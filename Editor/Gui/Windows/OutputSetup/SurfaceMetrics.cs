@@ -157,7 +157,7 @@ internal static class SurfaceMetrics
     {
         aspect = 1f;
         var source = setup.FindSource(slice.SourceId);
-        if (source == null || !OutputContentResolver.TryGetSourceContent(source.SymbolChildId, out _, out var content)
+        if (source == null || !OutputContentResolver.TryGetPreviewContent(source.SymbolChildId, out var content)
             || content is not { IsDisposed: false })
             return false;
 

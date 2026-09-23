@@ -102,19 +102,20 @@ internal sealed partial class SetupOutputView
 
         var min = _projection.CanvasToScreen(sourceOrigin + new Vector2(uv.X, uv.Y) * sourceSize);
         var max = _projection.CanvasToScreen(sourceOrigin + new Vector2(uv.Z, uv.W) * sourceSize);
+        SetupStrokes.SnapRect(ref min, ref max);
 
         // Dim the source outside the slice — this view exists to judge one surface's crop, so everything the
         // surface won't show recedes. (The atlas view, where every slice matters equally, won't do this.)
         if (dimOutside)
         {
-            var sourceMin = _projection.CanvasToScreen(sourceOrigin);
-            var sourceMax = _projection.CanvasToScreen(sourceOrigin + sourceSize);
+            var sourceMin = SetupStrokes.Snap(_projection.CanvasToScreen(sourceOrigin));
+            var sourceMax = SetupStrokes.Snap(_projection.CanvasToScreen(sourceOrigin + sourceSize));
             CanvasDraw.ScrimOutside(dl, sourceMin, sourceMax, min, max, UiColors.BackgroundFull.Fade(0.3f));
         }
 
         // No tint inside: the crop now reads from the dimmed surround, and colouring the content would work
         // against judging it.
-        dl.AddRect(min, max, SetupColors.ForKind(SetupEntityKinds.Slice), 0, ImDrawFlags.None, 2 * T3Ui.UiScaleFactor);
+        SetupStrokes.DrawInlineRect(dl, min, max, SetupColors.ForKind(SetupEntityKinds.Slice), isSelected: true);
 
 
         // Canvas space, like every other handle — the projection subtracts the framing origin itself.
@@ -215,8 +216,7 @@ internal sealed partial class SetupOutputView
             }
 
             // A plain field write per frame; the undo step and save happen once, on Completed (RunSliceDrag).
-            slice.UvRect = new Vector4(Math.Clamp(next.X, 0, 1), Math.Clamp(next.Y, 0, 1),
-                                       Math.Clamp(next.Z, 0, 1), Math.Clamp(next.W, 0, 1));
+            slice.SetUvRect(next);
             if (edgePhase != CanvasPointHandle.DragPhases.Started)
                 RunSliceDrag(edgePhase, setup, slice);
 
@@ -277,8 +277,7 @@ internal sealed partial class SetupOutputView
                                                   draggedCorner is 2 or 3 ? height : -height);
             var cornerMin = Vector2.Min(fixedCorner, moved);
             var cornerMax = Vector2.Max(fixedCorner, moved);
-            slice.UvRect = new Vector4(Math.Clamp(cornerMin.X, 0, 1), Math.Clamp(cornerMin.Y, 0, 1),
-                                       Math.Clamp(cornerMax.X, 0, 1), Math.Clamp(cornerMax.Y, 0, 1));
+            slice.SetUvRect(new Vector4(cornerMin.X, cornerMin.Y, cornerMax.X, cornerMax.Y));
             if (cornerPhase != CanvasPointHandle.DragPhases.Started)
                 RunSliceDrag(cornerPhase, setup, slice);
 
@@ -338,7 +337,7 @@ internal sealed partial class SetupOutputView
 
                 sliceOrigin.X = Math.Clamp(sliceOrigin.X, 0, MathF.Max(1 - size.X, 0));
                 sliceOrigin.Y = Math.Clamp(sliceOrigin.Y, 0, MathF.Max(1 - size.Y, 0));
-                slice.UvRect = new Vector4(sliceOrigin.X, sliceOrigin.Y, sliceOrigin.X + size.X, sliceOrigin.Y + size.Y);
+                slice.SetUvRect(new Vector4(sliceOrigin.X, sliceOrigin.Y, sliceOrigin.X + size.X, sliceOrigin.Y + size.Y));
                 break;
             }
 
@@ -398,7 +397,7 @@ internal sealed partial class SetupOutputView
         var minY = Math.Clamp(centreY - height * 0.5f, 0, MathF.Max(1 - height, 0));
 
         var rect = new Vector4(minX, minY, minX + width, minY + height);
-        SetupUndo.RunUndoable("Adjust slice", setup, () => slice.UvRect = rect);
+        SetupUndo.RunUndoable("Adjust slice", setup, () => slice.SetUvRect(rect));
     }
 
     /// <summary>The one drag lifecycle for slice-rect edits (edge crop, corner scale, label move): a gesture like every other.</summary>

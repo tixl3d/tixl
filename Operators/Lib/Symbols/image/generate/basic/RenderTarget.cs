@@ -300,6 +300,7 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
         if (colorFormatChanged)
         {
             wasChanged = true;
+            _statsCountReallocations++;
             // Color / Multi sampling
             Utilities.Dispose(ref _multiSampledColorBufferSrv);
             Utilities.Dispose(ref _multiSampledColorBufferRtv);
@@ -691,6 +692,7 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
         yield return ("RenderTargets", _statsCount);
         yield return ("with MSAA", _statsCountWithMsaa);
         yield return ("pixels", _statsCountPixels);
+        yield return ("target re-allocations", _statsCountReallocations);
     }
 
     private static readonly object _lock = new ();
@@ -700,9 +702,14 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
         _statsCount = 0;
         _statsCountPixels = 0;
         _statsCountWithMsaa = 0;
+        _statsCountReallocations = 0;
     }
         
     private static int _statsCount;
+
+    /** Re-allocating a target every frame costs far more than drawing into it, and only shows up as a slow
+        frame — so consumers asking for different sizes in turn is worth counting rather than guessing at. */
+    private static int _statsCountReallocations;
     private static int _statsCountWithMsaa;
     private static int _statsCountPixels;
     private static bool _registeredStats;

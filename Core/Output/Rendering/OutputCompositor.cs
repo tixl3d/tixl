@@ -41,6 +41,21 @@ public static class OutputCompositor
     /// presentation, the Board card and an open output view all ask for the same pixels, so later calls in
     /// the frame get the target rendered by the first.
     /// </summary>
+    /// <summary>
+    /// An output's composite for a preview (a Board card, the output view): re-composited when the preview
+    /// budget allows, otherwise the last composite. See <see cref="OutputPreviewRefresh"/>.
+    /// </summary>
+    public static Texture2D? RenderPreview(Guid outputId)
+    {
+        if (OutputPreviewRefresh.ShouldRefresh(outputId))
+            return RenderOutput(outputId);
+
+        return _compositeFrames.TryGetValue(outputId, out var rendered) && rendered.HasContent
+               && _targets.TryGetValue(outputId, out var target)
+                   ? target.Texture
+                   : null;
+    }
+
     public static Texture2D? RenderOutput(Guid outputId)
     {
         var setup = ActiveSetup.Current;
@@ -289,6 +304,7 @@ public static class OutputCompositor
 
         _targets.Clear();
         _compositeFrames.Clear();
+        OutputPreviewRefresh.InvalidateAll();
     }
 
     /// <summary>Frees a deleted output's composite target.</summary>
@@ -298,6 +314,7 @@ public static class OutputCompositor
             target.Dispose();
 
         _compositeFrames.Remove(outputId);
+        OutputPreviewRefresh.Invalidate(outputId);
     }
 
     // Source is a UV rect (xMin, yMin, xMax, yMax); a degenerate rect falls back to the full image.

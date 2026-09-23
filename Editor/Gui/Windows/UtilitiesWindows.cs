@@ -65,13 +65,14 @@ internal sealed class UtilitiesWindow : Window
                         {
                             ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.5f / (index + 1) + 0.5f));
                             ImGui.PushFont(index == 0 ? Fonts.FontBold : Fonts.FontNormal);
+                            // Repeated command names are the norm here, so the row index carries the id.
                             if (c is MacroCommand macroCommand)
                             {
-                                ImGui.Selectable($"{c.Name} ({macroCommand.Count})");
+                                ImGui.Selectable($"{c.Name} ({macroCommand.Count})##{index}");
                             }
                             else
                             {
-                                ImGui.Selectable(c.Name);
+                                ImGui.Selectable($"{c.Name}##{index}");
                             }
 
                             ImGui.PopFont();
@@ -91,7 +92,7 @@ internal sealed class UtilitiesWindow : Window
                         {
                             ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.5f / (index + 1) + 0.5f));
                             ImGui.PushFont(index == 0 ? Fonts.FontBold : Fonts.FontNormal);
-                            ImGui.Selectable($" {c})");
+                            ImGui.Selectable($" {c})##{index}");
                             ImGui.PopFont();
                             ImGui.PopStyleColor();
                             index++;

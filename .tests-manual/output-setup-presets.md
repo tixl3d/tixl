@@ -119,6 +119,19 @@ Rename it again, press Escape instead, then make an edit and undo it.
 - Escape keeps the name. Undoing the edit doesn't bring the old name (or its file) back.
 - Renaming to the name of another setup is refused with a warning in the log.
 
+## Step: The app bar chip counts what is presenting
+
+**Action:**
+With one output bound to a display, look at the projector chip in the app bar, right of the warnings
+indicator. Hover it, then click it. Then set the output's **Send** toggle to off.
+
+**Expected:**
+- The chip shows "1" and its tooltip lists the output with its resolution, "→ Display 2" (or whichever)
+  and a duration in ms; a header row gives the total.
+- Clicking the chip opens the Output Setup in the primary output window.
+- With Send off, the chip disappears; with no project open it is gone too.
+- Closing and reopening the project brings the chip back without opening the Output Setup first.
+
 ## Step: Unbinding stops the presentation
 
 **Action:**

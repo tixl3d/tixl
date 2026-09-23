@@ -128,7 +128,7 @@ internal sealed partial class SetupOutputView
                 || !TryGetBoardBounds(setup, SetupEntityKinds.ContentSource, source.SymbolChildId, out var min, out var max))
                 continue;
 
-            var srv = OutputContentResolver.TryGetSourceContent(source.SymbolChildId, out _, out var content) && content is { IsDisposed: false }
+            var srv = OutputContentResolver.TryGetPreviewContent(source.SymbolChildId, out var content) && content is { IsDisposed: false }
                           ? SrvManager.GetSrvForTexture(content)
                           : null;
             DrawBoardCard(setup, selection, dl, SetupEntityKinds.ContentSource, source.SymbolChildId, min, max,
@@ -204,7 +204,7 @@ internal sealed partial class SetupOutputView
             if (!TryGetBoardBounds(setup, SetupEntityKinds.Output, output.Id, out var min, out var max))
                 continue;
 
-            var composite = OutputCompositor.RenderOutput(output.Id);
+            var composite = OutputCompositor.RenderPreview(output.Id);
             var srv = composite is { IsDisposed: false } ? SrvManager.GetSrvForTexture(composite) : null;
             DrawBoardCard(setup, selection, dl, SetupEntityKinds.Output, output.Id, min, max,
                           output.Name, BoardMeta(output.Id), srv, true);
@@ -313,6 +313,7 @@ internal sealed partial class SetupOutputView
         var fade = _boardLayerFade;
         var sMin = _boardProjection.CanvasToScreen(new Vector2(min.X, max.Y));
         var sMax = _boardProjection.CanvasToScreen(new Vector2(max.X, min.Y));
+        SetupStrokes.SnapRect(ref sMin, ref sMax);
 
         // A fading card is only looked at: no hover, no pick, no grab.
         var interactive = fade >= 0.999f;
@@ -353,7 +354,7 @@ internal sealed partial class SetupOutputView
         }
         else if (kind == SetupEntityKinds.Surface && preview > 0.01f && setup.FindSurface(id) is { } canvasFedSurface
                  && TryFindCanvasQuad(setup, canvasFedSurface, _canvasFedQuad, out var feedingOutputId)
-                 && OutputCompositor.RenderOutput(feedingOutputId) is { IsDisposed: false } composite
+                 && OutputCompositor.RenderPreview(feedingOutputId) is { IsDisposed: false } composite
                  && SrvManager.GetSrvForTexture(composite) is { IsDisposed: false } compositeSrv)
         {
             // No content of its own, but the surface has a place on an output's canvas: the wall shows what the
@@ -369,12 +370,8 @@ internal sealed partial class SetupOutputView
         if (pulse > 0.001f)
             dl.AddRectFilled(sMin, sMax, kindColor.Fade(pulse * 0.15f * fade), 3 * scale);
 
-        dl.AddRect(sMin, sMax, PulseColor(kindColor.Fade(hovered ? 1f : 0.7f), pulse).Fade(fade), rounding, ImDrawFlags.None, 1 * scale);
-        if (isSelected)
-        {
-            var outset = new Vector2(1.5f * scale);
-            dl.AddRect(sMin - outset, sMax + outset, kindColor.Fade(fade), rounding, ImDrawFlags.None, 3 * scale);
-        }
+        var frameColor = isSelected ? kindColor : PulseColor(kindColor.Fade(hovered ? 1f : 0.7f), pulse);
+        SetupStrokes.DrawFrame(dl, sMin, sMax, frameColor.Fade(fade), isSelected, rounding);
 
         // Name above the card's top-left, in the kind's label hue (bold while selected) on a faint shade; the
         // metadata only while hovered or selected — it answers a question, it doesn't label.
@@ -647,6 +644,7 @@ internal sealed partial class SetupOutputView
         var fade = _boardLayerFade;
         var sMin = _boardProjection.CanvasToScreen(new Vector2(min.X, max.Y));
         var sMax = _boardProjection.CanvasToScreen(new Vector2(max.X, min.Y));
+        SetupStrokes.SnapRect(ref sMin, ref sMax);
         var isSelected = selection?.IsSelected(kind, id) ?? false;
         var pulse = isSelected ? 0f : FrameStats.CrossHighlightAmount(id);
 
@@ -654,8 +652,8 @@ internal sealed partial class SetupOutputView
         if (pulse > 0.001f)
             dl.AddRectFilled(sMin, sMax, kindColor.Fade(pulse * 0.15f * fade));
 
-        dl.AddRect(sMin, sMax, (isSelected ? kindColor : PulseColor(kindColor.Fade(0.7f), pulse)).Fade(fade),
-                   0, ImDrawFlags.None, (isSelected ? 2f : 1f) * scale);
+        // A cut of the card it sits on, so its stroke stays inside its own rect rather than over the card's frame.
+        SetupStrokes.DrawInlineRect(dl, sMin, sMax, (isSelected ? kindColor : PulseColor(kindColor.Fade(0.7f), pulse)).Fade(fade), isSelected);
 
         _boardQuad[0] = sMin;
         _boardQuad[1] = new Vector2(sMax.X, sMin.Y);
@@ -808,6 +806,7 @@ internal sealed partial class SetupOutputView
         PlanBounds(plan, out var min, out var max);
         var sMin = _boardProjection.CanvasToScreen(new Vector2(min.X, max.Y));
         var sMax = _boardProjection.CanvasToScreen(new Vector2(max.X, min.Y));
+        SetupStrokes.SnapRect(ref sMin, ref sMax);
         var pad = 4 * scale;
         var rounding = 3 * scale;
         var nameFont = isSelected ? Fonts.FontBold : Fonts.FontSmall;
@@ -823,12 +822,7 @@ internal sealed partial class SetupOutputView
         if (hovered)
             FrameStats.RequestCrossHighlight(plan.Id);
 
-        dl.AddRect(sMin, sMax, PulseColor(hue.Fade(hovered ? 1f : 0.7f), pulse).Fade(fade), rounding, ImDrawFlags.None, 1 * scale);
-        if (isSelected)
-        {
-            var outset = new Vector2(1.5f * scale);
-            dl.AddRect(sMin - outset, sMax + outset, hue.Fade(fade), rounding, ImDrawFlags.None, 3 * scale);
-        }
+        SetupStrokes.DrawFrame(dl, sMin, sMax, (isSelected ? hue : PulseColor(hue.Fade(hovered ? 1f : 0.7f), pulse)).Fade(fade), isSelected, rounding);
 
         dl.AddRectFilled(labelMin, labelMax, UiColors.BackgroundFull.Fade(0.3f * fade), rounding);
         dl.AddText(nameFont, nameFont.FontSize, labelMin + new Vector2(pad, pad), SetupColors.LabelFor(SetupEntityKinds.FloorPlan).Fade(fade), plan.Name);
@@ -1341,14 +1335,14 @@ internal sealed partial class SetupOutputView
         var color = UiColors.StatusAnimated.Fade(0.6f);
         if (_boardSnapGuideX != null)
         {
-            var x = _boardProjection.CanvasToScreen(new Vector2(_boardSnapGuideX.Value, 0)).X;
-            dl.AddLine(new Vector2(x, windowMin.Y), new Vector2(x, windowMax.Y), color, 1 * T3Ui.UiScaleFactor);
+            var x = MathF.Round(_boardProjection.CanvasToScreen(new Vector2(_boardSnapGuideX.Value, 0)).X);
+            SetupStrokes.DrawCrispLine(dl, new Vector2(x, windowMin.Y), new Vector2(x, windowMax.Y), color, 1);
         }
 
         if (_boardSnapGuideY != null)
         {
-            var y = _boardProjection.CanvasToScreen(new Vector2(0, _boardSnapGuideY.Value)).Y;
-            dl.AddLine(new Vector2(windowMin.X, y), new Vector2(windowMax.X, y), color, 1 * T3Ui.UiScaleFactor);
+            var y = MathF.Round(_boardProjection.CanvasToScreen(new Vector2(0, _boardSnapGuideY.Value)).Y);
+            SetupStrokes.DrawCrispLine(dl, new Vector2(windowMin.X, y), new Vector2(windowMax.X, y), color, 1);
         }
 
         _boardSnapGuideX = null;
@@ -1926,7 +1920,7 @@ internal sealed partial class SetupOutputView
         switch (kind)
         {
             case SetupEntityKinds.ContentSource:
-                if (OutputContentResolver.TryGetSourceContent(id, out _, out var content) && content is { IsDisposed: false })
+                if (OutputContentResolver.TryGetPreviewContent(id, out var content) && content is { IsDisposed: false })
                     return new Vector2(Math.Max(1, content.Description.Width), Math.Max(1, content.Description.Height));
 
                 return new Vector2(1920, 1080);

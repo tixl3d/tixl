@@ -94,9 +94,20 @@ internal static class CornerPinHandles
         if (style.ShowsChecker)
             ShowsChecker(dl, corners, projection, style.CheckerColor);
 
+        // Inline: the edges run inside the quad, so a patch filling its canvas doesn't stroke over the frame
+        // around it, and two quads sharing an edge stay two lines rather than one doubled one.
         var edgeThickness = (style.EdgeThickness > 0 ? style.EdgeThickness : 1.5f) * T3Ui.UiScaleFactor;
+        var centre = (screen[0] + screen[1] + screen[2] + screen[3]) * 0.25f;
+        Span<Vector2> edge = stackalloc Vector2[4];
         for (var i = 0; i < 4; i++)
-            dl.AddLine(screen[i], screen[(i + 1) % 4], style.EdgeColor, edgeThickness);
+        {
+            var inward = centre - screen[i];
+            var length = inward.Length();
+            edge[i] = length < 0.001f ? screen[i] : screen[i] + inward / length * edgeThickness * 0.5f;
+        }
+
+        for (var i = 0; i < 4; i++)
+            dl.AddLine(edge[i], edge[(i + 1) % 4], style.EdgeColor, edgeThickness);
 
         if (!string.IsNullOrEmpty(style.Label))
             DrawCenteredLabel(dl, screen, style.Label!, style.LabelColor, style.LabelBackgroundColor);

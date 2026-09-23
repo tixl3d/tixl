@@ -63,6 +63,51 @@ internal sealed partial class SetupOutputView
     }
 
     /// <summary>
+    /// The previews that must stay live: the focused output's composite, and whatever the selection points at —
+    /// a surface or slice through to the source feeding it, so dragging content around shows the real thing.
+    /// Several selected take turns; everything else holds the content it rendered once.
+    /// </summary>
+    private static void MarkEditedPreviews(Setup setup, OutputDefinition? output, SetupEntitySelection? selection)
+    {
+        OutputPreviewRefresh.BeginPriorityFrame();
+        if (output != null)
+            OutputPreviewRefresh.AddPriority(output.Id);
+
+        if (selection == null)
+            return;
+
+        for (var i = 0; i < selection.Targets.Count; i++)
+        {
+            var target = selection.Targets[i];
+            switch (target.Kind)
+            {
+                case SetupEntityKinds.ContentSource:
+                case SetupEntityKinds.Output:
+                    OutputPreviewRefresh.AddPriority(target.EntityId);
+                    break;
+
+                case SetupEntityKinds.Slice:
+                    OutputPreviewRefresh.AddPriority(SourceChildIdOfSlice(setup, target.EntityId));
+                    break;
+
+                case SetupEntityKinds.Surface:
+                    var surface = setup.FindSurface(target.EntityId);
+                    if (surface != null)
+                        OutputPreviewRefresh.AddPriority(SourceChildIdOfSlice(setup, surface.SliceId));
+
+                    break;
+            }
+        }
+    }
+
+    private static Guid SourceChildIdOfSlice(Setup setup, Guid sliceId)
+    {
+        var slice = sliceId == Guid.Empty ? null : setup.FindSlice(sliceId);
+        var source = slice == null ? null : setup.FindSource(slice.SourceId);
+        return source?.SymbolChildId ?? Guid.Empty;
+    }
+
+    /// <summary>
     /// The Board with no output focused — what the window shows while nothing else claims it. A shown surface
     /// traced on a photo can still take the Straight tab: it straightens on that photo, in place.
     /// </summary>
@@ -84,6 +129,9 @@ internal sealed partial class SetupOutputView
         _shownSurfaceId = shownSurfaceId;
         OpenedReferenceImageId = Guid.Empty;
         ResolveEditMode(setup, output, outputId);
+
+        // What is being edited keeps evaluating every frame; everything else renders once and then holds.
+        MarkEditedPreviews(setup, output, selection);
 
         if (!DeferHeader(HeaderKinds.Modes, outputId))
             DrawHeader(setup, output, outputId);
@@ -288,7 +336,7 @@ internal sealed partial class SetupOutputView
         var straighten = _viewMorph.Value;
 
         // Pulled before the transform so the content aspect below reads a live evaluation context.
-        var composite = OutputCompositor.RenderOutput(outputId);
+        var composite = OutputCompositor.RenderPreview(outputId);
 
         // Rectify basis = the focused surface. Freeze it while it is the one being dragged, so the transform
         // doesn't chase its own edit; otherwise the live quad keeps R settled and current.

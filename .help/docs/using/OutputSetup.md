@@ -79,6 +79,8 @@ A **reference image** is a photo or a plan of the venue. To trace a floor plan f
 
 An output presents when it is bound to a plug and its **Send** toggle is on. Turning Send off pauses the output without dropping the binding, useful to mute a projector between cues.
 
+Presenting runs from the moment a project is loaded, whether or not any output window is open — a binding is saved with the machine and resumes by itself. The **projector chip** in the app bar, next to the warnings, shows how many outputs are presenting right now; it appears only while at least one is. Hovering it lists them with their resolution, where each one goes, and what each costs the editor's frame; clicking it opens the Output Setup. The times are the editor's own work, mostly rendering the content the output asks for, so a setup that drags the editor down shows which output to turn off with **Send**.
+
 - **Displays** open the output fullscreen on that display, each bound output on its own, so several projectors can run side by side. Two outputs bound to the same display is a mistake rather than a blend: the first one listed keeps it. A binding whose display is no longer attached presents nothing and is left alone, so a setup survives a projector being unplugged.
 - **Spout and NDI** push the output's composite into a sender under the plug's name every frame. Other applications on the same machine (Spout) or the network (NDI) receive it. Rename the plug to rename the sender; remove it from its context menu.
 

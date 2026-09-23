@@ -53,10 +53,10 @@ internal static class SliceUvAnchoring
         var top = (oldMax.Y - newMax.Y) / oldSize.Y;
         var bottom = (oldMax.Y - newMin.Y) / oldSize.Y;
 
-        slice.UvRect = new Vector4(uvStart.X + left * uvWidth,
-                                   uvStart.Y + top * uvHeight,
-                                   uvStart.X + right * uvWidth,
-                                   uvStart.Y + bottom * uvHeight);
+        slice.SetUvRect(new Vector4(uvStart.X + left * uvWidth,
+                                    uvStart.Y + top * uvHeight,
+                                    uvStart.X + right * uvWidth,
+                                    uvStart.Y + bottom * uvHeight));
     }
 
     /// <summary>
@@ -77,6 +77,6 @@ internal static class SliceUvAnchoring
         shiftX = Math.Clamp(shiftX, -uvStart.X, 1f - uvStart.Z);
         shiftY = Math.Clamp(shiftY, -uvStart.Y, 1f - uvStart.W);
 
-        slice.UvRect = new Vector4(uvStart.X + shiftX, uvStart.Y + shiftY, uvStart.Z + shiftX, uvStart.W + shiftY);
+        slice.SetUvRect(new Vector4(uvStart.X + shiftX, uvStart.Y + shiftY, uvStart.Z + shiftX, uvStart.W + shiftY));
     }
 }

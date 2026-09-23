@@ -28,6 +28,14 @@ public static class PerformanceMetrics
     public static readonly RollingMetric UiRenderDuration =
         RollingMetric.CreateLinear(WindowSize, BucketCount, 0f, 32f);
 
+    /// <summary>
+    /// Time spent handing finished frames to the displays, in milliseconds. Its own metric because a vsynced
+    /// Present blocks: with several swap chains (the main window, the viewer, one per bound output) the frame
+    /// can be spent waiting for vblanks while nothing is being computed, which is invisible in the frame bar.
+    /// </summary>
+    public static readonly RollingMetric PresentDuration =
+        RollingMetric.CreateLinear(WindowSize, BucketCount, 0f, 32f);
+
     /// <summary>Managed allocations per frame, in kilobytes. Log10-bucketed 0.1 kB .. 10 MB.</summary>
     public static readonly RollingMetric GcAllocationsKb =
         RollingMetric.CreateLog10(WindowSize, 10, 0f, 4f);
@@ -55,6 +63,12 @@ public static class PerformanceMetrics
     public static void RecordUiRender(float uiRenderMs)
     {
         UiRenderDuration.Update(uiRenderMs, Now);
+    }
+
+    /// <summary>Record the time the frame spent in Present. Call once per frame.</summary>
+    public static void RecordPresent(float presentMs)
+    {
+        PresentDuration.Update(presentMs, Now);
     }
 
     private static void SampleGc(double now)

@@ -109,7 +109,7 @@ internal static class SetupParameterView
 
         // Through the shared resolver: the same context and size the composite pulls with, so this shows the
         // frame the output renders rather than evaluating the graph a second time at a size of its own.
-        OutputContentResolver.TryGetSourceContent(instance.SymbolChildId, out _, out var content);
+        OutputContentResolver.TryGetPreviewContent(instance.SymbolChildId, out var content);
 
         Span<int> resolution = [0, 0]; // nothing connected: no size, rather than a made-up one
         if (content is { IsDisposed: false })
@@ -878,7 +878,7 @@ internal static class SetupParameterView
         if (instance is not IContentSupplier supplier)
             return;
 
-        OutputContentResolver.TryGetSourceContent(childId, out _, out var content);
+        OutputContentResolver.TryGetPreviewContent(childId, out var content);
         var context = OutputContentResolver.Context;
 
         var update = supplier.GetUpdateEnabled(context);
@@ -924,7 +924,7 @@ internal static class SetupParameterView
         var source = setup.FindSource(slice.SourceId);
         var texW = 0;
         var texH = 0;
-        if (source != null && OutputContentResolver.TryGetSourceContent(source.SymbolChildId, out _, out var content)
+        if (source != null && OutputContentResolver.TryGetPreviewContent(source.SymbolChildId, out var content)
             && content is { IsDisposed: false })
         {
             texW = content.Description.Width;
@@ -957,7 +957,7 @@ internal static class SetupParameterView
         {
             var nx = Math.Clamp(FromUnit(position[0], texW), 0f, 1f - widthUv);
             var ny = Math.Clamp(FromUnit(position[1], texH), 0f, 1f - heightUv);
-            slice.UvRect = new Vector4(nx, ny, nx + widthUv, ny + heightUv);
+            slice.SetUvRect(new Vector4(nx, ny, nx + widthUv, ny + heightUv));
         }
 
         CommitFieldUndo(setup, "Move slice", positionState);
@@ -969,7 +969,7 @@ internal static class SetupParameterView
         {
             var nw = Math.Clamp(FromUnit(size[0], texW), SurfaceGeometry.MinSliceSize, 1f - uv.X);
             var nh = Math.Clamp(FromUnit(size[1], texH), SurfaceGeometry.MinSliceSize, 1f - uv.Y);
-            slice.UvRect = new Vector4(uv.X, uv.Y, uv.X + nw, uv.Y + nh);
+            slice.SetUvRect(new Vector4(uv.X, uv.Y, uv.X + nw, uv.Y + nh));
         }
 
         CommitFieldUndo(setup, "Resize slice", sizePxState);

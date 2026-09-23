@@ -56,7 +56,25 @@ public static class OutputContentResolver
 
         var content = supplier.GetContent(context);
         _pulledContent[supplier] = content;
+        if (supplier is Instance pulledInstance)
+            _lastContentByChildId[pulledInstance.SymbolChildId] = content;
+
         return content;
+    }
+
+    /// <summary>
+    /// A content source's texture for a preview (a Board card, a parameter thumbnail): evaluated when the
+    /// preview budget allows, otherwise the last texture it produced. See <see cref="OutputPreviewRefresh"/>.
+    /// </summary>
+    public static bool TryGetPreviewContent(Guid symbolChildId, out Texture2D? content)
+    {
+        if (!OutputPreviewRefresh.ShouldRefresh(symbolChildId))
+        {
+            content = _lastContentByChildId.GetValueOrDefault(symbolChildId);
+            return content is { IsDisposed: false };
+        }
+
+        return TryGetSourceContent(symbolChildId, out _, out content);
     }
 
     /// <summary>The live texture a content source resolves to, if its op is currently instantiated.</summary>
@@ -211,7 +229,7 @@ public static class OutputContentResolver
         var slice = setup.FindSlice(surface.SliceId);
         var sourceId = slice?.SourceId ?? Guid.Empty;
         var source = sourceId == Guid.Empty ? null : setup.FindSource(sourceId);
-        if (source == null || !TryGetSourceContent(source.SymbolChildId, out _, out var content))
+        if (source == null || !TryGetPreviewContent(source.SymbolChildId, out var content))
             return (false, slice, null);
 
         return (true, slice, content);
@@ -234,6 +252,9 @@ public static class OutputContentResolver
     private static readonly Dictionary<Guid, (bool Found, Slice? Slice, Texture2D? Content)> _surfaceSlices = new();
     private static int _surfaceSliceFrame = -1;
     private static readonly Dictionary<IContentSupplier, Texture2D?> _pulledContent = new();
+
+    /** Kept across frames so a preview that isn't evaluating this frame still has something to show. */
+    private static readonly Dictionary<Guid, Texture2D?> _lastContentByChildId = new();
     private static int _pulledContentFrame = -1;
 
     /// <summary>The first fitted patch on <paramref name="output"/> that shows this send's content, as a request.</summary>

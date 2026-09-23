@@ -238,7 +238,8 @@ internal sealed partial class SetupOutputView
         if (photoSrv is { IsDisposed: false })
             dl.AddImage(photoSrv.NativePointer, min, max);
 
-        dl.AddRect(min, max, UiColors.ForegroundFull.Fade(0.25f));
+        SetupStrokes.SnapRect(ref min, ref max);
+        SetupStrokes.DrawInlineRect(dl, min, max, UiColors.ForegroundFull.Fade(0.25f), isSelected: false);
 
         DrawTracedQuads(setup, image, selection, dl, _spaceBlend.Value >= 1f && _referenceStraighten.IsSettled, 1f);
     }

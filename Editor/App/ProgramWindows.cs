@@ -2,7 +2,10 @@ using System.Windows.Forms;
 using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
+using System.Diagnostics;
 using SharpDX.DXGI;
+using T3.Core.Logging;
+using T3.Core.Stats;
 using T3.Core.IO;
 using T3.Core.Resource;
 using T3.Core.SystemUi;
@@ -308,18 +311,17 @@ internal static class ProgramWindows
 
     public static void Present(bool useVSync)
     {
+        var startTimestamp = Stopwatch.GetTimestamp();
         try
         {
             Main.SwapChain.Present(useVSync ? 1 : 0, PresentFlags.None);
 
-            // Always present the Viewer's swap chain, regardless of whether its window is shown.
-            // Empirically, having two flip-model Present calls per frame in the same process
-            // gives DWM's scheduler a noticeably better composition slot for Main — the Viewer's
-            // Present acts as a co-pacing primitive even when its window is hidden. The cost of
-            // the extra Present is small (the back buffer is unchanged when ShowSecondaryRenderWindow
-            // is false; DWM doesn't display the hidden window; FlipDiscard discards the buffer
-            // immediately on the next present cycle).
-            Viewer?.SwapChain?.Present(useVSync ? 1 : 0, PresentFlags.None);
+            // Only while its window is actually shown. Presenting a hidden flip-model swap chain is not the
+            // cheap no-op it looks like: DWM throttles presents to a window it isn't displaying, and with an
+            // output window up that wait measured 34ms per frame against 0.3ms for Main. Main's pacing comes
+            // from its frame-latency waitable swap chain, not from a second Present.
+            if (T3Ui.ShowSecondaryRenderWindow)
+                Viewer?.SwapChain?.Present(useVSync ? 1 : 0, PresentFlags.None);
 
             // Each display an output is bound to has its own swap chain, presented with the same sync as Main so
             // a projector never tears.
@@ -363,6 +365,12 @@ internal static class ProgramWindows
             }
 
             throw new ApplicationException($"Graphics device lost ({reason}: {description}): {e.Message}");
+        }
+        finally
+        {
+            // Without vsync this is where a GPU that can't keep up shows itself: the driver blocks the queue
+            // here rather than in the work that filled it.
+            PerformanceMetrics.RecordPresent((float)((Stopwatch.GetTimestamp() - startTimestamp) * 1000.0 / Stopwatch.Frequency));
         }
     }
 

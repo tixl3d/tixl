@@ -66,6 +66,9 @@ internal static class OutputSetupHandling
     public static void SaveActive()
     {
         StructureVersion++;
+
+        // A setup edit (re-routing, a new slice, a moved patch) changes what the cards show, so they render once more.
+        T3.Core.Output.Rendering.OutputPreviewRefresh.InvalidateAll();
         if (!TryGetFocusedEntry(out var entry, out var setupsFolder))
             return;
 

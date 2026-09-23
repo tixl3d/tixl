@@ -110,6 +110,8 @@ internal static class T3Metrics
         ImGui.Separator();
         DrawLabeledGraph(PerformanceMetrics.UiRenderDuration, "Draw", "ms", 32f, FormatMs);
         ImGui.Separator();
+        DrawLabeledGraph(PerformanceMetrics.PresentDuration, "Present", "ms", 32f, FormatMs);
+        ImGui.Separator();
         DrawLabeledGraph(PerformanceMetrics.GcAllocationsKb, "Mem-Alloc", "", 10_000f, FormatKb);
 
         ImGui.TextUnformatted($"Render: {_peakDeltaTimeMs:0.0}ms");
