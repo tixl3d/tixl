@@ -186,6 +186,7 @@ internal static class Program
         Log.Debug("Initializing ProgramWindows...");
         ProgramWindows.InitializeMainWindow(FormattedEditorVersion, out var device);
         GpuMemoryBudget.Initialize(device);
+        T3.Core.Output.Rendering.OutputCompositor.RegisterStats();
         AssetHandling.InitAssetTypes();
         
         Device = device;

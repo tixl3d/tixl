@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using Texture2D = T3.Core.DataTypes.Texture2D;
@@ -20,8 +21,8 @@ public static class OutputContentResolver
 
     /// <summary>
     /// Readies the shared evaluation context for pulling content this frame: fresh state, the resolution the
-    /// content is asked to render at, and the once-per-frame invalidation of every send — whichever entry
-    /// point pulls first (a composite, or a source preview on the Board) does it.
+    /// content is asked to render at, and the once-per-frame invalidation tick — whichever entry point pulls
+    /// first (a composite, or a source preview on the Board) opens the frame.
     /// </summary>
     public static EvaluationContext PrepareContext(Int2 requestedResolution)
     {
@@ -54,7 +55,25 @@ public static class OutputContentResolver
         if (_pulledContent.TryGetValue(supplier, out var pulled))
             return pulled;
 
+        // Invalidated here rather than for every registered send at the start of the frame. Marking a graph
+        // dirty walks all of it, and a send nobody renders gains nothing from being walked — worse, a time clip
+        // only stops being walked once it has been *updated* and found to lie outside the current time
+        // (TimeClipSlot suspends itself). A send that is invalidated but never evaluated therefore keeps its
+        // whole subgraph in the walk forever: on this project that was 52k slot visits and 10ms per frame.
+        // Update=false freezes the content at its last frame, so it isn't invalidated at all.
+        if (supplier.GetUpdateEnabled(context))
+        {
+            var invalidateStart = Stopwatch.GetTimestamp();
+            var visitsBefore = DirtyFlag.InvalidationVisits;
+            supplier.InvalidateContent();
+            StatsInvalidatedSends++;
+            StatsInvalidationVisits += DirtyFlag.InvalidationVisits - visitsBefore;
+            StatsInvalidateUs += Microseconds(invalidateStart);
+        }
+
+        var evaluateStart = Stopwatch.GetTimestamp();
         var content = supplier.GetContent(context);
+        StatsEvaluateUs += Microseconds(evaluateStart);
         _pulledContent[supplier] = content;
         if (supplier is Instance pulledInstance)
             _lastContentByChildId[pulledInstance.SymbolChildId] = content;
@@ -211,12 +230,8 @@ public static class OutputContentResolver
         _invalidatedContentFrame = frame;
 
         DirtyFlag.GlobalInvalidationTick++;
-        foreach (var supplier in ContentSupplierRegistry.Suppliers)
-        {
-            // Update=false freezes this content at its last frame — skip its invalidation.
-            if (supplier.GetUpdateEnabled(context))
-                supplier.InvalidateContent();
-        }
+        DirtyFlag.InvalidationVisits = 0;
+        StatsInvalidatedSends = 0;
     }
 
     private static (bool Found, Slice? Slice, Texture2D? Content) ResolveSurfaceSlice(Guid surfaceId)
@@ -244,6 +259,30 @@ public static class OutputContentResolver
         }
 
         return null;
+    }
+
+    /// <summary>Microseconds this frame spent invalidating every send, and evaluating the graphs behind them.
+    /// Separated because one is bookkeeping over the whole project and the other is the actual rendering.</summary>
+    public static int StatsInvalidateUs;
+
+    public static int StatsEvaluateUs;
+
+    /// <summary>How many sends were invalidated, and how many slots that walk reached.</summary>
+    public static int StatsInvalidatedSends;
+
+    public static int StatsInvalidationVisits;
+
+    public static void ResetStats()
+    {
+        StatsInvalidateUs = 0;
+        StatsEvaluateUs = 0;
+        StatsInvalidatedSends = 0;
+        StatsInvalidationVisits = 0;
+    }
+
+    private static int Microseconds(long startTimestamp)
+    {
+        return (int)((Stopwatch.GetTimestamp() - startTimestamp) * 1_000_000 / Stopwatch.Frequency);
     }
 
     private static readonly Vector4 _fullUvRect = new(0, 0, 1, 1);
