@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "0bec016a-5e1b-467a-8273-368d4d6b9935"/*Trigger*/,
-  "Description": "Returns a boolean that gets reset to false on the next frame.",
+  "Description": "Output a Bool value true for a single frame, then automatically resets to false on the next\nAKA: bang, push button, pulse, momentary trigger, one-shot.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -9,14 +9,16 @@
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "if disabled the value is true until you release the button"
     },
     {
       "InputId": "e7c1f0af-da6d-4e33-ac86-7dc96bfe7eb3"/*BoolValue*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Usage": "Trigger"
     },
     {
       "InputId": "fa14ac1d-3247-4d36-bc96-14ff7356720a"/*ColorInGraph*/,
