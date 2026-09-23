@@ -8,7 +8,7 @@
       "InputId": "27bf737b-966e-4203-b8fd-2d9c7b19dcad"/*MappingCurve*/,
       "Position": {
         "X": -119.75375,
-        "Y": 1401.7167
+        "Y": 1416.2874
       },
       "Description": "Defines the actual remapping curve. \nNote that only the x-range between 0 and 1 is used."
     },
@@ -56,7 +56,7 @@
     {
       "InputId": "7c944690-d5b2-4894-a178-97593ecd797a"/*Gradient*/,
       "Position": {
-        "X": -64.73947,
+        "X": 20.246216,
         "Y": 1512.325
       },
       "Description": "Defines the colors to be applied for remapped input range.\n\nTip: Try to use a HOLD interpolated gradient with Random input mode."
@@ -90,7 +90,7 @@
       "InputId": "cd91ff45-7f21-40fd-86c8-8dd95204c3b3"/*ValueTexture*/,
       "Position": {
         "X": 20.246246,
-        "Y": 1366.7167
+        "Y": 1381.2874
       },
       "Description": "Allows overriding the curve with a texture."
     },
@@ -173,7 +173,7 @@
     {
       "ChildId": "a727cbe7-3609-41c1-a2ab-af348b583d3e"/*SrvFromTexture2d*/,
       "Position": {
-        "X": 215.26053,
+        "X": 300.24622,
         "Y": 1512.325
       }
     },
@@ -181,7 +181,7 @@
       "ChildId": "a75abfbb-426a-47d3-9018-1239afc4235f"/*SrvFromTexture2d*/,
       "Position": {
         "X": 160.24625,
-        "Y": 1436.7167
+        "Y": 1451.2874
       }
     },
     {
@@ -195,13 +195,13 @@
       "ChildId": "c07a4962-64ae-48aa-b517-58f7fb7eba08"/*CurvesToTexture*/,
       "Position": {
         "X": 20.246246,
-        "Y": 1401.7167
+        "Y": 1416.2874
       }
     },
     {
       "ChildId": "e6858bcc-16ce-45dc-a878-0ebe319e7872"/*GradientsToTexture*/,
       "Position": {
-        "X": 75.26053,
+        "X": 160.24622,
         "Y": 1512.325
       }
     },
@@ -209,7 +209,7 @@
       "ChildId": "ef24f862-a9d4-4fa7-82d5-9373a92513cf"/*FirstValidTexture*/,
       "Position": {
         "X": 160.24625,
-        "Y": 1366.7167
+        "Y": 1381.2874
       }
     },
     {

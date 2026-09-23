@@ -63,7 +63,7 @@ internal sealed class FloatListOutputUi : OutputUi<List<float>>
                                ? settings
                                : _viewSettingsForId[viewId] = new ViewSettings();
 
-        FormInputs.SegmentedButton(ref viewSettings.ViewStyle);
+        CustomComponents.SegmentedButton(ref viewSettings.ViewStyle);
 
         switch (viewSettings.ViewStyle)
         {

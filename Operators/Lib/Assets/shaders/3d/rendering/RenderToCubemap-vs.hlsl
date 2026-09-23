@@ -18,12 +18,6 @@ float g_CubeLodCount = 1;
 // int BaseMip;
 // int NumSamples;
 
-SamplerState samLinear
-{
-    Filter = MIN_MAG_MIP_LINEAR;
-    AddressU = Wrap;
-    AddressV = Wrap;
-};
 
 cbuffer Params : register(b0)
 {

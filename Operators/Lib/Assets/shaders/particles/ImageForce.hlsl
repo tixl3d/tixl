@@ -89,7 +89,7 @@ RWStructuredBuffer<Particle> Particles : register(u0);
 
     float accelerationToDepthCenter = depth - CenterDepth;
     offset.z += accelerationToDepthCenter * DepthConcentration;
-    offset = mul(float4(offset.xyz, 0), CameraToWorld );
+    offset = mul(float4(offset.xyz, 0), CameraToWorld).xyz;
 
     float intensity = length(offset);
     Particles[i.x].Color = lerp(Particles[i.x].Color, Color, saturate( intensity * Colorize));

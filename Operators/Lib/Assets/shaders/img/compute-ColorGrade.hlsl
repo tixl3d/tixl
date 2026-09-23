@@ -25,9 +25,6 @@ struct vsOutput
     float2 texCoord : TEXCOORD;
 };
 
-Texture2D<float4> inputTexture : register(t0);
-sampler texSampler : register(s0);
-
 float4 psMain(vsOutput psInput) : SV_TARGET
 {
     //uint width, height;
@@ -45,12 +42,12 @@ float4 psMain(vsOutput psInput) : SV_TARGET
     c.rgb = lerp( float3(gray, gray,gray), c.rgb, PreSaturate); 
          
     // Grade        
-    float3 liftScaled =   Lift * 2*Lift.a + (0.5-Lift.a);
-    float3 gammaScaled =   Gamma * 2*Gamma.a + (0.5-Gamma.a);
-    float3 gainScaled =   Gain * 2*Gain.a + (0.5-Gain.a);
+    float3 liftScaled =   (Lift * 2*Lift.a + (0.5-Lift.a)).rgb;
+    float3 gammaScaled =   (Gamma * 2*Gamma.a + (0.5-Gamma.a)).rgb;
+    float3 gainScaled =   (Gain * 2*Gain.a + (0.5-Gain.a)).rgb;
     
     c.rgb=  pow( 
-                   ( c.rgb+ (liftScaled * 2-1)*(1-c))*      // Lift
+                   ( c.rgb+ (liftScaled * 2-1)*(1-c.rgb))*      // Lift
                    ( gainScaled * 2 )  // Gain
                    ,    
                    1/((gammaScaled*2)));        

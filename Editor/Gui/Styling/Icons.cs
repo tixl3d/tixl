@@ -14,7 +14,7 @@ namespace T3.Editor.Gui.Styling;
 internal static class Icons
 {
     public static ImFontPtr IconFont { get; set; }
-    public static float FontSize = 16;
+    public static float FontSize = 15;
 
     /** Draws icon vertically aligned to the current font */
     public static void DrawAtCursor(this Icon icon)
@@ -35,6 +35,32 @@ internal static class Icons
         DrawAtCursor(icon);
         ImGui.PopStyleColor();
     }
+
+    /// <summary>
+    /// Draws a glyph at the current cursor as a plain text item — unlike <see cref="DrawAtCursor(Icon)"/> it
+    /// applies no vertical correction, so the caller positions it (inline icons in rows, gutters, labels).
+    /// </summary>
+    public static void DrawInlineGlyph(Icon icon, System.Numerics.Vector4 rgba)
+    {
+        ImGui.PushStyleColor(ImGuiCol.Text, rgba);
+        ImGui.PushFont(IconFont);
+        ImGui.TextUnformatted(GetGlyphString(icon));
+        ImGui.PopFont();
+        ImGui.PopStyleColor();
+    }
+
+    /// <summary>Cached one-char strings, so per-frame inline glyphs don't allocate a string per draw.</summary>
+    private static string GetGlyphString(Icon icon)
+    {
+        if (_glyphStrings.TryGetValue(icon, out var s))
+            return s;
+
+        s = ((char)icon).ToString();
+        _glyphStrings[icon] = s;
+        return s;
+    }
+
+    private static readonly System.Collections.Generic.Dictionary<Icon, string> _glyphStrings = new();
 
     public static void DrawIconAtScreenPosition(Icon icon, Vector2 screenPos)
     {
@@ -307,6 +333,15 @@ internal static class Icons
             new(Icon.Reset, slotIndex: 150),
             new(Icon.Apply, slotIndex: 151),
             new(Icon.DragIndicator, slotIndex: 152),
+            new(Icon.Projector, slotIndex: 153),
+            new(Icon.Mapping, slotIndex: 154),
+            new(Icon.Slice, slotIndex: 155),
+            new(Icon.RoundingNW, slotIndex: 156),
+            new(Icon.RoundingNE, slotIndex: 157),
+            new(Icon.RoundingSE, slotIndex: 158),
+            new(Icon.RoundingSW, slotIndex: 159),
+            new(Icon.ChevronUpDown, slotIndex: 160),
+            new(Icon.Patch, slotIndex: 161),
         };
 
     public static readonly string IconAtlasPath = Path.Combine(SharedResources.EditorResourcesDirectory, @"images/t3-icons.png");
@@ -477,5 +512,14 @@ public enum Icon
     Record,
     Reset,
     Apply,
-    DragIndicator
+    DragIndicator,
+    Projector,
+    Slice,
+    RoundingNW,
+    RoundingNE,
+    RoundingSE,
+    RoundingSW,
+    Mapping,
+    ChevronUpDown,
+    Patch
 }

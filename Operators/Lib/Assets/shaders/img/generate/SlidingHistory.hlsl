@@ -9,7 +9,7 @@ cbuffer Params : register(b0)
     float SourceSlice;
 }
 
-cbuffer Params : register(b1)
+cbuffer IntParams : register(b1)
 {
     int Direction;
 }

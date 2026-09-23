@@ -30,7 +30,7 @@ cbuffer Params : register(b1)
     float4 ShadowColor;
 };
 
-cbuffer Params : register(b2)
+cbuffer IntParams : register(b2)
 {
     int SegmentCount;
     int UseWForSize;

@@ -13,7 +13,6 @@ using T3.Editor.UiModel;
 using Device = SharpDX.Direct3D11.Device;
 using PixelShader = T3.Core.DataTypes.PixelShader;
 using VertexShader = T3.Core.DataTypes.VertexShader;
-using Vector2 = System.Numerics.Vector2;
 
 namespace T3.Editor.App;
 
@@ -46,56 +45,15 @@ internal static class ProgramWindows
         if (Main.IsFullScreen == UserSettings.Config.FullScreen)
             return;
 
-        var screenCount = Screen.AllScreens.Length;
         if (UserSettings.Config.FullScreen)
         {
-            Main.SetFullScreen(UserSettings.Config.FullScreenIndexMain < screenCount ? UserSettings.Config.FullScreenIndexMain : 0);
+            // The display the window is already on: drag the editor where you want it, then go fullscreen —
+            // which beats keeping a screen index that silently means a different monitor after a replug.
+            Main.SetFullScreen(IndexOfScreenUnder(Main));
         }
         else
         {
             Main.SetSizeable();
-        }
-    }
-
-    /// <summary>
-    /// Updates the viewer window spanning bounds dynamically
-    /// Called whenever the spanning area selection changes in the Screen Manager
-    /// </summary>
-    internal static void UpdateViewerSpanning(ImRect spanningBounds)
-    {
-        if (Viewer == null)
-            return;
-
-        // Check if there's a valid spanning area defined
-        if (spanningBounds.Max.X > 0 && spanningBounds.Max.Y > 0)
-        {
-            // Update the viewer window to the spanning bounds
-            Viewer.UpdateSpanningBounds(
-                (int)spanningBounds.Min.X,
-                (int)spanningBounds.Min.Y,
-                (int)spanningBounds.Max.X,
-                (int)spanningBounds.Max.Y
-            );
-        }
-    
-    }
-
-    /// <summary>
-    /// Call this when the secondary render window is enabled/disabled
-    /// to ensure the viewer window is properly configured
-    /// </summary>
-    internal static void UpdateViewerWindowState()
-    {
-        if (Viewer == null)
-            return;
-
-        var spanning = UserSettings.Config.OutputArea;
-        var spanningBounds = new ImRect(new Vector2(spanning.X, spanning.Y), new Vector2(spanning.Z, spanning.W));
-
-        var isSpanningValid = spanningBounds.Max.X > 0 && spanningBounds.Max.Y > 0;
-        if (isSpanningValid)
-        {
-            UpdateViewerSpanning(spanningBounds);
         }
     }
 
@@ -263,13 +221,37 @@ internal static class ProgramWindows
 
     internal static void InitializeSecondaryViewerWindow(string name, int width, int height)
     {
-        Viewer = new(name, disableClose: true);
-        Viewer.SetDevice(_device, _deviceContext);
-        Viewer.SetSize(width, height);
-        Viewer.SetSizeable();
-        Viewer.InitViewSwapChain(_factory);
-        Viewer.InitializeWindow(FormWindowState.Normal, null, false);
+        Viewer = CreateViewerWindow(name, width, height);
         Viewer.Show();
+    }
+
+    /// <summary>The display a window sits on, by its index in the arrangement; 0 when it can't be placed.</summary>
+    private static int IndexOfScreenUnder(AppWindow window)
+    {
+        var screen = Screen.FromControl(window.Form);
+        var screens = Screen.AllScreens;
+        for (var i = 0; i < screens.Length; i++)
+        {
+            if (screens[i].DeviceName == screen.DeviceName)
+                return i;
+        }
+
+        return 0;
+    }
+
+    /// <summary>
+    /// A window for showing a rendered texture: its own swap chain, no ImGui content and no key tracking, so it
+    /// can sit on a projector while the editor keeps the keyboard.
+    /// </summary>
+    internal static AppWindow CreateViewerWindow(string name, int width, int height)
+    {
+        var window = new AppWindow(name, disableClose: true);
+        window.SetDevice(_device, _deviceContext);
+        window.SetSize(width, height);
+        window.SetSizeable();
+        window.InitViewSwapChain(_factory);
+        window.InitializeWindow(FormWindowState.Normal, null, false);
+        return window;
     }
 
     private static void OnCloseMainWindow(object sender, FormClosingEventArgs args)
@@ -292,6 +274,7 @@ internal static class ProgramWindows
 
     public static void Release()
     {
+        OutputWindowHandling.Release();
         Main.Release();
         Viewer.Release();
         _device.ImmediateContext.ClearState();
@@ -323,7 +306,7 @@ internal static class ProgramWindows
         _deviceContext.OutputMerger.SetTargets(Main.RenderTargetView);
     }
 
-    public static void Present(bool useVSync, bool showSecondaryRenderWindow)
+    public static void Present(bool useVSync)
     {
         try
         {
@@ -337,6 +320,14 @@ internal static class ProgramWindows
             // is false; DWM doesn't display the hidden window; FlipDiscard discards the buffer
             // immediately on the next present cycle).
             Viewer?.SwapChain?.Present(useVSync ? 1 : 0, PresentFlags.None);
+
+            // Each display an output is bound to has its own swap chain, presented with the same sync as Main so
+            // a projector never tears.
+            var outputWindows = OutputWindowHandling.Presenting;
+            for (var i = 0; i < outputWindows.Count; i++)
+            {
+                outputWindows[i].Window.SwapChain?.Present(useVSync ? 1 : 0, PresentFlags.None);
+            }
         }
         catch (SharpDX.SharpDXException e)
         {
@@ -426,12 +417,64 @@ internal static class ProgramWindows
         UiCopyTextureSrv = new ShaderResourceView(_device, _uiCopyTexture);
     }
 
-    private static Texture2D _uiCopyTexture;
+    /// <summary>
+    /// For things like presentations, demos or certain live performance situations it
+    /// can be desired to share also T3's UI content on a second display.
+    ///  
+    /// On Windows duplicating a display is extremely expensive. This work around
+    /// copies the last frame into a texture which is then presented on the second display.
+    /// </summary>
+    public static void CopyUiContentToShareTexture()
+    {
+        if (_uiCopyTexture == null || _uiCopyTexture.IsDisposed)
+        {
+            Log.Warning("Can't use undefined uiCopyTexture");
+            return;
+        }
+
+        _deviceContext.CopyResource(Main.BackBufferTexture, _uiCopyTexture);
+    }
 
     /// <summary>
-    /// The last presented UI frame. For presentations or live performances it can be mirrored to the
-    /// second view, because duplicating a display on Windows is extremely expensive.
+    /// Captures the main window's next rendered UI frame — the same back-buffer copy the second-display
+    /// mirror makes — for the debug bridge. Served once by <see cref="ServePendingUiCapture"/>, after the
+    /// UI has rendered and before Present. The receiver owns the texture it gets and disposes it when done.
     /// </summary>
+    public static void RequestUiCapture(Action<T3.Core.DataTypes.Texture2D> onCaptured)
+    {
+        _pendingUiCapture = onCaptured;
+    }
+
+    internal static void ServePendingUiCapture()
+    {
+        var callback = _pendingUiCapture;
+        if (callback == null)
+            return;
+
+        _pendingUiCapture = null;
+
+        // A fresh copy per capture: the wrapper handed out disposes its native texture, so it must not be
+        // the mirror's shared one.
+        var mode = Main.SwapChain.Description.ModeDescription;
+        var copy = new Texture2D(_device, new Texture2DDescription
+                                              {
+                                                  Width = mode.Width,
+                                                  Height = mode.Height,
+                                                  MipLevels = 1,
+                                                  ArraySize = 1,
+                                                  Format = mode.Format,
+                                                  SampleDescription = new SampleDescription(1, 0),
+                                                  Usage = ResourceUsage.Default,
+                                                  BindFlags = BindFlags.ShaderResource,
+                                                  CpuAccessFlags = CpuAccessFlags.None,
+                                                  OptionFlags = ResourceOptionFlags.None,
+                                              });
+        _deviceContext.CopyResource(Main.BackBufferTexture, copy);
+        callback(new T3.Core.DataTypes.Texture2D(copy));
+    }
+
+    private static Texture2D _uiCopyTexture;
+    private static Action<T3.Core.DataTypes.Texture2D> _pendingUiCapture;
     public static ShaderResourceView UiCopyTextureSrv { get; private set; }
 
     internal static Texture2DDescription UiCopyTextureDescription { get; private set; }

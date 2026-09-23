@@ -6,9 +6,7 @@ tags: [user, essential, hardware]
 added: 2026-08-01
 added-in-version: 4.3
 prerequisites:
-  - A project with graph audio that plays live — e.g. an [AudioToneGenerator]
-    through an [AudioEcho] and an [AudioClip] with music, both into an
-    [AudioBus] wired into the render chain.
+  - A project with graph audio that plays live — e.g. an [AudioToneGenerator] through an [AudioEcho] and an [AudioClip] with music, both into an [AudioBus] wired into the render chain.
 ---
 
 Verifies that audio-graph sound survives both export paths: video render

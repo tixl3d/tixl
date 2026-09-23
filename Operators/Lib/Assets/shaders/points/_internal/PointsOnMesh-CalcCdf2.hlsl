@@ -25,7 +25,10 @@ void main(uint3 i : SV_DispatchThreadID)
         return;
 
     float sum;
-    for (int j = 0; j < faceCount; j++)
+
+    // One declaration for all three loops: the loop variable lives in the function's scope.
+    int j;
+    for (j = 0; j < faceCount; j++)
     {
         uint3 f = FaceIndices[j];
         float3 p0 = Vertices[f[0]].Position;
@@ -52,7 +55,7 @@ void main(uint3 i : SV_DispatchThreadID)
     }
 
     sum = 0;
-    for (int j = 0; j < faceCount; j++)
+    for (j = 0; j < faceCount; j++)
     {
         sum += FaceData[j].normalizedFaceArea;
     }
@@ -60,7 +63,7 @@ void main(uint3 i : SV_DispatchThreadID)
     sum = 1.0/sum;
 
     float cdf = 0;
-    for (int j = 0; j < faceCount; j++)
+    for (j = 0; j < faceCount; j++)
     {
         cdf += FaceData[j].normalizedFaceArea * sum;
         FaceData[j].cdf = cdf;

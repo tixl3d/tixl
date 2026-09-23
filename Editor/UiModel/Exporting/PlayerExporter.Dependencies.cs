@@ -24,6 +24,9 @@ internal static partial class PlayerExporter
                     required.Add(pattern);
             }
 
+            foreach (var pattern in exportData.RequiredDependencyFiles)
+                required.Add(pattern);
+
             var all = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             foreach (var symbol in EditorSymbolPackage.AllSymbols)
             {

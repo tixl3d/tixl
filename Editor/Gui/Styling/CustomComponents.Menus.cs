@@ -84,15 +84,37 @@ internal static partial class CustomComponents
     }
 
     /// <summary>
+    /// Grays out every item drawn while it is set, without the callers having to thread an enabled flag
+    /// through. Used where a menu is shared between contexts and only some of its items apply — a
+    /// multi-selection, say, where the per-entity actions can't act on N things at once. Set it around the
+    /// items that should dim and clear it afterwards; it is not scoped for you.
+    /// </summary>
+    public static bool MenuItemsDisabled;
+
+    /// <summary>
+    /// Drops the left checkmark and icon columns for a menu that uses neither, so its labels sit flush left
+    /// instead of behind empty gutters. Set it around such a menu and clear it afterwards; it is not scoped
+    /// for you. Only for menus with no toggles and no icons — an item that draws an icon while this is set
+    /// would collide with its own label.
+    /// </summary>
+    public static bool MenuItemsFlushLeft;
+
+    /// <summary>
     /// Menu item with the checkbox slot on the left, an optional icon, label and an optional
     /// right-aligned keyboard shortcut. <paramref name="state"/> controls the label brightness:
-    /// <see cref="ButtonStates.Emphasized"/> reads as the primary/active row, <see cref="ButtonStates.Default"/>
-    /// as a muted secondary row. A disabled item always renders greyed regardless of <paramref name="state"/>.
+    /// <see cref="ButtonStates.Emphasized"/> reads as the primary/active item, <see cref="ButtonStates.Default"/>
+    /// as a muted secondary item. A disabled item always renders greyed regardless of <paramref name="state"/>.
     /// </summary>
     public static bool DrawMenuItem(int id, Icon icon, string label, string keyboardShortCut = null, bool isChecked = false, bool isEnabled = true,
                                     bool reserveCheckmarkColumn = true, bool reserveIconColumn = true,
                                     ButtonStates state = ButtonStates.Default)
     {
+        isEnabled &= !MenuItemsDisabled;
+        if (MenuItemsFlushLeft)
+        {
+            reserveCheckmarkColumn = false;
+            reserveIconColumn = false;
+        }
         var h = ImGui.GetFrameHeight();
         var imguiPadding = ImGui.GetStyle().ItemSpacing;
 
@@ -188,6 +210,9 @@ internal static partial class CustomComponents
     /// </summary>
     public static bool DrawSubMenu(int id, string label, bool isEnabled = true, bool reserveCheckmarkColumn = true)
     {
+        if (MenuItemsFlushLeft)
+            reserveCheckmarkColumn = false;
+
         var iconSlotWidth = Icons.FontSize * 1.4f;
         var imguiPadding = ImGui.GetStyle().ItemSpacing;
         // Match DrawMenuItem's label start (checkmark column reserved, no icon column) so headers align with rows.
@@ -205,12 +230,21 @@ internal static partial class CustomComponents
         // No PushID here: when the submenu opens, BeginMenu switches to the child window before we could
         // pop, so a PushID/PopID pair would straddle two per-window id stacks ("Missing PopID()"). The
         // label (plus ##id for uniqueness) is the menu's id; the style-color stack is global, so its pops are safe.
+        // We draw the label indented by the checkmark column and put the chevron in a column flush right, but
+        // ImGui sizes BeginMenu from the bare label and knows about neither — so on a narrow popup the label
+        // runs under the chevron. Pad the (hidden) sizing label with spaces to reserve both columns, mirroring
+        // the explicit width DrawMenuItem computes.
+        var spaceWidth = ImGui.CalcTextSize(" ").X;
+        var reserve = (reserveCheckmarkColumn ? iconSlotWidth : 0f) + iconSlotWidth;
+        var padCount = spaceWidth > 0.01f ? (int)MathF.Ceiling(reserve / spaceWidth) : 0;
+        var sizingLabel = label + new string(' ', padCount);
+
         var transparent = UiColors.ForegroundFull.Fade(0f).Rgba;
         ImGui.PushStyleColor(ImGuiCol.Text, transparent);
         ImGui.PushStyleColor(ImGuiCol.Header, transparent);
         ImGui.PushStyleColor(ImGuiCol.HeaderHovered, transparent);
         ImGui.PushStyleColor(ImGuiCol.HeaderActive, transparent);
-        var isOpen = ImGui.BeginMenu($"{label}##{id}", isEnabled);
+        var isOpen = ImGui.BeginMenu($"{sizingLabel}##{id}", isEnabled);
         ImGui.PopStyleColor(4);
 
         if (isEnabled && (isOpen || ImGui.IsItemHovered()))

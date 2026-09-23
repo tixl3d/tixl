@@ -166,7 +166,7 @@ groupshared float2 BestHitBaryUV[RAY_THREAD_COUNT];
                         bary,
                         t))
                 {
-                    float org;
+                    int org;
                     int intt = t * 1000;
                     InterlockedMin(BestHitIntDistances[rayThreadId], intt, org);
                     if (org > intt)

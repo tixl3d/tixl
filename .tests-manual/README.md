@@ -24,7 +24,7 @@ scope: graph-window               # broad feature area (free-form tag)
 tags: [smoke, essential]          # optional — used by the runner to filter sets
 added: 2026-05-31                 # ISO date the set was first added — drives "Recently added" sort
 added-in-version: 4.2             # TiXL major.minor the set first shipped in
-prerequisites:                    # optional — free-text setup requirements
+prerequisites:                    # optional — free-text setup requirements; one line per item, never wrapped
   - An empty project is open.
 related-help:                     # optional — relative links into .help/
   - ../.help/using/graph-window.md

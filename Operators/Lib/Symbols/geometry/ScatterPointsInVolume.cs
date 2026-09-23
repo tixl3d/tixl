@@ -1,3 +1,4 @@
+#nullable enable
 using Lib.Utils;
 
 namespace Lib.geometry;
@@ -20,10 +21,10 @@ internal sealed class ScatterPointsInVolume : Instance<ScatterPointsInVolume>, I
     }
 
     IInputSlot ITransformable.TranslationInput => Center;
-    IInputSlot ITransformable.RotationInput => null;
+    IInputSlot? ITransformable.RotationInput => null;
     IInputSlot ITransformable.ScaleInput => Size;
 
-    public Action<Instance, EvaluationContext> TransformCallback { get; set; }
+    public Action<Instance, EvaluationContext>? TransformCallback { get; set; }
 
     private void Update(EvaluationContext context)
     {

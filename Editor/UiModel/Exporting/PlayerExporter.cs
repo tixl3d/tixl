@@ -1,12 +1,16 @@
 #nullable enable
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using T3.Core.Operator.Attributes;
+using System.Reflection;
 using T3.Core.Audio;
 using T3.Core.Compilation;
 using T3.Core.DataTypes;
 using T3.Core.IO;
 using T3.Core.Model;
 using T3.Core.Operator;
+using T3.Core.Output;
+using T3.Core.Output.Streaming;
 using T3.Core.Operator.Slots;
 using T3.Core.Settings;
 using T3.Core.Resource;
@@ -32,8 +36,17 @@ internal static partial class PlayerExporter
     /// </summary>
     public static void ExportAndReport(Instance composition, SymbolUi.Child childUi)
     {
-        var exportName = childUi.SymbolChild.ReadableName;
-        if (TryExportInstance(composition, childUi, out var reason, out var exportDir))
+        ExportAndReport(composition.Children[childUi.SymbolChild.Id]);
+    }
+
+    /// <summary>
+    /// Exports and reports the outcome to the user (message box, log, export folder opened on success). Any op
+    /// can be exported, a project's root included: the sends inside it decide what ships, not where it sits.
+    /// </summary>
+    public static void ExportAndReport(Instance exportedInstance)
+    {
+        var exportName = ExportName(exportedInstance);
+        if (TryExportInstance(exportedInstance, out var reason, out var exportDir))
         {
             Log.Info(reason);
             BlockingWindow.Instance.ShowMessageBox(reason, $"Exported {exportName} successfully!");
@@ -47,25 +60,32 @@ internal static partial class PlayerExporter
     }
 
     /// <summary>
-    /// Where <see cref="TryExportInstance"/> writes the export of the given child.
+    /// Where <see cref="TryExportInstance(Instance, out string, out string)"/> writes the export: inside the
+    /// project that holds the op, so exporting a library op from a project never writes into the library.
     /// </summary>
-    public static string GetExportDirectory(Instance composition, SymbolUi.Child childUi)
+    public static string GetExportDirectory(Instance exportedInstance)
     {
-        return Path.Combine(composition.Symbol.SymbolPackage.Folder, FileLocations.ExportSubFolder, childUi.SymbolChild.ReadableName);
+        var owner = exportedInstance.Parent ?? exportedInstance;
+        return Path.Combine(owner.Symbol.SymbolPackage.Folder, FileLocations.ExportSubFolder, ExportName(exportedInstance));
     }
 
     public static bool TryExportInstance(Instance composition, SymbolUi.Child childUi, out string reason, out string exportDir)
     {
+        return TryExportInstance(composition.Children[childUi.SymbolChild.Id], out reason, out exportDir);
+    }
+
+    public static bool TryExportInstance(Instance exportedInstance, out string reason, out string exportDir)
+    {
         T3Ui.Save(false);
 
-        var exportedInstance = composition.Children[childUi.SymbolChild.Id];
         var symbol = exportedInstance.Symbol;
         Log.Info($"Exporting {symbol.Name}...");
 
-        var output = exportedInstance.Outputs.FirstOrDefault();
-        if (output == null || output.ValueType != typeof(Texture2D))
+        _contentSuppliers.Clear();
+        ContentSupplierSearch.CollectUnder(exportedInstance, _contentSuppliers);
+        if (_contentSuppliers.Count == 0)
         {
-            reason = "Can only export ops with 'Texture2D' output";
+            reason = NoContentSupplierReason;
             exportDir = string.Empty;
             return false;
         }
@@ -74,10 +94,22 @@ internal static partial class PlayerExporter
         var exportConfig = symbol.CompositionSettings?.Export ?? CompositionSettings.Current.Export;
         var exportData = new ExportData(symbol);
 
-        // Traverse starting at output and collect everything that can evaluate in the player
-        RecursivelyCollectExportData(output, exportData);
+        // The sends are the roots: what a show puts on its outputs is what has to travel. They have no output
+        // slot of their own, so the walk starts at each one's inputs and takes the op itself along.
+        foreach (var supplier in _contentSuppliers)
+        {
+            foreach (var input in supplier.Inputs)
+            {
+                RecursivelyCollectExportData(input, exportData);
+            }
+
+            exportData.TryAddInstance(supplier);
+        }
+
         CollectAutoCollectedOps(exportedInstance, exportData);
         exportData.FinishCollection(exportConfig.StripUnusedOperators);
+        if (exportConfig.PlayerMode == CompositionSettings.PlayerModes.Installation)
+            IncludeStreamSenderPackages(symbol, exportData);
 
         // Get soundtrack or show warning message
         if (TryFindSoundtrack(exportedInstance, symbol, out var address))
@@ -111,6 +143,10 @@ internal static partial class PlayerExporter
         // Include implicitly shared assets
         foreach (var shared in (string[]) [
                          "Lib:shaders/dx11/resolve-multisampled-depth-buffer-cs.hlsl",
+                         // The output compositor warps every slice with this; no graph references it.
+                         "Lib:shaders/dx11/corner-pin-layer.hlsl",
+                         // The NDI sender packs frames to UYVY with this before reading them back.
+                         "Lib:shaders/img/rgba-to-uyvy-cs.hlsl",
                          "Lib:pbr/studio_small_08-prefiltered.dds",
                          "Lib:pbr/BRDF-LookUp.dds",
                      ])
@@ -127,7 +163,7 @@ internal static partial class PlayerExporter
 
         exportData.PrintInfo();
 
-        exportDir = GetExportDirectory(composition, childUi);
+        exportDir = GetExportDirectory(exportedInstance);
 
         if (!TryRemoveExistingExportDir(out reason, exportDir))
             return false;
@@ -171,6 +207,8 @@ internal static partial class PlayerExporter
 
         if (!TryExportSettings(exportDir, symbol, exportConfig, title, author, out reason))
             return false;
+
+        TryExportOutputSetups(symbol, exportDir, exportConfig.PlayerMode);
 
         RenamePlayerExecutable(exportDir, title);
 
@@ -485,6 +523,72 @@ internal static partial class PlayerExporter
     }
 
     /// <summary>
+    /// An installation that streams (NDI, Spout) needs the package implementing that sender, which no operator in
+    /// the graph pulls in: the binding names a stream kind, and the provider for it registers when its package loads.
+    /// </summary>
+    private static void IncludeStreamSenderPackages(Symbol symbol, ExportData exportData)
+    {
+        var machineConfigPath = Path.Combine(SetupFiles.FolderIn(symbol.SymbolPackage.Folder), MachineConfig.FileName);
+        if (!File.Exists(machineConfigPath) || !MachineConfig.TryLoadFromFile(machineConfigPath, out var machineConfig))
+            return;
+
+        foreach (var binding in machineConfig.Bindings)
+        {
+            if (!binding.IsStream)
+                continue;
+
+            var stream = machineConfig.FindStreamPlug(binding.PlugId);
+            var provider = stream == null ? null : OutputStreamRegistry.TryGetProvider(stream.Kind);
+            if (stream == null || provider == null)
+                continue;
+
+            var assemblyName = provider.GetType().Assembly.GetName().Name;
+            SymbolPackage? providerPackage = null;
+            foreach (var package in SymbolPackage.AllPackages)
+            {
+                if (package.AssemblyInformation.Name == assemblyName)
+                {
+                    providerPackage = package;
+                    break;
+                }
+            }
+
+            if (providerPackage == null)
+            {
+                Log.Warning($"Stream \"{stream.Name}\" needs the {stream.Kind} sender, but its package could not be found. "
+                            + "The installation will not send it.");
+                continue;
+            }
+
+            exportData.IncludePackage(providerPackage);
+            var declaredFiles = provider.GetType().GetCustomAttribute<ExportDependenciesAttribute>()?.FileNames;
+            if (declaredFiles != null)
+                exportData.RequireDependencyFiles(declaredFiles);
+
+            Log.Info($"Including {providerPackage.DisplayName} for stream \"{stream.Name}\" ({stream.Kind}).");
+        }
+    }
+
+    /** A child is named as it reads in its parent; a project root has no parent and goes by its symbol. */
+    private static string ExportName(Instance exportedInstance)
+    {
+        return exportedInstance.Parent == null ? exportedInstance.Symbol.Name : exportedInstance.SymbolChild.ReadableName;
+    }
+
+    /// <summary>
+    /// Why an op cannot be exported yet — shown where the export is offered, so the answer arrives before the
+    /// attempt rather than after it.
+    /// </summary>
+    public const string NoContentSupplierReason = "Add a [SendToOutput] inside this operator. "
+                                                  + "An executable ships what its sends put on the setup's outputs.";
+
+    /// <summary>Whether this op holds anything an export could ship — the check behind an offered export button.</summary>
+    public static bool CanExport(Instance exportedInstance)
+    {
+        return ContentSupplierSearch.ContainsAny(exportedInstance.Symbol);
+    }
+
+    /// <summary>
     /// The player's render loop evaluates some direct children of the exported op without an output connection:
     /// auto-playing audio clips (<see cref="AudioClipCollector"/>) and loose audio sources
     /// (<see cref="AudioGraphCollector"/>). Include them and whatever feeds them.
@@ -620,6 +724,53 @@ internal static partial class PlayerExporter
         }
     }
 
+    /// <summary>
+    /// Ships the project's active output setup beside the player, so the venue-reading ops and the player's own
+    /// presentation both find it. The setup describes the venue and always travels; this machine's display
+    /// bindings only do so for an installation, which is exported for one computer.
+    /// </summary>
+    private static void TryExportOutputSetups(Symbol symbol, string exportDir, CompositionSettings.PlayerModes playerMode)
+    {
+        var projectFolder = symbol.SymbolPackage.Folder;
+        var sourceFolder = SetupFiles.FolderIn(projectFolder);
+        if (!Directory.Exists(sourceFolder))
+            return;
+
+        // Only the setup the editor has active: the player can't switch between several, and a demo, which
+        // leaves the machine config behind, would otherwise pick whichever file the folder happens to list first.
+        if (!SetupFiles.TryFindActiveFile(sourceFolder, out var activeSetupPath))
+            return;
+
+        var targetFolder = SetupFiles.FolderIn(exportDir);
+        try
+        {
+            Directory.CreateDirectory(targetFolder);
+            File.Copy(activeSetupPath, Path.Combine(targetFolder, Path.GetFileName(activeSetupPath)), overwrite: true);
+            Log.Info($"Exported output setup \"{Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(activeSetupPath))}\".");
+
+            // An installation runs on the machine it was exported for, so its display bindings travel with it.
+            // A demo does not: the same numbering would name different screens wherever it is run.
+            if (playerMode != CompositionSettings.PlayerModes.Installation)
+                return;
+
+            var machineConfigPath = Path.Combine(sourceFolder, MachineConfig.FileName);
+            if (!File.Exists(machineConfigPath))
+            {
+                Log.Warning("Installation export: no local bindings to ship. Bind the outputs to displays first, "
+                            + "or the player will show only the first output in a window.");
+                return;
+            }
+
+            File.Copy(machineConfigPath, Path.Combine(targetFolder, MachineConfig.FileName), overwrite: true);
+            Log.Info("Exported this machine's display bindings.");
+        }
+        catch (Exception e)
+        {
+            // The graph still runs without a setup; only the ops that read the venue go quiet.
+            Log.Warning($"Could not export the output setup: {e.Message}");
+        }
+    }
+
     private static bool TryExportSettings(string exportDir, Symbol symbol, CompositionSettings.ExportConfig exportConfig, string title, string author,
                                           out string reason)
     {
@@ -648,6 +799,8 @@ internal static partial class PlayerExporter
         reason = $"Failed to save export settings to {ExportSettings.FileName}";
         return false;
     }
+
+    private static readonly List<Instance> _contentSuppliers = [];
 
     private static bool TryRemoveExistingExportDir(out string reason, string exportDir)
     {

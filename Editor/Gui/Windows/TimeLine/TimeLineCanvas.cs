@@ -32,6 +32,9 @@ namespace T3.Editor.Gui.Windows.TimeLine;
 [HelpUiID("Timeline")]
 internal sealed class TimeLineCanvas : AnimationCanvas
 {
+    /** Alt + drag is the timeline's own gesture. */
+    internal protected override bool PansWithAltDrag => false;
+
     public TimeLineCanvas(NodeSelection nodeSelection, Func<Instance> getCompositionOp, Func<Guid, bool> requestChildCompositionFunc)
     {
         _nodeSelection = nodeSelection;

@@ -42,6 +42,8 @@ public sealed class Texture2D(SharpDX.Direct3D11.Texture2D texture) : Texture<Sh
                               SampleDescription = new SampleDescription(1, 0),
                           };
         
+        // Only level 0 has pixels; the coarser levels are filtered down from it on the GPU right away, so
+        // anything that samples the image small (a thumbnail, a card, a minifying shader) sees the picture.
         var dataRectangles = new DataRectangle[mipLevels];
         for (var i = 0; i < mipLevels; i++)
         {
@@ -50,6 +52,12 @@ public sealed class Texture2D(SharpDX.Direct3D11.Texture2D texture) : Texture<Sh
         }
 
         var dxTexture = new SharpDX.Direct3D11.Texture2D(device, texDesc, dataRectangles);
+        if (mipLevels > 1)
+        {
+            using var srv = new ShaderResourceView(device, dxTexture);
+            device.ImmediateContext.GenerateMips(srv);
+        }
+
         return new Texture2D(dxTexture);
     }
 

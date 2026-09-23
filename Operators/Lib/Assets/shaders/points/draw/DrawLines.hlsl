@@ -23,7 +23,7 @@ cbuffer Params : register(b0)
     float FadeTooLong;
 };
 
-cbuffer Params : register(b1)
+cbuffer IntParams : register(b1)
 {
     int UvMode;
     int WidthFX;

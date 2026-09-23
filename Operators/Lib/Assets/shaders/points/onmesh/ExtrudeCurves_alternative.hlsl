@@ -62,7 +62,6 @@ void main(uint3 i : SV_DispatchThreadID)
     v.Bitangent = qRotateVec3(float3(1,0,0), rotation);
     v.TexCoord = float2((float)columnIndex/(columns-1),(float)rowIndex/(rows-1));
     v.Selected = 1;
-    v.__padding =0;
 
     Vertices[vertexIndex] = v;
     if(IsSeparator(railPoint) || IsSeparator(shapePoint))
@@ -83,16 +82,15 @@ void main(uint3 i : SV_DispatchThreadID)
         {
             if (columnIndex < columns - 1 && rowIndex < rows - 1) 
             {
-                TriangleIndices[faceIndex + 0] = int4(0, 0, 0, 0);
-                TriangleIndices[faceIndex + 1] = int4(0, 0, 0, 0);
-                //TriangleIndices[faceIndex + 1] = int4(0, 0, 0, 0); //commented duplicate line
+                TriangleIndices[faceIndex + 0] = int3(0, 0, 0);
+                TriangleIndices[faceIndex + 1] = int3(0, 0, 0);
             }
              if(IsSeparator(railPoint) || IsSeparator(shapePoint))
                  Vertices[vertexIndex].Position = float3(0,0,0);
             return;
         }        
-        TriangleIndices[faceIndex + 0] = int4(vertexIndex + 1, vertexIndex + rows, vertexIndex, 0);
-        TriangleIndices[faceIndex + 1] = int4(vertexIndex + 1, vertexIndex + rows + 1, vertexIndex + rows, 0);
+        TriangleIndices[faceIndex + 0] = int3(vertexIndex + 1, vertexIndex + rows, vertexIndex);
+        TriangleIndices[faceIndex + 1] = int3(vertexIndex + 1, vertexIndex + rows + 1, vertexIndex + rows);
     }
 }
 

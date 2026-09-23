@@ -1,0 +1,20 @@
+{
+  "FormatVersion": 3,
+  "Id": "98aac8ba-480c-4a28-8391-23c7d1ae11d9"/*StageGeometry*/,
+  "Inputs": [
+    {
+      "Id": "e64bc3c3-cbe2-4460-91a6-d0fc207c1743"/*OutputRef*/,
+      "DefaultValue": "00000000-0000-0000-0000-000000000000"
+    },
+    {
+      "Id": "b5066b38-41aa-4bbb-9d85-6f5bdf48c82d"/*UvMode*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "c1d2e3f4-5a6b-4c7d-8e9f-0a1b2c3d4e5f"/*UvScale*/,
+      "DefaultValue": 1.0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

@@ -1,0 +1,153 @@
+#nullable enable
+using System;
+using System.Collections.Generic;
+using System.IO;
+using T3.Core.DataTypes.Vector;
+using T3.Core.Logging;
+using T3.Core.Settings;
+
+namespace T3.Core.Output;
+
+/// <summary>
+/// Finds and loads a project's output setup from its <see cref="FolderIn">setups folder</see>. Shared by the
+/// editor, which loads the folder it is editing, and the player, which loads the copy shipped beside an
+/// exported project — so both pick the same setup out of the same folder by the same rules.
+/// </summary>
+public static class SetupFiles
+{
+    /// <summary>The folder holding the setups and the machine config of a project (or of an exported player).</summary>
+    public static string FolderIn(string rootFolder)
+    {
+        return Path.Combine(rootFolder, FileLocations.MetaSubFolder, Setup.FolderName);
+    }
+
+    /// <summary>
+    /// Reads the machine config and the setup it names, falling back to the first setup in the folder. Returns
+    /// false when the folder holds no setup at all; <paramref name="machineConfig"/> is always usable.
+    /// </summary>
+    /// <param name="wasRepaired">The file needed fixing to be loadable — the caller decides whether to write it back.</param>
+    public static bool TryLoad(string setupsFolder, out Setup? setup, out MachineConfig machineConfig, out bool wasRepaired)
+    {
+        setup = null;
+        wasRepaired = false;
+        machineConfig = new MachineConfig();
+
+        // The machine config remembers which setup this machine last had active, so it is read first.
+        var machineConfigPath = Path.Combine(setupsFolder, MachineConfig.FileName);
+        if (File.Exists(machineConfigPath))
+            MachineConfig.TryLoadFromFile(machineConfigPath, out machineConfig);
+
+        if (!Directory.Exists(setupsFolder))
+            return false;
+
+        var activeName = machineConfig.ActiveSetupName;
+        if (activeName.Length > 0)
+        {
+            var preferred = FilePathFor(setupsFolder, activeName);
+            if (File.Exists(preferred))
+                Setup.TryLoadFromFile(preferred, out setup, out wasRepaired);
+        }
+
+        // The remembered setup is gone, or none was ever recorded.
+        if (setup == null)
+        {
+            try
+            {
+                foreach (var filePath in Directory.EnumerateFiles(setupsFolder, "*" + Setup.FileSuffix))
+                {
+                    if (Setup.TryLoadFromFile(filePath, out setup, out wasRepaired))
+                        break;
+                }
+            }
+            catch (Exception e)
+            {
+                // An unreadable folder must not take the host down with it: a player runs unattended, and an
+                // editor can still open the project and write a fresh setup.
+                Log.Warning($"Could not read output setups from \"{setupsFolder}\": {e.Message}");
+            }
+        }
+
+        return setup != null;
+    }
+
+    /// <summary>
+    /// The file <see cref="TryLoad"/> would pick: the setup this machine last had active, else the first in the
+    /// folder. An export ships this one alone — a player has no way to switch, and without the machine config
+    /// (a demo leaves it behind) it could only guess among several.
+    /// </summary>
+    public static bool TryFindActiveFile(string setupsFolder, out string filePath)
+    {
+        filePath = string.Empty;
+        if (!Directory.Exists(setupsFolder))
+            return false;
+
+        var machineConfigPath = Path.Combine(setupsFolder, MachineConfig.FileName);
+        if (File.Exists(machineConfigPath)
+            && MachineConfig.TryLoadFromFile(machineConfigPath, out var machineConfig)
+            && machineConfig.ActiveSetupName.Length > 0)
+        {
+            var preferred = FilePathFor(setupsFolder, machineConfig.ActiveSetupName);
+            if (File.Exists(preferred))
+            {
+                filePath = preferred;
+                return true;
+            }
+        }
+
+        try
+        {
+            foreach (var candidate in Directory.EnumerateFiles(setupsFolder, "*" + Setup.FileSuffix))
+            {
+                filePath = candidate;
+                return true;
+            }
+        }
+        catch (Exception e)
+        {
+            Log.Warning($"Could not read output setups from \"{setupsFolder}\": {e.Message}");
+        }
+
+        return false;
+    }
+
+    /// <summary>The path a setup of this name is stored at.</summary>
+    public static string FilePathFor(string setupsFolder, string setupName)
+    {
+        return Path.Combine(setupsFolder, setupName + Setup.FileSuffix);
+    }
+
+    /// <summary>
+    /// Fills each output's <see cref="OutputDefinition.ResolvedResolution"/>: its own canvas size, or the size of
+    /// whatever is bound to it when that is left at 0×0. A binding is machine state, so this lives outside the
+    /// model and the setup file stays free of display numbering. Fitted patches are re-derived right after, so an
+    /// output of another aspect re-fits them before anything draws.
+    /// </summary>
+    /// <param name="resolutionOfBinding">Resolves a binding to the pixel size behind it. A host with no display
+    /// inventory passes null, and every plug-following output falls back to <see cref="UnboundResolution"/>.</param>
+    public static void ResolveCanvasResolutions(Setup setup, MachineConfig machineConfig,
+                                                Func<PlugBinding?, Int2>? resolutionOfBinding)
+    {
+        foreach (var output in setup.Outputs)
+        {
+            if (!output.FollowsPlug)
+            {
+                output.ResolvedResolution = output.CanvasResolution;
+                continue;
+            }
+
+            var binding = machineConfig.FindBinding(output.Id);
+            var resolution = resolutionOfBinding == null ? UnboundResolution : resolutionOfBinding(binding);
+            output.ResolvedResolution = resolution.Width > 0 && resolution.Height > 0 ? resolution : UnboundResolution;
+        }
+
+        foreach (var output in setup.Outputs)
+        {
+            var canvas = output.CanvasSize;
+            foreach (var patch in output.Patches)
+                patch.TryFitQuad(canvas);
+        }
+    }
+
+    /// <summary>What an output that follows its plug renders at while nothing is bound to it.</summary>
+    public static readonly Int2 UnboundResolution = new(1920, 1080);
+}

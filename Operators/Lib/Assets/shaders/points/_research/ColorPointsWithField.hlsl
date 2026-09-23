@@ -11,12 +11,12 @@ cbuffer Params : register(b0)
     float Range;
 }
 
-cbuffer Params : register(b1)
+cbuffer FloatParams : register(b1)
 {
     /*{FLOAT_PARAMS}*/
 }
 
-cbuffer Params : register(b2)
+cbuffer IntParams : register(b2)
 {
     int StrengthFactor;
 }

@@ -64,7 +64,6 @@ internal static partial class WindowManager
     internal static readonly SettingsWindow SettingsWindow = new();
     internal static readonly ProjectSettingsWindow ProjectSettingsWindow = new();
     internal static readonly UtilitiesWindow UtilitiesWindow = new();
-    internal static readonly ScreenManagerWindow ScreenManagerWindow = new();
     internal static readonly SnixlWindow SnixlWindow = new();
     internal static readonly GuidedFeatureTestsWindow GuidedFeatureTestsWindow = new();
 
@@ -101,7 +100,6 @@ internal static partial class WindowManager
                 GuidedFeatureTestsWindow,
                 SettingsWindow, // item shown in TiXL menu
                 ProjectSettingsWindow, // item shown in TiXL menu
-                ScreenManagerWindow,
                 WelcomeWindow, // opened from Help → Welcome / the version-welcome trigger
             ];
 

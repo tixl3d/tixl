@@ -6,11 +6,9 @@ added-in-version: 4.3
 scope: project-creation
 tags: [dev, edge, essential]
 prerequisites:
-  - TiXL is closed before the first step. Several steps require modifying PATH
-    or moving files before launching the editor.
+  - TiXL is closed before the first step. Several steps require modifying PATH or moving files before launching the editor.
   - You have administrator access (some steps temporarily rename system files).
-  - A scratch project directory is configured under `Settings → Project Directories`
-    that is safe to delete after the test.
+  - A scratch project directory is configured under `Settings → Project Directories` that is safe to delete after the test.
 related-help:
   - ../.help/getting-started/install.md
 ---

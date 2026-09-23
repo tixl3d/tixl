@@ -191,12 +191,39 @@ internal abstract class ListInputValueUi<T> : InputValueUi<T>
                 }
                 case string stringValue:
                 {
-                    
+
                     if (ImGui.InputText("##textEdit", ref stringValue, 1024))
                     {
                         r |= InputEditStateFlags.Modified;
                         ff = (TT)(object)stringValue;
                     }
+                    break;
+                }
+                case Guid guidValue:
+                {
+                    ImGui.AlignTextToFramePadding();
+
+                    // A Guid isn't hand-editable as text. If a picker is registered (e.g. the output setup's
+                    // surface/output dropdown), use it — it fills `size.X` so the trailing ×/+ align right.
+                    if (GuidListLabels.Picker != null)
+                    {
+                        if (GuidListLabels.Picker(guidValue, size.X, out var picked) && picked != guidValue)
+                        {
+                            ff = (TT)(object)picked;
+                            r |= InputEditStateFlags.ModifiedAndFinished;
+                        }
+                    }
+                    else
+                    {
+                        // Fall back to a read-only, full-width label so ×/+ still align. A resolver may name
+                        // the id; else a short id, or "(missing)" for one that resolves to nothing.
+                        var label = GuidListLabels.Resolver?.Invoke(guidValue)
+                                    ?? (guidValue == Guid.Empty ? "(none)" : guidValue.ToString("D")[..8]);
+                        ImGui.BeginDisabled();
+                        ImGui.Button(label, size);
+                        ImGui.EndDisabled();
+                    }
+
                     break;
                 }
             }
@@ -265,4 +292,19 @@ internal abstract class ListInputValueUi<T> : InputValueUi<T>
     
     private readonly List<int> _listOrderWhileDragging = [];
     private bool _isDragging;
+}
+
+/// <summary>Draws an editable picker for a Guid list item spanning <paramref name="width"/>; returns true
+/// and sets <paramref name="picked"/> when the user chooses a different id.</summary>
+internal delegate bool GuidItemPicker(Guid current, float width, out Guid picked);
+
+/// <summary>Optional hooks the owning module sets to make a Guid list (e.g. SendToOutput.TargetIds) show
+/// human labels and a real picker instead of raw ids. Both are optional and fall back gracefully.</summary>
+internal static class GuidListLabels
+{
+    /// <summary>Names a Guid; return null to fall back to a short id / "(missing)".</summary>
+    internal static Func<Guid, string?>? Resolver;
+
+    /// <summary>A dropdown to re-pick a Guid item; null falls back to a read-only label.</summary>
+    internal static GuidItemPicker? Picker;
 }

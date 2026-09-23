@@ -64,6 +64,10 @@ public sealed class DirtyFlag
     // editor-specific value
     public int FramesSinceLastUpdate => (_globalTickCount - 1 - _lastUpdateTick) / GlobalTickDiffPerFrame;
 
+    /// <summary>Whether the slot ran its update since the ticks were advanced for this frame — i.e. some other
+    /// consumer already evaluated it, and a view can show the value without invalidating the graph again.</summary>
+    public bool WasUpdatedThisFrame => _lastUpdateTick >= _globalTickCount;
+
     public DirtyFlagTrigger Trigger
     {
         get => _trigger;

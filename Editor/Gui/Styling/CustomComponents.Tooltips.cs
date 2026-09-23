@@ -66,7 +66,8 @@ internal static partial class CustomComponents
 
     public static void TooltipForLastItem(Action drawContent, bool useHoverDelay = true)
     {
-        if (!ImGui.IsItemHovered())
+        // A disabled item is exactly the one whose tooltip has to say why.
+        if (!ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
             return;
 
         FrameStats.Current.SomethingWithTooltipHovered = true;

@@ -1,3 +1,4 @@
+#nullable enable
 using System.Reflection;
 using System.Runtime.Loader;
 using Microsoft.CodeAnalysis;
@@ -16,7 +17,7 @@ namespace Lib.geometry;
 internal sealed class CustomScalarField : Instance<CustomScalarField>
 {
     [Output(Guid = "0a5e8d3c-71b9-4f26-9c48-d2e6a0b4f817")]
-    public readonly Slot<ScalarField> Result = new();
+    public readonly Slot<ScalarField?> Result = new();
 
     public CustomScalarField()
     {

@@ -1,0 +1,105 @@
+# OutputSetup
+
+The Output Setup is where a project meets the room: it maps what your graph renders onto the displays, projectors and video streams of a venue. Use it for projection mapping onto walls and objects, for multi-display installations, and for sending a rendered canvas to another application over Spout or NDI.
+
+This page walks through the parts of the view, the way content flows through a setup, and how a setup is bound to the computer it runs on.
+
+## Where to find it
+
+Open an **Output window** and click **Output Setup**, the last button in its toolbar. **Edit Output Setup** in the TiXL menu does the same for the primary output window, showing one first if none is open. Selecting a SendToOutput op in the graph also switches the window over. The window then shows the setup canvas on top and the **flow outliner** strip below it. The strip's header holds the setup switcher, the canvas tabs (**Board**, **Straight**, **Output**), a help button and a toggle that collapses the strip to its header.
+
+A project can hold several setups, one per venue. The switcher's menu creates, renames, duplicates and deletes them. Duplicating keeps every entity id, so operators that reference a surface or output keep working in the copy.
+
+## Two files, one show
+
+A setup is saved next to the project in its `.meta/Setups` folder and is meant to be shared and versioned: it describes the venue in metres and pixels, but never which connector of which computer drives a projector. That part lives in a second, machine-specific file, `outputs.machine.json`, which holds this computer's **local bindings**. A touring show keeps one setup per venue and rebinds outputs on the show computer once.
+
+## The flow outliner
+
+The strip below the canvas lays the setup out along its content flow, in four columns:
+
+1. **Content** — every [SendToOutput] op in the active composition: the nearest op up the breadcrumbs that is marked as a composition, or the whole project if none is. These are the sends an export of that composition ships. Sends of other compositions keep their routing, they are only hidden until you work in them again. Each one is a source of pixels. Clicking one opens the op that holds it in the graph. A **slice** cuts a rectangle out of a source. A source whose single slice is the full frame shows no slice row: that slice *is* the source, so it is folded into it and appears only once you cut, name, or add another.
+2. **Surfaces** — the planes light lands on: a wall, a screen, the face of a set piece. A surface shows one slice and is mapped onto one or more outputs. **Regions** are coplanar children of a surface, arranged in pixels, for poster slots and split layouts.
+3. **Outputs** — the canvases that projectors and displays receive. A canvas has a pixel size, but everything mapped onto it is stored as a fraction of it, so changing that size re-renders at the new resolution without moving a single mapping. Set the size to 0 × 0 and the canvas takes the resolution of whatever is plugged into it, so the same setup renders at 1080p or 1440p depending on the display. Surfaces are corner-pinned onto them. A **patch** feeds a slice straight onto part of the canvas without a surface, for a plain display or a quick test. Its **Rotation** turns the patch around its centre in quarter turns, shape and picture together, for a display or LED panel mounted on its side. Its **Scale mode** decides what happens when the canvas changes aspect, for example when a different display is plugged in: **Stretch** keeps the patch as a share of the canvas, so it stretches along; **Fit** keeps an aspect ratio you type as a pair, such as 16 : 9 or 2.39 : 1, and fits the largest rectangle of that shape into the canvas, centred, at the **Scale** you set. A fitted patch also asks its content to render at the patch's own size, so content that follows the requested resolution arrives in the right proportions. As with slices, an output's full-canvas base patch is folded into the output row — tiles added over it are listed, it stays the output itself; **Add Patch** creates a visible tile.
+4. **Local bindings** — this machine's plugs. Attached displays are detected; **+** adds a Spout or NDI sender under a name you choose. A plug whose package isn't loaded is listed but sends nothing. Hovering a display shows the machine's screens in their arrangement with that one lit, which answers "is Display 2 the projector or the laptop?" without guessing; Its context menu opens the system display settings, where the arrangement itself is changed.
+
+Lines between the columns show the routing: slice → surface, surface → output, slice → patch, output → plug. Hovering or selecting a row lights up its lines. Rows whose entity isn't in use recede. Dragging a row mostly up or down moves it among its siblings, which is the composite order for patches; dragging it sideways starts a routing drag as before. A drag on empty strip space fences the rows it crosses.
+
+### Connecting things
+
+Drag a row onto another row to connect them. The direction doesn't matter: dropping a surface onto an output is the same link as dropping the output onto the surface. One rule covers every pair: a drop connects, dropping what the target already shows changes nothing, and otherwise the target's input is replaced. What connects to what:
+
+- A slice or source onto a surface shows it there, replacing whatever it showed. To show a second thing on the same wall, add a region and feed that.
+- A surface onto an output maps it there, **filling** the canvas: a display shows the surface whole, and a projector is aimed by pulling the corners in from the frame it actually throws. A fill stays on the whole canvas whatever the surface measures in the room; the first corner or label drag turns it into a corner pin, which then follows the surface's size the way a pinned quad does. **Fill \<output\>** in the surface's menu gives it the whole canvas back.
+- A slice or source onto an output fills its canvas. No patch appears in the strip: an output's sole full-canvas patch is folded into the output row, the way a source's full-frame slice is folded into the source.
+- A slice or source onto a patch re-feeds that patch. A surface onto a patch is pinned to the patch's quad; a patch that fed content hands it to the surface and goes, a patch without content (a traced pixel map area) stays. A surface without content of its own shows on its Board card what the output canvas holds at its place: its mapping, or a patch carrying its name.
+- An output onto a plug binds it to that display or stream. Content or a surface dropped on a plug routes into the output it presents, creating and binding one if the plug is still free.
+
+Each row's context menu offers Rename, Duplicate and Delete. `Del` removes the selection while the strip has focus.
+
+## The canvas
+
+### Board
+
+The Board shows every entity as a card at its neutral placement, in metres: sources, surfaces, outputs, reference photos and props. It answers "what is in this venue and how big is it". Drag a card by its frame or its name label to move it; the handle at the top-right corner scales it. Selecting a card selects the entity everywhere else; right-click a card or its label for the entity's menu. Right-click empty Board to add a surface, a reference image or a prop.
+
+Double-clicking a card opens its tab: a surface opens **Straight**, an output opens **Output**. Choosing **Board**, or clicking empty strip, returns.
+
+A send's card is already its texture seen flat, so slices live there rather than in a view of their own: each is drawn as a labelled sub-rect, with a line naming what shows it, and the selected one is edited in place — edges crop, corners scale with the aspect held, the label moves it, everything snapping to the source's borders and the sibling slices. Add slices from the send's context menu and duplicate them from the slice's.
+
+### Straight
+
+The selected surface seen flat, as if you stood in front of it. Place its content here, add and arrange regions, and set the surface's real size. A surface traced on a reference photo straightens on that photo, in place. The frame's handles read the same on both: a **corner** says the wall's corner lies elsewhere than it was traced or pinned, an **edge** crops the wall to end there — the surface's declared size along that edge goes with it, so the picture keeps its proportions — and **Ctrl** on an edge stretches instead, re-declaring the wall wider or taller along that edge's axis while the photo stays. Measuring lines and reference points mark features of the real wall, so every one of these carries them along.
+
+### Output
+
+An output's canvas: the live composite the projector receives. Each mapped surface appears as a quad you corner-pin over the real wall while watching the projector. Once a surface carries reference points, aim them at their real positions and the pin is solved to hit them exactly. Patches appear as plain quads on the canvas.
+
+**Pixel map.** Venues that take one video signal for a whole room hand out a pixel map: an image at the signal's resolution with every wall's rectangle drawn in. Select the output and pick that image under **Pixel Map** in the Parameter window; it is drawn over the canvas at the **Opacity** you set, so patches can be placed against it while their content still shows through. The card warns when the image and the canvas differ in size, with a button to adopt the image's size. Below it, the **Patches** table lists every patch on the canvas with its top-left corner, size and rotation, in pixels or as ratios of the canvas, so a spec sheet can be typed in as printed. Clicking a name selects that patch; the same table sits on each patch's card, with that patch marked.
+
+## The stage and floor plans
+
+Every physical surface has a place in the stage: a position in metres and a rotation, shown on its card as **Position** and **Rotation** (yaw, pitch, roll). An unturned surface stands upright facing the viewer, and a floor is pitched by -90. For a room nobody types those numbers: a **floor plan** describes the venue from above, and its surfaces follow it.
+
+A floor plan is a card on the Board: a run of corners in metres, drawn at the same scale as the surface cards next to it. Each edge between two corners can carry a **wall**, a real surface that is as wide as the edge and stands on it facing the room; a **closed** plan can carry a **floor** surface covering its footprint. The walls stay derived: drag a corner on the Board or type a wall's width on its card, and the plan and its walls agree again. The small dot in the middle of an edge is its wall switch: filled while a wall stands there, and a click raises or takes down the wall. Dragging the dot slides the edge sideways while the neighbouring walls lengthen or shorten along their own lines, and its right-click menu splits the edge with a new corner. A double-click on a corner removes it (its right-click menu does too). The plan's corners are stage metres, so where its card sits on the Board changes nothing in the stage. A derived surface shows its position and rotation read-only, its height stays yours. Unticking a wall or floor on the plan's card removes the surface if nothing was done to it; one that carries content, a projection, a trace or regions is kept and stops following, and ticking the edge again brings that same surface back.
+
+Start one with **Add Floor Plan...** in the Board's `+` menu, which asks for a rectangle's width and depth, or from a surface you already have: its context menu offers **Start Floor Plan from Bottom Edge** (the surface becomes the first wall of an open run) and **Use as Floor of New Plan**. Walls are raised per edge on the plan's card, and each wall's name and length are written along its edge on the Board. All walls stand on one ground level.
+
+**Drawing walls.** A selected open plan shows a plus at each end of its run; click it, or **Draw Walls** in the plan's menu, and a line follows the cursor from that corner, snapped to 45° steps of the last wall (hold Shift to draw free). Type a number to set the length, and each click or Enter plants the next corner with a wall on the new edge, one undo step each. Clicking the run's other end closes the room. Escape or a right-click ends the tool. Starting a plan from a surface's bottom edge enters the tool right away, so a traced wall becomes a room in a few clicks.
+
+## The stage in the graph
+
+**StageGeometry** emits the active setup's physical surfaces as geometry: one quad per surface at its stage pose and real size, so the room drawn on the Board can be looked at in 3D. Wire it through **GeometryToMesh** into **DrawMesh**. Its **UvMode** decides what the mesh's texture coordinates are: over each surface, where the surface lands on the output canvas, from its mapping there or from a patch that carries the surface's name (texture the mesh with that output's pixel map or composite and every wall shows its own picture, the quickest way to catch a wall standing upside down), the world position on each face's plane in metres for a seamless material, or the world position seen from above for a floor plan image laid over the whole room. **DrawStageCanvas** goes the other way: it paints an output canvas from the room, looking from a viewer position through each wall into an equirectangular image or a cube map, so one scene lands continuous across every wall.
+
+## Reference images and props
+
+A **reference image** is a photo or a plan of the venue. To trace a floor plan from a scanned plan, give the image a **scale**: choose **Set Scale...** in its card's menu, click both ends of a length you know on the drawing and type that length. The card then stands at true size on the Board, the line stays on it with its length, its ends can be dragged and the length edited on the card. **Lock** the image and it becomes a backdrop: drawn beneath every card and never picked, moved or fenced, so a floor plan can be drawn over it corner by corner. An open run also closes by dragging one of its end corners onto the other. Trace a surface on a photo to define it from the picture, then measure it with line annotations to give it real dimensions. Plans are orthographic and only need a scale. A **prop** is a scale reference in the stage — a 1.70 m person, a table — so sizes can be sanity-checked at a glance.
+
+## Presenting
+
+An output presents when it is bound to a plug and its **Send** toggle is on. Turning Send off pauses the output without dropping the binding, useful to mute a projector between cues.
+
+- **Displays** open the output fullscreen on that display, each bound output on its own, so several projectors can run side by side. Two outputs bound to the same display is a mistake rather than a blend: the first one listed keeps it. A binding whose display is no longer attached presents nothing and is left alone, so a setup survives a projector being unplugged.
+- **Spout and NDI** push the output's composite into a sender under the plug's name every frame. Other applications on the same machine (Spout) or the network (NDI) receive it. Rename the plug to rename the sender; remove it from its context menu.
+
+Select a plug to see its settings in the Parameter window: the resolution it sends (the bound output's canvas), and for kinds that have them, the frame rate and whether alpha is carried. Only the settings a kind honours are shown, so a Spout plug offers neither.
+
+The bindings are also reachable from the output's context menu and from the Output window's breadcrumb menu.
+
+## Content from the graph
+
+[SendToOutput] supplies a texture to the setup. Its **Update** toggle freezes the content at its last frame when off. Its **Resolution** is 0 × 0 by default, which means "render at whatever the output asks for": an auto-sized [RenderTarget] upstream then follows the projector or display this content is routed to, so the same graph renders at 1080p or at 4K without being edited. Set a size to pin it regardless of where it goes.
+
+[UseProjectorCam] renders its content through an output's projector camera, so 3D geometry aligned to the stage lands correctly on that projector without a corner pin. Wire its result through a [RenderTarget] into a [SendToOutput] bound to the same output.
+
+## Tips
+
+- Name surfaces after the real thing ("Left wall", "Bar counter"); slices and patches are named after what they cut from, so they stay right when you rename.
+- Keep the outliner strip tall while routing and collapse it while pinning corners.
+- Every structural edit is undoable with `Ctrl+Z`. Bindings are machine state and save immediately, outside the undo stack.
+- Exporting an executable copies the setup beside it, so the operators that read the venue work there too. The bindings stay behind — see [Export Executables](ExportExecutables.md).
+
+## See also
+
+- [Live performances](LivePerformances.md)
+- [Realtime rendering](RealtimeRendering.md)

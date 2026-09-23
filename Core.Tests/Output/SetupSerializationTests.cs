@@ -1,0 +1,259 @@
+using System;
+using System.Collections.Generic;
+using System.Numerics;
+using Newtonsoft.Json.Linq;
+using T3.Core.DataTypes.Vector;
+using T3.Core.Output;
+using Xunit;
+
+namespace Core.Tests.Output;
+
+public class SetupSerializationTests
+{
+    [Fact]
+    public void FullSetup_RoundTripsAllFields()
+    {
+        var setup = CreateStudioSetup();
+        var restored = RoundTrip(setup);
+
+        Assert.Equal(setup.Id, restored.Id);
+        Assert.Equal("studio", restored.Name);
+
+        var image = Assert.Single(restored.ReferenceImages);
+        Assert.Equal(setup.ReferenceImages[0].Id, image.Id);
+        Assert.Equal(ReferenceImage.Kinds.Photo, image.Kind);
+        Assert.Equal("images/refs/corner.jpg", image.FilePath);
+        Assert.Equal(4032, image.Width);
+
+        var surface = Assert.Single(restored.Surfaces);
+        Assert.Equal(setup.Surfaces[0].Id, surface.Id);
+        Assert.Equal(new Vector2(5, 3), surface.SizeInMeters);
+        Assert.Equal(400, surface.PixelsPerMeter);
+
+        var mapping = Assert.Single(surface.OutputMappings);
+        Assert.Equal(setup.Outputs[1].Id, mapping.OutputId);
+        Assert.Equal(MappingModes.CornerPin, mapping.Mode);
+        Assert.Equal(new Vector2(0.11f, 0.08f), mapping.Quad[0]);
+        Assert.Equal(new Vector2(0.112f, 0.755f), mapping.Quad[3]);
+
+        Assert.NotNull(surface.Trace);
+        Assert.Equal(setup.ReferenceImages[0].Id, surface.Trace!.ImageId);
+        var annotation = Assert.Single(surface.Trace.Annotations);
+        Assert.Equal(4.5f, annotation.LengthInMeters);
+        Assert.Equal("mortar-3", annotation.Name);
+        Assert.True(annotation.ShowArrows);
+
+        Assert.NotNull(surface.Placement);
+        Assert.Equal(new Vector3(0.5f, 0, 1), surface.Placement!.Pose.Position);
+        Assert.Equal(new Vector2(0.4f, 1), surface.Anchor);
+        Assert.NotNull(surface.BoardPlacement);
+        Assert.Equal(new Vector2(1.5f, 0), surface.BoardPlacement!.Position);
+
+        Assert.Equal(2, restored.Outputs.Count);
+        Assert.Equal(OutputDefinition.Kinds.Default, restored.Outputs[0].Kind);
+        var projector = restored.Outputs[1];
+        Assert.Equal(OutputDefinition.Kinds.Projector, projector.Kind);
+        Assert.Equal(new Int2(1920, 1200), projector.CanvasResolution);
+        Assert.NotNull(projector.BoardPlacement);
+        Assert.Equal(800f, projector.BoardPlacement!.CardScale);
+        var patch = Assert.Single(projector.Patches);
+        Assert.Equal(setup.Outputs[1].Patches[0].Id, patch.Id);
+        Assert.Equal(setup.Outputs[1].Patches[0].SliceId, patch.SliceId);
+        Assert.Equal("left half", patch.Name);
+        Assert.Equal(new Vector2(0.5f, 0), patch.Quad[1]);
+        Assert.Equal(new Vector2(0, 1), patch.Quad[3]);
+        Assert.NotNull(projector.Camera);
+        Assert.NotNull(projector.Camera!.Pose);
+        Assert.NotNull(projector.Camera.Lens);
+        Assert.Equal(0.66f, projector.Camera.Lens!.Value.FieldOfViewY, 4);
+        var calibrationPoint = Assert.Single(projector.Camera.CalibrationPoints);
+        Assert.Equal(new Vector3(1, 2, 0), calibrationPoint.StagePosition);
+
+        var prop = Assert.Single(restored.Props);
+        Assert.Equal(1.70f, prop.HeightInMeters);
+    }
+
+    [Fact]
+    public void FullSetup_RoundTrip_NeedsNoRepair()
+    {
+        var restored = RoundTrip(CreateStudioSetup());
+        var before = restored.ToJsonString();
+
+        Assert.False(SetupRepair.Repair(restored));
+        Assert.Equal(before, restored.ToJsonString());
+    }
+
+    [Fact]
+    public void Duplicate_PreservesEntityGuids_ButGetsNewSetupId()
+    {
+        var setup = CreateStudioSetup();
+        var duplicate = setup.Duplicate("venue");
+
+        Assert.NotEqual(setup.Id, duplicate.Id);
+        Assert.Equal("venue", duplicate.Name);
+
+        // The venue-swap contract: every op-bindable entity keeps its GUID
+        Assert.Equal(setup.Surfaces[0].Id, duplicate.Surfaces[0].Id);
+        Assert.Equal(setup.Outputs[0].Id, duplicate.Outputs[0].Id);
+        Assert.Equal(setup.Outputs[1].Id, duplicate.Outputs[1].Id);
+        Assert.Equal(setup.ReferenceImages[0].Id, duplicate.ReferenceImages[0].Id);
+    }
+
+    [Fact]
+    public void SurfaceWithoutAnchor_ReadsBottomCentre()
+    {
+        var setup = Setup.ReadFromJson(JObject.Parse("""{ "Version": 1, "Name": "s", "Surfaces": [ { "Name": "wall", "SizeInMeters": [4, 2] } ] }"""));
+
+        var surface = Assert.Single(setup.Surfaces);
+        Assert.Equal(Surface.DefaultAnchor, surface.Anchor);
+        Assert.Equal(new Vector2(2, 0), surface.AnchorInMeters);
+    }
+
+    [Fact]
+    public void MinimalJson_LoadsWithDefaults()
+    {
+        var setup = Setup.ReadFromJson(JObject.Parse("""{ "Version": 1, "Name": "sparse" }"""));
+
+        Assert.Equal("sparse", setup.Name);
+        Assert.Empty(setup.Surfaces);
+        Assert.Empty(setup.Outputs);
+    }
+
+    [Fact]
+    public void UnknownFieldsAndNewerVersion_AreTolerated()
+    {
+        var setup = Setup.ReadFromJson(JObject.Parse("""
+            {
+              "Version": 99,
+              "Name": "future",
+              "SomeFutureFeature": { "nested": true },
+              "Surfaces": [
+                { "Name": "wall", "SizeInMeters": [2, 1], "FutureField": 42 },
+                "garbage-entry"
+              ]
+            }
+            """));
+
+        var surface = Assert.Single(setup.Surfaces);
+        Assert.Equal("wall", surface.Name);
+        Assert.Equal(new Vector2(2, 1), surface.SizeInMeters);
+    }
+
+    [Fact]
+    public void LadderIsMonotone_L1SurfaceHasNoOptionalSections()
+    {
+        var setup = Setup.CreateDefault();
+        setup.Surfaces.Add(new Surface { Name = "poster-left", SizeInMeters = new Vector2(0.6f, 0.9f) });
+
+        var json = JObject.Parse(setup.ToJsonString());
+        var surfaceJson = (JObject)json["Surfaces"]![0]!;
+
+        // L1 surfaces don't write the L2/L3 upgrade fields at all
+        Assert.Null(surfaceJson["Reference"]);
+        Assert.Null(surfaceJson["Placement"]);
+
+        var restored = RoundTrip(setup);
+        Assert.Null(restored.Surfaces[0].Trace);
+        Assert.Null(restored.Surfaces[0].Placement);
+    }
+
+    [Fact]
+    public void CreateDefault_ContainsDefaultOutput()
+    {
+        var setup = Setup.CreateDefault();
+        var output = Assert.Single(setup.Outputs);
+        Assert.Equal(OutputDefinition.Kinds.Default, output.Kind);
+        Assert.Equal("Default", output.Name);
+    }
+
+    private static Setup RoundTrip(Setup setup)
+    {
+        return Setup.ReadFromJson(JObject.Parse(setup.ToJsonString()));
+    }
+
+    private static Setup CreateStudioSetup()
+    {
+        var image = new ReferenceImage
+                        {
+                            Name = "north-corner",
+                            Kind = ReferenceImage.Kinds.Photo,
+                            FilePath = "images/refs/corner.jpg",
+                            Width = 4032,
+                            Height = 3024,
+                        };
+
+        var projector = new OutputDefinition
+                            {
+                                Name = "P1",
+                                Kind = OutputDefinition.Kinds.Projector,
+                                CanvasResolution = new Int2(1920, 1200),
+                                Camera = new OutputDefinition.ProjectorCamera
+                                             {
+                                                 Pose = new Pose(new Vector3(1.8f, 1.6f, 3.5f), Quaternion.Identity),
+                                                 Lens = Projection.CreatePerspective(0.66f, new Vector2(0, 0.4f)),
+                                                 CalibrationPoints = [new CalibrationPoint { StagePosition = new Vector3(1, 2, 0), OutputPixel = new Vector2(600, 300) }],
+                                                 ResidualPx = 0.4f,
+                                             },
+                            };
+        projector.BoardPlacement = new BoardPlacement { Position = new Vector2(7, 0), CardScale = 800 };
+        projector.Patches.Add(new OutputDefinition.Patch
+                                  {
+                                      Name = "left half",
+                                      SliceId = Guid.NewGuid(),
+                                      Quad = [Vector2.Zero, new Vector2(0.5f, 0), new Vector2(0.5f, 1), new Vector2(0, 1)],
+                                  });
+
+        var setup = Setup.CreateDefault("studio");
+        setup.ReferenceImages.Add(image);
+        setup.Outputs.Add(projector);
+        setup.Surfaces.Add(new Surface
+                               {
+                                   Name = "wall",
+                                   SizeInMeters = new Vector2(5, 3),
+                                   OutputMappings =
+                                   [
+                                       new Surface.OutputMapping
+                                           {
+                                               OutputId = projector.Id,
+                                               Quad =
+                                               [
+                                                   new Vector2(0.11f, 0.08f),
+                                                   new Vector2(0.865f, 0.1f),
+                                                   new Vector2(0.86f, 0.78f),
+                                                   new Vector2(0.112f, 0.755f),
+                                               ],
+                                           }
+                                   ],
+                                   Trace = new Surface.TraceBinding
+                                                   {
+                                                       ImageId = image.Id,
+                                                       Quad =
+                                                       [
+                                                           new Vector2(430, 300),
+                                                           new Vector2(1450, 180),
+                                                           new Vector2(1450, 900),
+                                                           new Vector2(430, 830),
+                                                       ],
+                                                       Annotations =
+                                                       [
+                                                           new Annotation
+                                                               {
+                                                                   P1 = new Vector2(500, 400),
+                                                                   P2 = new Vector2(1200, 410),
+                                                                   LengthInMeters = 4.5f,
+                                                                   Name = "mortar-3",
+                                                                   ShowArrows = true,
+                                                               }
+                                                       ],
+                                                   },
+                                   Anchor = new Vector2(0.4f, 1),
+                                   BoardPlacement = new BoardPlacement { Position = new Vector2(1.5f, 0) },
+                                   Placement = new Surface.StagePlacement
+                                                   {
+                                                       Pose = new Pose(new Vector3(0.5f, 0, 1), Quaternion.Identity),
+                                                   },
+                               });
+        setup.Props.Add(new Prop { Position = new Vector3(1.5f, 0, 1.2f), HeightInMeters = 1.70f });
+        return setup;
+    }
+}

@@ -21,7 +21,7 @@ cbuffer TimeConstants : register(b1)
     float beatTime;
 }
 
-cbuffer TimeConstants : register(b2)
+cbuffer TimeConstants2 : register(b2)
 {
     float TargetWidth;
     float TargetHeight;
@@ -112,7 +112,7 @@ float4 psMain(vsOutput psInput) : SV_TARGET
     float2 uv = psInput.texCoord;
     float cellFx = 1-saturate( abs(blendFx)-Gap);
 
-    float celShade = sin((beatTime + hash * 999) ) +1;
+    float celShade = sin((beatTime + hash.x * 999) ) +1;
     float lineThickness = -0.02+LineThickness* cellFx;
     float edge = smoothstep(lineThickness+0.01, lineThickness + 0.02, distanceFromEdge);
     lineThickness += 0.02;

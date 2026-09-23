@@ -1,0 +1,33 @@
+{
+  "FormatVersion": 3,
+  "Id": "b3e6f1a2-9c4d-4e58-8a71-2f5c6d0b93e4"/*UseProjectorCam*/,
+  "Description": "Renders its content through a setup output's projector camera.\n\nSets the view from the referenced output's calibrated (or manual) projector camera before evaluating the connected content, so 3D geometry aligned to the physical stage lands correctly on that projector — no corner-pin warp. Wire the rendered result through a RenderTarget into a SendToOutput bound to the same output.\n\nAKA: projector, mapping camera, calibration, stage, 3d",
+  "InputUis": [
+    {
+      "InputId": "d5081c34-7e6f-4b7a-ac93-417208d25b16"/*Command*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "e6192d45-6f70-4c8b-bd04-528319e36c27"/*OutputRef*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Usage": "OutputSetupEntities"
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "c4f70b23-8d5e-4a69-9b82-3061e7c14a05"/*Output*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

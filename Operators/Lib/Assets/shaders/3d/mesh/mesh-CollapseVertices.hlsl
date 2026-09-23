@@ -19,7 +19,7 @@ cbuffer Params : register(b0)
     float BlendStep;
 }
 
-cbuffer Params : register(b1)
+cbuffer IntParams : register(b1)
 {
     uint Count;
     int VolumeShape;
@@ -38,11 +38,11 @@ RWStructuredBuffer<PbrVertex> ResultVertices : register(u0);
 
 static const float NoisePhase = 0;
 
-static const float VolumeSphere = 0.5;
-static const float VolumeBox = 1.5;
-static const float VolumePlane = 2.5;
-static const float VolumeZebra = 3.5;
-static const float VolumeNoise = 4.5;
+static const int VolumeSphere = 0;
+static const int VolumeBox = 1;
+static const int VolumePlane = 2;
+static const int VolumeZebra = 3;
+static const int VolumeNoise = 4;
 
 static const float ModeOverride = 0.5;
 static const float ModeAdd = 1.5;

@@ -263,7 +263,7 @@ public partial class ScalableCanvas
             && (isInteractable || isPanning)
             && (flags & T3Ui.EditingFlags.PreventPanningWithMouse) == 0
             && ((
-                    ImGui.IsMouseDragging(ImGuiMouseButton.Left) && ImGui.GetIO().KeyAlt && this is not TimeLineCanvas)
+                    ImGui.IsMouseDragging(ImGuiMouseButton.Left) && ImGui.GetIO().KeyAlt && PansWithAltDrag)
                 || (!UserSettings.Config.MiddleMouseButtonZooms && ImGui.IsMouseDragging(ImGuiMouseButton.Middle) && !ImGui.GetIO().KeyAlt)
                 || (ImGui.IsMouseDragging(ImGuiMouseButton.Right) && !ImGui.GetIO().KeyAlt))
             )
@@ -303,6 +303,13 @@ public partial class ScalableCanvas
 
     private static ScalableCanvas? _draggedCanvas;
     internal static bool IsAnyCanvasDragged => _draggedCanvas != null;
+
+    /// <summary>Whether Alt + left drag pans this canvas. Off where Alt + drag means something else — the timeline,
+
+    /// and the Board, where it duplicates what it drags.</summary>
+
+    internal protected virtual bool PansWithAltDrag => true;
+
 
     internal protected virtual Vector2 ClampScaleToValidRange(Vector2 scale)
     {

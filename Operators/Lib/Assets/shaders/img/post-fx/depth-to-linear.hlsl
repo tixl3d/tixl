@@ -29,7 +29,7 @@ cbuffer ParamConstants : register(b0)
 
     float c = Mode < 0.5
                   ? (-f * n) / (depth * (f - n) - f)
-                  : (c = (2.0 * n) / (f + n - depth * (f - n))); // Legacy Mode for Depth of Field
+                  : (2.0 * n) / (f + n - depth * (f - n)); // Legacy Mode for Depth of Field
 
     if (OutrangeMin != 0 || OutrangeMax != 0)
     {

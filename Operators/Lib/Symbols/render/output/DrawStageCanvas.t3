@@ -1,0 +1,56 @@
+{
+  "FormatVersion": 3,
+  "Id": "533eb7f8-f18d-41bf-a094-167e0557eae8"/*DrawStageCanvas*/,
+  "Inputs": [
+    {
+      "Id": "ec895305-671f-4f1b-ada1-7ef91afc6212"/*Mesh*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "d5dee94b-5dbc-448b-b8eb-c44eb6e36539"/*Image*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "acd9fcfb-5693-49e5-890f-95ffce4d0d32"/*CubeMap*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "a17c5fd5-04f8-4ed1-bc89-c389d845f152"/*ViewerPosition*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 1.6,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "379b6223-920b-448f-a508-c93dccb06316"/*OutputRef*/,
+      "DefaultValue": "00000000-0000-0000-0000-000000000000"
+    },
+    {
+      "Id": "2fb9a2cb-8583-49bc-9745-438a5d2eed63"/*Resolution*/,
+      "DefaultValue": {
+        "X": 0,
+        "Y": 0
+      }
+    },
+    {
+      "Id": "8213f365-71e2-41dc-8e84-e3948f0ceea2"/*Color*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 1.0,
+        "Z": 1.0,
+        "W": 1.0
+      }
+    },
+    {
+      "Id": "0f0b5a2e-4b9e-4f3a-9c2d-7a1e6d8c5b41"/*RotateY*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "3c7d9e11-2a6f-4d5b-8e4c-1f9a0b7c6d52"/*FlipHorizontal*/,
+      "DefaultValue": false
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

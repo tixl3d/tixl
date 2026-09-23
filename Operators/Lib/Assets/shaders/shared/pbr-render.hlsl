@@ -4,7 +4,7 @@
 #ifndef __AdjustRoughnessForSpecularAA
 #define __AdjustRoughnessForSpecularAA
 
-inline float3 AdjustRoughnessForSpecularAA(float baseRoughness, float specularAA)
+inline float AdjustRoughnessForSpecularAA(float baseRoughness, float specularAA)
 {
  // --- Specular anti-aliasing ---
     // Compute normal variance using screen-space derivatives and increase roughness accordingly.

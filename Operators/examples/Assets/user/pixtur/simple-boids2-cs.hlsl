@@ -2,6 +2,7 @@
 
 #include "shared/hash-functions.hlsl"
 #include "shared/point.hlsl"
+#include "shared/quat-functions.hlsl"
 #include "points/spatial-hash-map/hash-map-settings.hlsl" 
 
 cbuffer ParamConstants : register(b0)
@@ -119,10 +120,10 @@ void main(uint3 Gid : SV_GroupID, uint3 DTid : SV_DispatchThreadID, uint3 GTid :
     float3 position = self.Position;
     
     if(true) {
-        direction = rotate_vector(FORWARD, self.SpriteOrientation); 
+        direction = qRotateVec3(FORWARD, self.SpriteOrientation); 
     }
     else {
-        direction = float3(rotate_vector(FORWARD, self.SpriteOrientation).xy, 0); 
+        direction = float3(qRotateVec3(FORWARD, self.SpriteOrientation).xy, 0); 
         position.z = 0;
     }
     
@@ -159,7 +160,7 @@ void main(uint3 Gid : SV_GroupID, uint3 DTid : SV_DispatchThreadID, uint3 GTid :
 
                 if(distance < BoidsTypes[boidTypIndex].AlignmentRadius)
                 {
-                    averageDirection += rotate_vector(FORWARD, Agents[otherIndex].SpriteOrientation);
+                    averageDirection += qRotateVec3(FORWARD, Agents[otherIndex].SpriteOrientation);
                     countForAlignment++;
                 }
 
@@ -242,9 +243,9 @@ void main(uint3 Gid : SV_GroupID, uint3 DTid : SV_DispatchThreadID, uint3 GTid :
     //float4 rot = Agents[DTid.x].SpriteOrientation;
     
     // Use look at velocity rotation and rotate back into xy plane
-    float4 rot = normalize(q_look_at(direction, float3(0,0,1)));
-    rot = qmul(rot, rotate_angle_axis(0.5*PI , float3(1,0,0)));
-    //rot = q_slerp(self.SpriteOrientation, rot, 0.9);
+    float4 rot = normalize(qLookAt(direction, float3(0,0,1)));
+    rot = qMul(rot, qFromAngleAxis(0.5*PI , float3(1,0,0)));
+    //rot = qSlerp(self.SpriteOrientation, rot, 0.9);
 
     // 2d-rotation around z
     Agents[DTid.x].SpriteOrientation = rot;

@@ -90,7 +90,7 @@ void main(uint3 i : SV_DispatchThreadID)
     float3 pt2= TargetPoints[2].Position;
     float3 pt3= TargetPoints[3].Position;
 
-    float2 targetPos = 
+    float3 targetPos = 
     lerp(
         lerp(pt0, pt1, uv.x),
         lerp(pt2, pt3, 1-uv.x),

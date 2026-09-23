@@ -65,7 +65,7 @@ internal sealed class MapPointAttributes : Instance<MapPointAttributes>
     private enum MappingModes
     {
         Centered,
-        ForStart,
+        FromStart,
         PingPong,
         Repeat,
         UseOriginalW,

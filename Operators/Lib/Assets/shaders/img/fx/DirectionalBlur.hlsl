@@ -54,7 +54,7 @@ float4 psMain(vsOutput input) : SV_TARGET
         pos += dir;
         totalWeight += 2*weight;
     }
-        c.rgb = c/totalWeight;
+        c.rgb = (c/totalWeight).rgb;
 
     c.a = clamp(c.a/totalWeight, 0,1);
     return clamp(c,0,1000);

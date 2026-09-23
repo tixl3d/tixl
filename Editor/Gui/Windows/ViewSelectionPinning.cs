@@ -20,7 +20,7 @@ namespace T3.Editor.Gui.Windows;
 /// </summary>
 internal sealed class ViewSelectionPinning
 {
-    public void DrawPinning()
+    public void DrawPinning(Action? drawExtraMenuItems = null)
     {
         if (!TryGetPinnedOrSelectedInstance(out var pinnedOrSelectedInstance, out var canvas))
         {
@@ -47,7 +47,7 @@ internal sealed class ViewSelectionPinning
         {
             if (_isPinned)
             {
-                _isPinned = false;
+                Unpin();
             }
             else
             {
@@ -83,11 +83,6 @@ internal sealed class ViewSelectionPinning
         ImGui.SameLine();
         ImGui.SetNextItemWidth(200 * T3Ui.UiScaleFactor);
         var suffix = _isPinned ? " (pinned)" : " (selected)";
-
-        if (TryGetPinnedEvaluationInstance(canvas.Structure, out var pinnedEvaluationInstance))
-        {
-            suffix += " -> " + pinnedEvaluationInstance.Symbol.Name + " (Final)";
-        }
 
         var symbolName = pinnedOrSelectedInstance.Symbol.Name;
         var symbolChildName = pinnedOrSelectedInstance.SymbolChild?.Name;
@@ -132,21 +127,6 @@ internal sealed class ViewSelectionPinning
                 }
             }
 
-            if (pinnedEvaluationInstance != null)
-            {
-                if (CustomComponents.DrawMenuItem(_unpinStartOperatorId, "Unpin Start Operator", reserveIconColumn: false))
-                {
-                    _pinnedEvaluationInstancePath = [];
-                }
-            }
-            else
-            {
-                if (CustomComponents.DrawMenuItem(_pinAsStartOperatorId, "Pin as Start Operator", reserveIconColumn: false))
-                {
-                    PinSelectionAsEvaluationStart(nodeSelection.GetFirstSelectedInstance());
-                }
-            }
-
             if (ProjectView.Focused != null)
             {
                 if (CustomComponents.DrawMenuItem(_showInGraphId, "Show in Graph", reserveIconColumn: false))
@@ -188,6 +168,12 @@ internal sealed class ViewSelectionPinning
                 }
             }
 
+            if (drawExtraMenuItems != null)
+            {
+                CustomComponents.SeparatorLine();
+                drawExtraMenuItems();
+            }
+
             CustomComponents.SeparatorLine();
             CustomComponents.DrawMenuItem(_showHoveredOutputsId, "Show Hovered Outputs", isEnabled: false, reserveIconColumn: false);
             ImGui.PopStyleVar();
@@ -201,14 +187,6 @@ internal sealed class ViewSelectionPinning
     {
         var firstSelectedInstance = canvas.NodeSelection.GetFirstSelectedInstance();
         PinInstance(firstSelectedInstance, canvas);
-        //_pinnedEvaluationInstancePath = null;
-    }
-
-    private void PinSelectionAsEvaluationStart(Instance? instance)
-    {
-        _pinnedEvaluationInstancePath = instance != null
-                                            ? instance.InstancePath
-                                            : [];
     }
 
     public bool IsPinned => _isPinned;
@@ -282,7 +260,6 @@ internal sealed class ViewSelectionPinning
         }
 
         _pinnedInstancePath = instance != null ? instance.InstancePath : [];
-        _pinnedEvaluationInstancePath = _pinnedInstancePath;
         _pinnedProjectView = projectView;
         _isPinned = true;
     }
@@ -292,20 +269,21 @@ internal sealed class ViewSelectionPinning
         _isPinned = false;
         _pinnedProjectView = null;
         _pinnedInstancePath = [];
-        _pinnedEvaluationInstancePath = [];
-    }
-
-    public bool TryGetPinnedEvaluationInstance(Structure structure, [NotNullWhen(true)] out Instance? instance)
-    {
-        instance = structure.GetInstanceFromIdPath(_pinnedEvaluationInstancePath);
-        return instance != null;
     }
 
     internal void SaveStateTo(Output.OutputWindowState state)
     {
         state.IsPinned = _isPinned;
         state.PinnedOutputId = _selectedOutputId;
-        state.PinnedInstancePath = _isPinned ? _pinnedInstancePath.ToArray() : [];
+        // Synced every frame: copy only when the pinned path actually changed.
+        if (!_isPinned)
+        {
+            state.PinnedInstancePath = [];
+        }
+        else if (!IsSamePath(state.PinnedInstancePath, _pinnedInstancePath))
+        {
+            state.PinnedInstancePath = _pinnedInstancePath.ToArray();
+        }
     }
 
     internal void LoadStateFrom(Output.OutputWindowState state)
@@ -314,14 +292,26 @@ internal sealed class ViewSelectionPinning
         _selectedOutputId = state.PinnedOutputId;
         _pinnedInstancePath = state.PinnedInstancePath;
         _pinnedProjectView = UiModel.ProjectHandling.ProjectView.Focused;
-        _pinnedEvaluationInstancePath = state.PinnedInstancePath; // Same path for now
     }
 
     private bool _isPinned;
     private Guid _selectedOutputId; // Empty if default
     private ProjectView? _pinnedProjectView;
+    private static bool IsSamePath(Guid[] stored, IReadOnlyList<Guid> path)
+    {
+        if (stored.Length != path.Count)
+            return false;
+
+        for (var i = 0; i < stored.Length; i++)
+        {
+            if (stored[i] != path[i])
+                return false;
+        }
+
+        return true;
+    }
+
     private IReadOnlyList<Guid> _pinnedInstancePath = [];
-    private IReadOnlyList<Guid> _pinnedEvaluationInstancePath = [];
 
     public ISlot? GetPinnedOrDefaultOutput(List<ISlot> outputs)
     {
@@ -343,8 +333,6 @@ internal sealed class ViewSelectionPinning
 
     private static readonly int _unpinViewId = nameof(_unpinViewId).GetHashCode();
     private static readonly int _pinSelectionToViewId = nameof(_pinSelectionToViewId).GetHashCode();
-    private static readonly int _unpinStartOperatorId = nameof(_unpinStartOperatorId).GetHashCode();
-    private static readonly int _pinAsStartOperatorId = nameof(_pinAsStartOperatorId).GetHashCode();
     private static readonly int _showInGraphId = nameof(_showInGraphId).GetHashCode();
     private static readonly int _showOutputId = nameof(_showOutputId).GetHashCode();
     private static readonly int _showOutputItemBaseId = nameof(_showOutputItemBaseId).GetHashCode();

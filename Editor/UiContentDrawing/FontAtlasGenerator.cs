@@ -34,9 +34,9 @@ internal static class FontAtlasGenerator
     internal static unsafe void CreateFontAtlasWithIcons(Device device,
                                                          IntPtr imguiContext,
                                                          out ShaderResourceView fontTextureView,
-                                                         out SamplerState fontSampler)
+                                                         out SamplerState imGuiSampler)
     {
-        fontSampler = null;
+        imGuiSampler = null;
         fontTextureView = null;
         var scaleFactor = T3Ui.UiScaleFactor;
 
@@ -143,9 +143,11 @@ internal static class FontAtlasGenerator
                                       MipLodBias = 0.0f,
                                       ComparisonFunction = Comparison.Always,
                                       MinimumLod = 0.0f,
-                                      MaximumLod = 0.0f
+                                      // Every image ImGui draws goes through this sampler, so it must reach the mip chain:
+                                      // clamped to level 0, a photo shrunk onto a card is a moiré of its finest pixels.
+                                      MaximumLod = float.MaxValue,
                                   };
-            fontSampler = new SamplerState(device, samplerDesc);
+            imGuiSampler = new SamplerState(device, samplerDesc);
         }
         catch (Exception e)
         {

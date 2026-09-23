@@ -83,7 +83,7 @@ psInput vsMain(uint id: SV_VertexID)
     float2 rand2Centered = hash21((particleId + Seed * 2701) % 33533);
 
     float4 centerInObject = float4(pointDef.Position,1) + float4(randCentered * ScatterPosition,0,0);
-    centerInObject.x *= aspect;
+    centerInObject.x *= aspect.x;
     float4 centerInCamera = mul(centerInObject, ObjectToCamera);
     centerInCamera.xyz /= centerInCamera.w;
 
@@ -92,7 +92,7 @@ psInput vsMain(uint id: SV_VertexID)
     centerUv.y = 1- centerUv.y;
 
     float2 quadSize = pointDef.FX1 * Size * Stretch * (1 + pow( rand, 2) * ScatterStretch) * 0.05;
-    quadSize.x *= aspect;
+    quadSize.x *= aspect.x;
     float4 vertexInClipSpace = centerInClipspace 
                              + float4(cornerDef.xy * quadSize, 0,0);
     

@@ -30,7 +30,7 @@ cbuffer Params : register(b0)
     // float UseWForU;
 };
 
-cbuffer Params : register(b3)
+cbuffer IntParams : register(b3)
 {
     int CurrentStep;
 };

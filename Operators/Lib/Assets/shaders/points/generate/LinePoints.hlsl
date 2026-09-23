@@ -27,7 +27,7 @@ cbuffer Params : register(b0)
     float Twist;
 }
 
-cbuffer Params : register(b1)
+cbuffer IntParams : register(b1)
 {
     int AddSeparator;
     int OrientationMode;

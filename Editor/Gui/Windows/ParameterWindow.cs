@@ -1,6 +1,7 @@
 #nullable enable
 using ImGuiNET;
 using System.Diagnostics.CodeAnalysis;
+using T3.Editor.Gui.Windows.OutputSetup;
 using T3.Editor.Gui.Help;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
@@ -71,7 +72,16 @@ internal sealed class ParameterWindow : Window
         }
         
 
-        if (!NodeSelection.TryGetSelectedInstanceOrInput(out var instance, out var inputUi, out _selectionChanged))
+        var hasGraphSelection = NodeSelection.TryGetSelectedInstanceOrInput(out var instance, out var inputUi, out _selectionChanged);
+
+        // A picked output-setup entity owns this window until the graph picks again (GlobalSelectionHandling).
+        if (SetupParameterView.TryDraw())
+        {
+            _lastSelectedInstanceId = Guid.Empty;
+            return;
+        }
+
+        if (!hasGraphSelection)
         {
             var nodeSelection = ProjectView.Focused?.NodeSelection;
             var sectionSettingsShown = nodeSelection != null && DrawSettingsForSelectedSections(nodeSelection);
@@ -94,7 +104,10 @@ internal sealed class ParameterWindow : Window
             _lastSelectedInstanceId = Guid.Empty;
             return;
         }
-        
+
+        if (instance == null) // nullable-flow guard: hasGraphSelection == true implies non-null
+            return;
+
         if (inputUi != null)
         {
             _viewMode = ViewModes.Settings;
@@ -420,6 +433,10 @@ internal sealed class ParameterWindow : Window
         DrawParameters(instance, selectedChildSymbolUi, symbolChildUi, compositionSymbolUi, false, this);
         FormInputs.AddVerticalSpace(15);
 
+        // A SendToOutput's setup side (resolution, routing) belongs with its parameters —
+        // the one deliberate case of op params and setup properties sharing the window.
+        SetupParameterView.DrawSendExtras(instance);
+
         
         // With the Help window open the summary would only duplicate the doc shown there.
         if (!HelpWindow.IsOpen && OperatorHelp.DrawHelpSummary(symbolUi))
@@ -668,16 +685,18 @@ internal sealed class ParameterWindow : Window
             // area up onto this line.
             ImGui.SameLine();
             var projectView = ProjectView.Focused;
-            var canPin = projectView != null && RenderProcess.OutputWindow != null && projectView.CompositionInstance != null;
-            if (!canPin)
+            var outputWindow = RenderProcess.OutputWindow;
+            var compositionInstance = projectView?.CompositionInstance;
+            if (projectView == null || outputWindow == null || compositionInstance == null)
             {
                 CustomComponents.IconButton(Icon.PlayOutput, Vector2.Zero, CustomComponents.ButtonStates.Disabled);
                 CustomComponents.TooltipForLastItem("Pin to output — needs an output window");
             }
             else
             {
-                var isPinned = RenderProcess.OutputWindow!.Pinning.TryGetPinnedEvaluationInstance(projectView!.Structure,
-                                   out var pinnedInstance)
+                var pinning = outputWindow.Pinning;
+                var isPinned = pinning.IsPinned
+                               && pinning.TryGetPinnedOrSelectedInstance(out var pinnedInstance, out _)
                                && pinnedInstance == op;
 
                 if (CustomComponents.ToggleIconButton(ref isPinned, Icon.PlayOutput, Vector2.Zero))
@@ -694,7 +713,7 @@ internal sealed class ParameterWindow : Window
                     {
                         NodeActions.PinSelectedToOutputWindow(projectView,
                             projectView.NodeSelection,
-                            projectView.CompositionInstance!,
+                            compositionInstance,
                             true);
                     }
                 }

@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using SharpDX;
 using SharpDX.Direct3D;
@@ -7,6 +8,8 @@ using T3.Core.Animation;
 using T3.Core.Audio;
 using T3.Core.Logging;
 using T3.Core.Operator;
+using T3.Core.Output.Rendering;
+using T3.Core.Output;
 using T3.Core.Operator.Slots;
 using T3.Core.Stats;
 using Texture2D = T3.Core.DataTypes.Texture2D;
@@ -65,9 +68,10 @@ internal static partial class Program
         DirtyFlag.IncrementGlobalTicks();
         DirtyFlag.GlobalInvalidationTick++;
 
-        EvaluateAndDrawOutput(_evalContext, _resolution, _textureOutput, _deviceContext, _renderView);
+        EvaluateAndDrawOutput(_resolution, _deviceContext, _renderView);
 
         _swapChain.Present(_vsyncInterval, PresentFlags.None);
+        PresentOutputWindows();
 
         PerformanceMetrics.RecordFrame((float)(Playback.LastFrameDuration * 1000.0));
     }
@@ -76,12 +80,57 @@ internal static partial class Program
     {
     }
 
-    private static bool EvaluateAndDrawOutput(EvaluationContext evalContext,
-                                              T3.Core.DataTypes.Vector.Int2 resolution,
-                                              Slot<Texture2D> textureOutput,
+    /// <summary>
+    /// What the main window shows: its bound output's composite, else the first sending output's. A project whose
+    /// sends reach no output — no setup, or nothing routed yet — shows its first send's own texture instead, so a
+    /// quick export works before anyone has opened the output setup.
+    /// </summary>
+    private static Texture2D? RenderMainWindowTexture(T3.Core.DataTypes.Vector.Int2 resolution)
+    {
+        var setup = ActiveSetup.Current;
+        if (setup != null)
+        {
+            // Every other display is drawn first, while the back buffer is still free.
+            DrawOutputWindows();
+
+            if (_mainWindowOutputId != Guid.Empty)
+                return OutputCompositor.RenderOutput(_mainWindowOutputId);
+
+            for (var i = 0; i < setup.Outputs.Count; i++)
+            {
+                var output = setup.Outputs[i];
+                if (output.Kind == OutputDefinition.Kinds.Default || !output.IsSending)
+                    continue;
+
+                var composite = OutputCompositor.RenderOutput(output.Id);
+                if (composite != null)
+                    return composite;
+            }
+        }
+
+        if (_sends.Count == 0 || _sends[0] is not IContentSupplier firstSend)
+            return null;
+
+        OutputContentResolver.PrepareContext(resolution);
+        return OutputContentResolver.PullContent(firstSend);
+    }
+
+    private static bool EvaluateAndDrawOutput(T3.Core.DataTypes.Vector.Int2 resolution,
                                               DeviceContext deviceContext,
                                               RenderTargetView renderView)
     {
+        // One token per frame for everything the compositing path memoises, advanced before anything asks.
+        OutputFrame.Advance();
+
+        // Operators that render off-screen save and restore the bound viewports, and SharpDX's GetViewports
+        // throws when none is bound at all — so one is bound before any content runs, as the editor always has.
+        deviceContext.Rasterizer.SetViewport(new Viewport(0, 0, _backBufferSize.Width, _backBufferSize.Height, 0.0f, 1.0f));
+
+        // Composited first: the compositor binds render targets of its own and leaves them bound, so the back
+        // buffer is claimed after it is done rather than before.
+        var outputTexture = RenderMainWindowTexture(resolution);
+        SendStreams();
+
         // The output is rendered at the requested resolution and stretched onto the back buffer,
         // whose size follows the window (borderless fullscreen may differ from the requested size).
         deviceContext.Rasterizer.SetViewport(new Viewport(0, 0, _backBufferSize.Width, _backBufferSize.Height, 0.0f, 1.0f));
@@ -91,16 +140,6 @@ internal static partial class Program
         // (typically white), which hides the fact that the output produced nothing.
         deviceContext.ClearRenderTargetView(renderView, new Color(0.45f, 0.55f, 0.6f, 1.0f));
 
-        evalContext.Reset();
-        evalContext.RequestedResolution = resolution;
-
-        if (textureOutput == null)
-        {
-            return false;
-        }
-
-        textureOutput.InvalidateGraph();
-        var outputTexture = textureOutput.GetValue(evalContext);
         if (outputTexture == null)
         {
             if (!_loggedNullOutput)

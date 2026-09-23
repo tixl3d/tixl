@@ -7,8 +7,7 @@ scope: timeline
 tags: [user, assets]
 prerequisites:
   - A project is open with the composition's Syncing mode set to **Timeline**.
-  - A standard MIDI file (`.mid` / `.midi`) with a few notes and ideally some CC
-    automation — any DAW export or downloaded file works.
+  - A standard MIDI file (`.mid` / `.midi`) with a few notes and ideally some CC automation — any DAW export or downloaded file works.
 ---
 
 MIDI files can be dropped into a project like audio or video. The file becomes a

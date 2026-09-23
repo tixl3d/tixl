@@ -39,6 +39,7 @@ internal sealed class GeometryMeshCompiler
         // Attribute lookups once, outside the loops
         geometry.Attributes.TryGet<Vector3>(GeometryAttributeNames.Normal, AttributeDomain.Corner, out var cornerNormals);
         geometry.Attributes.TryGet<Vector2>(GeometryAttributeNames.TexCoord, AttributeDomain.Corner, out var cornerUvs);
+        geometry.Attributes.TryGet<Vector2>(GeometryAttributeNames.TexCoord2, AttributeDomain.Corner, out var cornerUvs2);
         geometry.Attributes.TryGet<Vector4>(GeometryAttributeNames.Color, AttributeDomain.Corner, out var cornerColors);
 
         // Coarser color domains are promoted to corners here: face color, else part color
@@ -92,6 +93,7 @@ internal sealed class GeometryMeshCompiler
             {
                 var normal = cornerNormals != null ? cornerNormals.Values[c] : faceNormal;
                 var uv = cornerUvs != null ? cornerUvs.Values[c] : Vector2.Zero;
+                var uv2 = cornerUvs2 != null ? cornerUvs2.Values[c] : uv;
                 var color = cornerColors != null ? cornerColors.Values[c] : faceColor;
 
                 vertices[c] = new PbrVertex
@@ -99,7 +101,7 @@ internal sealed class GeometryMeshCompiler
                                       Position = positions[cornerPoints[c]],
                                       Normal = normal,
                                       Texcoord = uv,
-                                      Texcoord2 = uv,
+                                      Texcoord2 = uv2,
                                       Selection = 1,
                                       ColorRgb = new Vector3(color.X, color.Y, color.Z),
                                   };
