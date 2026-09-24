@@ -223,6 +223,8 @@
 
         <Message Importance="high" Text="Path for $(PackageName): $(PackageBuildDirectory)" />
 
+        <Error Condition="Exists('$(SourceDir)/$(PackageName).csproj') and !Exists('$(PackageBuildDirectory)/OperatorPackage.json')" Text="Operator package $(PackageName) has no Release build output at $(PackageBuildDirectory). Build the package before packaging Editor." />
+
         <ItemGroup>
             <ProjectFiles Include="$(PackageBuildDirectory)/**" />
         </ItemGroup>
