@@ -1,0 +1,815 @@
+{
+  "FormatVersion": 3,
+  "Id": "d53adae7-b5f0-4157-9710-4683a44d5601"/*APC40Mk1FeedbackExample*/,
+  "Inputs": [],
+  "Children": [
+    {
+      "Id": "02fe6259-048b-431c-aa35-ddbcb62060e4"/*Group*/,
+      "SymbolId": "a3f64d34-1fab-4230-86b3-1c3deba3f90b",
+      "SymbolName": "Lib.render.transform.Group",
+      "InputValues": [],
+      "Outputs": []
+    },
+    {
+      "Id": "085e2dd6-bbd0-42fb-ba24-bc50f027d900"/*MidiOutput*/,
+      "SymbolId": "f9f4281b-92ee-430d-a930-6b588a5cb9a9",
+      "SymbolName": "Lib.io.midi.MidiOutput",
+      "InputValues": [
+        {
+          "Id": "0fff2ce2-defa-442c-a089-4b12e7d71620"/*NoteOrController*/,
+          "Type": "System.Int32",
+          "Value": 53
+        },
+        {
+          "Id": "a10e3f7b-d132-49ca-9f6d-726d5e699443"/*Velocity127*/,
+          "Type": "System.Int32",
+          "Value": 3
+        },
+        {
+          "Id": "a7e1eac2-5602-4c40-8519-19ca53763c76"/*ChannelNumber*/,
+          "Type": "System.Int32",
+          "Value": 3
+        },
+        {
+          "Id": "adea6968-35ef-436a-bc2d-d9433b623df6"/*Device*/,
+          "Type": "System.String",
+          "Value": "Akai APC40"
+        },
+        {
+          "Id": "ec4d83b6-78eb-4cac-826b-cafb0be3f604"/*SendMode*/,
+          "Type": "System.Int32",
+          "Value": 1
+        }
+      ],
+      "Outputs": []
+    },
+    {
+      "Id": "0c19df75-c4d8-4b78-8c0f-89797544a71b"/*FloatToInt*/,
+      "SymbolId": "06b4728e-852c-491a-a89d-647f7e0b5415",
+      "SymbolName": "Lib.numbers.int.process.FloatToInt",
+      "InputValues": [],
+      "Outputs": []
+    },
+    {
+      "Id": "1e281ec9-da62-403d-be87-648e2157e629"/*MidiInput*/,
+      "SymbolId": "59a0458e-2f3a-4856-96cd-32936f783cc5",
+      "SymbolName": "Lib.io.midi.MidiInput",
+      "InputValues": [
+        {
+          "Id": "044168eb-791c-405f-867f-3d5702924165"/*EventType*/,
+          "Type": "System.Int32",
+          "Value": 1
+        },
+        {
+          "Id": "23c34f4c-4ba3-4834-8d51-3e3909751f84"/*Device*/,
+          "Type": "System.String",
+          "Value": "Akai APC40"
+        },
+        {
+          "Id": "7c681ee6-d071-4284-8585-1c3e03a089ea"/*TeachTrigger*/,
+          "Type": "System.Boolean",
+          "Value": false
+        },
+        {
+          "Id": "9b0d32de-c53c-4df6-8b29-5e68a5a9c5f9"/*Channel*/,
+          "Type": "System.Int32",
+          "Value": 3
+        },
+        {
+          "Id": "ca3ce08d-6a19-4ad5-9435-08b050753311"/*Damping*/,
+          "Type": "System.Single",
+          "Value": 0.0
+        },
+        {
+          "Id": "ddbe4c30-74d7-41bc-a062-e19152de1080"/*LastKnownControllerValue*/,
+          "Type": "System.Single",
+          "Value": 127.0
+        },
+        {
+          "Id": "df81b7b3-f39e-4e5d-8b97-f29dd576a76d"/*Control*/,
+          "Type": "System.Int32",
+          "Value": 53
+        }
+      ],
+      "Outputs": []
+    },
+    {
+      "Id": "2a83d1d9-e6e4-44ac-99e3-dacdcffdf83a"/*CountInt*/,
+      "SymbolId": "0e1d5f4b-3ba0-4e71-aa26-7308b6df214d",
+      "SymbolName": "Lib.numbers.int.logic.CountInt",
+      "InputValues": [
+        {
+          "Id": "11f9cdb5-84fc-4413-8ca7-77e12047f521"/*DefaultValue*/,
+          "Type": "System.Int32",
+          "Value": 1
+        },
+        {
+          "Id": "2ff3d674-90d7-4c8f-8551-aad9992540db"/*Modulo*/,
+          "Type": "System.Int32",
+          "Value": 2
+        }
+      ],
+      "Outputs": []
+    },
+    {
+      "Id": "31787747-2b86-488a-8216-891f83cd1ef1"/*MidiOutput*/,
+      "SymbolId": "f9f4281b-92ee-430d-a930-6b588a5cb9a9",
+      "SymbolName": "Lib.io.midi.MidiOutput",
+      "InputValues": [
+        {
+          "Id": "0fff2ce2-defa-442c-a089-4b12e7d71620"/*NoteOrController*/,
+          "Type": "System.Int32",
+          "Value": 49
+        },
+        {
+          "Id": "a7e1eac2-5602-4c40-8519-19ca53763c76"/*ChannelNumber*/,
+          "Type": "System.Int32",
+          "Value": 1
+        },
+        {
+          "Id": "adea6968-35ef-436a-bc2d-d9433b623df6"/*Device*/,
+          "Type": "System.String",
+          "Value": "Akai APC40"
+        },
+        {
+          "Id": "ec4d83b6-78eb-4cac-826b-cafb0be3f604"/*SendMode*/,
+          "Type": "System.Int32",
+          "Value": 2
+        }
+      ],
+      "Outputs": []
+    },
+    {
+      "Id": "33d0b6fc-03d0-4a8c-8d74-cb685ae35775"/*Group*/,
+      "SymbolId": "a3f64d34-1fab-4230-86b3-1c3deba3f90b",
+      "SymbolName": "Lib.render.transform.Group",
+      "InputValues": [],
+      "Outputs": []
+    },
+    {
+      "Id": "40158fbb-899b-4f69-b162-7a989a89be01"/*MidiOutput*/,
+      "SymbolId": "f9f4281b-92ee-430d-a930-6b588a5cb9a9",
+      "SymbolName": "Lib.io.midi.MidiOutput",
+      "InputValues": [
+        {
+          "Id": "0fff2ce2-defa-442c-a089-4b12e7d71620"/*NoteOrController*/,
+          "Type": "System.Int32",
+          "Value": 56
+        },
+        {
+          "Id": "a10e3f7b-d132-49ca-9f6d-726d5e699443"/*Velocity127*/,
+          "Type": "System.Int32",
+          "Value": 1
+        },
+        {
+          "Id": "a7e1eac2-5602-4c40-8519-19ca53763c76"/*ChannelNumber*/,
+          "Type": "System.Int32",
+          "Value": 1
+        },
+        {
+          "Id": "adea6968-35ef-436a-bc2d-d9433b623df6"/*Device*/,
+          "Type": "System.String",
+          "Value": "Akai APC40"
+        },
+        {
+          "Id": "ec4d83b6-78eb-4cac-826b-cafb0be3f604"/*SendMode*/,
+          "Type": "System.Int32",
+          "Value": 2
+        }
+      ],
+      "Outputs": []
+    },
+    {
+      "Id": "50a9bda3-a3c1-432d-b30e-8123244f3589"/*MidiInput*/,
+      "SymbolId": "59a0458e-2f3a-4856-96cd-32936f783cc5",
+      "SymbolName": "Lib.io.midi.MidiInput",
+      "InputValues": [
+        {
+          "Id": "044168eb-791c-405f-867f-3d5702924165"/*EventType*/,
+          "Type": "System.Int32",
+          "Value": 2
+        },
+        {
+          "Id": "23c34f4c-4ba3-4834-8d51-3e3909751f84"/*Device*/,
+          "Type": "System.String",
+          "Value": "Akai APC40"
+        },
+        {
+          "Id": "7c681ee6-d071-4284-8585-1c3e03a089ea"/*TeachTrigger*/,
+          "Type": "System.Boolean",
+          "Value": false
+        },
+        {
+          "Id": "9b0d32de-c53c-4df6-8b29-5e68a5a9c5f9"/*Channel*/,
+          "Type": "System.Int32",
+          "Value": 1
+        },
+        {
+          "Id": "aad1e576-f144-423f-83b5-5694b1119c23"/*OutputRange*/,
+          "Type": "System.Numerics.Vector2",
+          "Value": {
+            "X": 0.0,
+            "Y": 127.0
+          }
+        },
+        {
+          "Id": "ca3ce08d-6a19-4ad5-9435-08b050753311"/*Damping*/,
+          "Type": "System.Single",
+          "Value": 0.0
+        },
+        {
+          "Id": "ddbe4c30-74d7-41bc-a062-e19152de1080"/*LastKnownControllerValue*/,
+          "Type": "System.Single",
+          "Value": 52.0
+        },
+        {
+          "Id": "df81b7b3-f39e-4e5d-8b97-f29dd576a76d"/*Control*/,
+          "Type": "System.Int32",
+          "Value": 49
+        }
+      ],
+      "Outputs": []
+    },
+    {
+      "Id": "5897c33a-0271-4be7-b498-973f5b74a493"/*MidiOutput*/,
+      "SymbolId": "f9f4281b-92ee-430d-a930-6b588a5cb9a9",
+      "SymbolName": "Lib.io.midi.MidiOutput",
+      "InputValues": [
+        {
+          "Id": "0fff2ce2-defa-442c-a089-4b12e7d71620"/*NoteOrController*/,
+          "Type": "System.Int32",
+          "Value": 57
+        },
+        {
+          "Id": "a10e3f7b-d132-49ca-9f6d-726d5e699443"/*Velocity127*/,
+          "Type": "System.Int32",
+          "Value": 2
+        },
+        {
+          "Id": "a7e1eac2-5602-4c40-8519-19ca53763c76"/*ChannelNumber*/,
+          "Type": "System.Int32",
+          "Value": 1
+        },
+        {
+          "Id": "adea6968-35ef-436a-bc2d-d9433b623df6"/*Device*/,
+          "Type": "System.String",
+          "Value": "Akai APC40"
+        },
+        {
+          "Id": "ec4d83b6-78eb-4cac-826b-cafb0be3f604"/*SendMode*/,
+          "Type": "System.Int32",
+          "Value": 2
+        }
+      ],
+      "Outputs": []
+    },
+    {
+      "Id": "6336006b-bdae-4311-9dc2-b711f981b1b4"/*Group*/,
+      "SymbolId": "a3f64d34-1fab-4230-86b3-1c3deba3f90b",
+      "SymbolName": "Lib.render.transform.Group",
+      "InputValues": [],
+      "Outputs": []
+    },
+    {
+      "Id": "6a795023-e4eb-414a-b4d4-d5ac9b33aeef"/*MidiInput*/,
+      "SymbolId": "59a0458e-2f3a-4856-96cd-32936f783cc5",
+      "SymbolName": "Lib.io.midi.MidiInput",
+      "InputValues": [
+        {
+          "Id": "044168eb-791c-405f-867f-3d5702924165"/*EventType*/,
+          "Type": "System.Int32",
+          "Value": 1
+        },
+        {
+          "Id": "23c34f4c-4ba3-4834-8d51-3e3909751f84"/*Device*/,
+          "Type": "System.String",
+          "Value": "Akai APC40"
+        },
+        {
+          "Id": "7c681ee6-d071-4284-8585-1c3e03a089ea"/*TeachTrigger*/,
+          "Type": "System.Boolean",
+          "Value": false
+        },
+        {
+          "Id": "9b0d32de-c53c-4df6-8b29-5e68a5a9c5f9"/*Channel*/,
+          "Type": "System.Int32",
+          "Value": 2
+        },
+        {
+          "Id": "ca3ce08d-6a19-4ad5-9435-08b050753311"/*Damping*/,
+          "Type": "System.Single",
+          "Value": 0.0
+        },
+        {
+          "Id": "ddbe4c30-74d7-41bc-a062-e19152de1080"/*LastKnownControllerValue*/,
+          "Type": "System.Single",
+          "Value": 127.0
+        },
+        {
+          "Id": "df81b7b3-f39e-4e5d-8b97-f29dd576a76d"/*Control*/,
+          "Type": "System.Int32",
+          "Value": 53
+        }
+      ],
+      "Outputs": []
+    },
+    {
+      "Id": "730a9d57-74fe-4540-affc-47c198157d18"/*MidiInput*/,
+      "SymbolId": "59a0458e-2f3a-4856-96cd-32936f783cc5",
+      "SymbolName": "Lib.io.midi.MidiInput",
+      "InputValues": [
+        {
+          "Id": "044168eb-791c-405f-867f-3d5702924165"/*EventType*/,
+          "Type": "System.Int32",
+          "Value": 2
+        },
+        {
+          "Id": "23c34f4c-4ba3-4834-8d51-3e3909751f84"/*Device*/,
+          "Type": "System.String",
+          "Value": "Akai APC40"
+        },
+        {
+          "Id": "7c681ee6-d071-4284-8585-1c3e03a089ea"/*TeachTrigger*/,
+          "Type": "System.Boolean",
+          "Value": false
+        },
+        {
+          "Id": "9b0d32de-c53c-4df6-8b29-5e68a5a9c5f9"/*Channel*/,
+          "Type": "System.Int32",
+          "Value": 1
+        },
+        {
+          "Id": "aad1e576-f144-423f-83b5-5694b1119c23"/*OutputRange*/,
+          "Type": "System.Numerics.Vector2",
+          "Value": {
+            "X": 0.0,
+            "Y": 127.0
+          }
+        },
+        {
+          "Id": "ca3ce08d-6a19-4ad5-9435-08b050753311"/*Damping*/,
+          "Type": "System.Single",
+          "Value": 0.0
+        },
+        {
+          "Id": "ddbe4c30-74d7-41bc-a062-e19152de1080"/*LastKnownControllerValue*/,
+          "Type": "System.Single",
+          "Value": 51.0
+        },
+        {
+          "Id": "df81b7b3-f39e-4e5d-8b97-f29dd576a76d"/*Control*/,
+          "Type": "System.Int32",
+          "Value": 50
+        }
+      ],
+      "Outputs": []
+    },
+    {
+      "Id": "86845256-e8f6-46fb-a4b3-ccc6e88487d9"/*FloatToInt*/,
+      "SymbolId": "06b4728e-852c-491a-a89d-647f7e0b5415",
+      "SymbolName": "Lib.numbers.int.process.FloatToInt",
+      "InputValues": [],
+      "Outputs": []
+    },
+    {
+      "Id": "87812da2-fb9b-464a-ad5c-93ba60913976"/*MidiOutput*/,
+      "SymbolId": "f9f4281b-92ee-430d-a930-6b588a5cb9a9",
+      "SymbolName": "Lib.io.midi.MidiOutput",
+      "InputValues": [
+        {
+          "Id": "0fff2ce2-defa-442c-a089-4b12e7d71620"/*NoteOrController*/,
+          "Type": "System.Int32",
+          "Value": 50
+        },
+        {
+          "Id": "a7e1eac2-5602-4c40-8519-19ca53763c76"/*ChannelNumber*/,
+          "Type": "System.Int32",
+          "Value": 1
+        },
+        {
+          "Id": "adea6968-35ef-436a-bc2d-d9433b623df6"/*Device*/,
+          "Type": "System.String",
+          "Value": "Akai APC40"
+        },
+        {
+          "Id": "ec4d83b6-78eb-4cac-826b-cafb0be3f604"/*SendMode*/,
+          "Type": "System.Int32",
+          "Value": 2
+        }
+      ],
+      "Outputs": []
+    },
+    {
+      "Id": "8d168ea8-9a79-4241-b0bb-0cbe32af45c0"/*MidiOutput*/,
+      "SymbolId": "f9f4281b-92ee-430d-a930-6b588a5cb9a9",
+      "SymbolName": "Lib.io.midi.MidiOutput",
+      "InputValues": [
+        {
+          "Id": "0fff2ce2-defa-442c-a089-4b12e7d71620"/*NoteOrController*/,
+          "Type": "System.Int32",
+          "Value": 53
+        },
+        {
+          "Id": "a10e3f7b-d132-49ca-9f6d-726d5e699443"/*Velocity127*/,
+          "Type": "System.Int32",
+          "Value": 1
+        },
+        {
+          "Id": "a7e1eac2-5602-4c40-8519-19ca53763c76"/*ChannelNumber*/,
+          "Type": "System.Int32",
+          "Value": 1
+        },
+        {
+          "Id": "adea6968-35ef-436a-bc2d-d9433b623df6"/*Device*/,
+          "Type": "System.String",
+          "Value": "Akai APC40"
+        },
+        {
+          "Id": "ec4d83b6-78eb-4cac-826b-cafb0be3f604"/*SendMode*/,
+          "Type": "System.Int32",
+          "Value": 0
+        }
+      ],
+      "Outputs": []
+    },
+    {
+      "Id": "967ba335-6b8f-44cc-9948-0389a7085113"/*FloatToInt*/,
+      "SymbolId": "06b4728e-852c-491a-a89d-647f7e0b5415",
+      "SymbolName": "Lib.numbers.int.process.FloatToInt",
+      "InputValues": [],
+      "Outputs": []
+    },
+    {
+      "Id": "9a404e06-c799-45bc-9752-c330bb36b767"/*MidiOutput*/,
+      "SymbolId": "f9f4281b-92ee-430d-a930-6b588a5cb9a9",
+      "SymbolName": "Lib.io.midi.MidiOutput",
+      "InputValues": [
+        {
+          "Id": "0fff2ce2-defa-442c-a089-4b12e7d71620"/*NoteOrController*/,
+          "Type": "System.Int32",
+          "Value": 58
+        },
+        {
+          "Id": "a10e3f7b-d132-49ca-9f6d-726d5e699443"/*Velocity127*/,
+          "Type": "System.Int32",
+          "Value": 3
+        },
+        {
+          "Id": "a7e1eac2-5602-4c40-8519-19ca53763c76"/*ChannelNumber*/,
+          "Type": "System.Int32",
+          "Value": 1
+        },
+        {
+          "Id": "adea6968-35ef-436a-bc2d-d9433b623df6"/*Device*/,
+          "Type": "System.String",
+          "Value": "Akai APC40"
+        },
+        {
+          "Id": "ec4d83b6-78eb-4cac-826b-cafb0be3f604"/*SendMode*/,
+          "Type": "System.Int32",
+          "Value": 2
+        }
+      ],
+      "Outputs": []
+    },
+    {
+      "Id": "9ca4c7d6-7e1f-49d0-9bdc-59e7d89dabfc"/*MidiInput*/,
+      "SymbolId": "59a0458e-2f3a-4856-96cd-32936f783cc5",
+      "SymbolName": "Lib.io.midi.MidiInput",
+      "InputValues": [
+        {
+          "Id": "044168eb-791c-405f-867f-3d5702924165"/*EventType*/,
+          "Type": "System.Int32",
+          "Value": 2
+        },
+        {
+          "Id": "23c34f4c-4ba3-4834-8d51-3e3909751f84"/*Device*/,
+          "Type": "System.String",
+          "Value": "Akai APC40"
+        },
+        {
+          "Id": "6c15e743-9a70-47e7-a0a4-75636817e441"/*PrintLogMessages*/,
+          "Type": "System.Boolean",
+          "Value": false
+        },
+        {
+          "Id": "7c681ee6-d071-4284-8585-1c3e03a089ea"/*TeachTrigger*/,
+          "Type": "System.Boolean",
+          "Value": false
+        },
+        {
+          "Id": "9b0d32de-c53c-4df6-8b29-5e68a5a9c5f9"/*Channel*/,
+          "Type": "System.Int32",
+          "Value": 1
+        },
+        {
+          "Id": "aad1e576-f144-423f-83b5-5694b1119c23"/*OutputRange*/,
+          "Type": "System.Numerics.Vector2",
+          "Value": {
+            "X": 0.0,
+            "Y": 127.0
+          }
+        },
+        {
+          "Id": "ca3ce08d-6a19-4ad5-9435-08b050753311"/*Damping*/,
+          "Type": "System.Single",
+          "Value": 0.0
+        },
+        {
+          "Id": "ddbe4c30-74d7-41bc-a062-e19152de1080"/*LastKnownControllerValue*/,
+          "Type": "System.Single",
+          "Value": 57.0
+        },
+        {
+          "Id": "df81b7b3-f39e-4e5d-8b97-f29dd576a76d"/*Control*/,
+          "Type": "System.Int32",
+          "Value": 48
+        }
+      ],
+      "Outputs": []
+    },
+    {
+      "Id": "cb8e47c9-888e-4310-8ada-a3e2d4d5b024"/*MidiOutput*/,
+      "SymbolId": "f9f4281b-92ee-430d-a930-6b588a5cb9a9",
+      "SymbolName": "Lib.io.midi.MidiOutput",
+      "InputValues": [
+        {
+          "Id": "0fff2ce2-defa-442c-a089-4b12e7d71620"/*NoteOrController*/,
+          "Type": "System.Int32",
+          "Value": 53
+        },
+        {
+          "Id": "a10e3f7b-d132-49ca-9f6d-726d5e699443"/*Velocity127*/,
+          "Type": "System.Int32",
+          "Value": 5
+        },
+        {
+          "Id": "a7e1eac2-5602-4c40-8519-19ca53763c76"/*ChannelNumber*/,
+          "Type": "System.Int32",
+          "Value": 2
+        },
+        {
+          "Id": "adea6968-35ef-436a-bc2d-d9433b623df6"/*Device*/,
+          "Type": "System.String",
+          "Value": "Akai APC40"
+        },
+        {
+          "Id": "ec4d83b6-78eb-4cac-826b-cafb0be3f604"/*SendMode*/,
+          "Type": "System.Int32",
+          "Value": 1
+        }
+      ],
+      "Outputs": []
+    },
+    {
+      "Id": "cd421141-e0bb-49c4-9f60-0b450d885e16"/*MidiInput*/,
+      "SymbolId": "59a0458e-2f3a-4856-96cd-32936f783cc5",
+      "SymbolName": "Lib.io.midi.MidiInput",
+      "InputValues": [
+        {
+          "Id": "044168eb-791c-405f-867f-3d5702924165"/*EventType*/,
+          "Type": "System.Int32",
+          "Value": 1
+        },
+        {
+          "Id": "23c34f4c-4ba3-4834-8d51-3e3909751f84"/*Device*/,
+          "Type": "System.String",
+          "Value": "Akai APC40"
+        },
+        {
+          "Id": "7c681ee6-d071-4284-8585-1c3e03a089ea"/*TeachTrigger*/,
+          "Type": "System.Boolean",
+          "Value": false
+        },
+        {
+          "Id": "9b0d32de-c53c-4df6-8b29-5e68a5a9c5f9"/*Channel*/,
+          "Type": "System.Int32",
+          "Value": 1
+        },
+        {
+          "Id": "ca3ce08d-6a19-4ad5-9435-08b050753311"/*Damping*/,
+          "Type": "System.Single",
+          "Value": 0.0
+        },
+        {
+          "Id": "ddbe4c30-74d7-41bc-a062-e19152de1080"/*LastKnownControllerValue*/,
+          "Type": "System.Single",
+          "Value": 127.0
+        },
+        {
+          "Id": "df81b7b3-f39e-4e5d-8b97-f29dd576a76d"/*Control*/,
+          "Type": "System.Int32",
+          "Value": 53
+        }
+      ],
+      "Outputs": []
+    },
+    {
+      "Id": "ce45c660-b5d2-4baa-87f7-2fd99bccfd10"/*Execute*/,
+      "SymbolId": "936e4324-bea2-463a-b196-6064a2d8a6b2",
+      "SymbolName": "Lib.flow.Execute",
+      "InputValues": [],
+      "Outputs": []
+    },
+    {
+      "Id": "cfb96e91-26d8-4307-92c0-d78fa5de6932"/*IsIntEven*/,
+      "SymbolId": "9a34f503-709b-42e0-a25f-bc74573afa6b",
+      "SymbolName": "Lib.numbers.int.logic.IsIntEven",
+      "InputValues": [],
+      "Outputs": []
+    },
+    {
+      "Id": "e4b613c3-7c2a-40a5-8fbd-e7db1d211900"/*MidiOutput*/,
+      "SymbolId": "f9f4281b-92ee-430d-a930-6b588a5cb9a9",
+      "SymbolName": "Lib.io.midi.MidiOutput",
+      "InputValues": [
+        {
+          "Id": "0fff2ce2-defa-442c-a089-4b12e7d71620"/*NoteOrController*/,
+          "Type": "System.Int32",
+          "Value": 48
+        },
+        {
+          "Id": "a7e1eac2-5602-4c40-8519-19ca53763c76"/*ChannelNumber*/,
+          "Type": "System.Int32",
+          "Value": 1
+        },
+        {
+          "Id": "adea6968-35ef-436a-bc2d-d9433b623df6"/*Device*/,
+          "Type": "System.String",
+          "Value": "Akai APC40"
+        },
+        {
+          "Id": "ec4d83b6-78eb-4cac-826b-cafb0be3f604"/*SendMode*/,
+          "Type": "System.Int32",
+          "Value": 2
+        }
+      ],
+      "Outputs": []
+    },
+    {
+      "Id": "f8d388df-8ec7-4eae-975a-57a8c004683e"/*IsGreater*/,
+      "SymbolId": "52c92cd8-241e-4d79-aebc-b60b092f7941",
+      "SymbolName": "Lib.numbers.float.logic.IsGreater",
+      "InputValues": [
+        {
+          "Id": "0fed5b94-0284-419d-a53a-0600b3b9b62d"/*Threshold*/,
+          "Type": "System.Single",
+          "Value": 0.5
+        }
+      ],
+      "Outputs": []
+    }
+  ],
+  "Connections": [
+    {
+      "SourceParentOrChildId": "ce45c660-b5d2-4baa-87f7-2fd99bccfd10",
+      "SourceSlotId": "e81c99ce-fcee-4e7c-a1c7-0aa3b352b7e1",
+      "TargetParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "TargetSlotId": "a466ccac-6f5d-4f0c-9976-4cfe2daf73fc"
+    },
+    {
+      "SourceParentOrChildId": "87812da2-fb9b-464a-ad5c-93ba60913976",
+      "SourceSlotId": "670c784c-de53-46f4-b93a-a1f07aa8f18e",
+      "TargetParentOrChildId": "02fe6259-048b-431c-aa35-ddbcb62060e4",
+      "TargetSlotId": "9e961f73-1ee7-4369-9ac7-5c653e570b6f"
+    },
+    {
+      "SourceParentOrChildId": "9a404e06-c799-45bc-9752-c330bb36b767",
+      "SourceSlotId": "670c784c-de53-46f4-b93a-a1f07aa8f18e",
+      "TargetParentOrChildId": "02fe6259-048b-431c-aa35-ddbcb62060e4",
+      "TargetSlotId": "9e961f73-1ee7-4369-9ac7-5c653e570b6f"
+    },
+    {
+      "SourceParentOrChildId": "f8d388df-8ec7-4eae-975a-57a8c004683e",
+      "SourceSlotId": "67e68f72-9bcb-4012-91f3-47d16a8efbaf",
+      "TargetParentOrChildId": "085e2dd6-bbd0-42fb-ba24-bc50f027d900",
+      "TargetSlotId": "9efa1be1-f102-4457-a69b-2aef59f6b845"
+    },
+    {
+      "SourceParentOrChildId": "9ca4c7d6-7e1f-49d0-9bdc-59e7d89dabfc",
+      "SourceSlotId": "01706780-d25b-4c30-a741-8b7b81e04d82",
+      "TargetParentOrChildId": "0c19df75-c4d8-4b78-8c0f-89797544a71b",
+      "TargetSlotId": "af866a6c-1ab0-43c0-9e8a-5d25c300e128"
+    },
+    {
+      "SourceParentOrChildId": "6a795023-e4eb-414a-b4d4-d5ac9b33aeef",
+      "SourceSlotId": "4bf74648-207f-4275-83ba-09e1c048c33b",
+      "TargetParentOrChildId": "2a83d1d9-e6e4-44ac-99e3-dacdcffdf83a",
+      "TargetSlotId": "bfd95809-61d2-49eb-85d4-ff9e36b2d158"
+    },
+    {
+      "SourceParentOrChildId": "86845256-e8f6-46fb-a4b3-ccc6e88487d9",
+      "SourceSlotId": "1eb7c5c4-0982-43f4-b14d-524571e3cdda",
+      "TargetParentOrChildId": "31787747-2b86-488a-8216-891f83cd1ef1",
+      "TargetSlotId": "a10e3f7b-d132-49ca-9f6d-726d5e699443"
+    },
+    {
+      "SourceParentOrChildId": "31787747-2b86-488a-8216-891f83cd1ef1",
+      "SourceSlotId": "670c784c-de53-46f4-b93a-a1f07aa8f18e",
+      "TargetParentOrChildId": "33d0b6fc-03d0-4a8c-8d74-cb685ae35775",
+      "TargetSlotId": "9e961f73-1ee7-4369-9ac7-5c653e570b6f"
+    },
+    {
+      "SourceParentOrChildId": "5897c33a-0271-4be7-b498-973f5b74a493",
+      "SourceSlotId": "670c784c-de53-46f4-b93a-a1f07aa8f18e",
+      "TargetParentOrChildId": "33d0b6fc-03d0-4a8c-8d74-cb685ae35775",
+      "TargetSlotId": "9e961f73-1ee7-4369-9ac7-5c653e570b6f"
+    },
+    {
+      "SourceParentOrChildId": "e4b613c3-7c2a-40a5-8fbd-e7db1d211900",
+      "SourceSlotId": "670c784c-de53-46f4-b93a-a1f07aa8f18e",
+      "TargetParentOrChildId": "6336006b-bdae-4311-9dc2-b711f981b1b4",
+      "TargetSlotId": "9e961f73-1ee7-4369-9ac7-5c653e570b6f"
+    },
+    {
+      "SourceParentOrChildId": "40158fbb-899b-4f69-b162-7a989a89be01",
+      "SourceSlotId": "670c784c-de53-46f4-b93a-a1f07aa8f18e",
+      "TargetParentOrChildId": "6336006b-bdae-4311-9dc2-b711f981b1b4",
+      "TargetSlotId": "9e961f73-1ee7-4369-9ac7-5c653e570b6f"
+    },
+    {
+      "SourceParentOrChildId": "50a9bda3-a3c1-432d-b30e-8123244f3589",
+      "SourceSlotId": "01706780-d25b-4c30-a741-8b7b81e04d82",
+      "TargetParentOrChildId": "86845256-e8f6-46fb-a4b3-ccc6e88487d9",
+      "TargetSlotId": "af866a6c-1ab0-43c0-9e8a-5d25c300e128"
+    },
+    {
+      "SourceParentOrChildId": "967ba335-6b8f-44cc-9948-0389a7085113",
+      "SourceSlotId": "1eb7c5c4-0982-43f4-b14d-524571e3cdda",
+      "TargetParentOrChildId": "87812da2-fb9b-464a-ad5c-93ba60913976",
+      "TargetSlotId": "a10e3f7b-d132-49ca-9f6d-726d5e699443"
+    },
+    {
+      "SourceParentOrChildId": "cd421141-e0bb-49c4-9f60-0b450d885e16",
+      "SourceSlotId": "4bf74648-207f-4275-83ba-09e1c048c33b",
+      "TargetParentOrChildId": "8d168ea8-9a79-4241-b0bb-0cbe32af45c0",
+      "TargetSlotId": "9efa1be1-f102-4457-a69b-2aef59f6b845"
+    },
+    {
+      "SourceParentOrChildId": "730a9d57-74fe-4540-affc-47c198157d18",
+      "SourceSlotId": "01706780-d25b-4c30-a741-8b7b81e04d82",
+      "TargetParentOrChildId": "967ba335-6b8f-44cc-9948-0389a7085113",
+      "TargetSlotId": "af866a6c-1ab0-43c0-9e8a-5d25c300e128"
+    },
+    {
+      "SourceParentOrChildId": "cfb96e91-26d8-4307-92c0-d78fa5de6932",
+      "SourceSlotId": "b69bc0ba-010d-4268-93f4-d5f682af00d5",
+      "TargetParentOrChildId": "cb8e47c9-888e-4310-8ada-a3e2d4d5b024",
+      "TargetSlotId": "9efa1be1-f102-4457-a69b-2aef59f6b845"
+    },
+    {
+      "SourceParentOrChildId": "6336006b-bdae-4311-9dc2-b711f981b1b4",
+      "SourceSlotId": "977ca2f4-cddb-4b9a-82b2-ff66453bbf9b",
+      "TargetParentOrChildId": "ce45c660-b5d2-4baa-87f7-2fd99bccfd10",
+      "TargetSlotId": "5d73ebe6-9aa0-471a-ae6b-3f5bfd5a0f9c"
+    },
+    {
+      "SourceParentOrChildId": "33d0b6fc-03d0-4a8c-8d74-cb685ae35775",
+      "SourceSlotId": "977ca2f4-cddb-4b9a-82b2-ff66453bbf9b",
+      "TargetParentOrChildId": "ce45c660-b5d2-4baa-87f7-2fd99bccfd10",
+      "TargetSlotId": "5d73ebe6-9aa0-471a-ae6b-3f5bfd5a0f9c"
+    },
+    {
+      "SourceParentOrChildId": "02fe6259-048b-431c-aa35-ddbcb62060e4",
+      "SourceSlotId": "977ca2f4-cddb-4b9a-82b2-ff66453bbf9b",
+      "TargetParentOrChildId": "ce45c660-b5d2-4baa-87f7-2fd99bccfd10",
+      "TargetSlotId": "5d73ebe6-9aa0-471a-ae6b-3f5bfd5a0f9c"
+    },
+    {
+      "SourceParentOrChildId": "8d168ea8-9a79-4241-b0bb-0cbe32af45c0",
+      "SourceSlotId": "670c784c-de53-46f4-b93a-a1f07aa8f18e",
+      "TargetParentOrChildId": "ce45c660-b5d2-4baa-87f7-2fd99bccfd10",
+      "TargetSlotId": "5d73ebe6-9aa0-471a-ae6b-3f5bfd5a0f9c"
+    },
+    {
+      "SourceParentOrChildId": "cb8e47c9-888e-4310-8ada-a3e2d4d5b024",
+      "SourceSlotId": "670c784c-de53-46f4-b93a-a1f07aa8f18e",
+      "TargetParentOrChildId": "ce45c660-b5d2-4baa-87f7-2fd99bccfd10",
+      "TargetSlotId": "5d73ebe6-9aa0-471a-ae6b-3f5bfd5a0f9c"
+    },
+    {
+      "SourceParentOrChildId": "085e2dd6-bbd0-42fb-ba24-bc50f027d900",
+      "SourceSlotId": "670c784c-de53-46f4-b93a-a1f07aa8f18e",
+      "TargetParentOrChildId": "ce45c660-b5d2-4baa-87f7-2fd99bccfd10",
+      "TargetSlotId": "5d73ebe6-9aa0-471a-ae6b-3f5bfd5a0f9c"
+    },
+    {
+      "SourceParentOrChildId": "2a83d1d9-e6e4-44ac-99e3-dacdcffdf83a",
+      "SourceSlotId": "2e172f90-3995-4b16-af33-9957be07323b",
+      "TargetParentOrChildId": "cfb96e91-26d8-4307-92c0-d78fa5de6932",
+      "TargetSlotId": "c5703990-1062-4512-b016-74ae1cce538a"
+    },
+    {
+      "SourceParentOrChildId": "0c19df75-c4d8-4b78-8c0f-89797544a71b",
+      "SourceSlotId": "1eb7c5c4-0982-43f4-b14d-524571e3cdda",
+      "TargetParentOrChildId": "e4b613c3-7c2a-40a5-8fbd-e7db1d211900",
+      "TargetSlotId": "a10e3f7b-d132-49ca-9f6d-726d5e699443"
+    },
+    {
+      "SourceParentOrChildId": "1e281ec9-da62-403d-be87-648e2157e629",
+      "SourceSlotId": "01706780-d25b-4c30-a741-8b7b81e04d82",
+      "TargetParentOrChildId": "f8d388df-8ec7-4eae-975a-57a8c004683e",
+      "TargetSlotId": "0cca00d1-ebad-4bef-9d87-b40be2568b61"
+    }
+  ]
+}

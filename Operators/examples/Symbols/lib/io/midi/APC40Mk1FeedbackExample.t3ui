@@ -1,0 +1,565 @@
+{
+  "FormatVersion": 3,
+  "Id": "d53adae7-b5f0-4157-9710-4683a44d5601"/*APC40Mk1FeedbackExample*/,
+  "Description": "## APC40 Mk1 Feedback Example\n\nThis graph demonstrates encoder-ring feedback and three clip-launch button states with an APC40 Mk1. Connect the APC40 input and output, then use Generic mode for the graph’s MIDI examples.\n\n## Select a mode\n\n- **Shift + Record Arm 1 — Generic (`0x40`)**: use this mode to pass the graph’s MIDI buttons through.\n- **Shift + Record Arm 2 — Ableton Live (`0x41`)**.\n- **Shift + Record Arm 3 — Preset/Snapshot (`0x42`)**: the compatible-device handler consumes its snapshot controls.\n\nWhen TiXL detects matching `Akai APC40` input and output ports, its built-in compatible-device handler sends the introduction SysEx. The graph does not send SysEx, and no separate SysEx checkbox is required.\n\n## Encoder-ring feedback\n\nThe first three Track Control knobs send their value back on the same CC and set the ring type separately:\n\n- **Knob 1:** input/output CC 48; ring-style CC 56 with value 1 (Single).\n- **Knob 2:** input/output CC 49; ring-style CC 57 with value 2 (Volume).\n- **Knob 3:** input/output CC 50; ring-style CC 58 with value 3 (Pan).\n- **Cue Level:** CC 47 uses relative steps. It has no absolute position to reflect as an encoder ring.\n\n## Button feedback\n\nEach example listens for Notes on channel 1 and sends feedback to its matching APC40 clip-launch button:\n\n- **Trigger — Clip Launch 1, note 53:** `MidiInput.WasHit` pulses; `Notes_FixedDuration` lights the button briefly. Green, velocity 1.\n- **Toggle — Clip Launch 2, note 54:** each press increments `CountInt`; `IsIntEven` alternates the light. Yellow, velocity 5. It starts off (`CountInt.DefaultValue = 1`).\n- **Hold — Clip Launch 3, note 55:** `MidiInput.Result > 0.5` stays true while pressed; `Note_WhileTriggered` turns the LED off on release. Red, velocity 3.\n\nAll feedback outputs use channel 1 and device `Akai APC40`. For clip-launch LEDs, velocity 0 is off, 1/2 are green steady/blink, 3/4 are red steady/blink, and 5/6 are yellow steady/blink. Other APC40 buttons may use different LED rules.\n\n## References\n\nSee the [Akai APC40 Communications Protocol, Revision 1](https://cdn.inmusicbrands.com/akai/apc40/APC40_Communications_Protocol_rev_1.pdf_1db97c1fdba23bacf47df0f9bf64e913.pdf) for the Mk1 modes, note mapping, and LED velocities.",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "02fe6259-048b-431c-aa35-ddbcb62060e4"/*Group*/,
+      "SectionId": "3effe94f-f0ba-4485-b251-a9cfe36553a8",
+      "Position": {
+        "X": 478.94604,
+        "Y": 578.4843
+      }
+    },
+    {
+      "ChildId": "085e2dd6-bbd0-42fb-ba24-bc50f027d900"/*MidiOutput*/,
+      "SectionId": "5d67450a-19fb-4be5-992f-2681073553b9",
+      "Position": {
+        "X": 317.28223,
+        "Y": 1269.8141
+      }
+    },
+    {
+      "ChildId": "0c19df75-c4d8-4b78-8c0f-89797544a71b"/*FloatToInt*/,
+      "SectionId": "3536202b-4d39-4e48-84da-1dac76f9b8d7",
+      "Position": {
+        "X": 175.87779,
+        "Y": 245.32605
+      }
+    },
+    {
+      "ChildId": "1e281ec9-da62-403d-be87-648e2157e629"/*MidiInput*/,
+      "SectionId": "5d67450a-19fb-4be5-992f-2681073553b9",
+      "Position": {
+        "X": 37.91324,
+        "Y": 1262.3173
+      }
+    },
+    {
+      "ChildId": "2a83d1d9-e6e4-44ac-99e3-dacdcffdf83a"/*CountInt*/,
+      "SectionId": "b45772b6-a69a-4cb2-a3f1-44e7f200af10",
+      "Position": {
+        "X": 317.28223,
+        "Y": 1033.144
+      }
+    },
+    {
+      "ChildId": "31787747-2b86-488a-8216-891f83cd1ef1"/*MidiOutput*/,
+      "SectionId": "88fc9324-02f3-47c6-b1ea-4d8b70940cfe",
+      "Position": {
+        "X": 318.08398,
+        "Y": 381.8426
+      }
+    },
+    {
+      "ChildId": "33d0b6fc-03d0-4a8c-8d74-cb685ae35775"/*Group*/,
+      "SectionId": "88fc9324-02f3-47c6-b1ea-4d8b70940cfe",
+      "Position": {
+        "X": 478.94598,
+        "Y": 410.06384
+      }
+    },
+    {
+      "ChildId": "40158fbb-899b-4f69-b162-7a989a89be01"/*MidiOutput*/,
+      "SectionId": "3536202b-4d39-4e48-84da-1dac76f9b8d7",
+      "Position": {
+        "X": 318.08398,
+        "Y": 285.81476
+      }
+    },
+    {
+      "ChildId": "50a9bda3-a3c1-432d-b30e-8123244f3589"/*MidiInput*/,
+      "SectionId": "88fc9324-02f3-47c6-b1ea-4d8b70940cfe",
+      "Position": {
+        "X": 38.08394,
+        "Y": 416.8426
+      }
+    },
+    {
+      "ChildId": "5897c33a-0271-4be7-b498-973f5b74a493"/*MidiOutput*/,
+      "SectionId": "88fc9324-02f3-47c6-b1ea-4d8b70940cfe",
+      "Position": {
+        "X": 318.08392,
+        "Y": 456.6635
+      }
+    },
+    {
+      "ChildId": "6336006b-bdae-4311-9dc2-b711f981b1b4"/*Group*/,
+      "SectionId": "3536202b-4d39-4e48-84da-1dac76f9b8d7",
+      "Position": {
+        "X": 478.94598,
+        "Y": 235.0353
+      }
+    },
+    {
+      "ChildId": "6a795023-e4eb-414a-b4d4-d5ac9b33aeef"/*MidiInput*/,
+      "SectionId": "b45772b6-a69a-4cb2-a3f1-44e7f200af10",
+      "Position": {
+        "X": 37.91324,
+        "Y": 1065.4917
+      }
+    },
+    {
+      "ChildId": "730a9d57-74fe-4540-affc-47c198157d18"/*MidiInput*/,
+      "SectionId": "3effe94f-f0ba-4485-b251-a9cfe36553a8",
+      "Position": {
+        "X": 38.08397,
+        "Y": 594.387
+      }
+    },
+    {
+      "ChildId": "86845256-e8f6-46fb-a4b3-ccc6e88487d9"/*FloatToInt*/,
+      "SectionId": "88fc9324-02f3-47c6-b1ea-4d8b70940cfe",
+      "Position": {
+        "X": 178.08394,
+        "Y": 416.8426
+      }
+    },
+    {
+      "ChildId": "87812da2-fb9b-464a-ad5c-93ba60913976"/*MidiOutput*/,
+      "SectionId": "3effe94f-f0ba-4485-b251-a9cfe36553a8",
+      "Position": {
+        "X": 318.08398,
+        "Y": 559.38715
+      }
+    },
+    {
+      "ChildId": "8d168ea8-9a79-4241-b0bb-0cbe32af45c0"/*MidiOutput*/,
+      "SectionId": "9df35cc5-57ee-4723-9186-a35095dfe27b",
+      "Position": {
+        "X": 316.44995,
+        "Y": 904.34375
+      }
+    },
+    {
+      "ChildId": "967ba335-6b8f-44cc-9948-0389a7085113"/*FloatToInt*/,
+      "SectionId": "3effe94f-f0ba-4485-b251-a9cfe36553a8",
+      "Position": {
+        "X": 178.08397,
+        "Y": 594.387
+      }
+    },
+    {
+      "ChildId": "9a404e06-c799-45bc-9752-c330bb36b767"/*MidiOutput*/,
+      "SectionId": "3effe94f-f0ba-4485-b251-a9cfe36553a8",
+      "Position": {
+        "X": 318.08398,
+        "Y": 634.59283
+      }
+    },
+    {
+      "ChildId": "9ca4c7d6-7e1f-49d0-9bdc-59e7d89dabfc"/*MidiInput*/,
+      "SectionId": "3536202b-4d39-4e48-84da-1dac76f9b8d7",
+      "Position": {
+        "X": 35.877792,
+        "Y": 245.32605
+      }
+    },
+    {
+      "ChildId": "cb8e47c9-888e-4310-8ada-a3e2d4d5b024"/*MidiOutput*/,
+      "SectionId": "b45772b6-a69a-4cb2-a3f1-44e7f200af10",
+      "Position": {
+        "X": 317.28223,
+        "Y": 1103.144
+      }
+    },
+    {
+      "ChildId": "cd421141-e0bb-49c4-9f60-0b450d885e16"/*MidiInput*/,
+      "SectionId": "9df35cc5-57ee-4723-9186-a35095dfe27b",
+      "Position": {
+        "X": 37.080963,
+        "Y": 865.99506
+      }
+    },
+    {
+      "ChildId": "ce45c660-b5d2-4baa-87f7-2fd99bccfd10"/*Execute*/,
+      "Position": {
+        "X": 728.3643,
+        "Y": 508.7655
+      }
+    },
+    {
+      "ChildId": "cfb96e91-26d8-4307-92c0-d78fa5de6932"/*IsIntEven*/,
+      "SectionId": "b45772b6-a69a-4cb2-a3f1-44e7f200af10",
+      "Position": {
+        "X": 317.28223,
+        "Y": 1068.144
+      }
+    },
+    {
+      "ChildId": "e4b613c3-7c2a-40a5-8fbd-e7db1d211900"/*MidiOutput*/,
+      "SectionId": "3536202b-4d39-4e48-84da-1dac76f9b8d7",
+      "Position": {
+        "X": 315.8778,
+        "Y": 210.32603
+      }
+    },
+    {
+      "ChildId": "f8d388df-8ec7-4eae-975a-57a8c004683e"/*IsGreater*/,
+      "SectionId": "5d67450a-19fb-4be5-992f-2681073553b9",
+      "Position": {
+        "X": 317.28223,
+        "Y": 1234.8141
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "a466ccac-6f5d-4f0c-9976-4cfe2daf73fc"/*Output*/,
+      "Position": {
+        "X": 899.143,
+        "Y": 510.55408
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "3536202b-4d39-4e48-84da-1dac76f9b8d7",
+      "Title": "01 SINGLE | Track Control knob 1 | CC48 value, CC56 ring type = 1",
+      "ParentSectionId": "3c9f3047-9ceb-4851-b237-476a518aa3e7",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -5.291107,
+        "Y": 173.29959
+      },
+      "Size": {
+        "X": 650.73944,
+        "Y": 154.6153
+      }
+    },
+    {
+      "Id": "3c9f3047-9ceb-4851-b237-476a518aa3e7",
+      "Title": "How it works:\n- If you midi learn an encoder value - example: 48\n- The CC value 12 numbers above will control the encoder ring type - example: 56\n- This uses velocity to set the ring type - example: [1=Single], [2=Volume], [3=Pan] ",
+      "Label": "Encoder Ring LED Assignment",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -22.086761,
+        "Y": 33.787582
+      },
+      "Size": {
+        "X": 697.38696,
+        "Y": 677.03735
+      }
+    },
+    {
+      "Id": "3effe94f-f0ba-4485-b251-a9cfe36553a8",
+      "Title": "03 PAN | Track Control knob 3 | CC50 value, CC58 ring type = 3",
+      "ParentSectionId": "3c9f3047-9ceb-4851-b237-476a518aa3e7",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -5.291107,
+        "Y": 514.9058
+      },
+      "Size": {
+        "X": 650.7395,
+        "Y": 163.57306
+      }
+    },
+    {
+      "Id": "5d67450a-19fb-4be5-992f-2681073553b9",
+      "Title": "HOLD | on while pressed | clip LED red",
+      "ParentSectionId": "6f858f08-6904-4606-90cf-45d1898ef255",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -3.2556608,
+        "Y": 1201.9883
+      },
+      "Size": {
+        "X": 493.25558,
+        "Y": 110.53357
+      }
+    },
+    {
+      "Id": "62c611f8-e447-4810-8c10-a7b454fd52ec",
+      "Title": "APC40 Mk1 Feedback Example\n\nTixl Examples symbol: Examples.Lib.io.midi.APC40Mk1FeedbackExample\n\nSource:\nOperators/examples/Symbols/lib/io/midi/APC40Mk1FeedbackExample.t3\n\nAPC40 Mk1 modes and SysEx\n\nThe APC40 Mk1 compatible-device handler sends the introduction SysEx\nautomatically after it detects matching Akai APC40 input and output\nports. No separate SysEx checkbox is required. The Generic\ninitialization message is F0 47 7F 73 60 00 04 40 08 01 01 F7.\n\n- Shift + Record Arm 1 selects Generic mode (0x40), which lets this\ngraph's button MIDI pass through.\n- Shift + Record Arm 2 selects Ableton Live mode (0x41).\n- Shift + Record Arm 3 selects Preset/Snapshot mode (0x42, Akai's\nAlternate Live mode); the compatible handler consumes its snapshot\ncontrols.\n\nEncoder examples\n\n- Track Control knob 1: input CC 48; ring-style CC 56; Single style (1).\n- Track Control knob 2: input CC 49; ring-style CC 57; Volume style (2).\n- Track Control knob 3: input CC 50; ring-style CC 58; Pan style (3).\n- Cue Level: input CC 47; relative steps, with no ring-style output.\n\nThe first three encoder rows send each knob value back on its CC and set\nthe ring style separately. Cue Level sends relative movement rather than\nan absolute position, so its example is read-only.\n\nReferences\n\n- Akai APC40 Communications Protocol, Revision 1 — Mk1 modes, note\nmapping, and clip-launch LED velocities.\nhttps://cdn.inmusicbrands.com/akai/apc40/APC40_Communications_Protocol_r\nev_1.pdf_1db97c1fdba23bacf47df0f9bf64e913.pdf",
+      "Label": "Readme - Modes and encoder feedback",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1100.0,
+        "Y": 34.0
+      },
+      "Size": {
+        "X": 900.0,
+        "Y": 850.0
+      }
+    },
+    {
+      "Id": "6f858f08-6904-4606-90cf-45d1898ef255",
+      "Label": "Button Types",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -22.086761,
+        "Y": 747.8947
+      },
+      "Size": {
+        "X": 537.7975,
+        "Y": 590.92926
+      }
+    },
+    {
+      "Id": "88fc9324-02f3-47c6-b1ea-4d8b70940cfe",
+      "Title": "02 VOLUME | Track Control knob 2 | CC49 value, CC57 ring type = 2",
+      "ParentSectionId": "3c9f3047-9ceb-4851-b237-476a518aa3e7",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -5.291107,
+        "Y": 340.46558
+      },
+      "Size": {
+        "X": 650.7395,
+        "Y": 160.03702
+      }
+    },
+    {
+      "Id": "9df35cc5-57ee-4723-9186-a35095dfe27b",
+      "Title": "TRIGGER | press pulse | clip LED green",
+      "ParentSectionId": "6f858f08-6904-4606-90cf-45d1898ef255",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -3.2556608,
+        "Y": 829.27045
+      },
+      "Size": {
+        "X": 493.25565,
+        "Y": 115.72955
+      }
+    },
+    {
+      "Id": "aa3caf0d-71e6-4bfe-a2bc-4bbdf7773a88",
+      "Title": "Button feedback patterns\n\nEach input listens for Notes on channel 1. Its output sends feedback to\nthe same clip-launch note. All three rows route through a Group into the\nscene's Execute operator.\n\n- Trigger — green, velocity 1: MidiInput.WasHit makes a short pulse;\nNotes_FixedDuration lights Clip Launch 1 (note 53) briefly.\n- Toggle — yellow, velocity 5: WasHit increments CountInt modulo 2;\nIsIntEven keeps Clip Launch 2 (note 54) lit every other press.\n- Hold — red, velocity 3: MidiInput.Result > 0.5 stays true while\npressed; Note_WhileTriggered turns Clip Launch 3 (note 55) off on\nrelease.\n\nAll outputs use channel 1 and device Akai APC40. The toggle starts off\n(CountInt.DefaultValue = 1): the first press turns it on, and the second\nturns it off. The hold example uses the input level because WasHit is\nonly a press pulse.\n\nFor APC40 Mk1 clip-launch LEDs, velocity 0 is off, 1 is green, 2 is\ngreen blink, 3 is red, 4 is red blink, 5 is yellow, and 6 is yellow\nblink. These values apply to the clip-launch LEDs; other APC40 buttons\nmay use different LED rules.",
+      "Label": "Readme - Button feedback",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1100.0,
+        "Y": 934.0
+      },
+      "Size": {
+        "X": 900.0,
+        "Y": 650.0
+      }
+    },
+    {
+      "Id": "b45772b6-a69a-4cb2-a3f1-44e7f200af10",
+      "Title": "TOGGLE | alternate on/off | clip LED yellow",
+      "ParentSectionId": "6f858f08-6904-4606-90cf-45d1898ef255",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -3.2556608,
+        "Y": 990.17053
+      },
+      "Size": {
+        "X": 493.2556,
+        "Y": 154.14368
+      }
+    }
+  ],
+  "Settings": {
+    "OutputWindows": [
+      {
+  "ShowGizmos": "On",
+  "TransformGizmoMode": "Move",
+  "BackgroundColor": [
+    0.1,
+    0.1,
+    0.1,
+    1.0
+  ],
+  "CameraControlMode": "AutoUseFirstCam",
+  "CameraPosition": [
+    0.0,
+    0.0,
+    2.4142134
+  ],
+  "CameraTarget": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "CameraRoll": 0.0,
+  "CameraSpeed": 1.0,
+  "ResolutionTitle": "Fill",
+  "ResolutionWidth": 0,
+  "ResolutionHeight": 0,
+  "ResolutionUseAsAspectRatio": true,
+  "IsPinned": false,
+  "PinnedInstancePath": [],
+  "PinnedOutputId": "00000000-0000-0000-0000-000000000000",
+  "PinnedEntityKind": "None",
+  "PinnedEntityId": "00000000-0000-0000-0000-000000000000"
+}
+    ],
+    "WindowLayout": "[Window][DockSpaceViewport_11111111]\nPos=0,26\nSize=1920,1054\nCollapsed=0\n\n[Window][Graph View##1]\nPos=326,26\nSize=891,1035\nCollapsed=0\nDockId=0x00000003,0\n\n[Window][Parameters]\nPos=1661,710\nSize=442,568\nCollapsed=0\nDockId=0x00000002,0\n\n[Window][Variations]\nPos=1863,505\nSize=57,556\nCollapsed=0\nDockId=0x0000000A,0\n\n[Window][Output View##0]\nPos=1219,26\nSize=701,477\nCollapsed=0\nDockId=0x00000007,0\n\n[Window][Debug##Default]\nPos=60,60\nSize=400,400\nCollapsed=0\n\n[Window][Explore Variations]\nPos=810,306\nSize=768,283\nCollapsed=0\n\n[Window][Console]\nPos=1331,138\nSize=550,450\nCollapsed=0\n\n[Window][Output View##1]\nPos=0,26\nSize=2304,712\nCollapsed=0\n\n[Window][Symbol Library]\nPos=0,26\nSize=324,655\nCollapsed=0\nDockId=0x0000000D,0\n\n[Window][Render as Video]\nPos=2105,710\nSize=455,568\nCollapsed=0\nDockId=0x00000002,1\n\n[Window][##typeAheadSearchPopup]\nPos=1158,585\nSize=450,300\nCollapsed=0\n\n[Window][Combine into symbol]\nPos=1030,545\nSize=500,350\nCollapsed=0\n\n[Window][Parameters##98]\nPos=0,576\nSize=323,864\nCollapsed=0\n\n[Window][Add output]\nPos=1030,595\nSize=500,250\nCollapsed=0\n\n[Window][Duplicate as new symbol]\nPos=1030,580\nSize=500,280\nCollapsed=0\n\n[Window][Output View##97]\nPos=0,26\nSize=1728,927\nCollapsed=0\n\n[Window][Output View##98]\nPos=0,26\nSize=2304,593\nCollapsed=0\n\n[Window][Parameters##1]\nPos=1219,505\nSize=642,556\nCollapsed=0\nDockId=0x00000009,0\n\n[Window][Render To File]\nPos=1336,536\nSize=584,423\nCollapsed=0\nDockId=0x00000002,1\n\n[Window][Add parameter input]\nPos=1030,533\nSize=500,350\nCollapsed=0\n\n[Window][Variation Explorer]\nPos=0,26\nSize=1315,1414\nCollapsed=0\n\n[Window][Dear ImGui Demo]\nPos=650,46\nSize=550,680\nCollapsed=0\n\n[Window][Search]\nPos=710,390\nSize=500,300\nCollapsed=0\n\n[Window][##CurvePopup]\nPos=1164,199\nSize=500,400\nCollapsed=0\n\n[Window][Settings]\nPos=60,60\nSize=550,450\nCollapsed=0\n\n[Window][Output View##99]\nPos=763,26\nSize=1157,948\nCollapsed=0\n\n[Window][Rename symbol]\nPos=710,365\nSize=500,350\nCollapsed=0\n\n[Window][Edit description]\nPos=410,190\nSize=1100,700\nCollapsed=0\n\n[Window][Rename input]\nPos=710,365\nSize=500,350\nCollapsed=0\n\n[Window][Edit comment]\nPos=710,315\nSize=500,450\nCollapsed=0\n\n[Window][Output View##100]\nSize=550,448\nCollapsed=0\n\n[Window][WindowOverViewport_11111111]\nPos=0,26\nSize=1920,1035\nCollapsed=0\n\n[Window][Assets]\nPos=0,683\nSize=324,378\nCollapsed=0\nDockId=0x0000000E,0\n\n[Window][Output View##101]\nPos=1821,26\nSize=739,1272\nCollapsed=0\n\n[Window][ProgressionPopup]\nPos=930,578\nSize=700,260\nCollapsed=0\n\n[Window][Skill Quest Overview]\nPos=880,408\nSize=800,600\nCollapsed=0\n\n[Window][###ExitDialog]\nPos=1070,620\nSize=420,200\nCollapsed=0\n\n[Window][Editor Feature Tests]\nPos=389,265\nSize=588,457\nCollapsed=0\n\n[Window][Welcome to the TiXL Alpha]\nPos=60,60\nSize=680,480\nCollapsed=0\n\n[Window][Composition Settings]\nPos=705,117\nSize=553,453\nCollapsed=0\n\n[Window][Help]\nPos=1863,505\nSize=57,556\nCollapsed=0\nDockId=0x0000000A,1\n\n[Window][Edit username]\nPos=1420,558\nSize=600,300\nCollapsed=0\n\n[Window][Welcome to TiXL]\nPos=661,258\nSize=680,480\nCollapsed=0\n\n[Window][Create new project]\nPos=1445,542\nSize=550,333\nCollapsed=0\n\n[Window][Performance]\nPos=1001,26\nSize=599,714\nCollapsed=0\n\n[Window][Changes made to readonly operator]\nPos=710,283\nSize=500,450\nCollapsed=0\n\n[Window][Dear ImGui Style Editor]\nPos=60,60\nSize=559,971\nCollapsed=0\n\n[Window][Warning: Missing Symbols]\nPos=650,294\nSize=620,428\nCollapsed=0\n\n[Docking][Data]\nDockSpace         ID=0x08BD597D Window=0x1BBC0F80 Pos=0,26 Size=1920,1035 Split=X Selected=0x8995E68A\n  DockNode        ID=0x0000000B Parent=0x08BD597D SizeRef=324,1391 Split=Y Selected=0x42C24103\n    DockNode      ID=0x0000000D Parent=0x0000000B SizeRef=549,881 HiddenTabBar=1 Selected=0xD41FC2E2\n    DockNode      ID=0x0000000E Parent=0x0000000B SizeRef=549,508 HiddenTabBar=1 Selected=0x42C24103\n  DockNode        ID=0x0000000C Parent=0x08BD597D SizeRef=1594,1391 Split=X\n    DockNode      ID=0x00000003 Parent=0x0000000C SizeRef=891,1391 CentralNode=1 HiddenTabBar=1 Selected=0x8995E68A\n    DockNode      ID=0x00000004 Parent=0x0000000C SizeRef=701,1391 Split=Y Selected=0xC9567BC1\n      DockNode    ID=0x00000007 Parent=0x00000004 SizeRef=916,641 HiddenTabBar=1 Selected=0xC9567BC1\n      DockNode    ID=0x00000008 Parent=0x00000004 SizeRef=916,748 Split=X Selected=0x35577784\n        DockNode  ID=0x00000009 Parent=0x00000008 SizeRef=642,446 HiddenTabBar=1 Selected=0x35577784\n        DockNode  ID=0x0000000A Parent=0x00000008 SizeRef=57,446 Selected=0x742F3B5B\nDockSpace         ID=0x7C6B3D9B Pos=0,26 Size=1953,1101 CentralNode=1 HiddenTabBar=1 Selected=0xF7A0F8A9\nDockSpace         ID=0x8B93E3BD Pos=0,26 Size=1920,1054 Split=X Selected=0x1F46795C\n  DockNode        ID=0x00000001 Parent=0x8B93E3BD SizeRef=824,1391 CentralNode=1 Selected=0xF7A0F8A9\n  DockNode        ID=0x00000002 Parent=0x8B93E3BD SizeRef=916,1391 Selected=0x9CE63BF6\n\n",
+    "WindowLayoutImGuiVersion": "1.91.6",
+    "WindowVisibility": {
+      "Variations": true,
+      "Output View##0": true,
+      "Output View##1": false,
+      "Output View##2": false,
+      "Output View##3": false,
+      "Output View##4": false,
+      "Output View##5": false,
+      "Output View##6": false,
+      "Output View##7": false,
+      "Output View##8": false,
+      "Output View##9": false,
+      "Output View##10": false,
+      "Output View##11": false,
+      "Output View##12": false,
+      "Output View##13": false,
+      "Output View##14": false,
+      "Output View##15": false,
+      "Output View##16": false,
+      "Output View##17": false,
+      "Output View##18": false,
+      "Output View##19": false,
+      "Output View##20": false,
+      "Output View##21": false,
+      "Output View##22": false,
+      "Output View##23": false,
+      "Output View##24": false,
+      "Output View##25": false,
+      "Output View##26": false,
+      "Output View##27": false,
+      "Output View##28": false,
+      "Output View##29": false,
+      "Output View##30": false,
+      "Output View##31": false,
+      "Output View##32": false,
+      "Output View##33": false,
+      "Output View##34": false,
+      "Output View##35": false,
+      "Output View##36": false,
+      "Output View##37": false,
+      "Output View##38": false,
+      "Output View##39": false,
+      "Output View##40": false,
+      "Output View##41": false,
+      "Output View##42": false,
+      "Output View##43": false,
+      "Output View##44": false,
+      "Output View##45": false,
+      "Output View##46": false,
+      "Output View##47": false,
+      "Output View##48": false,
+      "Output View##49": false,
+      "Output View##50": false,
+      "Output View##51": false,
+      "Output View##52": false,
+      "Output View##53": false,
+      "Output View##54": false,
+      "Output View##55": false,
+      "Output View##56": false,
+      "Output View##57": false,
+      "Output View##58": false,
+      "Output View##59": false,
+      "Output View##60": false,
+      "Output View##61": false,
+      "Output View##62": false,
+      "Output View##63": false,
+      "Output View##64": false,
+      "Output View##65": false,
+      "Output View##66": false,
+      "Output View##67": false,
+      "Output View##68": false,
+      "Output View##69": false,
+      "Output View##70": false,
+      "Output View##71": false,
+      "Output View##72": false,
+      "Output View##73": false,
+      "Output View##74": false,
+      "Output View##75": false,
+      "Output View##76": false,
+      "Output View##77": false,
+      "Output View##78": false,
+      "Output View##79": false,
+      "Output View##80": false,
+      "Output View##81": false,
+      "Output View##82": false,
+      "Output View##83": false,
+      "Output View##84": false,
+      "Output View##85": false,
+      "Output View##86": false,
+      "Output View##87": false,
+      "Output View##88": false,
+      "Output View##89": false,
+      "Output View##90": false,
+      "Output View##91": false,
+      "Output View##92": false,
+      "Output View##93": false,
+      "Output View##94": false,
+      "Output View##95": false,
+      "Output View##96": false,
+      "Output View##97": false,
+      "Output View##98": false,
+      "Output View##99": false,
+      "Output View##100": false,
+      "Graph View##0": false,
+      "Graph View##1": true,
+      "Parameters##1": true,
+      "Symbol Library": true,
+      "Assets": true,
+      "Variation Explorer": false,
+      "Render To File": false,
+      "IO Events": false,
+      "Performance": false,
+      "Help": true,
+      "Console": false,
+      "Utilities": false,
+      "Guided Feature Tests": false,
+      "Settings": false,
+      "Composition Settings": false,
+      "Welcome to the TiXL Alpha": false
+    }
+  }
+}
