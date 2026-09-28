@@ -9,6 +9,7 @@ using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows;
 using T3.Editor.Gui.Windows.Layouts;
+using T3.Editor.Gui.Windows.Output;
 using T3.Editor.Gui.Windows.TimeLine;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.ProjectHandling;
@@ -106,6 +107,14 @@ internal sealed class GraphWindow : Windows.Window
         }
 
         _focusOnNextFrame = true;
+
+        // Opening a project also frames whatever the Output View shows. Programmatic opens pass
+        // tryRestoreViewArea: false because they set the view themselves.
+        if (tryRestoreViewArea)
+        {
+            OutputWindow.RequestShowInGraphOnProjectOpen();
+        }
+
         return true;
     }
 
