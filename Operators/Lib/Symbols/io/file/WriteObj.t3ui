@@ -1,0 +1,67 @@
+{
+  "FormatVersion": 3,
+  "Id": "d2a3f0b4-8a17-4c22-9b61-2a4e6d81b0c5"/*WriteObj*/,
+  "Description": "Exports the connected mesh as a Wavefront .obj file.\n\nPer vertex it writes the position, the normal and the first UV set. If they exists vertex colors are written. Faces are exported as triangles.\n\nLimitations: OBJ can only store one UV set, so a second UV set (TexCoord2) is dropped and no materials or textures are written.\n\nThe file is written when Trigger Write is triggered. An existing file is overwritten without warning.\n\nAlso see: [LoadObj] [LoadObjGeometry] [WriteToFile] [LoadObjAsPoints]",
+  "InputUis": [
+    {
+      "InputId": "1c7a6e9f-4b85-4d23-8a07-3e9d5f2b1c64"/*FileName*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      },
+      "Description": "Name of the file to write; the .obj extension is enforced and any other extension is replaced (mesh.ply becomes mesh.obj). Invalid characters are replaced with underscores.",
+      "Usage": "Default",
+      "FileFilter": "obj"
+    },
+    {
+      "InputId": "3a9d5c1e-7b42-4f86-a1e9-6c0d2f83a5b7"/*TriggerWrite*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      },
+      "Description": "Writes the file, if it already exists it'll be overwritten, no warning."
+    },
+    {
+      "InputId": "6e1f2d9a-3c87-4b15-9e24-5a0b8d7f1c63"/*MeshBuffer*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "The mesh to export; its vertex positions, normals, UVs and optional vertex colors are written."
+    },
+    {
+      "InputId": "8f4b7e2c-1a6d-4e93-b0c5-2d9a3f17e8b4"/*Folder*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      },
+      "Description": "Target folder as a project asset address (e.g. **Username.MyProject:geometry** (Missing folders are created)) or an absolute path. ",
+      "Usage": "Default",
+      "FileFilter": "obj"
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "4c2e8f1b-9d74-4e89-a0b3-71c6f25ae9d1"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    },
+    {
+      "OutputId": "b7e9a2d4-1f63-4d8a-b5c0-9e8f27c64a31"/*OutFilepath*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 300.0
+      }
+    },
+    {
+      "OutputId": "572dd7d6-1c5f-4490-8f72-e14a941eed69"/*Data*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 400.0
+      }
+    }
+  ]
+}
