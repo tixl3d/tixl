@@ -71,7 +71,8 @@ internal sealed class SubdivisionStretch : Instance<SubdivisionStretch>
 
     private enum ColorModes
     {
-        MultiplyGradient,
+        ColorWithGradient,
         GradientOnly,
+        TextureWithGradient,
     }
 }
