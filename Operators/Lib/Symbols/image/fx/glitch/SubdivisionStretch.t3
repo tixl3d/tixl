@@ -120,24 +120,28 @@
     {
       "Id": "0349d0d5-ff4b-41c4-813d-32e7dbf71202"/*GradientsToTexture*/,
       "SymbolId": "2c53eee7-eb38-449b-ad2a-d7a674952e5b",
+      "SymbolName": "Lib.numbers.color.GradientsToTexture",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "0f0073ed-6ec7-46ae-8af5-43d6cf0c2e45"/*FirstValidTexture*/,
       "SymbolId": "db73b47d-3d42-4b17-b8fd-08b6f1286716",
+      "SymbolName": "Lib.image.use.FirstValidTexture",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "14b41437-c3ff-4df2-978b-6a34c2c899e5"/*BoolToInt*/,
       "SymbolId": "cd43942a-887e-4e34-bc54-0c2e5e8bc2af",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToInt",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "30e43a69-4f5b-49e3-8c08-51582186e865"/*LoadImage*/,
       "SymbolId": "0b3436db-e283-436e-ba85-2f3a1de76a9d",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
       "InputValues": [
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
@@ -150,18 +154,21 @@
     {
       "Id": "4381b874-12b5-4802-8521-74908787ef2a"/*Vector2Components*/,
       "SymbolId": "0946c48b-85d8-4072-8f21-11d17cc6f6cf",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "6ebce145-be96-411d-8d9f-e7a8ad934ddd"/*BoolToInt*/,
       "SymbolId": "cd43942a-887e-4e34-bc54-0c2e5e8bc2af",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToInt",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "8229aec5-9664-485b-ac36-4ace21a8e29a"/*_multiImageFxSetup*/,
       "SymbolId": "a2567844-3314-48de-bda7-7904b5546535",
+      "SymbolName": "Lib.image.fx._._multiImageFxSetup",
       "InputValues": [
         {
           "Id": "440e471b-9f67-435c-9e21-304cd57728aa"/*GenerateMips*/,
@@ -184,7 +191,7 @@
         {
           "Id": "a5cb5bda-0fb2-4863-bd8d-9ac09135fc30"/*WrapMode*/,
           "Type": "SharpDX.Direct3D11.TextureAddressMode",
-          "Value": "Clamp"
+          "Value": "Wrap"
         }
       ],
       "Outputs": []
@@ -192,12 +199,14 @@
     {
       "Id": "da5c8406-a897-46d3-ad8e-dc4641bd6c51"/*Vector2Components*/,
       "SymbolId": "0946c48b-85d8-4072-8f21-11d17cc6f6cf",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "ffc5ada5-8129-48ad-8196-1e5d3eff2a74"/*Vector4Components*/,
       "SymbolId": "b15e4950-5c72-4655-84bc-c00647319030",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "InputValues": [],
       "Outputs": []
     }

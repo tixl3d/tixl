@@ -1,6 +1,7 @@
 #nullable enable
 using SharpDX;
 using SharpDX.Direct3D11;
+using SharpDX.Mathematics.Interop;
 using T3.Core.Rendering;
 using T3.Core.Utils;
 using Utilities = T3.Core.Utils.Utilities;
@@ -144,17 +145,18 @@ internal sealed class _SpecularPrefilter : Instance<_SpecularPrefilter>
                                CullMode = CullMode.None,
                                IsDepthClipEnabled = false
                            };
-        _rasterizerState = new RasterizerState(device, rastDesc);
+        _rasterizerState ??= new RasterizerState(device, rastDesc);
 
         // Input Assembler
-        //var previousTopology = device.ImmediateContext.InputAssembler.PrimitiveTopology;
+        _prevTopology = device.ImmediateContext.InputAssembler.PrimitiveTopology;
         device.ImmediateContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
 
-        //_prevBlendState = device.ImmediateContext.OutputMerger.GetBlendState(out _prevBlendFactor, out _prevSampleMask);
+        _prevBlendState = device.ImmediateContext.OutputMerger.GetBlendState(out _prevBlendFactor, out _prevSampleMask);
+        _prevDepthStencilState = device.ImmediateContext.OutputMerger.GetDepthStencilState(out _prevStencilReference);
         device.ImmediateContext.OutputMerger.BlendState = DefaultRenderingStates.DisabledBlendState;
         device.ImmediateContext.OutputMerger.DepthStencilState = DefaultRenderingStates.DisabledDepthStencilState;
             
-        _prevRenderTargetViews = device.ImmediateContext.OutputMerger.GetRenderTargets(2);
+        _prevRenderTargetViews = device.ImmediateContext.OutputMerger.GetRenderTargets(OutputMergerStage.SimultaneousRenderTargetCount);
         device.ImmediateContext.OutputMerger.GetRenderTargets(out _prevDepthStencilView);
                 
         var rtvDesc = new RenderTargetViewDescription()
@@ -172,6 +174,7 @@ internal sealed class _SpecularPrefilter : Instance<_SpecularPrefilter>
         var size = _prefilteredCubeMap.Description.Width;
             
         _prevViewports = device.ImmediateContext.Rasterizer.GetViewports<RawViewportF>();
+        _prevRasterizerState = device.ImmediateContext.Rasterizer.State;
             
         device.ImmediateContext.Rasterizer.State = _rasterizerState;
 
@@ -241,7 +244,6 @@ internal sealed class _SpecularPrefilter : Instance<_SpecularPrefilter>
         FilteredCubeMap.Value = _prefilteredCubeMap;
         Utilities.Dispose(ref _cubeMapRtv);
 
-        //device.ImmediateContext.InputAssembler.PrimitiveTopology = previousTopology;
         Restore();
         _updatedOnce = true;
     }
@@ -252,7 +254,14 @@ internal sealed class _SpecularPrefilter : Instance<_SpecularPrefilter>
         var deviceContext = ResourceManager.Device.ImmediateContext;
 
         deviceContext.Rasterizer.SetViewports(_prevViewports, _prevViewports.Length);
-        //deviceContext.OutputMerger.BlendState = _prevBlendState;
+        deviceContext.Rasterizer.State = _prevRasterizerState;
+        Utilities.Dispose(ref _prevRasterizerState);
+        deviceContext.InputAssembler.PrimitiveTopology = _prevTopology;
+
+        deviceContext.OutputMerger.SetBlendState(_prevBlendState, _prevBlendFactor, _prevSampleMask);
+        Utilities.Dispose(ref _prevBlendState);
+        deviceContext.OutputMerger.SetDepthStencilState(_prevDepthStencilState, _prevStencilReference);
+        Utilities.Dispose(ref _prevDepthStencilState);
             
         // Vertex shader
         var vsStage = deviceContext.VertexShader;
@@ -368,9 +377,13 @@ internal sealed class _SpecularPrefilter : Instance<_SpecularPrefilter>
         
     private RawViewportF[] _prevViewports = [];
         
-    //private BlendState _prevBlendState;
-    // private RawColor4 _prevBlendFactor;
-    // private int _prevSampleMask;
+    private RasterizerState? _prevRasterizerState;
+    private PrimitiveTopology _prevTopology;
+    private BlendState? _prevBlendState;
+    private RawColor4 _prevBlendFactor;
+    private int _prevSampleMask;
+    private DepthStencilState? _prevDepthStencilState;
+    private int _prevStencilReference;
         
     private RenderTargetView[] _prevRenderTargetViews= [];
     private DepthStencilView? _prevDepthStencilView;

@@ -29,8 +29,8 @@ internal sealed class OutputMergerStage : Instance<OutputMergerStage> {
         RenderTargetViews.GetValues(ref _renderTargetViews, context);
         UnorderedAccessViews.GetValues(ref _unorderedAccessViews, context);
 
-        // KEEP RTVs
-        _prevRenderTargetViews = outputMerger.GetRenderTargets(_renderTargetViews.Length);
+        // KEEP all RTV slots: restoring fewer than were bound would unbind the rest (e.g. a parent's normal buffer)
+        _prevRenderTargetViews = outputMerger.GetRenderTargets(SharpDX.Direct3D11.OutputMergerStage.SimultaneousRenderTargetCount);
         outputMerger.GetRenderTargets(out _prevDepthStencilView);
             
         // KEEP blend state

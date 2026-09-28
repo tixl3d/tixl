@@ -441,7 +441,7 @@ internal sealed class _ExecuteFastBlurPasses : Instance<_ExecuteFastBlurPasses>
             _viewports = context.Rasterizer.GetViewports<RawViewportF>();
 
             _blendState = context.OutputMerger.GetBlendState(out _blendFactor, out _sampleMask);
-            _prevRenderTargetViews = context.OutputMerger.GetRenderTargets(1);
+            _prevRenderTargetViews = context.OutputMerger.GetRenderTargets(OutputMergerStage.SimultaneousRenderTargetCount);
             context.OutputMerger.GetRenderTargets(out _depthStencilView);
 
             _isSaved = true;

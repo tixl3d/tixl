@@ -91,7 +91,7 @@ internal sealed class DrawStageCanvas : Instance<DrawStageCanvas>, IStatusProvid
         var deviceContext = device.ImmediateContext;
 
         // Everything touched is put back afterwards: this op renders on the side, inside whatever draw the graph is in.
-        var prevTargets = deviceContext.OutputMerger.GetRenderTargets(1, out var prevDepth);
+        var prevTargets = deviceContext.OutputMerger.GetRenderTargets(OutputMergerStage.SimultaneousRenderTargetCount, out var prevDepth);
         var prevViewports = deviceContext.Rasterizer.GetViewports<RawViewportF>();
         var prevTopology = deviceContext.InputAssembler.PrimitiveTopology;
         var prevRasterizer = deviceContext.Rasterizer.State;
