@@ -48,6 +48,7 @@ internal enum UserActions
 
     // Graph
     PinToOutputWindow,
+    ShowInGraph,
     DisplayImageAsBackground,
     ClearBackgroundImage,
     Duplicate,

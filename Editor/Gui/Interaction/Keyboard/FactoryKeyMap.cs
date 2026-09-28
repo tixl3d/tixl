@@ -50,6 +50,7 @@ internal static class FactoryKeyMap
                 new(UserActions.ToggleBypassed, new KeyCombination(Key.B, shift: true)),
                 new(UserActions.Disconnect, new KeyCombination(Key.D, alt: true)),
                 new(UserActions.PinToOutputWindow, new KeyCombination(Key.P)),
+                new(UserActions.ShowInGraph, new KeyCombination(Key.P, shift: true)),
                 new(UserActions.DisplayImageAsBackground, new KeyCombination(Key.P, ctrl: true)),
                 new(UserActions.ClearBackgroundImage, new KeyCombination(Key.P, ctrl: true, shift: true)),
                 new(UserActions.LayoutSelection, new KeyCombination(Key.G)),
