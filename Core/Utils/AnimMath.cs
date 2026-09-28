@@ -78,6 +78,19 @@ public static class AnimMath
             case Shapes.Steps:
                 result =  (int)time;
                 break;
+
+            case Shapes.TriSaw:
+                var t = (float)MathUtils.Fmod(time, 1);
+                // bias = bias.Clamp(0.001f, 1.0f);
+                if(t <= bias)
+                {
+                    result = 1f - (float)(bias - t) / bias;
+                } else {
+                    result = 1f - (float)(t - bias) / (1f - bias);
+                }
+
+                result = (result/ratio).Clamp(0,1);
+                break;
         }
         return result;
     }        
@@ -129,6 +142,7 @@ public static class AnimMath
         Random = 10,
         RandomSigned = 11,
         Steps = 12,
+        TriSaw = 13,
     }
 
     private const string SpeedFactorA = "SpeedFactorA";
