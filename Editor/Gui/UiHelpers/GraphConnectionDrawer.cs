@@ -1,4 +1,4 @@
-﻿using ImGuiNET;
+using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Utils;
 using T3.Editor.Gui.Styling;
@@ -257,6 +257,109 @@ internal static class GraphConnectionDrawer
     {
         var circleResolution = (int) canvasScale.RemapAndClamp(0.2f, 1.5f, 6, 15);
         return (int)(arcLengthRad * circleResolution).Clamp(1, UserSettings.Config.MaxSegmentCount);
+    }
+
+    /// <summary>
+    /// Draws a connection that follows a polyline of manual bend points, as straight segments with
+    /// hard corners.
+    /// </summary>
+    /// <remarks>
+    /// Straight segments rather than a curve: the bend points are draggable handles, so the drawn line
+    /// has to be exactly where the user put them. A smooth curve would pull away from its handles and
+    /// make them feel unresponsive.
+    /// </remarks>
+    internal static bool DrawConnection(float canvasScale, IReadOnlyList<Vector2> pointsOnScreen,
+                                        Vector2 sourcePos, Vector2 targetPos, Color color, float thickness,
+                                        out Vector2 hoverPosition, out float normalizedHoverPos)
+    {
+        hoverPosition = Vector2.Zero;
+        normalizedHoverPos = -1;
+
+        if (pointsOnScreen.Count < 2)
+            return false;
+
+        var drawList = ImGui.GetWindowDrawList();
+        var drawListFlags = drawList.Flags;
+        drawList.Flags &= ~ImDrawListFlags.AntiAliasedLines;
+
+        // Outline first, so the cable stays readable where it crosses a node.
+        if (canvasScale > 0.5f)
+        {
+            for (var index = 0; index < pointsOnScreen.Count - 1; index++)
+            {
+                drawList.AddLine(pointsOnScreen[index] + Vector2.One * 0.5f,
+                                 pointsOnScreen[index + 1] + Vector2.One * 0.5f,
+                                 UiColors.WindowBackground.Fade(0.6f * color.A),
+                                 thickness + 5f);
+            }
+        }
+
+        for (var index = 0; index < pointsOnScreen.Count - 1; index++)
+        {
+            drawList.AddLine(pointsOnScreen[index] + Vector2.One * 0.5f,
+                             pointsOnScreen[index + 1] + Vector2.One * 0.5f,
+                             color,
+                             thickness);
+        }
+
+        drawList.Flags = drawListFlags;
+
+        return TryFindHoverOnPolyline(pointsOnScreen, out hoverPosition, out normalizedHoverPos);
+    }
+
+    /// <summary>
+    /// Finds the point on the polyline closest to the cursor, if the cursor is close enough to count as
+    /// hovering the connection. Reports how far along the whole route that point sits, so a click can be
+    /// attributed to the right end of the cable.
+    /// </summary>
+    private static bool TryFindHoverOnPolyline(IReadOnlyList<Vector2> pointsOnScreen,
+                                               out Vector2 positionOnLine,
+                                               out float normalizedHoverPos)
+    {
+        positionOnLine = Vector2.Zero;
+        normalizedHoverPos = -1;
+
+        const float hoverDistance = 6;
+
+        var mousePos = ImGui.GetMousePos();
+        var closestDistanceSquared = hoverDistance * hoverDistance;
+        var found = false;
+
+        var totalLength = 0f;
+        var lengthBeforeSegment = 0f;
+        var distanceAlongSegment = 0f;
+
+        for (var index = 0; index < pointsOnScreen.Count - 1; index++)
+        {
+            var start = pointsOnScreen[index];
+            var end = pointsOnScreen[index + 1];
+
+            var segment = end - start;
+            var segmentLength = segment.Length();
+            if (segmentLength < 0.0001f)
+                continue;
+
+            var t = Math.Clamp(Vector2.Dot(mousePos - start, segment) / (segmentLength * segmentLength), 0f, 1f);
+            var closest = start + segment * t;
+
+            var distanceSquared = Vector2.DistanceSquared(mousePos, closest);
+            if (distanceSquared < closestDistanceSquared)
+            {
+                closestDistanceSquared = distanceSquared;
+                positionOnLine = closest;
+                lengthBeforeSegment = totalLength;
+                distanceAlongSegment = segmentLength * t;
+                found = true;
+            }
+
+            totalLength += segmentLength;
+        }
+
+        if (!found)
+            return false;
+
+        normalizedHoverPos = totalLength > 0.0001f ? (lengthBeforeSegment + distanceAlongSegment) / totalLength : 0;
+        return true;
     }
     
     private static float ComputeInnerTangentAngle(Vector2 centerA, float radiusA, Vector2 centerB, float radiusB, bool flipped = false)

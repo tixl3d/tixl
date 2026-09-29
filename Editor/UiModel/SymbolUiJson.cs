@@ -165,12 +165,52 @@ internal static class SymbolUiJson
                 writer.WriteEndArray();
             }
 
+            WriteConnectionWaypoints(childUi, writer);
+
             writer.WriteEndObject();
         }
 
         while (unresolvedIndex < unresolvedChildUis.Count)
         {
             unresolvedChildUis[unresolvedIndex++].Json.WriteTo(writer);
+        }
+
+        writer.WriteEndArray();
+    }
+
+    /// <summary>
+    /// Writes manually rerouted connections. Waypoints live in canvas space, so they move with the nodes.
+    /// </summary>
+    private static void WriteConnectionWaypoints(SymbolUi.Child childUi, JsonTextWriter writer)
+    {
+        if (childUi.ConnectionWaypoints.Count == 0)
+            return;
+
+        writer.WritePropertyName(JsonKeys.ConnectionWaypoints);
+        writer.WriteStartArray();
+
+        foreach (var (connectionTarget, waypoints) in childUi.ConnectionWaypoints)
+        {
+            if (connectionTarget.SourceOutputId == Guid.Empty
+                || connectionTarget.TargetInputId == Guid.Empty
+                || waypoints is not { Count: > 0 })
+            {
+                continue;
+            }
+
+            writer.WriteStartObject();
+            writer.WriteObject(JsonKeys.SourceOutputId, connectionTarget.SourceOutputId);
+            writer.WriteObject(JsonKeys.TargetInputId, connectionTarget.TargetInputId);
+
+            writer.WritePropertyName(JsonKeys.Points);
+            writer.WriteStartArray();
+            foreach (var waypoint in waypoints)
+            {
+                _vector2ToJson(writer, waypoint);
+            }
+
+            writer.WriteEndArray();
+            writer.WriteEndObject();
         }
 
         writer.WriteEndArray();
@@ -550,10 +590,46 @@ internal static class SymbolUiJson
                 }
             }
 
+            ReadConnectionWaypoints(childUi, childEntry);
+
             symbolChildUis.Add(childUi);
         }
 
         return symbolChildUis;
+    }
+
+    /// <summary>
+    /// Reads manually rerouted connections. Entries written by an older or newer format that don't parse
+    /// cleanly are skipped rather than dropped silently as a whole.
+    /// </summary>
+    private static void ReadConnectionWaypoints(SymbolUi.Child childUi, JToken childEntry)
+    {
+        if (childEntry[JsonKeys.ConnectionWaypoints] is not JArray waypointEntries)
+            return;
+
+        foreach (var waypointEntry in waypointEntries)
+        {
+            if (!JsonUtils.TryGetGuid(waypointEntry[JsonKeys.SourceOutputId], out var sourceOutputId)
+                || !JsonUtils.TryGetGuid(waypointEntry[JsonKeys.TargetInputId], out var targetInputId))
+            {
+                Log.Warning("Skipping connection waypoints with invalid source or target id");
+                continue;
+            }
+
+            if (waypointEntry[JsonKeys.Points] is not JArray pointEntries)
+                continue;
+
+            var waypoints = new List<Vector2>(pointEntries.Count);
+            foreach (var pointEntry in pointEntries)
+            {
+                waypoints.Add(GetVec2OrDefault(pointEntry));
+            }
+
+            if (waypoints.Count > 0)
+            {
+                childUi.ConnectionWaypoints[new SymbolUi.Child.ConnectionTarget(sourceOutputId, targetInputId)] = waypoints;
+            }
+        }
     }
 
     private static OrderedDictionary<Guid, Section> ReadSections(JToken token)
@@ -708,6 +784,12 @@ internal static class SymbolUiJson
         public const string Style = nameof(Style);
         public const string Comment = nameof(Comment);
         public const string ConnectionStyleOverrides = nameof(ConnectionStyleOverrides);
+
+        // Manually rerouted connections
+        public const string ConnectionWaypoints = nameof(ConnectionWaypoints);
+        public const string SourceOutputId = nameof(SourceOutputId);
+        public const string TargetInputId = nameof(TargetInputId);
+        public const string Points = nameof(Points);
 
         // Section fields
         public const string SectionId = nameof(SectionId);

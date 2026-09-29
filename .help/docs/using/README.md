@@ -16,6 +16,8 @@ Reference and how-tos for the day-to-day work: the UI, the graph, connecting inp
 
 - [Character animation](CharacterAnimation.md) — play glTF animation clips, blend and
   retarget poses, rig procedural geometry to skeletons.
+- [Rerouting connection lines](ReroutingConnections.md) — pull a cable aside with bend points
+  when the graph gets crowded.
 
 *Still to write:*
 
