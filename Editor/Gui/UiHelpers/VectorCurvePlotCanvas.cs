@@ -1,5 +1,4 @@
-﻿#nullable enable
-using System.Diagnostics.CodeAnalysis;
+#nullable enable
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Utils;
@@ -113,7 +112,7 @@ internal sealed class VectorCurvePlotCanvas<T>
         
         for(int cIndex= 0; cIndex< _componentCount; cIndex ++)
         {
-            var color = _componentCount == 1 ? CurveComponentColors.GrayCurveColor : CurveComponentColors.CurveColors[cIndex];
+            var color = CurveComponentColors.GetCurveColor(cIndex, _componentCount);
             dl.AddPolyline(ref _graphPoints[cIndex,startIndex], shownSampleCount, color, ImDrawFlags.None, 1);
             dl.AddCircleFilled(_graphPoints[cIndex, _sampleCount - 1], 3, color);
         }
@@ -131,9 +130,10 @@ internal sealed class VectorCurvePlotCanvas<T>
 
         for (var cIndex = 0; cIndex < _lastValues.Length; cIndex++)
         {
-            var color = _componentCount == 1 ? CurveComponentColors.GrayCurveColor : CurveComponentColors.TextColors[cIndex];
-            color.Rgba.W= 1;
-                
+            var color = CurveComponentColors.GetValueColor(cIndex, _componentCount);
+            // The readout stays legible even when the curve color is semi-transparent.
+            color.Rgba.W = 1;
+
             var lastValue = _lastValues[cIndex];
             var valueAsString = $"{lastValue:G4}";
             dl.AddText(font,
@@ -170,26 +170,40 @@ internal sealed class VectorCurvePlotCanvas<T>
     //private const int MaxComponents = 4;
 }
 
-[SuppressMessage("ReSharper", "RedundantArgumentDefaultValue")]
+/// <summary>
+/// Decides which theme color each component of a plotted value is drawn with. The colors themselves are
+/// declared in <see cref="UiColors"/> (group "Curve plots") so that they can be edited in the theme editor;
+/// this mapping is what makes the first component red, the second green, the third blue and the fourth gray.
+/// </summary>
 internal static class CurveComponentColors
 {
-    internal static readonly Color GrayCurveColor = new(1f, 1f, 1.0f, 0.3f);
+    /// <summary>Color of the curve line. Values with a single component (a lone number) share one fallback color.</summary>
+    internal static Color GetCurveColor(int componentIndex, int componentCount)
+    {
+        if (componentCount == 1)
+            return UiColors.CurvePlotSingleComponent;
 
-    internal static readonly Color[] CurveColors =
-        [
-            new(1f, 0.2f, 0.2f, 0.3f),
-            new(0.1f, 1f, 0.2f, 0.3f),
-            new(0.1f, 0.4f, 1.0f, 0.5f),
-            new(0.5f, 0.5f, 0.5f, 0.5f),
-            GrayCurveColor
-        ];
-
-    internal static readonly Color[] TextColors =
-        [
-            new(1f, 0.5f, 0.5f, 1f),
-            new(0.4f, 1f, 0.5f, 1f),
-            new(0.6f, 0.671f, 1.0f, 1f),
-            new(0.6f, 0.6f, 0.6f, 1f),
-            GrayCurveColor
-        ];        
+        return componentIndex switch
+                   {
+                       0 => UiColors.CurvePlotLineX,
+                       1 => UiColors.CurvePlotLineY,
+                       2 => UiColors.CurvePlotLineZ,
+                       _ => UiColors.CurvePlotLineW,
+                   };
     }
+
+    /// <summary>Color of the numeric value printed next to the curve.</summary>
+    internal static Color GetValueColor(int componentIndex, int componentCount)
+    {
+        if (componentCount == 1)
+            return UiColors.CurvePlotSingleComponent;
+
+        return componentIndex switch
+                   {
+                       0 => UiColors.CurvePlotValueX,
+                       1 => UiColors.CurvePlotValueY,
+                       2 => UiColors.CurvePlotValueZ,
+                       _ => UiColors.CurvePlotValueW,
+                   };
+    }
+}

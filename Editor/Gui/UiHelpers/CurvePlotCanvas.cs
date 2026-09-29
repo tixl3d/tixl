@@ -78,12 +78,20 @@ internal sealed class CurvePlotCanvas
             x += dx;
         }
             
+        // Single-component plots — a lone number or a bool — share one theme color, because a value plotted
+        // here never has a second component to tell apart. See UiColors.CurvePlotSingleComponent.
+        var curveColor = UiColors.CurvePlotSingleComponent;
+
+        // The marker and the readout are drawn opaque, so a faded curve color doesn't make them hard to see.
+        var opaqueCurveColor = curveColor;
+        opaqueCurveColor.Rgba.W = 1;
+
         dl.AddPolyline(ref _graphPoints[startIndex], 
                        shownSampleCount , 
-                       UiColors.Text.Fade(0.3f), 
+                       curveColor, 
                        ImDrawFlags.None, 
                        1);
-        dl.AddCircleFilled(_graphPoints[_sampleCount - 1], 3, UiColors.Gray);
+        dl.AddCircleFilled(_graphPoints[_sampleCount - 1], 3, opaqueCurveColor);
 
         var windowHeight = ImGui.GetWindowSize().Y / T3Ui.UiScaleFactor;
         var font = windowHeight switch
@@ -99,7 +107,7 @@ internal sealed class CurvePlotCanvas
                    _canvas.WindowPos
                    + new Vector2(_canvas.WindowSize.X - font.FontSize*5,
                                  _canvas.WindowSize.Y * 0.5f - font.FontSize / 2),
-                   UiColors.Text,
+                   opaqueCurveColor,
                    valueAsString);
             
         dl.PopClipRect();
