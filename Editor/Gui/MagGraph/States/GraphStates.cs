@@ -184,7 +184,9 @@ namespace T3.Editor.Gui.MagGraph.States
                                   context.StateMachine.SetState(HoldItem, context);
                               }
                               // Mouse is pressed but nothing is active -> background 
-                              else
+                              // Alt is reserved for editing connection bend points, so it must not
+                              // also start the long-press insert on the background behind the line.
+                              else if (!ImGui.GetIO().KeyAlt)
                               {
                                   context.StateMachine.SetState(HoldBackground, context);
                               }

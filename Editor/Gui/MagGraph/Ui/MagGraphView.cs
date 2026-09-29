@@ -402,6 +402,8 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
                 && (_context.StateMachine.CurrentState == GraphStates.Default
                     || _context.StateMachine.CurrentState == GraphStates.HoldBackground)
                 && _context.StateMachine.StateTime > 0.01f // Prevent glitches when coming from other states.
+                // A bend-point drag leaves the state machine in Default, so it has to opt out explicitly.
+                && !_context.ConnectionHovering.IsDraggingBendPoint
             ;
 
         if (!shouldBeActive)

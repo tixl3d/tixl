@@ -24,9 +24,65 @@ public partial class SymbolUi
             FadedOut,
         }
 
+        /// <summary>
+        /// Identifies one input connection of a child: the output it comes from and the input it feeds.
+        /// A child's input has a single source slot, so together they are unique within the child.
+        /// </summary>
+        internal readonly record struct ConnectionTarget(Guid SourceOutputId, Guid TargetInputId);
+
+        /// <summary>
+        /// Returns the manual bend points of a connection, or null when it still follows its automatic route.
+        /// </summary>
+        internal List<Vector2>? GetConnectionWaypoints(ConnectionTarget target)
+        {
+            return ConnectionWaypoints.GetValueOrDefault(target);
+        }
+
+        /// <summary>Replaces a connection's bend points; an empty list removes the reroute entirely.</summary>
+        internal void SetConnectionWaypoints(ConnectionTarget target, List<Vector2> waypoints)
+        {
+            if (waypoints.Count == 0)
+            {
+                ConnectionWaypoints.Remove(target);
+                return;
+            }
+
+            ConnectionWaypoints[target] = [..waypoints];
+        }
+
+        /// <summary>
+        /// Takes ownership of <paramref name="waypoints"/> instead of copying it. Callers must not reuse
+        /// the list; this exists for drag operations, which would otherwise allocate a list every frame.
+        /// </summary>
+        internal void SetConnectionWaypointsOwned(ConnectionTarget target, List<Vector2> waypoints)
+        {
+            if (waypoints.Count == 0)
+            {
+                ConnectionWaypoints.Remove(target);
+                return;
+            }
+
+            ConnectionWaypoints[target] = waypoints;
+        }
+
+        internal void RemoveConnectionWaypoints(ConnectionTarget target)
+        {
+            ConnectionWaypoints.Remove(target);
+        }
+
         internal static Vector2 DefaultOpSize { get; } = new(110, 25);
 
         internal Dictionary<Guid, ConnectionStyles> ConnectionStyleOverrides { get; } = new();
+
+        /// <summary>
+        /// Manual bend points ("waypoints") that reroute individual input connections around the nodes
+        /// they would otherwise cross, in canvas space.
+        /// </summary>
+        /// <remarks>
+        /// Purely cosmetic: the connection path has no effect on evaluation. A child's input has one
+        /// source, so the target input id identifies the connection.
+        /// </remarks>
+        internal Dictionary<ConnectionTarget, List<Vector2>> ConnectionWaypoints { get; } = new();
 
         internal Symbol.Child SymbolChild => Parent.Children.GetValueOrDefault(Id);
         private Symbol Parent => _parentSymbolPackage.Symbols[_symbolId];
@@ -128,6 +184,11 @@ public partial class SymbolUi
             {
                 newChild.ConnectionStyleOverrides[overridePair.Key] = overridePair.Value;
             }
+
+            foreach (var waypoints in original.ConnectionWaypoints)
+            {
+                newChild.ConnectionWaypoints[waypoints.Key] = [..waypoints.Value];
+            }
             
             return newChild;
         }
@@ -139,16 +200,28 @@ public partial class SymbolUi
 
         internal Child Clone(SymbolUi parent, Symbol.Child symbolChild)
         {
-            return new Child(symbolChild.Id, parent._id, (EditorSymbolPackage)parent.Symbol.SymbolPackage)
-                       {
-                           PosOnCanvas = PosOnCanvas,
-                           Size = Size,
-                           Style = Style,
-                           Comment = Comment,
-                           SectionId = SectionId,
-                           SnapshotGroupIndex = SnapshotGroupIndex,
-                           SnapshotEnabledInputIds = SnapshotEnabledInputIds == null ? null : [..SnapshotEnabledInputIds],
-                       };
+            var clone = new Child(symbolChild.Id, parent._id, (EditorSymbolPackage)parent.Symbol.SymbolPackage)
+                            {
+                                PosOnCanvas = PosOnCanvas,
+                                Size = Size,
+                                Style = Style,
+                                Comment = Comment,
+                                SectionId = SectionId,
+                                SnapshotGroupIndex = SnapshotGroupIndex,
+                                SnapshotEnabledInputIds = SnapshotEnabledInputIds == null ? null : [..SnapshotEnabledInputIds],
+                            };
+
+            foreach (var overridePair in ConnectionStyleOverrides)
+            {
+                clone.ConnectionStyleOverrides[overridePair.Key] = overridePair.Value;
+            }
+
+            foreach (var waypoints in ConnectionWaypoints)
+            {
+                clone.ConnectionWaypoints[waypoints.Key] = [..waypoints.Value];
+            }
+
+            return clone;
         }
 
         public override string ToString()
