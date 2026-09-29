@@ -49,6 +49,17 @@ the same handle.
 - Dragging moves the handle and the cable follows it, staying made of straight
   segments between the handles.
 - The right-click removes the handle and the cable returns to its automatic route.
+- **No context menu opens** over the graph when the right-click removed a handle.
+
+## Step: The context menu still works away from handles
+
+**Action:**
+Wait a moment, then right-click on empty canvas, and separately on an operator.
+
+**Expected:**
+- The canvas context menu opens as it did before this feature existed.
+- Right-clicking an operator still shows that operator's menu.
+- Only a right-click that lands on a bend point handle is diverted to removing it.
 
 ## Step: Dragging a handle does not need Alt
 

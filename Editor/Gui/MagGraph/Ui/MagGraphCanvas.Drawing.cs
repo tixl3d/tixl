@@ -309,8 +309,11 @@ internal sealed partial class MagGraphView
             }
 
             // A right-click on a bend point removes it, so the context menu must not also open there.
-            if (FrameStats.Current.OpenedPopUpName == string.Empty && !_context.ConnectionHovering.IsCursorOnBendPoint)
+            if (FrameStats.Current.OpenedPopUpName == string.Empty
+                && !_context.ConnectionHovering.IsContextMenuSuppressedForBendPoint)
+            {
                 CustomComponents.DrawContextMenuForScrollCanvas(() => GraphContextMenu.DrawContextMenuContent(_context, _projectView), ref _contextMenuIsOpen);
+            }
 
             SmoothItemPositions();
 

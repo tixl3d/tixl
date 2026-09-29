@@ -44,7 +44,6 @@ internal sealed class ConnectionHovering
         if (_bendPointDrag is { IsDragging: true })
         {
             UpdateBendPointDrag(context);
-            IsCursorOnBendPoint = true;
             return;
         }
 
@@ -54,9 +53,6 @@ internal sealed class ConnectionHovering
 
         if (!context.View.IsHovered)
             _lastConnectionHovers.Clear();
-
-        // Recompute before the hover list can be consumed by the bend-point path below.
-        UpdateCursorOnBendPoint(context);
 
         // Bend points are always grabbable; Alt is only needed to ADD one to the cable. So the
         // bend-point path runs either when Alt is held or when the cursor is actually on a handle.
@@ -241,30 +237,20 @@ internal sealed class ConnectionHovering
     }
 
     /// <summary>
-    /// True when the cursor sat on a bend point during the last processed frame. The canvas context
-    /// menu opens before hover state for the current frame is available, so this is the only reliable
-    /// way for it to stand down and let a right-click remove the bend point instead.
+    /// True while the canvas context menu must stay closed because the bend-point interaction is using
+    /// this gesture. The menu opens on right-click <em>release</em> - a frame or more after the press
+    /// that grabbed or removed a handle - so this is a short window rather than a live cursor test.
     /// </summary>
-    internal bool IsCursorOnBendPoint { get; private set; }
+    internal bool IsContextMenuSuppressedForBendPoint => ImGui.GetTime() < _suppressContextMenuUntil;
 
     /// <summary>
-    /// Refreshes <see cref="IsCursorOnBendPoint"/> from the hover points just processed.
+    /// Holds the context menu closed briefly whenever a bend point is grabbed or removed. Without it,
+    /// the right-click that removed a handle would also open the canvas menu over the cable.
     /// </summary>
-    private void UpdateCursorOnBendPoint(GraphUiContext context)
+    private void SuppressContextMenuBriefly()
     {
-        var mousePos = ImGui.GetMousePos();
-        foreach (var hover in _lastConnectionHovers)
-        {
-            if (ConnectionBendPoints.FindBendPointAt(context.View, hover.Connection, mousePos) < 0)
-                continue;
-
-            IsCursorOnBendPoint = true;
-            return;
-        }
-
-        IsCursorOnBendPoint = false;
+        _suppressContextMenuUntil = ImGui.GetTime() + ContextMenuSuppressionSec;
     }
-
     /// <summary>
     /// Decides whether the hovered cable should be handled by the bend-point interaction, and while
     /// <c>Alt</c> is held records where a new bend point would land so it can be shown to the user.
@@ -330,6 +316,7 @@ internal sealed class ConnectionHovering
 
         if (bendPointIndex >= 0 && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
         {
+            SuppressContextMenuBriefly();
             StartBendPointDrag(context, connection, bendPointIndex);
             _lastConnectionHovers.Clear();
             return;
@@ -337,6 +324,9 @@ internal sealed class ConnectionHovering
 
         if (bendPointIndex >= 0 && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
         {
+            // The menu opens on right-click RELEASE, a frame or more after this press, so the
+            // suppression has to outlive the press that removed the handle.
+            SuppressContextMenuBriefly();
             RemoveBendPointAtCursor(context, connection, bendPointIndex);
             _lastConnectionHovers.Clear();
             return;
@@ -578,6 +568,11 @@ internal sealed class ConnectionHovering
     private BendPointDrag? _bendPointDrag;
 
     private bool _hasCandidateBendPoint;
+
+    /// <summary>How long the canvas context menu stays closed after a bend-point gesture.</summary>
+    private const double ContextMenuSuppressionSec = 0.25;
+
+    private double _suppressContextMenuUntil;
 
     /// <summary>
     /// True while a bend point is being dragged. Other canvas interactions - the selection fence in
