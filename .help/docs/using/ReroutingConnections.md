@@ -37,7 +37,9 @@ Once a bend point exists it is a visible handle, so it needs no modifier:
 - **Right-click a handle** to remove it.
 
 Dragging a handle never opens the operator search and never starts a selection
-fence, so the gesture only ever affects the cable.
+fence, so the gesture only ever affects the cable. A right-click that removes a
+handle also does **not** open the canvas context menu — the menu stays quiet for a
+moment afterwards, then behaves as usual.
 
 ## Cables you cannot reroute
 
