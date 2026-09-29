@@ -294,15 +294,17 @@ public class GraphicsCompatTests
         var shaderView = new ShaderResourceView(device, texture);
         var targetView = new RenderTargetView(device, texture);
 
-        // What an operator does when its resolution or format changed.
+        // What an operator does when its resolution or format changed. The wrapper reports disposed at once —
+        // caches evict on that — while the image itself lives until the last view lets go.
         texture.Dispose();
-        Assert.False(texture.IsDisposed);
+        Assert.True(texture.IsDisposed);
+        Assert.False(texture.Native!.IsDisposed);
 
         shaderView.Dispose();
-        Assert.False(texture.IsDisposed);
+        Assert.False(texture.Native!.IsDisposed);
 
         targetView.Dispose();
-        Assert.True(texture.IsDisposed);
+        Assert.True(texture.Native!.IsDisposed);
     }
 
     /// <summary>
@@ -332,10 +334,10 @@ public class GraphicsCompatTests
         firstView.Dispose();
         texture.Dispose();
         texture.Dispose();
-        Assert.False(texture.IsDisposed);
+        Assert.False(texture.Native!.IsDisposed);
 
         secondView.Dispose();
-        Assert.True(texture.IsDisposed);
+        Assert.True(texture.Native!.IsDisposed);
     }
 
     /// <summary>

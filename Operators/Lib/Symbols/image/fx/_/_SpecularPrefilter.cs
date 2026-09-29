@@ -118,15 +118,22 @@ internal sealed class _SpecularPrefilter : Instance<_SpecularPrefilter>
                                   ArraySize = 6
                               };
 
-        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _prefilteredCubeMap);
-        try
+        // Kept across updates: with live update this runs every frame, and building the cube map means a new
+        // image with all its mips and faces each time — which costs far more than the filtering itself.
+        if (_prefilteredCubeMap == null || _prefilteredCubeMap.IsDisposed || !MatchesDescription(_prefilteredCubeMap, cubeMapDesc))
         {
-            _prefilteredCubeMap = Texture2D.CreateTexture2D(cubeMapDesc);
-        }
-        catch (Exception e)
-        {
-            Log.Debug($"can't create CubeMap target {e.Message}", this);
-            return;
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _prefilteredCubeMap);
+            DisposeMipTargets();
+
+            try
+            {
+                _prefilteredCubeMap = Texture2D.CreateTexture2D(cubeMapDesc);
+            }
+            catch (Exception e)
+            {
+                Log.Debug($"can't create CubeMap target {e.Message}", this);
+                return;
+            }
         }
 
         var rastDesc = new RasterizerStateDescription
@@ -135,7 +142,7 @@ internal sealed class _SpecularPrefilter : Instance<_SpecularPrefilter>
                                CullMode = CullMode.None,
                                IsDepthClipEnabled = false
                            };
-        _rasterizerState = new RasterizerState(device, rastDesc);
+        _rasterizerState ??= new RasterizerState(device, rastDesc);
 
         // Input Assembler
         //var previousTopology = device.ImmediateContext.InputAssembler.PrimitiveTopology;
@@ -181,10 +188,20 @@ internal sealed class _SpecularPrefilter : Instance<_SpecularPrefilter>
             device.ImmediateContext.Rasterizer.SetViewports([viewport]);
                 
                 
-            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _cubeMapRtv);
-            rtvDesc.Texture2DArray.MipSlice = mipSlice;
-            _cubeMapRtv = new RenderTargetView(device, _prefilteredCubeMap, rtvDesc);
-            device.ImmediateContext.OutputMerger.SetTargets(_cubeMapRtv, null);
+            // One view per mip, kept with the cube map they point into.
+            if (_mipTargets.Length != numMipLevels)
+            {
+                DisposeMipTargets();
+                _mipTargets = new RenderTargetView[numMipLevels];
+            }
+
+            if (_mipTargets[mipSlice] == null)
+            {
+                rtvDesc.Texture2DArray.MipSlice = mipSlice;
+                _mipTargets[mipSlice] = new RenderTargetView(device, _prefilteredCubeMap, rtvDesc);
+            }
+
+            device.ImmediateContext.OutputMerger.SetTargets(_mipTargets[mipSlice], null);
 
             var roughness = (float)mipSlice / (_prefilteredCubeMap.Description.MipLevels - 1);
                 
@@ -227,7 +244,6 @@ internal sealed class _SpecularPrefilter : Instance<_SpecularPrefilter>
         }
 
         FilteredCubeMap.Value = _prefilteredCubeMap;
-        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _cubeMapRtv);
 
         //device.ImmediateContext.InputAssembler.PrimitiveTopology = previousTopology;
         Restore();
@@ -310,7 +326,7 @@ internal sealed class _SpecularPrefilter : Instance<_SpecularPrefilter>
     protected override void Dispose(bool disposing)
     {
         T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _prefilteredCubeMap);
-        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _cubeMapRtv);
+        DisposeMipTargets();
         T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _rasterizerState);
         base.Dispose(disposing);
     }
@@ -323,7 +339,26 @@ internal sealed class _SpecularPrefilter : Instance<_SpecularPrefilter>
     // private int _prevSampleMask;
         
         
-    private RenderTargetView? _cubeMapRtv;
+    private RenderTargetView?[] _mipTargets = [];
+
+    private static bool MatchesDescription(Texture2D texture, in Texture2DDescription description)
+    {
+        var current = texture.Description;
+        return current.Width == description.Width
+               && current.Height == description.Height
+               && current.Format == description.Format
+               && current.MipLevels == description.MipLevels;
+    }
+
+    private void DisposeMipTargets()
+    {
+        for (var i = 0; i < _mipTargets.Length; i++)
+        {
+            _mipTargets[i]?.Dispose();
+            _mipTargets[i] = null;
+        }
+    }
+
     private RasterizerState? _rasterizerState;
 
     //private Buffer[] _constantBuffers = new Buffer[0];

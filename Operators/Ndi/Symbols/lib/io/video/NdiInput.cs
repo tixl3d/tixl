@@ -126,17 +126,36 @@ public sealed class NdiInput : Instance<NdiInput>, IStatusProvider, ICustomDropd
 
     public NdiInput()
     {
+        Texture.UpdateAction += Update;
+
+        // The finder searches the network at once, through the native library. Creating the operator must not
+        // fail where that library is missing, so it stays null there and every use checks.
+        if (T3.Core.Utils.WindowsOnlyFeature.IsAvailable("NDI input"))
+            _ndiInputFinder = ConnectToNdi();
+    }
+
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private NdiSourceFinder ConnectToNdi()
+    {
         InitializeNdi();
 
         // Note that this example does see local sources (showLocalSources: true)
         // This is for ease of testing, but normally is not needed in released products.
-        _ndiInputFinder = new NdiSourceFinder(showLocalSources: true);
-        Texture.UpdateAction += Update;
+        return new NdiSourceFinder(showLocalSources: true);
     }
 
     private double _lastUpdateRunTime;
 
     private void Update(EvaluationContext context)
+    {
+        if (!T3.Core.Utils.WindowsOnlyFeature.IsAvailable("NDI input"))
+            return;
+
+        ReceiveWithNdi(context);
+    }
+
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private void ReceiveWithNdi(EvaluationContext context)
     {
         var reconnectTriggered = MathUtils.WasTriggered(TriggerReconnect.GetValue(context), ref _reconnect);
         if (reconnectTriggered)
@@ -217,7 +236,7 @@ public sealed class NdiInput : Instance<NdiInput>, IStatusProvider, ICustomDropd
         if (string.IsNullOrEmpty(sourceName))
             return;
 
-        var sourceExists = _ndiInputFinder.HasSource(sourceName);
+        var sourceExists = _ndiInputFinder != null && _ndiInputFinder.HasSource(sourceName);
         if (!sourceExists)
         {
             if (sourceName == "0")
@@ -545,7 +564,8 @@ public sealed class NdiInput : Instance<NdiInput>, IStatusProvider, ICustomDropd
 
         try
         {
-            Task.Run(() => _ndiInputFinder.Dispose()).Wait(TimeSpan.FromSeconds(2));
+            if (_ndiInputFinder != null)
+                Task.Run(() => _ndiInputFinder.Dispose()).Wait(TimeSpan.FromSeconds(2));
         }
         catch (Exception ex)
         {
@@ -580,7 +600,7 @@ public sealed class NdiInput : Instance<NdiInput>, IStatusProvider, ICustomDropd
     #endregion
 
     private static bool _initialized;
-    private readonly NdiSourceFinder _ndiInputFinder;
+    private readonly NdiSourceFinder? _ndiInputFinder;
 
     // A pointer to our unmanaged NDI receiver instance
     private IntPtr _receiveInstancePtr = IntPtr.Zero;
@@ -643,7 +663,7 @@ public sealed class NdiInput : Instance<NdiInput>, IStatusProvider, ICustomDropd
             return PlaceholderText;
 
         // Check if the current value actually exists in available sources
-        var sourceExists = _ndiInputFinder.HasSource(currentValue);
+        var sourceExists = _ndiInputFinder != null && _ndiInputFinder.HasSource(currentValue);
         if (!sourceExists)
             return PlaceholderText;
 

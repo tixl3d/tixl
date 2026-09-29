@@ -17,6 +17,15 @@ public sealed class NdiOutput : Instance<NdiOutput>, IStatusProvider
 
     private void Update(EvaluationContext context)
     {
+        if (!T3.Core.Utils.WindowsOnlyFeature.IsAvailable("NDI output"))
+            return;
+
+        SendWithNdi(context);
+    }
+
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private void SendWithNdi(EvaluationContext context)
+    {
         var texture = Texture.GetValue(context);
         var senderName = SenderName.GetValue(context) ?? "unknown";
 

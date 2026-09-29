@@ -18,6 +18,15 @@ public sealed class ScreenCapture : Instance<ScreenCapture>
 
     private void Update(EvaluationContext context)
     {
+        if (!T3.Core.Utils.WindowsOnlyFeature.IsAvailable("Screen capture"))
+            return;
+
+        CaptureScreen(context);
+    }
+
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private void CaptureScreen(EvaluationContext context)
+    {
         var device = ResourceManager.Device;
         var screenIndex = ScreenIndex.GetValue(context);
         var timeOut = TimeOut.GetValue(context);

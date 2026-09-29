@@ -44,7 +44,12 @@ public abstract class Resource : DeviceChild
         }
     }
 
-    public bool IsDisposed => Native == null || Native.IsDisposed;
+    /// <summary>
+    /// True once this wrapper was disposed, as it was under SharpDX — even while views still hold the native
+    /// object alive. Callers recreate a resource on this, and caches evict on it, so it has to follow the
+    /// owner's Dispose rather than the native lifetime.
+    /// </summary>
+    public bool IsDisposed => _disposeCalled != 0 || Native == null || Native.IsDisposed;
 
     /// <summary>The backend object. Null only if creation failed, which on Vulkan can happen under memory pressure.</summary>
     public abstract GpuResource? Native { get; }

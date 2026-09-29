@@ -973,6 +973,7 @@ internal static class DebugServer
 
         result["renderStats"] = renderStats;
         result["gpuMemory"] = TryGetGpuMemoryInfo();
+        result["liveGpuResources"] = Program.Device?.Backend.LiveResourceCount ?? 0;
         context.SendOk(result);
     }
 

@@ -1,6 +1,5 @@
 #nullable enable
 using T3.Graphics.Compat;
-using SharpDX.WIC;
 using SharpGLTF.Animations;
 using SharpGLTF.Schema2;
 using T3.Core.Rendering;
@@ -873,22 +872,15 @@ public class LoadGltfScene : Instance<LoadGltfScene>
         {
             using var memStream = new MemoryStream(imageContent.ToArray());
             memStream.Position = 0;
-            using var imagingFactory = new ImagingFactory();
 
-            using var bitmapDecoder = new BitmapDecoder(imagingFactory, memStream, DecodeOptions.CacheOnDemand);
-            using var formatConverter = new FormatConverter(imagingFactory);
-            using var bitmapFrameDecode = bitmapDecoder.GetFrame(0);
-            formatConverter.Initialize(bitmapFrameDecode, SharpDX.WIC.PixelFormat.Format32bppRGBA, BitmapDitherType.None, null, 0.0,
-                                       BitmapPaletteType.Custom);
+            if (!Texture2D.TryCreateFromStream(memStream, out texture, out var failureReason))
+            {
+                Log.Error($"Failed to create texture from channel {gltfMaterial.Name}.{channel.Key} : {failureReason}");
+                return false;
+            }
 
-            texture = Texture2D.CreateFromBitmap(ResourceManager.Device, formatConverter);
             texture.Name = channel.Key;
-
             Log.Debug($" Created {gltfMaterial.Name}.{channel.Key} with {texture.Description.Width}×{texture.Description.Height}");
-            // bitmapFrameDecode.Dispose();
-            // bitmapDecoder.Dispose();
-            // formatConverter.Dispose();
-            // imagingFactory.Dispose();
 
             srv = new ShaderResourceView(ResourceManager.Device, texture);
             ResourceManager.Device.ImmediateContext.GenerateMips(srv);

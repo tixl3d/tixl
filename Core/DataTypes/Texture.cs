@@ -109,7 +109,7 @@ public sealed class Texture2D(T3.Graphics.Compat.Texture2D texture) : Texture<T3
         }
         else
         {
-            if (!TryCreate(stream, out texture, out failureReason))
+            if (!TryCreateFromStream(stream, out texture, out failureReason))
             {
                 failureReason = "Failed to create texture";
                 return false;
@@ -120,7 +120,11 @@ public sealed class Texture2D(T3.Graphics.Compat.Texture2D texture) : Texture<T3
         return true;
     }
 
-    private static bool TryCreate(Stream stream, [NotNullWhen(true)] out Texture2D? texture, [NotNullWhen(false)] out string? failureReason)
+    /// <summary>
+    /// Decodes an image of any format stb reads — png, jpg, bmp, tga, psd, gif — into a texture. Also used for
+    /// the images embedded in a glTF file, which arrive as bytes rather than as a file.
+    /// </summary>
+    public static bool TryCreateFromStream(Stream stream, [NotNullWhen(true)] out Texture2D? texture, [NotNullWhen(false)] out string? failureReason)
     {
         try
         {

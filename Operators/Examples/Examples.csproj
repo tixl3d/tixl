@@ -23,6 +23,7 @@
     <RunAnalyzers Condition="'$(Configuration)' == 'Debug'">false</RunAnalyzers>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="StbImageWriteSharp" Version="1.16.7" />
     <Using Include="System" />
     <Using Include="System.Numerics" />
     <Using Include="System.Linq" />

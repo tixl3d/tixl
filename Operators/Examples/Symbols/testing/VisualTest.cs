@@ -1,7 +1,5 @@
 using System.Text.RegularExpressions;
 using T3.Graphics.Compat;
-using SharpDX.IO;
-using SharpDX.WIC;
 using T3.Core.Animation;
 using T3.Core.Settings;
 using T3.Core.Utils;
@@ -308,51 +306,43 @@ internal sealed class VisualTest : Instance<VisualTest>
             return false;
         }
 
-        var imagingFactory = new ImagingFactory();
+        try
+        {
+            using var file = File.OpenRead(filePath);
+            var decoded = StbImageSharp.ImageResult.FromStream(file, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
 
-        // Decode the image
-        var decoder = new BitmapDecoder(imagingFactory, filePath, DecodeOptions.CacheOnDemand);
-        var frame = decoder.GetFrame(0);
+            var texDesc = new Texture2DDescription
+                              {
+                                  Width = decoded.Width,
+                                  Height = decoded.Height,
+                                  ArraySize = 1,
+                                  BindFlags = BindFlags.ShaderResource,
+                                  Usage = ResourceUsage.Immutable,
+                                  CpuAccessFlags = CpuAccessFlags.None,
+                                  Format = Format.R8G8B8A8_UNorm,
+                                  MipLevels = 1,
+                                  OptionFlags = ResourceOptionFlags.None,
+                                  SampleDescription = new SampleDescription(1, 0)
+                              };
 
-        // Convert to 32bpp RGBA
-        var converter = new FormatConverter(imagingFactory);
-        converter.Initialize(frame, PixelFormat.Format32bppRGBA);
+            var pinned = System.Runtime.InteropServices.GCHandle.Alloc(decoded.Data, System.Runtime.InteropServices.GCHandleType.Pinned);
+            try
+            {
+                var dataBox = new DataBox(pinned.AddrOfPinnedObject(), decoded.Width * 4, 0);
+                image = new T3.Graphics.Compat.Texture2D(device, texDesc, [dataBox]);
+            }
+            finally
+            {
+                pinned.Free();
+            }
+        }
+        catch (Exception e)
+        {
+            Log.Warning($"Failed to load reference image {filePath}: {e.Message}");
+            image = null;
+            return false;
+        }
 
-        int width = converter.Size.Width;
-        int height = converter.Size.Height;
-
-        // Copy pixels into a buffer
-        var stride = width * 4;
-        var buffer = new SharpDX.DataStream(height * stride, true, true);
-        converter.CopyPixels(stride, buffer);
-
-        // Create texture description
-        var texDesc = new Texture2DDescription
-                          {
-                              Width = width,
-                              Height = height,
-                              ArraySize = 1,
-                              BindFlags = BindFlags.ShaderResource,
-                              Usage = ResourceUsage.Immutable,
-                              CpuAccessFlags = CpuAccessFlags.None,
-                              Format = Format.R8G8B8A8_UNorm,
-                              MipLevels = 1,
-                              OptionFlags = ResourceOptionFlags.None,
-                              SampleDescription = new SampleDescription(1, 0)
-                          };
-
-        // Define initial data
-        var dataBox = new DataBox(buffer.DataPointer, stride, 0);
-        var dataBoxes = new[] { dataBox };
-        var texture = new T3.Graphics.Compat.Texture2D(device, texDesc, dataBoxes);
-
-        // Cleanup
-        buffer.Dispose();
-        converter.Dispose();
-        frame.Dispose();
-        decoder.Dispose();
-        imagingFactory.Dispose();
-        image = texture;
         return true;
     }
 
@@ -478,63 +468,28 @@ internal sealed class VisualTest : Instance<VisualTest>
 
         var width = requestCpuAccessTexture.Description.Width;
         var height = requestCpuAccessTexture.Description.Height;
-        var factory = new ImagingFactory();
 
-        WICStream stream;
-        try
-        {
-            stream = new WICStream(factory, requestFilepath, NativeFileAccess.Write);
-        }
-        catch (Exception e)
-        {
-            Log.Warning("Failed to export image: " + e.Message);
-            return;
-        }
-
-        BitmapEncoder encoder = new PngBitmapEncoder(factory);
-        encoder.Initialize(stream);
-
-        // Create a Frame encoder
-        var bitmapFrameEncode = new BitmapFrameEncode(encoder);
-        bitmapFrameEncode.Initialize();
-        bitmapFrameEncode.SetSize(width, height);
-        var formatId = PixelFormat.Format32bppRGBA;
-        bitmapFrameEncode.SetPixelFormat(ref formatId);
-
-        var rowStride = PixelFormat.GetStride(formatId, width);
-        var outBufferSize = height * rowStride;
-        var outDataStream = new SharpDX.DataStream(outBufferSize, true, true);
+        // The mapped rows are padded, so they are copied out one at a time.
+        var pixels = new byte[width * height * 4];
+        var row = new byte[width * 4];
 
         try
         {
-            // Note: dataBox.RowPitch and outputStream.RowPitch can diverge if width is not divisible by 16.
-            for (var loopY = 0; loopY < height; loopY++)
+            for (var y = 0; y < height; y++)
             {
-                imageStream.Position = (long)(loopY) * dataBox.RowPitch;
-                outDataStream.WriteRange(imageStream.ReadRange<byte>(rowStride));
+                System.Runtime.InteropServices.Marshal.Copy(dataBox.DataPointer + y * dataBox.RowPitch, row, 0, row.Length);
+                row.CopyTo(pixels, y * row.Length);
             }
 
-            // Copy the BGRA pixels from the buffer to the Wic Bitmap Frame encoder
-            bitmapFrameEncode.WritePixels(height, new SharpDX.DataRectangle(outDataStream.DataPointer, rowStride));
-
-            // Commit changes
-            bitmapFrameEncode.Commit();
-            encoder.Commit();
+            using var file = File.Create(requestFilepath);
+            new StbImageWriteSharp.ImageWriter().WritePng(pixels, width, height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, file);
         }
         catch (Exception e)
         {
-            Log.Error($"Screenshot internal image copy failed : {e.Message}");
-        }
-        finally
-        {
-            imageStream.Dispose();
-            outDataStream.Dispose();
-            bitmapFrameEncode.Dispose();
-            encoder.Dispose();
-            stream.Dispose();
+            Log.Error($"Writing the test image failed: {e.Message}");
         }
     }
-    
+
     private States _state = States.Waiting;
     private int _testIndex;
 

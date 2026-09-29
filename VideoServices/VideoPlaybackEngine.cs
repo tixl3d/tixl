@@ -38,6 +38,11 @@ public sealed class VideoPlaybackEngine : IVideoPlaybackEngine
     public VideoFrameResult RequestFrame(Guid streamId, string absolutePath, double requestedSeconds, bool loop,
                                          bool renderingToFile, VideoPlaybackOptimization optimization)
     {
+        // Every decode path goes through here, and a decoder built without its native libraries takes the
+        // process down rather than failing.
+        if (!FfmpegLibrary.EnsureInitialized())
+            return new VideoFrameResult(false, null, 0, false, false, FfmpegLibrary.StatusError);
+
         var now = Environment.TickCount64;
         var stream = GetOrCreateStream(streamId, now);
         stream.LastRequestMs = now;
@@ -52,6 +57,9 @@ public sealed class VideoPlaybackEngine : IVideoPlaybackEngine
 
     public int RequestAudio(Guid streamId, string absolutePath, double sourceSeconds, bool loop, bool renderingToFile)
     {
+        if (!FfmpegLibrary.EnsureInitialized())
+            return 0;
+
         var stream = GetOrCreateStream(streamId, Environment.TickCount64);
 
         // Deliberately not ResolveEffectivePath: proxies are video-only, so audio always reads the source.

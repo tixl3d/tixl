@@ -814,6 +814,17 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         return resource;
     }
 
+    public int LiveResourceCount
+    {
+        get
+        {
+            lock (_liveResources)
+            {
+                return _liveResources.Count;
+            }
+        }
+    }
+
     /// <summary>Called by a resource as it is released.</summary>
     internal void Untrack(GpuResource resource)
     {

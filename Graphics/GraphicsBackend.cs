@@ -11,6 +11,13 @@ public interface IGraphicsBackend : IDisposable
     string AdapterName { get; }
 
     /// <summary>
+    /// How many resources the backend is holding. A count that climbs while the graph does the same work every
+    /// frame is a leak, which is otherwise only visible once the process exits. Zero where a backend does not
+    /// track them.
+    /// </summary>
+    int LiveResourceCount => 0;
+
+    /// <summary>
     /// The native device, for the libraries TiXL hands it to: FFmpeg's hardware decoder, Spout, NDI. Zero on
     /// a backend that has no such handle, and every one of those features is Windows-only anyway.
     /// </summary>
