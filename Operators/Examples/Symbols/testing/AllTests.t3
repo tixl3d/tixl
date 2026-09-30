@@ -6,6 +6,7 @@
     {
       "Id": "032369ea-6dfd-4f8c-ad77-32a37e01c6de"/*ExecuteTests*/,
       "SymbolId": "83cb923e-a387-4be2-b391-4111c7bd90fe",
+      "SymbolName": "Examples.testing.ExecuteTests",
       "InputValues": [
         {
           "Id": "13d66a6d-75e1-4ab0-805d-a2234b3334a4"/*OnlyShowFails*/,
@@ -28,12 +29,14 @@
     {
       "Id": "0e675013-1925-4741-a9e0-c0d055641e03"/*IoTests*/,
       "SymbolId": "202467cd-e898-4869-b08c-804ca5db5b45",
+      "SymbolName": "Examples.testing.IoTests",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "10faad6c-183d-4705-bbf2-fda99f5c99e9"/*Test all*/,
       "SymbolId": "83cb923e-a387-4be2-b391-4111c7bd90fe",
+      "SymbolName": "Examples.testing.ExecuteTests",
       "Name": "Test all",
       "InputValues": [
         {
@@ -66,12 +69,14 @@
     {
       "Id": "1e456b87-7d8c-4f8b-ab29-fdecb8defc3c"/*ExecuteTests*/,
       "SymbolId": "83cb923e-a387-4be2-b391-4111c7bd90fe",
+      "SymbolName": "Examples.testing.ExecuteTests",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "33977f8e-023b-4b37-8b93-41fc742c956e"/*ExecuteTests*/,
       "SymbolId": "83cb923e-a387-4be2-b391-4111c7bd90fe",
+      "SymbolName": "Examples.testing.ExecuteTests",
       "InputValues": [
         {
           "Id": "13d66a6d-75e1-4ab0-805d-a2234b3334a4"/*OnlyShowFails*/,
@@ -94,12 +99,14 @@
     {
       "Id": "36284a42-864f-4028-97f5-1133530a9c97"/*MathTests*/,
       "SymbolId": "69de6e29-4eeb-4672-934a-05ca982ed5db",
+      "SymbolName": "Examples.testing.MathTests",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "59c24bca-ab64-4edf-9bc9-a122d0649914"/*ExecuteTests*/,
       "SymbolId": "83cb923e-a387-4be2-b391-4111c7bd90fe",
+      "SymbolName": "Examples.testing.ExecuteTests",
       "InputValues": [
         {
           "Id": "31937a13-1e53-45dd-8e6f-91ca5f3aaa19"/*TriggerTest*/,
@@ -117,12 +124,14 @@
     {
       "Id": "7a825daf-6620-4b08-b3d8-4d1c1dd28666"/*ParticleTests*/,
       "SymbolId": "340f164b-c3c3-4a36-9ca6-19312fed4438",
+      "SymbolName": "Examples.testing.ParticleTests",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "804c58c6-544d-41b6-8e5a-00b5574ee947"/*ExecuteTests*/,
       "SymbolId": "83cb923e-a387-4be2-b391-4111c7bd90fe",
+      "SymbolName": "Examples.testing.ExecuteTests",
       "InputValues": [
         {
           "Id": "31937a13-1e53-45dd-8e6f-91ca5f3aaa19"/*TriggerTest*/,
@@ -140,24 +149,28 @@
     {
       "Id": "85e65c1c-c4ac-46ac-a321-840638f83b02"/*PbrTests*/,
       "SymbolId": "e7cecfc5-e6e5-4fb7-aadf-0f7b7dfef154",
+      "SymbolName": "Examples.testing.PbrTests",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "8aad18ca-aec8-41c2-835c-2d4da1c5025e"/*DemoProjectTests*/,
       "SymbolId": "cf9a082f-490c-4b59-8a9a-eee161420d06",
+      "SymbolName": "Examples.testing.DemoProjectTests",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "d6bc9851-841a-44c0-961e-d4991b799556"/*ShaderTests*/,
       "SymbolId": "6647b9fd-a99f-45c8-864f-a2f0a7b61857",
+      "SymbolName": "Examples.testing.ShaderTests",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "dff1caad-9921-4d27-9916-5f15ed93151a"/*ExecuteTests*/,
       "SymbolId": "83cb923e-a387-4be2-b391-4111c7bd90fe",
+      "SymbolName": "Examples.testing.ExecuteTests",
       "InputValues": [
         {
           "Id": "13d66a6d-75e1-4ab0-805d-a2234b3334a4"/*OnlyShowFails*/,
@@ -180,6 +193,7 @@
     {
       "Id": "ea931cc3-c474-403e-8e64-ea0c584f16ac"/*ExecuteTests*/,
       "SymbolId": "83cb923e-a387-4be2-b391-4111c7bd90fe",
+      "SymbolName": "Examples.testing.ExecuteTests",
       "InputValues": [
         {
           "Id": "31937a13-1e53-45dd-8e6f-91ca5f3aaa19"/*TriggerTest*/,
@@ -197,6 +211,7 @@
     {
       "Id": "ec6f7a65-02e9-4231-a6ce-20a2c908c7c8"/*PointTests*/,
       "SymbolId": "9eab73c1-bcca-4a10-8af8-7aa13649a9b6",
+      "SymbolName": "Examples.testing.PointTests",
       "InputValues": [],
       "Outputs": []
     }
