@@ -375,7 +375,12 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
 
     public void DrawIndirect(GpuBuffer arguments, int offset)
     {
-        if (arguments is not VulkanBuffer buffer || !PrepareDraw())
+        if (arguments is not VulkanBuffer buffer)
+            return;
+
+        BarrierIndirectArguments(buffer);
+
+        if (!PrepareDraw())
             return;
 
         backend.Api.vkCmdDrawIndirect(_commandBuffer, buffer.Buffer, (ulong)offset, 1, 0);
@@ -391,10 +396,32 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
 
     public void DispatchIndirect(GpuBuffer arguments, int offset)
     {
-        if (arguments is not VulkanBuffer buffer || !PrepareDispatch())
+        if (arguments is not VulkanBuffer buffer)
+            return;
+
+        BarrierIndirectArguments(buffer);
+
+        if (!PrepareDispatch())
             return;
 
         backend.Api.vkCmdDispatchIndirect(_commandBuffer, buffer.Buffer, (ulong)offset);
+    }
+
+    /// <summary>
+    /// Waits for whatever produced the indirect arguments. They are usually written by a compute shader
+    /// earlier in the frame, and reading them is a stage of its own - the bound-resource barriers say nothing
+    /// about it, because the argument buffer is passed to the call rather than bound to the pipeline. Without
+    /// this the counts can be read while the dispatch that computes them is still writing.
+    /// </summary>
+    private void BarrierIndirectArguments(VulkanBuffer arguments)
+    {
+        if (!VulkanBarriers.NeedsBarrier(arguments, VkAccessFlags2.IndirectCommandRead))
+            return;
+
+        // Barriers are not allowed inside a render pass; attachments always load, so closing it loses nothing.
+        EndRenderingIfActive();
+        VulkanBarriers.BarrierBuffer(backend, _commandBuffer, arguments, VkPipelineStageFlags2.DrawIndirect,
+                                     VkAccessFlags2.IndirectCommandRead);
     }
 
     public void CopyTexture(GpuTexture source, GpuTexture destination)
@@ -550,8 +577,9 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
             return;
 
         EndRenderingIfActive();
+        // Both directions: every level but the first is written by a blit that reads the level above it.
         VulkanBarriers.TransitionImage(backend, _commandBuffer, texture, VkImageLayout.General,
-                                       VkPipelineStageFlags2.Blit, VkAccessFlags2.TransferWrite);
+                                       VkPipelineStageFlags2.Blit, VkAccessFlags2.TransferRead | VkAccessFlags2.TransferWrite);
 
         var width = Math.Max(1, texture.Description.Width);
         var height = Math.Max(1, texture.Description.Height);
@@ -750,8 +778,11 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
         for (var i = 0; i < _colorCount; i++)
         {
             var view = _colorTargets[i];
+            // Read as well as write: the attachment loads rather than clears (below), so the pass reads what is
+            // already there, and a barrier that only grants write access leaves that read unsynchronized.
             VulkanBarriers.TransitionImage(backend, _commandBuffer, view.Texture, VkImageLayout.ColorAttachmentOptimal,
-                                           VkPipelineStageFlags2.ColorAttachmentOutput, VkAccessFlags2.ColorAttachmentWrite);
+                                           VkPipelineStageFlags2.ColorAttachmentOutput,
+                                           VkAccessFlags2.ColorAttachmentRead | VkAccessFlags2.ColorAttachmentWrite);
 
             attachments[i] = new VkRenderingAttachmentInfo
                                  {
