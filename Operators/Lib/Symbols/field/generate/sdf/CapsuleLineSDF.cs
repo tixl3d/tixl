@@ -41,7 +41,10 @@ internal sealed class CapsuleLineSDF : Instance<CapsuleLineSDF>
                                 } 
                                 """;
 
-        c.AppendCall($"f{c}.w = fCapsule(p{c} - {ShaderNode}Center, {ShaderNode}StartingPoint, {ShaderNode}EndPoint, {ShaderNode}Thickness);");
+        // .xyz, like every other SDF node: p is a float4 and fCapsule takes a float3. Subtracting the float3
+        // centre from it is a truncation that fxc performs silently and slang rejects outright, which fails the
+        // whole generated shader - and a field graph is only as compilable as the nodes that end up in it.
+        c.AppendCall($"f{c}.w = fCapsule(p{c}.xyz - {ShaderNode}Center, {ShaderNode}StartingPoint, {ShaderNode}EndPoint, {ShaderNode}Thickness);");
         c.AppendCall($"f{c}.xyz = p.w < 0.5 ?  p{c}.xyz : 1;"); // save local space
     }
 
