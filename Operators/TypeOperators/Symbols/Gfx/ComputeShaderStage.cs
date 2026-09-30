@@ -6,11 +6,12 @@ namespace Types.Gfx;
 public sealed class ComputeShaderStage : Instance<ComputeShaderStage>, IRenderStatsProvider
 {
     [Output(Guid = "{C382284F-7E37-4EB0-B284-BC735247F26B}")]
-    public readonly Slot<Command> Output = new();
+    public readonly Slot<Command> Output = new(new Command());
 
     public ComputeShaderStage()
     {
         Output.UpdateAction += Update;
+        Output.Value!.RestoreAction = Restore;
         if (!_statsRegistered)
         {
             RenderStatsCollector.RegisterProvider(this);
@@ -39,12 +40,13 @@ public sealed class ComputeShaderStage : Instance<ComputeShaderStage>, IRenderSt
         Uavs.GetValues(ref _uavs, context);
         int counter = UavBufferCounter.GetValue(context);
 
+        // Saved explicitly and popped in Restore, like the other shader stages. It has to happen before the
+        // early return below: Restore runs for every update, so a skipped push would pop the enclosing
+        // operator's snapshot instead and leave its render targets unbound.
+        device.ImmediateContext.PushState(StateGroups.ComputeShader | StateGroups.OutputMerger);
+
         if (_uavs.Length == 0 || _cs == null)
             return;
-        
-        // Saved explicitly, and popped by the enclosing operator. The readback this replaces allocated a
-        // fresh array of views every frame.
-        device.ImmediateContext.PushState(StateGroups.ComputeShader | StateGroups.OutputMerger);
         
         if (needAdditionalConstantBuffer && _constantBuffers.Length > 0)
         {
@@ -135,6 +137,11 @@ public sealed class ComputeShaderStage : Instance<ComputeShaderStage>, IRenderSt
         _statsDispatchCount += dispatchCount.X * dispatchCount.Y * dispatchCount.Z;
     }
     
+    private void Restore(EvaluationContext context)
+    {
+        ResourceManager.Device.ImmediateContext.PopState();
+    }
+
     private void GetAdditionalResources(EvaluationContext context)
     {
         if (!VariousResources.DirtyFlag.IsDirty)
