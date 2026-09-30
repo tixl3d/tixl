@@ -60,11 +60,6 @@ RWStructuredBuffer<Point> ResultPoints : register(u0);
 
 sampler texSampler : register(s0);
 
-float3 fmod(float3 x, float3 y)
-{
-    return (x - y * floor(x / y));
-}
-
 [numthreads(64, 1, 1)] void main(uint3 i : SV_DispatchThreadID)
 {
     uint index = i.x;

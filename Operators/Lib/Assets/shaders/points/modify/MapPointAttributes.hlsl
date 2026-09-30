@@ -27,6 +27,19 @@ Texture2D<float4> GradientImage : register(t2);
 RWStructuredBuffer<Point> ResultPoints : register(u0);
 sampler ClampedSampler : register(s0);
 
+// Wrapping, not truncating: a negative x comes back positive. HLSL's own fmod keeps x's sign, and the two
+// compilers disagree about which one a scalar call means — fxc promotes the scalar and picks this one, while
+// slang takes the built-in. Spelling out every width settles it for both.
+inline float fmod(float x, float y)
+{
+    return (x - y * floor(x / y));
+}
+
+inline float2 fmod(float2 x, float2 y)
+{
+    return (x - y * floor(x / y));
+}
+
 inline float3 fmod(float3 x, float3 y)
 {
     return (x - y * floor(x / y));
