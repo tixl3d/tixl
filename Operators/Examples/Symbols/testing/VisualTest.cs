@@ -290,6 +290,9 @@ internal sealed class VisualTest : Instance<VisualTest>
         return unchecked((int)hash ^ (int)(hash >> 32));
     }
 
+    /// <summary>The distance between two channels, each held in the lowest byte of its argument.</summary>
+    private static int Difference(uint a, uint b) => Math.Abs((int)(a & 0xff) - (int)(b & 0xff));
+
     private string GetCompositionName()
     {
         var compositionName = !string.IsNullOrEmpty(Parent?.Symbol.Name) 
@@ -398,24 +401,30 @@ internal sealed class VisualTest : Instance<VisualTest>
             referenceStream.Position = 0;
 
 
+            // Both pixels arrive as one packed integer each, and the two differ in channel order: the readback
+            // is BGRA, the reference was loaded from a PNG as RGBA. Comparing the packed values instead of the
+            // channels is what made every deviation land in the millions.
             double deviation = 0;
             for (int y = 0; y < currentBgraWithCpuAccess.Description.Height; ++y)
             {
                 for (int x = 0; x < currentBgraWithCpuAccess.Description.Width; ++x)
                 {
-                    var currentBgra = new Vector4(currentStream.Read<Int32>());
-                    var referenceRgba = new Vector4(referenceStream.Read<Int32>());
-                    deviation += Math.Abs(currentBgra.W - referenceRgba.W)
-                                 + Math.Abs(currentBgra.Z - referenceRgba.X)
-                                 + Math.Abs(currentBgra.Y - referenceRgba.Y)
-                                 + Math.Abs(currentBgra.X - referenceRgba.Z);
+                    var currentBgra = (uint)currentStream.Read<Int32>();
+                    var referenceRgba = (uint)referenceStream.Read<Int32>();
+
+                    deviation += Difference(currentBgra >> 16, referenceRgba) // red
+                                 + Difference(currentBgra >> 8, referenceRgba >> 8) // green
+                                 + Difference(currentBgra, referenceRgba >> 16) // blue
+                                 + Difference(currentBgra >> 24, referenceRgba >> 24); // alpha
                 }
 
                 currentStream.Position += currentDataBox.RowPitch - currentBgraWithCpuAccess.Description.Width * 4;
                 referenceStream.Position += refDataBox.RowPitch - currentBgraWithCpuAccess.Description.Width * 4;
             }
 
-            deviation /= currentBgraWithCpuAccess.Description.Width * currentBgraWithCpuAccess.Description.Height;
+            // Averaged over every channel of every pixel and scaled to 0...1, so a threshold reads as a
+            // fraction of full brightness.
+            deviation /= currentBgraWithCpuAccess.Description.Width * currentBgraWithCpuAccess.Description.Height * 4 * 255.0;
 
             immediateContext.UnmapSubresource(currentBgraWithCpuAccess, 0);
             T3.Graphics.Compat.GraphicsUtilities.Dispose(ref currentStream);
@@ -478,7 +487,16 @@ internal sealed class VisualTest : Instance<VisualTest>
             for (var y = 0; y < height; y++)
             {
                 System.Runtime.InteropServices.Marshal.Copy(dataBox.DataPointer + y * dataBox.RowPitch, row, 0, row.Length);
-                row.CopyTo(pixels, y * row.Length);
+
+                // The readback converts to BGRA, and a PNG wants RGB.
+                var target = y * row.Length;
+                for (var x = 0; x < row.Length; x += 4)
+                {
+                    pixels[target + x] = row[x + 2];
+                    pixels[target + x + 1] = row[x + 1];
+                    pixels[target + x + 2] = row[x];
+                    pixels[target + x + 3] = row[x + 3];
+                }
             }
 
             using var file = File.Create(requestFilepath);

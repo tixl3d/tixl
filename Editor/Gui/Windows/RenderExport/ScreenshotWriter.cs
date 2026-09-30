@@ -101,10 +101,11 @@ internal static class ScreenshotWriter
                 var target = y * width * bytesPerPixel;
                 for (var x = 0; x < width; x++)
                 {
+                    // The readback converts to BGRA, and a PNG wants RGB.
                     var source = x * 4;
-                    pixels[target++] = row[source];
-                    pixels[target++] = row[source + 1];
                     pixels[target++] = row[source + 2];
+                    pixels[target++] = row[source + 1];
+                    pixels[target++] = row[source];
                     if (isPng)
                         pixels[target++] = _forceOpaque ? (byte)255 : row[source + 3];
                 }
