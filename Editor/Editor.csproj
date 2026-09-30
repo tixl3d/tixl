@@ -91,8 +91,18 @@
     <!--This
     copies all files in the `dependencies` folder *directly* into the output directory-->
     <ItemGroup>
-        <Content Include="../Dependencies/**/*" Visible="false">
+        <Content Include="../Dependencies/**/*" Exclude="../Dependencies/linux-x64/**/*" Visible="false">
             <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+
+    <!-- BASS ships one native per platform under the same managed name, so the Linux shared objects live in
+         their own folder and are copied only there - the flat copy above would otherwise drop them into a
+         Windows build as dead weight. BASSWASAPI has no Linux build; audio input is gated on it at runtime. -->
+    <ItemGroup Condition="!$([MSBuild]::IsOSPlatform('Windows'))">
+        <Content Include="../Dependencies/linux-x64/*.so" Visible="false">
+            <Link>%(Filename)%(Extension)</Link>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
     </ItemGroup>

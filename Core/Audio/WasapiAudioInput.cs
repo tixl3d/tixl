@@ -41,6 +41,10 @@ public static class WasapiAudioInput
         var wantsCaptureForFft = settings.Playback.AudioSource == CompositionSettings.AudioSources.ExternalDevice;
         var wantsCaptureForRecording = _isCaptureNeededForRecording;
 
+        // BASSWASAPI is Windows-only, so elsewhere there is no capture to start and nothing to stop.
+        if ((wantsCaptureForFft || wantsCaptureForRecording) && !BassLibrary.IsWasapiAvailable)
+            return;
+
         if (!wantsCaptureForFft && !wantsCaptureForRecording)
         {
             if (!string.IsNullOrEmpty(ActiveInputDeviceName))
@@ -122,6 +126,9 @@ public static class WasapiAudioInput
     {
         get
         {
+            if (!BassLibrary.IsWasapiAvailable)
+                return _inputDevices ??= [];
+
             if (_inputDevices == null)
                 InitializeInputDeviceList();
 

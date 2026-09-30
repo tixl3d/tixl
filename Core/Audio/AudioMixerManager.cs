@@ -67,6 +67,14 @@ public static class AudioMixerManager
                 return;
             }
 
+            // Asking first, because everything below P/Invokes BASS and a missing library throws from the
+            // call. Several callers sit in the render loop, where that would end the process.
+            if (!BassLibrary.IsAvailable)
+            {
+                _initializationFailed = true;
+                return;
+            }
+
             Log.Gated.Audio("[AudioMixer] Starting initialization...");
 
         // Check if BASS is already initialized by checking the default output device
@@ -115,8 +123,16 @@ public static class AudioMixerManager
             // Try to initialize BASS with the device's actual sample rate first,
             // then fall back to common sample rates if that fails
             // Enable 3D audio support along with latency optimization
-            var initFlags = DeviceInitFlags.Latency | DeviceInitFlags.Stereo | DeviceInitFlags.Device3D;
-            
+            // Init is tried across three dimensions, outermost first: the device, then the flag set, then the
+            // sample rate. Device -1 leads so Windows and macOS behave exactly as before - the extra device
+            // candidates only come into play where BASS's default does not work (see GetDeviceCandidates).
+            (DeviceInitFlags Flags, string Name)[] methods =
+            [
+                (DeviceInitFlags.Latency | DeviceInitFlags.Stereo | DeviceInitFlags.Device3D, "LATENCY"),
+                (DeviceInitFlags.Stereo | DeviceInitFlags.Device3D, "STEREO+3D"),
+                (DeviceInitFlags.Default | DeviceInitFlags.Device3D, "DEFAULT+3D"),
+            ];
+
             // Build frequency list: device rate first (if known), then common fallbacks
             var frequenciesToTry = new List<int>();
             if (deviceSampleRate > 0)
@@ -126,98 +142,65 @@ public static class AudioMixerManager
             // Add common fallbacks that aren't already in the list
             if (deviceSampleRate != 48000) frequenciesToTry.Add(48000);
             if (deviceSampleRate != 44100) frequenciesToTry.Add(44100);
-            
-            bool initialized = false;
-            int usedFrequency = 0;
-            bool usedDeviceDefault = false;
-            string initMethod = "LATENCY";
-            
-            foreach (var freq in frequenciesToTry)
+
+            var initialized = false;
+            var usedFrequency = 0;
+            var usedDeviceDefault = false;
+            var initMethod = "LATENCY";
+            var usedDevice = -1;
+
+            foreach (var device in GetDeviceCandidates())
             {
-                bool isDeviceRate = (freq == deviceSampleRate && deviceSampleRate > 0);
-                var freqDesc = isDeviceRate ? $"{freq}Hz (device)" : $"{freq}Hz (fallback)";
-                Log.Gated.Audio($"[AudioMixer] Attempting BASS.Init with Latency+Stereo at {freqDesc}...");
-                
-                if (Bass.Init(-1, freq, initFlags, IntPtr.Zero))
+                foreach (var (flags, methodName) in methods)
                 {
-                    Log.Gated.Audio($"[AudioMixer] BASS initialized with LATENCY flag at {freqDesc}");
-                    initialized = true;
-                    usedFrequency = freq;
-                    usedDeviceDefault = isDeviceRate;
-                    initMethod = "LATENCY";
-                    break;
+                    foreach (var freq in frequenciesToTry)
+                    {
+                        var isDeviceRate = freq == deviceSampleRate && deviceSampleRate > 0;
+                        var freqDesc = isDeviceRate ? $"{freq}Hz (device)" : $"{freq}Hz (fallback)";
+
+                        if (Bass.Init(device, freq, flags, IntPtr.Zero))
+                        {
+                            if (methodName == "LATENCY")
+                                Log.Gated.Audio($"[AudioMixer] BASS initialized with LATENCY flag at {freqDesc}");
+                            else
+                                Log.Warning($"[AudioMixer] BASS initialized with {methodName} at {freqDesc} (no latency optimization)");
+
+                            initialized = true;
+                            usedFrequency = freq;
+                            usedDeviceDefault = isDeviceRate;
+                            initMethod = methodName;
+                            usedDevice = device;
+                            break;
+                        }
+
+                        var error = Bass.LastError;
+
+                        // Something else initialized BASS first; that init is usable as it stands.
+                        if (error == Errors.Already)
+                        {
+                            Log.Gated.Audio("[AudioMixer] BASS already initialized");
+                            initialized = true;
+                            usedDeviceDefault = true;
+                            initMethod = "EXISTING";
+                            usedDevice = device;
+                            break;
+                        }
+
+                        Log.Gated.Audio($"{error} [AudioMixer] Init of device {device} at {freqDesc} failed, trying next...");
+                    }
+
+                    if (initialized)
+                        break;
                 }
-                
-                var error1 = Bass.LastError;
-                // If already initialized, that's fine - continue with existing init
-                if (error1 == Errors.Already)
-                {
-                    Log.Gated.Audio("[AudioMixer] BASS already initialized");
-                    initialized = true;
-                    usedDeviceDefault = true; // Assume existing init used device default
-                    initMethod = "EXISTING";
-                    break;
-                }
-                
-                Log.Gated.Audio($"{error1} [AudioMixer] Init at {freqDesc} failed, trying next...");
+
+                if (!initialized)
+                    continue;
+
+                if (usedDevice != -1)
+                    Log.Warning($"[AudioMixer] BASS's default device was unusable; using device {usedDevice} '{DescribeDevice(usedDevice)}' instead.");
+                break;
             }
-            
-            // If all frequencies failed with Latency flag, try without it
-            if (!initialized)
-            {
-                foreach (var freq in frequenciesToTry)
-                {
-                    bool isDeviceRate = (freq == deviceSampleRate && deviceSampleRate > 0);
-                    var freqDesc = isDeviceRate ? $"{freq}Hz (device)" : $"{freq}Hz (fallback)";
-                    
-                    if (Bass.Init(-1, freq, DeviceInitFlags.Stereo | DeviceInitFlags.Device3D, IntPtr.Zero))
-                    {
-                        Log.Warning($"[AudioMixer] BASS initialized with STEREO+3D flag at {freqDesc} (no latency optimization)");
-                        initialized = true;
-                        usedFrequency = freq;
-                        usedDeviceDefault = isDeviceRate;
-                        initMethod = "STEREO+3D";
-                        break;
-                    }
-                    
-                    if (Bass.LastError == Errors.Already)
-                    {
-                        initialized = true;
-                        usedDeviceDefault = true;
-                        initMethod = "EXISTING";
-                        break;
-                    }
-                }
-            }
-            
-            // Last resort - basic init with 3D
-            if (!initialized)
-            {
-                foreach (var freq in frequenciesToTry)
-                {
-                    bool isDeviceRate = (freq == deviceSampleRate && deviceSampleRate > 0);
-                    var freqDesc = isDeviceRate ? $"{freq}Hz (device)" : $"{freq}Hz (fallback)";
-                    
-                    if (Bass.Init(-1, freq, DeviceInitFlags.Default | DeviceInitFlags.Device3D, IntPtr.Zero))
-                    {
-                        Log.Warning($"[AudioMixer] BASS initialized with DEFAULT+3D flags at {freqDesc}");
-                        initialized = true;
-                        usedFrequency = freq;
-                        usedDeviceDefault = isDeviceRate;
-                        initMethod = "DEFAULT+3D";
-                        break;
-                    }
-                    
-                    if (Bass.LastError == Errors.Already)
-                    {
-                        initialized = true;
-                        usedDeviceDefault = true;
-                        initMethod = "EXISTING";
-                        break;
-                    }
-                }
-            }
-            
+
             if (!initialized)
             {
                 var lastError = Bass.LastError;
@@ -237,7 +220,7 @@ public static class AudioMixerManager
         }
 
         // Load BASS FLAC plugin for native FLAC support (better than Media Foundation)
-        _flacPluginHandle = Bass.PluginLoad("bassflac.dll");
+        _flacPluginHandle = Bass.PluginLoad(OperatingSystem.IsWindows() ? "bassflac.dll" : "libbassflac.so");
         if (_flacPluginHandle == 0)
         {
             Log.Warning($"[AudioMixer] Failed to load BASS FLAC plugin: {Bass.LastError}. FLAC files will use Media Foundation fallback.");
@@ -445,6 +428,9 @@ public static class AudioMixerManager
     /// <returns>Stream handle, or 0 if creation failed</returns>
     public static int CreateOfflineAnalysisStream(string filePath)
     {
+        if (!BassLibrary.IsAvailable)
+            return 0;
+
         // Ensure BASS is initialized
         if (!_initialized)
         {
@@ -587,11 +573,70 @@ public static class AudioMixerManager
     /// machines with many or disconnected devices.
     /// </summary>
     /// <returns>The device sample rate in Hz, or 0 if it couldn't be determined.</returns>
+    /// <summary>
+    /// Devices to try for initialization, best first. -1 lets BASS pick, which is the right answer on
+    /// Windows and macOS, so those get nothing else.
+    /// </summary>
+    /// <remarks>
+    /// On Linux BASS's "Default" entry follows ALSA's <c>default</c> PCM, and under PipeWire or PulseAudio
+    /// that can resolve to a dmix slave which refuses to open - init then fails with
+    /// <see cref="Errors.Driver"/> on a machine that plainly has working output. The sound server's own
+    /// device does work, so it is preferred over a raw card: opening a <c>hw:</c> device directly takes
+    /// exclusive hold of it and bypasses whatever the user is mixing with.
+    /// </remarks>
+    private static List<int> GetDeviceCandidates()
+    {
+        var candidates = new List<int> { -1 };
+        if (OperatingSystem.IsWindows())
+            return candidates;
+
+        var soundServers = new List<int>();
+        var cards = new List<int>();
+
+        // Device 0 is BASS's "No sound" device, and 1 is the default that -1 already stands for.
+        for (var i = 2; Bass.GetDeviceInfo(i, out var info); i++)
+        {
+            if (!info.IsEnabled)
+                continue;
+
+            var driver = info.Driver ?? string.Empty;
+            if (driver.Contains("pipewire", StringComparison.OrdinalIgnoreCase)
+                || driver.Contains("pulse", StringComparison.OrdinalIgnoreCase))
+            {
+                soundServers.Add(i);
+            }
+            else
+            {
+                cards.Add(i);
+            }
+        }
+
+        candidates.AddRange(soundServers);
+        candidates.AddRange(cards);
+        return candidates;
+    }
+
+    /// <summary>The device's reported name, for a log line that says which one was settled on.</summary>
+    private static string DescribeDevice(int device)
+        => Bass.GetDeviceInfo(device, out var info) && !string.IsNullOrEmpty(info.Name) ? info.Name : $"#{device}";
+
     private static int GetDefaultOutputSampleRate()
     {
         try
         {
-            if (!Bass.Init(-1, 48000, DeviceInitFlags.Default, IntPtr.Zero))
+            // Same candidate order as the real init, so the rate measured here belongs to the device that
+            // will actually be opened rather than to one that cannot be.
+            var opened = -1;
+            foreach (var device in GetDeviceCandidates())
+            {
+                if (!Bass.Init(device, 48000, DeviceInitFlags.Default, IntPtr.Zero))
+                    continue;
+
+                opened = device;
+                break;
+            }
+
+            if (opened == -1)
             {
                 Log.Debug($"[AudioMixer] Probe init failed: {Bass.LastError}");
                 return 0;

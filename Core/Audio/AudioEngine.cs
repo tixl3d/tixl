@@ -194,7 +194,15 @@ public static class AudioEngine
     /// <param name="frameDurationInSeconds">The duration of the current frame in seconds.</param>
     public static void CompleteFrame(Playback playback, double frameDurationInSeconds)
     {
-        EnsureBassInitialized();
+        if (!EnsureBassInitialized())
+        {
+            // Without BASS there are no streams, buses or 3D sources to service. Only the bookkeeping other
+            // systems read has to stay current, so they don't mistake a silent frame for a stalled one.
+            EnsureFrameTokenCurrent();
+            _obsoleteSoundtrackHandles.Clear();
+            _updatedSoundtrackClipTimes.Clear();
+            return;
+        }
 
         ProcessSoundtrackClips(playback, frameDurationInSeconds);
 
@@ -223,9 +231,17 @@ public static class AudioEngine
         _updatedSoundtrackClipTimes.Clear();
     }
 
-    private static void EnsureBassInitialized()
+    /// <summary>False when audio is unavailable and the caller has to skip everything that touches BASS.</summary>
+    private static bool EnsureBassInitialized()
     {
-        if (_bassInitialized || _bassInitFailed) return;
+        if (_bassInitialized) return true;
+        if (_bassInitFailed) return false;
+
+        if (!BassLibrary.IsAvailable)
+        {
+            _bassInitFailed = true;
+            return false;
+        }
 
         try
         {
@@ -237,18 +253,19 @@ public static class AudioEngine
             // depend on audio, so carry on without it rather than taking the whole render loop down.
             Log.Warning($"[AudioEngine] BASS is unavailable; audio disabled. {e.Message}");
             _bassInitFailed = true;
-            return;
+            return false;
         }
 
         if (AudioMixerManager.OperatorMixerHandle == 0)
         {
             Log.Error("[AudioEngine] Failed to initialize AudioMixerManager; audio disabled.");
             _bassInitFailed = true;
-            return;
+            return false;
         }
 
         _bassInitialized = true;
         InitializeGlobalVolumeFromSettings();
+        return true;
     }
 
     private static void ProcessSoundtrackClips(Playback playback, double frameDurationInSeconds)

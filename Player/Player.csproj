@@ -34,8 +34,16 @@
     <ItemGroup>
         <!-- DanceAi.dll is referenced by Core and arrives through it; copying it here too makes publish fail with
              NETSDK1152 (two outputs at the same path), which silently left the exported player stale. -->
-        <Content Include="../Dependencies/**/*" Exclude="../Dependencies/DanceAi.dll" Visible="false">
+        <Content Include="../Dependencies/**/*" Exclude="../Dependencies/DanceAi.dll;../Dependencies/linux-x64/**/*" Visible="false">
             <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+
+    <!-- See Editor.csproj: BASS's Linux natives are copied only on Linux. -->
+    <ItemGroup Condition="!$([MSBuild]::IsOSPlatform('Windows'))">
+        <Content Include="../Dependencies/linux-x64/*.so" Visible="false">
+            <Link>%(Filename)%(Extension)</Link>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
     </ItemGroup>
