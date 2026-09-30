@@ -40,8 +40,10 @@ public sealed class VideoPlaybackEngine : IVideoPlaybackEngine
     {
         // Every decode path goes through here, and a decoder built without its native libraries takes the
         // process down rather than failing.
+        // Reported ready and completed on purpose: no frame will ever arrive, and an exporter or test that
+        // waits for one would wait forever.
         if (!FfmpegLibrary.EnsureInitialized())
-            return new VideoFrameResult(false, null, 0, false, false, FfmpegLibrary.StatusError);
+            return new VideoFrameResult(false, null, 0, true, true, FfmpegLibrary.StatusError);
 
         var now = Environment.TickCount64;
         var stream = GetOrCreateStream(streamId, now);
