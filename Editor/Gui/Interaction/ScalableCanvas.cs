@@ -4,6 +4,7 @@ using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Utils;
 using T3.Editor.App;
+using T3.Editor.App.Gestures;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.Layouts;
@@ -207,7 +208,11 @@ public partial class ScalableCanvas
         var minTargetInCanvas = ScrollTarget;
         var maxTargetInCanvas = ScrollTarget + WindowSize / ScaleTarget;
 
-        var f = Math.Min(deltaTime / UserSettings.Config.ScrollSmoothing.Clamp(0.01f, 0.99f), 1);
+        // A trackpad moves the view directly, so it has to arrive where the fingers put it rather than catching
+        // up over the next frames.
+        var f = PointerGestures.IsManipulating
+                    ? 1
+                    : Math.Min(deltaTime / UserSettings.Config.ScrollSmoothing.Clamp(0.01f, 0.99f), 1);
 
         var min = Vector2.Lerp(minInCanvas, minTargetInCanvas, f);
         var max = Vector2.Lerp(maxInCanvas, maxTargetInCanvas, f);
@@ -277,18 +282,22 @@ public partial class ScalableCanvas
         var preventZoom = (flags & T3Ui.EditingFlags.PreventZoomWithMouseWheel) != 0;
         if (isInteractable && !preventZoom)
         {
-            if (UserSettings.Config.UseTouchPadPanning)
+            if (PointerGestures.PansWithScroll)
             {
                 if (isDirectlyHovered)
                 {
-                    if (Math.Abs(ImGui.GetIO().MouseWheel) > 0.001f || Math.Abs(ImGui.GetIO().MouseWheelH) > 0.001f)
+                    // The pan carries the glide after a flick, so it keeps arriving for a moment with no input.
+                    var panInPixels = PointerGestures.PanDelta;
+                    if (panInPixels.LengthSquared() > 0.0001f)
+                    {
+                        ScrollTarget += TransformPanDelta(new Vector2(panInPixels.X, -panInPixels.Y)) / ScaleTarget;
                         panned = true;
+                    }
 
-                    ScrollTarget += new Vector2(ImGui.GetIO().MouseWheelH * 220,
-                                                -ImGui.GetIO().MouseWheel * 220) / ScaleTarget;
-                    //MouseWheelPanning.Delta * new Vector2(-1,1) / ScaleTarget;
-                    var zoomFactor= ComputeZoomDeltaFromMouseWheel(MouseWheelPanning.PinchZoomDelta);
-                    ApplyZoomDelta(mouseState.Position, zoomFactor, out zoomed);
+                    // A pinch zooms around the fingers; an emulated one has no focus of its own and uses the pointer.
+                    var zoomFactor = PointerGestures.ZoomFactor;
+                    var focus = PointerGestures.HasZoomFocus ? PointerGestures.ZoomFocus : mouseState.Position;
+                    ApplyZoomDelta(focus, zoomFactor, out zoomed);
                 }
             }
             else

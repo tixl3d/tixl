@@ -40,7 +40,7 @@ public static partial class T3Ui
         FormInputs.BeginFrame();
         InitializeAfterAppWindowReady();
 
-        MouseWheelPanning.ProcessFrame(120);
+        App.Gestures.PointerGestures.ProcessFrame(ImGui.GetIO().DeltaTime);
         
         // Prepare the current frame 
         RenderStatsCollector.StartNewFrame();

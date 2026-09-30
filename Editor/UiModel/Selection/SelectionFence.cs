@@ -44,7 +44,9 @@ public sealed class SelectionFence
             return States.PressedButNotMoved;
         }
 
-        var globalMousePos = globalMouse.PositionVec;
+        // ImGui's position, not the desktop cursor's: the two only agree on an unscaled display with the window
+        // at the origin, and elsewhere the fence would start at a fraction of the distance to the pointer.
+        var globalMousePos = imguiMousePos;
         var interactionMin = Vector2.Max(_startPositionInScreen, globalMousePos);
         var interactionMax = Vector2.Min(_startPositionInScreen, globalMousePos);
             

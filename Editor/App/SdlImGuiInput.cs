@@ -57,12 +57,24 @@ internal static unsafe class SdlImGuiInput
                 if (button >= 0)
                     io.MouseDown[button] = down;
 
+                // A touch anywhere ends the glide, as it does on every other trackpad.
+                if (down)
+                    Gestures.PointerGestures.StopGliding();
+
                 break;
             }
 
             case SDL_EventType.SDL_EVENT_MOUSE_WHEEL:
                 if (IsMainWindow(sdlEvent.wheel.windowID))
-                    MouseWheelPanning.ProcessWheel(sdlEvent.wheel.x, sdlEvent.wheel.y, IsCtrlDown(), io);
+                    _gestures.ProcessWheel(sdlEvent.wheel, IsCtrlDown(), io);
+
+                break;
+
+            case SDL_EventType.SDL_EVENT_PINCH_BEGIN:
+            case SDL_EventType.SDL_EVENT_PINCH_UPDATE:
+            case SDL_EventType.SDL_EVENT_PINCH_END:
+                if (IsMainWindow(sdlEvent.pinch.windowID))
+                    _gestures.TryProcessEvent(sdlEvent, ProgramWindows.Main?.PixelDensity ?? 1f);
 
                 break;
 
@@ -177,6 +189,9 @@ internal static unsafe class SdlImGuiInput
         SDL_SetCursor(GetSystemCursor(requested));
         SDL_ShowCursor();
     }
+
+    /// <summary>Tells the gesture layer which source feeds it, so the editor can log what a machine ended up with.</summary>
+    public static void InstallGestures() => Gestures.PointerGestures.SetSource(_gestures);
 
     /// <summary>
     /// Routes ImGui's copy and paste through SDL. ImGui only knows the Win32 clipboard; elsewhere its copies
@@ -337,6 +352,7 @@ internal static unsafe class SdlImGuiInput
     private const int VirtualKeyControl = 0x11;
     private const int VirtualKeyAlt = 0x12;
 
+    private static readonly Gestures.SdlPointerGestureSource _gestures = new();
     private static IntPtr _clipboardText;
     private static ImGuiMouseCursor _lastRequestedCursor = ImGuiMouseCursor.Arrow;
     private static readonly Dictionary<SDL_SystemCursor, IntPtr> _cursors = [];

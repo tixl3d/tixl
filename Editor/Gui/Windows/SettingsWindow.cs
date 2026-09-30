@@ -191,11 +191,12 @@ internal sealed partial class SettingsWindow : Window
                     FormInputs.AddVerticalSpace();
                     FormInputs.AddSectionSubHeader("Input");
 
-                    changed |= FormInputs.AddCheckBox("Enable Touchpad Panning",
+                    changed |= FormInputs.AddCheckBox("Always use touchpad panning",
                                                       ref UserSettings.Config.UseTouchPadPanning,
                                                       """
-                                                      Use your trackpad for panning your graph and timeline views.
-                                                      Zooming in/out is possible with pinch zoom.
+                                                      Two fingers pan the graph and timeline views, and a pinch zooms them.
+                                                      A trackpad is recognized on its own, so this is only needed for a
+                                                      device that scrolls in whole steps and is not detected as one.
                                                       """,
                                                       UserSettings.Defaults.UseTouchPadPanning);
 
