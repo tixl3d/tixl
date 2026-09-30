@@ -196,10 +196,11 @@ internal static class Program
         
         Device = device;
 
-        // FXC only exists on Windows, and only D3D11 reads its bytecode.
-        ShaderCompiler.Instance = OperatingSystem.IsWindows()
-                                      ? new DX11ShaderCompiler { Device = device }
-                                      : new SlangShaderCompiler(device);
+        // Follows the backend, not the OS: FXC emits DXBC that only D3D11 reads, so a Vulkan run needs
+        // slang even on Windows.
+        ShaderCompiler.Instance = ProgramWindows.UseVulkanBackend
+                                      ? new SlangShaderCompiler(device)
+                                      : new DX11ShaderCompiler { Device = device };
 
         Log.Debug("Initializing UiContentContentDrawer...");
         var contentDrawer = new WindowsUiContentDrawer();

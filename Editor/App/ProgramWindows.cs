@@ -122,7 +122,9 @@ internal static unsafe class ProgramWindows
             if (Program.WindowSizeOverride is { } windowSize)
                 Main.SetSize(windowSize.Width, windowSize.Height);
 
-            if (OperatingSystem.IsWindows())
+            // D3D11 only, not Windows only: this reaches through the device's native pointer as a
+            // SharpDX D3D11 device, which a Vulkan device is not.
+            if (OperatingSystem.IsWindows() && !UseVulkanBackend)
                 IgnoreDxgiWindowShortcuts(device, Main.HwndHandle);
         }
         catch (Exception e)
@@ -151,13 +153,25 @@ internal static unsafe class ProgramWindows
     }
 
     /// <summary>
-    /// Direct3D 11 on Windows, Vulkan everywhere else. The D3D11 path stays in its own method so its assemblies
-    /// are only touched where they can load.
+    /// Whether to create the Vulkan backend. Everywhere but Windows there is no choice; on Windows
+    /// TIXL_BACKEND=vulkan selects it over D3D11, so the Vulkan path can be exercised against a second driver
+    /// stack without a second machine. Evaluated once - the backend cannot change while running.
+    /// </summary>
+    internal static bool UseVulkanBackend { get; } =
+        !OperatingSystem.IsWindows()
+        || string.Equals(Environment.GetEnvironmentVariable("TIXL_BACKEND"), "vulkan", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Direct3D 11 on Windows, Vulkan everywhere else - or on Windows too when TIXL_BACKEND=vulkan. The D3D11
+    /// path stays in its own method so its assemblies are only touched where they can load.
     /// </summary>
     private static IGraphicsBackend CreateBackend()
     {
-        if (OperatingSystem.IsWindows())
+        if (!UseVulkanBackend)
             return CreateD3D11Backend();
+
+        if (OperatingSystem.IsWindows())
+            Log.Info("TIXL_BACKEND=vulkan: using the Vulkan backend instead of D3D11.");
 
         // TIXL_VULKAN_VALIDATION=1 turns the validation layer on. It reports invalid use while the command is
         // recorded, which is the only way to see what a driver later reports as nothing but a lost device.

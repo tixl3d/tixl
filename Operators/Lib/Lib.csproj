@@ -1,7 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <Import Project="$(SolutionDir)/Tixl.props" />
   <PropertyGroup>
-    <TargetFramework>net10.0-windows</TargetFramework>
+    <!-- Plain net10.0, not net10.0-windows: the only Windows-desktop dependency is System.Drawing in five
+         operators, already gated at runtime by WindowsOnlyFeature. The editor reads this element as raw XML to
+         locate the build output, so it must stay a single unconditional value. -->
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -108,7 +111,6 @@
     <Using Alias="SampleDescription" Include="T3.Graphics.SampleDescription" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Mediapipe\Mediapipe.csproj" Private="false" PrivateAssets="all" />
     <ProjectReference Include="..\..\Core\Core.csproj" Private="false" PrivateAssets="all" />
     <ProjectReference Include="..\..\Graphics\Graphics.csproj" Private="false" PrivateAssets="all" />
     <ProjectReference Include="..\..\Graphics.Compat\Graphics.Compat.csproj" Private="false" PrivateAssets="all" />

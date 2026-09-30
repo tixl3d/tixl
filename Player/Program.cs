@@ -168,10 +168,11 @@ internal static partial class Program
 
             CoreUi.Instance.Cursor.SetVisible(!_isFullScreen);
 
-            // FXC only exists on Windows; Slang compiles the same HLSL to SPIR-V for Vulkan.
-            ShaderCompiler.Instance = OperatingSystem.IsWindows()
-                                          ? new DX11ShaderCompiler { Device = _device }
-                                          : new SlangShaderCompiler(_device);
+            // Follows the backend, not the OS: FXC emits DXBC that only D3D11 reads, so a Vulkan run needs
+            // slang even on Windows.
+            ShaderCompiler.Instance = UseVulkanBackend
+                                          ? new SlangShaderCompiler(_device)
+                                          : new DX11ShaderCompiler { Device = _device };
                 
             SharedResources.Initialize();
                 
@@ -556,13 +557,25 @@ internal static partial class Program
     }
 
     /// <summary>
-    /// Direct3D 11 on Windows, Vulkan everywhere else. The D3D11 path stays in its own method so the
-    /// assembly is only touched where it can load.
+    /// Whether to create the Vulkan backend. Everywhere but Windows there is no choice; on Windows
+    /// TIXL_BACKEND=vulkan selects it over D3D11, so the Vulkan path can be exercised against a second driver
+    /// stack without a second machine. Evaluated once - the backend cannot change while running.
+    /// </summary>
+    internal static bool UseVulkanBackend { get; } =
+        !OperatingSystem.IsWindows()
+        || string.Equals(Environment.GetEnvironmentVariable("TIXL_BACKEND"), "vulkan", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Direct3D 11 on Windows, Vulkan everywhere else - or on Windows too when TIXL_BACKEND=vulkan. The D3D11
+    /// path stays in its own method so its assemblies are only touched where they can load.
     /// </summary>
     private static IGraphicsBackend CreateBackend()
     {
-        if (OperatingSystem.IsWindows())
+        if (!UseVulkanBackend)
             return CreateD3D11Backend();
+
+        if (OperatingSystem.IsWindows())
+            Log.Info("TIXL_BACKEND=vulkan: using the Vulkan backend instead of D3D11.");
 
         // TIXL_VULKAN_VALIDATION=1 turns the validation layer on. It reports invalid use while the command is
         // recorded, which is the only way to see what a driver later reports as nothing but a lost device.
