@@ -167,6 +167,7 @@ float4 ComputeSubdivision(float2 uv)
     // Each split halves the texture window while the cut lands off-center, so the content squeezes into the smaller cell and stretches across the larger one.
     float2 imageUv;
     float4 imageColor;
+
     if(ColorMode < 2) {
         imageSize = 0;
     }
@@ -179,6 +180,7 @@ float4 ComputeSubdivision(float2 uv)
     }
     
     imageUv = imageMin + uvInCell * imageSize;
+    if(ColorMode==0)imageUv=uv - uvInCell * size + size / 2;
 
     imageColor = lerp(Image.Sample(texSampler, imageUv), 1, ColorMode == 1) * gradientColor;
     
