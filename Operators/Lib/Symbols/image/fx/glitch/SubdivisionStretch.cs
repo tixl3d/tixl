@@ -74,5 +74,6 @@ internal sealed class SubdivisionStretch : Instance<SubdivisionStretch>
         ColorWithGradient,
         GradientOnly,
         TextureWithGradient,
+        RepeatTexture,
     }
 }

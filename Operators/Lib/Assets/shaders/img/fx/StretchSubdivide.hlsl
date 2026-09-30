@@ -165,14 +165,23 @@ float4 ComputeSubdivision(float2 uv)
     float sGap = smoothstep(Padding - Feather, Padding + Feather, d5);
 
     // Each split halves the texture window while the cut lands off-center, so the content squeezes into the smaller cell and stretches across the larger one.
-
+    float2 imageUv;
+    float4 imageColor;
     if(ColorMode < 2) {
         imageSize = 0;
     }
+    if(ColorMode == 3){
+        imageSize = 1;
+        
+        imageUv = uvInCell * imageSize;
+        imageColor = lerp(Image.SampleLevel(texSampler, imageUv,0), 1, ColorMode == 1) * gradientColor;
+        return lerp(GapColor, imageColor, sGap);
+    }
+    
+    imageUv = imageMin + uvInCell * imageSize;
 
-    float2 imageUv = imageMin + uvInCell * imageSize;
-
-    float4 imageColor = lerp(Image.Sample(texSampler, imageUv), 1, ColorMode == 1) * gradientColor;
+    imageColor = lerp(Image.Sample(texSampler, imageUv), 1, ColorMode == 1) * gradientColor;
+    
     return lerp(GapColor, imageColor, sGap);
 }
 
