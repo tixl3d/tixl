@@ -94,6 +94,10 @@ public abstract partial class ShaderCompiler
             return true;
         }
 
+        // Kept for inspection: a generated shader has no file to open afterwards, and the assembled source is
+        // the only place the offending line can be seen.
+        ShaderCompileFailures.Record(name, args.EntryPoint, reason, args.SourceCode, args.Owner);
+
         reason = $"Failed to compile {name}: {reason}";
         shader = null;
         return false;

@@ -131,11 +131,20 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
 
         using var deviceExtensionNames = new VkStringArray(deviceExtensions);
 
-        VkPhysicalDeviceVulkan13Features features13 = new() { dynamicRendering = true, synchronization2 = true };
-
-        VkPhysicalDeviceVulkan12Features supported12 = new();
+        VkPhysicalDeviceVulkan13Features supported13 = new();
+        VkPhysicalDeviceVulkan12Features supported12 = new() { pNext = &supported13 };
         VkPhysicalDeviceFeatures2 supported = new() { pNext = &supported12 };
         InstanceApi.vkGetPhysicalDeviceFeatures2(PhysicalDevice, &supported);
+
+        // shaderIntegerDotProduct is not something TiXL's shaders ask for, but slang emits the DotProduct
+        // capability on its own. Without the feature enabled the module is invalid, vkCreateShaderModule
+        // rejects it, and the draw silently renders nothing at all.
+        VkPhysicalDeviceVulkan13Features features13 = new()
+                                                          {
+                                                              dynamicRendering = true,
+                                                              synchronization2 = true,
+                                                              shaderIntegerDotProduct = supported13.shaderIntegerDotProduct,
+                                                          };
 
         // scalarBlockLayout lets a structured buffer keep D3D's tight packing; shaderDrawParameters is what
         // makes SV_VertexID mean the same thing it does in D3D. The optional two are D3D11 features TiXL uses

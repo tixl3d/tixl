@@ -16,6 +16,7 @@ using T3.Core.Animation;
 using T3.Core.Logging;
 using T3.Core.Model;
 using T3.Core.Operator;
+using T3.Core.Resource.ShaderCompiling;
 using T3.Core.Operator.Slots;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
@@ -257,6 +258,10 @@ internal static class DebugServer
 
             case "getMetrics":
                 HandleGetMetrics(context);
+                break;
+
+            case "getShaderErrors":
+                HandleGetShaderErrors(request, context);
                 break;
 
             case "screenshot":
@@ -953,6 +958,57 @@ internal static class DebugServer
         {
             return new JObject { ["unserializable"] = value.ValueType.Name };
         }
+    }
+
+    /// <summary>
+    /// The shaders that failed to compile, newest first, each with the operator that asked for it and the
+    /// path to a copy of the exact source the compiler saw. A generated shader is assembled in memory from
+    /// many nodes, so without that copy there is no file to look at - and one bad line fails the whole
+    /// shader, which then draws nothing.
+    /// </summary>
+    private static void HandleGetShaderErrors(JObject request, RequestContext context)
+    {
+        if (request["clear"]?.Value<bool>() == true)
+        {
+            ShaderCompileFailures.Clear();
+            context.SendOk(new JObject { ["cleared"] = true });
+            return;
+        }
+
+        var includeSource = request["includeSource"]?.Value<bool>() ?? false;
+        var failures = ShaderCompileFailures.Recent;
+        var list = new JArray();
+
+        foreach (var f in failures)
+        {
+            var entry = new JObject
+                            {
+                                ["time"] = f.TimeUtc.ToString("o"),
+                                ["name"] = f.Name,
+                                ["entryPoint"] = f.EntryPoint,
+                                ["reason"] = f.Reason,
+                                ["ownerPath"] = f.OwnerPath,
+                                ["ownerId"] = f.OwnerId.ToString(),
+                                ["sourcePath"] = f.SourcePath,
+                                ["sourceLineCount"] = f.SourceLineCount,
+                            };
+
+            if (includeSource && f.SourcePath != null)
+            {
+                try
+                {
+                    entry["source"] = File.ReadAllText(f.SourcePath);
+                }
+                catch (Exception e)
+                {
+                    entry["sourceError"] = e.Message;
+                }
+            }
+
+            list.Add(entry);
+        }
+
+        context.SendOk(new JObject { ["count"] = list.Count, ["failures"] = list });
     }
 
     private static void HandleGetMetrics(RequestContext context)

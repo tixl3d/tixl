@@ -472,6 +472,7 @@ PSOutput psMain(vsOutput input)
     frag.N = normal;
     frag.Lo = -dp;
     frag.worldPosition = mul(float4(p, 1), ObjectToWorld).xyz;
+    frag.fog = 0;
 
     frag.Roughness = AdjustRoughnessForSpecularAA(roughnessMetallicOcclusion.x + Roughness, SpecularAA);
     
