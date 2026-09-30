@@ -28,8 +28,12 @@ internal sealed class Execute : Instance<Execute>
                 commands[i].GetValue(context);
             }
 
-            // cleanup after usage
-            for (int i = 0; i < commands.Count; i++)
+            // Cleanup runs backwards: the commands pushed their saved state in order, and PopState is a stack,
+            // so restoring forwards hands each command the snapshot a later one took. That only stays invisible
+            // while the pushed state groups do not overlap - a [ComputeShaderStage] saves the output merger
+            // alongside the compute stage, so next to an [OutputMergerStage] the render targets come back wrong
+            // and whatever draws afterwards goes nowhere.
+            for (int i = commands.Count - 1; i >= 0; i--)
             {
                 commands[i].Value?.RestoreAction?.Invoke(context);
             }

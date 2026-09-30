@@ -1019,6 +1019,8 @@ internal static class DebugServer
                              ["frameDeltaSeconds"] = io.DeltaTime,
                              ["fps"] = io.DeltaTime > 0 ? Math.Round(1f / io.DeltaTime, 1) : 0,
                              ["gcTotalMemoryMb"] = Math.Round(GC.GetTotalMemory(false) / (1024.0 * 1024.0), 2),
+                             // Grows without bound when an operator saves render state that nothing restores.
+                             ["stateStackDepth"] = T3.Core.Resource.ResourceManager.Device.ImmediateContext.StateStackDepth,
                          };
 
         var renderStats = new JObject();

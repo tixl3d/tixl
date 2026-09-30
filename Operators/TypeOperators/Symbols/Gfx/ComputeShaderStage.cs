@@ -11,7 +11,6 @@ public sealed class ComputeShaderStage : Instance<ComputeShaderStage>, IRenderSt
     public ComputeShaderStage()
     {
         Output.UpdateAction += Update;
-        Output.Value!.RestoreAction = Restore;
         if (!_statsRegistered)
         {
             RenderStatsCollector.RegisterProvider(this);
@@ -46,7 +45,10 @@ public sealed class ComputeShaderStage : Instance<ComputeShaderStage>, IRenderSt
         device.ImmediateContext.PushState(StateGroups.ComputeShader | StateGroups.OutputMerger);
 
         if (_uavs.Length == 0 || _cs == null)
+        {
+            device.ImmediateContext.PopState();
             return;
+        }
         
         if (needAdditionalConstantBuffer && _constantBuffers.Length > 0)
         {
@@ -133,15 +135,15 @@ public sealed class ComputeShaderStage : Instance<ComputeShaderStage>, IRenderSt
             csStage.SetConstantBuffer(i, null);
         }
         
+        // Popped here, not from an enclosing command: the dispatch is finished by the time this returns, and
+        // this stage is usually pulled for its buffer rather than executed as a command - in that case nothing
+        // ever invokes RestoreAction, and every evaluation leaked a snapshot onto the state stack.
+        deviceContext.PopState();
+
         _statsUpdateCount++;
         _statsDispatchCount += dispatchCount.X * dispatchCount.Y * dispatchCount.Z;
     }
     
-    private void Restore(EvaluationContext context)
-    {
-        ResourceManager.Device.ImmediateContext.PopState();
-    }
-
     private void GetAdditionalResources(EvaluationContext context)
     {
         if (!VariousResources.DirtyFlag.IsDirty)
