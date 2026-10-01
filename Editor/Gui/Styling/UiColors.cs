@@ -1,4 +1,4 @@
-﻿// ReSharper disable RedundantArgumentDefaultValue
+// ReSharper disable RedundantArgumentDefaultValue
 
 using System.Diagnostics.CodeAnalysis;
 using Color = T3.Core.DataTypes.Vector.Color;
@@ -202,4 +202,42 @@ public static class UiColors
     
     [T3Style.Hint(Description = "Base color for audio-graph data.")]
     public static Color ColorForAudioGraph = new(0.3f, 0.4f, 0.75f, 1.000f);
+
+    // -- Curve plots --------------------------------------------------------------------------------
+    [T3Style.Hint(GroupTitle = "Curve plots",
+                  DisplayName = "X curve",
+                  Description = "Curve of the first component — X for a Vector3.")]
+    public static Color CurvePlotLineX = new(1f, 0.2f, 0.2f, 0.3f);
+
+    [T3Style.Hint(DisplayName = "Y curve",
+                  Description = "Curve of the second component — Y for a Vector3.")]
+    public static Color CurvePlotLineY = new(0.1f, 1f, 0.2f, 0.3f);
+
+    [T3Style.Hint(DisplayName = "Z curve",
+                  Description = "Curve of the third component — Z for a Vector3.")]
+    public static Color CurvePlotLineZ = new(0.1f, 0.4f, 1.0f, 0.5f);
+
+    [T3Style.Hint(DisplayName = "W curve",
+                  Description = "Curve of the fourth component — W for a Vector4. Semi-transparent by default, since a fourth curve overlaps the others most.")]
+    public static Color CurvePlotLineW = new(0.5f, 0.5f, 0.5f, 0.5f);
+
+    [T3Style.Hint(DisplayName = "X value",
+                  Description = "The current value of the first component printed next to the plot. Drawn fully opaque regardless of the alpha set here.")]
+    public static Color CurvePlotValueX = new(1f, 0.5f, 0.5f, 1f);
+
+    [T3Style.Hint(DisplayName = "Y value",
+                  Description = "The current value of the second component printed next to the plot.")]
+    public static Color CurvePlotValueY = new(0.4f, 1f, 0.5f, 1f);
+
+    [T3Style.Hint(DisplayName = "Z value",
+                  Description = "The current value of the third component printed next to the plot.")]
+    public static Color CurvePlotValueZ = new(0.6f, 0.671f, 1.0f, 1f);
+
+    [T3Style.Hint(DisplayName = "W value",
+                  Description = "The current value of the fourth component printed next to the plot.")]
+    public static Color CurvePlotValueW = new(0.6f, 0.6f, 0.6f, 1f);
+
+    [T3Style.Hint(DisplayName = "Single component",
+                  Description = "Plots of a single-component value — a lone number or a bool. Colors the curve, its leading marker and its value readout; the marker and the readout stay opaque regardless of the alpha set here.")]
+    public static Color CurvePlotSingleComponent = new(1f, 1f, 1.0f, 0.3f);
 }
