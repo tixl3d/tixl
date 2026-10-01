@@ -80,13 +80,5 @@
       }
     }
   ],
-  "Links": [
-    {
-      "Id": "179198c7-60f5-46b4-94a2-b2bca6d14fc2",
-      "Title": "Wikipedia",
-      "Description": "",
-      "LinkUrl": "https://en.wikipedia.org/wiki/Koch_snowflake",
-      "LinkType": "Documentation"
-    }
-  ]
+  "Links": []
 }
