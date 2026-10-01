@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "f46cd7e5-291c-4dfa-9eb0-ecc97ee317b8",
+  "Description": "Forwards T3.Core.DataTypes.ShaderGraphNode through a movable routing anchor.\n\nRetains its slot type when disconnected. Reference values are forwarded without cloning or taking ownership.",
+  "InputUis": [
+    {
+      "InputId": "52e4901e-60c3-410d-b895-9eb4faecfc0e",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "1747d94c-9dff-4002-9986-4b111a6ff374",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}

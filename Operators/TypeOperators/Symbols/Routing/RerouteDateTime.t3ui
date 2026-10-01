@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "9cdd6e12-84df-4cb8-9def-4a2ce35db768",
+  "Description": "Forwards System.DateTime through a movable routing anchor.\n\nRetains its slot type when disconnected. Reference values are forwarded without cloning or taking ownership.",
+  "InputUis": [
+    {
+      "InputId": "01686d8a-998e-4819-9047-51f87e6b1209",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "eab0846c-21fc-433b-840f-543081a8f569",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}

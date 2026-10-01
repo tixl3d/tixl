@@ -7,6 +7,7 @@ using T3.Editor.Gui.MagGraph.Interaction;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.Ui;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.Modification;
@@ -43,7 +44,7 @@ namespace T3.Editor.Gui.MagGraph.States;
 /// during most processing and makes "graph-global" components and states accessible to all related components.
 /// New instances of the context are created when the composition object or window changes.
 /// - <see cref="StateMachine"/> the state machine is a very bare-bones (no hierarchy or events) implementation
-/// of a state machine that handles activation of <see cref="State"/>s. There can only be one state active.
+/// of a state machine that handles activation of <see cref="State{GraphUiContext}"/>s. There can only be one state active.
 /// Most of the update interaction is done in State.Update() overrides.
 /// - <see cref="MagGraphView"/> is a scalable canvas that handles drawing. The Layout sometimes resets
 /// the current state.
@@ -89,6 +90,7 @@ internal sealed class GraphUiContext
     internal readonly PlaceholderCreation Placeholder;
     internal readonly ConnectionHovering ConnectionHovering = new();
     internal readonly MagGraphLayout Layout = new();
+    internal readonly ConnectionStroke ConnectionStroke = new();
     
     internal readonly StateMachine<GraphUiContext> StateMachine;
     internal  MacroCommand? MacroCommand { get; private set; }
@@ -170,24 +172,30 @@ internal sealed class GraphUiContext
     internal Vector2 PeekAnchorInCanvas;
     internal bool ShouldAttemptToSnapToInput;
     
+    // Capture connected anchors before the first mutation so cleanup can distinguish deliberately blank anchors.
     internal MacroCommand StartMacroCommand(string title)
     {
         Debug.Assert(MacroCommand == null);
+        var composition = CompositionInstance.Symbol;
+        _rerouteCleanupCommand = new RemoveDisconnectedReroutesCommand(composition.Id, RerouteOperations.CaptureConnectedReroutes(composition));
         MacroCommand = new MacroCommand(title);
         return MacroCommand;
     }
     
     internal MacroCommand StartOrContinueMacroCommand(string title)
     {
-        MacroCommand ??= new MacroCommand(title);
-        return MacroCommand;
+        return MacroCommand ?? StartMacroCommand(title);
     }
     
     internal void CompleteMacroCommand()
     {
         Debug.Assert(MacroCommand != null);
+        if (RerouteOperations.CompleteCleanup(_rerouteCleanupCommand, MacroCommand!))
+            Layout.FlagStructureAsChanged();
+
         UndoRedoStack.Add(MacroCommand);
         MacroCommand = null;
+        _rerouteCleanupCommand = null;
     }
     
     internal void CancelMacroCommand()
@@ -195,6 +203,7 @@ internal sealed class GraphUiContext
         Debug.Assert(MacroCommand != null);
         MacroCommand.Undo();
         MacroCommand = null;
+        _rerouteCleanupCommand = null;
     }
     
     // Dialogs
@@ -215,6 +224,8 @@ internal sealed class GraphUiContext
     
     internal readonly List<MagGraphConnection> TempConnections = [];
 
+    /// <summary>Draws pending symbol dialogs and reports their modification outcome.</summary>
+    /// <returns>Combined symbol modification result produced by the dialogs.</returns>
     public ChangeSymbol.SymbolModificationResults DrawDialogs(ProjectView projectView)
     {
         EditCommentDialog.Draw(Selector);
@@ -254,4 +265,6 @@ internal sealed class GraphUiContext
 
         return results;
     }
+
+    private RemoveDisconnectedReroutesCommand? _rerouteCleanupCommand;
 }

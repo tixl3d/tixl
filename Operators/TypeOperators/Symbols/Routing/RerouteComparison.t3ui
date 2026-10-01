@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "751aacca-1381-4582-ad22-aac1815d81e9",
+  "Description": "Forwards SharpDX.Direct3D11.Comparison through a movable routing anchor.\n\nRetains its slot type when disconnected. Reference values are forwarded without cloning or taking ownership.",
+  "InputUis": [
+    {
+      "InputId": "e7304091-6489-4d33-9442-9f62543c4e1d",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "dea7b435-7dc6-429c-9c6f-85a4a217235d",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}

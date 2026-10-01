@@ -28,6 +28,15 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
     internal int LastUpdateCycle;
     public Guid Id { get; init; }
     public Variants Variant;
+    /// <summary>
+    /// Reroutes retain the Operator variant and selection identity but expose one horizontal
+    /// input/output pair on a compact body. RerouteSize is in canvas units; anchor positions
+    /// use DampedPosOnCanvas so attached cables follow the animated dot.
+    /// </summary>
+    public bool IsReroute;
+
+    // Manual wiring remains available when automatic block layout is disabled.
+    internal bool SupportsBlockLayout => !IsReroute;
     public Type PrimaryType = typeof(float);
     public required ISelectableCanvasObject Selectable;
     public SymbolUi.Child? ChildUi; // matches Selected for operators
@@ -81,6 +90,7 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
     // {
     //     return nodeSelection.Selection.Any(c => c.Id == Id);
     // }
+    /// <summary>Clears cached slot lines and records the layout cycle that retained the item.</summary>
     public void ResetConnections(int updateCycle)
     {
         InputLines = Array.Empty<InputLine>();
@@ -160,9 +170,14 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
     public const float WidthHalf = Width / 2;
     public const float LineHeight = 35;
     public static readonly Vector2 GridSize = new(Width, LineHeight);
+    /// <summary>Compact reroute body dimensions in canvas units.</summary>
+    public static readonly Vector2 RerouteSize = new(16, 16);
+    internal float RerouteRadius => MathF.Min(Size.X, Size.Y) * 0.3f;
 
     public ImRect Bounds => ImRect.RectWithSize(PosOnCanvas, Size);
     
+    /// <summary>Computes one canvas rectangle enclosing the supplied items.</summary>
+    /// <returns>Combined bounds, or a default rectangle when the sequence is empty.</returns>
     public static ImRect GetItemsBounds(IEnumerable<MagGraphItem> items)
     {
         ImRect extend = default;
@@ -195,6 +210,17 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
     /// </summary>
     public void GetOutputAnchorAtIndex(int index, ref OutputAnchorPoint point)
     {
+        if (IsReroute)
+        {
+            point.PositionOnCanvas = DampedPosOnCanvas + Size / 2 + new Vector2(RerouteRadius, 0);
+            point.Direction = Directions.Horizontal;
+            point.ConnectionType = OutputLines[0].Output.ValueType;
+            point.SnappedConnectionHash = FreeAnchor;
+            point.SlotId = OutputLines[0].Id;
+            point.OutputLineIndex = 0;
+            return;
+        }
+
         if (index == 0)
         {
             point.PositionOnCanvas = new Vector2(WidthHalf, Size.Y) + DampedPosOnCanvas;
@@ -215,7 +241,9 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
         point.OutputLineIndex = lineIndex;
     }
 
-    public int GetOutputAnchorCount() => OutputLines.Length == 0 ? 0 : OutputLines.Length + 1;
+    /// <summary>Counts displayed output anchors, with one horizontal socket for a reroute.</summary>
+    /// <returns>Number of displayed output anchors available for drawing and snapping.</returns>
+    public int GetOutputAnchorCount() => OutputLines.Length == 0 ? 0 : IsReroute ? 1 : OutputLines.Length + 1;
 
 
     /// <summary>
@@ -227,6 +255,17 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
     /// </remarks>
     public void GetInputAnchorAtIndex(int index, ref InputAnchorPoint anchorPoint)
     {
+        if (IsReroute)
+        {
+            anchorPoint.PositionOnCanvas = DampedPosOnCanvas + new Vector2(0, Size.Y / 2);
+            anchorPoint.Direction = Directions.Horizontal;
+            anchorPoint.ConnectionType = InputLines[0].Type;
+            anchorPoint.SnappedConnectionHash = InputLines[0].ConnectionIn?.ConnectionHash ?? FreeAnchor;
+            anchorPoint.SlotId = InputLines[0].Id;
+            anchorPoint.InputLine = InputLines[0];
+            return;
+        }
+
         if (index == 0)
         {
             anchorPoint.PositionOnCanvas = new Vector2(WidthHalf, 0) + DampedPosOnCanvas;
@@ -248,7 +287,9 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
         anchorPoint.InputLine = InputLines[lineIndex]; //TODO avoid copy
     }
     
-    public int GetInputAnchorCount() => InputLines.Length == 0 ? 0 : InputLines.Length + 1;
+    /// <summary>Counts displayed input anchors, with one horizontal socket for a reroute.</summary>
+    /// <returns>Number of displayed input anchors available for drawing and snapping.</returns>
+    public int GetInputAnchorCount() => InputLines.Length == 0 ? 0 : IsReroute ? 1 : InputLines.Length + 1;
 
     /** Assume as free (I.e. not connected) unless an connection is snapped, then return this connection as hash. */
     private static int GetSnappedConnectionHash(List<MagGraphConnection> snapGraphConnections)
@@ -264,6 +305,8 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
         return FreeAnchor;
     }
 
+    /// <summary>Retrieves the connection attached to the primary displayed input.</summary>
+    /// <returns>True when the primary input has a connection.</returns>
     public bool TryGetPrimaryInConnection([NotNullWhen(true)]out  MagGraphConnection? connection)
     {
         connection = null;
@@ -275,6 +318,8 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
         return connection != null;
     }
     
+    /// <summary>Retrieves the connections attached to the primary displayed output.</summary>
+    /// <returns>True when the primary output has at least one connection.</returns>
     public bool TryGetPrimaryOutConnections(out List<MagGraphConnection> connections)
     {
         if (OutputLines.Length == 0)
@@ -336,6 +381,7 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
     //     }
     // }
 
+    /// <summary>Selects this item using its current symbol UI and runtime instance.</summary>
     public void Select(NodeSelection nodeSelection)
     {
         // TODO: Avoid this by not using magGraphItem as selectable
@@ -353,6 +399,7 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
         }
     }
 
+    /// <summary>Adds this item to the selection using its current symbol UI and runtime instance.</summary>
     public void AddToSelection(NodeSelection nodeSelection)
     {
         // TODO: Avoid this by not using magGraphItem as selectable

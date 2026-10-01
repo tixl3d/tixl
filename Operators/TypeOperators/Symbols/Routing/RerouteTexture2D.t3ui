@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "e32a4006-d2d1-4ab8-baa9-0970f3683af2",
+  "Description": "Forwards T3.Core.DataTypes.Texture2D through a movable routing anchor.\n\nRetains its slot type when disconnected. Reference values are forwarded without cloning or taking ownership.",
+  "InputUis": [
+    {
+      "InputId": "18ddd0a1-19a0-4891-b2a8-443dd550cab2",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "3bec74ca-b894-429c-ba5b-fa6d5eeaee96",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "2d54c862-9e4b-4068-8381-ea793a1a0cce",
+  "Description": "Forwards System.Numerics.Quaternion through a movable routing anchor.\n\nRetains its slot type when disconnected. Reference values are forwarded without cloning or taking ownership.",
+  "InputUis": [
+    {
+      "InputId": "7fa06341-7189-4881-ad08-213f0e3ead89",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "e64874ab-0382-473f-8dd2-1f9716c0563c",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}

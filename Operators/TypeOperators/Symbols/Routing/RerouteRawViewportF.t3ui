@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "38c3fe02-c841-428d-aeb0-689a57e15388",
+  "Description": "Forwards SharpDX.Mathematics.Interop.RawViewportF through a movable routing anchor.\n\nRetains its slot type when disconnected. Reference values are forwarded without cloning or taking ownership.",
+  "InputUis": [
+    {
+      "InputId": "f3222283-0e2d-49ed-a52b-7537d0d4386a",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "23809fbb-c3de-4598-8b1c-ff0dea5344e3",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}

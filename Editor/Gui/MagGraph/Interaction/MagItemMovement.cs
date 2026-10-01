@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 
 using System.Diagnostics;
 using ImGuiNET;
@@ -390,7 +390,33 @@ internal sealed partial class MagItemMovement
         if (_connectionsToDraggedItems.Count == 0)
             return false;
 
-        NodeActions.DisconnectNodes(context.CompositionInstance, DraggedItems.Select(i => i.Selectable).ToList());
+        var draggedSelectables = DraggedItems.Select(i => i.Selectable).ToList();
+        var reroutesToRemove = new HashSet<MagGraphItem>();
+        foreach (var connection in _connectionsToDraggedItems)
+        {
+            if (connection.SourceItem.IsReroute && DraggedItems.Contains(connection.SourceItem))
+                reroutesToRemove.Add(connection.SourceItem);
+            if (connection.TargetItem.IsReroute && DraggedItems.Contains(connection.TargetItem))
+                reroutesToRemove.Add(connection.TargetItem);
+        }
+
+        foreach (var connection in _layout.MagConnections)
+        {
+            if (!DraggedItems.Contains(connection.SourceItem) || !DraggedItems.Contains(connection.TargetItem))
+                continue;
+
+            reroutesToRemove.Remove(connection.SourceItem);
+            reroutesToRemove.Remove(connection.TargetItem);
+        }
+
+        if (reroutesToRemove.Count > 0)
+        {
+            // Cleanup removes dragged anchors; consume the held mouse button before they leave the layout.
+            CompleteDragOperation(context);
+            context.StateMachine.SetState(GraphStates.WaitForMouseRelease, context);
+        }
+
+        NodeActions.DisconnectNodes(context.CompositionInstance, draggedSelectables);
 
         // foreach (var c in _borderConnections)
         // {
@@ -514,6 +540,10 @@ internal sealed partial class MagItemMovement
 
             foreach (var otherItem in overlappingItems)
             {
+                // Only eligible items can join operator snap stacks.
+                if (!otherItem.SupportsBlockLayout)
+                    continue;
+
                 _snapping.TestItemsForInsertion(otherItem, insertionAnchorItem, ip, _view);
             }
         }
@@ -522,6 +552,9 @@ internal sealed partial class MagItemMovement
         {
             foreach (var draggedItem in DraggedItems)
             {
+                if (!otherItem.SupportsBlockLayout || !draggedItem.SupportsBlockLayout)
+                    continue;
+
                 _snapping.TestItemsForSnap(otherItem, draggedItem, false, _view);
                 _snapping.TestItemsForSnap(draggedItem, otherItem, true, _view);
             }
@@ -637,6 +670,7 @@ internal sealed partial class MagItemMovement
     private static readonly ValueSnapHandler _snapHandlerX = new(SnapResult.Orientations.Horizontal);
     private static readonly List<MagGraphItem> _visibleItemsForSnapping = [];
 
+    /// <summary>Captures movement state and splice candidates at the start of a drag.</summary>
     public void StartDragOperation(GraphUiContext context)
     {
         _draggedSelectables = DraggedItems.Select(i => i as ISelectableCanvasObject).ToList();
@@ -987,6 +1021,8 @@ internal sealed partial class MagItemMovement
         }
     }
 
+    /// <summary>Checks whether disconnecting a wire would remove an optional or repeated input row.</summary>
+    /// <returns>True when the disconnected occurrence would collapse a visible input row.</returns>
     public static bool DisconnectedInputWouldCollapseLine(MagGraphConnection connection)
     {
         var inputWasNotPrimary = connection.InputLineIndex > 0;
@@ -1220,6 +1256,10 @@ internal sealed partial class MagItemMovement
 
     private static void GetPotentialConnectionsAfterSnap(ref List<PotentialConnection> result, MagGraphItem a, MagGraphItem b)
     {
+        // Automatic connections require both items to participate in block layout.
+        if (!a.SupportsBlockLayout || !b.SupportsBlockLayout)
+            return;
+
         MagGraphConnection? inConnection;
 
         for (var bInputLineIndex = 0; bInputLineIndex < b.InputLines.Length; bInputLineIndex++)
@@ -1335,6 +1375,13 @@ internal sealed partial class MagItemMovement
     private void InitSpliceLinks(HashSet<MagGraphItem> draggedItems, Vector2 mousePosInCanvas)
     {
         SpliceSets.Clear();
+
+        // Splicing requires the entire selection to participate in block layout.
+        foreach (var item in draggedItems)
+        {
+            if (!item.SupportsBlockLayout)
+                return;
+        }
 
         foreach (var inputItemA in draggedItems)
         {
@@ -1634,6 +1681,8 @@ internal sealed partial class MagItemMovement
     /// <summary>
     /// Add snapped items to the given set or create new set
     /// </summary>
+    /// <param name="ignoreConnectionHash">Connection hash to exclude from traversal, or zero for no exclusion.</param>
+    /// <returns>The supplied or newly created set of items reachable through the allowed snapped connections.</returns>
     public static HashSet<MagGraphItem> CollectSnappedItems(MagGraphItem rootItem,  HashSet<MagGraphItem>? set = null, bool includeRoot= true, int ignoreConnectionHash= 0)
     {
         set ??= [];
@@ -1671,6 +1720,8 @@ internal sealed partial class MagItemMovement
         }
     }
 
+    /// <summary>Collects the union of the snapped blocks containing the supplied roots.</summary>
+    /// <returns>Distinct items in the reachable snapped blocks.</returns>
     public static HashSet<MagGraphItem> CollectSnappedItems(IEnumerable<MagGraphItem> rootItems)
     {
         var set = new HashSet<MagGraphItem>();
@@ -1771,4 +1822,5 @@ internal sealed partial class MagItemMovement
     private readonly MagGraphLayout _layout;
     private readonly NodeSelection _nodeSelection;
     private const float SnapTolerance = 0.01f;
+
 }

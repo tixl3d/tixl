@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "98932409-f9e8-46ca-bc4f-ccc08e021729",
+  "Description": "Forwards SharpDX.Direct3D11.BindFlags through a movable routing anchor.\n\nRetains its slot type when disconnected. Reference values are forwarded without cloning or taking ownership.",
+  "InputUis": [
+    {
+      "InputId": "3fd608d0-33f7-4410-875e-2e4d672e87fb",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "084a99fa-97d6-4206-8b45-14cfaa81e023",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "38f55b51-360a-44df-b51a-cb9e013fc9a7",
+  "Description": "Forwards SharpDX.Direct3D11.Filter through a movable routing anchor.\n\nRetains its slot type when disconnected. Reference values are forwarded without cloning or taking ownership.",
+  "InputUis": [
+    {
+      "InputId": "fe3fa1a7-d5ba-4473-9a2f-fa3f789fc6b7",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "681804b9-b826-4a22-ac0e-a8a0bc114e8b",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}

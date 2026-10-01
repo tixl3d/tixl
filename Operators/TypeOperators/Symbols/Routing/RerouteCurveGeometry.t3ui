@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "228a7275-1371-4819-9195-ae035d2c63a2",
+  "Description": "Forwards T3.Core.DataTypes.CurveGeometry through a movable routing anchor.\n\nRetains its slot type when disconnected. Reference values are forwarded without cloning or taking ownership.",
+  "InputUis": [
+    {
+      "InputId": "856fb959-d337-4f66-bf71-6ee3ddec0fe0",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "a188407e-420f-4df3-97a6-24c2b91adb78",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "7df77232-14f0-4a13-849b-a7b5d2315dca",
+  "Description": "Forwards T3.Core.DataTypes.VectorField through a movable routing anchor.\n\nRetains its slot type when disconnected. Reference values are forwarded without cloning or taking ownership.",
+  "InputUis": [
+    {
+      "InputId": "ce71b474-58eb-4b1b-b9fb-8a86c9ba7a22",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "7f3a6bcc-bcf7-45bd-835e-d7868c2a54be",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}

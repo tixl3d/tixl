@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "7aef6927-a8d4-43fc-8353-67b7f20c62b9",
+  "Description": "Forwards SharpDX.Direct3D11.UnorderedAccessView through a movable routing anchor.\n\nRetains its slot type when disconnected. Reference values are forwarded without cloning or taking ownership.",
+  "InputUis": [
+    {
+      "InputId": "6a3ee5da-64a0-4ed4-abe2-5508d95bed3d",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "8c78682d-d3ba-40e0-b791-95bc08a4b151",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}

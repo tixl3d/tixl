@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "fff832dd-d776-4789-9e0f-41ca344c80e5",
+  "Description": "Forwards SharpDX.Direct3D11.RasterizerState through a movable routing anchor.\n\nRetains its slot type when disconnected. Reference values are forwarded without cloning or taking ownership.",
+  "InputUis": [
+    {
+      "InputId": "8e511ae7-fb10-4af1-bc75-343b3a509e76",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "aa7f0e7c-618e-4d2a-91e9-7a502c3ee201",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}

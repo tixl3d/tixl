@@ -1,5 +1,6 @@
 #nullable enable
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.Settings;
@@ -13,6 +14,66 @@ namespace T3.Editor.UiModel.Helpers;
 /// </summary>
 internal static class SymbolAnalysis
 {
+    internal readonly record struct RerouteDefinition(Guid SymbolId, Guid InputId, Guid OutputId);
+
+    internal static readonly Guid TypeOperatorsPackageId = new("c8a53b12-ded3-4327-86d2-bd731b25de22");
+
+    internal static bool IsReroute(Symbol symbol) => TryGetRerouteDefinition(symbol, out _);
+
+    // Resolve the marker by name from the current package assembly so reloads need no retained CLR type.
+    internal static bool TryGetRerouteDefinition(Symbol symbol, out RerouteDefinition definition)
+    {
+        definition = default;
+        if (symbol.SymbolPackage.Id != TypeOperatorsPackageId || symbol.InputDefinitions.Count != 1 || symbol.OutputDefinitions.Count != 1
+            || symbol.InputDefinitions[0].IsMultiInput || symbol.InputDefinitions[0].ValueType != symbol.OutputDefinitions[0].ValueType
+            || symbol.OutputDefinitions[0].OutputDataType != null || symbol.Children.Count != 0)
+            return false;
+
+        var marked = false;
+        foreach (var marker in symbol.InstanceType.GetInterfaces())
+        {
+            if (marker.FullName == MarkerName && marker.Assembly == symbol.InstanceType.Assembly)
+            {
+                marked = true;
+                break;
+            }
+        }
+
+        if (!marked)
+            return false;
+
+        var inputs = 0;
+        var outputs = 0;
+        foreach (var field in symbol.InstanceType.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly))
+        {
+            if (!typeof(ISlot).IsAssignableFrom(field.FieldType))
+                continue;
+
+            if (!field.FieldType.IsGenericType || field.FieldType.GetGenericArguments()[0] != symbol.InputDefinitions[0].ValueType)
+                return false;
+
+            var genericType = field.FieldType.GetGenericTypeDefinition();
+            if (genericType == typeof(InputSlot<>))
+            {
+                inputs++;
+            }
+            else if (genericType == typeof(Slot<>))
+            {
+                outputs++;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        if (inputs != 1 || outputs != 1)
+            return false;
+
+        definition = new RerouteDefinition(symbol.Id, symbol.InputDefinitions[0].Id, symbol.OutputDefinitions[0].Id);
+        return true;
+    }
+
     /// <summary>
     /// Detailed info per symbol id, filled by UpdateDetails().
     /// </summary>
@@ -455,6 +516,8 @@ internal static class SymbolAnalysis
     }
     #endregion
 
+    /// <summary>Finds a string input configured as a file path on an operator instance.</summary>
+    /// <returns>True when a compatible runtime slot and file-path input UI are both found.</returns>
     public static bool TryGetFileInputFromInstance(Instance instance,
                                                    [NotNullWhen(true)] out InputSlot<string>? stringInput,
                                                    [NotNullWhen(true)] out StringInputUi? stringInputUi)
@@ -480,4 +543,6 @@ internal static class SymbolAnalysis
 
         return false;
     }
+
+    private const string MarkerName = "Types.Routing.IRerouteNode";
 }

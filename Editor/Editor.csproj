@@ -76,6 +76,7 @@
 
     <!-- ======================= Project References =========================== -->
     <ItemGroup>
+        <InternalsVisibleTo Include="Editor.IntegrationTests" />
         <ProjectReference Include="..\Core\Core.csproj" />
         <ProjectReference Include="..\IoServices\IoServices.csproj" />
         <ProjectReference Include="..\Logging\Logging.csproj" />

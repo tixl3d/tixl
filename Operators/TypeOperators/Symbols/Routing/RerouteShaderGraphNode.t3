@@ -1,0 +1,14 @@
+{
+  "FormatVersion": 3,
+  "Id": "f46cd7e5-291c-4dfa-9eb0-ecc97ee317b8",
+  "Inputs": [],
+  "Children": [],
+  "Connections": [
+    {
+      "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "SourceSlotId": "52e4901e-60c3-410d-b895-9eb4faecfc0e",
+      "TargetParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "TargetSlotId": "1747d94c-9dff-4002-9986-4b111a6ff374"
+    }
+  ]
+}
