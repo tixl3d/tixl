@@ -23,6 +23,10 @@
       "DefaultValue": 0
     },
     {
+      "Id": "7f3a9c21-5d4e-4b88-9a17-2c6e1b0d4f55"/*Flattening*/,
+      "DefaultValue": 0
+    },
+    {
       "Id": "c6692e97-e7f8-4b3f-95bc-5f86c2b399a5"/*Scale*/,
       "DefaultValue": 1.0
     },

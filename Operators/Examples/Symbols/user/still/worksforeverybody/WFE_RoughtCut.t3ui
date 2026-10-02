@@ -549,5 +549,39 @@
         "Y": 504.70654
       }
     }
-  ]
+  ],
+  "Settings": {
+    "RenderExport": {
+  "TimeReference": "Bars",
+  "StartInBars": 0.0,
+  "EndInBars": 8.0,
+  "FrameRate": 60.0,
+  "OverrideMotionBlurSamples": -1,
+  "RenderMode": "Video",
+  "VideoCodec": "H264",
+  "Bitrate": 25000000,
+  "AutoIncrementVersionNumber": true,
+  "CreateSubFolder": true,
+  "AutoIncrementSubFolder": true,
+  "ExportAudio": true,
+  "FileFormat": "Png",
+  "TimeRange": "Custom",
+  "ContinuousClock": "Realtime",
+  "ContinuousFrameRate": "FixedFps",
+  "ResolutionFactor": 1.0,
+  "VideoFilePath": "./Render/render-v01.mp4",
+  "SequenceFilePath": "./ImageSequence/",
+  "SequenceFileName": "v01",
+  "SequencePrefix": "render"
+},
+    "Timeline": {
+  "ScaleX": 80.0,
+  "ScrollX": -3.0,
+  "Mode": "DopeView",
+  "TimelineHeight": -1,
+  "InlineDataClipEditEnabled": false,
+  "DetailsAreaHeight": 200.0,
+  "InlineDataClipStripHeight": null
+}
+  }
 }

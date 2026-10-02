@@ -1,11 +1,10 @@
+extern alias skiasvg;
 #nullable enable
-using System.Drawing;
-using System.Drawing.Drawing2D;
+using System.Collections.Generic;
 using Lib.Utils;
-using Svg;
-using Svg.Pathing;
-using Svg.Transforms;
+using SkiaSharp;
 using T3.Core.Utils;
+using S = skiasvg::Svg;
 
 namespace Lib.point.io;
 
@@ -17,106 +16,82 @@ internal sealed class LoadSvg : Instance<LoadSvg>, IDescriptiveFilename
 
     public LoadSvg()
     {
-        _svgResource = new Resource<SvgDocument>(FilePath, SvgLoader.TryLoad);
+        _svgResource = new Resource<S.SvgDocument>(FilePath, SkiaSvgGeometry.TryLoad);
         _svgResource.AddDependentSlots(ResultList);
         ResultList.UpdateAction += Update;
         _pointListWithSeparator.TypedElements[_pointListWithSeparator.NumElements - 1] = Point.Separator();
     }
 
-    private struct GraphicsPathEntry
+    /// <summary>One contour, already flattened into the points it contributes.</summary>
+    private struct PathEntry
     {
-        public GraphicsPath GraphicsPath;
+        public List<SKPoint> Points;
         public bool NeedsClosing;
     }
 
     private void Update(EvaluationContext context)
     {
-        // The SVG library draws through System.Drawing, which is Windows-only since .NET 7 and fails
-        // while this method is being prepared - no try inside it can catch that. Hence the split.
-        if (!T3.Core.Utils.WindowsOnlyFeature.IsAvailable("SVG loading"))
-        {
-            _pointListWithSeparator.SetLength(0);
-            ResultList.Value = _pointListWithSeparator;
-            return;
-        }
-
-        UpdateFromSvg(context);
-    }
-
-    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-    private void UpdateFromSvg(EvaluationContext context)
-    {
-        if (!_svgResource.TryGetValue(context, out var svgDoc) && !Scale.IsDirty && !CenterToBounds.IsDirty && !ScaleToBounds.IsDirty && !ImportAs.IsDirty && !ReduceFactor.IsDirty)
+        if (!_svgResource.TryGetValue(context, out var svgDoc)
+            && !Scale.IsDirty && !CenterToBounds.IsDirty && !ScaleToBounds.IsDirty
+            && !ImportAs.IsDirty && !ReduceFactor.IsDirty && !Flattening.IsDirty)
         {
             // Nothing changed, keep existing data
             return;
         }
+
         if (svgDoc == null)
         {
             _pointListWithSeparator.SetLength(0);
             ResultList.Value = _pointListWithSeparator;
             return;
         }
+
         var centerToBounds = CenterToBounds.GetValue(context);
         var scaleToBounds = ScaleToBounds.GetValue(context);
-
-        var bounds = new Vector3(svgDoc.Bounds.Size.Width, svgDoc.Bounds.Size.Height, 0);
-        var fitBoundsFactor = scaleToBounds ? (2f / bounds.Y) : 1;
-        var scale = Scale.GetValue(context) * fitBoundsFactor;
 
         var importMode = ImportAs.GetValue(context);
         var importAsLines = importMode == 0;
         var importAsShape = importMode == 2;
 
+        var flattenMode = (SkiaSvgGeometry.FlattenModes)Flattening.GetValue(context);
+
+        // Adaptive reads this as a flatness tolerance and even spacing as a distance, so the useful ranges
+        // differ by an order of magnitude. Scaling here keeps the one parameter meaningful for both.
         var reduceFactor = ReduceFactor.GetValue(context).Clamp(0.001f, 1f);
-        var selectedShapeIndex = SelectSingleShape.GetValue(context); // Get the selected shape index
+        var flattenAmount = flattenMode == SkiaSvgGeometry.FlattenModes.EvenSpacing
+                                ? reduceFactor * 10f
+                                : reduceFactor;
+
+        var selectedShapeIndex = SelectSingleShape.GetValue(context);
 
         var svgElements = svgDoc.Descendants();
         var pathElements = importAsShape
-            ? GetSelectedShapePathElements(svgElements, selectedShapeIndex)
-            : ConvertAllNodesIntoGraphicPaths(svgElements, importAsLines);
+                               ? GetSelectedShape(svgElements, selectedShapeIndex, flattenMode, flattenAmount, out var contentBounds)
+                               : ConvertAllNodes(svgElements, importAsLines, flattenMode, flattenAmount, out contentBounds);
 
-        // Calculate actual bounds and center offset based on import mode
+        // The document used to answer this through System.Drawing; what it meant was the content's extent.
+        var bounds = new Vector3(contentBounds.Width, contentBounds.Height, 0);
+        var fitBoundsFactor = scaleToBounds && bounds.Y > 0 ? (2f / bounds.Y) : 1;
+        var scale = Scale.GetValue(context) * fitBoundsFactor;
+
         Vector3 centerOffset;
-
         if (importAsShape && pathElements.Count > 0)
         {
-            // Get actual bounds from the shape path
-            var minX = float.MaxValue;
-            var minY = float.MaxValue;
-            var maxX = float.MinValue;
-            var maxY = float.MinValue;
-
-            foreach (var pathElement in pathElements)
-            {
-                var pathBounds = pathElement.GraphicsPath.GetBounds();
-                if (pathBounds.Left < minX) minX = pathBounds.Left;
-                if (pathBounds.Right > maxX) maxX = pathBounds.Right;
-                if (pathBounds.Bottom < minY) minY = pathBounds.Bottom;
-                if (pathBounds.Top > maxY) maxY = pathBounds.Top;
-            }
-
-            var shapeWidth = maxX - minX;
-            var shapeHeight = maxY - minY;
-            
-
-            // Center offset should account for the actual position of the shape
             centerOffset = centerToBounds
-                ? new Vector3(-(minX + shapeWidth / 2), (minY + shapeHeight / 2), 0)
-                : Vector3.Zero;
+                               ? new Vector3(-(contentBounds.Left + contentBounds.Width / 2),
+                                             contentBounds.Top + contentBounds.Height / 2, 0)
+                               : Vector3.Zero;
         }
         else
         {
             centerOffset = centerToBounds ? new Vector3(-bounds.X / 2, bounds.Y / 2, 0) : Vector3.Zero;
         }
 
-        // Flatten and sum total point count including separators 
+        // Total including the separator after each contour, and the repeated first point where one closes.
         var totalPointCount = 0;
-        foreach (var p in pathElements)
+        foreach (var entry in pathElements)
         {
-            p.GraphicsPath.Flatten(null, reduceFactor);
-            var closePoint = p.NeedsClosing ? 1 : 0;
-            totalPointCount += p.GraphicsPath.PointCount + 1 + closePoint;
+            totalPointCount += entry.Points.Count + 1 + (entry.NeedsClosing ? 1 : 0);
         }
 
         if (totalPointCount != _pointListWithSeparator.NumElements)
@@ -124,68 +99,58 @@ internal sealed class LoadSvg : Instance<LoadSvg>, IDescriptiveFilename
             _pointListWithSeparator.SetLength(totalPointCount);
         }
 
+        if (totalPointCount == 0)
+        {
+            ResultList.Value = _pointListWithSeparator;
+            return;
+        }
+
         var pointIndex = 0;
-        foreach (var pathElement in pathElements)
+        foreach (var entry in pathElements)
         {
             var startIndex = pointIndex;
+            var points = entry.Points;
+            var pathPointCount = points.Count;
 
-            var path = pathElement.GraphicsPath;
-            var pathPointCount = path.PathPoints.Length;
-            for (var pathPointIndex = 0; pathPointIndex < pathPointCount; pathPointIndex++)
+            for (var i = 0; i < pathPointCount; i++)
             {
-                var point = path.PathPoints[pathPointIndex];
+                var point = points[i];
+                ref var target = ref _pointListWithSeparator.TypedElements[startIndex + i];
 
-                _pointListWithSeparator.TypedElements[startIndex + pathPointIndex].Position
-                    = (new Vector3(point.X, 1 - point.Y, 0) + centerOffset) * scale;
-                _pointListWithSeparator.TypedElements[startIndex + pathPointIndex].F1 = 1;
-                _pointListWithSeparator.TypedElements[startIndex + pathPointIndex].Orientation = Quaternion.Identity;
-                _pointListWithSeparator.TypedElements[startIndex + pathPointIndex].Color = new Vector4(1.0f); // We need a better fix, maybe with the colors from the SVG file
-                _pointListWithSeparator.TypedElements[startIndex + pathPointIndex].F2 = 1;
-                _pointListWithSeparator.TypedElements[startIndex + pathPointIndex].Scale = Vector3.One;
+                target.Position = (new Vector3(point.X, 1 - point.Y, 0) + centerOffset) * scale;
+                target.F1 = 1;
+                target.Orientation = Quaternion.Identity;
+                target.Color = new Vector4(1.0f); // We need a better fix, maybe with the colors from the SVG file
+                target.F2 = 1;
+                target.Scale = Vector3.One;
             }
 
-            // Calculate normals
+            // Orientation follows the step to the next point; the last point borrows the step before it.
             if (pathPointCount > 1)
             {
-                for (var pathPointIndex = 0; pathPointIndex < pathPointCount; pathPointIndex++)
+                for (var i = 0; i < pathPointCount; i++)
                 {
-                    if (pathPointIndex == 0)
-                    {
-                        _pointListWithSeparator.TypedElements[startIndex + pathPointIndex].Orientation =
-                            RotationFromTwoPositions(_pointListWithSeparator.TypedElements[0].Position,
-                                                     _pointListWithSeparator.TypedElements[1].Position);
-                    }
-                    else if (pathPointIndex == pathPointCount - 1)
-                    {
-                        _pointListWithSeparator.TypedElements[startIndex + pathPointIndex].Orientation =
-                            RotationFromTwoPositions(_pointListWithSeparator.TypedElements[pathPointCount - 2].Position,
-                                                     _pointListWithSeparator.TypedElements[pathPointCount - 1].Position);
-                    }
-                    else
-                    {
-                        _pointListWithSeparator.TypedElements[startIndex + pathPointIndex].Orientation =
-                            RotationFromTwoPositions(_pointListWithSeparator.TypedElements[startIndex + pathPointIndex].Position,
-                                                     _pointListWithSeparator.TypedElements[startIndex + pathPointIndex + 1].Position);
-                    }
+                    var a = i == pathPointCount - 1 ? pathPointCount - 2 : i;
+
+                    _pointListWithSeparator.TypedElements[startIndex + i].Orientation =
+                        RotationFromTwoPositions(_pointListWithSeparator.TypedElements[startIndex + a].Position,
+                                                 _pointListWithSeparator.TypedElements[startIndex + a + 1].Position);
                 }
             }
 
-            // Close loop?
-            if (pathElement.NeedsClosing)
+            pointIndex += pathPointCount;
+
+            if (entry.NeedsClosing)
             {
-                _pointListWithSeparator.TypedElements[startIndex + pathPointCount] = _pointListWithSeparator.TypedElements[startIndex];
+                _pointListWithSeparator.TypedElements[pointIndex] = _pointListWithSeparator.TypedElements[startIndex];
                 pointIndex++;
             }
-
-            pointIndex += path.PathPoints.Length;
 
             _pointListWithSeparator.TypedElements[pointIndex] = Point.Separator();
             pointIndex++;
         }
 
-
         ResultList.Value = _pointListWithSeparator;
-
     }
 
     private static Quaternion RotationFromTwoPositions(Vector3 p1, Vector3 p2)
@@ -193,92 +158,76 @@ internal sealed class LoadSvg : Instance<LoadSvg>, IDescriptiveFilename
         return Quaternion.CreateFromAxisAngle(new Vector3(0, 0, 1), (float)(Math.Atan2(p1.X - p2.X, -(p1.Y - p2.Y)) + Math.PI / 2));
     }
 
-    /// <summary>
-    /// Gets a specific path element by index from all SVG paths
-    /// </summary>
-    private static List<GraphicsPathEntry> GetSelectedShapePathElements(IEnumerable<SvgElement> nodes, int selectedIndex)
+    /// <summary>One chosen path element, split into its contours.</summary>
+    private static List<PathEntry> GetSelectedShape(IEnumerable<S.SvgElement> nodes, int selectedIndex,
+                                                    SkiaSvgGeometry.FlattenModes mode, float amount,
+                                                    out SKRect contentBounds)
     {
-        var paths = new List<GraphicsPathEntry>();
-        _svgRenderer ??= SvgRenderer.FromImage(new Bitmap(1, 1));
+        var entries = new List<PathEntry>();
+        contentBounds = SKRect.Empty;
 
-        // Collect all SvgPath elements
-        var allSvgPaths = nodes.OfType<SvgPath>().ToList();
-
+        var allSvgPaths = nodes.OfType<S.SvgPath>().ToList();
         if (allSvgPaths.Count == 0)
-            return paths;
+            return entries;
 
-        // Clamp the selected index to valid range
-        var clampedIndex = selectedIndex;
-        if (clampedIndex < 0)
-            clampedIndex = 0;
-        if (clampedIndex >= allSvgPaths.Count)
-            clampedIndex = allSvgPaths.Count - 1;
+        var clampedIndex = selectedIndex.Clamp(0, allSvgPaths.Count - 1);
 
-        var targetPath = allSvgPaths[clampedIndex];
+        using var path = SkiaSvgGeometry.TryBuildPath(allSvgPaths[clampedIndex]);
+        if (path == null)
+            return entries;
 
-        // Let the library build the full path (handles the new AddToPath API internally)
-        var fullPath = targetPath.Path(_svgRenderer);
-        SplitGraphicsPathIntoSubPaths(fullPath, paths);
+        contentBounds = path.Bounds;
+        foreach (var contour in SkiaSvgGeometry.Flatten(path, mode, amount))
+        {
+            entries.Add(new PathEntry { Points = contour, NeedsClosing = false });
+        }
 
-        return paths;
+        return entries;
     }
 
-    private static List<GraphicsPathEntry> ConvertAllNodesIntoGraphicPaths(IEnumerable<SvgElement> nodes, bool importAsLines)
+    private static List<PathEntry> ConvertAllNodes(IEnumerable<S.SvgElement> nodes, bool importAsLines,
+                                                  SkiaSvgGeometry.FlattenModes mode, float amount,
+                                                  out SKRect contentBounds)
     {
-        var paths = new List<GraphicsPathEntry>();
-
-        _svgRenderer ??= SvgRenderer.FromImage(new Bitmap(1, 1));
+        var entries = new List<PathEntry>();
+        var bounds = SKRect.Empty;
+        var hasBounds = false;
 
         foreach (var node in nodes)
         {
-            switch (node)
+            if (node is S.SvgGroup)
+                continue;
+
+            using var path = SkiaSvgGeometry.TryBuildPath(node);
+            if (path == null)
+                continue;
+
+            if (!hasBounds)
             {
-                case SvgPath svgPath:
-                    {
-                        // Let the library build the full path (handles the new AddToPath API internally)
-                        var fullPath = svgPath.Path(_svgRenderer);
-                        SplitGraphicsPathIntoSubPaths(fullPath, paths);
-                        break;
-                    }
-                case SvgGroup:
-                    break;
+                bounds = path.Bounds;
+                hasBounds = true;
+            }
+            else
+            {
+                bounds.Union(path.Bounds);
+            }
 
-                case SvgPathBasedElement element:
-                    {
-                        if (element is SvgRectangle rect)
-                        {
-                            if (rect.Transforms != null)
-                            {
-                                foreach (var t in rect.Transforms)
-                                {
-                                    if (t is not SvgTranslate tr)
-                                        continue;
+            // A closed primitive drawn as lines has to return to its first point. A path carries its own
+            // close, and points mode has nothing to join up.
+            var needsClosing = importAsLines && node is S.SvgRectangle or S.SvgCircle or S.SvgEllipse;
 
-                                    rect.X += tr.X;
-                                    rect.Y += tr.Y;
-                                }
-                            }
-                        }
-
-                        var needsClosing = element is SvgRectangle or SvgCircle or SvgEllipse;
-
-                        var graphicsPath = element.Path(_svgRenderer);
-
-                        paths.Add(new GraphicsPathEntry
-                        {
-                            GraphicsPath = graphicsPath,
-                            NeedsClosing = needsClosing && importAsLines
-                        });
-                        break;
-                    }
+            foreach (var contour in SkiaSvgGeometry.Flatten(path, mode, amount))
+            {
+                entries.Add(new PathEntry { Points = contour, NeedsClosing = needsClosing });
             }
         }
 
-        return paths;
+        contentBounds = bounds;
+        return entries;
     }
 
     public InputSlot<string> SourcePathSlot => FilePath;
-    private readonly Resource<SvgDocument> _svgResource;
+    private readonly Resource<S.SvgDocument> _svgResource;
     private readonly StructuredList<Point> _pointListWithSeparator = new(101);
 
     [Input(Guid = "EF2A461D-C66D-44D8-8B0E-E48A57EC991F")]
@@ -302,89 +251,14 @@ internal sealed class LoadSvg : Instance<LoadSvg>, IDescriptiveFilename
     [Input(Guid = "05E5AEC4-35A7-48DD-8F79-91EF754D20E8")]
     public readonly InputSlot<int> SelectSingleShape = new();
 
+    [Input(Guid = "7F3A9C21-5D4E-4B88-9A17-2C6E1B0D4F55", MappedType = typeof(SkiaSvgGeometry.FlattenModes))]
+    public readonly InputSlot<int> Flattening = new();
+
     [SuppressMessage("ReSharper", "UnusedMember.Local")]
     private enum ImportModes
     {
         Lines,
         Points,
-        Shape 
+        Shape
     }
-
-    /// <summary>
-    /// Splits a GraphicsPath into sub-paths at each StartPoint marker.
-    /// This avoids manual segment iteration with AddToPath, letting the SVG library
-    /// handle path construction internally via SvgPath.Path(renderer).
-    /// </summary>
-    private static void SplitGraphicsPathIntoSubPaths(GraphicsPath? fullPath, List<GraphicsPathEntry> paths)
-    {
-        if (fullPath == null || fullPath.PointCount == 0)
-            return;
-
-        var points = fullPath.PathPoints;
-        var types = fullPath.PathTypes;
-
-        GraphicsPath? currentSubPath = null;
-        var subPathStart = PointF.Empty;
-
-        for (var i = 0; i < points.Length; i++)
-        {
-            var pathType = types[i];
-            var pointType = (PathPointType)(pathType & 0x07); // mask off flags
-            var isStartPoint = pointType == PathPointType.Start;
-            var isCloseSubPath = (pathType & (byte)PathPointType.CloseSubpath) != 0;
-
-            if (isStartPoint)
-            {
-                // Flush previous sub-path
-                if (currentSubPath != null && currentSubPath.PointCount > 0)
-                {
-                    paths.Add(new GraphicsPathEntry
-                    {
-                        GraphicsPath = currentSubPath,
-                        NeedsClosing = false
-                    });
-                }
-                currentSubPath = new GraphicsPath();
-                subPathStart = points[i];
-            }
-
-            currentSubPath ??= new GraphicsPath();
-
-            if (pointType == PathPointType.Line)
-            {
-                var prev = i > 0 ? points[i - 1] : subPathStart;
-                currentSubPath.AddLine(prev, points[i]);
-            }
-            else if (pointType == PathPointType.Bezier3 && i + 2 < points.Length)
-            {
-                // Cubic bezier uses 3 consecutive points (control1, control2, endpoint)
-                var prev = i > 0 ? points[i - 1] : subPathStart;
-                currentSubPath.AddBezier(prev, points[i], points[i + 1], points[i + 2]);
-                i += 2; // skip the two extra bezier points
-            }
-
-            if (isCloseSubPath && currentSubPath.PointCount > 0)
-            {
-                currentSubPath.CloseFigure();
-                paths.Add(new GraphicsPathEntry
-                {
-                    GraphicsPath = currentSubPath,
-                    NeedsClosing = false
-                });
-                currentSubPath = null;
-            }
-        }
-
-        // Flush last sub-path
-        if (currentSubPath != null && currentSubPath.PointCount > 0)
-        {
-            paths.Add(new GraphicsPathEntry
-            {
-                GraphicsPath = currentSubPath,
-                NeedsClosing = false
-            });
-        }
-    }
-
-    private static ISvgRenderer? _svgRenderer;
 }

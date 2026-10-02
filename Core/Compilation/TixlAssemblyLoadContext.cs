@@ -613,7 +613,98 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
             }
         }
 
+        // NuGet keeps native dependencies under runtimes/<rid>/native/ rather than beside the managed dll, so
+        // a package like SkiaSharp resolves nowhere by the probes above. Checking the layout here makes any
+        // operator package's native dependency work, and works the same way on every platform.
+        var fromRuntimes = TryLoadFromRuntimesFolder(unmanagedDllName);
+        if (fromRuntimes != IntPtr.Zero)
+            return fromRuntimes;
+
         return IntPtr.Zero;
+    }
+
+    /// <summary>Probes the NuGet runtimes layout, most specific identifier first.</summary>
+    private IntPtr TryLoadFromRuntimesFolder(string unmanagedDllName)
+    {
+        var runtimesRoot = Path.Combine(MainDirectory, "runtimes");
+        if (!Directory.Exists(runtimesRoot))
+            return IntPtr.Zero;
+
+        var bare = Path.GetFileNameWithoutExtension(unmanagedDllName);
+
+        foreach (var rid in NativeRuntimeIdentifiers())
+        {
+            var nativeDir = Path.Combine(runtimesRoot, rid, "native");
+            if (!Directory.Exists(nativeDir))
+                continue;
+
+            foreach (var candidate in NativeFileNames(bare))
+            {
+                var path = Path.Combine(nativeDir, candidate);
+                if (!File.Exists(path))
+                    continue;
+
+                try
+                {
+                    return LoadUnmanagedDllFromPath(path);
+                }
+                catch (Exception e)
+                {
+                    Log.Error($"{Name!}: Failed to load unmanaged dll {unmanagedDllName} from {path}: {e}");
+                    return IntPtr.Zero;
+                }
+            }
+        }
+
+        return IntPtr.Zero;
+    }
+
+    private static IEnumerable<string> NativeRuntimeIdentifiers()
+    {
+        var architecture = RuntimeInformation.ProcessArchitecture switch
+                               {
+                                   Architecture.X64   => "x64",
+                                   Architecture.X86   => "x86",
+                                   Architecture.Arm64 => "arm64",
+                                   Architecture.Arm   => "arm",
+                                   _                  => null,
+                               };
+
+        if (architecture == null)
+            yield break;
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            yield return $"win-{architecture}";
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            yield return $"osx-{architecture}";
+        }
+        else
+        {
+            // musl builds are published under their own identifier and are not interchangeable with glibc ones.
+            yield return $"linux-{architecture}";
+            yield return $"linux-musl-{architecture}";
+        }
+    }
+
+    private static IEnumerable<string> NativeFileNames(string bare)
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            yield return bare + ".dll";
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            yield return bare + ".dylib";
+            yield return "lib" + bare + ".dylib";
+        }
+        else
+        {
+            yield return bare + ".so";
+            yield return "lib" + bare + ".so";
+        }
     }
 
     private void AddDependency(AssemblyTreeNode node)
