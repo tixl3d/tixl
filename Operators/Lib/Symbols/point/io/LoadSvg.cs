@@ -31,6 +31,21 @@ internal sealed class LoadSvg : Instance<LoadSvg>, IDescriptiveFilename
 
     private void Update(EvaluationContext context)
     {
+        // The SVG library draws through System.Drawing, which is Windows-only since .NET 7 and fails
+        // while this method is being prepared - no try inside it can catch that. Hence the split.
+        if (!T3.Core.Utils.WindowsOnlyFeature.IsAvailable("SVG loading"))
+        {
+            _pointListWithSeparator.SetLength(0);
+            ResultList.Value = _pointListWithSeparator;
+            return;
+        }
+
+        UpdateFromSvg(context);
+    }
+
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private void UpdateFromSvg(EvaluationContext context)
+    {
         if (!_svgResource.TryGetValue(context, out var svgDoc) && !Scale.IsDirty && !CenterToBounds.IsDirty && !ScaleToBounds.IsDirty && !ImportAs.IsDirty && !ReduceFactor.IsDirty)
         {
             // Nothing changed, keep existing data
