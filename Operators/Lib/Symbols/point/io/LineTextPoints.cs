@@ -1,11 +1,10 @@
+extern alias skiasvg;
 #nullable enable
-using System.Drawing;
-using System.Drawing.Drawing2D;
+using System.Collections.Generic;
 using Lib.Utils;
-using Svg;
-using Svg.Pathing;
-using Svg.Transforms;
+using SkiaSharp;
 using T3.Core.Utils;
+using skiasvg::Svg;
 // ReSharper disable MemberCanBePrivate.Global
 
 // ReSharper disable TooWideLocalVariableScope
@@ -28,27 +27,13 @@ internal sealed class LineTextPoints : Instance<LineTextPoints>
 
     public LineTextPoints()
     {
-        _svgResource = new Resource<SvgDocument>(FilePath, SvgLoader.TryLoad);
+        _svgResource = new Resource<SvgDocument>(FilePath, SkiaSvgGeometry.TryLoad);
         _svgResource.AddDependentSlots(ResultList);
         ResultList.UpdateAction += Update;
         _structuredPoints.TypedElements[_structuredPoints.NumElements - 1] = Point.Separator();
     }
 
     private void Update(EvaluationContext context)
-    {
-        // The SVG library draws through System.Drawing, which is Windows-only since .NET 7 and fails
-        // while this method is being prepared - no try inside it can catch that. Hence the split.
-        if (!T3.Core.Utils.WindowsOnlyFeature.IsAvailable("SVG line fonts"))
-        {
-            ResultList.Value = null;
-            return;
-        }
-
-        UpdateFromSvg(context);
-    }
-
-    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-    private void UpdateFromSvg(EvaluationContext context)
     {
         if (!_svgResource.TryGetValue(context, out var svgDoc))
         {
@@ -483,7 +468,7 @@ internal sealed class LineFont
             font.UnitsPerEm = svgFontFace.UnitsPerEm;
         }
 
-        font.LineHeight = svgFont.FontSize != 0 ? svgFont.FontSize : font.UnitsPerEm;
+        font.LineHeight = svgFont.FontSize.Value != 0 ? svgFont.FontSize.Value : font.UnitsPerEm;
 
         foreach (var svgFontChild in svgFont.Children)
         {
@@ -500,6 +485,7 @@ internal sealed class LineFont
                 continue;
             }
 
+            var glyphBounds = GlyphPathEntry.BoundsOf(svgGlyph);
             var uniCode = svgGlyph.Unicode[0];
             var glyphValue = (int)uniCode;
 
@@ -518,8 +504,8 @@ internal sealed class LineFont
                                                          AdvanceX = svgGlyph.HorizAdvX,
                                                          VertOriginX = svgGlyph.VertOriginX,
                                                          VertOriginY = svgGlyph.VertOriginY,
-                                                         BoundsMin = new Vector2(svgGlyph.Bounds.Left, svgGlyph.Bounds.Top),
-                                                         BoundsMax = new Vector2(svgGlyph.Bounds.Right, svgGlyph.Bounds.Bottom),
+                                                         BoundsMin = new Vector2(glyphBounds.Left, glyphBounds.Top),
+                                                         BoundsMax = new Vector2(glyphBounds.Right, glyphBounds.Bottom),
                                                      };
         }
     }
@@ -527,37 +513,18 @@ internal sealed class LineFont
     private static Point[] GetPointsFromSvgGroup(LineFont font, SvgElement svgGlyph)
     {
         var svgElements = new List<SvgElement> { svgGlyph };
-        var pathElements = GraphicsPathEntry.CreateFromSvgElements(svgElements, true);
-
-        // Flatten and sum total point count including separators 
-            
+        var pathElements = GlyphPathEntry.CreateFromSvgElements(svgElements, font.ReduceCurveThreshold);
 
         _tempPoints.Clear();
-        foreach (var pathElement in pathElements)
+        foreach (var pathPoints in pathElements)
         {
-            try
-            {
-                pathElement.GraphicsPath?.Flatten(null, font.ReduceCurveThreshold);
-                _ = pathElement.GraphicsPath?.PathPoints.Length; // Access path points to see if result is valid. 
-            }
-            catch (Exception e)
-            {
-                Log.Debug("Can't flatten element" + e.Message);
-                continue;
-            }
+            var pathPointCount = pathPoints.Count;
 
-            var path = pathElement.GraphicsPath;
-            if (path == null)
-                continue;
-
-            var pathPointCount = path.PathPoints.Length;
-
-            var loopStartIndex = _tempPoints.Count;
             var lastPos = new Vector3(-9999f, 0f, 0f);
 
             for (var pathPointIndex = 0; pathPointIndex < pathPointCount; pathPointIndex++)
             {
-                var point = path.PathPoints[pathPointIndex];
+                var point = pathPoints[pathPointIndex];
 
                 var position = (new Vector3(point.X, 1 - point.Y, 0));
                 var length = (lastPos - position).LengthSquared();
@@ -577,12 +544,6 @@ internal sealed class LineFont
                                         Scale = Vector3.One,
                                         F2 = 1,
                                     });
-            }
-
-            // Close loop?
-            if (pathElement.NeedsClosing)
-            {
-                _tempPoints.Add(_tempPoints[loopStartIndex]);
             }
 
             _tempPoints.Add(Point.Separator());
@@ -660,141 +621,39 @@ internal sealed class LineFont
     }
 }
 
-internal sealed class GraphicsPathEntry
+/// <summary>
+/// Turns the shapes of a glyph into the point lists they contribute, one per contour.
+/// </summary>
+/// <remarks>
+/// This used to build a System.Drawing GraphicsPath, which is Windows-only since .NET 7. The geometry now
+/// comes from <see cref="SkiaSvgGeometry"/>, which assembles paths from the SVG DOM's own segments and
+/// returns one list per contour - so the sub-path splitting this class used to do by hand is gone.
+/// </remarks>
+internal static class GlyphPathEntry
 {
-    public GraphicsPath? GraphicsPath;
-    public bool NeedsClosing;
-
-    public static List<GraphicsPathEntry> CreateFromSvgElements(IEnumerable<SvgElement> nodes, bool importAsLines)
+    public static List<List<SKPoint>> CreateFromSvgElements(IEnumerable<SvgElement> nodes, float curveTolerance)
     {
-        var paths = new List<GraphicsPathEntry>();
-
-        _svgRenderer ??= SvgRenderer.FromImage(new Bitmap(1, 1));
+        var contours = new List<List<SKPoint>>();
 
         foreach (var node in nodes)
         {
-            switch (node)
-            {
-                case SvgPath svgPath:
-                {
-                    var fullPath = svgPath.Path(_svgRenderer);
-                    SplitGraphicsPathIntoSubPaths(fullPath, paths);
-                    break;
-                }
+            if (node is SvgGroup)
+                continue;
 
-                case SvgGlyph svgGlyph:
-                {
-                    var fullPath = svgGlyph.Path(_svgRenderer);
-                    SplitGraphicsPathIntoSubPaths(fullPath, paths);
-                    break;
-                }
+            using var path = SkiaSvgGeometry.TryBuildPath(node);
+            if (path == null)
+                continue;
 
-                case SvgGroup:
-                    break;
-
-                case SvgPathBasedElement element:
-                {
-                    if (element is SvgRectangle { Transforms: not null } rect)
-                    {
-                        foreach (var t in rect.Transforms)
-                        {
-                            if (t is not SvgTranslate tr)
-                                continue;
-
-                            rect.X += tr.X;
-                            rect.Y += tr.Y;
-                        }
-                    }
-
-                    var needsClosing = element is SvgRectangle or SvgCircle or SvgEllipse;
-
-                    var graphicsPath = element.Path(_svgRenderer);
-
-                    paths.Add(new GraphicsPathEntry
-                                  {
-                                      GraphicsPath = graphicsPath,
-                                      NeedsClosing = needsClosing && importAsLines
-                                  });
-                    break;
-                }
-            }
+            contours.AddRange(SkiaSvgGeometry.Flatten(path, SkiaSvgGeometry.FlattenModes.Adaptive, curveTolerance));
         }
 
-        return paths;
+        return contours;
     }
 
-    /// <summary>
-    /// Splits a GraphicsPath into sub-paths at each StartPoint marker.
-    /// This avoids manual segment iteration with AddToPath, letting the SVG library
-    /// handle path construction internally via SvgPath.Path(renderer).
-    /// </summary>
-    private static void SplitGraphicsPathIntoSubPaths(GraphicsPath? fullPath, List<GraphicsPathEntry> paths)
+    /// <summary>The element's own extent, which the SVG DOM no longer answers for itself.</summary>
+    public static SKRect BoundsOf(SvgElement element)
     {
-        if (fullPath == null || fullPath.PointCount == 0)
-            return;
-
-        var points = fullPath.PathPoints;
-        var types = fullPath.PathTypes;
-
-        GraphicsPath? currentSubPath = null;
-        var subPathStart = PointF.Empty;
-
-        for (var i = 0; i < points.Length; i++)
-        {
-            var pathType = types[i];
-            var pointType = (PathPointType)(pathType & 0x07);
-            var isStartPoint = pointType == PathPointType.Start;
-            var isCloseSubPath = (pathType & (byte)PathPointType.CloseSubpath) != 0;
-
-            if (isStartPoint)
-            {
-                if (currentSubPath != null && currentSubPath.PointCount > 0)
-                {
-                    paths.Add(new GraphicsPathEntry
-                                  {
-                                      GraphicsPath = currentSubPath,
-                                      NeedsClosing = false
-                                  });
-                }
-                currentSubPath = new GraphicsPath();
-                subPathStart = points[i];
-            }
-
-            currentSubPath ??= new GraphicsPath();
-
-            if (pointType == PathPointType.Line)
-            {
-                var prev = i > 0 ? points[i - 1] : subPathStart;
-                currentSubPath.AddLine(prev, points[i]);
-            }
-            else if (pointType == PathPointType.Bezier3 && i + 2 < points.Length)
-            {
-                var prev = i > 0 ? points[i - 1] : subPathStart;
-                currentSubPath.AddBezier(prev, points[i], points[i + 1], points[i + 2]);
-                i += 2;
-            }
-
-            if (isCloseSubPath && currentSubPath.PointCount > 0)
-            {
-                currentSubPath.CloseFigure();
-                paths.Add(new GraphicsPathEntry
-                              {
-                                  GraphicsPath = currentSubPath,
-                                  NeedsClosing = false
-                              });
-                currentSubPath = null;
-            }
-        }
-
-        if (currentSubPath != null && currentSubPath.PointCount > 0)
-        {
-            paths.Add(new GraphicsPathEntry
-                          {
-                              GraphicsPath = currentSubPath,
-                              NeedsClosing = false
-                          });
-        }
+        using var path = SkiaSvgGeometry.TryBuildPath(element);
+        return path?.Bounds ?? SKRect.Empty;
     }
-
-    private static ISvgRenderer? _svgRenderer;
 }

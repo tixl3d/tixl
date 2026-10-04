@@ -67,7 +67,12 @@ public static class SkiaSvgGeometry
         switch (element)
         {
             case S.SvgPath p:
-                AppendSegments(path, p);
+                AppendSegments(path, p.PathData);
+                break;
+
+            // A glyph in an SVG font carries its outline the same way a path does.
+            case S.SvgGlyph g:
+                AppendSegments(path, g.PathData);
                 break;
 
             case S.SvgRectangle r:
@@ -119,9 +124,8 @@ public static class SkiaSvgGeometry
         return path;
     }
 
-    private static void AppendSegments(SKPath path, S.SvgPath element)
+    private static void AppendSegments(SKPath path, SP.SvgPathSegmentList? data)
     {
-        var data = element.PathData;
         if (data == null)
             return;
 
@@ -233,7 +237,8 @@ public static class SkiaSvgGeometry
     }
 
     /// <summary>
-    /// Points for one path, one list per contour so the caller can keep sub-paths apart.
+    /// Points for one path, one list per contour so the caller can keep sub-paths apart. A contour the path
+    /// declares closed ends where it started, so callers do not have to join it up themselves.
     /// </summary>
     public static List<List<SKPoint>> Flatten(SKPath path, FlattenModes mode, float amount)
         => mode == FlattenModes.EvenSpacing ? FlattenEvenly(path, amount) : FlattenByCurvature(path, amount);
@@ -297,6 +302,14 @@ public static class SkiaSvgGeometry
                 case SKPathVerb.Cubic:
                     if (current != null)
                         SubdivideCubic(current, points[0], points[1], points[2], points[3], tolerance, 0);
+                    break;
+
+                // The iterator reports the close but not the segment it implies, so a closed outline would
+                // otherwise come back a segment short - visible as a gap in every glyph that uses 'Z'.
+                // SKPathMeasure, which the even-spacing mode uses, already walks that segment itself.
+                case SKPathVerb.Close:
+                    if (current is { Count: > 0 })
+                        current.Add(current[0]);
                     break;
             }
         }

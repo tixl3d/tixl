@@ -22,13 +22,6 @@ internal sealed class LoadSvg : Instance<LoadSvg>, IDescriptiveFilename
         _pointListWithSeparator.TypedElements[_pointListWithSeparator.NumElements - 1] = Point.Separator();
     }
 
-    /// <summary>One contour, already flattened into the points it contributes.</summary>
-    private struct PathEntry
-    {
-        public List<SKPoint> Points;
-        public bool NeedsClosing;
-    }
-
     private void Update(EvaluationContext context)
     {
         if (!_svgResource.TryGetValue(context, out var svgDoc)
@@ -50,7 +43,6 @@ internal sealed class LoadSvg : Instance<LoadSvg>, IDescriptiveFilename
         var scaleToBounds = ScaleToBounds.GetValue(context);
 
         var importMode = ImportAs.GetValue(context);
-        var importAsLines = importMode == 0;
         var importAsShape = importMode == 2;
 
         var flattenMode = (SkiaSvgGeometry.FlattenModes)Flattening.GetValue(context);
@@ -67,7 +59,7 @@ internal sealed class LoadSvg : Instance<LoadSvg>, IDescriptiveFilename
         var svgElements = svgDoc.Descendants();
         var pathElements = importAsShape
                                ? GetSelectedShape(svgElements, selectedShapeIndex, flattenMode, flattenAmount, out var contentBounds)
-                               : ConvertAllNodes(svgElements, importAsLines, flattenMode, flattenAmount, out contentBounds);
+                               : ConvertAllNodes(svgElements, flattenMode, flattenAmount, out contentBounds);
 
         // The document used to answer this through System.Drawing; what it meant was the content's extent.
         var bounds = new Vector3(contentBounds.Width, contentBounds.Height, 0);
@@ -87,11 +79,11 @@ internal sealed class LoadSvg : Instance<LoadSvg>, IDescriptiveFilename
             centerOffset = centerToBounds ? new Vector3(-bounds.X / 2, bounds.Y / 2, 0) : Vector3.Zero;
         }
 
-        // Total including the separator after each contour, and the repeated first point where one closes.
+        // Total including the separator after each contour.
         var totalPointCount = 0;
         foreach (var entry in pathElements)
         {
-            totalPointCount += entry.Points.Count + 1 + (entry.NeedsClosing ? 1 : 0);
+            totalPointCount += entry.Count + 1;
         }
 
         if (totalPointCount != _pointListWithSeparator.NumElements)
@@ -106,10 +98,9 @@ internal sealed class LoadSvg : Instance<LoadSvg>, IDescriptiveFilename
         }
 
         var pointIndex = 0;
-        foreach (var entry in pathElements)
+        foreach (var points in pathElements)
         {
             var startIndex = pointIndex;
-            var points = entry.Points;
             var pathPointCount = points.Count;
 
             for (var i = 0; i < pathPointCount; i++)
@@ -140,12 +131,6 @@ internal sealed class LoadSvg : Instance<LoadSvg>, IDescriptiveFilename
 
             pointIndex += pathPointCount;
 
-            if (entry.NeedsClosing)
-            {
-                _pointListWithSeparator.TypedElements[pointIndex] = _pointListWithSeparator.TypedElements[startIndex];
-                pointIndex++;
-            }
-
             _pointListWithSeparator.TypedElements[pointIndex] = Point.Separator();
             pointIndex++;
         }
@@ -159,37 +144,31 @@ internal sealed class LoadSvg : Instance<LoadSvg>, IDescriptiveFilename
     }
 
     /// <summary>One chosen path element, split into its contours.</summary>
-    private static List<PathEntry> GetSelectedShape(IEnumerable<S.SvgElement> nodes, int selectedIndex,
-                                                    SkiaSvgGeometry.FlattenModes mode, float amount,
-                                                    out SKRect contentBounds)
+    private static List<List<SKPoint>> GetSelectedShape(IEnumerable<S.SvgElement> nodes, int selectedIndex,
+                                                        SkiaSvgGeometry.FlattenModes mode, float amount,
+                                                        out SKRect contentBounds)
     {
-        var entries = new List<PathEntry>();
         contentBounds = SKRect.Empty;
 
         var allSvgPaths = nodes.OfType<S.SvgPath>().ToList();
         if (allSvgPaths.Count == 0)
-            return entries;
+            return [];
 
         var clampedIndex = selectedIndex.Clamp(0, allSvgPaths.Count - 1);
 
         using var path = SkiaSvgGeometry.TryBuildPath(allSvgPaths[clampedIndex]);
         if (path == null)
-            return entries;
+            return [];
 
         contentBounds = path.Bounds;
-        foreach (var contour in SkiaSvgGeometry.Flatten(path, mode, amount))
-        {
-            entries.Add(new PathEntry { Points = contour, NeedsClosing = false });
-        }
-
-        return entries;
+        return SkiaSvgGeometry.Flatten(path, mode, amount);
     }
 
-    private static List<PathEntry> ConvertAllNodes(IEnumerable<S.SvgElement> nodes, bool importAsLines,
-                                                  SkiaSvgGeometry.FlattenModes mode, float amount,
-                                                  out SKRect contentBounds)
+    private static List<List<SKPoint>> ConvertAllNodes(IEnumerable<S.SvgElement> nodes,
+                                                       SkiaSvgGeometry.FlattenModes mode, float amount,
+                                                       out SKRect contentBounds)
     {
-        var entries = new List<PathEntry>();
+        var entries = new List<List<SKPoint>>();
         var bounds = SKRect.Empty;
         var hasBounds = false;
 
@@ -212,14 +191,7 @@ internal sealed class LoadSvg : Instance<LoadSvg>, IDescriptiveFilename
                 bounds.Union(path.Bounds);
             }
 
-            // A closed primitive drawn as lines has to return to its first point. A path carries its own
-            // close, and points mode has nothing to join up.
-            var needsClosing = importAsLines && node is S.SvgRectangle or S.SvgCircle or S.SvgEllipse;
-
-            foreach (var contour in SkiaSvgGeometry.Flatten(path, mode, amount))
-            {
-                entries.Add(new PathEntry { Points = contour, NeedsClosing = needsClosing });
-            }
+            entries.AddRange(SkiaSvgGeometry.Flatten(path, mode, amount));
         }
 
         contentBounds = bounds;
