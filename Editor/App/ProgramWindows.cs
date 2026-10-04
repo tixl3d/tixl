@@ -169,6 +169,11 @@ internal static unsafe class ProgramWindows
     /// </summary>
     private static IGraphicsBackend CreateBackend()
     {
+        // A backend that can't create a view or state reports it here and carries on, so without this the
+        // operator just renders nothing.
+        GraphicsLog.Error = message => Log.Error($"[graphics] {message}");
+        GraphicsLog.Warning = message => Log.Warning($"[graphics] {message}");
+
         if (!UseVulkanBackend)
             return CreateD3D11Backend();
 
@@ -181,9 +186,7 @@ internal static unsafe class ProgramWindows
         if (validation)
         {
             Log.Info("Vulkan validation layer enabled.");
-            GraphicsLog.Error = message => Log.Error($"[vulkan] {message}");
-            GraphicsLog.Warning = message => Log.Warning($"[vulkan] {message}");
-            GraphicsLog.Debug = message => Log.Debug($"[vulkan] {message}");
+            GraphicsLog.Debug = message => Log.Debug($"[graphics] {message}");
         }
 
         return new T3.Graphics.Vulkan.VulkanBackend(new T3.Graphics.Vulkan.VulkanBackendOptions
@@ -423,8 +426,13 @@ internal static unsafe class ProgramWindows
             // Without vsync this is where a GPU that can't keep up shows itself: the driver blocks the queue
             // here rather than in the work that filled it.
             PerformanceMetrics.RecordPresent((float)((Stopwatch.GetTimestamp() - startTimestamp) * 1000.0 / Stopwatch.Frequency));
+            LastPresentMs = Stopwatch.GetElapsedTime(startTimestamp).TotalMilliseconds; // TEMP latency probe
         }
     }
+
+    // TEMP latency probe
+    internal static double LastPresentMs;
+    internal static double LastFrameLatencyWaitMs;
 
     /// <summary>
     /// Keeps a copy of the frame that is about to be presented. The flip-model swap chain discards

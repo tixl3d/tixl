@@ -118,7 +118,9 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
         // Frame-pacing wait via DXGI's FrameLatencyWaitableObject. Must run *before* any other
         // per-frame work so the loop is locked to the swap chain's signalled cadence rather than
         // queueing up speculatively. No-op if the waitable wasn't enabled at swap-chain creation.
+        var waitStart = System.Diagnostics.Stopwatch.GetTimestamp(); // TEMP latency probe
         ProgramWindows.Main.WaitForFrameLatency();
+        ProgramWindows.LastFrameLatencyWaitMs = System.Diagnostics.Stopwatch.GetElapsedTime(waitStart).TotalMilliseconds;
         StallWatchdog.NotifyFrameStarted();
 
         // Vulkan records a frame into one command buffer and submits it after the swap chains are presented;

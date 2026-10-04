@@ -571,6 +571,11 @@ internal static partial class Program
     /// </summary>
     private static IGraphicsBackend CreateBackend()
     {
+        // A backend that can't create a view or state reports it here and carries on, so without this the
+        // operator just renders nothing.
+        GraphicsLog.Error = message => Log.Error($"[graphics] {message}");
+        GraphicsLog.Warning = message => Log.Warning($"[graphics] {message}");
+
         if (!UseVulkanBackend)
             return CreateD3D11Backend();
 
@@ -584,9 +589,7 @@ internal static partial class Program
         if (validation)
         {
             Log.Info("Vulkan validation layer enabled.");
-            GraphicsLog.Error = message => Log.Error($"[vulkan] {message}");
-            GraphicsLog.Warning = message => Log.Warning($"[vulkan] {message}");
-            GraphicsLog.Debug = message => Log.Debug($"[vulkan] {message}");
+            GraphicsLog.Debug = message => Log.Debug($"[graphics] {message}");
         }
 
         return new T3.Graphics.Vulkan.VulkanBackend(new T3.Graphics.Vulkan.VulkanBackendOptions

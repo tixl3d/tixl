@@ -49,6 +49,9 @@ internal sealed class D3D11TextureView(D3D11Texture texture, TextureViewDescript
 
     public override ulong ImGuiTextureId => (ulong)(ShaderResource?.NativePointer ?? IntPtr.Zero);
 
+    /** D3D11 rejects a plain Texture2D view of a multisampled texture, and the view would silently be missing. */
+    private bool IsMultisampled => texture.Description.Samples.Count > 1;
+
     private ShaderResourceViewDescription ShaderResourceDescription()
     {
         var description = new ShaderResourceViewDescription { Format = Convert.ToDxgi(Description.Format) };
@@ -75,7 +78,20 @@ internal sealed class D3D11TextureView(D3D11Texture texture, TextureViewDescript
                 break;
 
             default:
-                if (Description.ArraySize > 1)
+                if (IsMultisampled)
+                {
+                    if (Description.ArraySize > 1)
+                    {
+                        description.Dimension = D3D.ShaderResourceViewDimension.Texture2DMultisampledArray;
+                        description.Texture2DMSArray = new ShaderResourceViewDescription.Texture2DMultisampledArrayResource
+                                                           { FirstArraySlice = Description.FirstArraySlice, ArraySize = Description.ArraySize };
+                    }
+                    else
+                    {
+                        description.Dimension = D3D.ShaderResourceViewDimension.Texture2DMultisampled;
+                    }
+                }
+                else if (Description.ArraySize > 1)
                 {
                     description.Dimension = D3D.ShaderResourceViewDimension.Texture2DArray;
                     description.Texture2DArray = new ShaderResourceViewDescription.Texture2DArrayResource
@@ -121,7 +137,20 @@ internal sealed class D3D11TextureView(D3D11Texture texture, TextureViewDescript
                 break;
 
             default:
-                if (Description.ArraySize > 1 || Description.Dimension == TextureDimension.TextureCube)
+                if (IsMultisampled)
+                {
+                    if (Description.ArraySize > 1)
+                    {
+                        description.Dimension = RenderTargetViewDimension.Texture2DMultisampledArray;
+                        description.Texture2DMSArray = new RenderTargetViewDescription.Texture2DMultisampledArrayResource
+                                                           { FirstArraySlice = Description.FirstArraySlice, ArraySize = Description.ArraySize };
+                    }
+                    else
+                    {
+                        description.Dimension = RenderTargetViewDimension.Texture2DMultisampled;
+                    }
+                }
+                else if (Description.ArraySize > 1 || Description.Dimension == TextureDimension.TextureCube)
                 {
                     description.Dimension = RenderTargetViewDimension.Texture2DArray;
                     description.Texture2DArray = new RenderTargetViewDescription.Texture2DArrayResource
@@ -147,7 +176,20 @@ internal sealed class D3D11TextureView(D3D11Texture texture, TextureViewDescript
     {
         var description = new DepthStencilViewDescription { Format = Convert.ToDxgi(Description.Format) };
 
-        if (Description.ArraySize > 1)
+        if (IsMultisampled)
+        {
+            if (Description.ArraySize > 1)
+            {
+                description.Dimension = DepthStencilViewDimension.Texture2DMultisampledArray;
+                description.Texture2DMSArray = new DepthStencilViewDescription.Texture2DMultisampledArrayResource
+                                                   { FirstArraySlice = Description.FirstArraySlice, ArraySize = Description.ArraySize };
+            }
+            else
+            {
+                description.Dimension = DepthStencilViewDimension.Texture2DMultisampled;
+            }
+        }
+        else if (Description.ArraySize > 1)
         {
             description.Dimension = DepthStencilViewDimension.Texture2DArray;
             description.Texture2DArray = new DepthStencilViewDescription.Texture2DArrayResource
