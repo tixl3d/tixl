@@ -6,24 +6,28 @@
     {
       "Id": "0276f919-3c06-4d78-87dc-8f3986a4999a"/*SpherePoints*/,
       "SymbolId": "1a241222-200b-417d-a8c7-131e3b48cc36",
+      "SymbolName": "Lib.point.generate.SpherePoints",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "14d045a5-25e2-4ebf-9116-f22f6f51b5c5"/*Camera*/,
       "SymbolId": "746d886c-5ab6-44b1-bb15-f3ce2fadf7e6",
+      "SymbolName": "Lib.render.camera.Camera",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "4bfca9eb-9373-44bc-92dc-835cb3548701"/*Execute*/,
       "SymbolId": "936e4324-bea2-463a-b196-6064a2d8a6b2",
+      "SymbolName": "Lib.flow.Execute",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "6f5e5a09-3f24-4495-949f-b828a1cec20e"/*DrawPoints*/,
       "SymbolId": "ffd94e5a-bc98-4e70-84d8-cce831e6925f",
+      "SymbolName": "Lib.point.draw.DrawPoints",
       "InputValues": [
         {
           "Id": "414c8045-5086-4449-9d9a-03f28c3966b3"/*PointSize*/,
@@ -46,12 +50,14 @@
     {
       "Id": "75458cd6-2d25-4bb9-a667-dfb2c6caf577"/*RenderTarget*/,
       "SymbolId": "f9fe78c5-43a6-48ae-8e8c-6cdbbc330dd1",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "InputValues": [],
       "Outputs": []
     },
     {
-      "Id": "7cb227e5-c654-4e6e-af7e-feea20aec4f0"/*PointsToCPU*/,
+      "Id": "7cb227e5-c654-4e6e-af7e-feea20aec4f0"/*ReadPointsFromGpu*/,
       "SymbolId": "a5f4552f-7e25-43a5-bb14-21ab836fa0b3",
+      "SymbolName": "Lib.point.helper.ReadPointsFromGpu",
       "InputValues": [
         {
           "Id": "77ee7ca9-a2db-4de9-bb9c-21ec4f1bbeaf"/*UpdateContinuously*/,
@@ -69,36 +75,42 @@
     {
       "Id": "8017e708-b07a-4534-a57d-fb3b365c7e43"/*DampVec3*/,
       "SymbolId": "671f8151-9ec1-4f02-9ad1-b8a2d70d3d68",
+      "SymbolName": "Lib.numbers.vec3.DampVec3",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "8705f675-cc45-4587-b6e8-c1459bf858e2"/*GetPointDataFromList*/,
       "SymbolId": "1de7b1be-cab6-4beb-a837-4c817562efb2",
+      "SymbolName": "Lib.numbers.data.utils.GetPointDataFromList",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "95232ee6-52f5-4223-9531-7a820bbd88dd"/*AnimValue*/,
       "SymbolId": "ea7b8491-2f8e-4add-b0b1-fd068ccfed0d",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "b6ddb224-e30a-47d0-af14-278c8eb6f65a"/*CountInt*/,
       "SymbolId": "0e1d5f4b-3ba0-4e71-aa26-7308b6df214d",
+      "SymbolName": "Lib.numbers.int.logic.CountInt",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "c1a51960-b649-46d4-9589-dddc6f3ef7f9"/*FilterPoints*/,
       "SymbolId": "18251874-5d5a-4384-8dcd-fcf297e54886",
+      "SymbolName": "Lib.point.modify.FilterPoints",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "c5160e61-bee2-42eb-818e-089a9ef0ae5d"/*DrawPoints*/,
       "SymbolId": "ffd94e5a-bc98-4e70-84d8-cce831e6925f",
+      "SymbolName": "Lib.point.draw.DrawPoints",
       "InputValues": [],
       "Outputs": []
     }

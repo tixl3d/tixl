@@ -15,6 +15,7 @@
     {
       "Id": "1b8b830f-07ce-4b99-bc2b-a50c05caf552"/*SetPlaybackTime*/,
       "SymbolId": "c6d22dc3-a6ff-4a6f-aa14-8be6595da2b1",
+      "SymbolName": "Lib.numbers.anim.time.SetPlaybackTime",
       "InputValues": [
         {
           "Id": "61ad3f49-8188-45bd-8d72-bbb35c04ca3c"/*TriggerMode*/,
@@ -32,6 +33,7 @@
     {
       "Id": "8b39cc63-1c74-4833-bc66-8ab347c69ca5"/*FreezeValue*/,
       "SymbolId": "587dbb73-fd79-4481-a79e-f77055abda9a",
+      "SymbolName": "Lib.numbers.float.process.FreezeValue",
       "InputValues": [
         {
           "Id": "9ad1267b-6d0a-43f4-a4e9-0f77659ddd44"/*Mode*/,
@@ -44,12 +46,14 @@
     {
       "Id": "8ed9e9de-b914-45a7-8906-90b7f1205013"/*Sub*/,
       "SymbolId": "3ba13faf-ea80-44ec-948a-02ed3d653a20",
+      "SymbolName": "Lib.numbers.float.basic.Sub",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "dacc71d9-5aab-45a5-b5c0-6e419cc3d97b"/*MidiInput/ MidiTime*/,
       "SymbolId": "59a0458e-2f3a-4856-96cd-32936f783cc5",
+      "SymbolName": "Lib.io.midi.MidiInput",
       "Name": "MidiInput/ MidiTime",
       "InputValues": [
         {

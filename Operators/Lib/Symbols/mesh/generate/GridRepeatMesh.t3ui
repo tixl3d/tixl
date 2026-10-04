@@ -90,7 +90,7 @@
       "AddPadding": "True"
     },
     {
-      "InputId": "f8a33ecb-3ea4-4bad-8650-7047fe703b83"/*Size*/,
+      "InputId": "f8a33ecb-3ea4-4bad-8650-7047fe703b83"/*Stretch*/,
       "Position": {
         "X": -278.3219,
         "Y": 412.52356

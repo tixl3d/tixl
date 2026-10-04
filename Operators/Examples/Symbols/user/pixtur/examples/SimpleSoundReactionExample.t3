@@ -6,6 +6,7 @@
     {
       "Id": "0387fa6a-9615-49bd-bb3b-4277dfcf0293"/*AudioReaction*/,
       "SymbolId": "03477b9a-860e-4887-81c3-5fe51621122c",
+      "SymbolName": "Lib.io.audio.AudioReaction",
       "InputValues": [
         {
           "Id": "02f71a92-d5c8-4dd7-af5f-da12330f60eb"/*Threshold*/,
@@ -23,18 +24,21 @@
     {
       "Id": "0665a502-9322-47a0-a714-3ad5cacdb37c"/*BoolToInt*/,
       "SymbolId": "cd43942a-887e-4e34-bc54-0c2e5e8bc2af",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToInt",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "22b451bf-69b2-478f-a885-93312b9effd1"/*AudioReaction*/,
       "SymbolId": "03477b9a-860e-4887-81c3-5fe51621122c",
+      "SymbolName": "Lib.io.audio.AudioReaction",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "28b8be24-d414-4c1f-846b-7be5bc01d64b"/*Counter*/,
       "SymbolId": "11882635-4757-4cac-a024-70bb4e8b504c",
+      "SymbolName": "Lib.numbers.anim._obsolete.Counter",
       "InputValues": [
         {
           "Id": "b04d475b-a898-421b-bf26-ae5cf982a351"/*Blending*/,
@@ -52,6 +56,7 @@
     {
       "Id": "2c37b47b-1b0a-4419-b6ef-1956e19491a6"/*IsGreater*/,
       "SymbolId": "52c92cd8-241e-4d79-aebc-b60b092f7941",
+      "SymbolName": "Lib.numbers.float.logic.IsGreater",
       "InputValues": [
         {
           "Id": "0fed5b94-0284-419d-a53a-0600b3b9b62d"/*Threshold*/,
@@ -64,12 +69,14 @@
     {
       "Id": "320baa2f-a36a-4d4c-aa34-17737ea9a1c7"/*Counter*/,
       "SymbolId": "11882635-4757-4cac-a024-70bb4e8b504c",
+      "SymbolName": "Lib.numbers.anim._obsolete.Counter",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "36e8475b-c6f5-4776-8207-ed3283188abe"/*_BlobOld*/,
       "SymbolId": "c8590f8f-cca1-434a-a880-67bb91920e1a",
+      "SymbolName": "Lib.image.generate._obsolete._BlobOld",
       "InputValues": [
         {
           "Id": "41f4065a-0b65-4dda-9cd3-ef7802ed170b"/*Round*/,
@@ -82,6 +89,7 @@
     {
       "Id": "423b0b53-c250-425c-a3dd-f6fd16936e3c"/*Layer2d*/,
       "SymbolId": "d8c5330f-59b5-4907-b845-a02def3042fa",
+      "SymbolName": "Lib.render.basic.Layer2d",
       "InputValues": [
         {
           "Id": "c8d0e44e-acd1-4045-b565-e1ce0b722e70"/*BlendMode*/,
@@ -104,18 +112,21 @@
     {
       "Id": "454fdfbc-d173-4a02-a7d4-4b253333dade"/*PickTexture*/,
       "SymbolId": "e6070817-cf2e-4430-87e0-bf3dd15afdb5",
+      "SymbolName": "Lib.image.use.PickTexture",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "47cc0534-2b73-459c-914b-946ed6126965"/*Execute*/,
       "SymbolId": "936e4324-bea2-463a-b196-6064a2d8a6b2",
+      "SymbolName": "Lib.flow.Execute",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "5520424e-d145-42e8-ab10-ef05843b3348"/*Text*/,
       "SymbolId": "fd31d208-12fe-46bf-bfa3-101211f8f497",
+      "SymbolName": "Lib.render.basic.Text",
       "InputValues": [
         {
           "Id": "0e5f05b4-5e8a-4f6d-8cac-03b04649eb67"/*Color*/,
@@ -173,6 +184,7 @@
     {
       "Id": "595ddbc1-ee8f-49e1-b32e-2f86135d6d2a"/*SampleGradient*/,
       "SymbolId": "8211249d-7a26-4ad0-8d84-56da72a5c536",
+      "SymbolName": "Lib.numbers.color.SampleGradient",
       "InputValues": [
         {
           "Id": "eff10fad-cf95-4133-91db-efc41258cd1b"/*Gradient*/,
@@ -211,12 +223,14 @@
     {
       "Id": "5f91ba1f-0e11-4635-b2bd-6fc23cf3bd14"/*Time*/,
       "SymbolId": "b0d75f21-df33-460b-beab-d8c5e1f23e5e",
+      "SymbolName": "Lib.numbers.anim.time.Time",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "7fc0333f-a718-47fa-bb54-27a514d636ed"/*MockStrings*/,
       "SymbolId": "3af25959-fd3f-4608-b521-5860d82554df",
+      "SymbolName": "Lib.string.random.MockStrings",
       "InputValues": [
         {
           "Id": "054ade21-c08e-4633-9725-6168fd7806f9"/*Category*/,
@@ -229,6 +243,7 @@
     {
       "Id": "7feb483d-ce7b-4b71-a3bc-c5af4bbdad27"/*Steps*/,
       "SymbolId": "4cdc0f90-6ce9-4a03-9cd0-efeddee70567",
+      "SymbolName": "Lib.image.fx.stylize.Steps",
       "InputValues": [
         {
           "Id": "16745545-84e5-4290-a6c1-7df513c6a828"/*Highlight*/,
@@ -323,6 +338,7 @@
     {
       "Id": "883924e2-3c17-4e91-aa4b-ae732ad67917"/*LinearGradient*/,
       "SymbolId": "2c3d2c26-ac45-42e9-8f13-6ea338333568",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "InputValues": [
         {
           "Id": "e47e9e63-9c94-4c29-9555-2452fa498d57"/*Gradient*/,
@@ -361,12 +377,14 @@
     {
       "Id": "904694c2-2146-4cfb-a97d-7ea824b221ca"/*AudioReaction*/,
       "SymbolId": "03477b9a-860e-4887-81c3-5fe51621122c",
+      "SymbolName": "Lib.io.audio.AudioReaction",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "934869da-e317-4b80-8868-7d5cd85160c2"/*AudioReaction*/,
       "SymbolId": "03477b9a-860e-4887-81c3-5fe51621122c",
+      "SymbolName": "Lib.io.audio.AudioReaction",
       "InputValues": [
         {
           "Id": "02f71a92-d5c8-4dd7-af5f-da12330f60eb"/*Threshold*/,
@@ -384,24 +402,28 @@
     {
       "Id": "94f88ef5-c8bc-4042-9de1-771f3961debc"/*AudioReaction*/,
       "SymbolId": "03477b9a-860e-4887-81c3-5fe51621122c",
+      "SymbolName": "Lib.io.audio.AudioReaction",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "966d2ba3-1e4b-4ba5-8a00-3c83b2de394f"/*PickString*/,
       "SymbolId": "a9784e5e-7696-49a0-bb77-2302587ede59",
+      "SymbolName": "Lib.string.logic.PickString",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "977f4f8c-c3d6-4a1c-ae34-6e6db650086e"/*RenderTarget*/,
       "SymbolId": "f9fe78c5-43a6-48ae-8e8c-6cdbbc330dd1",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "9cab172c-8259-4769-b251-ee8fdcb40501"/*MirrorRepeat*/,
       "SymbolId": "06621b4b-43be-4ef9-80d0-f1b36fa4dbd1",
+      "SymbolName": "Lib.image.transform.MirrorRepeat",
       "InputValues": [
         {
           "Id": "e39e2fd3-6820-4353-b098-44127303bb51"/*Width*/,
@@ -414,12 +436,14 @@
     {
       "Id": "b9527711-fc32-4d0c-8a77-d7032417eda8"/*AudioReaction*/,
       "SymbolId": "03477b9a-860e-4887-81c3-5fe51621122c",
+      "SymbolName": "Lib.io.audio.AudioReaction",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "bccbe27c-e7c9-4174-af7d-88a6c846f09c"/*PickStringPart*/,
       "SymbolId": "7baaa83d-5c09-42a0-b7bc-35dbcfa5156d",
+      "SymbolName": "Lib.string.logic.PickStringPart",
       "InputValues": [
         {
           "Id": "5d7184f6-cf46-4cb0-b29f-b3c52b34b634"/*SplitInto*/,
@@ -432,12 +456,14 @@
     {
       "Id": "bcee1fb2-52f2-45f6-a00b-d3862c6f28bd"/*AudioReaction*/,
       "SymbolId": "03477b9a-860e-4887-81c3-5fe51621122c",
+      "SymbolName": "Lib.io.audio.AudioReaction",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "bd7e83bd-24c7-46ec-9763-5690f4197355"/*_Jitter2d*/,
       "SymbolId": "23794a1f-372d-484b-ac31-9470d0e77819",
+      "SymbolName": "Lib.numbers.anim._obsolete._Jitter2d",
       "InputValues": [
         {
           "Id": "38086d8a-15e0-4f3e-b161-a46a79fc5cc3"/*Blending*/,
@@ -455,12 +481,14 @@
     {
       "Id": "d1d54ac0-4ccc-4acc-86c6-b5413acb3de1"/*AudioReaction*/,
       "SymbolId": "03477b9a-860e-4887-81c3-5fe51621122c",
+      "SymbolName": "Lib.io.audio.AudioReaction",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "dcc00f69-f64f-4580-a159-cec3967348b7"/*Glow*/,
       "SymbolId": "d392d4af-4c78-4f4a-bc3f-4c54c8c73538",
+      "SymbolName": "Lib.image.fx.stylize.Glow",
       "InputValues": [
         {
           "Id": "57968725-0a45-44f9-a9a2-f74c10b728e8"/*Radius*/,
@@ -473,6 +501,7 @@
     {
       "Id": "ea36f8d0-810c-4022-afd6-1ad37ea13dbd"/*String*/,
       "SymbolId": "5880cbc3-a541-4484-a06a-0e6f77cdbe8e",
+      "SymbolName": "Types.Values.String",
       "InputValues": [
         {
           "Id": "ceeae47b-d792-471d-a825-49e22749b7b9"/*InputString*/,
@@ -485,12 +514,14 @@
     {
       "Id": "f13d2168-4dde-4fd3-80e4-ac49f4356dd5"/*CountInt*/,
       "SymbolId": "0e1d5f4b-3ba0-4e71-aa26-7308b6df214d",
+      "SymbolName": "Lib.numbers.int.logic.CountInt",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "f58f5596-490d-4a3f-ba54-97688f2c674f"/*AudioReaction*/,
       "SymbolId": "03477b9a-860e-4887-81c3-5fe51621122c",
+      "SymbolName": "Lib.io.audio.AudioReaction",
       "InputValues": [
         {
           "Id": "02f71a92-d5c8-4dd7-af5f-da12330f60eb"/*Threshold*/,
@@ -508,12 +539,14 @@
     {
       "Id": "f88c9f77-7f44-4f92-848f-5b776d694655"/*ChangeCase*/,
       "SymbolId": "acdd78b1-4e66-4fd0-a36b-5318670fefd4",
+      "SymbolName": "Lib.string.transform.ChangeCase",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "fd0f3f1d-4806-4e82-9847-697917c80fcf"/*AdjustColors*/,
       "SymbolId": "55411442-d538-48bf-ab78-b8c24c85aa46",
+      "SymbolName": "Lib.image.color.AdjustColors",
       "InputValues": [
         {
           "Id": "090c56b2-bbed-447e-baa1-5993b4e12ddc"/*Vignette*/,
@@ -541,6 +574,7 @@
     {
       "Id": "ff4c52ea-9908-428f-bb5f-61e0aeeb99be"/*BuildRandomString*/,
       "SymbolId": "7b21f10b-3548-4a23-95df-360addaeb03d",
+      "SymbolName": "Lib.string.random.BuildRandomString",
       "InputValues": [
         {
           "Id": "095202bf-118f-4c4c-802e-7916bc290a60"/*Insert*/,

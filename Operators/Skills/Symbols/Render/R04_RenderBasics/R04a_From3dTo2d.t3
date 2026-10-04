@@ -6,18 +6,21 @@
     {
       "Id": "18ee8f7e-48d1-42e3-bfa1-bddb07745b8d"/*DrawSphere*/,
       "SymbolId": "3b97856c-5397-402e-85ca-5d227af348dd",
+      "SymbolName": "Lib.render.gizmo._.DrawSphere",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "7011c815-68ef-4145-bd20-f7e907f438cb"/*DrawSphere*/,
       "SymbolId": "3b97856c-5397-402e-85ca-5d227af348dd",
+      "SymbolName": "Lib.render.gizmo._.DrawSphere",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "78bec12f-1464-4b4e-a959-c5b52c9597c1"/*AnimValue*/,
       "SymbolId": "ea7b8491-2f8e-4add-b0b1-fd068ccfed0d",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "InputValues": [
         {
           "Id": "48005727-0158-4795-ad70-8410c27fd01d"/*Rate*/,
@@ -45,18 +48,21 @@
     {
       "Id": "806357d3-d805-4b2b-9435-78931d8a99aa"/*Vector3*/,
       "SymbolId": "94a5de3b-ee6a-43d3-8d21-7b8fe94b042b",
+      "SymbolName": "Types.Values.Vector3",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "81b6af8e-7b25-4e67-bed4-7d8c686989aa"/*DrawQuiz*/,
       "SymbolId": "16e30ce0-20c9-4677-9837-0200454e05ae",
+      "SymbolName": "Lib.flow.skillQuest.DrawQuiz",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "8a0bc36a-35ef-47c7-ab26-073e329fc074"/*Distance*/,
       "SymbolId": "5d7d61ae-0a41-4ffa-a51d-93bab665e7fe",
+      "SymbolName": "Types.Values.Value",
       "Name": "Distance",
       "InputValues": [
         {
@@ -70,6 +76,7 @@
     {
       "Id": "c1493834-57c0-4515-8cbe-1e610f7f94a7"/*AnimValue*/,
       "SymbolId": "ea7b8491-2f8e-4add-b0b1-fd068ccfed0d",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "InputValues": [
         {
           "Id": "48005727-0158-4795-ad70-8410c27fd01d"/*Rate*/,
@@ -102,6 +109,7 @@
     {
       "Id": "c7d7e024-60e4-4fa5-bcc2-3c9feed67bc7"/*AnimValue*/,
       "SymbolId": "ea7b8491-2f8e-4add-b0b1-fd068ccfed0d",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "InputValues": [
         {
           "Id": "48005727-0158-4795-ad70-8410c27fd01d"/*Rate*/,
@@ -134,12 +142,14 @@
     {
       "Id": "c80e5ec3-bd88-4e9e-b3ba-1d9b3c198c62"/*Vector3*/,
       "SymbolId": "94a5de3b-ee6a-43d3-8d21-7b8fe94b042b",
+      "SymbolName": "Types.Values.Vector3",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "e40a4f2d-6810-445f-9f26-6664014afb4b"/*AnimValue*/,
       "SymbolId": "ea7b8491-2f8e-4add-b0b1-fd068ccfed0d",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "InputValues": [
         {
           "Id": "48005727-0158-4795-ad70-8410c27fd01d"/*Rate*/,
@@ -167,6 +177,7 @@
     {
       "Id": "ec26cbe3-86cd-4d34-b45b-69979d132ac7"/*Distance*/,
       "SymbolId": "5d7d61ae-0a41-4ffa-a51d-93bab665e7fe",
+      "SymbolName": "Types.Values.Value",
       "Name": "Distance",
       "InputValues": [
         {

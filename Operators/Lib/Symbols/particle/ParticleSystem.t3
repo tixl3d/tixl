@@ -71,12 +71,14 @@
     {
       "Id": "066038e0-ee67-4252-9034-c5d877f9e4a5"/*Any*/,
       "SymbolId": "1446e61e-7f68-4655-99c8-5be390f64851",
+      "SymbolName": "Lib.numbers.bool.combine.Any",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "08bd9088-5efd-4cf7-b295-685fa03dd278"/*Emit*/,
       "SymbolId": "cd43942a-887e-4e34-bc54-0c2e5e8bc2af",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToInt",
       "Name": "Emit",
       "InputValues": [],
       "Outputs": []
@@ -84,12 +86,14 @@
     {
       "Id": "0dc49394-c5eb-4217-93cd-37d1eade95e8"/*Any*/,
       "SymbolId": "1446e61e-7f68-4655-99c8-5be390f64851",
+      "SymbolName": "Lib.numbers.bool.combine.Any",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "0ea5cd85-6f28-45ba-8c87-634e8ee1148d"/*HasTimeChanged*/,
       "SymbolId": "2443b2fd-c397-4ea6-9588-b595f918cf01",
+      "SymbolName": "Lib.numbers.anim.time.HasTimeChanged",
       "InputValues": [
         {
           "Id": "bc112889-77a8-4967-a9b7-683b7c7017fe"/*Mode*/,
@@ -102,12 +106,14 @@
     {
       "Id": "11d59891-c071-4700-aa43-e8c8d42b199e"/*_SetParticleSystemComponents*/,
       "SymbolId": "705df4fe-8f91-4b1e-a7d1-432011ffcb3f",
+      "SymbolName": "Lib.point._internal._SetParticleSystemComponents",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "174bd467-28fd-426f-b32b-d44f1b281a0c"/*ComputeShader*/,
       "SymbolId": "a256d70f-adb3-481d-a926-caf35bd3e64c",
+      "SymbolName": "Types.Gfx.ComputeShader",
       "InputValues": [
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
@@ -120,6 +126,7 @@
     {
       "Id": "27a6a915-dff2-44f9-b66e-89389adc16ed"/*Reset*/,
       "SymbolId": "cd43942a-887e-4e34-bc54-0c2e5e8bc2af",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToInt",
       "Name": "Reset",
       "InputValues": [],
       "Outputs": []
@@ -127,6 +134,7 @@
     {
       "Id": "2bbb4e59-acea-4ea8-9025-a4e9e3fed4ca"/*Particles*/,
       "SymbolId": "b6c5be1d-b133-45e9-a269-8047ea0d6ad7",
+      "SymbolName": "Types.Gfx.StructuredBufferWithViews",
       "Name": "Particles",
       "InputValues": [
         {
@@ -145,18 +153,21 @@
     {
       "Id": "2dbfb5f3-70e4-49e4-9968-906eef514efd"/*FloatsToBuffer*/,
       "SymbolId": "724da755-2d0c-42ab-8335-8c88ec5fb078",
+      "SymbolName": "Lib.render._dx11.api.FloatsToBuffer",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "2f81d9b6-8709-4bd8-be99-50dbf948a597"/*All*/,
       "SymbolId": "3a6fd508-0272-4c18-96b8-bc2387d3b2fd",
+      "SymbolName": "Lib.numbers.bool.combine.All",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "42d72297-3db1-4c3b-af6d-9bbc2771e8bb"/*ClampInt*/,
       "SymbolId": "5f734c25-9f1a-436c-b56c-7e0a1e07fdda",
+      "SymbolName": "Lib.numbers.int.process.ClampInt",
       "InputValues": [
         {
           "Id": "23e55b5d-b469-4d0f-a495-7e87fe65cccf"/*Max*/,
@@ -174,6 +185,7 @@
     {
       "Id": "44173a3d-faac-4d1f-a398-fdf889ce56e2"/*Time*/,
       "SymbolId": "b0d75f21-df33-460b-beab-d8c5e1f23e5e",
+      "SymbolName": "Lib.numbers.anim.time.Time",
       "InputValues": [
         {
           "Id": "ba443b6a-487f-4739-94a3-915584ee2d46"/*Units*/,
@@ -186,30 +198,35 @@
     {
       "Id": "49cc1f06-5eda-41e1-95cd-98a85d05a93a"/*GetBufferComponents*/,
       "SymbolId": "80dff680-5abf-484a-b9e0-81d72f3b7aa4",
+      "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "4dcf68b4-5be4-4289-a401-16f21681b7b4"/*Div*/,
       "SymbolId": "15fb88b2-81a1-43b8-97ba-41221293bb07",
+      "SymbolName": "Lib.numbers.float.basic.Div",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "5f8b07fd-9e8f-4a56-be23-4260c67b44ea"/*GetBufferComponents*/,
       "SymbolId": "80dff680-5abf-484a-b9e0-81d72f3b7aa4",
+      "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "650753f3-c023-492d-9b41-6586450cc817"/*HasIntChanged*/,
       "SymbolId": "62f7408a-a34a-459a-bd7d-bb349196df9b",
+      "SymbolName": "Lib.numbers.int.logic.HasIntChanged",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "78d0975b-1a25-4437-ba0e-3e9137af87d6"/*ResultPoints*/,
       "SymbolId": "b6c5be1d-b133-45e9-a269-8047ea0d6ad7",
+      "SymbolName": "Types.Gfx.StructuredBufferWithViews",
       "Name": "ResultPoints",
       "InputValues": [
         {
@@ -223,12 +240,14 @@
     {
       "Id": "7ef64581-d672-4cd5-b5c6-0b94bd854822"/*CountInt*/,
       "SymbolId": "0e1d5f4b-3ba0-4e71-aa26-7308b6df214d",
+      "SymbolName": "Lib.numbers.int.logic.CountInt",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "87abbc5a-e272-4616-b918-fa4ec362bdf4"/*UsingEmitCount*/,
       "SymbolId": "cd43942a-887e-4e34-bc54-0c2e5e8bc2af",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToInt",
       "Name": "UsingEmitCount",
       "InputValues": [],
       "Outputs": []
@@ -236,12 +255,14 @@
     {
       "Id": "886dff75-130d-4903-8d11-435d8c673fef"/*Execute*/,
       "SymbolId": "936e4324-bea2-463a-b196-6064a2d8a6b2",
+      "SymbolName": "Lib.flow.Execute",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "8bbbde76-3130-457c-9318-3e25a2382897"/*ComputeShaderStage*/,
       "SymbolId": "8bef116d-7d1c-4c1b-b902-25c1d5e925a9",
+      "SymbolName": "Types.Gfx.ComputeShaderStage",
       "InputValues": [
         {
           "Id": "180cae35-10e3-47f3-8191-f6ecea7d321c"/*Dispatch*/,
@@ -258,36 +279,42 @@
     {
       "Id": "90f9c965-8e2e-48d3-9caf-e4cb032f0248"/*GetFrameSpeedFactor*/,
       "SymbolId": "3be62864-30dd-4531-9980-28b634296e47",
+      "SymbolName": "Lib.numbers.anim.time.GetFrameSpeedFactor",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "a913c47d-9023-45dc-a28d-4d74264b031b"/*IntsToBuffer*/,
       "SymbolId": "2eb20a76-f8f7-49e9-93a5-1e5981122b50",
+      "SymbolName": "Lib.numbers.int.process.IntsToBuffer",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "af3d5d3d-71a7-4e17-8b5c-819d383f92e9"/*ExecuteBufferUpdate*/,
       "SymbolId": "58351c8f-4a73-448e-b7bb-69412e71bd76",
+      "SymbolName": "Lib.render._dx11.fxsetup.ExecuteBufferUpdate",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "c1b1014e-3226-45fe-852b-b45300166682"/*GetBufferComponents*/,
       "SymbolId": "80dff680-5abf-484a-b9e0-81d72f3b7aa4",
+      "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "cbc5699a-6a05-4997-b619-5d30489a0388"/*CalcDispatchCount*/,
       "SymbolId": "eb68addb-ec59-416f-8608-ff9d2319f3a3",
+      "SymbolName": "Lib.render._dx11.api.CalcDispatchCount",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "ee3b01ae-c85b-46ee-a98c-d4ebbb76dace"/*CompareInt*/,
       "SymbolId": "05cf9ea7-045d-421f-8ed3-2c2f6b325a46",
+      "SymbolName": "Lib.numbers.int.logic.CompareInt",
       "InputValues": [
         {
           "Id": "5bf37ae4-bb84-42ee-96f9-52c2adefa669"/*Mode*/,

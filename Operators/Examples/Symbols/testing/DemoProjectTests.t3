@@ -6,6 +6,7 @@
     {
       "Id": "34a06156-8b88-4610-aee0-7194a0c3faed"/*DemoWorksForEverybody*/,
       "SymbolId": "f92a1144-55d9-4d8e-bfa6-f80665800e25",
+      "SymbolName": "Examples.testing.VisualTest",
       "Name": "DemoWorksForEverybody",
       "InputValues": [
         {
@@ -37,12 +38,14 @@
     {
       "Id": "4a18ea3a-4f45-4262-abd5-10e6f86aae13"/*WorksForEverybody*/,
       "SymbolId": "00485ce8-d342-4c97-aac3-1af8a7f03897",
+      "SymbolName": "Examples.user.still.worksforeverybody.WorksForEverybody",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "64d92ce1-5e58-4c1d-8dba-7d5062e7a19a"/*ExecuteTests*/,
       "SymbolId": "83cb923e-a387-4be2-b391-4111c7bd90fe",
+      "SymbolName": "Examples.testing.ExecuteTests",
       "InputValues": [
         {
           "Id": "31937a13-1e53-45dd-8e6f-91ca5f3aaa19"/*TriggerTest*/,
@@ -60,12 +63,14 @@
     {
       "Id": "7319e3f8-c410-4ecf-84e2-284402821169"/*ThereDemo*/,
       "SymbolId": "5ea8bc54-d1f6-4748-9839-e3e4415a5608",
+      "SymbolName": "Examples.user.still.there.ThereDemo",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "86c6c88a-dd5d-42d8-8039-768146712a96"/*DemoDesatyre*/,
       "SymbolId": "f92a1144-55d9-4d8e-bfa6-f80665800e25",
+      "SymbolName": "Examples.testing.VisualTest",
       "Name": "DemoDesatyre",
       "InputValues": [
         {
@@ -97,6 +102,7 @@
     {
       "Id": "8949b1e4-0efc-4a61-b742-e61807a1574a"/*DemoThere*/,
       "SymbolId": "f92a1144-55d9-4d8e-bfa6-f80665800e25",
+      "SymbolName": "Examples.testing.VisualTest",
       "Name": "DemoThere",
       "InputValues": [
         {
@@ -128,6 +134,7 @@
     {
       "Id": "8fd6c8f2-a899-4509-9b1a-61ba6b189e96"/*ExecuteTests*/,
       "SymbolId": "83cb923e-a387-4be2-b391-4111c7bd90fe",
+      "SymbolName": "Examples.testing.ExecuteTests",
       "InputValues": [
         {
           "Id": "31937a13-1e53-45dd-8e6f-91ca5f3aaa19"/*TriggerTest*/,
@@ -145,12 +152,14 @@
     {
       "Id": "a26e199b-cc62-443b-9a60-5ab56ea19fbb"/*Katsumaki*/,
       "SymbolId": "bfa5b00c-e1f3-4b15-8fec-859156facfce",
+      "SymbolName": "Examples.user.still.katsu.Katsumaki",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "b0cf2b73-484a-4531-b215-08f0bee0af42"/*Test Demos*/,
       "SymbolId": "83cb923e-a387-4be2-b391-4111c7bd90fe",
+      "SymbolName": "Examples.testing.ExecuteTests",
       "Name": "Test Demos",
       "InputValues": [
         {
@@ -174,6 +183,7 @@
     {
       "Id": "fa431c7a-81c5-4c0a-b4ae-f559c4c1707b"/*Katsumaki*/,
       "SymbolId": "f92a1144-55d9-4d8e-bfa6-f80665800e25",
+      "SymbolName": "Examples.testing.VisualTest",
       "Name": "Katsumaki",
       "InputValues": [
         {

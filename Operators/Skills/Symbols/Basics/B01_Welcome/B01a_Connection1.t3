@@ -6,12 +6,14 @@
     {
       "Id": "08c5f3b7-76ad-4e6d-8536-493c3952510c"/*ImageQuiz*/,
       "SymbolId": "b1cb8864-0d51-4b7f-96eb-4c6267d4b216",
+      "SymbolName": "Lib.flow.skillQuest.ImageQuiz",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "346a5eef-0135-4d15-9841-1a82bba84fc7"/*RoundedRect*/,
       "SymbolId": "bf7fcd04-0cf6-4518-86cc-48f74483d98d",
+      "SymbolName": "Lib.image.generate.basic.RoundedRect",
       "InputValues": [
         {
           "Id": "202340b4-0629-40a1-9399-0cda047df116"/*Rotate*/,
@@ -29,6 +31,7 @@
     {
       "Id": "db2c4eab-f92a-4d5d-a465-dbe30c438daf"/*RoundedRect*/,
       "SymbolId": "bf7fcd04-0cf6-4518-86cc-48f74483d98d",
+      "SymbolName": "Lib.image.generate.basic.RoundedRect",
       "InputValues": [
         {
           "Id": "202340b4-0629-40a1-9399-0cda047df116"/*Rotate*/,

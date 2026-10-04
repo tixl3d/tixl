@@ -6,18 +6,21 @@
     {
       "Id": "2bc68e7c-5ad3-47e4-96b6-48a3ce052fc0"/*RenderTarget*/,
       "SymbolId": "f9fe78c5-43a6-48ae-8e8c-6cdbbc330dd1",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "600befcf-d898-4e13-8b96-2fe6d0513915"/*Glow*/,
       "SymbolId": "d392d4af-4c78-4f4a-bc3f-4c54c8c73538",
+      "SymbolName": "Lib.image.fx.stylize.Glow",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "7adb3b91-d418-4165-94f6-4331e62dd93a"/*PerlinNoise3*/,
       "SymbolId": "50aab941-0a29-474a-affd-13a74ea0c780",
+      "SymbolName": "Lib.numbers.vec3.PerlinNoise3",
       "InputValues": [
         {
           "Id": "2693cb7d-33b3-4a0c-929f-e6911d2d4a0c"/*Octaves*/,
@@ -30,6 +33,7 @@
     {
       "Id": "7e665c6e-59b4-484a-b4a3-be9316db9cbf"/*DrawPoints*/,
       "SymbolId": "ffd94e5a-bc98-4e70-84d8-cce831e6925f",
+      "SymbolName": "Lib.point.draw.DrawPoints",
       "InputValues": [
         {
           "Id": "414c8045-5086-4449-9d9a-03f28c3966b3"/*PointSize*/,
@@ -42,6 +46,7 @@
     {
       "Id": "9c07c130-59e4-41fb-990a-6e0b7b1c0659"/*SimForceOffset*/,
       "SymbolId": "9c378944-9a57-4ae4-a88e-36c07244bcf7",
+      "SymbolName": "Lib.point.sim.SimForceOffset",
       "InputValues": [
         {
           "Id": "2cce4aac-2d41-4c0d-a046-9a5529b912b1"/*Radius*/,
@@ -78,6 +83,7 @@
     {
       "Id": "9d10b05e-c8d1-4203-b30e-5bc0abd137cf"/*_GridPoints_Old*/,
       "SymbolId": "3ee8f66d-68df-43c1-b0eb-407259bf7e86",
+      "SymbolName": "Lib.point.generate._GridPoints_Old",
       "InputValues": [
         {
           "Id": "37a11e3d-e353-4b0f-a052-356582e235b0"/*Size*/,
@@ -114,6 +120,7 @@
     {
       "Id": "f3a6a12d-bcc7-427b-bd5a-2035c5ec0d8e"/*OrbitCamera*/,
       "SymbolId": "6415ed0e-3692-45e2-8e70-fe0cf4d29ebc",
+      "SymbolName": "Lib.render.camera.OrbitCamera",
       "InputValues": [
         {
           "Id": "dd92fb0a-4b3e-4492-bf59-437d914a1ad3"/*DistanceToTarget*/,

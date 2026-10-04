@@ -36,6 +36,7 @@
     {
       "Id": "11b3a284-bd7b-41e6-8d2b-a2dd577bdfb6"/*RaymarchPoints*/,
       "SymbolId": "a914c462-b707-4240-b57b-ed0e24e80a94",
+      "SymbolName": "Lib.field.use.RaymarchPoints",
       "InputValues": [
         {
           "Id": "3ea2d4c9-35f4-49d4-b26f-1e12bfd71fbe"/*MaxDistance*/,
@@ -63,6 +64,7 @@
     {
       "Id": "17797167-f572-4294-be49-428770682c52"/*MapPointAttributes*/,
       "SymbolId": "191e5057-4da4-447e-b7cf-e9e0ed8c5dd8",
+      "SymbolName": "Lib.point.modify.MapPointAttributes",
       "InputValues": [
         {
           "Id": "38046ede-e786-4cb1-ac17-de6cb7b91c32"/*Range*/,
@@ -176,6 +178,7 @@
     {
       "Id": "1ad9127a-fa0f-45d2-9a78-ec6bfc70668f"/*SetPointAttributes*/,
       "SymbolId": "86b61bcf-4eaa-4f77-a535-8a1dc876aada",
+      "SymbolName": "Lib.point.modify.SetPointAttributes",
       "InputValues": [
         {
           "Id": "b4c4414d-e24d-4456-8c7d-00eb9de89de9"/*Color*/,
@@ -203,6 +206,7 @@
     {
       "Id": "2318e2b3-ca07-4a0f-a76b-da62fc6f93bf"/*Point*/,
       "SymbolId": "9989f539-f86c-4508-83d7-3fc0e559f502",
+      "SymbolName": "Types.Values.Point",
       "InputValues": [
         {
           "Id": "55a3370f-1768-414f-b38d-4accc5e93914"/*RotationAxis*/,
@@ -224,6 +228,7 @@
     {
       "Id": "34653076-95b0-4197-b150-5fbed58beb7b"/*RepeatAtPoints*/,
       "SymbolId": "780edb20-f83f-494c-ab17-7015e2311250",
+      "SymbolName": "Lib.point.generate.RepeatAtPoints",
       "InputValues": [
         {
           "Id": "6bd240ad-0ff8-4282-a045-8e00d82cc017"/*ScaleFactor*/,
@@ -236,6 +241,7 @@
     {
       "Id": "4e0dfbe5-236d-4077-8d26-32e1b719d253"/*DrawPoints*/,
       "SymbolId": "ffd94e5a-bc98-4e70-84d8-cce831e6925f",
+      "SymbolName": "Lib.point.draw.DrawPoints",
       "InputValues": [
         {
           "Id": "414c8045-5086-4449-9d9a-03f28c3966b3"/*PointSize*/,
@@ -258,18 +264,21 @@
     {
       "Id": "5a41cf57-fb70-46df-819a-9d91160e1abf"/*IntToFloat*/,
       "SymbolId": "17db8a36-079d-4c83-8a2a-7ea4c1aa49e6",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "64dfbce4-665c-4428-8995-88911de5e0de"/*RaymarchField*/,
       "SymbolId": "9323e32f-078c-4156-941b-203f4c265ff5",
+      "SymbolName": "Lib.field.render.RaymarchField",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "6fd80000-9664-4fbd-b918-9741b892731f"/*DrawLines*/,
       "SymbolId": "836f211f-b387-417c-8316-658e0dc6e117",
+      "SymbolName": "Lib.point.draw.DrawLines",
       "InputValues": [
         {
           "Id": "75419a73-8a3e-4538-9a1d-e3b0ce7f8561"/*Color*/,
@@ -287,6 +296,7 @@
     {
       "Id": "8089aae1-fa9f-44f7-8faf-ab86f69ef94b"/*TransformMesh*/,
       "SymbolId": "026e6917-6e6f-4ee3-b2d4-58f4f1de74c9",
+      "SymbolName": "Lib.mesh.modify.TransformMesh",
       "InputValues": [
         {
           "Id": "1168094f-1eee-4ed7-95e2-9459e6171e08"/*Rotation*/,
@@ -303,6 +313,7 @@
     {
       "Id": "853490c5-d2d4-4bbd-9b1b-7e3a1495080b"/*DrawLines*/,
       "SymbolId": "836f211f-b387-417c-8316-658e0dc6e117",
+      "SymbolName": "Lib.point.draw.DrawLines",
       "InputValues": [
         {
           "Id": "75419a73-8a3e-4538-9a1d-e3b0ce7f8561"/*Color*/,
@@ -325,6 +336,7 @@
     {
       "Id": "8b0ed4fe-e977-4793-93e2-bc47aa6af8a1"/*LoadObj*/,
       "SymbolId": "be52b670-9749-4c0d-89f0-d8b101395227",
+      "SymbolName": "Lib.mesh.generate.LoadObj",
       "InputValues": [
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
@@ -342,6 +354,7 @@
     {
       "Id": "95e4e046-8374-4173-83bf-108ba1701419"/*DrawPoints*/,
       "SymbolId": "ffd94e5a-bc98-4e70-84d8-cce831e6925f",
+      "SymbolName": "Lib.point.draw.DrawPoints",
       "InputValues": [
         {
           "Id": "414c8045-5086-4449-9d9a-03f28c3966b3"/*PointSize*/,
@@ -354,6 +367,7 @@
     {
       "Id": "a1948555-5cb1-46af-8f5f-2cf9eb7f7290"/*DrawMeshAtPoints*/,
       "SymbolId": "42cb88bc-beb8-4d89-ac99-44b77be5f03e",
+      "SymbolName": "Lib.mesh.draw.DrawMeshAtPoints",
       "InputValues": [
         {
           "Id": "ba7befdf-270b-4ac0-bfc2-7543e2c3097b"/*Color*/,
@@ -371,6 +385,7 @@
     {
       "Id": "a3c0ed21-ce63-46ee-ace3-42ad3379d31d"/*DrawPoints*/,
       "SymbolId": "ffd94e5a-bc98-4e70-84d8-cce831e6925f",
+      "SymbolName": "Lib.point.draw.DrawPoints",
       "InputValues": [
         {
           "Id": "cc442161-e9ca-40ea-be3b-f87189d4e155"/*Color*/,
@@ -388,6 +403,7 @@
     {
       "Id": "ab5ff56b-d1e5-4a17-a3e2-5b47b00ca99f"/*VisualizeFieldDistance*/,
       "SymbolId": "89dd9ee0-8754-4e4c-abdc-74425c39dcc2",
+      "SymbolName": "Lib.field.analyze.VisualizeFieldDistance",
       "InputValues": [
         {
           "Id": "0abd3f44-27f3-4f4c-a56b-e1fbfcb32cb6"/*Background*/,
@@ -415,12 +431,14 @@
     {
       "Id": "ac14b779-a9d2-49f4-83f8-3f0002229c13"/*PairPointsForLines*/,
       "SymbolId": "ab6ab34f-4c6e-41ef-af69-48bb9393651b",
+      "SymbolName": "Lib.point.combine.PairPointsForLines",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "ae0ecc52-7c05-42de-ba59-a1a10062e6ec"/*Group*/,
       "SymbolId": "a3f64d34-1fab-4230-86b3-1c3deba3f90b",
+      "SymbolName": "Lib.render.transform.Group",
       "InputValues": [
         {
           "Id": "996bd2d7-3741-4ade-b1b6-18eb3d884081"/*Color*/,
@@ -438,6 +456,7 @@
     {
       "Id": "b50d84eb-bf50-4be6-8f6d-4b08c6ae2f59"/*DrawLines*/,
       "SymbolId": "836f211f-b387-417c-8316-658e0dc6e117",
+      "SymbolName": "Lib.point.draw.DrawLines",
       "InputValues": [
         {
           "Id": "75419a73-8a3e-4538-9a1d-e3b0ce7f8561"/*Color*/,
@@ -460,6 +479,7 @@
     {
       "Id": "b887e20f-1872-4cae-9354-e45840ae34bb"/*Add*/,
       "SymbolId": "c160f925-0a66-4505-a569-cadd878dbb6f",
+      "SymbolName": "Lib.numbers.float.basic.Add",
       "InputValues": [
         {
           "Id": "993d59bb-1fc0-4857-a36d-629b0e7aa0d2"/*Input2*/,
@@ -472,6 +492,7 @@
     {
       "Id": "cb590f64-77ad-48a4-a5d1-59196d422617"/*MoveToSDF*/,
       "SymbolId": "983d8a34-e225-456b-9f12-806eede743e3",
+      "SymbolName": "Lib.point.modify.MoveToSDF",
       "InputValues": [
         {
           "Id": "f8f3e984-421b-4e1e-abb1-8d75afb5b64d"/*SetColor*/,
@@ -484,6 +505,7 @@
     {
       "Id": "d401ad45-4494-4636-a999-2c9e2aaa72e9"/*RadialPoints*/,
       "SymbolId": "3352d3a1-ab04-4d0a-bb43-da69095b73fd",
+      "SymbolName": "Lib.point.generate.RadialPoints",
       "InputValues": [
         {
           "Id": "6df5829e-a534-4620-bcd5-9324f94b4f54"/*Axis*/,
@@ -510,6 +532,7 @@
     {
       "Id": "d70dd3cf-aea2-4bdc-ab82-675a35313d88"/*MapPointAttributes*/,
       "SymbolId": "191e5057-4da4-447e-b7cf-e9e0ed8c5dd8",
+      "SymbolName": "Lib.point.modify.MapPointAttributes",
       "InputValues": [
         {
           "Id": "38046ede-e786-4cb1-ac17-de6cb7b91c32"/*Range*/,
@@ -573,6 +596,7 @@
     {
       "Id": "eba1b97e-49f1-41d0-aeba-978456815a41"/*Gradient*/,
       "SymbolId": "8211249d-7a26-4ad0-8d84-56da72a5c536",
+      "SymbolName": "Lib.numbers.color.SampleGradient",
       "Name": "Gradient",
       "InputValues": [
         {

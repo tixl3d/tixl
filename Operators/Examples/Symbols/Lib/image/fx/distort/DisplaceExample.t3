@@ -6,6 +6,7 @@
     {
       "Id": "00f1ef58-f3ff-49b8-b45d-8cf3fafbfe14"/*CompareImages*/,
       "SymbolId": "0e13e34f-c07b-4ada-8c87-6b89f4ed8b41",
+      "SymbolName": "Lib.image.analyze.CompareImages",
       "InputValues": [
         {
           "Id": "99171ae6-fb07-4121-bf23-e97f30b33be5"/*IntensityRange*/,
@@ -23,6 +24,7 @@
     {
       "Id": "113a51a8-bdf3-41e2-855f-5662f17d887a"/*AnimValue*/,
       "SymbolId": "ea7b8491-2f8e-4add-b0b1-fd068ccfed0d",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "InputValues": [
         {
           "Id": "4cf5d20b-7335-4584-b246-c260ac5cdf4f"/*Shape*/,
@@ -45,6 +47,7 @@
     {
       "Id": "1a5e8741-0f1f-4861-ab48-676b24ba2d38"/*Time*/,
       "SymbolId": "b0d75f21-df33-460b-beab-d8c5e1f23e5e",
+      "SymbolName": "Lib.numbers.anim.time.Time",
       "InputValues": [
         {
           "Id": "e0f765f3-ac71-45c9-87a4-e9be3fa9a9a0"/*SpeedFactor*/,
@@ -57,6 +60,7 @@
     {
       "Id": "37355988-0e42-4a23-842c-0d0f57f9f46e"/*Displace*/,
       "SymbolId": "1b149f1f-529c-4418-ac9d-3871f24a9e38",
+      "SymbolName": "Lib.image.fx.distort.Displace",
       "InputValues": [
         {
           "Id": "0f2867ab-a65e-4bf3-b1b5-9c241690ba5f"/*Displacement*/,
@@ -84,6 +88,7 @@
     {
       "Id": "4654f026-d78c-44f3-9800-1580585720d9"/*LoadImage*/,
       "SymbolId": "0b3436db-e283-436e-ba85-2f3a1de76a9d",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
       "InputValues": [
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
@@ -96,6 +101,7 @@
     {
       "Id": "5396c5c7-d7ec-426e-99eb-3f8dfcff5c08"/*Displace*/,
       "SymbolId": "1b149f1f-529c-4418-ac9d-3871f24a9e38",
+      "SymbolName": "Lib.image.fx.distort.Displace",
       "InputValues": [
         {
           "Id": "0f2867ab-a65e-4bf3-b1b5-9c241690ba5f"/*Displacement*/,
@@ -123,6 +129,7 @@
     {
       "Id": "83a4fa11-f33c-4dbe-9dc0-2b1a8f4fa5c3"/*RadialGradient*/,
       "SymbolId": "82ad8911-c930-4851-803d-3f24422445bc",
+      "SymbolName": "Lib.image.generate.basic.RadialGradient",
       "InputValues": [
         {
           "Id": "3f5a284b-e2f0-47e2-bf79-2a7fe8949519"/*Gradient*/,
@@ -176,6 +183,7 @@
     {
       "Id": "a09ecff3-2789-4096-aae1-9b8fec313467"/*RadialGradient*/,
       "SymbolId": "82ad8911-c930-4851-803d-3f24422445bc",
+      "SymbolName": "Lib.image.generate.basic.RadialGradient",
       "InputValues": [
         {
           "Id": "3f5a284b-e2f0-47e2-bf79-2a7fe8949519"/*Gradient*/,

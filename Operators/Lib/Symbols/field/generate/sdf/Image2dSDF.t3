@@ -26,6 +26,7 @@
     {
       "Id": "838dbb18-c2c9-485b-a293-f177afa807e6"/*ExecuteImage2dSdf*/,
       "SymbolId": "8fd60f01-9960-47fb-a730-45b50b9b94d2",
+      "SymbolName": "Lib.field.generate.sdf._.ExecuteImage2dSdf",
       "InputValues": [
         {
           "Id": "5d256e1e-7189-4239-a1dd-717d909382a0"/*Scale*/,
@@ -46,6 +47,7 @@
     {
       "Id": "fef5b00d-ad54-430b-9069-ce445e9aa0b5"/*SrvFromTexture2d*/,
       "SymbolId": "c2078514-cf1d-439c-a732-0d7b31b5084a",
+      "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
       "InputValues": [],
       "Outputs": []
     }

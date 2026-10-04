@@ -23,12 +23,14 @@
     {
       "Id": "0d6fcdc1-7c04-45f8-9a5c-c33e59f3ec87"/*Execute*/,
       "SymbolId": "936e4324-bea2-463a-b196-6064a2d8a6b2",
+      "SymbolName": "Lib.flow.Execute",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "3d45156f-be39-4393-9bb1-b5514bc956c0"/*CombineStrings*/,
       "SymbolId": "48ab9824-76ca-4238-800f-9cf95311e6c0",
+      "SymbolName": "Lib.string.combine.CombineStrings",
       "InputValues": [
         {
           "Id": "c832ba89-f4ae-4c47-b62b-52da52a09556"/*Separator*/,
@@ -41,6 +43,7 @@
     {
       "Id": "5838f596-567e-48cd-83b2-4b85cf25a09d"/*PlayVideo*/,
       "SymbolId": "914fb032-d7eb-414b-9e09-2bdd7049e049",
+      "SymbolName": "Lib.io.video.PlayVideo",
       "InputValues": [
         {
           "Id": "0e255347-08bc-4363-9ffa-ab863a1cea8e"/*Path*/,
@@ -53,6 +56,7 @@
     {
       "Id": "6e7f0afa-90ca-486f-b112-89a19f544c1c"/*Text*/,
       "SymbolId": "fd31d208-12fe-46bf-bfa3-101211f8f497",
+      "SymbolName": "Lib.render.basic.Text",
       "InputValues": [
         {
           "Id": "0e5f05b4-5e8a-4f6d-8cac-03b04649eb67"/*Color*/,
@@ -108,12 +112,14 @@
     {
       "Id": "98d97f0e-0d18-42b4-92fd-30d98be78e0b"/*FilePathParts*/,
       "SymbolId": "42c556fb-014b-4ac5-b390-f426ab415aa7",
+      "SymbolName": "Lib.string.logic.FilePathParts",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "9f67b61e-b9f0-4199-a63d-2654798331c5"/*Time*/,
       "SymbolId": "b0d75f21-df33-460b-beab-d8c5e1f23e5e",
+      "SymbolName": "Lib.numbers.anim.time.Time",
       "InputValues": [
         {
           "Id": "6d2f783a-23b7-425c-a4e3-cfcdcd61cf3a"/*Mode*/,
@@ -131,24 +137,28 @@
     {
       "Id": "ba579db7-b4bf-4a25-910b-64952e4201c2"/*Layer2d*/,
       "SymbolId": "d8c5330f-59b5-4907-b845-a02def3042fa",
+      "SymbolName": "Lib.render.basic.Layer2d",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "bc1c0497-6e4d-4fa2-9e97-645e53158ecc"/*TimeToString*/,
       "SymbolId": "075612b1-8760-4858-ad6b-6c85a7716794",
+      "SymbolName": "Lib.string.datetime.TimeToString",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "cf433af9-1257-4684-954a-04858e74116b"/*Execute*/,
       "SymbolId": "936e4324-bea2-463a-b196-6064a2d8a6b2",
+      "SymbolName": "Lib.flow.Execute",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "da318983-b8e7-4ecb-8f96-75541ce82671"/*ConvertFormat*/,
       "SymbolId": "e1cd1cdf-3982-4bb3-b080-9f0a851566d7",
+      "SymbolName": "Lib.image.color.ConvertFormat",
       "InputValues": [],
       "Outputs": []
     }

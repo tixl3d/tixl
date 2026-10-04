@@ -142,7 +142,7 @@
       }
     },
     {
-      "ChildId": "1ea969a5-4a8b-4743-8281-64c06fa1e01d"/*PointsToCPU*/,
+      "ChildId": "1ea969a5-4a8b-4743-8281-64c06fa1e01d"/*ReadPointsFromGpu*/,
       "SectionId": "3c22fab6-384b-4bd8-b318-3f61458fcd4d",
       "Position": {
         "X": 959.13983,

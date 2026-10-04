@@ -6,6 +6,7 @@
     {
       "Id": "03dd906f-9a24-44f5-95be-0fd4e086df26"/*4*/,
       "SymbolId": "9b550333-1caa-43d4-9e6f-245c55c2d24a",
+      "SymbolName": "Examples.testing._ParticleUpdateTester",
       "Name": "4",
       "InputValues": [
         {
@@ -34,6 +35,7 @@
     {
       "Id": "10189b0c-6d7b-40e6-b414-9a939133a128"/*ParticleSystem*/,
       "SymbolId": "e44ae9b6-cd56-4224-8a5d-118eda4cd3f4",
+      "SymbolName": "Lib.particle.ParticleSystem",
       "InputValues": [
         {
           "Id": "38392c86-4a1b-4b6f-ac32-26920a73e1e2"/*EmitVelocity*/,
@@ -56,6 +58,7 @@
     {
       "Id": "3266f682-840d-4c9f-9250-2888775d9c45"/*Framerate Speed*/,
       "SymbolId": "f92a1144-55d9-4d8e-bfa6-f80665800e25",
+      "SymbolName": "Examples.testing.VisualTest",
       "Name": "Framerate Speed",
       "InputValues": [
         {
@@ -69,6 +72,7 @@
     {
       "Id": "33174fac-dd49-4b42-90ed-9419a66a75f8"/*_ParticleUpdateTester*/,
       "SymbolId": "9b550333-1caa-43d4-9e6f-245c55c2d24a",
+      "SymbolName": "Examples.testing._ParticleUpdateTester",
       "InputValues": [
         {
           "Id": "4b21554e-a551-43aa-8fb1-b3b2794977e4"/*PointSize*/,
@@ -91,6 +95,7 @@
     {
       "Id": "3d9e75ec-2985-402f-a34f-408c03193d03"/*ExecuteTests*/,
       "SymbolId": "83cb923e-a387-4be2-b391-4111c7bd90fe",
+      "SymbolName": "Examples.testing.ExecuteTests",
       "InputValues": [
         {
           "Id": "31937a13-1e53-45dd-8e6f-91ca5f3aaa19"/*TriggerTest*/,
@@ -108,6 +113,7 @@
     {
       "Id": "3f264983-bdc4-47eb-af87-2952fb18df48"/*HasTimeChanged*/,
       "SymbolId": "2443b2fd-c397-4ea6-9588-b595f918cf01",
+      "SymbolName": "Lib.numbers.anim.time.HasTimeChanged",
       "InputValues": [
         {
           "Id": "bc112889-77a8-4967-a9b7-683b7c7017fe"/*Mode*/,
@@ -120,6 +126,7 @@
     {
       "Id": "5410e163-3c84-4187-8e5f-ce2187cf5af7"/*2*/,
       "SymbolId": "9b550333-1caa-43d4-9e6f-245c55c2d24a",
+      "SymbolName": "Examples.testing._ParticleUpdateTester",
       "Name": "2",
       "InputValues": [
         {
@@ -148,18 +155,21 @@
     {
       "Id": "62d9b60d-9b76-4483-bba4-90c78b825ad4"/*Group*/,
       "SymbolId": "a3f64d34-1fab-4230-86b3-1c3deba3f90b",
+      "SymbolName": "Lib.render.transform.Group",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "63f9c403-6ce5-471b-8b41-eaa9eb5e4e16"/*Camera*/,
       "SymbolId": "746d886c-5ab6-44b1-bb15-f3ce2fadf7e6",
+      "SymbolName": "Lib.render.camera.Camera",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "7303470b-920f-4a78-a188-2fa555e9cf8d"/*TurbulenceForce*/,
       "SymbolId": "3f8376f2-b89a-4ab4-b6dc-a3e8bf88c0a5",
+      "SymbolName": "Lib.particle.force.TurbulenceForce",
       "InputValues": [
         {
           "Id": "e27a97ce-3d0f-41a9-93c3-a1691f4029aa"/*Amount*/,
@@ -172,24 +182,28 @@
     {
       "Id": "8c0deeaf-3784-4c0e-a1ed-74957a3b3293"/*RadialPoints*/,
       "SymbolId": "3352d3a1-ab04-4d0a-bb43-da69095b73fd",
+      "SymbolName": "Lib.point.generate.RadialPoints",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "9094b343-8ff8-47d1-b907-624961d18d8d"/*RenderTarget*/,
       "SymbolId": "f9fe78c5-43a6-48ae-8e8c-6cdbbc330dd1",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "9cf3b50f-e0f1-404d-8cdb-48a247ec0eb2"/*DrawPoints*/,
       "SymbolId": "ffd94e5a-bc98-4e70-84d8-cce831e6925f",
+      "SymbolName": "Lib.point.draw.DrawPoints",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "b27c8222-a2b2-4e53-bd3f-d466b0cfe33f"/*RenderTarget*/,
       "SymbolId": "f9fe78c5-43a6-48ae-8e8c-6cdbbc330dd1",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "InputValues": [
         {
           "Id": "ec46bef4-8dce-4eb4-bfe8-e35a5ac416ec"/*TextureFormat*/,
@@ -202,6 +216,7 @@
     {
       "Id": "df3f9ba9-aff8-4a63-982b-b3e314502a8b"/*Particles*/,
       "SymbolId": "f92a1144-55d9-4d8e-bfa6-f80665800e25",
+      "SymbolName": "Examples.testing.VisualTest",
       "Name": "Particles",
       "InputValues": [
         {
@@ -215,6 +230,7 @@
     {
       "Id": "f83d4008-7b52-449d-80c8-c6f20f610125"/*8*/,
       "SymbolId": "9b550333-1caa-43d4-9e6f-245c55c2d24a",
+      "SymbolName": "Examples.testing._ParticleUpdateTester",
       "Name": "8",
       "InputValues": [
         {

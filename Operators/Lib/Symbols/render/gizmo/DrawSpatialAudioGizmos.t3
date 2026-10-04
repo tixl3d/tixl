@@ -11,12 +11,14 @@
     {
       "Id": "374777d6-9686-495d-b0e8-8b39e4cb9262"/*GetAllSpatialAudioPlayers*/,
       "SymbolId": "91f249cf-a398-4261-8654-22637a1b9c12",
+      "SymbolName": "Lib.io.audio._.GetAllSpatialAudioPlayers",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "610a8da0-b6cd-42d9-a889-a4f5c08cf6c4"/*GetFloatVar*/,
       "SymbolId": "e6072ecf-30d2-4c52-afa1-3b195d61617b",
+      "SymbolName": "Lib.flow.context.GetFloatVar",
       "InputValues": [
         {
           "Id": "015d1ea0-ea51-4038-893a-4af2f8584631"/*VariableName*/,
@@ -29,24 +31,28 @@
     {
       "Id": "6fa114be-e7bf-44df-bd41-9bf776201bdd"/*VisibleGizmos*/,
       "SymbolId": "d61d7192-9ca3-494e-91e2-10a530ee9375",
+      "SymbolName": "Lib.render.gizmo.VisibleGizmos",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "7acbee3f-7fc6-4290-a23f-c28e86e07a19"/*Loop*/,
       "SymbolId": "3631c727-36a0-4f26-ae76-ee9c100efc33",
+      "SymbolName": "Lib.flow.Loop",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "900c2ddd-ade7-4fe0-aa0f-5301b7a1ff92"/*SpatialAudioPlayerGizmo*/,
       "SymbolId": "b26e6624-4017-46b5-970d-1525d90fafad",
+      "SymbolName": "Lib.io.audio.SpatialAudioPlayerGizmo",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "bdcdcb92-47d7-4c8d-86ec-dce784a59391"/*FloatToInt*/,
       "SymbolId": "06b4728e-852c-491a-a89d-647f7e0b5415",
+      "SymbolName": "Lib.numbers.int.process.FloatToInt",
       "InputValues": [],
       "Outputs": []
     }

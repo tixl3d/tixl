@@ -66,30 +66,35 @@
     {
       "Id": "0b046afa-a364-40b3-a97d-708873e0c551"/*IntToFloat*/,
       "SymbolId": "17db8a36-079d-4c83-8a2a-7ea4c1aa49e6",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "13fc6ec5-f483-4ff3-84ac-71f43730c65c"/*FirstValidTexture*/,
       "SymbolId": "db73b47d-3d42-4b17-b8fd-08b6f1286716",
+      "SymbolName": "Lib.image.use.FirstValidTexture",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "14ef1100-1ad6-4057-bd74-4000c6ece035"/*Vector4Components*/,
       "SymbolId": "b15e4950-5c72-4655-84bc-c00647319030",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "bfe8150d-e0f6-4f4e-a3d3-cd8a50ae6ca4"/*Vector2Components*/,
       "SymbolId": "0946c48b-85d8-4072-8f21-11d17cc6f6cf",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "cad868ef-df34-49de-8653-1d3276d7066f"/*_multiImageFxSetup*/,
       "SymbolId": "a2567844-3314-48de-bda7-7904b5546535",
+      "SymbolName": "Lib.image.fx._._multiImageFxSetup",
       "InputValues": [
         {
           "Id": "440e471b-9f67-435c-9e21-304cd57728aa"/*GenerateMips*/,
@@ -112,6 +117,7 @@
     {
       "Id": "efb30cae-7028-412e-9401-5ff7acec8a27"/*Vector2Components*/,
       "SymbolId": "0946c48b-85d8-4072-8f21-11d17cc6f6cf",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "InputValues": [],
       "Outputs": []
     }

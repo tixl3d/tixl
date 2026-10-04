@@ -12,17 +12,17 @@
       }
     },
     {
-      "InputId": "d9a2f6b1-3e58-4c07-8f4d-52c0e7a9b136"/*Center*/,
-      "Position": {
-        "X": 0.0,
-        "Y": 45.0
-      }
-    },
-    {
       "InputId": "6b4e0d97-a25c-4f83-91c6-e7d3a8f2b504"/*Size*/,
       "Position": {
         "X": 0.0,
         "Y": 90.0
+      }
+    },
+    {
+      "InputId": "d9a2f6b1-3e58-4c07-8f4d-52c0e7a9b136"/*Center*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
       }
     },
     {

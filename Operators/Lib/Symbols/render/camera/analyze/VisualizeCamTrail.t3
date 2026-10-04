@@ -19,6 +19,7 @@
     {
       "Id": "35dda355-a21e-4895-ab33-1b793a31c3af"/*SampleGradient*/,
       "SymbolId": "8211249d-7a26-4ad0-8d84-56da72a5c536",
+      "SymbolName": "Lib.numbers.color.SampleGradient",
       "InputValues": [
         {
           "Id": "eff10fad-cf95-4133-91db-efc41258cd1b"/*Gradient*/,
@@ -87,6 +88,7 @@
     {
       "Id": "4b9f46c3-7e0c-4e1e-a349-6e37bb5d861c"/*_CameraGizmo*/,
       "SymbolId": "b601be85-fa85-4358-9541-7e97341bf6b3",
+      "SymbolName": "Lib.render.gizmo._._CameraGizmo",
       "InputValues": [
         {
           "Id": "d75731a1-6826-44bf-8f2b-a684ef36e48f"/*Scale*/,
@@ -99,6 +101,7 @@
     {
       "Id": "63e34105-b60e-461e-8f30-cb71fd1a9f44"/*Remap*/,
       "SymbolId": "f0acd1a4-7a98-43ab-a807-6d1bd3e92169",
+      "SymbolName": "Lib.numbers.float.adjust.Remap",
       "InputValues": [
         {
           "Id": "f2baf278-adde-42de-afce-336b6c8d0387"/*RangeOutMin*/,
@@ -111,18 +114,21 @@
     {
       "Id": "6a228abc-6675-4c33-8120-f034eb36c244"/*GetFloatVar*/,
       "SymbolId": "e6072ecf-30d2-4c52-afa1-3b195d61617b",
+      "SymbolName": "Lib.flow.context.GetFloatVar",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "75227ac3-ae7b-475e-8613-511814d36434"/*Multiply*/,
       "SymbolId": "17b60044-9125-4961-8a79-ca94697b3726",
+      "SymbolName": "Lib.numbers.float.basic.Multiply",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "8294fb47-0ac2-4349-b322-28862651e91f"/*ClampInt*/,
       "SymbolId": "5f734c25-9f1a-436c-b56c-7e0a1e07fdda",
+      "SymbolName": "Lib.numbers.int.process.ClampInt",
       "InputValues": [
         {
           "Id": "23e55b5d-b469-4d0f-a495-7e87fe65cccf"/*Max*/,
@@ -140,6 +146,7 @@
     {
       "Id": "97d7026b-d0d5-458b-9639-c18789b81838"/*SetTime*/,
       "SymbolId": "32325c5b-53f7-4414-b4dd-a436e45528b0",
+      "SymbolName": "Lib.numbers.anim.time.SetTime",
       "InputValues": [
         {
           "Id": "d2c934bb-de5c-449c-adf8-7a2f48082e9c"/*NewTime*/,
@@ -157,12 +164,14 @@
     {
       "Id": "cd3ee2b5-7132-473a-a3bb-0f540c0a1761"/*ApplyCamTransform*/,
       "SymbolId": "68e2031d-20ac-4a2e-a407-fc2cbd76aad2",
+      "SymbolName": "Lib.render._.ApplyCamTransform",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "eeef889f-8574-4b7b-997d-1ca5dcbb417c"/*Loop*/,
       "SymbolId": "3631c727-36a0-4f26-ae76-ee9c100efc33",
+      "SymbolName": "Lib.flow.Loop",
       "InputValues": [],
       "Outputs": []
     }

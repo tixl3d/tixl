@@ -19,6 +19,7 @@
     {
       "Id": "1317228a-e8d4-41f0-8179-5efe540af596"/*DrawLines*/,
       "SymbolId": "836f211f-b387-417c-8316-658e0dc6e117",
+      "SymbolName": "Lib.point.draw.DrawLines",
       "InputValues": [
         {
           "Id": "75419a73-8a3e-4538-9a1d-e3b0ce7f8561"/*Color*/,
@@ -36,12 +37,14 @@
     {
       "Id": "3a97f510-d196-4792-8123-0ca94ab94e58"/*PairPointsForLines*/,
       "SymbolId": "ab6ab34f-4c6e-41ef-af69-48bb9393651b",
+      "SymbolName": "Lib.point.combine.PairPointsForLines",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "5445d79d-8f89-4fb2-abd8-8745bbe2bb7d"/*MeshVerticesToPoints*/,
       "SymbolId": "2467e1ed-f7fc-4c90-8230-b80ba6b42a2d",
+      "SymbolName": "Lib.point.generate.MeshVerticesToPoints",
       "InputValues": [
         {
           "Id": "664b9a97-0709-40d5-b0a0-651092e658af"/*OffsetByTBN*/,
@@ -58,24 +61,28 @@
     {
       "Id": "580fb4c4-1955-4a33-b2b4-287a8e7a66c9"/*MeshVerticesToPoints*/,
       "SymbolId": "2467e1ed-f7fc-4c90-8230-b80ba6b42a2d",
+      "SymbolName": "Lib.point.generate.MeshVerticesToPoints",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "699c4a59-9844-40f0-8d04-4f4633d894eb"/*PairPointsForLines*/,
       "SymbolId": "ab6ab34f-4c6e-41ef-af69-48bb9393651b",
+      "SymbolName": "Lib.point.combine.PairPointsForLines",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "6efb44ae-fe62-4b93-82f1-237c6acfdd33"/*VisibleGizmos*/,
       "SymbolId": "d61d7192-9ca3-494e-91e2-10a530ee9375",
+      "SymbolName": "Lib.render.gizmo.VisibleGizmos",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "75d7659c-8208-49c8-89cd-16d360518e1f"/*DrawLines*/,
       "SymbolId": "836f211f-b387-417c-8316-658e0dc6e117",
+      "SymbolName": "Lib.point.draw.DrawLines",
       "InputValues": [
         {
           "Id": "75419a73-8a3e-4538-9a1d-e3b0ce7f8561"/*Color*/,
@@ -93,12 +100,14 @@
     {
       "Id": "90685806-a29d-43f2-a86a-3443a0a44756"/*PairPointsForLines*/,
       "SymbolId": "ab6ab34f-4c6e-41ef-af69-48bb9393651b",
+      "SymbolName": "Lib.point.combine.PairPointsForLines",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "a18937a4-eab2-4206-9ef6-31245f96e74c"/*MeshVerticesToPoints*/,
       "SymbolId": "2467e1ed-f7fc-4c90-8230-b80ba6b42a2d",
+      "SymbolName": "Lib.point.generate.MeshVerticesToPoints",
       "InputValues": [
         {
           "Id": "664b9a97-0709-40d5-b0a0-651092e658af"/*OffsetByTBN*/,
@@ -115,6 +124,7 @@
     {
       "Id": "a91bf7ae-1a19-4163-922e-291587d4af58"/*DrawLines*/,
       "SymbolId": "836f211f-b387-417c-8316-658e0dc6e117",
+      "SymbolName": "Lib.point.draw.DrawLines",
       "InputValues": [
         {
           "Id": "75419a73-8a3e-4538-9a1d-e3b0ce7f8561"/*Color*/,
@@ -132,6 +142,7 @@
     {
       "Id": "ba8d5d80-ce27-4afe-9aac-481511064be5"/*MeshVerticesToPoints*/,
       "SymbolId": "2467e1ed-f7fc-4c90-8230-b80ba6b42a2d",
+      "SymbolName": "Lib.point.generate.MeshVerticesToPoints",
       "InputValues": [
         {
           "Id": "664b9a97-0709-40d5-b0a0-651092e658af"/*OffsetByTBN*/,

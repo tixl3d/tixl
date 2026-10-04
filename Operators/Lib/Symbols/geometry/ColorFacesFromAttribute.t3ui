@@ -4,19 +4,18 @@
   "Description": "Colors faces by picking from a color list with an attribute as index.\n\nThe Attribute dropdown offers the part index, the part's seed index (one color per fracture chunk) and every face attribute of the incoming geometry. With OnlySelected, only faces with Selection > 0.5 are colored - so the cut faces of a [VoronoiFracture] get one color per chunk while the outer surface keeps its color. Wrap repeats or clamps the list.\n\nAKA: palette, tint chunks, color by id, ColorFromAttribute",
   "InputUis": [
     {
+      "InputId": "17e0d5a9-b4c2-4f83-96b7-d3f8a1e6c452"/*Wrap*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 135.0
+      }
+    },
+    {
       "InputId": "9d3b6e58-1c47-4fa2-b8e0-73a5c9d2f614"/*Geometry*/,
       "Relevancy": "Required",
       "Position": {
         "X": 0.0,
         "Y": 0.0
-      }
-    },
-    {
-      "InputId": "e2a95c07-6b38-4d1f-a4c6-58f0b7e3d921"/*Colors*/,
-      "Relevancy": "Required",
-      "Position": {
-        "X": 0.0,
-        "Y": 45.0
       }
     },
     {
@@ -28,10 +27,11 @@
       "Usage": "CustomDropdown"
     },
     {
-      "InputId": "17e0d5a9-b4c2-4f83-96b7-d3f8a1e6c452"/*Wrap*/,
+      "InputId": "e2a95c07-6b38-4d1f-a4c6-58f0b7e3d921"/*Colors*/,
+      "Relevancy": "Required",
       "Position": {
         "X": 0.0,
-        "Y": 135.0
+        "Y": 45.0
       }
     },
     {

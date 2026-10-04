@@ -22,6 +22,7 @@
     {
       "Id": "1777c10c-ab32-49d0-ab5a-62ce19224207"/*Blend*/,
       "SymbolId": "9f43f769-d32a-4f49-92ac-e0be3ba250cf",
+      "SymbolName": "Lib.image.use.Blend",
       "InputValues": [
         {
           "Id": "e8923e83-ce48-4b71-a1aa-46b9ff79780b"/*ScaleMode*/,
@@ -34,18 +35,21 @@
     {
       "Id": "1b483982-05b1-44a1-a463-10fba96ec306"/*RgbaToColor*/,
       "SymbolId": "82a5f040-926b-4970-9da2-aa36de94b436",
+      "SymbolName": "Lib.numbers.vec4.RgbaToColor",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "2743cd73-1a12-40a0-a1a5-634a52f6be1b"/*PickTexture*/,
       "SymbolId": "e6070817-cf2e-4430-87e0-bf3dd15afdb5",
+      "SymbolName": "Lib.image.use.PickTexture",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "352d4e84-5723-453b-9d24-7f71e57e869b"/*AddInt*/,
       "SymbolId": "ab73a49e-c548-437d-a4ab-b3fa41e30097",
+      "SymbolName": "Lib.numbers.int.basic.AddInt",
       "InputValues": [
         {
           "Id": "d5efbe02-8f33-42e9-a205-859c218acbec"/*Input2*/,
@@ -58,12 +62,14 @@
     {
       "Id": "9e0cc84d-0c0f-4699-87f9-054ddd6d6b4f"/*FloatToInt*/,
       "SymbolId": "06b4728e-852c-491a-a89d-647f7e0b5415",
+      "SymbolName": "Lib.numbers.int.process.FloatToInt",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "9e8e3c41-d643-4975-8e6c-0fb9f683687f"/*Clamp*/,
       "SymbolId": "c3a18346-930c-4242-9e42-aa9b3a439395",
+      "SymbolName": "Lib.numbers.float.adjust.Clamp",
       "InputValues": [
         {
           "Id": "54c0e659-7fda-459f-9938-deeee0cfa11c"/*Max*/,
@@ -76,12 +82,14 @@
     {
       "Id": "e5f300f8-f443-4a9a-a732-a8bbedbcd5bc"/*Modulo*/,
       "SymbolId": "5202d3f6-c970-4006-933d-3c60d6c202dc",
+      "SymbolName": "Lib.numbers.float.basic.Modulo",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "e766ae39-678a-4dbc-905c-1910cc7f1ae7"/*PickTexture*/,
       "SymbolId": "e6070817-cf2e-4430-87e0-bf3dd15afdb5",
+      "SymbolName": "Lib.image.use.PickTexture",
       "InputValues": [],
       "Outputs": []
     }

@@ -52,6 +52,7 @@
     {
       "Id": "3045573f-0d4f-4d71-937a-305e6186c442"/*_multiImageFxSetup*/,
       "SymbolId": "a2567844-3314-48de-bda7-7904b5546535",
+      "SymbolName": "Lib.image.fx._._multiImageFxSetup",
       "InputValues": [
         {
           "Id": "440e471b-9f67-435c-9e21-304cd57728aa"/*GenerateMips*/,
@@ -84,6 +85,7 @@
     {
       "Id": "b2940c35-362a-4eb9-8f38-f14a5016a141"/*Vector2Components*/,
       "SymbolId": "0946c48b-85d8-4072-8f21-11d17cc6f6cf",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "InputValues": [
         {
           "Id": "36f14238-5bb8-4521-9533-f4d1e8fb802b"/*Value*/,
@@ -99,6 +101,7 @@
     {
       "Id": "bc328a71-c8ef-4907-84d0-ddd72fe94649"/*_multiImageFxSetup*/,
       "SymbolId": "a2567844-3314-48de-bda7-7904b5546535",
+      "SymbolName": "Lib.image.fx._._multiImageFxSetup",
       "InputValues": [
         {
           "Id": "440e471b-9f67-435c-9e21-304cd57728aa"/*GenerateMips*/,
@@ -136,6 +139,7 @@
     {
       "Id": "f626873a-4305-484a-9ccf-77289cd983f5"/*Vector4Components*/,
       "SymbolId": "b15e4950-5c72-4655-84bc-c00647319030",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "InputValues": [],
       "Outputs": []
     }

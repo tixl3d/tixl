@@ -6,6 +6,7 @@
     {
       "Id": "4a145906-ca01-4487-81d3-fca21270e6af"/*Distance*/,
       "SymbolId": "5d7d61ae-0a41-4ffa-a51d-93bab665e7fe",
+      "SymbolName": "Types.Values.Value",
       "Name": "Distance",
       "InputValues": [
         {
@@ -19,6 +20,7 @@
     {
       "Id": "581aa2bc-67b7-4533-ad1f-0a4435ddd436"/*Distance*/,
       "SymbolId": "5d7d61ae-0a41-4ffa-a51d-93bab665e7fe",
+      "SymbolName": "Types.Values.Value",
       "Name": "Distance",
       "InputValues": [
         {
@@ -32,12 +34,14 @@
     {
       "Id": "77119db7-0d09-4bb3-826f-b1fb06234d20"/*Vector3*/,
       "SymbolId": "94a5de3b-ee6a-43d3-8d21-7b8fe94b042b",
+      "SymbolName": "Types.Values.Vector3",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "8896da69-fcfa-4772-90a4-e25317616bbe"/*AnimValue*/,
       "SymbolId": "ea7b8491-2f8e-4add-b0b1-fd068ccfed0d",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "InputValues": [
         {
           "Id": "48005727-0158-4795-ad70-8410c27fd01d"/*Rate*/,
@@ -70,6 +74,7 @@
     {
       "Id": "a820ea6b-9886-4a9c-8687-bdd8d9ca7921"/*AnimValue*/,
       "SymbolId": "ea7b8491-2f8e-4add-b0b1-fd068ccfed0d",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "InputValues": [
         {
           "Id": "48005727-0158-4795-ad70-8410c27fd01d"/*Rate*/,
@@ -102,18 +107,21 @@
     {
       "Id": "b0fa4e1d-d429-4298-9618-55eeb608265b"/*DrawSphere*/,
       "SymbolId": "3b97856c-5397-402e-85ca-5d227af348dd",
+      "SymbolName": "Lib.render.gizmo._.DrawSphere",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "ba7f5396-60b1-489e-920b-e5fb4ab0308e"/*DrawSphere*/,
       "SymbolId": "3b97856c-5397-402e-85ca-5d227af348dd",
+      "SymbolName": "Lib.render.gizmo._.DrawSphere",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "e0970bb1-33fd-469c-a726-2e085cdeb7c1"/*AnimValue*/,
       "SymbolId": "ea7b8491-2f8e-4add-b0b1-fd068ccfed0d",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "InputValues": [
         {
           "Id": "48005727-0158-4795-ad70-8410c27fd01d"/*Rate*/,
@@ -141,12 +149,14 @@
     {
       "Id": "e50dc3d4-01d3-4232-8426-bf49206b26ae"/*Vector3*/,
       "SymbolId": "94a5de3b-ee6a-43d3-8d21-7b8fe94b042b",
+      "SymbolName": "Types.Values.Vector3",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "eb406f4a-6275-47c9-92ab-74386afc7fe3"/*AnimValue*/,
       "SymbolId": "ea7b8491-2f8e-4add-b0b1-fd068ccfed0d",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "InputValues": [
         {
           "Id": "48005727-0158-4795-ad70-8410c27fd01d"/*Rate*/,
@@ -174,6 +184,7 @@
     {
       "Id": "fa03361c-ba00-4341-b6fe-811d1f1362c7"/*DrawQuiz*/,
       "SymbolId": "16e30ce0-20c9-4677-9837-0200454e05ae",
+      "SymbolName": "Lib.flow.skillQuest.DrawQuiz",
       "InputValues": [],
       "Outputs": []
     }

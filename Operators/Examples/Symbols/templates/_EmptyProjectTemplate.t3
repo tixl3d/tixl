@@ -6,6 +6,7 @@
     {
       "Id": "a9babb73-eb31-427d-8cc6-3f6cf98d9eca"/*Text*/,
       "SymbolId": "fd31d208-12fe-46bf-bfa3-101211f8f497",
+      "SymbolName": "Lib.render.basic.Text",
       "InputValues": [
         {
           "Id": "28be4e86-6761-4d07-80bf-abf6f82897e4"/*CullMode*/,
@@ -18,6 +19,7 @@
     {
       "Id": "de3f931a-c1c4-4942-9677-20dabdfb328a"/*RenderTarget*/,
       "SymbolId": "f9fe78c5-43a6-48ae-8e8c-6cdbbc330dd1",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "InputValues": [],
       "Outputs": []
     }

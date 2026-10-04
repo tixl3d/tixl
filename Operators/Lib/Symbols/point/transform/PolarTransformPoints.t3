@@ -43,12 +43,14 @@
     {
       "Id": "12b288d4-ad9d-47e8-ba78-684575e000cf"/*GetSRVProperties*/,
       "SymbolId": "bc489196-9a30-4580-af6f-dc059f226da1",
+      "SymbolName": "Lib.render._dx11.api.GetSRVProperties",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "1679856f-c737-474e-866f-1feda15e9474"/*ComputeShader*/,
       "SymbolId": "a256d70f-adb3-481d-a926-caf35bd3e64c",
+      "SymbolName": "Types.Gfx.ComputeShader",
       "InputValues": [
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
@@ -61,18 +63,21 @@
     {
       "Id": "23da49ad-d9d6-40c1-8265-ed5448b1f0cf"/*PickSDXVector4*/,
       "SymbolId": "a83f2e4f-cb4d-4a6f-9f7a-2ea7fdfab54b",
+      "SymbolName": "Lib.render._.PickSDXVector4",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "31fa509b-d9a7-41ef-8e02-33d05acb2c1f"/*CalcDispatchCount*/,
       "SymbolId": "eb68addb-ec59-416f-8608-ff9d2319f3a3",
+      "SymbolName": "Lib.render._dx11.api.CalcDispatchCount",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "41e1caa7-2860-42f4-8783-cca374acee99"/*ExecuteBufferUpdate*/,
       "SymbolId": "58351c8f-4a73-448e-b7bb-69412e71bd76",
+      "SymbolName": "Lib.render._dx11.fxsetup.ExecuteBufferUpdate",
       "InputValues": [
         {
           "Id": "6887f319-cf3f-4e87-9a8c-a7c912dbf5ad"/*IsEnabled*/,
@@ -85,6 +90,7 @@
     {
       "Id": "46e937bd-c923-4c5f-8009-fe0132274a57"/*StructuredBufferWithViews*/,
       "SymbolId": "b6c5be1d-b133-45e9-a269-8047ea0d6ad7",
+      "SymbolName": "Types.Gfx.StructuredBufferWithViews",
       "InputValues": [
         {
           "Id": "0016dd87-8756-4a97-a0da-096e1a879c05"/*Stride*/,
@@ -97,24 +103,28 @@
     {
       "Id": "5e817aeb-c8c5-40b1-beb3-6c2b699587a3"/*GetBufferComponents*/,
       "SymbolId": "80dff680-5abf-484a-b9e0-81d72f3b7aa4",
+      "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "72af22bb-0a90-4cdd-a74c-c4af698ce55c"/*TransformMatrix*/,
       "SymbolId": "17324ce1-8920-4653-ac67-c211ad507a81",
+      "SymbolName": "Lib.render._.TransformMatrix",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "7a3081aa-ad5e-4a41-afc6-63a36c854ca3"/*IntToFloat*/,
       "SymbolId": "17db8a36-079d-4c83-8a2a-7ea4c1aa49e6",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "7f7dd26d-0fe2-4136-8a34-fedc238ca774"/*PickSDXVector4*/,
       "SymbolId": "a83f2e4f-cb4d-4a6f-9f7a-2ea7fdfab54b",
+      "SymbolName": "Lib.render._.PickSDXVector4",
       "InputValues": [
         {
           "Id": "dbc92e88-cae2-44a8-b291-1a6168624244"/*Index*/,
@@ -127,6 +137,7 @@
     {
       "Id": "88da2f90-f46e-4be6-b5aa-76431f9f619a"/*PickSDXVector4*/,
       "SymbolId": "a83f2e4f-cb4d-4a6f-9f7a-2ea7fdfab54b",
+      "SymbolName": "Lib.render._.PickSDXVector4",
       "InputValues": [
         {
           "Id": "dbc92e88-cae2-44a8-b291-1a6168624244"/*Index*/,
@@ -139,6 +150,7 @@
     {
       "Id": "a4ba7261-79b7-4ea6-bcc6-62c9c4cfb67b"/*ComputeShaderStage*/,
       "SymbolId": "8bef116d-7d1c-4c1b-b902-25c1d5e925a9",
+      "SymbolName": "Types.Gfx.ComputeShaderStage",
       "InputValues": [
         {
           "Id": "180cae35-10e3-47f3-8191-f6ecea7d321c"/*Dispatch*/,
@@ -155,18 +167,21 @@
     {
       "Id": "ccc7f10d-98f5-4699-ae9f-126b7240344e"/*GetBufferComponents*/,
       "SymbolId": "80dff680-5abf-484a-b9e0-81d72f3b7aa4",
+      "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "ceec05c1-36cb-4aed-901f-c57ed0bb76d7"/*FloatsToBuffer*/,
       "SymbolId": "724da755-2d0c-42ab-8335-8c88ec5fb078",
+      "SymbolName": "Lib.render._dx11.api.FloatsToBuffer",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "f91c80fa-3fff-4f5e-85b7-33897baf2a6f"/*PickSDXVector4*/,
       "SymbolId": "a83f2e4f-cb4d-4a6f-9f7a-2ea7fdfab54b",
+      "SymbolName": "Lib.render._.PickSDXVector4",
       "InputValues": [
         {
           "Id": "dbc92e88-cae2-44a8-b291-1a6168624244"/*Index*/,

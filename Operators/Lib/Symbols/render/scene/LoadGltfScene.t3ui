@@ -85,6 +85,20 @@
         "X": 300.0,
         "Y": 1000.0
       }
+    },
+    {
+      "OutputId": "e7a2c34b-8f91-4d26-a6f3-59b1c0d8e442"/*SkinWeights*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 1100.0
+      }
+    },
+    {
+      "OutputId": "3c9e5a17-64d2-4f8b-9a3e-d07f16b82c55"/*SkeletonPoints*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 1200.0
+      }
     }
   ]
 }

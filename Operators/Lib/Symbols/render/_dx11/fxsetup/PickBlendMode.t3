@@ -11,12 +11,14 @@
     {
       "Id": "1713bba2-4e8d-4d87-85e3-986742e3689a"/*BlendState*/,
       "SymbolId": "064ca51f-47ab-4cb7-95f2-e537b68e137e",
+      "SymbolName": "Types.Gfx.BlendState",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "1d52da61-f32b-46d9-afc1-c2922799feab"/*Invert*/,
       "SymbolId": "38ee7546-8d7d-463c-aeea-e482d7ca3f30",
+      "SymbolName": "Types.Gfx.RenderTargetBlendDescription",
       "Name": "Invert",
       "InputValues": [
         {
@@ -55,6 +57,7 @@
     {
       "Id": "1df85201-3804-4909-ac8f-681596e97c86"/*BlendOnWhites01*/,
       "SymbolId": "38ee7546-8d7d-463c-aeea-e482d7ca3f30",
+      "SymbolName": "Types.Gfx.RenderTargetBlendDescription",
       "Name": "BlendOnWhites01",
       "InputValues": [
         {
@@ -78,6 +81,7 @@
     {
       "Id": "1ecbb18d-0ba2-4ff0-9252-66f53bf80a15"/*Add*/,
       "SymbolId": "38ee7546-8d7d-463c-aeea-e482d7ca3f30",
+      "SymbolName": "Types.Gfx.RenderTargetBlendDescription",
       "Name": "Add",
       "InputValues": [
         {
@@ -116,18 +120,21 @@
     {
       "Id": "2a58b3a9-d63a-4087-8f99-4e8283b1a07e"/*BlendState*/,
       "SymbolId": "064ca51f-47ab-4cb7-95f2-e537b68e137e",
+      "SymbolName": "Types.Gfx.BlendState",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "41bc4763-eaa4-4e1c-9212-ebe0ee7679eb"/*SwitchBlendState*/,
       "SymbolId": "179093f6-d3ef-43bc-a5af-1df2379ec081",
+      "SymbolName": "Lib.render._dx11.fxsetup.SwitchBlendState",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "442c175d-40a5-447e-9a1c-a2315a8f79fc"/*UseImage_Alpha*/,
       "SymbolId": "38ee7546-8d7d-463c-aeea-e482d7ca3f30",
+      "SymbolName": "Types.Gfx.RenderTargetBlendDescription",
       "Name": "UseImage_Alpha",
       "InputValues": [
         {
@@ -151,6 +158,7 @@
     {
       "Id": "465c3595-dd0d-4ff4-b40d-b28c3c57ed68"/*Multiply*/,
       "SymbolId": "38ee7546-8d7d-463c-aeea-e482d7ca3f30",
+      "SymbolName": "Types.Gfx.RenderTargetBlendDescription",
       "Name": "Multiply",
       "InputValues": [
         {
@@ -184,12 +192,14 @@
     {
       "Id": "4c6a33d8-7050-41e5-8a5d-75e9f3a3b526"/*BlendState*/,
       "SymbolId": "064ca51f-47ab-4cb7-95f2-e537b68e137e",
+      "SymbolName": "Types.Gfx.BlendState",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "53e0ef4c-c046-41a0-baa4-d891d476a0e6"/*No Blend*/,
       "SymbolId": "38ee7546-8d7d-463c-aeea-e482d7ca3f30",
+      "SymbolName": "Types.Gfx.RenderTargetBlendDescription",
       "Name": "No Blend",
       "InputValues": [
         {
@@ -203,6 +213,7 @@
     {
       "Id": "5a39b008-9b76-4d36-97b2-e574de70d7f6"/*PremultipliedAlpha*/,
       "SymbolId": "38ee7546-8d7d-463c-aeea-e482d7ca3f30",
+      "SymbolName": "Types.Gfx.RenderTargetBlendDescription",
       "Name": "PremultipliedAlpha",
       "InputValues": [
         {
@@ -226,12 +237,14 @@
     {
       "Id": "674b7d97-7baf-4388-9805-264eee280cbb"/*BlendState*/,
       "SymbolId": "064ca51f-47ab-4cb7-95f2-e537b68e137e",
+      "SymbolName": "Types.Gfx.BlendState",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "7ff6258e-c852-4adc-b458-b87df9396f05"/*BlendState*/,
       "SymbolId": "064ca51f-47ab-4cb7-95f2-e537b68e137e",
+      "SymbolName": "Types.Gfx.BlendState",
       "InputValues": [
         {
           "Id": "3ca79807-00c9-471a-ac44-525a05740fed"/*AlphaToCoverageEnable*/,
@@ -249,12 +262,14 @@
     {
       "Id": "8d40ecf9-d5da-4896-a02f-cf0b0b899de1"/*BlendState*/,
       "SymbolId": "064ca51f-47ab-4cb7-95f2-e537b68e137e",
+      "SymbolName": "Types.Gfx.BlendState",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "9cd85a03-a0c3-4566-a8e8-f23032587b01"/*RenderTargetBlendDescription*/,
       "SymbolId": "38ee7546-8d7d-463c-aeea-e482d7ca3f30",
+      "SymbolName": "Types.Gfx.RenderTargetBlendDescription",
       "InputValues": [
         {
           "Id": "7f535169-8f65-4186-866d-59c2b89d7da2"/*BlendEnabled*/,
@@ -267,6 +282,7 @@
     {
       "Id": "b9ac860e-4f91-42c7-baf7-93f9905cbc28"/*BlendState*/,
       "SymbolId": "064ca51f-47ab-4cb7-95f2-e537b68e137e",
+      "SymbolName": "Types.Gfx.BlendState",
       "InputValues": [
         {
           "Id": "873ad863-dec6-4b4b-9d81-89d5fa11beec"/*IndependentBlendEnable*/,
@@ -279,6 +295,7 @@
     {
       "Id": "bff74c44-a870-4e61-807b-556bb8ad3752"/*RenderTargetBlendDescription*/,
       "SymbolId": "38ee7546-8d7d-463c-aeea-e482d7ca3f30",
+      "SymbolName": "Types.Gfx.RenderTargetBlendDescription",
       "InputValues": [
         {
           "Id": "2632af70-5a05-429c-8123-fe280adea655"/*SourceAlphaBlend*/,
@@ -316,12 +333,14 @@
     {
       "Id": "e8c1d16a-fd0e-41ce-99e7-e8bc3b69868b"/*BlendState*/,
       "SymbolId": "064ca51f-47ab-4cb7-95f2-e537b68e137e",
+      "SymbolName": "Types.Gfx.BlendState",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "ecff38e1-c7ec-40cb-8511-b16b4fa4d647"/*BlendState*/,
       "SymbolId": "064ca51f-47ab-4cb7-95f2-e537b68e137e",
+      "SymbolName": "Types.Gfx.BlendState",
       "InputValues": [
         {
           "Id": "3ca79807-00c9-471a-ac44-525a05740fed"/*AlphaToCoverageEnable*/,
@@ -339,6 +358,7 @@
     {
       "Id": "fb771ba7-931e-4257-bc7c-9554c1e159e9"/*BlendOnWhites*/,
       "SymbolId": "38ee7546-8d7d-463c-aeea-e482d7ca3f30",
+      "SymbolName": "Types.Gfx.RenderTargetBlendDescription",
       "Name": "BlendOnWhites",
       "InputValues": [
         {
@@ -367,6 +387,7 @@
     {
       "Id": "fcc42cee-1340-4250-989c-23b8dd343d6a"/*BlendState*/,
       "SymbolId": "064ca51f-47ab-4cb7-95f2-e537b68e137e",
+      "SymbolName": "Types.Gfx.BlendState",
       "InputValues": [],
       "Outputs": []
     }

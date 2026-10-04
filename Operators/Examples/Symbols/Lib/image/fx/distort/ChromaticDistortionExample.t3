@@ -6,6 +6,7 @@
     {
       "Id": "0058f642-ae48-43ad-a33f-bf8d4049c52a"/*_Jitter2d*/,
       "SymbolId": "23794a1f-372d-484b-ac31-9470d0e77819",
+      "SymbolName": "Lib.numbers.anim._obsolete._Jitter2d",
       "InputValues": [
         {
           "Id": "1df95beb-da6d-4263-8273-7a180fd190f5"/*Rate*/,
@@ -28,6 +29,7 @@
     {
       "Id": "0e596b4e-34da-403e-8f45-bc00c35e29f6"/*_BlobOld*/,
       "SymbolId": "c8590f8f-cca1-434a-a880-67bb91920e1a",
+      "SymbolName": "Lib.image.generate._obsolete._BlobOld",
       "InputValues": [
         {
           "Id": "2d3a7e9a-9efe-486a-8c33-10a5a16dc17b"/*FeatherBias*/,
@@ -78,6 +80,7 @@
     {
       "Id": "205400b5-7d79-4ae6-b1fa-3d9ae6501e16"/*_FractalNoiseOld*/,
       "SymbolId": "97eb35ec-2825-4f63-8fdf-3fe38fa9e652",
+      "SymbolName": "Lib.image.generate._obsolete._FractalNoiseOld",
       "InputValues": [
         {
           "Id": "0e3d1c9f-d0aa-4765-a0ab-d8292a981368"/*Bias*/,
@@ -126,6 +129,7 @@
     {
       "Id": "388a16d8-f1a2-4101-b9f1-a2076c74e481"/*_Time_old*/,
       "SymbolId": "9cb4d49e-135b-400b-a035-2b02c5ea6a72",
+      "SymbolName": "Lib.numbers.anim._obsolete._Time_old",
       "InputValues": [
         {
           "Id": "2d9c040d-5244-40ac-8090-d8d57323487b"/*SpeedFactor*/,
@@ -138,6 +142,7 @@
     {
       "Id": "3aa7da3a-a51f-43b3-99e9-e271366020c7"/*_Time_old*/,
       "SymbolId": "9cb4d49e-135b-400b-a035-2b02c5ea6a72",
+      "SymbolName": "Lib.numbers.anim._obsolete._Time_old",
       "InputValues": [
         {
           "Id": "2d9c040d-5244-40ac-8090-d8d57323487b"/*SpeedFactor*/,
@@ -150,6 +155,7 @@
     {
       "Id": "a21db344-e3de-4c8d-bfe4-5a8aa018c86e"/*AdjustColors*/,
       "SymbolId": "55411442-d538-48bf-ab78-b8c24c85aa46",
+      "SymbolName": "Lib.image.color.AdjustColors",
       "InputValues": [
         {
           "Id": "74d63ccb-7ae5-45d9-af69-ad91b8582407"/*Exposure*/,
@@ -167,6 +173,7 @@
     {
       "Id": "ae5257eb-0199-4538-9208-655cb4c46034"/*Raster*/,
       "SymbolId": "4f89b41b-1643-442b-bec8-9f9ef2173baa",
+      "SymbolName": "Lib.image.generate.pattern.Raster",
       "InputValues": [
         {
           "Id": "0d0944a4-b5f6-4df5-8ef6-cbfe70fbae94"/*Background*/,
@@ -239,6 +246,7 @@
     {
       "Id": "b538769b-09d3-4a87-af75-8ba46f9431c6"/*Counter*/,
       "SymbolId": "11882635-4757-4cac-a024-70bb4e8b504c",
+      "SymbolName": "Lib.numbers.anim._obsolete.Counter",
       "InputValues": [
         {
           "Id": "286cbbfb-796d-499f-93d3-d467512110be"/*Rate*/,
@@ -271,6 +279,7 @@
     {
       "Id": "bea5e243-4b8b-43dc-a243-d69b848b0935"/*ChromaticDistortion*/,
       "SymbolId": "ecf2c782-4461-4a94-8995-067425e3f84b",
+      "SymbolName": "Lib.image.fx.distort.ChromaticDistortion",
       "InputValues": [
         {
           "Id": "2bb8354d-b995-497d-962a-c5e9952eca50"/*Colorize*/,
@@ -298,6 +307,7 @@
     {
       "Id": "d0bb56a8-84cd-4975-a74d-10928945956d"/*AdjustColors*/,
       "SymbolId": "55411442-d538-48bf-ab78-b8c24c85aa46",
+      "SymbolName": "Lib.image.color.AdjustColors",
       "InputValues": [
         {
           "Id": "090c56b2-bbed-447e-baa1-5993b4e12ddc"/*Vignette*/,
@@ -330,6 +340,7 @@
     {
       "Id": "e6246f00-4f1c-48d4-8e6e-8bbef5dec3d9"/*ChromaticDistortion*/,
       "SymbolId": "ecf2c782-4461-4a94-8995-067425e3f84b",
+      "SymbolName": "Lib.image.fx.distort.ChromaticDistortion",
       "InputValues": [
         {
           "Id": "2bb8354d-b995-497d-962a-c5e9952eca50"/*Colorize*/,
@@ -357,6 +368,7 @@
     {
       "Id": "ebf907db-ef44-4867-9db5-6a2c245a66c3"/*Vector2*/,
       "SymbolId": "926ab3fd-fbaf-4c4b-91bc-af277000dcb8",
+      "SymbolName": "Types.Values.Vector2",
       "InputValues": [
         {
           "Id": "2d9c040d-5244-40ac-8090-d8d57323487b"/*Y*/,
@@ -369,6 +381,7 @@
     {
       "Id": "f57e2dde-fea4-4dc5-a925-bd664df18121"/*_BlobOld*/,
       "SymbolId": "c8590f8f-cca1-434a-a880-67bb91920e1a",
+      "SymbolName": "Lib.image.generate._obsolete._BlobOld",
       "InputValues": [
         {
           "Id": "41f4065a-0b65-4dda-9cd3-ef7802ed170b"/*Round*/,

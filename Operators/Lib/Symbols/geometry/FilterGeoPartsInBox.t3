@@ -7,19 +7,19 @@
       "DefaultValue": null
     },
     {
-      "Id": "d9a2f6b1-3e58-4c07-8f4d-52c0e7a9b136"/*Center*/,
-      "DefaultValue": {
-        "X": 0.0,
-        "Y": 0.0,
-        "Z": 0.0
-      }
-    },
-    {
       "Id": "6b4e0d97-a25c-4f83-91c6-e7d3a8f2b504"/*Size*/,
       "DefaultValue": {
         "X": 1.0,
         "Y": 1.0,
         "Z": 1.0
+      }
+    },
+    {
+      "Id": "d9a2f6b1-3e58-4c07-8f4d-52c0e7a9b136"/*Center*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
       }
     },
     {

@@ -48,18 +48,21 @@
     {
       "Id": "092f4670-a3ed-4bfa-84bf-364e1652fde8"/*_ExecuteSdfToColor_Old*/,
       "SymbolId": "c0045cbb-7eaf-438e-872e-9e0ba08040a4",
+      "SymbolName": "Lib.field.adjust._._ExecuteSdfToColor_Old",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "22389c00-7664-4a8e-9a14-489ef7a80ec1"/*SrvFromTexture2d*/,
       "SymbolId": "c2078514-cf1d-439c-a732-0d7b31b5084a",
+      "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "8daf367d-a9ff-4388-846b-758ff3e0e7ce"/*GradientsToTexture*/,
       "SymbolId": "2c53eee7-eb38-449b-ad2a-d7a674952e5b",
+      "SymbolName": "Lib.numbers.color.GradientsToTexture",
       "InputValues": [],
       "Outputs": []
     }

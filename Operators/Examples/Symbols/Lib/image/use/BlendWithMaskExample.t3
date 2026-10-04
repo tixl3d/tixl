@@ -6,6 +6,7 @@
     {
       "Id": "1dce8460-0f31-4afb-9d7a-973c87ae931f"/*LinearGradient*/,
       "SymbolId": "2c3d2c26-ac45-42e9-8f13-6ea338333568",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "InputValues": [
         {
           "Id": "10d59d0f-a5a3-42e6-b874-345ab028978e"/*Width*/,
@@ -54,6 +55,7 @@
     {
       "Id": "1fd6d96e-75db-4845-8aa0-29be8160225f"/*_Time_old*/,
       "SymbolId": "9cb4d49e-135b-400b-a035-2b02c5ea6a72",
+      "SymbolName": "Lib.numbers.anim._obsolete._Time_old",
       "InputValues": [
         {
           "Id": "2d9c040d-5244-40ac-8090-d8d57323487b"/*SpeedFactor*/,
@@ -66,12 +68,14 @@
     {
       "Id": "3448034f-e4c9-453c-b21e-288c112cf2bb"/*LoadImage*/,
       "SymbolId": "0b3436db-e283-436e-ba85-2f3a1de76a9d",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "65bd2f7a-29eb-404b-8d24-aba1cce3f151"/*LoadImage*/,
       "SymbolId": "0b3436db-e283-436e-ba85-2f3a1de76a9d",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
       "InputValues": [
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
@@ -84,6 +88,7 @@
     {
       "Id": "f5b22ec9-e184-4dc9-b0cf-6ed03202e0b0"/*BlendWithMask*/,
       "SymbolId": "7da55d23-0bd1-457b-a036-9b6b51d2e34b",
+      "SymbolName": "Lib.image.use.BlendWithMask",
       "InputValues": [
         {
           "Id": "0f542667-8b2c-4fd7-9f9a-d63f1573d25a"/*ColorA*/,

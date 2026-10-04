@@ -6,6 +6,7 @@
     {
       "Id": "31851d51-c3c5-4a4c-a4e3-ad22d718396a"/*ImageSequenceClip*/,
       "SymbolId": "927a77d5-7bf0-477b-b288-4bb48d4980cd",
+      "SymbolName": "Lib.image.generate.load.ImageSequenceClip",
       "InputValues": [
         {
           "Id": "25215a7e-1e38-4370-8845-cbf422a7eb92"/*TriggerUpdate*/,
@@ -27,7 +28,8 @@
                 "Start": 30.474417,
                 "End": 35.747528
               },
-              "LayerIndex": 0
+              "LayerIndex": 0,
+              "SourceUnit": "Bars"
             }
           }
         }
@@ -36,30 +38,35 @@
     {
       "Id": "3d5b3c37-4ccd-470d-9c0b-4f95e8b7973a"/*RenderTarget*/,
       "SymbolId": "f9fe78c5-43a6-48ae-8e8c-6cdbbc330dd1",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "6e35fa27-3a22-4c4c-96e5-78bc656e3671"/*Execute*/,
       "SymbolId": "936e4324-bea2-463a-b196-6064a2d8a6b2",
+      "SymbolName": "Lib.flow.Execute",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "d825ee6b-89e8-4488-b2df-ff3d50528432"/*MarsAsciiMirrorScene*/,
       "SymbolId": "df176113-ccc4-43e7-a462-5f37fff72fd2",
+      "SymbolName": "Examples.user._1x.marsEpress.MarsAsciiMirrorScene",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "e06cac0f-bd55-487c-b86a-0db0c8202167"/*Execute*/,
       "SymbolId": "936e4324-bea2-463a-b196-6064a2d8a6b2",
+      "SymbolName": "Lib.flow.Execute",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "f6ec547f-8105-4af9-af7c-1b7b7f9f0de8"/*TimeClip*/,
       "SymbolId": "3036067a-a4c2-434b-b0e3-ac95c5c943f4",
+      "SymbolName": "Lib.flow.TimeClip",
       "InputValues": [],
       "Outputs": [
         {
@@ -75,7 +82,8 @@
                 "Start": 15.3575,
                 "End": 30.474417
               },
-              "LayerIndex": 0
+              "LayerIndex": 0,
+              "SourceUnit": "Bars"
             }
           }
         }
@@ -84,6 +92,7 @@
     {
       "Id": "f7108b07-ff8e-43c4-8c8a-2e4a0345ad2d"/*ImageSequenceClip*/,
       "SymbolId": "927a77d5-7bf0-477b-b288-4bb48d4980cd",
+      "SymbolName": "Lib.image.generate.load.ImageSequenceClip",
       "InputValues": [
         {
           "Id": "25215a7e-1e38-4370-8845-cbf422a7eb92"/*TriggerUpdate*/,
@@ -105,7 +114,8 @@
                 "Start": 0.0,
                 "End": 15.357504
               },
-              "LayerIndex": 1
+              "LayerIndex": 1,
+              "SourceUnit": "Bars"
             }
           }
         }
@@ -160,12 +170,15 @@
     "Enabled": true,
     "Playback": {
       "Bpm": 120.0,
+      "OnBpmChange": 0,
       "AudioSource": 0,
       "Syncing": 0,
       "AudioDecayFactor": 0.98,
       "AudioGainFactor": 1.0,
       "AudioInputDeviceName": "",
       "EnableAudioBeatLocking": "False",
+      "BeatLockSource": 0,
+      "BeatLockSmoothing": 0.5,
       "BeatLockAudioOffsetSec": "0",
       "AudioClips": [
         {
@@ -187,8 +200,15 @@
       "AudioResyncThreshold": 0.04
     },
     "Export": {
+      "Title": "",
+      "Author": "",
       "DefaultWindowMode": 1,
-      "EnablePlaybackControlWithKeyboard": true
+      "EnablePlaybackControlWithKeyboard": true,
+      "PreferredWidth": 1920,
+      "PreferredHeight": 1080,
+      "ShowLogs": false,
+      "SkipStartupDialog": false,
+      "StripUnusedOperators": true
     },
     "Proxy": {
       "Format": 1,

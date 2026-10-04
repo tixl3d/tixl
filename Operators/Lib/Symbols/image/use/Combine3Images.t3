@@ -66,30 +66,35 @@
     {
       "Id": "16d7fa18-2229-48db-b997-0fb90dcf1f65"/*Vector4Components*/,
       "SymbolId": "b15e4950-5c72-4655-84bc-c00647319030",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "1e731012-0301-4abb-bf52-0da9df687717"/*IntToFloat*/,
       "SymbolId": "17db8a36-079d-4c83-8a2a-7ea4c1aa49e6",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "1f7560ad-98c1-4cdf-82c5-09d4e374abd2"/*IntToFloat*/,
       "SymbolId": "17db8a36-079d-4c83-8a2a-7ea4c1aa49e6",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "24ac575b-369a-4529-872e-ba80d04e27d4"/*IntToFloat*/,
       "SymbolId": "17db8a36-079d-4c83-8a2a-7ea4c1aa49e6",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "27f564f2-8641-4d64-87bc-226b90f3f2b8"/*_trippleImageFxSetup*/,
       "SymbolId": "5b999887-19df-4e91-9f58-1df2d8f1440b",
+      "SymbolName": "Lib.image.fx._._trippleImageFxSetup",
       "InputValues": [
         {
           "Id": "58dd103d-4172-4cea-9c78-c9f6db9be41e"/*ShaderPath*/,
@@ -102,18 +107,21 @@
     {
       "Id": "43825270-fa2e-4215-95b8-90b3600b3fbe"/*IntToFloat*/,
       "SymbolId": "17db8a36-079d-4c83-8a2a-7ea4c1aa49e6",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "d03465c6-3992-4155-bfb9-9a9ce198f8aa"/*Vector4Components*/,
       "SymbolId": "b15e4950-5c72-4655-84bc-c00647319030",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "f697ae9b-bfab-4cef-b43f-6c3800d242e7"/*Vector4Components*/,
       "SymbolId": "b15e4950-5c72-4655-84bc-c00647319030",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "InputValues": [],
       "Outputs": []
     }

@@ -19,6 +19,7 @@
     {
       "Id": "49676bbc-9566-479e-87ff-68741dedf878"/*_VideoFormatConversion*/,
       "SymbolId": "7845ec24-e249-4c6a-84e3-63422ede1a1d",
+      "SymbolName": "Examples.user.pixtur.research._VideoFormatConversion",
       "InputValues": [
         {
           "Id": "b0c4ceaa-5101-42c6-bf71-230a01918916"/*Format*/,
@@ -31,12 +32,14 @@
     {
       "Id": "524dda12-de31-4378-87bd-9e587c087871"/*PlayVideo*/,
       "SymbolId": "914fb032-d7eb-414b-9e09-2bdd7049e049",
+      "SymbolName": "Lib.io.video.PlayVideo",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "a054b8bc-67ad-4610-92a9-d51d1d57aab4"/*Layer2d*/,
       "SymbolId": "d8c5330f-59b5-4907-b845-a02def3042fa",
+      "SymbolName": "Lib.render.basic.Layer2d",
       "InputValues": [
         {
           "Id": "022f1959-a62b-49de-817a-3930bc8ec32b"/*EnableDepthWrite*/,

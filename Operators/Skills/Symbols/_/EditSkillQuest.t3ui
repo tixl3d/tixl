@@ -1508,7 +1508,9 @@
     "a59bbd1c-48a4-efc9-1b19-d8dce82c16e0",
     "a739d892-dc00-4bbd-9004-d1f7fd485ea4"
   ],
-  "PinnedOutputId": "00000000-0000-0000-0000-000000000000"
+  "PinnedOutputId": "00000000-0000-0000-0000-000000000000",
+  "PinnedEntityKind": "None",
+  "PinnedEntityId": "00000000-0000-0000-0000-000000000000"
 }
     ],
     "Timeline": {

@@ -23,6 +23,10 @@
       "DefaultValue": 0
     },
     {
+      "Id": "9f56d158-101d-4fbc-bc63-a67b9e923dbd"/*Source*/,
+      "DefaultValue": null
+    },
+    {
       "Id": "aece14b8-88e0-4817-8204-b79159db8102"/*MinTimeBetweenHits*/,
       "DefaultValue": 0.025
     },

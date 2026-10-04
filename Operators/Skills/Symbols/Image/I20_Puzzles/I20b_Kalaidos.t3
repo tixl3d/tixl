@@ -6,6 +6,7 @@
     {
       "Id": "13b8427a-b4a2-4cb3-abde-99386d664e68"/*MirrorRepeat*/,
       "SymbolId": "06621b4b-43be-4ef9-80d0-f1b36fa4dbd1",
+      "SymbolName": "Lib.image.transform.MirrorRepeat",
       "InputValues": [
         {
           "Id": "8caa4f2b-bfab-455e-a594-09b0cfb500fc"/*RotateImage*/,
@@ -18,12 +19,14 @@
     {
       "Id": "2b6c7ccf-089a-4586-9277-515bc11a4006"/*MirrorRepeat*/,
       "SymbolId": "06621b4b-43be-4ef9-80d0-f1b36fa4dbd1",
+      "SymbolName": "Lib.image.transform.MirrorRepeat",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "512ba494-05a6-4fed-b11f-d285bd7ce33c"/*MirrorRepeat*/,
       "SymbolId": "06621b4b-43be-4ef9-80d0-f1b36fa4dbd1",
+      "SymbolName": "Lib.image.transform.MirrorRepeat",
       "InputValues": [
         {
           "Id": "8caa4f2b-bfab-455e-a594-09b0cfb500fc"/*RotateImage*/,
@@ -36,6 +39,7 @@
     {
       "Id": "78634de5-dd36-48dc-81fa-0b42fe71f2da"/*Time*/,
       "SymbolId": "b0d75f21-df33-460b-beab-d8c5e1f23e5e",
+      "SymbolName": "Lib.numbers.anim.time.Time",
       "InputValues": [
         {
           "Id": "e0f765f3-ac71-45c9-87a4-e9be3fa9a9a0"/*SpeedFactor*/,
@@ -48,6 +52,7 @@
     {
       "Id": "8fa6edbf-9368-43bc-9097-89dd78a241b9"/*MirrorRepeat*/,
       "SymbolId": "06621b4b-43be-4ef9-80d0-f1b36fa4dbd1",
+      "SymbolName": "Lib.image.transform.MirrorRepeat",
       "InputValues": [
         {
           "Id": "149a9d1c-b76e-4256-8f5d-a261923a9ae5"/*RotateMirror*/,
@@ -60,6 +65,7 @@
     {
       "Id": "96a6040b-a96f-45b5-842f-11067c040266"/*Time*/,
       "SymbolId": "b0d75f21-df33-460b-beab-d8c5e1f23e5e",
+      "SymbolName": "Lib.numbers.anim.time.Time",
       "InputValues": [
         {
           "Id": "e0f765f3-ac71-45c9-87a4-e9be3fa9a9a0"/*SpeedFactor*/,
@@ -72,12 +78,14 @@
     {
       "Id": "a52407ec-749f-495a-8a39-98442ea8bda9"/*ImageQuiz*/,
       "SymbolId": "b1cb8864-0d51-4b7f-96eb-4c6267d4b216",
+      "SymbolName": "Lib.flow.skillQuest.ImageQuiz",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "d9f887a5-afb1-4099-b3d4-20d6c5b215f3"/*LinearGradient*/,
       "SymbolId": "2c3d2c26-ac45-42e9-8f13-6ea338333568",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "InputValues": [
         {
           "Id": "10d59d0f-a5a3-42e6-b874-345ab028978e"/*Width*/,
@@ -95,6 +103,7 @@
     {
       "Id": "ee124649-1946-4bdf-ba13-53cb895453fd"/*LinearGradient*/,
       "SymbolId": "2c3d2c26-ac45-42e9-8f13-6ea338333568",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "InputValues": [],
       "Outputs": []
     }

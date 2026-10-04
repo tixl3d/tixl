@@ -6,6 +6,7 @@
     {
       "Id": "0edf89dc-cf3a-4769-af02-8a2bfea0106b"/*PrepareSvgLineTransition*/,
       "SymbolId": "b7345438-f3f4-4ad3-9c57-6076ed0e9399",
+      "SymbolName": "Lib.point.io.PrepareSvgLineTransition",
       "InputValues": [
         {
           "Id": "5fd5eea5-b7ab-406f-8c10-8435d59297b5"/*Spread*/,
@@ -23,6 +24,7 @@
     {
       "Id": "20e24719-9118-42cb-99b4-670ec652aac1"/*LoadSvg*/,
       "SymbolId": "e8d94dd7-eb54-42fe-a7b1-b43543dd457e",
+      "SymbolName": "Lib.point.io.LoadSvg",
       "InputValues": [
         {
           "Id": "221bf10c-b13e-40cf-80af-769c10a21c5b"/*ScaleToBounds*/,
@@ -50,6 +52,7 @@
     {
       "Id": "5133b458-dbce-41c9-a776-737ff52d6369"/*Camera*/,
       "SymbolId": "746d886c-5ab6-44b1-bb15-f3ce2fadf7e6",
+      "SymbolName": "Lib.render.camera.Camera",
       "InputValues": [
         {
           "Id": "313596cc-3854-436b-89da-5fd40164ce76"/*Position*/,
@@ -75,6 +78,7 @@
     {
       "Id": "61638ff9-ed2a-4118-8b11-52d436461327"/*AnimValue*/,
       "SymbolId": "ea7b8491-2f8e-4add-b0b1-fd068ccfed0d",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "InputValues": [
         {
           "Id": "48005727-0158-4795-ad70-8410c27fd01d"/*Rate*/,
@@ -97,6 +101,7 @@
     {
       "Id": "66b9b5a7-f278-4ef3-98fe-9ee492ef5ebb"/*Draw Original Lines*/,
       "SymbolId": "836f211f-b387-417c-8316-658e0dc6e117",
+      "SymbolName": "Lib.point.draw.DrawLines",
       "Name": "Draw Original Lines",
       "InputValues": [
         {
@@ -140,12 +145,14 @@
     {
       "Id": "9202fa72-8c88-407d-83f2-3e5fba66f249"/*ListToBuffer*/,
       "SymbolId": "7e28c796-85e7-47ee-99bb-9599284dbeeb",
+      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "a9fc4684-60e9-4450-85de-2e3cb896be9d"/*RenderTarget*/,
       "SymbolId": "f9fe78c5-43a6-48ae-8e8c-6cdbbc330dd1",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "InputValues": [
         {
           "Id": "e882e0f0-03f9-46e6-ac7a-709e6fa66613"/*Multisampling*/,
@@ -158,6 +165,7 @@
     {
       "Id": "bdf668de-c215-484a-a946-144d65c968fd"/*DrawLinesBuildup*/,
       "SymbolId": "66f5a6af-b4a5-46ef-b1e5-4cdd035b6539",
+      "SymbolName": "Lib.point.draw.DrawLinesBuildup",
       "InputValues": [
         {
           "Id": "01ac641b-961e-4e6b-b26d-47760ccd6a76"/*Color*/,
@@ -185,12 +193,14 @@
     {
       "Id": "d973a7b0-aabb-4975-847f-e83cf32b31b8"/*Execute*/,
       "SymbolId": "936e4324-bea2-463a-b196-6064a2d8a6b2",
+      "SymbolName": "Lib.flow.Execute",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "f60df4ec-e484-4ac1-9b0d-dcdc272be0e1"/*Glow*/,
       "SymbolId": "d392d4af-4c78-4f4a-bc3f-4c54c8c73538",
+      "SymbolName": "Lib.image.fx.stylize.Glow",
       "InputValues": [
         {
           "Id": "4927a3fc-87ff-44e7-88c0-499e3efcca55"/*Intensity*/,

@@ -15,6 +15,7 @@
     {
       "Id": "02f136be-1912-45cb-98e9-4880f0b4bd86"/*Clear*/,
       "SymbolId": "8bef116d-7d1c-4c1b-b902-25c1d5e925a9",
+      "SymbolName": "Types.Gfx.ComputeShaderStage",
       "Name": "Clear",
       "InputValues": [
         {
@@ -32,6 +33,7 @@
     {
       "Id": "083ec96e-a7b8-4f97-a203-15dd76b0ccba"/*Count*/,
       "SymbolId": "8bef116d-7d1c-4c1b-b902-25c1d5e925a9",
+      "SymbolName": "Types.Gfx.ComputeShaderStage",
       "Name": "Count",
       "InputValues": [
         {
@@ -49,36 +51,42 @@
     {
       "Id": "13c5c5bc-55ec-48bc-b256-ad4443355808"/*GetBufferComponents*/,
       "SymbolId": "80dff680-5abf-484a-b9e0-81d72f3b7aa4",
+      "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "178429cd-57d1-4a8e-a665-edfbb98f0c6a"/*CalcDispatchCount*/,
       "SymbolId": "eb68addb-ec59-416f-8608-ff9d2319f3a3",
+      "SymbolName": "Lib.render._dx11.api.CalcDispatchCount",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "26b0a38e-2090-4c54-b545-ed73c919ea46"/*GetBufferComponents*/,
       "SymbolId": "80dff680-5abf-484a-b9e0-81d72f3b7aa4",
+      "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "2b30d631-991b-45f4-9a69-83ee8d590ced"/*GetBufferComponents*/,
       "SymbolId": "80dff680-5abf-484a-b9e0-81d72f3b7aa4",
+      "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "3f5444ce-9bc1-42c3-b0fa-cf3fe0507ea6"/*GetBufferComponents*/,
       "SymbolId": "80dff680-5abf-484a-b9e0-81d72f3b7aa4",
+      "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "5482af90-715e-44dd-a31e-f5e871a5b38f"/*CellEntries*/,
       "SymbolId": "cc07b314-4582-4c2c-84b8-bb32f59fc09b",
+      "SymbolName": "Types.Values.IntValue",
       "Name": "CellEntries",
       "InputValues": [
         {
@@ -92,6 +100,7 @@
     {
       "Id": "57fd2baf-62cf-4ce4-a6ba-50473a0a7085"/*ParticleGridBuffer*/,
       "SymbolId": "b6c5be1d-b133-45e9-a269-8047ea0d6ad7",
+      "SymbolName": "Types.Gfx.StructuredBufferWithViews",
       "Name": "ParticleGridBuffer",
       "InputValues": [
         {
@@ -105,6 +114,7 @@
     {
       "Id": "8b1ad3df-5bd1-4945-b42e-e8dca5ad3580"/*PrefixSum*/,
       "SymbolId": "d35a403b-7e6e-4725-a344-6e8008a4e1e1",
+      "SymbolName": "Lib.render._dx11.fxsetup.PrefixSum",
       "InputValues": [],
       "Outputs": [
         {
@@ -116,30 +126,35 @@
     {
       "Id": "8e391859-097a-42f0-84cc-03521c79a51c"/*GetSRVProperties*/,
       "SymbolId": "bc489196-9a30-4580-af6f-dc059f226da1",
+      "SymbolName": "Lib.render._dx11.api.GetSRVProperties",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "a7502316-2af6-4b82-8338-306610b856c5"/*MultiplyInt*/,
       "SymbolId": "6a4edb6a-5ced-4356-9090-4bf770cdeb52",
+      "SymbolName": "Lib.numbers.int.basic.MultiplyInt",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "a9ae64e6-72a7-4d34-a8e8-7dbf818818a6"/*FloatsToBuffer*/,
       "SymbolId": "724da755-2d0c-42ab-8335-8c88ec5fb078",
+      "SymbolName": "Lib.render._dx11.api.FloatsToBuffer",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "b0ddf1e5-ba6f-446d-b877-5e504b9b8ebe"/*GetBufferComponents*/,
       "SymbolId": "80dff680-5abf-484a-b9e0-81d72f3b7aa4",
+      "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "b18f495f-d0b1-4a20-9795-4a37f436f756"/*ComputeShader*/,
       "SymbolId": "a256d70f-adb3-481d-a926-caf35bd3e64c",
+      "SymbolName": "Types.Gfx.ComputeShader",
       "InputValues": [
         {
           "Id": "8ad9e58d-a767-4a5f-bfbf-d082b80901d6"/*EntryPoint*/,
@@ -157,6 +172,7 @@
     {
       "Id": "b28ef13f-9b9f-4169-b334-98460c606f46"/*ParticleGridCountBuffer*/,
       "SymbolId": "b6c5be1d-b133-45e9-a269-8047ea0d6ad7",
+      "SymbolName": "Types.Gfx.StructuredBufferWithViews",
       "Name": "ParticleGridCountBuffer",
       "InputValues": [
         {
@@ -170,18 +186,21 @@
     {
       "Id": "ba25d171-0086-470a-8334-836b130e1c2d"/*CalcDispatchCount*/,
       "SymbolId": "eb68addb-ec59-416f-8608-ff9d2319f3a3",
+      "SymbolName": "Lib.render._dx11.api.CalcDispatchCount",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "baf5d18a-e410-4287-a630-433358ce0314"/*Execute*/,
       "SymbolId": "936e4324-bea2-463a-b196-6064a2d8a6b2",
+      "SymbolName": "Lib.flow.Execute",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "c60af93b-1472-4dae-85de-df3b44e30272"/*ScatterParticlesInCells*/,
       "SymbolId": "8bef116d-7d1c-4c1b-b902-25c1d5e925a9",
+      "SymbolName": "Types.Gfx.ComputeShaderStage",
       "Name": "ScatterParticlesInCells",
       "InputValues": [
         {
@@ -199,12 +218,14 @@
     {
       "Id": "c7f781c4-aa85-464d-a629-73f371ed0469"/*GetBufferComponents*/,
       "SymbolId": "80dff680-5abf-484a-b9e0-81d72f3b7aa4",
+      "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "c8f75754-6036-4404-b8cc-d08be7a6a01e"/*ParticleGridCellBuffer*/,
       "SymbolId": "b6c5be1d-b133-45e9-a269-8047ea0d6ad7",
+      "SymbolName": "Types.Gfx.StructuredBufferWithViews",
       "Name": "ParticleGridCellBuffer",
       "InputValues": [
         {
@@ -218,12 +239,14 @@
     {
       "Id": "ceb9ec75-8a5c-4c1f-9bce-8db80a108abb"/*CalcDispatchCount*/,
       "SymbolId": "eb68addb-ec59-416f-8608-ff9d2319f3a3",
+      "SymbolName": "Lib.render._dx11.api.CalcDispatchCount",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "d6617889-06c7-4996-845f-7acc5158193a"/*ComputeShader*/,
       "SymbolId": "a256d70f-adb3-481d-a926-caf35bd3e64c",
+      "SymbolName": "Types.Gfx.ComputeShader",
       "InputValues": [
         {
           "Id": "8ad9e58d-a767-4a5f-bfbf-d082b80901d6"/*EntryPoint*/,
@@ -241,12 +264,14 @@
     {
       "Id": "dda3dd38-1bad-4add-9a6d-0ef20847b0a6"/*FloatsToBuffer*/,
       "SymbolId": "724da755-2d0c-42ab-8335-8c88ec5fb078",
+      "SymbolName": "Lib.render._dx11.api.FloatsToBuffer",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "eb884c6d-8be0-4d52-9894-bdf0b3f5bdc3"/*CellCount*/,
       "SymbolId": "cc07b314-4582-4c2c-84b8-bb32f59fc09b",
+      "SymbolName": "Types.Values.IntValue",
       "Name": "CellCount",
       "InputValues": [
         {
@@ -260,12 +285,14 @@
     {
       "Id": "ec614cbd-a7e8-478e-af89-edb3452f302c"/*FloatsToBuffer*/,
       "SymbolId": "724da755-2d0c-42ab-8335-8c88ec5fb078",
+      "SymbolName": "Lib.render._dx11.api.FloatsToBuffer",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "f450b0c3-85da-493c-ad59-b9d624dfb13c"/*ParticleGridHashBuffer*/,
       "SymbolId": "b6c5be1d-b133-45e9-a269-8047ea0d6ad7",
+      "SymbolName": "Types.Gfx.StructuredBufferWithViews",
       "Name": "ParticleGridHashBuffer",
       "InputValues": [
         {
@@ -279,6 +306,7 @@
     {
       "Id": "f5cfa01d-25ab-4065-8308-0b71f08ef76b"/*ComputeShader*/,
       "SymbolId": "a256d70f-adb3-481d-a926-caf35bd3e64c",
+      "SymbolName": "Types.Gfx.ComputeShader",
       "InputValues": [
         {
           "Id": "8ad9e58d-a767-4a5f-bfbf-d082b80901d6"/*EntryPoint*/,

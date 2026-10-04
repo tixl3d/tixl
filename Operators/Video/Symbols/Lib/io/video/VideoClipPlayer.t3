@@ -19,18 +19,21 @@
     {
       "Id": "0bfc8cd5-a08c-4acd-93fd-6d460c3974ce"/*GetForegroundColor*/,
       "SymbolId": "6c1271a0-058f-4ff0-940b-f196e5debdf7",
+      "SymbolName": "Lib.flow.context.GetForegroundColor",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "1302bbfd-2acd-4df8-815d-2acd58ce2063"/*_ProcessVideoClips*/,
       "SymbolId": "0162ddd9-4611-4a0a-b02f-8f68ded99cfb",
+      "SymbolName": "Lib.io.video._ProcessVideoClips",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "1c0843b2-4b85-4a69-9f3b-3f4ed0165a95"/*GetIntVar*/,
       "SymbolId": "470db771-c7f2-4c52-8897-d3a9b9fc6a4e",
+      "SymbolName": "Lib.flow.context.GetIntVar",
       "InputValues": [
         {
           "Id": "d7662b65-f249-4887-a319-dc2cf7d192f2"/*VariableName*/,
@@ -43,18 +46,21 @@
     {
       "Id": "22b80bb4-6130-49d0-a551-adc89ceb9092"/*Layer2d*/,
       "SymbolId": "d8c5330f-59b5-4907-b845-a02def3042fa",
+      "SymbolName": "Lib.render.basic.Layer2d",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "363742e9-f79e-48f9-ad73-e9b748e96429"/*UseTextureReference*/,
       "SymbolId": "fd5ac393-02a4-43ae-8cdf-64a947abbafa",
+      "SymbolName": "Lib.image.use.UseTextureReference",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "dedfeb9e-60c5-4c87-b853-860f2c0944a2"/*RenderTarget*/,
       "SymbolId": "f9fe78c5-43a6-48ae-8e8c-6cdbbc330dd1",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "InputValues": [
         {
           "Id": "8bb4a4e5-0c88-4d99-a5b2-2c9e22bd301f"/*ClearColor*/,

@@ -6,12 +6,14 @@
     {
       "Id": "1b4b157a-7e61-49e8-a093-bd76d0f00ba2"/*RenderTarget*/,
       "SymbolId": "f9fe78c5-43a6-48ae-8e8c-6cdbbc330dd1",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "605f277f-3b16-48d9-91cf-5e463c1b7920"/*OrbitCamera*/,
       "SymbolId": "6415ed0e-3692-45e2-8e70-fe0cf4d29ebc",
+      "SymbolName": "Lib.render.camera.OrbitCamera",
       "InputValues": [
         {
           "Id": "dd92fb0a-4b3e-4492-bf59-437d914a1ad3"/*DistanceToTarget*/,
@@ -24,12 +26,14 @@
     {
       "Id": "67c18928-1cdd-46da-81eb-7cf6d9fcfd14"/*Vector3*/,
       "SymbolId": "94a5de3b-ee6a-43d3-8d21-7b8fe94b042b",
+      "SymbolName": "Types.Values.Vector3",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "6cd02123-0436-4b02-88ed-1ebc0625b651"/*AnimValue*/,
       "SymbolId": "ea7b8491-2f8e-4add-b0b1-fd068ccfed0d",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "InputValues": [
         {
           "Id": "79917ef7-64ca-4825-9c6a-c9b2a7f6ff86"/*Amplitude*/,
@@ -42,6 +46,7 @@
     {
       "Id": "77c0941a-7a14-4467-9c63-3960ff0474bd"/*MoveMeshToPointLine*/,
       "SymbolId": "c6dd42a7-d3a3-4405-b64a-159bcf3beab8",
+      "SymbolName": "Lib.mesh.modify.MoveMeshToPointLine",
       "InputValues": [
         {
           "Id": "413a2c30-586e-452c-8b67-b7268a32702f"/*Scale*/,
@@ -64,6 +69,7 @@
     {
       "Id": "7bbcde95-c865-4b28-9f2c-0508ee053864"/*TransformMesh*/,
       "SymbolId": "026e6917-6e6f-4ee3-b2d4-58f4f1de74c9",
+      "SymbolName": "Lib.mesh.modify.TransformMesh",
       "InputValues": [
         {
           "Id": "f37c11a5-b210-4e83-8ebd-64ea49ee9b96"/*Scale*/,
@@ -80,12 +86,14 @@
     {
       "Id": "7cae587d-a686-42b6-8107-f6d49ddad86e"/*Time*/,
       "SymbolId": "b0d75f21-df33-460b-beab-d8c5e1f23e5e",
+      "SymbolName": "Lib.numbers.anim.time.Time",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "804b5cb1-c104-4b9b-bb42-74d2edc28650"/*LinePoints*/,
       "SymbolId": "4ae9e2f5-7cb3-40b0-a662-0662e8cb7c68",
+      "SymbolName": "Lib.point.generate.LinePoints",
       "InputValues": [
         {
           "Id": "6fa2fddb-3b8d-4fda-9ac4-796618aa88d0"/*Length*/,
@@ -117,6 +125,7 @@
     {
       "Id": "8da6ca85-7827-4e9c-83e1-c5d5394f0145"/*LoadObj*/,
       "SymbolId": "be52b670-9749-4c0d-89f0-d8b101395227",
+      "SymbolName": "Lib.mesh.generate.LoadObj",
       "InputValues": [
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
@@ -129,6 +138,7 @@
     {
       "Id": "9cc23a34-d104-49c6-be52-995eb32f81be"/*AnimValue*/,
       "SymbolId": "ea7b8491-2f8e-4add-b0b1-fd068ccfed0d",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "InputValues": [
         {
           "Id": "4cf5d20b-7335-4584-b246-c260ac5cdf4f"/*Shape*/,
@@ -141,6 +151,7 @@
     {
       "Id": "ba740954-d923-45e2-b4a5-91b2dbb98e65"/*VisualizePoints*/,
       "SymbolId": "37bdbafc-d14c-4b81-91c3-8f63c3b63812",
+      "SymbolName": "Lib.point.draw.VisualizePoints",
       "InputValues": [
         {
           "Id": "621bf2cf-8d49-4b5f-88b9-4460045e8914"/*Size*/,
@@ -158,18 +169,21 @@
     {
       "Id": "c9c00b5b-89e1-4c4a-a337-5cb7e051c1d4"/*Group*/,
       "SymbolId": "a3f64d34-1fab-4230-86b3-1c3deba3f90b",
+      "SymbolName": "Lib.render.transform.Group",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "dba07be6-6576-44e1-8109-01d2b913f815"/*DrawMesh*/,
       "SymbolId": "a3c5471e-079b-4d4b-886a-ec02d6428ff6",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "e00ce935-3035-41bf-9a3f-d353adc382df"/*ResampleLinePoints*/,
       "SymbolId": "13ff9adb-2634-4129-8bb4-4fb764d38be6",
+      "SymbolName": "Lib.point.modify.ResampleLinePoints",
       "InputValues": [
         {
           "Id": "3e2be2bd-ffe9-4758-828d-5d6f4e1f1581"/*Rotation*/,
@@ -187,6 +201,7 @@
     {
       "Id": "e8faa07c-4ee7-4eee-a128-538b80b6294a"/*RandomizePoints*/,
       "SymbolId": "ec0675d7-6b72-4b15-b141-80bdd2367cd8",
+      "SymbolName": "Lib.point.modify.RandomizePoints",
       "InputValues": [
         {
           "Id": "270bcf23-35ee-4c4f-aae5-192435b1aee3"/*Position*/,

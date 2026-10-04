@@ -35,6 +35,7 @@
     {
       "Id": "0a1149d9-b2b8-4c59-8f9b-0053ec20b127"/*_BlobOld*/,
       "SymbolId": "c8590f8f-cca1-434a-a880-67bb91920e1a",
+      "SymbolName": "Lib.image.generate._obsolete._BlobOld",
       "InputValues": [
         {
           "Id": "325461c8-2892-4e8d-8d3b-0eea1bcc03f9"/*Position*/,
@@ -91,12 +92,14 @@
     {
       "Id": "149ca2ae-0189-476d-af76-baf715057fac"/*PickColor*/,
       "SymbolId": "3539c3a0-73f1-412c-aad2-517810126ac6",
+      "SymbolName": "Lib.numbers.vec4.PickColor",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "162746bf-04d6-4ddc-97bb-158bc1886a2c"/*SplitString*/,
       "SymbolId": "a0fcf7ed-1f14-4a8b-a57e-99e5b2407b1b",
+      "SymbolName": "Lib.string.list.SplitString",
       "InputValues": [
         {
           "Id": "c54e4b16-b185-41f8-bc50-230b7624d093"/*Split*/,
@@ -109,6 +112,7 @@
     {
       "Id": "25b3aafd-2d54-44b3-92c6-385e2da844d0"/*_BlobOld*/,
       "SymbolId": "c8590f8f-cca1-434a-a880-67bb91920e1a",
+      "SymbolName": "Lib.image.generate._obsolete._BlobOld",
       "InputValues": [
         {
           "Id": "325461c8-2892-4e8d-8d3b-0eea1bcc03f9"/*Position*/,
@@ -165,6 +169,7 @@
     {
       "Id": "26936710-b4ad-438b-aa42-a9210e5ed92c"/*PickStringFromList*/,
       "SymbolId": "ef357e66-24e9-4f54-8d86-869db74602f4",
+      "SymbolName": "Lib.string.list.PickStringFromList",
       "InputValues": [
         {
           "Id": "12ce5fe3-750f-47ed-9507-416cb327a615"/*Index*/,
@@ -177,6 +182,7 @@
     {
       "Id": "31c7227c-3ba1-4257-8710-3735a28900b7"/*Compare*/,
       "SymbolId": "026869ee-b62f-481e-aadf-f8a1db77fe65",
+      "SymbolName": "Lib.numbers.float.logic.Compare",
       "InputValues": [
         {
           "Id": "f1537faa-1bd2-44c9-b0ae-d06c5af5cdef"/*Mode*/,
@@ -189,6 +195,7 @@
     {
       "Id": "33a23b44-1f31-4247-a845-de2168ddd679"/*Text*/,
       "SymbolId": "fd31d208-12fe-46bf-bfa3-101211f8f497",
+      "SymbolName": "Lib.render.basic.Text",
       "InputValues": [
         {
           "Id": "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3"/*FontPath*/,
@@ -224,12 +231,14 @@
     {
       "Id": "4e28b6e2-b40c-4b3e-a407-56e0edd27b58"/*Switch*/,
       "SymbolId": "e64f95e4-c045-400f-98ca-7c020ad46174",
+      "SymbolName": "Lib.flow.Switch",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "5068b94a-c01e-4148-b86f-65ac4eb34c7b"/*SetIntVar*/,
       "SymbolId": "7953f704-ebee-498b-8bdd-a2c201dfe278",
+      "SymbolName": "Lib.flow.context.SetIntVar",
       "InputValues": [
         {
           "Id": "4ab2a742-7f3f-4d96-b67e-73e14b4a8f47"/*LogLevel*/,
@@ -247,12 +256,14 @@
     {
       "Id": "5653dda5-f2a0-449c-ac5d-63191939c95f"/*IntToFloat*/,
       "SymbolId": "17db8a36-079d-4c83-8a2a-7ea4c1aa49e6",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "628e1cf8-711b-4591-bb63-63eb81dca88a"/*Text*/,
       "SymbolId": "fd31d208-12fe-46bf-bfa3-101211f8f497",
+      "SymbolName": "Lib.render.basic.Text",
       "InputValues": [
         {
           "Id": "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3"/*FontPath*/,
@@ -288,6 +299,7 @@
     {
       "Id": "72a9da65-6128-4e7b-8b2e-5f2a562e7666"/*IntValue*/,
       "SymbolId": "cc07b314-4582-4c2c-84b8-bb32f59fc09b",
+      "SymbolName": "Types.Values.IntValue",
       "InputValues": [
         {
           "Id": "4515c98e-05bc-4186-8773-4d2b31a8c323"/*Int*/,
@@ -300,12 +312,14 @@
     {
       "Id": "7557c703-560f-4f04-9aa5-762701a78a31"/*PickStringPart*/,
       "SymbolId": "7baaa83d-5c09-42a0-b7bc-35dbcfa5156d",
+      "SymbolName": "Lib.string.logic.PickStringPart",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "78b3524d-e93f-4a91-a9b1-846a4f85e072"/*Layer2d*/,
       "SymbolId": "d8c5330f-59b5-4907-b845-a02def3042fa",
+      "SymbolName": "Lib.render.basic.Layer2d",
       "InputValues": [
         {
           "Id": "4618d8e0-2718-4373-a071-88ec1843b0c8"/*Stretch*/,
@@ -339,12 +353,14 @@
     {
       "Id": "876b7c15-956c-4ba9-8ba9-43af95d160ca"/*PickStringFromList*/,
       "SymbolId": "ef357e66-24e9-4f54-8d86-869db74602f4",
+      "SymbolName": "Lib.string.list.PickStringFromList",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "8be90d09-03cc-40a0-bc11-c08737b9adb9"/*Multiply*/,
       "SymbolId": "17b60044-9125-4961-8a79-ca94697b3726",
+      "SymbolName": "Lib.numbers.float.basic.Multiply",
       "InputValues": [
         {
           "Id": "5ae4bb07-4214-4ec3-a499-24d9f6d404a5"/*B*/,
@@ -357,6 +373,7 @@
     {
       "Id": "91680865-844a-49cc-b7d6-cd8b87567c24"/*IntValue*/,
       "SymbolId": "cc07b314-4582-4c2c-84b8-bb32f59fc09b",
+      "SymbolName": "Types.Values.IntValue",
       "InputValues": [
         {
           "Id": "4515c98e-05bc-4186-8773-4d2b31a8c323"/*Int*/,
@@ -369,6 +386,7 @@
     {
       "Id": "916ee8c1-1f61-4543-88da-6c14823c186f"/*SampleGradient*/,
       "SymbolId": "8211249d-7a26-4ad0-8d84-56da72a5c536",
+      "SymbolName": "Lib.numbers.color.SampleGradient",
       "InputValues": [
         {
           "Id": "eff10fad-cf95-4133-91db-efc41258cd1b"/*Gradient*/,
@@ -407,6 +425,7 @@
     {
       "Id": "996fe257-3432-4ba4-a18b-ee9c6cc5d9fb"/*Text*/,
       "SymbolId": "fd31d208-12fe-46bf-bfa3-101211f8f497",
+      "SymbolName": "Lib.render.basic.Text",
       "InputValues": [
         {
           "Id": "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3"/*FontPath*/,
@@ -442,6 +461,7 @@
     {
       "Id": "99919767-9553-4295-833a-12d6c6c82004"/*HSLToColor*/,
       "SymbolId": "1677fd74-6e54-479a-b478-c2ac77288f9c",
+      "SymbolName": "Lib.numbers.color.HSLToColor",
       "InputValues": [
         {
           "Id": "115e3d92-2e91-447d-ba81-18a508d3d36a"/*Lightness*/,
@@ -459,12 +479,14 @@
     {
       "Id": "9feca440-ff75-4f2d-a665-9684433b114d"/*Execute*/,
       "SymbolId": "936e4324-bea2-463a-b196-6064a2d8a6b2",
+      "SymbolName": "Lib.flow.Execute",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "a2df3dc5-2605-49ac-ab36-0c02dcb3d81c"/*RgbaToColor*/,
       "SymbolId": "82a5f040-926b-4970-9da2-aa36de94b436",
+      "SymbolName": "Lib.numbers.vec4.RgbaToColor",
       "InputValues": [
         {
           "Id": "0742e707-1557-4f66-98d9-3f277416b7a3"/*G*/,
@@ -487,6 +509,7 @@
     {
       "Id": "b28b489c-ac98-4a16-babe-7ac81d494a1b"/*SampleGradient*/,
       "SymbolId": "8211249d-7a26-4ad0-8d84-56da72a5c536",
+      "SymbolName": "Lib.numbers.color.SampleGradient",
       "InputValues": [
         {
           "Id": "eff10fad-cf95-4133-91db-efc41258cd1b"/*Gradient*/,
@@ -525,6 +548,7 @@
     {
       "Id": "c4f3c508-dfa7-4519-9850-08f51fe561a6"/*_BlobOld*/,
       "SymbolId": "c8590f8f-cca1-434a-a880-67bb91920e1a",
+      "SymbolName": "Lib.image.generate._obsolete._BlobOld",
       "InputValues": [
         {
           "Id": "325461c8-2892-4e8d-8d3b-0eea1bcc03f9"/*Position*/,
@@ -563,6 +587,7 @@
     {
       "Id": "cf292389-6926-41ee-9959-cdaab6368b3f"/*Layer2d*/,
       "SymbolId": "d8c5330f-59b5-4907-b845-a02def3042fa",
+      "SymbolName": "Lib.render.basic.Layer2d",
       "InputValues": [
         {
           "Id": "4618d8e0-2718-4373-a071-88ec1843b0c8"/*Stretch*/,
@@ -596,6 +621,7 @@
     {
       "Id": "d16b97ac-7aee-4836-92cd-15ede98f8207"/*PickStringFromList*/,
       "SymbolId": "ef357e66-24e9-4f54-8d86-869db74602f4",
+      "SymbolName": "Lib.string.list.PickStringFromList",
       "InputValues": [
         {
           "Id": "12ce5fe3-750f-47ed-9507-416cb327a615"/*Index*/,
@@ -608,6 +634,7 @@
     {
       "Id": "d1bf2b2a-8dec-4578-adbe-bab332daa7fd"/*Texts*/,
       "SymbolId": "a3f64d34-1fab-4230-86b3-1c3deba3f90b",
+      "SymbolName": "Lib.render.transform.Group",
       "Name": "Texts",
       "InputValues": [],
       "Outputs": []
@@ -615,6 +642,7 @@
     {
       "Id": "d9267621-09d5-4166-ba44-2c99cd658755"/*Text*/,
       "SymbolId": "fd31d208-12fe-46bf-bfa3-101211f8f497",
+      "SymbolName": "Lib.render.basic.Text",
       "InputValues": [
         {
           "Id": "0e5f05b4-5e8a-4f6d-8cac-03b04649eb67"/*Color*/,
@@ -645,12 +673,14 @@
     {
       "Id": "db1a1428-ba92-44c4-9b4c-76666885d883"/*Execute*/,
       "SymbolId": "936e4324-bea2-463a-b196-6064a2d8a6b2",
+      "SymbolName": "Lib.flow.Execute",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "dc7c5d37-a3e5-49a9-b5ff-f91a45e9c2de"/*HSLToColor*/,
       "SymbolId": "1677fd74-6e54-479a-b478-c2ac77288f9c",
+      "SymbolName": "Lib.numbers.color.HSLToColor",
       "InputValues": [
         {
           "Id": "115e3d92-2e91-447d-ba81-18a508d3d36a"/*Lightness*/,
@@ -668,6 +698,7 @@
     {
       "Id": "e44e83a9-82b6-466d-9522-747402e184b2"/*Layer2d*/,
       "SymbolId": "d8c5330f-59b5-4907-b845-a02def3042fa",
+      "SymbolName": "Lib.render.basic.Layer2d",
       "InputValues": [
         {
           "Id": "4618d8e0-2718-4373-a071-88ec1843b0c8"/*Stretch*/,
@@ -701,12 +732,14 @@
     {
       "Id": "ec58f5d5-634c-447a-9f89-a77aa65e6a88"/*IntToString*/,
       "SymbolId": "416a1c8d-4143-4de7-bcf9-466c4009112a",
+      "SymbolName": "Lib.string.convert.IntToString",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "f1abbac9-5895-4166-aaa2-d1b09d284acf"/*SearchAndReplace*/,
       "SymbolId": "b7910fc6-c3b2-4daf-93cd-010dcfe22a57",
+      "SymbolName": "Lib.string.search.SearchAndReplace",
       "InputValues": [
         {
           "Id": "4fe3f641-1c36-4970-be71-dafb5632fb53"/*SearchPattern*/,
@@ -724,12 +757,14 @@
     {
       "Id": "f3e8f2eb-2863-4da4-9090-51c7ad5bf25e"/*Group*/,
       "SymbolId": "a3f64d34-1fab-4230-86b3-1c3deba3f90b",
+      "SymbolName": "Lib.render.transform.Group",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "fb735541-142d-4182-8700-775da2480fd4"/*Group*/,
       "SymbolId": "a3f64d34-1fab-4230-86b3-1c3deba3f90b",
+      "SymbolName": "Lib.render.transform.Group",
       "InputValues": [
         {
           "Id": "9e24c5d1-191a-4c1a-b88e-03df826fffc0"/*Translation*/,

@@ -6,6 +6,7 @@
     {
       "Id": "174e0024-649e-466d-8f47-6e739a3cf3ec"/*AdvancedFeedback*/,
       "SymbolId": "33424f7f-ea2d-4753-bbc3-8df00830c4b5",
+      "SymbolName": "Lib.image.fx.feedback.AdvancedFeedback",
       "InputValues": [
         {
           "Id": "1d5207f0-132e-42e9-9b2b-171d092d6cac"/*Displacement*/,
@@ -76,6 +77,7 @@
     {
       "Id": "2ee0dbca-a96c-4cf5-a4ae-21cd79ca2d25"/*Layer2d*/,
       "SymbolId": "d8c5330f-59b5-4907-b845-a02def3042fa",
+      "SymbolName": "Lib.render.basic.Layer2d",
       "InputValues": [
         {
           "Id": "ed4f8c30-7b71-4649-97e6-710a718039b0"/*Color*/,
@@ -93,6 +95,7 @@
     {
       "Id": "4f76e8fa-749e-4af2-b747-f66c1ccfdf34"/*DetectEdges*/,
       "SymbolId": "2a5475c8-9e16-409f-8c40-a3063e045d38",
+      "SymbolName": "Lib.image.fx.stylize.DetectEdges",
       "InputValues": [
         {
           "Id": "6d10c73c-37b8-443b-94d9-854b04027a3c"/*Color*/,
@@ -120,6 +123,7 @@
     {
       "Id": "9e20455f-d402-43ec-8a53-c17b2901d8bf"/*DetectEdges*/,
       "SymbolId": "2a5475c8-9e16-409f-8c40-a3063e045d38",
+      "SymbolName": "Lib.image.fx.stylize.DetectEdges",
       "InputValues": [
         {
           "Id": "7f66aa8d-fbdd-47d6-ba38-07e257e19401"/*SampleRadius*/,
@@ -137,12 +141,14 @@
     {
       "Id": "bce44f23-cce2-4954-b854-4b18e0ecaf85"/*LoadImage*/,
       "SymbolId": "0b3436db-e283-436e-ba85-2f3a1de76a9d",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "c92b1bcf-c13c-493f-a280-ebf13a68a3d5"/*PerlinNoise2*/,
       "SymbolId": "ccc06dd6-4eec-4d17-af0b-4f1700e7887a",
+      "SymbolName": "Lib.numbers.vec2.PerlinNoise2",
       "InputValues": [
         {
           "Id": "463d2c27-721f-41ad-ba76-5db138d92bf4"/*Frequency*/,
@@ -160,6 +166,7 @@
     {
       "Id": "fb25f069-f743-4e8b-8187-027d77a1ec6a"/*PerlinNoise*/,
       "SymbolId": "436e93a8-03c0-4366-8d9a-2245e5bcaa6c",
+      "SymbolName": "Lib.numbers.float.random.PerlinNoise",
       "InputValues": [
         {
           "Id": "b7434932-aeea-407e-bb00-22337a21f293"/*Frequency*/,

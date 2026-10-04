@@ -6,12 +6,14 @@
     {
       "Id": "3ca68ae8-02bd-432b-94a4-be80b6eb5d1a"/*LoadImage*/,
       "SymbolId": "0b3436db-e283-436e-ba85-2f3a1de76a9d",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "710e4b8a-f5c7-4d6c-82a7-df509ed708ce"/*AsciiRender*/,
       "SymbolId": "42e6319e-669c-4524-8d0d-9416a86afdb3",
+      "SymbolName": "Lib.image.fx.stylize.AsciiRender",
       "InputValues": [
         {
           "Id": "011db3c0-4b2b-4040-934a-c52f671b40fd"/*Randomize*/,
@@ -52,12 +54,14 @@
     {
       "Id": "73ef00c1-942d-4464-9390-b9632fef8468"/*DetectEdges*/,
       "SymbolId": "2a5475c8-9e16-409f-8c40-a3063e045d38",
+      "SymbolName": "Lib.image.fx.stylize.DetectEdges",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "8e521fb6-e59d-403c-80cc-9e9b38df0b23"/*Text*/,
       "SymbolId": "fd31d208-12fe-46bf-bfa3-101211f8f497",
+      "SymbolName": "Lib.render.basic.Text",
       "InputValues": [
         {
           "Id": "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3"/*FontPath*/,
@@ -80,12 +84,14 @@
     {
       "Id": "b35105be-26e1-4847-bfb5-4686fb304d1b"/*RenderTarget*/,
       "SymbolId": "f9fe78c5-43a6-48ae-8e8c-6cdbbc330dd1",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "cfcb9a91-54a9-4b04-a972-30fbb65f9ee2"/*Blur*/,
       "SymbolId": "946da16c-f536-4887-b764-af9468f22c0f",
+      "SymbolName": "Lib.image.fx.blur.Blur",
       "InputValues": [
         {
           "Id": "99188668-b6ac-468b-a892-cd020a3862b2"/*Size*/,
@@ -103,12 +109,14 @@
     {
       "Id": "d7df48f3-9989-4b99-ad68-a266ed2b9760"/*Blob*/,
       "SymbolId": "27b0e1af-cb2e-4603-83f9-5c9b042d87e6",
+      "SymbolName": "Lib.image.generate.basic.Blob",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "ebfeac4e-0baf-4d89-9572-311831b8e631"/*AnimValue*/,
       "SymbolId": "ea7b8491-2f8e-4add-b0b1-fd068ccfed0d",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "InputValues": [
         {
           "Id": "48005727-0158-4795-ad70-8410c27fd01d"/*Rate*/,
@@ -136,6 +144,7 @@
     {
       "Id": "f8b7be5b-bd28-40f3-9c30-880575a764f8"/*AnimVec2*/,
       "SymbolId": "af79ee8c-d08d-4dca-b478-b4542ed69ad8",
+      "SymbolName": "Lib.numbers.anim.animators.AnimVec2",
       "InputValues": [
         {
           "Id": "140cba08-e712-4c2b-a625-f270f1b72b54"/*Amplitudes*/,

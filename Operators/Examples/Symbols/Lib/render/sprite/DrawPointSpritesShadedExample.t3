@@ -6,6 +6,7 @@
     {
       "Id": "17011ab8-95b2-4f3c-8438-566cb2d9bcfb"/*PerlinNoise3*/,
       "SymbolId": "50aab941-0a29-474a-affd-13a74ea0c780",
+      "SymbolName": "Lib.numbers.vec3.PerlinNoise3",
       "InputValues": [
         {
           "Id": "03df41a8-3d72-47b1-b854-81e6e59e7cb4"/*Frequency*/,
@@ -41,6 +42,7 @@
     {
       "Id": "47d50d16-37bc-40c1-92af-75165ad23f6b"/*DepthOfField*/,
       "SymbolId": "53d3eebd-4ead-4965-b26d-10a8bbd48182",
+      "SymbolName": "Lib.render.postfx.DepthOfField",
       "InputValues": [
         {
           "Id": "97b76d02-e735-4e93-88ad-5c9b8766a63c"/*FocusDistance*/,
@@ -53,12 +55,14 @@
     {
       "Id": "5506efbb-b273-4b69-9bc1-29afa8188e4c"/*PairPointsForLines*/,
       "SymbolId": "ab6ab34f-4c6e-41ef-af69-48bb9393651b",
+      "SymbolName": "Lib.point.combine.PairPointsForLines",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "5c67163d-7304-4d8f-8300-061c833aebde"/*SetMaterial*/,
       "SymbolId": "0ed2bee3-641f-4b08-8685-df1506e9af3c",
+      "SymbolName": "Lib.render.shading.SetMaterial",
       "InputValues": [
         {
           "Id": "108ff533-f205-4989-b894-acf48e3cc1db"/*Metal*/,
@@ -86,6 +90,7 @@
     {
       "Id": "621e5479-6597-4169-8392-4da3be7f51af"/*DrawPointSpritesShaded*/,
       "SymbolId": "122cbf32-b3e5-4db7-b18d-f2af5b10419c",
+      "SymbolName": "Lib.render.sprite.DrawPointSpritesShaded",
       "InputValues": [
         {
           "Id": "08fb9c79-2672-4ece-89bc-6f05e07592d7"/*AlphaCutOff*/,
@@ -113,12 +118,14 @@
     {
       "Id": "659f83b8-6d59-4f1b-9fa6-149224579e34"/*LoadObj*/,
       "SymbolId": "be52b670-9749-4c0d-89f0-d8b101395227",
+      "SymbolName": "Lib.mesh.generate.LoadObj",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "699a4975-75b2-4b89-be53-a13d757654d9"/*PointSimulation*/,
       "SymbolId": "10507c42-1240-47cc-9569-5e3f1c733e99",
+      "SymbolName": "Lib.point.sim.PointSimulation",
       "InputValues": [
         {
           "Id": "2f883ce2-421a-45f5-8de2-9e05d984b551"/*MinCapacity*/,
@@ -141,6 +148,7 @@
     {
       "Id": "7eb288bf-5bba-4e14-abff-f95cf76ca5e1"/*PointsOnMesh*/,
       "SymbolId": "17188f49-1243-4511-a46c-1804cae10768",
+      "SymbolName": "Lib.point.generate.PointsOnMesh",
       "InputValues": [
         {
           "Id": "b3d526ee-b1f1-4254-b702-1980d659e557"/*Count*/,
@@ -163,12 +171,14 @@
     {
       "Id": "928144b0-ab26-4fb0-8f7a-ab1477bc09a3"/*Execute*/,
       "SymbolId": "936e4324-bea2-463a-b196-6064a2d8a6b2",
+      "SymbolName": "Lib.flow.Execute",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "9ca85136-1251-4eae-ad6c-d0af371ed97d"/*_RandomizePoints_Legacy1*/,
       "SymbolId": "15f056a3-ee8b-41a2-92c9-eb85153f8200",
+      "SymbolName": "Lib.point.modify._RandomizePoints_Legacy1",
       "InputValues": [
         {
           "Id": "5fc7dd7c-6298-4f7e-9e4e-cec3506c19aa"/*Amount*/,
@@ -204,6 +214,7 @@
     {
       "Id": "a95f7191-9735-47ed-9f40-efa689471584"/*PointLight*/,
       "SymbolId": "9c67a8c8-839f-4f67-a949-08cb38b9dffd",
+      "SymbolName": "Lib.render.shading.PointLight",
       "InputValues": [
         {
           "Id": "98155900-1bb9-427a-9c4e-0988fec806cd"/*Intensity*/,
@@ -235,6 +246,7 @@
     {
       "Id": "ad3ff053-09dd-4b5c-b66e-9fd7fe4c7dad"/*TextSprites*/,
       "SymbolId": "1a6a58ea-c63a-4c99-aa9d-aeaeb01662f4",
+      "SymbolName": "Lib.render.sprite.TextSprites",
       "InputValues": [
         {
           "Id": "1cde902d-5eaa-4144-b579-85f54717356b"/*Color*/,
@@ -276,6 +288,7 @@
     {
       "Id": "b013b48a-f8bf-4ba4-a927-eea18429c9a3"/*OrbitCamera*/,
       "SymbolId": "6415ed0e-3692-45e2-8e70-fe0cf4d29ebc",
+      "SymbolName": "Lib.render.camera.OrbitCamera",
       "InputValues": [
         {
           "Id": "8c4dab88-68cb-40cc-b576-ca3f3ea8461f"/*SpinOffset*/,
@@ -302,6 +315,7 @@
     {
       "Id": "b2732e8a-ae51-4d94-ba4b-2b67c1b34693"/*SelectPoints*/,
       "SymbolId": "371d72b8-69d4-4ced-beda-271386ad2fd6",
+      "SymbolName": "Lib.point.modify.SelectPoints",
       "InputValues": [
         {
           "Id": "0b11d459-01cc-4e91-99d2-37e77a0c8a35"/*VolumeCenter*/,
@@ -343,6 +357,7 @@
     {
       "Id": "cf8500d6-994f-479b-8a98-362c35b233c9"/*SSAO*/,
       "SymbolId": "13d5260d-4e50-48f8-909c-7d84d6f0a43f",
+      "SymbolName": "Lib.render.postfx.SSAO",
       "InputValues": [
         {
           "Id": "c310f731-bc13-44e7-a827-d8e4f996ff99"/*Passes*/,
@@ -355,18 +370,21 @@
     {
       "Id": "de70fb32-0ce5-40c4-8648-4d31f39f6966"/*Once*/,
       "SymbolId": "e8d2b4ac-0ba2-400f-9c82-e5dd15a23d32",
+      "SymbolName": "Lib.flow.Once",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "e6efefe5-3ee9-4c76-85a5-f5898caef6b3"/*RenderTarget*/,
       "SymbolId": "f9fe78c5-43a6-48ae-8e8c-6cdbbc330dd1",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "fc417864-945a-4f2e-b466-03a5a07d6c70"/*DrawLines*/,
       "SymbolId": "836f211f-b387-417c-8316-658e0dc6e117",
+      "SymbolName": "Lib.point.draw.DrawLines",
       "InputValues": [
         {
           "Id": "75419a73-8a3e-4538-9a1d-e3b0ce7f8561"/*Color*/,

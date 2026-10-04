@@ -6,18 +6,21 @@
     {
       "Id": "1f825751-27ad-44c0-9c8a-73c2063b929c"/*TriggerAnim*/,
       "SymbolId": "95d586a2-ee14-4ff5-a5bb-40c497efde95",
+      "SymbolName": "Lib.numbers.anim.animators.TriggerAnim",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "26b5d65c-6db4-4590-8525-03266e000752"/*OrbitCamera*/,
       "SymbolId": "6415ed0e-3692-45e2-8e70-fe0cf4d29ebc",
+      "SymbolName": "Lib.render.camera.OrbitCamera",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "49dcff0e-b823-45e7-bb5e-b1d71d05911a"/*Glow*/,
       "SymbolId": "d392d4af-4c78-4f4a-bc3f-4c54c8c73538",
+      "SymbolName": "Lib.image.fx.stylize.Glow",
       "InputValues": [
         {
           "Id": "57968725-0a45-44f9-a9a2-f74c10b728e8"/*Radius*/,
@@ -30,12 +33,14 @@
     {
       "Id": "70eb40e7-a073-49f0-93a0-659e2af78681"/*RenderTarget*/,
       "SymbolId": "f9fe78c5-43a6-48ae-8e8c-6cdbbc330dd1",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "76c0472a-c867-4133-b637-d0c082833807"/*DrawMeshUnlit*/,
       "SymbolId": "4499dcb1-c936-49ed-861b-2ad8ae58cb28",
+      "SymbolName": "Lib.mesh.draw.DrawMeshUnlit",
       "InputValues": [
         {
           "Id": "72060e5d-090f-4c84-890a-ca9ee238fe82"/*AlphaCutOff*/,
@@ -53,6 +58,7 @@
     {
       "Id": "ad7710c7-522a-4451-8f16-29024ce191ff"/*AnimValue*/,
       "SymbolId": "ea7b8491-2f8e-4add-b0b1-fd068ccfed0d",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "InputValues": [
         {
           "Id": "4cf5d20b-7335-4584-b246-c260ac5cdf4f"/*Shape*/,
@@ -65,6 +71,7 @@
     {
       "Id": "d8c274ef-5bb0-4706-9dd6-bc1e39ebca02"/*RyojiPattern1*/,
       "SymbolId": "3ee3597d-dbf1-43a2-89d9-2f7b099112c7",
+      "SymbolName": "Lib.image.generate.pattern.RyojiPattern1",
       "InputValues": [
         {
           "Id": "19a0d33c-4c0e-40ce-8344-5ae17cf081e5"/*Iterations*/,
@@ -180,12 +187,14 @@
     {
       "Id": "e9cbe991-e4f9-4cad-9184-ec8b1a6f4c03"/*TorusMesh*/,
       "SymbolId": "a835ab86-29c1-438e-a7f7-2e297108bfd5",
+      "SymbolName": "Lib.mesh.generate.TorusMesh",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "e9d92a69-1a9e-432e-9a5f-5ea08b599ca6"/*SampleGradient*/,
       "SymbolId": "8211249d-7a26-4ad0-8d84-56da72a5c536",
+      "SymbolName": "Lib.numbers.color.SampleGradient",
       "InputValues": [
         {
           "Id": "eff10fad-cf95-4133-91db-efc41258cd1b"/*Gradient*/,

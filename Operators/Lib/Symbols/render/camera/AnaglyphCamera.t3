@@ -31,6 +31,7 @@
     {
       "Id": "04d7ee48-b688-4793-b1a2-4158fe0d73ea"/*GetFloatVar*/,
       "SymbolId": "e6072ecf-30d2-4c52-afa1-3b195d61617b",
+      "SymbolName": "Lib.flow.context.GetFloatVar",
       "InputValues": [
         {
           "Id": "015d1ea0-ea51-4038-893a-4af2f8584631"/*VariableName*/,
@@ -43,30 +44,35 @@
     {
       "Id": "1c0ef4f1-e0d4-4104-b210-d058244fe26c"/*AddVec3*/,
       "SymbolId": "15ac7153-69af-45f8-bcdd-50cdef0c9ae1",
+      "SymbolName": "Lib.numbers.vec3.AddVec3",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "315129dd-44f0-4755-848a-8f571baf89d6"/*PointLight*/,
       "SymbolId": "9c67a8c8-839f-4f67-a949-08cb38b9dffd",
+      "SymbolName": "Lib.render.shading.PointLight",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "3e59f647-95f1-4f55-8111-897736022681"/*RenderTarget*/,
       "SymbolId": "f9fe78c5-43a6-48ae-8e8c-6cdbbc330dd1",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "5055a6fd-1a80-4f22-a603-ed8c5909a9ec"/*Vector2*/,
       "SymbolId": "926ab3fd-fbaf-4c4b-91bc-af277000dcb8",
+      "SymbolName": "Types.Values.Vector2",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "5f3213b1-a3c4-454c-ac2d-9bd08b25967e"/*Bloom*/,
       "SymbolId": "f634e126-8834-46ea-bd6e-5ebfdc8b0733",
+      "SymbolName": "Lib.image.fx.blur.Bloom",
       "InputValues": [
         {
           "Id": "bb706662-2555-4f3b-a81e-60e04f052f36"/*Intensity*/,
@@ -79,24 +85,28 @@
     {
       "Id": "669a0544-be51-4a48-bb3d-0ab6e2f425c9"/*Lerp*/,
       "SymbolId": "1f5294e1-9d0b-4cd5-9d65-14c8bbf59e61",
+      "SymbolName": "Lib.numbers.float.process.Lerp",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "6713eb65-4f53-43fa-b615-c2d15a3b7c60"/*Lerp*/,
       "SymbolId": "1f5294e1-9d0b-4cd5-9d65-14c8bbf59e61",
+      "SymbolName": "Lib.numbers.float.process.Lerp",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "68cff7f6-52f4-4490-8849-82458ad545c7"/*Vector3*/,
       "SymbolId": "94a5de3b-ee6a-43d3-8d21-7b8fe94b042b",
+      "SymbolName": "Types.Values.Vector3",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "77652eb4-1e8b-42db-affd-81d24b5357d8"/*GetFloatVar*/,
       "SymbolId": "e6072ecf-30d2-4c52-afa1-3b195d61617b",
+      "SymbolName": "Lib.flow.context.GetFloatVar",
       "InputValues": [
         {
           "Id": "015d1ea0-ea51-4038-893a-4af2f8584631"/*VariableName*/,
@@ -109,18 +119,21 @@
     {
       "Id": "779b8913-e659-450f-8737-58d222e9ebdd"/*CamPosition*/,
       "SymbolId": "2ed26fb7-fe66-4ed6-8b8d-230d87ae5c77",
+      "SymbolName": "Lib.render.camera.CamPosition",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "8a3bd9f3-bf93-4d57-85ed-e83f7171f8c7"/*InvertFloat*/,
       "SymbolId": "97032147-ba0c-4454-b878-1048d8faea05",
+      "SymbolName": "Lib.numbers.float.adjust.InvertFloat",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "8ea5cf6f-e3d6-46e9-9200-ff93df5183c3"/*Camera*/,
       "SymbolId": "746d886c-5ab6-44b1-bb15-f3ce2fadf7e6",
+      "SymbolName": "Lib.render.camera.Camera",
       "InputValues": [
         {
           "Id": "123396f0-62c4-43cd-8be0-a661553d4783"/*AlsoOffsetTarget*/,
@@ -164,6 +177,7 @@
     {
       "Id": "962f5e4b-4bab-402d-b7fd-75e45a17298d"/*GetFloatVar*/,
       "SymbolId": "e6072ecf-30d2-4c52-afa1-3b195d61617b",
+      "SymbolName": "Lib.flow.context.GetFloatVar",
       "InputValues": [
         {
           "Id": "015d1ea0-ea51-4038-893a-4af2f8584631"/*VariableName*/,
@@ -181,6 +195,7 @@
     {
       "Id": "a1ae9b53-11a3-4249-b69d-9d690f371f4c"/*BlendColors*/,
       "SymbolId": "6b7c541a-ca36-4f21-ac95-89e874820c5a",
+      "SymbolName": "Lib.numbers.color.BlendColors",
       "InputValues": [
         {
           "Id": "b9e5c6f3-7052-456f-9d1b-c182b4412433"/*ColorB*/,
@@ -208,6 +223,7 @@
     {
       "Id": "c7679999-7504-44a5-a63f-ea70647e7f27"/*DepthOfField*/,
       "SymbolId": "53d3eebd-4ead-4965-b26d-10a8bbd48182",
+      "SymbolName": "Lib.render.postfx.DepthOfField",
       "InputValues": [
         {
           "Id": "3655d507-96b3-4ded-9cef-886ea703ca89"/*Amount*/,
@@ -233,6 +249,7 @@
     {
       "Id": "dacf3c39-6fc6-47ed-9ef0-bc7e1957fc7a"/*Loop*/,
       "SymbolId": "3631c727-36a0-4f26-ae76-ee9c100efc33",
+      "SymbolName": "Lib.flow.Loop",
       "InputValues": [
         {
           "Id": "1f6e2adb-cff8-4dc4-9cb4-a26e3ad8b087"/*Count*/,
@@ -255,12 +272,14 @@
     {
       "Id": "dc65872b-90dd-4e8d-80fa-28f9dda45809"/*InvertFloat*/,
       "SymbolId": "97032147-ba0c-4454-b878-1048d8faea05",
+      "SymbolName": "Lib.numbers.float.adjust.InvertFloat",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "f1564d66-2426-4bb2-8ffa-f3d6d5ecc2d7"/*Layer2d*/,
       "SymbolId": "d8c5330f-59b5-4907-b845-a02def3042fa",
+      "SymbolName": "Lib.render.basic.Layer2d",
       "InputValues": [
         {
           "Id": "c8d0e44e-acd1-4045-b565-e1ce0b722e70"/*BlendMode*/,

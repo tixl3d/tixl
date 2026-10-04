@@ -1,7 +1,12 @@
 {
   "FormatVersion": 3,
   "Id": "2ed26fb7-fe66-4ed6-8b8d-230d87ae5c77"/*CamPosition*/,
-  "Inputs": [],
+  "Inputs": [
+    {
+      "Id": "51a79f01-9b63-4217-b396-10e3c6f22c80"/*CamReference*/,
+      "DefaultValue": null
+    }
+  ],
   "Children": [],
   "Connections": []
 }

@@ -60,30 +60,35 @@
     {
       "Id": "29361a0f-84fb-431a-bfc3-37dcec47305d"/*RandomizePoints*/,
       "SymbolId": "ec0675d7-6b72-4b15-b141-80bdd2367cd8",
+      "SymbolName": "Lib.point.modify.RandomizePoints",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "3e8eb0b3-d7fb-4859-9b8a-70d28c26ca02"/*GradientsToTexture*/,
       "SymbolId": "2c53eee7-eb38-449b-ad2a-d7a674952e5b",
+      "SymbolName": "Lib.numbers.color.GradientsToTexture",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "908d7793-e1a6-4d1d-a886-5119f9d90bce"/*SelectPointsWithSDF*/,
       "SymbolId": "695d20dc-d1fe-4648-80fb-e1159b8aead4",
+      "SymbolName": "Lib.point.modify.SelectPointsWithSDF",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "f1cb187c-4f5e-4aa1-bacd-af99d4283034"/*_ExecuteSdfToColor*/,
       "SymbolId": "5b8daf99-7a4d-4491-a50f-403cb598bca4",
+      "SymbolName": "Lib.field.adjust._._ExecuteSdfToColor",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "f5d210df-78dd-4e25-b9e0-5eabac98116e"/*SrvFromTexture2d*/,
       "SymbolId": "c2078514-cf1d-439c-a732-0d7b31b5084a",
+      "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
       "InputValues": [],
       "Outputs": []
     }

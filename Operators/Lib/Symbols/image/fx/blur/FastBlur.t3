@@ -15,18 +15,21 @@
     {
       "Id": "007934b7-db18-4806-87af-9ed171d2b399"/*_ExecuteFastBlurPasses*/,
       "SymbolId": "46ce6fad-87fe-4d1f-b236-ae644dd1f76c",
+      "SymbolName": "Lib.image.fx._._ExecuteFastBlurPasses",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "59e50af9-bfc1-47c2-8de4-10a6158cfd66"/*SrvFromTexture2d*/,
       "SymbolId": "c2078514-cf1d-439c-a732-0d7b31b5084a",
+      "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "ad9a0924-046d-4aa0-8269-3e48f4cb9c74"/*LinearSampler*/,
       "SymbolId": "9515d59d-0bd5-406b-96da-6a5f60215700",
+      "SymbolName": "Types.Gfx.SamplerState",
       "Name": "LinearSampler",
       "InputValues": [
         {
@@ -50,6 +53,7 @@
     {
       "Id": "c5d073f7-22ac-4062-a2d3-f31eb8de3d17"/*PixelShader*/,
       "SymbolId": "f7c625da-fede-4993-976c-e259e0ee4985",
+      "SymbolName": "Types.Gfx.PixelShader",
       "InputValues": [
         {
           "Id": "24646f06-1509-43ce-94c6-eeb608ad97cd"/*Source*/,
@@ -72,6 +76,7 @@
     {
       "Id": "cbb2a266-df41-451c-a027-5d5dabb2053c"/*VertexShader*/,
       "SymbolId": "646f5988-0a76-4996-a538-ba48054fd0ad",
+      "SymbolName": "Types.Gfx.VertexShader",
       "InputValues": [
         {
           "Id": "78fb7501-74d9-4a27-8db2-596f25482c87"/*Source*/,
@@ -89,6 +94,7 @@
     {
       "Id": "f1bbb1bb-70a1-490a-8df2-950b3a14834e"/*PixelShader*/,
       "SymbolId": "f7c625da-fede-4993-976c-e259e0ee4985",
+      "SymbolName": "Types.Gfx.PixelShader",
       "InputValues": [
         {
           "Id": "24646f06-1509-43ce-94c6-eeb608ad97cd"/*Source*/,
