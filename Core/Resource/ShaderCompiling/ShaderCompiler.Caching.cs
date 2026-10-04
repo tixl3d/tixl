@@ -259,8 +259,18 @@ public abstract partial class ShaderCompiler
     {
         var hash = sourceCode.ComputeStableHash();
         hash = entryPoint.ComputeStableHash(hash);
-        return shaderTypeName.ComputeStableHash(hash);
+        hash = shaderTypeName.ComputeStableHash(hash);
+
+        // Unsalted for FXC, so existing DXBC caches and those shipped with exports stay valid.
+        var target = Instance.CacheTarget;
+        return target.Length == 0 ? hash : target.ComputeStableHash(hash);
     }
+
+    /// <summary>
+    /// Distinguishes this compiler's blobs in the shared cache: both backends use the same folder, and a
+    /// blob of the wrong format fails at shader creation.
+    /// </summary>
+    protected virtual string CacheTarget => string.Empty;
 
     private static readonly Dictionary<byte[], ulong> _shaderBytecodeHashes = new();
     private static readonly Dictionary<ulong, byte[]> _shaderBytecodeCache = new();

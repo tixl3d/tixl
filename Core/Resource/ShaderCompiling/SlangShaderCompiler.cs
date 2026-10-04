@@ -120,6 +120,9 @@ public sealed class SlangShaderCompiler : ShaderCompiler
         where TShader : AbstractShader
         => CompileShaderFromSource<TShader>(args, out blob, out errorMessage);
 
+    /** Includes the Slang version, because another compiler can generate different code from the same source. */
+    protected override string CacheTarget => "spirv-slang-" + PinnedVersion;
+
     protected override bool CompileShaderFromSource<TShader>(ShaderCompilationArgs args, out byte[] blob, out string errorMessage)
     {
         blob = null!;
