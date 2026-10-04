@@ -69,6 +69,7 @@ public sealed class D3D11Backend : IGraphicsBackend, IDisposable
         var bindFlags = Convert.ToD3D(description.Usage);
         var usage = Convert.ToD3D(description.Memory);
         var cpuAccess = Convert.ToCpuAccess(description.Memory);
+        var options = OptionFlagsFor(description, format, bindFlags, usage);
 
         var boxes = new SharpDX.DataBox[initialData.Length];
 
@@ -93,6 +94,7 @@ public sealed class D3D11Backend : IGraphicsBackend, IDisposable
                                                  Usage = usage,
                                                  BindFlags = bindFlags,
                                                  CpuAccessFlags = cpuAccess,
+                                                 OptionFlags = options,
                                              },
                                          boxes);
                 break;
@@ -108,6 +110,7 @@ public sealed class D3D11Backend : IGraphicsBackend, IDisposable
                                                  Usage = usage,
                                                  BindFlags = bindFlags,
                                                  CpuAccessFlags = cpuAccess,
+                                                 OptionFlags = options,
                                              },
                                          boxes);
                 break;
@@ -126,9 +129,7 @@ public sealed class D3D11Backend : IGraphicsBackend, IDisposable
                                                  Usage = usage,
                                                  BindFlags = bindFlags,
                                                  CpuAccessFlags = cpuAccess,
-                                                 OptionFlags = description.Dimension == TextureDimension.TextureCube
-                                                                   ? ResourceOptionFlags.TextureCube
-                                                                   : ResourceOptionFlags.None,
+                                                 OptionFlags = options,
                                              },
                                          boxes);
                 break;
@@ -146,7 +147,7 @@ public sealed class D3D11Backend : IGraphicsBackend, IDisposable
         var bindFlags = Convert.ToD3D(description.Usage);
         var usage = Convert.ToD3D(description.Memory);
         var cpuAccess = Convert.ToCpuAccess(description.Memory);
-        var options = description.Dimension == TextureDimension.TextureCube ? ResourceOptionFlags.TextureCube : ResourceOptionFlags.None;
+        var options = OptionFlagsFor(description, format, bindFlags, usage);
 
         fixed (byte* data = initialData)
         {
@@ -163,6 +164,7 @@ public sealed class D3D11Backend : IGraphicsBackend, IDisposable
                                                    Usage = usage,
                                                    BindFlags = bindFlags,
                                                    CpuAccessFlags = cpuAccess,
+                                                   OptionFlags = options,
                                                };
 
                     return initialData.IsEmpty
@@ -182,6 +184,7 @@ public sealed class D3D11Backend : IGraphicsBackend, IDisposable
                                                    Usage = usage,
                                                    BindFlags = bindFlags,
                                                    CpuAccessFlags = cpuAccess,
+                                                   OptionFlags = options,
                                                };
 
                     return initialData.IsEmpty
@@ -213,6 +216,28 @@ public sealed class D3D11Backend : IGraphicsBackend, IDisposable
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// D3D11 ignores GenerateMips on a texture created without <see cref="ResourceOptionFlags.GenerateMipMaps"/>,
+    /// and refuses to create one with the flag where it can't generate them, so it is set wherever it is allowed.
+    /// </summary>
+    private ResourceOptionFlags OptionFlagsFor(in TextureDescription description, DXGI.Format format, BindFlags bindFlags,
+                                               ResourceUsage usage)
+    {
+        var options = description.Dimension == TextureDimension.TextureCube ? ResourceOptionFlags.TextureCube : ResourceOptionFlags.None;
+
+        const BindFlags requiredBindings = BindFlags.RenderTarget | BindFlags.ShaderResource;
+        if (description.MipLevels > 1
+            && (bindFlags & requiredBindings) == requiredBindings
+            && description.Samples.Count <= 1
+            && usage == ResourceUsage.Default
+            && (Device.CheckFormatSupport(format) & FormatSupport.MipAutogen) != 0)
+        {
+            options |= ResourceOptionFlags.GenerateMipMaps;
+        }
+
+        return options;
     }
 
     /// <summary>

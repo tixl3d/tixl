@@ -246,6 +246,10 @@ internal static class StallWatchdog
             // has no second recording context yet — Vulkan would need its own command buffer and pool — so
             // the frozen-application overlay stays dark until it does. Detection is unaffected.
             GraphicsLog.WarnOnce("The stall overlay needs a second recording context, which the backend does not provide yet.");
+
+            // Every present must be matched by one wait on the frame-latency waitable. An unmatched one lets the
+            // main loop run ahead by a frame for good, and each stall would deepen the queue and the input lag.
+            _mainWindow.WaitForFrameLatency();
             _mainWindow.SwapChain.Present(0);
             _hasPresentedSinceLastFrame = true;
         }

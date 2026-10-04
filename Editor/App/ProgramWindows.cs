@@ -426,13 +426,8 @@ internal static unsafe class ProgramWindows
             // Without vsync this is where a GPU that can't keep up shows itself: the driver blocks the queue
             // here rather than in the work that filled it.
             PerformanceMetrics.RecordPresent((float)((Stopwatch.GetTimestamp() - startTimestamp) * 1000.0 / Stopwatch.Frequency));
-            LastPresentMs = Stopwatch.GetElapsedTime(startTimestamp).TotalMilliseconds; // TEMP latency probe
         }
     }
-
-    // TEMP latency probe
-    internal static double LastPresentMs;
-    internal static double LastFrameLatencyWaitMs;
 
     /// <summary>
     /// Keeps a copy of the frame that is about to be presented. The flip-model swap chain discards

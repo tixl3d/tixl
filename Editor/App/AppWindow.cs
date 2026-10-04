@@ -229,6 +229,10 @@ internal sealed unsafe class AppWindow
         SDL_Event sdlEvent;
         while (!_exitRequested)
         {
+            // Waiting before the events are read, not after, keeps the frame from being drawn with input that is
+            // already a refresh old.
+            WaitForFrameLatency();
+
             while (SDL_PollEvent(&sdlEvent))
             {
                 HandleEvent(sdlEvent);
@@ -290,8 +294,9 @@ internal sealed unsafe class AppWindow
     }
 
     /// <summary>
-    /// Blocks until the swap chain signals that the next frame may be submitted. Call once at the very start of
-    /// each frame. No-op unless <see cref="UseFrameLatencyWaitable"/> was set before the swap chain was made.
+    /// Blocks until the swap chain signals that the next frame may be submitted. Call exactly once per present,
+    /// before the frame's input is read. No-op unless <see cref="UseFrameLatencyWaitable"/> was set before the
+    /// swap chain was made.
     /// </summary>
     public void WaitForFrameLatency()
     {
@@ -382,6 +387,8 @@ internal sealed unsafe class AppWindow
         // An exception must not unwind into SDL's native frame.
         try
         {
+            // This frame is presented like any other, so it needs its own wait to keep presents and waits paired.
+            window.WaitForFrameLatency();
             window.RenderFrame();
         }
         catch (Exception e)
