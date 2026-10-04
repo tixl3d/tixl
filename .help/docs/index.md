@@ -16,7 +16,7 @@ Learning TiXL is designed to be straightforward. Interactive tutorials guide you
 
 ### Requirements
 
-TiXL currently runs on Windows and performs best on systems with a dedicated graphics card. While it is possible to run it on [Linux](/install/InstallLinux.md) and [macOS](/install/InstallMacOS.md) through emulation, native versions for these platforms are in development.
+TiXL currently runs on Windows and performs best on systems with a dedicated graphics card. A native [Linux](/install/InstallLinux.md) version is available as a preview. On [macOS](/install/InstallMacOS.md) it runs through emulation while a native version is in development.
 
 [Installation on Windows](/install/Installation.md) is simple: download the installer, run it, and launch TiXL.
 

@@ -5,7 +5,7 @@ Install TiXL on your machine, or set up a development environment for writing C#
 ## Pages in this section
 
 - [Installation](Installation.md) — Windows (recommended).
-- [Install on Linux](InstallLinux.md) — under Wine.
+- [Install on Linux](InstallLinux.md) — native preview, or the Windows version under Wine.
 - [Install on macOS](InstallMacOS.md) — under Sikarugir.
 - [Set up a development environment](InstallDev.md) — run TiXL from Visual Studio or Rider.
 

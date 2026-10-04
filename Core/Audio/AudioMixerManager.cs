@@ -686,14 +686,14 @@ public static class AudioMixerManager
         
         try
         {
-            // Check for bass.dll
-            var bassDllPath = System.IO.Path.Combine(Environment.CurrentDirectory, "bass.dll");
-            var bassDllExists = System.IO.File.Exists(bassDllPath);
-            Log.Error($"  bass.dll exists in current dir: {bassDllExists}");
+            // Natives load from the app folder, not the working directory (which a launcher may set anywhere).
+            var bassFileName = OperatingSystem.IsWindows() ? "bass.dll" : "libbass.so";
+            var bassDllExists = System.IO.File.Exists(System.IO.Path.Combine(AppContext.BaseDirectory, bassFileName));
+            Log.Error($"  {bassFileName} exists in app dir: {bassDllExists}");
             
-            var bassMixDllPath = System.IO.Path.Combine(Environment.CurrentDirectory, "bassmix.dll");
-            var bassMixDllExists = System.IO.File.Exists(bassMixDllPath);
-            Log.Error($"  bassmix.dll exists in current dir: {bassMixDllExists}");
+            var bassMixFileName = OperatingSystem.IsWindows() ? "bassmix.dll" : "libbassmix.so";
+            var bassMixDllExists = System.IO.File.Exists(System.IO.Path.Combine(AppContext.BaseDirectory, bassMixFileName));
+            Log.Error($"  {bassMixFileName} exists in app dir: {bassMixDllExists}");
         }
         catch (Exception ex)
         {

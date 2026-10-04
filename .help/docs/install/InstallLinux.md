@@ -1,108 +1,227 @@
 # Install on Linux
 
-This guide covers running TiXL on Linux under Wine. Native Linux support is not yet available.
+This page covers the native Linux version of TiXL: what your system needs, how to download and run it,
+and what doesn't work on Linux yet. If the native version doesn't run on your machine, you can still
+[run the Windows version under Wine](#run-the-windows-version-under-wine).
 
-## Prerequisites
+The native Linux version is a preview. Expect rough edges, and please report problems on
+[GitHub issues](https://github.com/tixl3d/tixl/issues).
 
-Before installing TiXL, install Microsoft's .NET certificate package. This ensures your custom operators compile (TiXL runs `dotnet` via Wine, which can have certificate issues).
+## System requirements
 
-1. Download both `codesignctl.pem` and `timestampctl.pem` from [.NET's github repository](https://github.com/dotnet/sdk/tree/main/src/Layout/redist/trustedroots).
-2. Install the certificates system-wide [(steps to do that linked here)](https://wiki.archlinux.org/title/User:Grawity/Adding_a_trusted_CA_certificate).
+- A 64-bit x86 PC (`x86_64`). ARM machines like Raspberry Pi or Apple Silicon aren't supported.
+- A graphics card with a Vulkan driver: Mesa (AMD, Intel) or NVIDIA's proprietary driver.
+- A distribution from late 2023 or later: Ubuntu 24.04, Debian 13, Fedora 39, Linux Mint 22, or a current Arch.
+- The **.NET 10 SDK**. TiXL compiles operators while it runs, so the runtime alone isn't enough.
+- The **Slang shader compiler** (`slangc`). TiXL uses it to compile shaders for Vulkan.
 
-## Option 1: Install with Bottles (recommended)
+## Install the dependencies
 
-1. Install [Bottles](https://usebottles.com/) – either via Flatpak or your distro's package manager.
-2. Start a new Wine prefix using the 'Gaming' preset - at time of writing, the default runner is `soda-9.0-1`.
-3. Go to Options → Dependencies and install `powershell_core` 
-4. Download the [TiXL installer](https://github.com/tixl3d/tixl/releases); that's the .exe under "Assets".
-5. Place the installer in an accessible location under your Wine prefix:
-    - In Bottles, click the three dots next to the power icon in the toolbar, then "Browse Files..." - you'll probably want to pin/bookmark this directory in your file explorer for ease of access. That's your prefix's C: drive.
-    - I saved mine in `$WINE_PREFIX/drive_c/users/Public/Desktop`, for example.
-6. In Bottles, click "Run Executable..." and run the TiXL installer; this should also install the .NET 10 SDK.
-7. Once it's done installing, you can either allow it to launch TiXL automatically or run the executable via Bottles. Unless you changed the default install location, it'll be in `$WINE_PREFIX/drive_c/TiXL`.
-8. If all is well, add the program executable as a shortcut, then click the three dots next to its program entry and select "Add Desktop Entry". TiXL should now show up amongst your usual apps 🚀
- 
-## Option 2. Install with system WINE
+Install the .NET 10 SDK and Vulkan support with your package manager. Most desktop installs already
+have the Vulkan driver, but the commands below make sure.
 
-(Tested with WINE 11.2)
+### Arch, Manjaro, EndeavourOS
 
-The following assumes operating in a dedicated WINE prefix. This could be skipped though if you're not afraid of messing your default (`~/.wine`) prefix. If there are issues with the default WINE prefix, you could delete it, and it will be recreated from scratch.
+```bash
+sudo pacman -S dotnet-sdk vulkan-icd-loader
+```
 
-Install
-```sh
+For Slang, install `shader-slang-bin` from the AUR, for example with `yay -S shader-slang-bin`.
+
+### Ubuntu, Debian, Linux Mint, Pop!_OS
+
+```bash
+sudo apt install dotnet-sdk-10.0 libvulkan1 mesa-vulkan-drivers
+```
+
+If `apt` can't find `dotnet-sdk-10.0`, your release doesn't ship it yet. On Ubuntu, add the .NET
+backports archive with `sudo add-apt-repository ppa:dotnet/backports` and try again. On Debian, follow
+[Microsoft's instructions for Debian](https://learn.microsoft.com/dotnet/core/install/linux-debian).
+
+### Fedora
+
+```bash
+sudo dnf install dotnet-sdk-10.0 vulkan-loader mesa-vulkan-drivers
+```
+
+### NixOS
+
+Add `dotnetCorePackages.sdk_10_0`, `vulkan-loader` and `shader-slang` to your packages, and enable
+`hardware.graphics.enable = true;` in your configuration.
+
+### Slang on other distributions
+
+If your distribution doesn't package Slang, download the release TiXL is tested with and unpack it
+into the folder TiXL looks in first. No `PATH` changes needed:
+
+```bash
+mkdir -p ~/.local/opt/slang-2026.18
+curl -L https://github.com/shader-slang/slang/releases/download/v2026.18/slang-2026.18-linux-x86_64.tar.gz \
+  | tar xz -C ~/.local/opt/slang-2026.18
+```
+
+If you keep `slangc` somewhere else, put it on your `PATH` or point the `TIXL_SLANGC` environment
+variable at it.
+
+## Download and run TiXL
+
+1. Download the latest `tixl-<version>-linux-x64.tar.gz` from the
+   [releases page](https://github.com/tixl3d/tixl/releases), under **Assets**.
+2. Unpack it wherever you like to keep applications, for example `~/Apps`:
+
+   ```bash
+   mkdir -p ~/Apps
+   tar xzf ~/Downloads/tixl-*-linux-x64.tar.gz -C ~/Apps
+   ```
+
+3. Start TiXL:
+
+   ```bash
+   ~/Apps/tixl-*-linux-x64/TiXL
+   ```
+
+TiXL brings its own copy of the .NET runtime, so it always starts, even before the SDK is installed.
+
+### Missing dependencies
+
+At startup, TiXL checks for the .NET SDK, the Vulkan loader and `slangc`. If one is missing, a dialog
+lists it together with the install command for your distribution:
+
+- Without Vulkan, TiXL can't render and quits after the dialog.
+- Without the .NET SDK or `slangc`, you can choose **Continue**. The built-in operators still load, but
+  your own operators won't compile without the SDK, and shaders won't compile without `slangc`.
+
+The same messages also appear in the log, so you can check them later.
+
+### Add TiXL to your app menu
+
+The download contains a desktop entry and an icon in its `share` folder. To add TiXL to your
+desktop's app menu, link the program and copy both files into your home folder:
+
+```bash
+cd ~/Apps/tixl-*-linux-x64
+mkdir -p ~/.local/bin
+ln -sf "$PWD/TiXL" ~/.local/bin/tixl
+install -Dm644 share/applications/app.tixl.TiXL.desktop ~/.local/share/applications/app.tixl.TiXL.desktop
+install -Dm644 share/icons/hicolor/256x256/apps/app.tixl.TiXL.png ~/.local/share/icons/hicolor/256x256/apps/app.tixl.TiXL.png
+```
+
+The menu entry starts `tixl`, so `~/.local/bin` must be on your `PATH`. It is by default on most
+distributions; log out and back in if the entry doesn't start right away.
+
+## Where TiXL keeps your files
+
+TiXL never writes into the folder you unpacked it to:
+
+- **Projects** go to `~/Documents/TiXL<version>/`, for example `~/Documents/TiXL4.3`.
+- **Settings, logs and caches** go to `~/.config/TiXL<version>/`. Log files are in its `Log` folder.
+
+You can add more project folders under *Settings → Projects → Project Directories*.
+
+## Update and uninstall
+
+To update, unpack the new version next to the old one and run it. If you set up the app menu, repeat
+the `ln -sf` command from the new folder so the menu starts the new version. A new minor version
+(for example 4.3 to 4.4) starts with fresh settings, because the settings and projects folder names
+contain the version. If your projects don't show up after such an update, add the previous version's
+projects folder under *Settings → Projects → Project Directories*.
+
+To uninstall, delete the unpacked folder, `~/.local/bin/tixl`, and the two files you copied into
+`~/.local/share`. Your projects and settings stay in `~/Documents` and `~/.config` until you delete
+them yourself.
+
+## What doesn't work on Linux yet
+
+A few features rely on Windows-only libraries:
+
+- Computer vision operators based on OpenCV and MediaPipe.
+- Live audio input from an external device. Audio playback and the timeline's audio work.
+- Spout video sharing, which only exists on Windows.
+- SpaceMouse support.
+
+NDI operators need the NDI runtime (`libndi.so.6`), which TiXL can't ship. On Arch, install `ndi-sdk`
+from the AUR; on NixOS, the `ndi` package; elsewhere, download it from [ndi.video](https://ndi.video).
+
+## Troubleshooting
+
+### Nothing happens when I start TiXL from the app menu
+
+Start it from a terminal instead. TiXL prints its startup log there, which usually shows what went
+wrong. Running `~/Apps/tixl-*-linux-x64/TiXL` directly also rules out problems with the menu entry.
+
+### "version `GLIBC_2.38' not found"
+
+Your distribution is older than TiXL supports. Upgrade to one of the releases listed under
+[System requirements](#system-requirements), or use the
+[Wine setup](#run-the-windows-version-under-wine).
+
+### TiXL can't find a graphics device
+
+Check that Vulkan works outside TiXL. Install `vulkan-tools` and run `vulkaninfo --summary`. It
+should list your graphics card. If it doesn't, install the Vulkan driver for your card (see
+[Install the dependencies](#install-the-dependencies)).
+
+### Shader operators show compile errors
+
+TiXL is tested with Slang 2026.18. Other versions usually work, but if shaders fail to compile, try
+the tested version as described in [Slang on other distributions](#slang-on-other-distributions).
+
+## Run the Windows version under Wine
+
+If the native version doesn't work for you, you can run the Windows version of TiXL under Wine.
+
+Before installing TiXL, install Microsoft's .NET certificate package. This makes sure your own
+operators compile, because TiXL runs `dotnet` through Wine, which can have certificate issues.
+
+1. Download both `codesignctl.pem` and `timestampctl.pem` from
+   [.NET's GitHub repository](https://github.com/dotnet/sdk/tree/main/src/Layout/redist/trustedroots).
+2. Install the certificates system-wide, as described in the
+   [Arch wiki's guide to adding a trusted certificate](https://wiki.archlinux.org/title/User:Grawity/Adding_a_trusted_CA_certificate).
+
+### With Bottles (recommended)
+
+1. Install [Bottles](https://usebottles.com/), either via Flatpak or your distribution's package manager.
+2. Create a new Wine prefix using the **Gaming** preset. At the time of writing, the default runner is `soda-9.0-1`.
+3. Go to **Options → Dependencies** and install `powershell_core`.
+4. Download the TiXL installer from the [releases page](https://github.com/tixl3d/tixl/releases); that's the `.exe` under **Assets**.
+5. Place the installer somewhere inside your Wine prefix:
+    - In Bottles, click the three dots next to the power icon in the toolbar, then **Browse Files...**. That folder is your prefix's `C:` drive; bookmarking it in your file manager helps.
+    - `$WINE_PREFIX/drive_c/users/Public/Desktop` works well, for example.
+6. In Bottles, click **Run Executable...** and run the TiXL installer. It also installs the .NET 10 SDK.
+7. When it's done, let it start TiXL, or run the executable via Bottles. Unless you changed the default location, it's in `$WINE_PREFIX/drive_c/TiXL`.
+8. Add the program executable as a shortcut, then click the three dots next to its entry and select **Add Desktop Entry**. TiXL now shows up with your other apps.
+
+### With system Wine
+
+Tested with Wine 11.2. The commands below use a dedicated Wine prefix, so TiXL doesn't affect your
+default `~/.wine` prefix.
+
+Install (adjust the version to the installer you downloaded):
+
+```bash
 export WINEPREFIX=~/.wine-tixl
-# powershell_core might not be needed, but had some issues some time without it
+# powershell_core might not be needed, but it avoided issues in some setups
 winetricks d3dcompiler_47 powershell_core
-# adjust the version accordingly
 wine ~/Downloads/Tixl-v4.0.6.1.exe
 ```
-Run (adjust the version accordingly)
-```sh
+
+Run (adjust the version accordingly):
+
+```bash
 WINEPREFIX=~/.wine-tixl wine "$WINEPREFIX/drive_c/Program Files/TiXL/TiXL 4.0.6.1/TiXL.exe"
 ```
 
-# Troubleshooting
+### Troubleshooting under Wine
 
-### TiXL launches but crashes or fail to compile shader when a shader operator is selected
-Install `d3dcompiler_46.dll` from the Dependencies list:
+If TiXL starts but crashes or fails to compile a shader when you select a shader operator, install
+`d3dcompiler_46.dll` from the Bottles **Dependencies** list:
 
-![image](https://github.com/user-attachments/assets/8a0186f3-f506-403f-add8-edccadba7f55)
+![Bottles dependency list with d3dcompiler_46 selected](https://github.com/user-attachments/assets/8a0186f3-f506-403f-add8-edccadba7f55)
 
-# Known issues 
-* Rendering to video doesn't work [yet](https://github.com/tixl3d/tixl/pull/912).
+Rendering to video doesn't work under Wine yet; see
+[the pull request that tracks it](https://github.com/tixl3d/tixl/pull/912).
 
-*** 
+## See also
 
-# The following instructions are for earlier releases of TiXL (Tooll3).
-
-## 1. Install Wine
-PlayOnLinux, Bottles, Q4Wine, Lutris, any Wine application should do.
-This guide follows a Bottles installation using Flatpak - on distributions that do not come with
-flatpak preinstalled (looking at you, Ubuntu) then you can follow the steps for your distro at
-[Flatpak Setup](https://www.flatpak.org/setup/)
-
-## 2. Start a Wine prefix
-I used the 'Gaming' preset in Bottles.
-
-![image](https://github.com/user-attachments/assets/67e614e5-6909-4adb-8938-55dca6e87726)
-![image](https://github.com/user-attachments/assets/0c9ec77b-d479-41c6-918f-521fb2e69327)
-
-That environment installs Windows 10, DXVK, VKD3D, DX9 DLLs, Microsoft Line Services,
-Arial Font and Times New Roman Font. Dotnet 6 will need to be installed as well.
-
-## 3. Install .NET Dependency
-Run dotnetcoredesktop6 from the Dependencies list, or download manually from
-[Download .NET 6 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/sdk-6.0.403-windows-x64-installer) and run the executable with the same prefix.
-
-![image](https://github.com/user-attachments/assets/67e197dd-2044-4a0c-98ba-205b5ee873cb)
-
-
-## 4. Download Tooll3
-[Download Tooll3](https://github.com/tixl3d/tixl/releases/tag/v3.9.3)
-Download the .zip file and extract it into a VERY specific directory... it needs to go inside the
-wine prefix. So, open Bottles and using the 3 dots at the top next to the shutdown icon and
-select 'Browse Files' which will open up a file browser at the prefix (C Drive) location. I saved
-the extracted tool3.8.1 directory in C/users/Documents just to make it easy to find later.
-
-![image](https://github.com/user-attachments/assets/68521f38-8f0e-4927-a0a1-b9189c2a30ab)
-
-
-## 5. Run startT3.exe with Bottles
-Select ‘Run Executable...’ and navigate to your wine prefix
-(`~/.var/app/com.usebottles.bottles/data/bottles/bottles`) and navigate through to find the
-startT3.exe file. You may need to show hidden files to find `.var` in your home directory.
-
-![image](https://github.com/user-attachments/assets/62935fbb-2bec-45d4-ab1e-82a8f4e7f527)
-
-
-## 5(a). Run startT3.exe with the wine file browser.
-This will take you straight to the C Drive and from there you can find the startT3.exe executable
-and run it with a double click.
-
-## 6. Add a desktop link
-After successfully running T3, you can add it to your desktop by selecting the 3 dots next to the
-launch button and click ‘Add Desktop Entry’.
-
-![image](https://github.com/user-attachments/assets/bedcbc2a-7db3-48ac-8c46-439768df3ae8)
-![image](https://github.com/user-attachments/assets/716dae2f-113e-4d27-9b76-e042b48b9ea3)
-
+- [Installation](Installation.md) for Windows
+- [Set up a development environment](InstallDev.md) to build TiXL from source

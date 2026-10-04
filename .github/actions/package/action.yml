@@ -10,4 +10,4 @@ runs:
 
   - name: Package Application
     shell: pwsh
-    run: iscc Installer\installer.iss /DMyAppName=Tooll-v${{ github.event.release.tag_name }} /DMyAppVersion=${{ github.event.release.tag_name }}
+    run: iscc Installer\Windows\installer.iss /DMyAppName=Tooll-v${{ github.event.release.tag_name }} /DMyAppVersion=${{ github.event.release.tag_name }}

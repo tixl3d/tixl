@@ -1,0 +1,59 @@
+# Reference PKGBUILD for an AUR `tixl-git` package. The published copy lives in the AUR's own git repo;
+# keep this one in sync when the build or the staged layout changes.
+
+pkgname=tixl-git
+pkgver=r0
+pkgrel=1
+pkgdesc="Real-time motion graphics and VJ tool"
+arch=('x86_64')
+url="https://tixl.app"
+# BASS is free for non-commercial use only; see Dependencies/linux-x64/README.md.
+license=('MIT' 'LicenseRef-BASS')
+depends=('dotnet-sdk>=10' 'vulkan-icd-loader' 'gcc-libs' 'glibc')
+makedepends=('git' 'file')
+optdepends=('vulkan-validation-layers: diagnostics for the Vulkan backend')
+provides=('tixl')
+conflicts=('tixl')
+options=('!strip' '!debug')
+source=("tixl::git+https://github.com/tixl3d/tixl.git#branch=feat/linux-port"
+        "https://www.un4seen.com/files/bass24-linux.zip"
+        "https://www.un4seen.com/files/bassmix24-linux.zip"
+        "https://www.un4seen.com/files/bassflac24-linux.zip")
+noextract=('bass24-linux.zip' 'bassmix24-linux.zip' 'bassflac24-linux.zip')
+# The un4seen URLs are unversioned, so their checksums can't be pinned.
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP')
+
+pkgver() {
+    cd tixl
+    printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+prepare() {
+    local name
+    for name in bass bassmix bassflac; do
+        mkdir -p "$name"
+        bsdtar -xf "${name}24-linux.zip" -C "$name"
+        find "$name" -name "lib$name.so" -path '*64*' -exec cp {} tixl/Dependencies/linux-x64/ \; -quit
+    done
+}
+
+build() {
+    cd tixl
+    export DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_NOLOGO=1 NUGET_PACKAGES="$srcdir/nuget"
+    # dotnet-sdk is a dependency anyway, so the editor uses the system runtime.
+    Installer/Linux/build-tarball.sh --stage-only --system-dotnet
+}
+
+package() {
+    local stage
+    stage="$(find "$srcdir/tixl/Installer/Linux/Output" -mindepth 1 -maxdepth 1 -type d -name 'tixl-*' | head -1)"
+
+    install -d "$pkgdir/usr/lib/tixl" "$pkgdir/usr/share" "$pkgdir/usr/bin"
+    cp -a "$stage/." "$pkgdir/usr/lib/tixl/"
+    cp -a "$stage/share/." "$pkgdir/usr/share/"
+    rm -rf "$pkgdir/usr/lib/tixl/share"
+    ln -s /usr/lib/tixl/TiXL "$pkgdir/usr/bin/tixl"
+
+    install -Dm644 "$srcdir/tixl/LICENSE.txt" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+    cp -a "$srcdir/tixl/Dependencies/licenses/." "$pkgdir/usr/share/licenses/$pkgname/"
+}

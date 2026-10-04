@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>app.tixl.TiXL</id>
+  <name>TiXL</name>
+  <summary>Real-time motion graphics and VJ tool</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <developer id="app.tixl">
+    <name>TiXL Community</name>
+  </developer>
+  <description>
+    <p>
+      TiXL is an open source tool for creating real-time motion graphics. It combines a node-based
+      operator graph with a keyframe timeline, so live performances, music videos and installations
+      can be built and tweaked while they render.
+    </p>
+  </description>
+  <launchable type="desktop-id">app.tixl.TiXL.desktop</launchable>
+  <url type="homepage">https://tixl.app</url>
+  <url type="bugtracker">https://github.com/tixl3d/tixl/issues</url>
+  <url type="vcs-browser">https://github.com/tixl3d/tixl</url>
+  <content_rating type="oars-1.1" />
+  <releases>
+    <release version="4.3.0.1" date="2026-09-19" />
+  </releases>
+</component>

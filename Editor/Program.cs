@@ -152,6 +152,9 @@ internal static class Program
             
         Log.Info($"Starting {FormattedEditorVersion}");
 
+        if (!DependencyCheck.Run())
+            EditorUi.Instance.ExitApplication();
+
         if (TryGetDebugServerPortArg(args, out var debugServerPort))
             App.DebugProtocol.DebugServer.Start(debugServerPort);
 

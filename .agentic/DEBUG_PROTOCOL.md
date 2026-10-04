@@ -189,10 +189,18 @@ frame**. Setting an input does not run the graph.
 Operator packages hot-reload via `reload`, but Editor/Core changes need a restart:
 
 1. Send `shutdown` (fire-and-forget; the response may not arrive). Debug builds close
-   immediately; teardown takes ~2–10 s — poll the process list.
+   immediately; teardown takes ~2–10 s — poll with `pgrep -x TiXL`. Not `pgrep -f <path>`:
+   that matches the full command line, including that of the shell running the poll loop, so
+   the wait never ends.
 2. `dotnet build` the affected project. Never build the configuration of a still-running
    editor (Debug incremental is safe once it exited).
 3. Relaunch with the flags above and wait for the port.
+
+**A Debug editor loads the *Release* operator packages.** Rebuilding an operator package
+(`Operators/Lib`, `Operators/Video`, …) in Debug alone leaves the editor running the previous
+code, and the obvious conclusion — "my change had no effect" — is wrong. Build operator
+packages with `-c Release`, or both. A stack trace from the running editor is the quickest
+check: its line numbers will match the old source.
 
 ## Running the visual reference test suite
 

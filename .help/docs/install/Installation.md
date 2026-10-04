@@ -19,10 +19,8 @@ When TiXL detects this, it shows a **Could not load Project** dialog after start
 
 ## Non-Windows systems
 
-A native port to Linux and macOS is in progress. Until then you can run TiXL under a translation layer:
-
-- [Install on Linux](InstallLinux.md)
-- [Install on macOS](InstallMacOS.md)
+- **Linux**: a native preview is available, and the Windows version also runs under Wine. See [Install on Linux](InstallLinux.md).
+- **macOS**: a native port is in progress. Until then you can run TiXL under a translation layer, see [Install on macOS](InstallMacOS.md).
 
 ## Run TiXL from an IDE
 

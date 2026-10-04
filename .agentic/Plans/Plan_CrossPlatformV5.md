@@ -296,7 +296,8 @@ In:
 - Audio playback (BASS) and audio input: WASAPI on Windows; BASS recording on Linux, with PipeWire
   monitor sources for loopback.
 - Operator compilation and hot reload, the debug bridge, and the visual test suite on both systems.
-- Stretch goals, decided in Phase 6: render export (needs Linux FFmpeg builds), MIDI via RtMidi,
+- Stretch goals, decided in Phase 6: render export (Linux FFmpeg natives landed 2026-10-04 and decode is
+  verified; encode is not), MIDI via RtMidi,
   OSC / Art-Net (after splitting the Io package).
 
 Out (v5.x or never): macOS, Microsoft Store, NDI, Spout, Mediapipe, webcams (later through SDL3's camera

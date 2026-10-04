@@ -48,6 +48,14 @@
     <PackageOutputPath>$(SolutionDir)packages\$(Configuration)</PackageOutputPath> -->
     </PropertyGroup>
 
+    <!-- Release tarballs pass TixlEditorRuntime (e.g. linux-x64) to bundle the .NET runtime: the editor then starts on
+         systems without .NET and can explain which dependencies are missing instead of failing silently. -->
+    <PropertyGroup Condition="'$(TixlEditorRuntime)' != ''">
+        <RuntimeIdentifier>$(TixlEditorRuntime)</RuntimeIdentifier>
+        <SelfContained>true</SelfContained>
+        <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+    </PropertyGroup>
+
     <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
         <DefineConstants>TRACE</DefineConstants>
         <DebugType>full</DebugType>
@@ -218,19 +226,16 @@
 
         <Message Importance="high" Text="Attempting to copy $(PackageName)..." />
 
-        <!-- Use XmlPeek to extract the version from the csproj file of the package -->
-        <!-- Left here as an example in case we need to use it for extracting the target framework
-        in the future -->
-        <!-- <XmlPeek XmlInputPath="$(SourceDir)/$(PackageName).csproj"
-        Query="//VersionPrefix/text()">
-             <Output TaskParameter="Result" ItemName="projVersion"/>
-         </XmlPeek>
-        <Message Importance="high" Text="Found version for $(PackageName): @(projVersion)"/>-->
+        <!-- Packages don't share one target framework (platform-neutral ones target net10.0), so read each
+             package's own to find its build folder. -->
+        <XmlPeek XmlInputPath="$(SourceDir)/$(PackageName).csproj" Query="//TargetFramework/text()" Condition="Exists('$(SourceDir)/$(PackageName).csproj')">
+            <Output TaskParameter="Result" PropertyName="PackageTargetFramework" />
+        </XmlPeek>
 
-        <!-- Define the package build directory based on the version found
-            This should match the OutputPath defined by the project -->
+        <!-- This should match the OutputPath defined by the project -->
         <PropertyGroup>
-            <PackageBuildDirectory>$(SourceDir)/.temp/bin/$(Configuration)/$(TixlNetFrameworkVersion)</PackageBuildDirectory>
+            <PackageTargetFramework Condition="'$(PackageTargetFramework)' == ''">$(TixlNetFrameworkVersion)</PackageTargetFramework>
+            <PackageBuildDirectory>$(SourceDir)/.temp/bin/$(Configuration)/$(PackageTargetFramework)</PackageBuildDirectory>
         </PropertyGroup>
 
         <Message Importance="high" Text="Path for $(PackageName): $(PackageBuildDirectory)" />

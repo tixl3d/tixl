@@ -1,0 +1,65 @@
+name: Linux Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feat/linux-port
+  release:
+    types: [published]
+
+concurrency:
+  group: linux-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # Ubuntu 22.04's glibc (2.35) keeps everything built here portable; the prebuilt libcimgui.so from
+    # ImGui.NET still raises the tarball's minimum to glibc 2.38.
+    container: ubuntu:22.04
+    permissions:
+      contents: write
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Install Build Tools
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends git ca-certificates curl file unzip libicu70 libssl3 zlib1g
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Cache NuGet Packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-linux-${{ hashFiles('**/*.csproj', 'Tixl.props', 'Directory.Build.props') }}
+          restore-keys: nuget-linux-
+
+      - name: Fetch BASS
+        run: Installer/Linux/fetch-bass.sh
+
+      - name: Build Tarball
+        run: Installer/Linux/build-tarball.sh
+
+      - name: Upload Tarball
+        if: github.event_name != 'release'
+        uses: actions/upload-artifact@v4
+        with:
+          name: tixl-linux-x64
+          path: Installer/Linux/Output/*.tar.gz
+          retention-days: 14
+
+      - name: Attach Tarball to Release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: Installer/Linux/Output/*.tar.gz

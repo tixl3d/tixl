@@ -304,8 +304,9 @@ Resources/user/pixtur/VJ/agingCombined
 Resources/user/pixtur/VJ/CatMadness
 Resources/user/pixtur/VJ/meshes
 ImageSequence
-Installer/Output
-Installer/dependencies/downloads
+Installer/Windows/Output
+Installer/Linux/Output
+Installer/Windows/dependencies/downloads
 
 shadertoolsconfig.json
 .temp/

@@ -39,7 +39,7 @@ DisableProgramGroupPage=yes
 
 OutputDir=.\Output
 OutputBaseFilename=Tixl-v{#MyAppVersion}
-SetupIconFile=..\EditorResources\images\t3.ico 
+SetupIconFile=..\..\EditorResources\images\t3.ico 
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
@@ -51,16 +51,16 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "..\Editor\bin\Release\net10.0-windows\*"; DestDir: "{app}"; Excludes: "*.proxy.mov,*.waveform.png,*.waveform.jpg,win-x86,win-arm64,osx*,linux-*,android*,ios,maccatalyst-*,unix"; Flags: ignoreversion recursesubdirs
+Source: "..\..\Editor\bin\Release\net10.0\*"; DestDir: "{app}"; Excludes: "*.proxy.mov,*.waveform.png,*.waveform.jpg,win-x86,win-arm64,osx*,linux-*,android*,ios,maccatalyst-*,unix"; Flags: ignoreversion recursesubdirs
 ; Operator thumbnails live next to the source projects in .meta\Thumbnails\ and are not copied
 ; into the build output by the csproj content rules. Pull them straight from the source tree so
 ; they ship with the release.
-Source: "..\Operators\Lib\.meta\*";      DestDir: "{app}\Operators\Lib\.meta";      Excludes: "*.proxy.mov,*.waveform.png,*.waveform.jpg,win-x86,win-arm64,osx*,linux-*,android*,ios,maccatalyst-*,unix"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "..\Operators\Examples\.meta\*"; DestDir: "{app}\Operators\Examples\.meta"; Excludes: "*.proxy.mov,*.waveform.png,*.waveform.jpg,win-x86,win-arm64,osx*,linux-*,android*,ios,maccatalyst-*,unix"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\..\Operators\Lib\.meta\*";      DestDir: "{app}\Operators\Lib\.meta";      Excludes: "*.proxy.mov,*.waveform.png,*.waveform.jpg,win-x86,win-arm64,osx*,linux-*,android*,ios,maccatalyst-*,unix"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\..\Operators\Examples\.meta\*"; DestDir: "{app}\Operators\Examples\.meta"; Excludes: "*.proxy.mov,*.waveform.png,*.waveform.jpg,win-x86,win-arm64,osx*,linux-*,android*,ios,maccatalyst-*,unix"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "dependencies\downloads\{#DotNetSdkInstaller}"; DestDir: "{tmp}"; Flags: deleteafterinstall
 Source: "dependencies\downloads\VC_redist.x64.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall
 Source: "dependencies\grafiktools.bat"; DestDir: "{tmp}"; Flags: deleteafterinstall ignoreversion
-Source: "..\.Defaults\Tests\*"; DestDir: "{userappdata}\TiXL\Tests"; Excludes: "*.proxy.mov,*.waveform.png,*.waveform.jpg,win-x86,win-arm64,osx*,linux-*,android*,ios,maccatalyst-*,unix"; Flags: ignoreversion recursesubdirs
+Source: "..\..\.Defaults\Tests\*"; DestDir: "{userappdata}\TiXL\Tests"; Excludes: "*.proxy.mov,*.waveform.png,*.waveform.jpg,win-x86,win-arm64,osx*,linux-*,android*,ios,maccatalyst-*,unix"; Flags: ignoreversion recursesubdirs
 
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=TiXL
+GenericName=Motion Graphics Editor
+Comment=Real-time motion graphics and VJ tool
+Exec=tixl %F
+Icon=app.tixl.TiXL
+Terminal=false
+Categories=Graphics;3DGraphics;
+Keywords=motion graphics;vj;shader;realtime;visuals;node editor;
+StartupWMClass=TiXL

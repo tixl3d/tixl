@@ -2,13 +2,13 @@
 # Used by: installer.iss (local) and .github/actions/build/action.yml (CI)
 #
 # Usage:
-#   pwsh Installer/build-release.ps1              # full build
-#   pwsh Installer/build-release.ps1 -SkipRestore # skip dotnet restore (CI may restore separately)
+#   pwsh Installer/Windows/build-release.ps1              # full build
+#   pwsh Installer/Windows/build-release.ps1 -SkipRestore # skip dotnet restore (CI may restore separately)
 
 param([switch]$SkipRestore)
 
 $ErrorActionPreference = "Stop"
-$root = Resolve-Path "$PSScriptRoot/.."
+$root = Resolve-Path "$PSScriptRoot/../.."
 
 if (-not $SkipRestore) {
     Write-Host "Restoring dependencies..." -ForegroundColor Cyan
