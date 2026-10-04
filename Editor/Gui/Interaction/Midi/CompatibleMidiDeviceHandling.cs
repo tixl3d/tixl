@@ -1,7 +1,8 @@
-﻿using System.Reflection;
+using System.Reflection;
 using T3.IoServices;
 using T3.Editor.Gui.UiHelpers;
 using Type = System.Type;
+using T3.IoServices.Midi;
 
 namespace T3.Editor.Gui.Interaction.Midi;
 

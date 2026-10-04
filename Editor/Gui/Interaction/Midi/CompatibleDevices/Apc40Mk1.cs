@@ -1,9 +1,10 @@
-﻿using NAudio;
+using NAudio;
 using NAudio.Midi;
 using T3.Editor.Gui.Interaction.Midi.CommandProcessing;
 using T3.Editor.Gui.Interaction.Variations;
 using T3.Editor.Gui.Interaction.Variations.Model;
 using T3.Editor.Gui.UiHelpers;
+using T3.IoServices.Midi;
 
 namespace T3.Editor.Gui.Interaction.Midi.CompatibleDevices;
 
@@ -353,7 +354,7 @@ public sealed class Apc40Mk1 : CompatibleMidiDevice
     /// Sends LED color using APC40 Mk1 specific channel mapping.
     /// Generic mode: Notes 0-39 on Channel 1. Ableton mode: Notes 53-57 on Channels 1-8.
     /// </summary>
-    protected override void SendColor(MidiOut midiOut, int apcControlIndex, int colorCode)
+    protected override void SendColor(MidiOutputDevice midiOut, int apcControlIndex, int colorCode)
     {
         if (apcControlIndex < 0 || apcControlIndex >= CacheControllerColors.Length)
             return;

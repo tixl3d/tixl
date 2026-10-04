@@ -4,7 +4,7 @@ using NAudio.Midi;
 using T3.Core.IO;
 using T3.Core.Logging;
 
-namespace T3.IoServices;
+namespace T3.IoServices.Midi;
 
 public static class MidiConnectionManager
 {
@@ -48,7 +48,7 @@ public static class MidiConnectionManager
     /// <summary>
     /// Checks if a MIDI device is currently being controlled and should block passthrough.
     /// </summary>
-    public static bool IsDeviceInControlMode(MidiIn midiIn)
+    public static bool IsDeviceInControlMode(MidiInputDevice midiIn)
     {
         if (_devicesByMidiIn.TryGetValue(midiIn, out var device))
         {
@@ -137,13 +137,13 @@ public static class MidiConnectionManager
 
     // FIXME: remove
 
-    public static MidiInCapabilities GetDescriptionForMidiIn(MidiIn midiIn)
+    public static MidiDeviceInfo GetDescriptionForMidiIn(MidiInputDevice midiIn)
     {
         _devicesByMidiIn.TryGetValue(midiIn, out var description);
         return description;
     }
 
-    public static bool TryGetMidiOut(string productName, out MidiOut midiOut)
+    public static bool TryGetMidiOut(string productName, out MidiOutputDevice midiOut)
     {
         midiOut = null;
         foreach (var (midi, device) in _midiOutsWithDevices)
@@ -158,7 +158,7 @@ public static class MidiConnectionManager
         return false;
     }
 
-    public static bool TryGetMidiIn(string productName, out MidiIn midiIn)
+    public static bool TryGetMidiIn(string productName, out MidiInputDevice midiIn)
     {
         midiIn = null;
         foreach (var (midiIn2, device) in _devicesByMidiIn)
@@ -195,77 +195,49 @@ public static class MidiConnectionManager
 
     private static void ScanAndRegisterToMidiDevices(bool logInformation = false)
     {
-        // NAudio's MIDI is WinMM, so elsewhere there are simply no devices.
-        if (!OperatingSystem.IsWindows())
+        var provider = MidiDeviceProvider.Current;
+        if (!provider.IsAvailable)
         {
-            Log.Debug("Midi devices are only available on Windows.");
+            Log.Debug("This system offers no MIDI devices.");
             return;
         }
 
-        Log.Debug("Capturing Midi devices...");
+        Log.Debug($"Capturing Midi devices via {provider.Name}...");
         if (!string.IsNullOrEmpty(CoreSettings.Config.LimitMidiDeviceCapture))
         {
             var settingsString = CoreSettings.Config.LimitMidiDeviceCapture.Replace("\n", "; ");
             Log.Debug($"NOTE: In settings Midi device capture is limited to '{settingsString}");
         }
 
-        for (var index = 0; index < MidiIn.NumberOfDevices; index++)
+        var openedInputs = new List<MidiInputDevice>();
+        var openedOutputs = new List<MidiOutputDevice>();
+        provider.OpenDevices(ShouldCapture, openedInputs, openedOutputs);
+
+        foreach (var input in openedInputs)
         {
-            var deviceInputInfo = MidiIn.DeviceInfo(index);
-            var deviceInfoProductName = deviceInputInfo.ProductName;
-
-            if (!IsMidiDeviceCaptureEnabled(deviceInfoProductName))
-            {
-                Log.Debug($" skipping '{deviceInfoProductName}' (disabled in setting)");
-                continue;
-            }
-
             if (logInformation)
-                Log.Debug($" listening to '{deviceInfoProductName}'...");
-
-            MidiIn newMidiIn;
-            try
             {
-                newMidiIn = new MidiIn(index);
-            }
-            catch (NAudio.MmException e)
-            {
-                Log.Error(e.Message == "MemoryAllocationError"
-                              ? " > The device is already being used by an application."
-                              : $" > {e.Message} {deviceInfoProductName}");
-                continue;
+                Log.Debug($" listening to '{input.Info.ProductName}'...");
             }
 
-            newMidiIn.Start();
-
-            _devicesByMidiIn[newMidiIn] = deviceInputInfo;
+            input.Start();
+            _devicesByMidiIn[input] = input.Info;
         }
 
-        for (var index = 0; index < MidiOut.NumberOfDevices; index++)
+        foreach (var output in openedOutputs)
         {
-            var deviceOutputInfo = MidiOut.DeviceInfo(index);
-            var deviceInfoProductName = deviceOutputInfo.ProductName;
+            _midiOutsWithDevices[output] = output.Info;
+        }
 
-            if (!IsMidiDeviceCaptureEnabled(deviceInfoProductName))
+        bool ShouldCapture(string productName)
+        {
+            if (IsMidiDeviceCaptureEnabled(productName))
             {
-                Log.Debug($" skipping '{deviceInfoProductName}' (disabled in setting)");
-                continue;
+                return true;
             }
 
-            MidiOut newMidiOut;
-            try
-            {
-                newMidiOut = new MidiOut(index);
-            }
-            catch (NAudio.MmException e)
-            {
-                Log.Error(e.Message == "MemoryAllocationError"
-                              ? " > The device is already being used by an application."
-                              : $" > {e.Message} {deviceInfoProductName}");
-                continue;
-            }
-                
-            _midiOutsWithDevices[newMidiOut] = deviceOutputInfo;
+            Log.Debug($" skipping '{productName}' (disabled in setting)");
+            return false;
         }
     }
 
@@ -309,17 +281,19 @@ public static class MidiConnectionManager
         }
 
         _midiOutsWithDevices.Clear();
+
+        // The ALSA backend keeps one sequencer client and a reading thread behind all of these.
+        MidiDeviceProvider.Current.Shutdown();
     }
 
     private static readonly List<IMidiConsumer> _midiInputConsumers = new();
 
     /// <summary>
-    /// Sadly, we have to maintain this list, because NAudio does not provide an easy means
-    /// to get the produceName of an incoming midi-message.
+    /// The opened input ports, keyed so a consumer can resolve the device an incoming message came from.
     /// </summary>
-    public static IReadOnlyDictionary<MidiIn, MidiInCapabilities> MidiIns => _devicesByMidiIn;
-    private static readonly Dictionary<MidiIn, MidiInCapabilities> _devicesByMidiIn = new();
-        
-    public static IReadOnlyDictionary<MidiOut, MidiOutCapabilities> MidiOutsWithDevices => _midiOutsWithDevices;
-    private static readonly Dictionary<MidiOut, MidiOutCapabilities> _midiOutsWithDevices = new();
+    public static IReadOnlyDictionary<MidiInputDevice, MidiDeviceInfo> MidiIns => _devicesByMidiIn;
+    private static readonly Dictionary<MidiInputDevice, MidiDeviceInfo> _devicesByMidiIn = new();
+
+    public static IReadOnlyDictionary<MidiOutputDevice, MidiDeviceInfo> MidiOutsWithDevices => _midiOutsWithDevices;
+    private static readonly Dictionary<MidiOutputDevice, MidiDeviceInfo> _midiOutsWithDevices = new();
 }

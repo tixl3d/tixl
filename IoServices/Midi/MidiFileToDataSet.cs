@@ -8,7 +8,7 @@ using NAudio.Midi;
 using Newtonsoft.Json.Linq;
 using T3.Core.DataTypes.DataSet;
 
-namespace T3.IoServices;
+namespace T3.IoServices.Midi;
 
 /// <summary>
 /// Converts a standard MIDI file (<c>.mid</c> / <c>.midi</c>) into a <see cref="DataSet"/>

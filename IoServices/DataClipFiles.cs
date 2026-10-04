@@ -3,6 +3,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using T3.Core.DataTypes.DataSet;
+using T3.IoServices.Midi;
 
 namespace T3.IoServices;
 

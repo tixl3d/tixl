@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <Import Project="$(SolutionDir)/Tixl.props" />
   <PropertyGroup>
-    <TargetFramework>net10.0-windows</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -116,8 +116,10 @@
     <!-- Video2DPointScanner (dmx helper) uses OpenCV for blob detection. -->
     <PackageReference Include="OpenCvSharp4" Version="4.13.0.20260627" />
     <PackageReference Include="OpenCvSharp4.Extensions" Version="4.13.0.20260627" />
-    <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.13.0.20260627" />
-    <PackageReference Include="OpenCvSharp4.Windows" Version="4.13.0.20260627" />
+    <!-- The managed OpenCvSharp4 is portable; these two carry the Windows natives and a WPF reference,
+         which has no Linux equivalent to resolve against. -->
+    <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.13.0.20260627" Condition="$([MSBuild]::IsOSPlatform('Windows'))" />
+    <PackageReference Include="OpenCvSharp4.Windows" Version="4.13.0.20260627" Condition="$([MSBuild]::IsOSPlatform('Windows'))" />
   </ItemGroup>
   <ItemGroup Label="OperatorPackages">
     <Operators Include="lib" Version="1.0.0" ResourcesOnly="False" />
