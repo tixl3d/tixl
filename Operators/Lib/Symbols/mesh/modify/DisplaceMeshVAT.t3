@@ -91,7 +91,7 @@
         },
         {
           "Id": "43c2b314-4809-4022-9b07-99965e5c1a7a"/*BufferFlags*/,
-          "Type": "SharpDX.Direct3D11.UnorderedAccessViewBufferFlags",
+          "Type": "T3.Graphics.Compat.UnorderedAccessViewBufferFlags",
           "Value": "None"
         }
       ],

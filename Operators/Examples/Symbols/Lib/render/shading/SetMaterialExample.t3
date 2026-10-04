@@ -65,7 +65,7 @@
       "InputValues": [
         {
           "Id": "d1db33ea-1739-4323-9105-7b236a0e240f"/*WrapMode*/,
-          "Type": "SharpDX.Direct3D11.TextureAddressMode",
+          "Type": "T3.Graphics.Compat.TextureAddressMode",
           "Value": "Clamp"
         }
       ],
@@ -136,7 +136,7 @@
       "InputValues": [
         {
           "Id": "048d3e2b-7d9b-4250-a69a-12f9ee22f6ca"/*OutputFormat*/,
-          "Type": "SharpDX.DXGI.Format",
+          "Type": "T3.Graphics.Format",
           "Value": "R32G32B32A32_Float"
         },
         {
@@ -213,7 +213,7 @@
       "InputValues": [
         {
           "Id": "048d3e2b-7d9b-4250-a69a-12f9ee22f6ca"/*OutputFormat*/,
-          "Type": "SharpDX.DXGI.Format",
+          "Type": "T3.Graphics.Format",
           "Value": "R32G32B32A32_Float"
         },
         {

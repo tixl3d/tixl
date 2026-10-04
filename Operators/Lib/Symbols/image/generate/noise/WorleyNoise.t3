@@ -153,7 +153,7 @@
         },
         {
           "Id": "3fe1b650-ce34-4155-9b61-0425e39f7690"/*Wrap*/,
-          "Type": "SharpDX.Direct3D11.TextureAddressMode",
+          "Type": "T3.Graphics.Compat.TextureAddressMode",
           "Value": "Mirror"
         },
         {

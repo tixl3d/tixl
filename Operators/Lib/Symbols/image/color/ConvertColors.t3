@@ -32,7 +32,7 @@
         },
         {
           "Id": "2624d563-bad7-4fcb-a201-0ee0b9b93afa"/*Filter*/,
-          "Type": "SharpDX.Direct3D11.Filter",
+          "Type": "T3.Graphics.Compat.Filter",
           "Value": "MinMagMipPoint"
         },
         {
@@ -47,7 +47,7 @@
         },
         {
           "Id": "ff7cb999-aa3a-4e11-b9c8-d027bdb55ff6"/*OutputFormat*/,
-          "Type": "SharpDX.DXGI.Format",
+          "Type": "T3.Graphics.Format",
           "Value": "R32G32B32A32_Float"
         }
       ],

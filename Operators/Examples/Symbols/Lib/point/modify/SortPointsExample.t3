@@ -953,7 +953,7 @@
         },
         {
           "Id": "eb070a0b-703d-43cc-a877-cf9e371ebd05"/*WrapMode*/,
-          "Type": "SharpDX.Direct3D11.TextureAddressMode",
+          "Type": "T3.Graphics.Compat.TextureAddressMode",
           "Value": "Wrap"
         }
       ],

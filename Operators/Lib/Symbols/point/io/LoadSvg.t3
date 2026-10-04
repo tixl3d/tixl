@@ -19,11 +19,11 @@
       "DefaultValue": true
     },
     {
-      "Id": "8d63c134-1257-4331-ae84-f5eb6dd66c13"/*ImportAs*/,
+      "Id": "7f3a9c21-5d4e-4b88-9a17-2c6e1b0d4f55"/*Flattening*/,
       "DefaultValue": 0
     },
     {
-      "Id": "7f3a9c21-5d4e-4b88-9a17-2c6e1b0d4f55"/*Flattening*/,
+      "Id": "8d63c134-1257-4331-ae84-f5eb6dd66c13"/*ImportAs*/,
       "DefaultValue": 0
     },
     {

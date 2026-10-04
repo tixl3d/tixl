@@ -177,7 +177,7 @@
       "InputValues": [
         {
           "Id": "0529bdf2-47bf-40bf-8ad9-d925545257e9"/*TextureMode*/,
-          "Type": "SharpDX.Direct3D11.TextureAddressMode",
+          "Type": "T3.Graphics.Compat.TextureAddressMode",
           "Value": "Mirror"
         },
         {

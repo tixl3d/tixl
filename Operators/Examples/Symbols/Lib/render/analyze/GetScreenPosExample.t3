@@ -245,7 +245,7 @@
         },
         {
           "Id": "28be4e86-6761-4d07-80bf-abf6f82897e4"/*CullMode*/,
-          "Type": "SharpDX.Direct3D11.CullMode",
+          "Type": "T3.Graphics.Compat.CullMode",
           "Value": "None"
         },
         {

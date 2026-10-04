@@ -87,7 +87,7 @@
       "InputValues": [
         {
           "Id": "9997e726-3951-4822-af7e-ffbf26164723"/*TextureFilter*/,
-          "Type": "SharpDX.Direct3D11.Filter",
+          "Type": "T3.Graphics.Compat.Filter",
           "Value": "MinMagMipPoint"
         },
         {

@@ -158,17 +158,17 @@
       "InputValues": [
         {
           "Id": "93d8bf26-5067-4ccc-b4cb-e03970686462"/*AddressW*/,
-          "Type": "SharpDX.Direct3D11.TextureAddressMode",
+          "Type": "T3.Graphics.Compat.TextureAddressMode",
           "Value": "Clamp"
         },
         {
           "Id": "e7c95fd5-14d1-434f-a140-f22ef69076ab"/*AddressU*/,
-          "Type": "SharpDX.Direct3D11.TextureAddressMode",
+          "Type": "T3.Graphics.Compat.TextureAddressMode",
           "Value": "Clamp"
         },
         {
           "Id": "fdeb503f-09c6-48d1-8853-7426f68cdec3"/*AddressV*/,
-          "Type": "SharpDX.Direct3D11.TextureAddressMode",
+          "Type": "T3.Graphics.Compat.TextureAddressMode",
           "Value": "Clamp"
         }
       ],
@@ -262,7 +262,7 @@
       "InputValues": [
         {
           "Id": "03f3bc7f-3949-4a97-88cf-04e162cfa2f7"/*CullMode*/,
-          "Type": "SharpDX.Direct3D11.CullMode",
+          "Type": "T3.Graphics.Compat.CullMode",
           "Value": "Back"
         },
         {
@@ -451,7 +451,7 @@
         },
         {
           "Id": "27f1f703-7333-49e5-a024-4606e34e8427"/*Comparison*/,
-          "Type": "SharpDX.Direct3D11.Comparison",
+          "Type": "T3.Graphics.Compat.Comparison",
           "Value": "LessEqual"
         },
         {

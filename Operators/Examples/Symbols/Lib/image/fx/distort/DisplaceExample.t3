@@ -164,7 +164,7 @@
         },
         {
           "Id": "93dd184b-8809-4746-8544-41abde6635a3"/*TextureFormat*/,
-          "Type": "SharpDX.DXGI.Format",
+          "Type": "T3.Graphics.Format",
           "Value": "R32G32B32A32_Float"
         },
         {

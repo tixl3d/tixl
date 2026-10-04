@@ -102,7 +102,7 @@
         },
         {
           "Id": "cfebc37f-6813-416a-9073-e48d31074115"/*BindFlags*/,
-          "Type": "SharpDX.Direct3D11.BindFlags",
+          "Type": "T3.Graphics.Compat.BindFlags",
           "Value": "ShaderResource, RenderTarget"
         }
       ],
@@ -365,7 +365,7 @@
       "InputValues": [
         {
           "Id": "ce649059-f136-4d32-81c6-23d7b55f3378"/*Format*/,
-          "Type": "SharpDX.DXGI.Format",
+          "Type": "T3.Graphics.Format",
           "Value": "R32_Float"
         },
         {
@@ -432,7 +432,7 @@
       "InputValues": [
         {
           "Id": "a870921f-a28c-4501-9f31-38a18b0acdcc"/*Filter*/,
-          "Type": "SharpDX.Direct3D11.Filter",
+          "Type": "T3.Graphics.Compat.Filter",
           "Value": "ComparisonMinMagMipPoint"
         }
       ],

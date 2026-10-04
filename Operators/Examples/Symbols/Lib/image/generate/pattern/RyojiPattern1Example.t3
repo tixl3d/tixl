@@ -49,7 +49,7 @@
         },
         {
           "Id": "8d223463-edff-45fb-9ead-6650a911cebd"/*Culling*/,
-          "Type": "SharpDX.Direct3D11.CullMode",
+          "Type": "T3.Graphics.Compat.CullMode",
           "Value": "None"
         }
       ],

@@ -10,7 +10,7 @@
       "InputValues": [
         {
           "Id": "e52b254e-e13b-4df8-81d4-35867aeb188e"/*TextureFormat*/,
-          "Type": "SharpDX.DXGI.Format",
+          "Type": "T3.Graphics.Format",
           "Value": "R8G8B8A8_UNorm"
         }
       ],
@@ -291,7 +291,7 @@
         },
         {
           "Id": "8d223463-edff-45fb-9ead-6650a911cebd"/*Culling*/,
-          "Type": "SharpDX.Direct3D11.CullMode",
+          "Type": "T3.Graphics.Compat.CullMode",
           "Value": "None"
         }
       ],

@@ -106,12 +106,12 @@
       "InputValues": [
         {
           "Id": "2632af70-5a05-429c-8123-fe280adea655"/*SourceAlphaBlend*/,
-          "Type": "SharpDX.Direct3D11.BlendOption",
+          "Type": "T3.Graphics.Compat.BlendOption",
           "Value": "SourceAlpha"
         },
         {
           "Id": "56c398ce-fe71-47eb-a33f-11eec8f82e79"/*SourceBlend*/,
-          "Type": "SharpDX.Direct3D11.BlendOption",
+          "Type": "T3.Graphics.Compat.BlendOption",
           "Value": "SourceAlpha"
         },
         {
@@ -121,12 +121,12 @@
         },
         {
           "Id": "8dc53fe4-79bb-43e4-9d4a-4e06f9a3214c"/*DestinationBlend*/,
-          "Type": "SharpDX.Direct3D11.BlendOption",
+          "Type": "T3.Graphics.Compat.BlendOption",
           "Value": "InverseSourceAlpha"
         },
         {
           "Id": "acc5550b-18ed-4dba-8e69-d5228e2ad850"/*DestinationAlphaBlend*/,
-          "Type": "SharpDX.Direct3D11.BlendOption",
+          "Type": "T3.Graphics.Compat.BlendOption",
           "Value": "DestinationAlpha"
         }
       ],
@@ -298,7 +298,7 @@
       "InputValues": [
         {
           "Id": "03f3bc7f-3949-4a97-88cf-04e162cfa2f7"/*CullMode*/,
-          "Type": "SharpDX.Direct3D11.CullMode",
+          "Type": "T3.Graphics.Compat.CullMode",
           "Value": "Back"
         },
         {
@@ -366,7 +366,7 @@
       "InputValues": [
         {
           "Id": "a870921f-a28c-4501-9f31-38a18b0acdcc"/*Filter*/,
-          "Type": "SharpDX.Direct3D11.Filter",
+          "Type": "T3.Graphics.Compat.Filter",
           "Value": "MinMagMipPoint"
         }
       ],

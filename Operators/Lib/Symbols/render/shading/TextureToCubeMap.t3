@@ -83,7 +83,7 @@
       "InputValues": [
         {
           "Id": "2c9e4cb0-0333-439e-abcc-1148a840a260"/*ResourceOptionFlags*/,
-          "Type": "SharpDX.Direct3D11.ResourceOptionFlags",
+          "Type": "T3.Graphics.Compat.ResourceOptionFlags",
           "Value": "GenerateMipMaps, TextureCube"
         },
         {
@@ -93,7 +93,7 @@
         },
         {
           "Id": "67cd82c3-504b-4c80-8c49-5b303733ed52"/*Format*/,
-          "Type": "SharpDX.DXGI.Format",
+          "Type": "T3.Graphics.Format",
           "Value": "R16G16B16A16_Float"
         },
         {
@@ -111,7 +111,7 @@
         },
         {
           "Id": "cfebc37f-6813-416a-9073-e48d31074115"/*BindFlags*/,
-          "Type": "SharpDX.Direct3D11.BindFlags",
+          "Type": "T3.Graphics.Compat.BindFlags",
           "Value": "ShaderResource, RenderTarget"
         }
       ],
@@ -151,7 +151,7 @@
       "InputValues": [
         {
           "Id": "03f3bc7f-3949-4a97-88cf-04e162cfa2f7"/*CullMode*/,
-          "Type": "SharpDX.Direct3D11.CullMode",
+          "Type": "T3.Graphics.Compat.CullMode",
           "Value": "None"
         },
         {

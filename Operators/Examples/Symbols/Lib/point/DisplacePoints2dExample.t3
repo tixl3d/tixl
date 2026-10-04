@@ -15,7 +15,7 @@
         },
         {
           "Id": "9f9c0795-5d84-4687-9d4b-49c0776ec983"/*TextureMode*/,
-          "Type": "SharpDX.Direct3D11.TextureAddressMode",
+          "Type": "T3.Graphics.Compat.TextureAddressMode",
           "Value": "Clamp"
         },
         {

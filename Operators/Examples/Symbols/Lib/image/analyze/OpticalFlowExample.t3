@@ -298,7 +298,7 @@
       "InputValues": [
         {
           "Id": "152ee687-aefc-4261-8a3e-a01b3fe4e78f"/*TextureMode*/,
-          "Type": "SharpDX.Direct3D11.TextureAddressMode",
+          "Type": "T3.Graphics.Compat.TextureAddressMode",
           "Value": "Clamp"
         },
         {

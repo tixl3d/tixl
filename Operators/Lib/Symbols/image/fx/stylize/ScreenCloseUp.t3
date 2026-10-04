@@ -604,7 +604,7 @@
       "InputValues": [
         {
           "Id": "155c2396-0e05-4437-8171-288048b1158a"/*Filter*/,
-          "Type": "SharpDX.Direct3D11.Filter",
+          "Type": "T3.Graphics.Compat.Filter",
           "Value": "Anisotropic"
         },
         {
@@ -702,7 +702,7 @@
       "InputValues": [
         {
           "Id": "155c2396-0e05-4437-8171-288048b1158a"/*Filter*/,
-          "Type": "SharpDX.Direct3D11.Filter",
+          "Type": "T3.Graphics.Compat.Filter",
           "Value": "Anisotropic"
         }
       ],

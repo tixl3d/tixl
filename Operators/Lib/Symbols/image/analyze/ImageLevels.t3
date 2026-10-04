@@ -60,7 +60,7 @@
         },
         {
           "Id": "3aab7e93-2629-4c6a-b647-cfbd9d5089b2"/*Filter*/,
-          "Type": "SharpDX.Direct3D11.Filter",
+          "Type": "T3.Graphics.Compat.Filter",
           "Value": "MinMagMipPoint"
         },
         {

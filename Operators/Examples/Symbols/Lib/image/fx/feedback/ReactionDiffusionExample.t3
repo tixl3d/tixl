@@ -38,7 +38,7 @@
         },
         {
           "Id": "732c4231-ffce-4305-9835-13b4d71a7e14"/*OutputFormat*/,
-          "Type": "SharpDX.DXGI.Format",
+          "Type": "T3.Graphics.Format",
           "Value": "R32_Float"
         },
         {
@@ -139,7 +139,7 @@
       "InputValues": [
         {
           "Id": "28be4e86-6761-4d07-80bf-abf6f82897e4"/*CullMode*/,
-          "Type": "SharpDX.Direct3D11.CullMode",
+          "Type": "T3.Graphics.Compat.CullMode",
           "Value": "None"
         },
         {
@@ -410,7 +410,7 @@
       "InputValues": [
         {
           "Id": "28be4e86-6761-4d07-80bf-abf6f82897e4"/*CullMode*/,
-          "Type": "SharpDX.Direct3D11.CullMode",
+          "Type": "T3.Graphics.Compat.CullMode",
           "Value": "None"
         },
         {
@@ -625,7 +625,7 @@
         },
         {
           "Id": "9c944546-1363-4e3b-b706-31a4b750db2c"/*Wrap*/,
-          "Type": "SharpDX.Direct3D11.TextureAddressMode",
+          "Type": "T3.Graphics.Compat.TextureAddressMode",
           "Value": "Wrap"
         }
       ],
@@ -689,7 +689,7 @@
         },
         {
           "Id": "6e772174-813d-4baa-b6b5-27e197b547ac"/*WrapMode*/,
-          "Type": "SharpDX.Direct3D11.TextureAddressMode",
+          "Type": "T3.Graphics.Compat.TextureAddressMode",
           "Value": "Wrap"
         }
       ],
@@ -707,7 +707,7 @@
         },
         {
           "Id": "9c944546-1363-4e3b-b706-31a4b750db2c"/*Wrap*/,
-          "Type": "SharpDX.Direct3D11.TextureAddressMode",
+          "Type": "T3.Graphics.Compat.TextureAddressMode",
           "Value": "Wrap"
         }
       ],
@@ -1049,7 +1049,7 @@
         },
         {
           "Id": "9c944546-1363-4e3b-b706-31a4b750db2c"/*Wrap*/,
-          "Type": "SharpDX.Direct3D11.TextureAddressMode",
+          "Type": "T3.Graphics.Compat.TextureAddressMode",
           "Value": "Wrap"
         }
       ],
@@ -1072,7 +1072,7 @@
         },
         {
           "Id": "6e772174-813d-4baa-b6b5-27e197b547ac"/*WrapMode*/,
-          "Type": "SharpDX.Direct3D11.TextureAddressMode",
+          "Type": "T3.Graphics.Compat.TextureAddressMode",
           "Value": "Clamp"
         },
         {

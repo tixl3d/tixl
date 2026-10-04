@@ -377,7 +377,7 @@
         },
         {
           "Id": "eb070a0b-703d-43cc-a877-cf9e371ebd05"/*WrapMode*/,
-          "Type": "SharpDX.Direct3D11.TextureAddressMode",
+          "Type": "T3.Graphics.Compat.TextureAddressMode",
           "Value": "Wrap"
         }
       ],
@@ -433,7 +433,7 @@
         },
         {
           "Id": "a21fd13b-da4b-43f5-8697-85a2b5b9a1ff"/*Culling*/,
-          "Type": "SharpDX.Direct3D11.CullMode",
+          "Type": "T3.Graphics.Compat.CullMode",
           "Value": "None"
         },
         {

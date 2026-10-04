@@ -949,7 +949,7 @@
       "InputValues": [
         {
           "Id": "3f7b713d-2808-4312-87b4-707cb891b567"/*Format*/,
-          "Type": "SharpDX.DXGI.Format",
+          "Type": "T3.Graphics.Format",
           "Value": "R16G16B16A16_Float"
         }
       ],

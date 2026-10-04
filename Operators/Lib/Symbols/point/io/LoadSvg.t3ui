@@ -37,6 +37,13 @@
       }
     },
     {
+      "InputId": "7f3a9c21-5d4e-4b88-9a17-2c6e1b0d4f55"/*Flattening*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 375.0
+      }
+    },
+    {
       "InputId": "8d63c134-1257-4331-ae84-f5eb6dd66c13"/*ImportAs*/,
       "Position": {
         "X": -200.0,
