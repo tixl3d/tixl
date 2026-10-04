@@ -1,5 +1,6 @@
 using T3.Core.Audio;
 using T3.Core.Utils;
+using T3.Core.Audio.Input;
 
 namespace Lib.io.audio._;
 
@@ -17,9 +18,9 @@ internal sealed class AudioFrequencies : Instance<AudioFrequencies>
     private void Update(EvaluationContext context)
     {
         // if (!string.IsNullOrEmpty(Playback.Current.Settings?.AudioInputDeviceName) 
-        //     && !WasapiAudioInput.DevicesInitialized)
+        //     && !AudioInput.DevicesInitialized)
         // {
-        //     WasapiAudioInput.Initialize(context.Playback.Settings);
+        //     AudioInput.Initialize(context.Playback.Settings);
         // }
             
         var mode = (Modes)Mode.GetValue(context).Clamp(0, Enum.GetNames(typeof(Modes)).Length-1);

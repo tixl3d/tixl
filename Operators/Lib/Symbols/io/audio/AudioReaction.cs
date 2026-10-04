@@ -1,6 +1,7 @@
 using T3.Core.Animation;
 using T3.Core.Audio;
 using T3.Core.Utils;
+using T3.Core.Audio.Input;
 
 namespace Lib.io.audio;
 
@@ -59,9 +60,9 @@ public sealed class AudioReaction : Instance<AudioReaction>, IStatusProvider
             _lastHitTime = timeSinceLastHit;
         }
             
-        // if (!string.IsNullOrEmpty(context.Playback.Settings?.AudioInputDeviceName) && !WasapiAudioInput.DevicesInitialized)
+        // if (!string.IsNullOrEmpty(context.Playback.Settings?.AudioInputDeviceName) && !AudioInput.DevicesInitialized)
         // {
-        //     WasapiAudioInput.Initialize(context.Playback.Settings);
+        //     AudioInput.Initialize(context.Playback.Settings);
         // }
 
         if (MathUtils.WasTriggered(Reset.GetValue(context), ref _reset))

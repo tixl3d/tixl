@@ -16,13 +16,14 @@ using T3.Editor.UiModel.Commands.Animation;
 using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.Helpers;
 using T3.Editor.UiModel.ProjectHandling;
+using T3.Core.Audio.Input;
 
 namespace T3.Editor.Gui.Windows.TimeLine;
 
 /// <summary>
 /// Coordinates a paired audio + IO recording session. Owns the "is something being
 /// captured right now" state, dispatches start / stop to the underlying
-/// <see cref="WasapiAudioInput"/> and <see cref="IoDataSetRecorder"/>, and spawns the
+/// <see cref="AudioInput"/> and <see cref="IoDataSetRecorder"/>, and spawns the
 /// destination clips on the timeline at start so the user sees the recording grow in
 /// real time. The whole session lands as one <see cref="MacroCommand"/> on stop so it
 /// undoes as a unit.
@@ -145,7 +146,7 @@ internal static class RecordingSession
         // index to 001 every session).
         var sessionIndex = RecordingPaths.NextSessionIndex(NextIndexScanDirs(compositionOp));
         if (captureAudio)
-            WasapiAudioInput.BeginRecording(sessionIndex);
+            AudioInput.BeginRecording(sessionIndex);
         if (captureIo)
             IoDataSetRecorder.BeginRecording(sessionIndex, captureMidi: captureMidi, captureOsc: captureOsc);
 
@@ -232,7 +233,7 @@ internal static class RecordingSession
         // Skip EndRecording on whichever side never started — the underlying recorders
         // log a warning when called without an active session, which would otherwise spam
         // the Console every time the user records with only one source selected.
-        var audioPath = _audioCaptureActive ? WasapiAudioInput.EndRecording() : null;
+        var audioPath = _audioCaptureActive ? AudioInput.EndRecording() : null;
         var dataPath = _ioCaptureActive ? IoDataSetRecorder.EndRecording() : null;
         _audioCaptureActive = false;
         _ioCaptureActive = false;

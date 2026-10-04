@@ -6,6 +6,7 @@ using ManagedBass.Wasapi;
 using T3.Core.Audio;
 using T3.Core.IO;
 using T3.Editor.Gui.Styling;
+using T3.Core.Audio.Input;
 
 namespace T3.Editor.Gui.Audio;
 
@@ -102,20 +103,20 @@ internal static class AudioDeviceSelector
     {
         var changed = false;
         var deviceIndex = 0;
-        foreach (var d in WasapiAudioInput.InputDevices)
+        foreach (var d in AudioInput.InputDevices)
         {
             // Seed the ID from the index: devices can share a display name, which ImGui flags as conflicting IDs.
             ImGui.PushID(deviceIndex++);
-            var isSelected = d.DeviceInfo.Name == selectedName;
-            if (ImGui.Selectable(d.DeviceInfo.Name, isSelected, ImGuiSelectableFlags.NoAutoClosePopups))
+            var isSelected = d.Name == selectedName;
+            if (ImGui.Selectable(d.Name, isSelected, ImGuiSelectableFlags.NoAutoClosePopups))
             {
                 Bass.Configure(Configuration.UpdateThreads, false);
-                selectedName = d.DeviceInfo.Name;
+                selectedName = d.Name;
                 changed = true;
             }
 
             if (ImGui.IsItemHovered())
-                DrawDeviceTooltip(d.DeviceInfo);
+                DrawDeviceTooltip(d);
 
             ImGui.PopID();
         }
@@ -123,16 +124,16 @@ internal static class AudioDeviceSelector
         return changed;
     }
 
-    private static void DrawDeviceTooltip(WasapiDeviceInfo di)
+    private static void DrawDeviceTooltip(AudioInputDevice device)
     {
         ImGui.BeginTooltip();
         ImGui.PushFont(Fonts.FontSmall);
         var sb = new StringBuilder();
-        foreach (var f in typeof(WasapiDeviceInfo).GetProperties())
+        foreach (var f in typeof(AudioInputDevice).GetProperties())
         {
             sb.Append(f.Name);
             sb.Append(": ");
-            sb.Append(f.GetValue(di));
+            sb.Append(f.GetValue(device));
             sb.Append('\n');
         }
 

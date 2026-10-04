@@ -3,26 +3,24 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using ManagedBass;
-using ManagedBass.Wasapi;
 using T3.Core.Animation;
 using T3.Core.Audio.Timing;
 using T3.Core.IO;
 using T3.Core.Logging;
 using T3.Core.Settings;
 
-namespace T3.Core.Audio;
+namespace T3.Core.Audio.Input;
 
 /// <summary>
-/// Provides Windows Audio Session API (WASAPI) audio input handling for real-time audio capture.
-/// Uses the WASAPI audio API to get audio reaction from devices like speakers and microphones.
-/// Supports both loopback (system audio) and input device capture.
+/// Captures audio from an input device so the graph can react to something other than the project's own
+/// soundtrack, which <see cref="AudioEngine"/> analyses directly.
 /// </summary>
 /// <remarks>
-/// This class manages the lifecycle of WASAPI audio capture, including device enumeration,
-/// initialization, and frame-by-frame audio processing. It integrates with the playback system
-/// to provide FFT analysis data and audio level metering.
+/// Manages the lifecycle of capture - device enumeration, starting, and frame-by-frame processing - and
+/// feeds FFT and level data to the playback system. Which devices exist, and whether loopback is among
+/// them, is up to <see cref="AudioInputBackend"/>.
 /// </remarks>
-public static class WasapiAudioInput
+public static class AudioInput
 {
     /// <summary>
     /// Processes audio input at the start of each frame.
@@ -41,8 +39,8 @@ public static class WasapiAudioInput
         var wantsCaptureForFft = settings.Playback.AudioSource == CompositionSettings.AudioSources.ExternalDevice;
         var wantsCaptureForRecording = _isCaptureNeededForRecording;
 
-        // BASSWASAPI is Windows-only, so elsewhere there is no capture to start and nothing to stop.
-        if ((wantsCaptureForFft || wantsCaptureForRecording) && !BassLibrary.IsWasapiAvailable)
+        // Without a usable backend there is no capture to start and nothing to stop.
+        if ((wantsCaptureForFft || wantsCaptureForRecording) && !AudioInputBackend.Current.IsAvailable)
             return;
 
         if (!wantsCaptureForFft && !wantsCaptureForRecording)
@@ -90,7 +88,7 @@ public static class WasapiAudioInput
             return;
         }
 
-        var device = InputDevices.FirstOrDefault(d => d.DeviceInfo.Name == deviceName);
+        var device = InputDevices.FirstOrDefault(d => d.Name == deviceName);
         if (device == null)
         {
             Log.Warning($"Can't find input device {deviceName}");
@@ -119,14 +117,14 @@ public static class WasapiAudioInput
     /// Gets the list of available WASAPI input devices.
     /// </summary>
     /// <value>
-    /// A list of <see cref="WasapiInputDevice"/> instances representing available audio input devices.
+    /// A list of <see cref="AudioInputDevice"/> instances representing available audio input devices.
     /// The list is lazily initialized on first access.
     /// </value>
-    public static List<WasapiInputDevice> InputDevices
+    public static List<AudioInputDevice> InputDevices
     {
         get
         {
-            if (!BassLibrary.IsWasapiAvailable)
+            if (!AudioInputBackend.Current.IsAvailable)
                 return _inputDevices ??= [];
 
             if (_inputDevices == null)
@@ -147,57 +145,32 @@ public static class WasapiAudioInput
     /// It ensures BASS is initialized before WASAPI setup and registers <see cref="ProcessDataCallback"/>
     /// for asynchronous audio data processing.
     /// </remarks>
-    private static void StartInputCapture(WasapiInputDevice device)
+    private static void StartInputCapture(AudioInputDevice device)
     {
-        // Ensure BASS is initialized before WASAPI
-        // WASAPI requires a valid BASS device to work properly
-        AudioMixerManager.Initialize();
-        
-        var inputDeviceIndex = BassWasapi.DefaultInputDevice;
-
         if (device == null)
         {
             if (_inputDevices.Count == 0)
             {
-                Log.Error("No wasapi input devices found");
+                Log.Error("No audio input devices found");
                 return;
             }
 
-            Log.Error($"Attempting default input {BassWasapi.DefaultInputDevice}.");
             device = _inputDevices[0];
+            Log.Error($"Attempting first input '{device.Name}'.");
         }
         else
         {
-            Log.Info($"Initializing WASAPI audio input for  {device.DeviceInfo.Name}... ");
-            inputDeviceIndex = device.WasapiDeviceIndex;
+            Log.Info($"Initializing {AudioInputBackend.Current.Name} audio input for {device.Name}... ");
         }
 
-        SampleRate = device.DeviceInfo.MixFrequency;
+        SampleRate = device.SampleRate;
 
-        BassWasapi.Stop();
-        BassWasapi.Free();
-        if (!BassWasapi.Init(inputDeviceIndex,
-                             Frequency: device.DeviceInfo.MixFrequency,
-                             Channels: 0,
-                             //Flags: WasapiInitFlags.Buffer | WasapiInitFlags.Exclusive,
-                             Flags: WasapiInitFlags.Buffer,
-                             Buffer: (float)device.DeviceInfo.MinimumUpdatePeriod*4,
-                             Period: (float)device.DeviceInfo.MinimumUpdatePeriod,
-                             Procedure: ProcessDataCallback,
-                             User: IntPtr.Zero))
+        if (!AudioInputBackend.Current.TryStartCapture(device, OnCapturedData))
         {
-            Log.Error("Can't initialize WASAPI:" + Bass.LastError);
             return;
         }
 
-        ActiveInputDeviceName = device.DeviceInfo.Name;
-
-        // Record the channel count BASS settled on, so an active WavFileWriter knows
-        // the correct interleave layout. Falls back to stereo if Info isn't populated yet.
-        var info = BassWasapi.Info;
-        _activeChannelCount = info.Channels > 0 ? info.Channels : 2;
-
-        BassWasapi.Start();
+        ActiveInputDeviceName = device.Name;
     }
         
     /// <summary>
@@ -214,8 +187,7 @@ public static class WasapiAudioInput
             EndRecording();
         }
 
-        BassWasapi.Stop();
-        BassWasapi.Free();
+        AudioInputBackend.Current.StopCapture();
         ActiveInputDeviceName = null;
         DanceAiPhaseTracker.Reset();
     }
@@ -271,7 +243,7 @@ public static class WasapiAudioInput
         var path = Path.Combine(directory, fileName);
 
         var sampleRate = SampleRate > 0 ? SampleRate : 48000;
-        var channels = _activeChannelCount > 0 ? _activeChannelCount : 2;
+        var channels = AudioInputBackend.Current.ActiveChannelCount > 0 ? AudioInputBackend.Current.ActiveChannelCount : 2;
 
         try
         {
@@ -336,9 +308,9 @@ public static class WasapiAudioInput
     {
         var configuredDeviceName = ResolveInputDeviceName(Playback.Current?.Settings?.Playback.AudioInputDeviceName);
 
-        WasapiInputDevice device = null;
+        AudioInputDevice device = null;
         if (!string.IsNullOrEmpty(configuredDeviceName))
-            device = InputDevices.FirstOrDefault(d => d.DeviceInfo.Name == configuredDeviceName);
+            device = InputDevices.FirstOrDefault(d => d.Name == configuredDeviceName);
 
         if (device == null && InputDevices.Count > 0)
             device = InputDevices[0];
@@ -383,28 +355,7 @@ public static class WasapiAudioInput
     private static void InitializeInputDeviceList()
     {
         _inputDevices = [];
-
-        // Ensure BASS is initialized before enumerating WASAPI devices
-        AudioMixerManager.Initialize();
-        
-        // Keep in local variable to avoid double evaluation
-        var deviceCount = BassWasapi.DeviceCount;
-
-        for (var deviceIndex = 0; deviceIndex < deviceCount; deviceIndex++)
-        {
-            var deviceInfo = BassWasapi.GetDeviceInfo(deviceIndex);
-            var isValidInputDevice = deviceInfo.IsEnabled && (deviceInfo.IsLoopback || deviceInfo.IsInput);
-
-            if (!isValidInputDevice)
-                continue;
-
-            Log.Debug($"Found Wasapi input ID:{_inputDevices.Count} {deviceInfo.Name} LoopBack:{deviceInfo.IsLoopback} IsInput:{deviceInfo.IsInput} (at {deviceIndex})");
-            _inputDevices.Add(new WasapiInputDevice()
-                                  {
-                                      WasapiDeviceIndex = deviceIndex,
-                                      DeviceInfo = deviceInfo,
-                                  });
-        }
+        AudioInputBackend.Current.EnumerateDevices(_inputDevices);
     }
 
     /// <summary>
@@ -424,11 +375,11 @@ public static class WasapiAudioInput
     /// <item>Beat synchronization updates when enabled</item>
     /// </list>
     /// </remarks>
-    private static int ProcessDataCallback(IntPtr buffer, int length, IntPtr user)
+    private static void OnCapturedData(IntPtr buffer, int length)
     {
-        // Skip all WASAPI processing during export - AudioRendering handles FFT/waveform
+        // Skip all capture processing during export - AudioRendering handles FFT/waveform
         if (Playback.Current.IsRenderingToFile)
-            return length;
+            return;
 
         // Stream the raw captured samples to the active WAV recording, if any.
         // Read directly from the callback's buffer instead of issuing another GetData()
@@ -448,22 +399,23 @@ public static class WasapiAudioInput
         if (WaveFormProcessing.RequestedOnce && !Playback.Current.IsRenderingToFile)
         {
             var sizeInBytes = AudioConfig.WaveformSampleCount << 2 << 1;
-            WaveFormProcessing.LastFetchResultCode = BassWasapi.GetData(WaveFormProcessing.InterleavenSampleBuffer,  
-                                                                        sizeInBytes);
+            WaveFormProcessing.LastFetchResultCode = AudioInputBackend.Current.GetData(WaveFormProcessing.InterleavenSampleBuffer,
+                                                                                       sizeInBytes);
         }
         
-        var resultCode = BassWasapi.GetData(AudioAnalysis.FftGainBuffer, (int)(AudioAnalysis.BassFlagForFftBufferSize | DataFlags.FFTRemoveDC));
+        var resultCode = AudioInputBackend.Current.GetData(AudioAnalysis.FftGainBuffer,
+                                                           (int)(AudioAnalysis.BassFlagForFftBufferSize | DataFlags.FFTRemoveDC));
         _failedToGetLastFffData = resultCode < 0;
         if (_failedToGetLastFffData)
         {
-            Log.Debug($"Can't get Wasapi FFT-Data: {Bass.LastError}");
-            return length;
+            Log.Debug($"Can't get FFT data from the audio input: {Bass.LastError}");
+            return;
         }
         
         // level is an int32 carrying per-channel level, such as: "0xRRRRLLLL"
         // convert to M/S, and scale it.
         // more info : https://documentation.help/BASSWASAPI/BASS_WASAPI_GetLevel.html
-        var level = BassWasapi.GetLevel();
+        var level = AudioInputBackend.Current.GetLevel();
         if (level != -1) // exactly -1 is a capture error, do not measure it
         {
             var left = level & 0xffff;
@@ -474,7 +426,7 @@ public static class WasapiAudioInput
         var playbackSettings = Playback.Current?.Settings;
         
         if (playbackSettings == null) 
-            return length;
+            return;
         
         AudioAnalysis.ProcessUpdate(playbackSettings.Playback.AudioGainFactor,
                                     playbackSettings.Playback.AudioDecayFactor);
@@ -483,15 +435,13 @@ public static class WasapiAudioInput
         {
             if (playbackSettings.Playback.BeatLockSource != CompositionSettings.BeatLockSources.OnsetDetection)
             {
-                DanceAiPhaseTracker.FeedCapture(buffer, length, _activeChannelCount, SampleRate);
+                DanceAiPhaseTracker.FeedCapture(buffer, length, AudioInputBackend.Current.ActiveChannelCount, SampleRate);
             }
             else
             {
                 BeatSynchronizer.UpdateBeatTimer();
             }
         }
-        
-        return length;
     }
 
     /// <summary>
@@ -501,25 +451,9 @@ public static class WasapiAudioInput
     private static bool _failedToGetLastFffData;
 
     /// <summary>
-    /// Represents a WASAPI audio input device with its associated device information.
-    /// </summary>
-    public sealed class WasapiInputDevice
-    {
-        /// <summary>
-        /// The internal WASAPI device index used for initialization.
-        /// </summary>
-        internal int WasapiDeviceIndex;
-        
-        /// <summary>
-        /// Contains detailed device information including name, mix frequency, and capabilities.
-        /// </summary>
-        public WasapiDeviceInfo DeviceInfo;
-    }
-
-    /// <summary>
     /// Internal cache of enumerated WASAPI input devices.
     /// </summary>
-    private static List<WasapiInputDevice> _inputDevices;
+    private static List<AudioInputDevice> _inputDevices;
     
     /// <summary>
     /// The time in seconds since the last audio data update callback.
@@ -544,7 +478,7 @@ public static class WasapiAudioInput
     /// Attempts to get the device sample rate from <see cref="AudioMixerManager"/>.
     /// Falls back to 48000 Hz if initialization fails.
     /// </remarks>
-    static WasapiAudioInput()
+    static AudioInput()
     {
         try
         {
@@ -556,7 +490,7 @@ public static class WasapiAudioInput
         }
         catch (Exception ex)
         {
-            Log.Debug($"WasapiAudioInput: Failed to initialize sample rate from AudioMixerManager: {ex.Message}");
+            Log.Debug($"AudioInput: Failed to initialize sample rate from AudioMixerManager: {ex.Message}");
             SampleRate = 48000;
         }
     }
@@ -581,12 +515,6 @@ public static class WasapiAudioInput
     /// </summary>
     private static WavFileWriter _activeRecording;
 
-    /// <summary>
-    /// Channel count of the active WASAPI capture, captured after BASS_WASAPI_Init.
-    /// Used as the channel count for new WAV recordings.
-    /// </summary>
-    private static int _activeChannelCount;
-    
     /// <summary>
     /// Gets a time-decayed audio level value suitable for visual metering. (gain meter in playback settings)
     /// </summary>

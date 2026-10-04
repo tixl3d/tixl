@@ -37,6 +37,7 @@ using T3.Editor.UiModel.Helpers;
 using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
+using T3.Core.Audio.Input;
 
 namespace T3.Editor.Gui.Windows.TimeLine;
 
@@ -295,7 +296,7 @@ internal sealed class ProjectSettingsWindow : Window
             AudioDeviceSelector.DrawLocalDefaultDeviceCombo("##SelectLocalDevice");
             CustomComponents.HelpText("Stored per machine, not in the project. Set this once and shared projects work everywhere.");
         }
-        else if (playback.AudioInputDeviceName != WasapiAudioInput.ActiveInputDeviceName)
+        else if (playback.AudioInputDeviceName != AudioInput.ActiveInputDeviceName)
         {
             FormInputs.DrawInputLabel(" ");
             ImGui.PushStyleColor(ImGuiCol.Text, UiColors.StatusWarning.Rgba);
@@ -317,7 +318,7 @@ internal sealed class ProjectSettingsWindow : Window
             0.9f);
 
         // Input meter
-        var level = playback.AudioGainFactor * WasapiAudioInput.DecayingAudioLevel * 0.03f;
+        var level = playback.AudioGainFactor * AudioInput.DecayingAudioLevel * 0.03f;
         var normalizedLevel = level / 644f;
         FormInputs.DrawInputLabel("Level");
         var inputSize = FormInputs.GetAvailableInputSize(" ", true, true);

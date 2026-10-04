@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using T3.Core.DataTypes.DataSet;
 using T3.Core.IO;
 using T3.Core.Settings;
+using T3.Core.Audio.Input;
 
 namespace T3.Core.Audio.Timing;
 
@@ -93,8 +94,8 @@ public static class BeatSynchronizer
     {
         Initialize();
 
-        var currentTimeMs = WasapiAudioInput.LastUpdateTime * 1000;
-        var deltaTimeMs = WasapiAudioInput.TimeSinceLastUpdate * 1000;
+        var currentTimeMs = AudioInput.LastUpdateTime * 1000;
+        var deltaTimeMs = AudioInput.TimeSinceLastUpdate * 1000;
 
         // Advance time...
         _barTime += _currentBpm / 60.0 / 1000.0 / 4.0 * deltaTimeMs;

@@ -13,6 +13,7 @@ using T3.Core.Stats;
 using Texture2D = T3.Core.DataTypes.Texture2D;
 
 using System.Numerics;
+using T3.Core.Audio.Input;
 
 namespace T3.Player;
 
@@ -26,7 +27,7 @@ internal static partial class Program
         // The backends record into a frame and submit it at the end; D3D11's immediate context needed no such
         // bracketing, which is why the render loop never had it.
         _device.BeginFrame();
-        WasapiAudioInput.StartFrame(_playback.Settings);
+        AudioInput.StartFrame(_playback.Settings);
         _playback.Update();
 
         //Log.Debug($" render at playback time {_playback.TimeInSecs:0.00}s");

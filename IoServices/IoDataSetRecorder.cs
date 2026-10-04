@@ -11,6 +11,7 @@ using T3.Core.IO;
 using T3.Core.Logging;
 using T3.Core.Settings;
 using T3.IoServices.Midi;
+using T3.Core.Audio.Input;
 
 namespace T3.IoServices;
 
@@ -18,7 +19,7 @@ namespace T3.IoServices;
 /// Session-scoped MIDI / OSC recorder. A single static façade starts a session, captures
 /// incoming MIDI and OSC events into a fresh <see cref="DataSet"/> with timestamps
 /// relative to record-start, and serialises the result to a <c>.data</c> file on stop.
-/// Mirrors <see cref="T3.Core.Audio.WasapiAudioInput.BeginRecording"/> on the data side.
+/// Mirrors <see cref="T3.Core.Audio.AudioInput.BeginRecording"/> on the data side.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -45,7 +46,7 @@ public sealed class IoDataSetRecorder : MidiConnectionManager.IMidiConsumer, Osc
     /// Optional filename suffix. Audio sessions use suffixes per source (e.g. <c>mic1</c>);
     /// data sessions merge all selected MIDI / OSC sources into a single file so this is
     /// normally null. Kept for symmetry with
-    /// <see cref="T3.Core.Audio.WasapiAudioInput.BeginRecording"/>.
+    /// <see cref="T3.Core.Audio.AudioInput.BeginRecording"/>.
     /// </param>
     public static string? BeginRecording(int sessionIndex = -1, string? suffix = null, bool captureMidi = true, bool captureOsc = true)
     {

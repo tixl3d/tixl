@@ -10,6 +10,7 @@ using T3.Core.Logging;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.ProjectHandling;
+using T3.Core.Audio.Input;
 
 namespace T3.Editor.Gui.Windows.TimeLine;
 
@@ -122,8 +123,8 @@ internal static class TimelineToolbar
                 if (isRecording)
                 {
                     ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-                    if (!string.IsNullOrEmpty(WasapiAudioInput.ActiveRecordingPath))
-                        ImGui.TextUnformatted("audio → " + WasapiAudioInput.ActiveRecordingPath);
+                    if (!string.IsNullOrEmpty(AudioInput.ActiveRecordingPath))
+                        ImGui.TextUnformatted("audio → " + AudioInput.ActiveRecordingPath);
                     if (!string.IsNullOrEmpty(IoDataSetRecorder.ActiveRecordingPath))
                         ImGui.TextUnformatted("data  → " + IoDataSetRecorder.ActiveRecordingPath);
                     ImGui.PopStyleColor();

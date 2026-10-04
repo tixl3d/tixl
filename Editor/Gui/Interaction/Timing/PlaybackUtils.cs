@@ -8,6 +8,7 @@ using T3.Core.Settings;
 using T3.Core.Resource;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.ProjectHandling;
+using T3.Core.Audio.Input;
 
 namespace T3.Editor.Gui.Interaction.Timing;
 
@@ -20,7 +21,7 @@ public static class PlaybackUtils
     {
         var settings = FindCompositionSettings(out var audioComposition);
 
-        WasapiAudioInput.StartFrame(settings);
+        AudioInput.StartFrame(settings);
 
         if (settings.Playback.AudioSource == CompositionSettings.AudioSources.ProjectSoundTrack)
         {
