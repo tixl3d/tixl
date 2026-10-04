@@ -6,12 +6,14 @@
     {
       "Id": "0ca6a0b1-108d-4ca9-86c5-231ce357be14"/*ListToBuffer*/,
       "SymbolId": "7e28c796-85e7-47ee-99bb-9599284dbeeb",
+      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "2b0b88d7-dae5-4ee8-bb75-de94ece27af4"/*_AnimValueOld*/,
       "SymbolId": "c5e39c67-256f-4cb9-a635-b62a0d9c796c",
+      "SymbolName": "Lib.numbers.anim._obsolete._AnimValueOld",
       "InputValues": [
         {
           "Id": "4c38c34c-d992-47f1-bcb5-9bd13fc6474b"/*Shape*/,
@@ -34,12 +36,14 @@
     {
       "Id": "2c95bd87-1eef-48d8-bd2b-627422f1bf75"/*Vector3*/,
       "SymbolId": "94a5de3b-ee6a-43d3-8d21-7b8fe94b042b",
+      "SymbolName": "Types.Values.Vector3",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "3f7b5aa5-bbf2-4a3e-99b6-ecc8c068bab6"/*SoftTransformPoints*/,
       "SymbolId": "697bbc2d-0b2e-4013-bbc3-d58a28a79f31",
+      "SymbolName": "Lib.point.transform.SoftTransformPoints",
       "InputValues": [
         {
           "Id": "1055ad89-2aa1-493f-b991-ae55b7fbf2e4"/*Translate*/,
@@ -61,6 +65,7 @@
     {
       "Id": "4463778d-bb71-4bba-8b7b-81163e369ec0"/*LoadObjAsPoints*/,
       "SymbolId": "ad651447-75e7-4491-a56a-f737d70c0522",
+      "SymbolName": "Lib.point.helper.LoadObjAsPoints",
       "InputValues": [
         {
           "Id": "0ae6b6c5-80fa-4229-b06b-d9c2ac8c2a3f"/*Sorting*/,
@@ -83,6 +88,7 @@
     {
       "Id": "68f82425-6764-47d7-a9ea-74daca6f230c"/*OrbitCamera*/,
       "SymbolId": "6415ed0e-3692-45e2-8e70-fe0cf4d29ebc",
+      "SymbolName": "Lib.render.camera.OrbitCamera",
       "InputValues": [
         {
           "Id": "acf14901-3373-4b0c-8567-03ea0051a21f"/*CameraTargetPosition*/,
@@ -104,6 +110,7 @@
     {
       "Id": "ad5ad6d8-aeb2-4073-b718-eef07d9399ee"/*_AnimValueOld*/,
       "SymbolId": "c5e39c67-256f-4cb9-a635-b62a0d9c796c",
+      "SymbolName": "Lib.numbers.anim._obsolete._AnimValueOld",
       "InputValues": [
         {
           "Id": "4c38c34c-d992-47f1-bcb5-9bd13fc6474b"/*Shape*/,
@@ -126,12 +133,14 @@
     {
       "Id": "e327c066-9d5f-48eb-8423-ba0dcb6a4ca8"/*RenderTarget*/,
       "SymbolId": "f9fe78c5-43a6-48ae-8e8c-6cdbbc330dd1",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "ff3b4619-656b-4dee-b4f6-0301830c8790"/*DrawBillboards*/,
       "SymbolId": "18d3d929-e530-45fa-9131-658368060ae2",
+      "SymbolName": "Lib.point.draw.DrawBillboards",
       "InputValues": [
         {
           "Id": "8f203c5f-6eb8-42a1-bfea-9ca52a49e132"/*Scale*/,

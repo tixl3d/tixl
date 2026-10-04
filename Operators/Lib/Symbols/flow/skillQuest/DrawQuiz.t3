@@ -22,6 +22,7 @@
     {
       "Id": "1dcfd891-6788-4020-b2a3-7d23b6ccd689"/*ComputeImageDifference*/,
       "SymbolId": "45ddd1ac-5fd8-4479-81ac-eae5baf71fb6",
+      "SymbolName": "Lib.render._.ComputeImageDifference",
       "InputValues": [
         {
           "Id": "2713907a-425e-44d2-ab38-33570f52296c"/*PrecisionScale*/,
@@ -34,12 +35,14 @@
     {
       "Id": "376eb412-8e28-4955-84f7-c98790b1478a"/*RenderTarget*/,
       "SymbolId": "f9fe78c5-43a6-48ae-8e8c-6cdbbc330dd1",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "4fdfe2b0-2e81-4ea4-a31a-7b79fee2f3e7"/*RenderTarget*/,
       "SymbolId": "f9fe78c5-43a6-48ae-8e8c-6cdbbc330dd1",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "InputValues": [
         {
           "Id": "8bb4a4e5-0c88-4d99-a5b2-2c9e22bd301f"/*ClearColor*/,
@@ -57,24 +60,28 @@
     {
       "Id": "61e3410c-9347-4ef0-a141-e201e8843c95"/*RenderTarget*/,
       "SymbolId": "f9fe78c5-43a6-48ae-8e8c-6cdbbc330dd1",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "653c74ef-0425-474d-99c2-c0ef40166ba2"/*_QuizUp*/,
       "SymbolId": "b9460cd7-c363-4a6e-8c3e-5c2f84a4aae3",
+      "SymbolName": "Lib.flow.skillQuest._QuizUp",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "86326606-3f9a-436e-91c6-519c03ff73d6"/*FirstValidTexture*/,
       "SymbolId": "db73b47d-3d42-4b17-b8fd-08b6f1286716",
+      "SymbolName": "Lib.image.use.FirstValidTexture",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "adc7f7e9-53e5-4891-abc7-2b526e6d4ff3"/*CTA*/,
       "SymbolId": "fd31d208-12fe-46bf-bfa3-101211f8f497",
+      "SymbolName": "Lib.render.basic.Text",
       "Name": "CTA",
       "InputValues": [
         {

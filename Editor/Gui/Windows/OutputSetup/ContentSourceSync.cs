@@ -22,6 +22,9 @@ namespace T3.Editor.Gui.Windows.OutputSetup;
 /// send op" only means "no pixels this frame". A source is removed only once its child is confirmed *gone* from
 /// a symbol we can actually see, which is what makes deleting the op cascade to its slices and to every
 /// surface showing them.</para>
+/// <para>Scoped to the active composition — the nearest op up the breadcrumbs with composition settings, else the
+/// project root — because its sends are what an export of it ships. Sources of other compositions stay in the
+/// setup with their routing, they are only neither adopted nor shown while another composition is active.</para>
 /// </summary>
 internal static class ContentSourceSync
 {
@@ -29,9 +32,34 @@ internal static class ContentSourceSync
     /// source list stays in step with the graph whether or not any output UI is open.</summary>
     public static void UpdateFrame()
     {
+        UpdateScope();
         var setup = ActiveSetup.Current;
         if (setup != null)
             Update(setup);
+    }
+
+    /// <summary>Whether a live send op lies under the active composition.</summary>
+    public static bool IsInScope(Instance send)
+    {
+        var scopePath = _scopePath;
+        var path = send.InstancePath;
+        if (scopePath == null || path.Count <= scopePath.Count)
+            return false;
+
+        for (var i = 0; i < scopePath.Count; i++)
+        {
+            if (path[i] != scopePath[i])
+                return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>Whether a content source's send op lies under the active composition, instantiated or not.</summary>
+    public static bool IsSourceInScope(Guid childId)
+    {
+        var instance = FindSendInstance(childId);
+        return instance != null ? IsInScope(instance) : _scopeSendChildIds.Contains(childId);
     }
 
     /// <summary>
@@ -108,20 +136,21 @@ internal static class ContentSourceSync
         UndoRedoStack.AddAndExecute(new ChangeSymbolChildNameCommand(childUi, parentSymbolUi.Symbol) { NewName = newName });
     }
 
-    /// <summary>Selects the content's SendToOutput op in the focused graph and frames it — the setup → graph
-    /// half of the sync (the graph → setup highlight is handled by the highlighted-content id).</summary>
+    /// <summary>Opens the composition holding the content's SendToOutput op, selects and frames it — the setup →
+    /// graph half of the sync (the graph → setup highlight is handled by the highlighted-content id).</summary>
     public static void RevealContentOpInGraph(Guid childId)
     {
         var instance = FindSendInstance(childId);
-        var parentSymbolUi = instance?.Parent?.GetSymbolUi();
-        if (instance == null || parentSymbolUi == null || ProjectView.Focused == null)
+        var projectView = ProjectView.Focused;
+        if (instance == null || projectView?.GraphView == null)
             return;
 
-        if (!parentSymbolUi.ChildUis.TryGetValue(instance.SymbolChildId, out var childUi))
+        // The registry spans every open project; a path from another one can't be opened in this graph.
+        var path = instance.InstancePath;
+        if (path.Count == 0 || path[0] != projectView.RootInstance.SymbolChildId)
             return;
 
-        ProjectView.Focused.NodeSelection.SetSelection(childUi, instance);
-        FitViewToSelectionHandling.FitViewToSelection();
+        projectView.GraphView.OpenAndFocusInstance(path);
     }
 
     private static void Update(Setup setup)
@@ -135,7 +164,7 @@ internal static class ContentSourceSync
                 continue;
 
             var childId = instance.SymbolChildId;
-            if (setup.FindSourceByChildId(childId) != null)
+            if (!IsInScope(instance) || setup.FindSourceByChildId(childId) != null)
                 continue;
 
             setup.ContentSources.Add(new ContentSource
@@ -185,6 +214,37 @@ internal static class ContentSourceSync
             OutputSetupHandling.SaveActive();
         }
     }
+
+    private static void UpdateScope()
+    {
+        var projectView = ProjectView.Focused;
+        var composition = projectView?.CompositionInstance;
+        if (projectView == null || composition == null)
+        {
+            _scopePath = null;
+            _scopeSendChildIds.Clear();
+            return;
+        }
+
+        var scopeRoot = composition;
+        while (scopeRoot.Parent != null && !scopeRoot.Symbol.CompositionSettings.Enabled)
+        {
+            scopeRoot = scopeRoot.Parent;
+        }
+
+        // The symbol walk only reruns when the scope moved or a send appeared or went away.
+        if (_scopePath == scopeRoot.InstancePath && _scopeRegistryVersion == ContentSupplierRegistry.Version)
+            return;
+
+        _scopePath = scopeRoot.InstancePath;
+        _scopeRegistryVersion = ContentSupplierRegistry.Version;
+        _scopeSendChildIds.Clear();
+        ContentSupplierSearch.CollectSupplierChildIds(scopeRoot.Symbol, _scopeSendChildIds);
+    }
+
+    private static IReadOnlyList<Guid>? _scopePath;
+    private static int _scopeRegistryVersion = -1;
+    private static readonly HashSet<Guid> _scopeSendChildIds = [];
 
     private static double? _pendingSaveSince;
     private static int _sweptRegistryVersion = -1;

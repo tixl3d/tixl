@@ -6,18 +6,21 @@
     {
       "Id": "2871c4d5-4e37-4997-b9f6-3e79aba46cf1"/*LoadObj*/,
       "SymbolId": "be52b670-9749-4c0d-89f0-d8b101395227",
+      "SymbolName": "Lib.mesh.generate.LoadObj",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "9ceb12b7-664c-4688-9912-2835875b3dca"/*DrawQuiz*/,
       "SymbolId": "16e30ce0-20c9-4677-9837-0200454e05ae",
+      "SymbolName": "Lib.flow.skillQuest.DrawQuiz",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "aedaa497-85b0-4e45-b3ea-22d66971195d"/*Text*/,
       "SymbolId": "fd31d208-12fe-46bf-bfa3-101211f8f497",
+      "SymbolName": "Lib.render.basic.Text",
       "InputValues": [
         {
           "Id": "f1f1be0e-d5bc-4940-bbc1-88bfa958f0e1"/*InputText*/,
@@ -30,6 +33,7 @@
     {
       "Id": "e14c99ff-473a-4a25-afe0-3a2651b1dc91"/*Text*/,
       "SymbolId": "fd31d208-12fe-46bf-bfa3-101211f8f497",
+      "SymbolName": "Lib.render.basic.Text",
       "InputValues": [
         {
           "Id": "f1f1be0e-d5bc-4940-bbc1-88bfa958f0e1"/*InputText*/,
@@ -42,6 +46,7 @@
     {
       "Id": "e513224e-8431-4b0b-9fc7-a794dc796120"/*CombineMeshes*/,
       "SymbolId": "c276f4eb-f19c-405b-b247-3db159677571",
+      "SymbolName": "Lib.mesh.modify.CombineMeshes",
       "InputValues": [],
       "Outputs": []
     }

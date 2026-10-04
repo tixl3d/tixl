@@ -138,7 +138,7 @@
       }
     },
     {
-      "ChildId": "11180e6b-af7d-457b-ab1f-e4307c942faa"/*LinePointsCpu*/,
+      "ChildId": "11180e6b-af7d-457b-ab1f-e4307c942faa"/*_PointsForLine*/,
       "Position": {
         "X": 926.65735,
         "Y": -383.97122

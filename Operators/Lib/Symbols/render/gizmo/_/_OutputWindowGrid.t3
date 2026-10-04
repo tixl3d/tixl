@@ -6,6 +6,7 @@
     {
       "Id": "b7280d50-5b52-4832-a408-4d0e7a06550b"/*GridPlane*/,
       "SymbolId": "935e6597-3d9f-4a79-b4a6-600e8f28861e",
+      "SymbolName": "Lib.render.gizmo.GridPlane",
       "InputValues": [
         {
           "Id": "c0f652b8-80fb-4bd2-b6cd-cfc459f9fcc5"/*Color*/,

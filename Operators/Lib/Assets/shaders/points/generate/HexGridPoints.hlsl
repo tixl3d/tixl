@@ -77,7 +77,7 @@ void main(uint3 i : SV_DispatchThreadID)
                             
         const float TriangleScale = 0.581f;
         float3 pos =float3((float) ((cell.x - c.x/2 + 0.5f) * Size.x * TriangleScale),
-                        (float) ((cell.y - c.y/2 + 0.5f) * Size.y + verticalOffset),
+                        (float) ((cell.y - c.y/2 + 0.5f) * Size.y + verticalOffset.x),
                         (float) (0));
 
         float rotZ=  isOdd ? 60 * ToRad : 0;

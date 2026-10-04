@@ -59,12 +59,14 @@
     {
       "Id": "25acd8a3-db12-457a-98a9-f70e51be66d5"/*Vector2Components*/,
       "SymbolId": "0946c48b-85d8-4072-8f21-11d17cc6f6cf",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "31adbf53-34ea-4f3a-981b-cf1757e60933"/*Wrap*/,
       "SymbolId": "bd0b9c5b-c611-42d0-8200-31af9661f189",
+      "SymbolName": "Lib.render._dx11.fxsetup._ImageFxShaderSetupStatic",
       "Name": "Wrap",
       "InputValues": [
         {
@@ -98,6 +100,7 @@
     {
       "Id": "401e51a0-e6cc-4132-9b19-a593e406c1a0"/*AddInt*/,
       "SymbolId": "ab73a49e-c548-437d-a4ab-b3fa41e30097",
+      "SymbolName": "Lib.numbers.int.basic.AddInt",
       "InputValues": [
         {
           "Id": "d5efbe02-8f33-42e9-a205-859c218acbec"/*Input2*/,
@@ -110,6 +113,7 @@
     {
       "Id": "6133eec4-9179-4a64-8b2c-a3109e0cf651"/*New Resolution*/,
       "SymbolId": "f86358e0-2573-4acd-9a90-e95108e8a4da",
+      "SymbolName": "Lib.numbers.int2.process.Int2Components",
       "Name": "New Resolution",
       "InputValues": [],
       "Outputs": []
@@ -117,18 +121,21 @@
     {
       "Id": "6fd25409-5867-4a4a-a36e-29eb1c162137"/*Vector2*/,
       "SymbolId": "926ab3fd-fbaf-4c4b-91bc-af277000dcb8",
+      "SymbolName": "Types.Values.Vector2",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "93cbb499-e916-4517-a172-71fb2f194925"/*GetTextureSize*/,
       "SymbolId": "daec568f-f7b4-4d81-a401-34d62462daab",
+      "SymbolName": "Lib.render._dx11.api.GetTextureSize",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "9a5e9045-713f-4c0b-ad14-b78e167078ce"/*OrgResolution*/,
       "SymbolId": "f86358e0-2573-4acd-9a90-e95108e8a4da",
+      "SymbolName": "Lib.numbers.int2.process.Int2Components",
       "Name": "OrgResolution",
       "InputValues": [],
       "Outputs": []
@@ -136,6 +143,7 @@
     {
       "Id": "a4d78db8-f0a6-4ed3-b4f8-39eae5c464b3"/*IntToWrapmode*/,
       "SymbolId": "54ba8673-ff58-48d1-ae2e-ee2b83bc6860",
+      "SymbolName": "Lib.render.shading.IntToWrapmode",
       "InputValues": [
         {
           "Id": "f50c736b-dc80-424b-8517-af0ca4168666"/*ModeIndex*/,
@@ -148,12 +156,14 @@
     {
       "Id": "bf478418-fbc1-4e6c-a85b-c53129d432e9"/*Vector2Components*/,
       "SymbolId": "0946c48b-85d8-4072-8f21-11d17cc6f6cf",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "c93d2ff8-d2ea-4bb8-add5-c766e5446e34"/*ScaleResolution*/,
       "SymbolId": "eb818dd0-0c9c-40ee-b76e-2148f958b987",
+      "SymbolName": "Lib.numbers.int2.process.ScaleResolution",
       "InputValues": [],
       "Outputs": []
     }

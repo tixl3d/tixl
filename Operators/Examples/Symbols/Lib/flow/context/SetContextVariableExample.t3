@@ -6,6 +6,7 @@
     {
       "Id": "0694d224-7680-49a2-91a8-2776c538a26b"/*TorusMesh*/,
       "SymbolId": "a835ab86-29c1-438e-a7f7-2e297108bfd5",
+      "SymbolName": "Lib.mesh.generate.TorusMesh",
       "InputValues": [
         {
           "Id": "99f5d952-8490-4930-b8ab-9d8e968183c6"/*Segments*/,
@@ -21,12 +22,14 @@
     {
       "Id": "375100d4-cc91-4b77-b366-9da9dded9d0d"/*Execute*/,
       "SymbolId": "936e4324-bea2-463a-b196-6064a2d8a6b2",
+      "SymbolName": "Lib.flow.Execute",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "473e4804-48c3-45de-bdcb-89c33a5da39d"/*TorusMesh*/,
       "SymbolId": "a835ab86-29c1-438e-a7f7-2e297108bfd5",
+      "SymbolName": "Lib.mesh.generate.TorusMesh",
       "InputValues": [
         {
           "Id": "99f5d952-8490-4930-b8ab-9d8e968183c6"/*Segments*/,
@@ -42,6 +45,7 @@
     {
       "Id": "4a3511be-ed39-4e24-8882-aac4026fa342"/*Multiply*/,
       "SymbolId": "17b60044-9125-4961-8a79-ca94697b3726",
+      "SymbolName": "Lib.numbers.float.basic.Multiply",
       "InputValues": [
         {
           "Id": "5ae4bb07-4214-4ec3-a499-24d9f6d404a5"/*B*/,
@@ -54,6 +58,7 @@
     {
       "Id": "583fd83a-1d3a-4dbf-9dbd-ab8daf6f0a3b"/*GetFloatVar*/,
       "SymbolId": "e6072ecf-30d2-4c52-afa1-3b195d61617b",
+      "SymbolName": "Lib.flow.context.GetFloatVar",
       "InputValues": [
         {
           "Id": "015d1ea0-ea51-4038-893a-4af2f8584631"/*VariableName*/,
@@ -66,12 +71,14 @@
     {
       "Id": "79fd62d8-2a59-4f28-8432-e1f188ed8d54"/*DrawMesh*/,
       "SymbolId": "a3c5471e-079b-4d4b-886a-ec02d6428ff6",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "7cfa7a3c-1035-408f-b235-66390150b80a"/*GetFloatVar*/,
       "SymbolId": "e6072ecf-30d2-4c52-afa1-3b195d61617b",
+      "SymbolName": "Lib.flow.context.GetFloatVar",
       "InputValues": [
         {
           "Id": "015d1ea0-ea51-4038-893a-4af2f8584631"/*VariableName*/,
@@ -84,12 +91,14 @@
     {
       "Id": "7dc84730-2e90-4a26-84df-c3999094cdd6"/*DrawMesh*/,
       "SymbolId": "a3c5471e-079b-4d4b-886a-ec02d6428ff6",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "7ea0d73d-307b-4daf-9ef6-6c30f45803e5"/*SetFloatVar*/,
       "SymbolId": "2a0c932a-eb81-4a7d-aeac-836a23b0b789",
+      "SymbolName": "Lib.flow.context.SetFloatVar",
       "InputValues": [
         {
           "Id": "68e31eaa-1481-48f4-b742-5177a241fe6d"/*FloatValue*/,
@@ -107,6 +116,7 @@
     {
       "Id": "f531fcf8-73f6-452a-a2f3-9a77536d740e"/*_AnimValueOld*/,
       "SymbolId": "c5e39c67-256f-4cb9-a635-b62a0d9c796c",
+      "SymbolName": "Lib.numbers.anim._obsolete._AnimValueOld",
       "InputValues": [
         {
           "Id": "4c38c34c-d992-47f1-bcb5-9bd13fc6474b"/*Shape*/,

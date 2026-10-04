@@ -6,6 +6,7 @@
     {
       "Id": "b469fc56-51fc-45d3-9a63-3927fe197138"/*Sharpen*/,
       "SymbolId": "4b207e35-64b4-4833-977c-da6c7154a081",
+      "SymbolName": "Lib.image.fx.blur.Sharpen",
       "InputValues": [
         {
           "Id": "def5bcf3-d499-41ad-82b8-1b9706ebaab6"/*Strength*/,
@@ -18,6 +19,7 @@
     {
       "Id": "bb4e1d6e-faab-4453-94e7-e0bb7c0969c5"/*AnimValue*/,
       "SymbolId": "ea7b8491-2f8e-4add-b0b1-fd068ccfed0d",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "InputValues": [
         {
           "Id": "48005727-0158-4795-ad70-8410c27fd01d"/*Rate*/,
@@ -45,6 +47,7 @@
     {
       "Id": "f7cbbc29-1e79-46c0-8898-45eb9ab624be"/*LoadImage*/,
       "SymbolId": "0b3436db-e283-436e-ba85-2f3a1de76a9d",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
       "InputValues": [],
       "Outputs": []
     }

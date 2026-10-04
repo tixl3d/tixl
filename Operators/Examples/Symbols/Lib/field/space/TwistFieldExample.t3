@@ -6,6 +6,7 @@
     {
       "Id": "05a2c109-ac54-4c38-848b-c27464c930ba"/*Adjust for UVs*/,
       "SymbolId": "c44d23c7-bfac-403d-b49e-49d00001a316",
+      "SymbolName": "Lib.field.space.TransformField",
       "Name": "Adjust for UVs",
       "InputValues": [
         {
@@ -32,6 +33,7 @@
     {
       "Id": "09a70d1f-a9e2-4739-af09-b906c4bd024e"/*CylinderSDF*/,
       "SymbolId": "67f21840-dc9a-4390-aa45-234ce81c8717",
+      "SymbolName": "Lib.field.generate.sdf.CylinderSDF",
       "InputValues": [
         {
           "Id": "1f65cd48-caa9-4b25-925c-7cbcc12eabbc"/*Axis*/,
@@ -58,6 +60,7 @@
     {
       "Id": "14b4b51c-caf8-4a58-a20a-5cb1a9ff4563"/*RaymarchField*/,
       "SymbolId": "9323e32f-078c-4156-941b-203f4c265ff5",
+      "SymbolName": "Lib.field.render.RaymarchField",
       "InputValues": [
         {
           "Id": "0b4d60de-261f-4dbf-ad44-6395cda3a496"/*MinDistance*/,
@@ -90,6 +93,7 @@
     {
       "Id": "1521251d-04d1-40ee-af28-124e93a2846c"/*OrbitCamera*/,
       "SymbolId": "6415ed0e-3692-45e2-8e70-fe0cf4d29ebc",
+      "SymbolName": "Lib.render.camera.OrbitCamera",
       "InputValues": [
         {
           "Id": "8b75047f-03b7-4619-8869-2906e66731d1"/*OrbitAngleAndWobble*/,
@@ -119,6 +123,7 @@
     {
       "Id": "39687850-a7de-4f64-a778-274a246b47ff"/*RaymarchField*/,
       "SymbolId": "9323e32f-078c-4156-941b-203f4c265ff5",
+      "SymbolName": "Lib.field.render.RaymarchField",
       "InputValues": [
         {
           "Id": "561768f6-adf6-4d3d-a36a-20b6f35ff151"/*StepSize*/,
@@ -131,6 +136,7 @@
     {
       "Id": "52f27b7c-7d80-4a9b-92b9-11f79f6674b6"/*CylinderSDF*/,
       "SymbolId": "67f21840-dc9a-4390-aa45-234ce81c8717",
+      "SymbolName": "Lib.field.generate.sdf.CylinderSDF",
       "InputValues": [
         {
           "Id": "1f65cd48-caa9-4b25-925c-7cbcc12eabbc"/*Axis*/,
@@ -157,6 +163,7 @@
     {
       "Id": "5f3110b8-38eb-40a0-a42b-07a13120bbb7"/*Vector3Gizmo*/,
       "SymbolId": "e9dc80e1-8898-4b77-b515-bf6d589302de",
+      "SymbolName": "Lib.numbers.vec3.Vector3Gizmo",
       "InputValues": [
         {
           "Id": "a2025ddf-423f-4683-a4ce-ec8c7bda42ee"/*Position*/,
@@ -173,6 +180,7 @@
     {
       "Id": "617fdc62-2091-4efa-9e73-3dad4f717e44"/*TorusSDF*/,
       "SymbolId": "a54e0946-71d0-4985-90bc-184cdb1b6b34",
+      "SymbolName": "Lib.field.generate.sdf.TorusSDF",
       "InputValues": [
         {
           "Id": "522a9640-ca8c-47e6-ad36-5c316a9092ae"/*Axis*/,
@@ -204,6 +212,7 @@
     {
       "Id": "62ce0bc7-81b1-48fe-bafb-c0f3b5315f2f"/*SetSDFMaterial*/,
       "SymbolId": "88926602-4694-4632-9fd7-04c8d6ddd728",
+      "SymbolName": "Lib.field.adjust.SetSDFMaterial",
       "InputValues": [
         {
           "Id": "d2a64234-c7ef-424b-822c-addce0b84e69"/*Color*/,
@@ -221,6 +230,7 @@
     {
       "Id": "64cf69de-980b-482c-b1c7-1b4b83f1d68d"/*TwistField*/,
       "SymbolId": "d7c6e980-6766-4f83-a32c-677e3713e8a6",
+      "SymbolName": "Lib.field.space.TwistField",
       "InputValues": [
         {
           "Id": "195f4642-52f7-4c95-9127-07f6175549f5"/*Axis*/,
@@ -238,12 +248,14 @@
     {
       "Id": "6b24dbe3-c64f-4b07-8667-d0c3286e1f78"/*CombineSDF*/,
       "SymbolId": "82270977-07b5-4d86-8544-5aebc638d46c",
+      "SymbolName": "Lib.field.combine.CombineSDF",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "76cd258a-f4e0-4ab4-93bf-71200da79148"/*RadialGradient*/,
       "SymbolId": "82ad8911-c930-4851-803d-3f24422445bc",
+      "SymbolName": "Lib.image.generate.basic.RadialGradient",
       "InputValues": [
         {
           "Id": "3f5a284b-e2f0-47e2-bf79-2a7fe8949519"/*Gradient*/,
@@ -305,6 +317,7 @@
     {
       "Id": "77941b0a-0f99-47da-832a-a12db25d442d"/*RadialGradient*/,
       "SymbolId": "82ad8911-c930-4851-803d-3f24422445bc",
+      "SymbolName": "Lib.image.generate.basic.RadialGradient",
       "InputValues": [
         {
           "Id": "3f5a284b-e2f0-47e2-bf79-2a7fe8949519"/*Gradient*/,
@@ -378,12 +391,14 @@
     {
       "Id": "78aaa57e-86c8-439d-bab8-d97b4b3e696a"/*Vector3*/,
       "SymbolId": "94a5de3b-ee6a-43d3-8d21-7b8fe94b042b",
+      "SymbolName": "Types.Values.Vector3",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "7a19727c-60e5-45b9-a2ae-5177dfa89817"/*RenderTarget*/,
       "SymbolId": "f9fe78c5-43a6-48ae-8e8c-6cdbbc330dd1",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "InputValues": [
         {
           "Id": "e882e0f0-03f9-46e6-ac7a-709e6fa66613"/*Multisampling*/,
@@ -396,6 +411,7 @@
     {
       "Id": "7ac9512f-7a31-4446-a40c-3b039e3cb632"/*Torus*/,
       "SymbolId": "c160f925-0a66-4505-a569-cadd878dbb6f",
+      "SymbolName": "Lib.numbers.float.basic.Add",
       "Name": "Torus",
       "InputValues": [],
       "Outputs": []
@@ -403,6 +419,7 @@
     {
       "Id": "80914859-bfff-43b8-b766-080797ca866f"/*CombineSDF*/,
       "SymbolId": "82270977-07b5-4d86-8544-5aebc638d46c",
+      "SymbolName": "Lib.field.combine.CombineSDF",
       "InputValues": [
         {
           "Id": "4648e514-b48c-4a98-a728-3ebf9bcfa0b7"/*CombineMethod*/,
@@ -415,6 +432,7 @@
     {
       "Id": "937e09b7-dab7-4b73-b100-aad580a265f0"/*TwistField*/,
       "SymbolId": "d7c6e980-6766-4f83-a32c-677e3713e8a6",
+      "SymbolName": "Lib.field.space.TwistField",
       "InputValues": [
         {
           "Id": "195f4642-52f7-4c95-9127-07f6175549f5"/*Axis*/,
@@ -432,6 +450,7 @@
     {
       "Id": "997c2d1e-ef64-4a15-97d3-1c4dfc201684"/*TransformField*/,
       "SymbolId": "c44d23c7-bfac-403d-b49e-49d00001a316",
+      "SymbolName": "Lib.field.space.TransformField",
       "InputValues": [
         {
           "Id": "3b817e6c-f532-4a8c-a2ff-a00dc926eeb2"/*Translation*/,
@@ -448,6 +467,7 @@
     {
       "Id": "9b851b54-2eda-4cfe-a790-6ce272881572"/*Value*/,
       "SymbolId": "5d7d61ae-0a41-4ffa-a51d-93bab665e7fe",
+      "SymbolName": "Types.Values.Value",
       "InputValues": [
         {
           "Id": "7773837e-104a-4b3d-a41f-cadbd9249af2"/*Float*/,
@@ -460,6 +480,7 @@
     {
       "Id": "a6f06a7c-a332-4740-8fc2-b0a5e39d64cb"/*Vector2*/,
       "SymbolId": "926ab3fd-fbaf-4c4b-91bc-af277000dcb8",
+      "SymbolName": "Types.Values.Vector2",
       "InputValues": [
         {
           "Id": "2d9c040d-5244-40ac-8090-d8d57323487b"/*Y*/,
@@ -477,6 +498,7 @@
     {
       "Id": "a7fd9182-8d1e-49fd-8aef-ca6ba6f7fd85"/*TwistField*/,
       "SymbolId": "d7c6e980-6766-4f83-a32c-677e3713e8a6",
+      "SymbolName": "Lib.field.space.TwistField",
       "InputValues": [
         {
           "Id": "195f4642-52f7-4c95-9127-07f6175549f5"/*Axis*/,
@@ -494,6 +516,7 @@
     {
       "Id": "a95f10ae-e325-4fa0-82d6-6aa5b926d634"/*Flatten Torus*/,
       "SymbolId": "c44d23c7-bfac-403d-b49e-49d00001a316",
+      "SymbolName": "Lib.field.space.TransformField",
       "Name": "Flatten Torus",
       "InputValues": [
         {
@@ -511,6 +534,7 @@
     {
       "Id": "ade51471-c115-4858-a9e2-4af11c4c18fc"/*SetSDFMaterial*/,
       "SymbolId": "88926602-4694-4632-9fd7-04c8d6ddd728",
+      "SymbolName": "Lib.field.adjust.SetSDFMaterial",
       "InputValues": [
         {
           "Id": "d2a64234-c7ef-424b-822c-addce0b84e69"/*Color*/,
@@ -528,12 +552,14 @@
     {
       "Id": "b3d9d229-9e94-4cb9-8ca8-db4780138433"/*Vector2Components*/,
       "SymbolId": "0946c48b-85d8-4072-8f21-11d17cc6f6cf",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "cd17d64f-3b9a-4e40-aabd-738660266cb1"/*Multiply*/,
       "SymbolId": "17b60044-9125-4961-8a79-ca94697b3726",
+      "SymbolName": "Lib.numbers.float.basic.Multiply",
       "InputValues": [
         {
           "Id": "5ae4bb07-4214-4ec3-a499-24d9f6d404a5"/*B*/,
@@ -546,12 +572,14 @@
     {
       "Id": "d297b54c-1dec-4ebc-89d9-e0ed0b33bace"/*Group*/,
       "SymbolId": "a3f64d34-1fab-4230-86b3-1c3deba3f90b",
+      "SymbolName": "Lib.render.transform.Group",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "d901dcbf-bc62-41e2-b93b-ca95de46598d"/*TransformField*/,
       "SymbolId": "c44d23c7-bfac-403d-b49e-49d00001a316",
+      "SymbolName": "Lib.field.space.TransformField",
       "InputValues": [
         {
           "Id": "3b817e6c-f532-4a8c-a2ff-a00dc926eeb2"/*Translation*/,
@@ -568,6 +596,7 @@
     {
       "Id": "dbeb8b12-165d-4cd6-8b09-be9058214104"/*Strength*/,
       "SymbolId": "5d7d61ae-0a41-4ffa-a51d-93bab665e7fe",
+      "SymbolName": "Types.Values.Value",
       "Name": "Strength",
       "InputValues": [
         {
@@ -581,6 +610,7 @@
     {
       "Id": "de597e48-dca3-4735-929d-b00ec979aa01"/*SetSDFMaterial*/,
       "SymbolId": "88926602-4694-4632-9fd7-04c8d6ddd728",
+      "SymbolName": "Lib.field.adjust.SetSDFMaterial",
       "InputValues": [
         {
           "Id": "d2a64234-c7ef-424b-822c-addce0b84e69"/*Color*/,
@@ -598,6 +628,7 @@
     {
       "Id": "e027a823-ae3d-4647-9c1b-14ad9b161285"/*GridPlane*/,
       "SymbolId": "935e6597-3d9f-4a79-b4a6-600e8f28861e",
+      "SymbolName": "Lib.render.gizmo.GridPlane",
       "InputValues": [],
       "Outputs": [
         {
@@ -609,6 +640,7 @@
     {
       "Id": "e3280e1c-069c-4983-b56c-05f74a382671"/*SetMaterial*/,
       "SymbolId": "0ed2bee3-641f-4b08-8685-df1506e9af3c",
+      "SymbolName": "Lib.render.shading.SetMaterial",
       "InputValues": [
         {
           "Id": "9d5ca726-28b0-4f3d-a5aa-f0ae3e2043a9"/*Specular*/,
@@ -626,6 +658,7 @@
     {
       "Id": "e4fae62b-4417-4696-bd1f-14b514f3a015"/*Rotate Torus*/,
       "SymbolId": "c44d23c7-bfac-403d-b49e-49d00001a316",
+      "SymbolName": "Lib.field.space.TransformField",
       "Name": "Rotate Torus",
       "InputValues": [],
       "Outputs": []
@@ -633,6 +666,7 @@
     {
       "Id": "f789d33e-8f69-46fb-9932-64452333cb51"/*TransformField*/,
       "SymbolId": "c44d23c7-bfac-403d-b49e-49d00001a316",
+      "SymbolName": "Lib.field.space.TransformField",
       "InputValues": [
         {
           "Id": "3b817e6c-f532-4a8c-a2ff-a00dc926eeb2"/*Translation*/,
@@ -649,6 +683,7 @@
     {
       "Id": "f84adbbe-8c5c-4426-9272-df70c402879d"/*CylinderSDF*/,
       "SymbolId": "67f21840-dc9a-4390-aa45-234ce81c8717",
+      "SymbolName": "Lib.field.generate.sdf.CylinderSDF",
       "InputValues": [
         {
           "Id": "04ce1364-f421-4bd1-8f45-60921c8605df"/*Radius*/,
@@ -680,6 +715,7 @@
     {
       "Id": "fa007a4d-3ff0-4bb5-9783-6a61039a06ec"/*ScaleVector3*/,
       "SymbolId": "646d6a5d-a1d7-471e-86ab-e1fb2542a2c2",
+      "SymbolName": "Lib.numbers.vec3.ScaleVector3",
       "InputValues": [
         {
           "Id": "4ab40aa5-b390-4042-a959-8eddf9cbc9b0"/*ScaleUniform*/,
@@ -692,12 +728,14 @@
     {
       "Id": "fd497fdc-2959-4fa1-950a-411c4152498d"/*RaymarchField*/,
       "SymbolId": "9323e32f-078c-4156-941b-203f4c265ff5",
+      "SymbolName": "Lib.field.render.RaymarchField",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "fe93dfba-1922-4c4a-9e14-46b15d7a22c7"/*OscillateVec3*/,
       "SymbolId": "8a6ab5ec-caa6-4baa-a9d1-2079af22685c",
+      "SymbolName": "Lib.numbers.anim.animators.OscillateVec3",
       "InputValues": [
         {
           "Id": "9505b4aa-0ee1-4d0a-b215-f17194c71be4"/*AmplitudeScale*/,

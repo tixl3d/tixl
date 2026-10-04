@@ -113,6 +113,7 @@ internal sealed partial class OutputWindow : Window
     protected override void DrawContent()
     {
         SyncStateWithProject();
+        ConsumeRequestedShowInGraph();
 
         // In skill training the toolbar is hidden, so force the window-fitting resolution
         // instead of whatever the level project saved (typically 1920x1080).
@@ -221,6 +222,36 @@ internal sealed partial class OutputWindow : Window
 
     public static readonly List<Window> OutputWindowInstances = [];
     public ViewSelectionPinning Pinning { get; } = new();
+
+    /// <summary>
+    /// Requests the automatic "Show in Graph" that follows opening a project. Deferred, because the
+    /// Output View only learns which project it belongs to when it next syncs its state.
+    /// </summary>
+    internal static void RequestShowInGraphOnProjectOpen()
+    {
+        _showInGraphRequested = true;
+    }
+
+    private void ConsumeRequestedShowInGraph()
+    {
+        if (!_showInGraphRequested)
+            return;
+
+        if (ProjectView.Focused == null)
+        {
+            _showInGraphRequested = false;
+            return;
+        }
+
+        // The request is global, so only the primary window acts on it.
+        if (!TryGetPrimaryOutputWindow(out var primary) || primary != this)
+            return;
+
+        _showInGraphRequested = false;
+        Pinning.ShowInGraph();
+    }
+
+    private static bool _showInGraphRequested;
     private readonly OutputSetupModeView _setupMode = new();
 
     private System.Numerics.Vector4 _backgroundColor = new(0.1f, 0.1f, 0.1f, 1.0f);

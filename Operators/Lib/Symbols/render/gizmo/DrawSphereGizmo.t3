@@ -24,12 +24,14 @@
     {
       "Id": "14be5539-3247-4857-92e8-d6317f78d1c7"/*Vector3*/,
       "SymbolId": "94a5de3b-ee6a-43d3-8d21-7b8fe94b042b",
+      "SymbolName": "Types.Values.Vector3",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "29e347ee-bf81-49b5-9e45-4853727fd6f4"/*LinePoints*/,
       "SymbolId": "4ae9e2f5-7cb3-40b0-a662-0662e8cb7c68",
+      "SymbolName": "Lib.point.generate.LinePoints",
       "InputValues": [
         {
           "Id": "208b724d-c5d7-4eaa-94a1-e1f045f14969"/*OrientationAngle*/,
@@ -70,30 +72,35 @@
     {
       "Id": "3468be00-ddba-4254-b1ef-b91dbf68fe3b"/*RepeatAtPoints*/,
       "SymbolId": "780edb20-f83f-494c-ab17-7015e2311250",
+      "SymbolName": "Lib.point.generate.RepeatAtPoints",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "34c30ed0-b20d-4613-a809-f9b51c01991b"/*Vector3*/,
       "SymbolId": "94a5de3b-ee6a-43d3-8d21-7b8fe94b042b",
+      "SymbolName": "Types.Values.Vector3",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "379b4030-26d4-4e46-bf03-5d4786e09a3e"/*Execute*/,
       "SymbolId": "936e4324-bea2-463a-b196-6064a2d8a6b2",
+      "SymbolName": "Lib.flow.Execute",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "40cd90cb-39c3-4b04-8c84-f537f0e2d0b4"/*Transform*/,
       "SymbolId": "284d2183-197d-47fd-b130-873cced78b1c",
+      "SymbolName": "Lib.render.transform.Transform",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "4fe380ae-8749-4a3c-9859-eb792004b8b3"/*Value*/,
       "SymbolId": "5d7d61ae-0a41-4ffa-a51d-93bab665e7fe",
+      "SymbolName": "Types.Values.Value",
       "InputValues": [
         {
           "Id": "7773837e-104a-4b3d-a41f-cadbd9249af2"/*Float*/,
@@ -106,6 +113,7 @@
     {
       "Id": "64d33c5f-7911-44a6-9358-6af239d5dff8"/*DrawLines*/,
       "SymbolId": "836f211f-b387-417c-8316-658e0dc6e117",
+      "SymbolName": "Lib.point.draw.DrawLines",
       "InputValues": [
         {
           "Id": "75419a73-8a3e-4538-9a1d-e3b0ce7f8561"/*Color*/,
@@ -128,12 +136,14 @@
     {
       "Id": "7a86c7c3-0c4d-49d1-aff9-4b8588c97fa2"/*CombineBuffers*/,
       "SymbolId": "4dd8a618-eb3b-40af-9851-89c50683d83e",
+      "SymbolName": "Lib.point.combine.CombineBuffers",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "aec4013e-e4eb-4d1c-ae9f-91a1f6dfb988"/*DrawPoints*/,
       "SymbolId": "ffd94e5a-bc98-4e70-84d8-cce831e6925f",
+      "SymbolName": "Lib.point.draw.DrawPoints",
       "InputValues": [
         {
           "Id": "414c8045-5086-4449-9d9a-03f28c3966b3"/*PointSize*/,
@@ -146,6 +156,7 @@
     {
       "Id": "ccbc6ed6-4e96-4ca0-af3a-b9475588dc33"/*RadialPoints*/,
       "SymbolId": "3352d3a1-ab04-4d0a-bb43-da69095b73fd",
+      "SymbolName": "Lib.point.generate.RadialPoints",
       "InputValues": [
         {
           "Id": "01a62754-7629-487d-a43a-f0cd2fbfafce"/*OrientationAxis*/,
@@ -177,6 +188,7 @@
     {
       "Id": "d6156f1a-7196-43ff-bc78-d4f3386ca269"/*RadialPoints*/,
       "SymbolId": "3352d3a1-ab04-4d0a-bb43-da69095b73fd",
+      "SymbolName": "Lib.point.generate.RadialPoints",
       "InputValues": [
         {
           "Id": "6df5829e-a534-4620-bcd5-9324f94b4f54"/*Axis*/,
@@ -222,12 +234,14 @@
     {
       "Id": "dfab703d-1920-4afa-b790-0ea773124b58"/*Transform*/,
       "SymbolId": "284d2183-197d-47fd-b130-873cced78b1c",
+      "SymbolName": "Lib.render.transform.Transform",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "e1b3b07a-4337-4a21-8cd3-c1cf80e5938e"/*Value*/,
       "SymbolId": "5d7d61ae-0a41-4ffa-a51d-93bab665e7fe",
+      "SymbolName": "Types.Values.Value",
       "InputValues": [
         {
           "Id": "7773837e-104a-4b3d-a41f-cadbd9249af2"/*Float*/,
@@ -240,6 +254,7 @@
     {
       "Id": "e8a92c99-a038-4007-96de-71bc23df9c52"/*RadialPoints*/,
       "SymbolId": "3352d3a1-ab04-4d0a-bb43-da69095b73fd",
+      "SymbolName": "Lib.point.generate.RadialPoints",
       "InputValues": [
         {
           "Id": "01a62754-7629-487d-a43a-f0cd2fbfafce"/*OrientationAxis*/,

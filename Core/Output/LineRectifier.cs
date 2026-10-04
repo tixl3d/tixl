@@ -144,6 +144,9 @@ public static class LineRectifier
     /// regularization is what lets this work where <see cref="TrySolve"/> can't: with only one line on an
     /// axis the constraints leave degrees of freedom open, and without it the quad would wander off toward
     /// whatever squarer shape also satisfies them.</para>
+    /// <para>Every candidate is held to the starting quad's scale and aspect (see <see cref="KeepGauge"/>),
+    /// and each line's say is weighted by its length (see <see cref="ScoreQuad"/>). Both keep this honest to
+    /// what lines can actually tell: a direction each, and nothing about the metric.</para>
     /// </summary>
     public static bool TryRefineQuad(ReadOnlySpan<Vector4> linesInOutput, Vector2 size, ReadOnlySpan<Vector2> quad,
                                      Span<Vector2> refined)
@@ -187,6 +190,7 @@ public static class LineRectifier
                 {
                     current.CopyTo(trial);
                     trial[corner] += direction * step;
+                    KeepGauge(trial, start);
 
                     var score = ScoreQuad(trial, start, rect, linesInOutput, diagonal);
                     if (score >= best - 1e-12f)
@@ -206,21 +210,37 @@ public static class LineRectifier
         return true;
     }
 
-    /// <summary>Summed squared angular error of the lines under this quad, plus the pull toward the start.</summary>
+    /// <summary>
+    /// Squared angular error of the lines under this quad, each weighted by its length, plus the pull toward
+    /// the start. A line states a direction by where its two ends sit, so the same hand-width of imprecision
+    /// at the ends is a large angle on a short line and a small one on a long line: the shorter line is the
+    /// weaker measurement, and its say is scaled by the square of its length to match. The weights are
+    /// normalized to average one, so lengths decide the lines' say relative to each other while the pull
+    /// toward the start keeps the footing it was tuned against.
+    /// </summary>
     private static float ScoreQuad(ReadOnlySpan<Vector2> candidate, ReadOnlySpan<Vector2> start, ReadOnlySpan<Vector2> rect,
                                    ReadOnlySpan<Vector4> linesInOutput, float diagonal)
     {
         if (!Homography.TryComputeQuadToQuad(candidate, rect, out var outputToSurface))
             return float.MaxValue;
 
-        var score = 0f;
+        // Lengths are read in surface space, where the lines were judged, against the surface's own diagonal.
+        var reference = MathF.Max(rect[2].Length(), 1e-4f);
+        var weighted = 0f;
+        var weights = 0f;
         foreach (var line in linesInOutput)
         {
             var a = outputToSurface.TransformPoint(new Vector2(line.X, line.Y));
             var b = outputToSurface.TransformPoint(new Vector2(line.Z, line.W));
             IsHorizontal(a, b, out var deviation);
-            score += deviation * deviation;
+
+            var relativeLength = (b - a).Length() / reference;
+            var weight = relativeLength * relativeLength;
+            weighted += weight * deviation * deviation;
+            weights += weight;
         }
+
+        var score = weights > 1e-9f ? weighted / weights * linesInOutput.Length : 0f;
 
         for (var i = 0; i < 4; i++)
         {
@@ -229,6 +249,54 @@ public static class LineRectifier
         }
 
         return score;
+    }
+
+    /// <summary>
+    /// Puts a candidate back on the starting quad's gauge: its centre, and its span along each of its own two
+    /// axes. Angles cannot see scale — the same quad stretched scores exactly the same — so the descent would
+    /// otherwise wander along that freedom, and every press of Straighten would stretch the picture a little
+    /// further and change its aspect. Keystone is what the lines determine; the metric stays with the measured
+    /// lengths (see the class summary).
+    /// </summary>
+    private static void KeepGauge(Span<Vector2> quad, ReadOnlySpan<Vector2> start)
+    {
+        // The quad's own frame, so a pin that is rotated on the canvas is corrected along its edges rather
+        // than along the canvas' axes.
+        var u = (quad[1] - quad[0] + quad[2] - quad[3]) * 0.5f;
+        var v = (quad[3] - quad[0] + quad[2] - quad[1]) * 0.5f;
+        var determinant = u.X * v.Y - u.Y * v.X;
+        if (MathF.Abs(determinant) < 1e-9f)
+            return;
+
+        var wanted = AxisSpans(start);
+        var have = AxisSpans(quad);
+        if (have.X < 1e-6f || have.Y < 1e-6f)
+            return;
+
+        var scale = new Vector2(wanted.X / have.X, wanted.Y / have.Y);
+        var centre = Centre(quad);
+        var target = Centre(start);
+        for (var i = 0; i < 4; i++)
+        {
+            // Split the corner into its u and v shares, scale each, and put it back together.
+            var offset = quad[i] - centre;
+            var along = (offset.X * v.Y - offset.Y * v.X) / determinant * scale.X;
+            var across = (u.X * offset.Y - u.Y * offset.X) / determinant * scale.Y;
+            quad[i] = target + u * along + v * across;
+        }
+    }
+
+    /// <summary>A quad's span along each of its axes: the mean of its two opposite edges, so a keystone reads
+    /// as one number per axis.</summary>
+    private static Vector2 AxisSpans(ReadOnlySpan<Vector2> quad)
+    {
+        return new Vector2(((quad[1] - quad[0]).Length() + (quad[2] - quad[3]).Length()) * 0.5f,
+                           ((quad[3] - quad[0]).Length() + (quad[2] - quad[1]).Length()) * 0.5f);
+    }
+
+    private static Vector2 Centre(ReadOnlySpan<Vector2> quad)
+    {
+        return (quad[0] + quad[1] + quad[2] + quad[3]) * 0.25f;
     }
 
     /// <summary>

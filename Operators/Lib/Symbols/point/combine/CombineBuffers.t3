@@ -11,12 +11,14 @@
     {
       "Id": "147e4f54-b089-4459-8d22-30ccd3c6fdc7"/*_ExecuteCombineBuffers*/,
       "SymbolId": "56f7cf15-678d-4527-a328-8666a80882d0",
+      "SymbolName": "Lib.point.combine._ExecuteCombineBuffers",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "20fe9fd0-de88-4bbe-a38e-dff60a157ec8"/*ComputeShader*/,
       "SymbolId": "a256d70f-adb3-481d-a926-caf35bd3e64c",
+      "SymbolName": "Types.Gfx.ComputeShader",
       "InputValues": [
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,

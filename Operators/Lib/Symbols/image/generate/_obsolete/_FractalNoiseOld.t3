@@ -78,18 +78,21 @@
     {
       "Id": "39e42b47-a8f8-4b29-96e8-775361da0c45"/*IntToFloat*/,
       "SymbolId": "17db8a36-079d-4c83-8a2a-7ea4c1aa49e6",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "3e087c62-4789-4777-8136-5d26200b08e6"/*IntToFloat*/,
       "SymbolId": "17db8a36-079d-4c83-8a2a-7ea4c1aa49e6",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "5704272b-42c8-403c-b5c7-5786c1d8c31a"/*_ImageFxShaderSetupStatic*/,
       "SymbolId": "bd0b9c5b-c611-42d0-8200-31af9661f189",
+      "SymbolName": "Lib.render._dx11.fxsetup._ImageFxShaderSetupStatic",
       "InputValues": [
         {
           "Id": "1e4e274b-60b2-4fe8-b275-ebef80d520a7"/*Source*/,
@@ -107,30 +110,35 @@
     {
       "Id": "7ad09e7c-f591-42e4-ac92-5c67100c81b3"/*Vector2Components*/,
       "SymbolId": "0946c48b-85d8-4072-8f21-11d17cc6f6cf",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "85049eae-97e0-49b2-938e-03e6f3717bfb"/*Vector2Components*/,
       "SymbolId": "0946c48b-85d8-4072-8f21-11d17cc6f6cf",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "8cd65317-0fa1-4032-857c-9ccca1367b06"/*Vector4Components*/,
       "SymbolId": "b15e4950-5c72-4655-84bc-c00647319030",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "d014bff3-778c-42c2-8d46-5fb9b2d2b196"/*Vector3Components*/,
       "SymbolId": "a8083b41-951e-41f2-bb8a-9b511da26102",
+      "SymbolName": "Lib.numbers.vec3.Vector3Components",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "e90d74e9-55f0-4370-994f-63e373cd2af9"/*Vector4Components*/,
       "SymbolId": "b15e4950-5c72-4655-84bc-c00647319030",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "InputValues": [],
       "Outputs": []
     }

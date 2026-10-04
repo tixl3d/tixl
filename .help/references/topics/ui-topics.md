@@ -182,9 +182,21 @@ classes: ProjectsPanel
 id: RenderSettings
 classes: RenderWindow
 
-## Output settings
-id: OutputSettings
-classes: OutputWindowState
+## Output resolution
+id: OutputResolution
+parent: OutputWindow
+synonyms: output settings, resolution override, magic resolution, 0x0 resolution
+classes: OutputWindowState, EditResolutionDialog
+
+## Output setup
+id: OutputSetup
+synonyms: output system, output board, setup view, screen manager, surfaces, slices, regions, patches, projector calibration, mapping, flow outliner, stage board
+classes: SetupOutputView, SetupEntities, OutputPresentation, CalibrationOverlay
+
+## Geometry operators
+id: GeometryOps
+synonyms: geometry nodes, geometry node system, mesh geometry ops, procedural geometry, scalar field
+classes: MeshGeometry, GeometryToMesh
 
 ## IO view
 id: IoView

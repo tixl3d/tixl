@@ -6,12 +6,14 @@
     {
       "Id": "0e361c90-3076-49f5-8e64-9efd713126d0"/*DrawQuiz*/,
       "SymbolId": "16e30ce0-20c9-4677-9837-0200454e05ae",
+      "SymbolName": "Lib.flow.skillQuest.DrawQuiz",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "3ca69801-5395-403e-92df-7fa7c12d33e6"/*Text*/,
       "SymbolId": "fd31d208-12fe-46bf-bfa3-101211f8f497",
+      "SymbolName": "Lib.render.basic.Text",
       "InputValues": [
         {
           "Id": "f1f1be0e-d5bc-4940-bbc1-88bfa958f0e1"/*InputText*/,
@@ -24,6 +26,7 @@
     {
       "Id": "8c2c212c-7f51-4cef-b67b-77af55a69e3c"/*Text*/,
       "SymbolId": "fd31d208-12fe-46bf-bfa3-101211f8f497",
+      "SymbolName": "Lib.render.basic.Text",
       "InputValues": [
         {
           "Id": "f1f1be0e-d5bc-4940-bbc1-88bfa958f0e1"/*InputText*/,

@@ -12,7 +12,7 @@ namespace T3.Core.Output;
 
 /// <summary>
 /// The machine-specific side of the output pipeline: the stream plugs this machine offers, device
-/// bindings and (later) window placement and sync. Lives next to the setups in the project's .meta/
+/// bindings and (later) window placement and sync. Lives next to the setups in the project's .meta/Setups/
 /// folder but is per-computer and meant to be gitignored — a touring show rewrites it on first bind
 /// at each venue while Setup and project never learn about display numbering.
 /// </summary>

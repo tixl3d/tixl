@@ -40,6 +40,7 @@
     {
       "Id": "0f4c21b3-34f8-4820-b43b-f103eaa32fdf"/*_VisualizeTBN*/,
       "SymbolId": "dd353ac7-1f11-4dd6-aff5-5c557c695512",
+      "SymbolName": "Lib.render.gizmo._._VisualizeTBN",
       "InputValues": [
         {
           "Id": "d1cfa06d-a4bd-4975-90d4-5aa1ca39dc39"/*Visibility*/,
@@ -57,24 +58,28 @@
     {
       "Id": "13711154-4738-4bd1-8663-fea51263cea9"/*Execute*/,
       "SymbolId": "936e4324-bea2-463a-b196-6064a2d8a6b2",
+      "SymbolName": "Lib.flow.Execute",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "3a12a5ef-30d8-4705-8a00-000210ccc1a1"/*Execute*/,
       "SymbolId": "936e4324-bea2-463a-b196-6064a2d8a6b2",
+      "SymbolName": "Lib.flow.Execute",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "58fc8769-054c-4cde-a35e-d89a617f4b9d"/*MeshVerticesToPoints*/,
       "SymbolId": "2467e1ed-f7fc-4c90-8230-b80ba6b42a2d",
+      "SymbolName": "Lib.point.generate.MeshVerticesToPoints",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "60c1aa65-3472-4f03-b685-e3482092313c"/*VisualizePoints*/,
       "SymbolId": "37bdbafc-d14c-4b81-91c3-8f63c3b63812",
+      "SymbolName": "Lib.point.draw.VisualizePoints",
       "InputValues": [
         {
           "Id": "40a04de8-54aa-4f66-acea-80ffc4dab7bd"/*PointSize*/,
@@ -112,6 +117,7 @@
     {
       "Id": "723fa282-bc09-4f1b-820a-6e42236a19fe"/*DrawMesh*/,
       "SymbolId": "a3c5471e-079b-4d4b-886a-ec02d6428ff6",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
       "InputValues": [
         {
           "Id": "8c9dee45-d165-48c8-b8dd-b7f47e77fd00"/*Color*/,
@@ -134,6 +140,7 @@
     {
       "Id": "7a1b0543-a70c-4a9f-84f8-119020c58e45"/*DrawMesh*/,
       "SymbolId": "a3c5471e-079b-4d4b-886a-ec02d6428ff6",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
       "InputValues": [
         {
           "Id": "2c4b5f3a-e9ec-432e-b1ae-6d999ae44f1b"/*FillMode*/,
@@ -161,18 +168,21 @@
     {
       "Id": "c66a5704-5d38-4975-9fa4-92652261f93c"/*Execute*/,
       "SymbolId": "936e4324-bea2-463a-b196-6064a2d8a6b2",
+      "SymbolName": "Lib.flow.Execute",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "f307f212-7953-4b88-976b-36a34c84d419"/*Execute*/,
       "SymbolId": "936e4324-bea2-463a-b196-6064a2d8a6b2",
+      "SymbolName": "Lib.flow.Execute",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "fc9c897b-8c17-42ef-ab95-fdd1a80e079e"/*Execute*/,
       "SymbolId": "936e4324-bea2-463a-b196-6064a2d8a6b2",
+      "SymbolName": "Lib.flow.Execute",
       "InputValues": [],
       "Outputs": []
     }

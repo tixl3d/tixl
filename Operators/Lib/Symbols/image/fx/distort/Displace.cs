@@ -44,6 +44,9 @@ internal sealed class Displace : Instance<Displace>
 
         [Input(Guid = "0c0dd89a-e9ff-4746-b12c-dd4799a0b500")]
         public readonly InputSlot<T3.Graphics.Compat.Filter> TextureFiltering = new InputSlot<T3.Graphics.Compat.Filter>();
+
+        [Input(Guid = "d6d39a15-11ab-4adb-949b-c33b3f1347b8")]
+        public readonly InputSlot<T3.Core.DataTypes.Vector.Int2> Resolution = new InputSlot<T3.Core.DataTypes.Vector.Int2>();
         
     private enum DisplaceModes {
         IntensityGradient,

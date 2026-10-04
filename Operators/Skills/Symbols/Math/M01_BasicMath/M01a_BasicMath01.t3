@@ -6,6 +6,7 @@
     {
       "Id": "64ea0207-e4f0-4f0f-934b-5da16bbdd0d7"/*Value*/,
       "SymbolId": "5d7d61ae-0a41-4ffa-a51d-93bab665e7fe",
+      "SymbolName": "Types.Values.Value",
       "InputValues": [
         {
           "Id": "7773837e-104a-4b3d-a41f-cadbd9249af2"/*Float*/,
@@ -18,12 +19,14 @@
     {
       "Id": "d31fd376-18a9-4e89-bbdf-8b8e47dd7feb"/*Value*/,
       "SymbolId": "5d7d61ae-0a41-4ffa-a51d-93bab665e7fe",
+      "SymbolName": "Types.Values.Value",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "fd80fdde-824c-4946-815b-6acc418248a1"/*ValueQuiz*/,
       "SymbolId": "702f1f75-df90-44ca-b567-78ba9d1613b5",
+      "SymbolName": "Lib.flow.skillQuest.ValueQuiz",
       "InputValues": [],
       "Outputs": []
     }

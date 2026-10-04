@@ -29,12 +29,14 @@
     {
       "Id": "176abda2-2366-44ed-9c16-8b342187ccd0"/*_ValueQuizGraph*/,
       "SymbolId": "64b2f2d5-0261-4f22-b30f-1f3a1421fe2e",
+      "SymbolName": "Lib.flow.skillQuest._ValueQuizGraph",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "34eb4f91-fa37-4638-8657-b1484ddf56d7"/*CompareFloatLists*/,
       "SymbolId": "136aef9b-373d-487d-9863-a8691d1b909f",
+      "SymbolName": "Lib.numbers.floats.process.CompareFloatLists",
       "InputValues": [
         {
           "Id": "0e331c5e-d8a4-4ee8-b552-b6374702649f"/*Threshold*/,
@@ -47,12 +49,14 @@
     {
       "Id": "663fff5b-6a9f-41e0-9884-bc6595328279"/*_QuizUp*/,
       "SymbolId": "b9460cd7-c363-4a6e-8c3e-5c2f84a4aae3",
+      "SymbolName": "Lib.flow.skillQuest._QuizUp",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "a58041c7-1de9-4bf5-99a0-7e738a29af34"/*_ValueQuizGraph*/,
       "SymbolId": "64b2f2d5-0261-4f22-b30f-1f3a1421fe2e",
+      "SymbolName": "Lib.flow.skillQuest._ValueQuizGraph",
       "InputValues": [],
       "Outputs": []
     }

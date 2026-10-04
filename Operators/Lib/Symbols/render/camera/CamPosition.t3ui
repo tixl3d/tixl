@@ -3,7 +3,15 @@
   "Id": "2ed26fb7-fe66-4ed6-8b8d-230d87ae5c77"/*CamPosition*/,
   "Description": "Returns the current camera properties. This can be very useful for positioning or emitting things in front of the camera.\n\nPlease consider looking at the example.",
   "SymbolTags": "1",
-  "InputUis": [],
+  "InputUis": [
+    {
+      "InputId": "51a79f01-9b63-4217-b396-10e3c6f22c80"/*CamReference*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    }
+  ],
   "SymbolChildUis": [],
   "OutputUis": [
     {

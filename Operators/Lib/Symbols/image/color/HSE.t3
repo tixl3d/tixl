@@ -27,6 +27,7 @@
     {
       "Id": "9d77d29a-2306-4539-82e1-f77b95d01235"/*_multiImageFxSetupStatic*/,
       "SymbolId": "cc34a183-3978-4b6b-8ef1-dd8102410816",
+      "SymbolName": "Lib.image.fx._._multiImageFxSetupStatic",
       "InputValues": [
         {
           "Id": "f6269be3-3331-43a6-91ec-138b47199f3e"/*ShaderPath*/,

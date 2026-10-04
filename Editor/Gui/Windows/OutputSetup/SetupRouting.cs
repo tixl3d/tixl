@@ -126,7 +126,7 @@ internal static class SetupRouting
             // A region normally rides its parent's pin; a mapping of its own overrides that for this output
             // (see Surface.OutputMappings). It stays a child everywhere else — same plane, same rectangle.
             if (surface != null && output != null && !surface.HasMapping(targetId))
-                surface.OutputMappings.Add(CreateDefaultMapping(output));
+                SetupActions.AddMapping(surface, output);
 
             return;
         }
@@ -148,6 +148,8 @@ internal static class SetupRouting
             var mapping = surface.FindMapping(patchOutput.Id);
             if (mapping != null)
             {
+                // The patch's area is a placement, so a surface that filled this output stops filling it.
+                mapping.PromoteToCornerPin();
                 mapping.Quad = quad;
             }
             else
@@ -235,7 +237,6 @@ internal static class SetupRouting
                                                                      {
                                                                          Name = Plugs.PlugName(machineConfig, plugId),
                                                                          Kind = OutputDefinition.Kinds.Display,
-                                                                         CanvasResolution = Plugs.PlugResolution(plugId),
                                                                      };
                                                        setup.Outputs.Add(created);
                                                    });
@@ -260,13 +261,15 @@ internal static class SetupRouting
                 return;
         }
 
-        if (output.Patches.Count == 1)
+        // The full-canvas layer the output already has is the one the drop asks for, however many tiles sit
+        // over it. Without one it is inserted underneath them, not appended, or it would cover them.
+        if (SetupRelations.TryGetImplicitPatch(output, out var implicitPatch))
         {
-            output.Patches[0].SliceId = sliceId;
+            implicitPatch!.SliceId = sliceId;
             return;
         }
 
-        SetupActions.AddPatchInternal(output, sliceId);
+        output.Patches.Insert(0, SetupActions.CreateFullCanvasPatch(sliceId));
     }
 
     /// <summary>
@@ -283,16 +286,5 @@ internal static class SetupRouting
         var slice = new Slice { SourceId = source.Id };
         setup.Slices.Add(slice);
         return slice;
-    }
-
-    /// <summary>The middle 60% of the canvas, as fractions of it like every mapping quad.</summary>
-    private static Surface.OutputMapping CreateDefaultMapping(OutputDefinition output)
-    {
-        const float x0 = 0.2f, x1 = 0.8f, y0 = 0.2f, y1 = 0.8f;
-        return new Surface.OutputMapping
-                   {
-                       OutputId = output.Id,
-                       Quad = [new Vector2(x0, y0), new Vector2(x1, y0), new Vector2(x1, y1), new Vector2(x0, y1)],
-                   };
     }
 }

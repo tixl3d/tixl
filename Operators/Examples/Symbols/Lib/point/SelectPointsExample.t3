@@ -6,6 +6,7 @@
     {
       "Id": "129c3c72-080f-48c0-af3f-2bb31928bbf6"/*_GridPoints_Old*/,
       "SymbolId": "3ee8f66d-68df-43c1-b0eb-407259bf7e86",
+      "SymbolName": "Lib.point.generate._GridPoints_Old",
       "InputValues": [
         {
           "Id": "0f053c34-c9ef-46b7-9c73-fff9984a3d5e"/*Center*/,
@@ -47,6 +48,7 @@
     {
       "Id": "3a6c8ebc-5aa6-4ba7-aec6-ad342bd03d3b"/*OscillateVec3*/,
       "SymbolId": "8a6ab5ec-caa6-4baa-a9d1-2079af22685c",
+      "SymbolName": "Lib.numbers.anim.animators.OscillateVec3",
       "InputValues": [
         {
           "Id": "4c94a39e-88d9-4b7f-bbbf-42e80f9627ef"/*Amplitude*/,
@@ -73,6 +75,7 @@
     {
       "Id": "3f7f85ee-0208-444f-a064-eca32283bac1"/*TransformPoints*/,
       "SymbolId": "7f6c64fe-ca2e-445e-a9b4-c70291ce354e",
+      "SymbolName": "Lib.point.transform.TransformPoints",
       "InputValues": [
         {
           "Id": "454d0150-dac4-41b2-83f8-d1ecc3ef76d4"/*Rotation*/,
@@ -99,12 +102,14 @@
     {
       "Id": "41ead94a-a6fb-4029-bc22-89b512d196cd"/*DrawPoints*/,
       "SymbolId": "ffd94e5a-bc98-4e70-84d8-cce831e6925f",
+      "SymbolName": "Lib.point.draw.DrawPoints",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "5188e433-1b28-4022-b8bd-c5d07129e859"/*OscillateVec3*/,
       "SymbolId": "8a6ab5ec-caa6-4baa-a9d1-2079af22685c",
+      "SymbolName": "Lib.numbers.anim.animators.OscillateVec3",
       "InputValues": [
         {
           "Id": "9505b4aa-0ee1-4d0a-b215-f17194c71be4"/*AmplitudeScale*/,
@@ -122,6 +127,7 @@
     {
       "Id": "61e4062c-7410-4628-a634-4b1560dddea4"/*SelectPoints*/,
       "SymbolId": "371d72b8-69d4-4ced-beda-271386ad2fd6",
+      "SymbolName": "Lib.point.modify.SelectPoints",
       "InputValues": [
         {
           "Id": "2c5e5bb5-6023-4ff4-906d-d0a905110e95"/*VolumeShape*/,
@@ -163,6 +169,7 @@
       "Id": "eb454251-6595-48ce-918a-64dc67fff674"/*SetFog*/,
       "IsBypassed": true,
       "SymbolId": "74cbfce0-f8b8-46a1-b5d6-38477d4eec99",
+      "SymbolName": "Lib.render.shading.SetFog",
       "InputValues": [
         {
           "Id": "53479387-1c04-4fbc-b093-043075495e10"/*Bias*/,
@@ -180,6 +187,7 @@
     {
       "Id": "fbfe673f-d3bf-4486-8076-ec72a2e50518"/*RenderTarget*/,
       "SymbolId": "f9fe78c5-43a6-48ae-8e8c-6cdbbc330dd1",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "InputValues": [],
       "Outputs": []
     }

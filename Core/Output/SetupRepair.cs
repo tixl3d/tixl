@@ -55,6 +55,13 @@ public static class SetupRepair
 
             foreach (var mapping in surface.OutputMappings)
             {
+                // A fill's quad is the canvas by definition; anything else in the file is stale.
+                if (mapping.IsFilling)
+                {
+                    mapping.Quad = OutputDefinition.FullCanvasQuad();
+                    continue;
+                }
+
                 if (QuadIsUsable(mapping.Quad))
                     continue;
 

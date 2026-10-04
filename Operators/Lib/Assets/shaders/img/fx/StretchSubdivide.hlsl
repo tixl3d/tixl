@@ -86,6 +86,8 @@ float4 ComputeSubdivision(float2 uv)
     float aspectRatio = TargetWidth / TargetHeight;
 
     float2 size = 1;
+    float2 imageMin = 0;
+    float2 imageSize = 1;
     float2 uvInCell = uv;
     // float hash2 = 0.5;
     float phaseHashForCell = (PhaseHash(mainSeed) - 0.5) * SplitVariation + SplitPosition;
@@ -102,6 +104,7 @@ float4 ComputeSubdivision(float2 uv)
             {
                 uvInCell.x /= phaseHashForCell;
                 size.x *= phaseHashForCell;
+                imageSize.x *= 0.5;
                 mainSeed += (int)(phaseHashForCell + 2123u);
                 seedInCell *= 2;
             }
@@ -109,6 +112,8 @@ float4 ComputeSubdivision(float2 uv)
             {
                 uvInCell.x = (uvInCell.x - phaseHashForCell) / (1 - phaseHashForCell);
                 size.x *= (1 - phaseHashForCell);
+                imageSize.x *= 0.5;
+                imageMin.x += imageSize.x;
                 mainSeed = (int)(mainSeed + 213u) % 1251u;
                 seedInCell *= 3;
             }
@@ -121,6 +126,7 @@ float4 ComputeSubdivision(float2 uv)
             {
                 uvInCell.y /= phaseHashForCell;
                 size.y *= phaseHashForCell;
+                imageSize.y *= 0.5;
                 mainSeed = (int)(mainSeed + _PRIME2) % _PRIME1;
                 seedInCell *= 5;
             }
@@ -128,6 +134,8 @@ float4 ComputeSubdivision(float2 uv)
             {
                 uvInCell.y = (uvInCell.y - phaseHashForCell) / (1 - phaseHashForCell);
                 size.y *= (1 - phaseHashForCell);
+                imageSize.y *= 0.5;
+                imageMin.y += imageSize.y;
                 mainSeed = (int)(mainSeed + _PRIME1) % _PRIME2;
                 seedInCell *= 7;
             }
@@ -139,7 +147,7 @@ float4 ComputeSubdivision(float2 uv)
 
         phaseHashForCell = (PhaseHash(mainSeed) - 0.5) * SplitVariation + SplitPosition;
 
-        float4 extra = Image.Sample(texSampler, uv - uvInCell * size + size / 2);
+        float4 extra = Image.Sample(texSampler, imageMin + imageSize / 2);
         float extraGray = (extra.r + extra.g + extra.b) / 3 * extra.a * TextureFx;
 
         if (hash <= SubdivisionThreshold - extraGray)
@@ -156,10 +164,26 @@ float4 ComputeSubdivision(float2 uv)
     float d5 = min(d4.x, d4.y);
     float sGap = smoothstep(Padding - Feather, Padding + Feather, d5);
 
-    float2 imageUv = uv - uvInCell * size + size / 2;
+    // Each split halves the texture window while the cut lands off-center, so the content squeezes into the smaller cell and stretches across the larger one.
+    float2 imageUv;
+    float4 imageColor;
 
-    float4 imageColor = lerp(Image.Sample(texSampler, imageUv), 1, ColorMode == 1) * gradientColor;
+    if(ColorMode < 2) {
+        imageSize = 0;
+    }
+    if(ColorMode == 3){
+        imageSize = 1;
+        
+        imageUv = uvInCell * imageSize;
+        imageColor = lerp(Image.SampleLevel(texSampler, imageUv,0), 1, ColorMode == 1) * gradientColor;
+        return lerp(GapColor, imageColor, sGap);
+    }
+    
+    imageUv = imageMin + uvInCell * imageSize;
+    if(ColorMode==0)imageUv=uv - uvInCell * size + size / 2;
 
+    imageColor = lerp(Image.Sample(texSampler, imageUv), 1, ColorMode == 1) * gradientColor;
+    
     return lerp(GapColor, imageColor, sGap);
 }
 

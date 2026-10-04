@@ -6,6 +6,7 @@
     {
       "Id": "0d7395b1-1bc0-41f3-b3ab-9b51642b5062"/*LinearGradient*/,
       "SymbolId": "2c3d2c26-ac45-42e9-8f13-6ea338333568",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "InputValues": [
         {
           "Id": "10d59d0f-a5a3-42e6-b874-345ab028978e"/*Width*/,
@@ -33,6 +34,7 @@
     {
       "Id": "35110282-1b14-4e4f-8621-bc74dc437e3d"/*LinearGradient*/,
       "SymbolId": "2c3d2c26-ac45-42e9-8f13-6ea338333568",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "InputValues": [
         {
           "Id": "10d59d0f-a5a3-42e6-b874-345ab028978e"/*Width*/,
@@ -60,6 +62,7 @@
     {
       "Id": "61300505-90de-41e4-ba03-1f4887202ffe"/*Time*/,
       "SymbolId": "b0d75f21-df33-460b-beab-d8c5e1f23e5e",
+      "SymbolName": "Lib.numbers.anim.time.Time",
       "InputValues": [
         {
           "Id": "e0f765f3-ac71-45c9-87a4-e9be3fa9a9a0"/*SpeedFactor*/,
@@ -72,6 +75,7 @@
     {
       "Id": "72df8843-517e-48f0-96b8-f1c7109e9269"/*Time*/,
       "SymbolId": "b0d75f21-df33-460b-beab-d8c5e1f23e5e",
+      "SymbolName": "Lib.numbers.anim.time.Time",
       "InputValues": [
         {
           "Id": "e0f765f3-ac71-45c9-87a4-e9be3fa9a9a0"/*SpeedFactor*/,
@@ -84,6 +88,7 @@
     {
       "Id": "7609cc9a-7521-4366-8493-e3b1cb6c5fa3"/*LinearGradient*/,
       "SymbolId": "2c3d2c26-ac45-42e9-8f13-6ea338333568",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "InputValues": [
         {
           "Id": "8169be8f-cb35-4900-b462-f2139b412d59"/*Rotate*/,
@@ -101,6 +106,7 @@
     {
       "Id": "9a9c27e6-5aa8-4138-9dee-f0f466a3b21d"/*LinearGradient*/,
       "SymbolId": "2c3d2c26-ac45-42e9-8f13-6ea338333568",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "InputValues": [
         {
           "Id": "10d59d0f-a5a3-42e6-b874-345ab028978e"/*Width*/,
@@ -133,12 +139,14 @@
     {
       "Id": "be3ce1e8-b3e4-44d3-b9ab-86c811e63daf"/*ImageQuiz*/,
       "SymbolId": "b1cb8864-0d51-4b7f-96eb-4c6267d4b216",
+      "SymbolName": "Lib.flow.skillQuest.ImageQuiz",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "f45a5925-d315-4f1b-9fda-b216af6adf5c"/*LinearGradient*/,
       "SymbolId": "2c3d2c26-ac45-42e9-8f13-6ea338333568",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "InputValues": [
         {
           "Id": "10d59d0f-a5a3-42e6-b874-345ab028978e"/*Width*/,

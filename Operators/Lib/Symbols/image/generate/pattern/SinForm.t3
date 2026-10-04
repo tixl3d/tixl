@@ -77,6 +77,7 @@
     {
       "Id": "16b1a70c-40c8-485f-b485-0a67d6496b96"/*_ImageFxShaderSetupStatic*/,
       "SymbolId": "bd0b9c5b-c611-42d0-8200-31af9661f189",
+      "SymbolName": "Lib.render._dx11.fxsetup._ImageFxShaderSetupStatic",
       "InputValues": [
         {
           "Id": "1e4e274b-60b2-4fe8-b275-ebef80d520a7"/*Source*/,
@@ -99,6 +100,7 @@
     {
       "Id": "89a92adc-48a3-4698-afbc-cacd7346904b"/*_ImageFxShaderSetup2*/,
       "SymbolId": "2b20afce-2b54-4bcc-ba0e-e456a0d92833",
+      "SymbolName": "Lib.render._dx11.fxsetup._ImageFxShaderSetup2",
       "InputValues": [
         {
           "Id": "16dce9bc-02d9-48f8-b07e-94a9af48d27b"/*Source*/,
@@ -121,30 +123,35 @@
     {
       "Id": "9494915c-75ff-44ba-9923-d05995988fa6"/*Vector4Components*/,
       "SymbolId": "b15e4950-5c72-4655-84bc-c00647319030",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "9d91b028-3e3e-40a9-99cf-16e6bcc57b1f"/*Vector2Components*/,
       "SymbolId": "0946c48b-85d8-4072-8f21-11d17cc6f6cf",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "a09a8895-394a-49e9-a5d5-a0bde791fecb"/*Vector4Components*/,
       "SymbolId": "b15e4950-5c72-4655-84bc-c00647319030",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "b4732038-ebc4-4e61-956b-69d51c5410bd"/*Vector2Components*/,
       "SymbolId": "0946c48b-85d8-4072-8f21-11d17cc6f6cf",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "dc4e387f-20b8-4abd-b5ed-5adb41a8bbcb"/*Vector2Components*/,
       "SymbolId": "0946c48b-85d8-4072-8f21-11d17cc6f6cf",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "InputValues": [],
       "Outputs": []
     }

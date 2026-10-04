@@ -1,6 +1,8 @@
 using System;
 using System.Runtime.CompilerServices;
 
+using System.Collections.Generic;
+
 namespace T3.Core.Operator.Slots;
 
 /// <summary>
@@ -19,6 +21,9 @@ public sealed class DirtyFlag
     public bool IsDirty => TriggerIsEnabled || ValueVersion != SourceVersion;
 
     public static int GlobalInvalidationTick = 0;
+
+    /** Slots the current invalidation walk actually descended into — how far a "mark everything dirty" reaches. */
+    public static int InvalidationVisits;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int Invalidate()

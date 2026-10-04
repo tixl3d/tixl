@@ -6,12 +6,14 @@
     {
       "Id": "11db15df-98fd-4b58-b6d4-7b0d3de9d223"/*ImageQuiz*/,
       "SymbolId": "b1cb8864-0d51-4b7f-96eb-4c6267d4b216",
+      "SymbolName": "Lib.flow.skillQuest.ImageQuiz",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "8c09cc9f-ed7b-4cd2-a3de-176d84b0c5b5"/*LinearGradient*/,
       "SymbolId": "2c3d2c26-ac45-42e9-8f13-6ea338333568",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "InputValues": [
         {
           "Id": "8169be8f-cb35-4900-b462-f2139b412d59"/*Rotate*/,
@@ -29,6 +31,7 @@
     {
       "Id": "90d3cc1c-7a99-4c15-8edb-1eaf50331a20"/*LinearGradient*/,
       "SymbolId": "2c3d2c26-ac45-42e9-8f13-6ea338333568",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "InputValues": [
         {
           "Id": "8169be8f-cb35-4900-b462-f2139b412d59"/*Rotate*/,
@@ -112,6 +115,7 @@
     {
       "Id": "c64506bf-8350-4f42-b06b-20d7eb4568e4"/*LinearGradient*/,
       "SymbolId": "2c3d2c26-ac45-42e9-8f13-6ea338333568",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "InputValues": [
         {
           "Id": "10d59d0f-a5a3-42e6-b874-345ab028978e"/*Width*/,

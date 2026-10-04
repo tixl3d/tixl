@@ -161,3 +161,19 @@ Drag the output item onto "Local / Display 1". Then right-click that display ite
   status is gone and a gray curve joins the two.
 - After unbinding both revert. Clicking a bindings item selects nothing; right-clicking it
   opens the plug's own menu (see the "Local Bindings, Streams and Help" set for the rest).
+
+## Step: CONTENT follows the active composition
+
+**Action:**
+In `_agentTests` (or any project), open an op, tick **Composition** in its project settings and put a
+[SendToOutput] inside a child op of it. Leave a second [SendToOutput] outside, at the project root.
+1. Navigate into the composition's child op.
+2. Click the send's CONTENT item.
+3. Navigate back up to the project root.
+
+**Expected:**
+- After 1: CONTENT lists only the send inside the composition, also while viewing its child op. The
+  root's send is not listed, and its Board card is gone.
+- After 2: the graph opens the op that holds the send, selects it and frames it.
+- After 3: both sends are listed, since the project root spans everything below it. The root's send
+  kept its slices and routing.

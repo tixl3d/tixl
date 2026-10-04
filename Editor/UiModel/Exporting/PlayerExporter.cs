@@ -528,7 +528,7 @@ internal static partial class PlayerExporter
     /// </summary>
     private static void IncludeStreamSenderPackages(Symbol symbol, ExportData exportData)
     {
-        var machineConfigPath = Path.Combine(symbol.SymbolPackage.Folder, Setup.FolderName, MachineConfig.FileName);
+        var machineConfigPath = Path.Combine(SetupFiles.FolderIn(symbol.SymbolPackage.Folder), MachineConfig.FileName);
         if (!File.Exists(machineConfigPath) || !MachineConfig.TryLoadFromFile(machineConfigPath, out var machineConfig))
             return;
 
@@ -732,7 +732,7 @@ internal static partial class PlayerExporter
     private static void TryExportOutputSetups(Symbol symbol, string exportDir, CompositionSettings.PlayerModes playerMode)
     {
         var projectFolder = symbol.SymbolPackage.Folder;
-        var sourceFolder = Path.Combine(projectFolder, Setup.FolderName);
+        var sourceFolder = SetupFiles.FolderIn(projectFolder);
         if (!Directory.Exists(sourceFolder))
             return;
 
@@ -741,7 +741,7 @@ internal static partial class PlayerExporter
         if (!SetupFiles.TryFindActiveFile(sourceFolder, out var activeSetupPath))
             return;
 
-        var targetFolder = Path.Combine(exportDir, Setup.FolderName);
+        var targetFolder = SetupFiles.FolderIn(exportDir);
         try
         {
             Directory.CreateDirectory(targetFolder);

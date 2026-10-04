@@ -12,6 +12,7 @@ using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.Templates;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.Layouts;
+using T3.Editor.Gui.Windows.Output;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Helpers;
@@ -66,6 +67,13 @@ public static partial class T3Ui
         }
         else if (UserActions.ToggleFocusMode.Triggered())
             UiConfig.ToggleFocusMode();
+        else if (UserActions.ShowInGraph.Triggered())
+        {
+            if (OutputWindow.TryGetPrimaryOutputWindow(out var outputWindow))
+            {
+                outputWindow.Pinning.ShowInGraph();
+            }
+        }
     }
 
     /// <summary>

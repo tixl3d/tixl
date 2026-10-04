@@ -70,6 +70,7 @@
     {
       "Id": "031534da-cbf8-4e07-8327-98a028643307"/*RepeatMeshAtPoints*/,
       "SymbolId": "ab496711-8b99-4463-aac9-b41fdf46608d",
+      "SymbolName": "Lib.mesh.generate.RepeatMeshAtPoints",
       "InputValues": [
         {
           "Id": "631a4691-0774-40c7-a8fa-4b9ee76854d6"/*ApplyPointScale*/,
@@ -82,6 +83,7 @@
     {
       "Id": "2bfd2802-aa35-4c0a-afda-6c89f472ae92"/*RadialPoints*/,
       "SymbolId": "3352d3a1-ab04-4d0a-bb43-da69095b73fd",
+      "SymbolName": "Lib.point.generate.RadialPoints",
       "InputValues": [
         {
           "Id": "6df5829e-a534-4620-bcd5-9324f94b4f54"/*Axis*/,
@@ -103,6 +105,7 @@
     {
       "Id": "7a7d1fa3-6ee3-447a-a2be-2404aa7d8890"/*DrawMesh*/,
       "SymbolId": "a3c5471e-079b-4d4b-886a-ec02d6428ff6",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
       "InputValues": [],
       "Outputs": []
     }

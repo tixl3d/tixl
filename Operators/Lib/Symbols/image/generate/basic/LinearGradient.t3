@@ -102,18 +102,21 @@
     {
       "Id": "3c0c9eae-d119-4fbc-96d0-154cce0b8989"/*Multiply*/,
       "SymbolId": "17b60044-9125-4961-8a79-ca94697b3726",
+      "SymbolName": "Lib.numbers.float.basic.Multiply",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "3cf139ae-0d71-4a68-bb75-2276154b988a"/*PickFloat*/,
       "SymbolId": "63e6e642-827b-4518-ac64-9ab0a8d4391e",
+      "SymbolName": "Lib.numbers.float.logic.PickFloat",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "58c8c801-c758-41dc-bc6d-52a901b0583a"/*_multiImageFxSetupStatic*/,
       "SymbolId": "cc34a183-3978-4b6b-8ef1-dd8102410816",
+      "SymbolName": "Lib.image.fx._._multiImageFxSetupStatic",
       "InputValues": [
         {
           "Id": "6022a4b0-c6fc-49a3-811a-179dcceb8b44"/*WrapMode*/,
@@ -131,18 +134,21 @@
     {
       "Id": "622d64d8-d845-47a9-a87f-31be42832aa6"/*IntToFloat*/,
       "SymbolId": "17db8a36-079d-4c83-8a2a-7ea4c1aa49e6",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "67faeb1c-65dc-4b2c-9a33-2c99f979dfc3"/*BoolToFloat*/,
       "SymbolId": "9db2fcbf-54b9-4222-878b-80d1a0dc6edf",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "693baad7-d351-44de-af5c-cd0212003e35"/*BoolToFloat*/,
       "SymbolId": "9db2fcbf-54b9-4222-878b-80d1a0dc6edf",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
       "InputValues": [
         {
           "Id": "253b9ae4-fac5-4641-bf0c-d8614606a840"/*BoolValue*/,
@@ -155,6 +161,7 @@
     {
       "Id": "6e9cfe0c-c7ea-45d6-8b35-140208425b6c"/*GradientsToTexture*/,
       "SymbolId": "2c53eee7-eb38-449b-ad2a-d7a674952e5b",
+      "SymbolName": "Lib.numbers.color.GradientsToTexture",
       "InputValues": [
         {
           "Id": "1f1838e4-8502-4ac4-a8df-dcb4cae57da4"/*Resolution*/,
@@ -198,18 +205,21 @@
     {
       "Id": "6f71bad8-200a-4638-a8d5-e9966f6820a3"/*IntToFloat*/,
       "SymbolId": "17db8a36-079d-4c83-8a2a-7ea4c1aa49e6",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "9b1378ec-a83d-432b-8f40-ecb21618087a"/*Vector2Components*/,
       "SymbolId": "0946c48b-85d8-4072-8f21-11d17cc6f6cf",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "de66c2b3-8e69-4534-bdbe-5f756169a7ad"/*Vector2Components*/,
       "SymbolId": "0946c48b-85d8-4072-8f21-11d17cc6f6cf",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "InputValues": [],
       "Outputs": []
     }

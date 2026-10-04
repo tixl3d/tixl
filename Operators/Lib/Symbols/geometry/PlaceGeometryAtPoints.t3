@@ -7,8 +7,8 @@
       "DefaultValue": null
     },
     {
-      "Id": "f1a6d3c8-4e27-4b95-a0d7-c3b9e5f8a162"/*Points*/,
-      "DefaultValue": null
+      "Id": "5a1f7c3e-9d62-4b08-a3e5-f0b8d4c6e271"/*UseColor*/,
+      "DefaultValue": true
     },
     {
       "Id": "7e3b9f52-a8c1-4d06-9b4e-d6f2a1c7e380"/*UseOrientation*/,
@@ -19,8 +19,8 @@
       "DefaultValue": true
     },
     {
-      "Id": "5a1f7c3e-9d62-4b08-a3e5-f0b8d4c6e271"/*UseColor*/,
-      "DefaultValue": true
+      "Id": "f1a6d3c8-4e27-4b95-a0d7-c3b9e5f8a162"/*Points*/,
+      "DefaultValue": null
     }
   ],
   "Children": [],

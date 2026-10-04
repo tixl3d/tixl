@@ -6,6 +6,7 @@
     {
       "Id": "0f4f8063-9943-4cd2-a0c2-c0e80e2bce0a"/*Text*/,
       "SymbolId": "fd31d208-12fe-46bf-bfa3-101211f8f497",
+      "SymbolName": "Lib.render.basic.Text",
       "InputValues": [
         {
           "Id": "f1f1be0e-d5bc-4940-bbc1-88bfa958f0e1"/*InputText*/,
@@ -18,12 +19,14 @@
     {
       "Id": "13feb874-88b8-41e7-b500-1aa2d99dafc7"/*RadialPoints*/,
       "SymbolId": "3352d3a1-ab04-4d0a-bb43-da69095b73fd",
+      "SymbolName": "Lib.point.generate.RadialPoints",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "16c15e9c-4299-49b3-b0c4-de4079ae205c"/*OffsetCenter*/,
       "SymbolId": "94a5de3b-ee6a-43d3-8d21-7b8fe94b042b",
+      "SymbolName": "Types.Values.Vector3",
       "Name": "OffsetCenter",
       "InputValues": [
         {
@@ -47,6 +50,7 @@
     {
       "Id": "18d8e321-d9b3-4b0e-ac3a-6cee116e99ce"/*Center*/,
       "SymbolId": "94a5de3b-ee6a-43d3-8d21-7b8fe94b042b",
+      "SymbolName": "Types.Values.Vector3",
       "Name": "Center",
       "InputValues": [
         {
@@ -70,12 +74,14 @@
     {
       "Id": "1fddd5d8-f870-4a83-bf24-084c46224699"/*RadialRepeatMesh*/,
       "SymbolId": "fcd806aa-1b17-4e2a-a5a5-57940f2411fd",
+      "SymbolName": "Lib.mesh.generate.RadialRepeatMesh",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "20ab1cf6-965e-4167-8ee9-fc9ccd65d37e"/*Radius*/,
       "SymbolId": "5d7d61ae-0a41-4ffa-a51d-93bab665e7fe",
+      "SymbolName": "Types.Values.Value",
       "Name": "Radius",
       "InputValues": [
         {
@@ -89,12 +95,14 @@
     {
       "Id": "30f84e79-b722-4403-aab9-605115d86c52"/*DrawMesh*/,
       "SymbolId": "a3c5471e-079b-4d4b-886a-ec02d6428ff6",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "4d56eed8-ea18-4775-b973-3c0d04e91062"/*Rotations*/,
       "SymbolId": "5d7d61ae-0a41-4ffa-a51d-93bab665e7fe",
+      "SymbolName": "Types.Values.Value",
       "Name": "Rotations",
       "InputValues": [
         {
@@ -108,6 +116,7 @@
     {
       "Id": "513af0af-c751-471d-882b-1f7fdcf52830"/*GainAndBias*/,
       "SymbolId": "926ab3fd-fbaf-4c4b-91bc-af277000dcb8",
+      "SymbolName": "Types.Values.Vector2",
       "Name": "GainAndBias",
       "InputValues": [
         {
@@ -126,6 +135,7 @@
     {
       "Id": "5198c12e-195a-4d8e-b633-4a850d57dd72"/*Count*/,
       "SymbolId": "cc07b314-4582-4c2c-84b8-bb32f59fc09b",
+      "SymbolName": "Types.Values.IntValue",
       "Name": "Count",
       "InputValues": [
         {
@@ -139,12 +149,14 @@
     {
       "Id": "6b050498-05e5-49b9-98a9-0c3e8529185e"/*RadialRepeatMesh*/,
       "SymbolId": "fcd806aa-1b17-4e2a-a5a5-57940f2411fd",
+      "SymbolName": "Lib.mesh.generate.RadialRepeatMesh",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "6c44e924-316b-4815-9123-c269e1abcaf8"/*StartAngle*/,
       "SymbolId": "5d7d61ae-0a41-4ffa-a51d-93bab665e7fe",
+      "SymbolName": "Types.Values.Value",
       "Name": "StartAngle",
       "InputValues": [
         {
@@ -158,12 +170,14 @@
     {
       "Id": "6d2f149b-a4db-4429-96a7-cf3e8527d1d1"/*DrawQuiz*/,
       "SymbolId": "16e30ce0-20c9-4677-9837-0200454e05ae",
+      "SymbolName": "Lib.flow.skillQuest.DrawQuiz",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "800dbe44-0d88-42eb-92e0-c3bdb5069257"/*Text*/,
       "SymbolId": "fd31d208-12fe-46bf-bfa3-101211f8f497",
+      "SymbolName": "Lib.render.basic.Text",
       "InputValues": [
         {
           "Id": "f1f1be0e-d5bc-4940-bbc1-88bfa958f0e1"/*InputText*/,
@@ -176,6 +190,7 @@
     {
       "Id": "b0d9e98e-7d57-44a5-9b0a-66ebf574af94"/*Axis*/,
       "SymbolId": "94a5de3b-ee6a-43d3-8d21-7b8fe94b042b",
+      "SymbolName": "Types.Values.Vector3",
       "Name": "Axis",
       "InputValues": [
         {
@@ -199,6 +214,7 @@
     {
       "Id": "b3c90ba5-9720-41ea-a547-d16857b32469"/*Stretch*/,
       "SymbolId": "94a5de3b-ee6a-43d3-8d21-7b8fe94b042b",
+      "SymbolName": "Types.Values.Vector3",
       "Name": "Stretch",
       "InputValues": [
         {
@@ -222,12 +238,14 @@
     {
       "Id": "f0207120-8d7c-46ef-8bc3-9fb8c6117e22"/*CubeMesh*/,
       "SymbolId": "c47ab830-aae7-4f8f-b67c-9119bcbaf7df",
+      "SymbolName": "Lib.mesh.generate.CubeMesh",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "f9da8dad-6c5e-46f5-9c84-f720f1650ae9"/*OffsetRadius*/,
       "SymbolId": "5d7d61ae-0a41-4ffa-a51d-93bab665e7fe",
+      "SymbolName": "Types.Values.Value",
       "Name": "OffsetRadius",
       "InputValues": [
         {

@@ -193,3 +193,36 @@ On an open run with at least three corners, drag its last corner onto its first 
 **Expected:**
 - The two corners merge, the plan's card shows **Closed** ticked, and a wall stands on the edge
   that now joins them. Ctrl+Z reopens the run in one step.
+
+## Step: The draw handles don't need a selection
+
+**Action:**
+With an open (not closed) floor plan on the Board, click empty Board so nothing is selected, and look at
+the two ends of the plan's run.
+
+**Expected:**
+- A plus sits at each open end, dimmer than when the plan is selected but clearly there, and hovering
+  lifts it. Its corners and edges behave the same way, which is the point.
+- Clicking it starts the wall-drawing tool as before.
+
+## Step: Drawing snaps to the plan's own axes
+
+**Action:**
+Start drawing from an end whose last wall runs at an angle (not horizontal or vertical). Move the cursor
+slowly through horizontal, then through vertical.
+
+**Expected:**
+- The line snaps to horizontal and to vertical as well as to the 45° steps of the slanted wall, taking
+  whichever is nearer to the cursor.
+- Holding Shift still draws free.
+
+## Step: A locked reference image can be unlocked again
+
+**Action:**
+Lock a reference image from its card menu. It stops answering clicks and is not listed in the outliner.
+Now right-click on it.
+
+**Expected:**
+- The Board's menu opens (the image takes no press), and it carries **Unlock \<name\>** for that image.
+- Choosing it unlocks the image, which is selectable again; the step is undoable.
+- Right-clicking empty Board away from any locked image shows no Unlock entries.

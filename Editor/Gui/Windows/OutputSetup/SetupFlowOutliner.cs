@@ -27,7 +27,7 @@ namespace T3.Editor.Gui.Windows.OutputSetup;
 /// CONTENT → SURFACES → OUTPUTS → LOCAL BINDINGS as columns, with a shelf for reference images and props
 /// at the right end. Items are <see cref="OutlinerItem"/>s (surfaces nest by <see cref="Surface.ParentId"/>,
 /// slices under their source, patches under their output); the relationships between them light up
-/// through the gutters and the connections drawn between the columns. CONTENT lists the live <see cref="IContentSupplier"/> ops, everything else the active
+/// through the gutters and the connections drawn between the columns. CONTENT lists the live <see cref="IContentSupplier"/> ops of the active composition, everything else the active
 /// setup; LOCAL BINDINGS is this machine's inventory of plugs.
 /// </summary>
 internal sealed class SetupFlowOutliner
@@ -116,9 +116,12 @@ internal sealed class SetupFlowOutliner
         var leaveWidth = 0f;
         if (_onLeave != null)
         {
-            leaveWidth = height;
-            ImGui.SetCursorScreenPos(new Vector2(rowRight - toggleWidth - height * 2, rowPos.Y + 3 * scale));
-            if (CustomComponents.IconButton(Icon.Close, Vector2.Zero))
+            // Labelled rather than an X, like the "Output Setup" button that leads in here: a lone X in a
+            // window's top right reads as "close the window".
+            const string leaveLabel = "Close";
+            leaveWidth = ImGui.CalcTextSize(leaveLabel).X + ImGui.GetStyle().FramePadding.X * 2;
+            ImGui.SetCursorScreenPos(new Vector2(rowRight - toggleWidth - height - leaveWidth, rowPos.Y + 3 * scale));
+            if (CustomComponents.StateButton(leaveLabel, CustomComponents.ButtonStates.Default))
                 _onLeave();
 
             CustomComponents.TooltipForLastItem("Leave the output setup", "Back to the operator view; the Output Setup button in its toolbar returns here.");
@@ -133,7 +136,7 @@ internal sealed class SetupFlowOutliner
         CustomComponents.TooltipForLastItem("Add to the Board", "A reference photo to trace surfaces on, a prop for scale, or a whole room.");
 
         var openRoomDialog = false;
-        if (ImGui.BeginPopup(AddBoardItemMenuId))
+        if (SetupPopup.Begin(AddBoardItemMenuId))
         {
             if (CustomComponents.DrawMenuItem(1, "Add Reference Image"))
                 SetupActions.AddReferenceImage(selection);
@@ -151,13 +154,13 @@ internal sealed class SetupFlowOutliner
 
             CustomComponents.TooltipForLastItem("The venue seen from above: a footprint whose edges carry the walls, drawn at true scale.");
 
-            ImGui.EndPopup();
+            SetupPopup.End();
         }
 
         if (openRoomDialog)
-            ImGui.OpenPopup(AddRoomDialogId);
+            AddFloorPlanDialog.RequestOpen();
 
-        DrawAddRoomDialog(setup, selection);
+        AddFloorPlanDialog.Draw(selection);
 
         if (onToggleCollapse != null)
         {
@@ -208,7 +211,7 @@ internal sealed class SetupFlowOutliner
         maxY = MathF.Max(maxY, ImGui.GetCursorScreenPos().Y);
 
         BeginColumn(origin.X + columnWidth + gap * 0.5f, origin.Y, columnWidth - gap);
-        DrawColumnHeader("SURFACES", "##addSurface", selection, SetupActions.AddSurface, SetupEntityKinds.Surface);
+        DrawColumnHeader("SURFACES", "##addSurface", selection, s => SetupActions.AddSurface(s), SetupEntityKinds.Surface);
         DrawSurfaces(selection, setup);
         maxY = MathF.Max(maxY, ImGui.GetCursorScreenPos().Y);
 
@@ -585,7 +588,7 @@ internal sealed class SetupFlowOutliner
             _addPlugMenuRequested = false;
         }
 
-        if (ImGui.BeginPopup(AddPlugMenuId))
+        if (SetupPopup.Begin(AddPlugMenuId))
         {
             CustomComponents.MenuGroupHeader("Add stream sender");
             var providers = OutputStreamRegistry.Providers;
@@ -601,7 +604,7 @@ internal sealed class SetupFlowOutliner
                 }
             }
 
-            ImGui.EndPopup();
+            SetupPopup.End();
         }
     }
 
@@ -654,18 +657,13 @@ internal sealed class SetupFlowOutliner
     private void DrawContentSends(SetupEntitySelection selection, Setup setup)
     {
         var suppliers = ContentSupplierRegistry.Suppliers;
-        if (suppliers.Count == 0)
-        {
-            ImGui.Indent(8 * T3Ui.UiScaleFactor);
-            CustomComponents.StylizedText("no SendToOutput ops", Fonts.FontSmall, UiColors.TextMuted.Fade(0.6f));
-            ImGui.Unindent(8 * T3Ui.UiScaleFactor);
-            return;
-        }
-
+        var drawnCount = 0;
         for (var i = 0; i < suppliers.Count; i++)
         {
-            if (suppliers[i] is not Instance instance)
+            if (suppliers[i] is not Instance instance || !ContentSourceSync.IsInScope(instance))
                 continue;
+
+            drawnCount++;
 
             var childId = instance.SymbolChildId;
             var source = setup.FindSourceByChildId(childId);
@@ -698,6 +696,13 @@ internal sealed class SetupFlowOutliner
 
                 DrawSliceItem(selection, setup, slice);
             }
+        }
+
+        if (drawnCount == 0)
+        {
+            ImGui.Indent(8 * T3Ui.UiScaleFactor);
+            CustomComponents.StylizedText("no SendToOutput ops in this composition", Fonts.FontSmall, UiColors.TextMuted.Fade(0.6f));
+            ImGui.Unindent(8 * T3Ui.UiScaleFactor);
         }
     }
 
@@ -792,6 +797,12 @@ internal sealed class SetupFlowOutliner
         var pos = ImGui.GetCursorScreenPos();
         var height = ImGui.GetFrameHeight();
         var width = MathF.Max(60 * scale, ImGui.CalcTextSize(setup.Name).X + Icons.FontSize + 16 * scale);
+        if (_isRenamingSetup)
+        {
+            DrawSetupRenameField(width);
+            return;
+        }
+
         if (ImGui.InvisibleButton("##setupSwitcher", new Vector2(width, height)))
             ImGui.OpenPopup("##setupMenu");
 
@@ -809,7 +820,7 @@ internal sealed class SetupFlowOutliner
         ImGui.SetCursorScreenPos(new Vector2(pos.X + width, pos.Y));
         ImGui.Dummy(Vector2.Zero); // the row continues to the right of the control
 
-        if (ImGui.BeginPopup("##setupMenu"))
+        if (SetupPopup.Begin("##setupMenu"))
         {
             CustomComponents.MenuGroupHeader("Setups");
             _availableNames.Clear();
@@ -825,14 +836,21 @@ internal sealed class SetupFlowOutliner
             }
 
             CustomComponents.SeparatorLine();
-            if (CustomComponents.DrawMenuItem(900, "Duplicate current"))
+            if (CustomComponents.DrawMenuItem(903, "Rename"))
+            {
+                _isRenamingSetup = true;
+                _setupRenameFocusPending = true;
+                _setupRenameBuffer = setup.Name;
+            }
+
+            if (CustomComponents.DrawMenuItem(900, "Duplicate Current"))
             {
                 OutputSetupHandling.TryDuplicateActive(GetFreeName(setup.Name + " copy"));
             }
             CustomComponents.TooltipForLastItem("Duplicates the setup for another venue.",
                                                 "Entity ids are preserved, so operator bindings stay intact.");
 
-            if (CustomComponents.DrawMenuItem(901, "New (empty)"))
+            if (CustomComponents.DrawMenuItem(901, "New (Empty)"))
             {
                 if (OutputSetupHandling.TryCreateNew(GetFreeName("Setup")))
                     selection.Clear();
@@ -852,7 +870,29 @@ internal sealed class SetupFlowOutliner
                 _drawMenuExtras();
             }
 
-            ImGui.EndPopup();
+            SetupPopup.End();
+        }
+    }
+
+    /// <summary>Inline name field in place of the switcher; commits on Enter/blur, cancels on Escape.</summary>
+    private void DrawSetupRenameField(float switcherWidth)
+    {
+        ImGui.SetNextItemWidth(MathF.Max(switcherWidth, 160 * T3Ui.UiScaleFactor));
+        if (_setupRenameFocusPending)
+        {
+            ImGui.SetKeyboardFocusHere();
+            _setupRenameFocusPending = false;
+        }
+
+        ImGui.InputText("##renameSetup", ref _setupRenameBuffer, 256);
+        if (ImGui.IsItemDeactivatedAfterEdit())
+        {
+            OutputSetupHandling.TryRenameActive(_setupRenameBuffer.Trim());
+            _isRenamingSetup = false;
+        }
+        else if (ImGui.IsItemDeactivated() || ImGui.IsKeyPressed(ImGuiKey.Escape))
+        {
+            _isRenamingSetup = false;
         }
     }
 
@@ -896,43 +936,8 @@ internal sealed class SetupFlowOutliner
     private static readonly List<(int Width, int Height, string Label)> _resolutionLabels = [];
 
     private const string AddPlugMenuId = "##addPlugMenu";
-    /// <summary>A rectangular footprint to start from; walls are raised per edge on the plan's card afterwards.</summary>
-    private static void DrawAddRoomDialog(Setup setup, SetupEntitySelection selection)
-    {
-        ImGui.SetNextWindowSize(new Vector2(280 * T3Ui.UiScaleFactor, 0));
-        if (!ImGui.BeginPopup(AddRoomDialogId))
-            return;
-
-        CustomComponents.StylizedText("Add Floor Plan", Fonts.FontBold, UiColors.Text);
-        CustomComponents.StylizedText("A rectangle to start from; raise walls on its edges on its card.",
-                                      Fonts.FontSmall, UiColors.TextMuted);
-
-        FormInputs.AddFloat("Width (m)", ref _roomWidth, 0.1f, 1000, 0.05f, clampMin: true, clampMax: true, "Left to right.");
-        FormInputs.AddFloat("Depth (m)", ref _roomDepth, 0.1f, 1000, 0.05f, clampMin: true, clampMax: true, "Near to far.");
-        FormInputs.AddCheckBox("With floor surface", ref _roomWithFloor, "A surface lying on the footprint, for floor projection.");
-
-        FormInputs.AddVerticalSpace(4);
-        if (ImGui.Button("Create"))
-        {
-            SetupActions.AddFloorPlan(selection, new Vector2(_roomWidth, _roomDepth), _roomWithFloor);
-            ImGui.CloseCurrentPopup();
-        }
-
-        ImGui.SameLine();
-        if (ImGui.Button("Cancel"))
-            ImGui.CloseCurrentPopup();
-
-        ImGui.EndPopup();
-    }
-
     private Action? _onLeave;
     private const string AddBoardItemMenuId = "##addBoardItemMenu";
-    private const string AddRoomDialogId = "##addFloorPlanDialog";
-
-    // The dialog's fields, kept between openings so a venue's numbers can be tweaked and re-added.
-    private static float _roomWidth = 10;
-    private static float _roomDepth = 8;
-    private static bool _roomWithFloor = true;
     private const string HelpDocId = "OutputSetup";
     private const string HelpWikiUrl = "https://github.com/tixl3d/tixl/wiki/help.OutputSetup";
     private bool _addPlugMenuRequested;
@@ -955,6 +960,10 @@ internal sealed class SetupFlowOutliner
     private readonly Dictionary<Guid, string> _patchLabels = [];
 
     private Action? _drawMenuExtras;
+
+    private bool _isRenamingSetup;
+    private bool _setupRenameFocusPending;
+    private string _setupRenameBuffer = string.Empty;
 
     // Items drawn this frame, for the connections (cleared per frame; a few dozen entries, searched linearly).
     private readonly List<Anchor> _anchors = [];

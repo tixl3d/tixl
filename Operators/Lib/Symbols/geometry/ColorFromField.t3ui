@@ -4,11 +4,10 @@
   "Description": "Writes a corner Color attribute by sampling a ScalarField at each corner position, remapping from ValueRange and blending ColorA to ColorB.\n\nNote: the built-in mesh shaders don't display vertex colors yet.",
   "InputUis": [
     {
-      "InputId": "7ff90229-3731-4a5f-adc3-2abab11d3d46"/*Geometry*/,
-      "Relevancy": "Required",
+      "InputId": "3f412276-cbc9-4b0d-a5a5-5a02ef1ac230"/*ColorB*/,
       "Position": {
         "X": 0.0,
-        "Y": 0.0
+        "Y": 135.0
       }
     },
     {
@@ -20,17 +19,11 @@
       }
     },
     {
-      "InputId": "aa992691-1a1c-4c52-9024-341812603d35"/*ColorA*/,
+      "InputId": "7ff90229-3731-4a5f-adc3-2abab11d3d46"/*Geometry*/,
+      "Relevancy": "Required",
       "Position": {
         "X": 0.0,
-        "Y": 90.0
-      }
-    },
-    {
-      "InputId": "3f412276-cbc9-4b0d-a5a5-5a02ef1ac230"/*ColorB*/,
-      "Position": {
-        "X": 0.0,
-        "Y": 135.0
+        "Y": 0.0
       }
     },
     {
@@ -38,6 +31,13 @@
       "Position": {
         "X": 0.0,
         "Y": 180.0
+      }
+    },
+    {
+      "InputId": "aa992691-1a1c-4c52-9024-341812603d35"/*ColorA*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 90.0
       }
     }
   ],

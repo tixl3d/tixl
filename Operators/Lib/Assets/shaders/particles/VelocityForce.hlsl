@@ -36,7 +36,7 @@ void main(uint3 i : SV_DispatchThreadID)
     float randBias = ApplyGainAndBias(rand, VariationGainAndBias);
     float variationFactor = (1 - (1-randBias) * saturate(Variation));
 
-    float strength = Amount * variationFactor;
+    float strength = Amount * variationFactor.x;
 
     speed += Acelleration * 0.02 * strength;
     speed = clamp(speed, MinSpeed, MaxSpeed);

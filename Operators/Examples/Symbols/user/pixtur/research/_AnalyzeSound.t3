@@ -43,6 +43,7 @@
     {
       "Id": "05f01cde-4ee2-441f-a850-fdcdf1b33b97"/*Div*/,
       "SymbolId": "15fb88b2-81a1-43b8-97ba-41221293bb07",
+      "SymbolName": "Lib.numbers.float.basic.Div",
       "InputValues": [
         {
           "Id": "70460191-7573-400f-ba88-11878ecc917c"/*A*/,
@@ -60,12 +61,14 @@
     {
       "Id": "079565f9-ea7e-4a32-9ac0-4bddca4815ef"/*IntToFloat*/,
       "SymbolId": "17db8a36-079d-4c83-8a2a-7ea4c1aa49e6",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "08d45cac-02d2-4233-a566-5ee22db169d5"/*RenderTarget*/,
       "SymbolId": "f9fe78c5-43a6-48ae-8e8c-6cdbbc330dd1",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "InputValues": [
         {
           "Id": "03749b41-cc3c-4f38-aea6-d7cea19fc073"/*Resolution*/,
@@ -96,36 +99,42 @@
     {
       "Id": "0c6295fe-af6b-4a15-a3d6-f5d8e63e72f5"/*_SetAudioAnalysis*/,
       "SymbolId": "ecbafbeb-c14b-4507-953f-80bc6676d077",
+      "SymbolName": "Lib.io.audio._._SetAudioAnalysis",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "0c9a4075-10b7-47de-9608-81eb4e2aca48"/*Execute*/,
       "SymbolId": "936e4324-bea2-463a-b196-6064a2d8a6b2",
+      "SymbolName": "Lib.flow.Execute",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "1b69b7e4-9b0f-441a-9b09-e6ff1bfb3024"/*FloatToInt*/,
       "SymbolId": "06b4728e-852c-491a-a89d-647f7e0b5415",
+      "SymbolName": "Lib.numbers.int.process.FloatToInt",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "2076b54f-a6a4-4ab5-b982-ee34fbdb1053"/*Execute*/,
       "SymbolId": "936e4324-bea2-463a-b196-6064a2d8a6b2",
+      "SymbolName": "Lib.flow.Execute",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "280d52f7-e2c5-480d-acf1-cffe351edb14"/*AudioFrequencies*/,
       "SymbolId": "b72d968b-0045-408d-a2f9-5c739c692a66",
+      "SymbolName": "Lib.io.audio._.AudioFrequencies",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "2a166463-ce37-43bc-a42e-cf29517f8b5e"/*AmplifyValues*/,
       "SymbolId": "4def850e-3627-46d8-ae2b-58b513843885",
+      "SymbolName": "Lib.numbers.floats.process.AmplifyValues",
       "InputValues": [
         {
           "Id": "2c6c16e9-2037-4b5e-a4ac-6c5aab0fc582"/*Smoothing*/,
@@ -153,6 +162,7 @@
     {
       "Id": "39883765-7f00-4f1c-9e52-9fb82238f6d9"/*Multiply*/,
       "SymbolId": "17b60044-9125-4961-8a79-ca94697b3726",
+      "SymbolName": "Lib.numbers.float.basic.Multiply",
       "InputValues": [
         {
           "Id": "5ae4bb07-4214-4ec3-a499-24d9f6d404a5"/*B*/,
@@ -165,6 +175,7 @@
     {
       "Id": "44da8e08-70f7-4c2f-a7b5-3bb94c109b79"/*Remap*/,
       "SymbolId": "f0acd1a4-7a98-43ab-a807-6d1bd3e92169",
+      "SymbolName": "Lib.numbers.float.adjust.Remap",
       "InputValues": [
         {
           "Id": "f2baf278-adde-42de-afce-336b6c8d0387"/*RangeOutMin*/,
@@ -177,12 +188,14 @@
     {
       "Id": "4940ba20-9625-4ac2-9be2-59aa6543018b"/*PlaybackFFT*/,
       "SymbolId": "cda108a1-db4f-4a0a-ae4d-d50e9aade467",
+      "SymbolName": "Lib.numbers.floats.io.PlaybackFFT",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "5386ec5b-4b8d-43f1-beae-396cee2c534d"/*Pow*/,
       "SymbolId": "58aa74af-32aa-4c46-8bb5-5811f16bf7f8",
+      "SymbolName": "Lib.numbers.float.basic.Pow",
       "InputValues": [
         {
           "Id": "36853585-1a17-47f7-8485-569f17f48c66"/*Exponent*/,
@@ -195,6 +208,7 @@
     {
       "Id": "6d98ba18-8a37-4d21-b25e-51d11e9ab6f0"/*Camera*/,
       "SymbolId": "746d886c-5ab6-44b1-bb15-f3ce2fadf7e6",
+      "SymbolName": "Lib.render.camera.Camera",
       "InputValues": [
         {
           "Id": "f66e91a1-b991-48c3-a8c9-33bcad0c2f6f"/*AspectRatio*/,
@@ -207,12 +221,14 @@
     {
       "Id": "73fc6ee7-ee23-4735-912e-6ac13fb77799"/*IntToFloat*/,
       "SymbolId": "17db8a36-079d-4c83-8a2a-7ea4c1aa49e6",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "76a5b743-8cac-442b-9023-bafe25800652"/*ValuesToTexture*/,
       "SymbolId": "55cc0f79-96c9-482e-9794-934dc0f87708",
+      "SymbolName": "Lib.numbers.floats.process.ValuesToTexture",
       "InputValues": [
         {
           "Id": "cc812393-f080-4e17-a525-15b09f8acdd0"/*Gain*/,
@@ -225,6 +241,7 @@
     {
       "Id": "78efee4e-b64f-4229-a0fa-618db5f8d6b3"/*ModInt*/,
       "SymbolId": "cf3268d7-4f3d-47bd-8cb5-0214c75432ec",
+      "SymbolName": "Lib.numbers.int.basic.ModInt",
       "InputValues": [
         {
           "Id": "ccdea113-c046-4ec2-b1fb-30d6e15db7ce"/*Mod*/,
@@ -237,6 +254,7 @@
     {
       "Id": "7d38e286-00d4-4097-ad80-6821cf965933"/*Counter*/,
       "SymbolId": "11882635-4757-4cac-a024-70bb4e8b504c",
+      "SymbolName": "Lib.numbers.anim._obsolete.Counter",
       "InputValues": [
         {
           "Id": "eefdb8ca-68e7-4e39-b302-22eb8930fb8c"/*TriggerIncrement*/,
@@ -249,12 +267,14 @@
     {
       "Id": "8499ecc5-424f-4afd-b3bf-69cb7429a4ce"/*RenderTarget*/,
       "SymbolId": "f9fe78c5-43a6-48ae-8e8c-6cdbbc330dd1",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "85d805f0-193a-40a1-b26b-851e21e9875e"/*CountInt*/,
       "SymbolId": "0e1d5f4b-3ba0-4e71-aa26-7308b6df214d",
+      "SymbolName": "Lib.numbers.int.logic.CountInt",
       "InputValues": [
         {
           "Id": "bfd95809-61d2-49eb-85d4-ff9e36b2d158"/*TriggerIncrement*/,
@@ -267,12 +287,14 @@
     {
       "Id": "900e52f4-4ebd-4b83-bc4d-51d726ea57a8"/*PickFloatList*/,
       "SymbolId": "6832d272-e63f-4ab2-b48c-85466b4ede1b",
+      "SymbolName": "Lib.numbers.floats.logic.PickFloatList",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "993f1e42-8b34-4150-b4f4-d38177058233"/*Layer2d*/,
       "SymbolId": "d8c5330f-59b5-4907-b845-a02def3042fa",
+      "SymbolName": "Lib.render.basic.Layer2d",
       "InputValues": [
         {
           "Id": "38f34034-b36f-4351-84e1-1a4f96e03fc6"/*Scale*/,
@@ -293,6 +315,7 @@
     {
       "Id": "a327dc01-f938-4067-8332-3011646a1e68"/*Layer2d*/,
       "SymbolId": "d8c5330f-59b5-4907-b845-a02def3042fa",
+      "SymbolName": "Lib.render.basic.Layer2d",
       "InputValues": [
         {
           "Id": "4618d8e0-2718-4373-a071-88ec1843b0c8"/*Stretch*/,
@@ -318,24 +341,28 @@
     {
       "Id": "a52c8e43-d247-41ba-9b77-69a674b58737"/*AudioFrequencies*/,
       "SymbolId": "b72d968b-0045-408d-a2f9-5c739c692a66",
+      "SymbolName": "Lib.io.audio._.AudioFrequencies",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "a6dcd496-64a2-49b6-bb0a-3205578f4fed"/*Execute*/,
       "SymbolId": "936e4324-bea2-463a-b196-6064a2d8a6b2",
+      "SymbolName": "Lib.flow.Execute",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "b2688057-895b-42d4-8795-464ee59a697c"/*VisibleGizmos*/,
       "SymbolId": "d61d7192-9ca3-494e-91e2-10a530ee9375",
+      "SymbolName": "Lib.render.gizmo.VisibleGizmos",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "b540fed1-09b1-454c-88bd-6436f38b9b1b"/*Div*/,
       "SymbolId": "15fb88b2-81a1-43b8-97ba-41221293bb07",
+      "SymbolName": "Lib.numbers.float.basic.Div",
       "InputValues": [
         {
           "Id": "70460191-7573-400f-ba88-11878ecc917c"/*A*/,
@@ -353,6 +380,7 @@
     {
       "Id": "b8177c6e-6bc6-4471-8c71-77e38737f069"/*AnalyzeBass*/,
       "SymbolId": "6bb3fc41-f1d4-467e-afc6-62b452ec36be",
+      "SymbolName": "Examples.user.pixtur.research._AnalyseAudioRange",
       "Name": "AnalyzeBass",
       "InputValues": [
         {
@@ -376,6 +404,7 @@
     {
       "Id": "bb47e175-a00e-4d41-909a-b72d49b46722"/*Transform*/,
       "SymbolId": "284d2183-197d-47fd-b130-873cced78b1c",
+      "SymbolName": "Lib.render.transform.Transform",
       "InputValues": [
         {
           "Id": "b4a8c16d-5a0f-4867-ae03-92a675abe709"/*Translation*/,
@@ -401,6 +430,7 @@
     {
       "Id": "c73b9a90-304c-4f6b-894e-87a305a94e62"/*AmplifyValues*/,
       "SymbolId": "4def850e-3627-46d8-ae2b-58b513843885",
+      "SymbolName": "Lib.numbers.floats.process.AmplifyValues",
       "InputValues": [
         {
           "Id": "2c6c16e9-2037-4b5e-a4ac-6c5aab0fc582"/*Smoothing*/,
@@ -428,6 +458,7 @@
     {
       "Id": "c7ab6309-0eca-485b-accb-565f339e6b1a"/*FFlevels*/,
       "SymbolId": "cc07b314-4582-4c2c-84b8-bb32f59fc09b",
+      "SymbolName": "Types.Values.IntValue",
       "Name": "FFlevels",
       "InputValues": [
         {
@@ -441,18 +472,21 @@
     {
       "Id": "ca4bea18-34b0-45cf-8d6c-c40915ee6595"/*FloatToInt*/,
       "SymbolId": "06b4728e-852c-491a-a89d-647f7e0b5415",
+      "SymbolName": "Lib.numbers.int.process.FloatToInt",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "d209659d-c849-489d-8bc9-025f15009e5d"/*SetFloatVar*/,
       "SymbolId": "2a0c932a-eb81-4a7d-aeac-836a23b0b789",
+      "SymbolName": "Lib.flow.context.SetFloatVar",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "da855a24-2ef3-4e20-9fda-24f5f47fb679"/*Modulo*/,
       "SymbolId": "5202d3f6-c970-4006-933d-3c60d6c202dc",
+      "SymbolName": "Lib.numbers.float.basic.Modulo",
       "InputValues": [
         {
           "Id": "62a8185f-32c0-41d2-b8be-d8c1d7178c00"/*ModuloValue*/,
@@ -465,6 +499,7 @@
     {
       "Id": "eb8ba729-686e-43e4-8128-ceb7c1ae9705"/*analyzeHighs*/,
       "SymbolId": "6bb3fc41-f1d4-467e-afc6-62b452ec36be",
+      "SymbolName": "Examples.user.pixtur.research._AnalyseAudioRange",
       "Name": "analyzeHighs",
       "InputValues": [
         {
@@ -493,12 +528,14 @@
     {
       "Id": "f39d9136-b214-4927-95e1-28110ee2f104"/*Layer2d*/,
       "SymbolId": "d8c5330f-59b5-4907-b845-a02def3042fa",
+      "SymbolName": "Lib.render.basic.Layer2d",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "f7657f35-0f73-4576-8aa9-f9f5fba4005e"/*Vector2*/,
       "SymbolId": "926ab3fd-fbaf-4c4b-91bc-af277000dcb8",
+      "SymbolName": "Types.Values.Vector2",
       "InputValues": [],
       "Outputs": []
     }

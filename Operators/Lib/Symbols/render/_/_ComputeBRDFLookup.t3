@@ -14,6 +14,7 @@
     {
       "Id": "1ae5cbfa-5887-4059-a134-10749e67ec3e"/*ComputeShaderStage*/,
       "SymbolId": "8bef116d-7d1c-4c1b-b902-25c1d5e925a9",
+      "SymbolName": "Types.Gfx.ComputeShaderStage",
       "InputValues": [
         {
           "Id": "180cae35-10e3-47f3-8191-f6ecea7d321c"/*Dispatch*/,
@@ -30,24 +31,28 @@
     {
       "Id": "26f76886-eff3-406f-bd30-3fefd23d7144"/*CalcInt2DispatchCount*/,
       "SymbolId": "cc11774e-82dd-409f-97fb-5be3f2746f9d",
+      "SymbolName": "Lib.render._dx11.api.CalcInt2DispatchCount",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "578b2323-856f-4c06-a720-6e358e95baa7"/*UavFromTexture2d*/,
       "SymbolId": "84e02044-3011-4a5e-b76a-c904d9b4557f",
+      "SymbolName": "Lib.render._dx11.api.UavFromTexture2d",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "658d89e8-3dc8-4430-80c6-b547bc5500ac"/*ExecuteTextureUpdate*/,
       "SymbolId": "6c2f8241-9f4b-451e-8a1d-871631d21163",
+      "SymbolName": "Lib.render._dx11.fxsetup.ExecuteTextureUpdate",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "85a5c91b-0531-4e68-9dd5-f2bbc0ccd7e8"/*ComputeShader*/,
       "SymbolId": "a256d70f-adb3-481d-a926-caf35bd3e64c",
+      "SymbolName": "Types.Gfx.ComputeShader",
       "InputValues": [
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
@@ -65,6 +70,7 @@
     {
       "Id": "a4b1ca57-3583-4f42-aec8-45711e313a08"/*Texture2d*/,
       "SymbolId": "f52db9a4-fde9-49ca-9ef7-131825c34e65",
+      "SymbolName": "Types.Gfx.Texture2d",
       "InputValues": [
         {
           "Id": "58ff26e7-6beb-44cb-910b-fe467402cee9"/*MipLevels*/,

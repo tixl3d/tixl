@@ -129,16 +129,10 @@ internal sealed class ViewSelectionPinning
 
             if (ProjectView.Focused != null)
             {
-                if (CustomComponents.DrawMenuItem(_showInGraphId, "Show in Graph", reserveIconColumn: false))
+                if (CustomComponents.DrawMenuItem(_showInGraphId, "Show in Graph",
+                                                  UserActions.ShowInGraph.ListShortcuts(), reserveIconColumn: false))
                 {
-                    var parentInstance = pinnedOrSelectedInstance.Parent;
-                    var parentSymbolUi = parentInstance?.GetSymbolUi();
-                    if (parentSymbolUi == null)
-                        return;
-
-                    var instanceChildUi = parentSymbolUi.ChildUis[pinnedOrSelectedInstance.SymbolChildId];
-                    nodeSelection.SetSelection(instanceChildUi, pinnedOrSelectedInstance);
-                    FitViewToSelectionHandling.FitViewToSelection();
+                    ShowInGraph();
                 }
             }
 
@@ -187,6 +181,30 @@ internal sealed class ViewSelectionPinning
     {
         var firstSelectedInstance = canvas.NodeSelection.GetFirstSelectedInstance();
         PinInstance(firstSelectedInstance, canvas);
+    }
+
+    /// <summary>
+    /// Selects the instance the Output View shows and frames it in the graph. Shared by the pinning
+    /// menu, its keyboard shortcut and the automatic call after a project opens.
+    /// </summary>
+    public void ShowInGraph()
+    {
+        if (ProjectView.Focused == null)
+            return;
+
+        if (!TryGetPinnedOrSelectedInstance(out var instance, out var projectView))
+            return;
+
+        var parentSymbolUi = instance.Parent?.GetSymbolUi();
+        if (parentSymbolUi == null || !parentSymbolUi.ChildUis.TryGetValue(instance.SymbolChildId, out var childUi))
+            return;
+
+        projectView.NodeSelection.SetSelection(childUi, instance);
+
+        // Opening a project leaves a "restore saved view" request pending, which is applied one frame
+        // later. Showing an explicit selection has to win over it.
+        projectView.GraphView.Canvas.CancelPendingViewTransition();
+        FitViewToSelectionHandling.FitViewToSelection();
     }
 
     public bool IsPinned => _isPinned;

@@ -4,25 +4,10 @@
   "Description": "Transforms CPU-side procedural geometry: scale, rotate (degrees) and translate. Normals are rotated and corrected for non-uniform scaling; topology and other attributes are passed through.",
   "InputUis": [
     {
-      "InputId": "90343fe1-bee7-4ec5-a29d-c44b68a3a37c"/*Geometry*/,
-      "Relevancy": "Required",
-      "Position": {
-        "X": 0.0,
-        "Y": 0.0
-      }
-    },
-    {
       "InputId": "3497c025-efaf-4191-8621-ade40d377ee9"/*Translation*/,
       "Position": {
         "X": 0.0,
         "Y": 45.0
-      }
-    },
-    {
-      "InputId": "b478cdd9-14c5-486b-be7b-4c70bd8f667c"/*Rotation*/,
-      "Position": {
-        "X": 0.0,
-        "Y": 90.0
       }
     },
     {
@@ -33,10 +18,25 @@
       }
     },
     {
+      "InputId": "90343fe1-bee7-4ec5-a29d-c44b68a3a37c"/*Geometry*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
       "InputId": "a3096995-909c-42f4-9519-99b25f1c330e"/*UniformScale*/,
       "Position": {
         "X": 0.0,
         "Y": 180.0
+      }
+    },
+    {
+      "InputId": "b478cdd9-14c5-486b-be7b-4c70bd8f667c"/*Rotation*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 90.0
       }
     }
   ],

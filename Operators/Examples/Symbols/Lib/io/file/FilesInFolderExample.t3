@@ -6,6 +6,7 @@
     {
       "Id": "06246b83-0aeb-433a-b116-9dbac1d0a7f4"/*FilesInFolder*/,
       "SymbolId": "f90fcd0a-eab9-4e2a-b393-e8d3a0380823",
+      "SymbolName": "Lib.io.file.FilesInFolder",
       "InputValues": [
         {
           "Id": "8b746651-16a5-4274-85db-0168d30c86b2"/*Filter*/,
@@ -28,12 +29,14 @@
     {
       "Id": "51d34f0d-5fee-434a-8bdd-e70a9d3586f0"/*PickStringFromList*/,
       "SymbolId": "ef357e66-24e9-4f54-8d86-869db74602f4",
+      "SymbolName": "Lib.string.list.PickStringFromList",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "7270fe74-0c1c-4d88-86fc-360c166fb644"/*Counter*/,
       "SymbolId": "11882635-4757-4cac-a024-70bb4e8b504c",
+      "SymbolName": "Lib.numbers.anim._obsolete.Counter",
       "InputValues": [
         {
           "Id": "286cbbfb-796d-499f-93d3-d467512110be"/*Rate*/,
@@ -46,12 +49,14 @@
     {
       "Id": "99855e3f-01dc-44c1-b82c-118151eda1ad"/*LoadImage*/,
       "SymbolId": "0b3436db-e283-436e-ba85-2f3a1de76a9d",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "b181d253-7343-4a9e-bca6-fe70fefe3951"/*FloatToInt*/,
       "SymbolId": "06b4728e-852c-491a-a89d-647f7e0b5415",
+      "SymbolName": "Lib.numbers.int.process.FloatToInt",
       "InputValues": [],
       "Outputs": []
     }

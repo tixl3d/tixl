@@ -1,11 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "e4a7c15d-9b23-4f68-8d0a-6c2e5b1f7a93"/*FilterGeoPartsByIndex*/,
-  "Description": "Keeps a range of parts by index (Start and Count).
-
-Count 1 isolates a single chunk - the quickest way to inspect one fracture cell. Negative Start counts from the end; Count 0 keeps everything from Start on. PartCount reports the number of parts in the input. Geometry without parts counts as one part.
-
-AKA: select chunk, isolate part, debug",
+  "Description": "Keeps a range of parts by index (Start and Count).\n\nCount 1 isolates a single chunk - the quickest way to inspect one fracture cell. Negative Start counts from the end; Count 0 keeps everything from Start on. PartCount reports the number of parts in the input. Geometry without parts counts as one part.\n\nAKA: select chunk, isolate part, debug",
   "InputUis": [
     {
       "InputId": "1d6f8a93-c2b5-4e40-a7d1-59e3b0c8f627"/*Geometry*/,
@@ -16,17 +12,17 @@ AKA: select chunk, isolate part, debug",
       }
     },
     {
-      "InputId": "8e2c4b70-5f9a-4d16-b3c8-a0d7e1f5c394"/*Start*/,
-      "Position": {
-        "X": 0.0,
-        "Y": 45.0
-      }
-    },
-    {
       "InputId": "3b9e7d24-6a0f-4c85-9f2e-c1b6d8a4e057"/*Count*/,
       "Position": {
         "X": 0.0,
         "Y": 90.0
+      }
+    },
+    {
+      "InputId": "8e2c4b70-5f9a-4d16-b3c8-a0d7e1f5c394"/*Start*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
       }
     }
   ],

@@ -1,10 +1,12 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using T3.Graphics.Compat;
 using T3.Graphics;
 using System.Numerics;
+using T3.Core.Logging;
 using T3.Core.Rendering;
 using T3.Core.Resource;
 using Buffer = T3.Graphics.Compat.Buffer;
@@ -24,6 +26,44 @@ namespace T3.Core.Output.Rendering;
 /// </summary>
 public static class OutputCompositor
 {
+    /// <summary>
+    /// Splits what an output costs the frame: pulling its content (which evaluates the graph behind every send
+    /// it shows) against compositing the pulled textures into the canvas. One number for both can't say whether
+    /// a slow output is the graph's doing or ours.
+    /// </summary>
+    private sealed class CompositorStats : IRenderStatsProvider
+    {
+        public IEnumerable<(string, int)> GetStats()
+        {
+            yield return ("us output content", _statsContentUs);
+            yield return ("us output evaluate", OutputContentResolver.StatsEvaluateUs);
+            yield return ("us output invalidate", OutputContentResolver.StatsInvalidateUs);
+            yield return ("invalidated sends", OutputContentResolver.StatsInvalidatedSends);
+            yield return ("invalidation visits", OutputContentResolver.StatsInvalidationVisits);
+            yield return ("us output composite", _statsCompositeUs);
+        }
+
+        public void StartNewFrame()
+        {
+            _statsContentUs = 0;
+            _statsCompositeUs = 0;
+            OutputContentResolver.ResetStats();
+        }
+    }
+
+    public static void RegisterStats()
+    {
+        RenderStatsCollector.RegisterProvider(new CompositorStats());
+    }
+
+    private static int Microseconds(long startTimestamp)
+    {
+        return (int)((Stopwatch.GetTimestamp() - startTimestamp) * 1_000_000 / Stopwatch.Frequency);
+    }
+
+    private static int _statsContentUs;
+    private static int _statsCompositeUs;
+
     // GridParams.w > 0.5 selects the analytic calibration grid (Srv unused); otherwise Srv is warped as content.
     public readonly record struct DrawItem(ShaderResourceView? Srv, Matrix4x4 Homography, Vector4 SourceRect, Vector4 Color,
                                              Vector4 GridParams, Vector4 GridColor, Vector4 GridOrigin, Vector4 Mask);
@@ -39,6 +79,21 @@ public static class OutputCompositor
     /// presentation, the Board card and an open output view all ask for the same pixels, so later calls in
     /// the frame get the target rendered by the first.
     /// </summary>
+    /// <summary>
+    /// An output's composite for a preview (a Board card, the output view): re-composited when the preview
+    /// budget allows, otherwise the last composite. See <see cref="OutputPreviewRefresh"/>.
+    /// </summary>
+    public static Texture2D? RenderPreview(Guid outputId)
+    {
+        if (OutputPreviewRefresh.ShouldRefresh(outputId))
+            return RenderOutput(outputId);
+
+        return _compositeFrames.TryGetValue(outputId, out var rendered) && rendered.HasContent
+               && _targets.TryGetValue(outputId, out var target)
+                   ? target.Texture
+                   : null;
+    }
+
     public static Texture2D? RenderOutput(Guid outputId)
     {
         var setup = ActiveSetup.Current;
@@ -50,6 +105,7 @@ public static class OutputCompositor
         if (_compositeFrames.TryGetValue(outputId, out var rendered) && rendered.Frame == frame)
             return rendered.HasContent && _targets.TryGetValue(outputId, out var renderedTarget) ? renderedTarget.Texture : null;
 
+        var pullStart = Stopwatch.GetTimestamp();
         var context = OutputContentResolver.PrepareContext(output.ResolvedResolution);
 
         // Phase 1: resolve each surface's content and mapping. Pulling content here (before our RT is
@@ -163,6 +219,7 @@ public static class OutputCompositor
         }
 
         Overlay?.CollectPhotoFragments(output.ResolvedResolution, _drawItems);
+        _statsContentUs += Microseconds(pullStart);
 
         if (_drawItems.Count == 0)
         {
@@ -182,6 +239,8 @@ public static class OutputCompositor
 
         var vs = _vertexShaderResource!.Value;
         var ps = _pixelShaderResource!.Value;
+
+        var compositeStart = Stopwatch.GetTimestamp();
 
         // Phase 2: bind our render target and composite. No state restore: the host binds its own target for
         // the rest of the frame, and every caller here runs before that happens.
@@ -221,6 +280,7 @@ public static class OutputCompositor
         deviceContext.PixelShader.SetShaderResource(0, null);
 
         Overlay?.Draw(deviceContext, output.ResolvedResolution);
+        _statsCompositeUs += Microseconds(compositeStart);
         _compositeFrames[outputId] = (frame, true);
         return target.Texture;
     }
@@ -287,6 +347,7 @@ public static class OutputCompositor
 
         _targets.Clear();
         _compositeFrames.Clear();
+        OutputPreviewRefresh.InvalidateAll();
     }
 
     /// <summary>Frees a deleted output's composite target.</summary>
@@ -296,6 +357,7 @@ public static class OutputCompositor
             target.Dispose();
 
         _compositeFrames.Remove(outputId);
+        OutputPreviewRefresh.Invalidate(outputId);
     }
 
     // Source is a UV rect (xMin, yMin, xMax, yMax); a degenerate rect falls back to the full image.

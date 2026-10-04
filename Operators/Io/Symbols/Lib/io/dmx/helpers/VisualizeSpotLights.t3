@@ -36,6 +36,7 @@
     {
       "Id": "128b6ee0-9cd0-4504-b4c5-7986b6e0c8ff"/*RepeatAtPoints*/,
       "SymbolId": "780edb20-f83f-494c-ab17-7015e2311250",
+      "SymbolName": "Lib.point.generate.RepeatAtPoints",
       "InputValues": [
         {
           "Id": "9df1f57c-a079-49c1-b537-d8eb08f2d0d3"/*Scale*/,
@@ -48,6 +49,7 @@
     {
       "Id": "1c12cb81-d205-49af-8be9-8a67cae9265c"/*DrawLines*/,
       "SymbolId": "836f211f-b387-417c-8316-658e0dc6e117",
+      "SymbolName": "Lib.point.draw.DrawLines",
       "InputValues": [
         {
           "Id": "75419a73-8a3e-4538-9a1d-e3b0ce7f8561"/*Color*/,
@@ -75,6 +77,7 @@
     {
       "Id": "2027de76-524d-4465-b270-10c28890f3cb"/*DrawMeshAtPoints*/,
       "SymbolId": "42cb88bc-beb8-4d89-ac99-44b77be5f03e",
+      "SymbolName": "Lib.mesh.draw.DrawMeshAtPoints",
       "InputValues": [
         {
           "Id": "59420e45-cbe2-48d8-961c-3dea5e55b182"/*Shading*/,
@@ -87,6 +90,7 @@
     {
       "Id": "20999693-3f86-43bb-8559-b04f8956112e"/*VisualizePoints*/,
       "SymbolId": "37bdbafc-d14c-4b81-91c3-8f63c3b63812",
+      "SymbolName": "Lib.point.draw.VisualizePoints",
       "InputValues": [
         {
           "Id": "621bf2cf-8d49-4b5f-88b9-4460045e8914"/*Size*/,
@@ -109,12 +113,14 @@
     {
       "Id": "2b32d598-520a-4ace-974d-11d6d23c9fe2"/*Execute*/,
       "SymbolId": "936e4324-bea2-463a-b196-6064a2d8a6b2",
+      "SymbolName": "Lib.flow.Execute",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "2c60a78c-91c3-4b8b-b9a6-2e857a56cfda"/*DrawSpots*/,
       "SymbolId": "42cb88bc-beb8-4d89-ac99-44b77be5f03e",
+      "SymbolName": "Lib.mesh.draw.DrawMeshAtPoints",
       "Name": "DrawSpots",
       "InputValues": [
         {
@@ -143,12 +149,14 @@
     {
       "Id": "2f425f2e-e32d-4d7b-bcbb-551f3477ce76"/*Group*/,
       "SymbolId": "a3f64d34-1fab-4230-86b3-1c3deba3f90b",
+      "SymbolName": "Lib.render.transform.Group",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "309c586f-849e-4a21-afcb-288e442e8629"/*RemoveColor*/,
       "SymbolId": "86b61bcf-4eaa-4f77-a535-8a1dc876aada",
+      "SymbolName": "Lib.point.modify.SetPointAttributes",
       "Name": "RemoveColor",
       "InputValues": [
         {
@@ -162,6 +170,7 @@
     {
       "Id": "4ac345f2-80ef-49be-9ffc-d4f4ac6d216c"/*DrawLines*/,
       "SymbolId": "836f211f-b387-417c-8316-658e0dc6e117",
+      "SymbolName": "Lib.point.draw.DrawLines",
       "InputValues": [
         {
           "Id": "75419a73-8a3e-4538-9a1d-e3b0ce7f8561"/*Color*/,
@@ -179,6 +188,7 @@
     {
       "Id": "7007dae8-bb7d-4d2a-893f-909449164317"/*CylinderMesh*/,
       "SymbolId": "5777a005-bbae-48d6-b633-5e998ca76c91",
+      "SymbolName": "Lib.mesh.generate.CylinderMesh",
       "InputValues": [
         {
           "Id": "321693a5-4e2c-47a0-a42e-95cbdc6ebf80"/*Columns*/,
@@ -210,6 +220,7 @@
     {
       "Id": "7945f746-3bbb-4a02-9759-b7743fd46445"/*TransformMesh*/,
       "SymbolId": "026e6917-6e6f-4ee3-b2d4-58f4f1de74c9",
+      "SymbolName": "Lib.mesh.modify.TransformMesh",
       "InputValues": [
         {
           "Id": "da607ebd-6fec-4ae8-bf91-b70dcb794557"/*Translation*/,
@@ -226,6 +237,7 @@
     {
       "Id": "868847cf-34c4-4204-baa7-46cd6bddf887"/*TransformPoints*/,
       "SymbolId": "7f6c64fe-ca2e-445e-a9b4-c70291ce354e",
+      "SymbolName": "Lib.point.transform.TransformPoints",
       "InputValues": [
         {
           "Id": "1ab4671f-7977-4e7e-bb06-f828ae32e3af"/*Space*/,
@@ -247,6 +259,7 @@
     {
       "Id": "8bb69d3c-2e5f-43b6-b6c1-7175882c7f2d"/*CylinderMesh*/,
       "SymbolId": "5777a005-bbae-48d6-b633-5e998ca76c91",
+      "SymbolName": "Lib.mesh.generate.CylinderMesh",
       "InputValues": [
         {
           "Id": "321693a5-4e2c-47a0-a42e-95cbdc6ebf80"/*Columns*/,
@@ -284,6 +297,7 @@
     {
       "Id": "9971f81b-e3f4-4d30-9c98-5ad07b242c80"/*RadialPoints*/,
       "SymbolId": "3352d3a1-ab04-4d0a-bb43-da69095b73fd",
+      "SymbolName": "Lib.point.generate.RadialPoints",
       "InputValues": [
         {
           "Id": "76124db6-4b89-4d7c-bd25-2ebf95b1c141"/*CloseCircleLine*/,
@@ -296,12 +310,14 @@
     {
       "Id": "a10b1a50-841c-4d55-8e40-492554dac734"/*VisibleGizmos*/,
       "SymbolId": "d61d7192-9ca3-494e-91e2-10a530ee9375",
+      "SymbolName": "Lib.render.gizmo.VisibleGizmos",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "a5af2ebb-52eb-430d-94e1-2f4bdc660e2b"/*TransformMesh*/,
       "SymbolId": "026e6917-6e6f-4ee3-b2d4-58f4f1de74c9",
+      "SymbolName": "Lib.mesh.modify.TransformMesh",
       "InputValues": [
         {
           "Id": "86791d0a-97c3-413a-89d9-aa2ddd40ce4a"/*UniformScale*/,
@@ -323,6 +339,7 @@
     {
       "Id": "b06c043d-e527-488b-ad59-723779b5355c"/*CylinderMesh*/,
       "SymbolId": "5777a005-bbae-48d6-b633-5e998ca76c91",
+      "SymbolName": "Lib.mesh.generate.CylinderMesh",
       "InputValues": [
         {
           "Id": "4c91b66c-670d-45ff-94cc-01d1a68cd040"/*RadiusOffset*/,
@@ -345,6 +362,7 @@
     {
       "Id": "b1261f42-dc1d-4542-a144-0f6303ab8592"/*RepeatAtPoints*/,
       "SymbolId": "780edb20-f83f-494c-ab17-7015e2311250",
+      "SymbolName": "Lib.point.generate.RepeatAtPoints",
       "InputValues": [
         {
           "Id": "9df1f57c-a079-49c1-b537-d8eb08f2d0d3"/*Scale*/,
@@ -357,6 +375,7 @@
     {
       "Id": "c1a98591-ce18-49f0-92e6-31e74ae58b83"/*CommonPointSets*/,
       "SymbolId": "353f63fc-e613-43ca-b037-02d7b9f4e935",
+      "SymbolName": "Lib.point.generate.CommonPointSets",
       "InputValues": [
         {
           "Id": "2ba96aee-ff89-41bd-90c5-c6c36907b6e4"/*Set*/,
@@ -369,6 +388,7 @@
     {
       "Id": "db82dec2-2d74-4858-8882-8d020c4c733c"/*DrawLines*/,
       "SymbolId": "836f211f-b387-417c-8316-658e0dc6e117",
+      "SymbolName": "Lib.point.draw.DrawLines",
       "InputValues": [
         {
           "Id": "9ba2aa59-e55b-4ebe-aa98-0f79ed77c7aa"/*EnableZTest*/,
@@ -386,12 +406,14 @@
     {
       "Id": "dcdeb65c-0758-4b41-af56-501256757519"/*CombineMeshes*/,
       "SymbolId": "c276f4eb-f19c-405b-b247-3db159677571",
+      "SymbolName": "Lib.mesh.modify.CombineMeshes",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "e618c74b-1ae9-40b6-80de-f043b9010879"/*SphereMesh*/,
       "SymbolId": "5fb3dafe-aed4-4fff-a5b9-c144ea023d35",
+      "SymbolName": "Lib.mesh.generate.SphereMesh",
       "InputValues": [
         {
           "Id": "24a1e643-3e52-4a8b-97b6-7c6f1706d14c"/*Radius*/,
@@ -412,6 +434,7 @@
     {
       "Id": "eccc0596-275f-4587-b2c7-eb6f925e85bd"/*DrawPoints*/,
       "SymbolId": "ffd94e5a-bc98-4e70-84d8-cce831e6925f",
+      "SymbolName": "Lib.point.draw.DrawPoints",
       "InputValues": [
         {
           "Id": "414c8045-5086-4449-9d9a-03f28c3966b3"/*PointSize*/,
@@ -429,6 +452,7 @@
     {
       "Id": "f984d45a-d4ec-430f-be07-59b3b20caf98"/*TransformMesh*/,
       "SymbolId": "026e6917-6e6f-4ee3-b2d4-58f4f1de74c9",
+      "SymbolName": "Lib.mesh.modify.TransformMesh",
       "InputValues": [
         {
           "Id": "1168094f-1eee-4ed7-95e2-9459e6171e08"/*Rotation*/,

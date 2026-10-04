@@ -11,12 +11,14 @@
     {
       "Id": "04edba45-b503-4f6c-b33e-a29d471c54cf"/*PlayVideo*/,
       "SymbolId": "914fb032-d7eb-414b-9e09-2bdd7049e049",
+      "SymbolName": "Lib.io.video.PlayVideo",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "06767f17-9860-42c4-ac2e-6fe377e0ada8"/*SetMaterial*/,
       "SymbolId": "0ed2bee3-641f-4b08-8685-df1506e9af3c",
+      "SymbolName": "Lib.render.shading.SetMaterial",
       "InputValues": [
         {
           "Id": "108ff533-f205-4989-b894-acf48e3cc1db"/*Metal*/,
@@ -44,6 +46,7 @@
     {
       "Id": "0ddc3103-e552-4ec0-97b0-373b20c189a4"/*CommonPointSets*/,
       "SymbolId": "353f63fc-e613-43ca-b037-02d7b9f4e935",
+      "SymbolName": "Lib.point.generate.CommonPointSets",
       "InputValues": [
         {
           "Id": "2ba96aee-ff89-41bd-90c5-c6c36907b6e4"/*Set*/,
@@ -56,6 +59,7 @@
     {
       "Id": "0ee06ef3-30fb-471b-a960-fc8a37fcca1f"/*PointSimulation*/,
       "SymbolId": "10507c42-1240-47cc-9569-5e3f1c733e99",
+      "SymbolName": "Lib.point.sim.PointSimulation",
       "InputValues": [
         {
           "Id": "0954b214-dd1f-40fd-bebe-29f74a8f5585"/*Reset*/,
@@ -78,6 +82,7 @@
     {
       "Id": "10b9298d-d0be-4d12-a344-24f69ad89bd5"/*Amount*/,
       "SymbolId": "5d7d61ae-0a41-4ffa-a51d-93bab665e7fe",
+      "SymbolName": "Types.Values.Value",
       "Name": "Amount",
       "InputValues": [
         {
@@ -91,6 +96,7 @@
     {
       "Id": "1efdc617-dace-40ae-876f-fe6b6fc1bfed"/*OpticalFlow*/,
       "SymbolId": "0309e746-c356-4c7b-af05-93136a2607de",
+      "SymbolName": "Lib.image.analyze.OpticalFlow",
       "InputValues": [
         {
           "Id": "a1eba7f5-e2f1-46cb-8982-ae9cb1b7531b"/*Lod*/,
@@ -113,24 +119,28 @@
     {
       "Id": "1fc6361f-5c43-4b5c-bb33-cf2d50690001"/*Layer2d*/,
       "SymbolId": "d8c5330f-59b5-4907-b845-a02def3042fa",
+      "SymbolName": "Lib.render.basic.Layer2d",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "215d38c7-2aec-4b7d-9883-94d95ce4e3e9"/*Group*/,
       "SymbolId": "a3f64d34-1fab-4230-86b3-1c3deba3f90b",
+      "SymbolName": "Lib.render.transform.Group",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "273aef27-7be4-4872-86d5-2952c19f0f93"/*HasIntChanged*/,
       "SymbolId": "62f7408a-a34a-459a-bd7d-bb349196df9b",
+      "SymbolName": "Lib.numbers.int.logic.HasIntChanged",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "29e02a09-9161-42a0-b055-b92d9fb68b9b"/*HasIntChanged*/,
       "SymbolId": "62f7408a-a34a-459a-bd7d-bb349196df9b",
+      "SymbolName": "Lib.numbers.int.logic.HasIntChanged",
       "InputValues": [
         {
           "Id": "b68b0839-156e-4f31-916d-13d066c13831"/*ReturnTrueIf*/,
@@ -143,6 +153,7 @@
     {
       "Id": "2e46a895-ae87-4943-9a25-2e8712aefe37"/*Rings*/,
       "SymbolId": "d002bd90-5921-48b0-a940-a8d0c779f674",
+      "SymbolName": "Lib.image.generate.pattern.Rings",
       "InputValues": [
         {
           "Id": "0556c0a1-bdbf-4a20-a9a7-8ab7effb087f"/*_Twist*/,
@@ -240,12 +251,14 @@
     {
       "Id": "31e06c35-9609-43b0-9ac9-64be1a441d91"/*RenderTarget*/,
       "SymbolId": "f9fe78c5-43a6-48ae-8e8c-6cdbbc330dd1",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "32e85c68-d781-426f-bf6b-f652247b9225"/*ParticleSystem*/,
       "SymbolId": "e44ae9b6-cd56-4224-8a5d-118eda4cd3f4",
+      "SymbolName": "Lib.particle.ParticleSystem",
       "InputValues": [
         {
           "Id": "38392c86-4a1b-4b6f-ac32-26920a73e1e2"/*EmitVelocity*/,
@@ -268,6 +281,7 @@
     {
       "Id": "39064685-0e9f-479b-a254-e43cdf9dc52f"/*PlayVideo*/,
       "SymbolId": "914fb032-d7eb-414b-9e09-2bdd7049e049",
+      "SymbolName": "Lib.io.video.PlayVideo",
       "InputValues": [
         {
           "Id": "21b5671b-862f-4cea-a355-fa019996c936"/*Loop*/,
@@ -280,6 +294,7 @@
     {
       "Id": "3e0f9ed8-42bb-4470-bebc-34f63be09327"/*SamplePointSimAttributes*/,
       "SymbolId": "e85f0fcb-303e-4d21-b592-ad4578286336",
+      "SymbolName": "Lib.point.sim.SamplePointSimAttributes",
       "InputValues": [
         {
           "Id": "152ee687-aefc-4261-8a3e-a01b3fe4e78f"/*TextureMode*/,
@@ -330,6 +345,7 @@
     {
       "Id": "42564df3-855f-4fd3-b6bc-64785046885a"/*DrawLines*/,
       "SymbolId": "836f211f-b387-417c-8316-658e0dc6e117",
+      "SymbolName": "Lib.point.draw.DrawLines",
       "InputValues": [
         {
           "Id": "75419a73-8a3e-4538-9a1d-e3b0ce7f8561"/*Color*/,
@@ -362,6 +378,7 @@
     {
       "Id": "4771aebf-6745-4694-87c2-e3727cab0a39"/*ConvertFormat*/,
       "SymbolId": "e1cd1cdf-3982-4bb3-b080-9f0a851566d7",
+      "SymbolName": "Lib.image.color.ConvertFormat",
       "InputValues": [
         {
           "Id": "88623684-a5e4-4415-8458-648761e834e1"/*GenerateMipMaps*/,
@@ -374,6 +391,7 @@
     {
       "Id": "4c773ea9-a098-459b-a0ea-5224dd98bb3b"/*Layer2d*/,
       "SymbolId": "d8c5330f-59b5-4907-b845-a02def3042fa",
+      "SymbolName": "Lib.render.basic.Layer2d",
       "InputValues": [
         {
           "Id": "ed4f8c30-7b71-4649-97e6-710a718039b0"/*Color*/,
@@ -391,18 +409,21 @@
     {
       "Id": "4dc73458-f9c5-45a3-af3b-bfee74772a06"/*KeepPreviousFrame*/,
       "SymbolId": "57c1fe66-d8bc-4ea5-ad25-6986d4c2bba4",
+      "SymbolName": "Lib.image.use.KeepPreviousFrame",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "566c5a9b-555c-4274-baf6-25d3e55704cd"/*KeepPreviousFrame*/,
       "SymbolId": "57c1fe66-d8bc-4ea5-ad25-6986d4c2bba4",
+      "SymbolName": "Lib.image.use.KeepPreviousFrame",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "5e542058-f818-46fc-9a0b-53b081936d0d"/*OpticalFlow*/,
       "SymbolId": "0309e746-c356-4c7b-af05-93136a2607de",
+      "SymbolName": "Lib.image.analyze.OpticalFlow",
       "InputValues": [
         {
           "Id": "c54cd59c-7b60-4044-b178-1faa9b279138"/*Amount*/,
@@ -415,6 +436,7 @@
     {
       "Id": "76a0c247-2288-4a72-b274-69faf81ff98c"/*RepeatAtPoints*/,
       "SymbolId": "780edb20-f83f-494c-ab17-7015e2311250",
+      "SymbolName": "Lib.point.generate.RepeatAtPoints",
       "InputValues": [
         {
           "Id": "9df1f57c-a079-49c1-b537-d8eb08f2d0d3"/*Scale*/,
@@ -428,6 +450,7 @@
       "Id": "81b93cd2-a150-4073-9596-72cc379daf69"/*ImageLevels*/,
       "IsBypassed": true,
       "SymbolId": "592a2b6f-d4e3-43e0-9e73-034cca3b3900",
+      "SymbolName": "Lib.image.analyze.ImageLevels",
       "InputValues": [
         {
           "Id": "1224b62e-5fca-41e9-a388-4c13c1458d56"/*Center*/,
@@ -443,6 +466,7 @@
     {
       "Id": "85c3d46f-616d-4470-81c2-53933c9b992b"/*_Time_old*/,
       "SymbolId": "9cb4d49e-135b-400b-a035-2b02c5ea6a72",
+      "SymbolName": "Lib.numbers.anim._obsolete._Time_old",
       "InputValues": [
         {
           "Id": "8da7d58d-10a5-4378-8f44-b98f87ec2697"/*Mode*/,
@@ -455,6 +479,7 @@
     {
       "Id": "9b1c328b-c37e-404e-812d-b689aeb2fd48"/*TransformPoints*/,
       "SymbolId": "7f6c64fe-ca2e-445e-a9b4-c70291ce354e",
+      "SymbolName": "Lib.point.transform.TransformPoints",
       "InputValues": [
         {
           "Id": "454d0150-dac4-41b2-83f8-d1ecc3ef76d4"/*Rotation*/,
@@ -471,12 +496,14 @@
     {
       "Id": "a6150640-917b-4805-ac9e-536598b4a37d"/*DrawPointsShaded*/,
       "SymbolId": "84a93ea9-98fb-4088-a1e9-87454f7292f1",
+      "SymbolName": "Lib.point.draw.DrawPointsShaded",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "a87d1393-301b-48be-8a8c-028a9bf1732e"/*TextureMapForce*/,
       "SymbolId": "4f5999c9-8ade-4e31-8379-afb7db56e170",
+      "SymbolName": "Lib.particle.force.TextureMapForce",
       "InputValues": [
         {
           "Id": "0de3d1e6-63d4-4dbf-a426-cbd4e6019c45"/*ViewConfinement*/,
@@ -494,6 +521,7 @@
     {
       "Id": "b9f6e8de-6284-4380-8c9c-5849a8300f45"/*_Time_old*/,
       "SymbolId": "9cb4d49e-135b-400b-a035-2b02c5ea6a72",
+      "SymbolName": "Lib.numbers.anim._obsolete._Time_old",
       "InputValues": [
         {
           "Id": "2d9c040d-5244-40ac-8090-d8d57323487b"/*SpeedFactor*/,
@@ -506,6 +534,7 @@
     {
       "Id": "cba7d7aa-dc89-48be-b1f0-f4362b802c92"/*_GridPoints_Old*/,
       "SymbolId": "3ee8f66d-68df-43c1-b0eb-407259bf7e86",
+      "SymbolName": "Lib.point.generate._GridPoints_Old",
       "InputValues": [
         {
           "Id": "6de4f08a-5834-4b9b-93e8-8f93fe32164c"/*CountZ*/,
@@ -538,6 +567,7 @@
     {
       "Id": "cbc9f786-19e2-43f5-90f9-2beaf2b050ab"/*_GridPoints_Old*/,
       "SymbolId": "3ee8f66d-68df-43c1-b0eb-407259bf7e86",
+      "SymbolName": "Lib.point.generate._GridPoints_Old",
       "InputValues": [
         {
           "Id": "6de4f08a-5834-4b9b-93e8-8f93fe32164c"/*CountZ*/,
@@ -550,6 +580,7 @@
     {
       "Id": "d3adf557-1a26-4cf6-b72c-a4475e476475"/*RandomizePoints*/,
       "SymbolId": "ec0675d7-6b72-4b15-b141-80bdd2367cd8",
+      "SymbolName": "Lib.point.modify.RandomizePoints",
       "InputValues": [
         {
           "Id": "82384eba-1d7a-41c8-a703-9184c961d766"/*Strength*/,
@@ -572,6 +603,7 @@
     {
       "Id": "d5e9c363-4567-4a67-8e69-7c9d57722aed"/*Group*/,
       "SymbolId": "a3f64d34-1fab-4230-86b3-1c3deba3f90b",
+      "SymbolName": "Lib.render.transform.Group",
       "InputValues": [],
       "Outputs": []
     }

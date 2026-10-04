@@ -15,6 +15,7 @@
     {
       "Id": "00861351-d0f7-472b-bf5b-758f1c780710"/*SplitString*/,
       "SymbolId": "a0fcf7ed-1f14-4a8b-a57e-99e5b2407b1b",
+      "SymbolName": "Lib.string.list.SplitString",
       "InputValues": [
         {
           "Id": "c54e4b16-b185-41f8-bc50-230b7624d093"/*Split*/,
@@ -27,6 +28,7 @@
     {
       "Id": "20fbad0f-78aa-4d23-b95f-045f108685e5"/*SplitString*/,
       "SymbolId": "a0fcf7ed-1f14-4a8b-a57e-99e5b2407b1b",
+      "SymbolName": "Lib.string.list.SplitString",
       "InputValues": [
         {
           "Id": "c54e4b16-b185-41f8-bc50-230b7624d093"/*Split*/,
@@ -39,6 +41,7 @@
     {
       "Id": "2e4fc125-c978-4021-80c9-9f5ec7f1a67c"/*JoinStringList*/,
       "SymbolId": "51943340-70b1-4bb5-8cb9-0e79d366a57b",
+      "SymbolName": "Lib.string.list.JoinStringList",
       "InputValues": [
         {
           "Id": "89350e3c-2b83-4720-bfa1-d4adc6cc02fa"/*Separator*/,
@@ -51,6 +54,7 @@
     {
       "Id": "51c0afc1-bdf9-4a8e-86b8-f07bca81db5f"/*JoinStringList*/,
       "SymbolId": "51943340-70b1-4bb5-8cb9-0e79d366a57b",
+      "SymbolName": "Lib.string.list.JoinStringList",
       "InputValues": [
         {
           "Id": "89350e3c-2b83-4720-bfa1-d4adc6cc02fa"/*Separator*/,
@@ -63,6 +67,7 @@
     {
       "Id": "54fd08e0-1d90-4f5c-be25-aeda9f7c7357"/*String*/,
       "SymbolId": "5880cbc3-a541-4484-a06a-0e6f77cdbe8e",
+      "SymbolName": "Types.Values.String",
       "InputValues": [
         {
           "Id": "ceeae47b-d792-471d-a825-49e22749b7b9"/*InputString*/,
@@ -75,12 +80,14 @@
     {
       "Id": "592d3edd-abd8-419d-8804-c031d8a0cc4e"/*CombineStrings*/,
       "SymbolId": "48ab9824-76ca-4238-800f-9cf95311e6c0",
+      "SymbolName": "Lib.string.combine.CombineStrings",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "5cf3533a-b93d-48b9-ad30-fa2c94623457"/*SplitString*/,
       "SymbolId": "a0fcf7ed-1f14-4a8b-a57e-99e5b2407b1b",
+      "SymbolName": "Lib.string.list.SplitString",
       "InputValues": [
         {
           "Id": "c54e4b16-b185-41f8-bc50-230b7624d093"/*Split*/,
@@ -93,12 +100,14 @@
     {
       "Id": "64a0d070-922a-4ee2-b100-48b94bea0c21"/*PointsToRGBList*/,
       "SymbolId": "0e881c4d-c4ed-42c1-a2c9-d076b0489395",
+      "SymbolName": "Lib.io.dmx.obsolete.PointsToRGBList",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "66598d56-38ed-4272-872e-9e9ff3e839e9"/*GridPoints*/,
       "SymbolId": "e46b50ce-c84f-46bb-b8e7-dea2a64a1bdc",
+      "SymbolName": "Lib.point.generate.GridPoints",
       "InputValues": [
         {
           "Id": "2e3f0337-c7c1-4dff-9a84-ab7e5fbc3d18"/*Scale*/,
@@ -131,6 +140,7 @@
     {
       "Id": "695d17a7-1086-49ee-b8af-c6ee4d2f247b"/*SearchAndReplace*/,
       "SymbolId": "b7910fc6-c3b2-4daf-93cd-010dcfe22a57",
+      "SymbolName": "Lib.string.search.SearchAndReplace",
       "InputValues": [
         {
           "Id": "4fe3f641-1c36-4970-be71-dafb5632fb53"/*SearchPattern*/,
@@ -148,6 +158,7 @@
     {
       "Id": "6d3bbae6-2613-44cb-ad15-2f460993360a"/*String*/,
       "SymbolId": "5880cbc3-a541-4484-a06a-0e6f77cdbe8e",
+      "SymbolName": "Types.Values.String",
       "InputValues": [
         {
           "Id": "ceeae47b-d792-471d-a825-49e22749b7b9"/*InputString*/,
@@ -160,6 +171,7 @@
     {
       "Id": "863f222f-269c-479d-9897-d717976511e6"/*MidiSysexOutput*/,
       "SymbolId": "78cadb24-5a77-41e2-908f-01d61140c769",
+      "SymbolName": "Lib.io.midi.MidiSysexOutput",
       "InputValues": [
         {
           "Id": "611e8c42-9954-421c-8071-1e959478c8fe"/*TriggerSend*/,
@@ -182,12 +194,14 @@
     {
       "Id": "90aa1eae-b157-4fb4-b6dc-f7007dd756f7"/*RGBToSysEx*/,
       "SymbolId": "dcd44623-3cbc-4cf4-b5b9-00ea0f884a22",
+      "SymbolName": "Examples.user.fuzzy.midi.RGBToSysEx",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "9432d07e-a08a-4540-a39f-5a3873ee15d1"/*PickPointList*/,
       "SymbolId": "e9a0bdfd-6f6e-41e2-8c0c-cd5fee26e359",
+      "SymbolName": "Lib.point.combine.PickPointList",
       "InputValues": [
         {
           "Id": "8b418dcd-e7cd-4bce-a69e-a9a543426bfe"/*Index*/,
@@ -200,6 +214,7 @@
     {
       "Id": "a596ed77-6296-4555-af77-dc1164aba098"/*JoinStringList*/,
       "SymbolId": "51943340-70b1-4bb5-8cb9-0e79d366a57b",
+      "SymbolName": "Lib.string.list.JoinStringList",
       "InputValues": [
         {
           "Id": "89350e3c-2b83-4720-bfa1-d4adc6cc02fa"/*Separator*/,
@@ -212,6 +227,7 @@
     {
       "Id": "a968ccef-2921-4bf5-88f4-28cc65153bfa"/*String*/,
       "SymbolId": "5880cbc3-a541-4484-a06a-0e6f77cdbe8e",
+      "SymbolName": "Types.Values.String",
       "InputValues": [
         {
           "Id": "ceeae47b-d792-471d-a825-49e22749b7b9"/*InputString*/,
@@ -224,6 +240,7 @@
     {
       "Id": "b1532b18-1d00-4d6b-8d4c-b46b31282796"/*ZipStringList*/,
       "SymbolId": "04d557f8-3cc7-471f-8f2f-39090fec63bb",
+      "SymbolName": "Lib.string.list.ZipStringList",
       "InputValues": [
         {
           "Id": "be829559-ab5b-41ee-b104-dc5b0c1a1b2e"/*StringsOne*/,
@@ -253,6 +270,7 @@
     {
       "Id": "c2271ee1-e3af-498c-9693-ea5f61ee6517"/*SamplePointColorAttributes*/,
       "SymbolId": "056ea55a-91a2-4b55-bcce-e44cc8602623",
+      "SymbolName": "Lib.point.modify.SamplePointColorAttributes",
       "InputValues": [
         {
           "Id": "7139213f-fb73-42b6-8b2a-ffb05c2aeaf9"/*Scale*/,
@@ -273,6 +291,7 @@
     {
       "Id": "f649593b-518f-428a-a73a-0153e09459f2"/*RemapFloatList*/,
       "SymbolId": "f4e26a76-f8c4-4889-b1dc-c690cd078296",
+      "SymbolName": "Lib.numbers.floats.process.RemapFloatList",
       "InputValues": [
         {
           "Id": "023147fa-fae5-446c-b24a-88b0cb6bc27b"/*Mode*/,

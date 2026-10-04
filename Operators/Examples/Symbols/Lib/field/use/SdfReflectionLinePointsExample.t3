@@ -6,6 +6,7 @@
     {
       "Id": "0bb2bd48-f775-49a4-b49a-ce134925098c"/*SdfReflectionLinePoints*/,
       "SymbolId": "4af7bbd1-9231-4ef3-bb7a-1d643c7d16cf",
+      "SymbolName": "Lib.field.use.SdfReflectionLinePoints",
       "InputValues": [
         {
           "Id": "0d73ebd5-c76b-46c2-b15f-96ff2ec498bd"/*MaxReflectionCount*/,
@@ -18,6 +19,7 @@
     {
       "Id": "122a2fa9-fa02-4638-8854-5dc6fcd7427f"/*Add*/,
       "SymbolId": "c160f925-0a66-4505-a569-cadd878dbb6f",
+      "SymbolName": "Lib.numbers.float.basic.Add",
       "InputValues": [
         {
           "Id": "993d59bb-1fc0-4857-a36d-629b0e7aa0d2"/*Input2*/,
@@ -30,6 +32,7 @@
     {
       "Id": "2195441f-4cd4-42f7-a891-4b21e5d1794a"/*Blob*/,
       "SymbolId": "27b0e1af-cb2e-4603-83f9-5c9b042d87e6",
+      "SymbolName": "Lib.image.generate.basic.Blob",
       "InputValues": [
         {
           "Id": "0c49c872-852a-4f15-8cde-f3cda743c28e"/*FeatherBias*/,
@@ -55,12 +58,14 @@
     {
       "Id": "380af89b-4686-4579-8c36-8cd485834fad"/*Fxaa*/,
       "SymbolId": "0784b2ea-ac03-4f6e-8de3-4200cb93d651",
+      "SymbolName": "Lib.image.use.Fxaa",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "5e177afb-6bf1-428e-8ac7-2bc8d0f03dfc"/*SetMaterial*/,
       "SymbolId": "0ed2bee3-641f-4b08-8685-df1506e9af3c",
+      "SymbolName": "Lib.render.shading.SetMaterial",
       "InputValues": [
         {
           "Id": "108ff533-f205-4989-b894-acf48e3cc1db"/*Metal*/,
@@ -78,6 +83,7 @@
     {
       "Id": "63dbd215-2d00-4e3e-b61c-35a7e5bfa1b9"/*CustomSDF*/,
       "SymbolId": "637d00e4-ab63-4fe3-8e63-1e206c728841",
+      "SymbolName": "Lib.field.generate.sdf.CustomSDF",
       "InputValues": [
         {
           "Id": "3c366d34-c398-410e-972b-d8cc2baffddb"/*A*/,
@@ -105,6 +111,7 @@
     {
       "Id": "7177345b-8dc9-4d76-a3a6-0ffd06af33d5"/*DrawRayLines*/,
       "SymbolId": "7f69a5e5-28e5-44c1-b3e3-74b05faa0531",
+      "SymbolName": "Lib.point.draw.DrawRayLines",
       "InputValues": [
         {
           "Id": "037a162b-2054-44b1-b536-b532ab0c14b7"/*BlendMod*/,
@@ -142,6 +149,7 @@
     {
       "Id": "7d723ce6-2b4e-4d81-b68d-bc91cc4f8ec6"/*DrawPoints*/,
       "SymbolId": "ffd94e5a-bc98-4e70-84d8-cce831e6925f",
+      "SymbolName": "Lib.point.draw.DrawPoints",
       "InputValues": [
         {
           "Id": "414c8045-5086-4449-9d9a-03f28c3966b3"/*PointSize*/,
@@ -179,6 +187,7 @@
     {
       "Id": "871e9b8e-0cef-498c-bd06-5bd32b8f8e23"/*MapPointAttributes*/,
       "SymbolId": "191e5057-4da4-447e-b7cf-e9e0ed8c5dd8",
+      "SymbolName": "Lib.point.modify.MapPointAttributes",
       "InputValues": [
         {
           "Id": "38046ede-e786-4cb1-ac17-de6cb7b91c32"/*Range*/,
@@ -252,6 +261,7 @@
     {
       "Id": "8c37b04e-879d-4ba9-a964-3c5185f67d79"/*SetFog*/,
       "SymbolId": "74cbfce0-f8b8-46a1-b5d6-38477d4eec99",
+      "SymbolName": "Lib.render.shading.SetFog",
       "InputValues": [
         {
           "Id": "7a331539-33ea-48b9-8930-daf93dd33d7c"/*Distance*/,
@@ -274,6 +284,7 @@
     {
       "Id": "9758ba48-1d2e-44eb-8763-6db6599fc02f"/*OrbitCamera*/,
       "SymbolId": "6415ed0e-3692-45e2-8e70-fe0cf4d29ebc",
+      "SymbolName": "Lib.render.camera.OrbitCamera",
       "InputValues": [
         {
           "Id": "11b13db2-3c91-4199-8245-50af200e3a9d"/*PositionOffset*/,
@@ -317,6 +328,7 @@
     {
       "Id": "9892aca8-072f-4f1f-a709-bad739bd909a"/*RadialPoints*/,
       "SymbolId": "3352d3a1-ab04-4d0a-bb43-da69095b73fd",
+      "SymbolName": "Lib.point.generate.RadialPoints",
       "InputValues": [
         {
           "Id": "01a62754-7629-487d-a43a-f0cd2fbfafce"/*OrientationAxis*/,
@@ -376,24 +388,28 @@
     {
       "Id": "a4ac5e56-61c9-4bdd-a37c-c9c04290b6b0"/*RenderTarget*/,
       "SymbolId": "f9fe78c5-43a6-48ae-8e8c-6cdbbc330dd1",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "a7a76ba7-7082-43af-be5b-b9d21bbb2422"/*Group*/,
       "SymbolId": "a3f64d34-1fab-4230-86b3-1c3deba3f90b",
+      "SymbolName": "Lib.render.transform.Group",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "b96aba56-ea78-434f-aa47-2699bae0120c"/*Bloom*/,
       "SymbolId": "f634e126-8834-46ea-bd6e-5ebfdc8b0733",
+      "SymbolName": "Lib.image.fx.blur.Bloom",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "f1bf3916-8665-46df-b51a-4e41b8724826"/*RaymarchField*/,
       "SymbolId": "9323e32f-078c-4156-941b-203f4c265ff5",
+      "SymbolName": "Lib.field.render.RaymarchField",
       "InputValues": [
         {
           "Id": "0b4d60de-261f-4dbf-ad44-6395cda3a496"/*MinDistance*/,
@@ -436,6 +452,7 @@
     {
       "Id": "f30ad6e6-803e-421f-948d-521522bf1c38"/*Time*/,
       "SymbolId": "b0d75f21-df33-460b-beab-d8c5e1f23e5e",
+      "SymbolName": "Lib.numbers.anim.time.Time",
       "InputValues": [
         {
           "Id": "e0f765f3-ac71-45c9-87a4-e9be3fa9a9a0"/*SpeedFactor*/,
@@ -448,6 +465,7 @@
     {
       "Id": "ff6ffac1-7e3b-4387-a5e6-c7219e6b966a"/*MapPointAttributes*/,
       "SymbolId": "191e5057-4da4-447e-b7cf-e9e0ed8c5dd8",
+      "SymbolName": "Lib.point.modify.MapPointAttributes",
       "InputValues": [
         {
           "Id": "38046ede-e786-4cb1-ac17-de6cb7b91c32"/*Range*/,

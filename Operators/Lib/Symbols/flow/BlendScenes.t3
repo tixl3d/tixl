@@ -15,24 +15,28 @@
     {
       "Id": "1294d0e9-5023-44ee-8644-4c94a1ef64f6"/*Switch*/,
       "SymbolId": "e64f95e4-c045-400f-98ca-7c020ad46174",
+      "SymbolName": "Lib.flow.Switch",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "2ffa8074-0bd9-4d6c-8878-70dabad7ae29"/*Execute*/,
       "SymbolId": "936e4324-bea2-463a-b196-6064a2d8a6b2",
+      "SymbolName": "Lib.flow.Execute",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "7ad52dfb-d63b-4b46-890e-72256db54bb7"/*Modulo*/,
       "SymbolId": "5202d3f6-c970-4006-933d-3c60d6c202dc",
+      "SymbolName": "Lib.numbers.float.basic.Modulo",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "7f0ba63f-9f31-4524-8b9b-33a659380e9b"/*Sub*/,
       "SymbolId": "3ba13faf-ea80-44ec-948a-02ed3d653a20",
+      "SymbolName": "Lib.numbers.float.basic.Sub",
       "InputValues": [
         {
           "Id": "4889e720-e47c-4617-8353-06acf0af5283"/*Input1*/,
@@ -45,12 +49,14 @@
     {
       "Id": "8fbdc192-6f62-44bd-8739-956d8b707bac"/*Group*/,
       "SymbolId": "a3f64d34-1fab-4230-86b3-1c3deba3f90b",
+      "SymbolName": "Lib.render.transform.Group",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "9576ed9a-d637-41bb-938e-c1021b8d22b7"/*HSLToColor*/,
       "SymbolId": "1677fd74-6e54-479a-b478-c2ac77288f9c",
+      "SymbolName": "Lib.numbers.color.HSLToColor",
       "InputValues": [
         {
           "Id": "115e3d92-2e91-447d-ba81-18a508d3d36a"/*Lightness*/,
@@ -63,12 +69,14 @@
     {
       "Id": "959f1eab-9e7f-4152-9f66-115204389b72"/*FloatToInt*/,
       "SymbolId": "06b4728e-852c-491a-a89d-647f7e0b5415",
+      "SymbolName": "Lib.numbers.int.process.FloatToInt",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "9d6598df-7306-4cf1-b1ed-ed4a8f1b2e13"/*AddInt*/,
       "SymbolId": "ab73a49e-c548-437d-a4ab-b3fa41e30097",
+      "SymbolName": "Lib.numbers.int.basic.AddInt",
       "InputValues": [
         {
           "Id": "d5efbe02-8f33-42e9-a205-859c218acbec"/*Input2*/,
@@ -81,18 +89,21 @@
     {
       "Id": "c1185ed2-1d14-4975-a606-639173e609af"/*Switch*/,
       "SymbolId": "e64f95e4-c045-400f-98ca-7c020ad46174",
+      "SymbolName": "Lib.flow.Switch",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "efdd35bb-806f-4bcb-b7f8-1dd6864ecb38"/*Group*/,
       "SymbolId": "a3f64d34-1fab-4230-86b3-1c3deba3f90b",
+      "SymbolName": "Lib.render.transform.Group",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "f242b52f-7e31-41e3-a764-b0f80370f93a"/*HSLToColor*/,
       "SymbolId": "1677fd74-6e54-479a-b478-c2ac77288f9c",
+      "SymbolName": "Lib.numbers.color.HSLToColor",
       "InputValues": [
         {
           "Id": "115e3d92-2e91-447d-ba81-18a508d3d36a"/*Lightness*/,
@@ -105,6 +116,7 @@
     {
       "Id": "f9960ef9-c26c-457b-8cb1-763ea1346c36"/*Clamp*/,
       "SymbolId": "c3a18346-930c-4242-9e42-aa9b3a439395",
+      "SymbolName": "Lib.numbers.float.adjust.Clamp",
       "InputValues": [
         {
           "Id": "54c0e659-7fda-459f-9938-deeee0cfa11c"/*Max*/,

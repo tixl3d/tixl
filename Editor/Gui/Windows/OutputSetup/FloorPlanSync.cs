@@ -128,6 +128,26 @@ internal static class FloorPlanSync
     /// content, a projection, a trace or regions is lowered — it stays linked to the edge but stops following
     /// the plan, and ticking the edge again raises that same surface.
     /// </summary>
+    /// <summary>
+    /// Applies the plan's wall height to the walls standing on it. A wall whose height still matches what the
+    /// plan asked for before follows along; one that was given a height of its own keeps it — that difference
+    /// *is* the override, so nothing extra has to be stored or migrated.
+    /// </summary>
+    public static void ApplyWallHeight(Setup setup, FloorPlan plan, float previousHeight)
+    {
+        var height = MathF.Max(plan.WallHeight, SurfaceGeometry.MinSize);
+        for (var segment = 0; segment < plan.SegmentCount; segment++)
+        {
+            var wall = setup.FindSurface(plan.WallOf(segment));
+            if (wall == null || MathF.Abs(wall.SizeInMeters.Y - previousHeight) > 0.0005f)
+                continue;
+
+            wall.SizeInMeters = new Vector2(wall.SizeInMeters.X, height);
+        }
+
+        Apply(setup, plan);
+    }
+
     public static void SetWall(Setup setup, FloorPlan plan, int segment, bool on)
     {
         plan.EnsureWallSlots();

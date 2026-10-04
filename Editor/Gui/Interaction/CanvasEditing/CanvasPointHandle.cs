@@ -116,7 +116,9 @@ internal static class CanvasPointHandle
 
         if (style.Shape == Shapes.Square)
         {
-            var half = new Vector2(radius);
+            // Square handles are axis-aligned, so they land on whole pixels; round handles keep their antialiasing.
+            var half = new Vector2(MathF.Round(radius));
+            screen = new Vector2(MathF.Round(screen.X), MathF.Round(screen.Y));
             dl.AddRectFilled(screen - half, screen + half, color);
             if (hasOutline)
                 dl.AddRect(screen - half, screen + half, style.OutlineColor, 0, ImDrawFlags.None, outlineWidth);

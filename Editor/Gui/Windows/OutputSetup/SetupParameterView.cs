@@ -110,7 +110,7 @@ internal static class SetupParameterView
 
         // Through the shared resolver: the same context and size the composite pulls with, so this shows the
         // frame the output renders rather than evaluating the graph a second time at a size of its own.
-        OutputContentResolver.TryGetSourceContent(instance.SymbolChildId, out _, out var content);
+        OutputContentResolver.TryGetPreviewContent(instance.SymbolChildId, out var content);
 
         Span<int> resolution = [0, 0]; // nothing connected: no size, rather than a made-up one
         if (content is { IsDisposed: false })
@@ -322,6 +322,8 @@ internal static class SetupParameterView
             CommitFieldUndo(setup, "Change raster", gridCellState);
         }
 
+        DrawMappingModeRows(setup, surface);
+
         Span<float> anchor = [surface.Anchor.X, surface.Anchor.Y];
         var anchorState = DrawFloatsRow("Anchor (-1..1)", anchor,
                                         "Origin of the metre raster and of child regions: (0,0) is the centre, (0,-1) the bottom-centre, (±1,±1) the corners.");
@@ -330,6 +332,39 @@ internal static class SetupParameterView
             surface.Anchor = new Vector2(anchor[0], anchor[1]);
 
         CommitFieldUndo(setup, "Move anchor", anchorState);
+    }
+
+    /// <summary>
+    /// One row per output this surface is shown on: whether it takes the whole canvas or sits on corners you
+    /// place. A fill ignores every later resize of the surface, which is the point of it on a display; switching
+    /// to a corner pin hands over the quad it filled, so nothing moves until a corner is dragged.
+    /// </summary>
+    private static void DrawMappingModeRows(Setup setup, Surface surface)
+    {
+        for (var i = 0; i < surface.OutputMappings.Count; i++)
+        {
+            var mapping = surface.OutputMappings[i];
+            var output = setup.FindOutput(mapping.OutputId);
+            if (output == null)
+                continue;
+
+            var mode = mapping.Mode;
+            ImGui.PushID(mapping.OutputId.GetHashCode());
+            if (FormInputs.AddSegmentedButtonWithLabel(ref mode, $"On {output.Name}",
+                                                       "Fill takes the whole canvas and stays there however the surface is resized. "
+                                                       + "Corner pin is aimed: you drag its corners onto the wall, and reshaping the surface on the wall moves it along."))
+            {
+                SetupUndo.RunUndoable("Change mapping mode", setup, () =>
+                                                                    {
+                                                                        if (mode == MappingModes.Fill)
+                                                                            mapping.FillCanvas();
+                                                                        else
+                                                                            mapping.PromoteToCornerPin();
+                                                                    });
+            }
+
+            ImGui.PopID();
+        }
     }
 
     /// <summary>How a physical surface is turned in the stage: yaw, pitch and roll, for reading and fine-tuning a free surface.</summary>
@@ -386,10 +421,15 @@ internal static class SetupParameterView
         }
 
         Span<float> height = [plan.WallHeight];
-        var heightState = DrawFloatsRow("Wall height (m)", height, "What a newly raised wall gets; walls already standing keep their own height.");
+        var heightState = DrawFloatsRow("Wall height (m)", height,
+                                        "The height of this plan's walls. A wall given a height of its own keeps it, and a newly raised wall starts here.");
         BeginFieldUndo(setup, heightState);
         if ((heightState & InputEditStateFlags.Modified) != 0)
+        {
+            var previous = plan.WallHeight;
             plan.WallHeight = MathF.Max(height[0], 0.1f);
+            FloorPlanSync.ApplyWallHeight(setup, plan, previous);
+        }
 
         CommitFieldUndo(setup, "Change wall height", heightState);
 
@@ -436,9 +476,7 @@ internal static class SetupParameterView
         {
             // 0 means "follow the plug". Only a render size either way: every quad on this canvas is stored as
             // a fraction of it, so changing it re-renders without moving a single mapping.
-            var width = Math.Clamp(canvas[0], 0, 16384);
-            var height = Math.Clamp(canvas[1], 0, 16384);
-            output.CanvasResolution = new T3.Core.DataTypes.Vector.Int2(width, height);
+            output.CanvasResolution = OutputDefinition.ClampResolution(new T3.Core.DataTypes.Vector.Int2(canvas[0], canvas[1]));
         }
 
         CommitFieldUndo(setup, "Resize canvas", canvasState);
@@ -530,7 +568,8 @@ internal static class SetupParameterView
             if (ImGui.SmallButton("Use as Canvas Size"))
             {
                 SetupUndo.RunUndoable("Resize canvas to pixel map", setup,
-                                      () => output.CanvasResolution = new T3.Core.DataTypes.Vector.Int2(image.Width, image.Height));
+                                      () => output.CanvasResolution =
+                                                OutputDefinition.ClampResolution(new T3.Core.DataTypes.Vector.Int2(image.Width, image.Height)));
             }
         }
     }
@@ -787,8 +826,9 @@ internal static class SetupParameterView
             BeginFieldUndo(setup, resolutionState);
             if ((resolutionState & InputEditStateFlags.Modified) != 0)
             {
-                boundOutput.CanvasResolution = new T3.Core.DataTypes.Vector.Int2(Math.Clamp(resolution[0], 1, 16384),
-                                                                                 Math.Clamp(resolution[1], 1, 16384));
+                // A bound output sends at its canvas, so 0 ("follow the plug") would be circular here.
+                boundOutput.CanvasResolution = OutputDefinition.ClampResolution(new T3.Core.DataTypes.Vector.Int2(Math.Max(resolution[0], 1),
+                                                                                                                 Math.Max(resolution[1], 1)));
             }
 
             CommitFieldUndo(setup, "Resize canvas", resolutionState);
@@ -844,7 +884,7 @@ internal static class SetupParameterView
         if (instance is not IContentSupplier supplier)
             return;
 
-        OutputContentResolver.TryGetSourceContent(childId, out _, out var content);
+        OutputContentResolver.TryGetPreviewContent(childId, out var content);
         var context = OutputContentResolver.Context;
 
         var update = supplier.GetUpdateEnabled(context);
@@ -890,7 +930,7 @@ internal static class SetupParameterView
         var source = setup.FindSource(slice.SourceId);
         var texW = 0;
         var texH = 0;
-        if (source != null && OutputContentResolver.TryGetSourceContent(source.SymbolChildId, out _, out var content)
+        if (source != null && OutputContentResolver.TryGetPreviewContent(source.SymbolChildId, out var content)
             && content is { IsDisposed: false })
         {
             texW = content.Description.Width;
@@ -923,7 +963,7 @@ internal static class SetupParameterView
         {
             var nx = Math.Clamp(FromUnit(position[0], texW), 0f, 1f - widthUv);
             var ny = Math.Clamp(FromUnit(position[1], texH), 0f, 1f - heightUv);
-            slice.UvRect = new Vector4(nx, ny, nx + widthUv, ny + heightUv);
+            slice.SetUvRect(new Vector4(nx, ny, nx + widthUv, ny + heightUv));
         }
 
         CommitFieldUndo(setup, "Move slice", positionState);
@@ -935,7 +975,7 @@ internal static class SetupParameterView
         {
             var nw = Math.Clamp(FromUnit(size[0], texW), SurfaceGeometry.MinSliceSize, 1f - uv.X);
             var nh = Math.Clamp(FromUnit(size[1], texH), SurfaceGeometry.MinSliceSize, 1f - uv.Y);
-            slice.UvRect = new Vector4(uv.X, uv.Y, uv.X + nw, uv.Y + nh);
+            slice.SetUvRect(new Vector4(uv.X, uv.Y, uv.X + nw, uv.Y + nh));
         }
 
         CommitFieldUndo(setup, "Resize slice", sizePxState);
@@ -1365,7 +1405,7 @@ internal static class SetupParameterView
     private static void DrawMeasuredSizePopup(Setup setup, Surface surface)
     {
         ImGui.SetNextWindowSize(new Vector2(260 * T3Ui.UiScaleFactor, 0));
-        if (!ImGui.BeginPopup(MeasuredSizePopupId))
+        if (!SetupPopup.Begin(MeasuredSizePopupId))
             return;
 
         ImGui.PushFont(Fonts.FontBold);
@@ -1390,7 +1430,7 @@ internal static class SetupParameterView
         if (ImGui.Button("Cancel"))
             ImGui.CloseCurrentPopup();
 
-        ImGui.EndPopup();
+        SetupPopup.End();
     }
 
     /// <summary>
@@ -1435,7 +1475,7 @@ internal static class SetupParameterView
             ImGui.OpenPopup("##pickTargetPopup");
 
         var changed = false;
-        if (ImGui.BeginPopup("##pickTargetPopup"))
+        if (SetupPopup.Begin("##pickTargetPopup"))
         {
             for (var i = 0; i < setup.Surfaces.Count; i++)
             {
@@ -1460,7 +1500,7 @@ internal static class SetupParameterView
                 }
             }
 
-            ImGui.EndPopup();
+            SetupPopup.End();
         }
 
         return changed;

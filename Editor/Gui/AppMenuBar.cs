@@ -64,6 +64,8 @@ internal static class AppMenuBar
 
             DrawVersionIndicator();
             DrawErrorsIndicator();
+            DrawGpuMemoryIndicator();
+            Windows.OutputSetup.OutputsIndicator.Draw();
             T3Metrics.DrawRenderPerformanceGraph();
 
             ImGui.SameLine();
@@ -134,6 +136,37 @@ internal static class AppMenuBar
             ImGui.EndTooltip();
         }
     }
+
+    /// <summary>
+    /// Warns while another application has taken so much video memory that ours no longer fits in the budget the
+    /// driver grants us. Only then: TiXL filling the card by itself is normal and costs nothing, while being
+    /// pushed past the budget pages resources per frame and reads as the renderer having become slow.
+    /// </summary>
+    private static void DrawGpuMemoryIndicator()
+    {
+        App.GpuMemoryBudget.UpdateFrame();
+        if (!App.GpuMemoryBudget.IsOversubscribed)
+            return;
+
+        ImGui.SameLine(0, AppBarSpacingX);
+        Icon.Warning.DrawAtCursor(UiColors.StatusAttention);
+        ImGui.SameLine(0, 4 * T3Ui.UiScaleFactor);
+        CustomComponents.StylizedText("GPU memory", Fonts.FontNormal, UiColors.StatusAttention);
+
+        if (!ImGui.IsItemHovered())
+            return;
+
+        CustomComponents.BeginTooltip(400);
+        CustomComponents.StylizedText("Another application is using the GPU's memory", Fonts.FontNormal, UiColors.Text);
+        ImGui.TextWrapped($"TiXL holds {GigaBytes(App.GpuMemoryBudget.UsageBytes)} while the driver currently grants it "
+                          + $"{GigaBytes(App.GpuMemoryBudget.BudgetBytes)}. What doesn't fit is moved in and out of graphics "
+                          + "memory for every frame that needs it, which can cost tens of milliseconds and looks like slow rendering.\n\n"
+                          + "Close whatever else is using the GPU (browsers and design tools are the usual culprits), or render at "
+                          + "a lower resolution or with less multisampling.");
+        CustomComponents.EndTooltip();
+    }
+
+    private static string GigaBytes(long bytes) => $"{bytes / (1024.0 * 1024 * 1024):0.0} GB";
 
     private static void DrawErrorsIndicator()
     {

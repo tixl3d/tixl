@@ -32,6 +32,7 @@ The following is a list of the **default keyboard** short-cuts. With v4.0.4 you 
  | ToggleBypassed                 | Shift + B (NeedsWindowFocus)                       |
  | Disconnect                     | Alt + D (NeedsWindowFocus)                         |
  | PinToOutputWindow              | P (NeedsWindowFocus)                               |
+ | ShowInGraph                    | Shift + P                                          |
  | DisplayImageAsBackground       | ctrl + P                                           |
  | ClearBackgroundImage           | ctrl + P (NeedsWindowFocus) or use Clear BG button |
  | LoadBookmark1                  | ctrl + D1                                          |

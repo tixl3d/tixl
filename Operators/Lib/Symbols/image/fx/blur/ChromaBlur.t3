@@ -15,6 +15,7 @@
     {
       "Id": "191a4985-3b65-4eb5-b85f-1c71564170e4"/*CustomPixelShader*/,
       "SymbolId": "46daab0e-e957-413e-826c-0699569d0e07",
+      "SymbolName": "Lib.image.use.CustomPixelShader",
       "InputValues": [
         {
           "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
@@ -32,6 +33,7 @@
     {
       "Id": "2b6056cf-2ede-4093-bb43-5aecf0b52e14"/*FastBlur*/,
       "SymbolId": "1112d3ea-fef0-4d7c-a265-a067030256a1",
+      "SymbolName": "Lib.image.fx.blur.FastBlur",
       "InputValues": [
         {
           "Id": "01d8a4a8-56ca-4e6d-a6c9-8092e4153963"/*MaxLevels*/,
@@ -44,6 +46,7 @@
     {
       "Id": "fd12c8ca-43ad-47bf-9e8e-e97a7a76b7ae"/*CustomPixelShader*/,
       "SymbolId": "46daab0e-e957-413e-826c-0699569d0e07",
+      "SymbolName": "Lib.image.use.CustomPixelShader",
       "InputValues": [
         {
           "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,

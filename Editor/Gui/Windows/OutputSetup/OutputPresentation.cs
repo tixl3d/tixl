@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using T3.Core.Output;
 using T3.Core.Output.Rendering;
 using T3.Editor.App;
@@ -26,6 +27,7 @@ internal static class OutputPresentation
         // One token per frame for everything the compositing path memoises, advanced before anything asks.
         OutputFrame.Advance();
         OutputWindowHandling.BeginFrame();
+        OutputPresentationStats.BeginFrame();
 
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out var machineConfig))
         {
@@ -45,15 +47,19 @@ internal static class OutputPresentation
             if (binding == null)
                 continue;
 
+            var startTimestamp = Stopwatch.GetTimestamp();
             if (binding.IsStream)
             {
                 OutputStreaming.Send(machineConfig, output, binding);
-                continue;
+            }
+            else
+            {
+                // RenderOutput returns null when there's nothing to composite (no active send op for this
+                // output, empty target list, paused update); the window then keeps its last frame.
+                OutputWindowHandling.Present(binding.DisplayIndex, OutputCompositor.RenderOutput(output.Id));
             }
 
-            // RenderOutput returns null when there's nothing to composite (no active send op for this
-            // output, empty target list, paused update); the window then keeps its last frame.
-            OutputWindowHandling.Present(binding.DisplayIndex, OutputCompositor.RenderOutput(output.Id));
+            OutputPresentationStats.NotePresented(output, startTimestamp);
         }
 
         OutputStreaming.EndFrame();
@@ -75,6 +81,7 @@ internal static class OutputPresentation
     {
         OutputCompositor.ReleaseAll();
         OutputContentResolver.ReleaseAll();
+        OutputPresentationStats.ReleaseAll();
         OutputStreaming.DisposeAll();
         OutputWindowHandling.HideAll();
     }
@@ -83,5 +90,6 @@ internal static class OutputPresentation
     public static void ReleaseOutput(Guid outputId)
     {
         OutputCompositor.ReleaseOutput(outputId);
+        OutputPresentationStats.Release(outputId);
     }
 }

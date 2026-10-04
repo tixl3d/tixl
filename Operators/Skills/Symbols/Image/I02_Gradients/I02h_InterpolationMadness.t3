@@ -6,24 +6,28 @@
     {
       "Id": "0a724784-1092-42f5-962f-e4eafbd49454"/*ImageQuiz*/,
       "SymbolId": "b1cb8864-0d51-4b7f-96eb-4c6267d4b216",
+      "SymbolName": "Lib.flow.skillQuest.ImageQuiz",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "17170e81-62f2-455f-8e78-34543cfa364d"/*ImageLevels*/,
       "SymbolId": "592a2b6f-d4e3-43e0-9e73-034cca3b3900",
+      "SymbolName": "Lib.image.analyze.ImageLevels",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "6561177b-012f-47dc-b2e5-22508649110b"/*ImageLevels*/,
       "SymbolId": "592a2b6f-d4e3-43e0-9e73-034cca3b3900",
+      "SymbolName": "Lib.image.analyze.ImageLevels",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "77576ab9-7784-45f3-be45-259e2b58605f"/*LinearGradient*/,
       "SymbolId": "2c3d2c26-ac45-42e9-8f13-6ea338333568",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "InputValues": [
         {
           "Id": "8169be8f-cb35-4900-b462-f2139b412d59"/*Rotate*/,
@@ -41,6 +45,7 @@
     {
       "Id": "b6f65cd0-62d2-4921-8107-d7001e9a1092"/*LinearGradient*/,
       "SymbolId": "2c3d2c26-ac45-42e9-8f13-6ea338333568",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "InputValues": [
         {
           "Id": "e47e9e63-9c94-4c29-9555-2452fa498d57"/*Gradient*/,
@@ -89,6 +94,7 @@
     {
       "Id": "caa36c77-ac62-4cb3-8b47-9689a1d2319f"/*LinearGradient*/,
       "SymbolId": "2c3d2c26-ac45-42e9-8f13-6ea338333568",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "InputValues": [
         {
           "Id": "10d59d0f-a5a3-42e6-b874-345ab028978e"/*Width*/,

@@ -51,24 +51,28 @@
     {
       "Id": "13cfa0b8-99cc-48b0-ae82-89d5d3e9e47a"/*Rasterizer*/,
       "SymbolId": "fbd7f0f0-36a3-4fbb-91e1-cb33d4666d09",
+      "SymbolName": "Lib.render._dx11.api.Rasterizer",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "1d0d7ef0-45f5-4708-840d-2c8c7fa206a0"/*SrvFromTexture2d*/,
       "SymbolId": "c2078514-cf1d-439c-a732-0d7b31b5084a",
+      "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "541d1df8-d9df-4be6-8674-6c533861921c"/*PickBlendMode*/,
       "SymbolId": "fd9bffd3-5c57-462f-8761-85f94c5a629b",
+      "SymbolName": "Lib.render._dx11.fxsetup.PickBlendMode",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "6795c921-894a-449e-a864-acaff7bae5ff"/*Vector4Components*/,
       "SymbolId": "b15e4950-5c72-4655-84bc-c00647319030",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "InputValues": [
         {
           "Id": "980ef785-6ae2-44d1-803e-febfc75791c5"/*Value*/,
@@ -86,18 +90,21 @@
     {
       "Id": "71eb6c14-5b82-4acf-825b-b6a3ad17c0c3"/*FloatsToBuffer*/,
       "SymbolId": "724da755-2d0c-42ab-8335-8c88ec5fb078",
+      "SymbolName": "Lib.render._dx11.api.FloatsToBuffer",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "7fc97f06-13f4-4122-8d6f-1132997759e9"/*Execute*/,
       "SymbolId": "936e4324-bea2-463a-b196-6064a2d8a6b2",
+      "SymbolName": "Lib.flow.Execute",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "810afc82-dc07-4388-9188-c0516b59b897"/*SamplerState*/,
       "SymbolId": "9515d59d-0bd5-406b-96da-6a5f60215700",
+      "SymbolName": "Types.Gfx.SamplerState",
       "InputValues": [
         {
           "Id": "93d8bf26-5067-4ccc-b4cb-e03970686462"/*AddressW*/,
@@ -125,6 +132,7 @@
     {
       "Id": "81c3ffc4-61f7-4818-8cb3-724bb7c36f7e"/*VertexShader*/,
       "SymbolId": "646f5988-0a76-4996-a538-ba48054fd0ad",
+      "SymbolName": "Types.Gfx.VertexShader",
       "InputValues": [
         {
           "Id": "78fb7501-74d9-4a27-8db2-596f25482c87"/*Source*/,
@@ -147,12 +155,14 @@
     {
       "Id": "9e4b170c-c8eb-4b39-8aff-d9cd8ae9551d"/*VertexShaderStage*/,
       "SymbolId": "a9600440-4203-4315-bdb1-4dfd603b4515",
+      "SymbolName": "Types.Gfx.VertexShaderStage",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "a2a3d2bf-04d9-4056-a354-7c861c931d68"/*Draw*/,
       "SymbolId": "9b28e6b9-1d1f-42d8-8a9e-33497b1df820",
+      "SymbolName": "Lib.render._dx11.api.Draw",
       "InputValues": [
         {
           "Id": "8716b11a-ef71-437e-9930-bb747da818a7"/*VertexCount*/,
@@ -165,12 +175,14 @@
     {
       "Id": "a464b19f-8f6c-4ca2-9fa6-4d1b86b93da7"/*PixelShaderStage*/,
       "SymbolId": "75306997-4329-44e9-a17a-050dae532182",
+      "SymbolName": "Types.Gfx.PixelShaderStage",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "ad28d2c9-670f-41a1-b0d9-101e915789cf"/*LoadImage*/,
       "SymbolId": "0b3436db-e283-436e-ba85-2f3a1de76a9d",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
       "InputValues": [
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
@@ -183,6 +195,7 @@
     {
       "Id": "caf3d3c1-76fa-406b-a24c-8c7e0aec0496"/*PixelShader*/,
       "SymbolId": "f7c625da-fede-4993-976c-e259e0ee4985",
+      "SymbolName": "Types.Gfx.PixelShader",
       "InputValues": [
         {
           "Id": "24646f06-1509-43ce-94c6-eeb608ad97cd"/*Source*/,
@@ -205,6 +218,7 @@
     {
       "Id": "cf1ec4e5-ff4a-4100-94a0-d117446d1712"/*DepthStencilState*/,
       "SymbolId": "04858a08-f0fe-4536-9152-686659f0ab58",
+      "SymbolName": "Types.Gfx.DepthStencilState",
       "InputValues": [
         {
           "Id": "2342df71-a162-4db7-afc3-514916239897"/*EnableZWrite*/,
@@ -217,6 +231,7 @@
     {
       "Id": "d330c026-4e60-4930-b9b8-c780dc45bdd2"/*RasterizerState*/,
       "SymbolId": "c7283335-ef57-46ad-9538-abbade65845a",
+      "SymbolName": "Types.Gfx.RasterizerState",
       "InputValues": [
         {
           "Id": "03f3bc7f-3949-4a97-88cf-04e162cfa2f7"/*CullMode*/,
@@ -234,18 +249,21 @@
     {
       "Id": "d82e4dfc-7839-4600-8a72-b60121d20c6b"/*UseFallbackTexture*/,
       "SymbolId": "b470fdf9-ac0b-4eb9-9600-453b8c094e3f",
+      "SymbolName": "Lib.image.use.UseFallbackTexture",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "dd3ea474-e0f0-45d0-a7cd-ccc2ebe2e9a4"/*Vector2Components*/,
       "SymbolId": "0946c48b-85d8-4072-8f21-11d17cc6f6cf",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "e6891131-b7ec-4026-8872-c1918e97eb92"/*OutputMergerStage*/,
       "SymbolId": "5efaf208-ba62-42ce-b3df-059b37fc1382",
+      "SymbolName": "Lib.render._dx11.api.OutputMergerStage",
       "InputValues": [
         {
           "Id": "ccee2ec3-586f-4396-8b20-cc99484e1b64"/*BlendFactor*/,
@@ -263,6 +281,7 @@
     {
       "Id": "f2a8063c-7138-406c-8d61-7e4293c4cc46"/*InputAssemblerStage*/,
       "SymbolId": "9d1266c5-23db-439f-a475-8000fdd1c318",
+      "SymbolName": "Lib.render._dx11.api.InputAssemblerStage",
       "InputValues": [],
       "Outputs": []
     }

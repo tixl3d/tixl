@@ -106,12 +106,14 @@
     {
       "Id": "0094265a-6359-4b3a-b5be-3562f05f8d45"/*Vector2Components*/,
       "SymbolId": "0946c48b-85d8-4072-8f21-11d17cc6f6cf",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "06917b14-4bd5-4840-8991-5c43626a36dc"/*BoolToFloat*/,
       "SymbolId": "9db2fcbf-54b9-4222-878b-80d1a0dc6edf",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
       "InputValues": [
         {
           "Id": "253b9ae4-fac5-4641-bf0c-d8614606a840"/*BoolValue*/,
@@ -124,36 +126,42 @@
     {
       "Id": "06fadd69-478c-4583-b86e-3c7091a24edd"/*IntToFloat*/,
       "SymbolId": "17db8a36-079d-4c83-8a2a-7ea4c1aa49e6",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "1e874625-65bf-47cd-8024-93c7b4c8b140"/*Vector4Components*/,
       "SymbolId": "b15e4950-5c72-4655-84bc-c00647319030",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "3b46ece1-a7be-42f1-a3e4-c4bda3a03169"/*Vector2Components*/,
       "SymbolId": "0946c48b-85d8-4072-8f21-11d17cc6f6cf",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "45b30540-b3b5-4790-ba75-f9fee6bf4e36"/*BoolToFloat*/,
       "SymbolId": "9db2fcbf-54b9-4222-878b-80d1a0dc6edf",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "4810224c-6cc8-456b-b364-6a580b560e9f"/*Vector2Components*/,
       "SymbolId": "0946c48b-85d8-4072-8f21-11d17cc6f6cf",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "8b8d8b02-50d2-448e-87fa-28bfca5116b2"/*_multiImageFxSetupStatic*/,
       "SymbolId": "cc34a183-3978-4b6b-8ef1-dd8102410816",
+      "SymbolName": "Lib.image.fx._._multiImageFxSetupStatic",
       "InputValues": [
         {
           "Id": "f6269be3-3331-43a6-91ec-138b47199f3e"/*ShaderPath*/,
@@ -166,6 +174,7 @@
     {
       "Id": "decf22da-532e-4d45-acb0-4d1072d9921e"/*GradientsToTexture*/,
       "SymbolId": "2c53eee7-eb38-449b-ad2a-d7a674952e5b",
+      "SymbolName": "Lib.numbers.color.GradientsToTexture",
       "InputValues": [
         {
           "Id": "588be11f-d0db-4e51-8dbb-92a25408511c"/*Gradients*/,

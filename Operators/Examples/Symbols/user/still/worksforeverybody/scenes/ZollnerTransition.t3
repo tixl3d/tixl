@@ -6,6 +6,7 @@
     {
       "Id": "5d6e1ca9-6043-40dc-9dd6-e11d624a1067"/*Add*/,
       "SymbolId": "c160f925-0a66-4505-a569-cadd878dbb6f",
+      "SymbolName": "Lib.numbers.float.basic.Add",
       "InputValues": [
         {
           "Id": "993d59bb-1fc0-4857-a36d-629b0e7aa0d2"/*Input2*/,
@@ -18,6 +19,7 @@
     {
       "Id": "ae762bf6-c988-41e7-bdd6-1ff2eebf175f"/*Value*/,
       "SymbolId": "5d7d61ae-0a41-4ffa-a51d-93bab665e7fe",
+      "SymbolName": "Types.Values.Value",
       "InputValues": [
         {
           "Id": "7773837e-104a-4b3d-a41f-cadbd9249af2"/*Float*/,
@@ -30,6 +32,7 @@
     {
       "Id": "ca20e963-8ca0-4d67-8561-c1ef3243a277"/*LinearGradient*/,
       "SymbolId": "2c3d2c26-ac45-42e9-8f13-6ea338333568",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "InputValues": [
         {
           "Id": "c38647f6-c6ea-40a0-b872-0df6d4168c05"/*Offset*/,
@@ -78,6 +81,7 @@
     {
       "Id": "eccb0098-0c48-49a2-9e30-1680144b4c50"/*ZollnerPattern*/,
       "SymbolId": "f2a0a8d9-e2dc-476b-ac97-de13101a6fdb",
+      "SymbolName": "Lib.image.generate.pattern.ZollnerPattern",
       "InputValues": [
         {
           "Id": "3ee9d4c7-8f6d-453a-a6ff-262250e6559a"/*RAffects_BarWidth*/,

@@ -981,7 +981,32 @@ public class LoadGltfScene : Instance<LoadGltfScene>
                 if (tangents.Length != verticesCount)
                     tangents = null;
             }
+            Vector3[]? vtColors = null;
 
+            // Vertex Color (COLOR_0 can be VEC3 or VEC4)
+            if (vertexAccessors.TryGetValue("COLOR_0", out var colorAccess)
+                && colorAccess.Count == verticesCount)
+            {
+                switch (colorAccess.Dimensions)
+                {
+                    case DimensionType.VEC3:
+                        vtColors = colorAccess.AsVector3Array().ToArray();
+                        break;
+
+                    case DimensionType.VEC4:
+                        {
+                            var colors4 = colorAccess.AsVector4Array();
+                            vtColors = new Vector3[colors4.Count];
+                            for (var i = 0; i < vtColors.Length; i++)
+                            {
+                                var c = colors4[i];
+                                vtColors[i] = new Vector3(c.X, c.Y, c.Z);
+                            }
+
+                            break;
+                        }
+                }
+            }
             // Write vertex buffer
             for (var vertexIndex = 0; vertexIndex < positions.Count; vertexIndex++)
             {
@@ -1000,7 +1025,7 @@ public class LoadGltfScene : Instance<LoadGltfScene>
                                                                        ? Vector2.Zero
                                                                        : new Vector2(texCoords2[vertexIndex].X,
                                                                                      1 - texCoords2[vertexIndex].Y),
-                                                        ColorRgb = Vector3.One,
+                                                        ColorRgb = vtColors == null ? Vector3.One : vtColors[vertexIndex],
                                                         Selection = 1,
                                                     };
 

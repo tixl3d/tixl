@@ -65,8 +65,8 @@ internal static class MetricGridRaster
         if (boardMin.Y <= 0 && boardMax.Y >= 0)
         {
             var y = Snap(projection.CanvasToScreen(Vector2.Zero).Y);
-            dl.AddLine(new Vector2(screenMin.X, y), new Vector2(screenMax.X, y),
-                       SetupColors.ForKind(SetupEntityKinds.Surface).Fade(0.5f * emphasis), 1.5f * scale);
+            SetupStrokes.DrawCrispLine(dl, new Vector2(screenMin.X, y), new Vector2(screenMax.X, y),
+                                       SetupColors.ForKind(SetupEntityKinds.Surface).Fade(0.5f * emphasis), 1.5f);
             dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize, new Vector2(screenMin.X + 6 * scale, y - Fonts.FontSmall.FontSize - 2 * scale),
                        labelColor, "Floor (0 m)");
         }
@@ -90,7 +90,7 @@ internal static class MetricGridRaster
                 continue;
 
             var sx = Snap(projection.CanvasToScreen(new Vector2(x, 0)).X);
-            dl.AddLine(new Vector2(sx, screenMin.Y), new Vector2(sx, screenMax.Y), color, 1 * scale);
+            SetupStrokes.DrawCrispLine(dl, new Vector2(sx, screenMin.Y), new Vector2(sx, screenMax.Y), color, 1);
             if (labeled)
                 dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize, new Vector2(sx + 3 * scale, screenMax.Y - Fonts.FontSmall.FontSize - 2 * scale), labelColor, MetreLabel(x));
         }
@@ -105,14 +105,14 @@ internal static class MetricGridRaster
                 continue; // the floor line is drawn on its own
 
             var sy = Snap(projection.CanvasToScreen(new Vector2(0, y)).Y);
-            dl.AddLine(new Vector2(screenMin.X, sy), new Vector2(screenMax.X, sy), color, 1 * scale);
+            SetupStrokes.DrawCrispLine(dl, new Vector2(screenMin.X, sy), new Vector2(screenMax.X, sy), color, 1);
             if (labeled)
                 dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize, new Vector2(screenMin.X + 3 * scale, sy - Fonts.FontSmall.FontSize - 1 * scale), labelColor, MetreLabel(y));
         }
     }
 
-    /// <summary>Pixel centre, so a one-pixel line lands on one pixel instead of blurring over two.</summary>
-    private static float Snap(float screen) => MathF.Floor(screen) + 0.5f;
+    /// <summary>Whole pixels; the half that centres the line on one is added by the draw call itself.</summary>
+    private static float Snap(float screen) => MathF.Round(screen);
 
     private static bool IsMultiple(float value, float spacing)
     {

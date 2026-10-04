@@ -11,6 +11,7 @@
     {
       "Id": "72ff6f53-e073-4bf1-9616-4a24a4e2fec7"/*Text*/,
       "SymbolId": "fd31d208-12fe-46bf-bfa3-101211f8f497",
+      "SymbolName": "Lib.render.basic.Text",
       "InputValues": [
         {
           "Id": "0e5f05b4-5e8a-4f6d-8cac-03b04649eb67"/*Color*/,
@@ -53,6 +54,7 @@
     {
       "Id": "87ff275b-ef33-41d7-876c-6dbb495c8be3"/*Time*/,
       "SymbolId": "b0d75f21-df33-460b-beab-d8c5e1f23e5e",
+      "SymbolName": "Lib.numbers.anim.time.Time",
       "InputValues": [
         {
           "Id": "6d2f783a-23b7-425c-a4e3-cfcdcd61cf3a"/*Mode*/,
@@ -70,6 +72,7 @@
     {
       "Id": "892672cd-90c4-4840-b549-61b8a76ede01"/*CombineStrings*/,
       "SymbolId": "48ab9824-76ca-4238-800f-9cf95311e6c0",
+      "SymbolName": "Lib.string.combine.CombineStrings",
       "InputValues": [
         {
           "Id": "c832ba89-f4ae-4c47-b62b-52da52a09556"/*Separator*/,
@@ -82,6 +85,7 @@
     {
       "Id": "f17f7422-8e91-49f6-b2e1-916deb6b5d3a"/*String*/,
       "SymbolId": "5880cbc3-a541-4484-a06a-0e6f77cdbe8e",
+      "SymbolName": "Types.Values.String",
       "InputValues": [
         {
           "Id": "ceeae47b-d792-471d-a825-49e22749b7b9"/*InputString*/,
@@ -94,12 +98,14 @@
     {
       "Id": "f40f2b3d-a5f9-458b-8de1-72638bce42ba"/*TimeToString*/,
       "SymbolId": "075612b1-8760-4858-ad6b-6c85a7716794",
+      "SymbolName": "Lib.string.datetime.TimeToString",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "f8efe9d7-dada-4104-9692-ed48bbdd376a"/*Group*/,
       "SymbolId": "a3f64d34-1fab-4230-86b3-1c3deba3f90b",
+      "SymbolName": "Lib.render.transform.Group",
       "InputValues": [
         {
           "Id": "9e24c5d1-191a-4c1a-b88e-03df826fffc0"/*Translation*/,

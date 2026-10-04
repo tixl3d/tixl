@@ -6,18 +6,21 @@
     {
       "Id": "1f57fa8d-8d12-414f-b3fa-7ac4287ae56a"/*Time*/,
       "SymbolId": "b0d75f21-df33-460b-beab-d8c5e1f23e5e",
+      "SymbolName": "Lib.numbers.anim.time.Time",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "82720834-df78-49a5-8649-e08c57532e22"/*Modulo*/,
       "SymbolId": "5202d3f6-c970-4006-933d-3c60d6c202dc",
+      "SymbolName": "Lib.numbers.float.basic.Modulo",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "ad949ad1-814c-4c17-a597-117d86fdb768"/*Modulo*/,
       "SymbolId": "5202d3f6-c970-4006-933d-3c60d6c202dc",
+      "SymbolName": "Lib.numbers.float.basic.Modulo",
       "InputValues": [
         {
           "Id": "62a8185f-32c0-41d2-b8be-d8c1d7178c00"/*ModuloValue*/,
@@ -30,6 +33,7 @@
     {
       "Id": "d52258cf-1cb9-4351-ab28-b86bdbcf3a08"/*Time*/,
       "SymbolId": "b0d75f21-df33-460b-beab-d8c5e1f23e5e",
+      "SymbolName": "Lib.numbers.anim.time.Time",
       "InputValues": [
         {
           "Id": "e0f765f3-ac71-45c9-87a4-e9be3fa9a9a0"/*SpeedFactor*/,
@@ -42,6 +46,7 @@
     {
       "Id": "da60ce9e-7d7d-48de-9552-d1f787dcc4d3"/*ValueQuiz*/,
       "SymbolId": "702f1f75-df90-44ca-b567-78ba9d1613b5",
+      "SymbolName": "Lib.flow.skillQuest.ValueQuiz",
       "InputValues": [
         {
           "Id": "fe12fa62-9207-4a6a-bbb3-4d57218094bf"/*DisplayValueRange*/,

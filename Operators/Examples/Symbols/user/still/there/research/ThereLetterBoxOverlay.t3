@@ -24,6 +24,7 @@
     {
       "Id": "138e970e-0626-4884-a3e4-3312f9e9fece"/*DrawScreenQuad*/,
       "SymbolId": "5a2752e8-95ae-4d76-b903-1f52ef43bcdc",
+      "SymbolName": "Lib.render.basic.DrawScreenQuad",
       "InputValues": [
         {
           "Id": "4e8fecd0-00ca-404e-a9d4-1cb0d3e044f1"/*Color*/,
@@ -49,12 +50,14 @@
     {
       "Id": "1ea7977e-fe26-46ed-bad2-97be37a75b34"/*Vector2*/,
       "SymbolId": "926ab3fd-fbaf-4c4b-91bc-af277000dcb8",
+      "SymbolName": "Types.Values.Vector2",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "2d8a20a8-099c-4b2d-be04-4e145938f677"/*Value*/,
       "SymbolId": "5d7d61ae-0a41-4ffa-a51d-93bab665e7fe",
+      "SymbolName": "Types.Values.Value",
       "InputValues": [
         {
           "Id": "7773837e-104a-4b3d-a41f-cadbd9249af2"/*Float*/,
@@ -67,6 +70,7 @@
     {
       "Id": "48af6472-7005-44be-b130-935b26a8fd18"/*Switch*/,
       "SymbolId": "e64f95e4-c045-400f-98ca-7c020ad46174",
+      "SymbolName": "Lib.flow.Switch",
       "InputValues": [
         {
           "Id": "00fd2794-567a-4f9b-a900-c2ebf9760764"/*Index*/,
@@ -79,6 +83,7 @@
     {
       "Id": "5402a23e-1a4a-4868-81c7-6c6c1d5acf94"/*Value*/,
       "SymbolId": "5d7d61ae-0a41-4ffa-a51d-93bab665e7fe",
+      "SymbolName": "Types.Values.Value",
       "InputValues": [
         {
           "Id": "7773837e-104a-4b3d-a41f-cadbd9249af2"/*Float*/,
@@ -91,18 +96,21 @@
     {
       "Id": "7739aab6-aaf6-4381-b1f6-98b20d0d0241"/*Execute*/,
       "SymbolId": "936e4324-bea2-463a-b196-6064a2d8a6b2",
+      "SymbolName": "Lib.flow.Execute",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "813cdb45-96e9-4ff1-b80c-8500203ca6ad"/*Vector2*/,
       "SymbolId": "926ab3fd-fbaf-4c4b-91bc-af277000dcb8",
+      "SymbolName": "Types.Values.Vector2",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "81cce9f9-bd18-4010-9c2f-31db039e22cd"/*DrawScreenQuad*/,
       "SymbolId": "5a2752e8-95ae-4d76-b903-1f52ef43bcdc",
+      "SymbolName": "Lib.render.basic.DrawScreenQuad",
       "InputValues": [
         {
           "Id": "4e8fecd0-00ca-404e-a9d4-1cb0d3e044f1"/*Color*/,
@@ -128,6 +136,7 @@
     {
       "Id": "857be937-1979-42fe-89a4-a6a6ad21ef0f"/*DrawScreenQuad*/,
       "SymbolId": "5a2752e8-95ae-4d76-b903-1f52ef43bcdc",
+      "SymbolName": "Lib.render.basic.DrawScreenQuad",
       "InputValues": [
         {
           "Id": "4e8fecd0-00ca-404e-a9d4-1cb0d3e044f1"/*Color*/,
@@ -153,6 +162,7 @@
     {
       "Id": "a1c7b2db-d10c-4f1c-a238-a56c572bfc1a"/*Add*/,
       "SymbolId": "c160f925-0a66-4505-a569-cadd878dbb6f",
+      "SymbolName": "Lib.numbers.float.basic.Add",
       "InputValues": [
         {
           "Id": "e3550929-8905-4cdf-bc85-c31e97da4baa"/*Input1*/,
@@ -165,6 +175,7 @@
     {
       "Id": "a3285e62-6055-43b1-967e-bcbb3c1c7ada"/*RenderTarget*/,
       "SymbolId": "f9fe78c5-43a6-48ae-8e8c-6cdbbc330dd1",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "InputValues": [
         {
           "Id": "03749b41-cc3c-4f38-aea6-d7cea19fc073"/*Resolution*/,
@@ -190,6 +201,7 @@
     {
       "Id": "a89f6fc2-1e6d-45c5-b319-c98c042df8f6"/*DrawScreenQuad*/,
       "SymbolId": "5a2752e8-95ae-4d76-b903-1f52ef43bcdc",
+      "SymbolName": "Lib.render.basic.DrawScreenQuad",
       "InputValues": [
         {
           "Id": "4e8fecd0-00ca-404e-a9d4-1cb0d3e044f1"/*Color*/,
@@ -215,18 +227,21 @@
     {
       "Id": "bda62a80-6187-4028-8986-8e37484f78e6"/*Execute*/,
       "SymbolId": "936e4324-bea2-463a-b196-6064a2d8a6b2",
+      "SymbolName": "Lib.flow.Execute",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "bea62145-c404-496e-9092-e3bcb53389eb"/*Vector2*/,
       "SymbolId": "926ab3fd-fbaf-4c4b-91bc-af277000dcb8",
+      "SymbolName": "Types.Values.Vector2",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "ce5f1ed4-1158-43d5-bbe9-1e570d283745"/*Sub*/,
       "SymbolId": "3ba13faf-ea80-44ec-948a-02ed3d653a20",
+      "SymbolName": "Lib.numbers.float.basic.Sub",
       "InputValues": [
         {
           "Id": "4889e720-e47c-4617-8353-06acf0af5283"/*Input1*/,
@@ -239,12 +254,14 @@
     {
       "Id": "ebc27b63-9c00-4fc7-ba4e-9ded99b9d809"/*Vector2*/,
       "SymbolId": "926ab3fd-fbaf-4c4b-91bc-af277000dcb8",
+      "SymbolName": "Types.Values.Vector2",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "f1cabc34-cdb4-43d5-942f-96e6c424a893"/*Add*/,
       "SymbolId": "c160f925-0a66-4505-a569-cadd878dbb6f",
+      "SymbolName": "Lib.numbers.float.basic.Add",
       "InputValues": [
         {
           "Id": "e3550929-8905-4cdf-bc85-c31e97da4baa"/*Input1*/,
@@ -257,6 +274,7 @@
     {
       "Id": "f4ffe253-f5af-4d69-8b73-aeb1ac53953b"/*Sub*/,
       "SymbolId": "3ba13faf-ea80-44ec-948a-02ed3d653a20",
+      "SymbolName": "Lib.numbers.float.basic.Sub",
       "InputValues": [
         {
           "Id": "4889e720-e47c-4617-8353-06acf0af5283"/*Input1*/,

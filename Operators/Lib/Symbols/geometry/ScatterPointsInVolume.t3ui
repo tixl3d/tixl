@@ -4,10 +4,10 @@
   "Description": "Scatters points deterministically inside a box volume or a MeshGeometry.\n\nWith a Geometry connected, points are placed inside the mesh; otherwise inside the Center/Size box. An optional Density field modulates the distribution via rejection sampling (values clamped to 0..1). The same Seed always produces the same points.\n\nAKA: random points, poisson, volume scatter",
   "InputUis": [
     {
-      "InputId": "e17d4a92-6b58-4c03-a9f1-84c5d2e7b360"/*Count*/,
+      "InputId": "12e9b8c4-75a0-4d36-9f82-3dc6e1b0a597"/*Seed*/,
       "Position": {
         "X": 0.0,
-        "Y": 0.0
+        "Y": 225.0
       }
     },
     {
@@ -18,17 +18,17 @@
       }
     },
     {
-      "InputId": "a94b0e58-27c3-4f61-90ad-c8e52b7f1d39"/*Size*/,
-      "Position": {
-        "X": 0.0,
-        "Y": 90.0
-      }
-    },
-    {
       "InputId": "58c1f7a3-b2d9-4e06-85cb-7f4a90e6d221"/*Geometry*/,
       "Position": {
         "X": 0.0,
         "Y": 135.0
+      }
+    },
+    {
+      "InputId": "a94b0e58-27c3-4f61-90ad-c8e52b7f1d39"/*Size*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 90.0
       }
     },
     {
@@ -39,10 +39,10 @@
       }
     },
     {
-      "InputId": "12e9b8c4-75a0-4d36-9f82-3dc6e1b0a597"/*Seed*/,
+      "InputId": "e17d4a92-6b58-4c03-a9f1-84c5d2e7b360"/*Count*/,
       "Position": {
         "X": 0.0,
-        "Y": 225.0
+        "Y": 0.0
       }
     }
   ],

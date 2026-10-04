@@ -75,6 +75,7 @@
     {
       "Id": "106b2ad4-5745-4636-8c11-c5a7248b88de"/*DrawLines*/,
       "SymbolId": "836f211f-b387-417c-8316-658e0dc6e117",
+      "SymbolName": "Lib.point.draw.DrawLines",
       "InputValues": [
         {
           "Id": "75419a73-8a3e-4538-9a1d-e3b0ce7f8561"/*Color*/,
@@ -92,12 +93,14 @@
     {
       "Id": "127a0e39-9eee-4631-8671-1c88dc2d1b5e"/*CombineBuffers*/,
       "SymbolId": "4dd8a618-eb3b-40af-9851-89c50683d83e",
+      "SymbolName": "Lib.point.combine.CombineBuffers",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "31af10d1-cc86-4d85-bd00-49dc1cc475d3"/*ComputeShader*/,
       "SymbolId": "a256d70f-adb3-481d-a926-caf35bd3e64c",
+      "SymbolName": "Types.Gfx.ComputeShader",
       "InputValues": [
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
@@ -110,12 +113,14 @@
     {
       "Id": "428ef171-5840-490e-acde-fd673ae18985"/*CalcDispatchCount*/,
       "SymbolId": "eb68addb-ec59-416f-8608-ff9d2319f3a3",
+      "SymbolName": "Lib.render._dx11.api.CalcDispatchCount",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "4e052c9e-6a24-416d-8e29-f397e60ff6ca"/*DrawSphereGizmo*/,
       "SymbolId": "1998f949-5c0a-4f39-82cf-b0bda31f7f21",
+      "SymbolName": "Lib.render.gizmo.DrawSphereGizmo",
       "InputValues": [
         {
           "Id": "15f73f4f-a4f1-4ff0-aba5-074ea2d328bc"/*Radius*/,
@@ -138,12 +143,14 @@
     {
       "Id": "5687b828-dadf-474c-80ee-e981a1342bd5"/*_ExecuteParticleUpdate*/,
       "SymbolId": "b1352ba6-1164-4b44-9b69-a9eb802ea77d",
+      "SymbolName": "Lib.point._internal._ExecuteParticleUpdate",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "5a882631-79e4-4db9-83ca-6dc6f306f6a3"/*ComputeShaderStage*/,
       "SymbolId": "8bef116d-7d1c-4c1b-b902-25c1d5e925a9",
+      "SymbolName": "Types.Gfx.ComputeShaderStage",
       "InputValues": [
         {
           "Id": "0105aca4-5fd5-40c8-82a5-e919bb7dd507"/*UavBufferCounter*/,
@@ -165,12 +172,14 @@
     {
       "Id": "61f398c1-af4e-4534-8981-129c99963f75"/*ApplyTransformMatrix*/,
       "SymbolId": "195afff5-13f6-4c5d-af49-655a4f92c2f8",
+      "SymbolName": "Lib.render._.ApplyTransformMatrix",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "8a091e5f-e5cf-477e-958a-84cdccdc71be"/*CommonPointSets*/,
       "SymbolId": "353f63fc-e613-43ca-b037-02d7b9f4e935",
+      "SymbolName": "Lib.point.generate.CommonPointSets",
       "InputValues": [
         {
           "Id": "2ba96aee-ff89-41bd-90c5-c6c36907b6e4"/*Set*/,
@@ -183,6 +192,7 @@
     {
       "Id": "8eee10cb-9148-4866-a004-579023b157cf"/*BoolToFloat*/,
       "SymbolId": "9db2fcbf-54b9-4222-878b-80d1a0dc6edf",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
       "InputValues": [
         {
           "Id": "0a53a4ff-4dfb-455a-b70b-0d7eed5e5f22"/*ForTrue*/,
@@ -200,6 +210,7 @@
     {
       "Id": "97da2ad6-0525-4a68-866f-fd8a9ff55058"/*HasTimeChanged*/,
       "SymbolId": "2443b2fd-c397-4ea6-9588-b595f918cf01",
+      "SymbolName": "Lib.numbers.anim.time.HasTimeChanged",
       "InputValues": [
         {
           "Id": "bc112889-77a8-4967-a9b7-683b7c7017fe"/*Mode*/,
@@ -212,12 +223,14 @@
     {
       "Id": "996aeb35-deff-4ff9-ae66-840a52a1216c"/*FloatsToBuffer*/,
       "SymbolId": "724da755-2d0c-42ab-8335-8c88ec5fb078",
+      "SymbolName": "Lib.render._dx11.api.FloatsToBuffer",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "a59168ba-9ddd-4b10-930f-a01a9ee50095"/*TransformPoints*/,
       "SymbolId": "7f6c64fe-ca2e-445e-a9b4-c70291ce354e",
+      "SymbolName": "Lib.point.transform.TransformPoints",
       "InputValues": [
         {
           "Id": "454d0150-dac4-41b2-83f8-d1ecc3ef76d4"/*Rotation*/,
@@ -239,6 +252,7 @@
     {
       "Id": "a78d92bb-6aa2-448b-a410-6f3e782e2500"/*TransformPoints*/,
       "SymbolId": "7f6c64fe-ca2e-445e-a9b4-c70291ce354e",
+      "SymbolName": "Lib.point.transform.TransformPoints",
       "InputValues": [
         {
           "Id": "4af2dbdd-1005-465e-a193-756ed2b29a33"/*ScaleW*/,
@@ -265,6 +279,7 @@
     {
       "Id": "ae96f5b4-50ac-446a-be07-e6fc0ea34ca0"/*CommonPointSets*/,
       "SymbolId": "353f63fc-e613-43ca-b037-02d7b9f4e935",
+      "SymbolName": "Lib.point.generate.CommonPointSets",
       "InputValues": [
         {
           "Id": "2ba96aee-ff89-41bd-90c5-c6c36907b6e4"/*Set*/,
@@ -277,6 +292,7 @@
     {
       "Id": "b27fa0e3-f6c9-478b-af0f-c49b336c805b"/*CommonPointSets*/,
       "SymbolId": "353f63fc-e613-43ca-b037-02d7b9f4e935",
+      "SymbolName": "Lib.point.generate.CommonPointSets",
       "InputValues": [
         {
           "Id": "2ba96aee-ff89-41bd-90c5-c6c36907b6e4"/*Set*/,
@@ -289,36 +305,42 @@
     {
       "Id": "b838e39b-d60c-4199-93dc-c191773dd422"/*All*/,
       "SymbolId": "3a6fd508-0272-4c18-96b8-bc2387d3b2fd",
+      "SymbolName": "Lib.numbers.bool.combine.All",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "c63e9136-e7e3-430b-b278-30915e4800dd"/*VisibleGizmos*/,
       "SymbolId": "d61d7192-9ca3-494e-91e2-10a530ee9375",
+      "SymbolName": "Lib.render.gizmo.VisibleGizmos",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "c76d94aa-e938-490b-be9b-3068c9c9749c"/*GetParticleComponents*/,
       "SymbolId": "e62c1fa0-6fcd-49f5-9cf8-d3081c8a5917",
+      "SymbolName": "Lib.point._internal.GetParticleComponents",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "cd4f52ed-b3f5-48d0-a147-1aeaafb9b04b"/*Execute*/,
       "SymbolId": "936e4324-bea2-463a-b196-6064a2d8a6b2",
+      "SymbolName": "Lib.flow.Execute",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "cf743825-c36d-492c-aa33-78c51eef84e4"/*Switch*/,
       "SymbolId": "e64f95e4-c045-400f-98ca-7c020ad46174",
+      "SymbolName": "Lib.flow.Switch",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "d1547070-2105-44a6-99fb-87390bd99606"/*TransformMatrix*/,
       "SymbolId": "17324ce1-8920-4653-ac67-c211ad507a81",
+      "SymbolName": "Lib.render._.TransformMatrix",
       "InputValues": [
         {
           "Id": "e19808d8-6d73-4638-b5f2-ddddc49ad815"/*Invert*/,
@@ -331,12 +353,14 @@
     {
       "Id": "fdb2b12e-fd32-4b82-8eb0-27fe4220b16f"/*IntsToBuffer*/,
       "SymbolId": "2eb20a76-f8f7-49e9-93a5-1e5981122b50",
+      "SymbolName": "Lib.numbers.int.process.IntsToBuffer",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "fed35fa2-842e-4fa2-ab47-f96a5a4f91b2"/*DrawLines*/,
       "SymbolId": "836f211f-b387-417c-8316-658e0dc6e117",
+      "SymbolName": "Lib.point.draw.DrawLines",
       "InputValues": [
         {
           "Id": "75419a73-8a3e-4538-9a1d-e3b0ce7f8561"/*Color*/,

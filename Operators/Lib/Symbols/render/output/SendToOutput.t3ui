@@ -11,6 +11,13 @@
       }
     },
     {
+      "InputId": "3c7f1e58-0a94-4d62-b8f3-2e5d9a0c4b17"/*Resolution*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      }
+    },
+    {
       "InputId": "8a4dd1b3-2e6f-4c25-9d0a-7f3b61c8e942"/*Texture*/,
       "Relevancy": "Required",
       "Position": {
@@ -23,13 +30,6 @@
       "Position": {
         "X": -200.0,
         "Y": 180.0
-      }
-    },
-    {
-      "InputId": "3c7f1e58-0a94-4d62-b8f3-2e5d9a0c4b17"/*Resolution*/,
-      "Position": {
-        "X": -200.0,
-        "Y": 225.0
       }
     }
   ],

@@ -201,15 +201,16 @@ internal static class SetupRelations
     }
 
     /// <summary>
-    /// An output's implicit patch: its only patch, unnamed and covering the whole canvas — the full-canvas
+    /// An output's implicit patch: its first patch, unnamed and covering the whole canvas — the full-canvas
     /// route a drop makes. It *is* the output as far as the user is concerned, so the views fold it into the
     /// output row/card instead of listing it, exactly as a source's full-frame slice folds into the source.
-    /// It becomes a patch of its own the moment it is named, turned, moved off the full canvas, or joined by a second.
+    /// Tiles added over it are listed and leave it folded; it becomes a patch of its own the moment it is
+    /// named, turned, fitted or moved off the full canvas.
     /// </summary>
     public static bool TryGetImplicitPatch(OutputDefinition output, out OutputDefinition.Patch? implicitPatch)
     {
         implicitPatch = null;
-        if (output.Patches.Count != 1)
+        if (output.Patches.Count == 0)
             return false;
 
         // A turned or fitted patch is no longer "the output itself": its rotation or fit is state worth seeing
@@ -231,7 +232,7 @@ internal static class SetupRelations
     /// <summary>Patches the views list — the output's implicit full-canvas patch is folded into the output.</summary>
     public static int CountListedPatches(OutputDefinition output)
     {
-        return TryGetImplicitPatch(output, out _) ? 0 : output.Patches.Count;
+        return output.Patches.Count - (TryGetImplicitPatch(output, out _) ? 1 : 0);
     }
 
     private static bool CoversFullCanvas(OutputDefinition output, OutputDefinition.Patch patch)

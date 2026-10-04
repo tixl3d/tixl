@@ -78,18 +78,21 @@
     {
       "Id": "11459d6e-e6e3-4972-90a8-5b37f057cb95"/*Vector2Components*/,
       "SymbolId": "0946c48b-85d8-4072-8f21-11d17cc6f6cf",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "2aabe6fd-31e3-4c2f-9e5f-98b3c1cb86ff"/*Value*/,
       "SymbolId": "5d7d61ae-0a41-4ffa-a51d-93bab665e7fe",
+      "SymbolName": "Types.Values.Value",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "644a0416-07f0-4b29-a793-fa63962bc344"/*_multiImageFxSetup*/,
       "SymbolId": "a2567844-3314-48de-bda7-7904b5546535",
+      "SymbolName": "Lib.image.fx._._multiImageFxSetup",
       "InputValues": [
         {
           "Id": "7f14d0e3-1159-434d-b038-74644948937c"/*ShaderPath*/,
@@ -102,18 +105,21 @@
     {
       "Id": "82047030-92cc-4372-b77e-e056fbb5a3c0"/*Vector4Components*/,
       "SymbolId": "b15e4950-5c72-4655-84bc-c00647319030",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "86f9b6cf-1e04-4958-bc9f-4ef6f5cc525d"/*Vector4Components*/,
       "SymbolId": "b15e4950-5c72-4655-84bc-c00647319030",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "eb737384-491f-47d1-9fb7-a7aa046cd9e6"/*Vector2Components*/,
       "SymbolId": "0946c48b-85d8-4072-8f21-11d17cc6f6cf",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "InputValues": [],
       "Outputs": []
     }

@@ -6,6 +6,7 @@
     {
       "Id": "0394d4d2-168d-4063-93b8-281266b299eb"/*LinearGradient*/,
       "SymbolId": "2c3d2c26-ac45-42e9-8f13-6ea338333568",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "InputValues": [
         {
           "Id": "10d59d0f-a5a3-42e6-b874-345ab028978e"/*Width*/,
@@ -49,6 +50,7 @@
     {
       "Id": "122a4bf0-c0e1-4789-a492-a355b4c1b55d"/*SampleGradient*/,
       "SymbolId": "8211249d-7a26-4ad0-8d84-56da72a5c536",
+      "SymbolName": "Lib.numbers.color.SampleGradient",
       "InputValues": [
         {
           "Id": "eff10fad-cf95-4133-91db-efc41258cd1b"/*Gradient*/,
@@ -137,6 +139,7 @@
     {
       "Id": "29a38486-c7c5-4756-aaac-b3eb47f5fb4a"/*shapeSize*/,
       "SymbolId": "59a0458e-2f3a-4856-96cd-32936f783cc5",
+      "SymbolName": "Lib.io.midi.MidiInput",
       "Name": "shapeSize",
       "InputValues": [
         {
@@ -178,6 +181,7 @@
     {
       "Id": "39e1aa58-2cb2-4be0-8da0-a8d6014815b4"/*FraserGrid*/,
       "SymbolId": "b882a5d0-f5ae-40a4-8c42-5b25e5775def",
+      "SymbolName": "Lib.image.generate.pattern.FraserGrid",
       "InputValues": [
         {
           "Id": "1dad9264-32a0-4476-a4af-c7eb9a5a5fec"/*Rotate*/,
@@ -260,6 +264,7 @@
     {
       "Id": "4162b59d-4a41-4ec3-963f-103d6c12bbab"/*Counter*/,
       "SymbolId": "11882635-4757-4cac-a024-70bb4e8b504c",
+      "SymbolName": "Lib.numbers.anim._obsolete.Counter",
       "InputValues": [
         {
           "Id": "b04d475b-a898-421b-bf26-ae5cf982a351"/*Blending*/,
@@ -277,12 +282,14 @@
     {
       "Id": "6174c42d-fb40-4c6d-9e0b-3516844c418d"/*WasTrigger*/,
       "SymbolId": "d21652e9-4dc3-4ece-9205-51fced56c3bd",
+      "SymbolName": "Lib.numbers.bool.logic.WasTrigger",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "6350ebf9-ba57-4932-b8d1-84b4e54f76b4"/*RadialGradient*/,
       "SymbolId": "82ad8911-c930-4851-803d-3f24422445bc",
+      "SymbolName": "Lib.image.generate.basic.RadialGradient",
       "InputValues": [
         {
           "Id": "3f5a284b-e2f0-47e2-bf79-2a7fe8949519"/*Gradient*/,
@@ -331,6 +338,7 @@
     {
       "Id": "7f41d342-c7d3-43ad-978e-523206307b4e"/*Counter*/,
       "SymbolId": "11882635-4757-4cac-a024-70bb4e8b504c",
+      "SymbolName": "Lib.numbers.anim._obsolete.Counter",
       "InputValues": [
         {
           "Id": "286cbbfb-796d-499f-93d3-d467512110be"/*Rate*/,
@@ -353,6 +361,7 @@
     {
       "Id": "b19c3149-cfcd-4a0f-bf7d-45651934cad0"/*MirrorRepeat*/,
       "SymbolId": "06621b4b-43be-4ef9-80d0-f1b36fa4dbd1",
+      "SymbolName": "Lib.image.transform.MirrorRepeat",
       "InputValues": [
         {
           "Id": "e39e2fd3-6820-4353-b098-44127303bb51"/*Width*/,
@@ -365,6 +374,7 @@
     {
       "Id": "b230f04e-e446-4491-a853-0cbab9edecfc"/*BlendColors*/,
       "SymbolId": "6b7c541a-ca36-4f21-ac95-89e874820c5a",
+      "SymbolName": "Lib.numbers.color.BlendColors",
       "InputValues": [
         {
           "Id": "40803d0e-c37c-4b5d-b64b-fd1ef090a4f7"/*Factor*/,
@@ -387,12 +397,14 @@
     {
       "Id": "b2850946-d8d0-4f73-b873-b9ce3c5e3470"/*Layer2d*/,
       "SymbolId": "d8c5330f-59b5-4907-b845-a02def3042fa",
+      "SymbolName": "Lib.render.basic.Layer2d",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "e0b9e37e-5d26-458a-8b21-3690bcc2574e"/*Counter*/,
       "SymbolId": "11882635-4757-4cac-a024-70bb4e8b504c",
+      "SymbolName": "Lib.numbers.anim._obsolete.Counter",
       "InputValues": [
         {
           "Id": "286cbbfb-796d-499f-93d3-d467512110be"/*Rate*/,
@@ -415,6 +427,7 @@
     {
       "Id": "f57c6b1e-8302-4f24-9aeb-6e32f980e192"/*_Time_old*/,
       "SymbolId": "9cb4d49e-135b-400b-a035-2b02c5ea6a72",
+      "SymbolName": "Lib.numbers.anim._obsolete._Time_old",
       "InputValues": [
         {
           "Id": "2d9c040d-5244-40ac-8090-d8d57323487b"/*SpeedFactor*/,
@@ -427,6 +440,7 @@
     {
       "Id": "ffb24236-a628-4ed9-9cc2-57494fbd62ab"/*AnimValue*/,
       "SymbolId": "ea7b8491-2f8e-4add-b0b1-fd068ccfed0d",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "InputValues": [
         {
           "Id": "738f6cfb-8b71-423c-b897-824c20397e5a"/*AllowSpeedFactor*/,

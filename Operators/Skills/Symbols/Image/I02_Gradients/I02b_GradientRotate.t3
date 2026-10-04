@@ -6,12 +6,14 @@
     {
       "Id": "25d53d5e-d143-4687-9fdf-7a314b46775d"/*LinearGradient*/,
       "SymbolId": "2c3d2c26-ac45-42e9-8f13-6ea338333568",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "b2f938b1-07c7-4d0a-808c-36a43fa68be8"/*LinearGradient*/,
       "SymbolId": "2c3d2c26-ac45-42e9-8f13-6ea338333568",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "InputValues": [
         {
           "Id": "8169be8f-cb35-4900-b462-f2139b412d59"/*Rotate*/,
@@ -24,6 +26,7 @@
     {
       "Id": "fcda1e93-96ec-407a-9730-2c037b8a8109"/*ImageQuiz*/,
       "SymbolId": "b1cb8864-0d51-4b7f-96eb-4c6267d4b216",
+      "SymbolName": "Lib.flow.skillQuest.ImageQuiz",
       "InputValues": [],
       "Outputs": []
     }

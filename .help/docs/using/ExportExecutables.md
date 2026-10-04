@@ -52,7 +52,7 @@ The player writes its log files and the remembered startup choice to a `.temp/` 
 
 ### Output setup
 
-If the project has an [output setup](OutputSetup.md), the setup that is active in the editor is copied into a `.meta` folder beside the executable and the player loads it at startup. Other setups of the project stay behind — the player can't switch between them. Operators that read the venue — [StageGeometry], [DrawStageCanvas], [UseProjectorCam] — therefore work in an export exactly as they do in the editor.
+If the project has an [output setup](OutputSetup.md), the setup that is active in the editor is copied into a `.meta/Setups` folder beside the executable and the player loads it at startup. Other setups of the project stay behind — the player can't switch between them. Operators that read the venue — [StageGeometry], [DrawStageCanvas], [UseProjectorCam] — therefore work in an export exactly as they do in the editor.
 
 What else travels depends on **Player Mode** in the project's `Executable` settings:
 
@@ -63,7 +63,7 @@ An output whose canvas is left at 0 × 0 takes the size of what shows it: its di
 
 Streams travel the same way. An installation whose outputs are bound to an NDI or Spout plug sends them from the player just as the editor does, and the export includes the package that implements the sender even when no operator in the graph comes from it. A stream whose sender is missing on the target machine is reported once in the log.
 
-To move an installation to another machine, or to rebind at a venue, edit `outputs.machine.json` in the export's `.meta` folder or open the project in TiXL and export again. The player has no binding UI of its own — an installation should come up the same way every time.
+To move an installation to another machine, or to rebind at a venue, edit `outputs.machine.json` in the export's `.meta/Setups` folder or open the project in TiXL and export again. The player has no binding UI of its own — an installation should come up the same way every time.
 
 ### Loading screen
 

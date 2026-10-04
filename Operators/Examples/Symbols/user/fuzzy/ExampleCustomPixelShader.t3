@@ -6,18 +6,21 @@
     {
       "Id": "21bb7f77-b970-43df-80f9-c07c282ecc3a"/*BoolToInt*/,
       "SymbolId": "cd43942a-887e-4e34-bc54-0c2e5e8bc2af",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToInt",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "2dbf24d3-b7d2-4a10-87c0-6e00c4978cb5"/*PickString*/,
       "SymbolId": "a9784e5e-7696-49a0-bb77-2302587ede59",
+      "SymbolName": "Lib.string.logic.PickString",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "32fdf8a8-54da-42c1-ba29-b5a3a3053812"/*String*/,
       "SymbolId": "5880cbc3-a541-4484-a06a-0e6f77cdbe8e",
+      "SymbolName": "Types.Values.String",
       "InputValues": [
         {
           "Id": "ceeae47b-d792-471d-a825-49e22749b7b9"/*InputString*/,
@@ -30,6 +33,7 @@
     {
       "Id": "3481f05e-9e40-4e10-9812-043738cc5150"/*String*/,
       "SymbolId": "5880cbc3-a541-4484-a06a-0e6f77cdbe8e",
+      "SymbolName": "Types.Values.String",
       "InputValues": [
         {
           "Id": "ceeae47b-d792-471d-a825-49e22749b7b9"/*InputString*/,
@@ -42,6 +46,7 @@
     {
       "Id": "46d4eb94-b1d7-4a24-bf6a-49fd299cab78"/*String*/,
       "SymbolId": "5880cbc3-a541-4484-a06a-0e6f77cdbe8e",
+      "SymbolName": "Types.Values.String",
       "InputValues": [
         {
           "Id": "ceeae47b-d792-471d-a825-49e22749b7b9"/*InputString*/,
@@ -54,6 +59,7 @@
     {
       "Id": "85c9fe80-3aa1-4a56-b74c-eb13805b1933"/*CombineStrings*/,
       "SymbolId": "48ab9824-76ca-4238-800f-9cf95311e6c0",
+      "SymbolName": "Lib.string.combine.CombineStrings",
       "InputValues": [
         {
           "Id": "c832ba89-f4ae-4c47-b62b-52da52a09556"/*Separator*/,
@@ -66,6 +72,7 @@
     {
       "Id": "95b5736c-eca9-4406-9498-282035bc3f68"/*String*/,
       "SymbolId": "5880cbc3-a541-4484-a06a-0e6f77cdbe8e",
+      "SymbolName": "Types.Values.String",
       "InputValues": [
         {
           "Id": "ceeae47b-d792-471d-a825-49e22749b7b9"/*InputString*/,
@@ -78,6 +85,7 @@
     {
       "Id": "c0b6cb99-7799-466c-bd1f-e4c36614dd10"/*String*/,
       "SymbolId": "5880cbc3-a541-4484-a06a-0e6f77cdbe8e",
+      "SymbolName": "Types.Values.String",
       "InputValues": [
         {
           "Id": "ceeae47b-d792-471d-a825-49e22749b7b9"/*InputString*/,
@@ -90,6 +98,7 @@
     {
       "Id": "d2fd6315-30b6-48c6-90bd-c58ef0843c15"/*Boolean*/,
       "SymbolId": "ed0f5188-8888-453e-8db4-20d87d18e9f4",
+      "SymbolName": "Types.Values.Boolean",
       "InputValues": [
         {
           "Id": "e7c1f0af-da6d-4e33-ac86-7dc96bfe7eb3"/*BoolValue*/,
@@ -102,6 +111,7 @@
     {
       "Id": "d34889a1-59ed-4481-8265-9038698f3568"/*CustomPixelShader*/,
       "SymbolId": "46daab0e-e957-413e-826c-0699569d0e07",
+      "SymbolName": "Lib.image.use.CustomPixelShader",
       "InputValues": [
         {
           "Id": "3d84725a-594b-46d8-aa21-eec99026115d"/*A*/,
@@ -122,6 +132,7 @@
     {
       "Id": "e04df980-65ee-476d-8b9c-ffa15243e4b6"/*Time*/,
       "SymbolId": "b0d75f21-df33-460b-beab-d8c5e1f23e5e",
+      "SymbolName": "Lib.numbers.anim.time.Time",
       "InputValues": [],
       "Outputs": []
     }

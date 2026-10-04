@@ -48,12 +48,14 @@
     {
       "Id": "513b1255-f9c5-4a08-bf30-db3a1641ade0"/*Vector4Components*/,
       "SymbolId": "b15e4950-5c72-4655-84bc-c00647319030",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "5ab3e928-5018-479d-834a-1ef081c7563c"/*_ImageFxShaderSetup2*/,
       "SymbolId": "2b20afce-2b54-4bcc-ba0e-e456a0d92833",
+      "SymbolName": "Lib.render._dx11.fxsetup._ImageFxShaderSetup2",
       "InputValues": [
         {
           "Id": "16dce9bc-02d9-48f8-b07e-94a9af48d27b"/*Source*/,
@@ -71,6 +73,7 @@
     {
       "Id": "ac5f45de-7b15-4563-8d92-cb54f065a808"/*Vector4Components*/,
       "SymbolId": "b15e4950-5c72-4655-84bc-c00647319030",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "InputValues": [],
       "Outputs": []
     }

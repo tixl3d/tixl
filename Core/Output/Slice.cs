@@ -28,6 +28,24 @@ public sealed class Slice
     /// <summary>Rotation of the slice within the source, in degrees, about the rect's centre.</summary>
     public float Rotation;
 
+    /// <summary>
+    /// The one way to write <see cref="UvRect"/>: a cut is a rectangle *of* the source, so it is ordered, at
+    /// least a pixel wide and never outside the frame. A rect that leaves the frame would be sampled wrapped —
+    /// the content appears a second time along the edge — and drawn as a slice rect floating beside its source.
+    /// </summary>
+    public void SetUvRect(Vector4 rect)
+    {
+        var minX = Math.Clamp(MathF.Min(rect.X, rect.Z), 0, 1);
+        var minY = Math.Clamp(MathF.Min(rect.Y, rect.W), 0, 1);
+        var maxX = Math.Clamp(MathF.Max(rect.X, rect.Z), 0, 1);
+        var maxY = Math.Clamp(MathF.Max(rect.Y, rect.W), 0, 1);
+        UvRect = new Vector4(MathF.Min(minX, 1 - MinUvExtent), MathF.Min(minY, 1 - MinUvExtent),
+                             MathF.Max(maxX, minX + MinUvExtent), MathF.Max(maxY, minY + MinUvExtent));
+    }
+
+    /** A cut smaller than this is a mistake rather than an intent, and would divide by ~0 in every mapping. */
+    private const float MinUvExtent = 0.0005f;
+
     public void WriteToJson(JsonTextWriter writer)
     {
         writer.WriteStartObject();
@@ -41,13 +59,15 @@ public sealed class Slice
 
     public static Slice ReadFromJson(JToken token)
     {
-        return new Slice
+        var slice = new Slice
                    {
                        Id = OutputJson.ReadGuid(token["Id"]),
                        SourceId = OutputJson.ReadGuid(token["SourceId"]),
                        Name = token.ReadValueSafe("Name", string.Empty) ?? string.Empty,
-                       UvRect = OutputJson.ReadVector4(token["UvRect"], new Vector4(0, 0, 1, 1)),
                        Rotation = token.ReadValueSafe("Rotation", 0f),
                    };
+        // Heals rects written before they were kept inside the source.
+        slice.SetUvRect(OutputJson.ReadVector4(token["UvRect"], new Vector4(0, 0, 1, 1)));
+        return slice;
     }
 }

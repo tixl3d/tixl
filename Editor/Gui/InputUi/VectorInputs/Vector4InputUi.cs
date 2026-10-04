@@ -7,8 +7,9 @@ using T3.Core.DataTypes;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Editor.Gui.Input;
-using T3.Editor.Gui.InputUi.CombinedInputs;
+using T3.Editor.Gui.InputUi.VectorInputs.Controls;
 using T3.Editor.Gui.Interaction;
+using T3.Editor.Gui.Styling;
 using T3.Editor.UiModel.InputsAndTypes;
 using T3.Serialization;
 
@@ -26,7 +27,9 @@ internal sealed class Vector4InputUi : FloatVectorInputValueUi<Vector4>
         
     public override IInputUi Clone()
     {
-        return CloneWithType<Vector4InputUi>();
+        var clone = (Vector4InputUi)CloneWithType<Vector4InputUi>();
+        clone.UseVec4Control = UseVec4Control;
+        return clone;
     }
 
     public override void ApplyValueToAnimation(IInputSlot inputSlot, InputValue inputValue, Animator animator, double time)
@@ -44,20 +47,27 @@ internal sealed class Vector4InputUi : FloatVectorInputValueUi<Vector4>
         Curve.UpdateCurveValues(curves, time, FloatComponents);
     }
 
+    protected override InputEditStateFlags DrawValueControl(string name, InputSlot<Vector4> inputSlot, ref Vector4 value, bool readOnly)
+    {
+        if (!_customControls.TryGetValue(UseVec4Control, out var control))
+        {
+            return base.DrawValueControl(name, inputSlot, ref value, readOnly);
+        }
+
+        if (readOnly)
+        {
+            var displayValue = value;
+            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.StatusAutomated.Rgba);
+            control.Draw(inputSlot, ref displayValue);
+            ImGui.PopStyleColor();
+            return InputEditStateFlags.Nothing;
+        }
+
+        return control.Draw(inputSlot, ref value);
+    }
+
     protected override InputEditStateFlags DrawEditControl(string name, Symbol.Child.Input input, ref Vector4 float4Value, bool readOnly)
     {
-        if (UseVec4Control == Vec4Controls.AdsrEnvelope)
-        {
-            if (readOnly)
-            {
-                var tempEnvelope = float4Value;
-                AdsrEnvelopeInputUi.DrawAdsrControl(ref tempEnvelope, cloneIfModified: false);
-                return InputEditStateFlags.Nothing;
-            }
-
-            return AdsrEnvelopeInputUi.DrawAdsrControl(ref float4Value, input.IsDefault);
-        }
-        
         float4Value.CopyTo(FloatComponents);
         var thumbWidth = ImGui.GetFrameHeight();
         var inputEditState = VectorValueEdit.Draw(FloatComponents, Min, Max, Scale, ClampMin, ClampMax, thumbWidth+1);
@@ -158,4 +168,9 @@ internal sealed class Vector4InputUi : FloatVectorInputValueUi<Vector4>
         None,
         AdsrEnvelope,
     }
+
+    private static readonly Dictionary<Vec4Controls, IVector4InputControl> _customControls = new()
+        {
+            [Vec4Controls.AdsrEnvelope] = new AdsrEnvelopeControl(),
+        };
 }

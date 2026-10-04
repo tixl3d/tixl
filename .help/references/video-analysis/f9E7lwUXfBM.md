@@ -12,7 +12,7 @@ A short tip explaining how an image operator's resolution is resolved: the "magi
 ## Mentions
 - 0:25→0:48 [Blob] · explained · scripted · Example · 88% — A handy starting image effect for demonstrating how resolution flows; its drawn circle stays circular regardless of the requested aspect ratio.
 - 0:31→1:02 [ui:OutputWindow] · explained · scripted · Concept · 90% — In its default "fill" mode the output window size sets the render resolution of whatever is pinned to it, and aspect ratio is preserved so circular content stays circular.
-- 1:05→1:18 [ui:OutputSettings] · explained · scripted · Tip · 85% — Override the inferred output size with a fixed resolution (Full HD, 4K, 720p) when you need predictable, reproducible dimensions instead of whatever the window happens to be.
+- 1:05→1:18 [ui:OutputResolution] · explained · scripted · Tip · 85% — Override the inferred output size with a fixed resolution (Full HD, 4K, 720p) when you need predictable, reproducible dimensions instead of whatever the window happens to be.
 - 1:22→1:35 [ui:Graph] · passing · scripted · Tip · 70% — Live-hover previews always render at a fixed 640×360 thumbnail size, whereas the "current state" hover shows the operator's true resolution.
 - 1:48→2:21 [Layer2d] · explained · scripted · Gotcha · 78% — Even once it is no longer a flat image, its render resolution is still driven by the output it is pinned to, so changing the output size re-renders it at the new resolution.
 - 2:32→3:14 [LoadImage] · explained · scripted · Example · 85% — A loaded texture forces its own pixel dimensions (e.g. a square 799×799 source) downstream, which is why effects suddenly inherit a non-standard incoming resolution.

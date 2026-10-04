@@ -7,22 +7,22 @@
     {
       "InputId": "0c0dd89a-e9ff-4746-b12c-dd4799a0b500"/*TextureFiltering*/,
       "Position": {
-        "X": -115.55017,
-        "Y": 931.89075
+        "X": 333.24564,
+        "Y": 928.5328
       }
     },
     {
       "InputId": "0eff3a75-eafc-4a5e-8a2c-10577c12e776"/*DisplacementOffset*/,
       "Position": {
-        "X": 24.449814,
-        "Y": 541.8907
+        "X": 333.24564,
+        "Y": 543.5328
       }
     },
     {
       "InputId": "0f2867ab-a65e-4bf3-b1b5-9c241690ba5f"/*Displacement*/,
       "Position": {
-        "X": 24.449814,
-        "Y": 506.89072
+        "X": 333.24564,
+        "Y": 508.53278
       },
       "GroupTitle": "Amount",
       "Scale": 0.01
@@ -30,8 +30,8 @@
     {
       "InputId": "1ff7d454-b8fb-470f-beee-ec7521db8a7f"/*DisplaceMapOffset*/,
       "Position": {
-        "X": -115.55017,
-        "Y": 646.89075
+        "X": 193.24564,
+        "Y": 648.5328
       },
       "AddPadding": "True",
       "Min": -2.0,
@@ -41,47 +41,47 @@
       "InputId": "3b5b278d-fd4e-4216-9916-5cd7ffd54ab2"/*DisplaceMap*/,
       "Relevancy": "Required",
       "Position": {
-        "X": 24.449814,
-        "Y": 471.89072
+        "X": 333.24564,
+        "Y": 473.53278
       }
     },
     {
       "InputId": "404c8102-3a5e-45c6-a0f1-4d97a5f0db07"/*SampleRadius*/,
       "Position": {
-        "X": 24.44983,
-        "Y": 716.89075
+        "X": 333.24564,
+        "Y": 718.5328
       },
       "GroupTitle": "Sampling"
     },
     {
       "InputId": "6a5c120f-7c04-439b-ad2d-6f78ceb3b378"/*DisplaceMode*/,
       "Position": {
-        "X": 24.44983,
-        "Y": 821.89075
+        "X": 333.24564,
+        "Y": 858.5328
       },
       "AddPadding": "True"
     },
     {
       "InputId": "6e772174-813d-4baa-b6b5-27e197b547ac"/*WrapMode*/,
       "Position": {
-        "X": -73.624374,
-        "Y": 1045.0623
+        "X": 333.24564,
+        "Y": 788.5328
       },
       "Description": "Defines if and how the image is repeated at its edge"
     },
     {
       "InputId": "77673c64-918d-46a6-aa29-c362057afee6"/*Shade*/,
       "Position": {
-        "X": 24.449814,
-        "Y": 611.8907
+        "X": 333.24564,
+        "Y": 613.5328
       },
       "Description": "Darkens the effect"
     },
     {
       "InputId": "b2f58dc7-e5c6-4c57-a704-94aaa0b1e002"/*GenerateMips*/,
       "Position": {
-        "X": 24.44983,
-        "Y": 786.89075
+        "X": 333.24564,
+        "Y": 823.5328
       },
       "GroupTitle": "Quality"
     },
@@ -89,15 +89,23 @@
       "InputId": "d0508dfa-89cf-4713-8f5e-893dd5bfc3f4"/*Image*/,
       "Relevancy": "Required",
       "Position": {
-        "X": 24.449814,
-        "Y": 436.89072
+        "X": 333.24564,
+        "Y": 438.53278
+      }
+    },
+    {
+      "InputId": "d6d39a15-11ab-4adb-949b-c33b3f1347b8"/*Resolution*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 333.24564,
+        "Y": 753.5328
       }
     },
     {
       "InputId": "dc8dfa33-1a49-4800-8c1f-89b29d7427f3"/*Twist*/,
       "Position": {
-        "X": 24.449814,
-        "Y": 576.89075
+        "X": 333.24564,
+        "Y": 578.5328
       },
       "Min": -180.0,
       "Max": 180.0,
@@ -106,8 +114,8 @@
     {
       "InputId": "ea2b9f80-49b9-4c90-ba34-f0274169ece3"/*RGSS_4xAA*/,
       "Position": {
-        "X": -115.55017,
-        "Y": 856.89075
+        "X": 193.24564,
+        "Y": 893.5328
       }
     }
   ],
@@ -115,34 +123,22 @@
     {
       "ChildId": "0da95969-3de8-4603-9b0e-477c1aa6eb11"/*Vector2Components*/,
       "Position": {
-        "X": 24.44983,
-        "Y": 646.89075
-      }
-    },
-    {
-      "ChildId": "c2468361-b9f0-438f-b434-d1699c6b97f8"/*_multiImageFxSetup*/,
-      "Style": "Resizable",
-      "Size": {
-        "X": 128.4052,
-        "Y": 541.74316
-      },
-      "Position": {
-        "X": 164.44983,
-        "Y": 401.89072
+        "X": 333.24564,
+        "Y": 648.5328
       }
     },
     {
       "ChildId": "defb45ad-5d5f-466f-8198-e7a7fb055698"/*BoolToInt*/,
       "Position": {
-        "X": 24.44983,
-        "Y": 856.89075
+        "X": 333.24564,
+        "Y": 893.5328
       }
     },
     {
       "ChildId": "fb73be5e-fcb2-43d4-ae9e-211b9a41be50"/*_multiImageFxSetupStatic*/,
       "Position": {
-        "X": 420.61484,
-        "Y": 397.0882
+        "X": 473.24564,
+        "Y": 403.53278
       }
     }
   ],
@@ -150,8 +146,8 @@
     {
       "OutputId": "0faa056c-b1d6-4e1f-a9be-b0791f3bae84"/*Output*/,
       "Position": {
-        "X": 597.1986,
-        "Y": 261.88043
+        "X": 473.2456,
+        "Y": 963.5328
       }
     }
   ]

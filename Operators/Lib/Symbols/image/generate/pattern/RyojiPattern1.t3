@@ -112,24 +112,28 @@
     {
       "Id": "503052e3-fc4b-40a7-a27b-d2146a487903"/*Vector4Components*/,
       "SymbolId": "b15e4950-5c72-4655-84bc-c00647319030",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "5b6562db-76d6-4907-bd27-82175342e596"/*Vector2Components*/,
       "SymbolId": "0946c48b-85d8-4072-8f21-11d17cc6f6cf",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "66d6c4ef-6b9a-468a-98a9-862362945850"/*Vector4Components*/,
       "SymbolId": "b15e4950-5c72-4655-84bc-c00647319030",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "6e680b83-48b4-4199-a885-e6e58b57927f"/*_ImageFxShaderSetup2*/,
       "SymbolId": "2b20afce-2b54-4bcc-ba0e-e456a0d92833",
+      "SymbolName": "Lib.render._dx11.fxsetup._ImageFxShaderSetup2",
       "InputValues": [
         {
           "Id": "16dce9bc-02d9-48f8-b07e-94a9af48d27b"/*Source*/,
@@ -152,30 +156,35 @@
     {
       "Id": "90518119-afb7-4432-a290-860c0699081f"/*Vector2Components*/,
       "SymbolId": "0946c48b-85d8-4072-8f21-11d17cc6f6cf",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "a5f0011f-2ae1-437e-89cf-37609de862d2"/*Vector2Components*/,
       "SymbolId": "0946c48b-85d8-4072-8f21-11d17cc6f6cf",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "c6268984-b834-42a9-a31f-77b4de44b27b"/*Vector2Components*/,
       "SymbolId": "0946c48b-85d8-4072-8f21-11d17cc6f6cf",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "ca157645-9e0b-4166-8151-60c53ab86ccb"/*Vector2Components*/,
       "SymbolId": "0946c48b-85d8-4072-8f21-11d17cc6f6cf",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "fa231b23-ad2d-4082-804f-9489e27abe5d"/*Vector4Components*/,
       "SymbolId": "b15e4950-5c72-4655-84bc-c00647319030",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "InputValues": [],
       "Outputs": []
     }

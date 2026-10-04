@@ -33,8 +33,8 @@ internal static class SetupActions
     }
 
     /// <summary>
-    /// Adds a patch as a visible tile — a centred quarter of the canvas — rather than the full canvas. A sole
-    /// full-canvas patch is the output's implicit one and is folded away in the views
+    /// Adds a patch as a visible tile — a centred quarter of the canvas — rather than the full canvas. The
+    /// output's full-canvas base patch is its implicit one and is folded away in the views
     /// (<see cref="SetupRelations.TryGetImplicitPatch"/>), so a patch added by hand has to be something you can
     /// see and drag.
     /// </summary>
@@ -42,24 +42,29 @@ internal static class SetupActions
     {
         SetupUndo.RunUndoable("Add patch", setup, () =>
                                                   {
-                                                      var patch = AddPatchInternal(output, Guid.Empty);
                                                       var min = new Vector2(0.25f, 0.25f);
                                                       var max = new Vector2(0.75f, 0.75f);
-                                                      patch.Quad = [min, new Vector2(max.X, min.Y), max, new Vector2(min.X, max.Y)];
+
+                                                      // Left unnamed: the label is derived from its position (see SetupLabels.PatchLabel).
+                                                      var patch = new OutputDefinition.Patch
+                                                                      {
+                                                                          Quad = [min, new Vector2(max.X, min.Y), max, new Vector2(min.X, max.Y)],
+                                                                      };
+                                                      output.Patches.Add(patch);
                                                       selection.Select(SetupEntityKinds.Patch, patch.Id);
                                                   });
     }
 
-    /// <summary>A full-canvas patch fed by a slice, appended outside any undo step — the caller's.</summary>
-    internal static OutputDefinition.Patch AddPatchInternal(OutputDefinition output, Guid sliceId)
+    /// <summary>A full-canvas patch fed by a slice; the caller places it on an output and owns the undo step.</summary>
+    internal static OutputDefinition.Patch CreateFullCanvasPatch(Guid sliceId)
     {
         // Left unnamed: the label is derived from its position (see SetupLabels.PatchLabel).
-        var patch = new OutputDefinition.Patch { SliceId = sliceId, Quad = OutputDefinition.FullCanvasQuad() };
-        output.Patches.Add(patch);
-        return patch;
+        return new OutputDefinition.Patch { SliceId = sliceId, Quad = OutputDefinition.FullCanvasQuad() };
     }
 
-    internal static void AddSurface(SetupEntitySelection selection)
+    /// <param name="boardPosition">Where the card lands, in board metres — the point the request came from,
+    /// e.g. a menu's click. Null leaves the placement to the Board's own seeding.</param>
+    internal static void AddSurface(SetupEntitySelection selection, Vector2? boardPosition = null)
     {
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
             return;
@@ -67,12 +72,110 @@ internal static class SetupActions
         SetupUndo.RunUndoable("Add surface", setup, () =>
                                                     {
                                                         var surface = new Surface { Name = $"Surface {setup.Surfaces.Count + 1}" };
+                                                        if (boardPosition != null)
+                                                            surface.BoardPlacement = new BoardPlacement { Position = boardPosition.Value };
+
                                                         setup.Surfaces.Add(surface);
                                                         selection.Select(SetupEntityKinds.Surface, surface.Id);
                                                     });
     }
 
-    internal static void AddProp(SetupEntitySelection selection)
+    /// <param name="boardPosition">Where it stands, in board metres. A prop has no card of its own, so this is
+    /// its place in the stage; null leaves it at the origin.</param>
+    /// <summary>How many of the selected entities are surfaces — what <see cref="ArrangeSurfacesAlongWalls"/> would act on.</summary>
+    internal static int CountSelectedSurfaces(SetupEntitySelection selection)
+    {
+        var count = 0;
+        for (var i = 0; i < selection.Targets.Count; i++)
+        {
+            if (selection.Targets[i].Kind == SetupEntityKinds.Surface)
+                count++;
+        }
+
+        return count;
+    }
+
+    /// <summary>
+    /// Lays the selected surfaces out on the Board side by side, in the order their walls run around the floor
+    /// plan — the room unfolded into an elevation. Surfaces that stand on no plan follow, ordered as they lie
+    /// now, so a mixed selection still lands in a readable row. Board placement only: nothing in the stage,
+    /// the routing or the calibration moves.
+    /// </summary>
+    internal static void ArrangeSurfacesAlongWalls(SetupEntitySelection selection, Setup setup)
+    {
+        var selected = new List<Surface>();
+        for (var i = 0; i < selection.Targets.Count; i++)
+        {
+            var target = selection.Targets[i];
+            if (target.Kind != SetupEntityKinds.Surface)
+                continue;
+
+            var surface = setup.FindSurface(target.EntityId);
+            if (surface != null && !selected.Contains(surface))
+                selected.Add(surface);
+        }
+
+        if (selected.Count < 2)
+            return;
+
+        // Walls first, plan by plan and edge by edge around each; then whatever is left, west to east.
+        var ordered = new List<Surface>(selected.Count);
+        foreach (var plan in setup.FloorPlans)
+        {
+            for (var segment = 0; segment < plan.SegmentCount; segment++)
+            {
+                var wall = setup.FindSurface(plan.WallOf(segment));
+                if (wall != null && selected.Contains(wall) && !ordered.Contains(wall))
+                    ordered.Add(wall);
+            }
+        }
+
+        var rest = new List<Surface>();
+        foreach (var surface in selected)
+        {
+            if (!ordered.Contains(surface))
+                rest.Add(surface);
+        }
+
+        rest.Sort((a, b) => LeftEdgeOf(a).CompareTo(LeftEdgeOf(b)));
+        ordered.AddRange(rest);
+
+        // The row starts where the selection already is, so an arrange doesn't fling the cards across the Board.
+        var left = float.MaxValue;
+        var bottom = float.MaxValue;
+        foreach (var surface in ordered)
+        {
+            left = MathF.Min(left, LeftEdgeOf(surface));
+            bottom = MathF.Min(bottom, BottomEdgeOf(surface));
+        }
+
+        SetupUndo.RunUndoable("Arrange surfaces", setup, () =>
+                                                         {
+                                                             var x = left;
+                                                             foreach (var surface in ordered)
+                                                             {
+                                                                 var anchor = surface.AnchorInMeters;
+                                                                 surface.BoardPlacement ??= new BoardPlacement();
+                                                                 surface.BoardPlacement.Position = new Vector2(x + anchor.X, bottom + anchor.Y);
+                                                                 x += surface.SizeInMeters.X + ArrangeGapInMeters;
+                                                             }
+                                                         });
+    }
+
+    private static float LeftEdgeOf(Surface surface)
+    {
+        return (surface.BoardPlacement?.Position.X ?? 0) - surface.AnchorInMeters.X;
+    }
+
+    private static float BottomEdgeOf(Surface surface)
+    {
+        return (surface.BoardPlacement?.Position.Y ?? 0) - surface.AnchorInMeters.Y;
+    }
+
+    /** Enough of a seam to tell two walls apart, far less than a wall's own width. */
+    private const float ArrangeGapInMeters = 0.1f;
+
+    internal static void AddProp(SetupEntitySelection selection, Vector2? boardPosition = null)
     {
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
             return;
@@ -80,13 +183,16 @@ internal static class SetupActions
         SetupUndo.RunUndoable("Add prop", setup, () =>
                                                  {
                                                      var prop = new Prop();
+                                                     if (boardPosition != null)
+                                                         prop.Position = new Vector3(boardPosition.Value.X, boardPosition.Value.Y, prop.Position.Z);
+
                                                      setup.Props.Add(prop);
                                                      selection.Select(SetupEntityKinds.Prop, prop.Id);
                                                  });
     }
 
     /// <summary>A closed rectangular floor plan of <paramref name="size"/> metres, with or without its floor surface.</summary>
-    internal static void AddFloorPlan(SetupEntitySelection selection, Vector2 size, bool withFloor)
+    internal static void AddFloorPlan(SetupEntitySelection selection, Vector2 size, bool withFloor, Vector2? boardPosition = null)
     {
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
             return;
@@ -94,6 +200,9 @@ internal static class SetupActions
         SetupUndo.RunUndoable("Add floor plan", setup, () =>
                                                        {
                                                            var plan = FloorPlanSync.CreateRectangle(setup, size, withFloor);
+                                                           if (boardPosition != null)
+                                                               plan.BoardPlacement = new BoardPlacement { Position = boardPosition.Value };
+
                                                            selection.Select(SetupEntityKinds.FloorPlan, plan.Id);
                                                        });
     }
@@ -183,44 +292,30 @@ internal static class SetupActions
                                                                         {
                                                                             Name = $"P{CountProjectorOutputs(setup) + 1}",
                                                                             Kind = OutputDefinition.Kinds.Projector,
-                                                                            CanvasResolution = new T3.Core.DataTypes.Vector.Int2(1920, 1200),
                                                                         };
                                                        setup.Outputs.Add(output);
                                                        selection.Select(SetupEntityKinds.Output, output.Id);
                                                    });
     }
 
-    /// <summary>Maps a surface onto an output with a centred corner-pin quad at the surface's aspect — appended outside any undo step, the caller's.</summary>
-    internal static void AddMapping(Surface surface, OutputDefinition output, Guid outputId)
+    /// <summary>
+    /// Maps a surface onto an output — appended outside any undo step, the caller's. It takes the whole canvas:
+    /// a projector is aimed by pulling the corners in from the frame it actually throws, and a display shows the
+    /// surface whole to begin with. Either way the first drag turns the fill into a corner pin.
+    /// </summary>
+    internal static void AddMapping(Surface surface, OutputDefinition output)
     {
-        var canvasW = Math.Max(1, output.ResolvedResolution.Width);
-        var canvasH = Math.Max(1, output.ResolvedResolution.Height);
+        surface.OutputMappings.Add(Surface.OutputMapping.CreateFilling(output.Id));
+    }
 
-        var aspect = surface.SizeInMeters.Y > 0.0001f ? surface.SizeInMeters.X / surface.SizeInMeters.Y : 1f;
-        var maxW = canvasW * 0.6f;
-        var maxH = canvasH * 0.6f;
-        var w = maxW;
-        var h = w / aspect;
-        if (h > maxH)
-        {
-            h = maxH;
-            w = h * aspect;
-        }
+    /// <summary>Gives the surface the whole canvas on this output again, dropping the corners it was dragged to.</summary>
+    internal static void FillOutput(Surface surface, Guid outputId)
+    {
+        var mapping = surface.FindMapping(outputId);
+        if (mapping == null)
+            return;
 
-        var cx = canvasW * 0.5f;
-        var cy = canvasH * 0.5f;
-
-        // Laid out in pixels for the aspect, stored as fractions of the canvas like every mapping quad.
-        var canvas = new Vector2(canvasW, canvasH);
-        var quad = new[]
-                       {
-                           new Vector2(cx - w * 0.5f, cy - h * 0.5f) / canvas, // top-left
-                           new Vector2(cx + w * 0.5f, cy - h * 0.5f) / canvas, // top-right
-                           new Vector2(cx + w * 0.5f, cy + h * 0.5f) / canvas, // bottom-right
-                           new Vector2(cx - w * 0.5f, cy + h * 0.5f) / canvas, // bottom-left
-                       };
-
-        surface.OutputMappings.Add(new Surface.OutputMapping { OutputId = outputId, Quad = quad });
+        mapping.FillCanvas();
     }
 
     /// <summary>The image asset type's extensions in the picker's comma-separated form, built once.</summary>
@@ -283,7 +378,7 @@ internal static class SetupActions
                                                             });
     }
 
-    internal static void AddReferenceImage(SetupEntitySelection selection)
+    internal static void AddReferenceImage(SetupEntitySelection selection, Vector2? boardPosition = null)
     {
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
             return;
@@ -291,6 +386,9 @@ internal static class SetupActions
         SetupUndo.RunUndoable("Add reference image", setup, () =>
                                                             {
                                                                 var image = new ReferenceImage { Name = $"Image {setup.ReferenceImages.Count + 1}" };
+                                                                if (boardPosition != null)
+                                                                    image.BoardPlacement = new BoardPlacement { Position = boardPosition.Value };
+
                                                                 setup.ReferenceImages.Add(image);
                                                                 selection.Select(SetupEntityKinds.ReferenceImage, image.Id);
                                                             });
@@ -971,6 +1069,10 @@ internal static class SetupActions
             // A root carries its own pins, so nudge those instead.
             foreach (var mapping in copy.OutputMappings)
             {
+                // A fill has nowhere to be nudged to: it is the canvas, and the copy fills it just as well.
+                if (mapping.IsFilling)
+                    continue;
+
                 // A nudge of the canvas rather than a pixel count, so it reads the same at any resolution.
                 for (var i = 0; i < mapping.Quad.Length; i++)
                     mapping.Quad[i] += new Vector2(0.0125f, 0.0125f);

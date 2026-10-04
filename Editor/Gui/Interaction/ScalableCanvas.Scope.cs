@@ -178,6 +178,15 @@ public partial class ScalableCanvas
         _requestedTransition = new TransitionToArea(targetCanvasArea, transition);
     }
 
+    /// <summary>
+    /// Drops a requested-but-not-yet-applied view area, so a focus request made in the same frame isn't
+    /// overridden when the pending request is applied afterwards.
+    /// </summary>
+    internal void CancelPendingViewTransition()
+    {
+        _requestedTransition = null;
+    }
+
     private void HandleRequestedTransitions()
     {
         if (_requestedTransition == null)

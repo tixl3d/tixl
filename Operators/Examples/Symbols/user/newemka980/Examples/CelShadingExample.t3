@@ -6,12 +6,14 @@
     {
       "Id": "00a19f13-bdbb-4a5a-8587-a1aef59be141"/*ReuseCamera2*/,
       "SymbolId": "1de05a51-4a22-44cd-a584-6f1ae1c0e8d1",
+      "SymbolName": "Lib.render._.ReuseCamera2",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "09bfd588-6a0f-4747-8b78-9338db7c9720"/*Camera*/,
       "SymbolId": "746d886c-5ab6-44b1-bb15-f3ce2fadf7e6",
+      "SymbolName": "Lib.render.camera.Camera",
       "InputValues": [
         {
           "Id": "313596cc-3854-436b-89da-5fd40164ce76"/*Position*/,
@@ -37,18 +39,21 @@
     {
       "Id": "0b43fdda-0a8d-4a50-9ad0-3611644797a3"/*DrawPoints*/,
       "SymbolId": "ffd94e5a-bc98-4e70-84d8-cce831e6925f",
+      "SymbolName": "Lib.point.draw.DrawPoints",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "281243e1-f366-46d1-8ef2-cd374df9aab6"/*Transform*/,
       "SymbolId": "284d2183-197d-47fd-b130-873cced78b1c",
+      "SymbolName": "Lib.render.transform.Transform",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "3f1bd1cb-aabf-4e1c-b4e8-62b5f045db19"/*Point*/,
       "SymbolId": "9989f539-f86c-4508-83d7-3fc0e559f502",
+      "SymbolName": "Types.Values.Point",
       "InputValues": [
         {
           "Id": "a0a453db-d8f1-415a-9a98-3c88a25b15e7"/*Position*/,
@@ -66,6 +71,7 @@
       "Id": "490e6225-7cbb-4869-ba0c-b32a05054fda"/*PointLight*/,
       "IsBypassed": true,
       "SymbolId": "9c67a8c8-839f-4f67-a949-08cb38b9dffd",
+      "SymbolName": "Lib.render.shading.PointLight",
       "InputValues": [
         {
           "Id": "98155900-1bb9-427a-9c4e-0988fec806cd"/*Intensity*/,
@@ -87,6 +93,7 @@
     {
       "Id": "7a02b895-1590-45b7-b61d-739be19f6375"/*DrawMeshCelShading*/,
       "SymbolId": "dcacc281-92c6-4e47-8eea-91fa8954ed86",
+      "SymbolName": "Lib.mesh.draw.DrawMeshCelShading",
       "InputValues": [
         {
           "Id": "3d2eaff6-9b02-4bc9-9ebc-76f5888943f6"/*Shading*/,
@@ -180,6 +187,7 @@
     {
       "Id": "868e7227-fc37-45fb-8159-0368b8a433ac"/*LoadObj*/,
       "SymbolId": "be52b670-9749-4c0d-89f0-d8b101395227",
+      "SymbolName": "Lib.mesh.generate.LoadObj",
       "InputValues": [
         {
           "Id": "c39a61b3-fb6b-4611-8f13-273f13c9c491"/*ScaleFactor*/,
@@ -192,6 +200,7 @@
     {
       "Id": "8bd95053-1ab9-41f5-89a4-ac833533a062"/*DetectEdges*/,
       "SymbolId": "2a5475c8-9e16-409f-8c40-a3063e045d38",
+      "SymbolName": "Lib.image.fx.stylize.DetectEdges",
       "InputValues": [
         {
           "Id": "6d10c73c-37b8-443b-94d9-854b04027a3c"/*Color*/,
@@ -214,18 +223,21 @@
     {
       "Id": "8f886f76-38e8-49ef-8d85-93d95d7fa216"/*Transform*/,
       "SymbolId": "284d2183-197d-47fd-b130-873cced78b1c",
+      "SymbolName": "Lib.render.transform.Transform",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "b57179b1-bd63-4f71-8870-f93bf70a2c61"/*Group*/,
       "SymbolId": "a3f64d34-1fab-4230-86b3-1c3deba3f90b",
+      "SymbolName": "Lib.render.transform.Group",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "bc77bbe3-21e9-443b-a5ed-88376c467897"/*DrawMeshUnlit*/,
       "SymbolId": "4499dcb1-c936-49ed-861b-2ad8ae58cb28",
+      "SymbolName": "Lib.mesh.draw.DrawMeshUnlit",
       "InputValues": [
         {
           "Id": "2c88e7c4-04f8-4e45-94d8-214775c5609c"/*EnableZWrite*/,
@@ -248,6 +260,7 @@
     {
       "Id": "bdf1868b-941d-4f3d-9b32-653c7113efb0"/*AnimValue*/,
       "SymbolId": "ea7b8491-2f8e-4add-b0b1-fd068ccfed0d",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "InputValues": [
         {
           "Id": "48005727-0158-4795-ad70-8410c27fd01d"/*Rate*/,
@@ -265,12 +278,14 @@
     {
       "Id": "c6070490-5430-4f70-b058-cfdbe81633cd"/*Vector3*/,
       "SymbolId": "94a5de3b-ee6a-43d3-8d21-7b8fe94b042b",
+      "SymbolName": "Types.Values.Vector3",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "e202813f-c1f9-4cd2-b2d2-7416fa77712e"/*PointLight*/,
       "SymbolId": "9c67a8c8-839f-4f67-a949-08cb38b9dffd",
+      "SymbolName": "Lib.render.shading.PointLight",
       "InputValues": [
         {
           "Id": "98155900-1bb9-427a-9c4e-0988fec806cd"/*Intensity*/,
@@ -292,6 +307,7 @@
     {
       "Id": "e2c6543e-89a8-4e10-a293-53366a285cc7"/*RenderTarget*/,
       "SymbolId": "f9fe78c5-43a6-48ae-8e8c-6cdbbc330dd1",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "InputValues": [
         {
           "Id": "8bb4a4e5-0c88-4d99-a5b2-2c9e22bd301f"/*ClearColor*/,
@@ -309,6 +325,7 @@
     {
       "Id": "e5fa1c70-0c67-4f9b-b3b5-bbf90f82a8e2"/*RenderTarget*/,
       "SymbolId": "f9fe78c5-43a6-48ae-8e8c-6cdbbc330dd1",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "InputValues": [
         {
           "Id": "8bb4a4e5-0c88-4d99-a5b2-2c9e22bd301f"/*ClearColor*/,
@@ -326,6 +343,7 @@
     {
       "Id": "f33d7b8c-80b8-4327-ba8b-c26801fc8367"/*Blend*/,
       "SymbolId": "9f43f769-d32a-4f49-92ac-e0be3ba250cf",
+      "SymbolName": "Lib.image.use.Blend",
       "InputValues": [],
       "Outputs": []
     }

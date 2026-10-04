@@ -149,10 +149,10 @@ internal sealed partial class SetupOutputView
     }
 
     /// <summary>The length prompt at the end of the tool; drawn by the Board every frame so the popup can open.</summary>
-    private void DrawScaleLengthPopup(Setup setup)
+    private void DrawScaleLengthPopup(Setup setup, SetupEntitySelection? selection)
     {
         ImGui.SetNextWindowSize(new Vector2(260 * T3Ui.UiScaleFactor, 0));
-        if (!ImGui.BeginPopup(ScaleLengthPopupId))
+        if (!SetupPopup.Begin(ScaleLengthPopupId))
         {
             // Dismissed by a click elsewhere: the tool ends with its popup.
             if (_scaleToolPopupOpen)
@@ -180,6 +180,8 @@ internal sealed partial class SetupOutputView
                                                                  image.ScaleLineMeters = meters;
                                                                  ApplyScaleLine(image);
                                                              });
+            // The image is what the Parameter window now shows, so it is what the Board shows as selected.
+            selection?.Select(SetupEntityKinds.ReferenceImage, image.Id);
             _scaleToolImageId = Guid.Empty;
             _scaleToolPopupOpen = false;
             ImGui.CloseCurrentPopup();
@@ -193,7 +195,7 @@ internal sealed partial class SetupOutputView
             ImGui.CloseCurrentPopup();
         }
 
-        ImGui.EndPopup();
+        SetupPopup.End();
     }
 
     /// <summary>

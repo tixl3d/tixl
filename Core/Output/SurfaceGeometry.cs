@@ -122,29 +122,84 @@ public static class SurfaceGeometry
     }
 
     /// <summary>
-    /// Adopts new bounds — expressed in the surface's *current* space — as the surface's rectangle. Every
-    /// mapping's quad is re-projected through its own recovered projection, so what the projector shows stays
-    /// put while the footprint changes. The origin does not move: the anchor's normalized position is re-derived
-    /// from where the origin now sits inside the new rectangle, and everything stored in surface space
-    /// (measuring lines, regions, the raster) keeps its coordinates.
+    /// Adopts new bounds — expressed in the surface's *current* space — as the surface's rectangle. The origin
+    /// does not move: the anchor's normalized position is re-derived from where the origin now sits inside the
+    /// new rectangle, and everything stored in surface space (measuring lines, regions, the raster) keeps its
+    /// coordinates.
     /// </summary>
-    public static void ApplyBounds(Surface surface, Vector2 min, Vector2 max)
+    public static void ApplyBounds(Surface surface, Vector2 min, Vector2 max, RectangleEdits edit = RectangleEdits.OnTheWall)
     {
-        Span<Vector2> corners = stackalloc Vector2[4];
-        WriteRectCorners(min, max, corners, yUp: true);
-        foreach (var mapping in surface.OutputMappings)
-        {
-            // Read and write both in the canvas' normalized space, so no output (and no resolution) is needed.
-            if (!TryGetSurfaceToOutput(surface, mapping, Vector2.One, out var surfaceToOutput))
-                continue;
-
-            for (var i = 0; i < 4; i++)
-                mapping.Quad[i] = surfaceToOutput.TransformPoint(corners[i]);
-        }
+        Span<Vector2> oldRect = stackalloc Vector2[4];
+        WriteLocalRect(surface, oldRect);
 
         var newSize = new Vector2(MathF.Max(max.X - min.X, MinSize), MathF.Max(max.Y - min.Y, MinSize));
         surface.SizeInMeters = newSize;
         surface.Anchor = new Vector2(-2 * min.X / newSize.X - 1, -2 * min.Y / newSize.Y - 1);
+
+        if (edit == RectangleEdits.OnTheWall)
+            CarrySpaceChange(surface, oldRect);
+    }
+
+    /// <summary>
+    /// Carries everything a surface's rectangle holds — its corner pins, its traced photo, and the measuring
+    /// lines and points on it — after a gesture moved that rectangle, or the space it is measured in. Each
+    /// projection is rebuilt from its own old one: for a corner of the new rectangle, where did it sit in the
+    /// old space, and where did that land. The marks name physical features that did not move, so it is their
+    /// coordinates that change instead. Child regions are left alone: their metres are a design placement.
+    /// <para>A crop only reshapes the rectangle, so it passes no correction and the marks keep their
+    /// coordinates. A straighten or a trace refine moves the space itself and passes one, naming the quad it
+    /// just solved so that one is not carried back over its own result.</para>
+    /// <para>The content window (a slice's uv) is not a projection of the surface and stays with its caller.</para>
+    /// </summary>
+    /// <param name="oldRect">The surface's rectangle before the gesture, in its own space.</param>
+    /// <param name="newToOld">Takes a point of the moved space back to where it was; null when only the
+    /// rectangle changed and every coordinate still means what it meant.</param>
+    public static void CarrySpaceChange(Surface surface, ReadOnlySpan<Vector2> oldRect, Homography? newToOld = null,
+                                        Surface.OutputMapping? solvedMapping = null, bool solvedTrace = false)
+    {
+        if (oldRect.Length < 4)
+            return;
+
+        Span<Vector2> newRect = stackalloc Vector2[4];
+        WriteLocalRect(surface, newRect);
+
+        // Where each corner of the new rectangle sat in the old space — the one lookup every projection is rebuilt from.
+        Span<Vector2> sources = stackalloc Vector2[4];
+        for (var i = 0; i < 4; i++)
+            sources[i] = newToOld?.TransformPoint(newRect[i]) ?? newRect[i];
+
+        foreach (var mapping in surface.OutputMappings)
+        {
+            // A fill is the whole canvas whatever the surface measures — the display shows it, it is not aimed at it.
+            if (ReferenceEquals(mapping, solvedMapping) || mapping.IsFilling || mapping.Quad.Length < 4)
+                continue;
+
+            // Read and written in the canvas' normalized space: the stored quad is a fraction of the canvas,
+            // so no output and no resolution are needed.
+            CarryQuad(oldRect, sources, mapping.Quad);
+        }
+
+        if (!solvedTrace && surface.Trace is { Quad.Length: >= 4 } trace)
+            CarryQuad(oldRect, sources, trace.Quad);
+
+        if (newToOld == null || surface.Annotations.Count == 0 || !newToOld.Value.TryInvert(out var oldToNew))
+            return;
+
+        foreach (var annotation in surface.Annotations)
+        {
+            annotation.P1 = oldToNew.TransformPoint(annotation.P1);
+            annotation.P2 = oldToNew.TransformPoint(annotation.P2);
+        }
+    }
+
+    /// <summary>One quad rebuilt through the projection it had from the old rectangle.</summary>
+    private static void CarryQuad(ReadOnlySpan<Vector2> oldRect, ReadOnlySpan<Vector2> sources, Vector2[] quad)
+    {
+        if (!Homography.TryComputeQuadToQuad(oldRect, quad, out var fromOldRect))
+            return;
+
+        for (var i = 0; i < 4; i++)
+            quad[i] = fromOldRect.TransformPoint(sources[i]);
     }
 
     /// <summary>

@@ -83,9 +83,17 @@ internal sealed partial class OutputWindow
         // another window — and at a size this window's resolution preset accepts: show the value as it is.
         // Otherwise the preset wins and the chain renders again at this window's resolution, which for a
         // render target means it is resized back and forth every frame — hence the warning by the caption.
+        //
+        // Only textures may be reused. A Command is view-dependent: its render carries the camera this window
+        // manipulates and the transform gizmos of the selected ops, and the evaluation that already happened
+        // (the output setup's, which composites with gizmos off from the scene camera) also consumed this
+        // frame's update. Reusing that value would freeze the preview — dragging would do nothing and no gizmo
+        // would appear — so a Command is always rendered again here, at this window's own view and preset.
         var alreadyEvaluated = !evalOutput.DirtyFlag.IsDirty && evalOutput.DirtyFlag.WasUpdatedThisFrame;
-        var reuse = alreadyEvaluated && PresetAcceptsValue(evalOutput);
-        _imageCanvas.IsRenderedTwice = alreadyEvaluated && !reuse;
+        var isTexture = evalOutput is Slot<Texture2D>;
+        var presetAccepts = isTexture && PresetAcceptsValue(evalOutput);
+        var reuse = alreadyEvaluated && presetAccepts;
+        _imageCanvas.IsRenderedTwice = alreadyEvaluated && isTexture && !presetAccepts;
 
         // Render!
         evaluatedOutputUi.DrawValue(evalOutput, EvaluationContext, Config.Title, recompute: !reuse);

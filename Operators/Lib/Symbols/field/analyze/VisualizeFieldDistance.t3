@@ -60,6 +60,7 @@
     {
       "Id": "044fc894-3da2-427d-91d8-76034adf890a"/*RasterizerState*/,
       "SymbolId": "c7283335-ef57-46ad-9538-abbade65845a",
+      "SymbolName": "Types.Gfx.RasterizerState",
       "InputValues": [
         {
           "Id": "03f3bc7f-3949-4a97-88cf-04e162cfa2f7"/*CullMode*/,
@@ -77,6 +78,7 @@
     {
       "Id": "05402356-285a-4b6d-88f6-9f4b7f90d17d"/*Draw*/,
       "SymbolId": "9b28e6b9-1d1f-42d8-8a9e-33497b1df820",
+      "SymbolName": "Lib.render._dx11.api.Draw",
       "InputValues": [
         {
           "Id": "8716b11a-ef71-437e-9930-bb747da818a7"/*VertexCount*/,
@@ -89,6 +91,7 @@
     {
       "Id": "0b2e9f1a-2deb-46bc-bf8f-2702979759a6"/*PixelShaderFromSource*/,
       "SymbolId": "9f784a4a-857f-41ad-afc1-0de08c1cfec6",
+      "SymbolName": "Types.Gfx.PixelShaderFromSource",
       "InputValues": [
         {
           "Id": "2b616fb0-2966-45a9-a0cc-da960ca509cf"/*EntryPoint*/,
@@ -101,30 +104,35 @@
     {
       "Id": "0bda17a9-d81b-496d-8692-ecc7c0174634"/*Rasterizer*/,
       "SymbolId": "fbd7f0f0-36a3-4fbb-91e1-cb33d4666d09",
+      "SymbolName": "Lib.render._dx11.api.Rasterizer",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "127905d8-ac1f-40db-8c82-b30604c1bda4"/*InputAssemblerStage*/,
       "SymbolId": "9d1266c5-23db-439f-a475-8000fdd1c318",
+      "SymbolName": "Lib.render._dx11.api.InputAssemblerStage",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "27eed576-1057-4f3c-b35b-ddfd5be43298"/*_TransformsCBuffer*/,
       "SymbolId": "a60adc26-d7c6-4615-af78-8d2d6da46b79",
+      "SymbolName": "Lib.render._dx11.api._TransformsCBuffer",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "3a2dc19e-f2b5-4588-b16b-f1ebe7cae07d"/*OutputMergerStage*/,
       "SymbolId": "5efaf208-ba62-42ce-b3df-059b37fc1382",
+      "SymbolName": "Lib.render._dx11.api.OutputMergerStage",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "3aac3d34-49fb-477f-a899-04e8b86fa5e9"/*GenerateShaderGraphCode*/,
       "SymbolId": "73c028d1-3de2-4269-b503-97f62bbce320",
+      "SymbolName": "Lib.field.render._.GenerateShaderGraphCode",
       "InputValues": [
         {
           "Id": "0b5cbbdf-afe7-4daf-9f1e-0e79792691f1"/*TemplateFilePath*/,
@@ -137,12 +145,14 @@
     {
       "Id": "4d49bf55-28a4-4a4e-99f1-69fe0c5ff0c2"/*TransformMatrix*/,
       "SymbolId": "17324ce1-8920-4653-ac67-c211ad507a81",
+      "SymbolName": "Lib.render._.TransformMatrix",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "5a29acc3-95ca-4e47-b0cc-5da3ab3c66b0"/*Clamped*/,
       "SymbolId": "9515d59d-0bd5-406b-96da-6a5f60215700",
+      "SymbolName": "Types.Gfx.SamplerState",
       "Name": "Clamped",
       "InputValues": [
         {
@@ -166,12 +176,14 @@
     {
       "Id": "5ede328b-37d6-4481-ae04-25ee5c5ae2bd"/*FloatsToBuffer*/,
       "SymbolId": "724da755-2d0c-42ab-8335-8c88ec5fb078",
+      "SymbolName": "Lib.render._dx11.api.FloatsToBuffer",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "5f4de270-36b1-4096-9b0f-6502ec8d3456"/*Vector4Components*/,
       "SymbolId": "b15e4950-5c72-4655-84bc-c00647319030",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "InputValues": [
         {
           "Id": "980ef785-6ae2-44d1-803e-febfc75791c5"/*Value*/,
@@ -189,6 +201,7 @@
     {
       "Id": "6294a7de-e95a-4b1f-bc26-11e161b78bc6"/*BlendOnWhites*/,
       "SymbolId": "38ee7546-8d7d-463c-aeea-e482d7ca3f30",
+      "SymbolName": "Types.Gfx.RenderTargetBlendDescription",
       "Name": "BlendOnWhites",
       "InputValues": [
         {
@@ -202,6 +215,7 @@
     {
       "Id": "68831092-3d5d-48e3-916a-b952cbe102af"/*VertexShader*/,
       "SymbolId": "646f5988-0a76-4996-a538-ba48054fd0ad",
+      "SymbolName": "Types.Gfx.VertexShader",
       "InputValues": [
         {
           "Id": "78fb7501-74d9-4a27-8db2-596f25482c87"/*Source*/,
@@ -219,6 +233,7 @@
     {
       "Id": "94a95ead-483b-4aad-9050-682571b94605"/*Vec2ToVec3*/,
       "SymbolId": "b732a668-8994-4f34-ab96-5245d355e33f",
+      "SymbolName": "Lib.numbers.vec2.Vec2ToVec3",
       "InputValues": [
         {
           "Id": "f1e036d8-61bc-4fdc-bb87-5a8a27982d65"/*Z*/,
@@ -231,18 +246,21 @@
     {
       "Id": "9e5b7321-bfe1-40e8-84df-a404b8449692"/*SetPixelAndVertexShaderStage*/,
       "SymbolId": "b956f707-2a33-4330-b7ff-9c91edbcf041",
+      "SymbolName": "Lib.render._dx11.fxsetup.SetPixelAndVertexShaderStage",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "9fac5a0e-8fee-43fb-a909-c274d400d90b"/*PickBlendMode*/,
       "SymbolId": "fd9bffd3-5c57-462f-8761-85f94c5a629b",
+      "SymbolName": "Lib.render._dx11.fxsetup.PickBlendMode",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "ac33855c-67c3-4350-b06e-125e55aa4169"/*DepthStencilState*/,
       "SymbolId": "04858a08-f0fe-4536-9152-686659f0ab58",
+      "SymbolName": "Types.Gfx.DepthStencilState",
       "InputValues": [
         {
           "Id": "2342df71-a162-4db7-afc3-514916239897"/*EnableZWrite*/,
@@ -260,6 +278,7 @@
     {
       "Id": "b664d516-dd08-4149-ba6a-53a6cc6a284a"/*Vector4Components*/,
       "SymbolId": "b15e4950-5c72-4655-84bc-c00647319030",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "InputValues": [
         {
           "Id": "980ef785-6ae2-44d1-803e-febfc75791c5"/*Value*/,
@@ -277,6 +296,7 @@
     {
       "Id": "c07f686d-6e9e-4f03-8cae-f98ff66347de"/*Wrapped*/,
       "SymbolId": "9515d59d-0bd5-406b-96da-6a5f60215700",
+      "SymbolName": "Types.Gfx.SamplerState",
       "Name": "Wrapped",
       "InputValues": [],
       "Outputs": []
@@ -284,12 +304,14 @@
     {
       "Id": "dc1270c7-1a60-4120-8748-c2d854e16880"/*BlendState*/,
       "SymbolId": "064ca51f-47ab-4cb7-95f2-e537b68e137e",
+      "SymbolName": "Types.Gfx.BlendState",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "dc653a98-5b13-4c51-8ca8-4c2e7c1b24ab"/*Execute*/,
       "SymbolId": "936e4324-bea2-463a-b196-6064a2d8a6b2",
+      "SymbolName": "Lib.flow.Execute",
       "InputValues": [],
       "Outputs": []
     }

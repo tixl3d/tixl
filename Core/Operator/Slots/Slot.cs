@@ -347,6 +347,8 @@ public class Slot<T> : ISlot, ITimeClipRemapTarget
             return _dirtyFlag.SourceVersion;
         }
 
+        DirtyFlag.InvalidationVisits++;
+
         // MultiInputSlot, TimeClipSlot, TransformCallbackSlot, etc
         if (HasInvalidationOverride) 
         {

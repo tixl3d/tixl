@@ -35,12 +35,14 @@
     {
       "Id": "0c22b9b4-bfd8-4390-bba8-3d437ed577f3"/*FloatsToBuffer*/,
       "SymbolId": "724da755-2d0c-42ab-8335-8c88ec5fb078",
+      "SymbolName": "Lib.render._dx11.api.FloatsToBuffer",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "18008ba5-00d4-4407-82d4-29ad0eebc0d3"/*ComputeShaderStage*/,
       "SymbolId": "8bef116d-7d1c-4c1b-b902-25c1d5e925a9",
+      "SymbolName": "Types.Gfx.ComputeShaderStage",
       "InputValues": [
         {
           "Id": "180cae35-10e3-47f3-8191-f6ecea7d321c"/*Dispatch*/,
@@ -57,6 +59,7 @@
     {
       "Id": "26cbf086-4f0c-4799-a758-c2f74aa0bc90"/*ComputeShader*/,
       "SymbolId": "a256d70f-adb3-481d-a926-caf35bd3e64c",
+      "SymbolName": "Types.Gfx.ComputeShader",
       "InputValues": [
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
@@ -69,42 +72,49 @@
     {
       "Id": "2a70a81c-3982-41b7-9d8c-e9a1be1c5a8f"/*CountInt*/,
       "SymbolId": "0e1d5f4b-3ba0-4e71-aa26-7308b6df214d",
+      "SymbolName": "Lib.numbers.int.logic.CountInt",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "4da076d9-f2ec-450a-b813-e962ea775d35"/*Execute*/,
       "SymbolId": "936e4324-bea2-463a-b196-6064a2d8a6b2",
+      "SymbolName": "Lib.flow.Execute",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "4ee85f49-faf8-4802-98e3-3b0addf1e18d"/*IntsToBuffer*/,
       "SymbolId": "2eb20a76-f8f7-49e9-93a5-1e5981122b50",
+      "SymbolName": "Lib.numbers.int.process.IntsToBuffer",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "52907566-99d3-4ae4-97ef-6007414e987b"/*CalcDispatchCount*/,
       "SymbolId": "eb68addb-ec59-416f-8608-ff9d2319f3a3",
+      "SymbolName": "Lib.render._dx11.api.CalcDispatchCount",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "6e8f5882-31de-45f3-b4d3-531dab05bc28"/*IntToFloat*/,
       "SymbolId": "17db8a36-079d-4c83-8a2a-7ea4c1aa49e6",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "6ef76d3a-e819-4051-bb95-ddb238c07fe0"/*_TransformsCBuffer*/,
       "SymbolId": "a60adc26-d7c6-4615-af78-8d2d6da46b79",
+      "SymbolName": "Lib.render._dx11.api._TransformsCBuffer",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "c784dbaa-9648-44d5-b549-05001671c843"/*HasTimeChanged*/,
       "SymbolId": "2443b2fd-c397-4ea6-9588-b595f918cf01",
+      "SymbolName": "Lib.numbers.anim.time.HasTimeChanged",
       "InputValues": [
         {
           "Id": "bc112889-77a8-4967-a9b7-683b7c7017fe"/*Mode*/,
@@ -117,12 +127,14 @@
     {
       "Id": "f5088258-30e2-45ad-9bc3-3bcb56486c65"/*_ExecuteParticleUpdate*/,
       "SymbolId": "b1352ba6-1164-4b44-9b69-a9eb802ea77d",
+      "SymbolName": "Lib.point._internal._ExecuteParticleUpdate",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "fe7c8efa-6c24-4802-8ac7-6afbbf5f44fe"/*GetParticleComponents*/,
       "SymbolId": "e62c1fa0-6fcd-49f5-9cf8-d3081c8a5917",
+      "SymbolName": "Lib.point._internal.GetParticleComponents",
       "InputValues": [],
       "Outputs": []
     }

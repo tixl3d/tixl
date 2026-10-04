@@ -35,12 +35,14 @@
     {
       "Id": "100b38c2-69a2-43fe-8eb3-5d1379d858c8"/*TryParse*/,
       "SymbolId": "62cdbff3-cb29-4745-92b1-02490e35345d",
+      "SymbolName": "Lib.numbers.float.logic.TryParse",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "10d6f5cf-11b4-4951-b539-3288c6748442"/*OutOffset*/,
       "SymbolId": "15ac7153-69af-45f8-bcdd-50cdef0c9ae1",
+      "SymbolName": "Lib.numbers.vec3.AddVec3",
       "Name": "OutOffset",
       "InputValues": [],
       "Outputs": []
@@ -48,12 +50,14 @@
     {
       "Id": "1262384c-d99e-435a-b0ea-a4804272a73c"/*Vector3*/,
       "SymbolId": "94a5de3b-ee6a-43d3-8d21-7b8fe94b042b",
+      "SymbolName": "Types.Values.Vector3",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "1dd4845a-4170-4e0f-ad2b-272c29fa4fbe"/*OutA*/,
       "SymbolId": "c160f925-0a66-4505-a569-cadd878dbb6f",
+      "SymbolName": "Lib.numbers.float.basic.Add",
       "Name": "OutA",
       "InputValues": [],
       "Outputs": []
@@ -61,12 +65,14 @@
     {
       "Id": "3a4d00cf-0e5b-40a5-9736-520d5ae3a476"/*TryParse*/,
       "SymbolId": "62cdbff3-cb29-4745-92b1-02490e35345d",
+      "SymbolName": "Lib.numbers.float.logic.TryParse",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "3e6a32ac-13ca-47ad-a147-5d3edfffe71a"/*NumOfItems*/,
       "SymbolId": "cc07b314-4582-4c2c-84b8-bb32f59fc09b",
+      "SymbolName": "Types.Values.IntValue",
       "Name": "NumOfItems",
       "InputValues": [],
       "Outputs": []
@@ -74,6 +80,7 @@
     {
       "Id": "3ed89093-bd9c-4a91-a6ab-ebf4df8cf3ef"/*OutB*/,
       "SymbolId": "c160f925-0a66-4505-a569-cadd878dbb6f",
+      "SymbolName": "Lib.numbers.float.basic.Add",
       "Name": "OutB",
       "InputValues": [],
       "Outputs": []
@@ -81,18 +88,21 @@
     {
       "Id": "48e5cd45-7193-474d-861f-ee8d6dd8fb2a"/*TryParse*/,
       "SymbolId": "62cdbff3-cb29-4745-92b1-02490e35345d",
+      "SymbolName": "Lib.numbers.float.logic.TryParse",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "491832ef-438c-40f9-a458-e8cf1b048beb"/*TryParse*/,
       "SymbolId": "62cdbff3-cb29-4745-92b1-02490e35345d",
+      "SymbolName": "Lib.numbers.float.logic.TryParse",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "522202df-dc6f-4949-922e-e8b02c745721"/*RowSelect*/,
       "SymbolId": "cc07b314-4582-4c2c-84b8-bb32f59fc09b",
+      "SymbolName": "Types.Values.IntValue",
       "Name": "RowSelect",
       "InputValues": [],
       "Outputs": []
@@ -100,6 +110,7 @@
     {
       "Id": "5be1a34f-07b8-4000-a4e0-a9bdd4c6fb92"/*C*/,
       "SymbolId": "5d7d61ae-0a41-4ffa-a51d-93bab665e7fe",
+      "SymbolName": "Types.Values.Value",
       "Name": "C",
       "InputValues": [],
       "Outputs": []
@@ -107,6 +118,7 @@
     {
       "Id": "621c00e4-0962-4e28-9262-6ff5ffc74d1d"/*B*/,
       "SymbolId": "5d7d61ae-0a41-4ffa-a51d-93bab665e7fe",
+      "SymbolName": "Types.Values.Value",
       "Name": "B",
       "InputValues": [],
       "Outputs": []
@@ -114,6 +126,7 @@
     {
       "Id": "64d7385a-6c01-45a6-a2fb-4d8e4dcc3741"/*GetAttributeFromJsonString*/,
       "SymbolId": "43783ad9-72a0-4928-bb86-c89aae5c5d85",
+      "SymbolName": "Lib.io.json.GetAttributeFromJsonString",
       "InputValues": [
         {
           "Id": "dadd353a-2195-4b52-80d2-88288c55b0e4"/*ColumnName*/,
@@ -126,18 +139,21 @@
     {
       "Id": "6723b1e0-d918-41da-a061-02466fc2b71b"/*PickString*/,
       "SymbolId": "a9784e5e-7696-49a0-bb77-2302587ede59",
+      "SymbolName": "Lib.string.logic.PickString",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "696b85a1-4a6a-48c0-a26b-83428a38d088"/*TryParse*/,
       "SymbolId": "62cdbff3-cb29-4745-92b1-02490e35345d",
+      "SymbolName": "Lib.numbers.float.logic.TryParse",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "6dbdb46e-cf1c-40c3-9d5a-dd584ff31600"/*InputJson*/,
       "SymbolId": "5880cbc3-a541-4484-a06a-0e6f77cdbe8e",
+      "SymbolName": "Types.Values.String",
       "Name": "InputJson",
       "InputValues": [],
       "Outputs": []
@@ -145,6 +161,7 @@
     {
       "Id": "7397c92a-f0cf-46dc-be33-b57376b9d2c1"/*ReadFile*/,
       "SymbolId": "5f71d2f8-98c8-4502-8f40-2ea4a1e18cca",
+      "SymbolName": "Lib.io.file.ReadFile",
       "InputValues": [
         {
           "Id": "24b7e7e1-fe0b-46be-807e-0afacd4800f9"/*FilePath*/,
@@ -157,6 +174,7 @@
     {
       "Id": "85a2008c-7469-449a-9235-0ae4c79e558b"/*ReadFile*/,
       "SymbolId": "5f71d2f8-98c8-4502-8f40-2ea4a1e18cca",
+      "SymbolName": "Lib.io.file.ReadFile",
       "InputValues": [
         {
           "Id": "24b7e7e1-fe0b-46be-807e-0afacd4800f9"/*FilePath*/,
@@ -169,6 +187,7 @@
     {
       "Id": "8722e7e5-5240-4342-8def-d78f8c112d44"/*ReadFile*/,
       "SymbolId": "5f71d2f8-98c8-4502-8f40-2ea4a1e18cca",
+      "SymbolName": "Lib.io.file.ReadFile",
       "InputValues": [
         {
           "Id": "24b7e7e1-fe0b-46be-807e-0afacd4800f9"/*FilePath*/,
@@ -181,6 +200,7 @@
     {
       "Id": "91755980-d153-4fa4-9997-bbc027725c83"/*GetAttributeFromJsonString*/,
       "SymbolId": "43783ad9-72a0-4928-bb86-c89aae5c5d85",
+      "SymbolName": "Lib.io.json.GetAttributeFromJsonString",
       "InputValues": [
         {
           "Id": "dadd353a-2195-4b52-80d2-88288c55b0e4"/*ColumnName*/,
@@ -193,18 +213,21 @@
     {
       "Id": "981bc2c4-f823-40b2-9e9b-56951519c852"/*TryParse*/,
       "SymbolId": "62cdbff3-cb29-4745-92b1-02490e35345d",
+      "SymbolName": "Lib.numbers.float.logic.TryParse",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "99cea938-77b9-4a4b-9cb1-7b00ebef8fba"/*CustomSDF*/,
       "SymbolId": "637d00e4-ab63-4fe3-8e63-1e206c728841",
+      "SymbolName": "Lib.field.generate.sdf.CustomSDF",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "b5054029-edf3-46e9-b948-50cca691256e"/*GetAttributeFromJsonString*/,
       "SymbolId": "43783ad9-72a0-4928-bb86-c89aae5c5d85",
+      "SymbolName": "Lib.io.json.GetAttributeFromJsonString",
       "InputValues": [
         {
           "Id": "dadd353a-2195-4b52-80d2-88288c55b0e4"/*ColumnName*/,
@@ -217,6 +240,7 @@
     {
       "Id": "bc33a3d7-8366-4d11-ba17-93e0ae1d9b5f"/*GetAttributeFromJsonString*/,
       "SymbolId": "43783ad9-72a0-4928-bb86-c89aae5c5d85",
+      "SymbolName": "Lib.io.json.GetAttributeFromJsonString",
       "InputValues": [
         {
           "Id": "dadd353a-2195-4b52-80d2-88288c55b0e4"/*ColumnName*/,
@@ -229,6 +253,7 @@
     {
       "Id": "d1f5981a-5559-4eb5-94b6-9e0d8f97a078"/*OutCode*/,
       "SymbolId": "5880cbc3-a541-4484-a06a-0e6f77cdbe8e",
+      "SymbolName": "Types.Values.String",
       "Name": "OutCode",
       "InputValues": [],
       "Outputs": []
@@ -236,6 +261,7 @@
     {
       "Id": "d574da4e-248f-41d9-85ef-1cd9640b4844"/*GetAttributeFromJsonString*/,
       "SymbolId": "43783ad9-72a0-4928-bb86-c89aae5c5d85",
+      "SymbolName": "Lib.io.json.GetAttributeFromJsonString",
       "InputValues": [
         {
           "Id": "dadd353a-2195-4b52-80d2-88288c55b0e4"/*ColumnName*/,
@@ -248,6 +274,7 @@
     {
       "Id": "d66690a2-8b30-4cf9-88e0-5e573e9e712c"/*GetAttributeFromJsonString*/,
       "SymbolId": "43783ad9-72a0-4928-bb86-c89aae5c5d85",
+      "SymbolName": "Lib.io.json.GetAttributeFromJsonString",
       "InputValues": [
         {
           "Id": "dadd353a-2195-4b52-80d2-88288c55b0e4"/*ColumnName*/,
@@ -260,6 +287,7 @@
     {
       "Id": "e0489bb4-ed5c-4cab-af56-2f7f14701e8b"/*OutC*/,
       "SymbolId": "c160f925-0a66-4505-a569-cadd878dbb6f",
+      "SymbolName": "Lib.numbers.float.basic.Add",
       "Name": "OutC",
       "InputValues": [],
       "Outputs": []
@@ -267,6 +295,7 @@
     {
       "Id": "ea6a3606-1be0-4259-8ab6-a31dc3171373"/*Offset*/,
       "SymbolId": "a8083b41-951e-41f2-bb8a-9b511da26102",
+      "SymbolName": "Lib.numbers.vec3.Vector3Components",
       "Name": "Offset",
       "InputValues": [],
       "Outputs": []
@@ -274,12 +303,14 @@
     {
       "Id": "f30d7a62-d2ee-4f47-bcd5-983006b74778"/*Vector3*/,
       "SymbolId": "94a5de3b-ee6a-43d3-8d21-7b8fe94b042b",
+      "SymbolName": "Types.Values.Vector3",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "f675ea27-0a1c-43cd-b527-8be06e607b35"/*GetAttributeFromJsonString*/,
       "SymbolId": "43783ad9-72a0-4928-bb86-c89aae5c5d85",
+      "SymbolName": "Lib.io.json.GetAttributeFromJsonString",
       "InputValues": [
         {
           "Id": "dadd353a-2195-4b52-80d2-88288c55b0e4"/*ColumnName*/,
@@ -292,6 +323,7 @@
     {
       "Id": "f7cfbbeb-832f-42a2-8811-213849a9a4d9"/*A*/,
       "SymbolId": "5d7d61ae-0a41-4ffa-a51d-93bab665e7fe",
+      "SymbolName": "Types.Values.Value",
       "Name": "A",
       "InputValues": [],
       "Outputs": []

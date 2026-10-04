@@ -71,12 +71,14 @@
     {
       "Id": "6043d431-f383-43f5-9a2c-a8a0ceb2e2bd"/*UseFallbackTexture*/,
       "SymbolId": "b470fdf9-ac0b-4eb9-9600-453b8c094e3f",
+      "SymbolName": "Lib.image.use.UseFallbackTexture",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "64c08db3-03e8-4951-a95f-39da0ec4637b"/*_BlobOld*/,
       "SymbolId": "c8590f8f-cca1-434a-a880-67bb91920e1a",
+      "SymbolName": "Lib.image.generate._obsolete._BlobOld",
       "InputValues": [
         {
           "Id": "325461c8-2892-4e8d-8d3b-0eea1bcc03f9"/*Position*/,
@@ -122,6 +124,7 @@
     {
       "Id": "67c9ad24-252d-4a95-87ab-6847cd2d8958"/*Blur*/,
       "SymbolId": "946da16c-f536-4887-b764-af9468f22c0f",
+      "SymbolName": "Lib.image.fx.blur.Blur",
       "InputValues": [
         {
           "Id": "3c8b43be-430f-4afe-8244-5282be49bfbc"/*Samples*/,
@@ -139,6 +142,7 @@
     {
       "Id": "7cb20847-8668-45ef-9068-99138d1a2d19"/*_multiImageFxSetup*/,
       "SymbolId": "a2567844-3314-48de-bda7-7904b5546535",
+      "SymbolName": "Lib.image.fx._._multiImageFxSetup",
       "InputValues": [
         {
           "Id": "7f14d0e3-1159-434d-b038-74644948937c"/*ShaderPath*/,
@@ -161,18 +165,21 @@
     {
       "Id": "7f44e678-010a-4efc-92f4-e4f522df15f6"/*Multiply*/,
       "SymbolId": "17b60044-9125-4961-8a79-ca94697b3726",
+      "SymbolName": "Lib.numbers.float.basic.Multiply",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "a6d895fd-16c0-4fa6-83d1-bdbd7dc5c01f"/*Vector2Components*/,
       "SymbolId": "0946c48b-85d8-4072-8f21-11d17cc6f6cf",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "a87c1bdb-aa97-4b3a-bfe4-759ac4baa77b"/*BlendColors*/,
       "SymbolId": "6b7c541a-ca36-4f21-ac95-89e874820c5a",
+      "SymbolName": "Lib.numbers.color.BlendColors",
       "InputValues": [
         {
           "Id": "8d444e8c-d9b5-4206-9202-5abf23b13baf"/*Mode*/,
@@ -195,6 +202,7 @@
     {
       "Id": "d8b232b7-711b-440e-8e4f-20562e2697f9"/*_BlobOld*/,
       "SymbolId": "c8590f8f-cca1-434a-a880-67bb91920e1a",
+      "SymbolName": "Lib.image.generate._obsolete._BlobOld",
       "InputValues": [
         {
           "Id": "41f4065a-0b65-4dda-9cd3-ef7802ed170b"/*Round*/,
@@ -232,6 +240,7 @@
     {
       "Id": "fca0aad7-e4f4-408a-a4f6-4ccc1e5a55d8"/*_BlobOld*/,
       "SymbolId": "c8590f8f-cca1-434a-a880-67bb91920e1a",
+      "SymbolName": "Lib.image.generate._obsolete._BlobOld",
       "InputValues": [
         {
           "Id": "325461c8-2892-4e8d-8d3b-0eea1bcc03f9"/*Position*/,

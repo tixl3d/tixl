@@ -11,7 +11,7 @@ Improvised newcomer intro on a meet-up stream: the host walks a graphic designer
 ## Mentions
 - 5:55→7:05 [FakeLight] · explained · discussion · Concept · 70% — Cheap fake relighting of a 2D image stands in for full PBR; the host's wishlist (normal map + environment texture + bloom) marks the line between this quick effect and a real HDR relight.
 - 11:23→12:00 [ui:Graph] · passing · discussion · Concept · 80% — The whole composition is one node graph you freely arrange operators on, then dive into sub-graphs; framed for someone coming from layer-based tools.
-- 12:09→12:27 [ui:OutputSettings] · passing · discussion · Concept · 65% — The final image is rendered at a resolution you set (or override) at the top, much like a game-engine frame, before any operators are stacked on.
+- 12:09→12:27 [ui:OutputResolution] · passing · discussion · Concept · 65% — The final image is rendered at a resolution you set (or override) at the top, much like a game-engine frame, before any operators are stacked on.
 - 12:42→13:09 [LoadImage] · explained · discussion · Example · 80% — Unpinning its output shows the image directly; it's the typical starting node you then branch off in two directions to add effects.
 - 13:18→13:36 [ColorGrade] · passing · discussion · Tip · 70% — Hold Alt while hovering its thumbnail to flip through built-in presets instead of dialing every knob by hand.
 - 13:43→13:55 [ui:ParameterWindow] · passing · discussion · Concept · 70% — The selected operator's knobs live in a side panel; the per-parameter keyframes show up alongside them.

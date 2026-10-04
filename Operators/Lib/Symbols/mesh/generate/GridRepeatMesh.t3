@@ -63,7 +63,7 @@
       }
     },
     {
-      "Id": "f8a33ecb-3ea4-4bad-8650-7047fe703b83"/*Size*/,
+      "Id": "f8a33ecb-3ea4-4bad-8650-7047fe703b83"/*Stretch*/,
       "DefaultValue": {
         "X": 1.0,
         "Y": 1.0,
@@ -75,6 +75,7 @@
     {
       "Id": "261be5b9-4a28-4004-93c6-3538516336c7"/*RepeatMeshAtPoints*/,
       "SymbolId": "ab496711-8b99-4463-aac9-b41fdf46608d",
+      "SymbolName": "Lib.mesh.generate.RepeatMeshAtPoints",
       "InputValues": [
         {
           "Id": "631a4691-0774-40c7-a8fa-4b9ee76854d6"/*ApplyPointScale*/,
@@ -87,6 +88,7 @@
     {
       "Id": "c1bbf7de-89ad-4c0f-8d12-9dc8a40aa1c6"/*RandomizePoints*/,
       "SymbolId": "ec0675d7-6b72-4b15-b141-80bdd2367cd8",
+      "SymbolName": "Lib.point.modify.RandomizePoints",
       "InputValues": [
         {
           "Id": "270bcf23-35ee-4c4f-aae5-192435b1aee3"/*Position*/,
@@ -122,6 +124,7 @@
     {
       "Id": "fe973bf2-9404-42d7-be39-6957a820af6b"/*GridPoints*/,
       "SymbolId": "e46b50ce-c84f-46bb-b8e7-dea2a64a1bdc",
+      "SymbolName": "Lib.point.generate.GridPoints",
       "InputValues": [
         {
           "Id": "3a8a5f10-62ff-41e5-9aba-c265308cf508"/*CountY*/,

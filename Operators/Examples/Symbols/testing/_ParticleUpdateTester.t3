@@ -24,6 +24,7 @@
     {
       "Id": "0d414887-09b3-4522-a396-97536ad0d806"/*ParticleSystem*/,
       "SymbolId": "e44ae9b6-cd56-4224-8a5d-118eda4cd3f4",
+      "SymbolName": "Lib.particle.ParticleSystem",
       "InputValues": [
         {
           "Id": "38392c86-4a1b-4b6f-ac32-26920a73e1e2"/*EmitVelocity*/,
@@ -46,24 +47,28 @@
     {
       "Id": "1ca3c233-bf21-4c4d-8100-b61ae5acc6ba"/*Group*/,
       "SymbolId": "a3f64d34-1fab-4230-86b3-1c3deba3f90b",
+      "SymbolName": "Lib.render.transform.Group",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "1e5d2fca-a5c5-459c-97da-3559e6d752f0"/*IntToFloat*/,
       "SymbolId": "17db8a36-079d-4c83-8a2a-7ea4c1aa49e6",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "21e1ae95-285e-4248-bc65-17082b430bf2"/*Once*/,
       "SymbolId": "e8d2b4ac-0ba2-400f-9c82-e5dd15a23d32",
+      "SymbolName": "Lib.flow.Once",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "240d2d9b-9a34-4ede-966b-e563fe514d26"/*SphereSDF*/,
       "SymbolId": "fc2a33fc-d957-4113-8096-92d4dcbe14b5",
+      "SymbolName": "Lib.field.generate.sdf.SphereSDF",
       "InputValues": [
         {
           "Id": "3dd7c779-7982-4e7c-b4ce-f1915f477ad0"/*Radius*/,
@@ -85,6 +90,7 @@
     {
       "Id": "2726ea3c-dd64-4b0e-9505-c776d8718015"/*BlendColors*/,
       "SymbolId": "6b7c541a-ca36-4f21-ac95-89e874820c5a",
+      "SymbolName": "Lib.numbers.color.BlendColors",
       "InputValues": [
         {
           "Id": "8d444e8c-d9b5-4206-9202-5abf23b13baf"/*Mode*/,
@@ -107,6 +113,7 @@
     {
       "Id": "5f64ff10-f8b2-4dc6-a25c-720809db4e92"/*DrawPoints*/,
       "SymbolId": "ffd94e5a-bc98-4e70-84d8-cce831e6925f",
+      "SymbolName": "Lib.point.draw.DrawPoints",
       "InputValues": [
         {
           "Id": "414c8045-5086-4449-9d9a-03f28c3966b3"/*PointSize*/,
@@ -129,6 +136,7 @@
     {
       "Id": "6f681bee-05a2-435f-b962-0cb3aa5e3959"/*TurbulenceForce*/,
       "SymbolId": "3f8376f2-b89a-4ab4-b6dc-a3e8bf88c0a5",
+      "SymbolName": "Lib.particle.force.TurbulenceForce",
       "InputValues": [],
       "Outputs": [
         {
@@ -140,6 +148,7 @@
     {
       "Id": "736dcc02-5219-4072-82f6-7b5b2e99ba35"/*FieldVolumeForce*/,
       "SymbolId": "599ada75-b2ac-4f6c-ac98-f7b4bb6cf47d",
+      "SymbolName": "Lib.particle.force.FieldVolumeForce",
       "InputValues": [
         {
           "Id": "97334c3a-7d1b-4990-a541-70f6ef040197"/*ReflectOnCollision*/,
@@ -157,6 +166,7 @@
     {
       "Id": "77d08446-366e-44b1-accd-f8c726381b82"/*TransformPoints*/,
       "SymbolId": "7f6c64fe-ca2e-445e-a9b4-c70291ce354e",
+      "SymbolName": "Lib.point.transform.TransformPoints",
       "InputValues": [
         {
           "Id": "9e803bd1-c5a3-4f6f-926d-d19f32dcbae5"/*Translation*/,
@@ -173,12 +183,14 @@
     {
       "Id": "8714f977-44d5-4b78-b7fe-961ecf8b7632"/*Point*/,
       "SymbolId": "9989f539-f86c-4508-83d7-3fc0e559f502",
+      "SymbolName": "Types.Values.Point",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "8a6ff006-5cf8-41f0-a71f-fad8c020e861"/*HasTimeChanged*/,
       "SymbolId": "2443b2fd-c397-4ea6-9588-b595f918cf01",
+      "SymbolName": "Lib.numbers.anim.time.HasTimeChanged",
       "InputValues": [
         {
           "Id": "bc112889-77a8-4967-a9b7-683b7c7017fe"/*Mode*/,
@@ -191,6 +203,7 @@
     {
       "Id": "8ef66954-227c-4719-83f6-e55f87a4540a"/*CountInt*/,
       "SymbolId": "0e1d5f4b-3ba0-4e71-aa26-7308b6df214d",
+      "SymbolName": "Lib.numbers.int.logic.CountInt",
       "InputValues": [
         {
           "Id": "2ff3d674-90d7-4c8f-8551-aad9992540db"/*Modulo*/,
@@ -203,6 +216,7 @@
     {
       "Id": "94d62918-dffa-45bd-8e00-c1dc4fe8f038"/*CollisionForce*/,
       "SymbolId": "ed0bc47a-31ef-400b-b4e4-5552a859b309",
+      "SymbolName": "Lib.particle.force.CollisionForce",
       "InputValues": [
         {
           "Id": "0724bf0c-8f97-44de-bf42-6a89b89f1632"/*CellSize*/,
@@ -220,12 +234,14 @@
     {
       "Id": "996b7d9b-d05a-4f04-b4cd-048be36ef40e"/*CompareInt*/,
       "SymbolId": "05cf9ea7-045d-421f-8ed3-2c2f6b325a46",
+      "SymbolName": "Lib.numbers.int.logic.CompareInt",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "9d7c8f9e-ed54-4fd1-99e0-3b586b820fe3"/*DrawLines*/,
       "SymbolId": "836f211f-b387-417c-8316-658e0dc6e117",
+      "SymbolName": "Lib.point.draw.DrawLines",
       "InputValues": [
         {
           "Id": "df158fcf-3042-48cf-8383-7bf4c1bcb8a6"/*LineWidth*/,
@@ -238,12 +254,14 @@
     {
       "Id": "c9e66b6f-5883-428f-9b42-2c40650d1c83"/*DirectionalForce*/,
       "SymbolId": "0f1bf849-949e-4462-a7af-ecb2ff3cd109",
+      "SymbolName": "Lib.particle.force.DirectionalForce",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "cc05c47b-7351-4c16-9f1d-43d90e890ac4"/*VolumeForce*/,
       "SymbolId": "fbe1a703-f372-4236-9f20-5d0b69183843",
+      "SymbolName": "Lib.particle.force._.VolumeForce",
       "InputValues": [
         {
           "Id": "e3485fea-3a75-47f9-9a7d-ea69f4feb5f6"/*VolumeCenter*/,
@@ -260,6 +278,7 @@
     {
       "Id": "ce6ae4b8-11e8-4821-b091-cd725b8a24cf"/*Boolean*/,
       "SymbolId": "ed0f5188-8888-453e-8db4-20d87d18e9f4",
+      "SymbolName": "Types.Values.Boolean",
       "InputValues": [
         {
           "Id": "e7c1f0af-da6d-4e33-ac86-7dc96bfe7eb3"/*BoolValue*/,
@@ -272,6 +291,7 @@
     {
       "Id": "cf4f2fa1-945a-4ed2-a322-00c113156672"/*ReconstructiveForce*/,
       "SymbolId": "eeec02e2-7db9-4132-935a-4caf03c828c6",
+      "SymbolName": "Lib.particle.force.ReconstructiveForce",
       "InputValues": [
         {
           "Id": "5c3e885d-ba4c-4a8d-aaa0-f0d942e1457a"/*Strength*/,
@@ -299,6 +319,7 @@
     {
       "Id": "f2ac3823-2ccf-4061-a629-55b1a5e88bc8"/*LinePoints*/,
       "SymbolId": "4ae9e2f5-7cb3-40b0-a662-0662e8cb7c68",
+      "SymbolName": "Lib.point.generate.LinePoints",
       "InputValues": [
         {
           "Id": "951a1792-e607-4595-b211-97be7d27694c"/*Count*/,

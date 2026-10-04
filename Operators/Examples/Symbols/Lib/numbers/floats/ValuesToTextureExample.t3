@@ -6,6 +6,7 @@
     {
       "Id": "30c53b23-3ff8-43c8-8417-79b1cebb80cb"/*Glow*/,
       "SymbolId": "d392d4af-4c78-4f4a-bc3f-4c54c8c73538",
+      "SymbolName": "Lib.image.fx.stylize.Glow",
       "InputValues": [
         {
           "Id": "03f2bd5c-b599-47f5-b697-9f881639a598"/*AmplifyCore*/,
@@ -28,6 +29,7 @@
     {
       "Id": "311c1b2d-9438-4da3-ac59-f43f7d92d0a8"/*Camera*/,
       "SymbolId": "746d886c-5ab6-44b1-bb15-f3ce2fadf7e6",
+      "SymbolName": "Lib.render.camera.Camera",
       "InputValues": [
         {
           "Id": "313596cc-3854-436b-89da-5fd40164ce76"/*Position*/,
@@ -53,12 +55,14 @@
     {
       "Id": "354013b8-008f-4341-b09f-d72da6df27c6"/*LinePoints*/,
       "SymbolId": "4ae9e2f5-7cb3-40b0-a662-0662e8cb7c68",
+      "SymbolName": "Lib.point.generate.LinePoints",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "3e2b8f08-1bd2-4a4e-a2f0-20d090bc60b3"/*DrawPoints*/,
       "SymbolId": "ffd94e5a-bc98-4e70-84d8-cce831e6925f",
+      "SymbolName": "Lib.point.draw.DrawPoints",
       "InputValues": [
         {
           "Id": "414c8045-5086-4449-9d9a-03f28c3966b3"/*PointSize*/,
@@ -81,12 +85,14 @@
     {
       "Id": "4bcdf44b-a07e-435d-9ce2-cb93419f0391"/*RenderTarget*/,
       "SymbolId": "f9fe78c5-43a6-48ae-8e8c-6cdbbc330dd1",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "9cb70b7f-fb90-413b-b326-bb096f263de5"/*ValuesToTexture*/,
       "SymbolId": "55cc0f79-96c9-482e-9794-934dc0f87708",
+      "SymbolName": "Lib.numbers.floats.process.ValuesToTexture",
       "InputValues": [
         {
           "Id": "51545316-69fc-441f-b59f-44979e32972c"/*Pow*/,
@@ -99,6 +105,7 @@
     {
       "Id": "ad7318c4-fb4f-4c7b-bf26-589dba1e7f65"/*LinearSamplePointAttributes*/,
       "SymbolId": "bb4803d2-0c23-470a-94a8-c477e4f7dd8c",
+      "SymbolName": "Lib.point.modify.LinearSamplePointAttributes",
       "InputValues": [
         {
           "Id": "159bf880-b6b7-413b-afc9-acdc1b87a9e4"/*RedFactor*/,
@@ -116,6 +123,7 @@
     {
       "Id": "e4f2b694-423a-4f25-859b-3d0ac8d7de25"/*PlaybackFFT*/,
       "SymbolId": "cda108a1-db4f-4a0a-ae4d-d50e9aade467",
+      "SymbolName": "Lib.numbers.floats.io.PlaybackFFT",
       "InputValues": [
         {
           "Id": "66cb16d6-1506-4783-925d-3cdf62602812"/*InputBand*/,

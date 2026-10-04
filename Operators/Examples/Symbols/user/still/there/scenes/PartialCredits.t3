@@ -6,6 +6,7 @@
     {
       "Id": "17ee19a4-1fca-4a64-aefa-38fcef93e45a"/*DrawLines*/,
       "SymbolId": "836f211f-b387-417c-8316-658e0dc6e117",
+      "SymbolName": "Lib.point.draw.DrawLines",
       "InputValues": [],
       "Outputs": [
         {
@@ -17,6 +18,7 @@
     {
       "Id": "1edb7898-ced3-4dac-b08e-64a340eec743"/*CreditText*/,
       "SymbolId": "7b1093bb-33ec-4fa4-a102-9a28002b511c",
+      "SymbolName": "Examples.user.still.there.helpers.CreditText",
       "InputValues": [
         {
           "Id": "c21e5e9c-7e50-41b4-abd2-f054c944221e"/*Position*/,
@@ -47,12 +49,14 @@
     {
       "Id": "200a4952-1c1c-4649-970d-9a0c17840a31"/*Camera*/,
       "SymbolId": "746d886c-5ab6-44b1-bb15-f3ce2fadf7e6",
+      "SymbolName": "Lib.render.camera.Camera",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "251bc857-dc18-42f3-9c6c-f72b108ddfb9"/*CreditText*/,
       "SymbolId": "7b1093bb-33ec-4fa4-a102-9a28002b511c",
+      "SymbolName": "Examples.user.still.there.helpers.CreditText",
       "InputValues": [
         {
           "Id": "c21e5e9c-7e50-41b4-abd2-f054c944221e"/*Position*/,
@@ -83,6 +87,7 @@
     {
       "Id": "39379b07-8aa4-4d53-ba7e-f5bba55111e1"/*CreditText*/,
       "SymbolId": "7b1093bb-33ec-4fa4-a102-9a28002b511c",
+      "SymbolName": "Examples.user.still.there.helpers.CreditText",
       "InputValues": [
         {
           "Id": "c21e5e9c-7e50-41b4-abd2-f054c944221e"/*Position*/,
@@ -113,6 +118,7 @@
     {
       "Id": "3cedbf17-a9e7-456f-833d-1eab2008173e"/*_GridPoints_Old*/,
       "SymbolId": "3ee8f66d-68df-43c1-b0eb-407259bf7e86",
+      "SymbolName": "Lib.point.generate._GridPoints_Old",
       "InputValues": [
         {
           "Id": "6de4f08a-5834-4b9b-93e8-8f93fe32164c"/*CountZ*/,
@@ -135,6 +141,7 @@
     {
       "Id": "4b0e0a07-fd05-4091-afa1-004e0066b0d0"/*_GridPoints_Old*/,
       "SymbolId": "3ee8f66d-68df-43c1-b0eb-407259bf7e86",
+      "SymbolName": "Lib.point.generate._GridPoints_Old",
       "InputValues": [
         {
           "Id": "37a11e3d-e353-4b0f-a052-356582e235b0"/*Size*/,
@@ -171,6 +178,7 @@
     {
       "Id": "4d35d36f-f99a-4a58-8667-e72d318d4d78"/*Layer2d*/,
       "SymbolId": "d8c5330f-59b5-4907-b845-a02def3042fa",
+      "SymbolName": "Lib.render.basic.Layer2d",
       "InputValues": [
         {
           "Id": "4618d8e0-2718-4373-a071-88ec1843b0c8"/*Stretch*/,
@@ -201,6 +209,7 @@
     {
       "Id": "4e57ef45-414d-45b0-b0cb-6eca63ac6aa1"/*CreditText*/,
       "SymbolId": "7b1093bb-33ec-4fa4-a102-9a28002b511c",
+      "SymbolName": "Examples.user.still.there.helpers.CreditText",
       "InputValues": [
         {
           "Id": "c21e5e9c-7e50-41b4-abd2-f054c944221e"/*Position*/,
@@ -231,6 +240,7 @@
     {
       "Id": "60dc334f-db31-42e0-b58e-2bb735951bb9"/*Transform*/,
       "SymbolId": "284d2183-197d-47fd-b130-873cced78b1c",
+      "SymbolName": "Lib.render.transform.Transform",
       "InputValues": [
         {
           "Id": "b4a8c16d-5a0f-4867-ae03-92a675abe709"/*Translation*/,
@@ -247,12 +257,14 @@
     {
       "Id": "868cb735-0f9d-459c-946d-0f01167daada"/*Execute*/,
       "SymbolId": "936e4324-bea2-463a-b196-6064a2d8a6b2",
+      "SymbolName": "Lib.flow.Execute",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "b13ed921-23e1-4ecb-8128-fd197fbe73f3"/*CreditText*/,
       "SymbolId": "7b1093bb-33ec-4fa4-a102-9a28002b511c",
+      "SymbolName": "Examples.user.still.there.helpers.CreditText",
       "InputValues": [
         {
           "Id": "c21e5e9c-7e50-41b4-abd2-f054c944221e"/*Position*/,
@@ -283,6 +295,7 @@
     {
       "Id": "be27c8f8-f34c-49cb-b6e7-7ace4946d51a"/*Execute*/,
       "SymbolId": "936e4324-bea2-463a-b196-6064a2d8a6b2",
+      "SymbolName": "Lib.flow.Execute",
       "InputValues": [],
       "Outputs": [
         {
@@ -294,12 +307,14 @@
     {
       "Id": "c29d8a76-f79d-4c47-b9ce-3c6e3193236d"/*Execute*/,
       "SymbolId": "936e4324-bea2-463a-b196-6064a2d8a6b2",
+      "SymbolName": "Lib.flow.Execute",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "ecec3ef3-3e01-4631-8ca5-af20dce1f9aa"/*DrawPoints*/,
       "SymbolId": "ffd94e5a-bc98-4e70-84d8-cce831e6925f",
+      "SymbolName": "Lib.point.draw.DrawPoints",
       "InputValues": [
         {
           "Id": "414c8045-5086-4449-9d9a-03f28c3966b3"/*PointSize*/,
@@ -317,6 +332,7 @@
     {
       "Id": "f36c44b6-6599-4683-96a3-62bc2bfe4898"/*CreditText*/,
       "SymbolId": "7b1093bb-33ec-4fa4-a102-9a28002b511c",
+      "SymbolName": "Examples.user.still.there.helpers.CreditText",
       "InputValues": [
         {
           "Id": "c21e5e9c-7e50-41b4-abd2-f054c944221e"/*Position*/,

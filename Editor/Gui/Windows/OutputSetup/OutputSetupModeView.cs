@@ -3,6 +3,7 @@ using ImGuiNET;
 using T3.Editor.Gui.Windows.Output;
 using T3.Core.Operator;
 using T3.Core.Output;
+using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
@@ -133,7 +134,17 @@ internal sealed class OutputSetupModeView
         if (CustomComponents.StateButton("Output Setup", CustomComponents.ButtonStates.Default))
             EnterSetupMode();
 
-        CustomComponents.TooltipForLastItem("Edit the output setup", "Surfaces, outputs and what is routed where, with the Flow Outliner under the canvas.");
+        CustomComponents.TooltipForLastItem(DrawSetupButtonTooltip);
+    }
+
+    /// <summary>Static method group, so the per-frame hover check doesn't allocate a closure.</summary>
+    private static void DrawSetupButtonTooltip()
+    {
+        CustomComponents.StylizedText("Edit the output setup", Fonts.FontNormal, UiColors.Text);
+        CustomComponents.StylizedText("Surfaces, outputs and what is routed where, with the Flow Outliner under the canvas.",
+                                      Fonts.FontNormal, UiColors.Text.Fade(0.7f));
+        FormInputs.AddVerticalSpace(5);
+        OutputsIndicator.DrawActiveOutputsSummary();
     }
 
     /// <summary>Shows the setup view with its Flow Outliner, whatever the graph selection is.</summary>

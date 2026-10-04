@@ -6,6 +6,7 @@
     {
       "Id": "0ae3a80f-7db1-4d61-b382-1f4cd720ab85"/*_AnimValueOld*/,
       "SymbolId": "c5e39c67-256f-4cb9-a635-b62a0d9c796c",
+      "SymbolName": "Lib.numbers.anim._obsolete._AnimValueOld",
       "InputValues": [
         {
           "Id": "3396de1f-03af-43ee-a43a-55016bec70ae"/*Bias*/,
@@ -28,12 +29,14 @@
     {
       "Id": "0d2ae839-6ee8-4a06-97be-4a6bf34edbe8"/*DrawPoints*/,
       "SymbolId": "ffd94e5a-bc98-4e70-84d8-cce831e6925f",
+      "SymbolName": "Lib.point.draw.DrawPoints",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "1bdf4d72-0667-41f9-a0d6-5136d1dac11a"/*AddNoise*/,
       "SymbolId": "dd586355-64b3-4e96-af6d-b4927595dee7",
+      "SymbolName": "Lib.point.modify.AddNoise",
       "InputValues": [
         {
           "Id": "aaba1602-e7a1-4b48-81d4-9d7b2b3aa8b1"/*Phase*/,
@@ -46,24 +49,28 @@
     {
       "Id": "3aeabce6-bc1c-480b-a6a7-c1da75624302"/*_Time_old*/,
       "SymbolId": "9cb4d49e-135b-400b-a035-2b02c5ea6a72",
+      "SymbolName": "Lib.numbers.anim._obsolete._Time_old",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "6f7a454c-a5e3-439e-82ef-10e82974dfe9"/*_GridPoints_Old*/,
       "SymbolId": "3ee8f66d-68df-43c1-b0eb-407259bf7e86",
+      "SymbolName": "Lib.point.generate._GridPoints_Old",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "723e0de6-0f7a-40a8-bd81-8940fa654277"/*RenderTarget*/,
       "SymbolId": "f9fe78c5-43a6-48ae-8e8c-6cdbbc330dd1",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "73b8854f-7b04-47ec-b23c-2e9ad4ba62cb"/*AddNoise*/,
       "SymbolId": "dd586355-64b3-4e96-af6d-b4927595dee7",
+      "SymbolName": "Lib.point.modify.AddNoise",
       "InputValues": [
         {
           "Id": "aaba1602-e7a1-4b48-81d4-9d7b2b3aa8b1"/*Phase*/,
@@ -76,6 +83,7 @@
     {
       "Id": "783560c4-b6e8-419d-ba8b-23f4ca4ccbe9"/*Add*/,
       "SymbolId": "c160f925-0a66-4505-a569-cadd878dbb6f",
+      "SymbolName": "Lib.numbers.float.basic.Add",
       "InputValues": [
         {
           "Id": "993d59bb-1fc0-4857-a36d-629b0e7aa0d2"/*Input2*/,
@@ -88,6 +96,7 @@
     {
       "Id": "78909550-5271-4ffd-b094-e8a3824c13f2"/*Text*/,
       "SymbolId": "fd31d208-12fe-46bf-bfa3-101211f8f497",
+      "SymbolName": "Lib.render.basic.Text",
       "InputValues": [
         {
           "Id": "d89c518c-a862-4f46-865b-0380350b7417"/*Size*/,
@@ -105,24 +114,28 @@
     {
       "Id": "818099bf-b5f9-4aa7-8d63-ae3029527dfd"/*RenderTarget*/,
       "SymbolId": "f9fe78c5-43a6-48ae-8e8c-6cdbbc330dd1",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "9a4cdb5c-132b-40c3-9aef-ddaf81712d30"/*BlendPoints*/,
       "SymbolId": "2dc5c9d1-ea93-4597-a4d9-7b610aad603a",
+      "SymbolName": "Lib.point.combine.BlendPoints",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "9af5ed25-628a-4518-a81b-f27c4ae70b44"/*TransformPoints*/,
       "SymbolId": "7f6c64fe-ca2e-445e-a9b4-c70291ce354e",
+      "SymbolName": "Lib.point.transform.TransformPoints",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "d22fc9ae-a76a-495e-a7a1-629fcc026771"/*SamplePointAttributes_v1*/,
       "SymbolId": "b3de7a93-e921-4e43-8a56-6c84b2d18b74",
+      "SymbolName": "Lib.point.modify.SamplePointAttributes_v1",
       "InputValues": [
         {
           "Id": "1531e949-fe17-4718-9ac6-4dc3884c23fc"/*RedFactor*/,
@@ -153,6 +166,7 @@
     {
       "Id": "dfcdeba7-b97c-41e7-a9f3-eda7caab33af"/*ColorGradeDepth*/,
       "SymbolId": "a1e3b8d3-3888-4e18-80e4-f6c65a136e75",
+      "SymbolName": "Lib.image.color.ColorGradeDepth",
       "InputValues": [
         {
           "Id": "92912c42-9928-495e-a8c7-c752e79eeba6"/*Gradient*/,
@@ -209,6 +223,7 @@
     {
       "Id": "fd50e12e-cdd0-4690-bd86-c31c087705a5"/*PerlinNoise3*/,
       "SymbolId": "50aab941-0a29-474a-affd-13a74ea0c780",
+      "SymbolName": "Lib.numbers.vec3.PerlinNoise3",
       "InputValues": [
         {
           "Id": "03df41a8-3d72-47b1-b854-81e6e59e7cb4"/*Frequency*/,

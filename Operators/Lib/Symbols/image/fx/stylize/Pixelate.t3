@@ -35,24 +35,28 @@
     {
       "Id": "13e82ae1-dc6d-46c1-b048-4ed47129b95a"/*Vector2Components*/,
       "SymbolId": "0946c48b-85d8-4072-8f21-11d17cc6f6cf",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "260e5d44-0826-4de0-ad22-f903d5b3c87c"/*UseFallbackTexture*/,
       "SymbolId": "b470fdf9-ac0b-4eb9-9600-453b8c094e3f",
+      "SymbolName": "Lib.image.use.UseFallbackTexture",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "310167bc-dd39-418a-8ecf-2ea039f1607e"/*IntToFloat*/,
       "SymbolId": "17db8a36-079d-4c83-8a2a-7ea4c1aa49e6",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "5233129b-a879-49b8-83c9-abb94bc31a11"/*_multiImageFxSetupStatic*/,
       "SymbolId": "cc34a183-3978-4b6b-8ef1-dd8102410816",
+      "SymbolName": "Lib.image.fx._._multiImageFxSetupStatic",
       "InputValues": [
         {
           "Id": "6022a4b0-c6fc-49a3-811a-179dcceb8b44"/*WrapMode*/,
@@ -70,6 +74,7 @@
     {
       "Id": "70682c18-cc2b-4b8b-adf1-977d45b9391d"/*LoadImage*/,
       "SymbolId": "0b3436db-e283-436e-ba85-2f3a1de76a9d",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
       "InputValues": [
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
@@ -82,12 +87,14 @@
     {
       "Id": "aae3dec4-e007-41a7-8c97-7eeab9d3b719"/*Vector4Components*/,
       "SymbolId": "b15e4950-5c72-4655-84bc-c00647319030",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "b5bd17ea-2ae3-4c80-a0a4-31fc419fee3d"/*Int2ToVector2*/,
       "SymbolId": "d1a66374-f0e8-4ef5-adf4-2871ec549d2a",
+      "SymbolName": "Lib.numbers.vec2.Int2ToVector2",
       "InputValues": [],
       "Outputs": []
     }

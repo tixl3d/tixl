@@ -6,6 +6,7 @@
     {
       "Id": "0774c646-964a-469e-9971-14517d623c84"/*DelayTriggerChange*/,
       "SymbolId": "fbd9ac37-4427-4852-95d7-d8383fefbe36",
+      "SymbolName": "Lib.numbers.bool.process.DelayTriggerChange",
       "InputValues": [
         {
           "Id": "1d86c7d6-95c1-416c-a643-28745e099a53"/*TimeMode*/,
@@ -23,6 +24,7 @@
     {
       "Id": "0aebc79b-28fe-4e4d-bda0-3ca8834a3534"/*AnimValue*/,
       "SymbolId": "ea7b8491-2f8e-4add-b0b1-fd068ccfed0d",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "InputValues": [
         {
           "Id": "48005727-0158-4795-ad70-8410c27fd01d"/*Rate*/,
@@ -35,12 +37,14 @@
     {
       "Id": "264696f6-5589-4f34-be4f-edcfc578ac03"/*ValuesToTexture*/,
       "SymbolId": "55cc0f79-96c9-482e-9794-934dc0f87708",
+      "SymbolName": "Lib.numbers.floats.process.ValuesToTexture",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "4231bdf2-ad93-4a55-9276-e4a1b2e63c7a"/*ExecuteTests*/,
       "SymbolId": "83cb923e-a387-4be2-b391-4111c7bd90fe",
+      "SymbolName": "Examples.testing.ExecuteTests",
       "InputValues": [
         {
           "Id": "31937a13-1e53-45dd-8e6f-91ca5f3aaa19"/*TriggerTest*/,
@@ -58,6 +62,7 @@
     {
       "Id": "5112b462-6a5d-4b6d-8dc9-75f7940770e4"/*KeepFloatValues*/,
       "SymbolId": "32a1d28e-23bc-44a8-becc-b52972464526",
+      "SymbolName": "Lib.numbers.floats.process.KeepFloatValues",
       "InputValues": [
         {
           "Id": "c84aa4cf-ce04-43e2-8d88-4ce3b8a7155e"/*AddValueToList*/,
@@ -70,6 +75,7 @@
     {
       "Id": "58dee5ef-e36e-4a7a-a015-7c6077edf313"/*ExecuteTests*/,
       "SymbolId": "83cb923e-a387-4be2-b391-4111c7bd90fe",
+      "SymbolName": "Examples.testing.ExecuteTests",
       "InputValues": [
         {
           "Id": "13d66a6d-75e1-4ab0-805d-a2234b3334a4"/*OnlyShowFails*/,
@@ -92,6 +98,7 @@
     {
       "Id": "8237c4a0-f444-4953-952f-eb87b780da1a"/*DelayTrigger*/,
       "SymbolId": "f92a1144-55d9-4d8e-bfa6-f80665800e25",
+      "SymbolName": "Examples.testing.VisualTest",
       "Name": "DelayTrigger",
       "InputValues": [
         {
@@ -113,6 +120,7 @@
     {
       "Id": "933f4e3c-1420-4c0b-943e-eaaf69c9cd01"/*Trigger*/,
       "SymbolId": "0bec016a-5e1b-467a-8273-368d4d6b9935",
+      "SymbolName": "Lib.numbers.bool.logic.Trigger",
       "InputValues": [
         {
           "Id": "e7c1f0af-da6d-4e33-ac86-7dc96bfe7eb3"/*BoolValue*/,
@@ -125,24 +133,28 @@
     {
       "Id": "954b1b05-1bb6-4bfb-8e9b-a33d1cf5672b"/*KeepFloatValues*/,
       "SymbolId": "32a1d28e-23bc-44a8-becc-b52972464526",
+      "SymbolName": "Lib.numbers.floats.process.KeepFloatValues",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "a5b92786-d338-4022-bfd5-a21e7dd8f4d4"/*KeepFloatValues*/,
       "SymbolId": "32a1d28e-23bc-44a8-becc-b52972464526",
+      "SymbolName": "Lib.numbers.floats.process.KeepFloatValues",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "b639afd8-e2f4-47ce-8726-df77ab4cb620"/*BoolToFloat*/,
       "SymbolId": "9db2fcbf-54b9-4222-878b-80d1a0dc6edf",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "bbe9e51d-3485-46a9-a20c-653c72c05888"/*Int2*/,
       "SymbolId": "f1218934-f874-4f70-a077-0ebe7d12104d",
+      "SymbolName": "Types.Values.Int2",
       "InputValues": [
         {
           "Id": "53602af2-48d9-42ab-80c3-ae1f1e600d28"/*Y*/,
@@ -155,6 +167,7 @@
     {
       "Id": "dd35ff4c-e1b2-4cfe-9370-b311be14cf6f"/*frameCount*/,
       "SymbolId": "cc07b314-4582-4c2c-84b8-bb32f59fc09b",
+      "SymbolName": "Types.Values.IntValue",
       "Name": "frameCount",
       "InputValues": [
         {
@@ -168,6 +181,7 @@
     {
       "Id": "f62279ac-097f-4556-9bf5-c8a83cb1fa93"/*BoolToFloat*/,
       "SymbolId": "9db2fcbf-54b9-4222-878b-80d1a0dc6edf",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
       "InputValues": [],
       "Outputs": []
     }

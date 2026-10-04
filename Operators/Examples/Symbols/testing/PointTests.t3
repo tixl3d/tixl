@@ -6,12 +6,14 @@
     {
       "Id": "8bacc42b-e92b-4425-9a3e-d240a8a377b2"/*SelectPointsExample*/,
       "SymbolId": "2fcb6afc-2d82-47a5-a6dd-39c85348b8c4",
+      "SymbolName": "Examples.Lib.point.SelectPointsExample",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "ea0aa684-494c-4f0f-a9c3-b75f29430849"/*Particles*/,
       "SymbolId": "f92a1144-55d9-4d8e-bfa6-f80665800e25",
+      "SymbolName": "Examples.testing.VisualTest",
       "Name": "Particles",
       "InputValues": [],
       "Outputs": []
@@ -19,6 +21,7 @@
     {
       "Id": "fc443f4a-50ae-4bfd-aaf1-15c1c859ea0f"/*ExecuteTests*/,
       "SymbolId": "83cb923e-a387-4be2-b391-4111c7bd90fe",
+      "SymbolName": "Examples.testing.ExecuteTests",
       "InputValues": [
         {
           "Id": "31937a13-1e53-45dd-8e6f-91ca5f3aaa19"/*TriggerTest*/,

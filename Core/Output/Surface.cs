@@ -36,13 +36,8 @@ public sealed class Surface
     /// </summary>
     public sealed class OutputMapping
     {
-        public static class Modes
-        {
-            public const string CornerPin = "CornerPin";
-        }
-
         public Guid OutputId;
-        public string Mode = Modes.CornerPin;
+        public MappingModes Mode = MappingModes.CornerPin;
 
         /// <summary>
         /// Corners in the output canvas' own 0..1 space (Y down): top-left, top-right, bottom-right,
@@ -67,11 +62,35 @@ public sealed class Surface
         /// <summary>Where each of the surface's reference points sits on this output, by point id.</summary>
         public Dictionary<Guid, PointAim> PointAims = new();
 
+        /// <summary>Whether the quad covers the whole canvas by definition rather than by where it was dragged.</summary>
+        public bool IsFilling => Mode == MappingModes.Fill;
+
+        /// <summary>Takes the quad as placed: a fill that is dragged, straightened or solved becomes a pin.</summary>
+        public void PromoteToCornerPin()
+        {
+            Mode = MappingModes.CornerPin;
+        }
+
+        /// <summary>Takes the whole canvas, dropping the corners it was placed at.</summary>
+        public void FillCanvas()
+        {
+            Mode = MappingModes.Fill;
+            Quad = OutputDefinition.FullCanvasQuad();
+        }
+
+        /// <summary>A mapping that covers the whole canvas and stays there.</summary>
+        public static OutputMapping CreateFilling(Guid outputId)
+        {
+            var mapping = new OutputMapping { OutputId = outputId };
+            mapping.FillCanvas();
+            return mapping;
+        }
+
         public void WriteToJson(JsonTextWriter writer)
         {
             writer.WriteStartObject();
             writer.WriteObject("OutputId", OutputId);
-            writer.WriteString("Mode", Mode);
+            writer.WriteString("Mode", Mode.ToString());
             writer.WriteQuad("Quad", Quad);
             if (PointAims.Count > 0)
             {
@@ -97,7 +116,9 @@ public sealed class Surface
             var mapping = new OutputMapping
                               {
                                   OutputId = OutputJson.ReadGuid(token["OutputId"]),
-                                  Mode = token.ReadValueSafe("Mode", Modes.CornerPin) ?? Modes.CornerPin,
+                                  Mode = Enum.TryParse<MappingModes>(token.ReadValueSafe("Mode", string.Empty), out var mode)
+                                             ? mode
+                                             : MappingModes.CornerPin,
                                   Quad = OutputJson.ReadQuad(token["Quad"]),
                               };
 

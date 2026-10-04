@@ -6,6 +6,7 @@
     {
       "Id": "07ee757f-78b5-401a-8e0d-b44654d54649"/*ModInt*/,
       "SymbolId": "cf3268d7-4f3d-47bd-8cb5-0214c75432ec",
+      "SymbolName": "Lib.numbers.int.basic.ModInt",
       "InputValues": [
         {
           "Id": "ccdea113-c046-4ec2-b1fb-30d6e15db7ce"/*Mod*/,
@@ -18,18 +19,21 @@
     {
       "Id": "0fdc3210-a18f-421b-b79d-4026cc87ab9b"/*CountInt*/,
       "SymbolId": "0e1d5f4b-3ba0-4e71-aa26-7308b6df214d",
+      "SymbolName": "Lib.numbers.int.logic.CountInt",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "157b4208-44d0-4b06-9ad9-072932e08270"/*RenderTarget*/,
       "SymbolId": "f9fe78c5-43a6-48ae-8e8c-6cdbbc330dd1",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "2732a4bc-e9b7-4b5a-8ace-56d63f80edf8"/*ModInt*/,
       "SymbolId": "cf3268d7-4f3d-47bd-8cb5-0214c75432ec",
+      "SymbolName": "Lib.numbers.int.basic.ModInt",
       "InputValues": [
         {
           "Id": "ccdea113-c046-4ec2-b1fb-30d6e15db7ce"/*Mod*/,
@@ -42,6 +46,7 @@
     {
       "Id": "2c85346b-3a63-4ea8-b29b-991e3aeff2b2"/*AnimValue*/,
       "SymbolId": "ea7b8491-2f8e-4add-b0b1-fd068ccfed0d",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "InputValues": [
         {
           "Id": "48005727-0158-4795-ad70-8410c27fd01d"/*Rate*/,
@@ -54,6 +59,7 @@
     {
       "Id": "31c21fd4-98d6-44cf-9ba8-9d928eb41be2"/*Remap*/,
       "SymbolId": "f0acd1a4-7a98-43ab-a807-6d1bd3e92169",
+      "SymbolName": "Lib.numbers.float.adjust.Remap",
       "InputValues": [
         {
           "Id": "252276fb-8de1-42cc-ba41-07d6862015bd"/*RangeOutMax*/,
@@ -66,6 +72,7 @@
     {
       "Id": "3e54cf99-4cf0-4637-87c2-56d8f9770e61"/*AddInt*/,
       "SymbolId": "ab73a49e-c548-437d-a4ab-b3fa41e30097",
+      "SymbolName": "Lib.numbers.int.basic.AddInt",
       "InputValues": [
         {
           "Id": "d5efbe02-8f33-42e9-a205-859c218acbec"/*Input2*/,
@@ -78,6 +85,7 @@
     {
       "Id": "3fa0d03c-ea6a-4589-8fd4-6d16ba3026a1"/*MidiOutput*/,
       "SymbolId": "f9f4281b-92ee-430d-a930-6b588a5cb9a9",
+      "SymbolName": "Lib.io.midi.MidiOutput",
       "InputValues": [
         {
           "Id": "0fff2ce2-defa-442c-a089-4b12e7d71620"/*NoteOrController*/,
@@ -115,6 +123,7 @@
     {
       "Id": "42d6398d-4de1-4ada-862c-aa6331ef036d"/*AddInt*/,
       "SymbolId": "ab73a49e-c548-437d-a4ab-b3fa41e30097",
+      "SymbolName": "Lib.numbers.int.basic.AddInt",
       "InputValues": [
         {
           "Id": "d5efbe02-8f33-42e9-a205-859c218acbec"/*Input2*/,
@@ -127,6 +136,7 @@
     {
       "Id": "6210458f-73f3-4e6a-bbcb-262d5df1f3e7"/*MidiOutput*/,
       "SymbolId": "f9f4281b-92ee-430d-a930-6b588a5cb9a9",
+      "SymbolName": "Lib.io.midi.MidiOutput",
       "InputValues": [
         {
           "Id": "0fff2ce2-defa-442c-a089-4b12e7d71620"/*NoteOrController*/,
@@ -174,6 +184,7 @@
     {
       "Id": "6a3b2da0-636a-4bb4-87a2-24fd336d7088"/*MidiOutput*/,
       "SymbolId": "f9f4281b-92ee-430d-a930-6b588a5cb9a9",
+      "SymbolName": "Lib.io.midi.MidiOutput",
       "InputValues": [
         {
           "Id": "0fff2ce2-defa-442c-a089-4b12e7d71620"/*NoteOrController*/,
@@ -211,6 +222,7 @@
     {
       "Id": "6abefeae-0823-4631-9585-4246d309fa7c"/*AnimValue*/,
       "SymbolId": "ea7b8491-2f8e-4add-b0b1-fd068ccfed0d",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "InputValues": [
         {
           "Id": "48005727-0158-4795-ad70-8410c27fd01d"/*Rate*/,
@@ -223,6 +235,7 @@
     {
       "Id": "755b6cb5-a8d6-4b69-84e5-5e104631a24b"/*CountInt*/,
       "SymbolId": "0e1d5f4b-3ba0-4e71-aa26-7308b6df214d",
+      "SymbolName": "Lib.numbers.int.logic.CountInt",
       "InputValues": [
         {
           "Id": "2ff3d674-90d7-4c8f-8551-aad9992540db"/*Modulo*/,
@@ -235,12 +248,14 @@
     {
       "Id": "771c849c-a071-4939-a02e-a5a5676758b8"/*FloatToInt*/,
       "SymbolId": "06b4728e-852c-491a-a89d-647f7e0b5415",
+      "SymbolName": "Lib.numbers.int.process.FloatToInt",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "86c38124-205a-49ca-838a-f0e54abdb05f"/*MidiOutput*/,
       "SymbolId": "f9f4281b-92ee-430d-a930-6b588a5cb9a9",
+      "SymbolName": "Lib.io.midi.MidiOutput",
       "InputValues": [
         {
           "Id": "0fff2ce2-defa-442c-a089-4b12e7d71620"/*NoteOrController*/,
@@ -283,6 +298,7 @@
     {
       "Id": "8db60eb5-58f7-40cb-a560-4ae9322184b7"/*AddInt*/,
       "SymbolId": "ab73a49e-c548-437d-a4ab-b3fa41e30097",
+      "SymbolName": "Lib.numbers.int.basic.AddInt",
       "InputValues": [
         {
           "Id": "d5efbe02-8f33-42e9-a205-859c218acbec"/*Input2*/,
@@ -295,18 +311,21 @@
     {
       "Id": "ba687aab-205f-4207-a446-f8c1e0e53cee"/*RadialPoints*/,
       "SymbolId": "3352d3a1-ab04-4d0a-bb43-da69095b73fd",
+      "SymbolName": "Lib.point.generate.RadialPoints",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "c4b61564-b490-4c3c-9156-a57667494d7d"/*Execute*/,
       "SymbolId": "936e4324-bea2-463a-b196-6064a2d8a6b2",
+      "SymbolName": "Lib.flow.Execute",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "cb35bfff-a612-4b05-a819-cdaa43ec0ace"/*MidiInput*/,
       "SymbolId": "59a0458e-2f3a-4856-96cd-32936f783cc5",
+      "SymbolName": "Lib.io.midi.MidiInput",
       "InputValues": [
         {
           "Id": "044168eb-791c-405f-867f-3d5702924165"/*EventType*/,
@@ -339,18 +358,21 @@
     {
       "Id": "d48efee0-a26d-4c54-9827-cf2e6d95506d"/*DrawPoints*/,
       "SymbolId": "ffd94e5a-bc98-4e70-84d8-cce831e6925f",
+      "SymbolName": "Lib.point.draw.DrawPoints",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "f2b8c30b-4d9b-4676-b944-1650c101d9b8"/*MidiInput*/,
       "SymbolId": "59a0458e-2f3a-4856-96cd-32936f783cc5",
+      "SymbolName": "Lib.io.midi.MidiInput",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "fb4d3357-1635-4066-ab14-85e91bc2c4db"/*MidiOutput*/,
       "SymbolId": "f9f4281b-92ee-430d-a930-6b588a5cb9a9",
+      "SymbolName": "Lib.io.midi.MidiOutput",
       "InputValues": [
         {
           "Id": "0fff2ce2-defa-442c-a089-4b12e7d71620"/*NoteOrController*/,

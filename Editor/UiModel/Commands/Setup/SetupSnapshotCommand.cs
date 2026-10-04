@@ -48,7 +48,7 @@ internal sealed class SetupSnapshotCommand : ICommand
             return;
         }
 
-        setup.Name = restored.Name;
+        // The name is kept: it names the file, and a rename isn't undoable — restoring it would save a second file.
         setup.ReferenceImages = restored.ReferenceImages;
         setup.Surfaces = restored.Surfaces;
         setup.ContentSources = restored.ContentSources;

@@ -179,6 +179,33 @@ TiXL's editor is Dear ImGui plus custom widgets, rendered every frame at the out
 - On the MagGraph canvas or any zoomable surface, combine factors in this order: `value / T3Ui.UiScaleFactor * CanvasScale` — UI-scale first, then canvas zoom.
 - Threshold-cull expensive detail at low zoom. MagGraph skips labels below `CanvasScale 0.25f`, thumbnails below `0.2f`, etc.
 
+### Pixel alignment
+
+**Anything with straight, axis-aligned edges is drawn on whole pixels.** Rectangles, their strokes, grids,
+guides and square drag handles. A rect at a fractional position renders as two grey rows instead of one crisp
+line, which reads as sloppy work — the maintainer notices it immediately. Free-angle lines (connections,
+traced outlines), circular handles and point markers are the exception: they rely on antialiasing, and snapping
+would make them wobble as the view moves.
+
+The half-pixel rule is the part that gets this wrong, in both directions:
+
+- `AddRect` and `AddLine` **already shift their input by half a pixel** before stroking. Hand them whole
+  numbers and an odd stroke width lands on exactly one pixel. Adding another half puts it back on the boundary
+  between two.
+- `AddRectFilled` and `AddPolyline` **do not shift**. Their callers add the half themselves — that is what
+  `GraphConnectionDrawer` does to keep connections crisp.
+- An **even** stroke width is centred on a pixel boundary, an **odd** one on a pixel centre. So the adjustment
+  depends on the width, and a blanket `+0.5` cannot be right for both.
+- Stroke widths must be whole pixels too: round after applying `T3Ui.UiScaleFactor`, minimum 1.
+- ImGui spreads an antialiasing fringe to either side of every stroke, so even a perfectly placed 1px line
+  stays soft. Clear `ImDrawListFlags.AntiAliasedLines` for the draw and restore the flags afterwards — but
+  leave it on for rounded corners, whose arcs turn into visible steps without it.
+
+`Editor/Gui/Windows/OutputSetup/SetupStrokes.cs` implements all of this; reuse it (or copy its approach)
+rather than hand-rolling offsets. It also carries the stroke convention used on canvases: a **frame** sits
+outside the content it frames (2px, 3px when selected), a stroke around content *inside* content — a slice, a
+patch — sits inside its own rect (1px, 2px when selected), so the two never overlap.
+
 ### Fonts
 - Only use values from the `Fonts` enum (`FontNormal`, `FontSmall`, `FontBold`, `FontLarge`). Target mix: Normal ~70 %, Small ~20 %, Bold ~5 %, Large <2 %.
 - If you change `Fonts.*.Scale` for a local effect, reset it to `1` before returning from the draw method — the scale leaks into sibling draws otherwise.

@@ -41,6 +41,7 @@
     {
       "Id": "0e132e3c-67d5-4f57-9914-9ec30b30a8a0"/*ExecuteHeightmapSdf*/,
       "SymbolId": "77bfe126-5ea6-4254-ba46-2dd9f77d7a70",
+      "SymbolName": "Lib.field.generate.sdf._.ExecuteHeightmapSdf",
       "InputValues": [
         {
           "Id": "72246279-47f9-42e4-8714-fba34b687238"/*MaxHeight*/,
@@ -53,18 +54,21 @@
     {
       "Id": "2b4e2a58-5bdc-49b8-ad9a-308cc6e9c363"/*SrvFromTexture2d*/,
       "SymbolId": "c2078514-cf1d-439c-a732-0d7b31b5084a",
+      "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "32bca2c5-81b7-45ff-806e-3821af10e773"/*ScaleVector2*/,
       "SymbolId": "4bbc6fac-789d-496e-9833-a0af78c31c98",
+      "SymbolName": "Lib.numbers.vec2.ScaleVector2",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "70e2e97d-485a-4aaa-94b1-e88939b88212"/*Div*/,
       "SymbolId": "15fb88b2-81a1-43b8-97ba-41221293bb07",
+      "SymbolName": "Lib.numbers.float.basic.Div",
       "InputValues": [],
       "Outputs": []
     }

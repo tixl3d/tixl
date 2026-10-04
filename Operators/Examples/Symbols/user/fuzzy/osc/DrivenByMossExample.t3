@@ -6,6 +6,7 @@
     {
       "Id": "0cd474ee-4620-4167-a567-fcf56a296f6b"/*OscOutput*/,
       "SymbolId": "4e99da86-482f-4037-8664-b2371526d632",
+      "SymbolName": "Lib.io.osc.OscOutput",
       "InputValues": [
         {
           "Id": "6c0e07ba-7ea6-4dab-af0b-61cf9cb74ad7"/*Port*/,
@@ -28,6 +29,7 @@
     {
       "Id": "1cff6553-ccf8-46ac-94a5-d4139a11d14e"/*AnimValue*/,
       "SymbolId": "ea7b8491-2f8e-4add-b0b1-fd068ccfed0d",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "InputValues": [
         {
           "Id": "48005727-0158-4795-ad70-8410c27fd01d"/*Rate*/,
@@ -40,6 +42,7 @@
     {
       "Id": "3262eb19-71ae-4c96-9061-2b77ba5e27a6"/*IntValue*/,
       "SymbolId": "cc07b314-4582-4c2c-84b8-bb32f59fc09b",
+      "SymbolName": "Types.Values.IntValue",
       "InputValues": [
         {
           "Id": "4515c98e-05bc-4186-8773-4d2b31a8c323"/*Int*/,
@@ -52,12 +55,14 @@
     {
       "Id": "32d91674-bee5-40d0-b18c-f6940c9082b6"/*HasValueDecreased*/,
       "SymbolId": "f376121a-2360-4232-9724-0db6937062c3",
+      "SymbolName": "Lib.numbers.float.process.HasValueDecreased",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "7644ee08-d19c-4e21-a24b-e1bd08f2b9d8"/*Remap*/,
       "SymbolId": "f0acd1a4-7a98-43ab-a807-6d1bd3e92169",
+      "SymbolName": "Lib.numbers.float.adjust.Remap",
       "InputValues": [
         {
           "Id": "252276fb-8de1-42cc-ba41-07d6862015bd"/*RangeOutMax*/,
@@ -70,12 +75,14 @@
     {
       "Id": "7af4d555-a4e4-434f-8a56-2a388edb1e23"/*FloatToInt*/,
       "SymbolId": "06b4728e-852c-491a-a89d-647f7e0b5415",
+      "SymbolName": "Lib.numbers.int.process.FloatToInt",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "873bdb1f-a95c-4a7f-a14e-3948d2ad1bec"/*Multiply*/,
       "SymbolId": "17b60044-9125-4961-8a79-ca94697b3726",
+      "SymbolName": "Lib.numbers.float.basic.Multiply",
       "InputValues": [
         {
           "Id": "5ae4bb07-4214-4ec3-a499-24d9f6d404a5"/*B*/,
@@ -88,18 +95,21 @@
     {
       "Id": "ac803da7-52d3-4796-80ac-31b5abdd2d48"/*SplitString*/,
       "SymbolId": "a0fcf7ed-1f14-4a8b-a57e-99e5b2407b1b",
+      "SymbolName": "Lib.string.list.SplitString",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "b5285a5a-59bf-4d34-b37b-1cd5a459714d"/*Execute*/,
       "SymbolId": "936e4324-bea2-463a-b196-6064a2d8a6b2",
+      "SymbolName": "Lib.flow.Execute",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "b5d0dc15-6978-4b40-b192-a5cadc143ee9"/*OscOutput*/,
       "SymbolId": "4e99da86-482f-4037-8664-b2371526d632",
+      "SymbolName": "Lib.io.osc.OscOutput",
       "InputValues": [
         {
           "Id": "6c0e07ba-7ea6-4dab-af0b-61cf9cb74ad7"/*Port*/,
@@ -122,12 +132,14 @@
     {
       "Id": "c6e83411-b934-430f-bf45-ff139141ae2f"/*PickStringFromList*/,
       "SymbolId": "ef357e66-24e9-4f54-8d86-869db74602f4",
+      "SymbolName": "Lib.string.list.PickStringFromList",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "d7913360-57b2-47ed-bd0d-5a33ae19a460"/*Value*/,
       "SymbolId": "5d7d61ae-0a41-4ffa-a51d-93bab665e7fe",
+      "SymbolName": "Types.Values.Value",
       "InputValues": [
         {
           "Id": "7773837e-104a-4b3d-a41f-cadbd9249af2"/*Float*/,
@@ -140,6 +152,7 @@
     {
       "Id": "e83ed529-2b19-4a5c-ab6d-5305e90884f6"/*String*/,
       "SymbolId": "5880cbc3-a541-4484-a06a-0e6f77cdbe8e",
+      "SymbolName": "Types.Values.String",
       "InputValues": [
         {
           "Id": "ceeae47b-d792-471d-a825-49e22749b7b9"/*InputString*/,
@@ -152,6 +165,7 @@
     {
       "Id": "eb428fce-5ffc-4531-979c-7ebbd6d54bae"/*MockStrings*/,
       "SymbolId": "3af25959-fd3f-4608-b521-5860d82554df",
+      "SymbolName": "Lib.string.random.MockStrings",
       "InputValues": [
         {
           "Id": "054ade21-c08e-4633-9725-6168fd7806f9"/*Category*/,
@@ -164,6 +178,7 @@
     {
       "Id": "f146c02a-a838-4b84-9fac-7b26f91210c9"/*Counter*/,
       "SymbolId": "11882635-4757-4cac-a024-70bb4e8b504c",
+      "SymbolName": "Lib.numbers.anim._obsolete.Counter",
       "InputValues": [],
       "Outputs": []
     }

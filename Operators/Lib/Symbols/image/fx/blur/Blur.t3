@@ -38,6 +38,7 @@
     {
       "Id": "182b10f8-0d60-4d18-b442-75431f9beca4"/*Resources\lib\img\fx\Blur.hlsl*/,
       "SymbolId": "bd0b9c5b-c611-42d0-8200-31af9661f189",
+      "SymbolName": "Lib.render._dx11.fxsetup._ImageFxShaderSetupStatic",
       "Name": "Resources\\lib\\img\\fx\\Blur.hlsl",
       "InputValues": [
         {
@@ -51,6 +52,7 @@
     {
       "Id": "24ba6f99-4bcd-4e84-b4cc-147f4cee2c63"/*WidthToHeight*/,
       "SymbolId": "5d7d61ae-0a41-4ffa-a51d-93bab665e7fe",
+      "SymbolName": "Types.Values.Value",
       "Name": "WidthToHeight",
       "InputValues": [
         {
@@ -64,6 +66,7 @@
     {
       "Id": "3d331fa5-2020-432f-8fc4-40fa10c23cec"/*Resources\lib\img\fx\Blur.hlsl*/,
       "SymbolId": "bd0b9c5b-c611-42d0-8200-31af9661f189",
+      "SymbolName": "Lib.render._dx11.fxsetup._ImageFxShaderSetupStatic",
       "Name": "Resources\\lib\\img\\fx\\Blur.hlsl",
       "InputValues": [
         {
@@ -77,30 +80,35 @@
     {
       "Id": "68b65d39-c6d1-4c23-8b5a-321640ed50ad"/*GetTextureSize*/,
       "SymbolId": "daec568f-f7b4-4d81-a401-34d62462daab",
+      "SymbolName": "Lib.render._dx11.api.GetTextureSize",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "8a1e1b10-b102-4fd3-945c-09da4385f356"/*Div*/,
       "SymbolId": "15fb88b2-81a1-43b8-97ba-41221293bb07",
+      "SymbolName": "Lib.numbers.float.basic.Div",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "a3bdc17e-c073-4df0-a204-b08df50ce0a4"/*Vector2Components*/,
       "SymbolId": "0946c48b-85d8-4072-8f21-11d17cc6f6cf",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "a663161b-a214-41a0-87d0-7c642e39e1f7"/*Value*/,
       "SymbolId": "5d7d61ae-0a41-4ffa-a51d-93bab665e7fe",
+      "SymbolName": "Types.Values.Value",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "dd5731e9-069c-410f-98ca-ef958c5b1ce8"/*Vertical*/,
       "SymbolId": "0946c48b-85d8-4072-8f21-11d17cc6f6cf",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Name": "Vertical",
       "InputValues": [
         {

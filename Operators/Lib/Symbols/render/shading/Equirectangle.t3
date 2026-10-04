@@ -15,6 +15,7 @@
     {
       "Id": "0e6c7c8e-34ff-44a6-8708-af6769f4118d"/*Down*/,
       "SymbolId": "746d886c-5ab6-44b1-bb15-f3ce2fadf7e6",
+      "SymbolName": "Lib.render.camera.Camera",
       "Name": "Down",
       "InputValues": [
         {
@@ -46,6 +47,7 @@
     {
       "Id": "1ee0aedf-cc85-4eeb-8c5d-63579c530822"/*Switch*/,
       "SymbolId": "e64f95e4-c045-400f-98ca-7c020ad46174",
+      "SymbolName": "Lib.flow.Switch",
       "InputValues": [
         {
           "Id": "e896b269-d17e-417f-be1f-2d6e9addae91"/*OptimizeInvalidation*/,
@@ -58,12 +60,14 @@
     {
       "Id": "25429a57-45d2-48b6-9fba-9c02f003fc2c"/*ConvertEquirectangle*/,
       "SymbolId": "c6014c28-c6ab-4b4e-b6bf-0cee92fb4b40",
+      "SymbolName": "Lib.render.utils.ConvertEquirectangle",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "304a1580-1ce4-4c19-bdde-5e103bca2880"/*CameraWithRotation*/,
       "SymbolId": "9e27c32d-b187-4b7c-9761-0c5bb4ae3c45",
+      "SymbolName": "Lib.render.camera.CameraWithRotation",
       "InputValues": [
         {
           "Id": "6bd84cf7-e89f-4e48-84ca-63fe5bab6291"/*Position*/,
@@ -85,12 +89,14 @@
     {
       "Id": "39a1fcc7-39df-4c6a-a876-a29b9abc6276"/*GetIntVar*/,
       "SymbolId": "470db771-c7f2-4c52-8897-d3a9b9fc6a4e",
+      "SymbolName": "Lib.flow.context.GetIntVar",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "3b5fce00-f8cd-4670-8249-2640cb217151"/*Multiply*/,
       "SymbolId": "17b60044-9125-4961-8a79-ca94697b3726",
+      "SymbolName": "Lib.numbers.float.basic.Multiply",
       "InputValues": [
         {
           "Id": "5ae4bb07-4214-4ec3-a499-24d9f6d404a5"/*B*/,
@@ -103,6 +109,7 @@
     {
       "Id": "48c077cc-fef5-484b-b345-239b3a35ca1e"/*Lock Position*/,
       "SymbolId": "94a5de3b-ee6a-43d3-8d21-7b8fe94b042b",
+      "SymbolName": "Types.Values.Vector3",
       "Name": "Lock Position",
       "InputValues": [
         {
@@ -126,6 +133,7 @@
     {
       "Id": "4ae35150-356f-4517-acde-44fcf3f2e09f"/*SliceViewPort*/,
       "SymbolId": "8b888408-e472-4bf9-be25-17a3dd8b90fd",
+      "SymbolName": "Lib.render.transform.SliceViewPort",
       "InputValues": [
         {
           "Id": "0ec5edfc-426c-40bb-a68e-80e4caa4c7bf"/*CellIndex*/,
@@ -151,6 +159,7 @@
     {
       "Id": "503d6fac-8e35-4e13-889a-d82871b65abe"/*Group*/,
       "SymbolId": "a3f64d34-1fab-4230-86b3-1c3deba3f90b",
+      "SymbolName": "Lib.render.transform.Group",
       "InputValues": [
         {
           "Id": "35a18838-b095-431f-a3af-2dba81dcc16f"/*ForceColorUpdate*/,
@@ -168,18 +177,21 @@
     {
       "Id": "5c29a745-534b-4722-b82f-0172ba32cbe4"/*Int2*/,
       "SymbolId": "f1218934-f874-4f70-a077-0ebe7d12104d",
+      "SymbolName": "Types.Values.Int2",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "5e2ff0fd-c8f0-4d57-974b-194d86937a72"/*MaxInt*/,
       "SymbolId": "f7fd7342-18d1-443a-98ec-758974891434",
+      "SymbolName": "Lib.numbers.int.process.MaxInt",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "5e9357cb-c9be-4d65-85c9-240cee49ae86"/*SubInts*/,
       "SymbolId": "7934f11d-c95c-41ae-b282-6e568b9c5f30",
+      "SymbolName": "Lib.numbers.int.basic.SubInts",
       "InputValues": [
         {
           "Id": "b1a34f4a-7be5-4c6b-84f1-0bb04cc80d0d"/*Input2*/,
@@ -192,12 +204,14 @@
     {
       "Id": "738a21c2-91d8-4d10-aa72-83ae2b063711"/*Vector3*/,
       "SymbolId": "94a5de3b-ee6a-43d3-8d21-7b8fe94b042b",
+      "SymbolName": "Types.Values.Vector3",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "84c6bc06-eb3b-46de-a7aa-5458f970bf8d"/*MultiplyInt*/,
       "SymbolId": "6a4edb6a-5ced-4356-9090-4bf770cdeb52",
+      "SymbolName": "Lib.numbers.int.basic.MultiplyInt",
       "InputValues": [
         {
           "Id": "e02f9e84-a7bf-45bf-9cb1-0b0c1c396796"/*B*/,
@@ -210,12 +224,14 @@
     {
       "Id": "b3afd95c-ebcf-4b04-a424-a64752fb9516"/*Vector3*/,
       "SymbolId": "94a5de3b-ee6a-43d3-8d21-7b8fe94b042b",
+      "SymbolName": "Types.Values.Vector3",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "c6ef0b76-18ff-4f77-8594-638779e48141"/*MultiplyInt*/,
       "SymbolId": "6a4edb6a-5ced-4356-9090-4bf770cdeb52",
+      "SymbolName": "Lib.numbers.int.basic.MultiplyInt",
       "InputValues": [
         {
           "Id": "e02f9e84-a7bf-45bf-9cb1-0b0c1c396796"/*B*/,
@@ -228,12 +244,14 @@
     {
       "Id": "cc848c98-8f6f-4c37-ba34-95e54b34c3d9"/*GetIntVar*/,
       "SymbolId": "470db771-c7f2-4c52-8897-d3a9b9fc6a4e",
+      "SymbolName": "Lib.flow.context.GetIntVar",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "cdace738-cb6b-449d-9354-11203f14ed75"/*Camera*/,
       "SymbolId": "746d886c-5ab6-44b1-bb15-f3ce2fadf7e6",
+      "SymbolName": "Lib.render.camera.Camera",
       "InputValues": [
         {
           "Id": "313596cc-3854-436b-89da-5fd40164ce76"/*Position*/,
@@ -264,6 +282,7 @@
     {
       "Id": "d093f293-e78c-4c7c-9f64-8d3160ccb446"/*IntValue*/,
       "SymbolId": "cc07b314-4582-4c2c-84b8-bb32f59fc09b",
+      "SymbolName": "Types.Values.IntValue",
       "InputValues": [
         {
           "Id": "4515c98e-05bc-4186-8773-4d2b31a8c323"/*Int*/,
@@ -276,12 +295,14 @@
     {
       "Id": "dadf542a-f781-402c-b7f8-2c35c189c7eb"/*IntToFloat*/,
       "SymbolId": "17db8a36-079d-4c83-8a2a-7ea4c1aa49e6",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "de6abf64-d10f-4cae-8f09-2ef2e0be2e6c"/*Int2*/,
       "SymbolId": "f1218934-f874-4f70-a077-0ebe7d12104d",
+      "SymbolName": "Types.Values.Int2",
       "InputValues": [
         {
           "Id": "53602af2-48d9-42ab-80c3-ae1f1e600d28"/*Y*/,
@@ -294,6 +315,7 @@
     {
       "Id": "ebb8b541-2e95-4930-b381-f3b6e80a5a47"/*Up*/,
       "SymbolId": "746d886c-5ab6-44b1-bb15-f3ce2fadf7e6",
+      "SymbolName": "Lib.render.camera.Camera",
       "Name": "Up",
       "InputValues": [
         {
@@ -334,6 +356,7 @@
     {
       "Id": "f6b1e614-e215-4903-bb86-e3149374d46f"/*Loop*/,
       "SymbolId": "3631c727-36a0-4f26-ae76-ee9c100efc33",
+      "SymbolName": "Lib.flow.Loop",
       "InputValues": [
         {
           "Id": "1f6e2adb-cff8-4dc4-9cb4-a26e3ad8b087"/*Count*/,
@@ -346,6 +369,7 @@
     {
       "Id": "f7537fed-34f7-4e65-bc1d-6b57b00fcf7e"/*RenderTarget*/,
       "SymbolId": "f9fe78c5-43a6-48ae-8e8c-6cdbbc330dd1",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "InputValues": [
         {
           "Id": "03749b41-cc3c-4f38-aea6-d7cea19fc073"/*Resolution*/,
@@ -361,6 +385,7 @@
     {
       "Id": "f841202a-a54e-4486-a813-2be8308166ba"/*ConvertEquirectangle*/,
       "SymbolId": "c6014c28-c6ab-4b4e-b6bf-0cee92fb4b40",
+      "SymbolName": "Lib.render.utils.ConvertEquirectangle",
       "InputValues": [],
       "Outputs": []
     }
