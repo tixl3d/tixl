@@ -58,7 +58,7 @@ internal static class DependencyCheck
             return false;
         }
 
-        message.Append("TiXL can start, but the features that need it won't work.");
+        message.Append("TiXL can start, but the features that need it may not work correctly.");
         var choice = BlockingWindow.Instance.ShowMessageBox(message.ToString(), "Missing Dependencies", "Continue", "Quit");
         return choice != "Quit";
     }
@@ -118,17 +118,32 @@ internal static class DependencyCheck
                                           PreventsStart: true));
     }
 
+    /** Also flags a slangc of another version: it can generate different code than the shaders were checked against. */
     private static void CheckSlangCompiler(List<MissingDependency> missing)
     {
-        if (SlangShaderCompiler.FindCompiler() != null)
+        const string pinned = SlangShaderCompiler.PinnedVersion;
+        var compiler = SlangShaderCompiler.FindCompiler();
+
+        if (compiler == null)
+        {
+            missing.Add(new MissingDependency($"The Slang shader compiler (slangc {pinned}) was not found.",
+                                              InstallHint(arch: $"Install shader-slang-bin from the AUR, if it is at version {pinned}. Otherwise: {SlangReleaseHint}",
+                                                          debian: SlangReleaseHint,
+                                                          fedora: SlangReleaseHint,
+                                                          nix: "shader-slang",
+                                                          other: SlangReleaseHint),
+                                              PreventsStart: false));
+            return;
+        }
+
+        var version = SlangShaderCompiler.QueryVersion(compiler);
+
+        // Patch releases (2026.18.3) only fix bugs on the pinned line.
+        if (version == pinned || version?.StartsWith(pinned + ".", StringComparison.Ordinal) == true)
             return;
 
-        missing.Add(new MissingDependency("The Slang shader compiler (slangc) was not found.",
-                                          InstallHint(arch: "Install shader-slang-bin from the AUR.",
-                                                      debian: SlangReleaseHint,
-                                                      fedora: SlangReleaseHint,
-                                                      nix: "shader-slang",
-                                                      other: SlangReleaseHint),
+        missing.Add(new MissingDependency($"{compiler} reports version {version ?? "unknown"}, but TiXL expects Slang {pinned}.",
+                                          $"Install: {SlangReleaseHint}",
                                           PreventsStart: false));
     }
 
@@ -188,6 +203,7 @@ internal static class DependencyCheck
     private const int RequiredSdkMajorVersion = 10;
     private const int SdkQueryTimeoutMs = 5000;
 
-    private const string SlangReleaseHint =
-        "Download it from https://github.com/shader-slang/slang/releases, then put slangc on PATH or point TIXL_SLANGC at it.";
+    private static string SlangReleaseHint =>
+        $"Extract the release from https://github.com/shader-slang/slang/releases/tag/v{SlangShaderCompiler.PinnedVersion} "
+        + $"into {SlangShaderCompiler.PinnedInstallDirectory}, so slangc ends up in its bin folder. Or point TIXL_SLANGC at slangc.";
 }

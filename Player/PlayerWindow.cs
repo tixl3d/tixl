@@ -28,7 +28,7 @@ internal sealed unsafe class PlayerWindow : IDisposable
         // A surface can only be created from a window that asked for Vulkan when it was made, so the flag has
         // to match the backend the player will pick.
         var flags = SDL_WindowFlags.SDL_WINDOW_HIDDEN | SDL_WindowFlags.SDL_WINDOW_HIGH_PIXEL_DENSITY;
-        if (!OperatingSystem.IsWindows())
+        if (Program.UseVulkanBackend)
             flags |= SDL_WindowFlags.SDL_WINDOW_VULKAN;
 
         _window = SDL_CreateWindow(title, clientSizeInPixels.Width, clientSizeInPixels.Height, flags);

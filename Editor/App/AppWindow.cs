@@ -64,7 +64,7 @@ internal sealed unsafe class AppWindow
         // A surface can only be created from a window that asked for Vulkan when it was made, so the flag has to
         // match the backend the editor picks.
         var flags = SDL_WindowFlags.SDL_WINDOW_HIDDEN | SDL_WindowFlags.SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WindowFlags.SDL_WINDOW_RESIZABLE;
-        if (!OperatingSystem.IsWindows())
+        if (ProgramWindows.UseVulkanBackend)
             flags |= SDL_WindowFlags.SDL_WINDOW_VULKAN;
 
         var initialSize = disableClose ? new Int2(640, 360 + 20) : new Int2(640, 480);

@@ -32,6 +32,16 @@ public sealed class SlangShaderCompiler : ShaderCompiler
 
     public T3.Graphics.Compat.Device Device { get; set; }
 
+    /// <summary>
+    /// The Slang release line the shaders are checked against; its patch releases are accepted. Upgrades are
+    /// deliberate, because a different compiler can generate different code from the same source.
+    /// </summary>
+    public const string PinnedVersion = "2026.18";
+
+    /// <summary>Where the pinned release is found without any configuration; slangc sits in its <c>bin</c> folder.</summary>
+    public static string PinnedInstallDirectory { get; } =
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local", "opt", "slang-" + PinnedVersion);
+
     /// <summary>Where slangc is, or null when it cannot be found — which is worth saying once, clearly.</summary>
     public static string? FindCompiler()
     {
@@ -42,8 +52,7 @@ public sealed class SlangShaderCompiler : ShaderCompiler
 
         var executable = OperatingSystem.IsWindows() ? "slangc.exe" : "slangc";
 
-        var pinned = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-                                  ".local", "opt", "slang-" + PinnedVersion, "bin", executable);
+        var pinned = Path.Combine(PinnedInstallDirectory, "bin", executable);
 
         if (File.Exists(pinned))
             return pinned;
@@ -56,6 +65,46 @@ public sealed class SlangShaderCompiler : ShaderCompiler
             var candidate = Path.Combine(directory, executable);
 
             if (File.Exists(candidate))
+                return candidate;
+        }
+
+        return null;
+    }
+
+    /// <summary>The version the compiler reports, e.g. "2026.18", or null when it could not be asked.</summary>
+    public static string? QueryVersion(string compiler)
+    {
+        string output;
+        try
+        {
+            using var process = Process.Start(new ProcessStartInfo(compiler, "-v")
+                                                  {
+                                                      RedirectStandardError = true,
+                                                      RedirectStandardOutput = true,
+                                                      UseShellExecute = false,
+                                                      CreateNoWindow = true,
+                                                  });
+            if (process == null)
+                return null;
+
+            output = (process.StandardOutput.ReadToEnd() + process.StandardError.ReadToEnd()).Trim();
+
+            if (!process.WaitForExit(VersionQueryTimeoutMs))
+            {
+                process.Kill(entireProcessTree: true);
+                return null;
+            }
+        }
+        catch (Exception e) when (e is System.ComponentModel.Win32Exception or InvalidOperationException)
+        {
+            return null;
+        }
+
+        // Tolerates a "v" prefix or a leading label, so a change in the output's wording isn't read as a mismatch.
+        foreach (var token in output.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries))
+        {
+            var candidate = token.TrimStart('v');
+            if (candidate.Length > 0 && char.IsDigit(candidate[0]))
                 return candidate;
         }
 
@@ -366,8 +415,8 @@ public sealed class SlangShaderCompiler : ShaderCompiler
         }
     }
 
-    private const string PinnedVersion = "2026.18";
     private const int CompileTimeoutMs = 60_000;
+    private const int VersionQueryTimeoutMs = 5000;
 
     private static readonly IReadOnlyDictionary<Type, ShaderStage> _stages = new Dictionary<Type, ShaderStage>
                                                                                 {
