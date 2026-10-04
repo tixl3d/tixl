@@ -1,5 +1,6 @@
 using NAudio.Midi;
 using T3.IoServices;
+using T3.IoServices.Midi;
 
 namespace Lib.io.midi;
 

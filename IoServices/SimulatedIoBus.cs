@@ -2,6 +2,7 @@
 
 using System;
 using NAudio.Midi;
+using T3.IoServices.Midi;
 
 namespace T3.IoServices;
 
@@ -15,7 +16,7 @@ namespace T3.IoServices;
 /// <remarks>
 /// Does <b>not</b> reach <c>CompatibleMidiDevice</c> instances (the surface controllers
 /// driving variations / snapshots) — those filter by <c>sender == _midiInputConnection</c>
-/// and always need a real <see cref="MidiIn"/>. Variation replay is out of scope for
+/// and always need a real <see cref="MidiInputDevice"/>. Variation replay is out of scope for
 /// this bus by design.
 /// <para>
 /// The producer side is the <c>SimulateIoData</c> operator; consumers subscribe in
@@ -28,7 +29,7 @@ public static class SimulatedIoBus
 {
     /// <summary>
     /// One replayed MIDI event. Identifies the source device by product name (the same
-    /// string <c>MidiInput.Device</c> matches against) rather than by <see cref="MidiIn"/>
+    /// string <c>MidiInput.Device</c> matches against) rather than by <see cref="MidiInputDevice"/>
     /// instance, so simulation works without the original hardware connected.
     /// </summary>
     /// <param name="DeviceProductName">Source device name as recorded.</param>

@@ -1,9 +1,10 @@
-﻿using NAudio;
+using NAudio;
 using NAudio.Midi;
 using T3.Editor.Gui.Interaction.Midi.CommandProcessing;
 using T3.Editor.Gui.Interaction.Variations;
 using T3.Editor.Gui.Interaction.Variations.Model;
 using T3.Editor.Gui.UiHelpers;
+using T3.IoServices.Midi;
 
 namespace T3.Editor.Gui.Interaction.Midi.CompatibleDevices;
 
@@ -391,7 +392,7 @@ public sealed class Apc40Mk2 : CompatibleMidiDevice
     /// - Channel 1-8: Solid for track columns 1-8
     /// - Channel 9-15: Behaviors (Pulse/Blink) using note to encode row+column
     /// </summary>
-    private void SendLedState(MidiOut midiOut, int controlIndex, LedState state)
+    private void SendLedState(MidiOutputDevice midiOut, int controlIndex, LedState state)
     {
         if (midiOut == null || controlIndex < 0 || controlIndex >= CacheControllerColors.Length)
             return;
@@ -454,7 +455,7 @@ public sealed class Apc40Mk2 : CompatibleMidiDevice
     /// <summary>
     /// Override required by base class - delegates to SendLedState.
     /// </summary>
-    protected override void SendColor(MidiOut midiOut, int apcControlIndex, int colorCode)
+    protected override void SendColor(MidiOutputDevice midiOut, int apcControlIndex, int colorCode)
     {
         // Decode legacy color code format
         var color = (Apc40Mk2Colors)(colorCode & 0xFF);

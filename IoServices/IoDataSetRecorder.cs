@@ -10,6 +10,7 @@ using T3.Core.DataTypes.DataSet;
 using T3.Core.IO;
 using T3.Core.Logging;
 using T3.Core.Settings;
+using T3.IoServices.Midi;
 
 namespace T3.IoServices;
 
@@ -186,7 +187,7 @@ public sealed class IoDataSetRecorder : MidiConnectionManager.IMidiConsumer, Osc
 
     void MidiConnectionManager.IMidiConsumer.MessageReceivedHandler(object sender, MidiInMessageEventArgs msg)
     {
-        if (sender is not MidiIn midiIn || msg.MidiEvent == null)
+        if (sender is not MidiInputDevice midiIn || msg.MidiEvent == null)
             return;
 
         if (msg.MidiEvent.CommandCode == MidiCommandCode.AutoSensing)

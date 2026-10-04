@@ -1,10 +1,11 @@
-﻿#nullable enable
+#nullable enable
 using System.Diagnostics.CodeAnalysis;
 using NAudio;
 using NAudio.Midi;
 using T3.Editor.Gui.Interaction.Midi.CommandProcessing;
 using T3.Editor.Gui.Interaction.Variations;
 using T3.Editor.Gui.Interaction.Variations.Model;
+using T3.IoServices.Midi;
 
 namespace T3.Editor.Gui.Interaction.Midi.CompatibleDevices;
 
@@ -109,7 +110,7 @@ public sealed class ApcMiniMk2 : CompatibleMidiDevice
 
     private int _updateCount;
 
-    protected override void SendColor(MidiOut midiOut, int apcControlIndex, int colorCode)
+    protected override void SendColor(MidiOutputDevice midiOut, int apcControlIndex, int colorCode)
     {
         if (CacheControllerColors[apcControlIndex] == colorCode)
             return;

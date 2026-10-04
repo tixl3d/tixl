@@ -16,6 +16,7 @@ using T3.Editor.Gui.Windows.Output;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Helpers;
+using T3.IoServices.Midi;
 
 namespace T3.Editor.Gui;
 

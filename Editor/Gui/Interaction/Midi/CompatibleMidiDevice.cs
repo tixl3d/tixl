@@ -1,7 +1,8 @@
-﻿using NAudio;
+using NAudio;
 using NAudio.Midi;
 using T3.IoServices;
 using T3.Editor.Gui.Interaction.Midi.CommandProcessing;
+using T3.IoServices.Midi;
 
 namespace T3.Editor.Gui.Interaction.Midi;
 
@@ -15,7 +16,7 @@ namespace T3.Editor.Gui.Interaction.Midi;
 /// </remarks>
 public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer, IDisposable
 {
-    internal void Initialize(MidiIn midiIn, MidiOut midiOut)
+    internal void Initialize(MidiInputDevice midiIn, MidiOutputDevice midiOut)
     {
         _midiInputConnection = midiIn;
         MidiOutConnection = midiOut;
@@ -255,7 +256,7 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
 
     void MidiConnectionManager.IMidiConsumer.MessageReceivedHandler(object sender, MidiInMessageEventArgs msg)
     {
-        if (sender is not MidiIn midiIn || msg.MidiEvent == null)
+        if (sender is not MidiInputDevice midiIn || msg.MidiEvent == null)
             return;
 
         if (midiIn != _midiInputConnection)
@@ -344,7 +345,7 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
         }
     }
 
-    protected virtual void SendColor(MidiOut midiOut, int apcControlIndex, int colorCode)
+    protected virtual void SendColor(MidiOutputDevice midiOut, int apcControlIndex, int colorCode)
     {
         if (CacheControllerColors[apcControlIndex] == colorCode)
             return;
@@ -382,8 +383,8 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
     private readonly Dictionary<int, ButtonSignal> _combinedButtonSignals = new();
     private readonly List<ButtonSignal> _buttonSignalsSinceLastUpdate = new();
     private readonly List<ControlChangeSignal> _controlSignalsSinceLastUpdate = new();
-    private MidiIn _midiInputConnection;
-    protected MidiOut MidiOutConnection;
+    private MidiInputDevice _midiInputConnection;
+    protected MidiOutputDevice MidiOutConnection;
 }
 
 [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]

@@ -1,6 +1,10 @@
 # MIDI Controller Abstraction
 
 **Status:** Draft — 2026-08-23. Design discussed, nothing implemented. Editor-only scope for now.
+**Sequenced after the port (decided 2026-10-04):** finish Linux/macOS and make multiplatform the new main
+first, to limit drift; this follows. It does not block the port — see [Cross-platform device
+layer](#cross-platform-device-layer-2026-10-04), which also belongs to this plan rather than being done
+separately.
 
 VJ setups currently hard-code specific MIDI devices (APC mini / APC mini MKII / APC 40) both in `MidiInput` ops
 and in the editor's snapshot controller layer. Goal: a device-independent layer — "8 faders + 1 master +
@@ -184,3 +188,25 @@ exclusive access for LED handshakes (Launchpad programmer mode) — document tha
    parameter that snapshots also write is exactly the last-writer-wins case.)
 5. Liveness threshold: `FramesSinceLastUpdate <= 1` vs. a few frames of hysteresis so a scene that is
    cross-faded out doesn't flicker between live/not-live. Decide with hardware in hand.
+
+## Cross-platform device layer (2026-10-04)
+
+The abstraction described above and the Linux/macOS backend swap touch the same code, so they are one job,
+not two. Findings from surveying it:
+
+- **The port is not blocked.** `MidiConnectionManager.ScanAndRegisterToMidiDevices` returns early off Windows
+  with a log line; nothing crashes. Multiplatform can become main with MIDI still Windows-only.
+- **Only the device layer is Windows-bound.** `NAudio.Midi` is `netstandard2.0`, so the event and file model
+  (`MidiEvent`, `NoteOnEvent`, `MidiFile`, `MidiCommandCode`, `TempoEvent`, ~120 references) already works
+  everywhere. What binds to WinMM is `MidiIn` / `MidiOut` / `MidiInCapabilities` / `MidiOutCapabilities` —
+  ~40 references in 8 files, with `MidiConnectionManager` (`TryGetMidiIn`, `TryGetMidiOut`,
+  `GetDescriptionForMidiIn`) as the hub. Keeping those types from leaking past it is the same seam this plan
+  wants anyway.
+- **Sysex out is a hard requirement**, not just note/CC in: the controller classes push LED state back with
+  `MidiOutConnection.SendBuffer(...)` (`Apc40Mk2`, `LaunchpadMiniMk3`).
+- **RtMidi.Core** (MIT) remains the right backend, as Plan_CrossPlatformV5 already assumed. It is the only
+  candidate shipping `librtmidi.so` next to `.dylib` and `.dll`, so it covers Linux *and* macOS in one swap,
+  and RtMidi supports sysex. Caveat: last release 2023-09, though the C++ RtMidi underneath is stable.
+- **DryWetMIDI** is the better-maintained library (MIT, 8.0.3 in 2026-09) but its device natives are Windows
+  and macOS only — no Linux `.so` even in 8.0.3. It would solve macOS, not Linux.
+- Writing ALSA sequencer P/Invoke directly is viable given the seam, but is Linux-only and leaves macOS open.

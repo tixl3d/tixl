@@ -1,4 +1,4 @@
-﻿using ImGuiNET;
+using ImGuiNET;
 using T3.Core.Animation;
 using T3.Core.Audio;
 using T3.Core.DataTypes.DataSet;
@@ -19,6 +19,7 @@ using T3.Editor.UiModel.InputsAndTypes;
 using Icon = T3.Editor.Gui.Styling.Icon;
 using Vector2 = System.Numerics.Vector2;
 using Vector4 = System.Numerics.Vector4;
+using T3.IoServices.Midi;
 
 // ReSharper disable CompareOfFloatsByEqualityOperator
 

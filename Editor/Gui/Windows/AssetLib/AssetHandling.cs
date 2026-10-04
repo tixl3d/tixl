@@ -2,6 +2,7 @@
 
 using T3.Core.Resource.Assets;
 using T3.Editor.Gui.Styling;
+using T3.IoServices.Midi;
 
 namespace T3.Editor.Gui.Windows.AssetLib;
 

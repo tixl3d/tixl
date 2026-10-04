@@ -5,14 +5,14 @@ using T3.Core.Animation;
 using T3.Core.DataTypes.DataSet;
 using T3.Core.Model;
 
-namespace T3.IoServices;
+namespace T3.IoServices.Midi;
 
 /// <summary>
 /// This is a stub for an implementation of midi signal recording
 /// - These recordings are intended for later playback so that MidiConsumers would receive the
 ///   signals and replay them like live signals. For this to work...
 ///   - MidiInput and MidiStream recorder would need to share the same MidiEvent definition (maybe different from NAudio.MidiEvent)
-///   - Handle MidiEvent should not rely on the MidiIn class to avoid double lookup of device description.
+///   - Handle MidiEvent should not rely on the MidiInputDevice class to avoid double lookup of device description.
 /// </summary>
 public class MidiDataRecording : MidiConnectionManager.IMidiConsumer
 {
@@ -35,13 +35,13 @@ public class MidiDataRecording : MidiConnectionManager.IMidiConsumer
 
     void MidiConnectionManager.IMidiConsumer.MessageReceivedHandler(object sender, MidiInMessageEventArgs msg)
     {
-        if (sender is not MidiIn midiIn || msg.MidiEvent == null || TypeNameRegistry.Entries.Values.Count == 0)
+        if (sender is not MidiInputDevice midiIn || msg.MidiEvent == null || TypeNameRegistry.Entries.Values.Count == 0)
             return;
 
         if (msg.MidiEvent.CommandCode == MidiCommandCode.AutoSensing)
             return;
 
-        // MidiIn callbacks fire on per-device threads; serialize writes.
+        // MidiInputDevice callbacks fire on per-device threads; serialize writes.
         // IMPROVE: UI-thread readers/writers of _dataSet.Channels don't yet share this lock.
         lock (_writeLock)
         {

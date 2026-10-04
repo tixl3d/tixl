@@ -19,6 +19,7 @@ using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.Helpers;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.IoServices;
+using T3.IoServices.Midi;
 
 namespace T3.Editor.Gui.Windows.TimeLine.TimeClips;
 

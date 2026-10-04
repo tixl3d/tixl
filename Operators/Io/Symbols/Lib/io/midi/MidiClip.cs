@@ -4,6 +4,7 @@ using T3.Core.Animation;
 using T3.Core.DataTypes.DataSet;
 using T3.IoServices;
 using T3CoreDataClip = T3.Core.DataTypes.DataSet.DataClip;
+using T3.IoServices.Midi;
 
 namespace Lib.io.midi;
 
