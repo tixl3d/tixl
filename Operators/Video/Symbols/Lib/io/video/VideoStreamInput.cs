@@ -173,7 +173,7 @@ namespace Lib.io.video
                         if (_sharedRgba == null || _sharedRgba.Length < byteCount)
                             _sharedRgba = new byte[byteCount];
 
-                        rgba.FillImageBuffer(_sharedRgba, 1);
+                        converter.CopyPixels(rgba, _sharedRgba);
                         _sharedWidth = rgba.Width;
                         _sharedHeight = rgba.Height;
                         _hasFrame = true;

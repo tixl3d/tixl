@@ -42,6 +42,41 @@ public sealed class SoftwareFrameConverter : IDisposable
         return _destination;
     }
 
+    /// <summary>
+    /// Copies the converted frame's packed pixels into <paramref name="destination"/>, which must hold at
+    /// least <c>Width * Height * BytesPerPixel</c> bytes.
+    /// </summary>
+    /// <remarks>
+    /// Sdcb's <c>Frame.FillImageBuffer</c> would do the same thing but is unusable outside Windows: its
+    /// binding declares FFmpeg's <c>uint8_t *data[4]</c> and <c>int linesize[4]</c> parameters as by-value
+    /// structs where the C signature decays them to pointers, so the two sides disagree about argument
+    /// layout. The Windows x64 convention happens to hide that; on Linux libavutil receives a garbage
+    /// picture height - a different one on every run - and rejects the call. For a packed single-plane
+    /// format the copy below is what that helper does anyway, and it saves an interop hop on Windows too.
+    /// </remarks>
+    public unsafe void CopyPixels(Frame rgba, Span<byte> destination)
+    {
+        var rowBytes = rgba.Width * BytesPerPixel;
+        var stride = rgba.Linesize[0];
+        var source = (byte*)rgba.Data[0];
+
+        fixed (byte* target = destination)
+        {
+            // swscale usually leaves no padding at this width, and then the plane is one contiguous block.
+            if (stride == rowBytes)
+            {
+                var total = (long)rowBytes * rgba.Height;
+                Buffer.MemoryCopy(source, target, total, total);
+                return;
+            }
+
+            for (var y = 0; y < rgba.Height; y++)
+            {
+                Buffer.MemoryCopy(source + (long)y * stride, target + (long)y * rowBytes, rowBytes, rowBytes);
+            }
+        }
+    }
+
     public void Dispose()
     {
         _destination?.Dispose();

@@ -525,7 +525,7 @@ public sealed class VideoPlaybackController : IDisposable
             if (_pendingBuffer == null || _pendingBuffer.Length < byteCount)
                 _pendingBuffer = new byte[byteCount];
 
-            rgba.FillImageBuffer(_pendingBuffer, 1);
+            _converter.CopyPixels(rgba, _pendingBuffer);
             _pendingWidth = rgba.Width;
             _pendingHeight = rgba.Height;
             _pendingIsHdr = _session!.IsHdr;

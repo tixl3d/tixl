@@ -122,9 +122,10 @@ public static class FfmpegLibrary
                                  };
     }
 
-    // The FFmpeg DLLs live next to this assembly, which is not on the OS DLL search path inside the editor's
-    // custom operator load context. So a library's inter-dependencies (avcodec → avutil/swresample) won't
-    // resolve by name. Pre-load each by full path, avutil first, so dependencies are already in the process.
+    // The FFmpeg libraries live next to this assembly, which is not on the OS library search path inside the
+    // editor's custom operator load context. So a library's inter-dependencies (avcodec → avutil/swresample)
+    // won't resolve by name. Pre-load each by full path, avutil first, so dependencies are already in the
+    // process by the time something needs them - the loader then matches them by name and loads nothing twice.
     private static void PreloadNativeLibraries()
     {
         var directory = Path.GetDirectoryName(typeof(FfmpegLibrary).Assembly.Location);
@@ -137,7 +138,7 @@ public static class FfmpegLibrary
                : fileName.Contains("swscale") ? 2
                : 3;
 
-        var libraries = Directory.GetFiles(directory, "*.dll")
+        var libraries = Directory.GetFiles(directory)
                                  .Where(IsFfmpegLibrary)
                                  .OrderBy(path => LoadOrder(Path.GetFileName(path)));
 
@@ -145,10 +146,26 @@ public static class FfmpegLibrary
             NativeLibrary.TryLoad(path, out _);
     }
 
+    /// <summary>
+    /// Matches the libav* family under either naming scheme: "avcodec-61.dll" on Windows, "libavcodec.so.61"
+    /// elsewhere - the version suffix rules out matching by extension.
+    /// </summary>
     private static bool IsFfmpegLibrary(string path)
     {
         var name = Path.GetFileName(path);
-        return name.StartsWith("av") || name.StartsWith("sw") || name.StartsWith("postproc");
+        if (name.StartsWith("lib", StringComparison.Ordinal))
+            name = name[3..];
+
+        if (!name.StartsWith("av", StringComparison.Ordinal)
+            && !name.StartsWith("sw", StringComparison.Ordinal)
+            && !name.StartsWith("postproc", StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        return name.EndsWith(".dll", StringComparison.OrdinalIgnoreCase)
+               || name.Contains(".so", StringComparison.Ordinal)
+               || name.EndsWith(".dylib", StringComparison.Ordinal);
     }
 
     private static readonly object _initLock = new();

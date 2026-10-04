@@ -352,6 +352,10 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
                fileName.EndsWith(".exe") ||
                fileName.EndsWith(".pdb") ||
                fileName.EndsWith(".so") ||
+               fileName.EndsWith(".dylib") ||
+               // A versioned soname ("libavcodec.so.61") has no usable extension, and leaving it behind
+               // would strand the native half of a package whose managed half was copied.
+               fileName.Contains(".so.") ||
                fileName.EndsWith(".xml") ||
                fileName.EndsWith(".json");
     }

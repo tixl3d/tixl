@@ -110,9 +110,13 @@
     <!-- FFmpeg natives for this package's video operators. Sdcb.FFmpeg = LGPL managed bindings; the native
          shared DLLs come from FFmpeg.LGPL (BtbN lgpl-shared, avcodec-61 = FFmpeg 7.x, no gpl/nonfree flags),
          NOT Sdcb.FFmpeg.runtime.windows-x64 (GPL, rejected by FfmpegLibrary's guardrail). Pinned to 20250329
-         (newest avcodec-61); 20250330 bumped to avcodec-62, which the Sdcb 7.0.0 bindings don't match. -->
+         (newest avcodec-61); 20250330 bumped to avcodec-62, which the Sdcb 7.0.0 bindings don't match.
+         Linux gets the same FFmpeg 7.1 from TqkLibrary's build of the same ffbuild recipe, since FFmpeg.LGPL
+         ships win-x64 only and the distro's own FFmpeg is long past avcodec-61. Each natives package is
+         restored only on the platform that can use it; the managed bindings are needed on both. -->
     <PackageReference Include="Sdcb.FFmpeg" Version="7.0.0" />
-    <PackageReference Include="FFmpeg.LGPL" Version="20250329.1.0" />
+    <PackageReference Include="FFmpeg.LGPL" Version="20250329.1.0" Condition="$([MSBuild]::IsOSPlatform('Windows'))" />
+    <PackageReference Include="TqkLibrary.FFmpeg.Lgpl3.Native.Linux.x64" Version="7.1.5.1" Condition="$([MSBuild]::IsOSPlatform('Linux'))" />
   </ItemGroup>
   <ItemGroup Label="OperatorPackages">
     <Operators Include="lib" Version="1.0.0" ResourcesOnly="False" />
@@ -135,7 +139,7 @@
   </Target>
   <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild" Condition="'$(Configuration)' == 'Release'">
     <ItemGroup>
-      <_StaleBuildOutput Include="$(BaseOutputPath)$(Configuration)/**/*" Exclude="$(BaseOutputPath)$(Configuration)/**/av*.dll;$(BaseOutputPath)$(Configuration)/**/sw*.dll;$(BaseOutputPath)$(Configuration)/**/postproc*.dll" />
+      <_StaleBuildOutput Include="$(BaseOutputPath)$(Configuration)/**/*" Exclude="$(BaseOutputPath)$(Configuration)/**/av*.dll;$(BaseOutputPath)$(Configuration)/**/sw*.dll;$(BaseOutputPath)$(Configuration)/**/postproc*.dll;$(BaseOutputPath)$(Configuration)/**/libav*.so*;$(BaseOutputPath)$(Configuration)/**/libsw*.so*;$(BaseOutputPath)$(Configuration)/**/libpostproc*.so*" />
     </ItemGroup>
     <Delete Files="@(_StaleBuildOutput)" ContinueOnError="true" />
   </Target>
@@ -165,12 +169,14 @@
     </PropertyGroup>
     <WriteLinesToFile File="$(OutputPath)/OperatorPackage.json" Lines="$(OperatorPackageInfoJson)" Overwrite="True" Encoding="UTF-8" />
   </Target>
-  <!-- TiXL's operator loader resolves native DLLs flat next to the operator assembly. FFmpeg.LGPL's .targets
-       already copies the av/sw DLLs flat; this backstop also flattens any left under runtimes/win-x64/native/. -->
+  <!-- TiXL's operator loader resolves native libraries flat next to the operator assembly. FFmpeg.LGPL's
+       .targets already copies the av/sw DLLs flat; this backstop also flattens any left under
+       runtimes/<rid>/native/, which is where the Linux package puts its shared objects. -->
   <Target Name="FlattenFFmpegNatives" AfterTargets="AfterBuild">
     <ItemGroup>
-      <_FFmpegNativeDlls Include="$(OutputPath)/runtimes/win-x64/native/av*.dll;$(OutputPath)/runtimes/win-x64/native/sw*.dll;$(OutputPath)/runtimes/win-x64/native/postproc*.dll" />
+      <_FFmpegNativeLibs Include="$(OutputPath)/runtimes/win-x64/native/av*.dll;$(OutputPath)/runtimes/win-x64/native/sw*.dll;$(OutputPath)/runtimes/win-x64/native/postproc*.dll" />
+      <_FFmpegNativeLibs Include="$(OutputPath)/runtimes/linux-x64/native/libav*.so*;$(OutputPath)/runtimes/linux-x64/native/libsw*.so*;$(OutputPath)/runtimes/linux-x64/native/libpostproc*.so*" />
     </ItemGroup>
-    <Copy SourceFiles="@(_FFmpegNativeDlls)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_FFmpegNativeLibs)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" />
   </Target>
 </Project>
