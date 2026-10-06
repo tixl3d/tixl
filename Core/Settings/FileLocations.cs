@@ -27,7 +27,11 @@ public static class FileLocations
     public const string TypesPackageName = "Types";
     public const string SkillsPackageName = "Skills";
     
-    public static string TempFolder => Path.Combine(SettingsDirectory, "Tmp");
+    /// <summary>
+    /// Scratch for the current session: staging files, working directories, diagnostics. Lands in the
+    /// system temp directory, so it may be cleared on reboot - nothing here is allowed to matter by then.
+    /// </summary>
+    public static string TempFolder => Path.Combine(Path.GetTempPath(), VersionedAppFolderName);
 
 #if RELEASE
     public static string TestReferencesFolder => Path.Combine(SettingsDirectory, TestsSubFolder);
@@ -142,6 +146,42 @@ public static string TestReferencesFolder => Path.Combine(".tixl", TestsSubFolde
 
                      //, Process.GetCurrentProcess().ProcessName
                      );
+
+    /// <summary>
+    /// Expensive to rebuild, safe to delete, and must survive a reboot: compiled shaders, shadow-copied
+    /// assemblies, thumbnails.
+    /// </summary>
+    /// <remarks>
+    /// Separate from <see cref="SettingsDirectory"/> because this is not configuration and users are right
+    /// to object to it sitting in a config folder, and separate from <see cref="TempFolder"/> because losing
+    /// it on every reboot would mean recompiling every shader.
+    /// </remarks>
+    public static readonly string CacheDirectory = ResolveCacheDirectory();
+
+    private static string ResolveCacheDirectory()
+    {
+        if (OperatingSystem.IsWindows())
+        {
+            // Local rather than roaming: a shader cache has no business following a user between machines.
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                                VersionedAppFolderName);
+        }
+
+        var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+
+        if (OperatingSystem.IsMacOS())
+        {
+            return Path.Combine(home, "Library", "Caches", VersionedAppFolderName);
+        }
+
+        // The XDG base directory spec: $XDG_CACHE_HOME, or ~/.cache when it is unset or not absolute.
+        var configured = Environment.GetEnvironmentVariable("XDG_CACHE_HOME");
+        var cacheRoot = !string.IsNullOrWhiteSpace(configured) && Path.IsPathRooted(configured)
+                            ? configured
+                            : Path.Combine(home, ".cache");
+
+        return Path.Combine(cacheRoot, VersionedAppFolderName);
+    }
 
     public static readonly string DefaultProjectFolder =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),

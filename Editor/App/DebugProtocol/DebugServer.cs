@@ -13,6 +13,7 @@ using ImGuiNET;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using T3.Core.Animation;
+using T3.Core.Settings;
 using T3.Core.Stats;
 using T3.Editor.Gui.Windows.Analyze;
 using T3.Core.Logging;
@@ -230,6 +231,19 @@ internal static class DebugServer
                                    {
                                        ["protocolVersion"] = ProtocolVersion,
                                        ["editorVersion"] = Assembly.GetExecutingAssembly().GetName().Version?.ToString(),
+                                   });
+                break;
+
+            // The settings folder is version-suffixed, so an older release's folder usually sits beside it.
+            // Guessing from the file system picks the wrong one; ask the editor which it opened.
+            case "getPaths":
+                context.SendOk(new JObject
+                                   {
+                                       ["settings"] = FileLocations.SettingsDirectory,
+                                       ["log"] = FileWriter.Instance?.LogDirectory,
+                                       ["temp"] = FileLocations.TempFolder,
+                                       ["cache"] = FileLocations.CacheDirectory,
+                                       ["projects"] = FileLocations.DefaultProjectFolder,
                                    });
                 break;
 

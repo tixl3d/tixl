@@ -36,7 +36,7 @@ JSON lines over TCP on `127.0.0.1:<port>`. One request per line, one response pe
 
 ## Methods
 
-Read surface: `ping`, `getVersion`, `getStructureVersion`, `getMetrics`, `getContext`,
+Read surface: `ping`, `getVersion`, `getPaths`, `getStructureVersion`, `getMetrics`, `getContext`,
 `getLogTail` (`minLevel`, `maxCount`), `getGraphState`, `getOutput`, `screenshot` (`path`,
 optional `target`: `output` = the output window's texture, the default; `ui` = the **whole editor
 window as rendered** — windows, panels, canvases — copied from the back buffer on the next frame).

@@ -253,7 +253,7 @@ internal static class VideoClipThumbnailCache
     }
 
     private static string GetPngPath(Guid thumbGuid)
-        => Path.Combine(FileLocations.TempFolder, ThumbnailManager.ThumbnailsSubFolder, "VideoClips", $"{thumbGuid}.png");
+        => Path.Combine(FileLocations.CacheDirectory, ThumbnailManager.ThumbnailsSubFolder, "VideoClips", $"{thumbGuid}.png");
     #endregion
 
     #region Path resolution and keying
