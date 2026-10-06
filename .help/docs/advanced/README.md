@@ -12,6 +12,7 @@ Beyond the basics: writing custom operators in C#, writing shaders, and controll
 - [Converting raymarching functions](ConvertSDFs.md)
 - [Adding new fonts](AddingFonts.md)
 - [Creating and using single-line SVG fonts](SvgLineFonts.md)
+- [Upgrading projects to the Vulkan renderer](UpgradingToVulkan.md)
 
 ## Still to write
 

@@ -1,10 +1,12 @@
 ﻿#nullable enable
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Text.Json;
 using ImGuiNET;
 using Sentry;
 using T3.Core.Animation;
+using T3.Core.Diagnostics;
 using T3.Core.SystemUi;
 using T3.Core.Utils;
 using T3.Editor.Compilation;
@@ -49,6 +51,11 @@ internal static class CrashReporting
 
     private static SentryEvent? CrashHandler(SentryEvent sentryEvent, SentryHint hint)
     {
+        // A report from an earlier session is a crash that already happened - it must not re-enter the
+        // crash flow and prompt again.
+        if (sentryEvent.Tags.ContainsKey(PendingCrashReports.DeferredTag))
+            return sentryEvent;
+
         // Aggregate exception normally don't cause crashes
         if (sentryEvent.Exception is AggregateException)
             return null;
@@ -56,6 +63,7 @@ internal static class CrashReporting
         var components = ProjectView.Focused;
 
         sentryEvent.SetTag("Nickname", UserSettings.Config.UserName);
+        AttachEnvironment(sentryEvent);
         sentryEvent.Contexts["tooll3"] = new
                                              {
                                                  UndoStack = UndoRedoStack.GetUndoStackAsString(),
@@ -84,7 +92,7 @@ internal static class CrashReporting
             sentryEvent.SetExtra("CurrentOpExportFailed", e.Message);
         }
 
-        WriteCrashReportFile(sentryEvent);
+        var reportPath = WriteCrashReportFile(sentryEvent);
 
         // We only show crash report dialog in release mode 
         
@@ -96,6 +104,13 @@ internal static class CrashReporting
         
         if (inReleaseMode)
         {
+            // Left before the prompt, not after: the point of the marker is to survive a crash that never
+            // gets as far as answering it.
+            if (reportPath != null)
+            {
+                PendingCrashReports.Remember(sentryEvent, reportPath);
+            }
+
             var lastBackupTime = AutoBackup.GetTimeOfLastBackup().GetReadableRelativeTime();
 
             var message = $"""
@@ -138,6 +153,12 @@ internal static class CrashReporting
 
             var sendingEnabled = result == confirmation;
 
+            // The user has now answered, so the next launch must not ask about this one again.
+            if (reportPath != null)
+            {
+                PendingCrashReports.Forget(reportPath);
+            }
+
             if (!string.IsNullOrWhiteSpace(LogPath))
             {
                 CoreUi.Instance.OpenWithDefaultApplication(LogPath);
@@ -150,6 +171,28 @@ internal static class CrashReporting
             WriteReportToLog(sentryEvent, false);
             CoreUi.Instance.SetUnhandledExceptionMode(true);
             return null;
+        }
+    }
+
+    /// <summary>
+    /// Adds the machine description. Collected here rather than at init because the graphics device and the
+    /// native runtimes register themselves while the editor starts.
+    /// </summary>
+    private static void AttachEnvironment(SentryEvent sentryEvent)
+    {
+        try
+        {
+            var environment = new Dictionary<string, string>();
+            foreach (var (key, value) in EnvironmentReport.Collect())
+            {
+                environment[key] = value;
+            }
+
+            sentryEvent.Contexts["machine"] = environment;
+        }
+        catch (Exception e)
+        {
+            sentryEvent.SetExtra("EnvironmentReportFailed", e.Message);
         }
     }
 
@@ -176,10 +219,10 @@ internal static class CrashReporting
     }
 
     /** Additional to logging the crash we also write a copy to a dedicated crash file. */
-    private static void WriteCrashReportFile(SentryEvent? sentryEvent)
+    private static string? WriteCrashReportFile(SentryEvent? sentryEvent)
     {
         if (sentryEvent?.Exception == null || FileWriter.Instance == null)
-            return;
+            return null;
 
         var exceptionTitle = sentryEvent.Exception.GetType().Name;
 
@@ -192,10 +235,12 @@ internal static class CrashReporting
         try
         {
             WriteCrashReportTo(sentryEvent, filepath);
+            return filepath;
         }
         catch (Exception e)
         {
             Log.Warning($"Failed to write crash report file: {e.Message}");
+            return null;
         }
     }
 

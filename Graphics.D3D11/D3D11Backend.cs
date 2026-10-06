@@ -32,6 +32,7 @@ public sealed class D3D11Backend : IGraphicsBackend, IDisposable
     public D3D11Device Device { get; }
 
     public string AdapterName { get; }
+    public string BackendDescription => $"Direct3D 11 on {AdapterName}";
 
     public IntPtr NativeDeviceHandle => Device.NativePointer;
 

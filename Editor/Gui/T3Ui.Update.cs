@@ -121,6 +121,7 @@ public static partial class T3Ui
         RestoreBackupDialog.Draw();
         _couldNotLoadProjectDialog.Draw();
         _missingOperatorsDialog.Draw();
+        _sendCrashReportsDialog.Draw();
         CreateFromTemplateDialog.Draw();
         _userNameDialog.Draw();
         Windows.AssetLib.FolderImportDialog.Instance.Draw();
@@ -152,6 +153,11 @@ public static partial class T3Ui
             {
                 _missingOperatorsChecked = true;
                 _missingOperatorsDialog.ShowIfOperatorsAreMissing();
+            }
+            else if (!_crashReportsChecked && !IsAnyPopupOpen)
+            {
+                _crashReportsChecked = true;
+                _sendCrashReportsDialog.ShowIfReportsArePending();
             }
         }
 
@@ -203,6 +209,7 @@ public static partial class T3Ui
     private static bool _versionWelcomeChecked;
     private static bool _blockedProjectsChecked;
     private static bool _missingOperatorsChecked;
+    private static bool _crashReportsChecked;
 
     private static void UpdateModifiedProjects()
     {

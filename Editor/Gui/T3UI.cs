@@ -130,6 +130,7 @@ public static partial class T3Ui
     internal static readonly RestoreBackupDialog RestoreBackupDialog = new();
     private static readonly CouldNotLoadProjectDialog _couldNotLoadProjectDialog = new();
     private static readonly MissingOperatorsDialog _missingOperatorsDialog = new();
+    private static readonly SendCrashReportsDialog _sendCrashReportsDialog = new();
     internal static readonly ExitDialog ExitDialog = new();
     private static readonly List<EditableSymbolProject> _modifiedProjects = new();
 

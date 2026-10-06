@@ -14,6 +14,7 @@ public sealed class Device(IGraphicsBackend backend)
     public DeviceContext ImmediateContext { get; } = new(backend);
 
     public string AdapterName => Backend.AdapterName;
+    public string BackendDescription => Backend.BackendDescription;
 
     /// <summary>
     /// Fixed at 11.1: everything the facade exposes is a D3D11.1 feature, and the Vulkan backend requires

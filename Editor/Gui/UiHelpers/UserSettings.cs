@@ -98,6 +98,9 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         /// <summary>When true, the Welcome window opens automatically at startup. Toggled from that window.</summary>
         public bool ShowWelcomeOnStartup = true;
 
+        /// <summary>Whether the next launch offers crashes that were never reported.</summary>
+        public bool AskToSendCrashReports = true;
+
         // UI-State
         public float UiScaleFactor = 1;
         public bool FullScreen = false;

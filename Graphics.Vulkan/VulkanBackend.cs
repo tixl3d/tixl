@@ -106,6 +106,8 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
 
         InstanceApi.vkGetPhysicalDeviceProperties(PhysicalDevice, out var properties);
         AdapterName = new VkUtf8String(properties.deviceName).ToString();
+        BackendDescription = $"Vulkan {properties.apiVersion.Major}.{properties.apiVersion.Minor}."
+                             + $"{properties.apiVersion.Patch} on {AdapterName}";
         _limits = properties.limits;
 
         var priority = 1f;
@@ -207,6 +209,7 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
     internal readonly VkPhysicalDevice PhysicalDevice;
 
     public string AdapterName { get; }
+    public string BackendDescription { get; }
 
     /// <summary>Zero: a VkDevice is not what the libraries asking for this expect.</summary>
     public IntPtr NativeDeviceHandle => IntPtr.Zero;

@@ -31,6 +31,7 @@ using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.ProjectHandling;
+using T3.Core.Settings;
 
 namespace T3.Editor.App.DebugProtocol;
 
@@ -228,6 +229,18 @@ internal static class DebugServer
                                    {
                                        ["protocolVersion"] = ProtocolVersion,
                                        ["editorVersion"] = Assembly.GetExecutingAssembly().GetName().Version?.ToString(),
+                                   });
+                break;
+
+            // The settings folder is version-suffixed, so an older release's folder usually sits beside it.
+            // Guessing from the file system picks the wrong one; ask the editor which it opened.
+            case "getPaths":
+                context.SendOk(new JObject
+                                   {
+                                       ["settings"] = FileLocations.SettingsDirectory,
+                                       ["log"] = FileWriter.Instance?.LogDirectory,
+                                       ["temp"] = FileLocations.TempFolder,
+                                       ["projects"] = FileLocations.DefaultProjectFolder,
                                    });
                 break;
 

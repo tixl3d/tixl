@@ -1,4 +1,6 @@
 using System.Runtime.CompilerServices;
+using System.Text;
+using T3.Core.Diagnostics;
 using System.Runtime.InteropServices;
 using SDL;
 using T3.Graphics.Compat;
@@ -112,7 +114,9 @@ internal static unsafe class ProgramWindows
         {
             _backend = CreateBackend();
             ActiveGpu = _backend.AdapterName;
-            Log.Info($"Rendering with {_backend.GetType().Name} on {ActiveGpu}");
+            EnvironmentReport.GraphicsDescription = _backend.BackendDescription;
+            Log.Info($"Rendering with {_backend.BackendDescription}");
+            LogEnvironment();
 
             device = new Device(_backend);
             _device = device;
@@ -541,4 +545,20 @@ internal static unsafe class ProgramWindows
     public static ShaderResourceView UiCopyTextureSrv { get; private set; }
 
     internal static Texture2DDescription UiCopyTextureDescription { get; private set; }
+
+    /// <summary>
+    /// Records what this machine is, once, so a pasted log answers the questions a Linux bug report always
+    /// raises - which distribution, which session, which driver - without asking the reporter.
+    /// </summary>
+    private static void LogEnvironment()
+    {
+        var builder = new StringBuilder("Environment:");
+        foreach (var (key, value) in EnvironmentReport.Collect())
+        {
+            builder.Append("\n  ").Append(key).Append(": ").Append(value);
+        }
+
+        Log.Debug(builder.ToString());
+    }
+
 }

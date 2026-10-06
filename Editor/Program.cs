@@ -152,6 +152,13 @@ internal static class Program
             
         Log.Info($"Starting {FormattedEditorVersion}");
 
+        // Named on every start, not just when overridden: the folder carries the version
+        // (TiXL4.4-alpha), so it moves with every release and neither a tester reading their own log nor
+        // anyone reading a pasted one can safely guess which of several it is.
+        Log.Info($"Settings folder: {FileLocations.SettingsDirectory}");
+
+        PendingCrashReports.LogPending();
+
         if (!DependencyCheck.Run())
             EditorUi.Instance.ExitApplication();
 
@@ -159,7 +166,7 @@ internal static class Program
             App.DebugProtocol.DebugServer.Start(debugServerPort);
 
         if (FileLocations.VersionIdOverride != null)
-            Log.Info($"Settings folder overridden via '{FileLocations.VersionIdOverrideEnvVar}': {FileLocations.SettingsDirectory}");
+            Log.Info($"Settings folder overridden via '{FileLocations.VersionIdOverrideEnvVar}'.");
 
         CrashReporting.LogPath = logPath;
         //if (IsStandAlone)

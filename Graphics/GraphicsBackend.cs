@@ -11,6 +11,12 @@ public interface IGraphicsBackend : IDisposable
     string AdapterName { get; }
 
     /// <summary>
+    /// Backend, API version and adapter in one line, for the About dialog and crash reports. Defaults to the
+    /// adapter alone where the backend has nothing more specific to say.
+    /// </summary>
+    string BackendDescription => AdapterName;
+
+    /// <summary>
     /// How many resources the backend is holding. A count that climbs while the graph does the same work every
     /// frame is a leak, which is otherwise only visible once the process exits. Zero where a backend does not
     /// track them.
