@@ -135,6 +135,23 @@ Independent of the rest of the plan. Lands in its own commit.
 **Tasks:**
 1. CLI flag `--safe` in `Program.Main`. Bypasses project-restore and forces full verification.
 2. New Start Menu shortcut added by InnoSetup — `TiXL (Safe Mode).lnk` pointing at the same exe with `--safe`.
+2b. On Linux the equivalent is a **Desktop Action** in the existing `app.tixl.TiXL.desktop`, rather than a
+   second entry: one icon with "Safe start" in its right-click menu, invoking the same binary with `--safe`.
+
+   ```ini
+   Actions=SafeStart;
+
+   [Desktop Action SafeStart]
+   Name=Safe start
+   Exec=tixl --safe
+   ```
+
+   This is also the answer to capturing a startup that fails before logging exists. A launcher script that
+   wraps the binary to tee its console output was tried and rejected: it nests a shell inside every normal
+   run, puts two near-identical names (`tixl`, `TiXL`) in one folder — which collide outright on a
+   case-insensitive filesystem — and it buys little, because a missing native library already surfaces as a
+   logged `DllNotFoundException`, and a hard crash leaves a `coredumpctl` entry either way. An opt-in entry
+   point costs the normal path nothing.
 3. Result UI: a Safe-Mode banner stays visible until the user closes it; explains what's been checked, what wasn't, and offers the "Open Project…" and "Restore From Backup…" buttons explicitly.
 4. Hook into [Plan_BrokenPackageRecovery](Plan_BrokenPackageRecovery.md) Phase 2 — the backup browser is offered directly from Safe Mode's UI.
 

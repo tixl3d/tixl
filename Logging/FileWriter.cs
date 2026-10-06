@@ -13,6 +13,8 @@ public sealed class FileWriter : ILogWriter
         _logPath = Path.Combine(LogDirectory, filename);
 
         Directory.CreateDirectory(LogDirectory);
+        PruneOldLogs(LogDirectory);
+
         try
         {
             _streamWriter = new StreamWriter(_logPath);
@@ -66,6 +68,35 @@ public sealed class FileWriter : ILogWriter
         }
     }
 
+    /// <summary>
+    /// Keeps the most recent log files and deletes the rest.
+    /// </summary>
+    /// <remarks>
+    /// One file is written per launch and nothing used to remove them, so the folder grew without limit -
+    /// which matters because the crash reports live in it too, and they are what someone is looking for.
+    /// Only this writer's own "*.log" files are considered; crash reports and anything else stay.
+    /// </remarks>
+    private static void PruneOldLogs(string directory)
+    {
+        try
+        {
+            var logFiles = new DirectoryInfo(directory).GetFiles("*.log");
+            if (logFiles.Length <= MaxKeptLogFiles)
+                return;
+
+            Array.Sort(logFiles, (a, b) => b.LastWriteTimeUtc.CompareTo(a.LastWriteTimeUtc));
+
+            for (var index = MaxKeptLogFiles; index < logFiles.Length; index++)
+            {
+                logFiles[index].Delete();
+            }
+        }
+        catch (Exception)
+        {
+            // A log folder we cannot tidy is not a reason to start without logging.
+        }
+    }
+
     public static ILogWriter CreateDefault(string settingsFolder, out string path)
     {
         if (Instance != null)
@@ -89,4 +120,7 @@ public sealed class FileWriter : ILogWriter
     public readonly string LogDirectory;
     public static FileWriter? Instance { get; private set; }
     private const string LogSubDirectory = "Log";
+
+    /** Enough to cover a week of ordinary use, without burying the crash reports in the same folder. */
+    private const int MaxKeptLogFiles = 20;
 }

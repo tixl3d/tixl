@@ -1,5 +1,6 @@
 #nullable enable
 using System.ComponentModel;
+using System.Linq;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -25,10 +26,22 @@ internal static class DependencyCheck
         Nix,
     }
 
-    private readonly record struct MissingDependency(string Description, string InstallHint, bool PreventsStart);
+    /// <param name="Install">
+    /// Installs the dependency without a package manager, where that is possible at all. Returns null on
+    /// success, otherwise why it failed.
+    /// </param>
+    private readonly record struct MissingDependency(string Description, string InstallHint, bool PreventsStart,
+                                                     Func<string?>? Install = null);
 
     /// <summary>Returns false if TiXL should quit: the user chose to, or a missing dependency prevents starting.</summary>
     public static bool Run()
+    {
+        // One retry: after installing, what was missing should now be found, and anything still missing is
+        // reported the ordinary way rather than offered again.
+        return Run(offerToInstall: true);
+    }
+
+    private static bool Run(bool offerToInstall)
     {
         var missing = new List<MissingDependency>();
         CheckDotNetSdk(missing);
@@ -59,8 +72,41 @@ internal static class DependencyCheck
         }
 
         message.Append("TiXL can start, but the features that need it may not work correctly.");
-        var choice = BlockingWindow.Instance.ShowMessageBox(message.ToString(), "Missing Dependencies", "Continue", "Quit");
+
+        const string installChoice = "Download and install";
+        var canInstallSomething = offerToInstall && missing.Any(d => d.Install != null);
+        var buttons = canInstallSomething
+                          ? new[] { installChoice, "Continue", "Quit" }
+                          : new[] { "Continue", "Quit" };
+
+        var choice = BlockingWindow.Instance.ShowMessageBox(message.ToString(), "Missing Dependencies", buttons);
+
+        if (choice == installChoice)
+        {
+            InstallWhatWeCan(missing);
+            return Run(offerToInstall: false);
+        }
+
         return choice != "Quit";
+    }
+
+    private static void InstallWhatWeCan(List<MissingDependency> missing)
+    {
+        var failures = new StringBuilder();
+        foreach (var dependency in missing)
+        {
+            var failure = dependency.Install?.Invoke();
+            if (failure == null)
+                continue;
+
+            Log.Warning($"Could not install: {dependency.Description} {failure}");
+            failures.Append(dependency.Description).Append('\n').Append(failure).Append("\n\n");
+        }
+
+        if (failures.Length > 0)
+        {
+            BlockingWindow.Instance.ShowMessageBox(failures.ToString(), "Installation failed");
+        }
     }
 
     /** User projects and package updates are compiled with the dotnet CLI, the same way <c>Compiler</c> calls it. */
@@ -127,12 +173,15 @@ internal static class DependencyCheck
         if (compiler == null)
         {
             missing.Add(new MissingDependency($"The Slang shader compiler (slangc {pinned}) was not found.",
-                                              InstallHint(arch: $"Install shader-slang-bin from the AUR, if it is at version {pinned}. Otherwise: {SlangReleaseHint}",
-                                                          debian: SlangReleaseHint,
-                                                          fedora: SlangReleaseHint,
-                                                          nix: "shader-slang",
-                                                          other: SlangReleaseHint),
-                                              PreventsStart: false));
+                                              SlangInstaller.CanInstall
+                                                  ? $"TiXL can download it into {SlangInstaller.TargetDirectory}."
+                                                  : InstallHint(arch: $"Install shader-slang-bin from the AUR, if it is at version {pinned}. Otherwise: {SlangReleaseHint}",
+                                                                debian: SlangReleaseHint,
+                                                                fedora: SlangReleaseHint,
+                                                                nix: "shader-slang",
+                                                                other: SlangReleaseHint),
+                                              PreventsStart: false,
+                                              Install: SlangInstaller.CanInstall ? SlangInstaller.TryInstall : null));
             return;
         }
 

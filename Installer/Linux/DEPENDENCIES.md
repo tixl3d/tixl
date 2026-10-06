@@ -7,10 +7,20 @@ runtime (`dlopen`), which `ldd` can't see.
 Package names: Arch, AUR and nixpkgs names were checked against the live repositories (2026-10).
 Debian/Ubuntu and Fedora names follow those distros' conventions but haven't been tested yet.
 
+Until distribution packages exist, `install-dependencies.sh` installs the three required components from
+this table for Arch, Debian/Ubuntu and Fedora. Run it as your normal user — it calls `sudo` only for the
+package manager, so slangc lands in your home rather than root's:
+
+```bash
+Installer/Linux/install-dependencies.sh --check   # report only
+Installer/Linux/install-dependencies.sh           # ask, then install
+```
+
 ## Required
 
 At startup the Editor checks for the .NET SDK, the Vulkan loader and slangc, and shows the install command
-for the user's distribution when one is missing.
+for the user's distribution when one is missing. It can download slangc itself, since that one needs no
+package manager.
 
 | Component | Why | Arch | Debian / Ubuntu | Fedora | nixpkgs |
 |---|---|---|---|---|---|

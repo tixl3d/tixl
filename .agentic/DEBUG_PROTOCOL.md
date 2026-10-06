@@ -195,9 +195,9 @@ frame**. Setting an input does not run the graph.
 Operator packages hot-reload via `reload`, but Editor/Core changes need a restart:
 
 1. Send `shutdown` (fire-and-forget; the response may not arrive). Debug builds close
-   immediately; teardown takes ~2–10 s — poll with `pgrep -x TiXL`. Not `pgrep -f <path>`:
-   that matches the full command line, including that of the shell running the poll loop, so
-   the wait never ends.
+   immediately; teardown takes ~2–10 s — poll with `pgrep -x TiXL`. Never match on the full
+   command line: `pgrep -f <path>` and `pkill -f <pattern>` also match the shell running them,
+   so the wait never ends and the kill takes out your own command.
 2. `dotnet build` the affected project. Never build the configuration of a still-running
    editor (Debug incremental is safe once it exited).
 3. Relaunch with the flags above and wait for the port.

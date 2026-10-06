@@ -113,10 +113,13 @@ distributions; log out and back in if the entry doesn't start right away.
 
 TiXL never writes into the folder you unpacked it to:
 
-- **Projects** go to `~/Documents/TiXL<version>/`, for example `~/Documents/TiXL4.3`.
-- **Settings, logs and caches** go to `~/.config/TiXL<version>/`. Log files are in its `Log` folder.
+- **Projects** go to `~/Documents/TiXL<version>/` — or wherever your desktop puts Documents.
+- **Settings and logs** go to `~/.config/TiXL<version>/`. Log files are in its `Log` folder.
+- **Caches** go to `~/.cache/TiXL<version>/`, and scratch files to `/tmp/TiXL<version>/`. Both are safe
+  to delete.
 
-You can add more project folders under *Settings → Projects → Project Directories*.
+You can add more project folders under *Settings → Projects → Project Directories*. See
+[Files and folders](FilesAndFolders.md) for the full list and what is safe to remove.
 
 ## Update and uninstall
 
@@ -148,6 +151,20 @@ from the AUR; on NixOS, the `ndi` package; elsewhere, download it from [ndi.vide
 
 Start it from a terminal instead. TiXL prints its startup log there, which usually shows what went
 wrong. Running `~/Apps/tixl-*-linux-x64/TiXL` directly also rules out problems with the menu entry.
+
+### TiXL closes immediately without printing anything
+
+A crash inside a graphics driver kills the process before it can write a log or show a message, so there
+is nothing in `~/.config/TiXL<version>/Log/` and nothing on the terminal. On a systemd distribution the
+crash is still recorded:
+
+```bash
+coredumpctl list TiXL     # was there a crash, and when
+coredumpctl info TiXL     # the stack trace of the most recent one
+```
+
+If `coredumpctl` reports nothing, TiXL exited on purpose rather than crashing — check the log folder and
+the terminal output again, and see [Missing dependencies](#missing-dependencies).
 
 ### "version `GLIBC_2.38' not found"
 

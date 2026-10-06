@@ -137,10 +137,12 @@
          same namespace, so the two collide (CS0433); the alias keeps the old library in the global namespace
          while [LoadSvgAsTexture2D] reaches the fork through "extern alias skiasvg". The remaining SVG
          operators still use the old library and stay Windows-only until their path code moves to SKPath.
-         The Linux natives are not pulled in by Svg.Skia itself and have to be asked for explicitly. -->
+         The natives are not pulled in by Svg.Skia itself and have to be asked for explicitly, one package
+         per platform - Windows gets its own through SkiaSharp. -->
     <PackageReference Include="Svg.Skia" Version="5.2.3" />
     <PackageReference Include="Svg.Custom" Version="5.2.3" Aliases="skiasvg" />
-    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="4.148.0" Condition="!$([MSBuild]::IsOSPlatform('Windows'))" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="4.148.0" Condition="$([MSBuild]::IsOSPlatform('Linux'))" />
+    <PackageReference Include="SkiaSharp.NativeAssets.macOS" Version="4.148.0" Condition="$([MSBuild]::IsOSPlatform('OSX'))" />
     <PackageReference Include="SixLabors.Fonts" Version="$(SixLaborsFontsVersion)" />
     <PackageReference Include="LibTessDotNet" Version="1.1.15" />
   </ItemGroup>

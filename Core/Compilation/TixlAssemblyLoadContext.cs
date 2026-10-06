@@ -286,6 +286,7 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
             if (Directory.Exists(stagingDirectory))
                 Directory.Delete(stagingDirectory, true);
 
+            FileLocations.EnsureCacheDirectory();
             Directory.CreateDirectory(stagingDirectory);
 
             foreach (var (relativePath, file) in EnumerateShadowCopyFiles(mainDirectory))

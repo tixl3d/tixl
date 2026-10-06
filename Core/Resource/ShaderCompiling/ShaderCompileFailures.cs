@@ -91,7 +91,13 @@ public static class ShaderCompileFailures
     {
         try
         {
-            var folder = Path.Combine(FileLocations.TempFolder, "ShaderErrors");
+            // Beside the logs and crash reports rather than in the temp folder: this is a diagnostic the
+            // user is explicitly pointed at, and nobody goes looking in a temp folder.
+            var logDirectory = FileWriter.Instance?.LogDirectory;
+            if (string.IsNullOrEmpty(logDirectory))
+                return null;
+
+            var folder = Path.Combine(logDirectory, "ShaderErrors");
             Directory.CreateDirectory(folder);
 
             // Numbered, because the interesting names repeat: every generated pixel shader is called

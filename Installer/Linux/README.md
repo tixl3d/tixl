@@ -3,6 +3,11 @@
 Notes for distro packagers (AUR, Nix, Flatpak, ...). The Linux port is a preview: the Editor runs with the
 Vulkan backend, but expect gaps.
 
+## Dependencies
+
+`install-dependencies.sh` is the stopgap for testers until packages exist — see
+[DEPENDENCIES.md](DEPENDENCIES.md) for the table it is derived from.
+
 ## Build
 
 ```bash

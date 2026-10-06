@@ -326,6 +326,7 @@ public abstract partial class ShaderCompiler
                 return;
             }
 
+            FileLocations.EnsureCacheDirectory();
             Directory.CreateDirectory(_shaderCacheDirectory);
         }
     }

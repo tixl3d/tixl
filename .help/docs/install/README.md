@@ -8,9 +8,9 @@ Install TiXL on your machine, or set up a development environment for writing C#
 - [Install on Linux](InstallLinux.md) — native preview, or the Windows version under Wine.
 - [Install on macOS](InstallMacOS.md) — under Sikarugir.
 - [Set up a development environment](InstallDev.md) — run TiXL from Visual Studio or Rider.
+- [Files and folders](FilesAndFolders.md) — where TiXL stores projects, settings, cache and logs.
 
 ## Still to write
 
 - **Troubleshooting** — a dedicated page for "TiXL won't start", graphics driver issues, antivirus interference. Some of this lives in [FAQ](../using/FAQ.md) today; split if it grows.
-- **Uninstall / clean slate** — how to remove TiXL and its user data cleanly.
 - **Side-by-side with Tooll3** — when both are installed, how to keep them from conflicting.

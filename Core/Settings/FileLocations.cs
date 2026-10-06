@@ -158,6 +158,39 @@ public static string TestReferencesFolder => Path.Combine(".tixl", TestsSubFolde
     /// </remarks>
     public static readonly string CacheDirectory = ResolveCacheDirectory();
 
+    /// <summary>
+    /// Creates the cache folder and marks it as a cache, so it is skipped by backup tools.
+    /// </summary>
+    /// <remarks>
+    /// A CACHEDIR.TAG makes "this is disposable" a property of the directory rather than of its location,
+    /// which is what tar --exclude-caches, borg, restic and rsnapshot look for. Cheap insurance for a folder
+    /// that holds compiled shaders and shadow-copied assemblies and can run to hundreds of megabytes.
+    /// </remarks>
+    public static void EnsureCacheDirectory()
+    {
+        try
+        {
+            Directory.CreateDirectory(CacheDirectory);
+
+            var tag = Path.Combine(CacheDirectory, "CACHEDIR.TAG");
+            if (File.Exists(tag))
+                return;
+
+            // The first line is the signature the specification requires, byte for byte.
+            File.WriteAllText(tag,
+                              """
+                              Signature: 8a477f597d28d172789f06886806bc55
+                              # This file is a cache directory tag created by TiXL.
+                              # For information about cache directory tags, see https://bford.info/cachedir/
+
+                              """);
+        }
+        catch (Exception)
+        {
+            // Not being able to tag the cache is never worth failing over.
+        }
+    }
+
     private static string ResolveCacheDirectory()
     {
         if (OperatingSystem.IsWindows())
