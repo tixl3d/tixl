@@ -42,7 +42,7 @@ JSON lines over TCP on `127.0.0.1:<port>`. One request per line, one response pe
 
 ## Methods
 
-Read surface: `ping`, `getVersion`, `getStructureVersion`, `getMetrics`, `getContext`,
+Read surface: `ping`, `getVersion`, `getPaths`, `getStructureVersion`, `getMetrics`, `getContext`,
 `getLogTail` (`minLevel`, `maxCount`), `getGraphState`, `getOutput`, `screenshot` (`path`,
 optional `target`: `output` = the output window's texture, the default; `ui` = the **whole editor
 window as rendered** — windows, panels, canvases — copied from the back buffer on the next frame).
@@ -61,6 +61,12 @@ rectified surface's on-screen centre path as mean distance from the window centr
 the chord (1.00 = a straight line) and the largest deviation from the chord.
 
 Parameter shapes are defined in `DebugServer.cs` — read the handler when unsure. Notes:
+
+- **Never guess the settings folder — ask `getPaths`.** It is version-suffixed
+  (`~/.config/TiXL4.4-alpha`, `%APPDATA%\TiXL4.4-alpha`), so the previous release's folder usually sits
+  right beside it, and the editor also logs the one it opened. Editing the wrong one is silent: settings
+  appear not to apply and planted files are never found. `getPaths` returns `settings`, `log`, `temp` and
+  `projects`.
 
 - **Start from what the user is looking at.** `getContext` returns the focused
   composition, `selectedChildren` (ids + names) and `outputView` (the op the output
