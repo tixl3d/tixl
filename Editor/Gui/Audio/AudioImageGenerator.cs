@@ -388,7 +388,7 @@ internal static class AudioImageGenerator
         return Path.Combine(SoundtrackImageCacheFolder, $"{safePrefix}.{hash}{variantSuffix}");
     }
 
-    private static readonly string SoundtrackImageCacheFolder = Path.Combine(FileLocations.TempFolder, "SoundtrackImages");
+    private static readonly string SoundtrackImageCacheFolder = Path.Combine(FileLocations.CacheDirectory, "SoundtrackImages");
 
     private static readonly PreComputedLogs PrecomputedLogs = new();
     private static readonly Color[] IntensityPalette = GeneratePalette();

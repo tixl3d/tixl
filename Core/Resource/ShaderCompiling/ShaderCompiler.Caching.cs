@@ -276,7 +276,7 @@ public abstract partial class ShaderCompiler
     private static readonly Dictionary<ulong, byte[]> _shaderBytecodeCache = new();
     
     private static readonly object _shaderCacheLock = new();
-    private static string _shaderCacheRootPath = Path.Combine(FileLocations.TempFolder, "Cache");
+    private static string _shaderCacheRootPath = Path.Combine(FileLocations.CacheDirectory, "Shaders");
     private static string _shaderCacheDirectory = string.Empty;
     private static string? _shaderCacheSeedDirectory;
     private static readonly HashSet<ulong> _ownerlessHashes = [];

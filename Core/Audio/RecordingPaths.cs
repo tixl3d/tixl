@@ -33,7 +33,7 @@ namespace T3.Core.Audio;
 public static class RecordingPaths
 {
     /// <summary>
-    /// Temp staging directory for in-progress recordings: <c>%APPDATA%\TiXL&lt;version&gt;\Tmp\Recordings\</c>.
+    /// Temp staging directory for in-progress recordings, under the system temp folder.
     /// Transient — the finalised file is imported into the project's <c>Assets/</c> on stop and the staging
     /// copy deleted, so nothing here is meant to persist.
     /// </summary>

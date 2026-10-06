@@ -50,7 +50,7 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
     private static List<AssemblyTreeNode> CoreNodes => _coreNodes;
     public readonly string MainDirectory;
 
-    private static string ShadowCopyRootFolder => Path.Combine(FileLocations.TempFolder, "ShadowCopy");
+    private static string ShadowCopyRootFolder => Path.Combine(FileLocations.CacheDirectory, "ShadowCopy");
     private static string RootShadowCopyDir => Path.Combine(ShadowCopyRootFolder, $"{Environment.ProcessId}");
 
     private readonly string _shadowCopyDirectory;

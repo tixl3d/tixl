@@ -240,6 +240,7 @@ internal static class DebugServer
                                        ["settings"] = FileLocations.SettingsDirectory,
                                        ["log"] = FileWriter.Instance?.LogDirectory,
                                        ["temp"] = FileLocations.TempFolder,
+                                       ["cache"] = FileLocations.CacheDirectory,
                                        ["projects"] = FileLocations.DefaultProjectFolder,
                                    });
                 break;

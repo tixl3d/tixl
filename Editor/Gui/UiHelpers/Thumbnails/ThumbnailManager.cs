@@ -480,8 +480,8 @@ internal static class ThumbnailManager
     {
         return category switch {
             Categories.PackageMeta => Path.Combine(package.Folder, FileLocations.MetaSubFolder, ThumbnailsSubFolder),
-            Categories.User        => Path.Combine(FileLocations.TempFolder, ThumbnailsSubFolder, package.Name),
-            _                      => Path.Combine(FileLocations.TempFolder, ThumbnailsSubFolder)
+            Categories.User        => Path.Combine(FileLocations.CacheDirectory, ThumbnailsSubFolder, package.Name),
+            _                      => Path.Combine(FileLocations.CacheDirectory, ThumbnailsSubFolder)
         };
     }
     #endregion
