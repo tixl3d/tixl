@@ -260,13 +260,13 @@ internal static class GraphConnectionDrawer
     }
 
     /// <summary>
-    /// Draws a connection that follows a polyline of manual bend points, as straight segments with
-    /// hard corners.
+    /// Draws a connection that follows a polyline of manual bend points. The route is built by
+    /// <see cref="ConnectionRouteBuilder"/>, so it consists of horizontal and vertical runs joined by
+    /// arcs and matches the style of a connection that still follows its automatic route.
     /// </summary>
     /// <remarks>
-    /// Straight segments rather than a curve: the bend points are draggable handles, so the drawn line
-    /// has to be exactly where the user put them. A smooth curve would pull away from its handles and
-    /// make them feel unresponsive.
+    /// The endpoints are passed in for the caller's convenience and are not needed to stroke the
+    /// polyline; the hover point is measured against the whole route instead.
     /// </remarks>
     internal static bool DrawConnection(float canvasScale, IReadOnlyList<Vector2> pointsOnScreen,
                                         Vector2 sourcePos, Vector2 targetPos, Color color, float thickness,
@@ -282,29 +282,23 @@ internal static class GraphConnectionDrawer
         var drawListFlags = drawList.Flags;
         drawList.Flags &= ~ImDrawListFlags.AntiAliasedLines;
 
+        // AddPolyline needs an array it can take by reference, so the route is copied out of the list.
+        var points = pointsOnScreen as Vector2[] ?? [..pointsOnScreen];
+
         // Outline first, so the cable stays readable where it crosses a node.
         if (canvasScale > 0.5f)
         {
-            for (var index = 0; index < pointsOnScreen.Count - 1; index++)
-            {
-                drawList.AddLine(pointsOnScreen[index] + Vector2.One * 0.5f,
-                                 pointsOnScreen[index + 1] + Vector2.One * 0.5f,
+            drawList.AddPolyline(ref points[0],
+                                 points.Length,
                                  UiColors.WindowBackground.Fade(0.6f * color.A),
+                                 ImDrawFlags.None,
                                  thickness + 5f);
-            }
         }
 
-        for (var index = 0; index < pointsOnScreen.Count - 1; index++)
-        {
-            drawList.AddLine(pointsOnScreen[index] + Vector2.One * 0.5f,
-                             pointsOnScreen[index + 1] + Vector2.One * 0.5f,
-                             color,
-                             thickness);
-        }
-
+        drawList.AddPolyline(ref points[0], points.Length, color, ImDrawFlags.None, thickness);
         drawList.Flags = drawListFlags;
 
-        return TryFindHoverOnPolyline(pointsOnScreen, out hoverPosition, out normalizedHoverPos);
+        return TryFindHoverOnPolyline(points, out hoverPosition, out normalizedHoverPos);
     }
 
     /// <summary>

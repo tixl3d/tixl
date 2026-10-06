@@ -10,9 +10,16 @@ A bend point belongs to one connection, not to an operator. Add two or three and
 that cable follows them exactly — it keeps its type colour, its hover behaviour
 and its tooltip, it just takes the route you drew.
 
-A rerouted cable is drawn as straight segments between its bend points, and each
-bend point is shown as a round handle you can drag. The automatic route is hidden
-while the cable is rerouted, so what you see is exactly the route you set.
+A rerouted cable keeps the look of an automatic one: it is drawn from horizontal and
+vertical runs that meet in rounded corners, so it never cuts a diagonal across the
+graph. Each bend point becomes one of those corners, and is shown as a round handle
+you can drag. The automatic route is hidden while the cable is rerouted, so what you
+see is exactly the route you set.
+
+The corners follow the **Connection radius** and **Connection segments** settings
+that shape every other cable — see *Settings → Graph Style*. Turn the radius up for
+long sweeping elbows, or the segment count down to `1` to cut each corner as a
+single straight line.
 
 Bend points only change how the cable is **drawn**. They have no effect on what a
 graph evaluates or on the order operators run in, so you can never break a
