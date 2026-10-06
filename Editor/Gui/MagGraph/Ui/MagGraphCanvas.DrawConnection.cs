@@ -298,11 +298,27 @@ internal sealed partial class MagGraphView
             return;
         }
 
-        // The drawer works in screen space, so the canvas route has to be transformed first.
+        // The bend points define where the cable has to turn, not a set of free diagonals between them:
+        // the route is squared off into horizontal and vertical runs that are joined by arcs sized and
+        // tessellated with the same connection settings the automatic routes use, so a rerouted cable
+        // curves like the cables around it.
+        ConnectionRouteBuilder.Build(canvasPoints,
+                                     UserSettings.Config.MaxCurveRadius,
+                                     CanvasScale,
+                                     UserSettings.Config.MaxSegmentCount,
+                                     _canvasRoutePoints);
+
+        // Drawing happens in screen space, so the route has to be transformed first.
         _pathPointsOnScreen.Clear();
-        foreach (var canvasPoint in canvasPoints)
+        foreach (var canvasPoint in _canvasRoutePoints)
         {
             _pathPointsOnScreen.Add(TransformPosition(canvasPoint));
+        }
+
+        if (_pathPointsOnScreen.Count < 2)
+        {
+            DrawConnection(connection, drawList, context);
+            return;
         }
 
         var isSelected = context.Selector.IsSelected(connection.SourceItem) ||
@@ -444,5 +460,9 @@ internal sealed partial class MagGraphView
     }
 
     private readonly List<Vector2> _canvasPathPoints = new(16);
-    private readonly List<Vector2> _pathPointsOnScreen = new(16);
+
+    /// <summary>The squared-off route of the connection currently being drawn, in canvas space.</summary>
+    private readonly List<Vector2> _canvasRoutePoints = new(64);
+
+    private readonly List<Vector2> _pathPointsOnScreen = new(64);
 }

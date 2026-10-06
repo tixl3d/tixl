@@ -28,6 +28,34 @@ once where you want the cable to run instead.
 - The graph's output is unchanged — the output window keeps rendering the same
   result.
 
+## Step: A rerouted cable is routed like an automatic one
+
+**Action:**
+Drop a bend point so the cable has to travel both across and down the canvas, then
+look at the whole cable.
+
+**Expected:**
+- The cable is made of horizontal and vertical runs only — no diagonal segment
+  appears anywhere along it.
+- Two runs meet in a rounded corner, not a sharp or mitred one, and the corners look
+  the same as the ones on a cable that was never rerouted.
+- The corner sits at the bend point handle for a cable that just steps sideways, and
+  the handle is always drawn over its own cable.
+
+## Step: Rerouted corners follow the connection settings
+
+**Action:**
+With the cable rerouted, open *Settings → Graph Style* and change **Connection
+radius**. Look at the cable again, then set **Connection segments** to `1` and look
+once more.
+
+**Expected:**
+- A larger radius makes the corner visibly rounder and a smaller one tighter, the
+  same way the setting changes a cable that was never rerouted.
+- With the segment count at `1` each corner is drawn as a single straight cut across
+  it, while the runs on either side stay horizontal and vertical.
+- The cable still passes through its bend points at every setting.
+
 ## Step: Place a bend point in one drag
 
 **Action:**
@@ -46,8 +74,8 @@ the same handle.
 
 **Expected:**
 - The handle under the cursor fills in while you point at it.
-- Dragging moves the handle and the cable follows it, staying made of straight
-  segments between the handles.
+- Dragging moves the handle and the cable follows it, still made of horizontal and
+  vertical runs with rounded corners.
 - The right-click removes the handle and the cable returns to its automatic route.
 - **No context menu opens** over the graph when the right-click removed a handle.
 
@@ -100,7 +128,10 @@ them. Hold `Alt` and click two or three points along a route that goes around th
 stacked nodes instead.
 
 **Expected:**
-- The cable follows each point in the order you added them, as straight segments.
+- The cable follows each point in the order you added them, and passes through every
+  one of them.
+- Between the points it stays on horizontal and vertical runs, so going around the
+  stacked nodes does not cut a diagonal through them.
 - Every bend point is shown as a draggable handle.
 - None of the bend points replaces another; adding one between two existing points
   inserts it in the correct order rather than appending it at the end.
