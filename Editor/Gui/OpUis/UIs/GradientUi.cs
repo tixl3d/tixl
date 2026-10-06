@@ -1,4 +1,4 @@
-﻿using ImGuiNET;
+using ImGuiNET;
 using T3.Core.DataTypes;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
@@ -56,6 +56,7 @@ internal static class GradientUi
 
         var dragHandleWidth = WidgetElements.DrawOperatorDragHandle(screenRect, drawList, canvas.Scale);
         innerRect.Min.X += dragHandleWidth;
+        innerRect.Max.X -= dragHandleWidth;
 
         var cloneIfModified = data.Gradient.Input.IsDefault;
         ImGui.PushID(instance.SymbolChildId.GetHashCode());
