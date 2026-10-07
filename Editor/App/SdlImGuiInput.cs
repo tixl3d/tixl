@@ -73,7 +73,7 @@ internal static unsafe class SdlImGuiInput
             case SDL_EventType.SDL_EVENT_PINCH_BEGIN:
             case SDL_EventType.SDL_EVENT_PINCH_UPDATE:
             case SDL_EventType.SDL_EVENT_PINCH_END:
-                if (IsMainWindow(sdlEvent.pinch.windowID))
+                if (IsMainWindow(PinchWindow(sdlEvent.pinch.windowID)))
                     _gestures.TryProcessEvent(sdlEvent, ProgramWindows.Main?.PixelDensity ?? 1f);
 
                 break;
@@ -319,6 +319,19 @@ internal static unsafe class SdlImGuiInput
     }
 
     private static bool IsMainWindow(SDL_WindowID windowId) => ProgramWindows.Main != null && windowId == ProgramWindows.Main.Id;
+
+    /// <summary>
+    /// The window a pinch belongs to. macOS trackpad pinches arrive without one, and then it is the window under
+    /// the pointer - the one the fingers are over.
+    /// </summary>
+    private static SDL_WindowID PinchWindow(SDL_WindowID reported)
+    {
+        if (reported != 0)
+            return reported;
+
+        var focus = SDL_GetMouseFocus();
+        return focus != null ? SDL_GetWindowID(focus) : 0;
+    }
 
     private static bool IsCtrlDown() => (SDL_GetModState() & SdlKeyMap.ShortcutModifier) != 0;
 

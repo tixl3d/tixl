@@ -293,16 +293,20 @@ public partial class ScalableCanvas
                         ScrollTarget += TransformPanDelta(new Vector2(panInPixels.X, -panInPixels.Y)) / ScaleTarget;
                         panned = true;
                     }
-
-                    // A pinch zooms around the fingers; an emulated one has no focus of its own and uses the pointer.
-                    var zoomFactor = PointerGestures.ZoomFactor;
-                    var focus = PointerGestures.HasZoomFocus ? PointerGestures.ZoomFocus : mouseState.Position;
-                    ApplyZoomDelta(focus, zoomFactor, out zoomed);
                 }
             }
             else
             {
                 ZoomWithMouseWheel(mouseState, out zoomed);
+            }
+
+            // Only a trackpad pinches, so a pinch zooms even before a scroll has shown the device to be one.
+            // It zooms around the fingers; an emulated one has no focus of its own and uses the pointer.
+            if (isDirectlyHovered && PointerGestures.ZoomFactor != 1)
+            {
+                var focus = PointerGestures.HasZoomFocus ? PointerGestures.ZoomFocus : mouseState.Position;
+                ApplyZoomDelta(focus, PointerGestures.ZoomFactor, out var pinchZoomed);
+                zoomed |= pinchZoomed;
             }
         }
 

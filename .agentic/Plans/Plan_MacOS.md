@@ -116,6 +116,32 @@ Cmd mapping, trackpad, Retina, settings location, reveal-in-Finder, occlusion ha
 rewrite without GS. Run the visual suite and triage failures by cause (format support, precision, MoltenVK
 bugs). Estimate: 20–50 agent hours plus your review/testing time.
 
+**Todo (later):**
+
+- [ ] **Measure the descriptor-set path on MoltenVK.** MoltenVK 1.4.2 returns 0 from `OpArrayLength` for push
+      descriptors (fixed upstream in MoltenVK PR #2827), so on portability devices `VulkanCommandList` allocates
+      a per-frame descriptor set per draw/dispatch instead of pushing (`VulkanBackend.UsesPushDescriptors`).
+      Expected to cost about the same as MoltenVK's own push emulation, but unmeasured. Compare frame times on a
+      heavy example project via the debug bridge against forcing push descriptors back on (images will be
+      wrong, CPU cost comparable). Once a MoltenVK release with the fix lands in Homebrew / the Vulkan SDK,
+      gate the fallback on the driver version instead.
+- [ ] **Remove the per-draw LINQ allocation in `VulkanCommandList.PushDescriptors`** (all platforms, not
+      Mac-specific). `_pipeline.Declared.GroupBy(...)` and `ToArray()` allocate on every draw and dispatch.
+      Precompute the per-set binding lists once when the pipeline is created (`VulkanPipeline`) and iterate
+      those.
+- [ ] **One failing operator crashes the editor** (all platforms). An exception from an operator's `Update`
+      (seen: `LoadSvg` with a missing native library) propagates through `OutputUi.Recompute` and the output
+      window into the main loop and aborts the process. Catch per output evaluation, report it on the operator,
+      and keep the frame going.
+- [ ] **Line-only OBJ files fail to load** (code is platform-neutral; not yet checked on Linux).
+      `ObjMesh.TryLoadFromFile` (`Core/Rendering/ObjMesh.cs`) returns `mesh.DistinctDistinctVertices.Count != 0`,
+      which is 0 for a file with vertices and `l` entries but no faces. `ThereDemo`'s
+      `linedrawings/intro-logo-marion.obj` parses to 2217 positions and 1951 lines and is still rejected
+      ("Can't read file" from `LoadObjAsPoints` / `LoadObj`). Also accept positions plus lines.
+- [ ] **"An update larger than 64 KB needs a staging copy and was dropped."** Logged once on the Mac while the
+      SVG test chain ran in `_agentTests`. Find the caller and check whether Linux shows it too; whatever it
+      uploads is currently lost.
+
 ### M3 — Distribution
 `.app` bundle (Editor + bundled .NET runtime + MoltenVK + slangc + dylibs), `Info.plist`, icon, DMG.
 Hardened runtime entitlements: `com.apple.security.cs.allow-jit`,

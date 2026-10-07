@@ -6,7 +6,8 @@ namespace T3.Editor.App.Gestures;
 
 /// <summary>
 /// Trackpad gestures as SDL reports them: Wayland's pointer gestures on Linux and the magnification gesture on
-/// macOS arrive as pinch events, and two-finger scrolling arrives as a wheel with fractional notches.
+/// macOS arrive as pinch events (on macOS without a window id - see SdlImGuiInput), and two-finger scrolling
+/// arrives as a wheel with fractional notches.
 /// </summary>
 /// <remarks>
 /// Windows has no pinch through SDL — its drivers send Ctrl + wheel instead, which
@@ -30,14 +31,17 @@ internal sealed class SdlPointerGestureSource : IPointerGestureSource
 
             case SDL_EventType.SDL_EVENT_PINCH_UPDATE:
             {
-                // Wayland reports the scale against the gesture's start, not against the previous event, and it
-                // sends no finger positions to measure a span with. So the step is the ratio between them.
+                // macOS reports the change since the previous event, as SDL documents. Wayland reports the scale
+                // against the gesture's start, and sends no finger positions to measure a span with, so there the
+                // step is the ratio between two events.
                 var scale = sdlEvent.pinch.scale;
-                var step = _lastScale > 0 ? scale / _lastScale : 1;
+                var step = OperatingSystem.IsMacOS() ? scale
+                           : _lastScale > 0 ? scale / _lastScale
+                           : 1;
                 _lastScale = scale;
 
-                // Wayland sends no finger positions and reports -1 for the focus; then the zoom belongs at the
-                // pointer, which sits between the fingers anyway.
+                // Neither macOS nor Wayland sends finger positions; both report -1 for the focus. Then the zoom
+                // belongs at the pointer, which sits between the fingers anyway.
                 var hasFocus = sdlEvent.pinch.focus_x >= 0 && sdlEvent.pinch.focus_y >= 0;
                 var focus = new Vector2(sdlEvent.pinch.focus_x, sdlEvent.pinch.focus_y) * pixelDensity;
 

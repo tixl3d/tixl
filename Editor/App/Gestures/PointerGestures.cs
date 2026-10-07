@@ -159,7 +159,7 @@ internal static class PointerGestures
         }
 
         ZoomFactor = _pinchScale * ComputeZoomFromNotches(_emulatedZoomNotches);
-        IsManipulating = PansWithScroll && (IsPinching || _scrolledThisFrame || PanDelta.LengthSquared() > 0.0001f);
+        IsManipulating = IsPinching || PansWithScroll && (_scrolledThisFrame || PanDelta.LengthSquared() > 0.0001f);
 
         _scrollNotches = Vector2.Zero;
         _scrolledThisFrame = false;
