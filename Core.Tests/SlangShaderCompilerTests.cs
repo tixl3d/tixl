@@ -188,6 +188,77 @@ public class SlangShaderCompilerTests(ITestOutputHelper output)
         Assert.Equal(_validationErrorsAtStart, VulkanBackend.ValidationErrorCount);
     }
 
+    /// <summary>
+    /// Nearly every point operator bounds its threads with GetDimensions. It becomes OpArrayLength, which a
+    /// portability driver (MoltenVK) has to emulate - and where that reports 0, every operator writes nothing.
+    /// </summary>
+    [Fact]
+    public void GetDimensionsReportsTheStructuredBufferLength()
+    {
+        using var backend = TryCreateBackend();
+
+        if (backend == null)
+            return;
+
+        var device = new Device(backend);
+        var compiler = new SlangShaderCompiler(device);
+
+        const string source = """
+                              StructuredBuffer<float4> Source : register(t0);
+                              RWStructuredBuffer<uint2> Result : register(u0);
+
+                              [numthreads(1, 1, 1)]
+                              void main(uint3 id : SV_DispatchThreadID)
+                              {
+                                  uint count, stride;
+                                  Source.GetDimensions(count, stride);
+                                  Result[0] = uint2(count, stride);
+                              }
+                              """;
+
+        Assert.True(TryCompile<ComputeShader>(compiler, source, "main", out var shader, out var reason), reason);
+        using var compiled = shader;
+
+        const int sourceElements = 37;
+        using var sourceBuffer = new Buffer(device,
+                                            new BufferDescription
+                                                {
+                                                    SizeInBytes = sourceElements * 16,
+                                                    BindFlags = BindFlags.ShaderResource,
+                                                    Usage = ResourceUsage.Default,
+                                                    OptionFlags = ResourceOptionFlags.BufferStructured,
+                                                    StructureByteStride = 16,
+                                                });
+        using var sourceView = new ShaderResourceView(device, sourceBuffer);
+
+        using var result = new Buffer(device,
+                                      new BufferDescription
+                                          {
+                                              SizeInBytes = 8,
+                                              BindFlags = BindFlags.UnorderedAccess | BindFlags.ShaderResource,
+                                              Usage = ResourceUsage.Default,
+                                              OptionFlags = ResourceOptionFlags.BufferStructured,
+                                              StructureByteStride = 8,
+                                          });
+        using var resultUav = new UnorderedAccessView(device, result);
+
+        var context = device.ImmediateContext;
+        device.BeginFrame();
+        context.ComputeShader.Set(shader!);
+        context.ComputeShader.SetShaderResource(0, sourceView);
+        context.ComputeShader.SetUnorderedAccessView(0, resultUav);
+        context.Dispatch(1, 1, 1);
+        device.EndFrame();
+
+        var readback = backend.ReadbackAsync(ResultBufferOf(result)).GetAwaiter().GetResult();
+        var values = System.Runtime.InteropServices.MemoryMarshal.Cast<byte, uint>(readback.Data.Span);
+        output.WriteLine($"count {values[0]}, stride {values[1]}");
+
+        Assert.Equal((uint)sourceElements, values[0]);
+        Assert.Equal(16u, values[1]);
+        Assert.Equal(_validationErrorsAtStart, VulkanBackend.ValidationErrorCount);
+    }
+
     [Fact]
     public void ARealShaderWithIncludesCompiles()
     {

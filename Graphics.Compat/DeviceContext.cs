@@ -108,34 +108,41 @@ public sealed class DeviceContext
     #region draw and dispatch
     public void Draw(int vertexCount, int startVertex)
     {
-        PrepareDraw();
+        if (!PrepareDraw())
+            return;
+
         Commands.Draw(vertexCount, 1, startVertex, 0);
     }
 
     public void DrawInstanced(int vertexCountPerInstance, int instanceCount, int startVertex, int startInstance)
     {
-        PrepareDraw();
+        if (!PrepareDraw())
+            return;
+
         Commands.Draw(vertexCountPerInstance, instanceCount, startVertex, startInstance);
     }
 
     public void DrawIndexed(int indexCount, int startIndex, int baseVertex)
     {
-        PrepareDraw();
+        if (!PrepareDraw())
+            return;
+
         Commands.DrawIndexed(indexCount, 1, startIndex, baseVertex, 0);
     }
 
     public void DrawIndexedInstanced(int indexCountPerInstance, int instanceCount, int startIndex, int baseVertex, int startInstance)
     {
-        PrepareDraw();
+        if (!PrepareDraw())
+            return;
+
         Commands.DrawIndexed(indexCountPerInstance, instanceCount, startIndex, baseVertex, startInstance);
     }
 
     public void DrawInstancedIndirect(Buffer arguments, int alignedByteOffset)
     {
-        if (arguments.GpuBuffer == null)
+        if (arguments.GpuBuffer == null || !PrepareDraw())
             return;
 
-        PrepareDraw();
         Commands.DrawIndirect(arguments.GpuBuffer, alignedByteOffset);
     }
 
@@ -429,7 +436,8 @@ public sealed class DeviceContext
     #endregion
 
     #region resolving state into pipelines
-    private void PrepareDraw()
+    /// <summary>False when the pipeline for this state can't be built; the draw is then skipped.</summary>
+    private bool PrepareDraw()
     {
         BeginRenderingIfNeeded();
 
@@ -451,7 +459,11 @@ public sealed class DeviceContext
                                   Samples = OutputMerger.Samples,
                               };
 
-        Commands.SetPipeline(Backend.GetOrCreatePipeline(description));
+        var pipeline = Backend.GetOrCreatePipeline(description);
+        if (pipeline == null)
+            return false;
+
+        Commands.SetPipeline(pipeline);
         Commands.SetBlendConstants(OutputMerger.BlendFactor, OutputMerger.SampleMask);
         Rasterizer.Flush(Commands);
 
@@ -459,6 +471,7 @@ public sealed class DeviceContext
         FlushBindings(PixelShader);
         FlushBindings(GeometryShader);
         InputAssembler.Flush(Commands);
+        return true;
     }
 
     private bool PrepareDispatch()
@@ -468,7 +481,11 @@ public sealed class DeviceContext
 
         // Compute cannot run inside a render pass.
         EndRendering();
-        Commands.SetPipeline(Backend.GetOrCreatePipeline(new ComputePipelineDescription { ComputeShader = shader }));
+        var pipeline = Backend.GetOrCreatePipeline(new ComputePipelineDescription { ComputeShader = shader });
+        if (pipeline == null)
+            return false;
+
+        Commands.SetPipeline(pipeline);
         FlushBindings(ComputeShader);
         return true;
     }

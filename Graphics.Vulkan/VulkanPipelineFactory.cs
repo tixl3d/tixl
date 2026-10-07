@@ -307,10 +307,12 @@ internal static unsafe class VulkanPipelineFactory
             }
 
             // Push descriptors: the bindings travel with the draw, so there is no pool to size and no set to
-            // keep alive while the GPU reads it.
+            // keep alive while the GPU reads it. Where they are not used, the same layout allocates sets.
             VkDescriptorSetLayoutCreateInfo layoutInfo = new()
                                                              {
-                                                                 flags = VkDescriptorSetLayoutCreateFlags.PushDescriptor,
+                                                                 flags = backend.UsesPushDescriptors
+                                                                             ? VkDescriptorSetLayoutCreateFlags.PushDescriptor
+                                                                             : VkDescriptorSetLayoutCreateFlags.None,
                                                                  bindingCount = (uint)slots.Count,
                                                                  pBindings = slots.Count > 0 ? bindings : null,
                                                              };

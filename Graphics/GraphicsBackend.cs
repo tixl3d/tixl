@@ -73,10 +73,13 @@ public interface IGraphicsBackend : IDisposable
     /// </summary>
     GpuSwapchain? CreateSwapchain(in SwapchainDescription description, in SurfaceTarget target, string? label = null);
 
-    /// <summary>Cached by description; calling this per draw is the expected usage.</summary>
-    GpuPipeline GetOrCreatePipeline(in GraphicsPipelineDescription description);
+    /// <summary>
+    /// Cached by description; calling this per draw is the expected usage. Null when this device cannot build
+    /// it (a geometry shader on Metal); the failure is reported once and the draw is skipped.
+    /// </summary>
+    GpuPipeline? GetOrCreatePipeline(in GraphicsPipelineDescription description);
 
-    GpuPipeline GetOrCreatePipeline(in ComputePipelineDescription description);
+    GpuPipeline? GetOrCreatePipeline(in ComputePipelineDescription description);
 
     /// <summary>True if the device can actually do this; topology and format support differ between drivers.</summary>
     bool Supports(Topology topology);

@@ -928,8 +928,21 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
                 }
             }
 
-            backend.Api.vkCmdPushDescriptorSetKHR(_commandBuffer, bindPoint, _pipeline.Layout, (uint)setGroup.Key,
-                                                  (uint)declared.Length, writes);
+            if (backend.UsesPushDescriptors)
+            {
+                backend.Api.vkCmdPushDescriptorSetKHR(_commandBuffer, bindPoint, _pipeline.Layout, (uint)setGroup.Key,
+                                                      (uint)declared.Length, writes);
+                continue;
+            }
+
+            var set = backend.AllocateDescriptorSet(_pipeline.SetLayouts[setGroup.Key]);
+            for (var i = 0; i < declared.Length; i++)
+            {
+                writes[i].dstSet = set;
+            }
+
+            backend.Api.vkUpdateDescriptorSets((uint)declared.Length, writes, 0, null);
+            backend.Api.vkCmdBindDescriptorSets(_commandBuffer, bindPoint, _pipeline.Layout, (uint)setGroup.Key, 1, &set, 0, null);
         }
     }
 

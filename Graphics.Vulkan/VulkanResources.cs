@@ -167,6 +167,9 @@ internal sealed class VulkanPipeline(VulkanBackend backend, VkPipeline pipeline,
     internal readonly VkPipelineLayout Layout = layout;
     internal readonly VkPipelineBindPoint BindPoint = bindPoint;
 
+    /// <summary>One per descriptor set, for allocating sets where push descriptors are not used.</summary>
+    internal readonly VkDescriptorSetLayout[] SetLayouts = setLayouts;
+
     /// <summary>
     /// The descriptor type each declared binding was given. A draw may leave a binding unset — operators do
     /// that constantly — and the write still has to name the type the layout was created with.

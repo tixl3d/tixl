@@ -157,6 +157,11 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         if (isPortabilitySubset)
             deviceExtensions.Add(VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME);
 
+        // MoltenVK does not refresh the buffer sizes behind OpArrayLength for push descriptors, so every
+        // GetDimensions on a structured buffer reads 0 - and nearly every point operator bounds its threads
+        // with it. Ordinary descriptor sets carry the sizes. Fixed upstream in MoltenVK PR #2827.
+        UsesPushDescriptors = !isPortabilitySubset;
+
         // Only when the instance can make a surface at all: VK_KHR_swapchain requires VK_KHR_surface, and a
         // headless instance was not given it. A window that appears later needs the extensions up front,
         // which is why the caller passes them when it has a window in mind.
@@ -214,6 +219,7 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         // Metal has no geometry shaders. Only the cubemap operators use them; their pipelines fail on
         // their own where the feature is missing, which is better than no device at all.
         features2.features.geometryShader = supported.features.geometryShader;
+        _supportsGeometryShader = supported.features.geometryShader;
 
         VkDeviceCreateInfo deviceInfo = new()
                                             {
@@ -247,6 +253,7 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
             Api.vkCreateFence(&fenceInfo, null, out _frames[i].Fence).CheckResult();
 
             _frames[i].Retired = [];
+            _frames[i].DescriptorPools = [];
         }
 
         _commands = new VulkanCommandList(this);
@@ -257,6 +264,9 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
     internal readonly VkPhysicalDevice PhysicalDevice;
 
     public string AdapterName { get; }
+
+    /// <summary>False on MoltenVK; descriptors are then written into per-frame sets instead.</summary>
+    internal bool UsesPushDescriptors { get; }
     public string BackendDescription { get; }
 
     /// <summary>Zero: a VkDevice is not what the libraries asking for this expect.</summary>
@@ -660,31 +670,53 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         return Track(new VulkanSwapchain(this, surface, description, label));
     }
 
-    public GpuPipeline GetOrCreatePipeline(in GraphicsPipelineDescription description)
+    public GpuPipeline? GetOrCreatePipeline(in GraphicsPipelineDescription description)
     {
         lock (_pipelines)
         {
             if (_pipelines.TryGetValue(description, out var cached))
                 return cached;
 
-            var pipeline = VulkanPipelineFactory.CreateGraphics(this, description);
+            // A failure is cached too, so a pipeline the device cannot build is tried and reported once.
+            VulkanPipeline? pipeline = null;
+            try
+            {
+                pipeline = VulkanPipelineFactory.CreateGraphics(this, description);
+            }
+            catch (VkException e)
+            {
+                GraphicsLog.Error?.Invoke($"Can't create a graphics pipeline{DescribeGeometryStage(description)}; its draws are skipped. {e.Message}");
+            }
+
             _pipelines[description] = pipeline;
             return pipeline;
         }
     }
 
-    public GpuPipeline GetOrCreatePipeline(in ComputePipelineDescription description)
+    public GpuPipeline? GetOrCreatePipeline(in ComputePipelineDescription description)
     {
         lock (_computePipelines)
         {
             if (_computePipelines.TryGetValue(description, out var cached))
                 return cached;
 
-            var pipeline = VulkanPipelineFactory.CreateCompute(this, description);
+            VulkanPipeline? pipeline = null;
+            try
+            {
+                pipeline = VulkanPipelineFactory.CreateCompute(this, description);
+            }
+            catch (VkException e)
+            {
+                GraphicsLog.Error?.Invoke($"Can't create a compute pipeline; its dispatches are skipped. {e.Message}");
+            }
+
             _computePipelines[description] = pipeline;
             return pipeline;
         }
     }
+
+    private string DescribeGeometryStage(in GraphicsPipelineDescription description)
+        => description.GeometryShader != null && !_supportsGeometryShader ? " (it uses a geometry shader, which this GPU lacks)" : string.Empty;
 
     public bool Supports(Topology topology)
     {
@@ -737,6 +769,13 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         RunRetired(ref frame);
 
         Api.vkResetCommandPool(frame.Pool, VkCommandPoolResetFlags.None).CheckResult();
+
+        foreach (var pool in frame.DescriptorPools)
+        {
+            Api.vkResetDescriptorPool(pool, VkDescriptorPoolResetFlags.None).CheckResult();
+        }
+
+        frame.ActiveDescriptorPool = 0;
 
         VkCommandBufferBeginInfo beginInfo = new() { flags = VkCommandBufferUsageFlags.OneTimeSubmit };
         Api.vkBeginCommandBuffer(frame.CommandBuffer, &beginInfo).CheckResult();
@@ -1587,17 +1626,23 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
 
         foreach (var pipeline in _pipelines.Values)
         {
-            pipeline.Dispose();
+            pipeline?.Dispose();
         }
 
         foreach (var pipeline in _computePipelines.Values)
         {
-            pipeline.Dispose();
+            pipeline?.Dispose();
         }
 
         for (var i = 0; i < FramesInFlight; i++)
         {
             RunRetired(ref _frames[i]);
+
+            foreach (var pool in _frames[i].DescriptorPools)
+            {
+                Api.vkDestroyDescriptorPool(pool);
+            }
+
             Api.vkDestroyFence(_frames[i].Fence);
             Api.vkDestroyCommandPool(_frames[i].Pool);
         }
@@ -1617,6 +1662,66 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         internal VkFence Fence;
 
         internal List<Action<VkDeviceApi>> Retired;
+
+        /// <summary>Only where push descriptors are not used; reset when the slot comes round again.</summary>
+        internal List<VkDescriptorPool> DescriptorPools;
+        internal int ActiveDescriptorPool;
+    }
+
+    /// <summary>
+    /// A descriptor set that lives until this frame slot is reused. Pools are added as a frame needs them and
+    /// kept, so a busy frame pays for the growth once.
+    /// </summary>
+    internal VkDescriptorSet AllocateDescriptorSet(VkDescriptorSetLayout layout)
+    {
+        ref var frame = ref _frames[_frameIndex];
+
+        while (true)
+        {
+            if (frame.ActiveDescriptorPool == frame.DescriptorPools.Count)
+                frame.DescriptorPools.Add(CreateDescriptorPool());
+
+            var pool = frame.DescriptorPools[frame.ActiveDescriptorPool];
+            VkDescriptorSetAllocateInfo allocateInfo = new()
+                                                           {
+                                                               descriptorPool = pool,
+                                                               descriptorSetCount = 1,
+                                                               pSetLayouts = &layout,
+                                                           };
+
+            VkDescriptorSet set;
+            var result = Api.vkAllocateDescriptorSets(&allocateInfo, &set);
+            if (result == VkResult.Success)
+                return set;
+
+            if (result is not (VkResult.ErrorOutOfPoolMemory or VkResult.ErrorFragmentedPool))
+                result.CheckResult();
+
+            frame.ActiveDescriptorPool++;
+        }
+    }
+
+    private VkDescriptorPool CreateDescriptorPool()
+    {
+        const uint setsPerPool = 1024;
+        var sizes = stackalloc VkDescriptorPoolSize[]
+                        {
+                            new() { type = VkDescriptorType.UniformBuffer, descriptorCount = setsPerPool * 4 },
+                            new() { type = VkDescriptorType.StorageBuffer, descriptorCount = setsPerPool * 4 },
+                            new() { type = VkDescriptorType.SampledImage, descriptorCount = setsPerPool * 4 },
+                            new() { type = VkDescriptorType.Sampler, descriptorCount = setsPerPool * 2 },
+                            new() { type = VkDescriptorType.StorageImage, descriptorCount = setsPerPool },
+                        };
+
+        VkDescriptorPoolCreateInfo poolInfo = new()
+                                                  {
+                                                      maxSets = setsPerPool,
+                                                      poolSizeCount = 5,
+                                                      pPoolSizes = sizes,
+                                                  };
+
+        Api.vkCreateDescriptorPool(&poolInfo, null, out var pool).CheckResult();
+        return pool;
     }
 
     private static readonly VkUtf8String ValidationLayerName = "VK_LAYER_KHRONOS_validation"u8;
@@ -1628,6 +1733,7 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
     private readonly uint _queueFamilyIndex;
     private readonly VkPhysicalDeviceLimits _limits;
     private readonly bool _supportsMipLodBias;
+    private readonly bool _supportsGeometryShader;
     private readonly bool _supportsMemoryBudget;
     private bool _supportsSwapchain;
     private readonly bool _debugNamesAvailable;
@@ -1635,8 +1741,8 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
     private readonly object _queueLock = new();
     private readonly VulkanCommandList _commands;
     private readonly FrameSlot[] _frames = new FrameSlot[FramesInFlight];
-    private readonly Dictionary<GraphicsPipelineDescription, VulkanPipeline> _pipelines = [];
-    private readonly Dictionary<ComputePipelineDescription, VulkanPipeline> _computePipelines = [];
+    private readonly Dictionary<GraphicsPipelineDescription, VulkanPipeline?> _pipelines = [];
+    private readonly Dictionary<ComputePipelineDescription, VulkanPipeline?> _computePipelines = [];
     private readonly Dictionary<ulong, VulkanTextureView> _imGuiTextures = [];
     private readonly List<VulkanSwapchain> _pendingPresents = [];
     private readonly List<VulkanSwapchain> _acquiredSwapchains = [];
