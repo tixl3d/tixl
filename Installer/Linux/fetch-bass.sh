@@ -1,7 +1,18 @@
 #!/usr/bin/env bash
-# Download the BASS natives into Dependencies/linux-x64 (not in git: un4seen's license forbids it).
-# Shipping them in a release means accepting un4seen's terms, see Dependencies/linux-x64/README.md.
+# Makes sure the BASS natives are in Dependencies/linux-x64.
+#
+# They are committed, so this normally finds them and does nothing. It exists to restore them if they
+# are missing and, with --force, to pull a newer release from un4seen. Shipping them means accepting
+# un4seen's terms; see Dependencies/linux-x64/README.md.
 set -euo pipefail
+
+force=false
+if [[ "${1:-}" == "--force" ]]; then
+    force=true
+elif [[ -n "${1:-}" ]]; then
+    echo "Usage: ${0##*/} [--force]" >&2
+    exit 2
+fi
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 target="$script_dir/../../Dependencies/linux-x64"
@@ -9,7 +20,7 @@ work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
 
 for name in bass bassmix bassflac; do
-    if [[ -f "$target/lib$name.so" ]]; then
+    if [[ -f "$target/lib$name.so" ]] && ! $force; then
         echo "lib$name.so already present, skipping."
         continue
     fi

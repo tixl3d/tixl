@@ -176,9 +176,16 @@ internal static class Compiler
         
         if (nugetRestore)
         {
-            // NuGetAudit=false: the audit downloads the advisory database on every restore (tens of seconds on a
-            // slow connection) and its warnings never reach the user from here anyway.
-            var (restoreOutput, restoreExitCode) = RunCommand($"dotnet restore \"{projectFile.FullPath}\" --nologo -p:NuGetAudit=false", projectFile.Directory);
+            // Both switches turn off SDK behaviour that reaches the network for something an operator
+            // project never needs:
+            //   NuGetAudit - downloads the advisory database on every restore (tens of seconds on a slow
+            //     connection), and its warnings never reach the user from here anyway.
+            //   EnableTargetingPackDownload - the SDK pre-fetches every targeting pack it knows of that is
+            //     not already on disk. An operator project references only Microsoft.NETCore.App, which
+            //     ships with the SDK, but distributions that split the other packs out (Arch omits
+            //     Microsoft.AspNetCore.App.Ref) make the SDK fetch one that is never used.
+            // Together they let an operator project compile with no network and an empty package cache.
+            var (restoreOutput, restoreExitCode) = RunCommand($"dotnet restore \"{projectFile.FullPath}\" --nologo -p:NuGetAudit=false -p:EnableTargetingPackDownload=false", projectFile.Directory);
             output = restoreOutput;
             if (restoreExitCode != 0)
             {
@@ -197,6 +204,7 @@ internal static class Compiler
                  .Append(verbosity.ToString().ToLower())
 
                  .Append(" --nologo ")
+                 .Append(" -p:EnableTargetingPackDownload=false")
                  .Append(" --no-restore"); // Optimization: Skip restore if you already did it
 
         if (buildMode == BuildMode.Debug)

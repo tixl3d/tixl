@@ -38,8 +38,9 @@ The full list with package names per distro is in [`DEPENDENCIES.md`](DEPENDENCI
   and writes to `~/.nuget`.
 - Vulkan loader and driver.
 - `slangc` (Slang 2026.18) for shader compilation, found on `PATH` or through `TIXL_SLANGC`.
-- BASS for audio (`libbass.so`, `libbassmix.so`, `libbassflac.so`). It's not in git because of its
-  license, see `Dependencies/linux-x64/README.md`. `fetch-bass.sh` downloads them; the build warns when they're missing.
+- BASS for audio (`libbass.so`, `libbassmix.so`, `libbassflac.so`). These are committed under
+  `Dependencies/linux-x64/`; see its README for un4seen's terms. `fetch-bass.sh` restores them if they go
+  missing and refreshes them with `--force`.
 
 ## Where TiXL writes
 
