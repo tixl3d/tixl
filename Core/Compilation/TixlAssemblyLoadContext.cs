@@ -686,6 +686,9 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
             yield return $"osx-{architecture}";
+
+            // Universal binaries (SkiaSharp's, for one) are published without an architecture.
+            yield return "osx";
         }
         else
         {
