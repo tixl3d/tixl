@@ -93,6 +93,18 @@ See [Developer setup on a Mac](#developer-setup-on-a-mac). Done when `dotnet bui
 -p:EnableWindowsTargeting=true` succeeds and `Core.Tests` pass on the Mac.
 
 ### M1 — First light (agent work on Linux, verified on the Mac)
+
+**Progress 2026-10-07:** the Editor starts, loads all projects and is interactive on the M4. Done: loader lookup
+by full path (`VulkanLoader`, also handed to SDL via `SDL_HINT_VULKAN_LIBRARY` — a bare name misses
+`/opt/homebrew/lib`), portability enumeration + subset (subset features enabled as reported, gaps logged:
+`pointPolygons`, `samplerMipLodBias`), mip LOD bias dropped where unsupported, optional `geometryShader`,
+D24S8 → D32S8 fallback, validation layer that fails to load no longer costs the device, OS-split BASS copy
+rules (`Dependencies/osx/`), `osx-arm64` RID, `.dylib` in the load context and BASS names, Mac install hints in
+`DependencyCheck`. The 23 GPU tests in Core.Tests used to skip silently on the Mac; they now run and pass.
+Homebrew's validation layer manifest names a bare dylib — run with
+`DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib:/usr/local/lib:/usr/lib` to get validation. **M1 done:**
+a new project renders `MandelbrotFractal` correctly with validation clean, and operator projects compile from
+the Editor. Known gap carried into M2: cubemap operators (no geometry shaders).
 Portability enumeration/subset, conditional geometry shader + tessellation, depth-format fallback, OS-aware
 dependency copying, `osx-arm64` RID, Skia macOS natives, BASS dylibs, `DependencyCheck` Mac branch.
 Done when the Editor opens a project and renders `MandelbrotFractal` with validation layers clean.
@@ -172,8 +184,12 @@ merged into it, and `main` has no commits it lacks. Recommendation:
 
 ## Open questions
 
-1. MacBook Air — which chip (M1–M4), how much RAM, which macOS version? Its `vulkaninfo --summary` decides
-   how much of M1 is feature fallbacks.
+1. ~~MacBook Air — which chip, RAM, macOS version?~~ **Answered:** M4, 24 GB, macOS 26.5.1 (Tahoe). RAM is
+   not a constraint. `vulkaninfo` (Homebrew MoltenVK 1.4.2, loader 1.4.363, 2026-10-07): API 1.4.357;
+   dynamicRendering, synchronization2, scalarBlockLayout, shaderDrawParameters, push_descriptor,
+   shaderOutputLayer, tessellationShader all supported; `VK_KHR_portability_subset` and
+   `VK_KHR_portability_enumeration` present; **geometryShader = false**; D24S8 not a depth format (D32S8 is).
+   M0 done the same day: `t3.sln` builds, Core.Tests 198/198 pass.
 2. Settings folder: `~/.config/TiXL` (like Linux) or `~/Library/Application Support/TiXL`?
 3. Cmd/Ctrl mapping policy, and whether Ctrl+click is a right-click.
 4. Apple Developer account for signing/notarization — who owns it?

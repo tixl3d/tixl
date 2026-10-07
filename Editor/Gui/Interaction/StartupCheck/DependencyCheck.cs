@@ -13,7 +13,7 @@ namespace T3.Editor.Gui.Interaction.StartupCheck;
 
 /// <summary>
 /// Checks for the system dependencies TiXL can't bundle and explains what's missing, with the install command
-/// for the user's distribution, before the main window is created.
+/// for the user's distribution (or Homebrew on macOS), before the main window is created.
 /// </summary>
 internal static class DependencyCheck
 {
@@ -142,13 +142,16 @@ internal static class DependencyCheck
                                                       debian: $"sudo apt install dotnet-sdk-{RequiredSdkMajorVersion}.0",
                                                       fedora: $"sudo dnf install dotnet-sdk-{RequiredSdkMajorVersion}.0",
                                                       nix: $"dotnetCorePackages.sdk_{RequiredSdkMajorVersion}_0",
-                                                      other: $"https://dotnet.microsoft.com/download/dotnet/{RequiredSdkMajorVersion}.0"),
+                                                      other: $"https://dotnet.microsoft.com/download/dotnet/{RequiredSdkMajorVersion}.0",
+                                                      mac: $"the Arm64 installer from https://dotnet.microsoft.com/download/dotnet/{RequiredSdkMajorVersion}.0"),
                                           PreventsStart: false));
     }
 
     private static void CheckVulkanLoader(List<MissingDependency> missing)
     {
-        var loaderName = OperatingSystem.IsWindows() ? "vulkan-1.dll" : "libvulkan.so.1";
+        var loaderName = OperatingSystem.IsWindows() ? "vulkan-1.dll"
+                         : OperatingSystem.IsMacOS() ? T3.Graphics.Vulkan.VulkanLoader.FindLibraryPath() ?? "libvulkan.1.dylib"
+                         : "libvulkan.so.1";
         if (NativeLibrary.TryLoad(loaderName, out var handle))
         {
             NativeLibrary.Free(handle);
@@ -160,7 +163,8 @@ internal static class DependencyCheck
                                                       debian: "sudo apt install libvulkan1 mesa-vulkan-drivers",
                                                       fedora: "sudo dnf install vulkan-loader mesa-vulkan-drivers",
                                                       nix: "vulkan-loader, and hardware.graphics.enable = true",
-                                                      other: "Install your GPU driver's Vulkan support."),
+                                                      other: "Install your GPU driver's Vulkan support.",
+                                                      mac: "brew install molten-vk vulkan-loader, or the Vulkan SDK from https://vulkan.lunarg.com/sdk/home#mac"),
                                           PreventsStart: true));
     }
 
@@ -196,10 +200,13 @@ internal static class DependencyCheck
                                           PreventsStart: false));
     }
 
-    private static string InstallHint(string arch, string debian, string fedora, string nix, string other)
+    private static string InstallHint(string arch, string debian, string fedora, string nix, string other, string? mac = null)
     {
         if (OperatingSystem.IsWindows())
             return $"Install: {other}";
+
+        if (OperatingSystem.IsMacOS())
+            return $"Install: {mac ?? other}";
 
         return DetectPackageFamily() switch
                    {
