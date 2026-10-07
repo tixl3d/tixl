@@ -346,7 +346,7 @@ internal static class AppMenuBar
 
                 if (BeginSubMenu("Open Project in"))
                 {
-                    if (MenuItem("File Explorer"))
+                    if (MenuItem(PlatformNames.FileBrowser))
                     {
                         CoreUi.Instance.OpenWithDefaultApplication(project.Folder);
                     }

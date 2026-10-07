@@ -198,7 +198,7 @@ internal static class ProjectsPanel
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(5, 5));
         if (ImGui.BeginPopupContextItem("windows_context_menu"))
         {
-            if (CustomComponents.DrawMenuItem(_revealInExplorerId, "Reveal in Explorer", reserveIconColumn: false))
+            if (CustomComponents.DrawMenuItem(_revealInExplorerId, PlatformNames.RevealInFileBrowser, reserveIconColumn: false))
             {
                 CoreUi.Instance.OpenWithDefaultApplication(package.Folder);
             }
@@ -362,7 +362,7 @@ internal static class ProjectsPanel
                 ImGui.EndMenu();
             }
 
-            if (CustomComponents.DrawMenuItem(_revealBrokenInExplorerId, "Reveal in Explorer", reserveIconColumn: false))
+            if (CustomComponents.DrawMenuItem(_revealBrokenInExplorerId, PlatformNames.RevealInFileBrowser, reserveIconColumn: false))
             {
                 CoreUi.Instance.OpenWithDefaultApplication(broken.Folder);
             }

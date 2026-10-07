@@ -490,7 +490,7 @@ internal sealed class SymbolLibrary : Window
                                                     var symbolInNamespace = mapsToFolder ? TryFindFirstSymbolRecursive(subtree) : null;
 
                                                     if (CustomComponents.DrawMenuItem(_revealNamespaceInExplorerId,
-                                                                                      isProject ? "Reveal Project in Explorer" : "Reveal Namespace in Explorer",
+                                                                                      isProject ? _revealProjectLabel : _revealNamespaceLabel,
                                                                                       isEnabled: symbolInNamespace != null,
                                                                                       reserveIconColumn: false))
                                                     {
@@ -946,13 +946,13 @@ internal sealed class SymbolLibrary : Window
                                                                    // Existing symbol-specific menu
                                                                    CustomComponents.DrawSymbolCodeContextMenuItem(symbol);
 
-                                                                   if (CustomComponents.DrawMenuItem(_revealSymbolInExplorerId, "Reveal Symbol in Explorer",
+                                                                   if (CustomComponents.DrawMenuItem(_revealSymbolInExplorerId, _revealSymbolLabel,
                                                                                                      reserveIconColumn: false))
                                                                    {
                                                                        RevealInExplorer(GetFileOfSymbol(symbol));
                                                                    }
 
-                                                                   if (CustomComponents.DrawMenuItem(_revealProjectInExplorerId, "Reveal Project in Explorer",
+                                                                   if (CustomComponents.DrawMenuItem(_revealProjectInExplorerId, _revealProjectLabel,
                                                                                                      reserveIconColumn: false))
                                                                    {
                                                                        RevealInExplorer(symbol.SymbolPackage.Folder);
@@ -1256,4 +1256,7 @@ internal sealed class SymbolLibrary : Window
     private static readonly int _revealSymbolInExplorerId = nameof(_revealSymbolInExplorerId).GetHashCode();
     private static readonly int _revealProjectInExplorerId = nameof(_revealProjectInExplorerId).GetHashCode();
     private static readonly int _revealNamespaceInExplorerId = nameof(_revealNamespaceInExplorerId).GetHashCode();
+    private static readonly string _revealSymbolLabel = "Reveal Symbol in " + PlatformNames.FileBrowser;
+    private static readonly string _revealProjectLabel = "Reveal Project in " + PlatformNames.FileBrowser;
+    private static readonly string _revealNamespaceLabel = "Reveal Namespace in " + PlatformNames.FileBrowser;
 }

@@ -132,7 +132,7 @@ internal sealed class MissingOperatorsDialog : ModalDialog
                 RevealFile(entry.FilePath!);
             }
 
-            CustomComponents.TooltipForLastItem("Reveal in Explorer", entry.FilePath);
+            CustomComponents.TooltipForLastItem(PlatformNames.RevealInFileBrowser, entry.FilePath);
             ImGui.PopID();
         }
     }

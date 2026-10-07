@@ -36,7 +36,7 @@ internal sealed partial class AssetLibrary
             }
 
             var isValidDir = _state.ActiveAsset is { IsDirectory: true, FileSystemInfo: not null }; 
-            if (CustomComponents.DrawMenuItem(_revealInExplorerId, "Reveal in Explorer",
+            if (CustomComponents.DrawMenuItem(_revealInExplorerId, PlatformNames.RevealInFileBrowser,
                                               null,
                                               false,
                                               !string.IsNullOrEmpty(absolutePath)))

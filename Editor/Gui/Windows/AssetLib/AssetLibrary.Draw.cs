@@ -189,7 +189,7 @@ internal sealed partial class AssetLibrary
             CustomComponents.ContextMenuForItem(() =>
             {
                 CustomComponents.StylizedText(folder.Name, Fonts.FontSmall, UiColors.TextMuted);
-                if (CustomComponents.DrawMenuItem(_openFolderInExplorerId, "Open in Explorer", reserveIconColumn: false))
+                if (CustomComponents.DrawMenuItem(_openFolderInExplorerId, PlatformNames.OpenInFileBrowser, reserveIconColumn: false))
                 {
                     if (!string.IsNullOrEmpty(_folderForMenu.AbsolutePath))
                     {
@@ -433,7 +433,7 @@ internal sealed partial class AssetLibrary
                     }
                 }
 
-                if (CustomComponents.DrawMenuItem(_revealAssetInExplorerId, "Reveal in Explorer", reserveIconColumn: false))
+                if (CustomComponents.DrawMenuItem(_revealAssetInExplorerId, PlatformNames.RevealInFileBrowser, reserveIconColumn: false))
                 {
                     var absolutePath = asset.FullPath;
 

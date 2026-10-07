@@ -112,7 +112,7 @@ internal sealed class RestoreBackupDialog : ModalDialog
         ImGui.TextWrapped(_resultMessage);
         FormInputs.AddVerticalSpace(8);
 
-        if (ImGui.Button("Reveal in Explorer"))
+        if (ImGui.Button(PlatformNames.RevealInFileBrowser))
             CoreUi.Instance.OpenWithDefaultApplication(_projectFolder);
 
         ImGui.SameLine();

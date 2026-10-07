@@ -44,6 +44,13 @@ public sealed class SdlCoreUi : ICoreSystemUiService
             return;
         }
 
+        if (OperatingSystem.IsMacOS() && (File.Exists(fullPath) || Directory.Exists(fullPath)))
+        {
+            // Finder opens the enclosing folder with the item selected.
+            Process.Start(new ProcessStartInfo("open", ["-R", fullPath]));
+            return;
+        }
+
         // Selecting a file needs a platform file-manager API; opening its folder works everywhere.
         OpenWithDefaultApplication(File.Exists(fullPath) ? Path.GetDirectoryName(fullPath)! : fullPath);
     }
