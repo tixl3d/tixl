@@ -16,7 +16,7 @@
         <ApplicationIcon>..\EditorResources\images\t3.ico</ApplicationIcon>
         <RootNamespace>T3.Editor</RootNamespace>
         <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
-        <RuntimeIdentifiers>win-x64;linux-x64;osx-x64</RuntimeIdentifiers>
+        <RuntimeIdentifiers>win-x64;linux-x64;osx-arm64</RuntimeIdentifiers>
         <EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>
         <Deterministic>true</Deterministic>
         <Configurations>Debug;Release</Configurations>
@@ -99,17 +99,23 @@
     <!--This
     copies all files in the `dependencies` folder *directly* into the output directory-->
     <ItemGroup>
-        <Content Include="../Dependencies/**/*" Exclude="../Dependencies/linux-x64/**/*" Visible="false">
+        <Content Include="../Dependencies/**/*" Exclude="../Dependencies/linux-x64/**/*;../Dependencies/osx/**/*" Visible="false">
             <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
     </ItemGroup>
 
-    <!-- BASS ships one native per platform under the same managed name, so the Linux shared objects live in
-         their own folder and are copied only there - the flat copy above would otherwise drop them into a
-         Windows build as dead weight. BASSWASAPI has no Linux build; audio input is gated on it at runtime. -->
-    <ItemGroup Condition="!$([MSBuild]::IsOSPlatform('Windows'))">
+    <!-- BASS ships one native per platform under the same managed name, so the Linux and macOS libraries live
+         in their own folders and are copied only there - the flat copy above would otherwise drop them into a
+         Windows build as dead weight. BASSWASAPI is Windows-only; audio input is gated on it at runtime. -->
+    <ItemGroup Condition="$([MSBuild]::IsOSPlatform('Linux'))">
         <Content Include="../Dependencies/linux-x64/*.so" Visible="false">
+            <Link>%(Filename)%(Extension)</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+    <ItemGroup Condition="$([MSBuild]::IsOSPlatform('OSX'))">
+        <Content Include="../Dependencies/osx/*.dylib" Visible="false">
             <Link>%(Filename)%(Extension)</Link>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>

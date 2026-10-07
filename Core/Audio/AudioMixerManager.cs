@@ -220,7 +220,7 @@ public static class AudioMixerManager
         }
 
         // Load BASS FLAC plugin for native FLAC support (better than Media Foundation)
-        _flacPluginHandle = Bass.PluginLoad(OperatingSystem.IsWindows() ? "bassflac.dll" : "libbassflac.so");
+        _flacPluginHandle = Bass.PluginLoad(NativeFileName("bassflac"));
         if (_flacPluginHandle == 0)
         {
             Log.Warning($"[AudioMixer] Failed to load BASS FLAC plugin: {Bass.LastError}. FLAC files will use Media Foundation fallback.");
@@ -687,11 +687,11 @@ public static class AudioMixerManager
         try
         {
             // Natives load from the app folder, not the working directory (which a launcher may set anywhere).
-            var bassFileName = OperatingSystem.IsWindows() ? "bass.dll" : "libbass.so";
+            var bassFileName = NativeFileName("bass");
             var bassDllExists = System.IO.File.Exists(System.IO.Path.Combine(AppContext.BaseDirectory, bassFileName));
             Log.Error($"  {bassFileName} exists in app dir: {bassDllExists}");
             
-            var bassMixFileName = OperatingSystem.IsWindows() ? "bassmix.dll" : "libbassmix.so";
+            var bassMixFileName = NativeFileName("bassmix");
             var bassMixDllExists = System.IO.File.Exists(System.IO.Path.Combine(AppContext.BaseDirectory, bassMixFileName));
             Log.Error($"  {bassMixFileName} exists in app dir: {bassMixDllExists}");
         }
@@ -699,5 +699,14 @@ public static class AudioMixerManager
         {
             Log.Error($"  Failed to check DLL existence: {ex.Message}");
         }
+    }
+
+    /// <summary>The file name un4seen ships a BASS library under on this platform.</summary>
+    private static string NativeFileName(string name)
+    {
+        if (OperatingSystem.IsWindows())
+            return name + ".dll";
+
+        return OperatingSystem.IsMacOS() ? "lib" + name + ".dylib" : "lib" + name + ".so";
     }
 }

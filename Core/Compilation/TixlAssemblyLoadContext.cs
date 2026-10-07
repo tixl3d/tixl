@@ -596,13 +596,14 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
             }
         }
 
-        // check for the .so extension on linux/mac
+        // check for the platform's native extension on linux/mac
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ||
             RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD))
         {
+            var extension = RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? ".dylib" : ".so";
             var unixPath = pathFullyQualified
-                               ? Path.ChangeExtension(fullPath, ".so")
-                               : Path.Combine(MainDirectory, unmanagedDllName + ".so");
+                               ? Path.ChangeExtension(fullPath, extension)
+                               : Path.Combine(MainDirectory, unmanagedDllName + extension);
 
             if (File.Exists(unixPath))
             {

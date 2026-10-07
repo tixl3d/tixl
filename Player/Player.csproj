@@ -34,15 +34,21 @@
     <ItemGroup>
         <!-- DanceAi.dll is referenced by Core and arrives through it; copying it here too makes publish fail with
              NETSDK1152 (two outputs at the same path), which silently left the exported player stale. -->
-        <Content Include="../Dependencies/**/*" Exclude="../Dependencies/DanceAi.dll;../Dependencies/linux-x64/**/*" Visible="false">
+        <Content Include="../Dependencies/**/*" Exclude="../Dependencies/DanceAi.dll;../Dependencies/linux-x64/**/*;../Dependencies/osx/**/*" Visible="false">
             <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
     </ItemGroup>
 
-    <!-- See Editor.csproj: BASS's Linux natives are copied only on Linux. -->
-    <ItemGroup Condition="!$([MSBuild]::IsOSPlatform('Windows'))">
+    <!-- See Editor.csproj: BASS's Linux and macOS natives are copied only on their own platform. -->
+    <ItemGroup Condition="$([MSBuild]::IsOSPlatform('Linux'))">
         <Content Include="../Dependencies/linux-x64/*.so" Visible="false">
+            <Link>%(Filename)%(Extension)</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+    <ItemGroup Condition="$([MSBuild]::IsOSPlatform('OSX'))">
+        <Content Include="../Dependencies/osx/*.dylib" Visible="false">
             <Link>%(Filename)%(Extension)</Link>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
