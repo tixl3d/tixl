@@ -239,6 +239,11 @@ internal static unsafe class SdlImGuiInput
                 io.KeyCtrl = down;
                 io.AddKeyEvent(ImGuiKey.ModCtrl, down);
                 break;
+            case VirtualKeyLeftWindows or VirtualKeyRightWindows:
+                // Physical Ctrl on macOS (see SdlKeyMap). Nothing in TiXL uses it yet; ImGui gets it as Super.
+                io.KeySuper = down;
+                io.AddKeyEvent(ImGuiKey.ModSuper, down);
+                break;
             case VirtualKeyAlt:
                 io.KeyAlt = down;
                 io.AddKeyEvent(ImGuiKey.ModAlt, down);
@@ -274,7 +279,7 @@ internal static unsafe class SdlImGuiInput
             KeyHandler.SetKeyUp(Key.ShiftKey);
         }
 
-        if (io.KeyCtrl && (modifiers & SDL_Keymod.SDL_KMOD_CTRL) == 0)
+        if (io.KeyCtrl && (modifiers & SdlKeyMap.ShortcutModifier) == 0)
         {
             io.KeyCtrl = false;
             io.AddKeyEvent(ImGuiKey.ModCtrl, false);
@@ -315,7 +320,7 @@ internal static unsafe class SdlImGuiInput
 
     private static bool IsMainWindow(SDL_WindowID windowId) => ProgramWindows.Main != null && windowId == ProgramWindows.Main.Id;
 
-    private static bool IsCtrlDown() => (SDL_GetModState() & SDL_Keymod.SDL_KMOD_CTRL) != 0;
+    private static bool IsCtrlDown() => (SDL_GetModState() & SdlKeyMap.ShortcutModifier) != 0;
 
     private static System.Numerics.Vector2 ToPixels(float x, float y)
     {
@@ -351,6 +356,8 @@ internal static unsafe class SdlImGuiInput
     private const int VirtualKeyShift = 0x10;
     private const int VirtualKeyControl = 0x11;
     private const int VirtualKeyAlt = 0x12;
+    private const int VirtualKeyLeftWindows = 0x5B;
+    private const int VirtualKeyRightWindows = 0x5C;
 
     private static readonly Gestures.SdlPointerGestureSource _gestures = new();
     private static IntPtr _clipboardText;

@@ -1,6 +1,7 @@
 using ImGuiNET;
 using T3.Core.Animation;
 using T3.Core.Utils;
+using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.Styling;
 using T3.SystemUi;
 
@@ -243,8 +244,8 @@ public static class KeyboardAndMouseOverlay
                                                                       new(9, "Tab"),
                                                                       new(13, "Return"),
                                                                       new(16, "Shift"),
-                                                                      new(17, "Ctrl"),
-                                                                      new(18, "Alt"),
+                                                                      new(17, KeyCombination.CtrlLabel),
+                                                                      new(18, KeyCombination.AltLabel),
                                                                       new(20, "Caps"),
                                                                       new(27, "Esc"),
                                                                       new(32, "Space"),

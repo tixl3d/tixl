@@ -77,6 +77,9 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
             io.BackendFlags |= ImGuiBackendFlags.HasMouseCursors
                              | ImGuiBackendFlags.RendererHasVtxOffset;
             io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
+
+            // SdlKeyMap already turns Cmd into Ctrl on macOS; ImGui's own swap would turn it back.
+            io.ConfigMacOSXBehaviors = false;
             SdlImGuiInput.InstallClipboard();
             SdlImGuiInput.InstallGestures();
 

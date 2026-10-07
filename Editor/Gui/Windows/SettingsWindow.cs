@@ -231,7 +231,7 @@ internal sealed partial class SettingsWindow : Window
                     changed |= FormInputs.AddFloat("Sequential screenshots",
                                                    ref UserSettings.Config.ContinuousScreenshotDelay,
                                                    0.1f, 60f, 0.1f, true, true,
-                                                   "Seconds between captures when continuous screenshot mode is active. Ctrl-click the screenshot icon in the output window to start it.",
+                                                   "Seconds between captures when continuous screenshot mode is active. " + KeyCombination.CtrlLabel + "-click the screenshot icon in the output window to start it.",
                                                    UserSettings.Defaults.ContinuousScreenshotDelay);
 
                     FormInputs.AddVerticalSpace();
@@ -253,9 +253,9 @@ internal sealed partial class SettingsWindow : Window
                     FormInputs.AddVerticalSpace();
                     FormInputs.AddSectionSubHeader("Advanced options");
 
-                    changed |= FormInputs.AddCheckBox("Editing values with mousewheel needs CTRL key",
+                    changed |= FormInputs.AddCheckBox("Editing values with mousewheel needs " + KeyCombination.CtrlLabel + " key",
                                                       ref UserSettings.Config.MouseWheelEditsNeedCtrlKey,
-                                                      "In parameter window you can edit numeric values by using the mouse wheel. This setting will prevent accidental modifications while scrolling because by using ctrl key for activation.",
+                                                      "In parameter window you can edit numeric values by using the mouse wheel. This setting will prevent accidental modifications while scrolling because by using " + KeyCombination.CtrlLabel + " key for activation.",
                                                       UserSettings.Defaults.MouseWheelEditsNeedCtrlKey);
 
                     changed |= FormInputs.AddCheckBox("Mousewheel adjust flight speed",

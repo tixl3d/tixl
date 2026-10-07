@@ -194,11 +194,11 @@ internal static class KeyMapEditor
 
         var needsUpdate = false;
 
-        if (DrawToggle("Ctrl", _selectedCombo.Ctrl))
+        if (DrawToggle(KeyCombination.CtrlLabel, _selectedCombo.Ctrl))
             _selectedCombo.Ctrl = !_selectedCombo.Ctrl;
 
         ImGui.SameLine(0, 4);
-        if (DrawToggle("Alt", _selectedCombo.Alt))
+        if (DrawToggle(KeyCombination.AltLabel, _selectedCombo.Alt))
             _selectedCombo.Alt = !_selectedCombo.Alt;
 
         ImGui.SameLine(0, 4);

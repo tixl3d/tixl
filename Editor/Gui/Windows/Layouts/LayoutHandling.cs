@@ -62,7 +62,7 @@ internal static class LayoutHandling
             for (int i = 0; i < 10; i++)
             {
                 var label = "Layout " + (i + 1);
-                if (CustomComponents.DrawMenuItem(label.GetHashCode(), Icon.None, label, "Ctrl+F" + (i + 1), reserveIconColumn: false))
+                if (CustomComponents.DrawMenuItem(label.GetHashCode(), Icon.None, label, KeyCombination.CtrlLabel + "+F" + (i + 1), reserveIconColumn: false))
                 {
                     SaveLayout(i);
                 }

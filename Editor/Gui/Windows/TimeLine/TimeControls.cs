@@ -411,7 +411,7 @@ internal static class TimeControls
             }
 
             CustomComponents.TooltipForLastItem("Click on beat to sync. Tap later once to refine. Click right to sync measure.\n"
-                                                + "Ctrl+Click to round BPM",
+                                                + KeyCombination.CtrlLabel + "+Click to round BPM",
                                                 $"Tap: {UserActions.TapBeatSync.ListShortcuts()}\n"
                                                 + $"Resync: {UserActions.TapBeatSyncMeasure.ListShortcuts()}");
 

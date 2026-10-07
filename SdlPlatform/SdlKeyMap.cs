@@ -10,12 +10,31 @@ namespace T3.SdlPlatform;
 /// Letters and digits follow the keyboard layout on both sides, so German QWERTZ's Z stays Z. Windows assigns
 /// punctuation keys an "OEM" code by the character they type, not by their position, so those are mapped by
 /// character for the US and German layouts.
+///
+/// On macOS Cmd and Ctrl trade places: Cmd becomes the Ctrl that every TiXL shortcut and ImGui text field is
+/// written against, and the physical Ctrl key becomes the Windows key. Saved key bindings stay portable.
 /// </remarks>
 public static class SdlKeyMap
 {
+    /// <summary>The modifier that acts as TiXL's Ctrl: Cmd on macOS, Ctrl elsewhere.</summary>
+    public static SDL_Keymod ShortcutModifier { get; } = OperatingSystem.IsMacOS() ? SDL_Keymod.SDL_KMOD_GUI : SDL_Keymod.SDL_KMOD_CTRL;
+
     /// <summary>Returns <see cref="Key.Undefined"/> (0) for keys without a Win32 equivalent.</summary>
     public static int ToVirtualKey(SDL_Keycode keycode)
     {
+        if (OperatingSystem.IsMacOS())
+        {
+            switch (keycode)
+            {
+                case SDL_Keycode.SDLK_LGUI or SDL_Keycode.SDLK_RGUI:
+                    return VkControl;
+                case SDL_Keycode.SDLK_LCTRL:
+                    return VkLeftWindows;
+                case SDL_Keycode.SDLK_RCTRL:
+                    return VkRightWindows;
+            }
+        }
+
         var code = (uint)keycode;
         if (code is >= 'a' and <= 'z')
             return (int)(code - 'a' + 'A');
@@ -35,6 +54,9 @@ public static class SdlKeyMap
         return _otherKeys.TryGetValue(code, out var virtualKey) ? virtualKey : (int)Key.Undefined;
     }
 
+    private const int VkControl = 0x11;
+    private const int VkLeftWindows = 0x5B;
+    private const int VkRightWindows = 0x5C;
     private const int VkF1 = 0x70;
     private const int VkF13 = 0x7C;
     private const int VkNumpad1 = 0x61;

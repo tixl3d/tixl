@@ -89,7 +89,7 @@ internal static class GraphBookmarkNavigation
         var bookmark = GetBookmarkAt(index);
         if (bookmark == null)
         {
-            Log.Debug($"Bookmark {index} doesn't exist. You can create it by focusing a graph window and press Ctrl+Shift" + index);
+            Log.Debug($"Bookmark {index} doesn't exist. You can create it by focusing a graph window and press {KeyCombination.CtrlLabel}+Shift" + index);
             return;
         }
 
