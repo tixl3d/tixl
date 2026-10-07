@@ -36,6 +36,16 @@ public static unsafe class SdlSurface
         return extensions;
     }
 
+    /// <summary>
+    /// Makes SDL load the Vulkan loader from this path rather than by name. Must happen before the first
+    /// <c>SDL_WINDOW_VULKAN</c> window; null keeps SDL's own lookup.
+    /// </summary>
+    public static void SetVulkanLibraryPath(string? path)
+    {
+        if (path != null)
+            SDL_SetHint(SDL_HINT_VULKAN_LIBRARY, path);
+    }
+
     /// <summary>A surface for a window created with <c>SDL_WINDOW_VULKAN</c>; zero on failure.</summary>
     public static nint CreateVulkanSurface(SDL_Window* window, nint instance)
     {

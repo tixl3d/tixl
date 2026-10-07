@@ -325,3 +325,4 @@ shadertoolsconfig.json
 **/swiftcam.dll
 # Generated video proxies — regenerable, machine-local (suffix from VideoPlayback.ProxySuffix)
 *.proxy.mov
+.DS_Store

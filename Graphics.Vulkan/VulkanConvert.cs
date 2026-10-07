@@ -5,6 +5,9 @@ namespace T3.Graphics.Vulkan;
 
 internal static class VulkanConvert
 {
+    /// <summary>Set by the backend from the device; D24 formats fall back to D32S8 where it is false.</summary>
+    internal static bool SupportsD24S8 = true;
+
     /// <summary>
     /// DXGI formats to Vulkan's. Only the formats TiXL can actually create are listed; anything else comes
     /// back as Undefined and is reported rather than silently rendering wrong.
@@ -47,9 +50,9 @@ internal static class VulkanConvert
                        // Vulkan has no typeless formats. D3D11 declares a depth buffer it also samples as
                        // typeless and picks the concrete format per view, so use the depth one for the image.
                        Format.R32_Typeless          => VkFormat.D32Sfloat,
-                       Format.R24G8_Typeless        => VkFormat.D24UnormS8Uint,
+                       Format.R24G8_Typeless        => SupportsD24S8 ? VkFormat.D24UnormS8Uint : VkFormat.D32SfloatS8Uint,
                        Format.D32_Float_S8X24_UInt  => VkFormat.D32SfloatS8Uint,
-                       Format.D24_UNorm_S8_UInt     => VkFormat.D24UnormS8Uint,
+                       Format.D24_UNorm_S8_UInt     => SupportsD24S8 ? VkFormat.D24UnormS8Uint : VkFormat.D32SfloatS8Uint,
                        Format.D16_UNorm             => VkFormat.D16Unorm,
                        Format.R10G10B10A2_UNorm     => VkFormat.A2B10G10R10UnormPack32,
                        Format.R10G10B10A2_UInt      => VkFormat.A2B10G10R10UintPack32,

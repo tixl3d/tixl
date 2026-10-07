@@ -74,6 +74,7 @@ internal static partial class Program
 
         CoreSettings.Config = exportSettings.ConfigData;
 
+        SdlSurface.SetVulkanLibraryPath(T3.Graphics.Vulkan.VulkanLoader.FindLibraryPath());
         if (!SDL_Init(SDL_InitFlags.SDL_INIT_VIDEO))
         {
             BlockingWindow.Instance.ShowMessageBox($"Failed to initialize SDL: {SDL_GetError()}");

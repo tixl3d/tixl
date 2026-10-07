@@ -36,7 +36,8 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
 
     public VulkanBackend(VulkanBackendOptions options)
     {
-        vkInitialize().CheckResult();
+        var loaderPath = VulkanLoader.FindLibraryPath();
+        (loaderPath != null ? vkInitialize(loaderPath) : vkInitialize()).CheckResult();
 
         var enableValidation = options.EnableValidation;
         var layers = new List<VkUtf8String>();
@@ -58,6 +59,12 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
             GraphicsLog.WarnOnce("The Vulkan validation layer is not installed; running without it.");
         }
 
+        // MoltenVK is not a conformant driver, and the loader hides such drivers unless the instance opts in.
+        // SDL already asks for the extension on macOS; the flag is ours to set.
+        var enumeratePortability = IsInstanceExtensionAvailable(PortabilityEnumerationName);
+        if (enumeratePortability && !extensions.Contains(PortabilityEnumerationName))
+            extensions.Add(PortabilityEnumerationName);
+
         VkUtf8ReadOnlyString applicationName = "TiXL"u8;
         VkApplicationInfo applicationInfo = new()
                                                 {
@@ -72,6 +79,7 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         VkInstanceCreateInfo instanceInfo = new()
                                                 {
                                                     pApplicationInfo = &applicationInfo,
+                                                    flags = enumeratePortability ? VkInstanceCreateFlags.EnumeratePortabilityKHR : VkInstanceCreateFlags.None,
                                                     enabledLayerCount = layerNames.Length,
                                                     ppEnabledLayerNames = layerNames,
                                                     enabledExtensionCount = extensionNames.Length,
@@ -88,11 +96,32 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
                                                                pfnUserCallback = &OnDebugMessage,
                                                            };
 
-        // Attached to the create info as well, so errors during instance creation are reported too.
+        // Attached to the create info as well, so errors during instance creation are reported too. Those come
+        // from the loader (a layer that fails to load) rather than from validation, so they are marked as not
+        // to be counted - the count is process-wide and other backends' tests compare against it.
+        VkDebugUtilsMessengerCreateInfoEXT instanceDebugInfo = debugInfo;
+        instanceDebugInfo.pUserData = (void*)InstanceCreationMarker;
         if (validationEnabled)
-            instanceInfo.pNext = &debugInfo;
+            instanceInfo.pNext = &instanceDebugInfo;
 
-        vkCreateInstance(&instanceInfo, out _instance).CheckResult();
+        var instanceResult = vkCreateInstance(&instanceInfo, out _instance);
+
+        // The layer's manifest can be found while its library is not: Homebrew's names a bare dylib that macOS
+        // only finds with DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib. Validation is a debugging aid, so
+        // losing it must not cost the device.
+        if (instanceResult == VkResult.ErrorLayerNotPresent && validationEnabled)
+        {
+            GraphicsLog.WarnOnce("The Vulkan validation layer is installed but failed to load; running without it.");
+            validationEnabled = false;
+            instanceInfo.enabledLayerCount = 0;
+            instanceInfo.pNext = null;
+            using var extensionsWithoutDebug = new VkStringArray(extensions.Where(name => name != "VK_EXT_debug_utils").ToList());
+            instanceInfo.enabledExtensionCount = extensionsWithoutDebug.Length;
+            instanceInfo.ppEnabledExtensionNames = extensionsWithoutDebug;
+            instanceResult = vkCreateInstance(&instanceInfo, out _instance);
+        }
+
+        instanceResult.CheckResult();
         InstanceApi = GetApi(_instance);
 
         if (validationEnabled)
@@ -123,6 +152,11 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         if (supportsMemoryBudget)
             deviceExtensions.Add(VK_EXT_MEMORY_BUDGET_EXTENSION_NAME);
 
+        // The spec requires enabling it wherever it is advertised, together with the subset features used.
+        var isPortabilitySubset = HasDeviceExtension(PhysicalDevice, VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME);
+        if (isPortabilitySubset)
+            deviceExtensions.Add(VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME);
+
         // Only when the instance can make a surface at all: VK_KHR_swapchain requires VK_KHR_surface, and a
         // headless instance was not given it. A window that appears later needs the extensions up front,
         // which is why the caller passes them when it has a window in mind.
@@ -133,7 +167,8 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
 
         using var deviceExtensionNames = new VkStringArray(deviceExtensions);
 
-        VkPhysicalDeviceVulkan13Features supported13 = new();
+        VkPhysicalDevicePortabilitySubsetFeaturesKHR portabilityFeatures = new();
+        VkPhysicalDeviceVulkan13Features supported13 = new() { pNext = isPortabilitySubset ? &portabilityFeatures : null };
         VkPhysicalDeviceVulkan12Features supported12 = new() { pNext = &supported13 };
         VkPhysicalDeviceFeatures2 supported = new() { pNext = &supported12 };
         InstanceApi.vkGetPhysicalDeviceFeatures2(PhysicalDevice, &supported);
@@ -141,8 +176,15 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         // shaderIntegerDotProduct is not something TiXL's shaders ask for, but slang emits the DotProduct
         // capability on its own. Without the feature enabled the module is invalid, vkCreateShaderModule
         // rejects it, and the draw silently renders nothing at all.
+        // Whatever subset the device supports is enabled as reported; the gaps are logged once.
+        if (isPortabilitySubset)
+            LogPortabilityGaps(portabilityFeatures);
+
+        _supportsMipLodBias = !isPortabilitySubset || portabilityFeatures.samplerMipLodBias;
+
         VkPhysicalDeviceVulkan13Features features13 = new()
                                                           {
+                                                              pNext = isPortabilitySubset ? &portabilityFeatures : null,
                                                               dynamicRendering = true,
                                                               synchronization2 = true,
                                                               shaderIntegerDotProduct = supported13.shaderIntegerDotProduct,
@@ -169,7 +211,9 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         features2.features.depthClamp = true;
         features2.features.fillModeNonSolid = true;
         features2.features.independentBlend = true;
-        features2.features.geometryShader = true;
+        // Metal has no geometry shaders. Only the cubemap operators use them; their pipelines fail on
+        // their own where the feature is missing, which is better than no device at all.
+        features2.features.geometryShader = supported.features.geometryShader;
 
         VkDeviceCreateInfo deviceInfo = new()
                                             {
@@ -181,6 +225,10 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
                                             };
 
         InstanceApi.vkCreateDevice(PhysicalDevice, &deviceInfo, null, out _device).CheckResult();
+
+        // Apple GPUs have no D24S8; D32S8 holds everything it would.
+        InstanceApi.vkGetPhysicalDeviceFormatProperties(PhysicalDevice, VkFormat.D24UnormS8Uint, out var d24Properties);
+        VulkanConvert.SupportsD24S8 = (d24Properties.optimalTilingFeatures & VkFormatFeatureFlags.DepthStencilAttachment) != 0;
         Api = GetApi(_instance, _device);
         Api.vkGetDeviceQueue(_queueFamilyIndex, 0, out _queue);
 
@@ -547,7 +595,8 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
                                                   addressModeU = VulkanConvert.ToVulkan(description.AddressU),
                                                   addressModeV = VulkanConvert.ToVulkan(description.AddressV),
                                                   addressModeW = VulkanConvert.ToVulkan(description.AddressW),
-                                                  mipLodBias = description.MipLodBias,
+                                                  // A portability driver may not support a bias at all, and then rejects any but zero.
+                                                  mipLodBias = _supportsMipLodBias ? description.MipLodBias : 0f,
                                                   anisotropyEnable = description.MaxAnisotropy > 1,
                                                   maxAnisotropy = Math.Clamp(description.MaxAnisotropy, 1, (int)_limits.maxSamplerAnisotropy),
                                                   compareEnable = description.Compare != null,
@@ -1266,21 +1315,30 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
                                        VkDebugUtilsMessengerCallbackDataEXT* callbackData, void* userData)
     {
         var message = new VkUtf8String(callbackData->pMessage).ToString();
+        var isError = (severity & VkDebugUtilsMessageSeverityFlagsEXT.Error) != 0;
 
-        if ((severity & VkDebugUtilsMessageSeverityFlagsEXT.Error) != 0)
-        {
+        if (isError && userData != (void*)InstanceCreationMarker)
             Interlocked.Increment(ref _validationErrorCount);
-            GraphicsLog.Error?.Invoke($"[Vulkan] {message}");
-        }
-        else
+
+        // Called from native code: an exception escaping here (a log sink that has gone away, as a finished
+        // test's output does) cannot unwind through the driver and aborts the process.
+        try
         {
-            GraphicsLog.Warning?.Invoke($"[Vulkan] {message}");
+            if (isError)
+                GraphicsLog.Error?.Invoke($"[Vulkan] {message}");
+            else
+                GraphicsLog.Warning?.Invoke($"[Vulkan] {message}");
+        }
+        catch (Exception)
+        {
+            // Nothing sensible left to report to.
         }
 
         return VK_FALSE;
     }
 
     private static int _validationErrorCount;
+    private const nint InstanceCreationMarker = 1;
 
     /// <summary>
     /// The requested sample count, reduced to one the device offers for the ways this image will be used.
@@ -1441,6 +1499,67 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         return false;
     }
 
+    private static bool IsInstanceExtensionAvailable(string extensionName)
+    {
+        uint count = 0;
+        vkEnumerateInstanceExtensionProperties(&count, null).CheckResult();
+        var extensions = new VkExtensionProperties[count];
+        vkEnumerateInstanceExtensionProperties(extensions).CheckResult();
+
+        for (var index = 0; index < extensions.Length; index++)
+        {
+            fixed (byte* namePointer = extensions[index].extensionName)
+            {
+                if (new VkUtf8String(namePointer).ToString() == extensionName)
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    private bool HasDeviceExtension(VkPhysicalDevice physicalDevice, VkUtf8String extensionName)
+    {
+        uint count = 0;
+        InstanceApi.vkEnumerateDeviceExtensionProperties(physicalDevice, null, &count, null).CheckResult();
+        var extensions = new VkExtensionProperties[count];
+
+        fixed (VkExtensionProperties* pointer = extensions)
+        {
+            InstanceApi.vkEnumerateDeviceExtensionProperties(physicalDevice, null, &count, pointer).CheckResult();
+        }
+
+        for (var index = 0; index < extensions.Length; index++)
+        {
+            fixed (byte* namePointer = extensions[index].extensionName)
+            {
+                if (new VkUtf8String(namePointer) == extensionName)
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>The D3D11 behavior a portability driver (MoltenVK) cannot match, for when a render differs.</summary>
+    private static void LogPortabilityGaps(in VkPhysicalDevicePortabilitySubsetFeaturesKHR features)
+    {
+        var missing = new List<string>();
+        if (!features.constantAlphaColorBlendFactors) missing.Add("constantAlphaColorBlendFactors");
+        if (!features.imageViewFormatReinterpretation) missing.Add("imageViewFormatReinterpretation");
+        if (!features.imageViewFormatSwizzle) missing.Add("imageViewFormatSwizzle");
+        if (!features.imageView2DOn3DImage) missing.Add("imageView2DOn3DImage");
+        if (!features.multisampleArrayImage) missing.Add("multisampleArrayImage");
+        if (!features.mutableComparisonSamplers) missing.Add("mutableComparisonSamplers");
+        if (!features.pointPolygons) missing.Add("pointPolygons");
+        if (!features.samplerMipLodBias) missing.Add("samplerMipLodBias");
+        if (!features.separateStencilMaskRef) missing.Add("separateStencilMaskRef");
+        if (!features.vertexAttributeAccessBeyondStride) missing.Add("vertexAttributeAccessBeyondStride");
+
+        if (missing.Count > 0)
+            GraphicsLog.WarnOnce("The Vulkan driver is a portability subset without: " + string.Join(", ", missing));
+    }
+
     private static bool IsLayerAvailable(VkUtf8String layerName)
     {
         uint layerCount = 0;
@@ -1501,12 +1620,14 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
     }
 
     private static readonly VkUtf8String ValidationLayerName = "VK_LAYER_KHRONOS_validation"u8;
+    private const string PortabilityEnumerationName = "VK_KHR_portability_enumeration";
 
     private readonly VkInstance _instance;
     private readonly VkDevice _device;
     private readonly VkQueue _queue;
     private readonly uint _queueFamilyIndex;
     private readonly VkPhysicalDeviceLimits _limits;
+    private readonly bool _supportsMipLodBias;
     private readonly bool _supportsMemoryBudget;
     private bool _supportsSwapchain;
     private readonly bool _debugNamesAvailable;

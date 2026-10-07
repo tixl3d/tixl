@@ -28,6 +28,7 @@ using T3.Editor.SystemUi;
 using T3.Editor.UiContentDrawing;
 using T3.Editor.UiModel.Helpers;
 using SDL;
+using T3.SdlPlatform;
 using T3.SystemUi;
 using ShaderCompiler = T3.Core.Resource.ShaderCompiling.ShaderCompiler;
 
@@ -108,6 +109,7 @@ internal static class Program
         BlockingWindow.Instance = windowProvider;
 
         // The editor's windows are SDL windows; its message boxes and splash screen are not, and do not need it.
+        SdlSurface.SetVulkanLibraryPath(T3.Graphics.Vulkan.VulkanLoader.FindLibraryPath());
         if (!SDL3.SDL_Init(SDL_InitFlags.SDL_INIT_VIDEO))
         {
             BlockingWindow.Instance.ShowMessageBox($"Failed to initialize SDL: {SDL3.SDL_GetError()}");
