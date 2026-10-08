@@ -190,14 +190,18 @@ internal static class Combine
             Log.Error($"Could not compile new symbol '{newSymbolName}': {failureLog}");
             
             const string exit = "Exit";
-            var choice = BlockingWindow.Instance.ShowMessageBox("""
-                                                                Sadly the compilation of the combined operator filed.
-                                                                
+            // The log goes in a code block: message boxes render Markdown, and build output is full of * and _.
+            var choice = BlockingWindow.Instance.ShowMessageBox($$"""
+                                                                Sadly the compilation of the combined operator failed.
+
                                                                 Potential reasons:
                                                                 - An input name is using a known core type.
-                                                                - Some other protected names or keywords are used 
+                                                                - Some other protected names or keywords are used
 
-                                                                """ + failureLog, 
+                                                                ```
+                                                                {{failureLog}}
+                                                                ```
+                                                                """, 
                                                                 "Can't compile", 
                                                                 exit,
                                                                 "Try to continue");

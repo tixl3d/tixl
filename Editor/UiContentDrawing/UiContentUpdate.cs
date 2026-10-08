@@ -5,10 +5,13 @@ using System.Runtime.InteropServices;
 using ImGuiNET;
 using SilkWindows;
 using T3.Core.Resource;
+using T3.Core.SystemUi;
 using T3.Editor.App;
 using T3.Editor.Gui;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.SystemUi;
+using T3.SdlPlatform;
 
 namespace T3.Editor.UiContentDrawing;
 
@@ -64,8 +67,14 @@ internal static class UiContentUpdate
         var codeFont = new TtfFont(codeFontPath, 18f * dpiAwareScale);
         Fonts.Code = fontAtlasPtr.AddFontFromFileTTF(codeFont.Path, codeFont.PixelSize, default, ranges);
 
-        ImGuiWindowService.Instance.SetFonts(new FontPack(normalFont, boldFont, smallFont, largeFont));
+        var fontPack = new FontPack(normalFont, boldFont, smallFont, largeFont);
+        ImGuiWindowService.Instance.SetFonts(fontPack);
+        (BlockingWindow.Instance as SdlMessageBoxProvider)?.ShareFonts(fontAtlasPtr,
+                                                                       new ImFonts([Fonts.FontSmall, Fonts.FontNormal, Fonts.FontBold, Fonts.FontLarge]),
+                                                                       _messageBoxLook);
     }
+
+    private static readonly EditorMessageBoxLook _messageBoxLook = new();
 
     /// <summary>
     /// Extended glyph ranges for the editor's TTF fonts. Default ImGui only
