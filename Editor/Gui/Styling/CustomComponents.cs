@@ -154,9 +154,10 @@ internal static partial class CustomComponents
     public static bool EmptyWindowMessage(string message, string buttonLabel = null)
     {
         var center = ImGui.GetWindowPos() + ImGui.GetWindowSize() * 0.5f;
-        var lines = message.Split('\n').ToArray();
+        var wrapWidth = ImGui.GetWindowWidth() - 2 * ImGui.GetStyle().WindowPadding.X;
+        var lines = GetWrappedLines(message, wrapWidth);
 
-        var lineCount = lines.Length;
+        var lineCount = lines.Count;
         if (!string.IsNullOrEmpty(buttonLabel))
             lineCount++;
 
@@ -190,6 +191,46 @@ internal static partial class CustomComponents
 
         return false;
     }
+
+    /// <summary>
+    /// Breaks a message into lines that fit the width, keeping its own line breaks. Measuring text allocates, so
+    /// the result is kept per message until the width changes.
+    /// </summary>
+    private static List<string> GetWrappedLines(string message, float wrapWidth)
+    {
+        if (_wrappedMessages.TryGetValue(message, out var cached) && MathF.Abs(cached.Width - wrapWidth) < 1)
+            return cached.Lines;
+
+        // Messages built at runtime would otherwise fill the cache for good.
+        if (_wrappedMessages.Count > 64)
+            _wrappedMessages.Clear();
+
+        var lines = new List<string>();
+        foreach (var paragraph in message.Split('\n'))
+        {
+            var line = string.Empty;
+            foreach (var word in paragraph.Split(' '))
+            {
+                var candidate = line.Length == 0 ? word : line + " " + word;
+                if (line.Length > 0 && ImGui.CalcTextSize(candidate).X > wrapWidth)
+                {
+                    lines.Add(line);
+                    line = word;
+                }
+                else
+                {
+                    line = candidate;
+                }
+            }
+
+            lines.Add(line);
+        }
+
+        _wrappedMessages[message] = (wrapWidth, lines);
+        return lines;
+    }
+
+    private static readonly Dictionary<string, (float Width, List<string> Lines)> _wrappedMessages = new();
 
     public static bool DrawInputFieldWithPlaceholder(string placeHolderLabel, ref string value, float width = 0, bool showClear = true,
                                                      ImGuiInputTextFlags inputFlags = ImGuiInputTextFlags.None)
