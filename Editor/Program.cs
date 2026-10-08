@@ -137,9 +137,15 @@ internal static class Program
         var windowProvider = new SilkWindowProvider();
         var imguiContextLock = windowProvider.ContextLock;
         ImGuiWindowService.Instance = windowProvider;
-        BlockingWindow.Instance = windowProvider;
+        BlockingWindow.Instance = new SdlMessageBoxProvider
+                                      {
+                                          WindowIconPath = Path.Combine(SharedResources.EditorResourcesDirectory, "images", "t3.ico"),
+                                      };
 
-        // The editor's windows are SDL windows; its message boxes and splash screen are not, and do not need it.
+        // Before SDL_Init: on Wayland the id is the app_id, which the desktop shell matches to the installed
+        // app.tixl.TiXL.desktop for the icon and taskbar grouping.
+        SDL3.SDL_SetAppMetadata("TiXL", VersionText, "app.tixl.TiXL");
+
         SdlSurface.SetVulkanLibraryPath(T3.Graphics.Vulkan.VulkanLoader.FindLibraryPath());
         if (!SDL3.SDL_Init(SDL_InitFlags.SDL_INIT_VIDEO))
         {

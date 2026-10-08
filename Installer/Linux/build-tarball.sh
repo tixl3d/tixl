@@ -92,6 +92,12 @@ install -Dm644 "$script_dir/common/app.tixl.TiXL.desktop"       "$share/applicat
 install -Dm644 "$script_dir/common/app.tixl.TiXL.metainfo.xml"  "$share/metainfo/app.tixl.TiXL.metainfo.xml"
 install -Dm644 "$script_dir/common/app.tixl.TiXL.png"           "$share/icons/hicolor/256x256/apps/app.tixl.TiXL.png"
 cp "$root/LICENSE.txt" "$stage/LICENSE.txt"
+# Tarball users have no package manager pulling in the SDK, Vulkan and slangc; this does it for them.
+install -Dm755 "$script_dir/install-dependencies.sh" "$stage/install-dependencies.sh"
+install -Dm644 "$script_dir/DEPENDENCIES.md"         "$stage/DEPENDENCIES.md"
+
+# Packaging recipes (the Flatpak manifest) point at this instead of the versioned folder.
+ln -sfn "$name" "$script_dir/Output/tixl-linux-x64"
 
 if [[ "$stage_only" == true ]]; then
     echo "Staged at $stage"

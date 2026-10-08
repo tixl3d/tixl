@@ -69,5 +69,17 @@ it as a workflow artifact, and a tag also attaches it to that tag's release.
 
 - `aur/PKGBUILD`: reference `tixl-git` package. It downloads BASS and installs to `/usr/lib/tixl`
   with a `/usr/bin/tixl` symlink.
-- Flatpak and Nix: not started. Nix needs the SDK in the wrapper's `PATH`/`DOTNET_ROOT`, and its
-  offline builds need NuGet dependencies pinned (`fetch-deps`).
+- `flatpak/app.tixl.TiXL.yml`: tester bundle that repackages the staged tarball build, with the full .NET 10
+  SDK (dotnet10 extension) and Slang 2026.18 inside. Stage first, then build and export a bundle:
+
+  ```bash
+  Installer/Linux/build-tarball.sh --stage-only
+  flatpak run org.flatpak.Builder --user --install-deps-from=flathub --force-clean --state-dir=Installer/Linux/Output/flatpak-builder \
+      --repo=Installer/Linux/Output/flatpak-repo \
+      Installer/Linux/Output/flatpak-build Installer/Linux/flatpak/app.tixl.TiXL.yml
+  flatpak build-bundle Installer/Linux/Output/flatpak-repo Installer/Linux/Output/tixl.flatpak app.tixl.TiXL
+  ```
+
+  Flathub would additionally need a build from source and permission to redistribute BASS.
+- Nix: not started. Nix needs the SDK in the wrapper's `PATH`/`DOTNET_ROOT`, and its offline builds need
+  NuGet dependencies pinned (`fetch-deps`).

@@ -13,9 +13,11 @@
 
     <ItemGroup>
         <PackageReference Include="ppy.SDL3-CS" Version="2026.722.0" />
+        <PackageReference Include="ImGui.NET" Version="1.91.6.1" />
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\ImguiWindows\ImguiWindows.csproj" />
         <ProjectReference Include="..\Logging\Logging.csproj" />
         <ProjectReference Include="..\SystemUi\SystemUi.csproj" />
     </ItemGroup>

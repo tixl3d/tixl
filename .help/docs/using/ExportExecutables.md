@@ -13,6 +13,10 @@ With v4.0.6 (2025-09-15)…
 * the executable will be created in a folder called `T3Export\`. This location will change in the future.
 * the export only ships the operators reachable from the exported output (plus auto-playing audio ops), the assets they reference and the optional libraries they declare. If an export misses content, disable `Strip Unused Operators` in `Project Settings` → `Executable` and export again.
 
+## Licenses of bundled libraries
+
+An exported executable includes third-party libraries, and their license texts are copied into the `licenses/` folder of every export. Most of them are open source. The **BASS** audio library, which plays the soundtrack and audio, is different: it is free for non-commercial use only. If you distribute an exported executable commercially, for example by selling it or delivering it to a client as part of paid work, you need a BASS license from [un4seen](https://www.un4seen.com). TiXL shows this note in the `Executable` settings and after every export.
+
 ---
 
 # Documentation for Tooll v3.9

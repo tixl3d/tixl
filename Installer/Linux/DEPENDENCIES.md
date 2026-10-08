@@ -27,7 +27,7 @@ package manager.
 | **.NET 10 SDK** (not just the runtime) | Runs the Editor and compiles operator projects at runtime (`dotnet restore` / `dotnet build`, needs network for NuGet) | `dotnet-sdk` | `dotnet-sdk-10.0` (Ubuntu archive or `ppa:dotnet/backports`; Debian via packages.microsoft.com) | `dotnet-sdk-10.0` | `dotnetCorePackages.sdk_10_0` |
 | **Vulkan loader** | Rendering | `vulkan-icd-loader` | `libvulkan1` | `vulkan-loader` | `vulkan-loader` |
 | **Vulkan driver** | Rendering | `vulkan-radeon` / `vulkan-intel` / `nvidia-utils` | `mesa-vulkan-drivers` (NVIDIA: proprietary driver) | `mesa-vulkan-drivers` (NVIDIA: proprietary driver) | `hardware.graphics.enable = true;` |
-| **slangc** | Shader compilation. Found via `TIXL_SLANGC`, `~/.local/opt/slang-2026.18/bin`, or `PATH`. Tested with 2026.18 | AUR `shader-slang-bin` (note: `extra/slang` is the unrelated S-Lang) | GitHub release of shader-slang | GitHub release of shader-slang | `shader-slang` |
+| **slangc** | Shader compilation. Found via `TIXL_SLANGC`, `~/.local/opt/slang-2026.18/bin`, or `PATH`. Tested with 2026.18 | `shader-slang` (extra; `slang` is the unrelated S-Lang) | GitHub release of shader-slang | GitHub release of shader-slang | `shader-slang` |
 | **ALSA library** | Audio output (BASS loads it; PipeWire/PulseAudio provide the ALSA plugin) | `alsa-lib` | `libasound2t64` (older: `libasound2`) | `alsa-lib` | `alsa-lib` |
 | **ICU, OpenSSL** | .NET globalization and HTTPS | pulled in by the SDK package | pulled in by the SDK package | pulled in by the SDK package | pulled in by the SDK package |
 | **X11 or Wayland client libs, libGL/EGL** | Windows (SDL3), startup dialog (GLFW) | present on any desktop | present on any desktop | present on any desktop | present on any desktop |
@@ -65,7 +65,8 @@ License texts for everything bundled are in `Dependencies/licenses/`.
 These are feature gaps, not packaging issues. The affected operators are expected to fail when used.
 
 - **Emgu CV** (`cvextern`) and **Mediapipe**: only Windows natives are vendored.
-- **Live audio input**: BASSWASAPI is Windows-only.
+- **Loopback audio capture**: BASS on Linux only enumerates real inputs, so microphones and line inputs
+  work but capturing the system's own output doesn't. (WASAPI loopback is Windows-only.)
 - **Spout**: Windows-only by design.
 
 ## Build dependencies

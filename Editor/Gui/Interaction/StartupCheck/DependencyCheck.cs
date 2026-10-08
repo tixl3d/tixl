@@ -179,7 +179,7 @@ internal static class DependencyCheck
             missing.Add(new MissingDependency($"The Slang shader compiler (slangc {pinned}) was not found.",
                                               SlangInstaller.CanInstall
                                                   ? $"TiXL can download it into {SlangInstaller.TargetDirectory}."
-                                                  : InstallHint(arch: $"Install shader-slang-bin from the AUR, if it is at version {pinned}. Otherwise: {SlangReleaseHint}",
+                                                  : InstallHint(arch: $"sudo pacman -S shader-slang, if it is at version {pinned}. Otherwise: {SlangReleaseHint}",
                                                                 debian: SlangReleaseHint,
                                                                 fedora: SlangReleaseHint,
                                                                 nix: "shader-slang",

@@ -9,7 +9,8 @@ arch=('x86_64')
 url="https://tixl.app"
 # BASS is free for non-commercial use only; see Dependencies/linux-x64/README.md.
 license=('MIT' 'LicenseRef-BASS')
-depends=('dotnet-sdk>=10' 'vulkan-icd-loader' 'gcc-libs' 'glibc')
+# shader-slang from extra provides slangc; TiXL is tested with its 2026.18 line.
+depends=('dotnet-sdk>=10' 'vulkan-icd-loader' 'shader-slang' 'alsa-lib' 'gcc-libs' 'glibc')
 makedepends=('git' 'file')
 optdepends=('vulkan-validation-layers: diagnostics for the Vulkan backend')
 provides=('tixl')

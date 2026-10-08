@@ -193,35 +193,8 @@ internal static unsafe class SdlImGuiInput
     /// <summary>Tells the gesture layer which source feeds it, so the editor can log what a machine ended up with.</summary>
     public static void InstallGestures() => Gestures.PointerGestures.SetSource(_gestures);
 
-    /// <summary>
-    /// Routes ImGui's copy and paste through SDL. ImGui only knows the Win32 clipboard; elsewhere its copies
-    /// would stay inside the editor. Call once, with the context current.
-    /// </summary>
-    public static void InstallClipboard()
-    {
-        var platformIo = ImGui.GetPlatformIO();
-        platformIo.Platform_GetClipboardTextFn = (IntPtr)(delegate* unmanaged[Cdecl]<IntPtr, IntPtr>)&GetClipboardText;
-        platformIo.Platform_SetClipboardTextFn = (IntPtr)(delegate* unmanaged[Cdecl]<IntPtr, IntPtr, void>)&SetClipboardText;
-    }
-
-    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
-    private static IntPtr GetClipboardText(IntPtr context)
-    {
-        // ImGui reads the returned text until the next call, so it is kept in a buffer this class owns.
-        if (_clipboardText != IntPtr.Zero)
-            Marshal.FreeCoTaskMem(_clipboardText);
-
-        _clipboardText = Marshal.StringToCoTaskMemUTF8(SDL_GetClipboardText() ?? string.Empty);
-        return _clipboardText;
-    }
-
-    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
-    private static void SetClipboardText(IntPtr context, IntPtr text)
-    {
-        var managed = Marshal.PtrToStringUTF8(text);
-        if (managed != null)
-            SDL_SetClipboardText(managed);
-    }
+    /// <summary>Routes ImGui's copy and paste through SDL. Call once, with the context current.</summary>
+    public static void InstallClipboard() => SdlImguiClipboard.Install();
 
     /// <summary>
     /// Forwards a key to ImGui, keeping both its modifier events (shortcut matching) and its legacy modifier
@@ -373,7 +346,6 @@ internal static unsafe class SdlImGuiInput
     private const int VirtualKeyRightWindows = 0x5C;
 
     private static readonly Gestures.SdlPointerGestureSource _gestures = new();
-    private static IntPtr _clipboardText;
     private static ImGuiMouseCursor _lastRequestedCursor = ImGuiMouseCursor.Arrow;
     private static readonly Dictionary<SDL_SystemCursor, IntPtr> _cursors = [];
     private static readonly List<string> _droppedFiles = [];
