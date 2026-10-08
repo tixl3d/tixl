@@ -17,16 +17,42 @@ The native Linux version is a preview. Expect rough edges, and please report pro
 
 ## Install the dependencies
 
-Install the .NET 10 SDK and Vulkan support with your package manager. Most desktop installs already
-have the Vulkan driver, but the commands below make sure.
+TiXL needs the .NET 10 SDK, the Vulkan loader and the Slang shader compiler (`slangc`). Most desktop
+installs already have the Vulkan driver.
+
+### With the setup script
+
+The download (see [Download and run TiXL](#download-and-run-tixl)) contains `install-dependencies.sh`.
+Run it from the unpacked folder as your normal user, **not** with `sudo`:
+
+```bash
+cd ~/Apps/tixl-*-linux-x64
+./install-dependencies.sh
+```
+
+The script recognizes Arch, Debian/Ubuntu and Fedora (and their derivatives), lists what's missing and
+asks before it installs anything:
+
+- The .NET SDK and the Vulkan loader come from your package manager, which asks for your password.
+- `slangc` is downloaded in the tested version (2026.18) into `~/.local/opt/slang-2026.18`, the folder
+  TiXL looks in first. This step needs no password.
+
+`./install-dependencies.sh --check` only reports what's missing; `--yes` installs without asking. On
+NixOS the script prints what to add to your configuration instead. On other distributions it installs
+only `slangc` and tells you what's left.
+
+To install the dependencies by hand, use the commands for your distribution below.
 
 ### Arch, Manjaro, EndeavourOS
 
 ```bash
-sudo pacman -S dotnet-sdk vulkan-icd-loader
+sudo pacman -S dotnet-sdk vulkan-icd-loader shader-slang
 ```
 
-For Slang, install `shader-slang-bin` from the AUR, for example with `yay -S shader-slang-bin`.
+`shader-slang` from the official `extra` repository provides `slangc`. TiXL is tested with the Slang
+2026.18 line; if Arch has moved past it and shaders misbehave, use the pinned download described under
+[Slang on other distributions](#slang-on-other-distributions). Don't confuse it with `slang`, which is the
+unrelated S-Lang interpreter.
 
 ### Ubuntu, Debian, Linux Mint, Pop!_OS
 
@@ -90,6 +116,8 @@ lists it together with the install command for your distribution:
 - Without Vulkan, TiXL can't render and quits after the dialog.
 - Without the .NET SDK or `slangc`, you can choose **Continue**. The built-in operators still load, but
   your own operators won't compile without the SDK, and shaders won't compile without `slangc`.
+- If `slangc` is missing, the dialog also offers **Download and install**. It downloads the tested Slang
+  release into `~/.local/opt/slang-2026.18` and checks again.
 
 The same messages also appear in the log, so you can check them later.
 

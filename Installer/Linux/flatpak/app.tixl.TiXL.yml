@@ -1,0 +1,66 @@
+# Flatpak for testers: repackages the staged tarball build (Installer/Linux/build-tarball.sh --stage-only).
+# Flathub would additionally need a build from source and permission to redistribute BASS.
+id: app.tixl.TiXL
+runtime: org.freedesktop.Platform
+runtime-version: '26.08'
+sdk: org.freedesktop.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.dotnet10
+command: tixl
+
+finish-args:
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --share=ipc
+  # GPU for Vulkan, plus MIDI (ALSA sequencer), game controllers and cameras.
+  - --device=all
+  - --socket=pulseaudio
+  # OSC, NDI, and the NuGet restore when TiXL compiles operator projects.
+  - --share=network
+  # TiXL's own file browser doesn't go through portals, and projects and assets live anywhere.
+  - --filesystem=home
+  - --env=TIXL_SLANGC=/app/lib/slang/bin/slangc
+  - --env=DOTNET_ROOT=/app/lib/dotnet
+  - --env=DOTNET_CLI_TELEMETRY_OPTOUT=1
+  - --env=DOTNET_NOLOGO=1
+
+modules:
+  # The full SDK, not just the runtime: TiXL runs dotnet restore/build on operator projects.
+  - name: dotnet-sdk
+    buildsystem: simple
+    build-commands:
+      - /usr/lib/sdk/dotnet10/bin/install-sdk.sh
+      # install-sdk.sh stops short of compiling: it leaves out the targeting packs (reference assemblies,
+      # NETSDK1127 without them) and the workload manifests the SDK verifies on every build.
+      - cp -r /usr/lib/sdk/dotnet10/lib/packs /usr/lib/sdk/dotnet10/lib/sdk-manifests /app/lib/dotnet/
+
+  # The Slang release TiXL's shaders are tested with; TIXL_SLANGC above points at it.
+  - name: slang
+    buildsystem: simple
+    build-commands:
+      - mkdir -p /app/lib/slang
+      - cp -a bin lib /app/lib/slang/
+      - install -Dm644 LICENSE /app/share/licenses/slang/LICENSE
+    sources:
+      - type: archive
+        url: https://github.com/shader-slang/slang/releases/download/v2026.18/slang-2026.18-linux-x86_64-glibc-2.27.tar.gz
+        sha256: e45ea4f117d51b8c1e84fa49f562081e73a9f29d02bd4f7fad20678603282829
+        strip-components: 0
+
+  - name: tixl
+    buildsystem: simple
+    build-commands:
+      - mkdir -p /app/lib/tixl
+      - cp -a . /app/lib/tixl/
+      - cp -a share/. /app/share/
+      - rm -rf /app/lib/tixl/share /app/lib/tixl/tixl-launcher.sh /app/lib/tixl/install-dependencies.sh
+      - install -Dm755 tixl-launcher.sh /app/bin/tixl
+    sources:
+      - type: dir
+        path: ../Output/tixl-4.4.0.0-linux-x64
+      - type: script
+        dest-filename: tixl-launcher.sh
+        commands:
+          # The NuGet cache belongs inside the app's sandbox folder, not in the user's ~/.nuget.
+          - export NUGET_PACKAGES="${XDG_CACHE_HOME}/nuget"
+          - exec /app/lib/tixl/TiXL "$@"
