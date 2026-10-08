@@ -89,12 +89,13 @@ internal static class GraphTitleAndBreadCrumbs
         void DrawSeparator(string iconString, float padding = 0)
         {
             ImGui.SameLine(0, padding);
+
+            // Centre the glyph's ink, not the font's line box: icon glyphs sit at different heights within it.
+            var glyph = Icons.IconFont.FindGlyph(iconString[0]);
+            var dy = (int)((frameHeight - (glyph.Y1 - glyph.Y0)) / 2 - glyph.Y0);
+            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + dy);
             ImGui.PushFont(Icons.IconFont);
-            var yPadding = (frameHeight - Icons.IconFont.FontSize) / 2;
-            ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(10,yPadding));
-            ImGui.AlignTextToFramePadding();
             ImGui.TextUnformatted(iconString);
-            ImGui.PopStyleVar();
             ImGui.PopFont();
         }
     }
