@@ -151,9 +151,19 @@ bugs). Estimate: 20–50 agent hours plus your review/testing time.
       - `NdiOutput`, `PlayVideo`: no NDI / FFmpeg on the Mac yet (expected).
       - Validation noise: unbound `TextureCube` slots get a 2D placeholder view (`mesh-DrawUnlit` CubeMap);
         add a cube placeholder to `VulkanNullResources`.
-- [ ] **"An update larger than 64 KB needs a staging copy and was dropped."** Logged once on the Mac while the
-      SVG test chain ran in `_agentTests`. Find the caller and check whether Linux shows it too; whatever it
-      uploads is currently lost.
+- [x] **"An update larger than 64 KB needs a staging copy and was dropped."** Fixed 2026-10-08 (all
+      platforms): `UpdateResource` on a device-local buffer now copies anything over `vkCmdUpdateBuffer`'s 64 KB
+      through a staging buffer of its own (`VulkanCommandList.CopyThroughStaging`).
+- [ ] **`PbrTests/PointShading`: last item (Draw Sphere Mesh) sometimes cut off.** Went away after pasting a
+      copy of the whole test into a project - looks like timing, initialization or a missing barrier rather than
+      shading. Reproduce with the visual suite run twice and compare.
+- [ ] **Clean up `RenderToCubemap-vs.hlsl`** (the specular prefilter; over 10 years old). Unused globals outside
+      any cbuffer (`objectToWorldMatrix` … `textureMatrix`, `g_CubeSize`, `g_CubeLod`, `g_CubeLodCount` - Slang
+      warns about each), a commented-out cbuffer and reference code, the debug `colorOfBox`, inconsistent naming
+      and formatting. `UvAndIndexToBoxCoord` and `colorOfBox` are duplicated in `TextureToCubemap-cs.hlsl`; move
+      them to a shared include. To show the face in the pixel shader while debugging, add
+      `nointerpolation uint face : FACE_INDEX` to `psInput` - Mac only, since the geometry shader on Windows/Linux
+      does not pass it on.
 
 ### M3 — Distribution
 `.app` bundle (Editor + bundled .NET runtime + MoltenVK + slangc + dylibs), `Info.plist`, icon, DMG.

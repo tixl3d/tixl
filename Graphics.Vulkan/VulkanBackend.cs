@@ -684,6 +684,10 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
             if (_pipelines.TryGetValue(description, out var cached))
                 return cached;
 
+            // TIXL_LOG_PIPELINES=1: the state each pipeline is built with, for when a draw renders wrong but valid.
+            if (_logPipelines)
+                LogPipeline(description);
+
             // A failure is cached too, so a pipeline the device cannot build is tried and reported once.
             VulkanPipeline? pipeline = null;
             try
@@ -721,6 +725,30 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
             return pipeline;
         }
     }
+
+    private static void LogPipeline(in GraphicsPipelineDescription description)
+    {
+        var text = new System.Text.StringBuilder();
+        text.Append("[pipeline] vs=").Append(description.VertexShader?.Label)
+            .Append(" ps=").Append(description.PixelShader?.Label)
+            .Append(" gs=").Append(description.GeometryShader?.Label)
+            .Append(" topology=").Append(description.Topology)
+            .Append(" samples=").Append(description.Samples.Count)
+            .Append(" depth=").Append(description.DepthStencilFormat);
+
+        for (var i = 0; i < description.RenderTargetCount; i++)
+        {
+            var blend = description.Blend[i];
+            text.Append(" | rt").Append(i).Append('=').Append(description.RenderTargetFormats[i])
+                .Append(" blend=").Append(blend.Enabled)
+                .Append(' ').Append(blend.SourceColor).Append('/').Append(blend.DestinationColor)
+                .Append(" mask=").Append(blend.WriteMask);
+        }
+
+        GraphicsLog.Debug?.Invoke(text.ToString());
+    }
+
+    private static readonly bool _logPipelines = Environment.GetEnvironmentVariable("TIXL_LOG_PIPELINES") == "1";
 
     private string DescribeGeometryStage(in GraphicsPipelineDescription description)
         => description.GeometryShader != null && !_supportsGeometryShader ? " (it uses a geometry shader, which this GPU lacks)" : string.Empty;

@@ -986,6 +986,11 @@
           }
         },
         {
+          "Id": "9628a5c6-e731-4df7-b49b-e617c75cfda4"/*Threshold*/,
+          "Type": "System.Single",
+          "Value": 0.002
+        },
+        {
           "Id": "adfe6fe4-7fa7-4f1c-9d66-1cbf9b383ba1"/*WarmUpStepCount*/,
           "Type": "System.Int32",
           "Value": 2
@@ -1897,7 +1902,7 @@
         {
           "Id": "82a1a932-f5c3-41d5-9539-9b21663aee1b"/*Phase*/,
           "Type": "System.Single",
-          "Value": 4.08
+          "Value": 4.0772
         },
         {
           "Id": "840aa616-6983-4840-a58b-d5396a91c2f9"/*Mapping*/,

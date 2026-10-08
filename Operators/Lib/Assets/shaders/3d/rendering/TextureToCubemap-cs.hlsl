@@ -215,5 +215,8 @@ float4 psMain(in psInput i) : SV_TARGET0
     // return float4(0,1,0,1);
     float2 uv = ComputeUvFromNormal(i.normal) + float2(Orientation, 0);
     float4 col = Image.SampleLevel(texSampler, uv, 0);
-    return col;
+
+    // Opaque: the cube map is the environment, not a layer over whatever the target held before. With the
+    // image's alpha, the alpha-blended pass left stale content on Metal (white or green-only cube maps).
+    return float4(col.rgb, 1);
 }

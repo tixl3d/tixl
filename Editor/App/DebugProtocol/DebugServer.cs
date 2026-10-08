@@ -1466,10 +1466,125 @@ internal static class DebugServer
                                                  Slot<Vector3> s => new JArray(s.Value.X, s.Value.Y, s.Value.Z),
                                                  Slot<Vector4> s => new JArray(s.Value.X, s.Value.Y, s.Value.Z, s.Value.W),
                                                  Slot<T3.Core.DataTypes.MeshGeometry> s => DescribeGeometry(s.Value, request["dumpObj"]?.Value<string>()),
+                                                 Slot<T3.Core.DataTypes.Texture2D> s => DescribeTexture(s.Value),
+                                                 Slot<T3.Core.DataTypes.BufferWithViews> s => DescribeBuffer(s.Value, request),
+                                                 Slot<T3.Core.DataTypes.StructuredList> s => DescribeList(s.Value, request),
                                                  _               => JValue.CreateNull(),
                                              },
                          };
         context.SendOk(result);
+    }
+
+    /// <summary>
+    /// A GPU buffer output: its size and stride, and with <c>readCount</c> (from <c>readOffset</c>) the elements
+    /// themselves, read back from the GPU. A 64-byte stride is taken to be <see cref="T3.Core.DataTypes.Point"/>.
+    /// The read flushes the GPU work recorded so far and waits for it - a probe, not something to do per frame.
+    /// </summary>
+    private static JToken DescribeBuffer(T3.Core.DataTypes.BufferWithViews? buffer, JObject request)
+    {
+        if (buffer?.Buffer == null)
+            return JValue.CreateNull();
+
+        var description = buffer.Buffer.Description;
+        var stride = Math.Max(4, description.StructureByteStride);
+        var result = new JObject
+                         {
+                             ["sizeInBytes"] = description.SizeInBytes,
+                             ["stride"] = description.StructureByteStride,
+                             ["elementCount"] = description.SizeInBytes / stride,
+                             ["disposed"] = buffer.Buffer.IsDisposed,
+                         };
+
+        var readCount = request["readCount"]?.Value<int>() ?? 0;
+        if (readCount <= 0 || buffer.Buffer.GpuBuffer == null)
+            return result;
+
+        using var readback = T3.Core.Resource.ResourceManager.Device.Backend.ReadbackAsync(buffer.Buffer.GpuBuffer).GetAwaiter().GetResult();
+        result["elements"] = ReadElements(readback.Data.Span, stride, request);
+        return result;
+    }
+
+    /// <summary>A CPU-side list output (e.g. LoadSvg's points): its type and count, and with <c>readCount</c> the elements.</summary>
+    private static JToken DescribeList(T3.Core.DataTypes.StructuredList? list, JObject request)
+    {
+        if (list == null)
+            return JValue.CreateNull();
+
+        var result = new JObject
+                         {
+                             ["type"] = list.Type.Name,
+                             ["elementCount"] = list.NumElements,
+                             ["elementSizeInBytes"] = list.ElementSizeInBytes,
+                         };
+
+        var readCount = request["readCount"]?.Value<int>() ?? 0;
+        if (readCount <= 0 || list.NumElements == 0)
+            return result;
+
+        using var stream = new MemoryStream(list.TotalSizeInBytes);
+        list.WriteToStream(stream);
+        result["elements"] = ReadElements(stream.ToArray(), list.ElementSizeInBytes, request);
+        return result;
+    }
+
+    private static JArray ReadElements(ReadOnlySpan<byte> bytes, int stride, JObject request)
+    {
+        var offset = Math.Max(0, request["readOffset"]?.Value<int>() ?? 0);
+        var count = Math.Min(request["readCount"]?.Value<int>() ?? 0, Math.Max(0, bytes.Length / stride - offset));
+        var floats = System.Runtime.InteropServices.MemoryMarshal.Cast<byte, float>(bytes);
+        var floatsPerElement = stride / 4;
+        var elements = new JArray();
+
+        for (var i = 0; i < count; i++)
+        {
+            var f = floats.Slice((offset + i) * floatsPerElement, floatsPerElement);
+            if (floatsPerElement == 16)
+            {
+                elements.Add(new JObject
+                                 {
+                                     ["index"] = offset + i,
+                                     ["position"] = new JArray(f[0], f[1], f[2]),
+                                     ["f1"] = f[3],
+                                     ["orientation"] = new JArray(f[4], f[5], f[6], f[7]),
+                                     ["color"] = new JArray(f[8], f[9], f[10], f[11]),
+                                     ["scale"] = new JArray(f[12], f[13], f[14]),
+                                     ["f2"] = f[15],
+                                 });
+            }
+            else
+            {
+                var values = new JArray();
+                foreach (var value in f)
+                    values.Add(value);
+
+                elements.Add(values);
+            }
+        }
+
+        return elements;
+    }
+
+    /// <summary>
+    /// What a texture output holds without its pixels: enough to see whether an operator produced one at all and
+    /// with which shape, flags and GPU backing.
+    /// </summary>
+    private static JToken DescribeTexture(T3.Core.DataTypes.Texture2D? texture)
+    {
+        if (texture == null)
+            return JValue.CreateNull();
+
+        var d = texture.Description;
+        return new JObject
+                   {
+                       ["width"] = d.Width,
+                       ["height"] = d.Height,
+                       ["format"] = d.Format.ToString(),
+                       ["mipLevels"] = d.MipLevels,
+                       ["arraySize"] = d.ArraySize,
+                       ["bindFlags"] = d.BindFlags.ToString(),
+                       ["optionFlags"] = d.OptionFlags.ToString(),
+                       ["disposed"] = texture.IsDisposed,
+                   };
     }
 
     /// <summary>

@@ -246,6 +246,7 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
                 VulkanBarriers.BarrierBuffer(backend, _commandBuffer, buffer, VkPipelineStageFlags2.Copy, VkAccessFlags2.TransferWrite);
 
                 // vkCmdUpdateBuffer is limited to 64 KB, which covers every constant buffer TiXL writes this way.
+                // Larger updates - point and vertex data filled from the CPU - go through a staging copy.
                 if (data.Length <= 65536)
                 {
                     fixed (byte* pointer = data)
@@ -255,7 +256,7 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
                 }
                 else
                 {
-                    GraphicsLog.WarnOnce("An update larger than 64 KB needs a staging copy and was dropped.");
+                    CopyThroughStaging(buffer, data);
                 }
 
                 break;
@@ -274,6 +275,29 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
                 break;
             }
         }
+    }
+
+    /// <summary>
+    /// A staging buffer of its own per update: the copy runs when the frame is submitted, so a shared one would
+    /// be overwritten by the next update recorded in the same frame. Disposing retires it until the frame is done.
+    /// </summary>
+    private void CopyThroughStaging(VulkanBuffer buffer, ReadOnlySpan<byte> data)
+    {
+        if (backend.CreateBuffer(new GpuBufferDescription
+                                     {
+                                         SizeInBytes = data.Length,
+                                         Usage = BufferUsage.CopySource,
+                                         Memory = MemoryKind.Upload,
+                                     },
+                                 data, "buffer upload") is not VulkanBuffer { Mapped: not null } staging)
+        {
+            GraphicsLog.WarnOnce("Could not allocate a staging buffer for a buffer update; the update was dropped.");
+            return;
+        }
+
+        var region = new VkBufferCopy { size = (ulong)data.Length };
+        backend.Api.vkCmdCopyBuffer(_commandBuffer, staging.Buffer, buffer.Buffer, 1, &region);
+        staging.Dispose();
     }
 
     private void UploadTexture(VulkanTexture texture, int subresource, ReadOnlySpan<byte> data, int rowPitch)
@@ -583,18 +607,25 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
 
         var width = Math.Max(1, texture.Description.Width);
         var height = Math.Max(1, texture.Description.Height);
+        var layers = texture.Description.Dimension switch
+                         {
+                             TextureDimension.Texture3D   => 1u,
+                             TextureDimension.TextureCube => (uint)Math.Max(6, texture.Description.ArraySize),
+                             _                            => (uint)Math.Max(1, texture.Description.ArraySize),
+                         };
 
         for (var level = 1; level < levels; level++)
         {
             var nextWidth = Math.Max(1, width / 2);
             var nextHeight = Math.Max(1, height / 2);
 
+            // Every layer: a cube map's six faces each need their own chain, or faces 1-5 keep black mips.
             VkImageBlit blit = new()
                                    {
                                        srcSubresource = new VkImageSubresourceLayers
-                                                            { aspectMask = texture.Aspect, mipLevel = (uint)(level - 1), layerCount = 1 },
+                                                            { aspectMask = texture.Aspect, mipLevel = (uint)(level - 1), layerCount = layers },
                                        dstSubresource = new VkImageSubresourceLayers
-                                                            { aspectMask = texture.Aspect, mipLevel = (uint)level, layerCount = 1 },
+                                                            { aspectMask = texture.Aspect, mipLevel = (uint)level, layerCount = layers },
                                    };
 
             blit.srcOffsets[1] = new VkOffset3D(width, height, 1);
@@ -771,14 +802,29 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
         return false;
     }
 
+    /// <summary>Narrows the render area and layer count to what this attachment's view covers.</summary>
+    private static void Fit(VulkanTextureView view, ref int width, ref int height, ref int layers)
+    {
+        var mip = view.Description.FirstMip;
+        width = Math.Min(width, Math.Max(1, view.Texture.Description.Width >> mip));
+        height = Math.Min(height, Math.Max(1, view.Texture.Description.Height >> mip));
+        layers = Math.Min(layers, view.Description.Dimension == TextureDimension.Texture3D ? 1 : Math.Max(1, view.Description.ArraySize));
+    }
+
     private void BeginRenderingIfNeeded()
     {
         if (_renderingActive || !_renderingRequested)
             return;
 
         var attachments = stackalloc VkRenderingAttachmentInfo[Math.Max(1, _colorCount)];
-        var width = 0;
-        var height = 0;
+
+        // The area and layers every attachment has: a view of a smaller mip (the specular prefilter renders
+        // into each in turn) is smaller than its image, and a view of a cube map's faces has six layers the
+        // vertex shader picks from. Vulkan rejects an area larger than an attachment, and draws to a layer
+        // beyond layerCount go nowhere.
+        var width = int.MaxValue;
+        var height = int.MaxValue;
+        var layers = int.MaxValue;
 
         for (var i = 0; i < _colorCount; i++)
         {
@@ -799,8 +845,7 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
                                      storeOp = VkAttachmentStoreOp.Store,
                                  };
 
-            width = Math.Max(width, view.Texture.Description.Width);
-            height = Math.Max(height, view.Texture.Description.Height);
+            Fit(view, ref width, ref height, ref layers);
         }
 
         VkRenderingAttachmentInfo depthAttachment = default;
@@ -819,14 +864,16 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
                                       storeOp = VkAttachmentStoreOp.Store,
                                   };
 
-            width = Math.Max(width, _depthTarget.Texture.Description.Width);
-            height = Math.Max(height, _depthTarget.Texture.Description.Height);
+            Fit(_depthTarget, ref width, ref height, ref layers);
         }
+
+        if (width == int.MaxValue)
+            width = height = layers = 1;
 
         VkRenderingInfo renderingInfo = new()
                                             {
                                                 renderArea = new VkRect2D(0, 0, (uint)width, (uint)height),
-                                                layerCount = 1,
+                                                layerCount = (uint)layers,
                                                 colorAttachmentCount = (uint)_colorCount,
                                                 pColorAttachments = _colorCount > 0 ? attachments : null,
                                                 pDepthAttachment = _depthTarget != null ? &depthAttachment : null,

@@ -253,8 +253,27 @@ public sealed class DeviceContext
         if (view.GpuView == null)
             return;
 
+        // D3D11 only generates mips for a texture created with GenerateMipMaps and ignores the call otherwise.
+        // Operators rely on that: LoadImage calls it every frame, also on a DDS that ships its own mip chain -
+        // which must not be overwritten (a prefiltered environment map's levels are blurs, not downsamples).
+        if (!WasCreatedWithGenerateMips(view.Resource))
+            return;
+
         EndRendering();
         Commands.GenerateMips(view.GpuView);
+    }
+
+    private static bool WasCreatedWithGenerateMips(Resource resource)
+    {
+        var options = resource switch
+                          {
+                              Texture2D texture => texture.Description.OptionFlags,
+                              Texture3D texture => texture.Description.OptionFlags,
+                              Texture1D texture => texture.Description.OptionFlags,
+                              _                 => ResourceOptionFlags.None,
+                          };
+
+        return (options & ResourceOptionFlags.GenerateMipMaps) != 0;
     }
 
     public unsafe void UpdateSubresource(Resource resource, int subresource, ReadOnlySpan<byte> data, int rowPitch, int slicePitch)

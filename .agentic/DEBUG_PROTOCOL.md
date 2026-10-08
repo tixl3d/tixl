@@ -92,6 +92,13 @@ Parameter shapes are defined in `DebugServer.cs` — read the handler when unsur
   geometry ops without screenshots. Add `dumpObj: "<path>"` to also write the
   geometry as OBJ (one object per part, `# cut` before IsCut faces) for offline
   analysis of exactly which edges are open.
+- `getOutput` on a `Texture2D` slot returns its shape (size, format, mips, array size, bind/option
+  flags, disposed) - enough to see whether an op produced a texture at all.
+- `getOutput` on a `BufferWithViews` (GPU) or `StructuredList` (CPU) slot returns size, stride and
+  element count. Add `readCount` (and optionally `readOffset`) to also get the elements: a 64-byte
+  stride is decoded as a `Point` (`position`, `f1`, `orientation`, `color`, `scale`, `f2`), anything
+  else as one float array per element. A GPU read flushes and waits for the GPU - fine for a probe.
+  Compare the same query across machines (e.g. Mac vs Linux) to find the first op whose values differ.
 - `getOutput update:true` starts a fresh invalidation tick before pulling, so
   upstream changes propagate through the chain. Ops upstream with `Async` on
   still return their *previous* result while a job runs - set `Async` false on
