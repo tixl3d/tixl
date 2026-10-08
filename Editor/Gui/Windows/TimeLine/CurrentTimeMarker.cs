@@ -16,7 +16,11 @@ internal sealed class CurrentTimeMarker: IValueSnapAttractor
         var windowHeight = ImGui.GetWindowHeight() +1;
         drawList.AddRectFilled(p + new Vector2(-1,y), p + new Vector2(2, windowHeight), UiColors.BackgroundFull.Fade(0.2f));
         drawList.AddRectFilled(p, p + new Vector2(1, y+ windowHeight), UiColors.StatusAnimated);
-        Icons.DrawIconAtScreenPosition(Icon.CurrentTimeMarkerHandle, p+ new Vector2(-4,y-1));
+
+        // Centre on the line using the glyph's real width: hi-dpi icon atlases make it wider than at 1x.
+        Icons.GetGlyphDefinition(Icon.CurrentTimeMarkerHandle, out _, out var handleSize);
+        var handleX = MathF.Floor(p.X + 0.5f - handleSize.X / 2);
+        Icons.DrawIconAtScreenPosition(Icon.CurrentTimeMarkerHandle, new Vector2(handleX, y - 1));
     }
 
     /// <summary>
