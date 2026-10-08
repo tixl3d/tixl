@@ -1,7 +1,7 @@
 name: macOS Build
 
-# A version tag (v4.4.0.0) builds the DMG and attaches it to that tag's release; a manual run keeps it as an
-# artifact. Pushes to branches build nothing - a DMG is ~600 MB.
+# A version tag (v4.4.0.0) or a manual run builds the DMG. It is always kept as a workflow artifact, and a tag
+# also attaches it to that tag's release. Pushes to branches build nothing - a DMG is ~600 MB.
 on:
   workflow_dispatch:
   push:
@@ -45,7 +45,6 @@ jobs:
         run: Installer/macOS/build-dmg.sh
 
       - name: Upload DMG
-        if: github.ref_type != 'tag'
         uses: actions/upload-artifact@v4
         with:
           name: tixl-osx-arm64
@@ -60,3 +59,7 @@ jobs:
         with:
           tag_name: ${{ github.ref_name }}
           files: Installer/macOS/Output/*.dmg
+          # Linux and macOS are previews: their releases are pre-releases and never replace the Windows release
+          # GitHub shows as "Latest".
+          prerelease: true
+          make_latest: false

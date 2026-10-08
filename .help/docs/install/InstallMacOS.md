@@ -31,9 +31,28 @@ If you use Homebrew, `brew install --cask dotnet-sdk` installs the same package.
 2. Open the DMG and drag **TiXL** into **Applications**.
 3. Start TiXL from Applications or Launchpad.
 
-The app isn't signed with an Apple developer certificate yet, so macOS blocks it the first time. Open
-**System Settings → Privacy & Security**, scroll to the message about TiXL and click **Open Anyway**. You
-only need to do this once per version.
+Start it from Applications, not straight from the DMG or the Downloads folder. Otherwise macOS runs a
+read-only copy of the app from a hidden location, which can stop TiXL from loading.
+
+### Allow TiXL to open
+
+The app isn't signed with an Apple developer certificate yet, so macOS blocks it the first time with a
+message that it couldn't verify TiXL. Right-clicking the app and choosing **Open** no longer helps on
+macOS 15 and later. Instead:
+
+1. Try to start TiXL once and close the message with **Done**.
+2. Open **System Settings → Privacy & Security** and scroll down to the message that TiXL was blocked.
+3. Click **Open Anyway** and confirm with your password or Touch ID.
+4. Start TiXL again and confirm **Open Anyway** once more.
+
+The button only shows up for about an hour after the blocked attempt; if it's missing, start TiXL again.
+You need to do this once per version.
+
+If you're comfortable with the Terminal, removing the download's quarantine flag does the same in one step:
+
+```bash
+xattr -dr com.apple.quarantine /Applications/TiXL.app
+```
 
 When TiXL first opens your projects, macOS asks whether it may access your **Documents** folder. Click
 **Allow**: TiXL keeps your projects there, and it waits until you answer.

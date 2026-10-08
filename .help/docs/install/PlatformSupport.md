@@ -139,8 +139,9 @@ deleting an asset removes it for good instead of moving it to the trash.
 | Signed | Yes | — | Not yet |
 
 The macOS app isn't signed with an Apple developer certificate yet. The first time you open it, macOS
-blocks it; allow it once under **System Settings → Privacy & Security → Open Anyway**. When TiXL first
-opens your projects, macOS also asks for permission to access your Documents folder.
+blocks it; allow it once under **System Settings → Privacy & Security → Open Anyway** — the steps are in
+[Install on macOS](InstallMacOS.md#allow-tixl-to-open). When TiXL first opens your projects, macOS also asks
+for permission to access your Documents folder.
 
 Where TiXL keeps its files on each system is described in [Files and folders](FilesAndFolders.md).
 
