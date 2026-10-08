@@ -84,11 +84,12 @@ internal sealed partial class MagGraphView
         }
         else
         {
+            // Shrink with the canvas, but hold at normal text size so the label stays readable when zoomed out.
+            // Far out the hold gives way again (at a third of the zoom), so labels don't cover the ops they name.
+            var scaledSize = Fonts.FontLarge.FontSize * canvasScale;
             titleFontSize = canvasScale > 1
                 ? Fonts.FontLarge.FontSize
-                : canvasScale > 0.333f / Fonts.FontLarge.Scale
-                    ? Fonts.FontLarge.FontSize
-                    : Fonts.FontLarge.FontSize * canvasScale * 3;
+                : MathF.Max(scaledSize, MathF.Min(Fonts.FontNormal.FontSize, scaledSize * 3));
         }
     
 
@@ -208,7 +209,7 @@ internal sealed partial class MagGraphView
                                      pMin + new Vector2(toggleSize + 8 * T3Ui.UiScaleFactor, 3 * T3Ui.UiScaleFactor),
                                      ColorVariations.OperatorLabel.Apply(section.Color.Fade(fade)),
                                      section.Label);
-                    labelHeight = Fonts.FontLarge.FontSize;
+                    labelHeight = titleFontSize;
                 }
             }
 
@@ -216,7 +217,7 @@ internal sealed partial class MagGraphView
             {
                 var font = section.Title.StartsWith("# ") ? Fonts.FontLarge : Fonts.FontNormal;
                 drawList.PushClipRect(pMin, pMax, true);
-                var labelPos = pMin + new Vector2(8, 8 + labelHeight) * T3Ui.UiScaleFactor;
+                var labelPos = pMin + new Vector2(8, 8) * T3Ui.UiScaleFactor + new Vector2(0, labelHeight);
 
                 var fade = MathUtils.SmootherStep(0.25f, 0.6f, canvasScale) * 0.8f;
                 var fontSize = canvasScale > 1

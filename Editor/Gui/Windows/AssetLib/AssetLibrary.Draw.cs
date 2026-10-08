@@ -48,7 +48,7 @@ internal sealed partial class AssetLibrary
             ImGui.SameLine();
             var toolItemState = _state.ActiveTypeFilters.Count > 0
                                     ? CustomComponents.ButtonStates.NeedsAttention
-                                    : CustomComponents.ButtonStates.Emphasized;
+                                    : CustomComponents.ButtonStates.Default;
 
             if (CustomComponents.IconButton(Icon.Settings2, Vector2.Zero, toolItemState))
             {
