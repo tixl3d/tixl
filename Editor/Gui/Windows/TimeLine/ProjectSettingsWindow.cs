@@ -781,6 +781,8 @@ internal sealed class ProjectSettingsWindow : Window
                                            defaults.StripUnusedOperators);
 
         FormInputs.AddVerticalSpace(3);
+        CustomComponents.HelpText(PlayerExporter.BassLicenseNote);
+        FormInputs.AddVerticalSpace();
         DrawExportButtons(composition);
 
         return modified;

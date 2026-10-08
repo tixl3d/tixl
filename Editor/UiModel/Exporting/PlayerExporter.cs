@@ -224,7 +224,11 @@ internal static partial class PlayerExporter
             Log.Debug("Skipped optional dependencies: " + string.Join(", ", dependencyFilter.ExcludedPatterns));
         }
 
-        reason = "Exported successfully to " + exportDir;
+        reason = $"""
+                  Exported successfully to {exportDir}
+
+                  {BassLicenseNote}
+                  """;
         return true;
     }
 
@@ -581,6 +585,14 @@ internal static partial class PlayerExporter
     /// </summary>
     public const string NoContentSupplierReason = "Add a [SendToOutput] inside this operator. "
                                                   + "An executable ships what its sends put on the setup's outputs.";
+
+    /// <summary>
+    /// Shown where the export is offered and in its result: the player ships BASS, whose free license only
+    /// covers non-commercial use. The license text travels with every export in its licenses folder.
+    /// </summary>
+    public const string BassLicenseNote = "Exported executables include the BASS audio library (un4seen.com). It is free for "
+                                          + "non-commercial use; distributing an executable commercially requires a BASS license "
+                                          + "from un4seen. See licenses/BASS-un4seen.txt in the export folder.";
 
     /// <summary>Whether this op holds anything an export could ship — the check behind an offered export button.</summary>
     public static bool CanExport(Instance exportedInstance)
