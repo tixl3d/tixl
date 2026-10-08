@@ -96,6 +96,9 @@ cp "$root/LICENSE.txt" "$stage/LICENSE.txt"
 install -Dm755 "$script_dir/install-dependencies.sh" "$stage/install-dependencies.sh"
 install -Dm644 "$script_dir/DEPENDENCIES.md"         "$stage/DEPENDENCIES.md"
 
+# Packaging recipes (the Flatpak manifest) point at this instead of the versioned folder.
+ln -sfn "$name" "$script_dir/Output/tixl-linux-x64"
+
 if [[ "$stage_only" == true ]]; then
     echo "Staged at $stage"
     exit 0

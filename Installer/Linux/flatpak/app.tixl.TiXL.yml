@@ -57,7 +57,8 @@ modules:
       - install -Dm755 tixl-launcher.sh /app/bin/tixl
     sources:
       - type: dir
-        path: ../Output/tixl-4.4.0.0-linux-x64
+        # Version-less link to the latest stage, so a version bump does not break the manifest.
+        path: ../Output/tixl-linux-x64
       - type: script
         dest-filename: tixl-launcher.sh
         commands:
