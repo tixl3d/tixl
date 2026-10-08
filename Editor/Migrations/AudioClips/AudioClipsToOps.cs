@@ -23,7 +23,7 @@ namespace T3.Editor.Migrations.AudioClips;
 /// migrated symbols are flagged as modified, so the change persists through the regular save machinery
 /// whenever the user next saves. Each migrated clip becomes a symbol child with Path / Volume / Mute /
 /// TimeRange copied and AutoPlay on; the former main soundtrack gets <c>Display = BackgroundImage</c> (which
-/// carries the main-soundtrack designation) and <c>Style = Waveform</c>. Migrated entries are removed from
+/// carries the main-soundtrack designation) and <c>Style = Spectrum</c>. Migrated entries are removed from
 /// the settings list; the ops are the single source of truth afterwards.
 /// </summary>
 internal static class AudioClipsToOps
@@ -159,7 +159,7 @@ internal static class AudioClipsToOps
         if (clip.IsMainSoundtrack)
         {
             SetInput(symbol, child, DisplayInputId, new InputValue<int>((int)AudioClipDisplay.BackgroundImage));
-            SetInput(symbol, child, StyleInputId, new InputValue<int>((int)AudioClipStyle.Waveform));
+            SetInput(symbol, child, StyleInputId, new InputValue<int>((int)AudioClipStyle.Spectrum));
         }
 
         return true;
