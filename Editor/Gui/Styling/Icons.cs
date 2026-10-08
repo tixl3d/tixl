@@ -19,10 +19,11 @@ internal static class Icons
     /** Draws icon vertically aligned to the current font */
     public static void DrawAtCursor(this Icon icon)
     {
-        var defaultFontSize = ImGui.GetFrameHeight(); // ImGui.GetFontSize();
+        // Centres the glyph's ink in the frame row. Y0..Y1 is where the glyph is drawn below the cursor, so its
+        // height is Y1 - Y0 and its top sits Y0 below the cursor.
+        var rowHeight = ImGui.GetFrameHeight();
         var glyph = IconFont.FindGlyph((char)icon);
-        var iconHeight = glyph.Y0; // Not sure if this is correct
-        var dy = (int)((defaultFontSize - iconHeight) / 2) + 2;
+        var dy = (int)((rowHeight - (glyph.Y1 - glyph.Y0)) / 2 - glyph.Y0);
         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + dy);
         ImGui.PushFont(IconFont);
         ImGui.TextUnformatted(((char)(int)icon).ToString());
