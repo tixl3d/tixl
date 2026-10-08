@@ -140,12 +140,11 @@ bugs). Estimate: 20–50 agent hours plus your review/testing time.
       ("Can't read file" from `LoadObjAsPoints` / `LoadObj`). Also accept positions plus lines.
 - [ ] **Visual suite on the Mac: 71 / 97 (2026-10-08).** Fixed so far: 8x MSAA clamp for pipelines, `level`
       shadowing Metal's `level()` (mesh-DrawUnlit, RgbTV, waveform-cs), compute bindings leaking into draw
-      transitions, TextureToCubemap without geometry-shader fan-out. Still failing, by cause:
-      - `RenderToCubemap` (8 pipelines) needs its geometry stage; rewrite to 6 instanced draws with the layer
-        written by the vertex shader, like TextureToCubemap.
-      - `PbrTests/Basic`: environment now present, but dielectrics are tinted green. Not the specular cube map
-        (RGBA16F) nor the BRDF LUT format (RGBA16 UNorm storage works); next look at the BRDF LUT contents via
-        the bridge.
+      transitions, TextureToCubemap and RenderToCubemap (specular prefilter) without geometry-shader fan-out -
+      no pipeline fails to build any more. Still failing, by cause:
+      - `PbrTests/Basic` (0.03) and `PointShading` (0.01): environment and prefilter now work, but the blue
+        channel seems lost - teal and purple surfaces come out green. Not the specular cube map (RGBA16F) nor
+        the BRDF LUT format (RGBA16 UNorm storage works); probe the material/albedo path via the bridge.
       - `DemoWorksForEverybody` (14 frames, flat/green CRT frames), `Particles`, `FieldParticleVolume`
         (particles missing), `TestImage2dSDF` (text "S!" missing), `ComplexComposition`, `Katsumaki`,
         `DemoThere`: silent, no validation errors; not triaged.

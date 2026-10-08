@@ -238,7 +238,8 @@ internal sealed class _SpecularPrefilter : Instance<_SpecularPrefilter>
             vsStage.SetConstantBuffers(0, 1, constantBuffers);
             gsStage.SetConstantBuffers(0, 1, constantBuffers);
 
-            device.ImmediateContext.Draw(3, 0);
+            // A full-screen triangle per cube face; the shader picks the face from the vertex id.
+            device.ImmediateContext.Draw(18, 0);
             size /= 2;
             ++mipSlice;
         }

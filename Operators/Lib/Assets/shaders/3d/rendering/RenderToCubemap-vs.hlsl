@@ -100,28 +100,6 @@ float3 importanceSampleGGX(float2 xi, float3 N)
 
 
 
-struct vsOutput
-{
-    float4 pos : SV_POSITION;
-    float2 uv : TEXCOORD0;
-};
- 
-void vsMain(out vsOutput o, uint id : SV_VERTEXID)
-{
-    o.uv = float2((id << 1) & 2, id & 2);
-    o.pos = float4(o.uv * float2(2,-2) + float2(-1,1), 0, 1);
-//o.uv = (o.pos.xy * float2(0.5,-0.5) + 0.5) * 4;
-//o.uv.y = 1 - o.uv.y;
-}
- 
-struct gsOutput
-{
-    float4 pos : SV_POSITION;
-    float3 nrm : TEXCOORD0;
-    float4 col : COLOR0;
-    uint face : SV_RENDERTARGETARRAYINDEX;
-};
-
 float4 colorOfBox(uint face)
 {
     float4 c = float4(0,0,0,1);
@@ -200,21 +178,64 @@ float3 UvAndIndexToBoxCoord(float2 uv, uint face)
     return n;
 }
  
-[maxvertexcount(18)]
-void gsMain(triangle vsOutput input[3], inout TriangleStream<gsOutput> output)
+// One full-screen triangle per cube face: 18 vertices, the face is vertexId / 3. The geometry shader only routes
+// each triangle to its face's layer. Where there is no geometry stage (Metal), the vertex shader does that itself.
+struct vsOutput
 {
-    for( int f = 0; f < 6; ++f )
+    float4 pos : SV_POSITION;
+    float3 nrm : TEXCOORD0;
+    nointerpolation uint face : FACE_INDEX;
+#if defined(__SLANG__)
+    uint layer : SV_RenderTargetArrayIndex;
+#endif
+};
+
+struct gsInput
+{
+    float4 pos : SV_POSITION;
+    float3 nrm : TEXCOORD0;
+    nointerpolation uint face : FACE_INDEX;
+};
+
+struct gsOutput
+{
+    float4 pos : SV_POSITION;
+    float3 nrm : TEXCOORD0;
+    uint face : SV_RENDERTARGETARRAYINDEX;
+};
+
+struct psInput
+{
+    float4 pos : SV_POSITION;
+    float3 nrm : TEXCOORD0;
+};
+
+vsOutput vsMain(uint id : SV_VERTEXID)
+{
+    uint face = id / 3;
+    uint corner = id % 3;
+
+    vsOutput o;
+    float2 uv = float2((corner << 1) & 2, corner & 2);
+    o.pos = float4(uv * float2(2, -2) + float2(-1, 1), 0, 1);
+    o.nrm = UvAndIndexToBoxCoord(uv, face);
+    o.face = face;
+#if defined(__SLANG__)
+    o.layer = face;
+#endif
+    return o;
+}
+
+[maxvertexcount(3)]
+void gsMain(triangle gsInput input[3], inout TriangleStream<gsOutput> output)
+{
+    for (int v = 0; v < 3; ++v)
     {
-        for( int v = 0; v < 3; ++v )
-        {
-            gsOutput o;
-            o.pos = input[v].pos;
-            o.nrm = UvAndIndexToBoxCoord(input[v].uv, f);
-            o.col = colorOfBox(f);
-            o.face = f;
-            output.Append(o);
-        }
-        output.RestartStrip();
+        gsOutput o;
+        o.pos = input[v].pos;
+        o.nrm = input[v].nrm;
+        o.face = input[0].face;
+        output.Append(o);
     }
 }
  
@@ -302,7 +323,7 @@ float D_GGX(float NoH, float roughness)
 
 //#define REFERENCE_ON
 
-float4 psMain(in gsOutput i) : SV_TARGET0
+float4 psMain(in psInput i) : SV_TARGET0
 {
     float3 N = normalize(i.nrm);
 //    return colorOfBox(i.face);
