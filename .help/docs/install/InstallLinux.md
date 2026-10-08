@@ -138,12 +138,12 @@ them yourself.
 A few features rely on Windows-only libraries:
 
 - Computer vision operators based on OpenCV and MediaPipe.
-- Live audio input from an external device. Audio playback and the timeline's audio work.
+- NDI input and output, webcams and screen capture.
+- Recording what other programs play (loopback). Live input from a microphone or line-in works.
 - Spout video sharing, which only exists on Windows.
-- SpaceMouse support.
+- SpaceMouse support, gamepads and Ableton Link.
 
-NDI operators need the NDI runtime (`libndi.so.6`), which TiXL can't ship. On Arch, install `ndi-sdk`
-from the AUR; on NixOS, the `ndi` package; elsewhere, download it from [ndi.video](https://ndi.video).
+[Platform support](PlatformSupport.md) has the full comparison of Windows, Linux and macOS.
 
 ## Troubleshooting
 

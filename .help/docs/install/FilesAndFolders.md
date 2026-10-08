@@ -30,6 +30,18 @@ Deleting the cache or temp folder costs you nothing but a slower next start. Del
     so `$XDG_CONFIG_HOME` and `$XDG_CACHE_HOME` are honoured if you set them. The projects folder follows your
     desktop's configured Documents directory, so on a localised system it may be `~/Dokumente` instead.
 
+=== "macOS"
+
+    ```
+    ~/Documents/TiXL4.4-alpha/                        projects
+    ~/Library/Application Support/TiXL4.4-alpha/      settings and logs
+    ~/Library/Caches/TiXL4.4-alpha/                   cache
+    $TMPDIR/TiXL4.4-alpha/                            temp
+    ```
+
+    `~/Library` is hidden in Finder; press `Cmd+Shift+G` and type the path to open it. `$TMPDIR` is a
+    per-user folder under `/var/folders/` that macOS clears now and then.
+
 === "Windows"
 
     ```

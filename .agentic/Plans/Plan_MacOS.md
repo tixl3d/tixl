@@ -157,6 +157,15 @@ bugs). Estimate: 20–50 agent hours plus your review/testing time.
 - [ ] **`PbrTests/PointShading`: last item (Draw Sphere Mesh) sometimes cut off.** Went away after pasting a
       copy of the whole test into a project - looks like timing, initialization or a missing barrier rather than
       shading. Reproduce with the visual suite run twice and compare.
+- [ ] **Player export strips native libraries on Linux/macOS.** `PlayerExporter.IsForeignRuntimeFile` keeps only
+      `runtimes/win-x64` and `runtimes/win` ("the player runs on win-x64 only"), so an exported Linux or Mac
+      player loses e.g. SkiaSharp's `runtimes/linux-x64` / `runtimes/osx` natives. Keep the host's RIDs (and plain
+      `osx`, `unix`). Also: the executable is only renamed after the project for `Player.exe`, and no `.app` is
+      produced on macOS.
+- [ ] **Stale developer docs:** `Installer/Linux/DEPENDENCIES.md` and `Dependencies/{linux-x64,osx}/README.md` still
+      say live audio input is unavailable (BASS recording provides mic/line-in now, no loopback);
+      `DEPENDENCIES.md` lists the NDI runtime as optional on Linux, but `WindowsOnlyFeature` disables NDI off
+      Windows. The user-facing state is in `.help/docs/install/PlatformSupport.md`.
 - [ ] **Clean up `RenderToCubemap-vs.hlsl`** (the specular prefilter; over 10 years old). Unused globals outside
       any cbuffer (`objectToWorldMatrix` … `textureMatrix`, `g_CubeSize`, `g_CubeLod`, `g_CubeLodCount` - Slang
       warns about each), a commented-out cbuffer and reference code, the debug `colorOfBox`, inconsistent naming
