@@ -301,7 +301,7 @@ internal static class PlaceHolderUi
             }
         }
 
-        last.Y = last.Y.Clamp(0, 250);
+        last.Y = last.Y.Clamp(0, 250 * T3Ui.UiScaleFactor);
 
         var resultAreaOnScreen = ImRect.RectWithSize(resultPosOnScreen, last);
 
@@ -417,7 +417,7 @@ internal static class PlaceHolderUi
             }
         }
 
-        WindowContentExtend.ExtendToLastItem(200);
+        WindowContentExtend.ExtendToLastItem((int)(200 * T3Ui.UiScaleFactor));
         return result;
     }
 
@@ -476,7 +476,7 @@ internal static class PlaceHolderUi
 
             if (!HelpWindow.HoverPreviewActive)
             {
-                ImGui.SetNextWindowSize(new Vector2(300, 0));
+                ImGui.SetNextWindowSize(new Vector2(300 * T3Ui.UiScaleFactor, 0));
                 ImGui.BeginTooltip();
                 OperatorHelp.DrawHelpSummary(symbolUi, false);
                 ImGui.EndTooltip();
