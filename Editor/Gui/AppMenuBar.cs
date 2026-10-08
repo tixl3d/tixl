@@ -300,7 +300,7 @@ internal static class AppMenuBar
 
     private static void DrawMainMenu()
     {
-        if (ImGui.BeginMenu("TiXL"))
+        if (ImGui.BeginMenu(PlatformNames.MainMenu))
         {
             var currentProject = ProjectView.Focused?.OpenedProject.Package;
             UserSettings.Config.ShowMainMenu = true;

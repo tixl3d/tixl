@@ -107,7 +107,9 @@ macOS hasn't been tested much yet.
 | SpaceMouse | Works | Planned | Planned |
 | Trackpad pinch and two-finger pan | — | Works | Works |
 
-On macOS, **Cmd** takes the place of **Ctrl** in all shortcuts, and menus show the Mac key names.
+On macOS, **Cmd** takes the place of **Ctrl** in all shortcuts, and menus show the Mac key names. The
+menu called **TiXL** on Windows and Linux is called **File** on macOS, because the Mac's own app menu
+already carries the name TiXL.
 
 ## Computer vision and AI
 
