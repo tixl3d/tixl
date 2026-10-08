@@ -136,7 +136,7 @@ internal static class InputWithTypeAheadSearch
             _activeInputId = inputId;
 
             var lastPosition = new Vector2(ImGui.GetItemRectMin().X, ImGui.GetItemRectMax().Y);
-            var size = new Vector2(ImGui.GetItemRectSize().X, 320);
+            var size = new Vector2(ImGui.GetItemRectSize().X, 320 * T3Ui.UiScaleFactor);
             ImGui.SetNextWindowPos(lastPosition);
             ImGui.SetNextWindowSize(size);
             if (ImGui.IsItemFocused() && ImGui.IsKeyPressed(Key.Return.ToImGuiKey()))
@@ -150,7 +150,7 @@ internal static class InputWithTypeAheadSearch
                                            | ImGuiWindowFlags.Tooltip // ugly as f**k. Sadly .PopUp will lead to random crashes.
                                            | ImGuiWindowFlags.NoFocusOnAppearing;
                 
-            ImGui.SetNextWindowSize(new Vector2(450,300));
+            ImGui.SetNextWindowSize(new Vector2(450, 300) * T3Ui.UiScaleFactor);
             ImGui.PushStyleColor(ImGuiCol.PopupBg, UiColors.BackgroundFull.Rgba);
             if (ImGui.Begin("##typeAheadSearchPopup", ref isSearchResultWindowOpen,flags))
             {

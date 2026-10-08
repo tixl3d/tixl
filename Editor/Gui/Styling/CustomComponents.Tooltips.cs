@@ -48,13 +48,13 @@ internal static partial class CustomComponents
         EndTooltip();
     }
 
-    /** Should be used for drawing consistently styled tooltips */
+    /** Should be used for drawing consistently styled tooltips. <paramref name="wrapPos"/> is scaled with the UI. */
     public static bool BeginTooltip(float wrapPos = 300)
     {
         var isHovered = false;
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(6, 6));
         isHovered = ImGui.BeginTooltip();
-        ImGui.PushTextWrapPos(wrapPos);
+        ImGui.PushTextWrapPos(wrapPos * T3Ui.UiScaleFactor);
         return isHovered;
     }
 

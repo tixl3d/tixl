@@ -11,20 +11,20 @@ internal sealed class EditResolutionDialog : ModalDialog
         var success = false;
         if (BeginDialog("Edit output resolution"))
         {
-            ImGui.SetNextItemWidth(120);
+            ImGui.SetNextItemWidth(120 * T3Ui.UiScaleFactor);
             ImGui.AlignTextToFramePadding();
             ImGui.TextUnformatted("Name:");
             ImGui.SameLine();
-            ImGui.SetNextItemWidth(250);
+            ImGui.SetNextItemWidth(250 * T3Ui.UiScaleFactor);
             ImGui.InputText("##parameterName", ref resolution.Title, 255);
 
             ImGui.Spacing();
 
-            ImGui.SetNextItemWidth(120);
+            ImGui.SetNextItemWidth(120 * T3Ui.UiScaleFactor);
             ImGui.AlignTextToFramePadding();
             ImGui.TextUnformatted("Resolution:");
             ImGui.SameLine();
-            ImGui.SetNextItemWidth(250);
+            ImGui.SetNextItemWidth(250 * T3Ui.UiScaleFactor);
 
             var res = new int[2] { resolution.Size.Width, resolution.Size.Height };
             ImGui.DragInt2("##resolution", ref res[0], 255);

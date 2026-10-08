@@ -420,7 +420,7 @@ internal static class FormInputs
 
         // Compute box height: account for all items plus the bottom transient add-row; add 1.5 lines total so the add-row is visible
         var lineHeight = ImGui.GetTextLineHeightWithSpacing();
-        var listBoxHeight = MathF.Min(300, (values.Count + 2.5f) * lineHeight);
+        var listBoxHeight = MathF.Min(300 * T3Ui.UiScaleFactor, (values.Count + 2.5f) * lineHeight);
         var size = inputSize with {Y = listBoxHeight};
 
         var modified = false;
@@ -1113,7 +1113,7 @@ internal static class FormInputs
         var sizeForResetToDefault = hasReset ? toolWidth : 0;
         var sizeForTooltip = !string.IsNullOrEmpty(tooltip) ? toolWidth : 0;
 
-        var requestedWidth = fillWidth ? ImGui.GetContentRegionAvail().X * _widthRatio : 200;
+        var requestedWidth = fillWidth ? ImGui.GetContentRegionAvail().X * _widthRatio : 200 * T3Ui.UiScaleFactor;
         if (maxWidth > 0)
             requestedWidth = MathF.Min(requestedWidth, maxWidth * T3Ui.UiScaleFactor);
         var availableWidth = MathF.Min(requestedWidth, ImGui.GetContentRegionAvail().X + 20);

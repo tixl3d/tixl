@@ -51,7 +51,7 @@ public static class CurveEditPopup
         if (_justOpened)
         {
             _justOpened = false;
-            ImGui.SetNextWindowSize(new Vector2(500, 400), ImGuiCond.Once);
+            ImGui.SetNextWindowSize(new Vector2(500, 400) * T3Ui.UiScaleFactor, ImGuiCond.Once);
         }
 
         var isOpen = true;
