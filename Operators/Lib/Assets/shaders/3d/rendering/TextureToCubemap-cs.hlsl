@@ -147,53 +147,67 @@ float2 ComputeUvFromNormal(float3 n)
     return uv;
 }
 
+// One full-screen triangle per cube face: 18 vertices, the face is vertexId / 3. The geometry shader only routes
+// each triangle to its face's layer. Where there is no geometry stage (Metal), the vertex shader does that itself.
 struct vsOutput
 {
     float4 position : SV_POSITION;
-    float2 uv : TEXCOORD0;
+    float3 normal : CUSTOM;
+    nointerpolation uint face : FACE_INDEX;
+#if defined(__SLANG__)
+    uint layer : SV_RenderTargetArrayIndex;
+#endif
+};
+
+struct gsInput
+{
+    float4 position : SV_POSITION;
+    float3 normal : CUSTOM;
+    nointerpolation uint face : FACE_INDEX;
 };
 
 struct gsOutput
 {
-    uint faceId : SV_RENDERTARGETARRAYINDEX;
     float4 position : SV_POSITION;
     float3 normal : CUSTOM;
-    float4 color : COLOR0;
+    uint faceId : SV_RENDERTARGETARRAYINDEX;
+};
+
+struct psInput
+{
+    float4 position : SV_POSITION;
+    float3 normal : CUSTOM;
 };
 
 vsOutput vsMain(uint vertexId : SV_VertexID)
 {
+    uint face = vertexId / 3;
+    uint corner = vertexId % 3;
+
     vsOutput output;
-
-    // uint faceIndex = vertexId / 6;
-
-    // float4 quadPos = float4(Quad[vertexId], 1) ;
-
-    // output.uv= quadPos.xy * float2(0.5, -0.5) + 0.5;
-    // output.position = quadPos;
-    output.uv = float2((vertexId << 1) & 2, vertexId & 2);
-    output.position = float4(output.uv * float2(2, -2) + float2(-1, 1), 0, 1);
+    float2 uv = float2((corner << 1) & 2, corner & 2);
+    output.position = float4(uv * float2(2, -2) + float2(-1, 1), 0, 1);
+    output.normal = UvAndIndexToBoxCoord(uv, face);
+    output.face = face;
+#if defined(__SLANG__)
+    output.layer = face;
+#endif
     return output;
 }
 
-[maxvertexcount(18)] void gsMain(triangle vsOutput input[3], inout TriangleStream<gsOutput> output)
+[maxvertexcount(3)] void gsMain(triangle gsInput input[3], inout TriangleStream<gsOutput> output)
 {
-    for (int f = 0; f < 6; ++f)
+    for (int v = 0; v < 3; ++v)
     {
-        for (int v = 0; v < 3; ++v)
-        {
-            gsOutput o;
-            o.position = input[v].position;
-            o.normal = UvAndIndexToBoxCoord(input[v].uv, f);
-            o.color = colorOfBox(f); // float4(1,1,1,1);
-            o.faceId = f;
-            output.Append(o);
-        }
-        output.RestartStrip();
+        gsOutput o;
+        o.position = input[v].position;
+        o.normal = input[v].normal;
+        o.faceId = input[0].face;
+        output.Append(o);
     }
 }
 
-float4 psMain(in gsOutput i) : SV_TARGET0
+float4 psMain(in psInput i) : SV_TARGET0
 {
     // return float4(Orientation,0,0,1);
     // return i.color;

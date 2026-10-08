@@ -138,6 +138,20 @@ bugs). Estimate: 20–50 agent hours plus your review/testing time.
       which is 0 for a file with vertices and `l` entries but no faces. `ThereDemo`'s
       `linedrawings/intro-logo-marion.obj` parses to 2217 positions and 1951 lines and is still rejected
       ("Can't read file" from `LoadObjAsPoints` / `LoadObj`). Also accept positions plus lines.
+- [ ] **Visual suite on the Mac: 71 / 97 (2026-10-08).** Fixed so far: 8x MSAA clamp for pipelines, `level`
+      shadowing Metal's `level()` (mesh-DrawUnlit, RgbTV, waveform-cs), compute bindings leaking into draw
+      transitions, TextureToCubemap without geometry-shader fan-out. Still failing, by cause:
+      - `RenderToCubemap` (8 pipelines) needs its geometry stage; rewrite to 6 instanced draws with the layer
+        written by the vertex shader, like TextureToCubemap.
+      - `PbrTests/Basic`: environment now present, but dielectrics are tinted green. Not the specular cube map
+        (RGBA16F) nor the BRDF LUT format (RGBA16 UNorm storage works); next look at the BRDF LUT contents via
+        the bridge.
+      - `DemoWorksForEverybody` (14 frames, flat/green CRT frames), `Particles`, `FieldParticleVolume`
+        (particles missing), `TestImage2dSDF` (text "S!" missing), `ComplexComposition`, `Katsumaki`,
+        `DemoThere`: silent, no validation errors; not triaged.
+      - `NdiOutput`, `PlayVideo`: no NDI / FFmpeg on the Mac yet (expected).
+      - Validation noise: unbound `TextureCube` slots get a 2D placeholder view (`mesh-DrawUnlit` CubeMap);
+        add a cube placeholder to `VulkanNullResources`.
 - [ ] **"An update larger than 64 KB needs a staging copy and was dropped."** Logged once on the Mac while the
       SVG test chain ran in `_agentTests`. Find the caller and check whether Linux shows it too; whatever it
       uploads is currently lost.

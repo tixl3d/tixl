@@ -39,10 +39,10 @@ void main(uint3 i : SV_DispatchThreadID)
             float2 uv = float2(float2( i.x / (float)texWidth, (float) rowIndex / 256.0 ));
             float4 col = InputTexture.SampleLevel(texSampler, uv,0);
 
-            int3 level = 512 - clamp( col.rgb * 256, 0, 511);
-            SharedColors[level.r] += float4(Intensity,0,0,Opacity) * col.a;
-            SharedColors[level.g] += float4(0,Intensity,0,Opacity) * col.a;
-            SharedColors[level.b] += float4(0,0,Intensity,Opacity) * col.a;
+            int3 bin = 512 - clamp( col.rgb * 256, 0, 511);
+            SharedColors[bin.r] += float4(Intensity,0,0,Opacity) * col.a;
+            SharedColors[bin.g] += float4(0,Intensity,0,Opacity) * col.a;
+            SharedColors[bin.b] += float4(0,0,Intensity,Opacity) * col.a;
         }
     }
 
