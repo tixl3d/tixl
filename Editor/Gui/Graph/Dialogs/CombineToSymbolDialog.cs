@@ -44,8 +44,8 @@ internal sealed class CombineToSymbolDialog : ModalDialog
                 ImGui.PushFont(Fonts.FontSmall);
                 ImGui.TextUnformatted("Description");
                 ImGui.PopFont();
-                ImGui.SetNextItemWidth(460);
-                ImGui.InputTextMultiline("##description", ref description, 1024, new Vector2(450, 60));
+                ImGui.SetNextItemWidth(460 * T3Ui.UiScaleFactor);
+                ImGui.InputTextMultiline("##description", ref description, 1024, new Vector2(450, 60) * T3Ui.UiScaleFactor);
 
                 ImGui.Checkbox("Combine as time clip", ref _shouldBeTimeClip);
                 CustomComponents.TooltipForLastItem("""

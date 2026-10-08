@@ -61,7 +61,7 @@ internal static class OutputsIndicator
         if (!ImGui.IsItemHovered())
             return;
 
-        CustomComponents.BeginTooltip(SummaryWidth * T3Ui.UiScaleFactor);
+        CustomComponents.BeginTooltip(SummaryWidth);
         DrawActiveOutputsSummary();
         CustomComponents.EndTooltip();
     }

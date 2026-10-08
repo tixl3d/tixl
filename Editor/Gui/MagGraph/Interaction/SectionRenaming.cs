@@ -72,7 +72,7 @@ internal static class SectionRenaming
         // --- Label editing UI ---
         ImGui.SetCursorScreenPos(screenArea.Min);
         ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(4, 4));
-        ImGui.SetNextItemWidth(350);
+        ImGui.SetNextItemWidth(350 * T3Ui.UiScaleFactor);
         ImGui.InputText("##renameSectionLabel", ref _labelBuffer, 256, ImGuiInputTextFlags.AutoSelectAll);
         var isLabelActive = ImGui.IsItemActive();
         ImGui.PopStyleVar();

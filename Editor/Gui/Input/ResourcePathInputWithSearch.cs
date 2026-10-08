@@ -217,7 +217,7 @@ internal static class AssetInputWithTypeAheadSearch
                                        | ImGuiWindowFlags.Tooltip // ugly as f**k. Sadly .PopUp will lead to random crashes.
                                        | ImGuiWindowFlags.NoFocusOnAppearing;
 
-        ImGui.SetNextWindowSize(new Vector2(750, 300));
+        ImGui.SetNextWindowSize(new Vector2(750, 300) * T3Ui.UiScaleFactor);
         ImGui.PushStyleColor(ImGuiCol.PopupBg, UiColors.BackgroundFull.Rgba);
         if (ImGui.Begin("##typeAheadSearchPopup", ref isSearchResultWindowOpen, flags))
         {

@@ -47,7 +47,7 @@ internal sealed class EditCommentDialog : ModalDialog
                     if (ImGui.IsWindowAppearing())
                         ImGui.SetKeyboardFocusHere();
 
-                    ImGui.InputTextMultiline("##comment", ref _editBuffer, 2000, new Vector2(-1, 300), ImGuiInputTextFlags.None);
+                    ImGui.InputTextMultiline("##comment", ref _editBuffer, 2000, new Vector2(-1, 300 * T3Ui.UiScaleFactor), ImGuiInputTextFlags.None);
                 }
             }
             if (ImGui.Button("Close"))

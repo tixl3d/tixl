@@ -65,7 +65,7 @@ public static class SceneSetupPopup
             return;
 
 
-        ImGui.SetNextWindowSize(new Vector2(800, 300));
+        ImGui.SetNextWindowSize(new Vector2(800, 300) * T3Ui.UiScaleFactor);
         if (ImGui.BeginPopup(EditSceneStructureId))
         {
             drawList = ImGui.GetWindowDrawList();
@@ -148,7 +148,7 @@ public static class SceneSetupPopup
                 meshLabel = $"  {node.MeshName.Truncate(25)} (no mesh)";
             else
                 meshLabel = $"  {node.MeshName.Truncate(25)} ({node.MeshBuffers.FaceCount.FormatCount()})";
-            ImGui.SameLine(300);
+            ImGui.SameLine(300 * T3Ui.UiScaleFactor);
             ImGui.TextColored(UiColors.TextMuted.Rgba, meshLabel);
             if (ImGui.IsItemHovered())
             {
@@ -163,7 +163,7 @@ public static class SceneSetupPopup
             // Material
             if (node.Material != null)
             {
-                ImGui.SameLine(630);
+                ImGui.SameLine(630 * T3Ui.UiScaleFactor);
                 ImGui.TextColored(UiColors.TextMuted.Rgba, node.Material.Name);
                 
                 var h = ImGui.GetFrameHeight();
@@ -204,7 +204,7 @@ public static class SceneSetupPopup
             }
             else
             {
-                ImGui.SameLine(630);
+                ImGui.SameLine(630 * T3Ui.UiScaleFactor);
                 ImGui.TextUnformatted("no material");
             }
 

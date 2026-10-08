@@ -45,7 +45,7 @@ internal static class T3Metrics
         // so you don't get a redundant overlay on top of the window.
         if (ImGui.IsItemHovered() && !WindowManager.IsAnyInstanceVisible<PerformanceWindow>())
         {
-            CustomComponents.BeginTooltip(450 * T3Ui.UiScaleFactor);
+            CustomComponents.BeginTooltip(450);
             {
                 ImGui.Dummy(new Vector2(250 * T3Ui.UiScaleFactor, 1));
                 DrawDetailedView();

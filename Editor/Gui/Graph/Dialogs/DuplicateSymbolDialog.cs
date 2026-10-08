@@ -101,7 +101,7 @@ internal sealed class DuplicateSymbolDialog : ModalDialog
                 ImGui.Spacing();
 
                 FormInputs.DrawInputLabel("Description");
-                ImGui.InputTextMultiline("##description", ref description, 1024, new Vector2(450, 60));
+                ImGui.InputTextMultiline("##description", ref description, 1024, new Vector2(450, 60) * T3Ui.UiScaleFactor);
 
                 FormInputs.AddHint("Duplicating creates a new operator and can't be undone — this clears the undo history.");
 

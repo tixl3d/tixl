@@ -53,7 +53,7 @@ public sealed class EditSymbolDescriptionDialog : ModalDialog
             if (ImGui.IsWindowAppearing())
                 ImGui.SetKeyboardFocusHere();
 
-            ImGui.InputTextMultiline("##name", ref desc, 2000, new Vector2(-1, 400), ImGuiInputTextFlags.None);
+            ImGui.InputTextMultiline("##name", ref desc, 2000, new Vector2(-1, 400 * T3Ui.UiScaleFactor), ImGuiInputTextFlags.None);
             symbolUi.Description = desc;
 
             ImGui.Text("Links...");
@@ -61,14 +61,14 @@ public sealed class EditSymbolDescriptionDialog : ModalDialog
             {
                 ImGui.PushID(l.Id.GetHashCode());
 
-                ImGui.SetNextItemWidth(150);
+                ImGui.SetNextItemWidth(150 * T3Ui.UiScaleFactor);
                 FormInputs.DrawEnumDropdown(ref l.Type, "type");
 
                 ImGui.SameLine();
-                CustomComponents.DrawInputFieldWithPlaceholder("URL", ref l.Url, 220);
+                CustomComponents.DrawInputFieldWithPlaceholder("URL", ref l.Url, 220 * T3Ui.UiScaleFactor);
 
                 ImGui.SameLine();
-                CustomComponents.DrawInputFieldWithPlaceholder("Title", ref l.Title, 220);
+                CustomComponents.DrawInputFieldWithPlaceholder("Title", ref l.Title, 220 * T3Ui.UiScaleFactor);
 
                 ImGui.SameLine();
                 CustomComponents.DrawInputFieldWithPlaceholder("Description", ref l.Description);
