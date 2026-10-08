@@ -265,6 +265,9 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
 
     public string AdapterName { get; }
 
+    /// <summary>False on Metal. Pipelines are then built without their geometry stage.</summary>
+    internal bool SupportsGeometryShader => _supportsGeometryShader;
+
     /// <summary>False on MoltenVK; descriptors are then written into per-frame sets instead.</summary>
     internal bool UsesPushDescriptors { get; }
     public string BackendDescription { get; }
@@ -624,6 +627,10 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
     public GpuShader CreateShader(ShaderStage stage, ReadOnlySpan<byte> code, string entryPoint, ReadOnlySpan<ShaderBinding> bindings = default,
                                   string? label = null)
     {
+        // A geometry module is invalid without the feature, and the pipelines leave the stage out anyway.
+        if (stage == ShaderStage.Geometry && !_supportsGeometryShader)
+            return Track(new VulkanShader(this, VkShaderModule.Null, stage, bindings.ToArray(), label));
+
         fixed (byte* pointer = code)
         {
             VkShaderModuleCreateInfo moduleInfo = new()
@@ -1411,6 +1418,24 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
 
         if (requested < ToSampleCount(description.Samples.Count))
             GraphicsLog.WarnOnce($"{description.Samples.Count}x multisampling is not available here; using {(uint)requested}x.");
+
+        return requested == 0 ? VkSampleCountFlags.Count1 : requested;
+    }
+
+    /// <summary>
+    /// The sample count a pipeline draws with: the request, reduced to what a sampled render target and its depth
+    /// buffer can both have - the same reduction <see cref="SupportedSampleCount"/> gives their images. Apple GPUs
+    /// stop at 4, and Metal refuses a pipeline that asks for 8.
+    /// </summary>
+    internal VkSampleCountFlags SupportedRasterSampleCount(int count)
+    {
+        var requested = ToSampleCount(count);
+        var allowed = _limits.framebufferColorSampleCounts & _limits.framebufferDepthSampleCounts & _limits.sampledImageColorSampleCounts;
+
+        while (requested > VkSampleCountFlags.Count1 && (allowed & requested) == 0)
+        {
+            requested = (VkSampleCountFlags)((uint)requested >> 1);
+        }
 
         return requested == 0 ? VkSampleCountFlags.Count1 : requested;
     }

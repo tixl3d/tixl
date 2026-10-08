@@ -21,7 +21,10 @@ internal static unsafe class VulkanPipelineFactory
         if (description.PixelShader is VulkanShader pixel)
             shaders.Add(pixel);
 
-        if (description.GeometryShader is VulkanShader geometry)
+        // Metal has no geometry stage. Left out, a pipeline whose vertex shader already does what the geometry
+        // shader would - picking the layer, as TextureToCubemap's does - still works; one that relies on it
+        // fails to link and is skipped like any other unbuildable pipeline.
+        if (description.GeometryShader is VulkanShader geometry && backend.SupportsGeometryShader)
             shaders.Add(geometry);
 
         var layout = CreateLayout(backend, shaders, out var setLayouts, out var declared);
@@ -130,9 +133,9 @@ internal static unsafe class VulkanPipelineFactory
 
         VkPipelineMultisampleStateCreateInfo multisample = new()
                                                               {
-                                                                  rasterizationSamples = description.Samples.Count >= 2
-                                                                                             ? (VkSampleCountFlags)description.Samples.Count
-                                                                                             : VkSampleCountFlags.Count1,
+                                                                  // Reduced as the targets' images were, or the
+                                                                  // pipeline asks for more samples than they have.
+                                                                  rasterizationSamples = backend.SupportedRasterSampleCount(description.Samples.Count),
                                                                   alphaToCoverageEnable = description.AlphaToCoverage,
                                                                   minSampleShading = 1f,
                                                               };

@@ -653,10 +653,10 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
         // Barriers are not allowed inside a render pass. A texture uploaded or rendered into since the pass
         // opened has to be transitioned before this draw samples it, so the pass is closed and reopened around
         // the barriers; attachments always load, so nothing drawn so far is lost.
-        if (_renderingActive && BoundResourcesNeedBarriers())
+        if (_renderingActive && BoundResourcesNeedBarriers(GraphicsStages))
             EndRenderingIfActive();
 
-        TransitionBoundResources(VkPipelineStageFlags2.AllGraphics);
+        TransitionBoundResources(GraphicsStages, VkPipelineStageFlags2.AllGraphics);
         BeginRenderingIfNeeded();
 
         var api = backend.Api;
@@ -682,19 +682,24 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
             return false;
 
         EndRenderingIfActive();
-        TransitionBoundResources(VkPipelineStageFlags2.ComputeShader);
+        TransitionBoundResources(ComputeStages, VkPipelineStageFlags2.ComputeShader);
         backend.Api.vkCmdBindPipeline(_commandBuffer, VkPipelineBindPoint.Compute, _pipeline.Pipeline);
         PushDescriptors(VkPipelineBindPoint.Compute);
         return true;
     }
 
     /// <summary>
-    /// Puts every bound resource into the layout its use needs. This runs before the render pass opens,
-    /// because a transition inside one is not allowed.
+    /// Puts every resource bound to the given stages into the layout its use needs. This runs before the render
+    /// pass opens, because a transition inside one is not allowed.
     /// </summary>
-    private void TransitionBoundResources(VkPipelineStageFlags2 stage)
+    /// <remarks>
+    /// Only the stages the work runs: compute bindings stay set across draws, as they do in D3D11, and a texture
+    /// a dispatch wrote as a storage image would otherwise be moved back to General after the pixel stage's
+    /// transition to sampling - leaving it in the wrong layout for the draw that samples it.
+    /// </remarks>
+    private void TransitionBoundResources(StageRange stages, VkPipelineStageFlags2 stage)
     {
-        for (var stageIndex = 0; stageIndex < MaxStages; stageIndex++)
+        for (var stageIndex = stages.First; stageIndex <= stages.Last; stageIndex++)
         {
             var bindings = _bindings[stageIndex];
 
@@ -730,9 +735,9 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
     }
 
     /// <summary>Whether <see cref="TransitionBoundResources"/> would emit any barrier.</summary>
-    private bool BoundResourcesNeedBarriers()
+    private bool BoundResourcesNeedBarriers(StageRange stages)
     {
-        for (var stageIndex = 0; stageIndex < MaxStages; stageIndex++)
+        for (var stageIndex = stages.First; stageIndex <= stages.Last; stageIndex++)
         {
             var bindings = _bindings[stageIndex];
 
@@ -1037,6 +1042,11 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
     #endregion
 
     private const int MaxStages = 4;
+
+    private readonly record struct StageRange(int First, int Last);
+
+    private static readonly StageRange GraphicsStages = new((int)ShaderStage.Vertex, (int)ShaderStage.Geometry);
+    private static readonly StageRange ComputeStages = new((int)ShaderStage.Compute, (int)ShaderStage.Compute);
     private const int MaxBindingsPerStage = 166;
 
     private readonly Binding[][] _bindings =

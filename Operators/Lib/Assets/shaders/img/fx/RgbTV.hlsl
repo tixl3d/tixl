@@ -137,15 +137,15 @@ float4 psMain(vsOutput psInput) : SV_TARGET
 
         // Accumulate blur color
         float f = i / ((float)mipLevelCount);
-        float level = saturate((pow(f + 1 - saturate(BlurImage), 20) + 0.001));
-        blurredSum += level;
-        blurredCol += mipColor * level;
+        float mipWeight = saturate((pow(f + 1 - saturate(BlurImage), 20) + 0.001));
+        blurredSum += mipWeight;
+        blurredCol += mipColor * mipWeight;
 
         // Accumulate glow color
 
-        level = saturate((pow(f + 1 - saturate(GlowBlur), 20) + 0.001));
-        glowSum += level;
-        glowCol += mipColor * level;
+        mipWeight = saturate((pow(f + 1 - saturate(GlowBlur), 20) + 0.001));
+        glowSum += mipWeight;
+        glowCol += mipColor * mipWeight;
     }
     blurredCol /= blurredSum;
     float4 imgCol1 = inputTexture.SampleLevel(clampingSampler, uv2, 0);

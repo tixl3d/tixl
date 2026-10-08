@@ -72,27 +72,27 @@ float4 psMain(psInput pin) : SV_TARGET
         uint width, height, levels;
         CubeMap.GetDimensions(0, width, height, levels);
 
-        float level = BlurLevel * levels;
-        int baseLevel = (int)level;
+        float mipLevel = BlurLevel * levels;
+        int baseLevel = (int)mipLevel;
 
         float4 c1 = CubeMap.SampleLevel(texSampler, pin.normal.xyz, baseLevel);
         float4 c2 = CubeMap.SampleLevel(texSampler, pin.normal.xyz, baseLevel + 1);
-        float4 albedo = lerp(c1, c2, level - baseLevel);
+        float4 albedo = lerp(c1, c2, mipLevel - baseLevel);
         return albedo * Color;        
     }
     else 
     {
         uint width, height, levels;
         BaseColorMap2.GetDimensions(0, width, height, levels);
-        float level = BlurLevel * levels;
-        int baseLevel = (int)level;
+        float mipLevel = BlurLevel * levels;
+        int baseLevel = (int)mipLevel;
 
         float4 albedo = 0;
         if(BlurLevel > 0) 
         {
             float4 c1 = BaseColorMap2.SampleLevel(texSampler, pin.texCoord, baseLevel);
             float4 c2 = BaseColorMap2.SampleLevel(texSampler, pin.texCoord, baseLevel + 1);
-            albedo = lerp(c1, c2, level - baseLevel);
+            albedo = lerp(c1, c2, mipLevel - baseLevel);
         }
         else {
             albedo = BaseColorMap2.Sample(texSampler, pin.texCoord);
