@@ -230,8 +230,10 @@ internal static partial class CustomComponents
 
     private static Color GetRestingIconBackground(bool isActivated)
     {
+        // Half as opaque as a pressed button: toolbars lie over the output image, and at full strength an active
+        // icon reads as a dark hole in the bar rather than as "on".
         if (isActivated)
-            return UiColors.BackgroundButtonActivated;
+            return UiColors.BackgroundButtonActivated.Fade(0.5f);
 
         return _useFilledIconBackground ? UiColors.BackgroundButton : Color.Transparent;
     }
