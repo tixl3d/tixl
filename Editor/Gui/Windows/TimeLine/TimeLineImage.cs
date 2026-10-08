@@ -70,7 +70,8 @@ internal sealed class TimeLineImage
                               new Vector2(xMin, yMin),
                               new Vector2(xMax, yMin + size.Y),
                               new Vector2(u0, 0),
-                              new Vector2(u1, 1));
+                              new Vector2(u1, 1),
+                              _imageTint);
         }
     }
 
@@ -100,6 +101,9 @@ internal sealed class TimeLineImage
             
         _loadedImagePath = imagePath;
     }
+
+    // Half strength, so keyframes, clip labels and the time ruler stay readable on top of the image.
+    private static readonly uint _imageTint = ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 1, 0.5f));
 
     private static string? _loadedImagePath;
     private static ShaderResourceView? _srv;

@@ -1036,7 +1036,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
     private float _lastDopeContentHeight = 120f;
 
     // Styling
-    private const float TimeLineDragHeight = 30;
+    private static float TimeLineDragHeight => 30 * T3Ui.UiScaleFactor;
 
     internal readonly TimelineHeight FoldingHeight;
 
