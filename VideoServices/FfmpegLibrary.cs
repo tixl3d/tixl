@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using System.Runtime.Loader;
 using Sdcb.FFmpeg.Raw;
 using Sdcb.FFmpeg.Utils;
 using T3.Core.Logging;
@@ -83,7 +84,8 @@ public static class FfmpegLibrary
                               || !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("TIXL_FFMPEG_ALLOW_RESTRICTED"));
         if (isRestricted && !allowRestricted)
         {
-            StatusError = "Bundled FFmpeg build is GPL/non-free and not permitted — an LGPL build is required.";
+            StatusError = "Bundled FFmpeg build is GPL/non-free and not permitted — an LGPL build is required. "
+                          + "For development, TIXL_FFMPEG_ALLOW_RESTRICTED=1 allows it.";
             Log.Warning(StatusError);
             return;
         }
@@ -132,6 +134,9 @@ public static class FfmpegLibrary
         if (string.IsNullOrEmpty(directory) || !Directory.Exists(directory))
             return;
 
+        if (OperatingSystem.IsMacOS() && !Directory.EnumerateFiles(directory).Any(IsFfmpegLibrary))
+            UseInstalledLibrariesOnMac();
+
         static int LoadOrder(string fileName)
             => fileName.Contains("avutil") ? 0
                : fileName.Contains("swresample") ? 1
@@ -144,6 +149,47 @@ public static class FfmpegLibrary
 
         foreach (var path in libraries)
             NativeLibrary.TryLoad(path, out _);
+    }
+
+    /// <summary>
+    /// macOS has no LGPL FFmpeg package to ship yet, so a development machine uses an installed one: the folder
+    /// in TIXL_FFMPEG_DIR, or Homebrew's ffmpeg@7 (FFmpeg 7.x = avcodec-61, which these bindings need; plain
+    /// "ffmpeg" is already 8.x). Sdcb.FFmpeg asks for "libavutil.59.dylib" by name and finds nothing outside
+    /// the standard paths, so the request falls through to this handler.
+    /// </summary>
+    /// <remarks>
+    /// Loaded by the resolved Cellar path, never copied: Homebrew's libraries reference each other by absolute
+    /// path, and a copy next to this assembly would put a second avutil into the process. Homebrew builds are
+    /// GPL, so the license check below still refuses them unless TIXL_FFMPEG_ALLOW_RESTRICTED is set.
+    /// </remarks>
+    private static void UseInstalledLibrariesOnMac()
+    {
+        string[] candidates =
+            [
+                Environment.GetEnvironmentVariable("TIXL_FFMPEG_DIR") ?? string.Empty,
+                "/opt/homebrew/opt/ffmpeg@7/lib",
+                "/usr/local/opt/ffmpeg@7/lib",
+            ];
+
+        var folder = candidates.FirstOrDefault(c => c.Length > 0 && Directory.Exists(c));
+        if (folder == null)
+        {
+            Log.Debug("FFmpeg: no libraries next to the Video package and none installed (brew install ffmpeg@7).");
+            return;
+        }
+
+        var bindings = AssemblyLoadContext.GetLoadContext(typeof(ffmpeg).Assembly) ?? AssemblyLoadContext.Default;
+        bindings.ResolvingUnmanagedDll += (_, name) =>
+                                          {
+                                              var path = Path.Combine(folder, name);
+                                              if (!File.Exists(path))
+                                                  return IntPtr.Zero;
+
+                                              var resolved = new FileInfo(path).ResolveLinkTarget(returnFinalTarget: true)?.FullName ?? path;
+                                              return NativeLibrary.TryLoad(resolved, out var handle) ? handle : IntPtr.Zero;
+                                          };
+
+        Log.Debug($"FFmpeg: using the libraries installed in {folder}.");
     }
 
     /// <summary>

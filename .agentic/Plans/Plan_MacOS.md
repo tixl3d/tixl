@@ -206,6 +206,10 @@ Machine: a MacBook Air (Apple Silicon, M1 or newer). macOS 14 or newer. Things t
    slangc inside the Vulkan SDK — its version differs from the pinned one.
 6. **BASS:** download the macOS builds of bass, bassmix and bassflac from un4seen.com into
    `Dependencies/osx/` (to be added to `fetch-bass.sh`).
+6b. **FFmpeg (development only):** `brew install ffmpeg@7` - the bindings need FFmpeg 7.x (avcodec-61), and
+   Homebrew's plain `ffmpeg` is already 8.x. `FfmpegLibrary` finds the keg-only libraries itself (or the folder
+   in `TIXL_FFMPEG_DIR`). Homebrew builds are GPL, so run the Editor with `TIXL_FFMPEG_ALLOW_RESTRICTED=1`;
+   shipping needs our own LGPL build (M3).
 7. **Rider** for macOS (same license); open `t3.sln`.
 8. **Clone:** `git clone` then `git switch feat/linux-port` (or whatever the branch is called then). APFS is
    case-insensitive by default; the repo already has no case-only path duplicates, but a case-sensitive APFS
