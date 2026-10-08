@@ -13,6 +13,11 @@ public static unsafe class SdlWindowIcon
 {
     public static void TrySet(SDL_Window* window, string icoPath)
     {
+        // On macOS a window icon becomes the app's icon in the Dock and app switcher. Inside an app bundle the
+        // bundle's icon is the right one; this .ico would replace it with a small square.
+        if (OperatingSystem.IsMacOS() && AppContext.BaseDirectory.Contains(".app/Contents/", StringComparison.Ordinal))
+            return;
+
         try
         {
             if (!TryReadLargestBgraFrame(File.ReadAllBytes(icoPath), out var width, out var height, out var bgraTopDown))

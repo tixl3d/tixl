@@ -114,12 +114,13 @@ else
     echo "Warning: no Vulkan loader/MoltenVK in $vulkan_lib_dir - the app needs them installed. Set VULKAN_LIB_DIR." >&2
 fi
 
-# Icon: the Linux 256 px PNG, scaled into an iconset.
+# Icon: AppIcon.png is the logo on Apple's icon grid (a rounded square spanning 824 of 1024 px, with a shadow) -
+# a full-bleed square looks oversized next to every other app and covers its name in the app switcher.
 iconset="$output/TiXL.iconset"
 rm -rf "$iconset"
 mkdir -p "$iconset"
-source_icon="$root/Installer/Linux/common/app.tixl.TiXL.png"
-for size in 16 32 128 256; do
+source_icon="$script_dir/AppIcon.png"
+for size in 16 32 128 256 512; do
     sips -z "$size" "$size" "$source_icon" --out "$iconset/icon_${size}x${size}.png" >/dev/null
     double=$((size * 2))
     sips -z "$double" "$double" "$source_icon" --out "$iconset/icon_${size}x${size}@2x.png" >/dev/null
