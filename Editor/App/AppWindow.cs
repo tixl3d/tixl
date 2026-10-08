@@ -76,6 +76,21 @@ internal sealed unsafe class AppWindow
         SdlWindowIcon.TrySet(_window, Path.Combine(SharedResources.EditorResourcesDirectory, "images", "t3.ico"));
     }
 
+    /// <summary>
+    /// Keeps the macOS title bar in the colour of the menu bar below it. Called every frame so theme changes
+    /// show at once; it only reaches the native window when the colour changes.
+    /// </summary>
+    internal void SyncTitleBarColor(Color color)
+    {
+        if (!OperatingSystem.IsMacOS() || color.Rgba == _titleBarColor)
+            return;
+
+        _titleBarColor = color.Rgba;
+        SdlMacTitleBar.TrySetColor(_window, color.R, color.G, color.B);
+    }
+
+    private Vector4 _titleBarColor = new(-1);
+
     public void SetVisible(bool isVisible)
     {
         // Called every frame for the viewer; SDL maps and unmaps windows even when nothing changes.

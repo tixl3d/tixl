@@ -13,6 +13,7 @@ using T3.Core.Resource;
 using T3.Core.SystemUi;
 using T3.Editor.App;
 using T3.Editor.Gui;
+using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows;
 using T3.Editor.Gui.Windows.Analyze;
@@ -226,6 +227,7 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
             try
             {
                 T3Ui.ProcessFrame();
+                ProgramWindows.Main.SyncTitleBarColor(UiColors.BackgroundGaps);
                 ProgramWindows.RefreshViewport();
 
                 ImGui.Render();
