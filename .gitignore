@@ -305,6 +305,7 @@ Resources/user/pixtur/VJ/CatMadness
 Resources/user/pixtur/VJ/meshes
 ImageSequence
 Installer/Windows/Output
+Installer/macOS/Output
 Installer/Linux/Output
 Installer/Windows/dependencies/downloads
 

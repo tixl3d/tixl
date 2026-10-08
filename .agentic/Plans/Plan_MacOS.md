@@ -172,6 +172,15 @@ Hardened runtime entitlements: `com.apple.security.cs.allow-jit`,
 and native libs we don't sign). Developer ID signing and notarization in a GitHub Actions `macos-14`
 (arm64) job. Needs an Apple Developer account ($99/yr). Estimate: 10–30 agent hours.
 
+**Progress 2026-10-08:** `Installer/macOS/build-dmg.sh` builds an ad-hoc signed `TiXL.app` and a DMG (~590 MB).
+Layout: the Editor lives in `Contents/Resources/TiXL/` - signing seals `Contents/MacOS` as code and takes NuGet's
+dotted `runtimes/*/lib/net10.0` folders for nested bundles - and `Contents/MacOS/TiXL` is a launcher script that
+sets `VK_DRIVER_FILES` (bundled MoltenVK ICD) and `exec`s the Editor. Bundled: Vulkan loader + MoltenVK, BASS.
+Verified from a Finder launch: Vulkan from the bundle, no writes into the bundle (signature stays valid),
+operator builds work (`Program.AddDotnetToPathOnMac` - Finder apps get no shell PATH). First launch blocks on
+macOS's Documents permission prompt until the user answers. Not bundled yet: slangc (startup check downloads
+it), LGPL FFmpeg. Next: Developer ID signing with hardened runtime + notarization, CI job.
+
 ### M4 — Platform extras (later)
 Syphon output (the macOS counterpart of Spout), camera input via SDL3, FFmpeg encode.
 
@@ -245,7 +254,8 @@ merged into it, and `main` has no commits it lacks. Recommendation:
    M0 done the same day: `t3.sln` builds, Core.Tests 198/198 pass.
 2. Settings folder: `~/.config/TiXL` (like Linux) or `~/Library/Application Support/TiXL`?
 3. Cmd/Ctrl mapping policy, and whether Ctrl+click is a right-click.
-4. Apple Developer account for signing/notarization — who owns it?
+4. ~~Apple Developer account for signing/notarization — who owns it?~~ **Answered:** framefield's shared
+   company account; its Developer ID certificate goes into CI as a secret.
 5. Ship the .NET SDK dependency the same way as on Linux (operator compilation needs the SDK, not just the
    runtime), or bundle an SDK inside the `.app`?
 6. Is MoltenVK the only ICD, or also test KosmicKrisp (LunarG's Mesa-based Vulkan-on-Metal driver)?

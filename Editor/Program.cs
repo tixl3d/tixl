@@ -83,6 +83,34 @@ internal static class Program
     }
 
     [STAThread]
+    /// <summary>
+    /// An app started from the Finder gets only the system's PATH (/usr/bin:/bin:/usr/sbin:/sbin), not the
+    /// shell's, so the SDK's dotnet is invisible to Process.Start. The installer's and Homebrew's locations are
+    /// added to this process's PATH, which every child process inherits.
+    /// </summary>
+    private static void AddDotnetToPathOnMac()
+    {
+        if (!OperatingSystem.IsMacOS())
+            return;
+
+        var path = Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
+        var folders = path.Split(':', StringSplitOptions.RemoveEmptyEntries);
+        if (folders.Any(folder => File.Exists(Path.Combine(folder, "dotnet"))))
+            return;
+
+        string[] candidates =
+            [
+                Environment.GetEnvironmentVariable("DOTNET_ROOT") ?? string.Empty,
+                "/usr/local/share/dotnet",
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".dotnet"),
+                "/opt/homebrew/bin",
+            ];
+
+        var found = candidates.FirstOrDefault(folder => folder.Length > 0 && File.Exists(Path.Combine(folder, "dotnet")));
+        if (found != null)
+            Environment.SetEnvironmentVariable("PATH", path.Length > 0 ? found + ":" + path : found);
+    }
+
     private static void Main(string[] args)
     {
         // Must run before any code that may trigger assembly resolution.
@@ -94,6 +122,9 @@ internal static class Program
         // Must run before the settings files are read — a restarted instance races the old
         // instance's save-on-quit writes otherwise.
         WaitForPredecessorArg(args);
+
+        // Before anything starts dotnet: operator compilation and the SDK check call it by name.
+        AddDotnetToPathOnMac();
 
         // Before anything awaits: continuations started on this thread come back to it, as under WinForms.
         MainThreadSynchronizationContext.Install();
