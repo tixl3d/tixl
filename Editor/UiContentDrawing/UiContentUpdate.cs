@@ -49,9 +49,9 @@ internal static class UiContentUpdate
         const string fileExtension = ".ttf";
         var format = $"{rootFilePath}{{0}}{fileExtension}";
 
-        var normalFont = new TtfFont(string.Format(format, "Regular"), 18f * dpiAwareScale);
-        var boldFont = new TtfFont(string.Format(format, "SemiBold"), 18f * dpiAwareScale);
-        var smallFont = new TtfFont(string.Format(format, "Regular"), 14f * dpiAwareScale);
+        var normalFont = new TtfFont(string.Format(format, "Regular"), 16f * dpiAwareScale);
+        var boldFont = new TtfFont(string.Format(format, "SemiBold"), 16f * dpiAwareScale);
+        var smallFont = new TtfFont(string.Format(format, "Regular"), 12f * dpiAwareScale);
         var largeFont = new TtfFont(string.Format(format, "Light"), 30f * dpiAwareScale);
 
         var ranges = GetExtendedGlyphRanges();
