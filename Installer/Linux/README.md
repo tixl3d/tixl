@@ -62,8 +62,8 @@ TiXL is MIT. Bundled third-party licenses are in `Dependencies/licenses/`. Two n
 ## CI
 
 `.github/workflows/linux-build.yml` builds the tarball in an `ubuntu:22.04` container. The bundled `libcimgui.so` from ImGui.NET still
-requires glibc 2.38, so that is the effective minimum. Pushes
-to `feat/linux-port` and manual runs upload it as a workflow artifact; published releases get it attached.
+requires glibc 2.38, so that is the effective minimum. A version tag (`v*`) attaches the tarball to that tag's
+release; manual runs upload it as a workflow artifact.
 
 ## Formats
 

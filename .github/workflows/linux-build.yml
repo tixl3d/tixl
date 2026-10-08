@@ -1,12 +1,12 @@
 name: Linux Build
 
+# A version tag (v4.4.0.0) builds the tarball and attaches it to that tag's release; a manual run keeps it as
+# an artifact. Pushes to branches build nothing.
 on:
   workflow_dispatch:
   push:
-    branches:
-      - feat/linux-port
-  release:
-    types: [published]
+    tags:
+      - 'v*'
 
 concurrency:
   group: linux-build-${{ github.ref }}
@@ -51,7 +51,7 @@ jobs:
         run: Installer/Linux/build-tarball.sh
 
       - name: Upload Tarball
-        if: github.event_name != 'release'
+        if: github.ref_type != 'tag'
         uses: actions/upload-artifact@v4
         with:
           name: tixl-linux-x64
@@ -59,7 +59,8 @@ jobs:
           retention-days: 14
 
       - name: Attach Tarball to Release
-        if: github.event_name == 'release'
+        if: github.ref_type == 'tag'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.ref_name }}
           files: Installer/Linux/Output/*.tar.gz

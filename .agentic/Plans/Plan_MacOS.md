@@ -238,8 +238,8 @@ merged into it, and `main` has no commits it lacks. Recommendation:
    checks).
 2. **Renaming is cosmetic; do it at a quiet moment, not as a merge.** If you rename to `feat/cross-platform`:
    push the new name, keep `feat/linux-port` on the remote as a stale alias for a few weeks, and update the
-   five references: `.github/workflows/linux-build.yml:7`, `Installer/Linux/aur/PKGBUILD:18`,
-   `Installer/Linux/README.md:65`, `Plan_LinuxEditor.md:6`, `Plan_CrossPlatformV5.md:74`. Tell the AUR/Nix
+   three references: `Installer/Linux/aur/PKGBUILD:18`, `Plan_LinuxEditor.md:6`, `Plan_CrossPlatformV5.md:74`
+   (the build workflows run on version tags and no longer name the branch). Tell the AUR/Nix
    packagers first.
 3. **The real milestone is merging into `main` (4.4)**, after 4.3 ships from `main`. Once there, macOS work
    continues on `main` in small commits, and the branch name stops mattering.

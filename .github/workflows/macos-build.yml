@@ -1,0 +1,62 @@
+name: macOS Build
+
+# A version tag (v4.4.0.0) builds the DMG and attaches it to that tag's release; a manual run keeps it as an
+# artifact. Pushes to branches build nothing - a DMG is ~600 MB.
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+concurrency:
+  group: macos-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    # Apple Silicon runner: the DMG is osx-arm64 only.
+    runs-on: macos-15
+    permissions:
+      contents: write
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Cache NuGet Packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-macos-${{ hashFiles('**/*.csproj', 'Tixl.props', 'Directory.Build.props') }}
+          restore-keys: nuget-macos-
+
+      # build-dmg.sh copies the Vulkan loader and MoltenVK into the bundle from Homebrew's lib folder.
+      - name: Install Vulkan Loader and MoltenVK
+        run: brew install molten-vk vulkan-loader
+
+      - name: Build DMG
+        run: Installer/macOS/build-dmg.sh
+
+      - name: Upload DMG
+        if: github.ref_type != 'tag'
+        uses: actions/upload-artifact@v4
+        with:
+          name: tixl-osx-arm64
+          path: Installer/macOS/Output/*.dmg
+          retention-days: 14
+          # Already compressed (UDZO); zipping it again only costs time.
+          compression-level: 0
+
+      - name: Attach DMG to Release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          files: Installer/macOS/Output/*.dmg
