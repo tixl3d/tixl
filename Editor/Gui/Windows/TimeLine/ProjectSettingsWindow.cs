@@ -351,7 +351,7 @@ internal sealed class ProjectSettingsWindow : Window
             if (ImGui.Button("Create Soundtrack"))
             {
                 // Creates a visible [AudioClip] op at 0.0, flagged as main soundtrack (Display =
-                // BackgroundImage, Style = Waveform) and selects it — the op owns path, offset and
+                // BackgroundImage, Style = Spectrum) and selects it — the op owns path, offset and
                 // trimming from there on.
                 if (compositionWithSettings is { } settingsComposition)
                     CreateSoundtrackOp(settingsComposition);
@@ -912,7 +912,7 @@ internal sealed class ProjectSettingsWindow : Window
 
             var styleCommand = new ChangeInputValueCommand(symbolUi.Symbol, child.Id,
                                                            child.Inputs[AudioClipsToOps.StyleInputId],
-                                                           new InputValue<int>((int)AudioClipStyle.Waveform));
+                                                           new InputValue<int>((int)AudioClipStyle.Spectrum));
             styleCommand.Do();
             commands.Add(styleCommand);
         }
