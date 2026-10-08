@@ -14,9 +14,15 @@ public static unsafe class SdlWindowIcon
     public static void TrySet(SDL_Window* window, string icoPath)
     {
         // On macOS a window icon becomes the app's icon in the Dock and app switcher. Inside an app bundle the
-        // bundle's icon is the right one; this .ico would replace it with a small square.
-        if (OperatingSystem.IsMacOS() && AppContext.BaseDirectory.Contains(".app/Contents/", StringComparison.Ordinal))
+        // bundle's icon is the right one; outside one (an exported player, a development build) the rounded
+        // macOS version next to the .ico fits in, where the .ico would show a small full-bleed square.
+        if (OperatingSystem.IsMacOS())
+        {
+            if (!AppContext.BaseDirectory.Contains(".app/Contents/", StringComparison.Ordinal))
+                TrySetPng(window, Path.Combine(Path.GetDirectoryName(icoPath) ?? string.Empty, "t3-macos.png"));
+
             return;
+        }
 
         try
         {
@@ -44,6 +50,22 @@ public static unsafe class SdlWindowIcon
         {
             Log.Warning($"Failed to set window icon from {icoPath}: {e.Message}");
         }
+    }
+
+    private static void TrySetPng(SDL_Window* window, string pngPath)
+    {
+        if (!File.Exists(pngPath))
+            return;
+
+        var surface = SDL_LoadPNG(pngPath);
+        if (surface == null)
+        {
+            Log.Warning($"Failed to load window icon {pngPath}: {SDL_GetError()}");
+            return;
+        }
+
+        SDL_SetWindowIcon(window, surface);
+        SDL_DestroySurface(surface);
     }
 
     private static bool TryReadLargestBgraFrame(byte[] ico, out int width, out int height, out byte[] bgraTopDown)

@@ -205,7 +205,11 @@ internal static partial class ProjectSetup
 
     private static void LoadBuiltInPackages()
     {
-        var directory = Directory.CreateDirectory(_coreOperatorDirectory);
+        // Created only when missing: the app may run from a read-only location (macOS translocates an app that
+        // was opened straight from a download), and there creating even an existing folder fails.
+        var directory = new DirectoryInfo(_coreOperatorDirectory);
+        if (!directory.Exists)
+            directory.Create();
 
         directory
            .EnumerateDirectories("*", SearchOption.TopDirectoryOnly)

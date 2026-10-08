@@ -20,7 +20,11 @@ public static class UserData
 {
     static UserData()
     {
-        Directory.CreateDirectory(FileLocations.ReadOnlySettingsPath);
+        // The defaults folder ships with the app, which may run from a read-only location (a translocated macOS
+        // app); creating even an existing folder fails there.
+        if (!Directory.Exists(FileLocations.ReadOnlySettingsPath))
+            Directory.CreateDirectory(FileLocations.ReadOnlySettingsPath);
+
         Directory.CreateDirectory(FileLocations.SettingsDirectory);
     }
 
