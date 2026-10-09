@@ -93,6 +93,46 @@
           "ea812b8d-f275-4a91-bfae-cd3308c04362": 0.08
         }
       }
+    },
+    {
+      "Id": "23e64d97-aded-4228-8de5-626a1e4d3197",
+      "IsPreset": true,
+      "ActivationIndex": 6,
+      "Title": "Test2",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 245.10112
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "e94e2b7e-6f0a-42b5-bf5e-abdffe728273": 0.0,
+          "815975d2-5613-4ca8-b208-f09ac07b0518": 1.3,
+          "dfa5e772-0cb4-440f-8483-dcc89b40107d": 0.0,
+          "b295586d-2339-4d69-868a-c17468e77998": true,
+          "a3af8d20-8c09-4250-b5bd-806c12ad7c05": 5,
+          "ea812b8d-f275-4a91-bfae-cd3308c04362": 0.15
+        }
+      }
+    },
+    {
+      "Id": "f7003624-b52d-4733-8b97-8571311ba8cf",
+      "IsPreset": true,
+      "ActivationIndex": 7,
+      "Title": "Meta Blur",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 245.1011
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "e94e2b7e-6f0a-42b5-bf5e-abdffe728273": 0.015,
+          "815975d2-5613-4ca8-b208-f09ac07b0518": 4.0,
+          "dfa5e772-0cb4-440f-8483-dcc89b40107d": 10.0,
+          "b295586d-2339-4d69-868a-c17468e77998": true,
+          "a3af8d20-8c09-4250-b5bd-806c12ad7c05": 5,
+          "ea812b8d-f275-4a91-bfae-cd3308c04362": 6.5
+        }
+      }
     }
   ]
 }
