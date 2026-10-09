@@ -8,6 +8,8 @@
 param([switch]$SkipRestore)
 
 $ErrorActionPreference = "Stop"
+# Windows PowerShell's progress bar slows Invoke-WebRequest down by an order of magnitude.
+$ProgressPreference = "SilentlyContinue"
 $root = Resolve-Path "$PSScriptRoot/../.."
 
 if (-not $SkipRestore) {
@@ -33,6 +35,13 @@ $deps = @(
     @{ File = "VC_redist.x64.exe";              Url = "https://aka.ms/vs/17/release/vc_redist.x64.exe" }
 )
 
+# The Vulkan backend compiles shaders with slangc. The version comes from the compiler's pin so the two can't drift.
+$slangSource = Get-Content "$root/Core/Resource/ShaderCompiling/SlangShaderCompiler.cs" -Raw
+if ($slangSource -notmatch 'PinnedVersion\s*=\s*"([^"]+)"') { throw "Could not read SlangShaderCompiler.PinnedVersion" }
+$slangVersion = $Matches[1]
+$slangZip = "slang-$slangVersion-windows-x86_64.zip"
+$deps += @{ File = $slangZip; Url = "https://github.com/shader-slang/slang/releases/download/v$slangVersion/$slangZip" }
+
 foreach ($dep in $deps) {
     $path = Join-Path $downloadsDir $dep.File
     if (-not (Test-Path $path)) {
@@ -42,5 +51,21 @@ foreach ($dep in $deps) {
         Write-Host "$($dep.File) already present, skipping download." -ForegroundColor DarkGray
     }
 }
+
+# Only what slangc needs for HLSL -> SPIR-V (~33 MB of the release's ~150 MB bin/; slang-llvm alone is 80 MB and
+# only serves CPU targets). SlangShaderCompiler.FindCompiler looks for it in <app>/slang/bin.
+Write-Host "Bundling slangc $slangVersion..." -ForegroundColor Cyan
+$slangStaging = Join-Path ([System.IO.Path]::GetTempPath()) "tixl-slang-$slangVersion"
+if (Test-Path $slangStaging) { Remove-Item -Recurse -Force $slangStaging }
+Expand-Archive -Path (Join-Path $downloadsDir $slangZip) -DestinationPath $slangStaging
+$slangTarget = "$root/Editor/bin/Release/net10.0/slang"
+if (Test-Path $slangTarget) { Remove-Item -Recurse -Force $slangTarget }
+New-Item -ItemType Directory -Force -Path "$slangTarget/bin" | Out-Null
+foreach ($file in @("slangc.exe", "slang.dll", "slang-compiler.dll", "slang-glslang.dll", "slang-glsl-module.dll")) {
+    Copy-Item "$slangStaging/bin/$file" "$slangTarget/bin/"
+}
+Copy-Item "$slangStaging/LICENSE" "$slangTarget/"
+Remove-Item -Recurse -Force $slangStaging
+if (-not (Test-Path "$slangTarget/bin/slangc.exe")) { throw "slangc.exe missing after unpacking $slangZip" }
 
 Write-Host "Release build complete." -ForegroundColor Green

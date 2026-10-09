@@ -52,6 +52,12 @@ public sealed class SlangShaderCompiler : ShaderCompiler
 
         var executable = OperatingSystem.IsWindows() ? "slangc.exe" : "slangc";
 
+        // Installed builds ship the pinned release beside the executable (see Installer/Windows/build-release.ps1).
+        var bundled = Path.Combine(AppContext.BaseDirectory, "slang", "bin", executable);
+
+        if (File.Exists(bundled))
+            return bundled;
+
         var pinned = Path.Combine(PinnedInstallDirectory, "bin", executable);
 
         if (File.Exists(pinned))

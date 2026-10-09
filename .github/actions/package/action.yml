@@ -10,4 +10,9 @@ runs:
 
   - name: Package Application
     shell: pwsh
-    run: iscc Installer\Windows\installer.iss /DMyAppName=Tooll-v${{ github.event.release.tag_name }} /DMyAppVersion=${{ github.event.release.tag_name }}
+    # Nightly runs have no release; they keep installer.iss's version instead of passing an empty one.
+    run: |
+      $tag = "${{ github.event.release.tag_name }}"
+      if ($tag) { iscc Installer\Windows\installer.iss /DMyAppVersion=$($tag.TrimStart("v")) }
+      else { iscc Installer\Windows\installer.iss }
+      if ($LASTEXITCODE -ne 0) { throw "iscc failed" }

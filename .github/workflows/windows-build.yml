@@ -1,0 +1,72 @@
+name: Windows Build
+
+# Preview installer for the Vulkan-based cross-platform branch. A version tag (v4.4.0.0) or a manual run builds
+# it. It is always kept as a workflow artifact, and a tag also attaches it to that tag's release as a
+# pre-release, so it never replaces the stable Windows release GitHub shows as "Latest".
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+concurrency:
+  group: windows-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Cache NuGet Packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-windows-${{ hashFiles('**/*.csproj', 'Tixl.props', 'Directory.Build.props') }}
+          restore-keys: nuget-windows-
+
+      - name: Install Inno Setup
+        run: choco install innosetup --no-progress -y
+
+      # Windows PowerShell, like installer.iss does locally.
+      - name: Build Release
+        shell: powershell
+        run: Installer/Windows/build-release.ps1
+
+      - name: Package Installer
+        run: |
+          $isccArgs = @("Installer\Windows\installer.iss", "/DSkipBuild")
+          if ("${{ github.ref_type }}" -eq "tag") {
+              $version = "${{ github.ref_name }}".TrimStart("v")
+              $isccArgs += "/DMyAppVersion=$version"
+          }
+          iscc @isccArgs
+          if ($LASTEXITCODE -ne 0) { throw "iscc failed" }
+
+      - name: Upload Installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: tixl-windows-x64
+          path: Installer/Windows/Output/*.exe
+          retention-days: 14
+
+      - name: Attach Installer to Release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          files: Installer/Windows/Output/*.exe
+          prerelease: true
+          make_latest: false

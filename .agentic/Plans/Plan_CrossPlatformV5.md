@@ -128,6 +128,9 @@ Open items from this work:
 - `SilkWindows` (startup dialog, message boxes) still runs GLFW + OpenGL next to SDL3; its assembly probes log
   misleading "reinstall TiXL" warnings. Folding it into SDL3 is deferred.
 - Agent hours per commit were not tracked.
+- Shader compilation spawns one `slangc` process per entry point, ~0.3 s each on Windows (5–10× slower cold
+  AllTests than macOS / Linux). Move to Slang's in-process API once rendering and features are stable:
+  `Plan_SlangInProcess.md`.
 
 ## Architecture
 

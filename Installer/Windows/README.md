@@ -34,3 +34,5 @@ The build script automatically downloads these into `Installer/Windows/dependenc
 * [Visual C++ Redistributable](https://aka.ms/vs/17/release/vc_redist.x64.exe)
 
 The installer bundles them and installs them on the user's machine if needed.
+
+It also downloads the [Slang](https://github.com/shader-slang/slang/releases) release pinned in `SlangShaderCompiler.PinnedVersion` and copies `slangc` with the DLLs it needs into `Editor/bin/Release/net10.0/slang/`, so the Vulkan backend can compile shaders without a separate install.
