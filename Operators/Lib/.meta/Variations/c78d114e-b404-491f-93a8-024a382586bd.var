@@ -358,6 +358,52 @@
           "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "SetupFrag(pin);\nc= ComputePbr(); // Computes CosLo\nc+= SampleGradient( Biased(frag.cosLo));\n"
         }
       }
+    },
+    {
+      "Id": "0226f951-254a-4841-8217-31645a973a0d",
+      "IsPreset": true,
+      "ActivationIndex": 10,
+      "Title": "SmoothStep AA example",
+      "PosOnCanvas": {
+        "X": -315.47864,
+        "Y": 122.55056
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "e7dc01ac-cb1d-409a-b8f3-ad22b1255771": 3.59,
+          "05feb9d0-3bfc-4c96-b79e-b884132813e9": -45.3,
+          "dc032839-eca3-48d0-be68-99b06da28167": 0.5,
+          "ada34207-e581-4f35-9ef5-8f6122e0bde5": 0.14,
+          "eff4073a-619b-4b4c-8612-758c54dc12bf": {
+            "Gradient": {
+              "Interpolation": "Linear",
+              "Steps": [
+                {
+                  "Id": "4bb0b33f-fda5-441c-9c62-1eda0331fef1",
+                  "NormalizedPosition": 0.0,
+                  "Color": {
+                    "R": 0.0,
+                    "G": 0.0,
+                    "B": 0.0,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "6aca02fd-469e-453b-9343-8cef775f68c3",
+                  "NormalizedPosition": 0.9880858,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.02467215,
+                    "B": 0.82029873,
+                    "A": 1.0
+                  }
+                }
+              ]
+            }
+          },
+          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "//A = offset\n//B = scale\n//C = width/blur\n//D = mode switch\n\n\nSetupFrag(pin);\n//frag.Metalness += Points[pin.pointIndex].FX1;\nc = ComputePbr();\n\nfloat d=GetDistance(pin.worldPosition.xyz);\n\nfloat f=d*B+A;\n\nfloat wd=fwidth(f);\n\nf=abs(frac(f)*2-1)-.5;\nif(D>.5){\nf=f>0;\n}else{\nf=smoothstep(-wd,wd,f*C);\n}\nfloat4 col=SampleGradient(1);\nc.rgb=f;\n//c=lerp(col,c,f);\n"
+        }
+      }
     }
   ]
 }
