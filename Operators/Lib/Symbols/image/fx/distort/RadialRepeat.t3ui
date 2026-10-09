@@ -1,0 +1,105 @@
+{
+  "FormatVersion": 3,
+  "Id": "6dc6bfa3-ba30-4987-96c3-78b0da3ada62"/*RadialRepeat*/,
+  "Description": "Simple effect similar to [MirrorRepeat] and [KochSnowflake]. The input image will be mirrored with radial symmetry on the central axis by the specified number of slices.",
+  "InputUis": [
+    {
+      "InputId": "0d05623b-d71a-47fa-ad7c-7be339cc52bf"/*Resolution*/,
+      "Position": {
+        "X": -345.57733,
+        "Y": 485.7539
+      },
+      "GroupTitle": "Advanced",
+      "Description": "Output resolution. Set to 0 for dynamic scaling."
+    },
+    {
+      "InputId": "29014e97-bd03-4371-8ce9-334a6f474ab4"/*Slices*/,
+      "Position": {
+        "X": -345.57733,
+        "Y": 203.95569
+      },
+      "Description": "The number of radial mirror slices",
+      "Scale": 0.01
+    },
+    {
+      "InputId": "2e1a24f6-63b4-42ac-8a33-cb6e79ff2a7e"/*Zoom*/,
+      "Position": {
+        "X": -345.57733,
+        "Y": 328.16364
+      },
+      "Scale": 0.01
+    },
+    {
+      "InputId": "43b610e7-7623-471b-b105-8008cba34a17"/*Image*/,
+      "Position": {
+        "X": -345.57733,
+        "Y": 58.11561
+      }
+    },
+    {
+      "InputId": "4cd2aef5-52dc-4025-bd16-ab5987caeaac"/*Offset*/,
+      "Position": {
+        "X": -345.57733,
+        "Y": 126.16928
+      },
+      "GroupTitle": "Radial Symmetry Settings",
+      "Scale": 0.01,
+      "UseVec2Control": "Position"
+    },
+    {
+      "InputId": "a0a55a6d-5b1f-4a38-94cf-478413eef3ed"/*RotateSlice*/,
+      "Position": {
+        "X": -345.57733,
+        "Y": 266.69745
+      },
+      "Description": "Rotate the image within each slice",
+      "Min": -180.0,
+      "Max": 180.0,
+      "Scale": 3.6,
+      "Format": "{0:0.0}°"
+    },
+    {
+      "InputId": "e3bf3deb-8230-486e-9f19-30cb3753be5a"/*Rotate*/,
+      "Position": {
+        "X": -345.57733,
+        "Y": 415.85648
+      },
+      "GroupTitle": "Output",
+      "Description": "Rotate the final image",
+      "Min": -180.0,
+      "Max": 180.0,
+      "Scale": 3.6,
+      "Format": "{0:0.0}°"
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "85cf6521-ca2d-430e-aebe-717a296bb241"/*Vector2Components*/,
+      "Position": {
+        "X": -196.20035,
+        "Y": 126.16928
+      }
+    },
+    {
+      "ChildId": "de84e6e7-09d3-4dd5-99bc-6df69cc82102"/*_ImageFxShaderSetup2*/,
+      "Style": "Resizable",
+      "Size": {
+        "X": 71.010735,
+        "Y": 356.30136
+      },
+      "Position": {
+        "X": 213.38686,
+        "Y": 53.967354
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "2a036c9c-9d82-4582-af70-40cd3eb89fbe"/*TextureOutput*/,
+      "Position": {
+        "X": 518.2661,
+        "Y": 119.74711
+      }
+    }
+  ]
+}
