@@ -159,17 +159,17 @@ internal static unsafe class ProgramWindows
     }
 
     /// <summary>
-    /// Whether to create the Vulkan backend. Everywhere but Windows there is no choice; on Windows
-    /// TIXL_BACKEND=vulkan selects it over D3D11, so the Vulkan path can be exercised against a second driver
-    /// stack without a second machine. Evaluated once - the backend cannot change while running.
+    /// Whether to create the Vulkan backend. It is the default everywhere and the only choice outside Windows;
+    /// on Windows TIXL_BACKEND=d3d11 falls back to Direct3D 11, e.g. to compare output or to work around a
+    /// Vulkan driver issue. Evaluated once - the backend cannot change while running.
     /// </summary>
     internal static bool UseVulkanBackend { get; } =
         !OperatingSystem.IsWindows()
-        || string.Equals(Environment.GetEnvironmentVariable("TIXL_BACKEND"), "vulkan", StringComparison.OrdinalIgnoreCase);
+        || !string.Equals(Environment.GetEnvironmentVariable("TIXL_BACKEND"), "d3d11", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
-    /// Direct3D 11 on Windows, Vulkan everywhere else - or on Windows too when TIXL_BACKEND=vulkan. The D3D11
-    /// path stays in its own method so its assemblies are only touched where they can load.
+    /// Vulkan by default; Direct3D 11 on Windows when TIXL_BACKEND=d3d11. The D3D11 path stays in its own
+    /// method so its assemblies are only touched where they can load.
     /// </summary>
     private static IGraphicsBackend CreateBackend()
     {
@@ -179,10 +179,10 @@ internal static unsafe class ProgramWindows
         GraphicsLog.Warning = message => Log.Warning($"[graphics] {message}");
 
         if (!UseVulkanBackend)
+        {
+            Log.Info("TIXL_BACKEND=d3d11: using the Direct3D 11 backend instead of Vulkan.");
             return CreateD3D11Backend();
-
-        if (OperatingSystem.IsWindows())
-            Log.Info("TIXL_BACKEND=vulkan: using the Vulkan backend instead of D3D11.");
+        }
 
         // TIXL_VULKAN_VALIDATION=1 turns the validation layer on. It reports invalid use while the command is
         // recorded, which is the only way to see what a driver later reports as nothing but a lost device.
