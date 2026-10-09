@@ -282,7 +282,7 @@ public static class MidiConnectionManager
 
         _midiOutsWithDevices.Clear();
 
-        // The ALSA backend keeps one sequencer client and a reading thread behind all of these.
+        // The ALSA backend keeps one sequencer client and a reading thread behind all of these; CoreMIDI keeps its client.
         MidiDeviceProvider.Current.Shutdown();
     }
 

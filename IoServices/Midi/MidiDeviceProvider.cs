@@ -9,8 +9,8 @@ namespace T3.IoServices.Midi;
 /// </summary>
 /// <remarks>
 /// MIDI has no portable library worth depending on, so each platform talks to its own system API:
-/// WinMM through NAudio on Windows, the ALSA sequencer on Linux. Both are present wherever the OS has
-/// sound, so nothing is bundled.
+/// WinMM through NAudio on Windows, the ALSA sequencer on Linux, CoreMIDI on macOS. All are present
+/// wherever the OS has sound, so nothing is bundled.
 /// </remarks>
 public abstract class MidiDeviceProvider
 {
@@ -46,6 +46,11 @@ public abstract class MidiDeviceProvider
         if (OperatingSystem.IsLinux())
         {
             return new AlsaSeqMidiDeviceProvider();
+        }
+
+        if (OperatingSystem.IsMacOS())
+        {
+            return new CoreMidiDeviceProvider();
         }
 
         return new UnsupportedMidiDeviceProvider();
