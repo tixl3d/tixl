@@ -418,6 +418,7 @@ internal sealed partial class SettingsWindow : Window
                                                                      """
                                                                      Adds debug information to shaders and buffers for tools like RenderDoc.
                                                                      Can impact rendering performance. Requires a restart.
+                                                                     Needs the Windows "Graphics Tools" optional feature; without it the debug layer is skipped.
                                                                      """,
                                                                      CoreSettings.Defaults.EnableDirectXDebug);
                     FormInputs.SetIndentToParameters();
