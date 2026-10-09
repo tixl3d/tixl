@@ -124,6 +124,7 @@ internal static class SkillQuestStructureSync
         }
 
         // Pass 2: markdown files define level order, titles, and tour content
+        var mdFileBySymbolId = new Dictionary<Guid, string>();
         foreach (var categoryDir in Directory.GetDirectories(repositoryPath).OrderBy(d => d, StringComparer.OrdinalIgnoreCase))
         {
             var folderName = Path.GetFileName(categoryDir);
@@ -152,15 +153,22 @@ internal static class SkillQuestStructureSync
                     var level = new Level { Tour = tour, Title = tour.Title };
                     if (!string.IsNullOrEmpty(tour.IdString))
                     {
-                        if (symbolsByShortId.TryGetValue(tour.IdString, out var symbol))
-                        {
-                            level.Symbol = symbol;
-                        }
-                        else
+                        if (!symbolsByShortId.TryGetValue(tour.IdString, out var symbol))
                         {
                             Log.Warning($"Level '{tour.Title}' in {cleanName} references unknown id &{tour.IdString} - skipping.");
                             continue;
                         }
+
+                        // A level listed in two files would end up in whichever topic is laid out last,
+                        // and its tour would be overwritten by the other file's (possibly stale) copy.
+                        if (mdFileBySymbolId.TryGetValue(symbol.Id, out var claimingFile))
+                        {
+                            Log.Warning($"Level '{tour.Title}' &{tour.IdString} in {cleanName} is already listed in {claimingFile} - skipping.");
+                            continue;
+                        }
+
+                        mdFileBySymbolId[symbol.Id] = cleanName;
+                        level.Symbol = symbol;
                     }
 
                     topic.Levels.Add(level);

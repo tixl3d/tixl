@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "4f9eb54f-1b81-4a6b-a842-f80c423e5843"/*B01e_SpeedItUp*/,
-  "Description": "Speed it up!",
+  "Description": "Increasing Animation Speed",
   "SymbolTags": "16",
   "InputUis": [],
   "SymbolChildUis": [
@@ -92,12 +92,15 @@
     {
       "Id": "2d74cde3-b4c4-419d-9368-78160d2bbd6a",
       "ChildId": "c560820f-fc83-4026-8966-65ab12e90d4b",
-      "Description": "The [RoundedRect] is rotating, but very slowly.\nTiXL uses degrees. A full rotation takes 360 seconds at this speed."
+      "InputId": "202340b4-0629-40a1-9399-0cda047df116",
+      "Description": "The [RoundedRect] is rotating, but very slowly.\nTiXL uses degrees, so a full rotation takes 360 seconds at this speed.",
+      "Style": "InfoFor"
     },
     {
       "Id": "c131274a-b1a9-4585-867a-0bf10acf2b79",
       "ChildId": "8a5312ac-7112-413b-a303-3b6ba97ab5ef",
-      "Description": "Insert a [Multiply] operator between [Time] and [RoundedRect] to speed things up."
+      "Description": "Insert a [Multiply] operator between [Time] and [RoundedRect] to speed things up.",
+      "Style": "CallToAction"
     }
   ]
 }
