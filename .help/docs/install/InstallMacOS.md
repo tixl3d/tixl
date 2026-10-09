@@ -110,7 +110,6 @@ folders above until you delete them yourself.
 
 ## What doesn't work on macOS yet
 
-- **MIDI** — planned, through Apple's CoreMIDI.
 - **Video** without the Homebrew setup above, and hardware-accelerated video export.
 - **NDI, webcams and screen capture.** Syphon, the Mac's way of sharing video with other apps, is planned.
 - **Geometry shaders.** Apple's graphics chips don't have them. TiXL's own operators don't need them, but a

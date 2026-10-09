@@ -98,7 +98,7 @@ macOS hasn't been tested much yet.
 
 | Feature | Windows | Linux | macOS |
 |---|---|---|---|
-| MIDI input and output, MIDI controllers | Works | Works | Planned |
+| MIDI input and output, MIDI controllers | Works | Works | Works |
 | OSC | Works | Works | Works |
 | Art-Net, sACN, DMX | Works | Works | Works |
 | Serial devices (Arduino, WLED, steppers) | Works | Works | Works |
