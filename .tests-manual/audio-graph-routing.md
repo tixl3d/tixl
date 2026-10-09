@@ -178,3 +178,78 @@ Trigger it again. Then delete the [AudioBus] entirely while a sample is playing.
   it returns to the operator mixer rather than going permanently silent.
 - Deleting the bus mid-sample does the same; no stuck silence, and no repeated
   routing warnings in the console.
+
+## Step: A sampler wired into an unused [CombineAudio] still plays
+
+**Action:**
+Start from a [PlayAudioSample] with `AudioFile` set to `Lib:audio/SNARE_01.wav`,
+`TriggerMode` set to `Trigger` and `AudioReference` unconnected. Add a
+[CombineAudio] and wire the sampler's `AudioReference` into it. Leave the
+[CombineAudio]'s output unconnected, make sure no [AudioBus] exists in the
+composition, and pin the [PlayAudioSample] to the output window. Trigger
+`PlayAudio`.
+
+**Expected:**
+- The whole snare plays on every trigger, at the sampler's own `Volume`.
+- It never goes silent just because the reference is wired somewhere: only a
+  bus that actually plays the source takes over its level.
+
+## Step: Pinning an audio node to an output window plays it
+
+**Action:**
+Wire two [AudioToneGenerator]s with `Trigger` set to true into a [CombineAudio],
+with no [AudioBus] in the composition. Start playback, then pin the
+[CombineAudio] to an output window and set its `Volume` to 0.3.
+
+**Expected:**
+- Both tones are audible while the [CombineAudio] is pinned, and the
+  combine's `Volume` of 0.3 makes them audibly quieter.
+- The output window shows the op name, a level meter that moves with the
+  sound, and the hint "Editor preview — not included in render exports".
+- Stopping playback silences the preview; starting it again resumes it.
+
+## Step: An effect pinned to an output window is heard with its effect
+
+**Action:**
+Wire an [AudioToneGenerator] into an [AudioReverb], with no [AudioBus] in the
+composition. Pin the [AudioReverb] to an output window and trigger a short tone.
+
+**Expected:**
+- The tone is heard with the reverb tail, and `Mix` and `Time` changes are
+  audible while it rings.
+
+## Step: Unpinning stops the preview
+
+**Action:**
+With the [CombineAudio] pinned and audible, pin a different, non-audio op
+(for example a [RadialGradient]) to the same output window.
+
+**Expected:**
+- The combine's sound stops immediately.
+- A [PlayAudioSample] that was previewed the same way plays again on its
+  next trigger through its own path, at its own `Volume`.
+- Pinning the [CombineAudio] again brings the sound back immediately.
+
+## Step: A real bus wins over the preview
+
+**Action:**
+Wire the [CombineAudio] into an [AudioBus], set the bus `Volume` to 0.2 and
+wire the bus's `Result` into the render chain. Keep the [CombineAudio] pinned
+to the output window.
+
+**Expected:**
+- The tones play once, through the bus, at the bus `Volume` of 0.2 — not
+  louder, and not doubled.
+- No crackling or level flicker, and the console shows no repeated
+  `[AudioBus] routing` messages.
+- The preview's level meter stays still, because the bus plays the sources.
+
+## Step: The preview is not part of a render export
+
+**Action:**
+With the [AudioBus] from the previous step deleted and the [CombineAudio]
+pinned and audible, render a 2-second export with audio.
+
+**Expected:**
+- The tones are not in the exported audio track. To export them, they need
+  an [AudioBus] in the render chain.

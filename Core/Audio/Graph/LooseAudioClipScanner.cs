@@ -4,7 +4,7 @@ using T3.Core.DataTypes;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 
-namespace T3.Core.Audio;
+namespace T3.Core.Audio.Graph;
 
 /// <summary>
 /// Finds the audio sources of a composition whose <c>AudioReference</c> output isn't wired anywhere —

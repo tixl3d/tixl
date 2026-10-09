@@ -2,7 +2,7 @@
 using T3.Core.DataTypes;
 using T3.Core.Operator.Slots;
 
-namespace T3.Core.Audio;
+namespace T3.Core.Audio.Graph;
 
 /// <summary>
 /// Implemented by audio-graph <b>source</b> operators (ops that emit an <see cref="AudioGraphNode"/> leaf with a

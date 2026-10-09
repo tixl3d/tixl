@@ -4,6 +4,7 @@ using System.IO;
 using T3.Core.Operator.Attributes;
 using System.Reflection;
 using T3.Core.Audio;
+using T3.Core.Audio.Graph;
 using T3.Core.Compilation;
 using T3.Core.DataTypes;
 using T3.Core.IO;

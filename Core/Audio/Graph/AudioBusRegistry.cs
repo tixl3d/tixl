@@ -4,7 +4,7 @@ using ManagedBass;
 using ManagedBass.Mix;
 using T3.Core.Animation;
 
-namespace T3.Core.Audio;
+namespace T3.Core.Audio.Graph;
 
 /// <summary>
 /// Liveness tracking for audio-graph bus submixes. A bus ([AudioBus]) is pull-based — only its per-frame

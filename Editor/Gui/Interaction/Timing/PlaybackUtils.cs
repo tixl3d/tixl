@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using T3.Core.Animation;
 using T3.Core.Audio;
+using T3.Core.Audio.Graph;
 using T3.Core.IO;
 using T3.Core.Operator;
 using T3.Core.Settings;

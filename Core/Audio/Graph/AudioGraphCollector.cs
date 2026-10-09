@@ -7,7 +7,7 @@ using T3.Core.DataTypes;
 using T3.Core.Logging;
 using T3.Core.Operator;
 
-namespace T3.Core.Audio;
+namespace T3.Core.Audio.Graph;
 
 /// <summary>
 /// Plays "loose" audio-graph sources — ops implementing <see cref="IAudioSource"/> whose output isn't wired
@@ -73,6 +73,10 @@ public static class AudioGraphCollector
             if (_routed.Contains(ch))
                 continue;
 
+            // A preview that stopped leaves the channel in its paused submix.
+            if (BassMix.ChannelGetMixer(ch) != 0)
+                BassMix.MixerRemoveChannel(ch);
+
             if (BassMix.MixerAddChannel(_defaultBus, ch, BassFlags.MixerChanBuffer))
                 _routed.Add(ch);
         }
@@ -85,7 +89,9 @@ public static class AudioGraphCollector
 
         for (var i = 0; i < _toRemove.Count; i++)
         {
-            BassMix.MixerRemoveChannel(_toRemove[i]);
+            // The bus or preview that took the channel over has already moved it; removing it now would mute it there.
+            if (BassMix.ChannelGetMixer(_toRemove[i]) == _defaultBus)
+                BassMix.MixerRemoveChannel(_toRemove[i]);
             _routed.Remove(_toRemove[i]);
         }
     }

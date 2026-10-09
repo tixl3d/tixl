@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using ManagedBass;
 using T3.Core.Animation;
+using T3.Core.Audio.Graph;
 using T3.Core.IO;
 using T3.Core.Logging;
 using T3.Core.Settings;
@@ -574,9 +575,9 @@ public static class AudioEngine
 
         state.Stream.GraphOwnsVolume = routedToGraph;
 
-        // Un-routing (unwired, or the bus deleted) leaves the channel in no mixer at all, so take it back.
-        // Checking real membership every frame rather than a one-shot transition avoids racing the bus, whose
-        // own removal can run later in the same frame.
+        // Un-routing leaves the channel in no mixer, or in the paused submix of a bus that stopped collecting it,
+        // so take it back. Checking real membership every frame rather than a one-shot transition avoids racing
+        // the bus, whose own removal can run later in the same frame.
         if (!routedToGraph)
             state.Stream.ReclaimMixerMembership(AudioMixerManager.OperatorMixerHandle);
 

@@ -17,7 +17,7 @@
     },
     {
       "Id": "505139a0-71ce-4297-8440-5bf84488902e"/*AudioFile*/,
-      "DefaultValue": ""
+      "DefaultValue": "Lib:audio/KICK_06.wav"
     },
     {
       "Id": "53d1622e-b1d5-4b1c-acd0-ebceb7064043"/*Panning*/,

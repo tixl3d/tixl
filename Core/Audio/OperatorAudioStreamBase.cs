@@ -91,14 +91,21 @@ public abstract class OperatorAudioStreamBase
     internal bool GraphOwnsVolume;
 
     /// <summary>
-    /// Re-joins <paramref name="mixerHandle"/> if nothing holds this channel any more — which happens when the
-    /// graph routed it into a bus submix and then stopped (unwired, or the bus was deleted). Restores the
+    /// Re-joins <paramref name="mixerHandle"/> once no bus routes this channel any more — unwired, the bus
+    /// deleted, or an editor preview that stopped and left the channel in its paused submix. Restores the
     /// paused flag to match the stream's own state rather than assuming silence.
     /// </summary>
     internal void ReclaimMixerMembership(int mixerHandle)
     {
-        if (mixerHandle == 0 || StreamHandle == 0 || BassMix.ChannelGetMixer(StreamHandle) != 0)
+        if (mixerHandle == 0 || StreamHandle == 0)
             return;
+
+        var currentMixer = BassMix.ChannelGetMixer(StreamHandle);
+        if (currentMixer == mixerHandle)
+            return;
+
+        if (currentMixer != 0)
+            BassMix.MixerRemoveChannel(StreamHandle);
 
         if (!BassMix.MixerAddChannel(mixerHandle, StreamHandle, BassFlags.MixerChanBuffer))
             return;

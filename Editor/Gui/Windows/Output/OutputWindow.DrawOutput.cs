@@ -97,6 +97,7 @@ internal sealed partial class OutputWindow
 
         // Render!
         evaluatedOutputUi.DrawValue(evalOutput, EvaluationContext, Config.Title, recompute: !reuse);
+
         return evalOutput.ValueType;
     }
 
