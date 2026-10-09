@@ -49,6 +49,16 @@ float SubdivisionLine(float n, float r)
     // return (n + lineThickness, n, colorOnLine.rgba) * smoothstep(n - lineThickness, n, colorOnLine.rgba)
 }
 
+float4 TintChannels(float4 shape)
+{
+    float channelAlpha = 0.1;
+    float n = -0.2;
+    return shape.r * float4(1, n, n, channelAlpha)   //
+           + shape.g * float4(n, 1, n, channelAlpha) //
+           + shape.b * float4(n, n, 1, channelAlpha) //
+           + shape.a * float4(1, 1, 1, channelAlpha);
+}
+
 float4 psMain(vsOutput psInput) : SV_TARGET
 {
     uint width, height;
@@ -70,6 +80,7 @@ float4 psMain(vsOutput psInput) : SV_TARGET
 
     lineThickness = 1.1 / (height) / Width;
     float nInRange = (normalizedDistance) * (Range.y - Range.x) + Range.x;
+    
     float4 subdivisionLines = (SubdivisionLine(nInRange, 8) * float4(0.0, 0, 0, .3) + SubdivisionLine(nInRange, 1) * float4(0.0, 0, 0, 1) + SubdivisionLine(nInRange, 256) * float4(0.0, 0, 0, 0.3)) * (normalizedDistance < 1);
 
     // Bottom Line
@@ -90,12 +101,10 @@ float4 psMain(vsOutput psInput) : SV_TARGET
     float4 curveColor = 0;
     float4 curveShape2 = smoothstep(normalizedDistance, normalizedDistance + lineThickness, colorOnLine.rgba);
 
-    float channelAlpha = 0.1;
-    float n = -0.2;
-    float4 curveShape = curveShape2.r * float4(1, n, n, channelAlpha)   //
-                        + curveShape2.g * float4(n, 1, n, channelAlpha) //
-                        + curveShape2.b * float4(n, n, 1, channelAlpha) //
-                        + curveShape2.a * float4(1, 1, 1, channelAlpha);
+    float4 curveShape = TintChannels(curveShape2);
+
+    // Below the baseline, fill from 0 down to values under the range minimum
+    float4 belowRangeShape = TintChannels(smoothstep(normalizedDistance, normalizedDistance - lineThickness, colorOnLine.rgba));
 
     float4 curveLines = smoothstep(normalizedDistance + lineThickness * float4(1, 1, 1, 1.5), normalizedDistance, colorOnLine.rgba)   //
                         * smoothstep(normalizedDistance - lineThickness * float4(1, 1, 1, 1.5), normalizedDistance, colorOnLine.rgba) //
@@ -114,12 +123,12 @@ float4 psMain(vsOutput psInput) : SV_TARGET
         curveColor *= 0.1;
 
     // Zebra pattern for highlight clamping
-    float3 clamping = (colorOnLine.rgb > 1 || colorOnLine.rgb < 0) ? float3(1, 1, 1) : float3(0, 0, 0);
-
     float pattern = (pixelposition.x + pixelposition.y + 0.5 + beatTime * 100) % 8 < 2 ? 1 : -1;
 
-    float3 clampedAreaRGB = clamping * curveShape.rgb * ((normalizedDistance > 1 || normalizedDistance < 0) ? 1 : 0);
-    float4 clampedArea = float4(clampedAreaRGB, length(clampedAreaRGB) * pattern * 0.5);
+    float3 outOfRangeShape = normalizedDistance > 1   ? curveShape.rgb
+                             : normalizedDistance < 0 ? belowRangeShape.rgb
+                                                      : float3(0, 0, 0);
+    float4 clampedArea = float4(outOfRangeShape, length(outOfRangeShape) * pattern * 0.5);
     float heighlightExcessiveAlpha = ((normalizedDistance > 1 || normalizedDistance < 0) && colorOnLine.a > normalizedDistance) ? 1 : 0;
 
     bool isBetweenCurveRange = normalizedDistance >= 0 && normalizedDistance <= 1;
