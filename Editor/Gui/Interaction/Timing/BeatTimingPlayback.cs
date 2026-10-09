@@ -17,6 +17,9 @@ internal sealed class BeatTimingPlayback : Playback
         LastFrameDuration = (float)(currentRuntimeInSecs - _lastFrameStart);
         _lastFrameStart = currentRuntimeInSecs;
             
+        // Beat time never stops in tapping mode. Audio gates on PlaybackSpeed and would stay paused at 0.
+        PlaybackSpeed = 1;
+
         FxTimeInBars = BeatTiming.BeatTime;
         Bpm = BeatTiming.Bpm;
         TimeInBars = FxTimeInBars;
