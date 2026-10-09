@@ -551,8 +551,9 @@ internal static partial class Program
         var setupsFolder = SetupFiles.FolderIn(FileLocations.StartFolder);
         if (!SetupFiles.TryLoad(setupsFolder, out var setup, out var machineConfig, out _) || setup == null)
         {
-            Log.Debug("No output setup shipped with this project.");
-            return;
+            // The editor keeps an unedited project's default setup in memory only, so the player recreates it.
+            Log.Debug("No output setup shipped with this project — using the default.");
+            setup = Setup.CreateDefault();
         }
 
         // Called once at startup, so the capturing lambda costs nothing that matters.
