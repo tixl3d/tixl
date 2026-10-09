@@ -59,7 +59,6 @@ Source: "..\Operators\Lib\.meta\*";      DestDir: "{app}\Operators\Lib\.meta";  
 Source: "..\Operators\Examples\.meta\*"; DestDir: "{app}\Operators\Examples\.meta"; Excludes: "*.proxy.mov,*.waveform.png,*.waveform.jpg,win-x86,win-arm64,osx*,linux-*,android*,ios,maccatalyst-*,unix"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "dependencies\downloads\{#DotNetSdkInstaller}"; DestDir: "{tmp}"; Flags: deleteafterinstall
 Source: "dependencies\downloads\VC_redist.x64.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall
-Source: "dependencies\grafiktools.bat"; DestDir: "{tmp}"; Flags: deleteafterinstall ignoreversion
 Source: "..\.Defaults\Tests\*"; DestDir: "{userappdata}\TiXL\Tests"; Excludes: "*.proxy.mov,*.waveform.png,*.waveform.jpg,win-x86,win-arm64,osx*,linux-*,android*,ios,maccatalyst-*,unix"; Flags: ignoreversion recursesubdirs
 
 [Icons]
@@ -67,23 +66,49 @@ Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
 [Code]
+// Returns the numeric field before the next '.' and removes it from Rest; -1 if not numeric.
+function TakeVersionPart(var Rest: string): Integer;
+var
+  DotPos: Integer;
+begin
+  DotPos := Pos('.', Rest);
+  if DotPos = 0 then
+  begin
+    Result := StrToIntDef(Rest, -1);
+    Rest := '';
+  end
+  else
+  begin
+    Result := StrToIntDef(Copy(Rest, 1, DotPos - 1), -1);
+    Rest := Copy(Rest, DotPos + 1, Length(Rest));
+  end;
+end;
+
+// Any release SDK of major 10 at or above the bundled 10.0.201 is enough.
+// The SDK installer registers versions as value names in the 32-bit registry view.
 function GetDotNetSdkInstalled: Boolean;
 var
-  Key: string;
   Versions: TArrayOfString;
-  I: Integer;
+  I, Major, Minor, Patch: Integer;
+  Rest: string;
 begin
   Result := False;
-  Key := 'SOFTWARE\dotnet\Setup\InstalledVersions\x64\sdk';
-  if RegGetSubkeyNames(HKLM, Key, Versions) then
+  if not RegGetValueNames(HKLM32, 'SOFTWARE\dotnet\Setup\InstalledVersions\x64\sdk', Versions) then
+    Exit;
+
+  for I := 0 to GetArrayLength(Versions) - 1 do
   begin
-    for I := 0 to GetArrayLength(Versions) - 1 do
+    Rest := Versions[I];
+    if Pos('-', Rest) > 0 then
+      Continue;
+
+    Major := TakeVersionPart(Rest);
+    Minor := TakeVersionPart(Rest);
+    Patch := TakeVersionPart(Rest);
+    if (Major = 10) and ((Minor > 0) or ((Minor = 0) and (Patch >= 201))) then
     begin
-      if CompareStr(Versions[I], '10.0.201') = 0 then
-      begin
-        Result := True;
-        Exit;
-      end;
+      Result := True;
+      Exit;
     end;
   end;
 end;
@@ -94,7 +119,6 @@ begin
 end;
 
 [Run]
-Filename: "{tmp}\{#DotNetSdkInstaller}"; StatusMsg: "Install .NET 9 SDK"; Check: not GetDotNetSdkInstalled
+Filename: "{tmp}\{#DotNetSdkInstaller}"; StatusMsg: "Install .NET 10 SDK"; Check: not GetDotNetSdkInstalled
 Filename: "{tmp}\VC_redist.x64.exe"; StatusMsg: "Install Visual C++ Redistributable"; check: not GetvcruntimeVersion 
-Filename: "{tmp}\grafiktools.bat"; StatusMsg: "Start Windows Graphic Tools. This can take up to 10 minutes."; Flags: runhidden 
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
