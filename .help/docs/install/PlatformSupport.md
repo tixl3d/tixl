@@ -39,8 +39,7 @@ On all three systems TiXL needs the **.NET 10 SDK**, not just the runtime: it co
 runs.
 
 **Exported executables** run on the system you exported from — there is no export for another system. On
-Linux and macOS the exported player keeps the name `Player` instead of the project's title, and operators
-that depend on native libraries (for example the SVG operators) may not work in it yet.
+macOS the export is a folder with the executable, not an app you can put in Applications.
 
 **Video export on macOS** works only with the development setup for FFmpeg described under
 [Video](#video).

@@ -157,11 +157,11 @@ bugs). Estimate: 20–50 agent hours plus your review/testing time.
 - [ ] **`PbrTests/PointShading`: last item (Draw Sphere Mesh) sometimes cut off.** Went away after pasting a
       copy of the whole test into a project - looks like timing, initialization or a missing barrier rather than
       shading. Reproduce with the visual suite run twice and compare.
-- [ ] **Player export strips native libraries on Linux/macOS.** `PlayerExporter.IsForeignRuntimeFile` keeps only
-      `runtimes/win-x64` and `runtimes/win` ("the player runs on win-x64 only"), so an exported Linux or Mac
-      player loses e.g. SkiaSharp's `runtimes/linux-x64` / `runtimes/osx` natives. Keep the host's RIDs (and plain
-      `osx`, `unix`). Also: the executable is only renamed after the project for `Player.exe`, and no `.app` is
-      produced on macOS.
+- [x] **Player export strips native libraries on Linux/macOS.** Fixed 2026-10-09: `IsForeignRuntimeFile` keeps
+      the host's RID, its family and `unix`; the executable is renamed after the title on every system; asset-only
+      editable packages take `OperatorPackage.json` from their build output.
+- [ ] **Exported player is a folder, not a `.app`, on macOS.** Wrap it like `build-dmg.sh` does (launcher in
+      `Contents/MacOS`, payload in `Resources`), ad-hoc signed so it runs on Apple Silicon after copying.
 - [ ] **Stale developer docs:** `Installer/Linux/DEPENDENCIES.md` and `Dependencies/{linux-x64,osx}/README.md` still
       say live audio input is unavailable (BASS recording provides mic/line-in now, no loopback);
       `DEPENDENCIES.md` lists the NDI runtime as optional on Linux, but `WindowsOnlyFeature` disables NDI off

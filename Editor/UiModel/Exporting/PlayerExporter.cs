@@ -1,6 +1,7 @@
 #nullable enable
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Runtime.InteropServices;
 using T3.Core.Operator.Attributes;
 using System.Reflection;
 using T3.Core.Audio;
@@ -357,7 +358,11 @@ internal static partial class PlayerExporter
             if (alreadyIncluded)
                 continue;
 
+            // Installed packages carry the file in their folder; an editable project only has it in its build output.
             var sourcePath = Path.Combine(assetPackage.Folder, ReleaseInfo.FileName);
+            if (!File.Exists(sourcePath) && assetPackage is SymbolPackage symbolPackage)
+                sourcePath = Path.Combine(symbolPackage.AssemblyInformation.Directory, ReleaseInfo.FileName);
+
             var targetPath = Path.Combine(operatorDir, assetPackage.Name, ReleaseInfo.FileName);
 
             if (!TryCopyFile(sourcePath, targetPath))
@@ -381,7 +386,8 @@ internal static partial class PlayerExporter
     }
 
     /// <summary>
-    /// The player runs on win-x64 only; native libraries for other runtime identifiers are dead weight.
+    /// The player runs on the system it is exported from; native libraries for other runtime identifiers are dead
+    /// weight. NuGet places them by RID, from specific to general: "osx-arm64", "osx", "unix".
     /// </summary>
     private static bool IsForeignRuntimeFile(string relativePath)
     {
@@ -396,8 +402,22 @@ internal static partial class PlayerExporter
             return false;
 
         var rid = relativePath.AsSpan(ridStart, ridEnd - ridStart);
-        return !rid.Equals("win-x64", StringComparison.OrdinalIgnoreCase)
-               && !rid.Equals("win", StringComparison.OrdinalIgnoreCase);
+        return !IsHostRuntimeIdentifier(rid);
+    }
+
+    private static bool IsHostRuntimeIdentifier(ReadOnlySpan<char> rid)
+    {
+        // The host's own RID ("win-x64", "linux-x64", "osx-arm64") and its family without the architecture.
+        var hostRid = RuntimeInformation.RuntimeIdentifier;
+        if (rid.Equals(hostRid, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        var dash = hostRid.IndexOf('-');
+        if (dash > 0 && rid.Equals(hostRid.AsSpan(0, dash), StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        // Libraries for every Unix-like system, which both Linux and macOS load.
+        return !OperatingSystem.IsWindows() && rid.Equals("unix", StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>
@@ -715,8 +735,9 @@ internal static partial class PlayerExporter
     }
 
     /// <summary>
-    /// Renames the copied Player.exe after the export title. Safe because the apphost carries the
-    /// path to Player.dll baked in at build time - only the .exe gets a new name.
+    /// Renames the copied player executable after the export title. Safe because the apphost carries the
+    /// path to Player.dll baked in at build time - only the executable gets a new name. It is Player.exe on
+    /// Windows and plain Player on Linux and macOS.
     /// </summary>
     private static void RenamePlayerExecutable(string exportDir, string title)
     {
@@ -724,15 +745,16 @@ internal static partial class PlayerExporter
         if (string.IsNullOrEmpty(exeName) || exeName.Equals("Player", StringComparison.OrdinalIgnoreCase))
             return;
 
-        var sourcePath = Path.Combine(exportDir, "Player.exe");
-        var targetPath = Path.Combine(exportDir, exeName + ".exe");
+        var extension = OperatingSystem.IsWindows() ? ".exe" : string.Empty;
+        var sourcePath = Path.Combine(exportDir, "Player" + extension);
+        var targetPath = Path.Combine(exportDir, exeName + extension);
         try
         {
             File.Move(sourcePath, targetPath, overwrite: true);
         }
         catch (Exception e)
         {
-            Log.Warning($"Failed to rename Player.exe to {exeName}.exe: {e.Message}");
+            Log.Warning($"Failed to rename {Path.GetFileName(sourcePath)} to {Path.GetFileName(targetPath)}: {e.Message}");
         }
     }
 
