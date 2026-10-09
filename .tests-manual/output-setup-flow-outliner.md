@@ -170,10 +170,12 @@ In `_agentTests` (or any project), open an op, tick **Composition** in its proje
 1. Navigate into the composition's child op.
 2. Click the send's CONTENT item.
 3. Navigate back up to the project root.
+4. Select the send inside the composition and tick its **ExposeToParents** parameter.
 
 **Expected:**
 - After 1: CONTENT lists only the send inside the composition, also while viewing its child op. The
   root's send is not listed, and its Board card is gone.
 - After 2: the graph opens the op that holds the send, selects it and frames it.
-- After 3: both sends are listed, since the project root spans everything below it. The root's send
-  kept its slices and routing.
+- After 3: only the root's send is listed; the nested composition keeps its send to itself. The root's
+  send kept its slices and routing.
+- After 4: CONTENT at the project root lists both sends. Inside the composition it still lists only its own send.

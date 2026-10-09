@@ -81,4 +81,7 @@ internal sealed class SendToOutput : Instance<SendToOutput>, IContentSupplier, I
 
     [Input(Guid = "3c7f1e58-0a94-4d62-b8f3-2e5d9a0c4b17")]
     public readonly InputSlot<Int2> Resolution = new();
+
+    [Input(Guid = ContentSupplierSearch.ExposeToParentsInputGuid)]
+    public readonly InputSlot<bool> ExposeToParents = new();
 }
