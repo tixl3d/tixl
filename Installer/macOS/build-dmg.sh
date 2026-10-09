@@ -146,6 +146,8 @@ cat > "$contents/Info.plist" <<PLIST
     <key>NSHighResolutionCapable</key>    <true/>
     <key>NSDocumentsFolderUsageDescription</key>
     <string>TiXL keeps your projects in your Documents folder.</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>TiXL can react to sound from a microphone or line input.</string>
 </dict>
 </plist>
 PLIST

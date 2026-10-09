@@ -87,12 +87,11 @@ Spout only exists on Windows, and Syphon only on macOS; Syphon support is planne
 |---|---|---|---|
 | Soundtrack playback, mixing, waveforms | Works | Works | Works |
 | Audio reactivity from the soundtrack | Works | Works | Works |
-| Live input from a microphone or line-in | Works | Works | Partial |
+| Live input from a microphone or line-in | Works | Works | Works |
 | Live input from system audio (loopback) | Works | Not yet | Not yet |
 
 Recording what other programs play (loopback) needs a Windows-only interface. On macOS you can route
-system audio through a virtual audio device such as BlackHole and select it as the input. Live input on
-macOS hasn't been tested much yet.
+system audio through a virtual audio device such as BlackHole and select it as the input.
 
 ## Controllers and input devices
 
@@ -125,7 +124,7 @@ already carries the name TiXL.
 |---|---|---|---|
 | File dialogs, clipboard, drag and drop | Works | Works | Works |
 | Reveal in Explorer / File Manager / Finder | Works | Partial | Works |
-| Thumbnails in the asset and symbol library | Works | Not yet | Not yet |
+| Thumbnails in the asset and symbol library | Works | Works | Works |
 | Eyedropper outside the TiXL window | Works | Not yet | Not yet |
 | Deleted assets go to the trash | Works | Not yet | Not yet |
 | Crash reports | Works | Works | Works |

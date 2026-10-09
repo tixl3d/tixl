@@ -273,6 +273,19 @@ internal sealed class ProjectSettingsWindow : Window
         FormInputs.AddVerticalSpace();
         FormInputs.AddSectionSubHeader("Audio Analysis and Reactivity");
 
+        // The input device below is only captured in the Live / Interactive setup; in Animation the analysis
+        // follows the soundtrack, which is easy to miss when picking a microphone here.
+        var isUsingInputDevice = playback.AudioSource == CompositionSettings.AudioSources.ExternalDevice;
+        if (!isUsingInputDevice)
+        {
+            FormInputs.DrawInputLabel(" ");
+            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.StatusWarning.Rgba);
+            ImGui.TextWrapped("Project Setup is Animation: audio reactivity follows the soundtrack. Switch to "
+                              + "Live / Interactive under Playback to analyse the input device.");
+            ImGui.PopStyleColor();
+            FormInputs.AddVerticalSpace();
+        }
+
         FormInputs.DrawInputLabel("Input Device");
         var isDefaultDevice = string.IsNullOrEmpty(playback.AudioInputDeviceName);
         ImGui.SetNextItemWidth(FormInputs.GetAvailableInputSize(null, hasReset: true, fillWidth: true).X);
@@ -296,12 +309,19 @@ internal sealed class ProjectSettingsWindow : Window
             AudioDeviceSelector.DrawLocalDefaultDeviceCombo("##SelectLocalDevice");
             CustomComponents.HelpText("Stored per machine, not in the project. Set this once and shared projects work everywhere.");
         }
-        else if (playback.AudioInputDeviceName != AudioInput.ActiveInputDeviceName)
+        else if (isUsingInputDevice && playback.AudioInputDeviceName != AudioInput.ActiveInputDeviceName)
         {
             FormInputs.DrawInputLabel(" ");
-            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.StatusWarning.Rgba);
-            ImGui.TextUnformatted(playback.AudioInputDeviceName + " (NOT FOUND)");
-            ImGui.PopStyleColor();
+            if (!IsInputDeviceAvailable(playback.AudioInputDeviceName))
+            {
+                ImGui.PushStyleColor(ImGuiCol.Text, UiColors.StatusWarning.Rgba);
+                ImGui.TextUnformatted(playback.AudioInputDeviceName + " (NOT FOUND)");
+                ImGui.PopStyleColor();
+            }
+            else
+            {
+                CustomComponents.HelpText("Can't open this device. See the console for details.");
+            }
         }
 
         modified |= FormInputs.AddFloat("Gain", ref playback.AudioGainFactor, 0.01f, 100, 0.01f, true,
@@ -384,6 +404,17 @@ internal sealed class ProjectSettingsWindow : Window
     }
 
     /// <summary>Selects all [AudioClip] ops of the composition and fits the graph view to them.</summary>
+    private static bool IsInputDeviceAvailable(string deviceName)
+    {
+        foreach (var device in AudioInput.InputDevices)
+        {
+            if (device.Name == deviceName)
+                return true;
+        }
+
+        return false;
+    }
+
     private static void SelectAudioClipOps(Instance composition)
     {
         var projectView = ProjectView.Focused;

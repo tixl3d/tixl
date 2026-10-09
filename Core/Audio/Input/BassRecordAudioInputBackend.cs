@@ -73,7 +73,7 @@ internal sealed class BassRecordAudioInputBackend : AudioInputBackend
 
         var sampleRate = device.SampleRate > 0 ? device.SampleRate : DefaultSampleRate;
         _activeChannelCount = CaptureChannelCount;
-        _recordingHandle = Bass.RecordStart(sampleRate, CaptureChannelCount, BassFlags.Float, _procedure);
+        _recordingHandle = Bass.RecordStart(sampleRate, CaptureChannelCount, BassFlags.Float, CallbackPeriodMs, _procedure);
         if (_recordingHandle == 0)
         {
             Log.Error($"Can't start capturing from '{device.Name}': {Bass.LastError}");
@@ -112,6 +112,12 @@ internal sealed class BassRecordAudioInputBackend : AudioInputBackend
     private const int CaptureChannelCount = 2;
 
     private const int DefaultSampleRate = 48000;
+
+    /// <summary>
+    /// Every callback runs one analysis update. BASS's default of 100 ms would update audio reactivity only
+    /// 10 times a second; 10 ms keeps it ahead of the frame rate, like the WASAPI path's device period.
+    /// </summary>
+    private const int CallbackPeriodMs = 10;
 
     private RecordProcedure? _procedure;
     private int _recordingHandle;
