@@ -14,7 +14,8 @@
         "GraphWindow",
         "MagGraphView"
       ],
-      "docFile": "references/topics/ui/Graph.md"
+      "docFile": "references/topics/ui/Graph.md",
+      "ns": "ui"
     },
     "ui:SkillQuest": {
       "term": "SkillQuest",
@@ -26,7 +27,8 @@
       "classes": [
         "SkillTraining"
       ],
-      "docFile": "references/topics/ui/SkillQuest.md"
+      "docFile": "references/topics/ui/SkillQuest.md",
+      "ns": "ui"
     },
     "ui:SkillQuestLevel": {
       "term": "Skill Quest Level",
@@ -35,7 +37,8 @@
       "classes": [
         "QuestLevel"
       ],
-      "docFile": "references/topics/ui/SkillQuestLevel.md"
+      "docFile": "references/topics/ui/SkillQuestLevel.md",
+      "ns": "ui"
     },
     "ui:SkillMap": {
       "term": "Skill Map",
@@ -46,7 +49,8 @@
       "classes": [
         "SkillMapData"
       ],
-      "docFile": "references/topics/ui/SkillMap.md"
+      "docFile": "references/topics/ui/SkillMap.md",
+      "ns": "ui"
     },
     "ui:ParameterWindow": {
       "term": "Parameter window",
@@ -57,7 +61,8 @@
       "classes": [
         "ParameterWindow"
       ],
-      "docFile": "references/topics/ui/ParameterWindow.md"
+      "docFile": "references/topics/ui/ParameterWindow.md",
+      "ns": "ui"
     },
     "ui:OutputWindow": {
       "term": "Output Window",
@@ -66,7 +71,8 @@
       "classes": [
         "OutputWindow"
       ],
-      "docFile": "references/topics/ui/OutputWindow.md"
+      "docFile": "references/topics/ui/OutputWindow.md",
+      "ns": "ui"
     },
     "ui:Settings": {
       "term": "Settings",
@@ -78,7 +84,8 @@
       "classes": [
         "SettingsWindow"
       ],
-      "docFile": "references/topics/ui/Settings.md"
+      "docFile": "references/topics/ui/Settings.md",
+      "ns": "ui"
     },
     "ui:ProjectSettings": {
       "term": "Project Settings",
@@ -89,7 +96,8 @@
       "classes": [
         "ProjectSettingsWindow"
       ],
-      "docFile": "references/topics/ui/ProjectSettings.md"
+      "docFile": "references/topics/ui/ProjectSettings.md",
+      "ns": "ui"
     },
     "ui:Symbol": {
       "term": "Symbol",
@@ -98,7 +106,8 @@
       "classes": [
         "Symbol"
       ],
-      "docFile": "references/topics/ui/Symbol.md"
+      "docFile": "references/topics/ui/Symbol.md",
+      "ns": "ui"
     },
     "ui:Composition": {
       "term": "Composition",
@@ -107,7 +116,8 @@
       "classes": [
         "Instance"
       ],
-      "docFile": "references/topics/ui/Composition.md"
+      "docFile": "references/topics/ui/Composition.md",
+      "ns": "ui"
     },
     "ui:UserProject": {
       "term": "User Project",
@@ -116,7 +126,8 @@
       "classes": [
         "EditableSymbolProject"
       ],
-      "docFile": "references/topics/ui/UserProject.md"
+      "docFile": "references/topics/ui/UserProject.md",
+      "ns": "ui"
     },
     "ui:Asset": {
       "term": "Asset",
@@ -127,7 +138,8 @@
       "classes": [
         "Asset"
       ],
-      "docFile": "references/topics/ui/Asset.md"
+      "docFile": "references/topics/ui/Asset.md",
+      "ns": "ui"
     },
     "ui:AssetLibrary": {
       "term": "Asset Library",
@@ -136,7 +148,8 @@
       "classes": [
         "AssetLibrary"
       ],
-      "docFile": "references/topics/ui/AssetLibrary.md"
+      "docFile": "references/topics/ui/AssetLibrary.md",
+      "ns": "ui"
     },
     "ui:SymbolLibrary": {
       "term": "Symbol Library",
@@ -145,7 +158,8 @@
       "classes": [
         "SymbolLibrary"
       ],
-      "docFile": "references/topics/ui/SymbolLibrary.md"
+      "docFile": "references/topics/ui/SymbolLibrary.md",
+      "ns": "ui"
     },
     "ui:SymbolBrowser": {
       "term": "Symbol browser",
@@ -154,7 +168,8 @@
       "classes": [
         "PlaceholderCreation"
       ],
-      "docFile": "references/topics/ui/SymbolBrowser.md"
+      "docFile": "references/topics/ui/SymbolBrowser.md",
+      "ns": "ui"
     },
     "ui:VariationWindow": {
       "term": "Variation window",
@@ -163,7 +178,8 @@
       "classes": [
         "VariationsWindow"
       ],
-      "docFile": "references/topics/ui/VariationWindow.md"
+      "docFile": "references/topics/ui/VariationWindow.md",
+      "ns": "ui"
     },
     "ui:SearchWindow": {
       "term": "Search window",
@@ -175,7 +191,8 @@
       "classes": [
         "SearchDialog"
       ],
-      "docFile": "references/topics/ui/SearchWindow.md"
+      "docFile": "references/topics/ui/SearchWindow.md",
+      "ns": "ui"
     },
     "ui:Annotations": {
       "term": "Sections",
@@ -187,7 +204,8 @@
       "classes": [
         "MagGraphSection"
       ],
-      "docFile": "references/topics/ui/Annotations.md"
+      "docFile": "references/topics/ui/Annotations.md",
+      "ns": "ui"
     },
     "ui:OperatorSettings": {
       "term": "Operator Settings",
@@ -198,7 +216,8 @@
       "classes": [
         "ParameterSettings"
       ],
-      "docFile": "references/topics/ui/OperatorSettings.md"
+      "docFile": "references/topics/ui/OperatorSettings.md",
+      "ns": "ui"
     },
     "ui:GradientEditor": {
       "term": "Gradient editor",
@@ -207,7 +226,8 @@
       "classes": [
         "GradientEditor"
       ],
-      "docFile": "references/topics/ui/GradientEditor.md"
+      "docFile": "references/topics/ui/GradientEditor.md",
+      "ns": "ui"
     },
     "ui:Timeline": {
       "term": "Timeline",
@@ -218,7 +238,8 @@
       "classes": [
         "TimeLineCanvas"
       ],
-      "docFile": "references/topics/ui/Timeline.md"
+      "docFile": "references/topics/ui/Timeline.md",
+      "ns": "ui"
     },
     "ui:DopeSheet": {
       "term": "Dope sheet",
@@ -229,7 +250,8 @@
       "classes": [
         "DopeSheetArea"
       ],
-      "docFile": "references/topics/ui/DopeSheet.md"
+      "docFile": "references/topics/ui/DopeSheet.md",
+      "ns": "ui"
     },
     "ui:AnimationArea": {
       "term": "Animation area",
@@ -238,7 +260,8 @@
       "classes": [
         "TimelineDetailsArea"
       ],
-      "docFile": "references/topics/ui/AnimationArea.md"
+      "docFile": "references/topics/ui/AnimationArea.md",
+      "ns": "ui"
     },
     "ui:CurveEditor": {
       "term": "Curve editor",
@@ -249,7 +272,8 @@
       "classes": [
         "TimelineCurveEditor"
       ],
-      "docFile": "references/topics/ui/CurveEditor.md"
+      "docFile": "references/topics/ui/CurveEditor.md",
+      "ns": "ui"
     },
     "ui:ControlBar": {
       "term": "Control bar",
@@ -260,7 +284,8 @@
       "classes": [
         "TimeControls"
       ],
-      "docFile": "references/topics/ui/ControlBar.md"
+      "docFile": "references/topics/ui/ControlBar.md",
+      "ns": "ui"
     },
     "ui:PerformanceMonitor": {
       "term": "Performance monitor",
@@ -272,7 +297,8 @@
       "classes": [
         "PerformanceWindow"
       ],
-      "docFile": "references/topics/ui/PerformanceMonitor.md"
+      "docFile": "references/topics/ui/PerformanceMonitor.md",
+      "ns": "ui"
     },
     "ui:ControlView": {
       "term": "Control view",
@@ -281,7 +307,8 @@
       "classes": [
         "SnapshotControlView"
       ],
-      "docFile": "references/topics/ui/ControlView.md"
+      "docFile": "references/topics/ui/ControlView.md",
+      "ns": "ui"
     },
     "ui:ShaderGraph": {
       "term": "Shader graph",
@@ -290,7 +317,8 @@
       "classes": [
         "ShaderGraphNode"
       ],
-      "docFile": "references/topics/ui/ShaderGraph.md"
+      "docFile": "references/topics/ui/ShaderGraph.md",
+      "ns": "ui"
     },
     "ui:ShaderNode": {
       "term": "Shader node",
@@ -299,7 +327,26 @@
       "classes": [
         "ShaderGraphNode"
       ],
-      "docFile": "references/topics/ui/ShaderNode.md"
+      "docFile": "references/topics/ui/ShaderNode.md",
+      "ns": "ui"
+    },
+    "ui:ShaderCode": {
+      "term": "Shader code",
+      "parent": null,
+      "synonyms": [
+        "custom shader",
+        "hand-written shader",
+        "shader source",
+        "inline HLSL",
+        "shader editing"
+      ],
+      "classes": [
+        "CustomDrawMesh",
+        "CustomPointShader",
+        "ShaderCompiler"
+      ],
+      "docFile": "references/topics/ui/ShaderCode.md",
+      "ns": "ui"
     },
     "ui:Field": {
       "term": "Field",
@@ -312,7 +359,8 @@
       "classes": [
         "ShaderGraphNode"
       ],
-      "docFile": "references/topics/ui/Field.md"
+      "docFile": "references/topics/ui/Field.md",
+      "ns": "ui"
     },
     "ui:Gizmo": {
       "term": "Gizmo",
@@ -321,14 +369,16 @@
       "classes": [
         "TransformGizmoHandling"
       ],
-      "docFile": "references/topics/ui/Gizmo.md"
+      "docFile": "references/topics/ui/Gizmo.md",
+      "ns": "ui"
     },
     "ui:WelcomeWindow": {
       "term": "Welcome window",
       "parent": null,
       "synonyms": [],
       "classes": [],
-      "docFile": "references/topics/ui/WelcomeWindow.md"
+      "docFile": "references/topics/ui/WelcomeWindow.md",
+      "ns": "ui"
     },
     "ui:WelcomeAlphaWindow": {
       "term": "Welcome alpha window",
@@ -337,7 +387,8 @@
       "classes": [
         "WelcomeAlphaWindow"
       ],
-      "docFile": "references/topics/ui/WelcomeAlphaWindow.md"
+      "docFile": "references/topics/ui/WelcomeAlphaWindow.md",
+      "ns": "ui"
     },
     "ui:ProjectPanel": {
       "term": "Project panel",
@@ -349,7 +400,8 @@
       "classes": [
         "ProjectsPanel"
       ],
-      "docFile": "references/topics/ui/ProjectPanel.md"
+      "docFile": "references/topics/ui/ProjectPanel.md",
+      "ns": "ui"
     },
     "ui:RenderSettings": {
       "term": "Render settings",
@@ -358,7 +410,8 @@
       "classes": [
         "RenderWindow"
       ],
-      "docFile": "references/topics/ui/RenderSettings.md"
+      "docFile": "references/topics/ui/RenderSettings.md",
+      "ns": "ui"
     },
     "ui:OutputResolution": {
       "term": "Output resolution",
@@ -373,7 +426,8 @@
         "OutputWindowState",
         "EditResolutionDialog"
       ],
-      "docFile": "references/topics/ui/OutputResolution.md"
+      "docFile": "references/topics/ui/OutputResolution.md",
+      "ns": "ui"
     },
     "ui:OutputSetup": {
       "term": "Output setup",
@@ -398,7 +452,8 @@
         "OutputPresentation",
         "CalibrationOverlay"
       ],
-      "docFile": "references/topics/ui/OutputSetup.md"
+      "docFile": "references/topics/ui/OutputSetup.md",
+      "ns": "ui"
     },
     "ui:GeometryOps": {
       "term": "Geometry operators",
@@ -414,7 +469,8 @@
         "MeshGeometry",
         "GeometryToMesh"
       ],
-      "docFile": "references/topics/ui/GeometryOps.md"
+      "docFile": "references/topics/ui/GeometryOps.md",
+      "ns": "ui"
     },
     "ui:IoView": {
       "term": "IO view",
@@ -423,7 +479,8 @@
       "classes": [
         "IoViewWindow"
       ],
-      "docFile": "references/topics/ui/IoView.md"
+      "docFile": "references/topics/ui/IoView.md",
+      "ns": "ui"
     },
     "ui:ConsoleLog": {
       "term": "Console log",
@@ -435,7 +492,8 @@
       "classes": [
         "ConsoleLogWindow"
       ],
-      "docFile": "references/topics/ui/ConsoleLog.md"
+      "docFile": "references/topics/ui/ConsoleLog.md",
+      "ns": "ui"
     },
     "ui:SplashScreen": {
       "term": "Splash screen",
@@ -444,14 +502,16 @@
       "classes": [
         "SplashScreen"
       ],
-      "docFile": "references/topics/ui/SplashScreen.md"
+      "docFile": "references/topics/ui/SplashScreen.md",
+      "ns": "ui"
     },
     "ui:Player": {
       "term": "Player",
       "parent": null,
       "synonyms": [],
       "classes": [],
-      "docFile": "references/topics/ui/Player.md"
+      "docFile": "references/topics/ui/Player.md",
+      "ns": "ui"
     },
     "ui:PlayerExporter": {
       "term": "Player exporter",
@@ -460,7 +520,8 @@
       "classes": [
         "PlayerExporter"
       ],
-      "docFile": "references/topics/ui/PlayerExporter.md"
+      "docFile": "references/topics/ui/PlayerExporter.md",
+      "ns": "ui"
     },
     "ui:ColorEditor": {
       "term": "Color editor",
@@ -469,7 +530,8 @@
       "classes": [
         "ColorEditPopup"
       ],
-      "docFile": "references/topics/ui/ColorEditor.md"
+      "docFile": "references/topics/ui/ColorEditor.md",
+      "ns": "ui"
     },
     "ui:InfinitySlider": {
       "term": "Infinity slider",
@@ -478,7 +540,8 @@
       "classes": [
         "InfinitySliderOverlay"
       ],
-      "docFile": "references/topics/ui/InfinitySlider.md"
+      "docFile": "references/topics/ui/InfinitySlider.md",
+      "ns": "ui"
     },
     "ui:ParameterPopup": {
       "term": "Parameter popup",
@@ -487,7 +550,8 @@
       "classes": [
         "ParameterPopUp"
       ],
-      "docFile": "references/topics/ui/ParameterPopup.md"
+      "docFile": "references/topics/ui/ParameterPopup.md",
+      "ns": "ui"
     },
     "ui:FocusMode": {
       "term": "Focus mode",
@@ -496,7 +560,8 @@
       "classes": [
         "LayoutHandling"
       ],
-      "docFile": "references/topics/ui/FocusMode.md"
+      "docFile": "references/topics/ui/FocusMode.md",
+      "ns": "ui"
     },
     "ui:IdleMotion": {
       "term": "Idle motion",
@@ -505,7 +570,8 @@
       "classes": [
         "Playback"
       ],
-      "docFile": "references/topics/ui/IdleMotion.md"
+      "docFile": "references/topics/ui/IdleMotion.md",
+      "ns": "ui"
     },
     "ui:EvaluationContext": {
       "term": "Evaluation context",
@@ -517,7 +583,8 @@
       "classes": [
         "EvaluationContext"
       ],
-      "docFile": "references/topics/ui/EvaluationContext.md"
+      "docFile": "references/topics/ui/EvaluationContext.md",
+      "ns": "ui"
     },
     "ui:TimeOverrides": {
       "term": "Time overrides",
@@ -526,7 +593,8 @@
       "classes": [
         "EvaluationContext"
       ],
-      "docFile": "references/topics/ui/TimeOverrides.md"
+      "docFile": "references/topics/ui/TimeOverrides.md",
+      "ns": "ui"
     },
     "ui:LocalTime": {
       "term": "Local time",
@@ -535,7 +603,8 @@
       "classes": [
         "EvaluationContext"
       ],
-      "docFile": "references/topics/ui/LocalTime.md"
+      "docFile": "references/topics/ui/LocalTime.md",
+      "ns": "ui"
     },
     "ui:PlaybackTime": {
       "term": "Play back time",
@@ -544,7 +613,8 @@
       "classes": [
         "Playback"
       ],
-      "docFile": "references/topics/ui/PlaybackTime.md"
+      "docFile": "references/topics/ui/PlaybackTime.md",
+      "ns": "ui"
     },
     "ui:AudioInput": {
       "term": "Audio input",
@@ -553,7 +623,77 @@
       "classes": [
         "WasapiAudioInput"
       ],
-      "docFile": "references/topics/ui/AudioInput.md"
+      "docFile": "references/topics/ui/AudioInput.md",
+      "ns": "ui"
+    },
+    "tech:Hlsl": {
+      "term": "HLSL",
+      "parent": null,
+      "synonyms": [
+        "shader language",
+        "HLSL",
+        "slang",
+        "SPIR-V",
+        "shader compiler",
+        "swizzling",
+        "GLSL",
+        "constant buffer",
+        "cbuffer",
+        "buffer packing",
+        "register alignment"
+      ],
+      "classes": [],
+      "docFile": null,
+      "ns": "tech"
+    },
+    "tech:ShaderDerivatives": {
+      "term": "Screen-space derivatives",
+      "parent": "tech:Hlsl",
+      "synonyms": [
+        "ddx",
+        "ddy",
+        "fwidth",
+        "derivatives",
+        "pixel quad"
+      ],
+      "classes": [],
+      "docFile": null,
+      "ns": "tech"
+    },
+    "tech:Vulkan": {
+      "term": "Vulkan",
+      "parent": null,
+      "synonyms": [
+        "Vulkan",
+        "DirectX 11",
+        "graphics API",
+        "SharpDX",
+        "render backend"
+      ],
+      "classes": [],
+      "docFile": null,
+      "ns": "tech"
+    },
+    "tech:Linux": {
+      "term": "Linux",
+      "parent": null,
+      "synonyms": [
+        "Linux",
+        "Arch",
+        "distro",
+        "Wayland",
+        "X11",
+        "PipeWire",
+        "SDL",
+        "packaging",
+        "AppImage",
+        "Flatpak",
+        "ARM",
+        "Raspberry Pi"
+      ],
+      "classes": [],
+      "docFile": null,
+      "ns": "tech"
     }
   }
 }

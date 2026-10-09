@@ -99,5 +99,5 @@ RWStructuredBuffer<PbrVertex> ResultVertices : register(u0);
     
     ResultVertices[i.x].TexCoord = v.TexCoord;
     ResultVertices[i.x].Selected = v.Selected;
-    ResultVertices[i.x].ColorRGB = v.ColorRGB;
+    ResultVertices[i.x].ColorRGB = lerp(v.ColorRGB, p.Color.rgb, f);
 }

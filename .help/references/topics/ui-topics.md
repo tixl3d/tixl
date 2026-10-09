@@ -157,6 +157,11 @@ id: ShaderNode
 parent: ShaderGraph
 classes: ShaderGraphNode
 
+## Shader code
+id: ShaderCode
+synonyms: custom shader, hand-written shader, shader source, inline HLSL, shader editing
+classes: CustomDrawMesh, CustomPointShader, ShaderCompiler
+
 ## Field
 id: Field
 synonyms: SDF, distance field, value field

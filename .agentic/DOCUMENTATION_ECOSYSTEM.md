@@ -121,6 +121,13 @@ Two halves, by nature of the work:
 - The description carries a **wiki backlink** — `More details … on the TiXL wiki:
   https://github.com/tixl3d/tixl/wiki/meetup.<date>` (URL constructable from the date) — the
   video→wiki half of the cross-link; the wiki page links back via its thumbnail and chapters.
+- **YouTube caps the description at 5000 characters**, counting everything after line 1 (the title
+  is its own field). Budget for it while writing, not afterwards: **~40 chapters at ~55 characters
+  of title**, plus a summary under ~500, lands around 3500 and leaves room. Chapter *titles* are
+  where it overruns — 50 chapters averaging 76 characters already breaches the cap on a 4-hour
+  video. Fewer, shorter chapters are the fix, not a smaller summary. Count the body before handing
+  off; the limit is silent, YouTube simply refuses the paste.
+  The wiki page has no limit, but the two chapter lists **stay identical** (above), so trim both.
 - Human reviews. Nothing committed.
 
 ## The full process

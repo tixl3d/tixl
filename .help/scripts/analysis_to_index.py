@@ -5,13 +5,17 @@ analysis_to_index.py — STAGE 3 of the video -> docs pipeline.
 Reads the committed per-video analyses (written by the /analyze-videos skill) plus the hand-authored
 UI-topic registry, and builds the reference indices the editor reads:
 
-    references/video-analysis/<id>.md  +  references/topics/ui-topics.md
+    references/video-analysis/<id>.md  +  references/topics/{ui,tech}-topics.md
         -> references/indices/videos.json + mentions.json + topics.json
 
+Two topic namespaces, each with its own registry and doc folder:
+    ui:   TiXL's own vocabulary — anything you point at or author in the editor (panels, concepts).
+    tech: subject matter that would exist if TiXL didn't (HLSL, Vulkan, colour spaces).
+
 videos.json   = { "videos": [ { id, type, date, title, url, duration } ] }
-topics.json   = { "topics": { "ui:<id>": { term, parent, synonyms, classes, docFile } } }
-                  (docFile points at references/topics/ui/<id>.md — the editor loads it lazily)
-mentions.json = { "op:<fullpath>" | "ui:<id>": [ { video, startSecond, duration, url, depth, style, purpose, confidence, note } ] }
+topics.json   = { "topics": { "ui:<id>" | "tech:<id>": { term, parent, synonyms, classes, docFile, ns } } }
+                  (docFile points at references/topics/<ns>/<id>.md — the editor loads it lazily)
+mentions.json = { "op:<fullpath>" | "ui:<id>" | "tech:<id>": [ { video, startSecond, duration, url, depth, style, purpose, confidence, note } ] }
 
 Each mention line is `<start>[→<end>] [Op]/[ui:Id] · <depth> · <style> · <purpose> · <conf>% — <note>`. The start/end
 give `startSecond` + `duration` (platform-agnostic, no human label). The note is user-facing and may
@@ -28,14 +32,15 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 HELP = HERE.parent
 ANALYSES = HELP / "references" / "video-analysis"
-TOPICS_MD = HELP / "references" / "topics" / "ui-topics.md"
-TOPIC_DOCS_DIR = HELP / "references" / "topics" / "ui"
+TOPICS_DIR = HELP / "references" / "topics"
+NAMESPACES = ("ui", "tech")          # registry <ns>-topics.md, doc bodies in <ns>/<Id>.md
 INDICES = HELP / "references" / "indices"
 OP_INDEX = HELP / "docs" / "operators" / "index.json"
 
 TS = r"\d{1,2}:\d{2}(?::\d{2})?(?:,\d+)?"   # M:SS / H:MM:SS, tolerating a ,ms suffix
 RANGE_RE = re.compile(rf"^({TS})\s*(?:[→-]\s*({TS}))?")   # start, optional →end (arrow or hyphen)
-MARK_RE = re.compile(r"\[((?:ui:)+)?([A-Za-z][A-Za-z0-9]*)\]")  # [DrawPoints] / [ui:Timeline] (tolerates [ui:ui:X])
+# [DrawPoints] / [ui:Timeline] / [tech:Hlsl] (tolerates a doubled prefix, e.g. [ui:ui:X])
+MARK_RE = re.compile(r"\[(?:(ui|tech):)(?:(?:ui|tech):)*([A-Za-z][A-Za-z0-9]*)\]|\[([A-Za-z][A-Za-z0-9]*)\]")
 DEPTHS = ("in-depth", "explained", "passing")
 DEPTH_RANK = {"in-depth": 0, "explained": 1, "passing": 2}
 STYLES = ("scripted", "answer", "discussion", "experiment")   # how structured/trustworthy the moment is
@@ -48,6 +53,11 @@ NOTE_RE = re.compile(r"[—–]\s*(.+)$")               # em/en dash only — NO
 # linking. We score each (operator/topic × merged-segment) reference and keep only the strongest, so the
 # help UI shows a focused set. score = durationFactor × depthWeight × styleWeight.
 MAX_REFERENCES = 500                         # global cap; None disables curation (keep everything)
+# Namespaces the curated index spends its budget on. `tech:` is deliberately absent: the editor
+# hard-codes the `ui:` prefix (HelpTopic.cs), so tech references would crowd operator help out of the
+# cap to display nothing. They stay complete in mentions.full.json — add "tech" here once a consumer
+# exists, and give it its own budget if it turns out to be large.
+CURATED_NAMESPACES = ("ui",)
 DURATION_LO, DURATION_HI = 5, 30             # seconds → duration factor ramps linearly 0..1 across this
 DEPTH_WEIGHTS = {"in-depth": 2.0, "explained": 1.5, "passing": 0.5}   # how much the moment teaches
 STYLE_WEIGHTS = {"scripted": 2.0, "answer": 2.0, "discussion": 0.75, "experiment": 0.4}  # how trustworthy
@@ -109,7 +119,7 @@ def parse_analysis(path):
         nm = NOTE_RE.search(rest)
         note = nm.group(1).strip() if nm else ""
         head = rest[:nm.start()] if nm else rest            # markers + depth, before the note
-        marks = [("ui" if m.group(1) else "op", m.group(2)) for m in MARK_RE.finditer(head)]
+        marks = [(m.group(1) or "op", m.group(2) or m.group(3)) for m in MARK_RE.finditer(head)]
         if not marks:
             continue
         depth = next((d for d in DEPTHS if d in head.lower()), None)
@@ -125,30 +135,35 @@ def parse_analysis(path):
 
 
 def parse_topics():
-    if not TOPICS_MD.exists():
-        return {}
-    text = TOPICS_MD.read_text(encoding="utf-8", errors="replace").replace("\r\n", "\n")
+    """Every namespace's registry, keyed by bare id. Each topic carries its `ns`."""
     topics = {}
-    for block in re.split(r"^##\s+", text, flags=re.M)[1:]:
-        lines = block.splitlines()
-        term = lines[0].strip()
-        meta, i = {}, 1
-        while i < len(lines):
-            ln = lines[i].strip()
-            if not ln:
+    for ns in NAMESPACES:
+        registry = TOPICS_DIR / f"{ns}-topics.md"
+        if not registry.exists():
+            continue
+        docs_dir = TOPICS_DIR / ns
+        text = registry.read_text(encoding="utf-8", errors="replace").replace("\r\n", "\n")
+        for block in re.split(r"^##\s+", text, flags=re.M)[1:]:
+            lines = block.splitlines()
+            term = lines[0].strip()
+            meta, i = {}, 1
+            while i < len(lines):
+                ln = lines[i].strip()
+                if not ln:
+                    i += 1
+                    break
+                m = re.match(r"([A-Za-z]+):\s*(.*)$", ln)
+                if not m:
+                    break
+                meta[m.group(1).lower()] = m.group(2).strip()
                 i += 1
-                break
-            m = re.match(r"([A-Za-z]+):\s*(.*)$", ln)
-            if not m:
-                break
-            meta[m.group(1).lower()] = m.group(2).strip()
-            i += 1
-        tid = meta.get("id") or pascal(term)
-        split = lambda key: [x.strip() for x in meta.get(key, "").split(",") if x.strip()]
-        # Doc body lives in its own file; record a pointer the editor loads lazily.
-        doc_file = f"references/topics/ui/{tid}.md" if (TOPIC_DOCS_DIR / f"{tid}.md").exists() else None
-        topics[tid] = {"term": term, "parent": meta.get("parent") or None,
-                       "synonyms": split("synonyms"), "classes": split("classes"), "docFile": doc_file}
+            tid = meta.get("id") or pascal(term)
+            split = lambda key: [x.strip() for x in meta.get(key, "").split(",") if x.strip()]
+            # Doc body lives in its own file; record a pointer the editor loads lazily.
+            doc_file = f"references/topics/{ns}/{tid}.md" if (docs_dir / f"{tid}.md").exists() else None
+            topics[tid] = {"term": term, "parent": meta.get("parent") or None,
+                           "synonyms": split("synonyms"), "classes": split("classes"),
+                           "docFile": doc_file, "ns": ns}
     return topics
 
 
@@ -185,15 +200,25 @@ def build():
         for syn in t["synonyms"]:
             topic_lookup.setdefault(syn.lower(), tid)
 
+    def topic_key(name, want_ns=None):
+        """Resolve a topic id or synonym to its `<ns>:<id>` key, optionally pinned to one namespace."""
+        tid = topic_lookup.get(name.lower())
+        if not tid:
+            return None
+        ns = topics[tid]["ns"]
+        if want_ns and ns != want_ns:
+            return None                               # [ui:X] must not silently resolve to tech:X
+        return f"{ns}:{tid}"
+
     def keys_for(kind, name):
-        if kind == "ui":
-            tid = topic_lookup.get(name.lower())
-            return [f"ui:{tid}"] if tid else []
+        if kind in NAMESPACES:
+            key = topic_key(name, want_ns=kind)
+            return [key] if key else []
         paths = by_short.get(name) or by_short.get(ci.get(name.lower(), ""))
         if paths:
             return [f"op:{p}" for p in paths]
-        tid = topic_lookup.get(name.lower())          # bare op-name might be a UI topic
-        return [f"ui:{tid}"] if tid else []
+        key = topic_key(name)                         # bare op-name might be a topic in either namespace
+        return [key] if key else []
 
     def focus_keys(raw_value):                         # "[Rings], [ui:Timeline]" -> resolved index keys
         out = []
@@ -201,7 +226,8 @@ def build():
             tok = tok.strip()
             if not tok:
                 continue
-            kind, nm = ("ui", tok[3:]) if tok.lower().startswith("ui:") else ("op", tok)
+            kind, nm = next(((ns, tok[len(ns) + 1:]) for ns in NAMESPACES
+                             if tok.lower().startswith(f"{ns}:")), ("op", tok))
             ks = keys_for(kind, nm)
             if ks:
                 out.extend(ks)
@@ -230,7 +256,7 @@ def build():
             for kind, name in mn["marks"]:
                 ks = keys_for(kind, name)
                 if not ks:
-                    label = f"ui:{name}" if kind == "ui" else name
+                    label = f"{kind}:{name}" if kind in NAMESPACES else name
                     unknown[label] = unknown.get(label, 0) + 1
                     continue
                 for key in ks:
@@ -271,6 +297,8 @@ def build():
         full_idx[key] = flat
 
     # Curated index: globally keep only the highest-scoring references (drop now-empty keys).
+    skipped_ns = {ns for ns in NAMESPACES if ns not in CURATED_NAMESPACES}
+    all_refs = [r for r in all_refs if r[1].split(":", 1)[0] not in skipped_ns]
     all_refs.sort(key=lambda r: r[0], reverse=True)
     kept = all_refs if MAX_REFERENCES is None else all_refs[:MAX_REFERENCES]
     cutoff = kept[-1][0] if kept else 0.0
@@ -280,7 +308,9 @@ def build():
     for key in mentions_idx:
         mentions_idx[key].sort(key=lambda m: -m["score"])   # best moment first within an operator
 
-    topics_out = {f"ui:{tid}": {**t, "parent": f"ui:{t['parent']}" if t["parent"] else None}
+    # Keys (and parents) carry the namespace, so a topic's link target is stable across both.
+    topics_out = {f"{t['ns']}:{tid}": {**t, "parent": f"{topics.get(t['parent'], t)['ns']}:{t['parent']}"
+                                               if t["parent"] else None}
                   for tid, t in topics.items()}
 
     (INDICES / "videos.json").write_text(
@@ -303,10 +333,14 @@ def main():
     kept_total = sum(len(v) for v in mentions.values())
     op_keys = [k for k in mentions if k.startswith("op:")]
     ui_keys = [k for k in mentions if k.startswith("ui:")]
-    print(f"{len(videos)} video(s) · {len(topics)} UI topics defined")
+    tech_keys = [k for k in mentions if k.startswith("tech:")]
+    by_ns = {ns: sum(1 for x in topics.values() if x["ns"] == ns) for ns in NAMESPACES}
+    defined = ", ".join(f"{n} {ns}:" for ns, n in by_ns.items())
+    print(f"{len(videos)} video(s) · topics defined: {defined}")
     print(f"{len(full_idx)} keys / {full_total} references scored -> "
           f"kept top {kept_total} (cutoff score {cutoff:.3f})")
-    print(f"curated index covers {len(op_keys)} operators + {len(ui_keys)} UI topics")
+    print(f"curated index covers {len(op_keys)} operators + {len(ui_keys)} ui: "
+          f"+ {len(tech_keys)} tech: topics")
     by_depth, by_style, by_purpose = {}, {}, {}
     for segs in mentions.values():
         for s in segs:
