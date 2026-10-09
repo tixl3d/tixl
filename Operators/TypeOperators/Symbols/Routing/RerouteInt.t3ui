@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "aced3297-133d-479d-833b-736f76412340",
+  "Description": "Forwards int through a movable routing anchor.\n\nRetains its slot type when disconnected. Reference values are forwarded without cloning or taking ownership.",
+  "InputUis": [
+    {
+      "InputId": "25d025fc-5a92-4439-b2eb-6657d00a6676",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "5538bf75-20a9-452d-9713-1ee51993ce6d",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}

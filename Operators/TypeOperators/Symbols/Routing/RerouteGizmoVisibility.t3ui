@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "bf099cc0-025d-44e5-a97b-46ae404442ae",
+  "Description": "Forwards T3.Core.Operator.GizmoVisibility through a movable routing anchor.\n\nRetains its slot type when disconnected. Reference values are forwarded without cloning or taking ownership.",
+  "InputUis": [
+    {
+      "InputId": "6176e31b-23ac-4b90-850f-8f0edfe82ad5",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "06338380-a84a-42c4-a340-bfd72c073534",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}

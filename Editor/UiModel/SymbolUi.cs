@@ -3,13 +3,18 @@ using Newtonsoft.Json.Linq;
 using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Editor.Gui.OutputUi;
+using T3.Editor.UiModel.Helpers;
 using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.Selection;
 
 namespace T3.Editor.UiModel;
 
+/// <summary>Stores a symbol's editor presentation, selection containers, and derived browser visibility.</summary>
 public sealed partial class SymbolUi : ISelectionContainer
 {
+    // Derived from the symbol and never serialized.
+    internal bool HiddenFromBrowser { get; private set; }
+
     internal Symbol Symbol => _package.Symbols[_id];
     private SymbolPackage _package;
     private readonly Guid _id;
@@ -20,6 +25,8 @@ public sealed partial class SymbolUi : ISelectionContainer
         _package = symbol.SymbolPackage;
         if (_package == null)
             throw new ArgumentException("Symbol must have a package");
+
+        HiddenFromBrowser = SymbolAnalysis.IsReroute(symbol);
 
         InputUis = new OrderedDictionary<Guid, IInputUi>();
         OutputUis = new OrderedDictionary<Guid, IOutputUi>();
@@ -92,6 +99,7 @@ public sealed partial class SymbolUi : ISelectionContainer
     internal void UpdateConsistencyWithSymbol(Symbol? symbol = null)
     {
         symbol ??= Symbol;
+        HiddenFromBrowser = SymbolAnalysis.IsReroute(symbol);
         var package = (EditorSymbolPackage)symbol.SymbolPackage;
         // Check if child entries are missing
         foreach (var child in symbol.Children.Values)
@@ -344,6 +352,7 @@ public sealed partial class SymbolUi : ISelectionContainer
 
     internal void ReplaceWith(SymbolUi newSymbolUi)
     {
+        HiddenFromBrowser = newSymbolUi.HiddenFromBrowser;
         _childUis = newSymbolUi._childUis;
         UnresolvedChildUiJsons = newSymbolUi.UnresolvedChildUiJsons;
         InputUis = newSymbolUi.InputUis;

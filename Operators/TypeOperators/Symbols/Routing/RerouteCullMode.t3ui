@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "ca0062a7-1add-4a90-8934-26de96897d6e",
+  "Description": "Forwards SharpDX.Direct3D11.CullMode through a movable routing anchor.\n\nRetains its slot type when disconnected. Reference values are forwarded without cloning or taking ownership.",
+  "InputUis": [
+    {
+      "InputId": "23544843-643c-4d9b-bf79-60ef98c69fb1",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "6a964ae8-842d-41b0-b634-38ad05b1776d",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "d1ab44fe-eb4a-4e0c-bb52-2c2382f34f91",
+  "Description": "Forwards SharpDX.Direct3D11.RenderTargetBlendDescription through a movable routing anchor.\n\nRetains its slot type when disconnected. Reference values are forwarded without cloning or taking ownership.",
+  "InputUis": [
+    {
+      "InputId": "e5094f5d-efeb-41ed-93c5-dafabc5e37a0",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "42e1ef3e-ca7b-43fd-adc9-78eaec12b915",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}

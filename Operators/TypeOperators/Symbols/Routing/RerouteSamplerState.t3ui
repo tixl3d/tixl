@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "cbf73235-5b79-4ceb-9d40-81ae9e29ee6f",
+  "Description": "Forwards SharpDX.Direct3D11.SamplerState through a movable routing anchor.\n\nRetains its slot type when disconnected. Reference values are forwarded without cloning or taking ownership.",
+  "InputUis": [
+    {
+      "InputId": "0e35dfda-9db9-4ef0-acde-9c52d1cd7475",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "c0f8b77b-2916-4e49-a639-618a80486619",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}

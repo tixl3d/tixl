@@ -1,12 +1,16 @@
-﻿using T3.Core.Operator;
+using T3.Core.Operator;
+
+using T3.Editor.UiModel.Helpers;
 
 namespace T3.Editor.UiModel.Commands.Graph;
 
+/// <summary>Changes a child's bypass state while preserving routing-anchor callback forwarding.</summary>
 public sealed class ChangeInstanceBypassedCommand : ICommand
 {
     public string Name => "Bypass";
     public bool IsUndoable => true;
 
+    /// <summary>Captures an operator child's bypass state and the requested replacement value.</summary>
     public ChangeInstanceBypassedCommand(Symbol.Child symbolChild, bool setBypassedTo)
     {
         _inputParentSymbolId = symbolChild.Parent.Id;
@@ -36,6 +40,10 @@ public sealed class ChangeInstanceBypassedCommand : ICommand
             Log.Assert("Failed to find child");
             return;
         }
+
+        // Enforce this for every caller: bypass would replace a command reroute's prepare/restore proxy.
+        if (shouldBeBypassed && SymbolAnalysis.IsReroute(child.Symbol))
+            return;
 
         try
         {

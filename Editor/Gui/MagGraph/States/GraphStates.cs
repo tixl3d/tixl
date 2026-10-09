@@ -16,6 +16,32 @@ namespace T3.Editor.Gui.MagGraph.States
 {
     internal static class GraphStates
     {
+        // Shake-off can delete the dragged anchor; wait for release before accepting another interaction.
+        internal static State<GraphUiContext> WaitForMouseRelease
+            = new(Enter: static context =>
+                         {
+                             Default.Enter(context);
+                             context.ActiveItem = null;
+                             context.ItemForInputSelection = null;
+                         },
+                  Update: static context =>
+                          {
+                              if (!ImGui.IsMouseDown(ImGuiMouseButton.Left))
+                                  context.StateMachine.SetState(Default, context);
+                          },
+                  Exit: static _ => { });
+
+        // Commit after drawing so the release frame contributes its final wire hits.
+        internal static State<GraphUiContext> ConnectionStroke
+            = new(Enter: static context =>
+                         {
+                             context.ActiveItem = null;
+                             context.ActiveSourceItem = null;
+                             context.ActiveTargetItem = null;
+                         },
+                  Update: static _ => { },
+                  Exit: static context => context.ConnectionStroke.Cancel());
+
         internal static State<GraphUiContext> Default
             = new(
                   Enter: context =>

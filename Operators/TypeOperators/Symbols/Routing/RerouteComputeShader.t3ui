@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "cb80cc64-6ab1-4930-bfbb-f28f44385d40",
+  "Description": "Forwards T3.Core.DataTypes.ComputeShader through a movable routing anchor.\n\nRetains its slot type when disconnected. Reference values are forwarded without cloning or taking ownership.",
+  "InputUis": [
+    {
+      "InputId": "5788e777-2e12-4bc2-88ed-384a716b83ec",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "fa59c0fe-2602-4512-a39c-a3d222783931",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}

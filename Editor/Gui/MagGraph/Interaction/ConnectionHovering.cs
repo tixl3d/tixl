@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using ImGuiNET;
 using T3.Core.DataTypes;
 using T3.Core.DataTypes.Vector;
@@ -40,7 +40,8 @@ internal sealed class ConnectionHovering
         (_lastConnectionHovers, _connectionHoversForCurrentFrame) = (_connectionHoversForCurrentFrame, _lastConnectionHovers);
         _connectionHoversForCurrentFrame.Clear();
 
-        if (!context.View.IsHovered)
+        // A cable's screen-space hover tolerance must not steal the compact anchor's hit area.
+        if (!context.View.IsHovered || context.ActiveItem is { IsReroute: true })
             _lastConnectionHovers.Clear();
 
         if (_lastConnectionHovers.Count == 0)
@@ -236,6 +237,8 @@ internal sealed class ConnectionHovering
         return false;
     }
 
+    /// <summary>Registers a wire hover candidate for selection on the next frame.</summary>
+    /// <param name="normalizedPosition">Relative location of the hover point along the wire, from zero to one.</param>
     public static void RegisterHoverPoint(MagGraphConnection mcConnection, Color color, Vector2 positionOnScreen, float normalizedPosition,
                                           Vector2 sourcePosOnScreen)
     {

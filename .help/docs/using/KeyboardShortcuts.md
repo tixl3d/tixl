@@ -1,4 +1,25 @@
 
+## Graph Mouse Gestures
+
+Reroute anchors are created with the routing gesture below. They are hidden from node search and the node browser.
+
+| Action | Gesture |
+| --- | --- |
+| Route Connections through Anchors | Alt+Right Mouse Button drag across cables |
+| Cut Connections | Ctrl+Right Mouse Button drag across cables |
+
+Hold the modifier, press the right mouse button, and draw across the connections you want to change. Release to apply the preview. Each stroke is one undo step. Press Escape to cancel; release the mouse button before starting another gesture. Ctrl+Alt+Right Mouse Button makes no change.
+
+Routing creates one small anchor for each source output crossed by the stroke. Branches from the same output share an anchor; different outputs keep separate anchors, even when their types match. Uncrossed branches stay connected as before.
+
+Drag an anchor's center to move it. Dropping it onto another anchor keeps both anchors and their connections separate. Drag its left socket to connect an input, or its right socket to connect an output. Anchors retain their type while either side remains connected. Disconnecting or cutting the last remaining cable removes the anchor automatically; shake and Disconnect do the same. Undo restores the anchor and its connections together. Reconnecting a wire keeps the anchor, and a newly added blank anchor stays available for wiring.
+
+Anchors can be selected, copied, duplicated, and deleted like other operators. Deleting an anchor removes its cables. Automatic layout keeps manually placed anchors fixed and reserves their space. A selection containing an anchor does not splice into other connections, and dragging anchors near other nodes does not create magnetic connections. Manual socket wiring remains available. Bypass leaves anchors unchanged because they already forward their input.
+
+Routing supports the built-in ordinary slot types. A stroke containing an unsupported type, a composition multi-input bundle source, or an output carrying clip metadata is rejected without changing its cables. Individual connections into multi-input targets can be routed and cut. These gestures apply to editable graphs and take precedence over canvas pan/zoom while held.
+
+After shaking off an anchor, release the left mouse button before starting another graph interaction, including box selection.
+
 ## Hotkeys
 
 The following is a list of the **default keyboard** short-cuts. With v4.0.4 you can customize this list in the *Settings*.

@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "35367fa4-ef12-4e9a-b1f2-11f093108dd5",
+  "Description": "Forwards T3.Core.DataTypes.AudioGraphNode through a movable routing anchor.\n\nRetains its slot type when disconnected. Reference values are forwarded without cloning or taking ownership.",
+  "InputUis": [
+    {
+      "InputId": "083a30a4-4129-4f9a-a88c-698da67499ae",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "1e72fc91-ed9a-423d-8dbd-35cc69605158",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "f05c00a8-8d85-4cc9-9d85-09cfca9af1a4",
+  "Description": "Forwards command evaluation through a movable routing anchor.\n\nPreserves prepare, update, and restore ordering through a stable callback proxy. Retains the Command slot type; the proxy has its own object identity.",
+  "InputUis": [
+    {
+      "InputId": "3b74e35a-1b39-4a86-a00a-d266c2f3bcce",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "af6a1761-07e3-40bb-9c3b-f760793050b5",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "65f98fa4-5e8b-45ed-804f-5843cf331817",
+  "Description": "Forwards T3.Core.DataTypes.StructuredList through a movable routing anchor.\n\nRetains its slot type when disconnected. Reference values are forwarded without cloning or taking ownership.",
+  "InputUis": [
+    {
+      "InputId": "1b122f74-cecd-4aa6-9eaa-f3c0b8d49954",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "7250b11a-24c4-45c9-a6e0-803064b3bb42",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}

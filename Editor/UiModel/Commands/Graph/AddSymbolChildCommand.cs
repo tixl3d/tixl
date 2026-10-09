@@ -1,13 +1,17 @@
-﻿using T3.Core.Operator;
+using T3.Core.Operator;
+using T3.Editor.Gui.MagGraph.Model;
+using T3.Editor.UiModel.Helpers;
 
 namespace T3.Editor.UiModel.Commands.Graph;
 
+/// <summary>Adds a child with persisted initial geometry and supports replay against the live parent symbol.</summary>
 public sealed class AddSymbolChildCommand : ICommand
 {
     public string Name => "Add Symbol Child";
     public bool IsUndoable => true;
     public Guid AddedChildId => _addedChildId;
 
+    /// <summary>Prepares an undoable child insertion into a composition.</summary>
     public AddSymbolChildCommand(Symbol compositionOp, Guid symbolIdToAdd)
     {
         if (compositionOp == null)
@@ -29,6 +33,7 @@ public sealed class AddSymbolChildCommand : ICommand
         parentSymbolUi!.RemoveChild(_addedChildId);
     }
 
+    /// <summary>Creates the child with its saved position and size, using compact dimensions for a reroute.</summary>
     public void Do()
     {
         if(!SymbolUiRegistry.TryGetSymbolUi(_parentSymbolId, out var parentSymbolUi))
@@ -43,7 +48,9 @@ public sealed class AddSymbolChildCommand : ICommand
             return;
         }
             
-        parentSymbolUi!.AddChild(symbolToAdd!.Symbol, _addedChildId, PosOnCanvas, Size, ChildName);
+        // Persist compact geometry even when a caller uses the default operator dimensions.
+        var childSize = SymbolAnalysis.IsReroute(symbolToAdd!.Symbol) ? MagGraphItem.RerouteSize : Size;
+        parentSymbolUi!.AddChild(symbolToAdd.Symbol, _addedChildId, PosOnCanvas, childSize, ChildName);
         InitContentClipSourceRange(parentSymbolUi.Symbol);
     }
 
