@@ -49,7 +49,7 @@ ops = sorted(json.loads(Path(".help/docs/operators/index.json").read_text(encodi
 (tmp / "op-vocabulary.txt").write_text("\n".join(ops) + "\n", encoding="utf-8")
 
 topics = json.loads(Path(".help/references/indices/topics.json").read_text(encoding="utf-8"))["topics"]
-lines = [f"ui:{tid}  —  " + "; ".join([t["term"]] + t["synonyms"]) for tid, t in sorted(topics.items())]
+lines = [f"{tid}  —  " + "; ".join([t["term"]] + t["synonyms"]) for tid, t in sorted(topics.items())]  # tid already has the ui: prefix
 (tmp / "topic-vocabulary.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
 print(f"{len(ops)} operators, {len(lines)} UI topics")
 PY

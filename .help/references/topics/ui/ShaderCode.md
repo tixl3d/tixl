@@ -1,0 +1,3 @@
+Writing the shader source yourself inside an operator such as [CustomDrawMesh] or [CustomPointShader], instead of composing an effect from existing ones.
+
+The code is edited as a parameter and recompiled as you type, so a mistake surfaces as a compile error on the operator rather than a crash; the [ui:ConsoleLog|console] carries the message. You get the fragment's own data — its world position, normal and texture coordinates — plus whatever inputs the operator publishes, so a [ui:Field|field] can be sampled per fragment as a function rather than baked into a texture first. Keep a working copy of the shader before experimenting, since a half-finished edit stops the operator rendering until it compiles again.

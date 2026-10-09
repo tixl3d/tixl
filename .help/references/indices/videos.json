@@ -383,6 +383,16 @@
       "url": "https://www.youtube.com/watch?v=IJLvPtz0qTg"
     },
     {
+      "id": "InYRdFAZBm8",
+      "type": "meetup",
+      "date": "2026-10-05",
+      "title": "\"TiXL Meetup 2026-10-05 — The Linux/Vulkan Port, Time & Beat Sync, and a Deep Projection-Mapping Walkthrough\"",
+      "duration": "4:23:08",
+      "summary": "A long meet-up built around the Linux port: how DirectX/SharpDX and WinForms were swapped for a thin Vulkan facade and SDL, why existing HLSL shaders survived the move, and a live demo of the editor running natively on Arch. The second half is dense community Q&A — how time, bars and external MIDI/Ableton clocks actually work, why an inverse-switch \"route node\" doesn't fit the pull-based evaluation model, reading the performance numbers, render-target and resolution economics, a full photo-based projector calibration walked through with a user, and a closing discovery of screen-space derivatives for anti-aliasing field edges in a custom shader.",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=InYRdFAZBm8"
+    },
+    {
       "id": "J2Rqx3szSus",
       "type": "tutorial",
       "date": "2022-07-19",
