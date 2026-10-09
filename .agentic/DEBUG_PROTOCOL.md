@@ -46,7 +46,8 @@ buffer's alpha is render residue and would make the PNG see-through.
 
 Control surface: `openProject` (`name`), `newProject`, `select` (`childId`), `setInput`
 (`childId`, `inputName`, `value`), `addOp`, `connect`, `deleteOp`, `pin`, `pumpFrames`
-(`count`), `resetView`, `reload`, `undo`, `redo`, `setTime`, `setPlayback`, `shutdown`,
+(`count`), `layoutSelection` (runs the G layout action on the current selection; returns `changed` and
+the grown `selectedIds`), `resetView`, `reload`, `undo`, `redo`, `setTime`, `setPlayback`, `shutdown`,
 `outputSetup` (`entity`: a setup entity's display name to select, e.g. `"Surface 1"`; `mode`: the
 strip's toolbar tab — `Board`, `Straight`, `Output`; either optional).
 It does what the outliner click and the tab click do, so Board ↔ space folds can be driven without a

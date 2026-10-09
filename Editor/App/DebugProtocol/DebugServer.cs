@@ -21,6 +21,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using T3.Editor.Compilation;
 using T3.Editor.Gui.Interaction;
+using T3.Editor.Gui.MagGraph.Ui;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.Selection;
 using T3.Editor.Gui.Window;
@@ -411,6 +412,26 @@ internal static class DebugServer
                 }
 
                 context.SendOk(new JObject());
+                break;
+            }
+
+            case "layoutSelection":
+            {
+                var view = ProjectView.Focused;
+                if (view?.GraphView is not MagGraphView magGraphView)
+                {
+                    context.SendError("NO_COMPOSITION", "No graph view focused");
+                    break;
+                }
+
+                var changed = magGraphView.LayoutInputsOfSelection();
+                var selectedIds = new JArray();
+                foreach (var selectable in view.NodeSelection.Selection)
+                {
+                    selectedIds.Add(selectable.Id.ToString());
+                }
+
+                context.SendOk(new JObject { ["changed"] = changed, ["selectedIds"] = selectedIds });
                 break;
             }
 
