@@ -9,7 +9,7 @@ Download the [latest release](https://github.com/tixl3d/tixl/releases) and run t
 - Windows 10 or 11
 - DirectX 11.3-compatible graphics card (GTX 970 or later recommended)
 
-The installer bundles all required dependencies, including .NET and Windows Graphics Tools. Start the installer, dismiss the untrusted-source warning, and proceed.
+The installer bundles all required dependencies, including .NET and the Visual C++ runtime. Start the installer, dismiss the untrusted-source warning, and proceed.
 
 ## Sync tools and the projects folder
 

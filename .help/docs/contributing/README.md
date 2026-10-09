@@ -6,7 +6,7 @@ TiXL is an open, volunteer-run project. There are several ways to help, and most
 
 Every page on `tixl.app/help/` is sourced from the [`.help/`](https://github.com/tixl3d/tixl/tree/main/.help) directory of the main repo. Each rendered page has an **"Edit on GitHub"** link at the top-right that opens the source file.
 
-Before opening a PR, please read [`STYLE.md`](https://github.com/tixl3d/tixl/blob/main/.help/STYLE.md). Short version: short pages, plain language, relative links, operator names in `[brackets]`.
+Before opening a PR, please read [`STYLE.md`](https://github.com/tixl3d/tixl/blob/main/.help/docs/STYLE.md). Short version: short pages, plain language, relative links, operator names in `[brackets]`.
 
 Good first contributions:
 

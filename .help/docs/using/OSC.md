@@ -77,5 +77,5 @@ Like many other applications, Super Collider encodes data into a list of key/val
 
 
 
-That's great because we can use the "cycles" attribute to drive the TiXL time via [SetCommandTime].
+That's great because we can use the "cycles" attribute to drive the TiXL time via [SetTime].
 

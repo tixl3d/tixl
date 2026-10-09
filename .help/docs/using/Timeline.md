@@ -121,7 +121,7 @@ By default, only the keyframes of selected operators appear in the timeline. Ena
 
 ![Keep animated parameters visible](/images/Animation/image-9.png)
 
-If too many parameters stack up, press `Ctrl + Shift + K` twice to clear the list.
+If too many parameters stack up, press `Shift + K` to switch animation pinning off, which clears the list.
 
 ### Interpolation and tangents
 
@@ -217,7 +217,7 @@ Drag clips vertically to distribute them across layers. Layers **do not** affect
 
 ### Time remapping
 
-Time remapping lets a clip scale or offset the source time it exposes to its sub-graph — similar to `[SetCommandTime]`, but local to the clip.
+Time remapping lets a clip scale or offset the source time it exposes to its sub-graph — similar to `[SetTime]`, but local to the clip.
 
 ![Remapped time clip](/images/Animation/anim-6.gif)
 

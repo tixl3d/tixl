@@ -4,13 +4,13 @@
 
 Most of the initial flow didn’t change with some exceptions:
 
-* To export a project with a soundtrack, the soundtrack needs to be located within the project’s `Resources/` folder, e.g.
-  `c:\Users\<yourname>\Documents\TiXL\<YourProject>\Resources\<mysoundtrack.mp3>`
+* To export a project with a soundtrack, the soundtrack needs to be located within the project’s `Assets/` folder, e.g.
+  `c:\Users\<yourname>\Documents\TiXL\<YourProject>\Assets\<mysoundtrack.mp3>`
   (the precise path depends on your Windows version and language).
 
 With v4.0.6 (2025-09-15)…
 
-* the executable will be created in a folder called `T3Export\`. This location will change in the future.
+* the executable will be created in the `Export` folder inside your project's package folder.
 * the export only ships the operators reachable from the exported output (plus auto-playing audio ops), the assets they reference and the optional libraries they declare. If an export misses content, disable `Strip Unused Operators` in `Project Settings` → `Executable` and export again.
 
 ---
@@ -112,7 +112,7 @@ TiXL will scan your project operators for string parameters with FilePath proper
 - dynamically create paths by combining strings and connect them to a filepath parameter.
 - use the [FilesInDirectories] operator
 - Add custom fonts
-- Your resources are not located in the `./Resources/` folder or use absolute filepaths like `c:/myfile.mp3`.
+- Your resources are not located in the `./Assets/` folder or use absolute filepaths like `c:/myfile.mp3`.
 
 In these cases you have to add the files manually to the `Export/Resources/` folder. When exporting, TiXL will warn you about these issues.
 

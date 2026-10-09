@@ -10,7 +10,7 @@ in `Documents/TiXL/`...
   AbcDemo/
     bin <- Do NOT include this folder because it will be recreated on startup
     obj <- Do NOT include this folder because it will be recreated on startup
-    Resources/
+    Assets/
       shaders/
         someshader.hlsl
       images/
@@ -27,7 +27,7 @@ in `Documents/TiXL/`...
     README.md
 ```
 
-Make sure that all asset references use local resource paths (e.g. `AbcDemo/images/logo.png`) and don't rely on files outside of the Resources folder.
+Make sure that all asset references use local resource paths (e.g. `AbcDemo/images/logo.png`) and don't rely on files outside of the Assets folder.
 
 It is also a great idea to include a `README.md` file with a short description, author credits, and a license specifying what uses are allowed for the content.
 

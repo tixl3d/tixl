@@ -1,82 +1,96 @@
 
 ## Hotkeys
 
-The following is a list of the **default keyboard** short-cuts. With v4.0.4 you can customize this list in the *Settings*.
+The following is a list of the **default keyboard** short-cuts. With v4.0.4 you can customize this list in the *Settings*. Entries marked *(focus)* only work while the window is focused; *(hover)* only while the mouse is over the window.
 
- | action                         | Key                                                |
- | ------------------------------ | -------------------------------------------------- |
- | Add New Operator               | Tab (Context search type name)                     |
- | PlaybackForward                | L                                                  |
- | PlaybackForwardHalfSpeed       | Shift + L                                          |
- | PlaybackBackwards              | J                                                  |
- | PlaybackStop                   | K                                                  |
- | PlaybackPreviousFrame          | Shift + CursorLeft                                 |
- | PlaybackNextFrame              | Shift + CursorRight                                |
- | PlaybackJumpToNextKeyframe     | Period                                             |
- | PlaybackJumpToPreviousKeyframe | Comma                                              |
- | PlaybackNextFrame              | Shift + CursorRight                                |
- | PlaybackJumpBack               | B                                                  |
- | Undo                           | ctrl + Z                                           |
- | Redo                           | ctrl + shift + Z                                   |
- | Save                           | ctrl + S                                           |
- | FocusSelection                 | F (NeedsWindowHover)                               |
- | Duplicate                      | ctrl + D (NeedsWindowFocus)                        |
- | DuplicateWithConnections       | ctrl + shift + D (NeedsWindowFocus)                |
- | DeleteSelection                | Delete (NeedsWindowFocus)                          |
- | DeleteSelection                | Backspace (NeedsWindowFocus)                       |
- | CopyToClipboard                | ctrl + C (NeedsWindowFocus)                        |
- | PasteFromClipboard             | ctrl + V (NeedsWindowFocus)                        |
- | InsertKeyframe                 | C (NeedsWindowFocus)                               |
- | InsertKeyframeWithIncrement    | C, shift (NeedsWindowFocus)                        |
- | ToggleDisabled                 | Shift + D (NeedsWindowFocus)                       |
- | ToggleBypassed                 | Shift + B (NeedsWindowFocus)                       |
- | Disconnect                     | Alt + D (NeedsWindowFocus)                         |
- | PinToOutputWindow              | P (NeedsWindowFocus)                               |
- | ShowInGraph                    | Shift + P                                          |
- | DisplayImageAsBackground       | ctrl + P                                           |
- | ClearBackgroundImage           | ctrl + P (NeedsWindowFocus) or use Clear BG button |
- | LoadBookmark1                  | ctrl + D1                                          |
- | LoadBookmark2                  | ctrl + D2                                          |
- | LoadBookmark3                  | ctrl + D3                                          |
- | LoadBookmark4                  | ctrl + D4                                          |
- | LoadBookmark5                  | ctrl + D5                                          |
- | LoadBookmark6                  | ctrl + D6                                          |
- | LoadBookmark7                  | ctrl + D7                                          |
- | LoadBookmark8                  | ctrl + D8                                          |
- | LoadBookmark9                  | ctrl + D9                                          |
- | LoadBookmark0                  | ctrl + D0                                          |
- | SaveBookmark1                  | ctrl + D1, shift                                   |
- | SaveBookmark2                  | ctrl + D2, shift                                   |
- | SaveBookmark3                  | ctrl + D3, shift                                   |
- | SaveBookmark4                  | ctrl + D4, shift                                   |
- | SaveBookmark5                  | ctrl + D5, shift                                   |
- | SaveBookmark6                  | ctrl + D6, shift                                   |
- | SaveBookmark7                  | ctrl + D7, shift                                   |
- | SaveBookmark8                  | ctrl + D8, shift                                   |
- | SaveBookmark9                  | ctrl + D9, shift                                   |
- | SaveBookmark0                  | ctrl + D0, shift                                   |
- | LoadLayout0                    | F1                                                 |
- | LoadLayout1                    | F2                                                 |
- | LoadLayout2                    | F3                                                 |
- | LoadLayout3                    | F4                                                 |
- | LoadLayout4                    | F5                                                 |
- | LoadLayout5                    | F6                                                 |
- | LoadLayout6                    | F7                                                 |
- | LoadLayout7                    | F8                                                 |
- | LoadLayout8                    | F9                                                 |
- | LoadLayout9                    | F10                                                |
- | SaveLayout0                    | ctrl + F1                                          |
- | SaveLayout1                    | ctrl + F2                                          |
- | SaveLayout2                    | ctrl + F3                                          |
- | SaveLayout3                    | ctrl + F4                                          |
- | SaveLayout4                    | ctrl + F5                                          |
- | SaveLayout5                    | ctrl + F6                                          |
- | SaveLayout6                    | ctrl + F7                                          |
- | SaveLayout7                    | ctrl + F8                                          |
- | SaveLayout8                    | ctrl + F9                                          |
- | SaveLayout9                    | ctrl + F10                                         |
- | LayoutSelection                | G                                                  |
- | ToggleFullScreenGraph          | ctrl + F11                                         |
- | ToggleFocusMode                | Shift + Esc                                        |
- | AddSection                    | Shift+S, alias Shift+A (NeedsWindowFocus)          |
- | ToggleVariationsWindow         | Alt+V (NeedsWindowFocus)                           |
+### General
+
+| Action                   | Key                                       |
+| ------------------------ | ----------------------------------------- |
+| Add New Operator         | Tab (then type the operator name)         |
+| Undo                     | Ctrl + Z                                  |
+| Redo                     | Ctrl + Shift + Z                          |
+| Save                     | Ctrl + S                                  |
+| Toggle Fullscreen        | F11                                       |
+| Toggle Focus Mode        | F12                                       |
+| Toggle All UI Elements   | Shift + Esc                               |
+| Toggle Variations Window | Alt + V                                   |
+| Toggle Console Window    | Ctrl + Shift + Alt + L                    |
+| Toggle Manual Test Window| Ctrl + Shift + Alt + T                    |
+| Render Animation         | Ctrl + Shift + R                          |
+| Render Screenshot        | Ctrl + Alt + R                            |
+
+### Graph
+
+| Action                    | Key                                                  |
+| ------------------------- | ---------------------------------------------------- |
+| Focus Selection           | F (hover)                                            |
+| Search Graph              | Ctrl + F                                             |
+| Open Operator             | I                                                    |
+| Close Operator            | U                                                    |
+| Rename Child              | Enter                                                |
+| Navigate Backwards        | Alt + Left                                           |
+| Navigate Forward          | Alt + Right                                          |
+| Select to Above / Below   | Up / Down                                            |
+| Select to Left / Right    | Left / Right                                         |
+| Duplicate                 | Ctrl + D (focus)                                     |
+| Duplicate with Connections| Ctrl + Shift + D (focus)                             |
+| Delete Selection          | Delete or Backspace (focus)                          |
+| Copy to Clipboard         | Ctrl + C (focus)                                     |
+| Paste from Clipboard      | Ctrl + V (focus)                                     |
+| Paste Values              | Ctrl + Shift + V                                     |
+| Toggle Disabled           | Shift + D (focus)                                    |
+| Toggle Bypassed           | Shift + B (focus)                                    |
+| Disconnect                | Alt + D (focus)                                      |
+| Layout Selection          | G                                                    |
+| Align Selection Left      | Alt + A                                              |
+| Add Section               | Shift + S, alias Shift + A (focus)                   |
+| Add Comment               | Ctrl + Shift + C                                     |
+| Pin to Output Window      | P (focus)                                            |
+| Show in Graph             | Shift + P                                            |
+| Display Image as Background | Ctrl + P                                           |
+| Clear Background Image    | Ctrl + Shift + P (focus) or use the Clear BG button  |
+
+### Playback and Timeline
+
+| Action                          | Key                  |
+| ------------------------------- | -------------------- |
+| Toggle Playback                 | Space                |
+| Playback Forward                | L                    |
+| Playback Forward at Half Speed  | Shift + L            |
+| Playback Backwards              | J                    |
+| Playback Stop                   | K                    |
+| Previous Frame                  | Shift + Left         |
+| Next Frame                      | Shift + Right        |
+| Jump to Start Time              | Home                 |
+| Jump to Next Keyframe           | Period               |
+| Jump to Previous Keyframe       | Comma                |
+| Scrub Time                      | T                    |
+| Set Start Time                  | B                    |
+| Set End Time                    | N                    |
+| Insert Keyframe                 | C (focus)            |
+| Insert Keyframe with Increment  | Shift + C (focus)    |
+| Toggle Animation Pinning        | Shift + K            |
+| Split Selected or Hovered Clips | Ctrl + X             |
+| Select Following Clips          | Ctrl + Shift + A     |
+| Tap Beat Sync                   | Z                    |
+| Tap Beat Sync Measure           | X                    |
+
+### Output Camera
+
+| Action                | Key               |
+| --------------------- | ----------------- |
+| Move Left / Right     | A / D             |
+| Move Forward / Back   | W / S             |
+| Move Up / Down        | E / Q             |
+| Reset Camera          | F                 |
+| Focus Selection       | C                 |
+
+### Bookmarks and Layouts
+
+| Action          | Key                  |
+| --------------- | -------------------- |
+| Load Bookmark   | Ctrl + 1 … 9, 0      |
+| Save Bookmark   | Ctrl + Shift + 1 … 9, 0 |
+| Load Layout 0–9 | F1 … F10             |
+| Save Layout 0–9 | Ctrl + F1 … F10      |

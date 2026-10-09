@@ -13,7 +13,7 @@ Drag an audio file (mp3, wav, ogg) from the Asset Library or your file explorer 
 - **Style** picks the image drawn in the clip body: a frequency **Spectrum**, a peak **Waveform**, or a smoothed **Volume Level**.
 - Renaming the operator shows the new name in quotes on the clip; the file name stays visible in the tooltip.
 
-Splitting a clip (`Shift+X` at the playhead) keeps both halves playing seamlessly, and reconnects the new clip to whatever the original was wired into.
+Splitting a clip (`Ctrl+X` at the playhead) keeps both halves playing seamlessly, and reconnects the new clip to whatever the original was wired into.
 
 ## The main soundtrack
 

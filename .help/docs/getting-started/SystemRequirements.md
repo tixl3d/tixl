@@ -12,12 +12,12 @@ TiXL runs on Windows 10 and 11. For Linux and macOS use one of the Wine-based se
 ## Software
 
 - **OS:** Windows 10 (64-bit) or Windows 11.
-- **DirectX:** 11.3 runtime; Windows Graphics Tools. The installer handles both.
-- **.NET 9 runtime.** Bundled with the installer.
+- **DirectX:** 11.3 runtime (part of Windows).
+- **.NET 10 runtime.** Bundled with the installer.
 
 ## For developing C# operators
 
 - Visual Studio Community 2022, or JetBrains Rider (free for non-commercial use).
-- The .NET 9 **SDK** (not just the runtime).
+- The .NET 10 **SDK** (not just the runtime).
 
 See [Set up a development environment](../install/InstallDev.md) for the full walk-through.

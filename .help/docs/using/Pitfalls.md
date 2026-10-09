@@ -39,7 +39,7 @@ Inputs that were fed by a missing operator stay visible, so your layout does not
 
 ### Names in older projects
 
-Projects saved before TiXL 4.4 did not store the full name of each operator they use. For those, the warning may show only a short name, the name you gave the operator, or — rarely — just an id. Saving the project once with a current version, while everything is available, stores the full names for next time.
+Projects saved before TiXL 4.3 did not store the full name of each operator they use. For those, the warning may show only a short name, the name you gave the operator, or — rarely — just an id. Saving the project once with a current version, while everything is available, stores the full names for next time.
 
 ## See also
 

@@ -24,7 +24,7 @@
 
 ## Project Conventions
 
-- This is a C# / .NET 9 / DirectX 11 project using ImGui.NET for UI
+- This is a C# / .NET 10 / DirectX 11 project using ImGui.NET for UI
 - No heap allocations in per-frame code paths (no LINQ in hot loops, no closures, prefer simple for-loops)
 - Use `UiColor`/`UiColors` helpers instead of hard-coded color values
 - Store references by `Guid`, not by direct object reference
