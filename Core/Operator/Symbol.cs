@@ -317,13 +317,9 @@ public sealed partial class Symbol : IDisposable, IResource
         if (!_children.Remove(childId, out var symbolChild))
             return false;
 
-        lock (_creationLock)
-        {
-            foreach (var me in _childrenCreatedFromMe.Values)
-            {
-                me.RemoveChildInstancesOf(symbolChild);
-            }
-        }
+        // The child's own instance list, not a lookup through the parents: those resolve by id via Children,
+        // which no longer holds it, so a deleted op would never be disposed.
+        symbolChild.DisposeAllInstances();
 
         SymbolPackage.RemoveDependencyOn(symbolChild.Symbol);
 

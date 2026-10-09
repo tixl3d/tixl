@@ -345,20 +345,9 @@ public partial class Symbol
             return new Guid(newGuidBytes);
         }
 
-        internal void RemoveChildInstancesOf(Child child)
+        internal void DisposeAllInstances()
         {
-            var idToDestroy = child.Id;
-            lock (_creationLock)
-            {
-                foreach (var instance in _instancesOfSelf.Values)
-                {
-                    //var instance = instanceKvp.Value;
-                    if (instance.Children.TryGetChildInstance(idToDestroy, out var childInstance, false))
-                    {
-                        childInstance.DisposePackage(null);
-                    }
-                }
-            }
+            DestroyAndClearAllInstances(null);
         }
 
         private void DestroyAndClearAllInstances(SymbolPackage? onlyDisposeInPackage)
