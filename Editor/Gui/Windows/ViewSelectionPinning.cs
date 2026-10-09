@@ -195,9 +195,18 @@ internal sealed class ViewSelectionPinning
         if (!TryGetPinnedOrSelectedInstance(out var instance, out var projectView))
             return;
 
-        var parentSymbolUi = instance.Parent?.GetSymbolUi();
-        if (parentSymbolUi == null || !parentSymbolUi.ChildUis.TryGetValue(instance.SymbolChildId, out var childUi))
+        var parentInstance = instance.Parent;
+        var parentSymbolUi = parentInstance?.GetSymbolUi();
+        if (parentInstance == null || parentSymbolUi == null || !parentSymbolUi.ChildUis.TryGetValue(instance.SymbolChildId, out var childUi))
             return;
+
+        // The pinned instance can sit in a nested symbol. Selecting it while another composition is
+        // shown would target a node that isn't drawn, so the breadcrumb has to follow first.
+        if (projectView.CompositionInstance?.SymbolChildId != parentInstance.SymbolChildId)
+        {
+            if (!projectView.TrySetCompositionOp(parentInstance.InstancePath))
+                return;
+        }
 
         projectView.NodeSelection.SetSelection(childUi, instance);
 
