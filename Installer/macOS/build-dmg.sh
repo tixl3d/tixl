@@ -1,14 +1,23 @@
 #!/usr/bin/env bash
 # Build TiXL for Apple Silicon, wrap it in an app bundle and pack a DMG.
 #
-# Unsigned for now: the bundle is signed ad hoc, which Apple Silicon requires to run at all, but not with a
-# Developer ID and not notarized. Gatekeeper then blocks the first launch; testers allow it once under
-# System Settings > Privacy & Security > Open Anyway.
+# Without a signing identity the bundle is signed ad hoc, which Apple Silicon requires to run at all. Gatekeeper
+# then blocks the first launch; testers allow it once under System Settings > Privacy & Security > Open Anyway.
+# With a Developer ID the bundle is signed for distribution and, given notary credentials, notarized, so it
+# opens without that step.
 #
 # Usage:
 #   Installer/macOS/build-dmg.sh                # build + bundle + DMG
 #   Installer/macOS/build-dmg.sh --skip-build   # bundle + DMG from an existing Release build
 #   Installer/macOS/build-dmg.sh --bundle-only  # build + bundle, no DMG
+#
+# Environment:
+#   TIXL_SIGN_IDENTITY   Developer ID Application identity, e.g. "Developer ID Application: Name (TEAMID)".
+#                        Unset or "-" signs ad hoc.
+#   TIXL_NOTARY_PROFILE  A notarytool keychain profile (xcrun notarytool store-credentials) - or the three below,
+#   TIXL_NOTARY_KEY      as used in CI: path to an App Store Connect API key (.p8),
+#   TIXL_NOTARY_KEY_ID   its key ID,
+#   TIXL_NOTARY_ISSUER   and its issuer ID.
 set -euo pipefail
 
 skip_build=false
@@ -165,18 +174,40 @@ LAUNCHER
 chmod +x "$contents/MacOS/TiXL"
 
 # Apple Silicon refuses unsigned native code; an ad-hoc signature satisfies that without an identity. Every
-# Mach-O file gets its own, then the app seals the rest as resources.
-echo "Signing ad hoc..."
+# Mach-O file gets its own, then the app seals the rest as resources. A Developer ID signature for notarization
+# adds the hardened runtime and a secure timestamp to every file, and the entitlements to the executables.
+identity="${TIXL_SIGN_IDENTITY:--}"
+sign_options=(--force --sign "$identity")
+executable_options=()
+if [[ "$identity" != "-" ]]; then
+    echo "Signing as $identity..."
+    sign_options+=(--options runtime --timestamp)
+    executable_options=(--entitlements "$script_dir/TiXL.entitlements")
+else
+    echo "Signing ad hoc..."
+fi
+
 find "$app" -name .DS_Store -delete
 xattr -cr "$app"
+libraries=()
+executables=()
 while IFS= read -r -d '' file; do
-    if file -b "$file" | grep -q "Mach-O"; then
-        printf '%s\0' "$file"
-    fi
-done < <(find "$payload" -type f \( -name '*.dylib' -o -name '*.so' -o -perm -u+x \) -print0) \
-    | xargs -0 -P 8 -n 32 codesign --force --sign - 2>&1 | { grep -v "replacing existing signature" || true; }
-codesign --force --sign - "$contents/MacOS/TiXL"
-codesign --force --sign - "$app"
+    description="$(file -b "$file")"
+    case "$description" in
+        *"Mach-O"*executable*) executables+=("$file") ;;
+        *"Mach-O"*) libraries+=("$file") ;;
+    esac
+done < <(find "$payload" -type f \( -name '*.dylib' -o -name '*.so' -o -perm -u+x \) -print0)
+
+if (( ${#libraries[@]} > 0 )); then
+    printf '%s\0' "${libraries[@]}" \
+        | xargs -0 -P 8 -n 32 codesign "${sign_options[@]}" 2>&1 | { grep -v "replacing existing signature" || true; }
+fi
+for file in ${executables[@]+"${executables[@]}"}; do
+    codesign "${sign_options[@]}" ${executable_options[@]+"${executable_options[@]}"} "$file" 2>&1 | { grep -v "replacing existing signature" || true; }
+done
+codesign "${sign_options[@]}" ${executable_options[@]+"${executable_options[@]}"} "$contents/MacOS/TiXL"
+codesign "${sign_options[@]}" ${executable_options[@]+"${executable_options[@]}"} "$app"
 codesign --verify --strict "$app"
 
 if [[ "$bundle_only" == true ]]; then
@@ -192,5 +223,25 @@ cp -a "$app" "$dmg_root/"
 ln -s /Applications "$dmg_root/Applications"
 hdiutil create -volname "TiXL $version" -srcfolder "$dmg_root" -ov -format UDZO "$output/$name.dmg" >/dev/null
 rm -rf "$dmg_root"
+
+if [[ "$identity" != "-" ]]; then
+    codesign --force --sign "$identity" --timestamp "$output/$name.dmg"
+
+    notary_options=()
+    if [[ -n "${TIXL_NOTARY_PROFILE:-}" ]]; then
+        notary_options=(--keychain-profile "$TIXL_NOTARY_PROFILE")
+    elif [[ -n "${TIXL_NOTARY_KEY:-}" ]]; then
+        notary_options=(--key "$TIXL_NOTARY_KEY" --key-id "$TIXL_NOTARY_KEY_ID" --issuer "$TIXL_NOTARY_ISSUER")
+    fi
+
+    if (( ${#notary_options[@]} > 0 )); then
+        # Apple scans the upload and, once accepted, the ticket is stapled so the DMG opens offline too.
+        echo "Notarizing (this takes a few minutes)..."
+        xcrun notarytool submit "$output/$name.dmg" "${notary_options[@]}" --wait
+        xcrun stapler staple "$output/$name.dmg"
+    else
+        echo "Signed but not notarized: no notary credentials given."
+    fi
+fi
 
 echo "Done: $output/$name.dmg ($(du -h "$output/$name.dmg" | cut -f1))"

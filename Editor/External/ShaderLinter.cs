@@ -96,11 +96,9 @@ internal static class ShaderLinter
 
     public static void RemovePackage(IResourcePackage resourcePackage)
     {
+        // Release builds don't lint read-only packages, so those were never added.
         if (!_hlslToolsJsons.TryGetValue(resourcePackage, out var json))
-        {
-            Log.Error($"{nameof(ShaderLinter)}: failed to remove {resourcePackage.AssetsFolder}");
             return;
-        }
 
         var filePath = json.FilePath;
 

@@ -2,6 +2,9 @@ name: macOS Build
 
 # A version tag (v4.4.0.0) or a manual run builds the DMG. It is always kept as a workflow artifact, and a tag
 # also attaches it to that tag's release. Pushes to branches build nothing - a DMG is ~600 MB.
+#
+# Tag builds are signed with the Developer ID and notarized. The secrets for that live in the macos-signing
+# environment, which only v* tags may use; every other run signs ad hoc as before.
 on:
   workflow_dispatch:
   push:
@@ -16,6 +19,8 @@ jobs:
   build:
     # Apple Silicon runner: the DMG is osx-arm64 only.
     runs-on: macos-15
+    # Only tag runs enter the environment, so a manual run on a branch builds unsigned instead of being refused.
+    environment: ${{ github.ref_type == 'tag' && 'macos-signing' || '' }}
     permissions:
       contents: write
     defaults:
@@ -41,8 +46,55 @@ jobs:
       - name: Install Vulkan Loader and MoltenVK
         run: brew install molten-vk vulkan-loader
 
+      # A throwaway keychain holds the certificate for this run only; the API key goes to a file for notarytool.
+      - name: Import Signing Certificate
+        if: github.ref_type == 'tag'
+        env:
+          CERTIFICATE_P12: ${{ secrets.MACOS_CERTIFICATE_P12 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.MACOS_KEYCHAIN_PASSWORD }}
+          API_KEY_P8: ${{ secrets.APPLE_API_KEY_P8 }}
+          API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          API_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
+        run: |
+          if [[ -z "$CERTIFICATE_P12" ]]; then
+            echo "::warning::No signing secrets available; the DMG is signed ad hoc and not notarized."
+            exit 0
+          fi
+
+          keychain="$RUNNER_TEMP/signing.keychain-db"
+          echo "$CERTIFICATE_P12" | base64 --decode > "$RUNNER_TEMP/certificate.p12"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$keychain"
+          security set-keychain-settings -lut 21600 "$keychain"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$keychain"
+          security import "$RUNNER_TEMP/certificate.p12" -k "$keychain" -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          # Lets codesign use the key without the confirmation dialog a desktop session would show.
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$keychain" >/dev/null
+          security list-keychains -d user -s "$keychain" $(security list-keychains -d user | tr -d '"')
+          rm "$RUNNER_TEMP/certificate.p12"
+
+          identity="$(security find-identity -v -p codesigning "$keychain" | sed -n 's/.*"\(Developer ID Application:.*\)"/\1/p' | head -1)"
+          if [[ -z "$identity" ]]; then
+            echo "::error::The certificate holds no valid Developer ID Application identity."
+            exit 1
+          fi
+
+          echo "$API_KEY_P8" | base64 --decode > "$RUNNER_TEMP/notary-key.p8"
+          {
+            echo "TIXL_SIGN_IDENTITY=$identity"
+            echo "TIXL_NOTARY_KEY=$RUNNER_TEMP/notary-key.p8"
+            echo "TIXL_NOTARY_KEY_ID=$API_KEY_ID"
+            echo "TIXL_NOTARY_ISSUER=$API_ISSUER_ID"
+          } >> "$GITHUB_ENV"
+
       - name: Build DMG
         run: Installer/macOS/build-dmg.sh
+
+      - name: Remove Signing Keychain
+        if: always() && github.ref_type == 'tag'
+        run: |
+          security delete-keychain "$RUNNER_TEMP/signing.keychain-db" 2>/dev/null || true
+          rm -f "$RUNNER_TEMP/notary-key.p8"
 
       - name: Upload DMG
         uses: actions/upload-artifact@v4

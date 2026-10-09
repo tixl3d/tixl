@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Entitlements for TiXL's executables under the hardened runtime, which notarization requires.
+  - allow-jit / allow-unsigned-executable-memory: .NET compiles IL to machine code at run time, operators included.
+  - disable-library-validation: TiXL runs on the system's .NET install (signed by Microsoft, not by us) and loads
+    native libraries that other parties signed, such as BASS and Homebrew's FFmpeg.
+  - device.audio-input: live audio input from a microphone or line-in.
+-->
+<plist version="1.0">
+<dict>
+    <key>com.apple.security.cs.allow-jit</key>
+    <true/>
+    <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+    <true/>
+    <key>com.apple.security.cs.disable-library-validation</key>
+    <true/>
+    <key>com.apple.security.device.audio-input</key>
+    <true/>
+</dict>
+</plist>
