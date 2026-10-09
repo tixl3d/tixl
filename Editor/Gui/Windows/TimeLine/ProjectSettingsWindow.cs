@@ -1105,7 +1105,7 @@ internal sealed class ProjectSettingsWindow : Window
                     var bpmLabel = playback.Syncing == CompositionSettings.SyncModes.Tapping
                                        ? "Default BPM-Rate"
                                        : "BPM-Rate";
-                    modified |= FormInputs.AddFloat(bpmLabel,
+                    var bpmModified = FormInputs.AddFloat(bpmLabel,
                         ref playback.Bpm,
                         0,
                         1000,
@@ -1116,6 +1116,12 @@ internal sealed class ProjectSettingsWindow : Window
                         The BPM rate controls the animation speed of your project.
                         """,
                         120);
+
+                    // While tapping, the tap clock owns the rate and writes it back into the settings every frame.
+                    if (bpmModified && playback.UsesBeatTapping)
+                        BeatTiming.SetBpmRate(playback.Bpm);
+
+                    modified |= bpmModified;
                 }
 
                 if (playback.Syncing == CompositionSettings.SyncModes.Timeline)
