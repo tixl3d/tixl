@@ -128,7 +128,7 @@ internal static class VideoClipThumbnailCache
             var pngPath = GetPngPath(entry.ThumbGuid);
             if (File.Exists(pngPath))
             {
-                var loaded = ThumbnailManager.LoadTextureViaWic(pngPath).GetAwaiter().GetResult();
+                var loaded = ThumbnailManager.LoadImageTexture(pngPath).GetAwaiter().GetResult();
                 if (loaded != null)
                 {
                     ThumbnailManager.PushSlotTexture(entry.ThumbGuid, loaded);

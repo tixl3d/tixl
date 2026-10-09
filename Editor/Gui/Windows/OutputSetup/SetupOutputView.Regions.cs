@@ -111,7 +111,7 @@ internal sealed partial class SetupOutputView
         {
             var contentSrv = SrvManager.GetSrvForTexture(content);
             if (contentSrv is { IsDisposed: false })
-                dl.AddImageQuad(contentSrv.NativePointer, screen[0], screen[1], screen[2], screen[3],
+                dl.AddImageQuad((IntPtr)contentSrv.ImGuiTextureId, screen[0], screen[1], screen[2], screen[3],
                                 new Vector2(uv.X, uv.Y), new Vector2(uv.Z, uv.Y), new Vector2(uv.Z, uv.W), new Vector2(uv.X, uv.W),
                                 UiColors.ForegroundFull.Fade(preview * fade));
         }

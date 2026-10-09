@@ -737,7 +737,7 @@ internal sealed partial class SetupOutputView
         if (srv is not { IsDisposed: false })
             return false;
 
-        dl.AddImage(srv.NativePointer, frameMin, frameMax, Vector2.Zero, Vector2.One, tint);
+        dl.AddImage((IntPtr)srv.ImGuiTextureId, frameMin, frameMax, Vector2.Zero, Vector2.One, tint);
         return true;
     }
 

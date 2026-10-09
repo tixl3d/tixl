@@ -142,7 +142,7 @@ internal sealed class SnapshotControllerGrid
                                                                   ThumbnailManager.Categories.PackageMeta,
                                                                   fallbackCategory: ThumbnailManager.Categories.Temp);
                         if (thumb.IsReady && ThumbnailManager.AtlasSrv != null)
-                            drawList.AddImageRounded(ThumbnailManager.AtlasSrv.NativePointer, min, max,
+                            drawList.AddImageRounded((IntPtr)ThumbnailManager.AtlasSrv.ImGuiTextureId, min, max,
                                                      thumb.UvMin, thumb.UvMax, Color.White, 4 * scale);
 
                         drawList.AddRect(min, max, stateColor, 4 * scale, ImDrawFlags.None, 2 * scale);

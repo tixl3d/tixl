@@ -81,7 +81,7 @@ internal static class ThumbnailManager
         if (!thumbnail.IsReady || AtlasSrv == null)
             return false;
 
-        ImGui.Image(AtlasSrv.NativePointer, new Vector2(height * 4 / 3, height), thumbnail.UvMin, thumbnail.UvMax);
+        ImGui.Image((IntPtr)AtlasSrv.ImGuiTextureId, new Vector2(height * 4 / 3, height), thumbnail.UvMin, thumbnail.UvMax);
         return true;
     }
     #endregion
@@ -214,7 +214,7 @@ internal static class ThumbnailManager
             try
             {
                 var targetSlot = AssignAtlasSlot(guid);
-                var tex = await LoadTextureViaWic(path);
+                var tex = await LoadImageTexture(path);
 
                 if (tex == null)
                 {
@@ -244,7 +244,7 @@ internal static class ThumbnailManager
     {
         try
         {
-            var sourceTexture = await LoadTextureViaWic(sourcePath);
+            var sourceTexture = await LoadImageTexture(sourcePath);
             if (sourceTexture == null) return;
 
             var t3Texture = new T3.Core.DataTypes.Texture2D(sourceTexture);
@@ -258,8 +258,15 @@ internal static class ThumbnailManager
         }
     }
 
-    internal static async Task<T3.Graphics.Compat.Texture2D?> LoadTextureViaWic(string path)
+    /// <summary>
+    /// Decodes an image file into a texture on a worker thread. Windows uses WIC, which also reads formats like
+    /// TIFF; elsewhere stb decodes png, jpg, bmp, tga, psd and gif.
+    /// </summary>
+    internal static async Task<T3.Graphics.Compat.Texture2D?> LoadImageTexture(string path)
     {
+        if (!OperatingSystem.IsWindows())
+            return await Task.Run(() => LoadTextureViaStb(path));
+
         return await Task.Run(async () =>
         {
             int retries = 3;
@@ -299,6 +306,54 @@ internal static class ThumbnailManager
             }
             return null;
         });
+    }
+
+    private static T3.Graphics.Compat.Texture2D? LoadTextureViaStb(string path)
+    {
+        // An image that is still being written (a render export, a thumbnail just saved) can't be opened yet.
+        for (var attempt = 0; attempt < 3; attempt++)
+        {
+            try
+            {
+                using var stream = File.OpenRead(path);
+                var image = StbImageSharp.ImageResult.FromStream(stream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+                if (image.Width <= 0 || image.Height <= 0)
+                    return null;
+
+                var handle = System.Runtime.InteropServices.GCHandle.Alloc(image.Data, System.Runtime.InteropServices.GCHandleType.Pinned);
+                try
+                {
+                    return new T3.Graphics.Compat.Texture2D(ResourceManager.Device, new Texture2DDescription()
+                    {
+                        Width = image.Width,
+                        Height = image.Height,
+                        ArraySize = 1,
+                        BindFlags = BindFlags.ShaderResource,
+                        Usage = ResourceUsage.Immutable,
+                        Format = T3.Graphics.Format.R8G8B8A8_UNorm,
+                        MipLevels = 1,
+                        SampleDescription = new T3.Graphics.SampleDescription(1, 0),
+                    }, [new T3.Graphics.Compat.DataRectangle(handle.AddrOfPinnedObject(), image.Width * 4)]);
+                }
+                finally
+                {
+                    handle.Free();
+                }
+            }
+            catch (IOException)
+            {
+                System.Threading.Thread.Sleep(50);
+            }
+            catch (Exception e)
+            {
+                if (EnableLogging)
+                    Log.Debug($"Can't decode thumbnail source {path}: {e.Message}");
+
+                return null;
+            }
+        }
+
+        return null;
     }
     #endregion
 

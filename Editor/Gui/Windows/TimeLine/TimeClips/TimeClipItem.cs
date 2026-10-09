@@ -632,7 +632,7 @@ internal static class TimeClipItem
 
         if (VideoClipThumbnailCache.TryGetThumbnail(assetPath, clipInstance, endSecs, allowRequest, out var endRect))
         {
-            attr.DrawList.AddImage(atlasSrv.NativePointer, endMin, endMin + thumbSize,
+            attr.DrawList.AddImage((IntPtr)atlasSrv.ImGuiTextureId, endMin, endMin + thumbSize,
                                    endRect.UvMin, endRect.UvMax, Color.White.Fade(fade * endFade));
             DrawThumbnailBorder(attr.DrawList, endMin, endMin + thumbSize, bodyColor);
             drewEnd = true;
@@ -640,7 +640,7 @@ internal static class TimeClipItem
 
         if (VideoClipThumbnailCache.TryGetThumbnail(assetPath, clipInstance, startSecs, allowRequest, out var startRect))
         {
-            attr.DrawList.AddImage(atlasSrv.NativePointer, startMin, startMin + thumbSize,
+            attr.DrawList.AddImage((IntPtr)atlasSrv.ImGuiTextureId, startMin, startMin + thumbSize,
                                    startRect.UvMin, startRect.UvMax, Color.White.Fade(fade));
             DrawThumbnailBorder(attr.DrawList, startMin, startMin + thumbSize, bodyColor);
             drewStart = true;

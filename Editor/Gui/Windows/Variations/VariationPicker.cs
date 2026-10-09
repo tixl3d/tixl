@@ -477,7 +477,7 @@ internal sealed class VariationPicker
                                                       fallbackCategory: ThumbnailManager.Categories.Temp);
         drawList.AddRectFilled(imageMin, imageMax, UiColors.BackgroundFull, rounding);
         if (thumbnail.IsReady && ThumbnailManager.AtlasSrv != null)
-            drawList.AddImageRounded(ThumbnailManager.AtlasSrv.NativePointer, imageMin, imageMax,
+            drawList.AddImageRounded((IntPtr)ThumbnailManager.AtlasSrv.ImGuiTextureId, imageMin, imageMax,
                                      thumbnail.UvMin, thumbnail.UvMax, Color.White, rounding);
 
         drawList.AddRect(borderMin, borderMax, UiColors.ForegroundFull.Fade(0.2f), rounding);

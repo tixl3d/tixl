@@ -164,7 +164,7 @@ internal static class ProjectsPanel
             var height = ProjectItemSize.Y - padding * 2;
             var size = new Vector2(height * 4 / 3f, height);
             var pos = new Vector2(max.X - size.X - padding, min.Y + padding);
-            dl.AddImage(ThumbnailManager.AtlasSrv.NativePointer,
+            dl.AddImage((IntPtr)ThumbnailManager.AtlasSrv.ImGuiTextureId,
                         pos,
                         pos + size,
                         thumbnail.UvMin, thumbnail.UvMax);
@@ -292,7 +292,7 @@ internal static class ProjectsPanel
             var height = ProjectItemSize.Y - padding * 2;
             var size = new Vector2(height * 4 / 3f, height);
             var pos = new Vector2(max.X - size.X - padding, min.Y + padding);
-            dl.AddImage(ThumbnailManager.AtlasSrv.NativePointer,
+            dl.AddImage((IntPtr)ThumbnailManager.AtlasSrv.ImGuiTextureId,
                         pos,
                         pos + size,
                         thumbnail.UvMin, thumbnail.UvMax);

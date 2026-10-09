@@ -164,7 +164,7 @@ internal sealed class UtilitiesWindow : Window
 
                     if (ThumbnailManager.AtlasSrv != null)
                     {
-                        ImGui.Image(ThumbnailManager.AtlasSrv.NativePointer, new Vector2(1024));
+                        ImGui.Image((IntPtr)ThumbnailManager.AtlasSrv.ImGuiTextureId, new Vector2(1024));
                     }
 
                     break;

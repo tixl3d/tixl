@@ -329,7 +329,7 @@ internal static class AssetInputWithTypeAheadSearch
                             var dl = ImGui.GetForegroundDrawList();
                             var min = ImGui.GetMousePos() + new Vector2(16, 16);
                             var max = min + new Vector2(177, 133);
-                            dl.AddImage(ThumbnailManager.AtlasSrv.NativePointer, min, max, slot.UvMin, slot.UvMax);
+                            dl.AddImage((IntPtr)ThumbnailManager.AtlasSrv.ImGuiTextureId, min, max, slot.UvMin, slot.UvMax);
                         }
                     } 
                 }

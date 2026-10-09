@@ -83,7 +83,7 @@ internal static class VideoThumbnails
             if (srv == null)
                 return Entry.Missing;
 
-            return new Entry(srv.NativePointer, height == 0 ? DefaultAspect : (float)width / height, texture);
+            return new Entry((IntPtr)srv.ImGuiTextureId, height == 0 ? DefaultAspect : (float)width / height, texture);
         }
         catch (Exception e)
         {

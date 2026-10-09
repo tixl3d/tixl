@@ -61,7 +61,7 @@ internal static class VariationThumbnail
 
         if (thumbnailAtlasSrv != null && thumbnail.IsReady)
         {
-            drawList.AddImage(thumbnailAtlasSrv.NativePointer,
+            drawList.AddImage((IntPtr)thumbnailAtlasSrv.ImGuiTextureId,
                               pMin,
                               pMax,
                               thumbnail.UvMin,

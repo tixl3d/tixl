@@ -198,12 +198,12 @@ internal sealed partial class SetupOutputView
                 var sMin = _projection.CanvasToScreen(bboxMin);
                 var sMax = _projection.CanvasToScreen(bboxMax);
 
-                dl.AddImage(srv.NativePointer, sMin, sMax, Vector2.Zero, Vector2.One, UiColors.ForegroundFull.Fade(1f - 0.8f * t));
+                dl.AddImage((IntPtr)srv.ImGuiTextureId, sMin, sMax, Vector2.Zero, Vector2.One, UiColors.ForegroundFull.Fade(1f - 0.8f * t));
 
                 var rMin = _projection.CanvasToScreen(regionMin);
                 var rMax = _projection.CanvasToScreen(regionMax);
                 dl.PushClipRect(rMin, rMax, true);
-                dl.AddImage(srv.NativePointer, sMin, sMax);
+                dl.AddImage((IntPtr)srv.ImGuiTextureId, sMin, sMax);
                 dl.PopClipRect();
             }
 
@@ -236,7 +236,7 @@ internal sealed partial class SetupOutputView
         dl.AddRectFilled(min, max, UiColors.BackgroundFull.Fade(0.4f));
         var photoSrv = SrvManager.GetSrvForTexture(texture);
         if (photoSrv is { IsDisposed: false })
-            dl.AddImage(photoSrv.NativePointer, min, max);
+            dl.AddImage((IntPtr)photoSrv.ImGuiTextureId, min, max);
 
         SetupStrokes.SnapRect(ref min, ref max);
         SetupStrokes.DrawInlineRect(dl, min, max, UiColors.ForegroundFull.Fade(0.25f), isSelected: false);
