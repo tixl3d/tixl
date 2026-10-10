@@ -1,22 +1,29 @@
 {
   "FormatVersion": 3,
   "Id": "6dc6bfa3-ba30-4987-96c3-78b0da3ada62"/*RadialRepeat*/,
-  "Description": "Simple effect similar to [MirrorRepeat] and [KochSnowflake]. The input image will be mirrored with radial symmetry on the central axis by the specified number of slices.",
+  "Description": "Simple effect similar to [MirrorRepeat] and [KochKaleidoskope]. The input image will be mirrored with radial symmetry on the central axis by the specified number of slices.",
   "InputUis": [
     {
       "InputId": "0d05623b-d71a-47fa-ad7c-7be339cc52bf"/*Resolution*/,
       "Position": {
-        "X": -345.57733,
-        "Y": 485.7539
+        "X": 73.386856,
+        "Y": 368.96735
       },
       "GroupTitle": "Advanced",
       "Description": "Output resolution. Set to 0 for dynamic scaling."
     },
     {
+      "InputId": "241f95fb-12e0-45cf-9901-d7d857feacaf"/*WrapMode*/,
+      "Position": {
+        "X": -206.61314,
+        "Y": 403.96735
+      }
+    },
+    {
       "InputId": "29014e97-bd03-4371-8ce9-334a6f474ab4"/*Slices*/,
       "Position": {
-        "X": -345.57733,
-        "Y": 203.95569
+        "X": 73.386856,
+        "Y": 158.96735
       },
       "Description": "The number of radial mirror slices",
       "Scale": 0.01
@@ -24,33 +31,35 @@
     {
       "InputId": "2e1a24f6-63b4-42ac-8a33-cb6e79ff2a7e"/*Zoom*/,
       "Position": {
-        "X": -345.57733,
-        "Y": 328.16364
+        "X": 73.386856,
+        "Y": 228.96735
       },
       "Scale": 0.01
     },
     {
       "InputId": "43b610e7-7623-471b-b105-8008cba34a17"/*Image*/,
       "Position": {
-        "X": -345.57733,
-        "Y": 58.11561
+        "X": 73.386856,
+        "Y": 53.967354
       }
     },
     {
       "InputId": "4cd2aef5-52dc-4025-bd16-ab5987caeaac"/*Offset*/,
       "Position": {
-        "X": -345.57733,
-        "Y": 126.16928
+        "X": -66.613144,
+        "Y": 88.96735
       },
       "GroupTitle": "Radial Symmetry Settings",
+      "Min": -1.0,
+      "Max": 1.0,
       "Scale": 0.01,
       "UseVec2Control": "Position"
     },
     {
       "InputId": "a0a55a6d-5b1f-4a38-94cf-478413eef3ed"/*RotateSlice*/,
       "Position": {
-        "X": -345.57733,
-        "Y": 266.69745
+        "X": 73.386856,
+        "Y": 193.96735
       },
       "Description": "Rotate the image within each slice",
       "Min": -180.0,
@@ -59,10 +68,20 @@
       "Format": "{0:0.0}°"
     },
     {
+      "InputId": "c8409905-5074-40e6-9536-04b37c124d62"/*CenterPosition*/,
+      "Position": {
+        "X": -66.613144,
+        "Y": 298.96735
+      },
+      "Min": -1.0,
+      "Max": 1.0,
+      "UseVec2Control": "Position"
+    },
+    {
       "InputId": "e3bf3deb-8230-486e-9f19-30cb3753be5a"/*Rotate*/,
       "Position": {
-        "X": -345.57733,
-        "Y": 415.85648
+        "X": 73.386856,
+        "Y": 263.96735
       },
       "GroupTitle": "Output",
       "Description": "Rotate the final image",
@@ -74,10 +93,24 @@
   ],
   "SymbolChildUis": [
     {
+      "ChildId": "75fe3e72-b48c-43d1-92e3-f561f265e267"/*Vector2Components*/,
+      "Position": {
+        "X": 73.386856,
+        "Y": 298.96735
+      }
+    },
+    {
+      "ChildId": "76edc622-4167-4597-afd0-13b9222d9252"/*AddInt*/,
+      "Position": {
+        "X": -66.613144,
+        "Y": 403.96735
+      }
+    },
+    {
       "ChildId": "85cf6521-ca2d-430e-aebe-717a296bb241"/*Vector2Components*/,
       "Position": {
-        "X": -196.20035,
-        "Y": 126.16928
+        "X": 73.386856,
+        "Y": 88.96735
       }
     },
     {
@@ -91,14 +124,21 @@
         "X": 213.38686,
         "Y": 53.967354
       }
+    },
+    {
+      "ChildId": "dff286b4-4685-47c8-a133-0bc012cc1130"/*IntToWrapmode*/,
+      "Position": {
+        "X": 73.386856,
+        "Y": 403.96735
+      }
     }
   ],
   "OutputUis": [
     {
       "OutputId": "2a036c9c-9d82-4582-af70-40cd3eb89fbe"/*TextureOutput*/,
       "Position": {
-        "X": 518.2661,
-        "Y": 119.74711
+        "X": 353.38684,
+        "Y": 53.967354
       }
     }
   ]

@@ -20,9 +20,24 @@ internal sealed class RadialRepeat :Instance<RadialRepeat>{
         [Input(Guid = "2e1a24f6-63b4-42ac-8a33-cb6e79ff2a7e")]
         public readonly InputSlot<float> Zoom = new InputSlot<float>();
 
+        [Input(Guid = "241f95fb-12e0-45cf-9901-d7d857feacaf", MappedType = typeof(WrapModes))]
+        public readonly InputSlot<int> WrapMode = new InputSlot<int>();
+
         [Input(Guid = "e3bf3deb-8230-486e-9f19-30cb3753be5a")]
         public readonly InputSlot<float> Rotate = new InputSlot<float>();
 
+        [Input(Guid = "c8409905-5074-40e6-9536-04b37c124d62")]
+        public readonly InputSlot<System.Numerics.Vector2> CenterPosition = new InputSlot<System.Numerics.Vector2>();
+
         [Input(Guid = "0d05623b-d71a-47fa-ad7c-7be339cc52bf")]
         public readonly InputSlot<T3.Core.DataTypes.Vector.Int2> Resolution = new InputSlot<T3.Core.DataTypes.Vector.Int2>();
+
+    private enum WrapModes
+    {
+        Wrap,
+        Mirror,
+        Clamp,
+        Border,
+        MirrorOnce,
+    }
 }

@@ -6,6 +6,7 @@ cbuffer ParamConstants : register(b0)
 
     float Zoom;
     float RotateImage;
+    float2 CenterPosition;
 }
 
 cbuffer ResolutionConstants : register(b1)
@@ -63,13 +64,13 @@ float4 psMain(vsOutput psInput) : SV_TARGET
     float2 p = psInput.texCoord;
     p -= 0.5;
     p.x *= aspectRatio;
-
-    p = RadialRepeat(p);
+    float2 centerPos = float2(CenterPosition.x, -CenterPosition.y);
+    p = RadialRepeat(p-centerPos);
     p += Offset;
     p.x /= aspectRatio;
 
     p += 0.5;
-    float4 c = ImageA.Sample(texSampler, p);
+    float4 c = ImageA.SampleLevel(texSampler, p, 0);
 
     return c;
 }
