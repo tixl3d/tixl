@@ -1,4 +1,5 @@
-﻿#nullable enable
+#nullable enable
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Text.Json;
@@ -20,6 +21,14 @@ namespace T3.Editor;
 
 internal static class CrashReporting
 {
+    /// <summary>
+    /// Shared with <see cref="PreviewCrashDialog"/> so the previewed dialog matches the real one.
+    /// </summary>
+    internal const string CrashDialogTitle = @"☠🙈 Damn!";
+
+    internal const string SendReportButton = "Send crash report (it really helps!)";
+    internal const string DeclineReportButton = "No thanks";
+
     public static void InitializeCrashReporting()
     {
         SentrySdk.Init(o =>
@@ -86,71 +95,89 @@ internal static class CrashReporting
 
         WriteCrashReportFile(sentryEvent);
 
-        // We only show crash report dialog in release mode 
-        
-        #if RELEASE
-        var inReleaseMode = true;
-        #else
-        var inReleaseMode = false;
-        #endif
-        
-        if (inReleaseMode)
-        {
-            var lastBackupTime = AutoBackup.GetTimeOfLastBackup().GetReadableRelativeTime();
-
-            var message = $"""
-                           TiXL crashed. We're really sorry.
-
-                           The last backup was saved {lastBackupTime}.
-                           Backups live inside each user project at <project>/{AutoBackup.BackupSubFolder}/.
-
-                           Please refer to Help > Using Backups on what to do next.
-                           """;
-
-            if (json != null)
-            {
-                message += """
-
-                           When this window closes, the current operator will be copied to your clipboard. 
-                           """;
-            }
-
-            message += "\n\n" + (sentryEvent.Exception?.ToString() ?? Environment.StackTrace);
-
-            const string confirmation = "Send crash report (it really helps!)";
-            var result = BlockingWindow.Instance.ShowMessageBox(message,
-                                                                @"☠🙈 Damn!",
-                                                                confirmation,
-                                                                "No thanks");
-
-            if (json != null)
-            {
-                try
-                {
-                    EditorUi.Instance.SetClipboardText(json);
-                }
-                catch (Exception e)
-                {
-                    // A clipboard failure must not prevent sending the actual crash report
-                    Log.Warning($"Failed to copy crash report to clipboard: {e.Message}");
-                }
-            }
-
-            var sendingEnabled = result == confirmation;
-
-            if (!string.IsNullOrWhiteSpace(LogPath))
-            {
-                CoreUi.Instance.OpenWithDefaultApplication(LogPath);
-            }
-
-            return sendingEnabled ? sentryEvent : null;
-        }
-        else
+        // The dialog is shown in every build configuration, not just Release: testers frequently run
+        // Debug or alpha builds, and an editor that vanishes without a word is the worst outcome.
+        // Only an attached debugger takes precedence, so the IDE can break on the exception instead
+        // of a modal dialog swallowing it.
+        if (Debugger.IsAttached)
         {
             WriteReportToLog(sentryEvent, false);
             CoreUi.Instance.SetUnhandledExceptionMode(true);
             return null;
         }
+
+        var message = BuildCrashMessage(AutoBackup.GetTimeOfLastBackup().GetReadableRelativeTime(),
+                                        json != null,
+                                        sentryEvent.Exception);
+
+        var result = BlockingWindow.Instance.ShowMessageBox(message,
+                                                            CrashDialogTitle,
+                                                            SendReportButton,
+                                                            DeclineReportButton);
+
+        if (json != null)
+        {
+            try
+            {
+                EditorUi.Instance.SetClipboardText(json);
+            }
+            catch (Exception e)
+            {
+                // A clipboard failure must not prevent sending the actual crash report
+                Log.Warning($"Failed to copy crash report to clipboard: {e.Message}");
+            }
+        }
+
+        var sendingEnabled = result == SendReportButton;
+
+        if (!string.IsNullOrWhiteSpace(LogPath))
+        {
+            CoreUi.Instance.OpenWithDefaultApplication(LogPath);
+        }
+
+        return sendingEnabled ? sentryEvent : null;
+    }
+
+    /// <summary>
+    /// Builds the crash dialog's message. Extracted from <see cref="CrashHandler"/> so the exact same
+    /// text can be shown on demand by <see cref="PreviewCrashDialog"/> without provoking a crash.
+    /// </summary>
+    internal static string BuildCrashMessage(string lastBackupTime, bool includeClipboardHint, Exception? exception)
+    {
+        var message = $"""
+            TiXL {Program.FormattedEditorVersion} crashed. We're really sorry.
+
+            The last backup was saved {lastBackupTime}.
+            Backups live inside each user project at <project>/{AutoBackup.BackupSubFolder}/.
+
+            Please refer to Help > Using Backups on what to do next.
+            """;
+
+        if (includeClipboardHint)
+        {
+            message += """
+
+                When this window closes, the current operator will be copied to your clipboard. 
+                """;
+        }
+
+        message += "\n\n" + (exception?.ToString() ?? Environment.StackTrace);
+        return message;
+    }
+
+    /// <summary>
+    /// Shows the crash dialog without an actual crash so its wording and layout can be checked from
+    /// Development Tools > Debug in the menu bar. Does not touch Sentry and writes no crash report.
+    /// </summary>
+    internal static void PreviewCrashDialog()
+    {
+        var lastBackupTime = AutoBackup.GetTimeOfLastBackup().GetReadableRelativeTime();
+        var message = BuildCrashMessage(lastBackupTime, true, new Exception("Simulated crash for previewing the dialog."));
+
+        BlockingWindow.Instance.ShowMessageBox(message,
+                                               CrashDialogTitle,
+                                               SendReportButton,
+                                               DeclineReportButton);
     }
 
     private static void WriteReportToLog(SentryEvent sentryEvent, bool sendingEnabled)
