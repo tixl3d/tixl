@@ -10,7 +10,7 @@
     <AssemblyName>$(RootNamespace)</AssemblyName>
     <Configurations>Debug;Release</Configurations>
     <Platforms>AnyCPU</Platforms>
-    <VersionPrefix>1.672.1000</VersionPrefix>
+    <VersionPrefix>1.675.1000</VersionPrefix>
     <HomeGuid>00000000-0000-0000-0000-000000000000</HomeGuid>
     <EditorVersion>4.3.0</EditorVersion>
     <IsEditorOnly>false</IsEditorOnly>

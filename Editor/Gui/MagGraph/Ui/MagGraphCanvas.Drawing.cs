@@ -135,6 +135,12 @@ internal sealed partial class MagGraphView
 
             Fonts.FontSmall.Scale = 1; // WTF. Some of the drawNode seems to spill out fontSize
 
+            // Rerouted connections are drawn after the nodes so their detours stay visible.
+            foreach (var connection in _context.Layout.MagConnections)
+            {
+                DrawReroutedConnection(connection, drawList, _context);
+            }
+
             // Update active or hovered item
             // Doing this after rendering will add slight frame delay but will
             // keep drag operations more consistent.
@@ -288,7 +294,6 @@ internal sealed partial class MagGraphView
             OutputSnapper.Update(_context);
             InputSnapper.Update(_context);
 
-            _context.ConnectionHovering.PrepareNewFrame(_context);
             _context.Placeholder.Update(_context);
 
             // Draw animated Snap indicator
@@ -303,10 +308,18 @@ internal sealed partial class MagGraphView
                 }
             }
 
-            if (FrameStats.Current.OpenedPopUpName == string.Empty)
+            // A right-click on a bend point removes it, so the context menu must not also open there.
+            if (FrameStats.Current.OpenedPopUpName == string.Empty
+                && !_context.ConnectionHovering.IsContextMenuSuppressedForBendPoint)
+            {
                 CustomComponents.DrawContextMenuForScrollCanvas(() => GraphContextMenu.DrawContextMenuContent(_context, _projectView), ref _contextMenuIsOpen);
+            }
 
             SmoothItemPositions();
+
+            // PrepareNewFrame consumes the hover points this frame's draw registered, so it has to run
+            // before the state machine reacts to them.
+            _context.ConnectionHovering.PrepareNewFrame(_context);
 
             _context.StateMachine.UpdateAfterDraw(_context);
         }
