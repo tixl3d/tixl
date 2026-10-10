@@ -1,7 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <Import Project="$(SolutionDir)/Tixl.props" />
     <PropertyGroup>
-        <TargetFramework>$(TixlNetFrameworkVersion)</TargetFramework>
+        <!-- WinForms requires the Windows target. EnableWindowsTargeting lets the solution restore and build on
+             other platforms; the assembly is only usable on Windows. -->
+        <TargetFramework>net10.0-windows</TargetFramework>
+        <EnableWindowsTargeting>true</EnableWindowsTargeting>
 
         <Nullable>enable</Nullable>
         <UseWindowsForms>true</UseWindowsForms>
