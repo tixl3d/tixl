@@ -136,6 +136,22 @@ stacked nodes instead.
 - None of the bend points replaces another; adding one between two existing points
   inserts it in the correct order rather than appending it at the end.
 
+## Step: Duplicating a rerouted operator moves its bend points
+
+**Action:**
+Reroute a cable between two operators, then select both and duplicate them with
+`Ctrl+D`, dropping the copy somewhere else on the canvas. Also try copying the
+selection with `Ctrl+C` and pasting it.
+
+**Expected:**
+- The duplicate's cable is rerouted the same way as the original, with the same
+  number of bend points in the same shape.
+- Every bend point of the duplicate sits at the duplicate's position, offset by the
+  same amount the operators moved — none of them is left behind on the original.
+- The original keeps its own bend points unchanged.
+- Duplicating *only* the source or *only* the target operator also moves the bend
+  point instead of leaving it where the original was.
+
 ## Step: Snapped connections are left alone
 
 **Action:**

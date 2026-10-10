@@ -48,6 +48,12 @@ fence, so the gesture only ever affects the cable. A right-click that removes a
 handle also does **not** open the canvas context menu — the menu stays quiet for a
 moment afterwards, then behaves as usual.
 
+## Bend points travel with a copy
+
+Duplicating an operator — or pasting a copied selection — brings its rerouted cables
+along, bend points included. A duplicate's route is moved to wherever the duplicate
+landed, so it arrives at its new place instead of staying on top of the original.
+
 ## Cables you cannot reroute
 
 Two operators snapped directly together share a collapsed cable with no visible

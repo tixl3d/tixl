@@ -70,6 +70,24 @@ public partial class SymbolUi
             ConnectionWaypoints.Remove(target);
         }
 
+        /// <summary>
+        /// Moves every bend point of this child by <paramref name="offset"/>. Bend points are in canvas
+        /// space, so a copy of a child that is placed somewhere else needs its routes moved with it.
+        /// </summary>
+        internal void OffsetConnectionWaypoints(Vector2 offset)
+        {
+            if (ConnectionWaypoints.Count == 0)
+                return;
+
+            foreach (var (target, waypoints) in ConnectionWaypoints)
+            {
+                for (var index = 0; index < waypoints.Count; index++)
+                {
+                    waypoints[index] += offset;
+                }
+            }
+        }
+
         internal static Vector2 DefaultOpSize { get; } = new(110, 25);
 
         internal Dictionary<Guid, ConnectionStyles> ConnectionStyleOverrides { get; } = new();
