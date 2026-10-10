@@ -374,6 +374,40 @@ public sealed class D3D11Backend : IGraphicsBackend, IDisposable
         return true;
     }
 
+    public GpuQuery? CreateQuery(GpuQueryKind kind, string? label = null)
+    {
+        var type = kind == GpuQueryKind.TimestampDisjoint ? QueryType.TimestampDisjoint : QueryType.Timestamp;
+        var query = new Query(Device, new QueryDescription { Type = type });
+
+        if (label != null)
+            query.DebugName = label;
+
+        return new D3D11Query(query, kind, label);
+    }
+
+    public bool TryGetQueryResult(GpuQuery query, out GpuQueryResult result)
+    {
+        result = default;
+        if (query is not D3D11Query { IsEnded: true } d3dQuery)
+            return false;
+
+        var context = _commands.Context;
+        if (query.Kind == GpuQueryKind.TimestampDisjoint)
+        {
+            if (!context.GetData(d3dQuery.Query, AsynchronousFlags.DoNotFlush, out QueryDataTimestampDisjoint disjoint))
+                return false;
+
+            result = new GpuQueryResult(0, (ulong)disjoint.Frequency, disjoint.Disjoint);
+            return true;
+        }
+
+        if (!context.GetData(d3dQuery.Query, AsynchronousFlags.DoNotFlush, out long ticks))
+            return false;
+
+        result = new GpuQueryResult((ulong)ticks, 0, false);
+        return true;
+    }
+
     /// <summary>
     /// D3D11 has no frame boundary: there is nothing to reset and nothing to retire, because resources are
     /// released as soon as they are disposed and the driver tracks the rest.

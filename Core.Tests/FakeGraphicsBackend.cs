@@ -66,6 +66,14 @@ internal sealed class FakeGraphicsBackend : IGraphicsBackend
     public bool Supports(Topology topology) => true;
     public bool Supports(Format format, TextureUsage usage) => true;
 
+    public GpuQuery? CreateQuery(GpuQueryKind kind, string? label = null) => null;
+
+    public bool TryGetQueryResult(GpuQuery query, out GpuQueryResult result)
+    {
+        result = default;
+        return false;
+    }
+
     public ICommandList BeginFrame()
     {
         Commands.Reset();
@@ -184,6 +192,8 @@ internal sealed class FakeCommandList : ICommandList
     public void GenerateMips(GpuTextureView view) { }
     public void PushDebugGroup(string name) { }
     public void PopDebugGroup() { }
+    public void BeginQuery(GpuQuery query) { }
+    public void EndQuery(GpuQuery query) { }
 
     public readonly Dictionary<ShaderStage, Binding[]> BindingsPerStage = [];
     public readonly List<int> ColorTargetCounts = [];

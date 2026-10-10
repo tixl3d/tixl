@@ -376,6 +376,16 @@ internal sealed class D3D11Sampler(SamplerState state, SamplerDescription descri
     protected override void ReleaseWhenRetired() => State.Dispose();
 }
 
+internal sealed class D3D11Query(Query query, GpuQueryKind kind, string? label) : GpuQuery(kind, label)
+{
+    internal readonly Query Query = query;
+
+    /// <summary>D3D11 treats reading a query that was never issued as an error, not as "not ready".</summary>
+    internal bool IsEnded;
+
+    protected override void ReleaseWhenRetired() => Query.Dispose();
+}
+
 internal sealed class D3D11Shader(DeviceChild shader, ShaderStage stage, string? label) : GpuShader(stage, label)
 {
     internal readonly DeviceChild Shader = shader;

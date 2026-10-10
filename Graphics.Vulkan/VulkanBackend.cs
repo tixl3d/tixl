@@ -624,6 +624,52 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         return Track(new VulkanSampler(this, sampler, description, label));
     }
 
+    public GpuQuery? CreateQuery(GpuQueryKind kind, string? label = null)
+    {
+        if (!_limits.timestampComputeAndGraphics || _limits.timestampPeriod <= 0)
+            return null;
+
+        // Vulkan has no disjoint query: the tick rate is a device constant, so there is nothing to record.
+        if (kind == GpuQueryKind.TimestampDisjoint)
+            return Track(new VulkanQuery(this, VkQueryPool.Null, kind, label));
+
+        VkQueryPoolCreateInfo poolInfo = new()
+                                             {
+                                                 queryType = VkQueryType.Timestamp,
+                                                 queryCount = 1,
+                                             };
+
+        Api.vkCreateQueryPool(&poolInfo, null, out var pool).CheckResult();
+        SetDebugName(VkObjectType.QueryPool, pool.Handle, label);
+        return Track(new VulkanQuery(this, pool, kind, label));
+    }
+
+    public bool TryGetQueryResult(GpuQuery query, out GpuQueryResult result)
+    {
+        result = default;
+
+        // Until its frame has retired, the query may still hold the result of an earlier write: the reset
+        // that precedes the new one only happens on the GPU.
+        if (query is not VulkanQuery vulkanQuery
+            || vulkanQuery.WrittenInFrameSerial == 0
+            || vulkanQuery.WrittenInFrameSerial > _completedFrameSerial)
+            return false;
+
+        if (query.Kind == GpuQueryKind.TimestampDisjoint)
+        {
+            result = new GpuQueryResult(0, (ulong)Math.Round(1e9 / _limits.timestampPeriod), false);
+            return true;
+        }
+
+        ulong ticks;
+        if (Api.vkGetQueryPoolResults(vulkanQuery.Pool, 0, 1, sizeof(ulong), &ticks, sizeof(ulong), VkQueryResultFlags.Bit64)
+            != VkResult.Success)
+            return false;
+
+        result = new GpuQueryResult(ticks, 0, false);
+        return true;
+    }
+
     public GpuShader CreateShader(ShaderStage stage, ReadOnlySpan<byte> code, string entryPoint, ReadOnlySpan<ShaderBinding> bindings = default,
                                   string? label = null)
     {
@@ -800,6 +846,10 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         Api.vkWaitForFences(1, &fence, true, ulong.MaxValue).CheckResult();
         Api.vkResetFences(1, &fence).CheckResult();
 
+        // One queue retires its submissions in order, so everything up to this slot's last frame is done.
+        _completedFrameSerial = Math.Max(_completedFrameSerial, frame.Serial);
+        frame.Serial = ++_lastStartedFrameSerial;
+
         // Everything disposed while this slot's work was in flight is now unreferenced.
         RunRetired(ref frame);
 
@@ -922,6 +972,8 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
 
     /// <summary>Which frame slot is being recorded. Upload buffers use it to pick the copy they may write.</summary>
     internal int CurrentFrameIndex => _frameIndex;
+
+    internal long RecordingFrameSerial => _frames[_frameIndex].Serial;
 
     /// <summary>
     /// Hands work to the slot that is currently recording: by the time that slot comes round again its fence
@@ -1714,6 +1766,9 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         internal VkCommandBuffer CommandBuffer;
         internal VkFence Fence;
 
+        /** Counts every frame started on any slot; queries compare against it to know when their frame finished. */
+        internal long Serial;
+
         internal List<Action<VkDeviceApi>> Retired;
 
         /// <summary>Only where push descriptors are not used; reset when the slot comes round again.</summary>
@@ -1805,5 +1860,7 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
     private long _allocatedBytes;
     private ulong _nextImGuiTextureId;
     private int _frameIndex;
+    private long _lastStartedFrameSerial;
+    private long _completedFrameSerial;
     private bool _frameActive;
 }

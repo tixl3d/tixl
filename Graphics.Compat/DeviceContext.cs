@@ -427,22 +427,48 @@ public sealed class DeviceContext
     }
 
     /// <summary>
-    /// Reads a query's result. Always false for now: the backend API has no queries, so a timing operator
-    /// reports nothing rather than a made-up number.
+    /// Reads a timestamp into a <c>long</c>, or a disjoint query into <see cref="QueryDataTimestampDisjoint"/>.
+    /// Never waits and never flushes, whatever <paramref name="flags"/> say: the result arrives once the GPU has
+    /// finished the frame that recorded the query.
     /// </summary>
     public bool GetData<T>(Query query, AsynchronousFlags flags, out T result) where T : struct
     {
-        GraphicsLog.WarnOnce("GPU queries are not implemented by the backends, so no timing is reported.");
         result = default;
+        if (query.GpuQuery is not { IsDisposed: false } gpuQuery || !Backend.TryGetQueryResult(gpuQuery, out var queryResult))
+            return false;
+
+        if (typeof(T) == typeof(long))
+        {
+            var ticks = (long)queryResult.Ticks;
+            result = System.Runtime.CompilerServices.Unsafe.As<long, T>(ref ticks);
+            return true;
+        }
+
+        if (typeof(T) == typeof(QueryDataTimestampDisjoint))
+        {
+            var disjoint = new QueryDataTimestampDisjoint
+                               {
+                                   Frequency = (long)queryResult.TicksPerSecond,
+                                   Disjoint = queryResult.IsDisjoint,
+                               };
+            result = System.Runtime.CompilerServices.Unsafe.As<QueryDataTimestampDisjoint, T>(ref disjoint);
+            return true;
+        }
+
+        GraphicsLog.WarnOnce($"Query results can't be read as {typeof(T).Name}.");
         return false;
     }
 
     public void Begin(Query query)
     {
+        if (query.GpuQuery is { IsDisposed: false } gpuQuery)
+            Commands.BeginQuery(gpuQuery);
     }
 
     public void End(Query query)
     {
+        if (query.GpuQuery is { IsDisposed: false } gpuQuery)
+            Commands.EndQuery(gpuQuery);
     }
 
     /// <summary>

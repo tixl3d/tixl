@@ -675,6 +675,27 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
 
     public void PopDebugGroup() => backend.InstanceApi.vkCmdEndDebugUtilsLabelEXT(_commandBuffer);
 
+    /// <summary>Vulkan timestamps need no begin, and a disjoint query has nothing to record.</summary>
+    public void BeginQuery(GpuQuery query)
+    {
+    }
+
+    public void EndQuery(GpuQuery query)
+    {
+        if (query is not VulkanQuery vulkanQuery)
+            return;
+
+        if (!vulkanQuery.Pool.IsNull)
+        {
+            // A query pool can't be reset inside a render pass; the next draw reopens it, loading what is there.
+            EndRenderingIfActive();
+            backend.Api.vkCmdResetQueryPool(_commandBuffer, vulkanQuery.Pool, 0, 1);
+            backend.Api.vkCmdWriteTimestamp2(_commandBuffer, VkPipelineStageFlags2.AllCommands, vulkanQuery.Pool, 0);
+        }
+
+        vulkanQuery.WrittenInFrameSerial = backend.RecordingFrameSerial;
+    }
+
     #region issuing work
     private bool PrepareDraw()
     {

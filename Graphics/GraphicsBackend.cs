@@ -86,6 +86,15 @@ public interface IGraphicsBackend : IDisposable
 
     bool Supports(Format format, TextureUsage usage);
 
+    /// <summary>Null where the device cannot time GPU work; the measuring code then reports nothing.</summary>
+    GpuQuery? CreateQuery(GpuQueryKind kind, string? label = null);
+
+    /// <summary>
+    /// Reads a query without waiting or flushing. False until the GPU has finished the frame that recorded it,
+    /// and for a query that was never ended.
+    /// </summary>
+    bool TryGetQueryResult(GpuQuery query, out GpuQueryResult result);
+
     /// <summary>
     /// Starts a frame: retires the resources whose last user has finished and resets the upload ring.
     /// D3D11 has no equivalent, so the compatibility layer calls it from the render loop.
@@ -197,6 +206,12 @@ public interface ICommandList
     void PushDebugGroup(string name);
 
     void PopDebugGroup();
+
+    /// <summary>Opens a disjoint query; timestamps only need <see cref="EndQuery"/>.</summary>
+    void BeginQuery(GpuQuery query);
+
+    /// <summary>Records a timestamp, or closes a disjoint query.</summary>
+    void EndQuery(GpuQuery query);
 }
 
 /// <summary>CPU memory for one mip or slice of a texture being created.</summary>

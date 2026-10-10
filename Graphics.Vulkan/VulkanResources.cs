@@ -142,6 +142,24 @@ internal sealed class VulkanSampler(VulkanBackend backend, VkSampler sampler, Sa
     }
 }
 
+/// <summary>A one-slot query pool per timestamp. TiXL times a handful of spans, so pooling them would buy nothing.</summary>
+internal sealed class VulkanQuery(VulkanBackend backend, VkQueryPool pool, GpuQueryKind kind, string? label) : GpuQuery(kind, label)
+{
+    /// <summary>Null for a disjoint query, which needs no GPU object.</summary>
+    internal readonly VkQueryPool Pool = pool;
+
+    /// <summary>Zero until the query is first ended.</summary>
+    internal long WrittenInFrameSerial;
+
+    protected override void ReleaseWhenRetired()
+    {
+        backend.Untrack(this);
+        var queryPool = Pool;
+        if (!queryPool.IsNull)
+            backend.Retire(api => api.vkDestroyQueryPool(queryPool));
+    }
+}
+
 internal sealed class VulkanShader(VulkanBackend backend, VkShaderModule module, ShaderStage stage, ShaderBinding[] bindings, string? label)
     : GpuShader(stage, label)
 {

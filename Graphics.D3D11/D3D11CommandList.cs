@@ -280,6 +280,21 @@ internal sealed class D3D11CommandList(D3D11Device device) : ICommandList
 
     public void PopDebugGroup() => _annotation?.EndEvent();
 
+    public void BeginQuery(GpuQuery query)
+    {
+        if (query is D3D11Query d3dQuery)
+            Context.Begin(d3dQuery.Query);
+    }
+
+    public void EndQuery(GpuQuery query)
+    {
+        if (query is not D3D11Query d3dQuery)
+            return;
+
+        Context.End(d3dQuery.Query);
+        d3dQuery.IsEnded = true;
+    }
+
     private CommonShaderStage? StageFor(ShaderStage stage)
     {
         return stage switch

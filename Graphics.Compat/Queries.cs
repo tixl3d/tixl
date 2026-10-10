@@ -3,18 +3,28 @@ using T3.Graphics;
 namespace T3.Graphics.Compat;
 
 /// <summary>
-/// GPU timestamp queries, used by <c>GpuMeasure</c> to report how long a subtree took on the GPU.
+/// GPU timestamp queries, used by <c>GpuMeasure</c> and the editor's frame timer to report how long work took on
+/// the GPU. Only timestamps and their disjoint bracket exist; a device that can't time work reports no data.
 /// </summary>
-/// <remarks>
-/// The backend API has no query support yet, so a query never reports data and the operator shows no timing
-/// rather than a wrong one. Timestamps are cheap to add to both backends — D3D11 has these queries and Vulkan
-/// has query pools — but they are not part of getting a picture on screen.
-/// </remarks>
-public sealed class Query(Device device, QueryDescription description) : Resource(device)
+public sealed class Query : Resource
 {
-    public QueryDescription Description { get; } = description;
-    public override GpuResource? Native => null;
-    public override void Dispose() => GC.SuppressFinalize(this);
+    public Query(Device device, QueryDescription description) : base(device)
+    {
+        Description = description;
+        GpuQuery = description.Type switch
+                       {
+                           QueryType.Timestamp         => device.Backend.CreateQuery(GpuQueryKind.Timestamp),
+                           QueryType.TimestampDisjoint => device.Backend.CreateQuery(GpuQueryKind.TimestampDisjoint),
+                           _                           => null
+                       };
+
+        if (GpuQuery == null)
+            GraphicsLog.WarnOnce($"GPU {description.Type} queries are not available on this device, so no timing is reported.");
+    }
+
+    public QueryDescription Description { get; }
+    public GpuQuery? GpuQuery { get; }
+    public override GpuResource? Native => GpuQuery;
 }
 
 public struct QueryDescription

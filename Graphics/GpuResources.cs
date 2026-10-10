@@ -83,6 +83,32 @@ public abstract class GpuShader(ShaderStage stage, string? label) : GpuResource(
 /// </summary>
 public abstract class GpuPipeline(string? label) : GpuResource(label);
 
+/// <summary>
+/// A GPU timing query. Results arrive frames after the query was recorded and are polled, never waited for.
+/// </summary>
+public abstract class GpuQuery(GpuQueryKind kind, string? label) : GpuResource(label)
+{
+    public readonly GpuQueryKind Kind = kind;
+}
+
+public enum GpuQueryKind
+{
+    /// <summary>The GPU clock at the point the query is ended.</summary>
+    Timestamp,
+
+    /// <summary>
+    /// Brackets timestamps with begin and end, and reports the clock's tick rate and whether it stayed steady
+    /// in between. D3D11 needs it; under Vulkan the tick rate is fixed and the clock never jumps.
+    /// </summary>
+    TimestampDisjoint,
+}
+
+/// <summary>
+/// What a finished query reports: <see cref="Ticks"/> for a timestamp, <see cref="TicksPerSecond"/> and
+/// <see cref="IsDisjoint"/> for a disjoint query.
+/// </summary>
+public readonly record struct GpuQueryResult(ulong Ticks, ulong TicksPerSecond, bool IsDisjoint);
+
 public enum ShaderStage
 {
     Vertex,
