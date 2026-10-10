@@ -183,6 +183,12 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
 
     public bool HasActiveInteraction => _context.StateMachine.CurrentState != GraphStates.Default;
 
+    /// <summary>Runs the layout action bound to G, as the debug bridge drives it.</summary>
+    internal bool LayoutInputsOfSelection()
+    {
+        return !HasActiveInteraction && TreeLayouting.LayoutInputsOfSelection(_context);
+    }
+
     void IGraphView.Close()
     {
         _destroyed = true;

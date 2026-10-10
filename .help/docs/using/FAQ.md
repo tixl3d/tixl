@@ -34,12 +34,12 @@ TiXL aims to stay backward-compatible when updating. If you follow a few simple 
 - Never modify symbols in the `lib.*` namespace without submitting a pull request.
 - Don't work directly in the `[Dashboard]` operator — create your own playground or project operators instead.
 - Use a consistent namespace for your operators, such as `user.yourname.project`.
-- Keep your personal resource files in their own folders, e.g. `Resources/user/yourname/projectTitle/`.
+- Keep your personal resource files in their own folders, e.g. `Assets/user/yourname/projectTitle/`.
 
 If you're using a standalone release, you need to copy the following to the new version:
 
 - Everything in `.t3/`
-- Your `Resources/`
+- Your `Assets/`
 - Your custom operators
 
 Future releases will streamline this migration.

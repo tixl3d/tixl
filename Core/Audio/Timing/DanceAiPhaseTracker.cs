@@ -59,15 +59,15 @@ public static class DanceAiPhaseTracker
         }
     }
 
-    /// <summary>Locked clock: continuous bar count since the first bar start, extrapolated to the current runtime.</summary>
-    public static double BarProgress
+    /// <summary>
+    /// Locked clock: continuous bar count since the first bar start, extrapolated to <paramref name="runTimeSec"/>
+    /// (in the time base of <see cref="Playback.RunTimeInSecs"/>), e.g. the frame's visual time.
+    /// </summary>
+    public static double GetBarProgress(double runTimeSec)
     {
-        get
+        lock (_stateLock)
         {
-            lock (_stateLock)
-            {
-                return _lockedAnchorBars + SecondsSinceAnchor() * BpmMath.BarsPerSecond(_lockedBpm);
-            }
+            return _lockedAnchorBars + (runTimeSec - _anchorTimeSec) * BpmMath.BarsPerSecond(_lockedBpm);
         }
     }
 
@@ -83,15 +83,15 @@ public static class DanceAiPhaseTracker
         }
     }
 
-    /// <summary>Unprocessed model phase, unwrapped to a continuous bar count and extrapolated with the model tempo.</summary>
-    public static double RawBarProgress
+    /// <summary>
+    /// Unprocessed model phase, unwrapped to a continuous bar count and extrapolated with the model tempo to
+    /// <paramref name="runTimeSec"/> (in the time base of <see cref="Playback.RunTimeInSecs"/>).
+    /// </summary>
+    public static double GetRawBarProgress(double runTimeSec)
     {
-        get
+        lock (_stateLock)
         {
-            lock (_stateLock)
-            {
-                return _rawAnchorBars + SecondsSinceAnchor() * BpmMath.BarsPerSecond(_rawBpm);
-            }
+            return _rawAnchorBars + (runTimeSec - _anchorTimeSec) * BpmMath.BarsPerSecond(_rawBpm);
         }
     }
 
@@ -161,8 +161,6 @@ public static class DanceAiPhaseTracker
 
         _samplesAvailable.Set();
     }
-
-    private static double SecondsSinceAnchor() => Playback.RunTimeInSecs - _anchorTimeSec;
 
     /// <summary>
     /// Callbacks arrive late but never early, so the earliest observed start wins and later

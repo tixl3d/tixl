@@ -1,3 +1,4 @@
+using T3.Core.Animation;
 using T3.Core.Utils;
 
 namespace Lib.numbers.floats.process;
@@ -29,7 +30,7 @@ internal sealed class DampPeakDecay : Instance<DampPeakDecay>
 
         var value = Value.GetValue(context);
         _dampedValue = _dampedValue > value
-                           ? MathUtils.Lerp(_dampedValue, value, Decay.GetValue(context))
+                           ? MathUtils.Lerp(_dampedValue, value, MathUtils.BlendForFrame(Decay.GetValue(context), Playback.LastFrameDuration))
                            : value;
 
 

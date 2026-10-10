@@ -5,6 +5,7 @@ using T3.Core.DataTypes;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.Resource;
+using T3.Core.Stats;
 using T3.Core.SystemUi;
 using T3.Core.Utils;
 using T3.Editor.Gui.Input;
@@ -48,7 +49,8 @@ internal static class ColorEditPopup
             ImGui.ColorConvertRGBtoHSV(color.X, color.Y, color.Z, out var hNormalized, out var linearSaturation, out var v);
 
             var compareColor = _isHoveringColor ? _hoveredColor : (Color)previousColor;
-            _dampedCompareColor = Vector4.Max(Vector4.Lerp(_dampedCompareColor, compareColor, 0.2f), Vector4.Zero);
+            _dampedCompareColor = Vector4.Max(Vector4.Lerp(_dampedCompareColor, compareColor, MathUtils.BlendForFrame(0.2f, FrameTiming.VisualDeltaSec)),
+                                              Vector4.Zero);
             edited = DrawCircleAndSliders(ref cColor, _dampedCompareColor, ref hNormalized, ref linearSaturation, v, drawList);
             edited |= PickColor(ref cColor);
             edited |= DrawColorInputs(ref cColor, hNormalized, linearSaturation, v);

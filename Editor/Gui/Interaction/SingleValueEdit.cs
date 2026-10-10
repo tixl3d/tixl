@@ -1,4 +1,4 @@
-﻿using System.Data;
+using System.Data;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using ImGuiNET;
@@ -138,7 +138,7 @@ internal static class SingleValueEdit
                     var restarted = (float)(ImGui.GetTime() - _timeOpened) < 0.1f;
                     DrawValueEditMethod(ref _editValue, restarted, _center, min, max, clampMin, clampMax, scale);
                     _dampedValue = _slidingAverage.UpdateAndCompute(_editValue);
-                    
+
                     break;
 
                 case InputStates.StartedTextInput:
@@ -188,18 +188,16 @@ internal static class SingleValueEdit
                         SetState(InputStates.Inactive);
                         if (double.IsNaN(_editValue))
                             _editValue = _startValue;
-                        
+
                         modified = false;
                     }
 
+                    // While the text is incomplete (e.g. "2+"), keep the last valid value and leave the
+                    // user's text untouched. Don't report a modification so nothing gets applied.
                     var valid = Evaluate(_jogDialText, ref _editValue);
-
-                    // If the value is invalid, just revert it to what it was previously
                     if (!valid)
                     {
-                        _editValue = _startValue;
-                        _editValue = defaultValue;
-                        _jogDialText = value.ToString(CultureInfo.InvariantCulture);
+                        modified = false;
                     }
 
                     break;
@@ -214,12 +212,12 @@ internal static class SingleValueEdit
             {
                 value = _editValue;
             }
-            
+
             if (_state == InputStates.Inactive)
             {
                 return InputEditStateFlags.Finished;
             }
-            
+
             return modified ? InputEditStateFlags.Modified : InputEditStateFlags.Started;
         }
 
@@ -235,7 +233,7 @@ internal static class SingleValueEdit
             _activeJogDialId = componentId;
             _editValue = value;
             _startValue = value;
-            _jogDialText = FormatValueForButton(ref value);
+            _jogDialText = FormatValueForButton(ref value, true);
             SetState(InputStates.Dialing);
         }
         else
@@ -333,14 +331,14 @@ internal static class SingleValueEdit
         switch (newState)
         {
             case InputStates.Inactive:
-            {
-                _activeJogDialId = 0;
-                break;
-            }
+                {
+                    _activeJogDialId = 0;
+                    break;
+                }
 
             case InputStates.Dialing:
                 _slidingAverage.Clear(UserSettings.Config.ValueEditSmoothing);
-                 
+
                 _center = ImGui.GetMousePos();
                 _timeOpened = ImGui.GetTime();
                 break;
@@ -426,7 +424,7 @@ internal static class SingleValueEdit
 
     private static void DrawValueRangeIndicator(double value, double min, double max, bool isActive = false)
     {
-        if (double.IsInfinity(min) && double.IsInfinity(max)) 
+        if (double.IsInfinity(min) && double.IsInfinity(max))
             return;
 
         var itemSize = ImGui.GetItemRectSize();
@@ -449,7 +447,7 @@ internal static class SingleValueEdit
 
         var p1 = itemPos + new Vector2((float)center, 0);
         var p2 = itemPos + new Vector2((float)end, itemSize.Y);
-        
+
         var areaColor = UiColors.ForegroundFull.Fade(isActive ? 0.5f : 0.05f);
         var centerColor = UiColors.ForegroundFull.Fade(isActive ? 0.5f : 0.1f);
         var symbolColor = UiColors.ForegroundFull.Fade(isActive ? 0.8f : 0.06f);

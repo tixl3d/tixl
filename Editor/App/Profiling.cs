@@ -33,6 +33,11 @@ internal static class Profiling
         var frameEndTime = Playback.RunTimeInSecs;
         var duration = frameEndTime - _frameStartTime;
         DebugDataRecording.EndRegion(_frameRegionChannel, $"{duration * 1000:0ms}");
+
+        // One event per frame would otherwise grow for the whole session; trim in chunks to keep it off the frame budget.
+        var events = _frameRegionChannel.Events;
+        if (events.Count > MaxKeptFrameEvents)
+            events.RemoveRange(0, FrameEventsTrimmedAtOnce);
     }
 
     private static void TraceGCLevel(int level, ref  GCMemoryInfo gcMemoryInfo)
@@ -69,6 +74,10 @@ internal static class Profiling
     private static readonly DataChannel[] _gcHeapSizeDeltaChannels = new DataChannel[MaxGCLevels];
     private static readonly long[] _lastHeapSizeBytes = new long[MaxGCLevels];
     
+    /** About ten minutes at 60 Hz. */
+    private const int MaxKeptFrameEvents = 36_000;
+    private const int FrameEventsTrimmedAtOnce = 6_000;
+
     private static DataChannel? _frameRegionChannel; // Channels will be created on first use
     private static double _frameStartTime;
     

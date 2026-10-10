@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Globalization;
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
+using T3.Core.Animation;
 using T3.Core.Stats;
 using T3.Core.Utils;
 using T3.Editor.Gui.Styling;
@@ -13,17 +14,28 @@ namespace T3.Editor.Gui.Windows.Analyze;
 
 internal static class T3Metrics
 {
-    public static void UiRenderingStarted()
+    /// <summary>
+    /// Records the interval since the previous frame. Call once per frame after ImGui's delta time was set, independent
+    /// of whether any metrics UI is drawn.
+    /// </summary>
+    public static void RecordFrameInterval()
     {
-        _watchImgRenderTime.Restart();
-        _watchImgRenderTime.Start();
+        PerformanceMetrics.RecordFrame(ImGui.GetIO().DeltaTime * 1000);
+        FrameTiming.RecordFrameStart(Playback.RunTimeInSecs, T3Ui.UseVSync);
     }
 
-    public static void UiRenderingCompleted()
+    /// <summary>Starts timing the main thread's work for this frame.</summary>
+    public static void CpuFrameStarted()
     {
-        _watchImgRenderTime.Stop();
-        _uiRenderDurationMs = (float)((double)_watchImgRenderTime.ElapsedTicks / Stopwatch.Frequency * 1000.0);
-        PerformanceMetrics.RecordUiRender(_uiRenderDurationMs);
+        _cpuFrameStopwatch.Restart();
+    }
+
+    /// <summary>Stops timing the main thread's work; call just before presenting.</summary>
+    public static void CpuFrameCompleted()
+    {
+        _cpuFrameStopwatch.Stop();
+        _cpuFrameDurationMs = (float)((double)_cpuFrameStopwatch.ElapsedTicks / Stopwatch.Frequency * 1000.0);
+        PerformanceMetrics.RecordCpuFrame(_cpuFrameDurationMs);
     }
 
     public static void DrawRenderPerformanceGraph()
@@ -60,61 +72,65 @@ internal static class T3Metrics
         }
 
         float normalFramerateLevelAt = 0.5f;
-        float frameTimingScaleFactor = barWidth / normalFramerateLevelAt / ExpectedFramerate;
+        var refreshPeriodMs = (float)(FrameTiming.RefreshPeriodSec * 1000);
+        float frameTimingScaleFactor = barWidth / normalFramerateLevelAt / (float)FrameTiming.RefreshRate;
 
-        _uiSmoothedRenderDurationMs = MathUtils.Lerp(_uiSmoothedRenderDurationMs, _uiRenderDurationMs, 0.05f);
-
-        _peakUiRenderDurationMs = _peakUiRenderDurationMs > _uiRenderDurationMs
-                                      ? MathUtils.Lerp(_peakUiRenderDurationMs, _uiRenderDurationMs, 0.05f)
-                                      : _uiRenderDurationMs;
+        var peakDecay = MathUtils.BlendForFrame(0.05f, FrameTiming.VisualDeltaSec);
+        _peakCpuFrameDurationMs = _peakCpuFrameDurationMs > _cpuFrameDurationMs
+                                      ? MathUtils.Lerp(_peakCpuFrameDurationMs, _cpuFrameDurationMs, peakDecay)
+                                      : _cpuFrameDurationMs;
 
         var deltaTimeMs = ImGui.GetIO().DeltaTime * 1000;
-        PerformanceMetrics.RecordFrame(deltaTimeMs);
 
         _peakDeltaTimeMs = _peakDeltaTimeMs > deltaTimeMs
-                               ? MathUtils.Lerp(_peakDeltaTimeMs, deltaTimeMs, 0.05f)
+                               ? MathUtils.Lerp(_peakDeltaTimeMs, deltaTimeMs, peakDecay)
                                : deltaTimeMs;
 
         var drawList = ImGui.GetWindowDrawList();
 
-        // Draw Ui Render Duration
-        var uiTimeWidth = (float)Math.Ceiling(_uiRenderDurationMs * frameTimingScaleFactor).Clamp(0, paddedBarWidth);
-        drawList.AddRectFilled(screenPosition, screenPosition + new Vector2(uiTimeWidth, barHeight), ColorForUiBar);
+        // CPU time of the frame
+        var cpuTimeWidth = (float)Math.Ceiling(_cpuFrameDurationMs * frameTimingScaleFactor).Clamp(0, paddedBarWidth);
+        drawList.AddRectFilled(screenPosition, screenPosition + new Vector2(cpuTimeWidth, barHeight), ColorForCpuBar);
 
-        // Draw Frame Render Duration
-        var deltaTimeWidth = (deltaTimeMs * frameTimingScaleFactor - uiTimeWidth).Clamp(0, paddedBarWidth);
-        var renderBarPos = screenPosition + new Vector2(uiTimeWidth, 0);
+        // Rest of the frame interval
+        var deltaTimeWidth = (deltaTimeMs * frameTimingScaleFactor - cpuTimeWidth).Clamp(0, paddedBarWidth);
+        var renderBarPos = screenPosition + new Vector2(cpuTimeWidth, 0);
         drawList.AddRectFilled(renderBarPos, renderBarPos + new Vector2(deltaTimeWidth, barHeight), ColorForFramerateBar);
 
-        // Draw Peak UI Duration
-        var peakUiTimePos = screenPosition + new Vector2((int)(_peakUiRenderDurationMs * frameTimingScaleFactor).Clamp(0, paddedBarWidth), 0);
-        drawList.AddRectFilled(peakUiTimePos, peakUiTimePos + new Vector2(2, barHeight), ColorForUiBar);
+        // Peak CPU time
+        var peakCpuTimePos = screenPosition + new Vector2((int)(_peakCpuFrameDurationMs * frameTimingScaleFactor).Clamp(0, paddedBarWidth), 0);
+        drawList.AddRectFilled(peakCpuTimePos, peakCpuTimePos + new Vector2(2, barHeight), ColorForCpuBar);
 
         // Draw Peak Render Duration
         var peakDeltaTimePos = screenPosition + new Vector2((int)(_peakDeltaTimeMs * frameTimingScaleFactor).Clamp(0, paddedBarWidth), 0);
         drawList.AddRectFilled(peakDeltaTimePos, peakDeltaTimePos + new Vector2(2, barHeight), ColorForFramerateBar);
 
-        // Draw 60fps mark
-        var normalFramerateMarkerPos = screenPosition + new Vector2(ExpectedFrameDurationMs * frameTimingScaleFactor, 0);
-        drawList.AddRectFilled(normalFramerateMarkerPos + new Vector2(0, -1), normalFramerateMarkerPos + new Vector2(1, barHeight + 1), ColorForUiBar);
+        // Mark one refresh period of the display
+        var normalFramerateMarkerPos = screenPosition + new Vector2(refreshPeriodMs * frameTimingScaleFactor, 0);
+        drawList.AddRectFilled(normalFramerateMarkerPos + new Vector2(0, -1), normalFramerateMarkerPos + new Vector2(1, barHeight + 1), ColorForCpuBar);
     }
 
     /// <summary>
-    /// Body of the Performance window: three labelled metric graphs, render summary, and per-frame render stats.
+    /// Body of the Performance window: labelled metric graphs, display and presentation info, and per-frame render stats.
     /// </summary>
     internal static void DrawDetailedView()
     {
         DrawCopyCsvButton();
 
-        DrawLabeledGraph(PerformanceMetrics.FrameDuration, "Frame", "ms", 32f, FormatMs);
+        DrawLabeledGraph(PerformanceMetrics.FrameDuration, "Frame", FrameTooltip, "ms", 32f, FormatMs);
         ImGui.Separator();
-        DrawLabeledGraph(PerformanceMetrics.UiRenderDuration, "Draw", "ms", 32f, FormatMs);
+        DrawLabeledGraph(PerformanceMetrics.CpuFrameDuration, "CPU", CpuTooltip, "ms", 32f, FormatMs);
         ImGui.Separator();
-        DrawLabeledGraph(PerformanceMetrics.PresentDuration, "Present", "ms", 32f, FormatMs);
+        DrawLabeledGraph(PerformanceMetrics.PresentDuration, "Present", PresentTooltip, "ms", 32f, FormatMs);
         ImGui.Separator();
-        DrawLabeledGraph(PerformanceMetrics.GcAllocationsKb, "Mem-Alloc", "", 10_000f, FormatKb);
+        DrawLabeledGraph(PerformanceMetrics.GpuFrameDuration, "GPU", GpuTooltip, "ms", 32f, FormatMs);
+        ImGui.Separator();
+        DrawLabeledGraph(PerformanceMetrics.GcAllocationsKb, "Mem-Alloc", MemAllocTooltip, "", 10_000f, FormatKb);
 
         ImGui.TextUnformatted($"Render: {_peakDeltaTimeMs:0.0}ms");
+        ImGui.TextUnformatted($"Display: {FrameTiming.RefreshRate:0.00} Hz measured");
+        ImGui.TextUnformatted($"Presentation: {PresentationDiagnostics.Describe(PresentationDiagnostics.CompositionMode)}, "
+                              + $"{PresentationDiagnostics.QueuedFrames} queued");
 
         ImGui.Spacing();
 
@@ -149,31 +165,39 @@ internal static class T3Metrics
         CustomComponents.TooltipForLastItem("Copy current performance window to clipboard as CSV.");
     }
 
-    /// <summary>Builds a CSV snapshot of the current performance window across all three metrics.</summary>
+    /// <summary>Builds a CSV snapshot of the current performance window across all metrics.</summary>
     private static string BuildCsvExport()
     {
         var frameScratch = new float[PerformanceMetrics.WindowSize];
-        var drawScratch = new float[PerformanceMetrics.WindowSize];
+        var cpuScratch = new float[PerformanceMetrics.WindowSize];
+        var presentScratch = new float[PerformanceMetrics.WindowSize];
+        var gpuScratch = new float[PerformanceMetrics.WindowSize];
         var allocScratch = new float[PerformanceMetrics.WindowSize];
 
         var frames = PerformanceMetrics.FrameDuration.AsOrderedSpan(frameScratch);
-        var draws = PerformanceMetrics.UiRenderDuration.AsOrderedSpan(drawScratch);
+        var cpus = PerformanceMetrics.CpuFrameDuration.AsOrderedSpan(cpuScratch);
+        var presents = PerformanceMetrics.PresentDuration.AsOrderedSpan(presentScratch);
+        var gpus = PerformanceMetrics.GpuFrameDuration.AsOrderedSpan(gpuScratch);
         var allocs = PerformanceMetrics.GcAllocationsKb.AsOrderedSpan(allocScratch);
 
-        var count = Math.Min(Math.Min(frames.Length, draws.Length), allocs.Length);
+        var count = Math.Min(Math.Min(frames.Length, cpus.Length), Math.Min(presents.Length, allocs.Length));
 
-        var sb = new System.Text.StringBuilder(count * 32 + 256);
+        var sb = new System.Text.StringBuilder(count * 48 + 256);
         sb.Append("# TiXL Performance Export  ").AppendLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
         sb.Append("# Window: ").Append(PerformanceMetrics.WindowSize).Append(" samples  Total frames: ").AppendLine(PerformanceMetrics.TotalFrameCount.ToString());
-        sb.AppendLine("# Columns: frame_index, frame_ms, draw_ms, alloc_kB");
-        sb.AppendLine("frame_index,frame_ms,draw_ms,alloc_kB");
+        sb.AppendLine("# Columns: frame_index, frame_ms, cpu_ms, present_ms, gpu_ms, alloc_kB");
+        sb.AppendLine("# gpu_ms is its own sequence (reported a few frames late, dropped results skipped), not the GPU time of the frame on the same row.");
+        sb.AppendLine("frame_index,frame_ms,cpu_ms,present_ms,gpu_ms,alloc_kB");
 
         for (var i = 0; i < count; i++)
         {
             sb.Append(i).Append(',')
               .Append(frames[i].ToString("0.##", CultureInfo.InvariantCulture)).Append(',')
-              .Append(draws[i].ToString("0.##", CultureInfo.InvariantCulture)).Append(',')
-              .AppendLine(allocs[i].ToString("0.#", CultureInfo.InvariantCulture));
+              .Append(cpus[i].ToString("0.##", CultureInfo.InvariantCulture)).Append(',')
+              .Append(presents[i].ToString("0.##", CultureInfo.InvariantCulture)).Append(',');
+            if (i < gpus.Length)
+                sb.Append(gpus[i].ToString("0.##", CultureInfo.InvariantCulture));
+            sb.Append(',').AppendLine(allocs[i].ToString("0.#", CultureInfo.InvariantCulture));
         }
         return sb.ToString();
     }
@@ -184,7 +208,7 @@ internal static class T3Metrics
     /// The plot line auto-scales its Y-axis to the current window's max; <paramref name="domainMax"/>
     /// is only used as the rightmost histogram axis tick (the fixed domain upper bound).
     /// </summary>
-    private static void DrawLabeledGraph(RollingMetric metric, string label, string unit, float domainMax, Func<float, string> axisFormat)
+    private static void DrawLabeledGraph(RollingMetric metric, string label, string tooltip, string unit, float domainMax, Func<float, string> axisFormat)
     {
         if (metric.Count < 1)
             return;
@@ -197,6 +221,7 @@ internal static class T3Metrics
         var rightText = $"{axisFormat(metric.Max)}{unit} max";
 
         ImGui.TextUnformatted(label);
+        CustomComponents.TooltipForLastItem(tooltip);
 
         var centerSize = ImGui.CalcTextSize(centerText);
         ImGui.SameLine(0, 0);
@@ -443,21 +468,34 @@ internal static class T3Metrics
         return $"{kb / 1_000_000f:0.#}GB";
     }
 
-    private static uint ColorForUiBar => UiColors.ForegroundFull.Fade(0.4f);
+    private static uint ColorForCpuBar => UiColors.ForegroundFull.Fade(0.4f);
     private static uint ColorForFramerateBar => UiColors.ForegroundFull.Fade(0.1f);
 
     private static  Color BarColor => UiColors.ForegroundFull.Fade(0.1f);
     private static  Color FlashColor => UiColors.ForegroundFull.Fade(0.5f);
     private static  Color LineColor => UiColors.ForegroundFull.Fade(0.5f);
 
-    private const float ExpectedFramerate = 60;
-    private const float ExpectedFrameDurationMs = 1 / ExpectedFramerate * 1000;
+    private const string FrameTooltip = "Time between the starts of two frames. With vsync it settles at the display's refresh period.";
 
-    private static float _peakUiRenderDurationMs;
+    private const string CpuTooltip =
+        "Main-thread time per frame: evaluating the graph, building the UI and issuing GPU commands. "
+        + "Doesn't include the GPU executing them, unless the CPU had to wait for the GPU (e.g. reading back a texture). "
+        + "Close to the frame budget means CPU-bound.";
+
+    private const string PresentTooltip =
+        "Time spent handing the frame to the displays: waiting for a vblank or a free back buffer. "
+        + "With vsync and a light scene, the frame's spare time ends up here.";
+
+    private const string GpuTooltip =
+        "GPU time per frame, from timestamps around the frame's commands. Reported a few frames late; "
+        + "includes GPU idle gaps while the CPU is still submitting. Close to the frame budget means GPU-bound.";
+
+    private const string MemAllocTooltip = "Managed memory allocated per frame. Steady allocations lead to garbage-collection pauses.";
+
+    private static float _peakCpuFrameDurationMs;
     private static float _peakDeltaTimeMs;
-    private static float _uiRenderDurationMs;
-    private static float _uiSmoothedRenderDurationMs;
-    private static readonly Stopwatch _watchImgRenderTime = new();
+    private static float _cpuFrameDurationMs;
+    private static readonly Stopwatch _cpuFrameStopwatch = new();
 
     // Scratch buffer for plot-line copy-out (and reused by the tooltip's occurrence strip).
     // Sized to match PerformanceMetrics.WindowSize.

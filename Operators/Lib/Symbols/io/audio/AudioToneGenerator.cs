@@ -3,6 +3,7 @@ using ManagedBass;
 using ManagedBass.Mix;
 using T3.Core.Animation;
 using T3.Core.Audio;
+using T3.Core.Audio.Graph;
 
 namespace Lib.io.audio
 {

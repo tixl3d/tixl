@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using ImGuiNET;
+using T3.Core.Stats;
 using T3.Core.Utils;
 using T3.Editor.Gui;
 using T3.Editor.Gui.Input;
@@ -270,7 +271,7 @@ internal static class SkillMapEditor
     private static void DrawHoveredEmptyCell(ImDrawListPtr dl, HexCanvas.Cell cell)
     {
         var hoverCenter = _canvas.ScreenPosFromCell(cell);
-        _dampedHoverCanvasPos = MathUtils.Lerp(_dampedHoverCanvasPos, hoverCenter, 0.5f);
+        _dampedHoverCanvasPos = MathUtils.Lerp(_dampedHoverCanvasPos, hoverCenter, MathUtils.BlendForFrame(0.5f, FrameTiming.VisualDeltaSec));
 
         dl.AddNgonRotated(_dampedHoverCanvasPos, _canvas.HexRadiusOnScreen, UiColors.ForegroundFull.Fade(0.1f), false);
 

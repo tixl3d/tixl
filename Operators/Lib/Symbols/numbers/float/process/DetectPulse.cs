@@ -1,3 +1,4 @@
+using T3.Core.Animation;
 using T3.Core.Utils;
 
 namespace Lib.numbers.@float.process;
@@ -30,7 +31,7 @@ internal sealed class DetectPulse : Instance<DetectPulse>
         var deltaToDamped = _dampedValue - newValue;
             
         var dampFactor = Damping.GetValue(context).Clamp(0,1);
-        _dampedValue = MathUtils.Lerp(newValue, _dampedValue, dampFactor);
+        _dampedValue = MathUtils.Lerp(newValue, _dampedValue, MathUtils.DampingForFrame(dampFactor, Playback.LastFrameDuration));
 
         DebugValue.Value = deltaToDamped;
             

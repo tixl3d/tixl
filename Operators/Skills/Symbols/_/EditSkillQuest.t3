@@ -221,9 +221,9 @@
       "Outputs": []
     },
     {
-      "Id": "3ee3fc85-8497-449f-9376-a7fa7deef4e0"/*R02a_DrawingMeshes*/,
+      "Id": "3ee3fc85-8497-449f-9376-a7fa7deef4e0"/*R02b_DrawingMeshes*/,
       "SymbolId": "33a43877-abce-44cb-8504-eb2c5b5bca92",
-      "SymbolName": "Skills.Mesh.R02_DrawingMeshes.R02a_DrawingMeshes",
+      "SymbolName": "Skills.Render.R02_DrawingMeshes.R02b_DrawingMeshes",
       "InputValues": [],
       "Outputs": []
     },
@@ -272,7 +272,7 @@
     {
       "Id": "4fa43b0c-6032-453d-839c-13b770cc54ff"/*I20a_Swimming*/,
       "SymbolId": "e2f54c8c-2507-4b55-bc94-22a242ddf0ff",
-      "SymbolName": "Skills.Image.Skills.Image.I20_Puzzles.I20a_Swimming",
+      "SymbolName": "Skills.Image.I20_Puzzles.I20a_Swimming",
       "InputValues": [],
       "Outputs": []
     },
@@ -375,9 +375,9 @@
       "Outputs": []
     },
     {
-      "Id": "67b24fac-c857-4063-a13b-77efa2eb8ee6"/*R02d_TransparentTextures*/,
+      "Id": "67b24fac-c857-4063-a13b-77efa2eb8ee6"/*R02e_TransparentTextures*/,
       "SymbolId": "f5045ea4-8080-4f05-94d5-fab87c256251",
-      "SymbolName": "Skills.Mesh.R02_DrawingMeshes.R02d_TransparentTextures",
+      "SymbolName": "Skills.Render.R02_DrawingMeshes.R02e_TransparentTextures",
       "InputValues": [],
       "Outputs": []
     },
@@ -508,9 +508,9 @@
       "Outputs": []
     },
     {
-      "Id": "8982ef4d-c5c8-4608-b4f5-88dde03babcc"/*Me01a_DrawingMeshes*/,
+      "Id": "8982ef4d-c5c8-4608-b4f5-88dde03babcc"/*R02a_DrawingMeshes*/,
       "SymbolId": "effe072f-a15a-468c-8af2-53de5ec33378",
-      "SymbolName": "Skills.Mesh.R02_DrawingMeshes.Me01a_DrawingMeshes",
+      "SymbolName": "Skills.Render.R02_DrawingMeshes.R02a_DrawingMeshes",
       "InputValues": [],
       "Outputs": []
     },
@@ -536,9 +536,9 @@
       "Outputs": []
     },
     {
-      "Id": "974d9c78-47f9-433e-ad66-d79938b9c1cf"/*R02c_SolidColorImage*/,
+      "Id": "974d9c78-47f9-433e-ad66-d79938b9c1cf"/*R02d_SolidColorImage*/,
       "SymbolId": "ec042dc1-e616-4a60-81ab-91aede4b6e73",
-      "SymbolName": "Skills.Mesh.R02_DrawingMeshes.R02c_SolidColorImage",
+      "SymbolName": "Skills.Render.R02_DrawingMeshes.R02d_SolidColorImage",
       "InputValues": [],
       "Outputs": []
     },
@@ -767,9 +767,9 @@
       "Outputs": []
     },
     {
-      "Id": "de9ee3b5-fa47-4d3a-9e3c-9ec5cb5f07eb"/*R02b_UnlitDrawing*/,
+      "Id": "de9ee3b5-fa47-4d3a-9e3c-9ec5cb5f07eb"/*R02c_UnlitDrawing*/,
       "SymbolId": "02f5c918-9680-4891-8d78-a1bc2a705b6b",
-      "SymbolName": "Skills.Mesh.R02_DrawingMeshes.R02b_UnlitDrawing",
+      "SymbolName": "Skills.Render.R02_DrawingMeshes.R02c_UnlitDrawing",
       "InputValues": [],
       "Outputs": []
     },
@@ -795,9 +795,9 @@
       "Outputs": []
     },
     {
-      "Id": "e5b6ba9a-28c2-423c-934e-8585a3be4717"/*R02e_HatchingStyle*/,
+      "Id": "e5b6ba9a-28c2-423c-934e-8585a3be4717"/*R02f_HatchingStyle*/,
       "SymbolId": "1e3ff394-1d2d-4318-b50f-2147e001f26c",
-      "SymbolName": "Skills.Mesh.R02_DrawingMeshes.R02e_HatchingStyle",
+      "SymbolName": "Skills.Render.R02_DrawingMeshes.R02f_HatchingStyle",
       "InputValues": [],
       "Outputs": []
     },

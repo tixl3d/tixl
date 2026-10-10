@@ -24,8 +24,10 @@ public static class PerformanceMetrics
     public static readonly RollingMetric FrameDuration =
         RollingMetric.CreateLinear(WindowSize, BucketCount, 0, 32f);
 
-    /// <summary>UI render duration in milliseconds. Linear 0..30 ms.</summary>
-    public static readonly RollingMetric UiRenderDuration =
+    /// <summary>
+    /// Main-thread time per frame in milliseconds (evaluation, UI, issuing GPU commands), excluding GPU execution.
+    /// </summary>
+    public static readonly RollingMetric CpuFrameDuration =
         RollingMetric.CreateLinear(WindowSize, BucketCount, 0f, 32f);
 
     /// <summary>
@@ -34,6 +36,13 @@ public static class PerformanceMetrics
     /// can be spent waiting for vblanks while nothing is being computed, which is invisible in the frame bar.
     /// </summary>
     public static readonly RollingMetric PresentDuration =
+        RollingMetric.CreateLinear(WindowSize, BucketCount, 0f, 32f);
+
+    /// <summary>
+    /// GPU time per frame in milliseconds, from timestamps around the frame's commands. Samples arrive a few frames
+    /// late (the GPU reports when it is done) and include GPU idle gaps while the CPU is still submitting.
+    /// </summary>
+    public static readonly RollingMetric GpuFrameDuration =
         RollingMetric.CreateLinear(WindowSize, BucketCount, 0f, 32f);
 
     /// <summary>Managed allocations per frame, in kilobytes. Log10-bucketed 0.1 kB .. 10 MB.</summary>
@@ -57,18 +66,22 @@ public static class PerformanceMetrics
         SampleGc(now);
     }
 
-    /// <summary>
-    /// Record the duration of the UI pass within a frame (editor only). Call once per frame.
-    /// </summary>
-    public static void RecordUiRender(float uiRenderMs)
+    /// <summary>Record the main thread's time for a frame (editor only). Call once per frame.</summary>
+    public static void RecordCpuFrame(float cpuMs)
     {
-        UiRenderDuration.Update(uiRenderMs, Now);
+        CpuFrameDuration.Update(cpuMs, Now);
     }
 
     /// <summary>Record the time the frame spent in Present. Call once per frame.</summary>
     public static void RecordPresent(float presentMs)
     {
         PresentDuration.Update(presentMs, Now);
+    }
+
+    /// <summary>Record a frame's GPU time once the GPU has reported it.</summary>
+    public static void RecordGpuFrame(float gpuMs)
+    {
+        GpuFrameDuration.Update(gpuMs, Now);
     }
 
     private static void SampleGc(double now)

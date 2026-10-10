@@ -18,9 +18,9 @@ internal sealed class ActionCamera : Instance<ActionCamera>, ICamera, ICameraPro
 
     private void UpdateCameraDefinition(EvaluationContext context)
     {
-        var time = Playback.RunTimeInSecs;
-        var deltaTime = (float)(time - _lastUpdateTime);
-        _lastUpdateTime = time;
+        // A second evaluation within the same frame must not move the camera again.
+        var deltaTime = Playback.FrameCount != _lastUpdateFrame ? (float)Playback.LastFrameDuration : 0f;
+        _lastUpdateFrame = Playback.FrameCount;
 
         LastObjectToWorld = context.ObjectToWorld;
 
@@ -41,7 +41,7 @@ internal sealed class ActionCamera : Instance<ActionCamera>, ICamera, ICameraPro
         var rotationSpeed = RotationSpeed.GetValue(context);
 
         var reset = MathUtils.WasTriggered(TriggerReset.GetValue(context), ref _triggerReset);
-        var blend = BlendToReferenceCamera.GetValue(context) * deltaTime * 60;
+        var blend = MathUtils.BlendForFrame(BlendToReferenceCamera.GetValue(context), deltaTime);
         if (reset || !_initialized)
         {
             TriggerReset.SetTypedInputValue(false);
@@ -87,7 +87,7 @@ internal sealed class ActionCamera : Instance<ActionCamera>, ICamera, ICameraPro
     }
 
     private bool _triggerReset;
-    private double _lastUpdateTime;
+    private int _lastUpdateFrame = -1;
 
     private bool _initialized;
 

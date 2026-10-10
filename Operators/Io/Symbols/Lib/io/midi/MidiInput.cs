@@ -216,7 +216,7 @@ public sealed class MidiInput : Instance<MidiInput>, MidiConnectionManager.IMidi
         }
 
 
-        _dampedOutputValue = MathUtils.Lerp(currentValue, _dampedOutputValue, damping);
+        _dampedOutputValue = MathUtils.Lerp(currentValue, _dampedOutputValue, MathUtils.DampingForFrame(damping, Playback.LastFrameDuration));
 
         var reachTarget = MathF.Abs(_dampedOutputValue - currentValue) < 0.0001f;
         var needsUpdateNextFrame = !reachTarget || wasHit;

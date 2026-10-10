@@ -38,7 +38,8 @@ internal static class ContentSourceSync
             Update(setup);
     }
 
-    /// <summary>Whether a live send op lies under the active composition.</summary>
+    /// <summary>Whether a live send op belongs to the active composition: it lies under it, and any composition
+    /// nested in between lets it through.</summary>
     public static bool IsInScope(Instance send)
     {
         var scopePath = _scopePath;
@@ -50,6 +51,16 @@ internal static class ContentSourceSync
         {
             if (path[i] != scopePath[i])
                 return false;
+        }
+
+        // Ancestors strictly below the scope root, nearest first.
+        var ancestor = send.Parent;
+        for (var depth = path.Count - 1; ancestor != null && depth > scopePath.Count; depth--)
+        {
+            if (ancestor.Symbol.CompositionSettings.Enabled)
+                return ContentSupplierSearch.IsExposedToParents(send.SymbolChild);
+
+            ancestor = ancestor.Parent;
         }
 
         return true;

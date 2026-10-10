@@ -1,6 +1,7 @@
 #nullable enable
 using T3.Core.Animation;
 using T3.Core.Audio;
+using T3.Core.Audio.Graph;
 using T3.Core.Resource.Assets;
 using T3.Core.Video;
 using T3.VideoServices;

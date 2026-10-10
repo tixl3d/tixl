@@ -3,6 +3,7 @@
 using System.Diagnostics;
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
+using T3.Core.Stats;
 using T3.Core.Utils;
 using T3.Core.Operator;
 using T3.Editor.Gui.Interaction;
@@ -92,7 +93,7 @@ internal sealed partial class MagItemMovement
 
         var io = ImGui.GetIO();
         var speed = io.MouseDelta.Length() / MathF.Max(io.DeltaTime, 0.0001f) / T3Ui.UiScaleFactor;
-        _dampedDragSpeed = MathUtils.Lerp(_dampedDragSpeed, speed, 0.3f);
+        _dampedDragSpeed = MathUtils.Lerp(_dampedDragSpeed, speed, MathUtils.BlendForFrame(0.3f, FrameTiming.VisualDeltaSec));
 
         var symbolUi = context.CompositionInstance.GetSymbolUi();
         if (!symbolUi.Sections.TryGetValue(_slowGrowSectionId, out var section)

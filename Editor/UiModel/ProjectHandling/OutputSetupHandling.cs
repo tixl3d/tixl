@@ -9,8 +9,9 @@ namespace T3.Editor.UiModel.ProjectHandling;
 /// <summary>
 /// Loads and caches the active output <see cref="Setup"/> and per-machine
 /// <see cref="MachineConfig"/> for opened projects. Setups live at
-/// &lt;project&gt;/.meta/Setups/&lt;name&gt;.setup.json; every project gets a default setup with the
-/// always-present Default output on first access. The active setup is the venue the project
+/// &lt;project&gt;/.meta/Setups/&lt;name&gt;.setup.json. A project without one gets a default setup with the
+/// always-present Default output that stays in memory until its first save, so merely opening a project
+/// (or a shipped library) leaves no files behind. The active setup is the venue the project
 /// is currently configured for; switching, renaming, duplicating (GUID-preserving) and deleting are
 /// the setup-switcher operations of the output window's setup panel.
 /// </summary>
@@ -73,16 +74,24 @@ internal static class OutputSetupHandling
             return;
 
         Directory.CreateDirectory(setupsFolder);
-        entry.Setup.TrySaveToFile(SetupFilePath(setupsFolder, entry.Setup.Name));
+        if (entry.Setup.TrySaveToFile(SetupFilePath(setupsFolder, entry.Setup.Name)))
+            entry.IsSaved = true;
+
         entry.MachineConfig.ActiveSetupName = entry.Setup.Name;
         entry.MachineConfig.TrySaveToFile(Path.Combine(setupsFolder, MachineConfig.FileName));
     }
 
-    /// <summary>Setup names available for the focused project (from .meta/Setups/*.setup.json).</summary>
+    /// <summary>Setup names available for the focused project: its .meta/Setups/*.setup.json files, or the unsaved default.</summary>
     public static void GetAvailableSetupNames(List<string> names)
     {
         names.Clear();
-        if (!TryGetFocusedSetupsFolder(out var setupsFolder) || !Directory.Exists(setupsFolder))
+        if (!TryGetFocusedEntry(out var entry, out var setupsFolder))
+            return;
+
+        if (!entry.IsSaved)
+            names.Add(entry.Setup.Name);
+
+        if (!Directory.Exists(setupsFolder))
             return;
 
         foreach (var filePath in Directory.EnumerateFiles(setupsFolder, "*" + Setup.FileSuffix))
@@ -150,6 +159,9 @@ internal static class OutputSetupHandling
         if (!TryGetFocusedEntry(out var entry, out var setupsFolder) || !IsValidNewName(newName, setupsFolder))
             return false;
 
+        if (!entry.IsSaved)
+            SaveActive();
+
         var duplicate = entry.Setup.Duplicate(newName);
         entry.Setup = duplicate;
         OutputPresentation.ReleaseAll();
@@ -162,6 +174,10 @@ internal static class OutputSetupHandling
     {
         if (!TryGetFocusedEntry(out var entry, out var setupsFolder) || !IsValidNewName(newName, setupsFolder))
             return false;
+
+        // The unsaved default would otherwise vanish from the switcher once another setup exists.
+        if (!entry.IsSaved)
+            SaveActive();
 
         entry.Setup = Setup.CreateDefault(newName);
         OutputPresentation.ReleaseAll();
@@ -196,8 +212,9 @@ internal static class OutputSetupHandling
         else
         {
             entry.Setup = Setup.CreateDefault();
+            entry.IsSaved = false;
             OutputPresentation.ReleaseAll();
-            SaveActive();
+            StructureVersion++;
         }
 
         return true;
@@ -207,6 +224,9 @@ internal static class OutputSetupHandling
     {
         public required Setup Setup;
         public required MachineConfig MachineConfig;
+
+        /** False for the default setup of a project that has no setup file yet. */
+        public bool IsSaved;
     }
 
     /// <summary>
@@ -265,11 +285,10 @@ internal static class OutputSetupHandling
         var setupsFolder = SetupFiles.FolderIn(projectFolder);
         SetupFiles.TryLoad(setupsFolder, out var setup, out var machineConfig, out var wasRepaired);
 
+        var isSaved = setup != null;
         if (setup == null)
         {
             setup = Setup.CreateDefault();
-            Directory.CreateDirectory(setupsFolder);
-            setup.TrySaveToFile(SetupFilePath(setupsFolder, setup.Name));
         }
         else if (wasRepaired)
         {
@@ -277,7 +296,7 @@ internal static class OutputSetupHandling
             setup.TrySaveToFile(SetupFilePath(setupsFolder, setup.Name));
         }
 
-        entry = new ProjectEntry { Setup = setup, MachineConfig = machineConfig };
+        entry = new ProjectEntry { Setup = setup, MachineConfig = machineConfig, IsSaved = isSaved };
         _entriesByProjectFolder[projectFolder] = entry;
         return entry;
     }

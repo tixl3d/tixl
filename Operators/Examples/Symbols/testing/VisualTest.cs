@@ -115,24 +115,36 @@ internal sealed class VisualTest : Instance<VisualTest>
         Playback.Current.IsRenderingToFile = true;
         var stepStep = MathUtils.Lerp(_timeRange.X, _timeRange.Y, f);
         image = null;
-        for (int midStepIndex = 0; midStepIndex <= _warmUpSteps; midStepIndex++)
+
+        // Each evaluation step counts as one 60 fps frame, so damping, springs and simulations produce the same
+        // reference images on every machine and display.
+        var previousFixedFrameDuration = Playback.FixedFrameDurationSec;
+        Playback.FixedFrameDurationSec = ReferenceFrameDurationSec;
+        try
         {
-            var subTime = _warmUpSteps <= 1 ? 0 : (float)midStepIndex / _warmUpSteps;
-            var time = stepStep + subTime;
-            usedTime = time;
-            
-            context.LocalTime = time;
-            context.LocalFxTime = time;
-            Playback.FrameCount++;
-            context.RequestedResolution = _defaultResolution;
+            for (int midStepIndex = 0; midStepIndex <= _warmUpSteps; midStepIndex++)
+            {
+                var subTime = _warmUpSteps <= 1 ? 0 : (float)midStepIndex / _warmUpSteps;
+                var time = stepStep + subTime;
+                usedTime = time;
 
-            DirtyFlag.GlobalInvalidationTick++;
-            Image.InvalidateGraph();
-            Image.DirtyFlag.ForceInvalidate();
+                context.LocalTime = time;
+                context.LocalFxTime = time;
+                Playback.FrameCount++;
+                context.RequestedResolution = _defaultResolution;
 
-            image = Image.GetValue(context);
+                DirtyFlag.GlobalInvalidationTick++;
+                Image.InvalidateGraph();
+                Image.DirtyFlag.ForceInvalidate();
+
+                image = Image.GetValue(context);
+            }
         }
-        
+        finally
+        {
+            Playback.FixedFrameDurationSec = previousFixedFrameDuration;
+        }
+
         context.ShowGizmos = previousGizmo;
         context.LocalTime = previousKeyframeTime;
         context.LocalFxTime = previousEffectTime;
@@ -507,6 +519,8 @@ internal sealed class VisualTest : Instance<VisualTest>
             Log.Error($"Writing the test image failed: {e.Message}");
         }
     }
+
+    private const double ReferenceFrameDurationSec = 1.0 / 60.0;
 
     private States _state = States.Waiting;
     private int _testIndex;

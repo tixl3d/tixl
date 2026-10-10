@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using T3.Core.Settings;
+using T3.Core.Stats;
 
 namespace T3.Core.Animation;
 
@@ -63,14 +64,17 @@ public class Playback
         get => _isRenderingToFile;
         set {
             _isRenderingToFile = value;
+
+            // Update() measures from the clock it is about to switch to, so the next frame duration starts at 0
+            // instead of the gap between file time and the app's runtime.
             if (value)
             {
                 PlaybackSpeed = 0;
-                _lastFrameStart = RunTimeInSecs;
+                _lastFrameStart = TimeInSecs;
             }
             else
             {
-                _lastFrameStart = TimeInSecs;
+                _lastFrameStart = RunTimeInSecs;
             }
         }
     }
@@ -78,20 +82,38 @@ public class Playback
     public double PlaybackSpeed { get; set; }
         
     /// <summary>
-    /// This is set when rendering updates not at 60fps. This can happen for...
-    /// 
-    /// - high framerate displays -> e.g. 2 for 120hz displays
-    /// - when rendering low fps image sequences -> e.g. 25/60 for 25fps
-    ///    
+    /// The frame rate relative to 60 fps, e.g. 2 on a 120 Hz display or 25/60 when exporting at 25 fps.
+    /// Live it is measured (<see cref="FrameTiming.FrameRateRelativeTo60"/>); while rendering to file it is the value
+    /// set here by the exporter.
+    ///
     /// If possible simulation operators like [ParticleSystem] or [FeedbackEffect] should apply this factor to their overall speed factor.
     /// </summary>
-    public double FrameSpeedFactor { get; set; } = 1;
+    public double FrameSpeedFactor
+    {
+        get => IsRenderingToFile ? _frameSpeedFactorForFileRendering : FrameTiming.FrameRateRelativeTo60;
+        set => _frameSpeedFactorForFileRendering = value;
+    }
     public bool IsLooping = false;
     public static bool OpNotReady;
         
     public static double RunTimeInSecs => RunTimeWatch.Elapsed.TotalSeconds;
     public static int FrameCount;
-    public static double LastFrameDuration { get; protected set; }
+    /// <summary>
+    /// Duration of the current frame in seconds: the visual frame duration live, the file time step while rendering
+    /// to file, or <see cref="FixedFrameDurationSec"/> while that is set.
+    /// </summary>
+    public static double LastFrameDuration
+    {
+        get => FixedFrameDurationSec ?? _lastFrameDuration;
+        protected set => _lastFrameDuration = value;
+    }
+
+    /// <summary>
+    /// While set, <see cref="LastFrameDuration"/> returns this instead of a measured duration, so frame-duration
+    /// dependent ops (damping, springs, simulations) step identically on every machine and display. Set by export
+    /// (one frame of the export rate) and by visual reference tests (1/60 s per evaluation step).
+    /// </summary>
+    public static double? FixedFrameDurationSec { get; set; }
     public double LastFrameDurationInBars => BarsFromSeconds(LastFrameDuration);
         
     public virtual void Update(bool idleMotionEnabled = false)
@@ -101,8 +123,9 @@ public class Playback
         Current = this;
         var currentRuntime = IsRenderingToFile ?   TimeInSecs : RunTimeInSecs;
 
-        LastFrameDuration = currentRuntime - _lastFrameStart;
+        var wallClockDuration = currentRuntime - _lastFrameStart;
         _lastFrameStart = currentRuntime;
+        LastFrameDuration = IsRenderingToFile ? wallClockDuration : GetLiveFrameDuration(wallClockDuration);
 
         var timeSinceLastFrameInSecs = LastFrameDuration;
         var isPlaying = Math.Abs(PlaybackSpeed) > 0.001;
@@ -153,8 +176,24 @@ public class Playback
     {
         return bars * 240.0 / Bpm;
     }
-        
+
+    /// <summary>
+    /// The time animations advance by in live playback: the visual frame duration when the host recorded this frame
+    /// with <see cref="FrameTiming.RecordFrameStart"/> (whole refresh periods under vsync), otherwise the wall-clock duration.
+    /// </summary>
+    protected static double GetLiveFrameDuration(double wallClockDuration)
+    {
+        if (FrameTiming.RecordedFrameCount == _lastUsedTimingFrame)
+            return wallClockDuration;
+
+        _lastUsedTimingFrame = FrameTiming.RecordedFrameCount;
+        return FrameTiming.VisualDeltaSec;
+    }
+
     private static double _lastFrameStart;
+    private static double _lastFrameDuration;
+    private static long _lastUsedTimingFrame = -1;
+    private double _frameSpeedFactorForFileRendering = 1;
     private double _previousTimeInBars;
     private static readonly Stopwatch RunTimeWatch = Stopwatch.StartNew();
     private bool _isRenderingToFile;

@@ -1,3 +1,4 @@
+using T3.Core.Animation;
 using T3.Core.Utils;
 
 namespace Lib.numbers.vec3;
@@ -28,7 +29,7 @@ internal sealed class DampVec3 : Instance<DampVec3>
         var method = Method.GetValue(context).Clamp(0, 1);
         _dampedValue = method switch
                            {
-                               0 => MathUtils.Lerp(targetVector, _dampedValue, damping),
+                               0 => MathUtils.Lerp(targetVector, _dampedValue, MathUtils.DampingForFrame(damping, Playback.LastFrameDuration)),
                                1 => DampFunctions.SpringDampVec3(targetVector, _dampedValue, damping, ref _velocity),
                                _ => targetVector,
                            };

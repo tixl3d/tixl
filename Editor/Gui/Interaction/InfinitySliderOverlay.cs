@@ -2,6 +2,7 @@
 using System.Runtime.CompilerServices;
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
+using T3.Core.Stats;
 using T3.Core.Utils;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
@@ -76,7 +77,7 @@ internal static class InfinitySliderOverlay
         var normalizedLogDistanceForLog10 = (_verticalDistance / T3Ui.UiScaleFactor) / Log10YDistance;
 
         // Value range and tick interval 
-        _dampedModifierScaleFactor = MathUtils.Lerp(_dampedModifierScaleFactor, GetKeyboardScaleFactor(), 0.1f);
+        _dampedModifierScaleFactor = MathUtils.Lerp(_dampedModifierScaleFactor, GetKeyboardScaleFactor(), MathUtils.BlendForFrame(0.1f, FrameTiming.VisualDeltaSec));
 
         var valueRange = (Math.Pow(10, normalizedLogDistanceForLog10)) * scale * 0.25f * _dampedModifierScaleFactor * 600;
 

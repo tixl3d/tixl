@@ -31,19 +31,19 @@ Two clips appear on the timeline at the bar you started recording. Hit play to r
 <project>/
   Assets/
     audio/
-      rec-007.wav
+      AudioRec-007.wav
     dataclips/
-      rec-007.data
+      DataRec-007.data
 ```
 
-The session index (`007`) is shared between audio and data within one recording so they pair up. A backup copy of each file also lands in `%APPDATA%\TiXL<version>\Recordings\` — useful if a project file gets damaged.
+The session index (`007`) is shared between audio and data within one recording so they pair up. While recording, files are staged in `%APPDATA%\TiXL<version>\Tmp\Recordings\`. When you stop, they are imported into `Assets/` and the staged copy is removed.
 
 ## Replaying
 
 The `LoadDataClip` op exposes the recorded data as a `DataClip` value on the graph. To drive `MidiInput` / `OscInput` ops from the recording, chain it through a **`SimulateIoData`** op:
 
 ```
-LoadDataClip(rec-007.data).Clip ─► SimulateIoData.Clips ─► Execute
+LoadDataClip(DataRec-007.data).Clip ─► SimulateIoData.Clips ─► Execute
 ```
 
 `SimulateIoData` dispatches recorded events through a parallel bus the input ops subscribe to. Replay works regardless of whether the original device is currently connected — `MidiInput` ops match by device name string, not by hardware presence.
@@ -72,7 +72,7 @@ The on-disk `.data` format is JSON, designed to be human-readable and tool-frien
 {
   "Version": 1,
   "Metadata": {
-    "TixlVersion": "4.5",
+    "TixlVersion": "4.3",
     "RecordedAtUtc": "2026-05-28T16:42:11.0123456Z"
   },
   "Channels": [

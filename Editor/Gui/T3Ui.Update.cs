@@ -1,6 +1,7 @@
 ﻿using ImGuiNET;
 using T3.Core.Animation;
 using T3.Core.Audio;
+using T3.Core.Audio.Graph;
 using T3.Core.Resource;
 using T3.Editor.App;
 using T3.Editor.Gui.Dialog;

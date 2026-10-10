@@ -87,6 +87,55 @@ internal sealed class D3D11Swapchain : GpuSwapchain
             WaitForSingleObject(_latencyWaitable, 1000);
     }
 
+    public override bool TryGetPresentationStatistics(out PresentationStatistics statistics)
+    {
+        if (!TryGetFrameStatisticsMedia(out var media))
+        {
+            statistics = default;
+            return false;
+        }
+
+        var mode = (DXGI.FramePresentationMode)media.CompositionMode switch
+                       {
+                           DXGI.FramePresentationMode.Composed           => PresentationModes.ComposedBySystem,
+                           DXGI.FramePresentationMode.Overlay            => PresentationModes.HardwareOverlay,
+                           DXGI.FramePresentationMode.None               => PresentationModes.IndependentFlip,
+                           DXGI.FramePresentationMode.CompositionFailure => PresentationModes.CompositionFailure,
+                           _                                             => PresentationModes.Unknown
+                       };
+
+        statistics = new PresentationStatistics(mode, _swapChain.LastPresentCount - (int)media.PresentCount);
+        return true;
+    }
+
+    /// <summary>
+    /// SharpDX 4.2 has no IDXGISwapChainMedia wrapper, so GetFrameStatisticsMedia is called through the interface's
+    /// vtable. Fails (e.g. DXGI_ERROR_FRAME_STATISTICS_DISJOINT) until the swap chain has presented a few frames.
+    /// </summary>
+    private unsafe bool TryGetFrameStatisticsMedia(out NativeFrameStatisticsMedia statistics)
+    {
+        statistics = default;
+        if (System.Runtime.InteropServices.Marshal.QueryInterface(_swapChain.NativePointer, in SwapChainMediaInterfaceId, out var swapChainMedia) != 0
+            || swapChainMedia == IntPtr.Zero)
+            return false;
+
+        try
+        {
+            var vtable = *(IntPtr**)swapChainMedia;
+            var getFrameStatisticsMedia = (delegate* unmanaged[Stdcall]<IntPtr, NativeFrameStatisticsMedia*, int>)vtable[GetFrameStatisticsMediaVtableIndex];
+            NativeFrameStatisticsMedia result;
+            if (getFrameStatisticsMedia(swapChainMedia, &result) != 0)
+                return false;
+
+            statistics = result;
+            return true;
+        }
+        finally
+        {
+            System.Runtime.InteropServices.Marshal.Release(swapChainMedia);
+        }
+    }
+
     private void AcquireBackBuffer()
     {
         var texture = _swapChain.GetBackBuffer<SharpDX.Direct3D11.Texture2D>(0);
@@ -122,6 +171,24 @@ internal sealed class D3D11Swapchain : GpuSwapchain
 
     [System.Runtime.InteropServices.DllImport("kernel32.dll")]
     private static extern bool CloseHandle(nint handle);
+
+    /** Native DXGI_FRAME_STATISTICS_MEDIA. */
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    private struct NativeFrameStatisticsMedia
+    {
+        public uint PresentCount;
+        public uint PresentRefreshCount;
+        public uint SyncRefreshCount;
+        public long SyncQpcTime;
+        public long SyncGpuTime;
+        public int CompositionMode;
+        public uint ApprovedPresentDuration;
+    }
+
+    private static readonly Guid SwapChainMediaInterfaceId = new("dd95b90b-f05f-4f6a-bd65-25bfb264bd84");
+
+    /** IUnknown's three methods precede it. */
+    private const int GetFrameStatisticsMediaVtableIndex = 3;
 
     private readonly D3D11Backend _backend;
     private readonly DXGI.SwapChain1 _swapChain;

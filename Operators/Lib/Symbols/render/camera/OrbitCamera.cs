@@ -1,3 +1,4 @@
+using T3.Core.Animation;
 using T3.Core.Rendering;
 using T3.Core.Utils;
 using T3.Core.Utils.Geometry;
@@ -124,8 +125,9 @@ internal sealed class OrbitCamera : Instance<OrbitCamera>
         //eye+= positionOffset;
         var target = eye + adjustedViewDirection;
 
-        _dampedEye = Vector3.Lerp(eye, _dampedEye, damping);
-        _dampedTarget = Vector3.Lerp(target, _dampedTarget, damping);
+        var frameDamping = MathUtils.DampingForFrame(damping, Playback.LastFrameDuration);
+        _dampedEye = Vector3.Lerp(eye, _dampedEye, frameDamping);
+        _dampedTarget = Vector3.Lerp(target, _dampedTarget, frameDamping);
 
         _cameraDefinition.Target = _dampedTarget;
         _cameraDefinition.Position = _dampedEye;

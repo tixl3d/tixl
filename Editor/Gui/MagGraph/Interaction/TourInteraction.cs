@@ -1,5 +1,6 @@
 ﻿using ImGuiNET;
 using T3.Core.DataTypes.Vector;
+using T3.Core.Stats;
 using T3.Core.Utils;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
@@ -194,7 +195,7 @@ internal static class TourInteraction
         }
         else
         {
-            _dampedCanvasPos = Vector2.Lerp(_dampedCanvasPos, child.PosOnCanvas, 0.1f);
+            _dampedCanvasPos = Vector2.Lerp(_dampedCanvasPos, child.PosOnCanvas, MathUtils.BlendForFrame(0.1f, FrameTiming.VisualDeltaSec));
         }
 
         var posOnScreen = projectView.GraphView.Canvas.TransformPosition(_dampedCanvasPos);

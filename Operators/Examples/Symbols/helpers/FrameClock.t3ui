@@ -59,8 +59,8 @@
     {
       "ChildId": "17bc9448-a42f-47d5-b695-3c05e5926d3c"/*LinePoints*/,
       "Position": {
-        "X": 486.38385,
-        "Y": -375.51413
+        "X": 255.18018,
+        "Y": -406.63773
       }
     },
     {
@@ -96,6 +96,13 @@
       "ChildId": "3061ce24-55b3-4523-952c-41ed3c8f9a16"/*DrawPoints*/,
       "Position": {
         "X": 626.38385,
+        "Y": -375.51413
+      }
+    },
+    {
+      "ChildId": "3f01d57d-3857-4a8f-a421-bff78b2f2760"/*RadialPoints*/,
+      "Position": {
+        "X": 486.38385,
         "Y": -375.51413
       }
     },
@@ -381,5 +388,39 @@
         "Y": 586.2837
       }
     }
-  ]
+  ],
+  "Settings": {
+    "RenderExport": {
+  "TimeReference": "Bars",
+  "StartInBars": 0.0,
+  "EndInBars": 8.0,
+  "FrameRate": 60.0,
+  "OverrideMotionBlurSamples": -1,
+  "RenderMode": "Video",
+  "VideoCodec": "H264",
+  "Bitrate": 25000000,
+  "AutoIncrementVersionNumber": true,
+  "CreateSubFolder": true,
+  "AutoIncrementSubFolder": true,
+  "ExportAudio": true,
+  "FileFormat": "Png",
+  "TimeRange": "Custom",
+  "ContinuousClock": "Realtime",
+  "ContinuousFrameRate": "FixedFps",
+  "ResolutionFactor": 1.0,
+  "VideoFilePath": "./Render/render-v01.mp4",
+  "SequenceFilePath": "./ImageSequence/",
+  "SequenceFileName": "v01",
+  "SequencePrefix": "render"
+},
+    "Timeline": {
+  "ScaleX": 80.0,
+  "ScrollX": 33.414993,
+  "Mode": "DopeView",
+  "TimelineHeight": -1,
+  "InlineDataClipEditEnabled": false,
+  "DetailsAreaHeight": 200.0,
+  "InlineDataClipStripHeight": null
+}
+  }
 }

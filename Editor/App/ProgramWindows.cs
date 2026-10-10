@@ -13,6 +13,7 @@ using T3.Core.SystemUi;
 using T3.Editor.Gui;
 // for ReleaseMode
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Gui.Windows.Analyze;
 using T3.Editor.UiModel;
 using T3.SdlPlatform;
 using static SDL.SDL3;
@@ -124,6 +125,7 @@ internal static unsafe class ProgramWindows
 
             Main.SetDevice(device, _deviceContext);
             Main.InitViewSwapChain();
+            GpuFrameTimer.Initialize(device, _deviceContext);
             Main.InitializeWindow(maximized: Program.WindowSizeOverride == null, CanCloseMainWindow);
             if (Program.WindowSizeOverride is { } windowSize)
                 Main.SetSize(windowSize.Width, windowSize.Height);
@@ -337,6 +339,7 @@ internal static unsafe class ProgramWindows
     public static void Release()
     {
         OutputWindowHandling.Release();
+        GpuFrameTimer.Release();
         _device.ImmediateContext.ClearState();
         _deviceContext.Flush();
         Main.Release();
@@ -369,9 +372,11 @@ internal static unsafe class ProgramWindows
     public static void Present(bool useVSync)
     {
         var startTimestamp = Stopwatch.GetTimestamp();
+        GpuFrameTimer.EndFrame();
         try
         {
             Main.SwapChain.Present(useVSync ? 1 : 0);
+            PresentationDiagnostics.Update(Main.SwapChain);
 
             // Only while its window is actually shown. Presenting a hidden flip-model swap chain is not the
             // cheap no-op it looks like: DWM throttles presents to a window it isn't displaying, and with an

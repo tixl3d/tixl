@@ -36,6 +36,28 @@ public abstract class GpuSwapchain(SwapchainDescription description, string? lab
     /// instead of letting frames queue up.
     /// </summary>
     public abstract void WaitForFrameLatency();
+
+    /// <summary>
+    /// How the system currently shows this swapchain's frames and how many presented frames still wait for the
+    /// display. Frame pacing differs between presentation modes, so this is the first thing to check when frame
+    /// intervals jitter. False while the backend can't tell, which includes the first few presents.
+    /// </summary>
+    public virtual bool TryGetPresentationStatistics(out PresentationStatistics statistics)
+    {
+        statistics = default;
+        return false;
+    }
+}
+
+public readonly record struct PresentationStatistics(PresentationModes Mode, int QueuedFrames);
+
+public enum PresentationModes
+{
+    Unknown,
+    ComposedBySystem,
+    HardwareOverlay,
+    IndependentFlip,
+    CompositionFailure,
 }
 
 public readonly record struct SwapchainDescription

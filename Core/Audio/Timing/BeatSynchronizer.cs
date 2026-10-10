@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using T3.Core.DataTypes.DataSet;
 using T3.Core.IO;
 using T3.Core.Settings;
@@ -24,7 +25,9 @@ namespace T3.Core.Audio.Timing;
 /// To get maximum precision, we use every audio buffer update from WASAPI and immediately calculate frequency bins, possible onsets, and timing.
 /// This is normally out of sync with the display update rate of 60Hz.
 /// 
-/// To avoid jittering, the resulting timing is then smoothed in BeatTiming.
+/// Readers sample the bar clock with <see cref="GetBarProgress"/> at their frame's time, which extrapolates between
+/// audio updates, and phase corrections are spread over <see cref="PhaseCorrectionSpreadMs"/>, so the timing stays smooth
+/// without averaging (which would add lag).
 /// You can enable CoreSettings.EnableBeatSyncProfiling to get a better understanding of how different musical styles are matched.
 /// The algorithm uses too many magic numbers to list, but the most relevant ones are:
 /// - proportionalBpmAdjustment
@@ -40,9 +43,17 @@ public static class BeatSynchronizer
     public static double CurrentBpm => _currentBpm;
 
     /// <summary>
-    /// Gets the current progress within the bar, from 0.0 to  1.0.
+    /// Continuous bar count at <paramref name="runTimeSec"/> (in the time base of <c>Playback.RunTimeInSecs</c>),
+    /// extrapolated from the last audio update with the current tempo. Safe to call from the main thread while the
+    /// audio callback updates the clock.
     /// </summary>
-    public static double BarProgress => _barTime;
+    public static double GetBarProgress(double runTimeSec)
+    {
+        lock (_publishedClockLock)
+        {
+            return _publishedBarTime + (runTimeSec - _publishedUpdateTimeSec) * _publishedBpm / 240.0;
+        }
+    }
 
     /// <summary>
     /// Initializes the beat synchronizer. Must be called once at application start.
@@ -71,6 +82,8 @@ public static class BeatSynchronizer
         Initialize();
         _currentBpm = Math.Clamp(initialBpm, MinBpm, MaxBpm);
         _barTime = (int)(_barTime / 4) * 4; // Reset to beginning of last measure
+        _pendingPhaseCorrection = 0;
+        PublishBarClock(AudioInput.LastUpdateTime);
         _detectedOnsets.Clear();
 
         for (var index = 0; index < _lastAnyOnsetDetectionTimes.Length; index++)
@@ -93,12 +106,28 @@ public static class BeatSynchronizer
     internal static void UpdateBeatTimer()
     {
         Initialize();
+        try
+        {
+            AdvanceAndCorrectBarClock();
+        }
+        finally
+        {
+            PublishBarClock(AudioInput.LastUpdateTime);
+        }
+    }
 
+    private static void AdvanceAndCorrectBarClock()
+    {
         var currentTimeMs = AudioInput.LastUpdateTime * 1000;
         var deltaTimeMs = AudioInput.TimeSinceLastUpdate * 1000;
 
         // Advance time...
         _barTime += _currentBpm / 60.0 / 1000.0 / 4.0 * deltaTimeMs;
+
+        // Apply earlier phase corrections gradually; applied at once they show as small jumps in the beat timing.
+        var appliedCorrection = _pendingPhaseCorrection * Math.Min(1.0, deltaTimeMs / PhaseCorrectionSpreadMs);
+        _barTime -= appliedCorrection;
+        _pendingPhaseCorrection -= appliedCorrection;
 
         var maxAge = (60000.0 / MinBpm * 2);
 
@@ -190,7 +219,17 @@ public static class BeatSynchronizer
 
         _currentBpm += bpmCorrection;
         _currentBpm = Math.Clamp(_currentBpm, MinBpm, MaxBpm);
-        _barTime -= phaseCorrection;
+        _pendingPhaseCorrection += phaseCorrection;
+    }
+
+    private static void PublishBarClock(double updateTimeSec)
+    {
+        lock (_publishedClockLock)
+        {
+            _publishedBarTime = _barTime;
+            _publishedBpm = _currentBpm;
+            _publishedUpdateTimeSec = updateTimeSec;
+        }
     }
 
     /// <summary>
@@ -259,6 +298,16 @@ public static class BeatSynchronizer
     // Timing
     private static double _currentBpm = 120.0;
     private static double _barTime;
+    private static double _pendingPhaseCorrection;
+
+    /** Written by the audio callback thread, read by the main thread. */
+    private static readonly Lock _publishedClockLock = new();
+    private static double _publishedBarTime;
+    private static double _publishedBpm = 120.0;
+    private static double _publishedUpdateTimeSec;
+
+    /** Phase corrections decay with roughly this time constant. */
+    private const double PhaseCorrectionSpreadMs = 100.0;
 
     private static readonly List<Onset> _detectedOnsets = [];
 

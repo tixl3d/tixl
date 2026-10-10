@@ -1,6 +1,7 @@
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator.Interfaces;
+using T3.Core.Stats;
 using T3.Core.Utils;
 using T3.Editor.Gui.MagGraph.Interaction;
 using T3.Editor.Gui.MagGraph.Model;
@@ -336,7 +337,7 @@ internal sealed partial class MagGraphView
 
     private void SmoothItemPositions()
     {
-        const float dampAmount = 0.33f;
+        var dampAmount = MathUtils.DampingForFrame(0.33f, FrameTiming.VisualDeltaSec);
 
         foreach (var i in _context.Layout.Items.Values)
         {

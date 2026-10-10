@@ -25,7 +25,7 @@ Bind an output to a display in the [Output Setup](OutputSetup.md) and it opens f
 - Extend to two displays and use the primary notebook screen for controlling TiXL and the secondary display as fullscreen output connected via HDMI, USB-C, or DisplayPort.
 - Use various other tricks to output and split video signals (like HDMI mixers, splitters, Spout output, etc.).
 
-Going fullscreen (View → Fullscreen) puts the editor on whichever display its window is already on, so drag the main window to the screen you want before you press it.
+Going fullscreen (View → Fullscreen UI) puts the editor on whichever display its window is already on, so drag the main window to the screen you want before you press it.
 
 ## Overview
 
@@ -39,7 +39,7 @@ Here are the steps for starting a simple setup for live patching:
 1. If you already have a project, open it by double-clicking. Otherwise, create a new project by selecting "New → Empty Project" (giving it a meaningful title won't hurt). Then, double-click your new project to open it.
 1. Enable "Window → 2nd Render Window." This will open a second TiXL window that mirrors the operator pinned to the output panel. If the two windows are swapped (i.e. the main window is shown on your projector), activate "Windows → Settings → User Interface → Fullscreen Window Swap."
 1. For performance reasons, the output result will only be rendered once and used for both the output panel of TiXL's main window and the render output window. For that reason, you need to adjust the resolution of your output and switch the resolution selector in the output panel toolbar from "Fill" to "1080p".
-1. If not already, switch to full-screen mode (View → Fullscreen).
+1. If not already, switch to full-screen mode (View → Fullscreen UI).
 1. Create an operator with a texture output, e.g. [RyojiPattern2].
 1. Pin that operator to the output either using the pin icon in the output panel toolbar or by pressing "P" on your keyboard.
 

@@ -43,6 +43,12 @@ public sealed class Setup
     /// <summary>Venue footprints whose segments carry the wall surfaces standing on them.</summary>
     public List<FloorPlan> FloorPlans = [];
 
+    /// <summary>
+    /// Shared by the Default output of every setup created here. A project's default setup stays in memory until
+    /// it is first edited, so an id drawn per creation would break op references to it on every editor start.
+    /// </summary>
+    public static readonly Guid DefaultOutputId = new("b6a3c1f0-5d2e-4e8a-9c71-0d4f3e2a1b90");
+
     /// <summary>Creates a setup containing the always-present Default output.</summary>
     public static Setup CreateDefault(string name = "Setup 1")
     {
@@ -54,6 +60,7 @@ public sealed class Setup
                        [
                            new OutputDefinition
                                {
+                                   Id = DefaultOutputId,
                                    Name = "Default",
                                    Kind = OutputDefinition.Kinds.Default,
                                    CanvasResolution = new Int2(1920, 1080),

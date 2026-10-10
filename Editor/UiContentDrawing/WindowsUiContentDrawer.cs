@@ -150,12 +150,14 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
             }
 
             UiContentUpdate.TakeMeasurement();
+            T3Metrics.RecordFrameInterval();
+            GpuFrameTimer.BeginFrame();
             ImGui.GetIO().DisplaySize = ProgramWindows.Main.Size;
 
             ProgramWindows.HandleFullscreenToggle();
 
             DirtyFlag.IncrementGlobalTicks();
-            T3Metrics.UiRenderingStarted();
+            T3Metrics.CpuFrameStarted();
 
             if (!string.IsNullOrEmpty(Program.NewImGuiLayoutDefinition))
             {
@@ -258,7 +260,7 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
             ProgramWindows.ServePendingUiCapture();
         }
 
-        T3Metrics.UiRenderingCompleted();
+        T3Metrics.CpuFrameCompleted();
 
         ProgramWindows.Present(T3Ui.UseVSync);
     }

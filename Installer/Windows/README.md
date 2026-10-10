@@ -1,6 +1,6 @@
 # Building a TiXL Installer
 
-We use [Inno Setup](https://jrsoftware.org/isinfo.php) to generate a `.exe` installer that includes all dependencies and installs the Windows Graphics Tools.
+We use [Inno Setup](https://jrsoftware.org/isinfo.php) to generate a `.exe` installer that includes all dependencies.
 
 ## Quick Build (One Click)
 

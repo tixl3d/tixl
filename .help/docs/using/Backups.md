@@ -7,7 +7,7 @@ By default TiXL saves a backup of every user project every 3 minutes. Each backu
 TiXL has two backup modes, controlled by the **Enable Minimal Backup** checkbox in Settings:
 
 - **Full backup** — every project file except build output (`bin/`, `obj/`), exports (`Export/`), rendered videos (`Render/`), image sequences and screenshots. Includes binary assets (textures, meshes, audio).
-- **Minimal backup** *(default)* — only source-code-shaped files: `.csproj`, `.cs`, `.t3`, `.t3ui`, `.hlsl`, `.json`, `.txt`. Skips binary assets. Much smaller zips, but if you lose the original project folder the assets are gone too — keep your `Assets/` under separate version control or backup.
+- **Minimal backup** *(default)* — only source-code-shaped files: `.csproj`, `.cs`, `.t3`, `.t3ui`, `.hlsl`, `.json`, `.txt`, plus the project's `.meta/` data (such as variations, without thumbnails). Skips binary assets. Much smaller zips, but if you lose the original project folder the assets are gone too — keep your `Assets/` under separate version control or backup.
 
 The **first backup of a project is always full**, regardless of the toggle, so you have at least one complete snapshot on disk.
 

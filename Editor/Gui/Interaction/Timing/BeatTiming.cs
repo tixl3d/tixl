@@ -3,6 +3,7 @@ using T3.Core.Animation;
 using T3.Core.Audio;
 using T3.Core.Audio.Timing;
 using T3.Core.Settings;
+using T3.Core.Stats;
 
 namespace T3.Editor.Gui.Interaction.Timing;
 
@@ -37,7 +38,9 @@ internal static class BeatTiming
             return;
         }
         
-        var runTime = Playback.RunTimeInSecs;
+        // The frame's time on the visual clock: read mid-frame, RunTimeInSecs would carry the CPU's uneven frame
+        // starts into the beat time.
+        var runTime = FrameTiming.RecordedFrameCount > 0 ? FrameTiming.VisualFrameTimeSec : Playback.RunTimeInSecs;
         var distanceToMeasure = 1 - (float)Math.Abs((BeatTime % 4) / 4 - 0.5) * 2;
         BeatTimingDetails.DistanceToMeasure = distanceToMeasure;
 
@@ -172,7 +175,19 @@ internal static class BeatTiming
         {
             var config = playbackSettings.Playback;
             if (!config.EnableAudioBeatLocking)
+            {
+                _isBeatLockActive = false;
                 return false;
+            }
+
+            // A lock carried over from another source would be slewed off gradually, which plays time back
+            // and forth. Relocking from scratch switches hard at the next bar start.
+            if (!_isBeatLockActive || config.BeatLockSource != _activeBeatLockSource)
+            {
+                DanceAiPhaseTracker.Reset();
+                _activeBeatLockSource = config.BeatLockSource;
+                _isBeatLockActive = true;
+            }
 
             if (config.BeatLockSource != CompositionSettings.BeatLockSources.OnsetDetection)
                 DanceAiPhaseTracker.Smoothing = config.BeatLockSmoothing;
@@ -181,17 +196,17 @@ internal static class BeatTiming
             switch (config.BeatLockSource)
             {
                 case CompositionSettings.BeatLockSources.PhaseModelRaw when DanceAiPhaseTracker.HasEstimates:
-                    BeatTime = DanceAiPhaseTracker.RawBarProgress + offsetInBars;
+                    BeatTime = DanceAiPhaseTracker.GetRawBarProgress(runTime) + offsetInBars;
                     _beatDuration = 60.0 / DanceAiPhaseTracker.RawBpm;
                     return true;
 
                 case CompositionSettings.BeatLockSources.PhaseModel when DanceAiPhaseTracker.IsLocked:
-                    BeatTime = DanceAiPhaseTracker.BarProgress + offsetInBars;
+                    BeatTime = DanceAiPhaseTracker.GetBarProgress(runTime) + offsetInBars;
                     _beatDuration = 60.0 / DanceAiPhaseTracker.CurrentBpm;
                     return true;
 
                 case CompositionSettings.BeatLockSources.OnsetDetection when _resynced:
-                    BeatTime = _barTimeAverage.UpdateAndCompute(BeatSynchronizer.BarProgress) + offsetInBars;
+                    BeatTime = BeatSynchronizer.GetBarProgress(runTime) + offsetInBars;
                     _beatDuration = 60.0 / BeatSynchronizer.CurrentBpm;
                     return true;
 
@@ -253,5 +268,6 @@ internal static class BeatTiming
 
     private const double Threshold = 0.3;
 
-    private static readonly SlidingAverage _barTimeAverage = new(10);
+    private static bool _isBeatLockActive;
+    private static CompositionSettings.BeatLockSources _activeBeatLockSource;
 }

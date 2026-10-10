@@ -84,26 +84,10 @@ namespace Lib.io.audio
             AudioReference.UpdateAction += UpdateAudioReference;
         }
 
-        // Wired into the graph, or auto-collected by a bus/combine (which stamps the node) — either way the
-        // graph has taken the channel, and the engine must stand down from level and mixer membership.
+        // Only a bus collecting the node (it stamps every leaf it takes) means the graph has taken the channel.
+        // A wire alone is not enough: a [CombineAudio] that no bus pulls would leave the stream silent at volume 0.
         private bool IsRoutedToGraph()
-            => IsAudioReferenceWired() || Playback.FrameCount - _node.LastCollectedFrame <= GraphFrameSlack;
-
-        private bool IsAudioReferenceWired()
-        {
-            var connections = Parent?.Symbol.Connections;
-            if (connections == null)
-                return false;
-
-            for (var i = 0; i < connections.Count; i++)
-            {
-                var c = connections[i];
-                if (c.SourceParentOrChildId == SymbolChildId && c.SourceSlotId == AudioReference.Id)
-                    return true;
-            }
-
-            return false;
-        }
+            => Playback.FrameCount - _node.LastCollectedFrame <= GraphFrameSlack;
 
         // Evaluation by a bus is itself the drive: wiring the sampler into the graph is enough to play it,
         // without also routing Result into a command chain. Unlike a video, a sampler has no picture whose

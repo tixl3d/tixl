@@ -1,4 +1,5 @@
 ﻿using ImGuiNET;
+using T3.Core.Stats;
 using T3.Core.Utils;
 
 namespace T3.Editor.Gui.UiHelpers;
@@ -18,7 +19,7 @@ public class CurvePlot
         _graphValues[_sampleOffset] = value;
         if (Damping)
         {
-            _dampedValue = MathUtils.Lerp(_dampedValue, value, 0.01f);
+            _dampedValue = MathUtils.Lerp(_dampedValue, value, MathUtils.BlendForFrame(0.01f, FrameTiming.VisualDeltaSec));
             value = _dampedValue;
         }
             

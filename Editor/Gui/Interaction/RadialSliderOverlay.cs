@@ -1,5 +1,6 @@
 ﻿using ImGuiNET;
 using T3.Core.DataTypes.Vector;
+using T3.Core.Stats;
 using T3.Core.Utils;
 using T3.Editor.Gui.Styling;
 
@@ -81,11 +82,12 @@ public static class RadialSliderOverlay
         const float maxRadius = 2500;
         var angleDampingFromDelay = (_framesSinceStart > 30 ? MathF.Pow(MathUtils.SmootherStep(2, 15, _framesSinceLastMove),4) : 1) * 0.07f;
         var angleDampingFromRadiusDistance = MathF.Pow(MathUtils.SmootherStep(40, 70, Math.Abs(mousePosRadius - _dampedRadius)), 4);
-        _dampedRadius = MathUtils.Lerp(_dampedRadius, mousePosRadius.Clamp(40f,maxRadius), angleDampingFromDelay * angleDampingFromRadiusDistance);
+        _dampedRadius = MathUtils.Lerp(_dampedRadius, mousePosRadius.Clamp(40f,maxRadius),
+                                       MathUtils.BlendForFrame(angleDampingFromDelay * angleDampingFromRadiusDistance, FrameTiming.VisualDeltaSec));
         var normalizedClampedRadius = ( _dampedRadius/1000).Clamp(0.0f, 1);
             
         // Value range and tick interval 
-        _dampedModifierScaleFactor = MathUtils.Lerp(_dampedModifierScaleFactor, GetKeyboardScaleFactor(), 0.1f);
+        _dampedModifierScaleFactor = MathUtils.Lerp(_dampedModifierScaleFactor, GetKeyboardScaleFactor(), MathUtils.BlendForFrame(0.1f, FrameTiming.VisualDeltaSec));
         var valueRange = (Math.Pow(3 * (normalizedClampedRadius ), 3)) * 50 * scale * _dampedModifierScaleFactor;
         var tickInterval =  Math.Pow(10, (int)Math.Log10(valueRange * 250 / _dampedRadius) - 2) ;
                 

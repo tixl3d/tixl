@@ -9,7 +9,7 @@ lists which features work where.
 - **OS:** Windows 10 (64-bit) or Windows 11.
 - **GPU:** a DirectX 11.3-compatible card. GeForce GTX 970 or later is the minimum target; RTX-class cards
   handle complex shader graphs much more comfortably.
-- **DirectX:** 11.3 runtime and the Windows Graphics Tools. The installer handles both.
+- **DirectX:** 11.3 runtime (part of Windows).
 
 ## Linux
 

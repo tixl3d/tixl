@@ -7,24 +7,24 @@
     {
       "InputId": "6541c1ac-ba84-4a46-a6df-8ab52455c57b"/*ColorA*/,
       "Position": {
-        "X": -48.61692,
-        "Y": 91.24069
+        "X": 403.5539,
+        "Y": 183.61325
       },
       "Description": "A color multiplied onto the background image"
     },
     {
       "InputId": "70dc133e-800a-4cd0-a159-2cbab4c322cb"/*ColorB*/,
       "Position": {
-        "X": -48.61692,
-        "Y": 181.24069
+        "X": 403.5539,
+        "Y": 323.61325
       },
       "Description": "An optional color multiplied. The alpha channel can be used to fade out the image.\n\nConsider connecting this to a [SampleGradient]."
     },
     {
       "InputId": "93e63b73-e572-4bb2-bbbd-11bbffad89e7"/*Resolution*/,
       "Position": {
-        "X": -49.949135,
-        "Y": 506.8235
+        "X": 543.5539,
+        "Y": 603.6133
       },
       "Description": "The target resolution. Please make sure to check the documentation on how T3 handles resolutions."
     },
@@ -32,8 +32,8 @@
       "InputId": "abaa52e9-7d3d-4ae5-89d2-5251f61e5392"/*ImageA*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -48.61692,
-        "Y": 46.240692
+        "X": 543.5539,
+        "Y": 113.61325
       },
       "Description": "The background image defining the resolution of the output."
     },
@@ -41,16 +41,16 @@
       "InputId": "c7c524cf-e31e-4bac-8f77-58bd61b337de"/*ImageB*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -48.61692,
-        "Y": 136.24069
+        "X": 543.5539,
+        "Y": 148.61325
       },
       "Description": "The image blended on top of the background image."
     },
     {
       "InputId": "cad32967-e91b-4bd1-af09-5fdfdeee630e"/*AlphaMode*/,
       "Position": {
-        "X": -48.61692,
-        "Y": 271.24066
+        "X": 403.5539,
+        "Y": 498.61325
       },
       "Description": "Various modes for how the alpha channels are combined.",
       "AddPadding": "True"
@@ -58,8 +58,8 @@
     {
       "InputId": "cdc2cf4b-f788-4cb4-a3f5-8dfaa8bd54b3"/*NormalForUpperHalf*/,
       "Position": {
-        "X": -48.61692,
-        "Y": 316.24066
+        "X": 403.5539,
+        "Y": 533.6133
       },
       "GroupTitle": "Advanced Settings",
       "Description": "If used with blend modes other than normal, that blend mode will only be used if the alpha channel is below 0.5.\nAbove that, the image will be fully blended with normal mode.\n\nAs an example: If blended with Screen mode...\n- Alpha = 0.0: none of the image will be visible\n- Alpha = 0.5: the image will be fully visible with screen mode\n- Alpha = 1.0: the image will be fully visible with normal mode\n\n"
@@ -67,23 +67,23 @@
     {
       "InputId": "d7b83780-c4be-4337-b1df-0c98310b1926"/*GenerateMips*/,
       "Position": {
-        "X": -49.949135,
-        "Y": 461.8235
+        "X": 543.5539,
+        "Y": 638.6133
       },
       "Description": "Generated MipMap levels. Please read the \"Realtime Rendering for Artists\" wiki page for mode details."
     },
     {
       "InputId": "e8923e83-ce48-4b71-a1aa-46b9ff79780b"/*ScaleMode*/,
       "Position": {
-        "X": -49.949135,
-        "Y": 416.8235
+        "X": 403.5539,
+        "Y": 568.6133
       }
     },
     {
       "InputId": "fc5f1d08-3997-4ba3-ac59-d86e4e501fb0"/*BlendMode*/,
       "Position": {
-        "X": -48.61692,
-        "Y": 226.24069
+        "X": 403.5539,
+        "Y": 463.61325
       },
       "GroupTitle": "Settings",
       "Description": "Various blending modes for the colors."
@@ -100,43 +100,43 @@
     {
       "ChildId": "42f85198-b793-4609-aba8-8a7e2db62bbf"/*Vector4Components*/,
       "Position": {
-        "X": 122.33575,
-        "Y": 154.58716
+        "X": 543.5539,
+        "Y": 323.61325
       }
     },
     {
       "ChildId": "46965dc5-8929-4d8f-82ff-29cebdce3b8d"/*Vector4Components*/,
       "Position": {
-        "X": 122.33575,
-        "Y": 98.58719
+        "X": 543.5539,
+        "Y": 183.61325
       }
     },
     {
       "ChildId": "8127b1df-29ea-4670-8bb3-48ac73ed04d5"/*IntToFloat*/,
       "Position": {
-        "X": 122.33575,
-        "Y": 210.58716
+        "X": 543.5539,
+        "Y": 463.61325
       }
     },
     {
       "ChildId": "882f89a2-6842-4342-bc33-0d9a4977873f"/*BoolToFloat*/,
       "Position": {
-        "X": 120.221344,
-        "Y": 310.80862
+        "X": 543.5539,
+        "Y": 533.6133
       }
     },
     {
       "ChildId": "b2c29ae7-69bd-4a78-951e-1e0952052b41"/*IntToFloat*/,
       "Position": {
-        "X": 119.894775,
-        "Y": 417.96936
+        "X": 543.5539,
+        "Y": 568.6133
       }
     },
     {
       "ChildId": "b7edf6bf-99d6-40a5-a459-570202ead322"/*IntToFloat*/,
       "Position": {
-        "X": 122.33575,
-        "Y": 266.5871
+        "X": 543.5539,
+        "Y": 498.61325
       }
     }
   ],

@@ -344,7 +344,7 @@
         "22ca2fc1-417e-49fe-88c1-a5eb4b7711ae",
         "320cb1e3-5713-45aa-92d0-cf4031a3fef3"
       ],
-      "Namespace": "Skills.Math.M06.Vectors",
+      "Namespace": "Skills.Math.M06_Vectors",
       "TopicType": "Numbers",
       "Requirement": "AllInputPaths"
     },
@@ -578,7 +578,7 @@
         "4efe0a8d-4d49-426c-b762-73e730a76e20",
         "50f09b3a-39f0-48a6-bc83-6bc0c1aff185"
       ],
-      "Namespace": "Skills.Math.M05.BasicMath",
+      "Namespace": "Skills.Math.M05_Trigger",
       "TopicType": "Numbers",
       "Requirement": "AllInputPaths"
     },
@@ -592,7 +592,7 @@
       },
       "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
       "UnlocksTopics": [],
-      "Namespace": "Skills.Math.M04.BasicMath",
+      "Namespace": "Skills.Math.M04_TriggerAnims",
       "TopicType": "Numbers",
       "Requirement": "AllInputPaths"
     },
@@ -671,7 +671,7 @@
         "1ad7270b-f246-4e05-ac92-02169a9a8fb5",
         "af08df40-a878-408f-a5b2-e1be361e50e5"
       ],
-      "Namespace": "Skills.Render.R02_DrawingMeshes",
+      "Namespace": "Skills.Mesh.R02_DrawingMeshes",
       "TopicType": "Command",
       "Requirement": "AllInputPaths"
     },
@@ -689,7 +689,7 @@
         "e1025d52-5cd7-4c1e-af78-c7cf4ea335ab",
         "6bd3c94c-f01f-4fc4-94e4-8f28442decc6"
       ],
-      "Namespace": "Skills.Render.R05_ShadingAntMaterials",
+      "Namespace": "Skills.Render.R05_ShadingAndMaterial",
       "TopicType": "Command",
       "Requirement": "AllInputPaths"
     },
@@ -1160,7 +1160,7 @@
       "UnlocksTopics": [
         "f37f0fa5-2b34-4b82-a379-a32748f77725"
       ],
-      "Namespace": "Skills.Image.I04_Gradients",
+      "Namespace": "Skills.Image.I04_ColorCorrection",
       "TopicType": "Image",
       "Requirement": "AllInputPaths"
     },
@@ -1725,7 +1725,7 @@
       "UnlocksTopics": [
         "e81bac72-c60e-49ca-8880-0be823b60ce8"
       ],
-      "Namespace": "Skills.Image.I03_AnalyzingImages",
+      "Namespace": "Skills.Image.I03_Analyze",
       "TopicType": "Image",
       "Requirement": "AllInputPaths"
     },
@@ -1832,7 +1832,7 @@
         "4efe0a8d-4d49-426c-b762-73e730a76e20",
         "f15f35fe-a482-45b2-a909-4e88f529e71e"
       ],
-      "Namespace": "Skills.Math.M03.BasicMath",
+      "Namespace": "Skills.Math.M03_BoolsAndAnims",
       "TopicType": "Numbers",
       "Requirement": "AllInputPaths"
     },

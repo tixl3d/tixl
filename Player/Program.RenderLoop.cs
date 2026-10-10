@@ -4,6 +4,7 @@ using T3.Graphics.Compat;
 using T3.Graphics;
 using T3.Core.Animation;
 using T3.Core.Audio;
+using T3.Core.Audio.Graph;
 using T3.Core.Logging;
 using T3.Core.Operator;
 using T3.Core.Output.Rendering;
@@ -22,6 +23,9 @@ internal static partial class Program
     // todo - share this function with the editor ? is that possible? it could have delegate arguments
     private static void RenderCallback()
     {
+        // Recorded at the frame's start, before playback advances by the resulting visual frame duration.
+        FrameTiming.RecordFrameStart(Playback.RunTimeInSecs, _vsyncInterval > 0);
+
         EnsureBackBufferSize();
 
         // The backends record into a frame and submit it at the end; D3D11's immediate context needed no such
@@ -83,7 +87,7 @@ internal static partial class Program
         _device.EndFrame();
 
 
-        PerformanceMetrics.RecordFrame((float)(Playback.LastFrameDuration * 1000.0));
+        PerformanceMetrics.RecordFrame((float)(FrameTiming.FrameIntervalSec * 1000.0));
     }
     
     private class TimelineEndedException : Exception

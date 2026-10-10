@@ -5,6 +5,7 @@ using T3.Core.Animation;
 using T3.Core.DataTypes;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
+using T3.Core.Stats;
 using T3.Core.Utils;
 using T3.Editor.Gui.InputUi.VectorInputs;
 using T3.Editor.Gui.Interaction;
@@ -663,8 +664,9 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
 
             curveIndex++;
         }
-        minValue = parameter.DampedMinValue.DampTowards(minValue);
-        maxValue = parameter.DampedMaxValue.DampTowards(maxValue);
+        var rangeDamping = MathUtils.DampingForFrame(0.9f, FrameTiming.VisualDeltaSec);
+        minValue = parameter.DampedMinValue.DampTowards(minValue, rangeDamping);
+        maxValue = parameter.DampedMaxValue.DampTowards(maxValue, rangeDamping);
     }
 
     private static void DrawDopeSheetPolyline(ReadOnlySpan<Vector2> points, TimeLineCanvas canvas,

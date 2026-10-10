@@ -23,7 +23,7 @@ Rider is an excellent IDE for developing .NET applications. It's free to use for
 ## Additional requirements
 
 - A git client is useful but optional. [git-fork](https://git-fork.com/) is a good graphical option; plain `git` works too.
-- Windows Graphics Tools. The TiXL installer sets these up for you (see [Installation](Installation.md)), so you may already have them.
+- Windows Graphics Tools, for the DirectX debug layer. Debug builds of the Player need them, and so does the editor's *Enable DirectX Debug Mode* setting. Add them via *Settings → System → Optional features → Graphics Tools*.
 
 ## Cloning the repository.
 

@@ -124,6 +124,7 @@ internal static class RenderTiming
         Playback.Current.PlaybackSpeed = 0.0;
         Playback.Current.Settings = projectSettings;
         Playback.Current.FrameSpeedFactor = session.Settings.FrameRate / 60.0f;
+        Playback.FixedFrameDurationSec = 1.0 / session.Settings.FrameRate;
 
         // time range
         var startSecs = ReferenceTimeToSeconds(session.Settings.StartInBars, session.Settings.TimeReference, session.Settings.FrameRate);
@@ -184,7 +185,8 @@ internal static class RenderTiming
         Playback.Current.TimeInSecs = ReferenceTimeToSeconds(s.EndInBars, s.TimeReference, s.FrameRate);
         Playback.Current.IsRenderingToFile = false;
         Playback.Current.PlaybackSpeed = 0.0;
-        Playback.Current.FrameSpeedFactor = 1.0; // could use actual display frame rate
+        Playback.Current.FrameSpeedFactor = 1.0; // Only used while rendering to file; live playback measures it.
+        Playback.FixedFrameDurationSec = null;
         Playback.Current.Update();
 
         rt.AudioRecording = false;

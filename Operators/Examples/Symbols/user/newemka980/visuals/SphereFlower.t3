@@ -349,7 +349,13 @@
       "Id": "c973d8c2-4bbc-4175-9347-04d09d480dcb"/*HasTimeChanged*/,
       "SymbolId": "2443b2fd-c397-4ea6-9588-b595f918cf01",
       "SymbolName": "Lib.numbers.anim.time.HasTimeChanged",
-      "InputValues": [],
+      "InputValues": [
+        {
+          "Id": "bc112889-77a8-4967-a9b7-683b7c7017fe"/*Mode*/,
+          "Type": "System.Int32",
+          "Value": 0
+        }
+      ],
       "Outputs": []
     },
     {
@@ -383,6 +389,14 @@
       "SymbolId": "2c3d2c26-ac45-42e9-8f13-6ea338333568",
       "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "InputValues": [
+        {
+          "Id": "53afc8d9-f417-4628-9a97-220bec62919f"/*Resolution*/,
+          "Type": "T3.Core.DataTypes.Vector.Int2",
+          "Value": {
+            "X": 512,
+            "Y": 512
+          }
+        },
         {
           "Id": "8169be8f-cb35-4900-b462-f2139b412d59"/*Rotate*/,
           "Type": "System.Single",

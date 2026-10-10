@@ -9,16 +9,17 @@ namespace T3.Editor.Gui.MagGraph.Interaction;
 
 /// <summary>
 /// Grows a tree layout from the current selection one level per invocation: operators feeding the
-/// selected items are snapped into place (main input stacked above, other inputs left of their row)
+/// selected items are snapped into place (main input stacked above or, for input drivers, left of the row; other
+/// inputs left of their row)
 /// and added to the selection, so repeating the action walks further up and left through the graph.
 /// Selected items that feed other selected items are arranged as well, so a box selection gets tidied.
-/// Already snapped sources are kept where they are. A source snaps horizontally into a row only if it doesn't
-/// cover connected rows below it; taller ones and shared sources (fan-out, placed once all their consumers are
-/// part of the selection) go loosely left of their consumers with a gap. Only items taking part in the layout
-/// count as obstacles (the fixed part of the selection with everything snapped to it, plus placed clusters);
-/// unrelated operators in the way are overlapped, not avoided. Items only touch each other at exact snap
-/// positions; everything placed loosely keeps at least a row or column of air, so nothing reads as snapped
-/// that isn't. Connections are never changed.
+/// Already snapped sources are kept where they are. A source snaps horizontally into a row only if the rows it
+/// covers below are free or fed by its own further outputs; taller ones and shared sources (fan-out, placed
+/// once all their consumers are part of the selection) go loosely left of their consumers with a gap. Only items
+/// taking part in the layout count as obstacles (the fixed part of the selection with everything snapped to it,
+/// plus placed clusters); unrelated operators in the way are overlapped, not avoided. Items only touch each other
+/// at exact snap positions; everything placed loosely keeps at least a row or column of air, so nothing reads as
+/// snapped that isn't. Connections are never changed.
 /// </summary>
 internal static class TreeLayouting
 {
@@ -61,8 +62,7 @@ internal static class TreeLayouting
                 if (!selected.Contains(source) || source == target)
                     continue;
 
-                if (connection.OutputLineIndex == 0 && CountOutgoingConnections(source) == 1
-                    || AllConsumersAreIn(source, selected))
+                if (TryGetSnapRow(source, target, out _) || AllConsumersAreIn(source, selected))
                 {
                     movableSelected.Add(source);
                 }
@@ -72,6 +72,15 @@ internal static class TreeLayouting
         var handled = new HashSet<MagGraphItem>(selected);
         handled.ExceptWith(movableSelected);
         var obstacles = MagItemMovement.CollectSnappedItems(handled);
+
+        // Items snapped together form a block: the fixed selection with everything snapped to it, and each
+        // loosely placed cluster on its own. A snapping cluster may pack flush only against its target's block.
+        var fixedBlock = new HashSet<MagGraphItem>(obstacles);
+        var blocks = new Dictionary<MagGraphItem, HashSet<MagGraphItem>>();
+        foreach (var item in fixedBlock)
+        {
+            blocks[item] = fixedBlock;
+        }
 
         // Classify first, place afterwards: sources that are going to move must not block each other's spots
         var placements = new List<Placement>();
@@ -100,9 +109,9 @@ internal static class TreeLayouting
                     continue;
                 }
 
-                // Only the main output of a single-consumer source can snap. Shared or secondary outputs
-                // wait until every consumer is laid out, then go unsnapped left of all of them.
-                var canSnap = connection.OutputLineIndex == 0 && CountOutgoingConnections(source) == 1;
+                // A source can snap only if the target is its sole consumer and takes its outputs in matching
+                // rows. Shared sources wait until every consumer is laid out, then go unsnapped left of all of them.
+                var canSnap = TryGetSnapRow(source, target, out var snapRow);
                 if (!canSnap && !AllConsumersAreIn(source, handled, selected))
                     continue;
 
@@ -113,15 +122,16 @@ internal static class TreeLayouting
                 if (cluster.Overlaps(obstacles))
                     continue;
 
-                // A tall item snapped into a row covers the rows below it - fine as long as nothing wants to
+                // A tall item snapped into a row covers the rows below it - fine as long as nothing else wants to
                 // snap there. Stacking above allows any height.
-                var maySnapIntoRow = CoveredRowsAreFree(target, lineIndex, source);
-                var snaps = canSnap && (maySnapIntoRow || lineIndex == 0);
+                var canStack = canSnap && snapRow == 0 && CountOutgoingConnections(source) == 1;
+                var maySnapIntoRow = canSnap && CoveredRowsAreFree(target, snapRow, source);
+                var snaps = maySnapIntoRow || canStack;
 
                 handled.UnionWith(cluster);
                 obstacles.UnionWith(cluster);
                 pendingItems.UnionWith(cluster);
-                placements.Add(new Placement(target, lineIndex, source, cluster, snaps, maySnapIntoRow));
+                placements.Add(new Placement(target, snapRow, source, cluster, snaps, canStack, maySnapIntoRow));
             }
         }
 
@@ -148,12 +158,31 @@ internal static class TreeLayouting
 
         foreach (var (_, _, placement) in orderedPlacements)
         {
+            // A selected target can be skipped as a source itself (e.g. its cluster overlaps the fixed part);
+            // it then stays put and forms a block with whatever is snapped to it
+            if (!blocks.TryGetValue(placement.Target, out var targetBlock))
+            {
+                targetBlock = MagItemMovement.CollectSnappedItems(placement.Target);
+                foreach (var item in targetBlock)
+                {
+                    blocks[item] = targetBlock;
+                }
+            }
+
+            var isSnapped = false;
             var found = placement.Snaps
-                            ? TryFindSnappedPosition(placement, obstacles, pendingItems, out var newPos)
-                            : TryFindPositionLeftOfConsumers(placement, obstacles, pendingItems, out newPos);
+                            ? TryFindSnappedPosition(placement, obstacles, targetBlock, pendingItems, out var newPos, out isSnapped)
+                            : TryFindPositionLeftOfConsumers(placement, obstacles, targetBlock, pendingItems, out newPos);
 
             // From here on the cluster blocks at its final position, whether it moved or not
             pendingItems.ExceptWith(placement.Cluster);
+            var block = isSnapped ? targetBlock : new HashSet<MagGraphItem>();
+            block.UnionWith(placement.Cluster);
+            foreach (var item in placement.Cluster)
+            {
+                blocks[item] = block;
+            }
+
             if (!found)
                 continue;
 
@@ -183,11 +212,13 @@ internal static class TreeLayouting
         return movedCount > 0 || newlySelected.Count > 0;
     }
 
+    /// <param name="SnapRow">Target input row the source's first output line aligns with when snapped horizontally</param>
     private readonly record struct Placement(MagGraphItem Target,
-                                             int LineIndex,
+                                             int SnapRow,
                                              MagGraphItem Source,
                                              HashSet<MagGraphItem> Cluster,
                                              bool Snaps,
+                                             bool CanStack,
                                              bool MaySnapIntoRow);
 
     private static void MoveCluster(GraphUiContext context, HashSet<MagGraphItem> cluster, Vector2 offset)
@@ -225,6 +256,39 @@ internal static class TreeLayouting
         return count;
     }
 
+    /// <summary>
+    /// A source snaps horizontally when the target is its only consumer and every connection lands in the row
+    /// its output line sits in, so a multi-output helper feeding consecutive rows of a multi-input snaps as a whole.
+    /// </summary>
+    private static bool TryGetSnapRow(MagGraphItem source, MagGraphItem target, out int snapRow)
+    {
+        snapRow = -1;
+        foreach (var outputLine in source.OutputLines)
+        {
+            foreach (var connection in outputLine.ConnectionsOut)
+            {
+                if (connection.TargetItem != target)
+                {
+                    snapRow = -1;
+                    return false;
+                }
+
+                var row = connection.InputLineIndex - connection.VisibleOutputIndex;
+                if (snapRow == -1)
+                {
+                    snapRow = row;
+                }
+                else if (snapRow != row)
+                {
+                    snapRow = -1;
+                    return false;
+                }
+            }
+        }
+
+        return snapRow >= 0;
+    }
+
     private static bool AllConsumersAreIn(MagGraphItem source, HashSet<MagGraphItem> set, HashSet<MagGraphItem>? orSet = null)
     {
         foreach (var outputLine in source.OutputLines)
@@ -257,14 +321,16 @@ internal static class TreeLayouting
     }
 
     /// <summary>
-    /// True if the target rows a source of this height would cover below its own row are unconnected or don't exist.
+    /// True if the target rows a source of this height would cover below its snap row are unconnected, fed by
+    /// the source itself, or don't exist.
     /// </summary>
-    private static bool CoveredRowsAreFree(MagGraphItem target, int lineIndex, MagGraphItem source)
+    private static bool CoveredRowsAreFree(MagGraphItem target, int snapRow, MagGraphItem source)
     {
         var sourceRows = (int)MathF.Round(source.Size.Y / MagGraphItem.LineHeight);
-        for (var row = lineIndex + 1; row < lineIndex + sourceRows && row < target.InputLines.Length; row++)
+        for (var row = snapRow + 1; row < snapRow + sourceRows && row < target.InputLines.Length; row++)
         {
-            if (target.InputLines[row].ConnectionIn != null)
+            var connection = target.InputLines[row].ConnectionIn;
+            if (connection != null && connection.SourceItem != source)
                 return false;
         }
 
@@ -272,37 +338,48 @@ internal static class TreeLayouting
     }
 
     /// <summary>
-    /// Main input: stacked above the target. Otherwise (or if the stack spot is taken): snapped left of the row.
-    /// If neither exact spot is free, or the source would cover connected rows below, it falls back to the loose
-    /// placement - the connection then becomes a curve.
+    /// Main input: stacked above the target, or snapped left of its row. Input drivers prefer the row, where they
+    /// pack tighter; operators prefer the stack. If neither exact spot is free, or the source would cover connected
+    /// rows below, it falls back to the loose placement - the connection then becomes a curve.
     /// </summary>
-    private static bool TryFindSnappedPosition(in Placement placement, HashSet<MagGraphItem> obstacles, HashSet<MagGraphItem> pendingItems,
-                                               out Vector2 position)
+    private static bool TryFindSnappedPosition(in Placement placement, HashSet<MagGraphItem> obstacles, HashSet<MagGraphItem> targetBlock,
+                                               HashSet<MagGraphItem> pendingItems, out Vector2 position, out bool isSnapped)
     {
-        var target = placement.Target;
-        if (placement.LineIndex == 0)
-        {
-            position = target.PosOnCanvas - new Vector2(0, placement.Source.Size.Y);
-            if (IsFree(placement, obstacles, pendingItems, position, isSnapPosition: true))
-                return true;
-        }
+        isSnapped = true;
+        var rowFirst = placement.Source.Variant == MagGraphItem.Variants.Input;
+        if (rowFirst && TryGetRowPosition(placement, obstacles, targetBlock, pendingItems, out position))
+            return true;
 
-        if (placement.MaySnapIntoRow)
-        {
-            position = target.PosOnCanvas + new Vector2(-MagGraphItem.Width, placement.LineIndex * MagGraphItem.LineHeight);
-            if (IsFree(placement, obstacles, pendingItems, position, isSnapPosition: true))
-                return true;
-        }
+        if (TryGetStackPosition(placement, obstacles, targetBlock, pendingItems, out position))
+            return true;
 
-        return TryFindPositionLeftOfConsumers(placement, obstacles, pendingItems, out position);
+        if (!rowFirst && TryGetRowPosition(placement, obstacles, targetBlock, pendingItems, out position))
+            return true;
+
+        isSnapped = false;
+        return TryFindPositionLeftOfConsumers(placement, obstacles, targetBlock, pendingItems, out position);
+    }
+
+    private static bool TryGetStackPosition(in Placement placement, HashSet<MagGraphItem> obstacles, HashSet<MagGraphItem> targetBlock,
+                                            HashSet<MagGraphItem> pendingItems, out Vector2 position)
+    {
+        position = placement.Target.PosOnCanvas - new Vector2(0, placement.Source.Size.Y);
+        return placement.CanStack && IsFree(placement, obstacles, targetBlock, pendingItems, position, isSnapPosition: true);
+    }
+
+    private static bool TryGetRowPosition(in Placement placement, HashSet<MagGraphItem> obstacles, HashSet<MagGraphItem> targetBlock,
+                                          HashSet<MagGraphItem> pendingItems, out Vector2 position)
+    {
+        position = placement.Target.PosOnCanvas + new Vector2(-MagGraphItem.Width, placement.SnapRow * MagGraphItem.LineHeight);
+        return placement.MaySnapIntoRow && IsFree(placement, obstacles, targetBlock, pendingItems, position, isSnapPosition: true);
     }
 
     /// <summary>
     /// Loose placement: one column left of the leftmost consumer, at the row of the topmost consumer connection,
     /// walking down row by row until there is air on all sides.
     /// </summary>
-    private static bool TryFindPositionLeftOfConsumers(in Placement placement, HashSet<MagGraphItem> obstacles, HashSet<MagGraphItem> pendingItems,
-                                                       out Vector2 position)
+    private static bool TryFindPositionLeftOfConsumers(in Placement placement, HashSet<MagGraphItem> obstacles, HashSet<MagGraphItem> targetBlock,
+                                                       HashSet<MagGraphItem> pendingItems, out Vector2 position)
     {
         var minX = float.PositiveInfinity;
         var minRowY = float.PositiveInfinity;
@@ -320,7 +397,7 @@ internal static class TreeLayouting
         for (var step = 0; step < MaxSearchSteps; step++)
         {
             position = columnPos + new Vector2(0, step * MagGraphItem.LineHeight);
-            if (IsFree(placement, obstacles, pendingItems, position, isSnapPosition: false))
+            if (IsFree(placement, obstacles, targetBlock, pendingItems, position, isSnapPosition: false))
                 return true;
         }
 
@@ -333,8 +410,8 @@ internal static class TreeLayouting
     /// clusters) minus those still pending a move. Unrelated items don't block: overlapping them is visible and
     /// easy to fix by hand, while avoiding them would silently break the snap the user asked for.
     /// </summary>
-    private static bool IsFree(in Placement placement, HashSet<MagGraphItem> obstacles, HashSet<MagGraphItem> pendingItems,
-                               Vector2 sourcePos, bool isSnapPosition)
+    private static bool IsFree(in Placement placement, HashSet<MagGraphItem> obstacles, HashSet<MagGraphItem> targetBlock,
+                               HashSet<MagGraphItem> pendingItems, Vector2 sourcePos, bool isSnapPosition)
     {
         var offset = sourcePos - placement.Source.PosOnCanvas;
         foreach (var movedItem in placement.Cluster)
@@ -346,10 +423,9 @@ internal static class TreeLayouting
                     || pendingItems.Contains(other))
                     continue;
 
-                // At its snap position an item shares an edge with the target, and the target's other sources
-                // may pack against it in the same column. Everywhere else it keeps air on all sides.
-                var mayTouch = isSnapPosition
-                               && (other == placement.Target || IsDirectlyConnected(other, placement.Target));
+                // At its snap position a cluster shares an edge with the target and packs flush against the
+                // sources (and their inputs) already snapped around it. Everywhere else it keeps air on all sides.
+                var mayTouch = isSnapPosition && targetBlock.Contains(other);
                 if (mayTouch ? area.Overlaps(other.Area) : IsTooClose(area, other.Area))
                     return false;
             }
@@ -367,26 +443,6 @@ internal static class TreeLayouting
         var inflatedX = new ImRect(area.Min - new Vector2(TouchMargin, 0), area.Max + new Vector2(TouchMargin, 0));
         var inflatedY = new ImRect(area.Min - new Vector2(0, TouchMargin), area.Max + new Vector2(0, TouchMargin));
         return inflatedX.Overlaps(other) || inflatedY.Overlaps(other);
-    }
-
-    private static bool IsDirectlyConnected(MagGraphItem item, MagGraphItem target)
-    {
-        foreach (var inputLine in item.InputLines)
-        {
-            if (inputLine.ConnectionIn?.SourceItem == target)
-                return true;
-        }
-
-        foreach (var outputLine in item.OutputLines)
-        {
-            foreach (var connection in outputLine.ConnectionsOut)
-            {
-                if (connection.TargetItem == target)
-                    return true;
-            }
-        }
-
-        return false;
     }
 
     private const int MaxSearchSteps = 200;

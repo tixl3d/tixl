@@ -5,6 +5,7 @@ using ImGuiNET;
 using T3.Core.Animation;
 using T3.Core.DataTypes.DataSet;
 using T3.Core.DataTypes.Vector;
+using T3.Core.Stats;
 using T3.Core.Utils;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Styling;
@@ -724,8 +725,9 @@ internal sealed class DataSetViewCanvas
                         }
 
                         // Adjust auto height of plot line
-                        var newRange = new ValueRange(MathUtils.Lerp(valueRange.Min, newVisibleRange.Min, 0.1f),
-                                                      MathUtils.Lerp(valueRange.Max, newVisibleRange.Max, 0.1f));
+                        var rangeBlend = MathUtils.BlendForFrame(0.1f, FrameTiming.VisualDeltaSec);
+                        var newRange = new ValueRange(MathUtils.Lerp(valueRange.Min, newVisibleRange.Min, rangeBlend),
+                                                      MathUtils.Lerp(valueRange.Max, newVisibleRange.Max, rangeBlend));
                         if (float.IsNaN(newRange.Min) || float.IsNaN(newRange.Max))
                             newRange = new ValueRange();
 

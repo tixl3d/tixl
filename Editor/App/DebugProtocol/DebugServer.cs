@@ -13,6 +13,8 @@ using ImGuiNET;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using T3.Core.Animation;
+using T3.Core.Stats;
+using T3.Editor.Gui.Windows.Analyze;
 using T3.Core.Logging;
 using T3.Core.Model;
 using T3.Core.Operator;
@@ -22,6 +24,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using T3.Editor.Compilation;
 using T3.Editor.Gui.Interaction;
+using T3.Editor.Gui.MagGraph.Ui;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.Selection;
 using T3.Editor.Gui.Window;
@@ -430,6 +433,26 @@ internal static class DebugServer
                 }
 
                 context.SendOk(new JObject());
+                break;
+            }
+
+            case "layoutSelection":
+            {
+                var view = ProjectView.Focused;
+                if (view?.GraphView is not MagGraphView magGraphView)
+                {
+                    context.SendError("NO_COMPOSITION", "No graph view focused");
+                    break;
+                }
+
+                var changed = magGraphView.LayoutInputsOfSelection();
+                var selectedIds = new JArray();
+                foreach (var selectable in view.NodeSelection.Selection)
+                {
+                    selectedIds.Add(selectable.Id.ToString());
+                }
+
+                context.SendOk(new JObject { ["changed"] = changed, ["selectedIds"] = selectedIds });
                 break;
             }
 
@@ -1032,6 +1055,12 @@ internal static class DebugServer
                          {
                              ["frameDeltaSeconds"] = io.DeltaTime,
                              ["fps"] = io.DeltaTime > 0 ? Math.Round(1f / io.DeltaTime, 1) : 0,
+                             ["framePeriodMs"] = Math.Round(FrameTiming.FramePeriodSec * 1000, 3),
+                             ["refreshRateHz"] = Math.Round(FrameTiming.RefreshRate, 3),
+                             ["frameSpeedFactor"] = Math.Round(Playback.Current?.FrameSpeedFactor ?? 1, 3),
+                             ["gpuFrameMs"] = Math.Round(PerformanceMetrics.GpuFrameDuration.Average, 3),
+                             ["presentationMode"] = PresentationDiagnostics.Describe(PresentationDiagnostics.CompositionMode),
+                             ["queuedFrames"] = PresentationDiagnostics.QueuedFrames,
                              ["gcTotalMemoryMb"] = Math.Round(GC.GetTotalMemory(false) / (1024.0 * 1024.0), 2),
                              // Grows without bound when an operator saves render state that nothing restores.
                              ["stateStackDepth"] = T3.Core.Resource.ResourceManager.Device.ImmediateContext.StateStackDepth,

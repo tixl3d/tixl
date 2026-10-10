@@ -36,13 +36,13 @@ The integration uses a modular setup with multiple operators:
 
 You define **Points** with your light information.
 
-**PointsToArtnetLight** converts *Points* (and their `Color`, `Orientation`, `FX1`, `FX2`) into DMX value sequences. Through various parameters, you define which channels correspond to which attributes.
+**PointsToDMXLights** converts *Points* (and their `Color`, `Orientation`, `FX1`, `FX2`) into DMX value sequences. Through various parameters, you define which channels correspond to which attributes.
 
 **[ArtnetOutput]** broadcasts these value sequences.
 
-### PointsToArtnetLight
+### PointsToDMXLights
 
-We added a new grid display mode to inspect the output values of **PointsToArtnetLight**:
+We added a new grid display mode to inspect the output values of **PointsToDMXLights**:
 
 ![alt text](/images/Animation/anim-1.gif)
 
@@ -56,13 +56,13 @@ Use the \[MergeIntLists] operator to merge outputs from multiple fixture definit
 
 ![alt text](/images/Animation/anim-2.gif)
 
-The `Length` parameter ensures a 512-byte buffer. The optional `StartIndices` parameter allows manual offset placement for each fixture.
+The `MaxSize` parameter ensures a 512-byte buffer. The optional `StartIndices` parameter allows manual offset placement for each fixture.
 
 ### Light Orientations
 
 Controlling “moving heads” (lights with servo motors) is more advanced.
 
-Getting *some* rotation is straight forward: Just activate the  `GetRotation` Parameter in **PointsToArtnetLight**, enter the correct channel ids, and the light will do _something_. 
+Getting *some* rotation is straight forward: Just activate the  `GetRotation` Parameter in **PointsToDMXLights**, enter the correct channel ids, and the light will do _something_. 
 
 To set this up precisely, e.g. so that a group of spotlight will follow a point in space, will require more work:
 
@@ -74,7 +74,7 @@ To set this up precisely, e.g. so that a group of spotlight will follow a point 
 4. Adjust orientations.
 5. Apply effects to the points.
 6. **Combine** effect points with reference points.
-7. Enable `WithReferencePoints` in **PointsToArtnetLight**.
+7. Enable `ReferencePoints` in **PointsToDMXLights**.
 
 
 ## Hardware considerations
@@ -117,7 +117,7 @@ The current implementation is a solid proof-of-concept that already enables many
 
 After brainstorming with several light artists, the following features are envisioned:
 
-* A new `DataTable` type to hold and edit generic data, similar to an Excel spreadsheet. This would allow creating templates for fixture definitions (essentially all parameters of `PointsToArtnetLight`) that can be reused. The table would support CSV export/import, opening the door to converting existing GDTF specs.
+* A new `DataTable` type to hold and edit generic data, similar to an Excel spreadsheet. This would allow creating templates for fixture definitions (essentially all parameters of `PointsToDMXLights`) that can be reused. The table would support CSV export/import, opening the door to converting existing GDTF specs.
 * The `DataTable` could also be used to define mappings for `PointIndex`, `FixtureDefinitionId`, `UniverseIndex`, and `UniverseChannelIndex`.
 * A second data table could generate index-list buffers to filter points into subsets for selective effects.
 * A new \[PointList] type should be defined that can be serialized. This would support better editing, such as multi-selection, group transformations, and setting parameters for multiple selected points at once.

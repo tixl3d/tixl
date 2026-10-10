@@ -80,6 +80,8 @@ public sealed class SwapChain : IDisposable
 
     public void WaitForFrameLatency() => _swapchain.WaitForFrameLatency();
 
+    public bool TryGetPresentationStatistics(out PresentationStatistics statistics) => _swapchain.TryGetPresentationStatistics(out statistics);
+
     public void Dispose()
     {
         _backBuffers.Clear();
