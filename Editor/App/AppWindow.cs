@@ -186,8 +186,8 @@ internal sealed class AppWindow
         {
             using var swapChain2 = _swapChain.QueryInterface<SwapChain2>();
             _frameLatencyWaitableHandle = swapChain2.FrameLatencyWaitableObject;
-            // 1 = lowest latency, 2 = small queue depth (less risk of stalls under jitter).
-            swapChain2.MaximumFrameLatency = 2;
+            // A queue depth of 2 lets the loop run a frame ahead, so frame intervals alternate between ~0 and two vblanks.
+            swapChain2.MaximumFrameLatency = 1;
         }
         catch (SharpDX.SharpDXException e)
         {
