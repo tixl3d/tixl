@@ -449,6 +449,11 @@ internal static class AppMenuBar
                     if (MenuItem("ImGUI Metrics", isChecked: WindowManager.MetricsWindowVisible))
                         WindowManager.MetricsWindowVisible = !WindowManager.MetricsWindowVisible;
 
+                    CustomComponents.SeparatorLine();
+
+                    if (MenuItem("Preview Crash Dialog"))
+                        CrashReporting.PreviewCrashDialog();
+
                     ImGui.EndMenu();
                 }
 
