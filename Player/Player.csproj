@@ -63,7 +63,7 @@
     <ProjectReference Include="..\Graphics.Compat\Graphics.Compat.csproj" />
         <ProjectReference Include="..\IoServices\IoServices.csproj" />
         <ProjectReference Include="..\SdlPlatform\SdlPlatform.csproj" />
-        <ProjectReference Include="..\SilkWindows\SilkWindows.csproj" />
+        <ProjectReference Include="..\ImguiWindows\ImguiWindows.csproj" />
     </ItemGroup>
 
     <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild" Condition="'$(Configuration)' == 'Release'">

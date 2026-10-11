@@ -69,7 +69,7 @@ internal static class UiContentUpdate
 
         var fontPack = new FontPack(normalFont, boldFont, smallFont, largeFont);
         ImGuiWindowService.Instance.SetFonts(fontPack);
-        (BlockingWindow.Instance as SdlMessageBoxProvider)?.ShareFonts(fontAtlasPtr,
+        (BlockingWindow.Instance as SdlDialogProvider)?.ShareFonts(fontAtlasPtr,
                                                                        new ImFonts([Fonts.FontSmall, Fonts.FontNormal, Fonts.FontBold, Fonts.FontLarge]),
                                                                        _messageBoxLook);
     }

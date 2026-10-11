@@ -59,9 +59,22 @@ internal static partial class Program
         T3.Core.Diagnostics.AssemblyLoadDiagnostics.Install();
 
         CoreUi.Instance = _coreUi;
-        var silkWindows = new SilkWindowProvider();
-        BlockingWindow.Instance = silkWindows;
-        TrySetDialogFonts(silkWindows);
+        var dialogs = new SdlDialogProvider
+                          {
+                              WindowIconPath = Path.Combine(SharedResources.EditorResourcesDirectory, "images", "t3.ico"),
+                          };
+        BlockingWindow.Instance = dialogs;
+        TrySetDialogFonts(dialogs);
+
+        // Before anything that can fail: the message boxes reporting it are SDL windows too.
+        SdlSurface.SetVulkanLibraryPath(T3.Graphics.Vulkan.VulkanLoader.FindLibraryPath());
+        if (!SDL_Init(SDL_InitFlags.SDL_INIT_VIDEO))
+        {
+            var sdlError = $"Failed to initialize SDL: {SDL_GetError()}";
+            Log.Error(sdlError);
+            Console.Error.WriteLine(sdlError);
+            return;
+        }
 
         var settingsPath = Path.Combine(FileLocations.StartFolder, ExportSettings.FileName);
         if (!JsonUtils.TryLoadingJson(settingsPath, out ExportSettings exportSettings) || exportSettings.Export == null)
@@ -73,13 +86,6 @@ internal static partial class Program
         }
 
         CoreSettings.Config = exportSettings.ConfigData;
-
-        SdlSurface.SetVulkanLibraryPath(T3.Graphics.Vulkan.VulkanLoader.FindLibraryPath());
-        if (!SDL_Init(SDL_InitFlags.SDL_INIT_VIDEO))
-        {
-            BlockingWindow.Instance.ShowMessageBox($"Failed to initialize SDL: {SDL_GetError()}");
-            return;
-        }
 
         var playerDataDirectory = ResolvePlayerDataDirectory(exportSettings);
         var fileWriter = FileWriter.CreateDefault(playerDataDirectory, out var logPath);
@@ -110,7 +116,7 @@ internal static partial class Program
                 var dialogOptions = new SimpleWindowOptions(dialogSize, 60, true, false, true,
                                                             new Vector2(primary.Bounds.X + (primary.Bounds.Width - dialogSize.X) / 2,
                                                                         primary.Bounds.Y + (primary.Bounds.Height - dialogSize.Y) / 2));
-                var result = silkWindows.Show(exportSettings.ApplicationTitle, dialog, dialogOptions);
+                var result = dialogs.Show(exportSettings.ApplicationTitle, dialog, dialogOptions);
                 if (result == null)
                 {
                     Log.Info("Startup cancelled.");
@@ -518,7 +524,7 @@ internal static partial class Program
     /// <summary>
     /// Uses the editor's UI fonts for the startup dialog and message boxes when the export ships them.
     /// </summary>
-    private static void TrySetDialogFonts(SilkWindowProvider silkWindows)
+    private static void TrySetDialogFonts(SdlDialogProvider dialogs)
     {
         var fontDirectory = Path.Combine(SharedResources.EditorResourcesDirectory, "fonts");
         var regularPath = Path.Combine(fontDirectory, "Inter-Regular.ttf");
@@ -527,10 +533,10 @@ internal static partial class Program
         if (!File.Exists(regularPath) || !File.Exists(boldPath) || !File.Exists(lightPath))
             return;
 
-        silkWindows.SetFonts(new FontPack(new TtfFont(regularPath, 18),
-                                          new TtfFont(boldPath, 18),
-                                          new TtfFont(regularPath, 14),
-                                          new TtfFont(lightPath, 30)));
+        dialogs.SetFonts(new FontPack(new TtfFont(regularPath, 18),
+                                      new TtfFont(boldPath, 18),
+                                      new TtfFont(regularPath, 14),
+                                      new TtfFont(lightPath, 30)));
     }
 
     /// <summary>

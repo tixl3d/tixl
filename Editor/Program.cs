@@ -137,7 +137,7 @@ internal static class Program
         var windowProvider = new SilkWindowProvider();
         var imguiContextLock = windowProvider.ContextLock;
         ImGuiWindowService.Instance = windowProvider;
-        BlockingWindow.Instance = new SdlMessageBoxProvider
+        BlockingWindow.Instance = new SdlDialogProvider
                                       {
                                           WindowIconPath = Path.Combine(SharedResources.EditorResourcesDirectory, "images", "t3.ico"),
                                       };
