@@ -78,11 +78,19 @@ internal sealed unsafe class VulkanSwapchain : GpuSwapchain
     }
 
     /// <summary>
-    /// Nothing to wait for: <see cref="VulkanBackend.BeginFrame"/> already waits on the fence of the frame
-    /// slot it is about to reuse, which is the same bound on how far ahead the CPU may run.
+    /// Takes the frame's two blocking waits up front, where D3D11's latency waitable blocks: the fence of the
+    /// frame slot about to be reused, then the image acquire, which is where FIFO paces the loop to the display.
+    /// Left to happen lazily they block halfway through the frame, after its input was read, and the vsync wait
+    /// shows up as CPU time.
     /// </summary>
     public override void WaitForFrameLatency()
     {
+        if (_acquired)
+            return;
+
+        // The acquire signals this slot's semaphore, which is only free again once the slot's last frame is done.
+        _backend.WaitForRecordingSlot();
+        AcquireIfNeeded();
     }
 
     /// <summary>Presents the acquired image. Called by the backend once the frame's work has been submitted.</summary>

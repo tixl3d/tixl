@@ -85,34 +85,53 @@ public static class FrameTiming
     }
 
     /// <summary>
-    /// With vsync and no missed vblanks every interval is one refresh period, so the mean of the window's middle
-    /// 80 % is a precise measurement; single hitches at either end are excluded. A wide spread within that middle
-    /// means missed or doubled frames, and the previous estimate is kept.
+    /// With vsync every interval spans a whole number of refresh periods plus the jitter of when the loop wakes up.
+    /// That jitter can be large (Vulkan FIFO on Wayland releases images on the compositor's schedule, so 48 Hz shows
+    /// up as 15.5 / 20.8 / 25.5 ms), but it telescopes: the window's total time divided by the vblanks it spans is
+    /// precise. Each interval is rounded to whole periods of the window's mean, which also accounts for missed
+    /// vblanks. Too many intervals that fit no whole period mean the loop isn't vsync-paced, and the previous
+    /// estimate is kept.
     /// </summary>
     private static void UpdateRefreshPeriodIfSteady()
     {
-        Array.Copy(_intervals, _sortedScratch, WindowSize);
-        Array.Sort(_sortedScratch);
-        const int trimmedCount = WindowSize / 10;
-        var low = _sortedScratch[trimmedCount];
-        var high = _sortedScratch[WindowSize - 1 - trimmedCount];
-        if (high > low * MaxSteadySpread)
-            return;
+        var period = _intervalSum / _count;
 
-        var sum = 0.0;
-        for (var index = trimmedCount; index < WindowSize - trimmedCount; index++)
+        // A second pass, because missed vblanks bias the mean upwards.
+        for (var pass = 0; pass < 2; pass++)
         {
-            sum += _sortedScratch[index];
+            var sum = 0.0;
+            var vblankCount = 0.0;
+            var misfitCount = 0;
+            for (var index = 0; index < _count; index++)
+            {
+                var interval = _intervals[index];
+                var periods = Math.Round(interval / period);
+                if (periods < 1 || Math.Abs(interval - periods * period) > period * MaxPhaseJitter)
+                {
+                    misfitCount++;
+                    continue;
+                }
+
+                sum += interval;
+                vblankCount += periods;
+            }
+
+            if (misfitCount > _count / 10 || vblankCount == 0)
+                return;
+
+            period = sum / vblankCount;
         }
 
-        RefreshPeriodSec = sum / (WindowSize - 2 * trimmedCount);
+        RefreshPeriodSec = period;
         _hasMeasuredRefreshPeriod = true;
     }
 
     /// <summary>
     /// With vsync every frame stays on screen for whole refresh periods, so the visual clock advances one period per
     /// frame and only catches up in whole periods once it is a full period behind the wall clock (a missed vblank)
-    /// or ahead of it. Jitter in when frames start stays below that and never reaches the animation.
+    /// or ahead of it. Jitter in when frames start stays below that and never reaches the animation. A slow pull
+    /// towards the wall clock keeps the lag centred, so a slightly-off period estimate doesn't drift it into a
+    /// skipped or doubled frame every few seconds.
     /// </summary>
     private static double AdvanceVisualClock(double intervalSec, bool isVsynced)
     {
@@ -127,8 +146,10 @@ public static class FrameTiming
         }
 
         var period = RefreshPeriodSec;
-        var visualDelta = period;
         _visualClockLagSec += intervalSec - period;
+        var correction = _visualClockLagSec * LagCorrectionRate;
+        _visualClockLagSec -= correction;
+        var visualDelta = period + correction;
         if (Math.Abs(_visualClockLagSec) >= period)
         {
             var wholePeriods = Math.Truncate(_visualClockLagSec / period);
@@ -145,11 +166,15 @@ public static class FrameTiming
     private const int WindowSize = 120;
 
     private const int RefreshEstimateIntervalFrames = 30;
-    private const double MaxSteadySpread = 1.2;
+
+    /** How far, as a fraction of the period, an interval may be off a whole number of periods. Rounding flips at 0.5. */
+    private const double MaxPhaseJitter = 0.4;
+
+    /** Fraction of the visual clock's lag recovered per frame; ~1 s time constant, under 1 % change of speed. */
+    private const double LagCorrectionRate = 0.02;
     private const double MaxPlausibleIntervalSec = 0.25;
 
     private static readonly double[] _intervals = new double[WindowSize];
-    private static readonly double[] _sortedScratch = new double[WindowSize];
     private static int _count;
     private static int _nextIndex;
     private static double _intervalSum;
