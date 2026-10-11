@@ -1,5 +1,6 @@
 #nullable enable
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -205,7 +206,7 @@ internal static class StallWatchdog
 
             InitDeviceObjects();
 
-            var context = _deferredContext!;
+            var context = _deferredContext;
             context.MapSubresource(_vertexBuffer, MapMode.WriteDiscard, T3.Graphics.Compat.MapFlags.None, out var vertexStream);
             vertexStream.WriteRange(StallOverlay.Vertices, 0, vertexCount);
             vertexStream.Dispose();
@@ -255,20 +256,23 @@ internal static class StallWatchdog
         }
     }
 
+    [MemberNotNull(nameof(_deferredContext), nameof(_vertexBuffer), nameof(_projectionBuffer))]
     private static void InitDeviceObjects()
     {
-        if (_deferredContext != null)
+        if (_deferredContext != null && _vertexBuffer != null && _projectionBuffer != null)
             return;
 
-        _deferredContext = _device.ImmediateContext;
-        _vertexBuffer = new Buffer(_device, new BufferDescription
+        // Only reached from the watchdog thread, which Start launches after assigning the device.
+        var device = _device!;
+        _deferredContext = device.ImmediateContext;
+        _vertexBuffer = new Buffer(device, new BufferDescription
                                                 {
                                                     SizeInBytes = StallOverlay.Vertices.Length * Unsafe.SizeOf<ImDrawVert>(),
                                                     Usage = ResourceUsage.Dynamic,
                                                     BindFlags = BindFlags.VertexBuffer,
                                                     CpuAccessFlags = CpuAccessFlags.Write
                                                 });
-        _projectionBuffer = new Buffer(_device, new BufferDescription
+        _projectionBuffer = new Buffer(device, new BufferDescription
                                                     {
                                                         SizeInBytes = Unsafe.SizeOf<Matrix4x4>(),
                                                         Usage = ResourceUsage.Dynamic,

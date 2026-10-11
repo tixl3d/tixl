@@ -156,7 +156,7 @@ public sealed class _ExecuteCombineBuffers : Instance<_ExecuteCombineBuffers>
             return;
         
         T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _passParamBuffer);
-        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resultBuffer);
+        _resultBuffer.Dispose();
     }
     
     private const int PassParamSizeInBytes = 16; // min required

@@ -83,7 +83,7 @@ public class SpoutInput : Instance<SpoutInput>
     /// Opens a texture another process shared. Sharing is a D3D11 COM feature the facade does not wrap, so
     /// this goes through the native device — and stays Windows-only, as Spout itself is.
     /// </summary>
-    private static DXTexture2D? CreateD3D11Texture2D(DXTexture2D d3d11Texture2D)
+    private static DXTexture2D CreateD3D11Texture2D(DXTexture2D d3d11Texture2D)
     {
         var nativeDevice = ResourceManager.Device.NativePointer;
 

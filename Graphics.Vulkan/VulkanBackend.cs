@@ -134,7 +134,7 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         _supportsSwapchain = supportsSwapchain;
 
         InstanceApi.vkGetPhysicalDeviceProperties(PhysicalDevice, out var properties);
-        AdapterName = new VkUtf8String(properties.deviceName).ToString();
+        AdapterName = new VkUtf8String(properties.deviceName).ToString() ?? string.Empty;
         BackendDescription = $"Vulkan {properties.apiVersion.Major}.{properties.apiVersion.Minor}."
                              + $"{properties.apiVersion.Patch} on {AdapterName}";
         _limits = properties.limits;
@@ -947,6 +947,19 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         _acquiredSwapchains.Clear();
         _frameActive = false;
         _frameIndex = (_frameIndex + 1) % FramesInFlight;
+    }
+
+    /// <summary>
+    /// Blocks until the slot the next frame records into has finished on the GPU. <see cref="BeginFrame"/> waits for
+    /// the same fence; waiting early just moves the block to the top of the frame loop.
+    /// </summary>
+    internal void WaitForRecordingSlot()
+    {
+        if (_frameActive)
+            return;
+
+        var fence = _frames[_frameIndex].Fence;
+        Api.vkWaitForFences(1, &fence, true, ulong.MaxValue).CheckResult();
     }
 
     internal void RegisterAcquiredSwapchain(VulkanSwapchain swapchain)

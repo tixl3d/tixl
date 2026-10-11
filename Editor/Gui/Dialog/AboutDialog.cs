@@ -327,6 +327,10 @@ internal sealed class AboutDialog : ModalDialog
 
     private static string GetIdeName()
     {
+        // The parent process is looked up through WMI.
+        if (!OperatingSystem.IsWindows())
+            return "Unknown";
+
         try
         {
             // Get the current process

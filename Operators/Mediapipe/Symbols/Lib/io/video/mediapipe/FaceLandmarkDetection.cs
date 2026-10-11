@@ -777,7 +777,7 @@ namespace Lib.io.video.mediapipe
             
             if (dataBox.DataPointer == IntPtr.Zero)
             {
-                device.ImmediateContext.UnmapSubresource(_stagingTexture, 0);
+                device.ImmediateContext.UnmapSubresource(stagingTexture, 0);
                 return null;
             }
 
@@ -1164,7 +1164,5 @@ namespace Lib.io.video.mediapipe
 
         [Input(Guid = "01234567-890a-bcde-f012-34567890abcd")]
         public readonly InputSlot<float> ZScale = new(1.0f);
-
-        private Resource? _stagingTexture;
     }
 }

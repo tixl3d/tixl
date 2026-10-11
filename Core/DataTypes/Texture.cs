@@ -17,7 +17,7 @@ namespace T3.Core.DataTypes;
 
 public sealed class Texture2D(T3.Graphics.Compat.Texture2D texture) : Texture<T3.Graphics.Compat.Texture2D>(texture)
 {
-    public override string Name { get => TextureObject.DebugName; set => TextureObject.DebugName = value; }
+    public override string Name { get => TextureObject.DebugName ?? string.Empty; set => TextureObject.DebugName = value; }
     public readonly Texture2DDescription Description = texture.Description;
 
     [SupportedOSPlatform("windows")]
@@ -151,7 +151,7 @@ public sealed class Texture2D(T3.Graphics.Compat.Texture2D texture) : Texture<T3
 }
 public sealed class Texture3D(T3.Graphics.Compat.Texture3D texture) : Texture<T3.Graphics.Compat.Texture3D>(texture)
 {
-    public override string Name { get => TextureObject.DebugName; set => TextureObject.DebugName = value; }
+    public override string Name { get => TextureObject.DebugName ?? string.Empty; set => TextureObject.DebugName = value; }
     public readonly Texture3DDescription Description = texture.Description;
 
     public static Texture3D CreateTexture3D(Texture3DDescription description)
@@ -165,22 +165,19 @@ public abstract class Texture<T>(T texture) : AbstractTexture(texture)
     where T : T3.Graphics.Compat.Resource
 {
     public static implicit operator T(Texture<T> texture) => texture.TextureObject;
+    [return: NotNullIfNotNull(nameof(texture))]
     public static implicit operator T3.Graphics.Compat.Resource?(Texture<T>? texture) => texture?.TextureObject;
     protected readonly T TextureObject = texture;
     public bool IsDisposed => TextureObject.IsDisposed;
 }
 
-public abstract class AbstractTexture(IDisposable disposable) : IDisposable
+public abstract class AbstractTexture(T3.Graphics.Compat.Resource resource) : IDisposable
 {
-    private IDisposable? _disposable = disposable;
+    private readonly T3.Graphics.Compat.Resource _resource = resource;
+    private IDisposable? _disposable = resource;
     public abstract string Name { get; set; }
 
-    public static implicit operator T3.Graphics.Compat.Resource?(AbstractTexture texture)
-        => texture._disposable as T3.Graphics.Compat.Resource;
-    
-    // The original implementation. Not sure, if the above is valid.
-    // public static implicit operator T3.Graphics.Compat.Resource(AbstractTexture texture) 
-    //     => (T3.Graphics.Compat.Resource)texture._disposable;
+    public static implicit operator T3.Graphics.Compat.Resource(AbstractTexture texture) => texture._resource;
 
     public void Dispose()
     {

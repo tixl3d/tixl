@@ -483,7 +483,7 @@ public sealed class D3D11Backend : IGraphicsBackend, IDisposable
     /// </summary>
     public MemoryReport QueryMemory() => new(0, 0, 0);
 
-    public event Action<MemoryReport>? MemoryPressure;
+    public event Action<MemoryReport>? MemoryPressure { add { } remove { } }
 
     public void Dispose()
     {
@@ -498,8 +498,6 @@ public sealed class D3D11Backend : IGraphicsBackend, IDisposable
         {
             pipeline.Dispose();
         }
-
-        MemoryPressure = null;
 
         if (_ownsDevice)
             Device.Dispose();

@@ -291,9 +291,9 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
 
         public void Dispose()
         {
-            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref Texture);
-            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref RTV);
-            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref SRV);
+            Texture.Dispose();
+            RTV.Dispose();
+            SRV.Dispose();
         }
     }
 

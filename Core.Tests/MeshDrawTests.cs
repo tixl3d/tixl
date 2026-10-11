@@ -365,6 +365,6 @@ public class MeshDrawTests(ITestOutputHelper output)
             [new ShaderCompiler.ShaderResourcePackage(new FileInfo(Path.Combine(assetsFolder, "any.hlsl")))];
 
         public T3.Core.Model.SymbolPackage? Package => null;
-        public event Action<T3.Core.Resource.IResourceConsumer>? Disposing;
+        public event Action<T3.Core.Resource.IResourceConsumer>? Disposing { add { } remove { } }
     }
 }

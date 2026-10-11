@@ -630,7 +630,7 @@ internal static partial class Program
     private static RasterizerState _rasterizerState;
     private static Resource<VertexShader> _fullScreenVertexShaderResource;
     private static Resource<PixelShader> _fullScreenPixelShaderResource;
-    private static IGraphicsBackend? _backend;
+    private static IGraphicsBackend _backend;
     private static Device _device;
     private static Int2 _resolution;
     private static readonly List<Instance> _sends = [];

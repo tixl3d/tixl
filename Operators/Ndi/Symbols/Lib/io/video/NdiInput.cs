@@ -681,6 +681,9 @@ public sealed class NdiInput : Instance<NdiInput>, IStatusProvider, ICustomDropd
         // Add the placeholder as the first option
         yield return PlaceholderText;
 
+        if (_ndiInputFinder == null)
+            yield break;
+
         // Add all available NDI sources
         foreach (var name in _ndiInputFinder.GetSourceNames())
         {

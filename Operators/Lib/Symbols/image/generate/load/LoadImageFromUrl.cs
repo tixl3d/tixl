@@ -66,6 +66,10 @@ internal sealed class LoadImageFromUrl : Instance<LoadImageFromUrl>
     {
         if (client == null) throw new ArgumentNullException("httpClient");
 
+        // Decoding goes through WIC.
+        if (!T3.Core.Utils.WindowsOnlyFeature.IsAvailable("Loading images from URL"))
+            return;
+
         Stream stream = await DoGetRequest(client, url);
         if (stream != null)
         {
@@ -94,6 +98,8 @@ internal sealed class LoadImageFromUrl : Instance<LoadImageFromUrl>
     }
 
 
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
     void HandleResponse(Stream streamResponse)
     {
         lock (this)

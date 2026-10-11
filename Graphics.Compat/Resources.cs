@@ -197,7 +197,7 @@ public sealed class Texture2D : Texture
     }
 
     /// <summary>One entry per mip and slice, in D3D11's order.</summary>
-    public Texture2D(Device device, Texture2DDescription description, DataRectangle[] data)
+    public Texture2D(Device device, Texture2DDescription description, DataRectangle[]? data)
         : base(device, device.Backend.CreateTexture(Describe(description), ToSubresources(data, description)))
     {
         Description = description;
@@ -231,7 +231,7 @@ public sealed class Texture2D : Texture
     /// bytes a subresource holds. Derive it from the mip's height: staging only the row pitch makes the copy
     /// read past the end of the buffer, which faults the GPU rather than failing cleanly.
     /// </summary>
-    internal static SubresourceData[] ToSubresources(DataRectangle[] data, in Texture2DDescription description)
+    internal static SubresourceData[] ToSubresources(DataRectangle[]? data, in Texture2DDescription description)
     {
         // A render target is created through this overload with no pixels at all.
         if (data == null || data.Length == 0)

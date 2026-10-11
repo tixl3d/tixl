@@ -40,7 +40,7 @@ public sealed class GeometryShader(T3.Graphics.Compat.GeometryShader shader, byt
 public abstract class Shader<TShader> : AbstractShader where TShader : DeviceChild
 {
     private readonly TShader _shader;
-    public sealed override string Name { get => _shader.DebugName; set => _shader.DebugName = value; }
+    public sealed override string Name { get => _shader.DebugName ?? string.Empty; set => _shader.DebugName = value; }
 
     public static implicit operator TShader?(Shader<TShader>? shader) => shader?._shader;
 

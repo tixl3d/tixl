@@ -106,7 +106,7 @@ internal sealed class ValuesToTexture : Instance<ValuesToTexture>
             ValuesTexture.Value.Description.Height != height)
         {
             if (ValuesTexture.Value != null)
-                T3.Graphics.Compat.GraphicsUtilities.Dispose(ref ValuesTexture.Value);
+                ValuesTexture.Value.Dispose();
 
             var desc = new Texture2DDescription
             {

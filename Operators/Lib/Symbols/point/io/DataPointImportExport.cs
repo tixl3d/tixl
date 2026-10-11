@@ -167,7 +167,7 @@ public sealed class DataPointImportExport : Instance<DataPointImportExport>
                                                       UnorderedAccessViewBufferFlags.None,
                                                       ref buffer.Uav);
         }
-        else
+        else if (array != null)
         {
             // Simple sub‑resource update – fast path.
             ResourceManager.Device.ImmediateContext.UpdateSubresource(array, buffer.Buffer);

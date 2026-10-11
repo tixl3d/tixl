@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.Versioning;
 using T3.Core.Logging;
 
 namespace T3.Core.Utils;
@@ -16,6 +17,7 @@ namespace T3.Core.Utils;
 public static class WindowsOnlyFeature
 {
     /// <summary>True where the feature works. Elsewhere it says so once and the operator leaves its output empty.</summary>
+    [SupportedOSPlatformGuard("windows")]
     public static bool IsAvailable(string feature)
     {
         if (OperatingSystem.IsWindows())

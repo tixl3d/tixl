@@ -63,7 +63,8 @@ internal sealed class CommandOutputUi : OutputUi<Command>
                                       context.BackgroundColor.Y,
                                       context.BackgroundColor.Z,
                                       context.BackgroundColor.W);
-        deviceContext.ClearRenderTargetView(_msaaColorBufferRtv, colorRgba);
+        if (_msaaColorBufferRtv != null)
+            deviceContext.ClearRenderTargetView(_msaaColorBufferRtv, colorRgba);
         if (_msaaDepthBufferDsv != null)
             deviceContext.ClearDepthStencilView(_msaaDepthBufferDsv, DepthStencilClearFlags.Depth, 1.0f, 0);
 

@@ -198,7 +198,7 @@ internal sealed class VulkanPipeline(VulkanBackend backend, VkPipeline pipeline,
     {
         var pipeline = Pipeline;
         var layout = Layout;
-        var layouts = setLayouts;
+        var layouts = SetLayouts;
         backend.Retire(api =>
                        {
                            api.vkDestroyPipeline(pipeline);

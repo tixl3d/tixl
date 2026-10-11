@@ -290,12 +290,14 @@ internal static unsafe class VulkanPipelineFactory
         var highestSet = perSet.Count == 0 ? -1 : perSet.Keys.Max();
         setLayouts = new VkDescriptorSetLayout[highestSet + 1];
 
+        // Every set's bindings are a subset of all declared bindings, so one buffer serves each set in turn.
+        var bindings = stackalloc VkDescriptorSetLayoutBinding[Math.Max(1, types.Count)];
+
         for (var set = 0; set <= highestSet; set++)
         {
             perSet.TryGetValue(set, out var slots);
             slots ??= [];
 
-            var bindings = stackalloc VkDescriptorSetLayoutBinding[Math.Max(1, slots.Count)];
             var index = 0;
 
             foreach (var (slot, entry) in slots)

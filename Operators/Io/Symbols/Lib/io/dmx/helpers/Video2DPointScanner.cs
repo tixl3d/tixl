@@ -205,7 +205,9 @@ internal sealed class Video2DPointScanner : Instance<Video2DPointScanner>
         }
 
         AddDebugText(debugFrame, statusText, new Scalar(0, 255, 0));
-        UploadMatToTexture(debugFrame, ref _debugTexture);
+        // The debug view goes through System.Drawing; the scan itself works everywhere.
+        if (WindowsOnlyFeature.IsAvailable("Video2DPointScanner debug view"))
+            UploadMatToTexture(debugFrame, ref _debugTexture);
         DebugTexture.Value = _debugTexture;
 
         UpdateGpuBufferWithPoints(ref _pixelOutputBuffer, lightOutputPoints);
@@ -478,6 +480,8 @@ internal sealed class Video2DPointScanner : Instance<Video2DPointScanner>
         return matBgr;
     }
 
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
     private void UploadMatToTexture(Mat mat, ref Texture2D tex)
     {
         try

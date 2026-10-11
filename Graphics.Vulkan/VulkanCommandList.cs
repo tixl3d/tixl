@@ -925,12 +925,15 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
 
         var nulls = backend.NullResources;
 
+        // Sized for all sets at once and reused per set; every entry used is rewritten below.
+        var maxWriteCount = _pipeline.Declared.Count;
+        var writes = stackalloc VkWriteDescriptorSet[maxWriteCount];
+        var bufferInfos = stackalloc VkDescriptorBufferInfo[maxWriteCount];
+        var imageInfos = stackalloc VkDescriptorImageInfo[maxWriteCount];
+
         foreach (var setGroup in _pipeline.Declared.GroupBy(entry => entry.Key.Set))
         {
             var declared = setGroup.ToArray();
-            var writes = stackalloc VkWriteDescriptorSet[declared.Length];
-            var bufferInfos = stackalloc VkDescriptorBufferInfo[declared.Length];
-            var imageInfos = stackalloc VkDescriptorImageInfo[declared.Length];
 
             for (var i = 0; i < declared.Length; i++)
             {

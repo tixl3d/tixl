@@ -633,97 +633,105 @@ public class VideoDeviceInput : Instance<VideoDeviceInput>, ICustomDropdownHolde
                 _webcamCapabilities = new Dictionary<string, List<(int Width, int Height, double Fps)>>();
             }
 
-            try
+            // Device names and capabilities come from DirectShow.
+            if (T3.Core.Utils.WindowsOnlyFeature.IsAvailable("Webcam device scanning"))
+                ScanDirectShowDevices();
+
+            _devicesScanned = true;
+        }
+    }
+
+    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
+    private static void ScanDirectShowDevices()
+    {
+        try
+        {
+            var videoInputDevices = DsDevice.GetDevicesOfCat(FilterCategory.VideoInputDevice);
+            for (var i = 0; i < videoInputDevices.Length; i++)
             {
-                var videoInputDevices = DsDevice.GetDevicesOfCat(FilterCategory.VideoInputDevice);
-                for (var i = 0; i < videoInputDevices.Length; i++)
+                var device = videoInputDevices[i];
+                _webcamWithIndices.Add(new WebcamWithIndex(device.Name, i));
+
+                var capabilities = new List<(int Width, int Height, double Fps)>();
+                try
                 {
-                    var device = videoInputDevices[i];
-                    _webcamWithIndices.Add(new WebcamWithIndex(device.Name, i));
-
-                    var capabilities = new List<(int Width, int Height, double Fps)>();
-                    try
+                    if (device.Mon is not IMoniker moniker)
                     {
-                        if (device.Mon is not IMoniker moniker)
-                        {
-                            Log.Debug($"Moniker is null for device {device.Name}");
-                            continue;
-                        }
+                        Log.Debug($"Moniker is null for device {device.Name}");
+                        continue;
+                    }
 
-                        var filterGuid = typeof(IBaseFilter).GUID;
-                        moniker.BindToObject(null, null, ref filterGuid, out var filter);
-                        if (filter is not IBaseFilter captureFilter)
-                        {
-                            Log.Debug($"Failed to create capture filter for {device.Name}");
-                            continue;
-                        }
+                    var filterGuid = typeof(IBaseFilter).GUID;
+                    moniker.BindToObject(null, null, ref filterGuid, out var filter);
+                    if (filter is not IBaseFilter captureFilter)
+                    {
+                        Log.Debug($"Failed to create capture filter for {device.Name}");
+                        continue;
+                    }
 
-                        captureFilter.EnumPins(out var enumPins);
-                        var pins = new IPin[1];
-                        while (enumPins.Next(1, pins, IntPtr.Zero) == 0)
+                    captureFilter.EnumPins(out var enumPins);
+                    var pins = new IPin[1];
+                    while (enumPins.Next(1, pins, IntPtr.Zero) == 0)
+                    {
+                        pins[0].QueryPinInfo(out var pinInfo);
+                        if (pinInfo.dir == PinDirection.Output)
                         {
-                            pins[0].QueryPinInfo(out var pinInfo);
-                            if (pinInfo.dir == PinDirection.Output)
+                            if (pins[0] is IAMStreamConfig streamConfig)
                             {
-                                if (pins[0] is IAMStreamConfig streamConfig)
+                                streamConfig.GetNumberOfCapabilities(out int count, out int size);
+                                if (size > 0)
                                 {
-                                    streamConfig.GetNumberOfCapabilities(out int count, out int size);
-                                    if (size > 0)
+                                    var capsPtr = Marshal.AllocCoTaskMem(size);
+                                    try
                                     {
-                                        var capsPtr = Marshal.AllocCoTaskMem(size);
-                                        try
+                                        for (int j = 0; j < count; j++)
                                         {
-                                            for (int j = 0; j < count; j++)
+                                            streamConfig.GetStreamCaps(j, out var mediaType, capsPtr);
+                                            if (mediaType != null &&
+                                                mediaType.formatType == FormatType.VideoInfo &&
+                                                mediaType.formatPtr != IntPtr.Zero)
                                             {
-                                                streamConfig.GetStreamCaps(j, out var mediaType, capsPtr);
-                                                if (mediaType != null &&
-                                                    mediaType.formatType == FormatType.VideoInfo &&
-                                                    mediaType.formatPtr != IntPtr.Zero)
-                                                {
-                                                    var vih = Marshal.PtrToStructure<VideoInfoHeader>(mediaType.formatPtr);
-                                                    int w = vih.BmiHeader.Width;
-                                                    int h = vih.BmiHeader.Height;
-                                                    double fps = vih.AvgTimePerFrame > 0
-                                                                     ? 10_000_000.0 / vih.AvgTimePerFrame
-                                                                     : 30.0;
-                                                    capabilities.Add((w, h, fps));
-                                                }
-
-                                                if (mediaType != null)
-                                                    DsUtils.FreeAMMediaType(mediaType);
+                                                var vih = Marshal.PtrToStructure<VideoInfoHeader>(mediaType.formatPtr);
+                                                int w = vih.BmiHeader.Width;
+                                                int h = vih.BmiHeader.Height;
+                                                double fps = vih.AvgTimePerFrame > 0
+                                                                 ? 10_000_000.0 / vih.AvgTimePerFrame
+                                                                 : 30.0;
+                                                capabilities.Add((w, h, fps));
                                             }
+
+                                            if (mediaType != null)
+                                                DsUtils.FreeAMMediaType(mediaType);
                                         }
-                                        finally
-                                        {
-                                            Marshal.FreeCoTaskMem(capsPtr);
-                                        }
+                                    }
+                                    finally
+                                    {
+                                        Marshal.FreeCoTaskMem(capsPtr);
                                     }
                                 }
                             }
-
-                            Marshal.ReleaseComObject(pins[0]);
                         }
 
-                        Marshal.ReleaseComObject(enumPins);
-                        Marshal.ReleaseComObject(captureFilter);
-                    }
-                    catch (Exception e)
-                    {
-                        Log.Debug($"Failed to get capabilities for {device.Name}: {e.Message}");
+                        Marshal.ReleaseComObject(pins[0]);
                     }
 
-                    lock (_capabilitiesLock)
-                    {
-                        _webcamCapabilities.Add(device.Name, capabilities);
-                    }
+                    Marshal.ReleaseComObject(enumPins);
+                    Marshal.ReleaseComObject(captureFilter);
+                }
+                catch (Exception e)
+                {
+                    Log.Debug($"Failed to get capabilities for {device.Name}: {e.Message}");
+                }
+
+                lock (_capabilitiesLock)
+                {
+                    _webcamCapabilities.Add(device.Name, capabilities);
                 }
             }
-            catch (Exception e)
-            {
-                Log.Debug("Failed to scan webcams: " + e.Message);
-            }
-
-            _devicesScanned = true;
+        }
+        catch (Exception e)
+        {
+            Log.Debug("Failed to scan webcams: " + e.Message);
         }
     }
 

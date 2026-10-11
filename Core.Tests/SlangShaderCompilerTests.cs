@@ -110,7 +110,7 @@ public class SlangShaderCompilerTests(ITestOutputHelper output)
     }
 
     [Fact]
-    public void ACompiledShaderRunsAndWritesWhatItWasTold()
+    public async Task ACompiledShaderRunsAndWritesWhatItWasTold()
     {
         using var backend = TryCreateBackend();
 
@@ -170,7 +170,7 @@ public class SlangShaderCompilerTests(ITestOutputHelper output)
         context.Dispatch(1, 1, 1);
         device.EndFrame();
 
-        var readback = backend.ReadbackAsync(ResultBufferOf(result)).GetAwaiter().GetResult();
+        var readback = await backend.ReadbackAsync(ResultBufferOf(result));
         var values = System.Runtime.InteropServices.MemoryMarshal.Cast<byte, float>(readback.Data.Span);
 
         output.WriteLine("values: " + string.Join(", ", values.ToArray().Select(v => v.ToString("0.###"))));
@@ -193,7 +193,7 @@ public class SlangShaderCompilerTests(ITestOutputHelper output)
     /// portability driver (MoltenVK) has to emulate - and where that reports 0, every operator writes nothing.
     /// </summary>
     [Fact]
-    public void GetDimensionsReportsTheStructuredBufferLength()
+    public async Task GetDimensionsReportsTheStructuredBufferLength()
     {
         using var backend = TryCreateBackend();
 
@@ -250,7 +250,7 @@ public class SlangShaderCompilerTests(ITestOutputHelper output)
         context.Dispatch(1, 1, 1);
         device.EndFrame();
 
-        var readback = backend.ReadbackAsync(ResultBufferOf(result)).GetAwaiter().GetResult();
+        var readback = await backend.ReadbackAsync(ResultBufferOf(result));
         var values = System.Runtime.InteropServices.MemoryMarshal.Cast<byte, uint>(readback.Data.Span);
         output.WriteLine($"count {values[0]}, stride {values[1]}");
 
@@ -369,6 +369,6 @@ public class SlangShaderCompilerTests(ITestOutputHelper output)
         public IReadOnlyList<T3.Core.Resource.IResourcePackage> AvailableResourcePackages =>
             assetsFolder == null ? [] : [new ShaderCompiler.ShaderResourcePackage(new FileInfo(Path.Combine(assetsFolder, "any.hlsl")))];
         public T3.Core.Model.SymbolPackage? Package => null;
-        public event Action<T3.Core.Resource.IResourceConsumer>? Disposing;
+        public event Action<T3.Core.Resource.IResourceConsumer>? Disposing { add { } remove { } }
     }
 }

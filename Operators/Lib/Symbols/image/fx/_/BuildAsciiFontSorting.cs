@@ -26,6 +26,9 @@ internal sealed class BuildAsciiFontSorting : Instance<BuildAsciiFontSorting>
         }
 
         var filterCharacters = FilterCharacters.GetValue(context); 
+        if (!WindowsOnlyFeature.IsAvailable("ASCII font sorting"))
+            return;
+
         var brightnessTable = SortAsciiLetters(absolutePath, filterCharacters);
         if (brightnessTable == null)
         {
@@ -69,6 +72,8 @@ internal sealed class BuildAsciiFontSorting : Instance<BuildAsciiFontSorting>
         }
     }
 
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
     private BrightnessEntry[] SortAsciiLetters( string imageFilePath,string filterCharacters)
     {
         Bitmap bitmapImage;

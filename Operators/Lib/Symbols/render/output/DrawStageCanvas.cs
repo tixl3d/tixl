@@ -137,9 +137,10 @@ internal sealed class DrawStageCanvas : Instance<DrawStageCanvas>, IStatusProvid
     }
 
     /** The canvas texture at the wanted size, recreated only when the size changes. */
+    [MemberNotNull(nameof(_target), nameof(_targetView))]
     private void EnsureTarget(T3.Core.DataTypes.Vector.Int2 size)
     {
-        if (_target != null && !_target.IsDisposed && _target.Description.Width == size.Width && _target.Description.Height == size.Height)
+        if (_target != null && _targetView != null && !_target.IsDisposed && _target.Description.Width == size.Width && _target.Description.Height == size.Height)
             return;
 
         T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _targetView);

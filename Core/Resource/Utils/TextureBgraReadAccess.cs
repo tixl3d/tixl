@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using T3.Graphics.Compat;
 using T3.Graphics;
 using T3.Core.DataTypes;
@@ -158,9 +159,11 @@ public sealed class TextureBgraReadAccess : IDisposable
     /// <summary>
     /// Create several textures with a given format with CPU access to be able to read out the initial texture values
     /// </summary>
+    [MemberNotNull(nameof(_conversionTexture))]
     private void PrepareCpuAccessTexturesAndConversionTextures(Texture2DDescription currentDesc)
     {
-        if (_imagesWithCpuAccess.Count != 0
+        if (_conversionTexture != null
+            && _imagesWithCpuAccess.Count != 0
             && _imagesWithCpuAccess[0].Description.Width == currentDesc.Width
             && _imagesWithCpuAccess[0].Description.Height == currentDesc.Height
            )

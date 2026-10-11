@@ -57,8 +57,8 @@ internal sealed class KeepInTextureArray : Instance<KeepInTextureArray>
         {
             var srcDesc = src.Description;
 
-            bool needsRecreate =
-                _arrayTexture == null ||
+            // Tested inline rather than through a bool so flow analysis sees the textures are set afterwards.
+            if (_arrayTexture == null ||
                 _arrayTexture.IsDisposed ||
                 _sliceTexture == null ||
                 _sliceTexture.IsDisposed ||
@@ -69,10 +69,7 @@ internal sealed class KeepInTextureArray : Instance<KeepInTextureArray>
                 srcDesc.SampleDescription.Quality != _arrayDesc.SampleDescription.Quality ||
                  _arrayDesc.BindFlags != BindFlags.ShaderResource || 
                 _arrayDesc.OptionFlags != ResourceOptionFlags.None||
-                _arrayDesc.ArraySize != arraySize;
-
-
-            if (needsRecreate)
+                _arrayDesc.ArraySize != arraySize)
             {
                 T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _arrayTexture);
                 

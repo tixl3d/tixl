@@ -63,16 +63,16 @@ public static class SkiaSvgGeometry
 
     private static SKPath? BuildLocalPath(S.SvgElement element)
     {
-        var path = new SKPath();
+        using var builder = new SKPathBuilder();
         switch (element)
         {
             case S.SvgPath p:
-                AppendSegments(path, p.PathData);
+                AppendSegments(builder, p.PathData);
                 break;
 
             // A glyph in an SVG font carries its outline the same way a path does.
             case S.SvgGlyph g:
-                AppendSegments(path, g.PathData);
+                AppendSegments(builder, g.PathData);
                 break;
 
             case S.SvgRectangle r:
@@ -81,40 +81,41 @@ public static class SkiaSvgGeometry
                 var rx = r.CornerRadiusX.Value;
                 var ry = r.CornerRadiusY.Value;
                 if (rx > 0 || ry > 0)
-                    path.AddRoundRect(rect, rx > 0 ? rx : ry, ry > 0 ? ry : rx);
+                    builder.AddRoundRect(rect, rx > 0 ? rx : ry, ry > 0 ? ry : rx, SKPathDirection.Clockwise);
                 else
-                    path.AddRect(rect);
+                    builder.AddRect(rect, SKPathDirection.Clockwise);
                 break;
             }
 
             case S.SvgCircle c:
-                path.AddCircle(c.CenterX.Value, c.CenterY.Value, c.Radius.Value);
+                builder.AddCircle(c.CenterX.Value, c.CenterY.Value, c.Radius.Value, SKPathDirection.Clockwise);
                 break;
 
             case S.SvgEllipse e:
-                path.AddOval(SKRect.Create(e.CenterX.Value - e.RadiusX.Value, e.CenterY.Value - e.RadiusY.Value,
-                                           e.RadiusX.Value * 2, e.RadiusY.Value * 2));
+                builder.AddOval(SKRect.Create(e.CenterX.Value - e.RadiusX.Value, e.CenterY.Value - e.RadiusY.Value,
+                                              e.RadiusX.Value * 2, e.RadiusY.Value * 2),
+                                SKPathDirection.Clockwise);
                 break;
 
             case S.SvgLine l:
-                path.MoveTo(l.StartX.Value, l.StartY.Value);
-                path.LineTo(l.EndX.Value, l.EndY.Value);
+                builder.MoveTo(l.StartX.Value, l.StartY.Value);
+                builder.LineTo(l.EndX.Value, l.EndY.Value);
                 break;
 
             // Polyline derives from Polygon, so it has to be matched first or it never is.
             case S.SvgPolyline pl:
-                AppendPoly(path, pl.Points, close: false);
+                AppendPoly(builder, pl.Points, close: false);
                 break;
 
             case S.SvgPolygon pg:
-                AppendPoly(path, pg.Points, close: true);
+                AppendPoly(builder, pg.Points, close: true);
                 break;
 
             default:
-                path.Dispose();
                 return null;
         }
 
+        var path = builder.Detach();
         if (path.IsEmpty)
         {
             path.Dispose();
@@ -124,7 +125,7 @@ public static class SkiaSvgGeometry
         return path;
     }
 
-    private static void AppendSegments(SKPath path, SP.SvgPathSegmentList? data)
+    private static void AppendSegments(SKPathBuilder path, SP.SvgPathSegmentList? data)
     {
         if (data == null)
             return;
@@ -175,7 +176,7 @@ public static class SkiaSvgGeometry
         }
     }
 
-    private static void AppendPoly(SKPath path, S.SvgPointCollection? points, bool close)
+    private static void AppendPoly(SKPathBuilder path, S.SvgPointCollection? points, bool close)
     {
         if (points == null)
             return;

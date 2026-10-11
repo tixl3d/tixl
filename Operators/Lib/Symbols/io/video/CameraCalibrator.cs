@@ -103,6 +103,20 @@ namespace Lib.io.video
 
         private void Update(EvaluationContext context)
         {
+            // The checkerboard and both texture uploads go through System.Drawing.
+            if (!T3.Core.Utils.WindowsOnlyFeature.IsAvailable("Camera calibration"))
+            {
+                StatusMessage.Value = "Camera calibration is only available on Windows.";
+                return;
+            }
+
+            UpdateCalibration(context);
+        }
+
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+        [System.Runtime.Versioning.SupportedOSPlatform("windows")]
+        private void UpdateCalibration(EvaluationContext context)
+        {
             HandleTriggers(context);
             var mode = (Modes)Mode.GetValue(context);
 
@@ -345,6 +359,7 @@ namespace Lib.io.video
             _isCalibrated = true;
         }
 
+        [System.Runtime.Versioning.SupportedOSPlatform("windows")]
         private void GenerateCheckerboard(Size patternSize, Size imageSize, int border)
         {
             if (patternSize.Width <= 0 || patternSize.Height <= 0 || imageSize.Width <= 0 || imageSize.Height <= 0) return;
@@ -521,6 +536,7 @@ namespace Lib.io.video
             return matBgr;
         }
 
+        [System.Runtime.Versioning.SupportedOSPlatform("windows")]
         public static void UploadMatToTexture(Mat mat, ref Texture2D texture)
         {
             if (mat == null || mat.Empty()) return;
@@ -530,6 +546,7 @@ namespace Lib.io.video
             UploadBitmapToTexture(bmp, ref texture);
         }
 
+        [System.Runtime.Versioning.SupportedOSPlatform("windows")]
         public static void UploadBitmapToTexture(Bitmap bmp, ref Texture2D texture)
         {
             if (bmp == null) return;

@@ -34,6 +34,7 @@ internal sealed class LoadSvgAsTexture2D : Instance<LoadSvgAsTexture2D>, IDescri
     }
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
     private void UpdateTextureFromSvg(EvaluationContext context)
     {
         if (_svgResource.TryGetValue(context, out var svgDocument))
@@ -282,6 +283,7 @@ internal sealed class LoadSvgAsTexture2D : Instance<LoadSvgAsTexture2D>, IDescri
         return merged;
     }
 
+    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
     private static Texture2D ConvertBitmapToTexture2D(System.Drawing.Bitmap bitmap)
     {
         using var memoryStream = new MemoryStream();

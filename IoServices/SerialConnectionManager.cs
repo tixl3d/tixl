@@ -156,8 +156,13 @@ public static class SerialConnectionManager
         var portList = new List<string>();
         try
         {
-            var searcher = new ManagementObjectSearcher("root\\CIMV2", "SELECT * FROM Win32_PnPEntity WHERE Name LIKE '%(COM%)'");
-            portList.AddRange(searcher.Get().Cast<ManagementObject>().Select(p => p["Name"]?.ToString()).Where(s => s != null)!);
+            using var searcher = new ManagementObjectSearcher("root\\CIMV2", "SELECT * FROM Win32_PnPEntity WHERE Name LIKE '%(COM%)'");
+            foreach (var entry in searcher.Get())
+            {
+                // A lambda here would hide the platform check above from the analyzer.
+                if (entry["Name"]?.ToString() is { } name)
+                    portList.Add(name);
+            }
         }
         catch (Exception ex)
         {

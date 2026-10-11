@@ -59,13 +59,13 @@ internal static class ScreenshotWriter
         
         return _textureBgraReadAccess.InitiateConvertAndReadBack(gpuTexture, request => 
                                                                              {
-                                                                                 OnReadComplete(request, logErrors);
+                                                                                 OnReadComplete(request, filepath, logErrors);
                                                                                  onComplete?.Invoke(request.Filepath);
                                                                              }, filepath);        
     }
     
     
-    private static void OnReadComplete(TextureBgraReadAccess.ReadRequestItem request, bool logErrors)
+    private static void OnReadComplete(TextureBgraReadAccess.ReadRequestItem request, string filepath, bool logErrors)
     {
         var immediateContext = ResourceManager.Device.ImmediateContext;
         if (request.CpuAccessTexture.IsDisposed)
@@ -111,7 +111,7 @@ internal static class ScreenshotWriter
                 }
             }
 
-            using var file = File.Create(request.Filepath);
+            using var file = File.Create(filepath);
             var writer = new ImageWriter();
             if (isPng)
             {
@@ -122,7 +122,7 @@ internal static class ScreenshotWriter
                 writer.WriteJpg(pixels, width, height, ColorComponents.RedGreenBlue, file, JpegQuality);
             }
 
-            LastFilename = request.Filepath;
+            LastFilename = filepath;
         }
         catch (Exception e)
         {
