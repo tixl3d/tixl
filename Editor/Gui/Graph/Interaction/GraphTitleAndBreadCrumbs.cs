@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
@@ -116,7 +116,7 @@ internal static class GraphTitleAndBreadCrumbs
     private static void DrawNameAndDescription(ProjectView.InstanceView compositionOp)
     {
         ImGui.SetCursorPosX(8);
-        ImGui.PushFont(Fonts.FontLarge);
+        ImGui.PushFont(Fonts.FontNormal);
         ImGui.TextUnformatted(compositionOp.Symbol.Name);
 
         if (compositionOp.Instance.Parent == null && ImGui.BeginItemTooltip())
