@@ -105,7 +105,17 @@ internal sealed unsafe class VulkanBuffer(VulkanBackend backend, VkBuffer buffer
 
     internal ulong SliceStride;
     internal int CurrentSlice;
-    internal int SliceWrittenInFrame = -1;
+
+    /** The serial of the frame that last wrote the current slice, so a second write in that frame is recognised. */
+    internal long SliceWrittenInFrameSerial = -1;
+
+    /// <summary>
+    /// Where a Map(WriteDiscard) lands when the buffer was already written this frame. Unmap records the bytes
+    /// into the command stream, because the slice still holds what the frame's earlier commands read.
+    /// </summary>
+    internal byte* PendingWrite;
+
+    internal bool HasPendingWrite;
 
     /// <summary>Where the currently written copy starts. Descriptor writes and copies use it, not zero.</summary>
     internal ulong CurrentOffset => (ulong)CurrentSlice * SliceStride;
@@ -115,6 +125,12 @@ internal sealed unsafe class VulkanBuffer(VulkanBackend backend, VkBuffer buffer
 
     protected override void ReleaseWhenRetired()
     {
+        if (PendingWrite != null)
+        {
+            System.Runtime.InteropServices.NativeMemory.Free(PendingWrite);
+            PendingWrite = null;
+        }
+
         backend.Untrack(this);
         var buffer = Buffer;
         var memory = Memory;

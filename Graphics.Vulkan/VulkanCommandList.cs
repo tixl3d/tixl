@@ -174,8 +174,7 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
         if (buffer == null)
             return;
 
-        MapForDiscardCore(buffer, out var pointer);
-        data.CopyTo(new Span<byte>(pointer, data.Length));
+        WriteUploadBuffer(buffer, data);
 
         var bindings = _bindings[set];
         var count = _bindingCounts[set];
@@ -193,8 +192,16 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
         {
             case VulkanBuffer buffer:
             {
-                MapForDiscardCore(buffer, out var pointer);
-                return new MappedMemory(pointer, buffer.Description.SizeInBytes, buffer.Description.SizeInBytes, buffer.Description.SizeInBytes);
+                var size = buffer.Description.SizeInBytes;
+
+                if (TryClaimSliceForThisFrame(buffer))
+                    return new MappedMemory((byte*)buffer.Mapped + buffer.CurrentOffset, size, size, size);
+
+                if (buffer.PendingWrite == null)
+                    buffer.PendingWrite = (byte*)System.Runtime.InteropServices.NativeMemory.Alloc((nuint)size);
+
+                buffer.HasPendingWrite = true;
+                return new MappedMemory(buffer.PendingWrite, size, size, size);
             }
 
             case VulkanTexture { Mapped: not null } texture:
@@ -211,22 +218,69 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
     }
 
     /// <summary>
-    /// Moves an upload buffer to the copy this frame may write. That is what makes D3D11's Map(WriteDiscard)
-    /// free of stalls: the frames still on the GPU keep reading the copy they were given.
+    /// Moves an upload buffer to the copy this frame may write, for its first write in the frame. That is what
+    /// makes D3D11's Map(WriteDiscard) free of stalls: the frames still on the GPU keep reading the copy they were
+    /// given. False when the buffer was already written this frame: the slice then holds what the frame's earlier
+    /// commands read when the GPU runs them, so a further write has to go through the command stream.
     /// </summary>
-    private void MapForDiscardCore(VulkanBuffer buffer, out void* pointer)
+    private bool TryClaimSliceForThisFrame(VulkanBuffer buffer)
     {
-        if (buffer.SliceCount > 1 && buffer.SliceWrittenInFrame != _frameIndex)
+        // Outside a frame there is no command stream to order a write in; the slice is all there is.
+        if (!backend.IsFrameActive)
+            return true;
+
+        var serial = backend.RecordingFrameSerial;
+
+        if (buffer.SliceWrittenInFrameSerial == serial)
+            return false;
+
+        buffer.CurrentSlice = _frameIndex % buffer.SliceCount;
+        buffer.SliceWrittenInFrameSerial = serial;
+        return true;
+    }
+
+    /// <summary>
+    /// D3D11 renames a buffer on every Map(WriteDiscard), so a graph evaluated several times in one frame (test
+    /// warm-up, loops, multi-pass effects) gives each draw and dispatch the constants written just before it.
+    /// </summary>
+    private void WriteUploadBuffer(VulkanBuffer buffer, ReadOnlySpan<byte> data)
+    {
+        if (TryClaimSliceForThisFrame(buffer))
         {
-            buffer.CurrentSlice = _frameIndex % buffer.SliceCount;
-            buffer.SliceWrittenInFrame = _frameIndex;
+            data.CopyTo(new Span<byte>((byte*)buffer.Mapped + buffer.CurrentOffset, data.Length));
+            return;
         }
 
-        pointer = (byte*)buffer.Mapped + buffer.CurrentOffset;
+        RecordBufferWrite(buffer, data);
     }
 
     public void Unmap(GpuResource resource, int subresource)
     {
+        if (resource is not VulkanBuffer { HasPendingWrite: true } buffer)
+            return;
+
+        buffer.HasPendingWrite = false;
+        RecordBufferWrite(buffer, new ReadOnlySpan<byte>(buffer.PendingWrite, buffer.Description.SizeInBytes));
+    }
+
+    /// <summary>Writes into the buffer's current copy in command order, after the commands recorded so far.</summary>
+    private void RecordBufferWrite(VulkanBuffer buffer, ReadOnlySpan<byte> data)
+    {
+        EndRenderingIfActive();
+        VulkanBarriers.BarrierBuffer(backend, _commandBuffer, buffer, VkPipelineStageFlags2.Copy, VkAccessFlags2.TransferWrite);
+
+        // vkCmdUpdateBuffer is limited to 64 KB and whole words; anything else goes through a staging copy.
+        if (data.Length <= 65536 && data.Length % 4 == 0)
+        {
+            fixed (byte* pointer = data)
+            {
+                backend.Api.vkCmdUpdateBuffer(_commandBuffer, buffer.Buffer, buffer.CurrentOffset, (ulong)data.Length, pointer);
+            }
+        }
+        else
+        {
+            CopyThroughStaging(buffer, data);
+        }
     }
 
     public void UpdateResource(GpuResource resource, int subresource, ReadOnlySpan<byte> data, int rowPitch, int slicePitch)
@@ -234,11 +288,8 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
         switch (resource)
         {
             case VulkanBuffer { Mapped: not null } buffer:
-            {
-                MapForDiscardCore(buffer, out var pointer);
-                data.CopyTo(new Span<byte>(pointer, data.Length));
+                WriteUploadBuffer(buffer, data);
                 break;
-            }
 
             case VulkanBuffer buffer:
             {
@@ -295,7 +346,7 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
             return;
         }
 
-        var region = new VkBufferCopy { size = (ulong)data.Length };
+        var region = new VkBufferCopy { dstOffset = buffer.CurrentOffset, size = (ulong)data.Length };
         backend.Api.vkCmdCopyBuffer(_commandBuffer, staging.Buffer, buffer.Buffer, 1, &region);
         staging.Dispose();
     }
@@ -705,10 +756,11 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
         // Barriers are not allowed inside a render pass. A texture uploaded or rendered into since the pass
         // opened has to be transitioned before this draw samples it, so the pass is closed and reopened around
         // the barriers; attachments always load, so nothing drawn so far is lost.
-        if (_renderingActive && BoundResourcesNeedBarriers(GraphicsStages))
+        if (_renderingActive && (BoundResourcesNeedBarriers(GraphicsStages) || InputBuffersNeedBarriers()))
             EndRenderingIfActive();
 
         TransitionBoundResources(GraphicsStages, VkPipelineStageFlags2.AllGraphics);
+        BarrierInputBuffers();
         BeginRenderingIfNeeded();
 
         var api = backend.Api;
@@ -1037,6 +1089,31 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
         }
 
         return null;
+    }
+
+    /** Vertex and index buffers are passed to the draw rather than bound to the pipeline, so they need their own barriers. */
+    private bool InputBuffersNeedBarriers()
+    {
+        for (var i = 0; i < _vertexBufferCount; i++)
+        {
+            if (_vertexBuffers[i].Buffer is VulkanBuffer buffer && VulkanBarriers.NeedsBarrier(buffer, VkAccessFlags2.VertexAttributeRead))
+                return true;
+        }
+
+        return _indexBuffer != null && VulkanBarriers.NeedsBarrier(_indexBuffer, VkAccessFlags2.IndexRead);
+    }
+
+    private void BarrierInputBuffers()
+    {
+        for (var i = 0; i < _vertexBufferCount; i++)
+        {
+            if (_vertexBuffers[i].Buffer is VulkanBuffer buffer)
+                VulkanBarriers.BarrierBuffer(backend, _commandBuffer, buffer, VkPipelineStageFlags2.VertexAttributeInput,
+                                             VkAccessFlags2.VertexAttributeRead);
+        }
+
+        if (_indexBuffer != null)
+            VulkanBarriers.BarrierBuffer(backend, _commandBuffer, _indexBuffer, VkPipelineStageFlags2.IndexInput, VkAccessFlags2.IndexRead);
     }
 
     private void BindVertexBuffers()

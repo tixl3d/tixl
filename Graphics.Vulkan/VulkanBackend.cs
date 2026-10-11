@@ -988,6 +988,8 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
 
     internal long RecordingFrameSerial => _frames[_frameIndex].Serial;
 
+    internal bool IsFrameActive => _frameActive;
+
     /// <summary>
     /// Hands work to the slot that is currently recording: by the time that slot comes round again its fence
     /// has been waited on, so nothing the GPU could still be reading is freed.
@@ -1138,7 +1140,8 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
 
     public void Unmap(GpuResource resource, int subresource)
     {
-        // Host-visible memory stays mapped for the resource's lifetime; there is nothing to undo.
+        // Host-visible memory stays mapped for the resource's lifetime; only a write the command list deferred is left.
+        _commands.Unmap(resource, subresource);
     }
 
     public Task<ReadbackResult> ReadbackAsync(GpuTexture texture, int mipLevel, int arraySlice, CancellationToken cancellation = default)
