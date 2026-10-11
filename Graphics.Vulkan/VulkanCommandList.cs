@@ -15,6 +15,7 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
     {
         _commandBuffer = commandBuffer;
         _frameIndex = frameIndex;
+        _uploadBuffersUsed[frameIndex] = 0;
         _renderingRequested = false;
         _renderingActive = false;
         _pipeline = null;
@@ -35,6 +36,7 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
     {
         _commandBuffer = commandBuffer;
         _frameIndex = frameIndex;
+        _uploadBuffersUsed[frameIndex] = 0;
         _renderingActive = false;
     }
 
@@ -386,7 +388,7 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
             return;
         }
 
-        var staging = GetUploadBuffer(subresource, required);
+        var staging = GetUploadBuffer(required);
 
         if (staging == null || staging.Mapped == null)
         {
@@ -1139,25 +1141,41 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
         return new VkRect2D((int)_viewport.x, (int)(_viewport.y - height), (uint)_viewport.width, (uint)height);
     }
 
-    /// <summary>Staging for one subresource's pixels, grown and reused across frames like the scratch constants.</summary>
-    private VulkanBuffer? GetUploadBuffer(int subresource, int size)
+    /// <summary>
+    /// Staging for one texture upload. The copy runs when the frame is submitted, so every upload of a frame needs
+    /// a buffer of its own, and a frame slot reuses its buffers only once its fence has been waited on.
+    /// </summary>
+    private VulkanBuffer? GetUploadBuffer(int size)
     {
-        if (_uploadBuffers.TryGetValue(subresource, out var buffer) && buffer.Description.SizeInBytes >= size)
-            return buffer;
+        var pool = _uploadBuffers[_frameIndex];
+        var index = _uploadBuffersUsed[_frameIndex];
 
-        buffer?.Dispose();
+        if (index < pool.Count && pool[index].Description.SizeInBytes >= size)
+        {
+            _uploadBuffersUsed[_frameIndex] = index + 1;
+            return pool[index];
+        }
 
-        buffer = backend.CreateBuffer(new GpuBufferDescription
-                                          {
-                                              SizeInBytes = Math.Max(256, size),
-                                              Usage = BufferUsage.CopySource,
-                                              Memory = MemoryKind.Upload,
-                                          },
-                                      ReadOnlySpan<byte>.Empty, "texture upload") as VulkanBuffer;
+        if (backend.CreateBuffer(new GpuBufferDescription
+                                     {
+                                         SizeInBytes = Math.Max(256, size),
+                                         Usage = BufferUsage.CopySource,
+                                         Memory = MemoryKind.Upload,
+                                     },
+                                 ReadOnlySpan<byte>.Empty, "texture upload") is not VulkanBuffer buffer)
+            return null;
 
-        if (buffer != null)
-            _uploadBuffers[subresource] = buffer;
+        if (index < pool.Count)
+        {
+            pool[index].Dispose();
+            pool[index] = buffer;
+        }
+        else
+        {
+            pool.Add(buffer);
+        }
 
+        _uploadBuffersUsed[_frameIndex] = index + 1;
         return buffer;
     }
 
@@ -1209,7 +1227,8 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
     private readonly VulkanTextureView[] _colorTargets = new VulkanTextureView[BlendTargetStates.MaxRenderTargets];
     private readonly VertexBufferView[] _vertexBuffers = new VertexBufferView[8];
     private readonly Dictionary<(int, int), VulkanBuffer> _scratchBuffers = [];
-    private readonly Dictionary<int, VulkanBuffer> _uploadBuffers = [];
+    private readonly List<VulkanBuffer>[] _uploadBuffers = [[], []];
+    private readonly int[] _uploadBuffersUsed = new int[VulkanBackend.FramesInFlight];
 
     private VkCommandBuffer _commandBuffer;
     private VulkanPipeline? _pipeline;
