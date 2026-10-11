@@ -1,7 +1,7 @@
 name: Linux Build
 
-# A version tag (v4.4.0.0) or a manual run builds the tarball. It is always kept as a workflow artifact, and a
-# tag also attaches it to that tag's release. Pushes to branches build nothing.
+# A version tag (v4.4.0.0) or a manual run builds the tarball and a Flatpak bundle from it. Both are always kept
+# as workflow artifacts, and a tag also attaches them to that tag's release. Pushes to branches build nothing.
 on:
   workflow_dispatch:
   push:
@@ -65,5 +65,59 @@ jobs:
           files: Installer/Linux/Output/*.tar.gz
           # Linux and macOS are previews: their releases are pre-releases and never replace the Windows release
           # GitHub shows as "Latest".
+          prerelease: true
+          make_latest: false
+
+  flatpak:
+    # Repackages the tarball above for testers. A Flathub build would compile from source instead.
+    needs: build
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-26.08
+      # flatpak-builder sandboxes every build step, which needs a privileged container.
+      options: --privileged
+    permissions:
+      contents: write
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Download Tarball
+        uses: actions/download-artifact@v4
+        with:
+          name: tixl-linux-x64
+          path: Installer/Linux/Output
+
+      - name: Unpack Tarball
+        id: unpack
+        run: |
+          cd Installer/Linux/Output
+          tarball=$(ls tixl-*-linux-x64.tar.gz)
+          tar -xzf "$tarball"
+          name="${tarball%.tar.gz}"
+          # The manifest reads the stage through this version-less link, as after a local build-tarball.sh.
+          ln -sfn "$name" tixl-linux-x64
+          version="${name#tixl-}"
+          version="${version%-linux-x64}"
+          echo "bundle=tixl-$version.flatpak" >> "$GITHUB_OUTPUT"
+
+      - name: Build Flatpak Bundle
+        uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+        with:
+          manifest-path: Installer/Linux/flatpak/app.tixl.TiXL.yml
+          bundle: ${{ steps.unpack.outputs.bundle }}
+          cache-key: flatpak-builder-${{ github.sha }}
+          upload-artifact: true
+          artifact-name: tixl-flatpak
+
+      - name: Attach Bundle to Release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          files: ${{ steps.unpack.outputs.bundle }}
           prerelease: true
           make_latest: false

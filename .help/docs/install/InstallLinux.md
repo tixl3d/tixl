@@ -15,6 +15,29 @@ The native Linux version is a preview. Expect rough edges, and please report pro
 - The **.NET 10 SDK**. TiXL compiles operators while it runs, so the runtime alone isn't enough.
 - The **Slang shader compiler** (`slangc`). TiXL uses it to compile shaders for Vulkan.
 
+## The easy way: Flatpak
+
+Each release also has a `tixl-<version>.flatpak` under **Assets** on the
+[releases page](https://github.com/tixl3d/tixl/releases). It brings everything TiXL needs, including the .NET SDK
+and the Slang shader compiler, so you can skip the next two sections:
+
+```bash
+flatpak install --user ~/Downloads/tixl-*.flatpak
+flatpak run app.tixl.TiXL
+```
+
+On the first install, Flatpak downloads the shared runtime from Flathub (about 700 MB, shared with other Flatpak
+apps). Most distributions have Flathub set up already; if yours doesn't, add it with
+`flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo`.
+
+TiXL then appears in your app menu. Inside the Flatpak, settings and logs live in
+`~/.var/app/app.tixl.TiXL/config/`; projects stay in `~/Documents`. To update, install the next bundle the same way.
+To remove TiXL, run `flatpak uninstall --user app.tixl.TiXL`.
+
+TiXL currently includes the BASS audio library ([un4seen.com](https://www.un4seen.com)), in the Flatpak as in the
+download below. BASS is free for non-commercial use; using TiXL commercially requires a BASS license from un4seen
+until TiXL switches to its own audio backend. The license text is in the `licenses` folder of every download.
+
 ## Install the dependencies
 
 TiXL needs the .NET 10 SDK, the Vulkan loader and the Slang shader compiler (`slangc`). Most desktop
