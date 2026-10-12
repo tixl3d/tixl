@@ -2,6 +2,7 @@ using System.Windows.Forms;
 using ImGuiNET;
 using SharpDX.Windows;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.UiContentDrawing;
 using T3.SystemUi;
 
 // ReSharper disable InconsistentNaming
@@ -59,6 +60,7 @@ internal class ImGuiDx11RenderForm : RenderForm
 
     private const int WM_SETFOCUS = 0x0007;
     private const int WM_ACTIVATEAPP = 0x001C;
+    private const int WM_DPICHANGED = 0x02E0;
 
     #endregion
 
@@ -150,6 +152,14 @@ internal class ImGuiDx11RenderForm : RenderForm
                 (m.Msg == WM_SYSKEYDOWN || m.Msg == WM_SYSKEYUP) && (int) m.WParam == VK_ALT;
             if (!filterAltKeyToPreventFocusLoss)
                 base.WndProc(ref m);
+
+            // WinForms doesn't raise DpiChanged in PerMonitor (V1) mode, so react to the raw message.
+            if (m.Msg == WM_DPICHANGED && this == ProgramWindows.Main?.Form)
+            {
+                Log.Debug($"Display DPI changed to {(int)m.WParam & 0xFFFF}");
+                UiContentUpdate.RequestFontRebuild();
+                return;
+            }
 
             // The form's HWND can receive messages before WindowsUiContentDrawer.Initialize()
             // calls ImGui.CreateContext(). ImGui 1.91 hard-asserts on GetIO() when no context

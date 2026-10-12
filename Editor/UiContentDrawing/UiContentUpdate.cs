@@ -33,10 +33,19 @@ internal static class UiContentUpdate
         _hasSetScaling = true;
     }
 
+    /// <summary>
+    /// Rebuilds fonts and scaling on the next frame, e.g. after the window moved to a monitor with a different
+    /// display scale or the Windows scale setting changed.
+    /// </summary>
+    public static void RequestFontRebuild()
+    {
+        _hasSetScaling = false;
+    }
+
     private static void GenerateFontsWithScaleFactor(float scaleFactor)
     {
         // See https://stackoverflow.com/a/5977638
-        var displayScaleFactor = ProgramWindows.Main.GetDpi().X / 96f;
+        var displayScaleFactor = ProgramWindows.Main.Dpi / 96f;
         var dpiAwareScale = scaleFactor * displayScaleFactor;
 
         T3Ui.UiScaleFactor = dpiAwareScale;

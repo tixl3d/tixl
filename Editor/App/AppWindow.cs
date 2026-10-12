@@ -90,12 +90,14 @@ internal sealed class AppWindow
 
     public void Show() => Form.Show();
 
-    public Vector2 GetDpi()
-    {
-        using Graphics graphics = Form.CreateGraphics();
-        Vector2 dpi = new(graphics.DpiX, graphics.DpiY);
-        return dpi;
-    }
+    /// <summary>
+    /// The DPI of the monitor the window is on. GDI's <see cref="Graphics.DpiX"/> would return the system DPI,
+    /// which stays fixed until sign-out, and WinForms' DeviceDpi isn't updated in PerMonitor (V1) mode.
+    /// </summary>
+    public float Dpi => GetDpiForWindow(Form.Handle);
+
+    [DllImport("user32.dll")]
+    private static extern uint GetDpiForWindow(IntPtr hwnd);
 
     internal void SetFullScreen(int screenIndex)
     {
