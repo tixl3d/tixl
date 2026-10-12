@@ -351,6 +351,7 @@ internal static class ProgramWindows
 
             PresentWindow(Main, syncInterval);
             PresentationDiagnostics.Update(Main.SwapChain);
+            PresentationDiagnostics.MeasureRefreshPeriod(_pacingWindow.SwapChain);
 
             // Only while its window is actually shown. Presenting a hidden flip-model swap chain is not the
             // cheap no-op it looks like: DWM throttles presents to a window it isn't displaying, and with an

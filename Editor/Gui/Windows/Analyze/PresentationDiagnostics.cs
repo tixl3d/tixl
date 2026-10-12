@@ -1,7 +1,9 @@
 #nullable enable
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using SharpDX.DXGI;
 using T3.Core.Logging;
+using T3.Core.Stats;
 
 namespace T3.Editor.Gui.Windows.Analyze;
 
@@ -42,25 +44,46 @@ internal static class PresentationDiagnostics
 
         QueuedFrames = swapChain.LastPresentCount - (int)statistics.PresentCount;
 
-        // TEMP probe: is "queued" a real queue (fresh statistics) or stale bookkeeping (old SyncQpcTime)?
-        var now = System.Diagnostics.Stopwatch.GetTimestamp();
-        if (now - _lastProbeTimestamp > System.Diagnostics.Stopwatch.Frequency)
-        {
-            _lastProbeTimestamp = now;
-            var statisticsAgeMs = (now - statistics.SyncQpcTime) * 1000.0 / System.Diagnostics.Stopwatch.Frequency;
-            var refreshesSinceProbe = statistics.SyncRefreshCount - _lastProbeSyncRefreshCount;
-            _lastProbeSyncRefreshCount = statistics.SyncRefreshCount;
-            Log.Debug($"PresentProbe: last={swapChain.LastPresentCount} shown={statistics.PresentCount} queued={QueuedFrames} "
-                      + $"presentRefresh={statistics.PresentRefreshCount} syncRefresh={statistics.SyncRefreshCount} "
-                      + $"(+{refreshesSinceProbe}/s) statsAge={statisticsAgeMs:0.0}ms mode={Describe((FramePresentationMode)statistics.CompositionMode)}");
-        }
-
         var mode = (FramePresentationMode)statistics.CompositionMode;
         if (mode == CompositionMode)
             return;
 
         Log.Debug($"Main window presentation changed from {Describe(CompositionMode)} to {Describe(mode)}");
         CompositionMode = mode;
+    }
+
+    /// <summary>
+    /// Measures the refresh period of the display that paces the loop from its vblank count and timestamps, and hands
+    /// it to <see cref="FrameTiming"/>. Call once per frame after presenting, with the pacing window's swap chain.
+    /// </summary>
+    public static void MeasureRefreshPeriod(SwapChain pacingSwapChain)
+    {
+        if (!TryGetFrameStatisticsMedia(pacingSwapChain, out var statistics) || statistics.SyncQpcTime == 0)
+            return;
+
+        if (pacingSwapChain.NativePointer != _measuredSwapChain)
+        {
+            _measuredSwapChain = pacingSwapChain.NativePointer;
+            _baselineVblankQpc = statistics.SyncQpcTime;
+            _baselineVblankCount = statistics.SyncRefreshCount;
+            return;
+        }
+
+        var elapsedTicks = statistics.SyncQpcTime - _baselineVblankQpc;
+        if (elapsedTicks < Stopwatch.Frequency * RefreshMeasureIntervalSec)
+            return;
+
+        var vblanks = statistics.SyncRefreshCount - _baselineVblankCount;
+        _baselineVblankQpc = statistics.SyncQpcTime;
+        _baselineVblankCount = statistics.SyncRefreshCount;
+        if (vblanks == 0)
+            return;
+
+        var periodSec = elapsedTicks / (double)Stopwatch.Frequency / vblanks;
+        if (periodSec is < MinPlausibleRefreshPeriodSec or > MaxPlausibleRefreshPeriodSec)
+            return;
+
+        FrameTiming.SetRefreshPeriodFromDisplay(periodSec);
     }
 
     public static string Describe(FramePresentationMode? mode)
@@ -108,6 +131,11 @@ internal static class PresentationDiagnostics
     /** IUnknown's three methods precede it. */
     private const int GetFrameStatisticsMediaVtableIndex = 3;
 
-    private static long _lastProbeTimestamp;
-    private static uint _lastProbeSyncRefreshCount;
+    private const double RefreshMeasureIntervalSec = 1;
+    private const double MinPlausibleRefreshPeriodSec = 1.0 / 500;
+    private const double MaxPlausibleRefreshPeriodSec = 1.0 / 20;
+
+    private static IntPtr _measuredSwapChain;
+    private static long _baselineVblankQpc;
+    private static uint _baselineVblankCount;
 }

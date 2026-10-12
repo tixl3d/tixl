@@ -987,6 +987,7 @@ internal static class DebugServer
                              ["fps"] = io.DeltaTime > 0 ? Math.Round(1f / io.DeltaTime, 1) : 0,
                              ["framePeriodMs"] = Math.Round(FrameTiming.FramePeriodSec * 1000, 3),
                              ["refreshRateHz"] = Math.Round(FrameTiming.RefreshRate, 3),
+                             ["visualDeltaMs"] = Math.Round(FrameTiming.VisualDeltaSec * 1000, 3),
                              ["frameSpeedFactor"] = Math.Round(Playback.Current?.FrameSpeedFactor ?? 1, 3),
                              ["gpuFrameMs"] = Math.Round(PerformanceMetrics.GpuFrameDuration.Average, 3),
                              ["presentationMode"] = PresentationDiagnostics.Describe(PresentationDiagnostics.CompositionMode),

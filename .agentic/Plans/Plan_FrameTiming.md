@@ -262,6 +262,15 @@ Plan for this scenario, in order:
 4. **Diagnostics:** Output Setup shows each bound display's measured refresh and which display paces, and warns
    when the loop rate is not an integer multiple of an NDI output's rate.
 
+Progress 2026-10-12: (1) done — the first bound output paces (waitable on output swap chains, others
+`Present(1, DoNotWait)`), untested with a real projector. (2) done for the Editor — on this panel the latency
+waitable releases the loop on a 60 Hz grid (intervals 16.7/33.3 ms) while the panel shows every frame for one
+48 Hz refresh, so no interval-based estimate can see 48 Hz. `PresentationDiagnostics.MeasureRefreshPeriod`
+measures vblank count and `SyncQpcTime` of the pacing swap chain and feeds `FrameTiming.SetRefreshPeriodFromDisplay`
+(takes precedence for ~3 s per report). Measured 47.998 Hz; visual delta 20.7–20.95 ms against wall 16.7/33.4 ms.
+The interval estimator and the visual clock's lag pull were ported from linux-port `79261422c` (Vulkan/Wayland,
+and the Player's fallback).
+
 Workaround until then: set the internal panel to a fixed 60 Hz (or 120 Hz) and turn off Windows dynamic refresh
 rate, so both displays and the 30 fps NDI rate share one integer cadence. 59.94 vs 60 Hz drift between panel
 and projector remains (one hitch every ~17 s).
