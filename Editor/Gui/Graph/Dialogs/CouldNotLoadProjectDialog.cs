@@ -110,7 +110,7 @@ internal sealed class CouldNotLoadProjectDialog : ModalDialog
             ImGui.SameLine();
             if (ImGui.Button("..."))
             {
-                var picked = TryPickFolder();
+                var picked = FileOperations.TryPickAbsoluteFolder();
                 if (picked != null)
                     _customFolder = picked;
             }
@@ -413,27 +413,6 @@ internal sealed class CouldNotLoadProjectDialog : ModalDialog
         catch (Exception e)
         {
             Log.Warning($"Could not clean up \"{folder}\": {e.Message}");
-        }
-    }
-
-    private static string? TryPickFolder()
-    {
-        try
-        {
-            using var folderBrowser = EditorUi.Instance.CreateFilePicker();
-            folderBrowser.ValidateNames = false;
-            folderBrowser.CheckFileExists = false;
-            folderBrowser.CheckPathExists = true;
-            folderBrowser.FileName = "Folder Selection.";
-            if (!folderBrowser.ChooseFile())
-                return null;
-
-            return Path.GetDirectoryName(folderBrowser.FileName);
-        }
-        catch (Exception e)
-        {
-            Log.Warning("Couldn't open folder picker: " + e.Message);
-            return null;
         }
     }
 

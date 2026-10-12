@@ -310,22 +310,17 @@ internal sealed partial class SettingsWindow : Window
                        .HelpText("These are global settings. Also see the Project Settings window.");
                     FormInputs.AddVerticalSpace();
 
-                    FormInputs.AddSectionSubHeader("Project Settings");
-                    var selectedProjectDirectory = string.Empty;
                     var projectDirectories = UserSettings.Config.ProjectDirectories ??= new List<string>();
-                    var projectDirectoriesChanged = FormInputs.AddEditableListBox(ref selectedProjectDirectory,
-                                                                                  projectDirectories,
-                                                                                  "Project Directories",
-                                                                                  Directory.Exists,
-                                                                                  "Folder does not exist",
-                                                                                  """
-                                                                                  List of top-level directories that are scanned for projects.
+                    var projectDirectoriesChanged = FormInputs.AddFolderList("Project Directories",
+                                                                             projectDirectories,
+                                                                             """
+                                                                             List of top-level directories that are scanned for projects.
 
-                                                                                  This can be useful to manage your projects on multiple external drives or repositories.
+                                                                             This can be useful to manage your projects on multiple external drives or repositories.
 
-                                                                                  Changes require a restart.
-                                                                                  """
-                                                                                 );
+                                                                             Changes require a restart.
+                                                                             """
+                                                                            );
                     if (projectDirectoriesChanged)
                     {
                         changed = true;
@@ -334,12 +329,10 @@ internal sealed partial class SettingsWindow : Window
 
                     if (_projectDirectoriesRequireRestart)
                     {
-                        FormInputs.AddVerticalSpace();
-                        FormInputs.SetIndentToLeft();
+                        ImGui.SameLine(0, 4 * T3Ui.UiScaleFactor);
                         if (CustomComponents.DrawCtaButton("Restart Editor", Icon.None, UiColors.ForegroundFull, UiColors.StatusActivated, Color.Transparent))
                             EditorRestart.TryRestart();
                         CustomComponents.TooltipForLastItem("Restart TiXL to rescan the project directories.");
-                        FormInputs.SetIndentToParameters();
                     }
 
                     FormInputs.AddVerticalSpace();
