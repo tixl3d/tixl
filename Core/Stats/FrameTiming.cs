@@ -22,6 +22,12 @@ public static class FrameTiming
     public static double RefreshRate => 1 / RefreshPeriodSec;
 
     /// <summary>
+    /// How many refresh periods each frame stays on screen under vsync, e.g. 2 when a 120 Hz display renders at 60 fps.
+    /// Set by the host that presents.
+    /// </summary>
+    public static int VblanksPerFrame { get; set; } = 1;
+
+    /// <summary>
     /// The current frame rate relative to the 60 fps that per-frame simulations were tuned at, e.g. 2 at 120 fps.
     /// </summary>
     public static double FrameRateRelativeTo60 => DefaultRefreshPeriodSec / FramePeriodSec;
@@ -138,13 +144,13 @@ public static class FrameTiming
             period = sum / vblankCount;
         }
 
-        RefreshPeriodSec = period;
+        RefreshPeriodSec = period / VblanksPerFrame;
         _hasMeasuredRefreshPeriod = true;
     }
 
     /// <summary>
-    /// With vsync every frame stays on screen for whole refresh periods, so the visual clock advances one period per
-    /// frame and only catches up in whole periods once it is a full period behind the wall clock (a missed vblank)
+    /// With vsync every frame stays on screen for whole refresh periods, so the visual clock advances one frame period
+    /// (<see cref="VblanksPerFrame"/> refresh periods) per frame and only catches up in whole periods once it is a full period behind the wall clock (a missed vblank)
     /// or ahead of it. Jitter in when frames start stays below that and never reaches the animation. A slow pull
     /// towards the wall clock keeps the lag centred, so a slightly-off period estimate doesn't drift it into a
     /// skipped or doubled frame every few seconds.
@@ -161,7 +167,7 @@ public static class FrameTiming
             return Math.Max(0, intervalSec);
         }
 
-        var period = RefreshPeriodSec;
+        var period = RefreshPeriodSec * VblanksPerFrame;
         _visualClockLagSec += intervalSec - period;
         var correction = _visualClockLagSec * LagCorrectionRate;
         _visualClockLagSec -= correction;

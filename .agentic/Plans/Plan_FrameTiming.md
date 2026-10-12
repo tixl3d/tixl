@@ -271,6 +271,22 @@ measures vblank count and `SyncQpcTime` of the pacing swap chain and feeds `Fram
 The interval estimator and the visual clock's lag pull were ported from linux-port `79261422c` (Vulkan/Wayland,
 and the Player's fallback).
 
+Target rate (C3) done 2026-10-12 as a Frame Rate setting (Match Display / 120 / 60 / 50 / 30 fps). `Present(2)` /
+`Present(4)` had no effect on this machine — the latency waitable releases the loop once per vblank whatever the
+sync interval — so the loop waits for further vblanks of the pacing display (`IDXGIOutput::WaitForVerticalBlank`)
+until the frame has lasted its N refreshes, compared by elapsed time so it doesn't depend on whether the waitable
+fires just before or after a vblank. `FrameTiming.VblanksPerFrame` makes the visual clock advance N periods.
+Measured on 120 Hz: 60 fps → 16.75 ms visual step, 30 fps → 33.48 ms, both constant.
+
+Uncapped vsync-off (C1) tried and dropped 2026-10-12: with `ALLOW_TEARING` the latency waitable stops blocking in
+"hardware overlay" and "composed by DWM", but Windows still shows one frame per vblank there, so frames queue up
+(23–33 queued, visible lag). Independent flip, the only mode that tears, never lasted more than ~0.5 s for the editor
+on the ZBook. Without the flag, vsync off stays capped at the refresh rate and lag-free. Revisit only with a way to
+keep a window in independent flip, or on Vulkan (IMMEDIATE).
+
+Open: with vsync on, Match Display, on the 60 Hz external display in hardware overlay, `queued` reads 4 where 1–2 is
+expected (~30–50 ms extra latency). Investigate next.
+
 Workaround until then: set the internal panel to a fixed 60 Hz (or 120 Hz) and turn off Windows dynamic refresh
 rate, so both displays and the 30 fps NDI rate share one integer cadence. 59.94 vs 60 Hz drift between panel
 and projector remains (one hitch every ~17 s).

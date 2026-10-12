@@ -417,6 +417,28 @@ internal static class DebugServer
                 break;
             }
 
+            case "setVSync":
+            {
+                // Without a value it only reports, so a measurement can restore the user's choice afterwards.
+                var value = request["value"]?.Value<bool>();
+                if (value != null)
+                    UserSettings.Config.UseVSync = value.Value;
+
+                context.SendOk(new JObject { ["useVSync"] = UserSettings.Config.UseVSync });
+                break;
+            }
+
+            case "setTargetFrameRate":
+            {
+                // 0 renders every refresh; without a value it only reports.
+                var value = request["value"]?.Value<int>();
+                if (value != null)
+                    UserSettings.Config.TargetFrameRate = Math.Max(0, value.Value);
+
+                context.SendOk(new JObject { ["targetFrameRate"] = UserSettings.Config.TargetFrameRate });
+                break;
+            }
+
             case "layoutSelection":
             {
                 var view = ProjectView.Focused;
@@ -988,6 +1010,7 @@ internal static class DebugServer
                              ["framePeriodMs"] = Math.Round(FrameTiming.FramePeriodSec * 1000, 3),
                              ["refreshRateHz"] = Math.Round(FrameTiming.RefreshRate, 3),
                              ["visualDeltaMs"] = Math.Round(FrameTiming.VisualDeltaSec * 1000, 3),
+                             ["vblanksPerFrame"] = FrameTiming.VblanksPerFrame,
                              ["frameSpeedFactor"] = Math.Round(Playback.Current?.FrameSpeedFactor ?? 1, 3),
                              ["gpuFrameMs"] = Math.Round(PerformanceMetrics.GpuFrameDuration.Average, 3),
                              ["presentationMode"] = PresentationDiagnostics.Describe(PresentationDiagnostics.CompositionMode),

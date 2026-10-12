@@ -30,6 +30,18 @@ internal static class ProgramWindows
 
     /** The window whose display's vblank paces the frame loop. */
     private static AppWindow _pacingWindow;
+
+    private static int _pacingVblanksPerFrame = 1;
+    private static long _lastPacedFrameStart;
+
+    /** The display the pacing window is on, for waiting on its vblanks; refreshed when the pacing window changes. */
+    private static Output _pacingOutput;
+    private static AppWindow _pacingOutputWindow;
+    private static bool _hasLoggedVblankWaitFailure;
+
+    /** 30 fps on a 120 Hz display; lower rates don't need a frame-rate setting. */
+    private const int MaxVblanksPerFrame = 4;
+
     public static string ActiveGpu { get; private set; } = "Unknown";
 
     internal static void SetMainWindowSize(int width, int height)
@@ -325,6 +337,33 @@ internal static class ProgramWindows
     public static void WaitForFrameLatency()
     {
         _pacingWindow.WaitForFrameLatency();
+
+        // The latency waitable releases the loop once per vblank whatever the sync interval, so a lower frame rate
+        // waits for further vblanks of the pacing display until the frame has lasted its vblanks. Comparing against
+        // the elapsed time rather than counting waits doesn't depend on whether the waitable fires just before or
+        // just after a vblank.
+        if (_pacingVblanksPerFrame > 1)
+        {
+            var minFrameTicks = (long)((_pacingVblanksPerFrame - 0.5) * FrameTiming.RefreshPeriodSec * Stopwatch.Frequency);
+            while (Stopwatch.GetTimestamp() - _lastPacedFrameStart < minFrameTicks
+                   && WaitForVerticalBlank(_pacingWindow))
+            {
+            }
+        }
+
+        _lastPacedFrameStart = Stopwatch.GetTimestamp();
+    }
+
+    /// <summary>
+    /// How many vblanks each frame stays on screen to approach the target frame rate on the pacing display.
+    /// Only whole vblanks are possible, so 50 fps on a 120 Hz display gives 60 fps.
+    /// </summary>
+    private static int GetVblanksPerFrame(int targetFps, double refreshRate)
+    {
+        if (targetFps <= 0)
+            return 1;
+
+        return Math.Clamp((int)Math.Round(refreshRate / targetFps), 1, MaxVblanksPerFrame);
     }
 
     /// <summary>
@@ -348,6 +387,11 @@ internal static class ProgramWindows
                 Log.Debug($"Frame pacing now follows '{pacingWindow.Form.Text}'");
                 _pacingWindow = pacingWindow;
             }
+
+            // Takes effect in the next frame's wait; windows on other displays just show each frame longer.
+            var vblanksPerFrame = useVSync ? GetVblanksPerFrame(UserSettings.Config.TargetFrameRate, FrameTiming.RefreshRate) : 1;
+            FrameTiming.VblanksPerFrame = vblanksPerFrame;
+            _pacingVblanksPerFrame = vblanksPerFrame;
 
             PresentWindow(Main, syncInterval);
             PresentationDiagnostics.Update(Main.SwapChain);
@@ -425,6 +469,35 @@ internal static class ProgramWindows
             return;
 
         result.CheckError();
+    }
+
+    /** False when the display couldn't be waited on, so callers don't spin. */
+    private static bool WaitForVerticalBlank(AppWindow window)
+    {
+        try
+        {
+            if (_pacingOutputWindow != window || _pacingOutput == null)
+            {
+                _pacingOutput?.Dispose();
+                _pacingOutput = window.SwapChain.ContainingOutput;
+                _pacingOutputWindow = window;
+            }
+
+            _pacingOutput.WaitForVerticalBlank();
+            _hasLoggedVblankWaitFailure = false;
+            return true;
+        }
+        catch (SharpDX.SharpDXException e)
+        {
+            // A window moved between displays or a display reconfiguration; look the output up again next frame.
+            if (!_hasLoggedVblankWaitFailure)
+                Log.Debug($"Waiting for the pacing display's vblank failed: {e.Message}");
+
+            _hasLoggedVblankWaitFailure = true;
+            _pacingOutput?.Dispose();
+            _pacingOutput = null;
+            return false;
+        }
     }
 
     /// <summary>

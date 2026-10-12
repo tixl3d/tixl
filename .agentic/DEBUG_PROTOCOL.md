@@ -65,6 +65,9 @@ Parameter shapes are defined in `DebugServer.cs` — read the handler when unsur
 
 - `reload` works on **editable projects only** (synchronous recompile; MSBuild errors come
   back in a `COMPILE_FAILED` detail). Built-in packages like `Lib` need an editor restart.
+- `setVSync` (`value`: bool, optional) switches the user's Use VSync setting and returns `useVSync`; without
+  `value` it only reports. Restore the previous value after a measurement — the setting is saved.
+  `setTargetFrameRate` (`value`: fps, 0 = every refresh) works the same way for the Frame Rate setting.
 - `stallMainThread` sleeps on the main thread to exercise the stall overlay (`StallWatchdog`).
   With an `estimateKey` it runs inside a `MainThreadActivity` scope, so the second run with the
   same key shows estimated progress. The overlay is presented by another thread, so neither

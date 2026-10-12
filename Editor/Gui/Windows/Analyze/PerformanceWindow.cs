@@ -21,10 +21,45 @@ internal sealed class PerformanceWindow : Window
 
     protected override void DrawContent()
     {
-        FormInputs.AddCheckBox("Use VSync",ref UserSettings.Config.UseVSync,
-                               "Synchronise frame presentation to the display refresh rate. Turn off to uncap the frame rate (useful for benchmarking; can cause tearing).");
+        DrawPresentationSettings();
         T3Metrics.DrawDetailedView();
     }
+
+    /// <summary>The vsync and frame-rate settings, shared with the settings window.</summary>
+    internal static bool DrawPresentationSettings()
+    {
+        var changed = FormInputs.AddCheckBox("Use VSync",
+                                             ref UserSettings.Config.UseVSync,
+                                             "Synchronise frame presentation to the display refresh rate. Turn off to uncap the frame rate (useful for benchmarking; can cause tearing).",
+                                             UserSettings.Defaults.UseVSync);
+
+        changed |= FormInputs.AddDropdown(ref UserSettings.Config.TargetFrameRate,
+                                          TargetFrameRates,
+                                          "Frame Rate",
+                                          FormatTargetFrameRate,
+                                          """
+                                          Renders every refresh of the pacing display, or holds each frame for whole refreshes
+                                          to approach a lower rate: 60 fps on a 120 Hz display gives a 16.7 ms frame budget.
+                                          Rates the display can't divide into round to the nearest one it can.
+                                          Needs vsync; the pacing display is the first bound output, otherwise the editor window.
+                                          """);
+        return changed;
+    }
+
+    private static string FormatTargetFrameRate(int framesPerSecond)
+    {
+        return framesPerSecond switch
+                   {
+                       0   => "Match Display",
+                       120 => "120 fps",
+                       60  => "60 fps",
+                       50  => "50 fps",
+                       30  => "30 fps",
+                       _   => "Custom"
+                   };
+    }
+
+    private static readonly int[] TargetFrameRates = [0, 120, 60, 50, 30];
 
     internal override List<Window> GetInstances() => [];
 }
