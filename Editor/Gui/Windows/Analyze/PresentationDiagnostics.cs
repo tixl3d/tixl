@@ -42,6 +42,19 @@ internal static class PresentationDiagnostics
 
         QueuedFrames = swapChain.LastPresentCount - (int)statistics.PresentCount;
 
+        // TEMP probe: is "queued" a real queue (fresh statistics) or stale bookkeeping (old SyncQpcTime)?
+        var now = System.Diagnostics.Stopwatch.GetTimestamp();
+        if (now - _lastProbeTimestamp > System.Diagnostics.Stopwatch.Frequency)
+        {
+            _lastProbeTimestamp = now;
+            var statisticsAgeMs = (now - statistics.SyncQpcTime) * 1000.0 / System.Diagnostics.Stopwatch.Frequency;
+            var refreshesSinceProbe = statistics.SyncRefreshCount - _lastProbeSyncRefreshCount;
+            _lastProbeSyncRefreshCount = statistics.SyncRefreshCount;
+            Log.Debug($"PresentProbe: last={swapChain.LastPresentCount} shown={statistics.PresentCount} queued={QueuedFrames} "
+                      + $"presentRefresh={statistics.PresentRefreshCount} syncRefresh={statistics.SyncRefreshCount} "
+                      + $"(+{refreshesSinceProbe}/s) statsAge={statisticsAgeMs:0.0}ms mode={Describe((FramePresentationMode)statistics.CompositionMode)}");
+        }
+
         var mode = (FramePresentationMode)statistics.CompositionMode;
         if (mode == CompositionMode)
             return;
@@ -94,4 +107,7 @@ internal static class PresentationDiagnostics
 
     /** IUnknown's three methods precede it. */
     private const int GetFrameStatisticsMediaVtableIndex = 3;
+
+    private static long _lastProbeTimestamp;
+    private static uint _lastProbeSyncRefreshCount;
 }

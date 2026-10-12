@@ -210,7 +210,20 @@ internal sealed class AppWindow
         if (_frameLatencyWaitableHandle == IntPtr.Zero)
             return;
         WaitForSingleObjectEx(_frameLatencyWaitableHandle, 1000, false);
+
+        // Presents outside the frame loop (the stall overlay) signal the waitable without a matching wait. Each
+        // surplus signal would let the loop run one more frame ahead of the display for the rest of the session.
+        var surplusSignals = 0;
+        while (WaitForSingleObjectEx(_frameLatencyWaitableHandle, 0, false) == WaitObject0)
+        {
+            surplusSignals++;
+        }
+
+        if (surplusSignals > 0)
+            Log.Debug($"Drained {surplusSignals} surplus frame-latency signals of '{Form.Text}'");
     }
+
+    private const uint WaitObject0 = 0;
 
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern uint WaitForSingleObjectEx(IntPtr hHandle, uint dwMilliseconds, bool bAlertable);

@@ -228,6 +228,44 @@ Design (neutral): **one pacing display** waits on vsync; every other window pres
 - Multiple GPUs: a display on another adapter means cross-adapter copies per frame. Out of scope, but
   Output Setup should at least report which adapter drives each display.
 
+### C2a. Target scenario: laptop with a variable-refresh panel driving a show (added 2026-10-12)
+
+Reference machine: AMD Radeon 8060S laptop, internal panel 2880×1800 with a 48–120 Hz range (Windows reports
+48 Hz current while windowed). Show setup: a **60 Hz projector** as a bound output and/or an **NDI output at
+30 fps**. What happens on main today:
+
+- **Two vsync clocks block one loop.** `ProgramWindows.Present` presents Main (waitable, paced by the 48 Hz panel)
+  and then every output window with `Present(1)` on the projector's 60 Hz vblank. The loop runs at whatever the
+  beat of both clocks allows; neither display gets an even cadence.
+- **`FrameTiming` measures the wrong display.** The refresh estimate comes from loop intervals, which reflect
+  the panel (or a mix). Observed: "60.00 Hz measured" while frames run at ~20.9 ms. The estimate is either the
+  never-updated default (> 10 % hitches fail the spread check) or a stale 2×8.33 ms from a 120 Hz phase; it is
+  never invalidated once measured. If stale, the visual clock advances 16.67 ms per 20.8 ms frame and double-
+  steps every ~4th frame.
+- **NDI sends every rendered frame** and labels it with the configured `FrameRate` (`NdiSender.cs:145`,
+  `clock_video = false`). At a 48 Hz loop with 30 configured, receivers get 48 frames/s stamped as 30.
+- **Queued-frames readout** shows nonsense (50) while composed by DWM; the media statistics' `PresentCount`
+  lags in that mode. Show "n/a" when the statistics aren't advancing.
+
+Plan for this scenario, in order:
+1. **Pacing display = first bound output** (C2 decision, now required). Create output swap chains with the
+   frame-latency waitable; while an output is bound, wait on its waitable instead of Main's and present Main and
+   all other windows with `Present(1, DoNotWait)`, skipping on `WAS_STILL_DRAWING`. The editor UI then runs at
+   the projector's rate and may judder on the panel — acceptable during a show.
+2. **`FrameTiming` follows the pacing display:** reset the refresh estimate when the pacing display changes;
+   invalidate a stale estimate when the median interval is steadily not a whole multiple of it; prefer
+   `SyncQpcTime` deltas from the pacing swap chain's frame statistics when they advance (DXGI only, cheap).
+3. **Output rate decimation for NDI (and Spout/recording later):** send a frame only when the visual clock
+   crosses the next 1/fps boundary of the configured rate, and stamp it with that time instead of
+   `send_timecode_synthesize`. 60 → 30 is then an even every-second-frame; a non-integer ratio (48 → 30)
+   judders by nature, which the output UI should say.
+4. **Diagnostics:** Output Setup shows each bound display's measured refresh and which display paces, and warns
+   when the loop rate is not an integer multiple of an NDI output's rate.
+
+Workaround until then: set the internal panel to a fixed 60 Hz (or 120 Hz) and turn off Windows dynamic refresh
+rate, so both displays and the 30 fps NDI rate share one integer cadence. 59.94 vs 60 Hz drift between panel
+and projector remains (one hitch every ~17 s).
+
 ### C3. Higher refresh rates (user item 1.6)
 
 At 120/144 Hz, rendering every frame is better when the frame fits; skipping every second vblank is better
@@ -239,7 +277,14 @@ what consoles do and avoids the 1-2-1-2 cadence that reads as stutter.
 
 ### C4. Other presentation findings on main
 
-- **Present queue fills up after stalls (found 2026-10-10, not fixed).** After a stall (startup loading,
+- **Root cause found and fixed 2026-10-12:** every `Present` signals the frame-latency waitable, but the stall
+  overlay's presents (watchdog thread) have no matching wait. A 3 s stall left ~39 surplus signals, so the loop
+  ran ~40 frames (~1 s at 48 Hz) ahead of the display for the rest of the session — `queued` 2 → 43, a real
+  second of input latency, not stale statistics. `AppWindow.WaitForFrameLatency` now drains surplus signals
+  after its blocking wait (logs "Drained N surplus frame-latency signals"); after the same stall `queued`
+  stays at 2–4. Attempt (2) below "found no surplus" because it ran in a state without overlay presents.
+  The history below is kept for context.
+- **Present queue fills up after stalls (found 2026-10-10).** After a stall (startup loading,
   compiling; reproduced with the bridge's `stallMainThread`, 1 → 2–3 queued, persistent) the main window's
   flip queue stays full. PresentMon, both states "Hardware Composed: Independent Flip": good state 1 frame queued,
   12.9 ms present-to-display, even present cadence; bad state 2–3 queued, 53.3 ms, present intervals std 9.7 ms —

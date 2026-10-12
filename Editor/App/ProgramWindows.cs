@@ -27,6 +27,9 @@ internal static class ProgramWindows
     private static Device _device;
     private static DeviceContext _deviceContext;
     private static Factory _factory;
+
+    /** The window whose display's vblank paces the frame loop. */
+    private static AppWindow _pacingWindow;
     public static string ActiveGpu { get; private set; } = "Unknown";
 
     internal static void SetMainWindowSize(int width, int height)
@@ -76,6 +79,7 @@ internal static class ProgramWindows
         // pacing previously provided by Viewer's secondary `Present(1)` call. Must be set before
         // SwapChainDescription is consumed by Device.CreateWithSwapChain.
         Main.UseFrameLatencyWaitable = true;
+        _pacingWindow = Main;
         device = null;
         string[] highPerformanceKeywords = ["dedicated", "high performance", "rtx", "gtx"];
         string[] integratedKeywords = ["integrated", "intel(r) uhd graphics", "microsoft basic render", "microsoft basic render"]; // twice to make MS worse
@@ -251,6 +255,9 @@ internal static class ProgramWindows
     internal static AppWindow CreateViewerWindow(string name, int width, int height)
     {
         var window = new AppWindow(name, disableClose: true);
+
+        // An output window paces the frame loop while an output is bound to its display.
+        window.UseFrameLatencyWaitable = true;
         window.SetDevice(_device, _deviceContext);
         window.SetSize(width, height);
         window.SetSizeable();
@@ -312,28 +319,49 @@ internal static class ProgramWindows
         _deviceContext.OutputMerger.SetTargets(Main.RenderTargetView);
     }
 
+    /// <summary>
+    /// Blocks until the pacing window's swap chain accepts the next frame. Call once at the start of each frame.
+    /// </summary>
+    public static void WaitForFrameLatency()
+    {
+        _pacingWindow.WaitForFrameLatency();
+    }
+
+    /// <summary>
+    /// Presents every shown window. Only the pacing window may block on its display's vblank: windows on other
+    /// displays run on their own refresh clocks, and waiting for two clocks in one loop gives neither an even
+    /// cadence. They present without waiting and drop the frame when their display is still busy.
+    /// </summary>
     public static void Present(bool useVSync)
     {
         var startTimestamp = Stopwatch.GetTimestamp();
         GpuFrameTimer.EndFrame();
         try
         {
-            Main.SwapChain.Present(useVSync ? 1 : 0, PresentFlags.None);
+            var syncInterval = useVSync ? 1 : 0;
+
+            // The projector matters more than the editor UI during a show, so the first bound output paces.
+            var outputWindows = OutputWindowHandling.Presenting;
+            var pacingWindow = outputWindows.Count > 0 ? outputWindows[0].Window : Main;
+            if (pacingWindow != _pacingWindow)
+            {
+                Log.Debug($"Frame pacing now follows '{pacingWindow.Form.Text}'");
+                _pacingWindow = pacingWindow;
+            }
+
+            PresentWindow(Main, syncInterval);
             PresentationDiagnostics.Update(Main.SwapChain);
 
             // Only while its window is actually shown. Presenting a hidden flip-model swap chain is not the
             // cheap no-op it looks like: DWM throttles presents to a window it isn't displaying, and with an
-            // output window up that wait measured 34ms per frame against 0.3ms for Main. Main's pacing comes
-            // from its frame-latency waitable swap chain, not from a second Present.
-            if (T3Ui.ShowSecondaryRenderWindow)
-                Viewer?.SwapChain?.Present(useVSync ? 1 : 0, PresentFlags.None);
+            // output window up that wait measured 34ms per frame against 0.3ms for Main.
+            if (T3Ui.ShowSecondaryRenderWindow && Viewer != null)
+                PresentWindow(Viewer, syncInterval);
 
-            // Each display an output is bound to has its own swap chain, presented with the same sync as Main so
-            // a projector never tears.
-            var outputWindows = OutputWindowHandling.Presenting;
+            // Synced even when not pacing, so a projector never tears.
             for (var i = 0; i < outputWindows.Count; i++)
             {
-                outputWindows[i].Window.SwapChain?.Present(useVSync ? 1 : 0, PresentFlags.None);
+                PresentWindow(outputWindows[i].Window, syncInterval);
             }
         }
         catch (SharpDX.SharpDXException e)
@@ -377,6 +405,25 @@ internal static class ProgramWindows
             // here rather than in the work that filled it.
             PerformanceMetrics.RecordPresent((float)((Stopwatch.GetTimestamp() - startTimestamp) * 1000.0 / Stopwatch.Frequency));
         }
+    }
+
+    private static void PresentWindow(AppWindow window, int syncInterval)
+    {
+        var swapChain = window.SwapChain;
+        if (swapChain == null)
+            return;
+
+        if (window == _pacingWindow)
+        {
+            swapChain.Present(syncInterval, PresentFlags.None);
+            return;
+        }
+
+        var result = swapChain.TryPresent(syncInterval, PresentFlags.DoNotWait);
+        if (result == SharpDX.DXGI.ResultCode.WasStillDrawing.Result)
+            return;
+
+        result.CheckError();
     }
 
     /// <summary>
