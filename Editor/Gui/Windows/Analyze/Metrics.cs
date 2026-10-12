@@ -129,8 +129,10 @@ internal static class T3Metrics
 
         ImGui.TextUnformatted($"Render: {_peakDeltaTimeMs:0.0}ms");
         ImGui.TextUnformatted($"Display: {FrameTiming.RefreshRate:0.00} Hz measured, {FrameTiming.RefreshRate / FrameTiming.VblanksPerFrame:0.0} fps target");
-        ImGui.TextUnformatted($"Presentation: {PresentationDiagnostics.Describe(PresentationDiagnostics.CompositionMode)}, "
-                              + $"{PresentationDiagnostics.QueuedFrames} queued");
+        var queuedFrames = PresentationDiagnostics.QueuedFrames;
+        ImGui.TextUnformatted(queuedFrames < 0
+                                  ? $"Presentation: {PresentationDiagnostics.Describe(PresentationDiagnostics.CompositionMode)}, queue unknown"
+                                  : $"Presentation: {PresentationDiagnostics.Describe(PresentationDiagnostics.CompositionMode)}, {queuedFrames} queued");
 
         ImGui.Spacing();
 

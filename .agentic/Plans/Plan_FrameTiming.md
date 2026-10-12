@@ -284,8 +284,14 @@ Uncapped vsync-off (C1) tried and dropped 2026-10-12: with `ALLOW_TEARING` the l
 on the ZBook. Without the flag, vsync off stays capped at the refresh rate and lag-free. Revisit only with a way to
 keep a window in independent flip, or on Vulkan (IMMEDIATE).
 
-Open: with vsync on, Match Display, on the 60 Hz external display in hardware overlay, `queued` reads 4 where 1–2 is
-expected (~30–50 ms extra latency). Investigate next.
+Mixed refresh rates (fixed 2026-10-12): with the editor on a 60 Hz external display next to the 120 Hz panel, the
+loop ran at 120 fps and measured 119.47 Hz while composed by DWM — the latency waitable and the frame statistics
+follow the primary display's composition clock. Now the vblank measurement is checked once per second against the
+rate Windows reports for the window's monitor (EnumDisplaySettings, NTSC rates read as n·1000/1001) and replaced
+when more than 5 % off, and the loop waits for vblanks of the window's own output whenever a frame would start more
+than a quarter period early. Measured on the 60 Hz display: 16.68 ms intervals, constant visual step, 2 queued, in
+both hardware overlay and composed mode. Composed on a secondary display, the frame statistics can freeze for
+seconds; the queued count now reads "unknown" when they are older than 100 ms instead of counting up to ~450.
 
 Workaround until then: set the internal panel to a fixed 60 Hz (or 120 Hz) and turn off Windows dynamic refresh
 rate, so both displays and the 30 fps NDI rate share one integer cadence. 59.94 vs 60 Hz drift between panel

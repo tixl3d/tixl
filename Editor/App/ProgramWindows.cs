@@ -32,11 +32,19 @@ internal static class ProgramWindows
     private static AppWindow _pacingWindow;
 
     private static int _pacingVblanksPerFrame = 1;
+    private static bool _isPacingWithVSync = true;
     private static long _lastPacedFrameStart;
+
+    /**
+     * Fraction of a refresh period a frame may start early without waiting for another vblank. Large enough for
+     * start jitter, small enough that a frame released half a period early (120 Hz clock, 60 Hz display) still waits.
+     */
+    private const double VblankTimingTolerance = 0.25;
 
     /** The display the pacing window is on, for waiting on its vblanks; refreshed when the pacing window changes. */
     private static Output _pacingOutput;
     private static AppWindow _pacingOutputWindow;
+    private static long _pacingOutputLookupTimestamp;
     private static bool _hasLoggedVblankWaitFailure;
 
     /** 30 fps on a 120 Hz display; lower rates don't need a frame-rate setting. */
@@ -338,13 +346,13 @@ internal static class ProgramWindows
     {
         _pacingWindow.WaitForFrameLatency();
 
-        // The latency waitable releases the loop once per vblank whatever the sync interval, so a lower frame rate
-        // waits for further vblanks of the pacing display until the frame has lasted its vblanks. Comparing against
-        // the elapsed time rather than counting waits doesn't depend on whether the waitable fires just before or
-        // just after a vblank.
-        if (_pacingVblanksPerFrame > 1)
+        // The latency waitable releases the loop once per vblank of whatever clock DWM composes with — the primary
+        // display's while composing, whatever the sync interval. So the loop waits for further vblanks of the pacing
+        // display until the frame has lasted its vblanks. Comparing against the elapsed time rather than counting
+        // waits doesn't depend on whether the waitable fires just before or just after a vblank.
+        if (_isPacingWithVSync)
         {
-            var minFrameTicks = (long)((_pacingVblanksPerFrame - 0.5) * FrameTiming.RefreshPeriodSec * Stopwatch.Frequency);
+            var minFrameTicks = (long)((_pacingVblanksPerFrame - VblankTimingTolerance) * FrameTiming.RefreshPeriodSec * Stopwatch.Frequency);
             while (Stopwatch.GetTimestamp() - _lastPacedFrameStart < minFrameTicks
                    && WaitForVerticalBlank(_pacingWindow))
             {
@@ -392,10 +400,11 @@ internal static class ProgramWindows
             var vblanksPerFrame = useVSync ? GetVblanksPerFrame(UserSettings.Config.TargetFrameRate, FrameTiming.RefreshRate) : 1;
             FrameTiming.VblanksPerFrame = vblanksPerFrame;
             _pacingVblanksPerFrame = vblanksPerFrame;
+            _isPacingWithVSync = useVSync;
 
             PresentWindow(Main, syncInterval);
             PresentationDiagnostics.Update(Main.SwapChain);
-            PresentationDiagnostics.MeasureRefreshPeriod(_pacingWindow.SwapChain);
+            PresentationDiagnostics.MeasureRefreshPeriod(_pacingWindow.SwapChain, _pacingWindow.HwndHandle);
 
             // Only while its window is actually shown. Presenting a hidden flip-model swap chain is not the
             // cheap no-op it looks like: DWM throttles presents to a window it isn't displaying, and with an
@@ -476,8 +485,11 @@ internal static class ProgramWindows
     {
         try
         {
-            if (_pacingOutputWindow != window || _pacingOutput == null)
+            // Looked up again now and then: the window can be moved to another display.
+            var now = Stopwatch.GetTimestamp();
+            if (_pacingOutputWindow != window || _pacingOutput == null || now - _pacingOutputLookupTimestamp > Stopwatch.Frequency)
             {
+                _pacingOutputLookupTimestamp = now;
                 _pacingOutput?.Dispose();
                 _pacingOutput = window.SwapChain.ContainingOutput;
                 _pacingOutputWindow = window;

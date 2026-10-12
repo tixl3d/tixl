@@ -1,5 +1,6 @@
 #nullable enable
 
+using T3.Core.Stats;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.UiHelpers;
 
@@ -50,7 +51,7 @@ internal sealed class PerformanceWindow : Window
     {
         return framesPerSecond switch
                    {
-                       0   => "Match Display",
+                       0   => GetMatchDisplayLabel(),
                        120 => "120 fps",
                        60  => "60 fps",
                        50  => "50 fps",
@@ -59,7 +60,22 @@ internal sealed class PerformanceWindow : Window
                    };
     }
 
+    /** Rebuilt only when the rounded rate changes, so drawing the dropdown doesn't allocate every frame. */
+    private static string GetMatchDisplayLabel()
+    {
+        var refreshRate = (int)Math.Round(FrameTiming.RefreshRate);
+        if (refreshRate != _matchDisplayLabelRate)
+        {
+            _matchDisplayLabelRate = refreshRate;
+            _matchDisplayLabel = $"Match Display ({refreshRate} Hz)";
+        }
+
+        return _matchDisplayLabel;
+    }
+
     private static readonly int[] TargetFrameRates = [0, 120, 60, 50, 30];
+    private static int _matchDisplayLabelRate = -1;
+    private static string _matchDisplayLabel = "Match Display";
 
     internal override List<Window> GetInstances() => [];
 }

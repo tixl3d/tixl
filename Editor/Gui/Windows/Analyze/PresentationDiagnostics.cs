@@ -42,7 +42,12 @@ internal static class PresentationDiagnostics
             return;
         }
 
-        QueuedFrames = swapChain.LastPresentCount - (int)statistics.PresentCount;
+        // While DWM composes a window on a secondary display the statistics can stop updating for seconds, and the
+        // difference would count every present since then as queued.
+        var statisticsAgeTicks = Stopwatch.GetTimestamp() - statistics.SyncQpcTime;
+        QueuedFrames = statisticsAgeTicks > Stopwatch.Frequency * MaxStatisticsAgeSec
+                           ? -1
+                           : swapChain.LastPresentCount - (int)statistics.PresentCount;
 
         var mode = (FramePresentationMode)statistics.CompositionMode;
         if (mode == CompositionMode)
@@ -54,36 +59,100 @@ internal static class PresentationDiagnostics
 
     /// <summary>
     /// Measures the refresh period of the display that paces the loop from its vblank count and timestamps, and hands
-    /// it to <see cref="FrameTiming"/>. Call once per frame after presenting, with the pacing window's swap chain.
+    /// it to <see cref="FrameTiming"/>. Call once per frame after presenting, with the pacing window.
     /// </summary>
-    public static void MeasureRefreshPeriod(SwapChain pacingSwapChain)
+    /// <remarks>
+    /// While DWM composes a window on a secondary display, the swap chain's statistics follow the composition clock
+    /// of the primary display (measured: 119.5 Hz for a window on a 60 Hz monitor next to a 120 Hz panel). The rate
+    /// Windows reports for the window's monitor catches that; the measurement is kept when both agree, because it
+    /// is the precise one (59.94 vs 60 Hz).
+    /// </remarks>
+    public static void MeasureRefreshPeriod(SwapChain pacingSwapChain, IntPtr windowHandle)
     {
-        if (!TryGetFrameStatisticsMedia(pacingSwapChain, out var statistics) || statistics.SyncQpcTime == 0)
-            return;
-
+        var now = Stopwatch.GetTimestamp();
         if (pacingSwapChain.NativePointer != _measuredSwapChain)
         {
             _measuredSwapChain = pacingSwapChain.NativePointer;
-            _baselineVblankQpc = statistics.SyncQpcTime;
-            _baselineVblankCount = statistics.SyncRefreshCount;
+            _baselineVblankQpc = 0;
+            _hasTriedVblankBaseline = false;
+            _lastMeasureTimestamp = now;
             return;
         }
 
-        var elapsedTicks = statistics.SyncQpcTime - _baselineVblankQpc;
-        if (elapsedTicks < Stopwatch.Frequency * RefreshMeasureIntervalSec)
+        if (now - _lastMeasureTimestamp < Stopwatch.Frequency * RefreshMeasureIntervalSec)
             return;
 
+        _lastMeasureTimestamp = now;
+
+        // The first sample of a swap chain only sets the baseline the next one measures against.
+        var isFirstSample = _baselineVblankQpc == 0 && !_hasTriedVblankBaseline;
+        _hasTriedVblankBaseline = true;
+        var measuredPeriodSec = MeasureVblankPeriod(pacingSwapChain);
+        if (isFirstSample)
+            return;
+        var displayRefreshRate = GetDisplayRefreshRate(windowHandle);
+        var measurementMatchesDisplay = measuredPeriodSec > 0
+                                        && (displayRefreshRate <= 0
+                                            || Math.Abs(measuredPeriodSec * displayRefreshRate - 1) <= MaxRefreshRateMismatch);
+        if (measurementMatchesDisplay)
+        {
+            _isUsingReportedRefreshRate = false;
+            FrameTiming.SetRefreshPeriodFromDisplay(measuredPeriodSec);
+            return;
+        }
+
+        if (displayRefreshRate <= 0)
+            return;
+
+        if (!_isUsingReportedRefreshRate)
+        {
+            Log.Debug(measuredPeriodSec > 0
+                          ? $"Vblank statistics report {1 / measuredPeriodSec:0.00} Hz, but the display runs at {displayRefreshRate:0.00} Hz; using the display's rate"
+                          : $"No vblank statistics; using the display's reported {displayRefreshRate:0.00} Hz");
+            _isUsingReportedRefreshRate = true;
+        }
+
+        FrameTiming.SetRefreshPeriodFromDisplay(1 / displayRefreshRate);
+    }
+
+    /** The vblank period since the previous call, from the swap chain's frame statistics; 0 when unknown. */
+    private static double MeasureVblankPeriod(SwapChain swapChain)
+    {
+        if (!TryGetFrameStatisticsMedia(swapChain, out var statistics) || statistics.SyncQpcTime == 0)
+            return 0;
+
+        var elapsedTicks = statistics.SyncQpcTime - _baselineVblankQpc;
         var vblanks = statistics.SyncRefreshCount - _baselineVblankCount;
+        var hadBaseline = _baselineVblankQpc != 0;
         _baselineVblankQpc = statistics.SyncQpcTime;
         _baselineVblankCount = statistics.SyncRefreshCount;
-        if (vblanks == 0)
-            return;
+        if (!hadBaseline || vblanks == 0 || elapsedTicks <= 0)
+            return 0;
 
         var periodSec = elapsedTicks / (double)Stopwatch.Frequency / vblanks;
-        if (periodSec is < MinPlausibleRefreshPeriodSec or > MaxPlausibleRefreshPeriodSec)
-            return;
+        return periodSec is < MinPlausibleRefreshPeriodSec or > MaxPlausibleRefreshPeriodSec ? 0 : periodSec;
+    }
 
-        FrameTiming.SetRefreshPeriodFromDisplay(periodSec);
+    /// <summary>
+    /// The refresh rate Windows reports for the monitor a window is on; 0 when unknown. The display settings only
+    /// carry whole hertz, so the NTSC-style rates that are one below a common rate (59, 119, ...) are read as
+    /// 60000/1001 and so on, which is what such a mode really runs at.
+    /// </summary>
+    public static double GetDisplayRefreshRate(IntPtr windowHandle)
+    {
+        var monitor = MonitorFromWindow(windowHandle, MonitorDefaultToNearest);
+        var monitorInfo = new MonitorInfoEx { Size = Marshal.SizeOf<MonitorInfoEx>() };
+        if (monitor == IntPtr.Zero || !GetMonitorInfo(monitor, ref monitorInfo))
+            return 0;
+
+        var displayMode = new DisplayMode { Size = (short)Marshal.SizeOf<DisplayMode>() };
+        if (!EnumDisplaySettings(monitorInfo.DeviceName, EnumCurrentSettings, ref displayMode) || displayMode.DisplayFrequency <= 1)
+            return 0;
+
+        var hertz = displayMode.DisplayFrequency;
+        return hertz is 23 or 29 or 47 or 59 or 71 or 119 or 143 or 239
+                   ? (hertz + 1) * 1000.0 / 1001.0
+                   : hertz;
     }
 
     public static string Describe(FramePresentationMode? mode)
@@ -135,7 +204,59 @@ internal static class PresentationDiagnostics
     private const double MinPlausibleRefreshPeriodSec = 1.0 / 500;
     private const double MaxPlausibleRefreshPeriodSec = 1.0 / 20;
 
+    /** Several refresh periods even at 30 Hz; older statistics no longer describe the current queue. */
+    private const double MaxStatisticsAgeSec = 0.1;
+
+    /** Beyond this the vblank statistics describe another display's clock, not a 59.94 vs 60 Hz rounding. */
+    private const double MaxRefreshRateMismatch = 0.05;
+
+    private const uint MonitorDefaultToNearest = 2;
+    private const int EnumCurrentSettings = -1;
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    private struct MonitorInfoEx
+    {
+        public int Size;
+        public int MonitorLeft, MonitorTop, MonitorRight, MonitorBottom;
+        public int WorkLeft, WorkTop, WorkRight, WorkBottom;
+        public uint Flags;
+
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+        public string DeviceName;
+    }
+
+    /** DEVMODEW, display variant. */
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    private struct DisplayMode
+    {
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+        public string DeviceName;
+
+        public short SpecVersion, DriverVersion, Size, DriverExtra;
+        public int Fields;
+        public int PositionX, PositionY, DisplayOrientation, DisplayFixedOutput;
+        public short Color, Duplex, YResolution, TtOption, Collate;
+
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+        public string FormName;
+
+        public short LogPixels;
+        public int BitsPerPel, PelsWidth, PelsHeight, DisplayFlags, DisplayFrequency;
+    }
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr MonitorFromWindow(IntPtr windowHandle, uint flags);
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    private static extern bool GetMonitorInfo(IntPtr monitor, ref MonitorInfoEx monitorInfo);
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    private static extern bool EnumDisplaySettings(string deviceName, int modeIndex, ref DisplayMode displayMode);
+
     private static IntPtr _measuredSwapChain;
     private static long _baselineVblankQpc;
     private static uint _baselineVblankCount;
+    private static long _lastMeasureTimestamp;
+    private static bool _isUsingReportedRefreshRate;
+    private static bool _hasTriedVblankBaseline;
 }
