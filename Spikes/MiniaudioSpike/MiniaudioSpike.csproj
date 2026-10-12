@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <Import Project="$(SolutionDir)/Tixl.props" Condition="'$(SolutionDir)' != '' And Exists('$(SolutionDir)/Tixl.props')" />
+    <Import Project="../../Tixl.props" Condition="'$(SolutionDir)' == '' Or !Exists('$(SolutionDir)/Tixl.props')" />
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>$(TixlNetCoreFrameworkVersion)</TargetFramework>
+        <RootNamespace>T3.Spikes.MiniaudioSpike</RootNamespace>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <Configurations>Debug;Release</Configurations>
+        <Platforms>AnyCPU</Platforms>
+    </PropertyGroup>
+
+    <!-- Only for the side-by-side comparison with BASS (the "bass" command). -->
+    <ItemGroup>
+        <PackageReference Include="ManagedBass" Version="4.0.2" />
+        <None Include="../../Dependencies/linux-x64/libbass.so" Condition="$([MSBuild]::IsOSPlatform('Linux'))" CopyToOutputDirectory="PreserveNewest" Visible="false" />
+    </ItemGroup>
+
+    <!-- The native library is compiled from native/ with the system C compiler. Windows and macOS builds
+         aren't wired up yet; the same tixl_audio.c compiles there unchanged. -->
+    <Target Name="BuildNativeAudio" BeforeTargets="Build" Condition="$([MSBuild]::IsOSPlatform('Linux'))"
+            Inputs="native/tixl_audio.c;native/miniaudio.h;native/stb_vorbis.c;native/build.sh"
+            Outputs="$(OutDir)libtixlaudio.so">
+        <Exec Command="bash &quot;$(MSBuildProjectDirectory)/native/build.sh&quot; &quot;$(OutDir)&quot;" />
+    </Target>
+</Project>
