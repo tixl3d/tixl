@@ -1,0 +1,44 @@
+{
+  "FormatVersion": 3,
+  "Id": "a7b3c8d2-1e4f-4a5b-9c6d-2e8f3a1b5c7d"/*WledInstance*/,
+  "Inputs": [
+    {
+      "Id": "a6b7c8d9-e0f1-4a2b-3c4d-5e6f7a8b9c0d"/*SyncEnabledInput*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "b1c2d3e4-f5a6-4b7c-8d9e-0f1a2b3c4d5e"/*Discover*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "b7c8d9e0-f1a2-4b3c-4d5e-6f7a8b9c0d1e"/*SyncModeInput*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "c2d3e4f5-a6b7-4c8d-9e0f-1a2b3c4d5e6f"/*InstanceNameInput*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "c8d9e0f1-a2b3-4c4d-5e6f-7a8b9c0d1e2f"/*SyncTimeoutInput*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "d3e4f5a6-b7c8-4d9e-0f1a-2b3c4d5e6f7a"/*IpAddressInput*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "f5a6b7c8-d9e0-4f1a-2b3c-4d5e6f7a8b9c"/*StartAddressInput*/,
+      "DefaultValue": 1
+    },
+    {
+      "Id": "f6a7b8c9-d0e1-4f2a-3b4c-5d6e7f8a9b0c"/*LedCountInput*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "f5a6b7c8-d9e0-4f1a-2b3c-4d5e6f7a8b9c"/*StartAddressInput*/,
+      "DefaultValue": 1
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

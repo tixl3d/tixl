@@ -1,0 +1,149 @@
+{
+  "FormatVersion": 3,
+  "Id": "a7b3c8d2-1e4f-4a5b-9c6d-2e8f3a1b5c7d"/*WledInstance*/,
+  "Description": "Discovers WLED devices on the network via mDNS/Zeroconf and exposes their E1.31/sACN sync settings as outputs.\n\nUse this operator to find WLED controllers and automatically configure sACN parameters (universe, start address, sync mode, timeout). Chain the outputs into a [SacnOutput] operator to send DMX data to the discovered WLED device.\n\nAll parameters have both inputs (for manual/static values) and outputs (for chaining). When discovery is enabled and a matching instance name is selected, the discovered values override the manual inputs.\n\nFeatures:\n- WLED device discovery via mDNS/Zeroconf\n- Fetches sync settings (universe, start address, sync enabled, sync mode, timeout) from each device's web UI\n- Static input values work without discovery\n- Outputs can be chained to other operators (e.g. SacnOutput)\n- Discovery is shared across all WledInstance instances\n\nTips:\n- Enable `Discover` and select a device from the `InstanceName` dropdown to auto-configure all parameters\n- Without discovery, set `Universe`, `StartAddress`, `SyncEnabled`, etc. manually\n- Chain `IpAddress` into SacnOutput's `TargetIpAddress`, `Universe` into `SyncUniverse`, etc.\n\nAKA: wled, discovery, mdns, zeroconf, e1.31, sacn, led, dmx",
+  "InputUis": [
+    {
+      "InputId": "a6b7c8d9-e0f1-4a2b-3c4d-5e6f7a8b9c0d"/*SyncEnabledInput*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 450.0
+      },
+      "Description": "Whether E1.31/sACN sync (DMX input) is enabled on the WLED device. When discovery finds a matching device, this is set from the device's sync type setting."
+    },
+    {
+      "InputId": "b1c2d3e4-f5a6-4b7c-8d9e-0f1a2b3c4d5e"/*Discover*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "If enabled, discovers WLED devices on the network via mDNS/Zeroconf and populates the `InstanceName` dropdown. When a device is selected, its sync settings override the manual inputs."
+    },
+    {
+      "InputId": "b7c8d9e0-f1a2-4b3c-4d5e-6f7a8b9c0d1e"/*SyncModeInput*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 525.0
+      },
+      "Description": "The sync mode (0 = multi-universe, 1 = single-universe). When discovery finds a matching device, this is set from the device's sync mode setting."
+    },
+    {
+      "InputId": "c2d3e4f5-a6b7-4c8d-9e0f-1a2b3c4d5e6f"/*InstanceNameInput*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      },
+      "Description": "The name of the WLED instance to use. Select from the dropdown (requires Discover enabled) or type a name manually. When discovery is active and the name matches a discovered device, the device's settings are used.",
+      "Usage": "CustomDropdown"
+    },
+    {
+      "InputId": "c8d9e0f1-a2b3-4c4d-5e6f-7a8b9c0d1e2f"/*SyncTimeoutInput*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 600.0
+      },
+      "Description": "The sync timeout in milliseconds. When discovery finds a matching device, this is set from the device's sync timeout setting."
+    },
+    {
+      "InputId": "d3e4f5a6-b7c8-4d9e-0f1a-2b3c4d5e6f7a"/*IpAddressInput*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      },
+      "Description": "The IP address of the WLED device. Set manually or leave empty when using discovery (the discovered IP will be used).",
+      "Usage": "Default"
+    },
+    {
+      "InputId": "e4f5a6b7-c8d9-4e0f-1a2b-3c4d5e6f7a8b"/*UniverseInput*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      },
+      "Description": "The sACN/E1.31 universe number. When discovery finds a matching device, this is set from the device's sync universe setting."
+    },
+    {
+      "InputId": "f5a6b7c8-d9e0-4f1a-2b3c-4d5e6f7a8b9c"/*StartAddressInput*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 300.0
+      },
+      "Description": "The DMX start address within the universe. When discovery finds a matching device, this is set from the device's DMX address setting."
+    },
+    {
+      "InputId": "f6a7b8c9-d0e1-4f2a-3b4c-5d6e7f8a9b0c"/*LedCountInput*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 375.0
+      },
+      "Description": "The number of LEDs on the WLED device. Set manually or leave at 0 when using discovery (the discovered count will be used from the device's /json/ API)."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "a2b3c4d5-e6f7-4a8b-9c0d-1e2f3a4b5c4e"/*StartIndex*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "e0f1a2b3-c4d5-4e6f-7a8b-9c0d1e2f3a4c"/*IpAddress*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 75.0
+      }
+    },
+    {
+      "OutputId": "f1a2b3c4-d5e6-4f7a-8b9c-0d1e2f3a4b5d"/*Universe*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 150.0
+      }
+    },
+    {
+      "OutputId": "a2b3c4d5-e6f7-4a8b-9c0d-1e2f3a4b5c6e"/*StartAddress*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 225.0
+      },
+      "Description": "The DMX start address within the universe."
+    },
+    {
+      "OutputId": "e6f7a8b9-c0d1-4e2f-3a4b-5c6d7e8f9a0b"/*LedCount*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 300.0
+      },
+      "Description": "The number of LEDs on the WLED device. Fetched from the device's /json/ API during discovery."
+    },
+    {
+      "OutputId": "d9e0f1a2-b3c4-4d5e-6f7a-8b9c0d1e2f3b"/*InstanceName*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 375.0
+      }
+    },
+    {
+      "OutputId": "b3c4d5e6-f7a8-4b9c-0d1e-2f3a4b5c6d7f"/*SyncEnabled*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 450.0
+      }
+    },
+    {
+      "OutputId": "c4d5e6f7-a8b9-4c0d-1e2f-3a4b5c6d7e8a"/*SyncMode*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 525.0
+      }
+    },
+    {
+      "OutputId": "d5e6f7a8-b9c0-4d1e-2f3a-3a4b5c6d7e8a"/*SyncTimeout*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 600.0
+      }
+    }
+  ]
+}
