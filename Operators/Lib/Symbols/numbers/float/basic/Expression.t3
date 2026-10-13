@@ -1,0 +1,28 @@
+{
+  "FormatVersion": 3,
+  "Id": "a3f7c2e1-9b4d-4e8f-b6a1-2c5d8e0f3a7b"/*Expression*/,
+  "Inputs": [
+    {
+      "Id": "c9d5e2f8-4b1a-4c7e-8f3d-2a9b6e0c5d1f"/*ExpressionInput*/,
+      "DefaultValue": "a + b"
+    },
+    {
+      "Id": "d0e6f3a9-5c2b-4d8f-9a4e-3b0c7f1d6e2a"/*A*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "e1f7a4b0-6d3c-4e9a-0b5f-4c1d8a2e7f3b"/*B*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "f2a8b5c1-7e4d-4f0b-1c6a-5d2e9b3f8a4c"/*C*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "a3b9c6d2-8f5e-4a1c-2d7b-6e3f0c4a9b5d"/*D*/,
+      "DefaultValue": 0.0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}
