@@ -149,7 +149,7 @@
         {
           "Id": "0016dd87-8756-4a97-a0da-096e1a879c05"/*Stride*/,
           "Type": "System.Int32",
-          "Value": 32
+          "Value": 64
         }
       ],
       "Outputs": []
@@ -437,12 +437,6 @@
       "SourceSlotId": "d7918fd8-906e-424d-8c5c-9631941cfc9d",
       "TargetParentOrChildId": "713f8d68-c587-480a-9dc4-cd9deee0854c",
       "TargetSlotId": "e010c56f-ff0b-44b6-bbd9-b50e2ccec2bf"
-    },
-    {
-      "SourceParentOrChildId": "bc6b09a9-48f4-47e3-9dc1-f173c6b8fbbb",
-      "SourceSlotId": "6d7a9493-6210-462a-b9c2-525b925de6c8",
-      "TargetParentOrChildId": "731a874d-edcf-4696-ba28-74eb2b99c345",
-      "TargetSlotId": "0016dd87-8756-4a97-a0da-096e1a879c05"
     },
     {
       "SourceParentOrChildId": "3a704e9e-f698-4374-afd0-d163a027a883",
