@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using ImGuiNET;
 using T3.Core.Operator;
 using T3.Editor.App;
@@ -125,7 +125,7 @@ internal sealed class SearchDialog : ModalDialog
                         if (i < 0 || i >= matchingItems.Count)
                             continue;
 
-                        DrawItem(matchingItems[i]);
+                        DrawItem(matchingItems[i], i);
                     }
                 }
 
@@ -138,14 +138,13 @@ internal sealed class SearchDialog : ModalDialog
         ImGui.PopStyleVar(2);
     }
 
-    private void DrawItem(SearchResult item)
+    private void DrawItem(SearchResult item, int index)
     {
         var components = item.GraphCanvas;
         if (components == null)
             return;
 
-        var symbolHash = item.Id.GetHashCode();
-        ImGui.PushID(symbolHash);
+        ImGui.PushID(index);
         {
             var instance = item.Instance;
             if (item.Kind == SearchResult.Kinds.Instance)
@@ -172,9 +171,9 @@ internal sealed class SearchDialog : ModalDialog
                 ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(2, 4));
 
                 var isSelected = item == _selectedInstance;
-                ImGui.PushID(item.Id.GetHashCode());
+                
                 var hasBeenClicked = ImGui.Selectable("##Selectable", isSelected);
-                ImGui.PopID();
+                
                 _selectedItemChanged |= hasBeenClicked;
 
                 var path = instance.InstancePath;
@@ -213,7 +212,7 @@ internal sealed class SearchDialog : ModalDialog
             else if (item.Section != null) 
             {
                 var isSelected = item == _selectedInstance;
-                var hasBeenClicked = ImGui.Selectable($"##Selectable{symbolHash.ToString()}", isSelected);
+                var hasBeenClicked = ImGui.Selectable($"##Selectable.ToString()", isSelected);
                 
                 _selectedItemChanged |= hasBeenClicked;
 
@@ -246,7 +245,7 @@ internal sealed class SearchDialog : ModalDialog
             else
             {
                 var isSelected = item == _selectedInstance;
-                var hasBeenClicked = ImGui.Selectable($"##Selectable{symbolHash.ToString()}", isSelected);
+                var hasBeenClicked = ImGui.Selectable($"##SelectableToString()", isSelected);
 
                 _selectedItemChanged |= hasBeenClicked;
 
