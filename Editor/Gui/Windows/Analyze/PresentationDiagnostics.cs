@@ -33,6 +33,12 @@ internal static class PresentationDiagnostics
     /// <summary>Frames handed to Present that the display hasn't shown yet; -1 when unknown.</summary>
     public static int QueuedFrames { get; private set; } = -1;
 
+    /// <summary>
+    /// Whether the pacing window sits on the primary display, whose clock the frame-latency waitable follows while
+    /// DWM composes. On any other display the loop has to wait for that display's own vblanks. True until known.
+    /// </summary>
+    public static bool IsPacingWindowOnPrimaryDisplay { get; private set; } = true;
+
     /// <summary>Call once per frame after presenting the main swap chain.</summary>
     public static void Update(SwapChain swapChain)
     {
@@ -90,7 +96,9 @@ internal static class PresentationDiagnostics
         var measuredPeriodSec = MeasureVblankPeriod(pacingSwapChain);
         if (isFirstSample)
             return;
-        var displayRefreshRate = GetDisplayRefreshRate(windowHandle);
+
+        var displayRefreshRate = GetDisplayRefreshRate(windowHandle, out var isOnPrimaryDisplay);
+        IsPacingWindowOnPrimaryDisplay = isOnPrimaryDisplay;
         var measurementMatchesDisplay = measuredPeriodSec > 0
                                         && (displayRefreshRate <= 0
                                             || Math.Abs(measuredPeriodSec * displayRefreshRate - 1) <= MaxRefreshRateMismatch);
@@ -138,12 +146,15 @@ internal static class PresentationDiagnostics
     /// carry whole hertz, so the NTSC-style rates that are one below a common rate (59, 119, ...) are read as
     /// 60000/1001 and so on, which is what such a mode really runs at.
     /// </summary>
-    public static double GetDisplayRefreshRate(IntPtr windowHandle)
+    private static double GetDisplayRefreshRate(IntPtr windowHandle, out bool isOnPrimaryDisplay)
     {
+        isOnPrimaryDisplay = true;
         var monitor = MonitorFromWindow(windowHandle, MonitorDefaultToNearest);
         var monitorInfo = new MonitorInfoEx { Size = Marshal.SizeOf<MonitorInfoEx>() };
         if (monitor == IntPtr.Zero || !GetMonitorInfo(monitor, ref monitorInfo))
             return 0;
+
+        isOnPrimaryDisplay = (monitorInfo.Flags & MonitorInfoPrimary) != 0;
 
         var displayMode = new DisplayMode { Size = (short)Marshal.SizeOf<DisplayMode>() };
         if (!EnumDisplaySettings(monitorInfo.DeviceName, EnumCurrentSettings, ref displayMode) || displayMode.DisplayFrequency <= 1)
@@ -211,6 +222,7 @@ internal static class PresentationDiagnostics
     private const double MaxRefreshRateMismatch = 0.05;
 
     private const uint MonitorDefaultToNearest = 2;
+    private const uint MonitorInfoPrimary = 1;
     private const int EnumCurrentSettings = -1;
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]

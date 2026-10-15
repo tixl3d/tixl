@@ -293,6 +293,16 @@ than a quarter period early. Measured on the 60 Hz display: 16.68 ms intervals, 
 both hardware overlay and composed mode. Composed on a secondary display, the frame statistics can freeze for
 seconds; the queued count now reads "unknown" when they are older than 100 ms instead of counting up to ~450.
 
+Regression report 2026-10-15 (testers, builds after `258c124d1`): 60 → 30 fps for runs of up to 17 frames on single
+displays. Their exports show CPU ≈ 9 ms + GPU ≈ 8 ms — right at the period, which latency 1 serialises (known, C4).
+The only new delay in the default path was the extra vblank wait from `dd370f2b5`, which fired whenever the waitable
+released the loop more than a quarter period before the vblank, and so removed DWM's composition head start. It is
+now gated to the cases it was written for: a frame rate target below the display rate, or a pacing window that is
+not on the primary display (the waitable follows the primary display's clock while composing; in hardware overlay
+on a secondary display it already paced correctly, measured 2026-10-12). The log records when the loop starts or stops waiting
+for the pacing display's vblanks, so a tester's log shows which mode a bad stretch ran in. Not yet confirmed on a tester machine. The structural fix for
+CPU + GPU ≈ period remains frame latency 2 now that the visual clock exists (C4) — to be measured, not assumed.
+
 Workaround until then: set the internal panel to a fixed 60 Hz (or 120 Hz) and turn off Windows dynamic refresh
 rate, so both displays and the 30 fps NDI rate share one integer cadence. 59.94 vs 60 Hz drift between panel
 and projector remains (one hitch every ~17 s).

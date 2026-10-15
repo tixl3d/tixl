@@ -34,6 +34,7 @@ internal static class ProgramWindows
     private static int _pacingVblanksPerFrame = 1;
     private static bool _isPacingWithVSync = true;
     private static long _lastPacedFrameStart;
+    private static bool _isWaitingForVblanks;
 
     /**
      * Fraction of a refresh period a frame may start early without waiting for another vblank. Large enough for
@@ -346,11 +347,24 @@ internal static class ProgramWindows
     {
         _pacingWindow.WaitForFrameLatency();
 
-        // The latency waitable releases the loop once per vblank of whatever clock DWM composes with — the primary
-        // display's while composing, whatever the sync interval. So the loop waits for further vblanks of the pacing
-        // display until the frame has lasted its vblanks. Comparing against the elapsed time rather than counting
-        // waits doesn't depend on whether the waitable fires just before or just after a vblank.
-        if (_isPacingWithVSync)
+        // The latency waitable releases the loop once per vblank of the primary display's clock while DWM composes,
+        // whatever the sync interval. A window on another display, or a frame that should last several vblanks,
+        // therefore waits for the pacing display's own vblanks until the frame has lasted long enough. On the primary
+        // display at full rate the waitable alone paces, and the extra wait must stay out of the way: it fires
+        // whenever the waitable released the loop a little before the vblank, and that head start is what a frame
+        // whose CPU and GPU work add up to a full period needs to make its vblank.
+        var needsVblankWait = _isPacingWithVSync
+                              && (_pacingVblanksPerFrame > 1 || !PresentationDiagnostics.IsPacingWindowOnPrimaryDisplay);
+        if (needsVblankWait != _isWaitingForVblanks)
+        {
+            _isWaitingForVblanks = needsVblankWait;
+            Log.Debug(needsVblankWait
+                          ? $"Frame pacing waits for the pacing display's vblanks ({_pacingVblanksPerFrame} per frame, "
+                            + $"window on primary display: {PresentationDiagnostics.IsPacingWindowOnPrimaryDisplay})"
+                          : "Frame pacing follows the frame-latency waitable alone");
+        }
+
+        if (needsVblankWait)
         {
             var minFrameTicks = (long)((_pacingVblanksPerFrame - VblankTimingTolerance) * FrameTiming.RefreshPeriodSec * Stopwatch.Frequency);
             while (Stopwatch.GetTimestamp() - _lastPacedFrameStart < minFrameTicks
