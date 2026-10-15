@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System.Diagnostics;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
@@ -7,6 +7,7 @@ using T3.Core.DataTypes;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
+using T3.Core.Rendering;
 using T3.Core.Resource;
 using T3.Editor.Gui.Windows;
 using Device = SharpDX.Direct3D11.Device;
@@ -73,8 +74,24 @@ internal sealed class CommandOutputUi : OutputUi<Command>
 
         if (context.ShowGizmos != T3.Core.Operator.GizmoVisibility.Off)
         {
-            context.WorldToCamera = originalCamMatrix;
-            context.CameraToClipSpace = originalViewMatrix;
+            // Draw the grid with the same camera as the command list: camera operators restore their
+            // matrices after their subtree, so read them back from the operator. Otherwise the grid stays
+            // frozen on this window's view camera (e.g. while manipulating a previewed [Camera]).
+            // Bypassed cameras render with the view camera and are therefore excluded.
+            var gridCamera = !context.BypassCameras && slot.Parent?.SymbolChild is not { IsBypassed: true }
+                                 ? slot.Parent as ICameraPropertiesProvider
+                                 : null;
+
+            if (gridCamera != null)
+            {
+                context.WorldToCamera = gridCamera.WorldToCamera;
+                context.CameraToClipSpace = gridCamera.CameraToClipSpace;
+            }
+            else
+            {
+                context.WorldToCamera = originalCamMatrix;
+                context.CameraToClipSpace = originalViewMatrix;
+            }
 
             if(_gridOutputs != null && _gridOutputs.Count > 0)
             {
