@@ -57,7 +57,8 @@ The install folder is treated as read-only (the Windows installer puts it in Pro
 TiXL is MIT. Bundled third-party licenses are in `Dependencies/licenses/`. Two need attention:
 
 - **BASS**: free for non-commercial use only (`LicenseRef-BASS` on Arch, `unfree` in nixpkgs).
-- **NDI**: proprietary runtime, used by the Ndi operator package.
+- **NDI**: proprietary runtime, used by the Ndi operator package. Not bundled on Linux; users install it
+  themselves (see `DEPENDENCIES.md`).
 
 ## CI
 

@@ -584,8 +584,51 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
 
     public void CopyTextureRegion(GpuTexture source, int sourceSubresource, GpuTexture destination, int destinationSubresource, int x, int y, int z)
     {
-        if (source is not VulkanTexture from || destination is not VulkanTexture to || from.Image.IsNull || to.Image.IsNull)
+        if (source is not VulkanTexture from || destination is not VulkanTexture to)
             return;
+
+        // A staging texture is a buffer, so the copy is a buffer transfer: the whole texture into a readback, or an
+        // upload placed at an offset in the destination, as the thumbnail atlas does. Readbacks of one mip of a
+        // larger texture and uploads from a mip other than the first are not laid out in the buffer.
+        if (to.Image.IsNull)
+        {
+            if (x == 0 && y == 0 && z == 0 && sourceSubresource == 0 && destinationSubresource == 0)
+                CopyTexture(source, destination);
+            else
+                GraphicsLog.WarnOnce("Copying a region or a mip into a staging texture is not implemented; the copy is skipped.");
+
+            return;
+        }
+
+        if (from.Image.IsNull)
+        {
+            if (from.StagingBuffer.IsNull || sourceSubresource != 0)
+            {
+                GraphicsLog.WarnOnce("Copying from a mip of a staging texture is not implemented; the copy is skipped.");
+                return;
+            }
+
+            EndRenderingIfActive();
+            VulkanBarriers.TransitionImage(backend, _commandBuffer, to, VkImageLayout.TransferDstOptimal,
+                                           VkPipelineStageFlags2.Copy, VkAccessFlags2.TransferWrite);
+
+            var targetMips = Math.Max(1, to.Description.MipLevels);
+            VkBufferImageCopy upload = new()
+                                           {
+                                               imageSubresource = new VkImageSubresourceLayers
+                                                                      {
+                                                                          aspectMask = to.Aspect,
+                                                                          mipLevel = (uint)(destinationSubresource % targetMips),
+                                                                          baseArrayLayer = (uint)(destinationSubresource / targetMips),
+                                                                          layerCount = 1,
+                                                                      },
+                                               imageOffset = new VkOffset3D(x, y, z),
+                                               imageExtent = ExtentOf(from.Description),
+                                           };
+
+            backend.Api.vkCmdCopyBufferToImage(_commandBuffer, from.StagingBuffer, to.Image, VkImageLayout.TransferDstOptimal, 1, &upload);
+            return;
+        }
 
         EndRenderingIfActive();
         VulkanBarriers.TransitionImage(backend, _commandBuffer, from, VkImageLayout.TransferSrcOptimal,

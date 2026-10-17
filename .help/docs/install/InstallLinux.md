@@ -184,12 +184,33 @@ To uninstall, delete the unpacked folder, `~/.local/bin/tixl`, and the two files
 `~/.local/share`. Your projects and settings stay in `~/Documents` and `~/.config` until you delete
 them yourself.
 
+## Optional: NDI
+
+The [NdiInput] and [NdiOutput] operators and NDI streams in the output setup need the NDI runtime, which
+TiXL can't include. Install it once:
+
+- Arch: `ndi-sdk` from the AUR. With an AUR helper such as yay or paru: `yay -S ndi-sdk`. Without one:
+
+  ```bash
+  git clone https://aur.archlinux.org/ndi-sdk.git
+  cd ndi-sdk
+  makepkg -si
+  ```
+- NixOS: the `ndi` package (unfree).
+- Other distributions: download the NDI SDK for Linux from [ndi.video](https://ndi.video/for-developers/ndi-sdk/)
+  and either put its `libndi.so.6` where the system finds libraries, or set `NDI_RUNTIME_DIR_V6` to the folder
+  that contains it.
+
+NDI finds sources on the network through Avahi, so `avahi-daemon` has to be running. Restart TiXL after
+installing the runtime: a running program doesn't see newly installed libraries. Without the runtime the NDI
+operators show "NDI runtime not found" in their status and produce no output.
+
 ## What doesn't work on Linux yet
 
 A few features rely on Windows-only libraries:
 
 - Computer vision operators based on OpenCV and MediaPipe.
-- NDI input and output, webcams and screen capture.
+- Webcams and screen capture.
 - Recording what other programs play (loopback). Live input from a microphone or line-in works.
 - Spout video sharing, which only exists on Windows.
 - SpaceMouse support, gamepads and Ableton Link.

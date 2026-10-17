@@ -74,6 +74,7 @@ internal sealed class AssemblyTreeNode
     private static readonly HashSet<string> _assembliesWithOwnNativeResolver = new(StringComparer.Ordinal)
                                                                                    {
                                                                                        "Sdcb.FFmpeg", // locates its native libav* DLLs itself
+                                                                                       "NDILibDotNet6", // the Ndi package maps its Windows import name to libndi on Linux and macOS
                                                                                    };
 
     // this should only be called externally

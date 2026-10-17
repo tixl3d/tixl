@@ -221,5 +221,5 @@ Rules for working on this, each learned the expensive way while bringing the Pla
 
 ## Non-goals
 
-As in the parent plan: ImGui multi-viewport, an ImGui upgrade, SpaceMouse, NDI, Spout, Mediapipe, webcams and
+As in the parent plan: ImGui multi-viewport, an ImGui upgrade, SpaceMouse, Spout, Mediapipe, webcams and
 screen capture on Linux for v5.0.

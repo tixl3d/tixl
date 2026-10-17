@@ -40,7 +40,7 @@ zlib, fontconfig, freetype, libpng, expat, bzip2, brotli.
 
 | Component | Enables | Arch | Debian / Ubuntu | Fedora | nixpkgs |
 |---|---|---|---|---|---|
-| NDI runtime (`libndi.so.6`) | Ndi operators | AUR `ndi-sdk` | vendor download (ndi.video) | vendor download | `ndi` (unfree) |
+| NDI runtime (`libndi.so.6`) | Ndi operators and NDI output streams. Found via `NDI_RUNTIME_DIR_V6` or the system library path; source discovery needs `avahi-daemon` | AUR `ndi-sdk` | vendor download (ndi.video) | vendor download | `ndi` (unfree) |
 | Vulkan validation layers | GPU debugging | `vulkan-validation-layers` | `vulkan-validationlayers` | `vulkan-validation-layers` | `vulkan-validation-layers` |
 
 ## Bundled in the tarball

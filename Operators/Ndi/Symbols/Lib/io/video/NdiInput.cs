@@ -1,5 +1,6 @@
 #nullable enable
 using System.Diagnostics;
+using Lib.Utils;
 using NewTek;
 using NewTek.NDI;
 using T3.Graphics.Compat;
@@ -130,11 +131,12 @@ public sealed class NdiInput : Instance<NdiInput>, IStatusProvider, ICustomDropd
 
         // The finder searches the network at once, through the native library. Creating the operator must not
         // fail where that library is missing, so it stays null there and every use checks.
-        if (T3.Core.Utils.WindowsOnlyFeature.IsAvailable("NDI input"))
+        if (NdiRuntime.IsAvailable)
             _ndiInputFinder = ConnectToNdi();
+        else
+            _lastStatusMessage = NdiRuntime.MissingMessage;
     }
 
-    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
     private NdiSourceFinder ConnectToNdi()
     {
         InitializeNdi();
@@ -148,15 +150,9 @@ public sealed class NdiInput : Instance<NdiInput>, IStatusProvider, ICustomDropd
 
     private void Update(EvaluationContext context)
     {
-        if (!T3.Core.Utils.WindowsOnlyFeature.IsAvailable("NDI input"))
+        if (!NdiRuntime.IsAvailable)
             return;
 
-        ReceiveWithNdi(context);
-    }
-
-    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-    private void ReceiveWithNdi(EvaluationContext context)
-    {
         var reconnectTriggered = MathUtils.WasTriggered(TriggerReconnect.GetValue(context), ref _reconnect);
         if (reconnectTriggered)
         {
@@ -179,7 +175,7 @@ public sealed class NdiInput : Instance<NdiInput>, IStatusProvider, ICustomDropd
 
         _textureAction?.Invoke();
         _textureAction = null;
-        Texture.Value = _lastTexture;
+        Texture.Value = _gpuTexture;
     }
 
     private void InitializeNdi()
@@ -196,7 +192,7 @@ public sealed class NdiInput : Instance<NdiInput>, IStatusProvider, ICustomDropd
         }
         catch (Exception e)
         {
-            Log.Error("Failed to initialize NDIInput. One possible reason could be 'Processing.NDI.Lib.x64.dll' missing: " + e.Message);
+            Log.Error("Failed to initialize NDIInput. One possible reason could be a missing NDI runtime: " + e.Message);
             return;
         }
 
@@ -435,70 +431,36 @@ public sealed class NdiInput : Instance<NdiInput>, IStatusProvider, ICustomDropd
                                              return;
                                          }
 
-                                         // create several textures with a given format with CPU access
-                                         // to be able to read out the initial texture values
-                                         const Format textureFormat = Format.B8G8R8A8_UNorm;
-
-                                         if (_imagesWithCpuAccess.Count == 0
-                                             || _imagesWithCpuAccess[0].Description.Format != textureFormat
-                                             || _imagesWithCpuAccess[0].Description.Width != _xRes
-                                             || _imagesWithCpuAccess[0].Description.Height != _yRes
-                                             || _imagesWithCpuAccess[0].Description.MipLevels != 1)
+                                         if (_gpuTexture == null
+                                             || _gpuTexture.Description.Width != _xRes
+                                             || _gpuTexture.Description.Height != _yRes)
                                          {
                                              DebugDataRecording.KeepTraceData(this, "07-_textureActionCreateNewTexture", currReceiverId,
                                                                               ref _traceTextureAction2Channel);
-                                             //Log.Warning("resolution or format changed", this);
-
-                                             var imageDesc = new Texture2DDescription
-                                                                 {
-                                                                     BindFlags = BindFlags.ShaderResource,
-                                                                     Format = textureFormat,
-                                                                     Width = _xRes,
-                                                                     Height = _yRes,
-                                                                     MipLevels = 1,
-                                                                     SampleDescription = new SampleDescription(1, 0),
-                                                                     Usage = ResourceUsage.Dynamic,
-                                                                     OptionFlags = ResourceOptionFlags.None,
-                                                                     CpuAccessFlags = CpuAccessFlags.Write,
-                                                                     ArraySize = 1
-                                                                 };
-
                                              DisposeTextures();
 
-                                             // Log.Debug($"NDI input wxh = {xRes}x{yRes}, " +
-                                             //           $"format = {textureFormat} ({textureFormat})");
-
-                                             for (var i = 0; i < NumTextureEntries; ++i)
-                                             {
-                                                 var tex2D = Texture2D.CreateTexture2D(imageDesc);
-                                                 _imagesWithCpuAccess.Add(tex2D);
-                                             }
-
-                                             _currentIndex = 0;
+                                             // Device-local and filled with UpdateSubresource, like the camera and video operators: a
+                                             // CPU-writable texture can't be sampled on Vulkan, where it is a plain upload buffer.
+                                             _gpuTexture = Texture2D.CreateTexture2D(new Texture2DDescription
+                                                                                         {
+                                                                                             BindFlags = BindFlags.ShaderResource,
+                                                                                             Format = Format.B8G8R8A8_UNorm,
+                                                                                             Width = _xRes,
+                                                                                             Height = _yRes,
+                                                                                             MipLevels = 1,
+                                                                                             SampleDescription = new SampleDescription(1, 0),
+                                                                                             Usage = ResourceUsage.Default,
+                                                                                             OptionFlags = ResourceOptionFlags.None,
+                                                                                             CpuAccessFlags = CpuAccessFlags.None,
+                                                                                             ArraySize = 1
+                                                                                         });
                                          }
 
-                                         // copy texture to an internal image
-                                         var immediateContext = ResourceManager.Device.ImmediateContext;
-                                         var writableImage = _imagesWithCpuAccess[_currentIndex];
-                                         _currentIndex = (_currentIndex + 1) % NumTextureEntries;
-
-                                         // NOTE: During profiling we can observe that this block is zero length if image index is 0 ???
-                                         // We should investigate this, because there might be a bug in the code.
                                          if (_isProfiling)
-                                             DebugDataRecording.StartRegion(this, "08-CopyTextureToIndex", _currentIndex, ref _traceTextureCopyChannel);
+                                             DebugDataRecording.StartRegion(this, "08-CopyTextureToGpu", currReceiverId, ref _traceTextureCopyChannel);
 
-                                         // we have to map with a stride that represents multiples of 16 pixels here
-                                         // (it is yet unclear why, but works)
-                                         // map resource manually using our stride...
-                                         var dataBox = immediateContext.MapSubresourceWithSize(writableImage, 0, 0, MapMode.WriteDiscard,
-                                                                                       T3.Graphics.Compat.MapFlags.None, out int _);
-
-                                         T3.Core.Utils.Utilities.CopyImageMemory(videoFrame.p_data, dataBox.DataPointer, _yRes,
-                                                                                 videoFrame.line_stride_in_bytes, dataBox.RowPitch);
-
-                                         // release our resources
-                                         immediateContext.UnmapSubresource(writableImage, 0);
-                                         _lastTexture = writableImage;
+                                         var dataBox = new DataBox(videoFrame.p_data, videoFrame.line_stride_in_bytes, 0);
+                                         ResourceManager.Device.ImmediateContext.UpdateSubresource(dataBox, _gpuTexture, 0);
 
                                          if (_isProfiling)
                                              DebugDataRecording.EndRegion(_traceTextureCopyChannel);
@@ -534,14 +496,7 @@ public sealed class NdiInput : Instance<NdiInput>, IStatusProvider, ICustomDropd
     private void DisposeTextures()
     {
         Texture.Value = null;
-        _lastTexture = null;
-
-        foreach (var image in _imagesWithCpuAccess)
-        {
-            image.Dispose();
-        }
-
-        _imagesWithCpuAccess.Clear();
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _gpuTexture);
     }
 
     #region IDisposable Support
@@ -621,21 +576,14 @@ public sealed class NdiInput : Instance<NdiInput>, IStatusProvider, ICustomDropd
     /// </summary>
     private int _receiverId;
 
-    /** Hold several textures internally to speed up calculations */
-    private const int NumTextureEntries = 3;
-
-    private readonly List<Texture2D> _imagesWithCpuAccess = [];
-
-    /** Current image index (used for circular access of ImagesWithCpuAccess) */
-    private int _currentIndex;
-
     /** Mutex protecting changes to our images */
     private readonly Mutex _textureMutex = new();
 
     /** Action for changing the textures */
     private Action? _textureAction;
 
-    private Texture2D? _lastTexture;
+    /** The last received frame, uploaded on the main thread. */
+    private Texture2D? _gpuTexture;
 
     #region status provider
     public IStatusProvider.StatusLevel GetStatusLevel()

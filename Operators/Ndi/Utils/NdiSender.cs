@@ -51,6 +51,12 @@ internal sealed class NdiSender : IOutputStreamSender
 
     public bool Send(Texture2D frame)
     {
+        if (!NdiRuntime.IsAvailable)
+        {
+            _lastError = NdiRuntime.MissingMessage;
+            return false;
+        }
+
         if (frame == null)
         {
             _lastError = "No texture";

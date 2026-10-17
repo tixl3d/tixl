@@ -67,11 +67,14 @@ scenes. These are bugs being worked on, not missing features.
 | Network streams (RTSP) | Works | Works | Partial |
 | Hardware-accelerated video export | Works | Not yet | Not yet |
 | Webcams and capture cards | Works | Not yet | Planned |
-| NDI input and output | Works | Not yet | Not yet |
+| NDI input and output | Works | Partial | Not yet |
 | Spout (sharing video with other apps) | Works | — | — |
 | Syphon (sharing video with other apps) | — | — | Planned |
 | Screen capture | Works | Not yet | Not yet |
 | Timeline thumbnails of video clips | Works | Not yet | Not yet |
+
+NDI on Linux needs the NDI runtime, which TiXL can't include. [Install on Linux](InstallLinux.md#optional-ndi)
+says where to get it. Without it the NDI operators report "NDI runtime not found".
 
 TiXL plays and exports video with FFmpeg. Windows and Linux include it. On macOS there is no included
 FFmpeg yet: for now, install it with Homebrew (`brew install ffmpeg@7`) and start TiXL with

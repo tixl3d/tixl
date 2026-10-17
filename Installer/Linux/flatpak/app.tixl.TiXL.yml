@@ -17,6 +17,8 @@ finish-args:
   - --socket=pulseaudio
   # OSC, NDI, and the NuGet restore when TiXL compiles operator projects.
   - --share=network
+  # The host's NDI runtime is invisible from the sandbox. A copy of libndi.so.6 under the home folder works
+  # with `flatpak override --env=NDI_RUNTIME_DIR_V6=<that folder> app.tixl.TiXL`.
   # TiXL's own file browser doesn't go through portals, and projects and assets live anywhere.
   - --filesystem=home
   - --env=TIXL_SLANGC=/app/lib/slang/bin/slangc

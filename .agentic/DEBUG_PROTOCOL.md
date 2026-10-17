@@ -112,6 +112,23 @@ Parameter shapes are defined in `DebugServer.cs` — read the handler when unsur
   MSBuild skip the compile. `touch` the edited files before building, and check
   that the built DLL actually changed.
 
+## Shader printf on Vulkan
+
+When a compute or pixel shader seems to do nothing on Linux or macOS, the validation layer can print from
+inside it. Add `printf("...", values)` to the shader (Slang emits the debug-printf extension), write a layer
+settings file
+
+```
+khronos_validation.enables = VK_VALIDATION_FEATURE_ENABLE_DEBUG_PRINTF_EXT
+khronos_validation.printf_to_stdout = true
+```
+
+and start the editor with `TIXL_VULKAN_VALIDATION=1 VK_LAYER_SETTINGS_PATH=<that file>`. The output lands
+on the editor's stdout, not in the log, and without a `\n` every message joins the previous line. Guard the
+printf with a thread check (`if (id.x == 0 && id.y == 0)`), or one dispatch floods the buffer. Reading a
+texel the previous frame wrote (`Packed[uint2(5, 5)]`) and printing it tells whether writes persist in the
+image - which separates a dispatch that does nothing from a readback copy that does nothing.
+
 ## Looking at the graph
 
 The graph canvas can be driven like a user would scroll and zoom it. All positions are canvas

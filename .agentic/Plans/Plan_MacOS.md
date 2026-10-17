@@ -163,9 +163,8 @@ bugs). Estimate: 20–50 agent hours plus your review/testing time.
 - [ ] **Exported player is a folder, not a `.app`, on macOS.** Wrap it like `build-dmg.sh` does (launcher in
       `Contents/MacOS`, payload in `Resources`), ad-hoc signed so it runs on Apple Silicon after copying.
 - [ ] **Stale developer docs:** `Installer/Linux/DEPENDENCIES.md` and `Dependencies/{linux-x64,osx}/README.md` still
-      say live audio input is unavailable (BASS recording provides mic/line-in now, no loopback);
-      `DEPENDENCIES.md` lists the NDI runtime as optional on Linux, but `WindowsOnlyFeature` disables NDI off
-      Windows. The user-facing state is in `.help/docs/install/PlatformSupport.md`.
+      say live audio input is unavailable (BASS recording provides mic/line-in now, no loopback). The
+      user-facing state is in `.help/docs/install/PlatformSupport.md`.
 - [ ] **Clean up `RenderToCubemap-vs.hlsl`** (the specular prefilter; over 10 years old). Unused globals outside
       any cbuffer (`objectToWorldMatrix` … `textureMatrix`, `g_CubeSize`, `g_CubeLod`, `g_CubeLodCount` - Slang
       warns about each), a commented-out cbuffer and reference code, the debug `colorOfBox`, inconsistent naming
