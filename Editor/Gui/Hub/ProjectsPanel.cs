@@ -91,7 +91,8 @@ internal static class ProjectsPanel
 
         var dl = ImGui.GetWindowDrawList();
 
-        ImGui.PushID(package.DisplayName);
+        // Two projects can share a display name (same csproj name in different folders); the folder is unique.
+        ImGui.PushID(package.Folder);
         var isOpened = OpenedProject.OpenedProjects.TryGetValue(package, out var openedProject);
         var name = package.DisplayName;
         var clicked = ImGui.InvisibleButton(name, ProjectItemSize);
@@ -249,7 +250,7 @@ internal static class ProjectsPanel
     {
         var dl = ImGui.GetWindowDrawList();
 
-        ImGui.PushID(archivedProject.Name);
+        ImGui.PushID(archivedProject.ProjectFile.Directory);
         var name = archivedProject.Name;
         var clicked = ImGui.InvisibleButton(name, ProjectItemSize);
         var isHovered = ImGui.IsItemHovered();
