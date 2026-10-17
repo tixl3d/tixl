@@ -161,8 +161,9 @@ internal static class DragAndDropHandling
                     try
                     {
                         // If it was an internal ImGui-managed drag, the payload data might be relevant
-                        // Otherwise, we fall back to our stored _dataString
-                        var internalData = Marshal.PtrToStringAuto(payload.Data);
+                        // Otherwise, we fall back to our stored _dataString.
+                        // Must match the UTF-16 encoding written by StringToHGlobalUni; PtrToStringAuto reads UTF-8 on Linux.
+                        var internalData = Marshal.PtrToStringUni(payload.Data);
                         data = internalData ?? _dataString;
 
                         result = data != null
