@@ -60,6 +60,13 @@
       "Outputs": []
     },
     {
+      "Id": "11e43f67-487e-44a1-a675-c69c367d582f"/*Time*/,
+      "SymbolId": "b0d75f21-df33-460b-beab-d8c5e1f23e5e",
+      "SymbolName": "Lib.numbers.anim.time.Time",
+      "InputValues": [],
+      "Outputs": []
+    },
+    {
       "Id": "3032cb75-fcbc-46b4-93ef-4602fce7d85f"/*Point*/,
       "SymbolId": "9989f539-f86c-4508-83d7-3fc0e559f502",
       "SymbolName": "Types.Values.Point",
@@ -117,19 +124,6 @@
       "Outputs": []
     },
     {
-      "Id": "6ad3c59f-366c-4741-a463-a156ee3f6bdf"/*_Time_old*/,
-      "SymbolId": "9cb4d49e-135b-400b-a035-2b02c5ea6a72",
-      "SymbolName": "Lib.numbers.anim._obsolete._Time_old",
-      "InputValues": [
-        {
-          "Id": "2d9c040d-5244-40ac-8090-d8d57323487b"/*SpeedFactor*/,
-          "Type": "System.Single",
-          "Value": 0.25
-        }
-      ],
-      "Outputs": []
-    },
-    {
       "Id": "6e7fbb6e-89d1-43d9-b460-6860d410dbe3"/*RadialPoints*/,
       "SymbolId": "3352d3a1-ab04-4d0a-bb43-da69095b73fd",
       "SymbolName": "Lib.point.generate.RadialPoints",
@@ -162,6 +156,15 @@
       "SymbolName": "Lib.point.generate.RadialPoints",
       "InputValues": [
         {
+          "Id": "6df5829e-a534-4620-bcd5-9324f94b4f54"/*Axis*/,
+          "Type": "System.Numerics.Vector3",
+          "Value": {
+            "X": 0.0,
+            "Y": 1.0,
+            "Z": 0.0
+          }
+        },
+        {
           "Id": "76124db6-4b89-4d7c-bd25-2ebf95b1c141"/*CloseCircleLine*/,
           "Type": "System.Boolean",
           "Value": false
@@ -169,12 +172,21 @@
         {
           "Id": "acce4779-56d6-47c4-9c52-874fca91a3a1"/*Radius*/,
           "Type": "System.Single",
-          "Value": 0.27
+          "Value": 0.6
         },
         {
           "Id": "b654ffe2-d46e-4a62-89b3-a9692d5c6481"/*Count*/,
           "Type": "System.Int32",
           "Value": 10950
+        },
+        {
+          "Id": "ca84209e-d821-40c6-b23c-38fc4bbd47b0"/*Center*/,
+          "Type": "System.Numerics.Vector3",
+          "Value": {
+            "X": 0.0,
+            "Y": 0.82,
+            "Z": 0.0
+          }
         }
       ],
       "Outputs": []
@@ -239,21 +251,12 @@
         {
           "Id": "5894156a-cc31-4236-908c-de0e5385fd84"/*Strength*/,
           "Type": "System.Single",
-          "Value": 35.7
+          "Value": 1.0
         },
         {
           "Id": "929db7b2-f19c-4a28-b4c2-187365b99760"/*Frequency*/,
           "Type": "System.Single",
-          "Value": 0.2
-        },
-        {
-          "Id": "c2df1fa3-88e1-4be2-954e-8c44edd9d421"/*AmountDistribution*/,
-          "Type": "System.Numerics.Vector3",
-          "Value": {
-            "X": 5.0,
-            "Y": 4.0,
-            "Z": 5.0
-          }
+          "Value": 0.13
         }
       ],
       "Outputs": []
@@ -467,8 +470,8 @@
       "TargetSlotId": "3f5abde2-66e1-4b04-9bff-5a19a58aab86"
     },
     {
-      "SourceParentOrChildId": "6ad3c59f-366c-4741-a463-a156ee3f6bdf",
-      "SourceSlotId": "b20573fe-7a7e-48e1-9370-744288ca6e32",
+      "SourceParentOrChildId": "11e43f67-487e-44a1-a675-c69c367d582f",
+      "SourceSlotId": "fd3049aa-4c22-405b-b9b4-0a2474d0e377",
       "TargetParentOrChildId": "b63477f8-d234-4366-93c6-4a08d44b5cfd",
       "TargetSlotId": "aaba1602-e7a1-4b48-81d4-9d7b2b3aa8b1"
     },
