@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using T3.Graphics.Compat;
-using SharpDX.WIC;
+using StbImageWriteSharp;
 using T3.Core.Resource;
 using T3.Core.Resource.Assets;
 using T3.Core.Settings;
@@ -212,39 +212,8 @@ internal static class VideoClipThumbnailCache
         try
         {
             Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-
-            using var factory = new ImagingFactory();
-            using var stream = new WICStream(factory, path, SharpDX.IO.NativeFileAccess.Write);
-            using var encoder = new PngBitmapEncoder(factory, stream);
-            using var frame = new BitmapFrameEncode(encoder);
-            frame.Initialize();
-            frame.SetSize(SlotWidth, SlotHeight);
-
-            // The PNG encoder has no native RGBA format: asking for one makes WIC silently substitute BGRA and
-            // label our bytes with the wrong channel order, so red and blue come back swapped on reload.
-            var pixelFormat = PixelFormat.Format32bppBGRA;
-            frame.SetPixelFormat(ref pixelFormat);
-
-            for (var i = 0; i < rgba.Length; i += 4)
-            {
-                _bgraBuffer[i + 0] = rgba[i + 2];
-                _bgraBuffer[i + 1] = rgba[i + 1];
-                _bgraBuffer[i + 2] = rgba[i + 0];
-                _bgraBuffer[i + 3] = rgba[i + 3];
-            }
-
-            var handle = GCHandle.Alloc(_bgraBuffer, GCHandleType.Pinned);
-            try
-            {
-                frame.WritePixels(SlotHeight, new SharpDX.DataRectangle(handle.AddrOfPinnedObject(), SlotWidth * 4));
-            }
-            finally
-            {
-                handle.Free();
-            }
-
-            frame.Commit();
-            encoder.Commit();
+            using var file = File.Create(path);
+            new ImageWriter().WritePng(rgba, SlotWidth, SlotHeight, ColorComponents.RedGreenBlueAlpha, file);
         }
         catch (Exception e)
         {
@@ -352,5 +321,4 @@ internal static class VideoClipThumbnailCache
     private static IVideoThumbnailReader? _reader;
     private static string? _readerPath;
     private static readonly byte[] _rgbaBuffer = new byte[SlotWidth * SlotHeight * 4];
-    private static readonly byte[] _bgraBuffer = new byte[SlotWidth * SlotHeight * 4];
 }
