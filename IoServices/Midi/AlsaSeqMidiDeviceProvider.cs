@@ -121,10 +121,14 @@ internal sealed class AlsaSeqMidiDeviceProvider : MidiDeviceProvider
         _isShuttingDown = false;
     }
 
-    /// <summary>ALSA names a port for its device; only prefix the client when that is not already the case.</summary>
+    /// <summary>
+    /// ALSA names a port for its device; only prefix the client when that is not already the case.
+    /// The kernel's default port is "&lt;client&gt; MIDI 1", which is reported as the bare client name so it
+    /// matches the name WinMM reports - compatible controller classes and projects saved on Windows rely on it.
+    /// </summary>
     private static string BuildProductName(string clientName, string portName)
     {
-        if (string.IsNullOrEmpty(portName))
+        if (string.IsNullOrEmpty(portName) || portName == clientName + DefaultPortSuffix)
         {
             return clientName;
         }
@@ -436,6 +440,9 @@ internal sealed class AlsaSeqMidiDeviceProvider : MidiDeviceProvider
 
     /** How the editor shows up in aconnect and in other applications' port lists. */
     private const string ClientName = "TiXL";
+
+    /** The kernel's port name for a USB MIDI device's first port, appended to the client name. */
+    private const string DefaultPortSuffix = " MIDI 1";
 
     /** Large enough for the longest sysex a controller sends for its pad colours. */
     private const int MessageBufferSize = 1024;
