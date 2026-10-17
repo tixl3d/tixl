@@ -12,6 +12,7 @@
     <EditorVersion>$(TixlVersion)</EditorVersion>
     <IsEditorOnly>false</IsEditorOnly>
     <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>$(NoWarn);0108;9084;NU1900</NoWarn>
     <PackageId>fe98a538-31e2-47dc-82a4-62c2e1c29649</PackageId>
