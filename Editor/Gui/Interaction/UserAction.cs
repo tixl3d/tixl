@@ -21,6 +21,7 @@ internal enum UserActions
     PasteFromClipboard,
     PasteValues,
     New,
+    Exit,
 
     // Playback
     PlaybackForward,

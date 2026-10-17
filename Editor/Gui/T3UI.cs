@@ -52,6 +52,11 @@ public static partial class T3Ui
         {
             SaveInBackground(saveAll: false);
         }
+        else if (UserActions.Exit.Triggered())
+        {
+            if (!IsCurrentlySaving)
+                ExitDialog.ShowNextFrame();
+        }
         else if (UserActions.ToggleAllUiElements.Triggered())
         {
             UiConfig.ToggleAllUiElements();

@@ -10,79 +10,81 @@ using T3.Editor.UiModel.ProjectHandling;
 
 namespace T3.Editor.Gui.Dialog;
 
+/// <summary>
+/// Confirms leaving the editor. Return triggers the highlighted default (Save and Exit when there are
+/// unsaved changes, otherwise Exit); Escape cancels.
+/// </summary>
 internal sealed class ExitDialog : ModalDialog
 {
-    private bool _exitAfterSave = false;
-
     internal void Draw()
     {
-        DialogSize = new Vector2(420, 200);
+        DialogSize = new Vector2(420, 120);
 
         // ImGui 1.90 rejects empty popup ids; use ### to keep the title bar visually empty.
         if (BeginDialog("###ExitDialog"))
         {
             FormInputs.AddSectionHeader("Are you leaving?");
 
-            ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 5.0f);
-            ImGui.PushStyleColor(ImGuiCol.Button, UiColors.BackgroundButton.Rgba);
-            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, UiColors.BackgroundActive.Rgba);
-            var buttonSize = new Vector2(110f, 40f) * T3Ui.UiScaleFactor;
-            var size = ImGui.GetContentRegionAvail();
-            float spacing;
             var changeCount = GetChangedSymbolCount();
-
-            if (changeCount > 0)
+            var hasChanges = changeCount > 0;
+            if (hasChanges)
             {
-                spacing = (size.X - buttonSize.X * 3)/2;
-            }
-            else
-            {
-                spacing = (size.X - buttonSize.X * 2);
+                ImGui.TextUnformatted($"You have {changeCount} unsaved changes.");
             }
 
             FormInputs.AddVerticalSpace(2);
 
-            if (ImGui.Button("Cancel", buttonSize))
-            {
-                ImGui.CloseCurrentPopup();
-            }
-
-            ImGui.SameLine(0, spacing);
-
-            if (changeCount > 0)
-            {
-                
-                if (ImGui.Button("Save and Exit", buttonSize) && !T3Ui.IsCurrentlySaving)
-                {
-                    _exitAfterSave = true;
-                    T3Ui.SaveInBackground(saveAll: false);
-                }
-                ImGui.SameLine(0, spacing);
-            }
-            // Check if we should exit after save completed
-            if (_exitAfterSave && !T3Ui.IsCurrentlySaving && GetChangedSymbolCount() == 0)
+            // Finish a pending "Save and Exit" once the background save has flushed all changes.
+            if (_exitAfterSave && !T3Ui.IsCurrentlySaving && !hasChanges)
             {
                 _exitAfterSave = false;
                 Log.Debug("Exiting after saving");
                 EditorUi.Instance.ExitApplication();
             }
 
-            ImGui.PushFont(Fonts.FontBold);
-            if (ImGui.Button("Exit", buttonSize))
+            if (ImGui.IsKeyPressed(ImGuiKey.Escape, false))
+            {
+                ImGui.CloseCurrentPopup();
+            }
+
+            // Cancel sits left, the outcome buttons are pushed to the right edge.
+            var itemSpacing = ImGui.GetStyle().ItemSpacing.X;
+            var cancelWidth = CustomComponents.GetCtaButtonSize("Cancel").X;
+            var exitWidth = CustomComponents.GetCtaButtonSize("Exit").X;
+            var rightWidth = hasChanges
+                                 ? CustomComponents.GetCtaButtonSize("Save and Exit").X + itemSpacing + exitWidth
+                                 : exitWidth;
+            var gap = MathF.Max(itemSpacing, ImGui.GetContentRegionAvail().X - cancelWidth - rightWidth);
+
+            if (CustomComponents.DrawCtaButton("Cancel", Icon.None, CustomComponents.ButtonStates.Default))
+            {
+                ImGui.CloseCurrentPopup();
+            }
+
+            ImGui.SameLine(0, gap);
+
+            if (hasChanges)
+            {
+                if (CustomComponents.DrawCtaButton("Exit", Icon.None, CustomComponents.ButtonStates.Default))
+                {
+                    Log.Debug("Shutting down without saving");
+                    EditorUi.Instance.ExitApplication();
+                }
+
+                ImGui.SameLine();
+
+                if (CustomComponents.DrawCtaButton("Save and Exit", isEnabled: !T3Ui.IsCurrentlySaving, enableTriggerWithReturn: true))
+                {
+                    _exitAfterSave = true;
+                    T3Ui.SaveInBackground(saveAll: false);
+                }
+            }
+            else if (CustomComponents.DrawCtaButton("Exit", isEnabled: true, enableTriggerWithReturn: true))
             {
                 Log.Debug("Shutting down");
                 EditorUi.Instance.ExitApplication();
             }
-            FormInputs.AddVerticalSpace(2);
-            if (changeCount > 0)
-            {
-                ImGui.Text($"You have {changeCount} unsaved changes.");
-            }
 
-            ImGui.PopFont();
-
-            ImGui.PopStyleColor(2);
-            ImGui.PopStyleVar();
             EndDialogContent();
         }
 
@@ -108,4 +110,6 @@ internal sealed class ExitDialog : ModalDialog
 
         return changeCount;
     }
+
+    private bool _exitAfterSave;
 }

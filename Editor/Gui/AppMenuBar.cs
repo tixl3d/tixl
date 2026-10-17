@@ -475,7 +475,7 @@ internal static class AppMenuBar
 
             CustomComponents.SeparatorLine();
 
-            if (MenuItem("Exit", isEnabled: !T3Ui.IsCurrentlySaving))
+            if (MenuItem("Exit", UserActions.Exit.ListShortcuts(), isEnabled: !T3Ui.IsCurrentlySaving))
             {
                 T3Ui.ExitDialog.ShowNextFrame();
             }
