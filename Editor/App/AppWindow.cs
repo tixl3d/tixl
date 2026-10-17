@@ -122,6 +122,12 @@ internal sealed unsafe class AppWindow
 
     public void Show()
     {
+        // A window hidden while fullscreen would come back on whichever display the compositor picks: SDL's
+        // Wayland backend names the display only while a position request is pending, and a window that was
+        // mapped before has none. KWin then uses the active display, so the output lands on the editor's screen.
+        if (IsFullScreen)
+            RequestDisplay(_fullScreenDisplayIndex);
+
         SDL_ShowWindow(_window);
         SDL_SyncWindow(_window);
 
@@ -152,13 +158,22 @@ internal sealed unsafe class AppWindow
             return;
         }
 
-        // Wayland does not let applications position windows; fullscreen still lands on the display it names.
-        var centered = SDL_WINDOWPOS_CENTERED_DISPLAY(_displayProvider.GetDisplayId(screenIndex));
-        SDL_SetWindowPosition(_window, centered, centered);
+        RequestDisplay(screenIndex);
         SDL_SetWindowFullscreenMode(_window, null);
         SDL_SetWindowFullscreen(_window, true);
         SDL_SyncWindow(_window);
         IsFullScreen = true;
+        _fullScreenDisplayIndex = screenIndex;
+    }
+
+    /// <summary>
+    /// Asks for the window to sit on a display. Wayland does not let applications position windows, but a
+    /// fullscreen request that follows still lands on the display named here.
+    /// </summary>
+    private void RequestDisplay(int screenIndex)
+    {
+        var centered = SDL_WINDOWPOS_CENTERED_DISPLAY(_displayProvider.GetDisplayId(screenIndex));
+        SDL_SetWindowPosition(_window, centered, centered);
     }
 
     /// <summary>The displays <see cref="SetFullScreen"/> can target, in the order it indexes them.</summary>
@@ -489,6 +504,7 @@ internal sealed unsafe class AppWindow
     private Action? _renderCallback;
     private Func<bool>? _canClose;
     private Int2? _requestedPixelSize;
+    private int _fullScreenDisplayIndex;
     private bool _startMaximized;
     private bool _isRendering;
 }

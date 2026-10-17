@@ -132,8 +132,19 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
 
     public void SetScissor(in ScissorRect rect)
     {
-        _scissor = new VkRect2D(rect.X, rect.Y, (uint)Math.Max(0, rect.Width), (uint)Math.Max(0, rect.Height));
+        _scissor = ClampScissor(rect.X, rect.Y, rect.Width, rect.Height);
         _hasScissor = true;
+    }
+
+    /// <summary>
+    /// D3D11 clamps a scissor that starts left of or above the target; Vulkan rejects a negative offset, and RADV
+    /// turns it into an empty rectangle that discards the whole draw, as an oversized cover-crop viewport did.
+    /// </summary>
+    private static VkRect2D ClampScissor(int x, int y, int width, int height)
+    {
+        var left = Math.Max(0, x);
+        var top = Math.Max(0, y);
+        return new VkRect2D(left, top, (uint)Math.Max(0, width - (left - x)), (uint)Math.Max(0, height - (top - y)));
     }
 
     public void SetBlendConstants(Vector4 factor, uint sampleMask) => _blendConstants = factor;
@@ -1181,7 +1192,7 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
     {
         // The viewport is stored flipped, so its origin is the bottom edge.
         var height = (int)-_viewport.height;
-        return new VkRect2D((int)_viewport.x, (int)(_viewport.y - height), (uint)_viewport.width, (uint)height);
+        return ClampScissor((int)_viewport.x, (int)(_viewport.y - height), (int)_viewport.width, height);
     }
 
     /// <summary>
