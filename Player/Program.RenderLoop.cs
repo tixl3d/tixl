@@ -24,6 +24,7 @@ internal static partial class Program
     private static void RenderCallback()
     {
         // Recorded at the frame's start, before playback advances by the resulting visual frame duration.
+        FrameTiming.SetRefreshRateFromDisplay(_mainWindow.DisplayRefreshRate);
         FrameTiming.RecordFrameStart(Playback.RunTimeInSecs, _vsyncInterval > 0);
 
         EnsureBackBufferSize();

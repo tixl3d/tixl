@@ -164,6 +164,9 @@ internal sealed unsafe class AppWindow
     /// <summary>The displays <see cref="SetFullScreen"/> can target, in the order it indexes them.</summary>
     internal static int DisplayCount => _displayProvider.GetDisplays().Count;
 
+    /// <summary>The refresh rate of the display the window is on, in Hz; 0 if unknown.</summary>
+    internal double DisplayRefreshRate => SdlDisplayProvider.GetRefreshRateForWindow(_window);
+
     /// <summary>The index of the display the window is on, as <see cref="SetFullScreen"/> takes it; 0 if unknown.</summary>
     internal int GetDisplayIndex()
     {

@@ -47,6 +47,9 @@ internal sealed unsafe class PlayerWindow : IDisposable
     public RenderTargetView RenderTargetView { get; private set; } = null!;
     public Size BackBufferSize { get; private set; }
 
+    /// <summary>The refresh rate of the display the window is on, in Hz; 0 if unknown.</summary>
+    public double DisplayRefreshRate => SdlDisplayProvider.GetRefreshRateForWindow(_window);
+
     public void Show()
     {
         SDL_ShowWindow(_window);

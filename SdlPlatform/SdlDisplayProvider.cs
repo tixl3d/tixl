@@ -52,6 +52,19 @@ public sealed unsafe class SdlDisplayProvider : IDisplayProvider
         return displayIndex >= 0 && displayIndex < _displayIds.Count ? _displayIds[displayIndex] : SDL_GetPrimaryDisplay();
     }
 
+    /// <summary>The refresh rate of the display a window is on, in Hz; 0 when SDL doesn't know it.</summary>
+    public static double GetRefreshRateForWindow(SDL_Window* window)
+    {
+        var mode = SDL_GetCurrentDisplayMode(SDL_GetDisplayForWindow(window));
+        if (mode == null)
+            return 0;
+
+        // The fraction is exact for NTSC-style rates (60000/1001); backends that don't fill it in leave it 0.
+        return mode->refresh_rate_denominator > 0
+                   ? mode->refresh_rate_numerator / (double)mode->refresh_rate_denominator
+                   : mode->refresh_rate;
+    }
+
     /// <summary>One entry per resolution with its highest refresh rate, largest first.</summary>
     private static List<DisplayMode> GetModes(SDL_DisplayID displayId, DisplayMode current)
     {

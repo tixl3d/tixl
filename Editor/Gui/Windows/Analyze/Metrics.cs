@@ -6,6 +6,7 @@ using T3.Core.DataTypes.Vector;
 using T3.Core.Animation;
 using T3.Core.Stats;
 using T3.Core.Utils;
+using T3.Editor.App;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.Layouts;
@@ -21,6 +22,7 @@ internal static class T3Metrics
     public static void RecordFrameInterval()
     {
         PerformanceMetrics.RecordFrame(ImGui.GetIO().DeltaTime * 1000);
+        FrameTiming.SetRefreshRateFromDisplay(ProgramWindows.Main.DisplayRefreshRate);
         FrameTiming.RecordFrameStart(Playback.RunTimeInSecs, T3Ui.UseVSync);
     }
 
@@ -128,7 +130,7 @@ internal static class T3Metrics
         DrawLabeledGraph(PerformanceMetrics.GcAllocationsKb, "Mem-Alloc", MemAllocTooltip, "", 10_000f, FormatKb);
 
         ImGui.TextUnformatted($"Render: {_peakDeltaTimeMs:0.0}ms");
-        ImGui.TextUnformatted($"Display: {FrameTiming.RefreshRate:0.00} Hz measured, {FrameTiming.RefreshRate / FrameTiming.VblanksPerFrame:0.0} fps target");
+        ImGui.TextUnformatted($"Display: {FrameTiming.RefreshRate:0.00} Hz display, {FrameTiming.RefreshRate / FrameTiming.VblanksPerFrame:0.0} fps target");
         var queuedFrames = PresentationDiagnostics.QueuedFrames;
         ImGui.TextUnformatted(queuedFrames < 0
                                   ? $"Presentation: {PresentationDiagnostics.Describe(PresentationDiagnostics.CompositionMode)}, queue unknown"
