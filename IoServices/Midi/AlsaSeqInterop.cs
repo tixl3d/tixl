@@ -49,6 +49,7 @@ internal static class AlsaSeqInterop
     [DllImport(Lib)] internal static extern int snd_seq_create_simple_port(IntPtr handle, string name, uint caps, uint type);
     [DllImport(Lib)] internal static extern int snd_seq_delete_simple_port(IntPtr handle, int port);
     [DllImport(Lib)] internal static extern int snd_seq_connect_to(IntPtr handle, int myPort, int destClient, int destPort);
+    [DllImport(Lib)] internal static extern int snd_seq_disconnect_to(IntPtr handle, int myPort, int destClient, int destPort);
     [DllImport(Lib)] internal static extern int snd_seq_connect_from(IntPtr handle, int myPort, int srcClient, int srcPort);
     [DllImport(Lib)] internal static extern int snd_seq_disconnect_from(IntPtr handle, int myPort, int srcClient, int srcPort);
     [DllImport(Lib)] internal static extern int snd_seq_event_input(IntPtr handle, out IntPtr ev);
