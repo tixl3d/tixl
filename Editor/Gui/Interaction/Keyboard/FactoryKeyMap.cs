@@ -10,6 +10,7 @@ internal static class FactoryKeyMap
         List<KeyBinding> keyBindings =
             [
                 new(UserActions.Save, new KeyCombination(Key.S, ctrl: true)),
+                new(UserActions.Exit, new KeyCombination(Key.Q, ctrl: true)),
                 new(UserActions.FocusSelection, new KeyCombination(Key.F)),
                 new(UserActions.Duplicate, new KeyCombination(Key.D, ctrl: true)),
                 new(UserActions.DuplicateWithConnections, new KeyCombination(Key.D, ctrl: true, shift: true)),

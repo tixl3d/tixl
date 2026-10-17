@@ -106,6 +106,7 @@ internal static class KeyActionHandling
     private static void InitializeActionOptions()
     {
         RegisterActionsFlags(UserActions.Save, Flags.KeyPressOnly);
+        RegisterActionsFlags(UserActions.Exit, Flags.KeyPressOnly);
         RegisterActionsFlags(UserActions.FocusSelection, Flags.NeedsWindowHover);
         RegisterActionsFlags(UserActions.Duplicate, Flags.NeedsWindowFocus);
         RegisterActionsFlags(UserActions.DuplicateWithConnections, Flags.NeedsWindowFocus);
