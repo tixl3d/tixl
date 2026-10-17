@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using T3.Core.Operator;
 
 // ReSharper disable PossibleMultipleEnumeration
@@ -227,6 +227,11 @@ public sealed class CopySymbolChildrenCommand : ICommand
                                                                childEntryToCopy.NewChildId,
                                                                out var newSymbolChild,
                                                                out var newChildUi);
+
+            // Bend points are saved in canvas space, so the copy inherits the original route where it was
+            // drawn. Move it by the same offset the copied operators were placed with, or the rerouted
+            // cables of the duplicate would stay behind on top of the original ones.
+            newChildUi.OffsetConnectionWaypoints(PositionOffset);
 
             //Symbol.Child newSymbolChild = targetSymbol.Children.Find(child => child.Id == childToCopy.AddedId);
             NewSymbolChildIds.Add(newSymbolChild.Id);
