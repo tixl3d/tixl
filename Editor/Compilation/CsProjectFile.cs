@@ -151,6 +151,107 @@ internal sealed class CsProjectFile
         }
     }
 
+    /// <summary>
+    /// Format V3 -> V4: points the global using aliases at the graphics facade. A SharpDX alias is
+    /// mapped by <paramref name="mapSharpDxTypeName"/> and renamed after its new type; one that
+    /// collides with an alias the project already has is dropped. Facade aliases that new projects
+    /// get are added when missing. Returns whether anything changed; saved by the format stamping.
+    /// </summary>
+    public bool MigrateUsingsToGraphicsFacade(Func<string, string?> mapSharpDxTypeName)
+    {
+        var changed = false;
+        var existingIncludes = new HashSet<string>();
+        var usingItems = new List<ProjectItemElement>();
+        foreach (var item in _projectRootElement.Items)
+        {
+            if (item.ItemType != ProjectXml.UsingItemName)
+                continue;
+
+            usingItems.Add(item);
+            existingIncludes.Add(item.Include);
+        }
+
+        foreach (var item in usingItems)
+        {
+            if (!item.Include.StartsWith("SharpDX", StringComparison.Ordinal))
+                continue;
+
+            var mapped = mapSharpDxTypeName(item.Include);
+            if (mapped == null)
+            {
+                Log.Warning($"{Name}: keeping the global using for {item.Include}, which has no counterpart on the graphics facade.");
+                continue;
+            }
+
+            if (existingIncludes.Contains(mapped))
+            {
+                item.Parent.RemoveChild(item);
+                changed = true;
+                continue;
+            }
+
+            existingIncludes.Remove(item.Include);
+            existingIncludes.Add(mapped);
+            item.Include = mapped;
+
+            // The alias follows the type name, as in every alias the editor writes
+            foreach (var metadata in item.Metadata)
+            {
+                if (metadata.Name == "Alias")
+                    metadata.Value = mapped[(mapped.LastIndexOf('.') + 1)..];
+            }
+
+            changed = true;
+        }
+
+        changed |= _projectRootElement.AddMissingGraphicsFacadeUsings(existingIncludes);
+        return changed;
+    }
+
+    /// <summary>
+    /// Format V3 -> V4: references the facade assemblies and drops the SharpDX ones, unless a source
+    /// still needs them. Returns whether anything changed; saved by the format stamping.
+    /// </summary>
+    public bool MigrateReferencesToGraphicsFacade(bool keepSharpDxReferences)
+    {
+        var changed = _projectRootElement.AddMissingDefaultReferences();
+        if (keepSharpDxReferences)
+            return changed;
+
+        var referenceItemName = ItemType.EditorReference.GetItemName();
+        var sharpDxReferences = new List<ProjectItemElement>();
+        foreach (var item in _projectRootElement.Items)
+        {
+            if (item.ItemType == referenceItemName && item.Include.Contains("SharpDX", StringComparison.Ordinal))
+                sharpDxReferences.Add(item);
+        }
+
+        foreach (var item in sharpDxReferences)
+        {
+            item.Parent.RemoveChild(item);
+            changed = true;
+        }
+
+        return changed;
+    }
+
+    /// <summary>True when the project references an editor assembly whose file name starts with the given prefix.</summary>
+    public bool ReferencesEditorAssembly(string fileNamePrefix)
+    {
+        var referenceItemName = ItemType.EditorReference.GetItemName();
+        foreach (var item in _projectRootElement.Items)
+        {
+            if (item.ItemType != referenceItemName || !item.Include.Contains(ProjectSetup.EnvironmentVariableName))
+                continue;
+
+            var fileName = Path.GetFileName(item.Include.Replace('\\', '/'));
+            if (fileName.StartsWith(fileNamePrefix, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+
+        return false;
+    }
+
     private void RemoveProperty(string propertyName)
     {
         foreach (var property in _projectRootElement.Properties)

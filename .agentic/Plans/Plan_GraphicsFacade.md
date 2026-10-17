@@ -332,7 +332,8 @@ multi-threaded command recording, or GPU-driven draws. None of these are v5.0 go
   `Lib.GlobalUsings.g.cs` mean most operator files change by zero lines.
 - **`.t3` files:** the `"Type"` strings change (236 files). The reader ignores them, so the change is safe;
   re-save all library symbols in one commit to avoid diff noise.
-- **User projects:** a migration step rewrites `using SharpDX.*` in user operator code and drops the SharpDX
+- **User projects:** *(done 2026-10-17 as project format V4, `To4_SharpDxToGraphicsFacade`)* a migration step
+  rewrites `using SharpDX.*` in user operator code and drops the SharpDX
   package references. Users who wrote custom shaders or operators against SharpDX types need the same rename;
   document it in the v5 migration notes.
 - **Order:** `Graphics` + `Graphics.D3D11` first, with the visual suite green and metrics unchanged, before

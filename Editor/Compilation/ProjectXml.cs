@@ -90,16 +90,55 @@ internal static partial class ProjectXml
         var itemGroup = project.AddItemGroup();
         foreach (var use in _defaultUsingStatements)
         {
-            var item = itemGroup.AddItem("Using", use.Name);
-            if (use.Static)
-                item.AddMetadata("Static", "True");
-
-            if (use.Alias != null)
-            {
-                item.AddMetadata("Alias", use.Alias);
-            }
+            itemGroup.AddUsing(use);
         }
     }
+
+    /// <summary>
+    /// Adds the graphics facade aliases of the default usings that a project lacks, next to its
+    /// existing usings. Returns whether any were added.
+    /// </summary>
+    internal static bool AddMissingGraphicsFacadeUsings(this ProjectRootElement project, HashSet<string> existingIncludes)
+    {
+        ProjectItemGroupElement? usingGroup = null;
+        foreach (var item in project.Items)
+        {
+            if (item.ItemType != UsingItemName)
+                continue;
+
+            usingGroup = item.Parent as ProjectItemGroupElement;
+            break;
+        }
+
+        usingGroup ??= project.AddItemGroup();
+
+        var added = false;
+        foreach (var use in _defaultUsingStatements)
+        {
+            if (!use.Name.StartsWith("T3.Graphics", StringComparison.Ordinal) || existingIncludes.Contains(use.Name))
+                continue;
+
+            usingGroup.AddUsing(use);
+            existingIncludes.Add(use.Name);
+            added = true;
+        }
+
+        return added;
+    }
+
+    private static void AddUsing(this ProjectItemGroupElement itemGroup, Using use)
+    {
+        var item = itemGroup.AddItem(UsingItemName, use.Name);
+        if (use.Static)
+            item.AddMetadata("Static", "True");
+
+        if (use.Alias != null)
+        {
+            item.AddMetadata("Alias", use.Alias);
+        }
+    }
+
+    internal const string UsingItemName = "Using";
 
     private static void AddDefaultPropertyGroup(this ProjectRootElement project, string projectNamespace, Guid homeGuid, Guid packageId)
     {
@@ -135,11 +174,50 @@ internal static partial class ProjectXml
         var itemGroup = project.AddItemGroup();
         foreach (var reference in _defaultReferences)
         {
-            var item = itemGroup.AddItem(reference.Type.GetItemName(), reference.Include);
-            foreach (var tag in reference.Tags)
-            {
-                item.AddMetadata(tag.Tag.GetItemName(), tag.Value, tag.AddAsAttribute);
-            }
+            itemGroup.AddReference(reference);
+        }
+    }
+
+    /// <summary>
+    /// Adds the editor assembly references a project lacks, matched by file name because the
+    /// path separator after the assembly path variable differs between platforms. Returns whether
+    /// any were added.
+    /// </summary>
+    internal static bool AddMissingDefaultReferences(this ProjectRootElement project)
+    {
+        var referenceItemName = ItemType.EditorReference.GetItemName();
+        var existingFileNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        ProjectItemGroupElement? referenceGroup = null;
+        foreach (var item in project.Items)
+        {
+            if (item.ItemType != referenceItemName)
+                continue;
+
+            referenceGroup ??= item.Parent as ProjectItemGroupElement;
+            existingFileNames.Add(Path.GetFileName(item.Include.Replace('\\', '/')));
+        }
+
+        referenceGroup ??= project.AddItemGroup();
+
+        var added = false;
+        foreach (var reference in _defaultReferences)
+        {
+            if (existingFileNames.Contains(Path.GetFileName(reference.Include.Replace('\\', '/'))))
+                continue;
+
+            referenceGroup.AddReference(reference);
+            added = true;
+        }
+
+        return added;
+    }
+
+    private static void AddReference(this ProjectItemGroupElement itemGroup, Reference reference)
+    {
+        var item = itemGroup.AddItem(reference.Type.GetItemName(), reference.Include);
+        foreach (var tag in reference.Tags)
+        {
+            item.AddMetadata(tag.Tag.GetItemName(), tag.Value, tag.AddAsAttribute);
         }
     }
 

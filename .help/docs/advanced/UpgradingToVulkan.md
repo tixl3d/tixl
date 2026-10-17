@@ -142,6 +142,16 @@ For a generated shader — anything TiXL assembles from a field graph — there 
 slangc ShaderErrors/PixelShader_psMain.01.hlsl -entry psMain -stage pixel -target spirv -o /tmp/out.spv
 ```
 
+## Custom operators written against SharpDX
+
+Operators you wrote in C# used SharpDX's Direct3D 11 types, either through the aliases every project carries (`Buffer`, `SamplerState`, `TextureAddressMode`, ...) or spelled out as `SharpDX.Direct3D11.…`. These types now live in TiXL's own graphics layer, and the editor moves a project over the first time it opens it:
+
+- The project's aliases and assembly references point at `T3.Graphics` and `T3.Graphics.Compat` instead of SharpDX.
+- Your operator sources get the same rename: `using SharpDX.Direct3D11;` becomes `using T3.Graphics.Compat;`, qualified names such as `SharpDX.Direct3D11.TextureAddressMode` lose their SharpDX prefix, and the interop value types `RawVector4`, `RawRectangle` and `RawViewportF` become `Vector4`, `ScissorRect` and `Viewport`. Sources that never mentioned SharpDX are not touched.
+- The project recompiles once. A backup of the untouched project is pinned under its `.temp/Backup/` folder beforehand.
+
+Types that have no counterpart in the graphics layer stay as they are and are listed in the log: image decoding through `SharpDX.WIC`, shader compilation through `SharpDX.D3DCompiler`, and Direct2D. A project that still uses one of them keeps its SharpDX references so it continues to compile on Windows; running it on Linux or macOS needs that code replaced by hand.
+
 ## See also
 
 - [Using custom shader operators](UsingCustomShaders.md)

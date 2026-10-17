@@ -22,6 +22,9 @@ internal enum ProjectFormat
 
     /// <summary>Build output (bin/, obj/) lives under .temp/, rooted by a generated Directory.Build.props.</summary>
     V3 = 3,
+
+    /// <summary>Operator code and the csproj's aliases and references target the graphics facade instead of SharpDX.</summary>
+    V4 = 4,
 }
 
 /// <summary>
@@ -32,7 +35,7 @@ internal enum ProjectFormat
 /// </summary>
 internal static partial class FormatHelper
 {
-    public const ProjectFormat Current = ProjectFormat.V3;
+    public const ProjectFormat Current = ProjectFormat.V4;
 
     public static ProjectFormat GuessFormatForDirectory(string projectFolder)
     {
@@ -50,7 +53,8 @@ internal static partial class FormatHelper
         if (Directory.Exists(symbolsFolder)
             && Directory.EnumerateFiles(symbolsFolder, "*" + T3.Core.Model.SymbolPackage.SymbolExtension, SearchOption.AllDirectories).Any())
         {
-            // V2 and V3 share the Symbols layout; the props file rooting build output marks V3
+            // V2 and V3 share the Symbols layout; the props file rooting build output marks V3.
+            // An unmarked V4 project sniffs as V3 too - the facade step is idempotent on it.
             var propsText = ReadTextSafely(Path.Combine(projectFolder, Compilation.ProjectXml.BuildPropsFileName));
             return propsText != null && propsText.Contains("BaseOutputPath", StringComparison.OrdinalIgnoreCase)
                        ? ProjectFormat.V3

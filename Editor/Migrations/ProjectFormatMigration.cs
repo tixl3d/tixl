@@ -22,6 +22,7 @@ internal static class ProjectFormatMigration
         [
             new Steps.To2_SymbolsFolder(),
             new Steps.To3_BuildOutputToTemp(),
+            new Steps.To4_SharpDxToGraphicsFacade(),
         ];
 
     public static void MigrateIfNeeded(CsProjectFile csProjectFile)

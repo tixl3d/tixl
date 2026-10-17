@@ -384,14 +384,17 @@ internal static class Duplicate
 
     private static bool IsNamespaceVisibleToProject(string namespaceName, EditableSymbolProject project)
     {
-        // Core, Logging and SharpDX are referenced by every project; the project's own namespaces too.
+        // Core and Logging are referenced by every project; the project's own namespaces too.
         if (namespaceName.StartsWith("System", StringComparison.Ordinal)
             || namespaceName.StartsWith("Microsoft", StringComparison.Ordinal)
             || namespaceName.StartsWith("T3.", StringComparison.Ordinal)
-            || namespaceName.StartsWith("SharpDX", StringComparison.Ordinal)
             || namespaceName == project.RootNamespace
             || namespaceName.StartsWith(project.RootNamespace + ".", StringComparison.Ordinal))
             return true;
+
+        // Only projects with code the facade migration couldn't translate still reference SharpDX
+        if (namespaceName.StartsWith("SharpDX", StringComparison.Ordinal))
+            return project.CsProjectFile.ReferencesEditorAssembly("SharpDX");
 
         foreach (var package in SymbolPackage.AllPackages)
         {
@@ -428,7 +431,9 @@ internal static class Duplicate
                 return root;
         }
 
+        // The factory emits no whitespace of its own; without normalizing, "using" and the name fuse into one token
         var usingDirective = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName(sourceCodeNamespace))
+                                          .NormalizeWhitespace()
                                           .WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
         return compilationUnit.AddUsings(usingDirective);
     }
