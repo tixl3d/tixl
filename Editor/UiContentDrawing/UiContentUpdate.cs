@@ -19,29 +19,29 @@ internal static class UiContentUpdate
 {
     public static void SetupResourcesAndFontsWithScaling()
     {
-        if (_hasSetScaling && Math.Abs(UserSettings.Config.UiScaleFactor - _lastUiScale) <= 0.005f)
-            return;
-
-        Log.Debug("Setup editor resources...");
         // Prevent scale factor from being "actually" 0.0
         if (UserSettings.Config.UiScaleFactor < 0.1f)
             UserSettings.Config.UiScaleFactor = 0.1f;
 
-        // Update font atlas texture if UI-Scale changed
-        GenerateFontsWithScaleFactor(UserSettings.Config.UiScaleFactor);
+        // See https://stackoverflow.com/a/5977638
+        // Read every frame: the display scale changes when the window is dragged onto a display with another scale.
+        var displayScaleFactor = ProgramWindows.Main.GetDpi().X / 96f;
+        var dpiAwareScale = UserSettings.Config.UiScaleFactor * displayScaleFactor;
+        if (_hasSetScaling && Math.Abs(dpiAwareScale - _lastDpiAwareScale) <= 0.005f)
+            return;
+
+        Log.Debug("Setup editor resources...");
+        GenerateFontsWithScaleFactor(dpiAwareScale);
 
         Program.UiContentContentDrawer?.CreateDeviceObjectsAndFonts();
 
-        _lastUiScale = UserSettings.Config.UiScaleFactor;
+        _lastDpiAwareScale = dpiAwareScale;
         _hasSetScaling = true;
     }
 
-    private static void GenerateFontsWithScaleFactor(float scaleFactor)
+    /// <param name="dpiAwareScale">The user's UI scale multiplied by the display scale.</param>
+    private static void GenerateFontsWithScaleFactor(float dpiAwareScale)
     {
-        // See https://stackoverflow.com/a/5977638
-        var displayScaleFactor = ProgramWindows.Main.GetDpi().X / 96f;
-        var dpiAwareScale = scaleFactor * displayScaleFactor;
-
         T3Ui.UiScaleFactor = dpiAwareScale;
 
         var fontAtlasPtr = ImGui.GetIO().Fonts;
@@ -116,7 +116,7 @@ internal static class UiContentUpdate
     private static long _lastElapsedTicks;
     private static readonly Stopwatch _stopwatch = new();
 
-    private static float _lastUiScale = 1;
+    private static float _lastDpiAwareScale = 1;
 
     private static bool _hasSetScaling;
 
