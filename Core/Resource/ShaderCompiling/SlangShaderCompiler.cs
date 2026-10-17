@@ -42,6 +42,15 @@ public sealed class SlangShaderCompiler : ShaderCompiler
     public static string PinnedInstallDirectory { get; } =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local", "opt", "slang-" + PinnedVersion);
 
+    /// <summary>
+    /// <c>TIXL_SLANGC_UNPINNED=1</c> accepts a slangc from another release line. It exists for packagers:
+    /// a distribution's Slang package follows Slang's releases, not <see cref="PinnedVersion"/>, and asking
+    /// their users to install a second compiler would be worse. The startup check then only states which
+    /// version is in use, and <see cref="CacheTarget"/> keys the shader cache on it, so blobs from two
+    /// compilers stay apart. What remains is the reason for the pin: Slang can compile a shader differently.
+    /// </summary>
+    public static bool AcceptsUnpinnedVersion { get; } = Environment.GetEnvironmentVariable("TIXL_SLANGC_UNPINNED") == "1";
+
     /// <summary>Where slangc is, or null when it cannot be found — which is worth saying once, clearly.</summary>
     public static string? FindCompiler()
     {
@@ -127,7 +136,21 @@ public sealed class SlangShaderCompiler : ShaderCompiler
         => CompileShaderFromSource<TShader>(args, out blob, out errorMessage);
 
     /** Includes the Slang version, because another compiler can generate different code from the same source. */
-    protected override string CacheTarget => "spirv-slang-" + PinnedVersion;
+    protected override string CacheTarget => _cacheTarget.Value;
+
+    /// <summary>
+    /// Asking an unpinned compiler for its version costs one process, so it is done once and only when the
+    /// cache is actually used - the pinned case needs no query at all.
+    /// </summary>
+    private static readonly Lazy<string> _cacheTarget = new(() =>
+                                                            {
+                                                                if (!AcceptsUnpinnedVersion)
+                                                                    return "spirv-slang-" + PinnedVersion;
+
+                                                                var compiler = FindCompiler();
+                                                                var version = compiler == null ? null : QueryVersion(compiler);
+                                                                return "spirv-slang-" + (version ?? "unknown");
+                                                            });
 
     protected override bool CompileShaderFromSource<TShader>(ShaderCompilationArgs args, out byte[] blob, out string errorMessage)
     {

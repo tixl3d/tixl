@@ -195,6 +195,14 @@ internal static class DependencyCheck
         if (version == pinned || version?.StartsWith(pinned + ".", StringComparison.Ordinal) == true)
             return;
 
+        // A package that ships its distribution's Slang says so with TIXL_SLANGC_UNPINNED, and then the
+        // version belongs in the log rather than in a dialog its users can do nothing about.
+        if (SlangShaderCompiler.AcceptsUnpinnedVersion)
+        {
+            Log.Info($"TIXL_SLANGC_UNPINNED: compiling shaders with {compiler}, version {version ?? "unknown"} instead of the pinned {pinned}.");
+            return;
+        }
+
         missing.Add(new MissingDependency($"{compiler} reports version {version ?? "unknown"}, but TiXL expects Slang {pinned}.",
                                           $"Install: {SlangReleaseHint}",
                                           PreventsStart: false));

@@ -112,6 +112,12 @@ curl -L https://github.com/shader-slang/slang/releases/download/v2026.18/slang-2
 If you keep `slangc` somewhere else, put it on your `PATH` or point the `TIXL_SLANGC` environment
 variable at it.
 
+If your distribution packages a *newer* Slang, TiXL says so at startup: it is tested with one release line,
+because a different compiler can translate a shader differently. To use the packaged one anyway, start TiXL
+with `TIXL_SLANGC_UNPINNED=1` — the shader cache keeps its blobs apart from the pinned compiler's, so you can
+switch back at any time. Packages that ship their distribution's Slang (the Nix flake, for one) set this for
+you.
+
 ## Download and run TiXL
 
 1. Download the latest `tixl-<version>-linux-x64.tar.gz` from the

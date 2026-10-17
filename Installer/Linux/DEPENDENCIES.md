@@ -36,6 +36,12 @@ package manager.
 ImGui.NET needs it; everything else needs 2.34), libstdc++,
 zlib, fontconfig, freetype, libpng, expat, bzip2, brotli.
 
+A distribution's Slang package follows Slang's releases, not TiXL's pinned line, so the startup check would
+report it as the wrong version. A package that deliberately ships its distribution's slangc sets
+`TIXL_SLANGC_UNPINNED=1` (next to `TIXL_SLANGC`): the version then goes to the log instead of a dialog, and
+the shader cache is keyed on the version in use so blobs from two compilers stay apart. Shaders can still
+compile differently — that is what the pin is about — so prefer the pinned line where it is available.
+
 ## Optional
 
 | Component | Enables | Arch | Debian / Ubuntu | Fedora | nixpkgs |

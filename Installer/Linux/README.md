@@ -37,7 +37,9 @@ The full list with package names per distro is in [`DEPENDENCIES.md`](DEPENDENCI
   operator projects while it runs, calling `dotnet` from `PATH`. Restore needs network access to NuGet
   and writes to `~/.nuget`.
 - Vulkan loader and driver.
-- `slangc` (Slang 2026.18) for shader compilation, found on `PATH` or through `TIXL_SLANGC`.
+- `slangc` (Slang 2026.18) for shader compilation, found on `PATH` or through `TIXL_SLANGC`. A package that
+  ships its distribution's Slang instead sets `TIXL_SLANGC_UNPINNED=1`, which turns the startup check's
+  version complaint into a log line and keys the shader cache on the version in use.
 - BASS for audio (`libbass.so`, `libbassmix.so`, `libbassflac.so`). These are committed under
   `Dependencies/linux-x64/`; see its README for un4seen's terms. `fetch-bass.sh` restores them if they go
   missing and refreshes them with `--force`.
