@@ -11,8 +11,9 @@ namespace T3.Editor.App.Gestures;
 /// </summary>
 /// <remarks>
 /// A wheel reports whole notches, a trackpad a fraction of one per event, because it scrolls by pixels. That is
-/// what identifies it — device names are no help, since Wayland presents every pointer as one device. Each
-/// device is remembered, so a mouse plugged into the same machine keeps behaving like a wheel.
+/// what identifies it — device names are no help, since Wayland and Windows present every pointer as one
+/// device. So a trackpad is remembered until a drag with the right button, which only a mouse does, hands the
+/// scrolling back to the wheel.
 /// </remarks>
 internal static class PointerGestures
 {
@@ -51,12 +52,9 @@ internal static class PointerGestures
     }
 
     /// <summary>One scroll event, in notches. Fractional on a trackpad, whole on a wheel.</summary>
-    /// <param name="wholeNotchesY">
-    /// What the device accumulated into whole notches; a trackpad leaves it at 0 for most of its events.
-    /// </param>
-    public static void ReportScroll(float notchesX, float notchesY, int wholeNotchesY, uint deviceId, bool ctrlHeld, ImGuiIOPtr io)
+    public static void ReportScroll(float notchesX, float notchesY, uint deviceId, bool ctrlHeld, ImGuiIOPtr io)
     {
-        _lastDeviceIsPrecise = ClassifyDevice(deviceId, notchesY, wholeNotchesY);
+        _lastDeviceIsPrecise = ClassifyDevice(deviceId, notchesX, notchesY);
 
         // Windows trackpad drivers send a pinch as Ctrl + wheel, and for a moment afterwards further events
         // belong to that zoom rather than to panning. Where the system reports pinches this is not needed.
@@ -123,6 +121,14 @@ internal static class PointerGestures
     /// </summary>
     internal static void ProcessFrame(float secondsSinceLastFrame)
     {
+        // A right-button drag is a mouse in hand, so its wheel zooms until a fraction of a notch shows a trackpad again.
+        if (_lastDeviceIsPrecise && ImGui.IsMouseDragging(ImGuiMouseButton.Right))
+        {
+            Log.Debug("Right-button drag: scrolling zooms the view again until a trackpad shows up.");
+            _precisionDevices.Clear();
+            _lastDeviceIsPrecise = false;
+        }
+
         var deltaTime = Math.Clamp(secondsSinceLastFrame, 0.001f, 0.1f);
         var scrolled = _scrollNotches * PanPixelsPerNotch;
 
@@ -175,22 +181,33 @@ internal static class PointerGestures
     }
 
     /// <summary>
-    /// Remembers what a device is once it has sent a fraction of a notch. Wheels stay unclassified, which is
-    /// the same answer as "not a trackpad".
+    /// Remembers what a device is once it has sent a fraction of a notch, until a right-button drag forgets it.
+    /// Wheels stay unclassified, which is the same answer as "not a trackpad".
     /// </summary>
-    private static bool ClassifyDevice(uint deviceId, float notchesY, int wholeNotchesY)
+    private static bool ClassifyDevice(uint deviceId, float notchesX, float notchesY)
     {
         if (_precisionDevices.TryGetValue(deviceId, out var wasPrecise) && wasPrecise)
             return true;
 
-        var scrolled = MathF.Abs(notchesY) > 0.0001f;
-        var isPrecise = scrolled && (wholeNotchesY == 0 || MathF.Abs(notchesY - MathF.Round(notchesY)) > 0.01f);
-
-        if (isPrecise && !wasPrecise)
-            Log.Debug($"Scrolling device #{deviceId} behaves like a trackpad; two fingers pan the view.");
+        var isPrecise = IsFractionOfNotch(notchesX) || IsFractionOfNotch(notchesY);
+        if (isPrecise)
+            Log.Debug($"Scrolling device #{deviceId} behaves like a trackpad ({notchesX:0.###}, {notchesY:0.###} notches); two fingers pan the view.");
 
         _precisionDevices[deviceId] = isPrecise;
         return isPrecise;
+    }
+
+    /// <summary>
+    /// A wheel sends whole notches, one or more at a time; anything smaller or in between is a trackpad. SDL's
+    /// own whole-notch counter is no help: its residual carries over from a trackpad and can swallow a wheel notch.
+    /// </summary>
+    private static bool IsFractionOfNotch(float notches)
+    {
+        var magnitude = MathF.Abs(notches);
+        if (magnitude <= 0.0001f)
+            return false;
+
+        return magnitude < 0.99f || MathF.Abs(notches - MathF.Round(notches)) > 0.01f;
     }
 
     /// <summary>How much faster the view zooms than the fingers move; 1 would track them exactly.</summary>

@@ -58,10 +58,9 @@ internal sealed class SdlPointerGestureSource : IPointerGestureSource
         }
     }
 
-    /// <summary>One wheel event, with the whole-notch counters SDL derives from it.</summary>
     public void ProcessWheel(in SDL_MouseWheelEvent wheel, bool ctrlHeld, ImGuiIOPtr io)
     {
-        PointerGestures.ReportScroll(wheel.x, wheel.y, wheel.integer_y, (uint)wheel.which, ctrlHeld, io);
+        PointerGestures.ReportScroll(wheel.x, wheel.y, (uint)wheel.which, ctrlHeld, io);
     }
 
     private float _lastScale = 1;
