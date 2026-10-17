@@ -261,6 +261,31 @@ internal sealed class AlsaSeqMidiDeviceProvider : MidiDeviceProvider
         snd_seq_disconnect_from(_seq, _inputPort, client, port);
     }
 
+    /// <summary>
+    /// The kernel's rawmidi bridge opens a hardware port's output stream only for subscribers; events
+    /// addressed to an unsubscribed port are rejected with ENODEV, so sending requires this subscription.
+    /// </summary>
+    private bool SubscribeOutput(int client, int port, string productName)
+    {
+        if (snd_seq_connect_to(_seq, _outputPort, client, port) < 0)
+        {
+            Log.Warning($"Could not subscribe to MIDI output port {client}:{port} ({productName}).");
+            return false;
+        }
+
+        return true;
+    }
+
+    private void UnsubscribeOutput(int client, int port)
+    {
+        if (_seq == IntPtr.Zero)
+        {
+            return;
+        }
+
+        snd_seq_disconnect_to(_seq, _outputPort, client, port);
+    }
+
     private void SendTo(int client, int port, byte[] message, int length)
     {
         if (_seq == IntPtr.Zero || length <= 0)
@@ -364,6 +389,7 @@ internal sealed class AlsaSeqMidiDeviceProvider : MidiDeviceProvider
             _client = client;
             _port = port;
             Info = info;
+            _isSubscribed = provider.SubscribeOutput(client, port, info.ProductName);
         }
 
         public override MidiDeviceInfo Info { get; }
@@ -384,10 +410,18 @@ internal sealed class AlsaSeqMidiDeviceProvider : MidiDeviceProvider
 
         public override void Close()
         {
+            if (!_isSubscribed)
+            {
+                return;
+            }
+
+            _provider.UnsubscribeOutput(_client, _port);
+            _isSubscribed = false;
         }
 
         public override void Dispose()
         {
+            Close();
         }
 
         /// <summary>Program change and channel pressure carry one data byte; every other voice message carries two.</summary>
@@ -401,6 +435,7 @@ internal sealed class AlsaSeqMidiDeviceProvider : MidiDeviceProvider
         private readonly int _client;
         private readonly int _port;
         private readonly byte[] _shortMessageBuffer = new byte[3];
+        private bool _isSubscribed;
     }
 
     /** How the editor shows up in aconnect and in other applications' port lists. */
