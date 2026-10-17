@@ -48,6 +48,13 @@ internal sealed class SnapshotControllerGrid
             // always shows reading order.
             var layout = ControllerGridLayouts.ReadingOrder;
 
+            // Thumbnail cells need the 4:3 preview area; index-only cells can be much smaller, square
+            // pads like the hardware.
+            var cellW = (_showThumbnails ? 68 : 34) * scale;
+            var cellH = (_showThumbnails ? 51 : 34) * scale;
+            var gap = 3 * scale;
+            var gridWidth = layout.Columns * cellW + (layout.Columns - 1) * gap;
+
             // Header row: title on the left, a settings gear + doc button on the right. The right
             // cluster is drawn first (frame-height tall) so the title can be vertically centered.
             var frameHeight = ImGui.GetFrameHeight();
@@ -56,10 +63,10 @@ internal sealed class SnapshotControllerGrid
             var headerStartY = ImGui.GetCursorPosY();
             var headerGap = 4 * scale;
 
-            // Flush the cluster's right edge to the content edge (RightAlign would inset it by an
-            // extra window padding, leaving the icons looking un-aligned).
+            // Flush the cluster's right edge to the grid's right edge. The grid defines the popup width;
+            // the available region of an auto-sizing popup is only last frame's result and can't anchor it.
             var clusterWidth = 2 * iconSize.X + headerGap;
-            ImGui.SetCursorPosX(headerStartX + ImGui.GetContentRegionAvail().X - clusterWidth);
+            ImGui.SetCursorPosX(headerStartX + gridWidth - clusterWidth);
 
             if (CustomComponents.IconButton(Icon.Settings2, iconSize, CustomComponents.ButtonStates.Default))
                 ImGui.OpenPopup(SettingsPopupId);
@@ -77,11 +84,6 @@ internal sealed class SnapshotControllerGrid
             ImGui.SetCursorPosY(headerStartY + frameHeight);
             FormInputs.AddVerticalSpace(4);
 
-            // Thumbnail cells need the 4:3 preview area; index-only cells can be much smaller, square
-            // pads like the hardware.
-            var cellW = (_showThumbnails ? 68 : 34) * scale;
-            var cellH = (_showThumbnails ? 51 : 34) * scale;
-            var gap = 3 * scale;
             var drawList = ImGui.GetWindowDrawList();
 
             ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(gap, gap));
