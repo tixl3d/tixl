@@ -1,5 +1,8 @@
 #nullable enable
+using System.IO;
 using ImGuiNET;
+using T3.Core.SystemUi;
+using T3.Core.Utils;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.Styling.Markdown;
@@ -398,186 +401,155 @@ internal static class FormInputs
         return modified;
     }
 
-    private static readonly Dictionary<string, string> _listBoxAddInputs = new();
-
-    // Dragging state for reorder: persistent across frames while mouse button is down
-    private static int _draggingIndex = -1;
-    private static bool _isDragging;
-
-    public static bool AddEditableListBox(ref string selectedValue,
-        IList<string> values,
-        string label,
-        Predicate<string>? warningPredicate,
-        String? warningText,
-        string? tooltip = null)
+    /// <summary>
+    /// Full-width list of folders. Rows are reordered by dragging their grip, can be opened in Explorer
+    /// or removed, and "Add..." appends a folder from the system picker. Missing folders are flagged.
+    /// </summary>
+    public static bool AddFolderList(string label, IList<string> folders, string? tooltip = null)
     {
-        DrawInputLabel(label);
+        var scale = T3Ui.UiScaleFactor;
+        var rowHeight = MathF.Round(FolderRowHeight * scale);
+        var gripWidth = Icons.FontSize + 8 * scale;
+        var drawList = ImGui.GetWindowDrawList();
 
-        var imguiLabel = "##ListBox" + label;
-
-        // compute input size early
-        var inputSize = GetAvailableInputSize(tooltip, false, true);
-
-        // Compute box height: account for all items plus the bottom transient add-row; add 1.5 lines total so the add-row is visible
-        var lineHeight = ImGui.GetTextLineHeightWithSpacing();
-        var listBoxHeight = MathF.Min(300 * T3Ui.UiScaleFactor, (values.Count + 2.5f) * lineHeight);
-        var size = inputSize with {Y = listBoxHeight};
+        ImGui.PushID(label);
+        DrawFolderListHeader(label, tooltip);
 
         var modified = false;
-        if (ImGui.BeginListBox(imguiLabel, size))
+        var removeIndex = -1;
+        var moveFromIndex = -1;
+        var moveToIndex = -1;
+
+        for (var index = 0; index < folders.Count; index++)
         {
-            try
+            var folder = folders[index];
+            // Keyed by path, not index, so the active grip stays with its row while the list reorders.
+            ImGui.PushID(folder);
+
+            var rowMin = ImGui.GetCursorScreenPos().Floor();
+            var rowWidth = ImGui.GetContentRegionAvail().X;
+            var rowMax = rowMin + new Vector2(rowWidth, rowHeight).Floor();
+
+            ImGui.InvisibleButton("##grip", new Vector2(gripWidth, rowHeight));
+            var isDragging = ImGui.IsItemActive();
+            if (ImGui.IsItemHovered() || isDragging)
+                ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeNS);
+
+            if (isDragging)
             {
-                // Remember the list content start Y so we can compute item indices based on mouse Y while dragging
-                var listStartY = ImGui.GetCursorScreenPos().Y;
-                // Top: existing items
-                for (var i = 0; i < values.Count; i++)
+                var rowStride = rowHeight + ImGui.GetStyle().ItemSpacing.Y;
+                var dragY = ImGui.GetMouseDragDelta(ImGuiMouseButton.Left).Y;
+                if (dragY < -rowStride * 0.5f && index > 0)
                 {
-                    ImGui.PushID(i);
-                    ImGui.AlignTextToFramePadding();
-
-                    // Drag handle
-                    ImGui.Button($"{i}.");
-                    // start drag if user presses the handle
-                    if (ImGui.IsItemActive() && !_isDragging && ImGui.IsMouseDown(0))
-                    {
-                        _isDragging = true;
-                        _draggingIndex = i;
-                    }
-
-                    // continue drag while mouse down
-                    if (_isDragging && ImGui.IsMouseDown(0) && _draggingIndex >= 0)
-                    {
-                        var mouseY = ImGui.GetMousePos().Y;
-                        var targetIndex = (int) ((mouseY - listStartY) / lineHeight);
-                        targetIndex = Math.Clamp(targetIndex, 0, values.Count - 1);
-                        if (targetIndex != _draggingIndex)
-                        {
-                            (values[targetIndex], values[_draggingIndex]) =
-                                (values[_draggingIndex], values[targetIndex]);
-                            modified = true;
-                            _draggingIndex = targetIndex;
-                        }
-                    }
-
-                    // stop dragging when mouse released
-                    if (_isDragging && !ImGui.IsMouseDown(0))
-                    {
-                        _isDragging = false;
-                        _draggingIndex = -1;
-                    }
-
-                    ImGui.SameLine(30 * T3Ui.UiScaleFactor);
-
-                    var value = values[i];
-
-                    // warning icon on the left
-                    var hasWarning = warningPredicate != null && !warningPredicate(value);
-                    if (hasWarning)
-                    {
-                        AddIcon(Icon.Warning);
-                        // TextWrapped inside a raw auto-sizing tooltip wraps at zero width (one character
-                        // per line) — the styled helper sets a proper wrap position.
-                        CustomComponents.TooltipForLastItem(warningText ?? "This entry may cause issues.");
-
-                        ImGui.SameLine();
-                    }
-
-                    // compute reserve space for two small buttons
-                    var style = ImGui.GetStyle();
-                    var padX = style.FramePadding.X * 2;
-                    var wX = ImGui.CalcTextSize("×").X + padX;
-                    var wPlus = ImGui.CalcTextSize("+").X + padX;
-                    var buttonSpacing = style.ItemSpacing.X;
-                    var reservedRight = wX + wPlus + buttonSpacing;
-
-                    // set width for input so buttons fit on same line
-                    var regionAvail = ImGui.GetContentRegionAvail().X;
-                    ImGui.SetNextItemWidth(MathF.Max(20, regionAvail - reservedRight));
-
-                    var temp = value;
-                    if (ImGui.InputText("##item" + i + imguiLabel, ref temp, 1024u))
-                    {
-                        values[i] = temp;
-                        modified = true;
-                        if (selectedValue == value)
-                            selectedValue = temp;
-                    }
-
-                    // draw delete/insert on same line, right after the input
-                    ImGui.SameLine();
-                    if (ImGui.Button("×"))
-                    {
-                        if (selectedValue == value)
-                            selectedValue = string.Empty;
-
-                        values.RemoveAt(i);
-                        modified = true;
-                        ImGui.PopID();
-                        i--;
-                        continue;
-                    }
-
-                    ImGui.SameLine();
-                    if (ImGui.Button("+"))
-                    {
-                        values.Insert(i, value);
-                        modified = true;
-                        i++; // skip the inserted duplicate
-                    }
-
-                    ImGui.PopID();
+                    moveFromIndex = index;
+                    moveToIndex = index - 1;
+                    ImGui.ResetMouseDragDelta(ImGuiMouseButton.Left);
                 }
-
-                // Bottom: add new item input
-                ImGui.Separator();
-                ImGui.PushID("add" + imguiLabel);
-                if (!_listBoxAddInputs.TryGetValue(imguiLabel, out var addInput))
-                    addInput = string.Empty;
-
-                // Shift cursor horizontally to match the per-item input left offset (drag-handle width)
-                ImGui.SetCursorPosX(ImGui.GetCursorPosX() + 30 * T3Ui.UiScaleFactor);
-
-                // Compute reserved right width same as per-item (X + + spacing) so plus aligns exactly
-                var styleBottom = ImGui.GetStyle();
-                var padXBottom = styleBottom.FramePadding.X * 2;
-                var wXBottom = ImGui.CalcTextSize("×").X + padXBottom;
-                var wPlusBottom = ImGui.CalcTextSize("+").X + padXBottom;
-                var buttonSpacingBottom = styleBottom.ItemSpacing.X;
-                var reservedRightSame = wXBottom + wPlusBottom + buttonSpacingBottom;
-
-                var regionAvailBottom = ImGui.GetContentRegionAvail().X;
-                ImGui.SetNextItemWidth(MathF.Max(20, regionAvailBottom - reservedRightSame));
-
-                if (ImGui.InputText("##add" + imguiLabel, ref addInput, 1024u))
+                else if (dragY > rowStride * 0.5f && index < folders.Count - 1)
                 {
-                    _listBoxAddInputs[imguiLabel] = addInput;
+                    moveFromIndex = index;
+                    moveToIndex = index + 1;
+                    ImGui.ResetMouseDragDelta(ImGuiMouseButton.Left);
                 }
-
-                ImGui.SameLine();
-                if (ImGui.Button("+"))
-                {
-                    var trimmed = (addInput ?? string.Empty).Trim();
-                    if (!string.IsNullOrEmpty(trimmed))
-                    {
-                        values.Add(trimmed);
-                        selectedValue = trimmed;
-                        _listBoxAddInputs[imguiLabel] = string.Empty;
-                        modified = true;
-                    }
-                }
-
-                ImGui.PopID();
             }
-            finally
+
+            var backgroundColor = isDragging ? UiColors.BackgroundActive.Fade(0.4f) : UiColors.BackgroundButton;
+            drawList.AddRectFilled(rowMin, rowMax, backgroundColor, 4 * scale);
+
+            var gripColor = isDragging ? UiColors.Text : UiColors.TextMuted.Fade(0.5f);
+            var gripPos = new Vector2(rowMin.X + 4 * scale, rowMin.Y + (rowHeight - Icons.FontSize) / 2).Floor();
+            Icons.DrawIconAtScreenPosition(Icon.DragIndicator, gripPos, drawList, gripColor);
+
+            // Path text, clipped before the two tool icons
+            var buttonSize = new Vector2(rowHeight);
+            ImGui.SameLine(0, 0);
+            var textWidth = MathF.Max(1, rowWidth - gripWidth - 2 * buttonSize.X);
+            ImGui.InvisibleButton("##path", new Vector2(textWidth, rowHeight));
+            var exists = Directory.Exists(folder);
+            var textMin = ImGui.GetItemRectMin();
+            var textMax = ImGui.GetItemRectMax();
+            var textPos = new Vector2(textMin.X, textMin.Y + (rowHeight - ImGui.GetTextLineHeight()) / 2).Floor();
+            drawList.PushClipRect(textMin, textMax, true);
+            drawList.AddText(textPos, exists ? UiColors.Text : UiColors.StatusWarning, folder);
+            drawList.PopClipRect();
+            if (ImGui.IsItemHovered())
+                CustomComponents.TooltipForLastItem(exists ? folder : "Folder does not exist", exists ? null : folder);
+
+            ImGui.SameLine(0, 0);
+            if (CustomComponents.IconButton(Icon.Folder, buttonSize, exists ? CustomComponents.ButtonStates.Default : CustomComponents.ButtonStates.Disabled) && exists)
+                CoreUi.Instance.OpenWithDefaultApplication(folder);
+
+            CustomComponents.TooltipForLastItem("Open in Explorer");
+
+            ImGui.SameLine(0, 0);
+            if (CustomComponents.AttentionIconButton(Icon.Close, buttonSize))
+                removeIndex = index;
+
+            CustomComponents.TooltipForLastItem("Remove from list");
+
+            ImGui.PopID();
+        }
+
+        // List changes are applied after drawing so every row of this frame keeps a stable index.
+        if (moveFromIndex >= 0)
+        {
+            (folders[moveFromIndex], folders[moveToIndex]) = (folders[moveToIndex], folders[moveFromIndex]);
+            modified = true;
+        }
+        else if (removeIndex >= 0)
+        {
+            folders.RemoveAt(removeIndex);
+            modified = true;
+        }
+
+        AddVerticalSpace(2);
+        if (CustomComponents.DrawCtaButton("Add...", Icon.None, CustomComponents.ButtonStates.Emphasized))
+        {
+            var pickedFolder = FileOperations.TryPickAbsoluteFolder();
+            if (!string.IsNullOrEmpty(pickedFolder) && !ContainsFolder(folders, pickedFolder))
             {
-                ImGui.EndListBox();
+                folders.Add(pickedFolder);
+                modified = true;
             }
         }
 
-        AppendTooltip(tooltip);
+        CustomComponents.TooltipForLastItem("Choose a folder to add to the list.");
+        ImGui.PopID();
         return modified;
     }
+
+    private static void DrawFolderListHeader(string label, string? tooltip)
+    {
+        ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
+        ImGui.PushFont(Fonts.FontBold);
+        AddVerticalSpace(15);
+        ImGui.TextUnformatted(label);
+        ImGui.PopFont();
+        ImGui.PopStyleColor();
+
+        if (!string.IsNullOrEmpty(tooltip))
+        {
+            ImGui.SameLine();
+            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetContentRegionAvail().X - Icons.FontSize);
+            DrawHelpMarker(tooltip);
+        }
+
+        AddVerticalSpace(2);
+    }
+
+    private static bool ContainsFolder(IList<string> folders, string folder)
+    {
+        var normalized = Path.TrimEndingDirectorySeparator(folder);
+        foreach (var existing in folders)
+        {
+            if (string.Equals(Path.TrimEndingDirectorySeparator(existing), normalized, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+
+        return false;
+    }
+
+    private const float FolderRowHeight = 26;
 
     public static bool AddSegmentedButtonWithLabel<T>(ref T selectedValue, string label, string? tooltip = null)
         where T : struct, Enum
@@ -1136,7 +1108,11 @@ internal static class FormInputs
 
         // A small fixed gap to the input — the default item spacing reads as detached.
         ImGui.SameLine(0, 3 * T3Ui.UiScaleFactor);
+        DrawHelpMarker(tooltip);
+    }
 
+    private static void DrawHelpMarker(string tooltip)
+    {
         ImGui.PushFont(Icons.IconFont);
         ImGui.AlignTextToFramePadding();
         ImGui.TextUnformatted("" + (char) Icon.Help);

@@ -56,6 +56,30 @@ public static class FileOperations
         }
     }
 
+    /// <summary>
+    /// Shows the system folder picker and returns the chosen absolute folder, or null if canceled or failed.
+    /// </summary>
+    internal static string TryPickAbsoluteFolder()
+    {
+        try
+        {
+            using var folderBrowser = EditorUi.Instance.CreateFilePicker();
+            folderBrowser.ValidateNames = false;
+            folderBrowser.CheckFileExists = false;
+            folderBrowser.CheckPathExists = true;
+            folderBrowser.FileName = "Folder Selection.";
+            if (!folderBrowser.ChooseFile())
+                return null;
+
+            return Path.GetDirectoryName(folderBrowser.FileName);
+        }
+        catch (Exception e)
+        {
+            Log.Warning("Couldn't open folder picker: " + e.Message);
+            return null;
+        }
+    }
+
     public enum FilePickerTypes
     {
         None,

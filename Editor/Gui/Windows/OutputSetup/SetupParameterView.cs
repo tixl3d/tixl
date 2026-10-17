@@ -838,7 +838,7 @@ internal static class SetupParameterView
         {
             var frameRate = stream.FrameRate;
             if (FormInputs.AddInt("Frame rate", ref frameRate, 1, 240, 1,
-                                  "Frames per second advertised to receivers.", 60))
+                                  "Frames per second sent to receivers. Rendered frames in between are skipped, so a rate the render loop divides evenly into (30 from 60) is sent evenly.", 60))
             {
                 stream.FrameRate = Math.Clamp(frameRate, 1, 240);
                 OutputSetupHandling.SaveActive();

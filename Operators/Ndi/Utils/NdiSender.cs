@@ -7,6 +7,7 @@ using T3.Graphics;
 using T3.Core.Output;
 using T3.Core.Output.Streaming;
 using T3.Core.Resource.Assets;
+using T3.Core.Stats;
 using T3.Core.Utils;
 
 namespace Lib.Utils;
@@ -30,7 +31,7 @@ internal sealed class NdiSender : IOutputStreamSender
 
     public string? LastError => _lastError;
 
-    /// <summary>Frames per second advertised to receivers.</summary>
+    /// <summary>Frames per second sent and advertised to receivers; rendered frames in between are skipped.</summary>
     public int FrameRate = 60;
 
     /// <summary>Whether the alpha channel is sent, or receivers get an opaque frame.</summary>
@@ -107,8 +108,12 @@ internal sealed class NdiSender : IOutputStreamSender
         if (NDIlib.send_get_no_connections(_ndiSender, 0) <= 0)
         {
             DropQueuedFrames();
+            _nextSendTimeSec = 0;
             return false;
         }
+
+        if (!IsDueAtFrameRate())
+            return true;
 
         if (_stagingTextures.Count == 0 && !TryCreatePipeline(frame, width, height, packsToUyvy))
             return false;
@@ -279,6 +284,33 @@ internal sealed class NdiSender : IOutputStreamSender
         return true;
     }
 
+    /// <summary>
+    /// Whether this frame is the one to send for the next 1/<see cref="FrameRate"/> step of the visual clock. The
+    /// render loop runs at the display's rate, so a 30 fps stream from a 60 Hz loop takes every second frame; from
+    /// a 48 Hz loop it alternates one and two frames, which is the best a rate the loop can't divide into gets.
+    /// A frame is due when it is closer to the step than the next frame would be, so an exact multiple never
+    /// flips on rounding.
+    /// </summary>
+    private bool IsDueAtFrameRate()
+    {
+        if (FrameRate <= 0)
+            return true;
+
+        var periodSec = 1.0 / FrameRate;
+        var frameTimeSec = FrameTiming.VisualFrameTimeSec;
+        var halfFrameSec = FrameTiming.VisualDeltaSec * 0.5;
+
+        // After a stall (or the first frame) the schedule restarts from now instead of catching up in a burst.
+        if (_nextSendTimeSec == 0 || frameTimeSec - _nextSendTimeSec > periodSec)
+            _nextSendTimeSec = frameTimeSec;
+
+        if (frameTimeSec + halfFrameSec < _nextSendTimeSec)
+            return false;
+
+        _nextSendTimeSec += periodSec;
+        return true;
+    }
+
     /** A slot neither queued for sending nor held by NDI; -1 when all are busy (they never should be). */
     private int FindFreeSlot()
     {
@@ -368,4 +400,7 @@ internal sealed class NdiSender : IOutputStreamSender
     private readonly List<Texture2D> _stagingTextures = [];
     private readonly Queue<int> _queuedSlots = new();
     private int _inFlightSlot = -1;
+
+    /** Visual-clock time the next frame is due at; 0 restarts the schedule. */
+    private double _nextSendTimeSec;
 }

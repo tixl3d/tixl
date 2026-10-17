@@ -86,6 +86,8 @@ Presenting runs from the moment a project is loaded, whether or not any output w
 
 Select a plug to see its settings in the Parameter window: the resolution it sends (the bound output's canvas), and for kinds that have them, the frame rate and whether alpha is carried. Only the settings a kind honours are shown, so a Spout plug offers neither.
 
+The frame rate is the rate frames are actually sent at, not just a label: rendered frames in between are skipped. A rate the render loop divides into evenly is sent evenly — 30 fps from a 60 Hz loop is every second frame. From a loop at 48 Hz the same stream alternates between one and two frames per step, which no setting can fix; set the display or the editor's Frame Rate so the two rates divide.
+
 The bindings are also reachable from the output's context menu and from the Output window's breadcrumb menu.
 
 ## Content from the graph

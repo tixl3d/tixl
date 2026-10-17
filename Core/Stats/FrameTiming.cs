@@ -22,6 +22,12 @@ public static class FrameTiming
     public static double RefreshRate => 1 / RefreshPeriodSec;
 
     /// <summary>
+    /// How many refresh periods each frame stays on screen under vsync, e.g. 2 when a 120 Hz display renders at 60 fps.
+    /// Set by the host that presents.
+    /// </summary>
+    public static int VblanksPerFrame { get; set; } = 1;
+
+    /// <summary>
     /// The current frame rate relative to the 60 fps that per-frame simulations were tuned at, e.g. 2 at 120 fps.
     /// </summary>
     public static double FrameRateRelativeTo60 => DefaultRefreshPeriodSec / FramePeriodSec;
@@ -77,11 +83,27 @@ public static class FrameTiming
 
         FramePeriodSec = _intervalSum / _count;
 
-        if (_vsyncedFramesInWindow == WindowSize && ++_framesSinceRefreshEstimate >= RefreshEstimateIntervalFrames)
+        var hasRecentDisplayReport = _lastDisplayReportFrame >= 0
+                                     && RecordedFrameCount - _lastDisplayReportFrame < MaxFramesWithoutDisplayReport;
+        if (!hasRecentDisplayReport
+            && _vsyncedFramesInWindow == WindowSize
+            && ++_framesSinceRefreshEstimate >= RefreshEstimateIntervalFrames)
         {
             _framesSinceRefreshEstimate = 0;
             UpdateRefreshPeriodIfSteady();
         }
+    }
+
+    /// <summary>
+    /// Sets the refresh period from the pacing display's own vblank timestamps. Takes precedence over the estimate from
+    /// frame intervals, which fails when the loop is released on a different grid than the display scans out — e.g. a
+    /// 48 Hz panel whose frames start on a 60 Hz compositor cadence (intervals of 16.7 and 33.3 ms).
+    /// </summary>
+    public static void SetRefreshPeriodFromDisplay(double periodSec)
+    {
+        RefreshPeriodSec = periodSec;
+        _hasMeasuredRefreshPeriod = true;
+        _lastDisplayReportFrame = RecordedFrameCount;
     }
 
     /// <summary>
@@ -122,13 +144,13 @@ public static class FrameTiming
             period = sum / vblankCount;
         }
 
-        RefreshPeriodSec = period;
+        RefreshPeriodSec = period / VblanksPerFrame;
         _hasMeasuredRefreshPeriod = true;
     }
 
     /// <summary>
-    /// With vsync every frame stays on screen for whole refresh periods, so the visual clock advances one period per
-    /// frame and only catches up in whole periods once it is a full period behind the wall clock (a missed vblank)
+    /// With vsync every frame stays on screen for whole refresh periods, so the visual clock advances one frame period
+    /// (<see cref="VblanksPerFrame"/> refresh periods) per frame and only catches up in whole periods once it is a full period behind the wall clock (a missed vblank)
     /// or ahead of it. Jitter in when frames start stays below that and never reaches the animation. A slow pull
     /// towards the wall clock keeps the lag centred, so a slightly-off period estimate doesn't drift it into a
     /// skipped or doubled frame every few seconds.
@@ -145,7 +167,7 @@ public static class FrameTiming
             return Math.Max(0, intervalSec);
         }
 
-        var period = RefreshPeriodSec;
+        var period = RefreshPeriodSec * VblanksPerFrame;
         _visualClockLagSec += intervalSec - period;
         var correction = _visualClockLagSec * LagCorrectionRate;
         _visualClockLagSec -= correction;
@@ -174,6 +196,9 @@ public static class FrameTiming
     private const double LagCorrectionRate = 0.02;
     private const double MaxPlausibleIntervalSec = 0.25;
 
+    /** About three seconds at 60 Hz; after that the interval estimate takes over again. */
+    private const int MaxFramesWithoutDisplayReport = 180;
+
     private static readonly double[] _intervals = new double[WindowSize];
     private static int _count;
     private static int _nextIndex;
@@ -182,6 +207,7 @@ public static class FrameTiming
     private static int _framesSinceRefreshEstimate;
     private static bool _hasMeasuredRefreshPeriod;
     private static double _lastFrameStartSec;
+    private static long _lastDisplayReportFrame = -1;
 
     /** Wall-clock time minus visual time; stays within one refresh period. */
     private static double _visualClockLagSec;

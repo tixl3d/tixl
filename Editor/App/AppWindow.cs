@@ -247,6 +247,7 @@ internal sealed unsafe class AppWindow
             // Waiting before the events are read, not after, keeps the frame from being drawn with input that is
             // already a refresh old.
             WaitForFrameLatency();
+            ProgramWindows.HoldForTargetFrameRate();
 
             while (SDL_PollEvent(&sdlEvent))
             {

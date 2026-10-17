@@ -6,6 +6,7 @@ using SDL;
 using T3.Graphics.Compat;
 using T3.Graphics;
 using System.Diagnostics;
+using System.Threading;
 using T3.Core.Stats;
 using T3.Core.IO;
 using T3.Core.Resource;
@@ -368,6 +369,49 @@ internal static unsafe class ProgramWindows
         _deviceContext.Rasterizer.SetViewport(new Viewport(0, 0, Main.Width, Main.Height, 0.0f, 1.0f));
         _deviceContext.OutputMerger.SetTargets(Main.RenderTargetView);
     }
+
+    /// <summary>
+    /// Holds the loop until the previous frame has lasted the whole refreshes the frame-rate setting asks for. The
+    /// swap chain paces to single vblanks only, so lower rates come from waiting out the extra ones here, and
+    /// <see cref="FrameTiming.VblanksPerFrame"/> keeps animation speed unchanged. Call once per frame, right after
+    /// the frame-latency wait and before input is read.
+    /// </summary>
+    public static void HoldForTargetFrameRate()
+    {
+        var vblanksPerFrame = T3Ui.UseVSync ? GetVblanksPerFrame(UserSettings.Config.TargetFrameRate, FrameTiming.RefreshRate) : 1;
+        FrameTiming.VblanksPerFrame = vblanksPerFrame;
+
+        if (vblanksPerFrame > 1)
+        {
+            // Released a quarter period early: the present still lands on the intended vblank, and a frame whose
+            // work fills a whole period keeps its head start.
+            var minFrameTicks = (long)((vblanksPerFrame - VblankTimingTolerance) * FrameTiming.RefreshPeriodSec * Stopwatch.Frequency);
+            while (Stopwatch.GetTimestamp() - _lastPacedFrameStart < minFrameTicks)
+            {
+                Thread.Sleep(1);
+            }
+        }
+
+        _lastPacedFrameStart = Stopwatch.GetTimestamp();
+    }
+
+    /// <summary>
+    /// How many vblanks each frame stays on screen to approach the target frame rate on the pacing display.
+    /// Only whole vblanks are possible, so 50 fps on a 120 Hz display gives 60 fps.
+    /// </summary>
+    private static int GetVblanksPerFrame(int targetFps, double refreshRate)
+    {
+        if (targetFps <= 0)
+            return 1;
+
+        return Math.Clamp((int)Math.Round(refreshRate / targetFps), 1, MaxVblanksPerFrame);
+    }
+
+    private const double VblankTimingTolerance = 0.25;
+
+    /** 30 fps on a 120 Hz display; lower rates don't need a frame-rate setting. */
+    private const int MaxVblanksPerFrame = 4;
+    private static long _lastPacedFrameStart;
 
     public static void Present(bool useVSync)
     {
