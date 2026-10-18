@@ -408,8 +408,8 @@ internal static class FormInputs
     public static bool AddFolderList(string label, IList<string> folders, string? tooltip = null)
     {
         var scale = T3Ui.UiScaleFactor;
-        var rowHeight = MathF.Round(FolderRowHeight * scale);
-        var gripWidth = Icons.FontSize + 8 * scale;
+        var rowHeight = ListRowHeight;
+        var gripWidth = ListRowGripWidth;
         var drawList = ImGui.GetWindowDrawList();
 
         ImGui.PushID(label);
@@ -430,35 +430,8 @@ internal static class FormInputs
             var rowWidth = ImGui.GetContentRegionAvail().X;
             var rowMax = rowMin + new Vector2(rowWidth, rowHeight).Floor();
 
-            ImGui.InvisibleButton("##grip", new Vector2(gripWidth, rowHeight));
-            var isDragging = ImGui.IsItemActive();
-            if (ImGui.IsItemHovered() || isDragging)
-                ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeNS);
-
-            if (isDragging)
-            {
-                var rowStride = rowHeight + ImGui.GetStyle().ItemSpacing.Y;
-                var dragY = ImGui.GetMouseDragDelta(ImGuiMouseButton.Left).Y;
-                if (dragY < -rowStride * 0.5f && index > 0)
-                {
-                    moveFromIndex = index;
-                    moveToIndex = index - 1;
-                    ImGui.ResetMouseDragDelta(ImGuiMouseButton.Left);
-                }
-                else if (dragY > rowStride * 0.5f && index < folders.Count - 1)
-                {
-                    moveFromIndex = index;
-                    moveToIndex = index + 1;
-                    ImGui.ResetMouseDragDelta(ImGuiMouseButton.Left);
-                }
-            }
-
-            var backgroundColor = isDragging ? UiColors.BackgroundActive.Fade(0.4f) : UiColors.BackgroundButton;
-            drawList.AddRectFilled(rowMin, rowMax, backgroundColor, 4 * scale);
-
-            var gripColor = isDragging ? UiColors.Text : UiColors.TextMuted.Fade(0.5f);
-            var gripPos = new Vector2(rowMin.X + 4 * scale, rowMin.Y + (rowHeight - Icons.FontSize) / 2).Floor();
-            Icons.DrawIconAtScreenPosition(Icon.DragIndicator, gripPos, drawList, gripColor);
+            var isDragging = DrawRowDragGrip(index, folders.Count, rowHeight, ref moveFromIndex, ref moveToIndex);
+            DrawListRowBackground(drawList, rowMin, rowMax, isDragging, drawGrip: true);
 
             // Path text, clipped before the two tool icons
             var buttonSize = new Vector2(rowHeight);
@@ -516,6 +489,61 @@ internal static class FormInputs
         CustomComponents.TooltipForLastItem("Choose a folder to add to the list.");
         ImGui.PopID();
         return modified;
+    }
+
+    /// <summary>Height of a row in reorderable settings lists, in scaled pixels.</summary>
+    public static float ListRowHeight => MathF.Round(FolderRowHeight * T3Ui.UiScaleFactor);
+
+    /// <summary>Width of the drag grip at the start of a reorderable row, in scaled pixels.</summary>
+    public static float ListRowGripWidth => Icons.FontSize + 8 * T3Ui.UiScaleFactor;
+
+    /// <summary>
+    /// The invisible grip at the start of a reorderable row. Dragging it past half a row requests a swap
+    /// with the neighbour through <paramref name="moveFromIndex"/> / <paramref name="moveToIndex"/>, which the
+    /// caller applies after drawing all rows. Returns true while the grip is dragged.
+    /// </summary>
+    public static bool DrawRowDragGrip(int index, int rowCount, float rowHeight, ref int moveFromIndex, ref int moveToIndex)
+    {
+        ImGui.InvisibleButton("##grip", new Vector2(ListRowGripWidth, rowHeight));
+        var isDragging = ImGui.IsItemActive();
+        if (ImGui.IsItemHovered() || isDragging)
+            ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeNS);
+
+        if (!isDragging)
+            return false;
+
+        var rowStride = rowHeight + ImGui.GetStyle().ItemSpacing.Y;
+        var dragY = ImGui.GetMouseDragDelta(ImGuiMouseButton.Left).Y;
+        if (dragY < -rowStride * 0.5f && index > 0)
+        {
+            moveFromIndex = index;
+            moveToIndex = index - 1;
+            ImGui.ResetMouseDragDelta(ImGuiMouseButton.Left);
+        }
+        else if (dragY > rowStride * 0.5f && index < rowCount - 1)
+        {
+            moveFromIndex = index;
+            moveToIndex = index + 1;
+            ImGui.ResetMouseDragDelta(ImGuiMouseButton.Left);
+        }
+
+        return true;
+    }
+
+    /// <summary>Rounded row background for reorderable lists, with the grip icon when the row can be dragged.</summary>
+    public static void DrawListRowBackground(ImDrawListPtr drawList, Vector2 rowMin, Vector2 rowMax, bool isDragging, bool drawGrip)
+    {
+        var scale = T3Ui.UiScaleFactor;
+        var backgroundColor = isDragging ? UiColors.BackgroundActive.Fade(0.4f) : UiColors.BackgroundButton;
+        drawList.AddRectFilled(rowMin, rowMax, backgroundColor, 4 * scale);
+
+        if (!drawGrip)
+            return;
+
+        var rowHeight = rowMax.Y - rowMin.Y;
+        var gripColor = isDragging ? UiColors.Text : UiColors.TextMuted.Fade(0.5f);
+        var gripPos = new Vector2(rowMin.X + 4 * scale, rowMin.Y + (rowHeight - Icons.FontSize) / 2).Floor();
+        Icons.DrawIconAtScreenPosition(Icon.DragIndicator, gripPos, drawList, gripColor);
     }
 
     private static void DrawFolderListHeader(string label, string? tooltip)

@@ -15,7 +15,9 @@ using Newtonsoft.Json.Linq;
 using T3.Core.Animation;
 using T3.Core.Settings;
 using T3.Core.Stats;
+using T3.Editor.Gui.Windows;
 using T3.Editor.Gui.Windows.Analyze;
+using T3.Editor.Gui.Windows.Layouts;
 using T3.Core.Logging;
 using T3.Core.Model;
 using T3.Core.Operator;
@@ -292,6 +294,10 @@ internal static class DebugServer
 
             case "openProject":
                 HandleOpenProject(request, context);
+                break;
+
+            case "openWindow":
+                HandleOpenWindow(request, context);
                 break;
 
             case "select":
@@ -1206,6 +1212,40 @@ internal static class DebugServer
     /// <summary>
     /// Captures the editor UI of the last presented frame. 'region': "graph" crops to the graph canvas.
     /// </summary>
+    /// <summary>
+    /// Shows an editor window by its type name so panels can be captured with a UI screenshot.
+    /// For the settings window, <c>section</c> selects the category.
+    /// </summary>
+    private static void HandleOpenWindow(JObject request, RequestContext context)
+    {
+        var name = request["name"]?.Value<string>();
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            context.SendError("MISSING_PARAM", "openWindow requires a 'name' (window type name, e.g. SettingsWindow)");
+            return;
+        }
+
+        foreach (var window in WindowManager.GetAllWindows())
+        {
+            if (!string.Equals(window.GetType().Name, name, StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            window.Config.Visible = true;
+
+            var section = request["section"]?.Value<string>();
+            if (window is SettingsWindow settingsWindow && !string.IsNullOrEmpty(section) && !settingsWindow.TrySelectCategory(section))
+            {
+                context.SendError("INVALID_PARAM", $"Unknown settings section '{section}'");
+                return;
+            }
+
+            context.SendOk(new JObject { ["window"] = window.GetType().Name });
+            return;
+        }
+
+        context.SendError("NOT_FOUND", $"No window of type '{name}'");
+    }
+
     private static void HandleScreenshotWindow(JObject request, RequestContext context)
     {
         var path = request["path"]?.Value<string>();

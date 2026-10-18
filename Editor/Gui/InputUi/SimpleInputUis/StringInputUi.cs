@@ -33,6 +33,11 @@ public sealed class StringInputUi : InputValueUi<string>
         /// A file the operator writes. Not an asset dependency: it may not exist yet and is never bundled on export.
         /// </summary>
         OutputFilePath,
+
+        /// <summary>
+        /// A MIDI device name or alias. Lets the settings panel find every device reference across loaded projects.
+        /// </summary>
+        MidiDevice,
     }
 
     public UsageType Usage { get; private set; } = UsageType.Default;
@@ -112,6 +117,7 @@ public sealed class StringInputUi : InputValueUi<string>
                 NormalizePathSeparators(inputEditStateFlags, ref value);
                 break;
             case UsageType.CustomDropdown:
+            case UsageType.MidiDevice:
                 inputEditStateFlags = DrawCustomDropdown(input);
                 break;
         }

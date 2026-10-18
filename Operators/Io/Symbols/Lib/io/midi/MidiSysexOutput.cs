@@ -39,7 +39,8 @@ internal sealed class MidiSysexOutput : Instance<MidiSysexOutput>
     private void Update(EvaluationContext context)
     {
         var triggerActive = TriggerSend.GetValue(context);
-        var deviceName = Device.GetValue(context);
+        _deviceCache.Update(Device.GetValue(context), forOutput: true);
+        var deviceName = _deviceCache.ProductName;
         var foundDevice = false;
 
         if (triggerActive)
@@ -135,7 +136,7 @@ internal sealed class MidiSysexOutput : Instance<MidiSysexOutput>
                 }
             }
 
-            _lastErrorMessage = !foundDevice ? $"Can't find MidiDevice {deviceName}" : null;
+            _lastErrorMessage = foundDevice ? null : _deviceCache.MissingMessage ?? _lastErrorMessage;
             
             if(_lastErrorMessage != null)
                 Log.Warning(_lastErrorMessage, this);
@@ -158,6 +159,15 @@ internal sealed class MidiSysexOutput : Instance<MidiSysexOutput>
             yield return "undefined";
             yield break;
         }
+            
+        foreach (var alias in MidiConnectionManager.AliasNames)
+            
+        {
+            
+            yield return alias;
+            
+        }
+
             
         foreach (var device in MidiConnectionManager.MidiOutsWithDevices.Values)
         {
@@ -191,6 +201,7 @@ internal sealed class MidiSysexOutput : Instance<MidiSysexOutput>
     public void OnSettingsChanged() {}
 
     private string _lastErrorMessage;
+    private MidiDeviceNameCache _deviceCache;
     #endregion
         
     [Input(Guid = "611e8c42-9954-421c-8071-1e959478c8fe")]

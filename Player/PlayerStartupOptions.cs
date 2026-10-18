@@ -212,6 +212,9 @@ internal sealed class PlayerStartupOptions
         [Option("novsync", HelpText = "Disable vsync.")]
         public bool NoVsync { get; set; }
 
+        [Option("midi-alias", HelpText = "Map a MIDI alias to a device on this machine, e.g. ApcMini=\"APC MINI\". Several pairs may follow one option.")]
+        public IEnumerable<string>? MidiAliases { get; set; }
+
         [Option("no-dialog", HelpText = "Skip the startup dialog and start with the resolved settings.")]
         public bool NoDialog { get; set; }
 

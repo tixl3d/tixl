@@ -22,6 +22,7 @@ using T3.Editor.Compilation;
 using T3.Editor.Gui;
 using T3.Editor.Gui.InputUi.SimpleInputUis;
 using T3.Editor.Gui.Interaction.Timing;
+using T3.IoServices.Midi;
 using T3.Serialization;
 using ShaderCompiler = T3.Core.Resource.ShaderCompiling.ShaderCompiler;
 
@@ -829,10 +830,33 @@ internal static partial class PlayerExporter
                                                 ConfigData: configData);
 
         if (JsonUtils.TrySaveJson(exportSettings, Path.Combine(exportDir, ExportSettings.FileName)))
+        {
+            CopyMidiAliases(exportDir);
             return true;
+        }
 
         reason = $"Failed to save export settings to {ExportSettings.FileName}";
         return false;
+    }
+
+    /// <summary>
+    /// The alias table is machine-specific, but shipping this machine's copy gives the show a working start and a
+    /// file to edit on site. Same name and format as in the settings folder.
+    /// </summary>
+    private static void CopyMidiAliases(string exportDir)
+    {
+        var sourcePath = MidiDeviceAliases.FilePath;
+        if (sourcePath == null || !File.Exists(sourcePath) || MidiDeviceAliases.Entries.Count == 0)
+            return;
+
+        try
+        {
+            File.Copy(sourcePath, Path.Combine(exportDir, MidiDeviceAliases.FileName), overwrite: true);
+        }
+        catch (Exception e)
+        {
+            Log.Warning($"Could not copy {MidiDeviceAliases.FileName}: {e.Message}");
+        }
     }
 
     private static readonly List<Instance> _contentSuppliers = [];

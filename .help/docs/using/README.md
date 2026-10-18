@@ -29,6 +29,7 @@ Reference and how-tos for the day-to-day work: the UI, the graph, connecting inp
 - [Sending and receiving OSC](OSC.md)
 - [Controlling stage lights via ArtNet / DMX](ArtnetAndDMX.md)
 - [Importing MIDI files](MidiFileImport.md) — load `.mid` files as timeline clips and sample notes / CC curves.
+- [MIDI device aliases](MidiDeviceAliases.md) — stable device names that survive a change of controller, OS or machine.
 
 *Still to write:*
 

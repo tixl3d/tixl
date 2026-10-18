@@ -12,6 +12,7 @@ using T3.Core.Resource;
 using T3.Core.Resource.ShaderCompiling;
 using T3.Core.SystemUi;
 using T3.Core.Settings;
+using T3.IoServices.Midi;
 using T3.Editor.App;
 using T3.Editor.Compilation;
 using T3.Editor.Gui;
@@ -233,6 +234,7 @@ internal static class Program
 
         // ReSharper disable once UnusedVariable
         var projectSettings = new CoreSettings(saveOnQuit: true);
+        MidiDeviceAliases.Load(FileLocations.SettingsDirectory);
 
         if (UserSettings.Config.ProjectDirectories.Count == 0)
         {

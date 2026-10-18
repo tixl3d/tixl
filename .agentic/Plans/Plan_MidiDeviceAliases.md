@@ -1,6 +1,9 @@
 # MIDI Device Aliases
 
-**Status:** Draft — 2026-10-17. Design discussed, nothing implemented.
+**Status:** Implemented 2026-10-18 (all four phases), uncommitted on `feat/linux-port`. Verified on Linux with a
+virtual ALSA device: alias resolution, teaching writes the alias, unmapped alias receives nothing. The settings
+panel renders; its Use Alias dialog and the Player override are untested by hand. Manual test set:
+[`.tests-manual/midi-device-aliases.md`](../../.tests-manual/midi-device-aliases.md). Prefix decided: `TiXL:`.
 **Relation to other plans:** Supersedes Phase 1 ("Default MIDI controller") of
 [Plan_MidiControllerAbstraction.md](Plan_MidiControllerAbstraction.md). Phases 2–3 of that plan (roles,
 per-parameter binding) build on top of aliases: a controller profile binds to an alias instead of a product name.
@@ -26,19 +29,22 @@ physical device present on *this* machine lives in machine-local settings.
   `Prefix = "TiXL:"`, `IsAlias(string)`, `TryStripPrefix(string, out string)`.
 - Empty device name keeps meaning "any device" (`MidiInput`) — unchanged.
 
-### Mapping table — `CoreSettings`, not `UserSettings`
+### Mapping table — its own file, `midiAliases.json`
 
-`CoreSettings.ConfigData.MidiDeviceAliases : List<MidiDeviceAliasEntry>` (`Alias`, `ProductName`), saved in
-`projectSettings.json`. Rationale: same as `LocalAudioInputDeviceName` — machine-specific, but the Player
-needs it too. List, not dictionary, because the user orders it and order carries meaning (see teaching).
+`MidiDeviceAliases` (IoServices) holds `List<MidiDeviceAlias>` (`Alias`, `ProductName`) as a plain JSON list.
+The editor loads it from the settings folder at startup, the Player from its own folder, and the Player
+exporter copies the editor's file next to the executable. One file name and format everywhere; copying the
+file between machines moves a mapping. No Core changes. List, not dictionary, because the user orders it and
+order carries meaning (see teaching).
 
 Rules:
 - Alias is unique within the list (dictionary semantics on the alias side).
 - Several aliases may map to the same physical device (one controller standing in for two at a gig).
 - An entry whose device is not connected is **kept**, shown as `(NOT FOUND)`; never auto-removed.
 - `ProductName` empty = "Not Set".
+- An existing file that fails to parse is never overwritten (same guard as `Settings<T>`).
 
-### Resolution — once per frame, never per MIDI message
+### Resolution — on change only, never per MIDI message
 
 `MidiConnectionManager.ResolveDeviceName(string name) : string`
 - returns `name` unchanged if it is not an alias;
@@ -46,8 +52,10 @@ Rules:
 - returns a sentinel that matches no device (e.g. the alias itself) if unmapped — **an unmapped alias
   matches nothing**. Falling back to "any device" would reintroduce the surprises this feature removes.
 
-The lookup is a dictionary read; the manager rebuilds the dictionary from `CoreSettings` when the settings
-UI changes it (`MidiConnectionManager.ReloadAliases()`), not per call. No allocations.
+Each op keeps a `MidiDeviceNameCache` (IoServices) holding the requested name, the resolved product name,
+the connection state and the status text. It redoes that work only when the requested name or
+`MidiConnectionManager.DevicesVersion` changed; the version bumps on alias reload and on every device rescan.
+The per-frame path is one int and one string compare, and the status text is no longer rebuilt per frame.
 
 Consumers (all go through the one helper):
 | Consumer | Where the name is read today | Change |
@@ -82,15 +90,9 @@ This gives three things at once:
 
 ### Player
 
-`Player/Program.cs` replaces `CoreSettings.Config` wholesale with the `ConfigData` baked into
-`exportSettings` at export time. The alias table would therefore be the *exporting* machine's, and nothing on
-the show laptop could fix it. Required: a machine-local override layer. Options, in order of preference:
-1. After loading export settings, if `<player dir>/midiAliases.json` exists, replace `MidiDeviceAliases`
-   with its content. The file is a plain `[{ "Alias": "TiXL:ApcMini", "ProductName": "APC MINI" }]` list,
-   hand-editable, and the editor's settings panel offers "Export alias file…" to write it.
-2. Additionally honour `--midi-alias <alias>=<product>` command-line pairs in `PlayerStartupOptions` for
-   launch scripts.
-Log the effective table at startup so a broken show can be diagnosed from the log.
+`MidiAliasOverride.Apply` loads `midiAliases.json` from the Player's folder, applies `--midi-alias Alias=Device`
+pairs from `PlayerStartupOptions.CommandLineArgs` on top, and logs the effective table so a broken show can be
+diagnosed from the log.
 
 ## Settings » Midi UI
 
@@ -114,11 +116,11 @@ Everything below lives in `SettingsWindow.cs` `Categories.Midi` (extract to `Mid
 
 Header: "Device-specific names (loaded projects)". Help text explains fragility and points at the alias table.
 
-Each row: `APC MINI  · used 32×  · 3 read-only` | **Make Alias…** button.
+Each row: `APC MINI  · used 32×  · 3 read-only` | **Use Alias...** button.
 - Tooltip: referencing children as paths; read-only package entries marked.
 - Button disabled with tooltip when *all* usages are in read-only packages or connected inputs.
 
-**Make Alias… popup**
+**Use Alias... popup**
 - Alias name input (prefix shown fixed), default derived mechanically: PascalCase the alphanumerics of the
   product name and drop version tokens (`MK2`, `mk II`, `v2`) → `APC MINI MK2` → `ApcMini`. No curated table.
 - Device combo, preselected to the physical device the row is named after, if connected.
@@ -133,7 +135,7 @@ Each row: `APC MINI  · used 32×  · 3 read-only` | **Make Alias…** button.
 → `Children` → inputs whose `InputUi` is `StringInputUi` with `UsageType.MidiDevice` (same loop shape as
 `SymbolAnalysis.LogInvalidAssetReference`). Collect per device string: list of (symbolId, childId, inputId,
 isReadOnly, isConnected). Cached; recomputed when the Midi settings page is opened, after Rescan, after a
-Make Alias rewrite, and via an explicit refresh button. **Never per frame.**
+Use Alias rewrite, and via an explicit refresh button. **Never per frame.**
 
 ## Phases
 
@@ -149,18 +151,18 @@ Make Alias rewrite, and via an explicit refresh button. **Never per frame.**
 - `MidiDeviceUsage` scan + device-specific names list with tooltips.
 - `MidiInput` device dropdown via `UsageType.MidiDevice`.
 
-### Phase 3 — Make Alias rewrite
+### Phase 3 — Use Alias rewrite
 - Popup, default-name derivation, `MacroCommand` rewrite, read-only / connected skipping, save.
 
-### Phase 4 — Player override
-- `midiAliases.json` next to the Player, `--midi-alias` pairs, startup log of the effective table,
+### Phase 4 — Player
+- `midiAliases.json` copied by the exporter, `--midi-alias` pairs, startup log of the effective table.
   "Export alias file…" button in the settings panel.
 
 ### Docs and tests
 - `.help/docs/using/MidiDeviceAliases.md` (what an alias is, where the table lives, Player file).
 - `.tests-manual/midi-device-aliases.md`: map alias → device; teach an op and confirm it stores the alias;
   unplug the device and confirm `(NOT FOUND)` persists; unmapped alias shows the status warning and receives
-  nothing; Make Alias rewrites N inputs and is one undo step; read-only usages are skipped and counted;
+  nothing; Use Alias rewrites N inputs and is one undo step; read-only usages are skipped and counted;
   recorded IO replays into an aliased `MidiInput`; Player picks up `midiAliases.json`.
 - Update `Plan_MidiControllerAbstraction.md`: Phase 1 superseded by this plan.
 
@@ -173,5 +175,4 @@ Make Alias rewrite, and via an explicit refresh button. **Never per frame.**
    several known controllers are connected? Cheap to add; defines "the main controller" without a new setting.
 3. Dropdown for `Device` on the output ops: keep their `ICustomDropdownHolder` or move all to the
    `UsageType.MidiDevice` rendering in one go.
-4. Player override location: next to the exe (portable, per show) vs. the user's settings directory (per
-   machine, shared by all shows). Suggest next to the exe, with the settings directory as fallback.
+4. Resolved: the Player reads only the file next to the exe; a show depends on what sits in its own folder.
