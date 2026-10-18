@@ -425,7 +425,7 @@
         {
           "Id": "23c34f4c-4ba3-4834-8d51-3e3909751f84"/*Device*/,
           "Type": "System.String",
-          "Value": "Q Mini"
+          "Value": "TiXL:Keyboard"
         },
         {
           "Id": "6c15e743-9a70-47e7-a0a4-75636817e441"/*PrintLogMessages*/,

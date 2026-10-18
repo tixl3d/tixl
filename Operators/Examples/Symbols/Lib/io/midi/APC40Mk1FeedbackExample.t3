@@ -33,7 +33,7 @@
         {
           "Id": "adea6968-35ef-436a-bc2d-d9433b623df6"/*Device*/,
           "Type": "System.String",
-          "Value": "Akai APC40"
+          "Value": "TiXL:Apc40"
         },
         {
           "Id": "ec4d83b6-78eb-4cac-826b-cafb0be3f604"/*SendMode*/,
@@ -63,7 +63,7 @@
         {
           "Id": "23c34f4c-4ba3-4834-8d51-3e3909751f84"/*Device*/,
           "Type": "System.String",
-          "Value": "Akai APC40"
+          "Value": "TiXL:Apc40"
         },
         {
           "Id": "7c681ee6-d071-4284-8585-1c3e03a089ea"/*TeachTrigger*/,
@@ -129,7 +129,7 @@
         {
           "Id": "adea6968-35ef-436a-bc2d-d9433b623df6"/*Device*/,
           "Type": "System.String",
-          "Value": "Akai APC40"
+          "Value": "TiXL:Apc40"
         },
         {
           "Id": "ec4d83b6-78eb-4cac-826b-cafb0be3f604"/*SendMode*/,
@@ -169,7 +169,7 @@
         {
           "Id": "adea6968-35ef-436a-bc2d-d9433b623df6"/*Device*/,
           "Type": "System.String",
-          "Value": "Akai APC40"
+          "Value": "TiXL:Apc40"
         },
         {
           "Id": "ec4d83b6-78eb-4cac-826b-cafb0be3f604"/*SendMode*/,
@@ -192,7 +192,7 @@
         {
           "Id": "23c34f4c-4ba3-4834-8d51-3e3909751f84"/*Device*/,
           "Type": "System.String",
-          "Value": "Akai APC40"
+          "Value": "TiXL:Apc40"
         },
         {
           "Id": "7c681ee6-d071-4284-8585-1c3e03a089ea"/*TeachTrigger*/,
@@ -253,7 +253,7 @@
         {
           "Id": "adea6968-35ef-436a-bc2d-d9433b623df6"/*Device*/,
           "Type": "System.String",
-          "Value": "Akai APC40"
+          "Value": "TiXL:Apc40"
         },
         {
           "Id": "ec4d83b6-78eb-4cac-826b-cafb0be3f604"/*SendMode*/,
@@ -283,7 +283,7 @@
         {
           "Id": "23c34f4c-4ba3-4834-8d51-3e3909751f84"/*Device*/,
           "Type": "System.String",
-          "Value": "Akai APC40"
+          "Value": "TiXL:Apc40"
         },
         {
           "Id": "7c681ee6-d071-4284-8585-1c3e03a089ea"/*TeachTrigger*/,
@@ -326,7 +326,7 @@
         {
           "Id": "23c34f4c-4ba3-4834-8d51-3e3909751f84"/*Device*/,
           "Type": "System.String",
-          "Value": "Akai APC40"
+          "Value": "TiXL:Apc40"
         },
         {
           "Id": "7c681ee6-d071-4284-8585-1c3e03a089ea"/*TeachTrigger*/,
@@ -389,7 +389,7 @@
         {
           "Id": "adea6968-35ef-436a-bc2d-d9433b623df6"/*Device*/,
           "Type": "System.String",
-          "Value": "Akai APC40"
+          "Value": "TiXL:Apc40"
         },
         {
           "Id": "ec4d83b6-78eb-4cac-826b-cafb0be3f604"/*SendMode*/,
@@ -422,7 +422,7 @@
         {
           "Id": "adea6968-35ef-436a-bc2d-d9433b623df6"/*Device*/,
           "Type": "System.String",
-          "Value": "Akai APC40"
+          "Value": "TiXL:Apc40"
         },
         {
           "Id": "ec4d83b6-78eb-4cac-826b-cafb0be3f604"/*SendMode*/,
@@ -462,7 +462,7 @@
         {
           "Id": "adea6968-35ef-436a-bc2d-d9433b623df6"/*Device*/,
           "Type": "System.String",
-          "Value": "Akai APC40"
+          "Value": "TiXL:Apc40"
         },
         {
           "Id": "ec4d83b6-78eb-4cac-826b-cafb0be3f604"/*SendMode*/,
@@ -485,7 +485,7 @@
         {
           "Id": "23c34f4c-4ba3-4834-8d51-3e3909751f84"/*Device*/,
           "Type": "System.String",
-          "Value": "Akai APC40"
+          "Value": "TiXL:Apc40"
         },
         {
           "Id": "6c15e743-9a70-47e7-a0a4-75636817e441"/*PrintLogMessages*/,
@@ -551,7 +551,7 @@
         {
           "Id": "adea6968-35ef-436a-bc2d-d9433b623df6"/*Device*/,
           "Type": "System.String",
-          "Value": "Akai APC40"
+          "Value": "TiXL:Apc40"
         },
         {
           "Id": "ec4d83b6-78eb-4cac-826b-cafb0be3f604"/*SendMode*/,
@@ -574,7 +574,7 @@
         {
           "Id": "23c34f4c-4ba3-4834-8d51-3e3909751f84"/*Device*/,
           "Type": "System.String",
-          "Value": "Akai APC40"
+          "Value": "TiXL:Apc40"
         },
         {
           "Id": "7c681ee6-d071-4284-8585-1c3e03a089ea"/*TeachTrigger*/,
@@ -636,7 +636,7 @@
         {
           "Id": "adea6968-35ef-436a-bc2d-d9433b623df6"/*Device*/,
           "Type": "System.String",
-          "Value": "Akai APC40"
+          "Value": "TiXL:Apc40"
         },
         {
           "Id": "ec4d83b6-78eb-4cac-826b-cafb0be3f604"/*SendMode*/,

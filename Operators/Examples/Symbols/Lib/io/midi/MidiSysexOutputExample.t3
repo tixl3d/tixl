@@ -89,7 +89,7 @@
         {
           "Id": "d7189d4a-b6c7-4d4f-9cee-1c37ed55b4e5"/*Device*/,
           "Type": "System.String",
-          "Value": "Akai APC40"
+          "Value": "TiXL:Apc40"
         }
       ],
       "Outputs": []
