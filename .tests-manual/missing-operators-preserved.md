@@ -68,7 +68,7 @@ change one of its parameters, and save with `Ctrl+S`.
 - In a diff of the `.t3` file, the child with the edited `SymbolId` is still present with its input
   values and its `SymbolName`, its connections are still listed, and its `Animator` entries
   are still there. Only your deliberate edit shows up.
-- In a diff of the `.t3ui` file, the entry for that child id still exists with its position.
+- In a diff of the `.t3ui` file, the entry for that child id still exists with its `SymbolName` and position.
 
 ## Step: Deleting and undoing
 

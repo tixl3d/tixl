@@ -67,11 +67,62 @@ icon. Finally, close the project and reopen it.
 ## Step: Explicitly updating defaults still works
 
 **Action:**
-Right-click the canvas and choose "Update thumbnails".
+Click on empty canvas so nothing is selected, then right-click the canvas and
+choose "Update All Thumbnails".
 
 **Expected:**
-- Thumbnails re-render once and are saved as new defaults; they remain after
+- The menu entry reads "Update All Thumbnails" while nothing is selected.
+- All thumbnails re-render once and are saved as new defaults; they remain after
   toggling live previews on and off.
+
+## Step: Updating only the selected thumbnails
+
+**Action:**
+Select two thumbnails (shift-click or drag a fence), then right-click the canvas.
+
+**Expected:**
+- The entry now reads "Update Selected Thumbnails".
+- Choosing it re-renders only the two selected thumbnails; the others keep their
+  previous image.
+
+## Step: Renaming with Enter
+
+**Action:**
+Click a single thumbnail so it is selected and the Variations window has focus,
+then press `Enter`. Type a new name and press `Enter` again.
+
+**Expected:**
+- The first `Enter` opens the rename field at the top of the canvas.
+- The second `Enter` closes it and the thumbnail shows the new name.
+
+**Action:**
+Click on empty canvas so nothing is selected, then press `Enter`.
+
+**Expected:**
+- The rename field opens for the currently active (highlighted) variation.
+- With two or more thumbnails selected, `Enter` does nothing.
+
+## Step: Arranging the layout to a grid
+
+**Action:**
+Drag a few thumbnails around so the layout has gaps and uneven rows. Right-click
+the canvas and choose "Arrange Layout" > "To Grid".
+
+**Expected:**
+- The thumbnails pack into a gap-free grid, keeping their row-by-row order.
+- The view refits to show all thumbnails.
+- `Ctrl+Z` restores the previous positions.
+
+## Step: Arranging the layout by MIDI controller index
+
+**Action:**
+Right-click the canvas and choose "Arrange Layout" > "By MIDI Controller Index".
+
+**Expected:**
+- Each thumbnail moves to the cell of its index in an 8-column grid, matching
+  the controller grid in the Snapshot Control view (index 0 top-left, reading
+  order). Unused indices stay as gaps.
+- Reopening the project keeps the arranged positions.
 
 ## Step: Documentation button
 
