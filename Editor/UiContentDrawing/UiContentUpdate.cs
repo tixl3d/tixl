@@ -26,7 +26,7 @@ internal static class UiContentUpdate
         // See https://stackoverflow.com/a/5977638
         // Read every frame: the display scale changes when the window is dragged onto a display with another scale.
         var displayScaleFactor = ProgramWindows.Main.GetDpi().X / 96f;
-        var dpiAwareScale = UserSettings.Config.UiScaleFactor * displayScaleFactor;
+        var dpiAwareScale = UserSettings.Config.UiScaleFactor * displayScaleFactor * _platformScale;
         if (_hasSetScaling && Math.Abs(dpiAwareScale - _lastDpiAwareScale) <= 0.005f)
             return;
 
@@ -39,7 +39,7 @@ internal static class UiContentUpdate
         _hasSetScaling = true;
     }
 
-    /// <param name="dpiAwareScale">The user's UI scale multiplied by the display scale.</param>
+    /// <param name="dpiAwareScale">The user's UI scale multiplied by the display and platform scale.</param>
     private static void GenerateFontsWithScaleFactor(float dpiAwareScale)
     {
         T3Ui.UiScaleFactor = dpiAwareScale;
@@ -115,6 +115,9 @@ internal static class UiContentUpdate
 
     private static long _lastElapsedTicks;
     private static readonly Stopwatch _stopwatch = new();
+
+    /** Native macOS text is 13pt, so sizes that suit Windows and Linux desktops look oversized beside Mac chrome. */
+    private static readonly float _platformScale = OperatingSystem.IsMacOS() ? 16f / 18f : 1f;
 
     private static float _lastDpiAwareScale = 1;
 
