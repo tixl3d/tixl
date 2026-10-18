@@ -83,5 +83,4 @@ it as a workflow artifact, and a tag also attaches it to that tag's release.
   ```
 
   Flathub would additionally need a build from source and permission to redistribute BASS.
-- Nix: not started. Nix needs the SDK in the wrapper's `PATH`/`DOTNET_ROOT`, and its offline builds need
-  NuGet dependencies pinned (`fetch-deps`).
+- `nix/`: flake that builds from source with `buildDotnetModule`. See [nix/README.md](nix/README.md).

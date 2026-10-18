@@ -327,3 +327,7 @@ shadertoolsconfig.json
 # Generated video proxies — regenerable, machine-local (suffix from VideoPlayback.ProxySuffix)
 *.proxy.mov
 .DS_Store
+
+# Nix build symlinks
+result
+result-*

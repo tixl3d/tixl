@@ -95,8 +95,27 @@ sudo dnf install dotnet-sdk-10.0 vulkan-loader mesa-vulkan-drivers
 
 ### NixOS
 
-Add `dotnetCorePackages.sdk_10_0`, `vulkan-loader` and `shader-slang` to your packages, and enable
-`hardware.graphics.enable = true;` in your configuration.
+Run it on NixOS
+
+```bash
+nix run "github:tixl3d/tixl/feat/linux-port?dir=Installer/Linux/nix"
+```
+
+To keep TiXL installed, add the flake to your configuration:
+
+```nix
+{
+  inputs.tixl.url = "github:tixl3d/tixl/feat/linux-port?dir=Installer/Linux/nix";
+
+  # …
+
+  environment.systemPackages = [ inputs.tixl.packages.x86_64-linux.tixl ];
+}
+```
+
+On other distributions you can use the same flake through [nixGL](https://github.com/nix-community/nixGL).
+See [the flake's README](https://github.com/tixl3d/tixl/blob/feat/linux-port/Installer/Linux/nix/README.md)
+for more information on that.
 
 ### Slang on other distributions
 
