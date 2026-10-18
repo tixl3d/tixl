@@ -1,0 +1,50 @@
+name: Nix Deps Check
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+      - feat/linux-port
+    paths:
+      - "**/*.csproj"
+      - "t3.sln"
+      - "Tixl.props"
+      - "Directory.Build.props"
+      - "global.json"
+      - "Installer/Linux/nix/flake.nix"
+      - "Installer/Linux/nix/flake.lock"
+      - "Installer/Linux/nix/deps.json"
+      - ".github/workflows/nix-deps-check.yml"
+
+concurrency:
+  group: nix-deps-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      - name: Regenerate deps.json
+        run: nix run ./Installer/Linux/nix#fetch-deps -- "$PWD/Installer/Linux/nix/deps.json"
+
+      - name: Compare With Committed
+        run: |
+          if git diff --quiet -- Installer/Linux/nix/deps.json; then
+              echo "deps.json is up to date."
+              exit 0
+          fi
+          git --no-pager diff -- Installer/Linux/nix/deps.json
+          echo "::error::deps.json is out of date. Regenerate it with:"
+          echo "::error::  nix run ./Installer/Linux/nix#fetch-deps -- \"\$PWD/Installer/Linux/nix/deps.json\""
+          exit 1
