@@ -24,7 +24,9 @@ internal sealed class ShareProjectDialog : ModalDialog
 
         if (string.IsNullOrEmpty(_targetFolder))
         {
-            _targetFolder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            // DoNotVerify: without it a missing ~/Desktop yields an empty string, and the export would
+            // be written relative to the launch folder.
+            _targetFolder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop, Environment.SpecialFolderOption.DoNotVerify);
         }
 
         // Flush modified symbols so the analysis reflects the current graph state
