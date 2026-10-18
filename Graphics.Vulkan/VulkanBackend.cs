@@ -170,6 +170,18 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         else
             _supportsSwapchain = false;
 
+        // Lets a swapchain block until its previous present reached the display - the one wait per frame that
+        // paces the loop to the refresh, like D3D11's frame-latency waitable. Without it the fence and acquire
+        // waits only throttle a frame or two late, and on Windows the loop runs its frames in pairs.
+        SupportsPresentWait = _supportsSwapchain
+                              && HasDeviceExtension(PhysicalDevice, VK_KHR_PRESENT_ID_EXTENSION_NAME)
+                              && HasDeviceExtension(PhysicalDevice, VK_KHR_PRESENT_WAIT_EXTENSION_NAME);
+        if (SupportsPresentWait)
+        {
+            deviceExtensions.Add(VK_KHR_PRESENT_ID_EXTENSION_NAME);
+            deviceExtensions.Add(VK_KHR_PRESENT_WAIT_EXTENSION_NAME);
+        }
+
         using var deviceExtensionNames = new VkStringArray(deviceExtensions);
 
         VkPhysicalDevicePortabilitySubsetFeaturesKHR portabilityFeatures = new();
@@ -187,9 +199,16 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
 
         _supportsMipLodBias = !isPortabilitySubset || portabilityFeatures.samplerMipLodBias;
 
+        VkPhysicalDevicePresentWaitFeaturesKHR presentWaitFeatures = new()
+                                                                         {
+                                                                             pNext = isPortabilitySubset ? &portabilityFeatures : null,
+                                                                             presentWait = true,
+                                                                         };
+        VkPhysicalDevicePresentIdFeaturesKHR presentIdFeatures = new() { pNext = &presentWaitFeatures, presentId = true };
+
         VkPhysicalDeviceVulkan13Features features13 = new()
                                                           {
-                                                              pNext = isPortabilitySubset ? &portabilityFeatures : null,
+                                                              pNext = SupportsPresentWait ? &presentIdFeatures : (isPortabilitySubset ? &portabilityFeatures : null),
                                                               dynamicRendering = true,
                                                               synchronization2 = true,
                                                               shaderIntegerDotProduct = supported13.shaderIntegerDotProduct,
@@ -270,6 +289,9 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
 
     /// <summary>False on MoltenVK; descriptors are then written into per-frame sets instead.</summary>
     internal bool UsesPushDescriptors { get; }
+
+    /// <summary>Whether swapchains can wait for a present to reach the display (VK_KHR_present_wait).</summary>
+    internal bool SupportsPresentWait { get; }
     public string BackendDescription { get; }
 
     /// <summary>Zero: a VkDevice is not what the libraries asking for this expect.</summary>

@@ -88,6 +88,13 @@ internal sealed unsafe class VulkanSwapchain : GpuSwapchain
         if (_acquired)
             return;
 
+        // A present reaching the display is the one wait that paces the loop to the refresh; the two below then
+        // rarely block. One present stays in flight: a queued present is shown a vblank later, so waiting for the
+        // latest one halves the frame rate. A timeout (display off, window hidden) just lets the frame go ahead.
+        // Without vsync the loop runs free, so there is nothing to pace to.
+        if (_lastPresentId > 1 && _presentSyncInterval > 0 && !_swapchain.IsNull && _backend.SupportsPresentWait)
+            _backend.Api.vkWaitForPresentKHR(_swapchain, _lastPresentId - 1, PresentWaitTimeoutNs);
+
         // The acquire signals this slot's semaphore, which is only free again once the slot's last frame is done.
         _backend.WaitForRecordingSlot();
         AcquireIfNeeded();
@@ -100,8 +107,13 @@ internal sealed unsafe class VulkanSwapchain : GpuSwapchain
         var imageIndex = (uint)_imageIndex;
         var semaphore = waitSemaphore;
 
+        // Numbered so the next frame can wait for this present with VK_KHR_present_wait.
+        var presentId = _lastPresentId + 1;
+        VkPresentIdKHR presentIdInfo = new() { swapchainCount = 1, pPresentIds = &presentId };
+
         VkPresentInfoKHR presentInfo = new()
                                            {
+                                               pNext = _backend.SupportsPresentWait ? &presentIdInfo : null,
                                                waitSemaphoreCount = semaphore.IsNull ? 0u : 1u,
                                                pWaitSemaphores = semaphore.IsNull ? null : &semaphore,
                                                swapchainCount = 1,
@@ -110,6 +122,8 @@ internal sealed unsafe class VulkanSwapchain : GpuSwapchain
                                            };
 
         var result = _backend.Api.vkQueuePresentKHR(queue, &presentInfo);
+        if (result is VkResult.Success or VkResult.SuboptimalKHR)
+            _lastPresentId = presentId;
         _acquired = false;
 
         // A window that changed size mid-frame is not an error; the next frame renders at the new size.
@@ -247,6 +261,9 @@ internal sealed unsafe class VulkanSwapchain : GpuSwapchain
 
         _needsRecreation = false;
         _acquired = false;
+
+        // Present ids count per swapchain object.
+        _lastPresentId = 0;
     }
 
     private VkFormat PickFormat(Format requested, out VkColorSpaceKHR colorSpace)
@@ -368,6 +385,11 @@ internal sealed unsafe class VulkanSwapchain : GpuSwapchain
     private VkPresentModeKHR _presentMode = VkPresentModeKHR.Fifo;
     private bool _acquired;
     private bool _needsRecreation;
+
+    /** Id of the latest present queued on the current swapchain object; 0 before the first. */
+    private ulong _lastPresentId;
+
+    private const ulong PresentWaitTimeoutNs = 1_000_000_000;
 
     /** A resize that arrived while an image was in flight, applied at the next acquire. Zero when none. */
     private int _requestedWidth;
