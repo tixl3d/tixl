@@ -98,7 +98,8 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "3045573f-0d4f-4d71-937a-305e6186c442"/*_multiImageFxSetup*/,
+      "ChildId": "3045573f-0d4f-4d71-937a-305e6186c442",
+      "SymbolName": "Lib.image.fx._._multiImageFxSetup",
       "Style": "Resizable",
       "Size": {
         "X": 106.2901,
@@ -110,14 +111,16 @@
       }
     },
     {
-      "ChildId": "b2940c35-362a-4eb9-8f38-f14a5016a141"/*Vector2Components*/,
+      "ChildId": "b2940c35-362a-4eb9-8f38-f14a5016a141",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Position": {
         "X": -359.78207,
         "Y": -35.74472
       }
     },
     {
-      "ChildId": "bc328a71-c8ef-4907-84d0-ddd72fe94649"/*_multiImageFxSetup*/,
+      "ChildId": "bc328a71-c8ef-4907-84d0-ddd72fe94649",
+      "SymbolName": "Lib.image.fx._._multiImageFxSetup",
       "Style": "Resizable",
       "Size": {
         "X": 107.217575,
@@ -129,7 +132,8 @@
       }
     },
     {
-      "ChildId": "f626873a-4305-484a-9ccf-77289cd983f5"/*Vector4Components*/,
+      "ChildId": "f626873a-4305-484a-9ccf-77289cd983f5",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "Position": {
         "X": -162.24867,
         "Y": 273.48486

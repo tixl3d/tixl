@@ -37,7 +37,8 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "0d67c292-49fb-41c4-bc2d-5b96b98045c6"/*SliceViewPort*/,
+      "ChildId": "0d67c292-49fb-41c4-bc2d-5b96b98045c6",
+      "SymbolName": "Lib.render.transform.SliceViewPort",
       "SectionId": "34f78e9d-ee63-4b4f-a598-cf90d9d06f4d",
       "Comment": "Sadly, we can't reuse the other [SliceViewPort] because we want to override the camera so the labels are facing the camera.",
       "Position": {
@@ -46,7 +47,8 @@
       }
     },
     {
-      "ChildId": "0e7e5a81-b2bc-42f6-9c87-460a89f1cdda"/*IntToFloat*/,
+      "ChildId": "0e7e5a81-b2bc-42f6-9c87-460a89f1cdda",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "SectionId": "34f78e9d-ee63-4b4f-a598-cf90d9d06f4d",
       "Position": {
         "X": 196.74086,
@@ -54,7 +56,8 @@
       }
     },
     {
-      "ChildId": "114a2a4b-cd0c-4ab0-9ec9-43d26e023d64"/*SliceViewPort*/,
+      "ChildId": "114a2a4b-cd0c-4ab0-9ec9-43d26e023d64",
+      "SymbolName": "Lib.render.transform.SliceViewPort",
       "Comment": "This operator will slice the viewport. Check out its example in the description.",
       "Position": {
         "X": 1219.8354,
@@ -62,7 +65,8 @@
       }
     },
     {
-      "ChildId": "1e4309a6-554f-400f-9f22-0f167a668317"/*Text*/,
+      "ChildId": "1e4309a6-554f-400f-9f22-0f167a668317",
+      "SymbolName": "Lib.render.basic.Text",
       "SectionId": "34f78e9d-ee63-4b4f-a598-cf90d9d06f4d",
       "Position": {
         "X": 892.85364,
@@ -70,7 +74,8 @@
       }
     },
     {
-      "ChildId": "36bc32ce-c53b-41be-aad9-3d9027415dd0"/*Vector2*/,
+      "ChildId": "36bc32ce-c53b-41be-aad9-3d9027415dd0",
+      "SymbolName": "Types.Values.Vector2",
       "SectionId": "34f78e9d-ee63-4b4f-a598-cf90d9d06f4d",
       "Position": {
         "X": 476.74084,
@@ -78,7 +83,8 @@
       }
     },
     {
-      "ChildId": "3ffdae25-c262-4d90-a20a-270bd1201e56"/*SplitString*/,
+      "ChildId": "3ffdae25-c262-4d90-a20a-270bd1201e56",
+      "SymbolName": "Lib.string.list.SplitString",
       "SectionId": "34f78e9d-ee63-4b4f-a598-cf90d9d06f4d",
       "Position": {
         "X": 476.74084,
@@ -86,7 +92,8 @@
       }
     },
     {
-      "ChildId": "49c28772-0993-4f67-b85b-a857c9d45d1e"/*StringLength*/,
+      "ChildId": "49c28772-0993-4f67-b85b-a857c9d45d1e",
+      "SymbolName": "Lib.string.list.StringLength",
       "SectionId": "34f78e9d-ee63-4b4f-a598-cf90d9d06f4d",
       "Position": {
         "X": 612.85364,
@@ -94,7 +101,8 @@
       }
     },
     {
-      "ChildId": "62819993-7f9a-436a-8fc6-4b2e6c49ce7a"/*Switch*/,
+      "ChildId": "62819993-7f9a-436a-8fc6-4b2e6c49ce7a",
+      "SymbolName": "Lib.flow.Switch",
       "Comment": "This is 'magic': We route the multiple connections from outside into the [Switch] command here. So, it's not a single input, but as many as are connected on the outside.\nWe then use the total count for looping of each connected element.",
       "Position": {
         "X": 16.19165,
@@ -102,14 +110,16 @@
       }
     },
     {
-      "ChildId": "71d3437a-a20d-4b32-8f4a-5e94247b8900"/*Group*/,
+      "ChildId": "71d3437a-a20d-4b32-8f4a-5e94247b8900",
+      "SymbolName": "Lib.render.transform.Group",
       "Position": {
         "X": 1219.8354,
         "Y": 9.010986
       }
     },
     {
-      "ChildId": "72333a1c-72b8-4598-b2ac-f0462134bc98"/*CompareInt*/,
+      "ChildId": "72333a1c-72b8-4598-b2ac-f0462134bc98",
+      "SymbolName": "Lib.numbers.int.logic.CompareInt",
       "SectionId": "34f78e9d-ee63-4b4f-a598-cf90d9d06f4d",
       "Position": {
         "X": 752.85364,
@@ -117,7 +127,8 @@
       }
     },
     {
-      "ChildId": "764f39e4-f3ff-4afa-8705-54328aafdee9"/*Loop*/,
+      "ChildId": "764f39e4-f3ff-4afa-8705-54328aafdee9",
+      "SymbolName": "Lib.flow.Loop",
       "Comment": "Also, check out the example in the operator's description.",
       "Position": {
         "X": 1219.8354,
@@ -125,7 +136,8 @@
       }
     },
     {
-      "ChildId": "872983c2-dd4d-4e20-a69e-57f2c0fbac54"/*Transform*/,
+      "ChildId": "872983c2-dd4d-4e20-a69e-57f2c0fbac54",
+      "SymbolName": "Lib.render.transform.Transform",
       "SectionId": "34f78e9d-ee63-4b4f-a598-cf90d9d06f4d",
       "Position": {
         "X": 892.85364,
@@ -133,7 +145,8 @@
       }
     },
     {
-      "ChildId": "a03f9238-314a-4f8f-adb1-74ef635403ae"/*PickStringFromList*/,
+      "ChildId": "a03f9238-314a-4f8f-adb1-74ef635403ae",
+      "SymbolName": "Lib.string.list.PickStringFromList",
       "SectionId": "34f78e9d-ee63-4b4f-a598-cf90d9d06f4d",
       "Position": {
         "X": 476.74084,
@@ -141,7 +154,8 @@
       }
     },
     {
-      "ChildId": "a7013152-234e-47e1-8089-a9e2ff0ebc4b"/*Camera*/,
+      "ChildId": "a7013152-234e-47e1-8089-a9e2ff0ebc4b",
+      "SymbolName": "Lib.render.camera.Camera",
       "SectionId": "34f78e9d-ee63-4b4f-a598-cf90d9d06f4d",
       "Position": {
         "X": 892.85364,
@@ -149,28 +163,32 @@
       }
     },
     {
-      "ChildId": "b9325542-79fb-4760-8968-99668b22172b"/*Int2*/,
+      "ChildId": "b9325542-79fb-4760-8968-99668b22172b",
+      "SymbolName": "Types.Values.Int2",
       "Position": {
         "X": 481.44684,
         "Y": -92.56198
       }
     },
     {
-      "ChildId": "e1023b46-f22f-489f-b830-b6f9a8c0f6fd"/*GetIntVar*/,
+      "ChildId": "e1023b46-f22f-489f-b830-b6f9a8c0f6fd",
+      "SymbolName": "Lib.flow.context.GetIntVar",
       "Position": {
         "X": -136.21303,
         "Y": -23.765808
       }
     },
     {
-      "ChildId": "e59cfdbf-ecc7-410d-93c2-0592ad110c79"/*SetRequestedResolution*/,
+      "ChildId": "e59cfdbf-ecc7-410d-93c2-0592ad110c79",
+      "SymbolName": "Lib.render.shading.SetRequestedResolution",
       "Position": {
         "X": 419.865,
         "Y": 670.972
       }
     },
     {
-      "ChildId": "eb7bd884-887e-4e87-80da-8d43b6dd8633"/*Execute*/,
+      "ChildId": "eb7bd884-887e-4e87-80da-8d43b6dd8633",
+      "SymbolName": "Lib.flow.Execute",
       "SectionId": "34f78e9d-ee63-4b4f-a598-cf90d9d06f4d",
       "Position": {
         "X": 892.85364,
@@ -178,7 +196,8 @@
       }
     },
     {
-      "ChildId": "ebb880e6-46b7-4d5a-b1df-47370a46d632"/*Div*/,
+      "ChildId": "ebb880e6-46b7-4d5a-b1df-47370a46d632",
+      "SymbolName": "Lib.numbers.float.basic.Div",
       "SectionId": "34f78e9d-ee63-4b4f-a598-cf90d9d06f4d",
       "Position": {
         "X": 336.74084,

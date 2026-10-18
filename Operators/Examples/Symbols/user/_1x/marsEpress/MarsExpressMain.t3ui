@@ -5,49 +5,56 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "31851d51-c3c5-4a4c-a4e3-ad22d718396a"/*ImageSequenceClip*/,
+      "ChildId": "31851d51-c3c5-4a4c-a4e3-ad22d718396a",
+      "SymbolName": "Lib.image.generate.load.ImageSequenceClip",
       "Position": {
         "X": 2304.0215,
         "Y": 625.9433
       }
     },
     {
-      "ChildId": "3d5b3c37-4ccd-470d-9c0b-4f95e8b7973a"/*RenderTarget*/,
+      "ChildId": "3d5b3c37-4ccd-470d-9c0b-4f95e8b7973a",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "Position": {
         "X": 2926.6724,
         "Y": 550.2254
       }
     },
     {
-      "ChildId": "6e35fa27-3a22-4c4c-96e5-78bc656e3671"/*Execute*/,
+      "ChildId": "6e35fa27-3a22-4c4c-96e5-78bc656e3671",
+      "SymbolName": "Lib.flow.Execute",
       "Position": {
         "X": 2454.0215,
         "Y": 625.9433
       }
     },
     {
-      "ChildId": "d825ee6b-89e8-4488-b2df-ff3d50528432"/*MarsAsciiMirrorScene*/,
+      "ChildId": "d825ee6b-89e8-4488-b2df-ff3d50528432",
+      "SymbolName": "Examples.user._1x.marsEpress.MarsAsciiMirrorScene",
       "Position": {
         "X": 2304.0215,
         "Y": 562.9433
       }
     },
     {
-      "ChildId": "e06cac0f-bd55-487c-b86a-0db0c8202167"/*Execute*/,
+      "ChildId": "e06cac0f-bd55-487c-b86a-0db0c8202167",
+      "SymbolName": "Lib.flow.Execute",
       "Position": {
         "X": 2604.0215,
         "Y": 562.9433
       }
     },
     {
-      "ChildId": "f6ec547f-8105-4af9-af7c-1b7b7f9f0de8"/*TimeClip*/,
+      "ChildId": "f6ec547f-8105-4af9-af7c-1b7b7f9f0de8",
+      "SymbolName": "Lib.flow.TimeClip",
       "Position": {
         "X": 2454.0215,
         "Y": 562.9433
       }
     },
     {
-      "ChildId": "f7108b07-ff8e-43c4-8c8a-2e4a0345ad2d"/*ImageSequenceClip*/,
+      "ChildId": "f7108b07-ff8e-43c4-8c8a-2e4a0345ad2d",
+      "SymbolName": "Lib.image.generate.load.ImageSequenceClip",
       "Position": {
         "X": 2304.0215,
         "Y": 668.9433

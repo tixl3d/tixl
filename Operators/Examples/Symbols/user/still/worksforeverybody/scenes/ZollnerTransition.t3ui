@@ -5,28 +5,32 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "5d6e1ca9-6043-40dc-9dd6-e11d624a1067"/*Add*/,
+      "ChildId": "5d6e1ca9-6043-40dc-9dd6-e11d624a1067",
+      "SymbolName": "Lib.numbers.float.basic.Add",
       "Position": {
         "X": 150.0,
         "Y": 43.0
       }
     },
     {
-      "ChildId": "ae762bf6-c988-41e7-bdd6-1ff2eebf175f"/*Value*/,
+      "ChildId": "ae762bf6-c988-41e7-bdd6-1ff2eebf175f",
+      "SymbolName": "Types.Values.Value",
       "Position": {
         "X": 0.0,
         "Y": 43.0
       }
     },
     {
-      "ChildId": "ca20e963-8ca0-4d67-8561-c1ef3243a277"/*LinearGradient*/,
+      "ChildId": "ca20e963-8ca0-4d67-8561-c1ef3243a277",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "Position": {
         "X": 150.0,
         "Y": 0.0
       }
     },
     {
-      "ChildId": "eccb0098-0c48-49a2-9e30-1680144b4c50"/*ZollnerPattern*/,
+      "ChildId": "eccb0098-0c48-49a2-9e30-1680144b4c50",
+      "SymbolName": "Lib.image.generate.pattern.ZollnerPattern",
       "Position": {
         "X": 300.0,
         "Y": 0.0

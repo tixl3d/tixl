@@ -15,14 +15,16 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "147e4f54-b089-4459-8d22-30ccd3c6fdc7"/*_ExecuteCombineBuffers*/,
+      "ChildId": "147e4f54-b089-4459-8d22-30ccd3c6fdc7",
+      "SymbolName": "Lib.point.combine._ExecuteCombineBuffers",
       "Position": {
         "X": 650.5037,
         "Y": 630.7241
       }
     },
     {
-      "ChildId": "20fe9fd0-de88-4bbe-a38e-dff60a157ec8"/*ComputeShader*/,
+      "ChildId": "20fe9fd0-de88-4bbe-a38e-dff60a157ec8",
+      "SymbolName": "Types.Gfx.ComputeShader",
       "Position": {
         "X": 373.62054,
         "Y": 683.50574

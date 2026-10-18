@@ -60,14 +60,16 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "7c0ee695-1992-4bc9-8eef-4684d0a839a6"/*Vector4Components*/,
+      "ChildId": "7c0ee695-1992-4bc9-8eef-4684d0a839a6",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "Position": {
         "X": 371.94125,
         "Y": -67.45227
       }
     },
     {
-      "ChildId": "e471eb84-1a94-4e7e-940f-e5d92babfa94"/*_ImageFxShaderSetupStatic*/,
+      "ChildId": "e471eb84-1a94-4e7e-940f-e5d92babfa94",
+      "SymbolName": "Lib.render._dx11.fxsetup._ImageFxShaderSetupStatic",
       "Style": "Resizable",
       "Size": {
         "X": 94.37823,
@@ -79,7 +81,8 @@
       }
     },
     {
-      "ChildId": "f41c66fe-5a7a-4b62-9d57-94302a090d1a"/*BoolToFloat*/,
+      "ChildId": "f41c66fe-5a7a-4b62-9d57-94302a090d1a",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
       "Position": {
         "X": 371.94125,
         "Y": 212.54773

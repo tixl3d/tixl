@@ -57,35 +57,40 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "0885a5d9-9379-4050-b783-465039571888"/*PickTexture*/,
+      "ChildId": "0885a5d9-9379-4050-b783-465039571888",
+      "SymbolName": "Lib.image.use.PickTexture",
       "Position": {
         "X": 811.0896,
         "Y": 181.42737
       }
     },
     {
-      "ChildId": "13e0706e-44b4-42d6-a16d-e0518cc8e3ca"/*BoolToInt*/,
+      "ChildId": "13e0706e-44b4-42d6-a16d-e0518cc8e3ca",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToInt",
       "Position": {
         "X": 1019.13184,
         "Y": 398.16144
       }
     },
     {
-      "ChildId": "188cfdb1-8c5b-44de-85cf-78e46d654b4c"/*Any*/,
+      "ChildId": "188cfdb1-8c5b-44de-85cf-78e46d654b4c",
+      "SymbolName": "Lib.numbers.bool.combine.Any",
       "Position": {
         "X": -426.2153,
         "Y": -158.30392
       }
     },
     {
-      "ChildId": "1d140a0d-866f-4b89-96fa-5b1f601a8ca9"/*Blend*/,
+      "ChildId": "1d140a0d-866f-4b89-96fa-5b1f601a8ca9",
+      "SymbolName": "Lib.image.use.Blend",
       "Position": {
         "X": 581.0962,
         "Y": 473.1256
       }
     },
     {
-      "ChildId": "23d5af71-7482-4320-91a8-7c10d5c32351"/*KeepPreviousFrame*/,
+      "ChildId": "23d5af71-7482-4320-91a8-7c10d5c32351",
+      "SymbolName": "Lib.image.use.KeepPreviousFrame",
       "SectionId": "699e694d-e3cd-4686-9552-d14f0a9e90bb",
       "Position": {
         "X": 138.9894,
@@ -93,7 +98,8 @@
       }
     },
     {
-      "ChildId": "2fdb8a67-992e-4493-857a-997c43eebc3d"/*RenderTarget*/,
+      "ChildId": "2fdb8a67-992e-4493-857a-997c43eebc3d",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "SectionId": "d084d931-014b-4f7f-967d-835ddd6dedc5",
       "Position": {
         "X": 414.1938,
@@ -101,7 +107,8 @@
       }
     },
     {
-      "ChildId": "32045ab6-225c-4117-93f3-13fc7b35608f"/*RgbaToColor*/,
+      "ChildId": "32045ab6-225c-4117-93f3-13fc7b35608f",
+      "SymbolName": "Lib.numbers.vec4.RgbaToColor",
       "SectionId": "d084d931-014b-4f7f-967d-835ddd6dedc5",
       "Position": {
         "X": 138.9894,
@@ -109,7 +116,8 @@
       }
     },
     {
-      "ChildId": "371ea85d-54d1-40cc-be24-70f990182860"/*Blend*/,
+      "ChildId": "371ea85d-54d1-40cc-be24-70f990182860",
+      "SymbolName": "Lib.image.use.Blend",
       "SectionId": "d084d931-014b-4f7f-967d-835ddd6dedc5",
       "Position": {
         "X": 414.1938,
@@ -117,21 +125,24 @@
       }
     },
     {
-      "ChildId": "3e5cb299-7d05-41e1-9114-c972203664fa"/*RemapColor*/,
+      "ChildId": "3e5cb299-7d05-41e1-9114-c972203664fa",
+      "SymbolName": "Lib.image.color.RemapColor",
       "Position": {
         "X": 383.73508,
         "Y": 505.30344
       }
     },
     {
-      "ChildId": "4aaaf9fe-13f9-4d60-bd39-a5018dce1aa8"/*HasIntChanged*/,
+      "ChildId": "4aaaf9fe-13f9-4d60-bd39-a5018dce1aa8",
+      "SymbolName": "Lib.numbers.int.logic.HasIntChanged",
       "Position": {
         "X": -566.2152,
         "Y": -123.303925
       }
     },
     {
-      "ChildId": "538e6598-2915-4852-9db1-bcb2d6864ec2"/*GetTextureSize*/,
+      "ChildId": "538e6598-2915-4852-9db1-bcb2d6864ec2",
+      "SymbolName": "Lib.render._dx11.api.GetTextureSize",
       "SectionId": "d084d931-014b-4f7f-967d-835ddd6dedc5",
       "Position": {
         "X": 274.19385,
@@ -139,21 +150,24 @@
       }
     },
     {
-      "ChildId": "5441e1ac-cdc2-482d-ba2f-47f5582ecfda"/*CompareInt*/,
+      "ChildId": "5441e1ac-cdc2-482d-ba2f-47f5582ecfda",
+      "SymbolName": "Lib.numbers.int.logic.CompareInt",
       "Position": {
         "X": -566.2152,
         "Y": -158.30392
       }
     },
     {
-      "ChildId": "76c81156-85b2-4dc6-b437-83e4452db6b0"/*OpticalFlow*/,
+      "ChildId": "76c81156-85b2-4dc6-b437-83e4452db6b0",
+      "SymbolName": "Lib.image.analyze.OpticalFlow",
       "Position": {
         "X": 531.7391,
         "Y": -79.94412
       }
     },
     {
-      "ChildId": "81f12af0-61d1-4c84-a1b9-e1ba3bcf8fa0"/*Layer2d*/,
+      "ChildId": "81f12af0-61d1-4c84-a1b9-e1ba3bcf8fa0",
+      "SymbolName": "Lib.render.basic.Layer2d",
       "SectionId": "d084d931-014b-4f7f-967d-835ddd6dedc5",
       "Position": {
         "X": 414.1938,
@@ -161,42 +175,48 @@
       }
     },
     {
-      "ChildId": "9bd3ddc9-5c02-4a86-8a3a-6d164738596d"/*ColorGrade*/,
+      "ChildId": "9bd3ddc9-5c02-4a86-8a3a-6d164738596d",
+      "SymbolName": "Lib.image.color.ColorGrade",
       "Position": {
         "X": 581.0962,
         "Y": 543.1256
       }
     },
     {
-      "ChildId": "a40f6ae0-5fec-404d-8280-029903898940"/*RemapColor*/,
+      "ChildId": "a40f6ae0-5fec-404d-8280-029903898940",
+      "SymbolName": "Lib.image.color.RemapColor",
       "Position": {
         "X": 811.0896,
         "Y": 321.42737
       }
     },
     {
-      "ChildId": "b8050391-bc84-435b-9205-5d83e9be5cc1"/*TemporalAccumulation*/,
+      "ChildId": "b8050391-bc84-435b-9205-5d83e9be5cc1",
+      "SymbolName": "Lib.render.postfx.TemporalAccumulation",
       "Position": {
         "X": 213.15378,
         "Y": 413.8568
       }
     },
     {
-      "ChildId": "bac1004d-7769-42ec-afec-98b470958aab"/*Blend*/,
+      "ChildId": "bac1004d-7769-42ec-afec-98b470958aab",
+      "SymbolName": "Lib.image.use.Blend",
       "Position": {
         "X": 383.73508,
         "Y": 435.30344
       }
     },
     {
-      "ChildId": "c32d5ad7-a4ef-4124-bbc7-c91a326f222d"/*PickTexture*/,
+      "ChildId": "c32d5ad7-a4ef-4124-bbc7-c91a326f222d",
+      "SymbolName": "Lib.image.use.PickTexture",
       "Position": {
         "X": 1159.1317,
         "Y": 328.16144
       }
     },
     {
-      "ChildId": "f4db17ff-1c8b-4621-89cd-791820770175"/*Blend*/,
+      "ChildId": "f4db17ff-1c8b-4621-89cd-791820770175",
+      "SymbolName": "Lib.image.use.Blend",
       "SectionId": "699e694d-e3cd-4686-9552-d14f0a9e90bb",
       "Position": {
         "X": 278.98932,
@@ -204,7 +224,8 @@
       }
     },
     {
-      "ChildId": "fea41217-8c15-4f0c-8611-b41c84266fb4"/*Remap*/,
+      "ChildId": "fea41217-8c15-4f0c-8611-b41c84266fb4",
+      "SymbolName": "Lib.numbers.float.adjust.Remap",
       "SectionId": "d084d931-014b-4f7f-967d-835ddd6dedc5",
       "Position": {
         "X": -1.0106049,

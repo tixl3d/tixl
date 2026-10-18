@@ -165,35 +165,40 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "34207fc4-fea9-4299-9cb9-94ebf4e0139d"/*Vector4Components*/,
+      "ChildId": "34207fc4-fea9-4299-9cb9-94ebf4e0139d",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "Position": {
         "X": -31.066011,
         "Y": 68.89713
       }
     },
     {
-      "ChildId": "7e1f7a5b-6c83-4b42-88ea-acebe2329a35"/*Vector4Components*/,
+      "ChildId": "7e1f7a5b-6c83-4b42-88ea-acebe2329a35",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "Position": {
         "X": -31.066011,
         "Y": 12.897135
       }
     },
     {
-      "ChildId": "9d826906-2c65-46c1-bef9-8b6a9a94cf77"/*Vector2Components*/,
+      "ChildId": "9d826906-2c65-46c1-bef9-8b6a9a94cf77",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Position": {
         "X": -31.066011,
         "Y": 180.89713
       }
     },
     {
-      "ChildId": "ee1617ac-5c8c-492b-947c-991edf26c8a4"/*_ImageFxShaderSetupStatic*/,
+      "ChildId": "ee1617ac-5c8c-492b-947c-991edf26c8a4",
+      "SymbolName": "Lib.render._dx11.fxsetup._ImageFxShaderSetupStatic",
       "Position": {
         "X": 669.23,
         "Y": 106.487816
       }
     },
     {
-      "ChildId": "ef270b5c-dc55-4a3d-a13c-aead074165f9"/*Vector2Components*/,
+      "ChildId": "ef270b5c-dc55-4a3d-a13c-aead074165f9",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Position": {
         "X": -31.066011,
         "Y": 124.89712

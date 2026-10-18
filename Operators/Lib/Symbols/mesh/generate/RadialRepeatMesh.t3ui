@@ -94,21 +94,24 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "031534da-cbf8-4e07-8327-98a028643307"/*RepeatMeshAtPoints*/,
+      "ChildId": "031534da-cbf8-4e07-8327-98a028643307",
+      "SymbolName": "Lib.mesh.generate.RepeatMeshAtPoints",
       "Position": {
         "X": 240.97046,
         "Y": 146.9049
       }
     },
     {
-      "ChildId": "2bfd2802-aa35-4c0a-afda-6c89f472ae92"/*RadialPoints*/,
+      "ChildId": "2bfd2802-aa35-4c0a-afda-6c89f472ae92",
+      "SymbolName": "Lib.point.generate.RadialPoints",
       "Position": {
         "X": 240.97046,
         "Y": -168.0951
       }
     },
     {
-      "ChildId": "7a7d1fa3-6ee3-447a-a2be-2404aa7d8890"/*DrawMesh*/,
+      "ChildId": "7a7d1fa3-6ee3-447a-a2be-2404aa7d8890",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
       "Position": {
         "X": 469.5822,
         "Y": 267.62363

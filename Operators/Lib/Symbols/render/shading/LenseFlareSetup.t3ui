@@ -42,126 +42,144 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "26a1e12a-2444-4e48-9552-aa6f200243ae"/*NGon*/,
+      "ChildId": "26a1e12a-2444-4e48-9552-aa6f200243ae",
+      "SymbolName": "Lib.image.generate.basic.NGon",
       "Position": {
         "X": 260.0521,
         "Y": 960.45374
       }
     },
     {
-      "ChildId": "30b2e657-776e-4810-aade-42da88a9136b"/*Multiply*/,
+      "ChildId": "30b2e657-776e-4810-aade-42da88a9136b",
+      "SymbolName": "Lib.numbers.float.basic.Multiply",
       "Position": {
         "X": -271.44345,
         "Y": 1056.6156
       }
     },
     {
-      "ChildId": "4adf8371-e362-4d1b-aad9-826b0d36ad84"/*NGon*/,
+      "ChildId": "4adf8371-e362-4d1b-aad9-826b0d36ad84",
+      "SymbolName": "Lib.image.generate.basic.NGon",
       "Position": {
         "X": 258.20337,
         "Y": 596.3915
       }
     },
     {
-      "ChildId": "4dbb0179-291b-4a49-8465-a8c821d78a8a"/*Star*/,
+      "ChildId": "4dbb0179-291b-4a49-8465-a8c821d78a8a",
+      "SymbolName": "Lib.render._.DefineLensFlare",
       "Position": {
         "X": -48.905273,
         "Y": 557.7441
       }
     },
     {
-      "ChildId": "61116fd9-ea0d-4622-b147-2fdf2266cfd1"/*DrawLensShimmer*/,
+      "ChildId": "61116fd9-ea0d-4622-b147-2fdf2266cfd1",
+      "SymbolName": "Lib.render._.DrawLensShimmer",
       "Position": {
         "X": 416.3575,
         "Y": 1255.591
       }
     },
     {
-      "ChildId": "6c380cf7-db29-436d-9e42-4b4256c68ce6"/*CenterGlow*/,
+      "ChildId": "6c380cf7-db29-436d-9e42-4b4256c68ce6",
+      "SymbolName": "Lib.render._.DefineLensFlare",
       "Position": {
         "X": -46.053574,
         "Y": 445.3261
       }
     },
     {
-      "ChildId": "740c40f1-c864-4cc2-bb5c-af8c4bc1a4c3"/*Sparkle*/,
+      "ChildId": "740c40f1-c864-4cc2-bb5c-af8c4bc1a4c3",
+      "SymbolName": "Lib.render._.DefineLensFlare",
       "Position": {
         "X": -48.905273,
         "Y": 1145.8547
       }
     },
     {
-      "ChildId": "78d1c6aa-1983-40ff-a753-23f5780b7aa7"/*Digital*/,
+      "ChildId": "78d1c6aa-1983-40ff-a753-23f5780b7aa7",
+      "SymbolName": "Lib.render._.DefineLensFlare",
       "Position": {
         "X": -48.905273,
         "Y": 250.85422
       }
     },
     {
-      "ChildId": "79a20369-3383-45fd-9961-7829e1859c53"/*DrawLensFlares*/,
+      "ChildId": "79a20369-3383-45fd-9961-7829e1859c53",
+      "SymbolName": "Lib.render.shading._.DrawLensFlares",
       "Position": {
         "X": 400.0521,
         "Y": 890.45374
       }
     },
     {
-      "ChildId": "8689f584-ae3b-4656-b496-de71ff780ec6"/*Execute*/,
+      "ChildId": "8689f584-ae3b-4656-b496-de71ff780ec6",
+      "SymbolName": "Lib.flow.Execute",
       "Position": {
         "X": 803.05005,
         "Y": 276.86267
       }
     },
     {
-      "ChildId": "a0e9d0cc-a011-431e-a200-c6ae78534ffd"/*DrawLensFlares*/,
+      "ChildId": "a0e9d0cc-a011-431e-a200-c6ae78534ffd",
+      "SymbolName": "Lib.render.shading._.DrawLensFlares",
       "Position": {
         "X": 398.20337,
         "Y": 421.3915
       }
     },
     {
-      "ChildId": "a3e83f55-4e52-4f9b-adc9-75dc9f9aecdf"/*DrawLensShimmer*/,
+      "ChildId": "a3e83f55-4e52-4f9b-adc9-75dc9f9aecdf",
+      "SymbolName": "Lib.render._.DrawLensShimmer",
       "Position": {
         "X": 401.09473,
         "Y": 1145.8547
       }
     },
     {
-      "ChildId": "b1548e77-1699-4d18-90d7-340dd124ea48"/*DrawLensFlares*/,
+      "ChildId": "b1548e77-1699-4d18-90d7-340dd124ea48",
+      "SymbolName": "Lib.render.shading._.DrawLensFlares",
       "Position": {
         "X": 395.61774,
         "Y": 186.30495
       }
     },
     {
-      "ChildId": "c4b0dc54-87d5-4f86-9f9d-a089a03ac10c"/*DefineLensFlare*/,
+      "ChildId": "c4b0dc54-87d5-4f86-9f9d-a089a03ac10c",
+      "SymbolName": "Lib.render._.DefineLensFlare",
       "Position": {
         "X": -42.0688,
         "Y": 801.5913
       }
     },
     {
-      "ChildId": "ce7896a4-1c6c-41b9-84ff-152e4fb47054"/*NGon*/,
+      "ChildId": "ce7896a4-1c6c-41b9-84ff-152e4fb47054",
+      "SymbolName": "Lib.image.generate.basic.NGon",
       "Position": {
         "X": 255.61774,
         "Y": 256.30493
       }
     },
     {
-      "ChildId": "ed595f01-9089-42f7-ad86-2cf6b50e49e8"/*Shimmer*/,
+      "ChildId": "ed595f01-9089-42f7-ad86-2cf6b50e49e8",
+      "SymbolName": "Lib.render._.DefineLensFlare",
       "Position": {
         "X": -50.5058,
         "Y": 1234.3978
       }
     },
     {
-      "ChildId": "f267d537-e3cd-43ea-8cf5-e7d2b121d799"/*RandomColorEdgeGlow*/,
+      "ChildId": "f267d537-e3cd-43ea-8cf5-e7d2b121d799",
+      "SymbolName": "Lib.render._.DefineLensFlare",
       "Position": {
         "X": -48.905273,
         "Y": 643.8541
       }
     },
     {
-      "ChildId": "ff748efc-1326-4e8e-b827-04b7964544a2"/*MultiIris*/,
+      "ChildId": "ff748efc-1326-4e8e-b827-04b7964544a2",
+      "SymbolName": "Lib.render._.DefineLensFlare",
       "Position": {
         "X": -48.905273,
         "Y": 903.854

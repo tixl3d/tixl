@@ -5,140 +5,160 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "00899738-694e-4556-a559-bbb1775577a3"/*DisplacePoints2d*/,
+      "ChildId": "00899738-694e-4556-a559-bbb1775577a3",
+      "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": -32.30002,
         "Y": 251.841
       }
     },
     {
-      "ChildId": "027f62e4-2c7c-46d7-9431-f1ab56e8e157"/*BoundingBoxPointExample*/,
+      "ChildId": "027f62e4-2c7c-46d7-9431-f1ab56e8e157",
+      "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": -32.30002,
         "Y": 216.841
       }
     },
     {
-      "ChildId": "0a76ecf0-70be-4222-a1c2-06d08cd3c7af"/*SetAttributesWithPointFieldsExamples*/,
+      "ChildId": "0a76ecf0-70be-4222-a1c2-06d08cd3c7af",
+      "SymbolName": "Examples.Lib.point.SetAttributesWithPointFieldsExamples",
       "Position": {
         "X": -172.30002,
         "Y": 566.841
       }
     },
     {
-      "ChildId": "169b4fdb-2aa7-4cc2-83cb-23d4fa76f8fd"/*SplinePointsExample*/,
+      "ChildId": "169b4fdb-2aa7-4cc2-83cb-23d4fa76f8fd",
+      "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": -32.30002,
         "Y": 636.841
       }
     },
     {
-      "ChildId": "2976753e-1302-413b-8af3-01d483e202c8"/*DrawBillboardsExample*/,
+      "ChildId": "2976753e-1302-413b-8af3-01d483e202c8",
+      "SymbolName": "Examples.Lib.point.DrawBillboardsExample",
       "Position": {
         "X": -172.30002,
         "Y": 286.841
       }
     },
     {
-      "ChildId": "2db723b8-167e-4237-b96f-271774a611e8"/*SamplePointAttributesExample*/,
+      "ChildId": "2db723b8-167e-4237-b96f-271774a611e8",
+      "SymbolName": "Examples.Lib.point.SamplePointAttributesExample",
       "Position": {
         "X": -172.30002,
         "Y": 461.841
       }
     },
     {
-      "ChildId": "345dcb72-b3e1-4ca4-9cf8-d47ee1c9f637"/*SelectPointsWithSDFExample*/,
+      "ChildId": "345dcb72-b3e1-4ca4-9cf8-d47ee1c9f637",
+      "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": -32.30002,
         "Y": 531.841
       }
     },
     {
-      "ChildId": "3e54977c-8473-4454-b231-c128190e0f64"/*GainAndBiasExample*/,
+      "ChildId": "3e54977c-8473-4454-b231-c128190e0f64",
+      "SymbolName": "Examples.Lib.point.GainAndBiasExample",
       "Position": {
         "X": -172.30002,
         "Y": 356.841
       }
     },
     {
-      "ChildId": "45153f50-6ecf-4cef-8b19-73bd322a9f61"/*DrawBillboardsExample*/,
+      "ChildId": "45153f50-6ecf-4cef-8b19-73bd322a9f61",
+      "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": -32.30002,
         "Y": 286.841
       }
     },
     {
-      "ChildId": "48b0be05-b6d9-4f9b-8eaf-ae8f903f79d0"/*DrawMeshChunksAtPointsExample*/,
+      "ChildId": "48b0be05-b6d9-4f9b-8eaf-ae8f903f79d0",
+      "SymbolName": "Examples.Lib.mesh.DrawMeshChunksAtPointsExample",
       "Position": {
         "X": -172.30002,
         "Y": 601.841
       }
     },
     {
-      "ChildId": "5e4fbd64-dede-4150-a4a0-2b2b9e687a23"/*DisplacePoints2dExample*/,
+      "ChildId": "5e4fbd64-dede-4150-a4a0-2b2b9e687a23",
+      "SymbolName": "Examples.Lib.point.DisplacePoints2dExample",
       "Position": {
         "X": -172.30002,
         "Y": 251.841
       }
     },
     {
-      "ChildId": "628b1343-173e-4788-a0f9-3fb85df88783"/*BoundingBoxPointsExample*/,
+      "ChildId": "628b1343-173e-4788-a0f9-3fb85df88783",
+      "SymbolName": "Examples.Lib.point.BoundingBoxPointsExample",
       "Position": {
         "X": -172.30002,
         "Y": 216.841
       }
     },
     {
-      "ChildId": "6475068f-4fdf-45bf-8947-9bd1046bb8c1"/*SelectPointsWithSDFExample*/,
+      "ChildId": "6475068f-4fdf-45bf-8947-9bd1046bb8c1",
+      "SymbolName": "Examples.Lib.point.SelectPointsWithSDFExample",
       "Position": {
         "X": -172.30002,
         "Y": 531.841
       }
     },
     {
-      "ChildId": "740d97f0-c817-4266-947b-0276553602db"/*ApplyRandomWalkExamples*/,
+      "ChildId": "740d97f0-c817-4266-947b-0276553602db",
+      "SymbolName": "Examples.Lib.point.ApplyRandomWalkExamples",
       "Position": {
         "X": -172.30002,
         "Y": 181.841
       }
     },
     {
-      "ChildId": "7df5bc7b-5394-43a2-9dd4-05a3e8dd434b"/*SnapToAngleForceExample*/,
+      "ChildId": "7df5bc7b-5394-43a2-9dd4-05a3e8dd434b",
+      "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": -361.1878,
         "Y": 567.2695
       }
     },
     {
-      "ChildId": "817835e8-3426-4e85-856a-0239a62cdc1d"/*TextureMapForceExample2*/,
+      "ChildId": "817835e8-3426-4e85-856a-0239a62cdc1d",
+      "SymbolName": "Examples.Lib.point.TextureMapForceExample2",
       "Position": {
         "X": -172.30002,
         "Y": 671.841
       }
     },
     {
-      "ChildId": "8374d924-60dd-4430-b66f-b491a2b89e03"/*GetPointDataFromListExample*/,
+      "ChildId": "8374d924-60dd-4430-b66f-b491a2b89e03",
+      "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": -32.30002,
         "Y": 391.841
       }
     },
     {
-      "ChildId": "85c67123-af41-40fb-b6c2-cc2ef26b39c4"/*LineTextPointsExample*/,
+      "ChildId": "85c67123-af41-40fb-b6c2-cc2ef26b39c4",
+      "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": -32.30002,
         "Y": 426.841
       }
     },
     {
-      "ChildId": "8bacc42b-e92b-4425-9a3e-d240a8a377b2"/*SelectPointsExample*/,
+      "ChildId": "8bacc42b-e92b-4425-9a3e-d240a8a377b2",
+      "SymbolName": "Examples.Lib.point.SelectPointsExample",
       "Position": {
         "X": -172.30002,
         "Y": 146.841
       }
     },
     {
-      "ChildId": "983a3a3b-bf3f-4371-9368-0af093250a31"/*SnapToAnglesForceExample*/,
+      "ChildId": "983a3a3b-bf3f-4371-9368-0af093250a31",
+      "SymbolName": "Examples.Lib.point.SnapToAnglesForceExample",
       "Comment": "This is unstable, probably be cause of triggeranim\n",
       "Position": {
         "X": -501.1878,
@@ -146,105 +166,120 @@
       }
     },
     {
-      "ChildId": "a093227a-fd39-40b9-8ee0-f62f93ebcdb7"/*SetAttributesWithPointFields*/,
+      "ChildId": "a093227a-fd39-40b9-8ee0-f62f93ebcdb7",
+      "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": -32.30002,
         "Y": 566.841
       }
     },
     {
-      "ChildId": "a907859c-de36-480a-b1c7-411a72510c57"/*FindClosestPointsOnMeshExample*/,
+      "ChildId": "a907859c-de36-480a-b1c7-411a72510c57",
+      "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": -32.30002,
         "Y": 321.841
       }
     },
     {
-      "ChildId": "aafa0d55-5b3e-4efd-b79a-c5b435703140"/*SamplePointsAttributesExample*/,
+      "ChildId": "aafa0d55-5b3e-4efd-b79a-c5b435703140",
+      "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": -32.30002,
         "Y": 461.841
       }
     },
     {
-      "ChildId": "b0cee203-bea9-4254-b460-894a7dd7d73e"/*LineTextPointsExamples*/,
+      "ChildId": "b0cee203-bea9-4254-b460-894a7dd7d73e",
+      "SymbolName": "Examples.Lib.point.LineTextPointsExamples",
       "Position": {
         "X": -172.30002,
         "Y": 426.841
       }
     },
     {
-      "ChildId": "bdf20373-9010-4bd5-9566-68f2506a5b59"/*GainAndBiasExample*/,
+      "ChildId": "bdf20373-9010-4bd5-9566-68f2506a5b59",
+      "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": -32.30002,
         "Y": 356.841
       }
     },
     {
-      "ChildId": "d0a9c048-267a-45d3-845c-9fda40e9581d"/*SamplePointAttributesExample2*/,
+      "ChildId": "d0a9c048-267a-45d3-845c-9fda40e9581d",
+      "SymbolName": "Examples.Lib.point.SamplePointAttributesExample2",
       "Position": {
         "X": -172.30002,
         "Y": 496.841
       }
     },
     {
-      "ChildId": "d5f11451-c511-48a8-9950-32ce9bc45f7b"/*FindClosestPointsOnMeshExample*/,
+      "ChildId": "d5f11451-c511-48a8-9950-32ce9bc45f7b",
+      "SymbolName": "Examples.Lib.point.FindClosestPointsOnMeshExample",
       "Position": {
         "X": -172.30002,
         "Y": 321.841
       }
     },
     {
-      "ChildId": "dceb5571-12a2-4b4e-8bbd-797970907c08"/*GetPointDataFromListExample*/,
+      "ChildId": "dceb5571-12a2-4b4e-8bbd-797970907c08",
+      "SymbolName": "Examples.Lib.point.GetPointDataFromListExample",
       "Position": {
         "X": -172.30002,
         "Y": 391.841
       }
     },
     {
-      "ChildId": "e3f5538e-b35d-438a-abaa-a1b72082c1a9"/*ApplyRandomWalkExample*/,
+      "ChildId": "e3f5538e-b35d-438a-abaa-a1b72082c1a9",
+      "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": -32.30002,
         "Y": 181.841
       }
     },
     {
-      "ChildId": "e5c55206-152d-496b-b92b-daa7bb95f089"/*TextureMapForceExample*/,
+      "ChildId": "e5c55206-152d-496b-b92b-daa7bb95f089",
+      "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": -32.30002,
         "Y": 671.841
       }
     },
     {
-      "ChildId": "e6dd0cff-2e29-43e1-85a1-1eb4d20a06c9"/*SamplePointAttributesExample2*/,
+      "ChildId": "e6dd0cff-2e29-43e1-85a1-1eb4d20a06c9",
+      "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": -32.30002,
         "Y": 496.841
       }
     },
     {
-      "ChildId": "ea0aa684-494c-4f0f-a9c3-b75f29430849"/*SelectPointsExample*/,
+      "ChildId": "ea0aa684-494c-4f0f-a9c3-b75f29430849",
+      "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": -32.30002,
         "Y": 146.841
       }
     },
     {
-      "ChildId": "f2958846-595a-46c3-8fa4-58b1b76074b5"/*SplinePointsExample*/,
+      "ChildId": "f2958846-595a-46c3-8fa4-58b1b76074b5",
+      "SymbolName": "Examples.Lib.point.SplinePointsExample",
       "Position": {
         "X": -172.30002,
         "Y": 636.841
       }
     },
     {
-      "ChildId": "fb0eaaa4-e1e5-441e-96af-71380358df50"/*DrawMeshChunksAsPointsExample*/,
+      "ChildId": "fb0eaaa4-e1e5-441e-96af-71380358df50",
+      "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": -32.30002,
         "Y": 601.841
       }
     },
     {
-      "ChildId": "fc443f4a-50ae-4bfd-aaf1-15c1c859ea0f"/*ExecuteTests*/,
+      "ChildId": "fc443f4a-50ae-4bfd-aaf1-15c1c859ea0f",
+      "SymbolName": "Examples.testing.ExecuteTests",
       "Position": {
         "X": 107.69998,
         "Y": 146.841

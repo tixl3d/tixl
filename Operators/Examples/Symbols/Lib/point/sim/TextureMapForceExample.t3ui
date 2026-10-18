@@ -5,28 +5,32 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "053572c8-0c45-423b-a2bc-5ff962b104b3"/*SetFog*/,
+      "ChildId": "053572c8-0c45-423b-a2bc-5ff962b104b3",
+      "SymbolName": "Lib.render.shading.SetFog",
       "Position": {
         "X": 1372.7395,
         "Y": 144.20999
       }
     },
     {
-      "ChildId": "139c08ba-5fa7-4b1d-9b53-f4f1c936dfe1"/*AnimValue*/,
+      "ChildId": "139c08ba-5fa7-4b1d-9b53-f4f1c936dfe1",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "Position": {
         "X": 910.00006,
         "Y": 34.0
       }
     },
     {
-      "ChildId": "37dbe7d3-8eb5-44b9-8236-3865b77ef6be"/*DrawPoints*/,
+      "ChildId": "37dbe7d3-8eb5-44b9-8236-3865b77ef6be",
+      "SymbolName": "Lib.point.draw.DrawPoints",
       "Position": {
         "X": 1232.7395,
         "Y": 74.20999
       }
     },
     {
-      "ChildId": "573990a4-992e-437c-94da-6ce9043fbb5c"/*TextureMapForce*/,
+      "ChildId": "573990a4-992e-437c-94da-6ce9043fbb5c",
+      "SymbolName": "Lib.particle.force.TextureMapForce",
       "Comment": "We enforce the Gizmo visibility for this example.",
       "Position": {
         "X": 722.4907,
@@ -34,28 +38,32 @@
       }
     },
     {
-      "ChildId": "660e0cce-3b5f-4c8b-ab8b-a42e0b250903"/*Group*/,
+      "ChildId": "660e0cce-3b5f-4c8b-ab8b-a42e0b250903",
+      "SymbolName": "Lib.render.transform.Group",
       "Position": {
         "X": 1372.7395,
         "Y": 214.20999
       }
     },
     {
-      "ChildId": "6e8df7c2-ed5e-4d12-a225-938c56396cca"/*OrbitCamera*/,
+      "ChildId": "6e8df7c2-ed5e-4d12-a225-938c56396cca",
+      "SymbolName": "Lib.render.camera.OrbitCamera",
       "Position": {
         "X": 1372.7395,
         "Y": 179.20999
       }
     },
     {
-      "ChildId": "7e46845f-c3ae-4b3c-85dc-2d1a9b8f22be"/*RenderTarget*/,
+      "ChildId": "7e46845f-c3ae-4b3c-85dc-2d1a9b8f22be",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "Position": {
         "X": 1512.7395,
         "Y": 249.20999
       }
     },
     {
-      "ChildId": "899959b8-dbb3-46eb-a09e-76e2229e0126"/*RenderTarget*/,
+      "ChildId": "899959b8-dbb3-46eb-a09e-76e2229e0126",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "Comment": "Render it into a texture...",
       "Position": {
         "X": 722.49084,
@@ -63,7 +71,8 @@
       }
     },
     {
-      "ChildId": "8d09b9ee-2d1f-4e2e-9424-d4daa680681d"/*Text*/,
+      "ChildId": "8d09b9ee-2d1f-4e2e-9424-d4daa680681d",
+      "SymbolName": "Lib.render.basic.Text",
       "Comment": "Let's take a text.",
       "Position": {
         "X": 490.9475,
@@ -71,14 +80,16 @@
       }
     },
     {
-      "ChildId": "9612edcd-8ec7-4299-a70c-9037bc8a7509"/*DrawLines*/,
+      "ChildId": "9612edcd-8ec7-4299-a70c-9037bc8a7509",
+      "SymbolName": "Lib.point.draw.DrawLines",
       "Position": {
         "X": 1232.7395,
         "Y": 109.20999
       }
     },
     {
-      "ChildId": "b5937002-f7af-4af2-9c8d-4470a45b64e1"/*Blur*/,
+      "ChildId": "b5937002-f7af-4af2-9c8d-4470a45b64e1",
+      "SymbolName": "Lib.image.fx.blur.Blur",
       "Comment": "We blur the image to get a gradient at the edge.",
       "Position": {
         "X": 722.4907,
@@ -86,21 +97,24 @@
       }
     },
     {
-      "ChildId": "c00e2aa5-b1ae-4e1f-a0df-20a45eb0087b"/*Execute*/,
+      "ChildId": "c00e2aa5-b1ae-4e1f-a0df-20a45eb0087b",
+      "SymbolName": "Lib.flow.Execute",
       "Position": {
         "X": 1512.7395,
         "Y": 179.20999
       }
     },
     {
-      "ChildId": "dae77668-55cc-493c-bc5f-e36320c6f067"/*AnimValue*/,
+      "ChildId": "dae77668-55cc-493c-bc5f-e36320c6f067",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "Position": {
         "X": 582.4907,
         "Y": 67.65341
       }
     },
     {
-      "ChildId": "e0d88f70-0b51-4814-b39b-5a7dca8092d1"/*Glow*/,
+      "ChildId": "e0d88f70-0b51-4814-b39b-5a7dca8092d1",
+      "SymbolName": "Lib.image.fx.stylize.Glow",
       "Comment": "We add a glow with a large blur radius for a smooth gradient towards the center.",
       "Position": {
         "X": 722.4907,
@@ -108,14 +122,16 @@
       }
     },
     {
-      "ChildId": "eccd54df-ca63-4738-a758-e4e881ea9595"/*Group*/,
+      "ChildId": "eccd54df-ca63-4738-a758-e4e881ea9595",
+      "SymbolName": "Lib.render.transform.Group",
       "Position": {
         "X": 1372.7395,
         "Y": 74.20999
       }
     },
     {
-      "ChildId": "f40d65c9-5182-464b-977d-68bd35e3ee5d"/*ParticleSystem*/,
+      "ChildId": "f40d65c9-5182-464b-977d-68bd35e3ee5d",
+      "SymbolName": "Lib.particle.ParticleSystem",
       "Comment": "1. Slightly increase Drag here to stabilize things.\n2. Change emit mode to allow rendering connected lines.",
       "Position": {
         "X": 1050.0001,
@@ -123,7 +139,8 @@
       }
     },
     {
-      "ChildId": "fce3192d-fdfa-47ab-a49d-3df41f8f4352"/*NormalMap*/,
+      "ChildId": "fce3192d-fdfa-47ab-a49d-3df41f8f4352",
+      "SymbolName": "Lib.image.use.NormalMap",
       "Comment": "In this essential step, we convert the brightness gradient into a signed normal map.\n\n\"Signed\" means the texture contains NEGATIVE values. Please check the [ImageLevels] below to see how this looks.\n\nAlso note that we twist the resulting normals to create accelerations towards and away from the letters.",
       "Position": {
         "X": 722.4907,
@@ -131,7 +148,8 @@
       }
     },
     {
-      "ChildId": "fff2f405-2905-4fb1-87dd-4679e9fa0c22"/*RadialPoints*/,
+      "ChildId": "fff2f405-2905-4fb1-87dd-4679e9fa0c22",
+      "SymbolName": "Lib.point.generate.RadialPoints",
       "Comment": "We emit a bunch of points for aligned orientation axis so their z-axis can be used for initial velocity in [ParticleSystem].",
       "Position": {
         "X": 1050.0001,

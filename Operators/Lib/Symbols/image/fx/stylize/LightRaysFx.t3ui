@@ -80,7 +80,8 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "1ad828cf-9b7a-4c46-9ca7-ecb6b739e8fa"/*InputAssemblerStage*/,
+      "ChildId": "1ad828cf-9b7a-4c46-9ca7-ecb6b739e8fa",
+      "SymbolName": "Lib.render._dx11.api.InputAssemblerStage",
       "SectionId": "fd9fb83d-cfc9-45d3-b450-adb5144909c8",
       "Position": {
         "X": 1209.1223,
@@ -88,7 +89,8 @@
       }
     },
     {
-      "ChildId": "1c9ee15f-1734-440a-885c-3e78cb5e3b3b"/*PixelShader*/,
+      "ChildId": "1c9ee15f-1734-440a-885c-3e78cb5e3b3b",
+      "SymbolName": "Types.Gfx.PixelShader",
       "SectionId": "fd9fb83d-cfc9-45d3-b450-adb5144909c8",
       "Position": {
         "X": 801.24615,
@@ -96,14 +98,16 @@
       }
     },
     {
-      "ChildId": "1d446ccd-fd7c-4875-abbb-e412d88badd8"/*Vector2Components*/,
+      "ChildId": "1d446ccd-fd7c-4875-abbb-e412d88badd8",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Position": {
         "X": 291.43448,
         "Y": 52.15088
       }
     },
     {
-      "ChildId": "273c8ffb-fb8d-4928-a29c-ca604b2e628f"/*Texture2d*/,
+      "ChildId": "273c8ffb-fb8d-4928-a29c-ca604b2e628f",
+      "SymbolName": "Types.Gfx.Texture2d",
       "SectionId": "fd9fb83d-cfc9-45d3-b450-adb5144909c8",
       "Position": {
         "X": 694.07794,
@@ -111,28 +115,32 @@
       }
     },
     {
-      "ChildId": "2e93075e-ff56-435a-a07e-c571137cae1f"/*Vector2Components*/,
+      "ChildId": "2e93075e-ff56-435a-a07e-c571137cae1f",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Position": {
         "X": 151.43448,
         "Y": 472.15088
       }
     },
     {
-      "ChildId": "32ac3606-32b7-4509-887b-b34a16ea51d7"/*Vector4Components*/,
+      "ChildId": "32ac3606-32b7-4509-887b-b34a16ea51d7",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "Position": {
         "X": 291.43448,
         "Y": 192.15088
       }
     },
     {
-      "ChildId": "34bf7c1d-df87-465e-aa97-6abf209f31a0"/*Div*/,
+      "ChildId": "34bf7c1d-df87-465e-aa97-6abf209f31a0",
+      "SymbolName": "Lib.numbers.float.basic.Div",
       "Position": {
         "X": 291.43448,
         "Y": 472.15088
       }
     },
     {
-      "ChildId": "38488885-f1bd-4526-8226-87e30ddd7c47"/*Draw*/,
+      "ChildId": "38488885-f1bd-4526-8226-87e30ddd7c47",
+      "SymbolName": "Lib.render._dx11.api.Draw",
       "SectionId": "fd9fb83d-cfc9-45d3-b450-adb5144909c8",
       "Position": {
         "X": 1059.1228,
@@ -140,70 +148,80 @@
       }
     },
     {
-      "ChildId": "4354c617-c854-47e5-95dc-a40e7f6cc8f3"/*SrvFromTexture2d*/,
+      "ChildId": "4354c617-c854-47e5-95dc-a40e7f6cc8f3",
+      "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
       "Position": {
         "X": 1007.8684,
         "Y": 77.15967
       }
     },
     {
-      "ChildId": "459bf639-8e86-463c-b519-5814304a012c"/*Vector2Components*/,
+      "ChildId": "459bf639-8e86-463c-b519-5814304a012c",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Position": {
         "X": 652.47845,
         "Y": 159.87416
       }
     },
     {
-      "ChildId": "45a84aa4-537e-44d9-bd3e-7eecaed4532a"/*Rasterizer*/,
+      "ChildId": "45a84aa4-537e-44d9-bd3e-7eecaed4532a",
+      "SymbolName": "Lib.render._dx11.api.Rasterizer",
       "Position": {
         "X": 1206.0239,
         "Y": 183.31111
       }
     },
     {
-      "ChildId": "4677c7bc-2239-43f9-af3c-9c45180eb2c9"/*RasterizerState*/,
+      "ChildId": "4677c7bc-2239-43f9-af3c-9c45180eb2c9",
+      "SymbolName": "Types.Gfx.RasterizerState",
       "Position": {
         "X": 816.6541,
         "Y": 299.5852
       }
     },
     {
-      "ChildId": "47a72b52-1a16-4a10-bf2a-e5c65231fc44"/*SrvFromTexture2d*/,
+      "ChildId": "47a72b52-1a16-4a10-bf2a-e5c65231fc44",
+      "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
       "Position": {
         "X": 1007.86835,
         "Y": 37.650635
       }
     },
     {
-      "ChildId": "482b2d75-db6e-4aaa-af59-3bac8b7b71a0"/*IntToFloat*/,
+      "ChildId": "482b2d75-db6e-4aaa-af59-3bac8b7b71a0",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "Position": {
         "X": 291.43448,
         "Y": 122.15088
       }
     },
     {
-      "ChildId": "493e3596-5cec-4417-856e-2af5eb319a36"/*OutputMergerStage*/,
+      "ChildId": "493e3596-5cec-4417-856e-2af5eb319a36",
+      "SymbolName": "Lib.render._dx11.api.OutputMergerStage",
       "Position": {
         "X": 1206.0239,
         "Y": 263.1805
       }
     },
     {
-      "ChildId": "4d393e7f-3bf7-4f38-ab0e-62867e3e3843"/*ExecuteTextureUpdate*/,
+      "ChildId": "4d393e7f-3bf7-4f38-ab0e-62867e3e3843",
+      "SymbolName": "Lib.render._dx11.fxsetup.ExecuteTextureUpdate",
       "Position": {
         "X": 1636.2861,
         "Y": -102.13719
       }
     },
     {
-      "ChildId": "693af24e-96aa-4281-a02a-ad05d5b08b61"/*Viewport*/,
+      "ChildId": "693af24e-96aa-4281-a02a-ad05d5b08b61",
+      "SymbolName": "Lib.render._dx11.api.Viewport",
       "Position": {
         "X": 792.47845,
         "Y": 124.87416
       }
     },
     {
-      "ChildId": "8524802d-ccff-4aa7-99bb-c8e04676db5e"/*SrvFromTexture2d*/,
+      "ChildId": "8524802d-ccff-4aa7-99bb-c8e04676db5e",
+      "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
       "SectionId": "fd9fb83d-cfc9-45d3-b450-adb5144909c8",
       "Position": {
         "X": 801.24615,
@@ -211,7 +229,8 @@
       }
     },
     {
-      "ChildId": "87a6d72d-b626-4408-94f0-99b80b3be442"/*Execute*/,
+      "ChildId": "87a6d72d-b626-4408-94f0-99b80b3be442",
+      "SymbolName": "Lib.flow.Execute",
       "Style": "Resizable",
       "Size": {
         "X": 88.94497,
@@ -223,21 +242,24 @@
       }
     },
     {
-      "ChildId": "898abaa1-4abe-4307-93ab-49fbc386b892"/*InputAssemblerStage*/,
+      "ChildId": "898abaa1-4abe-4307-93ab-49fbc386b892",
+      "SymbolName": "Lib.render._dx11.api.InputAssemblerStage",
       "Position": {
         "X": 1193.0715,
         "Y": -104.39194
       }
     },
     {
-      "ChildId": "8a22dd1b-d87f-4db4-9f40-af67802ad190"/*IntToFloat*/,
+      "ChildId": "8a22dd1b-d87f-4db4-9f40-af67802ad190",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "Position": {
         "X": 291.43448,
         "Y": 437.15088
       }
     },
     {
-      "ChildId": "8cd8cc6d-037c-4d29-8340-e1b7da1ebdf6"/*SetPixelAndVertexShaderStage*/,
+      "ChildId": "8cd8cc6d-037c-4d29-8340-e1b7da1ebdf6",
+      "SymbolName": "Lib.render._dx11.fxsetup.SetPixelAndVertexShaderStage",
       "SectionId": "fd9fb83d-cfc9-45d3-b450-adb5144909c8",
       "Style": "Expanded",
       "Size": {
@@ -250,21 +272,24 @@
       }
     },
     {
-      "ChildId": "8ea45745-8d59-476e-b0e8-7f5140cddb9f"/*LoadImage*/,
+      "ChildId": "8ea45745-8d59-476e-b0e8-7f5140cddb9f",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
       "Position": {
         "X": -337.44907,
         "Y": 78.2321
       }
     },
     {
-      "ChildId": "a2981806-0289-4630-9038-6b88a36f5edd"/*RtvFromTexture2d*/,
+      "ChildId": "a2981806-0289-4630-9038-6b88a36f5edd",
+      "SymbolName": "Lib.render._dx11.api.RtvFromTexture2d",
       "Position": {
         "X": 1029.9697,
         "Y": 298.98917
       }
     },
     {
-      "ChildId": "a3bae9be-193d-4776-944a-cd61cd9eadcd"/*SetPixelAndVertexShaderStage*/,
+      "ChildId": "a3bae9be-193d-4776-944a-cd61cd9eadcd",
+      "SymbolName": "Lib.render._dx11.fxsetup.SetPixelAndVertexShaderStage",
       "Style": "Expanded",
       "Size": {
         "X": 110.0,
@@ -276,28 +301,32 @@
       }
     },
     {
-      "ChildId": "b210bba2-34b9-4850-bd41-2b531f861ead"/*SamplerState*/,
+      "ChildId": "b210bba2-34b9-4850-bd41-2b531f861ead",
+      "SymbolName": "Types.Gfx.SamplerState",
       "Position": {
         "X": 816.6541,
         "Y": 349.46536
       }
     },
     {
-      "ChildId": "b941977f-9621-41be-954f-16521537d841"/*FloatsToBuffer*/,
+      "ChildId": "b941977f-9621-41be-954f-16521537d841",
+      "SymbolName": "Lib.render._dx11.api.FloatsToBuffer",
       "Position": {
         "X": 431.43448,
         "Y": 17.150879
       }
     },
     {
-      "ChildId": "baa5f747-dbf2-4836-8110-e1dd7092445d"/*FirstValidTexture*/,
+      "ChildId": "baa5f747-dbf2-4836-8110-e1dd7092445d",
+      "SymbolName": "Lib.image.use.FirstValidTexture",
       "Position": {
         "X": -197.44907,
         "Y": 43.2321
       }
     },
     {
-      "ChildId": "be7d9e8c-e6a6-4223-9e89-0634b4fe37e4"/*Execute*/,
+      "ChildId": "be7d9e8c-e6a6-4223-9e89-0634b4fe37e4",
+      "SymbolName": "Lib.flow.Execute",
       "SectionId": "fd9fb83d-cfc9-45d3-b450-adb5144909c8",
       "Style": "Resizable",
       "Size": {
@@ -310,14 +339,16 @@
       }
     },
     {
-      "ChildId": "ca5e278b-49fd-4805-9e38-b880a4cbf453"/*PixelShader*/,
+      "ChildId": "ca5e278b-49fd-4805-9e38-b880a4cbf453",
+      "SymbolName": "Types.Gfx.PixelShader",
       "Position": {
         "X": 1007.8684,
         "Y": -6.066635
       }
     },
     {
-      "ChildId": "ccaa20f3-d60e-4970-aec8-af3c4b435505"/*OutputMergerStage*/,
+      "ChildId": "ccaa20f3-d60e-4970-aec8-af3c4b435505",
+      "SymbolName": "Lib.render._dx11.api.OutputMergerStage",
       "SectionId": "fd9fb83d-cfc9-45d3-b450-adb5144909c8",
       "Position": {
         "X": 1209.1223,
@@ -325,7 +356,8 @@
       }
     },
     {
-      "ChildId": "e0663d81-c4f8-4944-b304-163758aa4702"/*RtvFromTexture2d*/,
+      "ChildId": "e0663d81-c4f8-4944-b304-163758aa4702",
+      "SymbolName": "Lib.render._dx11.api.RtvFromTexture2d",
       "SectionId": "fd9fb83d-cfc9-45d3-b450-adb5144909c8",
       "Position": {
         "X": 1059.1228,
@@ -333,7 +365,8 @@
       }
     },
     {
-      "ChildId": "e75e5433-9ca3-46d7-b83d-394999e47bec"/*Execute*/,
+      "ChildId": "e75e5433-9ca3-46d7-b83d-394999e47bec",
+      "SymbolName": "Lib.flow.Execute",
       "Style": "Resizable",
       "Size": {
         "X": 88.94497,
@@ -345,28 +378,32 @@
       }
     },
     {
-      "ChildId": "e7b0ae2e-806d-46fd-955f-11f0f64daa3b"/*VertexShader*/,
+      "ChildId": "e7b0ae2e-806d-46fd-955f-11f0f64daa3b",
+      "SymbolName": "Types.Gfx.VertexShader",
       "Position": {
         "X": 1007.8684,
         "Y": -49.066635
       }
     },
     {
-      "ChildId": "ecbbe9ba-4739-429f-b6e8-eb332c421d7b"/*Texture2d*/,
+      "ChildId": "ecbbe9ba-4739-429f-b6e8-eb332c421d7b",
+      "SymbolName": "Types.Gfx.Texture2d",
       "Position": {
         "X": 285.41672,
         "Y": 778.2073
       }
     },
     {
-      "ChildId": "f1a5b0df-b737-4a6e-9c58-b0c65d797dcc"/*Draw*/,
+      "ChildId": "f1a5b0df-b737-4a6e-9c58-b0c65d797dcc",
+      "SymbolName": "Lib.render._dx11.api.Draw",
       "Position": {
         "X": 1206.0239,
         "Y": 344.96432
       }
     },
     {
-      "ChildId": "ffc6bcd5-1a8d-4195-a28c-30d94cb32179"/*GetTextureSize*/,
+      "ChildId": "ffc6bcd5-1a8d-4195-a28c-30d94cb32179",
+      "SymbolName": "Lib.render._dx11.api.GetTextureSize",
       "Position": {
         "X": -140.02545,
         "Y": 550.46155

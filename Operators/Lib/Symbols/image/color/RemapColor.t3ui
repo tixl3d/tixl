@@ -93,49 +93,56 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "05aef49e-71e0-4f76-b01f-536dc193d0dd"/*IntToFloat*/,
+      "ChildId": "05aef49e-71e0-4f76-b01f-536dc193d0dd",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "Position": {
         "X": 79.535034,
         "Y": 612.2047
       }
     },
     {
-      "ChildId": "06c9a212-c48b-4ff1-8882-a309fd0f9d7d"/*Vector2Components*/,
+      "ChildId": "06c9a212-c48b-4ff1-8882-a309fd0f9d7d",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Position": {
         "X": 79.535034,
         "Y": 717.2047
       }
     },
     {
-      "ChildId": "0ea5f0cd-02af-4872-8d07-3fc4ce0c4330"/*BoolToFloat*/,
+      "ChildId": "0ea5f0cd-02af-4872-8d07-3fc4ce0c4330",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
       "Position": {
         "X": 79.535034,
         "Y": 577.2047
       }
     },
     {
-      "ChildId": "8a6eb902-2cf7-4b63-a565-141f711dc3c6"/*TransformImage*/,
+      "ChildId": "8a6eb902-2cf7-4b63-a565-141f711dc3c6",
+      "SymbolName": "Lib.image.transform.TransformImage",
       "Position": {
         "X": -69.930084,
         "Y": 498.14648
       }
     },
     {
-      "ChildId": "9c2895b1-8571-4326-a744-0f65ed4b5420"/*_multiImageFxSetupStatic*/,
+      "ChildId": "9c2895b1-8571-4326-a744-0f65ed4b5420",
+      "SymbolName": "Lib.image.fx._._multiImageFxSetupStatic",
       "Position": {
         "X": 219.53503,
         "Y": 472.2047
       }
     },
     {
-      "ChildId": "b5d87d34-5883-4013-b357-522eeb62f3e4"/*GenerateMips*/,
+      "ChildId": "b5d87d34-5883-4013-b357-522eeb62f3e4",
+      "SymbolName": "Lib.render._dx11.api.GenerateMips",
       "Position": {
         "X": -88.86948,
         "Y": 429.20715
       }
     },
     {
-      "ChildId": "fdffba0b-5f7e-4a97-af75-21dfe98a569d"/*GradientsToTexture*/,
+      "ChildId": "fdffba0b-5f7e-4a97-af75-21dfe98a569d",
+      "SymbolName": "Lib.numbers.color.GradientsToTexture",
       "Position": {
         "X": -274.2527,
         "Y": 478.41687

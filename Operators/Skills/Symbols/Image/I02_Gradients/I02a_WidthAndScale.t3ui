@@ -5,7 +5,8 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "2385e6e5-8fd9-4edc-b4c9-29af4ffcd4e8"/*LinearGradient*/,
+      "ChildId": "2385e6e5-8fd9-4edc-b4c9-29af4ffcd4e8",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "Position": {
         "X": 1238.5605,
         "Y": 1882.29
@@ -13,7 +14,8 @@
       "SnapshotGroupIndex": "1"
     },
     {
-      "ChildId": "7cd66891-a750-4c93-9e33-707d22432c1c"/*LinearGradient*/,
+      "ChildId": "7cd66891-a750-4c93-9e33-707d22432c1c",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "SectionId": "53d5c7f3-ff9b-4f07-b07a-f545043ba7c8",
       "Position": {
         "X": 1256.9438,
@@ -21,7 +23,8 @@
       }
     },
     {
-      "ChildId": "c9c310ce-9573-49aa-8fc7-e325e98fc2bf"/*ImageQuiz*/,
+      "ChildId": "c9c310ce-9573-49aa-8fc7-e325e98fc2bf",
+      "SymbolName": "Lib.flow.skillQuest.ImageQuiz",
       "Position": {
         "X": 1609.7146,
         "Y": 2018.4391

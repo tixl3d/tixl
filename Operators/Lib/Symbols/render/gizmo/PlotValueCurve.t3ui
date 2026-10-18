@@ -71,77 +71,88 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "109651f5-81aa-4000-adbc-19c844344c1b"/*ValuesToTexture*/,
+      "ChildId": "109651f5-81aa-4000-adbc-19c844344c1b",
+      "SymbolName": "Lib.numbers.floats.process.ValuesToTexture",
       "Position": {
         "X": 149.99998,
         "Y": 56.0
       }
     },
     {
-      "ChildId": "340f504b-b741-4269-843f-83faf09d0b60"/*FloatToString*/,
+      "ChildId": "340f504b-b741-4269-843f-83faf09d0b60",
+      "SymbolName": "Lib.string.convert.FloatToString",
       "Position": {
         "X": 104.189514,
         "Y": 298.0761
       }
     },
     {
-      "ChildId": "901b84fd-a2d6-4729-9429-e12669b06594"/*Text*/,
+      "ChildId": "901b84fd-a2d6-4729-9429-e12669b06594",
+      "SymbolName": "Lib.render.basic.Text",
       "Position": {
         "X": 497.84668,
         "Y": 209.03596
       }
     },
     {
-      "ChildId": "9aed5db3-e4b3-4cd8-b46a-03ace7d7c343"/*LinePoints*/,
+      "ChildId": "9aed5db3-e4b3-4cd8-b46a-03ace7d7c343",
+      "SymbolName": "Lib.point.generate.LinePoints",
       "Position": {
         "X": 149.99998,
         "Y": 0.0
       }
     },
     {
-      "ChildId": "a44ac1eb-1394-44b9-bc88-df21a8278d51"/*DrawLines*/,
+      "ChildId": "a44ac1eb-1394-44b9-bc88-df21a8278d51",
+      "SymbolName": "Lib.point.draw.DrawLines",
       "Position": {
         "X": 450.0,
         "Y": 0.0
       }
     },
     {
-      "ChildId": "b8c82d0f-72aa-4f89-8b29-7b32e6c1fee4"/*Execute*/,
+      "ChildId": "b8c82d0f-72aa-4f89-8b29-7b32e6c1fee4",
+      "SymbolName": "Lib.flow.Execute",
       "Position": {
         "X": 497.84668,
         "Y": 244.03596
       }
     },
     {
-      "ChildId": "d03f8aeb-f6a5-4387-b215-e60ab6272a35"/*Remap*/,
+      "ChildId": "d03f8aeb-f6a5-4387-b215-e60ab6272a35",
+      "SymbolName": "Lib.numbers.float.adjust.Remap",
       "Position": {
         "X": -128.9432,
         "Y": 142.63365
       }
     },
     {
-      "ChildId": "d337499a-e4f4-487c-a699-09a72316b8e3"/*KeepFloatValues*/,
+      "ChildId": "d337499a-e4f4-487c-a699-09a72316b8e3",
+      "SymbolName": "Lib.numbers.floats.process.KeepFloatValues",
       "Position": {
         "X": 21.056793,
         "Y": 142.63365
       }
     },
     {
-      "ChildId": "d8e88e64-14e0-4319-821c-bbe76bc54d8c"/*LinearSamplePointAttributes*/,
+      "ChildId": "d8e88e64-14e0-4319-821c-bbe76bc54d8c",
+      "SymbolName": "Lib.point.modify.LinearSamplePointAttributes",
       "Position": {
         "X": 300.0,
         "Y": 0.0
       }
     },
     {
-      "ChildId": "d92699aa-309d-4b00-94ca-ddd0f836fc14"/*CombineStrings*/,
+      "ChildId": "d92699aa-309d-4b00-94ca-ddd0f836fc14",
+      "SymbolName": "Lib.string.combine.CombineStrings",
       "Position": {
         "X": 347.84668,
         "Y": 209.03596
       }
     },
     {
-      "ChildId": "f3adab7c-2ff8-431a-a4e2-ac1f854f704c"/*Group*/,
+      "ChildId": "f3adab7c-2ff8-431a-a4e2-ac1f854f704c",
+      "SymbolName": "Lib.render.transform.Group",
       "Position": {
         "X": 660.12573,
         "Y": 1.9402771

@@ -28,21 +28,24 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "49676bbc-9566-479e-87ff-68741dedf878"/*_VideoFormatConversion*/,
+      "ChildId": "49676bbc-9566-479e-87ff-68741dedf878",
+      "SymbolName": "Examples.user.pixtur.research._VideoFormatConversion",
       "Position": {
         "X": -84.20642,
         "Y": 116.76013
       }
     },
     {
-      "ChildId": "524dda12-de31-4378-87bd-9e587c087871"/*PlayVideo*/,
+      "ChildId": "524dda12-de31-4378-87bd-9e587c087871",
+      "SymbolName": "Lib.io.video.PlayVideo",
       "Position": {
         "X": -84.20642,
         "Y": 11.760132
       }
     },
     {
-      "ChildId": "a054b8bc-67ad-4610-92a9-d51d1d57aab4"/*Layer2d*/,
+      "ChildId": "a054b8bc-67ad-4610-92a9-d51d1d57aab4",
+      "SymbolName": "Lib.render.basic.Layer2d",
       "Position": {
         "X": -84.20642,
         "Y": 151.76013

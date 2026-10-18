@@ -21,28 +21,32 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "3af5dc6c-89f4-44b0-8c89-13b006d318cb"/*MockStrings*/,
+      "ChildId": "3af5dc6c-89f4-44b0-8c89-13b006d318cb",
+      "SymbolName": "Lib.string.random.MockStrings",
       "Position": {
         "X": 150.0,
         "Y": 0.0
       }
     },
     {
-      "ChildId": "9a2ba5ae-1660-48d2-bc58-a9a97f575741"/*PickStringPart*/,
+      "ChildId": "9a2ba5ae-1660-48d2-bc58-a9a97f575741",
+      "SymbolName": "Lib.string.logic.PickStringPart",
       "Position": {
         "X": 300.0,
         "Y": 0.0
       }
     },
     {
-      "ChildId": "d49a1aed-efe6-48b7-a6e7-8c2d3f4db751"/*FloatToInt*/,
+      "ChildId": "d49a1aed-efe6-48b7-a6e7-8c2d3f4db751",
+      "SymbolName": "Lib.numbers.int.process.FloatToInt",
       "Position": {
         "X": 150.0,
         "Y": 56.0
       }
     },
     {
-      "ChildId": "fa40238c-0cd8-4ffc-b8ea-18d11fa12790"/*AnimValue*/,
+      "ChildId": "fa40238c-0cd8-4ffc-b8ea-18d11fa12790",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "Position": {
         "X": 1.0560608,
         "Y": 214.44357

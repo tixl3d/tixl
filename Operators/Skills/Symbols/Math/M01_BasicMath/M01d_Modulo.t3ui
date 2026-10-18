@@ -5,7 +5,8 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "1f57fa8d-8d12-414f-b3fa-7ac4287ae56a"/*Time*/,
+      "ChildId": "1f57fa8d-8d12-414f-b3fa-7ac4287ae56a",
+      "SymbolName": "Lib.numbers.anim.time.Time",
       "SectionId": "8fb25bb2-3a78-4df0-b83b-d92f8d4a5ecb",
       "Position": {
         "X": 1320.434,
@@ -13,14 +14,16 @@
       }
     },
     {
-      "ChildId": "82720834-df78-49a5-8649-e08c57532e22"/*Modulo*/,
+      "ChildId": "82720834-df78-49a5-8649-e08c57532e22",
+      "SymbolName": "Lib.numbers.float.basic.Modulo",
       "Position": {
         "X": 1272.0806,
         "Y": 1825.6362
       }
     },
     {
-      "ChildId": "ad949ad1-814c-4c17-a597-117d86fdb768"/*Modulo*/,
+      "ChildId": "ad949ad1-814c-4c17-a597-117d86fdb768",
+      "SymbolName": "Lib.numbers.float.basic.Modulo",
       "SectionId": "8fb25bb2-3a78-4df0-b83b-d92f8d4a5ecb",
       "Position": {
         "X": 1320.434,
@@ -28,14 +31,16 @@
       }
     },
     {
-      "ChildId": "d52258cf-1cb9-4351-ab28-b86bdbcf3a08"/*Time*/,
+      "ChildId": "d52258cf-1cb9-4351-ab28-b86bdbcf3a08",
+      "SymbolName": "Lib.numbers.anim.time.Time",
       "Position": {
         "X": 1272.0806,
         "Y": 1763.7557
       }
     },
     {
-      "ChildId": "da60ce9e-7d7d-48de-9552-d1f787dcc4d3"/*ValueQuiz*/,
+      "ChildId": "da60ce9e-7d7d-48de-9552-d1f787dcc4d3",
+      "SymbolName": "Lib.flow.skillQuest.ValueQuiz",
       "Position": {
         "X": 1580.2582,
         "Y": 1895.0925

@@ -46,21 +46,24 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "46d18eb7-013b-4f6f-8e86-2b37a0313fd2"/*_ImageFxShaderSetupStatic*/,
+      "ChildId": "46d18eb7-013b-4f6f-8e86-2b37a0313fd2",
+      "SymbolName": "Lib.render._dx11.fxsetup._ImageFxShaderSetupStatic",
       "Position": {
         "X": 604.3195,
         "Y": 265.85956
       }
     },
     {
-      "ChildId": "5e4ffbe2-74e8-440c-9939-6cefd81665db"/*IntToFloat*/,
+      "ChildId": "5e4ffbe2-74e8-440c-9939-6cefd81665db",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "Position": {
         "X": 303.7946,
         "Y": 420.24344
       }
     },
     {
-      "ChildId": "b5befc31-b387-40f0-8866-1804e4565e92"/*BoolToFloat*/,
+      "ChildId": "b5befc31-b387-40f0-8866-1804e4565e92",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
       "Position": {
         "X": 303.7946,
         "Y": 476.2435

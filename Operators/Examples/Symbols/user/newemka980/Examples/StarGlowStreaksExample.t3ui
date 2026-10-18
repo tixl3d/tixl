@@ -6,7 +6,8 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "07eddce9-4715-44d3-b680-3ef2de49e029"/*RenderTarget*/,
+      "ChildId": "07eddce9-4715-44d3-b680-3ef2de49e029",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "Comment": "You need to activate GenerateMips if you want to use StarGlowStreaks \"Quality\" parameter ",
       "Position": {
         "X": 1034.8723,
@@ -14,84 +15,96 @@
       }
     },
     {
-      "ChildId": "1648984e-7713-44bb-b0a9-15517be9a49a"/*LoadObj*/,
+      "ChildId": "1648984e-7713-44bb-b0a9-15517be9a49a",
+      "SymbolName": "Lib.mesh.generate.LoadObj",
       "Position": {
         "X": 0.0,
         "Y": 1.505127
       }
     },
     {
-      "ChildId": "47d2e751-1456-49bb-9a0d-219ad13f7f7e"/*StarGlowStreaks*/,
+      "ChildId": "47d2e751-1456-49bb-9a0d-219ad13f7f7e",
+      "SymbolName": "Lib.image.fx.stylize.StarGlowStreaks",
       "Position": {
         "X": 1184.8723,
         "Y": 0.0
       }
     },
     {
-      "ChildId": "4df7e315-7c55-4ec8-89d5-e3fdf753ef29"/*Camera*/,
+      "ChildId": "4df7e315-7c55-4ec8-89d5-e3fdf753ef29",
+      "SymbolName": "Lib.render.camera.Camera",
       "Position": {
         "X": 884.8723,
         "Y": 0.0
       }
     },
     {
-      "ChildId": "5deaa310-2e8e-4e06-b0f3-0625d0839a1e"/*CountInt*/,
+      "ChildId": "5deaa310-2e8e-4e06-b0f3-0625d0839a1e",
+      "SymbolName": "Lib.numbers.int.logic.CountInt",
       "Position": {
         "X": 1034.8723,
         "Y": 67.0
       }
     },
     {
-      "ChildId": "60bb64de-81e2-4bac-82a9-ed66f184e0f2"/*Vector3*/,
+      "ChildId": "60bb64de-81e2-4bac-82a9-ed66f184e0f2",
+      "SymbolName": "Types.Values.Vector3",
       "Position": {
         "X": 300.0,
         "Y": 68.50513
       }
     },
     {
-      "ChildId": "850465a0-21b0-40d8-884e-dc6ffc4f53d4"/*Counter*/,
+      "ChildId": "850465a0-21b0-40d8-884e-dc6ffc4f53d4",
+      "SymbolName": "Lib.numbers.anim._obsolete.Counter",
       "Position": {
         "X": 884.8723,
         "Y": 56.0
       }
     },
     {
-      "ChildId": "93020cd3-5474-41ae-829c-2aa3c82b0a9d"/*PointLight*/,
+      "ChildId": "93020cd3-5474-41ae-829c-2aa3c82b0a9d",
+      "SymbolName": "Lib.render.shading.PointLight",
       "Position": {
         "X": 600.0,
         "Y": 1.505127
       }
     },
     {
-      "ChildId": "ad2b2c36-e3f5-4573-b890-e9b2c9fb66f7"/*Transform*/,
+      "ChildId": "ad2b2c36-e3f5-4573-b890-e9b2c9fb66f7",
+      "SymbolName": "Lib.render.transform.Transform",
       "Position": {
         "X": 450.0,
         "Y": 1.505127
       }
     },
     {
-      "ChildId": "d042cea7-04a5-4467-a90f-af776b248180"/*AnimValue*/,
+      "ChildId": "d042cea7-04a5-4467-a90f-af776b248180",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "Position": {
         "X": 150.0,
         "Y": 57.505127
       }
     },
     {
-      "ChildId": "d5badc84-d616-4401-b116-b47c78f1189d"/*DrawMesh*/,
+      "ChildId": "d5badc84-d616-4401-b116-b47c78f1189d",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
       "Position": {
         "X": 150.0,
         "Y": 1.505127
       }
     },
     {
-      "ChildId": "ebae9d86-c74b-4163-9c98-b583b0d39934"/*PointLight*/,
+      "ChildId": "ebae9d86-c74b-4163-9c98-b583b0d39934",
+      "SymbolName": "Lib.render.shading.PointLight",
       "Position": {
         "X": 734.8723,
         "Y": 0.0
       }
     },
     {
-      "ChildId": "fba1bdbd-b53e-4b83-b854-d4eafe23f776"/*SetMaterial*/,
+      "ChildId": "fba1bdbd-b53e-4b83-b854-d4eafe23f776",
+      "SymbolName": "Lib.render.shading.SetMaterial",
       "Position": {
         "X": 300.0,
         "Y": 1.505127

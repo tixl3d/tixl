@@ -39,14 +39,16 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "731c76e2-57bf-4fe5-b259-d332d006a1b6"/*BoolToFloat*/,
+      "ChildId": "731c76e2-57bf-4fe5-b259-d332d006a1b6",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
       "Position": {
         "X": 304.73257,
         "Y": 111.34497
       }
     },
     {
-      "ChildId": "9d63c269-a033-4a94-a54f-4bbb45452440"/*_ImageFxShaderSetupStatic*/,
+      "ChildId": "9d63c269-a033-4a94-a54f-4bbb45452440",
+      "SymbolName": "Lib.render._dx11.fxsetup._ImageFxShaderSetupStatic",
       "Style": "Resizable",
       "Size": {
         "X": 94.37823,

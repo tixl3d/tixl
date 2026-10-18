@@ -27,161 +27,184 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "0313dd7b-d6df-40d4-ac36-27d5f953d9a0"/*ListToBuffer*/,
+      "ChildId": "0313dd7b-d6df-40d4-ac36-27d5f953d9a0",
+      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
       "Position": {
         "X": 386.79694,
         "Y": 26.067612
       }
     },
     {
-      "ChildId": "1153dcbf-486d-44dd-a9bb-5f61b57a087a"/*InvertFloat*/,
+      "ChildId": "1153dcbf-486d-44dd-a9bb-5f61b57a087a",
+      "SymbolName": "Lib.numbers.float.adjust.InvertFloat",
       "Position": {
         "X": -555.5922,
         "Y": 259.81836
       }
     },
     {
-      "ChildId": "1a2b308f-06b2-4069-95fb-93c3645e803c"/*Vector3*/,
+      "ChildId": "1a2b308f-06b2-4069-95fb-93c3645e803c",
+      "SymbolName": "Types.Values.Vector3",
       "Position": {
         "X": -438.6881,
         "Y": 559.50006
       }
     },
     {
-      "ChildId": "2c7eeccc-b355-4ea7-b629-b8e4af0479de"/*InvertFloat*/,
+      "ChildId": "2c7eeccc-b355-4ea7-b629-b8e4af0479de",
+      "SymbolName": "Lib.numbers.float.adjust.InvertFloat",
       "Position": {
         "X": -555.5922,
         "Y": 203.81837
       }
     },
     {
-      "ChildId": "30750953-11ec-4d05-beaa-aa13ec74a652"/*Point*/,
+      "ChildId": "30750953-11ec-4d05-beaa-aa13ec74a652",
+      "SymbolName": "Types.Values.Point",
       "Position": {
         "X": -236.01416,
         "Y": -110.43724
       }
     },
     {
-      "ChildId": "38f9a480-d888-48f0-853d-f460c342222f"/*Add*/,
+      "ChildId": "38f9a480-d888-48f0-853d-f460c342222f",
+      "SymbolName": "Lib.numbers.float.basic.Add",
       "Position": {
         "X": -950.21405,
         "Y": 187.40642
       }
     },
     {
-      "ChildId": "3b8725e1-ac57-4a50-b14e-2eb2f1b3bd3f"/*Vector3*/,
+      "ChildId": "3b8725e1-ac57-4a50-b14e-2eb2f1b3bd3f",
+      "SymbolName": "Types.Values.Vector3",
       "Position": {
         "X": -438.6881,
         "Y": 457.50006
       }
     },
     {
-      "ChildId": "3edfdf0d-bef3-49bc-8d05-4119e2445cd4"/*Vector3*/,
+      "ChildId": "3edfdf0d-bef3-49bc-8d05-4119e2445cd4",
+      "SymbolName": "Types.Values.Vector3",
       "Position": {
         "X": -375.7099,
         "Y": 300.31824
       }
     },
     {
-      "ChildId": "4e1263c9-b532-4c14-aab7-141b11ee91d6"/*CombineBuffers*/,
+      "ChildId": "4e1263c9-b532-4c14-aab7-141b11ee91d6",
+      "SymbolName": "Lib.point.combine.CombineBuffers",
       "Position": {
         "X": 340.2022,
         "Y": -305.0474
       }
     },
     {
-      "ChildId": "66aed708-1796-4394-8c0b-1d8e361e6509"/*Point*/,
+      "ChildId": "66aed708-1796-4394-8c0b-1d8e361e6509",
+      "SymbolName": "Types.Values.Point",
       "Position": {
         "X": -255.59222,
         "Y": 536.3587
       }
     },
     {
-      "ChildId": "80b1b216-a746-446a-970b-d2221451cef6"/*Vector3*/,
+      "ChildId": "80b1b216-a746-446a-970b-d2221451cef6",
+      "SymbolName": "Types.Values.Vector3",
       "Position": {
         "X": -405.59222,
         "Y": 203.81837
       }
     },
     {
-      "ChildId": "839099f7-609a-40f3-8aa4-d979f453fdc7"/*Point*/,
+      "ChildId": "839099f7-609a-40f3-8aa4-d979f453fdc7",
+      "SymbolName": "Types.Values.Point",
       "Position": {
         "X": -191.70581,
         "Y": 259.1012
       }
     },
     {
-      "ChildId": "86bf8a17-587a-4868-8a1f-d67543e65322"/*Vector3*/,
+      "ChildId": "86bf8a17-587a-4868-8a1f-d67543e65322",
+      "SymbolName": "Types.Values.Vector3",
       "Position": {
         "X": -438.6881,
         "Y": 661.50006
       }
     },
     {
-      "ChildId": "aaf540ca-309a-4867-975a-5bcbcc082223"/*InvertFloat*/,
+      "ChildId": "aaf540ca-309a-4867-975a-5bcbcc082223",
+      "SymbolName": "Lib.numbers.float.adjust.InvertFloat",
       "Position": {
         "X": -555.5922,
         "Y": -0.18162537
       }
     },
     {
-      "ChildId": "b2ae429b-1852-4bd0-a46a-5452431d1f6d"/*Point*/,
+      "ChildId": "b2ae429b-1852-4bd0-a46a-5452431d1f6d",
+      "SymbolName": "Types.Values.Point",
       "Position": {
         "X": -255.59222,
         "Y": 625.3587
       }
     },
     {
-      "ChildId": "b3704241-6714-42a3-99a8-378b3b3059f9"/*Point*/,
+      "ChildId": "b3704241-6714-42a3-99a8-378b3b3059f9",
+      "SymbolName": "Types.Values.Point",
       "Position": {
         "X": -144.27869,
         "Y": 363.8883
       }
     },
     {
-      "ChildId": "bffcca08-3527-4cba-bf88-a7d2543c0acf"/*Point*/,
+      "ChildId": "bffcca08-3527-4cba-bf88-a7d2543c0acf",
+      "SymbolName": "Types.Values.Point",
       "Position": {
         "X": -255.59222,
         "Y": 203.81837
       }
     },
     {
-      "ChildId": "cca91bab-893a-42d5-95a4-9c45c017333a"/*Vector3*/,
+      "ChildId": "cca91bab-893a-42d5-95a4-9c45c017333a",
+      "SymbolName": "Types.Values.Vector3",
       "Position": {
         "X": -405.59222,
         "Y": -0.18162537
       }
     },
     {
-      "ChildId": "d0a0ffb1-edaa-4aa2-8021-4f114f3aac29"/*Point*/,
+      "ChildId": "d0a0ffb1-edaa-4aa2-8021-4f114f3aac29",
+      "SymbolName": "Types.Values.Point",
       "Position": {
         "X": -162.85388,
         "Y": 56.47963
       }
     },
     {
-      "ChildId": "d2e679e8-533e-49ae-9b1a-9c10283ee2d7"/*Point*/,
+      "ChildId": "d2e679e8-533e-49ae-9b1a-9c10283ee2d7",
+      "SymbolName": "Types.Values.Point",
       "Position": {
         "X": -162.85388,
         "Y": 112.47963
       }
     },
     {
-      "ChildId": "da37f5e7-7a0a-4440-87ac-186897b91aae"/*Point*/,
+      "ChildId": "da37f5e7-7a0a-4440-87ac-186897b91aae",
+      "SymbolName": "Types.Values.Point",
       "Position": {
         "X": -255.59222,
         "Y": 480.3587
       }
     },
     {
-      "ChildId": "eb5d1378-111f-4ce8-b4bd-de4c09dee835"/*InvertFloat*/,
+      "ChildId": "eb5d1378-111f-4ce8-b4bd-de4c09dee835",
+      "SymbolName": "Lib.numbers.float.adjust.InvertFloat",
       "Position": {
         "X": -555.5922,
         "Y": 101.818375
       }
     },
     {
-      "ChildId": "f28856fa-59e0-44ff-b6f7-9d6a4c23e9ac"/*Vector3*/,
+      "ChildId": "f28856fa-59e0-44ff-b6f7-9d6a4c23e9ac",
+      "SymbolName": "Types.Values.Vector3",
       "Position": {
         "X": -405.59222,
         "Y": 101.818375

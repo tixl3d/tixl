@@ -27,140 +27,160 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "000238ef-e565-424b-8fa4-4ac5283ad948"/*Text*/,
+      "ChildId": "000238ef-e565-424b-8fa4-4ac5283ad948",
+      "SymbolName": "Lib.render.basic.Text",
       "Position": {
         "X": 803.1116,
         "Y": 86.002106
       }
     },
     {
-      "ChildId": "1a044400-c968-4b74-a8b3-aa93d883de15"/*Or*/,
+      "ChildId": "1a044400-c968-4b74-a8b3-aa93d883de15",
+      "SymbolName": "Lib.numbers.bool.combine.Or",
       "Position": {
         "X": 353.11157,
         "Y": 86.002106
       }
     },
     {
-      "ChildId": "1d78f240-ce09-48e8-b588-321e52b19458"/*PickString*/,
+      "ChildId": "1d78f240-ce09-48e8-b588-321e52b19458",
+      "SymbolName": "Lib.string.logic.PickString",
       "Position": {
         "X": 353.11157,
         "Y": 224.0021
       }
     },
     {
-      "ChildId": "25e0dcba-ccbb-4fc8-80a4-6a8bfe22a69b"/*BoolToInt*/,
+      "ChildId": "25e0dcba-ccbb-4fc8-80a4-6a8bfe22a69b",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToInt",
       "Position": {
         "X": 203.11157,
         "Y": 373.0021
       }
     },
     {
-      "ChildId": "314a8eab-47c2-4f7e-acca-3a9dceff49c3"/*FloatToInt*/,
+      "ChildId": "314a8eab-47c2-4f7e-acca-3a9dceff49c3",
+      "SymbolName": "Lib.numbers.int.process.FloatToInt",
       "Position": {
         "X": 353.11157,
         "Y": 496.0021
       }
     },
     {
-      "ChildId": "38808ac9-faa3-4352-9cbe-cb118974253b"/*Or*/,
+      "ChildId": "38808ac9-faa3-4352-9cbe-cb118974253b",
+      "SymbolName": "Lib.numbers.bool.combine.Or",
       "Position": {
         "X": 353.11157,
         "Y": 155.0021
       }
     },
     {
-      "ChildId": "4a982b30-42cf-4244-9bba-41f5e39bff66"/*BuildRandomString*/,
+      "ChildId": "4a982b30-42cf-4244-9bba-41f5e39bff66",
+      "SymbolName": "Lib.string.random.BuildRandomString",
       "Position": {
         "X": 503.11157,
         "Y": 86.002106
       }
     },
     {
-      "ChildId": "524a59da-bd7e-4150-bedc-a8bc1cb22392"/*Pow*/,
+      "ChildId": "524a59da-bd7e-4150-bedc-a8bc1cb22392",
+      "SymbolName": "Lib.numbers.float.basic.Pow",
       "Position": {
         "X": 53.111572,
         "Y": 496.0021
       }
     },
     {
-      "ChildId": "5b1103c1-d3d9-435a-bda5-3229025aae73"/*_LegacyAudioReaction*/,
+      "ChildId": "5b1103c1-d3d9-435a-bda5-3229025aae73",
+      "SymbolName": "Lib.io.audio._obsolete._LegacyAudioReaction",
       "Position": {
         "X": -246.88843,
         "Y": 373.0021
       }
     },
     {
-      "ChildId": "65b880fe-db64-4552-8af1-29d93ea9a518"/*IsGreater*/,
+      "ChildId": "65b880fe-db64-4552-8af1-29d93ea9a518",
+      "SymbolName": "Lib.numbers.float.logic.IsGreater",
       "Position": {
         "X": -96.88843,
         "Y": 373.0021
       }
     },
     {
-      "ChildId": "7680b97a-764c-44f2-ac9a-f53b6826ec90"/*Or*/,
+      "ChildId": "7680b97a-764c-44f2-ac9a-f53b6826ec90",
+      "SymbolName": "Lib.numbers.bool.combine.Or",
       "Position": {
         "X": 53.111572,
         "Y": 373.0021
       }
     },
     {
-      "ChildId": "7c209ce9-6287-45bf-8c48-e1ef6db3ad35"/*_LegacyAudioReaction*/,
+      "ChildId": "7c209ce9-6287-45bf-8c48-e1ef6db3ad35",
+      "SymbolName": "Lib.io.audio._obsolete._LegacyAudioReaction",
       "Position": {
         "X": 203.11157,
         "Y": 155.0021
       }
     },
     {
-      "ChildId": "8cd1100c-6d43-4b37-9925-312be0219cb0"/*PickStringPart*/,
+      "ChildId": "8cd1100c-6d43-4b37-9925-312be0219cb0",
+      "SymbolName": "Lib.string.logic.PickStringPart",
       "Position": {
         "X": 203.11157,
         "Y": 224.0021
       }
     },
     {
-      "ChildId": "8daf0ccf-c5bb-496e-bacd-1f409381343e"/*_LegacyAudioReaction*/,
+      "ChildId": "8daf0ccf-c5bb-496e-bacd-1f409381343e",
+      "SymbolName": "Lib.io.audio._obsolete._LegacyAudioReaction",
       "Position": {
         "X": 203.11157,
         "Y": 86.002106
       }
     },
     {
-      "ChildId": "a11c23d1-5a49-4bf3-ad10-16209effd9da"/*ChangeCase*/,
+      "ChildId": "a11c23d1-5a49-4bf3-ad10-16209effd9da",
+      "SymbolName": "Lib.string.transform.ChangeCase",
       "Position": {
         "X": 653.1116,
         "Y": 86.002106
       }
     },
     {
-      "ChildId": "a7e76f69-16ea-49e8-bf26-077528b00ecc"/*CountInt*/,
+      "ChildId": "a7e76f69-16ea-49e8-bf26-077528b00ecc",
+      "SymbolName": "Lib.numbers.int.logic.CountInt",
       "Position": {
         "X": 53.111572,
         "Y": 267.0021
       }
     },
     {
-      "ChildId": "ace452a4-7afa-4714-b0cb-5f83f7ce04b3"/*MockStrings*/,
+      "ChildId": "ace452a4-7afa-4714-b0cb-5f83f7ce04b3",
+      "SymbolName": "Lib.string.random.MockStrings",
       "Position": {
         "X": 53.111572,
         "Y": 224.0021
       }
     },
     {
-      "ChildId": "b9856cc5-261e-4e43-8b86-aa8e653a1d2b"/*_LegacyAudioReaction*/,
+      "ChildId": "b9856cc5-261e-4e43-8b86-aa8e653a1d2b",
+      "SymbolName": "Lib.io.audio._obsolete._LegacyAudioReaction",
       "Position": {
         "X": -96.88843,
         "Y": 496.0021
       }
     },
     {
-      "ChildId": "cfe128d9-b087-4d2a-8b71-0b9ea35872ea"/*Multiply*/,
+      "ChildId": "cfe128d9-b087-4d2a-8b71-0b9ea35872ea",
+      "SymbolName": "Lib.numbers.float.basic.Multiply",
       "Position": {
         "X": 203.11157,
         "Y": 496.0021
       }
     },
     {
-      "ChildId": "e7128979-a61d-4b2d-b66e-f6b15f04b385"/*String*/,
+      "ChildId": "e7128979-a61d-4b2d-b66e-f6b15f04b385",
+      "SymbolName": "Types.Values.String",
       "Position": {
         "X": 203.11157,
         "Y": 330.0021

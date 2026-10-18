@@ -5,105 +5,120 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "032369ea-6dfd-4f8c-ad77-32a37e01c6de"/*ExecuteTests*/,
+      "ChildId": "032369ea-6dfd-4f8c-ad77-32a37e01c6de",
+      "SymbolName": "Examples.testing.ExecuteTests",
       "Position": {
         "X": 296.762,
         "Y": 681.0258
       }
     },
     {
-      "ChildId": "0e675013-1925-4741-a9e0-c0d055641e03"/*IoTests*/,
+      "ChildId": "0e675013-1925-4741-a9e0-c0d055641e03",
+      "SymbolName": "Examples.testing.IoTests",
       "Position": {
         "X": 156.762,
         "Y": 646.0258
       }
     },
     {
-      "ChildId": "10faad6c-183d-4705-bbf2-fda99f5c99e9"/*Test all*/,
+      "ChildId": "10faad6c-183d-4705-bbf2-fda99f5c99e9",
+      "SymbolName": "Examples.testing.ExecuteTests",
       "Position": {
         "X": 436.762,
         "Y": 506.02582
       }
     },
     {
-      "ChildId": "1e456b87-7d8c-4f8b-ab29-fdecb8defc3c"/*ExecuteTests*/,
+      "ChildId": "1e456b87-7d8c-4f8b-ab29-fdecb8defc3c",
+      "SymbolName": "Examples.testing.ExecuteTests",
       "Position": {
         "X": 296.762,
         "Y": 716.0258
       }
     },
     {
-      "ChildId": "33977f8e-023b-4b37-8b93-41fc742c956e"/*ExecuteTests*/,
+      "ChildId": "33977f8e-023b-4b37-8b93-41fc742c956e",
+      "SymbolName": "Examples.testing.ExecuteTests",
       "Position": {
         "X": 296.762,
         "Y": 541.0258
       }
     },
     {
-      "ChildId": "36284a42-864f-4028-97f5-1133530a9c97"/*MathTests*/,
+      "ChildId": "36284a42-864f-4028-97f5-1133530a9c97",
+      "SymbolName": "Examples.testing.MathTests",
       "Position": {
         "X": 156.762,
         "Y": 716.0258
       }
     },
     {
-      "ChildId": "59c24bca-ab64-4edf-9bc9-a122d0649914"/*ExecuteTests*/,
+      "ChildId": "59c24bca-ab64-4edf-9bc9-a122d0649914",
+      "SymbolName": "Examples.testing.ExecuteTests",
       "Position": {
         "X": 296.762,
         "Y": 611.0258
       }
     },
     {
-      "ChildId": "7a825daf-6620-4b08-b3d8-4d1c1dd28666"/*ParticleTests*/,
+      "ChildId": "7a825daf-6620-4b08-b3d8-4d1c1dd28666",
+      "SymbolName": "Examples.testing.ParticleTests",
       "Position": {
         "X": 156.762,
         "Y": 506.02585
       }
     },
     {
-      "ChildId": "804c58c6-544d-41b6-8e5a-00b5574ee947"/*ExecuteTests*/,
+      "ChildId": "804c58c6-544d-41b6-8e5a-00b5574ee947",
+      "SymbolName": "Examples.testing.ExecuteTests",
       "Position": {
         "X": 296.762,
         "Y": 506.02585
       }
     },
     {
-      "ChildId": "85e65c1c-c4ac-46ac-a321-840638f83b02"/*PbrTests*/,
+      "ChildId": "85e65c1c-c4ac-46ac-a321-840638f83b02",
+      "SymbolName": "Examples.testing.PbrTests",
       "Position": {
         "X": 156.762,
         "Y": 681.0258
       }
     },
     {
-      "ChildId": "8aad18ca-aec8-41c2-835c-2d4da1c5025e"/*DemoProjectTests*/,
+      "ChildId": "8aad18ca-aec8-41c2-835c-2d4da1c5025e",
+      "SymbolName": "Examples.testing.DemoProjectTests",
       "Position": {
         "X": 156.76201,
         "Y": 541.0258
       }
     },
     {
-      "ChildId": "d6bc9851-841a-44c0-961e-d4991b799556"/*ShaderTests*/,
+      "ChildId": "d6bc9851-841a-44c0-961e-d4991b799556",
+      "SymbolName": "Examples.testing.ShaderTests",
       "Position": {
         "X": 156.76201,
         "Y": 576.0258
       }
     },
     {
-      "ChildId": "dff1caad-9921-4d27-9916-5f15ed93151a"/*ExecuteTests*/,
+      "ChildId": "dff1caad-9921-4d27-9916-5f15ed93151a",
+      "SymbolName": "Examples.testing.ExecuteTests",
       "Position": {
         "X": 296.762,
         "Y": 576.0258
       }
     },
     {
-      "ChildId": "ea931cc3-c474-403e-8e64-ea0c584f16ac"/*ExecuteTests*/,
+      "ChildId": "ea931cc3-c474-403e-8e64-ea0c584f16ac",
+      "SymbolName": "Examples.testing.ExecuteTests",
       "Position": {
         "X": 296.762,
         "Y": 646.0258
       }
     },
     {
-      "ChildId": "ec6f7a65-02e9-4231-a6ce-20a2c908c7c8"/*PointTests*/,
+      "ChildId": "ec6f7a65-02e9-4231-a6ce-20a2c908c7c8",
+      "SymbolName": "Examples.testing.PointTests",
       "Position": {
         "X": 156.762,
         "Y": 611.0258

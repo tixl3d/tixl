@@ -15,98 +15,112 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "11e62dfd-c9de-4714-9115-5fcdbf720331"/*Multiply*/,
+      "ChildId": "11e62dfd-c9de-4714-9115-5fcdbf720331",
+      "SymbolName": "Lib.numbers.float.basic.Multiply",
       "Position": {
         "X": 19.560425,
         "Y": 195.0003
       }
     },
     {
-      "ChildId": "1d04262b-da7f-49de-a0a3-7de7589d20af"/*Floor*/,
+      "ChildId": "1d04262b-da7f-49de-a0a3-7de7589d20af",
+      "SymbolName": "Lib.numbers.float.adjust.Floor",
       "Position": {
         "X": 319.56042,
         "Y": 43.000122
       }
     },
     {
-      "ChildId": "1e1ae105-ea95-4b2c-9e7d-32fd934fab38"/*Modulo*/,
+      "ChildId": "1e1ae105-ea95-4b2c-9e7d-32fd934fab38",
+      "SymbolName": "Lib.numbers.float.basic.Modulo",
       "Position": {
         "X": 169.56042,
         "Y": 119.000305
       }
     },
     {
-      "ChildId": "387f494b-68de-40a3-9da4-9b4bed7caf91"/*Floor*/,
+      "ChildId": "387f494b-68de-40a3-9da4-9b4bed7caf91",
+      "SymbolName": "Lib.numbers.float.adjust.Floor",
       "Position": {
         "X": 319.56042,
         "Y": 119.000305
       }
     },
     {
-      "ChildId": "4693a9d2-485e-4e3b-9f07-496181b4281f"/*Div*/,
+      "ChildId": "4693a9d2-485e-4e3b-9f07-496181b4281f",
+      "SymbolName": "Lib.numbers.float.basic.Div",
       "Position": {
         "X": 169.56042,
         "Y": 43.000122
       }
     },
     {
-      "ChildId": "58230175-3f7a-4b01-b1b6-27193dc5a0e2"/*FloatToString*/,
+      "ChildId": "58230175-3f7a-4b01-b1b6-27193dc5a0e2",
+      "SymbolName": "Lib.string.convert.FloatToString",
       "Position": {
         "X": 469.56042,
         "Y": 195.0003
       }
     },
     {
-      "ChildId": "706dc843-9a95-4cf7-bb9a-ac1a8c1d4ce2"/*String*/,
+      "ChildId": "706dc843-9a95-4cf7-bb9a-ac1a8c1d4ce2",
+      "SymbolName": "Types.Values.String",
       "Position": {
         "X": 458.7432,
         "Y": -97.51553
       }
     },
     {
-      "ChildId": "98c950e9-b0c4-4cee-be31-b9cd1ee60eed"/*FloatToString*/,
+      "ChildId": "98c950e9-b0c4-4cee-be31-b9cd1ee60eed",
+      "SymbolName": "Lib.string.convert.FloatToString",
       "Position": {
         "X": 469.56042,
         "Y": 119.000305
       }
     },
     {
-      "ChildId": "ac87ddda-5e7f-4d85-a22a-3af5e274c154"/*Floor*/,
+      "ChildId": "ac87ddda-5e7f-4d85-a22a-3af5e274c154",
+      "SymbolName": "Lib.numbers.float.adjust.Floor",
       "Position": {
         "X": 319.56042,
         "Y": 195.0003
       }
     },
     {
-      "ChildId": "cdf0eb8d-e5e0-4a5c-8efa-63f1942fa4d9"/*CombineStrings*/,
+      "ChildId": "cdf0eb8d-e5e0-4a5c-8efa-63f1942fa4d9",
+      "SymbolName": "Lib.string.combine.CombineStrings",
       "Position": {
         "X": 769.5604,
         "Y": 0.0
       }
     },
     {
-      "ChildId": "e5168e43-3129-4c1d-81c6-33ef4d80ea71"/*FloatToString*/,
+      "ChildId": "e5168e43-3129-4c1d-81c6-33ef4d80ea71",
+      "SymbolName": "Lib.string.convert.FloatToString",
       "Position": {
         "X": 469.56042,
         "Y": 43.000122
       }
     },
     {
-      "ChildId": "e96babee-8ef9-411c-81f9-fdf3015b9289"/*_Time_old*/,
+      "ChildId": "e96babee-8ef9-411c-81f9-fdf3015b9289",
+      "SymbolName": "Lib.numbers.anim._obsolete._Time_old",
       "Position": {
         "X": -101.543846,
         "Y": 92.77409
       }
     },
     {
-      "ChildId": "f7f79af2-50d8-4bbc-bb8f-0d08fec71b29"/*Modulo*/,
+      "ChildId": "f7f79af2-50d8-4bbc-bb8f-0d08fec71b29",
+      "SymbolName": "Lib.numbers.float.basic.Modulo",
       "Position": {
         "X": 169.56042,
         "Y": 195.0003
       }
     },
     {
-      "ChildId": "febcd3dc-8adf-430b-a94e-eba1c010e1a8"/*CombineStrings*/,
+      "ChildId": "febcd3dc-8adf-430b-a94e-eba1c010e1a8",
+      "SymbolName": "Lib.string.combine.CombineStrings",
       "Position": {
         "X": 619.5604,
         "Y": 0.0

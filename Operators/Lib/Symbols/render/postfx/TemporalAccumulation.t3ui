@@ -25,63 +25,72 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "1d62239f-f62b-4309-87bb-d3fbf764520e"/*Execute*/,
+      "ChildId": "1d62239f-f62b-4309-87bb-d3fbf764520e",
+      "SymbolName": "Lib.flow.Execute",
       "Position": {
         "X": 312.7604,
         "Y": 152.91663
       }
     },
     {
-      "ChildId": "2179cb75-d55d-46fb-9551-49486aba0f07"/*Layer2d*/,
+      "ChildId": "2179cb75-d55d-46fb-9551-49486aba0f07",
+      "SymbolName": "Lib.render.basic.Layer2d",
       "Position": {
         "X": 172.7604,
         "Y": 187.91663
       }
     },
     {
-      "ChildId": "3d804d1b-d03b-45e3-84b6-cade78641f4a"/*RenderTarget*/,
+      "ChildId": "3d804d1b-d03b-45e3-84b6-cade78641f4a",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "Position": {
         "X": 312.7604,
         "Y": 257.91663
       }
     },
     {
-      "ChildId": "458be0e1-9eac-4708-b2a8-fa6cc26bbabc"/*Remap*/,
+      "ChildId": "458be0e1-9eac-4708-b2a8-fa6cc26bbabc",
+      "SymbolName": "Lib.numbers.float.adjust.Remap",
       "Position": {
         "X": -201.2475,
         "Y": 309.911
       }
     },
     {
-      "ChildId": "74abbceb-dc19-4a84-82da-237265cc9bdb"/*Layer2d*/,
+      "ChildId": "74abbceb-dc19-4a84-82da-237265cc9bdb",
+      "SymbolName": "Lib.render.basic.Layer2d",
       "Position": {
         "X": 172.7604,
         "Y": 152.91663
       }
     },
     {
-      "ChildId": "bb84e22d-210f-4224-861b-b8be21140222"/*HSLToColor*/,
+      "ChildId": "bb84e22d-210f-4224-861b-b8be21140222",
+      "SymbolName": "Lib.numbers.color.HSLToColor",
       "Position": {
         "X": -61.247498,
         "Y": 274.911
       }
     },
     {
-      "ChildId": "d31d5859-403a-4e60-985a-81113b483ada"/*GetTextureSize*/,
+      "ChildId": "d31d5859-403a-4e60-985a-81113b483ada",
+      "SymbolName": "Lib.render._dx11.api.GetTextureSize",
       "Position": {
         "X": 88.03029,
         "Y": 356.75616
       }
     },
     {
-      "ChildId": "e176933b-cb87-4967-9fe7-fc0cb213a16e"/*UseTextureReference*/,
+      "ChildId": "e176933b-cb87-4967-9fe7-fc0cb213a16e",
+      "SymbolName": "Lib.image.use.UseTextureReference",
       "Position": {
         "X": 32.760406,
         "Y": 117.916626
       }
     },
     {
-      "ChildId": "f22e37b7-0eb5-4947-9d53-e9313520402b"/*ConvertFormat*/,
+      "ChildId": "f22e37b7-0eb5-4947-9d53-e9313520402b",
+      "SymbolName": "Lib.image.color.ConvertFormat",
       "Position": {
         "X": -201.2475,
         "Y": 93.02562

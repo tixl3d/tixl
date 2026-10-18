@@ -14,42 +14,48 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "374777d6-9686-495d-b0e8-8b39e4cb9262"/*GetAllSpatialAudioPlayers*/,
+      "ChildId": "374777d6-9686-495d-b0e8-8b39e4cb9262",
+      "SymbolName": "Lib.io.audio._.GetAllSpatialAudioPlayers",
       "Position": {
         "X": 351.5141,
         "Y": 57.39151
       }
     },
     {
-      "ChildId": "610a8da0-b6cd-42d9-a889-a4f5c08cf6c4"/*GetFloatVar*/,
+      "ChildId": "610a8da0-b6cd-42d9-a889-a4f5c08cf6c4",
+      "SymbolName": "Lib.flow.context.GetFloatVar",
       "Position": {
         "X": 51.5141,
         "Y": 57.39151
       }
     },
     {
-      "ChildId": "6fa114be-e7bf-44df-bd41-9bf776201bdd"/*VisibleGizmos*/,
+      "ChildId": "6fa114be-e7bf-44df-bd41-9bf776201bdd",
+      "SymbolName": "Lib.render.gizmo.VisibleGizmos",
       "Position": {
         "X": 1022.3395,
         "Y": 25.186798
       }
     },
     {
-      "ChildId": "7acbee3f-7fc6-4290-a23f-c28e86e07a19"/*Loop*/,
+      "ChildId": "7acbee3f-7fc6-4290-a23f-c28e86e07a19",
+      "SymbolName": "Lib.flow.Loop",
       "Position": {
         "X": 855.0232,
         "Y": 21.888428
       }
     },
     {
-      "ChildId": "900c2ddd-ade7-4fe0-aa0f-5301b7a1ff92"/*SpatialAudioPlayerGizmo*/,
+      "ChildId": "900c2ddd-ade7-4fe0-aa0f-5301b7a1ff92",
+      "SymbolName": "Lib.io.audio.SpatialAudioPlayerGizmo",
       "Position": {
         "X": 550.0,
         "Y": 0.0
       }
     },
     {
-      "ChildId": "bdcdcb92-47d7-4c8d-86ec-dce784a59391"/*FloatToInt*/,
+      "ChildId": "bdcdcb92-47d7-4c8d-86ec-dce784a59391",
+      "SymbolName": "Lib.numbers.int.process.FloatToInt",
       "Position": {
         "X": 201.5141,
         "Y": 57.39151

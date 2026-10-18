@@ -138,28 +138,32 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "0094265a-6359-4b3a-b5be-3562f05f8d45"/*Vector2Components*/,
+      "ChildId": "0094265a-6359-4b3a-b5be-3562f05f8d45",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Position": {
         "X": -127.04544,
         "Y": -96.62457
       }
     },
     {
-      "ChildId": "06917b14-4bd5-4840-8991-5c43626a36dc"/*BoolToFloat*/,
+      "ChildId": "06917b14-4bd5-4840-8991-5c43626a36dc",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
       "Position": {
         "X": -120.71631,
         "Y": 318.82593
       }
     },
     {
-      "ChildId": "06fadd69-478c-4583-b86e-3c7091a24edd"/*IntToFloat*/,
+      "ChildId": "06fadd69-478c-4583-b86e-3c7091a24edd",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "Position": {
         "X": -121.629974,
         "Y": 511.77606
       }
     },
     {
-      "ChildId": "1e874625-65bf-47cd-8024-93c7b4c8b140"/*Vector4Components*/,
+      "ChildId": "1e874625-65bf-47cd-8024-93c7b4c8b140",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "Comment": "Connection order (top left, top right, bottom right, bottom left) ",
       "Position": {
         "X": -123.87378,
@@ -167,28 +171,32 @@
       }
     },
     {
-      "ChildId": "3b46ece1-a7be-42f1-a3e4-c4bda3a03169"/*Vector2Components*/,
+      "ChildId": "3b46ece1-a7be-42f1-a3e4-c4bda3a03169",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Position": {
         "X": -127.04544,
         "Y": -152.62457
       }
     },
     {
-      "ChildId": "45b30540-b3b5-4790-ba75-f9fee6bf4e36"/*BoolToFloat*/,
+      "ChildId": "45b30540-b3b5-4790-ba75-f9fee6bf4e36",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
       "Position": {
         "X": -120.71631,
         "Y": 374.82593
       }
     },
     {
-      "ChildId": "4810224c-6cc8-456b-b364-6a580b560e9f"/*Vector2Components*/,
+      "ChildId": "4810224c-6cc8-456b-b364-6a580b560e9f",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Position": {
         "X": -120.71631,
         "Y": 430.82593
       }
     },
     {
-      "ChildId": "8b8d8b02-50d2-448e-87fa-28bfca5116b2"/*_multiImageFxSetupStatic*/,
+      "ChildId": "8b8d8b02-50d2-448e-87fa-28bfca5116b2",
+      "SymbolName": "Lib.image.fx._._multiImageFxSetupStatic",
       "Style": "Resizable",
       "Size": {
         "X": 123.87697,
@@ -200,7 +208,8 @@
       }
     },
     {
-      "ChildId": "decf22da-532e-4d45-acb0-4d1072d9921e"/*GradientsToTexture*/,
+      "ChildId": "decf22da-532e-4d45-acb0-4d1072d9921e",
+      "SymbolName": "Lib.numbers.color.GradientsToTexture",
       "Position": {
         "X": -131.32559,
         "Y": -233.28627

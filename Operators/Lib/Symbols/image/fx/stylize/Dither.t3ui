@@ -105,35 +105,40 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "238dc22f-8b2b-41ac-8940-3290676b8bc0"/*IntToFloat*/,
+      "ChildId": "238dc22f-8b2b-41ac-8940-3290676b8bc0",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "Position": {
         "X": 263.2812,
         "Y": 731.94055
       }
     },
     {
-      "ChildId": "311c9229-8fd2-4be3-8434-e1133555a2e0"/*Vector4Components*/,
+      "ChildId": "311c9229-8fd2-4be3-8434-e1133555a2e0",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "Position": {
         "X": 281.75464,
         "Y": 46.275253
       }
     },
     {
-      "ChildId": "4481713e-e7b7-4f01-b154-7e9d01bb0a52"/*Vector2Components*/,
+      "ChildId": "4481713e-e7b7-4f01-b154-7e9d01bb0a52",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Position": {
         "X": 321.69183,
         "Y": 459.18488
       }
     },
     {
-      "ChildId": "674834e4-75bf-4b83-b477-a816ca3fa914"/*IntToFloat*/,
+      "ChildId": "674834e4-75bf-4b83-b477-a816ca3fa914",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "Position": {
         "X": 281.75458,
         "Y": 158.27525
       }
     },
     {
-      "ChildId": "6894bd29-0a18-49ae-b044-0cd2f3684bf0"/*_ImageFxShaderSetupStatic*/,
+      "ChildId": "6894bd29-0a18-49ae-b044-0cd2f3684bf0",
+      "SymbolName": "Lib.render._dx11.fxsetup._ImageFxShaderSetupStatic",
       "Style": "Resizable",
       "Size": {
         "X": 94.37823,
@@ -145,21 +150,24 @@
       }
     },
     {
-      "ChildId": "7d74437e-b5ad-4caf-939f-ea0f79fe7047"/*Vector4Components*/,
+      "ChildId": "7d74437e-b5ad-4caf-939f-ea0f79fe7047",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "Position": {
         "X": 282.46725,
         "Y": 251.62688
       }
     },
     {
-      "ChildId": "b1e594ab-15c0-4671-966d-da419f7c0fcf"/*Vector4Components*/,
+      "ChildId": "b1e594ab-15c0-4671-966d-da419f7c0fcf",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "Position": {
         "X": 281.75464,
         "Y": 102.27525
       }
     },
     {
-      "ChildId": "c633a809-71f5-49c4-9e25-a63d927d11aa"/*Vector2Components*/,
+      "ChildId": "c633a809-71f5-49c4-9e25-a63d927d11aa",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Position": {
         "X": 318.12875,
         "Y": 319.93036

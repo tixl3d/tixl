@@ -6,7 +6,8 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "b469fc56-51fc-45d3-9a63-3927fe197138"/*Sharpen*/,
+      "ChildId": "b469fc56-51fc-45d3-9a63-3927fe197138",
+      "SymbolName": "Lib.image.fx.blur.Sharpen",
       "Style": "Expanded",
       "Size": {
         "X": 110.0,
@@ -18,14 +19,16 @@
       }
     },
     {
-      "ChildId": "bb4e1d6e-faab-4453-94e7-e0bb7c0969c5"/*AnimValue*/,
+      "ChildId": "bb4e1d6e-faab-4453-94e7-e0bb7c0969c5",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "Position": {
         "X": 26.22644,
         "Y": 65.35385
       }
     },
     {
-      "ChildId": "f7cbbc29-1e79-46c0-8898-45eb9ab624be"/*LoadImage*/,
+      "ChildId": "f7cbbc29-1e79-46c0-8898-45eb9ab624be",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
       "Position": {
         "X": 26.22644,
         "Y": 22.353851

@@ -93,28 +93,32 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "75fe3e72-b48c-43d1-92e3-f561f265e267"/*Vector2Components*/,
+      "ChildId": "75fe3e72-b48c-43d1-92e3-f561f265e267",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Position": {
         "X": 73.386856,
         "Y": 298.96735
       }
     },
     {
-      "ChildId": "76edc622-4167-4597-afd0-13b9222d9252"/*AddInt*/,
+      "ChildId": "76edc622-4167-4597-afd0-13b9222d9252",
+      "SymbolName": "Lib.numbers.int.basic.AddInt",
       "Position": {
         "X": -66.613144,
         "Y": 403.96735
       }
     },
     {
-      "ChildId": "85cf6521-ca2d-430e-aebe-717a296bb241"/*Vector2Components*/,
+      "ChildId": "85cf6521-ca2d-430e-aebe-717a296bb241",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Position": {
         "X": 73.386856,
         "Y": 88.96735
       }
     },
     {
-      "ChildId": "de84e6e7-09d3-4dd5-99bc-6df69cc82102"/*_ImageFxShaderSetup2*/,
+      "ChildId": "de84e6e7-09d3-4dd5-99bc-6df69cc82102",
+      "SymbolName": "Lib.render._dx11.fxsetup._ImageFxShaderSetup2",
       "Style": "Resizable",
       "Size": {
         "X": 71.010735,
@@ -126,7 +130,8 @@
       }
     },
     {
-      "ChildId": "dff286b4-4685-47c8-a133-0bc012cc1130"/*IntToWrapmode*/,
+      "ChildId": "dff286b4-4685-47c8-a133-0bc012cc1130",
+      "SymbolName": "Lib.render.shading.IntToWrapmode",
       "Position": {
         "X": 73.386856,
         "Y": 403.96735

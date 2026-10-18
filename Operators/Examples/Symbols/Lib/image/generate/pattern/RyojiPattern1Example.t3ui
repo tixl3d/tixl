@@ -5,63 +5,72 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "1f825751-27ad-44c0-9c8a-73c2063b929c"/*TriggerAnim*/,
+      "ChildId": "1f825751-27ad-44c0-9c8a-73c2063b929c",
+      "SymbolName": "Lib.numbers.anim.animators.TriggerAnim",
       "Position": {
         "X": 150.0,
         "Y": 153.0
       }
     },
     {
-      "ChildId": "26b5d65c-6db4-4590-8525-03266e000752"/*OrbitCamera*/,
+      "ChildId": "26b5d65c-6db4-4590-8525-03266e000752",
+      "SymbolName": "Lib.render.camera.OrbitCamera",
       "Position": {
         "X": 750.0,
         "Y": 0.0
       }
     },
     {
-      "ChildId": "49dcff0e-b823-45e7-bb5e-b1d71d05911a"/*Glow*/,
+      "ChildId": "49dcff0e-b823-45e7-bb5e-b1d71d05911a",
+      "SymbolName": "Lib.image.fx.stylize.Glow",
       "Position": {
         "X": 1050.0,
         "Y": 0.0
       }
     },
     {
-      "ChildId": "70eb40e7-a073-49f0-93a0-659e2af78681"/*RenderTarget*/,
+      "ChildId": "70eb40e7-a073-49f0-93a0-659e2af78681",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "Position": {
         "X": 900.0,
         "Y": 0.0
       }
     },
     {
-      "ChildId": "76c0472a-c867-4133-b637-d0c082833807"/*DrawMeshUnlit*/,
+      "ChildId": "76c0472a-c867-4133-b637-d0c082833807",
+      "SymbolName": "Lib.mesh.draw.DrawMeshUnlit",
       "Position": {
         "X": 600.0,
         "Y": 0.0
       }
     },
     {
-      "ChildId": "ad7710c7-522a-4451-8f16-29024ce191ff"/*AnimValue*/,
+      "ChildId": "ad7710c7-522a-4451-8f16-29024ce191ff",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "Position": {
         "X": 0.0,
         "Y": 195.3086
       }
     },
     {
-      "ChildId": "d8c274ef-5bb0-4706-9dd6-bc1e39ebca02"/*RyojiPattern1*/,
+      "ChildId": "d8c274ef-5bb0-4706-9dd6-bc1e39ebca02",
+      "SymbolName": "Lib.image.generate.pattern.RyojiPattern1",
       "Position": {
         "X": 450.0,
         "Y": 153.0
       }
     },
     {
-      "ChildId": "e9cbe991-e4f9-4cad-9184-ec8b1a6f4c03"/*TorusMesh*/,
+      "ChildId": "e9cbe991-e4f9-4cad-9184-ec8b1a6f4c03",
+      "SymbolName": "Lib.mesh.generate.TorusMesh",
       "Position": {
         "X": 450.0,
         "Y": 0.0
       }
     },
     {
-      "ChildId": "e9d92a69-1a9e-432e-9a5f-5ea08b599ca6"/*SampleGradient*/,
+      "ChildId": "e9d92a69-1a9e-432e-9a5f-5ea08b599ca6",
+      "SymbolName": "Lib.numbers.color.SampleGradient",
       "Position": {
         "X": 300.0,
         "Y": 153.0

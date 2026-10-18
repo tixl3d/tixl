@@ -5,7 +5,8 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "0394d4d2-168d-4063-93b8-281266b299eb"/*LinearGradient*/,
+      "ChildId": "0394d4d2-168d-4063-93b8-281266b299eb",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "Position": {
         "X": 754.97363,
         "Y": -133.28906
@@ -13,21 +14,24 @@
       "SnapshotGroupIndex": "1"
     },
     {
-      "ChildId": "122a4bf0-c0e1-4789-a492-a355b4c1b55d"/*SampleGradient*/,
+      "ChildId": "122a4bf0-c0e1-4789-a492-a355b4c1b55d",
+      "SymbolName": "Lib.numbers.color.SampleGradient",
       "Position": {
         "X": 474.97366,
         "Y": 41.710938
       }
     },
     {
-      "ChildId": "29a38486-c7c5-4756-aaac-b3eb47f5fb4a"/*shapeSize*/,
+      "ChildId": "29a38486-c7c5-4756-aaac-b3eb47f5fb4a",
+      "SymbolName": "Lib.io.midi.MidiInput",
       "Position": {
         "X": 614.97363,
         "Y": 146.71094
       }
     },
     {
-      "ChildId": "39e1aa58-2cb2-4be0-8da0-a8d6014815b4"/*FraserGrid*/,
+      "ChildId": "39e1aa58-2cb2-4be0-8da0-a8d6014815b4",
+      "SymbolName": "Lib.image.generate.pattern.FraserGrid",
       "Position": {
         "X": 754.97363,
         "Y": 6.7109375
@@ -35,21 +39,24 @@
       "SnapshotGroupIndex": "1"
     },
     {
-      "ChildId": "4162b59d-4a41-4ec3-963f-103d6c12bbab"/*Counter*/,
+      "ChildId": "4162b59d-4a41-4ec3-963f-103d6c12bbab",
+      "SymbolName": "Lib.numbers.anim._obsolete.Counter",
       "Position": {
         "X": 614.97363,
         "Y": -98.28906
       }
     },
     {
-      "ChildId": "6174c42d-fb40-4c6d-9e0b-3516844c418d"/*WasTrigger*/,
+      "ChildId": "6174c42d-fb40-4c6d-9e0b-3516844c418d",
+      "SymbolName": "Lib.numbers.bool.logic.WasTrigger",
       "Position": {
         "X": 474.97366,
         "Y": -98.28906
       }
     },
     {
-      "ChildId": "6350ebf9-ba57-4932-b8d1-84b4e54f76b4"/*RadialGradient*/,
+      "ChildId": "6350ebf9-ba57-4932-b8d1-84b4e54f76b4",
+      "SymbolName": "Lib.image.generate.basic.RadialGradient",
       "Position": {
         "X": 754.97363,
         "Y": -63.289062
@@ -57,21 +64,24 @@
       "SnapshotGroupIndex": "1"
     },
     {
-      "ChildId": "7f41d342-c7d3-43ad-978e-523206307b4e"/*Counter*/,
+      "ChildId": "7f41d342-c7d3-43ad-978e-523206307b4e",
+      "SymbolName": "Lib.numbers.anim._obsolete.Counter",
       "Position": {
         "X": 614.97363,
         "Y": -28.289062
       }
     },
     {
-      "ChildId": "b19c3149-cfcd-4a0f-bf7d-45651934cad0"/*MirrorRepeat*/,
+      "ChildId": "b19c3149-cfcd-4a0f-bf7d-45651934cad0",
+      "SymbolName": "Lib.image.transform.MirrorRepeat",
       "Position": {
         "X": 754.97363,
         "Y": 181.71094
       }
     },
     {
-      "ChildId": "b230f04e-e446-4491-a853-0cbab9edecfc"/*BlendColors*/,
+      "ChildId": "b230f04e-e446-4491-a853-0cbab9edecfc",
+      "SymbolName": "Lib.numbers.color.BlendColors",
       "Position": {
         "X": 614.97363,
         "Y": 41.710938
@@ -79,28 +89,32 @@
       "SnapshotGroupIndex": "1"
     },
     {
-      "ChildId": "b2850946-d8d0-4f73-b873-b9ce3c5e3470"/*Layer2d*/,
+      "ChildId": "b2850946-d8d0-4f73-b873-b9ce3c5e3470",
+      "SymbolName": "Lib.render.basic.Layer2d",
       "Position": {
         "X": 754.97363,
         "Y": 216.71094
       }
     },
     {
-      "ChildId": "e0b9e37e-5d26-458a-8b21-3690bcc2574e"/*Counter*/,
+      "ChildId": "e0b9e37e-5d26-458a-8b21-3690bcc2574e",
+      "SymbolName": "Lib.numbers.anim._obsolete.Counter",
       "Position": {
         "X": 334.97366,
         "Y": 41.710938
       }
     },
     {
-      "ChildId": "f57c6b1e-8302-4f24-9aeb-6e32f980e192"/*_Time_old*/,
+      "ChildId": "f57c6b1e-8302-4f24-9aeb-6e32f980e192",
+      "SymbolName": "Lib.numbers.anim._obsolete._Time_old",
       "Position": {
         "X": 614.97363,
         "Y": 111.71094
       }
     },
     {
-      "ChildId": "ffb24236-a628-4ed9-9cc2-57494fbd62ab"/*AnimValue*/,
+      "ChildId": "ffb24236-a628-4ed9-9cc2-57494fbd62ab",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "Position": {
         "X": 614.97363,
         "Y": 76.71094

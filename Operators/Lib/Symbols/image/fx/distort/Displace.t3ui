@@ -121,21 +121,24 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "0da95969-3de8-4603-9b0e-477c1aa6eb11"/*Vector2Components*/,
+      "ChildId": "0da95969-3de8-4603-9b0e-477c1aa6eb11",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Position": {
         "X": 333.24564,
         "Y": 648.5328
       }
     },
     {
-      "ChildId": "defb45ad-5d5f-466f-8198-e7a7fb055698"/*BoolToInt*/,
+      "ChildId": "defb45ad-5d5f-466f-8198-e7a7fb055698",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToInt",
       "Position": {
         "X": 333.24564,
         "Y": 893.5328
       }
     },
     {
-      "ChildId": "fb73be5e-fcb2-43d4-ae9e-211b9a41be50"/*_multiImageFxSetupStatic*/,
+      "ChildId": "fb73be5e-fcb2-43d4-ae9e-211b9a41be50",
+      "SymbolName": "Lib.image.fx._._multiImageFxSetupStatic",
       "Position": {
         "X": 473.24564,
         "Y": 403.53278

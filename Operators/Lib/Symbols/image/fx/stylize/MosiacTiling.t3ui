@@ -115,42 +115,48 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "0b046afa-a364-40b3-a97d-708873e0c551"/*IntToFloat*/,
+      "ChildId": "0b046afa-a364-40b3-a97d-708873e0c551",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "Position": {
         "X": 320.84106,
         "Y": 428.41513
       }
     },
     {
-      "ChildId": "13fc6ec5-f483-4ff3-84ac-71f43730c65c"/*FirstValidTexture*/,
+      "ChildId": "13fc6ec5-f483-4ff3-84ac-71f43730c65c",
+      "SymbolName": "Lib.image.use.FirstValidTexture",
       "Position": {
         "X": 336.12442,
         "Y": -173.25787
       }
     },
     {
-      "ChildId": "14ef1100-1ad6-4057-bd74-4000c6ece035"/*Vector4Components*/,
+      "ChildId": "14ef1100-1ad6-4057-bd74-4000c6ece035",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "Position": {
         "X": 321.74207,
         "Y": 328.45667
       }
     },
     {
-      "ChildId": "bfe8150d-e0f6-4f4e-a3d3-cd8a50ae6ca4"/*Vector2Components*/,
+      "ChildId": "bfe8150d-e0f6-4f4e-a3d3-cd8a50ae6ca4",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Position": {
         "X": 321.91418,
         "Y": 93.95676
       }
     },
     {
-      "ChildId": "cad868ef-df34-49de-8653-1d3276d7066f"/*_multiImageFxSetup*/,
+      "ChildId": "cad868ef-df34-49de-8653-1d3276d7066f",
+      "SymbolName": "Lib.image.fx._._multiImageFxSetup",
       "Position": {
         "X": 688.4922,
         "Y": 192.03278
       }
     },
     {
-      "ChildId": "efb30cae-7028-412e-9401-5ff7acec8a27"/*Vector2Components*/,
+      "ChildId": "efb30cae-7028-412e-9401-5ff7acec8a27",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Position": {
         "X": 321.91418,
         "Y": 37.956757

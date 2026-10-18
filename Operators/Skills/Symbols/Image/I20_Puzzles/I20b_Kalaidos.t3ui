@@ -5,7 +5,8 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "13b8427a-b4a2-4cb3-abde-99386d664e68"/*MirrorRepeat*/,
+      "ChildId": "13b8427a-b4a2-4cb3-abde-99386d664e68",
+      "SymbolName": "Lib.image.transform.MirrorRepeat",
       "SectionId": "ed1b88c6-7ef2-4f1a-b570-c4dbf61194f2",
       "Position": {
         "X": 1317.2501,
@@ -13,21 +14,24 @@
       }
     },
     {
-      "ChildId": "2b6c7ccf-089a-4586-9277-515bc11a4006"/*MirrorRepeat*/,
+      "ChildId": "2b6c7ccf-089a-4586-9277-515bc11a4006",
+      "SymbolName": "Lib.image.transform.MirrorRepeat",
       "Position": {
         "X": 1251.486,
         "Y": 1923.6543
       }
     },
     {
-      "ChildId": "512ba494-05a6-4fed-b11f-d285bd7ce33c"/*MirrorRepeat*/,
+      "ChildId": "512ba494-05a6-4fed-b11f-d285bd7ce33c",
+      "SymbolName": "Lib.image.transform.MirrorRepeat",
       "Position": {
         "X": 1251.486,
         "Y": 1989.6571
       }
     },
     {
-      "ChildId": "78634de5-dd36-48dc-81fa-0b42fe71f2da"/*Time*/,
+      "ChildId": "78634de5-dd36-48dc-81fa-0b42fe71f2da",
+      "SymbolName": "Lib.numbers.anim.time.Time",
       "SectionId": "ed1b88c6-7ef2-4f1a-b570-c4dbf61194f2",
       "Position": {
         "X": 1131.6339,
@@ -35,7 +39,8 @@
       }
     },
     {
-      "ChildId": "8fa6edbf-9368-43bc-9097-89dd78a241b9"/*MirrorRepeat*/,
+      "ChildId": "8fa6edbf-9368-43bc-9097-89dd78a241b9",
+      "SymbolName": "Lib.image.transform.MirrorRepeat",
       "SectionId": "ed1b88c6-7ef2-4f1a-b570-c4dbf61194f2",
       "Position": {
         "X": 1317.2501,
@@ -43,21 +48,24 @@
       }
     },
     {
-      "ChildId": "96a6040b-a96f-45b5-842f-11067c040266"/*Time*/,
+      "ChildId": "96a6040b-a96f-45b5-842f-11067c040266",
+      "SymbolName": "Lib.numbers.anim.time.Time",
       "Position": {
         "X": 1251.486,
         "Y": 1779.4012
       }
     },
     {
-      "ChildId": "a52407ec-749f-495a-8a39-98442ea8bda9"/*ImageQuiz*/,
+      "ChildId": "a52407ec-749f-495a-8a39-98442ea8bda9",
+      "SymbolName": "Lib.flow.skillQuest.ImageQuiz",
       "Position": {
         "X": 1609.7146,
         "Y": 2018.4391
       }
     },
     {
-      "ChildId": "d9f887a5-afb1-4099-b3d4-20d6c5b215f3"/*LinearGradient*/,
+      "ChildId": "d9f887a5-afb1-4099-b3d4-20d6c5b215f3",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "SectionId": "ed1b88c6-7ef2-4f1a-b570-c4dbf61194f2",
       "Position": {
         "X": 1177.2501,
@@ -65,7 +73,8 @@
       }
     },
     {
-      "ChildId": "ee124649-1946-4bdf-ba13-53cb895453fd"/*LinearGradient*/,
+      "ChildId": "ee124649-1946-4bdf-ba13-53cb895453fd",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "Position": {
         "X": 1251.486,
         "Y": 1854.1033

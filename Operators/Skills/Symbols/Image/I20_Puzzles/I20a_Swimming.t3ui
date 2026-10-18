@@ -5,14 +5,16 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "55e78d83-4594-4383-9732-324c63a081b0"/*ImageQuiz*/,
+      "ChildId": "55e78d83-4594-4383-9732-324c63a081b0",
+      "SymbolName": "Lib.flow.skillQuest.ImageQuiz",
       "Position": {
         "X": 1609.7146,
         "Y": 2018.439
       }
     },
     {
-      "ChildId": "86fba173-6ca3-46c8-bc07-4cf36f21eab7"/*RoundedRect*/,
+      "ChildId": "86fba173-6ca3-46c8-bc07-4cf36f21eab7",
+      "SymbolName": "Lib.image.generate.basic.RoundedRect",
       "SectionId": "e721438d-4362-4b32-a0f7-e654b4cddc4a",
       "Position": {
         "X": 1285.9601,
@@ -20,14 +22,16 @@
       }
     },
     {
-      "ChildId": "8ed19911-dace-4057-beef-0f225faf2b66"/*RoundedRect*/,
+      "ChildId": "8ed19911-dace-4057-beef-0f225faf2b66",
+      "SymbolName": "Lib.image.generate.basic.RoundedRect",
       "Position": {
         "X": 1285.9601,
         "Y": 1916.2874
       }
     },
     {
-      "ChildId": "9b49ce28-2811-4472-8fb7-510116070391"/*Time*/,
+      "ChildId": "9b49ce28-2811-4472-8fb7-510116070391",
+      "SymbolName": "Lib.numbers.anim.time.Time",
       "SectionId": "e721438d-4362-4b32-a0f7-e654b4cddc4a",
       "Position": {
         "X": 1145.9601,
@@ -35,14 +39,16 @@
       }
     },
     {
-      "ChildId": "b3a217e5-e264-4f90-8758-f2a503d6dfcb"/*MirrorRepeat*/,
+      "ChildId": "b3a217e5-e264-4f90-8758-f2a503d6dfcb",
+      "SymbolName": "Lib.image.transform.MirrorRepeat",
       "Position": {
         "X": 1285.9601,
         "Y": 1976.4393
       }
     },
     {
-      "ChildId": "b7afbfe2-5a1c-49ba-80b7-bae2c6e1754e"/*MirrorRepeat*/,
+      "ChildId": "b7afbfe2-5a1c-49ba-80b7-bae2c6e1754e",
+      "SymbolName": "Lib.image.transform.MirrorRepeat",
       "SectionId": "e721438d-4362-4b32-a0f7-e654b4cddc4a",
       "Position": {
         "X": 1285.9601,
@@ -50,7 +56,8 @@
       }
     },
     {
-      "ChildId": "d8eb0294-3162-4cb7-b58c-8b0f99482715"/*Time*/,
+      "ChildId": "d8eb0294-3162-4cb7-b58c-8b0f99482715",
+      "SymbolName": "Lib.numbers.anim.time.Time",
       "Position": {
         "X": 1285.9601,
         "Y": 1858.818

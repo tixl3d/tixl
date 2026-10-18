@@ -5,7 +5,7 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "052aa4d9-4146-4f40-8762-ff5701e5f312"/*Reset*/,
+      "ChildId": "052aa4d9-4146-4f40-8762-ff5701e5f312",
       "SymbolName": "Lib.io.midi.MidiInput",
       "Position": {
         "X": 175.81274,
@@ -13,7 +13,7 @@
       }
     },
     {
-      "ChildId": "0ab7e002-3c1e-4d63-a696-a727437864b4"/*FadingSlideShow*/,
+      "ChildId": "0ab7e002-3c1e-4d63-a696-a727437864b4",
       "SymbolName": "Lib.render.basic.FadingSlideShow",
       "Position": {
         "X": 1367.9558,
@@ -21,7 +21,7 @@
       }
     },
     {
-      "ChildId": "0deb5bd3-b3ec-4b73-97b3-94c771f07e65"/*Zoom*/,
+      "ChildId": "0deb5bd3-b3ec-4b73-97b3-94c771f07e65",
       "SymbolName": "Lib.io.midi.MidiInput",
       "SectionId": "ecffd0eb-f156-4a39-95ca-c5fa89113fe2",
       "Position": {
@@ -30,7 +30,7 @@
       }
     },
     {
-      "ChildId": "0e3bc54a-b109-4ec1-ac16-6f5eac92f28a"/*HasValueIncreased*/,
+      "ChildId": "0e3bc54a-b109-4ec1-ac16-6f5eac92f28a",
       "SymbolName": "Lib.numbers.float.logic.HasValueIncreased",
       "Position": {
         "X": 1367.9558,
@@ -38,7 +38,7 @@
       }
     },
     {
-      "ChildId": "1ac9cc4e-ff7f-4723-998e-5b1fb46a736a"/*MidiInput*/,
+      "ChildId": "1ac9cc4e-ff7f-4723-998e-5b1fb46a736a",
       "SymbolName": "Lib.io.midi.MidiInput",
       "Position": {
         "X": -324.75317,
@@ -46,7 +46,7 @@
       }
     },
     {
-      "ChildId": "1d54577e-e035-4a5d-ad64-3595c5c12377"/*DisplaceOffset*/,
+      "ChildId": "1d54577e-e035-4a5d-ad64-3595c5c12377",
       "SymbolName": "Lib.io.midi.MidiInput",
       "SectionId": "ecffd0eb-f156-4a39-95ca-c5fa89113fe2",
       "Position": {
@@ -55,7 +55,7 @@
       }
     },
     {
-      "ChildId": "1e23e73d-3289-41c8-b5af-f0e77d4564b5"/*AdvancedFeedback2*/,
+      "ChildId": "1e23e73d-3289-41c8-b5af-f0e77d4564b5",
       "SymbolName": "Lib.image.fx.feedback.AdvancedFeedback2",
       "SectionId": "ecffd0eb-f156-4a39-95ca-c5fa89113fe2",
       "Position": {
@@ -65,7 +65,7 @@
       "SnapshotGroupIndex": "1"
     },
     {
-      "ChildId": "21c84324-63af-4156-8380-274a32747bc1"/*Displace*/,
+      "ChildId": "21c84324-63af-4156-8380-274a32747bc1",
       "SymbolName": "Lib.io.midi.MidiInput",
       "SectionId": "ecffd0eb-f156-4a39-95ca-c5fa89113fe2",
       "Position": {
@@ -74,7 +74,7 @@
       }
     },
     {
-      "ChildId": "276d250f-46d6-4350-a0cd-dbc48ca2bee7"/*DisplaceOffset*/,
+      "ChildId": "276d250f-46d6-4350-a0cd-dbc48ca2bee7",
       "SymbolName": "Lib.io.midi.MidiInput",
       "SectionId": "ecffd0eb-f156-4a39-95ca-c5fa89113fe2",
       "Position": {
@@ -83,7 +83,7 @@
       }
     },
     {
-      "ChildId": "2a4c441a-8d82-45a9-a2d6-f119f64c204f"/*Reset*/,
+      "ChildId": "2a4c441a-8d82-45a9-a2d6-f119f64c204f",
       "SymbolName": "Lib.io.midi.MidiInput",
       "SectionId": "ecffd0eb-f156-4a39-95ca-c5fa89113fe2",
       "Position": {
@@ -92,7 +92,7 @@
       }
     },
     {
-      "ChildId": "303c58d1-c408-4843-9722-1abf2b52792f"/*ChannelMixer*/,
+      "ChildId": "303c58d1-c408-4843-9722-1abf2b52792f",
       "SymbolName": "Lib.image.color.ChannelMixer",
       "Position": {
         "X": 1577.9558,
@@ -101,7 +101,7 @@
       "SnapshotGroupIndex": "1"
     },
     {
-      "ChildId": "306de2a7-3821-4cc6-befb-8b42898d2cba"/*Counter*/,
+      "ChildId": "306de2a7-3821-4cc6-befb-8b42898d2cba",
       "SymbolName": "Lib.numbers.anim._obsolete.Counter",
       "Position": {
         "X": 1367.9558,
@@ -109,7 +109,7 @@
       }
     },
     {
-      "ChildId": "3076309a-5a5e-4c3d-a29b-1bcd4b1d86fa"/*TriggerAnim*/,
+      "ChildId": "3076309a-5a5e-4c3d-a29b-1bcd4b1d86fa",
       "SymbolName": "Lib.numbers.anim.animators.TriggerAnim",
       "SectionId": "ecffd0eb-f156-4a39-95ca-c5fa89113fe2",
       "Position": {
@@ -118,7 +118,7 @@
       }
     },
     {
-      "ChildId": "309343fc-e106-4957-95f1-ed3c29ae4cad"/*Compare*/,
+      "ChildId": "309343fc-e106-4957-95f1-ed3c29ae4cad",
       "SymbolName": "Lib.numbers.float.logic.Compare",
       "SectionId": "ecffd0eb-f156-4a39-95ca-c5fa89113fe2",
       "Position": {
@@ -127,7 +127,7 @@
       }
     },
     {
-      "ChildId": "3bf46c20-ba89-4c9c-a92c-4a31f69a5796"/*MidiInput*/,
+      "ChildId": "3bf46c20-ba89-4c9c-a92c-4a31f69a5796",
       "SymbolName": "Lib.io.midi.MidiInput",
       "SectionId": "ecffd0eb-f156-4a39-95ca-c5fa89113fe2",
       "Position": {
@@ -136,7 +136,7 @@
       }
     },
     {
-      "ChildId": "3dcb115d-11ec-482e-9c36-8cbd7d57b649"/*AnimValue*/,
+      "ChildId": "3dcb115d-11ec-482e-9c36-8cbd7d57b649",
       "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "SectionId": "ecffd0eb-f156-4a39-95ca-c5fa89113fe2",
       "Position": {
@@ -145,7 +145,7 @@
       }
     },
     {
-      "ChildId": "44b75d2a-a2fd-4d1f-8b3e-7e6b54df5317"/*Reset*/,
+      "ChildId": "44b75d2a-a2fd-4d1f-8b3e-7e6b54df5317",
       "SymbolName": "Lib.io.midi.MidiInput",
       "SectionId": "ecffd0eb-f156-4a39-95ca-c5fa89113fe2",
       "Position": {
@@ -154,7 +154,7 @@
       }
     },
     {
-      "ChildId": "46d9abfe-ee02-4a99-90f6-c09b52efd925"/*Layer2d*/,
+      "ChildId": "46d9abfe-ee02-4a99-90f6-c09b52efd925",
       "SymbolName": "Lib.render.basic.Layer2d",
       "SectionId": "ecffd0eb-f156-4a39-95ca-c5fa89113fe2",
       "Position": {
@@ -164,7 +164,7 @@
       "SnapshotGroupIndex": "1"
     },
     {
-      "ChildId": "5d23fbaa-eedf-4ec2-851d-ff0e3c12ee63"/*AnimValue*/,
+      "ChildId": "5d23fbaa-eedf-4ec2-851d-ff0e3c12ee63",
       "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "SectionId": "ecffd0eb-f156-4a39-95ca-c5fa89113fe2",
       "Position": {
@@ -174,7 +174,7 @@
       "SnapshotGroupIndex": "1"
     },
     {
-      "ChildId": "66075924-243d-480e-bf6f-a6f056b79348"/*GetFloatVar*/,
+      "ChildId": "66075924-243d-480e-bf6f-a6f056b79348",
       "SymbolName": "Lib.flow.context.GetFloatVar",
       "Position": {
         "X": 1367.9558,
@@ -182,7 +182,7 @@
       }
     },
     {
-      "ChildId": "68855513-1a1d-4e32-b5da-2ff5a3f6dfd7"/*Reset*/,
+      "ChildId": "68855513-1a1d-4e32-b5da-2ff5a3f6dfd7",
       "SymbolName": "Lib.io.midi.MidiInput",
       "SectionId": "ecffd0eb-f156-4a39-95ca-c5fa89113fe2",
       "Position": {
@@ -191,7 +191,7 @@
       }
     },
     {
-      "ChildId": "6a95dcd4-de40-4a2e-9f45-8b5f70cfb50b"/*Displace*/,
+      "ChildId": "6a95dcd4-de40-4a2e-9f45-8b5f70cfb50b",
       "SymbolName": "Lib.io.midi.MidiInput",
       "SectionId": "ecffd0eb-f156-4a39-95ca-c5fa89113fe2",
       "Position": {
@@ -200,7 +200,7 @@
       }
     },
     {
-      "ChildId": "6afb8c7f-3ac3-4c88-885a-982b34ff4942"/*Reset*/,
+      "ChildId": "6afb8c7f-3ac3-4c88-885a-982b34ff4942",
       "SymbolName": "Lib.io.midi.MidiInput",
       "SectionId": "ecffd0eb-f156-4a39-95ca-c5fa89113fe2",
       "Position": {
@@ -209,7 +209,7 @@
       }
     },
     {
-      "ChildId": "6c8d172b-05d8-4852-a173-d47e901f9571"/*WasTrigger*/,
+      "ChildId": "6c8d172b-05d8-4852-a173-d47e901f9571",
       "SymbolName": "Lib.numbers.bool.logic.WasTrigger",
       "SectionId": "ecffd0eb-f156-4a39-95ca-c5fa89113fe2",
       "Position": {
@@ -218,7 +218,7 @@
       }
     },
     {
-      "ChildId": "7584dfd9-1126-4f7a-872d-135ccf5142fc"/*Reset*/,
+      "ChildId": "7584dfd9-1126-4f7a-872d-135ccf5142fc",
       "SymbolName": "Lib.io.midi.MidiInput",
       "SectionId": "ecffd0eb-f156-4a39-95ca-c5fa89113fe2",
       "Position": {
@@ -227,7 +227,7 @@
       }
     },
     {
-      "ChildId": "78e47020-c4ac-4322-bfab-b967696c3ee9"/*Reset*/,
+      "ChildId": "78e47020-c4ac-4322-bfab-b967696c3ee9",
       "SymbolName": "Lib.io.midi.MidiInput",
       "SectionId": "ecffd0eb-f156-4a39-95ca-c5fa89113fe2",
       "Position": {
@@ -236,7 +236,7 @@
       }
     },
     {
-      "ChildId": "7c07ad71-7321-4a01-b899-3d14a4e17810"/*Reset*/,
+      "ChildId": "7c07ad71-7321-4a01-b899-3d14a4e17810",
       "SymbolName": "Lib.io.midi.MidiInput",
       "SectionId": "ecffd0eb-f156-4a39-95ca-c5fa89113fe2",
       "Position": {
@@ -245,7 +245,7 @@
       }
     },
     {
-      "ChildId": "7c1bd6c1-90d6-4d8d-aaea-be199aebfc8b"/*ColorGrade*/,
+      "ChildId": "7c1bd6c1-90d6-4d8d-aaea-be199aebfc8b",
       "SymbolName": "Lib.image.color.ColorGrade",
       "Position": {
         "X": 1787.9558,
@@ -253,7 +253,7 @@
       }
     },
     {
-      "ChildId": "7c578035-05fe-46b9-bf4c-e7c028a621fd"/*BoolToInt*/,
+      "ChildId": "7c578035-05fe-46b9-bf4c-e7c028a621fd",
       "SymbolName": "Lib.numbers.bool.convert.BoolToInt",
       "SectionId": "ecffd0eb-f156-4a39-95ca-c5fa89113fe2",
       "Position": {
@@ -262,7 +262,7 @@
       }
     },
     {
-      "ChildId": "81e219c6-c49b-42e5-b3de-312b325bd526"/*Reset*/,
+      "ChildId": "81e219c6-c49b-42e5-b3de-312b325bd526",
       "SymbolName": "Lib.io.midi.MidiInput",
       "SectionId": "ecffd0eb-f156-4a39-95ca-c5fa89113fe2",
       "Position": {
@@ -271,7 +271,7 @@
       }
     },
     {
-      "ChildId": "8a18bda2-bf69-475f-a1d0-7f7cddd36f83"/*HSLToColor*/,
+      "ChildId": "8a18bda2-bf69-475f-a1d0-7f7cddd36f83",
       "SymbolName": "Lib.numbers.color.HSLToColor",
       "Position": {
         "X": 1647.9558,
@@ -279,7 +279,7 @@
       }
     },
     {
-      "ChildId": "8cb6c53a-9516-41c4-8565-bce416b3ccef"/*Reset*/,
+      "ChildId": "8cb6c53a-9516-41c4-8565-bce416b3ccef",
       "SymbolName": "Lib.io.midi.MidiInput",
       "SectionId": "ecffd0eb-f156-4a39-95ca-c5fa89113fe2",
       "Position": {
@@ -288,7 +288,7 @@
       }
     },
     {
-      "ChildId": "8dc1a635-fa0b-41fd-8e95-aed4e41e520e"/*RgbaToColor*/,
+      "ChildId": "8dc1a635-fa0b-41fd-8e95-aed4e41e520e",
       "SymbolName": "Lib.numbers.vec4.RgbaToColor",
       "SectionId": "ecffd0eb-f156-4a39-95ca-c5fa89113fe2",
       "Position": {
@@ -297,7 +297,7 @@
       }
     },
     {
-      "ChildId": "901f64af-e0cc-4e0a-8b9f-cb370465c81b"/*Colorize*/,
+      "ChildId": "901f64af-e0cc-4e0a-8b9f-cb370465c81b",
       "SymbolName": "Lib.io.midi.MidiInput",
       "SectionId": "ecffd0eb-f156-4a39-95ca-c5fa89113fe2",
       "Position": {
@@ -306,7 +306,7 @@
       }
     },
     {
-      "ChildId": "93e260ea-c1ea-47e4-9513-a6782bc0fd3c"/*BlendColors*/,
+      "ChildId": "93e260ea-c1ea-47e4-9513-a6782bc0fd3c",
       "SymbolName": "Lib.numbers.color.BlendColors",
       "SectionId": "ecffd0eb-f156-4a39-95ca-c5fa89113fe2",
       "Position": {
@@ -315,7 +315,7 @@
       }
     },
     {
-      "ChildId": "9c132599-faef-4539-bcbe-1e544e0a3eea"/*ColorGrade*/,
+      "ChildId": "9c132599-faef-4539-bcbe-1e544e0a3eea",
       "SymbolName": "Lib.image.color.ColorGrade",
       "SectionId": "ecffd0eb-f156-4a39-95ca-c5fa89113fe2",
       "Position": {
@@ -325,7 +325,7 @@
       "SnapshotGroupIndex": "1"
     },
     {
-      "ChildId": "aa5f45bc-2e3b-4800-abe8-137ec743c8cf"/*PickTexture*/,
+      "ChildId": "aa5f45bc-2e3b-4800-abe8-137ec743c8cf",
       "SymbolName": "Lib.image.use.PickTexture",
       "SectionId": "ecffd0eb-f156-4a39-95ca-c5fa89113fe2",
       "Position": {
@@ -334,7 +334,7 @@
       }
     },
     {
-      "ChildId": "aefb14f4-3556-4486-a581-cba2b1f756ea"/*Layer2d*/,
+      "ChildId": "aefb14f4-3556-4486-a581-cba2b1f756ea",
       "SymbolName": "Lib.render.basic.Layer2d",
       "SectionId": "ecffd0eb-f156-4a39-95ca-c5fa89113fe2",
       "Position": {
@@ -343,7 +343,7 @@
       }
     },
     {
-      "ChildId": "bb1d8749-8f19-4a25-9f8f-6f2c6495a1c1"/*SampleGradient*/,
+      "ChildId": "bb1d8749-8f19-4a25-9f8f-6f2c6495a1c1",
       "SymbolName": "Lib.numbers.color.SampleGradient",
       "SectionId": "ecffd0eb-f156-4a39-95ca-c5fa89113fe2",
       "Position": {
@@ -352,7 +352,7 @@
       }
     },
     {
-      "ChildId": "bc71408b-40e4-444d-a924-59777eb8d870"/*Twist*/,
+      "ChildId": "bc71408b-40e4-444d-a924-59777eb8d870",
       "SymbolName": "Lib.io.midi.MidiInput",
       "Position": {
         "X": 459.94455,
@@ -360,7 +360,7 @@
       }
     },
     {
-      "ChildId": "be36eb9d-4c3b-4b33-a8ae-c2d05c7704fb"/*Rotate*/,
+      "ChildId": "be36eb9d-4c3b-4b33-a8ae-c2d05c7704fb",
       "SymbolName": "Lib.io.midi.MidiInput",
       "SectionId": "ecffd0eb-f156-4a39-95ca-c5fa89113fe2",
       "Position": {
@@ -369,7 +369,7 @@
       }
     },
     {
-      "ChildId": "c60abe42-1006-4c26-8cd8-bb0360c8957b"/*Twist*/,
+      "ChildId": "c60abe42-1006-4c26-8cd8-bb0360c8957b",
       "SymbolName": "Lib.io.midi.MidiInput",
       "SectionId": "ecffd0eb-f156-4a39-95ca-c5fa89113fe2",
       "Position": {
@@ -378,7 +378,7 @@
       }
     },
     {
-      "ChildId": "cc168702-5748-4d23-86b3-8ba5e96ca043"/*Colorize*/,
+      "ChildId": "cc168702-5748-4d23-86b3-8ba5e96ca043",
       "SymbolName": "Lib.io.midi.MidiInput",
       "SectionId": "ecffd0eb-f156-4a39-95ca-c5fa89113fe2",
       "Position": {
@@ -387,7 +387,7 @@
       }
     },
     {
-      "ChildId": "d7f2e199-576c-4542-85ee-46ae2d4269f4"/*TriggerAnim*/,
+      "ChildId": "d7f2e199-576c-4542-85ee-46ae2d4269f4",
       "SymbolName": "Lib.numbers.anim.animators.TriggerAnim",
       "SectionId": "ecffd0eb-f156-4a39-95ca-c5fa89113fe2",
       "Position": {
@@ -396,7 +396,7 @@
       }
     },
     {
-      "ChildId": "e882eb1b-9e64-43be-a222-0e5e72389caf"/*Rotate*/,
+      "ChildId": "e882eb1b-9e64-43be-a222-0e5e72389caf",
       "SymbolName": "Lib.io.midi.MidiInput",
       "SectionId": "ecffd0eb-f156-4a39-95ca-c5fa89113fe2",
       "Position": {
@@ -405,7 +405,7 @@
       }
     },
     {
-      "ChildId": "eef426d1-08c5-46c4-afb6-cc83cbb81548"/*Reset*/,
+      "ChildId": "eef426d1-08c5-46c4-afb6-cc83cbb81548",
       "SymbolName": "Lib.io.midi.MidiInput",
       "SectionId": "ecffd0eb-f156-4a39-95ca-c5fa89113fe2",
       "Position": {
@@ -414,7 +414,7 @@
       }
     },
     {
-      "ChildId": "f0ea5331-0153-4b51-84d6-a65b48cb2a91"/*Reset*/,
+      "ChildId": "f0ea5331-0153-4b51-84d6-a65b48cb2a91",
       "SymbolName": "Lib.io.midi.MidiInput",
       "SectionId": "ecffd0eb-f156-4a39-95ca-c5fa89113fe2",
       "Position": {
@@ -423,7 +423,7 @@
       }
     },
     {
-      "ChildId": "f17d012c-9e0d-433a-96ad-af5c5988bcbf"/*Zoom*/,
+      "ChildId": "f17d012c-9e0d-433a-96ad-af5c5988bcbf",
       "SymbolName": "Lib.io.midi.MidiInput",
       "SectionId": "ecffd0eb-f156-4a39-95ca-c5fa89113fe2",
       "Position": {

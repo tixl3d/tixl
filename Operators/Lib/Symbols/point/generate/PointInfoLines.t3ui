@@ -63,49 +63,56 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "1b3d0719-0ca0-47e6-a72d-67fe643e3afc"/*_TransformsCBuffer*/,
+      "ChildId": "1b3d0719-0ca0-47e6-a72d-67fe643e3afc",
+      "SymbolName": "Lib.render._dx11.api._TransformsCBuffer",
       "Position": {
         "X": 208.61678,
         "Y": 443.44916
       }
     },
     {
-      "ChildId": "7dbeb39a-8075-4766-894a-99bbbe4b5d3f"/*CustomPointShader*/,
+      "ChildId": "7dbeb39a-8075-4766-894a-99bbbe4b5d3f",
+      "SymbolName": "Lib.point.modify.CustomPointShader",
       "Position": {
         "X": 348.6168,
         "Y": 233.44916
       }
     },
     {
-      "ChildId": "8cb47de9-b4d6-4bc8-ac92-bd0c8e18ee78"/*MultiplyInt*/,
+      "ChildId": "8cb47de9-b4d6-4bc8-ac92-bd0c8e18ee78",
+      "SymbolName": "Lib.numbers.int.basic.MultiplyInt",
       "Position": {
         "X": 208.61679,
         "Y": 408.44916
       }
     },
     {
-      "ChildId": "90ced117-508a-42f8-b34d-3789d7cc2710"/*GetBufferComponents*/,
+      "ChildId": "90ced117-508a-42f8-b34d-3789d7cc2710",
+      "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
       "Position": {
         "X": -29.796265,
         "Y": 131.7497
       }
     },
     {
-      "ChildId": "baaa2aec-2d8a-40ce-a4b6-feb2cb12bbc8"/*NumberLinePoints*/,
+      "ChildId": "baaa2aec-2d8a-40ce-a4b6-feb2cb12bbc8",
+      "SymbolName": "Lib.point._experimental.NumberLinePoints",
       "Position": {
         "X": 348.6168,
         "Y": 478.44916
       }
     },
     {
-      "ChildId": "efe42849-892c-4c84-a03e-0869e1ee3dc6"/*IntToFloat*/,
+      "ChildId": "efe42849-892c-4c84-a03e-0869e1ee3dc6",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "Position": {
         "X": 208.61679,
         "Y": 303.44916
       }
     },
     {
-      "ChildId": "febaabd4-632c-4442-b77d-7be19522822f"/*BoolToFloat*/,
+      "ChildId": "febaabd4-632c-4442-b77d-7be19522822f",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
       "Position": {
         "X": 208.61678,
         "Y": 373.44916

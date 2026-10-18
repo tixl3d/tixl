@@ -15,7 +15,8 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "04edba45-b503-4f6c-b33e-a29d471c54cf"/*PlayVideo*/,
+      "ChildId": "04edba45-b503-4f6c-b33e-a29d471c54cf",
+      "SymbolName": "Lib.io.video.PlayVideo",
       "SectionId": "587694e0-9a6f-4f31-9134-4da994582416",
       "Position": {
         "X": 93.77759,
@@ -23,14 +24,16 @@
       }
     },
     {
-      "ChildId": "06767f17-9860-42c4-ac2e-6fe377e0ada8"/*SetMaterial*/,
+      "ChildId": "06767f17-9860-42c4-ac2e-6fe377e0ada8",
+      "SymbolName": "Lib.render.shading.SetMaterial",
       "Position": {
         "X": 1200.0,
         "Y": 166.0
       }
     },
     {
-      "ChildId": "0ddc3103-e552-4ec0-97b0-373b20c189a4"/*CommonPointSets*/,
+      "ChildId": "0ddc3103-e552-4ec0-97b0-373b20c189a4",
+      "SymbolName": "Lib.point.generate.CommonPointSets",
       "SectionId": "587694e0-9a6f-4f31-9134-4da994582416",
       "Position": {
         "X": 693.7776,
@@ -38,7 +41,8 @@
       }
     },
     {
-      "ChildId": "0ee06ef3-30fb-471b-a960-fc8a37fcca1f"/*PointSimulation*/,
+      "ChildId": "0ee06ef3-30fb-471b-a960-fc8a37fcca1f",
+      "SymbolName": "Lib.point.sim.PointSimulation",
       "Comment": "Create a new buffer that constantly restores the original grid. ",
       "Position": {
         "X": 750.0,
@@ -46,21 +50,24 @@
       }
     },
     {
-      "ChildId": "10b9298d-d0be-4d12-a344-24f69ad89bd5"/*Amount*/,
+      "ChildId": "10b9298d-d0be-4d12-a344-24f69ad89bd5",
+      "SymbolName": "Types.Values.Value",
       "Position": {
         "X": 750.0,
         "Y": 229.0
       }
     },
     {
-      "ChildId": "1efdc617-dace-40ae-876f-fe6b6fc1bfed"/*OpticalFlow*/,
+      "ChildId": "1efdc617-dace-40ae-876f-fe6b6fc1bfed",
+      "SymbolName": "Lib.image.analyze.OpticalFlow",
       "Position": {
         "X": 600.0,
         "Y": 382.0
       }
     },
     {
-      "ChildId": "1fc6361f-5c43-4b5c-bb33-cf2d50690001"/*Layer2d*/,
+      "ChildId": "1fc6361f-5c43-4b5c-bb33-cf2d50690001",
+      "SymbolName": "Lib.render.basic.Layer2d",
       "SectionId": "587694e0-9a6f-4f31-9134-4da994582416",
       "Position": {
         "X": 1151.7695,
@@ -68,14 +75,16 @@
       }
     },
     {
-      "ChildId": "215d38c7-2aec-4b7d-9883-94d95ce4e3e9"/*Group*/,
+      "ChildId": "215d38c7-2aec-4b7d-9883-94d95ce4e3e9",
+      "SymbolName": "Lib.render.transform.Group",
       "Position": {
         "X": 1350.0,
         "Y": 110.0
       }
     },
     {
-      "ChildId": "273aef27-7be4-4872-86d5-2952c19f0f93"/*HasIntChanged*/,
+      "ChildId": "273aef27-7be4-4872-86d5-2952c19f0f93",
+      "SymbolName": "Lib.numbers.int.logic.HasIntChanged",
       "SectionId": "587694e0-9a6f-4f31-9134-4da994582416",
       "Comment": "Video only plays with 25fps. So we have to figure out which frames to keep.",
       "Position": {
@@ -84,14 +93,16 @@
       }
     },
     {
-      "ChildId": "29e02a09-9161-42a0-b055-b92d9fb68b9b"/*HasIntChanged*/,
+      "ChildId": "29e02a09-9161-42a0-b055-b92d9fb68b9b",
+      "SymbolName": "Lib.numbers.int.logic.HasIntChanged",
       "Position": {
         "X": 232.24878,
         "Y": 388.72302
       }
     },
     {
-      "ChildId": "2e46a895-ae87-4943-9a25-2e8712aefe37"/*Rings*/,
+      "ChildId": "2e46a895-ae87-4943-9a25-2e8712aefe37",
+      "SymbolName": "Lib.image.generate.pattern.Rings",
       "Comment": "Apply some random rotating segments for testing.\n\nAlso note that this automatically converts the video's BGRA format to RGBA.",
       "Position": {
         "X": 291.63544,
@@ -99,14 +110,16 @@
       }
     },
     {
-      "ChildId": "31e06c35-9609-43b0-9ac9-64be1a441d91"/*RenderTarget*/,
+      "ChildId": "31e06c35-9609-43b0-9ac9-64be1a441d91",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "Position": {
         "X": 1500.0,
         "Y": 110.0
       }
     },
     {
-      "ChildId": "32e85c68-d781-426f-bf6b-f652247b9225"/*ParticleSystem*/,
+      "ChildId": "32e85c68-d781-426f-bf6b-f652247b9225",
+      "SymbolName": "Lib.particle.ParticleSystem",
       "SectionId": "587694e0-9a6f-4f31-9134-4da994582416",
       "Comment": "We disable InitialVelocity and increase drag.",
       "Position": {
@@ -115,14 +128,16 @@
       }
     },
     {
-      "ChildId": "39064685-0e9f-479b-a254-e43cdf9dc52f"/*PlayVideo*/,
+      "ChildId": "39064685-0e9f-479b-a254-e43cdf9dc52f",
+      "SymbolName": "Lib.io.video.PlayVideo",
       "Position": {
         "X": -8.364563,
         "Y": 80.0
       }
     },
     {
-      "ChildId": "3e0f9ed8-42bb-4470-bebc-34f63be09327"/*SamplePointSimAttributes*/,
+      "ChildId": "3e0f9ed8-42bb-4470-bebc-34f63be09327",
+      "SymbolName": "Lib.point.sim.SamplePointSimAttributes",
       "Comment": "Sample the optical flow texture and apply the values as offsets to the current point positions.\n\nNotice that this is the \"Sim\" version SamplePointAttributes: It does NOT create a new buffer but manipulates the original \"simulation\" buffer. Thus, this setup is similar to a particle system.",
       "Position": {
         "X": 900.0,
@@ -130,7 +145,8 @@
       }
     },
     {
-      "ChildId": "42564df3-855f-4fd3-b6bc-64785046885a"/*DrawLines*/,
+      "ChildId": "42564df3-855f-4fd3-b6bc-64785046885a",
+      "SymbolName": "Lib.point.draw.DrawLines",
       "SectionId": "587694e0-9a6f-4f31-9134-4da994582416",
       "Position": {
         "X": 1293.7776,
@@ -138,7 +154,8 @@
       }
     },
     {
-      "ChildId": "4771aebf-6745-4694-87c2-e3727cab0a39"/*ConvertFormat*/,
+      "ChildId": "4771aebf-6745-4694-87c2-e3727cab0a39",
+      "SymbolName": "Lib.image.color.ConvertFormat",
       "SectionId": "587694e0-9a6f-4f31-9134-4da994582416",
       "Comment": "PlayVideo returns textures in BGRA format. For Layer2d to render it correctly, we have to first convert to RGBA.",
       "Position": {
@@ -147,7 +164,8 @@
       }
     },
     {
-      "ChildId": "4c773ea9-a098-459b-a0ea-5224dd98bb3b"/*Layer2d*/,
+      "ChildId": "4c773ea9-a098-459b-a0ea-5224dd98bb3b",
+      "SymbolName": "Lib.render.basic.Layer2d",
       "Comment": "Fade out original image. ",
       "Position": {
         "X": 1200.0,
@@ -155,14 +173,16 @@
       }
     },
     {
-      "ChildId": "4dc73458-f9c5-45a3-af3b-bfee74772a06"/*KeepPreviousFrame*/,
+      "ChildId": "4dc73458-f9c5-45a3-af3b-bfee74772a06",
+      "SymbolName": "Lib.image.use.KeepPreviousFrame",
       "Position": {
         "X": 450.0,
         "Y": 382.0
       }
     },
     {
-      "ChildId": "566c5a9b-555c-4274-baf6-25d3e55704cd"/*KeepPreviousFrame*/,
+      "ChildId": "566c5a9b-555c-4274-baf6-25d3e55704cd",
+      "SymbolName": "Lib.image.use.KeepPreviousFrame",
       "SectionId": "587694e0-9a6f-4f31-9134-4da994582416",
       "Comment": "The last version of [KeepPreviousFrame] didn't work correctly with non-60fps footage.",
       "Position": {
@@ -171,7 +191,8 @@
       }
     },
     {
-      "ChildId": "5e542058-f818-46fc-9a0b-53b081936d0d"/*OpticalFlow*/,
+      "ChildId": "5e542058-f818-46fc-9a0b-53b081936d0d",
+      "SymbolName": "Lib.image.analyze.OpticalFlow",
       "SectionId": "587694e0-9a6f-4f31-9134-4da994582416",
       "Comment": "We feed both frames into the optical flow detection.",
       "Position": {
@@ -180,7 +201,8 @@
       }
     },
     {
-      "ChildId": "76a0c247-2288-4a72-b274-69faf81ff98c"/*RepeatAtPoints*/,
+      "ChildId": "76a0c247-2288-4a72-b274-69faf81ff98c",
+      "SymbolName": "Lib.point.generate.RepeatAtPoints",
       "SectionId": "587694e0-9a6f-4f31-9134-4da994582416",
       "Position": {
         "X": 1143.7776,
@@ -188,14 +210,16 @@
       }
     },
     {
-      "ChildId": "81b93cd2-a150-4073-9596-72cc379daf69"/*ImageLevels*/,
+      "ChildId": "81b93cd2-a150-4073-9596-72cc379daf69",
+      "SymbolName": "Lib.image.analyze.ImageLevels",
       "Position": {
         "X": 767.9281,
         "Y": 500.77332
       }
     },
     {
-      "ChildId": "85c3d46f-616d-4470-81c2-53933c9b992b"/*_Time_old*/,
+      "ChildId": "85c3d46f-616d-4470-81c2-53933c9b992b",
+      "SymbolName": "Lib.numbers.anim._obsolete._Time_old",
       "SectionId": "587694e0-9a6f-4f31-9134-4da994582416",
       "Position": {
         "X": -56.222412,
@@ -203,7 +227,8 @@
       }
     },
     {
-      "ChildId": "9b1c328b-c37e-404e-812d-b689aeb2fd48"/*TransformPoints*/,
+      "ChildId": "9b1c328b-c37e-404e-812d-b689aeb2fd48",
+      "SymbolName": "Lib.point.transform.TransformPoints",
       "SectionId": "587694e0-9a6f-4f31-9134-4da994582416",
       "Position": {
         "X": 843.7776,
@@ -211,7 +236,8 @@
       }
     },
     {
-      "ChildId": "a6150640-917b-4805-ac9e-536598b4a37d"/*DrawPointsShaded*/,
+      "ChildId": "a6150640-917b-4805-ac9e-536598b4a37d",
+      "SymbolName": "Lib.point.draw.DrawPointsShaded",
       "Comment": "We use shaded points here to make overlapping points more readable.",
       "Position": {
         "X": 1050.0,
@@ -219,7 +245,8 @@
       }
     },
     {
-      "ChildId": "a87d1393-301b-48be-8a8c-028a9bf1732e"/*TextureMapForce*/,
+      "ChildId": "a87d1393-301b-48be-8a8c-028a9bf1732e",
+      "SymbolName": "Lib.particle.force.TextureMapForce",
       "SectionId": "587694e0-9a6f-4f31-9134-4da994582416",
       "Position": {
         "X": 693.7776,
@@ -227,14 +254,16 @@
       }
     },
     {
-      "ChildId": "b9f6e8de-6284-4380-8c9c-5849a8300f45"/*_Time_old*/,
+      "ChildId": "b9f6e8de-6284-4380-8c9c-5849a8300f45",
+      "SymbolName": "Lib.numbers.anim._obsolete._Time_old",
       "Position": {
         "X": 141.63544,
         "Y": 103.0
       }
     },
     {
-      "ChildId": "cba7d7aa-dc89-48be-b1f0-f4362b802c92"/*_GridPoints_Old*/,
+      "ChildId": "cba7d7aa-dc89-48be-b1f0-f4362b802c92",
+      "SymbolName": "Lib.point.generate._GridPoints_Old",
       "Comment": "We create an XY grid of points.",
       "Position": {
         "X": 600.0,
@@ -242,7 +271,8 @@
       }
     },
     {
-      "ChildId": "cbc9f786-19e2-43f5-90f9-2beaf2b050ab"/*_GridPoints_Old*/,
+      "ChildId": "cbc9f786-19e2-43f5-90f9-2beaf2b050ab",
+      "SymbolName": "Lib.point.generate._GridPoints_Old",
       "SectionId": "587694e0-9a6f-4f31-9134-4da994582416",
       "Position": {
         "X": 693.7776,
@@ -250,7 +280,8 @@
       }
     },
     {
-      "ChildId": "d3adf557-1a26-4cf6-b72c-a4475e476475"/*RandomizePoints*/,
+      "ChildId": "d3adf557-1a26-4cf6-b72c-a4475e476475",
+      "SymbolName": "Lib.point.modify.RandomizePoints",
       "SectionId": "587694e0-9a6f-4f31-9134-4da994582416",
       "Position": {
         "X": 993.7776,
@@ -258,7 +289,8 @@
       }
     },
     {
-      "ChildId": "d5e9c363-4567-4a67-8e69-7c9d57722aed"/*Group*/,
+      "ChildId": "d5e9c363-4567-4a67-8e69-7c9d57722aed",
+      "SymbolName": "Lib.render.transform.Group",
       "SectionId": "587694e0-9a6f-4f31-9134-4da994582416",
       "Position": {
         "X": 1592.623,

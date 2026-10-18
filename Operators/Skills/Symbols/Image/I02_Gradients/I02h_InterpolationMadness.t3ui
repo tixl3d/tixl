@@ -5,14 +5,16 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "0a724784-1092-42f5-962f-e4eafbd49454"/*ImageQuiz*/,
+      "ChildId": "0a724784-1092-42f5-962f-e4eafbd49454",
+      "SymbolName": "Lib.flow.skillQuest.ImageQuiz",
       "Position": {
         "X": 1609.7146,
         "Y": 2018.4391
       }
     },
     {
-      "ChildId": "17170e81-62f2-455f-8e78-34543cfa364d"/*ImageLevels*/,
+      "ChildId": "17170e81-62f2-455f-8e78-34543cfa364d",
+      "SymbolName": "Lib.image.analyze.ImageLevels",
       "Position": {
         "X": 1293.5648,
         "Y": 2005.7007
@@ -20,7 +22,8 @@
       "SnapshotGroupIndex": "1"
     },
     {
-      "ChildId": "6561177b-012f-47dc-b2e5-22508649110b"/*ImageLevels*/,
+      "ChildId": "6561177b-012f-47dc-b2e5-22508649110b",
+      "SymbolName": "Lib.image.analyze.ImageLevels",
       "SectionId": "7a0e4cf4-7fa2-4373-9371-b80b97d01f09",
       "Position": {
         "X": 1306.5621,
@@ -28,14 +31,16 @@
       }
     },
     {
-      "ChildId": "77576ab9-7784-45f3-be45-259e2b58605f"/*LinearGradient*/,
+      "ChildId": "77576ab9-7784-45f3-be45-259e2b58605f",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "Position": {
         "X": 1441.7301,
         "Y": 2334.827
       }
     },
     {
-      "ChildId": "b6f65cd0-62d2-4921-8107-d7001e9a1092"/*LinearGradient*/,
+      "ChildId": "b6f65cd0-62d2-4921-8107-d7001e9a1092",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "SectionId": "7a0e4cf4-7fa2-4373-9371-b80b97d01f09",
       "Position": {
         "X": 1306.5621,
@@ -43,7 +48,8 @@
       }
     },
     {
-      "ChildId": "caa36c77-ac62-4cb3-8b47-9689a1d2319f"/*LinearGradient*/,
+      "ChildId": "caa36c77-ac62-4cb3-8b47-9689a1d2319f",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "Position": {
         "X": 1293.5648,
         "Y": 1970.7007

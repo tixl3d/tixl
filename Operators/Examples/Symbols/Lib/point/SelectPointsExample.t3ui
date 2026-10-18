@@ -5,56 +5,64 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "129c3c72-080f-48c0-af3f-2bb31928bbf6"/*_GridPoints_Old*/,
+      "ChildId": "129c3c72-080f-48c0-af3f-2bb31928bbf6",
+      "SymbolName": "Lib.point.generate._GridPoints_Old",
       "Position": {
         "X": 754.45905,
         "Y": -244.8274
       }
     },
     {
-      "ChildId": "3a6c8ebc-5aa6-4ba7-aec6-ad342bd03d3b"/*OscillateVec3*/,
+      "ChildId": "3a6c8ebc-5aa6-4ba7-aec6-ad342bd03d3b",
+      "SymbolName": "Lib.numbers.anim.animators.OscillateVec3",
       "Position": {
         "X": 614.459,
         "Y": -209.8274
       }
     },
     {
-      "ChildId": "3f7f85ee-0208-444f-a064-eca32283bac1"/*TransformPoints*/,
+      "ChildId": "3f7f85ee-0208-444f-a064-eca32283bac1",
+      "SymbolName": "Lib.point.transform.TransformPoints",
       "Position": {
         "X": 754.45905,
         "Y": -139.8274
       }
     },
     {
-      "ChildId": "41ead94a-a6fb-4029-bc22-89b512d196cd"/*DrawPoints*/,
+      "ChildId": "41ead94a-a6fb-4029-bc22-89b512d196cd",
+      "SymbolName": "Lib.point.draw.DrawPoints",
       "Position": {
         "X": 754.459,
         "Y": -69.82739
       }
     },
     {
-      "ChildId": "5188e433-1b28-4022-b8bd-c5d07129e859"/*OscillateVec3*/,
+      "ChildId": "5188e433-1b28-4022-b8bd-c5d07129e859",
+      "SymbolName": "Lib.numbers.anim.animators.OscillateVec3",
       "Position": {
         "X": 614.459,
         "Y": -104.82739
       }
     },
     {
-      "ChildId": "61e4062c-7410-4628-a634-4b1560dddea4"/*SelectPoints*/,
+      "ChildId": "61e4062c-7410-4628-a634-4b1560dddea4",
+      "SymbolName": "Lib.point.modify.SelectPoints",
       "Position": {
         "X": 754.45905,
         "Y": -174.8274
       }
     },
     {
-      "ChildId": "eb454251-6595-48ce-918a-64dc67fff674"/*SetFog*/,
+      "ChildId": "eb454251-6595-48ce-918a-64dc67fff674",
+      "SymbolName": "Lib.render.shading.SetFog",
       "Position": {
         "X": 754.459,
         "Y": -34.827393
       }
     },
     {
-      "ChildId": "fbfe673f-d3bf-4486-8076-ec72a2e50518"/*RenderTarget*/,
+      "ChildId": "fbfe673f-d3bf-4486-8076-ec72a2e50518",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "Position": {
         "X": 754.459,
         "Y": 0.17260742

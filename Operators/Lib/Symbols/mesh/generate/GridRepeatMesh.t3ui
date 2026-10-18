@@ -101,21 +101,24 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "261be5b9-4a28-4004-93c6-3538516336c7"/*RepeatMeshAtPoints*/,
+      "ChildId": "261be5b9-4a28-4004-93c6-3538516336c7",
+      "SymbolName": "Lib.mesh.generate.RepeatMeshAtPoints",
       "Position": {
         "X": 450.57538,
         "Y": -132.8625
       }
     },
     {
-      "ChildId": "c1bbf7de-89ad-4c0f-8d12-9dc8a40aa1c6"/*RandomizePoints*/,
+      "ChildId": "c1bbf7de-89ad-4c0f-8d12-9dc8a40aa1c6",
+      "SymbolName": "Lib.point.modify.RandomizePoints",
       "Position": {
         "X": 268.90887,
         "Y": 722.5117
       }
     },
     {
-      "ChildId": "fe973bf2-9404-42d7-be39-6957a820af6b"/*GridPoints*/,
+      "ChildId": "fe973bf2-9404-42d7-be39-6957a820af6b",
+      "SymbolName": "Lib.point.generate.GridPoints",
       "Position": {
         "X": 90.328964,
         "Y": 420.6806

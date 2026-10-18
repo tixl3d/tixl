@@ -65,14 +65,16 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "a978b641-0aee-40ff-b880-6409489ff863"/*IntToFloat*/,
+      "ChildId": "a978b641-0aee-40ff-b880-6409489ff863",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "Position": {
         "X": 293.77438,
         "Y": 131.91797
       }
     },
     {
-      "ChildId": "e214dd0d-2a6f-40d8-a3c0-c3d18fd4e346"/*_ImageFxShaderSetupStatic*/,
+      "ChildId": "e214dd0d-2a6f-40d8-a3c0-c3d18fd4e346",
+      "SymbolName": "Lib.render._dx11.fxsetup._ImageFxShaderSetupStatic",
       "Style": "Resizable",
       "Size": {
         "X": 94.37823,

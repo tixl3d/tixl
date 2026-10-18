@@ -87,56 +87,64 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "2ab03a47-57e2-44be-88f5-70ee7b3f3df0"/*DrawSphereGizmo*/,
+      "ChildId": "2ab03a47-57e2-44be-88f5-70ee7b3f3df0",
+      "SymbolName": "Lib.render.gizmo.DrawSphereGizmo",
       "Position": {
         "X": 863.3138,
         "Y": 228.17346
       }
     },
     {
-      "ChildId": "48f86fa2-ad21-4078-ada2-f098e3ac33b5"/*BoolToInt*/,
+      "ChildId": "48f86fa2-ad21-4078-ada2-f098e3ac33b5",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToInt",
       "Position": {
         "X": 885.2842,
         "Y": -85.07857
       }
     },
     {
-      "ChildId": "4fed7615-da9b-4055-9cb6-780f7f11eacf"/*Transform*/,
+      "ChildId": "4fed7615-da9b-4055-9cb6-780f7f11eacf",
+      "SymbolName": "Lib.render.transform.Transform",
       "Position": {
         "X": 863.3138,
         "Y": 298.17346
       }
     },
     {
-      "ChildId": "65a2983d-5197-40bc-a7df-dd0caf1ea5e1"/*Execute*/,
+      "ChildId": "65a2983d-5197-40bc-a7df-dd0caf1ea5e1",
+      "SymbolName": "Lib.flow.Execute",
       "Position": {
         "X": 1025.2842,
         "Y": -50.078568
       }
     },
     {
-      "ChildId": "834bc450-3f49-4e45-84f8-ab924f2a1ec9"/*VisibleGizmos*/,
+      "ChildId": "834bc450-3f49-4e45-84f8-ab924f2a1ec9",
+      "SymbolName": "Lib.render.gizmo.VisibleGizmos",
       "Position": {
         "X": 863.3138,
         "Y": 368.17346
       }
     },
     {
-      "ChildId": "def1a967-ba08-44b0-8e3d-66acb93600bf"/*Multiply*/,
+      "ChildId": "def1a967-ba08-44b0-8e3d-66acb93600bf",
+      "SymbolName": "Lib.numbers.float.basic.Multiply",
       "Position": {
         "X": 863.3138,
         "Y": 158.17346
       }
     },
     {
-      "ChildId": "e50c80c8-d24d-4851-aade-4dc5485bea87"/*Switch*/,
+      "ChildId": "e50c80c8-d24d-4851-aade-4dc5485bea87",
+      "SymbolName": "Lib.flow.Switch",
       "Position": {
         "X": 1025.2842,
         "Y": -155.07857
       }
     },
     {
-      "ChildId": "f8e99532-7a20-474f-9b7f-19dbced8e191"/*SetPointLight*/,
+      "ChildId": "f8e99532-7a20-474f-9b7f-19dbced8e191",
+      "SymbolName": "Lib.render.shading.SetPointLight",
       "Position": {
         "X": 526.27625,
         "Y": -123.63472

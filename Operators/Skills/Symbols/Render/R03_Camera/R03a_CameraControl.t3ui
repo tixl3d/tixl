@@ -5,14 +5,16 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "4a145906-ca01-4487-81d3-fca21270e6af"/*Distance*/,
+      "ChildId": "4a145906-ca01-4487-81d3-fca21270e6af",
+      "SymbolName": "Types.Values.Value",
       "Position": {
         "X": 1186.4082,
         "Y": 1816.0571
       }
     },
     {
-      "ChildId": "581aa2bc-67b7-4533-ad1f-0a4435ddd436"/*Distance*/,
+      "ChildId": "581aa2bc-67b7-4533-ad1f-0a4435ddd436",
+      "SymbolName": "Types.Values.Value",
       "SectionId": "fdf64808-869b-4fd9-9274-5aa99d64fa35",
       "Position": {
         "X": 1133.8973,
@@ -20,7 +22,8 @@
       }
     },
     {
-      "ChildId": "77119db7-0d09-4bb3-826f-b1fb06234d20"/*Vector3*/,
+      "ChildId": "77119db7-0d09-4bb3-826f-b1fb06234d20",
+      "SymbolName": "Types.Values.Vector3",
       "SectionId": "fdf64808-869b-4fd9-9274-5aa99d64fa35",
       "Position": {
         "X": 1273.8973,
@@ -28,14 +31,16 @@
       }
     },
     {
-      "ChildId": "8896da69-fcfa-4772-90a4-e25317616bbe"/*AnimValue*/,
+      "ChildId": "8896da69-fcfa-4772-90a4-e25317616bbe",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "Position": {
         "X": 1192.6763,
         "Y": 1749.7174
       }
     },
     {
-      "ChildId": "a820ea6b-9886-4a9c-8687-bdd8d9ca7921"/*AnimValue*/,
+      "ChildId": "a820ea6b-9886-4a9c-8687-bdd8d9ca7921",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "SectionId": "fdf64808-869b-4fd9-9274-5aa99d64fa35",
       "Position": {
         "X": 1133.8973,
@@ -43,14 +48,16 @@
       }
     },
     {
-      "ChildId": "b0fa4e1d-d429-4298-9618-55eeb608265b"/*DrawSphere*/,
+      "ChildId": "b0fa4e1d-d429-4298-9618-55eeb608265b",
+      "SymbolName": "Lib.render.gizmo._.DrawSphere",
       "Position": {
         "X": 1423.1134,
         "Y": 1776.7373
       }
     },
     {
-      "ChildId": "ba7f5396-60b1-489e-920b-e5fb4ab0308e"/*DrawSphere*/,
+      "ChildId": "ba7f5396-60b1-489e-920b-e5fb4ab0308e",
+      "SymbolName": "Lib.render.gizmo._.DrawSphere",
       "SectionId": "fdf64808-869b-4fd9-9274-5aa99d64fa35",
       "Position": {
         "X": 1273.8973,
@@ -58,7 +65,8 @@
       }
     },
     {
-      "ChildId": "e0970bb1-33fd-469c-a726-2e085cdeb7c1"/*AnimValue*/,
+      "ChildId": "e0970bb1-33fd-469c-a726-2e085cdeb7c1",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "SectionId": "fdf64808-869b-4fd9-9274-5aa99d64fa35",
       "Position": {
         "X": 1133.8973,
@@ -66,21 +74,24 @@
       }
     },
     {
-      "ChildId": "e50dc3d4-01d3-4232-8426-bf49206b26ae"/*Vector3*/,
+      "ChildId": "e50dc3d4-01d3-4232-8426-bf49206b26ae",
+      "SymbolName": "Types.Values.Vector3",
       "Position": {
         "X": 1423.1135,
         "Y": 1673.5281
       }
     },
     {
-      "ChildId": "eb406f4a-6275-47c9-92ab-74386afc7fe3"/*AnimValue*/,
+      "ChildId": "eb406f4a-6275-47c9-92ab-74386afc7fe3",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "Position": {
         "X": 1192.6763,
         "Y": 1671.7372
       }
     },
     {
-      "ChildId": "fa03361c-ba00-4341-b6fe-811d1f1362c7"/*DrawQuiz*/,
+      "ChildId": "fa03361c-ba00-4341-b6fe-811d1f1362c7",
+      "SymbolName": "Lib.flow.skillQuest.DrawQuiz",
       "Position": {
         "X": 1693.2708,
         "Y": 1786.6185

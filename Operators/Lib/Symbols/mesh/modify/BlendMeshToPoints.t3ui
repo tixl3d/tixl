@@ -71,28 +71,32 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "1618a58c-1676-4b4a-a24e-69dd7b487871"/*_AssembleMeshBuffers*/,
+      "ChildId": "1618a58c-1676-4b4a-a24e-69dd7b487871",
+      "SymbolName": "Lib.mesh._._AssembleMeshBuffers",
       "Position": {
         "X": 765.86115,
         "Y": 1109.3113
       }
     },
     {
-      "ChildId": "1dabfe2d-eb56-48f2-9cf8-ed4a5aaed743"/*ComputeShader*/,
+      "ChildId": "1dabfe2d-eb56-48f2-9cf8-ed4a5aaed743",
+      "SymbolName": "Types.Gfx.ComputeShader",
       "Position": {
         "X": 168.51639,
         "Y": 627.6429
       }
     },
     {
-      "ChildId": "3f589894-3735-45e3-9d74-300baf117140"/*ComputeShaderStage*/,
+      "ChildId": "3f589894-3735-45e3-9d74-300baf117140",
+      "SymbolName": "Types.Gfx.ComputeShaderStage",
       "Position": {
         "X": 614.30774,
         "Y": 787.0883
       }
     },
     {
-      "ChildId": "453b9c04-1f39-4f63-a9ca-ec145c3f11a7"/*FloatsToBuffer*/,
+      "ChildId": "453b9c04-1f39-4f63-a9ca-ec145c3f11a7",
+      "SymbolName": "Lib.render._dx11.api.FloatsToBuffer",
       "Style": "Resizable",
       "Size": {
         "X": 110.86372,
@@ -104,70 +108,80 @@
       }
     },
     {
-      "ChildId": "632a246d-205b-4e14-bfe6-c9fe5d71fb3c"/*ExecuteBufferUpdate*/,
+      "ChildId": "632a246d-205b-4e14-bfe6-c9fe5d71fb3c",
+      "SymbolName": "Lib.render._dx11.fxsetup.ExecuteBufferUpdate",
       "Position": {
         "X": 614.3078,
         "Y": 997.0883
       }
     },
     {
-      "ChildId": "7d34c14d-9b85-4177-8d49-135d4fd93c52"/*IntToFloat*/,
+      "ChildId": "7d34c14d-9b85-4177-8d49-135d4fd93c52",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "Position": {
         "X": 168.51639,
         "Y": 856.5459
       }
     },
     {
-      "ChildId": "8b0fb8aa-875a-45ad-b601-a01955a2804e"/*GetBufferComponents*/,
+      "ChildId": "8b0fb8aa-875a-45ad-b601-a01955a2804e",
+      "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
       "Position": {
         "X": -279.36398,
         "Y": 1040.077
       }
     },
     {
-      "ChildId": "9becac8c-85eb-4066-9144-37ef6ad465d2"/*VertexStride*/,
+      "ChildId": "9becac8c-85eb-4066-9144-37ef6ad465d2",
+      "SymbolName": "Types.Values.IntValue",
       "Position": {
         "X": 168.51639,
         "Y": 1141.7369
       }
     },
     {
-      "ChildId": "9e1b55ad-5a41-4f92-93da-1e2fcabba0ea"/*IntToFloat*/,
+      "ChildId": "9e1b55ad-5a41-4f92-93da-1e2fcabba0ea",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "Position": {
         "X": 168.51639,
         "Y": 891.5459
       }
     },
     {
-      "ChildId": "9edb3e36-f4c7-462a-90d8-6d71e2f71d47"/*_MeshBufferComponents*/,
+      "ChildId": "9edb3e36-f4c7-462a-90d8-6d71e2f71d47",
+      "SymbolName": "Lib.mesh._._MeshBufferComponents",
       "Position": {
         "X": -279.36398,
         "Y": 970.077
       }
     },
     {
-      "ChildId": "bc797507-0d42-461d-a867-2cd9f3b28c5a"/*GetBufferComponents*/,
+      "ChildId": "bc797507-0d42-461d-a867-2cd9f3b28c5a",
+      "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
       "Position": {
         "X": 308.51636,
         "Y": 1306.7982
       }
     },
     {
-      "ChildId": "c65dbdcf-ff7e-4c88-9902-4686b38b1f96"/*CalcDispatchCount*/,
+      "ChildId": "c65dbdcf-ff7e-4c88-9902-4686b38b1f96",
+      "SymbolName": "Lib.render._dx11.api.CalcDispatchCount",
       "Position": {
         "X": 308.5164,
         "Y": 662.6429
       }
     },
     {
-      "ChildId": "df451e5a-21a6-414d-84da-3c85e888fc79"/*StructuredBufferWithViews*/,
+      "ChildId": "df451e5a-21a6-414d-84da-3c85e888fc79",
+      "SymbolName": "Types.Gfx.StructuredBufferWithViews",
       "Position": {
         "X": 308.5164,
         "Y": 1106.7369
       }
     },
     {
-      "ChildId": "e001f1f3-0f17-46b9-ad1d-83da66e35569"/*GetBufferComponents*/,
+      "ChildId": "e001f1f3-0f17-46b9-ad1d-83da66e35569",
+      "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
       "Position": {
         "X": 308.5164,
         "Y": 1176.7369

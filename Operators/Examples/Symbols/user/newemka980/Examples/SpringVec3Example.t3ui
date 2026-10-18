@@ -6,7 +6,8 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "0d5f7e71-97fa-46c6-a6e4-0ab591063a5a"/*SpringVec3*/,
+      "ChildId": "0d5f7e71-97fa-46c6-a6e4-0ab591063a5a",
+      "SymbolName": "Lib.numbers.vec3.process.SpringVec3",
       "Comment": "Rotation",
       "Position": {
         "X": 540.8412,
@@ -14,84 +15,96 @@
       }
     },
     {
-      "ChildId": "146dd775-133d-4ae4-9ee5-65ac987a763f"/*Text*/,
+      "ChildId": "146dd775-133d-4ae4-9ee5-65ac987a763f",
+      "SymbolName": "Lib.render.basic.Text",
       "Position": {
         "X": 1240.0581,
         "Y": 629.0673
       }
     },
     {
-      "ChildId": "14e9444c-9344-4dc7-acf3-013c2f51e08d"/*Vector3*/,
+      "ChildId": "14e9444c-9344-4dc7-acf3-013c2f51e08d",
+      "SymbolName": "Types.Values.Vector3",
       "Position": {
         "X": 204.92145,
         "Y": 543.8126
       }
     },
     {
-      "ChildId": "19093da4-0df6-4c13-821b-5392182c3143"/*RenderTarget*/,
+      "ChildId": "19093da4-0df6-4c13-821b-5392182c3143",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "Position": {
         "X": 2259.775,
         "Y": 400.76355
       }
     },
     {
-      "ChildId": "27333cca-9e9a-4204-90f6-afb91c4a4824"/*Camera*/,
+      "ChildId": "27333cca-9e9a-4204-90f6-afb91c4a4824",
+      "SymbolName": "Lib.render.camera.Camera",
       "Position": {
         "X": 1632.5471,
         "Y": 369.255
       }
     },
     {
-      "ChildId": "312ed840-c956-4abc-9292-14c65cd9c1e7"/*Execute*/,
+      "ChildId": "312ed840-c956-4abc-9292-14c65cd9c1e7",
+      "SymbolName": "Lib.flow.Execute",
       "Position": {
         "X": 1982.419,
         "Y": 411.10687
       }
     },
     {
-      "ChildId": "35d8302e-80d6-4540-a3a4-f395c99c4a7f"/*AnimVec3*/,
+      "ChildId": "35d8302e-80d6-4540-a3a4-f395c99c4a7f",
+      "SymbolName": "Lib.numbers.anim.animators.AnimVec3",
       "Position": {
         "X": -296.18378,
         "Y": 454.18762
       }
     },
     {
-      "ChildId": "371812ed-bc02-4788-a21b-a8c7a19caa7e"/*AnimVec2*/,
+      "ChildId": "371812ed-bc02-4788-a21b-a8c7a19caa7e",
+      "SymbolName": "Lib.numbers.anim.animators.AnimVec2",
       "Position": {
         "X": 1501.571,
         "Y": 221.04785
       }
     },
     {
-      "ChildId": "42c894dc-24bd-46f2-a8ba-ce1d58693209"/*Layer2d*/,
+      "ChildId": "42c894dc-24bd-46f2-a8ba-ce1d58693209",
+      "SymbolName": "Lib.render.basic.Layer2d",
       "Position": {
         "X": 1801.5717,
         "Y": 221.04785
       }
     },
     {
-      "ChildId": "5cbc8859-10ba-4155-898e-6086545b5b2f"/*Transform*/,
+      "ChildId": "5cbc8859-10ba-4155-898e-6086545b5b2f",
+      "SymbolName": "Lib.render.transform.Transform",
       "Position": {
         "X": 786.83936,
         "Y": 0.0
       }
     },
     {
-      "ChildId": "6f16e4e1-e547-466b-8f8c-67c9306b5f9d"/*Group*/,
+      "ChildId": "6f16e4e1-e547-466b-8f8c-67c9306b5f9d",
+      "SymbolName": "Lib.render.transform.Group",
       "Position": {
         "X": 1224.4468,
         "Y": 264.6836
       }
     },
     {
-      "ChildId": "8386cdf2-6dcd-4c65-8ded-4329de6fb536"/*ScaleVector3*/,
+      "ChildId": "8386cdf2-6dcd-4c65-8ded-4329de6fb536",
+      "SymbolName": "Lib.numbers.vec3.ScaleVector3",
       "Position": {
         "X": -116.98602,
         "Y": 522.54895
       }
     },
     {
-      "ChildId": "8d3cae5c-33e8-4173-abb7-b4dda31915b2"/*Group*/,
+      "ChildId": "8d3cae5c-33e8-4173-abb7-b4dda31915b2",
+      "SymbolName": "Lib.render.transform.Group",
       "Comment": "Group is like parent and child hierarchy in other 3D software",
       "Position": {
         "X": 1445.859,
@@ -99,21 +112,24 @@
       }
     },
     {
-      "ChildId": "a396b68e-3f94-4a07-af15-66f98ca19bf6"/*MidiInput*/,
+      "ChildId": "a396b68e-3f94-4a07-af15-66f98ca19bf6",
+      "SymbolName": "Lib.io.midi.MidiInput",
       "Position": {
         "X": -129.46875,
         "Y": 574.4545
       }
     },
     {
-      "ChildId": "b7a6c16e-8f8a-4910-bb32-7951b614b5de"/*DrawMesh*/,
+      "ChildId": "b7a6c16e-8f8a-4910-bb32-7951b614b5de",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
       "Position": {
         "X": 424.8363,
         "Y": 175.17126
       }
     },
     {
-      "ChildId": "c46c8f76-2f58-440e-8c80-432da68d7632"/*SpringVec3*/,
+      "ChildId": "c46c8f76-2f58-440e-8c80-432da68d7632",
+      "SymbolName": "Lib.numbers.vec3.process.SpringVec3",
       "Comment": "Position",
       "Position": {
         "X": 540.8412,
@@ -121,14 +137,16 @@
       }
     },
     {
-      "ChildId": "d96482c7-497e-4611-8102-6d2b7f3f8fbf"/*LoadObj*/,
+      "ChildId": "d96482c7-497e-4611-8102-6d2b7f3f8fbf",
+      "SymbolName": "Lib.mesh.generate.LoadObj",
       "Position": {
         "X": 418.42505,
         "Y": 331.01367
       }
     },
     {
-      "ChildId": "dc07b56f-6acb-43e5-afe5-dfc9bb34e77b"/*SpringVec2*/,
+      "ChildId": "dc07b56f-6acb-43e5-afe5-dfc9bb34e77b",
+      "SymbolName": "Lib.numbers.vec2.process.SpringVec2",
       "Comment": "Just for the sake of showing [SpringVec2]",
       "Position": {
         "X": 1651.571,
@@ -136,7 +154,8 @@
       }
     },
     {
-      "ChildId": "e388fcb8-ab65-4f2d-b9e3-fd36471b2985"/*Vector3Components*/,
+      "ChildId": "e388fcb8-ab65-4f2d-b9e3-fd36471b2985",
+      "SymbolName": "Lib.numbers.vec3.Vector3Components",
       "Comment": "Switching X and Z so the rotation follows the movement",
       "Position": {
         "X": 32.127167,
@@ -144,21 +163,24 @@
       }
     },
     {
-      "ChildId": "f25f11d0-30bf-4348-820b-321b0e82c322"/*Group*/,
+      "ChildId": "f25f11d0-30bf-4348-820b-321b0e82c322",
+      "SymbolName": "Lib.render.transform.Group",
       "Position": {
         "X": 998.90936,
         "Y": 92.2464
       }
     },
     {
-      "ChildId": "f76e8753-adde-4521-b007-a8875422b459"/*DrawMesh*/,
+      "ChildId": "f76e8753-adde-4521-b007-a8875422b459",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
       "Position": {
         "X": 568.42505,
         "Y": 331.01367
       }
     },
     {
-      "ChildId": "fc81ee64-82e2-446e-8d0c-4bd5db11c7f4"/*CylinderMesh*/,
+      "ChildId": "fc81ee64-82e2-446e-8d0c-4bd5db11c7f4",
+      "SymbolName": "Lib.mesh.generate.CylinderMesh",
       "Position": {
         "X": 237.1073,
         "Y": 192.55798
