@@ -59,7 +59,9 @@ internal sealed unsafe class VulkanNullResources : IDisposable
                               {
                                   ClearToZero(backend, commandBuffer, _sampledTexture);
                                   ClearToZero(backend, commandBuffer, _storageTexture);
-                                  backend.Api.vkCmdFillBuffer(commandBuffer, _buffer.Buffer, 0, VK_WHOLE_SIZE, 0);
+
+                                  if (!_buffer.Buffer.IsNull)
+                                      backend.Api.vkCmdFillBuffer(commandBuffer, _buffer.Buffer, 0, VK_WHOLE_SIZE, 0);
 
                                   VkMemoryBarrier2 cleared = new()
                                                                  {
@@ -80,6 +82,10 @@ internal sealed unsafe class VulkanNullResources : IDisposable
 
     private static void ClearToZero(VulkanBackend backend, VkCommandBuffer commandBuffer, VulkanTexture texture)
     {
+        // Out of memory already at the first draw: there is nothing to clear, and the draws read undefined bindings.
+        if (texture.Image.IsNull)
+            return;
+
         VulkanBarriers.TransitionImage(backend, commandBuffer, texture, VkImageLayout.TransferDstOptimal,
                                        VkPipelineStageFlags2.Clear, VkAccessFlags2.TransferWrite);
 

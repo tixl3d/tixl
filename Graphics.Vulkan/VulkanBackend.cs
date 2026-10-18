@@ -326,6 +326,12 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
             var staging = CreateBufferCore(SizeOf(description), VkBufferUsageFlags.TransferSrc | VkBufferUsageFlags.TransferDst,
                                            description.Memory, out var stagingMemory, out var mapped);
 
+            if (staging.IsNull)
+            {
+                ReportOutOfMemory($"staging texture {description.Width}x{description.Height} {description.Format}");
+                return new VulkanTexture(this, VkImage.Null, VkDeviceMemory.Null, description, label);
+            }
+
             var stagingTexture = Track(new VulkanTexture(this, VkImage.Null, stagingMemory, description, label) { StagingBuffer = staging, Mapped = mapped });
 
             if (!initialData.IsEmpty)
@@ -1174,6 +1180,9 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         var description = texture.Description with { Memory = MemoryKind.Readback, Usage = TextureUsage.CopyDestination };
         using var staging = (VulkanTexture)CreateTexture(description, ReadOnlySpan<byte>.Empty, "readback");
 
+        if (staging.Mapped == null)
+            return Task.FromResult(new ReadbackResult(ReadOnlyMemory<byte>.Empty, 0, 0, null));
+
         var frameWasActive = _frameActive;
         var commands = frameWasActive ? _commands : (VulkanCommandList)BeginFrame();
         commands.CopyTexture(source, staging);
@@ -1195,6 +1204,9 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
 
         var description = buffer.Description with { Memory = MemoryKind.Readback, Usage = BufferUsage.CopyDestination };
         using var staging = (VulkanBuffer)CreateBuffer(description, ReadOnlySpan<byte>.Empty, "readback");
+
+        if (staging.Mapped == null)
+            return Task.FromResult(new ReadbackResult(ReadOnlyMemory<byte>.Empty, 0, 0, null));
 
         var frameWasActive = _frameActive;
         var commands = frameWasActive ? _commands : (VulkanCommandList)BeginFrame();
@@ -1253,23 +1265,40 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
     {
         memory = VkDeviceMemory.Null;
 
-        if (!TryFindMemoryType(requirements.memoryTypeBits, properties, out var typeIndex))
+        if (TryFindMemoryType(requirements.memoryTypeBits, properties, VkMemoryPropertyFlags.None, out var typeIndex)
+            && TryAllocateFromType(requirements.size, typeIndex, out memory))
         {
-            // A device-local allocation that does not fit can still live in host memory: slower, but the
-            // alternative is a black frame. D3D11 did this silently.
-            if ((properties & VkMemoryPropertyFlags.DeviceLocal) == 0
-                || !TryFindMemoryType(requirements.memoryTypeBits, VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent,
-                                      out typeIndex))
-            {
-                return false;
-            }
-
-            GraphicsLog.WarnOnce("A device-local allocation fell back to host memory; the GPU budget is exhausted.");
+            return true;
         }
 
+        // A device-local allocation that does not fit - the heap is full, or the device has no such type - can
+        // still live in host memory: slower, but the alternative is a black frame. D3D11 did this silently.
+        if ((properties & VkMemoryPropertyFlags.DeviceLocal) == 0)
+            return false;
+
+        const VkMemoryPropertyFlags hostFlags = VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent;
+
+        // A type outside the full heap first; a device-local host-visible type sits in the heap that just ran out.
+        if (!TryFindMemoryType(requirements.memoryTypeBits, hostFlags, VkMemoryPropertyFlags.DeviceLocal, out typeIndex)
+            && !TryFindMemoryType(requirements.memoryTypeBits, hostFlags, VkMemoryPropertyFlags.None, out typeIndex))
+        {
+            return false;
+        }
+
+        if (!TryAllocateFromType(requirements.size, typeIndex, out memory))
+            return false;
+
+        var report = QueryMemory();
+        GraphicsLog.Warning?.Invoke($"Spilled a {requirements.size >> 10} KB device-local allocation to host memory "
+                                    + $"({report.UsedBytes >> 20} MB of {report.BudgetBytes >> 20} MB used); the GPU heap is full.");
+        return true;
+    }
+
+    private bool TryAllocateFromType(ulong size, uint typeIndex, out VkDeviceMemory memory)
+    {
         VkMemoryAllocateInfo allocateInfo = new()
                                                 {
-                                                    allocationSize = requirements.size,
+                                                    allocationSize = size,
                                                     memoryTypeIndex = typeIndex,
                                                 };
 
@@ -1278,7 +1307,7 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         return Api.vkAllocateMemory(&allocateInfo, null, out memory) == VkResult.Success;
     }
 
-    private bool TryFindMemoryType(uint typeBits, VkMemoryPropertyFlags required, out uint typeIndex)
+    private bool TryFindMemoryType(uint typeBits, VkMemoryPropertyFlags required, VkMemoryPropertyFlags excluded, out uint typeIndex)
     {
         InstanceApi.vkGetPhysicalDeviceMemoryProperties(PhysicalDevice, out var properties);
 
@@ -1287,7 +1316,9 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
             if ((typeBits & (1u << index)) == 0)
                 continue;
 
-            if ((properties.memoryTypes[index].propertyFlags & required) != required)
+            var flags = properties.memoryTypes[index].propertyFlags;
+
+            if ((flags & required) != required || (flags & excluded) != 0)
                 continue;
 
             typeIndex = (uint)index;
@@ -1335,6 +1366,13 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
     private void UploadTexture(VulkanTexture texture, ReadOnlySpan<byte> data)
     {
         var staging = CreateBufferCore((ulong)data.Length, VkBufferUsageFlags.TransferSrc, MemoryKind.Upload, out var stagingMemory, out var mapped);
+
+        if (staging.IsNull)
+        {
+            ReportOutOfMemory($"upload of {data.Length} bytes");
+            return;
+        }
+
         data.CopyTo(new Span<byte>(mapped, data.Length));
 
         SubmitOneShot(commandBuffer =>
@@ -1371,6 +1409,13 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
     private void UploadBuffer(VulkanBuffer buffer, ReadOnlySpan<byte> data)
     {
         var staging = CreateBufferCore((ulong)data.Length, VkBufferUsageFlags.TransferSrc, MemoryKind.Upload, out var stagingMemory, out var mapped);
+
+        if (staging.IsNull)
+        {
+            ReportOutOfMemory($"upload of {data.Length} bytes");
+            return;
+        }
+
         data.CopyTo(new Span<byte>(mapped, data.Length));
 
         var length = (ulong)data.Length;

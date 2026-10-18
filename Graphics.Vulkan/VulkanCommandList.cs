@@ -47,17 +47,30 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
         EndRenderingIfActive();
 
         _colorCount = 0;
+        var targetFailed = false;
 
         foreach (var target in colorTargets)
         {
-            if (target is VulkanTextureView view && _colorCount < _colorTargets.Length)
+            if (target is not VulkanTextureView view || _colorCount >= _colorTargets.Length)
+                continue;
+
+            if (view.View.IsNull)
+                targetFailed = true;
+            else
                 _colorTargets[_colorCount++] = view;
         }
 
         _depthTarget = depthTarget as VulkanTextureView;
 
+        if (_depthTarget is { View.IsNull: true })
+        {
+            targetFailed = true;
+            _depthTarget = null;
+        }
+
         // Only remembered here. The pass opens at the first draw, once the bindings have been transitioned.
-        _renderingRequested = _colorCount > 0 || _depthTarget != null;
+        // A target whose texture never got its memory makes the pass pointless: its draws are skipped instead.
+        _renderingRequested = !targetFailed && (_colorCount > 0 || _depthTarget != null);
     }
 
     public void EndRendering()
@@ -203,7 +216,7 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
     {
         switch (resource)
         {
-            case VulkanBuffer buffer:
+            case VulkanBuffer { Mapped: not null } buffer:
             {
                 var size = buffer.Description.SizeInBytes;
 
@@ -300,6 +313,10 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
     {
         switch (resource)
         {
+            // Creation already reported why there is nothing to write into.
+            case VulkanBuffer { Buffer.IsNull: true }:
+                break;
+
             case VulkanBuffer { Mapped: not null } buffer:
                 WriteUploadBuffer(buffer, data);
                 break;
@@ -558,6 +575,10 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
             return;
         }
 
+        // Either side never got its memory; creation reported it.
+        if (from.Image.IsNull || to.Image.IsNull)
+            return;
+
         VulkanBarriers.TransitionImage(backend, _commandBuffer, from, VkImageLayout.TransferSrcOptimal,
                                        VkPipelineStageFlags2.Copy, VkAccessFlags2.TransferRead);
         VulkanBarriers.TransitionImage(backend, _commandBuffer, to, VkImageLayout.TransferDstOptimal,
@@ -576,7 +597,7 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
 
     public void CopyBuffer(GpuBuffer source, int sourceOffset, GpuBuffer destination, int destinationOffset, int size)
     {
-        if (source is not VulkanBuffer from || destination is not VulkanBuffer to)
+        if (source is not VulkanBuffer from || destination is not VulkanBuffer to || from.Buffer.IsNull || to.Buffer.IsNull)
             return;
 
         EndRenderingIfActive();
@@ -819,6 +840,10 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
         BarrierInputBuffers();
         BeginRenderingIfNeeded();
 
+        // Vulkan has no draw outside a pass; D3D11 silently dropped one without targets.
+        if (!_renderingActive)
+            return false;
+
         var api = backend.Api;
         api.vkCmdBindPipeline(_commandBuffer, VkPipelineBindPoint.Graphics, _pipeline.Pipeline);
 
@@ -1042,13 +1067,14 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
         foreach (var setGroup in _pipeline.Declared.GroupBy(entry => entry.Key.Set))
         {
             var declared = setGroup.ToArray();
+            var writeCount = 0;
 
             for (var i = 0; i < declared.Length; i++)
             {
                 var (key, type) = (declared[i].Key, declared[i].Value);
                 var binding = FindBinding(key.Slot);
 
-                writes[i] = new VkWriteDescriptorSet
+                writes[writeCount] = new VkWriteDescriptorSet
                                 {
                                     dstBinding = (uint)key.Slot,
                                     descriptorCount = 1,
@@ -1063,7 +1089,7 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
                         var buffer = binding?.Buffer as VulkanBuffer;
                         var size = binding?.BufferSize ?? 0;
 
-                        bufferInfos[i] = buffer == null || buffer.Buffer.IsNull
+                        bufferInfos[writeCount] = buffer == null || buffer.Buffer.IsNull
                                              ? new VkDescriptorBufferInfo { buffer = nulls.Buffer, offset = 0, range = VK_WHOLE_SIZE }
                                              : new VkDescriptorBufferInfo
                                                    {
@@ -1072,60 +1098,76 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
                                                        range = size > 0 ? (ulong)size : (ulong)buffer.Description.SizeInBytes,
                                                    };
 
-                        writes[i].pBufferInfo = &bufferInfos[i];
+                        writes[writeCount].pBufferInfo = &bufferInfos[writeCount];
                         break;
                     }
 
                     case VkDescriptorType.Sampler:
                     {
                         var sampler = binding?.Sampler as VulkanSampler;
-                        imageInfos[i] = new VkDescriptorImageInfo { sampler = sampler?.Sampler ?? nulls.Sampler };
-                        writes[i].pImageInfo = &imageInfos[i];
+                        imageInfos[writeCount] = new VkDescriptorImageInfo { sampler = sampler?.Sampler ?? nulls.Sampler };
+                        writes[writeCount].pImageInfo = &imageInfos[writeCount];
                         break;
                     }
 
                     case VkDescriptorType.StorageImage:
                     {
                         var view = binding?.TextureView as VulkanTextureView;
-                        imageInfos[i] = new VkDescriptorImageInfo
+                        imageInfos[writeCount] = new VkDescriptorImageInfo
                                             {
-                                                imageView = view?.View ?? nulls.StorageView,
+                                                imageView = view is { View.IsNull: false } ? view.View : nulls.StorageView,
                                                 imageLayout = VkImageLayout.General,
                                             };
 
-                        writes[i].pImageInfo = &imageInfos[i];
+                        writes[writeCount].pImageInfo = &imageInfos[writeCount];
                         break;
                     }
 
                     default:
                     {
                         var view = binding?.TextureView as VulkanTextureView;
-                        imageInfos[i] = new VkDescriptorImageInfo
+                        imageInfos[writeCount] = new VkDescriptorImageInfo
                                             {
-                                                imageView = view?.View ?? nulls.SampledView,
+                                                imageView = view is { View.IsNull: false } ? view.View : nulls.SampledView,
                                                 imageLayout = VkImageLayout.ShaderReadOnlyOptimal,
                                             };
 
-                        writes[i].pImageInfo = &imageInfos[i];
+                        writes[writeCount].pImageInfo = &imageInfos[writeCount];
                         break;
                     }
                 }
+
+                // Not even the placeholder exists when the device ran out of memory before the first draw;
+                // the slot then stays unwritten rather than handing the driver a null handle.
+                var usable = type switch
+                                 {
+                                     VkDescriptorType.UniformBuffer or VkDescriptorType.StorageBuffer => !bufferInfos[writeCount].buffer.IsNull,
+                                     VkDescriptorType.Sampler => !imageInfos[writeCount].sampler.IsNull,
+                                     _ => !imageInfos[writeCount].imageView.IsNull,
+                                 };
+
+                if (usable)
+                    writeCount++;
             }
 
             if (backend.UsesPushDescriptors)
             {
-                backend.Api.vkCmdPushDescriptorSetKHR(_commandBuffer, bindPoint, _pipeline.Layout, (uint)setGroup.Key,
-                                                      (uint)declared.Length, writes);
+                if (writeCount > 0)
+                {
+                    backend.Api.vkCmdPushDescriptorSetKHR(_commandBuffer, bindPoint, _pipeline.Layout, (uint)setGroup.Key,
+                                                          (uint)writeCount, writes);
+                }
+
                 continue;
             }
 
             var set = backend.AllocateDescriptorSet(_pipeline.SetLayouts[setGroup.Key]);
-            for (var i = 0; i < declared.Length; i++)
+            for (var i = 0; i < writeCount; i++)
             {
                 writes[i].dstSet = set;
             }
 
-            backend.Api.vkUpdateDescriptorSets((uint)declared.Length, writes, 0, null);
+            backend.Api.vkUpdateDescriptorSets((uint)writeCount, writes, 0, null);
             backend.Api.vkCmdBindDescriptorSets(_commandBuffer, bindPoint, _pipeline.Layout, (uint)setGroup.Key, 1, &set, 0, null);
         }
     }
