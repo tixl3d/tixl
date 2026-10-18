@@ -57,6 +57,12 @@ internal static unsafe class SdlImGuiInput
                 if (button >= 0)
                     io.MouseDown[button] = down;
 
+                // ImGui forgets the pointer position when the window loses focus and only a motion event restores
+                // it. A press without a preceding motion - the pointer parked while another application had focus -
+                // would then land nowhere and the whole drag would go unowned.
+                if (down)
+                    io.MousePos = ToPixels(sdlEvent.button.x, sdlEvent.button.y);
+
                 // A touch anywhere ends the glide, as it does on every other trackpad.
                 if (down)
                     Gestures.PointerGestures.StopGliding();

@@ -146,6 +146,10 @@ internal static class Program
         // app.tixl.TiXL.desktop for the icon and taskbar grouping.
         SDL3.SDL_SetAppMetadata("TiXL", VersionText, "app.tixl.TiXL");
 
+        // SDL swallows the click that focuses a window, which under click-to-focus desktops (Wayland especially)
+        // drops the first interaction after working in another application. A tool wants that click.
+        SDL3.SDL_SetHint(SDL3.SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
+
         SdlSurface.SetVulkanLibraryPath(T3.Graphics.Vulkan.VulkanLoader.FindLibraryPath());
         if (!SDL3.SDL_Init(SDL_InitFlags.SDL_INIT_VIDEO))
         {
