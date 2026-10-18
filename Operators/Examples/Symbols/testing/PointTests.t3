@@ -8,7 +8,13 @@
       "SymbolId": "f92a1144-55d9-4d8e-bfa6-f80665800e25",
       "SymbolName": "Examples.testing.VisualTest",
       "Name": "DisplacePoints2d",
-      "InputValues": [],
+      "InputValues": [
+        {
+          "Id": "adfe6fe4-7fa7-4f1c-9d66-1cbf9b383ba1"/*WarmUpStepCount*/,
+          "Type": "System.Int32",
+          "Value": 400
+        }
+      ],
       "Outputs": []
     },
     {
@@ -236,7 +242,13 @@
       "SymbolId": "f92a1144-55d9-4d8e-bfa6-f80665800e25",
       "SymbolName": "Examples.testing.VisualTest",
       "Name": "ApplyRandomWalkExample",
-      "InputValues": [],
+      "InputValues": [
+        {
+          "Id": "adfe6fe4-7fa7-4f1c-9d66-1cbf9b383ba1"/*WarmUpStepCount*/,
+          "Type": "System.Int32",
+          "Value": 500
+        }
+      ],
       "Outputs": []
     },
     {
