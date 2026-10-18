@@ -51,7 +51,7 @@ internal sealed partial class MagGraphView
             idleFactor = MathUtils.RemapAndClamp(framesSinceLastUpdate, 0f, 60f, 0f, 1f);
         }
 
-        var smallFontScaleFactor = CanvasScale.Clamp(0.5f, 2);
+        var canvasTextScaleFactor = CanvasScale.Clamp(0.5f, 3);
         
         var typeUiProperties = TypeUiRegistry.GetPropertiesForType(item.PrimaryType);
 
@@ -264,27 +264,29 @@ internal sealed partial class MagGraphView
                     drawList.AddConvexPolyFilled(ref _inputIndicatorPoints[0], 5, ColorVariations.Highlight.Apply(typeColor).Fade(fade));
                     name = "   " + name;
                 }
+                // Log.Debug($"{CanvasScale}");
+                // Large font when zoomed in, normal otherwise
+                var font = CanvasScale > 1.8f ? Fonts.FontLarge : Fonts.FontNormal;
+                var labelText = name.AddSpacesForImGuiOutput();
 
-                ImGui.PushFont(Fonts.FontNormal);
-                var requiredLabelSize = ImGui.CalcTextSize(name.AddSpacesForImGuiOutput()).X;
+                ImGui.PushFont(font);
+                var requiredLabelSize = ImGui.CalcTextSize(labelText).X;
                 ImGui.PopFont();
 
-                var paddingForPreview = (hasPreview ? MagGraphItem.LineHeight + 15 : 0) ;
+                var paddingForPreview = hasPreview ? MagGraphItem.LineHeight + 15 : 0;
                 var availableLabelWidth = (MagGraphItem.Width - paddingForPreview) * 0.9f;
-                var downScaleFactor =  MathF.Min(1/T3Ui.UiScaleFactor,  availableLabelWidth / requiredLabelSize );
+                var downScaleFactor = MathF.Min(1 / T3Ui.UiScaleFactor, availableLabelWidth / requiredLabelSize);
+                var fontSize = font.FontSize * (downScaleFactor * CanvasScale).Clamp(0.1f, 1);
 
-                var fontSize = Fonts.FontNormal.FontSize * (downScaleFactor * CanvasScale).Clamp(0.1f , 1);
-                
-                var visibleLineHeight = Math.Min((pMaxVisible.Y - pMinVisible.Y), MagGraphItem.LineHeight * CanvasScale);
-                var yCenter = pMin.Y + visibleLineHeight / 2 - fontSize / 2;
-                var labelPos = new Vector2(pMin.X + 8 * CanvasScale, yCenter);
+                var visibleLineHeight = Math.Min(pMaxVisible.Y - pMinVisible.Y, MagGraphItem.LineHeight * CanvasScale);
+                var labelPos = new Vector2(MathF.Round(pMin.X + 8 * CanvasScale),
+                                           MathF.Round(pMin.Y + visibleLineHeight / 2 - fontSize / 2));
 
-                labelPos = new Vector2(MathF.Round(labelPos.X), MathF.Round(labelPos.Y));
-                drawList.AddText(Fonts.FontNormal,
+                drawList.AddText(font,
                                  fontSize,
                                  labelPos,
                                  labelColor.Fade(CanvasScale.RemapAndClamp(0.3f, 0.7f, 0, 1)),
-                                 name.AddSpacesForImGuiOutput());
+                                 labelText);
             }
         }
 
@@ -355,7 +357,7 @@ internal sealed partial class MagGraphView
                         if (!TypeNameRegistry.Entries.TryGetValue(_context.DraggedPrimaryOutputType, out var typeName))
                             typeName = _context.DraggedPrimaryOutputType.Name;
 
-                        ImGui.PushFont(Fonts.FontSmall);
+                        ImGui.PushFont(Fonts.FontNormal);
                         ImGui.TextColored(UiColors.TextMuted, typeName + " inputs");
                         ImGui.PopFont();
 
@@ -401,14 +403,16 @@ internal sealed partial class MagGraphView
 
         var borderColor = ColorVariations.OperatorOutline.Apply(typeColor);
         IReadOnlyList<ISlot> multiInputSlots = null;
-        if (CanvasScale > 0.25f)
+        if (CanvasScale > 0.5f)
         {
             // Input labels...
             if ((customUiResult & OpUi.CustomUiResult.PreventInputLabels) == 0)
             {
                 int inputIndex;
                 var itemWidth = pMax.X - pMin.X;
-                var labelFontSize = Fonts.FontSmall.FontSize / T3Ui.UiScaleFactor * Fonts.FontSmall.Scale * smallFontScaleFactor;
+
+                var labelFontSize = MathF.Min(Fonts.FontNormal.FontSize / T3Ui.UiScaleFactor * Fonts.FontNormal.Scale * canvasTextScaleFactor,
+                                              Fonts.FontNormal.FontSize);
                 for (inputIndex = 0; inputIndex < item.InputLines.Length; inputIndex++)
                 {
                     var inputLine = item.InputLines[inputIndex];
@@ -459,9 +463,8 @@ internal sealed partial class MagGraphView
                     }
 
                     
-                    var yCenter = pMin.Y + GridSizeOnScreen.Y * (inputIndex + 0.5f) - labelFontSize / 2 - 2;
-                    var labelPos = new Vector2(pMin.X + 8 * CanvasScale, yCenter);
                     var label = inputLine.InputUi.InputDefinition.Name ?? "?";
+                    
                     if (inputLine.MultiInputIndex > 0)
                     {
                         label = " +" + inputLine.MultiInputIndex;
@@ -478,17 +481,9 @@ internal sealed partial class MagGraphView
                         }
                     }
 
-                    drawList.AddText(Fonts.FontSmall,
-                                     labelFontSize,
-                                     labelPos,
-                                     labelColor.Fade(0.7f * CanvasScale.RemapAndClamp(0.3f,0.7f, 0,1) ),
-                                     label
-                                    );
-
-                    // Draw Value if possible
+                    var valueAsString = string.Empty;
                     if (CanvasScale > 0.4f)
                     {
-                        string valueAsString;
                         if (multiInputSlots != null && inputLine.MultiInputIndex < multiInputSlots.Count)
                         {
                             var multiInputSlot = multiInputSlots[inputLine.MultiInputIndex];
@@ -498,31 +493,53 @@ internal sealed partial class MagGraphView
                         {
                             valueAsString = ValueUtils.GetValueString(item.Instance.GetInput(inputLine.Input.Id));
                         }
+                    }
 
-                        if (!string.IsNullOrWhiteSpace(valueAsString))
-                        {
-                            ImGui.PushStyleColor(ImGuiCol.Text, labelColor.Rgba);
-                            var valueColor = labelColor;
-                            valueColor.Rgba.W *= 0.6f;
+                    // Spaced for reading ("RotationAxis" -> "Rotation Axis"). 
+                    var labelText = label.AddSpacesForImGuiOutput();
 
-                            ImGui.PushFont(Fonts.FontSmall);
-                            var labelSize = ImGui.CalcTextSize(valueAsString) * smallFontScaleFactor;
-                            ImGui.PopFont();
+                    var labelX = pMin.X + 8 * CanvasScale;
+                    var valueRightEdge = pMin.X + (item.Size.X - 5) * CanvasScale;
+                    var hasValue = !string.IsNullOrWhiteSpace(valueAsString);
+                    var valueWidth = 0f;
+                    var isValueOnSecondLine = false;
 
-                            var valuePos = new Vector2(pMin.X + (item.Size.X - 5) * CanvasScale - labelSize.X, labelPos.Y);
+                    if (hasValue)
+                    {
+                        // Values are measured at the size they are drawn with; ImGui.CalcTextSize() would return the
+                        // width at the atlas size (UiScaleFactor larger) and push the value off the right edge.
+                        valueWidth = Fonts.FontNormal.CalcTextSizeA(labelFontSize, float.MaxValue, 0, valueAsString).X;
 
-                            if (!string.IsNullOrEmpty(valueAsString))
-                            {
-                                drawList.AddText(Fonts.FontSmall,
-                                                 labelFontSize,
-                                                 valuePos,
-                                                 labelColor.Fade(0.5f),
-                                                 valueAsString
-                                                );
-                            }
+                        // A row is tall enough for two lines, so a value without room beside its input name moves
+                        // onto the line below it rather than overlapping the name.
+                        var labelWidth = Fonts.FontNormal.CalcTextSizeA(labelFontSize, float.MaxValue, 0, labelText).X;
+                        isValueOnSecondLine = valueRightEdge - valueWidth < labelX + labelWidth + MinLabelValueGap * CanvasScale;
+                    }
 
-                            ImGui.PopStyleColor();
-                        }
+                    // A value on its own line makes the text two lines tall; centering that block in the row lifts
+                    // the pair by half a line instead of pushing the value into the row below.
+                    var textBlockHeight = isValueOnSecondLine ? labelFontSize * 2 : labelFontSize;
+                    var labelPos = new Vector2(MathF.Round(labelX),
+                                               MathF.Round(pMin.Y + GridSizeOnScreen.Y * (inputIndex + 0.5f) - textBlockHeight / 2 - 2));
+
+                    drawList.AddText(Fonts.FontNormal,
+                                     labelFontSize,
+                                     labelPos,
+                                     labelColor.Fade(0.7f * CanvasScale.RemapAndClamp(0.3f,0.7f, 0,1) ),
+                                     labelText
+                                    );
+
+                    if (hasValue)
+                    {
+                        var valuePos = new Vector2(MathF.Round(MathF.Max(valueRightEdge - valueWidth, labelPos.X)),
+                                                   MathF.Round(labelPos.Y + (isValueOnSecondLine ? labelFontSize : 0)));
+
+                        drawList.AddText(Fonts.FontNormal,
+                                         labelFontSize,
+                                         valuePos,
+                                         labelColor.Fade(0.5f),
+                                         valueAsString
+                                        );
                     }
                 }
 
@@ -534,20 +551,22 @@ internal sealed partial class MagGraphView
                     if (outputLine.OutputUi == null)
                         continue;
 
-                    ImGui.PushFont(Fonts.FontSmall);
+                    ImGui.PushFont(Fonts.FontNormal);
                     var outputDefinitionName = outputLine.OutputUi.OutputDefinition.Name.AddSpacesForImGuiOutput();
                     var outputLabelSize = ImGui.CalcTextSize(outputDefinitionName);
                     ImGui.PopFont();
 
-                    var fontSizeRatio = labelFontSize / Fonts.FontSmall.FontSize;
+                    var fontSizeRatio = labelFontSize / Fonts.FontNormal.FontSize;
                     var scaledLabelWidth = outputLabelSize.X * fontSizeRatio;
 
                     var visibleLineHeight = GridSizeOnScreen.Y;
                     var yCenter = pMin.Y + visibleLineHeight * outputLine.VisibleIndex + visibleLineHeight / 2 - labelFontSize / 2;
+                    var outputLabelPos = new Vector2(MathF.Round(pMin.X + MagGraphItem.Width * CanvasScale - scaledLabelWidth - 8 * CanvasScale),
+                                                     MathF.Round(yCenter));
 
-                    drawList.AddText(Fonts.FontSmall,
+                    drawList.AddText(Fonts.FontNormal,
                                      labelFontSize,
-                                     new Vector2(pMin.X + MagGraphItem.Width * CanvasScale - scaledLabelWidth - 8 * CanvasScale, yCenter),
+                                     outputLabelPos,
                                      labelColor.Fade(0.7f * CanvasScale.RemapAndClamp(0.3f, 0.7f, 0, 1)),
                                      outputDefinitionName);
                 }
@@ -598,6 +617,8 @@ internal sealed partial class MagGraphView
 
             if (!string.IsNullOrEmpty(item.ChildUi.Comment))
             {
+                ImGui.PushID(item.Id.GetHashCode());
+
                 ImGui.SetCursorScreenPos(new Vector2(pMax.X, pMin.Y) + Vector2.Round(new Vector2(-5, -1) * (T3Ui.UiScaleFactor + CanvasScale)));
                 if (ImGui.InvisibleButton("#comment", new Vector2(15, 15)))
                 {
@@ -607,6 +628,8 @@ internal sealed partial class MagGraphView
 
                 Icons.DrawIconOnLastItem(Icon.Comment, UiColors.ForegroundFull);
                 CustomComponents.TooltipForLastItem(UiColors.Text, item.ChildUi.Comment, null, false);
+
+                ImGui.PopID();
             }
 
             // Non-Lib indicator 
@@ -1115,6 +1138,8 @@ internal sealed partial class MagGraphView
 
             if (UserSettings.Config.ShowOperatorStats)
             {
+                ImGui.PushID(item.Id.GetHashCode());
+
                 var s = item.Size.Y * 0.15f * CanvasScale;
                 ImGui.SetCursorScreenPos(pMinVisible + new Vector2(s, pMaxVisible.Y - pMinVisible.Y - s));
                 ImGui.InvisibleButton("#status", new Vector2(s, s));
@@ -1125,6 +1150,8 @@ internal sealed partial class MagGraphView
                     DrawInstanceStatus(instance);
                     ImGui.EndTooltip();
                 }
+
+                ImGui.PopID();
             }
         }
 
@@ -1319,6 +1346,9 @@ internal sealed partial class MagGraphView
 
         return true;
     }
+
+    /** Gap an input value needs beside its parameter name; below it the value moves to a second line. */
+    private const float MinLabelValueGap = 4;
 
     private static Guid _hoveredForInputPickingId;
     private static float _hoverPickingProgress;
