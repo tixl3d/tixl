@@ -39,6 +39,12 @@ internal static class AlsaSeqInterop
     internal const uint TypeMidiGeneric = 2, TypeApplication = 1048576;
     internal const byte EventSysex = 130, QueueDirect = 253;
 
+    /// <summary>Negated errno values as libasound returns them.</summary>
+    internal const int ErrorInterrupted = -4, ErrorTryAgain = -11, ErrorNoSpace = -28;
+
+    /** The largest input pool the kernel grants a client (SNDRV_SEQ_MAX_CLIENT_EVENTS). */
+    internal const int MaxClientInputPoolSize = 2000;
+
     /// <summary>ALSA's own client, which owns the Timer and Announce ports rather than any instrument.</summary>
     internal const int SystemClientId = 0;
 
@@ -46,6 +52,7 @@ internal static class AlsaSeqInterop
     [DllImport(Lib)] internal static extern int snd_seq_close(IntPtr handle);
     [DllImport(Lib)] internal static extern int snd_seq_set_client_name(IntPtr handle, string name);
     [DllImport(Lib)] internal static extern int snd_seq_client_id(IntPtr handle);
+    [DllImport(Lib)] internal static extern int snd_seq_set_client_pool_input(IntPtr handle, UIntPtr size);
     [DllImport(Lib)] internal static extern int snd_seq_create_simple_port(IntPtr handle, string name, uint caps, uint type);
     [DllImport(Lib)] internal static extern int snd_seq_delete_simple_port(IntPtr handle, int port);
     [DllImport(Lib)] internal static extern int snd_seq_connect_to(IntPtr handle, int myPort, int destClient, int destPort);

@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -16,6 +17,9 @@ namespace T3.IoServices.Midi;
 /// </remarks>
 internal sealed class AlsaSeqMidiDeviceProvider : MidiDeviceProvider
 {
+    /// <summary>A decoded short message waiting for the consumers, keyed by the port it came from.</summary>
+    private readonly record struct PendingMessage(AlsaMidiInputDevice Device, int RawMessage, int Timestamp);
+
     public override string Name => "ALSA sequencer";
 
     public override bool IsAvailable
@@ -103,6 +107,12 @@ internal sealed class AlsaSeqMidiDeviceProvider : MidiDeviceProvider
         _readerThread?.Join(TimeSpan.FromSeconds(1));
         _readerThread = null;
 
+        _pendingMessages?.CompleteAdding();
+        _dispatchThread?.Join(TimeSpan.FromSeconds(1));
+        _dispatchThread = null;
+        _pendingMessages?.Dispose();
+        _pendingMessages = null;
+
         if (_encoder != IntPtr.Zero)
         {
             snd_midi_event_free(_encoder);
@@ -156,6 +166,10 @@ internal sealed class AlsaSeqMidiDeviceProvider : MidiDeviceProvider
         snd_seq_set_client_name(_seq, ClientName);
         _clientId = snd_seq_client_id(_seq);
 
+        // The default pool of 200 events overruns within a fraction of a second when a network peer floods
+        // its port, e.g. with another editor's LED feedback relayed by rtpmidid.
+        snd_seq_set_client_pool_input(_seq, (UIntPtr)MaxClientInputPoolSize);
+
         const uint portType = TypeMidiGeneric | TypeApplication;
         _inputPort = snd_seq_create_simple_port(_seq, ClientName + " in", CapWrite | CapSubsWrite, portType);
         _outputPort = snd_seq_create_simple_port(_seq, ClientName + " out", CapRead | CapSubsRead, portType);
@@ -169,18 +183,52 @@ internal sealed class AlsaSeqMidiDeviceProvider : MidiDeviceProvider
         snd_midi_event_init(_encoder);
         snd_midi_event_no_status(_encoder, 1);
 
+        _pendingMessages = new BlockingCollection<PendingMessage>(PendingMessageCapacity);
+        _dispatchThread = new Thread(DispatchPendingMessages) { IsBackground = true, Name = "ALSA MIDI dispatch" };
+        _dispatchThread.Start();
+
         _readerThread = new Thread(ReadIncomingEvents) { IsBackground = true, Name = "ALSA MIDI in" };
         _readerThread.Start();
         return true;
     }
 
+    /// <summary>
+    /// Only drains the sequencer. A network peer can deliver thousands of events within milliseconds, and
+    /// the kernel queue holds at most <see cref="MaxClientInputPoolSize"/>, so running the consumers here
+    /// would overrun it; they get the messages from <see cref="DispatchPendingMessages"/> instead.
+    /// </summary>
+
     private void ReadIncomingEvents()
     {
         var buffer = new byte[MessageBufferSize];
+        var overrunCount = 0;
         while (!_isShuttingDown)
         {
-            if (snd_seq_event_input(_seq, out var eventPointer) < 0 || _isShuttingDown)
+            var result = snd_seq_event_input(_seq, out var eventPointer);
+            if (_isShuttingDown)
             {
+                break;
+            }
+
+            if (result < 0)
+            {
+                if (result == ErrorNoSpace)
+                {
+                    // The kernel reports an input overrun once, after dropping the queued events; reading continues.
+                    if (overrunCount++ == 0)
+                    {
+                        Log.Warning("MIDI input overrun: events arrived faster than they were consumed and were dropped.");
+                    }
+
+                    continue;
+                }
+
+                if (result is ErrorInterrupted or ErrorTryAgain)
+                {
+                    continue;
+                }
+
+                Log.Warning($"MIDI input stopped: ALSA sequencer error {result}. Rescan the devices to restart it.");
                 break;
             }
 
@@ -209,7 +257,48 @@ internal sealed class AlsaSeqMidiDeviceProvider : MidiDeviceProvider
             var rawMessage = buffer[0]
                              | (byteCount > 1 ? buffer[1] << 8 : 0)
                              | (byteCount > 2 ? buffer[2] << 16 : 0);
-            device.DispatchMessage(rawMessage);
+            QueuePendingMessage(new PendingMessage(device, rawMessage, Environment.TickCount));
+        }
+    }
+
+    private void QueuePendingMessage(PendingMessage message)
+    {
+        var pending = _pendingMessages;
+        if (pending == null)
+        {
+            return;
+        }
+
+        try
+        {
+            if (!pending.TryAdd(message) && _droppedPendingMessageCount++ == 0)
+            {
+                Log.Warning("MIDI consumers are too slow: incoming messages are being dropped.");
+            }
+        }
+        catch (InvalidOperationException)
+        {
+            // Shutdown completed the collection while this thread was still draining.
+        }
+    }
+
+    private void DispatchPendingMessages()
+    {
+        var pending = _pendingMessages;
+        if (pending == null)
+        {
+            return;
+        }
+
+        try
+        {
+            foreach (var message in pending.GetConsumingEnumerable())
+            {
+                message.Device.DispatchMessage(message.RawMessage, message.Timestamp);
+            }
+        }
+        catch (ObjectDisposedException)
+        {
         }
     }
 
@@ -370,9 +459,9 @@ internal sealed class AlsaSeqMidiDeviceProvider : MidiDeviceProvider
             Stop();
         }
 
-        internal void DispatchMessage(int rawMessage)
+        internal void DispatchMessage(int rawMessage, int timestamp)
         {
-            RaiseMessageReceived(rawMessage, Environment.TickCount);
+            RaiseMessageReceived(rawMessage, timestamp);
         }
 
         private readonly AlsaSeqMidiDeviceProvider _provider;
@@ -447,6 +536,9 @@ internal sealed class AlsaSeqMidiDeviceProvider : MidiDeviceProvider
     /** Large enough for the longest sysex a controller sends for its pad colours. */
     private const int MessageBufferSize = 1024;
 
+    /** Tens of seconds of a flooding peer; beyond that the consumers cannot be keeping up at all. */
+    private const int PendingMessageCapacity = 1 << 16;
+
     private IntPtr _seq;
     private IntPtr _decoder;
     private IntPtr _encoder;
@@ -456,6 +548,9 @@ internal sealed class AlsaSeqMidiDeviceProvider : MidiDeviceProvider
     private bool? _availability;
     private volatile bool _isShuttingDown;
     private Thread? _readerThread;
+    private Thread? _dispatchThread;
+    private BlockingCollection<PendingMessage>? _pendingMessages;
+    private int _droppedPendingMessageCount;
     private readonly object _decoderLock = new();
     private readonly object _outputLock = new();
     private readonly Dictionary<int, AlsaMidiInputDevice> _inputsByAddress = new();
