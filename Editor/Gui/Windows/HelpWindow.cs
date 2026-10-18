@@ -277,7 +277,8 @@ internal sealed class HelpWindow : Window
 
         if (symbolUi != null)
         {
-            OperatorHelp.DrawHelp(symbolUi);
+            DrawHeaderWithThumbnail(symbolUi);
+            OperatorHelp.DrawHelp(symbolUi, omitHeader: true);
         }
         else if (topicTitle != null)
         {
@@ -301,7 +302,37 @@ internal sealed class HelpWindow : Window
             DrawResourceFooter(mentionKey, resourceLinks);
     }
 
+    /// <summary>
+    /// Title block with the symbol's thumbnail right-aligned beside it, so the image doesn't push the
+    /// description down. Omitted while the thumbnail is missing, still loading, or the panel is too narrow.
+    /// </summary>
+    private static void DrawHeaderWithThumbnail(SymbolUi symbolUi)
+    {
+        var symbol = symbolUi.Symbol;
+        var thumbnail = ThumbnailManager.GetThumbnail(symbol.Id, symbol.SymbolPackage, ThumbnailManager.Categories.PackageMeta);
 
+        ImGui.BeginGroup();
+        OperatorHelp.DrawHeader(symbolUi);
+        ImGui.EndGroup();
+
+        if (!thumbnail.IsReady)
+            return;
+
+        var height = 60 * T3Ui.UiScaleFactor;
+        var width = height * 4 / 3;
+        var padding = 10 * T3Ui.UiScaleFactor;
+
+        ImGui.SameLine();
+        var spaceRight = ImGui.GetContentRegionAvail().X;
+        if (spaceRight < width + padding)
+        {
+            ImGui.NewLine();
+            return;
+        }
+
+        ImGui.SetCursorPosX(MathF.Floor(ImGui.GetCursorPosX() + spaceRight - width - padding));
+        thumbnail.AsImguiImage(height);
+    }
 
     private void DrawUiTopicDoc(string title, string? doc)
     {
