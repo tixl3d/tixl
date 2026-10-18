@@ -105,14 +105,10 @@ This was a real bug in TiXL's own PBR shading during the port, and it cost a day
 ### smoothstep with a descending edge
 
 ```hlsl
-smoothstep(1.0, 0.0, x)     // compiles; result is not what you want
+smoothstep(1.0, 0.0, x)     // works: a falling curve, same as FXC
 ```
 
-`smoothstep` is only defined when `edge0 < edge1`. FXC's output happened to be useful when the edges were swapped. Write the inversion explicitly instead:
-
-```hlsl
-1.0 - smoothstep(0.0, 1.0, x)
-```
+Swapped edges still work on all current compilers and drivers. Strictly, the SPIR-V spec leaves `edge0 > edge1` undefined, so `1.0 - smoothstep(0.0, 1.0, x)` is the portable spelling. Equal edges (`edge0 == edge1`) divide by zero everywhere — that one is always a bug.
 
 ### A function named after an intrinsic
 

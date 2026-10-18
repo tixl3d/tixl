@@ -5,6 +5,9 @@
 first, to limit drift; this follows. It does not block the port — see [Cross-platform device
 layer](#cross-platform-device-layer-2026-10-04), which also belongs to this plan rather than being done
 separately.
+**Phase 1 superseded (2026-10-17):** the "default MIDI controller" name substitution is replaced by the
+more general alias table in [Plan_MidiDeviceAliases.md](Plan_MidiDeviceAliases.md). Phases 2–3 bind profiles
+and roles to an alias instead of a product name.
 
 VJ setups currently hard-code specific MIDI devices (APC mini / APC mini MKII / APC 40) both in `MidiInput` ops
 and in the editor's snapshot controller layer. Goal: a device-independent layer — "8 faders + 1 master +

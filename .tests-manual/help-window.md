@@ -75,8 +75,10 @@ Then click one.
 Hover or select a library operator that has a thumbnail image (most `Lib` operators with visual output).
 
 **Expected:**
-- The thumbnail is shown at the top of the Help body, above the operator's name and description.
-- Operators without a thumbnail simply start with the name — no gap or placeholder.
+- The thumbnail is shown right-aligned beside the operator's name and namespace at the top of the Help body.
+- Operators without a thumbnail simply show the name — no gap or placeholder.
+- With the Help window closed (or its hover toggle off), hovering the symbol in the library shows the
+  thumbnail in the tooltip instead.
 
 ## Step: UI-topic links
 
