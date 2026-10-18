@@ -11,7 +11,12 @@ public sealed class MultiInputSlot<T> : InputSlot<T>, IMultiInputSlot
 {
     public List<Slot<T>> CollectedInputs => _collectedInputs;
     private readonly List<Slot<T>> _collectedInputs = new(10);
-    public int[] LimitMultiInputInvalidationToIndices = [];
+
+    /// <summary>
+    /// Restricts the invalidation walk to these connected inputs. Null walks all of them; an empty array walks
+    /// none, for owners that force-invalidate the inputs they evaluate themselves (e.g. ExecuteTests).
+    /// </summary>
+    public int[] LimitMultiInputInvalidationToIndices;
 
     public MultiInputSlot()
     {
@@ -54,13 +59,14 @@ public sealed class MultiInputSlot<T> : InputSlot<T>, IMultiInputSlot
         var collectedCount = collectedInputs.Count;
             
         int target = 0;
-        var multiInputLimitCount = LimitMultiInputInvalidationToIndices.Length;
+        var limitToIndices = LimitMultiInputInvalidationToIndices;
 
-        if (multiInputLimitCount > 0)
+        if (limitToIndices != null)
         {
+            var multiInputLimitCount = limitToIndices.Length;
             for (int i = 0; i < multiInputLimitCount; i++)
             {
-                var index = LimitMultiInputInvalidationToIndices[i];
+                var index = limitToIndices[i];
                 if (index >= collectedCount)
                     continue;
 
