@@ -190,24 +190,29 @@ internal static class RecordingSession
             return;
         }
 
+        ExtendClipsToElapsedTime(playback);
+    }
+
+    /// <summary>
+    /// Grows both clip ops' TimeClip output data in place to the wall-clock time elapsed since
+    /// record-start. TimeRange extends in timeline bars; SourceRange extends in file time, in
+    /// whichever unit the clip declares (seconds for [AudioClip], bars for [LoadDataClip]).
+    /// Keeping the two separate lets cut / start-handle trim work correctly — see InitClipTimeClip.
+    /// </summary>
+    private static void ExtendClipsToElapsedTime(Playback playback)
+    {
         var elapsedSecs = Playback.RunTimeInSecs - _recordStartRunSecs;
         var elapsedBars = elapsedSecs * playback.Bpm / 240.0;
         var timelineEnd = (float)(_recordStartBars + elapsedBars);
-        var sourceEnd = (float)elapsedBars;
 
-        // Grow both clip ops' TimeClip output data in place. Animated dirty flag on each op's
-        // output ensures the next Update picks up the new range. TimeRange extends in
-        // timeline-bar space (startBars + elapsed); SourceRange extends in file-time-bar space
-        // (elapsed since record-start). Keeping the two separate lets cut / start-handle trim
-        // work correctly — see InitClipTimeClip.
         if (SymbolUiRegistry.TryGetSymbolUi(_compositionSymbolId, out var compositionUi))
         {
-            GrowClipTimeRange(compositionUi.Symbol, _activeDataClipChildId, timelineEnd, sourceEnd);
-            GrowClipTimeRange(compositionUi.Symbol, _activeAudioClipChildId, timelineEnd, sourceEnd);
+            GrowClipTimeRange(compositionUi.Symbol, _activeDataClipChildId, timelineEnd, elapsedSecs, playback.Bpm);
+            GrowClipTimeRange(compositionUi.Symbol, _activeAudioClipChildId, timelineEnd, elapsedSecs, playback.Bpm);
         }
     }
 
-    private static void GrowClipTimeRange(Symbol composition, Guid childId, float timelineEnd, float sourceEnd)
+    private static void GrowClipTimeRange(Symbol composition, Guid childId, float timelineEnd, double elapsedSecs, double bpm)
     {
         if (childId == Guid.Empty || !composition.Children.TryGetValue(childId, out var symbolChild))
             return;
@@ -217,7 +222,7 @@ internal static class RecordingSession
             if (output.OutputData is TimeClip tc)
             {
                 tc.TimeRange.End = timelineEnd;
-                tc.SourceRange.End = sourceEnd;
+                tc.SourceRange.End = (float)tc.SecondsToSource(elapsedSecs, bpm);
                 break;
             }
         }
@@ -241,7 +246,8 @@ internal static class RecordingSession
         // Final extend with one last frame's worth so the clip ends precisely where the
         // recorders did. The recorders' EndRecording closes the files synchronously, so
         // the elapsed time at this exact moment is the real duration.
-        OnFrame();
+        if (Playback.Current != null)
+            ExtendClipsToElapsedTime(Playback.Current);
 
         if (!SymbolUiRegistry.TryGetSymbolUi(_compositionSymbolId, out var compositionUi))
         {
@@ -428,11 +434,11 @@ internal static class RecordingSession
         {
             if (output.OutputData is TimeClip tc)
             {
-                // TimeRange is in timeline bars (placement); SourceRange is in file-time
-                // bars (anchored at 0). Keeping the two in different spaces is what makes
-                // cut / drag-start trim mathematically consistent — splitting a clip just
-                // narrows both ranges in their own coordinate space, and LoadDataClip
-                // maps file events without rebasing.
+                // TimeRange is in timeline bars (placement); SourceRange is in file time
+                // (anchored at 0, in the clip's own SourceUnit). Keeping the two in different
+                // spaces is what makes cut / drag-start trim mathematically consistent —
+                // splitting a clip just narrows both ranges in their own coordinate space,
+                // and LoadDataClip maps file events without rebasing.
                 tc.TimeRange = new TimeRange(startBars, startBars);
                 tc.SourceRange = new TimeRange(0f, 0f);
                 tc.LayerIndex = layer;
