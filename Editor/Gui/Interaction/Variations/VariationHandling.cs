@@ -400,9 +400,11 @@ internal static class VariationHandling
     /// Toggles snapshot control for a single parameter as one undoable macro: updates the
     /// child's enabled set (enabling the first / disabling the last parameter also flips the
     /// per-op flag) and keeps all existing snapshots consistent — enabling captures the
-    /// parameter's current value, disabling removes its stored values.
+    /// parameter's current value, disabling removes its stored values. With <paramref name="collectInto"/>
+    /// the commands join that macro instead of forming their own undo step.
     /// </summary>
-    internal static void ToggleParameterSnapshotControl(SymbolUi compositionUi, SymbolUi.Child childUi, Symbol.Child.Input input, bool enable)
+    internal static void ToggleParameterSnapshotControl(SymbolUi compositionUi, SymbolUi.Child childUi, Symbol.Child.Input input, bool enable,
+                                                        MacroCommand? collectInto = null)
     {
         // ParameterCollections (group index above 1) keep their own semantics
         if (childUi.SnapshotGroupIndex > 1)
@@ -445,7 +447,7 @@ internal static class VariationHandling
             }
         }
 
-        var macro = new MacroCommand("Toggle parameter snapshot control");
+        var macro = collectInto ?? new MacroCommand("Toggle parameter snapshot control");
         macro.AddAndExecCommand(new ChangeSnapshotEnabledInputsCommand(compositionUi.Symbol.Id, childUi, newGroupIndex, newEnabledIds));
 
         var pool = GetOrLoadVariations(compositionUi.Symbol.Id);
@@ -477,7 +479,113 @@ internal static class VariationHandling
             }
         }
 
-        UndoRedoStack.Add(macro);
+        if (collectInto == null)
+            UndoRedoStack.Add(macro);
+    }
+
+    /// <summary>
+    /// Disables snapshot control for every parameter whose value is the same in all snapshots of
+    /// the composition, as one undoable macro. Returns the number of parameters removed. Needs at
+    /// least two snapshots, since a single one can't tell "unchanging" from "only one state".
+    /// </summary>
+    internal static int RemoveUnchangingParametersFromSnapshots(SymbolUi compositionUi)
+    {
+        var pool = GetOrLoadVariations(compositionUi.Symbol.Id);
+        var snapshots = new List<Variation>();
+        foreach (var variation in pool.AllVariations)
+        {
+            if (variation.IsSnapshot)
+                snapshots.Add(variation);
+        }
+
+        if (snapshots.Count < 2)
+            return 0;
+
+        return RemoveParametersFromSnapshots(compositionUi, "Remove unchanging snapshot parameters",
+                                             (childUi, input) => IsSameInAllSnapshots(snapshots, childUi.Id, input.Id, input.DefaultValue));
+    }
+
+    /// <summary>
+    /// Disables snapshot control for every parameter that has an incoming connection, as one
+    /// undoable macro. A connected input ignores its stored value, so controlling it only adds
+    /// noise. Returns the number of parameters removed.
+    /// </summary>
+    internal static int RemoveConnectedParametersFromSnapshots(SymbolUi compositionUi)
+    {
+        var connectedInputs = new HashSet<(Guid ChildId, Guid InputId)>();
+        foreach (var connection in compositionUi.Symbol.Connections)
+        {
+            connectedInputs.Add((connection.TargetParentOrChildId, connection.TargetSlotId));
+        }
+
+        if (connectedInputs.Count == 0)
+            return 0;
+
+        return RemoveParametersFromSnapshots(compositionUi, "Remove connected snapshot parameters",
+                                             (childUi, input) => connectedInputs.Contains((childUi.Id, input.Id)));
+    }
+
+    /// <summary>
+    /// Walks every controlled parameter of the composition's children and disables snapshot
+    /// control where <paramref name="shouldRemove"/> says so, all in one macro. Composition inputs
+    /// and ParameterCollections are left alone, like the per-parameter toggle does.
+    /// </summary>
+    private static int RemoveParametersFromSnapshots(SymbolUi compositionUi, string commandName,
+                                                     Func<SymbolUi.Child, Symbol.Child.Input, bool> shouldRemove)
+    {
+        var macro = new MacroCommand(commandName);
+        var removedCount = 0;
+        var controlledInputIds = new List<Guid>();
+
+        foreach (var childUi in compositionUi.ChildUis.Values)
+        {
+            if (!childUi.EnabledForSnapshots)
+                continue;
+
+            // Disabling rewrites the child's enabled set, so iterate a copy
+            controlledInputIds.Clear();
+            controlledInputIds.AddRange(childUi.SnapshotEnabledInputIds ?? CollectControlledInputIds(childUi));
+
+            foreach (var inputId in controlledInputIds)
+            {
+                if (!childUi.SymbolChild.Inputs.TryGetValue(inputId, out var input))
+                    continue;
+
+                if (!shouldRemove(childUi, input))
+                    continue;
+
+                ToggleParameterSnapshotControl(compositionUi, childUi, input, enable: false, macro);
+                removedCount++;
+            }
+        }
+
+        if (removedCount > 0)
+            UndoRedoStack.Add(macro);
+
+        return removedCount;
+    }
+
+    private static bool IsSameInAllSnapshots(List<Variation> snapshots, Guid childId, Guid inputId, InputValue defaultValue)
+    {
+        if (!ValueUtils.CompareFunctions.TryGetValue(defaultValue.ValueType, out var compare))
+            return false;
+
+        var reference = GetStoredOrDefault(snapshots[0], childId, inputId, defaultValue);
+        for (var index = 1; index < snapshots.Count; index++)
+        {
+            if (!compare(reference, GetStoredOrDefault(snapshots[index], childId, inputId, defaultValue)))
+                return false;
+        }
+
+        return true;
+    }
+
+    /** Snapshots don't store default values, so a missing entry means the default. */
+    private static InputValue GetStoredOrDefault(Variation variation, Guid childId, Guid inputId, InputValue defaultValue)
+    {
+        return variation.ParameterSetsForChildIds.TryGetValue(childId, out var set) && set.TryGetValue(inputId, out var stored)
+                   ? stored
+                   : defaultValue;
     }
 
     /// <summary>

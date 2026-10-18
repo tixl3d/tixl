@@ -134,17 +134,32 @@ internal sealed class ParameterWindow : Window
             return;
         }
 
-        // Clicking the graph background selects the composition itself. If it has no inputs
-        // to show, the snapshot control view is more useful than an empty parameter list.
+        // Clicking the graph background selects the composition itself. Once snapshots are
+        // defined, the intent is to see and edit them rather than the composition's inputs,
+        // so the snapshot control view takes over (a header icon toggles back). It also
+        // replaces the otherwise empty parameter list of a composition without inputs.
         // Handled before the ui-definition lookup, which requires a parent and would bail
         // out for compositions at the home level.
-        if (_viewMode == ViewModes.Parameters
-            && IsFocusedComposition(instance)
-            && instance.Inputs.Count == 0
-            && VariationHandling.ActivePoolForSnapshots != null
+        var canToggleSnapshots = false;
+        var showsSnapshots = false;
+        if (IsFocusedComposition(instance)
+            && VariationHandling.ActivePoolForSnapshots is { } snapshotPool
             && !SkillTraining.IsInPlayMode)
         {
-            if (DrawSymbolHeader(instance, instance.GetSymbolUi()))
+            if (instance.Symbol.Id != _snapshotToggleSymbolId)
+            {
+                _snapshotToggleSymbolId = instance.Symbol.Id;
+                _showCompositionInputs = false;
+            }
+
+            canToggleSnapshots = instance.Inputs.Count > 0 && snapshotPool.HasSnapshots;
+            showsSnapshots = _viewMode == ViewModes.Parameters
+                             && (instance.Inputs.Count == 0 || (canToggleSnapshots && !_showCompositionInputs));
+        }
+
+        if (showsSnapshots)
+        {
+            if (DrawSymbolHeader(instance, instance.GetSymbolUi(), canToggleSnapshots, showsSnapshots))
                 instance.GetSymbolUi().FlagAsModified();
 
             _snapshotControlView.Draw();
@@ -155,7 +170,7 @@ internal sealed class ParameterWindow : Window
             return;
 
         var modified = false;
-        modified |= DrawSymbolHeader(instance, symbolUi);
+        modified |= DrawSymbolHeader(instance, symbolUi, canToggleSnapshots, showsSnapshots);
 
         if (instance.Parent == null)
         {
@@ -178,7 +193,7 @@ internal sealed class ParameterWindow : Window
             symbolUi.FlagAsModified();
     }
 
-    private bool DrawSymbolHeader(Instance op, SymbolUi symbolUi)
+    private bool DrawSymbolHeader(Instance op, SymbolUi symbolUi, bool withSnapshotToggle = false, bool showsSnapshots = false)
     {
         var modified = false;
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(5, 5));
@@ -208,8 +223,9 @@ internal sealed class ParameterWindow : Window
             var namespaceForEdit = op.Symbol.Namespace ?? "";
 
             var iconSize = ImGui.GetFrameHeight();
-            // 3 icons; the settings and help buttons each nudge themselves +2px right
-            var iconBlockWidth = 3 * iconSize + 2 * (ImGui.GetStyle().ItemSpacing.X + 2);
+            // Tags, settings, help and the optional snapshot toggle; all but the first nudge themselves +2px right
+            var iconCount = withSnapshotToggle ? 4 : 3;
+            var iconBlockWidth = iconCount * iconSize + (iconCount - 1) * (ImGui.GetStyle().ItemSpacing.X + 2);
 
             ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X - iconBlockWidth - ImGui.GetStyle().ItemSpacing.X);
 
@@ -250,6 +266,25 @@ internal sealed class ParameterWindow : Window
                 // which ignores the item width set above.
                 ImGui.SetCursorPosX(ImGui.GetWindowWidth() - ImGui.GetStyle().WindowPadding.X - iconBlockWidth);
                 modified |= DrawSymbolTagsButton(symbolUi);
+            }
+
+            if (withSnapshotToggle)
+            {
+                ImGui.SameLine();
+                ImGui.SetCursorPosX(ImGui.GetCursorPosX() + 2);
+                ImGui.PushStyleColor(ImGuiCol.Button, Color.Transparent.Rgba);
+                if (CustomComponents.IconButton(Icon.Presets,
+                                                new Vector2(iconSize, iconSize),
+                                                showsSnapshots
+                                                    ? CustomComponents.ButtonStates.Activated
+                                                    : CustomComponents.ButtonStates.Default))
+                {
+                    _showCompositionInputs = showsSnapshots;
+                    _viewMode = ViewModes.Parameters;
+                }
+
+                ImGui.PopStyleColor();
+                CustomComponents.TooltipForLastItem("Click to toggle between snapshots and the composition's input parameters.");
             }
 
             // Settings Modes
@@ -1019,6 +1054,10 @@ internal sealed class ParameterWindow : Window
     private static int _instanceCounter;
     private Guid _lastSelectedInstanceId;
     private bool _selectionChanged;
+
+    /** User chose the selected composition's inputs over its snapshots; reset when the composition changes. */
+    private bool _showCompositionInputs;
+    private Guid _snapshotToggleSymbolId;
 
     private readonly ParameterSettings _parameterSettings = new();
     private readonly SnapshotControlView _snapshotControlView = new();

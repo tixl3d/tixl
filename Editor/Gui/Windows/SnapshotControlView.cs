@@ -232,8 +232,8 @@ internal sealed class SnapshotControlView
         }
         else if (selectedSnapshot != null && (ImGui.IsKeyPressed(ImGuiKey.Enter) || ImGui.IsKeyPressed(ImGuiKey.KeypadEnter)))
         {
-            // Safe here: the control view only shows when nothing is selected in the graph, so this
-            // can't collide with the graph's own Enter-to-rename.
+            // Safe here: this handler requires the parameter window to be focused, so it can't
+            // collide with the graph's own Enter-to-rename.
             StartRenaming(selectedSnapshot);
         }
     }
@@ -434,6 +434,30 @@ internal sealed class SnapshotControlView
 
             if (CustomComponents.DrawMenuItem(_updateThumbnailActionId, Icon.Refresh, "Update Thumbnail", isEnabled: selectedSnapshot != null, reserveCheckmarkColumn: false))
                 VariationThumbnailRenderer.RequestRender(pool, composition, selectedSnapshot!.Id, toFile: true);
+
+            CustomComponents.SeparatorLine();
+
+            if (CustomComponents.DrawMenuItem(_removeUnchangingActionId, Icon.None, "Remove Unchanging Parameters", isEnabled: _snapshots.Count > 1, reserveCheckmarkColumn: false))
+            {
+                var removedCount = VariationHandling.RemoveUnchangingParametersFromSnapshots(composition.GetSymbolUi());
+                Log.Info(removedCount > 0
+                             ? $"Removed {removedCount} parameters from snapshot control that were the same in all snapshots."
+                             : "Every controlled parameter differs between snapshots - nothing removed.");
+                _modificationCheck.Invalidate();
+            }
+
+            CustomComponents.TooltipForLastItem("Disables snapshot control for parameters whose value is the same in all snapshots. Undoable.");
+
+            if (CustomComponents.DrawMenuItem(_removeConnectedActionId, Icon.None, "Remove Connected Parameters", reserveCheckmarkColumn: false))
+            {
+                var removedCount = VariationHandling.RemoveConnectedParametersFromSnapshots(composition.GetSymbolUi());
+                Log.Info(removedCount > 0
+                             ? $"Removed {removedCount} connected parameters from snapshot control."
+                             : "No controlled parameter has an incoming connection - nothing removed.");
+                _modificationCheck.Invalidate();
+            }
+
+            CustomComponents.TooltipForLastItem("Disables snapshot control for parameters driven by an incoming connection. Undoable.");
 
             CustomComponents.SeparatorLine();
 
@@ -1361,6 +1385,8 @@ internal sealed class SnapshotControlView
     private static SnapshotMenuContext? _activeSnapshotMenuContext;
     private static readonly int _renameActionId = "snapshotRename".GetHashCode();
     private static readonly int _updateThumbnailActionId = "snapshotUpdateThumbnail".GetHashCode();
+    private static readonly int _removeUnchangingActionId = "snapshotRemoveUnchanging".GetHashCode();
+    private static readonly int _removeConnectedActionId = "snapshotRemoveConnected".GetHashCode();
     private static readonly int _removeActionId = "snapshotRemove".GetHashCode();
 
     private readonly ModificationCheck _modificationCheck = new();

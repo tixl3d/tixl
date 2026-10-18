@@ -50,6 +50,20 @@ internal sealed class SymbolVariationPool
     /// </summary>
     public bool IsBlendDrivenByOperator { get; set; }
 
+    public bool HasSnapshots
+    {
+        get
+        {
+            foreach (var variation in _allVariations)
+            {
+                if (variation.IsSnapshot)
+                    return true;
+            }
+
+            return false;
+        }
+    }
+
     // Live cross-fade weight vector (session-only): variationId → weight. Persists across picker
     // opens, resets to the single active variation on activation, drops entries on removal.
     private readonly Dictionary<Guid, float> _blendWeights = new();

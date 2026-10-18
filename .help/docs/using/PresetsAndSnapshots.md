@@ -34,7 +34,7 @@ At the top, a selector bar shows the index of the active snapshot, a searchable 
 
 - **Write** — write the current values into the active snapshot (enabled when they differ from it).
 - **Create (+)** — make a new snapshot from the current values.
-- An **actions menu (…)** with **Revert** (re-apply the snapshot's stored values), **Rename**, **Update thumbnail**, and **Remove**.
+- An **actions menu (…)** with **Revert** (re-apply the snapshot's stored values), **Rename**, **Update thumbnail**, **Remove Unchanging Parameters** (drops snapshot control from every parameter whose value is the same in all snapshots — handy for cleaning up projects where whole operators were enabled at once), **Remove Connected Parameters** (drops it from parameters driven by an incoming connection, which ignore their stored values anyway), and **Remove**.
 
 Click the **+** button to create a new snapshot from the current values; it becomes active and its name field is focused so it can be named right away. Clicking the index number on the left of the bar renames the active snapshot.
 
