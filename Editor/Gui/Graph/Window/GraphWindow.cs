@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using ImGuiNET;
 using T3.Core.Animation;
+using T3.Editor.Gui.Graph.Interaction;
 using T3.Editor.Gui.Hub;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.TransformGizmos;

@@ -1,139 +1,185 @@
 using System.Diagnostics;
 using ImGuiNET;
-using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
 using T3.Editor.Gui.Styling;
 using T3.Editor.UiModel.ProjectHandling;
 
-namespace T3.Editor.Gui.Interaction;
+namespace T3.Editor.Gui.Graph.Interaction;
 
+/// <summary>
+/// Draws the breadcrumbs and the composition's name as one row. Every element reserves its space as an item and
+/// draws its icon or text through the draw list, so all of them share the same vertical centre and text baseline.
+/// </summary>
 internal static class GraphTitleAndBreadCrumbs
 {
-    public static void Draw(ProjectView window)
+    public static void Draw(ProjectView projectView)
     {
-        if (window.InstView == null)
+        if (projectView.InstView == null)
             return;
-            
-        DrawBreadcrumbs(window);
-        DrawNameAndDescription(window.InstView);
+
+        ImGui.SetCursorScreenPos(ImGui.GetWindowPos() + new Vector2(2, 2) * T3Ui.UiScaleFactor);
+        _rowTop = ImGui.GetCursorScreenPos().Y;
+        _rowHeight = ImGui.GetFrameHeight();
+
+        // Baseline of the normal font when its line box is centred in the row; other fonts align to it.
+        _baselineY = _rowTop + MathF.Floor((_rowHeight - Fonts.FontNormal.FontSize) / 2) + Fonts.FontNormal.Ascent;
+
+        if (DrawBreadCrumbItem("Projects", Icon.Hub, isFirstInRow: true))
+            projectView.Close();
+
+        DrawSeparator();
+        DrawBreadCrumbs(projectView);
+        DrawNameAndNamespace(projectView.InstView);
     }
 
-    private static void DrawBreadcrumbs(ProjectView projectView)
+    private static void DrawBreadCrumbs(ProjectView projectView)
     {
-        var composition = projectView.InstView;
-        Debug.Assert(composition != null);
-        ImGui.SetCursorScreenPos(ImGui.GetWindowPos() + new Vector2(1, 1));
-        var frameHeight = ImGui.GetFrameHeight();
-        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, UiColors.BackgroundActive.Rgba);
-        
-        if(CustomComponents.IconButton(Icon.Hub, Vector2.One * frameHeight))
-        {
-            projectView.Close();
-        }
-        ImGui.PopStyleColor();
-        CustomComponents.TooltipForLastItem("Project Hub");
-        
-        //FormInputs.AddVerticalSpace();
-        if (composition.Instance.Parent == null)
+        Debug.Assert(projectView.InstView != null);
+
+        var composition = projectView.InstView.Instance;
+        if (composition.Parent == null)
             return;
-        
-        //ImGui.SameLine();
-        var parents = Structure.CollectParentInstances(composition.Instance);
-        
-        ImGui.PushStyleColor(ImGuiCol.Button, Color.Transparent.Rgba);
-        ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(1, 1));
-        ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(0, 0));
+
+        var compHash = composition.GetHashCode();
+        if (compHash != _lastCompositionHash)
         {
-            var isFirstChild = true;
-            foreach (var p in parents)
+            _lastCompositionHash = compHash;
+            var op = composition;
+
+            _parentInstances.Clear();
+            while (op.Parent != null)
             {
-                if (isFirstChild)
-                {
-                    DrawSeparator(_breadCrumbProject, 8);
-                    isFirstChild=false;
-                    ImGui.SameLine(0,0);
-                }
-                else
-                {
-                    ImGui.SameLine(0);
-                }
-                
-                ImGui.PushID(p.SymbolChildId.GetHashCode());
-
-                ImGui.PushFont(Fonts.FontSmall);
-                var clicked = ImGui.Button(p.Symbol.Name, new Vector2(0, frameHeight));
-                ImGui.PopFont();
-                        
-                if (p.Parent == null && ImGui.BeginItemTooltip())
-                {
-                    PopulateDependenciesTooltip(p);
-                    ImGui.EndTooltip();
-                }
-
-                if (clicked)
-                {
-                    projectView.TrySetCompositionOpToParent();
-                    ImGui.PopID();
-                    break;
-                }
-
-                ImGui.PopID();
-                DrawSeparator(_breadCrumbSeparator);
+                op = op.Parent;
+                _parentInstances.Insert(0, op);
             }
         }
-        ImGui.PopStyleVar(2);
-        ImGui.PopStyleColor(2);
-        return;
 
-        void DrawSeparator(string iconString, float padding = 0)
+        var isProject = true;
+        foreach (var p in _parentInstances)
         {
-            ImGui.SameLine(0, padding);
+            var icon = isProject ? Icon.FolderOpen : Icon.None;
+            if (DrawBreadCrumbItem(p.Symbol.Name, icon))
+            {
+                projectView.TrySetCompositionOpToParent();
+            }
 
-            // Centre the glyph's ink, not the font's line box: icon glyphs sit at different heights within it.
-            var glyph = Icons.IconFont.FindGlyph(iconString[0]);
-            var dy = (int)((frameHeight - (glyph.Y1 - glyph.Y0)) / 2 - glyph.Y0);
-            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + dy);
-            ImGui.PushFont(Icons.IconFont);
-            ImGui.TextUnformatted(iconString);
-            ImGui.PopFont();
+            DrawSeparator();
+            isProject = false;
         }
     }
 
-    private static void PopulateDependenciesTooltip(Instance p)
+    private static bool DrawBreadCrumbItem(string label, Icon icon, bool isFirstInRow = false)
     {
-        var project = p.Symbol.SymbolPackage;
-        ImGui.Text("Project: " + project.DisplayName);
-        ImGui.NewLine();
-        ImGui.Text("Dependencies:");
+        var paddingX = MathF.Round(4 * T3Ui.UiScaleFactor);
+        var iconTextGap = MathF.Round(4 * T3Ui.UiScaleFactor);
 
-        foreach (var dependency in project.Dependencies)
+        var hasIcon = icon != Icon.None;
+        var iconSize = Vector2.Zero;
+        if (hasIcon)
+            Icons.GetGlyphDefinition(icon, out _, out iconSize);
+
+        var labelWidth = ImGui.CalcTextSize(label).X;
+        var width = paddingX * 2 + labelWidth + (hasIcon ? iconSize.X + iconTextGap : 0);
+
+        if (!isFirstInRow)
+            ImGui.SameLine();
+
+        ImGui.PushID(label.GetHashCode());
+        var clicked = ImGui.InvisibleButton("##parent", new Vector2(width, _rowHeight));
+        ImGui.PopID();
+
+        var itemRectMin = ImGui.GetItemRectMin();
+        var drawList = ImGui.GetWindowDrawList();
+        var isItemHovered = ImGui.IsItemHovered();
+        var color = isItemHovered ? UiColors.ForegroundFull : UiColors.TextMuted;
+
+        if (isItemHovered)
         {
-            ImGui.Text(dependency.ToString());
+            drawList.AddRect(itemRectMin, ImGui.GetItemRectMax(), UiColors.ForegroundFull.Fade(0.4f), 3 * T3Ui.UiScaleFactor);
         }
+
+        var x = itemRectMin.X + paddingX;
+        if (hasIcon)
+        {
+            Icons.DrawIconAtScreenPosition(icon, new Vector2(x, CenteredIconTop(iconSize)), drawList, color);
+            x += iconSize.X + iconTextGap;
+        }
+
+        drawList.AddText(Fonts.FontNormal, Fonts.FontNormal.FontSize, new Vector2(x, TextTop(Fonts.FontNormal)), color, label);
+        return clicked;
     }
 
-    private static void DrawNameAndDescription(ProjectView.InstanceView compositionOp)
+    private static void DrawSeparator()
     {
-        ImGui.SetCursorPosX(8);
-        ImGui.PushFont(Fonts.FontNormal);
-        ImGui.TextUnformatted(compositionOp.Symbol.Name);
+        const Icon separatorIcon = Icon.ChevronRight;
+        Icons.GetGlyphDefinition(separatorIcon, out _, out var iconSize);
 
-        if (compositionOp.Instance.Parent == null && ImGui.BeginItemTooltip())
+        ImGui.SameLine();
+        ImGui.Dummy(new Vector2(iconSize.X, _rowHeight));
+        var pos = new Vector2(ImGui.GetItemRectMin().X, CenteredIconTop(iconSize));
+        Icons.DrawIconAtScreenPosition(separatorIcon, pos, ImGui.GetWindowDrawList(), UiColors.TextMuted);
+    }
+
+    private static void DrawNameAndNamespace(ProjectView.InstanceView compositionOp)
+    {
+        var drawList = ImGui.GetWindowDrawList();
+        var paddingX = MathF.Round(4 * T3Ui.UiScaleFactor);
+
+        var name = compositionOp.Symbol.Name;
+        var boldFont = Fonts.FontBold;
+        ImGui.PushFont(boldFont);
+        var nameWidth = ImGui.CalcTextSize(name).X;
+        ImGui.PopFont();
+
+        var isProject = compositionOp.Instance.Parent == null;
+        var iconSize = Vector2.Zero;
+        var iconTextGap = 0f;
+        if (isProject)
         {
-            ImGui.PushFont(Fonts.FontNormal);
-            PopulateDependenciesTooltip(compositionOp.Instance);
-            ImGui.PopFont();
+            Icons.GetGlyphDefinition(Icon.FolderOpen, out _, out iconSize);
+            iconTextGap = MathF.Round(4 * T3Ui.UiScaleFactor);
+        }
+
+        ImGui.SameLine();
+        ImGui.Dummy(new Vector2(paddingX * 2 + iconSize.X + iconTextGap + nameWidth, _rowHeight));
+        var nameX = ImGui.GetItemRectMin().X + paddingX;
+        if (isProject)
+        {
+            Icons.DrawIconAtScreenPosition(Icon.FolderOpen, new Vector2(nameX, CenteredIconTop(iconSize)), drawList, UiColors.ForegroundFull);
+            nameX += iconSize.X + iconTextGap;
+        }
+
+        drawList.AddText(boldFont, boldFont.FontSize, new Vector2(nameX, TextTop(boldFont)), UiColors.ForegroundFull, name);
+
+        if (isProject && ImGui.BeginItemTooltip())
+        {
             ImGui.EndTooltip();
         }
-                
-        ImGui.SameLine();
 
-        ImGui.PushStyleColor(ImGuiCol.Text, UiColors.ForegroundFull.Fade(0.3f).Rgba);
-        ImGui.TextUnformatted("  - " + compositionOp.Symbol.Namespace);
-        ImGui.PopFont();
-        ImGui.PopStyleColor();
+        var normalFont = Fonts.FontNormal;
+        var namespaceColor = UiColors.ForegroundFull.Fade(0.2f);
+        var namespaceX = ImGui.GetItemRectMax().X + paddingX;
+        var textTop = TextTop(normalFont);
+        drawList.AddText(normalFont, normalFont.FontSize, new Vector2(namespaceX, textTop), namespaceColor, NamespaceSeparator);
+        namespaceX += ImGui.CalcTextSize(NamespaceSeparator).X;
+        drawList.AddText(normalFont, normalFont.FontSize, new Vector2(namespaceX, textTop), namespaceColor, compositionOp.Symbol.Namespace);
     }
-    private static readonly string _breadCrumbSeparator = (char)Icon.ChevronRight + "";
-    private static readonly string _breadCrumbProject = (char)Icon.FolderOpen + "";
+
+    private static float CenteredIconTop(Vector2 iconSize)
+    {
+        return _rowTop + MathF.Floor((_rowHeight - iconSize.Y) / 2);
+    }
+
+    /** Top of a font's line box so that its baseline matches the normal font's. */
+    private static float TextTop(ImFontPtr font)
+    {
+        return MathF.Round(_baselineY - font.Ascent-1);
+    }
+
+    private const string NamespaceSeparator = "- ";
+    private static readonly List<Instance> _parentInstances = [];
+    private static int _lastCompositionHash;
+    private static float _rowTop;
+    private static float _rowHeight;
+    private static float _baselineY;
 }
