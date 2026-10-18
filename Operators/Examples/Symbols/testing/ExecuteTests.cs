@@ -15,6 +15,10 @@ internal sealed class ExecuteTests : Instance<ExecuteTests>
     public ExecuteTests()
     {
         Result.UpdateAction = Update;
+
+        // Each test is force-invalidated right before it runs, so the per-frame walk from the output window
+        // would only re-visit every op in every test composition for nothing.
+        Tests.LimitMultiInputInvalidationToIndices = [];
     }
 
     private bool _isRunning;

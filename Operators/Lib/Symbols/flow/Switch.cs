@@ -71,7 +71,7 @@ internal sealed class Switch : Instance<Switch>
         if (OptimizeInvalidation.GetValue(context))
         {
             var count = _activeIndices.Count;
-            if (commandSlot.LimitMultiInputInvalidationToIndices.Length == count)
+            if (commandSlot.LimitMultiInputInvalidationToIndices?.Length == count)
             {
                 var switchList = commandSlot.LimitMultiInputInvalidationToIndices;
                 for (int i = 0; i < count; i++)
