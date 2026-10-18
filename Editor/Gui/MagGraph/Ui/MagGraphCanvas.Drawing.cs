@@ -341,13 +341,13 @@ internal sealed partial class MagGraphView
 
         foreach (var i in _context.Layout.Items.Values)
         {
-            i.DampedPosOnCanvas = Vector2.Lerp(i.PosOnCanvas, i.DampedPosOnCanvas, dampAmount);
+            i.DampedPosOnCanvas.DampTowards(i.PosOnCanvas, dampAmount);
         }
 
         foreach (var a in _context.Layout.Sections.Values)
         {
-            a.DampedPosOnCanvas = Vector2.Lerp(a.Section.PosOnCanvas, a.DampedPosOnCanvas, dampAmount);
-            a.DampedSize = Vector2.Lerp(a.Section.Size, a.DampedSize, dampAmount);
+            a.DampedPosOnCanvas.DampTowards(a.Section.PosOnCanvas, dampAmount);
+            a.DampedSize.DampTowards(a.Section.Size, dampAmount);
         }
 
         foreach (var c in _context.Layout.MagConnections)
@@ -359,11 +359,11 @@ internal sealed partial class MagGraphView
             if (c.DampedTargetPos == Vector2.Zero)
                 c.DampedTargetPos = c.TargetPos;
 
-            c.DampedSourcePos = Vector2.Lerp(c.SourcePos, c.DampedSourcePos, dampAmount);
-            c.DampedTargetPos = Vector2.Lerp(c.TargetPos, c.DampedTargetPos, dampAmount);
-            
+            c.DampedSourcePos.DampTowards(c.SourcePos, dampAmount);
+            c.DampedTargetPos.DampTowards(c.TargetPos, dampAmount);
         }
     }
+
 
     private bool _contextMenuIsOpen;
 

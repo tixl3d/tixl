@@ -477,6 +477,20 @@ public static class MathUtils
         return value;
     }
 
+    /// <summary>
+    /// Slowly lerps the vector in place towards the target. Unlike <see cref="Vector2.Lerp"/> this settles
+    /// on the exact target instead of wobbling one ulp around it, which matters for pixel-snapped drawing.
+    /// </summary>
+    public static Vector2 DampTowards(this ref Vector2 value, Vector2 target, float damping = 0.9f)
+    {
+        value = Lerp(target, value, damping);
+        if (!float.IsFinite(value.X) || !float.IsFinite(value.Y))
+        {
+            value = Vector2.Zero;
+        }
+        return value;
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static double Log2(double value)
     {
