@@ -361,6 +361,19 @@ highlight over different snapshots. Then toggle the canvas icon.
 - The Parameter window immediately shows the composition's name and namespace
   header above the snapshot control view — no background click required.
 
+## Step: Background click prefers snapshots over the composition's inputs
+
+**Action:**
+1. Inside a composition that has at least one snapshot, add an input to the composition (e.g. publish a parameter as input) so the composition itself has input parameters.
+2. Click on the empty graph background.
+3. Click the snapshot icon in the Parameter window's header, then click it again.
+
+**Expected:**
+- After the background click the Parameter window shows the snapshot control view, not the composition's input parameters.
+- The header shows an extra, highlighted snapshot icon next to the settings icon. Clicking it switches to the composition's input parameters; clicking again returns to the snapshot control view.
+- The choice sticks while you stay in this composition and resets to the snapshot control view after entering another composition.
+- In a composition without any snapshot, the background click still shows the composition's input parameters and the header has no snapshot icon.
+
 ## Step: Jumping to an operator from the list
 
 **Action:**
@@ -380,6 +393,32 @@ With a snapshot active that contains values for both operators
 **Expected:**
 - The deleted operator no longer appears as an editable group; instead a muted row marks its leftover values, with a small trash button to remove them from the snapshot.
 - Undoing the deletion (`Ctrl+Z`) restores the editable group.
+
+## Step: Removing parameters that never change between snapshots
+
+**Action:**
+1. With at least two snapshots defined, make sure one controlled parameter (e.g. `[Blob]` `Scale`) has the same value in every snapshot, and another one (e.g. `[Blob]` `Position`) differs between them.
+2. Open the actions (…) menu in the selector bar and choose "Remove Unchanging Parameters".
+3. Press `Ctrl+Z`.
+
+**Expected:**
+- The unchanging parameter disappears from the control view and loses its controller indicator in the Parameter window; the differing parameter stays.
+- An operator whose controlled parameters were all unchanging disappears from the list entirely.
+- The console logs how many parameters were removed.
+- With fewer than two snapshots the menu entry is disabled.
+- Undo restores the removed parameters, including their stored values in every snapshot.
+
+## Step: Removing parameters driven by a connection
+
+**Action:**
+1. Connect an operator output (e.g. a `[Time]` or `[Value]`) to one controlled parameter of a snapshot-enabled operator; leave another controlled parameter of the same operator unconnected.
+2. Open the actions (…) menu in the selector bar and choose "Remove Connected Parameters".
+3. Press `Ctrl+Z`.
+
+**Expected:**
+- The connected parameter disappears from the control view and loses its controller indicator; the unconnected one stays.
+- The console logs how many parameters were removed. Choosing the entry again logs that nothing was removed.
+- Undo restores the parameter, including its stored values in every snapshot.
 
 ## Step: Removing a snapshot
 
