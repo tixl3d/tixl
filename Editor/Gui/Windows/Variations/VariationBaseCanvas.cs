@@ -8,6 +8,7 @@ using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Keyboard;
+using T3.Editor.Gui.Interaction.Midi;
 using T3.Editor.Gui.Interaction.Variations;
 using T3.Editor.Gui.Interaction.Variations.Model;
 using T3.Editor.Gui.Styling;
@@ -16,6 +17,8 @@ using T3.Editor.Gui.UiHelpers.DelaunayVoronoi;
 using T3.Editor.Gui.UiHelpers.Thumbnails;
 using T3.Editor.Gui.Windows.RenderExport;
 using T3.Editor.UiModel;
+using T3.Editor.UiModel.Commands;
+using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.Selection;
 using Point = T3.Editor.Gui.UiHelpers.DelaunayVoronoi.Point;
 using Vector2 = System.Numerics.Vector2;
@@ -423,12 +426,28 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
                                                                 }
 
                                                                 if (CustomComponents.DrawMenuItem(_updateThumbnailsId,
-                                                                                                  "Update Thumbnails",
+                                                                                                  oneOrMoreSelected ? "Update Selected Thumbnails" : "Update All Thumbnails",
                                                                                                   reserveIconColumn: false))
                                                                 {
                                                                     _rerenderRequested = true;
                                                                     _rerenderToFileRequested = true;
                                                                     TriggerThumbnailUpdate();
+                                                                }
+
+                                                                if (CustomComponents.DrawSubMenu(_arrangeLayoutId, "Arrange Layout"))
+                                                                {
+                                                                    if (CustomComponents.DrawMenuItem(_arrangeToGridId, "To Grid", reserveIconColumn: false))
+                                                                    {
+                                                                        ArrangeToGrid();
+                                                                    }
+
+                                                                    if (CustomComponents.DrawMenuItem(_arrangeByControllerIndexId, "By MIDI Controller Index",
+                                                                                                      reserveIconColumn: false))
+                                                                    {
+                                                                        ArrangeByControllerIndex();
+                                                                    }
+
+                                                                    ImGui.EndMenu();
                                                                 }
 
                                                                 CustomComponents.SeparatorLine();
@@ -830,6 +849,95 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
     }
 
     /// <summary>
+    /// Packs all variations into a gap-free grid. Keeps their current reading order (row by row, left
+    /// to right) and roughly the current width, so a messy layout snaps into place without reshuffling.
+    /// </summary>
+    private void ArrangeToGrid()
+    {
+        var pool = PoolForBlendOperations;
+        if (pool == null || !TryToGetBoundingBox(pool.AllVariations, 0, out var area))
+            return;
+
+        var sorted = new List<Variation>(pool.AllVariations);
+        sorted.Sort(_byCanvasReadingOrder);
+
+        var columns = Math.Clamp((int)MathF.Round(area.GetWidth() / _layoutStep.X), 1, sorted.Count);
+
+        var command = BeginLayoutChange(pool);
+        for (var i = 0; i < sorted.Count; i++)
+        {
+            sorted[i].PosOnCanvas = area.Min + new Vector2(i % columns, i / columns) * _layoutStep;
+        }
+
+        CompleteLayoutChange(pool, command);
+    }
+
+    /// <summary>
+    /// Mirrors the MIDI controller pad grid on the canvas: each variation lands in the cell of its
+    /// <see cref="Variation.ActivationIndex"/>, so unused pads show up as gaps and the canvas reads like
+    /// the controller. Variations without an index line up in rows below the grid.
+    /// </summary>
+    private void ArrangeByControllerIndex()
+    {
+        var pool = PoolForBlendOperations;
+        if (pool == null || !TryToGetBoundingBox(pool.AllVariations, 0, out var area))
+            return;
+
+        // Activation indices are canonical reading order, so the inverse of CellToIndex is plain division.
+        var columns = ControllerGridLayouts.ReadingOrder.Columns;
+
+        var command = BeginLayoutChange(pool);
+        var lastUsedRow = -1;
+        foreach (var v in pool.AllVariations)
+        {
+            if (v.ActivationIndex < 0)
+                continue;
+
+            var row = v.ActivationIndex / columns;
+            v.PosOnCanvas = area.Min + new Vector2(v.ActivationIndex % columns, row) * _layoutStep;
+            lastUsedRow = Math.Max(lastUsedRow, row);
+        }
+
+        var unassignedCount = 0;
+        foreach (var v in pool.AllVariations)
+        {
+            if (v.ActivationIndex >= 0)
+                continue;
+
+            v.PosOnCanvas = area.Min + new Vector2(unassignedCount % columns, lastUsedRow + 1 + unassignedCount / columns) * _layoutStep;
+            unassignedCount++;
+        }
+
+        CompleteLayoutChange(pool, command);
+    }
+
+    private ModifyCanvasElementsCommand BeginLayoutChange(SymbolVariationPool pool)
+    {
+        return new ModifyCanvasElementsCommand(this, new List<ISelectableCanvasObject>(pool.AllVariations), CanvasElementSelection);
+    }
+
+    private void CompleteLayoutChange(SymbolVariationPool pool, ModifyCanvasElementsCommand command)
+    {
+        command.StoreCurrentValues();
+        UndoRedoStack.Add(command);
+        pool.SaveVariationsToFile();
+        RequestResetView();
+    }
+
+    /// <summary>Thumbnail pitch on the canvas: one cell plus the gap that snapping leaves between neighbors.</summary>
+    private static readonly Vector2 _layoutStep = VariationThumbnail.ThumbnailSize + VariationThumbnail.SnapPadding;
+
+    /// <summary>Row by row, left to right. Rows are bucketed by thumbnail pitch so slightly uneven neighbors still count as one row.</summary>
+    private static readonly Comparison<Variation> _byCanvasReadingOrder = (a, b) =>
+                                                                          {
+                                                                              var rowA = (int)MathF.Round(a.PosOnCanvas.Y / _layoutStep.Y);
+                                                                              var rowB = (int)MathF.Round(b.PosOnCanvas.Y / _layoutStep.Y);
+                                                                              return rowA != rowB
+                                                                                         ? rowA.CompareTo(rowB)
+                                                                                         : a.PosOnCanvas.X.CompareTo(b.PosOnCanvas.X);
+                                                                          };
+
+    /// <summary>
     /// Sorts snapshots by their <see cref="Variation.ActivationIndex"/> — the same index the MIDI
     /// controller grid uses — so the list, the controller grid and procedural triggering all share one
     /// order. The 2D canvas keeps its free <see cref="Variation.PosOnCanvas"/> layout independently.
@@ -883,6 +991,9 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
     private static readonly int _deleteSelectedId = nameof(_deleteSelectedId).GetHashCode();
     private static readonly int _renameVariationId = nameof(_renameVariationId).GetHashCode();
     private static readonly int _updateThumbnailsId = nameof(_updateThumbnailsId).GetHashCode();
+    private static readonly int _arrangeLayoutId = nameof(_arrangeLayoutId).GetHashCode();
+    private static readonly int _arrangeToGridId = nameof(_arrangeToGridId).GetHashCode();
+    private static readonly int _arrangeByControllerIndexId = nameof(_arrangeByControllerIndexId).GetHashCode();
     private static readonly int _liveRenderPreviewsId = nameof(_liveRenderPreviewsId).GetHashCode();
     private static readonly int _previewOnHoverId = nameof(_previewOnHoverId).GetHashCode();
 }

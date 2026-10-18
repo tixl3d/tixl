@@ -76,7 +76,10 @@ By default TiXL will generate live thumbnails for your currently pinned output. 
 
 You can enable or disable live previews and hover preview with the toggle icons in the window header (highlighted when active) or with the context menu.
 
-Live thumbnails are temporary: they never overwrite the default thumbnails stored with the project. When you disable live previews, the default thumbnails reappear. Use "Update thumbnails" in the context menu to explicitly save the current renderings as new defaults.
+Live thumbnails are temporary: they never overwrite the default thumbnails stored with the project. When you disable live previews, the default thumbnails reappear. Use "Update All Thumbnails" in the context menu to explicitly save the current renderings as new defaults. With thumbnails selected, the entry becomes "Update Selected Thumbnails" and only those are re-rendered.
+
+### Arranging the Canvas
+Thumbnails can be dragged freely and snap to their neighbors. To tidy up, use "Arrange Layout" in the context menu: "To Grid" packs all thumbnails into a gap-free grid while keeping their order, and "By MIDI Controller Index" places each one in the cell of its controller index so the canvas mirrors the pad grid of your MIDI controller. Both can be undone.
 
 Note: Rendering of thumbnails will interfere with effects that rely on feedback rendering, eg. [AdvancedFeedback] or [SimpleLiquid]. 
 
