@@ -48,6 +48,14 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
         if (!T3Ui.IsCurrentlySaving && UserActions.DeleteSelection.Triggered())
             DeleteSelectedElements();
 
+        if (VariationThumbnail.VariationForRenaming == null
+            && ImGui.IsWindowFocused(ImGuiFocusedFlags.ChildWindows)
+            && UserActions.RenameChild.Triggered()
+            && TryGetVariationForRenaming(out var variationToRename))
+        {
+            VariationThumbnail.VariationForRenaming = variationToRename;
+        }
+
         bool pinnedOutputChanged = false;
 
         // Render variations to pinned output
@@ -416,7 +424,7 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
 
                                                                 if (CustomComponents.DrawMenuItem(_renameVariationId,
                                                                                                   "Rename",
-                                                                                                  null,
+                                                                                                  UserActions.RenameChild.ListShortcuts(),
                                                                                                   false,
                                                                                                   oneSelected,
                                                                                                   reserveIconColumn: false))
@@ -605,6 +613,35 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
         {
             CanvasElementSelection.AddSelection(element);
         }
+    }
+
+    /// <summary>
+    /// The single selected variation, or the active one when nothing is selected. A multi-selection
+    /// yields none, so Enter never renames something the user didn't single out.
+    /// </summary>
+    private bool TryGetVariationForRenaming([NotNullWhen(true)] out Variation? variation)
+    {
+        variation = null;
+        var selected = CanvasElementSelection.SelectedElements;
+        if (selected.Count == 1)
+        {
+            variation = selected[0] as Variation;
+            return variation != null;
+        }
+
+        if (selected.Count > 1 || PoolForBlendOperations == null)
+            return false;
+
+        foreach (var v in PoolForBlendOperations.AllVariations)
+        {
+            if (v.State != Variation.States.Active)
+                continue;
+
+            variation = v;
+            return true;
+        }
+
+        return false;
     }
 
     private void DeleteSelectedElements()
