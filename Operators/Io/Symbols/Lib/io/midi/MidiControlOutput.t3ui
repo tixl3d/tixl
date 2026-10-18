@@ -51,7 +51,7 @@
         "Y": 508.0
       },
       "AddPadding": "True",
-      "Usage": "CustomDropdown"
+      "Usage": "MidiDevice"
     },
     {
       "InputId": "b8612a7d-cb19-4203-b5d0-a44ca71f5477"/*SendMode*/,

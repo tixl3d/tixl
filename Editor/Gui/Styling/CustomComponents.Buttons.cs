@@ -482,7 +482,18 @@ internal static partial class CustomComponents
     }
 
     /// <summary>
-    /// Draws an search match underline under the last search item
+    /// Underlines the search match in the <see cref="ImGui.Selectable(string)"/> drawn last. A selectable's item
+    /// rect is grown by half the item spacing on the left and top, so the text starts inside it by that much.
+    /// </summary>
+    public static void DrawSearchMatchUnderlineForLastSelectable(string searchString, ReadOnlySpan<char> label)
+    {
+        var spacing = ImGui.GetStyle().ItemSpacing;
+        var textOrigin = ImGui.GetItemRectMin() + new Vector2(MathF.Truncate(spacing.X * 0.5f), MathF.Truncate(spacing.Y * 0.5f));
+        DrawSearchMatchUnderline(searchString, label, textOrigin);
+    }
+
+    /// <summary>
+    /// Draws a search match underline for text drawn at <paramref name="offset"/> in the current font.
     /// </summary>
     public static void DrawSearchMatchUnderline(string searchString, ReadOnlySpan<char> strId, Vector2 offset)
     {
@@ -505,6 +516,7 @@ internal static partial class CustomComponents
                   offset
                   + new Vector2( sizeBefore.X, fontSize) ;
                     
-        ImGui.GetWindowDrawList().AddLine(min, min + new Vector2(sizeMatch.X,0), UiColors.BackgroundActive);
+        var thickness = MathF.Max(1, MathF.Round(T3Ui.UiScaleFactor));
+        ImGui.GetWindowDrawList().AddLine(min.Floor(), (min + new Vector2(sizeMatch.X, 0)).Floor(), UiColors.BackgroundActive, thickness);
     }
 }

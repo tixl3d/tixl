@@ -51,7 +51,7 @@
         "Y": 508.0
       },
       "AddPadding": "True",
-      "Usage": "CustomDropdown"
+      "Usage": "MidiDevice"
     },
     {
       "InputId": "a33619fa-bb33-4649-a714-285c5cce15dc"/*Velocity*/,

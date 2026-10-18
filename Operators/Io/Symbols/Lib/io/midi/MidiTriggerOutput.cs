@@ -29,7 +29,8 @@ internal sealed class MidiTriggerOutput : Instance<MidiTriggerOutput>, MidiConne
     }
     private void Update(EvaluationContext context)
     {
-        var deviceName = Device.GetValue(context);
+        _deviceCache.Update(Device.GetValue(context), forOutput: true);
+        var deviceName = _deviceCache.ProductName;
         var foundDevice = false;
         var channel = ChannelNumber.GetValue(context).Clamp(1, 16);
         var trigPC = TriggerProgramChange.GetValue(context);
@@ -145,7 +146,7 @@ internal sealed class MidiTriggerOutput : Instance<MidiTriggerOutput>, MidiConne
             }
                 
         }
-        _lastErrorMessage = !foundDevice ? $"Can't find MidiDevice {deviceName}" : null;
+        _lastErrorMessage = foundDevice ? null : _deviceCache.MissingMessage ?? _lastErrorMessage;
     }
         
     private static int GetMicrosecondsPerQuarterNoteFromBpm(double bpm)
@@ -174,6 +175,15 @@ internal sealed class MidiTriggerOutput : Instance<MidiTriggerOutput>, MidiConne
             yield return "undefined";
             yield break;
         }
+            
+        foreach (var alias in MidiConnectionManager.AliasNames)
+            
+        {
+            
+            yield return alias;
+            
+        }
+
             
         foreach (var device in MidiConnectionManager.MidiOutsWithDevices.Values)
         {
@@ -207,6 +217,7 @@ internal sealed class MidiTriggerOutput : Instance<MidiTriggerOutput>, MidiConne
     public void OnSettingsChanged() {}
 
     private string _lastErrorMessage;
+    private MidiDeviceNameCache _deviceCache;
     #endregion
         
     [Input(Guid = "C134F57A-A40C-42E4-8223-5CD695B15CAA")]

@@ -31,7 +31,8 @@ internal sealed class MidiControlOutput : Instance<MidiControlOutput>, MidiConne
         var sendMode = SendMode.GetEnumValue<SendModes>(context);
         var triggerActive = TriggerSend.GetValue(context);
         var ccOrPressure = CCorPressure.GetEnumValue<DataTypes>(context);
-        var deviceName = Device.GetValue(context);
+        _deviceCache.Update(Device.GetValue(context), forOutput: true);
+        var deviceName = _deviceCache.ProductName;
         var foundDevice = false;
         var controller = ControllerNumber.GetValue(context).Clamp(0, 127);
 
@@ -122,7 +123,7 @@ internal sealed class MidiControlOutput : Instance<MidiControlOutput>, MidiConne
             }
                 
         }
-        _lastErrorMessage = !foundDevice ? $"Can't find MidiDevice {deviceName}" : null;
+        _lastErrorMessage = foundDevice ? null : _deviceCache.MissingMessage ?? _lastErrorMessage;
     }
         
     //private double _lastNoteOnTime;
@@ -161,6 +162,15 @@ internal sealed class MidiControlOutput : Instance<MidiControlOutput>, MidiConne
             yield break;
         }
             
+        foreach (var alias in MidiConnectionManager.AliasNames)
+            
+        {
+            
+            yield return alias;
+            
+        }
+
+            
         foreach (var device in MidiConnectionManager.MidiOutsWithDevices.Values)
         {
             yield return device.ProductName;
@@ -193,6 +203,7 @@ internal sealed class MidiControlOutput : Instance<MidiControlOutput>, MidiConne
     public void OnSettingsChanged() {}
 
     private string _lastErrorMessage;
+    private MidiDeviceNameCache _deviceCache;
     #endregion
 
     [Input(Guid = "B8612A7D-CB19-4203-B5D0-A44CA71F5477", MappedType = typeof(SendModes))]

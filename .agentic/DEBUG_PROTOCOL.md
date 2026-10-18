@@ -49,7 +49,9 @@ Control surface: `openProject` (`name`), `newProject`, `select` (`childId`), `se
 (`count`), `layoutSelection` (runs the G layout action on the current selection; returns `changed` and
 the grown `selectedIds`), `resetView`, `reload`, `undo`, `redo`, `setTime`, `setPlayback`, `shutdown`,
 `outputSetup` (`entity`: a setup entity's display name to select, e.g. `"Surface 1"`; `mode`: the
-strip's toolbar tab — `Board`, `Straight`, `Output`; either optional).
+strip's toolbar tab — `Board`, `Straight`, `Output`; either optional), `openWindow` (`name`: a window's
+type name such as `SettingsWindow`, `ParameterWindow`; optional `section` picks a settings category, e.g.
+`Midi`) — shows the window so a `screenshot` with `target: "ui"` can verify panel work without a mouse.
 It does what the outliner click and the tab click do, so Board ↔ space folds can be driven without a
 mouse. Every fold logs one `[fold] metrics …` line at Debug level (read it with `getLogTail`): the
 rectified surface's on-screen centre path as mean distance from the window centre, path length over

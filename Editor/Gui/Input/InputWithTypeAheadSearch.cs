@@ -194,7 +194,7 @@ internal static class InputWithTypeAheadSearch
                     // empty ID at the window root, which newer ImGui versions assert on.
                     ImGui.PushID(index);
                     ImGui.Selectable( item , isSelected, ImGuiSelectableFlags.None);
-                    CustomComponents.DrawSearchMatchUnderline(searchString, item, ImGui.GetItemRectMin());
+                    CustomComponents.DrawSearchMatchUnderlineForLastSelectable(searchString, item);
                     ImGui.PopID();
                     var isItemHovered = new ImRect(ImGui.GetItemRectMin(), ImGui.GetItemRectMax()).Contains( ImGui.GetMousePos());
                     isSelected = item == searchString;

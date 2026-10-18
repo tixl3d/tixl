@@ -39,6 +39,16 @@ internal sealed partial class SettingsWindow : Window
 
     private Categories _activeCategory;
 
+    /// <summary>Selects a category by its enum name; used by the debug bridge.</summary>
+    internal bool TrySelectCategory(string name)
+    {
+        if (!Enum.TryParse<Categories>(name, true, out var category))
+            return false;
+
+        _activeCategory = category;
+        return true;
+    }
+
     /// <summary>Pinned to the bottom of the sidebar: opens the per-version settings folder in the OS file browser.</summary>
     private static void DrawOpenSettingsFolderButton()
     {
@@ -431,33 +441,7 @@ internal sealed partial class SettingsWindow : Window
                 }
                 case Categories.Midi:
                 {
-                    if (ImGui.Button("Rescan devices"))
-                    {
-                        MidiConnectionManager.Rescan();
-                        CompatibleMidiDeviceHandling.InitializeConnectedDevices();
-                    }
-
-                    {
-                        FormInputs.AddVerticalSpace();
-                        ImGui.TextUnformatted("Limit captured MIDI devices...");
-                        CustomComponents
-                           .HelpText("This can be useful it avoid capturing devices required by other applications.\nEnter one search string per line...");
-
-                        var limitMidiDevices = string.IsNullOrEmpty(CoreSettings.Config.LimitMidiDeviceCapture)
-                                                   ? string.Empty
-                                                   : CoreSettings.Config.LimitMidiDeviceCapture;
-
-                        if (ImGui.InputTextMultiline("##Limit MidiDevices", ref limitMidiDevices, 2000, new Vector2(-1, 100)))
-                        {
-                            changed = true;
-                            CoreSettings.Config.LimitMidiDeviceCapture = string.IsNullOrEmpty(limitMidiDevices) ? null : limitMidiDevices;
-                            MidiConnectionManager.Rescan();
-                        }
-
-                        FormInputs.AddVerticalSpace();
-                    }
-
-                    FormInputs.AddVerticalSpace();
+                    DrawMidiPanel(ref projectSettingsChanged);
                     break;
                 }
                 case Categories.SpaceMouse:

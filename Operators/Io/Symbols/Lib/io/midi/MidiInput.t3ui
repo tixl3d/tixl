@@ -18,7 +18,7 @@
         "Y": 90.0
       },
       "ExcludedFromPresets": "True",
-      "Usage": "Default"
+      "Usage": "MidiDevice"
     },
     {
       "InputId": "4636d6cf-8233-4281-8840-5ba079b5f1a6"/*DefaultOutputValue*/,

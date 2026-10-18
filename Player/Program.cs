@@ -85,6 +85,8 @@ internal static partial class Program
                 return;
             }
 
+            MidiAliasOverride.Apply(commandLine.MidiAliases);
+
             var lastUsedPath = Path.Combine(playerDataDirectory, "playerSettings.json");
             _startupOptions = PlayerStartupOptions.Resolve(exportSettings, commandLine, lastUsedPath);
             var displays = silkWindows.GetDisplays();

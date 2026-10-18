@@ -18,7 +18,7 @@
         "Y": 508.0
       },
       "Description": "The device used to send the midi sysex",
-      "Usage": "CustomDropdown"
+      "Usage": "MidiDevice"
     },
     {
       "InputId": "e054dece-d5ce-4675-9e24-d29e616ce7de"/*SysexString*/,

@@ -69,7 +69,7 @@
         "Y": 508.0
       },
       "AddPadding": "True",
-      "Usage": "CustomDropdown"
+      "Usage": "MidiDevice"
     }
   ],
   "SymbolChildUis": [],
