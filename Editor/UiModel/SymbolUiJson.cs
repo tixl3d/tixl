@@ -104,7 +104,8 @@ internal static class SymbolUiJson
             writer.WriteStartObject(); // child entry
             writer.WriteObject(JsonKeys.ChildId, childUi.Id);
 
-            writer.WriteComment(symbolChild.ReadableName);
+            // Same hint as in the .t3 file, so a diff or a stale ui entry still tells which operator this was
+            writer.WriteObject(JsonKeys.SymbolName, symbolChild.Symbol.Namespace + "." + symbolChild.Symbol.Name);
 
             if (childUi.SectionId != Guid.Empty)
                 writer.WriteObject(JsonKeys.SectionId, childUi.SectionId);
@@ -703,6 +704,7 @@ internal static class SymbolUiJson
 
         // ChildUi fields
         public const string ChildId = nameof(ChildId);
+        public const string SymbolName = nameof(SymbolName);
         public const string Position = nameof(Position);
         public const string Size = nameof(Size);
         public const string Style = nameof(Style);
