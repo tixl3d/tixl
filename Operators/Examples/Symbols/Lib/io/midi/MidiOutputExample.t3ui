@@ -5,105 +5,120 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "01a75e65-43e5-45b2-8753-58c853cb72ac"/*FloatToInt*/,
+      "ChildId": "01a75e65-43e5-45b2-8753-58c853cb72ac",
+      "SymbolName": "Lib.numbers.int.process.FloatToInt",
       "Position": {
         "X": 605.67847,
         "Y": 71.11206
       }
     },
     {
-      "ChildId": "182775ea-421f-4299-b840-88c620584433"/*MouseInput*/,
+      "ChildId": "182775ea-421f-4299-b840-88c620584433",
+      "SymbolName": "Lib.io.input.MouseInput",
       "Position": {
         "X": 1.8929443,
         "Y": 159.12842
       }
     },
     {
-      "ChildId": "19936d09-6b4b-4fae-8292-397a3526aef9"/*Execute*/,
+      "ChildId": "19936d09-6b4b-4fae-8292-397a3526aef9",
+      "SymbolName": "Lib.flow.Execute",
       "Position": {
         "X": 1231.7109,
         "Y": 0.0
       }
     },
     {
-      "ChildId": "2647ea0d-63b5-435a-8246-411aaccc8773"/*AnimValue*/,
+      "ChildId": "2647ea0d-63b5-435a-8246-411aaccc8773",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "Position": {
         "X": 455.67847,
         "Y": 200.11206
       }
     },
     {
-      "ChildId": "3fa395a4-4c2a-4a4e-9676-9eb4c4c9ee10"/*FloatToInt*/,
+      "ChildId": "3fa395a4-4c2a-4a4e-9676-9eb4c4c9ee10",
+      "SymbolName": "Lib.numbers.int.process.FloatToInt",
       "Position": {
         "X": 605.67847,
         "Y": 200.11206
       }
     },
     {
-      "ChildId": "7bed6c0a-4d52-42f5-8eb4-307b75608c45"/*MouseInput*/,
+      "ChildId": "7bed6c0a-4d52-42f5-8eb4-307b75608c45",
+      "SymbolName": "Lib.io.input.MouseInput",
       "Position": {
         "X": 45.30359,
         "Y": 324.99756
       }
     },
     {
-      "ChildId": "818cf374-28a5-4d36-a24f-de7900a36adb"/*RenderTarget*/,
+      "ChildId": "818cf374-28a5-4d36-a24f-de7900a36adb",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "Position": {
         "X": 1381.7109,
         "Y": 0.0
       }
     },
     {
-      "ChildId": "9033bba1-0ce9-47a7-87a2-07b8783d86d2"/*Multiply*/,
+      "ChildId": "9033bba1-0ce9-47a7-87a2-07b8783d86d2",
+      "SymbolName": "Lib.numbers.float.basic.Multiply",
       "Position": {
         "X": 455.67847,
         "Y": 71.11206
       }
     },
     {
-      "ChildId": "c8bbc131-e795-4235-9fef-38e75c7f1f39"/*PickColorFromImage*/,
+      "ChildId": "c8bbc131-e795-4235-9fef-38e75c7f1f39",
+      "SymbolName": "Lib.numbers.color.PickColorFromImage",
       "Position": {
         "X": 154.05603,
         "Y": 124.651855
       }
     },
     {
-      "ChildId": "cb6f739a-29aa-4a92-84c3-7fe3c286244c"/*LoadImage*/,
+      "ChildId": "cb6f739a-29aa-4a92-84c3-7fe3c286244c",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
       "Position": {
         "X": 0.0,
         "Y": 14.04126
       }
     },
     {
-      "ChildId": "d94f7ce7-be3c-4ce4-ae08-1c8d0f9004e3"/*Add*/,
+      "ChildId": "d94f7ce7-be3c-4ce4-ae08-1c8d0f9004e3",
+      "SymbolName": "Lib.numbers.float.basic.Add",
       "Position": {
         "X": 905.42883,
         "Y": 82.59595
       }
     },
     {
-      "ChildId": "dfe39623-2743-487b-b8a8-e76f7a4a0e49"/*MidiOutput*/,
+      "ChildId": "dfe39623-2743-487b-b8a8-e76f7a4a0e49",
+      "SymbolName": "Lib.io.midi.MidiOutput",
       "Position": {
         "X": 755.6784,
         "Y": 71.11206
       }
     },
     {
-      "ChildId": "e12ddbdd-19f2-4f14-8448-47d2f4e70b3f"/*Layer2d*/,
+      "ChildId": "e12ddbdd-19f2-4f14-8448-47d2f4e70b3f",
+      "SymbolName": "Lib.render.basic.Layer2d",
       "Position": {
         "X": 1081.7109,
         "Y": 0.0
       }
     },
     {
-      "ChildId": "ee0ff220-e5d2-4d54-80dc-53e0f9b15bbd"/*Layer2d*/,
+      "ChildId": "ee0ff220-e5d2-4d54-80dc-53e0f9b15bbd",
+      "SymbolName": "Lib.render.basic.Layer2d",
       "Position": {
         "X": 1081.7109,
         "Y": 63.0
       }
     },
     {
-      "ChildId": "f458e4f2-7dd3-47cb-942f-05b378299ef1"/*Vector4Components*/,
+      "ChildId": "f458e4f2-7dd3-47cb-942f-05b378299ef1",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "Position": {
         "X": 305.67847,
         "Y": 71.11206

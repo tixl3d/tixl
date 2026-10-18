@@ -36,7 +36,8 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "163d09dc-98aa-4048-9054-39e287d1706d"/*RepeatAtPoints*/,
+      "ChildId": "163d09dc-98aa-4048-9054-39e287d1706d",
+      "SymbolName": "Lib.point.generate.RepeatAtPoints",
       "Comment": "Clone multiple points with variant Size and Opacity on these points.",
       "Position": {
         "X": 216.89514,
@@ -44,14 +45,16 @@
       }
     },
     {
-      "ChildId": "234bb14a-8a9c-47d6-8f71-10f4b3791909"/*RepeatAtPoints*/,
+      "ChildId": "234bb14a-8a9c-47d6-8f71-10f4b3791909",
+      "SymbolName": "Lib.point.generate.RepeatAtPoints",
       "Position": {
         "X": 366.89514,
         "Y": -11.656677
       }
     },
     {
-      "ChildId": "56d14c36-9f33-443a-8d75-11c373179161"/*OrientPoints*/,
+      "ChildId": "56d14c36-9f33-443a-8d75-11c373179161",
+      "SymbolName": "Lib.point.transform.OrientPoints",
       "Comment": "Orient field points towards camera.",
       "Position": {
         "X": 61.77719,
@@ -59,21 +62,24 @@
       }
     },
     {
-      "ChildId": "5ca2f482-804b-4037-ba59-769364b3f416"/*Draw Field Points*/,
+      "ChildId": "5ca2f482-804b-4037-ba59-769364b3f416",
+      "SymbolName": "Lib.render.transform.Group",
       "Position": {
         "X": 666.89514,
         "Y": 1.3433228
       }
     },
     {
-      "ChildId": "7b61f11b-c19e-4f08-9f19-b8cdaeccbc0a"/*LinePoints*/,
+      "ChildId": "7b61f11b-c19e-4f08-9f19-b8cdaeccbc0a",
+      "SymbolName": "Lib.point.generate.LinePoints",
       "Position": {
         "X": 68.09503,
         "Y": 137.86859
       }
     },
     {
-      "ChildId": "938e051f-9776-4d01-b63a-55b21323d827"/*RepeatAtPoints*/,
+      "ChildId": "938e051f-9776-4d01-b63a-55b21323d827",
+      "SymbolName": "Lib.point.generate.RepeatAtPoints",
       "Comment": "Draw some rings to visualize the field extent.",
       "Position": {
         "X": 366.89514,
@@ -81,35 +87,40 @@
       }
     },
     {
-      "ChildId": "94be0bb4-f869-4bba-a5ec-34954920e324"/*DrawLines*/,
+      "ChildId": "94be0bb4-f869-4bba-a5ec-34954920e324",
+      "SymbolName": "Lib.point.draw.DrawLines",
       "Position": {
         "X": 516.89514,
         "Y": 1.3433228
       }
     },
     {
-      "ChildId": "978fb632-0dba-47f8-b163-b5e2b42b36a1"/*CamPosition*/,
+      "ChildId": "978fb632-0dba-47f8-b163-b5e2b42b36a1",
+      "SymbolName": "Lib.render.camera.CamPosition",
       "Position": {
         "X": 17.555267,
         "Y": -153.66971
       }
     },
     {
-      "ChildId": "9b4b3abd-9c7d-486d-8bc8-f6bb77d8f87f"/*DrawLines*/,
+      "ChildId": "9b4b3abd-9c7d-486d-8bc8-f6bb77d8f87f",
+      "SymbolName": "Lib.point.draw.DrawLines",
       "Position": {
         "X": 516.89514,
         "Y": 57.343323
       }
     },
     {
-      "ChildId": "c633178a-3862-4c96-a62e-d14ff4eeea81"/*CommonPointSets*/,
+      "ChildId": "c633178a-3862-4c96-a62e-d14ff4eeea81",
+      "SymbolName": "Lib.point.generate.CommonPointSets",
       "Position": {
         "X": 217.0633,
         "Y": 8.524017
       }
     },
     {
-      "ChildId": "e41b68f7-b7ca-4c41-9133-f44779251245"/*RadialPoints*/,
+      "ChildId": "e41b68f7-b7ca-4c41-9133-f44779251245",
+      "SymbolName": "Lib.point.generate.RadialPoints",
       "Position": {
         "X": 216.89514,
         "Y": 126.34332

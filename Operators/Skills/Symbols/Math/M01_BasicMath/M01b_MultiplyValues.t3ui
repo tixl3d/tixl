@@ -5,14 +5,16 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "17eb7487-9b33-4239-aafd-5b8a3b3085c2"/*Weeks*/,
+      "ChildId": "17eb7487-9b33-4239-aafd-5b8a3b3085c2",
+      "SymbolName": "Types.Values.Value",
       "Position": {
         "X": 1090.8175,
         "Y": 1788.3484
       }
     },
     {
-      "ChildId": "58f60eca-b21b-4f16-89c8-9ba4e4e6ca8d"/*Weeks*/,
+      "ChildId": "58f60eca-b21b-4f16-89c8-9ba4e4e6ca8d",
+      "SymbolName": "Types.Values.Value",
       "SectionId": "2f87abd2-2372-4260-8c30-0368b426a9ca",
       "Position": {
         "X": 1124.7405,
@@ -20,35 +22,40 @@
       }
     },
     {
-      "ChildId": "6ce44690-d702-4e83-bcef-28d783676bba"/*Days Per Week*/,
+      "ChildId": "6ce44690-d702-4e83-bcef-28d783676bba",
+      "SymbolName": "Types.Values.Value",
       "Position": {
         "X": 1090.8175,
         "Y": 1734.5225
       }
     },
     {
-      "ChildId": "7375c614-6464-4cd7-a594-73ffa68a8ebe"/*ValueQuiz*/,
+      "ChildId": "7375c614-6464-4cd7-a594-73ffa68a8ebe",
+      "SymbolName": "Lib.flow.skillQuest.ValueQuiz",
       "Position": {
         "X": 1580.2582,
         "Y": 1895.0925
       }
     },
     {
-      "ChildId": "7fb42eef-0789-470f-b63e-ed1750b50e4b"/*Hours Per Day*/,
+      "ChildId": "7fb42eef-0789-470f-b63e-ed1750b50e4b",
+      "SymbolName": "Types.Values.Value",
       "Position": {
         "X": 1092.1251,
         "Y": 1666.9069
       }
     },
     {
-      "ChildId": "b3209a3b-6176-46be-9a5e-477aaedb088e"/*Multiply*/,
+      "ChildId": "b3209a3b-6176-46be-9a5e-477aaedb088e",
+      "SymbolName": "Lib.numbers.float.basic.Multiply",
       "Position": {
         "X": 1092.1251,
         "Y": 1894.8025
       }
     },
     {
-      "ChildId": "b45b89e7-0b20-43f4-92c7-8c41fba57257"/*Hours Per Day*/,
+      "ChildId": "b45b89e7-0b20-43f4-92c7-8c41fba57257",
+      "SymbolName": "Types.Values.Value",
       "SectionId": "2f87abd2-2372-4260-8c30-0368b426a9ca",
       "Position": {
         "X": 1124.7405,
@@ -56,14 +63,16 @@
       }
     },
     {
-      "ChildId": "d2def649-2838-4aef-b077-ac1837fdbb03"/*Multiply*/,
+      "ChildId": "d2def649-2838-4aef-b077-ac1837fdbb03",
+      "SymbolName": "Lib.numbers.float.basic.Multiply",
       "Position": {
         "X": 1090.8175,
         "Y": 1961.456
       }
     },
     {
-      "ChildId": "e0200cd2-07c9-42e5-b334-2585193dc913"/*Multiply*/,
+      "ChildId": "e0200cd2-07c9-42e5-b334-2585193dc913",
+      "SymbolName": "Lib.numbers.float.basic.Multiply",
       "SectionId": "2f87abd2-2372-4260-8c30-0368b426a9ca",
       "Position": {
         "X": 1264.7405,
@@ -71,7 +80,8 @@
       }
     },
     {
-      "ChildId": "e789ba55-b205-4151-a21b-7392cf4a372e"/*Multiply*/,
+      "ChildId": "e789ba55-b205-4151-a21b-7392cf4a372e",
+      "SymbolName": "Lib.numbers.float.basic.Multiply",
       "SectionId": "2f87abd2-2372-4260-8c30-0368b426a9ca",
       "Position": {
         "X": 1264.7405,
@@ -79,7 +89,8 @@
       }
     },
     {
-      "ChildId": "f6e0fdf3-12d7-4921-a351-fd4bdc5c073f"/*Days Per Week*/,
+      "ChildId": "f6e0fdf3-12d7-4921-a351-fd4bdc5c073f",
+      "SymbolName": "Types.Values.Value",
       "SectionId": "2f87abd2-2372-4260-8c30-0368b426a9ca",
       "Position": {
         "X": 1124.7405,

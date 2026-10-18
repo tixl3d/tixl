@@ -59,28 +59,32 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "0e132e3c-67d5-4f57-9914-9ec30b30a8a0"/*ExecuteHeightmapSdf*/,
+      "ChildId": "0e132e3c-67d5-4f57-9914-9ec30b30a8a0",
+      "SymbolName": "Lib.field.generate.sdf._.ExecuteHeightmapSdf",
       "Position": {
         "X": 1145.6335,
         "Y": 1012.57336
       }
     },
     {
-      "ChildId": "2b4e2a58-5bdc-49b8-ad9a-308cc6e9c363"/*SrvFromTexture2d*/,
+      "ChildId": "2b4e2a58-5bdc-49b8-ad9a-308cc6e9c363",
+      "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
       "Position": {
         "X": 1145.6335,
         "Y": 977.57336
       }
     },
     {
-      "ChildId": "32bca2c5-81b7-45ff-806e-3821af10e773"/*ScaleVector2*/,
+      "ChildId": "32bca2c5-81b7-45ff-806e-3821af10e773",
+      "SymbolName": "Lib.numbers.vec2.ScaleVector2",
       "Position": {
         "X": 814.1489,
         "Y": 1078.357
       }
     },
     {
-      "ChildId": "70e2e97d-485a-4aaa-94b1-e88939b88212"/*Div*/,
+      "ChildId": "70e2e97d-485a-4aaa-94b1-e88939b88212",
+      "SymbolName": "Lib.numbers.float.basic.Div",
       "Position": {
         "X": 674.1489,
         "Y": 1113.357

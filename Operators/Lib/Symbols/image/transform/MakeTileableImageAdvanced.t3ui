@@ -80,7 +80,8 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "02112825-0940-4186-9b78-3da865ab418c"/*BlendWithMask*/,
+      "ChildId": "02112825-0940-4186-9b78-3da865ab418c",
+      "SymbolName": "Lib.image.use.BlendWithMask",
       "Comment": "Now this texture can be repeated to infinity",
       "Position": {
         "X": 613.89294,
@@ -88,7 +89,8 @@
       }
     },
     {
-      "ChildId": "04c944cb-f2b5-4ad1-814e-21c9681b164a"/*TransformImage*/,
+      "ChildId": "04c944cb-f2b5-4ad1-814e-21c9681b164a",
+      "SymbolName": "Lib.image.transform.TransformImage",
       "Comment": "It's time to take care of the horizontal seam",
       "Position": {
         "X": -1385.7101,
@@ -96,7 +98,8 @@
       }
     },
     {
-      "ChildId": "054bf94d-d7f8-4d5b-bca2-8ca252bbc83e"/*PickTexture*/,
+      "ChildId": "054bf94d-d7f8-4d5b-bca2-8ca252bbc83e",
+      "SymbolName": "Lib.image.use.PickTexture",
       "SectionId": "c19db706-ceff-4fe3-80f6-c1c162655245",
       "Position": {
         "X": -131.93561,
@@ -104,14 +107,16 @@
       }
     },
     {
-      "ChildId": "08709d6a-9a72-466d-ac5d-1f28d8278934"/*Multiply*/,
+      "ChildId": "08709d6a-9a72-466d-ac5d-1f28d8278934",
+      "SymbolName": "Lib.numbers.float.basic.Multiply",
       "Position": {
         "X": -1185.9454,
         "Y": 387.2212
       }
     },
     {
-      "ChildId": "0aecaaa9-f7c3-4301-aecf-2bc5e18005d6"/*BlendWithMask*/,
+      "ChildId": "0aecaaa9-f7c3-4301-aecf-2bc5e18005d6",
+      "SymbolName": "Lib.image.use.BlendWithMask",
       "SectionId": "c19db706-ceff-4fe3-80f6-c1c162655245",
       "Comment": "We're blending in the first texture with the mask to hide the seam.",
       "Position": {
@@ -120,7 +125,8 @@
       }
     },
     {
-      "ChildId": "1ae51171-b601-469d-bcee-d63bc183f335"/*BlendWithMask*/,
+      "ChildId": "1ae51171-b601-469d-bcee-d63bc183f335",
+      "SymbolName": "Lib.image.use.BlendWithMask",
       "Comment": "Now this texture can be repeated to infinity",
       "Position": {
         "X": -1179.0946,
@@ -128,7 +134,8 @@
       }
     },
     {
-      "ChildId": "1d87b64f-5d6b-4448-a0a0-4e7e3bd14f75"/*Blend*/,
+      "ChildId": "1d87b64f-5d6b-4448-a0a0-4e7e3bd14f75",
+      "SymbolName": "Lib.image.use.Blend",
       "SectionId": "c19db706-ceff-4fe3-80f6-c1c162655245",
       "Position": {
         "X": -285.48965,
@@ -136,35 +143,40 @@
       }
     },
     {
-      "ChildId": "39fcbf97-bebd-4fb4-bf7d-cbc52e04fad0"/*Blend*/,
+      "ChildId": "39fcbf97-bebd-4fb4-bf7d-cbc52e04fad0",
+      "SymbolName": "Lib.image.use.Blend",
       "Position": {
         "X": 218.15552,
         "Y": 716.40753
       }
     },
     {
-      "ChildId": "3cd5a60c-3580-4e82-bec2-3ec342a69818"/*LinearGradient*/,
+      "ChildId": "3cd5a60c-3580-4e82-bec2-3ec342a69818",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "Position": {
         "X": 8.854126,
         "Y": 525.79205
       }
     },
     {
-      "ChildId": "3ddd3479-4744-4562-922b-8c8abffbe09f"/*LinearGradient*/,
+      "ChildId": "3ddd3479-4744-4562-922b-8c8abffbe09f",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "Position": {
         "X": -1683.0068,
         "Y": 1035.1669
       }
     },
     {
-      "ChildId": "48275925-4704-4247-82fa-38cb7fffe789"/*IntValue*/,
+      "ChildId": "48275925-4704-4247-82fa-38cb7fffe789",
+      "SymbolName": "Types.Values.IntValue",
       "Position": {
         "X": -589.1191,
         "Y": 579.4728
       }
     },
     {
-      "ChildId": "4d2020a8-7a4a-4451-bc81-38e1fec7b6db"/*BlendWithMask*/,
+      "ChildId": "4d2020a8-7a4a-4451-bc81-38e1fec7b6db",
+      "SymbolName": "Lib.image.use.BlendWithMask",
       "Comment": "We're blending in the first texture with the mask to hide the seam.",
       "Position": {
         "X": -1547.2101,
@@ -172,28 +184,32 @@
       }
     },
     {
-      "ChildId": "72e95fc1-b0c5-4211-a5db-ef0b2c2cfb24"/*Value*/,
+      "ChildId": "72e95fc1-b0c5-4211-a5db-ef0b2c2cfb24",
+      "SymbolName": "Types.Values.Value",
       "Position": {
         "X": -896.45575,
         "Y": 327.62247
       }
     },
     {
-      "ChildId": "7e3b0d83-6e1e-46e0-8ba4-09e6cb7189a3"/*PickTexture*/,
+      "ChildId": "7e3b0d83-6e1e-46e0-8ba4-09e6cb7189a3",
+      "SymbolName": "Lib.image.use.PickTexture",
       "Position": {
         "X": 940.0021,
         "Y": 78.654724
       }
     },
     {
-      "ChildId": "8904e2ef-eb11-4447-bffb-233cb17fab89"/*FractalNoise*/,
+      "ChildId": "8904e2ef-eb11-4447-bffb-233cb17fab89",
+      "SymbolName": "Lib.image.generate.noise.FractalNoise",
       "Position": {
         "X": -661.05334,
         "Y": 289.6153
       }
     },
     {
-      "ChildId": "8ca17c3d-e0c8-4b80-ad45-0f893161308e"/*BlendWithMask*/,
+      "ChildId": "8ca17c3d-e0c8-4b80-ad45-0f893161308e",
+      "SymbolName": "Lib.image.use.BlendWithMask",
       "SectionId": "4f12c8e6-a9f4-4ae2-adb6-14637474f3e7",
       "Comment": "Now this texture can be repeated to infinity",
       "Position": {
@@ -202,7 +218,8 @@
       }
     },
     {
-      "ChildId": "90fb77ca-74d5-4692-b82d-12df6e7185b4"/*TransformImage*/,
+      "ChildId": "90fb77ca-74d5-4692-b82d-12df6e7185b4",
+      "SymbolName": "Lib.image.transform.TransformImage",
       "SectionId": "c19db706-ceff-4fe3-80f6-c1c162655245",
       "Comment": "Now you can spot the vertical seam.\nIt's because we're shifting the texture on the X axis. And the texture wrapping mode is set to Wrap. \n",
       "Position": {
@@ -211,7 +228,8 @@
       }
     },
     {
-      "ChildId": "9aaddd21-aab2-4048-8417-8d659b6eeec7"/*TransformImage*/,
+      "ChildId": "9aaddd21-aab2-4048-8417-8d659b6eeec7",
+      "SymbolName": "Lib.image.transform.TransformImage",
       "SectionId": "4f12c8e6-a9f4-4ae2-adb6-14637474f3e7",
       "Comment": "It's time to take care of the horizontal seam",
       "Position": {
@@ -220,7 +238,8 @@
       }
     },
     {
-      "ChildId": "a0b3c3db-467b-48db-9ab5-98a334dbcef0"/*LinearGradient*/,
+      "ChildId": "a0b3c3db-467b-48db-9ab5-98a334dbcef0",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "SectionId": "4f12c8e6-a9f4-4ae2-adb6-14637474f3e7",
       "Position": {
         "X": -239.83075,
@@ -228,14 +247,16 @@
       }
     },
     {
-      "ChildId": "adb84b7d-a6b3-4958-9cb1-b874cd95174c"/*LinearGradient*/,
+      "ChildId": "adb84b7d-a6b3-4958-9cb1-b874cd95174c",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "Position": {
         "X": -474.0918,
         "Y": -376.47937
       }
     },
     {
-      "ChildId": "b6775626-bf03-4825-9c52-d106924c50c8"/*PickTexture*/,
+      "ChildId": "b6775626-bf03-4825-9c52-d106924c50c8",
+      "SymbolName": "Lib.image.use.PickTexture",
       "SectionId": "4f12c8e6-a9f4-4ae2-adb6-14637474f3e7",
       "Position": {
         "X": 114.46188,
@@ -243,7 +264,8 @@
       }
     },
     {
-      "ChildId": "cf833802-5ff6-4ec2-8d59-552b49807df7"/*TransformImage*/,
+      "ChildId": "cf833802-5ff6-4ec2-8d59-552b49807df7",
+      "SymbolName": "Lib.image.transform.TransformImage",
       "Comment": "Now you can spot the vertical seam.\nIt's because we're shifting the texture on the X axis. And the texture wrapping mode is set to Wrap. \n",
       "Position": {
         "X": -1764.8807,
@@ -251,35 +273,40 @@
       }
     },
     {
-      "ChildId": "d9e81bf1-686b-4ab7-90ae-40ca5a017edd"/*PickTexture*/,
+      "ChildId": "d9e81bf1-686b-4ab7-90ae-40ca5a017edd",
+      "SymbolName": "Lib.image.use.PickTexture",
       "Position": {
         "X": 422.64926,
         "Y": 589.02637
       }
     },
     {
-      "ChildId": "dd227fb9-0714-4751-8819-59dc58f3fa8e"/*BoolToInt*/,
+      "ChildId": "dd227fb9-0714-4751-8819-59dc58f3fa8e",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToInt",
       "Position": {
         "X": -781.86566,
         "Y": 557.9584
       }
     },
     {
-      "ChildId": "de4a994a-f01a-4fd9-8505-4cdbd765fafd"/*LinearGradient*/,
+      "ChildId": "de4a994a-f01a-4fd9-8505-4cdbd765fafd",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "Position": {
         "X": -1383.4199,
         "Y": 1084.9379
       }
     },
     {
-      "ChildId": "f1f23c2a-39b3-4875-9a35-5858afae8fb2"/*Vector4*/,
+      "ChildId": "f1f23c2a-39b3-4875-9a35-5858afae8fb2",
+      "SymbolName": "Types.Values.Vector4",
       "Position": {
         "X": -882.592,
         "Y": 85.359436
       }
     },
     {
-      "ChildId": "f9827944-3835-48b7-975c-2b17f65165a9"/*TransformImage*/,
+      "ChildId": "f9827944-3835-48b7-975c-2b17f65165a9",
+      "SymbolName": "Lib.image.transform.TransformImage",
       "Comment": "It's time to take care of the horizontal seam",
       "Position": {
         "X": 334.33817,
@@ -287,7 +314,8 @@
       }
     },
     {
-      "ChildId": "fdc851f3-89ae-4199-a411-32bbd11d8d5b"/*Blend*/,
+      "ChildId": "fdc851f3-89ae-4199-a411-32bbd11d8d5b",
+      "SymbolName": "Lib.image.use.Blend",
       "SectionId": "4f12c8e6-a9f4-4ae2-adb6-14637474f3e7",
       "Position": {
         "X": -30.170776,

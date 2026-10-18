@@ -56,35 +56,40 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "29361a0f-84fb-431a-bfc3-37dcec47305d"/*RandomizePoints*/,
+      "ChildId": "29361a0f-84fb-431a-bfc3-37dcec47305d",
+      "SymbolName": "Lib.point.modify.RandomizePoints",
       "Position": {
         "X": 1012.1476,
         "Y": 1073.3391
       }
     },
     {
-      "ChildId": "3e8eb0b3-d7fb-4859-9b8a-70d28c26ca02"/*GradientsToTexture*/,
+      "ChildId": "3e8eb0b3-d7fb-4859-9b8a-70d28c26ca02",
+      "SymbolName": "Lib.numbers.color.GradientsToTexture",
       "Position": {
         "X": 903.1894,
         "Y": 549.105
       }
     },
     {
-      "ChildId": "908d7793-e1a6-4d1d-a886-5119f9d90bce"/*SelectPointsWithSDF*/,
+      "ChildId": "908d7793-e1a6-4d1d-a886-5119f9d90bce",
+      "SymbolName": "Lib.point.modify.SelectPointsWithSDF",
       "Position": {
         "X": 1202.7743,
         "Y": 942.4254
       }
     },
     {
-      "ChildId": "f1cb187c-4f5e-4aa1-bacd-af99d4283034"/*_ExecuteSdfToColor*/,
+      "ChildId": "f1cb187c-4f5e-4aa1-bacd-af99d4283034",
+      "SymbolName": "Lib.field.adjust._._ExecuteSdfToColor",
       "Position": {
         "X": 1183.1895,
         "Y": 514.105
       }
     },
     {
-      "ChildId": "f5d210df-78dd-4e25-b9e0-5eabac98116e"/*SrvFromTexture2d*/,
+      "ChildId": "f5d210df-78dd-4e25-b9e0-5eabac98116e",
+      "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
       "Position": {
         "X": 1043.1895,
         "Y": 549.105

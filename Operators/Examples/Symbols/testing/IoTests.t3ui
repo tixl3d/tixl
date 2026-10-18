@@ -5,259 +5,296 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "09dc0bce-3ef3-48be-b216-c0c634b8e82c"/*ConvertFormat*/,
+      "ChildId": "09dc0bce-3ef3-48be-b216-c0c634b8e82c",
+      "SymbolName": "Lib.image.color.ConvertFormat",
       "Position": {
         "X": -446.90842,
         "Y": 937.62225
       }
     },
     {
-      "ChildId": "1bd1c988-1555-44e5-bba5-85289b93334f"/*PlayVideo*/,
+      "ChildId": "1bd1c988-1555-44e5-bba5-85289b93334f",
+      "SymbolName": "Lib.io.video.PlayVideo",
       "Position": {
         "X": -446.90842,
         "Y": 867.62225
       }
     },
     {
-      "ChildId": "2cad0c24-f0d8-4a3e-b7a4-247d659c60aa"/*PlayVideo*/,
+      "ChildId": "2cad0c24-f0d8-4a3e-b7a4-247d659c60aa",
+      "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": -446.90842,
         "Y": 1042.6223
       }
     },
     {
-      "ChildId": "2d7cc84f-34f9-4448-89db-7ae40599f0f2"/*WebCam*/,
+      "ChildId": "2d7cc84f-34f9-4448-89db-7ae40599f0f2",
+      "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": -446.90842,
         "Y": 1211.3344
       }
     },
     {
-      "ChildId": "2efd53eb-a247-43ec-a21b-11c05cfd26fd"/*ConvertFormat*/,
+      "ChildId": "2efd53eb-a247-43ec-a21b-11c05cfd26fd",
+      "SymbolName": "Lib.image.color.ConvertFormat",
       "Position": {
         "X": -446.90842,
         "Y": 1176.3344
       }
     },
     {
-      "ChildId": "335d04be-a0d9-42f5-86a6-6e7cc65fd3ff"/*Layer2d*/,
+      "ChildId": "335d04be-a0d9-42f5-86a6-6e7cc65fd3ff",
+      "SymbolName": "Lib.render.basic.Layer2d",
       "Position": {
         "X": -446.90842,
         "Y": 1476.0055
       }
     },
     {
-      "ChildId": "3b619a40-c54d-4b24-8218-f7571df0d9a7"/*RenderTarget*/,
+      "ChildId": "3b619a40-c54d-4b24-8218-f7571df0d9a7",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "Position": {
         "X": -446.90842,
         "Y": 1511.0055
       }
     },
     {
-      "ChildId": "3ca59277-eb71-43d9-aad2-eae7754a6a59"/*SelectFloatFromDict*/,
+      "ChildId": "3ca59277-eb71-43d9-aad2-eae7754a6a59",
+      "SymbolName": "Lib.numbers.data.utils.SelectFloatFromDict",
       "Position": {
         "X": -444.34708,
         "Y": 436.4751
       }
     },
     {
-      "ChildId": "41ca6051-92cb-4a80-be12-c3cbe206b6ee"/*Time*/,
+      "ChildId": "41ca6051-92cb-4a80-be12-c3cbe206b6ee",
+      "SymbolName": "Lib.numbers.anim.time.Time",
       "Position": {
         "X": -586.90845,
         "Y": 902.62225
       }
     },
     {
-      "ChildId": "437071f8-2574-4f96-9ea7-378441ea0ad3"/*LoadImage*/,
+      "ChildId": "437071f8-2574-4f96-9ea7-378441ea0ad3",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
       "Position": {
         "X": -444.34708,
         "Y": 176.81035
       }
     },
     {
-      "ChildId": "46861d1c-d523-4d1c-978b-bc312ce0db0b"/*SpoutInput*/,
+      "ChildId": "46861d1c-d523-4d1c-978b-bc312ce0db0b",
+      "SymbolName": "Lib.io.video.SpoutInput",
       "Position": {
         "X": -446.90842,
         "Y": 1441.0055
       }
     },
     {
-      "ChildId": "4df3ac25-2ca0-476f-8327-0202f5872dbc"/*LoadImage*/,
+      "ChildId": "4df3ac25-2ca0-476f-8327-0202f5872dbc",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
       "Position": {
         "X": -446.90842,
         "Y": 1251.1927
       }
     },
     {
-      "ChildId": "5af9194d-80a4-44fd-83a5-681593326c33"/*Layer2d*/,
+      "ChildId": "5af9194d-80a4-44fd-83a5-681593326c33",
+      "SymbolName": "Lib.render.basic.Layer2d",
       "Position": {
         "X": -446.90842,
         "Y": 972.62225
       }
     },
     {
-      "ChildId": "747e1c01-dc57-4e92-82cc-b559c9edd8a1"/*ExecuteTests*/,
+      "ChildId": "747e1c01-dc57-4e92-82cc-b559c9edd8a1",
+      "SymbolName": "Examples.testing.ExecuteTests",
       "Position": {
         "X": -192.01324,
         "Y": 1007.9109
       }
     },
     {
-      "ChildId": "7f8e0a4b-5424-46ab-bf4d-372a4ceb95c2"/*Layer2d*/,
+      "ChildId": "7f8e0a4b-5424-46ab-bf4d-372a4ceb95c2",
+      "SymbolName": "Lib.render.basic.Layer2d",
       "Position": {
         "X": -446.90842,
         "Y": 1321.1927
       }
     },
     {
-      "ChildId": "851fbf7d-09d0-482c-a5ea-5b0cd43d978d"/*Layer2d*/,
+      "ChildId": "851fbf7d-09d0-482c-a5ea-5b0cd43d978d",
+      "SymbolName": "Lib.render.basic.Layer2d",
       "Position": {
         "X": -444.34708,
         "Y": 50.68466
       }
     },
     {
-      "ChildId": "85badb3a-ca46-4934-9812-0711c2dfcbd3"/*Text*/,
+      "ChildId": "85badb3a-ca46-4934-9812-0711c2dfcbd3",
+      "SymbolName": "Lib.render.basic.Text",
       "Position": {
         "X": -444.34708,
         "Y": 506.4751
       }
     },
     {
-      "ChildId": "85c359c9-9903-4c50-86ac-184755d82cbc"/*OscOutput*/,
+      "ChildId": "85c359c9-9903-4c50-86ac-184755d82cbc",
+      "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": -444.34708,
         "Y": 769.3969
       }
     },
     {
-      "ChildId": "878e089d-28a2-4096-b1e3-db1ca1af6f96"/*OscOutput*/,
+      "ChildId": "878e089d-28a2-4096-b1e3-db1ca1af6f96",
+      "SymbolName": "Lib.io.osc.OscOutput",
       "Position": {
         "X": -444.34708,
         "Y": 664.3969
       }
     },
     {
-      "ChildId": "8ca53254-3018-4f7a-9fd4-becd7076149e"/*RenderTarget*/,
+      "ChildId": "8ca53254-3018-4f7a-9fd4-becd7076149e",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "Position": {
         "X": -444.34708,
         "Y": 281.81036
       }
     },
     {
-      "ChildId": "93a38349-d399-4e04-97fd-fa7e6586586b"/*RenderTarget*/,
+      "ChildId": "93a38349-d399-4e04-97fd-fa7e6586586b",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "Position": {
         "X": -444.34708,
         "Y": 734.3969
       }
     },
     {
-      "ChildId": "9d7da7a7-2703-4f5e-b298-5e18980e0e28"/*OscInput*/,
+      "ChildId": "9d7da7a7-2703-4f5e-b298-5e18980e0e28",
+      "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": -444.34708,
         "Y": 576.4751
       }
     },
     {
-      "ChildId": "a600d18c-238e-4d13-8e64-046e9c568690"/*SpoutOutput*/,
+      "ChildId": "a600d18c-238e-4d13-8e64-046e9c568690",
+      "SymbolName": "Lib.io.video.SpoutOutput",
       "Position": {
         "X": -446.90842,
         "Y": 1286.1927
       }
     },
     {
-      "ChildId": "a918d6f8-f2e5-42d8-b730-ab17615f67ff"/*NdiOutput*/,
+      "ChildId": "a918d6f8-f2e5-42d8-b730-ab17615f67ff",
+      "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": -444.34708,
         "Y": 316.81036
       }
     },
     {
-      "ChildId": "ac7922ee-b7d7-46fe-a8d6-1e8c27fc508e"/*OscInput*/,
+      "ChildId": "ac7922ee-b7d7-46fe-a8d6-1e8c27fc508e",
+      "SymbolName": "Lib.io.osc.OscInput",
       "Position": {
         "X": -444.34708,
         "Y": 401.4751
       }
     },
     {
-      "ChildId": "ade7a971-38b6-4d7f-a220-a28f5a9968dd"/*NdiInput*/,
+      "ChildId": "ade7a971-38b6-4d7f-a220-a28f5a9968dd",
+      "SymbolName": "Lib.io.video.NdiInput",
       "Position": {
         "X": -444.34708,
         "Y": 15.684662
       }
     },
     {
-      "ChildId": "bbb5a65c-f350-4a8a-b4c6-0637d9c7e424"/*SpoutOut*/,
+      "ChildId": "bbb5a65c-f350-4a8a-b4c6-0637d9c7e424",
+      "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": -446.90842,
         "Y": 1391.1929
       }
     },
     {
-      "ChildId": "bde238b7-90f8-4171-888b-842fcb47997a"/*RenderTarget*/,
+      "ChildId": "bde238b7-90f8-4171-888b-842fcb47997a",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "Position": {
         "X": -444.34708,
         "Y": 541.4751
       }
     },
     {
-      "ChildId": "c0c7c4b9-7190-4d16-a344-d4dc6c37a9fe"/*RenderTarget*/,
+      "ChildId": "c0c7c4b9-7190-4d16-a344-d4dc6c37a9fe",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "Position": {
         "X": -446.90842,
         "Y": 1007.62225
       }
     },
     {
-      "ChildId": "c4499e0f-6c97-4ba6-8632-a27011dc7f2c"/*SpoutInput*/,
+      "ChildId": "c4499e0f-6c97-4ba6-8632-a27011dc7f2c",
+      "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": -446.90842,
         "Y": 1546.0056
       }
     },
     {
-      "ChildId": "d5149f89-c395-4ea2-a9bc-02b836113eb9"/*Layer2d*/,
+      "ChildId": "d5149f89-c395-4ea2-a9bc-02b836113eb9",
+      "SymbolName": "Lib.render.basic.Layer2d",
       "Position": {
         "X": -444.34708,
         "Y": 246.81035
       }
     },
     {
-      "ChildId": "d6cb02e8-57c2-4590-806e-74289ab9a256"/*FloatToString*/,
+      "ChildId": "d6cb02e8-57c2-4590-806e-74289ab9a256",
+      "SymbolName": "Lib.string.convert.FloatToString",
       "Position": {
         "X": -444.34708,
         "Y": 471.4751
       }
     },
     {
-      "ChildId": "e63dbcfe-aa18-4a71-bfa6-9c878a83c310"/*RenderTarget*/,
+      "ChildId": "e63dbcfe-aa18-4a71-bfa6-9c878a83c310",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "Position": {
         "X": -444.34708,
         "Y": 85.68466
       }
     },
     {
-      "ChildId": "ebfc1e02-dc4f-4df0-810b-4a5269326a4a"/*ExecuteTests*/,
+      "ChildId": "ebfc1e02-dc4f-4df0-810b-4a5269326a4a",
+      "SymbolName": "Examples.testing.ExecuteTests",
       "Position": {
         "X": -446.90842,
         "Y": 1077.6223
       }
     },
     {
-      "ChildId": "f0f7eceb-45bb-4eb7-b86f-7287dda04ed6"/*NdiOutput*/,
+      "ChildId": "f0f7eceb-45bb-4eb7-b86f-7287dda04ed6",
+      "SymbolName": "Lib.io.video.NdiOutput",
       "Position": {
         "X": -444.34708,
         "Y": 211.81035
       }
     },
     {
-      "ChildId": "fa6de355-cf7d-4128-9285-55fb0df871c3"/*RenderTarget*/,
+      "ChildId": "fa6de355-cf7d-4128-9285-55fb0df871c3",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "Position": {
         "X": -446.90842,
         "Y": 1356.1927
       }
     },
     {
-      "ChildId": "fb7b4529-a97f-4204-85c4-58272d1f4bd7"/*NdiInput*/,
+      "ChildId": "fb7b4529-a97f-4204-85c4-58272d1f4bd7",
+      "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": -444.34708,
         "Y": 120.68466

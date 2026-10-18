@@ -87,28 +87,32 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "3b090021-f6b7-44e7-8519-2dd0e20a5d62"/*Vector4Components*/,
+      "ChildId": "3b090021-f6b7-44e7-8519-2dd0e20a5d62",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "Position": {
         "X": 261.9446,
         "Y": 577.09564
       }
     },
     {
-      "ChildId": "67e730f9-8c0c-42b4-88e5-5adaf87100f8"/*_ImageFxShaderSetupStatic*/,
+      "ChildId": "67e730f9-8c0c-42b4-88e5-5adaf87100f8",
+      "SymbolName": "Lib.render._dx11.fxsetup._ImageFxShaderSetupStatic",
       "Position": {
         "X": 504.8459,
         "Y": 508.03625
       }
     },
     {
-      "ChildId": "99fd4d48-60be-4716-aac1-73b5d2141535"/*IntToFloat*/,
+      "ChildId": "99fd4d48-60be-4716-aac1-73b5d2141535",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "Position": {
         "X": 171.73366,
         "Y": 1046.5469
       }
     },
     {
-      "ChildId": "c0354bce-5eb8-4a4f-ad53-bae7d42bce68"/*Vector4Components*/,
+      "ChildId": "c0354bce-5eb8-4a4f-ad53-bae7d42bce68",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "Position": {
         "X": 261.9446,
         "Y": 633.09564

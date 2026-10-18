@@ -31,42 +31,48 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "0bfc8cd5-a08c-4acd-93fd-6d460c3974ce"/*GetForegroundColor*/,
+      "ChildId": "0bfc8cd5-a08c-4acd-93fd-6d460c3974ce",
+      "SymbolName": "Lib.flow.context.GetForegroundColor",
       "Position": {
         "X": -656.6175,
         "Y": 155.15579
       }
     },
     {
-      "ChildId": "1302bbfd-2acd-4df8-815d-2acd58ce2063"/*_ProcessVideoClips*/,
+      "ChildId": "1302bbfd-2acd-4df8-815d-2acd58ce2063",
+      "SymbolName": "Lib.io.video._ProcessVideoClips",
       "Position": {
         "X": -73.47714,
         "Y": 35.256775
       }
     },
     {
-      "ChildId": "1c0843b2-4b85-4a69-9f3b-3f4ed0165a95"/*GetIntVar*/,
+      "ChildId": "1c0843b2-4b85-4a69-9f3b-3f4ed0165a95",
+      "SymbolName": "Lib.flow.context.GetIntVar",
       "Position": {
         "X": -656.6175,
         "Y": 190.15579
       }
     },
     {
-      "ChildId": "22b80bb4-6130-49d0-a551-adc89ceb9092"/*Layer2d*/,
+      "ChildId": "22b80bb4-6130-49d0-a551-adc89ceb9092",
+      "SymbolName": "Lib.render.basic.Layer2d",
       "Position": {
         "X": -516.6175,
         "Y": 85.15579
       }
     },
     {
-      "ChildId": "363742e9-f79e-48f9-ad73-e9b748e96429"/*UseTextureReference*/,
+      "ChildId": "363742e9-f79e-48f9-ad73-e9b748e96429",
+      "SymbolName": "Lib.image.use.UseTextureReference",
       "Position": {
         "X": -797.00134,
         "Y": 17.921448
       }
     },
     {
-      "ChildId": "dedfeb9e-60c5-4c87-b853-860f2c0944a2"/*RenderTarget*/,
+      "ChildId": "dedfeb9e-60c5-4c87-b853-860f2c0944a2",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "Position": {
         "X": -73.47714,
         "Y": 175.25677

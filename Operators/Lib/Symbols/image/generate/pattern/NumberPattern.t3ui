@@ -98,35 +98,40 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "05525d29-37ae-4b5d-9891-95789f1e0152"/*RenderTarget*/,
+      "ChildId": "05525d29-37ae-4b5d-9891-95789f1e0152",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "Position": {
         "X": -508.93265,
         "Y": -478.3158
       }
     },
     {
-      "ChildId": "0962359f-c757-436d-952e-35f094839739"/*LoadImage*/,
+      "ChildId": "0962359f-c757-436d-952e-35f094839739",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
       "Position": {
         "X": -31.86583,
         "Y": -434.5388
       }
     },
     {
-      "ChildId": "1abd66b6-de3c-4d9b-81b9-77ab80c418f9"/*_Time_old*/,
+      "ChildId": "1abd66b6-de3c-4d9b-81b9-77ab80c418f9",
+      "SymbolName": "Lib.numbers.anim._obsolete._Time_old",
       "Position": {
         "X": -419.92044,
         "Y": 563.3359
       }
     },
     {
-      "ChildId": "2e494307-7dac-44c1-9ff0-5491160ed0f2"/*Add*/,
+      "ChildId": "2e494307-7dac-44c1-9ff0-5491160ed0f2",
+      "SymbolName": "Lib.numbers.float.basic.Add",
       "Position": {
         "X": -243.40569,
         "Y": 538.5767
       }
     },
     {
-      "ChildId": "36828f8a-9b54-442c-9eb0-f2c85cf78bd9"/*_multiImageFxSetup*/,
+      "ChildId": "36828f8a-9b54-442c-9eb0-f2c85cf78bd9",
+      "SymbolName": "Lib.image.fx._._multiImageFxSetup",
       "Style": "Resizable",
       "Size": {
         "X": 170.03336,
@@ -138,70 +143,80 @@
       }
     },
     {
-      "ChildId": "50d85534-92a2-4a30-a602-59bd8ccbeb1e"/*Vector4Components*/,
+      "ChildId": "50d85534-92a2-4a30-a602-59bd8ccbeb1e",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "Position": {
         "X": -201.19226,
         "Y": -58.027115
       }
     },
     {
-      "ChildId": "6227ccde-5119-4684-b95f-4a36f9a603e1"/*Vector4Components*/,
+      "ChildId": "6227ccde-5119-4684-b95f-4a36f9a603e1",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "Position": {
         "X": -189.16547,
         "Y": -213.84908
       }
     },
     {
-      "ChildId": "7bdb8ac4-cfe6-4f17-9c99-798ce7ba0714"/*Vector2Components*/,
+      "ChildId": "7bdb8ac4-cfe6-4f17-9c99-798ce7ba0714",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Position": {
         "X": -223.91927,
         "Y": 390.11844
       }
     },
     {
-      "ChildId": "80df85eb-5784-438a-afe8-eecb5a0b4e2a"/*Vector4Components*/,
+      "ChildId": "80df85eb-5784-438a-afe8-eecb5a0b4e2a",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "Position": {
         "X": -203.59753,
         "Y": 89.37608
       }
     },
     {
-      "ChildId": "9b10f6b5-d667-4352-bba1-a602a4a166ad"/*Vector2Components*/,
+      "ChildId": "9b10f6b5-d667-4352-bba1-a602a4a166ad",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Position": {
         "X": -214.2979,
         "Y": 234.67288
       }
     },
     {
-      "ChildId": "b109264c-7c58-4ba9-ba91-aed6bf011127"/*RequestedResolution*/,
+      "ChildId": "b109264c-7c58-4ba9-ba91-aed6bf011127",
+      "SymbolName": "Lib.render.utils.RequestedResolution",
       "Position": {
         "X": -600.45496,
         "Y": 866.0931
       }
     },
     {
-      "ChildId": "bfb9503f-263a-4ecb-a76c-1326b4e58064"/*IntToFloat*/,
+      "ChildId": "bfb9503f-263a-4ecb-a76c-1326b4e58064",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "Position": {
         "X": -329.7422,
         "Y": 941.33624
       }
     },
     {
-      "ChildId": "cbd91d56-5bb4-417a-9b75-a85a80816074"/*Vector2Components*/,
+      "ChildId": "cbd91d56-5bb4-417a-9b75-a85a80816074",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Position": {
         "X": -220.31123,
         "Y": 308.5371
       }
     },
     {
-      "ChildId": "e2399b55-2ff7-40d4-8c3f-c96c93171811"/*IntToFloat*/,
+      "ChildId": "e2399b55-2ff7-40d4-8c3f-c96c93171811",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "Position": {
         "X": -317.71542,
         "Y": 887.7412
       }
     },
     {
-      "ChildId": "fdf7651f-8375-4d6c-9e8a-a8020256435c"/*Vector4Components*/,
+      "ChildId": "fdf7651f-8375-4d6c-9e8a-a8020256435c",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "Position": {
         "X": -174.73343,
         "Y": -375.5086

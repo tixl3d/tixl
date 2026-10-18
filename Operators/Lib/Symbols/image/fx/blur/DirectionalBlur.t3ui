@@ -115,77 +115,88 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "1d6d89aa-4e25-4ed2-a5cd-9c975b2ebabf"/*Div*/,
+      "ChildId": "1d6d89aa-4e25-4ed2-a5cd-9c975b2ebabf",
+      "SymbolName": "Lib.numbers.float.basic.Div",
       "Position": {
         "X": -400.56342,
         "Y": 685.9931
       }
     },
     {
-      "ChildId": "1dc01264-c53e-459c-92b7-7a56af54fde3"/*IntToFloat*/,
+      "ChildId": "1dc01264-c53e-459c-92b7-7a56af54fde3",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "Position": {
         "X": -56.5271,
         "Y": 558.73456
       }
     },
     {
-      "ChildId": "2b352f5b-e2f8-4e58-b029-b91db67ca0f7"/*_multiImageFxSetup*/,
+      "ChildId": "2b352f5b-e2f8-4e58-b029-b91db67ca0f7",
+      "SymbolName": "Lib.image.fx._._multiImageFxSetup",
       "Position": {
         "X": 260.06155,
         "Y": 276.99542
       }
     },
     {
-      "ChildId": "4194c8e2-5f6e-410b-b98f-71ed330e395c"/*_ImageFxShaderSetupStatic*/,
+      "ChildId": "4194c8e2-5f6e-410b-b98f-71ed330e395c",
+      "SymbolName": "Lib.render._dx11.fxsetup._ImageFxShaderSetupStatic",
       "Position": {
         "X": 81.36603,
         "Y": -1129.8193
       }
     },
     {
-      "ChildId": "46f4e0b1-7fe7-4d83-a916-4d149364cfda"/*BoolToInt*/,
+      "ChildId": "46f4e0b1-7fe7-4d83-a916-4d149364cfda",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToInt",
       "Position": {
         "X": 367.75134,
         "Y": 474.0664
       }
     },
     {
-      "ChildId": "728da07f-536c-49bb-8db6-692136fc3b46"/*_multiImageFxSetup*/,
+      "ChildId": "728da07f-536c-49bb-8db6-692136fc3b46",
+      "SymbolName": "Lib.image.fx._._multiImageFxSetup",
       "Position": {
         "X": 49.260468,
         "Y": 2.0201416
       }
     },
     {
-      "ChildId": "8ca6add7-ca09-49f6-882c-e6a5b1a02fe4"/*PickTexture*/,
+      "ChildId": "8ca6add7-ca09-49f6-882c-e6a5b1a02fe4",
+      "SymbolName": "Lib.image.use.PickTexture",
       "Position": {
         "X": 504.11707,
         "Y": 281.86584
       }
     },
     {
-      "ChildId": "c2ddd0ea-230b-47f1-982c-92dd229bf66c"/*UseFallbackTexture*/,
+      "ChildId": "c2ddd0ea-230b-47f1-982c-92dd229bf66c",
+      "SymbolName": "Lib.image.use.UseFallbackTexture",
       "Position": {
         "X": -196.50159,
         "Y": 407.31018
       }
     },
     {
-      "ChildId": "d2d3cf3b-87f3-4804-98a5-44ebb4418c12"/*Multiply*/,
+      "ChildId": "d2d3cf3b-87f3-4804-98a5-44ebb4418c12",
+      "SymbolName": "Lib.numbers.float.basic.Multiply",
       "Position": {
         "X": -211.51486,
         "Y": 698.8423
       }
     },
     {
-      "ChildId": "d5e26444-fe59-4923-98cb-5c22be2815f8"/*LoadImage*/,
+      "ChildId": "d5e26444-fe59-4923-98cb-5c22be2815f8",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
       "Position": {
         "X": -353.41815,
         "Y": 457.28357
       }
     },
     {
-      "ChildId": "e1463719-b383-4adf-bf68-d44c9adf6c0d"/*Multiply*/,
+      "ChildId": "e1463719-b383-4adf-bf68-d44c9adf6c0d",
+      "SymbolName": "Lib.numbers.float.basic.Multiply",
       "Position": {
         "X": -55.035797,
         "Y": 487.07574

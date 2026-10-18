@@ -70,70 +70,80 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "020d3da9-7ca7-4709-8869-a3e0d075a2d5"/*CalcDispatchCount*/,
+      "ChildId": "020d3da9-7ca7-4709-8869-a3e0d075a2d5",
+      "SymbolName": "Lib.render._dx11.api.CalcDispatchCount",
       "Position": {
         "X": 1.9657593,
         "Y": 551.6556
       }
     },
     {
-      "ChildId": "0dfb8c38-16c2-4604-8e32-ecb9cb7642aa"/*ComputeShaderStage*/,
+      "ChildId": "0dfb8c38-16c2-4604-8e32-ecb9cb7642aa",
+      "SymbolName": "Types.Gfx.ComputeShaderStage",
       "Position": {
         "X": 475.10886,
         "Y": 524.0607
       }
     },
     {
-      "ChildId": "1c233d4c-fb3c-47ac-9461-55b7ee4dc323"/*ComputeShader*/,
+      "ChildId": "1c233d4c-fb3c-47ac-9461-55b7ee4dc323",
+      "SymbolName": "Types.Gfx.ComputeShader",
       "Position": {
         "X": -138.03424,
         "Y": 516.6556
       }
     },
     {
-      "ChildId": "331e7588-3b1d-4f76-8021-b22147cd7972"/*BoolToFloat*/,
+      "ChildId": "331e7588-3b1d-4f76-8021-b22147cd7972",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
       "Position": {
         "X": 165.54813,
         "Y": 1140.0073
       }
     },
     {
-      "ChildId": "3f67b99a-f4c7-4b45-ba29-0e4f7c00444f"/*GetBufferComponents*/,
+      "ChildId": "3f67b99a-f4c7-4b45-ba29-0e4f7c00444f",
+      "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
       "Position": {
         "X": 25.548124,
         "Y": 1348.3009
       }
     },
     {
-      "ChildId": "52ea84e0-0daa-4c24-b50f-848a492d4df4"/*ExecuteBufferUpdate*/,
+      "ChildId": "52ea84e0-0daa-4c24-b50f-848a492d4df4",
+      "SymbolName": "Lib.render._dx11.fxsetup.ExecuteBufferUpdate",
       "Position": {
         "X": 475.1089,
         "Y": 699.0607
       }
     },
     {
-      "ChildId": "55f0a2a3-093b-426a-8955-f225413a96c7"/*GetSRVProperties*/,
+      "ChildId": "55f0a2a3-093b-426a-8955-f225413a96c7",
+      "SymbolName": "Lib.render._dx11.api.GetSRVProperties",
       "Position": {
         "X": -138.03426,
         "Y": 586.6556
       }
     },
     {
-      "ChildId": "58f46406-99ac-4552-ab39-5100ea0242e2"/*GetBufferComponents*/,
+      "ChildId": "58f46406-99ac-4552-ab39-5100ea0242e2",
+      "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
       "Position": {
         "X": -481.14288,
         "Y": 859.89764
       }
     },
     {
-      "ChildId": "7d9f0525-6ecc-4a74-9ae1-8f697b5b8aa0"/*_MeshBufferComponents*/,
+      "ChildId": "7d9f0525-6ecc-4a74-9ae1-8f697b5b8aa0",
+      "SymbolName": "Lib.mesh._._MeshBufferComponents",
       "Position": {
         "X": -481.14288,
         "Y": 789.89764
       }
     },
     {
-      "ChildId": "99c9771e-4112-4520-816e-32a0b9644897"/*FloatsToBuffer*/,
+      "ChildId": "99c9771e-4112-4520-816e-32a0b9644897",
+      "SymbolName": "Lib.render._dx11.api.FloatsToBuffer",
       "Style": "Resizable",
       "Size": {
         "X": 108.263535,
@@ -145,28 +155,32 @@
       }
     },
     {
-      "ChildId": "a616e533-23fa-424a-8eb4-d0d1b43b9482"/*PBRVertex.Stride*/,
+      "ChildId": "a616e533-23fa-424a-8eb4-d0d1b43b9482",
+      "SymbolName": "Types.Values.IntValue",
       "Position": {
         "X": -114.45187,
         "Y": 1313.3009
       }
     },
     {
-      "ChildId": "b3de1c6c-3781-4512-b80e-c7e9f21a95bd"/*TransformMatrix*/,
+      "ChildId": "b3de1c6c-3781-4512-b80e-c7e9f21a95bd",
+      "SymbolName": "Lib.render._.TransformMatrix",
       "Position": {
         "X": 305.54813,
         "Y": 930.0075
       }
     },
     {
-      "ChildId": "d44f886a-f752-48f5-b2a1-1eb20858e81d"/*_AssembleMeshBuffers*/,
+      "ChildId": "d44f886a-f752-48f5-b2a1-1eb20858e81d",
+      "SymbolName": "Lib.mesh._._AssembleMeshBuffers",
       "Position": {
         "X": 698.07605,
         "Y": 771.1472
       }
     },
     {
-      "ChildId": "fb5aa285-2f39-4fdb-b00b-5114d61223ff"/*StructuredBufferWithViews*/,
+      "ChildId": "fb5aa285-2f39-4fdb-b00b-5114d61223ff",
+      "SymbolName": "Types.Gfx.StructuredBufferWithViews",
       "Position": {
         "X": 25.548124,
         "Y": 1278.3009

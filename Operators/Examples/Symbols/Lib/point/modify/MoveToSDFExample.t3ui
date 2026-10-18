@@ -5,28 +5,32 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "0426d668-50a7-4419-a530-54013cf2fc55"/*LinePoints*/,
+      "ChildId": "0426d668-50a7-4419-a530-54013cf2fc55",
+      "SymbolName": "Lib.point.generate.LinePoints",
       "Position": {
         "X": 232.00327,
         "Y": 42.23271
       }
     },
     {
-      "ChildId": "0f9c6cd2-9911-49be-b882-ce095294b4eb"/*Group*/,
+      "ChildId": "0f9c6cd2-9911-49be-b882-ce095294b4eb",
+      "SymbolName": "Lib.render.transform.Group",
       "Position": {
         "X": 1145.9191,
         "Y": -25.798462
       }
     },
     {
-      "ChildId": "16d2cbd4-dbeb-4658-b578-07254536463c"/*Point*/,
+      "ChildId": "16d2cbd4-dbeb-4658-b578-07254536463c",
+      "SymbolName": "Types.Values.Point",
       "Position": {
         "X": 232.00327,
         "Y": 7.232712
       }
     },
     {
-      "ChildId": "2a6ba4a6-1841-4f11-b4aa-496ea88d60be"/*MoveToSDF*/,
+      "ChildId": "2a6ba4a6-1841-4f11-b4aa-496ea88d60be",
+      "SymbolName": "Lib.point.modify.MoveToSDF",
       "Comment": "Create a new set of points with the closed position on the given SDF-Field.",
       "Position": {
         "X": 781.34344,
@@ -34,14 +38,16 @@
       }
     },
     {
-      "ChildId": "2f38d902-a441-46da-bd84-67761ef983e5"/*AnimVec3*/,
+      "ChildId": "2f38d902-a441-46da-bd84-67761ef983e5",
+      "SymbolName": "Lib.numbers.anim.animators.AnimVec3",
       "Position": {
         "X": 234.01248,
         "Y": 307.1079
       }
     },
     {
-      "ChildId": "41794f9d-3344-4085-8174-8995eff7e0c8"/*DrawLines*/,
+      "ChildId": "41794f9d-3344-4085-8174-8995eff7e0c8",
+      "SymbolName": "Lib.point.draw.DrawLines",
       "SectionId": "9fca2e52-023c-4664-8a62-330b0a3dddbf",
       "Position": {
         "X": 748.5374,
@@ -49,35 +55,40 @@
       }
     },
     {
-      "ChildId": "4306bc71-6bea-41f5-b0a4-a6f452219e6c"/*Vector3Gizmo*/,
+      "ChildId": "4306bc71-6bea-41f5-b0a4-a6f452219e6c",
+      "SymbolName": "Lib.numbers.vec3.Vector3Gizmo",
       "Position": {
         "X": 92.003265,
         "Y": 7.232712
       }
     },
     {
-      "ChildId": "687550fd-981a-4da5-9262-aa2f37614414"/*DrawPoints*/,
+      "ChildId": "687550fd-981a-4da5-9262-aa2f37614414",
+      "SymbolName": "Lib.point.draw.DrawPoints",
       "Position": {
         "X": 781.34344,
         "Y": 217.5611
       }
     },
     {
-      "ChildId": "68facb18-8946-4ba7-b8a6-08d3b3377470"/*NoiseDisplaceSDF*/,
+      "ChildId": "68facb18-8946-4ba7-b8a6-08d3b3377470",
+      "SymbolName": "Lib.field.adjust.NoiseDisplaceSDF",
       "Position": {
         "X": 374.01248,
         "Y": 272.1079
       }
     },
     {
-      "ChildId": "6eda92f1-82d4-4fbd-a5c6-a8d6b160d6d7"/*AnimInt*/,
+      "ChildId": "6eda92f1-82d4-4fbd-a5c6-a8d6b160d6d7",
+      "SymbolName": "Lib.numbers.anim.animators.AnimInt",
       "Position": {
         "X": 232.00327,
         "Y": 112.23271
       }
     },
     {
-      "ChildId": "7b88bace-c4d0-41df-afdb-278b334f6142"/*MoveToSDF*/,
+      "ChildId": "7b88bace-c4d0-41df-afdb-278b334f6142",
+      "SymbolName": "Lib.point.modify.MoveToSDF",
       "SectionId": "9fca2e52-023c-4664-8a62-330b0a3dddbf",
       "Comment": "We clamp the amount of the movement to zero to lock them to their original position.\nWe also write the distance to FX1 so we can use it as a scale factor for...",
       "Position": {
@@ -86,14 +97,16 @@
       }
     },
     {
-      "ChildId": "9d6891ff-2378-4bf3-9e88-ef450d073645"/*BoxSDF*/,
+      "ChildId": "9d6891ff-2378-4bf3-9e88-ef450d073645",
+      "SymbolName": "Lib.field.generate.sdf.BoxSDF",
       "Position": {
         "X": 94.01248,
         "Y": 272.1079
       }
     },
     {
-      "ChildId": "afcd0bd5-4865-4e85-923d-3474a9611a43"/*PickPointList*/,
+      "ChildId": "afcd0bd5-4865-4e85-923d-3474a9611a43",
+      "SymbolName": "Lib.point.combine.PickPointList",
       "Comment": "Switch between a couple of source points sets.\nFeel free to experiment with our own.",
       "Position": {
         "X": 372.00327,
@@ -101,28 +114,32 @@
       }
     },
     {
-      "ChildId": "aff996b8-3345-4ccd-a8a2-b5b39a9dca70"/*SetMaterial*/,
+      "ChildId": "aff996b8-3345-4ccd-a8a2-b5b39a9dca70",
+      "SymbolName": "Lib.render.shading.SetMaterial",
       "Position": {
         "X": 947.25073,
         "Y": 353.45374
       }
     },
     {
-      "ChildId": "b984dd71-896a-4645-867e-677177474a59"/*RadialPoints*/,
+      "ChildId": "b984dd71-896a-4645-867e-677177474a59",
+      "SymbolName": "Lib.point.generate.RadialPoints",
       "Position": {
         "X": 232.00327,
         "Y": 77.23271
       }
     },
     {
-      "ChildId": "bfedc174-46fd-4518-a355-148507d86ef5"/*CombineSDF*/,
+      "ChildId": "bfedc174-46fd-4518-a355-148507d86ef5",
+      "SymbolName": "Lib.field.combine.CombineSDF",
       "Position": {
         "X": 234.01248,
         "Y": 272.1079
       }
     },
     {
-      "ChildId": "c5cdf0d0-bf59-4c30-912e-e2e340ce8295"/*DrawPoints*/,
+      "ChildId": "c5cdf0d0-bf59-4c30-912e-e2e340ce8295",
+      "SymbolName": "Lib.point.draw.DrawPoints",
       "Comment": "Draw the original points.",
       "Position": {
         "X": 948.3339,
@@ -130,7 +147,8 @@
       }
     },
     {
-      "ChildId": "d71f9ede-f9c6-4373-87d1-e636e9fe70c1"/*RadialPoints*/,
+      "ChildId": "d71f9ede-f9c6-4373-87d1-e636e9fe70c1",
+      "SymbolName": "Lib.point.generate.RadialPoints",
       "SectionId": "9fca2e52-023c-4664-8a62-330b0a3dddbf",
       "Position": {
         "X": 608.5374,
@@ -138,7 +156,8 @@
       }
     },
     {
-      "ChildId": "de9a4dc9-3fbc-49bc-8ea6-f56f0f6d6d31"/*RepeatAtPoints*/,
+      "ChildId": "de9a4dc9-3fbc-49bc-8ea6-f56f0f6d6d31",
+      "SymbolName": "Lib.point.generate.RepeatAtPoints",
       "SectionId": "9fca2e52-023c-4664-8a62-330b0a3dddbf",
       "Comment": "...repeating some circles at those points.",
       "Position": {
@@ -147,14 +166,16 @@
       }
     },
     {
-      "ChildId": "e78dd8f8-bb40-4de9-98d3-60b18a843f75"/*PairPointsForLines*/,
+      "ChildId": "e78dd8f8-bb40-4de9-98d3-60b18a843f75",
+      "SymbolName": "Lib.point.combine.PairPointsForLines",
       "Position": {
         "X": 949.67163,
         "Y": 29.521393
       }
     },
     {
-      "ChildId": "f07e261e-8c4f-43f4-8993-0eca8d2624bd"/*DrawLines*/,
+      "ChildId": "f07e261e-8c4f-43f4-8993-0eca8d2624bd",
+      "SymbolName": "Lib.point.draw.DrawLines",
       "Comment": "Draw a line between source and target.",
       "Position": {
         "X": 949.67163,
@@ -162,7 +183,8 @@
       }
     },
     {
-      "ChildId": "f07e8a07-a9e2-4584-b0bd-35695d62c3d0"/*RaymarchField*/,
+      "ChildId": "f07e8a07-a9e2-4584-b0bd-35695d62c3d0",
+      "SymbolName": "Lib.field.render.RaymarchField",
       "Comment": "Show the actual field.",
       "Position": {
         "X": 947.25073,

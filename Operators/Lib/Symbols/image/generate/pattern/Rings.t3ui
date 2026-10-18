@@ -198,77 +198,88 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "0d73ac25-19f4-41fb-bf0e-81f09eb1affa"/*Vector4Components*/,
+      "ChildId": "0d73ac25-19f4-41fb-bf0e-81f09eb1affa",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "Position": {
         "X": -1235.9949,
         "Y": -431.15872
       }
     },
     {
-      "ChildId": "1bb98fdd-eb9c-48f7-ab77-0178e1307c9d"/*IntToFloat*/,
+      "ChildId": "1bb98fdd-eb9c-48f7-ab77-0178e1307c9d",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "Position": {
         "X": -860.54755,
         "Y": 1108.8499
       }
     },
     {
-      "ChildId": "2071bf5e-1da9-4bae-881c-8de30a416d0d"/*Vector4Components*/,
+      "ChildId": "2071bf5e-1da9-4bae-881c-8de30a416d0d",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "Position": {
         "X": -1235.9949,
         "Y": -319.1586
       }
     },
     {
-      "ChildId": "4a8af0c6-5c94-4aad-9200-a4b334a0a574"/*Vector2Components*/,
+      "ChildId": "4a8af0c6-5c94-4aad-9200-a4b334a0a574",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Position": {
         "X": -1237.9113,
         "Y": 66.309265
       }
     },
     {
-      "ChildId": "690dcf27-0802-438f-aa0c-fcbedf8c3521"/*Vector2Components*/,
+      "ChildId": "690dcf27-0802-438f-aa0c-fcbedf8c3521",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Position": {
         "X": -1237.9113,
         "Y": 234.3096
       }
     },
     {
-      "ChildId": "6b273822-3d1c-409c-ab15-c3951d940a87"/*Vector4Components*/,
+      "ChildId": "6b273822-3d1c-409c-ab15-c3951d940a87",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "Position": {
         "X": -1235.9949,
         "Y": -375.1586
       }
     },
     {
-      "ChildId": "77315f66-fd85-48d1-9f7a-731d37d9aee6"/*Vector2Components*/,
+      "ChildId": "77315f66-fd85-48d1-9f7a-731d37d9aee6",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Position": {
         "X": -1235.9949,
         "Y": -207.15854
       }
     },
     {
-      "ChildId": "79258ce2-02c2-4825-8b6a-afce2c977158"/*GetTextureSize*/,
+      "ChildId": "79258ce2-02c2-4825-8b6a-afce2c977158",
+      "SymbolName": "Lib.render._dx11.api.GetTextureSize",
       "Position": {
         "X": -716.21564,
         "Y": 903.8837
       }
     },
     {
-      "ChildId": "b8a9445e-bac4-4724-b060-891582df2579"/*Vector2Components*/,
+      "ChildId": "b8a9445e-bac4-4724-b060-891582df2579",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Position": {
         "X": -1235.9949,
         "Y": -263.1586
       }
     },
     {
-      "ChildId": "b9d72894-3c1a-44be-87a8-252ae28575d4"/*Vector2Components*/,
+      "ChildId": "b9d72894-3c1a-44be-87a8-252ae28575d4",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Position": {
         "X": -1237.9113,
         "Y": 122.309296
       }
     },
     {
-      "ChildId": "d86865f4-6e1a-4425-8171-1a5ce2c33142"/*_ImageFxShaderSetupStatic*/,
+      "ChildId": "d86865f4-6e1a-4425-8171-1a5ce2c33142",
+      "SymbolName": "Lib.render._dx11.fxsetup._ImageFxShaderSetupStatic",
       "Style": "Resizable",
       "Size": {
         "X": 124.37192,
@@ -280,21 +291,24 @@
       }
     },
     {
-      "ChildId": "f6ec5a3a-d5e9-45ec-88ed-fcadae7b5b10"/*IntToFloat*/,
+      "ChildId": "f6ec5a3a-d5e9-45ec-88ed-fcadae7b5b10",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "Position": {
         "X": -1184.1146,
         "Y": 804.2446
       }
     },
     {
-      "ChildId": "fa434561-1c94-4b2e-8319-604201ea9ace"/*Vector2Components*/,
+      "ChildId": "fa434561-1c94-4b2e-8319-604201ea9ace",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Position": {
         "X": -1237.9113,
         "Y": 178.30936
       }
     },
     {
-      "ChildId": "fb3649a5-1203-4b87-a3f4-138a582e8c2e"/*IntToFloat*/,
+      "ChildId": "fb3649a5-1203-4b87-a3f4-138a582e8c2e",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "Position": {
         "X": -1271.5338,
         "Y": 524.7334

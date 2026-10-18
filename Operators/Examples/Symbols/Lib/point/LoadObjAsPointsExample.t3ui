@@ -6,63 +6,72 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "0ca6a0b1-108d-4ca9-86c5-231ce357be14"/*ListToBuffer*/,
+      "ChildId": "0ca6a0b1-108d-4ca9-86c5-231ce357be14",
+      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
       "Position": {
         "X": 150.0,
         "Y": 0.0
       }
     },
     {
-      "ChildId": "2b0b88d7-dae5-4ee8-bb75-de94ece27af4"/*_AnimValueOld*/,
+      "ChildId": "2b0b88d7-dae5-4ee8-bb75-de94ece27af4",
+      "SymbolName": "Lib.numbers.anim._obsolete._AnimValueOld",
       "Position": {
         "X": 0.0,
         "Y": 67.0
       }
     },
     {
-      "ChildId": "2c95bd87-1eef-48d8-bd2b-627422f1bf75"/*Vector3*/,
+      "ChildId": "2c95bd87-1eef-48d8-bd2b-627422f1bf75",
+      "SymbolName": "Types.Values.Vector3",
       "Position": {
         "X": 150.0,
         "Y": 69.0
       }
     },
     {
-      "ChildId": "3f7b5aa5-bbf2-4a3e-99b6-ecc8c068bab6"/*SoftTransformPoints*/,
+      "ChildId": "3f7b5aa5-bbf2-4a3e-99b6-ecc8c068bab6",
+      "SymbolName": "Lib.point.transform.SoftTransformPoints",
       "Position": {
         "X": 300.0,
         "Y": 0.0
       }
     },
     {
-      "ChildId": "4463778d-bb71-4bba-8b7b-81163e369ec0"/*LoadObjAsPoints*/,
+      "ChildId": "4463778d-bb71-4bba-8b7b-81163e369ec0",
+      "SymbolName": "Lib.point.helper.LoadObjAsPoints",
       "Position": {
         "X": 0.0,
         "Y": 0.0
       }
     },
     {
-      "ChildId": "68f82425-6764-47d7-a9ea-74daca6f230c"/*OrbitCamera*/,
+      "ChildId": "68f82425-6764-47d7-a9ea-74daca6f230c",
+      "SymbolName": "Lib.render.camera.OrbitCamera",
       "Position": {
         "X": 626.49023,
         "Y": 3.9899902
       }
     },
     {
-      "ChildId": "ad5ad6d8-aeb2-4073-b718-eef07d9399ee"/*_AnimValueOld*/,
+      "ChildId": "ad5ad6d8-aeb2-4073-b718-eef07d9399ee",
+      "SymbolName": "Lib.numbers.anim._obsolete._AnimValueOld",
       "Position": {
         "X": 150.0,
         "Y": 132.0
       }
     },
     {
-      "ChildId": "e327c066-9d5f-48eb-8423-ba0dcb6a4ca8"/*RenderTarget*/,
+      "ChildId": "e327c066-9d5f-48eb-8423-ba0dcb6a4ca8",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "Position": {
         "X": 776.49023,
         "Y": 3.9899902
       }
     },
     {
-      "ChildId": "ff3b4619-656b-4dee-b4f6-0301830c8790"/*DrawBillboards*/,
+      "ChildId": "ff3b4619-656b-4dee-b4f6-0301830c8790",
+      "SymbolName": "Lib.point.draw.DrawBillboards",
       "Position": {
         "X": 476.49023,
         "Y": 3.9899902

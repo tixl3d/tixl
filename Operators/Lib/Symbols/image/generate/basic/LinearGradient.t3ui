@@ -137,70 +137,80 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "3c0c9eae-d119-4fbc-96d0-154cce0b8989"/*Multiply*/,
+      "ChildId": "3c0c9eae-d119-4fbc-96d0-154cce0b8989",
+      "SymbolName": "Lib.numbers.float.basic.Multiply",
       "Position": {
         "X": -419.9153,
         "Y": 234.00821
       }
     },
     {
-      "ChildId": "3cf139ae-0d71-4a68-bb75-2276154b988a"/*PickFloat*/,
+      "ChildId": "3cf139ae-0d71-4a68-bb75-2276154b988a",
+      "SymbolName": "Lib.numbers.float.logic.PickFloat",
       "Position": {
         "X": -101.14078,
         "Y": 199.39484
       }
     },
     {
-      "ChildId": "58c8c801-c758-41dc-bc6d-52a901b0583a"/*_multiImageFxSetupStatic*/,
+      "ChildId": "58c8c801-c758-41dc-bc6d-52a901b0583a",
+      "SymbolName": "Lib.image.fx._._multiImageFxSetupStatic",
       "Position": {
         "X": 339.732,
         "Y": -187.30649
       }
     },
     {
-      "ChildId": "622d64d8-d845-47a9-a87f-31be42832aa6"/*IntToFloat*/,
+      "ChildId": "622d64d8-d845-47a9-a87f-31be42832aa6",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "Position": {
         "X": 199.732,
         "Y": 267.6935
       }
     },
     {
-      "ChildId": "67faeb1c-65dc-4b2c-9a33-2c99f979dfc3"/*BoolToFloat*/,
+      "ChildId": "67faeb1c-65dc-4b2c-9a33-2c99f979dfc3",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
       "Position": {
         "X": 199.732,
         "Y": 92.69351
       }
     },
     {
-      "ChildId": "693baad7-d351-44de-af5c-cd0212003e35"/*BoolToFloat*/,
+      "ChildId": "693baad7-d351-44de-af5c-cd0212003e35",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
       "Position": {
         "X": 199.732,
         "Y": 57.693512
       }
     },
     {
-      "ChildId": "6e9cfe0c-c7ea-45d6-8b35-140208425b6c"/*GradientsToTexture*/,
+      "ChildId": "6e9cfe0c-c7ea-45d6-8b35-140208425b6c",
+      "SymbolName": "Lib.numbers.color.GradientsToTexture",
       "Position": {
         "X": -46.656906,
         "Y": -117.30649
       }
     },
     {
-      "ChildId": "6f71bad8-200a-4638-a8d5-e9966f6820a3"/*IntToFloat*/,
+      "ChildId": "6f71bad8-200a-4638-a8d5-e9966f6820a3",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "Position": {
         "X": 199.732,
         "Y": 232.69351
       }
     },
     {
-      "ChildId": "9b1378ec-a83d-432b-8f40-ecb21618087a"/*Vector2Components*/,
+      "ChildId": "9b1378ec-a83d-432b-8f40-ecb21618087a",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Position": {
         "X": 199.732,
         "Y": 127.69351
       }
     },
     {
-      "ChildId": "de66c2b3-8e69-4534-bdbe-5f756169a7ad"/*Vector2Components*/,
+      "ChildId": "de66c2b3-8e69-4534-bdbe-5f756169a7ad",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Position": {
         "X": 199.732,
         "Y": -82.30649

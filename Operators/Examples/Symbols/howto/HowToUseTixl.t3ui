@@ -6,7 +6,8 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "3ca68ae8-02bd-432b-94a4-be80b6eb5d1a"/*LoadImage*/,
+      "ChildId": "3ca68ae8-02bd-432b-94a4-be80b6eb5d1a",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
       "SectionId": "125f20a8-465e-4758-b8c0-7601c7dc0112",
       "Position": {
         "X": 20.162567,
@@ -14,7 +15,8 @@
       }
     },
     {
-      "ChildId": "710e4b8a-f5c7-4d6c-82a7-df509ed708ce"/*AsciiRender*/,
+      "ChildId": "710e4b8a-f5c7-4d6c-82a7-df509ed708ce",
+      "SymbolName": "Lib.image.fx.stylize.AsciiRender",
       "SectionId": "14288e8d-d885-4a09-a83d-2849fea72054",
       "Position": {
         "X": 463.84412,
@@ -22,7 +24,8 @@
       }
     },
     {
-      "ChildId": "73ef00c1-942d-4464-9390-b9632fef8468"/*DetectEdges*/,
+      "ChildId": "73ef00c1-942d-4464-9390-b9632fef8468",
+      "SymbolName": "Lib.image.fx.stylize.DetectEdges",
       "SectionId": "d26f5d4f-5727-4d0f-989b-9fcb19c037e6",
       "Comment": "You discovered a comment! \nIn many examples, we will use these to explain the purpose of certain operators in a graph or point out noteworthy parameter settings.",
       "Position": {
@@ -31,7 +34,8 @@
       }
     },
     {
-      "ChildId": "8e521fb6-e59d-403c-80cc-9e9b38df0b23"/*Text*/,
+      "ChildId": "8e521fb6-e59d-403c-80cc-9e9b38df0b23",
+      "SymbolName": "Lib.render.basic.Text",
       "SectionId": "14288e8d-d885-4a09-a83d-2849fea72054",
       "Position": {
         "X": 13.844116,
@@ -39,7 +43,8 @@
       }
     },
     {
-      "ChildId": "b35105be-26e1-4847-bfb5-4686fb304d1b"/*RenderTarget*/,
+      "ChildId": "b35105be-26e1-4847-bfb5-4686fb304d1b",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "SectionId": "14288e8d-d885-4a09-a83d-2849fea72054",
       "Position": {
         "X": 163.84412,
@@ -47,7 +52,8 @@
       }
     },
     {
-      "ChildId": "cfcb9a91-54a9-4b04-a972-30fbb65f9ee2"/*Blur*/,
+      "ChildId": "cfcb9a91-54a9-4b04-a972-30fbb65f9ee2",
+      "SymbolName": "Lib.image.fx.blur.Blur",
       "SectionId": "14288e8d-d885-4a09-a83d-2849fea72054",
       "Position": {
         "X": 313.84412,
@@ -55,7 +61,8 @@
       }
     },
     {
-      "ChildId": "d7df48f3-9989-4b99-ad68-a266ed2b9760"/*Blob*/,
+      "ChildId": "d7df48f3-9989-4b99-ad68-a266ed2b9760",
+      "SymbolName": "Lib.image.generate.basic.Blob",
       "SectionId": "54456a70-93a3-4455-b1e1-a2731d03de39",
       "Position": {
         "X": 544.6786,
@@ -63,7 +70,8 @@
       }
     },
     {
-      "ChildId": "ebfeac4e-0baf-4d89-9572-311831b8e631"/*AnimValue*/,
+      "ChildId": "ebfeac4e-0baf-4d89-9572-311831b8e631",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "SectionId": "14288e8d-d885-4a09-a83d-2849fea72054",
       "Position": {
         "X": 313.84412,
@@ -71,7 +79,8 @@
       }
     },
     {
-      "ChildId": "f8b7be5b-bd28-40f3-9c30-880575a764f8"/*AnimVec2*/,
+      "ChildId": "f8b7be5b-bd28-40f3-9c30-880575a764f8",
+      "SymbolName": "Lib.numbers.anim.animators.AnimVec2",
       "SectionId": "14288e8d-d885-4a09-a83d-2849fea72054",
       "Position": {
         "X": 313.84412,

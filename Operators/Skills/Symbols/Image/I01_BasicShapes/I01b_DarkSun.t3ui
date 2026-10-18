@@ -5,7 +5,8 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "0d0c414c-70ba-4374-a0a2-d4a594425f62"/*Blob*/,
+      "ChildId": "0d0c414c-70ba-4374-a0a2-d4a594425f62",
+      "SymbolName": "Lib.image.generate.basic.Blob",
       "SectionId": "656d4f29-3202-45a8-9bf1-957ceba30c00",
       "Position": {
         "X": 1352.2639,
@@ -13,14 +14,16 @@
       }
     },
     {
-      "ChildId": "0f40b82e-f22d-4119-9f9a-58f74e7ed42a"/*ImageQuiz*/,
+      "ChildId": "0f40b82e-f22d-4119-9f9a-58f74e7ed42a",
+      "SymbolName": "Lib.flow.skillQuest.ImageQuiz",
       "Position": {
         "X": 1609.7146,
         "Y": 2018.4391
       }
     },
     {
-      "ChildId": "20873546-a48b-496b-8dc7-3313e66e2559"/*Blob*/,
+      "ChildId": "20873546-a48b-496b-8dc7-3313e66e2559",
+      "SymbolName": "Lib.image.generate.basic.Blob",
       "SectionId": "656d4f29-3202-45a8-9bf1-957ceba30c00",
       "Position": {
         "X": 1352.2639,
@@ -28,7 +31,8 @@
       }
     },
     {
-      "ChildId": "4c01a5ef-6f2e-4413-9cd9-c84cfd8c8d35"/*Blob*/,
+      "ChildId": "4c01a5ef-6f2e-4413-9cd9-c84cfd8c8d35",
+      "SymbolName": "Lib.image.generate.basic.Blob",
       "SectionId": "656d4f29-3202-45a8-9bf1-957ceba30c00",
       "Position": {
         "X": 1352.2639,
@@ -36,21 +40,24 @@
       }
     },
     {
-      "ChildId": "662d9d74-3352-4afd-b1bc-8be790716b5c"/*Blob*/,
+      "ChildId": "662d9d74-3352-4afd-b1bc-8be790716b5c",
+      "SymbolName": "Lib.image.generate.basic.Blob",
       "Position": {
         "X": 1329.1313,
         "Y": 1847.9598
       }
     },
     {
-      "ChildId": "69e01607-0a9d-4cee-b7fe-ca9015a18cb4"/*Blob*/,
+      "ChildId": "69e01607-0a9d-4cee-b7fe-ca9015a18cb4",
+      "SymbolName": "Lib.image.generate.basic.Blob",
       "Position": {
         "X": 1329.1313,
         "Y": 1778.8348
       }
     },
     {
-      "ChildId": "a87f1a1a-2023-4380-9f45-5a699e6487f8"/*Blob*/,
+      "ChildId": "a87f1a1a-2023-4380-9f45-5a699e6487f8",
+      "SymbolName": "Lib.image.generate.basic.Blob",
       "Position": {
         "X": 1329.1312,
         "Y": 1911.3973

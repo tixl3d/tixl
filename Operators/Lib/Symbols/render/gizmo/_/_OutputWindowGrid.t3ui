@@ -6,7 +6,8 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "b7280d50-5b52-4832-a408-4d0e7a06550b"/*GridPlane*/,
+      "ChildId": "b7280d50-5b52-4832-a408-4d0e7a06550b",
+      "SymbolName": "Lib.render.gizmo.GridPlane",
       "Position": {
         "X": -196.80994,
         "Y": 3.8131108

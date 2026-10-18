@@ -39,42 +39,48 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "06dc8186-591a-4232-9b85-87ee8bc26132"/*Text*/,
+      "ChildId": "06dc8186-591a-4232-9b85-87ee8bc26132",
+      "SymbolName": "Lib.render.basic.Text",
       "Position": {
         "X": 14.861929,
         "Y": 52.92098
       }
     },
     {
-      "ChildId": "0c2daf6f-1ce4-45e3-bcad-f2d74a1480ec"/*Value*/,
+      "ChildId": "0c2daf6f-1ce4-45e3-bcad-f2d74a1480ec",
+      "SymbolName": "Types.Values.Value",
       "Position": {
         "X": -334.51038,
         "Y": 384.9783
       }
     },
     {
-      "ChildId": "23e45921-d7ec-4775-943a-7ed4612bacdc"/*Value*/,
+      "ChildId": "23e45921-d7ec-4775-943a-7ed4612bacdc",
+      "SymbolName": "Types.Values.Value",
       "Position": {
         "X": -335.78946,
         "Y": 484.61365
       }
     },
     {
-      "ChildId": "3c79e6eb-87bf-47e1-adba-928b62367cb4"/*ChangeCase*/,
+      "ChildId": "3c79e6eb-87bf-47e1-adba-928b62367cb4",
+      "SymbolName": "Lib.string.transform.ChangeCase",
       "Position": {
         "X": -368.51477,
         "Y": -30.250494
       }
     },
     {
-      "ChildId": "524024a7-6a95-4fe5-a16b-834bc465e844"/*Value*/,
+      "ChildId": "524024a7-6a95-4fe5-a16b-834bc465e844",
+      "SymbolName": "Types.Values.Value",
       "Position": {
         "X": -334.51038,
         "Y": 427.9783
       }
     },
     {
-      "ChildId": "6594f82c-5200-40f9-b083-be20aa6adff5"/*SampleCurve*/,
+      "ChildId": "6594f82c-5200-40f9-b083-be20aa6adff5",
+      "SymbolName": "Lib.numbers.curve.SampleCurve",
       "Style": "Resizable",
       "Size": {
         "X": 223.63022,
@@ -86,14 +92,16 @@
       }
     },
     {
-      "ChildId": "97f254ea-aa7c-4132-bf97-eddd41620d7f"/*PickFloat*/,
+      "ChildId": "97f254ea-aa7c-4132-bf97-eddd41620d7f",
+      "SymbolName": "Lib.numbers.float.logic.PickFloat",
       "Position": {
         "X": -184.51038,
         "Y": 384.9783
       }
     },
     {
-      "ChildId": "f031526d-6ff6-492b-aea3-803558090357"/*SampleGradient*/,
+      "ChildId": "f031526d-6ff6-492b-aea3-803558090357",
+      "SymbolName": "Lib.numbers.color.SampleGradient",
       "Position": {
         "X": -290.29477,
         "Y": 75.95102

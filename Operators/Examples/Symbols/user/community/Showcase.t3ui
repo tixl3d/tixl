@@ -6,7 +6,8 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "1a68b755-05d8-45a7-b29e-1de29d1f01a3"/*LookTest08*/,
+      "ChildId": "1a68b755-05d8-45a7-b29e-1de29d1f01a3",
+      "SymbolName": "Examples.user._1x.LookTest08",
       "SectionId": "e2f3a538-ee6d-4baf-a543-a212f36a7afc",
       "Position": {
         "X": 453.25806,
@@ -14,7 +15,8 @@
       }
     },
     {
-      "ChildId": "202c8ca3-510d-4a5a-92e8-13acce783c1c"/*LookTest07*/,
+      "ChildId": "202c8ca3-510d-4a5a-92e8-13acce783c1c",
+      "SymbolName": "Examples.user._1x.LookTest07",
       "SectionId": "e2f3a538-ee6d-4baf-a543-a212f36a7afc",
       "Position": {
         "X": 303.25806,
@@ -22,7 +24,8 @@
       }
     },
     {
-      "ChildId": "23f90daf-81b8-45ff-8f6a-ff4cb1f1b9b6"/*LookTest09*/,
+      "ChildId": "23f90daf-81b8-45ff-8f6a-ff4cb1f1b9b6",
+      "SymbolName": "Examples.user._1x.LookTest09",
       "SectionId": "e2f3a538-ee6d-4baf-a543-a212f36a7afc",
       "Position": {
         "X": 0.56274414,
@@ -30,7 +33,8 @@
       }
     },
     {
-      "ChildId": "2f48b776-7f75-4371-9118-3083fad5c3dd"/*LookTest02*/,
+      "ChildId": "2f48b776-7f75-4371-9118-3083fad5c3dd",
+      "SymbolName": "Examples.user._1x.LookTest02",
       "SectionId": "e2f3a538-ee6d-4baf-a543-a212f36a7afc",
       "Position": {
         "X": 153.25806,
@@ -38,7 +42,8 @@
       }
     },
     {
-      "ChildId": "3365b721-900d-4c25-96ea-d4b4d51ee6c1"/*LookTest12*/,
+      "ChildId": "3365b721-900d-4c25-96ea-d4b4d51ee6c1",
+      "SymbolName": "Examples.user._1x.LookTest12",
       "SectionId": "e2f3a538-ee6d-4baf-a543-a212f36a7afc",
       "Position": {
         "X": 450.56274,
@@ -46,7 +51,8 @@
       }
     },
     {
-      "ChildId": "664ff6a4-c3ba-41a7-aefd-be9785ab9947"/*LookTest05*/,
+      "ChildId": "664ff6a4-c3ba-41a7-aefd-be9785ab9947",
+      "SymbolName": "Examples.user._1x.LookTest05",
       "SectionId": "e2f3a538-ee6d-4baf-a543-a212f36a7afc",
       "Position": {
         "X": 3.2580566,
@@ -54,7 +60,8 @@
       }
     },
     {
-      "ChildId": "670e6884-58ad-4e8f-8be8-7b4628cb982f"/*HandsOn002BrickOcean*/,
+      "ChildId": "670e6884-58ad-4e8f-8be8-7b4628cb982f",
+      "SymbolName": "Examples.tutorial.HandsOn002BrickOcean",
       "SectionId": "e2f3a538-ee6d-4baf-a543-a212f36a7afc",
       "Position": {
         "X": 603.25806,
@@ -62,7 +69,8 @@
       }
     },
     {
-      "ChildId": "793cd6aa-f266-4481-b4bc-08b637890319"/*LookTest11*/,
+      "ChildId": "793cd6aa-f266-4481-b4bc-08b637890319",
+      "SymbolName": "Examples.user._1x.LookTest11",
       "SectionId": "e2f3a538-ee6d-4baf-a543-a212f36a7afc",
       "Position": {
         "X": 300.56274,
@@ -70,7 +78,8 @@
       }
     },
     {
-      "ChildId": "928389b9-ef4a-44cd-a3a5-2d0023339b08"/*ChangesScannerFx*/,
+      "ChildId": "928389b9-ef4a-44cd-a3a5-2d0023339b08",
+      "SymbolName": "Examples.user.changes.ChangesScannerFx",
       "SectionId": "e2f3a538-ee6d-4baf-a543-a212f36a7afc",
       "Position": {
         "X": 757.6353,
@@ -78,7 +87,8 @@
       }
     },
     {
-      "ChildId": "b788a900-ef94-4707-b9be-f5e23e14ee25"/*LookTest03*/,
+      "ChildId": "b788a900-ef94-4707-b9be-f5e23e14ee25",
+      "SymbolName": "Examples.user._1x.LookTest03",
       "SectionId": "e2f3a538-ee6d-4baf-a543-a212f36a7afc",
       "Position": {
         "X": 303.25806,
@@ -86,7 +96,8 @@
       }
     },
     {
-      "ChildId": "c11ebcd0-7203-4cd0-a77b-f18ac0ba41b8"/*InkingFx*/,
+      "ChildId": "c11ebcd0-7203-4cd0-a77b-f18ac0ba41b8",
+      "SymbolName": "Examples.user.changes.InkingFx",
       "SectionId": "e2f3a538-ee6d-4baf-a543-a212f36a7afc",
       "Position": {
         "X": 753.25806,
@@ -94,7 +105,8 @@
       }
     },
     {
-      "ChildId": "d88f9546-76ff-4b92-821d-d63437dfc419"/*LookTest10*/,
+      "ChildId": "d88f9546-76ff-4b92-821d-d63437dfc419",
+      "SymbolName": "Examples.user._1x.LookTest10",
       "SectionId": "e2f3a538-ee6d-4baf-a543-a212f36a7afc",
       "Position": {
         "X": 150.56274,
@@ -102,7 +114,8 @@
       }
     },
     {
-      "ChildId": "d92a93be-9467-4393-9b68-a71bb84999f1"/*LookTest04*/,
+      "ChildId": "d92a93be-9467-4393-9b68-a71bb84999f1",
+      "SymbolName": "Examples.user._1x.LookTest04",
       "SectionId": "e2f3a538-ee6d-4baf-a543-a212f36a7afc",
       "Position": {
         "X": 453.25806,
@@ -110,7 +123,8 @@
       }
     },
     {
-      "ChildId": "e45774b1-dba6-4560-9335-62f15dcaca04"/*LookTest06*/,
+      "ChildId": "e45774b1-dba6-4560-9335-62f15dcaca04",
+      "SymbolName": "Examples.user._1x.LookTest06",
       "SectionId": "e2f3a538-ee6d-4baf-a543-a212f36a7afc",
       "Position": {
         "X": 153.25806,
@@ -118,7 +132,8 @@
       }
     },
     {
-      "ChildId": "e5aa9fa7-4fde-4bbb-98c2-d87b72a355e1"/*SphereFlower*/,
+      "ChildId": "e5aa9fa7-4fde-4bbb-98c2-d87b72a355e1",
+      "SymbolName": "Examples.user.newemka980.visuals.SphereFlower",
       "SectionId": "48fbd46a-ae4e-4a44-98dd-1e89ef014ea4",
       "Position": {
         "X": 771.077,
@@ -126,7 +141,8 @@
       }
     },
     {
-      "ChildId": "f6542d3d-612a-4911-a33d-0e043815483f"/*LookTest01*/,
+      "ChildId": "f6542d3d-612a-4911-a33d-0e043815483f",
+      "SymbolName": "Examples.user._1x.LookTest01",
       "SectionId": "e2f3a538-ee6d-4baf-a543-a212f36a7afc",
       "Position": {
         "X": 3.2580566,

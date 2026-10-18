@@ -5,28 +5,32 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "07c85e6b-55f6-46db-be52-a2ab504dbb97"/*FractalNoise*/,
+      "ChildId": "07c85e6b-55f6-46db-be52-a2ab504dbb97",
+      "SymbolName": "Lib.image.generate.noise.FractalNoise",
       "Position": {
         "X": 504.85852,
         "Y": 1283.3588
       }
     },
     {
-      "ChildId": "164f2289-1075-4120-9b86-db7b775aa848"/*DrawMesh*/,
+      "ChildId": "164f2289-1075-4120-9b86-db7b775aa848",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
       "Position": {
         "X": 1868.9064,
         "Y": 303.61328
       }
     },
     {
-      "ChildId": "1c021c96-fde7-4807-9fe5-1d74b701e644"/*Damp*/,
+      "ChildId": "1c021c96-fde7-4807-9fe5-1d74b701e644",
+      "SymbolName": "Lib.numbers.float.process.Damp",
       "Position": {
         "X": 300.0,
         "Y": 608.64795
       }
     },
     {
-      "ChildId": "1f9ab72e-4607-45a9-9682-11e827fd79f2"/*LoadImage*/,
+      "ChildId": "1f9ab72e-4607-45a9-9682-11e827fd79f2",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
       "SectionId": "ba057009-968d-478d-89be-d0301b374092",
       "Position": {
         "X": 53.848267,
@@ -34,119 +38,136 @@
       }
     },
     {
-      "ChildId": "2818b74d-034b-4614-ad65-f1e07da54ab7"/*QuadMesh*/,
+      "ChildId": "2818b74d-034b-4614-ad65-f1e07da54ab7",
+      "SymbolName": "Lib.mesh.generate.QuadMesh",
       "Position": {
         "X": 1433.5475,
         "Y": 303.61328
       }
     },
     {
-      "ChildId": "2977b905-0fcf-4d57-9451-1774ed6a0784"/*WorleyNoise*/,
+      "ChildId": "2977b905-0fcf-4d57-9451-1774ed6a0784",
+      "SymbolName": "Lib.image.generate.noise.WorleyNoise",
       "Position": {
         "X": 770.7267,
         "Y": 863.6521
       }
     },
     {
-      "ChildId": "32742730-32d6-4faf-b781-deae3514f667"/*Blend*/,
+      "ChildId": "32742730-32d6-4faf-b781-deae3514f667",
+      "SymbolName": "Lib.image.use.Blend",
       "Position": {
         "X": 308.85364,
         "Y": 363.71338
       }
     },
     {
-      "ChildId": "51ae361a-aaaa-44af-b47e-5cbe7662cb4c"/*WorleyNoise*/,
+      "ChildId": "51ae361a-aaaa-44af-b47e-5cbe7662cb4c",
+      "SymbolName": "Lib.image.generate.noise.WorleyNoise",
       "Position": {
         "X": 765.3275,
         "Y": 478.57593
       }
     },
     {
-      "ChildId": "57394051-c6fd-49eb-8a1d-a75459020488"/*WorleyNoise*/,
+      "ChildId": "57394051-c6fd-49eb-8a1d-a75459020488",
+      "SymbolName": "Lib.image.generate.noise.WorleyNoise",
       "Position": {
         "X": 775.223,
         "Y": 1052.7181
       }
     },
     {
-      "ChildId": "5d2e7272-81c2-4b70-b589-7f6dab61cad3"/*DisplaceMesh*/,
+      "ChildId": "5d2e7272-81c2-4b70-b589-7f6dab61cad3",
+      "SymbolName": "Lib.mesh.modify.DisplaceMesh",
       "Position": {
         "X": 1583.5475,
         "Y": 303.61328
       }
     },
     {
-      "ChildId": "6642c379-247e-4baf-926c-b39444dd2587"/*LinearGradient*/,
+      "ChildId": "6642c379-247e-4baf-926c-b39444dd2587",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "Position": {
         "X": 615.3275,
         "Y": 478.57593
       }
     },
     {
-      "ChildId": "6e365eda-a042-452a-9c37-abd59677a70f"/*RenderTarget*/,
+      "ChildId": "6e365eda-a042-452a-9c37-abd59677a70f",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "Position": {
         "X": 2334.1177,
         "Y": 317.92993
       }
     },
     {
-      "ChildId": "7354d009-2a04-472e-b602-0588f211641b"/*BoolToFloat*/,
+      "ChildId": "7354d009-2a04-472e-b602-0588f211641b",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
       "Position": {
         "X": 150.0,
         "Y": 608.64795
       }
     },
     {
-      "ChildId": "7b9e0b66-3505-4fe5-956f-a87e63fe84d6"/*Blend*/,
+      "ChildId": "7b9e0b66-3505-4fe5-956f-a87e63fe84d6",
+      "SymbolName": "Lib.image.use.Blend",
       "Position": {
         "X": 915.3275,
         "Y": 478.57593
       }
     },
     {
-      "ChildId": "7dbd61d1-2a53-40cc-afec-d8114a302cab"/*RemapColor*/,
+      "ChildId": "7dbd61d1-2a53-40cc-afec-d8114a302cab",
+      "SymbolName": "Lib.image.color.RemapColor",
       "Position": {
         "X": 1579.402,
         "Y": 572.1987
       }
     },
     {
-      "ChildId": "81a1db9d-c66a-4796-b9f1-8bafd11cf887"/*Blend*/,
+      "ChildId": "81a1db9d-c66a-4796-b9f1-8bafd11cf887",
+      "SymbolName": "Lib.image.use.Blend",
       "Position": {
         "X": 1783.7737,
         "Y": 745.44434
       }
     },
     {
-      "ChildId": "8f08c120-9c75-46a2-8ab3-a683942db411"/*AnimValue*/,
+      "ChildId": "8f08c120-9c75-46a2-8ab3-a683942db411",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "Position": {
         "X": 1314.6465,
         "Y": 632.42847
       }
     },
     {
-      "ChildId": "a3f717fc-2fe5-4ab5-ab27-18091eae41c7"/*Boolean*/,
+      "ChildId": "a3f717fc-2fe5-4ab5-ab27-18091eae41c7",
+      "SymbolName": "Types.Values.Boolean",
       "Position": {
         "X": 0.0,
         "Y": 608.64795
       }
     },
     {
-      "ChildId": "a4efd182-dba4-4b93-9135-f18556912d3b"/*RemapColor*/,
+      "ChildId": "a4efd182-dba4-4b93-9135-f18556912d3b",
+      "SymbolName": "Lib.image.color.RemapColor",
       "Position": {
         "X": 1560.7146,
         "Y": 969.94507
       }
     },
     {
-      "ChildId": "a897aada-808d-4366-b7cd-76f49e35d4be"/*FractalNoise*/,
+      "ChildId": "a897aada-808d-4366-b7cd-76f49e35d4be",
+      "SymbolName": "Lib.image.generate.noise.FractalNoise",
       "Position": {
         "X": 158.85388,
         "Y": 363.71338
       }
     },
     {
-      "ChildId": "af2673f8-6aea-4ffe-b165-d3633b1ab293"/*WorleyNoise*/,
+      "ChildId": "af2673f8-6aea-4ffe-b165-d3633b1ab293",
+      "SymbolName": "Lib.image.generate.noise.WorleyNoise",
       "SectionId": "ba057009-968d-478d-89be-d0301b374092",
       "Position": {
         "X": 279.8827,
@@ -154,56 +175,64 @@
       }
     },
     {
-      "ChildId": "bb686d31-4b42-4cf4-ad9a-4d7cdbd5f698"/*Glow*/,
+      "ChildId": "bb686d31-4b42-4cf4-ad9a-4d7cdbd5f698",
+      "SymbolName": "Lib.image.fx.stylize.Glow",
       "Position": {
         "X": 2513.1755,
         "Y": 308.63745
       }
     },
     {
-      "ChildId": "bc66675c-486c-44a5-95a8-d29ace95b591"/*SetMaterial*/,
+      "ChildId": "bc66675c-486c-44a5-95a8-d29ace95b591",
+      "SymbolName": "Lib.render.shading.SetMaterial",
       "Position": {
         "X": 2018.9064,
         "Y": 303.61328
       }
     },
     {
-      "ChildId": "bfbad3b8-8202-4e96-a22e-7250798c87d1"/*Camera*/,
+      "ChildId": "bfbad3b8-8202-4e96-a22e-7250798c87d1",
+      "SymbolName": "Lib.render.camera.Camera",
       "Position": {
         "X": 2168.9062,
         "Y": 303.61328
       }
     },
     {
-      "ChildId": "c829f93d-2a25-4b4d-a1ea-0ea9945f10f0"/*OscillateVec2*/,
+      "ChildId": "c829f93d-2a25-4b4d-a1ea-0ea9945f10f0",
+      "SymbolName": "Lib.numbers.anim.animators.OscillateVec2",
       "Position": {
         "X": 8.853882,
         "Y": 516.7134
       }
     },
     {
-      "ChildId": "c8cf5e19-e447-4cee-bbf9-2ca9077f9a73"/*RemapColor*/,
+      "ChildId": "c8cf5e19-e447-4cee-bbf9-2ca9077f9a73",
+      "SymbolName": "Lib.image.color.RemapColor",
       "Position": {
         "X": 654.8585,
         "Y": 1283.3588
       }
     },
     {
-      "ChildId": "db21024a-a054-48b9-a5ca-d7ad5d6a5c24"/*RadialGradient*/,
+      "ChildId": "db21024a-a054-48b9-a5ca-d7ad5d6a5c24",
+      "SymbolName": "Lib.image.generate.basic.RadialGradient",
       "Position": {
         "X": 158.85388,
         "Y": 516.7134
       }
     },
     {
-      "ChildId": "e6e49be8-b907-48cf-bd5f-ea91b516442b"/*CombineMaterialChannels*/,
+      "ChildId": "e6e49be8-b907-48cf-bd5f-ea91b516442b",
+      "SymbolName": "Lib.image.use.CombineMaterialChannels",
       "Position": {
         "X": 1792.2537,
         "Y": 937.24146
       }
     },
     {
-      "ChildId": "fa859fd5-c59a-4576-b96e-60ce8f45d1bb"/*Value*/,
+      "ChildId": "fa859fd5-c59a-4576-b96e-60ce8f45d1bb",
+      "SymbolName": "Types.Values.Value",
       "Position": {
         "X": 28.998169,
         "Y": 844.94336

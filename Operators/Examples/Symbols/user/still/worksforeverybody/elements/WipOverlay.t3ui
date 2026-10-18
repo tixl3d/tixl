@@ -15,42 +15,48 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "72ff6f53-e073-4bf1-9616-4a24a4e2fec7"/*Text*/,
+      "ChildId": "72ff6f53-e073-4bf1-9616-4a24a4e2fec7",
+      "SymbolName": "Lib.render.basic.Text",
       "Position": {
         "X": 931.8579,
         "Y": 0.0
       }
     },
     {
-      "ChildId": "87ff275b-ef33-41d7-876c-6dbb495c8be3"/*Time*/,
+      "ChildId": "87ff275b-ef33-41d7-876c-6dbb495c8be3",
+      "SymbolName": "Lib.numbers.anim.time.Time",
       "Position": {
         "X": 153.69379,
         "Y": 446.87054
       }
     },
     {
-      "ChildId": "892672cd-90c4-4840-b549-61b8a76ede01"/*CombineStrings*/,
+      "ChildId": "892672cd-90c4-4840-b549-61b8a76ede01",
+      "SymbolName": "Lib.string.combine.CombineStrings",
       "Position": {
         "X": 781.8579,
         "Y": 0.0
       }
     },
     {
-      "ChildId": "f17f7422-8e91-49f6-b2e1-916deb6b5d3a"/*String*/,
+      "ChildId": "f17f7422-8e91-49f6-b2e1-916deb6b5d3a",
+      "SymbolName": "Types.Values.String",
       "Position": {
         "X": 631.8579,
         "Y": 0.0
       }
     },
     {
-      "ChildId": "f40f2b3d-a5f9-458b-8de1-72638bce42ba"/*TimeToString*/,
+      "ChildId": "f40f2b3d-a5f9-458b-8de1-72638bce42ba",
+      "SymbolName": "Lib.string.datetime.TimeToString",
       "Position": {
         "X": 348.18518,
         "Y": 457.70197
       }
     },
     {
-      "ChildId": "f8efe9d7-dada-4104-9692-ed48bbdd376a"/*Group*/,
+      "ChildId": "f8efe9d7-dada-4104-9692-ed48bbdd376a",
+      "SymbolName": "Lib.render.transform.Group",
       "Position": {
         "X": 1081.8579,
         "Y": 0.0

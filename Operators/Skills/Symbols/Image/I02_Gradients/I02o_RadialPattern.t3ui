@@ -5,7 +5,8 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "2d3a8c46-47e0-4894-8571-d81772268262"/*RadialGradient*/,
+      "ChildId": "2d3a8c46-47e0-4894-8571-d81772268262",
+      "SymbolName": "Lib.image.generate.basic.RadialGradient",
       "Position": {
         "X": 1391.3212,
         "Y": 1859.333
@@ -13,14 +14,16 @@
       "SnapshotGroupIndex": "1"
     },
     {
-      "ChildId": "3384e813-39d4-4e0d-90ee-1950d3052c9c"/*LinearGradient*/,
+      "ChildId": "3384e813-39d4-4e0d-90ee-1950d3052c9c",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "Position": {
         "X": 1441.7301,
         "Y": 2334.827
       }
     },
     {
-      "ChildId": "49f7b21b-4bc2-443e-b655-6eefe2b81cb5"/*RadialGradient*/,
+      "ChildId": "49f7b21b-4bc2-443e-b655-6eefe2b81cb5",
+      "SymbolName": "Lib.image.generate.basic.RadialGradient",
       "SectionId": "fe704489-0653-47fc-a168-df57af376b90",
       "Position": {
         "X": 1403.9335,
@@ -28,7 +31,8 @@
       }
     },
     {
-      "ChildId": "5fab7495-e9d1-4c08-ae70-b21943391798"/*Time*/,
+      "ChildId": "5fab7495-e9d1-4c08-ae70-b21943391798",
+      "SymbolName": "Lib.numbers.anim.time.Time",
       "SectionId": "fe704489-0653-47fc-a168-df57af376b90",
       "Position": {
         "X": 1263.9335,
@@ -36,14 +40,16 @@
       }
     },
     {
-      "ChildId": "a3d65f7c-8e2b-4a22-8c03-6b0aecfd7327"/*ImageQuiz*/,
+      "ChildId": "a3d65f7c-8e2b-4a22-8c03-6b0aecfd7327",
+      "SymbolName": "Lib.flow.skillQuest.ImageQuiz",
       "Position": {
         "X": 1609.7146,
         "Y": 2018.4391
       }
     },
     {
-      "ChildId": "a42ff9c4-5a40-4b3f-b07d-a9b077670b38"/*RadialGradient*/,
+      "ChildId": "a42ff9c4-5a40-4b3f-b07d-a9b077670b38",
+      "SymbolName": "Lib.image.generate.basic.RadialGradient",
       "SectionId": "fe704489-0653-47fc-a168-df57af376b90",
       "Position": {
         "X": 1403.9335,
@@ -51,7 +57,8 @@
       }
     },
     {
-      "ChildId": "b2b2a6b3-c38b-474a-b71a-9fa73677a229"/*RadialGradient*/,
+      "ChildId": "b2b2a6b3-c38b-474a-b71a-9fa73677a229",
+      "SymbolName": "Lib.image.generate.basic.RadialGradient",
       "Position": {
         "X": 1391.3212,
         "Y": 1924.3414
@@ -59,7 +66,8 @@
       "SnapshotGroupIndex": "1"
     },
     {
-      "ChildId": "c71ae37b-d01b-4555-a332-09fd0b6e943f"/*Time*/,
+      "ChildId": "c71ae37b-d01b-4555-a332-09fd0b6e943f",
+      "SymbolName": "Lib.numbers.anim.time.Time",
       "Position": {
         "X": 1220.008,
         "Y": 1924.1141

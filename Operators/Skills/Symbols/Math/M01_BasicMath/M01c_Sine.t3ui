@@ -5,28 +5,32 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "3f18bcb0-0929-44f7-b948-a8413b0deec6"/*Time*/,
+      "ChildId": "3f18bcb0-0929-44f7-b948-a8413b0deec6",
+      "SymbolName": "Lib.numbers.anim.time.Time",
       "Position": {
         "X": 1322.5985,
         "Y": 1800.5574
       }
     },
     {
-      "ChildId": "a9311fcc-24dd-450a-9df9-e2fc108e3072"/*ValueQuiz*/,
+      "ChildId": "a9311fcc-24dd-450a-9df9-e2fc108e3072",
+      "SymbolName": "Lib.flow.skillQuest.ValueQuiz",
       "Position": {
         "X": 1580.2582,
         "Y": 1895.0925
       }
     },
     {
-      "ChildId": "b4a245fc-4a34-495e-8d52-3c1827490d52"/*Sin*/,
+      "ChildId": "b4a245fc-4a34-495e-8d52-3c1827490d52",
+      "SymbolName": "Lib.numbers.float.trigonometry.Sin",
       "Position": {
         "X": 1322.5985,
         "Y": 1869.631
       }
     },
     {
-      "ChildId": "b8770fb9-8f97-4928-aebf-430cdaf0705b"/*Time*/,
+      "ChildId": "b8770fb9-8f97-4928-aebf-430cdaf0705b",
+      "SymbolName": "Lib.numbers.anim.time.Time",
       "SectionId": "aac7d66b-9522-46ba-835d-fee499a83356",
       "Position": {
         "X": 1322.5986,
@@ -34,7 +38,8 @@
       }
     },
     {
-      "ChildId": "dc535372-0ade-45a9-bf95-d327ce62f6bd"/*Sin*/,
+      "ChildId": "dc535372-0ade-45a9-bf95-d327ce62f6bd",
+      "SymbolName": "Lib.numbers.float.trigonometry.Sin",
       "SectionId": "aac7d66b-9522-46ba-835d-fee499a83356",
       "Position": {
         "X": 1322.5986,

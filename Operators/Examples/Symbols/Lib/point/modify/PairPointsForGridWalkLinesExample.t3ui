@@ -5,112 +5,128 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "026a142a-e21f-48f9-bf2f-65aacce1219c"/*Remap*/,
+      "ChildId": "026a142a-e21f-48f9-bf2f-65aacce1219c",
+      "SymbolName": "Lib.numbers.float.adjust.Remap",
       "Position": {
         "X": 205.67479,
         "Y": 97.20996
       }
     },
     {
-      "ChildId": "03dc3ec4-9e99-44ea-a9fa-e2662a9c693d"/*AnimValue*/,
+      "ChildId": "03dc3ec4-9e99-44ea-a9fa-e2662a9c693d",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "Position": {
         "X": 65.67479,
         "Y": 97.20996
       }
     },
     {
-      "ChildId": "051fa736-9395-4be6-9737-77b9d6d6ca84"/*RenderTarget*/,
+      "ChildId": "051fa736-9395-4be6-9737-77b9d6d6ca84",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "Position": {
         "X": 485.6748,
         "Y": 377.20996
       }
     },
     {
-      "ChildId": "070fae67-2270-4cc8-9dea-52ef41c6c80d"/*PairPointsForGridWalkLines*/,
+      "ChildId": "070fae67-2270-4cc8-9dea-52ef41c6c80d",
+      "SymbolName": "Lib.point.combine.PairPointsForGridWalkLines",
       "Position": {
         "X": 345.6748,
         "Y": 27.20996
       }
     },
     {
-      "ChildId": "095adcd7-c5aa-4f26-8ada-22811619d3ff"/*Group*/,
+      "ChildId": "095adcd7-c5aa-4f26-8ada-22811619d3ff",
+      "SymbolName": "Lib.render.transform.Group",
       "Position": {
         "X": 485.6748,
         "Y": 167.20996
       }
     },
     {
-      "ChildId": "15768ed5-9b63-45bc-b891-99dbc043c69c"/*Bloom*/,
+      "ChildId": "15768ed5-9b63-45bc-b891-99dbc043c69c",
+      "SymbolName": "Lib.image.fx.blur.Bloom",
       "Position": {
         "X": 485.6748,
         "Y": 412.20996
       }
     },
     {
-      "ChildId": "4e884b83-2de6-450b-9fb8-76606a4bf6cc"/*OrbitCamera*/,
+      "ChildId": "4e884b83-2de6-450b-9fb8-76606a4bf6cc",
+      "SymbolName": "Lib.render.camera.OrbitCamera",
       "Position": {
         "X": 485.6748,
         "Y": 342.20996
       }
     },
     {
-      "ChildId": "5cc2f6f2-995a-4e2c-abc4-e1a4f6a9ef98"/*DrawPoints*/,
+      "ChildId": "5cc2f6f2-995a-4e2c-abc4-e1a4f6a9ef98",
+      "SymbolName": "Lib.point.draw.DrawPoints",
       "Position": {
         "X": 345.6748,
         "Y": 202.20996
       }
     },
     {
-      "ChildId": "65e4346f-4657-4a3a-b672-e53006a25128"/*DrawPoints*/,
+      "ChildId": "65e4346f-4657-4a3a-b672-e53006a25128",
+      "SymbolName": "Lib.point.draw.DrawPoints",
       "Position": {
         "X": 345.6748,
         "Y": 237.20996
       }
     },
     {
-      "ChildId": "7283b196-7595-4d10-a6a6-6cb3870ff5bb"/*RadialPoints*/,
+      "ChildId": "7283b196-7595-4d10-a6a6-6cb3870ff5bb",
+      "SymbolName": "Lib.point.generate.RadialPoints",
       "Position": {
         "X": 65.67479,
         "Y": 187.44891
       }
     },
     {
-      "ChildId": "806f2f08-2fbe-47e4-acef-d1a5b4671179"/*DrawRayLines*/,
+      "ChildId": "806f2f08-2fbe-47e4-acef-d1a5b4671179",
+      "SymbolName": "Lib.point.draw.DrawRayLines",
       "Position": {
         "X": 345.6748,
         "Y": 167.20996
       }
     },
     {
-      "ChildId": "a3ef6f7e-25a7-4ca9-a7e1-9a636cfc8e2f"/*MapPointAttributes*/,
+      "ChildId": "a3ef6f7e-25a7-4ca9-a7e1-9a636cfc8e2f",
+      "SymbolName": "Lib.point.modify.MapPointAttributes",
       "Position": {
         "X": 345.6748,
         "Y": 132.20996
       }
     },
     {
-      "ChildId": "c87328ee-70a2-4bf2-920b-31f177dba212"/*SpherePoints*/,
+      "ChildId": "c87328ee-70a2-4bf2-920b-31f177dba212",
+      "SymbolName": "Lib.point.generate.SpherePoints",
       "Position": {
         "X": 65.67479,
         "Y": 152.44891
       }
     },
     {
-      "ChildId": "dd8c0ec5-d1eb-49e0-b67c-3bc199504dfa"/*SetFog*/,
+      "ChildId": "dd8c0ec5-d1eb-49e0-b67c-3bc199504dfa",
+      "SymbolName": "Lib.render.shading.SetFog",
       "Position": {
         "X": 485.6748,
         "Y": 307.20996
       }
     },
     {
-      "ChildId": "e56d908c-1e64-4fed-b589-cf91b689fe3a"/*GridPoints*/,
+      "ChildId": "e56d908c-1e64-4fed-b589-cf91b689fe3a",
+      "SymbolName": "Lib.point.generate.GridPoints",
       "Position": {
         "X": 205.6748,
         "Y": 272.20996
       }
     },
     {
-      "ChildId": "fb1d5ec1-0c22-4ae8-a968-2c4a23444c05"/*DrawPoints*/,
+      "ChildId": "fb1d5ec1-0c22-4ae8-a968-2c4a23444c05",
+      "SymbolName": "Lib.point.draw.DrawPoints",
       "Position": {
         "X": 345.6748,
         "Y": 272.20996

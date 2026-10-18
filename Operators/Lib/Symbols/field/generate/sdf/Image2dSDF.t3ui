@@ -36,14 +36,16 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "838dbb18-c2c9-485b-a293-f177afa807e6"/*ExecuteImage2dSdf*/,
+      "ChildId": "838dbb18-c2c9-485b-a293-f177afa807e6",
+      "SymbolName": "Lib.field.generate.sdf._.ExecuteImage2dSdf",
       "Position": {
         "X": 1033.9691,
         "Y": 687.1224
       }
     },
     {
-      "ChildId": "fef5b00d-ad54-430b-9069-ce445e9aa0b5"/*SrvFromTexture2d*/,
+      "ChildId": "fef5b00d-ad54-430b-9069-ce445e9aa0b5",
+      "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
       "Position": {
         "X": 1033.9691,
         "Y": 652.1224

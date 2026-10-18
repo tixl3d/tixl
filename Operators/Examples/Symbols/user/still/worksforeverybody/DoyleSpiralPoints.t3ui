@@ -20,77 +20,88 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "0fd18aea-51f6-41b1-b35a-2f0da4059fbd"/*Value*/,
+      "ChildId": "0fd18aea-51f6-41b1-b35a-2f0da4059fbd",
+      "SymbolName": "Types.Values.Value",
       "Position": {
         "X": 0.0,
         "Y": 14.6171875
       }
     },
     {
-      "ChildId": "13df0300-d747-45e6-ba18-cf0179518211"/*RadialPoints*/,
+      "ChildId": "13df0300-d747-45e6-ba18-cf0179518211",
+      "SymbolName": "Lib.point.generate.RadialPoints",
       "Position": {
         "X": 818.365,
         "Y": 0.0
       }
     },
     {
-      "ChildId": "228d9fb3-e052-4dfb-b741-39751c335633"/*Value*/,
+      "ChildId": "228d9fb3-e052-4dfb-b741-39751c335633",
+      "SymbolName": "Types.Values.Value",
       "Position": {
         "X": 0.0,
         "Y": 70.61719
       }
     },
     {
-      "ChildId": "31f11b93-7199-4e7c-ba3a-7a09a85b7dd0"/*RadialPoints*/,
+      "ChildId": "31f11b93-7199-4e7c-ba3a-7a09a85b7dd0",
+      "SymbolName": "Lib.point.generate.RadialPoints",
       "Position": {
         "X": 518.365,
         "Y": 56.0
       }
     },
     {
-      "ChildId": "35b6bc7c-fec1-4d3a-8b85-96bec4d889f9"/*RepeatAtPoints*/,
+      "ChildId": "35b6bc7c-fec1-4d3a-8b85-96bec4d889f9",
+      "SymbolName": "Lib.point.generate.RepeatAtPoints",
       "Position": {
         "X": 968.365,
         "Y": 0.0
       }
     },
     {
-      "ChildId": "4323312c-9d35-4416-8f86-006a3e589793"/*MapPointAttributes*/,
+      "ChildId": "4323312c-9d35-4416-8f86-006a3e589793",
+      "SymbolName": "Lib.point.modify.MapPointAttributes",
       "Position": {
         "X": 668.365,
         "Y": 56.0
       }
     },
     {
-      "ChildId": "4563f02d-6c78-4448-9567-7ae1ac51d404"/*Multiply*/,
+      "ChildId": "4563f02d-6c78-4448-9567-7ae1ac51d404",
+      "SymbolName": "Lib.numbers.float.basic.Multiply",
       "Position": {
         "X": 368.36475,
         "Y": 112.0
       }
     },
     {
-      "ChildId": "63fed508-118f-4b0b-b072-10cee8a78c78"/*Div*/,
+      "ChildId": "63fed508-118f-4b0b-b072-10cee8a78c78",
+      "SymbolName": "Lib.numbers.float.basic.Div",
       "Position": {
         "X": 218.36523,
         "Y": 112.0
       }
     },
     {
-      "ChildId": "96dc9af9-af67-4c4a-bfff-619830c0f826"/*TransformPoints*/,
+      "ChildId": "96dc9af9-af67-4c4a-bfff-619830c0f826",
+      "SymbolName": "Lib.point.transform.TransformPoints",
       "Position": {
         "X": 818.365,
         "Y": 56.0
       }
     },
     {
-      "ChildId": "a601a7e9-6321-4e27-9092-4e87cc0461bb"/*FloatToInt*/,
+      "ChildId": "a601a7e9-6321-4e27-9092-4e87cc0461bb",
+      "SymbolName": "Lib.numbers.int.process.FloatToInt",
       "Position": {
         "X": 668.365,
         "Y": 0.0
       }
     },
     {
-      "ChildId": "e16694b0-99aa-40e1-8a55-1491c5d5eb0d"/*FloatToInt*/,
+      "ChildId": "e16694b0-99aa-40e1-8a55-1491c5d5eb0d",
+      "SymbolName": "Lib.numbers.int.process.FloatToInt",
       "Position": {
         "X": 368.36475,
         "Y": 56.0

@@ -104,56 +104,64 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "0ac1305d-697b-4d4b-80d2-4672117cb228"/*Vector2Components*/,
+      "ChildId": "0ac1305d-697b-4d4b-80d2-4672117cb228",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Position": {
         "X": 343.63788,
         "Y": 654.4072
       }
     },
     {
-      "ChildId": "10328e98-bef5-4e67-a3f5-566b9752c077"/*_ImageFxShaderSetupStatic*/,
+      "ChildId": "10328e98-bef5-4e67-a3f5-566b9752c077",
+      "SymbolName": "Lib.render._dx11.fxsetup._ImageFxShaderSetupStatic",
       "Position": {
         "X": 928.5582,
         "Y": 132.04938
       }
     },
     {
-      "ChildId": "51711a0c-c86c-465c-b5a9-067d9e8be9bd"/*Vector4Components*/,
+      "ChildId": "51711a0c-c86c-465c-b5a9-067d9e8be9bd",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "Position": {
         "X": 141.91951,
         "Y": 527.35626
       }
     },
     {
-      "ChildId": "78d8f249-6488-4348-b6b9-451f89cf8c4a"/*Vector4Components*/,
+      "ChildId": "78d8f249-6488-4348-b6b9-451f89cf8c4a",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "Position": {
         "X": 121.91951,
         "Y": 454.35626
       }
     },
     {
-      "ChildId": "845edc7d-c347-4882-bab7-8ade293e15b4"/*Value*/,
+      "ChildId": "845edc7d-c347-4882-bab7-8ade293e15b4",
+      "SymbolName": "Types.Values.Value",
       "Position": {
         "X": 788.5582,
         "Y": 867.0494
       }
     },
     {
-      "ChildId": "861b22f0-5267-4160-8887-3ec9ffdf9653"/*Vector4Components*/,
+      "ChildId": "861b22f0-5267-4160-8887-3ec9ffdf9653",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "Position": {
         "X": 121.91951,
         "Y": 342.35632
       }
     },
     {
-      "ChildId": "e4224966-8692-4fb3-bfa9-cabca46d9966"/*Vector4Components*/,
+      "ChildId": "e4224966-8692-4fb3-bfa9-cabca46d9966",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "Position": {
         "X": 121.91951,
         "Y": 398.35623
       }
     },
     {
-      "ChildId": "fa31315c-4a7e-4b2b-bad2-15dfaddbbd5f"/*BoolToFloat*/,
+      "ChildId": "fa31315c-4a7e-4b2b-bad2-15dfaddbbd5f",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
       "Position": {
         "X": 381.1678,
         "Y": 759.02155

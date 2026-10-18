@@ -104,49 +104,56 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "2c1898b6-3494-44d8-ac78-ca01e38c3bea"/*IntToFloat*/,
+      "ChildId": "2c1898b6-3494-44d8-ac78-ca01e38c3bea",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "Position": {
         "X": -0.3474121,
         "Y": 507.8712
       }
     },
     {
-      "ChildId": "31687085-b255-4b1e-a855-99b2727efda1"/*Vector4Components*/,
+      "ChildId": "31687085-b255-4b1e-a855-99b2727efda1",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "Position": {
         "X": -25.082056,
         "Y": 85.952194
       }
     },
     {
-      "ChildId": "44619228-581c-435d-a3e8-c3a5a8a2e98e"/*Vector4Components*/,
+      "ChildId": "44619228-581c-435d-a3e8-c3a5a8a2e98e",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "Position": {
         "X": -25.082056,
         "Y": 29.952059
       }
     },
     {
-      "ChildId": "639f7f5b-9010-4982-b8d5-6e3b7382630b"/*Vector2Components*/,
+      "ChildId": "639f7f5b-9010-4982-b8d5-6e3b7382630b",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Position": {
         "X": -25.082056,
         "Y": 253.95222
       }
     },
     {
-      "ChildId": "67a09b70-b68c-4297-8625-1caad37a0387"/*Vector2Components*/,
+      "ChildId": "67a09b70-b68c-4297-8625-1caad37a0387",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Position": {
         "X": -25.082056,
         "Y": 141.9522
       }
     },
     {
-      "ChildId": "96ed4415-be06-49d3-83b7-7f242a8da8ba"/*_ImageFxShaderSetupStatic*/,
+      "ChildId": "96ed4415-be06-49d3-83b7-7f242a8da8ba",
+      "SymbolName": "Lib.render._dx11.fxsetup._ImageFxShaderSetupStatic",
       "Position": {
         "X": 427.0464,
         "Y": -29.479145
       }
     },
     {
-      "ChildId": "b240cefd-caa4-4870-b9b9-ae5271a6c72e"/*Vector2Components*/,
+      "ChildId": "b240cefd-caa4-4870-b9b9-ae5271a6c72e",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Position": {
         "X": -25.082056,
         "Y": 197.95222

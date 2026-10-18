@@ -43,84 +43,96 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "0ea364e4-e158-4d3e-8889-c84ebdf6e39d"/*TimeToString*/,
+      "ChildId": "0ea364e4-e158-4d3e-8889-c84ebdf6e39d",
+      "SymbolName": "Lib.string.datetime.TimeToString",
       "Position": {
         "X": -409.29373,
         "Y": 299.75244
       }
     },
     {
-      "ChildId": "160185d9-d0dd-4127-b3cd-9821be524e3c"/*FloatToString*/,
+      "ChildId": "160185d9-d0dd-4127-b3cd-9821be524e3c",
+      "SymbolName": "Lib.string.convert.FloatToString",
       "Position": {
         "X": -29.626038,
         "Y": 125.41168
       }
     },
     {
-      "ChildId": "1e11e1e6-db51-481b-b6b8-95d58523b7d9"/*CompareImages*/,
+      "ChildId": "1e11e1e6-db51-481b-b6b8-95d58523b7d9",
+      "SymbolName": "Lib.image.analyze.CompareImages",
       "Position": {
         "X": -172.70784,
         "Y": 494.66608
       }
     },
     {
-      "ChildId": "207b563b-3df8-4a68-8db3-fce1564ca5c5"/*_Time_old*/,
+      "ChildId": "207b563b-3df8-4a68-8db3-fce1564ca5c5",
+      "SymbolName": "Lib.numbers.anim._obsolete._Time_old",
       "Position": {
         "X": -550.45575,
         "Y": 64.02295
       }
     },
     {
-      "ChildId": "5491d337-5724-4f20-969e-7cdca220a446"/*PickStringFromList*/,
+      "ChildId": "5491d337-5724-4f20-969e-7cdca220a446",
+      "SymbolName": "Lib.string.list.PickStringFromList",
       "Position": {
         "X": 120.37396,
         "Y": 0.41168213
       }
     },
     {
-      "ChildId": "97e97bce-6dde-492c-8d18-73f45c6f2df1"/*FloatToInt*/,
+      "ChildId": "97e97bce-6dde-492c-8d18-73f45c6f2df1",
+      "SymbolName": "Lib.numbers.int.process.FloatToInt",
       "Position": {
         "X": -29.626038,
         "Y": 69.41168
       }
     },
     {
-      "ChildId": "a7141bee-87ed-4e99-bc5a-8be6a348fc6d"/*LoadImage*/,
+      "ChildId": "a7141bee-87ed-4e99-bc5a-8be6a348fc6d",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
       "Position": {
         "X": 270.37396,
         "Y": 0.41168213
       }
     },
     {
-      "ChildId": "c9937e67-dc65-4f44-9b3e-fc2a160c704e"/*FilesInFolder*/,
+      "ChildId": "c9937e67-dc65-4f44-9b3e-fc2a160c704e",
+      "SymbolName": "Lib.io.file.FilesInFolder",
       "Position": {
         "X": -29.626038,
         "Y": 0.41168213
       }
     },
     {
-      "ChildId": "e6a06572-ace0-4406-b0a7-23a00715c2b6"/*Layer2d*/,
+      "ChildId": "e6a06572-ace0-4406-b0a7-23a00715c2b6",
+      "SymbolName": "Lib.render.basic.Layer2d",
       "Position": {
         "X": 420.37396,
         "Y": 0.41168213
       }
     },
     {
-      "ChildId": "eb5cba02-8c35-4869-9e37-a34cd5c5dc8a"/*Execute*/,
+      "ChildId": "eb5cba02-8c35-4869-9e37-a34cd5c5dc8a",
+      "SymbolName": "Lib.flow.Execute",
       "Position": {
         "X": 570.37396,
         "Y": 0.41168213
       }
     },
     {
-      "ChildId": "f3ba9356-53c5-4f40-b18d-f66bab7f219b"/*Text*/,
+      "ChildId": "f3ba9356-53c5-4f40-b18d-f66bab7f219b",
+      "SymbolName": "Lib.render.basic.Text",
       "Position": {
         "X": 120.37396,
         "Y": 149.41168
       }
     },
     {
-      "ChildId": "faba6557-4c87-4ff9-8b8e-c6905f2b4973"/*Multiply*/,
+      "ChildId": "faba6557-4c87-4ff9-8b8e-c6905f2b4973",
+      "SymbolName": "Lib.numbers.float.basic.Multiply",
       "Position": {
         "X": -179.62604,
         "Y": 43.411682

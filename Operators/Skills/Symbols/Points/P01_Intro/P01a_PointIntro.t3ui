@@ -5,7 +5,8 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "03f5e7ee-ba75-4b18-a8cd-1bb2fb91fbeb"/*AnimValue*/,
+      "ChildId": "03f5e7ee-ba75-4b18-a8cd-1bb2fb91fbeb",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "SectionId": "ca2f5eed-a08e-40f0-a610-64b59fa06e32",
       "Position": {
         "X": 1216.6234,
@@ -13,35 +14,40 @@
       }
     },
     {
-      "ChildId": "0754549e-050c-4951-bcd8-ce0f001ee681"/*RenderTarget*/,
+      "ChildId": "0754549e-050c-4951-bcd8-ce0f001ee681",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "Position": {
         "X": 1670.4669,
         "Y": 1902.6832
       }
     },
     {
-      "ChildId": "0e5a5c64-2100-4fef-bbfb-b912ebda2350"/*DrawPoints*/,
+      "ChildId": "0e5a5c64-2100-4fef-bbfb-b912ebda2350",
+      "SymbolName": "Lib.point.draw.DrawPoints",
       "Position": {
         "X": 1670.4669,
         "Y": 1867.6832
       }
     },
     {
-      "ChildId": "13679bd8-8fa1-446b-96cf-4f571b82ddc0"/*ImageQuiz*/,
+      "ChildId": "13679bd8-8fa1-446b-96cf-4f571b82ddc0",
+      "SymbolName": "Lib.flow.skillQuest.ImageQuiz",
       "Position": {
         "X": 1814.85,
         "Y": 2037.3966
       }
     },
     {
-      "ChildId": "217a6caf-b112-48b4-87c9-33265096cd7f"/*Point*/,
+      "ChildId": "217a6caf-b112-48b4-87c9-33265096cd7f",
+      "SymbolName": "Types.Values.Point",
       "Position": {
         "X": 1670.4669,
         "Y": 1832.6832
       }
     },
     {
-      "ChildId": "2543a81f-ca63-4642-abb4-0e2111017a33"/*PerlinNoise3*/,
+      "ChildId": "2543a81f-ca63-4642-abb4-0e2111017a33",
+      "SymbolName": "Lib.numbers.vec3.PerlinNoise3",
       "SectionId": "ca2f5eed-a08e-40f0-a610-64b59fa06e32",
       "Position": {
         "X": 1356.6234,
@@ -49,21 +55,24 @@
       }
     },
     {
-      "ChildId": "2d3e7157-7655-4e04-ab7b-84a6137cc6ce"/*AnimValue*/,
+      "ChildId": "2d3e7157-7655-4e04-ab7b-84a6137cc6ce",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "Position": {
         "X": 1285.017,
         "Y": 1876.1246
       }
     },
     {
-      "ChildId": "6eddf117-09f5-4f12-b1ab-4119c8859b25"/*PerlinNoise3*/,
+      "ChildId": "6eddf117-09f5-4f12-b1ab-4119c8859b25",
+      "SymbolName": "Lib.numbers.vec3.PerlinNoise3",
       "Position": {
         "X": 1420.922,
         "Y": 1768.2473
       }
     },
     {
-      "ChildId": "738f5dc0-e3d0-4491-aa84-2d41d3ac266c"/*PerlinNoise*/,
+      "ChildId": "738f5dc0-e3d0-4491-aa84-2d41d3ac266c",
+      "SymbolName": "Lib.numbers.float.random.PerlinNoise",
       "SectionId": "ca2f5eed-a08e-40f0-a610-64b59fa06e32",
       "Position": {
         "X": 1356.6234,
@@ -71,7 +80,8 @@
       }
     },
     {
-      "ChildId": "b128d131-a6a2-4d6b-9fa3-5196aa4b5b59"/*Point*/,
+      "ChildId": "b128d131-a6a2-4d6b-9fa3-5196aa4b5b59",
+      "SymbolName": "Types.Values.Point",
       "SectionId": "ca2f5eed-a08e-40f0-a610-64b59fa06e32",
       "Position": {
         "X": 1496.6234,
@@ -79,7 +89,8 @@
       }
     },
     {
-      "ChildId": "b12920d8-0b9b-4ad1-b0bf-2a6c21939964"/*SampleGradient*/,
+      "ChildId": "b12920d8-0b9b-4ad1-b0bf-2a6c21939964",
+      "SymbolName": "Lib.numbers.color.SampleGradient",
       "SectionId": "ca2f5eed-a08e-40f0-a610-64b59fa06e32",
       "Position": {
         "X": 1356.6234,
@@ -87,14 +98,16 @@
       }
     },
     {
-      "ChildId": "cf795ab9-aec3-4bfb-8fca-d0ab6dee0bf4"/*PerlinNoise*/,
+      "ChildId": "cf795ab9-aec3-4bfb-8fca-d0ab6dee0bf4",
+      "SymbolName": "Lib.numbers.float.random.PerlinNoise",
       "Position": {
         "X": 1420.922,
         "Y": 1820.6504
       }
     },
     {
-      "ChildId": "e8c44512-734b-44e7-8fb2-54530e1fefc1"/*RenderTarget*/,
+      "ChildId": "e8c44512-734b-44e7-8fb2-54530e1fefc1",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "SectionId": "ca2f5eed-a08e-40f0-a610-64b59fa06e32",
       "Position": {
         "X": 1496.6234,
@@ -102,14 +115,16 @@
       }
     },
     {
-      "ChildId": "e8fa8a53-341e-4a22-b1ef-e046c98db0e0"/*SampleGradient*/,
+      "ChildId": "e8fa8a53-341e-4a22-b1ef-e046c98db0e0",
+      "SymbolName": "Lib.numbers.color.SampleGradient",
       "Position": {
         "X": 1425.017,
         "Y": 1876.1246
       }
     },
     {
-      "ChildId": "ea65aec3-0770-4deb-a80d-a6d6729563ee"/*DrawPoints*/,
+      "ChildId": "ea65aec3-0770-4deb-a80d-a6d6729563ee",
+      "SymbolName": "Lib.point.draw.DrawPoints",
       "SectionId": "ca2f5eed-a08e-40f0-a610-64b59fa06e32",
       "Position": {
         "X": 1496.6234,

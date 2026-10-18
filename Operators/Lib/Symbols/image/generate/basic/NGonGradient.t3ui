@@ -153,35 +153,40 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "415a5f0a-df17-4f0d-8275-a67f766bdc0c"/*Vector2Components*/,
+      "ChildId": "415a5f0a-df17-4f0d-8275-a67f766bdc0c",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Position": {
         "X": -79.21353,
         "Y": 515.8844
       }
     },
     {
-      "ChildId": "4a36c240-2622-4d62-aad3-044be19c0560"/*IntToFloat*/,
+      "ChildId": "4a36c240-2622-4d62-aad3-044be19c0560",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "Position": {
         "X": -75.932816,
         "Y": 576.24677
       }
     },
     {
-      "ChildId": "4bc07f32-5b6f-4d06-8d2e-5d612952e817"/*BoolToFloat*/,
+      "ChildId": "4bc07f32-5b6f-4d06-8d2e-5d612952e817",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
       "Position": {
         "X": -79.21353,
         "Y": 403.88443
       }
     },
     {
-      "ChildId": "5d7e4088-c8d3-4fac-8977-95a516d6b28c"/*BoolToFloat*/,
+      "ChildId": "5d7e4088-c8d3-4fac-8977-95a516d6b28c",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
       "Position": {
         "X": -79.21353,
         "Y": 459.88443
       }
     },
     {
-      "ChildId": "b6c914eb-0a3e-46cf-9ab5-5b47a2f4e40b"/*_multiImageFxSetupStatic*/,
+      "ChildId": "b6c914eb-0a3e-46cf-9ab5-5b47a2f4e40b",
+      "SymbolName": "Lib.image.fx._._multiImageFxSetupStatic",
       "Style": "Resizable",
       "Size": {
         "X": 116.315186,
@@ -193,14 +198,16 @@
       }
     },
     {
-      "ChildId": "ba704603-3e70-4802-b2b6-44d91e347036"/*GradientsToTexture*/,
+      "ChildId": "ba704603-3e70-4802-b2b6-44d91e347036",
+      "SymbolName": "Lib.numbers.color.GradientsToTexture",
       "Position": {
         "X": 120.846405,
         "Y": -77.93887
       }
     },
     {
-      "ChildId": "cf18d5db-614a-4a1a-ba79-8e5b462d53e2"/*Vector2Components*/,
+      "ChildId": "cf18d5db-614a-4a1a-ba79-8e5b462d53e2",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Position": {
         "X": -52.848938,
         "Y": -22.900421

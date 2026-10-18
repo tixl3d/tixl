@@ -57,7 +57,8 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "0391973e-ae4b-4676-b974-c4d3cdd8a20c"/*_multiImageFxSetup*/,
+      "ChildId": "0391973e-ae4b-4676-b974-c4d3cdd8a20c",
+      "SymbolName": "Lib.image.fx._._multiImageFxSetup",
       "Style": "Resizable",
       "Size": {
         "X": 123.54739,
@@ -69,28 +70,32 @@
       }
     },
     {
-      "ChildId": "0edf16eb-4f2b-4d4d-9290-681d5446c4a1"/*Vector4Components*/,
+      "ChildId": "0edf16eb-4f2b-4d4d-9290-681d5446c4a1",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "Position": {
         "X": -100.70581,
         "Y": 304.56647
       }
     },
     {
-      "ChildId": "32776b15-aad9-4677-9714-40f113c6883f"/*ColorGrade*/,
+      "ChildId": "32776b15-aad9-4677-9714-40f113c6883f",
+      "SymbolName": "Lib.image.color.ColorGrade",
       "Position": {
         "X": -35.40545,
         "Y": -61.59488
       }
     },
     {
-      "ChildId": "3c2648f9-bf02-44b7-9a2e-9920c5e8e8dd"/*Vector2Components*/,
+      "ChildId": "3c2648f9-bf02-44b7-9a2e-9920c5e8e8dd",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Position": {
         "X": -61.060883,
         "Y": 439.8447
       }
     },
     {
-      "ChildId": "c64e8840-3d50-4bbf-887d-e4735eec446c"/*ColorGrade*/,
+      "ChildId": "c64e8840-3d50-4bbf-887d-e4735eec446c",
+      "SymbolName": "Lib.image.color.ColorGrade",
       "Position": {
         "X": -65.81404,
         "Y": -145.8522

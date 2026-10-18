@@ -75,7 +75,8 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "1cf6d21d-5c84-437c-912b-d91782f58230"/*_ImageFxShaderSetupStatic*/,
+      "ChildId": "1cf6d21d-5c84-437c-912b-d91782f58230",
+      "SymbolName": "Lib.render._dx11.fxsetup._ImageFxShaderSetupStatic",
       "Style": "Resizable",
       "Size": {
         "X": 94.37823,

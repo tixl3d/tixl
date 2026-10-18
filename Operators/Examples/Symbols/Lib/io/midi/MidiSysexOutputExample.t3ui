@@ -5,7 +5,8 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "4b01ddc7-37e3-493b-b7c4-60ef033449df"/*String*/,
+      "ChildId": "4b01ddc7-37e3-493b-b7c4-60ef033449df",
+      "SymbolName": "Types.Values.String",
       "SectionId": "b8642c04-38b9-4104-8c93-131a2ca93d87",
       "Comment": "Midi Sysex for APC40 Mk1 Ableton Alternative Mode",
       "Position": {
@@ -14,14 +15,16 @@
       }
     },
     {
-      "ChildId": "4faca885-dc92-4641-8a50-97d45958885a"/*Trigger*/,
+      "ChildId": "4faca885-dc92-4641-8a50-97d45958885a",
+      "SymbolName": "Lib.numbers.bool.logic.Trigger",
       "Position": {
         "X": 12.98967,
         "Y": -11.649078
       }
     },
     {
-      "ChildId": "56ed772a-2690-4d45-a4a1-f3d20f1626d8"/*String*/,
+      "ChildId": "56ed772a-2690-4d45-a4a1-f3d20f1626d8",
+      "SymbolName": "Types.Values.String",
       "SectionId": "b8642c04-38b9-4104-8c93-131a2ca93d87",
       "Comment": "Midi Sysex for APC40 Mk1 Ableton Mode",
       "Position": {
@@ -30,7 +33,8 @@
       }
     },
     {
-      "ChildId": "8fa34ee9-4d2d-4e58-9a0d-3792f1aacc8f"/*String*/,
+      "ChildId": "8fa34ee9-4d2d-4e58-9a0d-3792f1aacc8f",
+      "SymbolName": "Types.Values.String",
       "SectionId": "7caf5760-eec1-49a9-bf77-12ccb21b1507",
       "Comment": "Midi Sysex for APC40 Mk2 Generic Mode",
       "Position": {
@@ -39,7 +43,8 @@
       }
     },
     {
-      "ChildId": "a6624e36-f2fc-468a-b2d0-05e565d61216"/*String*/,
+      "ChildId": "a6624e36-f2fc-468a-b2d0-05e565d61216",
+      "SymbolName": "Types.Values.String",
       "SectionId": "b8642c04-38b9-4104-8c93-131a2ca93d87",
       "Comment": "Midi Sysex for APC40 Mk1 Generic Mode",
       "Position": {
@@ -48,7 +53,8 @@
       }
     },
     {
-      "ChildId": "b89c6929-abc5-43ff-8fd2-7c77fba1cb2b"/*String*/,
+      "ChildId": "b89c6929-abc5-43ff-8fd2-7c77fba1cb2b",
+      "SymbolName": "Types.Values.String",
       "SectionId": "7caf5760-eec1-49a9-bf77-12ccb21b1507",
       "Comment": "Midi Sysex for APC40 Mk2 Ableton Alternative Mode",
       "Position": {
@@ -57,14 +63,16 @@
       }
     },
     {
-      "ChildId": "e3f8adc1-7b93-499c-a16b-01d57e595c37"/*MidiSysexOutput*/,
+      "ChildId": "e3f8adc1-7b93-499c-a16b-01d57e595c37",
+      "SymbolName": "Lib.io.midi.MidiSysexOutput",
       "Position": {
         "X": 152.98969,
         "Y": -11.649078
       }
     },
     {
-      "ChildId": "ebd5435f-c1c4-407b-a281-2e879bc714fe"/*String*/,
+      "ChildId": "ebd5435f-c1c4-407b-a281-2e879bc714fe",
+      "SymbolName": "Types.Values.String",
       "SectionId": "7caf5760-eec1-49a9-bf77-12ccb21b1507",
       "Comment": "Midi Sysex for APC40 Mk2 Ableton Mode",
       "Position": {

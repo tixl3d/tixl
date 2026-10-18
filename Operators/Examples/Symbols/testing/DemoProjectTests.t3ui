@@ -5,70 +5,80 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "34a06156-8b88-4610-aee0-7194a0c3faed"/*DemoWorksForEverybody*/,
+      "ChildId": "34a06156-8b88-4610-aee0-7194a0c3faed",
+      "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": 0.0,
         "Y": 35.0
       }
     },
     {
-      "ChildId": "4a18ea3a-4f45-4262-abd5-10e6f86aae13"/*WorksForEverybody*/,
+      "ChildId": "4a18ea3a-4f45-4262-abd5-10e6f86aae13",
+      "SymbolName": "Examples.user.still.worksforeverybody.WorksForEverybody",
       "Position": {
         "X": 0.0,
         "Y": 0.0
       }
     },
     {
-      "ChildId": "64d92ce1-5e58-4c1d-8dba-7d5062e7a19a"/*ExecuteTests*/,
+      "ChildId": "64d92ce1-5e58-4c1d-8dba-7d5062e7a19a",
+      "SymbolName": "Examples.testing.ExecuteTests",
       "Position": {
         "X": 0.0,
         "Y": 269.89496
       }
     },
     {
-      "ChildId": "7319e3f8-c410-4ecf-84e2-284402821169"/*ThereDemo*/,
+      "ChildId": "7319e3f8-c410-4ecf-84e2-284402821169",
+      "SymbolName": "Examples.user.still.there.ThereDemo",
       "Position": {
         "X": 0.0,
         "Y": 93.361664
       }
     },
     {
-      "ChildId": "86c6c88a-dd5d-42d8-8039-768146712a96"/*DemoDesatyre*/,
+      "ChildId": "86c6c88a-dd5d-42d8-8039-768146712a96",
+      "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": 0.0,
         "Y": 364.92804
       }
     },
     {
-      "ChildId": "8949b1e4-0efc-4a61-b742-e61807a1574a"/*DemoThere*/,
+      "ChildId": "8949b1e4-0efc-4a61-b742-e61807a1574a",
+      "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": 0.0,
         "Y": 128.36166
       }
     },
     {
-      "ChildId": "8fd6c8f2-a899-4509-9b1a-61ba6b189e96"/*ExecuteTests*/,
+      "ChildId": "8fd6c8f2-a899-4509-9b1a-61ba6b189e96",
+      "SymbolName": "Examples.testing.ExecuteTests",
       "Position": {
         "X": 0.0,
         "Y": 399.92804
       }
     },
     {
-      "ChildId": "a26e199b-cc62-443b-9a60-5ab56ea19fbb"/*Katsumaki*/,
+      "ChildId": "a26e199b-cc62-443b-9a60-5ab56ea19fbb",
+      "SymbolName": "Examples.user.still.katsu.Katsumaki",
       "Position": {
         "X": 0.0,
         "Y": 199.89496
       }
     },
     {
-      "ChildId": "b0cf2b73-484a-4531-b215-08f0bee0af42"/*Test Demos*/,
+      "ChildId": "b0cf2b73-484a-4531-b215-08f0bee0af42",
+      "SymbolName": "Examples.testing.ExecuteTests",
       "Position": {
         "X": 193.15875,
         "Y": 293.53076
       }
     },
     {
-      "ChildId": "fa431c7a-81c5-4c0a-b4ae-f559c4c1707b"/*Katsumaki*/,
+      "ChildId": "fa431c7a-81c5-4c0a-b4ae-f559c4c1707b",
+      "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": 0.0,
         "Y": 234.89496

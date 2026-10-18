@@ -5,7 +5,8 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "039f598a-27da-460b-94da-eb2caf06479e"/*SphereMesh*/,
+      "ChildId": "039f598a-27da-460b-94da-eb2caf06479e",
+      "SymbolName": "Lib.mesh.generate.SphereMesh",
       "SectionId": "89cb9d04-6be9-46e6-b7c4-f74dc81714ea",
       "Comment": "We reduce poly count. It would work with the defaults, but it doesn't make a visual difference on the effect.",
       "Position": {
@@ -14,21 +15,24 @@
       }
     },
     {
-      "ChildId": "13a18577-39c6-42ac-9da8-73ce77035d19"/*Once*/,
+      "ChildId": "13a18577-39c6-42ac-9da8-73ce77035d19",
+      "SymbolName": "Lib.flow.Once",
       "Position": {
         "X": 485.20862,
         "Y": -8.944183
       }
     },
     {
-      "ChildId": "188acad3-3400-48f9-bab0-9a2f1a31e9d4"/*Group*/,
+      "ChildId": "188acad3-3400-48f9-bab0-9a2f1a31e9d4",
+      "SymbolName": "Lib.render.transform.Group",
       "Position": {
         "X": 1710.2389,
         "Y": 3.0
       }
     },
     {
-      "ChildId": "19579242-519b-4304-8661-cf93e13b06da"/*DrawMeshAtPoints*/,
+      "ChildId": "19579242-519b-4304-8661-cf93e13b06da",
+      "SymbolName": "Lib.mesh.draw.DrawMeshAtPoints",
       "SectionId": "807feda3-230a-4295-b55d-b49898bc5bfa",
       "Position": {
         "X": 1555.945,
@@ -36,7 +40,8 @@
       }
     },
     {
-      "ChildId": "207f32fb-778b-48cd-bfd1-864bcaaf32b0"/*TransformMesh*/,
+      "ChildId": "207f32fb-778b-48cd-bfd1-864bcaaf32b0",
+      "SymbolName": "Lib.mesh.modify.TransformMesh",
       "SectionId": "89cb9d04-6be9-46e6-b7c4-f74dc81714ea",
       "Position": {
         "X": 102.098816,
@@ -44,7 +49,8 @@
       }
     },
     {
-      "ChildId": "20bb7685-955f-4e23-8c73-26ce536238e1"/*HasTimeChanged*/,
+      "ChildId": "20bb7685-955f-4e23-8c73-26ce536238e1",
+      "SymbolName": "Lib.numbers.anim.time.HasTimeChanged",
       "SectionId": "807feda3-230a-4295-b55d-b49898bc5bfa",
       "Position": {
         "X": 955.94495,
@@ -52,7 +58,8 @@
       }
     },
     {
-      "ChildId": "23836a83-0129-40fb-8b71-e25b59ec6863"/*FilterPoints*/,
+      "ChildId": "23836a83-0129-40fb-8b71-e25b59ec6863",
+      "SymbolName": "Lib.point.modify.FilterPoints",
       "SectionId": "807feda3-230a-4295-b55d-b49898bc5bfa",
       "Comment": "We filter some of the stems...",
       "Position": {
@@ -61,7 +68,8 @@
       }
     },
     {
-      "ChildId": "3100a557-1e74-421f-aa48-618965161fe9"/*MapPointAttributes*/,
+      "ChildId": "3100a557-1e74-421f-aa48-618965161fe9",
+      "SymbolName": "Lib.point.modify.MapPointAttributes",
       "SectionId": "807feda3-230a-4295-b55d-b49898bc5bfa",
       "Comment": "We add a small growth animation to the size.",
       "Position": {
@@ -70,7 +78,8 @@
       }
     },
     {
-      "ChildId": "47d2ed8c-abd2-4bfe-af4d-a08d8dff97d6"/*ParticleSystem*/,
+      "ChildId": "47d2ed8c-abd2-4bfe-af4d-a08d8dff97d6",
+      "SymbolName": "Lib.particle.ParticleSystem",
       "SectionId": "807feda3-230a-4295-b55d-b49898bc5bfa",
       "Comment": "and append them to another particle system.",
       "Position": {
@@ -79,7 +88,8 @@
       }
     },
     {
-      "ChildId": "480b9d6c-1355-4800-a5b8-fa31435f46a4"/*CubeMesh*/,
+      "ChildId": "480b9d6c-1355-4800-a5b8-fa31435f46a4",
+      "SymbolName": "Lib.mesh.generate.CubeMesh",
       "SectionId": "89cb9d04-6be9-46e6-b7c4-f74dc81714ea",
       "Position": {
         "X": 252.09882,
@@ -87,7 +97,8 @@
       }
     },
     {
-      "ChildId": "4e6bf31c-1c5e-46d1-82f0-ece58232985c"/*PerlinNoise3*/,
+      "ChildId": "4e6bf31c-1c5e-46d1-82f0-ece58232985c",
+      "SymbolName": "Lib.numbers.vec3.PerlinNoise3",
       "SectionId": "89cb9d04-6be9-46e6-b7c4-f74dc81714ea",
       "Position": {
         "X": 102.098816,
@@ -95,7 +106,8 @@
       }
     },
     {
-      "ChildId": "5c5b7b71-a9d5-4ba0-9589-5341a2da896f"/*TransformMesh*/,
+      "ChildId": "5c5b7b71-a9d5-4ba0-9589-5341a2da896f",
+      "SymbolName": "Lib.mesh.modify.TransformMesh",
       "SectionId": "89cb9d04-6be9-46e6-b7c4-f74dc81714ea",
       "Position": {
         "X": 252.09882,
@@ -103,7 +115,8 @@
       }
     },
     {
-      "ChildId": "61a49ee8-aa7b-4680-ace5-63c5dd82ba6a"/*AnimValue*/,
+      "ChildId": "61a49ee8-aa7b-4680-ace5-63c5dd82ba6a",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "SectionId": "89cb9d04-6be9-46e6-b7c4-f74dc81714ea",
       "Position": {
         "X": 102.098816,
@@ -111,21 +124,24 @@
       }
     },
     {
-      "ChildId": "62ad7c73-706d-4379-8e79-e25f051945f9"/*RenderTarget*/,
+      "ChildId": "62ad7c73-706d-4379-8e79-e25f051945f9",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "Position": {
         "X": 2010.2389,
         "Y": 3.0
       }
     },
     {
-      "ChildId": "6dcc2eda-c85d-4519-a060-d2affb3d35bd"/*OrbitCamera*/,
+      "ChildId": "6dcc2eda-c85d-4519-a060-d2affb3d35bd",
+      "SymbolName": "Lib.render.camera.OrbitCamera",
       "Position": {
         "X": 1860.2389,
         "Y": 3.0
       }
     },
     {
-      "ChildId": "72ff9d82-34da-42ea-99af-11b4eb12e615"/*AnimVec3*/,
+      "ChildId": "72ff9d82-34da-42ea-99af-11b4eb12e615",
+      "SymbolName": "Lib.numbers.anim.animators.AnimVec3",
       "SectionId": "89cb9d04-6be9-46e6-b7c4-f74dc81714ea",
       "Position": {
         "X": 102.098816,
@@ -133,7 +149,8 @@
       }
     },
     {
-      "ChildId": "74139d64-af04-4fe8-83db-b4e7d9c1ca7e"/*_Time_old*/,
+      "ChildId": "74139d64-af04-4fe8-83db-b4e7d9c1ca7e",
+      "SymbolName": "Lib.numbers.anim._obsolete._Time_old",
       "SectionId": "807feda3-230a-4295-b55d-b49898bc5bfa",
       "Position": {
         "X": 1255.945,
@@ -141,21 +158,24 @@
       }
     },
     {
-      "ChildId": "775cad4e-066a-479d-bb7e-2e2e62cf72da"/*FollowMeshSurfaceForce*/,
+      "ChildId": "775cad4e-066a-479d-bb7e-2e2e62cf72da",
+      "SymbolName": "Lib.particle.force.FollowMeshSurfaceForce",
       "Position": {
         "X": 635.2086,
         "Y": 73.05582
       }
     },
     {
-      "ChildId": "79f0059e-02cb-4b29-8fb2-26f962719e3c"/*RadialPoints*/,
+      "ChildId": "79f0059e-02cb-4b29-8fb2-26f962719e3c",
+      "SymbolName": "Lib.point.generate.RadialPoints",
       "Position": {
         "X": 635.2086,
         "Y": -48.602417
       }
     },
     {
-      "ChildId": "7d489fde-e97a-4d7b-9278-2fd9cd130563"/*LoadObj*/,
+      "ChildId": "7d489fde-e97a-4d7b-9278-2fd9cd130563",
+      "SymbolName": "Lib.mesh.generate.LoadObj",
       "SectionId": "89cb9d04-6be9-46e6-b7c4-f74dc81714ea",
       "Comment": "This is as high poly as you should go.",
       "Position": {
@@ -164,14 +184,16 @@
       }
     },
     {
-      "ChildId": "83e90430-8701-4b78-a254-3bffc44f1af4"/*SSAO*/,
+      "ChildId": "83e90430-8701-4b78-a254-3bffc44f1af4",
+      "SymbolName": "Lib.render.postfx.SSAO",
       "Position": {
         "X": 2160.2388,
         "Y": 3.0
       }
     },
     {
-      "ChildId": "a5bb5adf-5b5a-4aac-9179-c041cb12c56b"/*PickMeshBuffer*/,
+      "ChildId": "a5bb5adf-5b5a-4aac-9179-c041cb12c56b",
+      "SymbolName": "Lib.mesh.modify.PickMeshBuffer",
       "SectionId": "89cb9d04-6be9-46e6-b7c4-f74dc81714ea",
       "Comment": "Switching between our geometries...",
       "Position": {
@@ -180,7 +202,8 @@
       }
     },
     {
-      "ChildId": "b7128776-9996-4f02-a3c8-6e09a19e9a9f"/*MapPointAttributes*/,
+      "ChildId": "b7128776-9996-4f02-a3c8-6e09a19e9a9f",
+      "SymbolName": "Lib.point.modify.MapPointAttributes",
       "SectionId": "f285df13-cf91-481a-9817-0e194dd89535",
       "Comment": "The moving particles are the tip of stems.\n\nWe add some random variation to color.",
       "Position": {
@@ -189,14 +212,16 @@
       }
     },
     {
-      "ChildId": "bcfdde64-777a-46da-8710-c604c8315ffa"/*_Time_old*/,
+      "ChildId": "bcfdde64-777a-46da-8710-c604c8315ffa",
+      "SymbolName": "Lib.numbers.anim._obsolete._Time_old",
       "Position": {
         "X": 485.20862,
         "Y": 71.05582
       }
     },
     {
-      "ChildId": "c4655e46-a146-4584-aedd-e5565fc59675"/*RandomizePoints*/,
+      "ChildId": "c4655e46-a146-4584-aedd-e5565fc59675",
+      "SymbolName": "Lib.point.modify.RandomizePoints",
       "SectionId": "807feda3-230a-4295-b55d-b49898bc5bfa",
       "Comment": "Adding some variations to the leaves' orientation and size.\n\nAnimating the RandomPhase will lead to a subtle secondary animation.",
       "Position": {
@@ -205,7 +230,8 @@
       }
     },
     {
-      "ChildId": "ce5418cc-059e-4ec4-9a5b-80f0bb54bdfb"/*CountInt*/,
+      "ChildId": "ce5418cc-059e-4ec4-9a5b-80f0bb54bdfb",
+      "SymbolName": "Lib.numbers.int.logic.CountInt",
       "SectionId": "807feda3-230a-4295-b55d-b49898bc5bfa",
       "Position": {
         "X": 805.94495,
@@ -213,7 +239,8 @@
       }
     },
     {
-      "ChildId": "d3bd7c3e-071c-4da8-b6fa-9434ee491b7b"/*PointTrail*/,
+      "ChildId": "d3bd7c3e-071c-4da8-b6fa-9434ee491b7b",
+      "SymbolName": "Lib.point.generate.PointTrail",
       "SectionId": "f285df13-cf91-481a-9817-0e194dd89535",
       "Position": {
         "X": 1410.2389,
@@ -221,7 +248,8 @@
       }
     },
     {
-      "ChildId": "dabc93eb-a14c-49e7-a335-847a9a6094d0"/*CountInt*/,
+      "ChildId": "dabc93eb-a14c-49e7-a335-847a9a6094d0",
+      "SymbolName": "Lib.numbers.int.logic.CountInt",
       "SectionId": "89cb9d04-6be9-46e6-b7c4-f74dc81714ea",
       "Position": {
         "X": 252.09882,
@@ -229,7 +257,8 @@
       }
     },
     {
-      "ChildId": "decbe1ee-3605-48d6-8620-13cf23d0781c"/*TransformMesh*/,
+      "ChildId": "decbe1ee-3605-48d6-8620-13cf23d0781c",
+      "SymbolName": "Lib.mesh.modify.TransformMesh",
       "SectionId": "89cb9d04-6be9-46e6-b7c4-f74dc81714ea",
       "Comment": "Let's add some random movement to this sphere...",
       "Position": {
@@ -238,14 +267,16 @@
       }
     },
     {
-      "ChildId": "e4aec6a9-e62b-4696-951d-3761dc7fab35"/*Any*/,
+      "ChildId": "e4aec6a9-e62b-4696-951d-3761dc7fab35",
+      "SymbolName": "Lib.numbers.bool.combine.Any",
       "Position": {
         "X": 635.2086,
         "Y": -8.944183
       }
     },
     {
-      "ChildId": "e6f05223-7c72-45e2-89f5-d279d96ace87"/*_Time_old*/,
+      "ChildId": "e6f05223-7c72-45e2-89f5-d279d96ace87",
+      "SymbolName": "Lib.numbers.anim._obsolete._Time_old",
       "SectionId": "f285df13-cf91-481a-9817-0e194dd89535",
       "Position": {
         "X": 1115.6064,
@@ -253,7 +284,8 @@
       }
     },
     {
-      "ChildId": "eb66c5d4-50d1-48d3-8895-e8cafcd77b19"/*QuadMesh*/,
+      "ChildId": "eb66c5d4-50d1-48d3-8895-e8cafcd77b19",
+      "SymbolName": "Lib.mesh.generate.QuadMesh",
       "SectionId": "807feda3-230a-4295-b55d-b49898bc5bfa",
       "Comment": "I'm not a leaf!",
       "Position": {
@@ -262,14 +294,16 @@
       }
     },
     {
-      "ChildId": "eba6fee3-02b3-46a9-a3ff-842b881b9b23"/*Restart me!*/,
+      "ChildId": "eba6fee3-02b3-46a9-a3ff-842b881b9b23",
+      "SymbolName": "Lib.numbers.bool.logic.Trigger",
       "Position": {
         "X": 485.20862,
         "Y": 34.055817
       }
     },
     {
-      "ChildId": "fe33efc0-4537-45b0-af04-f8292d802772"/*DrawLines*/,
+      "ChildId": "fe33efc0-4537-45b0-af04-f8292d802772",
+      "SymbolName": "Lib.point.draw.DrawLines",
       "SectionId": "f285df13-cf91-481a-9817-0e194dd89535",
       "Position": {
         "X": 1560.2389,
@@ -277,7 +311,8 @@
       }
     },
     {
-      "ChildId": "ff77512c-0b05-49b5-88c5-d58f61ec456d"/*ParticleSystem*/,
+      "ChildId": "ff77512c-0b05-49b5-88c5-d58f61ec456d",
+      "SymbolName": "Lib.particle.ParticleSystem",
       "Comment": "We emit only a selected number of points once.\n(E.g. one of each stem).\n\nNotice that very large lifetime.\nWe also add some drag to calm the stems down a notch.",
       "Position": {
         "X": 785.2086,

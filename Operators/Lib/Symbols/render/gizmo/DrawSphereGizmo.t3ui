@@ -32,105 +32,120 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "14be5539-3247-4857-92e8-d6317f78d1c7"/*Vector3*/,
+      "ChildId": "14be5539-3247-4857-92e8-d6317f78d1c7",
+      "SymbolName": "Types.Values.Vector3",
       "Position": {
         "X": 783.01154,
         "Y": 115.40672
       }
     },
     {
-      "ChildId": "29e347ee-bf81-49b5-9e45-4853727fd6f4"/*LinePoints*/,
+      "ChildId": "29e347ee-bf81-49b5-9e45-4853727fd6f4",
+      "SymbolName": "Lib.point.generate.LinePoints",
       "Position": {
         "X": 289.16174,
         "Y": -112.76834
       }
     },
     {
-      "ChildId": "3468be00-ddba-4254-b1ef-b91dbf68fe3b"/*RepeatAtPoints*/,
+      "ChildId": "3468be00-ddba-4254-b1ef-b91dbf68fe3b",
+      "SymbolName": "Lib.point.generate.RepeatAtPoints",
       "Position": {
         "X": 589.16174,
         "Y": -198.76834
       }
     },
     {
-      "ChildId": "34c30ed0-b20d-4613-a809-f9b51c01991b"/*Vector3*/,
+      "ChildId": "34c30ed0-b20d-4613-a809-f9b51c01991b",
+      "SymbolName": "Types.Values.Vector3",
       "Position": {
         "X": 1079.1907,
         "Y": 466.54034
       }
     },
     {
-      "ChildId": "379b4030-26d4-4e46-bf03-5d4786e09a3e"/*Execute*/,
+      "ChildId": "379b4030-26d4-4e46-bf03-5d4786e09a3e",
+      "SymbolName": "Lib.flow.Execute",
       "Position": {
         "X": 1118.332,
         "Y": 44.489502
       }
     },
     {
-      "ChildId": "40cd90cb-39c3-4b04-8c84-f537f0e2d0b4"/*Transform*/,
+      "ChildId": "40cd90cb-39c3-4b04-8c84-f537f0e2d0b4",
+      "SymbolName": "Lib.render.transform.Transform",
       "Position": {
         "X": 1248.332,
         "Y": 44.489502
       }
     },
     {
-      "ChildId": "4fe380ae-8749-4a3c-9859-eb792004b8b3"/*Value*/,
+      "ChildId": "4fe380ae-8749-4a3c-9859-eb792004b8b3",
+      "SymbolName": "Types.Values.Value",
       "Position": {
         "X": 949.1907,
         "Y": 466.54034
       }
     },
     {
-      "ChildId": "64d33c5f-7911-44a6-9358-6af239d5dff8"/*DrawLines*/,
+      "ChildId": "64d33c5f-7911-44a6-9358-6af239d5dff8",
+      "SymbolName": "Lib.point.draw.DrawLines",
       "Position": {
         "X": 968.33203,
         "Y": 148.38623
       }
     },
     {
-      "ChildId": "7a86c7c3-0c4d-49d1-aff9-4b8588c97fa2"/*CombineBuffers*/,
+      "ChildId": "7a86c7c3-0c4d-49d1-aff9-4b8588c97fa2",
+      "SymbolName": "Lib.point.combine.CombineBuffers",
       "Position": {
         "X": 439.16174,
         "Y": -198.76834
       }
     },
     {
-      "ChildId": "aec4013e-e4eb-4d1c-ae9f-91a1f6dfb988"/*DrawPoints*/,
+      "ChildId": "aec4013e-e4eb-4d1c-ae9f-91a1f6dfb988",
+      "SymbolName": "Lib.point.draw.DrawPoints",
       "Position": {
         "X": 783.01154,
         "Y": 46.40672
       }
     },
     {
-      "ChildId": "ccbc6ed6-4e96-4ca0-af3a-b9475588dc33"/*RadialPoints*/,
+      "ChildId": "ccbc6ed6-4e96-4ca0-af3a-b9475588dc33",
+      "SymbolName": "Lib.point.generate.RadialPoints",
       "Position": {
         "X": 289.16174,
         "Y": -155.76834
       }
     },
     {
-      "ChildId": "d6156f1a-7196-43ff-bc78-d4f3386ca269"/*RadialPoints*/,
+      "ChildId": "d6156f1a-7196-43ff-bc78-d4f3386ca269",
+      "SymbolName": "Lib.point.generate.RadialPoints",
       "Position": {
         "X": 439.16174,
         "Y": -49.76834
       }
     },
     {
-      "ChildId": "dfab703d-1920-4afa-b790-0ea773124b58"/*Transform*/,
+      "ChildId": "dfab703d-1920-4afa-b790-0ea773124b58",
+      "SymbolName": "Lib.render.transform.Transform",
       "Position": {
         "X": 968.33203,
         "Y": 44.489502
       }
     },
     {
-      "ChildId": "e1b3b07a-4337-4a21-8cd3-c1cf80e5938e"/*Value*/,
+      "ChildId": "e1b3b07a-4337-4a21-8cd3-c1cf80e5938e",
+      "SymbolName": "Types.Values.Value",
       "Position": {
         "X": 289.16174,
         "Y": -49.76834
       }
     },
     {
-      "ChildId": "e8a92c99-a038-4007-96de-71bc23df9c52"/*RadialPoints*/,
+      "ChildId": "e8a92c99-a038-4007-96de-71bc23df9c52",
+      "SymbolName": "Lib.point.generate.RadialPoints",
       "Position": {
         "X": 289.16174,
         "Y": -198.76834

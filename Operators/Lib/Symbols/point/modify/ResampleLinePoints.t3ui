@@ -77,56 +77,64 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "0047b851-159f-417e-9a7d-896796635677"/*ComputeShader*/,
+      "ChildId": "0047b851-159f-417e-9a7d-896796635677",
+      "SymbolName": "Types.Gfx.ComputeShader",
       "Position": {
         "X": -35.912445,
         "Y": 492.44617
       }
     },
     {
-      "ChildId": "12b5bf43-5a96-4684-8048-acb4480f4f05"/*ComputeShaderStage*/,
+      "ChildId": "12b5bf43-5a96-4684-8048-acb4480f4f05",
+      "SymbolName": "Types.Gfx.ComputeShaderStage",
       "Position": {
         "X": 471.04163,
         "Y": 587.7994
       }
     },
     {
-      "ChildId": "21d57cfb-98f1-436b-b7ed-dd12a5409522"/*Vector3Components*/,
+      "ChildId": "21d57cfb-98f1-436b-b7ed-dd12a5409522",
+      "SymbolName": "Lib.numbers.vec3.Vector3Components",
       "Position": {
         "X": -414.35547,
         "Y": 1158.043
       }
     },
     {
-      "ChildId": "740b34c1-d6e7-4c16-9253-e4decb065b6c"/*ExecuteBufferUpdate*/,
+      "ChildId": "740b34c1-d6e7-4c16-9253-e4decb065b6c",
+      "SymbolName": "Lib.render._dx11.fxsetup.ExecuteBufferUpdate",
       "Position": {
         "X": 641.2465,
         "Y": 646.7957
       }
     },
     {
-      "ChildId": "7e2e09d8-7edc-4735-95db-e586ea0b0991"/*FloatsToBuffer*/,
+      "ChildId": "7e2e09d8-7edc-4735-95db-e586ea0b0991",
+      "SymbolName": "Lib.render._dx11.api.FloatsToBuffer",
       "Position": {
         "X": 232.65718,
         "Y": 675.3694
       }
     },
     {
-      "ChildId": "893964f7-7d3d-4ad4-aefa-b8bd5540262b"/*GetBufferComponents*/,
+      "ChildId": "893964f7-7d3d-4ad4-aefa-b8bd5540262b",
+      "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
       "Position": {
         "X": 230.9817,
         "Y": 1250.8696
       }
     },
     {
-      "ChildId": "986f4ea6-52e8-4aba-bf1c-5bb740e43f2e"/*Vector2Components*/,
+      "ChildId": "986f4ea6-52e8-4aba-bf1c-5bb740e43f2e",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Position": {
         "X": -401.46265,
         "Y": 760.3659
       }
     },
     {
-      "ChildId": "9a86664c-4888-4d3d-83f4-cecfedf45dac"/*ClampInt*/,
+      "ChildId": "9a86664c-4888-4d3d-83f4-cecfedf45dac",
+      "SymbolName": "Lib.numbers.int.process.ClampInt",
       "Comment": "Clamp to 10 samples because this gets slow FAST.",
       "Position": {
         "X": -407.2406,
@@ -134,42 +142,48 @@
       }
     },
     {
-      "ChildId": "a220297c-7c17-4461-94e2-a40e8fc3e13a"/*__padding*/,
+      "ChildId": "a220297c-7c17-4461-94e2-a40e8fc3e13a",
+      "SymbolName": "Types.Values.Value",
       "Position": {
         "X": -148.51068,
         "Y": 793.5625
       }
     },
     {
-      "ChildId": "bd38b39c-f8c1-4b26-a31b-064b529b8898"/*GetBufferComponents*/,
+      "ChildId": "bd38b39c-f8c1-4b26-a31b-064b529b8898",
+      "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
       "Position": {
         "X": -419.65558,
         "Y": 590.20135
       }
     },
     {
-      "ChildId": "c7c1e709-7fb9-45a8-854a-02d1993fb12b"/*CalcDispatchCount*/,
+      "ChildId": "c7c1e709-7fb9-45a8-854a-02d1993fb12b",
+      "SymbolName": "Lib.render._dx11.api.CalcDispatchCount",
       "Position": {
         "X": 121.54491,
         "Y": 562.4695
       }
     },
     {
-      "ChildId": "cb9508c2-eaa5-4fa0-935e-4fd37cf07b00"/*IntsToBuffer*/,
+      "ChildId": "cb9508c2-eaa5-4fa0-935e-4fd37cf07b00",
+      "SymbolName": "Lib.numbers.int.process.IntsToBuffer",
       "Position": {
         "X": 246.24411,
         "Y": 954.8529
       }
     },
     {
-      "ChildId": "f08341af-deaa-46c3-a359-5dd2df156d80"/*StructuredBufferWithViews*/,
+      "ChildId": "f08341af-deaa-46c3-a359-5dd2df156d80",
+      "SymbolName": "Types.Gfx.StructuredBufferWithViews",
       "Position": {
         "X": 88.67059,
         "Y": 1330.228
       }
     },
     {
-      "ChildId": "fba3a6f5-d1fa-4af7-afa0-d00dfce61806"/*ClampInt*/,
+      "ChildId": "fba3a6f5-d1fa-4af7-afa0-d00dfce61806",
+      "SymbolName": "Lib.numbers.int.process.ClampInt",
       "Position": {
         "X": -388.86264,
         "Y": 650.20593

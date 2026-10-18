@@ -6,7 +6,8 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "099a644e-b04a-4a40-898e-7f461a96940b"/*DrawLines*/,
+      "ChildId": "099a644e-b04a-4a40-898e-7f461a96940b",
+      "SymbolName": "Lib.point.draw.DrawLines",
       "SectionId": "2a6c1856-7f44-4249-aa32-4d76e65d7399",
       "Comment": "And yes, this is a very ugly trick: to fade the cells out, we just draw 100 cells on top of each other.\n\nThis is not a very performant way to do this.",
       "Position": {
@@ -15,21 +16,24 @@
       }
     },
     {
-      "ChildId": "0a942c31-7d58-4bbb-8da5-c8bacc7b3d9c"/*Vector3*/,
+      "ChildId": "0a942c31-7d58-4bbb-8da5-c8bacc7b3d9c",
+      "SymbolName": "Types.Values.Vector3",
       "Position": {
         "X": 1699.7402,
         "Y": 325.2907
       }
     },
     {
-      "ChildId": "0be1b90b-27ec-4fa0-bd9c-bbe98c967aaf"/*RadialPoints*/,
+      "ChildId": "0be1b90b-27ec-4fa0-bd9c-bbe98c967aaf",
+      "SymbolName": "Lib.point.generate.RadialPoints",
       "Position": {
         "X": 1999.7402,
         "Y": 394.2907
       }
     },
     {
-      "ChildId": "13a453ea-ad12-4a01-86a4-7aee5fdd7def"/*RepeatAtPoints*/,
+      "ChildId": "13a453ea-ad12-4a01-86a4-7aee5fdd7def",
+      "SymbolName": "Lib.point.generate.RepeatAtPoints",
       "SectionId": "2a6c1856-7f44-4249-aa32-4d76e65d7399",
       "Position": {
         "X": 2143.9744,
@@ -37,7 +41,8 @@
       }
     },
     {
-      "ChildId": "15ee3cd1-16a5-40e5-8012-299be8216c19"/*ScaleVector3*/,
+      "ChildId": "15ee3cd1-16a5-40e5-8012-299be8216c19",
+      "SymbolName": "Lib.numbers.vec3.ScaleVector3",
       "SectionId": "1ae65319-3191-4a09-8496-d0da1886214a",
       "Position": {
         "X": 211.30313,
@@ -45,7 +50,8 @@
       }
     },
     {
-      "ChildId": "172e2960-77d0-4f9c-88bd-6811041c54ab"/*Group*/,
+      "ChildId": "172e2960-77d0-4f9c-88bd-6811041c54ab",
+      "SymbolName": "Lib.render.transform.Group",
       "Comment": "Note how the [CamPosition] operator needs to be connected so it is updated first with the current camera set in the context.",
       "Position": {
         "X": 1321.6868,
@@ -53,14 +59,16 @@
       }
     },
     {
-      "ChildId": "1a5c02ab-b5dc-41d1-9645-328e66d16466"/*Vector3Components*/,
+      "ChildId": "1a5c02ab-b5dc-41d1-9645-328e66d16466",
+      "SymbolName": "Lib.numbers.vec3.Vector3Components",
       "Position": {
         "X": 1549.7402,
         "Y": 325.2907
       }
     },
     {
-      "ChildId": "1e366d81-2670-4e38-990a-6a18b6b5b865"/*RadialPoints*/,
+      "ChildId": "1e366d81-2670-4e38-990a-6a18b6b5b865",
+      "SymbolName": "Lib.point.generate.RadialPoints",
       "SectionId": "3769fc78-7a43-41ad-a1bb-e3bbfae7bc72",
       "Position": {
         "X": 1993.55,
@@ -68,7 +76,8 @@
       }
     },
     {
-      "ChildId": "2023d2ab-a742-42be-b167-09eb381dd08f"/*CenterPoint*/,
+      "ChildId": "2023d2ab-a742-42be-b167-09eb381dd08f",
+      "SymbolName": "Types.Values.Point",
       "Comment": "We create a point at the current center...",
       "Position": {
         "X": 1849.7402,
@@ -76,7 +85,8 @@
       }
     },
     {
-      "ChildId": "22381b76-cbd6-405a-852d-71dd1910d846"/*ListToBuffer*/,
+      "ChildId": "22381b76-cbd6-405a-852d-71dd1910d846",
+      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
       "SectionId": "2a6c1856-7f44-4249-aa32-4d76e65d7399",
       "Position": {
         "X": 1843.9744,
@@ -84,7 +94,8 @@
       }
     },
     {
-      "ChildId": "25e8b622-b41d-4573-9d0c-b093850c7c45"/*_Time_old*/,
+      "ChildId": "25e8b622-b41d-4573-9d0c-b093850c7c45",
+      "SymbolName": "Lib.numbers.anim._obsolete._Time_old",
       "SectionId": "4a90a060-5873-4412-8b0d-3e4f1d18c8bb",
       "Comment": "We use the time to spin the emit points into a twirl.",
       "Position": {
@@ -93,7 +104,8 @@
       }
     },
     {
-      "ChildId": "268bfcf1-8fe5-4b43-982d-ad5e66525301"/*RoundVec3*/,
+      "ChildId": "268bfcf1-8fe5-4b43-982d-ad5e66525301",
+      "SymbolName": "Lib.numbers.vec3.RoundVec3",
       "SectionId": "2a6c1856-7f44-4249-aa32-4d76e65d7399",
       "Comment": "To get the center position of the active cell, we first have to floor...",
       "Position": {
@@ -102,7 +114,8 @@
       }
     },
     {
-      "ChildId": "2699a417-482f-4858-845d-63fc78622af9"/*PairPointsForLines*/,
+      "ChildId": "2699a417-482f-4858-845d-63fc78622af9",
+      "SymbolName": "Lib.point.combine.PairPointsForLines",
       "Comment": "We connect both points to draw a line.",
       "Position": {
         "X": 2135.8647,
@@ -110,7 +123,8 @@
       }
     },
     {
-      "ChildId": "2f0ee70b-bb1a-44a9-a4ae-c85e9de9826a"/*AddVec3*/,
+      "ChildId": "2f0ee70b-bb1a-44a9-a4ae-c85e9de9826a",
+      "SymbolName": "Lib.numbers.vec3.AddVec3",
       "SectionId": "2a6c1856-7f44-4249-aa32-4d76e65d7399",
       "Comment": "..then we have to add half a cell width.",
       "Position": {
@@ -119,7 +133,8 @@
       }
     },
     {
-      "ChildId": "3b813218-2ea1-4ac1-adb1-4825bcbf9710"/*_GridPoints_Old*/,
+      "ChildId": "3b813218-2ea1-4ac1-adb1-4825bcbf9710",
+      "SymbolName": "Lib.point.generate._GridPoints_Old",
       "SectionId": "3769fc78-7a43-41ad-a1bb-e3bbfae7bc72",
       "Position": {
         "X": 1843.55,
@@ -127,7 +142,8 @@
       }
     },
     {
-      "ChildId": "4fe32b56-8bbb-4b57-9008-d35bdc72b3f4"/*AddVec3*/,
+      "ChildId": "4fe32b56-8bbb-4b57-9008-d35bdc72b3f4",
+      "SymbolName": "Lib.numbers.vec3.AddVec3",
       "SectionId": "1ae65319-3191-4a09-8496-d0da1886214a",
       "Position": {
         "X": 361.30313,
@@ -135,14 +151,16 @@
       }
     },
     {
-      "ChildId": "68b97901-b4fc-4bb0-818e-00ca598494de"/*RenderTarget*/,
+      "ChildId": "68b97901-b4fc-4bb0-818e-00ca598494de",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "Position": {
         "X": 3058.3162,
         "Y": 0.0
       }
     },
     {
-      "ChildId": "6c7666b1-b54a-40e3-ae05-01832949630b"/*GridSize*/,
+      "ChildId": "6c7666b1-b54a-40e3-ae05-01832949630b",
+      "SymbolName": "Types.Values.IntValue",
       "SectionId": "3769fc78-7a43-41ad-a1bb-e3bbfae7bc72",
       "Position": {
         "X": 1644.27,
@@ -150,7 +168,8 @@
       }
     },
     {
-      "ChildId": "735dddfb-f47b-46e2-802e-f4064190f844"/*RepeatAtPoints*/,
+      "ChildId": "735dddfb-f47b-46e2-802e-f4064190f844",
+      "SymbolName": "Lib.point.generate.RepeatAtPoints",
       "SectionId": "3769fc78-7a43-41ad-a1bb-e3bbfae7bc72",
       "Position": {
         "X": 1993.55,
@@ -158,21 +177,24 @@
       }
     },
     {
-      "ChildId": "7413b598-32b0-4f2e-968f-7bebc47f8abb"/*CamPosition*/,
+      "ChildId": "7413b598-32b0-4f2e-968f-7bebc47f8abb",
+      "SymbolName": "Lib.render.camera.CamPosition",
       "Position": {
         "X": -115.579346,
         "Y": 11.3341675
       }
     },
     {
-      "ChildId": "7a9b956d-9d24-4205-a4cb-8ccd8d90c7aa"/*Group*/,
+      "ChildId": "7a9b956d-9d24-4205-a4cb-8ccd8d90c7aa",
+      "SymbolName": "Lib.render.transform.Group",
       "Position": {
         "X": 2435.8647,
         "Y": 272.04242
       }
     },
     {
-      "ChildId": "85884c6f-aa39-4de3-88ed-eec96f028a83"/*DrawLines*/,
+      "ChildId": "85884c6f-aa39-4de3-88ed-eec96f028a83",
+      "SymbolName": "Lib.point.draw.DrawLines",
       "SectionId": "3769fc78-7a43-41ad-a1bb-e3bbfae7bc72",
       "Position": {
         "X": 2143.55,
@@ -180,14 +202,16 @@
       }
     },
     {
-      "ChildId": "88be5e65-c6ee-4209-ae67-d34aae745b4c"/*SetFog*/,
+      "ChildId": "88be5e65-c6ee-4209-ae67-d34aae745b4c",
+      "SymbolName": "Lib.render.shading.SetFog",
       "Position": {
         "X": 2908.3162,
         "Y": 0.0
       }
     },
     {
-      "ChildId": "8c1887bd-56ce-4323-80f1-cef0d0c1f0b0"/*RepeatAtPoints*/,
+      "ChildId": "8c1887bd-56ce-4323-80f1-cef0d0c1f0b0",
+      "SymbolName": "Lib.point.generate.RepeatAtPoints",
       "SectionId": "3769fc78-7a43-41ad-a1bb-e3bbfae7bc72",
       "Position": {
         "X": 1993.55,
@@ -195,7 +219,8 @@
       }
     },
     {
-      "ChildId": "8d7bb45a-a706-440a-b463-01c58bef5ee2"/*CommonPointSets*/,
+      "ChildId": "8d7bb45a-a706-440a-b463-01c58bef5ee2",
+      "SymbolName": "Lib.point.generate.CommonPointSets",
       "SectionId": "3769fc78-7a43-41ad-a1bb-e3bbfae7bc72",
       "Position": {
         "X": 1993.9744,
@@ -203,7 +228,8 @@
       }
     },
     {
-      "ChildId": "8ef6b90a-829c-402a-a434-78a6f6c7bd4e"/*CenterPoint*/,
+      "ChildId": "8ef6b90a-829c-402a-a434-78a6f6c7bd4e",
+      "SymbolName": "Types.Values.Point",
       "Comment": "Another point with the y-axis zeroed out.",
       "Position": {
         "X": 1849.7402,
@@ -211,7 +237,8 @@
       }
     },
     {
-      "ChildId": "95a7f9ba-a7b7-4695-b422-81f4a10fdaa6"/*RepeatAtPoints*/,
+      "ChildId": "95a7f9ba-a7b7-4695-b422-81f4a10fdaa6",
+      "SymbolName": "Lib.point.generate.RepeatAtPoints",
       "Comment": "We repeat some radial points at the floor point to indicate the base",
       "Position": {
         "X": 2135.8647,
@@ -219,7 +246,8 @@
       }
     },
     {
-      "ChildId": "9d4c0032-4ef7-4ee5-95d3-443733b00887"/*Point*/,
+      "ChildId": "9d4c0032-4ef7-4ee5-95d3-443733b00887",
+      "SymbolName": "Types.Values.Point",
       "SectionId": "2a6c1856-7f44-4249-aa32-4d76e65d7399",
       "Comment": "Create a point at that center position.",
       "Position": {
@@ -228,7 +256,8 @@
       }
     },
     {
-      "ChildId": "a188d189-70dc-4f8e-9803-a645a2610f66"/*DrawLines*/,
+      "ChildId": "a188d189-70dc-4f8e-9803-a645a2610f66",
+      "SymbolName": "Lib.point.draw.DrawLines",
       "SectionId": "3769fc78-7a43-41ad-a1bb-e3bbfae7bc72",
       "Position": {
         "X": 2143.55,
@@ -236,14 +265,16 @@
       }
     },
     {
-      "ChildId": "a96b4569-9e53-43cd-adc7-4120cddbdbb8"/*ListToBuffer*/,
+      "ChildId": "a96b4569-9e53-43cd-adc7-4120cddbdbb8",
+      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
       "Position": {
         "X": 1999.7402,
         "Y": 325.2907
       }
     },
     {
-      "ChildId": "aa93f70f-6061-4bd5-85f4-16910e326004"/*DrawBillboards*/,
+      "ChildId": "aa93f70f-6061-4bd5-85f4-16910e326004",
+      "SymbolName": "Lib.point.draw.DrawBillboards",
       "SectionId": "4a90a060-5873-4412-8b0d-3e4f1d18c8bb",
       "Position": {
         "X": 1128.4601,
@@ -251,7 +282,8 @@
       }
     },
     {
-      "ChildId": "ac18e228-fa7b-42d9-9481-7cba9e62e576"/*PointTrailFast*/,
+      "ChildId": "ac18e228-fa7b-42d9-9481-7cba9e62e576",
+      "SymbolName": "Lib.point.generate.PointTrailFast",
       "SectionId": "2a6c1856-7f44-4249-aa32-4d76e65d7399",
       "Position": {
         "X": 1993.9744,
@@ -259,7 +291,8 @@
       }
     },
     {
-      "ChildId": "b006ee19-bce7-4412-aa68-2d9e520e828a"/*DrawLines*/,
+      "ChildId": "b006ee19-bce7-4412-aa68-2d9e520e828a",
+      "SymbolName": "Lib.point.draw.DrawLines",
       "SectionId": "3769fc78-7a43-41ad-a1bb-e3bbfae7bc72",
       "Position": {
         "X": 2143.55,
@@ -267,7 +300,8 @@
       }
     },
     {
-      "ChildId": "b0e4eaa3-6071-4bb4-9117-78a41fa16688"/*DrawLines*/,
+      "ChildId": "b0e4eaa3-6071-4bb4-9117-78a41fa16688",
+      "SymbolName": "Lib.point.draw.DrawLines",
       "SectionId": "3769fc78-7a43-41ad-a1bb-e3bbfae7bc72",
       "Position": {
         "X": 2143.55,
@@ -275,7 +309,8 @@
       }
     },
     {
-      "ChildId": "b15707dc-7227-4026-9656-5895ca66fce6"/*_GridPoints_Old*/,
+      "ChildId": "b15707dc-7227-4026-9656-5895ca66fce6",
+      "SymbolName": "Lib.point.generate._GridPoints_Old",
       "SectionId": "3769fc78-7a43-41ad-a1bb-e3bbfae7bc72",
       "Position": {
         "X": 1843.55,
@@ -283,7 +318,8 @@
       }
     },
     {
-      "ChildId": "b7539ffa-5826-4883-af1a-2b11b4dda080"/*RadialPoints*/,
+      "ChildId": "b7539ffa-5826-4883-af1a-2b11b4dda080",
+      "SymbolName": "Lib.point.generate.RadialPoints",
       "SectionId": "3769fc78-7a43-41ad-a1bb-e3bbfae7bc72",
       "Position": {
         "X": 1993.55,
@@ -291,7 +327,8 @@
       }
     },
     {
-      "ChildId": "ca237d4f-f833-488f-892c-f46b648241e3"/*PerlinNoise3*/,
+      "ChildId": "ca237d4f-f833-488f-892c-f46b648241e3",
+      "SymbolName": "Lib.numbers.vec3.PerlinNoise3",
       "SectionId": "1ae65319-3191-4a09-8496-d0da1886214a",
       "Position": {
         "X": 361.30313,
@@ -299,14 +336,16 @@
       }
     },
     {
-      "ChildId": "ca248567-76fa-4487-ae93-995298550484"/*ListToBuffer*/,
+      "ChildId": "ca248567-76fa-4487-ae93-995298550484",
+      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
       "Position": {
         "X": 1999.7402,
         "Y": 256.2907
       }
     },
     {
-      "ChildId": "cdf3c961-0c31-415d-ab3f-946fe22ea125"/*Grid*/,
+      "ChildId": "cdf3c961-0c31-415d-ab3f-946fe22ea125",
+      "SymbolName": "Lib.render.transform.Group",
       "SectionId": "3769fc78-7a43-41ad-a1bb-e3bbfae7bc72",
       "Position": {
         "X": 2293.55,
@@ -314,7 +353,8 @@
       }
     },
     {
-      "ChildId": "d38ad4e6-2fd4-4de4-9006-86aafc10bb8f"/*AddVec3*/,
+      "ChildId": "d38ad4e6-2fd4-4de4-9006-86aafc10bb8f",
+      "SymbolName": "Lib.numbers.vec3.AddVec3",
       "SectionId": "1ae65319-3191-4a09-8496-d0da1886214a",
       "Position": {
         "X": 511.30313,
@@ -322,7 +362,8 @@
       }
     },
     {
-      "ChildId": "d6966486-fd1c-4347-a580-5d46da24dbf9"/*ParticleSystem*/,
+      "ChildId": "d6966486-fd1c-4347-a580-5d46da24dbf9",
+      "SymbolName": "Lib.particle.ParticleSystem",
       "SectionId": "4a90a060-5873-4412-8b0d-3e4f1d18c8bb",
       "Comment": "We set the w-attribute to the particle age so it can then be used by [DrawBillboards] for coloring the points.",
       "Position": {
@@ -331,7 +372,8 @@
       }
     },
     {
-      "ChildId": "dac7434c-fdaf-4aac-aaba-c4429e286c9b"/*OrbitCamera*/,
+      "ChildId": "dac7434c-fdaf-4aac-aaba-c4429e286c9b",
+      "SymbolName": "Lib.render.camera.OrbitCamera",
       "Comment": "Please note how we set the second \"wobble\" component of some parameters to create a more complex camera animation.",
       "Position": {
         "X": 2762.5854,
@@ -339,7 +381,8 @@
       }
     },
     {
-      "ChildId": "e2178966-b0db-4095-ba6f-431439c38095"/*CommonPointSets*/,
+      "ChildId": "e2178966-b0db-4095-ba6f-431439c38095",
+      "SymbolName": "Lib.point.generate.CommonPointSets",
       "SectionId": "3769fc78-7a43-41ad-a1bb-e3bbfae7bc72",
       "Position": {
         "X": 1843.55,
@@ -347,21 +390,24 @@
       }
     },
     {
-      "ChildId": "ee78fa0c-28bc-43cc-bf1f-4617cd9e51e5"/*DrawLines*/,
+      "ChildId": "ee78fa0c-28bc-43cc-bf1f-4617cd9e51e5",
+      "SymbolName": "Lib.point.draw.DrawLines",
       "Position": {
         "X": 2285.8647,
         "Y": 352.04242
       }
     },
     {
-      "ChildId": "f01d83f5-f0fc-40cb-8c2e-37b2d997b8e6"/*Execute*/,
+      "ChildId": "f01d83f5-f0fc-40cb-8c2e-37b2d997b8e6",
+      "SymbolName": "Lib.flow.Execute",
       "Position": {
         "X": 2612.5854,
         "Y": 3.920044
       }
     },
     {
-      "ChildId": "f29ca9cb-6fa8-419c-9de3-50f4dcd55a3c"/*TurbulenceForce*/,
+      "ChildId": "f29ca9cb-6fa8-419c-9de3-50f4dcd55a3c",
+      "SymbolName": "Lib.particle.force.TurbulenceForce",
       "SectionId": "4a90a060-5873-4412-8b0d-3e4f1d18c8bb",
       "Comment": "We add a little bit of noise to make things more interesting.",
       "Position": {
@@ -370,14 +416,16 @@
       }
     },
     {
-      "ChildId": "fbe87562-b0a6-4177-a70e-af47964c4480"/*DrawLines*/,
+      "ChildId": "fbe87562-b0a6-4177-a70e-af47964c4480",
+      "SymbolName": "Lib.point.draw.DrawLines",
       "Position": {
         "X": 2285.8647,
         "Y": 272.04242
       }
     },
     {
-      "ChildId": "fdf61255-1945-4d60-b3ed-6e547adc9c77"/*RadialPoints*/,
+      "ChildId": "fdf61255-1945-4d60-b3ed-6e547adc9c77",
+      "SymbolName": "Lib.point.generate.RadialPoints",
       "SectionId": "4a90a060-5873-4412-8b0d-3e4f1d18c8bb",
       "Comment": "Disable line mode and adjust orientation of circle and its points so that each point's z-axis is pointing outwards.",
       "Position": {

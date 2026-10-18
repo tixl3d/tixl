@@ -69,98 +69,112 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "519fa01d-8b43-4bdb-8cdd-499c35f156c0"/*ExecuteBufferUpdate*/,
+      "ChildId": "519fa01d-8b43-4bdb-8cdd-499c35f156c0",
+      "SymbolName": "Lib.render._dx11.fxsetup.ExecuteBufferUpdate",
       "Position": {
         "X": 577.38947,
         "Y": 727.6048
       }
     },
     {
-      "ChildId": "55df09e4-1e4c-4526-a2ff-b4a6fe780582"/*BoolToInt*/,
+      "ChildId": "55df09e4-1e4c-4526-a2ff-b4a6fe780582",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToInt",
       "Position": {
         "X": 109.65976,
         "Y": 1019.68994
       }
     },
     {
-      "ChildId": "620f6dca-1b38-455c-a686-51cc20f9f0bb"/*GetBufferComponents*/,
+      "ChildId": "620f6dca-1b38-455c-a686-51cc20f9f0bb",
+      "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
       "Position": {
         "X": -30.34027,
         "Y": 1254.2037
       }
     },
     {
-      "ChildId": "692be752-6c2f-4f95-92f0-e29503411f1b"/*ComputeShader*/,
+      "ChildId": "692be752-6c2f-4f95-92f0-e29503411f1b",
+      "SymbolName": "Types.Gfx.ComputeShader",
       "Position": {
         "X": 109.659775,
         "Y": 493.5784
       }
     },
     {
-      "ChildId": "782cc97d-6707-4b32-86ce-7352e9d9fbd3"/*Vector3Components*/,
+      "ChildId": "782cc97d-6707-4b32-86ce-7352e9d9fbd3",
+      "SymbolName": "Lib.numbers.vec3.Vector3Components",
       "Position": {
         "X": 109.65976,
         "Y": 713.893
       }
     },
     {
-      "ChildId": "8666fc66-a454-472f-9008-57f2034675dc"/*GetBufferComponents*/,
+      "ChildId": "8666fc66-a454-472f-9008-57f2034675dc",
+      "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
       "Position": {
         "X": -439.24286,
         "Y": 618.8263
       }
     },
     {
-      "ChildId": "9298c051-0fba-4d40-a1f2-7f3113af7b82"/*BoolToInt*/,
+      "ChildId": "9298c051-0fba-4d40-a1f2-7f3113af7b82",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToInt",
       "Position": {
         "X": 109.65976,
         "Y": 1054.6898
       }
     },
     {
-      "ChildId": "95d9a6d8-2336-4a50-b643-b73789451022"/*ComputeShaderStage*/,
+      "ChildId": "95d9a6d8-2336-4a50-b643-b73789451022",
+      "SymbolName": "Types.Gfx.ComputeShaderStage",
       "Position": {
         "X": 577.3894,
         "Y": 482.6048
       }
     },
     {
-      "ChildId": "a8a59c58-9cfa-4dbb-9a5d-225699b778df"/*Vector3Components*/,
+      "ChildId": "a8a59c58-9cfa-4dbb-9a5d-225699b778df",
+      "SymbolName": "Lib.numbers.vec3.Vector3Components",
       "Position": {
         "X": 109.65976,
         "Y": 853.893
       }
     },
     {
-      "ChildId": "da172a84-9fff-4706-beb0-dcfebafa518e"/*CalcDispatchCount*/,
+      "ChildId": "da172a84-9fff-4706-beb0-dcfebafa518e",
+      "SymbolName": "Lib.render._dx11.api.CalcDispatchCount",
       "Position": {
         "X": 249.65977,
         "Y": 528.57837
       }
     },
     {
-      "ChildId": "e2ffb3b1-9327-4cd8-83af-9f6c0d9e8842"/*_TransformsCBuffer*/,
+      "ChildId": "e2ffb3b1-9327-4cd8-83af-9f6c0d9e8842",
+      "SymbolName": "Lib.render._dx11.api._TransformsCBuffer",
       "Position": {
         "X": 184.57353,
         "Y": 1248.5173
       }
     },
     {
-      "ChildId": "e4fba79b-8ebe-44a8-b0d7-cf6dddc4e015"/*IntsToBuffer*/,
+      "ChildId": "e4fba79b-8ebe-44a8-b0d7-cf6dddc4e015",
+      "SymbolName": "Lib.numbers.int.process.IntsToBuffer",
       "Position": {
         "X": 249.65976,
         "Y": 1019.68994
       }
     },
     {
-      "ChildId": "f5c87234-fda4-4a68-a986-f4d6fbb38a8f"/*StructuredBufferWithViews*/,
+      "ChildId": "f5c87234-fda4-4a68-a986-f4d6fbb38a8f",
+      "SymbolName": "Types.Gfx.StructuredBufferWithViews",
       "Position": {
         "X": -30.34027,
         "Y": 1184.2037
       }
     },
     {
-      "ChildId": "fff76470-6570-4c45-a17a-27e4191b441f"/*FloatsToBuffer*/,
+      "ChildId": "fff76470-6570-4c45-a17a-27e4191b441f",
+      "SymbolName": "Lib.render._dx11.api.FloatsToBuffer",
       "Style": "Resizable",
       "Size": {
         "X": 104.165405,

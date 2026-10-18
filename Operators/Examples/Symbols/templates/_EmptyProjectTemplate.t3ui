@@ -5,14 +5,16 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "a9babb73-eb31-427d-8cc6-3f6cf98d9eca"/*Text*/,
+      "ChildId": "a9babb73-eb31-427d-8cc6-3f6cf98d9eca",
+      "SymbolName": "Lib.render.basic.Text",
       "Position": {
         "X": -511.71448,
         "Y": -359.70978
       }
     },
     {
-      "ChildId": "de3f931a-c1c4-4942-9677-20dabdfb328a"/*RenderTarget*/,
+      "ChildId": "de3f931a-c1c4-4942-9677-20dabdfb328a",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "Position": {
         "X": -361.71448,
         "Y": -359.70978

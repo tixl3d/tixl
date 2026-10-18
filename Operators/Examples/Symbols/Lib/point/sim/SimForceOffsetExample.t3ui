@@ -5,49 +5,56 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "2bc68e7c-5ad3-47e4-96b6-48a3ce052fc0"/*RenderTarget*/,
+      "ChildId": "2bc68e7c-5ad3-47e4-96b6-48a3ce052fc0",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "Position": {
         "X": 560.0,
         "Y": 0.0
       }
     },
     {
-      "ChildId": "600befcf-d898-4e13-8b96-2fe6d0513915"/*Glow*/,
+      "ChildId": "600befcf-d898-4e13-8b96-2fe6d0513915",
+      "SymbolName": "Lib.image.fx.stylize.Glow",
       "Position": {
         "X": 700.0,
         "Y": 0.0
       }
     },
     {
-      "ChildId": "7adb3b91-d418-4165-94f6-4331e62dd93a"/*PerlinNoise3*/,
+      "ChildId": "7adb3b91-d418-4165-94f6-4331e62dd93a",
+      "SymbolName": "Lib.numbers.vec3.PerlinNoise3",
       "Position": {
         "X": 0.0,
         "Y": 70.0
       }
     },
     {
-      "ChildId": "7e665c6e-59b4-484a-b4a3-be9316db9cbf"/*DrawPoints*/,
+      "ChildId": "7e665c6e-59b4-484a-b4a3-be9316db9cbf",
+      "SymbolName": "Lib.point.draw.DrawPoints",
       "Position": {
         "X": 280.0,
         "Y": 0.0
       }
     },
     {
-      "ChildId": "9c07c130-59e4-41fb-990a-6e0b7b1c0659"/*SimForceOffset*/,
+      "ChildId": "9c07c130-59e4-41fb-990a-6e0b7b1c0659",
+      "SymbolName": "Lib.point.sim.SimForceOffset",
       "Position": {
         "X": 140.0,
         "Y": 0.0
       }
     },
     {
-      "ChildId": "9d10b05e-c8d1-4203-b30e-5bc0abd137cf"/*_GridPoints_Old*/,
+      "ChildId": "9d10b05e-c8d1-4203-b30e-5bc0abd137cf",
+      "SymbolName": "Lib.point.generate._GridPoints_Old",
       "Position": {
         "X": 0.0,
         "Y": 0.0
       }
     },
     {
-      "ChildId": "f3a6a12d-bcc7-427b-bd5a-2035c5ec0d8e"/*OrbitCamera*/,
+      "ChildId": "f3a6a12d-bcc7-427b-bd5a-2035c5ec0d8e",
+      "SymbolName": "Lib.render.camera.OrbitCamera",
       "Position": {
         "X": 420.0,
         "Y": 0.0

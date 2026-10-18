@@ -5,35 +5,40 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "1dce8460-0f31-4afb-9d7a-973c87ae931f"/*LinearGradient*/,
+      "ChildId": "1dce8460-0f31-4afb-9d7a-973c87ae931f",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "Position": {
         "X": 150.0,
         "Y": 306.0
       }
     },
     {
-      "ChildId": "1fd6d96e-75db-4845-8aa0-29be8160225f"/*_Time_old*/,
+      "ChildId": "1fd6d96e-75db-4845-8aa0-29be8160225f",
+      "SymbolName": "Lib.numbers.anim._obsolete._Time_old",
       "Position": {
         "X": 0.0,
         "Y": 306.0
       }
     },
     {
-      "ChildId": "3448034f-e4c9-453c-b21e-288c112cf2bb"/*LoadImage*/,
+      "ChildId": "3448034f-e4c9-453c-b21e-288c112cf2bb",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
       "Position": {
         "X": 150.0,
         "Y": 0.0
       }
     },
     {
-      "ChildId": "65bd2f7a-29eb-404b-8d24-aba1cce3f151"/*LoadImage*/,
+      "ChildId": "65bd2f7a-29eb-404b-8d24-aba1cce3f151",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
       "Position": {
         "X": 150.0,
         "Y": 153.0
       }
     },
     {
-      "ChildId": "f5b22ec9-e184-4dc9-b0cf-6ed03202e0b0"/*BlendWithMask*/,
+      "ChildId": "f5b22ec9-e184-4dc9-b0cf-6ed03202e0b0",
+      "SymbolName": "Lib.image.use.BlendWithMask",
       "Position": {
         "X": 300.0,
         "Y": 0.0

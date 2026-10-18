@@ -49,7 +49,8 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "a9fafbe5-97b4-497b-98dd-0aebacf13183"/*_ImageFxShaderSetupStatic*/,
+      "ChildId": "a9fafbe5-97b4-497b-98dd-0aebacf13183",
+      "SymbolName": "Lib.render._dx11.fxsetup._ImageFxShaderSetupStatic",
       "Style": "Resizable",
       "Size": {
         "X": 94.37823,
@@ -61,7 +62,8 @@
       }
     },
     {
-      "ChildId": "bcd266c6-ab5f-43ee-8297-deaf9ffc14bd"/*Vector4Components*/,
+      "ChildId": "bcd266c6-ab5f-43ee-8297-deaf9ffc14bd",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "Position": {
         "X": 315.8498,
         "Y": 163.31819

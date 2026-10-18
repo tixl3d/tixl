@@ -41,28 +41,32 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "176abda2-2366-44ed-9c16-8b342187ccd0"/*_ValueQuizGraph*/,
+      "ChildId": "176abda2-2366-44ed-9c16-8b342187ccd0",
+      "SymbolName": "Lib.flow.skillQuest._ValueQuizGraph",
       "Position": {
         "X": 613.88983,
         "Y": -1128.3794
       }
     },
     {
-      "ChildId": "34eb4f91-fa37-4638-8657-b1484ddf56d7"/*CompareFloatLists*/,
+      "ChildId": "34eb4f91-fa37-4638-8657-b1484ddf56d7",
+      "SymbolName": "Lib.numbers.floats.process.CompareFloatLists",
       "Position": {
         "X": 943.6841,
         "Y": -942.27374
       }
     },
     {
-      "ChildId": "663fff5b-6a9f-41e0-9884-bc6595328279"/*_QuizUp*/,
+      "ChildId": "663fff5b-6a9f-41e0-9884-bc6595328279",
+      "SymbolName": "Lib.flow.skillQuest._QuizUp",
       "Position": {
         "X": 1283.061,
         "Y": -1111.5164
       }
     },
     {
-      "ChildId": "a58041c7-1de9-4bf5-99a0-7e738a29af34"/*_ValueQuizGraph*/,
+      "ChildId": "a58041c7-1de9-4bf5-99a0-7e738a29af34",
+      "SymbolName": "Lib.flow.skillQuest._ValueQuizGraph",
       "Position": {
         "X": 613.88983,
         "Y": -1008.99146

@@ -5,7 +5,8 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "0d7395b1-1bc0-41f3-b3ab-9b51642b5062"/*LinearGradient*/,
+      "ChildId": "0d7395b1-1bc0-41f3-b3ab-9b51642b5062",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "Position": {
         "X": 1298.4764,
         "Y": 1844.6852
@@ -13,7 +14,8 @@
       "SnapshotGroupIndex": "1"
     },
     {
-      "ChildId": "35110282-1b14-4e4f-8621-bc74dc437e3d"/*LinearGradient*/,
+      "ChildId": "35110282-1b14-4e4f-8621-bc74dc437e3d",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "SectionId": "a7152566-789a-4602-a528-51419131503d",
       "Position": {
         "X": 1298.4766,
@@ -21,7 +23,8 @@
       }
     },
     {
-      "ChildId": "61300505-90de-41e4-ba03-1f4887202ffe"/*Time*/,
+      "ChildId": "61300505-90de-41e4-ba03-1f4887202ffe",
+      "SymbolName": "Lib.numbers.anim.time.Time",
       "SectionId": "a7152566-789a-4602-a528-51419131503d",
       "Position": {
         "X": 1158.4766,
@@ -29,21 +32,24 @@
       }
     },
     {
-      "ChildId": "72df8843-517e-48f0-96b8-f1c7109e9269"/*Time*/,
+      "ChildId": "72df8843-517e-48f0-96b8-f1c7109e9269",
+      "SymbolName": "Lib.numbers.anim.time.Time",
       "Position": {
         "X": 1298.4764,
         "Y": 1967.5139
       }
     },
     {
-      "ChildId": "7609cc9a-7521-4366-8493-e3b1cb6c5fa3"/*LinearGradient*/,
+      "ChildId": "7609cc9a-7521-4366-8493-e3b1cb6c5fa3",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "Position": {
         "X": 1441.7301,
         "Y": 2334.827
       }
     },
     {
-      "ChildId": "9a9c27e6-5aa8-4138-9dee-f0f466a3b21d"/*LinearGradient*/,
+      "ChildId": "9a9c27e6-5aa8-4138-9dee-f0f466a3b21d",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "SectionId": "a7152566-789a-4602-a528-51419131503d",
       "Position": {
         "X": 1298.4766,
@@ -51,14 +57,16 @@
       }
     },
     {
-      "ChildId": "be3ce1e8-b3e4-44d3-b9ab-86c811e63daf"/*ImageQuiz*/,
+      "ChildId": "be3ce1e8-b3e4-44d3-b9ab-86c811e63daf",
+      "SymbolName": "Lib.flow.skillQuest.ImageQuiz",
       "Position": {
         "X": 1609.7146,
         "Y": 2018.4391
       }
     },
     {
-      "ChildId": "f45a5925-d315-4f1b-9fda-b216af6adf5c"/*LinearGradient*/,
+      "ChildId": "f45a5925-d315-4f1b-9fda-b216af6adf5c",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "Position": {
         "X": 1298.4764,
         "Y": 1907.6056

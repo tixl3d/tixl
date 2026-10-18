@@ -5,28 +5,32 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "7388d24b-81e2-4d95-9a55-ebb9214dcafb"/*Time*/,
+      "ChildId": "7388d24b-81e2-4d95-9a55-ebb9214dcafb",
+      "SymbolName": "Lib.numbers.anim.time.Time",
       "Position": {
         "X": 1173.3724,
         "Y": 1792.5165
       }
     },
     {
-      "ChildId": "8f50174d-5bba-46e1-b6a3-cd9a2dec0a20"/*ImageQuiz*/,
+      "ChildId": "8f50174d-5bba-46e1-b6a3-cd9a2dec0a20",
+      "SymbolName": "Lib.flow.skillQuest.ImageQuiz",
       "Position": {
         "X": 1609.7146,
         "Y": 2018.4391
       }
     },
     {
-      "ChildId": "9dccdba3-f7e9-41a2-94e7-520f9d4d431c"/*LinearGradient*/,
+      "ChildId": "9dccdba3-f7e9-41a2-94e7-520f9d4d431c",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "Position": {
         "X": 1173.3723,
         "Y": 1856.4858
       }
     },
     {
-      "ChildId": "9fec925d-a19a-4643-bcd4-6443a859032a"/*LinearGradient*/,
+      "ChildId": "9fec925d-a19a-4643-bcd4-6443a859032a",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "SectionId": "5ae93470-9edb-4b13-842a-93e60ccf2c74",
       "Position": {
         "X": 1300.6509,
@@ -34,7 +38,8 @@
       }
     },
     {
-      "ChildId": "b80eb708-9052-4370-ae04-8c41f5f32692"/*Raster*/,
+      "ChildId": "b80eb708-9052-4370-ae04-8c41f5f32692",
+      "SymbolName": "Lib.image.generate.pattern.Raster",
       "SectionId": "5ae93470-9edb-4b13-842a-93e60ccf2c74",
       "Position": {
         "X": 1300.6509,
@@ -42,7 +47,8 @@
       }
     },
     {
-      "ChildId": "c0d8d4a7-68a4-4590-806d-34b42d6795f4"/*Time*/,
+      "ChildId": "c0d8d4a7-68a4-4590-806d-34b42d6795f4",
+      "SymbolName": "Lib.numbers.anim.time.Time",
       "SectionId": "5ae93470-9edb-4b13-842a-93e60ccf2c74",
       "Position": {
         "X": 1160.6509,
@@ -50,7 +56,8 @@
       }
     },
     {
-      "ChildId": "e403b241-a2c5-471b-a2ff-2f8f597f15a7"/*Raster*/,
+      "ChildId": "e403b241-a2c5-471b-a2ff-2f8f597f15a7",
+      "SymbolName": "Lib.image.generate.pattern.Raster",
       "Position": {
         "X": 1173.3723,
         "Y": 1911.0906

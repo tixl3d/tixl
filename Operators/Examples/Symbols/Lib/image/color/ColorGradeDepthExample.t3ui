@@ -6,105 +6,120 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "0ae3a80f-7db1-4d61-b382-1f4cd720ab85"/*_AnimValueOld*/,
+      "ChildId": "0ae3a80f-7db1-4d61-b382-1f4cd720ab85",
+      "SymbolName": "Lib.numbers.anim._obsolete._AnimValueOld",
       "Position": {
         "X": 218.74646,
         "Y": 249.1672
       }
     },
     {
-      "ChildId": "0d2ae839-6ee8-4a06-97be-4a6bf34edbe8"/*DrawPoints*/,
+      "ChildId": "0d2ae839-6ee8-4a06-97be-4a6bf34edbe8",
+      "SymbolName": "Lib.point.draw.DrawPoints",
       "Position": {
         "X": 900.9401,
         "Y": 36.946045
       }
     },
     {
-      "ChildId": "1bdf4d72-0667-41f9-a0d6-5136d1dac11a"/*AddNoise*/,
+      "ChildId": "1bdf4d72-0667-41f9-a0d6-5136d1dac11a",
+      "SymbolName": "Lib.point.modify.AddNoise",
       "Position": {
         "X": 274.41687,
         "Y": 114.84082
       }
     },
     {
-      "ChildId": "3aeabce6-bc1c-480b-a6a7-c1da75624302"/*_Time_old*/,
+      "ChildId": "3aeabce6-bc1c-480b-a6a7-c1da75624302",
+      "SymbolName": "Lib.numbers.anim._obsolete._Time_old",
       "Position": {
         "X": 0.0,
         "Y": 38.60083
       }
     },
     {
-      "ChildId": "6f7a454c-a5e3-439e-82ef-10e82974dfe9"/*_GridPoints_Old*/,
+      "ChildId": "6f7a454c-a5e3-439e-82ef-10e82974dfe9",
+      "SymbolName": "Lib.point.generate._GridPoints_Old",
       "Position": {
         "X": 0.0,
         "Y": 81.60083
       }
     },
     {
-      "ChildId": "723e0de6-0f7a-40a8-bd81-8940fa654277"/*RenderTarget*/,
+      "ChildId": "723e0de6-0f7a-40a8-bd81-8940fa654277",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "Position": {
         "X": 1050.9402,
         "Y": 36.946045
       }
     },
     {
-      "ChildId": "73b8854f-7b04-47ec-b23c-2e9ad4ba62cb"/*AddNoise*/,
+      "ChildId": "73b8854f-7b04-47ec-b23c-2e9ad4ba62cb",
+      "SymbolName": "Lib.point.modify.AddNoise",
       "Position": {
         "X": 274.41687,
         "Y": 45.84082
       }
     },
     {
-      "ChildId": "783560c4-b6e8-419d-ba8b-23f4ca4ccbe9"/*Add*/,
+      "ChildId": "783560c4-b6e8-419d-ba8b-23f4ca4ccbe9",
+      "SymbolName": "Lib.numbers.float.basic.Add",
       "Position": {
         "X": 135.08395,
         "Y": 159.10913
       }
     },
     {
-      "ChildId": "78909550-5271-4ffd-b094-e8a3824c13f2"/*Text*/,
+      "ChildId": "78909550-5271-4ffd-b094-e8a3824c13f2",
+      "SymbolName": "Lib.render.basic.Text",
       "Position": {
         "X": 445.7342,
         "Y": 197.33545
       }
     },
     {
-      "ChildId": "818099bf-b5f9-4aa7-8d63-ae3029527dfd"/*RenderTarget*/,
+      "ChildId": "818099bf-b5f9-4aa7-8d63-ae3029527dfd",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "Position": {
         "X": 595.7342,
         "Y": 197.33545
       }
     },
     {
-      "ChildId": "9a4cdb5c-132b-40c3-9aef-ddaf81712d30"/*BlendPoints*/,
+      "ChildId": "9a4cdb5c-132b-40c3-9aef-ddaf81712d30",
+      "SymbolName": "Lib.point.combine.BlendPoints",
       "Position": {
         "X": 450.94012,
         "Y": 42.419678
       }
     },
     {
-      "ChildId": "9af5ed25-628a-4518-a81b-f27c4ae70b44"/*TransformPoints*/,
+      "ChildId": "9af5ed25-628a-4518-a81b-f27c4ae70b44",
+      "SymbolName": "Lib.point.transform.TransformPoints",
       "Position": {
         "X": 600.9401,
         "Y": 42.419678
       }
     },
     {
-      "ChildId": "d22fc9ae-a76a-495e-a7a1-629fcc026771"/*SamplePointAttributes_v1*/,
+      "ChildId": "d22fc9ae-a76a-495e-a7a1-629fcc026771",
+      "SymbolName": "Lib.point.modify.SamplePointAttributes_v1",
       "Position": {
         "X": 750.9401,
         "Y": 36.946045
       }
     },
     {
-      "ChildId": "dfcdeba7-b97c-41e7-a9f3-eda7caab33af"/*ColorGradeDepth*/,
+      "ChildId": "dfcdeba7-b97c-41e7-a9f3-eda7caab33af",
+      "SymbolName": "Lib.image.color.ColorGradeDepth",
       "Position": {
         "X": 1266.5953,
         "Y": 34.715088
       }
     },
     {
-      "ChildId": "fd50e12e-cdd0-4690-bd86-c31c087705a5"/*PerlinNoise3*/,
+      "ChildId": "fd50e12e-cdd0-4690-bd86-c31c087705a5",
+      "SymbolName": "Lib.numbers.vec3.PerlinNoise3",
       "Position": {
         "X": 450.94012,
         "Y": 124.41968

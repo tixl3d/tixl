@@ -5,154 +5,176 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "03a9a928-4d53-48ca-bc00-98ab643f53ad"/*PointsOnMesh*/,
+      "ChildId": "03a9a928-4d53-48ca-bc00-98ab643f53ad",
+      "SymbolName": "Lib.point.generate.PointsOnMesh",
       "Position": {
         "X": 115.14784,
         "Y": -490.6966
       }
     },
     {
-      "ChildId": "061cf4d2-c671-4b59-8f06-57fcb01b68b3"/*SpherePoints*/,
+      "ChildId": "061cf4d2-c671-4b59-8f06-57fcb01b68b3",
+      "SymbolName": "Lib.point.generate.SpherePoints",
       "Position": {
         "X": 273.7563,
         "Y": -327.0838
       }
     },
     {
-      "ChildId": "15372043-ee81-4905-8593-3a2725b61233"/*Execute*/,
+      "ChildId": "15372043-ee81-4905-8593-3a2725b61233",
+      "SymbolName": "Lib.flow.Execute",
       "Position": {
         "X": 1340.6945,
         "Y": -429.44843
       }
     },
     {
-      "ChildId": "2296c1ce-42cc-49b1-bd3b-9e42c0abfbc6"/*TransformPoints*/,
+      "ChildId": "2296c1ce-42cc-49b1-bd3b-9e42c0abfbc6",
+      "SymbolName": "Lib.point.transform.TransformPoints",
       "Position": {
         "X": 265.14783,
         "Y": -490.6966
       }
     },
     {
-      "ChildId": "2b527503-3703-4410-a124-7cd0eae0d555"/*DepthOfField*/,
+      "ChildId": "2b527503-3703-4410-a124-7cd0eae0d555",
+      "SymbolName": "Lib.render.postfx.DepthOfField",
       "Position": {
         "X": 1940.6945,
         "Y": -429.44843
       }
     },
     {
-      "ChildId": "36cb9a67-315b-4ec2-be66-fdeb8e52fa4a"/*DrawConnectionLines*/,
+      "ChildId": "36cb9a67-315b-4ec2-be66-fdeb8e52fa4a",
+      "SymbolName": "Lib.point.draw.DrawConnectionLines",
       "Position": {
         "X": 885.8796,
         "Y": -285.1524
       }
     },
     {
-      "ChildId": "3bc66e22-5b67-4ce4-8517-91ef12c1cb81"/*DrawConnectionLines*/,
+      "ChildId": "3bc66e22-5b67-4ce4-8517-91ef12c1cb81",
+      "SymbolName": "Lib.point.draw.DrawConnectionLines",
       "Position": {
         "X": 887.25525,
         "Y": -485.851
       }
     },
     {
-      "ChildId": "3f56354c-3fa7-411c-859e-8744ad1b321a"/*DrawPoints*/,
+      "ChildId": "3f56354c-3fa7-411c-859e-8744ad1b321a",
+      "SymbolName": "Lib.point.draw.DrawPoints",
       "Position": {
         "X": 890.69446,
         "Y": -347.44843
       }
     },
     {
-      "ChildId": "6241df25-4cc8-4a86-8c22-4bafce20abcd"/*CellSize*/,
+      "ChildId": "6241df25-4cc8-4a86-8c22-4bafce20abcd",
+      "SymbolName": "Types.Values.Value",
       "Position": {
         "X": 679.5203,
         "Y": -619.52844
       }
     },
     {
-      "ChildId": "672b7e97-9256-47bd-bb28-99c40edc4a12"/*SliceViewPort*/,
+      "ChildId": "672b7e97-9256-47bd-bb28-99c40edc4a12",
+      "SymbolName": "Lib.render.transform.SliceViewPort",
       "Position": {
         "X": 1190.6945,
         "Y": -251.44843
       }
     },
     {
-      "ChildId": "7796c065-b969-4002-a029-1a6c2060a5a2"/*RenderTarget*/,
+      "ChildId": "7796c065-b969-4002-a029-1a6c2060a5a2",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "Position": {
         "X": 1790.6945,
         "Y": -429.44843
       }
     },
     {
-      "ChildId": "866a2103-88a0-48cc-959b-11f40be9b753"/*Glow*/,
+      "ChildId": "866a2103-88a0-48cc-959b-11f40be9b753",
+      "SymbolName": "Lib.image.fx.stylize.Glow",
       "Position": {
         "X": 2090.6943,
         "Y": -429.44843
       }
     },
     {
-      "ChildId": "b7e2dbdf-32b5-456e-8da8-16369a771ca9"/*SetFog*/,
+      "ChildId": "b7e2dbdf-32b5-456e-8da8-16369a771ca9",
+      "SymbolName": "Lib.render.shading.SetFog",
       "Position": {
         "X": 1640.6945,
         "Y": -429.44843
       }
     },
     {
-      "ChildId": "c90cbb38-90c5-427c-9c7f-f0cd73a2cd7d"/*AddNoise*/,
+      "ChildId": "c90cbb38-90c5-427c-9c7f-f0cd73a2cd7d",
+      "SymbolName": "Lib.point.modify.AddNoise",
       "Position": {
         "X": 423.7563,
         "Y": -327.0838
       }
     },
     {
-      "ChildId": "cc4f9775-0c98-4fd8-9a5b-366c5a0f47a8"/*HasTimeChanged*/,
+      "ChildId": "cc4f9775-0c98-4fd8-9a5b-366c5a0f47a8",
+      "SymbolName": "Lib.numbers.anim.time.HasTimeChanged",
       "Position": {
         "X": 566.37915,
         "Y": -466.87775
       }
     },
     {
-      "ChildId": "d0c860e5-c350-4ef2-9432-b0bdf85ea268"/*Execute*/,
+      "ChildId": "d0c860e5-c350-4ef2-9432-b0bdf85ea268",
+      "SymbolName": "Lib.flow.Execute",
       "Position": {
         "X": 1040.6945,
         "Y": -429.44843
       }
     },
     {
-      "ChildId": "d1265cfe-d2c8-48bd-b86c-53f1c8110eca"/*OrbitCamera*/,
+      "ChildId": "d1265cfe-d2c8-48bd-b86c-53f1c8110eca",
+      "SymbolName": "Lib.render.camera.OrbitCamera",
       "Position": {
         "X": 1490.6945,
         "Y": -429.44843
       }
     },
     {
-      "ChildId": "d1bafaa5-31f8-43df-9a28-4a3e57bc5c99"/*DrawPoints*/,
+      "ChildId": "d1bafaa5-31f8-43df-9a28-4a3e57bc5c99",
+      "SymbolName": "Lib.point.draw.DrawPoints",
       "Position": {
         "X": 890.69446,
         "Y": -169.44843
       }
     },
     {
-      "ChildId": "dbbf3b0f-5206-48c0-93f3-6838d858b8a2"/*LoadObj*/,
+      "ChildId": "dbbf3b0f-5206-48c0-93f3-6838d858b8a2",
+      "SymbolName": "Lib.mesh.generate.LoadObj",
       "Position": {
         "X": -34.852158,
         "Y": -490.6966
       }
     },
     {
-      "ChildId": "e8e7233d-d922-4e71-8aaa-7c5ef23fbef5"/*_Time_old*/,
+      "ChildId": "e8e7233d-d922-4e71-8aaa-7c5ef23fbef5",
+      "SymbolName": "Lib.numbers.anim._obsolete._Time_old",
       "Position": {
         "X": 273.7563,
         "Y": -284.0838
       }
     },
     {
-      "ChildId": "efa42e98-026e-43ac-b0a3-574bf0cf0325"/*SliceViewPort*/,
+      "ChildId": "efa42e98-026e-43ac-b0a3-574bf0cf0325",
+      "SymbolName": "Lib.render.transform.SliceViewPort",
       "Position": {
         "X": 1190.6945,
         "Y": -429.44843
       }
     },
     {
-      "ChildId": "f68e4e6f-e9dc-4140-8b03-fafd7abb9ef3"/*Execute*/,
+      "ChildId": "f68e4e6f-e9dc-4140-8b03-fafd7abb9ef3",
+      "SymbolName": "Lib.flow.Execute",
       "Position": {
         "X": 1040.6945,
         "Y": -251.44843

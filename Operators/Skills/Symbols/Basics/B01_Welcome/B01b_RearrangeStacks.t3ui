@@ -6,7 +6,8 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "00d45d58-e13b-4d34-b2f1-b1d3f9ab1556"/*Raster*/,
+      "ChildId": "00d45d58-e13b-4d34-b2f1-b1d3f9ab1556",
+      "SymbolName": "Lib.image.generate.pattern.Raster",
       "SectionId": "7fa7fdbc-6e64-4f13-bb08-e4df6b0f8023",
       "Position": {
         "X": 1056.6931,
@@ -14,7 +15,8 @@
       }
     },
     {
-      "ChildId": "43d35c42-9c4b-400b-be28-e714421383b2"/*Blob*/,
+      "ChildId": "43d35c42-9c4b-400b-be28-e714421383b2",
+      "SymbolName": "Lib.image.generate.basic.Blob",
       "SectionId": "7fa7fdbc-6e64-4f13-bb08-e4df6b0f8023",
       "Position": {
         "X": 1056.6931,
@@ -22,14 +24,16 @@
       }
     },
     {
-      "ChildId": "6184d203-c5eb-4683-b339-efbd6ab994c2"/*Raster*/,
+      "ChildId": "6184d203-c5eb-4683-b339-efbd6ab994c2",
+      "SymbolName": "Lib.image.generate.pattern.Raster",
       "Position": {
         "X": 1317.4214,
         "Y": 1842.4305
       }
     },
     {
-      "ChildId": "8a190a1c-779e-4fe4-841a-77f2a4b8a602"/*RoundedRect*/,
+      "ChildId": "8a190a1c-779e-4fe4-841a-77f2a4b8a602",
+      "SymbolName": "Lib.image.generate.basic.RoundedRect",
       "SectionId": "7fa7fdbc-6e64-4f13-bb08-e4df6b0f8023",
       "Position": {
         "X": 1056.6931,
@@ -37,21 +41,24 @@
       }
     },
     {
-      "ChildId": "ce2b8e28-76f5-4ff6-b793-2ac09fc69062"/*ImageQuiz*/,
+      "ChildId": "ce2b8e28-76f5-4ff6-b793-2ac09fc69062",
+      "SymbolName": "Lib.flow.skillQuest.ImageQuiz",
       "Position": {
         "X": 1548.4866,
         "Y": 1941.9801
       }
     },
     {
-      "ChildId": "e1ced027-06a0-4a71-8f0c-3cb6b6658b52"/*Blob*/,
+      "ChildId": "e1ced027-06a0-4a71-8f0c-3cb6b6658b52",
+      "SymbolName": "Lib.image.generate.basic.Blob",
       "Position": {
         "X": 1142.3529,
         "Y": 1841.2993
       }
     },
     {
-      "ChildId": "e70d3ff1-c036-4c38-9d89-277f03b747e7"/*RoundedRect*/,
+      "ChildId": "e70d3ff1-c036-4c38-9d89-277f03b747e7",
+      "SymbolName": "Lib.image.generate.basic.RoundedRect",
       "Position": {
         "X": 952.01245,
         "Y": 1837.34

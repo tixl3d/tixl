@@ -5,7 +5,8 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "209d436f-6b06-477c-b566-a7b6a1f5eef1"/*Text*/,
+      "ChildId": "209d436f-6b06-477c-b566-a7b6a1f5eef1",
+      "SymbolName": "Lib.render.basic.Text",
       "SectionId": "6a2111f1-f08f-4f87-b3fc-614c0ad6203a",
       "Position": {
         "X": 1244.7633,
@@ -13,14 +14,16 @@
       }
     },
     {
-      "ChildId": "3924ea87-1e06-4fdb-a8b6-787b4bda0a58"/*DrawQuiz*/,
+      "ChildId": "3924ea87-1e06-4fdb-a8b6-787b4bda0a58",
+      "SymbolName": "Lib.flow.skillQuest.DrawQuiz",
       "Position": {
         "X": 1693.2708,
         "Y": 1786.6185
       }
     },
     {
-      "ChildId": "7fecc2ca-9b8d-4383-983f-3c8e9b8c56fa"/*Text*/,
+      "ChildId": "7fecc2ca-9b8d-4383-983f-3c8e9b8c56fa",
+      "SymbolName": "Lib.render.basic.Text",
       "Position": {
         "X": 1366.8816,
         "Y": 1568.3276

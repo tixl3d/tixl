@@ -6,7 +6,8 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "16a393bc-102b-4285-863d-b4f0ca740f87"/*LinearGradient*/,
+      "ChildId": "16a393bc-102b-4285-863d-b4f0ca740f87",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "SectionId": "374f4922-c82a-416b-86ec-7c52b7321fc4",
       "Position": {
         "X": -573.9602,
@@ -14,7 +15,8 @@
       }
     },
     {
-      "ChildId": "2438bf57-200c-447a-9982-f8e56ce2d068"/*LoadImage*/,
+      "ChildId": "2438bf57-200c-447a-9982-f8e56ce2d068",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
       "SectionId": "374f4922-c82a-416b-86ec-7c52b7321fc4",
       "Position": {
         "X": -573.9602,
@@ -22,7 +24,8 @@
       }
     },
     {
-      "ChildId": "24986579-f249-48fc-ab7b-a48f44c977df"/*LoadImage*/,
+      "ChildId": "24986579-f249-48fc-ab7b-a48f44c977df",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
       "SectionId": "cc4c290c-294b-4d1d-bdcd-c58be4ad88d6",
       "Position": {
         "X": -793.96643,
@@ -30,7 +33,8 @@
       }
     },
     {
-      "ChildId": "2777e6c3-c78c-42c4-9b7e-d2a9bd562ac7"/*_AnimValueOld*/,
+      "ChildId": "2777e6c3-c78c-42c4-9b7e-d2a9bd562ac7",
+      "SymbolName": "Lib.numbers.anim._obsolete._AnimValueOld",
       "SectionId": "6d0076de-13c0-4688-982d-c3cb67fe35de",
       "Position": {
         "X": 635.0569,
@@ -38,7 +42,8 @@
       }
     },
     {
-      "ChildId": "293cb7d1-08f5-4437-aa94-502ddde4eb60"/*Blend*/,
+      "ChildId": "293cb7d1-08f5-4437-aa94-502ddde4eb60",
+      "SymbolName": "Lib.image.use.Blend",
       "SectionId": "341cd5a9-322a-46b4-bfa9-864e6aad8dd4",
       "Comment": "Note:\n\n1. Image B is rendered on top.\n2. We multiply the color from the gradient, so adjust its color and opacity.\n3. The effect uses the \"auto resolution\" [0,0], which here uses the resolution of Image A.\n4. Image B gets \"stretched.\" If you want to avoid that, see the [Layer2d] example below.",
       "Position": {
@@ -47,7 +52,8 @@
       }
     },
     {
-      "ChildId": "2afd07a3-4a23-4900-92ff-96185ac2e52e"/*LoadImage*/,
+      "ChildId": "2afd07a3-4a23-4900-92ff-96185ac2e52e",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
       "SectionId": "341cd5a9-322a-46b4-bfa9-864e6aad8dd4",
       "Position": {
         "X": 567.1265,
@@ -55,7 +61,8 @@
       }
     },
     {
-      "ChildId": "34135c50-1c3a-4999-9653-1cb04bb1b567"/*Layer2d*/,
+      "ChildId": "34135c50-1c3a-4999-9653-1cb04bb1b567",
+      "SymbolName": "Lib.render.basic.Layer2d",
       "SectionId": "5e8bd960-7a80-4d3b-9d1b-3ee52183a8fd",
       "Comment": "Note:\n\n1. The ScaleMode parameter is set to \"FitHeight.\" Feel free to experiment with the other modes.",
       "Position": {
@@ -64,7 +71,8 @@
       }
     },
     {
-      "ChildId": "3c581874-d61d-46aa-bd7a-c85503d66283"/*AsciiRender*/,
+      "ChildId": "3c581874-d61d-46aa-bd7a-c85503d66283",
+      "SymbolName": "Lib.image.fx.stylize.AsciiRender",
       "SectionId": "d05d3d5d-240b-4de8-a970-e881f43d4c02",
       "Position": {
         "X": -487.41382,
@@ -72,7 +80,8 @@
       }
     },
     {
-      "ChildId": "3d53d881-5422-4ffb-a19d-fa2531266fc9"/*AnimValue*/,
+      "ChildId": "3d53d881-5422-4ffb-a19d-fa2531266fc9",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "SectionId": "ab3b2edb-7215-4bed-bfb8-cea5b6f5969e",
       "Position": {
         "X": -766.5144,
@@ -80,7 +89,8 @@
       }
     },
     {
-      "ChildId": "45cfc38a-cf19-458f-97e9-8cd2585c21ae"/*Rotate*/,
+      "ChildId": "45cfc38a-cf19-458f-97e9-8cd2585c21ae",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "SectionId": "cc4c290c-294b-4d1d-bdcd-c58be4ad88d6",
       "Position": {
         "X": -781.48834,
@@ -88,7 +98,8 @@
       }
     },
     {
-      "ChildId": "45f48cde-daf3-4657-894e-90c58c12031a"/*Steps*/,
+      "ChildId": "45f48cde-daf3-4657-894e-90c58c12031a",
+      "SymbolName": "Lib.image.fx.stylize.Steps",
       "SectionId": "d05d3d5d-240b-4de8-a970-e881f43d4c02",
       "Position": {
         "X": -490.28662,
@@ -96,7 +107,8 @@
       }
     },
     {
-      "ChildId": "50402b67-ea93-4784-bca9-8f11127f1632"/*FloatToInt*/,
+      "ChildId": "50402b67-ea93-4784-bca9-8f11127f1632",
+      "SymbolName": "Lib.numbers.int.process.FloatToInt",
       "SectionId": "a35b622a-4f5c-4ee1-bf67-0c29c446415a",
       "Position": {
         "X": 73.99475,
@@ -104,7 +116,8 @@
       }
     },
     {
-      "ChildId": "56160207-977c-4165-8b29-7fed4497d70f"/*Raster*/,
+      "ChildId": "56160207-977c-4165-8b29-7fed4497d70f",
+      "SymbolName": "Lib.image.generate.pattern.Raster",
       "SectionId": "d05d3d5d-240b-4de8-a970-e881f43d4c02",
       "Position": {
         "X": -484.1703,
@@ -112,7 +125,8 @@
       }
     },
     {
-      "ChildId": "582bdcd1-f69d-428c-8f59-579553ff633d"/*OscillateVec2*/,
+      "ChildId": "582bdcd1-f69d-428c-8f59-579553ff633d",
+      "SymbolName": "Lib.numbers.anim.animators.OscillateVec2",
       "SectionId": "cc4c290c-294b-4d1d-bdcd-c58be4ad88d6",
       "Position": {
         "X": -757.7623,
@@ -120,7 +134,8 @@
       }
     },
     {
-      "ChildId": "5a8a018b-21fd-432a-a945-ca51368ff454"/*LoadImage*/,
+      "ChildId": "5a8a018b-21fd-432a-a945-ca51368ff454",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
       "SectionId": "e7d3314e-404f-47ba-96eb-ac6a1624f8cf",
       "Position": {
         "X": -33.451904,
@@ -128,7 +143,8 @@
       }
     },
     {
-      "ChildId": "5cdc3815-8326-47b5-868f-72f2ddec00ef"/*LoadImage*/,
+      "ChildId": "5cdc3815-8326-47b5-868f-72f2ddec00ef",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
       "SectionId": "eecc7921-23d8-4aa9-8e16-6d35fb2a816e",
       "Position": {
         "X": -746.052,
@@ -136,7 +152,8 @@
       }
     },
     {
-      "ChildId": "668d6a32-5f84-4fb9-a5f5-82b65f2682f3"/*GlitchDisplace*/,
+      "ChildId": "668d6a32-5f84-4fb9-a5f5-82b65f2682f3",
+      "SymbolName": "Lib.image.fx.glitch.GlitchDisplace",
       "SectionId": "50b5afd1-0769-411f-b2e0-5bc37a2e664c",
       "Position": {
         "X": 1570.8221,
@@ -144,7 +161,8 @@
       }
     },
     {
-      "ChildId": "6ce44056-bf52-46a6-833d-59e69e7d50b3"/*LoadImage*/,
+      "ChildId": "6ce44056-bf52-46a6-833d-59e69e7d50b3",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
       "SectionId": "341cd5a9-322a-46b4-bfa9-864e6aad8dd4",
       "Position": {
         "X": 567.1265,
@@ -152,7 +170,8 @@
       }
     },
     {
-      "ChildId": "72ab56a3-068a-44c6-82ab-35a1aeaa7a29"/*Dither*/,
+      "ChildId": "72ab56a3-068a-44c6-82ab-35a1aeaa7a29",
+      "SymbolName": "Lib.image.fx.stylize.Dither",
       "SectionId": "d05d3d5d-240b-4de8-a970-e881f43d4c02",
       "Position": {
         "X": -493.69778,
@@ -160,7 +179,8 @@
       }
     },
     {
-      "ChildId": "77288e81-392a-4425-be2e-6484063c6de2"/*Rotate*/,
+      "ChildId": "77288e81-392a-4425-be2e-6484063c6de2",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "SectionId": "eecc7921-23d8-4aa9-8e16-6d35fb2a816e",
       "Position": {
         "X": -746.052,
@@ -168,7 +188,8 @@
       }
     },
     {
-      "ChildId": "7740580a-6af3-486b-8885-f7cf5f8db401"/*Counter*/,
+      "ChildId": "7740580a-6af3-486b-8885-f7cf5f8db401",
+      "SymbolName": "Lib.numbers.anim._obsolete.Counter",
       "SectionId": "a35b622a-4f5c-4ee1-bf67-0c29c446415a",
       "Position": {
         "X": -76.00525,
@@ -176,7 +197,8 @@
       }
     },
     {
-      "ChildId": "780c9435-f59f-4247-9201-37b152fcee3b"/*OscillateVec2*/,
+      "ChildId": "780c9435-f59f-4247-9201-37b152fcee3b",
+      "SymbolName": "Lib.numbers.anim.animators.OscillateVec2",
       "SectionId": "7cf03de1-1d93-43f8-a91f-0d303e8fc2de",
       "Position": {
         "X": -178.87439,
@@ -184,7 +206,8 @@
       }
     },
     {
-      "ChildId": "7d471c04-6981-4754-bf77-516ee976e233"/*Displace*/,
+      "ChildId": "7d471c04-6981-4754-bf77-516ee976e233",
+      "SymbolName": "Lib.image.fx.distort.Displace",
       "SectionId": "ab3b2edb-7215-4bed-bfb8-cea5b6f5969e",
       "Position": {
         "X": -435.11987,
@@ -192,7 +215,8 @@
       }
     },
     {
-      "ChildId": "7d6cad4b-ad65-4d2b-ac2f-44f5165936f5"/*EdgeRepeat*/,
+      "ChildId": "7d6cad4b-ad65-4d2b-ac2f-44f5165936f5",
+      "SymbolName": "Lib.image.fx.distort.EdgeRepeat",
       "SectionId": "c57262d3-9928-48c2-ab08-eba3a204fcde",
       "Position": {
         "X": -495.78198,
@@ -200,7 +224,8 @@
       }
     },
     {
-      "ChildId": "7d77d004-92e5-4f7f-81e3-f276b3662600"/*_AnimValueOld*/,
+      "ChildId": "7d77d004-92e5-4f7f-81e3-f276b3662600",
+      "SymbolName": "Lib.numbers.anim._obsolete._AnimValueOld",
       "SectionId": "50b5afd1-0769-411f-b2e0-5bc37a2e664c",
       "Position": {
         "X": 1417.63,
@@ -208,7 +233,8 @@
       }
     },
     {
-      "ChildId": "887e3416-71f3-469e-87de-5ee14eeb0691"/*OscillateVec2*/,
+      "ChildId": "887e3416-71f3-469e-87de-5ee14eeb0691",
+      "SymbolName": "Lib.numbers.anim.animators.OscillateVec2",
       "SectionId": "cc4c290c-294b-4d1d-bdcd-c58be4ad88d6",
       "Position": {
         "X": -796.2522,
@@ -216,7 +242,8 @@
       }
     },
     {
-      "ChildId": "8e5148ef-7d15-4b98-acd2-9860cedc6d15"/*Layer2d*/,
+      "ChildId": "8e5148ef-7d15-4b98-acd2-9860cedc6d15",
+      "SymbolName": "Lib.render.basic.Layer2d",
       "SectionId": "5e8bd960-7a80-4d3b-9d1b-3ee52183a8fd",
       "Position": {
         "X": 770.1049,
@@ -224,7 +251,8 @@
       }
     },
     {
-      "ChildId": "990c72bf-1eac-47ca-aa79-e4d233491c80"/*SampleGradient*/,
+      "ChildId": "990c72bf-1eac-47ca-aa79-e4d233491c80",
+      "SymbolName": "Lib.numbers.color.SampleGradient",
       "SectionId": "341cd5a9-322a-46b4-bfa9-864e6aad8dd4",
       "Position": {
         "X": 567.1265,
@@ -232,7 +260,8 @@
       }
     },
     {
-      "ChildId": "9c3c7271-27fc-4add-b1c4-753791f75e7e"/*LoadImage*/,
+      "ChildId": "9c3c7271-27fc-4add-b1c4-753791f75e7e",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
       "SectionId": "6d0076de-13c0-4688-982d-c3cb67fe35de",
       "Position": {
         "X": 783.7207,
@@ -240,7 +269,8 @@
       }
     },
     {
-      "ChildId": "9f37d3d3-ae06-42c4-98b8-9a89244ead5a"/*_BlobOld*/,
+      "ChildId": "9f37d3d3-ae06-42c4-98b8-9a89244ead5a",
+      "SymbolName": "Lib.image.generate._obsolete._BlobOld",
       "SectionId": "7cf03de1-1d93-43f8-a91f-0d303e8fc2de",
       "Position": {
         "X": -28.87439,
@@ -248,7 +278,8 @@
       }
     },
     {
-      "ChildId": "9ff355e1-f077-4ba0-ad2e-d365912197bf"/*FakeLight*/,
+      "ChildId": "9ff355e1-f077-4ba0-ad2e-d365912197bf",
+      "SymbolName": "Lib.image.fx.stylize.FakeLight",
       "SectionId": "7cf03de1-1d93-43f8-a91f-0d303e8fc2de",
       "Position": {
         "X": 121.12561,
@@ -256,7 +287,8 @@
       }
     },
     {
-      "ChildId": "a32547d9-1bbd-4b77-8f2c-2b0315640c01"/*MirrorRepeat*/,
+      "ChildId": "a32547d9-1bbd-4b77-8f2c-2b0315640c01",
+      "SymbolName": "Lib.image.transform.MirrorRepeat",
       "SectionId": "c57262d3-9928-48c2-ab08-eba3a204fcde",
       "Position": {
         "X": -498.82513,
@@ -264,7 +296,8 @@
       }
     },
     {
-      "ChildId": "a9396aa0-98d4-44a4-97c2-3b84cdc894b3"/*Rotate*/,
+      "ChildId": "a9396aa0-98d4-44a4-97c2-3b84cdc894b3",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "SectionId": "e7d3314e-404f-47ba-96eb-ac6a1624f8cf",
       "Position": {
         "X": -176.74231,
@@ -272,7 +305,8 @@
       }
     },
     {
-      "ChildId": "b25770bf-184b-4434-be62-3326146ce95c"/*BubbleZoom*/,
+      "ChildId": "b25770bf-184b-4434-be62-3326146ce95c",
+      "SymbolName": "Lib.image.fx.distort.BubbleZoom",
       "SectionId": "c57262d3-9928-48c2-ab08-eba3a204fcde",
       "Position": {
         "X": -498.10532,
@@ -280,7 +314,8 @@
       }
     },
     {
-      "ChildId": "b3b270aa-d2a8-493c-ab8d-9509ebbf9238"/*LoadImage*/,
+      "ChildId": "b3b270aa-d2a8-493c-ab8d-9509ebbf9238",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
       "SectionId": "7cf03de1-1d93-43f8-a91f-0d303e8fc2de",
       "Position": {
         "X": -28.87439,
@@ -288,7 +323,8 @@
       }
     },
     {
-      "ChildId": "bd644acc-63c2-4e3e-9b4c-a8f651f94a93"/*LoadImage*/,
+      "ChildId": "bd644acc-63c2-4e3e-9b4c-a8f651f94a93",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
       "SectionId": "6d0076de-13c0-4688-982d-c3cb67fe35de",
       "Position": {
         "X": 783.7207,
@@ -296,7 +332,8 @@
       }
     },
     {
-      "ChildId": "c0bcb1c6-91e4-4b60-bb09-d26ee0be360f"/*LinearGradient*/,
+      "ChildId": "c0bcb1c6-91e4-4b60-bb09-d26ee0be360f",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "SectionId": "e7d3314e-404f-47ba-96eb-ac6a1624f8cf",
       "Position": {
         "X": -26.74231,
@@ -304,7 +341,8 @@
       }
     },
     {
-      "ChildId": "c15501c2-1756-44f3-a47a-3929fbe5d591"/*Execute*/,
+      "ChildId": "c15501c2-1756-44f3-a47a-3929fbe5d591",
+      "SymbolName": "Lib.flow.Execute",
       "SectionId": "5e8bd960-7a80-4d3b-9d1b-3ee52183a8fd",
       "Position": {
         "X": 920.1049,
@@ -312,7 +350,8 @@
       }
     },
     {
-      "ChildId": "c17b5d0d-69cb-4d2e-8a25-7223b63ab61e"/*BlendWithMask*/,
+      "ChildId": "c17b5d0d-69cb-4d2e-8a25-7223b63ab61e",
+      "SymbolName": "Lib.image.use.BlendWithMask",
       "SectionId": "6d0076de-13c0-4688-982d-c3cb67fe35de",
       "Position": {
         "X": 933.7207,
@@ -320,7 +359,8 @@
       }
     },
     {
-      "ChildId": "c8c2360c-73df-483e-bee1-4fe2a04da53c"/*BlurWithMask*/,
+      "ChildId": "c8c2360c-73df-483e-bee1-4fe2a04da53c",
+      "SymbolName": "Lib.image.fx._.BlurWithMask",
       "SectionId": "374f4922-c82a-416b-86ec-7c52b7321fc4",
       "Position": {
         "X": -423.9602,
@@ -328,7 +368,8 @@
       }
     },
     {
-      "ChildId": "cba28168-419c-4024-964e-02000cec480f"/*DetectEdges*/,
+      "ChildId": "cba28168-419c-4024-964e-02000cec480f",
+      "SymbolName": "Lib.image.fx.stylize.DetectEdges",
       "SectionId": "d05d3d5d-240b-4de8-a970-e881f43d4c02",
       "Position": {
         "X": -485.01575,
@@ -336,7 +377,8 @@
       }
     },
     {
-      "ChildId": "cffbb39b-8be7-4ccd-a37b-4cd5814fb6c9"/*RenderTarget*/,
+      "ChildId": "cffbb39b-8be7-4ccd-a37b-4cd5814fb6c9",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "SectionId": "5e8bd960-7a80-4d3b-9d1b-3ee52183a8fd",
       "Position": {
         "X": 1070.1042,
@@ -344,7 +386,8 @@
       }
     },
     {
-      "ChildId": "d0c165cc-6bbc-4d1b-a68d-555ffa7f91c9"/*DistortAndShade*/,
+      "ChildId": "d0c165cc-6bbc-4d1b-a68d-555ffa7f91c9",
+      "SymbolName": "Lib.image.fx.distort.DistortAndShade",
       "SectionId": "e7d3314e-404f-47ba-96eb-ac6a1624f8cf",
       "Position": {
         "X": 116.548096,
@@ -352,7 +395,8 @@
       }
     },
     {
-      "ChildId": "d5c0027d-2a90-4539-a0e5-bbbfcb9f468a"/*_FractalNoiseOld*/,
+      "ChildId": "d5c0027d-2a90-4539-a0e5-bbbfcb9f468a",
+      "SymbolName": "Lib.image.generate._obsolete._FractalNoiseOld",
       "SectionId": "ab3b2edb-7215-4bed-bfb8-cea5b6f5969e",
       "Position": {
         "X": -616.5144,
@@ -360,7 +404,8 @@
       }
     },
     {
-      "ChildId": "d9431484-08a6-41d3-8479-d880b5178165"/*AnimValue*/,
+      "ChildId": "d9431484-08a6-41d3-8479-d880b5178165",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "SectionId": "50b5afd1-0769-411f-b2e0-5bc37a2e664c",
       "Position": {
         "X": 1421.9293,
@@ -368,7 +413,8 @@
       }
     },
     {
-      "ChildId": "d9ecd28e-d8d7-4adb-8ee1-d2c8c8ea1313"/*_AnimValueOld*/,
+      "ChildId": "d9ecd28e-d8d7-4adb-8ee1-d2c8c8ea1313",
+      "SymbolName": "Lib.numbers.anim._obsolete._AnimValueOld",
       "SectionId": "341cd5a9-322a-46b4-bfa9-864e6aad8dd4",
       "Position": {
         "X": 417.12656,
@@ -376,7 +422,8 @@
       }
     },
     {
-      "ChildId": "dc62ad42-2aa6-4b7d-af87-f41068544c52"/*SortPixelGlitch*/,
+      "ChildId": "dc62ad42-2aa6-4b7d-af87-f41068544c52",
+      "SymbolName": "Lib.image.fx.glitch.SortPixelGlitch",
       "SectionId": "50b5afd1-0769-411f-b2e0-5bc37a2e664c",
       "Position": {
         "X": 1567.63,
@@ -384,7 +431,8 @@
       }
     },
     {
-      "ChildId": "e190ea1b-a8a5-476f-a38b-f84a71031a97"/*Rotate*/,
+      "ChildId": "e190ea1b-a8a5-476f-a38b-f84a71031a97",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "SectionId": "374f4922-c82a-416b-86ec-7c52b7321fc4",
       "Position": {
         "X": -723.9602,
@@ -392,7 +440,8 @@
       }
     },
     {
-      "ChildId": "e43c6694-7a42-48c3-b533-1443f9a2a263"/*DirectionalBlur*/,
+      "ChildId": "e43c6694-7a42-48c3-b533-1443f9a2a263",
+      "SymbolName": "Lib.image.fx.blur.DirectionalBlur",
       "SectionId": "eecc7921-23d8-4aa9-8e16-6d35fb2a816e",
       "Position": {
         "X": -577.41504,
@@ -400,7 +449,8 @@
       }
     },
     {
-      "ChildId": "edf1c3d0-01ae-4fe1-ba26-14dfc963b68d"/*KochKaleidoskope*/,
+      "ChildId": "edf1c3d0-01ae-4fe1-ba26-14dfc963b68d",
+      "SymbolName": "Lib.image.fx.distort.KochKaleidoskope",
       "SectionId": "c57262d3-9928-48c2-ab08-eba3a204fcde",
       "Position": {
         "X": -495.94604,
@@ -408,7 +458,8 @@
       }
     },
     {
-      "ChildId": "ef6aca02-7dd1-4eaa-be1e-419236d1cf34"/*PickTexture*/,
+      "ChildId": "ef6aca02-7dd1-4eaa-be1e-419236d1cf34",
+      "SymbolName": "Lib.image.use.PickTexture",
       "SectionId": "a35b622a-4f5c-4ee1-bf67-0c29c446415a",
       "Position": {
         "X": 256.91443,
@@ -416,7 +467,8 @@
       }
     },
     {
-      "ChildId": "efd9e808-8f31-467e-8977-a0b08c59a23e"/*LoadImage*/,
+      "ChildId": "efd9e808-8f31-467e-8977-a0b08c59a23e",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
       "SectionId": "ab3b2edb-7215-4bed-bfb8-cea5b6f5969e",
       "Position": {
         "X": -612.3684,
@@ -424,7 +476,8 @@
       }
     },
     {
-      "ChildId": "f48e49cc-bda9-43b8-baa6-fc1a713ded65"/*LoadImage*/,
+      "ChildId": "f48e49cc-bda9-43b8-baa6-fc1a713ded65",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
       "SectionId": "50b5afd1-0769-411f-b2e0-5bc37a2e664c",
       "Position": {
         "X": 1417.63,
@@ -432,7 +485,8 @@
       }
     },
     {
-      "ChildId": "f506c6d3-4095-4acf-82dd-d847515f6f1c"/*LinearGradient*/,
+      "ChildId": "f506c6d3-4095-4acf-82dd-d847515f6f1c",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "SectionId": "6d0076de-13c0-4688-982d-c3cb67fe35de",
       "Position": {
         "X": 785.0569,
@@ -440,7 +494,8 @@
       }
     },
     {
-      "ChildId": "f9664b47-b295-4c2e-87d7-b3212d073799"/*ChromaticDistortion*/,
+      "ChildId": "f9664b47-b295-4c2e-87d7-b3212d073799",
+      "SymbolName": "Lib.image.fx.distort.ChromaticDistortion",
       "SectionId": "c57262d3-9928-48c2-ab08-eba3a204fcde",
       "Position": {
         "X": -498.65253,
@@ -448,7 +503,8 @@
       }
     },
     {
-      "ChildId": "fd56af0c-52a3-4ea0-ab12-db8f8cc87294"/*AnimValue*/,
+      "ChildId": "fd56af0c-52a3-4ea0-ab12-db8f8cc87294",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "SectionId": "cc4c290c-294b-4d1d-bdcd-c58be4ad88d6",
       "Position": {
         "X": -781.48834,
@@ -456,7 +512,8 @@
       }
     },
     {
-      "ChildId": "fded24d6-fd46-4d1b-90bd-16e035752a8f"/*LoadImage*/,
+      "ChildId": "fded24d6-fd46-4d1b-90bd-16e035752a8f",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
       "SectionId": "50b5afd1-0769-411f-b2e0-5bc37a2e664c",
       "Position": {
         "X": 1420.822,

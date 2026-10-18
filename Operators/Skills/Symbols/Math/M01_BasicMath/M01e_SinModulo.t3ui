@@ -5,7 +5,8 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "0d2aff72-b45b-4acb-ab23-e5439622ef3a"/*Modulo*/,
+      "ChildId": "0d2aff72-b45b-4acb-ab23-e5439622ef3a",
+      "SymbolName": "Lib.numbers.float.basic.Modulo",
       "SectionId": "bc8e3da9-8b47-4608-9307-975f5e3bc9db",
       "Position": {
         "X": 1326.2296,
@@ -13,7 +14,8 @@
       }
     },
     {
-      "ChildId": "1fe68021-c103-4703-bf03-ba9a78365734"/*Sin*/,
+      "ChildId": "1fe68021-c103-4703-bf03-ba9a78365734",
+      "SymbolName": "Lib.numbers.float.trigonometry.Sin",
       "SectionId": "bc8e3da9-8b47-4608-9307-975f5e3bc9db",
       "Position": {
         "X": 1186.2296,
@@ -21,35 +23,40 @@
       }
     },
     {
-      "ChildId": "5131e282-ba05-4b17-8b84-7915a365f2a7"/*Time*/,
+      "ChildId": "5131e282-ba05-4b17-8b84-7915a365f2a7",
+      "SymbolName": "Lib.numbers.anim.time.Time",
       "Position": {
         "X": 1186.2295,
         "Y": 1724.9136
       }
     },
     {
-      "ChildId": "56341359-d315-4170-98ec-1383b7b752a4"/*ValueQuiz*/,
+      "ChildId": "56341359-d315-4170-98ec-1383b7b752a4",
+      "SymbolName": "Lib.flow.skillQuest.ValueQuiz",
       "Position": {
         "X": 1580.2582,
         "Y": 1895.0925
       }
     },
     {
-      "ChildId": "7ae3df7f-0c33-4c9c-8912-55de8969d44f"/*Sin*/,
+      "ChildId": "7ae3df7f-0c33-4c9c-8912-55de8969d44f",
+      "SymbolName": "Lib.numbers.float.trigonometry.Sin",
       "Position": {
         "X": 1186.2296,
         "Y": 1795.5363
       }
     },
     {
-      "ChildId": "a02faa00-b367-448c-85d8-b112cba9da40"/*Modulo*/,
+      "ChildId": "a02faa00-b367-448c-85d8-b112cba9da40",
+      "SymbolName": "Lib.numbers.float.basic.Modulo",
       "Position": {
         "X": 1186.2296,
         "Y": 1856.0702
       }
     },
     {
-      "ChildId": "ddef0878-d327-457a-9063-2dc3520fcd89"/*Time*/,
+      "ChildId": "ddef0878-d327-457a-9063-2dc3520fcd89",
+      "SymbolName": "Lib.numbers.anim.time.Time",
       "SectionId": "bc8e3da9-8b47-4608-9307-975f5e3bc9db",
       "Position": {
         "X": 1186.2296,

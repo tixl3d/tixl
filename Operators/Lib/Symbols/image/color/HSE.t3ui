@@ -52,7 +52,8 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "9d77d29a-2306-4539-82e1-f77b95d01235"/*_multiImageFxSetupStatic*/,
+      "ChildId": "9d77d29a-2306-4539-82e1-f77b95d01235",
+      "SymbolName": "Lib.image.fx._._multiImageFxSetupStatic",
       "Position": {
         "X": 489.32697,
         "Y": 154.92328

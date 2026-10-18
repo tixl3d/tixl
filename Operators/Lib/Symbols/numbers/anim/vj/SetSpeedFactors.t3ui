@@ -51,14 +51,16 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "4f65db0d-bd6b-4564-9605-895c80baf11d"/*PickFloat*/,
+      "ChildId": "4f65db0d-bd6b-4564-9605-895c80baf11d",
+      "SymbolName": "Lib.numbers.float.logic.PickFloat",
       "Position": {
         "X": 310.18182,
         "Y": 4.337738
       }
     },
     {
-      "ChildId": "6aff5a3c-0d33-453c-ae5b-ca27e17f9663"/*Execute*/,
+      "ChildId": "6aff5a3c-0d33-453c-ae5b-ca27e17f9663",
+      "SymbolName": "Lib.flow.Execute",
       "Style": "Resizable",
       "Size": {
         "X": 77.22693,
@@ -70,42 +72,48 @@
       }
     },
     {
-      "ChildId": "836b32e0-5749-44aa-a1dc-27deeccc4073"/*SetFloatVar*/,
+      "ChildId": "836b32e0-5749-44aa-a1dc-27deeccc4073",
+      "SymbolName": "Lib.flow.context.SetFloatVar",
       "Position": {
         "X": 310.18182,
         "Y": 109.33774
       }
     },
     {
-      "ChildId": "945a41f1-b4ff-474c-8de5-ade6fda08d14"/*SetFloatVar*/,
+      "ChildId": "945a41f1-b4ff-474c-8de5-ade6fda08d14",
+      "SymbolName": "Lib.flow.context.SetFloatVar",
       "Position": {
         "X": 310.18182,
         "Y": 297.8856
       }
     },
     {
-      "ChildId": "95fee365-c63e-49a4-8214-a7db2baeab83"/*ExecuteTextureUpdate*/,
+      "ChildId": "95fee365-c63e-49a4-8214-a7db2baeab83",
+      "SymbolName": "Lib.render._dx11.fxsetup.ExecuteTextureUpdate",
       "Position": {
         "X": 778.0138,
         "Y": -9.438477
       }
     },
     {
-      "ChildId": "afa6fe54-9018-4451-9daf-fe560e12e718"/*ValueToRate*/,
+      "ChildId": "afa6fe54-9018-4451-9daf-fe560e12e718",
+      "SymbolName": "Lib.numbers.float.logic.ValueToRate",
       "Position": {
         "X": 170.18182,
         "Y": 4.337738
       }
     },
     {
-      "ChildId": "c09c785a-a8d0-4d55-8870-bf5822fa80f0"/*PickFloat*/,
+      "ChildId": "c09c785a-a8d0-4d55-8870-bf5822fa80f0",
+      "SymbolName": "Lib.numbers.float.logic.PickFloat",
       "Position": {
         "X": 310.18182,
         "Y": 192.88559
       }
     },
     {
-      "ChildId": "cbbabef4-d1d7-4b11-88f3-193e6f2e1f2b"/*ValueToRate*/,
+      "ChildId": "cbbabef4-d1d7-4b11-88f3-193e6f2e1f2b",
+      "SymbolName": "Lib.numbers.float.logic.ValueToRate",
       "Position": {
         "X": 170.18182,
         "Y": 192.88559

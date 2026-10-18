@@ -108,14 +108,16 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "16b1a70c-40c8-485f-b485-0a67d6496b96"/*_ImageFxShaderSetupStatic*/,
+      "ChildId": "16b1a70c-40c8-485f-b485-0a67d6496b96",
+      "SymbolName": "Lib.render._dx11.fxsetup._ImageFxShaderSetupStatic",
       "Position": {
         "X": 583.1831,
         "Y": -17.433243
       }
     },
     {
-      "ChildId": "89a92adc-48a3-4698-afbc-cacd7346904b"/*_ImageFxShaderSetup2*/,
+      "ChildId": "89a92adc-48a3-4698-afbc-cacd7346904b",
+      "SymbolName": "Lib.render._dx11.fxsetup._ImageFxShaderSetup2",
       "Style": "Resizable",
       "Size": {
         "X": 80.50782,
@@ -127,35 +129,40 @@
       }
     },
     {
-      "ChildId": "9494915c-75ff-44ba-9923-d05995988fa6"/*Vector4Components*/,
+      "ChildId": "9494915c-75ff-44ba-9923-d05995988fa6",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "Position": {
         "X": 166.33609,
         "Y": 155.84024
       }
     },
     {
-      "ChildId": "9d91b028-3e3e-40a9-99cf-16e6bcc57b1f"/*Vector2Components*/,
+      "ChildId": "9d91b028-3e3e-40a9-99cf-16e6bcc57b1f",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Position": {
         "X": 166.33607,
         "Y": 295.84024
       }
     },
     {
-      "ChildId": "a09a8895-394a-49e9-a5d5-a0bde791fecb"/*Vector4Components*/,
+      "ChildId": "a09a8895-394a-49e9-a5d5-a0bde791fecb",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "Position": {
         "X": 166.33609,
         "Y": 15.840242
       }
     },
     {
-      "ChildId": "b4732038-ebc4-4e61-956b-69d51c5410bd"/*Vector2Components*/,
+      "ChildId": "b4732038-ebc4-4e61-956b-69d51c5410bd",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Position": {
         "X": 166.3361,
         "Y": 365.84024
       }
     },
     {
-      "ChildId": "dc4e387f-20b8-4abd-b5ed-5adb41a8bbcb"/*Vector2Components*/,
+      "ChildId": "dc4e387f-20b8-4abd-b5ed-5adb41a8bbcb",
+      "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Position": {
         "X": 166.33607,
         "Y": 435.84024

@@ -45,28 +45,32 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "06f31979-e952-4e9c-898e-15f205ad12f0"/*DrawMesh*/,
+      "ChildId": "06f31979-e952-4e9c-898e-15f205ad12f0",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
       "Position": {
         "X": 117.23688,
         "Y": -177.76315
       }
     },
     {
-      "ChildId": "5777d61c-7472-4642-9103-98502abca452"/*Transform*/,
+      "ChildId": "5777d61c-7472-4642-9103-98502abca452",
+      "SymbolName": "Lib.render.transform.Transform",
       "Position": {
         "X": 117.23688,
         "Y": -37.763153
       }
     },
     {
-      "ChildId": "70287706-2726-481f-be9b-079c592a8adb"/*SphereMesh*/,
+      "ChildId": "70287706-2726-481f-be9b-079c592a8adb",
+      "SymbolName": "Lib.mesh.generate.SphereMesh",
       "Position": {
         "X": 117.23688,
         "Y": -212.76315
       }
     },
     {
-      "ChildId": "c5e404fe-1027-4db3-b2bf-44f89e8fd4da"/*BoolToInt*/,
+      "ChildId": "c5e404fe-1027-4db3-b2bf-44f89e8fd4da",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToInt",
       "Position": {
         "X": -22.763123,
         "Y": -107.76315

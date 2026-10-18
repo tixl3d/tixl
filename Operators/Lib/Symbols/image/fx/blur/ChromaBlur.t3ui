@@ -20,21 +20,24 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "191a4985-3b65-4eb5-b85f-1c71564170e4"/*CustomPixelShader*/,
+      "ChildId": "191a4985-3b65-4eb5-b85f-1c71564170e4",
+      "SymbolName": "Lib.image.use.CustomPixelShader",
       "Position": {
         "X": 140.0,
         "Y": 0.0
       }
     },
     {
-      "ChildId": "2b6056cf-2ede-4093-bb43-5aecf0b52e14"/*FastBlur*/,
+      "ChildId": "2b6056cf-2ede-4093-bb43-5aecf0b52e14",
+      "SymbolName": "Lib.image.fx.blur.FastBlur",
       "Position": {
         "X": 0.0,
         "Y": 35.0
       }
     },
     {
-      "ChildId": "fd12c8ca-43ad-47bf-9e8e-e97a7a76b7ae"/*CustomPixelShader*/,
+      "ChildId": "fd12c8ca-43ad-47bf-9e8e-e97a7a76b7ae",
+      "SymbolName": "Lib.image.use.CustomPixelShader",
       "Position": {
         "X": 0.0,
         "Y": 0.0

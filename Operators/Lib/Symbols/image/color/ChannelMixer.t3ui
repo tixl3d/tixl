@@ -67,49 +67,56 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "0c6358fd-a9d2-4d8b-b9d6-5c435bd01708"/*Vector4Components*/,
+      "ChildId": "0c6358fd-a9d2-4d8b-b9d6-5c435bd01708",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "Position": {
         "X": 582.4342,
         "Y": 390.55728
       }
     },
     {
-      "ChildId": "0d751e5a-ab98-447a-86ae-998e16b4f99c"/*Vector4Components*/,
+      "ChildId": "0d751e5a-ab98-447a-86ae-998e16b4f99c",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "Position": {
         "X": 582.4342,
         "Y": 250.55728
       }
     },
     {
-      "ChildId": "1e6b6da4-4c9d-4bfe-a0ea-144116dbbe20"/*Vector4Components*/,
+      "ChildId": "1e6b6da4-4c9d-4bfe-a0ea-144116dbbe20",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "Position": {
         "X": 582.4342,
         "Y": 110.55728
       }
     },
     {
-      "ChildId": "34d84a40-5e42-46f2-aa44-5ad18246b03b"/*BoolToFloat*/,
+      "ChildId": "34d84a40-5e42-46f2-aa44-5ad18246b03b",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
       "Position": {
         "X": 582.4342,
         "Y": 530.55725
       }
     },
     {
-      "ChildId": "80db9bd5-cec6-49af-9cba-f33ef5752a31"/*Vector4Components*/,
+      "ChildId": "80db9bd5-cec6-49af-9cba-f33ef5752a31",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "Position": {
         "X": 582.4342,
         "Y": -29.442719
       }
     },
     {
-      "ChildId": "99f43d85-65d0-418e-bb90-83f75b71360f"/*_ImageFxShaderSetupStatic*/,
+      "ChildId": "99f43d85-65d0-418e-bb90-83f75b71360f",
+      "SymbolName": "Lib.render._dx11.fxsetup._ImageFxShaderSetupStatic",
       "Position": {
         "X": 722.4342,
         "Y": -204.44272
       }
     },
     {
-      "ChildId": "d417a36e-fe49-4115-8cb7-ea2de2844f10"/*Vector4Components*/,
+      "ChildId": "d417a36e-fe49-4115-8cb7-ea2de2844f10",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "Position": {
         "X": 582.4342,
         "Y": -169.44272
