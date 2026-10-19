@@ -95,8 +95,27 @@ sudo dnf install dotnet-sdk-10.0 vulkan-loader mesa-vulkan-drivers
 
 ### NixOS
 
-Add `dotnetCorePackages.sdk_10_0`, `vulkan-loader` and `shader-slang` to your packages, and enable
-`hardware.graphics.enable = true;` in your configuration.
+Run it on NixOS
+
+```bash
+nix run "github:tixl3d/tixl/feat/linux-port?dir=Installer/Linux/nix"
+```
+
+To keep TiXL installed, add the flake to your configuration:
+
+```nix
+{
+  inputs.tixl.url = "github:tixl3d/tixl/feat/linux-port?dir=Installer/Linux/nix";
+
+  # …
+
+  environment.systemPackages = [ inputs.tixl.packages.x86_64-linux.tixl ];
+}
+```
+
+On other distributions you can use the same flake through [nixGL](https://github.com/nix-community/nixGL).
+See [the flake's README](https://github.com/tixl3d/tixl/blob/feat/linux-port/Installer/Linux/nix/README.md)
+for more information on that.
 
 ### Slang on other distributions
 
@@ -111,6 +130,12 @@ curl -L https://github.com/shader-slang/slang/releases/download/v2026.18/slang-2
 
 If you keep `slangc` somewhere else, put it on your `PATH` or point the `TIXL_SLANGC` environment
 variable at it.
+
+If your distribution packages a *newer* Slang, TiXL says so at startup: it is tested with one release line,
+because a different compiler can translate a shader differently. To use the packaged one anyway, start TiXL
+with `TIXL_SLANGC_UNPINNED=1` — the shader cache keeps its blobs apart from the pinned compiler's, so you can
+switch back at any time. Packages that ship their distribution's Slang (the Nix flake, for one) set this for
+you.
 
 ## Download and run TiXL
 

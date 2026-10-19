@@ -1,0 +1,45 @@
+name: Nix Build
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+      - feat/linux-port
+    paths:
+      - "Installer/Linux/nix/**"
+      - "Installer/Linux/build-tarball.sh"
+      - "Installer/Linux/common/**"
+      - "**/*.csproj"
+      - "t3.sln"
+      - "Tixl.props"
+      - "Directory.Build.props"
+      - "Directory.Build.targets"
+      - "global.json"
+      - ".github/workflows/nix-build.yml"
+
+concurrency:
+  group: nix-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      # Separate from the build, so an evaluation error fails in seconds instead of after the restore.
+      - name: Check Flake
+        run: nix flake check --no-build ./Installer/Linux/nix
+
+      - name: Build Package
+        run: |
+          nix build --no-link --print-out-paths --print-build-logs ./Installer/Linux/nix#tixl

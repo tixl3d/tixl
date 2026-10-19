@@ -29,6 +29,36 @@ internal sealed partial class TixlAssemblyLoadContext
         NuGetFramework IFrameworkSpecific.TargetFramework => Framework;
     }
 
+    /// <summary>
+    /// True for the reference, runtime and apphost packs that make up a .NET framework, which come from the
+    /// SDK rather than the NuGet cache.
+    /// </summary>
+    /// <remarks>
+    /// Checked by name, not by library type: a self-contained publish lists a pack as a "runtimepack", but a
+    /// RID-specific restore (<c>dotnet restore --runtime linux-x64</c>, as distribution packages do) lists
+    /// the same pack as an ordinary package.
+    /// </remarks>
+    private static bool IsFrameworkPack(string libraryName)
+    {
+        if (libraryName.StartsWith("runtimepack.", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        foreach (var framework in _frameworkPackPrefixes)
+        {
+            if (libraryName.StartsWith(framework, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+
+        return false;
+    }
+
+    private static readonly string[] _frameworkPackPrefixes =
+        [
+            "Microsoft.NETCore.App.",
+            "Microsoft.AspNetCore.App.",
+            "Microsoft.WindowsDesktop.App.",
+        ];
+
     private Assembly? SearchNugetForAssemblies(AssemblyName asmName, string name)
     {
         lock (_nugetLock)
@@ -73,9 +103,13 @@ internal sealed partial class TixlAssemblyLoadContext
                     if (library.Path == null)
                         continue;
 
-                    // Only actual packages live in the global NuGet cache. Runtime packs
-                    // (e.g. microsoft.netcore.app.runtime.win-x64) ship with the .NET runtime
-                    // and would only produce misleading "directory not found" log noise here.
+                    // Only actual packages live in the global NuGet cache. Framework packs
+                    // (e.g. microsoft.netcore.app.runtime.win-x64) ship with the .NET runtime, and what they
+                    // contain is already loaded from the shared framework, so looking for them here can only
+                    // produce misleading "directory not found" log noise.
+                    if (IsFrameworkPack(library.Name))
+                        continue;
+
                     if (!string.Equals(library.Type, "package", StringComparison.OrdinalIgnoreCase))
                         continue;
                     var assemblyNames = library.GetDefaultAssemblyNames(_dependencyContext);

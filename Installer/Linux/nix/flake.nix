@@ -1,169 +1,215 @@
 {
-  description = "TiXL - real-time motion graphics: a preview package from the release tarball, and a development shell";
+  description = "TiXL - real-time motion graphics";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
-  outputs = { self, nixpkgs }:
+  outputs =
+    { self, nixpkgs }:
     let
+      # The shipped BASS natives and the Slang build are x86-64 only.
       system = "x86_64-linux";
 
-      # tixl-bin is unfree only because it ships BASS (free for non-commercial use). Allowing exactly this
+      # tixl is unfree only because it ships BASS (free for non-commercial use). Allowing exactly this
       # package keeps `nix run` working without NIXPKGS_ALLOW_UNFREE for everything else.
       pkgs = import nixpkgs {
         inherit system;
-        config.allowUnfreePredicate = pkg: (pkg.pname or "") == "tixl-bin";
+        config.allowUnfreePredicate = package: (package.pname or "") == "tixl";
       };
+
       lib = pkgs.lib;
 
-      dotnet = pkgs.dotnetCorePackages.sdk_10_0;
-
-      # The Slang release TiXL's shaders are tested with; nixpkgs' shader-slang may be newer, and TiXL's startup
-      # check warns about any other version.
-      slang = pkgs.stdenv.mkDerivation {
-        pname = "shader-slang-bin";
-        version = "2026.18";
-        src = pkgs.fetchurl {
-          url = "https://github.com/shader-slang/slang/releases/download/v2026.18/slang-2026.18-linux-x86_64-glibc-2.27.tar.gz";
-          hash = "sha256-5F6k8RfVG4wehPpJ9WIIHnOp8p0CvU9/rSBnhgMoKCk=";
-        };
-        sourceRoot = ".";
-        nativeBuildInputs = [ pkgs.autoPatchelfHook ];
-        buildInputs = [ pkgs.stdenv.cc.cc.lib pkgs.libx11 ];
-        installPhase = ''
-          runHook preInstall
-          mkdir -p $out
-          cp -r bin lib $out/
-          install -Dm644 LICENSE $out/share/licenses/slang/LICENSE
-          runHook postInstall
-        '';
-        meta = {
-          description = "Slang shader compiler, the release TiXL is tested with";
-          homepage = "https://github.com/shader-slang/slang";
-          license = lib.licenses.asl20;
-          sourceProvenance = [ lib.sourceTypes.binaryNativeCode ];
-          platforms = [ system ];
-        };
-      };
+      # Read out of Tixl.props, so a release bumps the version in one place. Matched per line, because
+      # builtins.match has to match a whole string and the file is more than this one property.
+      version = lib.head (
+        builtins.match ".*<TixlVersion>([^<]+)</TixlVersion>.*" (
+          lib.findFirst (line: lib.hasInfix "<TixlVersion>" line)
+            (throw "No <TixlVersion> in Tixl.props - has the property been renamed?")
+            (lib.splitString "\n" (builtins.readFile ../../../Tixl.props))
+        )
+      );
 
       # SDL3 declares the backends it may load (video, input, audio) in its dlopen notes, which autoPatchelf
-      # reads as dependencies.
-      sdlBackends = with pkgs; [
-        vulkan-loader
-        libGL
-        libdrm
-        libx11
-        libxext
-        libxcursor
-        libxi
-        libxrandr
-        libxfixes
-        libxscrnsaver
-        libxtst
-        libxkbcommon
-        wayland
-        libdecor
-        fribidi
-        libthai
-        alsa-lib
-        libpulseaudio
-        pipewire
-        libjack2
-        udev
-        dbus
-        libusb1
+      # reads as dependencies. The rest - BASS's audio, .NET's ICU and OpenSSL, fonts - is loaded without
+      # being declared anywhere, so the whole set also goes on the wrapper's library path.
+      runtimeLibraries = [
+        pkgs.vulkan-loader
+        pkgs.libGL
+        pkgs.libdrm
+        pkgs.libx11
+        pkgs.libxext
+        pkgs.libxcursor
+        pkgs.libxi
+        pkgs.libxrandr
+        pkgs.libxfixes
+        pkgs.libxscrnsaver
+        pkgs.libxtst
+        pkgs.libxkbcommon
+        pkgs.wayland
+        pkgs.libdecor
+        pkgs.fribidi
+        pkgs.libthai
+        pkgs.alsa-lib
+        pkgs.libpulseaudio
+        pkgs.pipewire
+        pkgs.libjack2
+        pkgs.udev
+        pkgs.dbus
+        pkgs.libusb1
+        pkgs.stdenv.cc.cc.lib
+        pkgs.icu
+        pkgs.openssl
+        pkgs.fontconfig
+        pkgs.freetype
+        pkgs.zlib
       ];
 
-      # Also loaded at runtime but declared nowhere (BASS's audio, .NET's ICU and OpenSSL), so the wrapper and the
-      # dev shell put everything on the library path. /run/opengl-driver holds the system's GPU drivers on NixOS.
-      runtimeLibraryPath = "/run/opengl-driver/lib:" + lib.makeLibraryPath (sdlBackends ++ (with pkgs; [
-        stdenv.cc.cc.lib
-        icu
-        openssl
-        fontconfig
-        freetype
-        zlib
-      ]));
+      dotnet_sdk = pkgs.dotnetCorePackages.sdk_10_0;
 
-      tixl-bin = pkgs.stdenv.mkDerivation rec {
-        pname = "tixl-bin";
-        version = "4.4.0.1";
+      # deps.json pins every NuGet package the restore pulls, because the build sandbox has no network.
+      # Regenerate it after changing a PackageReference or the SDK version:
+      #   nix run .#fetch-deps -- "$PWD/deps.json"
+      tixl = pkgs.buildDotnetModule (finalAttrs: {
+        pname = "tixl";
+        inherit version;
 
-        src = pkgs.fetchurl {
-          url = "https://github.com/tixl3d/tixl/releases/download/v${version}/tixl-${version}-linux-x64.tar.gz";
-          hash = "sha256-YXzwVC607nf5168t5Qk4jPOT8ZBi/MiRIvXgotF5kko=";
-        };
+        # The whole repository: the editor's build stages operators, resources and the embedded help.
+        src = ../../..;
 
-        nativeBuildInputs = [ pkgs.autoPatchelfHook pkgs.makeWrapper ];
-        buildInputs = [ pkgs.stdenv.cc.cc.lib pkgs.fontconfig ] ++ sdlBackends;
+        dotnet-sdk = dotnet_sdk;
+        # The editor compiles operator projects while it runs, so it needs the SDK on PATH, not just a
+        # runtime.
+        dotnet-runtime = dotnet_sdk;
 
-        # Optional SDL backends nixpkgs doesn't provide or that make no sense here: Steam integration, OpenBSD's
-        # sndio, OpenXR, and the obsolete GLES 1 library name.
-        autoPatchelfIgnoreMissingDeps = [ "libsteam_api.so" "libsndio.so.7" "libopenxr_loader.so.1" "libGLES_CM.so.1" ];
+        nugetDeps = ./deps.json;
 
-        dontBuild = true;
-        dontStrip = true;
+        # Restored as a solution, so that deps.json covers every project the build below touches.
+        projectFile = "t3.sln";
 
-        # Patched by hand below, to leave the player out.
-        dontAutoPatchelf = true;
+        # Some NuGet packages the solution references only ship Windows-desktop assets; resolving those on
+        # Linux needs the Windows targeting packs.
+        dotnetFlags = [ "-p:EnableWindowsTargeting=true" ];
+
+        nativeBuildInputs = [
+          pkgs.autoPatchelfHook
+          pkgs.file
+        ];
+
+        # For autoPatchelf; the same set lands on the wrapper's library path through runtimeDeps.
+        buildInputs = runtimeLibraries;
+        runtimeDeps = runtimeLibraries;
+
+        # Wrapped by hand in postFixup, to end up with `tixl` rather than the assembly's `TiXL`.
+        executables = [ ];
+
+        # What Installer/Linux/build-tarball.sh does, with its restore left out: the build hook has already
+        # restored, pinned to linux-x64, while the script's own restore pulls the Windows and macOS runtime
+        # packs that Editor.csproj lists as RuntimeIdentifiers - packages nothing here can use.
+        #
+        # The hook's build phase can't take the place of the explicit solution build either: it passes
+        # SelfContained as a global property, which a solution build hands to every project while project
+        # references strip it again, so every project would be built twice, in parallel, into the same files.
+        buildPhase = ''
+          runHook preBuild
+
+          # Exported players run on other machines, so the Player is published self-contained. The editor's
+          # build picks it up from this folder.
+          dotnet publish Player/Player.csproj \
+            --configuration Release \
+            --runtime linux-x64 \
+            --self-contained \
+            -p:PublishDir="$PWD/Player/bin/ReleasePublished/" \
+            ${lib.escapeShellArgs finalAttrs.dotnetFlags}
+
+          # Framework-dependent, as for a distro package: the editor needs the SDK on PATH at runtime anyway.
+          dotnet build t3.sln \
+            --configuration Release \
+            --no-restore \
+            ${lib.escapeShellArgs finalAttrs.dotnetFlags}
+
+          # Stages the editor's build output together with the operator packages, resources and embedded help
+          # its own MSBuild targets copy there - the layout every Linux package of TiXL shares.
+          bash Installer/Linux/build-tarball.sh --skip-build --stage-only
+
+          runHook postBuild
+        '';
 
         installPhase = ''
           runHook preInstall
+
           mkdir -p $out/lib/tixl $out/share
-          cp -r . $out/lib/tixl/
-          cp -r share/. $out/share/
-          rm -rf $out/lib/tixl/share $out/lib/tixl/install-dependencies.sh
+          cp -a Installer/Linux/Output/tixl-linux-x64/. $out/lib/tixl/
+          cp -a $out/lib/tixl/share/. $out/share/
+          # The tarball's dependency notes and installer: Nix brings the SDK, Vulkan and slangc along itself.
+          rm -rf $out/lib/tixl/share $out/lib/tixl/install-dependencies.sh $out/lib/tixl/DEPENDENCIES.md
 
           # .NET's optional LTTng tracing provider: nothing loads it unless tracing is switched on, and its
           # liblttng-ust.so.0 is older than the one nixpkgs ships.
           find $out/lib/tixl -name libcoreclrtraceptprovider.so -delete
+
           runHook postInstall
         '';
 
-        # Exports copy the player to other machines, so it keeps the standard interpreter and library lookup.
-        # On NixOS itself an exported player then needs nix-ld or steam-run.
-        postFixup = ''
-          mv $out/lib/tixl/Player "$TMPDIR/Player"
-          autoPatchelf $out/lib/tixl
-          mv "$TMPDIR/Player" $out/lib/tixl/Player
+        # Optional SDL backends nixpkgs doesn't provide or that make no sense here: Steam integration,
+        # OpenBSD's sndio, OpenXR, and the obsolete GLES 1 library name.
+        autoPatchelfIgnoreMissingDeps = [
+          "libsteam_api.so"
+          "libsndio.so.7"
+          "libopenxr_loader.so.1"
+          "libGLES_CM.so.1"
+        ];
 
-          makeWrapper $out/lib/tixl/TiXL $out/bin/tixl \
-            --prefix PATH : ${dotnet}/bin \
-            --set-default TIXL_SLANGC ${slang}/bin/slangc \
-            --prefix LD_LIBRARY_PATH : "${runtimeLibraryPath}" \
-            --set-default DOTNET_CLI_TELEMETRY_OPTOUT 1
+        # The Player is patched along with the editor, unlike in a tarball build: its runtime comes from the
+        # nixpkgs .NET packs, whose host and native libraries already point into the store, so an exported
+        # player stays bound to this machine either way. Keeping it loadable here at least lets exports be
+        # tested.
+        postFixup = ''
+          wrapDotnetProgram $out/lib/tixl/TiXL $out/bin/tixl
         '';
 
+        makeWrapperArgs = [
+          # Checked before anything on PATH, so this is the compiler TiXL uses; an explicit TIXL_SLANGC still
+          # wins.
+          "--set-default TIXL_SLANGC ${pkgs.shader-slang}/bin/slangc"
+          # nixpkgs' shader-slang follows Slang's releases, not TiXL's pinned line, and asking for a second
+          # compiler next to the packaged one would be worse. The shader cache is keyed on the version in
+          # use, so blobs from the two stay apart.
+          "--set-default TIXL_SLANGC_UNPINNED 1"
+          # /run/opengl-driver/lib holds the system's GPU drivers on NixOS. The separator is an argument of
+          # its own: makeWrapper reads --prefix as three words, and the hook splits these strings on spaces.
+          "--prefix LD_LIBRARY_PATH : /run/opengl-driver/lib"
+          "--set-default DOTNET_CLI_TELEMETRY_OPTOUT 1"
+        ];
+
         meta = {
-          description = "Real-time motion graphics and VJ tool (preview build repackaged from the release tarball)";
+          description = "Real-time motion graphics and VJ tool";
           homepage = "https://tixl.app";
-          # MIT, plus the bundled BASS audio library: free for non-commercial use, commercial use needs a license
-          # from un4seen.
-          license = [ lib.licenses.mit lib.licenses.unfree ];
-          sourceProvenance = [ lib.sourceTypes.binaryNativeCode lib.sourceTypes.binaryBytecode ];
+          # MIT, plus the bundled BASS audio library: free for non-commercial use, commercial use needs a
+          # license from un4seen.
+          license = [
+            lib.licenses.mit
+            lib.licenses.unfree
+          ];
+          sourceProvenance = [
+            lib.sourceTypes.fromSource
+            lib.sourceTypes.binaryNativeCode
+          ];
           platforms = [ system ];
           mainProgram = "tixl";
         };
-      };
+      });
     in
     {
-      packages.${system} = {
-        inherit tixl-bin slang;
-        default = tixl-bin;
+      # `nix run .#fetch-deps -- "$PWD/deps.json"` regenerates deps.json. The script buildDotnetModule
+      # exposes is a bare executable in the store, which `nix run` on the package attribute cannot
+      # launch, so it is published as an app of its own.
+      apps.${system}.fetch-deps = {
+        type = "app";
+        program = "${tixl.fetch-deps}";
       };
 
-      # For building TiXL from source: run `dotnet build t3.sln` and start the editor with
-      # `dotnet Editor/bin/Debug/net10.0/TiXL.dll`. The built TiXL executable expects a standard dynamic
-      # loader, which NixOS doesn't have without nix-ld.
-      devShells.${system}.default = pkgs.mkShell {
-        packages = [ dotnet slang pkgs.vulkan-tools pkgs.vulkan-validation-layers pkgs.git ];
-        LD_LIBRARY_PATH = runtimeLibraryPath;
-        TIXL_SLANGC = "${slang}/bin/slangc";
-        VK_ADD_LAYER_PATH = "${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d";
-        DOTNET_CLI_TELEMETRY_OPTOUT = "1";
-        shellHook = ''
-          echo "TiXL dev shell: dotnet build t3.sln, then dotnet Editor/bin/Debug/net10.0/TiXL.dll"
-          echo "Vulkan validation: TIXL_VULKAN_VALIDATION=1"
-        '';
+      packages.${system} = {
+        inherit tixl;
+        default = tixl;
       };
     };
 }
