@@ -21,6 +21,9 @@ internal sealed class ToneMapping : Instance<ToneMapping>
     public readonly InputSlot<float> Gamma = new InputSlot<float>();
 
         [Input(Guid = "b3ac35c2-7f59-49fb-a4ad-84dc5a8c3841")]
+        public readonly InputSlot<float> Scale = new InputSlot<float>();
+
+        [Input(Guid = "a38b62a7-6040-408a-9843-0c5735b0cad0")]
         public readonly InputSlot<float> Exposure = new InputSlot<float>();
 
     private enum Modes
