@@ -1,7 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "45ddd1ac-5fd8-4479-81ac-eae5baf71fb6"/*ComputeImageDifference*/,
-  "Description": "A shader that computes the relative difference between two images.",
+  "Description": "Internal helper. Computes the summed difference between two images on the GPU.\n\nFor every pixel the length of the RGBA difference is multiplied by PrecisionScale, truncated to an integer and accumulated. ImageB is sampled at the resolution of ImageA.",
+  "SymbolTags": "16",
   "InputUis": [
     {
       "InputId": "1aade534-94f4-4bd0-bc73-b73ad9d666fb"/*ImageB*/,
@@ -16,7 +17,8 @@
       "Position": {
         "X": 171.55302,
         "Y": 423.2924
-      }
+      },
+      "Description": "Multiplier applied before each per-pixel difference is truncated to an integer. Higher values keep small differences from rounding to zero."
     },
     {
       "InputId": "c0438cca-a773-401c-9cc2-700c6d53cbcf"/*ImageA*/,

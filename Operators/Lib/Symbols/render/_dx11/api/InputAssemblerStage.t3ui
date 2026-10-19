@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "9d1266c5-23db-439f-a475-8000fdd1c318"/*InputAssemblerStage*/,
-  "Description": "",
+  "Description": "Internal helper. Sets the primitive topology of the input assembler for the connected commands.",
   "SymbolTags": "24",
   "InputUis": [
     {
@@ -16,21 +16,24 @@
       "Position": {
         "X": 0.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Evaluated but not bound."
     },
     {
       "InputId": "b8e07473-60f9-4f5e-995d-7165ef8f7993"/*InputLayout*/,
       "Position": {
         "X": 0.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Evaluated but not bound."
     },
     {
       "InputId": "c8fd1c4b-e6d6-4ca1-a718-4518e3bffc59"/*IndexBuffer*/,
       "Position": {
         "X": 0.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Evaluated but not bound."
     }
   ],
   "SymbolChildUis": [],

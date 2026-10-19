@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "c7752832-7155-4082-acd5-276c1abe7eb4"/*KeepPreviousPointBuffer*/,
-  "Description": "Can be used to implement double buffering of points.",
+  "Description": "Keeps copies of a GPU buffer from the current and the previous update, for double buffering.\n\nOn every update while Keep is enabled, the input is copied into one of two internal buffers. BufferA returns the latest copy, BufferB the copy from the previous update. This allows comparing points between frames, e.g. to compute their motion as in [DrawMovingPoints].",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -17,7 +17,8 @@
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "When disabled, both buffers are frozen."
     }
   ],
   "SymbolChildUis": [],

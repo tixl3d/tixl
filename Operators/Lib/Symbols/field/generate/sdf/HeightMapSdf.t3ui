@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "f8593fe5-e845-4a81-a951-ceb7cd6d097c"/*HeightMapSdf*/,
-  "Description": "Generates an SDF from a texture",
+  "Description": "Generates a terrain-like SDF from a height map texture.\n\nThe texture is projected onto the XZ plane and its brightness lifts the surface along Y. The texture repeats infinitely. Render the result with [RaymarchField] and inspect it with [VisualizeFieldDistance].\n\nSee also: [Image2dSDF]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -9,21 +9,24 @@
       "Position": {
         "X": 674.1489,
         "Y": 1078.357
-      }
+      },
+      "Description": "Per-axis multiplier for the UV coordinates. Larger values repeat the texture more often."
     },
     {
       "InputId": "82a63a92-1d49-473f-92a9-169cba2cf735"/*DisplacementHeight*/,
       "Position": {
         "X": 1005.6335,
         "Y": 1047.5734
-      }
+      },
+      "Description": "Height in world units for a texture value of 1."
     },
     {
       "InputId": "a56d9a84-5f09-43e3-81bc-34eb888b8e1a"/*UvOffset*/,
       "Position": {
         "X": 1005.63354,
         "Y": 1117.5734
-      }
+      },
+      "Description": "Offset of the texture in UV space."
     },
     {
       "InputId": "b870f95a-2858-4d9b-be78-8c74bcd5eab3"/*SdfImage*/,
@@ -31,7 +34,8 @@
       "Position": {
         "X": 1145.6335,
         "Y": 942.57336
-      }
+      },
+      "Description": "Grayscale height map. Only the red channel is used."
     },
     {
       "InputId": "b9b08796-9997-41e8-8eb7-8d5ca02e93c6"/*UvScale*/,
@@ -39,7 +43,8 @@
         "X": 534.1489,
         "Y": 1148.357
       },
-      "GroupTitle": "Alignment"
+      "GroupTitle": "Alignment",
+      "Description": "Size of the texture in world units. Larger values stretch the texture."
     },
     {
       "InputId": "c82a8a96-e7f8-4ee1-874e-44ed7449f76f"/*MaxHeight*/,
@@ -47,14 +52,16 @@
         "X": 1005.63354,
         "Y": 1187.5734
       },
-      "GroupTitle": "Additional Options"
+      "GroupTitle": "Additional Options",
+      "Description": "Upper limit for the height. Higher values are cut off flat."
     },
     {
       "InputId": "f42f9439-38cc-4ff8-a3fc-51cc3d38f05e"/*MaxSlope*/,
       "Position": {
         "X": 1005.6336,
         "Y": 1152.5734
-      }
+      },
+      "Description": "Expected maximum steepness of the terrain. Increase it to reduce raymarching artifacts on steep slopes."
     }
   ],
   "SymbolChildUis": [

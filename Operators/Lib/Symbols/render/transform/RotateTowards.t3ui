@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "8373c170-a140-4ce4-b59b-47f42fb71700"/*RotateTowards*/,
-  "Description": "Rotates the incoming scene / objects towards a specified target.\n\nAlso known as 'LookAt'\n\nUseful combination: Using the position output of a [Locator] creates a visible Target in the viewport with an interactive transform gizmo (if 'toggle gizmos and floor grid' are turned on in the Output window)",
+  "Description": "Rotates the connected subgraph so that its positive z-axis points towards the camera or a target position.\n\nThe rotation is computed from the current position of the subgraph's origin.\n\nAKA: lookat, aim, billboard, face, track\n\nTips:\n- Use the Pos output of a [Locator] as AlternativeTarget for a visible target with an interactive gizmo.\n\nSee also: [RotateAroundAxis], [Transform], [Locator]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": 0.0,
         "Y": 0.0
       },
-      "Description": "Input for a 'Pos' value\nFor example from a [Locator] node.",
+      "Description": "World space target position used in TowardsPosition mode, e.g. from a [Locator].",
       "AddPadding": "True"
     },
     {
@@ -19,7 +19,7 @@
         "X": 0.0,
         "Y": 0.0
       },
-      "Description": "Values to offset the rotation of the incoming scene / object",
+      "Description": "Additional rotation in degrees applied before aiming.",
       "Min": -90.0,
       "Max": 90.0
     },
@@ -30,7 +30,7 @@
         "X": 15.714638,
         "Y": 12.576044
       },
-      "Description": "Scene / Object input that will be rotated to look towards the set target"
+      "Description": "The subgraph to rotate."
     },
     {
       "InputId": "ccd2cc62-ad7b-420a-95d4-243257291619"/*LookTowards*/,
@@ -38,7 +38,7 @@
         "X": 0.0,
         "Y": 135.0
       },
-      "Description": "Defines whether the incoming scene turns towards the active camera or towards the defined 'AlternativeTarget'",
+      "Description": "TowardsCamera = Points at the position of the current camera\nTowardsPosition = Points at AlternativeTarget",
       "AddPadding": "True"
     }
   ],

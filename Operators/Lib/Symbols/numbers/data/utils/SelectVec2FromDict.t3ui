@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "96b1e8f3-0b42-4a01-b82b-44ccbd857400"/*SelectVec2FromDict*/,
-  "Description": "",
+  "Description": "Reads a Vec2 from a float dictionary, e.g. from OSC input.\n\nSelectX picks the key of the X component. The Y component is taken from the next key in alphabetical order.\n\nSee also: [SelectVec3FromDict], [SelectFloatFromDict]",
   "InputUis": [
     {
       "InputId": "2f3472cb-4df8-41e7-b20e-1166992bf732"/*DictionaryInput*/,
@@ -17,6 +17,7 @@
         "X": -200.0,
         "Y": 45.0
       },
+      "Description": "Key of the X component.",
       "Usage": "CustomDropdown"
     }
   ],

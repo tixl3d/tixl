@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "93e2f11a-18a2-4dcb-86df-c452d340b409"/*BlendMeshVertices*/,
-  "Description": "Blends between two sets of mesh vertices. This only yields meaningful (i.e., predictable) results for meshes with the same vertex count and topology.",
+  "Description": "Blends between the vertices of two meshes.\n\nPositions, normals, UVs, selection and colors are interpolated per vertex. Results are predictable only for meshes with the same vertex count and topology.\n\nAKA: morph, blendshape\n\nSee also: [BlendMeshToPoints]",
   "SymbolTags": "64",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": 168.51639,
         "Y": 926.5459
       },
-      "Description": "Defines the range width when the 'BlendMode' is set to 'RangeBlend' or 'RangeBlendSmooth'"
+      "Description": "Width of the transition zone for the RangeBlend modes, relative to the vertex count."
     },
     {
       "InputId": "3f4ed7b1-dbb6-4736-b323-31ea8fad870e"/*Scatter*/,
@@ -18,7 +18,7 @@
         "X": 168.51639,
         "Y": 961.5459
       },
-      "Description": "Adds random noise to the vertices' position during the transition"
+      "Description": "Adds random noise to the blend factor of each vertex during the transition."
     },
     {
       "InputId": "42941c1f-c53e-45ed-876c-f9043753a473"/*Pairing*/,
@@ -26,7 +26,7 @@
         "X": 28.516388,
         "Y": 891.5459
       },
-      "Description": "Selects the mode with which vertices are paired for blending",
+      "Description": "How vertices are paired if the counts differ.\n\nWrapAround: pairs by index.\nAdjust: pairs by relative position in the buffer, so both lists are spread over each other.",
       "AddPadding": "True"
     },
     {
@@ -35,8 +35,7 @@
       "Position": {
         "X": 168.51636,
         "Y": 1271.7982
-      },
-      "Description": "Input for Mesh A"
+      }
     },
     {
       "InputId": "5ccbc77e-2180-4c83-aaa6-ed3232de8afb"/*BlendMode*/,
@@ -45,7 +44,7 @@
         "Y": 856.5459
       },
       "GroupTitle": "Options",
-      "Description": "Defines how to blend between the meshes"
+      "Description": "Blend: uses BlendValue for all vertices.\nUseW1AsWeight: uses the selection of MeshA.\nUseW2AsWeight: uses 1 - the selection of MeshB.\nRangeBlend: a linear transition moving along the vertex order.\nRangeBlendSmooth: a smooth transition along the vertex order."
     },
     {
       "InputId": "a7ef92db-87c9-4cf3-bd62-f8cb858d9ed9"/*MeshA*/,
@@ -53,8 +52,7 @@
       "Position": {
         "X": -419.36392,
         "Y": 970.077
-      },
-      "Description": "Input for Mesh A"
+      }
     },
     {
       "InputId": "add0fd7b-fa76-4788-8940-d1949a44b342"/*BlendValue*/,
@@ -62,7 +60,7 @@
         "X": 168.51639,
         "Y": 821.5459
       },
-      "Description": "Defines the transition between the two meshes\n0 = Mesh A is displayed without changes\n1 = Mesh B is displayed without changes\nIf the 'BlendMode' is set to 'Blend', the vertices overshoot at values lower than 0 and higher than 1.\nIf the 'BlendMode' is set to 'RangeBlendSmooth', the transition loops.",
+      "Description": "Blend factor between MeshA (0) and MeshB (1). Values outside 0..1 extrapolate in Blend mode.\nFor the RangeBlend modes it moves the transition along the vertex order; RangeBlendSmooth loops back and forth.",
       "AddPadding": "True",
       "Min": 0.0,
       "Max": 1.0

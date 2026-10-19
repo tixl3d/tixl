@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "a40cb2a4-5e4c-41ef-b70d-40fa04adafbb"/*LerpVec3*/,
-  "Description": "Blends between two values (Lerp).\n\nAlso see:\n- [BlendVector3] to blend between more Vector3s.",
+  "Description": "Blends between two Vector3 values (Lerp).\n\nF = 0 returns A and F = 1 returns B.\n\nSee also: [BlendVector3], [Lerp]",
   "InputUis": [
     {
       "InputId": "41159b82-5215-4915-b433-1f2b3f18547f"/*B*/,
@@ -29,7 +29,8 @@
       "Position": {
         "X": 197.0,
         "Y": 418.0
-      }
+      },
+      "Description": "Limits F to 0 to 1 to prevent extrapolation."
     }
   ],
   "SymbolChildUis": [],

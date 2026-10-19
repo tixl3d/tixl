@@ -1,28 +1,31 @@
 {
   "FormatVersion": 3,
   "Id": "209aa9d9-0ba8-42da-8a6a-5ff9fdf09f0c"/*KeepInts*/,
-  "Description": "Keeps integer values in a list",
+  "Description": "Records incoming integer values into a list of fixed length.\n\nNew values are inserted at index 0 and older ones are pushed back; values beyond BufferLength are dropped.\n\nAKA: history, buffer, record",
   "InputUis": [
     {
       "InputId": "2773b599-cb2d-43e5-a1d7-726772222b04"/*Reset*/,
       "Position": {
         "X": -200.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Clears the list (refilled with 0)."
     },
     {
       "InputId": "65e2ef46-fe76-47a8-9c61-58db4992230a"/*BufferLength*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Number of entries, 1 to 100000."
     },
     {
       "InputId": "e32048ba-449e-48fe-891b-8c16e9d8172c"/*AddValueToList*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Inserts Value on every frame while true."
     },
     {
       "InputId": "f9598f16-8fdb-40ca-809a-13af7b818ad9"/*Value*/,

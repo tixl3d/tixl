@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "3be62864-30dd-4531-9980-28b634296e47"/*GetFrameSpeedFactor*/,
-  "Description": "This is set when rendering updates not at 60fps. This can happen for...\n\n- high framerate displays -> e.g. 2 for 120Hz displays\n- when rendering low fps image sequences -> e.g. 25/60 for 25fps\n   \nIf possible, simulation operators like [ParticleSystem] or [FeedbackEffect] should apply this factor to their overall speed factor.",
+  "Description": "Returns the factor between the actual frame rate and 60 fps.\n\nFor example it is 2 on 120 Hz displays and 25/60 when rendering a 25 fps image sequence. Simulation operators like [ParticleSystem] should apply this factor to their speed.",
   "SymbolTags": "16",
   "InputUis": [],
   "SymbolChildUis": [],

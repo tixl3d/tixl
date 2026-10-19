@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "eae8b8af-ce79-4e0a-9777-2dd0a99c18cb"/*DivInt*/,
-  "Description": "Divides Integer A (Numerator) by Integer B (Denominator)",
+  "Description": "Divides the Numerator by the Denominator using integer division.\n\nThe result is truncated toward zero (7 / 2 = 3, -7 / 2 = -3). If the Denominator is 0, the output is 1.\n\nSee also: [ModInt], [Div]",
   "SymbolTags": "1",
   "InputUis": [
     {

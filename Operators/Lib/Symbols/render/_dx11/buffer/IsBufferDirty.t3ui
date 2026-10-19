@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "02b84d90-aa4e-4cf9-94d5-feb5d7ca731e"/*IsBufferDirty*/,
-  "Description": "A helper that can be used to optimize update behavior of compute shaders.",
+  "Description": "Returns true if the input buffer changed since the last evaluation.\n\nThis can be used to skip compute shader updates while the input is unchanged.",
   "SymbolTags": "24",
   "InputUis": [
     {

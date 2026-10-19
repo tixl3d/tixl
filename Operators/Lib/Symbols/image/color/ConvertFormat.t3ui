@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "e1cd1cdf-3982-4bb3-b080-9f0a851566d7"/*ConvertFormat*/,
-  "Description": "Converts a texture into another format. This can be useful to speed up video file rendering or to fix unsupported texture formats for [PlayVideo].\n\nFor fast video exporting use [B8G8R8A8_UNorm].\n\nPlease note: The ScaleImage is only experimental and will crop from the upper left corner.",
+  "Description": "Copies a texture into another texture format.\n\nThis can be used to speed up video rendering or to fix texture formats that are not supported by other operators like [PlayVideo]. For fast video export use the B8G8R8A8_UNorm format.\n\nAKA: format, pixelformat",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -25,7 +25,8 @@
       "Position": {
         "X": 236.08261,
         "Y": 687.3333
-      }
+      },
+      "Description": "Experimental: scales the size of the resulting texture. The image is not resampled but cropped from the upper left corner."
     },
     {
       "InputId": "8686d1c3-c5a5-4b4a-b30f-95a1cfd0dc90"/*Enable*/,
@@ -33,6 +34,7 @@
         "X": 236.08261,
         "Y": 642.3333
       },
+      "Description": "If disabled, the input texture is passed through unchanged.",
       "AddPadding": "True"
     },
     {

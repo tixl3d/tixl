@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "5b127401-600c-4247-9d59-2f6ff359ba85"/*_GetSceneDefinitionPoints*/,
-  "Description": "An internal helper for [DrawMeshChunksAtPoints].",
+  "Description": "Internal helper. Provides one point per draw dispatch (mesh chunk) of a scene setup for [DrawMeshChunksAtPoints].",
   "SymbolTags": "80",
   "InputUis": [
     {

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "fa45d013-5a1c-45a0-9b05-a4a4edfb06f9"/*TypoGridBuffer*/,
-  "Description": "Once upon a time...",
+  "Description": "Internal helper. Builds a structured buffer of character cells for [TextGrid].\n\nEach cell holds its position (0..1), the character index as a cell of a 16x16 font atlas and a highlight flag. VertexCount returns six vertices per cell.",
   "SymbolTags": "16",
   "InputUis": [
     {
@@ -16,35 +16,40 @@
       "Position": {
         "X": -200.0,
         "Y": 180.0
-      }
+      },
+      "Description": "Currently unused."
     },
     {
       "InputId": "1f34d82f-455e-4d6b-8c36-b058fbb5de3d"/*WrapText*/,
       "Position": {
         "X": -200.0,
         "Y": 225.0
-      }
+      },
+      "Description": "Repeats the text to fill all cells. Otherwise the remaining cells stay empty."
     },
     {
       "InputId": "86144b95-9272-4d02-a1a7-67c6544c3bb9"/*Height*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Currently unused."
     },
     {
       "InputId": "92985ef6-b9c1-4892-bb76-c9cbad69ec8a"/*CellPadding*/,
       "Position": {
         "X": -200.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Currently unused."
     },
     {
       "InputId": "a9a4470c-980c-4fff-936b-da0d28584e02"/*TextOffset*/,
       "Position": {
         "X": -200.0,
         "Y": 270.0
-      }
+      },
+      "Description": "Scrolls the text by columns (X) and rows (Y)."
     },
     {
       "InputId": "df1a4a1e-f1fb-4fb5-8416-422d224c3d23"/*HighlightCharacters*/,
@@ -52,6 +57,7 @@
         "X": -200.0,
         "Y": 315.0
       },
+      "Description": "Characters that get the highlight flag.",
       "Usage": "Default"
     },
     {
@@ -59,7 +65,8 @@
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Currently unused."
     },
     {
       "InputId": "e815d72e-1c71-42b7-a0a2-994c6e9f2954"/*Text*/,

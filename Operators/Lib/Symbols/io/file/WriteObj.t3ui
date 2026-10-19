@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "d2a3f0b4-8a17-4c22-9b61-2a4e6d81b0c5"/*WriteObj*/,
-  "Description": "Exports the connected mesh as a Wavefront .obj file.\n\nPer vertex it writes the position, the normal and the first UV set. If they exists vertex colors are written. Faces are exported as triangles.\n\nLimitations: OBJ can only store one UV set, so a second UV set (TexCoord2) is dropped and no materials or textures are written.\n\nThe file is written when Trigger Write is triggered. An existing file is overwritten without warning.\n\nAlso see: [LoadObj] [LoadObjGeometry] [WriteToFile] [LoadObjAsPoints]",
+  "Description": "Exports the connected mesh as a Wavefront .obj file.\n\nPer vertex it writes the position, the normal and the first UV set. Vertex colors are written if they exist. Faces are exported as triangles.\n\nLimitations: OBJ can only store one UV set, so a second UV set (TexCoord2) is dropped and no materials or textures are written.\n\nThe file is written when Trigger Write is triggered. An existing file is overwritten without warning.\n\nSee also: [LoadObj], [LoadObjGeometry], [WriteToFile], [LoadObjAsPoints]",
   "InputUis": [
     {
       "InputId": "1c7a6e9f-4b85-4d23-8a07-3e9d5f2b1c64"/*FileName*/,
@@ -35,7 +35,7 @@
         "X": -200.0,
         "Y": 75.0
       },
-      "Description": "Target folder as a project asset address (e.g. **Username.MyProject:geometry** (Missing folders are created)) or an absolute path. ",
+      "Description": "Target folder as a project asset address (e.g. Username.MyProject:geometry) or an absolute path. Missing folders are created.",
       "Usage": "Default",
       "FileFilter": "obj"
     }

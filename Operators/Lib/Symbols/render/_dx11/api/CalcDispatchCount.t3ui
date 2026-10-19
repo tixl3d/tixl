@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "eb68addb-ec59-416f-8608-ff9d2319f3a3"/*CalcDispatchCount*/,
-  "Description": "Uses the ThreadCount information from a compute shader to convert an element count into a thread group dispatch count.\n\nFor 2D Textures, also see [SizeToDispatchCount].",
+  "Description": "Uses the ThreadCount information from a compute shader to convert an element count into a thread group dispatch count.\n\nThe result is Count / ThreadGroupSize.X + 1 groups in X.\n\nSee also: [CalcInt2DispatchCount]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -10,7 +10,8 @@
       "Position": {
         "X": 0.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Thread group size of the compute shader. Only X is used. 0 returns a dispatch count of 0."
     },
     {
       "InputId": "f79ccc37-05fd-4f81-97d6-6c1cafca180c"/*Count*/,

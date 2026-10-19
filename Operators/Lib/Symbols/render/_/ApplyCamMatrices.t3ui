@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "3dae14a8-3d0b-432f-b951-bdd7afd7e5f8"/*ApplyCamMatrices*/,
-  "Description": "An internal helper that applies the camera transformation matrix to the context. \nThis can be used to draw something distorted with camera clip space.",
+  "Description": "Internal helper. Applies a camera view matrix, given as Vector4 rows, to the object transform of the connected commands.\n\nThe X and Y axes are divided by the projection scale factors of CamToClipSpaceRows. [DrawCamGizmos] uses this to draw a camera frustum.",
   "SymbolTags": "16",
   "InputUis": [
     {
@@ -10,7 +10,8 @@
       "Position": {
         "X": 15.714638,
         "Y": 102.57604
-      }
+      },
+      "Description": "Camera-to-clip-space matrix as four Vector4 rows. Only its X and Y scale factors are used."
     },
     {
       "InputId": "86fa7a95-c6df-4bb8-a447-e92882a99037"/*WorldToCamRows*/,
@@ -18,7 +19,8 @@
       "Position": {
         "X": 15.714638,
         "Y": 57.576042
-      }
+      },
+      "Description": "World-to-camera matrix as four Vector4 rows."
     },
     {
       "InputId": "aad90ca4-5085-4b90-bf58-b87bdc852d62"/*Command*/,

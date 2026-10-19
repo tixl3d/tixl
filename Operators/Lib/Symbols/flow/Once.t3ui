@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "e8d2b4ac-0ba2-400f-9c82-e5dd15a23d32"/*Once*/,
-  "Description": "Briefly indicates whether the incoming Boolean value has changed.",
+  "Description": "Outputs true for a single update when the Trigger input changed, otherwise false.\n\nThis is useful for connecting to IsEnabled or reset inputs that should only fire once, e.g. for initializing buffers.\n\nSee also: [HasStringChanged]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": -60.470352,
         "Y": 41.356163
       },
-      "Description": "Trigger / Input for a boolean value"
+      "Description": "Any change of this value (or its connection) produces a single true output."
     }
   ],
   "SymbolChildUis": [],

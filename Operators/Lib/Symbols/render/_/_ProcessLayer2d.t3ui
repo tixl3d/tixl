@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "d8699da1-13aa-42f7-816a-88abb1d0ba06"/*_ProcessLayer2d*/,
-  "Description": "Internal operator that prepares attribute for rendering a quad as a Layer2d.\nWe reimplemented this functionality in C# for performance optimization.",
+  "Description": "Internal helper. Computes the transform matrix of a Layer2d quad from position, rotation, scale and the aspect ratios of image and view.",
   "SymbolTags": "16",
   "InputUis": [
     {
@@ -17,7 +17,8 @@
       "Position": {
         "X": -200.0,
         "Y": 225.0
-      }
+      },
+      "Description": "In degrees."
     },
     {
       "InputId": "28d90f8c-ceae-46b8-9711-e62ba7826ce1"/*Stretch*/,
@@ -41,7 +42,8 @@
       "Position": {
         "X": -200.0,
         "Y": 90.0
-      }
+      },
+      "Description": "FitHeight: the image height fills the view.\nFitWidth: the image width fills the view.\nFitBoth: the whole image is visible.\nCover: the image covers the whole view.\nStretch: the image is stretched to the view.\nMatchPixelResolution: one image pixel matches one output pixel."
     },
     {
       "InputId": "674e048e-5a6c-4d3e-b1e0-e44603775e02"/*PositionXy*/,

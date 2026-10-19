@@ -119,7 +119,7 @@ internal sealed class PickStringPart : Instance<PickStringPart>
 
         
     private int _numberOfChunks;
-    private string[] _chunks;
+    private string[] _chunks = [];
     private string _delimiter;
         
     [Input(Guid = "05d7962b-a02e-4ab5-9927-865375348ccd")]

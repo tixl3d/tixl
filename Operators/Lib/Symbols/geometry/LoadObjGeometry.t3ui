@@ -10,6 +10,7 @@
         "X": 0.0,
         "Y": 0.0
       },
+      "Description": "Path of the .obj file.",
       "Usage": "FilePath",
       "FileFilter": "obj"
     },
@@ -18,7 +19,8 @@
       "Position": {
         "X": 0.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Scales all positions on import."
     }
   ],
   "SymbolChildUis": [],

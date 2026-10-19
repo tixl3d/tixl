@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "fe4fdf42-1e3e-4f62-994a-a3e87d02911c"/*AnaglyphCamera*/,
-  "Description": "",
+  "Description": "Renders the connected scene as a red/cyan anaglyph stereo image for viewing with 3D glasses.\n\nThe scene is rendered twice from the position and direction of the connected reference camera, shifted left and right by EyeOffet, tinted orange and cyan and combined additively. Each eye pass is run through [DepthOfField].\n\nAKA: stereo, stereoscopic, 3d, redcyan",
   "InputUis": [
     {
       "InputId": "0dd39a9b-d99e-44ed-8242-0d232375c333"/*EyeOffet*/,
@@ -9,6 +9,7 @@
         "X": 1973.5234,
         "Y": 433.24133
       },
+      "Description": "Distance of each eye from the reference camera position.",
       "Min": -1.0,
       "Max": 1.0,
       "Scale": 0.001
@@ -18,14 +19,16 @@
       "Position": {
         "X": 1792.4496,
         "Y": 276.5678
-      }
+      },
+      "Description": "Reference output of a camera (e.g. [Camera]) that defines position and view direction. Required."
     },
     {
       "InputId": "7f4aebda-bbfc-4b84-b66c-430705e5eba9"/*FOV*/,
       "Position": {
         "X": 2182.1792,
         "Y": 235.63718
-      }
+      },
+      "Description": "Field of view in degrees. The field of view of the reference camera is not used."
     },
     {
       "InputId": "9dd036ba-d890-4e46-8c98-ecf5201bdadc"/*PlaneSplit*/,
@@ -33,6 +36,7 @@
         "X": 1973.5236,
         "Y": 596.70215
       },
+      "Description": "Horizontal lens shift applied in opposite directions for both eyes. Adjusts the depth at which both images converge (the screen plane).",
       "Min": -1.0,
       "Max": 1.0,
       "Scale": 0.001
@@ -42,14 +46,16 @@
       "Position": {
         "X": 2541.5771,
         "Y": 467.16907
-      }
+      },
+      "Description": "The scene to render. It must not contain its own camera."
     },
     {
       "InputId": "dc5c49ad-73e0-4dea-9a15-d08544e1f04b"/*FocusDistance*/,
       "Position": {
         "X": 2541.5771,
         "Y": 782.16907
-      }
+      },
+      "Description": "Focus distance of the [DepthOfField] applied to each eye."
     }
   ],
   "SymbolChildUis": [

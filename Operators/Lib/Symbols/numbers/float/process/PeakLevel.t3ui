@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "d3fb5baf-43f8-4983-a1d9-42f4005a3af0"/*PeakLevel*/,
-  "Description": "Analyzes the incoming value changes and outputs information about the peaks\n\nOutput:\n1. attack level (float): Attack level\n2. foundPeak (bool): Did the incoming value just reach a peak True / False\n3. timeSincePeak (float): How much time has passed since the last peak\n4. movingSum (float): Passing on the incoming value",
+  "Description": "Analyzes the incoming value changes and outputs information about peaks.\n\nOutputs:\n- AttackLevel: change of the value since the last frame.\n- FoundPeak: true for a frame when the value rose by more than Threshold.\n- TimeSincePeak: seconds since the last peak.\n- MovingSum: running sum of all changes, roughly following the input value.\n\nSee also: [DetectPulse], [HasValueChanged]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": 197.0,
         "Y": 373.0
       },
-      "Description": "Threshold value for the height of the peak from which it is recognized as a peak (e.g., to be able to filter out noise)",
+      "Description": "Minimum increase within one frame to count as a peak, e.g. to filter out noise.",
       "AddPadding": "True"
     },
     {
@@ -26,7 +26,7 @@
         "X": 197.0,
         "Y": 373.0
       },
-      "Description": "Defines the minimum amount of time that must have passed before a peak can be registered again"
+      "Description": "Minimum time in seconds before another peak can be registered."
     }
   ],
   "SymbolChildUis": [],

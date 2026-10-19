@@ -1,7 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "9cdcfa49-609d-4a64-ae97-8f98567075d1"/*KeepBufferReference*/,
-  "Description": "",
+  "Description": "Internal helper. Passes a buffer through and stores it in the list provided by the Reference output of [RecycleBuffer].\n\nTogether with [RecycleBuffer] this allows using a GPU buffer from the end of a graph at its beginning in the next evaluation.",
+  "SymbolTags": "16",
   "InputUis": [
     {
       "InputId": "1904c4c7-3288-42fb-a5cb-b76e38780376"/*Buffer*/,
@@ -17,7 +18,8 @@
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Connect the Reference output of [RecycleBuffer]."
     }
   ],
   "SymbolChildUis": [],

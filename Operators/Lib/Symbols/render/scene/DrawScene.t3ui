@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "2fcdea21-18f1-4006-a2fe-aab40893fed8"/*DrawScene*/,
-  "Description": "Draw the connected SceneSetup.\n\nYou can use [LoadGltfScene] to load a scene.",
+  "Description": "Draws a scene setup with all its meshes, transforms and materials.\n\nThe scene setup usually comes from [LoadGltfScene]. Lights, environment and fog are taken from the context, e.g. from [PointLight], [SetEnvironment] and [SetFog].\n\nAKA: gltf, glb, model, import\n\nSee also: [LoadGltfScene], [DrawMesh], [DefineMaterials]",
   "SymbolTags": "72",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": 1053.3339,
         "Y": 4078.1934
       },
-      "Description": "If Scene materials are disabled you can select a context material defined with [DefineMaterials].",
+      "Description": "If UseSceneMaterials is disabled, selects a named material defined with [DefineMaterials].",
       "Usage": "CustomDropdown"
     },
     {
@@ -19,7 +19,7 @@
         "X": 1053.3339,
         "Y": 4312.1177
       },
-      "Description": "If enabled discards fragments sorted out by z-buffer.\n\nThis defines whether the mesh covers itself or is covered by or covers other meshes."
+      "Description": "If enabled, surfaces hidden behind other content in the depth buffer are discarded."
     },
     {
       "InputId": "22ad6256-f741-4e8f-9a47-4b5b82e2cecf"/*Scene*/,
@@ -28,7 +28,7 @@
         "X": 1052.57,
         "Y": 3903.5176
       },
-      "Description": "Scene Input from [LoadGltfScene]-Op"
+      "Description": "Scene setup, e.g. from [LoadGltfScene]."
     },
     {
       "InputId": "2fc29a7b-84ca-4780-8305-ff08da69d405"/*SpecularAA*/,
@@ -36,7 +36,7 @@
         "X": 1061.4344,
         "Y": 4747.4697
       },
-      "Description": "This reduces specular aliasing on silhouettes and high-frequency normalmap regions.",
+      "Description": "Reduces specular aliasing on silhouettes and in high-frequency normal map regions.",
       "Min": 0.0,
       "Max": 2.0,
       "ClampMin": true,
@@ -49,7 +49,7 @@
         "Y": 4402.1177
       },
       "GroupTitle": "Texture Options",
-      "Description": "Defines the threshold value from which a transparent surface is rendered as such"
+      "Description": "Pixels with an alpha below this threshold are discarded. Useful for foliage or cut-out textures."
     },
     {
       "InputId": "42e7cc49-5102-4e74-8bea-c7698cb4abca"/*Culling*/,
@@ -57,7 +57,7 @@
         "X": 1053.3339,
         "Y": 4267.1177
       },
-      "Description": "Defines the transparency of the surfaces.\nNone: All surfaces are \"bothsided\" or always visible from all sides\nFront: The normals are flipped (frontside is transparent / backside visible)\nBack: Default (Frontside is visible / backside is invisible)"
+      "Description": "None = Both sides of the surfaces are visible\nFront = Front faces are hidden, back faces are visible\nBack = Back faces are hidden (default)"
     },
     {
       "InputId": "49e57c71-cbd3-4f8a-9a96-8fb116c947b0"/*FillMode*/,
@@ -65,7 +65,7 @@
         "X": 1050.5773,
         "Y": 4182.5444
       },
-      "Description": "Defines whether the surfaces are rendered normally or as wireframe (with colors of the materials)."
+      "Description": "Draws the surfaces filled or as wireframe."
     },
     {
       "InputId": "5f63b525-5da3-44a3-8875-11a82c37b0a5"/*UseSceneMaterials*/,
@@ -73,7 +73,7 @@
         "X": 1053.3339,
         "Y": 4033.1934
       },
-      "Description": "If enabled Tool uses the materials from the SceneSetup. \nIf disabled these materials are ignored and the material defined by [SetMaterial] in the context will be used."
+      "Description": "If enabled, the materials of the scene setup are used.\nIf disabled, they are ignored and the context material (e.g. from [SetMaterial]) is used instead."
     },
     {
       "InputId": "69151dfb-59cf-4618-8642-c9dc88260786"/*BlendMode*/,
@@ -81,8 +81,7 @@
         "X": 1050.5773,
         "Y": 4137.5444
       },
-      "GroupTitle": "Draw settings",
-      "Description": "Defines how the scene / geometry / materials are rendered."
+      "GroupTitle": "Draw settings"
     },
     {
       "InputId": "a5ba01f8-5176-4f2f-aac3-ba7d8ede4c20"/*Filter*/,
@@ -90,7 +89,7 @@
         "X": 1050.7762,
         "Y": 4543.27
       },
-      "Description": "Defines which filter method is used to render the textures."
+      "Description": "Texture filtering method."
     },
     {
       "InputId": "b17800d2-cdf3-4334-90a0-d10b8cc27445"/*WrapMode*/,
@@ -98,7 +97,7 @@
         "X": 1050.7762,
         "Y": 4588.27
       },
-      "Description": "Defines how a texture is displayed at the edge when repeated."
+      "Description": "Defines how textures are repeated outside of their 0 to 1 coordinate range."
     },
     {
       "InputId": "d517b62c-0f11-4d76-a945-4dabb7d84d74"/*EnableZWrite*/,
@@ -106,7 +105,7 @@
         "X": 1053.3339,
         "Y": 4357.1177
       },
-      "Description": "This defines whether the mesh covers itself or is covered by or covers other meshes."
+      "Description": "If enabled, the scene writes to the depth buffer and can hide content drawn later."
     },
     {
       "InputId": "dd74d2b9-8c91-4a2a-adca-5ca187d433a3"/*Color*/,
@@ -114,14 +113,15 @@
         "X": 1043.4728,
         "Y": 3973.6714
       },
-      "Description": "Defines the color and alpha with which the loaded scene is colored / changed."
+      "Description": "Color and alpha multiplied with all materials of the scene."
     },
     {
       "InputId": "f01f64e6-0344-48cb-8fc5-8b9c12f0b123"/*Shading*/,
       "Position": {
         "X": 1050.7762,
         "Y": 4663.27
-      }
+      },
+      "Description": "Default = Smooth shading with the mesh normals\nFlat = Faceted shading computed per triangle"
     }
   ],
   "SymbolChildUis": [

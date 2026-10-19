@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "8fd60f01-9960-47fb-a730-45b50b9b94d2"/*ExecuteImage2dSdf*/,
-  "Description": "Internal implementation of [Image2dSDF]. You will not need this operator.",
+  "Description": "Internal helper. Implements the shader code for [Image2dSDF].",
   "SymbolTags": "24",
   "InputUis": [
     {

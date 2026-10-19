@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "dda268e8-fed6-4137-b21d-56ed907e3a51"/*StairCombineSDF*/,
-  "Description": "A set of sdf combine operations that will turn intersections into stairs or bumps.",
+  "Description": "Combines two or more SDFs so that the seams become stairs, columns, grooves or tongues.\n\nSee also: [CombineSDF]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,21 +9,24 @@
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Size of the stair or column region in world units. For Groove and Tongue it is the depth."
     },
     {
       "InputId": "750c399c-9f8c-4bcd-8d5d-a7e26d6510c0"/*CombineMethod*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Union, Difference and Intersection with columns or stairs. Groove cuts a carpenter-style groove into the first field where the following fields cross it, Tongue adds a ridge."
     },
     {
       "InputId": "d5dc3fe0-3b7d-4afb-a941-8e632ed80ae2"/*Steps*/,
       "Position": {
         "X": -200.0,
         "Y": 120.0
-      }
+      },
+      "Description": "Number of steps or columns. For Groove and Tongue it is the width."
     },
     {
       "InputId": "f6e33d8e-b5eb-490c-94d0-69bf7efe06f9"/*InputFields*/,

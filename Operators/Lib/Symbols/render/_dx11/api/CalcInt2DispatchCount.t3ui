@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "cc11774e-82dd-409f-97fb-5be3f2746f9d"/*CalcInt2DispatchCount*/,
-  "Description": "",
+  "Description": "Converts a 2D size (e.g. a texture resolution) into a thread group dispatch count for a compute shader.\n\nThe result is Size / ThreadGroups + 1 groups in X and Y.\n\nSee also: [CalcDispatchCount]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -17,7 +17,8 @@
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Thread group size of the compute shader. Only X and Y are used."
     }
   ],
   "SymbolChildUis": [],

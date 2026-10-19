@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "dd586355-64b3-4e96-af6d-b4927595dee7"/*AddNoise*/,
-  "Description": "Creates a new buffer by resampling the connected points. This can be useful for increasing resolution or smoothing out hard edges.\n\nAlso see [SimNoiseOffset] and [TurbulenceForce]",
+  "Description": "Offsets point positions with 3D simplex noise and rotates the points to follow the distorted space.\n\nThe noise is sampled at each point position, so neighboring points move coherently. Animate Phase to make the noise flow.\n\nAKA: noise, turbulence, jitter, displace\n\nSee also: [SimNoiseOffset], [TurbulenceForce], [RandomizePoints]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": 70.217224,
         "Y": 1088.1663
       },
-      "Description": "Adds more variance and detail to the noise."
+      "Description": "Adds a random per-point offset to the noise lookup, so that neighboring points move less coherently."
     },
     {
       "InputId": "2d229dc7-a7ec-4fae-b84c-5eea6b91e18a"/*NoiseOffset*/,
@@ -34,7 +34,7 @@
         "X": 70.217224,
         "Y": 983.1664
       },
-      "Description": "Defines the total intensity of the random movements.",
+      "Description": "Overall noise amplitude. Internally divided by 10.",
       "AddPadding": "True",
       "Min": 0.0,
       "Max": 2.0
@@ -53,7 +53,8 @@
       "Position": {
         "X": 70.217224,
         "Y": 1386.7686
-      }
+      },
+      "Description": "Optionally scales the strength per point with its F1 or F2 attribute."
     },
     {
       "InputId": "97c25ec6-ef71-42f8-9352-52baf2ce41a4"/*RotationLookupDistance*/,
@@ -62,7 +63,7 @@
         "Y": 1228.1663
       },
       "GroupTitle": "Additional Options",
-      "Description": "Defines the rotation lookup distance",
+      "Description": "Distance of the neighbor samples used to derive the new orientation from the distorted noise space.\n\nValues of 0 produce invalid rotations.",
       "Min": 0.001,
       "Scale": 0.01,
       "ClampMin": true

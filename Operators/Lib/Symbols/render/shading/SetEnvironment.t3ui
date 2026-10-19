@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "f3b66187-34b2-4018-8380-279f9f296ded"/*SetEnvironment*/,
-  "Description": "Sets the image-based lighting (IBL) for the current RenderTarget. This texture can then be used by drawing operators for physically based rendering (PBR) further left in the graph.\nThe operators needed are: [LoadImage] -> [TextureToCubeMap] -> [SetEnvironment]\n\n\nSome background information: a standard technology for rendering is to use environment textures that store various degrees of roughness in their mip map levels: fully reflective chrome in the highest resolution and very blurry/diffuse reflections in the lower levels. This is not just done by blurring, though: a single ultra bright pixel (e.g. the sun) can brighten the complete diffuse reflection. This computation is very(!) expensive and should not be done in real-time for high resolution environment maps.\n\nTo compute this IBL map [SetEnvironment] needs a cube map texture. As of now you can load equirectangular HDR maps only in DDS format and convert them with a [TextureToCubemap]. We are working on making this more convenient. You can also use procedural image textures for this.\n\nNOTICE: For the background environment to have the correct alignment, the camera must be set after the environment:\n\n[DrawMesh]->[SetMaterial]->[SetPointLight]->[SetEnvironment]->[SetCamera].\n\nAlso see: [HowToDrawThings]",
+  "Description": "Sets the environment map used for image-based lighting (IBL) and reflections by PBR draw operators in the connected subgraph, and optionally draws it as background.\n\nThe Texture can be an equirectangular image (e.g. an HDRI loaded with [LoadImage]), which is converted to a cube map internally, or a cube map from [TextureToCubeMap]. The environment is prefiltered into mip levels for different roughness values: sharp reflections in the highest resolution and blurry diffuse light in the lower levels. Because a single very bright pixel (e.g. the sun) can brighten the complete diffuse reflection, this computation is expensive and should not be done every frame for high resolution maps.\n\nFor the background to be aligned correctly, the camera must come after the environment, e.g. [DrawMesh] -> [SetMaterial] -> [PointLight] -> [SetEnvironment] -> [Camera].\n\nAKA: ibl, hdri, skybox, reflection, cubemap\n\nSee also: [TextureToCubeMap], [SetMaterial], [PointLight]\n\nAlso check out the [HowToDrawThings] tutorial.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -18,14 +18,15 @@
         "X": 297.4892,
         "Y": 1345.1274
       },
-      "Description": "A factor that is applied to the sample count for the different roughness levels.\nWhen enabling Live update this has significant(!) impact on your rendering performance, so turn this down until the artifacts are noticable."
+      "Description": "Factor applied to the sample count used for prefiltering the roughness levels.\nWith UpdateLive enabled this has a significant impact on performance, so reduce it until artifacts become visible."
     },
     {
       "InputId": "486f4f09-2e4e-43b8-bfbc-2722e77d5dbd"/*Orientation*/,
       "Position": {
         "X": 129.08041,
         "Y": 546.8303
-      }
+      },
+      "Description": "Rotates an equirectangular Texture around the vertical axis."
     },
     {
       "InputId": "4f573afe-8815-4fd3-a655-89ec40bf3c22"/*RenderBackground*/,
@@ -43,7 +44,7 @@
         "X": -51.30281,
         "Y": 925.5227
       },
-      "Description": "Cubemap input to overwrite the default cubemap.\nThis can be used with the [TextureToCubeMap] operator."
+      "Description": "Equirectangular image or cube map. If not connected, the Fallback environment is used."
     },
     {
       "InputId": "650aa9a6-4aa6-4928-be76-3f1f825aa773"/*BackgroundColor*/,
@@ -63,7 +64,7 @@
         "X": -51.30281,
         "Y": 1070.1595
       },
-      "Description": "Defines the intensity with which the scene is illuminated by the image.\n\nIf changing this value has no effect temporarily turn on and off the \"UpdateLive\" setting.\n"
+      "Description": "Brightness with which the scene is lit by the environment.\n\nChanges are only applied while UpdateLive is enabled."
     },
     {
       "InputId": "96094239-9d82-4a32-bbb0-e9da7f6501da"/*BackgroundBlur*/,
@@ -83,7 +84,7 @@
         "X": 297.4892,
         "Y": 1164.3557
       },
-      "Description": "Refreshes any changes to the image and exposure settings. This can be kept turned on but will significantly decrease rendering performance.\n\nIf turned on this allows animated \"Exposure\" values and live changes in the incoming image.",
+      "Description": "Recomputes the prefiltered environment when the image or exposure changes. This allows animated Exposure values and live images but can significantly decrease rendering performance.",
       "AddPadding": "True"
     },
     {
@@ -91,7 +92,8 @@
       "Position": {
         "X": 366.52692,
         "Y": 455.17175
-      }
+      },
+      "Description": "Environment used if no Texture is connected: 0 = studio, 1 = church interior, 2 = black."
     },
     {
       "InputId": "e4482cab-f20c-4f9f-9179-c64944164509"/*SubTree*/,

@@ -1,49 +1,55 @@
 {
   "FormatVersion": 3,
   "Id": "17a48029-6144-4c79-80f1-a53c87cadd33"/*DisplaceMeshVAT*/,
-  "Description": "VAT stands for Vertex Animation Texture. \nThe animation is stored in textures.",
+  "Description": "Animates a mesh with a vertex animation texture (VAT).\n\nEach vertex samples the position offset texture at its TexCoord2 coordinate; rows of the texture usually contain the animation frames, so animating the V component of UVOffset plays the animation. The color channels are applied as X=R, Y=B, Z=G. Normals are read from the Normal texture; without one, enable RecomputeNormal.\n\nAKA: vertex animation, houdini\n\nTips:\n- Use [RepeatMeshAtPoints] with TexCoord2Factor to play the animation with different offsets per copy.",
   "InputUis": [
     {
       "InputId": "0a07ec19-0623-4240-9354-1b49383fda86"/*SplitMesh*/,
       "Position": {
         "X": -184.10052,
         "Y": 985.9936
-      }
+      },
+      "Description": "Splits shared vertices with [SplitMeshVertices] before displacing."
     },
     {
       "InputId": "480ec4b2-558a-4a64-8a53-55ce1bdcfc18"/*UVOffset*/,
       "Position": {
         "X": -184.10052,
         "Y": 685.9936
-      }
+      },
+      "Description": "Offset added to TexCoord2 before sampling. Animate Y to step through the frames."
     },
     {
       "InputId": "bae99b0d-70e5-4f34-a052-5ae133bf9fcb"/*RecomputeNormal*/,
       "Position": {
         "X": -184.10052,
         "Y": 910.9936
-      }
+      },
+      "Description": "Recomputes the normals with [RecomputeNormals] after displacing."
     },
     {
       "InputId": "e11db6b9-6217-4c76-9ef2-6bd609f0a79a"/*Normal*/,
       "Position": {
         "X": -184.10052,
         "Y": 835.9936
-      }
+      },
+      "Description": "Optional normal texture with the same layout as the position texture."
     },
     {
       "InputId": "e5c52d40-1d93-40a8-b430-868ff4c77107"/*InputMesh*/,
       "Position": {
         "X": -184.10052,
         "Y": 610.9936
-      }
+      },
+      "Description": "Mesh with the VAT lookup coordinates in TexCoord2."
     },
     {
       "InputId": "f4593d23-e4ca-44b0-85e5-4a0038c450a0"/*Texture*/,
       "Position": {
         "X": -184.10052,
         "Y": 760.9936
-      }
+      },
+      "Description": "Position offset texture."
     }
   ],
   "SymbolChildUis": [

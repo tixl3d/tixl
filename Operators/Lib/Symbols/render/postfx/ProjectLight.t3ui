@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "7eb5ee83-2b5c-43bc-95d4-af5e18c85bc5"/*ProjectLight*/,
-  "Description": "Renders light \"godrays\" from a projected image into a scene casting nice shadows.\n\nIt's a post render effect rendering an image and a shadow pass and combining it while applying some colors parameters.\n",
+  "Description": "Renders light rays from a projected image into a scene, including the shadows cast by scene objects.\n\nThis is a post render effect: it renders the scene from the view camera and from the projector, then combines the lit surfaces and volumetric rays with the given colors. If no Image is connected, a soft blob is projected.\n\nAKA: projector, gobo, volumetric, lightshafts, spotlight\n\nSee also: [GodRays], [SetShadow]",
   "InputUis": [
     {
       "InputId": "01b6437a-a4ce-4311-afcb-68640300ec64"/*ShadowResolution*/,
@@ -16,7 +16,8 @@
       "Position": {
         "X": 1691.1718,
         "Y": 1457.6838
-      }
+      },
+      "Description": "Number of ray marching samples for the volumetric rays. Higher values are smoother but slower."
     },
     {
       "InputId": "04ae22f3-e6eb-49d8-b52a-e51c210afd13"/*Position*/,
@@ -42,7 +43,8 @@
         "X": 667.4365,
         "Y": 859.917
       },
-      "GroupTitle": "Light Position"
+      "GroupTitle": "Light Position",
+      "Description": "0 = Orthographic projection with parallel rays\n1 = Perspective projection with rays spreading from the Position"
     },
     {
       "InputId": "584ded98-20a2-4ee3-963d-168fc9920abe"/*AmbientColor*/,
@@ -62,6 +64,7 @@
         "X": 35.724915,
         "Y": 1881.1464
       },
+      "Description": "Image projected by the light. If not connected, a soft blob is used.",
       "AddPadding": "True"
     },
     {
@@ -69,7 +72,8 @@
       "Position": {
         "X": 471.5523,
         "Y": 1187.3953
-      }
+      },
+      "Description": "Size of the projection. In orthographic mode this is the size of the projected area, in perspective mode it controls the field of view."
     },
     {
       "InputId": "7fbd1079-1b2d-4987-9635-8f52b9f52bbd"/*ViewCamReference*/,
@@ -77,7 +81,8 @@
       "Position": {
         "X": 1240.1233,
         "Y": 346.45712
-      }
+      },
+      "Description": "Reference output of the camera the scene is viewed with, e.g. from [Camera]. Required."
     },
     {
       "InputId": "85f6f611-b977-43dd-910b-82f9d2a3e677"/*Scene*/,
@@ -85,7 +90,8 @@
       "Position": {
         "X": 805.8203,
         "Y": 594.40625
-      }
+      },
+      "Description": "The scene to render. It must not contain its own camera."
     },
     {
       "InputId": "89ecd151-6b40-48aa-b5ea-a4fdd75769a2"/*Roll*/,

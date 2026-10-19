@@ -1,8 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "b5b6c046-3c8e-478a-b423-899872c2e1c4"/*_KeepPreviousFrame_Old1*/,
-  "Description": "Implements a double buffer to keep the previous image. This can be useful for effects that rely on image change comparison, like motion estimation.",
-  "SymbolTags": "8",
+  "Description": "Obsolete. Use [KeepPreviousFrame] instead.\n\nImplements a double buffer that keeps the previous image. This can be useful for effects that rely on comparing image changes, like motion estimation.",
+  "SymbolTags": "4104",
   "InputUis": [
     {
       "InputId": "216dca25-9ba2-4cbb-b05a-e74befafaf37"/*Image*/,

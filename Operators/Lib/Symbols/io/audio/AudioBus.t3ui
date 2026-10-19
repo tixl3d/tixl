@@ -8,7 +8,8 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Audio sources or audio graph nodes to route into this bus."
     },
     {
       "InputId": "b7e0d240-0003-4c8a-9f31-0ab1cd2e0100"/*Volume*/,
@@ -16,6 +17,7 @@
         "X": -200.0,
         "Y": 45.0
       },
+      "Description": "Master volume of the bus. The Level output is measured before this volume.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true

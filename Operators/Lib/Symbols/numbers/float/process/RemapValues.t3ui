@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "efb9ecfc-5aa2-45f1-87b0-1455d7702aa7"/*RemapValues*/,
-  "Description": "Takes in a list of Vector2 and picks the y component of the pair where X is closest to LookupValue.",
+  "Description": "Maps an input value to the Y component of the Vector2 pair whose X component is closest to it.\n\nConnect one or more Vector2 values as lookup pairs (X: input, Y: output).\n\nSee also: [Remap], [ValueToRate]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,8 @@
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Lookup pairs. X is compared to InputValue, Y is output."
     },
     {
       "InputId": "9871ad71-30b0-4454-9418-0916fd58afa8"/*InputValue*/,

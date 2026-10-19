@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "ec8111b7-09d4-411e-9409-4e877d14371d"/*PairPointsForGridWalkLines*/,
-  "Description": "Special effects operator that works nicely with [CollectSpawnPoints].",
+  "Description": "Connects each start point with a target point by a line that walks along the axes of a grid, e.g. for circuit or Manhattan-style connection effects.\n\nEach connection has 11 points and is followed by a separator. Draw the result with [DrawLines].\n\nSee also: [PairPointsForLines], [PairPointsForSplines]",
   "SymbolTags": "64",
   "InputUis": [
     {
@@ -16,7 +16,8 @@
       "Position": {
         "X": -447.37976,
         "Y": 1082.7983
-      }
+      },
+      "Description": "Randomly offsets the intermediate grid positions per connection."
     },
     {
       "InputId": "4da560cd-f799-4704-8084-09a3c9c15934"/*TargetPoints*/,

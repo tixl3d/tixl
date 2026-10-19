@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "b3e6f1a2-9c4d-4e58-8a71-2f5c6d0b93e4"/*UseProjectorCam*/,
-  "Description": "Renders its content through a setup output's projector camera.\n\nSets the view from the referenced output's calibrated (or manual) projector camera before evaluating the connected content, so 3D geometry aligned to the physical stage lands correctly on that projector — no corner-pin warp. Wire the rendered result through a RenderTarget into a SendToOutput bound to the same output.\n\nAKA: projector, mapping camera, calibration, stage, 3d",
+  "Description": "Renders its content through a setup output's projector camera.\n\nSets the view from the referenced output's calibrated (or manual) projector camera before evaluating the connected content, so 3D geometry aligned to the physical stage lands correctly on that projector, with no corner-pin warp. Wire the rendered result through a [RenderTarget] into a [SendToOutput] bound to the same output.\n\nAKA: projector, mapping camera, calibration, stage, 3d",
   "InputUis": [
     {
       "InputId": "d5081c34-7e6f-4b7a-ac93-417208d25b16"/*Command*/,

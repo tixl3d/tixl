@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "9a36d1c3-cf55-4f3a-ae09-2f54eecb4642"/*RecycleBuffer*/,
-  "Description": "This will give a buffer reference to the input buffer with views.",
+  "Description": "Returns the GPU buffer that was last stored by a [KeepBufferReference], to build feedback loops with buffers.\n\nConnect the Reference output to the BufferReference input of [KeepBufferReference]. The Buffer output then returns the buffer that was last passed through it.",
   "InputUis": [],
   "SymbolChildUis": [],
   "OutputUis": [

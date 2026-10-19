@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "702f1f75-df90-44ca-b567-78ba9d1613b5"/*ValueQuiz*/,
-  "Description": "Computes a visual comparison between a \"solution\" and a \"goal\" value animation.\n\nConnect your solution to the upper input.",
+  "Description": "Computes a visual comparison between a solution and a goal value animation for skill quest challenges.\n\nConnect the solution to the Yours input.\n\nSee also: [DrawQuiz], [ImageQuiz]",
   "InputUis": [
     {
       "InputId": "270bda80-7f81-4f31-adb4-9cd5e8aea693"/*Yours*/,
@@ -29,7 +29,7 @@
         "X": 473.88983,
         "Y": -1008.99146
       },
-      "Description": "The reference goal for to current challenge.\nNeeds to be connected to the (hidden) solution."
+      "Description": "The reference goal for the current challenge.\nNeeds to be connected to the (hidden) solution."
     },
     {
       "InputId": "fe12fa62-9207-4a6a-bbb3-4d57218094bf"/*DisplayValueRange*/,

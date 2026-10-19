@@ -35,8 +35,7 @@
         "X": -158.25935,
         "Y": 364.10834
       },
-      "GroupTitle": "Options",
-      "Description": "Selects the Blend mode"
+      "GroupTitle": "Options"
     },
     {
       "InputId": "6a91ba46-257d-4c3c-94c5-72cbc06ee816"/*EnableDepthTest*/,

@@ -8,21 +8,24 @@
       "Position": {
         "X": 0.0,
         "Y": 180.0
-      }
+      },
+      "Description": "Center to explode from. Only used if AutoCenter is off."
     },
     {
       "InputId": "60d2c9b4-8e57-4a01-bf3d-94a6e1c8d725"/*Distance*/,
       "Position": {
         "X": 0.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Distance in world units that each part moves away from the center."
     },
     {
       "InputId": "a7c2e9d4-5b18-4f06-93ea-0d6c1b8f2a57"/*AutoCenter*/,
       "Position": {
         "X": 0.0,
         "Y": 135.0
-      }
+      },
+      "Description": "Uses the mean of all part pivots as center."
     },
     {
       "InputId": "b7a03e58-c1f9-4d24-8b6a-52e0d9c7f183"/*Geometry*/,
@@ -37,7 +40,8 @@
       "Position": {
         "X": 0.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Scales each part towards its pivot. 0 keeps the size, 1 shrinks it to a point."
     }
   ],
   "SymbolChildUis": [],

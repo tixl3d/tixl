@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "ef938762-4341-42f4-b421-c14e162e159e"/*DrawMovingPoints*/,
-  "Description": "",
+  "Description": "Draws a point buffer as camera-facing sprites that stretch along their movement on screen.\n\nA copy of the previous frame's buffer is kept internally to compute the motion of each point, so the buffer must keep its point order between frames, e.g. with [PointSimulation] or a [ParticleSystem].\n\nSee also: [DrawPoints]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -9,21 +9,24 @@
       "Position": {
         "X": 2449.8691,
         "Y": 3669.5444
-      }
+      },
+      "Description": "Points that moved further than this distance since the last frame (e.g. after a reset) are not stretched."
     },
     {
       "InputId": "37a6d217-6042-4322-aadb-0b165982876d"/*EnableZWrite*/,
       "Position": {
         "X": 2309.8691,
         "Y": 4200.2188
-      }
+      },
+      "Description": "Writes the points to the depth buffer so they can hide geometry drawn later."
     },
     {
       "InputId": "3a51a6e8-1beb-451b-8bba-f80501d9d48d"/*UsePointsScale*/,
       "Position": {
         "X": 2309.8694,
         "Y": 4007.346
-      }
+      },
+      "Description": "Multiplies the size with the point's Scale.x and Scale.y."
     },
     {
       "InputId": "3f69d14e-29b4-4477-a80e-04d64050157e"/*Texture_*/,
@@ -46,7 +49,8 @@
       "Position": {
         "X": 2449.8691,
         "Y": 3634.5444
-      }
+      },
+      "Description": "Points closer to the camera than this distance fade out; they are fully visible at twice the distance. 0 disables the fade."
     },
     {
       "InputId": "5df235ec-5147-4e6b-bea3-8c2e76045c19"/*GPoints*/,
@@ -68,35 +72,40 @@
       "Position": {
         "X": 2449.8691,
         "Y": 3599.5444
-      }
+      },
+      "Description": "Pixels with an alpha below this value are discarded."
     },
     {
       "InputId": "6f6087e6-b912-4431-a64f-36bf9061b9e8"/*VelocityStretch*/,
       "Position": {
         "X": 2449.8691,
         "Y": 3704.5444
-      }
+      },
+      "Description": "Stretch factor along the movement direction for fast-moving points."
     },
     {
       "InputId": "7dae1a72-c664-400d-90df-bbcdc45d4fde"/*ScaleFactor*/,
       "Position": {
         "X": 2449.869,
         "Y": 3972.346
-      }
+      },
+      "Description": "Point attribute that multiplies the size: None, F1 or F2."
     },
     {
       "InputId": "bb3706e6-9918-4500-a4ab-7e47a6c2b08b"/*ColorField*/,
       "Position": {
         "X": 2449.869,
         "Y": 3279.3027
-      }
+      },
+      "Description": "Optional field that multiplies the color depending on the world position of each point."
     },
     {
       "InputId": "c0aca5e3-1379-488d-a585-e981d49d9d1b"/*EnableZTest*/,
       "Position": {
         "X": 2309.8691,
         "Y": 4165.2188
-      }
+      },
+      "Description": "Hides points behind other geometry."
     },
     {
       "InputId": "ea88600c-6fc2-4f20-9969-cf3572bd011b"/*BlendMode*/,
@@ -110,7 +119,8 @@
       "Position": {
         "X": 2449.8691,
         "Y": 4042.346
-      }
+      },
+      "Description": "Number of rows in the texture. The row is selected by the amount of stretching."
     }
   ],
   "SymbolChildUis": [

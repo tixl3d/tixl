@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "03aa5f28-3f74-4feb-aa6a-36cdb2d7f0d9"/*SimFollowMeshSurface*/,
-  "Description": "An updated version of [FollowMeshSurface] that applies the movement on the original buffer.",
+  "Description": "Moves the points of a simulation buffer towards and along the surface of a mesh.\n\nAs the buffer is modified in place, use it with [PointSimulation]. For particles see [FollowMeshSurfaceForce].",
   "SymbolTags": "1",
   "InputUis": [
     {

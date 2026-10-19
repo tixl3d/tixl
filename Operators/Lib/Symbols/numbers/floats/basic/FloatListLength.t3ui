@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "affe33d0-b86a-4327-aae7-880553b4b7dc"/*FloatListLength*/,
-  "Description": "Needs a [FloatsToList] Operator connected.\nThe amount of [Value]s connected to this Operator is counted and sent out as an integer",
+  "Description": "Outputs the number of entries in a float list.\n\nOutputs 0 if no list is connected.\n\nAKA: count, size\n\nSee also: [FloatsToList]",
   "InputUis": [
     {
       "InputId": "237cdc7a-053c-4d60-8370-5eee2b5f611e"/*Input*/,

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "2c3d2c26-ac45-42e9-8f13-6ea338333568"/*LinearGradient*/,
-  "Description": "Renders a linear color ramp defined by a gradient. This can be very useful in combination with [Steps].\n\n\nSimilar Ops: [NGon] [RoundedRect] [Rings] [RadialGradient] [LinearGradient] [Blob]",
+  "Description": "Renders a linear color ramp defined by a gradient.\n\nThis is useful in combination with [Steps].\n\nAKA: ramp, gradient\n\nSee also: [RadialGradient], [BoxGradient], [NGonGradient], [Rings]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,6 +10,7 @@
         "X": -649.4021,
         "Y": -6.927498
       },
+      "Description": "Length of the gradient. Negative values flip it.",
       "AddPadding": "True",
       "Min": 0.0,
       "Max": 1.0,
@@ -22,6 +23,7 @@
         "Y": 127.69351
       },
       "GroupTitle": "Options",
+      "Description": "Applies gain (X) and bias (Y) to the gradient position.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -34,15 +36,15 @@
       "Position": {
         "X": 59.731995,
         "Y": 267.6935
-      }
+      },
+      "Description": "Blend mode used to combine the gradient with the connected Image. Ignored without an Image."
     },
     {
       "InputId": "29587763-5456-4d33-bfd4-5d47b133f1cd"/*OffsetMode*/,
       "Position": {
         "X": -241.14078,
         "Y": 269.39484
-      },
-      "Description": "Renders a linear color ramp defined by a gradient. This can be very useful in combination with [Steps].\n\n\nSimilar Ops: [NGon] [RoundedRect] [Rings] [RadialGradient] [LinearGradient] [Blob]"
+      }
     },
     {
       "InputId": "3a170e98-ba19-4316-a60e-2a8124900172"/*TextureFormat*/,
@@ -124,7 +126,8 @@
       "Position": {
         "X": 59.731995,
         "Y": 232.69351
-      }
+      },
+      "Description": "Defines whether Width and Center are measured relative to the image height or width."
     },
     {
       "InputId": "e47e9e63-9c94-4c29-9555-2452fa498d57"/*Gradient*/,

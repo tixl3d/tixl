@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "7da55d23-0bd1-457b-a036-9b6b51d2e34b"/*BlendWithMask*/,
-  "Description": "Blends two images by the brightness of a 3rd mask image.\n\nIn the mask, fully black areas will only render that portion of image A, and fully white areas will only render that of image B. Values in between will interpolate between the two.\n\nAll blend ops and similar: [BlendImages] [Blend] [BlendWithMask] [Combine3Images]",
+  "Description": "Blends two images by the brightness of a third mask image.\n\nBlack areas of the mask show ImageA, white areas ImageB, and values in between interpolate between the two.\n\nAKA: mask, matte, mix, composite\n\nSee also: [BlendImages], [Blend], [Combine3Images]",
   "SymbolTags": "1",
   "InputUis": [
     {

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "93d9b8f4-d92f-4727-8d06-c1add3a74fe7"/*EaseVec2*/,
-  "Description": "[Ease] [SpringVec2] [DampVec2]",
+  "Description": "Eases toward the incoming Vector2 over Duration whenever it changes.\n\nSee also: [Ease], [EaseVec3], [SpringVec2], [DampVec2]",
   "InputUis": [
     {
       "InputId": "19da524f-6cea-4da0-8ee2-9b47ef8a93a7"/*Interpolation*/,
@@ -22,7 +22,8 @@
       "Position": {
         "X": -200.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Use the application run time instead of the playback time, so easing continues while playback is paused."
     },
     {
       "InputId": "51989ff4-a9c6-4fbc-bbc1-79b7af859e23"/*Duration*/,
@@ -30,6 +31,7 @@
         "X": -200.0,
         "Y": 45.0
       },
+      "Description": "Transition time in seconds.",
       "Min": 0.001,
       "Max": 999.0,
       "ClampMin": true,

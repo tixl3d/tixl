@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "2a0c932a-eb81-4a7d-aeac-836a23b0b789"/*SetFloatVar*/,
-  "Description": "Writes a float value to the context's float variable dictionary.\nUse [ContextFloat] to read this value further down the graph.",
+  "Description": "Sets a float variable in the evaluation context that can be read by [GetFloatVar] in the connected subgraph.\n\nIf SubGraph is connected, the variable is set while the subgraph is executed and a previous value is restored afterwards. Without a connected subgraph the variable stays set for everything evaluated later.\n\nSee also: [GetFloatVar], [Loop]",
   "SymbolTags": "8",
   "InputUis": [
     {

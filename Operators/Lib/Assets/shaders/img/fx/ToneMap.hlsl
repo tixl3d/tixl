@@ -102,7 +102,7 @@ float4 psMain(vsOutput psInput) : SV_TARGET
         c.rgb = pow(c.rgb, 2.2);
         c= float4(tonemapAgX(c.rgb, false),1);
     }
-    else if(Mode < 4.5) {
+    else if(Mode < 5.5) {
         c.rgb = pow(c.rgb, 2.2);
         c= float4(tonemapAgX(c.rgb, true),1);
     }

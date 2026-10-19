@@ -1,8 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "4670ff79-f630-478c-8f3f-513e1f2b5913"/*SampleSpriteAttributes*/,
-  "Description": "Sets Sprite definition from a texture. This can be used to colorize sprites.",
-  "SymbolTags": "8",
+  "Description": "Experimental. Colors sprites by sampling a texture at the position of each point.\n\nThe texture is projected onto the xy-plane around Center. The sprite size, pivot and texture coordinates are reset to fixed values, and most of the color adjustment parameters currently have no effect.\n\nSee also: [DrawPointSprites], [TextSprites]",
+  "SymbolTags": "1032",
   "InputUis": [
     {
       "InputId": "1081643f-efab-43e3-87c9-58b6953f3338"/*Visibility*/,

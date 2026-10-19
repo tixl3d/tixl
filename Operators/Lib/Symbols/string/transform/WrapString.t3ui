@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "96ccea19-c37f-4ee4-8dd2-5abdb347f5a1"/*WrapString*/,
-  "Description": "Wraps a string at a column width",
+  "Description": "Wraps a string at a column width.\n\nSee also: [BuildRandomString]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": 0.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Maximum line length in characters, clamped to 1..10000."
     },
     {
       "InputId": "85ad6b56-45eb-484e-b7d9-a93d52f8e54d"/*InputText*/,
@@ -24,7 +25,8 @@
       "Position": {
         "X": 0.0,
         "Y": 90.0
-      }
+      },
+      "Description": "DontWrap: keeps the string unchanged.\nWrapAtWords: breaks lines at spaces and punctuation.\nWrapAtCharacters: deprecated, does nothing.\nWrapToFillBlock: removes existing line breaks and rewraps at words.\nSolidBlock: removes line breaks and breaks exactly at the column."
     }
   ],
   "SymbolChildUis": [],

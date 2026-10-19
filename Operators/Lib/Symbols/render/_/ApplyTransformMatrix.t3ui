@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "195afff5-13f6-4c5d-af49-655a4f92c2f8"/*ApplyTransformMatrix*/,
-  "Description": "",
+  "Description": "Internal helper. Applies a transform matrix given as four Vector4 rows to the object transform of the connected commands.",
   "SymbolTags": "16",
   "InputUis": [
     {
@@ -10,7 +10,8 @@
       "Position": {
         "X": 15.714638,
         "Y": 57.576042
-      }
+      },
+      "Description": "Exactly four Vector4 rows, e.g. the Result of [TransformMatrix]. The rows are transposed back before use. Any other length is ignored with a warning."
     },
     {
       "InputId": "f7d28833-d894-446f-9402-e8ac74794870"/*Command*/,

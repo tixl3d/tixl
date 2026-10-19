@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "e9a0bdfd-6f6e-41e2-8c0c-cd5fee26e359"/*PickPointList*/,
-  "Description": "Switches between different point buffers.",
+  "Description": "Switches between multiple connected point buffers.\n\nThe Index wraps around the number of connected inputs.\n\nAKA: switch, select, pick",
   "SymbolTags": "1",
   "InputUis": [
     {

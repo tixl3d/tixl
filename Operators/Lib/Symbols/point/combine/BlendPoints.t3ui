@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "2dc5c9d1-ea93-4597-a4d9-7b610aad603a"/*BlendPoints*/,
-  "Description": "Creates different transitions between two different point setups",
+  "Description": "Blends between two point buffers with different transition modes.\n\nSee also: [BlendMeshToPoints], [SnapToPoints]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,8 +10,7 @@
       "Position": {
         "X": 148.47668,
         "Y": 1052.1796
-      },
-      "Description": "Input for Point Setup B"
+      }
     },
     {
       "InputId": "97904d2e-ae67-4ab4-9201-7902a85d12f3"/*PointsA_*/,
@@ -19,8 +18,7 @@
       "Position": {
         "X": -539.26337,
         "Y": 958.8297
-      },
-      "Description": "Input for Point Setup A"
+      }
     },
     {
       "InputId": "acef877d-214d-4ca0-ac11-95fa59d1f6fc"/*Pairing*/,
@@ -28,7 +26,6 @@
         "X": -415.56927,
         "Y": 1432.6199
       },
-      "Description": "Selects the mode with which points are paired for blending",
       "AddPadding": "True"
     },
     {
@@ -37,7 +34,7 @@
         "X": -275.56927,
         "Y": 1362.6199
       },
-      "Description": "Defines the transition between the two point setups\n0 = PointsA is displayed without changes\n1 = PointsB is displayed without changes\nIf the 'BlendMode' is set to 'Blend', the points overshoot at values lower than 0 and higher than 1.\nIf the 'BlendMode' is set to 'RangeBlendSmooth', the transition loops.",
+      "Description": "0 shows PointsA, 1 shows PointsB.\n\nWith BlendMode Mix, values outside 0...1 overshoot. With MixWithSlidingRangeSmooth, the transition loops.",
       "AddPadding": "True",
       "Min": 0.0,
       "Max": 1.0
@@ -48,7 +45,7 @@
         "X": -275.56927,
         "Y": 1467.6199
       },
-      "Description": "Defines the range width when the 'BlendMode' is set to 'RangeBlend' or 'RangeBlendSmooth'"
+      "Description": "Width of the transition range for the MixWithSlidingRange modes."
     },
     {
       "InputId": "c5480ce5-a8ba-4a26-8cee-c28e442020b7"/*BlendMode*/,
@@ -57,7 +54,7 @@
         "Y": 1397.6199
       },
       "GroupTitle": "Options",
-      "Description": "Defines how to blend between the point setups"
+      "Description": "Mix: uses BlendFactor.\nUseA_F1: uses the F1 attribute of PointsA as blend factor.\nUseB_F1: uses 1 - F1 of PointsB.\nMixWithSlidingRange(Smooth): sweeps the transition along the point index."
     },
     {
       "InputId": "ee8e9e15-ce18-4034-abc6-dd56108c8a02"/*Scatter*/,
@@ -65,7 +62,7 @@
         "X": -275.56927,
         "Y": 1502.6199
       },
-      "Description": "Adds random noise to the points' position during the transition"
+      "Description": "Adds random offsets to the positions during the transition."
     }
   ],
   "SymbolChildUis": [

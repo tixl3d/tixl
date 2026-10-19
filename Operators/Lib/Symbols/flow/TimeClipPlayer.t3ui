@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "fb61e317-4b12-46c6-85d1-5925ccce09cd"/*TimeClipPlayer*/,
-  "Description": "Renders timeline Command time clips. With AutoCollect on (default) it executes every unwired time clip in the same composition — no wiring needed. You can also wire specific clip outputs into it for explicit control.\n\nClips on upper timeline rows draw on top of lower rows. Each clip still respects its own time range and time remapping. Wiring a clip into any consumer removes it from auto-collection — the consumer takes over.\n\nTips\nUse only one auto-collecting [TimeClipPlayer] per composition, wired into your render chain (e.g. via a [Group]).",
+  "Description": "Renders timeline Command time clips. With AutoCollect on (default) it executes every unwired time clip in the same composition — no wiring needed. Specific clip outputs can also be wired into it for explicit control.\n\nClips on upper timeline rows draw on top of lower rows. Each clip still respects its own time range and time remapping. Wiring a clip into any consumer removes it from auto-collection — the consumer takes over.\n\nTips:\n- Use only one auto-collecting [TimeClipPlayer] per composition, wired into the render chain (e.g. via a [Group]).\n\nSee also: [TimeClip]",
   "SymbolTags": "64",
   "InputUis": [
     {

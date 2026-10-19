@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "a52070ce-7110-439c-84e7-01f2a883b83f"/*ComposeVec3FromList*/,
-  "Description": "Composes a Vector3 by selecting floats from a list.\nThis can be useful for converting data from OSC messages into positions or rotations.",
+  "Description": "Composes a Vector3 by selecting floats from a list.\n\nThis can be useful for converting data from OSC messages into positions or rotations. Each picked value is remapped from InputRange to OutputRange and can optionally be smoothed with a spring.\n\nSee also: [PickFloatFromList]",
   "InputUis": [
     {
       "InputId": "3bff7193-765c-4962-95f5-3e659ed18ed0"/*IndexForZ*/,
@@ -22,28 +22,32 @@
       "Position": {
         "X": 0.0,
         "Y": 45.0
-      }
+      },
+      "Description": "List index for the X component. Indices outside the list result in NaN."
     },
     {
       "InputId": "8d5b71ac-5829-44f1-800c-e27a37eab60f"/*InputRange*/,
       "Position": {
         "X": 0.0,
         "Y": 180.0
-      }
+      },
+      "Description": "X: input value that maps to OutputRange.X. Y: input value that maps to OutputRange.Y."
     },
     {
       "InputId": "a9b1edde-ad70-4c65-8ed6-473577fe59a7"/*OutputRange*/,
       "Position": {
         "X": 0.0,
         "Y": 225.0
-      }
+      },
+      "Description": "Target range for the remapped values."
     },
     {
       "InputId": "b529d322-b7a4-4711-8391-e71f196b90b5"/*SpringDamping*/,
       "Position": {
         "X": 0.0,
         "Y": 270.0
-      }
+      },
+      "Description": "Smooths the values with a spring. 0 disables smoothing."
     },
     {
       "InputId": "b74c8e3a-3952-47e9-a41e-4f1d78e3f3bf"/*IndexForY*/,

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "d1a66374-f0e8-4ef5-adf4-2871ec549d2a"/*Int2ToVector2*/,
-  "Description": "Converts an [Int2] into a [Vector2]\n\nTo do the opposite two [FloatToInt] can be used.",
+  "Description": "Converts an Int2 into a Vector2.\n\nTo do the opposite, two [FloatToInt] can be used.\n\nSee also: [Int2], [Vector2]",
   "InputUis": [
     {
       "InputId": "5c493d16-cc75-4cd5-96d9-eca3adeaccd9"/*Int2*/,

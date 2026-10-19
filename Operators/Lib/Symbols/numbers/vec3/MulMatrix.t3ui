@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "b4c5519e-26fb-49f6-b932-7fcd076c458a"/*MulMatrix*/,
-  "Description": "Multiplies two 4x4 matrices",
+  "Description": "Multiplies two 4x4 matrices.\n\nSee also: [TransformVec3]",
   "InputUis": [
     {
       "InputId": "297a2b5b-6c04-464c-93e9-9721908e33c2"/*MatrixA*/,

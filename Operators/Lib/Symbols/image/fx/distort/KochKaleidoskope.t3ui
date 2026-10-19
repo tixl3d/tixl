@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "f7366bdc-86b2-4951-8788-3826126ed8c2"/*KochKaleidoskope*/,
-  "Description": "This effect is based on Koch snowflake fractal curve.\nAngle starts working with Steps set to 2 and above.\n\nFor a much simpler version see: [MirrorRepeat], [RadialRepeat] or [TransformImage]\n\nSimilar effects or interesting combinations: [MosaicTiling] [VoronoiCells] [SubdivisionStretch]",
+  "Description": "Creates a kaleidoscope effect based on the Koch snowflake fractal curve.\n\nAngle only has an effect when Steps is set to 2 or higher.\n\nAKA: kaleidoscope, fractal, snowflake, mirror\n\nSee also: [MirrorRepeat], [RadialRepeat], [TransformImage], [MosiacTiling], [VoronoiCells], [SubdivisionStretch]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -11,6 +11,7 @@
         "Y": 428.1638
       },
       "GroupTitle": "Source",
+      "Description": "Rotates the source image in degrees.",
       "Min": -180.0,
       "Max": 180.0,
       "Format": "{0:0.0}°"
@@ -75,6 +76,7 @@
         "X": -307.04523,
         "Y": 293.16394
       },
+      "Description": "Number of fractal folding iterations.",
       "Min": 1,
       "Max": 666,
       "ClampMin": true,

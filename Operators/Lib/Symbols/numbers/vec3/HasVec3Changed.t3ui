@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "841e4072-4138-4dda-b156-b01ec3a8f9ae"/*HasVec3Changed*/,
-  "Description": "Checks if the change of the incoming vector exceeded the given threshold.",
+  "Description": "Returns true when any component of the incoming Vector3 changed by more than Threshold since the previous frame.\n\nDelta gives the change since the previous frame, DeltaOnHit the absolute per-component change at the last detected hit.\n\nSee also: [HasVec2Changed], [HasValueChanged]",
   "InputUis": [
     {
       "InputId": "1d19da45-54e4-4ee9-a1a8-a04d9ffc5cac"/*Value*/,
@@ -22,7 +22,8 @@
       "Position": {
         "X": -200.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Changed: any component changed in either direction.\nIncreased: any component increased.\nDecreased: any component decreased."
     },
     {
       "InputId": "a5b87ffd-0710-4dc6-8eb7-f40a92fae0ef"/*Threshold*/,
@@ -36,7 +37,8 @@
       "Position": {
         "X": -200.0,
         "Y": 135.0
-      }
+      },
+      "Description": "Minimum time in seconds between two detected changes."
     }
   ],
   "SymbolChildUis": [],

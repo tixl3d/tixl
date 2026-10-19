@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "fcd806aa-1b17-4e2a-a5a5-57940f2411fd"/*RadialRepeatMesh*/,
-  "Description": "later",
+  "Description": "Repeats a mesh along a circle, spiral or helix and combines the copies into a single mesh.\n\nInternally it uses [RadialPoints] and [RepeatMeshAtPoints]; the parameters match those of [RadialPoints]. For many instances, draw with [DrawMeshAtPoints] instead.\n\nAKA: array, clone, circular, polar\n\nSee also: [GridRepeatMesh], [RepeatMeshAtPoints]",
   "InputUis": [
     {
       "InputId": "0ac072c5-e4f4-4f67-8149-b9f2fdcbb6e4"/*Stretch*/,
@@ -9,6 +9,7 @@
         "X": 100.97046,
         "Y": 216.9049
       },
+      "Description": "Non-uniform scale of each copy.",
       "AddPadding": "True"
     },
     {
@@ -17,6 +18,7 @@
         "X": 100.97046,
         "Y": 111.90491
       },
+      "Description": "Shapes the distribution of the copies along the circle.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -37,7 +39,8 @@
       "Position": {
         "X": 100.97046,
         "Y": -98.09509
-      }
+      },
+      "Description": "How far the radius of the last copy deviates from the radius of the first."
     },
     {
       "InputId": "65bf5bbd-26c1-4661-84fc-822282031d88"/*Center*/,
@@ -52,7 +55,8 @@
       "Position": {
         "X": 100.97046,
         "Y": 6.904907
-      }
+      },
+      "Description": "Offset of the last copy relative to the first, e.g. to create a helix."
     },
     {
       "InputId": "b4765f71-c9ed-4eb0-bb8b-37db6427eed9"/*InputMesh*/,
@@ -82,7 +86,8 @@
       "Position": {
         "X": 100.97046,
         "Y": 76.90491
-      }
+      },
+      "Description": "Number of full turns."
     },
     {
       "InputId": "f44902d8-1d0d-4a20-8e58-76fe49b87841"/*Axis*/,

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "3352d3a1-ab04-4d0a-bb43-da69095b73fd"/*RadialPoints*/,
-  "Description": "A versatile generator of circular point sets that can create a variety of circles, spirals, helixes, etc.\n\nTry the presets to get an overview.\n\nNeeds a [DrawPoints], [DrawLines] or [DrawMeshAtPoints] or similar in order to become visible.\n\nSimilar: [GridPoints], [SpherePoints], [PointsOnMesh]",
+  "Description": "A versatile generator of circular point sets that can create a variety of circles, spirals, helixes, etc.\n\nTry the presets to get an overview. Needs [DrawPoints], [DrawLines], [DrawMeshAtPoints] or similar in order to become visible.\n\nAKA: circle, spiral, helix, ring\n\nSee also: [GridPoints], [SpherePoints], [PointsOnMesh]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -31,7 +31,7 @@
         "X": 314.98688,
         "Y": 1677.0927
       },
-      "Description": "The first value will be default Fx1 value. \nThe y component is and offset to that at the end of the point."
+      "Description": "X is the F1 value of the first point. Y is added towards the last point."
     },
     {
       "InputId": "5a3347a2-ba87-4b38-a1a8-94bd0ef70f48"/*StartAngle*/,
@@ -50,7 +50,7 @@
         "X": 314.98688,
         "Y": 1747.0927
       },
-      "Description": "The first value will be default Fx2 value. \nThe y component is and offset to that at the end of the point."
+      "Description": "X is the F2 value of the first point. Y is added towards the last point."
     },
     {
       "InputId": "5f5394b4-b23e-41bf-8089-b5c063623e66"/*Color*/,
@@ -103,7 +103,6 @@
         "X": 454.98685,
         "Y": 837.09265
       },
-      "Description": "Radius of radial",
       "Min": 0.0,
       "Max": 2.0
     },
@@ -113,7 +112,6 @@
         "X": -95.136536,
         "Y": 627.8242
       },
-      "Description": "Amount of points generated between the first and last point",
       "Min": 0,
       "Max": 1000
     },
@@ -124,7 +122,7 @@
         "Y": 1607.0927
       },
       "GroupTitle": "Point Attributes",
-      "Description": "The first value will be default uniform scale factor. \nThe y component is and offset to that at the end of the point."
+      "Description": "X is the scale of the first point. Y is added towards the last point."
     },
     {
       "InputId": "ca84209e-d821-40c6-b23c-38fc4bbd47b0"/*Center*/,

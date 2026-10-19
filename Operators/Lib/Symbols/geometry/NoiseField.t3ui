@@ -8,7 +8,8 @@
       "Position": {
         "X": 0.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Approximate maximum absolute value of the field."
     },
     {
       "InputId": "4d91b7c3-6f28-4e5a-8c07-b3f9e6a1d258"/*Seed*/,
@@ -22,21 +23,24 @@
       "Position": {
         "X": 0.0,
         "Y": 135.0
-      }
+      },
+      "Description": "Moves the noise in space. Animate it to make the noise flow."
     },
     {
       "InputId": "c5f19a44-8b0e-4d63-a7d8-2f6b3e9c0a51"/*Frequency*/,
       "Position": {
         "X": 0.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Number of noise features per world unit."
     },
     {
       "InputId": "e8a2d1b7-3c94-4f28-b6e0-9d5c7a41f382"/*Octaves*/,
       "Position": {
         "X": 0.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Number of fBm octaves, clamped to 1..8."
     }
   ],
   "SymbolChildUis": [],

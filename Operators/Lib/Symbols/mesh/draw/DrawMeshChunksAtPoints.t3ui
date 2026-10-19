@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "0e313329-74fb-4f2a-b1c2-136e1ecf9b3e"/*DrawMeshChunksAtPoints*/,
-  "Description": "",
+  "Description": "Draws one chunk of a multi-chunk mesh at each point, with PBR shading and optional shadows.\n\nThe mesh needs chunk definitions, e.g. from [GeometryToMeshChunks] or [LoadGltfScene]. ChunkIndices selects the chunk for each point (repeated if shorter than the point list, wrapped by the chunk count); without it, point n draws chunk n. Shadows are rendered when used with [SetShadow].\n\nSee also: [DrawMeshAtPoints]",
   "SymbolTags": "192",
   "InputUis": [
     {
@@ -10,7 +10,8 @@
         "X": 3334.151,
         "Y": 4126.0264
       },
-      "GroupTitle": "Advanced"
+      "GroupTitle": "Advanced",
+      "Description": "Fragments with an alpha below this value are discarded. 0 disables alpha testing."
     },
     {
       "InputId": "271ffc87-bf9a-4958-ab9f-387f27744aee"/*ShadowBias*/,
@@ -18,6 +19,7 @@
         "X": 3334.151,
         "Y": 4216.0264
       },
+      "Description": "Depth tolerance when comparing against the shadow map. Increase it to remove shadow acne, decrease it if shadows detach from objects.",
       "Min": -0.01,
       "Max": 0.01,
       "Format": "{0:0.0000}"
@@ -28,6 +30,7 @@
         "X": 3334.151,
         "Y": 4171.0264
       },
+      "Description": "Offsets the shadow lookup position along the surface normal. Helps against self-shadowing artifacts.",
       "AddPadding": "True",
       "Min": -0.01,
       "Max": 0.01,
@@ -39,7 +42,8 @@
       "Position": {
         "X": 3449.5942,
         "Y": 4986.6025
-      }
+      },
+      "Description": "Which faces are hidden.\n\nNone: both sides are drawn.\nFront: front faces are hidden, only back faces are visible.\nBack: back faces are hidden (default)."
     },
     {
       "InputId": "40e840c7-b707-4f63-8ae8-bd7498d34f54"/*GPoints*/,
@@ -62,14 +66,16 @@
       "Position": {
         "X": 3177.2983,
         "Y": 4433.08
-      }
+      },
+      "Description": "Scales each instance by the point's F1 attribute."
     },
     {
       "InputId": "7d609639-d9f3-4c7c-9fde-91c71a29aedc"/*UseStretch*/,
       "Position": {
         "X": 3177.2983,
         "Y": 4489.08
-      }
+      },
+      "Description": "Stretches each instance by the point's Scale attribute."
     },
     {
       "InputId": "821e86ce-9118-429d-94d8-d30f5df9e455"/*Mesh*/,
@@ -85,6 +91,7 @@
         "X": 3449.5942,
         "Y": 5076.6025
       },
+      "Description": "If enabled, the mesh writes into the depth buffer so it can occlude itself and geometry drawn later.",
       "AddPadding": "True"
     },
     {
@@ -94,6 +101,7 @@
         "X": 854.73236,
         "Y": 3863.6565
       },
+      "Description": "Optional int buffer with one chunk index per point.",
       "AddPadding": "True"
     },
     {
@@ -102,6 +110,7 @@
         "X": 3334.151,
         "Y": 4081.026
       },
+      "Description": "Uniform scale of each instance.",
       "Min": 0.0,
       "Max": 5.0
     },
@@ -110,7 +119,8 @@
       "Position": {
         "X": 3449.5942,
         "Y": 5031.6025
-      }
+      },
+      "Description": "Solid or wireframe rendering."
     },
     {
       "InputId": "c54759f0-759d-470e-8000-03cdfe609f1c"/*ShadowColor*/,
@@ -118,6 +128,7 @@
         "X": 3184.151,
         "Y": 4261.0264
       },
+      "Description": "Color of shadowed areas. Alpha controls the shadow intensity.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -136,7 +147,8 @@
       "Position": {
         "X": 3449.5942,
         "Y": 5121.6025
-      }
+      },
+      "Description": "If enabled, fragments hidden behind already drawn geometry (according to the depth buffer) are discarded."
     },
     {
       "InputId": "fc846c4a-ac50-4260-8267-4484ced2d22f"/*UpdateDrawData*/,

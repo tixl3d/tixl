@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "e44ae9b6-cd56-4224-8a5d-118eda4cd3f4"/*ParticleSystem*/,
-  "Description": "Emits particles on emit points and applies the connected forces.\n\nPlease check the how-to linked below [HowToUseParticles].",
+  "Description": "Emits particles at the emit points and simulates them with the connected forces.\n\nEach emitted particle starts at the position and orientation of its emit point and keeps its color, scale and F attributes. The output is a point buffer that can be drawn with [DrawPoints], [DrawBillboards], [DrawMeshAtPoints] or as lines with [DrawLines].\n\nAKA: emitter, simulation, particles\n\nSee also: [TurbulenceForce], [DirectionalForce], [SwitchParticleForce]\n\nAlso check out the [HowToUseParticles] tutorial.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -22,7 +22,7 @@
         "X": 226.2659,
         "Y": 127.618164
       },
-      "Description": "This will affect how particles are inserted into the particle buffer. This order will have an effect when drawing with lines.\nNote that switching this setting might require resetting the system."
+      "Description": "How particles are inserted into the particle buffer. This order matters when drawing particles as lines. Changing it might require a reset.\n\nSequential: emitted particles are written one after another into the cycle buffer.\nForLines: reserves a block of the buffer per emit point and inserts separators, so the particles of each emit point can be drawn as a connected line."
     },
     {
       "InputId": "38392c86-4a1b-4b6f-ac32-26920a73e1e2"/*EmitVelocity*/,
@@ -30,7 +30,7 @@
         "X": 202.45206,
         "Y": -284.3761
       },
-      "Description": "An initial velocity that is set for emitted particles along their z-axis.",
+      "Description": "Initial velocity of emitted particles along the z-axis of their emit point.",
       "AddPadding": "True"
     },
     {
@@ -39,14 +39,15 @@
         "X": 202.45206,
         "Y": -214.3761
       },
-      "Description": "Rotates the particles in relation to their velocity"
+      "Description": "How strongly particles rotate to face their direction of movement."
     },
     {
       "InputId": "4c555ac3-3d62-47a7-9d1a-49e4d5808635"/*SetF2To*/,
       "Position": {
         "X": 226.2659,
         "Y": 92.618164
-      }
+      },
+      "Description": "Overrides the F2 attribute of the particles. Same options as SetF1To; the age is clamped to 0..1."
     },
     {
       "InputId": "4ca2f43a-ed90-4388-ae6f-2687e85db5a6"/*LifeTime*/,
@@ -63,7 +64,8 @@
       "Position": {
         "X": 226.2659,
         "Y": 197.61816
-      }
+      },
+      "Description": "Scales EmitVelocity by an attribute of the emit point.\n\nNone: no scaling.\nF1 / F2: scales by the F1 or F2 attribute."
     },
     {
       "InputId": "5a61994e-42c7-47e7-b0a5-5beb48f4a34b"/*Drag*/,
@@ -81,7 +83,7 @@
         "X": -145.66542,
         "Y": -39.67984
       },
-      "Description": "Enables emitting of the connected emit points. \n\nTip: For simulations of a fixed number of emitted points, you can set the MaxPointCount to -1 and use [Once] or [Trigger] to only trigger an initial emit burst.",
+      "Description": "Emits particles at the connected emit points while enabled.\n\nFor a fixed number of particles, set MaxParticleCount to -1 and use [Once] or [Trigger] to emit a single burst.",
       "AddPadding": "True"
     },
     {
@@ -99,7 +101,7 @@
         "X": 226.2659,
         "Y": 57.618164
       },
-      "Description": "Can be used for customizing the rendering of the particles.\n\nNote that many operators like [DrawPoints] use the W attribute to control the size of the points.\nWith other operators like [DrawBillboards] you can use the W parameter to colorize particles over their lifetime.\n\nKeep Original W -> no change\nParticle Age -> Normalized age between 0 ... 1\nVelocity -> A representation of the particle's velocity."
+      "Description": "Overrides the F1 attribute of the particles, e.g. to control size or color in the draw operators.\n\nKeepOriginal: keeps the value of the emit point.\nParticleAge: normalized age (0 at emission, 1 at the end of the lifetime).\nParticleSpeed: the particle velocity."
     },
     {
       "InputId": "b2c8f7cf-fdf5-4819-98ec-2c70ee9e8bc6"/*RadiusFactor*/,
@@ -116,7 +118,7 @@
         "X": -1355.4425,
         "Y": -542.1392
       },
-      "Description": "Input for GPoints"
+      "Description": "Points from which particles are emitted."
     },
     {
       "InputId": "c41d9633-1397-4602-a5f8-7808c3d63108"/*ParticleForces*/,
@@ -126,7 +128,7 @@
         "Y": -1156.5913
       },
       "GroupTitle": "Forces",
-      "Description": "Input for Forces or [SwitchParticleForce]"
+      "Description": "Forces such as [TurbulenceForce] or [SwitchParticleForce]."
     },
     {
       "InputId": "c6bdbb07-6996-4e5b-a058-37c9cbeca6fe"/*Reset*/,
@@ -134,14 +136,15 @@
         "X": -614.3496,
         "Y": -355.09625
       },
-      "Description": "Clears all emitted points.\n\nTip: You can connect [HasTimeChanged] to clean up on rewind or looping. "
+      "Description": "Clears all particles.\n\nConnect [HasTimeChanged] to reset on rewind or looping."
     },
     {
       "InputId": "cab3072c-694e-4278-9b1e-e30beb95e5c8"/*Update*/,
       "Position": {
         "X": 814.58826,
         "Y": -442.49432
-      }
+      },
+      "Description": "If disabled, the simulation is not updated."
     }
   ],
   "SymbolChildUis": [

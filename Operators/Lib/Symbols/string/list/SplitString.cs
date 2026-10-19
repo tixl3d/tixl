@@ -18,7 +18,7 @@ internal sealed class SplitString : Instance<SplitString>
     private void Update(EvaluationContext context)
     {
         var split = Split.GetValue(context);
-        var c = (split.Length == 0 || split == "\\n")  
+        var c = (string.IsNullOrEmpty(split) || split == "\\n")  
                     ? '\n'
                     : split[0];
             
@@ -26,6 +26,7 @@ internal sealed class SplitString : Instance<SplitString>
         if (string.IsNullOrEmpty(str))
         {
             Fragments.Value = _emptyList;
+            Count.Value = 0;
             return;
         }
             

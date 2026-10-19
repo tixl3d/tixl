@@ -68,7 +68,7 @@ internal sealed class SdfToVector : Instance<SdfToVector>
                               {c}GetSdfDistance(p{c}.xyz + float3(-{offset}, {offset}, -{offset})) * float3(-1, 1, -1) +
                               {c}GetSdfDistance(p{c}.xyz + float3(-{offset}, -{offset}, {offset})) * float3(-1, -1, 1) +
                               {c}GetSdfDistance(p{c}.xyz + float3({offset}, {offset}, {offset})) * float3(1, 1, 1));
-                              f{c}.w = GetSdfDistance(p{c}.xyz);
+                              f{c}.w = {c}GetSdfDistance(p{c}.xyz);
                        """);
         return true;
     }

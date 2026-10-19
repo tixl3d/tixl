@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "2a5475c8-9e16-409f-8c40-a3063e045d38"/*DetectEdges*/,
-  "Description": "Detects edges in the incoming image.\n\nTry the presets.\n\nFor similar effects see: [Steps] [DistortAndShade] [Displace] [FakeLight]",
+  "Description": "Detects edges in the incoming image by comparing each pixel with its neighbors.\n\nTry the presets.\n\nAKA: outline, sobel, contour, lines\n\nSee also: [Steps], [DistortAndShade], [Displace], [FakeLight], [Sharpen]\nAlso check out the [HowToUseImageEffects] tutorial.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -18,7 +18,8 @@
         "X": 231.94124,
         "Y": -67.45227
       },
-      "GroupTitle": "Result Settings"
+      "GroupTitle": "Result Settings",
+      "Description": "Multiplied with the edges, or used as edge color if OutputAsTransparent is enabled."
     },
     {
       "InputId": "7f66aa8d-fbdd-47d6-ba38-07e257e19401"/*SampleRadius*/,
@@ -26,7 +27,8 @@
         "X": 371.94125,
         "Y": 72.54773
       },
-      "GroupTitle": "Edge Detection"
+      "GroupTitle": "Edge Detection",
+      "Description": "Distance of the neighbor samples in pixels."
     },
     {
       "InputId": "921b8a04-d3b5-408e-ad3e-311a4c9890b1"/*OutputAsTransparent*/,
@@ -34,6 +36,7 @@
         "X": 231.94124,
         "Y": 212.54773
       },
+      "Description": "Outputs Color with the edge strength as alpha instead of grayscale edges.",
       "AddPadding": "True"
     },
     {
@@ -41,21 +44,24 @@
       "Position": {
         "X": 371.94125,
         "Y": 142.54773
-      }
+      },
+      "Description": "Added to the edge value. Negative values hide weak edges."
     },
     {
       "InputId": "c0a17636-f75b-45c0-ab63-cb0f9130a7ac"/*MixOriginal*/,
       "Position": {
         "X": 371.94125,
         "Y": 177.54773
-      }
+      },
+      "Description": "Blends from the edges (0) to the original image (1)."
     },
     {
       "InputId": "d3197979-b418-4182-b1c9-f3126b175f8d"/*Strength*/,
       "Position": {
         "X": 371.94125,
         "Y": 107.54773
-      }
+      },
+      "Description": "Multiplies the detected color difference."
     }
   ],
   "SymbolChildUis": [

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "6a4edb6a-5ced-4356-9090-4bf770cdeb52"/*MultiplyInt*/,
-  "Description": "Multiplies two Integers",
+  "Description": "Multiplies two integers.\n\nSee also: [MultiplyInts]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -9,8 +9,7 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      },
-      "Description": "Integer Input A"
+      }
     },
     {
       "InputId": "e02f9e84-a7bf-45bf-9cb1-0b0c1c396796"/*B*/,
@@ -18,7 +17,6 @@
         "X": -200.0,
         "Y": 45.0
       },
-      "Description": "Integer Input B",
       "AddPadding": "True"
     }
   ],

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "308bb0d1-337b-4c59-9233-6c7bdacf9633"/*CombineColorLists*/,
-  "Description": "",
+  "Description": "Concatenates all connected color lists into a single list.\n\nSee also: [PickColorFromList], [KeepColors]",
   "InputUis": [
     {
       "InputId": "05f25c43-c2f3-4cc1-8ef5-bbd93deb9bc2"/*InputLists*/,

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "eb818dd0-0c9c-40ee-b76e-2148f958b987"/*ScaleResolution*/,
-  "Description": "Non-uniformly scales/multiplies an int2 which is used for defining resolutions\n\nFor a similar operator with fewer settings see [ScaleSize]\n\nAlso see [MakeResolution], [int2], etc.",
+  "Description": "Scales an Int2 resolution by separate X and Y factors.\n\nResults are truncated to whole pixels.\n\nSee also: [ScaleSize], [MakeResolution], [Int2]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -9,8 +9,7 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      },
-      "Description": "Defines X and Y / Width and height of the resolution to be scaled"
+      }
     },
     {
       "InputId": "94703070-18a3-41a7-b8e7-53d6e24d84cf"/*Factor*/,
@@ -18,7 +17,6 @@
         "X": -200.0,
         "Y": 45.0
       },
-      "Description": "Defines the scaling factor for X and Y / Width and height",
       "AddPadding": "True"
     },
     {
@@ -27,7 +25,7 @@
         "X": -200.0,
         "Y": 90.0
       },
-      "Description": "Can limit the output to resolutions that are valid for textures (e.g. powers of 2)"
+      "Description": "Keeps width and height between 1 and 16384, the valid range for textures."
     }
   ],
   "SymbolChildUis": [],

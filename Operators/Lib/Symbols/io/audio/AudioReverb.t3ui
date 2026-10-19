@@ -8,7 +8,8 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Audio sources or audio graph nodes to process."
     },
     {
       "InputId": "f2b43ea0-0003-4c8a-9f31-0ab1cd2e0400"/*Volume*/,
@@ -16,6 +17,7 @@
         "X": -200.0,
         "Y": 45.0
       },
+      "Description": "Gain folded into all contained sources. 1 keeps the level unchanged.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true
@@ -26,6 +28,7 @@
         "X": -200.0,
         "Y": 90.0
       },
+      "Description": "Wet level from 0 (dry) to 1, mapped to -96..0 dB.",
       "Min": 0.0,
       "Max": 1.0,
       "Scale": 0.001,
@@ -38,6 +41,7 @@
         "X": -200.0,
         "Y": 135.0
       },
+      "Description": "Decay time in seconds, clamped to 0.001..3.",
       "Min": 0.001,
       "Max": 3.0,
       "Scale": 0.001,
@@ -50,6 +54,7 @@
         "X": -200.0,
         "Y": 180.0
       },
+      "Description": "Decay time of high frequencies relative to the overall decay, clamped to 0.001..0.999. Lower values give a darker tail.",
       "Min": 0.001,
       "Max": 0.999,
       "Scale": 0.001,

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "87915d7b-f2aa-45da-80f9-bd1f6033d387"/*SimCentricalOffset*/,
-  "Description": "Applies a directed force to points (acceleration stored in W). Use [SimForwardMovement] to move them as agents.",
+  "Description": "Pushes the points of a simulation buffer away from a center, or pulls them towards it, on every frame.\n\nThe offset per frame is Amount / distance^DecayExponent, clamped to MaxAcceleration. As the buffer is modified in place, the offset accumulates over time; use it with [PointSimulation].",
   "SymbolTags": "1088",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": 133.25916,
         "Y": 789.05835
-      }
+      },
+      "Description": "Strength of the offset. Negative values pull the points towards the Center."
     },
     {
       "InputId": "129f21fb-3206-4b0a-b455-485f1c11bd83"/*Center*/,
@@ -32,15 +33,15 @@
       "Position": {
         "X": 184.23888,
         "Y": 259.54614
-      },
-      "Description": "Point input"
+      }
     },
     {
       "InputId": "93cae017-8bf6-44c8-9b45-8b9a4e64b9bd"/*DecayExponent*/,
       "Position": {
         "X": 404.14755,
         "Y": 678.34076
-      }
+      },
+      "Description": "How quickly the effect decreases with distance. 2 behaves like gravity."
     },
     {
       "InputId": "cbcfcceb-309b-4a25-856a-cb4eb3798cf4"/*MaxAcceleration*/,
@@ -48,6 +49,7 @@
         "X": 404.14755,
         "Y": 608.3408
       },
+      "Description": "Limits the offset per frame to avoid extreme jumps close to the center.",
       "AddPadding": "True"
     }
   ],

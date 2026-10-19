@@ -1,14 +1,15 @@
 {
   "FormatVersion": 3,
   "Id": "185958a3-be54-499d-a105-cad22c0dd448"/*EulerToAxisAngle*/,
-  "Description": "Converts 3 Euler angles (heading, pitch, yaw) into an axis and angle representation.",
+  "Description": "Converts Euler angles (heading, attitude, bank) into an axis and angle representation.\n\nAngles are in radians, both for the Rotation input and the Angle output.",
   "InputUis": [
     {
       "InputId": "30ab9590-d1e2-4926-bf01-b7395a719056"/*Rotation*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Heading (X), attitude (Y) and bank (Z) in radians."
     }
   ],
   "SymbolChildUis": [],

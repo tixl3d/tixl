@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "c68fbb84-2f56-4aed-97ab-3c2df0ec700b"/*MosiacTiling*/,
-  "Description": "Subdivides the incoming image into recursive tiles. \nThis effect looks like the resolution of the image is reduced, also known as 'pixelate' or 'resizing without sampling'.\n\nCheck out the presets for an overview.\n\nFor similar effects or interesting combinations see: [MosaicTiling] [VoronoiCells] [SubdivisionStretch] [HoneyCombTiles] [TriangleGridTransition] [Dither] [AsciiRender]\n\nTags:\nPixelate / pixilated / Pixel / resolution / lowres / low-res / Pixelart / resolution / Mosaic",
+  "Description": "Subdivides the incoming image into recursive square tiles, with smaller tiles where the image has more detail.\n\nThis looks like the resolution of the image is reduced adaptively, also known as pixelate.\n\nCheck out the presets for an overview.\n\nAKA: pixelate, mosaic, lowres, pixelart, quadtree\n\nSee also: [Pixelate], [VoronoiCells], [SubdivisionStretch], [HoneyCombTiles], [Dither], [AsciiRender]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": 132.69783,
         "Y": 119.37579
       },
-      "Description": "Defines the scaling of the tiles",
+      "Description": "Size of the largest tiles.",
       "AddPadding": "True",
       "Min": 0.0,
       "Max": 2.0,
@@ -34,7 +34,7 @@
         "X": 132.69783,
         "Y": 262.32104
       },
-      "Description": "Randomizes the threshold for subdivisions",
+      "Description": "Randomly offsets the subdivision threshold per tile.",
       "AddPadding": "True"
     },
     {
@@ -51,7 +51,7 @@
         "X": 106.53725,
         "Y": -84.33664
       },
-      "Description": "Image input"
+      "Description": "Image whose color differences decide where tiles are subdivided."
     },
     {
       "InputId": "5a5ebec0-88ac-4e8e-873b-88e5d68fb920"/*Image*/,
@@ -76,7 +76,7 @@
         "X": 132.69783,
         "Y": 74.37579
       },
-      "Description": "Defines the stretching (currently not evaluated)"
+      "Description": "Currently ignored."
     },
     {
       "InputId": "79932d92-ccc2-48ed-b412-37698749636b"/*MaxSubdivisions*/,
@@ -84,7 +84,7 @@
         "X": 132.69783,
         "Y": 217.32104
       },
-      "Description": "Defines the maximum amount of subdivisions"
+      "Description": "Maximum number of subdivision levels."
     },
     {
       "InputId": "a99725c2-9a88-4d9f-8b38-cb3f392d0be9"/*Padding*/,
@@ -110,7 +110,7 @@
         "X": 132.69783,
         "Y": 164.3758
       },
-      "Description": "Defines the threshold value from which a tile is further subdivided"
+      "Description": "Tiles are subdivided further while the color difference within them is above this value."
     }
   ],
   "SymbolChildUis": [

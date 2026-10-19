@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "fbd7f0f0-36a3-4fbb-91e1-cb33d4666d09"/*Rasterizer*/,
-  "Description": "",
+  "Description": "Internal helper. Sets the rasterizer state and viewports for the connected commands.\n\nThe previous state is restored afterwards.",
   "SymbolTags": "24",
   "InputUis": [
     {
@@ -16,7 +16,8 @@
       "Position": {
         "X": 0.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Currently ignored."
     },
     {
       "InputId": "73945e5d-3c3c-4742-b341-a061b0dc116f"/*Viewports*/,

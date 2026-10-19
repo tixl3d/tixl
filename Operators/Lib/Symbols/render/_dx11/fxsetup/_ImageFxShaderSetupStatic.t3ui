@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "bd0b9c5b-c611-42d0-8200-31af9661f189"/*_ImageFxShaderSetupStatic*/,
-  "Description": "A version that has no time dependency with improved caching performance.",
+  "Description": "Internal helper. Variant of [_ImageFxShaderSetup2] without time dependency for better caching performance.",
   "SymbolTags": "16",
   "InputUis": [
     {

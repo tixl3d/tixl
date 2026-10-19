@@ -53,7 +53,7 @@ void main(uint3 i : SV_DispatchThreadID)
 
     float3 p = ResultPoints[i.x].Position - center;
 
-    if(isnan( p.x + p.y + p.x)    ) {
+    if(isnan( p.x + p.y + p.z)    ) {
          ResultPoints[i.x].FX1 = 0.010;
          ResultPoints[i.x].Position = center - Size * 0.2; // some not in center
          return;

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "5fb3dafe-aed4-4fff-a5b9-c144ea023d35"/*SphereMesh*/,
-  "Description": "Generates a procedural three-dimensional UV sphere mesh which can be rendered with [DrawMesh], [DrawMeshUnlit] and [DrawMeshHatched] among others.\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToDrawThings].\n\nIt can also become the source for a particle system with [MeshVerticesToPoints] or [PointsOnMesh].\nTo import static 3D meshes from other programs refer to [LoadObj].\n\n",
+  "Description": "Generates a UV sphere mesh.\n\nIt can be rendered with [DrawMesh], [DrawMeshUnlit], [DrawMeshHatched] and others, or used as a source for points with [MeshVerticesToPoints] or [PointsOnMesh]. To import meshes from other programs use [LoadObj].\n\nAKA: ball, globe\n\nSee also: [IcosahedronMesh]\n\nAlso check out the [HowToDrawThings] tutorial.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,8 +10,7 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "GroupTitle": "Sphere Parameters",
-      "Description": "Controls the size."
+      "GroupTitle": "Sphere Parameters"
     },
     {
       "InputId": "6f327667-9054-4952-9f8f-570fa5497b13"/*Segments*/,
@@ -19,7 +18,7 @@
         "X": -200.0,
         "Y": 90.0
       },
-      "Description": "Controls the quantity of segments.\nThe first value controls the division along the equator of the sphere.\nThe second value controls the division from pole to pole.",
+      "Description": "X: number of divisions around the equator.\nY: number of divisions from pole to pole.",
       "AddPadding": "True"
     }
   ],

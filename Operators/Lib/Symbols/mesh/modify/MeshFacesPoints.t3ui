@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "58a490b1-eb8a-4102-906a-f74a79c0ad1c"/*MeshFacesPoints*/,
-  "Description": "\n\nCreate points at the center, corners or edges of the mesh's faces.\n\nThe size of each of the faces defines the size of the points and FX1 as the W attribute gets the radius. \n\nIn center mode uses the \"Inscribed Circle Center\".\n\nUseful combinations [LoadObj] and [DrawPoints] and more.\n\nSimilar Operators:\nTo create a point at each vertex of the connected mesh [MeshVerticesToPoints] can be used.\nTo get evenly distributed points on a mesh [PointsOnMesh] can be used.",
+  "Description": "Creates points at the centers, corners or edges of the faces of a mesh.\n\nCenters are placed at the inscribed circle center of each triangle. The points are oriented along the face normal and get the color of the vertices, multiplied by Color and the optional texture sampled at their UV position.\n\nTips:\n- Combine with [LoadObj] and [DrawPoints] or [DrawMeshAtPoints].\n\nSee also: [MeshVerticesToPoints], [PointsOnMesh]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -18,7 +18,7 @@
         "Y": 2372.6238
       },
       "GroupTitle": "Additional Effects",
-      "Description": "Moves the points along one of the axes of the normal"
+      "Description": "Moves the centers along the face tangent (X), bitangent (Y) and normal (Z). Multiplied by OffsetScale."
     },
     {
       "InputId": "71d65094-f6a6-4ea7-8e3a-c0c95db5cff0"/*OffsetScale*/,
@@ -26,14 +26,15 @@
         "X": 1172.58,
         "Y": 2652.6238
       },
-      "Description": "This can be useful to \"inset\" edge loops.\n"
+      "Description": "Scales OffsetByTBN. In EdgeLines mode it also moves the line points between the face center (0) and the corners (1), e.g. to inset the edge loops."
     },
     {
       "InputId": "803dc471-081f-48c8-b1b5-f5b5e4673518"/*Texture*/,
       "Position": {
         "X": 1172.58,
         "Y": 2031.0386
-      }
+      },
+      "Description": "Optional texture sampled at the UV position of each point and multiplied with the color."
     },
     {
       "InputId": "8365a78f-4b04-477a-b762-bcdf9e62163f"/*Mode*/,
@@ -41,7 +42,7 @@
         "X": 752.5799,
         "Y": 2039.2845
       },
-      "Description": "Defines the output mode. This directly effects the resulting point count,  e.g. Loop mode results in FaceCount × 5 points because of an added separator. \n\nCorners is because identical to [MeshVerticesToPoints]."
+      "Description": "Defines which points are created per face. This defines the resulting point count.\n\nCenters: one point per face.\nCorners: three points per face, one at each corner.\nEdgeLines: a closed line around each face (four points and a separator), e.g. for [DrawLines]."
     },
     {
       "InputId": "9361aeff-d96f-400c-8837-7d98fb6da99e"/*Fx1*/,
@@ -50,7 +51,7 @@
         "Y": 2302.6238
       },
       "GroupTitle": "Set Attributes",
-      "Description": "Scales the W / size of the points."
+      "Description": "Value written to the F1 attribute of all points."
     },
     {
       "InputId": "b01260c2-9766-44b2-9754-6f4a8b8dc4e3"/*Orientation*/,
@@ -58,22 +59,22 @@
         "X": 1172.58,
         "Y": 2729.025
       },
-      "Description": "UseUpVector will look more consistent in most scenarios.\nTBN (Tangent, BiTagent and Normal) will be more precise a expecially for instanciating more content at the points."
+      "Description": "UseUpVector: aligns the points to the face normal using the world up vector. Looks more consistent in most cases.\nCalculateTBN: uses the face tangent space. More precise, e.g. for placing content aligned to the texture."
     },
     {
       "InputId": "bad1db42-201c-4d3b-8e62-82e812a8388f"/*InputMesh*/,
       "Position": {
         "X": 372.6872,
         "Y": 1709.1115
-      },
-      "Description": "Mesh input via [LoadObj] for example"
+      }
     },
     {
       "InputId": "d5288530-4e29-4a6d-9175-7e43e2880f1d"/*ScaleWithFaceArea*/,
       "Position": {
         "X": 1032.58,
         "Y": 2617.6238
-      }
+      },
+      "Description": "Scales the points by the inscribed circle radius of their face."
     },
     {
       "InputId": "df3005ad-76ca-423a-95f5-4a29ae1284ca"/*ScaleUniform*/,
@@ -88,7 +89,8 @@
       "Position": {
         "X": 1172.58,
         "Y": 2337.6238
-      }
+      },
+      "Description": "Value written to the F2 attribute of all points."
     },
     {
       "InputId": "ffe056e2-c937-4d91-a2ad-73e7988ea994"/*Color*/,
@@ -97,7 +99,7 @@
         "Y": 2477.6238
       },
       "GroupTitle": "Set Colors",
-      "Description": "Defines the color of the points",
+      "Description": "Multiplied with the vertex colors.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,

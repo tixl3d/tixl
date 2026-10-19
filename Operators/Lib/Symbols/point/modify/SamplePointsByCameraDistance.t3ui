@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "0f40e5e5-e406-4f87-854b-fbdd670b5504"/*SamplePointsByCameraDistance*/,
-  "Description": "Changes the W value / F value of existing points based on their distance to the active camera.\nFor example, to make distant points appear larger or smaller than nearby points, etc.\nNeeds a point source such as: [GridPoints], [RadialPoints], [SpherePoints] etc.\nAnd [DrawPoints], [DrawLines] or similar in order to view the result.\n\nUseful combinations: [GridPoints] [TransformPoints]",
+  "Description": "Multiplies the F1 attribute of points by a curve value that depends on their distance to the active camera.\n\nFor example, to make distant points appear larger or smaller than nearby points. Needs a point source such as [GridPoints], [RadialPoints] or [SpherePoints] and [DrawPoints], [DrawLines] or similar to view the result.",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": -366.7629,
         "Y": 1060.177
       },
-      "Description": "Curve that defines which value the points are assigned based on their distance",
+      "Description": "Curve mapping the normalized distance (0 at NearRange, 1 at FarRange) to a factor for F1.",
       "AddPadding": "True"
     },
     {
@@ -18,8 +18,7 @@
       "Position": {
         "X": -561.2523,
         "Y": 567.80304
-      },
-      "Description": "Point input"
+      }
     },
     {
       "InputId": "a7f46f47-4cc1-4d62-ae23-46b12aa44eea"/*FarRange*/,
@@ -27,7 +26,7 @@
         "X": -368.92084,
         "Y": 1020.5403
       },
-      "Description": "Defines the maximum distance from which points are taken into account."
+      "Description": "Camera distance mapped to the end of the curve."
     },
     {
       "InputId": "f03533f6-eec4-4cce-9736-b751322efa26"/*NearRange*/,
@@ -35,7 +34,7 @@
         "X": -368.92084,
         "Y": 975.54004
       },
-      "Description": "Defines the minimum distance from which points are taken into account.",
+      "Description": "Camera distance mapped to the start of the curve.",
       "AddPadding": "True"
     }
   ],

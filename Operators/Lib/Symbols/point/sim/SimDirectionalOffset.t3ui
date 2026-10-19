@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "7a08d73e-1aea-479f-8d36-ecb119d75c3a"/*SimDirectionalOffset*/,
-  "Description": "Linearly offsets the incoming points along the defined axis.\n\nNeeds a [DrawPoints], [DrawLines] or [DrawMeshAtPoints] or similar in order to become visible.\n\nNeeds Points as a base, for example: [RadialPoints], [SpherePoints], [PointsOnMesh]",
+  "Description": "Offsets the points of a simulation buffer along a direction on every frame.\n\nAs the buffer is modified in place, the offset accumulates over time; use it with [PointSimulation]. A draw operator like [DrawPoints], [DrawLines] or [DrawMeshAtPoints] is needed to make the points visible.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -11,7 +11,7 @@
         "Y": 574.45514
       },
       "GroupTitle": "Settings",
-      "Description": "Defines how much the Points are offset on the given axis",
+      "Description": "Offset per frame.",
       "Scale": 0.001
     },
     {
@@ -21,7 +21,7 @@
         "Y": 754.45526
       },
       "GroupTitle": "Advanced",
-      "Description": "Selects the mode"
+      "Description": "Legacy: Offsets the positions directly.\nEncodeInRotation: Adds the offset to a velocity encoded in the length of the rotation quaternion, as used by legacy simulations."
     },
     {
       "InputId": "2fe652d7-92c7-4cd0-8190-78905be178f1"/*RandomAmount*/,
@@ -29,7 +29,7 @@
         "X": -417.82614,
         "Y": 664.45526
       },
-      "Description": "Randomizes the force per point"
+      "Description": "Randomly increases the offset per point by up to this factor."
     },
     {
       "InputId": "4f9ab443-3885-4a57-9116-6be5824bd95b"/*Amount*/,
@@ -37,7 +37,7 @@
         "X": -417.82614,
         "Y": 619.45514
       },
-      "Description": "Defines the strength of the force",
+      "Description": "Multiplier for Direction.",
       "AddPadding": "True",
       "Scale": 0.001
     },
@@ -46,8 +46,7 @@
       "Position": {
         "X": -112.90869,
         "Y": 209.04144
-      },
-      "Description": "Point input"
+      }
     },
     {
       "InputId": "a6b0a4da-2f6f-4941-b097-ed5e3dd6af0b"/*ShowGizmo*/,

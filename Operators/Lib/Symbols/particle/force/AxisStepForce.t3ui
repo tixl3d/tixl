@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "2cc44046-2702-40d5-ab42-8b36ff3d6ca7"/*AxisStepForce*/,
-  "Description": "A force for the [ParticleSystem] that applies random accelerations toward an axis direction. This can lead to interesting results in motion design. If ApplyTrigger is true, a random selection ratio of particles is chosen and accelerated.\n\nUse the following options:\n\n- AxisDistribution to control the frequency of XYZ axis selection.\n- AddOriginalVelocity to control whether the original acceleration is replaced or mixed in.\n- Set Seed to a value greater than 0 to control randomness. If it's set to 0, the current frame number is used as the random seed.\n\nPlease note that the RotationAxis space may depend on the [ParticleSystem.OrientTowardsVelocity] parameter. You can also try combining this effect with [ParticleSystem.Damp] for enhanced results.",
+  "Description": "Kicks randomly selected particles along a random X, Y or Z axis direction.\n\nWhenever ApplyTrigger is active, a random ratio of the particles is selected and gets a new velocity along one of the axes. This creates stepped, technical looking motion paths.\n\nTips:\n- Increase the Drag of the [ParticleSystem] so the particles stop between the steps.\n- With AxisSpace set to RotationSpace, the axes follow the particle orientation, which depends on OrientTowardsVelocity of the [ParticleSystem].\n\nSee also: [SnapToAnglesForce], [VelocityForce]",
   "SymbolTags": "192",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": -540.1571,
         "Y": 287.20462
-      }
+      },
+      "Description": "Random variation of the strength per particle."
     },
     {
       "InputId": "25e77db3-6ccb-4857-8dd6-e5c19395d85b"/*AddOriginalVelocity*/,
@@ -17,6 +18,7 @@
         "X": -541.1749,
         "Y": 451.7198
       },
+      "Description": "How much of the previous velocity is kept. 0 replaces it, 1 adds the step to it.",
       "Min": 0.0,
       "Max": 1.0
     },
@@ -27,6 +29,7 @@
         "Y": 332.20456
       },
       "GroupTitle": "Axis Settings",
+      "Description": "Ratio of particles (0..1) that are affected by each step.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -38,6 +41,7 @@
         "X": -540.1571,
         "Y": 377.20456
       },
+      "Description": "Relative probability of the X, Y and Z axes being chosen.",
       "Min": 0.0,
       "Max": 1.0
     },
@@ -46,7 +50,8 @@
       "Position": {
         "X": -540.1571,
         "Y": 197.20462
-      }
+      },
+      "Description": "Applies the step while true. Connect a trigger, e.g. synced to the beat."
     },
     {
       "InputId": "a28e97a1-8bcf-4701-a8bb-97d69f91bc4b"/*Strength*/,
@@ -54,7 +59,8 @@
         "X": -540.1571,
         "Y": 242.20462
       },
-      "GroupTitle": "Settings"
+      "GroupTitle": "Settings",
+      "Description": "Velocity of the step."
     },
     {
       "InputId": "ab591dbc-b521-4ef0-b1e2-d03ff27b959e"/*AxisSpace*/,
@@ -62,6 +68,7 @@
         "X": -541.097,
         "Y": 617.51074
       },
+      "Description": "ObjectSpace: uses the world axes.\nRotationSpace: uses the axes of each particle's orientation.",
       "AddPadding": "True"
     },
     {
@@ -70,6 +77,7 @@
         "X": -541.1749,
         "Y": 496.7198
       },
+      "Description": "Scales the strength per axis.",
       "Min": 0.0,
       "Max": 1.0
     },
@@ -78,7 +86,8 @@
       "Position": {
         "X": -790.11786,
         "Y": 898.2902
-      }
+      },
+      "Description": "Random seed for the particle selection. If 0, the current frame is used, so a new selection is made every step."
     }
   ],
   "SymbolChildUis": [

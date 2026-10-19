@@ -1,8 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "fbe1a703-f372-4236-9f20-5d0b69183843"/*VolumeForce*/,
-  "Description": "Repels particles from primitive volumes.\n\nThis force uses the particle's radius in world units as defined on emit by [ParticleSystem]. Please check the documentation on that operator.\n\nThis op has been superceeded by [FieldVolumeForce].",
-  "SymbolTags": "1",
+  "Description": "Obsolete. Use [FieldVolumeForce] instead.\n\nRepels or attracts particles from primitive volume shapes such as spheres, boxes or planes. It uses the particle radius as defined on emit by the [ParticleSystem].\n\nSee also: [FieldVolumeForce]",
+  "SymbolTags": "4096",
   "InputUis": [
     {
       "InputId": "0db5c531-721d-403e-9154-e31f6be20ec6"/*GizmoVisibility*/,
@@ -10,7 +10,8 @@
         "X": 417.42053,
         "Y": 2352.177
       },
-      "GroupTitle": "Options"
+      "GroupTitle": "Options",
+      "Description": "Visibility of the volume gizmo."
     },
     {
       "InputId": "1097b588-db96-49c1-b6e6-78b5cb0f5f73"/*RandomizeBounce*/,

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "658b6a44-ff5a-42ca-8673-33874b752004"/*VectorFieldForce*/,
-  "Description": "Applies a vector field to the particle velocity. \n\nNote:  This will constantly pump more energy into your particle velocity. You might need to adjust the ParticleSystem Damp parameter.",
+  "Description": "Accelerates particles by the vectors of a vector field sampled at their positions.\n\nThe XYZ components of the field are added to the velocity, scaled by Amount and by the field's W component. This constantly adds energy to the system, so the Drag of the [ParticleSystem] might need to be increased.\n\nAKA: flow, vector field\n\nSee also: [TurbulenceForce], [TextureMapForce]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -10,6 +10,7 @@
         "X": 714.5168,
         "Y": 531.03577
       },
+      "Description": "Strength of the force.",
       "Min": 0.0,
       "Max": 1.0,
       "Scale": 0.001
@@ -20,14 +21,16 @@
       "Position": {
         "X": 657.7679,
         "Y": 58.578857
-      }
+      },
+      "Description": "Field whose XYZ values define the acceleration."
     },
     {
       "InputId": "fb9d4bfa-6a4e-4647-861a-b8b5a5ca690d"/*Randomize*/,
       "Position": {
         "X": 714.5168,
         "Y": 566.03577
-      }
+      },
+      "Description": "Random additional strength per particle (0 to Randomize times Amount)."
     }
   ],
   "SymbolChildUis": [

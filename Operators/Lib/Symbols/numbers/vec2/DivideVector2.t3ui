@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "c20452bc-ff82-4684-bc49-77fe59d2df46"/*DivideVector2*/,
-  "Description": "",
+  "Description": "Divides Vector2 A by B component-wise and then by UniformScale.\n\nDivision by 0 results in infinite or NaN values.\n\nSee also: [ScaleVector2]",
   "InputUis": [
     {
       "InputId": "65b844de-7ed6-4d3a-9ecd-e499f1523fb5"/*UniformScale*/,

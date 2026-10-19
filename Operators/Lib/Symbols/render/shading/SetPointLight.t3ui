@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "4912ba82-460a-4229-884d-6b647d64b08c"/*SetPointLight*/,
-  "Description": "Adds a point light into the scene which illuminates geometry using a combination of \"Color\", \"Intensity\" and \"Decay\".\n\nBeware that [SetEnvironment] also affects the lighting in your scene, even if you are not using it, because every scene is always lit by a Default CubeMap (that can be deactivated by manually adding a [SetEnvironment]).\n\nCurrently a maximum of 8 Pointlights can be used in your scene. For example by daisy-chaining them right before your graph goes into the camera.\n",
+  "Description": "Adds a point light without a gizmo to the connected subgraph.\n\nThe light illuminates geometry drawn with PBR and other shaded draw operators using Color, Intensity, Range and Decay. Up to 8 point lights can be used at the same time. For a light with an interactive gizmo use [PointLight].\n\nNote that scenes are also lit by an environment map. Without a [SetEnvironment], a default environment is used.\n\nAKA: light, lamp, omni, bulb\n\nSee also: [PointLight], [SetEnvironment]",
   "SymbolTags": "16",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": -199.39244,
         "Y": 238.36653
       },
-      "Description": "Controls how far the light shines into the scene.\n\nA low decay setting means the light is shining far.\nA high decay setting means the light reaches a short distance.",
+      "Description": "Exponent of the falloff beyond Range. Higher values make the light fade faster with distance.",
       "AddPadding": "True"
     },
     {
@@ -19,7 +19,7 @@
         "X": -199.39244,
         "Y": 103.36653
       },
-      "Description": "Increases or decreases the intensity of the light in relation to its decay.\n"
+      "Description": "Brightness of the light."
     },
     {
       "InputId": "7b77b6fb-e8bd-42a7-8fb9-5d411f9a0da6"/*Color*/,
@@ -42,7 +42,7 @@
         "X": -199.39244,
         "Y": 193.36653
       },
-      "Description": "This setting is currently ignored. It is recommended to use the \"Decay\" setting instead.\n",
+      "Description": "Distance at which the light intensity has dropped to half. The intensity falls off as Intensity / ((distance / Range) ^ Decay + 1).",
       "AddPadding": "True"
     },
     {
@@ -51,7 +51,7 @@
         "X": -199.39244,
         "Y": 58.36653
       },
-      "Description": "Changes the position of the PointLight:\n\nX (-left / +right), \nY (-down / +up), \nZ (-forward / +backwards)",
+      "Description": "World space position of the light.",
       "AddPadding": "True"
     }
   ],

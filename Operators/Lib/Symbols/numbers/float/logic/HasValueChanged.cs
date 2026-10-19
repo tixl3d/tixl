@@ -18,6 +18,7 @@ internal sealed class HasValueChanged : Instance<HasValueChanged>
     {
         HasChanged.UpdateAction += Update;
         Delta.UpdateAction += Update;
+        DeltaOnHit.UpdateAction += Update;
     }
 
     private void Update(EvaluationContext context)

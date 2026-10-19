@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "543a97fb-8319-4767-a248-d0662d2e8781"/*VerletRibbonForce*/,
-  "Description": "An experimental ribbon force simulation.",
+  "Description": "Experimental. Simulates particles as chains of connected segments, like ropes or ribbons, using Verlet integration.\n\nThe chains are defined by the ReferencePoints: consecutive points form a chain and separators split chains. The first point of each chain is pinned. The particle count should match the reference point count, e.g. by emitting the reference points once.\n\nAKA: rope, cloth, chain, hair\n\nSee also: [ParticleSystem]",
   "SymbolTags": "128",
   "InputUis": [
     {
@@ -9,14 +9,16 @@
       "Position": {
         "X": 362.09967,
         "Y": 1347.4706
-      }
+      },
+      "Description": "Number of constraint iterations per frame. More passes keep the segment lengths more stable."
     },
     {
       "InputId": "2d671320-2f3f-412d-97eb-34e1f4c5e75f"/*Strength*/,
       "Position": {
         "X": 807.02386,
         "Y": 520.63306
-      }
+      },
+      "Description": "Blends the particle positions towards the constrained positions (0..1)."
     },
     {
       "InputId": "31b66f8a-ffa7-4951-95f1-f2b10827f4c1"/*SegmentLength*/,
@@ -24,6 +26,7 @@
         "X": 807.02386,
         "Y": 565.63306
       },
+      "Description": "Target distance between neighboring points of a chain.",
       "Scale": 0.001
     },
     {
@@ -32,6 +35,7 @@
         "X": 669.55774,
         "Y": 440.57852
       },
+      "Description": "Gravity direction and strength.",
       "Scale": 0.001
     },
     {
@@ -39,14 +43,16 @@
       "Position": {
         "X": 676.6896,
         "Y": 917.2081
-      }
+      },
+      "Description": "Pulls the particles back towards the reference positions (0..1)."
     },
     {
       "InputId": "5d2bf09b-b582-4fd2-b006-94ac7a3fe6fb"/*Damping*/,
       "Position": {
         "X": 676.6896,
         "Y": 962.2081
-      }
+      },
+      "Description": "Fraction of the velocity kept per step. 1 keeps all momentum, lower values damp the motion."
     },
     {
       "InputId": "dfd31cce-0b26-4259-ab16-ffaf5656c275"/*ReferencePoints*/,
@@ -54,7 +60,8 @@
       "Position": {
         "X": 676.6896,
         "Y": 827.2081
-      }
+      },
+      "Description": "Point lines that define the chains and their rest positions."
     }
   ],
   "SymbolChildUis": [

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "e3596381-c118-4e2e-a482-83049a9f74af"/*ClearRenderTarget*/,
-  "Description": "",
+  "Description": "Internal helper. Clears a render target view to ClearColor and the depth of a depth stencil view to 1.",
   "SymbolTags": "24",
   "InputUis": [
     {

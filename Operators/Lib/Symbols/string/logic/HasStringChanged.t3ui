@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "de9f1dfd-05ec-466f-9f5f-46e7e8da219a"/*HasStringChanged*/,
-  "Description": "Returns true if the connected string attribute has changed.",
+  "Description": "Returns true if the connected string has changed since the last update.\n\nSee also: [Once], [HasBooleanChanged]",
   "SymbolTags": "8",
   "InputUis": [
     {

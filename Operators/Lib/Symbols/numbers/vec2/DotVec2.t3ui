@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "0db4fd9b-7996-47e1-a4cc-debfd04a18f4"/*DotVec2*/,
-  "Description": "Applies a dot product to two Vec2's",
+  "Description": "Computes the dot product of two Vector2 values.\n\nSee also: [DotVec3], [DotVec4]",
   "InputUis": [
     {
       "InputId": "3f28ec3a-e7ab-41f5-95d4-e3cc5b6357f9"/*Input2*/,

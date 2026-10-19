@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "16e30ce0-20c9-4677-9837-0200454e05ae"/*DrawQuiz*/,
-  "Description": "Stacking",
+  "Description": "Compares a drawn solution with a reference scene for skill quest challenges.\n\nConnect the solution commands to YourSolution. The DoNotChange input holds the hidden reference and must stay connected.\n\nSee also: [ImageQuiz], [ValueQuiz]",
   "InputUis": [
     {
       "InputId": "804aba22-3b3d-4121-b754-82c3ed2d4566"/*DifferenceRange*/,
@@ -18,7 +18,8 @@
       "Position": {
         "X": -929.536,
         "Y": -284.95593
-      }
+      },
+      "Description": "This is the reference input.\nDo not disconnect."
     },
     {
       "InputId": "a6f445ac-1be1-4921-baee-cf2caf5a6a90"/*YourSolution*/,

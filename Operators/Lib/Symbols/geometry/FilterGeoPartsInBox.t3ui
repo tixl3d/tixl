@@ -30,7 +30,8 @@
       "Position": {
         "X": 0.0,
         "Y": 135.0
-      }
+      },
+      "Description": "KeepInside or KeepOutside: which parts are kept, based on their pivot."
     }
   ],
   "SymbolChildUis": [],

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "27b0e1af-cb2e-4603-83f9-5c9b042d87e6"/*Blob*/,
-  "Description": "Generates ellipses, circles, blobs, vignettes, and similar shapes.\n\nUpdated version of [_BlobOld] with slightly different functionality: uses an ellipse as a base rather than a rounded rectangle.\nFor other behaviours, consider [RoundedRect] or [RadialGradient].\n\nTips:\n- Set \"Feather\" to a negative value to create a vignette.\n- The background color is still visible on feathered edges when it's set to transparent.\n- For more information on mipmaps, see the attached link about realtime rendering in TiXL.\n\n\nSimilar Ops: [NGon] [RoundedRect] [Rings] [RadialGradient] [LinearGradient] [Blob]",
+  "Description": "Generates ellipses, circles, blobs, vignettes and similar soft shapes.\n\nUnlike [RoundedRect], the shape is based on an ellipse.\n\nAKA: circle, ellipse, vignette, dot, disc\n\nTips:\n- Set Feather to a negative value to create a vignette.\n- The background color is still visible on feathered edges, even if it is transparent.\n\nSee also: [RoundedRect], [NGon], [Rings], [RadialGradient], [LinearGradient]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -67,7 +67,7 @@
         "Y": 641.74536
       },
       "GroupTitle": "Settings",
-      "Description": "Generate mipmaps (scaled-down versions of this image for use in situations where many small copies are shown on screen.)\nWill increase memory usage."
+      "Description": "Generates mipmaps (scaled-down versions of the image that improve quality when it is displayed small). Increases memory usage."
     },
     {
       "InputId": "8cc15ea0-074f-40ed-813d-b93f48681094"/*Image*/,

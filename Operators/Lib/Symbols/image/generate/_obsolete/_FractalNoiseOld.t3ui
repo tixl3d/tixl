@@ -1,7 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "97eb35ec-2825-4f63-8fdf-3fe38fa9e652"/*_FractalNoiseOld*/,
-  "Description": "Generates animated 2D Perlin noise. \n\nNOTE: The legacy version is very resource-intensive at higher resolutions and might not run in real-time at 1080p.\nThe OpenSimplex is a faster implementation from 'https://www.shadertoy.com/view/ttdGR8'.",
+  "Description": "Obsolete. Use [FractalNoise] instead.\n\nGenerates animated 2D Perlin noise. The Legacy method is very resource-intensive at higher resolutions and might not run in real-time at 1080p. OpenSimplex2S is a faster implementation from https://www.shadertoy.com/view/ttdGR8.",
+  "SymbolTags": "4096",
   "InputUis": [
     {
       "InputId": "0512491d-3022-48c2-b79d-4688ff18fd0e"/*GenerateMips*/,

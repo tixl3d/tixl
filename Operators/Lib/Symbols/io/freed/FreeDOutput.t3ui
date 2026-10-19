@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "a9b8c7d6-e5f4-4210-9876-54321fedcba0"/*FreeDOutput*/,
-  "Description": "Sends camera tracking data over UDP using the FreeD protocol. This is essential for virtual production, augmented reality, and broadcasting, allowing real-time integration with systems like Unreal Engine, Vizrt, or Aximmetry.\n\nAlso see: [FreeDInput]",
+  "Description": "Sends camera tracking data over UDP using the FreeD protocol. This is essential for virtual production, augmented reality, and broadcasting, allowing real-time integration with systems like Unreal Engine, Vizrt, or Aximmetry.\n\nSee also: [FreeDInput]",
   "InputUis": [
     {
       "InputId": "8f9a0b1c-2d3e-4f5a-a6b7-c8d9e0f1a2b3"/*Connect*/,
@@ -59,7 +59,7 @@
         "X": -200.0,
         "Y": 825.0
       },
-      "Description": "Enable to print detailed activity and error messages to the T3 log console for debugging."
+      "Description": "Enable to print detailed activity and error messages to the TiXL log console for debugging."
     },
     {
       "InputId": "c2d3e4f5-a6b7-4c9d-e0f1-a2b3c4d5e6f7"/*CameraId*/,

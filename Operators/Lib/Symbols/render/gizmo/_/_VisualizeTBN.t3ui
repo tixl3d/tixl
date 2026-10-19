@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "dd353ac7-1f11-4dd6-aff5-5c557c695512"/*_VisualizeTBN*/,
-  "Description": "Draws mesh normals, tangents and bitangents as lines for analysis. \nThis can be useful to verify that TBN space is spatially consistent.",
+  "Description": "Internal helper. Draws mesh normals, tangents and bitangents as lines for analysis.\n\nThis can be useful to verify that the tangent space of a mesh is spatially consistent.",
   "SymbolTags": "16",
   "InputUis": [
     {
@@ -16,14 +16,16 @@
       "Position": {
         "X": -200.0,
         "Y": 180.0
-      }
+      },
+      "Description": "Controls when the lines are drawn. Inherit follows the gizmo toggle of the output window."
     },
     {
       "InputId": "d9287fce-b451-4d5e-83d8-fc8c9d39b9a8"/*Length*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Length of the drawn lines."
     }
   ],
   "SymbolChildUis": [

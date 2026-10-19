@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "aaa64b7b-abe4-499e-ae29-a4d3df561c33"/*ScreenCloseUp*/,
-  "Description": "Uses the incoming 2D image and puts it on a virtual LCD/screen in a 3D scene that looks as if it is being filmed by a real camera (including depth of field etc)\n\nWorks great with [PlayVideo] or any [RenderTarget] or [ScreenCapture].\n\nAdditional ops can be used to emphasize the illusion of a real camera such as: [ChromaticAbberation], [ColorGrade], [Grain]",
+  "Description": "Puts the incoming image on a virtual LCD screen in a 3D scene that looks as if it is filmed by a real camera, including depth of field.\n\nWorks great with [PlayVideo], [RenderTarget] or [ScreenCapture].\n\nAKA: monitor, display, lcd, mockup\n\nTips:\n- Add [ChromaticAbberation], [ColorGrade] or [Grain] to emphasize the illusion of a real camera.\n\nSee also: [RgbTV]",
   "InputUis": [
     {
       "InputId": "4b2ea8f2-dfe3-4e59-a140-5d5427e5c1ce"/*Glossy*/,
@@ -18,7 +18,7 @@
         "X": 784.3391,
         "Y": -26.406616
       },
-      "Description": "Tilts/offsets the virtual camera without moving the target \nX = Left / Right\nY = Up / Down",
+      "Description": "Tilts the virtual camera without moving the target.\nX = left / right\nY = up / down",
       "Min": -90.0,
       "Max": 90.0,
       "ClampMin": true,

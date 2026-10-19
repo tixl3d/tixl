@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "5cbb8f47-5093-495d-bfb6-fbc5b00b7036"/*TileableNoise*/,
-  "Description": "Generates a procedural fractal noise image effect also known as pink noise or fractional noise that can be used to create visual patterns that look like cloud, smoke, dust and scratches on film and similar\n\nAvailable Noise Ops [WorleyNoise] [FractalNoise] [ShardNoise]",
+  "Description": "Generates fractal Perlin noise that repeats seamlessly at the image borders.\n\nUseful for textures that are repeated on surfaces or scrolled endlessly.\n\nAKA: perlin, seamless, tileable, clouds, fbm\n\nSee also: [FractalNoise], [MakeTileableImage], [WorleyNoise]",
   "InputUis": [
     {
       "InputId": "048d3e2b-7d9b-4250-a69a-12f9ee22f6ca"/*OutputFormat*/,
@@ -16,7 +16,7 @@
         "X": 1154.6647,
         "Y": 45.212646
       },
-      "Description": "The gain factor for each iteration step.",
+      "Description": "Amplitude factor applied for each successive octave.",
       "Min": 0.0,
       "Max": 5.0,
       "Format": "{0:0.000} ×"
@@ -27,7 +27,7 @@
         "X": 1154.6647,
         "Y": -94.78735
       },
-      "Description": "An additional scale factor that WILL ADD SEAMS.",
+      "Description": "An additional scale factor. Values other than 1 break the seamless tiling.",
       "Min": 0.0,
       "Max": 5.0,
       "Scale": 0.05
@@ -89,7 +89,7 @@
         "Y": 290.21265
       },
       "GroupTitle": "Complexity",
-      "Description": "The base period of the repeated noise"
+      "Description": "The base period of the repeated noise."
     },
     {
       "InputId": "91186518-2b7e-4def-92bc-ff56519c4883"/*RandomPhase*/,
@@ -98,7 +98,7 @@
         "Y": -59.787354
       },
       "GroupTitle": "Options",
-      "Description": "The 3rd coordinate of the 3d noise. Can be usedf for animations.",
+      "Description": "The third coordinate of the 3D noise. Can be used for animations.",
       "Scale": 0.01
     },
     {
@@ -107,7 +107,7 @@
         "X": 1014.66473,
         "Y": 255.21265
       },
-      "Description": "The complexity of the perline noise.\nI.e. the number of iterations the noise is computed.",
+      "Description": "Number of noise layers that are combined.",
       "AddPadding": "True",
       "Min": 1,
       "Max": 10,
@@ -133,7 +133,7 @@
         "X": 1154.6647,
         "Y": 80.21265
       },
-      "Description": "The scale factor for each iteration step.",
+      "Description": "Frequency factor applied for each successive octave.",
       "Min": 0.0,
       "Max": 5.0,
       "Format": "{0:0.000} ×"

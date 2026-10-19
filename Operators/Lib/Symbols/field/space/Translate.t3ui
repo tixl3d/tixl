@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "7b81d100-b5a6-4a0e-8900-0d6418146b41"/*Translate*/,
-  "Description": "Transforms the position of the field in 3D space.\nSimilar node with more options: [TransformField]\n\nIt can be rendered with [RaymarchField] and visualized with [VisualizeFieldDistance].\n\nOther nodes: [RepeatWithMirror], [PolarRepeat], [TwistField].\n\nIt needs an incoming field like [BoxSDF], [ChainLinkSDF], [FractalSDF] as an input.\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToRaymarchField].\n",
+  "Description": "Moves the incoming field.\n\nIt needs an incoming field like [BoxSDF] or [TorusSDF]. Render the result with [RaymarchField] and inspect it with [VisualizeFieldDistance].\n\nSee also: [TransformField]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -9,16 +9,14 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      },
-      "Description": "Field input"
+      }
     },
     {
       "InputId": "c872228d-e9ca-4dc1-b6c2-2ca130b2330b"/*Translation*/,
       "Position": {
         "X": -200.0,
         "Y": 75.0
-      },
-      "Description": "Defines the offset of the field in space"
+      }
     }
   ],
   "SymbolChildUis": [],

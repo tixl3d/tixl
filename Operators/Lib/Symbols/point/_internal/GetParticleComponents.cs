@@ -25,7 +25,7 @@ internal sealed class GetParticleComponents : Instance<GetParticleComponents>, I
     {
         if (context?.ParticleSystem == null)
         {
-            _lastErrorMessage = "Particle system not set. Is ParticleSimulation not attached?";
+            _lastErrorMessage = "Particle system not set. Is it used inside a ParticleSystem?";
             return;
         }
             

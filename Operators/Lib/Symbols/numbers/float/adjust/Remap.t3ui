@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "f0acd1a4-7a98-43ab-a807-6d1bd3e92169"/*Remap*/,
-  "Description": "Remaps a value range to a new value range. Optionally applies bias, clamping, or modulo.",
+  "Description": "Remaps a value from an input range to an output range. Optionally applies bias and gain, clamping, or modulo.\n\nAKA: map, fit, rescale, range\n\nSee also: [Lerp], [RemapFloatList], [SmoothStep]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,6 +10,7 @@
         "X": 0.0,
         "Y": 45.0
       },
+      "Description": "X: gain, Y: bias. Shapes the curve for values inside the input range. 0.5, 0.5 keeps it linear.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -35,14 +36,16 @@
       "Position": {
         "X": 0.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Normal: no limits, values outside the input range extrapolate.\nClamped: the result is limited to the output range.\nModulo: the result wraps by the size of the output range."
     },
     {
       "InputId": "cd369755-5062-4934-8f37-e3a5cc9963df"/*RangeInMax*/,
       "Position": {
         "X": 0.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Input value that maps to RangeOutMax."
     },
     {
       "InputId": "edb98f34-d019-47f6-b275-e5a80061e1f7"/*RangeInMin*/,
@@ -50,6 +53,7 @@
         "X": 197.0,
         "Y": 328.0
       },
+      "Description": "Input value that maps to RangeOutMin.",
       "AddPadding": "True"
     },
     {

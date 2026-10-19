@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "cc6100a4-73ed-45e4-87ab-601e7956fb36"/*RotatedPlaneSDF*/,
-  "Description": "A plane defined by center and normal vector.\nThis is similar to [PlaneSDF] but allows finer control.",
+  "Description": "Generates an infinite plane defined by a point and a normal vector as an SDF.\n\nSimilar to [PlaneSDF], but the normal can point in any direction. Render the result with [RaymarchField] and inspect it with [VisualizeFieldDistance].",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,14 +9,16 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Point on the plane."
     },
     {
       "InputId": "bfed14a7-7a97-4379-9419-222bb7a2ba57"/*Normal*/,
       "Position": {
         "X": -200.0,
         "Y": 75.0
-      }
+      },
+      "Description": "Direction the plane faces. It is normalized; everything behind the plane is inside."
     }
   ],
   "SymbolChildUis": [],

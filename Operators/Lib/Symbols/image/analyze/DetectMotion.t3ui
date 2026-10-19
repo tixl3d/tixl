@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "830df85c-51df-4d55-956c-e6810e8e3081"/*DetectMotion*/,
-  "Description": "Uses motion history or difference to detect changes in an image.\nThis might be useful for tracking.",
+  "Description": "Detects changes between successive frames of an image or video, for instance to drive effects by movement.\n\nFrameDifference outputs the difference to the previous frame, MotionHistory accumulates differences over time, and OpticalFlow outputs motion vectors (see [OpticalFlow]).\n\nSee also: [RemoveStaticBackground], [KeepPreviousFrame]",
   "InputUis": [
     {
       "InputId": "0181b151-2601-4d65-9d69-5b0efd4044f3"/*RemapGradient*/,
@@ -9,7 +9,7 @@
         "X": 671.0896,
         "Y": 356.42737
       },
-      "Description": "If enabled, can be used to increase contrast and reduce noise or key colors."
+      "Description": "Gradient used if RemapColor is enabled. Can be used to increase contrast, reduce noise or key colors."
     },
     {
       "InputId": "89e7a9a3-b73b-4296-aece-821e0c87362c"/*VideoTexture*/,
@@ -26,7 +26,7 @@
         "Y": 398.16144
       },
       "GroupTitle": "Output options",
-      "Description": "Enable color remap using the gradient below."
+      "Description": "Recolors the result by its brightness using RemapGradient."
     },
     {
       "InputId": "d0f131d3-80d7-45a5-b827-dd9cd8a514f7"/*Method*/,
@@ -42,7 +42,7 @@
         "X": -753.31836,
         "Y": -164.96545
       },
-      "Description": "For video inputs with frames different that 60fps (or the current refresh rate) you should pass in the frame count here.\n\nThis will prevent flickering."
+      "Description": "Connect the frame index of a video whose frame rate differs from the render frame rate. The previous frame is then only updated when the index changes, which prevents flickering."
     },
     {
       "InputId": "f0da83e6-cd5a-46e7-80cb-4ff4c995009d"/*BackgroundFade*/,
@@ -51,6 +51,7 @@
         "Y": 141.3941
       },
       "GroupTitle": "Motion History Option",
+      "Description": "How quickly old motion fades out. Only used by MotionHistory.",
       "Min": 0.0,
       "Max": 0.1
     }

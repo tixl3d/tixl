@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "1cd2f5b1-bc54-4405-8ee6-d1acf59ebe14"/*PickVector2*/,
-  "Description": "Selects one Vector2 of many, like a switch.",
+  "Description": "Selects one of the connected Vector2 inputs by Index, like a switch.\n\nThe Index wraps around the number of connections.\n\nSee also: [PickVector3], [PickFloat]",
   "InputUis": [
     {
       "InputId": "dad7d212-e895-44d9-83cc-69fb11898aec"/*Index*/,

@@ -1,7 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "f8aed421-5e0e-4d1f-993c-1801153ebba8"/*_LegacyAudioReaction*/,
-  "Description": "Can be used to drive float parameters through audio reaction. This requires [SetAudioReaction] to be added first.",
+  "Description": "Obsolete. Use [AudioReaction] instead.\n\nDrives float parameters from the legacy bass and hi-hat peak analysis.",
+  "SymbolTags": "4096",
   "InputUis": [
     {
       "InputId": "0e04d1f8-3bbd-46b1-bde6-46bcdfdbe3aa"/*UseModulo*/,

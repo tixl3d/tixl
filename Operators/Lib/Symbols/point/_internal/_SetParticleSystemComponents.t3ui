@@ -1,7 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "705df4fe-8f91-4b1e-a7d1-432011ffcb3f"/*_SetParticleSystemComponents*/,
-  "Description": "Adds information about the current particle system to the context, as it can be accessed by particle effects operators.",
+  "Description": "Internal helper. Provides the current particle system to the connected forces through the evaluation context.\n\nUsed inside [ParticleSystem].",
+  "SymbolTags": "16",
   "InputUis": [
     {
       "InputId": "083c9379-fc0a-4d35-b056-1a639f739321"/*SpeedFactor*/,

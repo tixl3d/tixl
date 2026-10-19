@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "92e28e50-bd40-4f93-ba92-8f69cded6ec1"/*WaveForm*/,
-  "Description": "Visualizes the color and intensity distribution within an image by overlaying a Waveform and a Vectorscope.\n\nThese overlays can be incredibly valuable. Countless tutorials on YouTube demonstrate how they can be applied to color correction and other use cases.\n\nSimilar: [ImageLevels] [CompareImages]",
+  "Description": "Overlays a waveform and a vectorscope to visualize the brightness and color distribution of an image.\n\nThe waveform plots the distribution of the red, green and blue values of each image column (values above 1 are shown in the upper half). The vectorscope shows hue as angle and saturation as distance from the center. Both are common tools for color correction.\n\nAKA: scope, vectorscope\n\nSee also: [ImageLevels], [CompareImages], [ColorGrade]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,6 +10,7 @@
         "X": -4236.861,
         "Y": -31.59829
       },
+      "Description": "Darkens the image behind the overlays.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -29,6 +30,7 @@
         "X": -4423.415,
         "Y": 372.96057
       },
+      "Description": "Magnifies the center of the vectorscope to show low saturations in more detail.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -39,7 +41,8 @@
       "Position": {
         "X": -4236.861,
         "Y": -166.59827
-      }
+      },
+      "Description": "Image to analyze."
     },
     {
       "InputId": "9fb0f6f6-4a86-4c43-90e7-14cef7d46e87"/*VectorScopePosition*/,
@@ -65,7 +68,8 @@
         "X": -4236.861,
         "Y": -121.59829
       },
-      "GroupTitle": "Visualizer"
+      "GroupTitle": "Visualizer",
+      "Description": "Height of the waveform area."
     },
     {
       "InputId": "d86c228c-f586-471e-ab07-4414375de29a"/*ColorIntensity*/,
@@ -73,6 +77,7 @@
         "X": -4236.861,
         "Y": 13.401711
       },
+      "Description": "Brightness of the plotted samples.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,

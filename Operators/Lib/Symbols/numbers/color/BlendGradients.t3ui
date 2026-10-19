@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "b9999f07-da19-45b9-ae12-f9d0662c694c"/*BlendGradients*/,
-  "Description": "Blends two color gradients with the defined blendmode",
+  "Description": "Blends two color gradients with the selected blend mode.\n\nSee also: [BlendColors]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,16 +9,14 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      },
-      "Description": "Defines gradient A"
+      }
     },
     {
       "InputId": "c1856ef1-bcbe-4377-a910-e8eef7d963da"/*GradientB*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      },
-      "Description": "Defines gradient B"
+      }
     },
     {
       "InputId": "c21371d6-1735-43d4-96ff-d04cbce0fec9"/*MixFactor*/,
@@ -26,7 +24,7 @@
         "X": -200.0,
         "Y": 135.0
       },
-      "Description": "Defines how strongly gradient B is faded into gradient A",
+      "Description": "How strongly GradientB is blended into GradientA.",
       "AddPadding": "True",
       "Min": 0.0,
       "Max": 1.0,
@@ -39,8 +37,7 @@
         "X": -200.0,
         "Y": 90.0
       },
-      "GroupTitle": "Settings",
-      "Description": "Defines the mode with which the colors of the gradients are merged"
+      "GroupTitle": "Settings"
     }
   ],
   "SymbolChildUis": [],

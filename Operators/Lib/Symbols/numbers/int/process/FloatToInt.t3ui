@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "06b4728e-852c-491a-a89d-647f7e0b5415"/*FloatToInt*/,
-  "Description": "Converts a float value to an integer. This can be useful for using values for indices or random seeds. Note: positive values will be floored (0.9 becomes 0), negative values get ceiled (-0.9 becomes 0).",
+  "Description": "Converts a float to an integer by dropping the fractional part.\n\nValues are truncated toward zero: 0.9 becomes 0 and -0.9 becomes 0. Useful for indices or random seeds.\n\nSee also: [IntToFloat]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -11,7 +11,6 @@
         "X": 0.0,
         "Y": 0.0
       },
-      "Description": "Definition / input for the Float value to be converted into an Integer.",
       "Min": -100.0,
       "Max": 100.0
     }

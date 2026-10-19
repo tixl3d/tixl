@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "97032147-ba0c-4454-b878-1048d8faea05"/*InvertFloat*/,
-  "Description": "Negates a float value. \n\nThis is the same as multiplying by -1.",
+  "Description": "Negates a float value if Invert is enabled.\n\nThis is the same as multiplying by -1.\n\nAKA: negate",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -18,7 +18,8 @@
       "Position": {
         "X": 36.0,
         "Y": 379.0
-      }
+      },
+      "Description": "If disabled, the value is passed through unchanged."
     }
   ],
   "SymbolChildUis": [],

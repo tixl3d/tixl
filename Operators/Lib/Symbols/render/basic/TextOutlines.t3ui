@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "84e9333f-38d2-422f-abf5-bf3929f01c7e"/*TextOutlines*/,
-  "Description": "Creates outlined text to use in combination with [Text] ",
+  "Description": "Creates outlined text from bitmap fonts.\n\nIt uses the same fonts and layout parameters as [Text] and can be combined with it.",
   "SymbolTags": "2056",
   "InputUis": [
     {

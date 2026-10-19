@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "ffbf3237-8f31-4d19-bc21-88f792a7df3e"/*Log*/,
-  "Description": "Calculates the result of a logarithmic function\n\nIn C#: Math.Log(x, y)",
+  "Description": "Computes the logarithm of Value to the given Base.\n\nThe result is NaN for a Value of 0 or below, and for a Base of 1 (the default), 0 or below.\n\nAKA: logarithm, ln\n\nSee also: [Pow]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": 36.0,
         "Y": 379.0
       },
-      "Description": "Base\nDefines what value was used for the base when raising to a power"
+      "Description": "Base of the logarithm, e.g. 10 or 2. Use 2.71828 for the natural logarithm."
     },
     {
       "InputId": "d3a0a2fd-e108-4636-a375-092701d58e19"/*Value*/,
@@ -18,7 +18,7 @@
         "X": 36.0,
         "Y": 334.0
       },
-      "Description": "Base\nDefines what value was the result of raising to a power",
+      "Description": "The value whose logarithm is computed. Must be greater than 0.",
       "Min": -100.0,
       "Max": 100.0
     }

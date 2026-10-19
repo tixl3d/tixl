@@ -1,14 +1,15 @@
 {
   "FormatVersion": 3,
   "Id": "310e174e-ea52-4c54-90e6-72dc8320118a"/*GridPosition*/,
-  "Description": "Converts an index to a grid raster position and sizes that can be used to draw a [Layer2d].\nThis can be helpful for procedural graphical designs.\nPlease check the example below.",
+  "Description": "Converts an index into the position and size of a cell in a grid, for placing [Layer2d] elements.\n\nCells are filled row by row from the top left. Position is the cell center in [Layer2d] coordinates and takes the aspect ratio of the requested resolution into account. Size is 1/columns and 1/rows.\n\nThis can be helpful for procedural graphical designs.",
   "InputUis": [
     {
       "InputId": "2fa305b7-42fc-44fa-bfcf-219916f93eef"/*RasterSize*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Number of columns (X) and rows (Y)."
     },
     {
       "InputId": "854731fb-bbc9-48e7-9bcb-45bc53340945"/*A*/,

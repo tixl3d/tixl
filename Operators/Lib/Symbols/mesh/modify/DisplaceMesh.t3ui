@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "79c01289-f3a9-4bea-8e95-a6b5f89b752d"/*DisplaceMesh*/,
-  "Description": "Distorts the input mesh by displacing its vertices by an amount controlled by the connected input texture.",
+  "Description": "Displaces the vertices of a mesh by the colors of a texture sampled at their UV coordinates.\n\nThe texture alpha is always applied as a factor. Normals are not updated; use [RecomputeNormals] afterwards for correct shading.\n\nAKA: heightmap, displacement\n\nSee also: [TextureDisplaceMesh], [DisplaceMeshNoise], [ScatterMeshFaces]",
   "SymbolTags": "65",
   "InputUis": [
     {
@@ -12,14 +12,15 @@
         "Y": 1404.9718
       },
       "GroupTitle": "Displacement Map",
-      "Description": "The displacement texture. Depending on the color channels, it will be applied as average or individually.\nThe alpha is always applied as a factor."
+      "Description": "Displacement texture."
     },
     {
       "InputId": "157b08ed-361e-426f-9242-100b1a73dbac"/*WrapMode*/,
       "Position": {
         "X": 812.9591,
         "Y": 1856.3958
-      }
+      },
+      "Description": "How the texture repeats outside the 0..1 UV range."
     },
     {
       "InputId": "7c6fa9b0-1c70-4865-8f01-d22c41ff9b6b"/*UseVertexSelection*/,
@@ -27,7 +28,8 @@
         "X": 273.30417,
         "Y": 1953.7844
       },
-      "GroupTitle": "Options"
+      "GroupTitle": "Options",
+      "Description": "Weights the displacement by the vertex selection, e.g. from [SelectVertices]."
     },
     {
       "InputId": "84c2b0ee-c67d-4eab-88ea-fd95c332da07"/*AmountDistribution*/,
@@ -35,21 +37,23 @@
         "X": 273.30414,
         "Y": 1848.7844
       },
-      "Description": "Applies a channel weight to the axis."
+      "Description": "Weights per axis for the color channels. In Surface mode only Z (the normal direction) is used."
     },
     {
       "InputId": "9ad4555a-33c4-4853-b4f9-e885cfb6ef81"/*UvSelection*/,
       "Position": {
         "X": 273.30417,
         "Y": 2093.7844
-      }
+      },
+      "Description": "UV set used to sample the texture."
     },
     {
       "InputId": "bbb330cb-6f13-445a-8e7c-c5610380f1ff"/*Mode*/,
       "Position": {
         "X": 273.30414,
         "Y": 1708.7844
-      }
+      },
+      "Description": "Surface: moves the vertices along their normal by the average brightness.\nSurface_XYZ: uses RGB as an offset in the tangent space of each vertex (R: tangent, G: bitangent, B: normal).\nWorld_XYZ: uses RGB as an offset along the X, Y and Z axes of the mesh."
     },
     {
       "InputId": "c7e1c790-8e52-4064-9ffb-c0b8c2a50320"/*ScaleUV*/,
@@ -57,7 +61,7 @@
         "X": 273.30417,
         "Y": 1778.7844
       },
-      "Description": "Scales the displacement map.",
+      "Description": "Scales the UV coordinates used to sample the texture.",
       "Min": 0.0,
       "Max": 5.0,
       "Format": "{0:0.000} ×"
@@ -68,7 +72,7 @@
         "X": 273.30414,
         "Y": 1988.7845
       },
-      "Description": "Additional offsets to the displacement without applying the displacement map.",
+      "Description": "Constant offset added to the texture value before it is scaled by Amount. In the Surface modes it is in tangent space.",
       "AddPadding": "True",
       "Min": -1.0,
       "Max": 1.0,
@@ -80,6 +84,7 @@
         "X": 413.3041,
         "Y": 1743.7844
       },
+      "Description": "Strength of the displacement.",
       "Min": -1.0,
       "Max": 1.0,
       "Format": "{0:0.000} ×"

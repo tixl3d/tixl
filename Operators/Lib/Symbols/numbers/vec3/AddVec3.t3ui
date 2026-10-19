@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "15ac7153-69af-45f8-bcdd-50cdef0c9ae1"/*AddVec3*/,
-  "Description": "Adds two Vec3 variables together",
+  "Description": "Adds two Vector3 values.\n\nSee also: [SubVec3], [ScaleVector3], [AddVec2]",
   "InputUis": [
     {
       "InputId": "08624ca6-8b69-48f5-8896-a483b403778e"/*Input2*/,

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "6535edc3-a4ed-46c7-ae71-d3974612b448"/*RequestUrl*/,
-  "Description": "Loads a URL and outputs the source text as a string.\n\nHint: The string contains what you see when you open the URL with a browser and select 'View Page Source'\n\nUseful combinations: [PickStringPart]\n\nAlso see [LoadImageFromUrl] [GetAttributeFromJsonString]",
+  "Description": "Loads a URL and outputs the source text as a string.\n\nThe string contains the same text a browser shows with \"View Page Source\".\n\nSee also: [PickStringPart], [LoadImageFromUrl], [GetAttributeFromJsonString]",
   "SymbolTags": "8",
   "InputUis": [
     {

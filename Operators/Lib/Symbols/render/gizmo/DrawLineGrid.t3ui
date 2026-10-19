@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "296dddbd-250b-4801-a039-bcb3cd555774"/*DrawLineGrid*/,
-  "Description": "Renders a grid of lines in the given scaling. \nThis might be useful for debugging or to use as content.\n\nAlso see [GridPlane]",
+  "Description": "Draws a grid of lines with line geometry.\n\nThis might be useful for debugging or as content. Unlike [GridPlane], the lines are actual geometry and are affected by [SetFog].\n\nAKA: floor, grid, graticule\n\nSee also: [GridPlane]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -27,14 +27,16 @@
       "Position": {
         "X": -310.6382,
         "Y": -88.957825
-      }
+      },
+      "Description": "Enables depth testing and writing for the grid lines."
     },
     {
       "InputId": "5767a3be-9ac1-4ad5-9529-aea00d3143ea"/*UniformScale*/,
       "Position": {
         "X": 170.0,
         "Y": 140.0
-      }
+      },
+      "Description": "Scales the whole grid. At 1 the grid spans 100 units."
     },
     {
       "InputId": "5e7da35a-6537-4fc1-9f23-faab82c8eeaa"/*Segments*/,
@@ -48,7 +50,8 @@
       "Position": {
         "X": -195.33334,
         "Y": 357.10706
-      }
+      },
+      "Description": "Selects the plane the grid is aligned to."
     },
     {
       "InputId": "a4ea3140-3397-4989-98ee-3cf02d11f242"/*LineWidth*/,
@@ -62,7 +65,8 @@
       "Position": {
         "X": 517.3989,
         "Y": 616.0383
-      }
+      },
+      "Description": "Additionally draws colored x, y and z axis lines."
     }
   ],
   "SymbolChildUis": [

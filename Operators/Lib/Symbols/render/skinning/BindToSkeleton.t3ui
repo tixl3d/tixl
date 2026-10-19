@@ -8,7 +8,8 @@
       "Position": {
         "X": 0.0,
         "Y": 225.0
-      }
+      },
+      "Description": "Shapes the falloff of the influence within Radius."
     },
     {
       "InputId": "2c85b0f7-64ad-4193-8e50-d9b3a1c67e04"/*Setup*/,
@@ -16,42 +17,48 @@
       "Position": {
         "X": 0.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Scene setup with the skeleton, e.g. from [LoadGltfScene] or [SkeletonFromPoints]."
     },
     {
       "InputId": "51e0c9d4-a786-4b23-9ef1-30d5b8a2c647"/*Mesh*/,
       "Position": {
         "X": 0.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Mesh to generate weights for. Either Mesh or Points must be connected."
     },
     {
       "InputId": "78d21b5e-4c09-4f6a-8b93-a5e0f62c48d1"/*Radius*/,
       "Position": {
         "X": 0.0,
         "Y": 180.0
-      }
+      },
+      "Description": "Distance from a bone at which its influence fades to zero."
     },
     {
       "InputId": "96a3f5e1-08c2-4d7b-b365-1ce49d07f8a2"/*Points*/,
       "Position": {
         "X": 0.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Point buffer to generate weights for, e.g. for [SkinPoints]."
     },
     {
       "InputId": "a6f083d2-5be7-4c94-8027-1f4d6b9e05c8"/*MaxInfluences*/,
       "Position": {
         "X": 0.0,
         "Y": 270.0
-      }
+      },
+      "Description": "Maximum number of bones influencing each vertex (1 to 4)."
     },
     {
       "InputId": "ef67a29c-b3d0-4851-92f4-06c8e5d13a7b"/*SkeletonIndex*/,
       "Position": {
         "X": 0.0,
         "Y": 135.0
-      }
+      },
+      "Description": "Index of the skeleton in the setup. Wraps around the number of skeletons."
     }
   ],
   "SymbolChildUis": [],

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "05cf9ea7-045d-421f-8ed3-2c2f6b325a46"/*CompareInt*/,
-  "Description": "Compares two integers and gives out the result as a Boolean and/or an Integer",
+  "Description": "Compares Value with TestValue and outputs the result as a boolean and as an integer.\n\nSee also: [HasIntChanged], [PickInt]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -10,15 +10,14 @@
         "X": 197.0,
         "Y": 463.0
       },
-      "Description": "Defines what integer is sent out if comparison is false"
+      "Description": "Integer output if the comparison is false."
     },
     {
       "InputId": "3b6ca34b-4a64-458a-874f-a0aa094fc278"/*Value*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      },
-      "Description": "Value A for comparison"
+      }
     },
     {
       "InputId": "5bf37ae4-bb84-42ee-96f9-52c2adefa669"/*Mode*/,
@@ -26,7 +25,6 @@
         "X": 197.0,
         "Y": 373.0
       },
-      "Description": "Testmode",
       "AddPadding": "True"
     },
     {
@@ -34,8 +32,7 @@
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      },
-      "Description": "Value B for comparison"
+      }
     },
     {
       "InputId": "bfa7d45a-0f98-4016-ae34-d5f653e821d6"/*ResultForTrue*/,
@@ -44,7 +41,7 @@
         "Y": 418.0
       },
       "GroupTitle": "Integer Output",
-      "Description": "Defines what integer is sent out if comparison is true"
+      "Description": "Integer output if the comparison is true."
     }
   ],
   "SymbolChildUis": [],

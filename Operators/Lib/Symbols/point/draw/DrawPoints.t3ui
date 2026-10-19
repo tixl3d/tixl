@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "ffd94e5a-bc98-4e70-84d8-cce831e6925f"/*DrawPoints*/,
-  "Description": "Draws a point buffer with the set camera, transform, and fog. The points are drawn as camera-facing billboards, ignoring the point orientation. The W attribute of the points is used for scaling. This can be controlled with the UseWForSize parameter.\n\nYou can connect a texture to override the round shape.\n\nThere are many Operators allowing you to create and manipulate point buffers in countless ways. Please have a look at the examples listed below.\n\nFor additional effects, you can experiment with different blend modes or disable depth testing. Note, however, that the points are drawn in the order they are defined in the buffer and not sorted by distance to the camera. This can introduce unwanted artifacts with transparent blending.\n\nAlthough drawing points is fast, drawing very large points can lead to high fill rates and can drastically impact render performance.\n\nSome notes regarding the size: For historic reasons we apply a 1/10 factor on the size: A point with W=1 will have a radius of 0.01 world units. So a scale of 5 draws a point with a 1 unit diameter.\n\n\nAlso see: [HowToDrawThings], [HowToUsePoints], [DrawLines], [DrawRibbons].\nFor an Operator with more Options see [DrawBillboards].",
+  "Description": "Draws a point buffer as camera-facing sprites.\n\nThe orientation of the points is ignored. The size is PointSize multiplied by the point's Scale (see UsePointsScale) and optionally its F1 or F2 attribute (see ScaleFactor). A PointSize of 1 results in a diameter of 0.2 world units. Point colors are multiplied with Color and the optional texture, which replaces the default round shape.\n\nPoints are drawn in buffer order and not sorted by distance to the camera, which can cause artifacts with transparent blending. Try other blend modes or disable depth writing for additive effects. Very large points cause high fill rates and can drastically impact performance.\n\nSee also: [DrawBillboards], [DrawPointsShaded], [DrawLines], [DrawRibbons]\nAlso check out the [HowToDrawThings] and [HowToUsePoints] tutorials.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": 2062.5884,
         "Y": 3953.3596
       },
-      "Description": "Points closer to the camera fade out.",
+      "Description": "Points closer to the camera than this distance fade out; they are fully visible at twice the distance. 0 disables the fade.",
       "AddPadding": "True"
     },
     {
@@ -19,7 +19,7 @@
         "X": 2062.5884,
         "Y": 3883.3596
       },
-      "Description": "Defines the size of the Points",
+      "Description": "Size of the points. A size of 1 results in a diameter of 0.2 world units.",
       "AddPadding": "True",
       "Min": 0.0,
       "Max": 0.5,
@@ -31,8 +31,7 @@
       "Position": {
         "X": 1475.8118,
         "Y": 4734.13
-      },
-      "Description": "Input for Points"
+      }
     },
     {
       "InputId": "64e75fea-c07f-4cb1-8ac0-0f8d05362664"/*UsePointsScale*/,
@@ -40,6 +39,7 @@
         "X": 1919.2306,
         "Y": 4175.031
       },
+      "Description": "Multiplies the size with the point's Scale.x and Scale.y.",
       "AddPadding": "True"
     },
     {
@@ -48,7 +48,7 @@
         "X": 2480.7285,
         "Y": 4631.41
       },
-      "Description": "Defines whether points cover themselves or are covered by or cover other 3D elements."
+      "Description": "Hides points behind other geometry."
     },
     {
       "InputId": "814fc516-250f-4383-8f20-c2a358bbe4e1"/*EnableZWrite*/,
@@ -56,7 +56,7 @@
         "X": 2480.7285,
         "Y": 4666.41
       },
-      "Description": "Defines whether points cover themselves or are covered by or cover other 3D elements.",
+      "Description": "Writes the points to the depth buffer so they can hide geometry drawn later.",
       "AddPadding": "True"
     },
     {
@@ -65,7 +65,7 @@
         "X": 1487.8793,
         "Y": 4263.588
       },
-      "Description": "Input for a texture map",
+      "Description": "Replaces the default round shape. Multiplied with the point color.",
       "AddPadding": "True"
     },
     {
@@ -74,8 +74,7 @@
         "X": 2480.7285,
         "Y": 4596.41
       },
-      "GroupTitle": "Draw options",
-      "Description": "Defines the Blendmode."
+      "GroupTitle": "Draw options"
     },
     {
       "InputId": "cc442161-e9ca-40ea-be3b-f87189d4e155"/*Color*/,
@@ -83,7 +82,7 @@
         "X": 1922.5884,
         "Y": 3673.3596
       },
-      "Description": "Defines the color of the Points.\nIf a Texture is used this color will be multiplied.",
+      "Description": "Multiplied with the point colors and the texture.",
       "AddPadding": "True"
     },
     {
@@ -91,21 +90,24 @@
       "Position": {
         "X": 2062.5884,
         "Y": 3918.3596
-      }
+      },
+      "Description": "Pixels with an alpha below this value are discarded. This avoids hard edges around transparent areas when depth writing is enabled."
     },
     {
       "InputId": "e40aeedd-49fe-467c-b886-064a1024cef3"/*ScaleFactor*/,
       "Position": {
         "X": 2059.2305,
         "Y": 4140.0303
-      }
+      },
+      "Description": "Point attribute that multiplies the size: None, F1 or F2."
     },
     {
       "InputId": "fe99f40a-607a-4f62-9949-17f4715db859"/*ColorField*/,
       "Position": {
         "X": 1781.4027,
         "Y": 3413.3674
-      }
+      },
+      "Description": "Optional field that multiplies the color depending on the world position of each point."
     }
   ],
   "SymbolChildUis": [

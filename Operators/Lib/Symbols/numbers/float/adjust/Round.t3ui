@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "ae0c87d6-2b1e-4e28-b0d0-8611a2f7e152"/*Round*/,
-  "Description": "Advanced version of rounding. See https://www.desmos.com/calculator/rojg8taxot for more additional details.\n\nAlso see [Ceil] & [Floor]",
+  "Description": "Rounds a value to steps, with an adjustable smooth transition between the steps.\n\nWith RoundRatio 1 the value is rounded to the nearest step. Lower ratios keep a linear ramp between the steps, and 0 leaves the value unchanged. See https://www.desmos.com/calculator/rojg8taxot for a visualization.\n\nAKA: quantize, snap, steps\n\nSee also: [Ceil], [Floor]",
   "SymbolTags": "1024",
   "InputUis": [
     {
@@ -10,6 +10,7 @@
         "X": 197.0,
         "Y": 328.0
       },
+      "Description": "Number of steps per unit. 1 rounds to integers, 4 to multiples of 0.25.",
       "AddPadding": "True",
       "Min": -100.0,
       "Max": 100.0
@@ -19,7 +20,8 @@
       "Position": {
         "X": 197.0,
         "Y": 373.0
-      }
+      },
+      "Description": "0: no rounding. 1: hard rounding to the nearest step. Values in between produce smooth stairs."
     },
     {
       "InputId": "e911807f-b3a7-44e9-82d2-f04608b39ec3"/*Value*/,

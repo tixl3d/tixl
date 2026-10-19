@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "ba059fe1-3397-4950-9ddd-e328f0c2e0bd"/*VoronoiCells*/,
-  "Description": "Creates a Voronoi cell pattern based on an incoming image.\n\nFor similar effects or interesting combinations see: [MosaicTiling] [VoronoiCells] [SubdivisionStretch] [HoneyCombTiles] [TriangleGridTransition] [Dither] [AsciiRender]",
+  "Description": "Creates a Voronoi cell pattern where each cell is filled with the color of the incoming image at its location.\n\nAKA: voronoi, cells, worley, stainedglass, crystallize\n\nSee also: [MosiacTiling], [SubdivisionStretch], [HoneyCombTiles], [Dither], [AsciiRender]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": 132.2552,
         "Y": 187.36877
-      }
+      },
+      "Description": "Moves the cell centers. Animate it for wobbling cells."
     },
     {
       "InputId": "485ea866-3764-402b-8bb5-ade85efde0c1"/*Resolution*/,
@@ -17,7 +18,7 @@
         "X": 132.2552,
         "Y": 222.36877
       },
-      "Description": "Defines the resolution of the output image"
+      "Description": "Overrides the output resolution."
     },
     {
       "InputId": "7328bfec-fad5-4262-9c10-fad57bd39e2e"/*EdgeWidth*/,
@@ -25,7 +26,7 @@
         "X": 132.25522,
         "Y": 152.36877
       },
-      "Description": "Defines the thickness of the edges"
+      "Description": "Thickness of the edges."
     },
     {
       "InputId": "b0e1cd04-9377-4ab0-9c4e-8780f4efa271"/*Scale*/,
@@ -34,14 +35,15 @@
         "Y": 117.368774
       },
       "GroupTitle": "Settings",
-      "Description": "Defines the scaling of the effect / the amount of Voronoi cells visible"
+      "Description": "Size of the effect. Controls the number of visible cells."
     },
     {
       "InputId": "c81900c4-3478-4a53-b6e6-4e9a09c81a91"/*Background*/,
       "Position": {
         "X": -475.24088,
         "Y": 45.25374
-      }
+      },
+      "Description": "Multiplied with the cell colors."
     },
     {
       "InputId": "f5bad014-1895-4490-8c00-4c775db54716"/*Image*/,
@@ -56,7 +58,7 @@
         "X": -7.7447815,
         "Y": -162.63123
       },
-      "Description": "Defines the color of the edges",
+      "Description": "Color of the edges.",
       "AddPadding": "True"
     }
   ],

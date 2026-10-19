@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "b2267122-4223-4eff-8ae4-91d149df535c"/*_DoyleSpiralRoot*/,
-  "Description": "",
+  "Description": "Internal helper for [DoyleSpiralPoints2]. Solves the Doyle spiral parameters for the given P and Q.\n\nOutputs A and B as (magnitude, angle) pairs of the two generating complex numbers and R as the circle radius ratio.",
   "SymbolTags": "80",
   "InputUis": [
     {

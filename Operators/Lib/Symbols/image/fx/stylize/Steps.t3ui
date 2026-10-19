@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "4cdc0f90-6ce9-4a03-9cd0-efeddee70567"/*Steps*/,
-  "Description": "A versatile effect that uses the value of the input image to draw 'steps'. These can be shaded and animated.\n\nFor similar effects see: [DetectEdges] [DistortAndShade] [Displace] [Fakelight]",
+  "Description": "Quantizes the brightness of the input image into a number of steps that are colored with gradients. The steps can be shaded and animated.\n\nAKA: posterize, quantize, contour, isolines, terraces\n\nSee also: [DetectEdges], [DistortAndShade], [Displace], [FakeLight]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,6 +10,7 @@
         "X": -204.75685,
         "Y": 358.8786
       },
+      "Description": "Color blended over the step at HighlightIndex, using its alpha.",
       "AddPadding": "True"
     },
     {
@@ -24,7 +25,8 @@
       "Position": {
         "X": -204.75685,
         "Y": 268.8786
-      }
+      },
+      "Description": "Shifts the steps in units of one step. Animate it with Repeat enabled for moving bands."
     },
     {
       "InputId": "7ccb8243-a6c6-4d95-a667-cb4abd396caf"/*SmoothRadius*/,
@@ -39,21 +41,24 @@
       "Position": {
         "X": -204.75685,
         "Y": 403.8786
-      }
+      },
+      "Description": "Index of the step that is blended with the Highlight color."
     },
     {
       "InputId": "82c7d336-9a0b-40e0-938c-9e2007019b82"/*Edge*/,
       "Position": {
         "X": -194.92776,
         "Y": 531.60254
-      }
+      },
+      "Description": "Blended over each step from its start (left) to its end (right), useful for shading the step edges."
     },
     {
       "InputId": "85d5e801-f9f2-41d6-9d7b-3fbfda781fca"/*Bias*/,
       "Position": {
         "X": -204.75685,
         "Y": 223.87848
-      }
+      },
+      "Description": "Shifts the distribution of the steps towards dark or bright values."
     },
     {
       "InputId": "bea7eaac-91f0-4001-864f-2ddda0330cbd"/*Repeat*/,
@@ -61,7 +66,8 @@
         "X": -194.92776,
         "Y": 576.60254
       },
-      "GroupTitle": "Output"
+      "GroupTitle": "Output",
+      "Description": "Wraps the steps around instead of clamping, so animating Offset cycles them endlessly."
     },
     {
       "InputId": "c550629c-b200-4c66-954f-d1d50ef5c542"/*Ramp*/,
@@ -69,7 +75,8 @@
         "X": -194.92776,
         "Y": 486.6025
       },
-      "GroupTitle": "Refine"
+      "GroupTitle": "Refine",
+      "Description": "Color of each step, picked by its index from left to right."
     },
     {
       "InputId": "c5c7888a-294d-4a51-a68d-446cc7f1444c"/*Image*/,
@@ -85,14 +92,16 @@
         "X": -186.66785,
         "Y": 112.67677
       },
-      "GroupTitle": "Steps"
+      "GroupTitle": "Steps",
+      "Description": "Number of brightness steps."
     },
     {
       "InputId": "eae96c29-6f21-43b2-b17e-eb9e140863ab"/*UseSuperSampling*/,
       "Position": {
         "X": -194.92776,
         "Y": 621.60254
-      }
+      },
+      "Description": "Renders 4 samples per pixel to smooth the step edges."
     }
   ],
   "SymbolChildUis": [

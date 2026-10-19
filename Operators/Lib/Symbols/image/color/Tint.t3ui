@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "d9a71078-8296-4a07-b7de-250d4e2b95ac"/*Tint*/,
-  "Description": "Tints the bright and dark colors of an image. This can be an easy method for subtle color corrections to achieve a wide variety of conversion effects, like grayscale or threshold.\n\n\nAlso, see [RemapColor] for a similar operator.",
+  "Description": "Maps the dark and bright tones of an image to two colors.\n\nThis is a simple way for subtle color corrections and for a wide variety of conversions like grayscale or threshold effects.\n\nAKA: duotone, colorize, monochrome\n\nSee also: [RemapColor], [AdjustColors]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -23,7 +23,7 @@
         "X": -13.558125,
         "Y": 451.8705
       },
-      "Description": "Light colors will become this",
+      "Description": "Light colors become this color.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -65,6 +65,7 @@
         "X": -11.143417,
         "Y": 845.4149
       },
+      "Description": "Applies gain (X) and bias (Y) to the brightness before mapping it to the two colors.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,

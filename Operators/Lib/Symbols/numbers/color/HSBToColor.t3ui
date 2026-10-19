@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "13b08a56-0af1-473c-8dbc-20eccbcbd372"/*HSBToColor*/,
-  "Description": "Creates an RGBA color from HSB settings (same as HSB in the Color Picker)",
+  "Description": "Creates an RGBA color from hue, saturation and brightness, like HSB in the color picker.\n\nSee also: [HSLToColor], [OKLChToColor]",
   "InputUis": [
     {
       "InputId": "436d7556-2d45-4ed3-ad45-657d5b9fa7f4"/*Alpha*/,

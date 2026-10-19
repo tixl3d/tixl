@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "99435f7a-4969-4a0e-83f5-404ee6a0cfa2"/*Warp2dMesh*/,
-  "Description": "Uses a set of reference points to warp a mesh geometry. This can be useful for adjusting projection mapping.\nIt's working with [QuadMesh]",
+  "Description": "Warps a mesh on the XY plane by mapping a source quad onto a target quad.\n\nBoth point lists must contain four corner points in circular order (e.g. top left, top right, bottom right, bottom left). Each vertex is located inside the source quad and moved to the corresponding position inside the target quad; Z is kept. Vertices outside the source quad are clamped to its border. Useful for corner pinning in projection mapping, e.g. with a [QuadMesh].\n\nAKA: cornerpin, keystone, perspective\n\nSee also: [MoveMeshToPointLine]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": 120.85092,
         "Y": 1487.186
-      }
+      },
+      "Description": "Four corner points of the source quad."
     },
     {
       "InputId": "8cf1ef77-4b59-412b-992b-74f88bf857f0"/*InputMesh*/,
@@ -24,7 +25,8 @@
       "Position": {
         "X": 125.63104,
         "Y": 1798.5442
-      }
+      },
+      "Description": "Four corner points of the target quad, in the same order."
     }
   ],
   "SymbolChildUis": [

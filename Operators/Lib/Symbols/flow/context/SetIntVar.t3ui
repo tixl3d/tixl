@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "7953f704-ebee-498b-8bdd-a2c201dfe278"/*SetIntVar*/,
-  "Description": "Sets or overwrites an int variable that can be retrieved by [GetIntVar] further down (left in) the graph.",
+  "Description": "Sets an int variable in the evaluation context that can be read by [GetIntVar] in the connected subgraph.\n\nIf SubGraph is connected, the variable is set while the subgraph is executed and a previous value is restored afterwards. Without a connected subgraph the variable stays set for everything evaluated later.\n\nSee also: [GetIntVar], [Loop]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -10,6 +10,7 @@
         "X": -200.0,
         "Y": 90.0
       },
+      "Description": "None: no logging.\nWarnings: warns about an empty variable name.\nChanges: logs when a previous value is overridden.\nAllUpdates: also logs newly set variables.",
       "AddPadding": "True"
     },
     {

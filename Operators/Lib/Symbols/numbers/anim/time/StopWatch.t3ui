@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "485af23d-543e-44a7-b29f-693ed9533ab5"/*StopWatch*/,
-  "Description": "A stopwatch that can stop, measure, and keep time and thus measure durations.",
+  "Description": "Measures the time since the last reset.\n\nThe Delta output returns the time since ResetTrigger last became true. LastDuration returns the duration of the previous interval in seconds.\n\nAKA: timer\n\nSee also: [Time], [RunTime]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -16,14 +16,16 @@
       "Position": {
         "X": -200.0,
         "Y": 90.0
-      }
+      },
+      "Description": "If true, Delta only advances while playback is running."
     },
     {
       "InputId": "c19343b2-7534-43a9-a9a6-ce9019437c62"/*DurationIn*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Unit of the Delta output."
     }
   ],
   "SymbolChildUis": [],

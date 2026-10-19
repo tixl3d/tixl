@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "e2b7f4a1-3c69-4d58-8a1e-9f6c0d2b5e37"/*TextToCurves*/,
-  "Description": "Lays out text with a TrueType or OpenType font and outputs the glyph outlines as curves.\r\n\r\nEach glyph becomes one part (pivot at its origin) of closed cubic-bezier contours, with part attributes CodePoint, GlyphId, CharIndex, WordIndex, LineIndex and Advance for selection and styling downstream. Size is the em height in scene units. Weight drives a variable font's wght axis (Inter Variable: 100..900); Axis and AxisValue set one more axis by its four-letter tag (e.g. opsz). Static fonts ignore them. Whitespace advances the layout but produces no geometry. Flatten with [CurvesToPoints] to draw as lines, or fill with [CurvesToGeometry].\r\n\r\nAKA: font outlines, 3d text, typography, glyphs",
+  "Description": "Lays out text with a TrueType or OpenType font and outputs the glyph outlines as curves.\n\nEach glyph becomes one part of closed cubic-bezier contours, with part attributes CodePoint, GlyphId, CharIndex, WordIndex, LineIndex and Advance for selection and styling downstream. Size is the em height in scene units. Weight drives a variable font's wght axis (Inter Variable: 100..900); Axis and AxisValue set one more axis by its four-letter tag (e.g. opsz). Static fonts ignore them. Whitespace advances the layout but produces no geometry. Flatten with [CurvesToPoints] to draw as lines, or fill with [CurvesToGeometry].\n\nAKA: font, outlines, typography, glyphs",
   "InputUis": [
     {
       "InputId": "1f8a3c5e-7d92-4b06-a4e1-c6b9d2f7a350"/*Text*/,
@@ -17,14 +17,16 @@
       "Position": {
         "X": 0.0,
         "Y": 360.0
-      }
+      },
+      "Description": "Value for the axis set in Axis."
     },
     {
       "InputId": "3e6b8d2a-c4f9-4a17-b5e3-8d0c7a2f6e41"/*LineSpacing*/,
       "Position": {
         "X": 0.0,
         "Y": 135.0
-      }
+      },
+      "Description": "Line spacing as multiple of the font's line height."
     },
     {
       "InputId": "4a7f2b9e-8c31-4d56-a0b2-c7e4f9d1a823"/*Pivot*/,
@@ -32,6 +34,7 @@
         "X": 0.0,
         "Y": 435.0
       },
+      "Description": "Position of each glyph's part pivot within its bounding box: -1 is left/bottom, 1 is right/top.",
       "Min": -1.0,
       "Max": 1.0,
       "Scale": 0.1,
@@ -42,7 +45,8 @@
       "Position": {
         "X": 0.0,
         "Y": 225.0
-      }
+      },
+      "Description": "Applies the kerning of the font."
     },
     {
       "InputId": "7c2e9a4b-5f61-4d38-b8a0-e3d5c1f9b724"/*Path*/,
@@ -51,6 +55,7 @@
         "X": 0.0,
         "Y": 45.0
       },
+      "Description": "Font file (.ttf, .otf or .ttc).",
       "Usage": "FilePath",
       "FileFilter": "ttf;otf;ttc"
     },
@@ -60,6 +65,7 @@
         "X": 0.0,
         "Y": 315.0
       },
+      "Description": "Four-letter tag of an additional variable font axis, e.g. opsz.",
       "Usage": "Default"
     },
     {
@@ -74,7 +80,8 @@
       "Position": {
         "X": 0.0,
         "Y": 180.0
-      }
+      },
+      "Description": "Horizontal alignment of the lines."
     },
     {
       "InputId": "f4a9c2e7-6d18-4b53-9e0c-a7b1d5f3c826"/*Weight*/,

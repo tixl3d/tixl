@@ -16,14 +16,16 @@
       "Position": {
         "X": 0.0,
         "Y": 90.0
-      }
+      },
+      "Description": "0 returns PoseA, 1 returns PoseB."
     },
     {
       "InputId": "ad60be52-17c9-4f38-b654-90e2c73a8f15"/*WeightMask*/,
       "Position": {
         "X": 0.0,
         "Y": 135.0
-      }
+      },
+      "Description": "Optional pose whose F1 values scale the blend factor per joint."
     },
     {
       "InputId": "e3a95b18-6d72-4c04-bf59-8a41d0c7263f"/*PoseB*/,

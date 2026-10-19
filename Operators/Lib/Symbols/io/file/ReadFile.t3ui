@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "5f71d2f8-98c8-4502-8f40-2ea4a1e18cca"/*ReadFile*/,
-  "Description": "Reads a file on the local disk and outputs the content as a string\n\nOpposite of: [WriteToFile]\n\nUseful combination: [PickStringPart]\n\nAlso see: [RequestUrl] which adds online capabilities and [GetAttributeFromJsonString]",
+  "Description": "Reads a file on the local disk and outputs the content as a string.\n\nSee also: [WriteToFile] (opposite), [PickStringPart], [RequestUrl] (online), [GetAttributeFromJsonString]",
   "InputUis": [
     {
       "InputId": "24b7e7e1-fe0b-46be-807e-0afacd4800f9"/*FilePath*/,

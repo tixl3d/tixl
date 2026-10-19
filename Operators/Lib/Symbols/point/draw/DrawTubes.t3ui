@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "c12cf584-f6db-4d24-a03a-7801736d2c50"/*DrawTubes*/,
-  "Description": "Draws a shaded 3D mesh for connected lines points.",
+  "Description": "Draws connected points as shaded 3D tubes.",
   "SymbolTags": "8",
   "InputUis": [
     {

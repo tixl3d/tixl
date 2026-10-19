@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "56eda8f4-09fc-48a3-ab1d-fbff4f4b6438"/*KeepStrings*/,
-  "Description": "Collects the input string to a list.",
+  "Description": "Collects incoming strings into a list each time InsertTrigger is true.\n\nThis can be used to build a history of messages, e.g. from network inputs. It also outputs the insertion time of each entry.",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": -200.0,
         "Y": 135.0
-      }
+      },
+      "Description": "Maximum number of kept strings, clamped to 0..10000."
     },
     {
       "InputId": "26adb8d2-14e7-4006-99ed-bcbbede8352a"/*NewString*/,
@@ -25,21 +26,24 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Clears the list and resets itself."
     },
     {
       "InputId": "3a9e3e1c-e8c2-46c7-96ac-b7c317205ed4"/*OnlyOnChanges*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Only adds NewString if it differs from the previously received string."
     },
     {
       "InputId": "694574a3-a3a9-4073-beec-a6a10ed64b81"/*InsertMode*/,
       "Position": {
         "X": -200.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Append: adds to the end and removes the oldest entries.\nInsert: adds to the beginning and removes entries at the end.\nOverwrite: fills the list, then overwrites entries in a cycle.\nUseIndex: writes at Index, or appends if Index is beyond the list end."
     },
     {
       "InputId": "ba5cd2ae-15df-4d67-8690-a5b0d1b81971"/*Index*/,
@@ -47,14 +51,16 @@
       "Position": {
         "X": 0.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Write position for UseIndex mode. Wraps at MaxCount."
     },
     {
       "InputId": "d045f941-7035-4a84-b0b0-2691477ef375"/*InsertTrigger*/,
       "Position": {
         "X": 0.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Adds the current NewString while true."
     }
   ],
   "SymbolChildUis": [],

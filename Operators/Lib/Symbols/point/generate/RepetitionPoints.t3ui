@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "73d99108-f49a-48fb-aa5d-707c00abb1c2"/*RepetitionPoints*/,
-  "Description": "Generate a list of points by repeating a transform operation.\nThis can be very useful in combination with [DrawMeshAtPoints].\n\nAlso, by driving the Offset parameter with an LFO, you can produce seamlessly animated endless scenes. This can be useful for VJ projects.",
+  "Description": "Generates a list of points by repeatedly applying a transform step.\n\nEach point i is placed with Translate, Rotate and Scale multiplied by (i + 1 + Phase). F1 is set to the relative scale plus StartW. This can be very useful in combination with [DrawMeshAtPoints].\n\nBy driving the Phase parameter with an LFO, seamlessly animated endless scenes can be produced.",
   "SymbolTags": "72",
   "InputUis": [
     {
@@ -16,7 +16,8 @@
       "Position": {
         "X": -200.0,
         "Y": 135.0
-      }
+      },
+      "Description": "Added to the F1 attribute of all points."
     },
     {
       "InputId": "3a1a829d-d273-4ec0-b327-30be0e0463c4"/*Translate*/,
@@ -52,7 +53,8 @@
       "Position": {
         "X": -200.0,
         "Y": 360.0
-      }
+      },
+      "Description": "Rotation step in degrees per point."
     },
     {
       "InputId": "af3c87e3-889d-410f-b4bc-62bd29bee8fa"/*Phase*/,
@@ -60,6 +62,7 @@
         "X": -200.0,
         "Y": 405.0
       },
+      "Description": "Offsets the repetition steps. Animate it to move all points along the repetition.",
       "AddPadding": "True"
     },
     {
@@ -67,7 +70,8 @@
       "Position": {
         "X": -200.0,
         "Y": 180.0
-      }
+      },
+      "Description": "Appends a separator so multiple lists can be combined into separate lines."
     }
   ],
   "SymbolChildUis": [],

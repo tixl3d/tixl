@@ -15,26 +15,31 @@ internal sealed class MultiUpdatePoints : Instance<MultiUpdatePoints>
 
     private void Update(EvaluationContext context)
     {
-        var connectedLists = PointBuffers.CollectedInputs.Select(c => c.GetValue(context)).Where(c => c != null).ToList();
-        PointBuffers.DirtyFlag.Clear();
-            
-        if (connectedLists.Count == 0)
+        var collectedInputs = PointBuffers.CollectedInputs;
+        BufferWithViews first = null;
+        BufferWithViews last = null;
+        var connectedIndex = 0;
+        for (var index = 0; index < collectedInputs.Count; index++)
         {
-            Result.Value = null;
-            return;
-        }
+            var buffer = collectedInputs[index].GetValue(context);
+            if (buffer == null)
+                continue;
 
-        BufferWithViews input = connectedLists[0];
-        for (var index = 1; index < connectedLists.Count; index++)
-        {
-            var cl = connectedLists[index];
-            if (cl != input)
+            if (first == null)
             {
-                Log.Warning($"Inconsistent buffers connected to MultiUpdatePoints on index {index}", this);
+                first = buffer;
             }
+            else if (buffer != first)
+            {
+                Log.Warning($"Inconsistent buffers connected to MultiUpdatePoints on index {connectedIndex}", this);
+            }
+
+            last = buffer;
+            connectedIndex++;
         }
 
-        Result.Value = connectedLists[connectedLists.Count - 1];
+        PointBuffers.DirtyFlag.Clear();
+        Result.Value = last;
     }
 
 

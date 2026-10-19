@@ -1,7 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "69c3b4ce-490a-48d4-b1d0-56dd6bf7a9a8"/*_LegacySimForwardMovement*/,
-  "Description": "Moves points similar to particles into the direction of their Orientation and with W as their current velocity.\n\nWith v3.8, the forward movement is done directly in the [ParticleSimulation] operator, which makes this operator obsolete.",
+  "Description": "Obsolete. Moves points like particles in the direction of their orientation, with W as their current velocity.\n\nThe forward movement is now done directly in [ParticleSystem].",
+  "SymbolTags": "4096",
   "InputUis": [
     {
       "InputId": "2038b006-b5a3-472d-870b-d1a3623dfc0c"/*GPoints*/,

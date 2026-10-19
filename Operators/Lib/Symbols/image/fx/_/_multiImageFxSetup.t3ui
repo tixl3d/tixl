@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "a2567844-3314-48de-bda7-7904b5546535"/*_multiImageFxSetup*/,
-  "Description": "",
+  "Description": "Internal helper. Renders a fullscreen pixel shader with two input images and the given float and int parameters.\n\nBase for many image effects with a mask or second image.",
   "SymbolTags": "16",
   "InputUis": [
     {

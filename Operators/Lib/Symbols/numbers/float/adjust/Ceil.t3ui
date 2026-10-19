@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "7129684e-bf84-4c8b-996e-baba68094585"/*Ceil*/,
-  "Description": "Rounds to the next highest integer value.\n\nAlso see [Round] & [Floor]",
+  "Description": "Rounds up to the next higher integer value.\n\nSee also: [Round], [Floor]",
   "SymbolTags": "8",
   "InputUis": [
     {

@@ -1,14 +1,15 @@
 {
   "FormatVersion": 3,
   "Id": "2ba45de7-c111-4c9f-9d19-8a17130dbcc8"/*SetFloatListValue*/,
-  "Description": "Manipulate a value in a float list",
+  "Description": "Sets, adds to or multiplies a value in a float list.\n\nThe change is applied in place to the incoming list on every update while TriggerSet is true, so in Add or Multiply mode the effect accumulates each frame.\n\nSee also: [PickFloatFromList], [KeepFloatValues]",
   "InputUis": [
     {
       "InputId": "2f21b0a8-bc10-4bcb-8545-077a3b8243df"/*TriggerSet*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "The change is only applied while this is true."
     },
     {
       "InputId": "2ffc3e9f-ef41-4c6a-aae7-a8e9008a096b"/*Value*/,
@@ -29,14 +30,16 @@
       "Position": {
         "X": -200.0,
         "Y": 135.0
-      }
+      },
+      "Description": "Index of the entry to change; wraps around the list length. -2 changes all entries; other negative values change nothing."
     },
     {
       "InputId": "f6ea6675-b0e5-442e-8d6e-6d862b200cca"/*Mode*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Set: replace the entry with Value.\nAdd: add Value to the entry.\nMultiply: multiply the entry with Value."
     }
   ],
   "SymbolChildUis": [],

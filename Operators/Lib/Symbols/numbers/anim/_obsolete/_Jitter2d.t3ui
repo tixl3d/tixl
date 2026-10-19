@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "23794a1f-372d-484b-ac31-9470d0e77819"/*_Jitter2d*/,
-  "Description": "Generates a randomly moving position within an area.\n\nThis operator has been deprecated. Please consider using [AnimVec2].",
+  "Description": "Obsolete. Generates a randomly moving position within an area; use [AnimVec2] instead.",
   "SymbolTags": "4096",
   "InputUis": [
     {

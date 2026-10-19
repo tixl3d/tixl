@@ -11,7 +11,7 @@
         "Y": 240.0
       },
       "GroupTitle": "Options",
-      "Description": "Defines the start of the data slice read back from GPU."
+      "Description": "Index of the first point to read."
     },
     {
       "InputId": "63014058-5418-4711-ae57-a9ba8841cb67"/*MaxCount*/,
@@ -19,14 +19,15 @@
         "X": -200.0,
         "Y": 165.0
       },
-      "Description": "Reading down large chunks for data can critically slow down the user interface.\nFor most diagnostic purposes you want to limit this count to a reasonable number."
+      "Description": "Maximum number of points to read. 0 reads all points.\n\nReading large buffers can critically slow down the user interface. For most diagnostic purposes, limit this count to a reasonable number."
     },
     {
       "InputId": "77ee7ca9-a2db-4de9-bb9c-21ec4f1bbeaf"/*UpdateContinuously*/,
       "Position": {
         "X": -200.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Reads the buffer on every update. When disabled, data is only fetched when TriggerUpdate is used or the buffer size changes."
     },
     {
       "InputId": "b2a36ab5-5b81-4b72-9f40-9e66d3dcf94b"/*Async*/,
@@ -41,7 +42,8 @@
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Reads the buffer once."
     },
     {
       "InputId": "f267534c-59ae-4758-b04a-13b6337bc0eb"/*PointBuffer*/,

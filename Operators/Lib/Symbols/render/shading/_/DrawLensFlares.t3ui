@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "de173d83-66e6-4363-a478-4336100c2dbd"/*DrawLensFlares*/,
-  "Description": "Draws 2D Sprites defined in a sprite buffer. This can be used to render things like lens flare quads or other effects.\n\nAdditionally to a Point-buffer, Sprites also contain attributes like UV and color.",
+  "Description": "Draws the lens flare sprites defined by one or more [DefineLensFlare] operators.\n\nThe sprite texture can contain a grid of cells (see TextureCells), so different flare elements can use different shapes.\n\nSee also: [DefineLensFlare], [LenseFlareSetup]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -16,7 +16,8 @@
       "Position": {
         "X": -92.402435,
         "Y": 982.2465
-      }
+      },
+      "Description": "Number of columns and rows of sprite cells in the texture."
     },
     {
       "InputId": "3c028f98-5130-4cb0-b09b-eca193a8382b"/*Color*/,
@@ -31,7 +32,8 @@
       "Position": {
         "X": -89.67319,
         "Y": 1139.8427
-      }
+      },
+      "Description": "Sprite lists from [DefineLensFlare]."
     },
     {
       "InputId": "8e1ceafe-4697-45a2-9464-9f0797cb6de5"/*Texture_*/,
@@ -40,14 +42,15 @@
         "X": -95.74167,
         "Y": 1378.026
       },
-      "Description": "Texture used for the sprites. Good options for generating them are [RadialGradient], [Blob] and [NGon].\nMake sure to set their Resolution to a fixed square size like 256x256 pixels."
+      "Description": "Texture used for the sprites. Good options for generating them are [RadialGradient], [Blob] and [NGon].\nUse a fixed square resolution like 256x256 pixels."
     },
     {
       "InputId": "b84b107c-5179-48b2-ab2e-eb0b847fbb1e"/*Size*/,
       "Position": {
         "X": -93.12924,
         "Y": 217.22752
-      }
+      },
+      "Description": "Scale factor for all sprites."
     },
     {
       "InputId": "ce9153c5-d9f6-45b7-8132-180a36dce18c"/*BlendMod*/,

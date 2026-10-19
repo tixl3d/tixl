@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "f925e9b9-5c7a-4fbf-9572-b11fe2d54d6c"/*ApplyRandomWalk*/,
-  "Description": "Applies random steps to the position and rotation of points.",
+  "Description": "Moves the points of a simulation buffer in random steps and turns, like a random walk.\n\nWhile TriggerStep is enabled, every point steps along its local X axis with the probability StepRatio, and stepping points turn around their local Z axis with the probability TurnRatio. As the buffer is modified in place, use it with [PointSimulation].",
   "SymbolTags": "64",
   "InputUis": [
     {
@@ -9,14 +9,16 @@
       "Position": {
         "X": 270.31702,
         "Y": 768.7075
-      }
+      },
+      "Description": "Random additional step length."
     },
     {
       "InputId": "23a45ab7-7f40-4f6d-91ff-5ecaf9ffe221"/*StepRatio*/,
       "Position": {
         "X": 270.31702,
         "Y": 678.7075
-      }
+      },
+      "Description": "Probability (0..1) that a point moves in a step."
     },
     {
       "InputId": "2b7fd9ed-4d08-4d0e-8258-41c7606c182f"/*Seed*/,
@@ -30,7 +32,8 @@
       "Position": {
         "X": 270.31702,
         "Y": 588.7075
-      }
+      },
+      "Description": "Step length along the local X axis of the point."
     },
     {
       "InputId": "4b3bb61b-a9f6-4c53-9af7-707984f7ff18"/*GPoints*/,
@@ -45,7 +48,8 @@
       "Position": {
         "X": 270.31702,
         "Y": 543.7075
-      }
+      },
+      "Description": "While enabled, a step is applied on every frame."
     },
     {
       "InputId": "87b7a45e-dad8-4d5b-93af-7ed743ac8237"/*AreaEdgeRange*/,
@@ -66,7 +70,8 @@
       "Position": {
         "X": 270.31702,
         "Y": 633.7075
-      }
+      },
+      "Description": "Turn angle in degrees around the local Z axis. Left or right is chosen randomly."
     },
     {
       "InputId": "b4cabe59-4166-490c-be8d-12eb9d5fe3c4"/*AreaCenter*/,
@@ -80,14 +85,16 @@
       "Position": {
         "X": 270.31702,
         "Y": 813.7075
-      }
+      },
+      "Description": "Random additional turn angle in degrees."
     },
     {
       "InputId": "e0326849-5e5b-41fb-b53e-0a2c0eafca12"/*TurnRatio*/,
       "Position": {
         "X": 270.31702,
         "Y": 723.7075
-      }
+      },
+      "Description": "Probability (0..1) that a moving point also turns."
     }
   ],
   "SymbolChildUis": [

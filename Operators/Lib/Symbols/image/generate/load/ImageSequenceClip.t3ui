@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "927a77d5-7bf0-477b-b288-4bb48d4980cd"/*ImageSequenceClip*/,
-  "Description": "Loads an image sequence from a folder and adds it as a time clip bar within the DopeView of the Timeline, similar to how video editing apps show clips.\nThese clips can be moved by drag and drop and arranged next to and on top of each other (classic NLE non-linear editing).\n\nWhen the time marker is running over / playing the time clip it is activated and rendered.\n\nTo load an Operator tree into the DopeView of the Timeline [TimeClip] can be used.\n[MidiClip] can be used to load linear MIDI information into the scene.",
+  "Description": "Plays the images of a folder as a sequence within a time clip in the timeline.\n\nLike other time clips, it is shown as a bar in the DopeSheet of the timeline and can be moved, trimmed and arranged next to and on top of other clips like in video editing software. The sequence is only rendered while the time is within the clip.\n\nAKA: sequence, frames, flipbook\n\nSee also: [TimeClip], [MidiClip], [LoadImage]",
   "InputUis": [
     {
       "InputId": "25215a7e-1e38-4370-8845-cbf422a7eb92"/*TriggerUpdate*/,
@@ -9,7 +9,7 @@
         "X": -834.8699,
         "Y": 13.593903
       },
-      "Description": "Forces update if clicked or activated via a bool"
+      "Description": "Rescans the folder for files."
     },
     {
       "InputId": "5c510853-f87d-4ebf-be0a-78d06d970be2"/*FrameRate*/,
@@ -17,7 +17,7 @@
         "X": -834.8699,
         "Y": -31.406097
       },
-      "Description": "Defines how many images per second are shown"
+      "Description": "Number of images shown per second."
     },
     {
       "InputId": "7c4fbfe3-2cf4-4e23-9b3e-961927f20935"/*Color*/,
@@ -25,7 +25,7 @@
         "X": -834.8699,
         "Y": 58.593903
       },
-      "Description": "Color value that tints / colors the image sequence",
+      "Description": "Tints the images of the sequence.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -37,7 +37,7 @@
         "X": -834.8699,
         "Y": -121.4061
       },
-      "Description": "Defines the storage location of the image sequence.\n",
+      "Description": "Folder containing the images of the sequence.",
       "Usage": "DirectoryPath"
     }
   ],

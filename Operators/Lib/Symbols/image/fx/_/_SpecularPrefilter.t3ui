@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "cc3cc712-9e87-49c6-b04b-49a12cf2ba75"/*_SpecularPrefilter*/,
-  "Description": "GGX prefiltering for input cubemap. Different roughness prefilterings are stored in mip levels.",
+  "Description": "Internal helper. Computes a GGX prefiltered version of a cubemap for image based lighting.\n\nThe prefilterings for increasing roughness are stored in the mip levels. Used by [SetEnvironment].",
   "SymbolTags": "16",
   "InputUis": [
     {
@@ -44,7 +44,8 @@
       "Position": {
         "X": -200.0,
         "Y": 315.0
-      }
+      },
+      "Description": "If disabled, the cubemap is only filtered once."
     },
     {
       "InputId": "9f7926aa-ac69-4963-af1d-342ad06fc278"/*CubeMap*/,

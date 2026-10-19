@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "fdb85ece-201b-49dc-899b-f044a98ac414"/*OctahedronSDF*/,
-  "Description": "Generates a octahedron distande field.\n[BoxSDF] [PlaneSDF] [CombineSDF] [RaymarchField] \n",
+  "Description": "Generates an octahedron as an SDF.\n\nRender the result with [RaymarchField] and inspect it with [VisualizeFieldDistance]. Modify it with [TransformField], [BendField], [RepeatPolar] and other field operators.\n\nSee also: [BoxSDF], [PyramidSDF], [CombineSDF]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Distance from the center to each tip."
     },
     {
       "InputId": "2811b696-3d09-46f7-84ac-045eb7fe82b0"/*Center*/,
@@ -24,6 +25,7 @@
         "X": -200.0,
         "Y": 45.0
       },
+      "Description": "Rounds the edges. This also grows the shape.",
       "Min": 0.002,
       "Max": 0.5
     }

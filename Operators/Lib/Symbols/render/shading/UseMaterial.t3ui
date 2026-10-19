@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "11c5b420-d20b-42df-bc96-8a9e851521e5"/*UseMaterial*/,
-  "Description": "Applies the connected material definition to the context and it will be used by Draw operators further down (left) in the graph.",
+  "Description": "Applies a material reference to the connected subgraph so that draw operators within it use it.\n\nThe material is usually defined by the Reference output of a [SetMaterial], so one material can be reused in several places.\n\nSee also: [SetMaterial], [DefineMaterials]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -17,7 +17,8 @@
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Reference output of a [SetMaterial]."
     }
   ],
   "SymbolChildUis": [],

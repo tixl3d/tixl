@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "ab73a49e-c548-437d-a4ab-b3fa41e30097"/*AddInt*/,
-  "Description": "Adds two integers\n\nSame as [IntAdd]",
+  "Description": "Adds two integers.\n\nSee also: [SubInts], [SumInts], [AddInt2]",
   "InputUis": [
     {
       "InputId": "8496877c-6186-4a9f-acb2-ceb90026dc1d"/*Input1*/,

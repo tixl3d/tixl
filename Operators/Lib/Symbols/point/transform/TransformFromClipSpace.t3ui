@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "81377edc-0a42-4bb1-9440-2f2433d5757f"/*TransformFromClipSpace*/,
-  "Description": "Transforms Point positions from world to clip space.",
+  "Description": "Transforms point positions and rotations with the camera-to-world matrix of the current camera.\n\nPositions are divided by the resulting w. Useful to attach points defined relative to the camera to the camera.",
   "SymbolTags": "64",
   "InputUis": [
     {

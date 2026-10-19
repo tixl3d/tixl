@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "facb7925-176a-4eae-bedc-cdbf532ff6ff"/*SetShadow*/,
-  "Description": "Renders a shadow pass for a directional light source.\nNeeds a [DrawMeshWithShadow] and a [SetPointLight] or [PointLight] in order to work.",
+  "Description": "Renders a shadow map of the connected subgraph from a light position, so that shadow-receiving draw operators can render cast shadows.\n\nThe shadow map is rendered from LightPosition towards LightTarget. It is only used by [DrawMeshWithShadow], and requires a [PointLight] or [SetPointLight] for the lighting itself.\n\nAKA: shadowmap, castshadow\n\nSee also: [DrawMeshWithShadow], [PointLight]\n\nAlso check out the [HowToDrawThings] tutorial.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,8 @@
         "X": -1952.9755,
         "Y": -421.11142
       },
-      "GroupTitle": "Shadow Settings"
+      "GroupTitle": "Shadow Settings",
+      "Description": "Width and height of the shadow map in pixels."
     },
     {
       "InputId": "5fb309a1-f164-4fe0-95e2-3bfc37823f78"/*DepthRange*/,
@@ -18,7 +19,8 @@
         "X": -1363.254,
         "Y": 216.51556
       },
-      "GroupTitle": "Advanced"
+      "GroupTitle": "Advanced",
+      "Description": "Near and far clip planes of the shadow map camera."
     },
     {
       "InputId": "6196074f-4770-4e81-812a-012fcaab207b"/*LightPosition*/,
@@ -26,14 +28,16 @@
         "X": -105.41022,
         "Y": -952.71454
       },
-      "GroupTitle": "Light Settings"
+      "GroupTitle": "Light Settings",
+      "Description": "Position from which the shadow map is rendered. Usually the position of the point light."
     },
     {
       "InputId": "76a6a0e4-168d-4172-9946-e843df9d0ca0"/*LightTarget*/,
       "Position": {
         "X": -225.91083,
         "Y": -910.1197
-      }
+      },
+      "Description": "Point the shadow map camera looks at."
     },
     {
       "InputId": "bbec0f5e-b6ec-44b2-97ec-403419161b3a"/*ShowDebug*/,
@@ -41,6 +45,7 @@
         "X": -1952.9755,
         "Y": -376.11142
       },
+      "Description": "Draws the shadow map as an overlay for debugging.",
       "AddPadding": "True"
     },
     {
@@ -48,7 +53,8 @@
       "Position": {
         "X": -1262.983,
         "Y": -166.91022
-      }
+      },
+      "Description": "The scene casting and receiving shadows."
     }
   ],
   "SymbolChildUis": [

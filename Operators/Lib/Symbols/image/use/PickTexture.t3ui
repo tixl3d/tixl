@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "e6070817-cf2e-4430-87e0-bf3dd15afdb5"/*PickTexture*/,
-  "Description": "Picks one of the connected textures. Only the selected connection will be updated.",
+  "Description": "Outputs one of the connected textures selected by Index.\n\nOnly the selected input is updated. The index wraps around the number of connected inputs.\n\nAKA: switch, select, choose\n\nSee also: [BlendImages], [FirstValidTexture]",
   "SymbolTags": "1",
   "InputUis": [
     {

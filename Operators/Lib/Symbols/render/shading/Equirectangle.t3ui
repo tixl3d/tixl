@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "9d71d46c-f3d8-4bf4-a104-38c0b37cc88b"/*Equirectangle*/,
-  "Description": "Renders the input scene as an image with depth with equirectangular mapping (for 360/VR/fulldome video)\n\nAlso see [PolarCoordinates], [ConvertEquirectangle]",
+  "Description": "Renders the connected scene in all directions into an equirectangular color and depth image, e.g. for 360° video, VR or fulldome projection.\n\nThe scene is rendered into the six faces of a cube map, which are then converted to an equirectangular image. The scene must not contain its own camera.\n\nAKA: 360, panorama, vr, fulldome, latlong, spherical\n\nSee also: [PolarCoordinates], [ConvertEquirectangle], [TextureToCubeMap]",
   "SymbolTags": "64",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": -2690.953,
         "Y": -131.78491
-      }
+      },
+      "Description": "The scene to render."
     },
     {
       "InputId": "9e35ef34-0b02-40f6-93d5-5163346d681a"/*Dimension*/,
@@ -17,7 +18,7 @@
         "X": -2690.953,
         "Y": -86.78491
       },
-      "Description": "Use 256, 512, 1024 or 2048",
+      "Description": "Resolution of each cube face in pixels. Use powers of two like 256, 512, 1024 or 2048.",
       "AddPadding": "True"
     }
   ],

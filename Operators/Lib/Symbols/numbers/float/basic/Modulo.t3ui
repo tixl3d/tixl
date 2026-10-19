@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "5202d3f6-c970-4006-933d-3c60d6c202dc"/*Modulo*/,
-  "Description": "Modulo for floats.",
+  "Description": "Computes the floored modulo of a float.\n\nThe result has the same sign as ModuloValue, so -0.5 mod 1 is 0.5. This makes it useful for looping values. A ModuloValue of 0 outputs 0.\n\nAKA: mod, wrap, repeat, fmod\n\nSee also: [Div]",
   "SymbolTags": "1",
   "InputUis": [
     {

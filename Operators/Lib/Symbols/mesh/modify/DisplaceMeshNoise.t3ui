@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "b5709297-c714-4019-9d0b-6982590b5590"/*DisplaceMeshNoise*/,
-  "Description": "Displaces a Mesh with Perlin noise.",
+  "Description": "Displaces the vertices of a mesh with 3D simplex noise.\n\nTangents and normals are updated by sampling the noise at neighboring positions, so shading follows the displacement.\n\nAKA: noise, turbulence, wobble\n\nSee also: [DisplaceMesh], [TextureDisplaceMesh]",
   "SymbolTags": "65",
   "InputUis": [
     {
@@ -10,7 +10,8 @@
         "X": 618.68,
         "Y": 1844.1096
       },
-      "GroupTitle": "Advanced"
+      "GroupTitle": "Advanced",
+      "Description": "Distance of the neighboring samples used to compute the new tangents and normals, relative to the noise frequency."
     },
     {
       "InputId": "093a468c-c208-4caf-be4f-d5d7d9ceddeb"/*OffsetDirection*/,
@@ -18,6 +19,7 @@
         "X": 618.68,
         "Y": 1984.1096
       },
+      "Description": "Constant value added to the noise before scaling, which shifts the displacement in one direction.",
       "AddPadding": "True"
     },
     {
@@ -26,6 +28,7 @@
         "X": 478.67996,
         "Y": 1914.1096
       },
+      "Description": "Position used to sample the noise.\n\nPointSpace: the UV coordinates of the vertex.\nWorldSpace: the vertex position transformed to world space.\nObjectSpace: the vertex position of the mesh.",
       "AddPadding": "True"
     },
     {
@@ -34,6 +37,7 @@
         "X": 618.68,
         "Y": 1634.1096
       },
+      "Description": "Scale of the noise pattern. Higher values create smaller details.",
       "AddPadding": "True"
     },
     {
@@ -41,14 +45,16 @@
       "Position": {
         "X": 478.67996,
         "Y": 2019.1094
-      }
+      },
+      "Description": "Weights the displacement by the vertex selection, e.g. from [SelectVertices]."
     },
     {
       "InputId": "9a82f2a6-390e-4073-bc80-e5fd3b1c0bfe"/*UseWAsWeight*/,
       "Position": {
         "X": 618.68,
         "Y": 1879.1096
-      }
+      },
+      "Description": "Currently has no effect."
     },
     {
       "InputId": "b7559321-2dbe-4fe0-ab86-52532d008980"/*Amount*/,
@@ -56,14 +62,16 @@
         "X": 618.68,
         "Y": 1599.1096
       },
-      "GroupTitle": "Settings"
+      "GroupTitle": "Settings",
+      "Description": "Strength of the displacement. 100 corresponds to a maximum offset of about one unit."
     },
     {
       "InputId": "b89b6730-de46-4d56-b2a8-b7d6f6876620"/*Phase*/,
       "Position": {
         "X": 618.68,
         "Y": 1669.1096
-      }
+      },
+      "Description": "Moves through the noise; can be animated."
     },
     {
       "InputId": "e02379a9-fadf-46d4-a6c2-74264e91b5a6"/*AmountDistribution*/,
@@ -71,6 +79,7 @@
         "X": 478.67996,
         "Y": 1739.1096
       },
+      "Description": "Scales the displacement per axis.",
       "AddPadding": "True"
     },
     {
@@ -78,14 +87,16 @@
       "Position": {
         "X": 618.68,
         "Y": 1704.1096
-      }
+      },
+      "Description": "Random noise offset per vertex."
     },
     {
       "InputId": "f108f6f7-5e6f-43c8-9d0b-c2e7bf5adf9c"/*Direction*/,
       "Position": {
         "X": 478.67996,
         "Y": 1949.1096
-      }
+      },
+      "Description": "WorldSpace: the noise offsets along the X, Y and Z axes.\nSurfaceNormal: the noise offsets in the tangent space of each vertex, so Z moves along the normal."
     },
     {
       "InputId": "fb86f0d6-1e5c-478f-b723-9f9462e2966c"/*InputMesh*/,

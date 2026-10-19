@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "075612b1-8760-4858-ad6b-6c85a7716794"/*TimeToString*/,
-  "Description": "Converts [Time] float output and similar to a string",
+  "Description": "Converts a time float (e.g. from [Time]) to a formatted string.",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,8 +9,7 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      },
-      "Description": "Input for [Time] operator"
+      }
     }
   ],
   "SymbolChildUis": [

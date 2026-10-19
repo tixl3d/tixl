@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "74901305-773d-4246-b962-2478096159b7"/*RandomChoiceIndex*/,
-  "Description": "Returns a random index for a given seed that can be used to pick from a list or scene.\n\nThe index will remain in the giving Modulo range and never repeat an index.",
+  "Description": "Returns a pseudo-random index in the range 0 to Mod-1 for the given Value, without repeating the previous index.\n\nThe result is deterministic: the same Value always gives the same index. Increase Value (e.g. with [CountInt]) to step through a shuffled sequence for picking from a list or scenes.\n\nAKA: shuffle",
   "InputUis": [
     {
       "InputId": "009e80fa-7f42-4db6-abd8-91039602bed6"/*Mod*/,
@@ -9,6 +9,7 @@
         "X": -200.0,
         "Y": 45.0
       },
+      "Description": "Number of choices. Values below 2 always output 0; 2 alternates between 0 and 1.",
       "Min": 2,
       "ClampMin": true
     },
@@ -17,7 +18,8 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Position in the random sequence, e.g. a counter or beat index."
     }
   ],
   "SymbolChildUis": [],

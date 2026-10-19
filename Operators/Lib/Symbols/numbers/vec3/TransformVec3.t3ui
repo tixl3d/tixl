@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "20ad2907-524d-4160-802b-ad4a359b3d0d"/*TransformVec3*/,
-  "Description": "Transform Vector3 with the given transform matrix.",
+  "Description": "Transforms a Vector3 position with a 4x4 matrix.\n\nThe vector is treated as a point (w = 1), so translation is applied.\n\nSee also: [MulMatrix], [RotateVector3]",
   "InputUis": [
     {
       "InputId": "5b124d01-ce79-4055-88ea-66394f7831d8"/*Matrix*/,

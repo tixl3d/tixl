@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "4238439e-a6b4-4390-9984-e6ebf19c3a69"/*ReprojectToUV*/,
-  "Description": "Uses a camera projection and the UV layout of the incoming mesh to reproject an image onto a geometry.\n\nThis can be useful for uses like projection mapping or immersive media installations.\n\nNote:\n\nFor the setup to work correctly make sure that...\n- the FOV of the viewer camera is wide enough.\n- the aspect ratio of the viewer camera matches the texture resolution\n\nSee [ReprojectToUvExample].\n\n\nFor simple methods to change the UVs of meshes, see [MeshProjectUV] or [TransformMeshUVs].",
+  "Description": "Uses a camera projection and the UV layout of the incoming mesh to reproject an image onto a geometry.\n\nThis can be useful for projection mapping or immersive media installations. For the setup to work correctly make sure that the FOV of the viewer camera is wide enough and the aspect ratio of the viewer camera matches the texture resolution.\n\nSee also: [MeshProjectUV], [TransformMeshUVs]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -11,7 +11,7 @@
         "X": 1071.5016,
         "Y": 4451.7437
       },
-      "Description": "Render / Texture input",
+      "Description": "The image rendered with the referenced camera.",
       "AddPadding": "True"
     },
     {
@@ -20,8 +20,7 @@
       "Position": {
         "X": 1429.2665,
         "Y": 4536.998
-      },
-      "Description": "Mesh input"
+      }
     },
     {
       "InputId": "6ff4c0bd-f47c-48f2-a2bc-ba13f7cff3ce"/*Resolution*/,
@@ -38,7 +37,6 @@
         "X": 2521.981,
         "Y": 4935.091
       },
-      "Description": "Defines the clear color",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -51,7 +49,7 @@
         "X": 1885.4541,
         "Y": 4055.1729
       },
-      "Description": "Input for the camera reference output"
+      "Description": "Connect the Reference output of the camera the texture was rendered with."
     },
     {
       "InputId": "e52b254e-e13b-4df8-81d4-35867aeb188e"/*TextureFormat*/,

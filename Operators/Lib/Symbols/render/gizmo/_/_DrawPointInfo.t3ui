@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "ff5b93e3-d29f-489f-8cca-cb12cd1af65d"/*_DrawPointInfo*/,
-  "Description": "Draws additional information like index or position on points.",
+  "Description": "Internal helper. Draws additional information like index or position as text labels on points.",
   "SymbolTags": "16",
   "InputUis": [
     {
@@ -27,7 +27,8 @@
       "Position": {
         "X": -202.5,
         "Y": 238.33334
-      }
+      },
+      "Description": "Optional point buffer whose positions are used to place the labels."
     },
     {
       "InputId": "44e119a8-2aa5-47b1-808c-2b207d74a0b4"/*Points*/,
@@ -42,7 +43,8 @@
       "Position": {
         "X": 737.8074,
         "Y": 1125.8114
-      }
+      },
+      "Description": "Added to the displayed point index."
     },
     {
       "InputId": "e6d32fee-30d9-4ccf-b48b-88906f841ff8"/*LabelOffset*/,

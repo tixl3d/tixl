@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "da93f7d1-ef91-4b4a-9708-2d9b1baa4c14"/*RemapColor*/,
-  "Description": "Replaces the colors of an image with a gradient based on its brightness. This can be used to emulate gradient curves or level adjustments or color cycling effects.\n\nTip: This operator can be used to simulate \"adjustment curves\" from image manipulation software when gradient interpolation is set to spline.\n\nNote: The gradient's alpha channel can control the intensity of the effect.\n\nAlso consider using [Tint].",
+  "Description": "Replaces the colors of an image with a gradient based on their brightness.\n\nThis can emulate adjustment curves (with spline gradient interpolation), level adjustments or color cycling effects. The gradient's alpha becomes the output alpha unless DontColorAlpha is enabled.\n\nAKA: gradientmap, colorramp, lut, curves\n\nSee also: [Tint]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -9,14 +9,16 @@
       "Position": {
         "X": -414.2527,
         "Y": 513.4169
-      }
+      },
+      "Description": "Number of samples used to convert the gradient into a texture."
     },
     {
       "InputId": "7023f71c-1c13-4d66-85e7-b0918cb8b02c"/*Repeat*/,
       "Position": {
         "X": 79.535034,
         "Y": 787.2047
-      }
+      },
+      "Description": "Number of gradient repetitions over the brightness range. Use WrapMode to define how it repeats."
     },
     {
       "InputId": "7777f86d-dbf7-44d4-9da4-99a819038095"/*DontColorAlpha*/,
@@ -24,7 +26,8 @@
         "X": -60.464966,
         "Y": 577.20465
       },
-      "GroupTitle": "Options"
+      "GroupTitle": "Options",
+      "Description": "Keeps the alpha computed from the input instead of using the gradient alpha."
     },
     {
       "InputId": "876f6f64-7cb4-4060-8571-e0b78b437d41"/*Image*/,
@@ -39,6 +42,7 @@
         "X": 79.535034,
         "Y": 682.2047
       },
+      "Description": "Multiplies the brightness before the gradient lookup.",
       "Min": 0.0,
       "Max": 5.0
     },
@@ -48,6 +52,7 @@
         "X": -60.464966,
         "Y": 717.2047
       },
+      "Description": "Applies gain (X) and bias (Y) to the brightness before the gradient lookup.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -60,7 +65,8 @@
         "X": 79.535034,
         "Y": 647.2047
       },
-      "GroupTitle": "Wrap and Cyle"
+      "GroupTitle": "Wrap and Cyle",
+      "Description": "Offsets the gradient lookup. Animate it for color cycling."
     },
     {
       "InputId": "c45d487b-3221-44c7-bf9e-b982a65280f6"/*Gradient*/,
@@ -81,14 +87,16 @@
       "Position": {
         "X": -60.464966,
         "Y": 612.2047
-      }
+      },
+      "Description": "UseGrayScale: maps the average RGB brightness to the gradient.\nIndividualChannels: maps each channel separately to the matching channel of the gradient."
     },
     {
       "InputId": "eb070a0b-703d-43cc-a877-cf9e371ebd05"/*WrapMode*/,
       "Position": {
         "X": 79.535034,
         "Y": 857.2047
-      }
+      },
+      "Description": "How the gradient is sampled outside the 0 to 1 range."
     }
   ],
   "SymbolChildUis": [

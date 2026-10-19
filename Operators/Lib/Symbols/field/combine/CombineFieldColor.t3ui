@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "023fa572-a3e0-4dfc-9b42-79bc1f5c353e"/*CombineFieldColor*/,
-  "Description": "",
+  "Description": "Combines the colors of two or more connected fields.\n\nSee also: [CombineSDF]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -17,14 +17,16 @@
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Mix factor. Only used with the Mix method."
     },
     {
       "InputId": "d17f87db-7500-4780-aece-d8400cfe4da0"/*CombineMethod*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Mix: blends towards each following field by K.\nAdd: adds the colors.\nMultiply: multiplies the colors."
     }
   ],
   "SymbolChildUis": [],

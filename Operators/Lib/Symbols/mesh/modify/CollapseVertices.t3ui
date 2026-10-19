@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "52d0df91-7464-4fff-9173-72c0ee29fced"/*CollapseVertices*/,
-  "Description": "A simple effect that snaps the position of vertices to a grid.\nThis might look interesting.",
+  "Description": "Snaps mesh vertices to a grid whose cell size depends on a selection volume.\n\nInside the volume vertices snap to the coarsest grid (GridSize); towards the falloff edge the grid becomes finer in power-of-two steps, so the mesh blends from blocky to its original shape. Outside the volume vertices are unchanged.\n\nAKA: quantize, voxelize, pixelate\n\nSee also: [SelectVertices], [DisplaceMesh]",
   "SymbolTags": "64",
   "InputUis": [
     {
@@ -16,14 +16,16 @@
       "Position": {
         "X": 334.9406,
         "Y": 2209.0278
-      }
+      },
+      "Description": "Offsets the grid."
     },
     {
       "InputId": "0ab0a287-6fa5-46d3-b427-fea8acac0068"/*Amount*/,
       "Position": {
         "X": 348.82504,
         "Y": 1891.6968
-      }
+      },
+      "Description": "Blends between the original (0) and the snapped (1) positions."
     },
     {
       "InputId": "350aa9d5-90cd-44ac-8740-9864727e9e4f"/*VolumeShape*/,
@@ -31,7 +33,8 @@
         "X": 348.82504,
         "Y": 1936.6968
       },
-      "GroupTitle": "Field Volume"
+      "GroupTitle": "Field Volume",
+      "Description": "Shape of the volume that controls the effect.\n\nSphere, Box, Plane (below the XZ plane), Zebra (repeating stripes along Y) or Noise."
     },
     {
       "InputId": "3a0c49ff-832a-45d0-bc3d-8b11a75654bc"/*InputMesh*/,
@@ -54,6 +57,7 @@
         "X": 334.9406,
         "Y": 2344.0278
       },
+      "Description": "Number of grid refinement levels between the volume center and its edge. Each level halves the cell size.",
       "AddPadding": "True"
     },
     {
@@ -62,6 +66,7 @@
         "X": 334.9406,
         "Y": 2389.0278
       },
+      "Description": "Smoothness of the blending between neighboring grid levels. 0 creates hard steps.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -73,14 +78,16 @@
         "X": 353.41452,
         "Y": 2104.2388
       },
-      "GroupTitle": "options for noise and zebra"
+      "GroupTitle": "options for noise and zebra",
+      "Description": "Shifts the Zebra and Noise patterns; can be animated."
     },
     {
       "InputId": "963b800e-32d9-48dc-8f14-6270606056be"/*Extend*/,
       "Position": {
         "X": 334.9406,
         "Y": 2299.0278
-      }
+      },
+      "Description": "Threshold of the Zebra and Noise volumes; changes the size of the selected areas."
     },
     {
       "InputId": "a4436ed0-0013-4ed9-b789-9f96a03e7571"/*Stretch*/,
@@ -95,6 +102,7 @@
         "X": 353.41452,
         "Y": 2059.2393
       },
+      "Description": "Size of the coarsest grid cells, used where the volume is fully applied.",
       "AddPadding": "True"
     },
     {
@@ -112,7 +120,8 @@
       "Position": {
         "X": 348.82504,
         "Y": 1981.6968
-      }
+      },
+      "Description": "Width of the transition at the volume border."
     }
   ],
   "SymbolChildUis": [

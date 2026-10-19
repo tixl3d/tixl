@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "6ab63114-6477-4ab2-a071-a66a64a6d2b9"/*Sin*/,
-  "Description": "Creates a sine wave also known as sinusoidal wave or sinusoid.\n\nUseful combinations: [Time] and an input\n\nAlternative: [Cos] [AnimValue] [SampleCurve]",
+  "Description": "Creates a sine wave.\n\nComputes sin(Input / Period + Phase) * Amplitude + Offset.\n\nAKA: sine, wave, oscillate, lfo\n\nTips:\n- Connect [Time] to Input to get a continuous oscillation.\n\nSee also: [Cos], [AnimValue], [SampleCurve]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": 0.0,
         "Y": 90.0
       },
-      "Description": "Offsets the curve forward / backward"
+      "Description": "Offset of the wave in radians."
     },
     {
       "InputId": "1319f4dc-45cc-46a5-8aab-f4dfa93cc3da"/*Amplitude*/,
@@ -18,7 +18,7 @@
         "X": 0.0,
         "Y": 135.0
       },
-      "Description": "Defines the highest and lowest value of the curve"
+      "Description": "Scales the wave. The output ranges from Offset-Amplitude to Offset+Amplitude."
     },
     {
       "InputId": "3cb40a40-a0c3-4356-bdf3-778671fbd428"/*Period*/,
@@ -26,7 +26,7 @@
         "X": 0.0,
         "Y": 45.0
       },
-      "Description": "Defines how fast the curve fluctuates between the highest and lowest point",
+      "Description": "Divides the input. One full cycle takes 2π × Period input units. Must not be 0.",
       "AddPadding": "True",
       "Min": 0.0,
       "Scale": 0.01
@@ -37,7 +37,7 @@
         "X": 0.0,
         "Y": 0.0
       },
-      "Description": "Input value\nExample: [Time]\n"
+      "Description": "e.g. from [Time]."
     },
     {
       "InputId": "ddf69868-6aa8-474c-a4ae-105bba6f120d"/*Offset*/,
@@ -45,7 +45,7 @@
         "X": 0.0,
         "Y": 180.0
       },
-      "Description": "Adds / subtracts a value from the output",
+      "Description": "Added to the output.",
       "AddPadding": "True"
     }
   ],

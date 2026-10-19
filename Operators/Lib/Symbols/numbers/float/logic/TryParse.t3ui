@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "62cdbff3-cb29-4745-92b1-02490e35345d"/*TryParse*/,
-  "Description": "Tries to parse a string to a float number; if failing, the default value is used instead.",
+  "Description": "Tries to parse a string to a float number; if failing, the default value is used instead.\n\nParsing uses the number format of the system locale, so the decimal separator can be a comma on some systems.",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -17,7 +17,8 @@
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Output if the string cannot be parsed."
     }
   ],
   "SymbolChildUis": [],

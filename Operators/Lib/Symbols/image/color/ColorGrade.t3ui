@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "42d86738-d644-47c8-ab92-cc426d958e51"/*ColorGrade*/,
-  "Description": "Adjusts the color grading of the incoming image for the Gain (highlights), Gamma (mid-tones), and Lift (shadows).\n\nGray values are neutral. Alpha can be used to amplify the effect. Vignette color, size, and position can be used for additional effects.\n\nTry:\n- blending by hovering over presets while holding the ALT key.\n- dragging the parameter color swatches vertically with the left and right mouse buttons to quickly adjust brightness and alpha.\n- adding a [WaveForm2] operator to visualize the image properties.\n\nOperator with more options that also allows objects far away from the camera to be colored differently than close objects: [ColorGradeDepth]\n\nAlso consider using [AdjustColors].",
+  "Description": "Grades an image with Lift (shadows), Gamma (mid-tones) and Gain (highlights) colors and an optional vignette.\n\nGray (0.5) colors are neutral. The alpha of each color amplifies its effect.\n\nAKA: lift, gamma, gain, grading, LUT\n\nTips:\n- Blend presets by hovering over them while holding the Alt key.\n- Drag the color swatches vertically with the left and right mouse buttons to quickly adjust brightness and alpha.\n- Add a [WaveForm] to visualize the image properties.\n\nSee also: [ColorGradeDepth], [AdjustColors]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,6 +10,7 @@
         "X": 648.5582,
         "Y": 867.0494
       },
+      "Description": "Saturation of the image before grading. 0 is grayscale, 1 is unchanged.",
       "Min": 0.0,
       "Max": 2.0
     },
@@ -20,6 +21,7 @@
         "Y": 527.35626
       },
       "GroupTitle": "Vignette",
+      "Description": "Color added to the gain toward the edges. Gray is neutral; the alpha amplifies the effect.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -49,6 +51,7 @@
         "X": -8.08049,
         "Y": 572.35626
       },
+      "Description": "Size of the vignette. Negative values invert it.",
       "AddPadding": "True"
     },
     {
@@ -73,7 +76,8 @@
       "Position": {
         "X": -8.08049,
         "Y": 752.35626
-      }
+      },
+      "Description": "Currently has no effect: the shader does not read this value."
     },
     {
       "InputId": "e8cc8a26-313e-4399-b800-901019bbaa78"/*Lift*/,

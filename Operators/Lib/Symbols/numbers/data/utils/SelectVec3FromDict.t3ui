@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "e623b242-98e8-4ac1-9b9a-5e0b98acf088"/*SelectVec3FromDict*/,
-  "Description": "",
+  "Description": "Reads a Vec3 from a float dictionary, e.g. from OSC input.\n\nSelectX picks the key of the X component; the keys of Y and Z are derived from it. A warning is shown if no matching keys are found.\n\nSee also: [SelectVec2FromDict], [SelectFloatFromDict]",
   "InputUis": [
     {
       "InputId": "428006e1-4188-4cc0-81f8-b27867f623a5"/*DictionaryInput*/,
@@ -17,6 +17,7 @@
         "X": -200.0,
         "Y": 45.0
       },
+      "Description": "Key of the X component.",
       "Usage": "CustomDropdown"
     }
   ],

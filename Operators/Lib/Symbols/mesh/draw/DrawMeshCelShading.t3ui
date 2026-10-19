@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "dcacc281-92c6-4e47-8eea-91fa8954ed86"/*DrawMeshCelShading*/,
-  "Description": "This is an attempt to create a cel shader. In fact, it's more a gradient-based shading as you need to use a gradient to define what colors will be used to shade your mesh. Make sure to use at least one [PointLight] and adjust the Brightness and the light intensity. You can set the gradient interpolation to hold, but you can still use the other interpolations; then you'll have full control, for example, if you don't want hard edges between colors.",
+  "Description": "Draws a mesh with gradient-based toon shading and dark silhouette edges.\n\nThe summed brightness of the point lights is mapped onto the Shading gradient, so the gradient defines the color bands. Set the gradient interpolation to Hold for hard cel bands, or use smooth interpolation for soft transitions. Surfaces facing away from the camera beyond EdgeThresold are drawn with EdgeColor.\n\nAKA: toon, cel\n\nTips:\n- Add at least one [PointLight] and balance its intensity with Brightness.\n\nSee also: [DrawMesh], [DrawMeshHatched]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,49 +9,56 @@
       "Position": {
         "X": 635.04663,
         "Y": 5083.9478
-      }
+      },
+      "Description": "Gradient that maps the light brightness (left: dark, right: bright) to colors."
     },
     {
       "InputId": "44720f79-d2c5-4da7-98df-334539153eac"/*EnableZTest*/,
       "Position": {
         "X": 635.04663,
         "Y": 5173.9478
-      }
+      },
+      "Description": "If enabled, fragments hidden behind already drawn geometry (according to the depth buffer) are discarded."
     },
     {
       "InputId": "5455e5b1-d48a-45d5-bbb8-e205ea75c796"/*EnableZWrite*/,
       "Position": {
         "X": 635.04663,
         "Y": 5218.9478
-      }
+      },
+      "Description": "If enabled, the mesh writes into the depth buffer so it can occlude itself and geometry drawn later."
     },
     {
       "InputId": "8cda736b-a316-4188-9130-182cfe78b25b"/*Culling*/,
       "Position": {
         "X": 635.04663,
         "Y": 5128.9478
-      }
+      },
+      "Description": "Which faces are hidden.\n\nNone: both sides are drawn.\nFront: front faces are hidden, only back faces are visible.\nBack: back faces are hidden (default)."
     },
     {
       "InputId": "8fa2a214-8b1d-4182-b4c8-145c3e168f87"/*Color*/,
       "Position": {
         "X": 639.3811,
         "Y": 4680.332
-      }
+      },
+      "Description": "Multiplied with the gradient color."
     },
     {
       "InputId": "a9a04304-2af3-49e8-a28e-bcac8361b17e"/*EdgeThresold*/,
       "Position": {
         "X": 633.7131,
         "Y": 4840.601
-      }
+      },
+      "Description": "Pixels whose normal faces the camera less than this value (0..1) are drawn with EdgeColor. Higher values give thicker edges."
     },
     {
       "InputId": "aaca0bae-9943-45d5-8389-45343ad86e39"/*ColorMap*/,
       "Position": {
         "X": 628.75635,
         "Y": 5276.926
-      }
+      },
+      "Description": "Optional albedo texture multiplied with the gradient color."
     },
     {
       "InputId": "ada7f290-b23f-4b50-87b4-0e9b91c66fbf"/*Mesh*/,
@@ -66,7 +73,8 @@
       "Position": {
         "X": 633.7131,
         "Y": 4795.601
-      }
+      },
+      "Description": "Multiplies the light brightness before it is looked up in the gradient."
     },
     {
       "InputId": "e1e45d58-4aa1-4bf4-8e9d-3b64cf82fd89"/*EdgeColor*/,

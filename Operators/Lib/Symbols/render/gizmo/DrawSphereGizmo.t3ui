@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "1998f949-5c0a-4f39-82cf-b0bda31f7f21"/*DrawSphereGizmo*/,
-  "Description": "Creates a 3D wireframe globe that can be used as a bounding box",
+  "Description": "Draws a wireframe globe made of line circles, e.g. to visualize a radius or bounding sphere.\n\nAKA: globe, bounds, wireframe\n\nSee also: [DrawBoxGizmo], [Locator]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,8 +9,7 @@
       "Position": {
         "X": -10.3936615,
         "Y": 186.16534
-      },
-      "Description": "Defines the size of the sphere"
+      }
     },
     {
       "InputId": "188c2244-e55a-4c55-be93-cccbd6fd4e41"/*Color*/,
@@ -18,7 +17,6 @@
         "X": -13.949599,
         "Y": 313.66354
       },
-      "Description": "Defines the color",
       "AddPadding": "True"
     },
     {
@@ -27,7 +25,7 @@
         "X": -10.3936615,
         "Y": 231.16534
       },
-      "Description": "Defines the size of an inner sphere consisting of points"
+      "Description": "Size of the inner sphere drawn with points, relative to Radius."
     }
   ],
   "SymbolChildUis": [

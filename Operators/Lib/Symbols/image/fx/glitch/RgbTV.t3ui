@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "5972a57b-73cd-49b2-8b24-96636a4c294b"/*RgbTV*/,
-  "Description": "Creates a vintage TV-glitch effect.\n\nUseful Ops for a PostFX Pipeline: [MotionBlur] [DepthOfField] [ChromaticAbberation] [Glow] [Grain] [Blur]",
+  "Description": "Creates a vintage CRT TV effect with RGB pixel pattern, noise, distortion and glitches.\n\nAKA: crt, vhs, retro, scanlines, monitor\n\nSee also: [GlitchDisplace], [ScreenCloseUp], [MotionBlur], [DepthOfField], [ChromaticAbberation], [Glow], [Grain], [Blur]",
   "SymbolTags": "1",
   "InputUis": [
     {

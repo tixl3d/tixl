@@ -17,7 +17,8 @@
       "Position": {
         "X": 0.0,
         "Y": 180.0
-      }
+      },
+      "Description": "Number of repetitions, clamped to 0..1000."
     }
   ],
   "SymbolChildUis": [],

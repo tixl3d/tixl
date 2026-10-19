@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "95817796-c125-4a9c-8996-ee8b6f089156"/*PickColorFromList*/,
-  "Description": "",
+  "Description": "Returns the color at the given index of a color list.\n\nThe index wraps around, so negative or too large values never fail. If the list is empty the last result is kept.\n\nSee also: [KeepColors], [CombineColorLists]",
   "InputUis": [
     {
       "InputId": "6ab7e3fe-955f-44d2-a99d-e743d7f05f45"/*Input*/,

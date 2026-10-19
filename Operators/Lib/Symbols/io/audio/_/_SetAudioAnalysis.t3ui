@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "ecbafbeb-c14b-4507-953f-80bc6676d077"/*_SetAudioAnalysis*/,
-  "Description": "An internal operator that stores the result of the current FFT audio analysis in the context, so it can be used by [AudioReaction] Ops further down the graph.",
+  "Description": "Internal helper. Writes bass and hi-hat peak analysis values into a global store that is read by [_LegacyAudioReaction].",
   "SymbolTags": "144",
   "InputUis": [
     {

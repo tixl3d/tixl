@@ -16,21 +16,24 @@
       "Position": {
         "X": 0.0,
         "Y": 180.0
-      }
+      },
+      "Description": "Stores the point color as part Color attribute."
     },
     {
       "InputId": "7e3b9f52-a8c1-4d06-9b4e-d6f2a1c7e380"/*UseOrientation*/,
       "Position": {
         "X": 0.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Rotates each copy by its point orientation."
     },
     {
       "InputId": "b4d8e2a7-3f19-4c65-8e0a-1c7f5b9d3a46"/*UseScale*/,
       "Position": {
         "X": 0.0,
         "Y": 135.0
-      }
+      },
+      "Description": "Scales each copy by its point scale."
     },
     {
       "InputId": "f1a6d3c8-4e27-4b95-a0d7-c3b9e5f8a162"/*Points*/,

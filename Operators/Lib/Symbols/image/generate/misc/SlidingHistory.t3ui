@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "1b69d98a-0b38-4563-aa43-aac5b8395c2b"/*SlidingHistory*/,
-  "Description": "Generates a waveform image by feeding in a horizontal texture line at the bottom of the texture.",
+  "Description": "Builds an image over time by appending one line of the input texture per frame and shifting the older lines away.\n\nThis can be used to draw a history graph or waveform of a changing value or image.\n\nAKA: history, scroll, trail, spectrogram",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -10,7 +10,8 @@
         "X": 390.45114,
         "Y": 658.7772
       },
-      "GroupTitle": "Settings"
+      "GroupTitle": "Settings",
+      "Description": "Number of lines (pixels) kept in the history."
     },
     {
       "InputId": "48699e66-a59b-4cbb-b131-171ce9fcade3"/*Texture2d*/,
@@ -25,7 +26,8 @@
       "Position": {
         "X": 384.06885,
         "Y": 1069.1395
-      }
+      },
+      "Description": "Position of the line read from the input texture, from 0 to 1."
     },
     {
       "InputId": "5d42ff17-a552-4437-877a-a27a369866d7"/*IsEnabled*/,
@@ -40,7 +42,8 @@
       "Position": {
         "X": 384.06885,
         "Y": 979.1395
-      }
+      },
+      "Description": "Clears the history."
     },
     {
       "InputId": "adc812a8-d86b-4ac9-b33f-99f78e0c8c44"/*Direction*/,
@@ -48,6 +51,7 @@
         "X": 384.06885,
         "Y": 1024.1395
       },
+      "Description": "Direction in which the history moves.",
       "AddPadding": "True"
     }
   ],

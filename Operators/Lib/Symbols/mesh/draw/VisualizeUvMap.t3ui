@@ -1,14 +1,15 @@
 {
   "FormatVersion": 3,
   "Id": "0920c9cf-91b3-42ee-9db4-a5a63c16d71e"/*VisualizeUvMap*/,
-  "Description": "A draw helper to check the UV maps of a given mesh",
+  "Description": "Draws the UV layout of a mesh flattened over its texture to check the UV mapping.\n\nWithout a connected texture a checkerboard is used.\n\nSee also: [UVsViewer], [VisualizeMesh], [TransformMeshUVs]",
   "InputUis": [
     {
       "InputId": "2772f510-8cdc-4d99-bf22-4c2054cf9491"/*Texture*/,
       "Position": {
         "X": -321.93686,
         "Y": 121.664215
-      }
+      },
+      "Description": "Texture shown behind the UV layout. Defaults to a checkerboard."
     },
     {
       "InputId": "35a9cbb6-fd1d-4137-bcb3-741f5061a711"/*SwitchUV*/,
@@ -16,7 +17,7 @@
         "X": -173.70093,
         "Y": 519.50195
       },
-      "Description": "Switch between TexCoord and TexCoord2"
+      "Description": "Shows TexCoord2 instead of TexCoord."
     },
     {
       "InputId": "55351998-2a43-46d4-b1c3-d506225070e6"/*Mesh*/,

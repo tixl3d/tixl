@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "42703423-1414-489e-aac2-21a3d7204262"/*PickColorFromImage*/,
-  "Description": "Gets the color of a certain position in the texture",
+  "Description": "Returns the color of a texture at the given position.\n\nThe texture is copied back from the GPU to the CPU, which can be slow for large images.\n\nSee also: [SampleGradient]",
   "SymbolTags": "64",
   "InputUis": [
     {
@@ -11,7 +11,7 @@
         "Y": 90.0
       },
       "GroupTitle": "Picker Settings",
-      "Description": "Defines the point of the image whose color is output on the X and Y axis.\nX: 0 Left / 1 Right\nY: 0 Top / 1 Bottom"
+      "Description": "Normalized position in the image.\nX: 0 left … 1 right\nY: 0 top … 1 bottom"
     },
     {
       "InputId": "3b8c51c9-c544-47eb-9d70-4bd6b161be2d"/*InputImage*/,
@@ -27,7 +27,7 @@
         "X": -200.0,
         "Y": 135.0
       },
-      "Description": "If activated, the incoming image is constantly updated. Helpful if the image is not static but changes over time (video / animation etc.)",
+      "Description": "If enabled, the image is read back every frame. Needed for images that change over time (video, animation).",
       "AddPadding": "True"
     }
   ],

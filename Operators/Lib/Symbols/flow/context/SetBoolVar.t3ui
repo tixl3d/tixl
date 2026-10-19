@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "9a843835-d39c-428f-b996-6334323e8106"/*SetBoolVar*/,
-  "Description": "",
+  "Description": "Sets a bool variable in the evaluation context that can be read by [GetBoolVar] in the connected subgraph.\n\nIf SubGraph is connected, the variable is set while the subgraph is executed and a previous value is restored afterwards. Without a connected subgraph the variable stays set for everything evaluated later.\n\nSee also: [GetBoolVar]",
   "InputUis": [
     {
       "InputId": "7698eccb-0319-4c03-8f4e-486cc959d50c"/*SubGraph*/,

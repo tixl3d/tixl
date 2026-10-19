@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "146fae64-18da-4183-9794-a322f47c669e"/*HasValueChanged*/,
-  "Description": "Tests whether the incoming value has changed by a defined threshold and outputs this as a Boolean\n\nSimilar to [HasValueIncreased]",
+  "Description": "Tests whether the incoming value has changed by more than a threshold since the last frame and outputs the result as a boolean.\n\nAlso outputs the change since the last frame (Delta) and the absolute change at the last hit (DeltaOnHit).\n\nAKA: changed, trigger, onchange\n\nSee also: [HasValueIncreased], [HasValueDecreased], [IsGreater]",
   "SymbolTags": "9",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": -200.0,
         "Y": 90.0
       },
-      "Description": "Defines how the value is tested for the boolean to be 'True'",
+      "Description": "Changed: any change in either direction.\nIncreased: only increases.\nDecreased: only decreases.",
       "AddPadding": "True"
     },
     {
@@ -20,15 +20,14 @@
         "Y": 45.0
       },
       "GroupTitle": "Options",
-      "Description": "If the value has changed more than is defined here, the output boolean will be set accordingly"
+      "Description": "Minimum change since the last frame to count as a hit."
     },
     {
       "InputId": "7f5fb125-8aca-4344-8b30-e7d4e7873c1c"/*Value*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      },
-      "Description": "Value to be tested"
+      }
     },
     {
       "InputId": "8ebf4715-0b4b-4cdd-a079-9f91c2df0476"/*PreventContinuedChanges*/,
@@ -36,7 +35,7 @@
         "X": -200.0,
         "Y": 180.0
       },
-      "Description": "Can prevent unstable results in certain scenarios"
+      "Description": "Off: only the first frame of a continuing change is a hit.\nOn: every frame with a change is a hit (limited by MinTimeBetweenHits)."
     },
     {
       "InputId": "b994249d-c101-41d9-8142-a4f675fcd70c"/*MinTimeBetweenHits*/,
@@ -45,7 +44,7 @@
         "Y": 135.0
       },
       "GroupTitle": "Time",
-      "Description": "Timing threshold"
+      "Description": "Minimum time in bars between two hits."
     }
   ],
   "SymbolChildUis": [],

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "7636bb3c-9f12-4323-b9be-e05f0eb561c5"/*Atan2*/,
-  "Description": "Returns the arctangent of a vector.",
+  "Description": "Returns the angle of a 2D vector in radians.\n\nComputes atan2(X, Y), so the angle is measured from the positive Y axis towards the positive X axis, in the range -π to π. Note that this argument order differs from the common atan2(y, x).\n\nAKA: angle, arctan\n\nSee also: [Sin], [Cos]",
   "SymbolTags": "9",
   "InputUis": [
     {

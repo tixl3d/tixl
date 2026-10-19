@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "d86e9585-d233-455a-9059-fa93debfed01"/*GetIteratedVec3*/,
-  "Description": "",
+  "Description": "Obsolete. Returns a Vec3 field of the list item currently iterated by [IterateList].",
   "SymbolTags": "4224",
   "InputUis": [
     {

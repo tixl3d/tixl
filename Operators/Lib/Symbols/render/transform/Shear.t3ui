@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "c3d35057-2544-4b82-b2de-b70fe205662b"/*Shear*/,
-  "Description": "Applies a shearing transformation to the transform matrix.",
+  "Description": "Applies a shearing transformation to the connected subgraph, slanting it like an italic font.\n\nAKA: skew, slant, italic\n\nSee also: [Transform]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -17,7 +17,8 @@
       "Position": {
         "X": 0.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Shear amounts:\nX = Shifts x proportional to y\nY = Shifts y proportional to x\nZ = Adds a projective term that tapers the content along the x-axis"
     }
   ],
   "SymbolChildUis": [],

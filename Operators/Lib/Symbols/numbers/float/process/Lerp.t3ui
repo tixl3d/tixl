@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "1f5294e1-9d0b-4cd5-9d65-14c8bbf59e61"/*Lerp*/,
-  "Description": "Blends between two values (lerp). Also see [BlendValues] to blend between more values and [Remap] to blend between two value ranges.",
+  "Description": "Blends linearly between two values.\n\nAKA: mix, interpolate, blend\n\nSee also: [BlendValues] (more values), [Remap] (blend between ranges)",
   "SymbolTags": "4096",
   "InputUis": [
     {
@@ -19,14 +19,16 @@
       "Position": {
         "X": 197.0,
         "Y": 373.0
-      }
+      },
+      "Description": "Blend factor: 0 outputs A, 1 outputs B. Values outside 0 to 1 extrapolate unless Clamp is enabled."
     },
     {
       "InputId": "cc1a1668-795d-44b9-9be0-23455c338aaf"/*Clamp*/,
       "Position": {
         "X": 197.0,
         "Y": 418.0
-      }
+      },
+      "Description": "Limits F to the range 0 to 1."
     },
     {
       "InputId": "f5904a0e-f7a6-4fd3-b8f3-8ecccd9363d7"/*A*/,

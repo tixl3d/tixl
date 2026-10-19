@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "746d886c-5ab6-44b1-bb15-f3ce2fadf7e6"/*Camera*/,
-  "Description": "Sets the camera for the subgraph.\n",
+  "Description": "Sets a perspective camera for the connected subgraph.\n\nThe camera looks from Position to Target. The Reference output can be connected to other operators like [ReuseCamera], [BlendCameras], [CamPosition] or [TXAA]. While the camera is selected, the output window view can be used to interactively move it.\n\nAKA: view, perspective, lookat\n\nSee also: [OrbitCamera], [OrthographicCamera], [ActionCamera], [BlendCameras]\n\nAlso check out the [HowToDrawThings] tutorial.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,14 +10,16 @@
       "Position": {
         "X": 0.0,
         "Y": 0.0
-      }
+      },
+      "Description": "The subgraph to render with this camera."
     },
     {
       "InputId": "123396f0-62c4-43cd-8be0-a661553d4783"/*AlsoOffsetTarget*/,
       "Position": {
         "X": 0.0,
         "Y": 180.0
-      }
+      },
+      "Description": "If enabled, PositionOffset moves the camera in its own view space and the view direction is kept. If disabled, PositionOffset moves the camera position in world space while it keeps looking at the Target."
     },
     {
       "InputId": "199d4ce0-aab1-403a-ad42-216ef1061a0e"/*ClipPlanes*/,
@@ -75,14 +77,16 @@
       "Position": {
         "X": 0.0,
         "Y": 135.0
-      }
+      },
+      "Description": "Shifts the projection without rotating the camera (off-axis projection). Useful for architectural perspective or splitting views."
     },
     {
       "InputId": "d4d0f046-297b-440a-aef8-c2f0426ef4f5"/*RotationOffset*/,
       "Position": {
         "X": 0.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Additional rotation in degrees (X: pitch, Y: yaw, Z: roll) applied in camera space after aiming at the target."
     },
     {
       "InputId": "e6dfbfb9-efed-4c17-8860-9c1a1ca2fa38"/*Up*/,
@@ -98,7 +102,7 @@
         "X": 0.0,
         "Y": 0.0
       },
-      "Description": "Enforce a fixed aspect ratio for the camera view. \nFor values smaller or equal to 0 this setting is ignored and the current view's aspect ratio is automatically used. When setting this parameter to a positive window, the content gets stretched with the aspect of the output window."
+      "Description": "Enforces a fixed aspect ratio for the camera view.\nFor values of 0 or below, the aspect ratio of the current render resolution is used. With a positive value, the content gets stretched if the output has a different aspect ratio."
     },
     {
       "InputId": "fee19916-846f-491a-a2ee-1e7b1ac8e533"/*PositionOffset*/,
@@ -106,7 +110,8 @@
         "X": 0.0,
         "Y": 45.0
       },
-      "GroupTitle": "Offset"
+      "GroupTitle": "Offset",
+      "Description": "Additional offset to the camera position. See AlsoOffsetTarget."
     }
   ],
   "SymbolChildUis": [],

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "1c54fdad-9eb4-49e8-8fde-1c78b0fa2b48"/*AttributesFromImageChannels*/,
-  "Description": "Some test.",
+  "Description": "Modifies point attributes like position, rotation, scale, F1 or F2 from the brightness and RGB channels of an image sampled at each point position.\n\nThe image is projected onto the XY plane (-1...1 covers the full image). For each of Brightness, Red, Green and Blue select the target attribute and scale the channel value with its Factor and Offset. The image alpha scales the effect.\n\nSee also: [TransformWithImage], [LinearSamplePointAttributes], [SamplePointColorAttributes]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -38,6 +38,7 @@
         "X": -516.5826,
         "Y": 1637.8374
       },
+      "Description": "Target attribute for the average of the RGB channels.",
       "AddPadding": "True"
     },
     {
@@ -45,7 +46,8 @@
       "Position": {
         "X": -516.5826,
         "Y": 1777.8375
-      }
+      },
+      "Description": "Currently not used."
     },
     {
       "InputId": "69f76f56-9e6c-4fab-9f30-55eb5ddc2926"/*Blue*/,
@@ -53,6 +55,7 @@
         "X": -516.5826,
         "Y": 1742.8374
       },
+      "Description": "Target attribute for the blue channel.",
       "AddPadding": "True"
     },
     {
@@ -119,6 +122,7 @@
         "X": -652.9161,
         "Y": 1550.8002
       },
+      "Description": "Applied to the sampled channel values before the factors.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -161,6 +165,7 @@
         "X": -516.5826,
         "Y": 1672.8374
       },
+      "Description": "Target attribute for the red channel.",
       "AddPadding": "True"
     },
     {
@@ -175,7 +180,8 @@
       "Position": {
         "X": -516.5826,
         "Y": 1882.8372
-      }
+      },
+      "Description": "Optionally scales the strength per point with its F1 or F2 attribute."
     },
     {
       "InputId": "e864651e-06df-427d-978e-5adaa5366d0c"/*RotationSpace*/,
@@ -183,14 +189,16 @@
         "X": -516.5826,
         "Y": 1847.8372
       },
-      "GroupTitle": "Transform options"
+      "GroupTitle": "Transform options",
+      "Description": "Object: rotations also rotate the point positions around the origin. Point: only the point orientation is rotated."
     },
     {
       "InputId": "f936817b-b430-4bd2-b373-c5242261ce9e"/*TranslationSpace*/,
       "Position": {
         "X": -516.5826,
         "Y": 1812.8372
-      }
+      },
+      "Description": "Object: position offsets are applied in world axes. Point: offsets are rotated by each point orientation."
     },
     {
       "InputId": "faf18518-6ce5-4af2-906c-b31176c52b0d"/*Green*/,
@@ -198,6 +206,7 @@
         "X": -516.5826,
         "Y": 1707.8374
       },
+      "Description": "Target attribute for the green channel.",
       "AddPadding": "True"
     }
   ],

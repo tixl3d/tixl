@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "5777a005-bbae-48d6-b633-5e998ca76c91"/*CylinderMesh*/,
-  "Description": "Generates a procedural three-dimensional mesh which can be rendered with [DrawMesh], [DrawMeshUnlit], and [DrawMeshHatched] among others.\n\nThis mesh can be generated with or without closing caps. You can use the Height, Fill, and RadiusOffset parameters to generate things like pie charts, torus diagrams, cones, and other shapes.\nCheck the presets.\n\nTip:\n- set the cap segments to 0 to skip drawing caps.\nAlso see [NGonMesh]\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToDrawThings].\n\nIt can also become the source for a particle system with [MeshVerticesToPoints] or [PointsOnMesh].\nTo import static 3D meshes from other programs refer to [LoadObj].\n\n",
+  "Description": "Generates a cylinder or cone mesh with optional caps.\n\nHeight, Fill and RadiusOffset allow shapes like pie charts, ring diagrams and cones. Check the presets. It can be rendered with [DrawMesh], [DrawMeshUnlit], [DrawMeshHatched] and others, or used as a source for points with [MeshVerticesToPoints] or [PointsOnMesh].\n\nAKA: cone, tube, pipe\n\nTips:\n- Set CapSegments to 0 to skip drawing the caps.\n\nSee also: [NGonMesh], [TorusMesh]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": -200.0,
         "Y": 225.0
       },
-      "Description": "Rotates the surface on top in relation to the \"Spin\" setting",
+      "Description": "Rotates the top relative to the bottom in degrees.",
       "Min": -90.0,
       "Max": 90.0,
       "Scale": 1.0,
@@ -22,7 +22,7 @@
         "X": -200.0,
         "Y": 135.0
       },
-      "Description": "Defines the subdivisions of the outer surface"
+      "Description": "Subdivisions around the circumference."
     },
     {
       "InputId": "4c7e0f67-a35b-4a23-b640-b0375c1a3259"/*Rotation*/,
@@ -30,7 +30,7 @@
         "X": -200.0,
         "Y": 360.0
       },
-      "Description": "Rotates the Mesh",
+      "Description": "Rotation in degrees.",
       "AddPadding": "True",
       "Min": -180.0,
       "Max": 180.0,
@@ -43,7 +43,7 @@
         "X": -200.0,
         "Y": 45.0
       },
-      "Description": "Scales the radius of the surface on top in relation to the radius."
+      "Description": "Added to Radius for the top. Use -Radius to create a cone."
     },
     {
       "InputId": "4dd4c4f0-c6b7-4ee8-92e2-cb8df6131e0a"/*Rows*/,
@@ -52,15 +52,14 @@
         "Y": 90.0
       },
       "GroupTitle": "Tesselation",
-      "Description": "Defines the subdivisions in height"
+      "Description": "Subdivisions along the height."
     },
     {
       "InputId": "57f3310c-6ed2-4a52-af72-43e083f73360"/*Height*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      },
-      "Description": "Scales the height of the Mesh"
+      }
     },
     {
       "InputId": "66332a91-e0c2-442a-99f6-347dedaed72e"/*Center*/,
@@ -77,7 +76,7 @@
         "Y": 315.0
       },
       "GroupTitle": "Pivot",
-      "Description": "Offsets the position of the pivot point (center).\n\nThis is helpful to change the point around which the cube rotates/along which it is scaled.",
+      "Description": "Vertical position of the pivot relative to the height. 0 places it at the bottom, 0.5 at the center.",
       "Min": 0.0,
       "Max": 1.0
     },
@@ -88,7 +87,7 @@
         "Y": 0.0
       },
       "GroupTitle": "Size",
-      "Description": "Defines the thickness of the Mesh",
+      "Description": "Radius of the bottom.",
       "Min": 0.0,
       "Max": 1.0
     },
@@ -98,7 +97,7 @@
         "X": -200.0,
         "Y": 270.0
       },
-      "Description": "Cuts and compresses/slides the geometry along the radius",
+      "Description": "Angle of the circumference in degrees. 360 is a closed cylinder, smaller values create pie segments.",
       "Min": 0.0,
       "Max": 360.0,
       "Scale": 1.0,
@@ -111,7 +110,7 @@
         "Y": 180.0
       },
       "GroupTitle": "Advanced Settings",
-      "Description": "Rotates the Geometry around the center",
+      "Description": "Rotates the geometry around its axis in degrees.",
       "Min": -90.0,
       "Max": 90.0,
       "Scale": 1.0,
@@ -123,7 +122,7 @@
         "X": -200.0,
         "Y": 315.0
       },
-      "Description": "Creates subdivisions on the top and bottom sides",
+      "Description": "Radial subdivisions of the caps. 0 removes the caps.",
       "AddPadding": "True"
     }
   ],

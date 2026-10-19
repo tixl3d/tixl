@@ -8,7 +8,8 @@
       "Position": {
         "X": 0.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Maximum distance between the polyline and the true curve. Smaller values give more points."
     },
     {
       "InputId": "b7f2d9c4-5a13-4e86-9d0b-3c6e8a1f5d27"/*Curves*/,
@@ -23,7 +24,8 @@
       "Position": {
         "X": 0.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Repeats the first point of closed contours so line strips are closed."
     }
   ],
   "SymbolChildUis": [],

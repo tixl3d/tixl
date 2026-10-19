@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "d1a1f207-0537-416a-985b-e350c3f7e655"/*SimpleLiquid2*/,
-  "Description": "This Simple Detailed Fluid effect is a port of 'https://www.shadertoy.com/view/sl3Szs' by Lomateron.\n\nParameters:\n\nIt yields very interesting results when combined with an FX Texture that can include the following channels:\n- RB -> Velocity vectors (0.5 is neutral)\n- G -> Mass\n- A -> Effect Amount\n\nEach of these channels can be multiplied with the ApplyFxTexture parameter.\n\nThe SpeedFactor is applied on each frame and can be used for adding friction (values smaller than 1) or dynamism (values larger than 1) to the system.\nThe StabilizeFactor will lower too intense and amplify too low mass values.\nThe iteration count will speed up the processing of the application.",
+  "Description": "Simulates a simple 2D fluid of colored mass in a compute shader. A port of \"simple detailed fluid\" (https://www.shadertoy.com/view/sl3Szs) by Lomateron.\n\nIt yields very interesting results when combined with an FxTexture that can include the following channels:\n- RG: Velocity vectors (0.5 is neutral)\n- B: Mass to add or remove\n- A: Effect amount\n\nAKA: fluid, liquid, simulation\n\nSee also: [SimpleLiquid], [FluidFeedback]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -34,6 +34,7 @@
         "X": -1112.5792,
         "Y": 2413.6152
       },
+      "Description": "Lowers too intense and amplifies too low mass values.",
       "Min": 0.8,
       "Max": 1.2,
       "Scale": 0.001,
@@ -59,7 +60,8 @@
       "Position": {
         "X": -1612.7144,
         "Y": 2350.4622
-      }
+      },
+      "Description": "Strength of the velocity from the red and green channels of the FxTexture."
     },
     {
       "InputId": "91d7a9e8-dc0e-4c77-8496-90ac7c4dfe0c"/*ApplyFxTexture*/,
@@ -67,6 +69,7 @@
         "X": -1612.7144,
         "Y": 2305.4622
       },
+      "Description": "Overall strength of the FxTexture.",
       "Min": 0.0,
       "Max": 3.0,
       "ClampMin": true,
@@ -77,7 +80,8 @@
       "Position": {
         "X": -1289.4493,
         "Y": 3344.8394
-      }
+      },
+      "Description": "Number of simulation steps per frame. Higher values speed up the simulation."
     },
     {
       "InputId": "b5e1cded-fded-4769-8d1e-38598cf944db"/*FxTexture*/,
@@ -92,6 +96,7 @@
         "X": -1112.5792,
         "Y": 2368.6152
       },
+      "Description": "Applied to the velocity each frame. Values below 1 add friction, values above 1 add dynamism.",
       "Min": 0.8,
       "Max": 1.2,
       "Scale": 0.001,
@@ -116,7 +121,8 @@
       "Position": {
         "X": -1612.7144,
         "Y": 2395.4622
-      }
+      },
+      "Description": "Strength of the mass added or removed by the blue channel of the FxTexture."
     }
   ],
   "SymbolChildUis": [

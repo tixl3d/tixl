@@ -1,14 +1,15 @@
 {
   "FormatVersion": 3,
   "Id": "02fe1b32-8819-4c8a-8ab4-d353ebcddfe3"/*PickObject*/,
-  "Description": "Pick on of the connected objects. This can be useful for switching between camera references.",
+  "Description": "Picks one of the connected objects by index.\n\nThe index wraps around the number of connected inputs. This can be useful for switching between camera references.\n\nSee also: [PickTexture], [PickBuffer]",
   "InputUis": [
     {
       "InputId": "1fd71ea2-177a-4d2f-9a8f-c620c29d1766"/*Index*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Wraps around the number of connected inputs."
     },
     {
       "InputId": "a4095b7e-2fad-42e5-b518-848f2645aa7d"/*Input*/,

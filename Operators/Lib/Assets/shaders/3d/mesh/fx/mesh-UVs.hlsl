@@ -21,7 +21,7 @@ RWStructuredBuffer<PbrVertex> ResultVertices : register(u0); // output
     VerticesA.GetDimensions(countA, stride);
 
 
-    if (i.x > resultCount)
+    if (i.x >= resultCount)
         return;
 
     uint aIndex = i.x;

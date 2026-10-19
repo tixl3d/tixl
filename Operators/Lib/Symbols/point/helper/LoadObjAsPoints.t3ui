@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "ad651447-75e7-4491-a56a-f737d70c0522"/*LoadObjAsPoints*/,
-  "Description": "Loads an OBJ point cloud file. These files can be generated with Blender or MeshLab and can contain color information.\n\nYou can use selected operators like [DrawBillboards] that can use the point rotation attribute (XYZW) as RGBA. This is a hack.\n\nYou can also use the [LineVertices] mode to import OBJ files with line definitions and draw them as lines like so:\n[LoadObjAsPoints]->[PrepareSvgLineTransition]->[ListToBuffer]->[DrawLinesBuildup]\n",
+  "Description": "Loads the vertices of an OBJ file as a CPU point list.\n\nOBJ point clouds can be created with Blender or MeshLab and may contain vertex colors. Depending on Mode, the colors are written to the point color or to F1, and lines or wireframe edges can be loaded as line points with separators.\n\nTips:\n- Draw imported line definitions as animated strokes with [LoadObjAsPoints] -> [PrepareSvgLineTransition] -> [ListToBuffer] -> [DrawLinesBuildup].\n\nSee also: [LoadObj]",
   "SymbolTags": "72",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": 51.512096,
         "Y": 136.99597
-      }
+      },
+      "Description": "Sorts the vertices along an axis before creating the points."
     },
     {
       "InputId": "895dab2c-e3be-4e73-9c96-0f6101cea113"/*Path*/,
@@ -25,7 +26,8 @@
       "Position": {
         "X": 51.512096,
         "Y": 91.99597
-      }
+      },
+      "Description": "What is loaded:\n\nAllVertices: Not implemented.\nLinesVertices: The line elements of the file, separated by separators.\nVertices_WithColor: All vertices with their color. The color is also written into the rotation, which some legacy operators use as RGBA.\nVertices_ColorAsGrayScale: All vertices with their color converted to gray.\nVertices_GrayscaleAsW: All vertices with the gray value written to F1.\nWireframeLines: The edges of all faces as lines."
     }
   ],
   "SymbolChildUis": [],

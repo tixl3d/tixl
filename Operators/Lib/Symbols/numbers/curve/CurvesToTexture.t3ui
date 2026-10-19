@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "ab511978-bad5-4b69-90b2-c028447fe9f7"/*CurvesToTexture*/,
-  "Description": "Tip: Hold Shift for snapping. Press F to extend the view to the selection.",
+  "Description": "Samples one or more curves into a float texture that shaders can read as lookup tables.\n\nEach connected curve is sampled at SampleSize evenly spaced positions from 0 to 1. With Horizontal direction, every curve becomes one row of pixels; with Vertical, one column.\n\nTips:\n- Hold Shift for snapping in the curve editor. Press F to extend the view to the selection.\n\nSee also: [SampleCurve], [ValuesToTexture]",
   "SymbolTags": "24",
   "InputUis": [
     {
@@ -9,21 +9,24 @@
       "Position": {
         "X": 36.0,
         "Y": 424.0
-      }
+      },
+      "Description": "Number of samples per curve (texture width or height), clamped to 1 to 16384."
     },
     {
       "InputId": "63e90d86-5ad5-4333-8b99-7f8d285c4913"/*Direction*/,
       "Position": {
         "X": 36.0,
         "Y": 469.0
-      }
+      },
+      "Description": "Horizontal: one row per curve. Vertical: one column per curve."
     },
     {
       "InputId": "74a9437b-a3cd-46c8-aa14-7c45fa629933"/*ExportGrayScale*/,
       "Position": {
         "X": 36.0,
         "Y": 379.0
-      }
+      },
+      "Description": "Off: single-channel R32 float texture. On: RGBA32 float texture with the value in RGB and alpha 1."
     },
     {
       "InputId": "83c5a68a-2685-4506-8d79-d0db7d739102"/*Curves*/,

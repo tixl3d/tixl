@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "b822a197-9cf6-4bda-abda-02cf98ed5b90"/*SetMatrixVar*/,
-  "Description": "Stores a matrix as an array of vector4 on the evaluation context.\nThis is used internally by passing transform matrices between render passes for things like rendering shadow maps.",
+  "Description": "Stores a matrix (as an array of four Vector4 rows) in the evaluation context.\n\nThis is used internally for passing transform matrices between render passes, e.g. for rendering shadow maps.\n\nSee also: [GetMatrixVar]",
   "SymbolTags": "8",
   "InputUis": [
     {

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "dfd4c912-4c4f-44b1-88aa-f27aa66b57af"/*ActionCamera*/,
-  "Description": "Allows to interactive control a camera starting from a giving reference camera.\n\nAlso know as: FlyThrough, GameControlled camera, walk through, POV, Point of View.\n\nAlso see [BlendCameras].\n\n",
+  "Description": "Interactively flies a camera like in a game, starting from a connected reference camera.\n\nThe movement and rotation inputs are velocities: they are integrated over time each frame, so connecting them to a game controller, MIDI or keyboard input steers the camera continuously. A value of 0 stops the motion.\n\nAKA: flythrough, walkthrough, fps, pov, navigation\n\nSee also: [BlendCameras], [Camera], [OrbitCamera]",
   "InputUis": [
     {
       "InputId": "37bbaf47-5985-42d7-801e-0bf099036d5f"/*UpDown*/,
@@ -9,7 +9,7 @@
         "X": 0.0,
         "Y": 225.0
       },
-      "Description": "Move along the world space up vector.",
+      "Description": "Movement speed along the world up axis.",
       "Min": -1.0,
       "Max": 1.0
     },
@@ -19,7 +19,7 @@
         "X": 0.0,
         "Y": 300.0
       },
-      "Description": "Allow to smoothly transition back to the reference camera."
+      "Description": "Smoothly pulls the camera back towards the reference camera. 0 keeps the current flight position, 1 jumps to the reference."
     },
     {
       "InputId": "44ed03fc-3551-4519-8b4c-dfdc1ddd1713"/*Speed*/,
@@ -28,7 +28,7 @@
         "Y": 0.0
       },
       "GroupTitle": "Move",
-      "Description": "Allows to adjust the movement speed."
+      "Description": "Multiplier for Forward, Sideways, UpDown and Roll."
     },
     {
       "InputId": "773f0b8f-16d4-4302-b26d-43cf4d4adce8"/*Yaw*/,
@@ -36,7 +36,7 @@
         "X": 0.0,
         "Y": 300.0
       },
-      "Description": "Rotate around y-axis",
+      "Description": "Rotation speed around the world y-axis.",
       "AddPadding": "True",
       "Min": -1.0,
       "Max": 1.0
@@ -47,7 +47,7 @@
         "X": 0.0,
         "Y": 375.0
       },
-      "Description": "Rotate around side vector (Forward cross World up)",
+      "Description": "Rotation speed around the side axis.",
       "Min": -1.0,
       "Max": 1.0
     },
@@ -57,7 +57,7 @@
         "X": 0.0,
         "Y": 375.0
       },
-      "Description": "Jump back to the reference camera. Same as Blending with 1."
+      "Description": "Jumps back to the reference camera."
     },
     {
       "InputId": "a93aa4ac-487c-4441-b501-742cd38a5f5e"/*Forward*/,
@@ -76,7 +76,7 @@
         "Y": 75.0
       },
       "GroupTitle": "Rotation",
-      "Description": "Allows to adjust speed of rotation."
+      "Description": "Multiplier for Yaw and Pitch."
     },
     {
       "InputId": "c529af20-2e52-4a29-b558-cd518bdc539d"/*Roll*/,
@@ -84,7 +84,7 @@
         "X": 0.0,
         "Y": 450.0
       },
-      "Description": "Additional roll parameter applied after movement. Does not have an affecto to movement.",
+      "Description": "Roll speed. The roll accumulates over time and does not affect the movement direction.",
       "Min": -1.0,
       "Max": 1.0
     },
@@ -94,7 +94,7 @@
         "X": 0.0,
         "Y": 150.0
       },
-      "Description": "Currently computed by forward and world space up.",
+      "Description": "Movement speed perpendicular to the view direction and the world up axis.",
       "Min": -1.0,
       "Max": 1.0
     },
@@ -103,7 +103,8 @@
       "Position": {
         "X": 0.0,
         "Y": 525.0
-      }
+      },
+      "Description": "Rate of change of the field of view per second. The field of view is clamped to a valid range."
     },
     {
       "InputId": "d46ee53d-887b-4e37-b5ba-4ee0ba50c711"/*ReferenceCamera*/,
@@ -112,7 +113,7 @@
         "X": 0.0,
         "Y": 450.0
       },
-      "Description": "A link to a camera that defines the original starting point."
+      "Description": "Reference output of a camera (e.g. [Camera]) that defines the starting point. Required."
     }
   ],
   "SymbolChildUis": [],

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "a6e12383-09b6-4bbd-a4bb-8908598c3409"/*RotateAroundAxis*/,
-  "Description": "Applies a rotation to the transform matrix.",
+  "Description": "Rotates the connected subgraph around an arbitrary axis through the origin.\n\nSee also: [Transform], [RotateTowards]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -11,6 +11,7 @@
         "X": 15.714638,
         "Y": 57.576042
       },
+      "Description": "Rotation angle in degrees.",
       "Min": -180.0,
       "Max": 180.0
     },
@@ -19,7 +20,8 @@
       "Position": {
         "X": 0.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Direction of the rotation axis. Should be normalized (length of 1), otherwise the result gets distorted."
     },
     {
       "InputId": "7fee8751-6784-49d2-9862-c8fd3759e82f"/*Command*/,

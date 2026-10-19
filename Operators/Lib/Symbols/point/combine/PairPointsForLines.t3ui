@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "ab6ab34f-4c6e-41ef-af69-48bb9393651b"/*PairPointsForLines*/,
-  "Description": "Combines two point buffers so they can be drawn with connection lines between points.",
+  "Description": "Combines two point buffers into pairs, separated by separators, so they can be drawn as connection lines between the points.\n\nThe point counts may differ: the shorter buffer is repeated.\n\nSee also: [PairPointsForSplines], [PairPointsForGridWalkLines]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": -63.199646,
         "Y": 883.5623
-      }
+      },
+      "Description": "Sets F1 to 0 for the points of GPoints and to 1 for those of GTargets."
     },
     {
       "InputId": "b571a5e9-abec-47df-ac07-a7d1e60163d9"/*GPoints*/,

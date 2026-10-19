@@ -13,7 +13,7 @@ internal sealed class StringLength : Instance<StringLength>
 
     private void Update(EvaluationContext context)
     {
-        Length.Value = InputString.GetValue(context).Length;
+        Length.Value = InputString.GetValue(context)?.Length ?? 0;
     }
 
     [Input(Guid = "{5794D63A-3EF7-42C5-B726-E814EA9093E3}")]

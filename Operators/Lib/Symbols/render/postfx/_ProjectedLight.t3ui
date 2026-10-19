@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "a2100b4a-be2b-474f-ab53-07198580c995"/*_ProjectedLight*/,
-  "Description": "Internal implementation of [ProjectLight].",
+  "Description": "Internal helper. Implementation of [ProjectLight].",
   "SymbolTags": "16",
   "InputUis": [],
   "SymbolChildUis": [],

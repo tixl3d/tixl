@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "1b149f1f-529c-4418-ac9d-3871f24a9e38"/*Displace*/,
-  "Description": "",
+  "Description": "Shifts the pixels of an image based on a displacement map.\n\nDepending on DisplaceMode, the direction is taken from the brightness slope of the map, from its brightness alone, or from its red and green channels (like a normal or velocity map).\n\nAKA: distort, warp, refract, offset\n\nSee also: [DistortAndShade], [TimeDisplace], [GlitchDisplace]\nAlso check out the [HowToUseImageEffects] tutorial.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -16,7 +16,8 @@
       "Position": {
         "X": 333.24564,
         "Y": 543.5328
-      }
+      },
+      "Description": "Constant displacement along the computed direction."
     },
     {
       "InputId": "0f2867ab-a65e-4bf3-b1b5-9c241690ba5f"/*Displacement*/,
@@ -25,6 +26,7 @@
         "Y": 508.53278
       },
       "GroupTitle": "Amount",
+      "Description": "Amount of displacement scaled by the strength of the map. Negative values invert the direction.",
       "Scale": 0.01
     },
     {
@@ -33,6 +35,7 @@
         "X": 193.24564,
         "Y": 648.5328
       },
+      "Description": "Shifts the displacement map in UV space.",
       "AddPadding": "True",
       "Min": -2.0,
       "Max": 2.0
@@ -43,7 +46,8 @@
       "Position": {
         "X": 333.24564,
         "Y": 473.53278
-      }
+      },
+      "Description": "The image controlling the displacement."
     },
     {
       "InputId": "404c8102-3a5e-45c6-a0f1-4d97a5f0db07"/*SampleRadius*/,
@@ -51,7 +55,8 @@
         "X": 333.24564,
         "Y": 718.5328
       },
-      "GroupTitle": "Sampling"
+      "GroupTitle": "Sampling",
+      "Description": "Distance of the slope samples in pixels of the map. Only used by IntensityGradient."
     },
     {
       "InputId": "6a5c120f-7c04-439b-ad2d-6f78ceb3b378"/*DisplaceMode*/,
@@ -59,6 +64,7 @@
         "X": 333.24564,
         "Y": 858.5328
       },
+      "Description": "IntensityGradient: Displaces along the brightness slope of the map.\nIntensity: Displaces vertically by the brightness.\nNormalMap / SignedNormalMap: Uses the red and green channels as direction. Both modes currently behave the same.",
       "AddPadding": "True"
     },
     {
@@ -67,7 +73,7 @@
         "X": 333.24564,
         "Y": 788.5328
       },
-      "Description": "Defines if and how the image is repeated at its edge"
+      "Description": "Defines how pixels beyond the image border are sampled."
     },
     {
       "InputId": "77673c64-918d-46a6-aa29-c362057afee6"/*Shade*/,
@@ -75,7 +81,7 @@
         "X": 333.24564,
         "Y": 613.5328
       },
-      "Description": "Darkens the effect"
+      "Description": "Darkens areas with strong displacement."
     },
     {
       "InputId": "b2f58dc7-e5c6-4c57-a704-94aaa0b1e002"/*GenerateMips*/,
@@ -107,6 +113,7 @@
         "X": 333.24564,
         "Y": 578.5328
       },
+      "Description": "Rotates the displacement direction in degrees.",
       "Min": -180.0,
       "Max": 180.0,
       "Format": "{0:0.0}°"
@@ -116,7 +123,8 @@
       "Position": {
         "X": 193.24564,
         "Y": 893.5328
-      }
+      },
+      "Description": "Renders the effect 4 times with rotated grid super sampling to reduce aliasing."
     }
   ],
   "SymbolChildUis": [

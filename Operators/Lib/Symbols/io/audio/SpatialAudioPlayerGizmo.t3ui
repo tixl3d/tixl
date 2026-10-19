@@ -10,6 +10,7 @@
         "X": -493.17938,
         "Y": -54.594086
       },
+      "Description": "Not used yet.",
       "Usage": "Default"
     },
     {
@@ -17,16 +18,14 @@
       "Position": {
         "X": -493.1794,
         "Y": 95.427925
-      },
-      "Description": "Position of the listener"
+      }
     },
     {
       "InputId": "5f6b0e74-e280-487f-8e61-bc3af7787254"/*Color*/,
       "Position": {
         "X": -493.1794,
         "Y": 410.42792
-      },
-      "Description": "Color for the gizmo visualization"
+      }
     },
     {
       "InputId": "708c414d-1017-4bc7-b650-265e8ed09613"/*MaxDistance*/,
@@ -34,7 +33,7 @@
         "X": -493.1794,
         "Y": 230.42792
       },
-      "Description": "Maximum distance for audio falloff"
+      "Description": "Radius of the outer (silent) distance sphere."
     },
     {
       "InputId": "73ab9ccd-bcec-4d28-9961-d05db79bd1e6"/*ConeLength*/,
@@ -59,8 +58,7 @@
       "Position": {
         "X": -493.1794,
         "Y": 455.42792
-      },
-      "Description": "Controls gizmo visibility"
+      }
     },
     {
       "InputId": "a7c899ee-28f4-444e-b111-4ea98a9ee5f8"/*SourceRotation*/,
@@ -96,15 +94,14 @@
         "X": -493.1794,
         "Y": 185.42792
       },
-      "Description": "Minimum distance for audio falloff"
+      "Description": "Radius of the inner (full volume) distance sphere."
     },
     {
       "InputId": "d68cfc97-8bf8-4b03-8b2d-9dba9175f36a"/*SourcePosition*/,
       "Position": {
         "X": -493.1794,
         "Y": 5.427925
-      },
-      "Description": "Position of the audio source"
+      }
     }
   ],
   "SymbolChildUis": [

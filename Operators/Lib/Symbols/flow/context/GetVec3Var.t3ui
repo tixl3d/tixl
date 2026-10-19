@@ -1,14 +1,15 @@
 {
   "FormatVersion": 3,
   "Id": "f21de2e1-6af8-4651-90a0-6c662bbb23af"/*GetVec3Var*/,
-  "Description": "",
+  "Description": "Reads a vec3 variable from the evaluation context.\n\nThe variable has to be set further right in the graph with [SetVec3Var]. If it is not defined, FallbackDefault is returned.\n\nSee also: [SetVec3Var]",
   "InputUis": [
     {
       "InputId": "5cce784c-020a-4e51-881b-edd48846b0fc"/*FallbackDefault*/,
       "Position": {
         "X": -200.0,
         "Y": 75.0
-      }
+      },
+      "Description": "Returned if the variable is not defined in the current context."
     },
     {
       "InputId": "d8a9d923-232f-4cd4-9e24-fadbf40fe1d1"/*VariableName*/,
@@ -16,6 +17,7 @@
         "X": -200.0,
         "Y": 0.0
       },
+      "Description": "Name of the context variable. The dropdown lists variables currently defined in the context.",
       "Usage": "CustomDropdown"
     }
   ],

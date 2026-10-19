@@ -8,35 +8,40 @@
       "Position": {
         "X": 0.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Rotation in degrees applied in the joint's local frame."
     },
     {
       "InputId": "6f38d5a1-09e7-4c42-8b96-d472e1f0a583"/*Pose*/,
       "Position": {
         "X": 0.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Pose with one point per joint, e.g. from [SampleGltfAnimation]."
     },
     {
       "InputId": "8c50e3b9-16df-4a72-b048-3f9a6d28c1e5"/*TranslationOffset*/,
       "Position": {
         "X": 0.0,
         "Y": 135.0
-      }
+      },
+      "Description": "Added to the local position of the joint."
     },
     {
       "InputId": "b1c86f24-73d9-4058-a6ce-08f5b3d19e67"/*JointIndex*/,
       "Position": {
         "X": 0.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Index of the joint to adjust. Invalid indices leave the pose unchanged."
     },
     {
       "InputId": "d764a1f8-3e92-4b05-8c17-25e0b9f4d6a3"/*ScaleFactor*/,
       "Position": {
         "X": 0.0,
         "Y": 180.0
-      }
+      },
+      "Description": "Multiplied with the local scale of the joint."
     }
   ],
   "SymbolChildUis": [],

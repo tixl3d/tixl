@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "f9d453d1-04d9-43ef-9189-50008f93bcc2"/*FluidFeedback*/,
-  "Description": "An example of how feedback combined with displacement can lead to a variety of effects.\n\nAll Feedback Ops: [FluidFeedback] [AdvancedFeedback] [AdvancedFeedback2]\n\nAlso see [AfterGlow2]",
+  "Description": "Renders the connected content into a feedback buffer that is transformed, displaced and blurred each frame, creating fluid-like trails.\n\nAKA: feedback, trails, echo, smear\n\nSee also: [FluidFeedback], [AdvancedFeedback], [AdvancedFeedback2], [AfterGlow2]",
   "SymbolTags": "192",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": -254.34756,
         "Y": 421.9679
-      }
+      },
+      "Description": "If disabled, the feedback buffer is not updated."
     },
     {
       "InputId": "297a2220-0648-47d3-82a1-c1077a1326a4"/*Twist*/,
@@ -25,6 +26,7 @@
         "X": -254.34756,
         "Y": 331.96786
       },
+      "Description": "Moves the feedback image each frame.",
       "AddPadding": "True"
     },
     {
@@ -32,7 +34,8 @@
       "Position": {
         "X": -254.34756,
         "Y": 286.96802
-      }
+      },
+      "Description": "Currently ignored."
     },
     {
       "InputId": "51621e59-9bdd-4004-a053-d4637278bd92"/*Reset*/,
@@ -40,6 +43,7 @@
         "X": -254.34756,
         "Y": 466.9679
       },
+      "Description": "Clears the feedback buffer.",
       "AddPadding": "True"
     },
     {
@@ -54,7 +58,8 @@
       "Position": {
         "X": -254.34756,
         "Y": 106.96799
-      }
+      },
+      "Description": "Blurs the feedback buffer each frame."
     },
     {
       "InputId": "806221f8-6e31-45ec-b62e-5baac6c1fd54"/*DisplaceOffset*/,
@@ -68,14 +73,16 @@
       "Position": {
         "X": -254.34756,
         "Y": 241.96799
-      }
+      },
+      "Description": "Rotates the feedback image each frame."
     },
     {
       "InputId": "98662eab-90b9-4af1-8ff3-ba6709b5038e"/*Zoom*/,
       "Position": {
         "X": -254.34756,
         "Y": 196.96799
-      }
+      },
+      "Description": "Scales the feedback image each frame. Values slightly above 1 create a zoom-in trail."
     },
     {
       "InputId": "a7669abe-65c7-4745-97a6-d0d80f6a3150"/*Displacement*/,
@@ -83,7 +90,8 @@
         "X": -254.34756,
         "Y": 5.9679832
       },
-      "GroupTitle": "Feedback"
+      "GroupTitle": "Feedback",
+      "Description": "Displaces the feedback image each frame."
     },
     {
       "InputId": "ebd35d33-dc73-46ae-a82c-2060d750018a"/*Command*/,
@@ -91,7 +99,8 @@
       "Position": {
         "X": -254.34756,
         "Y": -39.032017
-      }
+      },
+      "Description": "The 2D or 3D content rendered on top of the feedback buffer each frame."
     }
   ],
   "SymbolChildUis": [

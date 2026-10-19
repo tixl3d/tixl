@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "dc2273a7-8a54-4e6f-8d8e-9a675c1ef599"/*BoxGradient*/,
-  "Description": "A box gradient using the signed distance field \"Box - Exact\" described in the \"2D distance functions\" article on Inigo Quilez's website. \n\nBased on [RadialGradient]\n\n2D, SDF, sdBox, [RoundedRect]",
+  "Description": "Generates a gradient based on the distance to a rectangle with optionally rounded corners.\n\nThe distance is computed with the exact box signed distance function described in Inigo Quilez's \"2D distance functions\" article.\n\nAKA: sdf, sdbox, rectangle, frame\n\nSee also: [RadialGradient], [RoundedRect], [LinearGradient]",
   "SymbolTags": "1032",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": -270.7163,
         "Y": 26.825928
       },
-      "Description": "top left, top right, bottom right, bottom left",
+      "Description": "Corner radii in the order top left, top right, bottom right, bottom left.",
       "AddPadding": "True",
       "Min": 0.0,
       "Max": 1.0,

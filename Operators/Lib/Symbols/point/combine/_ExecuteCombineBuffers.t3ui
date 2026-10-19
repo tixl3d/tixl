@@ -1,7 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "56f7cf15-678d-4527-a328-8666a80882d0"/*_ExecuteCombineBuffers*/,
-  "Description": "The internal implementation",
+  "Description": "Internal helper for [CombineBuffers]. Copies the connected buffers into a single buffer with a compute shader.",
+  "SymbolTags": "16",
   "InputUis": [
     {
       "InputId": "c8a5769e-2536-4caa-8380-22fbeed1ef12"/*InputBuffers*/,

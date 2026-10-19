@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "46daab0e-e957-413e-826c-0699569d0e07"/*CustomPixelShader*/,
-  "Description": "Computes the output color for every pixel of a texture from a short HLSL code fragment.\n\nWrite the body of a pixel shader that sets the result color `c` (float4). Prepared variables include `uv`, `PixelCoord` and the images ImageA / ImageB; helpers like SampleGradient(f) and Biased(f) connect the code to the Gradient and GainAndBias parameters. Explore the presets for examples.\n\nFull documentation: https://help.tixl.app/advanced/UsingCustomShaders/\n\n\n```\nTesdf\najdfklsdf\n```",
+  "Description": "Computes the color of every pixel of a texture from a short HLSL code fragment.\n\nThe code is the body of a pixel shader that sets the result color `c` (float4). Prepared variables include `uv`, `PixelCoord` and the images ImageA and ImageB; helpers like SampleGradient(f) and Biased(f) connect the code to the Gradient and GainAndBias parameters. Explore the presets for examples.\n\nFull documentation: https://help.tixl.app/advanced/UsingCustomShaders/\n\nAKA: shader, hlsl, glsl, code, shadertoy",
   "InputUis": [
     {
       "InputId": "1ed14f4d-3b1e-4f24-9d83-d96005217716"/*TemplateFile*/,
@@ -18,7 +18,7 @@
         "X": 2617.35,
         "Y": 430.8828
       },
-      "Description": "Use FloatsToBuffer or Ints to buffer to pass additional input params, define in AdditionalCode for example:\n\n`cbuffer AdditionalIntParams: register(b2) { int Index; }`\n\n`cbuffer AdditionalFloatParams: register(b3) { float4 Color; }`"
+      "Description": "Additional constant buffers, e.g. from [FloatsToBuffer]. They must be declared in AdditionalCode, for example:\n\n`cbuffer AdditionalIntParams: register(b2) { int Index; }`\n\n`cbuffer AdditionalFloatParams: register(b3) { float4 Color; }`"
     },
     {
       "InputId": "3d84725a-594b-46d8-aa21-eec99026115d"/*A*/,
@@ -26,6 +26,7 @@
         "X": 1231.8137,
         "Y": 382.4334
       },
+      "Description": "Generic float parameter available in the shader code as A.",
       "AddPadding": "True"
     },
     {
@@ -41,7 +42,8 @@
       "Position": {
         "X": 1231.8137,
         "Y": 452.4334
-      }
+      },
+      "Description": "Generic float parameter available in the shader code as C."
     },
     {
       "InputId": "674cabbd-cf31-46ac-9a1a-4f6bd727c977"/*Offset*/,
@@ -68,6 +70,7 @@
         "X": 1759.3374,
         "Y": 285.80954
       },
+      "Description": "Body of the pixel shader. Must assign the result color to c.",
       "Usage": "Multiline"
     },
     {
@@ -76,7 +79,7 @@
         "X": 2617.35,
         "Y": 675.8828
       },
-      "Description": "Use SamplerState node to add custom sampler(s); first sampler input is defined in template as CustomSampler.\nsamplers coming after that will need to be defined in AdditionalCode, for example:\n\n`sampler Sampler2 : register(s2);`"
+      "Description": "Custom sampler states from [SamplerState]. The first one is available in the template as CustomSampler; further samplers must be declared in AdditionalCode, for example:\n\n`sampler Sampler2 : register(s2);`"
     },
     {
       "InputId": "92fdfa08-e7da-4a71-9145-277b74c93729"/*GenerateMips*/,
@@ -91,14 +94,15 @@
         "X": 2004.532,
         "Y": 1000.41077
       },
-      "Description": "Clearing RenderTarget\nsetting it to false also enables blending mode, so that result is blended on top of backbuffer"
+      "Description": "Clears the render target before drawing. If disabled, the result is blended on top of the previous content."
     },
     {
       "InputId": "b4895a95-5ff4-4583-9ec3-befcf0f7b18b"/*B*/,
       "Position": {
         "X": 1231.8137,
         "Y": 417.4334
-      }
+      },
+      "Description": "Generic float parameter available in the shader code as B."
     },
     {
       "InputId": "b4914d9d-7a39-46e1-8b45-803e1449039a"/*GainAndBias*/,
@@ -119,7 +123,7 @@
         "X": 2617.35,
         "Y": 570.8828
       },
-      "Description": "Use SrvFromTexutre2d for additional texture inputs. They will need to be defined in AdditionalCode, for example:\n\n`Texture2D<float4> Image3 : register(t2);`"
+      "Description": "Additional texture inputs, e.g. from [SrvFromTexture2d]. They must be declared in AdditionalCode, for example:\n\n`Texture2D<float4> Image3 : register(t2);`"
     },
     {
       "InputId": "c9a801ec-13fb-4ad4-b0cd-d125b5db500a"/*AdditionalCode*/,
@@ -128,6 +132,7 @@
         "Y": 215.80954
       },
       "GroupTitle": "Additional Options...",
+      "Description": "Code inserted before the shader function, e.g. helper functions or resource declarations.",
       "Usage": "Multiline"
     },
     {
@@ -135,7 +140,8 @@
       "Position": {
         "X": 1231.8137,
         "Y": 487.4334
-      }
+      },
+      "Description": "Generic float parameter available in the shader code as D."
     },
     {
       "InputId": "e0d05b9c-d433-4b9d-8e70-db2f7993d628"/*TextureFormat*/,

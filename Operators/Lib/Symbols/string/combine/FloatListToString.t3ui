@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "abf1ec99-049d-474c-9023-5302d5a5c804"/*FloatListToString*/,
-  "Description": "Converts a list of float numbers to String",
+  "Description": "Converts a list of float numbers to a string.\n\nEach value is formatted and followed by the separator (including the last one).\n\nSee also: [FloatToString]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -17,6 +17,7 @@
         "X": 0.0,
         "Y": 0.0
       },
+      "Description": "Format for each value: either a .NET composite format like {0:0.00} or a plain number format like 0.00.\nEmpty uses {0:0.00}.",
       "Usage": "Default"
     },
     {
@@ -25,6 +26,7 @@
         "X": 0.0,
         "Y": 45.0
       },
+      "Description": "Appended after each value. Use \"\\n\" for line breaks.",
       "Usage": "Default"
     }
   ],

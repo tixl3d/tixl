@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "5adffcb0-5e38-4e80-80a3-a56a427d6d7a"/*Vec2Magnitude*/,
-  "Description": "",
+  "Description": "Returns the length of a Vector2.\n\nAKA: length\n\nSee also: [Magnitude]",
   "InputUis": [
     {
       "InputId": "85639ce8-20ff-4fba-8573-706774cc53d5"/*Input*/,

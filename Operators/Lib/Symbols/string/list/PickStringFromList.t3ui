@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "ef357e66-24e9-4f54-8d86-869db74602f4"/*PickStringFromList*/,
-  "Description": "Can switch between different strings if the 'Fragments' output of a [SplitString] operator is used as an input",
+  "Description": "Picks a string from a string list by index, e.g. from the Fragments output of [SplitString].\n\nSee also: [SplitString], [FilesInFolder], [PickString]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -11,7 +11,7 @@
         "X": 0.0,
         "Y": 0.0
       },
-      "Description": "Index that controls which part of a string is used",
+      "Description": "Wraps around the list length.",
       "AddPadding": "True"
     },
     {
@@ -20,8 +20,7 @@
       "Position": {
         "X": 0.0,
         "Y": 0.0
-      },
-      "Description": "Input for [SplitString]"
+      }
     }
   ],
   "SymbolChildUis": [],

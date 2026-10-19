@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "816336a8-e214-4d2c-b8f9-05b1aa3ff2e2"/*ExtrudeCurves*/,
-  "Description": "Generates a mesh by extruding a set of points along a set of other points.\n\nThe extrusion is done along the z-axis. This means that the rail points should be aligned in a way that z is pointing along the rail.\n\nAlso, the normals are directly taken from the extruded points' z-axis. You can use the [VisualizePoints] to verify the alignment and adjust it in [TransformPoints] in point space.",
+  "Description": "Generates a mesh by sweeping a profile shape along a rail of points.\n\nThe profile points are placed in the XY plane of each rail point's orientation, so the rail points should be oriented with their z-axis pointing along the rail. The normals are taken directly from the combined orientation of rail and profile points. Use [VisualizePoints] to verify the alignment and adjust it with [TransformPoints] in point space.\n\nAKA: sweep, loft, extrude, tube\n\nSee also: [DrawMesh]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,14 +9,16 @@
       "Position": {
         "X": -846.2667,
         "Y": 1217.929
-      }
+      },
+      "Description": "Additionally scales the profile by an attribute of the rail point.\n\nNone: no extra scaling.\nRailPoint_F1: scales by F1.\nRailPoint_F2: scales by F2."
     },
     {
       "InputId": "332e7d07-f6a2-4f58-8fe4-d2b368a63f4a"/*Width*/,
       "Position": {
         "X": -706.2667,
         "Y": 1287.929
-      }
+      },
+      "Description": "Scales the profile."
     },
     {
       "InputId": "4d31be7a-3011-4fdf-9c63-425387b9bbfc"/*RailPoints*/,
@@ -24,7 +26,8 @@
       "Position": {
         "X": -1230.8755,
         "Y": 504.6468
-      }
+      },
+      "Description": "Points along which the profile is swept."
     },
     {
       "InputId": "5e2ada8d-10fa-419d-a377-0b504437fd72"/*ProfilePoints*/,
@@ -32,14 +35,16 @@
       "Position": {
         "X": -1275.9536,
         "Y": 774.96735
-      }
+      },
+      "Description": "Points describing the cross-section shape."
     },
     {
       "InputId": "7a2eff05-ab49-42ab-816c-86937f0ebbaf"/*UseExtend*/,
       "Position": {
         "X": -846.2667,
         "Y": 1252.929
-      }
+      },
+      "Description": "Scales the profile by the rail points' Scale attribute."
     },
     {
       "InputId": "7c24f499-8021-4c67-9790-5cc7efb83287"/*UseWAsWidth*/,
@@ -47,14 +52,16 @@
         "X": -1144.9685,
         "Y": 1386.346
       },
-      "GroupTitle": "Obsolete Parameters..."
+      "GroupTitle": "Obsolete Parameters...",
+      "Description": "Obsolete and ignored. Use ScaleFactor instead."
     },
     {
       "InputId": "e4591b4f-b2e7-496d-8e02-e574a0432737"/*UVsDirection*/,
       "Position": {
         "X": -846.2667,
         "Y": 1322.929
-      }
+      },
+      "Description": "Swaps the U and V directions of the texture coordinates."
     }
   ],
   "SymbolChildUis": [

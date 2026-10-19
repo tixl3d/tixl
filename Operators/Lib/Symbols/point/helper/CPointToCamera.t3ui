@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "0cfc80fc-7b98-4cf7-982f-1aa42697bb76"/*CPointToCamera*/,
-  "Description": "\n\nAKA: CpuPointToCamera",
+  "Description": "Creates a camera from the first point of a CPU point list.\n\nThe camera is placed at the point position, looks along the point's Z axis and uses its Y axis as up direction. Combine it with [SampleCPoints] to animate a camera along a path.\n\nAKA: CpuPointToCamera",
   "SymbolTags": "16",
   "InputUis": [
     {
@@ -16,7 +16,8 @@
       "Position": {
         "X": -200.0,
         "Y": 600.0
-      }
+      },
+      "Description": "Near and far clip distance."
     },
     {
       "InputId": "764ca304-fc86-48a9-9c82-a04fac7eadb2"/*Roll*/,
@@ -37,7 +38,8 @@
       "Position": {
         "X": -200.0,
         "Y": 150.0
-      }
+      },
+      "Description": "Vertical field of view in degrees."
     },
     {
       "InputId": "ae275370-a684-42fb-ab7a-50e16d24082d"/*LensShift*/,
@@ -72,7 +74,8 @@
       "Position": {
         "X": -200.0,
         "Y": 675.0
-      }
+      },
+      "Description": "Values below 0.0001 (default -1) use the aspect ratio of the current render resolution."
     },
     {
       "InputId": "fee19916-846f-491a-a2ee-1e7b1ac8e533"/*PositionOffset*/,

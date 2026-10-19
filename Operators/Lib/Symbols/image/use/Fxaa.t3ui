@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "0784b2ea-ac03-4f6e-8de3-4200cb93d651"/*Fxaa*/,
-  "Description": "Fast approXimate Anti-Aliasing is a post-FX, use it to improve SDF / RayMarching. ",
+  "Description": "Smooths jagged edges of an image with Fast Approximate Anti-Aliasing (FXAA).\n\nUseful as a post effect for SDF or raymarching renderings that cannot use multisampling.\n\nAKA: antialiasing, aa, smooth, jaggies",
   "InputUis": [
     {
       "InputId": "31ea272e-30ec-4af3-835c-5a92af306689"/*Image*/,
@@ -16,7 +16,8 @@
       "Position": {
         "X": -220.13264,
         "Y": 978.3909
-      }
+      },
+      "Description": "Keeps the original alpha channel instead of setting it to 1."
     },
     {
       "InputId": "aa56d3df-fa8f-4cb5-9164-f2bfd88dffab"/*Preset*/,

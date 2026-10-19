@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "6ca6420a-4c05-4c33-81a3-1a9c4872e29d"/*RotateField*/,
-  "Description": "",
+  "Description": "Rotates the incoming field around the X, Y and Z axes.\n\nIt needs an incoming field like [BoxSDF] or [TorusSDF]. Render the result with [RaymarchField] and inspect it with [VisualizeFieldDistance].\n\nSee also: [RotateAxis], [TransformField]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -17,6 +17,7 @@
         "X": -200.0,
         "Y": 75.0
       },
+      "Description": "Rotation in degrees around X, Y and Z.",
       "Min": -180.0,
       "Max": 180.0,
       "Format": "{0:0.0}°"

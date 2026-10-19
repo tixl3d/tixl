@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "67f77fd3-7fe3-49ca-bc5b-34b92aa7ab00"/*ApplyVectorField*/,
-  "Description": "Applies a signed XYZ vector field by setting the rotation and F1 to a set of points.\n\nIdeally this requires a _vector_ field, not a color or SDF, with signed vectors for the 3 axis in world space.\n\nAlso see [SdfToVector]",
+  "Description": "Orients points along the vectors of a field, and can write the vector length or distance into F1 or F2.\n\nThis expects a vector field with signed XYZ directions in world space, e.g. from [SdfToVector] or [ToroidalVortexField], not a color field.\n\nSee also: [SdfToVector], [SampleFieldPoints]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": 763.1979,
         "Y": 1643.0997
-      }
+      },
+      "Description": "Uses a length of 1 for all vectors."
     },
     {
       "InputId": "3f49f5f7-4856-41aa-8196-7495fb636aea"/*Points*/,
@@ -24,14 +25,16 @@
       "Position": {
         "X": 763.19794,
         "Y": 1375.9243
-      }
+      },
+      "Description": "Up direction used to build the orientation."
     },
     {
       "InputId": "739a735c-677b-4b56-892c-046eb7af239f"/*SetFx2To*/,
       "Position": {
         "X": 903.1979,
         "Y": 1748.0997
-      }
+      },
+      "Description": "Like SetFx1To, for F2."
     },
     {
       "InputId": "8346d059-b9df-4a61-a9da-31bc4ff37543"/*VectorField*/,
@@ -46,35 +49,40 @@
       "Position": {
         "X": 903.19794,
         "Y": 1713.0997
-      }
+      },
+      "Description": "Keep: leaves F1 unchanged. Magnitude: writes the vector length. Distance: writes the distance (W channel) of the field."
     },
     {
       "InputId": "9aae8917-40ad-4ce5-aac4-da2de48cdb62"/*ClampLength*/,
       "Position": {
         "X": 903.1979,
         "Y": 1480.9243
-      }
+      },
+      "Description": "Maximum vector length. Negative values disable clamping."
     },
     {
       "InputId": "a6ab6b01-9cd5-45f0-98d4-476fee3c9500"/*Strength*/,
       "Position": {
         "X": 903.1978,
         "Y": 1340.9243
-      }
+      },
+      "Description": "Blends between the original and the new orientation and F values."
     },
     {
       "InputId": "b4d7ac0b-92a4-44ed-8e64-717c560176bd"/*StrengthFactor*/,
       "Position": {
         "X": 903.1979,
         "Y": 1678.0997
-      }
+      },
+      "Description": "Multiplies Strength with F1 or F2 of each point."
     },
     {
       "InputId": "ccc4cb54-af87-4c3d-9759-c4409b092281"/*ScaleLength*/,
       "Position": {
         "X": 903.1979,
         "Y": 1515.9243
-      }
+      },
+      "Description": "Multiplies the vector length and the distance written to F1 or F2."
     }
   ],
   "SymbolChildUis": [

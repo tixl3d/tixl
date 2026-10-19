@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "44cee07e-2a71-4dd5-9ded-8274e8e19332"/*DefineIqGradient*/,
-  "Description": "A simple procedural method to define a gradient established by Inigo Quelez.\n\nIt's fun for playing around but takes some experimentation to get it under control. It can be very useful to find ABCD combinations for shaders.\n\nWatch the linked video for iq's excellent explanation.",
+  "Description": "Defines a gradient with the procedural cosine palette by Inigo Quilez.\n\nEach color channel is computed as A + B * cos(2π * (C * t + D)). It takes some experimentation to get under control, but can be very useful to find ABCD combinations for shaders.\n\nSee also: [SampleGradient]",
   "InputUis": [
     {
       "InputId": "12d9b558-c83c-4d7b-b366-481d09e54501"/*C_Frequency*/,
@@ -9,6 +9,7 @@
         "X": -200.0,
         "Y": 150.0
       },
+      "Description": "C: number of cosine cycles across the gradient per channel.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true
@@ -19,6 +20,7 @@
         "X": -200.0,
         "Y": 75.0
       },
+      "Description": "B: amplitude of the cosine per channel.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true
@@ -29,6 +31,7 @@
         "X": -200.0,
         "Y": 0.0
       },
+      "Description": "A: base value per channel (RGBA).",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true
@@ -38,7 +41,8 @@
       "Position": {
         "X": -200.0,
         "Y": 300.0
-      }
+      },
+      "Description": "Shifts the whole gradient."
     },
     {
       "InputId": "887c0b40-c71f-4e0e-bff2-0fdff64f8c82"/*D_Phase*/,
@@ -46,6 +50,7 @@
         "X": -200.0,
         "Y": 225.0
       },
+      "Description": "D: phase offset per channel.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true
@@ -62,7 +67,8 @@
       "Position": {
         "X": -200.0,
         "Y": 180.0
-      }
+      },
+      "Description": "Number of gradient steps, 1 to 256."
     }
   ],
   "SymbolChildUis": [],

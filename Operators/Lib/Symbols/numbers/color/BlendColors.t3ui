@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "6b7c541a-ca36-4f21-ac95-89e874820c5a"/*BlendColors*/,
-  "Description": "Blends two colors with the defined blend mode",
+  "Description": "Blends two colors with the selected blend mode.\n\nSee also: [BlendGradients]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -11,7 +11,7 @@
         "Y": 90.0
       },
       "GroupTitle": "Settings",
-      "Description": "Defines how strongly color B is faded into color A",
+      "Description": "How strongly ColorB is blended into ColorA.",
       "Min": 0.0,
       "Max": 1.0
     },
@@ -21,7 +21,6 @@
         "X": -200.0,
         "Y": 135.0
       },
-      "Description": "Defines the mode with which the colors are merged.",
       "AddPadding": "True"
     },
     {
@@ -29,16 +28,14 @@
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      },
-      "Description": "Input for a second color"
+      }
     },
     {
       "InputId": "eb601c57-2025-4135-8292-223eaedaf187"/*ColorA*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      },
-      "Description": "Input for the first color"
+      }
     }
   ],
   "SymbolChildUis": [],

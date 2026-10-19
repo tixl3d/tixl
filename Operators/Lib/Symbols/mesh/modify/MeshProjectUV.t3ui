@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "97ffb173-f4cc-4143-a479-80cf3465cc7e"/*MeshProjectUV*/,
-  "Description": "Overwrites the existing UV coordinates with planar mapping.\n\nBecomes visible with [DrawMesh].\n\nTo manipulate existing UV Coordinates see [TransformMeshUVs].\n\n\nAlso see [ReprojectToUV].",
+  "Description": "Overwrites the UV coordinates of a mesh with a planar projection.\n\nThe vertex positions are transformed by the Translate, Rotate, Scale and Stretch settings and projected along the Z axis. The result becomes visible when the mesh is drawn with a texture, e.g. with [DrawMesh].\n\nAKA: uv, projection, planar mapping\n\nSee also: [TransformMeshUVs], [ReprojectToUV]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,6 +10,7 @@
         "X": -1598.1094,
         "Y": 1180.2872
       },
+      "Description": "Writes the projection to TexCoord2 instead of TexCoord.",
       "AddPadding": "True"
     },
     {
@@ -42,7 +43,7 @@
         "X": -1598.8242,
         "Y": 814.76904
       },
-      "Description": "Rotates the planar mapping"
+      "Description": "Rotates the projection plane in degrees."
     },
     {
       "InputId": "8a991e5f-361c-4ab9-9660-bdf759c87594"/*Translate*/,

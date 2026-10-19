@@ -1,7 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "7ad3a38a-9f04-43ba-a16f-6982b87dd2d4"/*AnalyzeBuffers*/,
-  "Description": "An internal operator that generates counts that can be used to combine multiple GPU buffers into a new buffer.",
+  "Description": "Internal helper. Computes counts and offsets for combining multiple GPU buffers into one.\n\nReturns the number of connected buffers, their total element count, and for the buffer selected by Index its start position within the combined buffer and its stride.",
+  "SymbolTags": "16",
   "InputUis": [
     {
       "InputId": "bf9c64ac-39b5-41c0-a896-84809b12fff6"/*Index*/,

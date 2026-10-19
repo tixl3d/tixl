@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "54ba8673-ff58-48d1-ae2e-ee2b83bc6860"/*IntToWrapmode*/,
-  "Description": "Picks a wrap mode with an index.",
+  "Description": "Converts an integer into a texture wrap mode, e.g. to animate or switch the wrap mode of a sampler.",
   "SymbolTags": "24",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "1 = Wrap, 2 = Mirror, 3 = Clamp, 4 = Border, 5 = MirrorOnce. Other values are clamped to this range."
     }
   ],
   "SymbolChildUis": [],

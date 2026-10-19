@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "0626aba2-ed0c-40c4-9b50-2e729d0d8d86"/*SinForm*/,
-  "Description": "Generates a sine curve with various parameters\n\nThe presets show various application possibilities for different patterns\n\n\nOther interesting patterns can be generated with [SinForm] [ZollnerPattern] [FraserGrid] [Raster] [CheckerBoard] [RyojiPattern2] [RyojiPattern1]",
+  "Description": "Generates sine curves with adjustable copies, offsets and line widths.\n\nCheck the presets for different patterns.\n\nAKA: wave, sine, lines, oscillator\n\nSee also: [ZollnerPattern], [FraserGrid], [Raster], [CheckerBoard], [RyojiPattern1], [RyojiPattern2]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -10,7 +10,6 @@
         "X": 166.33609,
         "Y": 505.8402
       },
-      "Description": "Rotates the line",
       "Scale": 0.5
     },
     {
@@ -19,7 +18,7 @@
         "X": 26.336105,
         "Y": 365.84024
       },
-      "Description": "Transforms the position of the line"
+      "Description": "Moves the curve."
     },
     {
       "InputId": "33f88b64-3d8f-4b07-afdc-18d3b3eb63c8"/*Copies*/,
@@ -28,7 +27,7 @@
         "Y": 610.8402
       },
       "GroupTitle": "Copies",
-      "Description": "Defines the amount of duplicated lines",
+      "Description": "Number of duplicated curves.",
       "Scale": 0.2
     },
     {
@@ -37,7 +36,7 @@
         "X": 26.336075,
         "Y": 435.84024
       },
-      "Description": "Offsets the duplicated lines"
+      "Description": "Offset between the duplicated curves."
     },
     {
       "InputId": "5ac1e50d-21af-40e8-ba0b-45a3e8cdd75d"/*Image*/,
@@ -45,7 +44,7 @@
         "X": -98.2605,
         "Y": -89.32269
       },
-      "Description": "Custom input for a background image"
+      "Description": "Optional background image."
     },
     {
       "InputId": "710fd90b-05bd-468f-a50e-0894d4f27265"/*TextureFormat*/,
@@ -60,7 +59,7 @@
         "X": 26.336075,
         "Y": 295.84024
       },
-      "Description": "Scales the lines on the x and y axis",
+      "Description": "Scales the curve horizontally (wavelength) and vertically (amplitude).",
       "AddPadding": "True"
     },
     {
@@ -75,8 +74,7 @@
       "Position": {
         "X": 26.33609,
         "Y": 155.84024
-      },
-      "Description": "Defines the background color"
+      }
     },
     {
       "InputId": "aa818499-5322-47f4-b08d-d21bbd0b72c8"/*Fade*/,
@@ -84,7 +82,7 @@
         "X": 166.3361,
         "Y": 575.8402
       },
-      "Description": "Defines the smoothness of the line edges",
+      "Description": "Softness of the line edges.",
       "Scale": 0.1
     },
     {
@@ -93,8 +91,7 @@
         "X": 166.33607,
         "Y": 540.8402
       },
-      "GroupTitle": "Appearance",
-      "Description": "Defines the thickness of the lines"
+      "GroupTitle": "Appearance"
     },
     {
       "InputId": "ea8656ce-a75d-4cfd-9deb-cd3a36294399"/*Fill*/,
@@ -103,7 +100,7 @@
         "Y": 15.8402405
       },
       "GroupTitle": "Color",
-      "Description": "Defines the color of the line"
+      "Description": "Color of the curves."
     }
   ],
   "SymbolChildUis": [

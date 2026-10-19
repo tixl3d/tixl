@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "55b13dee-89f8-404f-b2fe-43d5e8c54536"/*Floor*/,
-  "Description": "Rounds to the next lower integer value.\n\nAlso see [Round] & [Ceil]",
+  "Description": "Removes the fractional part of a value.\n\nThe value is cast to an integer, so it is truncated towards zero: 2.7 becomes 2, but -2.7 becomes -2 (not -3). Values beyond the 32-bit integer range are not handled.\n\nAKA: truncate, int\n\nSee also: [Round], [Ceil]",
   "SymbolTags": "1",
   "InputUis": [
     {

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "7eefe668-d290-4673-b766-39c98b9ba12e"/*SnapToAnglesForce*/,
-  "Description": "Slowly align particle velocity with repeated angle steps on the xy-plane. \n\nIt works well when combined with [TurbulenceForce] and [PointTrail].\n\nNote: This will have no effect if the particles have no default velocity or only along the z-axis.",
+  "Description": "Gradually aligns the particle velocities to fixed angle steps within a plane.\n\nThis creates angular, circuit-like motion paths. The plane can be the camera view or one of the world planes. The velocity component perpendicular to the plane is kept unless KeepPlanar is increased.\n\nTips:\n- Combine with [TurbulenceForce] and draw with [PointTrail] and [DrawLines].\n- It has no effect on particles without velocity or with velocity only perpendicular to the plane.\n\nSee also: [AxisStepForce]",
   "SymbolTags": "64",
   "InputUis": [
     {
@@ -11,7 +11,7 @@
         "Y": 443.39877
       },
       "GroupTitle": "Options",
-      "Description": "A factor that will keep the particle velocity planar to the camera.\nThis might be useful to emphasize the angled direction if camera rotation changes.",
+      "Description": "Removes the velocity component perpendicular to the plane (0..1). Useful to emphasize the angled directions.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -23,6 +23,7 @@
         "X": -508.1693,
         "Y": 249.70999
       },
+      "Description": "Size of the angle steps in degrees, e.g. 90 for four directions or 45 for eight.",
       "AddPadding": "True",
       "Min": 0.0,
       "Max": 360.0,
@@ -34,7 +35,7 @@
         "X": -516.99866,
         "Y": 536.7369
       },
-      "Description": "A twist angle that is applied every frame. Might lead to unpredictable but interesting effects.",
+      "Description": "Rotates the snapped directions. Might lead to unpredictable but interesting effects.",
       "Min": -180.0,
       "Max": 180.0,
       "Format": "{0:0.0}°"
@@ -69,7 +70,8 @@
       "Position": {
         "X": -516.99866,
         "Y": 611.7369
-      }
+      },
+      "Description": "Plane in which the angles are snapped.\n\nCameraSpace: the view plane of the camera.\nWorldSpaceXY, WorldSpaceXZ, WorldSpaceYZ: the corresponding world plane."
     },
     {
       "InputId": "e596a8ec-3681-4f45-b72c-d50a97240270"/*Amount*/,
@@ -77,6 +79,7 @@
         "X": -508.1693,
         "Y": 204.71024
       },
+      "Description": "How strongly the direction is snapped to the nearest step (0..1).",
       "Min": 0.0,
       "Max": 10.0,
       "ClampMin": true,

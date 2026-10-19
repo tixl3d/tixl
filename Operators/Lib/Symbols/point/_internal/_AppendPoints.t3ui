@@ -1,7 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "9d3d0582-5e55-4268-9649-07d4dd11d792"/*_AppendPoints*/,
-  "Description": "Combines two point buffers.\n\nThis operator has been deprecated. Consider using [CombineBuffer].",
+  "Description": "Obsolete. Combines two point buffers.\n\nUse [CombineBuffers] instead.",
+  "SymbolTags": "4096",
   "InputUis": [
     {
       "InputId": "8d597942-a0d2-43a0-a039-d450e197702e"/*GTargets*/,

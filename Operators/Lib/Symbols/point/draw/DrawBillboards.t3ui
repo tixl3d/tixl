@@ -168,8 +168,7 @@
         "X": 1126.2113,
         "Y": 1780.8822
       },
-      "GroupTitle": "Draw Settings...",
-      "Description": "Selects the Blendmode"
+      "GroupTitle": "Draw Settings..."
     },
     {
       "InputId": "8cd25011-5305-4bdf-9307-a46e52b5c503"/*RandomPhase*/,
@@ -196,7 +195,7 @@
         "X": 310.13693,
         "Y": 1665.4705
       },
-      "Description": "Defines how a billboard is aligned towards the camera:\n\nIf using point rotation, the orientation to the camera will be ignored.",
+      "Description": "Defines how the billboards are aligned:\n\nBillboard: Faces the camera.\nRotatedBillboard: Faces the camera and is rotated on screen to follow the point's Y axis.\nPointRotation: Uses the point orientation and ignores the camera.",
       "AddPadding": "True"
     },
     {
@@ -213,8 +212,7 @@
       "Position": {
         "X": 823.52856,
         "Y": 1463.1864
-      },
-      "Description": "Input for GPoints"
+      }
     },
     {
       "InputId": "a9e64a2e-6a88-4c36-9e02-95ca710ea86e"/*Randomize*/,

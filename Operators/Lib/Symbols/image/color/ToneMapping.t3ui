@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "025b32e9-b570-45be-ae84-50424982aae3"/*ToneMapping*/,
-  "Description": "Tone mapping is the process of converting high dynamic range (HDR) imagery to a displayable format, adjusting the contrast and brightness to make it visually appealing while preserving details in both highlights and shadows.",
+  "Description": "Converts high dynamic range (HDR) colors into the displayable 0 to 1 range while preserving details in highlights and shadows.\n\nAll modes except None set the alpha to 1.\n\nAKA: tonemap, hdr, aces, filmic, agx\n\nSee also: [AdjustColors], [ColorGrade]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -10,7 +10,8 @@
         "X": 153.79459,
         "Y": 431.24347
       },
-      "GroupTitle": "Mode"
+      "GroupTitle": "Mode",
+      "Description": "The tone mapping curve. None only applies Exposure and gamma correction."
     },
     {
       "InputId": "72e51856-bc8f-4bcf-a6d8-6c7b4f8b0583"/*Texture2d*/,
@@ -26,6 +27,7 @@
         "X": 155.58875,
         "Y": 589.0668
       },
+      "Description": "Multiplies the colors before tone mapping.",
       "AddPadding": "True"
     },
     {
@@ -34,14 +36,16 @@
         "X": 153.79459,
         "Y": 476.2435
       },
-      "GroupTitle": "Settings"
+      "GroupTitle": "Settings",
+      "Description": "Applies a gamma correction with the Gamma value after tone mapping."
     },
     {
       "InputId": "dfd590f5-a930-42df-aecd-52f8d0195369"/*Gamma*/,
       "Position": {
         "X": 153.79459,
         "Y": 521.2435
-      }
+      },
+      "Description": "Gamma used if CorrectGamma is enabled. The result is raised to the power of 1/Gamma."
     }
   ],
   "SymbolChildUis": [

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "f835b87a-05e6-4bde-931c-ca43524d4467"/*BuildGradient*/,
-  "Description": "",
+  "Description": "Builds a gradient from a list of colors and an optional list of positions.\n\nIf Positions is empty, the colors are distributed evenly from 0 to 1. Otherwise color and position lists are paired by index and extra entries of the longer list are ignored.\n\nSee also: [DefineGradient], [SampleGradient], [BlendGradients]",
   "InputUis": [
     {
       "InputId": "918c99f2-2197-467d-a991-2f69ef81440c"/*Interpolation*/,
@@ -22,7 +22,8 @@
       "Position": {
         "X": -200.0,
         "Y": 75.0
-      }
+      },
+      "Description": "Normalized positions (0…1) for each color. Leave unconnected for even spacing."
     }
   ],
   "SymbolChildUis": [],

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "e6072ecf-30d2-4c52-afa1-3b195d61617b"/*GetFloatVar*/,
-  "Description": "Fetches a float variable from the context.\n\nUse [SetFloatVar] to set the variable further up the graph. Also [GetIntVar]\n\nImportant:\nIf you're using this together with [Loop], don't forget to use 'f' as the normalized progress variable.",
+  "Description": "Reads a float variable from the evaluation context.\n\nThe variable has to be set further right in the graph with [SetFloatVar] or [Loop]. If it is not defined, FallbackDefault is returned.\n\nTips:\n- With [Loop], the normalized progress variable is \"f\" and the index is \"i\" by default.\n\nSee also: [SetFloatVar], [GetIntVar]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "Description": "Note: When used with [Loop] this is frequently \"f\".",
+      "Description": "Name of the context variable. The dropdown lists variables currently defined in the context.",
       "Usage": "CustomDropdown"
     },
     {
@@ -18,7 +18,8 @@
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Returned if the variable is not defined in the current context."
     }
   ],
   "SymbolChildUis": [],

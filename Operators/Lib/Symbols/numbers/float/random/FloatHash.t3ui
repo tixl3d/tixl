@@ -1,21 +1,23 @@
 {
   "FormatVersion": 3,
   "Id": "f2b80aaa-b353-45cc-9504-48c86e69ce99"/*FloatHash*/,
-  "Description": "Generates a psydorandom integer from a float value",
+  "Description": "Generates a pseudo-random integer from a float value.\n\nThe same input always results in the same integer.\n\nAKA: hash, random\n\nSee also: [Random]",
   "InputUis": [
     {
       "InputId": "9427b1cb-da57-431f-b182-de16b7e11002"/*Seed*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Input value to hash."
     },
     {
       "InputId": "dbeffbd5-92b0-4a63-9d28-5592c6b42b69"/*UniqueForChild*/,
       "Position": {
         "X": 0.0,
         "Y": 135.0
-      }
+      },
+      "Description": "Adds a value derived from the operator instance, so copies of the operator produce different results."
     }
   ],
   "SymbolChildUis": [],

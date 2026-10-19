@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "20338d1c-e4d3-4208-8f65-e1b720b8b563"/*TransformSomePoints*/,
-  "Description": "Transform some points",
+  "Description": "Transforms only some of the points, selected by a repeating pattern of taken and skipped points.",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -16,7 +16,8 @@
       "Position": {
         "X": -1026.0118,
         "Y": 1908.9076
-      }
+      },
+      "Description": "Only outputs the taken points."
     },
     {
       "InputId": "47997c7d-c1a7-444d-ba6b-d1dcbe935efb"/*Translation*/,
@@ -32,6 +33,7 @@
         "X": -1022.86884,
         "Y": 1684.8566
       },
+      "Description": "Number of consecutive points that are transformed.",
       "Min": 1,
       "Max": 100000,
       "ClampMin": true,
@@ -62,6 +64,7 @@
         "X": -1022.86884,
         "Y": 1729.8566
       },
+      "Description": "Number of consecutive points that are left unchanged after each taken group.",
       "Min": 0,
       "Max": 1000000,
       "ClampMin": true,

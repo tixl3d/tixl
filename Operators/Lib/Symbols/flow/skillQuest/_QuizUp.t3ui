@@ -1,7 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "b9460cd7-c363-4a6e-8c3e-5c2f84a4aae3"/*_QuizUp*/,
-  "Description": "Internal op that renders the skill quest tasks and sends completion messages.",
+  "Description": "Internal helper. Renders the skill quest tasks and sends completion messages.",
+  "SymbolTags": "16",
   "InputUis": [
     {
       "InputId": "088ca109-0959-4e1d-a926-722e51ab8062"/*DifferenceRange*/,

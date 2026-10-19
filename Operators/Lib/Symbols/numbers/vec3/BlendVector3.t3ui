@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "fc201df2-8b05-4567-9f24-0d9128aa8507"/*BlendVector3*/,
-  "Description": "Blends (lerps) two vectors.\n\nAlso see [LerpVec3]",
+  "Description": "Blends between any number of connected Vector3 inputs.\n\nThe integer part of F selects the input and the fractional part blends to the next one, wrapping from the last input back to the first.\n\nSee also: [LerpVec3]",
   "InputUis": [
     {
       "InputId": "83c7b887-e1af-4b9f-ad2f-469867940bda"/*Vectors*/,
@@ -16,7 +16,8 @@
       "Position": {
         "X": 0.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Blend position: 0 = first input, 1 = second, 1.5 = halfway between second and third."
     }
   ],
   "SymbolChildUis": [],

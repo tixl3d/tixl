@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "dbef3c50-ada6-437d-adac-62824daa9b6b"/*BlendSDFWithSDF*/,
-  "Description": "",
+  "Description": "Switches between two SDFs depending on a third field used as mask.\n\nWhere the WeightField distance (minus Offset) is negative FieldA is used, where it is positive FieldB. Range controls the width of the smooth transition. Colors are blended accordingly. All three inputs must be connected.\n\nSee also: [CombineSDF]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": -200.0,
         "Y": 300.0
-      }
+      },
+      "Description": "Shifts the switching border by offsetting the mask distance."
     },
     {
       "InputId": "78ec0731-e155-4c09-83b8-9b8e98a1f0ab"/*FieldB*/,
@@ -25,7 +26,8 @@
       "Position": {
         "X": -200.0,
         "Y": 75.0
-      }
+      },
+      "Description": "Field used as mask. Its distance decides which field is used."
     },
     {
       "InputId": "eb8e21ff-6ca3-406c-b88a-f9caec9272d0"/*FieldA*/,
@@ -40,7 +42,8 @@
       "Position": {
         "X": -200.0,
         "Y": 225.0
-      }
+      },
+      "Description": "Width of the transition in world units. 0 gives a hard switch."
     }
   ],
   "SymbolChildUis": [],

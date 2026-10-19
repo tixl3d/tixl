@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "3a246cf1-22da-4070-8504-08cd1c9c5c40"/*ColorsToList*/,
-  "Description": "",
+  "Description": "Combines connected colors into a list of Vector4 values.\n\nSee also: [FloatsToList], [ColorListToInts]",
   "InputUis": [
     {
       "InputId": "011cb37b-edd1-47fe-8072-7e67c4d5b571"/*Colors*/,

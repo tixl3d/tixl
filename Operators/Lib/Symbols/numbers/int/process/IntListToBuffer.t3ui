@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "3dd5629e-8b23-4381-acf2-db642fc4b030"/*IntListToBuffer*/,
-  "Description": "Converts a list of integer values to a structured GPU buffer.",
+  "Description": "Converts a list of integers into a structured GPU buffer with one int per element.\n\nOutputs nothing if the list is empty.\n\nSee also: [IntsToBuffer]",
   "InputUis": [
     {
       "InputId": "fdc560d8-0c47-4e31-ab93-a086468e8f96"/*IntList*/,

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "0b99ab8b-5d61-49da-9851-9ad723cad3ae"/*JoinLists*/,
-  "Description": "",
+  "Description": "Joins several structured lists of the same type into one list.\n\nSee also: [GetListItemAttribute]",
   "SymbolTags": "8",
   "InputUis": [
     {

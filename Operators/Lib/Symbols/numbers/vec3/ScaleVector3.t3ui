@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "646d6a5d-a1d7-471e-86ab-e1fb2542a2c2"/*ScaleVector3*/,
-  "Description": "Defines a value that is multiplied onto the incoming Vec3",
+  "Description": "Multiplies two Vector3 values component-wise and by a uniform factor.\n\nSee also: [ScaleVector2], [NormalizeVector3]",
   "InputUis": [
     {
       "InputId": "2218624e-2f7b-4bc6-9c36-447c371a6cd7"/*B*/,

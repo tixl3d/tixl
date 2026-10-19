@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "411d3dd4-778b-4012-a19f-05d855fa1baf"/*GetVec2Var*/,
-  "Description": "",
+  "Description": "Reads a vec2 variable from the evaluation context.\n\nThe variable has to be set further right in the graph with [SetVec2Var]. If it is not defined, FallbackDefault is returned.\n\nSee also: [SetVec2Var]",
   "InputUis": [
     {
       "InputId": "05d0cc68-4f6b-4e03-871c-4de0e6ea0b24"/*VariableName*/,
@@ -9,6 +9,7 @@
         "X": -200.0,
         "Y": 0.0
       },
+      "Description": "Name of the context variable. The dropdown lists variables currently defined in the context.",
       "Usage": "CustomDropdown"
     },
     {
@@ -16,7 +17,8 @@
       "Position": {
         "X": -200.0,
         "Y": 75.0
-      }
+      },
+      "Description": "Returned if the variable is not defined in the current context."
     }
   ],
   "SymbolChildUis": [],

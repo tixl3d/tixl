@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "dee8f2de-5cbd-4ca7-9449-d6c74197546e"/*GetTextureFromContext*/,
-  "Description": "Access a texture set by [SetContextTexture]",
+  "Description": "Gets a texture that was stored in the evaluation context by [SetContextTexture].\n\nThis only works for operators evaluated within the subgraph connected to the [SetContextTexture]. If no texture with the Id exists, the output is empty.\n\nSee also: [SetContextTexture]",
   "SymbolTags": "16",
   "InputUis": [
     {
@@ -10,6 +10,7 @@
         "X": -200.0,
         "Y": 45.0
       },
+      "Description": "Name of the texture, as defined in [SetContextTexture].",
       "Usage": "Default"
     }
   ],

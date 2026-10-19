@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "2ab1bbef-8322-4638-8b1d-7e31aaa6a457"/*KeyColor*/,
-  "Description": "A simple color keyer.\nThis can be used to select a color / range of colors in a 2D image / rendering / video to replace it with something else. For example, with a different color or turn it transparent.\nThis can be used for Bluescreen / Greenscreen footage.\nUseful combinations: [LoadImage], [PlayVideo], [PlayVideoClip]",
+  "Description": "Keys out a color or a range of colors in an image, for instance for blue screen or green screen footage.\n\nThe distance of each pixel to the Key color is computed from weighted hue, saturation and brightness differences. Pixels close to the key are considered keyed and can be made transparent, filled or extracted depending on the Return mode.\n\nAKA: chromakey, greenscreen, bluescreen, keyer\n\nSee also: [LoadImage], [PlayVideo], [RemoveStaticBackground]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": -39.329453,
         "Y": 803.59656
-      }
+      },
+      "Description": "Influence of hue differences on the key. Ignored for unsaturated pixels."
     },
     {
       "InputId": "645e7d14-d4f8-46db-a5bc-b47136a00af5"/*Texture2d*/,
@@ -25,6 +26,7 @@
         "X": -39.329453,
         "Y": 758.59656
       },
+      "Description": "Multiplies the color distance. Higher values give a harder, more contrasted mask.",
       "AddPadding": "True",
       "Min": -5.0,
       "Max": 5.0,
@@ -35,14 +37,16 @@
       "Position": {
         "X": -41.019333,
         "Y": 1083.517
-      }
+      },
+      "Description": "Radius in pixels by which the keyed area is grown."
     },
     {
       "InputId": "85826060-b94d-4f65-bf35-cad8fd8eb508"/*WeightBrightness*/,
       "Position": {
         "X": -41.019333,
         "Y": 948.51697
-      }
+      },
+      "Description": "Influence of brightness differences on the key."
     },
     {
       "InputId": "8d07d9ad-fe83-4b40-bebd-21c563d6d6ac"/*Key*/,
@@ -50,7 +54,8 @@
         "X": -39.329453,
         "Y": 623.59656
       },
-      "GroupTitle": "Key Color Settings"
+      "GroupTitle": "Key Color Settings",
+      "Description": "The color to key out."
     },
     {
       "InputId": "91e604d7-aed0-4fb9-9690-ab60a74c4df5"/*Amplify*/,
@@ -58,6 +63,7 @@
         "X": -41.019333,
         "Y": 993.51697
       },
+      "Description": "Subtracted from the color distance. Higher values key a wider range of colors.",
       "AddPadding": "True"
     },
     {
@@ -66,6 +72,7 @@
         "X": -39.329453,
         "Y": 713.59656
       },
+      "Description": "Color used by FillKeyed and KeyedWhiteOnBackground. In ReturnKeyed mode its alpha blends the result over this color.",
       "AddPadding": "True"
     },
     {
@@ -74,6 +81,7 @@
         "X": -41.019333,
         "Y": 903.51697
       },
+      "Description": "Influence of saturation differences on the key.",
       "AddPadding": "True"
     },
     {
@@ -82,7 +90,8 @@
         "X": -41.019333,
         "Y": 1038.517
       },
-      "GroupTitle": "Result Settings"
+      "GroupTitle": "Result Settings",
+      "Description": "RemoveKeyed: keyed areas become transparent.\nFillKeyed: keyed areas are filled with Background.\nKeyedWhiteOnBackground: outputs a mask with keyed areas white on Background.\nReturnKeyed: keeps only the keyed areas."
     }
   ],
   "SymbolChildUis": [

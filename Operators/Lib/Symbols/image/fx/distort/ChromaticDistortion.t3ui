@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "ecf2c782-4461-4a94-8995-067425e3f84b"/*ChromaticDistortion*/,
-  "Description": "Simulates an imaging error of optical camera lenses that manifests itself as blurring or discoloration at the outer edges.\n\nAlso see [ChromaticAberration]\n\nUseful Ops for a PostFX Pipeline: [MotionBlur] [DepthOfField] [ChromaticAberration] [Glow] [Grain] [Blur]",
+  "Description": "Simulates lens distortion with chromatic aberration, which blurs and splits colors towards the outer edges of the image.\n\nAKA: lens, fringe, barrel, rgbsplit\n\nSee also: [ChromaticAbberation], [MotionBlur], [DepthOfField], [Glow], [Grain], [Blur]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -19,7 +19,7 @@
         "X": 32.025677,
         "Y": 663.30994
       },
-      "Description": "Tints the image yellow.",
+      "Description": "Blends from a plain radial blur (0) to a rainbow color split (1).",
       "AddPadding": "True",
       "Min": -1.0,
       "Max": 2.0,
@@ -33,7 +33,7 @@
         "Y": 843.30994
       },
       "GroupTitle": "Advanced Options",
-      "Description": "Controls the fidelity of the effect.\nHigher numbers create smoother results at the cost of rendering speed."
+      "Description": "Number of samples (rounded to even, max 100). Higher numbers create smoother results at the cost of rendering speed."
     },
     {
       "InputId": "48e1129c-d6cc-4018-a6ee-5266244edd7f"/*Distort*/,
@@ -42,7 +42,7 @@
         "Y": 708.31
       },
       "GroupTitle": "Lense distort settings",
-      "Description": "Controls intensity of lens distortion.\n",
+      "Description": "Controls the intensity of the lens distortion.",
       "Min": -0.1,
       "Max": 0.3,
       "Scale": 0.001,
@@ -63,7 +63,7 @@
         "X": 32.025677,
         "Y": 618.3099
       },
-      "Description": "Controls the intensity of the effect.",
+      "Description": "Controls the length of the radial blur and color split.",
       "AddPadding": "True"
     },
     {
@@ -80,7 +80,7 @@
         "X": 32.025677,
         "Y": 753.31
       },
-      "Description": "Uniformly scales the image to fix unwanted effects at the edges when using \"distort\" setting.",
+      "Description": "Scales the distance used for the distortion. Adjust it to fix unwanted effects at the edges when using Distort.",
       "Min": 0.1,
       "Max": 2.0,
       "ClampMin": true,

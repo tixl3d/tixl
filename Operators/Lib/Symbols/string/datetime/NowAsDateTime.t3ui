@@ -9,7 +9,8 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Holds the last captured time while enabled."
     }
   ],
   "SymbolChildUis": [],

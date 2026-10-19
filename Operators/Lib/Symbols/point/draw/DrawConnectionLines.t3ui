@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "44d57201-addf-455c-9e31-709b018ba29f"/*DrawConnectionLines*/,
-  "Description": "",
+  "Description": "Draws lines between neighboring points, building up a network of connections over time.\n\nOn every frame LinesPerStep points are connected to a nearby point found with a spatial hash grid of CellSize. The connections are stored in a ring buffer of StepCount steps, so older connections are replaced over time.",
   "SymbolTags": "64",
   "InputUis": [
     {

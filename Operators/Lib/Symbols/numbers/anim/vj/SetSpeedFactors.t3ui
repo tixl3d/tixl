@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "61dc8ba5-8aa6-4003-8d8c-8bce27f56a67"/*SetSpeedFactors*/,
-  "Description": "Speed factors are multiplied to most animation operators like [AnimValue] and [Counter].\n\nThis is an extremely powerful method to adjust the pace of visuals while staying beat synced.\n\nIn NormalizedRates mode...\n- ...0.5 means neutral (factor 1).\n- ...lower means slower: 1/2 1/4 1/8 1/16 frozen\n- ...larger means faster x2 x4 x8 x16 x32\n\nSpeedFactorA is applied to:\n[Counter]\n\nSpeedFactorB is applied to:\n[AnimValue]\n[AnimVec2]\n[AnimVec3]\n\nTo keep things flexible it supports Image and Commands types (but not crossing between them).",
+  "Description": "Sets speed factors for animation operators in the connected subgraph.\n\nThis adjusts the pace of visuals while staying beat-synced. SpeedFactorA is used by [Counter], SpeedFactorB by [AnimValue], [AnimVec2] and [AnimVec3] (see their AllowSpeedFactor parameter). Both Commands and Texture subgraphs are supported, but only one per instance.",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -17,7 +17,8 @@
       "Position": {
         "X": -100.99625,
         "Y": 141.14243
-      }
+      },
+      "Description": "- NormalizedRates: 0.5 is neutral (factor 1); lower values give 1/2, 1/4, 1/8, 1/16 down to frozen; higher values give ×2, ×4, ×8, ×16, ×32.\n- Factor: The value is used as a multiplier."
     },
     {
       "InputId": "3ba30914-444c-43a9-b936-87d5d98898cd"/*Texture*/,

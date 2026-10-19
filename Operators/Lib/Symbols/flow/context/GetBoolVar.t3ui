@@ -1,14 +1,15 @@
 {
   "FormatVersion": 3,
   "Id": "604bfb46-fe8f-4c8b-896b-1b7bc827137b"/*GetBoolVar*/,
-  "Description": "",
+  "Description": "Reads a bool variable from the evaluation context.\n\nThe variable has to be set further right in the graph with [SetBoolVar]. If it is not defined, FallbackDefault is returned.\n\nSee also: [SetBoolVar]",
   "InputUis": [
     {
       "InputId": "992ee524-633b-4705-a9d7-9dbf14b01eab"/*FallbackDefault*/,
       "Position": {
         "X": -200.0,
         "Y": 75.0
-      }
+      },
+      "Description": "Returned if the variable is not defined in the current context."
     },
     {
       "InputId": "b0821091-68c0-4e34-9f8b-926c0b6ebf94"/*VariableName*/,
@@ -16,6 +17,7 @@
         "X": -200.0,
         "Y": 0.0
       },
+      "Description": "Name of the context variable. The dropdown lists variables currently defined in the context.",
       "Usage": "CustomDropdown"
     }
   ],

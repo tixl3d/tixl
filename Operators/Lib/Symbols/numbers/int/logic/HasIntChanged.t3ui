@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "62f7408a-a34a-459a-bd7d-bb349196df9b"/*HasIntChanged*/,
-  "Description": "Checks if the change of the incoming integer exceeded the given threshold.",
+  "Description": "Returns true for frames in which the incoming integer has changed in the selected direction.\n\nSee also: [HasValueChanged], [HasBooleanChanged], [CountInt]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -16,7 +16,8 @@
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Never, Increased, Decreased or Changed compared to the previous frame."
     }
   ],
   "SymbolChildUis": [],

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "68cf773d-30ac-4ae0-bc1e-b7a17ea322bb"/*UVsViewer*/,
-  "Description": "Morph a mesh to its UV map. It can be useful when you edit the texture of a mesh. \n\n[TransformMeshUVs] [MeshProjectUV]",
+  "Description": "Morphs a mesh into the flat layout of its UV map.\n\nUseful to inspect the UV layout when editing a mesh's texture.\n\nSee also: [VisualizeUvMap], [TransformMeshUVs], [MeshProjectUV]",
   "InputUis": [
     {
       "InputId": "017cf5d0-5e39-480e-9a23-ce3d6e1c0d40"/*BlendValue*/,
@@ -9,6 +9,7 @@
         "X": -485.13284,
         "Y": 992.25793
       },
+      "Description": "Blends between the original mesh (0) and its UV layout (1).",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -19,7 +20,8 @@
       "Position": {
         "X": -485.13284,
         "Y": 1067.2579
-      }
+      },
+      "Description": "Uses TexCoord2 instead of TexCoord."
     },
     {
       "InputId": "4ccfb3fe-5c64-45d6-8b3f-63249c69e146"/*Mesh*/,

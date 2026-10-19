@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "37a747b0-ec0e-4ebc-83dd-2e03022ad100"/*DrawRibbons*/,
-  "Description": "Draws a point buffer as ribbons. The lines will distance to the camera. You can override this with the ScaleWithDistance parameter. \nWe use the points W attribute as a scale factor for the line width. \nIf the W attribute of a point is NaN (Not a Number), that point is not being drawn and acts as a separator between the adjacent line segments.\n\nAlso see [DrawPoints], [DrawLines] and [DrawBillboards].\nFor a detailed interactive Tutorial about Tools Renderpipeline see [HowToDrawThings].",
+  "Description": "Draws a point buffer as flat ribbons oriented by the point rotations.\n\nThe ribbons extend along each point's local X axis (rotated by Spin and Twist), so unlike [DrawLines] they don't face the camera. Separator points split the buffer into multiple ribbons.\n\nSee also: [DrawLines], [DrawTubes], [DrawPoints], [DrawBillboards]\nAlso check out the [HowToUsePoints] tutorial.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -20,7 +20,7 @@
         "Y": 408.20538
       },
       "GroupTitle": "Texture Options",
-      "Description": "Defines the mode in which the texture is mapped to the tape. "
+      "Description": "How the U texture coordinate is mapped along the buffer:\n\nRelativeStartEnd: From TextureRange.x to TextureRange.y.\nStartRepeat: Starts at TextureRange.x and repeats TextureRange.y times.\nTile: Repeats the texture on every segment, offset by TextureRange.\nUseW: Uses the point's F1 attribute."
     },
     {
       "InputId": "22a23dbc-0222-441d-8435-b630dcd77acb"/*Color*/,
@@ -28,8 +28,7 @@
         "X": -226.94064,
         "Y": 164.1991
       },
-      "GroupTitle": "Options",
-      "Description": "Selects the color for the ribbons."
+      "GroupTitle": "Options"
     },
     {
       "InputId": "31791971-8c6e-4f8f-8b04-a3abf02ad69b"/*UseWAsWeight*/,
@@ -37,7 +36,7 @@
         "X": -228.65521,
         "Y": 751.3835
       },
-      "Description": "Defines whether the \"W\" value of the points used has an influence on the width of the ribbon.",
+      "Description": "Multiplies the width with the point's F1 attribute.",
       "AddPadding": "True"
     },
     {
@@ -46,7 +45,7 @@
         "X": -224.65475,
         "Y": 453.20538
       },
-      "Description": "Modifies the Start- and Endpoint of the used texture scaling / stretching it."
+      "Description": "Range or offset of the texture coordinates, depending on TextureMode."
     },
     {
       "InputId": "3f8b336d-fb2b-4b8a-b13a-a229e7792f46"/*Spin*/,
@@ -54,7 +53,7 @@
         "X": -226.94064,
         "Y": 299.1991
       },
-      "Description": "Uniformly rotates the ribbon around its center",
+      "Description": "Rotates the ribbons around their direction, in degrees.",
       "Min": -180.0,
       "Max": 180.0,
       "Scale": 1.0,
@@ -67,7 +66,6 @@
         "X": -228.65521,
         "Y": 661.3835
       },
-      "Description": "Selects the Blendmode.",
       "AddPadding": "True"
     },
     {
@@ -76,7 +74,7 @@
         "X": -228.65521,
         "Y": 706.3835
       },
-      "Description": "Defines the transparency of the surface.\nNone: All surfaces are \"bothsided\" or always visible from all sides\nFront: The normals are flipped (frontside is transparent / backside visible)\nBack: Default (Frontside is visible / backside is invisible)"
+      "Description": "None draws both sides. Front hides the front faces, Back hides the back faces."
     },
     {
       "InputId": "bbec658b-84fa-4528-ad03-6b306531b152"/*GPoints*/,
@@ -84,8 +82,7 @@
       "Position": {
         "X": -226.24692,
         "Y": 43.842525
-      },
-      "Description": "Input for Points"
+      }
     },
     {
       "InputId": "cdaf942a-a518-4dd0-aea7-737aa11436bb"/*Twist*/,
@@ -93,7 +90,7 @@
         "X": -226.94064,
         "Y": 344.1991
       },
-      "Description": "Rotates the end point of the Ribbon and thus twists it.",
+      "Description": "Additional rotation in degrees that increases from 0 at the first point to Twist at the last point of the buffer.",
       "Min": -3600.0,
       "Max": 3600.0,
       "Scale": 1.0,
@@ -106,7 +103,7 @@
         "X": -226.94064,
         "Y": 209.1991
       },
-      "Description": "Width of the Ribbons",
+      "Description": "Half the width of the ribbons in world units.",
       "AddPadding": "True",
       "Min": 0.01,
       "Max": 10.0,

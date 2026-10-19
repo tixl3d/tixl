@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "1a8d2a8d-d189-472f-bab3-d645a63c7aff"/*ShiftCamera*/,
-  "Description": "Shifts the clip space of the current context projection matrix.\nThis might be useful for the implementation of obscure rendering tricks.",
+  "Description": "Shifts the clip space of the current context projection matrix for the connected subgraph.\n\nThis works like an additional lens shift on top of the current camera and might be useful for the implementation of obscure rendering tricks.\n\nSee also: [Camera]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,21 +9,24 @@
       "Position": {
         "X": 0.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Currently not used."
     },
     {
       "InputId": "3f580113-4117-4f87-9a7e-c151f26fa1ed"/*Translation*/,
       "Position": {
         "X": 0.0,
         "Y": 0.0
-      }
+      },
+      "Description": "X and Y shift the projection (lens shift). Z is divided by 1000 and offsets the clip space depth."
     },
     {
       "InputId": "b48ff02f-f8cf-4daf-9c57-5c74c491b05a"/*Scale*/,
       "Position": {
         "X": 0.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Currently not used."
     },
     {
       "InputId": "b5df04f5-c648-4436-ae1c-b633fc5c16fa"/*Command*/,

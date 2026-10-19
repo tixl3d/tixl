@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "9c67a8c8-839f-4f67-a949-08cb38b9dffd"/*PointLight*/,
-  "Description": "The standard point light with transform gizmo.\nThis can bring light into your scene using a combination of \"Color\", \"Intensity\" and \"Decay\".\nBeware that [SetEnvironment] also affects the lighting in your scene, even if you are not using it, because every scene is always lit by a Default CubeMap (that can be deactivated by manually adding a [SetEnvironment]).\n\nCurrently a maximum of 8 Pointlights can be used in your scene. For example by daisychaining them right before your graph goes into the camera.\n",
+  "Description": "Adds a point light with a transform gizmo to the connected subgraph.\n\nThe light illuminates geometry drawn with PBR and other shaded draw operators using Color, Intensity, Range and Decay. Up to 8 point lights can be used at the same time, e.g. by chaining several of them before the camera.\n\nNote that scenes are also lit by an environment map. Without a [SetEnvironment], a default environment is used.\n\nAKA: light, lamp, omni, bulb\n\nSee also: [SetPointLight], [SetEnvironment], [Locator]\n\nAlso check out the [HowToDrawThings] tutorial.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": 723.3138,
         "Y": 193.17346
-      }
+      },
+      "Description": "Size of the drawn gizmo."
     },
     {
       "InputId": "55dc52d8-51a6-497a-9624-b118e0e27c65"/*Command*/,
@@ -24,6 +25,7 @@
         "X": 386.27625,
         "Y": 16.36528
       },
+      "Description": "Distance at which the light intensity has dropped to half. The intensity falls off as Intensity / ((distance / Range) ^ Decay + 1).",
       "Min": 0.01,
       "Max": 1000.0,
       "Scale": 0.001,
@@ -35,7 +37,7 @@
         "X": -33.625046,
         "Y": 165.16278
       },
-      "Description": "Increases or decreases the intensity of the light in relation to its decay.\n",
+      "Description": "Brightness of the light.",
       "Min": 0.0,
       "ClampMin": true
     },
@@ -46,7 +48,7 @@
         "Y": 403.17346
       },
       "GroupTitle": "Gizmo Settings",
-      "Description": "Can be used to override the \"Toggle gizmos and floor grid\" setting in the Output Window.\n\n- Off: The gizmo will always be invisible\n- On: The Gizmo will always be visible\n- IfSelected: The Gizmo will only be visible when the PointLight Op is selected\n- Inherit: The visibility of the Gizmo is controlled by the \"Toggle gizmos and floor grid\" setting in the Output Window.\n"
+      "Description": "Off = The gizmo is never visible\nOn = The gizmo is always visible\nIfSelected = The gizmo is visible while the operator is selected\nInherit = Follows the \"Toggle gizmos and floor grid\" setting of the output window"
     },
     {
       "InputId": "d6f6838c-4b36-41a8-86c5-1b1fe5dcece1"/*Decay*/,
@@ -55,7 +57,7 @@
         "Y": 51.36528
       },
       "GroupTitle": "Decay",
-      "Description": "Controls how far the light shines into the scene.\n\nA low decay setting means the light is shining far.\nA high decay setting means the light reaches a short distance.",
+      "Description": "Exponent of the falloff beyond Range. Higher values make the light fade faster with distance.",
       "Scale": 0.01
     },
     {
@@ -64,7 +66,7 @@
         "X": 745.2842,
         "Y": -85.07857
       },
-      "Description": "Turns the PointLight On / Off",
+      "Description": "Turns the light on or off. The connected subgraph is drawn in both cases.",
       "AddPadding": "True"
     },
     {
@@ -73,7 +75,7 @@
         "X": -29.352737,
         "Y": 95.74985
       },
-      "Description": "Changes the position of the PointLight:\n\nX (-left / +right), \nY (-down / +up), \nZ (-forward / +backwards)",
+      "Description": "World space position of the light.",
       "AddPadding": "True"
     },
     {

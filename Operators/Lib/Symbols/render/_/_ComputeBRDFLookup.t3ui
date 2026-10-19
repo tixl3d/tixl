@@ -1,8 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "08d526d0-d5e5-4fc9-a039-98189721d2b8"/*_ComputeBRDFLookup*/,
-  "Description": "Pre-integrates Cook-Torrance specular BRDF for varying roughness and viewing directions.",
-  "SymbolTags": "4096",
+  "Description": "Internal helper. Pre-integrates the Cook-Torrance specular BRDF for varying roughness and viewing directions into a lookup texture.",
+  "SymbolTags": "4112",
   "InputUis": [
     {
       "InputId": "e22057e4-1aae-4698-b7f6-120dde027a5d"/*Size*/,

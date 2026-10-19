@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "4023bcbf-74a6-4e50-a12e-4c22be5dbbdf"/*DataRecording*/,
-  "Description": "An experimental gateway to recorded data channels.\n\nEdit helpers can register their data channels which can then be accessed for review in the output window.\n",
+  "Description": "Experimental. Provides access to recorded data channels.\n\nEditor helpers can register their data channels, which can then be reviewed in the output window.",
   "SymbolTags": "128",
   "InputUis": [
     {

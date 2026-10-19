@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "638b60a4-5c91-46a6-8210-30d85478787c"/*GridRepeatMesh*/,
-  "Description": "later",
+  "Description": "Repeats a mesh on a 3D grid and combines the copies into a single mesh, with optional random offsets.\n\nInternally it uses [GridPoints], [RandomizePoints] and [RepeatMeshAtPoints]. For more control or many instances, combine those operators directly or draw with [DrawMeshAtPoints].\n\nAKA: array, clone, instance\n\nSee also: [RadialRepeatMesh], [RepeatMeshAtPoints]",
   "InputUis": [
     {
       "InputId": "3c0bd4c4-6547-4fba-83ba-76b0e6bbdc18"/*CountZ*/,
@@ -24,6 +24,7 @@
         "X": -49.67105,
         "Y": 630.6806
       },
+      "Description": "Pivot of the grid relative to its size. 0 centers the grid.",
       "Scale": 0.01
     },
     {
@@ -32,6 +33,7 @@
         "X": -213.86665,
         "Y": 952.5123
       },
+      "Description": "Changes the random values; can be animated.",
       "AddPadding": "True"
     },
     {
@@ -55,7 +57,8 @@
       "Position": {
         "X": -213.86667,
         "Y": 871.6025
-      }
+      },
+      "Description": "Random rotation per copy in degrees around X, Y and Z."
     },
     {
       "InputId": "a1584c44-1709-4212-b365-6200d8a40711"/*InputMesh*/,
@@ -71,7 +74,8 @@
         "X": -177.09389,
         "Y": 713.72253
       },
-      "GroupTitle": "Random"
+      "GroupTitle": "Random",
+      "Description": "Overall amount of the random offsets."
     },
     {
       "InputId": "ce6259cf-7384-4192-8e82-ea528da6ea8f"/*CountX*/,
@@ -87,6 +91,7 @@
         "X": -190.88367,
         "Y": 806.45233
       },
+      "Description": "Random position offset per copy along X, Y and Z.",
       "AddPadding": "True"
     },
     {
@@ -95,6 +100,7 @@
         "X": -278.3219,
         "Y": 412.52356
       },
+      "Description": "Size of the grid along X, Y and Z.",
       "AddPadding": "True",
       "Scale": 0.01
     }

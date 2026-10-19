@@ -15,35 +15,40 @@
       "Position": {
         "X": 0.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Center of the box. Only used without Geometry."
     },
     {
       "InputId": "58c1f7a3-b2d9-4e06-85cb-7f4a90e6d221"/*Geometry*/,
       "Position": {
         "X": 0.0,
         "Y": 135.0
-      }
+      },
+      "Description": "Optional closed mesh. If connected, points are placed inside it and Center/Size are ignored."
     },
     {
       "InputId": "a94b0e58-27c3-4f61-90ad-c8e52b7f1d39"/*Size*/,
       "Position": {
         "X": 0.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Size of the box. Only used without Geometry."
     },
     {
       "InputId": "c6a35d18-40fb-4972-bde6-19f8c2a7e054"/*Density*/,
       "Position": {
         "X": 0.0,
         "Y": 180.0
-      }
+      },
+      "Description": "Optional field that modulates the probability of a point. Values are clamped to 0..1."
     },
     {
       "InputId": "e17d4a92-6b58-4c03-a9f1-84c5d2e7b360"/*Count*/,
       "Position": {
         "X": 0.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Number of points, clamped to 0..1,000,000."
     }
   ],
   "SymbolChildUis": [],

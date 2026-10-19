@@ -1,7 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "c8590f8f-cca1-434a-a880-67bb91920e1a"/*_BlobOld*/,
-  "Description": "Generates rectangles, circles, blobs, vignettes and other things.\n\nThis is a legacy operator; consider using the updated [Blob] or [RoundedRect] instead.",
+  "Description": "Obsolete. Use [Blob] or [RoundedRect] instead.\n\nGenerates rectangles, circles, blobs, vignettes and similar shapes.",
+  "SymbolTags": "4096",
   "InputUis": [
     {
       "InputId": "2d3a7e9a-9efe-486a-8c33-10a5a16dc17b"/*FeatherBias*/,

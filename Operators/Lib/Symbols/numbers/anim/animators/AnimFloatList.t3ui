@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "d8010a72-68ac-4fde-9b9d-0984628b8a56"/*AnimFloatList*/,
-  "Description": "",
+  "Description": "Generates a list of beat-synced LFO values, each one shifted in time.\n\nEach list entry evaluates the selected Shape like [AnimValue], with entry i offset by i × OffsetCycle in time. Note that Phase is added before Rate is applied, so it is measured in bars rather than in cycles.\n\nSee also: [AnimValue], [AnimVec3]",
   "InputUis": [
     {
       "InputId": "0042a89e-2cdc-49e5-8366-5f6631fe04ed"/*AllowSpeedFactor*/,
@@ -22,7 +22,8 @@
       "Position": {
         "X": -104.88402,
         "Y": 370.80585
-      }
+      },
+      "Description": "Number of values in the output list. 0 or less returns an empty list."
     },
     {
       "InputId": "10eb53c5-44c7-4e33-ab5a-2025f5ad7d4a"/*Amplitude*/,
@@ -61,14 +62,16 @@
       "Position": {
         "X": -214.2857,
         "Y": 509.17584
-      }
+      },
+      "Description": "Time offset in bars between consecutive list entries."
     },
     {
       "InputId": "a63db03e-fe05-436e-99b8-1b67a5568a32"/*OverrideTime*/,
       "Position": {
         "X": -200.0,
         "Y": 90.0
-      }
+      },
+      "Description": "If connected, used instead of the current time."
     },
     {
       "InputId": "aff68f72-4c4d-4c38-b223-4c558e87d66d"/*Rate*/,

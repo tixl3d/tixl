@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "ed0bc47a-31ef-400b-b4e4-5552a859b309"/*CollisionForce*/,
-  "Description": "A simple simulation of sphere collision between points. The radius of the points is defined on emit by the [ParticleSystem]'s PointRadiusW factor.\n\nSome recommendations:\n1. Try to increase the radius (either by increasing the emit points W attribute or the radius factor) and adjust the [DrawPoints] radius accordingly.\n2. Try to increase [ParticleSystem] damping.\n",
+  "Description": "Simulates collisions between particles treated as spheres.\n\nThe radius of each particle is set on emission by the Scale of its emit point multiplied by the RadiusFactor of the [ParticleSystem]. Neighbors are found with a spatial hash grid, so only particles within about one CellSize are considered.\n\nTips:\n- Increase the radius (via the emit point scale or RadiusFactor) and adjust the size of [DrawPoints] accordingly.\n- Increase the Drag of the [ParticleSystem] to stabilize the simulation.\n\nSee also: [FieldVolumeForce]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -10,6 +10,7 @@
         "X": 1963.3588,
         "Y": 349.04147
       },
+      "Description": "Size of the grid cells used to find neighboring particles. Should be at least twice the particle radius.",
       "Min": 0.001,
       "Max": 100.0,
       "Scale": 0.01,
@@ -22,6 +23,7 @@
         "X": 2489.1,
         "Y": 617.99634
       },
+      "Description": "How quickly the attraction decreases with distance (exponent).",
       "AddPadding": "True"
     },
     {
@@ -37,14 +39,16 @@
       "Position": {
         "X": 2489.1,
         "Y": 652.9964
-      }
+      },
+      "Description": "How strongly overlapping particles are pushed apart per frame (0..1)."
     },
     {
       "InputId": "91966b2c-342a-420a-bad1-cbcf4d6af1ae"/*Attraction*/,
       "Position": {
         "X": 2489.1,
         "Y": 547.99634
-      }
+      },
+      "Description": "Attraction between particles that are not touching. Negative values repel."
     },
     {
       "InputId": "d0036a34-d7e4-4542-b231-5d1b687b0028"/*Bounciness*/,
@@ -52,6 +56,7 @@
         "X": 2489.1,
         "Y": 512.99634
       },
+      "Description": "Velocity factor applied when particles bounce off each other.",
       "AddPadding": "True"
     }
   ],

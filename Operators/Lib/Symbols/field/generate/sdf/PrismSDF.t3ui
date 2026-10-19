@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "1e1e65cd-3564-45e1-88f8-6cb4b4b18c5a"/*PrismSDF*/,
-  "Description": "Generates a prism SDF (i.e. an n-sided cylinder).\n\nNOTE: the triangular prism does not support rounding.",
+  "Description": "Generates a 3- or 6-sided prism as an SDF.\n\nThe triangular prism does not support rounded edges. Render the result with [RaymarchField] and inspect it with [VisualizeFieldDistance]. Modify it with [TransformField], [BendField], [RepeatPolar] and other field operators.\n\nSee also: [CylinderSDF]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": -200.0,
         "Y": 90.0
       },
-      "Description": "Defines the smoothness of the edge"
+      "Description": "Radius of the rounded edges. Only used with 6 sides."
     },
     {
       "InputId": "522a9640-ca8c-47e6-ad36-5c316a9092ae"/*Axis*/,
@@ -18,7 +18,7 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "Description": "Defines the axis along which the field is aligned"
+      "Description": "Axis along which the prism is aligned."
     },
     {
       "InputId": "b5e445df-88d0-4b1f-a583-3c4ea83d6526"/*Sides*/,
@@ -27,15 +27,14 @@
         "Y": 75.0
       },
       "GroupTitle": "Shader Variations",
-      "Description": "Switches between a 3-sided and 6-sided Prism \n(If changing this value has no effect, any other value must be changed to bring the change into effect)"
+      "Description": "Number of sides: 3 or 6."
     },
     {
       "InputId": "cfc6f8f3-94b4-46f6-9501-11d7b7916bb7"/*Center*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      },
-      "Description": "Transforms the center of the object"
+      }
     },
     {
       "InputId": "dd33f05b-6c98-4740-a218-a0e8a4922ac3"/*Length*/,
@@ -43,7 +42,7 @@
         "X": -200.0,
         "Y": 150.0
       },
-      "Description": "Defines the height"
+      "Description": "Total length of the prism."
     },
     {
       "InputId": "ef023a17-cd92-47c5-b2fd-4db7ac4bebac"/*Radius*/,
@@ -51,7 +50,7 @@
         "X": -200.0,
         "Y": 75.0
       },
-      "Description": "Defines the size",
+      "Description": "Size of the cross section.",
       "AddPadding": "True"
     }
   ],

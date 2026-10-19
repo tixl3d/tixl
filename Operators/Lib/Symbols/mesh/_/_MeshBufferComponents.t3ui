@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "5b9f1d97-4e10-4f31-ba83-4cbf7be9719b"/*_MeshBufferComponents*/,
-  "Description": "Gives access to Vertex and Index Buffers of a mesh.\n\nThe buffer can then be combined with [_AssembleMeshBuffers].",
+  "Description": "Internal helper that gives access to the vertex, index and chunk definition buffers of a mesh.\n\nThe buffers can be combined again with [_AssembleMeshBuffers].",
   "SymbolTags": "16",
   "InputUis": [
     {

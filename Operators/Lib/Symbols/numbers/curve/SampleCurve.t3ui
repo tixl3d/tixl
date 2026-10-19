@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "b724ea74-d5d7-4928-9cd1-7a7850e4e179"/*SampleCurve*/,
-  "Description": "Creates a window in the 'graph' in which a curve editor with a single curve is created. \n\nThis curve can be edited (in the 'Parameters' view) in the same way as the animation curves in the standard timeline.\n\nFunctions:\n\n- Left mouse click: Select points\n- Left-click and drag: Move points and their Bezier points\n- Left-click + alt: Create new point on the curve\n- Right-click: Options (extra and interpolation etc.)\n- Right-click dragging: Panning the view inside the curve editor\n- Clicking the Icon in the upper left corner opens the curve in a bigger window\n\nProTip: If the 'result' from an [AnimValue] is connected to the U-Input, you get an easily editable automatically animated curve with many options\n\nInfo: Selecting and moving this operator in the graph can sometimes be difficult. To the left of the CurveEditor there is a surface (with anti-slip coating ;) ) that is best suited for selecting and moving the operator.",
+  "Description": "Samples an editable curve at position U and outputs the value.\n\nThe curve is edited directly in the operator's graph node or in the Parameter window, the same way as animation curves in the timeline. The curve itself is also available as an output, e.g. for [CurvesToTexture].\n\nTips:\n- Click to select points, drag to move points and their tangents.\n- Alt+click on the curve to add a point.\n- Right-click for options like interpolation; right-drag to pan the view.\n- The icon in the upper left corner opens the curve in a bigger window.\n- Connect [AnimValue] to U to get an easily editable animated curve.\n- Selecting and moving the operator in the graph is easiest by dragging the area to the left of the curve editor.\n\nSee also: [AnimValue], [Sin]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,8 +9,7 @@
       "Position": {
         "X": 197.0,
         "Y": 373.0
-      },
-      "Description": "Curve Input / Editor"
+      }
     },
     {
       "InputId": "2c24d4fe-6c96-4502-bf76-dac756a16215"/*U*/,
@@ -20,7 +19,7 @@
         "Y": 334.0
       },
       "GroupTitle": "Time",
-      "Description": "Input for controlling the horizontal axis",
+      "Description": "Position on the curve's horizontal axis at which it is sampled.",
       "Min": -100.0,
       "Max": 100.0
     }

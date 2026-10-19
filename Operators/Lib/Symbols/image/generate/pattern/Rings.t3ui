@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "d002bd90-5921-48b0-a940-a8d0c779f674"/*Rings*/,
-  "Description": "Generates a procedural rings texture that can produce a wide variety of radial patterns. Please try the presets.\n\n\nSimilar Ops: [NGon] [RoundedRect] [Rings] [RadialGradient] [LinearGradient] [Blob]",
+  "Description": "Generates a procedural texture of concentric rings with segments, twist and random highlights that can produce a wide variety of radial patterns.\n\nCheck the presets for examples.\n\nAKA: circles, radial, segments, target\n\nSee also: [RadialGradient], [NGon], [RoundedRect], [Blob]",
   "SymbolTags": "1",
   "InputUis": [
     {

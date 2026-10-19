@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "46420979-1e56-4de3-a6ca-0447be1b9813"/*ExecRepeatedly*/,
-  "Description": "Controls how frequently the sub graph is being executed. \nThis can be useful for increasing or slowing down simulation speeds.",
+  "Description": "Controls how often the connected subgraph is executed per frame.\n\nThe subgraph is executed RepeatCount times, but only every SkipFrameCount+1 evaluations. This can be useful for speeding up or slowing down simulations.\n\nSee also: [Loop], [Execute]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": 0.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Number of evaluations to skip between executions. 0 executes every frame."
     },
     {
       "InputId": "d9de54b8-6d05-4cad-a1eb-bfa770a4520d"/*Command*/,
@@ -23,7 +24,8 @@
       "Position": {
         "X": 0.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Number of executions per update, clamped to 0..100. 0 disables execution."
     }
   ],
   "SymbolChildUis": [],

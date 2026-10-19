@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "c6d50423-54ea-4c9d-b547-eb78cc2c950c"/*ScaleSize*/,
-  "Description": "Uniformly scales/multiplies an int2 which is used for defining resolutions\n\nFor a similar operator with more settings see [ScaleResolution]\n\nAlso see [MakeResolution], [int2] etc.",
+  "Description": "Scales an Int2 resolution by a uniform factor and an optional per-axis Stretch.\n\nResults are truncated to whole pixels and are not clamped.\n\nSee also: [ScaleResolution], [MakeResolution], [Int2]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,6 @@
         "X": -200.0,
         "Y": 45.0
       },
-      "Description": "Scale factor that is used to multiply the resolution",
       "AddPadding": "True"
     },
     {
@@ -18,15 +17,15 @@
       "Position": {
         "X": -200.0,
         "Y": 75.0
-      }
+      },
+      "Description": "Additional factor for width (X) and height (Y)."
     },
     {
       "InputId": "ddceb7df-1c6f-4545-9669-b1b4a80e75e8"/*InputSize*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      },
-      "Description": "Defines X and Y / Width and height of the resolution to be scaled"
+      }
     }
   ],
   "SymbolChildUis": [],

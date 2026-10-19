@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "a3f64d34-1fab-4230-86b3-1c3deba3f90b"/*Group*/,
-  "Description": "Groups a sequence of incoming draw commands.\n\nAlthough similar to [Execute], it also allows to [Transform] and override the color multiply for all operators further down (i.e., left) in the graph.\n",
+  "Description": "Groups several draw commands and applies a transform and color to all of them.\n\nSimilar to [Execute], but it also allows to transform the subgraph like [Transform] and multiplies the color of all draw operators within it. If the alpha of Color is 0, the group is not drawn at all.\n\nAKA: null, parent, layer, folder, container\n\nSee also: [Execute], [Transform], [SpreadLayout]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": 0.0,
         "Y": 45.0
       },
-      "Description": "Uniformly scales the incoming subgraph\n",
+      "Description": "Uniformly scales the subgraph.",
       "AddPadding": "True",
       "Min": 0.0,
       "Max": 1.0,
@@ -23,7 +23,7 @@
         "Y": 180.0
       },
       "GroupTitle": "Additional Options",
-      "Description": "Forces constant updating if the colors animation is ignored."
+      "Description": "Invalidates the connected subgraph every frame, so that animated colors are applied by operators that would otherwise cache their result. This can be expensive."
     },
     {
       "InputId": "4e15eb7a-3872-4f26-93e3-1dd38bce01a5"/*Rotation*/,
@@ -31,7 +31,7 @@
         "X": 0.0,
         "Y": 0.0
       },
-      "Description": "Rotates the incoming subgraph around the following axes:\n\nX: Horizontal axis\nY: Vertical axis\nZ: Forward axis\n",
+      "Description": "Rotation in degrees around the x-axis (horizontal), y-axis (vertical) and z-axis (forward).",
       "Min": -90.0,
       "Max": 90.0,
       "Format": "{0:0.0}°"
@@ -42,7 +42,7 @@
         "X": 0.0,
         "Y": 0.0
       },
-      "Description": "Scales the incoming subgraph in the following directions:\n\nX: Width\nY: Height\nZ: Depth\n"
+      "Description": "Scales the subgraph along the individual axes."
     },
     {
       "InputId": "83d80b87-df2e-4a7e-8bb3-6d5f041a60e4"/*IsEnabled*/,
@@ -51,7 +51,7 @@
         "Y": 90.0
       },
       "GroupTitle": "Settings",
-      "Description": "Enables / Disables the group"
+      "Description": "If disabled, the connected commands are not drawn."
     },
     {
       "InputId": "996bd2d7-3741-4ade-b1b6-18eb3d884081"/*Color*/,
@@ -59,7 +59,7 @@
         "X": 0.0,
         "Y": 135.0
       },
-      "Description": "Everything in this group will be rendered with this color multiplied.",
+      "Description": "Multiplied with the color of all operators in the group. An alpha of 0 skips drawing the group.",
       "AddPadding": "True",
       "Min": 0.0,
       "Max": 1.0,
@@ -73,7 +73,7 @@
         "Y": 0.0
       },
       "GroupTitle": "Transformations",
-      "Description": "Moves the incoming subgraph\n\nX (-left / +right), \nY (-down / +up), \nZ (-forward / +backwards)\n"
+      "Description": "Moves the subgraph."
     },
     {
       "InputId": "9e961f73-1ee7-4369-9ac7-5c653e570b6f"/*Commands*/,
@@ -89,7 +89,7 @@
         "X": 0.0,
         "Y": 225.0
       },
-      "Description": "Enabling this option will measure the time it took to update the content of this group.\nThis can be very useful for profiling and optimizing your designs.\n\nYou can see the measurements in the \"IO Window\". "
+      "Description": "Measures the time it takes to update the content of this group.\nThe measurements are shown in the IO window."
     }
   ],
   "SymbolChildUis": [],

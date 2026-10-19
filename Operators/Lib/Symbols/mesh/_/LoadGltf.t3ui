@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "92b18d2b-1022-488f-ab8e-a4dcca346a23"/*LoadGltf*/,
-  "Description": "This operator currently has no function. Use [LoadGltfScene] in combination with [DrawScene] instead.",
+  "Description": "Loads the mesh of a single node from a glTF file.\n\nOnly the first primitive of the selected child of the default scene is converted. Positions, normals and the first UV set are read; materials, textures, animations and transforms are ignored. For complete glTF scenes use [LoadGltfScene] with [DrawScene].\n\nSee also: [LoadGltfScene], [LoadObj]",
   "SymbolTags": "64",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": 51.512096,
         "Y": 181.99597
-      }
+      },
+      "Description": "Index of the visual child node in the default scene whose mesh is loaded."
     },
     {
       "InputId": "6e0fa62a-a8e1-4d0b-a5b1-80876ff636c0"/*Path*/,

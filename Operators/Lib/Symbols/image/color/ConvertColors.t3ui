@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "d5516087-f7dd-44d4-a7e1-3c18767de921"/*ConvertColors*/,
-  "Description": "Converts between different color spaces. \n\nPlease note that for high precision (e.g. when converting back and forth between color spaces) you should change the render target format to 32bit.",
+  "Description": "Converts the colors of an image between RGB and the OKLab or LCh color spaces.\n\nWorking in these perceptual color spaces allows effects like smooth hue shifts or perceptually even brightness changes; convert back to RGB afterwards.\n\nTips:\n- For precise round trips between color spaces, set OutputFormat to a 32-bit float format.\n\nAKA: colorspace, oklab, lch",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -16,7 +16,8 @@
       "Position": {
         "X": 584.6041,
         "Y": 341.76242
-      }
+      },
+      "Description": "Texture format of the result. Use a float format to keep negative and high-precision values."
     },
     {
       "InputId": "dd2f08a9-a539-41e9-aa1e-f8ad64fb8d29"/*Texture2d*/,

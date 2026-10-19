@@ -1,7 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "9d42dbe7-34a5-4165-877d-6f9c1c675b60"/*_ExecuteBloomPasses*/,
-  "Description": "An internal operator that performs the necessary steps of the bloom effect.",
+  "Description": "Internal helper. Performs the threshold, downsample, blur and composite passes of [Bloom].",
+  "SymbolTags": "16",
   "InputUis": [
     {
       "InputId": "08c47369-295b-4638-0ae8-4967e54cf638"/*DownsamplePS*/,

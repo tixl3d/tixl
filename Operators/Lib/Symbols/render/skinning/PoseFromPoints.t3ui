@@ -8,7 +8,8 @@
       "Position": {
         "X": 0.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Index of the skeleton in the setup. Wraps around the number of skeletons."
     },
     {
       "InputId": "7e2a90c5-b164-4d38-8f0b-59c8e327a6d1"/*Points*/,
@@ -16,7 +17,8 @@
       "Position": {
         "X": 0.0,
         "Y": 0.0
-      }
+      },
+      "Description": "CPU point list in object space, in the same order the skeleton was built from."
     },
     {
       "InputId": "c31f68b0-52d9-4ae7-9264-08b5f7d0c9e3"/*Setup*/,
@@ -24,7 +26,8 @@
       "Position": {
         "X": 0.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Skeleton setup from [SkeletonFromPoints]."
     }
   ],
   "SymbolChildUis": [],

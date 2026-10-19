@@ -1,15 +1,16 @@
 {
   "FormatVersion": 3,
   "Id": "0b5b14bf-c850-493a-afb1-72643926e214"/*UavFromStructuredBuffer*/,
-  "Description": "This operator is obsolete. Please use [GetBufferComponents] instead.",
-  "SymbolTags": "24",
+  "Description": "Obsolete. Use [GetBufferComponents] instead.\n\nCreates an unordered access view for a structured buffer.",
+  "SymbolTags": "4120",
   "InputUis": [
     {
       "InputId": "13b85721-7126-47bb-ab4f-096eae59e412"/*BufferFlags*/,
       "Position": {
         "X": 0.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Append or counter flags of the view."
     },
     {
       "InputId": "5d888f13-0ad8-4034-99ca-da36c8fb261c"/*Buffer*/,

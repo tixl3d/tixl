@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "58aa74af-32aa-4c46-8bb5-5811f16bf7f8"/*Pow*/,
-  "Description": "Calculates the result of an exponential function\n\nIn C#: Math.Pow(x, y)",
+  "Description": "Raises Value to the power of Exponent.\n\nThe result is NaN for a negative Value combined with a non-integer Exponent.\n\nAKA: power, exponent\n\nSee also: [Sqrt], [Log]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": 36.0,
         "Y": 379.0
       },
-      "Description": "Power\nDefines how often the Value / Base is multiplied with itself"
+      "Description": "Power to raise Value to. 0.5 computes the square root."
     },
     {
       "InputId": "376ad938-fe23-4f40-901a-b1b582ea4904"/*Value*/,
@@ -18,7 +18,7 @@
         "X": 36.0,
         "Y": 334.0
       },
-      "Description": "Base\nDefines which value is multiplied with itself",
+      "Description": "Base value.",
       "Min": -100.0,
       "Max": 100.0
     }

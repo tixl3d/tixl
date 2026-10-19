@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "284d2183-197d-47fd-b130-873cced78b1c"/*Transform*/,
-  "Description": "Moves, scales and rotates the sub graph. \nTransform ops can be chained to add local pivots.\n\nAlso see [HowToDraw3d] playground.",
+  "Description": "Moves, rotates and scales the connected subgraph.\n\nTransform operators can be chained to build hierarchies and local pivots.\n\nAKA: xform, move, translate, rotate, scale\n\nSee also: [Group], [RotateTowards], [RotateAroundAxis], [Shear]\n\nAlso check out the [HowToDrawThings] tutorial.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": 0.0,
         "Y": 0.0
       },
-      "Description": "Rotates the incoming subgraph around the following axes:\n\nX: Horizontal axis\nY: Vertical axis\nZ: Forward axis\n",
+      "Description": "Rotation in degrees around the x-axis (horizontal), y-axis (vertical) and z-axis (forward).",
       "Min": -90.0,
       "Max": 90.0,
       "Format": "{0:0.0}°"
@@ -22,7 +22,7 @@
         "Y": 90.0
       },
       "GroupTitle": "Transform pivot",
-      "Description": "Moves the pivot (center point) of the incoming subgraph:\n\nX (-left / +right) \nY (-down / +up) \nZ (-forward / +backwards)\n\nThe pivot point determines the location of the incoming subgraph gizmo. Transforming its location can make it easier to perform transformations around the position you want.\n"
+      "Description": "Center point for rotation and scaling."
     },
     {
       "InputId": "a7b1e667-bce3-4e76-a5b1-0955c118d0fc"/*UniformScale*/,
@@ -30,7 +30,7 @@
         "X": 0.0,
         "Y": 45.0
       },
-      "Description": "Uniformly scales the incoming subgraph",
+      "Description": "Uniformly scales the subgraph.",
       "AddPadding": "True",
       "Format": "{0:0.000} ×"
     },
@@ -41,7 +41,7 @@
         "Y": 0.0
       },
       "GroupTitle": "Transform subgraph",
-      "Description": "Moves the incoming subgraph\n\nX (-left / +right), \nY (-down / +up), \nZ (-forward / +backwards)\n"
+      "Description": "Moves the subgraph."
     },
     {
       "InputId": "da4cd6c8-2307-45da-9258-49c578025aa8"/*Scale*/,
@@ -49,7 +49,7 @@
         "X": 0.0,
         "Y": 0.0
       },
-      "Description": "Scales the incoming subgraph in the following directions:\n\nX: Width\nY: Height\nZ: Depth\n"
+      "Description": "Scales the subgraph along the individual axes."
     },
     {
       "InputId": "dcd066ce-ac44-4e76-85b3-78821245d9dc"/*Command*/,
@@ -57,7 +57,8 @@
       "Position": {
         "X": 15.714638,
         "Y": 12.576044
-      }
+      },
+      "Description": "The subgraph to transform."
     }
   ],
   "SymbolChildUis": [],

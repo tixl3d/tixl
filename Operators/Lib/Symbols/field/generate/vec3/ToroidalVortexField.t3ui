@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "5623d6b3-b8a7-4fd1-9cb4-952dc7818a83"/*ToroidalVortexField*/,
-  "Description": "Generates a torus like vector field.",
+  "Description": "Generates a vector field that swirls around a ring, like a smoke ring.\n\nThe XYZ channels of the field hold the vectors, the W channel the falloff weight. Use it with [ApplyVectorField] to orient points.",
   "SymbolTags": "200",
   "InputUis": [
     {
@@ -16,42 +16,48 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Axis around which the ring is oriented."
     },
     {
       "InputId": "634933df-5f75-4071-a76a-6440bb3f02ef"/*SwirlGain*/,
       "Position": {
         "X": -200.0,
         "Y": 195.0
-      }
+      },
+      "Description": "Strength of the rotation around the ring."
     },
     {
       "InputId": "cdc51ba3-2989-449f-bf51-d8a642fd4647"/*Range*/,
       "Position": {
         "X": -200.0,
         "Y": 120.0
-      }
+      },
+      "Description": "Distance from the ring at which the field fades to zero."
     },
     {
       "InputId": "eb2e2e6d-af78-4b9a-a925-24cce2164053"/*RadialGain*/,
       "Position": {
         "X": -200.0,
         "Y": 270.0
-      }
+      },
+      "Description": "Strength of the pull towards the ring. Negative values push away."
     },
     {
       "InputId": "f2c26298-fb95-4b74-848e-28ea9ea7b724"/*Radius*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Radius of the ring that the field swirls around."
     },
     {
       "InputId": "f6d274ae-8502-459e-b7a9-59755e3cb21e"/*FallOffRate*/,
       "Position": {
         "X": -200.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Exponent of the falloff within Range. Higher values keep the field strong longer before it fades."
     }
   ],
   "SymbolChildUis": [],

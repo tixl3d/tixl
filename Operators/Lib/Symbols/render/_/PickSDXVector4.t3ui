@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "a83f2e4f-cb4d-4a6f-9f7a-2ea7fdfab54b"/*PickSDXVector4*/,
-  "Description": "A helper to access elements of a transform matrix stored in a Vector4[]",
+  "Description": "Internal helper. Returns the four components of one element of a Vector4 array, e.g. a row of a matrix from [TransformMatrix].",
   "SymbolTags": "16",
   "InputUis": [
     {
@@ -16,7 +16,8 @@
       "Position": {
         "X": 0.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Wraps around the array length."
     }
   ],
   "SymbolChildUis": [],

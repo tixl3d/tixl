@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "8d8345b5-56b6-4220-8845-510bc59db871"/*RepeatField3*/,
-  "Description": "Infinitely repeats the incoming field in every direction.\nSimilar node: [RepeatFieldLimit]\nIt can be rendered with [RaymarchField] and visualized with [VisualizeFieldDistance].\n\nOther nodes: [RepeatWithMirror], [PolarRepeat], [TwistField].\n\nIt needs an incoming field like [BoxSDF], [ChainLinkSDF], [FractalSDF] as an input.\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToRaymarchField].\n",
+  "Description": "Repeats the incoming field infinitely along all three axes.\n\nIt needs an incoming field like [BoxSDF] or [TorusSDF]. Render the result with [RaymarchField] and inspect it with [VisualizeFieldDistance].\n\nSee also: [RepeatAxis], [RepeatFieldLimit], [RepeatFieldAtPoints]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": -200.0,
         "Y": 75.0
-      }
+      },
+      "Description": "Distance between the repetitions for each axis."
     },
     {
       "InputId": "e264a846-934a-4821-9e85-badf8422a82b"/*InputField*/,

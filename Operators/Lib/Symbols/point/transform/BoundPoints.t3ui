@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "ffbbef55-3149-48c1-95cf-cad691ce15fe"/*BoundPoints*/,
-  "Description": "Constraints points within a boundary volume\nIt's the opposite of [BoundingBoxPoints]",
+  "Description": "Clamps point positions into a box, so points outside are moved onto its nearest surface.\n\nAKA: clamp, constrain, limit\n\nSee also: [WrapPoints], [BoundingBoxPoints]",
   "SymbolTags": "64",
   "InputUis": [
     {
@@ -23,14 +23,16 @@
       "Position": {
         "X": -532.1449,
         "Y": 1009.25146
-      }
+      },
+      "Description": "Center of the box."
     },
     {
       "InputId": "97aa1a22-55b5-42d5-896a-e4a79e0c9703"/*UniformScale*/,
       "Position": {
         "X": -532.1449,
         "Y": 1099.2515
-      }
+      },
+      "Description": "Multiplies the Size."
     }
   ],
   "SymbolChildUis": [

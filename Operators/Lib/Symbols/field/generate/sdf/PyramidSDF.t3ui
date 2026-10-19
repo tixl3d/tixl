@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "5b8604d0-65f4-45c9-9e85-4a044005a778"/*PyramidSDF*/,
-  "Description": "Generates a pyramid distande field.\n[BoxSDF] [PlaneSDF] [CombineSDF] [RaymarchField] ",
+  "Description": "Generates a four-sided pyramid as an SDF.\n\nRender the result with [RaymarchField] and inspect it with [VisualizeFieldDistance]. Modify it with [TransformField], [BendField], [RepeatPolar] and other field operators.\n\nSee also: [OctahedronSDF], [BoxSDF], [CombineSDF]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,28 +9,32 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Axis pointing to the tip."
     },
     {
       "InputId": "471d9c3b-ba5e-4b73-93cf-fb8ba76bf70e"/*UniformScale*/,
       "Position": {
         "X": -200.0,
         "Y": -45.0
-      }
+      },
+      "Description": "Multiplies Scale."
     },
     {
       "InputId": "5b3e69cf-cb55-4428-b78c-76f4f22cf2ac"/*Rounding*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Rounds the edges. This also grows the shape."
     },
     {
       "InputId": "8d5c22bb-2910-4415-9bf8-ab304e35a5b2"/*Scale*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Half width (X), half height (Y) and half depth (Z). The base is half the height below Center."
     },
     {
       "InputId": "92c03574-31e5-4ce2-9a76-ecab5f64d732"/*Center*/,

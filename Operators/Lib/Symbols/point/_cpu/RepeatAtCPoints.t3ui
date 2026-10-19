@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "478522e1-5683-4db1-a7dc-db59838eca2a"/*RepeatAtCPoints*/,
-  "Description": "\n\nAKA: RepeatAtPointsCpu, cpu points",
+  "Description": "Places a copy of the SourcePoints list at every point of DestinationsPoints (CPU point lists).\n\nEach copy is rotated by the orientation of the destination point and moved to its position. The orientations are combined and F1 is taken from the source point; other attributes like color and scale are not copied. The result contains source count × destination count points.\n\nAKA: RepeatAtPointsCpu, cpu points, instance, copy\n\nSee also: [RepeatAtPoints]",
   "InputUis": [
     {
       "InputId": "26ea6e28-e093-484c-9635-5c4ac0efdfb7"/*DestinationsPoints*/,

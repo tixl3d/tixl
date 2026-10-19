@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "17db8a36-079d-4c83-8a2a-7ea4c1aa49e6"/*IntToFloat*/,
-  "Description": "Converts an integer to a Float",
+  "Description": "Converts an integer to a float.\n\nSee also: [FloatToInt]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -9,8 +9,7 @@
       "Position": {
         "X": 0.0,
         "Y": 0.0
-      },
-      "Description": "Integer input for conversion"
+      }
     }
   ],
   "SymbolChildUis": [],

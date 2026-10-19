@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "3a6fd508-0272-4c18-96b8-bc2387d3b2fd"/*All*/,
-  "Description": "Returns true if all of the connected booleans are true.",
+  "Description": "Returns true if all of the connected booleans are true.\n\nReturns false if nothing is connected.\n\nSee also: [Any], [And]",
   "SymbolTags": "1",
   "InputUis": [
     {

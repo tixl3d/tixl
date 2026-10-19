@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "1192ae86-b174-4b58-9cc6-38afb666ce35"/*DirectionalBlur*/,
-  "Description": "Blurs the incoming image along a directional angle.\n\nYou can override the angle and strength through an FXTexture with:\nR - Angle\nG - Strength\n\nUsing an effects texture, especially one that is a blurred version of the input image, is particularly interesting.",
+  "Description": "Blurs the incoming image along a direction.\n\nThe angle and strength can be modulated per pixel with an FxTextures image:\nR - Angle\nG - Strength\n\nUsing an effects texture, especially one that is a blurred version of the input image, is particularly interesting.\n\nAKA: motion, streak, smear\n\nSee also: [Blur], [MotionBlur]\nAlso check out the [HowToUseImageEffects] tutorial.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,6 +10,7 @@
         "X": -630.6626,
         "Y": 130.77264
       },
+      "Description": "Number of samples on each side. Higher values are smoother but slower.",
       "Min": 0.0
     },
     {
@@ -34,6 +35,7 @@
         "X": -630.6626,
         "Y": 220.77263
       },
+      "Description": "Rotation in units of 360 degrees per unit of the FxTextures red channel.",
       "AddPadding": "True"
     },
     {
@@ -58,6 +60,7 @@
         "X": -630.6626,
         "Y": 175.77264
       },
+      "Description": "Blur direction in degrees.",
       "Min": -180.0,
       "Max": 180.0,
       "Scale": 0.1
@@ -76,6 +79,7 @@
         "X": -630.6626,
         "Y": 265.7726
       },
+      "Description": "Scales the size by (1 + FxSizeFactor * green) of the FxTextures.",
       "Min": 0.0,
       "Max": 10.0,
       "Scale": 0.01,
@@ -110,7 +114,8 @@
         "X": -630.07056,
         "Y": 418.6601
       },
-      "GroupTitle": "FX"
+      "GroupTitle": "FX",
+      "Description": "Optional image whose red channel rotates and green channel scales the blur per pixel."
     }
   ],
   "SymbolChildUis": [

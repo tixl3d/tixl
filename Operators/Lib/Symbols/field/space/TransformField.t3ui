@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "c44d23c7-bfac-403d-b49e-49d00001a316"/*TransformField*/,
-  "Description": "Transforms, rotates and scales the incoming field in 3D space.\nSimilar node with fewer options: [Translate]\n\nIt can be rendered with [RaymarchField] and visualized with [VisualizeFieldDistance].\n\nOther nodes: [RepeatWithMirror], [PolarRepeat], [TwistField].\n\nIt needs an incoming field like [BoxSDF], [ChainLinkSDF], [FractalSDF] as an input.\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToRaymarchField].\n",
+  "Description": "Moves, rotates, scales and shears the incoming field.\n\nNon-uniform Scale and Shear distort distances and can cause raymarching artifacts. It needs an incoming field like [BoxSDF] or [TorusSDF]. Render the result with [RaymarchField] and inspect it with [VisualizeFieldDistance].\n\nSee also: [Translate], [RotateField]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": -200.0,
         "Y": 225.0
       },
-      "Description": "Moves the Pivot (center point) of the incoming field:\n\nX (-left / +right) \nY (-down / +up) \nZ (-forward / +backwards)\n\nThe Pivot Point determines the location of the incoming subgraph Gizmo. Transforming its location can make it easier to perform transformations around the position you want.\n"
+      "Description": "Center for rotation and scaling."
     },
     {
       "InputId": "3b817e6c-f532-4a8c-a2ff-a00dc926eeb2"/*Translation*/,
@@ -18,8 +18,7 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "GroupTitle": "Transformation",
-      "Description": "Moves the incoming field\n\nX (-left / +right), \nY (-down / +up), \nZ (-forward / +backwards)\n"
+      "GroupTitle": "Transformation"
     },
     {
       "InputId": "5339862d-5a18-4d0c-b908-9277f5997563"/*Rotation*/,
@@ -27,7 +26,7 @@
         "X": -200.0,
         "Y": 45.0
       },
-      "Description": "Rotates the incoming field around the following axes:\n\nX: Horizontal axis\nY: Vertical axis\nZ: Forward axis\n",
+      "Description": "Rotation in degrees around X, Y and Z.",
       "Min": -180.0,
       "Max": 180.0,
       "Format": "{0:0.0}°"
@@ -38,7 +37,7 @@
         "X": -200.0,
         "Y": 135.0
       },
-      "Description": "Uniformly scales the incoming field",
+      "Description": "Uniform scale. Unlike Scale, this keeps distances correct.",
       "AddPadding": "True"
     },
     {
@@ -46,8 +45,7 @@
       "Position": {
         "X": -200.0,
         "Y": 90.0
-      },
-      "Description": "Scales the incoming field in the following directions:\n\nX: Width\nY: Height\nZ: Depth\n"
+      }
     },
     {
       "InputId": "7248c680-7279-4c1d-b968-3864cb849c77"/*InputField*/,
@@ -62,7 +60,8 @@
       "Position": {
         "X": -200.0,
         "Y": 300.0
-      }
+      },
+      "Description": "Also rotates the vectors stored in the XYZ channels of the field, e.g. for vector fields used with [ApplyVectorField]."
     },
     {
       "InputId": "f53f3311-e1fc-418b-8861-74adc175d5fa"/*Shear*/,
@@ -70,7 +69,6 @@
         "X": -200.0,
         "Y": 180.0
       },
-      "Description": "Shears the incoming field in the following directions:\n\nX: Width\nY: Height\nZ: Depth\n",
       "AddPadding": "True"
     }
   ],

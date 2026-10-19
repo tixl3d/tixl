@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "2467e1ed-f7fc-4c90-8230-b80ba6b42a2d"/*MeshVerticesToPoints*/,
-  "Description": "Creates a point at each vertex of the connected mesh.\nIntended as a helper method to analyze meshes.\n\nUseful combinations [LoadObj], [DrawPoints] and grouped with [DrawMesh] with Fillmode set to 'Wireframe' (similar to [VisualizeMesh])\n\nSimilar Operators:\nTo create a point at each face center of the connected mesh [MeshFacesPoints] can be used.\nTo get evenly distributed points on a mesh [PointsOnMesh] can be used.\n\n ",
+  "Description": "Creates a point at each vertex of the connected mesh.\n\nIntended as a helper to analyze meshes, e.g. with [DrawPoints] combined with [DrawMesh] with FillMode set to Wireframe (similar to [VisualizeMesh]).\n\nSee also: [MeshFacesPoints], [PointsOnMesh], [LoadObj]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -18,8 +18,7 @@
       "Position": {
         "X": -559.72864,
         "Y": 447.2469
-      },
-      "Description": "Mesh Input via [LoadObj]"
+      }
     },
     {
       "InputId": "e5ab7ae6-d8de-4c92-9130-1082e5a56ba1"/*W*/,

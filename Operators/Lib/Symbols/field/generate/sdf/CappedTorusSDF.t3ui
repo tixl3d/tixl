@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "b85198a8-6475-45e1-b2d2-83ec8f59d6ed"/*CappedTorusSDF*/,
-  "Description": "Generates a procedural torus field which can be capped (with rounded edges).\nIt can be rendered with [RaymarchField] and visualized with [VisualizeFieldDistance].\nAlso known as Cube SDF.\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToRaymarchField].\n\nIt can be modified with [BendField], [TransformField], [PolarRepeat] and more.\n\nSimilar nodes: [BoxSDF], [ChainLinkSDF], [FractalSDF].\n\nTo use a mesh made of polygons refer to [TorusMesh].",
+  "Description": "Generates a torus that can be cut open to an arc, with rounded ends, as an SDF.\n\nRender the result with [RaymarchField] and inspect it with [VisualizeFieldDistance]. Modify it with [TransformField], [BendField], [RepeatPolar] and other field operators.\n\nSee also: [TorusSDF], [ChainLinkSDF], [TorusMesh]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -10,14 +10,15 @@
         "X": -200.0,
         "Y": 90.0
       },
-      "Description": "Defines the size of the ring"
+      "Description": "Radius of the ring."
     },
     {
       "InputId": "01dec852-5b80-4705-8648-c6fd68199e83"/*Axis*/,
       "Position": {
         "X": -200.0,
         "Y": 210.0
-      }
+      },
+      "Description": "Axis around which the ring is oriented."
     },
     {
       "InputId": "d37914dd-7bbd-47fa-ad90-9921621afb9e"/*Fill*/,
@@ -25,7 +26,7 @@
         "X": -200.0,
         "Y": 45.0
       },
-      "Description": "Defines which part of the torus is capped.\n0.930 = the torus is completely capped\n3.218 = the torus is uncapped",
+      "Description": "Opening angle of the arc. Around 0.93 the ring disappears completely, around 3.22 it is closed. Values in between show an arc.",
       "AddPadding": "True"
     },
     {
@@ -34,15 +35,14 @@
         "X": -200.0,
         "Y": 135.0
       },
-      "Description": "Defines the thickness of the ring"
+      "Description": "Radius of the ring's cross section."
     },
     {
       "InputId": "f5a24e80-741a-49c5-9a0b-d7074e80940a"/*Center*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      },
-      "Description": "Transforms the center of the object"
+      }
     }
   ],
   "SymbolChildUis": [],

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "f7e3c9a4-2b8d-4e6f-a1c5-9d7b3e8f6a2c"/*ConeGizmo*/,
-  "Description": "Generates points for drawing a wireframe audio cone visualization matching BASS/ManagedBass 3D audio cone behavior. BASS cones are simple conical shapes defined by full angles (0-360 degrees). The cone extends from the origin in the -Z direction (forward). Generates line segments for: base circle and radial lines from apex to base. No rounded cap is used as BASS implements a hard cone boundary. Output points can be fed into DrawLines for rendering.",
+  "Description": "Generates line points for a wireframe cone, e.g. to visualize the directional cone of a spatial audio source.\n\nThe cone starts at the origin and extends along the negative z-axis (forward). The output contains line segments for the base circle and radial lines from the apex to the base, separated by separator points, and can be drawn with [DrawLines].\n\nSee also: [DrawSpatialAudioGizmos]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -20,7 +20,7 @@
         "X": 0.0,
         "Y": 0.0
       },
-      "Description": "The full cone angle in degrees (0-360). This is the total spread from edge to edge, not half-angle.",
+      "Description": "The full cone angle in degrees from edge to edge, not the half angle. Values of 180 and above do not produce a valid cone.",
       "Min": 0.0,
       "Max": 360.0
     },

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "8211249d-7a26-4ad0-8d84-56da72a5c536"/*SampleGradient*/,
-  "Description": "Defines a gradient that can then be sampled into a color or used further by [GradientsToTexture] or other operators.\nLeft-clicking the Gradient in the graph- or in the parameters window adds a color sample.\nDragging a color sample to the lower border removes it.\n\nThe first output returns the sampled color.\nThe second output the gradient structure.\n\nRight-click in the parameter window gradient to adjust interpolation mode or save presets.",
+  "Description": "Defines a gradient and samples a color from it.\n\nThe first output returns the color at SamplePos, the second output the gradient itself, which can be used by [GradientsToTexture] or other operators.\n\nTips:\n- Left-click on the gradient in the graph or parameter window to add a color step.\n- Drag a color step to the lower border to remove it.\n- Right-click the gradient in the parameter window to change the interpolation mode or save presets.\n\nSee also: [BuildGradient], [DefineGradient]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -17,7 +17,7 @@
         "X": 197.0,
         "Y": 373.0
       },
-      "Description": "Defines how the color is interpolated between the different samples on the gradient"
+      "Description": "Interpolation between the color steps. Only used if OverrideInterpolation is enabled."
     },
     {
       "InputId": "a4527e01-f19a-4200-85e5-00144f3ce061"/*SamplePos*/,
@@ -26,7 +26,7 @@
         "X": 197.0,
         "Y": 328.0
       },
-      "Description": "Defines which color is given out",
+      "Description": "Normalized position (0…1) on the gradient.",
       "Min": -100.0,
       "Max": 100.0,
       "Scale": 0.01
@@ -36,8 +36,7 @@
       "Position": {
         "X": 197.0,
         "Y": 373.0
-      },
-      "Description": "Defines the color gradient\n\nLeft-click adds a new color sample\nDragging the color sample down deletes it"
+      }
     }
   ],
   "SymbolChildUis": [],

@@ -1,8 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "84e02044-3011-4a5e-b76a-c904d9b4557f"/*UavFromTexture2d*/,
-  "Description": "",
-  "SymbolTags": "8",
+  "Description": "Internal helper. Creates an unordered access view for a Texture2D.\n\nThe texture needs the UnorderedAccess bind flag.",
+  "SymbolTags": "24",
   "InputUis": [
     {
       "InputId": "4a4f6830-1809-42c9-91eb-d4dbd0290043"/*Texture*/,

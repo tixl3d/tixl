@@ -17,7 +17,8 @@
       "Position": {
         "X": -200.0,
         "Y": 135.0
-      }
+      },
+      "Description": "If disabled, the commands are not executed and the output keeps its last value."
     },
     {
       "InputId": "72cfe742-88fb-41cd-b6cf-d96730b24b23"/*BufferWithViews*/,

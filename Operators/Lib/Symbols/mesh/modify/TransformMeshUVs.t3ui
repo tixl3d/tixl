@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "208a86b5-55cc-460a-86e6-2b17da818494"/*TransformMeshUVs*/,
-  "Description": "Manipulates the existing UV coordinates of a mesh to change the mapping of textures.\n\nBecomes visible with [DrawMesh].\n\nTo overwrite existing UV Coordinates with planar mapping see [MeshProjectUV]\n\nAlso see [ReprojectToUV].",
+  "Description": "Translates, rotates and scales the existing UV coordinates of a mesh.\n\nThe result becomes visible when the mesh is drawn with a texture, e.g. with [DrawMesh]. To replace the UVs with a planar projection use [MeshProjectUV].\n\nAKA: uv, texture coordinates\n\nSee also: [MeshProjectUV], [ReprojectToUV], [VisualizeUvMap]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -45,7 +45,8 @@
         "X": 194.30124,
         "Y": 3179.135
       },
-      "GroupTitle": "UvMap Selection"
+      "GroupTitle": "UvMap Selection",
+      "Description": "Transforms TexCoord2 instead of TexCoord."
     },
     {
       "InputId": "b9e7efdf-98d6-4d5a-94e8-16f38cfe4e55"/*InputMesh*/,
@@ -70,7 +71,7 @@
         "X": 187.80597,
         "Y": 2888.411
       },
-      "Description": "Rotates the UV coordinates",
+      "Description": "Rotates the UV coordinates around the pivot. Only the Z component is meaningful for UVs.",
       "Min": -90.0,
       "Max": 90.0,
       "Format": "{0:0.0}°"

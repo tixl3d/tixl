@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "f7a2c9e1-4b63-4d08-9e5a-2c7f8b1d6a34"/*SubdivideCurves*/,
-  "Description": "Subdivides long straight edges while keeping intact the small ones.\n- The curve shape is preserved\n- only the segment density changes.\n- use it after [TextToCurves]",
+  "Description": "Splits long curve segments into shorter ones while keeping short segments intact.\n\nThe curve shape is preserved exactly; only the number of segments changes. This is useful after [TextToCurves] to get evenly dense outlines for deformation or point distribution.",
   "InputUis": [
     {
       "InputId": "4a7e2c9f-6d15-4b83-a0e6-9c3f8b1d5e27"/*Curves*/,
@@ -16,6 +16,7 @@
         "X": -200.0,
         "Y": 750.0
       },
+      "Description": "Segments longer than this are split.",
       "Min": 0.01,
       "ClampMin": true
     },
@@ -24,7 +25,8 @@
       "Position": {
         "X": -200.0,
         "Y": 825.0
-      }
+      },
+      "Description": "Splits segments into parts of equal arc length instead of equal curve parameter."
     }
   ],
   "SymbolChildUis": [],

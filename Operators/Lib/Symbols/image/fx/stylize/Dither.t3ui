@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "299e9912-2a6a-40ea-aa31-4c357bbec125"/*Dither*/,
-  "Description": "Applies Floyd-Steinberg dithering to an image to convert it to black and white colors.\n\nFor similar effects or interesting combinations see: [MosaicTiling] [VoronoiCells] [SubdivisionStretch] [HoneyCombTiles] [TriangleGridTransition] [Dither] [AsciiRender]",
+  "Description": "Converts an image to two colors using ordered (Bayer) or random dithering.\n\nThe image is divided into cells of Scale pixels. For each cell the brightness is compared against a dither pattern to pick ShadowColor or HighlightColor.\n\nAKA: halftone, bayer, 1bit, retro\n\nSee also: [MosiacTiling], [VoronoiCells], [SubdivisionStretch], [HoneyCombTiles], [AsciiRender], [Pixelate]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -22,7 +22,8 @@
       "Position": {
         "X": 120.35292,
         "Y": 718.9912
-      }
+      },
+      "Description": "How the dithered colors are blended onto the original image."
     },
     {
       "InputId": "1c8ca868-0d54-4776-92bd-5c4183660216"/*GrayScaleWeights*/,
@@ -31,7 +32,7 @@
         "Y": 252.84007
       },
       "GroupTitle": "Advanced Settings",
-      "Description": "Defines which color channels are used to determine the light-dark distinction.\n",
+      "Description": "Currently ignored. The brightness is taken from the red channel.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -43,6 +44,7 @@
         "X": 128.1916,
         "Y": 315.1541
       },
+      "Description": "Shapes the brightness before dithering.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -65,7 +67,7 @@
         "Y": 404.83698
       },
       "GroupTitle": "Size",
-      "Description": "Uniformly scales the size of the effect.",
+      "Description": "Size of the dither cells in pixels.",
       "Min": 1.0,
       "Max": 15.0,
       "ClampMin": true,
@@ -77,6 +79,7 @@
         "X": 132.46725,
         "Y": 449.83698
       },
+      "Description": "Shifts the dither grid in cells.",
       "Min": -2.0,
       "Max": 2.0,
       "UseVec2Control": "Position"
@@ -99,7 +102,7 @@
         "X": 131.75464,
         "Y": 147.27525
       },
-      "Description": "Setting is currently ignored.",
+      "Description": "FloydSteinberg: Uses an ordered Bayer matrix pattern (despite the name).\nDiffusion: Uses random noise per cell.",
       "AddPadding": "True"
     }
   ],

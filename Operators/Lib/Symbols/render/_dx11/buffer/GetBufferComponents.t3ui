@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "80dff680-5abf-484a-b9e0-81d72f3b7aa4"/*GetBufferComponents*/,
-  "Description": "",
+  "Description": "Returns the buffer, its ShaderResourceView and UnorderedAccessView, element count and stride from a BufferWithViews.\n\nIsValid is false if the input is null or one of its views is missing or disposed.",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -17,7 +17,8 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Logs a warning if the views can not be accessed."
     }
   ],
   "SymbolChildUis": [],

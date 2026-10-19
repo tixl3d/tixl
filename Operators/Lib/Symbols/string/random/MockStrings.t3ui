@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "3af25959-fd3f-4608-b521-5860d82554df"/*MockStrings*/,
-  "Description": "A small selection of strings of different categories.",
+  "Description": "Returns example text of different categories, such as colors, names, lorem ipsum or prime numbers.\n\nUseful as placeholder text while building text layouts.\n\nSee also: [AnimRandomString], [PickStringPart]",
   "SymbolTags": "8",
   "InputUis": [
     {

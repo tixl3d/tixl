@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "501d75f4-c789-4946-a7ed-cca9245d38ef"/*ColorVerticesWithField*/,
-  "Description": "Uses a color field to set vertex colors from their position in that field.",
+  "Description": "Sets the vertex colors of a mesh by sampling a field at each vertex position.\n\nThe field color is blended over the existing vertex colors, weighted by Strength and the vertex selection.\n\nSee also: [SelectVerticesWithSDF], [CustomVertexShader]",
   "InputUis": [
     {
       "InputId": "d8c32b3b-8d88-448c-9af5-8e9e1cb9884e"/*Mesh*/,
@@ -17,6 +17,7 @@
         "X": 1361.3712,
         "Y": 1239.936
       },
+      "Description": "Blend amount between the original vertex color (0) and the field color (1). Multiplied by the vertex selection.",
       "AddPadding": "True",
       "Min": 0.0,
       "Max": 1.0,
@@ -28,14 +29,16 @@
       "Position": {
         "X": 1361.3712,
         "Y": 943.66724
-      }
+      },
+      "Description": "Field whose color is sampled, e.g. [SDFToColor]."
     },
     {
       "InputId": "f61722bb-11f3-4eb9-bb02-ca6161875492"/*StrengthFactor*/,
       "Position": {
         "X": 1361.3712,
         "Y": 1289.3162
-      }
+      },
+      "Description": "Currently has no effect."
     }
   ],
   "SymbolChildUis": [

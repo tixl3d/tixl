@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "e8a32d90-1e42-4c8a-9f31-0ab1cd2e0300"/*DuckAudioLevel*/,
-  "Description": "Converts a level signal into a smoothed ducking gain.\n\nWhile Level (wire it from an [AudioLevel] tap) exceeds Threshold, Gain dips toward 1 − Amount with the Attack ramp and recovers to 1 with the Release ramp. Wire Gain into the Volume of a [CombineAudio] or [AudioBus] to duck one signal under another — e.g. music under a voice-over.\n\nTips\nThe metered level trails the audible signal by about a frame; for ducking this is inaudible.",
+  "Description": "Converts a level signal into a smoothed ducking gain.\n\nWhile Level (wire it from an [AudioLevel] tap) exceeds Threshold, Gain dips toward 1 − Amount with the Attack ramp and recovers to 1 with the Release ramp. Wire Gain into the Volume of a [CombineAudio] or [AudioBus] to duck one signal under another — e.g. music under a voice-over.\n\nThe smoothing follows real time, not the timeline.\n\nTips:\n- The metered level trails the audible signal by about a frame; for ducking this is inaudible.",
   "InputUis": [
     {
       "InputId": "1fa75271-73c7-47d3-b536-1bfcc134ff73"/*GainAndBias*/,
@@ -9,6 +9,7 @@
         "X": -200.0,
         "Y": 255.0
       },
+      "Description": "Shapes the response curve (knee) between Threshold and full level. Components are clamped to 0..1.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -21,7 +22,8 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Input level, usually from an [AudioLevel] or [AudioBus] Level output."
     },
     {
       "InputId": "e8a32d90-0003-4c8a-9f31-0ab1cd2e0300"/*Threshold*/,
@@ -29,6 +31,7 @@
         "X": -200.0,
         "Y": 45.0
       },
+      "Description": "Level above which ducking starts. The reduction grows as the level rises from Threshold to 1.",
       "Min": 0.0,
       "Max": 1.0,
       "Scale": 0.001,
@@ -41,6 +44,7 @@
         "X": -200.0,
         "Y": 90.0
       },
+      "Description": "Maximum reduction from 0 (none) to 1 (silence).",
       "Min": 0.0,
       "Max": 1.0,
       "Scale": 0.001,
@@ -53,6 +57,7 @@
         "X": -200.0,
         "Y": 135.0
       },
+      "Description": "Smoothing time in seconds while ducking down.",
       "Min": 0.001,
       "Max": 2.0,
       "Scale": 0.001,
@@ -64,6 +69,7 @@
         "X": -200.0,
         "Y": 180.0
       },
+      "Description": "Smoothing time in seconds while recovering.",
       "Min": 0.001,
       "Max": 5.0,
       "Scale": 0.001,

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "b72d968b-0045-408d-a2f9-5c739c692a66"/*AudioFrequencies*/,
-  "Description": "Use it for executable export that relies on external audio device.\n\nSample audio frequencies just like [PlaybackFFT] ",
+  "Description": "Returns the current global audio analysis as a float list.\n\nThis can be useful for exported executables that rely on an external audio input device.\n\nSee also: [AudioReaction], [PlaybackFFT]",
   "SymbolTags": "128",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "RawFft: FFT gain.\nNormalizedFft: normalized FFT.\nFrequencyBands: frequency band levels.\nFrequencyBandsPeaks: band peaks.\nFrequencyBandsAttacks: band attacks."
     }
   ],
   "SymbolChildUis": [],

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "ad28819d-be62-4ed7-932a-fc861562983d"/*TextGrid*/,
-  "Description": "An experiment that uses a texture to shade text characters written in a text block.\nThis is ",
+  "Description": "Experimental. Draws text as a regular grid of character cells that can be displaced by a texture.\n\nCharacters listed in HighlightChars are drawn with HighlightColor.\n\nSee also: [Text]",
   "SymbolTags": "160",
   "InputUis": [
     {
@@ -10,6 +10,7 @@
         "X": -424.31763,
         "Y": 386.43723
       },
+      "Description": "Scrolls the text by columns (X) and rows (Y).",
       "Scale": 1.0
     },
     {
@@ -54,7 +55,8 @@
       "Position": {
         "X": -424.31757,
         "Y": 612.3423
-      }
+      },
+      "Description": "Repeats the text to fill all cells. Otherwise the remaining cells stay empty."
     },
     {
       "InputId": "98b5699a-60fb-436e-93f1-d301a471dfe1"/*HighlightColor*/,
@@ -76,6 +78,7 @@
         "X": -424.31757,
         "Y": 747.3423
       },
+      "Description": "Characters that are drawn with HighlightColor.",
       "Usage": "Default"
     },
     {

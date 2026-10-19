@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "c513c58d-e45c-408d-a0b8-250c9af31545"/*HasValueIncreased*/,
-  "Description": "Tests whether the incoming value has increased by a defined threshold and outputs this as a Boolean\n\nOperator with more options: [HasValueChanged]\n\nSimilar to [HasValueIncreased], [IsGreater] and [HasValueDecreased]",
+  "Description": "Tests whether the incoming value has increased by more than a threshold since the last update and outputs the result as a boolean.\n\nSee also: [HasValueChanged] (more options), [HasValueDecreased], [IsGreater]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": -200.0,
         "Y": 45.0
       },
-      "Description": "If the value has increased more than is defined here the output boolean will be 'True'",
+      "Description": "Minimum increase since the last update to output True.",
       "AddPadding": "True"
     },
     {
@@ -18,8 +18,7 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      },
-      "Description": "Value to be tested if it has increased"
+      }
     }
   ],
   "SymbolChildUis": [],

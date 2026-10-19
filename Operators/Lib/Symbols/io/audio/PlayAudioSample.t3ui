@@ -29,7 +29,6 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "Description": "Path to the audio file to play",
       "Usage": "FilePath",
       "FileFilter": "mp3, wav, ogg, flac, aiff, aif, m4a, aac, wma"
     },
@@ -52,23 +51,21 @@
         "X": -200.0,
         "Y": 125.0
       },
-      "Description": "Stops the audio playback and resets the position to the beginning"
+      "Description": "Stops playback and resets the position to the beginning."
     },
     {
       "InputId": "726bc4d3-df8b-4abe-a38e-2e09cf44ca10"/*PlayAudio*/,
       "Position": {
         "X": -200.0,
         "Y": 75.0
-      },
-      "Description": "Trigger to start or resume audio playback"
+      }
     },
     {
       "InputId": "7e42f2a8-3c5d-4f6e-9b8a-1d2e3f4a5b6c"/*PauseAudio*/,
       "Position": {
         "X": -200.0,
         "Y": 175.0
-      },
-      "Description": "Pauses the audio playback at the current position"
+      }
     },
     {
       "InputId": "905d9e01-b1fb-47c0-801c-fc920ed36884"/*TriggerMode*/,
@@ -131,7 +128,7 @@
         "X": -200.0,
         "Y": 550.0
       },
-      "Description": "Optional duration override for playback (in seconds)",
+      "Description": "Optional playback duration in seconds for Trigger mode. 0 or less plays the full sample.",
       "Min": 0.0,
       "ClampMin": true
     }

@@ -16,7 +16,10 @@ internal sealed class FirstValidTexture : Instance<FirstValidTexture>
     {
         var foundSomethingValid = false;
             
-        _complainedOnce |= Input.DirtyFlag.IsDirty;
+        if (Input.DirtyFlag.IsDirty)
+        {
+            _complainedOnce = false;
+        }
             
         var connections = Input.GetCollectedTypedInputs();
         if (connections != null && connections.Count > 0)

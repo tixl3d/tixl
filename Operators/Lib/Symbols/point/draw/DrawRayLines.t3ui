@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "7f69a5e5-28e5-44c1-b3e3-74b05faa0531"/*DrawRayLines*/,
-  "Description": "A special line renderer that draws camera-facing 3D geometry lines without corner metering that can intersect the near plane.",
+  "Description": "Draws line segments as camera-facing geometry that can intersect the camera near plane.\n\nUnlike [DrawLines], the segments are built in camera space without screen-space miter joints, so long segments that pass behind the camera are rendered correctly. The width is constant in world units.\n\nSee also: [DrawLines]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -24,6 +24,7 @@
         "X": 103.230286,
         "Y": 883.67615
       },
+      "Description": "Width of the lines: Size / 1000 world units.",
       "Scale": 0.001
     },
     {
@@ -73,7 +74,8 @@
       "Position": {
         "X": -36.769714,
         "Y": 1058.6763
-      }
+      },
+      "Description": "Point attribute that multiplies the width: 0 = none, 1 = F1, 2 = F2."
     },
     {
       "InputId": "f59b07c9-f947-4ab5-96c7-20801aca8d1a"/*EnableTest*/,

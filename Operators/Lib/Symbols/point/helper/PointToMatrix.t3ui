@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "e179e0da-f2cd-4cae-a39f-f89957440e74"/*PointToMatrix*/,
-  "Description": "Converts a point to transform matrix.",
+  "Description": "Converts the first point of a CPU point list into a 4x4 transformation matrix.\n\nThe matrix combines the position, orientation and scale of the point.",
   "SymbolTags": "8",
   "InputUis": [
     {

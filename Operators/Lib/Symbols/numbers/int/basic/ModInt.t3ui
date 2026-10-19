@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "cf3268d7-4f3d-47bd-8cb5-0214c75432ec"/*ModInt*/,
-  "Description": "Modulo for integers.",
+  "Description": "Computes the remainder of Value divided by Mod.\n\nUses the C# remainder operator, so negative values give negative results (-3 mod 4 = -3). If Mod is 0, the previous output is kept.\n\nAKA: modulo, remainder\n\nSee also: [Modulo], [DivInt]",
   "SymbolTags": "1",
   "InputUis": [
     {

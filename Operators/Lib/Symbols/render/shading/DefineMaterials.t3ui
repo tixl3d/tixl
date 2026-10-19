@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "0bd77dd6-a93a-4e2e-b69b-bbeb73cb5ae9"/*DefineMaterials*/,
-  "Description": "Defines materials for later use when drawing content or scenes.",
+  "Description": "Defines materials for the connected subgraph so they can be selected by name, e.g. with the UseMaterialId parameter of [DrawScene].\n\nSee also: [SetMaterial], [UseMaterial], [DrawScene]",
   "SymbolTags": "72",
   "InputUis": [
     {
@@ -10,7 +10,8 @@
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Reference outputs of [SetMaterial] operators with a MaterialId."
     },
     {
       "InputId": "ab03556d-02a5-4329-94af-58563f93e159"/*SubGraph*/,

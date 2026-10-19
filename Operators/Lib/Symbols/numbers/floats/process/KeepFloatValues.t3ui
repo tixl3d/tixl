@@ -1,21 +1,23 @@
 {
   "FormatVersion": 3,
   "Id": "32a1d28e-23bc-44a8-becc-b52972464526"/*KeepFloatValues*/,
-  "Description": "Builds a list of float values (e.g., a cycle buffer) but collects float values at the beginning of the list.",
+  "Description": "Builds a list of recent float values, e.g. as history buffer.\n\nWhile AddValueToList is true, the current value is inserted at the start of the list on every update and the oldest value is dropped.\n\nAKA: history, buffer, delay\n\nSee also: [SetFloatListValue]",
   "InputUis": [
     {
       "InputId": "519133d3-0440-4c8a-8bc8-75aa17219ad5"/*BufferLength*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Number of entries in the list."
     },
     {
       "InputId": "639dc9c2-e3b9-4e17-959e-cb181166b0a2"/*DefaultValue*/,
       "Position": {
         "X": -200.0,
         "Y": 165.0
-      }
+      },
+      "Description": "Value used to fill the list after a reset or when it grows."
     },
     {
       "InputId": "a5ed1db1-2dc9-43b2-97c3-cd416d07089b"/*Value*/,
@@ -36,7 +38,8 @@
       "Position": {
         "X": -200.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Clears the list and refills it with DefaultValue."
     }
   ],
   "SymbolChildUis": [],

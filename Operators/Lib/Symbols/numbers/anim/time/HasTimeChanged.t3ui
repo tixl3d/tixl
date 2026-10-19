@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "2443b2fd-c397-4ea6-9588-b595f918cf01"/*HasTimeChanged*/,
-  "Description": "Triggers a bool if time was scrubbed back in the timeline by the user or by looping. Also known as: DidTimeChange.",
+  "Description": "Returns true when the selected time jumped forward or backward by more than Threshold since the last frame.\n\nThis can detect scrubbing back in the timeline or looping. The DeltaTime output returns the time difference to the last frame.\n\nAKA: DidTimeChange, rewind\n\nSee also: [HasValueChanged]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -16,14 +16,16 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Minimal time change in the selected time unit to count as a change."
     },
     {
       "InputId": "bc112889-77a8-4967-a9b7-683b7c7017fe"/*Mode*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "- DidRewind: Time decreased.\n- DidAdvanced: Time increased.\n- DidChange: Time increased or decreased.\n- DidAdvancedWithMotionBlur: Like DidAdvanced, but ignores the additional motion blur render passes."
     }
   ],
   "SymbolChildUis": [],

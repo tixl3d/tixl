@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "f2a0a8d9-e2dc-476b-ac97-de13101a6fdb"/*ZollnerPattern*/,
-  "Description": "Creates an image for an optical illusion.\n\nOriginally programmed for [WorksForEverybody]\n\nOther interesting patterns can be generated with [SinForm] [ZollnerPattern] [FraserGrid] [Raster] [CheckerBoard] [RyojiPattern2] [RyojiPattern1]",
+  "Description": "Generates the pattern of the Zöllner illusion: parallel bars crossed by short hooks that make the bars appear tilted.\n\nOriginally programmed for [WorksForEverybody]. The RGB channels of a connected Image can modulate bar width, hook length and hook rotation.\n\nAKA: illusion, optical, zollner\n\nSee also: [FraserGrid], [Raster], [CheckerBoard], [SinForm]",
   "SymbolTags": "64",
   "InputUis": [
     {
@@ -11,7 +11,7 @@
         "Y": 474.05212
       },
       "GroupTitle": "Appearance",
-      "Description": "Stretches the pattern on the x and y axis"
+      "Description": "Stretches the pattern horizontally and vertically."
     },
     {
       "InputId": "3ee9d4c7-8f6d-453a-a6ff-262250e6559a"/*RAffects_BarWidth*/,
@@ -27,7 +27,7 @@
         "X": -219.05618,
         "Y": 780.9896
       },
-      "Description": "Smoothes the edges",
+      "Description": "Softness of the edges.",
       "Min": -2.0,
       "Max": 2.0,
       "Scale": 0.02
@@ -38,7 +38,7 @@
         "X": -223.4553,
         "Y": 519.05206
       },
-      "Description": "Transforms the pattern on the x and y axis"
+      "Description": "Moves the pattern."
     },
     {
       "InputId": "68bbb3ac-e8f2-4ed9-afd8-8a912c97f1ca"/*RowSwift*/,
@@ -54,8 +54,7 @@
       "Position": {
         "X": -198.85258,
         "Y": 994.4314
-      },
-      "Description": "Defines the length of the hooks"
+      }
     },
     {
       "InputId": "8f8a92bf-cdc6-45cd-9ff7-5d01cd31bd8e"/*BAffects_HookRotation*/,
@@ -69,8 +68,7 @@
       "Position": {
         "X": -198.85258,
         "Y": 1039.4314
-      },
-      "Description": "Defines the thickness of the hooks"
+      }
     },
     {
       "InputId": "98131a97-a883-473f-809a-1c4d9eabce63"/*AmplifyIllusion*/,
@@ -85,8 +83,7 @@
       "Position": {
         "X": -223.4553,
         "Y": 429.05206
-      },
-      "Description": "Defines the background color"
+      }
     },
     {
       "InputId": "a2765fe8-c65a-4510-9e07-0c76521506bd"/*HookRotation*/,
@@ -111,7 +108,7 @@
         "Y": 32.122437
       },
       "GroupTitle": "Color",
-      "Description": "Defines the color of the line"
+      "Description": "Color of the bars and hooks."
     },
     {
       "InputId": "c409ea13-e805-4e37-94d6-f3633810f906"/*Resolution*/,
@@ -128,7 +125,7 @@
         "Y": 1129.4314
       },
       "GroupTitle": "Elements",
-      "Description": "Defines the thickness of the center bars"
+      "Description": "Thickness of the center bars."
     },
     {
       "InputId": "da1779e6-36fd-4b5d-9730-3f3da244ca40"/*Rotate*/,
@@ -136,7 +133,6 @@
         "X": -223.4553,
         "Y": 609.0521
       },
-      "Description": "Rotates the pattern",
       "Min": -180.0,
       "Max": 180.0,
       "Scale": 0.01
@@ -147,7 +143,6 @@
         "X": -223.4553,
         "Y": 564.05206
       },
-      "Description": "Uniformly scales the pattern",
       "Min": -10.0,
       "Max": 10.0,
       "Scale": 0.1

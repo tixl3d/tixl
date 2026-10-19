@@ -8,7 +8,8 @@
       "Position": {
         "X": -200.0,
         "Y": 300.0
-      }
+      },
+      "Description": "Makes this send visible to parent compositions when it sits inside a nested composition."
     },
     {
       "InputId": "1d83a6f2-49c0-4e17-8b5d-c72e90fa4b36"/*Color*/,
@@ -22,7 +23,8 @@
       "Position": {
         "X": -200.0,
         "Y": 225.0
-      }
+      },
+      "Description": "Resolution the content is rendered at. 0x0 uses the resolution of the output it is routed to."
     },
     {
       "InputId": "8a4dd1b3-2e6f-4c25-9d0a-7f3b61c8e942"/*Texture*/,

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "10673c38-8c7e-4aa1-8dcd-3f2711c709b5"/*Random*/,
-  "Description": "Generates a static random value based on a seed in the predefined range.",
+  "Description": "Generates a static pseudo-random value between Min and Max based on a seed.\n\nSee also: [FloatHash], [PerlinNoise]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -27,7 +27,7 @@
         "X": 0.0,
         "Y": 135.0
       },
-      "Description": "(This seems to be broken at the moment)\nDefines whether, if multiple values are output, they are all identical or unique",
+      "Description": "Adds a value derived from the operator instance to the seed, so copies of the operator with the same seed produce different values.",
       "AddPadding": "True"
     },
     {
@@ -35,7 +35,8 @@
       "Position": {
         "X": 0.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Different seeds produce different values."
     }
   ],
   "SymbolChildUis": [],

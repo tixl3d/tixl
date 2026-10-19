@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "b7910fc6-c3b2-4daf-93cd-010dcfe22a57"/*SearchAndReplace*/,
-  "Description": "Looks for characters or strings within another string and returns a new string with the matches replaced.",
+  "Description": "Searches for text within a string and replaces all matches.\n\nIf Replace is empty, the original string is returned unchanged.\n\nSee also: [IndexOf], [SubString]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": 0.0,
         "Y": 210.0
-      }
+      },
+      "Description": "Interprets SearchPattern as a .NET regular expression (multiline and single line mode)."
     },
     {
       "InputId": "3ca66cbd-a16a-479c-b858-84732e5023ad"/*OriginalString*/,
@@ -17,7 +18,6 @@
         "X": 0.0,
         "Y": 45.0
       },
-      "Description": "Defines the string whose content is searched",
       "Usage": "Default"
     },
     {
@@ -26,7 +26,7 @@
         "X": 0.0,
         "Y": 90.0
       },
-      "Description": "Defines the string pattern that will be searched for and replaced",
+      "Description": "Text to search for, or a regular expression if UseRegex is enabled.",
       "AddPadding": "True",
       "Usage": "Default"
     },
@@ -36,7 +36,7 @@
         "X": 0.0,
         "Y": 135.0
       },
-      "Description": "Defines the string that will be used to replace what is defined as the search pattern",
+      "Description": "Replacement text. Use \"\\n\" for line breaks. With regex, $1 etc. insert captured groups.",
       "Usage": "Default"
     }
   ],

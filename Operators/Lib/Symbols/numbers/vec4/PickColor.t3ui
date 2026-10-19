@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "3539c3a0-73f1-412c-aad2-517810126ac6"/*PickColor*/,
-  "Description": "Selects and switches between any of the connected colors\n\nUseful combinations: [AColor], [SampleGradient]",
+  "Description": "Selects one of the connected colors by Index, like a switch.\n\nThe Index wraps around the number of connections.\n\nSee also: [SampleGradient], [PickVector3]",
   "InputUis": [
     {
       "InputId": "03a48f06-5375-449f-941b-35f93b2a5825"/*Input*/,

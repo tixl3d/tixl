@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "0cd18cbb-e138-4b4b-a800-175fc39c61bf"/*ConvertTime*/,
-  "Description": "Converts time between seconds and bars.",
+  "Description": "Converts time between seconds and bars using the current BPM rate.\n\nSee also: [Time], [GetBpm]",
   "SymbolTags": "8",
   "InputUis": [
     {

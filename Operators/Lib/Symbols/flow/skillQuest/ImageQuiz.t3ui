@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "b1cb8864-0d51-4b7f-96eb-4c6267d4b216"/*ImageQuiz*/,
-  "Description": "Stacking",
+  "Description": "Compares a solution image with a reference image for skill quest challenges.\n\nConnect the solution image to YourSolution. The DoNotChange input holds the hidden reference and must stay connected.\n\nSee also: [DrawQuiz], [ValueQuiz]",
   "InputUis": [
     {
       "InputId": "629ec47f-64d7-4c05-a5b1-29fe9303c8eb"/*DoNotChange*/,

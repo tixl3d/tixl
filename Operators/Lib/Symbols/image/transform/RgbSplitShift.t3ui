@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "66f2492d-9bd6-45e9-af12-c7b48c16c8e2"/*RgbSplitShift*/,
-  "Description": "Split RGB channels and Shift them independently",
+  "Description": "Splits an image into its red, green and blue channels and shifts them independently.\n\nAKA: rgbsplit, chromatic, glitch, offset\n\nSee also: [ChromaticAbberation]",
   "InputUis": [
     {
       "InputId": "04675fbd-234f-453b-bc06-1abb4e17b9af"/*WrapMode*/,
@@ -9,6 +9,7 @@
         "X": 321.92157,
         "Y": 510.93793
       },
+      "Description": "How shifted pixels outside the image are sampled.",
       "AddPadding": "True"
     },
     {
@@ -18,6 +19,7 @@
         "Y": 160.93791
       },
       "GroupTitle": "Shift direction",
+      "Description": "Offset of the red channel.",
       "Min": -0.5,
       "Max": 0.5,
       "Scale": 0.01,
@@ -29,6 +31,7 @@
         "X": 461.9216,
         "Y": 300.93793
       },
+      "Description": "Offset of the blue channel.",
       "Min": -0.5,
       "Max": 0.5,
       "Scale": 0.01,
@@ -48,6 +51,7 @@
         "X": 461.92157,
         "Y": 230.93791
       },
+      "Description": "Offset of the green channel.",
       "Min": -0.5,
       "Max": 0.5,
       "Scale": 0.01,
@@ -71,6 +75,7 @@
         "X": 461.92157,
         "Y": 372.00543
       },
+      "Description": "Multiplies the offsets of all channels.",
       "AddPadding": "True",
       "Scale": 0.01
     },
@@ -81,7 +86,7 @@
         "X": 130.84799,
         "Y": 46.565887
       },
-      "Description": "Controls the shifting strength. It allows to create creative glitch effects. "
+      "Description": "Optional texture that controls the shifting strength per pixel. Can be used for glitch effects."
     }
   ],
   "SymbolChildUis": [

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "52c92cd8-241e-4d79-aebc-b60b092f7941"/*IsGreater*/,
-  "Description": "Tests whether the incoming value is higher than the threshold and outputs the result as a Boolean\n\nOperator with more Options: [HasValueChanged]\n\nSimilar to [HasValueIncreased], [IsGreater] and [HasValueDecreased]",
+  "Description": "Tests whether the incoming value is greater than a threshold and outputs the result as a boolean.\n\nSee also: [Compare], [HasValueChanged], [HasValueIncreased], [HasValueDecreased]",
   "SymbolTags": "8",
   "InputUis": [
     {

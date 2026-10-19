@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "b89c5923-cc58-4d7a-8dce-eb1f8cdfc6e8"/*DrawQuad*/,
-  "Description": "Draw a simple unlit quad geometry, ignoring the Image's aspect ratio.\n\nPlease consider using [Layer2d] instead.",
+  "Description": "Draws a simple unlit textured quad that ignores the aspect ratio of the image.\n\nFor most use cases, [Layer2d] is more convenient.\n\nSee also: [Layer2d]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": 492.2412,
         "Y": 225.55548
       },
-      "Description": "Selects a color which will be multiplied with the incoming image."
+      "Description": "Multiplied with the texture."
     },
     {
       "InputId": "08a058b0-9889-49d3-87a0-a1a98278eb06"/*BlendMode*/,
@@ -18,8 +18,7 @@
         "X": 803.3153,
         "Y": 630.2581
       },
-      "GroupTitle": "Options",
-      "Description": "Selects the Blendmode"
+      "GroupTitle": "Options"
     },
     {
       "InputId": "105d474f-a54e-4350-8de6-8bfd4dc0b0dd"/*Width*/,
@@ -27,7 +26,7 @@
         "X": 632.2412,
         "Y": 365.55548
       },
-      "Description": "Multiplier for Width",
+      "Description": "Horizontal scale. At 1 the quad spans 2 units from -1 to 1.",
       "AddPadding": "True"
     },
     {
@@ -44,7 +43,7 @@
         "X": 482.92487,
         "Y": 651.7606
       },
-      "Description": "Selects the comparison mode",
+      "Description": "Depth comparison function used when EnableDepthTest is enabled.",
       "AddPadding": "True"
     },
     {
@@ -53,7 +52,7 @@
         "X": 632.2412,
         "Y": 400.55548
       },
-      "Description": "Multiplier for Height"
+      "Description": "Vertical scale. At 1 the quad spans 2 units from -1 to 1."
     },
     {
       "InputId": "a4630612-743f-4396-8e2f-982052d508f4"/*EnableDepthTest*/,
@@ -61,7 +60,7 @@
         "X": 482.92487,
         "Y": 581.7605
       },
-      "Description": "This defines whether the Quad covers itself or is covered by or covers other meshes.",
+      "Description": "If enabled, the quad is hidden behind content in the depth buffer.",
       "AddPadding": "True"
     },
     {
@@ -70,7 +69,7 @@
         "X": 482.92487,
         "Y": 616.7605
       },
-      "Description": "This defines whether the Quad covers itself or is covered by or covers other meshes."
+      "Description": "If enabled, the quad writes to the depth buffer and can hide content drawn later."
     }
   ],
   "SymbolChildUis": [

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "dd3d7e16-f33e-4fb0-89c6-4d8cbc9d702f"/*LoadObjEdges*/,
-  "Description": "Loads an Obj mesh file so its edges can be used for artistic line rendering.\n\nIt can be used like this:\n\n[LoadObjEdges]->[ListToBuffer]->[DrawLines]",
+  "Description": "Loads a Wavefront .obj file and outputs its unique edges as a point list for line rendering.\n\nEach edge becomes two points followed by a separator, so the list can be drawn as individual line segments, e.g. [LoadObjEdges] -> [ListToBuffer] -> [DrawLines]. Edges shared by several faces are only output once. Meshes with more than 65535 vertices are not supported.\n\nSee also: [LoadObj]",
   "SymbolTags": "72",
   "InputUis": [
     {

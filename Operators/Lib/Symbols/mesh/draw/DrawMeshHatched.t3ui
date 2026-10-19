@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "c757cde3-511c-44cb-af62-39156557daa6"/*DrawMeshHatched*/,
-  "Description": "Draws incoming geometry and meshnodes in an abstract shading style.\n\nAn interactive tutorial for the complete TiXL render pipeline can be found at [HowToDrawThings].\n\nThe most commonly used render methods are [Drawmesh], [DrawMeshUnlit], [DrawMeshHatched], and [DrawMeshAtPoints].\n\nThey can then be combined with [SetMaterial], [SetFog], [SetPointLight], and many others to create the look of scenes.",
+  "Description": "Draws a mesh in an abstract hatched line shading style.\n\nThe brightness from the scene lights is mapped through the Shading gradient and turned into screen-space stripes between ColorShade and ColorHighlight.\n\nSee also: [DrawMesh], [DrawMeshUnlit], [DrawMeshCelShading], [DrawMeshAtPoints]\n\nAlso check out the [HowToDrawThings] tutorial.",
   "SymbolTags": "64",
   "InputUis": [
     {
@@ -11,7 +11,7 @@
         "Y": 5276.926
       },
       "GroupTitle": "Inputs",
-      "Description": "Texture Input from [LoadImage]."
+      "Description": "Optional texture, e.g. from [LoadImage]."
     },
     {
       "InputId": "204a3776-c191-48b1-b502-2efc45adec67"/*ColorShade*/,
@@ -50,7 +50,7 @@
         "X": 633.7131,
         "Y": 4930.601
       },
-      "Description": "Rotates the alignment of the lines.",
+      "Description": "Rotates the line direction in degrees.",
       "Min": 0.0,
       "Max": 180.0,
       "Scale": 1.0,
@@ -78,7 +78,7 @@
         "Y": 5128.9478
       },
       "GroupTitle": "Z-Buffer",
-      "Description": "Defines the transparency of the surfaces.\nNone: All surfaces are \"bothsided\" or always visible from all sides\nFront: The normals are flipped (frontside is transparent / backside visible)\nBack: Default (Frontside is visible / backside is invisible)"
+      "Description": "Which faces are hidden.\n\nNone: both sides are drawn.\nFront: front faces are hidden, only back faces are visible.\nBack: back faces are hidden (default)."
     },
     {
       "InputId": "c74dbffa-cea8-4ab7-a3b9-0bc6009041f3"/*EnableZWrite*/,
@@ -86,7 +86,7 @@
         "X": 635.04663,
         "Y": 5218.9478
       },
-      "Description": "This defines whether the mesh covers itself or is covered by or covers other meshes."
+      "Description": "If enabled, the mesh writes into the depth buffer so it can occlude itself and geometry drawn later."
     },
     {
       "InputId": "ce4cc48f-07bb-4aa8-a410-2042732aaa25"/*FollowSurface*/,
@@ -94,7 +94,7 @@
         "X": 633.7131,
         "Y": 4885.601
       },
-      "Description": "Defines how strongly the lines follow the surface of the mesh.\n\nLow values: The lines mainly follow the angle of the view.\nHigh values: Lines also increasingly flow along the surfaces of the mesh",
+      "Description": "Defines how strongly the line direction follows the surface normal, in degrees.\n\nLow values: the lines mainly follow the screen orientation.\nHigh values: the lines increasingly flow along the surfaces of the mesh.",
       "AddPadding": "True",
       "Min": 0.0,
       "Max": 180.0,
@@ -108,7 +108,7 @@
         "X": 635.04663,
         "Y": 5083.9478
       },
-      "Description": "Defines the gradient between highlight and shade colors",
+      "Description": "Maps the light brightness to the line coverage. The red channel of the gradient is used.",
       "AddPadding": "True"
     },
     {
@@ -117,7 +117,7 @@
         "X": 635.04663,
         "Y": 5173.9478
       },
-      "Description": "This defines whether the mesh covers itself or is covered by or covers other meshes.",
+      "Description": "If enabled, fragments hidden behind already drawn geometry (according to the depth buffer) are discarded.",
       "AddPadding": "True"
     },
     {
@@ -139,8 +139,7 @@
       "Position": {
         "X": 628.75635,
         "Y": 5321.926
-      },
-      "Description": "Input for Incoming Mesh Geometry"
+      }
     }
   ],
   "SymbolChildUis": [

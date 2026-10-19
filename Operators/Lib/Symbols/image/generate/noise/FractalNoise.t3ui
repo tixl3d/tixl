@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "5a0b0485-7a55-4bf4-ae23-04f51d890334"/*FractalNoise*/,
-  "Description": "Generates a procedural fractal noise image effect also known as pink noise or fractional noise that can be used to create visual patterns that look like cloud, smoke, dust and scratches on film and similar\n\nAvailable Noise Ops [WorleyNoise] [FractalNoise] [ShardNoise]",
+  "Description": "Generates fractal noise (also known as pink or fractional noise) by layering several octaves of noise.\n\nIt can be used to create patterns that look like clouds, smoke, dust or scratches on film.\n\nAKA: perlin, simplex, fbm, clouds, turbulence\n\nSee also: [TileableNoise], [WorleyNoise], [ShardNoise], [Grain]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -96,6 +96,7 @@
         "Y": 469.4225
       },
       "GroupTitle": "Domain Warp",
+      "Description": "Number of noise octaves that are layered (1 to 5). More octaves add finer detail.",
       "Min": 0,
       "Max": 5,
       "ClampMin": true,
@@ -114,6 +115,7 @@
         "X": -147.36366,
         "Y": -141.26788
       },
+      "Description": "Applies gain (X) and bias (Y) to the noise value before mixing ColorA and ColorB.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,

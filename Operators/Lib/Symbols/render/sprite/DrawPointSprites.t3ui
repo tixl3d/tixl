@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "9d494c7e-f94c-477f-aeb3-7fa70788f225"/*DrawPointSprites*/,
-  "Description": "",
+  "Description": "Draws a sprite quad for each point, using the size, pivot and texture coordinates from a sprite buffer.\n\nEach quad is placed at the point position and oriented by the point rotation. The texture is interpreted as a multichannel signed distance field (MSDF), so the points and sprites from [TextSprites] can be drawn as crisp text at any size. Sprites are assigned to points by index, repeating if there are fewer sprites than points.\n\nAKA: glyph, text, quads, particles\n\nSee also: [TextSprites], [DrawPointSpritesShaded], [DrawBillboards]",
   "SymbolTags": "64",
   "InputUis": [
     {
@@ -10,7 +10,8 @@
       "Position": {
         "X": -686.9146,
         "Y": 96.05664
-      }
+      },
+      "Description": "MSDF texture, e.g. the font texture from [TextSprites]."
     },
     {
       "InputId": "12e1244c-efb7-4bfd-a13c-f94552f153ca"/*UsePointScale*/,
@@ -18,6 +19,7 @@
         "X": -674.21533,
         "Y": 781.9566
       },
+      "Description": "Multiplies the sprite size with the scale of each point.",
       "AddPadding": "True"
     },
     {
@@ -27,7 +29,8 @@
         "X": -690.1123,
         "Y": -64.879105
       },
-      "GroupTitle": "Points Input"
+      "GroupTitle": "Points Input",
+      "Description": "Points defining position, color and scale of each sprite."
     },
     {
       "InputId": "926bdbc2-ee14-4125-8886-18f445766ef3"/*AlphaCutOff*/,
@@ -35,6 +38,7 @@
         "X": -680.84375,
         "Y": 416.23785
       },
+      "Description": "Pixels with a shape coverage below this threshold are discarded. Useful in combination with EnableDepthWrite.",
       "AddPadding": "True"
     },
     {
@@ -50,7 +54,8 @@
       "Position": {
         "X": -674.21533,
         "Y": 706.9566
-      }
+      },
+      "Description": "Selects a point attribute (F1 or F2) that is multiplied with the sprite size."
     },
     {
       "InputId": "c694946c-37b6-4792-8fc5-4204ede69f90"/*Color*/,
@@ -65,7 +70,8 @@
       "Position": {
         "X": -680.84375,
         "Y": 371.23785
-      }
+      },
+      "Description": "Scale factor for all sprites."
     },
     {
       "InputId": "d815c639-d412-4266-81df-f5889a87b4f6"/*SpriteBuffer*/,
@@ -74,7 +80,8 @@
         "X": -690.1123,
         "Y": -8.879105
       },
-      "GroupTitle": "Sprites Input"
+      "GroupTitle": "Sprites Input",
+      "Description": "Sprite definitions, e.g. from [TextSprites]."
     },
     {
       "InputId": "fecc8310-208e-45de-a43b-bf547663e743"/*BlendMode*/,

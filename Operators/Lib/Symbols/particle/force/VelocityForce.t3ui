@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "1c9e27e9-7df0-4cda-ac4e-408f4516cf09"/*VelocityForce*/,
-  "Description": "Controls particle speeds by increasing, damping or limiting the particle velocit.y\nThis can be useful for \"pumping\" and syncing effects.",
+  "Description": "Accelerates, damps or limits the speed of particles without changing their direction.\n\nUseful for pumping or beat-synced speed effects. Particles without velocity are not affected.\n\nAKA: speed, damping, limit\n\nSee also: [DirectionalForce], [ParticleSystem]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -10,7 +10,8 @@
         "X": 360.8051,
         "Y": 149.58517
       },
-      "GroupTitle": "Clamp Resulting Speed"
+      "GroupTitle": "Clamp Resulting Speed",
+      "Description": "Lower speed limit. Always applied."
     },
     {
       "InputId": "3b604264-3aa8-4f80-9171-4f719258f786"/*Accelerate*/,
@@ -18,6 +19,7 @@
         "X": 360.8051,
         "Y": 114.585175
       },
+      "Description": "Change of speed per frame. Negative values slow particles down.",
       "AddPadding": "True"
     },
     {
@@ -26,6 +28,7 @@
         "X": 220.80511,
         "Y": 289.58517
       },
+      "Description": "Shapes the random distribution of the variation.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -38,7 +41,8 @@
       "Position": {
         "X": 360.8051,
         "Y": 184.58517
-      }
+      },
+      "Description": "Upper speed limit. Always applied."
     },
     {
       "InputId": "d8d6645f-d295-4bb4-b514-4d7c0a982803"/*Amount*/,
@@ -46,6 +50,7 @@
         "X": 360.805,
         "Y": 79.585175
       },
+      "Description": "Overall strength of the acceleration.",
       "Min": 0.0,
       "Max": 5.0
     },
@@ -56,6 +61,7 @@
         "Y": 219.58517
       },
       "GroupTitle": "Variation",
+      "Description": "Random reduction of the strength per particle (0..1).",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,

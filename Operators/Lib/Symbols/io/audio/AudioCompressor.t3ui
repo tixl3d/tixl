@@ -8,7 +8,8 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Audio sources or audio graph nodes to compress."
     },
     {
       "InputId": "b8d65fc0-0003-4c8a-9f31-0ab1cd2e0600"/*Volume*/,
@@ -16,6 +17,7 @@
         "X": -200.0,
         "Y": 45.0
       },
+      "Description": "Gain folded into all contained sources. 1 keeps the level unchanged.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true
@@ -26,6 +28,7 @@
         "X": -200.0,
         "Y": 90.0
       },
+      "Description": "Linear level (0..1) above which compression starts. 0 maps to -60 dB.",
       "Min": 0.0,
       "Max": 1.0,
       "Scale": 0.001,
@@ -38,6 +41,7 @@
         "X": -200.0,
         "Y": 135.0
       },
+      "Description": "Compression ratio, clamped to 1..100. 1 means no compression.",
       "Min": 1.0,
       "Max": 100.0,
       "Scale": 0.1,
@@ -50,6 +54,7 @@
         "X": -200.0,
         "Y": 180.0
       },
+      "Description": "Attack time in seconds, clamped to 0.0001..0.5.",
       "Min": 0.0001,
       "Max": 0.5,
       "Scale": 0.0001,
@@ -62,6 +67,7 @@
         "X": -200.0,
         "Y": 225.0
       },
+      "Description": "Release time in seconds, clamped to 0.05..3.",
       "Min": 0.05,
       "Max": 3.0,
       "Scale": 0.001,
@@ -74,6 +80,7 @@
         "X": -200.0,
         "Y": 270.0
       },
+      "Description": "Gain in dB applied after compression, clamped to -60..60.",
       "Min": -60.0,
       "Max": 60.0,
       "Scale": 0.1,

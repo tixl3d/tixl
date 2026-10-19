@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "c676b9c7-06d7-4ee0-8ffc-9bee96c5dc18"/*DrawInstancedIndirect*/,
-  "Description": "",
+  "Description": "Internal helper. Issues an instanced draw call whose arguments are read from a GPU buffer.",
   "SymbolTags": "80",
   "InputUis": [
     {
@@ -17,7 +17,8 @@
       "Position": {
         "X": 0.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Byte offset of the draw arguments in the buffer."
     }
   ],
   "SymbolChildUis": [],

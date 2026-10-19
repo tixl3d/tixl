@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "b601be85-fa85-4358-9541-7e97341bf6b3"/*_CameraGizmo*/,
-  "Description": "Renders a camera shape that can be used for visualization.",
+  "Description": "Internal helper. Draws a camera shape with lines, e.g. for camera gizmos.\n\nSee also: [DrawCamGizmos], [VisualizeCamTrail]",
   "SymbolTags": "16",
   "InputUis": [
     {

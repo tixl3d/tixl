@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "0841cdd4-0106-4f4e-826b-8de23bb5b5f0"/*PickFloatFromList*/,
-  "Description": "Picks a float value from the connected float list.\nAlso see [PickFloat].",
+  "Description": "Picks a float value from a list by index.\n\nThe index wraps around the list length. An empty list outputs 0.\n\nSee also: [PickFloat], [FloatsToList]",
   "InputUis": [
     {
       "InputId": "2f87e21a-a1bd-4e2a-948c-2fa35245998d"/*Index*/,
@@ -9,7 +9,8 @@
       "Position": {
         "X": 0.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Wraps around the list length."
     },
     {
       "InputId": "329ba6a4-5b84-43fc-8899-0c04465844da"/*Input*/,

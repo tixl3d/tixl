@@ -8,35 +8,40 @@
       "Position": {
         "X": 0.0,
         "Y": 135.0
-      }
+      },
+      "Description": "If connected, the clip is sampled at this time in seconds instead of the playback time."
     },
     {
       "InputId": "2a95cd41-7e68-4c0f-9b83-d15f0a62e837"/*Setup*/,
       "Position": {
         "X": 0.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Setup of a [LoadGltfScene] with an animated model."
     },
     {
       "InputId": "84b0f3e6-1d59-4c27-a9ce-72e8d4b1065f"/*ClipIndex*/,
       "Position": {
         "X": 0.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Index of the animation clip. Wraps around the number of clips."
     },
     {
       "InputId": "b3861f05-4dc2-49e8-92a7-6ff0e1d8c534"/*Loop*/,
       "Position": {
         "X": 0.0,
         "Y": 180.0
-      }
+      },
+      "Description": "If enabled, the clip repeats. Otherwise the time is clamped to the clip duration."
     },
     {
       "InputId": "f6e21b48-935a-4d70-8c1e-40a7d92c53b1"/*SkeletonIndex*/,
       "Position": {
         "X": 0.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Index of the skeleton in the setup. Wraps around the number of skeletons."
     }
   ],
   "SymbolChildUis": [],

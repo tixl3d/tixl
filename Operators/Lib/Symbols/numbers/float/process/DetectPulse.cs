@@ -41,7 +41,6 @@ internal sealed class DetectPulse : Instance<DetectPulse>
         var isHit = false;
         var timeSinceLastHit = context.LocalFxTime - _lastHitTime;
             
-        Log.Debug($"{deltaToDamped}  triggered: {wasTriggered}  delta: {deltaToDamped}", this);
         if (wasTriggered && timeSinceLastHit >= minTimeBetweenHits)
         {
                 

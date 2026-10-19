@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "0e13e34f-c07b-4ada-8c87-6b89f4ed8b41"/*CompareImages*/,
-  "Description": "A simple helper to verify an image effect before and after. It shows both images divided by a movable border which also acts as a comparison monitor.\n\nAlso see: [ImageLevels] [WaveForm]",
+  "Description": "Shows two images side by side, split by a movable border, to compare an image effect before and after.\n\nThe border also displays [ImageLevels] graphs of both images along the split line.\n\nSee also: [ImageLevels], [WaveForm]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -11,7 +11,7 @@
         "X": -680.5391,
         "Y": -140.30246
       },
-      "Description": "Input Image A"
+      "Description": "Image shown on the first side of the border."
     },
     {
       "InputId": "78c3486a-3a82-4e61-81fd-3da904fd7aed"/*Texture2d2*/,
@@ -20,7 +20,7 @@
         "X": -680.5391,
         "Y": -95.30245
       },
-      "Description": "Input Image B"
+      "Description": "Image shown on the second side of the border."
     },
     {
       "InputId": "99171ae6-fb07-4121-bf23-e97f30b33be5"/*IntensityRange*/,
@@ -28,7 +28,7 @@
         "X": -704.83606,
         "Y": 494.13895
       },
-      "Description": "Defines how large the border / monitor is displayed",
+      "Description": "Size of the level graph displayed along the border.",
       "AddPadding": "True",
       "Min": 0.0,
       "Max": 1.0,
@@ -41,7 +41,6 @@
         "X": -704.83606,
         "Y": 449.13895
       },
-      "Description": "Defines the center of the border",
       "UseVec2Control": "Position"
     },
     {
@@ -51,7 +50,7 @@
         "Y": 404.13895
       },
       "GroupTitle": "Settings",
-      "Description": "Rotates the border",
+      "Description": "Rotation of the border in degrees.",
       "Min": -90.0,
       "Max": 90.0,
       "Format": "{0:0.0}°"

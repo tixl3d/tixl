@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "e1c294b5-1ea8-435e-a437-26d280d3c2f4"/*GodRays*/,
-  "Description": "Uses the z-buffer to draw god rays.\n\nA different approach [LightRaysFx]\n\nUseful Ops for a PostFX Pipeline: [MotionBlur] [DepthOfField] [ChromaticAberration] [Glow] [Grain] [Blur]",
+  "Description": "Draws light rays (god rays) from a light position, using the depth buffer to let scene objects occlude the rays.\n\nThe rays are rendered in a first pass, radially blurred in a second pass and added on top of the original image.\n\nAKA: lightshafts, volumetric, crepuscular, sunbeams\n\nTips:\n- Use the position of a [Locator] for both a [PointLight] and LightPosition.\n\nSee also: [LightRaysFx], [MotionBlur], [DepthOfField], [ChromaticAbberation], [Glow]",
   "SymbolTags": "65",
   "InputUis": [
     {
@@ -36,7 +36,7 @@
         "X": -683.0428,
         "Y": 516.61707
       },
-      "Description": "Defines the intensity of the effect",
+      "Description": "Intensity of the rays close to the light source.",
       "Min": 0.0,
       "Max": 20.0,
       "Scale": 0.1,
@@ -49,7 +49,7 @@
         "X": -683.0428,
         "Y": 796.61707
       },
-      "Description": "Blur effect offset"
+      "Description": "Currently not used."
     },
     {
       "InputId": "58c08101-ac16-4aed-aa84-259853734116"/*LightPosition*/,
@@ -58,7 +58,7 @@
         "X": -823.0428,
         "Y": 96.61709
       },
-      "Description": "Center / Position of the Light source\nProTip: Use the position of a [Locator] for a [Pointlight] and as an Input"
+      "Description": "World space position of the light source."
     },
     {
       "InputId": "59568136-2903-4fd5-a504-8a6308a2a2dc"/*Samples*/,
@@ -93,7 +93,7 @@
         "X": -683.0428,
         "Y": 656.61707
       },
-      "Description": "Defines the image depth up to which the effect should be applied",
+      "Description": "Shifts the depth at which objects start to occlude the rays.",
       "Min": -2.0,
       "Max": 2.0,
       "Scale": 0.001
@@ -104,7 +104,7 @@
         "X": -683.0428,
         "Y": 691.61707
       },
-      "Description": "Scales the image effect separately from the original image",
+      "Description": "Shifts the radial blur of the rays along the ray direction.",
       "Min": -30.0,
       "Max": 30.0,
       "Scale": 0.01
@@ -127,7 +127,7 @@
         "X": -807.5316,
         "Y": -247.96196
       },
-      "Description": "[Reference] from [Camera] Output"
+      "Description": "Reference output of the [Camera] used to render the scene. Required to project the light position."
     },
     {
       "InputId": "b9ca7291-1f78-47e2-8ba9-35ccb282833c"/*Size*/,
@@ -135,7 +135,7 @@
         "X": -683.0428,
         "Y": 551.61707
       },
-      "Description": "Scales the samples to the depth of the image",
+      "Description": "Length of the rays.",
       "Min": -10.0,
       "Max": 10.0,
       "Scale": 0.1,
@@ -149,7 +149,7 @@
         "X": -1064.1685,
         "Y": -28.421623
       },
-      "Description": "DepthBuffer Input\ne.g. from [RenderTarget]"
+      "Description": "Depth buffer of the same [RenderTarget]."
     },
     {
       "InputId": "c59b6588-9e39-49ed-99b7-632e5f2b3bf4"/*RayIntensity*/,
@@ -171,7 +171,7 @@
         "X": -924.1684,
         "Y": -159.13464
       },
-      "Description": "Image Input \nusually [Camera] -> [RenderTarget]"
+      "Description": "Color buffer of the rendered scene, e.g. from [RenderTarget]."
     },
     {
       "InputId": "ea737eeb-e936-48c0-aaa7-8247fea95228"/*Decay*/,

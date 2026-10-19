@@ -1,7 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "3737cd30-c79a-4282-897a-7d2a44076c65"/*_OffsetPoints*/,
-  "Description": "Offsets point positions in point space. This operator has been deprecated. Please consider using [TransformPoints] with Space set to \"PointSpace\".",
+  "Description": "Obsolete. Offsets point positions in point space.\n\nUse [TransformPoints] with Space set to PointSpace instead.",
+  "SymbolTags": "4096",
   "InputUis": [
     {
       "InputId": "4b7cc2cc-8f7b-4460-8beb-8a4eea101ef6"/*Points*/,

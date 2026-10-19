@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "5efaf208-ba62-42ce-b3df-059b37fc1382"/*OutputMergerStage*/,
-  "Description": "",
+  "Description": "Internal helper. Binds render targets, depth stencil view, UAVs, blend state and depth stencil state of the output merger stage.\n\nThe previous state is restored after the connected commands have been evaluated.",
   "SymbolTags": "24",
   "InputUis": [
     {
@@ -9,14 +9,16 @@
       "Position": {
         "X": 0.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Currently ignored."
     },
     {
       "InputId": "0ed97939-643b-445e-879c-e18c4430aa03"/*UnorderedAccessViews*/,
       "Position": {
         "X": 0.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Bound starting at slot 1."
     },
     {
       "InputId": "1d5faad5-3be5-426c-b464-ad490ea3d1aa"/*DepthStencilState*/,
@@ -37,7 +39,8 @@
       "Position": {
         "X": 0.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Currently ignored."
     },
     {
       "InputId": "9c131da6-ad56-4e15-9730-754096b3b765"/*RenderTargetViews*/,
@@ -51,7 +54,8 @@
       "Position": {
         "X": 0.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Currently ignored."
     },
     {
       "InputId": "e0bc9cf8-42c8-4632-b958-7a96f6d03ba2"/*BlendState*/,

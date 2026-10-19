@@ -8,7 +8,8 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Audio sources to meter. They are passed through unchanged."
     }
   ],
   "SymbolChildUis": [],

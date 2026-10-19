@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "026869ee-b62f-481e-aadf-f8a1db77fe65"/*Compare*/,
-  "Description": "Compares two float values, outputting a boolean.\n\nAKA: greater, less, equal\n\nTips:\n- If you want to output the min or max value of a set of floats, try [Clamp].",
+  "Description": "Compares two float values, outputting a boolean.\n\nAKA: greater, less, equal\n\nTips:\n- To output the min or max value of a set of floats, try [Clamp].\n\nSee also: [IsGreater]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -18,7 +18,6 @@
         "X": 36.0,
         "Y": 334.0
       },
-      "Description": "Input value.",
       "Min": -100.0,
       "Max": 100.0
     },
@@ -28,7 +27,7 @@
         "X": 197.0,
         "Y": 418.0
       },
-      "Description": "How close the inputs need to be for them to be considered equal.\n"
+      "Description": "How close the inputs need to be to be considered equal. Only used in IsEqual and IsNotEqual modes."
     },
     {
       "InputId": "f1537faa-1bd2-44c9-b0ae-d06c5af5cdef"/*Mode*/,
@@ -36,7 +35,7 @@
         "X": 197.0,
         "Y": 328.0
       },
-      "Description": "Which comparison to use.\neg. in IsLarger mode, this op will output True if Value is greater than TestValue."
+      "Description": "IsSmaller: Value < TestValue.\nIsEqual: the difference is smaller than Precision.\nIsLarger: Value > TestValue.\nIsNotEqual: the difference is at least Precision."
     }
   ],
   "SymbolChildUis": [],

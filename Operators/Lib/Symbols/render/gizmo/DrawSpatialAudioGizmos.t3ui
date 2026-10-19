@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "b53e6425-f40a-449c-846c-b4e0b8306a43"/*DrawSpatialAudioGizmos*/,
-  "Description": "Draws gizmos for all spatial audio players in the current composition. Visualizes source and listener positions, attenuation ranges, and directional cones.",
+  "Description": "Draws gizmos for all spatial audio players in the current composition.\n\nVisualizes the source and listener positions, attenuation ranges and directional cones of every [PlaySpatialAudioSample].\n\nSee also: [PlaySpatialAudioSample], [SpatialAudioPlayerGizmo], [ConeGizmo]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": 184.93283,
         "Y": 372.0692
-      }
+      },
+      "Description": "Controls when the gizmos are drawn. Inherit follows the gizmo toggle of the output window."
     }
   ],
   "SymbolChildUis": [

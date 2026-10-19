@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "32325c5b-53f7-4414-b4dd-a436e45528b0"/*SetTime*/,
-  "Description": "Overrides the animation time of a sub-command graph.\n\nUseful combination [PlayVideo] -> [Layer2d] -> [SetCommandTime]",
+  "Description": "Overrides the animation time of a sub-command graph.\n\nSee also: [TimeClip], [Time]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,8 +10,7 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      },
-      "Description": "Scene input"
+      }
     },
     {
       "InputId": "d2c934bb-de5c-449c-adf8-7a2f48082e9c"/*NewTime*/,
@@ -20,7 +19,7 @@
         "X": -200.0,
         "Y": 45.0
       },
-      "Description": "Offsets the start time\ne.g. of a [PlayVideo] op when 'Offset mode' is set to 'Relative'",
+      "Description": "The new time, or an offset to the current time when OffsetMode is relative.",
       "AddPadding": "True"
     },
     {
@@ -29,7 +28,7 @@
         "X": -200.0,
         "Y": 90.0
       },
-      "Description": "Defines how the time is offset"
+      "Description": "- Absolute: Sets the time of the connected SubTree to NewTime.\n- Relative: Adds NewTime to the current time.\n- GlobalAbsolute: Only without a connected SubTree: sets the time of the current context."
     }
   ],
   "SymbolChildUis": [],

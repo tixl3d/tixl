@@ -114,7 +114,7 @@ static const float NoisePhase = 0;
     p.FX1 = lerp(p.FX1, results[SetFx1To], strength);
 
     results[0] = p.FX2;
-    p.FX2 = lerp(p.FX1, results[SetFx2To], strength);
+    p.FX2 = lerp(p.FX2, results[SetFx2To], strength);
 
     ResultPoints[i.x] = p;
 }

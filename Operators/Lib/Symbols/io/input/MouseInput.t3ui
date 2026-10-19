@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "eff2ffff-dc39-4b90-9b1c-3c0a9a0108c6"/*MouseInput*/,
-  "Description": "Allows the real-time manipulation of any values using the mouse / trackpad\n\nIf the mouse pointer is moved over the output window, the values of the X and Y axes of the mouse movements are evaluated and can control any functions. The left mouse button can also be evaluated as a boolean.\n\nUseful combinations: [Vec2ToVec3] [Vector2Components] [BoolToFloat] [Transform] [TransformMesh]\n\nAlso see: [KeyboardInput] [MidiInput]",
+  "Description": "Allows the real-time manipulation of any values using the mouse or trackpad.\n\nIf the mouse pointer is moved over the output window, the X and Y positions of the mouse can control any parameter. The left mouse button can also be evaluated as a boolean.\n\nSee also: [Vec2ToVec3], [Vector2Components], [BoolToFloat], [Transform], [TransformMesh], [KeyboardInput], [MidiInput]",
   "SymbolTags": "1",
   "InputUis": [
     {

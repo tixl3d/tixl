@@ -10,8 +10,7 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      },
-      "Description": "Bool input"
+      }
     },
     {
       "InputId": "ef785e90-49de-4075-be85-09327d48cb16"/*Index*/,
@@ -19,7 +18,7 @@
         "X": -200.0,
         "Y": 45.0
       },
-      "Description": "Selects which of the connected bools is used as an output"
+      "Description": "Selects which of the connected bools is returned."
     }
   ],
   "SymbolChildUis": [],

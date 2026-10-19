@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "acc71a14-daad-4b36-b0bc-cf0a796cc5d9"/*OrientPoints*/,
-  "Description": "Orients the rotation of points so that Z points towards a target position. You can also orient the point to the screen or the camera.",
+  "Description": "Rotates points so that their z-axis points towards a target position, the screen or the camera.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -48,7 +48,7 @@
         "X": -30.34024,
         "Y": 713.893
       },
-      "Description": "Target Position",
+      "Description": "Target position.",
       "AddPadding": "True"
     },
     {

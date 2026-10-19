@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "72e627e9-f570-4936-92b1-b12ed8d6004e"/*EdgeRepeat*/,
-  "Description": "Repeats (stretches) pixels of the input image along a line.\n\nPlease explore the presets.\n\nWorks well with [Dither]",
+  "Description": "Keeps a band of the image and stretches its edge pixels outward on both sides.\n\nPixels outside the band repeat the pixels at its border, creating streaks perpendicular to the band.\n\nAKA: smear, streak, extrude\n\nTips:\n- Explore the presets.\n- Works well with [Dither].",
   "InputUis": [
     {
       "InputId": "22b41600-7d42-44ad-8e94-3819f8d24964"/*Image*/,
@@ -16,14 +16,16 @@
       "Position": {
         "X": -136.20753,
         "Y": -116.69096
-      }
+      },
+      "Description": "Multiplied with the image inside the band."
     },
     {
       "InputId": "549020f5-e405-4f78-a973-9e9fb3c9c25e"/*LineColor*/,
       "Position": {
         "X": -136.20753,
         "Y": 163.30904
-      }
+      },
+      "Description": "Color of the lines at the band edges."
     },
     {
       "InputId": "881e04f7-1014-4e87-81c9-f4791086e57d"/*LineThickness*/,
@@ -31,6 +33,7 @@
         "X": 3.7924652,
         "Y": 443.30902
       },
+      "Description": "Thickness of the band edge lines. 0 hides them.",
       "Min": 0.0,
       "Max": 1000.0,
       "ClampMin": true,
@@ -42,6 +45,7 @@
         "X": 3.7924652,
         "Y": 408.30902
       },
+      "Description": "Angle of the band in degrees.",
       "Min": -180.0,
       "Max": 180.0,
       "Scale": 1.0,
@@ -53,6 +57,7 @@
         "X": 3.7924652,
         "Y": 373.30902
       },
+      "Description": "Half width of the unaltered band.",
       "Min": 0.0,
       "Max": 2.0,
       "ClampMin": true,
@@ -63,7 +68,8 @@
       "Position": {
         "X": -136.20753,
         "Y": 23.309036
-      }
+      },
+      "Description": "Multiplied with the stretched pixels outside the band."
     },
     {
       "InputId": "c30a5d00-681c-490d-80d4-d58577cd65db"/*Resolution*/,
@@ -79,6 +85,7 @@
         "X": -136.20753,
         "Y": 303.30905
       },
+      "Description": "Center of the band.",
       "AddPadding": "True",
       "Min": -2.0,
       "Max": 2.0,

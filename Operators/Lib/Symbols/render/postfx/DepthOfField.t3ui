@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "53d3eebd-4ead-4965-b26d-10a8bbd48182"/*DepthOfField*/,
-  "Description": "Adds a depth of field effect.\n\nHint: Use a [Locator] and its DistanceToCamera output to use automatic focus distance.\n\nUseful Ops for a PostFX Pipeline: [MotionBlur] [DepthOfField] [ChromaticAberration] [Glow] [Grain] [Blur]",
+  "Description": "Blurs a rendered image depending on the distance to a focus plane, simulating the depth of field of a camera lens.\n\nIt requires the color and depth buffer of the same [RenderTarget].\n\nAKA: dof, bokeh, focus, defocus, lensblur\n\nTips:\n- Use a [Locator] and its DistanceToCamera output for a visible focus target.\n- Temporarily increase Amount to make it easier to see which areas are in focus.\n\nSee also: [MotionBlur], [ChromaticAbberation], [Glow], [Grain], [Blur]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -21,7 +21,7 @@
         "X": 206.6908,
         "Y": -757.60004
       },
-      "Description": "Defines the near and far range of the scene which is affected by the effect."
+      "Description": "Near and far clip planes used to linearize the depth buffer. Should match the clip planes of the camera."
     },
     {
       "InputId": "493c40f0-21e6-466b-afc2-eff570229c86"/*MaxSamples*/,
@@ -38,7 +38,7 @@
         "X": 246.16498,
         "Y": -168.21191
       },
-      "Description": "Controls how far away from the camera the area is which is not affected by the blur.\n\nProTip: Use a higher \"Amount\" to make it easier to identify the area of your scene that are in focus. Or use a [Locator] to have a visual helper to define the FocusPoint."
+      "Description": "Distance from the camera that stays sharp."
     },
     {
       "InputId": "bc1685a8-0a92-460f-85ca-7f096db965f0"/*TextureBuffer*/,
@@ -46,7 +46,8 @@
       "Position": {
         "X": -153.90164,
         "Y": -606.87604
-      }
+      },
+      "Description": "Color buffer of the rendered scene, e.g. from [RenderTarget]."
     },
     {
       "InputId": "c2e7ebf7-5056-4380-9a9f-850b350804c9"/*DepthBuffer*/,
@@ -54,7 +55,8 @@
       "Position": {
         "X": 72.37915,
         "Y": -432.52582
-      }
+      },
+      "Description": "Depth buffer of the same [RenderTarget]."
     }
   ],
   "SymbolChildUis": [

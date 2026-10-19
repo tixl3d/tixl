@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "b536f791-ae9a-45a7-a153-e2f36a65cfb3"/*BuildAsciiFontSorting*/,
-  "Description": "",
+  "Description": "Internal helper. Sorts the 16x16 characters of a font atlas image by brightness and returns the order as a 1D lookup texture for [AsciiRender].\n\nOnly works on Windows (uses System.Drawing).",
   "SymbolTags": "16",
   "InputUis": [
     {
@@ -10,6 +10,7 @@
         "X": 36.0,
         "Y": 424.0
       },
+      "Description": "Only these characters are used. Empty uses all 256.",
       "Usage": "Default"
     },
     {
@@ -18,6 +19,7 @@
         "X": 36.0,
         "Y": 379.0
       },
+      "Description": "Font atlas image with 16x16 characters in ASCII order.",
       "Usage": "FilePath"
     }
   ],

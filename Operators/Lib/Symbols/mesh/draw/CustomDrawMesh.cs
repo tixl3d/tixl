@@ -29,7 +29,7 @@ internal sealed class CustomDrawMesh :Instance<CustomDrawMesh>,ICustomDropdownHo
         var previousMaterial = context.PbrMaterial;
             
         var materialId = UseMaterialId.GetValue(context);
-        if (!string.IsNullOrEmpty(materialId))
+        if (!string.IsNullOrEmpty(materialId) && context.Materials != null)
         {
             foreach(var m in context.Materials)
             {

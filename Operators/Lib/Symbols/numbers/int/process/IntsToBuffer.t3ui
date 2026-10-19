@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "2eb20a76-f8f7-49e9-93a5-1e5981122b50"/*IntsToBuffer*/,
-  "Description": "Combines / converts any connected integer into a buffer",
+  "Description": "Internal helper. Writes the connected integers into a constant buffer for shaders.\n\nThe buffer size is padded to multiples of 4 ints (16 bytes).\n\nSee also: [IntListToBuffer], [FloatsToBuffer]",
   "SymbolTags": "24",
   "InputUis": [
     {

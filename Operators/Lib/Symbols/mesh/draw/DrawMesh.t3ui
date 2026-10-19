@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "a3c5471e-079b-4d4b-886a-ec02d6428ff6"/*DrawMesh*/,
-  "Description": "Uses PBR rendering to draw incoming geometry and meshnodes according to the desired settings.\nFor convenience Tooll adds a default reflection and two point lights attached to the camera to a RenderTarget. You can override these by adding [SetEnvironment] and [SetMaterial] operators further up (further right) in your graph.\nYou can adjust various parameters to achieve wireframe or both sided rendering.\n\nAn interactive tutorial for the complete TiXL render pipeline can be found at [HowToDrawThings].\n\nThe most commonly used render methods are [DrawMesh], [DrawMeshUnlit], [DrawMeshHatched] and [DrawMeshAtPoints].\n\nThey can then be combined with [SetMaterial], [SetFog], [SetPointLight] and many others to create the look of scenes.",
+  "Description": "Draws a mesh with PBR shading using the current material, lights, fog and environment.\n\nIf no [SetEnvironment] or lights are defined, the render target provides a default reflection and two point lights attached to the camera. These can be overridden with [SetEnvironment], [SetMaterial], [SetPointLight] and [SetFog] further up the graph. Fill mode and culling allow wireframe or double-sided rendering.\n\nSee also: [DrawMeshUnlit], [DrawMeshHatched], [DrawMeshAtPoints], [DrawMeshWithShadow]\n\nAlso check out the [HowToDrawThings] tutorial.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": 1526.489,
         "Y": 3627.165
       },
-      "Description": "Select shading mode"
+      "Description": "Default: uses the mesh normals.\nFlat: computes facet normals per pixel, giving a faceted look."
     },
     {
       "InputId": "155c2396-0e05-4437-8171-288048b1158a"/*Filter*/,
@@ -19,7 +19,7 @@
         "Y": 3905.177
       },
       "GroupTitle": "Texture Options",
-      "Description": "Defines the mode for texture filtering"
+      "Description": "Texture filtering mode."
     },
     {
       "InputId": "2c4b5f3a-e9ec-432e-b1ae-6d999ae44f1b"/*FillMode*/,
@@ -28,7 +28,7 @@
         "Y": 4099.43
       },
       "GroupTitle": "Draw Style",
-      "Description": "Toggles between colored Wireframe Rendering or default shading method."
+      "Description": "Solid or wireframe rendering."
     },
     {
       "InputId": "2fdf0184-1459-4589-9633-2c739462ed66"/*FragmentField*/,
@@ -37,7 +37,7 @@
         "Y": 3098.7122
       },
       "GroupTitle": "Field Overrides...",
-      "Description": "An optional shader graph with a color function. \n\nIt will use the world position.xyz to generate a color that is multiplied before drawing the fragment.\nTry [SphereField]->[SdfToColor]->.FragmentField."
+      "Description": "Optional field whose color is multiplied with each fragment, evaluated at the world position.\n\nTry [SphereSDF] -> [SDFToColor] -> FragmentField."
     },
     {
       "InputId": "4748d9ab-58a4-41d7-a2ee-6f7dfed86211"/*AlphaCutOff*/,
@@ -45,7 +45,7 @@
         "X": 1824.954,
         "Y": 3585.8855
       },
-      "Description": "This value controls transparency if a texture containing an alpha channel is used."
+      "Description": "Fragments with an alpha below this value are discarded. 0 disables alpha testing."
     },
     {
       "InputId": "8c9dee45-d165-48c8-b8dd-b7f47e77fd00"/*Color*/,
@@ -54,7 +54,7 @@
         "Y": 3445.8855
       },
       "GroupTitle": "Appearance",
-      "Description": "Defines the shading color of the mesh.\nIf a [SetMaterial] is used, these colors are multiplied with its settings."
+      "Description": "Tints the mesh. Multiplied with the material colors set by [SetMaterial]."
     },
     {
       "InputId": "96df9e72-189f-4efc-82a6-b2f482166e34"/*ShaderDefines*/,
@@ -62,7 +62,7 @@
         "X": 1816.4573,
         "Y": 3133.7122
       },
-      "Description": "Additional shader code that can be injected before rendering. \nUsing this requirese knowledge about the internal implementation. Passing invalid code will break the rendering.\nThis is similar to shader flags but most powerful because it also allows to define methods that are applied before rendering the fragment.\n\nOptions are...\n\n#define USE_WORLDSPACE",
+      "Description": "Additional HLSL code inserted into the generated shader, e.g. #define statements or helper functions. Invalid code breaks rendering.",
       "Usage": "Multiline"
     },
     {
@@ -71,16 +71,14 @@
       "Position": {
         "X": 1339.876,
         "Y": 3887.7703
-      },
-      "Description": "Input for Incoming Mesh Geometry"
+      }
     },
     {
       "InputId": "9c17fa15-35f1-49d4-802f-a3a796cad96a"/*BlendMode*/,
       "Position": {
         "X": 2404.7104,
         "Y": 4175.523
-      },
-      "Description": "Selects the Blendmode."
+      }
     },
     {
       "InputId": "9e957f4a-6502-4905-8d97-331f8b54097c"/*Culling*/,
@@ -88,7 +86,7 @@
         "X": 2404.7104,
         "Y": 4064.43
       },
-      "Description": "Defines the transparency of the surfaces.\nNone: All surfaces are \"bothsided\" or always visible from all sides\nFront: The normals are flipped (frontside is transparent / backside visible)\nBack: Default (Frontside is visible / backside is invisible)"
+      "Description": "Which faces are hidden.\n\nNone: both sides are drawn.\nFront: front faces are hidden, only back faces are visible.\nBack: back faces are hidden (default)."
     },
     {
       "InputId": "b50b3fc7-35e1-421d-be0a-b3008a54c33c"/*EnableZTest*/,
@@ -96,7 +94,7 @@
         "X": 2404.7104,
         "Y": 4210.523
       },
-      "Description": "If enabled discards fragments sorted out by z-buffer.\n\nThis defines whether the mesh covers itself or is covered by or covers other meshes.",
+      "Description": "If enabled, fragments hidden behind already drawn geometry (according to the depth buffer) are discarded.",
       "AddPadding": "True"
     },
     {
@@ -105,7 +103,7 @@
         "X": 1824.9539,
         "Y": 3655.8855
       },
-      "Description": "This reduces specular aliasing on silhouettes and high-frequency normalmap regions.",
+      "Description": "Reduces specular aliasing on silhouettes and in high-frequency normal map regions.",
       "Min": 0.0,
       "Max": 20.0,
       "ClampMin": true
@@ -116,7 +114,7 @@
         "X": 2039.8054,
         "Y": 4026.683
       },
-      "Description": "Defines how the texture behaves when repeated.\n\nWrap: The texture repeats itself continuously\nMirror: The texture is mirrored and repeats infinitely.\nClamp: The texture is cut off at the edge\nBorder: Unclear\nMirrOnce: The texture is mirrored once, then cut off"
+      "Description": "How the texture is sampled outside the 0..1 UV range.\n\nWrap: repeats.\nMirror: repeats mirrored.\nClamp: extends the edge pixels.\nBorder: uses the sampler border color.\nMirrorOnce: mirrors once, then clamps."
     },
     {
       "InputId": "d7bd3003-8589-4537-92e8-e95c5eb2bfab"/*UseMaterialId*/,
@@ -124,6 +122,7 @@
         "X": 1332.4364,
         "Y": 4254.673
       },
+      "Description": "Selects a material by name from the materials available in the current context, instead of the active default material.",
       "Usage": "CustomDropdown"
     },
     {
@@ -132,7 +131,7 @@
         "X": 2404.7104,
         "Y": 4245.523
       },
-      "Description": "This defines whether the mesh covers itself or is covered by or covers other meshes."
+      "Description": "If enabled, the mesh writes into the depth buffer so it can occlude itself and geometry drawn later."
     }
   ],
   "SymbolChildUis": [

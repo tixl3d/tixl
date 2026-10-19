@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "c3cdcbed-7d2e-4f2f-8725-bf18bc4a2b73"/*MeshVolumeForce*/,
-  "Description": "Experimental force that moves particles along a low poly mesh.",
+  "Description": "Uses a mesh as a volume that particles collide with, are attracted to or repelled from.\n\nExperimental. It works like [FieldVolumeForce] but uses the closest face of a mesh instead of a distance field. Each particle checks all faces of the mesh, so it is only suitable for low-poly meshes.\n\nAKA: collider, container\n\nSee also: [FieldVolumeForce], [FollowMeshSurfaceForce]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -10,6 +10,7 @@
         "X": 701.231,
         "Y": 611.45715
       },
+      "Description": "Acceleration outwards for particles inside the volume.",
       "Min": -1.0,
       "Max": 1.0,
       "Scale": 0.02
@@ -21,6 +22,7 @@
         "Y": 646.4574
       },
       "GroupTitle": "Collision",
+      "Description": "Velocity factor applied on collision.",
       "Min": 0.0,
       "Max": 1.0,
       "Scale": 0.01
@@ -31,6 +33,7 @@
         "X": 701.231,
         "Y": 681.4575
       },
+      "Description": "Random variation of the bounciness per particle.",
       "Min": 0.0,
       "Max": 1.0,
       "Scale": 0.01
@@ -40,7 +43,8 @@
       "Position": {
         "X": 574.5167,
         "Y": 1083.565
-      }
+      },
+      "Description": "Reflects the particle velocity at the surface when a particle crosses it."
     },
     {
       "InputId": "95b532a1-23b1-4e83-88e6-f69e7efafb4a"/*InvertVolume*/,
@@ -48,7 +52,8 @@
         "X": 561.231,
         "Y": 751.458
       },
-      "GroupTitle": "Options"
+      "GroupTitle": "Options",
+      "Description": "Swaps inside and outside, e.g. to contain particles inside the mesh."
     },
     {
       "InputId": "9709b1c0-7b4f-46cc-93bf-7405564b514a"/*Mesh*/,
@@ -56,14 +61,16 @@
       "Position": {
         "X": 170.50171,
         "Y": 906.0529
-      }
+      },
+      "Description": "Low-poly mesh used as the volume."
     },
     {
       "InputId": "9e3e295d-ed8a-41b5-91ba-3cd06261b9a2"/*ApplyColorOnCollision*/,
       "Position": {
         "X": 574.5167,
         "Y": 1118.5657
-      }
+      },
+      "Description": "Currently has no effect."
     },
     {
       "InputId": "b4a1c048-f6e1-424e-b63d-c3a1896bffb4"/*Amount*/,
@@ -71,6 +78,7 @@
         "X": 701.231,
         "Y": 506.45715
       },
+      "Description": "Overall strength of the force and of the bounce.",
       "Min": 0.0,
       "Max": 1.0,
       "Scale": 0.001
@@ -81,6 +89,7 @@
         "X": 701.231,
         "Y": 576.45715
       },
+      "Description": "How quickly the attraction decreases with the distance from the surface.",
       "Min": -1.0,
       "Max": 1.0,
       "Scale": 0.02
@@ -91,6 +100,7 @@
         "X": 701.231,
         "Y": 716.458
       },
+      "Description": "Random variation of the reflection direction.",
       "Min": 0.0,
       "Max": 1.0,
       "Scale": 0.01
@@ -102,6 +112,7 @@
         "Y": 541.45715
       },
       "GroupTitle": "Behaviour",
+      "Description": "Acceleration towards the surface for particles outside the volume.",
       "Min": -1.0,
       "Max": 1.0,
       "Scale": 0.02
@@ -111,7 +122,8 @@
       "Position": {
         "X": 714.5167,
         "Y": 1153.5654
-      }
+      },
+      "Description": "Updates each group of particles only every Nth frame to reduce the cost."
     }
   ],
   "SymbolChildUis": [

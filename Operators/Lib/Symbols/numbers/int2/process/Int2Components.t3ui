@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "f86358e0-2573-4acd-9a90-e95108e8a4da"/*Int2Components*/,
-  "Description": "Converts an int2 to 4 single integers\n\nFor the opposite see [Int2]",
+  "Description": "Splits an Int2 into Width and Height, and also outputs their product (Length) and Width / Height (AspectRatio).\n\nFor the opposite see [Int2].\n\nSee also: [Vector2Components]",
   "SymbolTags": "1",
   "InputUis": [
     {

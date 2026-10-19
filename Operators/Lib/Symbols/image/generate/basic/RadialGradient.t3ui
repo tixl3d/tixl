@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "82ad8911-c930-4851-803d-3f24422445bc"/*RadialGradient*/,
-  "Description": "Generates an image with a radial gradient.\n\n\nSimilar Ops: [LinearGradient] [NGon] [RoundedRect] [Rings]  [Blob]",
+  "Description": "Generates a radial gradient around a center point.\n\nAKA: circle, radial, ring, vignette\n\nSee also: [LinearGradient], [BoxGradient], [NGonGradient], [Rings], [Blob]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -37,7 +37,7 @@
         "X": 401.1939,
         "Y": 504.2572
       },
-      "Description": "Applies Gain and Bias before sampling the gradiant.",
+      "Description": "Applies gain and bias to the gradient position before sampling the gradient.",
       "AddPadding": "True",
       "Min": 0.0,
       "Max": 1.0,
@@ -52,7 +52,7 @@
         "X": 401.1939,
         "Y": 364.2572
       },
-      "Description": "Repeats the gradient once.\nThis can be useful for rings."
+      "Description": "Mirrors the gradient once. This can be useful for rings."
     },
     {
       "InputId": "7270a7df-744e-4b66-8f85-71fbdf0848d6"/*BlendMode*/,
@@ -60,7 +60,7 @@
         "X": 401.1939,
         "Y": 469.2572
       },
-      "Description": "Blendmode when applied onto a connected input image."
+      "Description": "Blend mode used to combine the gradient with the connected Image. Ignored without an Image."
     },
     {
       "InputId": "8dbba1ce-eb54-4f52-86dc-6dc94dd3900f"/*Stretch*/,
@@ -68,7 +68,7 @@
         "X": 401.1939,
         "Y": 574.2572
       },
-      "Description": "An additional stretch factor\n",
+      "Description": "Non-uniform scale factor of the gradient.",
       "Min": 0.0,
       "Max": 1.0,
       "Format": "{0:0.000}"
@@ -86,7 +86,7 @@
         "X": 541.1939,
         "Y": 329.2572
       },
-      "Description": "Offsets the gradient. ",
+      "Description": "Offsets the gradient inward or outward.",
       "AddPadding": "True",
       "Min": -0.5,
       "Max": 0.5
@@ -104,7 +104,7 @@
         "X": 541.1939,
         "Y": 294.2572
       },
-      "Description": "The size of the gradient.\nFlips the gradient if smaller than 0.",
+      "Description": "The size of the gradient. Negative values flip it.",
       "AddPadding": "True",
       "Min": 0.0,
       "Max": 1.0
@@ -116,7 +116,7 @@
         "Y": 679.2572
       },
       "GroupTitle": "Texture Options",
-      "Description": "The resolution. \n\nIf 0,0 will use requested resuition of the input resolution if connected."
+      "Description": "Output resolution in pixels. If 0, the resolution of the connected Image or the requested resolution is used."
     },
     {
       "InputId": "dc383dbd-9dab-4bb2-8c6e-7f094e28d8a9"/*PolarOrientation*/,
@@ -125,7 +125,7 @@
         "Y": 434.2572
       },
       "GroupTitle": "Options",
-      "Description": "If enabled switches to a \"star like\" polar coordiante orienation."
+      "Description": "Switches to polar coordinates, which creates a star-like gradient around the center."
     },
     {
       "InputId": "eab31c38-0e6f-432a-9f15-04bfb0aae28c"/*Repeat*/,
@@ -141,7 +141,7 @@
         "X": 541.1939,
         "Y": 644.2572
       },
-      "Description": "Adding slight noise can improve color banding.",
+      "Description": "Adds slight noise to reduce color banding.",
       "Min": 0.0,
       "Max": 0.1,
       "Scale": 0.001,

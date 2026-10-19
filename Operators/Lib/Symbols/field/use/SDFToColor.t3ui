@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "15a1da54-2869-4d98-a61c-aa9fe89b0125"/*SDFToColor*/,
-  "Description": "",
+  "Description": "Maps the distance of an SDF to colors of a gradient.\n\nThis converts a distance field with potentially very large values into colors, e.g. for contour lines or for coloring with [RaymarchField] and [DrawMesh].\n\nSee also: [SetSDFMaterial], [VisualizeFieldDistance]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,6 +10,7 @@
         "X": 1043.1895,
         "Y": 689.105
       },
+      "Description": "Shapes the mapping before the gradient is sampled. 0.5/0.5 is linear.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -30,21 +31,24 @@
       "Position": {
         "X": 1043.1895,
         "Y": 584.105
-      }
+      },
+      "Description": "Centered: the surface maps to the gradient center. FromStart: the surface maps to the gradient start. PingPong and Repeat: the gradient repeats every Range."
     },
     {
       "InputId": "be783e46-ca50-4e9d-9e81-12029c5a3265"/*Range*/,
       "Position": {
         "X": 1043.1895,
         "Y": 619.105
-      }
+      },
+      "Description": "Distance range that is mapped onto the gradient."
     },
     {
       "InputId": "da4a52ab-8bdd-48f8-b530-ff9e6e303b5d"/*Offset*/,
       "Position": {
         "X": 1043.1895,
         "Y": 654.105
-      }
+      },
+      "Description": "Shifts the mapping."
     },
     {
       "InputId": "f3bc8b96-37b8-4be9-9a7c-61acb3e151f9"/*Gradient*/,

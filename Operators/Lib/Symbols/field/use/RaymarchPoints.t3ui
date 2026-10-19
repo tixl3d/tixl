@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "a914c462-b707-4240-b57b-ed0e24e80a94"/*RaymarchPoints*/,
-  "Description": "Moves points along their Z-axis until they hit an SDF surface.\n\nThis can be used for visualizing raymarching or simlurate rays being reflected from an SDF surface.",
+  "Description": "Moves points along their negative Z axis until they hit the surface of an SDF, optionally reflecting them.\n\nEach input point produces a line of points (start, hits and reflections) followed by a separator, which can be drawn with [DrawLines]. This can be used to visualize raymarching or to simulate rays reflected from an SDF surface.\n\nSee also: [SdfReflectionLinePoints], [RaymarchField]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -10,6 +10,7 @@
         "X": 973.82806,
         "Y": 1474.262
       },
+      "Description": "Distance at which a ray counts as hitting the surface.",
       "Min": 0.0
     },
     {
@@ -17,28 +18,32 @@
       "Position": {
         "X": 973.82806,
         "Y": 1579.262
-      }
+      },
+      "Description": "Distance after which a ray stops."
     },
     {
       "InputId": "685b1c07-4696-4a87-bb24-3103122db557"/*WriteStepCountTo*/,
       "Position": {
         "X": 976.59106,
         "Y": 1778.2859
-      }
+      },
+      "Description": "Writes the step or reflection index into F1 or F2."
     },
     {
       "InputId": "71d7f5a5-f13c-40fd-9a28-fbdd64ae07b6"/*MaxSteps*/,
       "Position": {
         "X": 164.88193,
         "Y": 1747.0396
-      }
+      },
+      "Description": "Maximum number of raymarching steps per ray, clamped to 1..100."
     },
     {
       "InputId": "75b28b25-02bf-4926-8d27-2a547231f40a"/*Mode*/,
       "Position": {
         "X": 164.88193,
         "Y": 1800.6741
-      }
+      },
+      "Description": "Raymarch: outputs only the start point and the hit points. KeepSteps: outputs every raymarching step."
     },
     {
       "InputId": "81855333-ab3a-4543-b68c-0eb2f62427b0"/*StepDistanceFactor*/,
@@ -46,6 +51,7 @@
         "X": 973.82806,
         "Y": 1509.262
       },
+      "Description": "Multiplies each step. Values below 1 reduce overshooting for fields with artifacts.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -56,7 +62,8 @@
       "Position": {
         "X": 164.88193,
         "Y": 1903.8231
-      }
+      },
+      "Description": "Number of reflections, clamped to 0..10."
     },
     {
       "InputId": "a21ebc40-ae79-439b-a3e7-d90a50b71ca7"/*Field*/,
@@ -71,7 +78,8 @@
       "Position": {
         "X": 973.8282,
         "Y": 1544.262
-      }
+      },
+      "Description": "Offset used to compute the surface normal for reflections."
     },
     {
       "InputId": "b1dc8336-33e0-4856-ba18-eaac052c5f43"/*Points*/,
@@ -86,7 +94,8 @@
       "Position": {
         "X": 976.59106,
         "Y": 1743.2859
-      }
+      },
+      "Description": "Writes the travelled distance into F1 or F2."
     }
   ],
   "SymbolChildUis": [

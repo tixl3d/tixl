@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "3f6a85be-a837-4681-9c2d-5c87e838f25a"/*ToggleBoolean*/,
-  "Description": "When triggered toggles from true to false and back.",
+  "Description": "Toggles between true and false each time TriggerToggle is set.\n\nThe trigger inputs are reset to false after use, so they are meant to be clicked in the parameter window. For a connected trigger signal use [FlipBool].\n\nSee also: [FlipBool], [FlipFlop]",
   "SymbolTags": "1",
   "InputUis": [
     {

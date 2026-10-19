@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "42c556fb-014b-4ac5-b390-f426ab415aa7"/*FilePathParts*/,
-  "Description": "Extracts directory, filename and extension from a filepath and checks if filepath exists.",
+  "Description": "Extracts directory, filename and extension from a file path and checks if the file exists.",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -10,6 +10,7 @@
         "X": 0.0,
         "Y": 0.0
       },
+      "Description": "Absolute or relative file path. Relative paths are resolved from the working directory, not as project asset addresses.",
       "Usage": "Default"
     }
   ],

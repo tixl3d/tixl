@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "5b911a78-8cad-4dbd-9f74-afccb0cb0787"/*AbsoluteSDF*/,
-  "Description": "Returns the absolute value of the signed distance field\n\nHelpful combination: [CombineSDF] ",
+  "Description": "Takes the absolute value of an SDF's distance, turning every solid into an infinitely thin shell at its surface.\n\nThe inside of the shape gets positive distances, so the surface becomes a hollow boundary. Combine with [PushPullSDF] to give that shell a thickness.\n\nSee also: [InvertSDF], [CombineSDF]",
   "SymbolTags": "8",
   "InputUis": [
     {
