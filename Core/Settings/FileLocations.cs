@@ -137,8 +137,21 @@ public static string TestReferencesFolder => Path.Combine(".tixl", TestsSubFolde
         return sanitized.Length == 0 ? null : sanitized;
     }
 
+    /// <summary>
+    /// Absolute path of a well-known user folder, falling back to <paramref name="fallback"/> if the
+    /// platform can't name one.
+    /// </summary>
+    private static string ResolveUserFolder(Environment.SpecialFolder folder, string fallback)
+    {
+        var path = Environment.GetFolderPath(folder, Environment.SpecialFolderOption.DoNotVerify);
+        return Path.IsPathRooted(path) ? path : fallback;
+    }
+
+    private static readonly string HomeDirectory =
+        ResolveUserFolder(Environment.SpecialFolder.UserProfile, Path.GetTempPath());
+
     public static readonly string SettingsDirectory =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+        Path.Combine(ResolveUserFolder(Environment.SpecialFolder.ApplicationData, Path.Combine(HomeDirectory, ".config")),
                      VersionedAppFolderName
 
                      // Skip process name to avoid double nesting of TiXL
@@ -196,28 +209,27 @@ public static string TestReferencesFolder => Path.Combine(".tixl", TestsSubFolde
         if (OperatingSystem.IsWindows())
         {
             // Local rather than roaming: a shader cache has no business following a user between machines.
-            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            return Path.Combine(ResolveUserFolder(Environment.SpecialFolder.LocalApplicationData,
+                                                  Path.Combine(HomeDirectory, "AppData", "Local")),
                                 VersionedAppFolderName);
         }
 
-        var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-
         if (OperatingSystem.IsMacOS())
         {
-            return Path.Combine(home, "Library", "Caches", VersionedAppFolderName);
+            return Path.Combine(HomeDirectory, "Library", "Caches", VersionedAppFolderName);
         }
 
         // The XDG base directory spec: $XDG_CACHE_HOME, or ~/.cache when it is unset or not absolute.
         var configured = Environment.GetEnvironmentVariable("XDG_CACHE_HOME");
         var cacheRoot = !string.IsNullOrWhiteSpace(configured) && Path.IsPathRooted(configured)
                             ? configured
-                            : Path.Combine(home, ".cache");
+                            : Path.Combine(HomeDirectory, ".cache");
 
         return Path.Combine(cacheRoot, VersionedAppFolderName);
     }
 
     public static readonly string DefaultProjectFolder =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+        Path.Combine(ResolveUserFolder(Environment.SpecialFolder.MyDocuments, Path.Combine(HomeDirectory, "Documents")),
                      VersionedAppFolderName);
     public const string LegacyResourcesSubfolder = "Resources";
     public const string AssetsSubfolder = "Assets";

@@ -64,12 +64,16 @@ public sealed class EditorFixture : IDisposable
     /// <summary>Locates the _agentTests source folder (for reload tests), tolerant of the TiXL version folder name.</summary>
     public static string FindPlaygroundSourceFile()
     {
-        var documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-        foreach (var versionDir in Directory.GetDirectories(documents, "TiXL*"))
+        // DoNotVerify: a missing ~/Documents would otherwise come back as an empty string.
+        var documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments, Environment.SpecialFolderOption.DoNotVerify);
+        if (Directory.Exists(documents))
         {
-            var candidate = Path.Combine(versionDir, "_agentTests", "Symbols", "_agentTests.cs");
-            if (File.Exists(candidate))
-                return candidate;
+            foreach (var versionDir in Directory.GetDirectories(documents, "TiXL*"))
+            {
+                var candidate = Path.Combine(versionDir, "_agentTests", "Symbols", "_agentTests.cs");
+                if (File.Exists(candidate))
+                    return candidate;
+            }
         }
 
         throw new FileNotFoundException("Can't locate _agentTests/Symbols/_agentTests.cs under Documents/TiXL*");
