@@ -167,14 +167,6 @@
       }
     },
     {
-      "ChildId": "4a489101-a5f9-4f7e-a8b6-73f2620eabd8",
-      "SymbolName": "Types.Gfx.PixelShaderStage",
-      "Position": {
-        "X": 2159.7332,
-        "Y": 4284.996
-      }
-    },
-    {
       "ChildId": "531baace-c8ad-4095-ad0c-af6bf2e93627",
       "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
       "Position": {
@@ -289,14 +281,6 @@
       "Position": {
         "X": 1682.9324,
         "Y": 4045.0068
-      }
-    },
-    {
-      "ChildId": "c66f4fe5-aa4b-41bd-b299-af722d8002fb",
-      "SymbolName": "Types.Gfx.VertexShaderStage",
-      "Position": {
-        "X": 2159.7332,
-        "Y": 4042.997
       }
     },
     {

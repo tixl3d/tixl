@@ -72,6 +72,7 @@ internal sealed class _SpecularPrefilter : Instance<_SpecularPrefilter>
         if (vs == null)
         {
             Log.Warning( $"{nameof(_SpecularPrefilter)} requires valid vertex shader", SymbolChildId );
+            Restore();
             return;
         }
         
@@ -88,6 +89,7 @@ internal sealed class _SpecularPrefilter : Instance<_SpecularPrefilter>
         if (gs == null)
         {
             Log.Warning( $"{nameof(_SpecularPrefilter)} requires valid geometry shader", SymbolChildId );
+            Restore();
             return;
         }
             
@@ -105,6 +107,7 @@ internal sealed class _SpecularPrefilter : Instance<_SpecularPrefilter>
         if (ps == null)
         {
             Log.Warning( $"{nameof(_SpecularPrefilter)} requires valid pixel shader", SymbolChildId );
+            Restore();
             return;
         }
         psStage.Set(ps);
