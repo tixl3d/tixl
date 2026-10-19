@@ -42,7 +42,7 @@
         "X": 973.82806,
         "Y": 1579.262
       },
-      "Description": "We have to rely on the field's gradient to estimate step direction.\nDepending on the provided field, increasing this distance \"blurs\" the field and thus helps with local inconsistencies."
+      "Description": "Distance used to estimate the field gradient that defines the step direction.\n\nDepending on the field, increasing this distance blurs the field and helps with local inconsistencies."
     },
     {
       "InputId": "cc76145b-dc10-4c36-b45b-2549c026cb12"/*MinDistance*/,
@@ -59,7 +59,7 @@
         "X": 973.82806,
         "Y": 1544.262
       },
-      "Description": "We have to rely on the field's gradient to estimate the marching directions.\nThis factor is applied on the distance field steps and can help with fields that don't have a constant Lipschitz property.",
+      "Description": "Multiplies each marching step. Values below 1 help with fields that do not provide exact distances.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,

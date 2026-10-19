@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "592a2b6f-d4e3-43e0-9e73-034cca3b3900"/*ImageLevels*/,
-  "Description": "Visualizes the image brightness distribution of an image.\nSee also [CompareImages] [WaveForm]",
+  "Description": "Overlays a graph of the RGB and alpha values of the pixels along a line through the image.\n\nThe line is defined by Center and Rotation; the graph is drawn next to it. Useful to check gradients, clipping and HDR values.\n\nSee also: [CompareImages], [WaveForm]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -11,6 +11,7 @@
         "Y": 227.14226
       },
       "GroupTitle": "Visualizer",
+      "Description": "Position of the sampled line.",
       "Min": -1.0,
       "Max": 1.0,
       "Scale": 0.001,
@@ -22,6 +23,7 @@
         "X": 45.18695,
         "Y": 297.14227
       },
+      "Description": "Height of the graph area.",
       "AddPadding": "True"
     },
     {
@@ -30,6 +32,7 @@
         "X": -94.81305,
         "Y": 367.14224
       },
+      "Description": "The value range shown in the graph area. Increase the upper value to inspect HDR values above 1.",
       "UseVec2Control": "Range"
     },
     {
@@ -38,7 +41,8 @@
         "X": 45.18695,
         "Y": 437.14227
       },
-      "GroupTitle": "Image"
+      "GroupTitle": "Image",
+      "Description": "Opacity of the input image behind the graph."
     },
     {
       "InputId": "f1084d72-f8b8-4723-82be-e1e98880faf3"/*Rotation*/,
@@ -46,6 +50,7 @@
         "X": 45.18695,
         "Y": 332.14224
       },
+      "Description": "Rotation of the sampled line in degrees.",
       "Min": -90.0,
       "Max": 90.0,
       "Format": "{0:0.000}°"

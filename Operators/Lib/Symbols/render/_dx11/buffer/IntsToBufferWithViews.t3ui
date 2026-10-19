@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "c036b4f2-97bf-40f1-b4d5-c2067a4fa97f"/*IntsToBufferWithViews*/,
-  "Description": "",
+  "Description": "Uploads the connected integers as a structured buffer with views.",
   "InputUis": [
     {
       "InputId": "fc2f2627-889e-469b-b57d-c9b855883759"/*Lists*/,

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "587dbb73-fd79-4481-a79e-f77055abda9a"/*FreezeValue*/,
-  "Description": "Keeps the current input value as long as Keep is true.\nThis can be useful for building interactive features like stopwatches.",
+  "Description": "Holds the input value depending on the Freeze input.\n\nThis can be useful for building interactive features like stopwatches. The second output gives the difference between the current and the frozen value.\n\nAKA: hold, sampleandhold, latch",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -17,7 +17,8 @@
       "Position": {
         "X": -200.0,
         "Y": 225.0
-      }
+      },
+      "Description": "FreezeWhileTrue: the output stops changing while Freeze is true.\nUpdateWhenSwitchingToTrue: the value is captured each time Freeze switches to true and held otherwise."
     },
     {
       "InputId": "b53df009-a0eb-46c9-90db-04d8ccdb0ae4"/*Freeze*/,

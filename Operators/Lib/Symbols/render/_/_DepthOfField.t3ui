@@ -1,8 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "2cd650a1-5b77-4040-895b-6049dc09206e"/*_DepthOfField*/,
-  "Description": "Internal implementation of the Depth of Field effect.\n\nThis is an internal component of [DepthOfField].",
-  "SymbolTags": "4096",
+  "Description": "Internal helper. Implementation of the [DepthOfField] effect.",
+  "SymbolTags": "4112",
   "InputUis": [
     {
       "InputId": "01773066-ea85-488d-abb3-a08e4afcb95c"/*Resolution*/,

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "3ba13faf-ea80-44ec-948a-02ed3d653a20"/*Sub*/,
-  "Description": "Subtracts two float values.",
+  "Description": "Subtracts Input2 from Input1.\n\nAKA: subtract, minus\n\nSee also: [Add]",
   "SymbolTags": "1",
   "InputUis": [
     {

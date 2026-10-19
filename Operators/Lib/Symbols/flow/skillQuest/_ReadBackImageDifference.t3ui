@@ -1,7 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "53a8a318-81dc-4c76-96a1-f86d0e2fb1d7"/*_ReadBackImageDifference*/,
-  "Description": "An internal operator the reads back the resulte of an image comparison to CPUI.",
+  "Description": "Internal helper. Reads back the result of an image comparison to the CPU.",
+  "SymbolTags": "16",
   "InputUis": [
     {
       "InputId": "18306295-6ea8-48f9-87bb-fc36fa1ab10c"/*Differences*/,

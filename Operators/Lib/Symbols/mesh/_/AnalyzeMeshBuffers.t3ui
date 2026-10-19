@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "e43370a7-dafd-48b0-bac6-f30ea1bcf4cb"/*AnalyzeMeshBuffers*/,
-  "Description": "An internal helper that exposes the count and size of mesh buffers. It's used by CombineMeshBuffers to iterate over the meshes to be combined.",
+  "Description": "Internal helper that outputs the counts and buffer offsets of a list of meshes.\n\nFor the mesh selected by Index it outputs its vertex and index buffers and their start positions within the combined buffers, plus the total vertex and index counts of all connected meshes. Used by [CombineMeshes] to iterate over the meshes to be combined.",
   "SymbolTags": "16",
   "InputUis": [
     {
@@ -10,7 +10,8 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "The mesh whose buffers and start positions are output. Clamped to the connected range."
     },
     {
       "InputId": "f16e43eb-36ab-4104-aca3-afe8617ee9da"/*Meshes*/,

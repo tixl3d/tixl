@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "48ab9824-76ca-4238-800f-9cf95311e6c0"/*CombineStrings*/,
-  "Description": "Combines any number with strings with the provided optional separator.\n\nTo add line breaks use \"\\n\".\n\nAlternative titles: Concat, Join",
+  "Description": "Combines any number of strings with an optional separator.\n\nAKA: concat, join, append\n\nSee also: [JoinStringList]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -19,7 +19,7 @@
         "X": 0.0,
         "Y": 45.0
       },
-      "Description": "Optional separator inserted between elements. \nUse \"\\n\" to insert line breaks.",
+      "Description": "Optional separator inserted between elements.\nUse \"\\n\" to insert line breaks.",
       "Usage": "Default"
     }
   ],

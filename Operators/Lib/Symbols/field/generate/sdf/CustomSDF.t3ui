@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "637d00e4-ab63-4fe3-8e63-1e206c728841"/*CustomSDF*/,
-  "Description": "Creates a custom distance field (SDF) from a short HLSL code fragment.\n\nWrite the body of a distance function: `p` is the sample position; return the signed distance to the surface. Offset, A, B and C are available as parameters, and a GLSL-style mod() is predefined. The default code generates a sphere; explore the presets for many fractal examples.\n\nRender the result with [RaymarchField], visualize it with [VisualizeFieldDistance], and modify it with [BendField], [TransformField], [PolarRepeat] and more. For an interactive tutorial see [HowToRaymarchField].\n\nSimilar nodes: [BoxSDF], [CapsuleLineSDF], [FractalSDF].\n\nFull documentation: https://help.tixl.app/advanced/UsingCustomShaders/",
+  "Description": "Creates an SDF from a short HLSL code fragment.\n\nDistanceFunction is the body of a function: `p` is the sample position (float3), and the code must return the signed distance to the surface. Offset, A, B and C are available as parameters, and a GLSL-style mod() is predefined. The default code generates a sphere; the presets contain many fractal examples.\n\nRender the result with [RaymarchField] and inspect it with [VisualizeFieldDistance]. Modify it with [TransformField], [BendField], [RepeatPolar] and other field operators.\n\nSee also: [FractalSDF], [BoxSDF]\n\nFull documentation: https://help.tixl.app/advanced/UsingCustomShaders/",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,6 +10,7 @@
         "X": -200.0,
         "Y": 0.0
       },
+      "Description": "Generic parameter available as A in the code.",
       "AddPadding": "True",
       "Min": -1.0,
       "Max": 1.0,
@@ -21,6 +22,7 @@
         "X": -200.0,
         "Y": 225.0
       },
+      "Description": "Optional HLSL code inserted before the function, e.g. for helper functions or #defines.",
       "Usage": "Multiline"
     },
     {
@@ -29,6 +31,7 @@
         "X": -200.0,
         "Y": 150.0
       },
+      "Description": "Generic parameter available as C in the code.",
       "Min": -1.0,
       "Max": 1.0,
       "Scale": 0.001
@@ -39,7 +42,8 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "GroupTitle": "Optional Parameters"
+      "GroupTitle": "Optional Parameters",
+      "Description": "Generic float3 parameter available as Offset in the code."
     },
     {
       "InputId": "874ae9c8-5835-4d0c-9bef-253ac75d19b2"/*B*/,
@@ -47,6 +51,7 @@
         "X": -200.0,
         "Y": 75.0
       },
+      "Description": "Generic parameter available as B in the code.",
       "Max": 1.0,
       "Scale": 0.001
     },
@@ -57,6 +62,7 @@
         "Y": 0.0
       },
       "GroupTitle": " FUNC(p, Offset, A,B,C) { ... }",
+      "Description": "HLSL function body that returns the distance for position p.",
       "Usage": "Multiline"
     }
   ],

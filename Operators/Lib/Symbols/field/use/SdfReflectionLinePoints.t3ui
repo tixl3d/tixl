@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "4af7bbd1-9231-4ef3-bb7a-1d643c7d16cf"/*SdfReflectionLinePoints*/,
-  "Description": "Moves points along their Z-axis until they hit an SDF surface.\n\nThis can be used for visualizing raymarching or simlurate rays being reflected from an SDF surface.",
+  "Description": "Shoots rays from points along their negative Z axis and reflects them on the surface of an SDF, outputting the ray paths as lines.\n\nEach input point produces a line of points followed by a separator, which can be drawn with [DrawLines].\n\nSee also: [RaymarchPoints], [RaymarchField]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": 477.1128,
         "Y": 1375.6528
-      }
+      },
+      "Description": "Number of reflections, clamped to 0..10."
     },
     {
       "InputId": "403f823d-043b-4009-b00f-e90aa154f30f"/*MinDistance*/,
@@ -17,6 +18,7 @@
         "X": 973.82806,
         "Y": 1474.262
       },
+      "Description": "Distance at which a ray counts as hitting the surface.",
       "Min": 0.0,
       "Scale": 0.01
     },
@@ -33,7 +35,8 @@
       "Position": {
         "X": 973.8281,
         "Y": 1826.3635
-      }
+      },
+      "Description": "Writes the travelled distance into F1 or F2."
     },
     {
       "InputId": "94c84de7-ac0c-48c1-9a45-f2d39ab6513f"/*MaxDistance*/,
@@ -41,6 +44,7 @@
         "X": 973.82806,
         "Y": 1579.262
       },
+      "Description": "Distance after which a ray stops.",
       "Scale": 0.01
     },
     {
@@ -49,6 +53,7 @@
         "X": 973.82806,
         "Y": 1509.262
       },
+      "Description": "Multiplies each step. Values below 1 reduce overshooting for fields with artifacts.",
       "Min": 0.0,
       "Max": 1.0,
       "Scale": 0.01,
@@ -61,6 +66,7 @@
         "X": 973.8282,
         "Y": 1544.262
       },
+      "Description": "Offset used to compute the surface normal for reflections.",
       "Scale": 0.01
     },
     {
@@ -68,7 +74,8 @@
       "Position": {
         "X": 833.8282,
         "Y": 1756.3635
-      }
+      },
+      "Description": "Maximum number of raymarching steps per ray, clamped to 1..100."
     },
     {
       "InputId": "c4e2297a-dd91-4162-8f2c-e968d8529158"/*Points*/,
@@ -83,7 +90,8 @@
       "Position": {
         "X": 973.8281,
         "Y": 1861.3635
-      }
+      },
+      "Description": "Writes the step or reflection index into F1 or F2."
     }
   ],
   "SymbolChildUis": [

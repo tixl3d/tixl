@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "63e6e642-827b-4518-ac64-9ab0a8d4391e"/*PickFloat*/,
-  "Description": "Picks a value from the connected float inputs.",
+  "Description": "Picks one of the connected float inputs by index.\n\nThe index wraps around, so it can count up continuously.\n\nAKA: switch, select, choose\n\nSee also: [PickFloatFromList], [BlendValues]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": -200.0,
         "Y": 45.0
       },
-      "Description": "Selects which of the connected values is used as an output",
+      "Description": "Selects which of the connected values is output. Wraps around the number of connections.",
       "AddPadding": "True"
     },
     {
@@ -19,8 +19,7 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      },
-      "Description": "Input for one or more Float values"
+      }
     }
   ],
   "SymbolChildUis": [],

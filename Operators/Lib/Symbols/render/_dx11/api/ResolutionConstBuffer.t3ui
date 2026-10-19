@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "38e88910-6063-41d1-840b-8aeeb0eeccc0"/*ResolutionConstBuffer*/,
-  "Description": "Sadly, it's not possible to get the resolution of the image a FragmentShader is currently writing into.\nThis helper operator provides a Constant Buffer that can be bound to a shader to get this information.\n\nIn most use-cases it is probably more convenient to use [RequestedResolution] with [FloatsToBuffer] or [IntsToBuffer]. ",
+  "Description": "Provides a constant buffer with a resolution (width and height as floats).\n\nA pixel shader cannot query the size of the render target it writes into, so this buffer passes it explicitly.\n\nTips:\n- In most cases [RequestedResolution] with [FloatsToBuffer] or [IntsToBuffer] is more convenient.",
   "SymbolTags": "8",
   "InputUis": [
     {

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "947ad81e-47da-46c3-9b1d-8e578174d876"/*DefineLensFlare*/,
-  "Description": "Generates a list of sprite positions that can be joined and rendered as sprites. ",
+  "Description": "Generates a list of lens flare sprite definitions for the point lights in the scene.\n\nThe sprites are distributed on the line between the screen position of each light and the screen center. Lights behind the camera produce sprites with zero size. The list is used inside [LenseFlareSetup] and can be drawn with [DrawLensShimmer].",
   "SymbolTags": "16",
   "InputUis": [
     {
@@ -30,7 +30,7 @@
         "Y": 765.0
       },
       "GroupTitle": "Effects for Zones",
-      "Description": "An effect that is added to the brightness if the sprites or light are inside one of the defined effect zones)."
+      "Description": "Scales the sprite size by (1 + FxZoneScale) inside the effect zones."
     },
     {
       "InputId": "1c11cb25-05f8-4422-aa16-db57e8cd2e0b"/*EdgeFxZone*/,
@@ -71,14 +71,15 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "Description": "Restrict the lens flare to the single light. Use -1 to apply to all."
+      "Description": "Restricts the lens flare to a single light. Use -1 for all lights."
     },
     {
       "InputId": "520ee127-f542-4ad8-a6ea-4a24a70ade4d"/*FxZoneBrightness*/,
       "Position": {
         "X": -200.0,
         "Y": 810.0
-      }
+      },
+      "Description": "Brightness added to sprites inside the effect zones."
     },
     {
       "InputId": "53351cf3-71a5-4cb3-ad81-60abc7718d4b"/*RandomizeColor*/,
@@ -136,6 +137,7 @@
         "X": -200.0,
         "Y": 90.0
       },
+      "Description": "Multiplied with the sprite opacity. At 0 no sprites are generated.",
       "AddPadding": "True",
       "Min": 0.0,
       "Max": 100.0,
@@ -148,7 +150,8 @@
       "Position": {
         "X": -200.0,
         "Y": 495.0
-      }
+      },
+      "Description": "Currently unused. The texture index of each sprite is randomized."
     },
     {
       "InputId": "bc1d9fdc-ea07-4c0d-be2d-02fa955f9e5a"/*RandomizeSpread*/,
@@ -174,7 +177,7 @@
         "Y": 630.0
       },
       "GroupTitle": "FX Zones",
-      "Description": "Effect zones define screen regions (e.g. on the center or edges) that can trigger effects defined further below."
+      "Description": "Effect zones define screen regions (e.g. the center or the edges) that trigger the effects defined below.\n\nObjects: zones are tested at each sprite position.\nLights: zones are tested at the screen position of the light.\nOff currently behaves like Objects."
     },
     {
       "InputId": "c8347ca9-c700-4195-a23f-0f220f5823e2"/*Stretch*/,
@@ -192,7 +195,7 @@
         "Y": 180.0
       },
       "GroupTitle": "Size and Rotation",
-      "Description": "The overall size of the sprites. This should be large for [DrawLenseShimmer] ",
+      "Description": "The overall size of the sprites. This should be large for [DrawLensShimmer].",
       "Min": 0.0,
       "Max": 0.1
     },

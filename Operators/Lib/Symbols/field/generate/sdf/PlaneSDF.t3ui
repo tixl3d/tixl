@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "883e01f5-44ee-4724-9e6e-f885255c17e5"/*PlaneSDF*/,
-  "Description": "Creates a flat surface as an SDF field.\nGenerates a procedural flat surface field which can be rendered with [RaymarchField] and visualized with [VisualizeFieldDistance].\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline for signed distance fields, see [HowToRaymarchField].\n\nIt can be modified with [BendField], [TransformField], [PolarRepeat] and more.\n\nSimilar nodes: [BoxSDF], [ChainLinkSDF], [FractalSDF].\n\nTo use a Mesh made of polygons refer to [QuadMesh].",
+  "Description": "Generates an infinite flat plane as an SDF.\n\nEverything below the plane (opposite to its normal) is inside. Render the result with [RaymarchField] and inspect it with [VisualizeFieldDistance]. Modify it with [TransformField], [BendField], [RepeatPolar] and other field operators.\n\nSee also: [RotatedPlaneSDF], [QuadMesh]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -9,14 +9,16 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Position on the plane."
     },
     {
       "InputId": "99fca01a-e0a6-49dc-9535-ebde0f5f8744"/*Axis*/,
       "Position": {
         "X": -200.0,
         "Y": 150.0
-      }
+      },
+      "Description": "Direction of the plane normal. The Neg variants flip the inside and outside."
     }
   ],
   "SymbolChildUis": [],

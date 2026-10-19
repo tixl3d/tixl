@@ -8,14 +8,16 @@
       "Position": {
         "X": 0.0,
         "Y": 135.0
-      }
+      },
+      "Description": "Blends the profile between a straight chamfer (0) and a circular arc (1)."
     },
     {
       "InputId": "3f8b1c4d-92e6-4a17-b5d0-6a4c8e2f7d19"/*RoundCorners*/,
       "Position": {
         "X": 0.0,
         "Y": 225.0
-      }
+      },
+      "Description": "Builds rounded patches at the vertices instead of flat fans. Needs more than one segment."
     },
     {
       "InputId": "46a2c9e2-7b5d-45ce-9955-b1c0b1bb01db"/*Geometry*/,
@@ -30,28 +32,32 @@
       "Position": {
         "X": 0.0,
         "Y": 270.0
-      }
+      },
+      "Description": "Computes the result on a background thread. The previous result stays visible until the new one is ready."
     },
     {
       "InputId": "c86a32c2-feeb-4c05-b2c0-cf54076247bb"/*FlatShading*/,
       "Position": {
         "X": 0.0,
         "Y": 180.0
-      }
+      },
+      "Description": "Uses flat normals for every bevel facet."
     },
     {
       "InputId": "ce40061f-b853-41be-bbef-0db172bbad7f"/*Width*/,
       "Position": {
         "X": 0.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Bevel width in world units. Clamped to 35% of the shortest edge so opposite bevels cannot cross."
     },
     {
       "InputId": "e9085eac-dc15-4ecf-862d-869e66981418"/*Segments*/,
       "Position": {
         "X": 0.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Number of segments of the bevel profile, clamped to 1..16."
     }
   ],
   "SymbolChildUis": [],

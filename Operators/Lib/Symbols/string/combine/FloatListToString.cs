@@ -39,11 +39,14 @@ internal sealed class FloatListToString : Instance<FloatListToString>
         {
             _stringBuilder.Clear();
                 
+            var isCompositeFormat = format.Contains('{');
             if (values != null)
             {
                 foreach (var v in values)
                 {
-                    _stringBuilder.Append(v.ToString(format, CultureInfo.InvariantCulture));
+                    _stringBuilder.Append(isCompositeFormat
+                                              ? string.Format(CultureInfo.InvariantCulture, format, v)
+                                              : v.ToString(format, CultureInfo.InvariantCulture));
                     _stringBuilder.Append(sep);
                 }
             }

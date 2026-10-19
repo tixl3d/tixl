@@ -1,7 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "eff96322-0e4e-42d6-93de-18451b56ae31"/*_SDFToColor_Old*/,
-  "Description": "Remaps an SDF function distance to colors or values.\n\nThis can be useful to convert a Signed Distance Function with a potentially very large distance to a value range that can be used for colors for effects.",
+  "Description": "Obsolete. Use [SDFToColor] instead.\n\nMaps the distance of an SDF to a color gradient.",
+  "SymbolTags": "4096",
   "InputUis": [
     {
       "InputId": "422ff7d0-b5b8-441b-baea-03744dc320ad"/*InputField*/,
@@ -17,6 +18,7 @@
         "X": 988.06616,
         "Y": 615.512
       },
+      "Description": "The distance is divided by (Y - X) and offset by X before the gradient is sampled.",
       "UseVec2Control": "Range"
     },
     {

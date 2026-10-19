@@ -16,14 +16,16 @@
       "Position": {
         "X": 0.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Number of parts to keep. 0 keeps all parts from Start on."
     },
     {
       "InputId": "8e2c4b70-5f9a-4d16-b3c8-a0d7e1f5c394"/*Start*/,
       "Position": {
         "X": 0.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Index of the first part to keep. Negative values count from the end."
     }
   ],
   "SymbolChildUis": [],

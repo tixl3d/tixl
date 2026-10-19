@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "cd9f16bc-5306-458c-aff8-1cca3bb24469"/*Abs*/,
-  "Description": "The absolute value of a number.",
+  "Description": "Outputs the absolute value of a number.\n\nAKA: absolute, magnitude",
   "SymbolTags": "1",
   "InputUis": [
     {

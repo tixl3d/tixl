@@ -16,7 +16,7 @@ internal sealed class _DoyleSpiralRoot : Instance<_DoyleSpiralRoot>
     {
         A.UpdateAction += Update;
         B.UpdateAction += Update;
-        B.UpdateAction += Update;
+        R.UpdateAction += Update;
     }
         
 

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "cdf5dd6a-73dc-4779-a366-df19b69071a6"/*DrawCamGizmos*/,
-  "Description": "An attempt to draw camera gizmos.",
+  "Description": "Draws gizmos for all cameras in the current composition.\n\nEach camera is drawn as a camera shape at its position and orientation. Cameras that have not been evaluated recently fade out.\n\nSee also: [GetAllCameras], [VisualizeCamTrail]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,14 +9,16 @@
       "Position": {
         "X": 473.1425,
         "Y": 112.86983
-      }
+      },
+      "Description": "Scale of the camera gizmos."
     },
     {
       "InputId": "f322ca22-8200-449c-b09b-618cddf488d3"/*Visibility*/,
       "Position": {
         "X": 564.50397,
         "Y": 388.8725
-      }
+      },
+      "Description": "Controls when the gizmos are drawn. Inherit follows the gizmo toggle of the output window."
     }
   ],
   "SymbolChildUis": [

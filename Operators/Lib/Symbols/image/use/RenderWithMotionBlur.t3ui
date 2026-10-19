@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "0989e44b-f543-4b9a-a08e-5058d0032259"/*RenderWithMotionBlur*/,
-  "Description": "This will render multiple instances of the incoming op each pass with slightly offset local time. \nIts primary purpose is to increase rendering quality for output with Render to Image Sequences or Video. Depending on the complexity of the graph, this effect can be very slow. You can use [HasTimeChanged] with Mode=AdvancedWithMotionBlur to trigger updates to the first pass. This can be useful for simulation or feedback effects. Tip: When rendering videos or sequences, you can override the sample count.\n\nAs an alternative: See [MotionBlur] for an operator that requires far fewer resources because it uses real-time camera data such as motion vectors.\n\nAlso see: [DepthOfField]\n\n\nUseful Ops for a PostFX Pipeline: [MotionBlur] [DepthOfField] [ChromaticAbberation] [Glow] [Grain] [Blur]",
+  "Description": "Renders the incoming graph several times per frame with slightly offset local time and averages the results to create motion blur.\n\nIts main purpose is to increase the quality of rendered image sequences or videos. Depending on the complexity of the graph, this can be very slow. [HasTimeChanged] with Mode AdvancedWithMotionBlur can trigger updates only for the first pass, which is useful for simulations or feedback effects.\n\nAKA: motionblur, shutter, accumulation\n\nTips:\n- When rendering videos or sequences, the sample count can be overridden.\n\nSee also: [MotionBlur], [DepthOfField]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -24,7 +24,7 @@
         "X": 527.9105,
         "Y": 18.111664
       },
-      "Description": "Controls the strength of the blur.\n\nProTip: For precise adjustment, it can be helpful to reduce the passes to \"2\" making the strength clearly visible.",
+      "Description": "Strength of the blur, i.e. the time range covered by the passes.\n\nTips:\n- For precise adjustment, reduce Passes to 2 to make the strength clearly visible.",
       "Min": 0.1,
       "Max": 3.0,
       "Scale": 0.001,

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "549ec76b-cc65-47b7-ad41-0abe93e86fe3"/*SmoothStep*/,
-  "Description": "Smoothes an incoming animated value\n\nFor an alternative with more options see [Damp]",
+  "Description": "Remaps a value between Min and Max to a smooth 0 to 1 transition.\n\nOutputs 0 for values below Min, 1 for values above Max, and an S-shaped smootherstep curve in between.\n\nAKA: smootherstep, fade, ease\n\nSee also: [Remap], [Sigmoid], [Damp]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "Description": "Defines the degree to which falling/lower values are drawn smoothly"
+      "Description": "Input value where the output is 0."
     },
     {
       "InputId": "338e3b0b-4012-4c7d-899b-12b7384f5a80"/*Max*/,
@@ -18,7 +18,7 @@
         "X": -200.0,
         "Y": 45.0
       },
-      "Description": "Defines the degree to which rising/high values are drawn smoothly"
+      "Description": "Input value where the output is 1."
     },
     {
       "InputId": "fe01e41c-bd3b-441c-82f6-6c972097e155"/*Value*/,

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "6415ed0e-3692-45e2-8e70-fe0cf4d29ebc"/*OrbitCamera*/,
-  "Description": "Provides common camera movement utilities for an easy dynamic camera setup.\n\nThis operator was previously known as RandomCamera.",
+  "Description": "Sets a camera that orbits around the scene with optional random wobble for an easy dynamic camera setup.\n\nEach angle input combines a base value in degrees (X) with a random wobble range (Y) that is animated with Perlin noise controlled by WobbleSpeed, WobbleComplexity and Seed. The Reference output can be used like that of a [Camera].\n\nThis operator was previously known as RandomCamera.\n\nAKA: turntable, orbit, random, shake, handheld\n\nSee also: [Camera], [ActionCamera]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": -224.62245,
         "Y": -129.46722
       },
-      "Description": "X = Turns the camera view to the left or right\nY = Defines how much may be deviated from the first value at random",
+      "Description": "X = Turns the view direction left or right in degrees\nY = Random wobble range in degrees",
       "Min": -180.0,
       "Max": 180.0,
       "Format": "{0:0.0}°"
@@ -21,14 +21,15 @@
         "X": -224.62245,
         "Y": 5.532776
       },
-      "Description": "Defines the complexity with which the random values fluctuate"
+      "Description": "Number of noise octaves for the wobble (1 to 8)."
     },
     {
       "InputId": "11b13db2-3c91-4199-8245-50af200e3a9d"/*PositionOffset*/,
       "Position": {
         "X": -224.62245,
         "Y": 230.53278
-      }
+      },
+      "Description": "Offsets the camera position, rotated with the orbit."
     },
     {
       "InputId": "1af76b2e-cffe-4e3f-8793-c7a59d00430b"/*AimRollAngleAndWobble*/,
@@ -36,7 +37,7 @@
         "X": -224.62245,
         "Y": -219.46722
       },
-      "Description": "X = Rolls the camera to the right or left\nY = Defines how much may be deviated from the first value at random",
+      "Description": "X = Rolls the camera in degrees\nY = Random wobble range in degrees",
       "Min": -180.0,
       "Max": 180.0,
       "Format": "{0:0.0}°"
@@ -72,7 +73,8 @@
       "Position": {
         "X": -224.62245,
         "Y": 320.53278
-      }
+      },
+      "Description": "If connected, replaces the local time used for spinning and wobble."
     },
     {
       "InputId": "4d2d2d2d-00bd-4df9-b209-62f0c7926c38"/*AimPitchAngleAndWobble*/,
@@ -80,7 +82,7 @@
         "X": -224.62245,
         "Y": -174.46722
       },
-      "Description": "X = Camera Pitch\nY = Defines how much may be deviated from the first value at random",
+      "Description": "X = Turns the view direction up or down in degrees\nY = Random wobble range in degrees",
       "Min": -180.0,
       "Max": 180.0,
       "Format": "{0:0.0}°"
@@ -91,7 +93,7 @@
         "X": -224.62245,
         "Y": -84.467224
       },
-      "Description": "X = Same as \"SpinOffset\"\nY = Defines how much may be deviated from the first value at random",
+      "Description": "X = Additional orbit angle in degrees, same as SpinOffset\nY = Random wobble range in degrees",
       "Min": -180.0,
       "Max": 180.0,
       "Format": "{0:0.0}°"
@@ -103,7 +105,7 @@
         "Y": -264.46722
       },
       "GroupTitle": "Wobble Ranges",
-      "Description": "X = The height at which the camera rotates around the target\nY = Defines how much may be deviated from the first value at random",
+      "Description": "X = Elevation angle of the orbit in degrees\nY = Random wobble range in degrees",
       "Min": -89.0,
       "Max": 89.0,
       "Scale": 1.0,
@@ -117,7 +119,7 @@
         "X": -224.62245,
         "Y": -309.46722
       },
-      "Description": "Value in degrees that is added to the \"SpinRate\"",
+      "Description": "Orbit angle offset in degrees.",
       "Min": -360.0,
       "Max": 360.0,
       "Scale": 1.0,
@@ -130,7 +132,7 @@
         "X": -224.62245,
         "Y": -519.9833
       },
-      "Description": "Position of the camera target",
+      "Description": "Point the camera looks at. Note that the orbit itself stays centered around the world origin.",
       "AddPadding": "True"
     },
     {
@@ -140,7 +142,7 @@
         "Y": -39.467224
       },
       "GroupTitle": "Wobble Settings",
-      "Description": "Defines how quickly the Y values vary in the \"Wobble Settings\"."
+      "Description": "Speed of the random wobble of all angle inputs."
     },
     {
       "InputId": "bd1bc8a5-72ce-42b0-8914-4f6e124a18ae"/*AspectRatio*/,
@@ -148,7 +150,7 @@
         "X": -224.62245,
         "Y": 230.53278
       },
-      "Description": "Defines the aspect ratio"
+      "Description": "For values of 0 or below, the aspect ratio of the current render resolution is used."
     },
     {
       "InputId": "c81b91c6-2d06-4e3e-97bd-01d60f5f0f7d"/*RotationOffset*/,
@@ -156,7 +158,7 @@
         "X": -224.62245,
         "Y": 185.53278
       },
-      "Description": "Camera Rotation offset",
+      "Description": "Additional aim rotation in degrees (X: yaw, Y: pitch, Z: roll).",
       "AddPadding": "True"
     },
     {
@@ -165,7 +167,7 @@
         "X": -224.62245,
         "Y": 95.532776
       },
-      "Description": "Random seed to manipulate random values",
+      "Description": "Random seed for the wobble and the initial orbit angle.",
       "AddPadding": "True"
     },
     {
@@ -174,7 +176,7 @@
         "X": -224.62245,
         "Y": -399.46722
       },
-      "Description": "Distance of the camera to the target",
+      "Description": "Radius of the orbit around the world origin.",
       "Scale": 0.01
     },
     {
@@ -184,7 +186,7 @@
         "Y": -354.46722
       },
       "GroupTitle": "Rotation",
-      "Description": "Speed at which the camera rotates",
+      "Description": "Orbit revolutions per time unit (bar).",
       "Min": -1.0,
       "Max": 1.0
     },
@@ -194,7 +196,7 @@
         "X": -224.62245,
         "Y": 275.53278
       },
-      "Description": "Defines the Up-Vector of the camera"
+      "Description": "Up vector of the camera before the roll is applied."
     },
     {
       "InputId": "fb113fd1-3edf-4db6-9dfb-800c62070d69"/*Damping*/,
@@ -202,7 +204,7 @@
         "X": -224.62245,
         "Y": 50.532776
       },
-      "Description": "Smoothes the random wobbling"
+      "Description": "Smooths the camera motion over time. 0 = no damping, values close to 1 are very smooth."
     }
   ],
   "SymbolChildUis": [],

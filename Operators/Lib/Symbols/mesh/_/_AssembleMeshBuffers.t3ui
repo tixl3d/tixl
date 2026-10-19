@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "e0849edd-ea1b-4657-b22d-5aa646318aa8"/*_AssembleMeshBuffers*/,
-  "Description": "An internal operator that combines structured buffers for Vertices and Face Indices into a MeshBuffer definition.\n\nIt's the reversal of [_MeshBufferComponents].",
+  "Description": "Internal helper that combines vertex, index and chunk definition buffers into a mesh.\n\nIt is the reverse of [_MeshBufferComponents].",
   "SymbolTags": "16",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": -196.4151,
         "Y": -58.396233
-      }
+      },
+      "Description": "Optional command evaluated before the buffers are read, e.g. a compute shader that fills them."
     },
     {
       "InputId": "87116a9a-beb0-4e2a-a2ef-f3e0b357f81d"/*ChunkDefs*/,

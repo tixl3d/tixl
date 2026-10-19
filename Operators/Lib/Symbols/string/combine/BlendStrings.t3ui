@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "98bd1491-6e69-4ae0-9fc1-0be8e6a72d32"/*BlendStrings*/,
-  "Description": "Blends two strings with a scrambling animation similar to an airport flight display board.",
+  "Description": "Blends between connected strings with a scrambling animation similar to an airport flight display board.\n\nEach character rolls through the Characters set from the character of one string to the next. Line breaks are kept.\n\nSee also: [BuildRandomString], [AnimRandomString]",
   "SymbolTags": "9",
   "InputUis": [
     {
@@ -11,7 +11,7 @@
         "Y": 135.0
       },
       "GroupTitle": "Blend Settings",
-      "Description": "BlendSettings"
+      "Description": "Float index into the connected strings. 1.5 blends halfway between the second and third string."
     },
     {
       "InputId": "3197934e-d0ed-4a81-9dc1-2cc63d97ac6f"/*InputTextA*/,
@@ -21,6 +21,7 @@
         "Y": 45.0
       },
       "GroupTitle": "String A",
+      "Description": "Not used.",
       "Usage": "Multiline"
     },
     {
@@ -29,6 +30,7 @@
         "X": 0.0,
         "Y": 345.0
       },
+      "Description": "Ordered set of characters to roll through. Characters not in the set are treated as the first one. Empty uses a default set of letters, digits and symbols.",
       "Usage": "Default"
     },
     {
@@ -36,7 +38,8 @@
       "Position": {
         "X": 0.0,
         "Y": 180.0
-      }
+      },
+      "Description": "How much the transition is spread across the characters from left to right."
     },
     {
       "InputId": "ccc21ecc-2877-4fe7-8d78-f7e2a708d762"/*InputTextB*/,
@@ -46,6 +49,7 @@
         "Y": 90.0
       },
       "GroupTitle": "String B",
+      "Description": "Not used.",
       "Usage": "Multiline"
     },
     {
@@ -54,6 +58,7 @@
         "X": 0.0,
         "Y": 270.0
       },
+      "Description": "Maximum number of characters, clamped to 1..10000.",
       "AddPadding": "True"
     },
     {
@@ -69,6 +74,7 @@
         "X": 0.0,
         "Y": 180.0
       },
+      "Description": "Fraction (0..1) of characters that get a random offset during the transition.",
       "AddPadding": "True"
     },
     {
@@ -77,6 +83,7 @@
         "X": -200.0,
         "Y": 0.0
       },
+      "Description": "Strings to blend between. Blend selects the position within this list.",
       "Usage": "Default"
     }
   ],

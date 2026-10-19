@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "a78a07f8-cf75-4a72-8952-b9ba40d6983f"/*StringToDateTime*/,
-  "Description": "Tries to parse the incoming string as a DateTime.",
+  "Description": "Tries to parse the incoming string as a DateTime.\n\nParsing uses the system culture. On failure the previous value is kept and a warning is shown.\n\nSee also: [DateTimeToString], [CountDown]",
   "SymbolTags": "8",
   "InputUis": [
     {

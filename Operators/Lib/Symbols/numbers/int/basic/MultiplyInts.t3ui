@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "318072b7-9d7b-4ad3-b163-484c3a987895"/*MultiplyInts*/,
-  "Description": "Multiplies all connected integer values. This can be useful to calculate the capacity or volume defined by an arbitrary number of axes.",
+  "Description": "Multiplies all connected integer values.\n\nThis can be useful to calculate the capacity or volume defined by an arbitrary number of axes. Outputs 0 if nothing is connected.\n\nSee also: [MultiplyInt], [SumInts]",
   "SymbolTags": "8",
   "InputUis": [
     {

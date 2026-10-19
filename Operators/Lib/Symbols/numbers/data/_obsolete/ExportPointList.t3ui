@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "d5607e3b-15e8-402c-8d54-b29e40415ab0"/*ExportPointList*/,
-  "Description": "A proof-of-concept / research operator that can be useful for exporting PointList to JSON files.",
+  "Description": "Obsolete. Exports a point list to a JSON file (proof of concept).",
   "SymbolTags": "4224",
   "InputUis": [
     {
@@ -24,7 +24,8 @@
       "Position": {
         "X": -200.0,
         "Y": 135.0
-      }
+      },
+      "Description": "Removes consecutive separator points (F1 = NaN)."
     },
     {
       "InputId": "b3d57d74-ac47-4287-b42a-d85e64501eb5"/*InputList*/,

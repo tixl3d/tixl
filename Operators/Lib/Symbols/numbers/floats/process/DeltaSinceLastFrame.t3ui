@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "919beb6b-4798-45fc-83bd-8203a9b26e8e"/*DeltaSinceLastFrame*/,
-  "Description": "Returns the change of the value during the last frame (or a given smoothing average).\nPlease note that this time is not frame-locked and will jitter slightly.",
+  "Description": "Returns the change of the value since the last frame.\n\nPlease note that the frame time is not locked and will jitter slightly.\n\nSee also: [HasValueChanged]",
   "InputUis": [
     {
       "InputId": "0e8896e1-b98f-4ff3-9136-e55002c887d8"/*Value*/,
@@ -15,7 +15,8 @@
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Not used."
     }
   ],
   "SymbolChildUis": [],

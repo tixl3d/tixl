@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "0b337922-aeca-473a-bfe9-4ab6ff804b11"/*Spring*/,
-  "Description": "Adds a bounce effect to the incoming value.\n\nAlso known as jump, bounce, wobble, rubber, flex\n\nA similar op: [Damp] [SpringVec2] [SpringVec3]",
+  "Description": "Adds a bounce effect to the incoming value.\n\nAKA: jump, bounce, wobble, rubber, flex\n\nSee also: [Damp], [SpringVec2], [SpringVec3]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,8 +10,7 @@
       "Position": {
         "X": 36.0,
         "Y": 334.0
-      },
-      "Description": "Value Input"
+      }
     },
     {
       "InputId": "7b130212-e567-4fd3-89aa-0b833c2ae490"/*Strength*/,

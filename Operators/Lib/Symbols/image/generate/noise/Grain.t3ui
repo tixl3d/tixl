@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "b5102fba-f05b-43fc-aa1d-613fe1d68ad2"/*Grain*/,
-  "Description": "Adds animated image pixel noise similar to that of an analog TV or film grain.\n\nProTip: While this effect can be used in real-time applications at virtually no cost, it can have a significant negative impact on the effectiveness of image and video compression methods.\n\n- This means that video streams and video files can lose quality and require more bandwidth or memory.\n- Individual videos and image sequences can require considerably more storage space.\n\nUseful Ops for a PostFX Pipeline: [MotionBlur] [DepthOfField] [ChromaticAberration] [Glow] [Grain] [Blur]",
+  "Description": "Adds animated pixel noise similar to analog TV noise or film grain.\n\nAKA: noise, film, static, dither\n\nTips:\n- The effect is cheap to render, but it strongly reduces the efficiency of video and image compression: video streams and files can lose quality or require more bandwidth and storage.\n\nSee also: [MotionBlur], [DepthOfField], [ChromaticAbberation], [Glow], [Blur]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -47,7 +47,7 @@
         "X": -123.48642,
         "Y": 320.43414
       },
-      "Description": "Enables generation of mipmaps.\n\nProTip: This can be useful and produces better results if \"Grain\" is not used as a pure post effect, but is applied to a surface which is rendered in 3D space from different distances and angles. For example, a television / CCTV screen during a fly-through.",
+      "Description": "Generates mipmaps. This improves quality if the grain is applied to a surface rendered at different distances and angles, e.g. a TV screen during a camera fly-through.",
       "AddPadding": "True"
     },
     {
@@ -55,8 +55,7 @@
       "Position": {
         "X": -123.48642,
         "Y": 145.43416
-      },
-      "Description": "Controls the image brightness"
+      }
     },
     {
       "InputId": "87b8eeac-14d7-4cb5-8669-4c8bb8f54419"/*CleanMode*/,
@@ -64,7 +63,7 @@
         "X": -263.48642,
         "Y": 250.43414
       },
-      "Description": "At large scale you'll notice stripes, enable to get rid of the stripes."
+      "Description": "Removes stripes that become visible at large scales."
     },
     {
       "InputId": "903c0270-dc46-402e-8088-8db8368a6dfb"/*Color*/,
@@ -73,7 +72,7 @@
         "Y": 75.43416
       },
       "GroupTitle": "Appearance",
-      "Description": "Controls the saturation of the noise.\n\n0: monochromatic noise\n5: Colored Noise as in old TV Sets",
+      "Description": "Saturation of the noise.\n0: monochromatic noise.\n5: colored noise as in old TV sets.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -84,8 +83,7 @@
       "Position": {
         "X": -123.48642,
         "Y": 110.43416
-      },
-      "Description": "Controls the Exponent"
+      }
     },
     {
       "InputId": "edb719cd-be40-4758-9c13-98cf14d1a5c5"/*Scale*/,
@@ -103,7 +101,7 @@
         "Y": 109.45392
       },
       "GroupTitle": "Motion",
-      "Description": "Controls the speed of the animation\n\nLow values can look like noise in liquids\n\nHigh values (50 and up) can look like TV static or film grain",
+      "Description": "Speed of the animation.\nLow values can look like noise in liquids, high values (50 and above) like TV static or film grain.",
       "Min": 0.0,
       "Max": 20.0,
       "Scale": 0.01

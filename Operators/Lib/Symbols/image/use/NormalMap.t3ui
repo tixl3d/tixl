@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "01458940-287f-4d31-9906-998efa9a2641"/*NormalMap*/,
-  "Description": "Converts the brightness of an image into a normal map that can be used with [SetMaterial].",
+  "Description": "Converts the brightness of an image into a normal map, e.g. for [SetMaterial].\n\nThe slope of the brightness between neighboring pixels defines the direction of the normals. Other modes output the slope as angle and magnitude or as a 2D offset for displacement effects.\n\nAKA: bump, normals, height, emboss\n\nSee also: [CombineMaterialChannels], [SetMaterial]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -9,14 +9,16 @@
       "Position": {
         "X": 204.9021,
         "Y": 283.4281
-      }
+      },
+      "Description": "Grayscale height image to convert."
     },
     {
       "InputId": "3e9bce35-7de1-42de-80e5-8eec29e92422"/*SampleRadius*/,
       "Position": {
         "X": 204.9021,
         "Y": 353.4281
-      }
+      },
+      "Description": "Distance in pixels to the neighboring samples used to compute the slope. Larger values give smoother normals."
     },
     {
       "InputId": "4d25b1db-daeb-4b5e-b2bc-8681f332b092"/*OutputFormat*/,
@@ -31,6 +33,7 @@
         "X": 204.9021,
         "Y": 388.4281
       },
+      "Description": "Rotates the normal directions in degrees.",
       "Min": -90.0,
       "Max": 90.0,
       "Format": "{0:0.0}°"
@@ -42,6 +45,7 @@
         "Y": 318.4281
       },
       "GroupTitle": "Settings",
+      "Description": "Strength of the slopes.",
       "Min": -1.0,
       "Max": 1.0
     },
@@ -58,7 +62,8 @@
       "Position": {
         "X": 204.9021,
         "Y": 493.42813
-      }
+      },
+      "Description": "How the image is sampled at its borders."
     },
     {
       "InputId": "cf7e6f41-cc6e-46dd-8779-1273326a5a53"/*Mode*/,
@@ -66,7 +71,8 @@
         "X": 64.9021,
         "Y": 423.4281
       },
-      "GroupTitle": "Advanced"
+      "GroupTitle": "Advanced",
+      "Description": "Gray_ToNormalizedRGB: normal map with directions encoded in the 0 to 1 range.\nGray_ToNormalizedRGBSigned: normal map with signed values.\nGray_ToAngleAndMagnitude: slope angle in red and magnitude in green.\nRed_ToRG_KeepBA: slope of the red channel as 2D offset in red and green; blue and alpha are kept."
     }
   ],
   "SymbolChildUis": [

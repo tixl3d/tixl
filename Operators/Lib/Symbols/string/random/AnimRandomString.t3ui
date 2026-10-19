@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "dd7fa7ee-266a-43c8-b29f-3357488b26be"/*AnimRandomString*/,
-  "Description": "Returns a random word per beat.",
+  "Description": "Returns a random word of a [MockStrings] category per beat.\n\nSee also: [MockStrings], [BuildRandomString]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -16,7 +16,8 @@
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Category of [MockStrings] to pick words from."
     }
   ],
   "SymbolChildUis": [

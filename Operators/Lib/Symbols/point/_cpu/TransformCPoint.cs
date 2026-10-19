@@ -27,10 +27,22 @@ internal sealed class TransformCPoint : Instance<TransformCPoint>
 
     private void Update(EvaluationContext context)
     {
-        var connectedLists = Lists2.CollectedInputs.Select(c => c.GetValue(context)).Where(c => c != null).ToList();
+        StructuredList connectedList = null;
+        var connectedCount = 0;
+        var collectedInputs = Lists2.CollectedInputs;
+        for (var index = 0; index < collectedInputs.Count; index++)
+        {
+            var list = collectedInputs[index].GetValue(context);
+            if (list == null)
+                continue;
+
+            connectedList = list;
+            connectedCount++;
+        }
+
         Lists2.DirtyFlag.Clear();
             
-        if (connectedLists.Count != 1)
+        if (connectedCount != 1)
         {
             return;
         }
@@ -41,7 +53,7 @@ internal sealed class TransformCPoint : Instance<TransformCPoint>
         var space = Space.GetEnumValue<Spaces>(context);
             
 
-        if (connectedLists[0] as StructuredList<Point> is var pointList)
+        if (connectedList as StructuredList<Point> is var pointList)
         {
                 
             if (pointList != null && pointList.NumElements > 0)

@@ -1,7 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "46ce6fad-87fe-4d1f-b236-ae644dd1f76c"/*_ExecuteFastBlurPasses*/,
-  "Description": "An internal operator that performs the necessary steps of the bloom effect.",
+  "Description": "Internal helper. Performs the dual-filter downsample and upsample passes of [FastBlur].",
+  "SymbolTags": "16",
   "InputUis": [
     {
       "InputId": "5d19c8be-7ea0-4b8d-5f3d-9ebb3a914b8d"/*LinearSampler*/,

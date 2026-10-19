@@ -14,7 +14,7 @@ internal sealed class CombineStrings : Instance<CombineStrings>
     private void Update(EvaluationContext context)
     {
         _stringBuilder.Clear();
-        var separator = Separator.GetValue(context).Replace("\\n", "\n");
+        var separator = (Separator.GetValue(context) ?? string.Empty).Replace("\\n", "\n");
 
         var isFirst = true;
         foreach (var input in Input.GetCollectedTypedInputs())

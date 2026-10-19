@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "7934f11d-c95c-41ae-b282-6e568b9c5f30"/*SubInts*/,
-  "Description": "Subtracts int B from int A.",
+  "Description": "Subtracts Input2 from Input1.\n\nSee also: [AddInt]",
   "SymbolTags": "1",
   "InputUis": [
     {

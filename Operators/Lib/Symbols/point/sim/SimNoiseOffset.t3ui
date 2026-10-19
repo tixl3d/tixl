@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "5f846187-e109-45d1-97e0-ae95e3e7d9ba"/*SimNoiseOffset*/,
-  "Description": "Adds Perlin curl noise to a point buffer. \n\nNote: Different from [AddNoise], this effect modifies the original buffer and is therefore not deterministic.\nAlso see [TurbulenceForce]",
+  "Description": "Adds Perlin or curl noise movement to a simulation buffer.\n\nDifferent from [AddNoise], this effect modifies the original buffer in place, so the movement accumulates over time. Use it with [PointSimulation].\n\nSee also: [TurbulenceForce]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -36,7 +36,7 @@
         "Y": 539.00476
       },
       "GroupTitle": "Settings",
-      "Description": "Defines the frequency, i.e. how fast the points move."
+      "Description": "Spatial frequency of the noise. Higher values create smaller swirls."
     },
     {
       "InputId": "7f73e109-b13a-4114-b2a5-fe9e86270893"/*AmountDistribution*/,
@@ -53,7 +53,7 @@
         "X": -70.61095,
         "Y": 764.00464
       },
-      "Description": "Switches back and forth between different noise variants"
+      "Description": "Uses divergence-free curl noise instead of simplex noise, which creates swirling, fluid-like movement."
     },
     {
       "InputId": "cb3ae9c7-5146-4bc6-9a87-3d17012fab52"/*Phase*/,
@@ -69,7 +69,7 @@
         "X": -70.61095,
         "Y": 494.005
       },
-      "Description": "Defines the total intensity of the random movements.",
+      "Description": "Strength of the movement per frame.",
       "AddPadding": "True"
     },
     {
@@ -78,7 +78,7 @@
         "X": -70.61095,
         "Y": 629.00464
       },
-      "Description": "Adds more variance and detail to the noise."
+      "Description": "Randomly offsets the noise lookup per point, so neighboring points move less uniformly."
     }
   ],
   "SymbolChildUis": [

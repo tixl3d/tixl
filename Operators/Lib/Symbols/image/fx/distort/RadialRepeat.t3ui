@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "6dc6bfa3-ba30-4987-96c3-78b0da3ada62"/*RadialRepeat*/,
-  "Description": "Simple effect similar to [MirrorRepeat] and [KochKaleidoskope]. The input image will be mirrored with radial symmetry on the central axis by the specified number of slices.",
+  "Description": "Mirrors the input image with radial symmetry around a center into the given number of slices.\n\nAKA: kaleidoscope, mirror, symmetry\n\nSee also: [MirrorRepeat], [KochKaleidoskope]",
   "InputUis": [
     {
       "InputId": "0d05623b-d71a-47fa-ad7c-7be339cc52bf"/*Resolution*/,
@@ -10,7 +10,7 @@
         "Y": 368.96735
       },
       "GroupTitle": "Advanced",
-      "Description": "Output resolution. Set to 0 for dynamic scaling."
+      "Description": "Overrides the output resolution. 0 uses the resolution of the input image."
     },
     {
       "InputId": "241f95fb-12e0-45cf-9901-d7d857feacaf"/*WrapMode*/,
@@ -25,7 +25,7 @@
         "X": 73.386856,
         "Y": 158.96735
       },
-      "Description": "The number of radial mirror slices",
+      "Description": "The number of radial mirror slices.",
       "Scale": 0.01
     },
     {
@@ -50,6 +50,7 @@
         "Y": 88.96735
       },
       "GroupTitle": "Radial Symmetry Settings",
+      "Description": "Shifts the image that is sampled into each slice.",
       "Min": -1.0,
       "Max": 1.0,
       "Scale": 0.01,
@@ -61,7 +62,7 @@
         "X": 73.386856,
         "Y": 193.96735
       },
-      "Description": "Rotate the image within each slice",
+      "Description": "Rotates the image within each slice.",
       "Min": -180.0,
       "Max": 180.0,
       "Scale": 3.6,
@@ -73,6 +74,7 @@
         "X": -66.613144,
         "Y": 298.96735
       },
+      "Description": "Center of the symmetry.",
       "Min": -1.0,
       "Max": 1.0,
       "UseVec2Control": "Position"
@@ -84,7 +86,7 @@
         "Y": 263.96735
       },
       "GroupTitle": "Output",
-      "Description": "Rotate the final image",
+      "Description": "Rotates the final image.",
       "Min": -180.0,
       "Max": 180.0,
       "Scale": 3.6,

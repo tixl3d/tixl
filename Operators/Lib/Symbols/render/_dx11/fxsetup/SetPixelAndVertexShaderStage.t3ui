@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "b956f707-2a33-4330-b7ff-9c91edbcf041"/*SetPixelAndVertexShaderStage*/,
-  "Description": "Combines Vertex and Pixel shader stages.",
+  "Description": "Internal helper. Binds a vertex shader and a pixel shader with shared constant buffers, shader resources and samplers.\n\nThe previous state is restored after the connected commands have been evaluated.",
   "SymbolTags": "24",
   "InputUis": [
     {
@@ -49,7 +49,8 @@
       "Position": {
         "X": 0.0,
         "Y": 75.0
-      }
+      },
+      "Description": "Accepts lists of ShaderResourceViews that are bound after ShaderResources."
     }
   ],
   "SymbolChildUis": [],

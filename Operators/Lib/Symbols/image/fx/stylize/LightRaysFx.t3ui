@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "53ff1a68-e888-444f-9ccc-23239c94d6db"/*LightRaysFx*/,
-  "Description": "Based on \"Simpler God Rays\" by akufishi\nPimped by Newemka",
+  "Description": "Adds volumetric light rays (god rays) that streak radially from a point through bright areas of the image.\n\nBased on \"Simpler God Rays\" by akufishi, extended by Newemka.\n\nAKA: godrays, volumetric, sunbeams, crepuscular\n\nSee also: [Glow], [Bloom], [StarGlowStreaks]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": 291.43448,
         "Y": 367.15088
-      }
+      },
+      "Description": "Also multiplies the original image with TextureFX."
     },
     {
       "InputId": "7d60c1e1-4924-48e8-991f-df83370c9a30"/*Direction*/,
@@ -17,6 +18,7 @@
         "X": 151.43448,
         "Y": 52.15088
       },
+      "Description": "Origin of the rays. (0,0) is the image center.",
       "Min": -2.0,
       "Max": 2.0,
       "UseVec2Control": "Position"
@@ -41,7 +43,8 @@
       "Position": {
         "X": 291.43448,
         "Y": 157.15085
-      }
+      },
+      "Description": "Length of the rays relative to the distance from the origin."
     },
     {
       "InputId": "af5bfaf5-4d4f-4a51-9316-7dfd508e4fdb"/*RayColor*/,
@@ -59,7 +62,8 @@
       "Position": {
         "X": 291.43448,
         "Y": 332.15088
-      }
+      },
+      "Description": "Exponent for the falloff along the rays. Higher values make them shorter."
     },
     {
       "InputId": "c661ae7d-1cac-482f-b200-2d47946c22db"/*Samples*/,
@@ -75,7 +79,7 @@
         "X": -337.44907,
         "Y": 43.2321
       },
-      "Description": "Allows to bring more variations to the light rays\nThis texture is using multiply blending mode"
+      "Description": "Optional texture to add variation to the light rays.\nIt is multiplied with the rays."
     }
   ],
   "SymbolChildUis": [

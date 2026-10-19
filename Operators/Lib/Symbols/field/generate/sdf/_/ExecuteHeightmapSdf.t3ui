@@ -1,7 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "77bfe126-5ea6-4254-ba46-2dd9f77d7a70"/*ExecuteHeightmapSdf*/,
-  "Description": "",
+  "Description": "Internal helper. Implements the shader code for [HeightMapSdf].",
+  "SymbolTags": "16",
   "InputUis": [
     {
       "InputId": "120ead3f-30d0-44a0-9ef8-a66d17fd977a"/*UvScale*/,

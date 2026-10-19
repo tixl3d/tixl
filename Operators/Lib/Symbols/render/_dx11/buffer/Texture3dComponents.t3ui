@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "09641970-b03a-431f-b3c6-5d8df824dde8"/*Texture3dComponents*/,
-  "Description": "description missing",
+  "Description": "Returns the texture, ShaderResourceView, UnorderedAccessView and RenderTargetView of a 3D texture.",
   "SymbolTags": "16",
   "InputUis": [
     {

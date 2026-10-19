@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "045e834a-f0ee-432b-8e14-19cadc497577"/*SubString*/,
-  "Description": "Returns a substring of the connect string. \nThis can be useful for trimming a string to a maximum length.",
+  "Description": "Returns a part of the connected string.\n\nThis can be useful for trimming a string to a maximum length.\n\nSee also: [PickStringPart], [IndexOf]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,6 +10,7 @@
         "X": 0.0,
         "Y": 180.0
       },
+      "Description": "Number of characters, clamped to the remaining length.",
       "Min": 0,
       "Max": 100000,
       "ClampMin": true,
@@ -20,7 +21,8 @@
       "Position": {
         "X": 0.0,
         "Y": 135.0
-      }
+      },
+      "Description": "Index of the first character, clamped to the string length."
     },
     {
       "InputId": "e7f79746-ff87-478e-9755-a8c7b1c34354"/*InputText*/,

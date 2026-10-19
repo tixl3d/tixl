@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "10acf0aa-2cb3-446b-b837-b6abe24d44da"/*DateTimeToFloat*/,
-  "Description": "Converts a DateTime into different float values like normalized time of day (between 0 ... 1), day of the year, etc.",
+  "Description": "Converts a DateTime into a float like the normalized time of day (0..1), the day of the year, etc.\n\nSee also: [NowAsDateTime], [DateTimeToString]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "TimeOfDay_Hours: hours since midnight (0..24).\nTimeOfDay_Normalized: time of day from 0 to 1.\nDayOfTheYear: 1..366.\nDayOfTheMonths: 1..31."
     },
     {
       "InputId": "7b432357-225c-499e-9109-61168b4be4a7"/*Value*/,
@@ -24,7 +25,8 @@
       "Position": {
         "X": -200.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Hours subtracted from the time before conversion, e.g. to shift time zones."
     }
   ],
   "SymbolChildUis": [],

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "590a0b0b-c847-433c-8ffa-602ed0ae8f28"/*SwapTextures*/,
-  "Description": "A helper that swaps texture buffers. This can be useful for implementing buffer buffering in compute shader effects.",
+  "Description": "Swaps two textures if EnableSwap is true.\n\nThis can be used to implement double buffering (ping-pong) for feedback or compute shader effects.\n\nAKA: pingpong, doublebuffer, swap",
   "SymbolTags": "8",
   "InputUis": [
     {

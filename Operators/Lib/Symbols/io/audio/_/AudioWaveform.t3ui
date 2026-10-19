@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "55e338f7-6d8c-4b61-8e10-9bb4d5fcff91"/*AudioWaveform*/,
-  "Description": "",
+  "Description": "Returns the current audio waveform as float lists for the left and right channel and for low, mid and high frequency ranges.\n\nSee also: [AudioReaction]",
   "SymbolTags": "128",
   "InputUis": [],
   "SymbolChildUis": [],

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "933aec2c-e7dd-44b4-a094-14d0195f9f7a"/*FractalSDF*/,
-  "Description": "Generates a procedural MandelBox field which can be rendered with [RaymarchField] and visualized with [VisualizeFieldDistance].\nFor more Fractals check [CustomSDF] with it's different Variations.\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToRaymarchField].\n\nIt can be modified with [BendField], [TransformField], [PolarRepeat] and more.\n\nSimilar nodes: [BoxSDF], [CapsuleLineSDF], [CustomSDF].",
+  "Description": "Generates a Mandelbox fractal as an SDF.\n\nFor more fractals check the presets of [CustomSDF].\n\nRender the result with [RaymarchField] and inspect it with [VisualizeFieldDistance]. Modify it with [TransformField], [BendField], [RepeatPolar] and other field operators.\n\nSee also: [CustomSDF]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -11,7 +11,7 @@
         "Y": 225.0
       },
       "GroupTitle": "Quality",
-      "Description": "The quality and complexity of the fractal greatly depend on the number of iterations. So does the performance.\n\nIterations above 10 might not be able to raymarch in 1080p."
+      "Description": "Number of fractal iterations, clamped to 1..20. More iterations add detail but cost performance; values above 10 may be too slow at 1080p."
     },
     {
       "InputId": "482ff1b2-2383-45db-8a5a-30ef2a07c8fb"/*Clamping*/,
@@ -19,7 +19,7 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "Description": "An internal parameter that shapes the fractal.\nThe x and y components only have an effect with a z-component > 0.",
+      "Description": "Box fold: X and Y are the clamp range, Z is the fold factor. X and Y only have an effect with Z > 0.",
       "AddPadding": "True"
     },
     {
@@ -29,7 +29,7 @@
         "Y": 45.0
       },
       "GroupTitle": "Fractal parameters",
-      "Description": "The overall detail of the fractal.",
+      "Description": "Scale factor of each iteration. Defines the overall shape and detail of the fractal.",
       "Min": 1.0,
       "Max": 10.0,
       "Scale": 0.01
@@ -39,7 +39,8 @@
       "Position": {
         "X": -200.0,
         "Y": 180.0
-      }
+      },
+      "Description": "Lower and upper limit of the sphere fold scaling."
     },
     {
       "InputId": "ab32b4f6-dea8-4e25-b5cd-2e232273a51e"/*Minrad*/,
@@ -47,7 +48,7 @@
         "X": -200.0,
         "Y": 135.0
       },
-      "Description": "The complexity of the fractal.",
+      "Description": "Minimum radius of the sphere fold, clamped to 0..1.",
       "Min": 0.0,
       "Max": 1.0
     },
@@ -57,7 +58,7 @@
         "X": -200.0,
         "Y": 90.0
       },
-      "Description": "An additional parameter to manipulate the fractal."
+      "Description": "Offset added in each iteration."
     }
   ],
   "SymbolChildUis": [],

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "f99cb938-205d-4605-8c17-e0be67f25d98"/*GetAPrime*/,
-  "Description": "Computes a prime number\n\nUseful with [IntToString] [IntToFloat]",
+  "Description": "Returns the n-th prime number.\n\nIndex 1 returns 2, index 2 returns 3, and so on. Index values below 1 or above 10001 return -1.\n\nSee also: [IntToString], [IntToFloat]",
   "SymbolTags": "8",
   "InputUis": [
     {

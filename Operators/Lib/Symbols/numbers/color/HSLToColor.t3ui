@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "1677fd74-6e54-479a-b478-c2ac77288f9c"/*HSLToColor*/,
-  "Description": "Creates an RGBA color from HSL settings",
+  "Description": "Creates an RGBA color from hue, saturation and lightness.\n\nSee also: [HSBToColor], [OKLChToColor]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -21,7 +21,7 @@
         "X": 0.0,
         "Y": 0.0
       },
-      "Description": "Normalized Hue (e.g. 0 .. 1 is a full color circle)",
+      "Description": "Normalized hue: 0…1 is a full color circle.",
       "Min": 0.0,
       "Max": 1.0
     },

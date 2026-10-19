@@ -8,7 +8,8 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Audio sources or nested audio graph nodes to combine."
     },
     {
       "InputId": "a5d10c30-0003-4c8a-9f31-0ab1cd2e0100"/*Volume*/,
@@ -16,6 +17,7 @@
         "X": -200.0,
         "Y": 45.0
       },
+      "Description": "Gain folded into all contained sources. 1 keeps the level unchanged.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "0814a593-80ab-416f-a3ca-eef78b0a9c0c"/*WrapPointPosition*/,
-  "Description": "Can be used to wrap positions around a cubic volume, e.g., around the current camera position.",
+  "Description": "Wraps point positions around a cubic volume, e.g., around the current camera position, so points leaving one side reappear on the opposite side.\n\nF1 is set to fade towards the edges of the volume.\n\nSee also: [WrapPoints]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -17,6 +17,7 @@
         "X": -233.76004,
         "Y": 742.2818
       },
+      "Description": "Uses the position of the current camera as center instead of Position.",
       "AddPadding": "True"
     },
     {
@@ -24,7 +25,8 @@
       "Position": {
         "X": -233.76004,
         "Y": 787.2818
-      }
+      },
+      "Description": "Turns wrapped points into separators so lines are not drawn across the volume."
     },
     {
       "InputId": "dbe72c8b-6cc2-454b-83db-712f0cd4211c"/*GPoints*/,

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "fc0a5e68-9915-4323-b2a4-2491fa5d59a9"/*IndexOf*/,
-  "Description": "Searches the original string for a search pattern and outputs the position at which the pattern was found",
+  "Description": "Searches the original string for a pattern and returns the position of its first occurrence, or -1 if not found.\n\nThe comparison is case sensitive and culture specific.\n\nSee also: [SearchAndReplace], [SubString]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,6 @@
         "X": -91.13745,
         "Y": 99.28253
       },
-      "Description": "Letters, numbers, or combinations to be searched for in the original string",
       "Usage": "Default"
     },
     {
@@ -19,7 +18,6 @@
         "X": -91.13745,
         "Y": 54.28253
       },
-      "Description": "String to be analyzed",
       "Usage": "Default"
     }
   ],

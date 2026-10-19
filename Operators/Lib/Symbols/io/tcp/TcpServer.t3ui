@@ -59,7 +59,7 @@
         "X": -200.0,
         "Y": 450.0
       },
-      "Description": "If enabled, prints status information, connection events, sent/received data, and errors to the T3 log. Useful for debugging."
+      "Description": "If enabled, prints status information, connection events, sent/received data, and errors to the TiXL log. Useful for debugging."
     }
   ],
   "SymbolChildUis": [],

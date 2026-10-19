@@ -1,6 +1,6 @@
 {
   "Id": "9989f539-f86c-4508-83d7-3fc0e559f502"/*APoint*/,
-  "Description": "A single point. You can use [JoinLists] and [ListToBuffer] to convert to GPU points.",
+  "Description": "Creates a single point on the CPU.\n\nUse [JoinLists] and [ListToBuffer] to combine and convert it into GPU points.",
   "InputUis": [
     {
       "InputId": "a0a453db-d8f1-415a-9a98-3c88a25b15e7"/*Position*/,

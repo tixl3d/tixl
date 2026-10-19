@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "fd5467c7-c75d-4755-8885-fd1ff1f07c95"/*SelectFloatFromDict*/,
-  "Description": "Parses a dictionary and converts a single value to a float.",
+  "Description": "Returns a value from a float dictionary, e.g. from OSC input.\n\nReturns 0 if the key is missing.\n\nSee also: [SelectBoolFromFloatDict], [SelectVec2FromDict], [SelectVec3FromDict]",
   "InputUis": [
     {
       "InputId": "126d52eb-cdf9-48e6-ac77-bb6e90700c56"/*DictionaryInput*/,

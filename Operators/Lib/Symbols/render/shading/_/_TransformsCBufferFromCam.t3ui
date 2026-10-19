@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "843c9378-6836-4f39-b676-06fd2828af3e"/*_TransformsCBufferFromCam*/,
-  "Description": "This operators is deprecated. Please use [_TransformsCBuffer]\nGets properties of a camera operator further down (further left) in the render graph. \nThis can be useful for effects like motion blur.",
+  "Description": "Obsolete. Use [_TransformsCBuffer] instead.\n\nCreates the transform constant buffer from the properties of a connected camera reference, e.g. for effects like motion blur.",
   "SymbolTags": "4104",
   "InputUis": [
     {
@@ -10,7 +10,8 @@
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Reference output of a camera, e.g. from [Camera]."
     }
   ],
   "SymbolChildUis": [],

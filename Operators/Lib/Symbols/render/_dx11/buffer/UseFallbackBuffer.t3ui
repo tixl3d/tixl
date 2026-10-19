@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "49549c3e-b09e-4633-86c6-1ac075f56b69"/*UseFallbackBuffer*/,
-  "Description": "Uses a fallback buffer if the primary input is not connected or not initialized. \nThis",
+  "Description": "Returns the fallback buffer if the primary buffer is not connected or null.\n\nSee also: [FirstValidBuffer]",
   "SymbolTags": "8",
   "InputUis": [
     {

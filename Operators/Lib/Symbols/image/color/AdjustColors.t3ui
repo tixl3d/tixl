@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "55411442-d538-48bf-ab78-b8c24c85aa46"/*AdjustColors*/,
-  "Description": "Adjusts various color properties of the incoming image and adds a slight vignette.\n\nOperator with more options that also allows objects far away from the camera to be colored differently than close objects: [ColorGradeDepth]\n\nAlso consider using [ColorGrade].",
+  "Description": "Adjusts exposure, contrast, brightness, hue and saturation of an image and can add a colorize tint and a vignette.\n\nAKA: levels, brightness, contrast, saturation, hue\n\nSee also: [ColorGrade], [ColorGradeDepth], [HSE], [Tint]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,6 +10,7 @@
         "X": 190.97151,
         "Y": 852.7887
       },
+      "Description": "Softly compresses bright values instead of clipping them.\nX: size of the blend range below the clipping point.\nY: how far above 1 values are compressed.",
       "AddPadding": "True",
       "Min": 0.0,
       "Max": 5.0
@@ -21,6 +22,7 @@
         "Y": 992.7887
       },
       "GroupTitle": "Additional Options",
+      "Description": "Darkens the image toward the edges. 0 disables the vignette.",
       "Min": 0.0,
       "Max": 5.0,
       "ClampMin": true,
@@ -32,6 +34,7 @@
         "X": 330.9715,
         "Y": 957.7887
       },
+      "Description": "Hue rotation in degrees.",
       "Min": -180.0,
       "Max": 180.0,
       "Scale": 0.1
@@ -42,6 +45,7 @@
         "X": 330.9715,
         "Y": 817.7887
       },
+      "Description": "Brightness of the complementary color used for the darks. Only used if Colorize alpha is above 0.",
       "AddPadding": "True",
       "Min": 0.0,
       "Max": 2.0
@@ -51,7 +55,8 @@
       "Position": {
         "X": -15.378929,
         "Y": 1026.6075
-      }
+      },
+      "Description": "Color blended behind transparent areas of the result."
     },
     {
       "InputId": "74d63ccb-7ae5-45d9-af69-ad91b8582407"/*Exposure*/,
@@ -69,7 +74,8 @@
         "X": 190.9715,
         "Y": 432.7887
       },
-      "GroupTitle": "Color Options"
+      "GroupTitle": "Color Options",
+      "Description": "Maps bright and mid tones toward this color and the darks toward its complementary hue. The alpha controls the amount; 0 disables the effect."
     },
     {
       "InputId": "c325d01a-5232-4696-9b58-e24f72779597"/*Texture2d*/,

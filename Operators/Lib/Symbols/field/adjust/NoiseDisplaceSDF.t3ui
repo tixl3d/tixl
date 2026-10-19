@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "54f28d0a-d367-4b59-8480-5b762b8f2a9c"/*NoiseDisplaceSDF*/,
-  "Description": "Displaces the distance of an SDF with a Perlin-like noise offset.\n\nNOTE: this operator will break the Lipschitz continuity of your field and will cause artifacts when raymarching.\nIt's sometimes possible to reduce some of these artifacts by reducing the step size for raymarching.\n\nPlease check the Additional documentation in [RaymarchSdf]",
+  "Description": "Displaces the surface of an SDF by adding 3D simplex noise to its distance.\n\nThis breaks the Lipschitz continuity of the field and can cause artifacts when raymarching. Lowering StepFactor (or StepSize in [RaymarchField]) reduces them at the cost of performance.\n\nSee also: [SpatialDisplaceSDF], [PushPullSDF]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -18,7 +18,7 @@
         "X": -200.0,
         "Y": 135.0
       },
-      "Description": "Amount of the displacement.",
+      "Description": "Strength of the distance offset in world units. Negative values invert the bumps.",
       "AddPadding": "True"
     },
     {
@@ -28,7 +28,7 @@
         "Y": 360.0
       },
       "GroupTitle": "Raymarching",
-      "Description": "Reduce step size to avoid raymarching artifacts.",
+      "Description": "Multiplies the resulting distance. Values below 1 reduce raymarching artifacts but need more steps.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -40,7 +40,7 @@
         "X": -200.0,
         "Y": 285.0
       },
-      "Description": "Offset to the noise field. Try to animate this with [AnimVec3]."
+      "Description": "Offset of the noise field. Animate it to make the noise flow, e.g. with [AnimVec3]."
     },
     {
       "InputId": "b7a2e12b-9e55-43a5-be79-510f4a28a1f4"/*Scale*/,
@@ -48,14 +48,15 @@
         "X": -200.0,
         "Y": 210.0
       },
-      "Description": "The scale of the noise field."
+      "Description": "Size of the noise features. Larger values give smoother, larger bumps."
     },
     {
       "InputId": "ee1c1993-3968-45a6-bbfc-9e4e6032ae7b"/*UseLocalSpace*/,
       "Position": {
         "X": -200.0,
         "Y": 435.0
-      }
+      },
+      "Description": "If enabled, the noise is sampled with the position after the transformations of the input field, so it sticks to the transformed object. Otherwise it is sampled with the incoming position."
     }
   ],
   "SymbolChildUis": [],

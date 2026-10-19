@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "d8c5330f-59b5-4907-b845-a02def3042fa"/*Layer2d*/,
-  "Description": "Creates a 2D plane in 3D space onto which the incoming image is rendered.\nThis op automatically adjusts to the correct aspect ratio.\n\nA possible alternative [QuadMesh] -> [DrawMesh] -> [SetMaterial] in combination with [RenderTarget].",
+  "Description": "Creates a 2D plane in 3D space onto which the incoming image is rendered.\n\nThe plane automatically adjusts to the aspect ratio of the image.\n\nSee also: [DrawScreenQuad], [QuadMesh], [DrawMesh], [SetMaterial], [RenderTarget]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -96,8 +96,7 @@
         "X": 510.461,
         "Y": 846.3778
       },
-      "GroupTitle": "Additional Options",
-      "Description": "Selects the blend mode."
+      "GroupTitle": "Additional Options"
     },
     {
       "InputId": "da0941c9-c700-4552-9d8a-799bf7a08826"/*Rotate*/,

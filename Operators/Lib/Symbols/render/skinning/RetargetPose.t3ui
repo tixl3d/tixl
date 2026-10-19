@@ -8,42 +8,48 @@
       "Position": {
         "X": 0.0,
         "Y": 180.0
-      }
+      },
+      "Description": "Index of the skeleton in the setup. Wraps around the number of skeletons."
     },
     {
       "InputId": "47b8e296-0d53-4c1a-af67-92e4c8b5d130"/*Pose*/,
       "Position": {
         "X": 0.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Pose of the source skeleton."
     },
     {
       "InputId": "5e19c483-b7a0-4d26-8f34-d9c162e75b08"/*SourceSkeletonIndex*/,
       "Position": {
         "X": 0.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Index of the skeleton in the setup. Wraps around the number of skeletons."
     },
     {
       "InputId": "a2f60d94-8c37-4b52-91de-56b0f3e8a4c7"/*SourceSetup*/,
       "Position": {
         "X": 0.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Setup containing the skeleton the pose was made for."
     },
     {
       "InputId": "c9d47f12-3a85-4e60-b29c-08e6a1d5f374"/*TargetSetup*/,
       "Position": {
         "X": 0.0,
         "Y": 135.0
-      }
+      },
+      "Description": "Setup containing the skeleton the pose is transferred to."
     },
     {
       "InputId": "e67f2b90-14c8-4da3-9605-7a3ce8d1b542"/*TranslationScale*/,
       "Position": {
         "X": 0.0,
         "Y": 225.0
-      }
+      },
+      "Description": "Amount of the source joint translations (e.g. root motion) relative to the rest pose that is applied. 0 keeps the target's rest translations."
     }
   ],
   "SymbolChildUis": [],

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "1fa725a1-dab6-4a2a-8a4d-6efdfba5cf05"/*Pixelate*/,
-  "Description": "TilesAmount parameter works only if Divisor = 0. If Divisor is greater than 0, it will divide the resolution of your image and try to keep the tiles close to a square shape.\n\n[MosaicTiling] is similar. I needed a \"pixel perfect\" alternative that allows defining the desired X and Y resolution using integers.\n\nTags:\nlowres / low-res / Pixelart / resolution / Mosaic / tiling / old-school / retro / grid",
+  "Description": "Reduces the image to a grid of uniform tiles, each filled with the color at its center.\n\nUnlike [MosiacTiling], this gives \"pixel perfect\" control: either define the tile count in X and Y with TileAmount, or set Divisor to derive square tiles from the source resolution. A Shape image can be repeated in every tile.\n\nAKA: pixelate, mosaic, lowres, pixelart, retro, grid\n\nSee also: [MosiacTiling], [Dither], [AsciiRender]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": 132.69783,
         "Y": 74.37579
       },
-      "Description": "Sets the size of the tiles according to the source resolution",
+      "Description": "If greater than 0, the tiles are 2 x Divisor pixels of the source image wide and TileAmount is ignored.",
       "Min": 0,
       "ClampMin": true,
       "ClampMax": true
@@ -21,7 +21,7 @@
         "X": 132.69783,
         "Y": 29.375793
       },
-      "Description": "Multiplier color applied to the final output"
+      "Description": "Multiplied with the result."
     },
     {
       "InputId": "7db8987c-f128-476f-93bb-d79e761caecc"/*Image*/,
@@ -37,7 +37,7 @@
         "X": 132.69783,
         "Y": 119.37579
       },
-      "Description": "Set X and Y resolution (ignored if Divisor is greater than 0)"
+      "Description": "Number of tiles in X and Y. Only used if Divisor is 0."
     },
     {
       "InputId": "f8a8381b-3a8c-4468-b66b-0a5be6f040bd"/*Shape*/,
@@ -46,7 +46,7 @@
         "Y": 299.3758
       },
       "GroupTitle": "Extra feature",
-      "Description": "Customize the tile, could be used to "
+      "Description": "Image repeated in each tile and multiplied with its color, e.g. a circle for LED looks."
     }
   ],
   "SymbolChildUis": [

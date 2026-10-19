@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "dc34c54b-f856-4fd2-a182-68fd75189d7d"/*ShardNoise*/,
-  "Description": "A port of @ENDESGA's SHARD NOISE shader\nIt can be used for clouds/fog/metal/crystal textures and more \nCheck the link below. \n\n\nAvailable Noise Ops [WorleyNoise] [FractalNoise] [ShardNoise]",
+  "Description": "Generates noise of sharp, crystal-like shards.\n\nA port of the SHARD NOISE shader by @ENDESGA. It can be used for clouds, fog, metal, crystal textures and more.\n\nAKA: crystal, shards, facets\n\nSee also: [FractalNoise], [WorleyNoise]",
   "SymbolTags": "8",
   "InputUis": [
     {

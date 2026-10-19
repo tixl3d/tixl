@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "9d6dbf28-9983-4584-abba-6281ce51d583"/*QuadMesh*/,
-  "Description": "Generates a procedural three-dimensional tessellated mesh which can be rendered with [DrawMesh], [DrawMeshUnlit] and [DrawMeshHatched] among others.\nAlso known as: Plane, Quad\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToDrawThings].\n\nIt can also become the source for a particle system with [MeshVerticesToPoints] or [PointsOnMesh].\nTo import static 3D meshes from other programs refer to [LoadObj].\n\nAlso consider using [CylinderMesh].\n\n",
+  "Description": "Generates a flat subdivided rectangle mesh.\n\nIt can be rendered with [DrawMesh], [DrawMeshUnlit], [DrawMeshHatched] and others, or used as a source for points with [MeshVerticesToPoints] or [PointsOnMesh]. To import meshes from other programs use [LoadObj].\n\nAKA: plane, quad, rectangle, grid\n\nSee also: [NGonMesh], [CubeMesh]\n\nAlso check out the [HowToDrawThings] tutorial.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -11,7 +11,7 @@
         "Y": 0.0
       },
       "GroupTitle": "Scaling",
-      "Description": "Controls the scaling:\nX: Width\nY: Height"
+      "Description": "Size along X (width) and Y (height)."
     },
     {
       "InputId": "18a5f3be-92a7-438c-b32b-e0da7c7a5736"/*Segments*/,
@@ -19,7 +19,7 @@
         "X": -200.0,
         "Y": 90.0
       },
-      "Description": "Defines the tessellation\nX: Left to Right \nY: Top to Bottom"
+      "Description": "Number of subdivisions along X and Y."
     },
     {
       "InputId": "44fc1e7b-b1d1-4199-b373-8b7c4cc060d2"/*Scale*/,
@@ -53,7 +53,7 @@
         "X": -200.0,
         "Y": 90.0
       },
-      "Description": "Transforms the position of the pivot"
+      "Description": "Moves the mesh."
     }
   ],
   "SymbolChildUis": [],

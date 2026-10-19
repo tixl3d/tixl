@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "81555155-ae6f-40aa-961d-b6badb77af21"/*PickInt*/,
-  "Description": "Picks a value from the connected Int inputs.",
+  "Description": "Picks one of the connected integer inputs by Index.\n\nThe Index wraps around the number of connections, so negative and large values are valid.\n\nAKA: switch, select\n\nSee also: [PickIntFromList], [PickFloat]",
   "SymbolTags": "1",
   "InputUis": [
     {

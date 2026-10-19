@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "ca3f3c1b-6f22-4bf3-b06b-d2b0d85a8881"/*BubbleZoom*/,
-  "Description": "An image effect that enlarges the inner circular region with a smooth edge. Other terms for this would be 'Bulge', 'Blob distort', 'Fish Eye zoom', 'Magnifying glass'",
+  "Description": "Magnifies a circular region of the image with a smooth edge.\n\nAKA: bulge, fisheye, magnifier, lens, loupe\n\nSee also: [PolarCoordinates], [Displace]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -24,6 +24,7 @@
         "X": 60.989746,
         "Y": 125.87604
       },
+      "Description": "Shapes the falloff across the feather zone.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -36,7 +37,8 @@
       "Position": {
         "X": 60.989807,
         "Y": -84.12396
-      }
+      },
+      "Description": "Colors blended over the transition zone using their alpha. Left is the inside."
     },
     {
       "InputId": "1e93d2b1-d21c-44bd-a96c-9844b9a89c8f"/*Feather*/,
@@ -44,6 +46,7 @@
         "X": 200.98975,
         "Y": 55.876038
       },
+      "Description": "Width of the transition between the zoomed inside and the original outside.",
       "Min": -1.0,
       "Max": 1.0,
       "Scale": 0.001
@@ -53,7 +56,8 @@
       "Position": {
         "X": 200.98975,
         "Y": 195.87604
-      }
+      },
+      "Description": "Blends between zooming inside (0) and outside (1) the circle."
     },
     {
       "InputId": "277c5e50-7d0f-416f-ba14-69ba407802dc"/*Center*/,
@@ -80,6 +84,7 @@
         "X": 200.98975,
         "Y": 20.876038
       },
+      "Description": "Zoom factor inside the circle. 1 = no zoom, values below 1 shrink the image.",
       "AddPadding": "True"
     },
     {
@@ -88,7 +93,8 @@
         "X": 59.044525,
         "Y": 423.13467
       },
-      "GroupTitle": "Obsolete"
+      "GroupTitle": "Obsolete",
+      "Description": "Not used anymore."
     }
   ],
   "SymbolChildUis": [

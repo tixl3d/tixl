@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "90b2c6d2-e9a6-4910-b42d-94202f07be27"/*Accumulator*/,
-  "Description": "Accumulates a value with the incoming rate.\n\nNote that the increment is a rate that gets multiplied with the current frame duration: With an increment of 1 you have a full value change of 1 unit after one second.\n\nSimilar to [Time].\nFor a variant that does not count up linearly / smooth but in steps, see [Counter]",
+  "Description": "Accumulates a value with the incoming increment.\n\nIn PerFrame mode the increment is added once per frame. In PerSeconds mode it is a rate: with an increment of 1 the value grows by 1 unit per second of playback.\n\nAKA: integrate, counter\n\nSee also: [Time], [Counter] (counts in steps)",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": 36.0,
         "Y": 334.0
       },
-      "Description": "Defines how quickly / intensively the accumulator counts up",
+      "Description": "Amount added per frame or per second, depending on Accumulate.",
       "AddPadding": "True",
       "Min": -100.0,
       "Max": 100.0
@@ -21,7 +21,7 @@
         "X": 197.0,
         "Y": 328.0
       },
-      "Description": "Defines the number with which the accumulator starts counting.\n\nNotice: On-the-fly changes are only applied after the reset trigger has been used",
+      "Description": "Value the accumulator starts with and is reset to.\n\nChanges are only applied after the reset trigger has been used.",
       "AddPadding": "True",
       "Min": -100.0,
       "Max": 100.0,
@@ -33,7 +33,7 @@
         "X": 197.0,
         "Y": 418.0
       },
-      "Description": "Additional modulo that can be useful to make the values loop.\nThis parameter is ignored when 0.",
+      "Description": "Wraps the output to loop the value. Ignored when 0 or below.",
       "AddPadding": "True"
     },
     {
@@ -41,7 +41,8 @@
       "Position": {
         "X": 197.0,
         "Y": 373.0
-      }
+      },
+      "Description": "Pauses accumulation while disabled."
     },
     {
       "InputId": "8e4e25e5-df86-4211-831b-fc834de156ec"/*Range*/,
@@ -49,7 +50,7 @@
         "X": 197.0,
         "Y": 493.0
       },
-      "Description": "0,0 means infinite \n-1, 1 the accumulation will contained between this range"
+      "Description": "Limits the accumulated value to X (min) and Y (max). 0, 0 means unlimited."
     },
     {
       "InputId": "9f1d76d2-c3dd-4035-a37c-300eb011331b"/*ResetTrigger*/,
@@ -57,14 +58,15 @@
         "X": 197.0,
         "Y": 373.0
       },
-      "Description": "Resets the accumulator"
+      "Description": "Resets the accumulator to StartValue."
     },
     {
       "InputId": "f647a803-1635-4dcd-bb4d-a7817789a3e2"/*Accumulate*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "PerFrame: add the increment each frame.\nPerSeconds: multiply the increment with the frame duration in seconds."
     }
   ],
   "SymbolChildUis": [],

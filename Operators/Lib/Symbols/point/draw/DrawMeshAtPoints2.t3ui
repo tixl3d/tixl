@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "065f6edb-6d3d-414b-ab36-4620a957a18c"/*DrawMeshAtPoints2*/,
-  "Description": "Similar to [DrawBillboards], this operator draws meshes instead of images.",
+  "Description": "Draws a mesh at every point of a buffer, with the color, scale and randomization options of [DrawBillboards].\n\nSee also: [DrawMeshAtPoints], [DrawPointsShaded]",
   "SymbolTags": "64",
   "InputUis": [
     {

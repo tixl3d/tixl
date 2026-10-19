@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "eb4d5014-2619-4368-a1b8-521db8372243"/*LenseFlareSetup*/,
-  "Description": "Pre-made complex light flare setups with various styles.\n\nRequire at least one [PointLight] on the left side or within the same group / graph.",
+  "Description": "Draws a pre-made lens flare with center glow, star, shimmer, iris reflections and other elements for a point light.\n\nRequires at least one [PointLight] or [SetPointLight] further right in the graph, i.e. in the context the flare is drawn in.\n\nAKA: lensflare, flare, glare, anamorphic\n\nSee also: [LenseFlareSetupAdvanced], [DefineLensFlare], [GetPointLightOccclusion]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": -562.30884,
         "Y": 339.61475
       },
-      "Description": "Automatically creates different combinations / styles of LensFlares.\n\nElements include: Centerglow, Star, Color, Sprites, Iris, Sparkle and Shimmer settings.",
+      "Description": "Varies the random edge glow and iris reflection elements.",
       "AddPadding": "True"
     },
     {
@@ -27,7 +27,7 @@
         "X": -568.0122,
         "Y": 452.42822
       },
-      "Description": "Select a color to tint various elements.",
+      "Description": "Tint color for the center glow, edge glow and iris elements.",
       "AddPadding": "True"
     },
     {
@@ -36,7 +36,7 @@
         "X": -562.30884,
         "Y": 384.61475
       },
-      "Description": "Select the Index / ID of the Pointlight to which the Lensflare is attached.",
+      "Description": "Index of the point light the flare is attached to.",
       "AddPadding": "True"
     }
   ],

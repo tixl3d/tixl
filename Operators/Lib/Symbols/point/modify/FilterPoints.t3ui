@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "18251874-5d5a-4384-8dcd-fcf297e54886"/*FilterPoints*/,
-  "Description": "Selects (i.e., picks) points based on the given criteria.\n\nCan be used to reduce the overall amount of points to increase performance.\n\nUseful combination [DrawPoints] [MeshFacesPoints] [MeshVerticesToPoints]\n\nVaguely similar [ClearSomePoints].",
+  "Description": "Picks a subset of points based on start index, step and count.\n\nCan be used to reduce the overall amount of points to increase performance.\n\nSee also: [ClearSomePoints], [DrawPoints], [MeshFacesPoints], [MeshVerticesToPoints]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -19,7 +19,7 @@
         "Y": 731.94434
       },
       "GroupTitle": "Selection",
-      "Description": "Defines how many points are allowed through the filter"
+      "Description": "Number of points in the result."
     },
     {
       "InputId": "537e6055-9c33-4b14-aa17-b34fd9d6bb61"/*Seed*/,
@@ -27,7 +27,6 @@
         "X": 52.325134,
         "Y": 1096.3247
       },
-      "Description": "Changes the random seed for the scatter effect",
       "Min": 0,
       "Max": 1
     },
@@ -38,7 +37,7 @@
         "Y": 828.4669
       },
       "GroupTitle": "Scattering",
-      "Description": "Scatters the selection by adding randomness to the indexes",
+      "Description": "Randomly offsets the picked indices.",
       "Min": 0.0,
       "Max": 1.0,
       "Scale": 0.001,
@@ -51,7 +50,7 @@
         "X": 52.32511,
         "Y": 863.4669
       },
-      "Description": "Defines the distance between the selected points.\nOr defines how many points are skipped during the selection if more than two points are passed through the filter.",
+      "Description": "Distance in indices between picked points.",
       "AddPadding": "True"
     },
     {
@@ -60,7 +59,7 @@
         "X": 52.325134,
         "Y": 1061.3247
       },
-      "Description": "Defines which point is defined as the first / starting point"
+      "Description": "Index of the first picked point."
     }
   ],
   "SymbolChildUis": [

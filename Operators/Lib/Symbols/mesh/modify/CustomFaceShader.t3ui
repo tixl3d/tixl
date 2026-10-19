@@ -17,6 +17,7 @@
         "Y": 23.114166
       },
       "GroupTitle": "Shader",
+      "Description": "HLSL code fragment applied to each element.",
       "Usage": "Multiline"
     },
     {
@@ -34,6 +35,7 @@
         "Y": 93.11415
       },
       "GroupTitle": "Additional Options...",
+      "Description": "Additional HLSL code inserted before the main function, e.g. #define statements or helper functions.",
       "Usage": "Multiline"
     },
     {
@@ -48,14 +50,16 @@
       "Position": {
         "X": 1530.2935,
         "Y": 1162.5802
-      }
+      },
+      "Description": "Recomputes the normals with [RecomputeNormals] after the code is applied."
     },
     {
       "InputId": "63fcdf71-45ce-4abd-a0f4-28364939e065"/*SplitVertices*/,
       "Position": {
         "X": -292.55844,
         "Y": 597.6346
-      }
+      },
+      "Description": "Splits shared vertices with [SplitMeshVertices] before the code is applied."
     },
     {
       "InputId": "6643b344-a69d-4142-85a6-f7c642a1e93a"/*D*/,

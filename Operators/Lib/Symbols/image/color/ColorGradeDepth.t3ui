@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "a1e3b8d3-3888-4e18-80e4-f6c65a136e75"/*ColorGradeDepth*/,
-  "Description": "An advanced color grade that uses a depth buffer-based gradient look for additional effects.\n\nUseful combinations: [SetFog]",
+  "Description": "Grades an image with Lift, Gamma and Gain colors like [ColorGrade], and additionally tints it by a gradient based on the distance from the camera.\n\nRequires the depth buffer of the [RenderTarget] that rendered the image. This allows effects like atmospheric haze where far objects get a different color than close ones.\n\nAKA: fog, haze, depth, grading\n\nSee also: [ColorGrade], [SetFog], [DepthBufferAsGrayScale]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -63,7 +63,8 @@
       "Position": {
         "X": -8.08049,
         "Y": 291.35632
-      }
+      },
+      "Description": "Saturation of the image before grading. 0 is grayscale, 1 is unchanged."
     },
     {
       "InputId": "92912c42-9928-495e-a8c7-c752e79eeba6"/*Gradient*/,
@@ -71,6 +72,7 @@
         "X": -6.2594147,
         "Y": 869.6292
       },
+      "Description": "Color added to the gain depending on the depth. Gray (0.5) is neutral; the alpha amplifies the effect.",
       "AddPadding": "True"
     },
     {
@@ -89,7 +91,8 @@
         "X": -8.08049,
         "Y": 707.35626
       },
-      "GroupTitle": "Depth"
+      "GroupTitle": "Depth",
+      "Description": "The depth buffer output of the [RenderTarget] that rendered the image."
     },
     {
       "InputId": "c3693fbf-83d1-4780-98a0-302e7ecf7ca2"/*VignetteCenter*/,
@@ -104,6 +107,7 @@
         "X": -6.2594147,
         "Y": 914.6292
       },
+      "Description": "Scene distances from the camera mapped to the start and end of the gradient.",
       "UseVec2Control": "Range"
     },
     {
@@ -111,7 +115,8 @@
       "Position": {
         "X": -6.2594147,
         "Y": 959.6292
-      }
+      },
+      "Description": "Near and far clip planes of the camera. Must match the camera settings for correct depth values."
     }
   ],
   "SymbolChildUis": [

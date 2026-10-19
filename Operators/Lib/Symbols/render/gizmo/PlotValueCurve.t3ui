@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "92f3193e-a7dd-4417-b569-129823607fbe"/*PlotValueCurve*/,
-  "Description": "Plots a history curve of a value.\n\nThis can be useful for debugging executables. While using the editor you might want to try [KeepFloatValues] or pinning a value operator to the output window.",
+  "Description": "Plots the recent history of a value as a curve with a label in the output.\n\nThis can be useful for debugging values in exported executables. While using the editor, [KeepFloatValues] or pinning a value operator to the output window might be more convenient.\n\nAKA: graph, plot, scope, oscilloscope, debug",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -20,21 +20,24 @@
       "Position": {
         "X": -376.877,
         "Y": 190.22757
-      }
+      },
+      "Description": "Value that is drawn at the top of the view."
     },
     {
       "InputId": "12a0a526-6255-49ee-a532-0e774dab91f8"/*Reset*/,
       "Position": {
         "X": -376.877,
         "Y": 235.22757
-      }
+      },
+      "Description": "Clears the recorded history."
     },
     {
       "InputId": "2f25a35f-51a6-4e7f-bb53-a91cf4f64505"/*DisplayLabel*/,
       "Position": {
         "X": -376.877,
         "Y": 355.22757
-      }
+      },
+      "Description": "Shows the label and the current value as text."
     },
     {
       "InputId": "491bba32-90df-477c-b9d6-0b22bad8b94e"/*Value*/,
@@ -52,6 +55,7 @@
         "Y": 100.22757
       },
       "GroupTitle": "Text",
+      "Description": "Text shown in front of the current value.",
       "Usage": "Default"
     },
     {
@@ -59,14 +63,16 @@
       "Position": {
         "X": -376.877,
         "Y": 280.22757
-      }
+      },
+      "Description": "Number of recorded frames shown in the curve."
     },
     {
       "InputId": "9fe97c16-b8ba-41a0-be15-a60d5124d806"/*RangeMin*/,
       "Position": {
         "X": -376.877,
         "Y": 145.22757
-      }
+      },
+      "Description": "Value that is drawn at the bottom of the view."
     }
   ],
   "SymbolChildUis": [

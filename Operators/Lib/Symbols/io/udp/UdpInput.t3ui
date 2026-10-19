@@ -25,7 +25,7 @@
         "X": -200.0,
         "Y": 225.0
       },
-      "Description": "If enabled, prints received data and sender information to the T3 log. Useful for debugging."
+      "Description": "If enabled, prints received data and sender information to the TiXL log. Useful for debugging."
     },
     {
       "InputId": "9e23335a-d63a-4286-930e-c63e86d0e6f0"/*LocalIpAddress*/,

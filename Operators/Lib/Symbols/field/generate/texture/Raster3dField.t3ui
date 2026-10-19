@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "edfc71fc-2d54-4226-b819-0340bb1fdd65"/*Raster3dField*/,
-  "Description": "Uses TiXL's Raymarching integration to generate a procedural raster 3D Texture that can be mapped onto meshes via [DrawMesh].\nConnects into the 'FragmentField' input of [DrawMesh].",
+  "Description": "Generates a 3D grid pattern as a color field.\n\nSpace is divided into cells of the given Scale. Each cell gets a cube of ColorB with the size LineWidth (relative to the cell), the rest of the cell is ColorA, which forms the grid lines. Connect it to the ColorField of [SetSDFMaterial] or to the FragmentField input of [DrawMesh].\n\nSee also: [SubDivPattern3d]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": -200.0,
         "Y": 210.0
-      }
+      },
+      "Description": "Softness of the transition."
     },
     {
       "InputId": "21092a7f-01b8-47b4-ba37-c0b1dc6affc4"/*ColorB*/,
@@ -17,6 +18,7 @@
         "X": -200.0,
         "Y": 75.0
       },
+      "Description": "Color of the cell interiors.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -28,7 +30,8 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "GroupTitle": "Transform"
+      "GroupTitle": "Transform",
+      "Description": "Offset of the grid in cell units."
     },
     {
       "InputId": "606584e3-2c4a-432f-a7a4-c3093a34685e"/*LineWidth*/,
@@ -36,6 +39,7 @@
         "X": -200.0,
         "Y": 135.0
       },
+      "Description": "Size of the ColorB cube relative to the cell. 1 fills the whole cell, smaller values make the ColorA lines thicker.",
       "AddPadding": "True"
     },
     {
@@ -43,7 +47,8 @@
       "Position": {
         "X": -200.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Size of the grid cells in world units."
     },
     {
       "InputId": "d3d51c3c-9dd7-4f9b-849d-59e94abff605"/*ColorA*/,
@@ -52,6 +57,7 @@
         "Y": 0.0
       },
       "GroupTitle": "Color",
+      "Description": "Color of the grid lines.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,

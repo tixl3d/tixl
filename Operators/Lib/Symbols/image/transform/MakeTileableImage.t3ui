@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "1e29f81b-0c05-4784-b3ac-c475ce510159"/*MakeTileableImage*/,
-  "Description": "Makes an incoming image tileable based on linear edge Falloff.\n\nThis can be used to repeat an imported or generated texture infinitely without any obviously visible borders.\n\nAlso see [MakeTileableImageAdvanced] for a version with more options.",
+  "Description": "Makes an image tileable by blending its edges with the opposite side using a linear falloff.\n\nThis allows repeating an imported or generated texture without obviously visible borders.\n\nAKA: seamless, tile, wrap\n\nSee also: [MakeTileableImageAdvanced], [TileableNoise], [TransformImage]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": -532.8175,
         "Y": 54.2388
       },
-      "Description": "Defines how the image is tiled:\n\n0 = No Tiling\n1 = horizontal tiling only\n2 = vertical tiling only\n3 = Vertical and horizontal tiling",
+      "Description": "0: no tiling\n1: horizontal tiling only\n2: vertical tiling only\n3: horizontal and vertical tiling",
       "Min": 0,
       "Max": 3,
       "Scale": 1.0,
@@ -30,7 +30,7 @@
         "X": -532.8175,
         "Y": 9.2388
       },
-      "Description": "Defines the length / size of the transition",
+      "Description": "Size of the blended transition at the edges.",
       "AddPadding": "True",
       "Min": 0.0,
       "Max": 1.0,

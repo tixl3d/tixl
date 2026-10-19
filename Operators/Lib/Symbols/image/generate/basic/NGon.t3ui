@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "22a3cd4e-02b3-44d7-ad2b-aab5810c5e88"/*NGon*/,
-  "Description": "Renders a polygon shape similar to [Blob] or [RoundedRect].\n\nSimilar Ops: [NGon] [RoundedRect] [Rings] [RadialGradient] [LinearGradient] [Blob]",
+  "Description": "Renders a regular polygon shape with optionally rounded or curved edges.\n\nAKA: polygon, triangle, hexagon, star, shape\n\nSee also: [NGonGradient], [Blob], [RoundedRect], [Rings], [RadialGradient], [LinearGradient]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": -202.95078,
         "Y": 400.32733
       },
-      "Description": "Defines the bias for the feather",
+      "Description": "Weights the feathering toward the inner or outer side of the edge.",
       "Min": -10.0,
       "Max": 10.0,
       "Scale": 0.1
@@ -37,7 +37,7 @@
         "X": -202.95078,
         "Y": 355.32733
       },
-      "Description": "Smoothes the whole shape",
+      "Description": "Rounds the whole shape.",
       "Min": 0.0,
       "Max": 1.0
     },
@@ -48,7 +48,7 @@
         "Y": 320.90118
       },
       "GroupTitle": "Edge",
-      "Description": "Defines how sharp the outer edge of the object is rendered",
+      "Description": "Width of the soft outer edge. 0 gives a hard edge.",
       "Min": -1.0,
       "Max": 1.0
     },
@@ -58,7 +58,7 @@
         "X": -199.99997,
         "Y": 230.90118
       },
-      "Description": "Defines if the outer line is convex or concave and can also invert the shape"
+      "Description": "Bends the edges outward (convex) or inward (concave). Extreme values can invert the shape."
     },
     {
       "InputId": "7613bc20-d400-440d-b6a5-5f60ce61a33c"/*Rotate*/,
@@ -111,8 +111,7 @@
       "Position": {
         "X": -203.93442,
         "Y": 122.45894
-      },
-      "Description": "Defines the radius"
+      }
     },
     {
       "InputId": "e7a99144-1f59-42ae-bdac-906ca1e54e0d"/*Sides*/,
@@ -121,7 +120,6 @@
         "Y": 77.45894
       },
       "GroupTitle": "Shape",
-      "Description": "Defines the amount of sides",
       "Min": 0.0,
       "Max": 42.0
     },
@@ -131,7 +129,7 @@
         "X": -197.04916,
         "Y": 790.5728
       },
-      "Description": "Blend mode between the generated blob graphic and the background image, if one is provided."
+      "Description": "Blend mode used to combine the shape with the connected Image. Ignored without an Image."
     }
   ],
   "SymbolChildUis": [

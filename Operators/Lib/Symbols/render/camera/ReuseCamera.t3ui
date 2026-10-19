@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "484bec1b-e441-440a-85b4-b3865c57b4ed"/*ReuseCamera*/,
-  "Description": "Set the projection matrix to the properties provided by another camera.\n\nThis can be helpful for reusing an animated [Camera] for several [RenderTarget]s.\n",
+  "Description": "Sets the view and projection of another camera for the connected subgraph.\n\nThis can be helpful for reusing an animated [Camera] for several [RenderTarget]s.\n\nSee also: [BlendCameras], [Camera]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -18,7 +18,8 @@
       "Position": {
         "X": 0.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Reference output of a camera, e.g. [Camera] or [OrbitCamera]. Required."
     }
   ],
   "SymbolChildUis": [],

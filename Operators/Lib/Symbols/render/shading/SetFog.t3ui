@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "74cbfce0-f8b8-46a1-b5d6-38477d4eec99"/*SetFog*/,
-  "Description": "Adds fog to the incoming scene.\n\nProTip: If large meshes (for example a \"quadmesh\" as a ground plane) are not properly obscured by the fog, one possible reason could be that the tessellation is not high enough.\n\nUseful combinations [ColorGradeDepth]. An operator that allows objects far away from the camera to be colored differently than close objects.\n\nAlso see [SetEnvironment] and [DepthBufferAsGrayScale]",
+  "Description": "Adds distance fog to the connected subgraph.\n\nThe fog is applied by the draw operators (e.g. [DrawMesh], [DrawLines]) based on the distance to the camera. It increases from the camera position and fully covers the content at Distance.\n\nAKA: haze, mist, atmosphere, depthcue\n\nTips:\n- Fog is computed per vertex in most draw operators. If large meshes (e.g. a ground plane) are not properly covered, increase their tessellation.\n- Use the alpha channel of Color to fade the fog effect.\n- [ColorGradeDepth] colors distant objects differently than close ones as a post effect.\n\nSee also: [SetEnvironment], [DepthBufferAsGrayScale], [ColorGradeDepth]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": -200.0,
         "Y": 90.0
       },
-      "Description": "Defines the thickness and gradations of the fog.\n\nA lower bias creates thin fog. \nMeaning that the distance between the beginning of the fog until it becomes dense is very long. \n\nA high bias creates dense fog.\nThe area in which it completely obscures the view is only a short distance behind the area in which it begins.\n",
+      "Description": "Exponent of the fog gradient. Values above 1 keep close areas clear and let the fog increase steeply towards Distance. Values below 1 make the fog appear close to the camera.",
       "Min": 0.0,
       "Max": 10.0
     },
@@ -20,7 +20,7 @@
         "X": -200.0,
         "Y": 45.0
       },
-      "Description": "Defines how far away from the view the fog starts to appear.",
+      "Description": "Distance from the camera at which the fog fully covers the content. 0 disables the fog.",
       "AddPadding": "True",
       "Min": 0.0,
       "Max": 100.0,
@@ -40,7 +40,7 @@
         "X": -200.0,
         "Y": 135.0
       },
-      "Description": "Defines the color of the fog. \nTip: you can use the alpha channel to fade out fog color impact.",
+      "Description": "Color of the fog. The alpha channel controls the fog strength.",
       "AddPadding": "True"
     }
   ],

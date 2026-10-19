@@ -32,7 +32,7 @@ public class DrawScene : Instance<DrawScene>
         var previousMaterial = context.PbrMaterial;
             
         var materialId = UseMaterialId.GetValue(context);
-        if (!string.IsNullOrEmpty(materialId))
+        if (!string.IsNullOrEmpty(materialId) && context.Materials != null)
         {
             foreach(var m in context.Materials)
             {

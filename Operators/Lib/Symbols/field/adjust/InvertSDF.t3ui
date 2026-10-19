@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "0707a816-d118-4419-84d6-7bdcbeee318d"/*InvertSDF*/,
-  "Description": "Inverts the incoming SDF field.\nExample: A cube in infinite empty space thus becomes a cut-out space in infinite matter.\n\nHelpful combination: [CombineSDF] ",
+  "Description": "Inverts the incoming SDF by negating its distance, swapping inside and outside.\n\nA box in empty space becomes a box-shaped cavity in infinite solid matter.\n\nSee also: [AbsoluteSDF], [CombineSDF]",
   "SymbolTags": "1",
   "InputUis": [
     {

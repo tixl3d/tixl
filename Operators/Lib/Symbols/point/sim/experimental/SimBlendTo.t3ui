@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "4ba8019b-f265-4e41-8722-4ee0c2c64ba9"/*SimBlendTo*/,
-  "Description": "",
+  "Description": "Moves the points of a simulation buffer towards the positions of PointsB on every frame.\n\nPoints are paired by index. As the buffer is modified in place, use it with [PointSimulation].\n\nSee also: [BlendPoints]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -25,6 +25,7 @@
         "X": -513.31537,
         "Y": 531.8599
       },
+      "Description": "Fraction of the remaining distance moved on every frame.",
       "Min": -5.0,
       "Max": 5.0,
       "Scale": 0.001

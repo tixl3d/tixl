@@ -58,9 +58,7 @@ inline float OIntToFloat(uint value)
     Point sourcePoint = SourcePoints[DTid.x];
     float3 position = sourcePoint.Position;
 
-    // float isValid = !(DTid.x >= sourcePointCount || isnan(position.x) || isnan(position.y) || isnan(position.z));
-
-    float isValid = !(isnan(position.x) || isnan(position.y) || isnan(position.z));
+    float isValid = !(DTid.x >= sourcePointCount || isnan(position.x) || isnan(position.y) || isnan(position.z));
     uint3 intPos = uint3(
         FloatToOInt(position.x),
         FloatToOInt(position.y),

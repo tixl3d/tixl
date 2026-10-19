@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "db73b47d-3d42-4b17-b8fd-08b6f1286716"/*FirstValidTexture*/,
-  "Description": "",
+  "Description": "Outputs the first connected texture that is not null.\n\nUseful to provide a fallback when an upstream operator (e.g. a file or video loader) fails to produce a texture.\n\nSee also: [UseFallbackTexture], [PickTexture]",
   "SymbolTags": "8",
   "InputUis": [
     {

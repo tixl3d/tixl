@@ -1,14 +1,15 @@
 {
   "FormatVersion": 3,
   "Id": "ba0ce504-a515-437f-a8d5-7889fe50d32c"/*SetIntListValue*/,
-  "Description": "",
+  "Description": "Modifies an entry of an int list while TriggerSet is true.\n\nThe incoming list is changed in place, so the change persists and also affects other operators using the same list.\n\nSee also: [SetFloatListValue], [PickIntFromList]",
   "InputUis": [
     {
       "InputId": "0ce474d8-57f9-43da-9374-739738498491"/*Mode*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Set replaces the entry, Add adds Value to it, Multiply multiplies it by Value."
     },
     {
       "InputId": "0f18e03d-c395-4a68-a139-e1e5aa9d54ff"/*IntList*/,
@@ -22,14 +23,16 @@
       "Position": {
         "X": -200.0,
         "Y": 195.0
-      }
+      },
+      "Description": "Entry to change; wraps around the list length. -2 applies to all entries; other negative values do nothing."
     },
     {
       "InputId": "5d42b93a-6973-4d6f-b2bf-3314b67c3a26"/*TriggerSet*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Applies the change on every frame while true."
     },
     {
       "InputId": "e585af2c-b1b0-4603-b173-afa452960f29"/*Value*/,

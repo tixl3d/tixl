@@ -1,14 +1,15 @@
 {
   "FormatVersion": 3,
   "Id": "c7b8359e-6b36-4ae0-a6b4-4ac0d0306966"/*MunchingSquares2*/,
-  "Description": "",
+  "Description": "Generates a \"munching squares\" bit pattern by combining the integer X and Y cell coordinates with bitwise operations.\n\nThe image is divided into square cells; each cell becomes ShadowColor or HighlightColor depending on the selected Method and Iterations value. A connected Image modulates the iteration count per cell by its brightness and is blended with the pattern.\n\nAKA: bitfield, xor, munching\n\nSee also: [RyojiPattern2], [CheckerBoard]",
   "InputUis": [
     {
       "InputId": "11be1492-a848-4172-83dd-d19eea7e7c88"/*Method*/,
       "Position": {
         "X": 380.32208,
         "Y": 445.07025
-      }
+      },
+      "Description": "The bitwise formula that combines the X and Y cell coordinates. Classic is (X xor Y) and Iterations."
     },
     {
       "InputId": "24dd4192-a1e8-4327-ab8e-88c1a34ef9b1"/*Stretch*/,
@@ -22,7 +23,8 @@
       "Position": {
         "X": 380.32205,
         "Y": 480.07025
-      }
+      },
+      "Description": "The bit mask that is combined with the cell coordinates. Animating it produces the classic munching effect."
     },
     {
       "InputId": "4b175d22-d1a4-4458-96d9-2a72ecd77ae0"/*HighlightColor*/,
@@ -41,6 +43,7 @@
         "X": 240.32208,
         "Y": 25.070145
       },
+      "Description": "Per-channel weights applied to the Image color before averaging RGB into a brightness value.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -76,6 +79,7 @@
         "X": 240.32211,
         "Y": 305.07025
       },
+      "Description": "Shifts the pattern in cells.",
       "Min": -2.0,
       "Max": 2.0
     },
@@ -93,6 +97,7 @@
         "X": 380.32208,
         "Y": 375.07025
       },
+      "Description": "Size of a cell in pixels.",
       "Min": 1.0,
       "Max": 15.0,
       "ClampMin": true,
@@ -103,14 +108,16 @@
       "Position": {
         "X": 380.32205,
         "Y": 410.07025
-      }
+      },
+      "Description": "Adds the brightness of the connected Image (after GrayScaleWeights and GainAndBias) multiplied by this factor to Iterations for each cell."
     },
     {
       "InputId": "fb02efe3-cca5-4664-b8ce-33ace59c51d6"/*BlendMethod*/,
       "Position": {
         "X": 380.32208,
         "Y": 515.07025
-      }
+      },
+      "Description": "Blend mode used to combine the pattern with the connected Image. Ignored without an Image."
     }
   ],
   "SymbolChildUis": [

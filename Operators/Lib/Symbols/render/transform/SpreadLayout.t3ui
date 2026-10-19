@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "e07550cf-033a-443d-b6f3-73eb71c72d9d"/*SpreadLayout*/,
-  "Description": "Spatially distributes the incoming graph elements.",
+  "Description": "Distributes the connected draw commands along a line and applies a common transform and color to them.\n\nEach connected command is moved by an equal fraction of Spread, in the order of the connections.\n\nAKA: layout, arrange, distribute, row, stack\n\nSee also: [SpreadIntoGrid], [Group]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -26,14 +26,16 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Draw commands to distribute."
     },
     {
       "InputId": "5f2c1b38-4b0c-45e4-810f-8f126084b285"/*Pivot*/,
       "Position": {
         "X": 0.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Alignment of the distribution relative to Translation. 0.5 centers it, 1 places the first command and 0 the last command at Translation."
     },
     {
       "InputId": "84c700dc-17da-4e4b-b636-dbb040bceefa"/*Color*/,
@@ -41,6 +43,7 @@
         "X": 0.0,
         "Y": 135.0
       },
+      "Description": "Multiplied with the color of the connected operators.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -51,7 +54,8 @@
       "Position": {
         "X": 0.0,
         "Y": 180.0
-      }
+      },
+      "Description": "Invalidates the connected subgraph every frame, so that animated colors are applied by operators that would otherwise cache their result. This can be expensive."
     },
     {
       "InputId": "a46dba34-0a69-4a9e-8e76-5dc01054fbb4"/*Spread*/,
@@ -59,7 +63,8 @@
         "X": -200.0,
         "Y": 45.0
       },
-      "GroupTitle": "Distribute"
+      "GroupTitle": "Distribute",
+      "Description": "Distance between the first and the last command."
     },
     {
       "InputId": "b89c93b7-2051-4458-9a86-fe51ba2c15d9"/*UniformScale*/,
@@ -74,7 +79,8 @@
         "X": 0.0,
         "Y": 90.0
       },
-      "GroupTitle": "Additional Options..."
+      "GroupTitle": "Additional Options...",
+      "Description": "If disabled, nothing is drawn."
     },
     {
       "InputId": "d730dc2f-0cd4-46eb-b917-ae886a319eeb"/*Scale*/,

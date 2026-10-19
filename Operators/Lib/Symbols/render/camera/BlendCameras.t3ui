@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "e3ff58e2-847a-4c97-947c-cfbcf8f9c79d"/*BlendCameras*/,
-  "Description": "Smoothly blends between multiple cameras by using a floating point index.",
+  "Description": "Smoothly blends between multiple cameras by using a floating point index.\n\nThe position, target, roll, field of view and other camera properties of the two neighboring cameras are interpolated. The result is applied to the connected Command and is also available as a camera reference output, e.g. for [ActionCamera] or [ReuseCamera].\n\nAKA: switcher, cut, crossfade\n\nSee also: [Camera], [ReuseCamera]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": -200.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Selects the camera. Fractional values blend between neighboring cameras, e.g. 1.5 is halfway between the second and third camera. Clamped to the number of connected cameras."
     },
     {
       "InputId": "c7ee5d97-86c1-442f-91d0-b60e6cfe24c7"/*Command*/,
@@ -25,7 +26,8 @@
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Reference outputs of the cameras to blend between, e.g. from [Camera]. Their own Command inputs do not need to be connected."
     }
   ],
   "SymbolChildUis": [],

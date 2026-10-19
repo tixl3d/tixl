@@ -1,28 +1,32 @@
 {
   "FormatVersion": 3,
   "Id": "8a104da8-3995-421f-b756-b6fc06953be3"/*SetRequestedResolutionCmd*/,
-  "Description": "",
+  "Description": "Internal helper. Overrides the requested resolution of the evaluation context while executing the connected commands.",
+  "SymbolTags": "16",
   "InputUis": [
     {
       "InputId": "58b2a52c-ece7-420b-9730-e3d0406a5616"/*Resolution*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Used if both components are greater than 0. Otherwise the current requested resolution is kept."
     },
     {
       "InputId": "a4d09d43-5f81-4b15-85db-e03f917b9764"/*ScaleResolution*/,
       "Position": {
         "X": -200.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Factor applied to the resolution."
     },
     {
       "InputId": "b05d30d3-3bc4-4517-bd3d-ed2d26f87646"/*StretchResolution*/,
       "Position": {
         "X": -200.0,
         "Y": 120.0
-      }
+      },
+      "Description": "Per-axis factor applied to the resolution."
     },
     {
       "InputId": "c59596ca-984f-4682-88d3-808c60665414"/*Texture*/,

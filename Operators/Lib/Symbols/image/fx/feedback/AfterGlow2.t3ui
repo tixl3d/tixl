@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "04ac6a30-a2ad-4e43-8954-94dc852b0602"/*AfterGlow2*/,
-  "Description": "Creates an afterglow effect for moving images\n\nOther Useful Ops for a PostFX Pipeline: [MotionBlur] [DepthOfField] [ChromaticAberration] [Glow] [Grain] [Blur]\n\nAll Feedback Ops: [FluidFeedback] [AdvancedFeedback] [AdvancedFeedback2]",
+  "Description": "Creates an afterglow effect that leaves fading, blurred trails behind moving images.\n\nAKA: trails, echo, persistence, ghosting\n\nSee also: [FluidFeedback], [AdvancedFeedback], [AdvancedFeedback2], [MotionBlur], [Glow], [Bloom]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": -463.38632,
         "Y": 154.52512
       },
-      "Description": "Controls how much the images created by the afterglow effect are blurred",
+      "Description": "Blur size of the image that is accumulated into the trails each frame.",
       "Min": 0.0,
       "Max": 10.0,
       "ClampMin": true
@@ -22,7 +22,7 @@
         "Y": 199.52512
       },
       "GroupTitle": "Color",
-      "Description": "Defines a color that is added to the afterglow"
+      "Description": "Tints the trails."
     },
     {
       "InputId": "b2ee3011-3187-4093-ab7d-30ec81c8ccc9"/*OrgColor*/,
@@ -30,7 +30,7 @@
         "X": -463.38632,
         "Y": 244.52512
       },
-      "Description": "Defines a color that is added to the original image",
+      "Description": "Tints the original image before the trails are added.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -43,7 +43,7 @@
         "Y": 64.52513
       },
       "GroupTitle": "Settings",
-      "Description": "Defines how quickly the afterglow fades",
+      "Description": "How quickly the trails fade to black. Higher values fade faster.",
       "Min": 0.0,
       "Max": 1.0,
       "Scale": 0.001,
@@ -56,7 +56,7 @@
         "X": -463.38632,
         "Y": 109.52513
       },
-      "Description": "Controls the intensity of a glow effect",
+      "Description": "Brightness of the image accumulated into the trails each frame.",
       "Min": 0.0,
       "Max": 1.0,
       "Scale": 0.01,

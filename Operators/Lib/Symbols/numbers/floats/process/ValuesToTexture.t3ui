@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "55cc0f79-96c9-482e-9794-934dc0f87708"/*ValuesToTexture*/,
-  "Description": "Converts a list of values into pixels of a texture in real time.\nSee the example of how this can be used to create audio reactive visualizers with [PlaybackFFT] and [LinearSamplePointAttributes]",
+  "Description": "Converts lists of values into pixels of a float texture in real time.\n\nEach pixel is computed as ((value + Offset) * Gain) ^ Pow. See the example of how this can be used to create audio reactive visualizers with [PlaybackFFT] and [LinearSamplePointAttributes].\n\nSee also: [ValuesToTexture2], [CurvesToTexture]",
   "InputUis": [
     {
       "InputId": "092c8d1f-a70e-4298-b5df-52c9d62f8e04"/*Values*/,
@@ -9,14 +9,16 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "GroupTitle": "Values"
+      "GroupTitle": "Values",
+      "Description": "One or more float lists. Each list becomes one row (Horizontal) or column (Vertical)."
     },
     {
       "InputId": "51545316-69fc-441f-b59f-44979e32972c"/*Pow*/,
       "Position": {
         "X": -200.0,
         "Y": 180.0
-      }
+      },
+      "Description": "Exponent applied to each value. Values near 0 stop updating the texture."
     },
     {
       "InputId": "63e90d86-5ad5-4333-8b99-7f8d285c4913"/*Direction*/,
@@ -24,6 +26,7 @@
         "X": -200.0,
         "Y": 225.0
       },
+      "Description": "Horizontal: one row per list. Vertical: one column per list.",
       "AddPadding": "True"
     },
     {

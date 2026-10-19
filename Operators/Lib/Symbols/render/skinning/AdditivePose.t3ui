@@ -8,35 +8,40 @@
       "Position": {
         "X": 0.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Scene setup with the skeleton, e.g. from [LoadGltfScene] or [SkeletonFromPoints]."
     },
     {
       "InputId": "38e6c0a4-d19b-4572-9fe8-b25a41c6d793"/*BasePose*/,
       "Position": {
         "X": 0.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Pose with one point per joint, e.g. from [SampleGltfAnimation]."
     },
     {
       "InputId": "5df03a86-27c4-4b91-8e35-fa1608d92c47"/*Weight*/,
       "Position": {
         "X": 0.0,
         "Y": 180.0
-      }
+      },
+      "Description": "0 keeps the base pose, 1 adds the full difference. Values above 1 exaggerate it."
     },
     {
       "InputId": "92b5e731-4f0c-48a6-bd27-c690f5a3e814"/*SkeletonIndex*/,
       "Position": {
         "X": 0.0,
         "Y": 135.0
-      }
+      },
+      "Description": "Index of the skeleton in the setup. Wraps around the number of skeletons."
     },
     {
       "InputId": "f90d54b7-6a28-4e13-85cf-1c74b09e62d8"/*Additive*/,
       "Position": {
         "X": 0.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Pose whose difference to the rest pose is added to BasePose."
     }
   ],
   "SymbolChildUis": [],

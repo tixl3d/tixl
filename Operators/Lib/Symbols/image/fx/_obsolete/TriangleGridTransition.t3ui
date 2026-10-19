@@ -1,7 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "da8ebc61-87cf-44ff-888e-994c8628ddb7"/*TriangleGridTransition*/,
-  "Description": "Creates a linear- or clock-wipe transition between two images using a truncated border consisting of triangles.\n\nAlso see [FadingSlideShow] [HoneyCombTiles]",
+  "Description": "Obsolete. Creates a linear- or clock-wipe transition between two images using a border of triangles.\n\nThere is no direct replacement.\n\nSee also: [FadingSlideShow], [HoneyCombTiles]",
+  "SymbolTags": "4096",
   "InputUis": [
     {
       "InputId": "0c6065b9-eb20-4a37-9d70-419d1c8912a6"/*Center*/,
@@ -10,23 +11,21 @@
         "Y": 697.0867
       },
       "GroupTitle": "Advanced Options",
-      "Description": "Shifts the location of the effect"
+      "Description": "Shifts the triangle grid."
     },
     {
       "InputId": "36a9b777-0201-4cec-9c6f-d5ec09e92b3a"/*ImageB*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      },
-      "Description": "Second Image input"
+      }
     },
     {
       "InputId": "5a5bed81-c48d-43dd-a6b0-fc7964f90f2d"/*Image*/,
       "Position": {
         "X": -198.11073,
         "Y": -74.62686
-      },
-      "Description": "Input for the first Image"
+      }
     },
     {
       "InputId": "5baee095-f7fe-4a07-a01d-cbb2f3c2f3bc"/*Resolution*/,
@@ -34,7 +33,7 @@
         "X": -215.69875,
         "Y": 514.8023
       },
-      "Description": "Overwrites the resolution of the output image",
+      "Description": "Overrides the output resolution.",
       "AddPadding": "True"
     },
     {
@@ -43,7 +42,7 @@
         "X": -215.69875,
         "Y": 334.8023
       },
-      "Description": "Amount of triangles used for the effect",
+      "Description": "Number of triangles across the image.",
       "AddPadding": "True",
       "Scale": 0.1
     },
@@ -53,7 +52,7 @@
         "X": -195.41698,
         "Y": 742.0867
       },
-      "Description": "Defines how intense the original image is mixed into the effect (currently ignored)"
+      "Description": "Currently ignored."
     },
     {
       "InputId": "82a572d3-a39f-4ab3-bc17-804d3098d1c1"/*EffectFalloff*/,
@@ -61,7 +60,7 @@
         "X": -215.69875,
         "Y": 379.8023
       },
-      "Description": "Increases the falloff of the effect"
+      "Description": "Width of the transition zone."
     },
     {
       "InputId": "846f8b1e-e6bb-4e6a-a42c-f83636fd4b6f"/*Fill*/,
@@ -70,7 +69,7 @@
         "Y": 244.8023
       },
       "GroupTitle": "Settings",
-      "Description": "Color that is multiplied with the triangles that appear during the transition"
+      "Description": "Multiplied with the triangles that appear during the transition."
     },
     {
       "InputId": "8c652498-33c7-4faa-a8c0-3f3d296474c8"/*LineThickness*/,
@@ -78,7 +77,7 @@
         "X": -215.69875,
         "Y": 424.8023
       },
-      "Description": "Decreases the size of the triangles"
+      "Description": "Thickness of the border between triangles. Higher values make the triangles smaller."
     },
     {
       "InputId": "8d4e1265-8479-4525-adbc-fe5c31d9984a"/*EffectCenter*/,
@@ -86,7 +85,7 @@
         "X": -200.0,
         "Y": 90.0
       },
-      "Description": "Increases the width of the effect / shifts and animates the effect like a linear-wipe transition"
+      "Description": "Shifts the transition. Animate it for a linear wipe."
     },
     {
       "InputId": "d99d5c03-2563-41e6-9bfe-bd61a7fed37d"/*Scatter*/,
@@ -94,7 +93,7 @@
         "X": -215.69875,
         "Y": 469.8023
       },
-      "Description": "Randomly scatters the effect"
+      "Description": "Randomly offsets the transition per triangle."
     },
     {
       "InputId": "dab4e3df-aaa6-411c-83f6-e4c730b740ce"/*EffectRotation*/,
@@ -102,7 +101,7 @@
         "X": -200.0,
         "Y": 45.0
       },
-      "Description": "Rotates and animates the effect like a clock-wipe transition",
+      "Description": "Angle of the wipe direction in degrees. Animate it for a clock-wipe.",
       "AddPadding": "True",
       "Scale": 0.5
     },
@@ -112,7 +111,7 @@
         "X": -215.69875,
         "Y": 289.8023
       },
-      "Description": "Background color that appears during the transition"
+      "Description": "Color shown in the gap between the two images."
     }
   ],
   "SymbolChildUis": [

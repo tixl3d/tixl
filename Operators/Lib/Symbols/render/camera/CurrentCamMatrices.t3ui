@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "f0c38f0f-36ef-4562-a993-96a175cd03cd"/*CurrentCamMatrices*/,
-  "Description": "Returns various matrices of the current context camera. \n\nThis is used internally for things like rendering shadow maps.",
+  "Description": "Returns the world-to-clip-space matrix of the current context camera.\n\nThe Command output must be evaluated within the subgraph of a camera. The matrix is transposed and returned as an array of four Vector4 rows, e.g. to pass it into a shader constant buffer. This is used internally for things like rendering shadow maps.\n\nSee also: [CamPosition]",
   "InputUis": [],
   "SymbolChildUis": [],
   "OutputUis": [

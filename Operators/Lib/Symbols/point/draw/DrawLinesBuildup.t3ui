@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "66f5a6af-b4a5-46ef-b1e5-4cdd035b6539"/*DrawLinesBuildup*/,
-  "Description": "Renders incoming points as growing strokes. The points' W attribute encodes the U progress of the extension of the strokes.\n\nThis operator requires a texture with a [LinearGradient] that is transparent at the ends.\n\nAnother approach would be [SvgToPoints]->[PrepareSvgLineTransition]->[ListToBuffer]->[DrawLinesBuildup].",
+  "Description": "Draws a point buffer as lines that are only visible within a moving window, to animate strokes being drawn.\n\nThe F1 attribute of each point defines its progress along the stroke. Only the parts with F1 between TransitionProgress - VisibleRange and TransitionProgress are drawn, and the texture is stretched across this visible range. Use a texture that is transparent at both ends, e.g. from a [LinearGradient], for soft stroke tips.\n\nTips:\n- [PrepareSvgLineTransition] writes suitable F1 values, e.g. [LoadSvg] -> [PrepareSvgLineTransition] -> [ListToBuffer] -> [DrawLinesBuildup].\n\nSee also: [DrawLines]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -16,7 +16,8 @@
       "Position": {
         "X": 649.87634,
         "Y": 1102.7606
-      }
+      },
+      "Description": "Hides lines behind other geometry."
     },
     {
       "InputId": "664a16be-e55e-4cd3-bd12-9122aa1c62d1"/*VisibleRange*/,
@@ -24,6 +25,7 @@
         "X": -7.994606,
         "Y": 590.18463
       },
+      "Description": "Length of the visible window, in units of the F1 attribute.",
       "Scale": 0.01
     },
     {
@@ -31,7 +33,8 @@
       "Position": {
         "X": -7.994606,
         "Y": 520.18463
-      }
+      },
+      "Description": "0 keeps a constant width on screen, 1 makes lines thinner with distance like regular geometry."
     },
     {
       "InputId": "929e0b9d-da3f-46b9-a61f-bd6500613166"/*Texture_*/,
@@ -45,7 +48,8 @@
       "Position": {
         "X": 649.87634,
         "Y": 1137.7606
-      }
+      },
+      "Description": "Writes the lines to the depth buffer so they can hide geometry drawn later."
     },
     {
       "InputId": "dbb4ee8f-eefa-4df7-a8dd-1efb6f5bdae0"/*LineWidth*/,
@@ -61,6 +65,7 @@
         "X": -147.99461,
         "Y": 555.18463
       },
+      "Description": "Position of the head of the visible window, in units of the F1 attribute.",
       "Scale": 0.001
     },
     {

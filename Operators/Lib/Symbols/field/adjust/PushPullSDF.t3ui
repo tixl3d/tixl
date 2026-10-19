@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "0ff18a32-c1e9-406d-b3e3-23700e2453a0"/*PushPullSDF*/,
-  "Description": "Makes the incoming SDF volumes thicker or thinner by pushing or pulling the surface by adding a constant value to the distance.",
+  "Description": "Makes the incoming SDF volume thinner or thicker by adding a constant to its distance.\n\nPositive Amount values shrink the shape, negative values grow it and round its edges. An optional AmountField modulates the offset per position, which can be used for displacement effects.\n\nSee also: [AbsoluteSDF], [NoiseDisplaceSDF]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": -200.0,
         "Y": 195.0
-      }
+      },
+      "Description": "Only used with a connected AmountField: the resulting distance is divided by 1 + StepScale to reduce raymarching artifacts."
     },
     {
       "InputId": "91c09fac-0b50-4f62-97ca-18461801b442"/*AmountField*/,
@@ -17,7 +18,7 @@
         "X": -200.0,
         "Y": 75.0
       },
-      "Description": "Add additional scale field to simulate some kind of displacement.\nThis will break the Lipschitz continuity of your field and cause artifacts when raymarching.",
+      "Description": "Optional field whose red channel is multiplied with Amount and added to the distance.\n\nThis breaks the Lipschitz continuity of the field and can cause raymarching artifacts.",
       "AddPadding": "True"
     },
     {
@@ -26,6 +27,7 @@
         "X": -200.0,
         "Y": 120.0
       },
+      "Description": "Distance added to the field. Positive values shrink the shape, negative values grow it.",
       "Min": -1.0,
       "Max": 1.0
     },

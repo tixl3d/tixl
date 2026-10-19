@@ -34,9 +34,8 @@ internal sealed class LoadGltf : Instance<LoadGltf>, IDescriptiveFilename, IStat
             try
             {            
                 var model = ModelRoot.Load(fullPath);
-            
-                if(childIndexChanged)
-                    UpdateBuffers(model, childIndex);
+                _lastErrorMessage = null;
+                UpdateBuffers(model, childIndex);
             }
             catch (Exception e)
             {

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "ccc06dd6-4eec-4d17-af0b-4f1700e7887a"/*PerlinNoise2*/,
-  "Description": "Generates a continuously and randomly changing value in the predefined range based on Perlin Noise / Gradient Noise.\n\nUseful to create random-looking animations e.g. flickering light, wind, fire, camshake, changing colors etc.\n\nThis creates PerlinNoise in 2 dimensions. See [PerlinNoise] and [PerlinNoise3] for Operators with less / more dimensions",
+  "Description": "Generates two continuously and randomly changing values based on Perlin noise.\n\nUseful to create random-looking animations, e.g. flickering light, wind, fire, camera shake or changing colors.\n\nSee also: [PerlinNoise], [PerlinNoise3]\nAlso check out the [HowToAnimate] tutorial.",
   "InputUis": [
     {
       "InputId": "0abcff87-ace5-4a06-9217-b2caf831ecae"/*Amplitude*/,
@@ -34,7 +34,8 @@
       "Position": {
         "X": -2.7436478,
         "Y": -69.55521
-      }
+      },
+      "Description": "Offset added to the time."
     },
     {
       "InputId": "c1ffdc20-7c90-49f9-8deb-f0a415e130c8"/*Seed*/,
@@ -51,6 +52,7 @@
         "X": -2.7436478,
         "Y": 200.4448
       },
+      "Description": "Added to the result.",
       "UseVec2Control": "Position"
     },
     {

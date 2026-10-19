@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "17b60044-9125-4961-8a79-ca94697b3726"/*Multiply*/,
-  "Description": "Multiplies two floats.\n\nAlso see [Div] [Sum] etc.",
+  "Description": "Multiplies two floats.\n\nAKA: mul, times, product\n\nSee also: [Div], [Sum]",
   "SymbolTags": "1",
   "InputUis": [
     {

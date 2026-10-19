@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "1a241222-200b-417d-a8c7-131e3b48cc36"/*SpherePoints*/,
-  "Description": "Generates a sphere with evenly distributed points on its surface.\n\nNeeds a [DrawPoints], [DrawLines], or [DrawMeshAtPoints] or similar in order to become visible.\n\nSimilar: [GridPoints], [RadialPoints], [PointsOnMesh]",
+  "Description": "Generates evenly distributed points on the surface of a sphere.\n\nNeeds [DrawPoints], [DrawLines], [DrawMeshAtPoints] or similar in order to become visible.\n\nSee also: [GridPoints], [RadialPoints], [PointsOnMesh]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,6 @@
         "X": -230.48734,
         "Y": 585.5762
       },
-      "Description": "Controls the amount of points distributed on the sphere",
       "Min": 2,
       "Max": 10000,
       "Scale": 1.0,
@@ -23,7 +22,6 @@
         "X": 134.58586,
         "Y": 796.0112
       },
-      "Description": "Controls the radius of the sphere",
       "Min": -5000.0,
       "Max": 5000.0,
       "Scale": 0.1,
@@ -36,7 +34,7 @@
         "X": 134.58586,
         "Y": 866.0112
       },
-      "Description": "Shifts the points on the sphere with varying values\n\nProTip: If the points should leave the surface of the sphere, [RandomizePoints] can be of help",
+      "Description": "Randomly shifts the points on the sphere surface.\n\nTips:\n- Use [RandomizePoints] to move points off the surface.",
       "AddPadding": "True"
     },
     {
@@ -45,7 +43,6 @@
         "X": -5.414154,
         "Y": 691.0112
       },
-      "Description": "Moves the center of the sphere",
       "AddPadding": "True"
     },
     {

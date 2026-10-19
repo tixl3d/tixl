@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "45d12ccb-3da8-41e5-85fd-61d7abfaa92d"/*ChromaBlur*/,
-  "Description": "Blurs only the colors of an image. This can be useful to reduce chromatic abberation artifacts.",
+  "Description": "Blurs only the colors of an image while keeping the lightness sharp.\n\nThe image is converted to Lab color space, the a and b channels are blurred with [FastBlur] and combined with the original lightness. This can be useful to reduce chroma noise or chromatic aberration artifacts. The output alpha is always 1.\n\nSee also: [FastBlur], [Blur]",
   "InputUis": [
     {
       "InputId": "3e6e1e6d-ea12-4cc6-b2db-b901d0743f99"/*ImageA*/,
@@ -15,7 +15,8 @@
       "Position": {
         "X": -200.0,
         "Y": 75.0
-      }
+      },
+      "Description": "Number of [FastBlur] levels. Higher values blur the colors more."
     }
   ],
   "SymbolChildUis": [

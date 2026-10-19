@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "836f211f-b387-417c-8316-658e0dc6e117"/*DrawLines*/,
-  "Description": "Draws a point buffer as lines. The lines will be aligned to the camera, but their width will shrink with distance to the camera. You can override this with the ScaleWithDistance parameter. We use the point’s W attribute as a scale factor for the line width. If the W attribute of a point is NaN (Not a Number), that point is not being drawn and acts as a separator between the adjacent line segments. This allows a point buffer to contain multiple disconnected line segments.\nDrawLines ignores the orientation defined by the points. Consider using [DrawRibbons] if you need consistent orientation.\n\n## Some caveats\n\nLong line segments that intersect the camera plane (i.e., one point is in front of the camera and the other behind the camera) will not be rendered correctly. Please consider using [DrawRaypoints] for this.\n\n## Performance considerations:\n\nDrawing lines is fast. Depending on your graphics card, you can draw millions of lines per frame. Performance will be impacted by the length of your lines rather than the point count. This is directly related to your render target’s resolution and multi-sampling level (MSAA).",
+  "Description": "Draws a point buffer as camera-facing lines connecting consecutive points.\n\nThe line width is LineWidth multiplied by each point's Scale.x and optionally its F1 or F2 attribute (see WidthFactor). Separator points (with NaN scale) split the buffer into multiple disconnected lines. The orientation of the points is ignored; use [DrawRibbons] or [DrawTubes] for oriented or 3D lines.\n\nLong segments that intersect the camera plane (one point in front of and one behind the camera) are not rendered correctly; use [DrawRayLines] for these.\n\nDrawing lines is fast: depending on the graphics card, millions of segments per frame are possible. Performance depends more on the screen area covered by the lines (render resolution and MSAA) than on the point count.\n\nSee also: [DrawClosedLines], [DrawLinesBuildup], [DrawPoints]\nAlso check out the [HowToUsePoints] tutorial.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -9,21 +9,24 @@
       "Position": {
         "X": 630.759,
         "Y": 220.82883
-      }
+      },
+      "Description": "Point attribute that multiplies the line width: None, F1 or F2."
     },
     {
       "InputId": "28f85ae9-ebae-4300-8aa0-738c6327cc44"/*TransitionProgress*/,
       "Position": {
         "X": 630.759,
         "Y": 54.1371
-      }
+      },
+      "Description": "Offsets the U texture coordinate, e.g. to scroll a texture along the lines."
     },
     {
       "InputId": "520c428e-77b0-44d7-95af-d1cbf9b7e4a7"/*UvScaleFX*/,
       "Position": {
         "X": 630.759,
         "Y": 185.82886
-      }
+      },
+      "Description": "Source of the U texture coordinate: Stretch maps 0..1 across the whole buffer, UFromFX1 and UFromFX2 use the point's F1 or F2 attribute."
     },
     {
       "InputId": "75419a73-8a3e-4538-9a1d-e3b0ce7f8561"/*Color*/,
@@ -41,7 +44,7 @@
         "Y": 639.4281
       },
       "GroupTitle": "Draw Options",
-      "Description": "Defines whether Lines cover themselves or are covered by or cover other 3D elements."
+      "Description": "Hides lines behind other geometry."
     },
     {
       "InputId": "ba83a66f-5a4c-4355-abb2-d4b7cd55d542"/*WrapMode*/,
@@ -49,7 +52,7 @@
         "X": 630.7589,
         "Y": 496.41733
       },
-      "Description": "Defines how the texture behaves when repeated.\n\nWrap: The texture repeats itself continuously\nMirror: The texture is mirrored and repeats infinitely.\nClamp: The texture is cut off at the edge\nBorder: Unclear\nMirrOnce: The texture is mirrored once, then cut off"
+      "Description": "How the texture repeats outside 0..1:\n\nWrap: Repeats continuously.\nMirror: Repeats mirrored.\nClamp: Stretches the edge pixels.\nBorder: Uses the border color.\nMirrorOnce: Mirrors once, then clamps."
     },
     {
       "InputId": "c10f9c6c-9923-42c6-848d-6b98097acc67"/*Texture_*/,
@@ -57,7 +60,7 @@
         "X": 490.75897,
         "Y": 373.78
       },
-      "Description": "Texture Input."
+      "Description": "Texture applied along the lines. U runs along the line, V across it."
     },
     {
       "InputId": "c78378f5-8306-4586-af6b-99cea40fa9a9"/*FadeOutTooLong*/,
@@ -65,6 +68,7 @@
         "X": 630.759,
         "Y": 124.1371
       },
+      "Description": "Segments longer than this length fade out and are hidden at twice the length. Negative values disable the fade.",
       "Min": -0.01,
       "Max": 1.0,
       "Scale": 0.001,
@@ -76,7 +80,7 @@
         "X": 844.74316,
         "Y": 674.4281
       },
-      "Description": "Defines whether Lines cover themselves or are covered by or cover other 3D elements."
+      "Description": "Writes the lines to the depth buffer so they can hide geometry drawn later."
     },
     {
       "InputId": "d0919481-203a-4379-8094-187d6209e00d"/*ShrinkWithDistance*/,
@@ -84,6 +88,7 @@
         "X": 630.759,
         "Y": 19.1371
       },
+      "Description": "0 keeps a constant width on screen, 1 makes lines thinner with distance like regular geometry.",
       "AddPadding": "True"
     },
     {
@@ -92,7 +97,6 @@
         "X": 844.74316,
         "Y": 604.4281
       },
-      "Description": "Selects the Blendmode",
       "AddPadding": "True"
     },
     {
@@ -101,7 +105,7 @@
         "X": 630.759,
         "Y": -15.8629
       },
-      "Description": "Defines the width",
+      "Description": "Width of the lines. Multiplied by each point's Scale.x and the attribute selected in WidthFactor.",
       "Scale": 0.001
     },
     {
@@ -110,8 +114,7 @@
       "Position": {
         "X": 704.74335,
         "Y": 731.009
-      },
-      "Description": "Input for GPoints"
+      }
     },
     {
       "InputId": "e797d93b-3847-4324-898e-09018267ea82"/*UvScale*/,
@@ -119,7 +122,7 @@
         "X": 630.759,
         "Y": 89.1371
       },
-      "Description": "Uniformly scales the mapping of the used texture",
+      "Description": "Scales the U texture coordinate along the lines.",
       "AddPadding": "True"
     }
   ],

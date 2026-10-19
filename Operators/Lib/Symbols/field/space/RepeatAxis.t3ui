@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "58ff3790-5ec5-4113-8e37-a934c3a7fdcd"/*RepeatAxis*/,
-  "Description": "Infinitely mirrors and repeats the incoming field along the defined axis.\nSimilar node: [RepeatFieldLimit], [RepeatField3]\n\nIt can be rendered with [RaymarchField] and visualized with [VisualizeFieldDistance].\n\nOther nodes: [RepeatWithMirror], [PolarRepeat], [TwistField].\n\nIt needs an incoming field like [BoxSDF], [ChainLinkSDF], [FractalSDF] as an input.\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToRaymarchField].\n",
+  "Description": "Repeats the incoming field infinitely along one axis.\n\nIt needs an incoming field like [BoxSDF] or [TorusSDF]. Render the result with [RaymarchField] and inspect it with [VisualizeFieldDistance].\n\nSee also: [RepeatFieldLimit], [RepeatField3], [RepeatPolar]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": -200.0,
         "Y": 45.0
       },
-      "Description": "Defines the size of the gaps between the repetition"
+      "Description": "Distance between the repetitions."
     },
     {
       "InputId": "6262f448-92fb-41ed-8613-2b387f2e72f2"/*InputField*/,
@@ -24,15 +24,15 @@
       "Position": {
         "X": -200.0,
         "Y": 75.0
-      },
-      "Description": "Defines along which axis the field is to be repeated"
+      }
     },
     {
       "InputId": "f590393a-c318-4254-91b3-4f8e3d3de937"/*Mirror*/,
       "Position": {
         "X": -200.0,
         "Y": 150.0
-      }
+      },
+      "Description": "Mirrors every other repetition, which avoids seams for shapes that are not symmetric."
     }
   ],
   "SymbolChildUis": [],

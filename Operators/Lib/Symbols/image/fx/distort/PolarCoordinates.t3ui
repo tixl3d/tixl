@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "941410e5-2023-43c6-87b1-55386bb048ac"/*PolarCoordinates*/,
-  "Description": "Applies a polar coordinate transformation that converts between circular and rectangular coordinates. In other words, it wraps and unwraps round images.\n\nAlso see [Equirectangle], [ConvertEquirectangle]",
+  "Description": "Converts an image between rectangular and polar coordinates. In other words, it wraps a strip into a circle or unwraps a round image into a strip.\n\nAKA: polar, radial, wrap, unwrap, tunnel\n\nSee also: [Equirectangle], [ConvertEquirectangle], [BubbleZoom]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": 132.69783,
         "Y": 344.3758
-      }
+      },
+      "Description": "Scales the angle (X) and radius (Y) lookups. Only for Cartesian2Polar."
     },
     {
       "InputId": "4c07b8bd-c78d-44ce-bb95-8114284af2bf"/*Center*/,
@@ -27,14 +28,16 @@
       "Position": {
         "X": 132.69783,
         "Y": 254.3758
-      }
+      },
+      "Description": "Rotates the angle proportional to the radius. Only for Cartesian2Polar."
     },
     {
       "InputId": "6f17f1b4-0b5e-4934-8be1-c8198443fac3"/*RadialOffset*/,
       "Position": {
         "X": 132.69783,
         "Y": 209.3758
-      }
+      },
+      "Description": "Shifts the image along the radius."
     },
     {
       "InputId": "83f2dc32-5830-4558-9137-f6805f3f6ff6"/*Radius*/,
@@ -51,7 +54,8 @@
       "Position": {
         "X": 132.69783,
         "Y": 434.3758
-      }
+      },
+      "Description": "Cartesian2Polar: Wraps the image around the center. The horizontal axis becomes the angle, the vertical axis the radius.\nPolar2Cartesian: Unwraps a round image into a strip."
     },
     {
       "InputId": "caa14f08-f004-4af8-a448-116e21106d5b"/*Resolution*/,
@@ -66,7 +70,8 @@
       "Position": {
         "X": 132.69783,
         "Y": 164.3758
-      }
+      },
+      "Description": "Exponent applied to the radius. 1 is linear."
     },
     {
       "InputId": "dfa1d71d-2964-41c2-bb04-86a39c36ce6e"/*Image*/,

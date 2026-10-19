@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "bf4daa46-ed0f-4a87-9ba1-93631b2ca29a"/*DelaunayMesh*/,
-  "Description": "Generate a mesh from point list",
+  "Description": "Generates a flat mesh by Delaunay triangulation of a closed boundary outline on the XY plane.\n\nThe boundary points are treated as an ordered polygon; separators are ignored. The inside can be filled with evenly spaced random points (FillDensity) or with a custom point list (ExtraPoints). UVs are mapped to the bounding box of the points. Only the X and Y coordinates are used.\n\nAKA: triangulate, fill, polygon\n\nSee also: [NGonMesh], [QuadMesh]",
   "SymbolTags": "192",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": -200.0,
         "Y": 150.0
       },
-      "Description": "remove points around the boundary shape"
+      "Description": "Minimum distance of inner points from the boundary, relative to the fill point spacing. Inner points closer to the boundary are removed."
     },
     {
       "InputId": "18fddd63-db79-4ee6-9a32-b90a5ceff582"/*BoundaryPoints*/,
@@ -19,7 +19,7 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "Description": "Defines the mesh boundaries"
+      "Description": "Ordered points describing the outline of the shape."
     },
     {
       "InputId": "3236e937-9dbe-41e8-aafa-c0c13c56bcdf"/*Seed*/,
@@ -27,14 +27,15 @@
         "X": -200.0,
         "Y": 225.0
       },
-      "Description": "Point distribution seed"
+      "Description": "Seed for the random fill point distribution."
     },
     {
       "InputId": "aba31520-065f-40c7-a4a6-a4470f1e0cdf"/*SubdivideLongEdges*/,
       "Position": {
         "X": -200.0,
         "Y": 150.0
-      }
+      },
+      "Description": "Adds extra points on long boundary edges. Higher values subdivide more (edges longer than 1 - SubdivideLongEdges are split). 0 disables it."
     },
     {
       "InputId": "db3c69b1-403b-485b-94e8-fc7e8b566947"/*ExtraPoints*/,
@@ -42,7 +43,7 @@
         "X": -200.0,
         "Y": 75.0
       },
-      "Description": "works only if Fill density is set to 0"
+      "Description": "Custom points inside the boundary added to the triangulation. Only used if FillDensity is 0."
     },
     {
       "InputId": "e00e4b12-8576-4a78-b773-17630b102a70"/*FillDensity*/,
@@ -51,7 +52,7 @@
         "Y": 75.0
       },
       "GroupTitle": "Inner points distribution",
-      "Description": "distribute points inside the mesh",
+      "Description": "Density of the random fill points generated inside the boundary (0..1). 0 disables the fill and uses ExtraPoints instead.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true

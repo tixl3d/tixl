@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "06621b4b-43be-4ef9-80d0-f1b36fa4dbd1"/*MirrorRepeat*/,
-  "Description": "Shifts, slices or mirrors the incoming image to create endless textures or kaleidoscopic patterns when combined with itself\n\nA more sophisticated version: [KochKaleidoskope]\nFor simpler transformations: [TransformImage]\n\nSimilar effects or interesting combinations: [RadialRepeat] [MosaicTiling] [VoronoiCells] [SubdivisionStretch]",
+  "Description": "Shifts, slices or mirrors an image to create endless textures or kaleidoscopic patterns, especially when combined with itself.\n\nAKA: mirror, kaleidoscope, symmetry, repeat, fold\n\nSee also: [KochKaleidoskope], [TransformImage], [RadialRepeat], [VoronoiCells], [SubdivisionStretch]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -21,8 +21,7 @@
       "Position": {
         "X": -77.13457,
         "Y": 30.053413
-      },
-      "Description": "Image input"
+      }
     },
     {
       "InputId": "341ee76d-f431-40e8-ba14-aa4e0a1f10c4"/*ShadeAmount*/,
@@ -31,7 +30,7 @@
         "Y": 547.31323
       },
       "GroupTitle": "Settings",
-      "Description": "Darkens one side of the mirrored image\n\nHint: If combined with a small width it creates a 'Fanfold' effect",
+      "Description": "Darkens one side of each mirrored stripe.\n\nTips:\n- Combined with a small Width this creates a fanfold effect.",
       "Min": 0.0,
       "Max": 1.0
     },
@@ -58,7 +57,7 @@
         "X": -101.94387,
         "Y": 731.96674
       },
-      "Description": "Defines the resolution of the result in pixels",
+      "Description": "Resolution of the result in pixels.",
       "AddPadding": "True"
     },
     {

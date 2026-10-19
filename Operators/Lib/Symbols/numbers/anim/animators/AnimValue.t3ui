@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "ea7b8491-2f8e-4add-b0b1-fd068ccfed0d"/*AnimValue*/,
-  "Description": "Generates a repetitive LFO-like signal synced to the current BPM rate. It supports various shapes, modes and forms.\n\nYou can manipulate the rate and shape directly in the graph by dragging with CTRL+ left mouse button.\n\nSome tips:\n- Please check out the [HowToAnimate] playground to see some applications.\n- You can use [SetSpeedFactors] to override the incoming rate, which is very useful for live VJ setups.\n\n- Also have a look at [AnimVec2], [AnimVec3], [TriggerAnim], [OscillateVec2] and [OscillateVec3]",
+  "Description": "Generates a repetitive LFO-like signal synced to the current BPM rate.\n\nIt supports various shapes, modes and forms. Rate and shape can be changed directly in the graph by dragging with CTRL + left mouse button.\n\nTips:\n- Use [SetSpeedFactors] to override the rate, which is useful for live VJ setups.\n\nAKA: lfo, oscillator, wave\n\nSee also: [AnimVec2], [AnimVec3], [TriggerAnim], [OscillateVec2], [OscillateVec3]\nAlso check out the [HowToAnimate] tutorial.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": -200.0,
         "Y": 225.0
       },
-      "Description": "Defines the speed",
+      "Description": "Cycles per bar.",
       "AddPadding": "True",
       "Min": -5.0,
       "Max": 5.0,
@@ -23,8 +23,7 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      },
-      "Description": "Selects the form of the animation"
+      }
     },
     {
       "InputId": "68f14205-f48d-4b44-823d-138eb61767b5"/*Phase*/,
@@ -32,7 +31,7 @@
         "X": -200.0,
         "Y": 180.0
       },
-      "Description": "Linear offset for the timing"
+      "Description": "Offset in cycles."
     },
     {
       "InputId": "738f6cfb-8b71-423c-b897-824c20397e5a"/*AllowSpeedFactor*/,
@@ -40,7 +39,7 @@
         "X": -200.0,
         "Y": 135.0
       },
-      "Description": "Switches between SpeedFactors"
+      "Description": "Selects which speed factor set by [SetSpeedFactors] is applied."
     },
     {
       "InputId": "79917ef7-64ca-4825-9c6a-c9b2a7f6ff86"/*Amplitude*/,
@@ -48,7 +47,6 @@
         "X": -200.0,
         "Y": 135.0
       },
-      "Description": "Defines the strongest value of the animation curve",
       "AddPadding": "True",
       "Min": -5.0,
       "Max": 5.0,
@@ -60,7 +58,7 @@
         "X": -200.0,
         "Y": 90.0
       },
-      "Description": "Overwrites the internal standard time, e.g. with a [time] operator",
+      "Description": "If connected, used instead of the current time.",
       "AddPadding": "True"
     },
     {
@@ -69,7 +67,6 @@
         "X": -200.0,
         "Y": 270.0
       },
-      "Description": "Defines the ratio",
       "Min": 0.0,
       "Max": 2.0,
       "ClampMin": true,
@@ -81,7 +78,7 @@
         "X": -200.0,
         "Y": 180.0
       },
-      "Description": "Linear offset for the value"
+      "Description": "Added to the result."
     },
     {
       "InputId": "f12fee9a-dd91-40c2-9aa5-ea34804a858d"/*Bias*/,
@@ -89,7 +86,7 @@
         "X": -200.0,
         "Y": 315.0
       },
-      "Description": "Changes the Bias for the selected shape",
+      "Description": "Bends the curve of the selected shape.",
       "AddPadding": "True",
       "Min": 0.01,
       "Max": 0.99,

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "020573c5-acaa-442e-9b1b-01338b0f4b62"/*SwapBuffers*/,
-  "Description": "A helper that swaps two StructuredBuffers if set.",
+  "Description": "Returns two buffers, swapped if EnableSwap is set.",
   "SymbolTags": "8",
   "InputUis": [
     {

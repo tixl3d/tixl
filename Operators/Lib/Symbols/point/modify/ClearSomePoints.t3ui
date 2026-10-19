@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "e570b2e6-6e35-4a14-ade6-f377494fe96d"/*ClearSomePoints*/,
-  "Description": "Override a fraction of points with separators to insert gaps into lines.",
+  "Description": "Overrides a random fraction of points with separators to insert gaps into lines.\n\nThe buffer size stays the same.\n\nSee also: [FilterPoints], [SelectPoints]",
   "SymbolTags": "64",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": -293.2356,
         "Y": 985.39294
-      }
+      },
+      "Description": "Fraction of points that are cleared (0...1)."
     },
     {
       "InputId": "23302290-2789-49da-9b65-6d5b472c94e8"/*Resolution*/,
@@ -17,6 +18,7 @@
         "X": -293.2356,
         "Y": 1125.8878
       },
+      "Description": "Number of consecutive points that share the same random decision. Must be at least 1.",
       "Min": 1,
       "ClampMin": true,
       "ClampMax": true
@@ -27,6 +29,7 @@
         "X": -293.2356,
         "Y": 1090.8878
       },
+      "Description": "Repeats the random pattern after this many hash values. 0 disables repetition.",
       "Min": 0,
       "ClampMin": true,
       "ClampMax": true

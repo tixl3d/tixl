@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "9c378944-9a57-4ae4-a88e-36c07244bcf7"/*SimForceOffset*/,
-  "Description": "Creates a gizmo with a spherical force that can be used to affect points\n\nNeeds a [DrawPoints], [DrawLines], or [DrawMeshAtPoints] or similar in order to become visible.\n\nNeeds Points as a base, for example: [RadialPoints], [SpherePoints], [PointsOnMesh]",
+  "Description": "Pushes or pulls the points of a simulation buffer within a spherical area and adds a constant gravity offset on every frame.\n\nAs the buffer is modified in place, the offset accumulates over time; use it with [PointSimulation]. A draw operator like [DrawPoints], [DrawLines] or [DrawMeshAtPoints] is needed to make the points visible.",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,8 +9,7 @@
       "Position": {
         "X": -257.97385,
         "Y": 272.30927
-      },
-      "Description": "Point input"
+      }
     },
     {
       "InputId": "2cce4aac-2d41-4c0d-a046-9a5529b912b1"/*Radius*/,
@@ -18,7 +17,7 @@
         "X": -168.55247,
         "Y": 615.88995
       },
-      "Description": "Defines the size of the Force",
+      "Description": "Points within this distance from Center are fully affected.",
       "AddPadding": "True"
     },
     {
@@ -26,8 +25,7 @@
       "Position": {
         "X": -162.4124,
         "Y": 875.356
-      },
-      "Description": "Randomizes the amount of the force"
+      }
     },
     {
       "InputId": "4267c75c-35a6-4feb-9a98-92c3d676dcae"/*RadiusFallOff*/,
@@ -35,7 +33,7 @@
         "X": -167.80368,
         "Y": 691.5903
       },
-      "Description": "Defines the size of the falloff / smooth area"
+      "Description": "Distance beyond Radius over which the effect fades out. 0 creates a hard edge."
     },
     {
       "InputId": "b30b9a6e-1407-48e8-9eaa-955250f289e7"/*RadialForce*/,
@@ -43,7 +41,7 @@
         "X": -165.15796,
         "Y": 750.1206
       },
-      "Description": "Multiplier to increase the amount of force"
+      "Description": "Strength of the push away from Center. Negative values pull the points towards it."
     },
     {
       "InputId": "cc7cf8dc-13f4-4442-94b5-2c7cda64776c"/*Center*/,
@@ -60,7 +58,7 @@
         "X": -160.04121,
         "Y": 955.8399
       },
-      "Description": "Adds a linear force on the defined axis"
+      "Description": "Constant offset applied to all affected points on every frame."
     },
     {
       "InputId": "e68e305e-9e2b-4bf2-9a85-4630697a8c34"/*UseWForMass*/,
@@ -68,8 +66,7 @@
         "X": -165.15796,
         "Y": 795.1206
       },
-      "GroupTitle": "Advanced",
-      "Description": "Controls how much the F-Value is affected"
+      "GroupTitle": "Advanced"
     },
     {
       "InputId": "e6b12dd3-fd25-4b4c-a3bb-bd4da9c1c1e2"/*IsEnabled*/,
@@ -86,7 +83,7 @@
         "X": -160.04121,
         "Y": 1000.8399
       },
-      "Description": "Defines how much the force decays based on the distance"
+      "Description": "How quickly the radial force decreases with distance from Center."
     }
   ],
   "SymbolChildUis": [

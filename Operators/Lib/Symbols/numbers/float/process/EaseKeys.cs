@@ -30,7 +30,6 @@ internal sealed class EaseKeys : Instance<EaseKeys>
         var currentTime = context.LocalTime;
 
         _curve = curve;
-        _keyframes = _curve.GetVDefinitions().ToList();
 
         float duration;
 

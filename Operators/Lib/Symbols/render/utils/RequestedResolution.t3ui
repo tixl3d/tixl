@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "c0a26813-bc97-4c42-b051-53a9a5913331"/*RequestedResolution*/,
-  "Description": "Has the function of extracting the resolution from an operator that is initialized later (for example a [Rendertarget]) in order to use it at an earlier point in the node tree.\n\nTo do this, you can connect the 'Resolution' input of a render target to the output of the 'RequestResolution'. The requested resolution can now be extracted and used again.\n\nAlso see [SetRequestedResolution]",
+  "Description": "Returns the resolution requested by the current context, e.g. the resolution of the [RenderTarget] this subgraph is rendered into.\n\nThis allows using that resolution at an earlier point of the graph, e.g. to size textures or as a shader parameter.\n\nSee also: [SetRequestedResolution]",
   "SymbolTags": "1",
   "InputUis": [],
   "SymbolChildUis": [],

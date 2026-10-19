@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "ff37499b-2550-4795-83fd-626ba6d2f2fb"/*DrawScreenQuadAdvanced*/,
-  "Description": "Just like DrawScreecQuad but with Depth and Normal buffer support for special FX.",
+  "Description": "Renders a rectangle locked to the camera view like [DrawScreenQuad], with an additional depth buffer input for special effects.",
   "InputUis": [
     {
       "InputId": "0a7c5acd-ae50-47a7-98e5-432b658a8bbd"/*Color*/,
@@ -89,8 +89,7 @@
         "X": -158.25935,
         "Y": 364.10834
       },
-      "GroupTitle": "Options",
-      "Description": "Selects the Blend mode"
+      "GroupTitle": "Options"
     }
   ],
   "SymbolChildUis": [

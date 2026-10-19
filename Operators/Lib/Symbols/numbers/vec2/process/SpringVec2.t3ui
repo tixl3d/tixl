@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "4ee040a3-e5dd-42f0-8f7e-0275d7c72538"/*SpringVec2*/,
-  "Description": "This is the vector 2 version of [Spring] \n\nExample: [SpringVec3Example]\n\nSimilar op: [SpringVec3]",
+  "Description": "Follows the incoming Vector2 with a springy motion that can overshoot.\n\nThis is the Vector2 version of [Spring].\n\nSee also: [SpringVec3], [DampVec2], [EaseVec2]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,8 @@
         "X": 36.0,
         "Y": 469.0
       },
-      "GroupTitle": "Advanced"
+      "GroupTitle": "Advanced",
+      "Description": "Use the application run time instead of the playback time."
     },
     {
       "InputId": "54d7918f-1bca-4198-a12d-0bb9df9e3285"/*Strength*/,

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "d1530d89-32b9-4e16-97fe-c08d095d9d03"/*MinInt*/,
-  "Description": "Outputs the minimum integer of the connected inputs.\n\nTo find a minimum float value, use [Clamp].",
+  "Description": "Outputs the smallest of the connected integers.\n\nIf nothing is connected, the output is the largest possible int (2147483647).\n\nSee also: [MaxInt], [ClampInt]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,8 +9,7 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      },
-      "Description": "Input ints to compare."
+      }
     }
   ],
   "SymbolChildUis": [],

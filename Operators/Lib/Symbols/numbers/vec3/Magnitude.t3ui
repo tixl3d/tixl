@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "99ce9535-23a3-4570-a98c-8d2262cb8755"/*Magnitude*/,
-  "Description": "Returns the length of a Vector3.",
+  "Description": "Returns the length of a Vector3.\n\nAKA: length\n\nSee also: [Vec2Magnitude], [Vec3Distance], [NormalizeVector3]",
   "InputUis": [
     {
       "InputId": "409e58c9-ad42-40d0-80c2-ed2df2251faa"/*Input*/,

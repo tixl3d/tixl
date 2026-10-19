@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "2be3d25a-777f-4464-a8c7-351d9e38c30d"/*TimeDisplace*/,
-  "Description": "Uses a texture array history buffer to displace in time.",
+  "Description": "Displaces the image in time: each pixel is taken from a different recent frame, selected by the brightness of a displacement map.\n\nThe incoming frames are kept in a texture array history buffer. Many inputs inherited from [Displace] currently have no effect.\n\nAKA: slitscan, timewarp, echo\n\nSee also: [Displace], [AfterGlow2]",
   "InputUis": [
     {
       "InputId": "10927384-3f0f-4411-ac00-08e15f047a97"/*Displacement*/,
@@ -10,6 +10,7 @@
         "Y": 506.89072
       },
       "GroupTitle": "Amount",
+      "Description": "Number of frames offset at full map brightness.",
       "Scale": 0.01
     },
     {
@@ -18,6 +19,7 @@
         "X": -115.55017,
         "Y": 646.89075
       },
+      "Description": "Currently ignored.",
       "AddPadding": "True",
       "Min": -2.0,
       "Max": 2.0,
@@ -29,6 +31,7 @@
         "X": 24.449814,
         "Y": 541.8907
       },
+      "Description": "Currently ignored.",
       "Scale": 0.01
     },
     {
@@ -37,6 +40,7 @@
         "X": 24.449814,
         "Y": 576.89075
       },
+      "Description": "Currently ignored.",
       "Min": -180.0,
       "Max": 180.0,
       "Scale": 3.6,
@@ -56,6 +60,7 @@
         "X": 24.44983,
         "Y": 821.89075
       },
+      "Description": "Currently ignored.",
       "AddPadding": "True"
     },
     {
@@ -71,7 +76,8 @@
       "Position": {
         "X": -115.55017,
         "Y": 856.89075
-      }
+      },
+      "Description": "Currently ignored."
     },
     {
       "InputId": "8e656ce6-3eb0-4dc4-bfdf-b278b9e27ff3"/*TextureFiltering*/,
@@ -87,6 +93,7 @@
         "Y": 716.89075
       },
       "GroupTitle": "Sampling",
+      "Description": "Currently ignored.",
       "Scale": 0.01
     },
     {
@@ -95,7 +102,8 @@
       "Position": {
         "X": 24.449814,
         "Y": 471.89072
-      }
+      },
+      "Description": "Its brightness (average of RGB) selects the frame offset per pixel."
     },
     {
       "InputId": "de5a6566-d625-4315-bda6-498ba14110a1"/*Shade*/,
@@ -103,7 +111,7 @@
         "X": 24.449814,
         "Y": 611.8907
       },
-      "Description": "Darkens the effect",
+      "Description": "Currently ignored.",
       "Scale": 0.01
     },
     {
@@ -111,8 +119,7 @@
       "Position": {
         "X": 336.81305,
         "Y": 781.10223
-      },
-      "Description": "Defines if and how the image is repeated at its edge"
+      }
     }
   ],
   "SymbolChildUis": [

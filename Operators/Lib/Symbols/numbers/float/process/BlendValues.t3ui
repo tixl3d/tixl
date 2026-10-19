@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "a1341063-f893-4447-93cd-63cfe514495e"/*BlendValues*/,
-  "Description": "Blends a number of incoming values with a float value.",
+  "Description": "Blends between a number of connected values with a float index.\n\nThe integer part of F selects a value, the fractional part blends towards the next one. F wraps around, so the last value blends back to the first.\n\nSee also: [Lerp], [PickFloat]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": 0.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Position in the list of values, e.g. 1.5 blends halfway between the second and third value."
     },
     {
       "InputId": "1c15cce3-3054-47f8-96b5-b8b741df40be"/*Values*/,

@@ -1,7 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "62c89469-7194-486a-87cd-c3e6bc0cf5d2"/*MultiUpdatePoints*/,
-  "Description": "A helper to combine multiple point modifiers like [ApplyNoise] or [ApplyForce] to the same Point buffer.",
+  "Description": "Internal helper. Evaluates several modifiers that operate on the same GPU point buffer and returns that buffer.\n\nAll connected inputs are expected to reference the same buffer; otherwise a warning is logged. The result is the last connected buffer.",
+  "SymbolTags": "16",
   "InputUis": [
     {
       "InputId": "7caa2f8c-64e1-4941-bd1c-8bdc89584ba7"/*PointBuffers*/,

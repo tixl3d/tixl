@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "1b9977be-70cf-4dbd-8af1-1459596b6527"/*NGonMesh*/,
-  "Description": "Generates a procedural flat circular mesh with a joined center vertex which can be rendered with [DrawMesh], [DrawMeshUnlit] and [DrawMeshHatched] among others.\nAlso consider using [CylinderMesh].\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToDrawThings].\n\nIt can also become the source for a particle system with [MeshVerticesToPoints] or [PointsOnMesh].\nTo import static 3D meshes from other programs refer to [LoadObj].\n\n",
+  "Description": "Generates a flat regular polygon or disc mesh with a shared center vertex.\n\nIt can be rendered with [DrawMesh], [DrawMeshUnlit], [DrawMeshHatched] and others, or used as a source for points with [MeshVerticesToPoints] or [PointsOnMesh]. To import meshes from other programs use [LoadObj].\n\nAKA: circle, disc, polygon\n\nSee also: [CylinderMesh], [QuadMesh]\n\nAlso check out the [HowToDrawThings] tutorial.",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -11,7 +11,7 @@
         "Y": 134.66893
       },
       "GroupTitle": "Shape",
-      "Description": "Controls the tessellation.",
+      "Description": "Number of corners.",
       "Min": 0,
       "Max": 100
     },
@@ -22,15 +22,14 @@
         "Y": 44.66893
       },
       "GroupTitle": "Orientation",
-      "Description": "Transforms the position of the pivot"
+      "Description": "Moves the mesh."
     },
     {
       "InputId": "9dbf0c3d-4762-41f6-94b8-26acbd1531c1"/*Radius*/,
       "Position": {
         "X": -199.74533,
         "Y": 179.66893
-      },
-      "Description": "Defines the Radius\n"
+      }
     },
     {
       "InputId": "b819ad07-6229-4b8d-b8b6-a2a89b7c81d8"/*Rotation*/,
@@ -38,7 +37,7 @@
         "X": -199.74533,
         "Y": 89.66893
       },
-      "Description": "Rotates the Mesh",
+      "Description": "Rotation in degrees.",
       "Scale": 0.1
     },
     {
@@ -47,7 +46,7 @@
         "X": -199.74533,
         "Y": 224.66893
       },
-      "Description": "Select different UV methods",
+      "Description": "How UVs are mapped.\n\nPlanar: projects the texture onto the disc.\nCircular: U follows the angle, V goes from the center (0) to the edge (1).\nCircularScaled: like Circular, but V at the edge equals the radius.",
       "AddPadding": "True"
     },
     {
@@ -56,7 +55,7 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "Description": "Scales the Mesh\nX: Width\nY: Height",
+      "Description": "Scales the shape along X (width) and Y (height).",
       "Min": 0.0,
       "Max": 1.0,
       "UseVec2Control": "Position"

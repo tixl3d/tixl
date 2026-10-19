@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "0ed2bee3-641f-4b08-8685-df1506e9af3c"/*SetMaterial*/,
-  "Description": "Sets the Physically Based Rendering (PBR) Material for the current RenderTarget which is then used by [DrawMesh] and other PBR rendering operators. Each of the material properties can be controlled by a color and/or by connecting a texture input by using a [LoadImage] operator.\n\nPlease note that the color parameter is multiplied to the texture: so for an emissive texture to be visible, you have to first set the Emissive Color to white (or 1,1,1).\n\nThe base (albedo) color can also be adjusted by the Draw operators.\nPlease use [CombineMaterialChannels] to combine Roughness, Metallic and Occlusion textures into a single texture that can be connected to the .RoughnessMetallicOcclusion parameter.\nFor the roughness rendering the draw operators need an IBL texture set by [SetEnvironment]. If [SetEnvironment] is not used there is still a predefined default IBL.\n\n\nAlso see: [HowToDrawThings]\n\nIf no normalmap is available [NormalMap] can be used to generate one.",
+  "Description": "Sets the physically based rendering (PBR) material for the connected subgraph, used by [DrawMesh], [DrawScene] and other PBR draw operators.\n\nEach material property can be controlled by a value and/or a texture, e.g. from [LoadImage]. Colors are multiplied with their textures, so for an emissive texture to be visible, EmissiveColor must not be black. Roughness and Metal are added to the values of the RoughnessMetallicOcclusionMap. The roughness rendering requires an environment set by [SetEnvironment]; without it a predefined default environment is used.\n\nThe Reference output can be used with [UseMaterial] or [DefineMaterials].\n\nAKA: pbr, shader, surface, texture\n\nTips:\n- Use [CombineMaterialChannels] to combine roughness, metallic and occlusion textures into a single texture.\n- If no normal map is available, [NormalMap] can be used to generate one.\n\nSee also: [UseMaterial], [DefineMaterials], [SetEnvironment]\n\nAlso check out the [HowToDrawThings] tutorial.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": -200.0,
         "Y": 90.0
       },
-      "Description": "Input for a Diffuse- / Albedo- / ColorMap or Texture via a [LoadImage] Operator."
+      "Description": "Base color (albedo) texture, e.g. from [LoadImage]."
     },
     {
       "InputId": "108ff533-f205-4989-b894-acf48e3cc1db"/*Metal*/,
@@ -18,7 +18,7 @@
         "X": -200.0,
         "Y": 270.0
       },
-      "Description": "Defines how similar to metal the material reacts to light and reflects the environment.\n\nA value of 1 can create a look similar to chrome.",
+      "Description": "Defines how metallic the surface reacts to light and reflects the environment. Added to the green channel of the RoughnessMetallicOcclusionMap.\n\nA value of 1 can create a look similar to chrome.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -38,7 +38,7 @@
         "X": -200.0,
         "Y": 135.0
       },
-      "Description": "Defines the color and brightness with which the material emits light*.\n\nPlease Note: If an [EmissiveColorMap] is used this must be set to white!\n\n*Please Note: As of now: Materials in T3 cannot be used to *actually* illuminate scenes. Scenes are lit with a combination of [SetEnvironment] and [Pointlight] Operators.",
+      "Description": "Color and brightness of the light emitted by the surface. Multiplied with the EmissiveColorMap.\n\nEmissive materials do not illuminate other objects; scenes are lit with [SetEnvironment] and [PointLight].",
       "AddPadding": "True"
     },
     {
@@ -48,7 +48,7 @@
         "Y": 315.0
       },
       "GroupTitle": "Additional Maps",
-      "Description": "Input for a Normalmap via a [LoadImage] Operator."
+      "Description": "Tangent space normal map texture."
     },
     {
       "InputId": "6d859756-0243-42c5-973d-6de2dcdc5609"/*EmissiveColorMap*/,
@@ -56,7 +56,7 @@
         "X": -200.0,
         "Y": 405.0
       },
-      "Description": "Input for an Emissive Color Map via a [LoadImage] Operator.\nPlease Note: The \"Emissive Color\" must be set to white, otherwise the image will always be rendered black."
+      "Description": "Emissive texture. EmissiveColor must not be black for it to be visible."
     },
     {
       "InputId": "71e289f0-382b-4d0f-a2e0-701c7019a360"/*MaterialId*/,
@@ -64,6 +64,7 @@
         "X": -200.0,
         "Y": 405.0
       },
+      "Description": "Name of the material, used to select it in [DrawScene] when defined with [DefineMaterials].",
       "Usage": "Default"
     },
     {
@@ -73,7 +74,7 @@
         "Y": 180.0
       },
       "GroupTitle": "Material Settings",
-      "Description": "Defines how intense the highlights of light sources are visible."
+      "Description": "Intensity of the highlights of light sources."
     },
     {
       "InputId": "9ff5ade2-cfa7-4616-ad89-356f3248e04f"/*BaseColor*/,
@@ -82,14 +83,15 @@
         "Y": 45.0
       },
       "GroupTitle": "Color Maps",
-      "Description": "Defines the Color which is multiplied with the \"BaseColorMap\"."
+      "Description": "Multiplied with the BaseColorMap."
     },
     {
       "InputId": "c8003fbd-c6ce-440c-9f1f-6b15b5ee5274"/*RoughnessMetallicOcclusionMap*/,
       "Position": {
         "X": -200.0,
         "Y": 360.0
-      }
+      },
+      "Description": "Texture with roughness in the red, metallic in the green and ambient occlusion in the blue channel."
     },
     {
       "InputId": "e14dcc43-7c18-4ed7-ad39-dfeab10e3d33"/*Roughness*/,
@@ -97,7 +99,7 @@
         "X": -200.0,
         "Y": 225.0
       },
-      "Description": "Defines how much reflections and highlights are blurred.",
+      "Description": "Defines how much reflections and highlights are blurred. Added to the red channel of the RoughnessMetallicOcclusionMap.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,

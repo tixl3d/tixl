@@ -9,7 +9,8 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Wraps around the number of connected inputs."
     },
     {
       "InputId": "6b1c6232-819a-4021-82a9-994f8928be13"/*Input*/,

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "a368035f-2697-4ba5-a7bd-484eeb54c39b"/*TextureDisplaceMesh*/,
-  "Description": "Uses a projected texture with a normal map to displace the mesh. \n\nThis is similar to [SamplePointAttributes].",
+  "Description": "Displaces the vertices of a mesh by a texture that is projected onto it from the front.\n\nThe texture is projected along the Z axis of a plane defined by Center, TextureRotate, Scale and Stretch. Its RGB channels, centered around 0.5, are used as X, Y and Z offsets, e.g. from a signed normal map. Tangents and normals are updated from neighboring samples. A gizmo shows the projected texture.\n\nSee also: [DisplaceMesh], [DisplaceMeshNoise]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,14 +10,16 @@
         "X": -1802.6189,
         "Y": 2459.2393
       },
-      "GroupTitle": "Additional Settings"
+      "GroupTitle": "Additional Settings",
+      "Description": "Distance of the neighboring samples used to compute the new tangents and normals."
     },
     {
       "InputId": "0b4d328e-aaa4-48a5-b63d-95e3d9959274"/*RotationSpace*/,
       "Position": {
         "X": -1788.7266,
         "Y": 2107.8052
-      }
+      },
+      "Description": "Object: the offset is applied in mesh space.\nPoint: the offset is transformed by the current object-to-world transform."
     },
     {
       "InputId": "163a697e-bb71-471c-adf5-1f449d036de7"/*Amount*/,
@@ -25,14 +27,16 @@
         "X": -1794.7379,
         "Y": 1859.0775
       },
-      "GroupTitle": "Effect"
+      "GroupTitle": "Effect",
+      "Description": "Strength of the displacement."
     },
     {
       "InputId": "24123f92-e11a-4918-8de2-0bc67c3d458b"/*Scale*/,
       "Position": {
         "X": -1799.9998,
         "Y": 1613.5406
-      }
+      },
+      "Description": "Uniform size of the projection plane."
     },
     {
       "InputId": "81f729bd-9e50-4f44-9b96-8792da2aa0b0"/*Texture*/,
@@ -40,28 +44,32 @@
       "Position": {
         "X": -1802.6189,
         "Y": 2684.2393
-      }
+      },
+      "Description": "Texture whose RGB values (with 0.5 as neutral) define the offset."
     },
     {
       "InputId": "88b8edf0-021c-40c0-b0f2-9edad50ab1ba"/*TextureRotate*/,
       "Position": {
         "X": -1799.9998,
         "Y": 1658.5406
-      }
+      },
+      "Description": "Rotation of the projection plane in degrees."
     },
     {
       "InputId": "89e061a1-878e-4731-9ef6-2440ca46e9b2"/*UseVertexSelection*/,
       "Position": {
         "X": -1802.6189,
         "Y": 2504.2393
-      }
+      },
+      "Description": "Weights the displacement by the vertex selection, e.g. from [SelectVertices]."
     },
     {
       "InputId": "a218aab7-c638-4987-a64c-4543b52555ee"/*Visibility*/,
       "Position": {
         "X": -1802.6189,
         "Y": 2594.2393
-      }
+      },
+      "Description": "Visibility of the projection gizmo."
     },
     {
       "InputId": "c4363e87-16fc-499b-8dcd-51dde1f079f6"/*Center*/,
@@ -69,7 +77,8 @@
         "X": -1799.9998,
         "Y": 1523.5406
       },
-      "GroupTitle": "FX Texture Position and Orientation"
+      "GroupTitle": "FX Texture Position and Orientation",
+      "Description": "Center of the projection plane."
     },
     {
       "InputId": "c965e214-9454-4b89-bc9c-4fe8dd97ff55"/*Mesh*/,
@@ -84,21 +93,24 @@
       "Position": {
         "X": -1802.6189,
         "Y": 2549.2393
-      }
+      },
+      "Description": "How the texture repeats outside the projection area."
     },
     {
       "InputId": "e70ca887-655c-49a4-8fde-3cdd3a5ca3af"/*AmountDistribution*/,
       "Position": {
         "X": -1794.7379,
         "Y": 1904.0775
-      }
+      },
+      "Description": "Scales the offset per axis."
     },
     {
       "InputId": "ffc625ab-290e-4949-b22d-44c19a1f9cc4"/*Stretch*/,
       "Position": {
         "X": -1799.9998,
         "Y": 1568.5406
-      }
+      },
+      "Description": "Size of the projection plane along X and Y."
     }
   ],
   "SymbolChildUis": [

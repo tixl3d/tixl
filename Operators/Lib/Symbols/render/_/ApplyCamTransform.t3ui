@@ -1,7 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "68e2031d-20ac-4a2e-a407-fc2cbd76aad2"/*ApplyCamTransform*/,
-  "Description": "A helper that can set the tranform matrix part of a camera reference.\nThis can be useful for moving something towards a camera position.",
+  "Description": "Internal helper. Places the connected commands at the position and orientation of the referenced camera.\n\nX and Y are scaled with the field of view of the camera, so content follows the camera frustum. This can be useful for moving something towards a camera position.",
+  "SymbolTags": "16",
   "InputUis": [
     {
       "InputId": "088fb8fd-df11-4de1-88a8-73cb8077eb9b"/*Command*/,
@@ -16,7 +17,8 @@
       "Position": {
         "X": 15.714638,
         "Y": 87.57604
-      }
+      },
+      "Description": "Connect the Reference output of a camera."
     }
   ],
   "SymbolChildUis": [],

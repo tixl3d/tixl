@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "122cbf32-b3e5-4db7-b18d-f2af5b10419c"/*DrawPointSpritesShaded*/,
-  "Description": "",
+  "Description": "Draws a sprite quad for each point like [DrawPointSprites], but shaded with the PBR material, environment and point lights of the context.\n\nThe quads are oriented by the point rotation and use it to compute their surface normal. The texture is interpreted as a multichannel signed distance field (MSDF), e.g. from [TextSprites].\n\nAKA: glyph, text, quads, lit\n\nSee also: [DrawPointSprites], [TextSprites], [SetMaterial]",
   "SymbolTags": "64",
   "InputUis": [
     {
@@ -10,6 +10,7 @@
         "X": -226.94064,
         "Y": 254.1991
       },
+      "Description": "Pixels with a shape coverage below this threshold are discarded.",
       "AddPadding": "True"
     },
     {
@@ -18,14 +19,16 @@
       "Position": {
         "X": -232.88492,
         "Y": 82.951294
-      }
+      },
+      "Description": "MSDF texture, e.g. the font texture from [TextSprites]."
     },
     {
       "InputId": "3602d9c6-6477-4a29-af63-2fb12c7efbb6"/*Size*/,
       "Position": {
         "X": -226.94064,
         "Y": 209.1991
-      }
+      },
+      "Description": "Scale factor for all sprites."
     },
     {
       "InputId": "5e39b0d4-a268-4022-bfc1-1fdc9a98b48c"/*BlendMod*/,
@@ -57,7 +60,7 @@
         "Y": -7.04871
       },
       "GroupTitle": "Points Input",
-      "Description": "Points Input"
+      "Description": "Points defining position, rotation, color and scale of each sprite."
     },
     {
       "InputId": "a49cf849-802f-47fe-9e6c-7f53611d7a41"/*Sprites*/,
@@ -66,7 +69,8 @@
         "X": -232.88492,
         "Y": 37.95129
       },
-      "GroupTitle": "Sprites Input"
+      "GroupTitle": "Sprites Input",
+      "Description": "Sprite definitions, e.g. from [TextSprites]."
     },
     {
       "InputId": "e7cd2998-cd5a-494e-8669-b68f59fba257"/*EnableDepthWrite*/,

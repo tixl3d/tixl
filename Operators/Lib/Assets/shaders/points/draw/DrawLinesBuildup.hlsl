@@ -108,7 +108,7 @@ psInput vsMain(uint id : SV_VertexID)
     {
         normalA = normal;
     }
-    if (IsSeparator(pointBB) || pointAA.Scale.x < 0.01)
+    if (IsSeparator(pointBB) || pointBB.Scale.x < 0.01)
     {
         normalB = normal;
     }

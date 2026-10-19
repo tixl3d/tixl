@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "2572b5f2-40af-442c-9354-7a9fa5bd378f"/*CombineFloatLists*/,
-  "Description": "",
+  "Description": "Concatenates multiple float lists into one list.\n\nAKA: join, append, concat\n\nSee also: [MergeFloatLists]",
   "InputUis": [
     {
       "InputId": "2101b2b6-da50-486e-b117-e533ad754fa3"/*InputLists*/,

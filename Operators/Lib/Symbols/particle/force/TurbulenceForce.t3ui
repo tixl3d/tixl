@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "3f8376f2-b89a-4ab4-b6dc-a3e8bf88c0a5"/*TurbulenceForce*/,
-  "Description": "Adds a turbulence force to a Particle Simulation.\n\nAlso see [SimNoiseOffset] and [AddNoise]",
+  "Description": "Adds a curl noise turbulence to the particle velocities.\n\nCurl noise creates swirling, flow-like motion without sinks. An optional field can scale the effect per position.\n\nAKA: noise, curl, swirl, wind\n\nSee also: [DirectionalForce], [VectorFieldForce], [SimNoiseOffset], [AddNoise]\n\nAlso check out the [HowToUseParticles] tutorial.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": 349.7188,
         "Y": 140.57773
       },
-      "Description": "Defines the phase of the noise and can be animated with a [Value], e.g. using [Time]."
+      "Description": "Moves through the noise; can be animated, e.g. with [Time]."
     },
     {
       "InputId": "56144ddb-9d4b-4e08-9169-7853a767f794"/*Variation*/,
@@ -18,7 +18,7 @@
         "X": 349.7188,
         "Y": 175.57773
       },
-      "Description": "Adds more variance and detail to the noise.",
+      "Description": "Random noise offset per particle, which makes particles move less uniformly.",
       "Min": 0.0,
       "Max": 1.0,
       "Format": "{0:0.000} ±"
@@ -28,7 +28,8 @@
       "Position": {
         "X": 209.71893,
         "Y": 245.57773
-      }
+      },
+      "Description": "Number of groups that share the same variation offset. 0 gives each particle its own offset."
     },
     {
       "InputId": "e27a97ce-3d0f-41a9-93c3-a1691f4029aa"/*Amount*/,
@@ -36,7 +37,7 @@
         "X": 349.7188,
         "Y": 70.57773
       },
-      "Description": "Defines the total intensity of the random movements.",
+      "Description": "Strength of the turbulence.",
       "Min": 0.0,
       "Max": 5.0,
       "Format": "{0:0.000} ×"
@@ -48,14 +49,15 @@
         "Y": 105.57773
       },
       "GroupTitle": "Settings",
-      "Description": "Defines the frequency, i.e. how fast the points move."
+      "Description": "Scale of the noise pattern. Higher values create smaller swirls."
     },
     {
       "InputId": "f3d0c69e-3788-49e8-bd70-361c446b4d62"/*ValueField*/,
       "Position": {
         "X": -62.761566,
         "Y": -425.20306
-      }
+      },
+      "Description": "Optional field whose brightness scales the effect at each particle position."
     }
   ],
   "SymbolChildUis": [

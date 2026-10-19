@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "f376121a-2360-4232-9724-0db6937062c3"/*HasValueDecreased*/,
-  "Description": "Tests whether the incoming value has decreased by a defined threshold and outputs this as a Boolean\n\nOperator with more Options: [HasValueChanged]\n\nSimilar to [HasValueIncreased], [IsGreater] and [HasValueDecreased]",
+  "Description": "Tests whether the incoming value has decreased by more than a threshold since the last update and outputs the result as a boolean.\n\nSee also: [HasValueChanged] (more options), [HasValueIncreased], [IsGreater]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -17,6 +17,7 @@
         "X": -200.0,
         "Y": 45.0
       },
+      "Description": "Minimum decrease since the last update to output True.",
       "AddPadding": "True"
     }
   ],

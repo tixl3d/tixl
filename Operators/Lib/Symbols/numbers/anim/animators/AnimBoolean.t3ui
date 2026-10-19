@@ -1,14 +1,15 @@
 {
   "FormatVersion": 3,
   "Id": "1f85f846-0a59-44f3-8e3e-4c2357893494"/*AnimBoolean*/,
-  "Description": "",
+  "Description": "Outputs true for one frame each time the beat-synced counter advances to the next whole step.\n\nThe counter is computed as time × Rate + Phase. With Rate 1 it fires once per bar, with Rate 4 once per beat.\n\nAKA: metronome, tick, clock, pulse\n\nSee also: [AnimInt], [AnimValue], [Trigger]",
   "InputUis": [
     {
       "InputId": "a8e49df7-3388-4532-8efe-766ea3a47108"/*Rate*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Steps per bar."
     },
     {
       "InputId": "be941605-4af3-445e-93a6-c830eebb3ed5"/*AllowSpeedFactor*/,
@@ -22,7 +23,8 @@
       "Position": {
         "X": -200.0,
         "Y": 120.0
-      }
+      },
+      "Description": "Offset in steps."
     }
   ],
   "SymbolChildUis": [],

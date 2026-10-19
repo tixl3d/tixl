@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "6184ac2d-c17d-47de-a314-15e1c670f969"/*SelectVertices*/,
-  "Description": "Sets the selection property of mesh vertices from a volume. This can later be used to selectively apply manipulations like displace.\n\nAlso see: [ScatterMeshFaces]",
+  "Description": "Sets the selection value of mesh vertices from a volume shape.\n\nThe selection can then be used by other operators with a UseVertexSelection option, e.g. [DisplaceMesh], [TransformMesh] or [ScatterMeshFaces], to apply effects only to parts of the mesh.\n\nAKA: mask, weight, falloff\n\nSee also: [SelectVerticesWithSDF], [ScatterMeshFaces]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -26,7 +26,8 @@
       "Position": {
         "X": -883.1582,
         "Y": 2597.019
-      }
+      },
+      "Description": "Changes the coverage of the Zebra and Noise shapes."
     },
     {
       "InputId": "9fcdd319-5120-402b-ac8e-07aa711bdaf5"/*Center*/,
@@ -48,7 +49,8 @@
       "Position": {
         "X": -881.0754,
         "Y": 2412.7205
-      }
+      },
+      "Description": "Clamps the resulting selection to 0..1."
     },
     {
       "InputId": "a9807f1e-bd65-4006-a42e-a1d8f67387f9"/*VolumeShape*/,
@@ -56,14 +58,16 @@
         "X": -881.0754,
         "Y": 2322.7202
       },
-      "GroupTitle": "Selection"
+      "GroupTitle": "Selection",
+      "Description": "Shape of the selection volume.\n\nSphere and Box: the unit volume transformed by Center, Rotate, Scale and Stretch.\nPlane: selects everything below the XZ plane of the volume.\nZebra: repeating stripes along the Y axis of the volume.\nNoise: 3D simplex noise."
     },
     {
       "InputId": "b0942a49-f562-4c46-9a10-3b4de8a3c5b2"/*Phase*/,
       "Position": {
         "X": -881.0754,
         "Y": 2547.7205
-      }
+      },
+      "Description": "Shifts the Box, Zebra and Noise patterns; can be animated."
     },
     {
       "InputId": "b3230397-8052-4bd6-8ecb-747f62c1bb3d"/*FallOff*/,
@@ -71,6 +75,7 @@
         "X": -881.0754,
         "Y": 2277.7202
       },
+      "Description": "Width of the soft transition at the border of the volume.",
       "AddPadding": "True"
     },
     {
@@ -79,7 +84,8 @@
         "X": -881.0754,
         "Y": 2502.7205
       },
-      "GroupTitle": "Noise"
+      "GroupTitle": "Noise",
+      "Description": "Scales the selection of the volume."
     },
     {
       "InputId": "ca4fe7d8-5e78-493b-a209-3ee6be0d0a90"/*Mode*/,
@@ -87,7 +93,8 @@
         "X": -881.0754,
         "Y": 2367.7205
       },
-      "GroupTitle": "Advanced"
+      "GroupTitle": "Advanced",
+      "Description": "How the new selection is combined with the existing one.\n\nOverride: replaces it.\nAdd: adds the volume to it.\nSub: subtracts the volume from it.\nMultiply: multiplies it by the volume.\nInvert: selects the volume only where nothing was selected before."
     },
     {
       "InputId": "f1350cb5-d7c5-43ad-9e0c-4b0aa7a8c0e4"/*InputMesh*/,

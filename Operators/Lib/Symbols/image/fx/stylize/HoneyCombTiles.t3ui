@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "ee398291-674c-409b-aab8-9ca843ce6cef"/*HoneyCombTiles*/,
-  "Description": "Creates a hexagonal pattern based on an incoming image.\nTip: Use [AdjustColors] on the incoming image to manipulate the pattern\n\nFor similar effects or interesting combinations see: [MosaicTiling] [VoronoiCells] [SubdivisionStretch] [HoneyCombTiles] [TriangleGridTransition] [Dither] [AsciiRender]",
+  "Description": "Creates a hexagonal tile pattern based on an incoming image.\n\nAKA: hexagon, honeycomb, hex, tiles\n\nTips:\n- Use [AdjustColors] on the incoming image to manipulate the pattern.\n\nSee also: [MosiacTiling], [VoronoiCells], [SubdivisionStretch], [TriangleGridTransition], [Dither], [AsciiRender]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": -162.75552,
         "Y": 270.99628
       },
-      "Description": "Defines the size of the Tiles",
+      "Description": "Defines the size of the tiles.",
       "AddPadding": "True",
       "Scale": 0.1
     },
@@ -20,7 +20,7 @@
         "X": -228.5755,
         "Y": 614.90857
       },
-      "Description": "Overwrites the resolution"
+      "Description": "Overrides the output resolution."
     },
     {
       "InputId": "0c227ab3-3394-40fb-9274-d857a2293d35"/*Rotation*/,
@@ -61,7 +61,7 @@
         "X": -192.27582,
         "Y": 233.48329
       },
-      "Description": "Shifts the position of the Tiles without affecting the incoming image",
+      "Description": "Shifts the position of the tiles without affecting the incoming image.",
       "AddPadding": "True"
     },
     {

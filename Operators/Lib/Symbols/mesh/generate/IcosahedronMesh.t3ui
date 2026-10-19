@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "e0cead3c-e19c-4726-8b5c-a9fefbf96ab9"/*IcosahedronMesh*/,
-  "Description": "This generator is expensive, it's not recommended to animate its parameters",
+  "Description": "Generates an icosahedron mesh that can be subdivided into a geodesic sphere.\n\nThe mesh is generated on the CPU and becomes expensive with higher subdivisions, so its parameters should not be animated.\n\nAKA: icosphere, geodesic, polyhedron\n\nSee also: [SphereMesh], [CubeMesh]",
   "SymbolTags": "192",
   "InputUis": [
     {
@@ -16,14 +16,16 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Number of subdivision levels (0..5). Each level splits every triangle into four."
     },
     {
       "InputId": "32a77592-eaa1-43e8-b1ab-74b989ecbccd"/*Spherical*/,
       "Position": {
         "X": -200.0,
         "Y": 75.0
-      }
+      },
+      "Description": "If enabled, vertices are pushed towards the sphere surface at each subdivision level."
     },
     {
       "InputId": "486c1717-20cf-4cf9-951e-cedd51c88262"/*Pivot*/,
@@ -38,7 +40,8 @@
       "Position": {
         "X": -200.0,
         "Y": 150.0
-      }
+      },
+      "Description": "How far subdivided vertices are pushed towards the sphere surface. 1 creates a sphere. Only used with Spherical."
     },
     {
       "InputId": "7438a4ca-1fa7-48cf-ad85-0e7067ae54cc"/*Shading*/,
@@ -46,7 +49,8 @@
         "X": -200.0,
         "Y": 525.0
       },
-      "GroupTitle": "Shading"
+      "GroupTitle": "Shading",
+      "Description": "Flat: each face has its own normal.\nSmoothed: normals are averaged across adjacent faces."
     },
     {
       "InputId": "96d161da-f459-427c-be67-e8f1b47d233d"/*Rotation*/,
@@ -54,6 +58,7 @@
         "X": -200.0,
         "Y": 375.0
       },
+      "Description": "Rotation in degrees.",
       "Format": "{0:0.0}°"
     },
     {

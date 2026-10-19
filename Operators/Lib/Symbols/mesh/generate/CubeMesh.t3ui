@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "c47ab830-aae7-4f8f-b67c-9119bcbaf7df"/*CubeMesh*/,
-  "Description": "Generates a procedural three-dimensional mesh which can be rendered with [DrawMesh], [DrawMeshUnlit] and [DrawMeshHatched] among others.\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToDrawThings].\n\nIt can also become the source for a particle system with [MeshVerticesToPoints] or [PointsOnMesh].\nTo import static 3D meshes from other programs refer to [LoadObj].",
+  "Description": "Generates a box mesh with configurable subdivisions and UV layouts.\n\nIt can be rendered with [DrawMesh], [DrawMeshUnlit], [DrawMeshHatched] and others, or used as a source for points with [MeshVerticesToPoints] or [PointsOnMesh]. To import meshes from other programs use [LoadObj].\n\nAKA: box\n\nAlso check out the [HowToDrawThings] tutorial.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": -200.0,
         "Y": 125.0
       },
-      "Description": "Padding between UV islands",
+      "Description": "Padding around the UV islands of TexCoord.",
       "Min": 0.0,
       "Max": 0.01
     },
@@ -21,15 +21,14 @@
         "Y": 45.0
       },
       "GroupTitle": "Scaling",
-      "Description": "Scales the size X (width) Y (height) Z (depth)"
+      "Description": "Size along X (width), Y (height) and Z (depth)."
     },
     {
       "InputId": "9a7d34a1-ca39-48bc-b977-9a786d23f3b1"/*Scale*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      },
-      "Description": "Uniformly scales the mesh"
+      }
     },
     {
       "InputId": "ba355fc0-0f1c-41d9-842e-d8ae9bee162a"/*Margin2*/,
@@ -37,7 +36,7 @@
         "X": -200.0,
         "Y": 125.0
       },
-      "Description": "Padding between UV islands",
+      "Description": "Padding around the UV islands of TexCoord2.",
       "Min": 0.0,
       "Max": 0.01
     },
@@ -48,7 +47,7 @@
         "Y": 125.0
       },
       "GroupTitle": "Uv Mapping",
-      "Description": "Alternative UV Maps"
+      "Description": "UV layout of the faces.\n\nDefault: each side uses the full 0..1 range.\nRows: unwraps the six sides into a 3x2 grid.\nCubeMap: unwraps the sides into a cross layout.\nCubeMapForSquare: cross layout fitted into a square texture."
     },
     {
       "InputId": "e445a6da-0b66-46ae-ad2b-650e9cc50798"/*Segments*/,
@@ -57,7 +56,7 @@
         "Y": 0.0
       },
       "GroupTitle": "Tesselation",
-      "Description": "Amount of segments from left to right / top to bottom / front to back."
+      "Description": "Number of subdivisions along X, Y and Z."
     },
     {
       "InputId": "e641c244-9dc8-444d-8dee-c3e9b710f9db"/*Rotation*/,
@@ -65,7 +64,7 @@
         "X": -200.0,
         "Y": 135.0
       },
-      "Description": "Rotates the Mesh",
+      "Description": "Rotation in degrees.",
       "AddPadding": "True",
       "Scale": 0.1,
       "Format": "{0:0.0}°"
@@ -76,7 +75,7 @@
         "X": -200.0,
         "Y": 90.0
       },
-      "Description": "Transforms the position of the pivot"
+      "Description": "Moves the mesh after rotation."
     },
     {
       "InputId": "f946d7a1-8bb6-4ba1-a3bb-f2f95fc2242d"/*TexCoord2*/,
@@ -84,7 +83,7 @@
         "X": -200.0,
         "Y": 125.0
       },
-      "Description": "Alternative UV Maps"
+      "Description": "UV layout written to the second UV set. Same modes as TexCoord."
     },
     {
       "InputId": "febfae90-13e8-4f0a-8ccf-b8825ea525f8"/*Pivot*/,
@@ -93,7 +92,7 @@
         "Y": 45.0
       },
       "GroupTitle": "Position and Rotation",
-      "Description": "Offsets the position of the pivot point (center).\n\nThis is helpful to change the point around which the cube rotates / along which it is scaled."
+      "Description": "Offsets the mesh relative to its rotation and scaling center, in units of the box size.\n\nE.g. 0, 0.5, 0 places the bottom of the box at the center so it grows upwards."
     }
   ],
   "SymbolChildUis": [],

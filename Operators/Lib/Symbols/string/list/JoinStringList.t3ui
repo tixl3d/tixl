@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "51943340-70b1-4bb5-8cb9-0e79d366a57b"/*JoinStringList*/,
-  "Description": "Joins the members of a string with a separator.",
+  "Description": "Joins the members of a string list with a separator.\n\nSee also: [SplitString], [CombineStrings]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -10,6 +10,7 @@
         "X": 0.0,
         "Y": 45.0
       },
+      "Description": "Inserted between the elements. Use \"\\n\" for line breaks.",
       "Usage": "Default"
     },
     {

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "5b538cf5-e3b6-4674-b23e-ab55fc59ada6"/*GetAllCameras*/,
-  "Description": "Provides a list of all cameras defined in the current composition symbol. \n\nThis can be useful for rendering camera gizmos.",
+  "Description": "Internal helper. Provides the matrices of one of the cameras in the composition that contains the parent operator.\n\nThis is used by [DrawCamGizmos] to draw camera gizmos. Note that the WorldToClipSpaceRows output actually contains the camera-to-clip-space matrix.",
   "SymbolTags": "208",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Index of the camera. Wraps around the number of cameras."
     }
   ],
   "SymbolChildUis": [],

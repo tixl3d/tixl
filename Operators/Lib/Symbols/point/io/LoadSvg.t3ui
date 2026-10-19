@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "e8d94dd7-eb54-42fe-a7b1-b43543dd457e"/*LoadSvg*/,
-  "Description": "Loads an SVG file as points so it can be rendered as points or lines. The supported SVG feature set is very basic, and depending on your exporting applications, elements could be missing or not correctly represented. Missing SVG features include: - Masking - Text - Fill - Effects - Stroke styles like dashes The \"ImportAs Lines\" mode inserts double points so closed shapes will be closed when rendering lines. To draw the SVG, you can convert the list to a GPU point buffer with [ListToBuffer] and then use [DrawLines]. Also see: [PrepareSvgLineTransition], [SvgLineTransitionExample]",
+  "Description": "Loads an SVG file as a list of points so it can be rendered as points or lines.\n\nThe supported SVG feature set is basic, and depending on the exporting application, elements could be missing or not correctly represented. Unsupported features include masking, text, fills, effects and stroke styles like dashes. Each path contour is followed by a separator.\n\nTo draw the SVG, convert the list to a GPU point buffer with [ListToBuffer] and use [DrawLines].\n\nSee also: [PrepareSvgLineTransition], [LineTextPoints]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -9,14 +9,16 @@
       "Position": {
         "X": -200.0,
         "Y": 300.0
-      }
+      },
+      "Description": "Index of the shape imported when ImportAs is set to Shape."
     },
     {
       "InputId": "221bf10c-b13e-40cf-80af-769c10a21c5b"/*ScaleToBounds*/,
       "Position": {
         "X": -200.0,
         "Y": 135.0
-      }
+      },
+      "Description": "Scales the content so that its height becomes 2 units."
     },
     {
       "InputId": "2bb64740-ed2f-4295-923d-d585d70197e7"/*ReduceFactor*/,
@@ -24,6 +26,7 @@
         "X": -200.0,
         "Y": 225.0
       },
+      "Description": "Controls how finely curves are flattened into points (0.001...1). Larger values create fewer points.",
       "Min": 0.01,
       "Max": 1.0,
       "ClampMin": true,
@@ -34,21 +37,24 @@
       "Position": {
         "X": -200.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Centers the content around the origin."
     },
     {
       "InputId": "7f3a9c21-5d4e-4b88-9a17-2c6e1b0d4f55"/*Flattening*/,
       "Position": {
         "X": -200.0,
         "Y": 375.0
-      }
+      },
+      "Description": "Adaptive places points depending on the curvature. EvenSpacing places points at regular distances."
     },
     {
       "InputId": "8d63c134-1257-4331-ae84-f5eb6dd66c13"/*ImportAs*/,
       "Position": {
         "X": -200.0,
         "Y": 180.0
-      }
+      },
+      "Description": "Shape: only imports the shape selected with SelectSingleShape."
     },
     {
       "InputId": "c6692e97-e7f8-4b3f-95bc-5f86c2b399a5"/*Scale*/,

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "196e14c7-3a71-4afd-a53b-e51d0fe8f414"/*MotionBlur*/,
-  "Description": "Applies a post processing motion blur to a RenderTarget texture and its DepthBuffer.\n\nSee also [RenderWithMotionBlur] for an operator using multi-pass rendering to achieve high quality at the cost of more resources. \nDesigned primarily for video rendering, it can also be used for real-time applications with just a few passes, in simple scenes or on fast hardware.\n\nAlso see [DepthOfField], [DirectionalBlur]",
+  "Description": "Applies a post-processing motion blur caused by camera movement to a rendered image.\n\nThe motion of each pixel is reconstructed from the depth buffer and the change of the camera matrices since the previous frame, so moving objects in front of a static camera are not blurred.\n\nSee also: [RenderWithMotionBlur] for multi-pass rendering at higher quality and cost, [DepthOfField], [DirectionalBlur]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -20,7 +20,8 @@
       "Position": {
         "X": 84.384766,
         "Y": 958.59155
-      }
+      },
+      "Description": "Depth buffer of the same [RenderTarget]."
     },
     {
       "InputId": "619c2684-8495-4c19-a5b2-673728feaa00"/*Image*/,
@@ -28,7 +29,8 @@
       "Position": {
         "X": -135.89685,
         "Y": 1055.9735
-      }
+      },
+      "Description": "Color buffer of the rendered scene, e.g. from [RenderTarget]."
     },
     {
       "InputId": "77ed2341-48f2-4e0f-913d-b2f368449088"/*ClampEffect*/,
@@ -36,7 +38,7 @@
         "X": -347.00583,
         "Y": 820.52246
       },
-      "Description": "Controls how much the intensity of the motion blur of very fast image elements differs from slower ones. ",
+      "Description": "Limits the blur length of very fast moving image areas.",
       "AddPadding": "True"
     },
     {
@@ -45,7 +47,8 @@
       "Position": {
         "X": 84.38478,
         "Y": 818.59155
-      }
+      },
+      "Description": "Reference output of the [Camera] used to render the scene. Required."
     },
     {
       "InputId": "db0d11c8-f4c0-4762-8821-4dd75c71fb9e"/*Strength*/,
@@ -53,7 +56,7 @@
         "X": -347.00583,
         "Y": 785.52234
       },
-      "Description": "Controls the strength of the blur.\n\nProTip: For precise adjustment, it can be helpful to reduce the passes to very low settings making the strength clearly visible."
+      "Description": "Controls the strength of the blur.\n\nTip: For precise adjustment it can help to reduce SampleCount to very low values, making the strength clearly visible."
     },
     {
       "InputId": "df8bf08c-e576-4310-95b5-e34c6a001959"/*SampleCount*/,
@@ -61,7 +64,7 @@
         "X": -487.0058,
         "Y": 750.52234
       },
-      "Description": "Controls the fidelity of the effect.\nHigher numbers create smoother results at the cost of rendering speed.",
+      "Description": "Controls the fidelity of the effect (1 to 32).\nHigher numbers create smoother results at the cost of rendering speed.",
       "AddPadding": "True",
       "Min": -1,
       "Max": 256,

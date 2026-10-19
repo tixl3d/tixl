@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "32e18957-3812-4f64-8663-18454518d005"/*TransformImage*/,
-  "Description": "Rotates, offsets, and scales the incoming image.\nIt includes texture wrapping modes: Repeat, Mirror, Clamp, Border...\nIt's a powerful and versatile operator with many use cases such as tiling textures, patterns, decals...\n\nTo control how the image changes when it's repeating use: [MirrorRepeat]\nA more sophisticated version: [KochKaleidoskope]",
+  "Description": "Moves, rotates and scales an image, with wrap modes like repeat, mirror, clamp and border for the area outside.\n\nThis makes it useful for tiling textures, patterns and decals.\n\nAKA: transform, move, rotate, scale, tile, offset\n\nSee also: [MirrorRepeat], [KochKaleidoskope], [Crop]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -18,7 +18,7 @@
         "X": 131.552,
         "Y": 205.0227
       },
-      "Description": "Defines how the area around the image will be rendered"
+      "Description": "How the area outside the image is rendered."
     },
     {
       "InputId": "53538db0-2b65-4c92-80b1-ea6aecbc49ae"/*Stretch*/,
@@ -26,7 +26,7 @@
         "X": 271.552,
         "Y": 30.022705
       },
-      "Description": "Scales the incoming image in the following directions:\n\nX: Width\nY: Height",
+      "Description": "Scales the image horizontally (X) and vertically (Y).",
       "AddPadding": "True"
     },
     {
@@ -34,8 +34,7 @@
       "Position": {
         "X": 411.552,
         "Y": 100.022705
-      },
-      "Description": "Linearly scales the incoming image"
+      }
     },
     {
       "InputId": "5c76dc8d-3a28-4b93-b3a0-e008c1ff14e9"/*Resolution*/,
@@ -44,7 +43,7 @@
         "Y": 130.15018
       },
       "GroupTitle": "Settings",
-      "Description": "Overwrites the resolution of the incoming image"
+      "Description": "Overrides the output resolution. If 0, the resolution of the input image is used."
     },
     {
       "InputId": "64e5cdf2-19b0-461c-b936-ea46ee58028f"/*Filter*/,
@@ -52,7 +51,7 @@
         "X": 411.552,
         "Y": 275.0227
       },
-      "Description": "Defines the image filtering used"
+      "Description": "Texture filtering used for sampling the image."
     },
     {
       "InputId": "6a786aa9-edf4-4363-9e34-0ddc7e763f0b"/*Rotation*/,
@@ -60,7 +59,7 @@
         "X": 411.552,
         "Y": 135.0227
       },
-      "Description": "Rotates the incoming image",
+      "Description": "Rotation in degrees.",
       "AddPadding": "True",
       "Min": -180.0,
       "Max": 180.0,
@@ -73,7 +72,6 @@
         "Y": -39.977295
       },
       "GroupTitle": "Transform",
-      "Description": "Moves the incoming image",
       "Min": -1.0,
       "Max": 1.0,
       "Scale": 0.001,
@@ -85,15 +83,14 @@
         "X": -190.43478,
         "Y": 200.15018
       },
-      "Description": "This can be useful to scale down and "
+      "Description": "Multiplies the output resolution. Values below 1 can be used to downscale the image."
     },
     {
       "InputId": "c31a95a9-2cfb-4eea-8006-97f883d11847"/*GenerateMips*/,
       "Position": {
         "X": 411.55203,
         "Y": 240.0227
-      },
-      "Description": "Defines whether mipmaps should be generated"
+      }
     }
   ],
   "SymbolChildUis": [

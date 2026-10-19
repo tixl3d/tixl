@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "13ff9adb-2634-4129-8bb4-4fb764d38be6"/*ResampleLinePoints*/,
-  "Description": "",
+  "Description": "Creates a new buffer with a given number of points evenly interpolated along the connected line points, optionally smoothing them.\n\nUseful to increase or reduce the resolution of a line or to round off hard corners. Position, color, scale, F1 and F2 are interpolated.\n\nAKA: resample, smooth, interpolate\n\nSee also: [SubdivideLinePoints], [SplinePoints]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -17,7 +17,8 @@
       "Position": {
         "X": -551.46265,
         "Y": 760.3659
-      }
+      },
+      "Description": "Part of the source line to resample, normalized 0...1. See RangeMode."
     },
     {
       "InputId": "3d50d3c5-07e6-4246-8740-fcdc62173e1d"/*SmoothDistance*/,
@@ -44,7 +45,8 @@
       "Position": {
         "X": -551.46265,
         "Y": 715.3659
-      }
+      },
+      "Description": "StartLength: SampleRange X is the start and Y the length of the sampled range.\nStartEnd: SampleRange X and Y are start and end.\n\nBoth are normalized to the line (0...1). Points outside 0...1 become separators."
     },
     {
       "InputId": "78f5d842-960f-4885-a65b-defd04871091"/*Points*/,

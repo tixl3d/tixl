@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "cb28a67e-80cb-460a-8130-00e3cd85b7c2"/*RyojiPattern2*/,
-  "Description": "A pattern generator inspired by the work of Ryoji Ikeda. It subdivides the image space recursively and can generate a range of different patterns.\n\nFor an earlier version with fewer options see: [RyojiPattern1]\n\nOther interesting patterns can be generated with [SinForm] [ZollnerPattern] [FraserGrid] [Raster] [CheckerBoard]",
+  "Description": "Generates animated patterns inspired by the work of Ryoji Ikeda by recursively subdividing the image into smaller segments.\n\nThis version offers more options than [RyojiPattern1].\n\nAKA: ikeda, glitch, data, barcode\n\nSee also: [SinForm], [ZollnerPattern], [FraserGrid], [Raster], [CheckerBoard], [RyojiPattern1]",
   "SymbolTags": "72",
   "InputUis": [
     {

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "c1c3725a-0745-4ce1-874b-839810c2124c"/*DateTimeToString*/,
-  "Description": "Uses [NowAsDateTime] output to convert it into a string",
+  "Description": "Converts a DateTime (e.g. from [NowAsDateTime]) into a string.\n\nSee also: [CountDown], [StringToDateTime]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -10,6 +10,7 @@
         "X": -133.22765,
         "Y": 40.552734
       },
+      "Description": ".NET DateTime format like yyyy-MM-dd HH:mm:ss. Empty uses the invariant default format.",
       "Usage": "Default"
     },
     {
@@ -18,8 +19,7 @@
       "Position": {
         "X": -182.1091,
         "Y": -14.074188
-      },
-      "Description": "Input for a 'DateTime' parameter\n\nFor example by [NowAsDateTime] operator"
+      }
     }
   ],
   "SymbolChildUis": [],

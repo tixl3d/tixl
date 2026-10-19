@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "c6dd42a7-d3a3-4405-b64a-159bcf3beab8"/*MoveMeshToPointLine*/,
-  "Description": "Deforms a mesh in world space origin along a line defined by points.\n\nIt maps the geometry to the complete range of all points. Use the range parameter to squeeze the geometry to the correct ratio.\nUse the Offset parameter to shift the object along the line.\nThe Scale parameter can help adjust the overall scale of the geometry.\n",
+  "Description": "Bends a mesh along a line defined by points.\n\nThe X axis of the mesh is mapped along the point line, while Y and Z are placed in the plane of the interpolated point orientations. The mesh should therefore be aligned along the X axis, starting at the origin. By default the geometry is mapped to the complete range of all points.\n\nAKA: path deform, curve deform, follow path\n\nSee also: [ExtrudeCurves]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -10,7 +10,8 @@
       "Position": {
         "X": 571.6502,
         "Y": 1579.0715
-      }
+      },
+      "Description": "Points describing the line. Their orientation defines how the cross-section is rotated."
     },
     {
       "InputId": "2d550543-d102-454e-b9f3-ff7d7832bba9"/*InputMesh*/,
@@ -26,14 +27,16 @@
       "Position": {
         "X": 571.6502,
         "Y": 1714.0715
-      }
+      },
+      "Description": "Scales the cross-section and the position along the line."
     },
     {
       "InputId": "62744fc9-00e0-40c1-881c-ea95367efd2f"/*Offset*/,
       "Position": {
         "X": 571.6502,
         "Y": 1669.0715
-      }
+      },
+      "Description": "Shifts the mesh along the line, relative to the full line length."
     },
     {
       "InputId": "c51d7f13-290c-48f9-b7ad-053d20e037b2"/*Range*/,
@@ -42,6 +45,7 @@
         "Y": 1624.0715
       },
       "GroupTitle": "Settings",
+      "Description": "Scales how much of the line one unit along the mesh X axis covers. Adjust it to fit the mesh to the correct ratio.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,

@@ -1,7 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "b1352ba6-1164-4b44-9b69-a9eb802ea77d"/*_ExecuteParticleUpdate*/,
-  "Description": "",
+  "Description": "Internal helper. Evaluates the connected commands while IsEnabled is true, so they can be connected as a force of a [ParticleSystem].",
+  "SymbolTags": "16",
   "InputUis": [
     {
       "InputId": "5d480604-dcb1-455c-b961-d72218380c99"/*Commands*/,

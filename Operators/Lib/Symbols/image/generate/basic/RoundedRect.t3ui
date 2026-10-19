@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "bf7fcd04-0cf6-4518-86cc-48f74483d98d"/*RoundedRect*/,
-  "Description": "Generates a rounded rectangle.\n\nCan be customized to create a variety of shapes, similarly to [Blob].\n\nAKA: rectangle, square, ellipse, circle, rings, blob, vignette\n\nTips:\n\nSimilar Ops: [NGon] [RoundedRect] [Rings] [RadialGradient] [LinearGradient] [Blob]",
+  "Description": "Generates a rectangle with rounded corners and an optional stroke.\n\nIt can be customized to create a variety of shapes like squares, pills or circles, similar to [Blob].\n\nAKA: rectangle, square, pill, frame, vignette\n\nSee also: [Blob], [NGon], [BoxGradient], [Rings], [RadialGradient]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -89,7 +89,7 @@
         "X": -202.27362,
         "Y": 776.44977
       },
-      "Description": "Generate mipmaps (scaled-down versions of this image for use in situations where many small copies are shown on screen.)\nWill increase memory usage."
+      "Description": "Generates mipmaps (scaled-down versions of the image that improve quality when it is displayed small). Increases memory usage."
     },
     {
       "InputId": "d2401798-593b-4cc3-85d8-3570ddec1f2a"/*Scale*/,

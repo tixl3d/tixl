@@ -1,8 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "c2078514-cf1d-439c-a732-0d7b31b5084a"/*SrvFromTexture2d*/,
-  "Description": "",
-  "SymbolTags": "8",
+  "Description": "Internal helper. Creates a ShaderResourceView for a Texture2D.\n\nDepth stencil textures are read as R32_Float.",
+  "SymbolTags": "24",
   "InputUis": [
     {
       "InputId": "d5afa102-2f88-431e-9cd4-af91e41f88f6"/*Texture*/,

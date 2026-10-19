@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "348652c3-abf5-4fe9-873b-89d1acaaf0ff"/*Locator*/,
-  "Description": "Can be used to add a visible transform gizmo and its position in a scene (only visible if 'Toggle Gizmos and Floor Grid' is enabled in the Output window).\n\nThe 'Pos' output can be linked to the 'Translation' input of any operator to synchronize (link) their position.\n(e.g. a [PointLight] with any mesh or geometry via [Transform] and the [GodRays] effect).\n\nThe 'Distance to Camera' output allows using the locator as a visible target for [DepthOfField].\n\nHelpful in combination with [TransformPoints], [TransformMesh]",
+  "Description": "Adds a visible point with an interactive transform gizmo to a scene and outputs its position.\n\nThe Pos output can be connected to position inputs of other operators to link them, e.g. a [PointLight], a [Transform] or the [GodRays] effect. The DistanceToCamera output allows using the locator as a visible focus target for [DepthOfField].\n\nThe locator is only drawn if gizmos are enabled (see Visibility).\n\nAKA: null, empty, helper, target, marker\n\nSee also: [TransformPoints], [TransformMesh], [RotateTowards]",
   "SymbolTags": "9",
   "InputUis": [
     {
@@ -9,8 +9,7 @@
       "Position": {
         "X": -14.877502,
         "Y": -425.41354
-      },
-      "Description": "Defines the color of the Locator"
+      }
     },
     {
       "InputId": "43f63f2d-72f0-4d73-9311-fba7e4e32b31"/*Size*/,
@@ -19,15 +18,14 @@
         "Y": -515.41345
       },
       "GroupTitle": "Visible Gizmo",
-      "Description": "Scales the Locator (only visible if 'Toggle Gizmos and Floor Grid' are enabled in the Output window)"
+      "Description": "Scales the drawn locator."
     },
     {
       "InputId": "53aeef4f-37f8-40a6-b552-cb35f5fb887c"/*Position*/,
       "Position": {
         "X": 84.13989,
         "Y": 279.4007
-      },
-      "Description": "Defines the position of the Locator"
+      }
     },
     {
       "InputId": "d7b88971-a4fb-4761-a2a2-0abeffd01552"/*Thickness*/,
@@ -35,7 +33,7 @@
         "X": -14.877502,
         "Y": -470.41354
       },
-      "Description": "Defines the thickness of the visible Locator"
+      "Description": "Line thickness of the drawn locator."
     },
     {
       "InputId": "f7a4cab5-6095-4b7f-98d0-faea091dda29"/*Label*/,
@@ -43,7 +41,7 @@
         "X": 202.61462,
         "Y": 62.041412
       },
-      "Description": "Text field to give the locator a name that can be seen in the viewport",
+      "Description": "Name displayed next to the locator in the viewport.",
       "Usage": "Default"
     },
     {
@@ -52,7 +50,7 @@
         "X": 984.24615,
         "Y": -51.569153
       },
-      "Description": "Defines the settings that control the visibility of the locator\n\nOff = Locator always invisible\nOn = Locator always visible\nIfSelected = Locator becomes visible when selected in the 'Graph' Window\nInherit = Locator is visible when 'Toggle Gizmos and Floor Grid' is activated\n"
+      "Description": "Off = Never visible\nOn = Always visible\nIfSelected = Visible when selected in the graph\nInherit = Visible when \"Toggle Gizmos and Floor Grid\" is enabled in the output window"
     }
   ],
   "SymbolChildUis": [

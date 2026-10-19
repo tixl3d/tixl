@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "f1333224-e1e3-44b4-a84b-e9b13cacf320"/*RemoveStaticBackground*/,
-  "Description": "Uses statistical filtering to remove static background from an image.\n\nThis is basically a keyer that tries to detect movement in front of a static background.",
+  "Description": "Separates moving foreground from a static background by learning a statistical model of every pixel over time.\n\nEach pixel keeps a learned mean color and a spread (noise tolerance). Pixels that deviate too far from the model are marked as foreground; the raw mask is then refined by a neighborhood vote and temporal smoothing. Typical use is keying people in front of a fixed camera, also with projections in the scene.\n\nAKA: keyer, segmentation, foreground, matte\n\nTips:\n- Enable IsTraining while the scene is empty so the background is learned quickly with the Training parameters.\n- Use the debug output modes to tune the parameters.\n\nSee also: [DetectMotion], [KeyColor]",
   "InputUis": [
     {
       "InputId": "007aec66-e8f2-493e-8035-cea3adfc1a2e"/*ChromaWeight*/,
@@ -80,7 +80,8 @@
       "Position": {
         "X": -862.5189,
         "Y": 2459.7742
-      }
+      },
+      "Description": "Enables updating the background model and output."
     },
     {
       "InputId": "5edbbfe4-99d8-4722-a922-68df4a669d54"/*BackgroundGateHi*/,
@@ -125,6 +126,7 @@
         "X": 499.39432,
         "Y": 1464.6096
       },
+      "Description": "Blends the mask with the previous frame to reduce flicker. 0 is off, 1 is very stable.",
       "Min": 0.0,
       "Max": 1.0,
       "Scale": 0.001,
@@ -207,7 +209,8 @@
       "Position": {
         "X": 483.5389,
         "Y": 1871.1793
-      }
+      },
+      "Description": "OutputForeground outputs the input with the refined mask as alpha. OutputMask outputs the mask as grayscale. The Debug modes show internal buffers of the model."
     },
     {
       "InputId": "a54b96a9-8579-4b70-b82c-cbea74aa3e60"/*EnableChroma*/,
@@ -215,6 +218,7 @@
         "X": 254.841,
         "Y": 642.0315
       },
+      "Description": "Includes color differences, not only brightness, when comparing with the background.",
       "AddPadding": "True"
     },
     {
@@ -223,7 +227,8 @@
         "X": -869.78973,
         "Y": 498.65186
       },
-      "GroupTitle": "Training"
+      "GroupTitle": "Training",
+      "Description": "While true, the Training parameters replace MeanRate, SpreadUpRate, SpreadDownRate and BrightSuppression to learn the background quickly."
     },
     {
       "InputId": "b27194af-c253-49e3-a215-1004d004ce3a"/*BrightSuppression*/,

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "7dff2da3-30e3-4ad9-bfc6-d6800f90fca8"/*StringInsert*/,
-  "Description": "Can replace and move characters to any position within a string",
+  "Description": "Overwrites a part of the original string with the insertion string at a given position.\n\nThe length of the original string is kept. If the insertion is not shorter than the original, the result is not updated.",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -28,7 +28,7 @@
         "X": 0.0,
         "Y": 135.0
       },
-      "Description": "Defines the position at which the 'Insertion' string is inserted into the 'original' string\n\nThis value can be animated"
+      "Description": "Character position of the insertion. Clamped to the valid range."
     },
     {
       "InputId": "c103c06d-bf68-4c5c-967e-ddd939221292"/*UseModuloPosition*/,
@@ -36,7 +36,7 @@
         "X": 0.0,
         "Y": 180.0
       },
-      "Description": "If modulo is activated, the string position is looped if the value is too high or too low"
+      "Description": "Wraps the absolute position around the valid range instead of clamping it."
     }
   ],
   "SymbolChildUis": [],

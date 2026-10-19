@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "38b85057-fbcb-4ab1-9b40-cfb090750150"/*ResetSubtreeTrigger*/,
-  "Description": "",
+  "Description": "Forces the complete connected subtree to be invalidated and re-evaluated when Trigger is set.\n\nTrigger is reset to false after it was handled, so it acts like a button. The command is executed every frame regardless.",
   "SymbolTags": "88",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": 0.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Invalidates the subtree once and resets itself to false."
     },
     {
       "InputId": "7cc4e43b-18a2-4564-a511-05eb0d8ec7d2"/*Command*/,

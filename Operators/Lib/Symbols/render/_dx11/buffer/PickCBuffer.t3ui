@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "690a64f6-7475-4766-a3f6-456fc5fcea86"/*PickCBuffer*/,
-  "Description": "Picks one of the connected Constatnt buffers. \n",
+  "Description": "Picks one of the connected constant buffers.",
   "InputUis": [
     {
       "InputId": "2168fd82-df85-405e-820f-7e6447298891"/*Input*/,
@@ -15,7 +15,8 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Wraps around the number of connected inputs."
     }
   ],
   "SymbolChildUis": [],

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "40fc6dd9-5480-414d-8204-07e8142215a9"/*ImageFFT*/,
-  "Description": "Discrete Fourier Transform on 2d image. \nRG, BA channels of the texture store two complex values\ntexture size is expected to be pow2",
+  "Description": "Computes the discrete Fourier transform of an image or its inverse.\n\nThe RG and BA channels of the texture each store one complex value (real, imaginary). The texture size is expected to be a power of two.\n\nAKA: fourier, fft, frequency, spectrum",
   "SymbolTags": "72",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": -200.0,
         "Y": 75.0
       },
-      "Description": "Inverse transform"
+      "Description": "Computes the inverse transform from frequency space back to image space."
     },
     {
       "InputId": "21860604-3c19-4265-87d2-425c2f421646"/*Normalization*/,
@@ -18,14 +18,15 @@
         "X": -200.0,
         "Y": 300.0
       },
-      "Description": "Ortho will scale output by 1/sqrt(N)\nBackward will only scale inverse transform by 1/N\nForward will only scale direct (forward) transform by 1/N"
+      "Description": "Ortho: scales both transforms by 1/sqrt(N).\nBackward: scales only the inverse transform by 1/N.\nForward: scales only the forward transform by 1/N."
     },
     {
       "InputId": "421fe2f3-7700-4479-9842-080106c4eb6d"/*Direction*/,
       "Position": {
         "X": -200.0,
         "Y": 225.0
-      }
+      },
+      "Description": "Transforms rows (Horizontal), columns (Vertical) or both."
     },
     {
       "InputId": "4f4727d7-f4f6-430d-968b-bc5afcddb176"/*Image*/,

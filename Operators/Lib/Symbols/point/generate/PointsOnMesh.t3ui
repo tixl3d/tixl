@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "17188f49-1243-4511-a46c-1804cae10768"/*PointsOnMesh*/,
-  "Description": "Get evenly distributed points on a mesh. Note that the initial evaluation of the mesh is extremely slow and should not be done on every frame.\n\nUseful combinations [LoadObj] and [DrawPoints]\n\nSimilar Operators:\nTo create a point at each vertex of the connected mesh [MeshVerticesToPoints] can be used.\nTo create a point at each face of the connected mesh [MeshFacesPoints] can be used.\n\nSimilar: [GridPoints], [RadialPoints], [SpherePoints],",
+  "Description": "Distributes points evenly on the surface of a mesh.\n\nThe initial evaluation of the mesh is slow and should not be done on every frame.\n\nSee also: [MeshVerticesToPoints], [MeshFacesPoints], [GridPoints], [RadialPoints], [SpherePoints]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -11,7 +11,7 @@
         "Y": 1484.1101
       },
       "GroupTitle": "Advanced Options",
-      "Description": "Defines the color of the points via an image operator like [LoadImage] for example"
+      "Description": "Optional image that defines the color of the points."
     },
     {
       "InputId": "1843683c-53a2-4862-a9a5-4b3afe729ace"/*UseVertexSelection*/,
@@ -28,8 +28,7 @@
       "Position": {
         "X": -601.2355,
         "Y": 1316.4998
-      },
-      "Description": "Mesh input via [LoadObj] for example"
+      }
     },
     {
       "InputId": "b3d526ee-b1f1-4254-b702-1980d659e557"/*Count*/,
@@ -37,8 +36,7 @@
         "X": -599.49646,
         "Y": 1394.1101
       },
-      "GroupTitle": "Settings",
-      "Description": "Defines the amount of points that are spawning on the surface"
+      "GroupTitle": "Settings"
     },
     {
       "InputId": "d737860b-2864-472d-ad46-4061b63a12d4"/*Seed*/,
@@ -46,7 +44,7 @@
         "X": -599.49646,
         "Y": 1439.1101
       },
-      "Description": "Seed to randomize the position of the points",
+      "Description": "Changes the random distribution.",
       "Min": -1.0,
       "Scale": -1.0
     },
@@ -55,8 +53,7 @@
       "Position": {
         "X": -599.49646,
         "Y": 1574.1101
-      },
-      "Description": "Toggle on / off"
+      }
     }
   ],
   "SymbolChildUis": [

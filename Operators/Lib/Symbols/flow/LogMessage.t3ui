@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "53127485-e2c7-4be8-aff2-da5790799593"/*LogMessage*/,
-  "Description": "Prints a message to the console log. \nThis can be useful for debugging updates, caching, and timing in complex graph networks.",
+  "Description": "Prints a message to the console log when evaluated and executes the connected subgraph.\n\nThis can be useful for debugging updates, caching, and timing in complex graphs. Nested LogMessage ops are indented.",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -16,14 +16,16 @@
       "Position": {
         "X": -200.0,
         "Y": 90.0
-      }
+      },
+      "Description": "None: logs nothing.\nMessages: logs the message, the local time and the damped update duration.\nUpdateTime: additionally logs the update duration of the subgraph."
     },
     {
       "InputId": "8483c153-627c-4154-8fbe-3611ca788701"/*OnlyOnChanges*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Only logs and executes the subgraph when the message changed."
     },
     {
       "InputId": "acd53819-c248-4c95-a1a5-92a583e9b49b"/*Message*/,

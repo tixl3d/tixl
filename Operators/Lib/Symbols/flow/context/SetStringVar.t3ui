@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "9c9274c1-3f85-4f57-9eb5-1e0a0b1cce00"/*SetStringVar*/,
-  "Description": "Writes a string value to the context's float variable dictionary.\nUse [GetStringVar] to read this value further down the graph.\n\nExample: [SetContextVariableExample]",
+  "Description": "Sets a string variable in the evaluation context that can be read by [GetStringVar] in the connected subgraph.\n\nIf SubGraph is connected, the variable is set while the subgraph is executed and a previous value is restored afterwards. Without a connected subgraph the variable stays set for everything evaluated later.\n\nSee also: [GetStringVar]",
   "InputUis": [
     {
       "InputId": "41b7154b-20b4-4cb2-9bcb-507a3ecb6807"/*ClearAfterExecution*/,
@@ -16,7 +16,6 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "Description": "The name to set for the variable. So it can be referenced to later in the graph.",
       "Usage": "Default"
     },
     {
@@ -25,7 +24,6 @@
         "X": -200.0,
         "Y": 45.0
       },
-      "Description": "String value of this variable",
       "Usage": "Default"
     },
     {
@@ -33,8 +31,7 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      },
-      "Description": "Optional sub-graph so this can be used between different command operators (Execute, etc.)."
+      }
     }
   ],
   "SymbolChildUis": [],

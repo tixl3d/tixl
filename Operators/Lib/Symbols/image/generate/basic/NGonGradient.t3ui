@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "05463270-37d4-400f-8d0d-c50f81663304"/*NGonGradient*/,
-  "Description": "Renders a polygon shape similar to [NGon], [Blob] or [RoundedRect].\n\nSimilar Ops: [Rings] [RadialGradient] [LinearGradient]",
+  "Description": "Renders a gradient based on the distance to a regular polygon shape.\n\nAKA: polygon, star, hexagon, gradient\n\nSee also: [NGon], [RadialGradient], [LinearGradient], [Rings]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -10,8 +10,7 @@
         "X": -223.31189,
         "Y": -92.8365
       },
-      "GroupTitle": "Gradient",
-      "Description": "Defines the Gradient"
+      "GroupTitle": "Gradient"
     },
     {
       "InputId": "1264ebb1-f953-46f9-9915-d0fca5a72aa8"/*Curvature*/,
@@ -27,7 +26,7 @@
         "X": -229.21353,
         "Y": 313.88443
       },
-      "Description": "Defines the size of the gradient"
+      "Description": "Size of the gradient."
     },
     {
       "InputId": "15a72217-4a3e-4e03-a767-0494ea1943f7"/*Sides*/,
@@ -35,7 +34,6 @@
         "X": -231.38449,
         "Y": 37.866974
       },
-      "Description": "Defines the amount of sides",
       "Min": 0.0,
       "Max": 42.0
     },
@@ -57,7 +55,7 @@
         "X": -199.96725,
         "Y": -203.49324
       },
-      "Description": "An optional background image. If connected, allows applying different BlendingModes."
+      "Description": "Optional background image. Defines the resolution if connected."
     },
     {
       "InputId": "49066387-92a6-46b2-a471-be0104e70651"/*Rotate*/,
@@ -86,7 +84,7 @@
         "Y": 576.24677
       },
       "GroupTitle": "Options",
-      "Description": "Blend mode between the generated blob graphic and the background image, if one is provided."
+      "Description": "Blend mode used to combine the gradient with the connected Image. Ignored without an Image."
     },
     {
       "InputId": "94d5a7cd-99bb-4146-a556-dd893eb3ebbc"/*Repeat*/,
@@ -94,15 +92,14 @@
         "X": -229.21353,
         "Y": 448.88443
       },
-      "Description": "Repeats the Gradient outward"
+      "Description": "Repeats the gradient outward."
     },
     {
       "InputId": "b96527a6-0392-4e50-aa17-564976141290"/*Radius*/,
       "Position": {
         "X": -231.38449,
         "Y": 82.866974
-      },
-      "Description": "Defines the radius"
+      }
     },
     {
       "InputId": "d3cf9f75-ec08-4162-bad6-514173ef974c"/*Blades*/,
@@ -127,7 +124,7 @@
         "X": -229.21353,
         "Y": 493.88443
       },
-      "Description": "Bias and gain to control the gradient",
+      "Description": "Applies gain and bias to the gradient position.",
       "AddPadding": "True",
       "UseVec2Control": "GainAndBias"
     },

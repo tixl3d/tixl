@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "58d86d45-f32d-4ddb-8eab-180161e05b2a"/*MakeResolution*/,
-  "Description": "Creates an int2 from two single ints\n\nTechnically the same as [int2] with different naming",
+  "Description": "Creates an Int2 resolution from Width and Height.\n\nTechnically the same as [Int2] with different naming.",
   "SymbolTags": "4096",
   "InputUis": [
     {
@@ -9,16 +9,14 @@
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      },
-      "Description": "Y value defines the height"
+      }
     },
     {
       "InputId": "e04cbaaf-d130-4185-9be7-daadafe9d402"/*Width*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      },
-      "Description": "X value defines the width"
+      }
     }
   ],
   "SymbolChildUis": [],

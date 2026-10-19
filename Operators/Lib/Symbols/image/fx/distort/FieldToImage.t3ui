@@ -1,14 +1,15 @@
 {
   "FormatVersion": 3,
   "Id": "f13b6fbd-bd73-4aab-90fc-98d62372baa8"/*FieldToImage*/,
-  "Description": "",
+  "Description": "Renders a 2D slice of an SDF field into an image.\n\nThe field is sampled on the XY plane at the given SliceDepth. The distance is either mapped to a color gradient or the color of the field is used directly.\n\nAKA: sdf, slice, distancefield\n\nSee also: [VisualizeFieldDistance], [RaymarchField]",
   "InputUis": [
     {
       "InputId": "2e07eea5-a7c1-4385-bfcb-da9e6c713e61"/*Scale*/,
       "Position": {
         "X": 1082.3544,
         "Y": 690.7006
-      }
+      },
+      "Description": "Size of the sampled area. At 1 the image height covers field coordinates -1 to 1."
     },
     {
       "InputId": "498f5af8-458b-45f7-8e70-e957f2bb994e"/*OutputFormat*/,
@@ -22,7 +23,8 @@
       "Position": {
         "X": 1274.3816,
         "Y": 1201.0791
-      }
+      },
+      "Description": "Z position of the sampled plane."
     },
     {
       "InputId": "5573ae7b-b699-42c5-84ac-2485040e9a55"/*GenerateMips*/,
@@ -38,6 +40,7 @@
         "Y": 830.70013
       },
       "GroupTitle": "Range",
+      "Description": "Distances mapped to the left (X) and right (Y) end of the gradient.",
       "UseVec2Control": "Range"
     },
     {
@@ -54,6 +57,7 @@
         "X": 1082.3544,
         "Y": 725.7006
       },
+      "Description": "Rotation in degrees.",
       "Min": -180.0,
       "Max": 180.0,
       "Format": "{0:0.0}°"
@@ -76,14 +80,16 @@
       "Position": {
         "X": 1082.3544,
         "Y": 455.59888
-      }
+      },
+      "Description": "The SDF field to render. Must be connected."
     },
     {
       "InputId": "c090441b-7ee6-426b-a37b-3a36555b9141"/*Mode*/,
       "Position": {
         "X": 791.7188,
         "Y": 1080.1316
-      }
+      },
+      "Description": "MapDistanceToColor: Maps the field distance through Range, GainAndBias and the Gradient.\nUseColor: Outputs the color of the field. Range and Gradient are ignored."
     },
     {
       "InputId": "d99d1e27-caba-4a9a-b689-8c965b9af89e"/*Gradient*/,
@@ -99,6 +105,7 @@
         "Y": 620.70013
       },
       "GroupTitle": "Position and size",
+      "Description": "Shifts the sampled area.",
       "Min": -2.0,
       "Max": 2.0,
       "UseVec2Control": "Position"
@@ -108,14 +115,16 @@
       "Position": {
         "X": 959.666,
         "Y": 973.654
-      }
+      },
+      "Description": "Repeats the gradient outside of Range."
     },
     {
       "InputId": "fd1a7b38-469c-47f0-9bcb-c6df99f49fd4"/*PingPong*/,
       "Position": {
         "X": 959.6659,
         "Y": 938.654
-      }
+      },
+      "Description": "Mirrors the gradient on every repetition."
     }
   ],
   "SymbolChildUis": [

@@ -29,7 +29,7 @@ internal sealed class RtvFromTexture2d : Instance<RtvFromTexture2d>, IStatusProv
             if (texture != null)
             {
                 var maxArraySize = texture.Description.ArraySize;
-                if (arrayIndex > maxArraySize)
+                if (arrayIndex >= maxArraySize)
                 {
                     var message = $"{arrayIndex} exceeds texture array size of {maxArraySize}";
                     Log.Warning(message, SymbolChildId);
@@ -87,7 +87,7 @@ internal sealed class RtvFromTexture2d : Instance<RtvFromTexture2d>, IStatusProv
         catch (Exception e)
         {
             var message = $"Failed to create RenderTextureView: {e.Message}";
-            _lastErrorMessage = null;
+            _lastErrorMessage = message;
             Log.Warning(message, this);
         }
             

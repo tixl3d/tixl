@@ -202,13 +202,11 @@ internal sealed class SampleCPoints : Instance<SampleCPoints>
             // nearly identical: nlerp is fine
             case > 0.9995f:
             {
-                Log.Debug(" Case A " + dot);
                 return Vector3.Normalize(Vector3.Lerp(a, b, t));
             }
             // nearly opposite: rotate a around an arbitrary orthogonal axis
             case < -0.9995f:
             {
-                Log.Debug(" Case B " + dot);
                 var ortho = MathF.Abs(a.X) < 0.1f ? Vector3.UnitX : Vector3.UnitY;
                 var axis = Vector3.Normalize(Vector3.Cross(a, ortho));
                 return RotateAroundAxis(a, axis, MathF.PI * t);

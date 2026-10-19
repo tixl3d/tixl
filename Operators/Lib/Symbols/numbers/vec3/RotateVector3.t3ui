@@ -1,14 +1,15 @@
 {
   "FormatVersion": 3,
   "Id": "ce7c2103-3669-4c7a-ba61-a10428b9d467"/*RotateVector3*/,
-  "Description": "Rotates a vector around an axis.",
+  "Description": "Rotates a vector around an axis and scales it.\n\nSee also: [TransformVec3]",
   "InputUis": [
     {
       "InputId": "351b4e46-397d-41dd-ad89-6ce200e36e2d"/*Axis*/,
       "Position": {
         "X": -200.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Rotation axis; should be normalized."
     },
     {
       "InputId": "56229f73-cbe2-4279-a659-d70d32e0df59"/*VectorA*/,
@@ -23,6 +24,7 @@
         "X": -200.0,
         "Y": 45.0
       },
+      "Description": "Rotation in degrees.",
       "Min": -180.0,
       "Max": 180.0,
       "Format": "{0:0.0}°"

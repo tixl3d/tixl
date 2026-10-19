@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "470db771-c7f2-4c52-8897-d3a9b9fc6a4e"/*GetIntVar*/,
-  "Description": "Reads a variable from the context.\n\nAlso see [GetFloatVar]",
+  "Description": "Reads an int variable from the evaluation context.\n\nThe variable has to be set further right in the graph with [SetIntVar] or [Loop]. If it is not defined, FallbackValue is returned.\n\nSee also: [SetIntVar], [GetFloatVar]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,14 +9,16 @@
       "Position": {
         "X": -200.0,
         "Y": 90.0
-      }
+      },
+      "Description": "None: no logging.\nWarnings: warns once if the variable is undefined.\nChanges: same as Warnings.\nAllUpdates: logs every read and every undefined access."
     },
     {
       "InputId": "c78e0d72-1296-430c-98fb-078cbe2e9596"/*FallbackValue*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Returned if the variable is not defined in the current context."
     },
     {
       "InputId": "d7662b65-f249-4887-a319-dc2cf7d192f2"/*VariableName*/,
@@ -24,6 +26,7 @@
         "X": -200.0,
         "Y": 0.0
       },
+      "Description": "Name of the context variable. The dropdown lists variables currently defined in the context.",
       "Usage": "CustomDropdown"
     }
   ],

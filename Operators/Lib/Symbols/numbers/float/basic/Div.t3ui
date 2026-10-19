@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "15fb88b2-81a1-43b8-97ba-41221293bb07"/*Div*/,
-  "Description": "Divides two float values and outputs the quotient / result as float\n\nAlso see: [Multiply] [Sum] etc.",
+  "Description": "Divides A by B.\n\nIf B is 0, the result is NaN.\n\nAKA: divide, quotient\n\nSee also: [Multiply], [Modulo]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -11,7 +11,7 @@
         "X": 36.0,
         "Y": 334.0
       },
-      "Description": "Value to be divided / dividend"
+      "Description": "Dividend: the value to be divided."
     },
     {
       "InputId": "a79a2f16-7a4e-464d-8af4-3e3029ae853e"/*B*/,
@@ -20,7 +20,7 @@
         "X": 197.0,
         "Y": 328.0
       },
-      "Description": "Value that divides / divisor"
+      "Description": "Divisor: the value A is divided by."
     }
   ],
   "SymbolChildUis": [],

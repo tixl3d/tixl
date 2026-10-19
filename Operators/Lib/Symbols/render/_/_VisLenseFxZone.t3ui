@@ -1,8 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "4f0506ac-6a72-4e35-96f0-0f331d8f6cca"/*_VisLenseFxZone*/,
-  "Description": "",
-  "SymbolTags": "4096",
+  "Description": "Internal helper. Visualizes the lens flare effect zones (inner, edge and matte box) as an animated screen overlay.",
+  "SymbolTags": "4112",
   "InputUis": [
     {
       "InputId": "2aa0b998-c8a0-4017-9002-23bd7b29d042"/*InnerFxZone*/,

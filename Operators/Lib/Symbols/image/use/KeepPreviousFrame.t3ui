@@ -1,14 +1,15 @@
 {
   "FormatVersion": 3,
   "Id": "57c1fe66-d8bc-4ea5-ad25-6986d4c2bba4"/*KeepPreviousFrame*/,
-  "Description": "",
+  "Description": "Keeps a copy of the incoming image so the previous frame can be compared with the current one.\n\nOn each update the incoming texture is copied into one of two internal buffers that are swapped every time. CurrentFrame outputs the latest copy, PreviousFrame the copy from the update before. This is needed for effects that compare successive frames, like [OpticalFlow] or [DetectMotion].",
   "InputUis": [
     {
       "InputId": "9bae6e82-3691-4f1a-82e0-77b3953b7019"/*Keep*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "If disabled, the buffers are not updated and both outputs keep their last textures."
     },
     {
       "InputId": "b304efd5-a8e4-4213-9c85-8f482c55c880"/*ImageA*/,

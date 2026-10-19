@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "ef440c7d-9cbd-49b7-81b6-e1a42c6eda83"/*SampleFieldPoints*/,
-  "Description": "",
+  "Description": "Samples a field at each point position and writes the distance into F1 or F2 of the points.\n\nSee also: [RaymarchPoints], [ApplyVectorField], [SelectPointsWithSDF]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": 949.6838,
         "Y": 1495.406
-      }
+      },
+      "Description": "0: nothing, 1: F1, 2: F2."
     },
     {
       "InputId": "79d8da72-1558-44d2-9a91-a2a123dde2e3"/*Field*/,

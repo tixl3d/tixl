@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "e46b50ce-c84f-46bb-b8e7-dea2a64a1bdc"/*GridPoints*/,
-  "Description": "Creates a buffer of GPU points distributed on a rectangular or hexagonal grid.\n\nTips:\n- Set any of the counts to 1 to create a plane of points.\n- Switch the SizeMode to set if the scaling refers to the padding between the points or the size of the volume.\n\nNeeds a [DrawPoints], [DrawLines] or [DrawMeshAtPoints] or similar in order to become visible.\n\nSimilar: [RadialPoints], [SpherePoints], [PointsOnMesh]",
+  "Description": "Creates a buffer of GPU points distributed on a rectangular or hexagonal grid.\n\nNeeds [DrawPoints], [DrawLines], [DrawMeshAtPoints] or similar in order to become visible.\n\nTips:\n- Set any of the counts to 1 to create a plane of points.\n- Switch the SizeMode to set if the scaling refers to the padding between the points or the size of the volume.\n\nSee also: [RadialPoints], [SpherePoints], [PointsOnMesh], [HexGridPoints]",
   "SymbolTags": "1",
   "InputUis": [
     {

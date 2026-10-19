@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "a0fcf7ed-1f14-4a8b-a57e-99e5b2407b1b"/*SplitString*/,
-  "Description": "Splits a string by the provided separation character. Returns a List<string> that can be parsed with [PickFromStringList].",
+  "Description": "Splits a string at a separator character and returns a string list.\n\nThe list can be used with [PickStringFromList].\n\nSee also: [JoinStringList], [PickStringPart]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -18,6 +18,7 @@
         "X": 0.0,
         "Y": 0.0
       },
+      "Description": "Separator character. Only the first character is used. Empty or \"\\n\" splits into lines.",
       "Usage": "Default"
     }
   ],

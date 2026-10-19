@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "20eee636-7bd4-44e8-8a86-77fe4be1f50b"/*IkChain*/,
-  "Description": "FABRIK inverse kinematic on the GPU. While this operator is still experimental, it works pretty good. Suggestions and help needed.\nUse [Once] to initialize.\n",
+  "Description": "Applies FABRIK inverse kinematics on the GPU so chains of points reach towards target points.\n\nExperimental. Use [Once] to initialize.",
   "SymbolTags": "64",
   "InputUis": [
     {
@@ -43,7 +43,7 @@
         "X": -45.767853,
         "Y": 981.56714
       },
-      "Description": "Targets influence",
+      "Description": "Influence of the targets.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,

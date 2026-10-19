@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "f38311df-d356-4385-8535-96f52a71d53e"/*FlipBool*/,
-  "Description": "Toggles (flips) a boolean between true/false every time it is triggered.\n\nThis is similar to [FlipFlop].",
+  "Description": "Toggles a boolean between true and false every time Trigger changes from false to true.\n\nSee also: [FlipFlop], [ToggleBoolean]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -17,7 +17,8 @@
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "While true, the output is set to DefaultValue."
     },
     {
       "InputId": "ad358d45-0531-4399-a755-c85d5ef01317"/*DefaultValue*/,

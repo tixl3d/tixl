@@ -50,7 +50,7 @@ void main(uint3 i : SV_DispatchThreadID)
 
     uint vertexCount, stride;
     SourceVertices.GetDimensions(vertexCount, stride);
-    if(vertexIndex > vertexCount) {
+    if(vertexIndex >= vertexCount) {
         return;
     }
 

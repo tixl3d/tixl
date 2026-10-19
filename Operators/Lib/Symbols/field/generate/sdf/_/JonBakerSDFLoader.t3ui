@@ -1,50 +1,56 @@
 {
   "FormatVersion": 3,
   "Id": "cea24093-69f0-4905-a695-a0da2e47abc9"/*JonBakerSDFLoader*/,
-  "Description": "SDF code loader\nhttps://jbaker.graphics/writings/DEC.html",
-  "SymbolTags": "1152",
+  "Description": "Internal helper. Loads SDF code snippets from the bundled JSON collections and feeds them into [CustomSDF].\n\nThe snippets are based on the collection at https://jbaker.graphics/writings/DEC.html.",
+  "SymbolTags": "1168",
   "InputUis": [
     {
       "InputId": "033447bc-93c2-4014-a614-579613ca3386"/*A*/,
       "Position": {
         "X": -623.259,
         "Y": -308.50336
-      }
+      },
+      "Description": "Added to the stored A value of the entry."
     },
     {
       "InputId": "0bb61cf3-1ed4-4236-ba5c-8b05f066df0b"/*B*/,
       "Position": {
         "X": -623.259,
         "Y": -263.50336
-      }
+      },
+      "Description": "Added to the stored B value of the entry."
     },
     {
       "InputId": "16b6b3d0-d367-428f-baca-916cce98232b"/*Offset*/,
       "Position": {
         "X": -623.259,
         "Y": -353.50336
-      }
+      },
+      "Description": "Added to the stored offset of the entry."
     },
     {
       "InputId": "66a854bc-0152-4efc-b8e6-155ac2beb982"/*ListSelect*/,
       "Position": {
         "X": -623.259,
         "Y": -473.50336
-      }
+      },
+      "Description": "Selects one of the bundled JSON collections (fractals, composed shapes or primitives)."
     },
     {
       "InputId": "de7e613a-1fb9-4939-b423-a15a6a64c328"/*RowSelect*/,
       "Position": {
         "X": -623.259,
         "Y": -398.50336
-      }
+      },
+      "Description": "Index of the entry in the selected collection."
     },
     {
       "InputId": "ff2623fe-6f91-497b-99db-fa11acbb6257"/*C*/,
       "Position": {
         "X": -623.259,
         "Y": -218.50336
-      }
+      },
+      "Description": "Added to the stored C value of the entry."
     }
   ],
   "SymbolChildUis": [

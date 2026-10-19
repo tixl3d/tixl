@@ -1,14 +1,15 @@
 {
   "FormatVersion": 3,
   "Id": "85b5a198-deb9-4bea-b760-dad211e16ee6"/*AnimInt*/,
-  "Description": "Animates an integer value.",
+  "Description": "Generates a beat-synced integer that counts up in steps.\n\nThe result is the integer part of time × Rate + Phase. With Rate 1 it increments once per bar.\n\nSee also: [AnimBoolean], [AnimValue], [Counter]",
   "InputUis": [
     {
       "InputId": "0d0a2c33-f3bb-4035-8f8d-d01524952b2e"/*Modulo*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "If not 0, the result wraps around to 0 … Modulo-1."
     },
     {
       "InputId": "1bc7d002-1483-48bd-b419-cccfcb38aa2f"/*Rate*/,
@@ -40,7 +41,8 @@
       "Position": {
         "X": -200.0,
         "Y": 90.0
-      }
+      },
+      "Description": "If connected, used instead of the current time."
     }
   ],
   "SymbolChildUis": [],

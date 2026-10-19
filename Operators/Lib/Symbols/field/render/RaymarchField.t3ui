@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "9323e32f-078c-4156-941b-203f4c265ff5"/*RaymarchField*/,
-  "Description": "Renders the connected shader graph SDF.\n\nIt uses the following [SetMaterial], [SetFog] and [PointLight] override. \nIt will correctly initialize the depth buffer so the output can be blended with other geometry like meshes.\n\nPlease check out the examples.\n\nAlso known as DrawField, DrawSDF, DrawRaymarchField, RaymarchSDF",
+  "Description": "Renders an SDF field by raymarching it into the current render target.\n\nThe field is shaded with the PBR material from [SetMaterial] (or colors from [SetSDFMaterial]), and uses the current [SetFog] and [PointLight] settings. With WriteDepth it writes to the depth buffer, so the result intersects correctly with meshes and other geometry.\n\nAKA: DrawField, DrawSDF, RaymarchSDF, raytrace\n\nSee also: [VisualizeFieldDistance], [RaymarchPoints]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": 889.58496,
         "Y": 342.71463
-      }
+      },
+      "Description": "Writes the surface depth so the result can intersect with other geometry."
     },
     {
       "InputId": "0b4d60de-261f-4dbf-ad44-6395cda3a496"/*MinDistance*/,
@@ -28,7 +29,7 @@
         "X": 104.6602,
         "Y": 1175.8185
       },
-      "Description": "A minor factor that can help to reduce edge artifacts for compositing into the scene."
+      "Description": "Blends the edges of the surface into the background to reduce artifacts when compositing."
     },
     {
       "InputId": "3148d927-8779-47ab-9e0a-fa63206f3002"/*MaxSteps*/,
@@ -56,7 +57,7 @@
         "X": 261.91522,
         "Y": 491.31775
       },
-      "Description": "Provides various options to generate UVs for the field."
+      "Description": "Defines how texture coordinates for [SetMaterial] are generated: global or local triplanar, or a planar projection in local space."
     },
     {
       "InputId": "561768f6-adf6-4d3d-a36a-20b6f35ff151"/*StepSize*/,
@@ -74,7 +75,7 @@
         "X": 104.6602,
         "Y": 1070.8182
       },
-      "Description": "Scale texture defined by the [SetMaterial]."
+      "Description": "Scales the texture defined by [SetMaterial]."
     },
     {
       "InputId": "8fc6f727-1eac-42f4-9c4f-525cba1f4bb1"/*SpecularAA*/,
@@ -82,6 +83,7 @@
         "X": 104.66019,
         "Y": 1210.8185
       },
+      "Description": "Increases roughness where normals change quickly to reduce flickering highlights.",
       "Min": 0.0,
       "Max": 5.0,
       "ClampMin": true
@@ -92,7 +94,7 @@
         "X": -486.14932,
         "Y": 794.4215
       },
-      "Description": "A color multiplier. You could also use [SetSDFMaterial] or [SetMaterial] for this."
+      "Description": "Color multiplier. Alternatively use [SetSDFMaterial] or [SetMaterial]."
     },
     {
       "InputId": "adeb374b-bce0-4af2-867b-efb3ce6289c9"/*MaxDistance*/,

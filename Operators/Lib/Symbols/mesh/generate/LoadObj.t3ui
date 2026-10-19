@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "be52b670-9749-4c0d-89f0-d8b101395227"/*LoadObj*/,
-  "Description": "Loads a mesh from an obj. file by generating Vertex and Index buffers which can be rendered with [DrawMesh], [DrawMeshUnlit] and [DrawMeshHatched] among others.\nAll surfaces must have valid UVs, otherwise they will appear black.\n\nFor a more comfortable import of 3d meshes (which also allows the import of already linked materials) use [LoadGltfScene] in combination with [DrawScene].\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToDrawThings].\n\nIt can also become the source for a particle system with [MeshVerticesToPoints] or [PointsOnMesh].\n\nTo generate meshes procedurally with many adjustment options see [CubeMesh], [CylinderMesh], [QuadMesh], [SphereMesh] or [TorusMesh] etc.\n\n",
+  "Description": "Loads a mesh from a Wavefront .obj file.\n\nThe result can be rendered with [DrawMesh], [DrawMeshUnlit], [DrawMeshHatched] and others, or used as a source for points with [MeshVerticesToPoints] or [PointsOnMesh]. All surfaces must have valid UVs, otherwise they appear black. For importing meshes together with their materials use [LoadGltfScene] with [DrawScene].\n\nAKA: import, model, wavefront\n\nSee also: [CubeMesh], [CylinderMesh], [QuadMesh], [SphereMesh], [TorusMesh]\n\nAlso check out the [HowToDrawThings] tutorial.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -11,7 +11,7 @@
         "Y": 46.995968
       },
       "GroupTitle": "Select file",
-      "Description": "Use \"...\" to select a Wavefront .obj file to import",
+      "Description": "Path to the Wavefront .obj file.",
       "Usage": "FilePath",
       "FileFilter": "obj"
     },
@@ -21,7 +21,7 @@
         "X": 51.512096,
         "Y": 136.99597
       },
-      "Description": "Check to sort vertices"
+      "Description": "Sorts the vertex order along an axis, which affects the order of points created with [MeshVerticesToPoints]. Ignore keeps the file order."
     },
     {
       "InputId": "c39a61b3-fb6b-4611-8f13-273f13c9c491"/*ScaleFactor*/,
@@ -30,7 +30,6 @@
         "Y": 181.99597
       },
       "GroupTitle": "Scaling",
-      "Description": "Uniformly scales the loaded mesh",
       "Min": 0.001,
       "Max": 1000.0,
       "Scale": 0.01,
@@ -43,7 +42,7 @@
         "X": 51.512096,
         "Y": 181.99597
       },
-      "Description": "Enable and disable to clear GPU cache"
+      "Description": "While enabled, the shared mesh cache is cleared on every update."
     },
     {
       "InputId": "ffd22736-a600-4c97-a4a4-ad3526b8b35c"/*UseGPUCaching*/,
@@ -52,7 +51,7 @@
         "Y": 91.99597
       },
       "GroupTitle": "Advanced Options...",
-      "Description": "Toggle GPU Caching"
+      "Description": "Shares the loaded mesh between all LoadObj operators using the same file. A cached mesh ignores later changes of ScaleFactor and SortVertices."
     }
   ],
   "SymbolChildUis": [],

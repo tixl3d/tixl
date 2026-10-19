@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "2f851b5b-b66d-40b0-9445-e733dc4b907d"/*Sum*/,
-  "Description": "Allows connecting any amount of floats whose sum is output\n\nAlso see [Add]",
+  "Description": "Outputs the sum of any number of connected float values.\n\nSee also: [Add]",
   "SymbolTags": "1",
   "InputUis": [
     {

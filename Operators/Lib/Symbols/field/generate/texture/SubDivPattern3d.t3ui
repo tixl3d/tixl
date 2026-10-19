@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "f17aba3c-dafc-4cab-9513-ea6bc19bcb15"/*SubDivPattern3d*/,
-  "Description": "Generates a 3D pattern similar to [SubDivisionStretch].",
+  "Description": "Generates a pattern of randomly subdivided rectangles as a color field, similar to [SubdivisionStretch].\n\nThe pattern is computed from the X and Y coordinates only and projected along Z. Connect it to the ColorField of [SetSDFMaterial] or to the FragmentField input of [DrawMesh].\n\nSee also: [Raster3dField]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": -200.0,
         "Y": 375.0
-      }
+      },
+      "Description": "Width of the gaps between the rectangles."
     },
     {
       "InputId": "2d22184f-4b01-47fd-b5df-f7aacb77f023"/*GapColor*/,
@@ -27,7 +28,8 @@
       "Position": {
         "X": -200.0,
         "Y": 225.0
-      }
+      },
+      "Description": "Relative position of each split."
     },
     {
       "InputId": "61663a1b-2476-49ed-a375-cce0a9e6fe03"/*ColorB*/,
@@ -45,7 +47,8 @@
       "Position": {
         "X": -200.0,
         "Y": 525.0
-      }
+      },
+      "Description": "Maximum number of splits per unit cell, clamped to 1..30."
     },
     {
       "InputId": "7a67075a-d63c-4a54-81fe-6510a85a7096"/*RandomSeed*/,
@@ -59,35 +62,40 @@
       "Position": {
         "X": -200.0,
         "Y": 750.0
-      }
+      },
+      "Description": "Probability of a cell to stop splitting early. Higher values give fewer, larger rectangles."
     },
     {
       "InputId": "a820d5ba-5210-4de6-979f-e619aa117dad"/*UseAspectForSplit*/,
       "Position": {
         "X": -200.0,
         "Y": 450.0
-      }
+      },
+      "Description": "If 1, cells tend to be split along their longer side."
     },
     {
       "InputId": "a9dac0aa-51d3-4bcf-b532-1cfddd810675"/*SplitVariation*/,
       "Position": {
         "X": -200.0,
         "Y": 300.0
-      }
+      },
+      "Description": "Random variation of the split position."
     },
     {
       "InputId": "b14a0607-00eb-479f-b50b-50f7f880d496"/*Feather*/,
       "Position": {
         "X": -200.0,
         "Y": 210.0
-      }
+      },
+      "Description": "Softness of the gap edges."
     },
     {
       "InputId": "d1c996e3-0f2c-45ac-9acb-52a13222cb5b"/*ColorMode*/,
       "Position": {
         "X": -200.0,
         "Y": 600.0
-      }
+      },
+      "Description": "0: random blend between ColorA and ColorB per rectangle. Other values: blend by subdivision depth."
     },
     {
       "InputId": "e95cc5a1-3425-457e-b763-18857aba08e3"/*ColorA*/,

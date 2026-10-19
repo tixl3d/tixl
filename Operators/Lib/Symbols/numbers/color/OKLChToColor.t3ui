@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "7547a0f5-eee2-474e-9000-ae81757f624e"/*OKLChToColor*/,
-  "Description": "",
+  "Description": "Creates an RGBA color from OKLCh values.\n\nOKLCh is a perceptual color space: changing the hue keeps the perceived brightness constant, which makes it well suited for color palettes and hue animations.\n\nAKA: oklab, lch\n\nSee also: [HSBToColor], [HSLToColor]",
   "InputUis": [
     {
       "InputId": "0ccf0379-a8f3-439c-a269-918bbfd715b7"/*Brightness*/,
@@ -9,6 +9,7 @@
         "X": 0.0,
         "Y": 0.0
       },
+      "Description": "OKLCh lightness.",
       "Min": 0.0,
       "Max": 2.0
     },
@@ -17,7 +18,8 @@
       "Position": {
         "X": 0.0,
         "Y": 150.0
-      }
+      },
+      "Description": "Multiplies the RGB channels. Values above 1 produce HDR colors."
     },
     {
       "InputId": "67bb3837-3cc3-4bf1-95b8-1a4ffd464fb6"/*UseGamma*/,
@@ -32,6 +34,7 @@
         "X": 0.0,
         "Y": 0.0
       },
+      "Description": "Normalized hue: 0…1 is a full color circle.",
       "Min": 0.0,
       "Max": 1.0
     },
@@ -41,6 +44,7 @@
         "X": 0.0,
         "Y": 0.0
       },
+      "Description": "OKLCh chroma.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,

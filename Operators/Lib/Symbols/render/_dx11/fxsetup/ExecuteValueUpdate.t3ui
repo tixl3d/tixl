@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "4c93c6e6-da4d-4255-a2e1-eca388eb775f"/*ExecuteValueUpdate*/,
-  "Description": "Executes a series of input commands before returning a value..\n\nThis can be relevant for dispatching compute shaders before returning their result.",
+  "Description": "Evaluates the connected commands before returning a value.\n\nThis can be relevant for dispatching compute shaders before returning their result.",
   "InputUis": [
     {
       "InputId": "c0631cfa-c130-4821-af83-20c2945d2fe5"/*InputValue*/,
@@ -24,7 +24,8 @@
       "Position": {
         "X": -200.0,
         "Y": 135.0
-      }
+      },
+      "Description": "If disabled, the commands are not executed and the output keeps its last value."
     }
   ],
   "SymbolChildUis": [],

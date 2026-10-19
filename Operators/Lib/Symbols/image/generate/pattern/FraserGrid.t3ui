@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "b882a5d0-f5ae-40a4-8c42-5b25e5775def"/*FraserGrid*/,
-  "Description": "The basis for the Fräser spiral illusion.\n\nOriginally programmed for [WorksForEverybody]\n\nOther interesting patterns can be generated with [SinForm] [ZollnerPattern] [FraserGrid] [Raster] [CheckerBoard] [RyojiPattern2] [RyojiPattern1]",
+  "Description": "Generates the pattern of the Fraser spiral illusion: rows of tilted shapes on a grid that make concentric circles appear as a spiral.\n\nOriginally programmed for [WorksForEverybody]. The RGB channels of a connected Image can modulate bar width, shape size and line ratio.\n\nAKA: illusion, optical, fraser\n\nSee also: [ZollnerPattern], [Raster], [CheckerBoard], [SinForm]",
   "SymbolTags": "64",
   "InputUis": [
     {

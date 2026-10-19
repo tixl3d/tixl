@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "0a2d0f9f-2737-4f19-9b2e-38348b2ab54e"/*Render2dField*/,
-  "Description": "Renders a 2d color field into a texture.",
+  "Description": "Draws a 2D color field as a full-screen quad into the current render target.\n\nThe field is sampled at the normalized screen coordinates (0..1). Only ColorField is used; the remaining parameters currently have no effect.",
   "SymbolTags": "5120",
   "InputUis": [
     {
@@ -70,7 +70,8 @@
       "Position": {
         "X": 173.22054,
         "Y": 452.033
-      }
+      },
+      "Description": "The color field to draw."
     },
     {
       "InputId": "cff144b3-bb6f-412a-89cf-6ef1b70d4ffd"/*AoDistance*/,

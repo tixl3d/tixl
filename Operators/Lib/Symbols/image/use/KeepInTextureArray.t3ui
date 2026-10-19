@@ -1,14 +1,15 @@
 {
   "FormatVersion": 3,
   "Id": "a783908a-63c2-4961-94ca-b97d17ed0788"/*KeepInTextureArray*/,
-  "Description": "Pick a single \"slice\" from a TextureArray",
+  "Description": "Stores copies of a texture in the slices of a texture array and outputs the array and one selected slice.\n\nWhen TriggerWrite is true, SourceTexture is copied into the slice at WriteIndex. ReadIndex selects the slice that is output as SelectedSlice.\n\nAKA: buffer, history, frames, slices",
   "InputUis": [
     {
       "InputId": "0227dbe2-797b-465d-bc48-fd47f42b6cd9"/*ReadIndex*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Slice that is output as SelectedSlice. Wraps around the array size."
     },
     {
       "InputId": "4cac523c-27bf-4f57-b13f-8d41038c5587"/*SourceTexture*/,
@@ -22,7 +23,8 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Number of slices in the array (1 to 256)."
     },
     {
       "InputId": "c829e9d6-a00f-4a80-8f9a-7c6152aaac01"/*WriteIndex*/,
@@ -36,7 +38,8 @@
       "Position": {
         "X": -200.0,
         "Y": 150.0
-      }
+      },
+      "Description": "While true, the source texture is copied into the slice at WriteIndex."
     }
   ],
   "SymbolChildUis": [],

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "9f43f769-d32a-4f49-92ac-e0be3ba250cf"/*Blend*/,
-  "Description": "Blends two images.\n\nIf you want to cross fade (mix) images, consider using [BlendImages]\n\nAll blend ops and similar: [BlendImages] [Blend] [BlendWithMask] [Combine3Images]",
+  "Description": "Blends one image on top of another with a blend mode like normal, screen or multiply.\n\nTo cross-fade between several images use [BlendImages].\n\nAKA: composite, layer, mix, over, screen, multiply\n\nSee also: [BlendImages], [BlendWithMask], [Combine3Images]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": 403.5539,
         "Y": 183.61325
       },
-      "Description": "A color multiplied onto the background image"
+      "Description": "Color multiplied with ImageA."
     },
     {
       "InputId": "70dc133e-800a-4cd0-a159-2cbab4c322cb"/*ColorB*/,
@@ -18,7 +18,7 @@
         "X": 403.5539,
         "Y": 323.61325
       },
-      "Description": "An optional color multiplied. The alpha channel can be used to fade out the image.\n\nConsider connecting this to a [SampleGradient]."
+      "Description": "Color multiplied with ImageB. Its alpha can be used to fade out the image.\n\nConsider connecting a [SampleGradient]."
     },
     {
       "InputId": "93e63b73-e572-4bb2-bbbd-11bbffad89e7"/*Resolution*/,
@@ -26,7 +26,7 @@
         "X": 543.5539,
         "Y": 603.6133
       },
-      "Description": "The target resolution. Please make sure to check the documentation on how T3 handles resolutions."
+      "Description": "Overrides the output resolution. If 0, the resolution of ImageA is used."
     },
     {
       "InputId": "abaa52e9-7d3d-4ae5-89d2-5251f61e5392"/*ImageA*/,
@@ -35,7 +35,7 @@
         "X": 543.5539,
         "Y": 113.61325
       },
-      "Description": "The background image defining the resolution of the output."
+      "Description": "The background image. Defines the resolution of the output."
     },
     {
       "InputId": "c7c524cf-e31e-4bac-8f77-58bd61b337de"/*ImageB*/,
@@ -70,7 +70,7 @@
         "X": 543.5539,
         "Y": 638.6133
       },
-      "Description": "Generated MipMap levels. Please read the \"Realtime Rendering for Artists\" wiki page for mode details."
+      "Description": "Generates mipmap levels."
     },
     {
       "InputId": "e8923e83-ce48-4b71-a1aa-46b9ff79780b"/*ScaleMode*/,
@@ -86,7 +86,7 @@
         "Y": 463.61325
       },
       "GroupTitle": "Settings",
-      "Description": "Various blending modes for the colors."
+      "Description": "How the colors of ImageB are combined with ImageA."
     }
   ],
   "SymbolChildUis": [

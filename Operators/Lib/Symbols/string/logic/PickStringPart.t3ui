@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "7baaa83d-5c09-42a0-b7bc-35dbcfa5156d"/*PickStringPart*/,
-  "Description": "Gets lines, words, or characters from the input string. Good for typewriter effects, etc.\n\nUseful combinations: [ReadFile] [RequestUrl] [GetAttributeFromJsonString]",
+  "Description": "Gets characters, words, lines or sentences from the input string. Useful for typewriter effects.\n\nThe fragments are joined again with a matching delimiter (none, space, line break or \". \").\n\nSee also: [ReadFile], [RequestUrl], [GetAttributeFromJsonString], [SplitString]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -18,14 +18,16 @@
       "Position": {
         "X": 0.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Characters, Words, Lines or Sentences.\nWords are split at whitespace and punctuation, so punctuation is removed."
     },
     {
       "InputId": "7520db6d-7855-40e1-bb81-ead290815435"/*FragmentCount*/,
       "Position": {
         "X": 0.0,
         "Y": 135.0
-      }
+      },
+      "Description": "Number of fragments to return. Fragments wrap around to the beginning."
     },
     {
       "InputId": "9cb908ad-0800-4b88-b256-c6cc2b84ab6c"/*FragmentStart*/,
@@ -33,7 +35,8 @@
       "Position": {
         "X": 0.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Index of the first fragment. Wraps around the fragment count."
     }
   ],
   "SymbolChildUis": [],

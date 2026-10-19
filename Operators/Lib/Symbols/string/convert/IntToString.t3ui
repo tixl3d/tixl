@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "416a1c8d-4143-4de7-bcf9-466c4009112a"/*IntToString*/,
-  "Description": "Converts an [IntValue] to a string.\n\nTip: You can override the string formatting to something like... \"{0:0} times\" add prefixes or suffixes.",
+  "Description": "Converts an int value to a string.\n\nTips:\n- Override the format with something like \"{0:0} times\" to add prefixes or suffixes.\n\nSee also: [FloatToString]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -17,6 +17,7 @@
         "X": 0.0,
         "Y": 0.0
       },
+      "Description": ".NET composite format string like {0:0.00}. Empty uses the default formatting.",
       "Usage": "Default"
     }
   ],

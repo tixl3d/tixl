@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "d40966c3-2369-40f2-8202-e5c8ab6d9cc0"/*BlurWithMask*/,
-  "Description": "Applying a masked blur can be a very powerful effect for simulating tilt-shift cameras (with [LinearRamp]) or depth of field (with [Blob]). \nIt can also be useful for fade-in transitions.\n\nTips:\n- Also try to apply it with animated patterns like [FractalNoise].\n- Some additional effects can be achieved by increasing .MaskContrast and animating .MaskOffset.\n- MaskContrast of -1 will invert the mask.\n\n",
+  "Description": "Blurs the image with a strength that is controlled by the brightness of a mask image.\n\nBright areas of the Mask are blurred with the full Size, dark areas stay sharp. This can simulate tilt-shift cameras (with [LinearGradient]) or depth of field (with [Blob]). It can also be useful for fade-in transitions.\n\nTips:\n- Also try to apply it with animated patterns like [FractalNoise].\n- Some additional effects can be achieved by increasing MaskContrast and animating MaskOffset.\n- A MaskContrast of -1 inverts the mask.\n\nSee also: [Blur], [DepthOfField]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,6 +10,7 @@
         "X": -614.52454,
         "Y": 272.84418
       },
+      "Description": "Multiplied with the blurred result.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -21,6 +22,7 @@
         "X": -614.52454,
         "Y": 362.84418
       },
+      "Description": "Added to the RGB of the result.",
       "Min": -1.0,
       "Max": 1.0
     },
@@ -30,6 +32,7 @@
         "X": -611.86176,
         "Y": 188.07684
       },
+      "Description": "Number of samples on each side. Higher values are smoother but slower.",
       "Min": 0.0,
       "Max": 100.0,
       "ClampMin": true,
@@ -49,7 +52,8 @@
       "Position": {
         "X": -611.86176,
         "Y": 98.07684
-      }
+      },
+      "Description": "Grayscale image (average of RGB) that scales the blur size per pixel."
     },
     {
       "InputId": "62971a40-08ef-414c-8bb5-31ee050551ea"/*AddOriginal*/,
@@ -57,6 +61,7 @@
         "X": -614.52454,
         "Y": 407.84418
       },
+      "Description": "Adds the original image, weighted by the mask.",
       "Min": -1.0,
       "Max": 1.0
     },
@@ -65,14 +70,16 @@
       "Position": {
         "X": -615.22235,
         "Y": 631.74036
-      }
+      },
+      "Description": "Added to the mask value before clamping to 0..1."
     },
     {
       "InputId": "731eaf1c-aef0-4310-a470-62c0dfeb310a"/*ApplyMaskToAlpha*/,
       "Position": {
         "X": -615.2039,
         "Y": 446.03854
-      }
+      },
+      "Description": "Fades the alpha out in masked areas (1 = alpha becomes 1 - mask)."
     },
     {
       "InputId": "d89ac5e9-9bdd-48f6-8118-3bbe04e3988d"/*MaskContrast*/,
@@ -80,6 +87,7 @@
         "X": -615.22235,
         "Y": 586.74036
       },
+      "Description": "Contrast applied to the mask around 0.5. Negative values invert the mask.",
       "Min": -10.0,
       "Max": 10.0
     },

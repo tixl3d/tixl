@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "697bbc2d-0b2e-4013-bbc3-d58a28a79f31"/*SoftTransformPoints*/,
-  "Description": "Transforms points inside a volume. Experimenting with different FallOff parameters can provide a wide variety of effects.\n\nWe provide the rotation not as three combined Euler angles to allow multiple revolutions.\n\nThis Operator is almost identical to combining [SelectPoints] -> [TransformPoints].",
+  "Description": "Transforms points inside a volume with a soft falloff. Experimenting with different FallOff parameters can provide a wide variety of effects.\n\nThe rotation is not provided as combined Euler angles to allow multiple revolutions. This operator is almost identical to combining [SelectPoints] and [TransformPoints].",
   "SymbolTags": "1",
   "InputUis": [
     {

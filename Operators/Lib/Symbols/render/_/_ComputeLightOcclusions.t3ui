@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "de0e54c3-631b-4a01-a8a7-8cdff2e07e55"/*_ComputeLightOcclusions*/,
-  "Description": "Internal operator that converts GPU data for point light occlusion.",
+  "Description": "Internal helper. Reads back the occlusion value of one point light from a GPU texture.\n\nThe readback is asynchronous, so the result arrives with a delay of a few frames.",
   "SymbolTags": "24",
   "InputUis": [
     {
@@ -10,14 +10,16 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Executed before the texture is read back."
     },
     {
       "InputId": "2869e416-7d0b-4ef5-b25b-5794fd840848"/*LightIndex*/,
       "Position": {
         "X": -200.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Clamped to 0..7."
     },
     {
       "InputId": "d2147f2d-04dd-47aa-8cab-5b588e178a1f"/*InputImage*/,

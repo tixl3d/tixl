@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "8a203866-148d-4785-ae0e-61328b7646bb"/*ChromaticAbberation*/,
-  "Description": "Simulates an imaging error of optical camera lenses that manifests itself as blurring or discoloration at the outer edges.\n\nAlso see [ChromaticDistortion]\n\nUseful Ops for a PostFX Pipeline: [MotionBlur] [DepthOfField] [ChromaticAberration] [Glow] [Grain] [Blur]",
+  "Description": "Simulates the chromatic aberration of camera lenses, which blurs and splits colors towards the outer edges of the image.\n\nAKA: aberration, fringe, rgbsplit, lens\n\nSee also: [ChromaticDistortion], [MotionBlur], [DepthOfField], [Glow], [Grain], [Blur]",
   "SymbolTags": "1",
   "InputUis": [
     {

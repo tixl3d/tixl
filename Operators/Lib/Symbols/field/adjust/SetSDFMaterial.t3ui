@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "88926602-4694-4632-9fd7-04c8d6ddd728"/*SetSDFMaterial*/,
-  "Description": "Injects a Color provider into the shader graph. \n\nThere can be multiple colors which can be mixed with [CombineSDF]",
+  "Description": "Sets the color of an SDF, either with a constant color or with a connected color field.\n\nColors of several fields are blended when they are combined with [CombineSDF]. [RaymarchField] uses this color as albedo.\n\nSee also: [Raster3dField], [SDFToColor]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -17,7 +17,8 @@
       "Position": {
         "X": -200.0,
         "Y": 75.0
-      }
+      },
+      "Description": "Optional color field such as [Raster3dField] that defines the color per position."
     },
     {
       "InputId": "d2a64234-c7ef-424b-822c-addce0b84e69"/*Color*/,
@@ -25,6 +26,7 @@
         "X": -200.0,
         "Y": 150.0
       },
+      "Description": "Albedo color. If a ColorField is connected, its color is multiplied with this.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,

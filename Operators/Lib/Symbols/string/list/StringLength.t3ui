@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "4c496e8d-2a83-4493-a7a4-fdad29ef3f7d"/*StringLength*/,
-  "Description": "Counts the characters in a string and outputs the amount as a float",
+  "Description": "Returns the number of characters in a string as an int.",
   "SymbolTags": "1",
   "InputUis": [
     {

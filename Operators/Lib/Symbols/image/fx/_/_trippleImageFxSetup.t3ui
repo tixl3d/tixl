@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "5b999887-19df-4e91-9f58-1df2d8f1440b"/*_trippleImageFxSetup*/,
-  "Description": "Combining 3 images...",
+  "Description": "Internal helper. Renders a fullscreen pixel shader with three input images and the given float parameters.",
   "SymbolTags": "16",
   "InputUis": [
     {

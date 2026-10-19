@@ -10,6 +10,7 @@
         "X": -200.0,
         "Y": 180.0
       },
+      "Description": "A hit is detected when the windowed level rises above this value.",
       "Min": 0.01,
       "Max": 3.0,
       "ClampMin": true,
@@ -20,7 +21,8 @@
       "Position": {
         "X": -200.0,
         "Y": 405.0
-      }
+      },
+      "Description": "Exponent applied to Pulse, TimeSinceHit and Level outputs."
     },
     {
       "InputId": "1d3a1132-e8b9-4c04-99bf-80f6f1530309"/*WindowWidth*/,
@@ -28,6 +30,7 @@
         "X": -200.0,
         "Y": 135.0
       },
+      "Description": "Normalized width (0..1) of the window's flat center.",
       "Min": 0.01,
       "Max": 1.0,
       "ClampMin": true,
@@ -39,7 +42,8 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "GroupTitle": "Input"
+      "GroupTitle": "Input",
+      "Description": "Analysis data the window is applied to.\nRawFft: FFT gain.\nNormalizedFft: normalized FFT.\nFrequencyBands: frequency band levels.\nFrequencyBandsPeaks: band peaks.\nFrequencyBandsAttacks: band attacks, good for detecting beats."
     },
     {
       "InputId": "80294096-ae64-471a-bcf1-622684e06d56"/*Output*/,
@@ -47,14 +51,16 @@
         "X": -200.0,
         "Y": 225.0
       },
-      "GroupTitle": "Output"
+      "GroupTitle": "Output",
+      "Description": "Pulse: 1 at a hit, fading to 0 within one bar.\nTimeSinceHit: time in bars since the last hit.\nCount: number of hits since reset.\nLevel: the windowed level.\nAccumulatedLevel: steadily increasing sum of the level, useful for driving speed."
     },
     {
       "InputId": "9f56d158-101d-4fbc-bc63-a67b9e923dbd"/*Source*/,
       "Position": {
         "X": -200.0,
         "Y": 345.0
-      }
+      },
+      "Description": "Optional audio sources to analyze instead of the final mix. Route Result into an [AudioBus]."
     },
     {
       "InputId": "aece14b8-88e0-4817-8204-b79159db8102"/*MinTimeBetweenHits*/,
@@ -62,6 +68,7 @@
         "X": -200.0,
         "Y": 405.0
       },
+      "Description": "Minimum time in bars between two detected hits.",
       "Min": 0.001,
       "Max": 100.0,
       "ClampMin": true,
@@ -72,14 +79,16 @@
       "Position": {
         "X": -200.0,
         "Y": 360.0
-      }
+      },
+      "Description": "Multiplier for the output value."
     },
     {
       "InputId": "d138c961-b163-428a-9479-2130f1e46314"/*Reset*/,
       "Position": {
         "X": -200.0,
         "Y": 270.0
-      }
+      },
+      "Description": "Resets Count and AccumulatedLevel."
     },
     {
       "InputId": "f3d7c7fd-4280-4fb4-9f9a-c39b28d1a72b"/*WindowCenter*/,
@@ -87,6 +96,7 @@
         "X": -200.0,
         "Y": 45.0
       },
+      "Description": "Normalized position (0..1) of the analyzed frequency window across the bins.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -98,6 +108,7 @@
         "X": -200.0,
         "Y": 90.0
       },
+      "Description": "Normalized width of the soft falloff at both sides of the window.",
       "Min": 0.01,
       "Max": 1.0,
       "ClampMin": true,

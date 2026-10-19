@@ -1,28 +1,31 @@
 {
   "FormatVersion": 3,
   "Id": "02aed181-4bf1-48f8-ac2a-93d66c170c0c"/*EaseKeys*/,
-  "Description": "This operator creates smooth, ease-in-out transitions by overriding the easing of keyframes. Customize the transition style with options like cubic, exponential, or back easing, or choose a linear fallback for a simple interpolation. \nConstant interpolation can be achieved by setting the keyframe type to Constant.[EaseVec2Keys] [EaseVec3Keys]",
+  "Description": "Overrides the interpolation between keyframes with an easing curve.\n\nThe Value input must be animated with keyframes. Between each pair of keyframes the output follows the selected easing curve instead of the curve's own interpolation. Keyframes with Constant interpolation keep their constant value.\n\nSee also: [Ease], [EaseVec2Keys], [EaseVec3Keys]",
   "InputUis": [
     {
       "InputId": "375b49e7-bc67-46cf-a687-2cad66e6fd76"/*Interpolation*/,
       "Position": {
         "X": 36.0,
         "Y": 514.0
-      }
+      },
+      "Description": "Shape of the easing curve."
     },
     {
       "InputId": "73c822ca-560c-4e86-b4ff-0ae722d7a371"/*Value*/,
       "Position": {
         "X": 36.0,
         "Y": 334.0
-      }
+      },
+      "Description": "Animate this parameter with keyframes. Without animation the value is passed through."
     },
     {
       "InputId": "ca4739a7-be8b-4e65-bbcf-593772bd0c5d"/*Direction*/,
       "Position": {
         "X": 36.0,
         "Y": 604.0
-      }
+      },
+      "Description": "Which end of each segment is eased: In, Out or InOut."
     }
   ],
   "SymbolChildUis": [],

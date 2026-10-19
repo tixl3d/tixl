@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "9a90890f-f5e2-4f96-9d6d-f5229f8b7531"/*IntListLength*/,
-  "Description": "Returns the number of elements in the connected int list.",
+  "Description": "Returns the number of elements in the connected int list.\n\nReturns 0 if nothing is connected.",
   "InputUis": [
     {
       "InputId": "6acfd752-dbf6-409c-99a5-25fb684fe830"/*Input*/,

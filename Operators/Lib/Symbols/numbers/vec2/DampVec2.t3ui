@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "fb801f10-8f84-4f69-9f7e-66cc7f6b7878"/*DampVec2*/,
-  "Description": "Smooths the incoming Vector2.",
+  "Description": "Damps (smooths) an incoming Vector2 over time.\n\nSee also: [DampVec3], [Damp], [SpringVec2], [EaseVec2]",
   "InputUis": [
     {
       "InputId": "dc4a8e1c-9399-4e06-a3d8-168839085f02"/*Damping*/,
@@ -19,7 +19,8 @@
       "Position": {
         "X": 36.0,
         "Y": 424.0
-      }
+      },
+      "Description": "LinearInterpolation: blends toward the target by Damping per frame. 0 means no damping; 1 freezes the value.\n\nDampedSpring: critically damped spring that never overshoots."
     },
     {
       "InputId": "e5d132e7-018e-4b37-a49b-8274ac988311"/*Value*/,

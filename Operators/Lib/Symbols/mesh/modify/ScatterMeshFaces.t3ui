@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "daacabd8-0338-4998-898f-94580abd8eac"/*ScatterMeshFaces*/,
-  "Description": "This op is similar to [DisplaceMesh]. However, it uses face centers instead of the vertices to \"scatter\" a mesh while keeping the size of the individual faces.\n\nPlease note that this effect works best with flat shader meshes created by [SplitMeshVertices], because this operator will generate artifacts for meshes that use shared vertices.\n",
+  "Description": "Moves, rotates and shrinks the individual faces of a mesh around their centers.\n\nSimilar to [DisplaceMesh], but it transforms whole faces instead of vertices, so the faces keep their shape. It works best on meshes without shared vertices, e.g. after [SplitMeshVertices]; with shared vertices neighboring faces pull on each other and create artifacts.\n\nAKA: explode, shatter, disintegrate\n\nSee also: [SplitMeshVertices], [SelectVertices]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": 425.65536,
         "Y": 1273.7155
-      }
+      },
+      "Description": "Moves through the noise; can be animated."
     },
     {
       "InputId": "46dbd416-53ab-4efc-bfe0-5e82e98db3b6"/*Rotate*/,
@@ -17,6 +18,7 @@
         "X": 425.65536,
         "Y": 1028.7155
       },
+      "Description": "Random rotation of each face around its center.",
       "Scale": 1.0
     },
     {
@@ -24,14 +26,16 @@
       "Position": {
         "X": 425.65536,
         "Y": 1063.7155
-      }
+      },
+      "Description": "Moves all faces along the direction."
     },
     {
       "InputId": "77c28c83-7592-4ab3-b7ca-d64a176965b1"/*Shrink*/,
       "Position": {
         "X": 425.65536,
         "Y": 1098.7155
-      }
+      },
+      "Description": "Scales the faces towards their centers. 1 collapses them."
     },
     {
       "InputId": "80778578-bdcc-469f-bae2-23f5d496f3cb"/*UseVertexSelection*/,
@@ -39,6 +43,7 @@
         "X": 285.65536,
         "Y": 1343.7155
       },
+      "Description": "Weights the effect per face by the average selection of its vertices, e.g. from [SelectVertices].",
       "AddPadding": "True"
     },
     {
@@ -46,7 +51,8 @@
       "Position": {
         "X": 425.65536,
         "Y": 1308.7155
-      }
+      },
+      "Description": "Random noise offset per face."
     },
     {
       "InputId": "95162eb0-c762-4370-8ae0-8fe8c05247fe"/*NoiseAmount*/,
@@ -54,14 +60,16 @@
         "X": 425.65536,
         "Y": 1203.7155
       },
-      "GroupTitle": "Noise"
+      "GroupTitle": "Noise",
+      "Description": "Amount of the noise added to the direction."
     },
     {
       "InputId": "9ed2888a-b2f9-4d7d-bd6f-804459e23da2"/*AmountDistribution*/,
       "Position": {
         "X": 285.65536,
         "Y": 1378.7155
-      }
+      },
+      "Description": "Scales the noise per axis."
     },
     {
       "InputId": "a795f91b-75e7-4b95-a8c7-28cbbe17fc04"/*Direction*/,
@@ -69,7 +77,8 @@
         "X": 285.65536,
         "Y": 958.71545
       },
-      "GroupTitle": "Scatter Settings"
+      "GroupTitle": "Scatter Settings",
+      "Description": "Direction in which the faces are moved.\n\nSurface: along the face normal, offset by the noise.\nNoise: along the noise vector.\nCenter: away from the mesh origin."
     },
     {
       "InputId": "cb0e3b52-fc4f-429b-a3c0-48138defcfe5"/*NoiseFrequency*/,
@@ -83,7 +92,8 @@
       "Position": {
         "X": 425.65536,
         "Y": 1168.7155
-      }
+      },
+      "Description": "Moves the vertices of each face by random amounts along the direction, which distorts the faces."
     },
     {
       "InputId": "d2ca131d-1bab-47ce-b0e7-382c61d6a176"/*InputMesh*/,
@@ -98,6 +108,7 @@
         "X": 425.65536,
         "Y": 993.71545
       },
+      "Description": "Overall strength of all effects.",
       "AddPadding": "True"
     },
     {
@@ -105,7 +116,8 @@
       "Position": {
         "X": 425.65536,
         "Y": 1133.7155
-      }
+      },
+      "Description": "Moves each face by a random distance along the direction."
     }
   ],
   "SymbolChildUis": [

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "613507c8-fe54-40b0-8434-d0c4b4f59b45"/*MakeTileableImageAdvanced*/,
-  "Description": "Makes an incoming image tileable based on linear edge falloff combined with a tweakable noise pattern that can also be animated.\nUseful to avoid visible repetitive patterns that can happen with the similar and simpler [MakeTileableImage].\n",
+  "Description": "Makes an image tileable by blending its edges with the opposite side using a linear falloff combined with an adjustable noise pattern.\n\nThe noise breaks up the straight transition that can be visible with the simpler [MakeTileableImage].\n\nAKA: seamless, tile, wrap\n\nSee also: [MakeTileableImage], [TileableNoise]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -11,7 +11,7 @@
         "Y": -22.297333
       },
       "GroupTitle": "NoiseTransition",
-      "Description": "Enables / disables a noise pattern in the transition"
+      "Description": "Adds a noise pattern to the transition."
     },
     {
       "InputId": "6f33e428-982f-4279-8b2b-0c8c2404c04d"/*FadeOut*/,
@@ -19,7 +19,7 @@
         "X": -1198.5454,
         "Y": 22.702667
       },
-      "Description": "Defines the subtlety / how intense the noise pattern is shown in the tiling.",
+      "Description": "Intensity of the noise pattern in the transition.",
       "AddPadding": "True",
       "Min": 0.0,
       "Max": 0.9,
@@ -33,7 +33,7 @@
         "X": -1198.5454,
         "Y": -112.29733
       },
-      "Description": "Defines the size / length of the transition",
+      "Description": "Size of the blended transition at the edges.",
       "Min": 0.0,
       "Max": 1.0,
       "Scale": 0.01,
@@ -46,7 +46,7 @@
         "X": -1198.5454,
         "Y": 112.70267
       },
-      "Description": "Can be used to randomly change the noise pattern.\nCan also be animated (for example with [Time]...)",
+      "Description": "Changes the noise pattern. Can be animated, for example with [Time].",
       "AddPadding": "True"
     },
     {
@@ -55,7 +55,7 @@
         "X": -1198.5454,
         "Y": 67.70267
       },
-      "Description": "Defines the size of the noise pattern",
+      "Description": "Size of the noise pattern.",
       "Min": 0.001,
       "Max": 1.0,
       "Scale": 0.01,
@@ -75,7 +75,7 @@
         "X": -1198.5454,
         "Y": -67.29733
       },
-      "Description": "Defines how the image is tiled:\n\n0 = No Tiling\n1 = horizontal tiling only\n2 = vertical tiling only\n3 = vertical and horizontal tiling"
+      "Description": "0: no tiling\n1: horizontal tiling only\n2: vertical tiling only\n3: horizontal and vertical tiling"
     }
   ],
   "SymbolChildUis": [

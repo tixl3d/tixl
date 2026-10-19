@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "5914f00f-6600-42a2-bbd5-4201053058ec"/*GetLightPosition*/,
-  "Description": "Returns the light position with the given index in world space.",
+  "Description": "Returns position (in world space), range, color and intensity of the point light with the given index.\n\nLightCount returns the number of point lights in the current context. If there are no lights, the other outputs keep their previous values.",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Clamped to the range of available lights."
     }
   ],
   "SymbolChildUis": [],

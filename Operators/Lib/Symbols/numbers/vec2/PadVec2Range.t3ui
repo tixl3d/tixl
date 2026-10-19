@@ -1,35 +1,39 @@
 {
   "FormatVersion": 3,
   "Id": "5454ce3e-8dc4-4058-9a17-6300d51c142f"/*PadVec2Range*/,
-  "Description": "Pad (aka extend) a value range (x=min and y=max).\nThis can be useful for adding \"space\" for value outputs.\n",
+  "Description": "Extends a value range given as a Vector2 (X = min, Y = max) around its center.\n\nThis can be useful for adding space around the value range of plotted outputs.",
   "InputUis": [
     {
       "InputId": "5b56faab-7a94-4026-8089-a80db8ff2d9e"/*UniformScale*/,
       "Position": {
         "X": -200.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Scales the range around its center."
     },
     {
       "InputId": "ae2368fa-e36c-40b2-b6f2-94d5cc95d3e2"/*A*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Range to pad, X = min, Y = max."
     },
     {
       "InputId": "d7dcbc7a-146d-42f0-84b1-a7d42f662487"/*ClampMinExtend*/,
       "Position": {
         "X": -200.0,
         "Y": 240.0
-      }
+      },
+      "Description": "Minimum distance of min and max from the center."
     },
     {
       "InputId": "e7307b14-2702-4222-9dd6-7c39dc6dab8e"/*GuaranteedRange*/,
       "Position": {
         "X": -200.0,
         "Y": 165.0
-      }
+      },
+      "Description": "If not (0, 0), the range is extended to include this range."
     }
   ],
   "SymbolChildUis": [],

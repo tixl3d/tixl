@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "67f21840-dc9a-4390-aa45-234ce81c8717"/*CylinderSDF*/,
-  "Description": "Generates a procedural cylinder field with rounded edges which can be rendered with [RaymarchField] and visualized with [VisualizeFieldDistance].\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToRaymarchField].\n\nIt can be modified with [BendField], [TransformField], [PolarRepeat] and more.\n\nSimilar nodes: [BoxSDF], [ChainLinkSDF], [FractalSDF].\n\nTo use a Mesh made of polygons refer to [CylinderMesh].",
+  "Description": "Generates a cylinder with optionally rounded edges as an SDF.\n\nRender the result with [RaymarchField] and inspect it with [VisualizeFieldDistance]. Modify it with [TransformField], [BendField], [RepeatPolar] and other field operators.\n\nSee also: [PrismSDF], [CapsuleLineSDF], [CylinderMesh]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": -200.0,
         "Y": 45.0
       },
-      "Description": "Defines the thickness / radius of the cylinder",
+      "Description": "Radius of the cylinder.",
       "AddPadding": "True"
     },
     {
@@ -20,15 +20,14 @@
         "Y": 0.0
       },
       "GroupTitle": "Shader Variations",
-      "Description": "Defines the axis along which the field is aligned"
+      "Description": "Axis along which the cylinder is aligned."
     },
     {
       "InputId": "29d6303f-34ba-4e1e-a910-3366104e26e3"/*Center*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      },
-      "Description": "Transforms the center of the object"
+      }
     },
     {
       "InputId": "8780e976-ae85-43fb-a822-def6ea21b407"/*Height*/,
@@ -36,7 +35,7 @@
         "X": -200.0,
         "Y": 45.0
       },
-      "Description": "Defines the height of the cylinder"
+      "Description": "Total height of the cylinder."
     },
     {
       "InputId": "c409c9a7-5c45-47f7-a49e-2b0fadcf7892"/*Rounding*/,
@@ -44,7 +43,7 @@
         "X": -200.0,
         "Y": 45.0
       },
-      "Description": "Defines how much the edge of the cylinder is rounded / beveled"
+      "Description": "Radius of the rounded edges."
     }
   ],
   "SymbolChildUis": [],

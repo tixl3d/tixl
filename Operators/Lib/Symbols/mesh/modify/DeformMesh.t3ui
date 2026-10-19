@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "a8fd7522-7874-4411-ad8d-b2e7a20bc4ac"/*DeformMesh*/,
-  "Description": "Spherize, Taper and Twist. It works better if your mesh has a high density of vertices.\n(such as a [CubeMesh] with 64 segments on each axis, for example)",
+  "Description": "Deforms a mesh with spherize, taper and twist effects.\n\nThe effects are applied in that order. Smooth results require a densely subdivided mesh, e.g. a [CubeMesh] with 64 segments per axis. Normals are not updated; use [RecomputeNormals] afterwards for correct shading.\n\nAKA: bend, spherify, twist, taper\n\nSee also: [TransformMesh], [DisplaceMesh]",
   "SymbolTags": "64",
   "InputUis": [
     {
@@ -10,28 +10,32 @@
         "X": 406.76312,
         "Y": 1218.147
       },
-      "GroupTitle": "Taper "
+      "GroupTitle": "Taper ",
+      "Description": "Overall taper amount. The scale changes linearly with the distance along TaperAxis."
     },
     {
       "InputId": "161f293c-1d7f-4543-befe-0b4bd676483a"/*Radius*/,
       "Position": {
         "X": 406.76312,
         "Y": 1183.147
-      }
+      },
+      "Description": "Radius of the spherize target sphere."
     },
     {
       "InputId": "3af8bfb8-a2d8-4919-98f5-5431798d927a"/*UseVertexSelection*/,
       "Position": {
         "X": 266.76312,
         "Y": 1113.147
-      }
+      },
+      "Description": "Weights all effects by the vertex selection, e.g. from [SelectVertices]."
     },
     {
       "InputId": "408f6526-8fef-41b9-8de6-a20ae81a2037"/*AmountPerAxis*/,
       "Position": {
         "X": 266.76312,
         "Y": 1673.147
-      }
+      },
+      "Description": "Taper factors for the two axes perpendicular to TaperAxis."
     },
     {
       "InputId": "6323532f-f548-4faa-9c21-826ee4d44090"/*TwistPivot*/,
@@ -39,14 +43,15 @@
         "X": -43.32721,
         "Y": 1886.6138
       },
-      "Description": "Blue cross, origin of twist deformation"
+      "Description": "Origin of the twist."
     },
     {
       "InputId": "a53aad5d-7bc5-4cbb-8a59-90cf8c346992"/*TaperAxis*/,
       "Position": {
         "X": 266.76312,
         "Y": 1288.147
-      }
+      },
+      "Description": "Axis along which the mesh is tapered."
     },
     {
       "InputId": "aa003a1b-929d-4776-b816-608771242177"/*ShowPivots*/,
@@ -54,7 +59,8 @@
         "X": 1117.6637,
         "Y": 1681.0876
       },
-      "GroupTitle": "Obsolete"
+      "GroupTitle": "Obsolete",
+      "Description": "Obsolete. Has no effect."
     },
     {
       "InputId": "b3593825-1ff5-4a5f-86cb-379a23471a4d"/*Mesh*/,
@@ -71,6 +77,7 @@
         "Y": 1253.147
       },
       "GroupTitle": "Twist",
+      "Description": "Twist angle in degrees per unit along TwistAxis.",
       "Min": -180.0,
       "Max": 180.0,
       "Format": "{0:0.0}°"
@@ -81,7 +88,7 @@
         "X": -43.327206,
         "Y": 1809.0547
       },
-      "Description": "Pink cross, center of Spherize"
+      "Description": "Center of the spherize effect."
     },
     {
       "InputId": "ebf1167b-1519-4ca9-bfa6-87472889966b"/*TwistAxis*/,
@@ -89,6 +96,7 @@
         "X": 266.76312,
         "Y": 1323.147
       },
+      "Description": "Axis around which the mesh is twisted.",
       "Min": 0,
       "Max": 2,
       "ClampMin": true,
@@ -100,7 +108,8 @@
         "X": 406.76312,
         "Y": 1148.147
       },
-      "GroupTitle": "Spherize"
+      "GroupTitle": "Spherize",
+      "Description": "Blends the vertices towards a sphere with the given Radius. 1 creates a sphere."
     }
   ],
   "SymbolChildUis": [

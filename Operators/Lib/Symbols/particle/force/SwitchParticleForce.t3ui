@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "87f68a6d-e13d-49b7-ab0c-c24c0cefd453"/*SwitchParticleForce*/,
-  "Description": "Switches between connected forces for the ParticleSystem. Can be used to switch between forces or deactivate all.\nThe index starts with 0 for the first input and will wrap on values exceeding the count of connected inputs.\n\nTip: \n- use index -1 to activate none (i.e. disable all)\n- use index -2 to activate all\n\nIs used with [ParticleSystem] and any force such as [AxisStepForce], [TurbulenceForce] etc.",
+  "Description": "Passes one of the connected particle forces to the [ParticleSystem], selected by Index.\n\nThe index starts with 0 for the first input and wraps around the number of connected inputs. Negative values wrap as well, except -1, which keeps the previously selected force.\n\nAKA: select, pick\n\nSee also: [ParticleSystem], [AxisStepForce], [TurbulenceForce]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -19,7 +19,7 @@
         "Y": 45.0
       },
       "GroupTitle": "Switch",
-      "Description": "Defines which of the incoming Forces is active\n-1 disables all forces\n-2 activates all forces"
+      "Description": "Index of the active force. Wraps around the number of connections; -1 keeps the previous selection."
     }
   ],
   "SymbolChildUis": [],

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "ffed6f9e-2495-4cf3-9cda-740ecec75d10"/*__ObsoletePulsate*/,
-  "Description": "This operator has been deprecated.\n\nPlease consider using [AnimValue] or [TriggerAnim].",
+  "Description": "Obsolete. Use [AnimValue] or [TriggerAnim] instead.",
   "SymbolTags": "4096",
   "InputUis": [
     {

@@ -69,7 +69,7 @@
         "X": -200.0,
         "Y": 600.0
       },
-      "Description": "If enabled, prints sent data and status information to the T3 log. Useful for debugging."
+      "Description": "If enabled, prints sent data and status information to the TiXL log. Useful for debugging."
     },
     {
       "InputId": "c7ac22c0-a31e-41f6-b29d-d40956e6688b"/*SendTrigger*/,

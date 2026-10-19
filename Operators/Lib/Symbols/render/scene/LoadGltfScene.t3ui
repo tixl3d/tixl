@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "00618c91-f39a-44ea-b9d8-175c996460dc"/*LoadGltfScene*/,
-  "Description": "Experimental op for loading complex scene setups using the glTF Format. Scenes have to be connected to a [DrawScene]-Op to be rendered.\nThis Operator supports *.glb and *.gltf + .bin + textures.\n\n\n\n\n\n\n\nAlso see [HowToDrawThings] ",
+  "Description": "Loads a scene with meshes, materials, transforms, skeletons and animations from a glTF file.\n\nSupports .glb files as well as .gltf files with their .bin and texture files. Connect the ResultSetup output to [DrawScene] to render it. The Mesh and Material outputs provide a single child selected by MeshChildIndex, e.g. for [DrawMesh]. Rigged and animated models can be used with [SampleGltfAnimation], [PoseToSkinMatrices] and [SkinMesh].\n\nAKA: gltf, glb, model, import, scene\n\nSee also: [DrawScene], [LoadObj]\n\nAlso check out the [HowToDrawThings] tutorial.",
   "SymbolTags": "72",
   "InputUis": [
     {
@@ -11,6 +11,7 @@
         "Y": 46.995968
       },
       "GroupTitle": "Gltf Scene",
+      "Description": "Path to a .glb or .gltf file.",
       "Usage": "FilePath",
       "FileFilter": "gltf, glb"
     },
@@ -28,14 +29,16 @@
         "X": 51.512096,
         "Y": 451.99597
       },
-      "GroupTitle": "Settings"
+      "GroupTitle": "Settings",
+      "Description": "Merges all meshes of the scene into one combined buffer with chunks."
     },
     {
       "InputId": "d02f41a6-1a6b-4a6e-8d6c-a28873c79f2c"/*Setup*/,
       "Position": {
         "X": 51.512096,
         "Y": 226.99597
-      }
+      },
+      "Description": "Stores the scene setup loaded from the file. Usually not connected."
     },
     {
       "InputId": "d7ae3173-c490-47cf-8d4b-4c25102f6904"/*OffsetRoughness*/,
@@ -51,7 +54,8 @@
       "Position": {
         "X": 51.512096,
         "Y": 271.99597
-      }
+      },
+      "Description": "Reloads the file."
     },
     {
       "InputId": "fb325383-754a-4702-aff2-c19e16363460"/*MeshChildIndex*/,

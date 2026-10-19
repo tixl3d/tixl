@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "b7345438-f3f4-4ad3-9c57-6076ed0e9399"/*PrepareSvgLineTransition*/,
-  "Description": "This will iterate over the length of all line segments and compute offsets into W.\nDrawLines can then use this offset for animation effects.\n\nSpread:\n0 - ",
+  "Description": "Writes a normalized progress offset into the F1 attribute of each line point so that line strokes (e.g. from [LoadSvg]) can be drawn in sequence.\n\nIt measures all strokes (lines separated by separators) and distributes their start and end across 0...1. [DrawLines] can then use F1 to animate the drawing of the strokes. Strokes need at least two points and there must be at least two strokes. Outputs the number of strokes as StrokeCount.\n\nSee also: [LoadSvg], [LineTextPoints]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,14 +9,16 @@
       "Position": {
         "X": -200.0,
         "Y": 180.0
-      }
+      },
+      "Description": "Blends each stroke duration towards a random duration (0...1)."
     },
     {
       "InputId": "5fd5eea5-b7ab-406f-8c10-8435d59297b5"/*Spread*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "0: all strokes are drawn simultaneously.\n1: strokes are drawn one after another."
     },
     {
       "InputId": "82b2e8d3-40c2-4a4c-a9ad-806d5097a8fd"/*SourcePoints*/,
@@ -30,14 +32,16 @@
       "Position": {
         "X": -200.0,
         "Y": 135.0
-      }
+      },
+      "Description": "Blends each stroke start time towards a random time (0...1)."
     },
     {
       "InputId": "c1fa1a4e-8884-4a6f-ac80-f22d3b5dfe2f"/*SpreadMode*/,
       "Position": {
         "X": -200.0,
         "Y": 90.0
-      }
+      },
+      "Description": "IgnoreStrokeLengths: every stroke gets the same duration.\nUseStrokeLength: stroke durations depend on their length.\nWeird: experimental."
     }
   ],
   "SymbolChildUis": [],

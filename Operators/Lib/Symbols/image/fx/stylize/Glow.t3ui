@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "d392d4af-4c78-4f4a-bc3f-4c54c8c73538"/*Glow*/,
-  "Description": "Adds a glow effect to the incoming image. It uses multiple resolution passes and is reasonably fast.\nYou can use the Offset parameter as a threshold for 'glowing' content.\n\nBetter alternative: [Bloom]\n\n\nUseful Ops for a PostFX Pipeline: [MotionBlur] [DepthOfField] [ChromaticAbberation] [Glow] [Grain] [Blur]",
+  "Description": "Adds a glow to the incoming image using several blurred passes at reduced resolutions.\n\nUse Threshold to limit the glow to bright content. [Bloom] is a faster and more versatile alternative.\n\nAKA: glare, halo, bloom\n\nSee also: [Bloom], [MotionBlur], [DepthOfField], [ChromaticAbberation], [Grain], [Blur]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -33,7 +33,7 @@
         "X": -650.3265,
         "Y": 934.8617
       },
-      "Description": "Controls the intensity of the bloom effect.",
+      "Description": "Controls the intensity of the glow.",
       "AddPadding": "True",
       "Min": 0.1,
       "Max": 1.0,
@@ -79,7 +79,7 @@
         "X": -645.9177,
         "Y": 1073.3584
       },
-      "Description": "Colorizes the Bloom effect.",
+      "Description": "Colorizes the glow.",
       "AddPadding": "True",
       "Min": 0.0,
       "Max": 1.0,

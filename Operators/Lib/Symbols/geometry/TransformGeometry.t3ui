@@ -30,14 +30,16 @@
       "Position": {
         "X": 0.0,
         "Y": 180.0
-      }
+      },
+      "Description": "Multiplies Scale."
     },
     {
       "InputId": "b478cdd9-14c5-486b-be7b-4c70bd8f667c"/*Rotation*/,
       "Position": {
         "X": 0.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Rotation in degrees around X, Y and Z."
     }
   ],
   "SymbolChildUis": [],

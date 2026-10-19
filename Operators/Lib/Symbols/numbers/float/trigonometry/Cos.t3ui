@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "61c70843-08ea-4249-ba90-9971493e45d1"/*Cos*/,
-  "Description": "Creates a cosine wave also known as cosinusoidal wave or cosinusoid.\n\nUseful combinations: [Time] as an input\n\nAlternative with featuring more options: [Sin] \n\nAlso see: [AnimValue] [SampleCurve]",
+  "Description": "Computes the cosine of the input in radians.\n\nConnect [Time] to create a cosine wave.\n\nAKA: cosine, wave, oscillate\n\nSee also: [Sin] (more options), [AnimValue], [SampleCurve]",
   "SymbolTags": "9",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": -1.6261063,
         "Y": -30.431416
       },
-      "Description": "Input value\nExample: [Time]"
+      "Description": "Angle in radians, e.g. from [Time]."
     }
   ],
   "SymbolChildUis": [],

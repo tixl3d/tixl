@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "8f4ca295-7268-44a2-94b0-4e974fac22a4"/*LenseFlareSetupAdvanced*/,
-  "Description": "Same as [LenseFlareSetup] but all elements can be tweaked separately.\n\nNote: Some effects can have unpredictable behaviour if the point light position matches the camera look target.\n",
+  "Description": "Draws a pre-made lens flare like [LenseFlareSetup], but with separate intensity controls for each element.\n\nSome elements can behave unpredictably if the point light position matches the camera target.\n\nAKA: lensflare, flare, glare, anamorphic\n\nSee also: [LenseFlareSetup], [DefineLensFlare]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -22,7 +22,7 @@
         "X": -564.8251,
         "Y": 399.45773
       },
-      "Description": "Automatically creates different combinations of LenseFlares.\n\nElements include: MultiIris",
+      "Description": "Varies the random edge glow and iris reflection elements.",
       "AddPadding": "True"
     },
     {
@@ -31,7 +31,7 @@
         "X": -564.8251,
         "Y": 489.45773
       },
-      "Description": "Select a color to tint various elements.",
+      "Description": "Tint color for the center glow, edge glow and iris elements.",
       "AddPadding": "True"
     },
     {
@@ -89,7 +89,7 @@
         "X": -564.8251,
         "Y": 444.45773
       },
-      "Description": "Select the Index / ID of the Pointlight to which the Lensflare is attached.",
+      "Description": "Index of the point light the flare is attached to.",
       "AddPadding": "True"
     },
     {
@@ -132,7 +132,7 @@
         "X": -564.8251,
         "Y": 354.45773
       },
-      "Description": "Controls the intensity of all elements listed in the advanced options.",
+      "Description": "Overall intensity multiplied with all element intensities.",
       "AddPadding": "True",
       "Min": 0.0,
       "Max": 100.0,

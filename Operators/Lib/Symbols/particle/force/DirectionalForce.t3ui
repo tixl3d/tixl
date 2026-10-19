@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "0f1bf849-949e-4462-a7af-ecb2ff3cd109"/*DirectionalForce*/,
-  "Description": "Generates a force acting on particles in a defined direction in space.\n\nUseful for simulating gravity, wind or attractive forces.",
+  "Description": "Accelerates all particles in a constant direction.\n\nUseful for simulating gravity, wind or other constant forces.\n\nAKA: gravity, wind\n\nSee also: [TurbulenceForce], [VelocityForce]\n\nAlso check out the [HowToUseParticles] tutorial.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": -80.76926,
         "Y": 569.66284
       },
-      "Description": "Defines the direction in which the force acts\n\nProTip: The 'ShowGizmo' feature creates a set of arrows that makes adjusting the direction easier",
+      "Description": "Direction of the acceleration. Its length also scales the force.\n\nTip: Enable ShowGizmo to see the direction as arrows.",
       "Scale": 0.001
     },
     {
@@ -19,7 +19,7 @@
         "X": 45.557922,
         "Y": 690.84485
       },
-      "Description": "Strength of the force",
+      "Description": "Strength of the force.",
       "AddPadding": "True",
       "Scale": 0.001
     },
@@ -29,7 +29,7 @@
         "X": -80.76926,
         "Y": 794.66296
       },
-      "Description": "Defines the visibility of the gizmo",
+      "Description": "Shows the direction as arrows in the output view.",
       "AddPadding": "True"
     },
     {
@@ -38,7 +38,7 @@
         "X": 659.83594,
         "Y": 745.4883
       },
-      "Description": "Adds or subtracts a random value per particle"
+      "Description": "Random additional strength per particle (0 to RandomAmount times Amount)."
     }
   ],
   "SymbolChildUis": [

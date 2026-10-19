@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "6e89c814-cc67-40c2-933c-d03ff1b30ef7"/*DrawClosedLines*/,
-  "Description": "Alternative version of [DrawLines] that allow to draw closed shapes by connecting the first and the last points. ",
+  "Description": "Draws a point buffer as camera-facing lines and connects the last point of each shape back to its first.\n\nWorks like [DrawLines], but closes the shapes. By default the whole buffer forms one closed shape; PointsPerShape splits it into multiple shapes with a fixed number of points.",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": 844.74316,
         "Y": 639.4281
-      }
+      },
+      "Description": "Hides lines behind other geometry."
     },
     {
       "InputId": "3ad26a8c-18ee-4072-ae22-117ec7aa3b41"/*Texture_*/,
@@ -38,6 +39,7 @@
         "X": 394.00714,
         "Y": -117.780136
       },
+      "Description": "Scales the U texture coordinate along the lines.",
       "AddPadding": "True"
     },
     {
@@ -46,7 +48,7 @@
         "X": 254.00711,
         "Y": -47.78015
       },
-      "Description": "needed when using [RepeatAtPoints]"
+      "Description": "Number of points per closed shape. 0 uses the whole buffer as one shape. Useful when drawing shapes copied with [RepeatAtPoints]."
     },
     {
       "InputId": "8c074334-d16f-409e-84c3-01b725c25526"/*BlendMod*/,
@@ -75,7 +77,8 @@
       "Position": {
         "X": 630.759,
         "Y": 220.82883
-      }
+      },
+      "Description": "Point attribute that multiplies the line width: None, F1 or F2."
     },
     {
       "InputId": "d0a13a9f-3f20-4202-b599-7c0b7f03ff9c"/*GPoints*/,
@@ -91,6 +94,7 @@
         "X": 394.00714,
         "Y": -82.780136
       },
+      "Description": "Segments longer than this length fade out and are hidden at twice the length. Negative values disable the fade.",
       "Min": -0.01,
       "Max": 1.0,
       "Scale": 0.001,
@@ -102,6 +106,7 @@
         "X": 394.00714,
         "Y": -222.78014
       },
+      "Description": "Width of the lines. Multiplied by each point's Scale.x and the attribute selected in WidthFactor.",
       "AddPadding": "True",
       "Scale": 0.001
     },
@@ -110,14 +115,16 @@
       "Position": {
         "X": 394.00714,
         "Y": -152.78014
-      }
+      },
+      "Description": "Offsets the U texture coordinate, e.g. to scroll a texture along the lines."
     },
     {
       "InputId": "fb71c6b5-6882-40d4-bccd-86f13e0f6486"/*EnableZWrite*/,
       "Position": {
         "X": 844.74316,
         "Y": 674.4281
-      }
+      },
+      "Description": "Writes the lines to the depth buffer so they can hide geometry drawn later."
     },
     {
       "InputId": "ff59f227-283b-4469-904c-f3a5d565fdbb"/*ShrinkWithDistance*/,
@@ -125,6 +132,7 @@
         "X": 394.00714,
         "Y": -187.78014
       },
+      "Description": "0 keeps a constant width on screen, 1 makes lines thinner with distance like regular geometry.",
       "AddPadding": "True"
     }
   ],

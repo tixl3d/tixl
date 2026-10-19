@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "9123651a-5df8-4f85-9e14-2068f33e2ff1"/*DrawBoxGizmo*/,
-  "Description": "Creates a 3D wireframe cube that can be used as a bounding box",
+  "Description": "Draws a wireframe box with lines, e.g. to visualize a bounding box or volume.\n\nAKA: cube, bounds, bbox, wireframe\n\nSee also: [DrawSphereGizmo], [Locator]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,8 +9,7 @@
       "Position": {
         "X": -277.8811,
         "Y": 311.51312
-      },
-      "Description": "Defines the color"
+      }
     },
     {
       "InputId": "6f95e60a-f259-45fa-b23f-ce284cc9275e"/*Stretch*/,
@@ -18,7 +17,7 @@
         "X": -277.8811,
         "Y": 446.51312
       },
-      "Description": "Scales the box along its individual axes",
+      "Description": "Scales the box along the individual axes.",
       "AddPadding": "True"
     },
     {
@@ -27,7 +26,6 @@
         "X": -277.8811,
         "Y": 401.51312
       },
-      "Description": "Defines the position of the box in 3D space",
       "AddPadding": "True"
     },
     {
@@ -36,7 +34,7 @@
         "X": -277.8811,
         "Y": 491.51312
       },
-      "Description": "Scales the size of the box linearly"
+      "Description": "Uniform scale factor of the box."
     }
   ],
   "SymbolChildUis": [

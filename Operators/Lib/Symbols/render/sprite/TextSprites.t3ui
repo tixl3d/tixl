@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "1a6a58ea-c63a-4c99-aa9d-aeaeb01662f4"/*TextSprites*/,
-  "Description": "Creates Points and Sprites from text that can be animated and then rendered with [DrawPointSprites] or [DrawPointSpritesShaded].\n\nThis operator is an advanced solution that loads a BmFont font definition and the matching MSDF (multichannel distance field) texture and generates a set of buffers.\nThese buffers can then be modified and combined with other operators.\n\nThe Point buffer includes position, orientation, Color, F1, F2, Scale (XYZ).\nThe Sprite buffer contains additional attributes for rendering like texture UV coordinates for characters, pivot, size, and layout information.\n\nSome tips:\n- You might replace the Point buffer with another buffer (e.g., [RadialPoints]).\n- For rendering basic text usage, consider using [Text].\n\nCheck the examples.",
+  "Description": "Creates points and sprites from text that can be animated and then rendered with [DrawPointSprites] or [DrawPointSpritesShaded].\n\nThis operator loads a BMFont font definition with the matching MSDF (multichannel signed distance field) texture and generates a set of buffers that can be modified and combined with other operators.\n\nThe point buffer includes position, orientation, color, F1, F2 and scale for each character. The sprite buffer contains additional attributes for rendering like texture coordinates, pivot, size and layout information.\n\nAKA: typography, font, glyphs, letters, msdf\n\nTips:\n- The point buffer can be replaced with another buffer (e.g. from [RadialPoints]).\n- For basic text rendering, consider using [Text].\n\nSee also: [Text], [DrawPointSprites]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -37,6 +37,7 @@
         "X": -200.0,
         "Y": 405.0
       },
+      "Description": "Shifts the characters vertically relative to the baseline, in font pixel units.",
       "AddPadding": "True"
     },
     {
@@ -53,14 +54,16 @@
       "Position": {
         "X": -200.0,
         "Y": 225.0
-      }
+      },
+      "Description": "Factor applied to the line height of the font."
     },
     {
       "InputId": "e05e143e-8d4c-4de7-8c9c-7fa7755009d3"/*Spacing*/,
       "Position": {
         "X": -200.0,
         "Y": 180.0
-      }
+      },
+      "Description": "Additional spacing between characters in font pixel units."
     },
     {
       "InputId": "e43bc887-d425-4f9c-8a86-a32c761de0cc"/*HorizontalAlign*/,
@@ -75,6 +78,7 @@
         "X": -200.0,
         "Y": 45.0
       },
+      "Description": "Path to a BMFont .fnt file. The MSDF .png texture with the same name is loaded from the same folder.",
       "AddPadding": "True",
       "Usage": "FilePath",
       "FileFilter": "fnt"

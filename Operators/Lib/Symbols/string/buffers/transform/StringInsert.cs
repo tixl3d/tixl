@@ -33,7 +33,7 @@ internal sealed class StringInsert : Instance<StringInsert>
         }
         else
         {
-            position.Clamp(0, maxPosition);
+            position = position.Clamp(0, maxPosition);
         }
 
         try

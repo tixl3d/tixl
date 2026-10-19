@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "946da16c-f536-4887-b764-af9468f22c0f"/*Blur*/,
-  "Description": "Blurs the incoming image\n\nUseful Ops for a PostFX Pipeline: [MotionBlur] [DepthOfField] [ChromaticAbberation] [Glow] [Grain] [Blur]",
+  "Description": "Blurs the incoming image.\n\nAKA: gaussian, soften, defocus\n\nSee also: [FastBlur], [DirectionalBlur], [BlurWithMask], [Bloom], [MotionBlur], [DepthOfField]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -11,7 +11,7 @@
         "Y": 193.1156
       },
       "GroupTitle": "Advanced Settings",
-      "Description": "Offsets the brightness of the image"
+      "Description": "Added to the RGB of the result."
     },
     {
       "InputId": "3c8b43be-430f-4afe-8244-5282be49bfbc"/*Samples*/,
@@ -19,7 +19,7 @@
         "X": -308.4377,
         "Y": 148.1156
       },
-      "Description": "Defines the number of iterations with which the image is blurred. \n\nHigher values produce higher quality at the cost of computing speed.",
+      "Description": "Number of samples on each side per pass. Higher values are smoother but slower.",
       "Min": 0.0,
       "Max": 100.0,
       "ClampMin": true,
@@ -31,7 +31,7 @@
         "X": -308.4377,
         "Y": 103.11561
       },
-      "Description": "Defines the strength/radius of the blur",
+      "Description": "Blur radius in percent of the image size.",
       "AddPadding": "True",
       "Min": 0.0,
       "Max": 20.0
@@ -42,7 +42,7 @@
         "X": -308.4377,
         "Y": 328.1156
       },
-      "Description": "Defines what is displayed at the edge of the image or how it is repeated should it be cut off/offset over its borders.",
+      "Description": "Defines how pixels beyond the image border are sampled.",
       "AddPadding": "True"
     },
     {
@@ -60,7 +60,7 @@
         "X": -308.4377,
         "Y": 238.1156
       },
-      "Description": "Changes the opacity/gamma of the image"
+      "Description": "Multiplies the RGB of the result."
     },
     {
       "InputId": "e4e5e654-d570-4dea-ad16-f4eb1018ff2f"/*Resolution*/,
@@ -68,7 +68,7 @@
         "X": -308.4377,
         "Y": 283.1156
       },
-      "Description": "Overwrites/redefines the resolution of the incoming image",
+      "Description": "Overrides the output resolution.",
       "AddPadding": "True"
     }
   ],

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "6c2f8241-9f4b-451e-8a1d-871631d21163"/*ExecuteTextureUpdate*/,
-  "Description": "A helper that first evaluates a command input before returning a texture2d. This can be useful for compute shader processing.",
+  "Description": "Evaluates the connected commands before returning a texture.\n\nThis is how most compute shader effects on textures are executed.",
   "SymbolTags": "24",
   "InputUis": [
     {
@@ -25,14 +25,16 @@
       "Position": {
         "X": -200.0,
         "Y": 135.0
-      }
+      },
+      "Description": "If disabled, the commands are not executed and the output keeps its last value."
     },
     {
       "InputId": "dc3bd757-300b-416a-92f9-b9c976ef7206"/*TriggerTexture*/,
       "Position": {
         "X": -200.0,
         "Y": 90.0
-      }
+      },
+      "Description": "If connected, the update only runs when this texture changed."
     }
   ],
   "SymbolChildUis": [],

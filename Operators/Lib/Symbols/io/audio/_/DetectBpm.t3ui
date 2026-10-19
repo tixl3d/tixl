@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "e712e801-863d-45c5-9ef8-fbe90dcb8375"/*DetectBpm*/,
-  "Description": "",
+  "Description": "Experimental. Attempts to detect the BPM rate of the incoming FFT data.",
   "SymbolTags": "128",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": 0.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Upper end of the detected BPM range, at most 200."
     },
     {
       "InputId": "25920975-44fd-4959-be50-b895dd3a6493"/*UpperLimit*/,
@@ -44,7 +45,8 @@
       "Position": {
         "X": 0.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Lower end of the detected BPM range, clamped to 50..200."
     },
     {
       "InputId": "f50cd488-9914-491d-9861-621a9c93019d"/*LockItFactor*/,

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "57a1ee33-702a-41ad-a17e-b43033d58638"/*RtvFromTexture2d*/,
-  "Description": "",
+  "Description": "Internal helper. Creates a render target view for a Texture2D.",
   "SymbolTags": "24",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": 0.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Slice of a texture array to render into. Cube maps always get a view of all six faces."
     },
     {
       "InputId": "73cf7c5d-cf0c-49db-91e8-dafe812e0232"/*Texture*/,

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "2d62dd4b-9597-4569-a09e-495abf880e34"/*DepthBufferAsGrayScale*/,
-  "Description": "Converts the provided depth buffer into a grayscale texture.\n\nImportant: Requires the correct settings for near/far clipping.",
+  "Description": "Converts a depth buffer into a grayscale texture of linear scene depth.\n\nNearFarRange must match the near and far clip planes of the camera that rendered the depth buffer.\n\nAKA: depth, zbuffer, distance\n\nSee also: [RenderTarget], [ColorGradeDepth]",
   "SymbolTags": "24",
   "InputUis": [
     {
@@ -10,6 +10,7 @@
         "X": -230.82169,
         "Y": 689.33484
       },
+      "Description": "0 outputs the linear scene depth. 1 uses a legacy normalized depth formula that was used for depth of field.",
       "AddPadding": "True"
     },
     {
@@ -18,7 +19,8 @@
       "Position": {
         "X": -234.91547,
         "Y": 371.6969
-      }
+      },
+      "Description": "Depth buffer, e.g. the DepthBuffer output of a [RenderTarget]."
     },
     {
       "InputId": "379bee6d-ba65-4a53-9d9e-8dded21f351a"/*ClampOutput*/,
@@ -26,6 +28,7 @@
         "X": -232.82065,
         "Y": 572.72107
       },
+      "Description": "Clamps the result to the range 0 to 1.",
       "AddPadding": "True"
     },
     {
@@ -33,7 +36,8 @@
       "Position": {
         "X": -232.82065,
         "Y": 527.72107
-      }
+      },
+      "Description": "Depth values mapped to 0 and 1 of the output. If both are 0, the linear depth is output unchanged."
     },
     {
       "InputId": "482e7931-cc65-49bd-ac56-8724b83a4e6a"/*NearFarRange*/,
@@ -41,7 +45,8 @@
         "X": -234.91547,
         "Y": 461.6969
       },
-      "GroupTitle": "Settings"
+      "GroupTitle": "Settings",
+      "Description": "Near and far clip planes of the camera."
     }
   ],
   "SymbolChildUis": [

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "2c53eee7-eb38-449b-ad2a-d7a674952e5b"/*GradientsToTexture*/,
-  "Description": "Generates a texture from a gradient",
+  "Description": "Renders one or more gradients into a texture.\n\nEach gradient becomes one row (Horizontal) or one column (Vertical) of the texture.\n\nSee also: [SampleGradient], [BuildGradient]",
   "SymbolTags": "16",
   "InputUis": [
     {
@@ -11,15 +11,14 @@
         "Y": 424.0
       },
       "GroupTitle": "Texture settings",
-      "Description": "Defines the size of the texture in pixels"
+      "Description": "Texture size in pixels along the gradient."
     },
     {
       "InputId": "588be11f-d0db-4e51-8dbb-92a25408511c"/*Gradients*/,
       "Position": {
         "X": 36.0,
         "Y": 379.0
-      },
-      "Description": "Defines the color gradient"
+      }
     },
     {
       "InputId": "65b83219-4e3f-4a3e-a35b-705e8658cc7b"/*Direction*/,
@@ -27,7 +26,6 @@
         "X": 36.0,
         "Y": 469.0
       },
-      "Description": "Changes the direction of the texture",
       "AddPadding": "True"
     }
   ],

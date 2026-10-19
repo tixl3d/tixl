@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "edecd98f-209b-423d-8201-0fd7d590c4cf"/*SplinePoints*/,
-  "Description": "Samples the incoming points into a set of spline points.",
+  "Description": "Samples a smooth Bezier spline through the connected point lists and returns evenly distributed points.\n\nAt least two point lists must be connected; they are joined in order. Outputs both a GPU buffer and a CPU list.\n\nSee also: [ResampleLinePoints], [PairPointsForSplines]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -30,14 +30,16 @@
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Number of resulting points (1...1000)."
     },
     {
       "InputId": "a438a275-7633-4502-9718-e548bb0ce4de"/*PreSampleSteps*/,
       "Position": {
         "X": -200.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Sampling steps per segment used to measure the spline length for even distribution (5...100)."
     }
   ],
   "SymbolChildUis": [],

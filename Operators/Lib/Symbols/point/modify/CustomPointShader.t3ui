@@ -60,7 +60,7 @@
         "X": -283.89365,
         "Y": 157.82715
       },
-      "Description": "Warning if this is not enable to 0 the operator will no longer be cached."
+      "Description": "If not set to 0, the operator is updated every frame and no longer cached."
     },
     {
       "InputId": "776b96c2-ec0d-4668-9112-39badbf5b619"/*Image*/,

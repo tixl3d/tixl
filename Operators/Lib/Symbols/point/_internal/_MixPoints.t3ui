@@ -1,7 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "bdd982c4-dfc4-48d6-888a-f067081dbe8e"/*_MixPoints*/,
-  "Description": "This is an early internal implementation that has been deprecated. Consider using [MixPoints].",
+  "Description": "Obsolete. Early implementation for combining two legacy CPU point arrays.\n\nUse [BlendPoints] instead.",
+  "SymbolTags": "4096",
   "InputUis": [
     {
       "InputId": "3119875e-a6ea-4d19-b536-513459a0db98"/*B*/,

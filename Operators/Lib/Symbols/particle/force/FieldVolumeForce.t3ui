@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "599ada75-b2ac-4f6c-ac98-f7b4bb6cf47d"/*FieldVolumeForce*/,
-  "Description": "Allows the use of a signed distance field as a force to manipulate a particle system.\n\nWorks as an input for [ParticleSystem].\nNeeds an SDF like [CylinderSDF], [SphereSDF] in order to work.\n",
+  "Description": "Uses a signed distance field as a volume that particles collide with, are attracted to or repelled from.\n\nParticles crossing the surface bounce off it. Particles outside are attracted towards the surface, particles inside are pushed out. With InvertVolume the inside and outside are swapped, e.g. to keep particles within a volume. Needs an SDF like [SphereSDF] or [CylinderSDF].\n\nAKA: collider, container\n\nSee also: [FieldDistanceForce], [MeshVolumeForce]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -11,6 +11,7 @@
         "Y": 566.03577
       },
       "GroupTitle": "Behaviour",
+      "Description": "Acceleration towards the surface for particles outside the volume.",
       "Min": -1.0,
       "Max": 1.0
     },
@@ -20,6 +21,7 @@
         "X": 714.5168,
         "Y": 636.03577
       },
+      "Description": "Acceleration outwards for particles inside the volume.",
       "Min": -1.0,
       "Max": 1.0
     },
@@ -29,6 +31,7 @@
         "X": 714.5168,
         "Y": 741.0366
       },
+      "Description": "Random variation of the reflection direction.",
       "Min": 0.0,
       "Max": 1.0
     },
@@ -38,6 +41,7 @@
         "X": 714.5168,
         "Y": 706.03613
       },
+      "Description": "Random variation of the bounciness per particle.",
       "Min": 0.0,
       "Max": 1.0
     },
@@ -47,6 +51,7 @@
         "X": 714.5168,
         "Y": 811.0366
       },
+      "Description": "Offset used to sample the field gradient for the surface normal. Larger values give smoother normals.",
       "Min": -0.1,
       "Max": 0.1
     },
@@ -55,7 +60,8 @@
       "Position": {
         "X": 574.5168,
         "Y": 969.58826
-      }
+      },
+      "Description": "Sets the particle color to the field color on collision."
     },
     {
       "InputId": "86f4bbf4-26a4-4dd7-9a23-3ef1a6c5a13b"/*Amount*/,
@@ -63,6 +69,7 @@
         "X": 714.5168,
         "Y": 531.03577
       },
+      "Description": "Overall strength of the force and of the bounce.",
       "Min": 0.0,
       "Max": 1.0,
       "Scale": 0.001
@@ -73,6 +80,7 @@
         "X": 714.5168,
         "Y": 671.036
       },
+      "Description": "Velocity factor applied on collision.",
       "AddPadding": "True",
       "Min": 0.0,
       "Max": 1.0
@@ -83,7 +91,8 @@
         "X": 574.5168,
         "Y": 934.58826
       },
-      "GroupTitle": "Collision"
+      "GroupTitle": "Collision",
+      "Description": "Reflects the particle velocity at the surface when a particle crosses it."
     },
     {
       "InputId": "bf4f4938-e8ca-4b64-aa8b-6247527ad2fd"/*InvertVolume*/,
@@ -91,7 +100,8 @@
         "X": 574.5168,
         "Y": 776.0366
       },
-      "GroupTitle": "Options"
+      "GroupTitle": "Options",
+      "Description": "Swaps inside and outside, e.g. to contain particles inside the volume."
     },
     {
       "InputId": "dba5f4e3-cbdc-4e12-b174-dd9b7d91bea8"/*AttractionDecay*/,
@@ -99,6 +109,7 @@
         "X": 714.5168,
         "Y": 601.03577
       },
+      "Description": "How quickly the attraction decreases with the distance from the surface.",
       "Min": -1.0,
       "Max": 1.0
     },
@@ -108,7 +119,8 @@
       "Position": {
         "X": 308.94855,
         "Y": 61.771713
-      }
+      },
+      "Description": "Signed distance field, e.g. from [SphereSDF] or [BoxSDF]."
     }
   ],
   "SymbolChildUis": [

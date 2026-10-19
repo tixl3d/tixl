@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "8171c2f5-96df-41f6-884c-dbd004ae8a17"/*ValueToRate*/,
-  "Description": "Converts a value to a rate.\n\nCan also be used with [MockStrings] to select between various other groups of numbers such as primes.",
+  "Description": "Maps a value between 0 and 1 to one of the numbers in a list of rates.\n\nThe Rates string holds one number per line. Value 0 picks the first entry and values towards 1 pick the last; Value is clamped to that range. If the list is empty the result is 1.\n\nCan also be used with [MockStrings] to select between other groups of numbers such as primes.",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -10,6 +10,7 @@
         "X": 36.0,
         "Y": 379.0
       },
+      "Description": "One number per line, using . as decimal separator.",
       "Usage": "Multiline"
     },
     {
@@ -18,6 +19,7 @@
         "X": 36.0,
         "Y": 334.0
       },
+      "Description": "Selection between 0 (first rate) and 1 (last rate).",
       "Min": 0.0,
       "Max": 1.0,
       "Scale": 0.01,

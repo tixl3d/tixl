@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "1de7b1be-cab6-4beb-a837-4c817562efb2"/*GetPointDataFromList*/,
-  "Description": "Returns Position, Rotation and W from a point.\nThis can be useful if combined with [ReadPointsFromGpu].",
+  "Description": "Returns position, orientation and W of a point in a point list.\n\nThis can be useful combined with [ReadPointsFromGpu].\n\nSee also: [GetListItemAttribute]",
   "SymbolTags": "8",
   "InputUis": [
     {

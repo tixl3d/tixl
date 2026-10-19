@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "a2ea3af5-d78b-46b4-84db-09d31f042798"/*AdvancedFeedback2*/,
-  "Description": "An improved feedback effect based on OKLab space.\n\nAll Feedback Ops: [FluidFeedback] [AdvancedFeedback] [AdvancedFeedback2]\n\nAlso see [AfterGlow2]",
+  "Description": "An improved feedback effect that adjusts the feedback buffer in OKLab color space.\n\nAKA: feedback, trails, echo, smear\n\nSee also: [FluidFeedback], [AdvancedFeedback], [AdvancedFeedback2], [AfterGlow2]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -21,6 +21,7 @@
         "X": 1398.6315,
         "Y": 907.3002
       },
+      "Description": "Moves the feedback image each frame.",
       "AddPadding": "True",
       "Min": -0.1,
       "Max": 0.1,
@@ -49,7 +50,8 @@
       "Position": {
         "X": 2266.1077,
         "Y": 1057.0999
-      }
+      },
+      "Description": "The 2D or 3D content rendered on top of the feedback buffer each frame."
     },
     {
       "InputId": "3c93af8c-5658-4466-8301-95799b650e2b"/*AddBlurred*/,
@@ -88,6 +90,7 @@
         "X": 883.65234,
         "Y": 1114.8125
       },
+      "Description": "Clears the feedback buffer.",
       "AddPadding": "True"
     },
     {
@@ -112,6 +115,7 @@
         "X": 1538.6315,
         "Y": 872.3002
       },
+      "Description": "Scales the feedback image each frame. Values slightly above 1 create a zoom-in trail.",
       "Min": -0.9,
       "Max": 1.1,
       "Scale": 0.0001
@@ -123,6 +127,7 @@
         "Y": 697.3002
       },
       "GroupTitle": "Feedback",
+      "Description": "Displaces the feedback image each frame.",
       "Min": -10.0,
       "Max": 10.0
     },
@@ -139,6 +144,7 @@
         "X": 1538.6315,
         "Y": 977.3002
       },
+      "Description": "Rotates the feedback image each frame.",
       "Min": -1.0,
       "Max": 1.0,
       "Scale": 0.01,
@@ -183,7 +189,8 @@
       "Position": {
         "X": 2126.1077,
         "Y": 987.1002
-      }
+      },
+      "Description": "If disabled, the feedback buffer is not updated."
     },
     {
       "InputId": "f153041e-6542-4197-a192-6f46e951f8df"/*ShiftSaturation*/,

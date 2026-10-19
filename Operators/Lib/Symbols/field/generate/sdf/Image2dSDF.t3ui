@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "2446df39-b455-428a-807d-73c0e6cbab79"/*Image2dSDF*/,
-  "Description": "Uses the grayscale information of a texture as (signed) distance data.\nThis works nicely with [JumpFloodFill]",
+  "Description": "Uses the grayscale of a texture as distance data, projected onto the XY plane and extruded infinitely along Z.\n\nBright areas are on the surface; darker values are further away, scaled by SdfScale. Outside of the image area the distance grows with the distance to the image border. This works well with distance textures from [JumpFloodFill]. Use [PushPullSDF] or Offset to grow the shape and [CombineSDF] with Intersect to limit its depth.\n\nRender the result with [RaymarchField] and inspect it with [VisualizeFieldDistance].\n\nSee also: [HeightMapSdf]",
   "SymbolTags": "72",
   "InputUis": [
     {
@@ -9,14 +9,16 @@
       "Position": {
         "X": 893.9691,
         "Y": 722.1224
-      }
+      },
+      "Description": "Size of the image area on the XY plane in world units."
     },
     {
       "InputId": "59297115-f0cd-449e-be89-8a7ccbb0aa44"/*Offset*/,
       "Position": {
         "X": 893.9691,
         "Y": 792.1224
-      }
+      },
+      "Description": "Added to the distance. Negative values grow the shape."
     },
     {
       "InputId": "c817ea37-e994-462b-ad8a-7e4cadf2f9a5"/*SdfImage*/,
@@ -24,14 +26,16 @@
       "Position": {
         "X": 1033.9694,
         "Y": 617.1224
-      }
+      },
+      "Description": "Distance texture. Only the red channel is used."
     },
     {
       "InputId": "d7ed4ea1-0472-4535-8f39-fd440400d11d"/*SdfScale*/,
       "Position": {
         "X": 893.9691,
         "Y": 757.1224
-      }
+      },
+      "Description": "Distance in world units for a texture value of 0 (black)."
     }
   ],
   "SymbolChildUis": [

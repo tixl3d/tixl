@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "e34c88f6-815e-4ce1-a6a8-59e2c8101849"/*SubdivisionStretch*/,
-  "Description": "A powerful image generation effect that splits an image into smaller and smaller fragments. The splits occur horizontal or vertical within the given split range.\n\nThis effect is especially nice, because it can be animated either with the RandomPhase parameter or with the ScrollOffset. Combining it with an incoming image is also great, because it can produce great glitch effects.\n\nIt's similar to [RyojiPattern] and [RyojiPattern2] but produces more random results. Check out the presets and parameter documentation.\n\n\nFor similar effects or interesting combinations see: [MosaicTiling] [VoronoiCells] [SubdivisionStretch] [HoneyCombTiles] [TriangleGridTransition] [Dither] [AsciiRender]",
+  "Description": "Recursively splits an image into smaller and smaller rectangular cells. The splits occur horizontally or vertically within the given split range.\n\nIt can be animated with the RandomPhase parameter or with the ScrollOffset. Combined with an incoming image it can produce great glitch effects.\n\nIt is similar to [RyojiPattern1] and [RyojiPattern2] but produces more random results. Check out the presets and parameter documentation.\n\nAKA: subdivide, mondrian, split, quadtree\n\nSee also: [MosiacTiling], [VoronoiCells], [HoneyCombTiles], [TriangleGridTransition], [Dither], [AsciiRender]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -163,7 +163,7 @@
         "X": 818.7557,
         "Y": 646.9158
       },
-      "Description": "The position where a cell is split (0.5 is center).\n",
+      "Description": "The position where a cell is split (0.5 is center).",
       "Min": 0.0,
       "Max": 1.0
     },
@@ -189,7 +189,7 @@
         "X": 818.7557,
         "Y": 1171.9158
       },
-      "Description": "Controls how the colors are picked from the gradient: \n\nSteps: use the cells subdivision count\nRandom: Pick a random color for each cell."
+      "Description": "Controls how the colors are picked from the gradient:\n\nSteps: Uses the subdivision count of the cell.\nRandom: Picks a random color for each cell."
     }
   ],
   "SymbolChildUis": [

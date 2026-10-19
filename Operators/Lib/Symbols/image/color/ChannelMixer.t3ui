@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "51968877-03e7-472d-9b43-95bc8aeda3bc"/*ChannelMixer*/,
-  "Description": "Adjusts the color of an incoming image.\n\nEach column defines a color channel of the output, whereas the incoming components are multiplied by a factor and summed up.\nFinally, a value is added to each component.\n\nYou can do a lot of things with this operator, like:\n- converting to grayscale\n- extracting an alpha channel to grayscale\n- inverting an image\n- swapping color channels.\n\nCheck the presets for examples.\nFor more natural color correction, try [Adjust Color].",
+  "Description": "Computes each output channel as a weighted sum of the input RGBA channels plus an offset.\n\nEach Multiply parameter defines how much of the input R, G, B and A contributes to one output channel. Finally Add is added to each output component. This allows converting to grayscale, extracting the alpha channel, inverting an image or swapping color channels. Check the presets for examples.\n\nAKA: swizzle, matrix, channels\n\nSee also: [AdjustColors], [Combine3Images]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": 442.4342,
         "Y": 530.55725
-      }
+      },
+      "Description": "Clamps negative colors and alpha to the range 0 to 1."
     },
     {
       "InputId": "1a0acd15-34d1-4b8f-9739-f78ba204f315"/*Add*/,
@@ -17,14 +18,16 @@
         "X": 442.4342,
         "Y": 390.55728
       },
-      "GroupTitle": "Settings"
+      "GroupTitle": "Settings",
+      "Description": "Offset added to the output R, G, B and A channels."
     },
     {
       "InputId": "1f380edd-ed50-49a4-976d-cce13783851d"/*MultiplyB*/,
       "Position": {
         "X": 442.4342,
         "Y": 110.55728
-      }
+      },
+      "Description": "Weights of the input R, G, B and A channels for the output blue channel."
     },
     {
       "InputId": "28bb7ff9-190a-4624-9361-c4a530851bfd"/*Texture2d*/,
@@ -40,14 +43,16 @@
         "X": 442.4342,
         "Y": -169.44272
       },
-      "GroupTitle": "Channels"
+      "GroupTitle": "Channels",
+      "Description": "Weights of the input R, G, B and A channels for the output red channel."
     },
     {
       "InputId": "76e01cd7-15b8-4962-a96f-592e67ae51c5"/*MultiplyG*/,
       "Position": {
         "X": 442.4342,
         "Y": -29.442719
-      }
+      },
+      "Description": "Weights of the input R, G, B and A channels for the output green channel."
     },
     {
       "InputId": "8e25ab02-ef93-441c-8a16-78555093c5a6"/*GenerateMipmaps*/,
@@ -62,7 +67,8 @@
       "Position": {
         "X": 442.4342,
         "Y": 250.55728
-      }
+      },
+      "Description": "Weights of the input R, G, B and A channels for the output alpha channel."
     }
   ],
   "SymbolChildUis": [

@@ -16,6 +16,7 @@
         "X": 0.0,
         "Y": 0.0
       },
+      "Description": "C# method body that returns a float for the sample position p.",
       "Usage": "Multiline"
     },
     {
@@ -44,7 +45,8 @@
       "Position": {
         "X": 0.0,
         "Y": 225.0
-      }
+      },
+      "Description": "Optional points, available as Points in the code."
     }
   ],
   "SymbolChildUis": [],

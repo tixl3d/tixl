@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "026e6917-6e6f-4ee3-b2d4-58f4f1de74c9"/*TransformMesh*/,
-  "Description": "Generates a new set of transformed vertices for a mesh.",
+  "Description": "Translates, rotates and scales the vertices of a mesh.\n\nUnlike [Transform], which only changes how a mesh is drawn, this creates new vertex data, so subsequent mesh operators work with the transformed positions. Normals and tangents are transformed as well.\n\nAKA: move, rotate, scale\n\nSee also: [TransformMeshUVs], [DeformMesh]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": 165.54813,
         "Y": 965.0075
       },
-      "Description": "Rotates the incoming mesh around the following axes:\n\nX: Horizontal axis\nY: Vertical axis\nZ: Forward axis\n",
+      "Description": "Rotation in degrees around the X, Y and Z axes.",
       "Min": -180.0,
       "Max": 180.0,
       "Format": "{0:0.0}°"
@@ -21,7 +21,7 @@
         "X": 25.548126,
         "Y": 1140.0073
       },
-      "Description": "Defines whether only selected vertices should be affected by the manipulation",
+      "Description": "Weights the transformation by the vertex selection, e.g. from [SelectVertices].",
       "AddPadding": "True"
     },
     {
@@ -30,7 +30,7 @@
         "X": 165.54813,
         "Y": 1035.0076
       },
-      "Description": "Uniformly scales the incoming mesh",
+      "Description": "Scales the mesh uniformly.",
       "AddPadding": "True"
     },
     {
@@ -48,7 +48,7 @@
         "Y": 1070.0076
       },
       "GroupTitle": "Transform Pivot",
-      "Description": "Moves the pivot (center point) of the incoming subgraph:\n\nX (-left / +right) \nY (-down / +up) \nZ (-forward / +backwards)\n\nThe pivot point determines the location of the incoming subgraph gizmo. Transforming its location can make it easier to perform transformations around the position you want.\n"
+      "Description": "Center of rotation and scaling."
     },
     {
       "InputId": "da607ebd-6fec-4ae8-bf91-b70dcb794557"/*Translation*/,
@@ -57,7 +57,7 @@
         "Y": 930.0075
       },
       "GroupTitle": "Transform Mesh",
-      "Description": "Moves the incoming mesh\n\nX (-left / +right), \nY (-down / +up), \nZ (-forward / +backwards)\n"
+      "Description": "Moves the mesh."
     },
     {
       "InputId": "f37c11a5-b210-4e83-8ebd-64ea49ee9b96"/*Scale*/,
@@ -65,7 +65,7 @@
         "X": 165.54813,
         "Y": 1000.0075
       },
-      "Description": "Scales the incoming subgraph in the following directions:\n\nX: Width\nY: Height\nZ: Depth\n"
+      "Description": "Scales the mesh along X, Y and Z."
     }
   ],
   "SymbolChildUis": [

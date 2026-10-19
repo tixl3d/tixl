@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "eeec02e2-7db9-4132-935a-4caf03c828c6"/*ReconstructiveForce*/,
-  "Description": "Blends the simulation particle points toward the original matching emit points.\n\nNote: The effect is likely to produce unpredictable results if the number of emit points does not match the number of simulation points.",
+  "Description": "Pulls particles back towards their matching target points inside a spherical volume.\n\nEach particle is blended towards the target point with the same index (wrapping around the target count), including its rotation and color, while its velocity is damped. The effect only applies within the volume defined by VolumeCenter, VolumeScale, VolumeStretch and VolumeRotate. Results are predictable only if the number of target points matches the number of particles, e.g. when using the emit points as targets.\n\nAKA: reform, restore, attract\n\nSee also: [ParticleSystem]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,8 @@
       "Position": {
         "X": -568.24054,
         "Y": 2101.319
-      }
+      },
+      "Description": "Points the particles return to, usually the emit points."
     },
     {
       "InputId": "4b253a7c-0e50-477d-8eee-4f4c9a5608e9"/*VolumeStretch*/,
@@ -26,6 +27,7 @@
         "Y": 1946.3186
       },
       "GroupTitle": "Force",
+      "Description": "How strongly particles are pulled to their targets per frame (0..1).",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -44,7 +46,8 @@
       "Position": {
         "X": -418.24057,
         "Y": 1801.3125
-      }
+      },
+      "Description": "Softness of the volume border."
     },
     {
       "InputId": "9b3a6a71-829e-47cd-87f2-fe87d7848120"/*VolumeRotate*/,
@@ -61,14 +64,16 @@
       "Position": {
         "X": -418.24057,
         "Y": 1901.3186
-      }
+      },
+      "Description": "Currently has no effect."
     },
     {
       "InputId": "b5f61cd0-ad6f-45fe-ad0f-8a7a716b7c8f"/*GizmoVisibility*/,
       "Position": {
         "X": 348.24634,
         "Y": 2326.5764
-      }
+      },
+      "Description": "Visibility of the volume gizmo."
     },
     {
       "InputId": "def19ffe-41d3-44a3-9b32-2ae9bb2f2fe4"/*VolumeScale*/,
@@ -82,7 +87,8 @@
       "Position": {
         "X": -568.2406,
         "Y": 2002.3191
-      }
+      },
+      "Description": "Which position decides whether a particle is inside the volume.\n\nUsePointsPosition: the current particle position.\nUseTargetsPosition: the position of its target point."
     }
   ],
   "SymbolChildUis": [

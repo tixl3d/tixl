@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "353f63fc-e613-43ca-b037-02d7b9f4e935"/*CommonPointSets*/,
-  "Description": "Provides a set of useful point lists that can be used to draw shapes, lines and other geometric forms.\n[RepeatAtPoints] can be used to distribute these shapes.\n\n[DrawPoints], [DrawLines] can be used to visualize them.\n\nAlso known as: Gridpoints, CrossPoints, Crosses, Arrow, Arrows\n\n",
+  "Description": "Provides a set of useful point lists that can be used to draw shapes like crosses, cubes, quads and arrows.\n\n[RepeatAtPoints] can be used to distribute these shapes. [DrawPoints] and [DrawLines] can be used to visualize them.\n\nAKA: crosspoints, crosses, arrow, arrows, gizmo",
   "SymbolTags": "1",
   "InputUis": [
     {

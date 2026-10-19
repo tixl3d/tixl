@@ -39,6 +39,7 @@
         "X": 792.96313,
         "Y": 490.7517
       },
+      "Description": "Blends the modified vel, col and pos back into the particle. 0 has no effect, 1 applies them fully.",
       "Min": 0.0,
       "Max": 1.0,
       "Scale": 0.001
@@ -63,6 +64,7 @@
         "X": 505.17255,
         "Y": 274.84805
       },
+      "Description": "HLSL code fragment executed for each particle.",
       "Usage": "Multiline"
     },
     {
@@ -91,6 +93,7 @@
         "X": 505.17252,
         "Y": 64.84799
       },
+      "Description": "Path of the HLSL template the code is inserted into.",
       "Usage": "FilePath",
       "FileFilter": "hlsl"
     },
@@ -101,6 +104,7 @@
         "Y": 204.84805
       },
       "GroupTitle": "Additional Options...",
+      "Description": "Additional HLSL code inserted before the main function, e.g. #define statements or helper functions.",
       "Usage": "Multiline"
     },
     {
@@ -116,6 +120,7 @@
         "X": 652.9632,
         "Y": 910.7517
       },
+      "Description": "Color value available in the code as Color.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "8e6ed99c-a3e0-42c0-9f81-a89b1e340757"/*Sketch*/,
-  "Description": "Allows adding sketches as annotations or storyboards. You can create multiple pages and switch between them by selecting or animating the PageIndex. Use the ShowAs parameter to toggle between showing the sketches as a single frame (e.g., as a comment), until the next frame (e.g., as a storyboard or animation), or with onion skinning. You can also use the following keyboard shortcuts:\n\n[P] - Draw mode\n[E] - Erase mode\n[X] - Cut Page\n[V] - Insert cut page\n[0-9] - Select brush size",
+  "Description": "Draws freehand sketches over the output as annotations or storyboards.\n\nSketches are stored in pages that are bound to the time at which they were drawn, so a storyboard or frame-by-frame animation can be created by drawing at different times. Strokes are saved automatically to a file.\n\nThe following keyboard shortcuts work while the operator is selected:\n- P: draw mode\n- E: erase mode\n- S: select mode\n- C: clear the selection\n- X: cut the current page\n- V: paste the cut page\n- 1-9: select brush size\n\nAKA: draw, paint, annotate, storyboard, doodle",
   "SymbolTags": "64",
   "InputUis": [
     {
@@ -16,7 +16,8 @@
       "Position": {
         "X": 1751.5901,
         "Y": 90.02823
-      }
+      },
+      "Description": "Optional scene rendered behind the sketch."
     },
     {
       "InputId": "1c5d0d86-c000-449e-903a-3212d19d8e1d"/*StrokeSize*/,
@@ -37,6 +38,7 @@
         "Y": 296.09412
       },
       "ExcludedFromPresets": "True",
+      "Description": "File in which the strokes are saved. A unique file path is assigned automatically.",
       "Usage": "FilePath"
     },
     {
@@ -55,7 +57,8 @@
       "Position": {
         "X": 98.33612,
         "Y": 331.09412
-      }
+      },
+      "Description": "If set, shows this page instead of the page at the current time."
     },
     {
       "InputId": "44b88a09-6374-4180-9bc9-713ccfbb36f0"/*Background*/,
@@ -73,7 +76,8 @@
       "Position": {
         "X": 98.33612,
         "Y": 261.09412
-      }
+      },
+      "Description": "Stroke: StrokeColor applies to new strokes.\nPage: StrokeColor recolors all strokes of the current page."
     },
     {
       "InputId": "5cdb04d5-9bef-4789-8082-ea04e56b3ca7"/*Resolution*/,
@@ -95,14 +99,16 @@
         "X": 679.13983,
         "Y": -154.78616
       },
-      "GroupTitle": "Settings"
+      "GroupTitle": "Settings",
+      "Description": "Shows faded strokes of neighboring pages."
     },
     {
       "InputId": "f823fdfd-fc3d-41c4-bd9d-6badf764d702"/*InputImage*/,
       "Position": {
         "X": 1751.5901,
         "Y": -49.97177
-      }
+      },
+      "Description": "Optional image shown behind the sketch."
     }
   ],
   "SymbolChildUis": [

@@ -60,7 +60,7 @@ internal sealed class BlendStrings : Instance<BlendStrings>
             return;
         }
 
-        BlendSpread.GetChangedValue(context, ref _blendSpread, out var blendSpread);
+        needsUpdate |= BlendSpread.GetChangedValue(context, ref _blendSpread, out var blendSpread);
         //var blendSpread = BlendSpread.GetValue(context);
 
         var totalMaxLength = MaxLength.GetValue(context).Clamp(1, 10000); // 10000 is going to be slow!

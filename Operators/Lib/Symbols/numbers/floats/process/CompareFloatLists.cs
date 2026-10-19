@@ -32,7 +32,7 @@ internal sealed class CompareFloatLists : Instance<CompareFloatLists>
 
         for (int index = 0; index < maxCount; index++)
         {
-            if (listA.Count < index || listB.Count < index)
+            if (listA.Count <= index || listB.Count <= index)
             {
                 differentElementCount++;
                 continue;

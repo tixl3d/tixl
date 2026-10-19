@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "8bede700-4e3e-42d8-8097-9744abdb8ad3"/*DistortAndShade*/,
-  "Description": "Uses two images to distort (create a bevel / emboss effect) that can look like textured glass\n\nAlso see [Displace]\n\nFor similar effects see: [Steps] [DetectEdges] [FakeLight]",
+  "Description": "Distorts ImageA by scaling it away from a center point, with the amount controlled by ImageB. This can look like textured glass.\n\nThe red and green channels of ImageB scale the horizontal and vertical distortion. ImageB can also blend a shading color over the result.\n\nAKA: refract, glass, lens\n\nSee also: [Displace], [Steps], [DetectEdges], [FakeLight]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -11,7 +11,7 @@
         "Y": 307.8106
       },
       "GroupTitle": "Settings",
-      "Description": "Defines a color which is multiplied with Image B\n\n(Only visible when the 'shading' value is increased)"
+      "Description": "Color blended over the result with Shading."
     },
     {
       "InputId": "2596e8fb-00aa-4704-9978-a880c1016c18"/*ImageB*/,
@@ -19,7 +19,8 @@
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Its red and green channels control the horizontal and vertical distortion."
     },
     {
       "InputId": "3a3acfbd-dca7-4f8a-b862-90eae2bc41ca"/*Center*/,
@@ -27,7 +28,7 @@
         "X": -236.10194,
         "Y": 162.53226
       },
-      "Description": "Shifts the direction from which image A is distorted by image B"
+      "Description": "Point (in UV coordinates, 0..1) that ImageA is scaled away from."
     },
     {
       "InputId": "824e1ad4-0d33-458f-aefe-f3780ab06529"/*ImageA*/,
@@ -44,7 +45,7 @@
         "Y": 117.53226
       },
       "GroupTitle": "Settings",
-      "Description": "Controls the direction and intensity of the effect"
+      "Description": "Strength of the distortion. Negative values scale towards the center."
     },
     {
       "InputId": "f942fc0d-ed5f-4594-8690-d464c5b12ed8"/*Shading*/,
@@ -52,7 +53,7 @@
         "X": -237.45099,
         "Y": 262.8106
       },
-      "Description": "Controls the visibility / brightness of image B"
+      "Description": "Blends ShadeColor over the result, weighted by ImageB."
     }
   ],
   "SymbolChildUis": [

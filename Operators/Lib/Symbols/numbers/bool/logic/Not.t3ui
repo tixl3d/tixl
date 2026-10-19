@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "51648ecd-05ee-40b3-b562-8518ada70918"/*Not*/,
-  "Description": "Creates and/or inverts a single Boolean value\n\nSimilar to [Boolean] (but inverted)",
+  "Description": "Inverts a boolean value.\n\nAKA: invert, negate\n\nSee also: [And], [Or], [Xor]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -9,8 +9,7 @@
       "Position": {
         "X": 0.0,
         "Y": 0.0
-      },
-      "Description": "Input for Boolean value"
+      }
     }
   ],
   "SymbolChildUis": [],

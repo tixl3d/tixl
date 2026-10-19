@@ -1,8 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "de8bc97a-8ef0-4d4a-9ffa-88046a2daf40"/*TimeConstBuffer*/,
-  "Description": "An obsolete helper that creates a constant buffer with different times.\n\nPlease use [Time] -> [FloatsToBuffer] instead.",
-  "SymbolTags": "24",
+  "Description": "Obsolete. Use [Time] with [FloatsToBuffer] instead.\n\nCreates a constant buffer with GlobalTime, Time, RunTime, BeatTime and LastFrameDuration.",
+  "SymbolTags": "4120",
   "InputUis": [],
   "SymbolChildUis": [],
   "OutputUis": [

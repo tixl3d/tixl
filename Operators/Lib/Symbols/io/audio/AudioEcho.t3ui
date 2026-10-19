@@ -8,7 +8,8 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Audio sources or audio graph nodes to process."
     },
     {
       "InputId": "a7c54fb0-0003-4c8a-9f31-0ab1cd2e0500"/*Volume*/,
@@ -16,6 +17,7 @@
         "X": -200.0,
         "Y": 45.0
       },
+      "Description": "Gain folded into all contained sources. 1 keeps the level unchanged.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true
@@ -26,6 +28,7 @@
         "X": -200.0,
         "Y": 90.0
       },
+      "Description": "Wet/dry mix from 0 (dry) to 1 (wet only).",
       "Min": 0.0,
       "Max": 1.0,
       "Scale": 0.001,
@@ -38,6 +41,7 @@
         "X": -200.0,
         "Y": 135.0
       },
+      "Description": "Echo time in seconds, clamped to 0.001..2.",
       "Min": 0.001,
       "Max": 2.0,
       "Scale": 0.001,
@@ -50,6 +54,7 @@
         "X": -200.0,
         "Y": 180.0
       },
+      "Description": "Amount fed back into the delay, clamped to 0..0.99. Higher values produce more repeats.",
       "Min": 0.0,
       "Max": 0.99,
       "Scale": 0.001,
@@ -61,7 +66,8 @@
       "Position": {
         "X": -200.0,
         "Y": 225.0
-      }
+      },
+      "Description": "Alternates the repeats between the left and right channel."
     }
   ],
   "SymbolChildUis": [],

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "fd5ac393-02a4-43ae-8cdf-64a947abbafa"/*UseTextureReference*/,
-  "Description": "Uses a reference to a [RenderTarget] to implement feedback effects.",
+  "Description": "Provides a reference to the texture of a [RenderTarget] to implement feedback effects.\n\nConnect the Reference output to the TextureReference input of a [RenderTarget]. The Texture and DepthTexture outputs then provide that render target's textures, which can be used inside the content it renders.\n\nAKA: feedback, reference",
   "SymbolTags": "8",
   "InputUis": [],
   "SymbolChildUis": [],

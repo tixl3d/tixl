@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "11958088-6358-4df1-b80f-c45fa6889a2e"/*PickGradient*/,
-  "Description": "Picks one of the connected gradients",
+  "Description": "Returns one of the connected gradients by index.\n\nSee also: [BlendGradients]",
   "InputUis": [
     {
       "InputId": "b8326dd4-9224-4d37-a490-7686184d8658"/*Index*/,

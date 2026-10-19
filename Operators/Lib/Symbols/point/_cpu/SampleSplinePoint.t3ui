@@ -1,14 +1,15 @@
 {
   "FormatVersion": 3,
   "Id": "688230de-a3fc-4740-a12d-9e2f98cad60a"/*SampleSplinePoint*/,
-  "Description": "Samples a position of the incoming spline.",
+  "Description": "Linearly interpolates a position and orientation along a CPU point list and draws SubTree there.\n\nThe SubTree is drawn with a transform built from the sampled position and orientation; it replaces the incoming object transform. The Position output returns the sampled position. Note that U = 1 reaches the second-to-last point of the list.\n\nSee also: [SampleCPoints]",
   "InputUis": [
     {
       "InputId": "73c4a495-d846-4762-9efd-fc47364920c1"/*U*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Normalized position along the list, clamped to 0..1."
     },
     {
       "InputId": "7c787d9d-38a4-4b09-9ec7-2a24123f9e03"/*Points*/,
@@ -24,7 +25,8 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Commands drawn at the sampled position and orientation."
     }
   ],
   "SymbolChildUis": [],

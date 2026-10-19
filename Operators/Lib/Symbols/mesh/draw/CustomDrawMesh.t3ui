@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "c78d114e-b404-491f-93a8-024a382586bd"/*CustomDrawMesh*/,
-  "Description": "TBD",
+  "Description": "Draws instances of a mesh at points with a custom HLSL pixel shader fragment.\n\nThe ShaderCode is inserted into the pixel shader. Call SetupFrag(pin) to prepare the PBR fragment data and write the final color into `c`, e.g. `c = ComputePbr();`. The parameters A-D, Offset, GainAndBias (via Biased(f)), Gradient (via SampleGradient(f)), Image and the connected Points are available in the code. The template file can be replaced to change the surrounding shader.\n\nSee also: [DrawMeshAtPoints], [CustomVertexShader], [CustomFaceShader]",
   "InputUis": [
     {
       "InputId": "05feb9d0-3bfc-4c96-b79e-b884132813e9"/*B*/,
@@ -16,7 +16,7 @@
         "X": 1887.6998,
         "Y": 3550.1223
       },
-      "Description": "This value controls transparency if a texture containing an alpha channel is used.",
+      "Description": "Fragments with an alpha below this value are discarded. 0 disables alpha testing.",
       "Scale": 0.01
     },
     {
@@ -24,8 +24,7 @@
       "Position": {
         "X": 2404.7104,
         "Y": 4175.523
-      },
-      "Description": "Selects the Blendmode."
+      }
     },
     {
       "InputId": "1aa04960-2b81-49dd-8389-31176df558c8"/*SpecularAA*/,
@@ -33,7 +32,7 @@
         "X": 1887.6997,
         "Y": 3620.1223
       },
-      "Description": "This reduces specular aliasing on silhouettes and high-frequency normalmap regions.",
+      "Description": "Reduces specular aliasing on silhouettes and in high-frequency normal map regions.",
       "Min": 0.0,
       "Max": 20.0,
       "Scale": 0.2,
@@ -46,7 +45,7 @@
         "Y": 4907.54
       },
       "GroupTitle": "Additional Options...",
-      "Description": "An optional shader graph with a color function. \n\nIt will use the world position.xyz to generate a color that is multiplied before drawing the fragment.\nTry [SphereField]->[SdfToColor]->.FragmentField."
+      "Description": "Optional field whose color is multiplied with each fragment, evaluated at the world position.\n\nTry [SphereSDF] -> [SDFToColor] -> FragmentField."
     },
     {
       "InputId": "3e7b6c69-f4d1-4f96-a693-a2162fe29a77"/*ShaderDefines*/,
@@ -54,7 +53,7 @@
         "X": 1762.7366,
         "Y": 5001.0
       },
-      "Description": "Additional shader code that can be injected before rendering. \nUsing this requirese knowledge about the internal implementation. Passing invalid code will break the rendering.\nThis is similar to shader flags but most powerful because it also allows to define methods that are applied before rendering the fragment.\n\nOptions are...\n\n#define USE_WORLDSPACE",
+      "Description": "Additional HLSL code inserted into the generated shader, e.g. #define statements or helper functions. Invalid code breaks rendering.",
       "Usage": "Default"
     },
     {
@@ -69,8 +68,7 @@
       "Position": {
         "X": 1747.6997,
         "Y": 3585.1223
-      },
-      "Description": "Select shading mode"
+      }
     },
     {
       "InputId": "4494c16e-1ff2-42db-9204-ac389451088f"/*GainAndBias*/,
@@ -91,7 +89,7 @@
         "X": 2050.3704,
         "Y": 4157.2036
       },
-      "Description": "Defines how the texture behaves when repeated.\n\nWrap: The texture repeats itself continuously\nMirror: The texture is mirrored and repeats infinitely.\nClamp: The texture is cut off at the edge\nBorder: Unclear\nMirrOnce: The texture is mirrored once, then cut off"
+      "Description": "How the texture is sampled outside the 0..1 UV range.\n\nWrap: repeats.\nMirror: repeats mirrored.\nClamp: extends the edge pixels.\nBorder: uses the sampler border color.\nMirrorOnce: mirrors once, then clamps."
     },
     {
       "InputId": "70f947b7-6e25-417a-94ce-cb4522f35797"/*Image*/,
@@ -106,6 +104,7 @@
         "X": 1911.0858,
         "Y": 5187.54
       },
+      "Description": "HLSL code inserted into the pixel shader. It must assign the output color to c.",
       "Usage": "Multiline"
     },
     {
@@ -114,7 +113,7 @@
         "X": 2404.7104,
         "Y": 4210.523
       },
-      "Description": "If enabled discards fragments sorted out by z-buffer.\n\nThis defines whether the mesh covers itself or is covered by or covers other meshes.",
+      "Description": "If enabled, fragments hidden behind already drawn geometry (according to the depth buffer) are discarded.",
       "AddPadding": "True"
     },
     {
@@ -123,14 +122,15 @@
         "X": 2404.7104,
         "Y": 4245.523
       },
-      "Description": "This defines whether the mesh covers itself or is covered by or covers other meshes."
+      "Description": "If enabled, the mesh writes into the depth buffer so it can occlude itself and geometry drawn later."
     },
     {
       "InputId": "93200afe-7b59-45a9-8662-4cfa477e011c"/*Points*/,
       "Position": {
         "X": 1296.666,
         "Y": 3268.5518
-      }
+      },
+      "Description": "Each point draws one instance of the mesh, using its position, rotation, scale and color."
     },
     {
       "InputId": "a0fc26e4-54af-4f65-a3ff-0a87a2389e8d"/*Filter*/,
@@ -139,7 +139,7 @@
         "Y": 4095.2783
       },
       "GroupTitle": "Texture Options...",
-      "Description": "Defines the mode for texture filtering"
+      "Description": "Texture filtering mode."
     },
     {
       "InputId": "a21fd13b-da4b-43f5-8697-85a2b5b9a1ff"/*Culling*/,
@@ -147,7 +147,7 @@
         "X": 2404.7104,
         "Y": 4064.43
       },
-      "Description": "Defines the transparency of the surfaces.\nNone: All surfaces are \"bothsided\" or always visible from all sides\nFront: The normals are flipped (frontside is transparent / backside visible)\nBack: Default (Frontside is visible / backside is invisible)"
+      "Description": "Which faces are hidden.\n\nNone: both sides are drawn.\nFront: front faces are hidden, only back faces are visible.\nBack: back faces are hidden (default)."
     },
     {
       "InputId": "ada34207-e581-4f35-9ef5-8f6122e0bde5"/*D*/,
@@ -162,8 +162,7 @@
       "Position": {
         "X": 1380.8081,
         "Y": 3942.326
-      },
-      "Description": "Input for Incoming Mesh Geometry"
+      }
     },
     {
       "InputId": "d5b24c95-4252-4b0b-ba37-0238f1957c4d"/*UseMaterialId*/,
@@ -171,6 +170,7 @@
         "X": -498.08478,
         "Y": 5388.4766
       },
+      "Description": "Selects a material by name from the materials available in the current context, instead of the active default material.",
       "Usage": "CustomDropdown"
     },
     {
@@ -194,7 +194,7 @@
         "Y": 4099.43
       },
       "GroupTitle": "Draw Style...",
-      "Description": "Toggles between colored Wireframe Rendering or default shading method."
+      "Description": "Solid or wireframe rendering."
     },
     {
       "InputId": "ede123e4-14cd-49f7-b7ce-c538ec381415"/*ShaderTemplatePath*/,
@@ -202,6 +202,7 @@
         "X": 1911.0857,
         "Y": 4942.54
       },
+      "Description": "Path of the HLSL template the shader code is inserted into.",
       "Usage": "FilePath"
     },
     {
@@ -226,7 +227,6 @@
         "Y": 3410.1223
       },
       "GroupTitle": "Appearance...",
-      "Description": "Defines the shading color of the mesh.\nIf a [SetMaterial] is used, these colors are multiplied with its settings.",
       "Scale": 0.01
     }
   ],

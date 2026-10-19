@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "f997d943-7a71-4fdf-b182-7a521a73ba27"/*DelayBoolean*/,
-  "Description": "",
+  "Description": "Delays a boolean signal by a number of frames.\n\nThe op only updates when time advances, so it holds its output while playback is paused. While the internal queue is still filling after a change of FrameCount, the output is false.\n\nSee also: [DelayTriggerChange]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -10,8 +10,7 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      },
-      "Description": "Boolean input"
+      }
     },
     {
       "InputId": "75dda16e-7f61-43d6-a41e-aee8c56ca13e"/*FrameCount*/,
@@ -20,7 +19,7 @@
         "Y": 45.0
       },
       "GroupTitle": "Delay",
-      "Description": "Defines by how many frames the change of the bool is delayed"
+      "Description": "Delay in frames (0…500). 0 passes the input through."
     }
   ],
   "SymbolChildUis": [],

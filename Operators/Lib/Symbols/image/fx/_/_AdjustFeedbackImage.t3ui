@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "d31a8463-0699-46d7-8e96-9abc6adb997d"/*_AdjustFeedbackImage*/,
-  "Description": "An internal image processing step that adjusts and stabilizes the values of a feedback buffer.",
+  "Description": "Internal helper. Adjusts and stabilizes the values of a feedback buffer.\n\nPushes very dark and very bright areas back towards the mid range, adds detected edges and shifts brightness, hue and saturation. Used by [AdvancedFeedback].",
   "SymbolTags": "16",
   "InputUis": [
     {
@@ -10,6 +10,7 @@
         "X": 132.69783,
         "Y": 29.375793
       },
+      "Description": "Brightens pixels whose average gray is below 0.1.",
       "Min": 0.0,
       "Max": 10.0,
       "Scale": 0.01
@@ -20,6 +21,7 @@
         "X": 133.35062,
         "Y": 394.5058
       },
+      "Description": "Distance of the neighbor samples in pixels.",
       "Min": 0.0,
       "Max": 50.0,
       "Scale": 0.01
@@ -54,6 +56,7 @@
         "X": 136.60469,
         "Y": 74.05339
       },
+      "Description": "Darkens pixels whose average gray is above 0.8.",
       "Min": 0.0,
       "Max": 10.0,
       "Scale": 0.01
@@ -70,7 +73,8 @@
       "Position": {
         "X": 133.35062,
         "Y": 349.5058
-      }
+      },
+      "Description": "Adds the color difference to neighboring pixels."
     }
   ],
   "SymbolChildUis": [

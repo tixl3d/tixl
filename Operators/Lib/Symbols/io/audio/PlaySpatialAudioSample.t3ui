@@ -1,23 +1,21 @@
 {
   "FormatVersion": 3,
   "Id": "8a3c9f2e-4b7d-4e1a-9c5f-7d2e8b1a6c3f"/*PlaySpatialAudioSample*/,
-  "Description": "A 3D positional audio player using BASS audio library's 3D sound system. It simulates real-world audio by positioning sound sources in 3D space relative to a listener (camera). Features include:\n\n- [Distance Attenuation]: Sound volume decreases with distance between MinDistance (full volume) and MaxDistance (silent)\n- [Directional Sound Cones]: Define inner/outer cone angles to create directional audio sources (e.g., speakers, spotlights)\n- [Listener Orientation]: Audio panning based on listener position and rotation for realistic spatial perception\n- [3D Mode]: Normal (absolute positioning), Relative (source attached to listener for footsteps/breathing), or Off (mono playback)",
+  "Description": "Plays an audio file as a 3D positional sound source relative to a listener (usually the camera).\n\n- Distance attenuation: volume decreases with distance between MinDistance (full volume) and MaxDistance (silent).\n- Directional cones: inner/outer cone angles create directional sources (e.g. speakers).\n- Listener orientation: panning follows the listener position and rotation.\n- 3D mode: Normal (absolute positioning), Relative (source attached to the listener, e.g. for footsteps) or Off (mono playback).\n\nSee also: [PlayAudioSample], [SpatialAudioPlayerGizmo]",
   "InputUis": [
     {
       "InputId": "159c7342-a8c8-4ffb-8a69-da3ffa0d3b71"/*ListenerPosition*/,
       "Position": {
         "X": -200.0,
         "Y": 900.0
-      },
-      "Description": "The 3D position of the listener (camera) in world space"
+      }
     },
     {
       "InputId": "1800cdcb-8863-423e-a2ec-901cf54e014c"/*StopAudio*/,
       "Position": {
         "X": -200.0,
         "Y": 150.0
-      },
-      "Description": "Stops the audio playback and resets the position to the beginning"
+      }
     },
     {
       "InputId": "2aa976e3-a63c-4c7e-80a5-a459b3240388"/*AudioFile*/,
@@ -25,7 +23,6 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "Description": "Path to the audio file to play",
       "Usage": "FilePath",
       "FileFilter": "mp3, wav, ogg, flac, aiff, aif, m4a, aac, wma"
     },
@@ -35,7 +32,7 @@
         "X": -200.0,
         "Y": 675.0
       },
-      "Description": "The rotation/orientation of the audio source in 3D space (affects directional sound)"
+      "Description": "Euler rotation of the source in degrees. Affects directional cones."
     },
     {
       "InputId": "42d8337a-d419-4038-a132-0e3934d25a2a"/*Audio3DMode*/,
@@ -50,8 +47,7 @@
       "Position": {
         "X": -200.0,
         "Y": 75.0
-      },
-      "Description": "Trigger to start or resume audio playback"
+      }
     },
     {
       "InputId": "7110399e-fd85-4053-9a49-cc09760dceb6"/*Volume*/,
@@ -75,7 +71,7 @@
         "X": -200.0,
         "Y": 1125.0
       },
-      "Description": "The outer angle of the sound cone (in degrees). Audio will be at OuterConeVolume outside of this"
+      "Description": "Outer cone angle in degrees (0..360). Outside it the audio plays at OuterConeVolume."
     },
     {
       "InputId": "77d9309e-0c9d-407f-b9b1-dd4b734fa51e"/*Visibility*/,
@@ -92,7 +88,7 @@
         "X": -200.0,
         "Y": 1050.0
       },
-      "Description": "The inner angle of the sound cone (in degrees). Audio plays at full volume inside of this"
+      "Description": "Inner cone angle in degrees (0..360). Audio plays at full volume inside it."
     },
     {
       "InputId": "7eb612cb-1dbf-4336-b91d-1042573bd7ff"/*MaxDistance*/,
@@ -100,7 +96,7 @@
         "X": -200.0,
         "Y": 825.0
       },
-      "Description": "The maximum distance at which the audio can still be heard (beyond this distance audio is silent)"
+      "Description": "Distance beyond which the audio is silent. Values not greater than MinDistance use MinDistance + 10."
     },
     {
       "InputId": "9c0b519b-45b1-4b28-8c0e-2eba7035a999"/*Speed*/,
@@ -116,7 +112,7 @@
         "X": -200.0,
         "Y": 375.0
       },
-      "Description": "When enabled, mutes the audio output without stopping playback"
+      "Description": "When enabled, mutes the audio output without stopping playback."
     },
     {
       "InputId": "b4d639d4-d96b-42e1-a250-efe57d7e9c5e"/*OuterConeVolume*/,
@@ -124,7 +120,7 @@
         "X": -200.0,
         "Y": 1200.0
       },
-      "Description": "The volume level of audio outside the outer cone angle (0.0 = silent, 1.0 = full, >1.0 = amplified)"
+      "Description": "Volume outside the outer cone angle, clamped to 0..1."
     },
     {
       "InputId": "b921cbd4-4803-48e8-9eb9-f05901cc5802"/*Seek*/,
@@ -132,15 +128,14 @@
         "X": -200.0,
         "Y": 525.0
       },
-      "Description": "Seek to a specific position in the audio file (in seconds)"
+      "Description": "Seeks to a normalized position in the audio file (0 = start, 1 = end)."
     },
     {
       "InputId": "d0c660d7-f90b-4e61-95ff-0ce7c76d9d67"/*PauseAudio*/,
       "Position": {
         "X": -200.0,
         "Y": 225.0
-      },
-      "Description": "Pauses the audio playback at the current position"
+      }
     },
     {
       "InputId": "db9a0aa1-95db-4da4-99fc-31c385773ca8"/*ListenerRotation*/,
@@ -156,8 +151,7 @@
         "X": -200.0,
         "Y": 600.0
       },
-      "GroupTitle": "3D Settings",
-      "Description": "The 3D position of the audio source in world space"
+      "GroupTitle": "3D Settings"
     }
   ],
   "SymbolChildUis": [],

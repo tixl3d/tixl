@@ -9,6 +9,7 @@
         "X": 0.0,
         "Y": 0.0
       },
+      "Description": "X: gain, Y: bias. 0.5/0.5 is linear. Both are clamped to 0.001..0.999.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,

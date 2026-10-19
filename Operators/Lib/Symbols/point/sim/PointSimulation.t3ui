@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "10507c42-1240-47cc-9569-5e3f1c733e99"/*PointSimulation*/,
-  "Description": "Creates a simulation buffer for applying simulation-like force fields, curl noise, or flocking simulation. \n\nIt initially creates a copy of the connected source point buffer. You can then reset to this initial state or constantly blend towards this original state. This can be very helpful to \"mix in\" a valid state and thus keep a simulation under control.\n\nAlthough the operators in the namespace lib.point.sim are optimized to apply modifications onto this \"simulated\" buffer, the [ParticleSystem] provides a more convenient setup for this.\n\nAlso see: [SimulateBoidsExample], [HowToUsePoints].",
+  "Description": "Creates a simulation buffer for applying simulation-like force fields, curl noise, or flocking simulations.\n\nIt initially creates a copy of the connected source point buffer. Operators in lib.point.sim then modify this copy on every frame. The simulation can be reset to the initial state or constantly blended towards it with MixOriginal, which helps to keep a simulation under control.\n\nThe [ParticleSystem] provides a more convenient setup for most particle effects.\n\nSee also: [SimulateBoidsExample]\nAlso check out the [HowToUsePoints] tutorial.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": -290.23273,
         "Y": 547.2019
       },
-      "Description": "Completely restores the buffer with the input buffer. This is equivalent to setting MixRate to 1.\n"
+      "Description": "Restores the simulation buffer from the input buffer. Equivalent to setting MixOriginal to 1."
     },
     {
       "InputId": "2f883ce2-421a-45f5-8de2-9e05d984b551"/*MinCapacity*/,
@@ -26,7 +26,7 @@
         "X": -290.2326,
         "Y": 652.2019
       },
-      "Description": "Restore input buffer with the MixRate."
+      "Description": "Enables the per-frame update of the simulation buffer. When disabled, the buffer is frozen until Reset is used."
     },
     {
       "InputId": "76263857-27ea-40f5-856f-983c6ddcbfe8"/*GPoints*/,

@@ -16,6 +16,7 @@
         "X": -200.0,
         "Y": 135.0
       },
+      "Description": "Size in metres of one texture repeat for StageTriplanar and StageTopDown.",
       "Min": 0.01,
       "Max": 100.0,
       "Scale": 0.01

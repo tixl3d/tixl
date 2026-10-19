@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "82a5f040-926b-4970-9da2-aa36de94b436"/*RgbaToColor*/,
-  "Description": "Creates a Color from 4 values (RGBA)\n\nSimilar to [AColor] and [PickColor] and the same as [Vector4]\nAlternative with more functions: [SampleGradient]\n\n\nFor the opposite see [Vector4Components]\n\nAlso see: [HSBToColor]\n",
+  "Description": "Creates a color from red, green, blue and alpha values.\n\nThe same as [Vector4] with different naming.\n\nSee also: [Vector4Components], [HSBToColor], [SampleGradient], [PickColor]",
   "InputUis": [
     {
       "InputId": "0742e707-1557-4f66-98d9-3f277416b7a3"/*G*/,
@@ -9,7 +9,6 @@
         "X": 0.0,
         "Y": 0.0
       },
-      "Description": "Green",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -21,7 +20,6 @@
         "X": 0.0,
         "Y": 0.0
       },
-      "Description": "Red",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -33,7 +31,6 @@
         "X": 0.0,
         "Y": 0.0
       },
-      "Description": "Blue",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -45,7 +42,6 @@
         "X": 0.0,
         "Y": 45.0
       },
-      "Description": "Alpha",
       "AddPadding": "True",
       "Min": 0.0,
       "Max": 1.0,

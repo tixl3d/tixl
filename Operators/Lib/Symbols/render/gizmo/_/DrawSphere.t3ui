@@ -1,14 +1,16 @@
 {
   "FormatVersion": 3,
   "Id": "3b97856c-5397-402e-85ca-5d227af348dd"/*DrawSphere*/,
-  "Description": "A simple helper to draw a sphere primitive.\n\nConsider using [SphereMesh] [DrawMesh] and [SetMaterial] instead.",
+  "Description": "Internal helper. Draws a sphere primitive, e.g. for gizmos.\n\nFor content, use [SphereMesh] with [DrawMesh] and [SetMaterial] instead.",
+  "SymbolTags": "16",
   "InputUis": [
     {
       "InputId": "347f8abe-dbd9-4939-9e28-4f25c73dddc9"/*WireFrame*/,
       "Position": {
         "X": -162.76312,
         "Y": -107.76315
-      }
+      },
+      "Description": "Draws the sphere as wireframe."
     },
     {
       "InputId": "408bb779-8007-49c3-9015-b04419981b03"/*Color*/,

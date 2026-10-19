@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "7d302c05-9898-4c56-a894-1f8f44b9b920"/*PointsFromMeshData*/,
-  "Description": "You can use [PointCloudFromObj] to load an object and then get points on its surface.",
+  "Description": "Scatters random points on the faces of a mesh face buffer, weighted by face area.\n\nData expects a structured buffer of faces including their cumulative area distribution, as used internally for distributing points on meshes. For most use cases [PointsOnMesh] is the better choice.",
   "InputUis": [
     {
       "InputId": "0f0652a0-8f5d-4f5c-ba1a-5bd3bd9a8f44"/*Count*/,
@@ -23,6 +23,7 @@
         "X": -418.0527,
         "Y": 1665.149
       },
+      "Description": "Random seed. Must not be 0, otherwise all points end up at the same location.",
       "Min": -1.0,
       "Max": 42.0,
       "Scale": -1.0

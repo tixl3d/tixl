@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "9e27c32d-b187-4b7c-9761-0c5bb4ae3c45"/*CameraWithRotation*/,
-  "Description": "An alternative camera operator",
+  "Description": "Sets a perspective camera that is oriented by rotation angles or a quaternion instead of a target point.\n\nThis is useful when the camera orientation comes from external sources like a tracking system or sensor data. Note that PositionOffset, AlsoOffsetTarget, RotationOffset and Up are only passed to the Reference output and do not affect the rendered view.\n\nSee also: [Camera], [OrbitCamera]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": 0.0,
         "Y": 135.0
-      }
+      },
+      "Description": "Added in degrees after RotationFactor has been applied."
     },
     {
       "InputId": "1b672745-d0fd-4611-862f-f27f59d3d416"/*Up*/,
@@ -24,6 +25,7 @@
         "X": 0.0,
         "Y": 45.0
       },
+      "Description": "Orientation used in Quaternion mode.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -71,7 +73,8 @@
       "Position": {
         "X": 0.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Multiplied with Rotation, e.g. to invert or scale individual axes of sensor data."
     },
     {
       "InputId": "766a9e48-9f3b-4204-973c-751bb7180400"/*ClipPlanes*/,
@@ -92,14 +95,16 @@
       "Position": {
         "X": 0.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Euler angles in degrees. Note that X rotates around the vertical axis and Y around the horizontal axis."
     },
     {
       "InputId": "d5761f3a-b2d0-435d-900c-3ff185373269"/*AspectRatio*/,
       "Position": {
         "X": 0.0,
         "Y": 0.0
-      }
+      },
+      "Description": "For values of 0 or below, the aspect ratio of the current render resolution is used."
     },
     {
       "InputId": "ddd02480-dcfd-4ae9-a057-ee56472bc0ec"/*FOV*/,
@@ -107,6 +112,7 @@
         "X": 0.0,
         "Y": 0.0
       },
+      "Description": "Vertical field of view in degrees.",
       "Min": 0.0,
       "Max": 180.0,
       "ClampMin": true,
@@ -117,7 +123,8 @@
       "Position": {
         "X": 0.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Euler: uses Rotation * RotationFactor + RotationOffset2 in degrees.\nQuaternion: uses RotationQuaternion (X, Y, Z, W), which should be normalized."
     }
   ],
   "SymbolChildUis": [],

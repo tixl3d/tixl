@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "332d7496-09ec-45b7-85b4-0653bb93dd62"/*SetVec2Var*/,
-  "Description": "",
+  "Description": "Sets a vec2 variable in the evaluation context that can be read by [GetVec2Var] in the connected subgraph.\n\nIf SubGraph is connected, the variable is set while the subgraph is executed and a previous value is restored afterwards. Without a connected subgraph the variable stays set for everything evaluated later.\n\nSee also: [GetVec2Var]",
   "InputUis": [
     {
       "InputId": "861f826a-9e0d-446e-8f80-ad51d7d9a09b"/*SubGraph*/,

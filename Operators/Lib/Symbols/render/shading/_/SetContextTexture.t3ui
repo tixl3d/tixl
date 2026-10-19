@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "944d1903-cd23-49ca-9b0d-2fc73bfcfd30"/*SetContextTexture*/,
-  "Description": "Store a texture in the context and access  it with [GetTextureFromContext] anywhere in the graph",
+  "Description": "Stores a texture in the evaluation context for the connected subgraph, where it can be accessed by [GetTextureFromContext].\n\nThis is used internally, e.g. by [SetEnvironment], to pass textures to draw operators without connecting them directly. If no texture is connected, a white pixel is used.\n\nSee also: [GetTextureFromContext]",
   "SymbolTags": "24",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "The subgraph in which the texture is available."
     },
     {
       "InputId": "1cd51956-0e0c-4b3f-b071-8d86cdcb7080"/*Id*/,
@@ -17,6 +18,7 @@
         "X": -200.0,
         "Y": 45.0
       },
+      "Description": "Name used to access the texture.",
       "Usage": "Default"
     },
     {

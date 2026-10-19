@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "dc9c4099-1c84-484d-abee-1d0fb4da6292"/*RemapVec3*/,
-  "Description": "Remaps an incoming Vec3 from one value range to another. This can be useful for conforming vectors to a range or for inverting components.\n",
+  "Description": "Remaps a Vector3 from one value range to another.\n\nThis can be useful for conforming vectors to a range or for inverting components.\n\nSee also: [Remap], [RemapVec2]",
   "InputUis": [
     {
       "InputId": "07308cd1-fe2c-47b2-a9c3-a8ea2b1f20d5"/*RangeInMax*/,
@@ -30,7 +30,8 @@
       "Position": {
         "X": -200.0,
         "Y": 225.0
-      }
+      },
+      "Description": "Normal: no limits.\nClamped: limits the result to the output range.\nModulo: wraps the result by the size of the output range."
     },
     {
       "InputId": "a341c041-a993-4e71-92ef-8239db7327f6"/*Value*/,

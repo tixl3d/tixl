@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "6f65e325-21cc-4bc5-9aea-4a691476e3bf"/*SampleCPoints*/,
-  "Description": "Samples a list of line points with cubic bezier spline interpolation. \nThis can useful to animate cameras and other objects.\n\nAKA: SampleCpuPoints, cpu points",
+  "Description": "Samples a position and orientation on a CPU point list using cubic Bézier interpolation.\n\nThe tangents follow the Z axis of the point orientations, so the path leaves and enters each point along its forward direction. The result is a single point that can animate cameras and other objects, e.g. with [CPointToCamera].\n\nAKA: SampleCpuPoints, cpu points",
   "SymbolTags": "16",
   "InputUis": [
     {
@@ -9,14 +9,16 @@
       "Position": {
         "X": -200.0,
         "Y": 150.0
-      }
+      },
+      "Description": "Length of the tangents relative to the segment length. 0 creates straight segments."
     },
     {
       "InputId": "6412d80e-d6fd-4c47-a8a4-6b88b5da95a5"/*SamplePos*/,
       "Position": {
         "X": -200.0,
         "Y": 75.0
-      }
+      },
+      "Description": "Index-based position: 0 is the first point, 1 the second, and so on. Fractions interpolate between neighbors."
     },
     {
       "InputId": "8cf06759-9c93-438f-ae5f-12a55a29b347"/*PointList*/,

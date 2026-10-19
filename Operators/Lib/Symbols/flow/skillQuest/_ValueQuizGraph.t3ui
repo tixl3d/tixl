@@ -1,7 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "64b2f2d5-0261-4f22-b30f-1f3a1421fe2e"/*_ValueQuizGraph*/,
-  "Description": "",
+  "Description": "Internal helper. Draws the value history graph for [ValueQuiz].",
+  "SymbolTags": "16",
   "InputUis": [
     {
       "InputId": "7148d3f0-7135-40c8-a204-d52a043d494d"/*DisplayValueRange*/,

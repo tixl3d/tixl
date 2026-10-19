@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "3631c727-36a0-4f26-ae76-ee9c100efc33"/*Loop*/,
-  "Description": "Executes the sub graph multiple times. This can be very useful for iterating a drawing function.\n\nYou can use [GetFloatVar] and [GetIntVar] to access the iterator variables. \n\nPlease note that this operation creates draw calls for each iteration and thus is not meant for loop counts exceeding 1000 or more.\n\nPlease check the example.\n\n\n",
+  "Description": "Executes the subgraph multiple times. This can be useful for iterating a drawing function.\n\nFor each iteration the index (as int and float) and a normalized progress (0..1) are written to context variables that can be read with [GetIntVar] and [GetFloatVar].\n\nEach iteration creates its own draw calls and invalidates the subgraph, so this is not meant for loop counts exceeding 1000 or more. For many instances, point-based instancing is far more efficient.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -26,6 +26,7 @@
         "X": -200.0,
         "Y": 135.0
       },
+      "Description": "Name of the float variable holding the normalized progress from 0 to 1. Default is \"f\".",
       "Usage": "Default"
     },
     {
@@ -34,6 +35,7 @@
         "X": -200.0,
         "Y": 45.0
       },
+      "Description": "Name of the int and float variable holding the iteration index. Default is \"i\".",
       "AddPadding": "True",
       "Usage": "Default"
     }

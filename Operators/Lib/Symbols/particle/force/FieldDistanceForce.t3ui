@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "42394232-51fa-4e75-851b-c2bca39de71a"/*FieldDistanceForce*/,
-  "Description": "Tries to keep particles within an SDF distance range.",
+  "Description": "Pulls particles towards the surface of a signed distance field.\n\nParticles outside the field are attracted towards its surface, particles inside are pushed outwards, so they gather on the surface.\n\nSee also: [FieldVolumeForce], [FollowMeshSurfaceForce]",
   "SymbolTags": "4224",
   "InputUis": [
     {
@@ -11,6 +11,7 @@
         "Y": 582.25055
       },
       "GroupTitle": "Surface response",
+      "Description": "Acceleration towards the surface for particles outside.",
       "Min": 0.0,
       "Max": 1.0,
       "Scale": 0.001
@@ -21,7 +22,8 @@
       "Position": {
         "X": 603.98566,
         "Y": 113.87631
-      }
+      },
+      "Description": "Signed distance field, e.g. from [SphereSDF] or [BoxSDF]."
     },
     {
       "InputId": "6e1099f2-78d7-4807-ba06-6b5354fb6ac9"/*NormalSamplingDistance*/,
@@ -29,28 +31,32 @@
         "X": 585.557,
         "Y": 652.25055
       },
-      "GroupTitle": "Options"
+      "GroupTitle": "Options",
+      "Description": "Offset used to sample the field gradient for the surface normal. Larger values give smoother normals."
     },
     {
       "InputId": "8145f581-65bf-4965-81e9-2aed3622039f"/*Amount*/,
       "Position": {
         "X": 585.557,
         "Y": 547.25055
-      }
+      },
+      "Description": "Overall strength of the force."
     },
     {
       "InputId": "be2df23e-d32c-4cfe-947b-352113ccdff8"/*Repulsion*/,
       "Position": {
         "X": 585.557,
         "Y": 617.25055
-      }
+      },
+      "Description": "Acceleration outwards for particles inside."
     },
     {
       "InputId": "fd65a976-577a-4c33-9660-ad7fac92c5f6"/*DecayWithDistance*/,
       "Position": {
         "X": 585.557,
         "Y": 727.25055
-      }
+      },
+      "Description": "How quickly the attraction decreases with the distance from the surface (exponent). 0 keeps it constant."
     }
   ],
   "SymbolChildUis": [

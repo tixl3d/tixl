@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "fc2a33fc-d957-4113-8096-92d4dcbe14b5"/*SphereSDF*/,
-  "Description": "Generates a procedural sphere field which can be rendered with [RaymarchField] and visualized with [VisualizeFieldDistance].\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline for signed distance fields, see [HowToRaymarchField].\n\nIt can be modified with [BendField], [TransformField], [PolarRepeat] and more.\n\nSimilar nodes: [BoxSDF], [ChainLinkSDF], [FractalSDF].\n\nTo use a Mesh made of polygons refer to [SphereMesh].",
+  "Description": "Generates a sphere as an SDF.\n\nRender the result with [RaymarchField] and inspect it with [VisualizeFieldDistance]. Modify it with [TransformField], [BendField], [RepeatPolar] and other field operators.\n\nSee also: [BoxSDF], [TorusSDF], [SphereMesh]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -9,16 +9,14 @@
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      },
-      "Description": "Defines the size / radius of the sphere field"
+      }
     },
     {
       "InputId": "ca582e39-37d7-4df6-b942-e2330f2bf2c6"/*Center*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      },
-      "Description": "Transforms the center of the object"
+      }
     }
   ],
   "SymbolChildUis": [],

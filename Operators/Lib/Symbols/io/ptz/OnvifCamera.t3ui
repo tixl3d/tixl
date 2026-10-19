@@ -105,7 +105,7 @@
         "X": -200.0,
         "Y": 675.0
       },
-      "Description": "Enables detailed logging to the T3 console for debugging connection or PTZ issues."
+      "Description": "Enables detailed logging to the TiXL console for debugging connection or PTZ issues."
     }
   ],
   "SymbolChildUis": [],

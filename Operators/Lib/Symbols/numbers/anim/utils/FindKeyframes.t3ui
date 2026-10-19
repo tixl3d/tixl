@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "127e1eb9-aca9-4f8e-b0c9-b709c8a0745a"/*FindKeyframes*/,
-  "Description": "Experimental operator to access keyframe times of another operator instance. This can be useful to build interactive use cases that rely on setting the playback time.",
+  "Description": "Returns time and value of keyframes of an animated parameter of another operator (experimental).\n\nConnect any output of the animated operator to AnimatedOp. This can be useful for interactive setups that set the playback time.\n\nSee also: [SetKeyframes], [SetPlaybackTime]",
   "SymbolTags": "64",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Index of the animation curve across all animated parameters of the operator (a Vec3 parameter has three curves)."
     },
     {
       "InputId": "1e606db7-7ff8-4cc8-9156-a88d7c27a662"/*WrapIndex*/,
@@ -23,7 +24,8 @@
       "Position": {
         "X": 197.0,
         "Y": 373.0
-      }
+      },
+      "Description": "- Index: Returns the keyframe with index IndexOrTime.\n- Nearest: Returns the keyframe closest to time IndexOrTime.\n- SampleAndDistance: Returns the curve value at time IndexOrTime and the time offset to the closest keyframe."
     },
     {
       "InputId": "8cbf43b8-899a-42d4-87c7-cabb43a5d219"/*IndexOrTime*/,
@@ -48,7 +50,8 @@
       "Position": {
         "X": 197.0,
         "Y": 463.0
-      }
+      },
+      "Description": "Selects one of the operators connected to AnimatedOp."
     }
   ],
   "SymbolChildUis": [],

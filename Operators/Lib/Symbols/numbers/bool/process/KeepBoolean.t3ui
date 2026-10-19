@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "743e18c7-eed5-40df-9a86-7caa996d94a2"/*KeepBoolean*/,
-  "Description": "Keeps the state of flag until it is reset.",
+  "Description": "Holds a boolean value depending on the Freeze input.\n\nThe TimeSinceFreeze output returns the time since Freeze last switched to true.\n\nAKA: latch, sample, hold\n\nSee also: [FlipFlop], [CacheBoolean]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -17,7 +17,8 @@
       "Position": {
         "X": -200.0,
         "Y": 225.0
-      }
+      },
+      "Description": "- FreezeWhileTrue: Passes Value through while Freeze is false and holds it while Freeze is true.\n- UpdateWhenSwitchingToTrue: Samples Value only when Freeze switches from false to true."
     },
     {
       "InputId": "5a571583-7544-4a79-9211-ab1225260e71"/*Freeze*/,

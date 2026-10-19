@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "79db48d8-38d3-47ca-9c9b-85dde2fa660d"/*ForwardBeatTaps*/,
-  "Description": "A helper op that forwards beat tapping to TiXL interfaces. \nThis can be useful for tapping BPM rate with a MIDI controller.\n[MidiInput] [Trigger] [Gamepad]\n",
+  "Description": "Forwards beat tapping to the TiXL playback, e.g. to tap the BPM rate with a MIDI controller.\n\nSee also: [MidiInput], [Trigger], [Gamepad]",
   "SymbolTags": "64",
   "InputUis": [
     {

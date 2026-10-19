@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "945014cf-ba0b-40b3-85f9-f7deed70fa8d"/*PointTrail*/,
-  "Description": "Same as [PointTrail] with added internal features for [DrawBillboards]\nKeeps previous copies of points in a cycling buffer that can be used to draw trails and other effects.\n\nCan be used with [DrawPoints] [DrawLines] [DrawBillboards] and similar",
+  "Description": "Keeps previous copies of points in a cycling buffer and outputs them sorted as trails, e.g. for drawing motion trails.\n\nCompared to [PointTrailFast], the result is reordered every frame so each trail is a continuous line. It can also write the position within the trail into F1, F2 or Scale (e.g. to fade or taper the trail) and add separators between trails.\n\nUse with [DrawLines], [DrawPoints], [DrawBillboards] or similar.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,6 @@
         "X": 966.77136,
         "Y": 248.25946
       },
-      "Description": "Enables / disables the trail",
       "AddPadding": "True"
     },
     {
@@ -18,15 +17,15 @@
       "Position": {
         "X": -231.61281,
         "Y": 628.3215
-      }
+      },
+      "Description": "Writes the normalized position within the trail (0...1) into the selected attribute."
     },
     {
       "InputId": "98366176-fdf3-42e1-afbc-a87fc0f9d82d"/*Reset*/,
       "Position": {
         "X": -360.35825,
         "Y": -286.86237
-      },
-      "Description": "Resets the trail when clicked"
+      }
     },
     {
       "InputId": "9a3998f9-f68a-4f8f-84dc-643e89f8c4f2"/*TrailLength*/,
@@ -34,14 +33,15 @@
         "X": -791.5747,
         "Y": -278.4427
       },
-      "Description": "Defines the length of the trail by the amount of points added"
+      "Description": "Number of copies kept for each point."
     },
     {
       "InputId": "aaad0484-2d4f-4936-880d-67cd3aaab1b6"/*WriteLineSeparators*/,
       "Position": {
         "X": -1069.6505,
         "Y": 652.9029
-      }
+      },
+      "Description": "Turns the last point of each trail into a separator so trails of different points are not connected when drawn as lines."
     },
     {
       "InputId": "f22a4834-6333-4ed5-b07d-237692c61dc6"/*GPoints*/,
@@ -49,8 +49,7 @@
       "Position": {
         "X": -1012.46356,
         "Y": 365.0464
-      },
-      "Description": "Point input"
+      }
     }
   ],
   "SymbolChildUis": [

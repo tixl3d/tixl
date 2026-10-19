@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "60adca24-4ae4-474a-b205-a814d89a7d53"/*AnalyzePianoMidi*/,
-  "Description": "Takes a List<float> from [MidiInput] and computes average, last velocity and last played note.",
+  "Description": "Analyzes a list of MIDI note values from [MidiInput] and outputs a velocity pulse and the last played note.\n\nVelocityPulse rises with every newly played note and decays over time. LastNormalizedNote is the index of the strongest new note, normalized to 0 to 1 over the list length.",
   "InputUis": [
     {
       "InputId": "3e02c9d5-28bb-4913-b983-bc5464c9f387"/*Input*/,
@@ -15,7 +15,8 @@
       "Position": {
         "X": 0.0,
         "Y": 150.0
-      }
+      },
+      "Description": "Multiplier for VelocityPulse."
     },
     {
       "InputId": "b5761d3f-4c56-47c7-a2d5-06ec7baa7d57"/*GainAndBias*/,
@@ -23,6 +24,7 @@
         "X": 0.0,
         "Y": 225.0
       },
+      "Description": "X: gain, Y: bias. Shapes the velocity response.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -35,7 +37,8 @@
       "Position": {
         "X": 0.0,
         "Y": 75.0
-      }
+      },
+      "Description": "Factor the pulse is multiplied with on each update. Lower values decay faster."
     }
   ],
   "SymbolChildUis": [],

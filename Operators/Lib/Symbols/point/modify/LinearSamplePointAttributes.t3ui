@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "bb4803d2-0c23-470a-94a8-c477e4f7dd8c"/*LinearSamplePointAttributes*/,
-  "Description": "A variation of [SamplePointAttributes] that uses the point index instead of texture mapping.",
+  "Description": "Modifies point attributes from the channels of an image sampled along the point index instead of the point position.\n\nVariation of [AttributesFromImageChannels]: the first point samples the left edge of the image and the last point the right edge.",
   "SymbolTags": "8",
   "InputUis": [
     {

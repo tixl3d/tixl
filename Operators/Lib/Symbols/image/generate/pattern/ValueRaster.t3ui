@@ -1,14 +1,15 @@
 {
   "FormatVersion": 3,
   "Id": "3f955def-cf86-4bd4-be98-ff1adea8c495"/*ValueRaster*/,
-  "Description": "",
+  "Description": "Draws a graph-paper grid of major and minor lines for a given value range that adapts its spacing in decades (powers of ten).\n\nUseful as a background for plotting values. Lines around the horizontal zero line are emphasized and tinted.\n\nAKA: grid, graph, axis, scale",
   "InputUis": [
     {
       "InputId": "00915862-77b3-4205-8c6a-3a51f4e9cc41"/*MinorLineWidth*/,
       "Position": {
         "X": 556.8036,
         "Y": 313.85886
-      }
+      },
+      "Description": "Line width in pixels of the subdivision lines. They fade out when they get too dense."
     },
     {
       "InputId": "03fa6f20-7bdc-4af2-8ad7-d95cd58d4e69"/*Image*/,
@@ -29,21 +30,24 @@
       "Position": {
         "X": 416.8036,
         "Y": 348.85886
-      }
+      },
+      "Description": "Minimum pixel distance between grid lines. Larger values give fewer lines."
     },
     {
       "InputId": "3037801b-e7c8-4aa1-9c23-5c815d5eb02e"/*RangeY*/,
       "Position": {
         "X": 416.80356,
         "Y": 208.85886
-      }
+      },
+      "Description": "Value range shown from the bottom to the top edge."
     },
     {
       "InputId": "317deea3-2d0d-4493-9008-6c0102a9a7e3"/*RangeX*/,
       "Position": {
         "X": 416.80356,
         "Y": 138.85886
-      }
+      },
+      "Description": "Value range shown from the left to the right edge."
     },
     {
       "InputId": "8c5601d2-a39a-4a02-9fef-0ebe0dc8330e"/*MixOriginal*/,
@@ -51,6 +55,7 @@
         "X": 556.8036,
         "Y": 418.85886
       },
+      "Description": "Amount of the connected Image's alpha kept behind the grid.",
       "Min": 0.0,
       "Max": 1.0
     },
@@ -66,7 +71,8 @@
       "Position": {
         "X": 556.8036,
         "Y": 278.85886
-      }
+      },
+      "Description": "Line width in pixels of the decade lines."
     },
     {
       "InputId": "e8f46ada-11da-4212-8751-5793b95cbb8d"/*Resolution*/,

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "0e1d5f4b-3ba0-4e71-aa26-7308b6df214d"/*CountInt*/,
-  "Description": "A helper operator that counts evaluations as an integer.",
+  "Description": "Counts up or down by Delta each time it is triggered.\n\nWhile TriggerIncrement is true, Delta is added on every evaluated frame unless OnlyCountChanges is enabled. TriggerReset (and the first evaluation) set the counter to DefaultValue.\n\nAKA: counter, accumulate\n\nSee also: [HasIntChanged], [RandomChoiceIndex]\nAlso check out the [HowToAnimate] tutorial.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -23,21 +23,24 @@
       "Position": {
         "X": -200.0,
         "Y": 180.0
-      }
+      },
+      "Description": "If not 0, the counter wraps with this value. Negative counts stay negative."
     },
     {
       "InputId": "518a8bd6-d830-4f73-ac83-49be2fd4b09d"/*OnlyCountChanges*/,
       "Position": {
         "X": -200.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Only count when a trigger changes from false to true, not on every frame it is true."
     },
     {
       "InputId": "6ebe2842-a8fc-4800-8296-c8664c804e3c"/*TriggerDecrement*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Subtracts Delta. Ignored while TriggerIncrement is true."
     },
     {
       "InputId": "abe64676-ccf7-4163-b4da-26d8b7179af4"/*Delta*/,

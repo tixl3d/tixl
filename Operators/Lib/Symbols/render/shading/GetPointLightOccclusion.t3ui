@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "574d636f-64e6-4f07-ac17-49754d2c3599"/*GetPointLightOccclusion*/,
-  "Description": "Returns a float list with the visibility of the current point lights.\n\nThis means: This operator can recognize if a point light is being occluded by another object. It can be used to control the intensity of effects like [LenseFlare], glow, godrays etc.\n\nUse the operator called [UseRenderTarget] to get a reference to the current render target and connect its Depth output.\nThe output value can then be connected to [LenseFlareSetup] Brightness parameter.\n\n[UseRenderTarget] -> [GetPointLightOcclusion] -> [LenseFlareSetup]\n\n",
+  "Description": "Computes how visible the current point lights are by testing their positions against a depth buffer.\n\nThis can be used to fade effects like lens flares, glows or god rays when a light gets occluded by other objects. It must be evaluated within the context of the point lights and the camera, e.g. from a [PointLight] further right in the graph.\n\nThe Occlusion output returns the damped visibility (0 to 1) of the light selected by LightIndex, e.g. for the Brightness of [LenseFlareSetup]. The Output texture contains the visibility of all 8 lights as one pixel each.\n\nSee also: [LenseFlareSetup], [PointLight]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": 374.63342,
         "Y": 88.783585
-      }
+      },
+      "Description": "Near and far clip planes of the camera."
     },
     {
       "InputId": "9a427b76-4976-4f7e-9033-1ba08b743c23"/*DepthMap*/,
@@ -17,21 +18,24 @@
       "Position": {
         "X": 707.34576,
         "Y": 447.39413
-      }
+      },
+      "Description": "Depth buffer of the rendered scene, e.g. from [RenderTarget]."
     },
     {
       "InputId": "a2a707cf-67ed-4107-8d06-1e28cbf539f8"/*LightIndex*/,
       "Position": {
         "X": 1249.3779,
         "Y": 528.86426
-      }
+      },
+      "Description": "Index of the point light returned by the Occlusion output."
     },
     {
       "InputId": "ef73ef3c-ad47-48ab-abaf-aec450a8459f"/*Damping*/,
       "Position": {
         "X": 1249.3779,
         "Y": 633.86426
-      }
+      },
+      "Description": "Smooths changes of the Occlusion output over time."
     }
   ],
   "SymbolChildUis": [

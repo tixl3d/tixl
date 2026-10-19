@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "ca4fe8c4-cf61-4196-84e4-d69dc8869a25"/*GetPbrParameters*/,
-  "Description": "Fetches the current render setting buffers from the context. This includes things like materials.",
+  "Description": "Internal helper. Gets the current PBR material buffers and textures from the evaluation context, as set by [SetMaterial] and [SetEnvironment].",
   "SymbolTags": "16",
   "InputUis": [],
   "SymbolChildUis": [],

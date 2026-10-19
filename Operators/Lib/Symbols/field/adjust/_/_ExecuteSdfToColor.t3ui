@@ -1,7 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "5b8daf99-7a4d-4491-a50f-403cb598bca4"/*_ExecuteSdfToColor*/,
-  "Description": "",
+  "Description": "Internal helper. Implements the shader code for [SDFToColor].",
+  "SymbolTags": "16",
   "InputUis": [
     {
       "InputId": "6c5a8f58-e0a7-4f6f-b061-4a0a5cf1b1a8"/*GradientSrv*/,

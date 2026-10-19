@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "8a6ab5ec-caa6-4baa-a9d1-2079af22685c"/*OscillateVec3*/,
-  "Description": "A helper that combines 3 sin waves into a vector\n\nSimilar Operators [OscillateVec2] [AnimValue] [AnimVec2] [AnimVec3]",
+  "Description": "Combines three sine waves into a Vec3.\n\nSee also: [OscillateVec2], [AnimValue], [AnimVec2], [AnimVec3]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -52,7 +52,7 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "Description": "Input to override the standard time"
+      "Description": "If connected, used instead of the current time."
     },
     {
       "InputId": "b3b06a36-ea91-4b26-88ac-dede32123ee6"/*Phase*/,

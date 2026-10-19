@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "dcd04bb7-4531-40ab-bb18-26a3bc269dc4"/*DrawPointsDOF*/,
-  "Description": "",
+  "Description": "Draws a point buffer as camera-facing sprites sorted by their distance to the camera.\n\nBefore drawing, the points are sorted into SortBucketCount distance buckets of BucketSize, which reduces artifacts with transparent blending.\n\nSee also: [DrawPoints]",
   "SymbolTags": "1024",
   "InputUis": [
     {
@@ -24,7 +24,8 @@
       "Position": {
         "X": 2421.6711,
         "Y": 4925.107
-      }
+      },
+      "Description": "Points closer to the camera than this distance fade out; they are fully visible at twice the distance. 0 disables the fade."
     },
     {
       "InputId": "74ab516a-f694-45ba-af2c-4f7c7171a560"/*PointSize*/,
@@ -40,14 +41,16 @@
       "Position": {
         "X": 2281.6711,
         "Y": 5363.588
-      }
+      },
+      "Description": "Hides points behind other geometry."
     },
     {
       "InputId": "7e15e9be-6ec9-4975-af1d-9a3642bb5c70"/*InputField*/,
       "Position": {
         "X": 2421.6714,
         "Y": 4516.7314
-      }
+      },
+      "Description": "Optional field that multiplies the color depending on the world position of each point."
     },
     {
       "InputId": "7f568085-7c31-4017-a1bc-638aa9f3a1ae"/*DofShape*/,
@@ -61,7 +64,8 @@
       "Position": {
         "X": -2302.2664,
         "Y": 4576.394
-      }
+      },
+      "Description": "Distance range covered by one sorting bucket, in world units."
     },
     {
       "InputId": "98cb7c7b-97c4-4352-87d7-8222f500c56b"/*BlendMode*/,
@@ -75,14 +79,16 @@
       "Position": {
         "X": 2421.6711,
         "Y": 4890.107
-      }
+      },
+      "Description": "Pixels with an alpha below this value are discarded."
     },
     {
       "InputId": "aa874a05-b142-43c0-8db0-1bd6d57ecf19"/*ScaleFactor*/,
       "Position": {
         "X": 2314.0002,
         "Y": 4998.8496
-      }
+      },
+      "Description": "Point attribute that multiplies the size: None, F1 or F2."
     },
     {
       "InputId": "ad390566-379e-499b-bec8-5b8d2360cc90"/*Color*/,
@@ -96,21 +102,24 @@
       "Position": {
         "X": 1973.4253,
         "Y": 5027.0815
-      }
+      },
+      "Description": "Multiplies the size with the point's Scale.x and Scale.y."
     },
     {
       "InputId": "e285bab3-01cd-46ec-8f22-aa5ac6d5f5dd"/*SortBucketCount*/,
       "Position": {
         "X": -1768.9087,
         "Y": 4411.025
-      }
+      },
+      "Description": "Number of distance buckets used for sorting (2 to 256)."
     },
     {
       "InputId": "f95cb054-e723-4ff1-bc6c-9b6efe7f5168"/*EnableZWrite*/,
       "Position": {
         "X": 2281.6711,
         "Y": 5398.588
-      }
+      },
+      "Description": "Writes the points to the depth buffer so they can hide geometry drawn later."
     }
   ],
   "SymbolChildUis": [

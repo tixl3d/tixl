@@ -1,7 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "2d7c4a9e-6b13-4f58-9a0e-c5d1e8f3b726"/*_BuildChunkDrawData*/,
-  "Description": "Builds the per-face draw table for [DrawMeshChunksAtPoints]: for every point the faces of the chunk it references.\n\nThe table depends only on the structure (point count, ChunkIndices, the mesh's chunk definitions), so it is rebuilt only when one of those changes; the two small structure buffers are read back once at that moment instead of every frame. UpdateEveryFrame forces a rebuild per frame for chunk indices that change on the GPU without changing size - slow, use only when needed.",
+  "Description": "Internal helper that builds the per-face draw table for [DrawMeshChunksAtPoints].\n\nFor every point it lists the faces of the chunk it references. The table depends only on the point count, ChunkIndices and the mesh's chunk definitions, so it is rebuilt only when one of those changes; the structure buffers are then read back once instead of every frame. UpdateEveryFrame forces a rebuild per frame for chunk indices that change on the GPU without changing size, which is slow.",
+  "SymbolTags": "16",
   "InputUis": [
     {
       "InputId": "3c8f1b6d-a2e5-4d79-b4a0-9e6c2f5d8a17"/*ChunkIndices*/,

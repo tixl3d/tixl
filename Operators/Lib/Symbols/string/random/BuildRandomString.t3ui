@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "7b21f10b-3548-4a23-95df-360addaeb03d"/*BuildRandomString*/,
-  "Description": "Produces a wide selection of text writer effects that \ncan be linked to AudioReactions. Interesting setups are\n\n[MockStrings]->[GetStringPart]->[ScrambleString]",
+  "Description": "Builds up a string by repeatedly inserting or overwriting text, producing a wide selection of text writer effects.\n\nOn each frame with Insert enabled, InsertString and Separator are written at the current position, which then advances. This can be driven by audio reactions or triggers.\n\nTips:\n- Connect [MockStrings] or [PickStringPart] to InsertString for interesting results.\n\nSee also: [BlendStrings], [StringBuilderToString]",
   "SymbolTags": "72",
   "InputUis": [
     {
@@ -9,21 +9,24 @@
       "Position": {
         "X": -200.0,
         "Y": 135.0
-      }
+      },
+      "Description": "Writes InsertString on every update while true."
     },
     {
       "InputId": "1559c0e9-ba56-447f-8241-03d8d59ac205"/*OverwriteOffset*/,
       "Position": {
         "X": -200.0,
         "Y": 270.0
-      }
+      },
+      "Description": "Position step per insertion in OverwriteAtFixedOffset mode."
     },
     {
       "InputId": "38ce7f47-c117-47a2-aeea-609716c60555"/*MaxLength*/,
       "Position": {
         "X": -200.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Maximum length of the result. 0 or less returns an empty string."
     },
     {
       "InputId": "3ea4f12e-7184-45bc-a523-ef6a2e1c5c3d"/*ScrambleSeed*/,
@@ -38,6 +41,7 @@
         "X": -200.0,
         "Y": 405.0
       },
+      "Description": "Clears the string while true.",
       "AddPadding": "True"
     },
     {
@@ -46,6 +50,7 @@
         "X": -200.0,
         "Y": 135.0
       },
+      "Description": "Fraction (0..1) of characters that get scrambled per update.",
       "AddPadding": "True"
     },
     {
@@ -54,6 +59,7 @@
         "X": -200.0,
         "Y": 360.0
       },
+      "Description": "DontWrap, WrapAtWords, WrapAtCharacters, WrapToFillBlock or SolidBlock.",
       "AddPadding": "True"
     },
     {
@@ -62,6 +68,7 @@
         "X": -200.0,
         "Y": 180.0
       },
+      "Description": "Appended after each insertion. Use \"\\n\" for line breaks.",
       "Usage": "Default"
     },
     {
@@ -69,7 +76,8 @@
       "Position": {
         "X": -200.0,
         "Y": 180.0
-      }
+      },
+      "Description": "Enables scrambling of existing characters."
     },
     {
       "InputId": "960179bd-286f-4629-bbcb-cd31aa9c9ae2"/*InsertString*/,
@@ -78,6 +86,7 @@
         "Y": 180.0
       },
       "GroupTitle": "Settings",
+      "Description": "Text written at the current position.",
       "Usage": "Default"
     },
     {
@@ -85,7 +94,8 @@
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Line length for wrapping, clamped to 1..1000."
     },
     {
       "InputId": "ccfac8a9-0954-4869-a47c-b66c714f6545"/*OverrideBuilder*/,
@@ -93,6 +103,7 @@
         "X": -200.0,
         "Y": 90.0
       },
+      "Description": "Optional external string builder to write into instead of the internal one.",
       "AddPadding": "True"
     },
     {
@@ -100,14 +111,16 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Insert: inserts at the current position.\nOverwrite: overwrites existing characters.\nOverwriteAtFixedOffset: overwrites and advances the position by OverwriteOffset."
     },
     {
       "InputId": "f977faaf-1840-4a75-9bc5-43176f2e88e9"/*JumpToRandomPos*/,
       "Position": {
         "X": -200.0,
         "Y": 315.0
-      }
+      },
+      "Description": "Moves the write position to a random location before each insertion."
     }
   ],
   "SymbolChildUis": [],

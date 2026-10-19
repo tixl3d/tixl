@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "83b8fc42-a200-4c3d-85dc-035b4f478069"/*ClipTime*/,
-  "Description": "Returns the current time in Bars.\nIt is never affected by 'Idle Motion'. This means that when the time is paused, this operator does not count up.\nThis operator should behave the same as [Time2] with Mode set to 'Playbacktime'.",
+  "Description": "Returns the current playback time in bars.\n\nIt is never affected by idle motion: when playback is paused, it does not count up. This is equivalent to [Time] with Mode set to PlaybackTime.",
   "SymbolTags": "8",
   "InputUis": [],
   "SymbolChildUis": [],

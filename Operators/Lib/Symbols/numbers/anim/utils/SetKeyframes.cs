@@ -39,7 +39,7 @@ internal sealed class SetKeyframes : Instance<SetKeyframes>
         if(TriggerClear.Value && !TriggerClear.HasInputConnections)
             TriggerClear.SetTypedInputValue(false);
 
-        var opIndex = OpIndex.GetValue(context).Clamp(0, AnimatedOp.CollectedInputs.Count);
+        var opIndex = OpIndex.GetValue(context).Clamp(0, AnimatedOp.CollectedInputs.Count - 1);
         var slot = AnimatedOp.CollectedInputs[opIndex];
         var requestCurveIndex = CurveIndex.GetValue(context);
 

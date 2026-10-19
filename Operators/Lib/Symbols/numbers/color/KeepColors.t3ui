@@ -1,28 +1,31 @@
 {
   "FormatVersion": 3,
   "Id": "2ccc7c43-5a5f-4b4e-aca7-078a5121bdb3"/*KeepColors*/,
-  "Description": "",
+  "Description": "Collects colors into a list, inserting the newest color at the front.\n\nWhile AddColorToList is true, the current Color is added on every update. The list is truncated to MaxLength.\n\nSee also: [PickColorFromList], [CombineColorLists]",
   "InputUis": [
     {
       "InputId": "8308d81b-3d9a-40a5-a2a3-8fb5eac201cc"/*AddColorToList*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "While true, Color is prepended to the list on every update."
     },
     {
       "InputId": "af59eb80-a803-421b-8a0a-d11e307bc49f"/*MaxLength*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Maximum number of colors kept (1…100000). Older colors are dropped."
     },
     {
       "InputId": "b2e05ddc-0000-453a-a531-87a6739d0c85"/*Reset*/,
       "Position": {
         "X": -200.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Clears the list."
     },
     {
       "InputId": "be2d418b-ce5e-4545-abc0-4e56b5665a75"/*Color*/,

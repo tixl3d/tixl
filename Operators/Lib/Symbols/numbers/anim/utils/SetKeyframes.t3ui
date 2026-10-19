@@ -1,14 +1,15 @@
 {
   "FormatVersion": 3,
   "Id": "97ea4288-2deb-44ea-8714-8374c71fda88"/*SetKeyframes*/,
-  "Description": "Allows to record keyframes to a connected animated operator",
+  "Description": "Records keyframes into an animated parameter of another operator.\n\nConnect any output of the animated operator to AnimatedOp; the target parameter must already be animated. Keys are written at the current time.\n\nSee also: [FindKeyframes]",
   "InputUis": [
     {
       "InputId": "198c6328-1b1c-4ba3-81dd-3b109ac86353"/*OpIndex*/,
       "Position": {
         "X": 197.0,
         "Y": 463.0
-      }
+      },
+      "Description": "Selects one of the operators connected to AnimatedOp."
     },
     {
       "InputId": "36b4906d-1cab-4589-b368-d63c5a9a3ba6"/*Value*/,
@@ -17,14 +18,15 @@
         "X": -200.0,
         "Y": 150.0
       },
-      "Description": "The value that should be written to the keyframe"
+      "Description": "Value written to the keyframe."
     },
     {
       "InputId": "6c918e42-d313-4921-8b8f-6485f3f5cb6c"/*CurveIndex*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Index of the animation curve across all animated parameters of the operator."
     },
     {
       "InputId": "92ecce97-9412-44f6-808e-9036f3f99ce4"/*AnimatedOp*/,
@@ -33,7 +35,7 @@
         "X": 197.0,
         "Y": 328.0
       },
-      "Description": "NOTE: These must be animated!",
+      "Description": "Output of the operator to write into. Its parameter must be animated.",
       "Min": -100.0,
       "Max": 100.0,
       "Scale": 0.01
@@ -51,7 +53,7 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "Description": "When to set keyframes.  Try using it with [AudioReaction].WasHit"
+      "Description": "Writes a keyframe when switching to true, e.g. connected to [AudioReaction] WasHit."
     }
   ],
   "SymbolChildUis": [],

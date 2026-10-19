@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "f634e126-8834-46ea-bd6e-5ebfdc8b0733"/*Bloom*/,
-  "Description": "A more versatile and faster version of [Glow].\n\nThis uses a down sampling and blurring cascade to create multiple blurred copies of the original image and then combines these layers additively while applying a gradient.\n\nPlease also try the presets and check the documentation of the parameters.\n\nUseful Ops for a PostFX Pipeline: [MotionBlur] [DepthOfField] [ChromaticAbberation] [Bloom] [Glow] [Grain] [Blur]",
+  "Description": "Adds a glow around bright areas of the image. A more versatile and faster version of [Glow].\n\nIt uses a downsampling and blurring cascade to create multiple blurred copies of the image and then combines these layers additively while applying a gradient.\n\nAKA: glare, halo, glow\n\nTips:\n- Try the presets and check the documentation of the parameters.\n- Use [ToneMapping] to clamp or compress the result.\n\nSee also: [MotionBlur], [DepthOfField], [ChromaticAbberation], [Glow], [Grain], [Blur]",
   "InputUis": [
     {
       "InputId": "2064aba1-658e-4795-a4fc-5be1026d7064"/*MaxLevels*/,
@@ -18,7 +18,7 @@
         "X": 1598.7069,
         "Y": 1531.1553
       },
-      "Description": "Limit the glow to brighter areas.",
+      "Description": "Limits the glow to brighter areas.",
       "Min": 0.0,
       "Max": 5.0,
       "Scale": 0.1,
@@ -66,7 +66,7 @@
         "Y": 1566.1553
       },
       "GroupTitle": "Settings",
-      "Description": "The overall intensity values below 1 are hardly noticeable.",
+      "Description": "The overall intensity. Values below 1 are hardly noticeable.",
       "Min": 0.0,
       "Max": 100.0,
       "Scale": 0.01,
@@ -80,7 +80,7 @@
         "Y": 1706.1553
       },
       "GroupTitle": "Advanced",
-      "Description": "Can be used to colorize or shape the glow. \nIt's multiplied onto each blur kernel with the more blurred levels on the right.\n\nTIP:\n- You can also adjust the brightness above 1 (hold CTRL while dragging the brightness slider) to amplify levels like the core."
+      "Description": "Can be used to colorize or shape the glow. It is multiplied onto each blur level, with the more blurred levels on the right.\n\nTips:\n- You can also adjust the brightness above 1 (hold Ctrl while dragging the brightness slider) to amplify levels like the core."
     },
     {
       "InputId": "c6a0cadc-9e1c-40ac-97f1-d9271b5376df"/*Blur*/,
@@ -96,7 +96,7 @@
         "X": 1598.7069,
         "Y": 1741.1553
       },
-      "Description": "Clamp the blur kernels before combining. \nThis will give a slightly different look. It will _NOT_ clamp the results. Use [ToneMap] for that."
+      "Description": "Clamps the blur levels before combining them. This gives a slightly different look.\n\nIt does not clamp the result. Use [ToneMapping] for that."
     }
   ],
   "SymbolChildUis": [

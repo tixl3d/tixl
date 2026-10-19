@@ -31,7 +31,8 @@
       "Position": {
         "X": 0.0,
         "Y": 180.0
-      }
+      },
+      "Description": "Field values mapped to ColorA (X) and ColorB (Y). Values outside are clamped."
     },
     {
       "InputId": "aa992691-1a1c-4c52-9024-341812603d35"/*ColorA*/,

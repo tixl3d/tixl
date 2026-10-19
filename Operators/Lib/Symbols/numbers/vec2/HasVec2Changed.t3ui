@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "cba315e4-6113-4a2e-969e-e4c2e914c293"/*HasVec2Changed*/,
-  "Description": "Checks if the change of the incoming vector exceeded the given threshold.",
+  "Description": "Returns true when the distance between the incoming Vector2 and its value on the previous frame exceeds Threshold.\n\nThe Delta output gives the change since the previous frame.\n\nSee also: [HasVec3Changed], [HasValueChanged]",
   "InputUis": [
     {
       "InputId": "36c294ef-3b4c-43fa-a21a-07393d888899"/*PreventContinuedChanges*/,
@@ -30,7 +30,8 @@
       "Position": {
         "X": -200.0,
         "Y": 135.0
-      }
+      },
+      "Description": "Minimum time in seconds between two detected changes."
     }
   ],
   "SymbolChildUis": [],

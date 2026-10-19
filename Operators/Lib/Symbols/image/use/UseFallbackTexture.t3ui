@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "b470fdf9-ac0b-4eb9-9600-453b8c094e3f"/*UseFallbackTexture*/,
-  "Description": "Automatically replaces a non-loadable texture with a predefined backup. \nFor example to define a backup if a [LoadImageFromUrl] cannot be reached due to a lack of Internet.\n\nNeeds a [LoadImage].\n\nUseful combinations: [UnsplashAPI]",
+  "Description": "Outputs a fallback texture if the main texture is missing.\n\nFor example, this can provide a replacement if an image from [LoadImageFromUrl] cannot be loaded because of a missing internet connection.\n\nAKA: fallback, default, placeholder\n\nSee also: [FirstValidTexture], [UnsplashAPI]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -11,7 +11,7 @@
         "X": -200.0,
         "Y": 45.0
       },
-      "Description": "Input for Backup / Fallback texture"
+      "Description": "Texture used if TextureA is null."
     },
     {
       "InputId": "91bffbba-b815-44d7-8f93-3238376935bf"/*TextureA*/,
@@ -20,7 +20,7 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "Description": "Main Texture input"
+      "Description": "Main texture."
     }
   ],
   "SymbolChildUis": [],

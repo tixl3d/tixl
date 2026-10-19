@@ -16,6 +16,7 @@
         "X": -200.0,
         "Y": 100.0
       },
+      "Description": "Length of a triggered tone in seconds. 0 or less sustains indefinitely. Ignored in Gate mode.",
       "Min": 0.01,
       "Max": 10.0,
       "Scale": 0.01,
@@ -26,7 +27,8 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "In Trigger mode a rising edge plays the tone for Duration. In Gate mode the tone sounds while this is true."
     },
     {
       "InputId": "5a7e9f2c-8d4b-4c1f-9a5e-3b2d6f7c8a4e"/*WaveformType*/,
@@ -41,6 +43,7 @@
         "X": -200.0,
         "Y": 50.0
       },
+      "Description": "Tone frequency in Hz, clamped to 20..20000. 0 or less uses 440 Hz.",
       "Min": 20.0,
       "Max": 20000.0,
       "Scale": 1.0,
@@ -53,6 +56,7 @@
         "X": -200.0,
         "Y": 300.0
       },
+      "Description": "ADSR envelope: X = attack, Y = decay, W = release in seconds; Z = sustain level 0..1.\nInvalid values fall back to 0.01, 0.1, 0.7 and 0.3.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -70,7 +74,8 @@
       "Position": {
         "X": -200.0,
         "Y": 225.0
-      }
+      },
+      "Description": "Gate: the tone sounds while Trigger is true.\nTrigger: a rising edge on Trigger plays the tone for Duration."
     }
   ],
   "SymbolChildUis": [],

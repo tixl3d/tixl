@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "6ae8ebb8-3174-463d-9ffb-e14e12eb3029"/*GetBpm*/,
-  "Description": "Returns the current BPM rate",
+  "Description": "Returns the current BPM rate.",
   "SymbolTags": "8",
   "InputUis": [],
   "SymbolChildUis": [],

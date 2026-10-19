@@ -66,7 +66,8 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Optional texture that is passed through to the texture output, e.g. the camera's video feed."
     },
     {
       "InputId": "c323a93a-3a45-069a-da23-4a5a6a7a8a9a"/*Pan*/,

@@ -1,14 +1,15 @@
 {
   "FormatVersion": 3,
   "Id": "ef3a1411-e88c-43a8-83b4-931fdbf16c75"/*DampPeakDecay*/,
-  "Description": "Compares the current input value to the current damped value. If the input value is great, it is immediately used and no damping applied.\nIf the input value is small, it is decaying slowly, similar to the peak indicators of equalizer visualizations.",
+  "Description": "Follows rising values immediately and lets falling values decay slowly.\n\nThis is similar to the peak indicators of equalizer visualizations.\n\nSee also: [Damp], [DampFloatList]",
   "InputUis": [
     {
       "InputId": "a2b624b4-ed36-45ec-a901-efe6d45aa067"/*Decay*/,
       "Position": {
         "X": 36.0,
         "Y": 379.0
-      }
+      },
+      "Description": "Share of the remaining distance the value falls per frame at 60 fps. Higher values decay faster."
     },
     {
       "InputId": "d548e650-ca2b-4a24-bca0-16c846fa9224"/*Value*/,

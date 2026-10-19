@@ -1,21 +1,23 @@
 {
   "FormatVersion": 3,
   "Id": "e7cdc103-4be4-4465-b77d-a66917cec5f6"/*KeyboardInputAsInt*/,
-  "Description": "Returns integer values from 0 to 9 for pressed numeric keys.",
+  "Description": "Returns integer values from 0 to 9 for pressed numeric keys.\n\nSee also: [KeyboardInput]",
   "InputUis": [
     {
       "InputId": "2aa9e2e4-1830-4483-88e5-1f2ca50bfe3f"/*Zone*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "NumRow: number keys above the letters.\nNumpad: number keys on the numeric keypad."
     },
     {
       "InputId": "8846aa50-e4d0-433c-9e5b-013a93f17f79"/*Mode*/,
       "Position": {
         "X": -200.0,
         "Y": 75.0
-      }
+      },
+      "Description": "IsDown: returns the number while the key is held and 0 otherwise.\nKeepActive: keeps the last pressed number after release."
     }
   ],
   "SymbolChildUis": [],

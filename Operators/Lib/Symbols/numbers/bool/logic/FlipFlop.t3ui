@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "ec1ba1fb-ceb7-4d4f-86b4-389589c7e6f0"/*FlipFlop*/,
-  "Description": "Holds the \"activated\" state of a boolean. Also check [DelayTrigger].",
+  "Description": "Switches to true when triggered and stays true until reset.\n\nSee also: [FlipBool], [KeepBoolean], [DelayTriggerChange]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -24,7 +24,8 @@
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "While true, the output is set to DefaultValue."
     }
   ],
   "SymbolChildUis": [],

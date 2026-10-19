@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "7ff47023-622e-4834-8de5-2438d56c09bd"/*DetectPulse*/,
-  "Description": "Detects if rapid changes within an input signal exceed a threshold. This can be useful for detecting beats in OSC or audio signals.",
+  "Description": "Detects if rapid changes within an input signal exceed a threshold. This can be useful for detecting beats in OSC or audio signals.\n\nThe value is compared to a damped copy of itself. A pulse is reported for a single frame when the value drops below the damped value by more than Threshold.\n\nSee also: [HasValueChanged], [PeakLevel]",
   "SymbolTags": "64",
   "InputUis": [
     {
@@ -9,14 +9,16 @@
       "Position": {
         "X": -200.0,
         "Y": 135.0
-      }
+      },
+      "Description": "Minimum time in bars between two pulses."
     },
     {
       "InputId": "4424863b-b25c-449a-8ac9-16796617af7b"/*Damping*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Damping of the reference value, between 0 and 1. Higher values react more slowly."
     },
     {
       "InputId": "b9a322a3-b85d-4e51-ad1c-17d61a6f5f5e"/*Threshold*/,
@@ -24,6 +26,7 @@
         "X": -200.0,
         "Y": 45.0
       },
+      "Description": "Minimum difference between damped and current value that triggers a pulse.",
       "Min": 0.0,
       "Max": 1000.0,
       "Scale": 0.001

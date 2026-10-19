@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "48136477-cb34-416c-a968-7c9d82da9d9b"/*SdfToVector*/,
-  "Description": "Converts an SDF to a direction vector field by sampling the gradient.",
+  "Description": "Converts an SDF to a vector field pointing away from the surface, by sampling the gradient of the distance.\n\nThe XYZ channels hold the normalized direction, W keeps the distance. Use it with [ApplyVectorField].",
   "SymbolTags": "72",
   "InputUis": [
     {
@@ -10,6 +10,7 @@
         "X": -200.0,
         "Y": 45.0
       },
+      "Description": "Sampling offset for the gradient. Larger values smooth the directions.",
       "Min": -180.0,
       "Max": 180.0
     },

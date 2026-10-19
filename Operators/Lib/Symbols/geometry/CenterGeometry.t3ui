@@ -16,7 +16,8 @@
       "Position": {
         "X": 0.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Point of the bounding box moved to the origin, in -0.5..0.5 per axis. (0,0,0) is the center."
     }
   ],
   "SymbolChildUis": [],

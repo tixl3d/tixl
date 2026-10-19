@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "e4a38f3c-bd4c-406a-9979-bb683d79b39b"/*CountDown*/,
-  "Description": "Prints a formatted string counting down a duration or time to/since a fixed date.",
+  "Description": "Formats the time span between now and LaunchTime as a string.\n\nThe sign is not shown, so the output works both for counting down to and up from a date.\n\nSee also: [NowAsDateTime], [DateTimeToString]",
   "SymbolTags": "192",
   "InputUis": [
     {
@@ -10,6 +10,7 @@
         "X": -200.0,
         "Y": 0.0
       },
+      "Description": "Target date and time, parsed with the system culture (e.g. 2026-12-31 20:00). Invalid values use today at midnight.",
       "Usage": "Default"
     },
     {
@@ -18,6 +19,7 @@
         "X": 0.0,
         "Y": 0.0
       },
+      "Description": "TimeSpan format string like dd\\:hh\\:mm\\:ss. Literal characters must be escaped with a backslash.",
       "Usage": "Default"
     }
   ],

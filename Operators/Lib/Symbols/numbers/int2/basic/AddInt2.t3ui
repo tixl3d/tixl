@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "40f0b1c9-9f87-489c-a6b9-ff9a5bd263ec"/*AddInt2*/,
-  "Description": "Adds two int2",
+  "Description": "Adds two Int2 values component-wise.\n\nSee also: [AddInt], [ScaleResolution]",
   "SymbolTags": "1",
   "InputUis": [
     {

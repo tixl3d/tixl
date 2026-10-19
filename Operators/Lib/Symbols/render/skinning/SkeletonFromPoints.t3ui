@@ -1,14 +1,15 @@
 {
   "FormatVersion": 3,
   "Id": "9c2e5f70-b813-4d4a-a8c6-1d05e94f72b6"/*SkeletonFromPoints*/,
-  "Description": "Builds a skeleton from a CPU point list, e.g. a spline chain read back with [ReadPointsFromGpu].\n\nThe points define the rest pose in object space. By default each point parents to the previous one (separator points with NaN scale split chains); with UseF2AsParent the F2 attribute is read as parent point index. The resulting setup feeds [PoseToSkinMatrices], [BindToSkeleton] and [PoseFromPoints].\n\nTip: Feed a static snapshot (PointsToCPU without UpdateContinuously) so the rest pose doesn't change every frame.",
+  "Description": "Builds a skeleton from a CPU point list, e.g. a spline chain read back with [ReadPointsFromGpu].\n\nThe points define the rest pose in object space. By default each point parents to the previous one (separator points with NaN scale split chains); with UseF2AsParent the F2 attribute is read as parent point index. The resulting setup feeds [PoseToSkinMatrices], [BindToSkeleton] and [PoseFromPoints].\n\nTips:\n- Feed a static snapshot ([ReadPointsFromGpu] without UpdateContinuously) so the rest pose does not change every frame.",
   "InputUis": [
     {
       "InputId": "68c1d4a7-95f0-4832-8ce5-b7304a61e9d2"/*UseF2AsParent*/,
       "Position": {
         "X": 0.0,
         "Y": 45.0
-      }
+      },
+      "Description": "If enabled, the F2 attribute of each point is used as the index of its parent point. Otherwise each point parents to the previous one."
     },
     {
       "InputId": "d05b39e8-42a6-4c17-b8f9-6273c580ad14"/*Points*/,
@@ -16,7 +17,8 @@
       "Position": {
         "X": 0.0,
         "Y": 0.0
-      }
+      },
+      "Description": "CPU point list defining the joints in their rest pose."
     }
   ],
   "SymbolChildUis": [],

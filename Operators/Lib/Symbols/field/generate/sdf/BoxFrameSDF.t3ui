@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "f393bb49-bea5-42f7-a437-c6896bdfd7d8"/*BoxFrameSDF*/,
-  "Description": "Generates a procedural Box Frame field which can be rendered with [RaymarchField] and visualized with [VisualizeFieldDistance].\nCan be used with [RepeatFieldLimit] to generate a chain.\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToRaymarchField].\n\nIt can be modified with [BendField], [TransformField], [PolarRepeat] and more.\n\nSimilar nodes: [BoxSDF], [OctahedronSDF], [PyramidSDF].",
+  "Description": "Generates the edges of a box as an SDF.\n\nRender the result with [RaymarchField] and inspect it with [VisualizeFieldDistance]. Modify it with [TransformField], [BendField], [RepeatPolar] and other field operators. Use [RepeatFieldLimit] to build chains or lattices.\n\nSee also: [BoxSDF], [OctahedronSDF], [PyramidSDF]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": -200.0,
         "Y": 45.0
       },
-      "Description": "Defines how thick is the frame",
+      "Description": "Thickness of the frame bars.",
       "AddPadding": "True",
       "Min": -0.002,
       "Max": 0.5,
@@ -22,7 +22,7 @@
         "X": -200.0,
         "Y": 45.0
       },
-      "Description": "Defines the size of the box\nx = width\ny = height\nz = depth",
+      "Description": "Width, height and depth of the box.",
       "AddPadding": "True"
     },
     {
@@ -31,15 +31,14 @@
         "X": -200.0,
         "Y": -45.0
       },
-      "Description": "Scales uniformly in all directions"
+      "Description": "Multiplies Size."
     },
     {
       "InputId": "c811ef83-e183-4b14-a1e6-3ea2fd840596"/*Center*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      },
-      "Description": "Position in space"
+      }
     }
   ],
   "SymbolChildUis": [],

@@ -1,7 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "c0045cbb-7eaf-438e-872e-9e0ba08040a4"/*_ExecuteSdfToColor_Old*/,
-  "Description": "The internal implementation of [SDFToColor].\n\nYou will never need to use this directly.",
+  "Description": "Internal helper. Old implementation of [_SDFToColor_Old].",
+  "SymbolTags": "16",
   "InputUis": [
     {
       "InputId": "4a095164-ec1d-4aa6-abb8-7cca0107b45a"/*InputField*/,

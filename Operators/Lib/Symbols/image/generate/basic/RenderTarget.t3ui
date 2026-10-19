@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "f9fe78c5-43a6-48ae-8e8c-6cdbbc330dd1"/*RenderTarget*/,
-  "Description": "The primary method of rendering 3D data into a 2D image texture. You will need this for all post-processing image effects and many other applications.",
+  "Description": "Renders 3D content (meshes, points, lines, drawing commands) into a 2D texture.\n\nThis is the primary method of converting a 3D scene into an image, which is required for all image effects and many other applications. It also outputs a depth buffer for effects like [DepthOfField] or [ColorGradeDepth].\n\nAKA: render, framebuffer, rendertexture, rtt\n\nSee also: [UseTextureReference]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -22,7 +22,7 @@
         "X": -100.96112,
         "Y": 167.75378
       },
-      "Description": "In combination with [UseRenderTarget] this can be used for feedback effects."
+      "Description": "Allows accessing the texture with [UseTextureReference] to implement feedback effects."
     },
     {
       "InputId": "3782e42e-6a36-4ba2-aaa2-3ee401a3cdf1"/*WithNormalBuffer*/,
@@ -45,7 +45,7 @@
         "X": -100.96112,
         "Y": 32.753784
       },
-      "Description": "You will need a depth buffer for all Z-Buffer sorting.\nCombining a depth buffer with MultiSampling requires internal downsampling: This basically means doubling the GPU memory consumption."
+      "Description": "A depth buffer is required for correct occlusion (Z-buffer sorting). Combining a depth buffer with multisampling requires internal downsampling, which roughly doubles GPU memory consumption."
     },
     {
       "InputId": "8bb4a4e5-0c88-4d99-a5b2-2c9e22bd301f"/*ClearColor*/,
@@ -69,7 +69,7 @@
         "X": -100.96112,
         "Y": 257.75378
       },
-      "Description": "Enables / Disables rendering. This can be very useful when connected to [Once] for caching the rendering after an initial update."
+      "Description": "Enables or disables rendering. Connect a [Once] to keep the image after an initial update."
     },
     {
       "InputId": "e882e0f0-03f9-46e6-ac7a-709e6fa66613"/*Multisampling*/,

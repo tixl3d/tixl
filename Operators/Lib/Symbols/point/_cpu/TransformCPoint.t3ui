@@ -1,14 +1,15 @@
 {
   "FormatVersion": 3,
   "Id": "5f2df291-4667-474e-9e84-3b64d4cc0555"/*TransformCPoint*/,
-  "Description": "Transforms a single point on the CPU, optionally incrementally - for camera animations or other interactive effects. Use [TransformCPoints] to transform a whole point list.\n\nAKA: TransformCpuPoint, cpu points",
+  "Description": "Transforms the first point of a CPU point list, optionally accumulating the transform on every update.\n\nWith Incremental enabled, Translation and Rotation are added on every update to the previous result instead of the input point. This can be used for camera flights or other interactive movement. The Position output returns the resulting position. Use [TransformCPoints] to transform a whole point list.\n\nAKA: TransformCpuPoint, cpu points",
   "InputUis": [
     {
       "InputId": "3e7ba85d-48d0-413e-99c7-9a8742c2653e"/*Rotation*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Rotation in radians, applied in the point's local frame: X is yaw (around Y), Y is pitch (around X), Z is roll (around Z)."
     },
     {
       "InputId": "95b26a7e-2360-4830-b605-da1bd8ae882a"/*Translation*/,
@@ -22,21 +23,24 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "WorldSpace moves along the world axes, PointSpace along the axes of the point orientation."
     },
     {
       "InputId": "bbbeba31-df6b-4f5f-8d00-71adb5e6f9c6"/*Lists2*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Exactly one point list must be connected. Only its first point is used."
     },
     {
       "InputId": "e8cadc7e-d45f-43f7-9c85-040da77a3af7"/*Incremental*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Adds Translation and Rotation on every update, continuing from the last result instead of the input point."
     }
   ],
   "SymbolChildUis": [],

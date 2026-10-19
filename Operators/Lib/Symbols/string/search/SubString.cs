@@ -19,6 +19,12 @@ internal sealed class SubString : Instance<SubString>
         var start = Start.GetValue(context);
         var length = Length.GetValue(context);
             
+        if (string.IsNullOrEmpty(str))
+        {
+            Result.Value = string.Empty;
+            return;
+        }
+
         var clampStart = start.Clamp(0, str.Length);
         var clampedLength = length.Clamp(0, str.Length - clampStart);
             

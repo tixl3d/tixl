@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "ab496711-8b99-4463-aac9-b41fdf46608d"/*RepeatMeshAtPoints*/,
-  "Description": "Creates a new mesh that repeats the incoming mesh at each point.\nNote: \nWarning: With detailed meshes, or very large scaled meshes and/or a very high number of points, this Operator can take up a lot of resources.\n\nAlso see: [DrawMeshAtPoints]",
+  "Description": "Creates a single mesh that contains a copy of the input mesh at each point.\n\nEach copy uses the position, rotation and color of its point. The result is a regular mesh that can be modified further with mesh operators. With detailed meshes or many points, the resulting mesh can become very large; for pure rendering [DrawMeshAtPoints] is much more efficient.\n\nAKA: copy, clone, instance, scatter\n\nSee also: [DrawMeshAtPoints], [GridRepeatMesh], [RadialRepeatMesh]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": 927.6345,
         "Y": 1430.9271
       },
-      "Description": "Non-Uniformly scales the Meshes.",
+      "Description": "Non-uniform scale of each copy.",
       "AddPadding": "True"
     },
     {
@@ -18,7 +18,8 @@
       "Position": {
         "X": 1067.6344,
         "Y": 1714.1138
-      }
+      },
+      "Description": "Additionally scales each copy by a point attribute.\n\nNone: no extra scaling.\nF1: scales by the point's F1.\nF2: scales by the point's F2."
     },
     {
       "InputId": "631a4691-0774-40c7-a8fa-4b9ee76854d6"/*ApplyPointScale*/,
@@ -26,7 +27,7 @@
         "X": 927.6344,
         "Y": 1570.9271
       },
-      "Description": "Controls whether the \"Stretching\" values from operators such as [RandomizePoints] or [TransformPoints] are used."
+      "Description": "Stretches each copy by the point's Scale attribute, e.g. set by [RandomizePoints] or [TransformPoints]."
     },
     {
       "InputId": "a7960188-ff39-4176-9d22-bc9d7e0cb2b5"/*Points*/,
@@ -35,7 +36,7 @@
         "X": 263.15887,
         "Y": 1332.1099
       },
-      "Description": "Input for Points such as [SpherePoints], [GridPoints] or [PointsOnMesh] etc."
+      "Description": "Points such as [SpherePoints], [GridPoints] or [PointsOnMesh]."
     },
     {
       "InputId": "abd961af-e76f-415b-a6ac-afb1cf08a1de"/*Scale*/,
@@ -44,7 +45,7 @@
         "Y": 1535.9271
       },
       "GroupTitle": "Settings",
-      "Description": "Defines the size of the meshes that are distributed at the points."
+      "Description": "Uniform scale of each copy."
     },
     {
       "InputId": "c981484b-1cef-4b53-abeb-f9f3ba4466e6"/*TexCoord2Factor*/,
@@ -53,7 +54,7 @@
         "Y": 1749.1138
       },
       "GroupTitle": "VAT Fx",
-      "Description": "Shift TexCoord2 vertically, useful to unsync VAT animations"
+      "Description": "Multiplies the V coordinate of TexCoord2 by a point attribute (None, F1 or F2).\n\nUseful to desynchronize vertex animation textures, see [DisplaceMeshVAT]."
     },
     {
       "InputId": "f8fb6e15-00dd-485e-a7fe-fa75c77182c2"/*InputMesh*/,
@@ -63,7 +64,7 @@
         "Y": 1482.6903
       },
       "GroupTitle": "Input",
-      "Description": "Input for Meshes like [LoadObj], [TorusMesh] etc."
+      "Description": "Mesh such as [LoadObj] or [TorusMesh]."
     }
   ],
   "SymbolChildUis": [

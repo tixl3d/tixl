@@ -1,7 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "071c9aad-ecbf-47bf-b2f6-c43e8212d5b1"/*_DrawBillboardsOld*/,
-  "Description": "Draws points as animated camera-aligned sprites. \nThe point's .W attributes control the lookup within the \"animation\" tracks for color and size.\n\nThis can be used for particle-like animations or to generate procedural designs.\n\nThis operator has been deprecated. Consider using [DrawBillboards] instead.\n",
+  "Description": "Obsolete. Draws points as animated camera-aligned sprites.\n\nThe W attribute of the points controls the lookup within the \"animation\" tracks for color and size. Use [DrawBillboards] instead.",
+  "SymbolTags": "4096",
   "InputUis": [
     {
       "InputId": "0555c899-3049-4d47-a2da-0febf6871754"/*BlendMod*/,

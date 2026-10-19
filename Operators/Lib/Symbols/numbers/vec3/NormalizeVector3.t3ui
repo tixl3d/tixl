@@ -1,15 +1,14 @@
 {
   "FormatVersion": 3,
   "Id": "7805285e-e74b-48f5-8228-20bbb178e828"/*NormalizeVector3*/,
-  "Description": "Normalizes a Vec3",
+  "Description": "Scales a Vector3 to the length given by Factor, keeping its direction.\n\nVectors shorter than 0.001 are not normalized.\n\nSee also: [Magnitude]",
   "InputUis": [
     {
       "InputId": "2405182f-a918-451a-b039-46e71a541e4d"/*A*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      },
-      "Description": "Vec3 input"
+      }
     },
     {
       "InputId": "8ae77ac6-7417-4f74-9409-0ded96407f23"/*Factor*/,
@@ -17,7 +16,7 @@
         "X": -200.0,
         "Y": 45.0
       },
-      "Description": "Factor for normalization",
+      "Description": "Length of the result.",
       "AddPadding": "True"
     }
   ],

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "8b4c95a8-d598-45a5-baa7-157120585695"/*SpatialDisplaceSDF*/,
-  "Description": "3D spatial distortion of an SDF \nSamples simplex noise at 3 positions to apply spatial warping",
+  "Description": "Warps the space of the incoming SDF with 3D simplex noise.\n\nThe position is offset by three independent noise samples, one per axis, before the field is evaluated. Unlike [NoiseDisplaceSDF], this distorts the shape itself instead of only changing the distance. Strong values break the Lipschitz continuity and may need a lower StepSize in [RaymarchField].",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": -200.0,
         "Y": 285.0
-      }
+      },
+      "Description": "Offset of the noise field. Animate it to make the distortion flow."
     },
     {
       "InputId": "15a6c491-16af-4351-b7c3-2541b0aee4cd"/*InputField*/,
@@ -24,14 +25,16 @@
       "Position": {
         "X": -200.0,
         "Y": 135.0
-      }
+      },
+      "Description": "Maximum offset of the sample position in world units."
     },
     {
       "InputId": "62f081b3-98a5-4614-8d62-911ce1397b60"/*vScale*/,
       "Position": {
         "X": -200.0,
         "Y": 285.0
-      }
+      },
+      "Description": "Per-axis multiplier for Scale."
     },
     {
       "InputId": "6710f3db-1d2e-49fd-b8d3-3a72275c30bc"/*Scale*/,
@@ -39,7 +42,8 @@
         "X": -200.0,
         "Y": 210.0
       },
-      "GroupTitle": "Noise Adjust"
+      "GroupTitle": "Noise Adjust",
+      "Description": "Size of the noise features."
     },
     {
       "InputId": "6b999a7f-4702-4939-92d9-5388403e3671"/*SamplePos*/,
@@ -47,7 +51,8 @@
         "X": -200.0,
         "Y": 360.0
       },
-      "GroupTitle": "Sampling"
+      "GroupTitle": "Sampling",
+      "Description": "Per-axis offset between the three noise samples. Set to 0 to use the same noise for all axes."
     }
   ],
   "SymbolChildUis": [],

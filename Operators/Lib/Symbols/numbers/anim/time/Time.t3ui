@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "b0d75f21-df33-460b-beab-d8c5e1f23e5e"/*Time*/,
-  "Description": "A cleaned up version of Time adds mode to clarify if time is returned in bars or seconds",
+  "Description": "Returns the current time in bars or seconds.\n\nIn most situations this is the playback time. It can be overridden by ops like [SetTime] or [TimeClip]. At 120 BPM one bar equals 2 seconds.\n\nAKA: clock, seconds, bars\n\nSee also: [ConvertTime], [AnimValue], [StopWatch]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "- LocalIdleMotionFxTime: Context time including idle motion (keeps running while playback is paused).\n- LocalTime: Context time without idle motion.\n- PlaybackTime: Global playback time, ignores local time overrides.\n- Runtime: Time since application start.\n- Frozen: Always 0."
     },
     {
       "InputId": "ba443b6a-487f-4739-94a3-915584ee2d46"/*Units*/,
@@ -24,6 +25,7 @@
         "X": -200.0,
         "Y": 0.0
       },
+      "Description": "Multiplies the time.",
       "Min": -5.0,
       "Max": 5.0
     }

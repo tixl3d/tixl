@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "c87b140b-1109-4eff-bf77-98bff3fc3e17"/*DrawLensShimmer*/,
-  "Description": "Draw a lens flare shimmer effect at the given points.\nIt requires a single [DefineLenseFlare] sprite with a large size ideally in the center of the light.\n\nThe effect has two different styles sharing the same parameter but resulting in completely different looks. This is a 2d fragment shader rendered on the sprite quad. This means that higher complexity does not affect the performance.",
+  "Description": "Draws a lens flare shimmer effect at the given sprite positions.\n\nIt requires a single [DefineLensFlare] sprite with a large size, ideally in the center of the light.\n\nThe effect has two styles that share the same parameters but result in completely different looks. It is a 2D fragment shader rendered on the sprite quad, so higher complexity does not affect performance.",
   "SymbolTags": "24",
   "InputUis": [
     {

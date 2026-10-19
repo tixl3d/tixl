@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "0b3436db-e283-436e-ba85-2f3a1de76a9d"/*LoadImage*/,
-  "Description": "Loads an image file as a Texture2D.\n\nSome notes:\n- Resources are cached, so accessing the same filename again will be much faster.\n- An ImageBuffer will forward its size so that image FX operators will produce buffers of identical sizes.\n- Mipmaps are created automatically.\n\nMost image types are supported, but only in 8-bit.\n\nTo directly use an image from a URL use [LoadImageFromUrl]",
+  "Description": "Loads an image file as a texture.\n\nMost common image formats are supported, but only with 8-bit precision. Mipmaps are created automatically. Image effect operators use the resolution of the loaded image for their results.\n\nAKA: image, file, texture, picture, import\n\nSee also: [LoadImageFromUrl], [LoadSvgAsTexture2D], [ImageSequenceClip]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -18,7 +18,8 @@
       "Position": {
         "X": 51.512096,
         "Y": 121.99597
-      }
+      },
+      "Description": "Keeps every loaded file in a cache of this operator, so switching back to a previously loaded path is instant. Useful if the path is animated."
     }
   ],
   "SymbolChildUis": [],

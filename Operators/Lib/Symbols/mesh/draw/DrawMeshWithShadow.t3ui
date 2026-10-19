@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "c08a6847-e7c4-46e6-a8fb-24bb62a64b96"/*DrawMeshWithShadow*/,
-  "Description": "Is used together with [SetShadow] and a [SetPointLight] to render incoming geometry with a shadow map.\nSee [SetShadowExample]",
+  "Description": "Draws a mesh with PBR shading and shadows from a shadow map.\n\nRequires [SetShadow] further up the graph and a light such as [SetPointLight] or [PointLight]. The first light also defines a soft spotlight cone outside of which everything is treated as shadowed.\n\nSee also: [DrawMesh], [SetShadow]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -11,6 +11,7 @@
         "Y": 3758.8037
       },
       "GroupTitle": "Shadow Settings",
+      "Description": "Color of shadowed areas. Alpha controls the shadow intensity.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -22,7 +23,8 @@
         "X": 2201.7131,
         "Y": 4214.662
       },
-      "GroupTitle": "Draw Style"
+      "GroupTitle": "Draw Style",
+      "Description": "Solid or wireframe rendering."
     },
     {
       "InputId": "5c4def3d-9261-4100-8136-abc552e9f547"/*Color*/,
@@ -30,14 +32,16 @@
         "X": 1269.222,
         "Y": 3618.8037
       },
-      "GroupTitle": "Draw Mesh Options"
+      "GroupTitle": "Draw Mesh Options",
+      "Description": "Tints the mesh. Multiplied with the material colors set by [SetMaterial]."
     },
     {
       "InputId": "734e5d0f-d319-43a9-84ab-8aee82acbb7f"/*AlphaCutOff*/,
       "Position": {
         "X": 1549.222,
         "Y": 3968.8037
-      }
+      },
+      "Description": "Fragments with an alpha below this value are discarded. 0 disables alpha testing."
     },
     {
       "InputId": "80071837-3b7c-440f-b0da-ec3c7fa31590"/*BlendMode*/,
@@ -60,6 +64,7 @@
         "X": 1549.222,
         "Y": 3898.8037
       },
+      "Description": "Depth tolerance when comparing against the shadow map. Increase it to remove shadow acne, decrease it if shadows detach from objects.",
       "AddPadding": "True"
     },
     {
@@ -67,21 +72,24 @@
       "Position": {
         "X": 2201.7131,
         "Y": 4179.662
-      }
+      },
+      "Description": "Which faces are hidden.\n\nNone: both sides are drawn.\nFront: front faces are hidden, only back faces are visible.\nBack: back faces are hidden (default)."
     },
     {
       "InputId": "bec607ca-e53f-43c8-a052-224506596016"/*ShadowOffset*/,
       "Position": {
         "X": 1549.222,
         "Y": 3933.8037
-      }
+      },
+      "Description": "Offsets the shadow lookup position along the surface normal. Helps against self-shadowing artifacts."
     },
     {
       "InputId": "d81604c9-5a34-44e7-a301-284c1a99afc0"/*EnableZWrite*/,
       "Position": {
         "X": 2201.7131,
         "Y": 4338.7285
-      }
+      },
+      "Description": "If enabled, the mesh writes into the depth buffer so it can occlude itself and geometry drawn later."
     },
     {
       "InputId": "f3f574a3-6e2f-45b9-9335-c8fc17111e05"/*EnableZTest*/,
@@ -89,6 +97,7 @@
         "X": 2201.7131,
         "Y": 4303.7285
       },
+      "Description": "If enabled, fragments hidden behind already drawn geometry (according to the depth buffer) are discarded.",
       "AddPadding": "True"
     }
   ],

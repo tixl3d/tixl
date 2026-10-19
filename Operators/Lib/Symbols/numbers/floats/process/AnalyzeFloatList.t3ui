@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "9a46ab17-a523-4378-b118-54ab904e184a"/*AnalyzeFloatList*/,
-  "Description": "",
+  "Description": "Computes the minimum, maximum and average of a float list.\n\nNaN and infinite entries are skipped for min and max; the AllValid output is false if the list contains any of them. An empty list outputs NaN.\n\nAKA: statistics, min, max, mean\n\nSee also: [SumRange]",
   "InputUis": [
     {
       "InputId": "54fa9e73-6669-4b98-b12e-8f6f06ac936f"/*Input*/,

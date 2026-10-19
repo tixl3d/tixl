@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "17324ce1-8920-4653-ac67-c211ad507a81"/*TransformMatrix*/,
-  "Description": "Composes a transformation matrix from translate, scale and rotation that can be used inside shaders",
+  "Description": "Composes a transformation matrix from translation, rotation, scale, shear and pivot for use in shaders.\n\nResult and ResultInverted are four Vector4 rows, transposed for the row layout of HLSL constant buffers. Matrix outputs the same transposed matrix.\n\nSee also: [ApplyTransformMatrix], [PickSDXVector4]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -40,14 +40,16 @@
       "Position": {
         "X": -200.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Multiplied with UniformScale."
     },
     {
       "InputId": "96841452-d384-49a5-977e-f16b57de9118"/*RotationMode*/,
       "Position": {
         "X": -200.0,
         "Y": 75.0
-      }
+      },
+      "Description": "PitchYawRoll: uses Rotation_PitchYawRoll in degrees.\nQuaternion: uses Rotation_Quaternion."
     },
     {
       "InputId": "e15b0cab-696f-44fd-b270-99f6fd26634f"/*Rotation_Quaternion*/,
@@ -64,7 +66,8 @@
       "Position": {
         "X": -200.0,
         "Y": 180.0
-      }
+      },
+      "Description": "Inverts Result. ResultInverted then holds the non-inverted matrix."
     },
     {
       "InputId": "f53f3311-e1fc-418b-8861-74adc175d5fa"/*Shear*/,

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "11ebbb25-984a-4772-b720-b8c7e5214a83"/*_ReadIntFromGpuBuffer*/,
-  "Description": "Reads back an integer array",
+  "Description": "Internal helper. Reads back one integer from a GPU buffer.\n\nThe value is read from the copy of the previous frame, so the result is delayed by one frame.",
   "SymbolTags": "16",
   "InputUis": [
     {
@@ -17,7 +17,8 @@
       "Position": {
         "X": -200.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Index of the integer in the buffer. Wraps around the buffer size with a warning."
     }
   ],
   "SymbolChildUis": [],

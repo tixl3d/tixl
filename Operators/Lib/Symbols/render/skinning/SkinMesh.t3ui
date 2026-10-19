@@ -9,7 +9,8 @@
       "Position": {
         "X": 0.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Skinning matrices from [PoseToSkinMatrices]."
     },
     {
       "InputId": "62e91c07-84fa-4d3b-a45c-08d7f9126b3e"/*Mesh*/,
@@ -17,7 +18,8 @@
       "Position": {
         "X": 0.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Mesh in its bind pose."
     },
     {
       "InputId": "d94a70b6-1f28-45c1-83b7-6ea0d5429c15"/*SkinWeights*/,
@@ -25,7 +27,8 @@
       "Position": {
         "X": 0.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Skin weights matching the mesh vertices, e.g. from [LoadGltfScene] or [BindToSkeleton]."
     }
   ],
   "SymbolChildUis": [],

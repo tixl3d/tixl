@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "e85d98cf-9240-4f5d-8df6-35425d325778"/*TextureToCubeMap*/,
-  "Description": "Converts a 2d texture ([loaded with [LoadImage]) into a cube map that can then be used by [SetEnvironment] for PBR image-based lighting.\nCurrently Tooll supports Equirectangular Cubemaps.\n\nIf changing values and settings in this Operator does not cause any changes in the Viewport, it may be necessary to (temporarily) activate 'UpdateLive' in the following [SetEnvironment] op.",
+  "Description": "Converts an equirectangular 2D image (e.g. an HDRI loaded with [LoadImage]) into a cube map, e.g. for [SetEnvironment].\n\nIf changes in this operator have no visible effect, it may be necessary to temporarily enable UpdateLive in the following [SetEnvironment].\n\nAKA: cubemap, hdri, equirectangular, skybox\n\nSee also: [SetEnvironment], [Equirectangle], [ConvertEquirectangle]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": 63.88965,
         "Y": 1215.1609
       },
-      "Description": "Rotates the texture along the horizon.\n\nIf changing this value does not cause any changes in the Viewport, it may be necessary to activate 'UpdateLive' in the following [SetEnvironment] op."
+      "Description": "Rotates the image around the vertical axis."
     },
     {
       "InputId": "8eeb0224-ade3-4808-a60b-9c490e42229a"/*Resolution*/,
@@ -18,7 +18,7 @@
         "X": -41.109863,
         "Y": 1648.8114
       },
-      "Description": "Defines the resolution in pixels"
+      "Description": "Width and height of each cube face in pixels."
     },
     {
       "InputId": "d5aa1045-5471-42c3-bfc2-c5fa9663817f"/*Image*/,
@@ -26,7 +26,8 @@
       "Position": {
         "X": 68.85986,
         "Y": 1120.0338
-      }
+      },
+      "Description": "Equirectangular source image."
     }
   ],
   "SymbolChildUis": [

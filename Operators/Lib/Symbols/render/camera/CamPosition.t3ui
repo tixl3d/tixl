@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "2ed26fb7-fe66-4ed6-8b8d-230d87ae5c77"/*CamPosition*/,
-  "Description": "Returns the current camera properties. This can be very useful for positioning or emitting things in front of the camera.\n\nPlease consider looking at the example.",
+  "Description": "Returns the position, view direction and aspect ratio of a camera.\n\nIf CamReference is connected, the properties of that camera are returned. Otherwise the camera of the current evaluation context is used, which requires the Command output to be evaluated within the camera's subgraph. This is useful for positioning or emitting things in front of the camera.\n\nThe values are only updated once per frame.\n\nSee also: [CurrentCamMatrices], [Locator]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Optional reference output of a camera (e.g. [Camera]). If not connected, the context camera is used."
     }
   ],
   "SymbolChildUis": [],

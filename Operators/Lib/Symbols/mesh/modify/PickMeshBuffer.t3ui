@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "845371ef-a5c2-4ca2-8315-ea2b62f63ee2"/*PickMeshBuffer*/,
-  "Description": "Switch between different mesh buffers",
+  "Description": "Outputs one of the connected meshes, selected by Index.\n\nAKA: switch, select\n\nSee also: [CombineMeshes]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": -200.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Index of the connected mesh to output. Wraps around the number of connections."
     },
     {
       "InputId": "7bb6f999-214a-448a-a7f7-be447113785e"/*Input*/,

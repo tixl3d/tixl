@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "436e93a8-03c0-4366-8d9a-2245e5bcaa6c"/*PerlinNoise*/,
-  "Description": "Generates a continuously and randomly changing value in the predefined range based on Perlin Noise / Gradient Noise.\n\nUseful to create random looking animations e.g. flickering light, wind, fire, camshake, changing colors etc.\n\nThis creates PerlinNoise in 1 dimension. See [PerlinNoise2] and [PerlinNoise3] for Operators with more dimensions",
+  "Description": "Generates a continuously and randomly changing value in the predefined range based on Perlin Noise / Gradient Noise.\n\nUseful to create random looking animations e.g. flickering light, wind, fire, camera shake, changing colors etc. Without OverrideTime the noise follows the playback time.\n\nThis creates PerlinNoise in 1 dimension. See [PerlinNoise2] and [PerlinNoise3] for operators with more dimensions.\n\nAKA: noise, wiggle, jitter, shake\n\nAlso check out the [HowToAnimate] tutorial.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": -2.7436478,
         "Y": -69.55521
-      }
+      },
+      "Description": "Offset added to the time."
     },
     {
       "InputId": "296d0f7f-d484-4781-b01f-48839def0324"/*BiasAndGain*/,
@@ -17,7 +18,7 @@
         "X": -2.7436478,
         "Y": -54.555206
       },
-      "Description": "Defines bias and gain, which can be used to weight the ranges (both in terms of time and intensity) in which the values are most likely to fluctuate",
+      "Description": "X: gain, Y: bias. Weights the output towards certain ranges. 0.5, 0.5 keeps the distribution unchanged.",
       "AddPadding": "True",
       "UseVec2Control": "GainAndBias"
     },
@@ -62,7 +63,7 @@
         "X": -2.7436478,
         "Y": -9.555206
       },
-      "Description": "Defines the number of octaves or the level of detail and variation of the noise over time."
+      "Description": "Number of noise layers with increasing detail, 1 to 20."
     },
     {
       "InputId": "e704cf6c-963e-4701-ba3d-127b880676fa"/*Amplitude*/,
@@ -71,7 +72,7 @@
         "Y": -99.55521
       },
       "GroupTitle": "Amplitude",
-      "Description": "Multiplier for the intensity of the highest and lowest value."
+      "Description": "Multiplier for the output range, scaled from RangeMin."
     },
     {
       "InputId": "eabbaf77-5f74-4303-9453-6fa44facc5db"/*OverrideTime*/,
@@ -80,7 +81,7 @@
         "X": -2.7436478,
         "Y": -144.5552
       },
-      "Description": "Input for a value to override the time"
+      "Description": "If connected, this value is used instead of the playback time."
     }
   ],
   "SymbolChildUis": [],

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "b7731197-b922-4ed8-8e22-bc7596c64f6c"/*GetPosition*/,
-  "Description": "Gets the current position, rotation, and scale in the world so it can be applied to other transforms.",
+  "Description": "Returns the current position, scale and transform matrix of the evaluation context.\n\nThe outputs only update when the UpdateCommand output is executed, so it must be connected into a command chain inside the transform hierarchy of interest.\n\nSee also: [Transform]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,14 +9,16 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "WorldSpace: object to world.\nCameraSpace: relative to the current camera.\nClipSpace: projected into clip space (not divided by w)."
     },
     {
       "InputId": "d55285f7-9ef9-461b-ac4c-50b80872d397"/*PositionOffset*/,
       "Position": {
         "X": -200.0,
         "Y": 75.0
-      }
+      },
+      "Description": "Local offset that gets transformed into the selected space."
     }
   ],
   "SymbolChildUis": [],

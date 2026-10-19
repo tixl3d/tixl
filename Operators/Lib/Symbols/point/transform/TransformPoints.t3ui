@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "7f6c64fe-ca2e-445e-a9b4-c70291ce354e"/*TransformPoints*/,
-  "Description": "Transforms incoming points.\n\nTips:\n- Try to activate .WIsWeight and combine this operator with [SelectPoints].\n- Changing the Space to Point can be used to offset the points.",
+  "Description": "Transforms incoming points with translation, rotation, scale and shearing.\n\nAKA: move, rotate, scale, xform\n\nTips:\n- Set the StrengthFactor to F1 or F2 and combine this operator with [SelectPoints] to only transform selected points.\n- Changing the Space to Point can be used to offset the points along their own orientation.\n\nSee also: [SoftTransformPoints], [TransformSomePoints]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -28,8 +28,7 @@
         "X": -32.16922,
         "Y": 1087.1665
       },
-      "GroupTitle": "Transform",
-      "Description": "Defines the space"
+      "GroupTitle": "Transform"
     },
     {
       "InputId": "319d71a9-b8dd-406f-a3a2-1c7508ba2ca7"/*Shearing*/,

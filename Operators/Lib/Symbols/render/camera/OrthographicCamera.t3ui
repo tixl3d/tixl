@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "954af16f-b37b-4e64-a965-4bec02b9179e"/*OrthographicCamera*/,
-  "Description": "Set an orthographic project matrix for the operators following further down (i.e., to the left).\n\nNote that this projection uses a special z-buffer depth that might be incompatible with other operators like [DepthBufferAsGrayScale]",
+  "Description": "Sets an orthographic camera without perspective distortion for the connected subgraph.\n\nObjects keep their size regardless of their distance to the camera. Note that this projection uses a different z-buffer depth that might be incompatible with other operators like [DepthBufferAsGrayScale]. The Reference output does not provide a camera definition, so it cannot be blended with [BlendCameras].\n\nAKA: ortho, isometric, parallel, 2d\n\nSee also: [Camera]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -24,7 +24,8 @@
       "Position": {
         "X": -75.613106,
         "Y": 145.74394
-      }
+      },
+      "Description": "Visible height of the view in world units."
     },
     {
       "InputId": "7b181495-ebd6-48c1-a866-b7b8337ef10d"/*Up*/,
@@ -38,7 +39,8 @@
       "Position": {
         "X": -75.613106,
         "Y": 115.74394
-      }
+      },
+      "Description": "Multiplies the visible width (X) and height (Y) independently."
     },
     {
       "InputId": "9326957b-bc25-4f89-a833-9b8bb415d8ef"/*NearFarClip*/,
@@ -52,7 +54,8 @@
       "Position": {
         "X": -75.613106,
         "Y": 220.74394
-      }
+      },
+      "Description": "For values of 0 or below, the aspect ratio of the current render resolution is used."
     },
     {
       "InputId": "a0a28003-d6b5-4af5-9444-acf7af18ab4e"/*Position*/,
@@ -67,7 +70,8 @@
       "Position": {
         "X": -75.613106,
         "Y": 25.74393
-      }
+      },
+      "Description": "Rolls the camera in degrees."
     }
   ],
   "SymbolChildUis": [],

@@ -24,7 +24,7 @@ public class GetMatrixVar : Instance<GetMatrixVar>
 
         var variableName = VariableName.GetValue(context);
 
-        if (context.ObjectVariables.TryGetValue(variableName, out var currentValue))
+        if (variableName != null && context.ObjectVariables.TryGetValue(variableName, out var currentValue))
         {
             if (currentValue is Vector4[] vector4Array)
             {

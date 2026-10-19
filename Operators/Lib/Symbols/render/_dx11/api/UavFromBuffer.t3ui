@@ -1,8 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "cc4847f8-a8a3-4da5-8b71-c4f3a3f488e6"/*UavFromBuffer*/,
-  "Description": "This operator is obsolete. Please use [GetBufferComponents] instead.",
-  "SymbolTags": "8",
+  "Description": "Obsolete. Use [GetBufferComponents] instead.\n\nCreates an R32_UInt unordered access view for a buffer.",
+  "SymbolTags": "4104",
   "InputUis": [
     {
       "InputId": "58ebae6e-7d8c-45a0-8266-8b71f601da0a"/*Buffer*/,

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "8b888408-e472-4bf9-be25-17a3dd8b90fd"/*SliceViewPort*/,
-  "Description": "Modifies the Viewport and projection matrix to help drawing grid cells. \n\nIn the simplest form this can be used to limit the rendering to a letterbox format (i.e., with black bars on top and bottom).\nIn a more complex setup it can be combined with Loop to draw a grid of render passes. See example for more details.",
+  "Description": "Limits rendering of the connected subgraph to one cell of a grid by adjusting the viewport and projection matrix.\n\nIn the simplest form this can be used to limit rendering to a letterbox format (i.e. with black bars on top and bottom). Combined with [Loop] and the Count output, it can render a grid of views, e.g. for multi-screen setups or contact sheets.\n\nAKA: viewport, split, tile, multiview, letterbox\n\nSee also: [Loop], [ShiftCamera]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,8 @@
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Index of the cell to render into, counted row by row. Wraps around the number of cells."
     },
     {
       "InputId": "21532b24-fed2-403b-abb1-6faa19311366"/*SubGraph*/,
@@ -18,28 +19,32 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "The subgraph to render into the cell."
     },
     {
       "InputId": "354eb18c-aba0-43e6-b534-c119176547ff"/*Mode*/,
       "Position": {
         "X": -200.0,
         "Y": 90.0
-      }
+      },
+      "Description": "RepeatView = Each cell shows the complete view\nSliceView = Each cell shows its part of the full view, so all cells together form one image\nFitProjection = Like SliceView, but the view is fitted to the cell aspect instead of cropped"
     },
     {
       "InputId": "4d4db9ad-b3a3-4da6-8716-23d21c5ffc4a"/*CellCounts*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Number of columns and rows of the grid."
     },
     {
       "InputId": "aa060596-ba04-4862-b123-e328f1ef58e1"/*Stretch*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Size of the viewport relative to the cell. Values below 1 leave a border around each cell."
     }
   ],
   "SymbolChildUis": [],

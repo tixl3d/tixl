@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "a18ae2d3-1735-40b8-bebb-65a6788bc872"/*And*/,
-  "Description": "Returns True if both inputs are true. Consider using [All] if you want to test more than two booleans for true.",
+  "Description": "Returns true if both inputs are true.\n\nSee also: [All], [Or]",
   "SymbolTags": "8",
   "InputUis": [
     {

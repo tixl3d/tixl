@@ -21,6 +21,8 @@ internal sealed class MinInt : Instance<MinInt>
             min = Math.Min(min, i.GetValue(context));
         }
 
+        Ints.DirtyFlag.Clear();
+
         Result.Value = min;
     }
 

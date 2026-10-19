@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "196ad0dc-035a-4fb6-8871-a8f3c9cdbef5"/*TemporalAccumulation*/,
-  "Description": "",
+  "Description": "Blends each new frame of an image over the accumulated result of the previous frames.\n\nThis creates trails, smooths noisy renderings over time or averages jittered samples. Unlike [TXAA], there is no reprojection, so moving content leaves trails.\n\nAKA: feedback, trails, accumulate, afterimage, echo\n\nSee also: [TXAA], [AfterGlow]",
   "InputUis": [
     {
       "InputId": "0ecb558b-d9a1-4c6f-9097-9f558d002df8"/*Texture*/,
@@ -16,6 +16,7 @@
         "X": -341.2475,
         "Y": 309.911
       },
+      "Description": "How much of the previous result is kept. 0 shows only the new frame, values close to 1 produce long trails, 1 freezes the image.",
       "Min": 0.0,
       "Max": 1.0,
       "Scale": 0.001,

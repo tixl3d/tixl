@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "25db2a97-38b2-4503-8842-fab3922d7a6c"/*PointTrailFast*/,
-  "Description": "Keeps previous copies of points in a cycling buffer that can be used to draw trails and other effects.\nHint: If some features don't work as expected try [PointTrail2]\n\nCan be used with [DrawPoints] [DrawLines] [DrawBillboards] and similar",
+  "Description": "Keeps previous copies of points in a cycling buffer that can be used to draw trails and other effects.\n\nThis is faster than [PointTrail] because the buffer is not reordered: each frame only the newest copy is written and the following slot is turned into a separator. Use [PointTrail] if the points need to be ordered or the trail position is needed as an attribute.\n\nUse with [DrawLines], [DrawPoints], [DrawBillboards] or similar.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,8 +10,7 @@
       "Position": {
         "X": -617.11475,
         "Y": 46.12413
-      },
-      "Description": "Point input"
+      }
     },
     {
       "InputId": "56eac471-ad48-41ec-b617-cbcb67646c97"/*AddSeperatorThreshold*/,
@@ -20,15 +19,14 @@
         "Y": 633.0454
       },
       "GroupTitle": "Options",
-      "Description": "Defines the threshold for the separator"
+      "Description": "If larger than 0, inserts a separator when a point moved further than this distance since the last frame. Helpful to avoid lines when points wrap around or respawn."
     },
     {
       "InputId": "63621a98-874b-4d1a-9724-f4fa70b8ccf1"/*Reset*/,
       "Position": {
         "X": -617.0139,
         "Y": -219.02551
-      },
-      "Description": "Resets the trail when clicked"
+      }
     },
     {
       "InputId": "6a2cb3f0-3b5a-4551-a809-3dc172bb7d79"/*TrailLength*/,
@@ -36,7 +34,7 @@
         "X": -1004.27905,
         "Y": 442.45508
       },
-      "Description": "Defines the length of the trail by the amount of points added",
+      "Description": "Number of copies kept for each point.",
       "Min": 1,
       "ClampMin": true,
       "ClampMax": true
@@ -47,7 +45,6 @@
         "X": 463.73843,
         "Y": 749.4218
       },
-      "Description": "Enables / disables the trail",
       "AddPadding": "True"
     }
   ],

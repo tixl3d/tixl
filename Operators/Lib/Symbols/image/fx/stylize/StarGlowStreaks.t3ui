@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "ecbb40c4-aef4-49a8-ac89-e82c3a09862f"/*StarGlowStreaks*/,
-  "Description": "Renders streaks onto the incoming image. You can use the threshold to limit the range that is used for streaks. Also, check out the presets.",
+  "Description": "Renders star-shaped glow streaks from bright areas of the incoming image.\n\nUse Threshold to limit which areas create streaks. Also check out the presets.\n\nAKA: starglow, glint, lensflare, sparkle, cross\n\nSee also: [Glow], [Bloom], [LightRaysFx]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": 132.69783,
         "Y": 344.3758
-      }
+      },
+      "Description": "Shape of the streaks: Diagonals, Cross, Star, Horizontal or Vertical."
     },
     {
       "InputId": "68e16fd7-fabf-446e-9553-a737422c026b"/*Brightness*/,
@@ -24,6 +25,7 @@
         "X": 132.69783,
         "Y": 254.3758
       },
+      "Description": "Multiplied with the original image.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -49,7 +51,7 @@
         "X": 132.69783,
         "Y": 299.3758
       },
-      "Description": "Experimental! 0 = Best quality, 7 = Lowest quality \nYou need to activate GenerateMips on the RenderTarget if you want to use the lower qualities.\nAs it's based on MipMaps, a lower quality should be less expensive. \n"
+      "Description": "Experimental. 0 = best quality, 7 = lowest quality.\nLower qualities sample lower mip levels and should be cheaper. They require GenerateMips to be enabled on the RenderTarget of the incoming image."
     },
     {
       "InputId": "afcba3d4-b7db-40bd-919a-d4f49b1bf7fc"/*Image*/,
@@ -64,7 +66,8 @@
       "Position": {
         "X": 132.69783,
         "Y": -15.624207
-      }
+      },
+      "Description": "Length of the streaks."
     },
     {
       "InputId": "dd0e21b8-91a6-4853-9907-e0f675a05a5d"/*BlendMode*/,

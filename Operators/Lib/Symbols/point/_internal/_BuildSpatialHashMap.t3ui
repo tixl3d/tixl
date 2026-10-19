@@ -1,7 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "f61ceb9b-74f8-4883-88ea-7e6c35b63bbd"/*_BuildSpatialHashMap*/,
-  "Description": "Building a spatial hashmap can be an important basis for complex simulations that require nearest neighbor search.\nThe implementation is based on work by Guillaume Boissé and involves multiple compute buffers and calculating an exclusive prefix sum.\n\nSome documentation can be found here: https://www.figma.com/file/wBNGUlaACjaCDOTdeBvBvR/ComputeShader-Ideas?node-id=8%3A0",
+  "Description": "Internal helper. Builds a spatial hash map for fast nearest-neighbor searches in point simulations.\n\nThe implementation is based on work by Guillaume Boissé and involves multiple compute buffers and calculating an exclusive prefix sum.\n\nSome documentation can be found here: https://www.figma.com/file/wBNGUlaACjaCDOTdeBvBvR/ComputeShader-Ideas?node-id=8%3A0",
+  "SymbolTags": "16",
   "InputUis": [
     {
       "InputId": "22f9737b-b3b4-4455-a4ec-8d61ab7abc6c"/*CellSize*/,

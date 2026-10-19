@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "6820b166-1782-43b9-bc5c-6b4f63b16f86"/*FakeLight*/,
-  "Description": "Applies fake shading to the image.\n\nFor similar effects see: [Steps] [DetectEdges] [DistortAndShade] [Displace]",
+  "Description": "Applies fake lighting to an image by treating its brightness as a height map.\n\nThe slope of the height map is used to look up a light map, which creates an embossed, shaded look.\n\nAKA: emboss, bevel, relief, shading, normal\n\nSee also: [Steps], [DetectEdges], [DistortAndShade], [Displace]",
   "SymbolTags": "1",
   "InputUis": [
     {

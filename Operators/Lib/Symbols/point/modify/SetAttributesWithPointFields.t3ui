@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "21b0a346-f214-449f-ae27-7bfbe5395d66"/*SetAttributesWithPointFields*/,
-  "Description": "Sets various attribute points from the distance of a 2nd (small) set of points.",
+  "Description": "Modifies point attributes like position, orientation, color and W depending on their distance to a second, small set of field points.\n\nOnly the first 10 field points are used.",
   "SymbolTags": "64",
   "InputUis": [
     {

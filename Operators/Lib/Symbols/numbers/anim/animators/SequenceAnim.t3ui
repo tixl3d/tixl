@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "94a392e6-3e03-4ccf-a114-e6fafa263b4f"/*SequenceAnim*/,
-  "Description": "Creates a visual sequencer that can be controlled by adding a string of numbers",
+  "Description": "A step sequencer that animates values from a string of numbers.\n\nSee also: [AnimValue], [TriggerAnim]",
   "SymbolTags": "9",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": -200.0,
         "Y": 450.0
       },
-      "Description": "Overwrites the standard time of the T3 timeline",
+      "Description": "If connected, used instead of the current time.",
       "AddPadding": "True"
     },
     {

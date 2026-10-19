@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "0bec016a-5e1b-467a-8273-368d4d6b9935"/*Trigger*/,
-  "Description": "Outputs a boolean value true for a single frame, then automatically resets to false on the next.\nAKA: bang, push button, pulse, momentary trigger, one-shot.",
+  "Description": "Outputs true for a single frame, then automatically resets to false.\n\nAKA: bang, button, pulse, momentary, oneshot",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": -200.0,
         "Y": 45.0
       },
-      "Description": "if disabled the value is true until you release the button"
+      "Description": "If disabled, the value stays true until the button is released."
     },
     {
       "InputId": "e7c1f0af-da6d-4e33-ac86-7dc96bfe7eb3"/*BoolValue*/,

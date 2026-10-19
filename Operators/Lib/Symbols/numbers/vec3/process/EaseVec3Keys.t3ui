@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "0ecb95ca-7db2-4a11-a6e5-214ae91ec268"/*EaseVec3Keys*/,
-  "Description": "[EaseKeys] [EaseVec2Keys]",
+  "Description": "Applies an easing function between the keyframes of the animated Value input.\n\nThe Value input must be animated; the shape of each segment is replaced by the selected Interpolation. Without animation the value is passed through.\n\nSee also: [EaseKeys], [EaseVec2Keys], [EaseVec3]",
   "InputUis": [
     {
       "InputId": "48d7bfd8-54c3-4c1b-bee4-92aaa735cc85"/*Value*/,

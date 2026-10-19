@@ -9,7 +9,8 @@
       "Position": {
         "X": 0.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Optional pose with one point per joint. If not connected, the rest pose is used."
     },
     {
       "InputId": "9d43f8a1-6e05-472b-8cd9-1b52a7e64c88"/*Setup*/,
@@ -17,14 +18,16 @@
       "Position": {
         "X": 0.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Scene setup with the skeleton, e.g. from [LoadGltfScene] or [SkeletonFromPoints]."
     },
     {
       "InputId": "a17c3e58-04bd-4e92-9f66-7d80b25c41a9"/*SkeletonIndex*/,
       "Position": {
         "X": 0.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Index of the skeleton in the setup. Wraps around the number of skeletons."
     }
   ],
   "SymbolChildUis": [],

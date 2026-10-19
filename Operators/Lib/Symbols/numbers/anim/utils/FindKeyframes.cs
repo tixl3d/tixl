@@ -39,7 +39,7 @@ internal sealed class FindKeyframes : Instance<FindKeyframes>, IStatusProvider
             
             
 
-        var opIndex = OpIndex.GetValue(context).Clamp(0, AnimatedOp.CollectedInputs.Count);
+        var opIndex = OpIndex.GetValue(context).Clamp(0, AnimatedOp.CollectedInputs.Count - 1);
         _wrapIndex = WrapIndex.GetValue(context);
         var slot = AnimatedOp.CollectedInputs[opIndex];
         var requestCurveIndex = CurveIndex.GetValue(context);
@@ -68,7 +68,7 @@ internal sealed class FindKeyframes : Instance<FindKeyframes>, IStatusProvider
         {
             case Modes.Index:
             {
-                var clampedIndex = _wrapIndex ? (int)indexOrTime % _keyframes.Count
+                var clampedIndex = _wrapIndex ? ((int)indexOrTime).Mod(_keyframes.Count)
                                        : Math.Abs((int)indexOrTime) % _keyframes.Count ;
                 var vDef = _keyframes[clampedIndex];
                 Time.Value = (float)vDef.U;

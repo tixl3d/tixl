@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "daec568f-f7b4-4d81-a401-34d62462daab"/*GetTextureSize*/,
-  "Description": "Returns the dimensions (resolution) of the connected texture in pixels.\n\nIt can also check if the texture is valid or undefined (i.e., Null).",
+  "Description": "Returns the dimensions (resolution) of the connected texture in pixels.\n\nIt also returns whether the texture is valid (not null) and whether it is a cube map. If no valid texture is connected, the requested resolution of the current context is returned.",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
       "Position": {
         "X": -163.63019,
         "Y": 29.70758
-      }
+      },
+      "Description": "If both components are greater than 0, this size is returned instead."
     },
     {
       "InputId": "8b15d8e1-10c7-41e1-84db-a85e31e0c909"/*Texture*/,

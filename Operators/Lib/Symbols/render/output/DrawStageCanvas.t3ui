@@ -9,6 +9,7 @@
         "X": -200.0,
         "Y": 315.0
       },
+      "Description": "Rotation of the environment around the viewer in degrees.",
       "Min": -180.0,
       "Max": 180.0,
       "Format": "{0:0.0}°"
@@ -18,7 +19,8 @@
       "Position": {
         "X": -200.0,
         "Y": 225.0
-      }
+      },
+      "Description": "Size of the canvas. 0x0 uses the size of the output named by OutputRef (or 1920x1080 if there is none)."
     },
     {
       "InputId": "379b6223-920b-448f-a508-c93dccb06316"/*OutputRef*/,
@@ -54,14 +56,16 @@
       "Position": {
         "X": -200.0,
         "Y": 90.0
-      }
+      },
+      "Description": "If a cube map is connected, it is used instead of Image."
     },
     {
       "InputId": "d5dee94b-5dbc-448b-b8eb-c44eb6e36539"/*Image*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Equirectangular environment image."
     },
     {
       "InputId": "ec895305-671f-4f1b-ada1-7ef91afc6212"/*Mesh*/,

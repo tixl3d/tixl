@@ -1,21 +1,23 @@
 {
   "FormatVersion": 3,
   "Id": "a38626d8-3145-4aa9-820f-ca16b3411985"/*RadialCPoints*/,
-  "Description": "\n\nAKA: RadialPointsCpu, cpu points",
+  "Description": "Generates a circle or spiral of points as a CPU point list.\n\nCount points are placed around Axis, starting at StartAngle. Radius, Center and W are interpolated towards Radius + RadiusOffset, Center + Offset and W + WOffset along the list, which can be used to build spirals or helices. W is written to the F1 attribute.\n\nAKA: RadialPointsCpu, cpu points\n\nSee also: [RadialPoints]",
   "InputUis": [
     {
       "InputId": "03a54164-8ef9-4cc8-88f3-55aa5db3640c"/*Offset*/,
       "Position": {
         "X": -200.0,
         "Y": 180.0
-      }
+      },
+      "Description": "Added to Center towards the last point, e.g. to create a helix."
     },
     {
       "InputId": "75acdfbd-176b-4e65-bd33-ac10f8373eb2"/*CloseCircle*/,
       "Position": {
         "X": -200.0,
         "Y": 450.0
-      }
+      },
+      "Description": "Appends a copy of the first point position followed by a separator, so lines drawn from the list form a closed loop."
     },
     {
       "InputId": "9c26fcad-ef7d-46aa-9a7e-eb853e88e955"/*Radius*/,
@@ -29,14 +31,16 @@
       "Position": {
         "X": -200.0,
         "Y": 90.0
-      }
+      },
+      "Description": "Added to Radius towards the last point."
     },
     {
       "InputId": "c02152e3-d643-4e1d-99ca-11ab6bc8a5fb"/*WOffset*/,
       "Position": {
         "X": -200.0,
         "Y": 405.0
-      }
+      },
+      "Description": "Added to W towards the last point."
     },
     {
       "InputId": "c9341b17-5f56-4112-ba87-fe734b7bf0ba"/*Cycles*/,
@@ -44,6 +48,7 @@
         "X": -200.0,
         "Y": 270.0
       },
+      "Description": "Number of full turns. Values above 1 create overlapping turns, negative values reverse the direction.",
       "Scale": 0.01
     },
     {
@@ -51,14 +56,16 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Number of points (1 to 10000)."
     },
     {
       "InputId": "d1e78447-e110-4cdf-b761-dff32f05140d"/*Axis*/,
       "Position": {
         "X": -200.0,
         "Y": 315.0
-      }
+      },
+      "Description": "Axis the circle is rotated around. The default Z places the circle in the XY plane."
     },
     {
       "InputId": "d68dcba4-d713-4bc7-a418-85042efc26d3"/*Center*/,
@@ -72,7 +79,8 @@
       "Position": {
         "X": -200.0,
         "Y": 360.0
-      }
+      },
+      "Description": "Value written to the F1 attribute of the points."
     },
     {
       "InputId": "e3736ced-d10d-41f3-92ed-ddfc3edd1bc6"/*StartAngle*/,
@@ -80,6 +88,7 @@
         "X": -200.0,
         "Y": 225.0
       },
+      "Description": "Angle of the first point in degrees.",
       "Scale": 1.0
     }
   ],

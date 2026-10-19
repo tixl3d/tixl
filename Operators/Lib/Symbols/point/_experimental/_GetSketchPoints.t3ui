@@ -1,7 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "271e397e-051c-473f-968f-a2251fed65d1"/*_GetSketchPoints*/,
-  "Description": "An internal operator that gets the points of a selected sketch page.\nThis is required for onion skin rendering of sketch pages.",
+  "Description": "Internal helper. Gets the points of a selected sketch page.\n\nRequired for onion skin rendering of sketch pages.",
+  "SymbolTags": "16",
   "InputUis": [
     {
       "InputId": "1b8d9a00-f337-431e-bab3-24d45ed9d191"/*PageIndex*/,

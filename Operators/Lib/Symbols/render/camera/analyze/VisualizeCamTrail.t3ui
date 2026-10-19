@@ -1,28 +1,31 @@
 {
   "FormatVersion": 3,
   "Id": "d59ee7b2-8beb-470e-b75a-f73cc1916b1a"/*VisualizeCamTrail*/,
-  "Description": "Visualize a  camera movement by looping over a time range and rendering onion skins of the connected camera reference.",
+  "Description": "Visualizes a camera movement by drawing camera gizmos of the connected camera at several points in time.\n\nThe camera is evaluated at evenly spaced time offsets before and after the current time, and each sample is drawn as a gizmo colored along a gradient. This must be rendered with another camera to be visible.\n\nAKA: onionskin, path, trail",
   "InputUis": [
     {
       "InputId": "7fd1c5f7-de89-46ed-b8ba-d14c2352848f"/*CamReference*/,
       "Position": {
         "X": -140.0,
         "Y": 70.0
-      }
+      },
+      "Description": "Reference output of the camera to visualize, e.g. from [Camera]."
     },
     {
       "InputId": "8fceaa45-96e1-446c-9e5d-d1ea23380aa1"/*Steps*/,
       "Position": {
         "X": -280.0001,
         "Y": 210.0
-      }
+      },
+      "Description": "Number of drawn camera gizmos (1 to 11)."
     },
     {
       "InputId": "9ca00da6-18b7-449e-be38-a42ef20f6c0a"/*TimeRange*/,
       "Position": {
         "X": -279.99997,
         "Y": 175.0
-      }
+      },
+      "Description": "Time offset before and after the current time that is covered by the gizmos."
     }
   ],
   "SymbolChildUis": [

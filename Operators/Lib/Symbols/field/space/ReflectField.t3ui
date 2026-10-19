@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "1a933eb2-a89b-4694-ae04-60d86779cf28"/*ReflectField*/,
-  "Description": "Folds / kinks / reflects the incoming field through a plane.\nIt can be rendered with [RaymarchField] and visualized with [VisualizeFieldDistance].\n\nSimilar nodes: [BendField], [PolarRepeat], [TwistField].\n\nIt needs an incoming field like [BoxSDF], [ChainLinkSDF], [FractalSDF] as an input.\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToRaymarchField].\n",
+  "Description": "Mirrors the incoming field at a plane, so the part in front of the plane is copied to the back side.\n\nIt needs an incoming field like [BoxSDF] or [TorusSDF]. Render the result with [RaymarchField] and inspect it with [VisualizeFieldDistance].\n\nSee also: [RepeatAxis], [RepeatPolar], [BendField]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": -200.0,
         "Y": 75.0
       },
-      "Description": "Defines the rotation of the plane which reflects the incoming field"
+      "Description": "Orientation of the mirror plane. It is normalized."
     },
     {
       "InputId": "c617549d-b67d-454c-91f5-bc1d6e9a66b7"/*InputField*/,
@@ -25,7 +25,7 @@
         "X": -200.0,
         "Y": 150.0
       },
-      "Description": "Moves / transforms the position of the reflection plane"
+      "Description": "Moves the mirror plane along its normal."
     }
   ],
   "SymbolChildUis": [],

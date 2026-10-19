@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "33424f7f-ea2d-4753-bbc3-8df00830c4b5"/*AdvancedFeedback*/,
-  "Description": "An advanced version of the [FluidFeedback] effect is much more versatile but harder to control. It also utilizes [DetectEdges] and stabilizes the feedback buffer to a meaningful value range, thus avoiding black or overly bright values.\n\n\nAll Feedback Ops: [FluidFeedback] [AdvancedFeedback] [AdvancedFeedback2]\n\nAlso see [AfterGlow2]",
+  "Description": "A more versatile but harder to control version of [FluidFeedback] that also amplifies edges and shifts colors of the feedback buffer each frame.\n\nIt keeps the feedback buffer within a meaningful value range, avoiding images that drift to black or overly bright values.\n\nAKA: feedback, trails, echo, smear\n\nSee also: [FluidFeedback], [AdvancedFeedback], [AdvancedFeedback2], [AfterGlow2]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,8 @@
       "Position": {
         "X": 1051.6638,
         "Y": -324.39157
-      }
+      },
+      "Description": "The 2D or 3D content rendered on top of the feedback buffer each frame."
     },
     {
       "InputId": "1d5207f0-132e-42e9-9b2b-171d092d6cac"/*Displacement*/,
@@ -19,6 +20,7 @@
         "Y": -674.3916
       },
       "GroupTitle": "Feedback",
+      "Description": "Displaces the feedback image each frame.",
       "Min": -0.1,
       "Max": 0.1,
       "Scale": 0.001
@@ -29,6 +31,7 @@
         "X": 1051.6638,
         "Y": -779.3916
       },
+      "Description": "Distance in pixels used for the edge and range detection.",
       "Min": 0.0,
       "Max": 300.0,
       "Scale": 0.01,
@@ -51,6 +54,7 @@
         "X": 1051.6638,
         "Y": -464.39154
       },
+      "Description": "Moves the feedback image each frame.",
       "AddPadding": "True",
       "Min": -0.1,
       "Max": 0.1,
@@ -62,6 +66,7 @@
         "X": 1051.6638,
         "Y": -814.3916
       },
+      "Description": "Adds the color difference to neighboring pixels each frame.",
       "Min": -1.0,
       "Max": 1.0
     },
@@ -71,6 +76,7 @@
         "X": 1051.6638,
         "Y": -429.39154
       },
+      "Description": "Rotates the feedback image each frame.",
       "Min": -1.0,
       "Max": 1.0,
       "Scale": 0.01
@@ -81,6 +87,7 @@
         "X": -482.2922,
         "Y": 131.12415
       },
+      "Description": "Currently ignored.",
       "Min": -0.1,
       "Max": 0.1
     },
@@ -100,6 +107,7 @@
         "X": 1051.6638,
         "Y": -954.3916
       },
+      "Description": "Darkens very bright areas of the feedback buffer to keep it stable.",
       "Min": 0.0,
       "Max": 20.0,
       "Scale": 0.01,
@@ -122,6 +130,7 @@
         "X": 504.17102,
         "Y": -196.55035
       },
+      "Description": "Clears the feedback buffer.",
       "AddPadding": "True"
     },
     {
@@ -137,7 +146,8 @@
       "Position": {
         "X": 911.6638,
         "Y": -114.3916
-      }
+      },
+      "Description": "If disabled, the feedback buffer is not updated."
     },
     {
       "InputId": "cbe45989-b239-491e-a2d8-83a42ab58b85"/*ShiftBrightness*/,
@@ -155,6 +165,7 @@
         "X": 1051.6638,
         "Y": -394.39154
       },
+      "Description": "Scales the feedback image each frame. Values slightly above 1 create a zoom-in trail.",
       "Min": -0.9,
       "Max": 1.1,
       "Scale": 0.0001
@@ -165,6 +176,7 @@
         "X": 589.36945,
         "Y": -665.32764
       },
+      "Description": "Blurs the feedback buffer each frame.",
       "Min": 0.0,
       "Max": 10.0,
       "Scale": 0.01

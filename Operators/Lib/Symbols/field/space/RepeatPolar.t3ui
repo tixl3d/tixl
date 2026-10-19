@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "1d9f133d-eba6-4b28-9dfd-08f6c5417ed6"/*RepeatPolar*/,
-  "Description": "Mirrors and rotates the incoming field in the desired number around a central axis.\n\nIt can be rendered with [RaymarchField] and visualized with [VisualizeFieldDistance].\n\nSimilar nodes: [ReflectField], [RepeatWithMirror], [TwistField].\n\nIt needs an incoming field like [BoxSDF], [ChainLinkSDF], [FractalSDF] as an input.\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToRaymarchField].",
+  "Description": "Repeats the incoming field radially around an axis.\n\nIt needs an incoming field like [BoxSDF] or [TorusSDF]. Render the result with [RaymarchField] and inspect it with [VisualizeFieldDistance].\n\nSee also: [RepeatAxis], [ReflectField], [TwistField]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,14 +10,15 @@
         "X": -200.0,
         "Y": 75.0
       },
-      "Description": "Defines the axis along which the field is aligned\n(If changing this value has no effect, any other value must be changed to bring the change into effect)"
+      "Description": "Axis around which the field is repeated."
     },
     {
       "InputId": "57f25302-ea5e-40ab-9c54-9d7c3411e467"/*Mirror*/,
       "Position": {
         "X": -200.0,
         "Y": 195.0
-      }
+      },
+      "Description": "Mirrors every other copy."
     },
     {
       "InputId": "7248c680-7279-4c1d-b968-3864cb849c77"/*InputField*/,
@@ -32,7 +33,7 @@
         "X": -200.0,
         "Y": 120.0
       },
-      "Description": "Rotates the field around its own axis",
+      "Description": "Rotates the copies around the axis.",
       "Min": -180.0,
       "Max": 180.0,
       "Format": "{0:0.0}°"
@@ -43,7 +44,7 @@
         "X": -200.0,
         "Y": 45.0
       },
-      "Description": "Defines how often the incoming object is repeated"
+      "Description": "Number of copies around the axis."
     }
   ],
   "SymbolChildUis": [],

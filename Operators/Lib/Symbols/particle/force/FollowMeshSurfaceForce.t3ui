@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "26bb382c-5e3d-49ae-b17e-5bd49b083d9a"/*FollowMeshSurfaceForce*/,
-  "Description": "Contains particles close to a surface of a simple(!) mesh geometry.",
+  "Description": "Keeps particles close to the surface of a mesh and lets them flow along it.\n\nEach particle searches the closest face of the whole mesh every frame, so the cost grows with particle count times face count. Use simple low-poly meshes.\n\nSee also: [MeshVolumeForce], [FieldDistanceForce]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -37,7 +37,8 @@
       "Position": {
         "X": 253.65576,
         "Y": 1000.2579
-      }
+      },
+      "Description": "Low-poly mesh the particles follow."
     },
     {
       "InputId": "a962fea7-b59f-49f4-83f0-a7e8b625e57c"/*Amount*/,

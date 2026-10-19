@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "fdad077d-e919-4f40-a154-36e86245a585"/*SetVec3Var*/,
-  "Description": "",
+  "Description": "Sets a vec3 variable in the evaluation context that can be read by [GetVec3Var] in the connected subgraph.\n\nIf SubGraph is connected, the variable is set while the subgraph is executed and a previous value is restored afterwards. Without a connected subgraph the variable stays set for everything evaluated later.\n\nSee also: [GetVec3Var]",
   "InputUis": [
     {
       "InputId": "0edf7837-4555-4e62-902f-930abf72e8b8"/*VariableName*/,

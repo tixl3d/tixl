@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "84a93ea9-98fb-4088-a1e9-87454f7292f1"/*DrawPointsShaded*/,
-  "Description": "Draws a point buffer as PBR-shaded spheres using the attributes defined by [SetMaterial].\n\nNote: This operator was previously called \"DrawMeshAsSpheres\".",
+  "Description": "Draws a point buffer as PBR-shaded spheres using the material defined by [SetMaterial].\n\nThe size is PointSize multiplied by the point's Scale (see UsePointScale) and optionally its F1 or F2 attribute (see ScaleFactor).\n\nNote: This operator was previously called \"DrawMeshAsSpheres\".\n\nSee also: [DrawPoints], [DrawMeshAtPoints]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -9,21 +9,24 @@
       "Position": {
         "X": 2630.4138,
         "Y": 4424.199
-      }
+      },
+      "Description": "Hides points behind other geometry."
     },
     {
       "InputId": "247d1fed-9897-486b-bcf0-39e6c98ccbd1"/*FadeNearest*/,
       "Position": {
         "X": 1619.0709,
         "Y": 3754.4053
-      }
+      },
+      "Description": "Points closer to the camera than this distance fade out; they are fully visible at twice the distance. 0 disables the fade."
     },
     {
       "InputId": "3472e004-210f-4cb7-aaab-dee0c5eab6eb"/*ColorField*/,
       "Position": {
         "X": 2205.8533,
         "Y": 3590.6753
-      }
+      },
+      "Description": "Optional field that multiplies the color depending on the world position of each point."
     },
     {
       "InputId": "4ca3418c-9542-4158-8a72-ba14c9c199ee"/*UsePointScale*/,
@@ -31,6 +34,7 @@
         "X": 2205.8533,
         "Y": 3768.3735
       },
+      "Description": "Multiplies the size with the point's Scale.x and Scale.y.",
       "AddPadding": "True"
     },
     {
@@ -55,7 +59,8 @@
         "X": 2630.4138,
         "Y": 4459.199
       },
-      "GroupTitle": "Draw Options"
+      "GroupTitle": "Draw Options",
+      "Description": "Writes the points to the depth buffer so they can hide geometry drawn later."
     },
     {
       "InputId": "bb8e9be9-1371-45fd-be67-93d183b1355e"/*BlendMode*/,
@@ -69,7 +74,8 @@
       "Position": {
         "X": 2345.8533,
         "Y": 3733.3735
-      }
+      },
+      "Description": "Point attribute that multiplies the size: None, F1 or F2."
     },
     {
       "InputId": "f5b4e08b-a49a-47ac-838d-577b621005b2"/*Color*/,

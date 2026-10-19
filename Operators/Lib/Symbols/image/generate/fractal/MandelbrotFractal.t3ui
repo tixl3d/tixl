@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "27e58fae-2b3d-404e-b9cd-307cb6ad4906"/*MandelbrotFractal*/,
-  "Description": "",
+  "Description": "Renders the Mandelbrot set colored by a gradient of the smooth iteration count.\n\nAKA: fractal, mandelbrot\n\nSee also: [FractalNoise]",
   "SymbolTags": "64",
   "InputUis": [
     {
@@ -10,6 +10,7 @@
         "X": 904.29663,
         "Y": -23.243103
       },
+      "Description": "Zoom as power of ten: each step of 1 zooms in by a factor of 10.",
       "Min": 0.0,
       "Max": 5.0,
       "Format": "{0:0.000} ×"
@@ -19,14 +20,16 @@
       "Position": {
         "X": 904.29663,
         "Y": 46.756897
-      }
+      },
+      "Description": "Number of iterations covered by one repetition of the gradient."
     },
     {
       "InputId": "67e309ff-e258-45af-b583-2f86f39de0d3"/*Phase*/,
       "Position": {
         "X": 904.29663,
         "Y": 81.7569
-      }
+      },
+      "Description": "Shifts the gradient lookup."
     },
     {
       "InputId": "8ac36378-ff86-4795-8c82-52f4f4c83e70"/*Gradient*/,
@@ -41,6 +44,7 @@
         "X": 764.29663,
         "Y": -93.2431
       },
+      "Description": "Position in the complex plane at the image center.",
       "Min": -2.0,
       "Max": 2.0,
       "Scale": 0.001,

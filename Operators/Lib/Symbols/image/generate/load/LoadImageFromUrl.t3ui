@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "61ec6355-bd7d-4abb-aa44-b01b7d658e23"/*LoadImageFromUrl*/,
-  "Description": "Loads an image file with the specified URL. This process does not use caching.\n\nTo load an image from a local folder use [LoadImage]\n\nAlso see [RequestUrl]",
+  "Description": "Loads an image from a URL as a texture.\n\nThe image is not cached and is reloaded when the URL changes or an update is triggered.\n\nAKA: download, web, http\n\nSee also: [LoadImage], [RequestUrl], [UseFallbackTexture]",
   "SymbolTags": "1",
   "InputUis": [
     {

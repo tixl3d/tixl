@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "d35a403b-7e6e-4725-a344-6e8008a4e1e1"/*PrefixSum*/,
-  "Description": "A complex compute shader setup that uses a spatial hash map to assist with GPU nearest neighbour search.",
+  "Description": "Computes a prefix sum (scan) over a buffer of unsigned integers on the GPU.\n\nThis is used for building spatial hash maps, e.g. for nearest neighbour searches of points.",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -17,7 +17,8 @@
       "Position": {
         "X": -490.50574,
         "Y": -115.89563
-      }
+      },
+      "Description": "Inclusive: each result includes its own element.\nExclusive: each result is the sum of all previous elements."
     }
   ],
   "SymbolChildUis": [

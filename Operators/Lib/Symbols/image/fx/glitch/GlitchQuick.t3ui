@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "53c8b5f4-fd3b-4a7c-a22a-dea37c45b6d4"/*GlitchQuick*/,
-  "Description": "A combination of [SortPixelGlitch], [GlitchDisplace], [Displace] and [Grain] for a quick image glitch effect.\n\n\nOther useful Ops for a PostFX Pipeline: [MotionBlur] [DepthOfField] [ChromaticAberration] [Glow] [Grain] [Blur]",
+  "Description": "A quick image glitch effect that combines [SortPixelGlitch], [GlitchDisplace], [Displace] and [Grain].\n\nAKA: datamosh, corrupt, glitch\n\nSee also: [RgbTV], [MotionBlur], [DepthOfField], [ChromaticAbberation], [Glow], [Grain], [Blur]",
   "InputUis": [
     {
       "InputId": "2a28f084-bc2f-4458-8ad8-f3bf11086fc4"/*SortPixelEnabled*/,

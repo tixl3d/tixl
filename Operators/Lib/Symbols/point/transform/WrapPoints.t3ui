@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "b263a6a1-0872-4223-80e7-5e09f4aea19d"/*WrapPoints*/,
-  "Description": "Wraps points within a boundary volume.",
+  "Description": "Wraps point positions into a box: points leaving one side reappear on the opposite side.\n\nAKA: repeat, modulo, tile\n\nSee also: [WrapPointPosition], [BoundPoints]",
   "SymbolTags": "1024",
   "InputUis": [
     {
@@ -16,7 +16,8 @@
       "Position": {
         "X": -532.1449,
         "Y": 1009.25146
-      }
+      },
+      "Description": "Center of the box."
     },
     {
       "InputId": "daba3196-b9eb-4cb0-b062-00626cadc28b"/*Size*/,

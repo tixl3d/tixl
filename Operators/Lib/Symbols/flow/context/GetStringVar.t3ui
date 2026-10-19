@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "15012739-97b0-49e6-8bdc-cd45cd262560"/*GetStringVar*/,
-  "Description": "Fetches a float variable from the context.\n\nUse [SetStringVar] to set the variable further up the graph.\n\nImportant:\nIf you're using this together with [Loop], don't forget to use 's' as the normalized progress variable.\n\nExample: [SetContextVariableExample]",
+  "Description": "Reads a string variable from the evaluation context.\n\nThe variable has to be set further right in the graph with [SetStringVar]. If it is not defined, FallbackDefault is returned.\n\nSee also: [SetStringVar]",
   "InputUis": [
     {
       "InputId": "d19b0483-cdd4-4684-852d-ef5ee8393dfc"/*VariableName*/,
@@ -9,7 +9,7 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "Description": "The name of the variable we want to get the string value from. This is set using [SetString]",
+      "Description": "Name of the context variable. The dropdown lists variables currently defined in the context.",
       "Usage": "CustomDropdown"
     },
     {
@@ -18,7 +18,7 @@
         "X": -200.0,
         "Y": 45.0
       },
-      "Description": "The String value that will used if there is no input",
+      "Description": "Returned if the variable is not defined in the current context.",
       "Usage": "Default"
     }
   ],

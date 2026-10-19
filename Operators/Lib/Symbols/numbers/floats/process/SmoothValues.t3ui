@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "50bf9e01-6912-4ab7-b233-660ce67bca25"/*SmoothValues*/,
-  "Description": "Smooths a list of values by applying a smoothing window.",
+  "Description": "Smooths a list of values by averaging each value with its following neighbors.\n\nSee also: [DampFloatList]",
   "InputUis": [
     {
       "InputId": "1f88c433-fd51-4076-8f46-34b586f723f9"/*Input*/,
@@ -15,7 +15,8 @@
       "Position": {
         "X": 0.0,
         "Y": 45.0
-      }
+      },
+      "Description": "Number of following entries averaged with each value, clamped to 1 to 10."
     }
   ],
   "SymbolChildUis": [],

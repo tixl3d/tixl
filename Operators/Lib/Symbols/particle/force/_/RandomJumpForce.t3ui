@@ -1,8 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "8342d554-6e83-49b1-91b5-2d4b5b63e726"/*RandomJumpForce*/,
-  "Description": "",
-  "SymbolTags": "128",
+  "Description": "Internal helper. Experimental force that directly offsets particle positions with curl noise.\n\nThe noise offset is scaled per axis by DirectionDistribution and rotated into the orientation of each particle. Unlike [TurbulenceForce] it changes the position instead of the velocity, which results in jittering jumps.\n\nSee also: [TurbulenceForce]",
+  "SymbolTags": "144",
   "InputUis": [
     {
       "InputId": "17758594-7c61-4524-a83f-7489daeb5005"/*Phase*/,
@@ -51,6 +51,7 @@
         "X": -86.355225,
         "Y": 189.99057
       },
+      "Description": "Currently has no effect.",
       "Min": -5.0,
       "Max": 5.0,
       "Format": "{0:0.000} ×"
@@ -61,6 +62,7 @@
         "X": 209.71893,
         "Y": 210.57773
       },
+      "Description": "Scales the offset along the particle's local X, Y and Z axes.",
       "Min": 0.0,
       "Max": 2.0,
       "ClampMin": true
@@ -70,7 +72,8 @@
       "Position": {
         "X": 149.2203,
         "Y": -267.07108
-      }
+      },
+      "Description": "Optional field whose brightness scales the effect at each particle position."
     }
   ],
   "SymbolChildUis": [
