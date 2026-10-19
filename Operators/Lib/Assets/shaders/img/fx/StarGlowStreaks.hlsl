@@ -43,12 +43,12 @@ float4 psMain(vsOutput input) : SV_TARGET
     // (Composite > 0.5) ? Image.Sample(texSampler, uv )
     //                                       : float4(0.0,0.0,0.0,1.0);
    
-    
+    float2 asp=float(height)/float2(width, height);
     for (float i = -Range; i < Range; i += steps) {
     
         float falloff = 1.0 - abs(i / Range);
     
-        float4 blur = Image.SampleLevel(texSampler, uv + i, Quality);
+        float4 blur = Image.SampleLevel(texSampler, uv + i*asp, Quality);
 
         if(GlareModes == 0  && GlareModes < 3 || GlareModes == 2 && GlareModes < 3)
         {
@@ -59,7 +59,7 @@ float4 psMain(vsOutput input) : SV_TARGET
             }
             
             //Diagonal 2
-            blur = Image.SampleLevel(texSampler, uv + float2(i, -i), Quality);
+            blur = Image.SampleLevel(texSampler, uv + float2(i, -i)*asp, Quality);
             if (blur.r + blur.g + blur.b > Threshold * 3.0)
             {
                 streaksColor += blur * falloff * steps * Brightness;
@@ -70,7 +70,7 @@ float4 psMain(vsOutput input) : SV_TARGET
             if(GlareModes == 3 || GlareModes == 1 || GlareModes == 2)
             {
                 //Horizontal 
-                blur = Image.SampleLevel(texSampler, uv + float2(i, 0), Quality);
+                blur = Image.SampleLevel(texSampler, uv + float2(i, 0)*asp, Quality);
                 if (blur.r + blur.g + blur.b > Threshold * 3.0)
                 {
                     streaksColor += blur * falloff * steps * Brightness;
@@ -80,7 +80,7 @@ float4 psMain(vsOutput input) : SV_TARGET
              if(GlareModes == 4 || GlareModes == 1 || GlareModes == 2)
             {
             //Vertical
-                blur = Image.SampleLevel(texSampler, uv + float2(0, i*2), Quality);
+                blur = Image.SampleLevel(texSampler, uv + float2(0, i*2)*asp, Quality);
                 if (blur.r + blur.g + blur.b > Threshold * 3.0)
                 {
                     streaksColor += blur * falloff * steps * Brightness;
