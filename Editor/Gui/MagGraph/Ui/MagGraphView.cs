@@ -49,6 +49,7 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
     private void CompositionChangedHandler(ProjectView arg1, Guid arg2)
     {
         _context.Layout.FlagStructureAsChanged();
+        _commandClipSlotIdsBySymbol.Clear();
     }
 
     private void CompositionContentChangedHandler(ProjectView view, ProjectView.ChangeTypes changes)
@@ -58,6 +59,9 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
         {
             _context.Layout.FlagStructureAsChanged();
         }
+
+        if ((changes & ProjectView.ChangeTypes.Children) != 0)
+            _commandClipSlotIdsBySymbol.Clear();
     }
 
     private readonly ProjectView _projectView;

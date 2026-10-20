@@ -46,10 +46,25 @@ internal sealed partial class MagGraphView
                 if (IsAutoCollectEnabled(item, _timeClipPlayerAutoCollectInputId))
                     _timeClipPlayers.Add(item);
             }
-            else if (TryGetCommandClipSlotId(item, out var clipSlotId))
+        }
+
+        // Command clips only matter once there's a player to collect them
+        if (_timeClipPlayers.Count > 0)
+        {
+            foreach (var item in _context.Layout.Items.Values)
             {
-                _commandClips.Add(item);
-                _commandClipSlotIds.Add(clipSlotId);
+                if (item.Variant != MagGraphItem.Variants.Operator || item.IsCollapsedAway)
+                    continue;
+
+                var symbolId = item.SymbolChild?.Symbol.Id;
+                if (symbolId == _videoClipPlayerSymbolId || symbolId == _videoClipSymbolId || symbolId == _timeClipPlayerSymbolId)
+                    continue;
+
+                if (TryGetCommandClipSlotId(item, out var clipSlotId))
+                {
+                    _commandClips.Add(item);
+                    _commandClipSlotIds.Add(clipSlotId);
+                }
             }
         }
 
@@ -142,27 +157,40 @@ internal sealed partial class MagGraphView
                                 1.1f);
     }
 
-    private static bool TryGetCommandClipSlotId(MagGraphItem item, out Guid clipSlotId)
+    private bool TryGetCommandClipSlotId(MagGraphItem item, out Guid clipSlotId)
     {
-        clipSlotId = default;
+        clipSlotId = Guid.Empty;
+        var symbol = item.SymbolChild?.Symbol;
+        if (symbol == null)
+            return false;
+
+        if (_commandClipSlotIdsBySymbol.TryGetValue(symbol.Id, out var cached) && cached.InstanceType == symbol.InstanceType)
+        {
+            clipSlotId = cached.ClipSlotId;
+            return clipSlotId != Guid.Empty;
+        }
+
         var instance = item.Instance;
+        if (instance == null)
+            return false;
 
         // Audio clips carry a Command time-clip slot for timeline presence but are collected by the
         // audio graph, not [TimeClipPlayer] — mirror the runtime's exclusion.
-        if (instance == null || instance is T3.Core.Audio.IAudioClipProvider)
-            return false;
-
-        var outputs = instance.Outputs;
-        for (var i = 0; i < outputs.Count; i++)
+        if (instance is not T3.Core.Audio.IAudioClipProvider)
         {
-            if (outputs[i] is TimeClipSlot<Command> clipSlot)
+            var outputs = instance.Outputs;
+            for (var i = 0; i < outputs.Count; i++)
             {
-                clipSlotId = clipSlot.Id;
-                return true;
+                if (outputs[i] is TimeClipSlot<Command> clipSlot)
+                {
+                    clipSlotId = clipSlot.Id;
+                    break;
+                }
             }
         }
 
-        return false;
+        _commandClipSlotIdsBySymbol[symbol.Id] = (symbol.InstanceType, clipSlotId);
+        return clipSlotId != Guid.Empty;
     }
 
     // AutoCollect from the stored input value, or the live slot value when the input is connected.
@@ -246,4 +274,10 @@ internal sealed partial class MagGraphView
     private readonly List<Guid> _commandClipSlotIds = new();
     private readonly HashSet<Guid> _wiredClipIds = new();
     private readonly Stack<Guid> _wiredWalkStack = new();
+
+    /**
+     * Only the operator type decides this, so it's resolved once per symbol. The type is kept to notice hot reloads;
+     * clearing on composition changes keeps entries from holding on to unloaded assemblies.
+     */
+    private readonly Dictionary<Guid, (Type InstanceType, Guid ClipSlotId)> _commandClipSlotIdsBySymbol = new();
 }
