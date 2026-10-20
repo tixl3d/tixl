@@ -97,13 +97,7 @@ internal sealed partial class MagGraphView
                 case MagGraphConnection.ConnectionStyles.MainOutToMainInSnappedHorizontal:
                 case MagGraphConnection.ConnectionStyles.MainOutToInputSnappedHorizontal:
                 {
-                    var isPotentialSplitTarget = _context.ItemMovement.SpliceSets.Count > 0
-                                                 && !_context.ItemMovement.DraggedItems.Contains(connection.SourceItem)
-                                                 && _context.ItemMovement.SpliceSets
-                                                            .Any(sp
-                                                                     => sp.Direction == MagGraphItem.Directions.Horizontal
-                                                                        && sp.Type == type);
-                    if (isPotentialSplitTarget)
+                    if (IsPotentialSplitTarget(connection, MagGraphItem.Directions.Horizontal))
                     {
                         var extend = new Vector2(0, MagGraphItem.GridSize.Y * CanvasScale * 0.25f);
 
@@ -125,13 +119,7 @@ internal sealed partial class MagGraphView
 
                 case MagGraphConnection.ConnectionStyles.MainOutToMainInSnappedVertical:
                 {
-                    var isPotentialSplitTarget = _context.ItemMovement.SpliceSets.Count > 0
-                                                 && !_context.ItemMovement.DraggedItems.Contains(connection.SourceItem)
-                                                 && _context.ItemMovement.SpliceSets
-                                                            .Any(x
-                                                                     => x.Direction == MagGraphItem.Directions.Vertical
-                                                                        && x.Type == type);
-                    if (isPotentialSplitTarget)
+                    if (IsPotentialSplitTarget(connection, MagGraphItem.Directions.Vertical))
                     {
                         var extend = new Vector2(MagGraphItem.GridSize.X * CanvasScale * 0.06f, 0);
 
@@ -254,5 +242,24 @@ internal sealed partial class MagGraphView
                     break;
             }
         }
+    }
+
+    /// <summary>
+    /// A plain loop rather than LINQ: a lambda capturing the connection type would allocate a closure for every
+    /// connection on every frame, even when nothing is dragged.
+    /// </summary>
+    private bool IsPotentialSplitTarget(MagGraphConnection connection, MagGraphItem.Directions direction)
+    {
+        var movement = _context.ItemMovement;
+        if (movement.SpliceSets.Count == 0 || movement.DraggedItems.Contains(connection.SourceItem))
+            return false;
+
+        foreach (var spliceLink in movement.SpliceSets)
+        {
+            if (spliceLink.Direction == direction && spliceLink.Type == connection.Type)
+                return true;
+        }
+
+        return false;
     }
 }
