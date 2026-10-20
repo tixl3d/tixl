@@ -35,6 +35,7 @@ internal static class ProgramWindows
     private static bool _isPacingWithVSync = true;
     private static long _lastPacedFrameStart;
     private static bool _isWaitingForVblanks;
+    private static int _pacingFrameLatency = 1;
 
     /**
      * Fraction of a refresh period a frame may start early without waiting for another vblank. Large enough for
@@ -353,8 +354,11 @@ internal static class ProgramWindows
         // display at full rate the waitable alone paces, and the extra wait must stay out of the way: it fires
         // whenever the waitable released the loop a little before the vblank, and that head start is what a frame
         // whose CPU and GPU work add up to a full period needs to make its vblank.
+        // With a frame latency of 2 the loop paces like the Vulkan backend: the waitable alone, a frame in flight
+        // ahead. Waiting for the secondary display's vblanks on top would take that head start away again.
         var needsVblankWait = _isPacingWithVSync
-                              && (_pacingVblanksPerFrame > 1 || !PresentationDiagnostics.IsPacingWindowOnPrimaryDisplay);
+                              && (_pacingVblanksPerFrame > 1
+                                  || (_pacingFrameLatency == 1 && !PresentationDiagnostics.IsPacingWindowOnPrimaryDisplay));
         if (needsVblankWait != _isWaitingForVblanks)
         {
             _isWaitingForVblanks = needsVblankWait;
@@ -415,6 +419,13 @@ internal static class ProgramWindows
             FrameTiming.VblanksPerFrame = vblanksPerFrame;
             _pacingVblanksPerFrame = vblanksPerFrame;
             _isPacingWithVSync = useVSync;
+
+            _pacingFrameLatency = Math.Clamp(UserSettings.Config.FrameLatency, 1, 2);
+            Main.SetMaximumFrameLatency(_pacingFrameLatency);
+            for (var i = 0; i < outputWindows.Count; i++)
+            {
+                outputWindows[i].Window.SetMaximumFrameLatency(_pacingFrameLatency);
+            }
 
             PresentWindow(Main, syncInterval);
             PresentationDiagnostics.Update(Main.SwapChain);

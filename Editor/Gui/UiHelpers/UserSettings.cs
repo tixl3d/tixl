@@ -110,6 +110,9 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         /** Frames per second to render at with vsync; 0 renders every refresh of the pacing display. */
         public int TargetFrameRate = 0;
 
+        /** Frames the loop may run ahead of the display: 1 for the lowest input latency, 2 to absorb late frames. */
+        public int FrameLatency = 1;
+
         /** Windows' implementation of mirroring a display is extremely slow and can
         * take up to 50% of the GPU time. Enabling this work around will copy the Main window
         * SwapChain buffer into a texture that is used for the 2nd viewer window.

@@ -188,8 +188,7 @@ internal sealed class AppWindow
         {
             using var swapChain2 = _swapChain.QueryInterface<SwapChain2>();
             _frameLatencyWaitableHandle = swapChain2.FrameLatencyWaitableObject;
-            // A queue depth of 2 lets the loop run a frame ahead, so frame intervals alternate between ~0 and two vblanks.
-            swapChain2.MaximumFrameLatency = 1;
+            swapChain2.MaximumFrameLatency = _maximumFrameLatency;
         }
         catch (SharpDX.SharpDXException e)
         {
@@ -207,21 +206,49 @@ internal sealed class AppWindow
     /// </summary>
     public void WaitForFrameLatency()
     {
-        if (_frameLatencyWaitableHandle == IntPtr.Zero)
-            return;
-        WaitForSingleObjectEx(_frameLatencyWaitableHandle, 1000, false);
-
-        // Presents outside the frame loop (the stall overlay) signal the waitable without a matching wait. Each
-        // surplus signal would let the loop run one more frame ahead of the display for the rest of the session.
-        var surplusSignals = 0;
-        while (WaitForSingleObjectEx(_frameLatencyWaitableHandle, 0, false) == WaitObject0)
-        {
-            surplusSignals++;
-        }
-
-        if (surplusSignals > 0)
-            Log.Debug($"Drained {surplusSignals} surplus frame-latency signals of '{Form.Text}'");
+        TryWaitForFrameLatency(1000);
     }
+
+    /// <summary>
+    /// Takes one frame-latency signal; false if none arrived within the timeout. Every present of a swap chain with
+    /// a waitable must be preceded by exactly one such wait, including presents outside the frame loop (the stall
+    /// overlay). Draining "surplus" signals afterwards instead is not safe: DXGI holds legitimate extra signals at
+    /// times, and taking one leaves the loop a frame short for the rest of the session, which halves the rate of
+    /// every frame that comes close to the refresh period.
+    /// </summary>
+    internal bool TryWaitForFrameLatency(uint timeoutMs)
+    {
+        return _frameLatencyWaitableHandle == IntPtr.Zero
+               || WaitForSingleObjectEx(_frameLatencyWaitableHandle, timeoutMs, false) == WaitObject0;
+    }
+
+    /// <summary>
+    /// How many frames the loop may run ahead of the display. 1 keeps input latency lowest but serialises CPU and
+    /// GPU, so once CPU work, GPU work and DWM composition don't fit one period together the rate halves. 2 is what
+    /// the Vulkan backend does (two frames in flight on a FIFO swapchain) and absorbs such a late frame.
+    /// </summary>
+    internal void SetMaximumFrameLatency(int latency)
+    {
+        if (latency == _maximumFrameLatency)
+            return;
+
+        _maximumFrameLatency = latency;
+        if (_frameLatencyWaitableHandle == IntPtr.Zero || _swapChain == null)
+            return;
+
+        try
+        {
+            using var swapChain2 = _swapChain.QueryInterface<SwapChain2>();
+            swapChain2.MaximumFrameLatency = latency;
+            Log.Debug($"Maximum frame latency of '{Form.Text}' set to {latency}");
+        }
+        catch (SharpDX.SharpDXException e)
+        {
+            Log.Warning($"Could not set maximum frame latency to {latency}: {e.Message}");
+        }
+    }
+
+    private int _maximumFrameLatency = 1;
 
     private const uint WaitObject0 = 0;
 

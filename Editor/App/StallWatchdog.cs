@@ -237,8 +237,16 @@ internal static class StallWatchdog
 
             using var commandList = context.FinishCommandList(false);
             _device!.ImmediateContext.ExecuteCommandList(commandList, true);
-            _mainWindow.SwapChain.Present(0, PresentFlags.None);
+
+            // The overlay is in the back buffer now, so the main thread must redraw even if this doesn't present.
             _hasPresentedSinceLastFrame = true;
+
+            // Like every present on Main's swap chain, the overlay's takes a frame-latency signal first. Without it
+            // each overlay present would leave a signal behind and let the frame loop run ahead once the stall is over.
+            if (!_mainWindow.TryWaitForFrameLatency(OverlayFrameLatencyTimeoutMs))
+                return;
+
+            _mainWindow.SwapChain.Present(0, PresentFlags.None);
         }
     }
 
@@ -298,6 +306,9 @@ internal static class StallWatchdog
     private const float MinVisibleFade = 0.1f;
     private const int IdlePollMilliseconds = 50;
     private const int OverlayFrameMilliseconds = 33;
+
+    /** Short, because the main thread waits for the present lock while this runs when the stall ends. */
+    private const uint OverlayFrameLatencyTimeoutMs = 50;
 
     private static Thread? _thread;
     private static Device? _device;
