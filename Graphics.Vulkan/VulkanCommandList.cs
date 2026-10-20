@@ -1064,9 +1064,9 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
         var bufferInfos = stackalloc VkDescriptorBufferInfo[maxWriteCount];
         var imageInfos = stackalloc VkDescriptorImageInfo[maxWriteCount];
 
-        foreach (var setGroup in _pipeline.Declared.GroupBy(entry => entry.Key.Set))
+        foreach (var declaredSet in _pipeline.DeclaredSets)
         {
-            var declared = setGroup.ToArray();
+            var declared = declaredSet.Bindings;
             var writeCount = 0;
 
             for (var i = 0; i < declared.Length; i++)
@@ -1154,21 +1154,21 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
             {
                 if (writeCount > 0)
                 {
-                    backend.Api.vkCmdPushDescriptorSetKHR(_commandBuffer, bindPoint, _pipeline.Layout, (uint)setGroup.Key,
+                    backend.Api.vkCmdPushDescriptorSetKHR(_commandBuffer, bindPoint, _pipeline.Layout, (uint)declaredSet.Set,
                                                           (uint)writeCount, writes);
                 }
 
                 continue;
             }
 
-            var set = backend.AllocateDescriptorSet(_pipeline.SetLayouts[setGroup.Key]);
+            var set = backend.AllocateDescriptorSet(_pipeline.SetLayouts[declaredSet.Set]);
             for (var i = 0; i < writeCount; i++)
             {
                 writes[i].dstSet = set;
             }
 
             backend.Api.vkUpdateDescriptorSets((uint)writeCount, writes, 0, null);
-            backend.Api.vkCmdBindDescriptorSets(_commandBuffer, bindPoint, _pipeline.Layout, (uint)setGroup.Key, 1, &set, 0, null);
+            backend.Api.vkCmdBindDescriptorSets(_commandBuffer, bindPoint, _pipeline.Layout, (uint)declaredSet.Set, 1, &set, 0, null);
         }
     }
 

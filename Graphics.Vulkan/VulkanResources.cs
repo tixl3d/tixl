@@ -197,6 +197,8 @@ internal sealed class VulkanPipeline(VulkanBackend backend, VkPipeline pipeline,
                                      IReadOnlyDictionary<(int Set, int Slot), VkDescriptorType> declared, string? label)
     : GpuPipeline(label)
 {
+    internal readonly record struct DeclaredDescriptorSet(int Set, KeyValuePair<(int Set, int Slot), VkDescriptorType>[] Bindings);
+
     internal readonly VkPipeline Pipeline = pipeline;
     internal readonly VkPipelineLayout Layout = layout;
     internal readonly VkPipelineBindPoint BindPoint = bindPoint;
@@ -209,6 +211,11 @@ internal sealed class VulkanPipeline(VulkanBackend backend, VkPipeline pipeline,
     /// that constantly — and the write still has to name the type the layout was created with.
     /// </summary>
     internal readonly IReadOnlyDictionary<(int Set, int Slot), VkDescriptorType> Declared = declared;
+
+    /// <summary><see cref="Declared"/> grouped by descriptor set once, so draws can walk it without allocating.</summary>
+    internal readonly DeclaredDescriptorSet[] DeclaredSets = declared.GroupBy(entry => entry.Key.Set)
+                                                                     .Select(group => new DeclaredDescriptorSet(group.Key, group.ToArray()))
+                                                                     .ToArray();
 
     protected override void ReleaseWhenRetired()
     {
