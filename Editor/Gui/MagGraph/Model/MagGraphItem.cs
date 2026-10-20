@@ -46,16 +46,34 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
 
     public SymbolUi? SymbolUi;
     public Symbol.Child? SymbolChild;
-    public IReadOnlyList<Guid>? InstancePath;
+
+    public IReadOnlyList<Guid>? InstancePath
+    {
+        get => _instancePath;
+        set
+        {
+            _instancePath = value;
+            _instance = null;
+        }
+    }
+
+    /// <summary>
+    /// Resolving the path takes the symbol's creation lock at every nesting level, and drawing reads this many
+    /// times per item and frame. The cached instance is dropped once disposed, e.g. after an operator package reload.
+    /// </summary>
     public Instance? Instance
     {
         get
         {
-            if (InstancePath == null || SymbolChild == null)
+            if (_instance is { IsDisposed: false })
+                return _instance;
+
+            _instance = null;
+            if (_instancePath == null || SymbolChild == null)
                 return null;
 
-            SymbolChild.TryGetOrCreateInstance(InstancePath, out var instance, out _, true);
-            return instance;
+            SymbolChild.TryGetOrCreateInstance(_instancePath, out _instance, out _, true);
+            return _instance;
         }
     }
 
@@ -368,4 +386,7 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
             nodeSelection.AddSelection(this);
         }
     }
+
+    private IReadOnlyList<Guid>? _instancePath;
+    private Instance? _instance;
 }

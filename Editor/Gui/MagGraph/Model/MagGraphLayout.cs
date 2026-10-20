@@ -69,13 +69,16 @@ internal sealed class MagGraphLayout
             parentSymbolUi.BumpVersionCounter();
         }
 
-        if (forceUpdate || FrameStats.Last.UndoRedoTriggered || StructureFlaggedAsChanged ||
-            HasCompositionDataChanged(compositionOp.Symbol, ref _compositionModelHash))
+        var structureChanged = forceUpdate || FrameStats.Last.UndoRedoTriggered || StructureFlaggedAsChanged ||
+                               HasCompositionDataChanged(compositionOp.Symbol, ref _compositionModelHash);
+        if (structureChanged)
             RefreshDataStructure(context, parentSymbolUi);
 
         // TODO: This only needs to be done, on structural changes or when items have been moved
         UpdateConnectionLayout();
-        ComputeVerticalStackBoundaries(context.View);
+
+        if (HasItemGeometryChanged(ref _itemGeometryHash) || structureChanged)
+            ComputeVerticalStackBoundaries(context.View);
     }
 
     public void FlagStructureAsChanged()
@@ -1047,8 +1050,34 @@ internal sealed class MagGraphLayout
         Log.Warning("Input line not found?");
     }
 
-    // Reuse list to avoid allocations
+    // Reuse lists to avoid allocations
     private static readonly List<MagGraphItem> _listStackedItems = new(32);
+    private static readonly List<MagGraphItem> _itemsSortedByColumn = new(128);
+
+    private bool HasItemGeometryChanged(ref int previousHash)
+    {
+        var hash = Items.Count;
+        foreach (var item in Items.Values)
+        {
+            hash = HashCode.Combine(hash, item.PosOnCanvas, item.Size);
+        }
+
+        if (hash == previousHash)
+            return false;
+
+        previousHash = hash;
+        return true;
+    }
+
+    private static int CompareByColumnThenY(MagGraphItem a, MagGraphItem b)
+    {
+        var byColumn = MathF.Round(a.PosOnCanvas.X).CompareTo(MathF.Round(b.PosOnCanvas.X));
+        if (byColumn != 0)
+            return byColumn;
+
+        var byY = a.PosOnCanvas.Y.CompareTo(b.PosOnCanvas.Y);
+        return byY != 0 ? byY : a.Id.CompareTo(b.Id);
+    }
 
     /// <summary>
     /// This improves the layout of arc connections inputs into multiple stacked ops so they
@@ -1059,7 +1088,15 @@ internal sealed class MagGraphLayout
         MagGraphItem? previousItem = null;
 
         _listStackedItems.Clear();
-        foreach (var item in Items.Values.OrderBy(i => MathF.Round(i.PosOnCanvas.X)).ThenBy(i => i.PosOnCanvas.Y))
+        _itemsSortedByColumn.Clear();
+        foreach (var item in Items.Values)
+        {
+            _itemsSortedByColumn.Add(item);
+        }
+
+        _itemsSortedByColumn.Sort(CompareByColumnThenY);
+
+        foreach (var item in _itemsSortedByColumn)
         {
             item.VerticalStackArea = item.Area;
 
@@ -1212,5 +1249,6 @@ internal sealed class MagGraphLayout
     }
 
     private int _compositionModelHash;
+    private int _itemGeometryHash;
     private bool StructureFlaggedAsChanged { get; set; }
 }
