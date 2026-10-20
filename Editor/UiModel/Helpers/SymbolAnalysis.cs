@@ -293,8 +293,10 @@ internal static class SymbolAnalysis
     #region Shared Helpers
     internal static bool TryGetOperatorType(Symbol symbol, out OperatorClassification opType)
     {
-        var ns = symbol.Namespace ?? string.Empty;
-        var rootSegment = ns.Split('.')[0];
+        // Sliced rather than split: the graph calls this for every visible operator each frame.
+        var ns = (symbol.Namespace ?? string.Empty).AsSpan();
+        var dotIndex = ns.IndexOf('.');
+        var rootSegment = dotIndex < 0 ? ns : ns[..dotIndex];
 
         opType = rootSegment switch
                      {
