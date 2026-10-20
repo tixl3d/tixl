@@ -33,7 +33,7 @@ internal sealed class PerformanceWindow : Window
                                              ref UserSettings.Config.UseVSync,
                                              "Synchronise frame presentation to the display refresh rate. Turn off to uncap the frame rate (useful for benchmarking; can cause tearing).",
                                              UserSettings.Defaults.UseVSync);
-
+        FormInputs.SetIndentToParameters();
         changed |= FormInputs.AddDropdown(ref UserSettings.Config.TargetFrameRate,
                                           TargetFrameRates,
                                           "Frame Rate",
