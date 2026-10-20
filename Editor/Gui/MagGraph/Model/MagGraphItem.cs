@@ -1,5 +1,6 @@
 #nullable enable
 using System.Diagnostics.CodeAnalysis;
+using ImGuiNET;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Editor.Gui.Interaction.Snapping;
@@ -38,6 +39,7 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
     public bool IsCollapsedAway => ChildUi != null && ChildUi.IsHiddenInCollapsedSection;
 
     public OpUiBinding? OpUiBinding;
+    public MeasuredTextWidth MeasuredLabel;
     
     public ImRect Area => ImRect.RectWithSize(PosOnCanvas, Size);
     public ImRect VerticalStackArea;
@@ -120,6 +122,40 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
         MissingConnection,
     } 
 
+    /// <summary>
+    /// A text width measured once at the font's base size and scaled to the requested size, as glyph advances
+    /// scale linearly. Measuring labels for every visible node each frame was a large share of drawing big graphs.
+    /// </summary>
+    public struct MeasuredTextWidth
+    {
+        /// <param name="text">The source string; a different value triggers a new measurement.</param>
+        /// <param name="displayedText">What is actually drawn, e.g. with spaces added for readability.</param>
+        public unsafe float GetWidth(ImFontPtr font, float fontSize, string text, ReadOnlySpan<char> displayedText)
+        {
+            var fontPtr = (nint)font.NativePtr;
+            var spacesAdded = UserSettings.Config.AddSpacesToParameterNames;
+            if (fontPtr != _font
+                || font.FontSize != _baseFontSize
+                || spacesAdded != _spacesAdded
+                || !string.Equals(text, _text))
+            {
+                _widthAtBaseSize = font.CalcTextSizeA(font.FontSize, float.MaxValue, 0, displayedText).X;
+                _font = fontPtr;
+                _baseFontSize = font.FontSize;
+                _spacesAdded = spacesAdded;
+                _text = text;
+            }
+
+            return _widthAtBaseSize * fontSize / _baseFontSize;
+        }
+
+        private string? _text;
+        private nint _font;
+        private float _baseFontSize;
+        private bool _spacesAdded;
+        private float _widthAtBaseSize;
+    }
+
     public struct InputLine
     {
         public Type Type;
@@ -130,6 +166,7 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
         public MagGraphConnection? ConnectionIn;
         public int MultiInputIndex;
         public InputLineStates ConnectionState;
+        public MeasuredTextWidth MeasuredLabel;
     }
 
     public struct OutputLine
@@ -140,6 +177,7 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
         public int VisibleIndex;
         public int OutputIndex;
         public List<MagGraphConnection> ConnectionsOut;
+        public MeasuredTextWidth MeasuredLabel;
 
         public Vector2 GetRightAnchorPosition(MagGraphItem item)
         {
