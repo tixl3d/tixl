@@ -7,6 +7,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Text;
 using ManagedBass;
@@ -57,6 +58,9 @@ internal static partial class Program
     {
         // Must run before any code that may trigger assembly resolution.
         T3.Core.Diagnostics.AssemblyLoadDiagnostics.Install();
+
+        // Background-only gen2 collections: a blocking one over a large heap would freeze rendering for many frames.
+        GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency;
 
         CoreUi.Instance = _coreUi;
         var dialogs = new SdlDialogProvider
