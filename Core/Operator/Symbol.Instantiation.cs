@@ -22,6 +22,8 @@ public sealed partial class Symbol
             throw new InvalidOperationException("The ID for symbol child must be unique.");
         }
 
+        BumpChildrenVersion();
+
         SymbolPackage.AddDependencyOn(symbol);
 
         List<Instance> newChildInstances;
@@ -115,6 +117,7 @@ public sealed partial class Symbol
                 {
                     Debug.Assert(og == original);
                     parent._children.TryAdd(newId, newChild);
+                    parent.BumpChildrenVersion();
                 }
             }
         
