@@ -885,6 +885,10 @@ internal sealed class TimeLineCanvas : AnimationCanvas
         var children = compositionOp.Children.Values;
         foreach (var child in children)
         {
+            // One lookup per child instead of one per input: most children in large graphs aren't animated at all
+            if (!animator.IsInstanceAnimated(child))
+                continue;
+
             var isChildSelected = Selected.Unknown;
 
             for (var inputIndex = 0; inputIndex < child.Inputs.Count; inputIndex++)
