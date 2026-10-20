@@ -269,9 +269,7 @@ internal sealed partial class MagGraphView
                 var font = CanvasScale > 1.8f ? Fonts.FontLarge : Fonts.FontNormal;
                 var labelText = name.AddSpacesForImGuiOutput();
 
-                ImGui.PushFont(font);
-                var requiredLabelSize = ImGui.CalcTextSize(labelText).X;
-                ImGui.PopFont();
+                var requiredLabelSize = item.MeasuredLabel.GetWidth(font, font.FontSize * font.Scale, name, labelText);
 
                 var paddingForPreview = hasPreview ? MagGraphItem.LineHeight + 15 : 0;
                 var availableLabelWidth = (MagGraphItem.Width - paddingForPreview) * 0.9f;
@@ -512,7 +510,7 @@ internal sealed partial class MagGraphView
 
                         // A row is tall enough for two lines, so a value without room beside its input name moves
                         // onto the line below it rather than overlapping the name.
-                        var labelWidth = Fonts.FontNormal.CalcTextSizeA(labelFontSize, float.MaxValue, 0, labelText).X;
+                        var labelWidth = item.InputLines[inputIndex].MeasuredLabel.GetWidth(Fonts.FontNormal, labelFontSize, label, labelText);
                         isValueOnSecondLine = valueRightEdge - valueWidth < labelX + labelWidth + MinLabelValueGap * CanvasScale;
                     }
 
@@ -551,13 +549,12 @@ internal sealed partial class MagGraphView
                     if (outputLine.OutputUi == null)
                         continue;
 
-                    ImGui.PushFont(Fonts.FontNormal);
-                    var outputDefinitionName = outputLine.OutputUi.OutputDefinition.Name.AddSpacesForImGuiOutput();
-                    var outputLabelSize = ImGui.CalcTextSize(outputDefinitionName);
-                    ImGui.PopFont();
-
-                    var fontSizeRatio = labelFontSize / Fonts.FontNormal.FontSize;
-                    var scaledLabelWidth = outputLabelSize.X * fontSizeRatio;
+                    var outputName = outputLine.OutputUi.OutputDefinition.Name;
+                    var outputDefinitionName = outputName.AddSpacesForImGuiOutput();
+                    var scaledLabelWidth = item.OutputLines[outputIndex].MeasuredLabel.GetWidth(Fonts.FontNormal,
+                                                                                                labelFontSize * Fonts.FontNormal.Scale,
+                                                                                                outputName,
+                                                                                                outputDefinitionName);
 
                     var visibleLineHeight = GridSizeOnScreen.Y;
                     var yCenter = pMin.Y + visibleLineHeight * outputLine.VisibleIndex + visibleLineHeight / 2 - labelFontSize / 2;
@@ -577,7 +574,8 @@ internal sealed partial class MagGraphView
         {
             // Animation indicator
             var indicatorCount = 0;
-            if (item.Instance.Parent.Symbol.Animator.IsInstanceAnimated(item.Instance))
+            // The parent symbol, not Instance.Parent: that resolves the parent instance by path under a lock.
+            if (item.SymbolChild?.Parent?.Animator.IsInstanceAnimated(item.Instance) == true)
             {
                 DrawIndicator(drawList, UiColors.StatusAnimated, idleFadeFactor, pMin, pMax, CanvasScale, ref indicatorCount, "is animated");
             }
