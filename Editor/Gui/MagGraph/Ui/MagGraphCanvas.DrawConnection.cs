@@ -23,27 +23,6 @@ internal sealed partial class MagGraphView
 
         var type = connection.Type;
 
-        // if (!TypeUiRegistry.TryGetPropertiesForType(type, out var typeUiProperties))
-        //     return;
-
-        var isSelected = context.Selector.IsSelected(connection.SourceItem) ||
-                         context.Selector.IsSelected(connection.TargetItem);
-
-        var typeUiProperties = TypeUiRegistry.GetPropertiesForType(type);
-
-        var anchorSize = 4 * CanvasScale;
-        var idleFadeProgress = MathUtils.RemapAndClamp(connection.SourceOutput.DirtyFlag.FramesSinceLastUpdate, 0, 100, 1, 0f);
-
-        var color = typeUiProperties.Color.Fade(_context.GraphOpacity);
-
-        var wasHoveredLastFrame = !_context.PreventInteraction && ConnectionHovering.IsHovered(connection);
-        var selectedColor = isSelected || wasHoveredLastFrame
-                                ? ColorVariations.OperatorLabel.Apply(color)
-                                : ColorVariations.ConnectionLines.Apply(color);
-
-        var typeColor = ColorVariations.ConnectionLines.Apply(selectedColor).Fade(MathUtils.Lerp(0.6f, 1, idleFadeProgress));
-        var connectionTypeColor = ColorVariations.OperatorLabel.Apply(selectedColor).Fade(MathUtils.Lerp(0.6f, 1, idleFadeProgress));
-
         Vector2 sourceOnCanvas;
         if (connection.SourceItem.IsCollapsedAway)
         {
@@ -71,6 +50,38 @@ internal sealed partial class MagGraphView
         {
             targetOnCanvas = connection.DampedTargetPos;
         }
+
+        // Cull before any ImGui call: these are the costliest part of drawing connections in large graphs.
+        var boundsOnCanvas = connection.SourceItem.Area;
+        boundsOnCanvas.Add(connection.TargetItem.VerticalStackArea);
+        boundsOnCanvas.Add(sourceOnCanvas);
+        boundsOnCanvas.Add(targetOnCanvas);
+        if (connection.Style is MagGraphConnection.ConnectionStyles.BottomToLeft or MagGraphConnection.ConnectionStyles.RightToTop)
+        {
+            // Bezier control points reach out by half the distance between the end points
+            boundsOnCanvas.Expand(Vector2.Distance(sourceOnCanvas, targetOnCanvas) / 2);
+        }
+
+        if (!IsRectVisible(boundsOnCanvas))
+            return;
+
+        var isSelected = context.Selector.IsSelected(connection.SourceItem) ||
+                         context.Selector.IsSelected(connection.TargetItem);
+
+        var typeUiProperties = TypeUiRegistry.GetPropertiesForType(type);
+
+        var anchorSize = 4 * CanvasScale;
+        var idleFadeProgress = MathUtils.RemapAndClamp(connection.SourceOutput.DirtyFlag.FramesSinceLastUpdate, 0, 100, 1, 0f);
+
+        var color = typeUiProperties.Color.Fade(_context.GraphOpacity);
+
+        var wasHoveredLastFrame = !_context.PreventInteraction && ConnectionHovering.IsHovered(connection);
+        var selectedColor = isSelected || wasHoveredLastFrame
+                                ? ColorVariations.OperatorLabel.Apply(color)
+                                : ColorVariations.ConnectionLines.Apply(color);
+
+        var typeColor = ColorVariations.ConnectionLines.Apply(selectedColor).Fade(MathUtils.Lerp(0.6f, 1, idleFadeProgress));
+        var connectionTypeColor = ColorVariations.OperatorLabel.Apply(selectedColor).Fade(MathUtils.Lerp(0.6f, 1, idleFadeProgress));
 
         var targetPosOnScreen = TransformPosition(targetOnCanvas);
 
