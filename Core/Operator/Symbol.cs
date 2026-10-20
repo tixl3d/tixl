@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using T3.Core.Logging;
 using T3.Core.Model;
 using T3.Core.Operator.Slots;
@@ -121,6 +122,8 @@ public sealed partial class Symbol : IDisposable, IResource
                 _children.Remove(child.Id, out _);
                 child.Dispose();
             }
+
+            BumpChildrenVersion();
 
             foreach (var child in _childrenCreatedFromMe.Values)
             {
@@ -317,6 +320,8 @@ public sealed partial class Symbol : IDisposable, IResource
         if (!_children.Remove(childId, out var symbolChild))
             return false;
 
+        BumpChildrenVersion();
+
         // The child's own instance list, not a lookup through the parents: those resolve by id via Children,
         // which no longer holds it, so a deleted op would never be disposed.
         symbolChild.DisposeAllInstances();
@@ -391,7 +396,16 @@ public sealed partial class Symbol : IDisposable, IResource
     /// </summary>
     public int VersionCounter { get; set; }
 
+    /// <summary>
+    /// Bumped after every addition, removal or re-keying of <see cref="Children"/>, so instance-side caches of the
+    /// child set know when to rebuild.
+    /// </summary>
+    internal int ChildrenVersion => Volatile.Read(ref _childrenVersion);
+
+    private void BumpChildrenVersion() => Interlocked.Increment(ref _childrenVersion);
+
     internal bool NeedsTypeUpdate { get; private set; } = true;
+    private int _childrenVersion;
     private readonly ConcurrentDictionary<Guid, Child> _children = new();
     private readonly Dictionary<Guid, Child> _childrenCreatedFromMe = new();
     

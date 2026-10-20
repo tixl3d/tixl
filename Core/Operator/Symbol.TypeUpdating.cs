@@ -287,6 +287,8 @@ public sealed partial class Symbol
             _children.Remove(child.Id, out _);
         }
 
+        BumpChildrenVersion();
+
         Connections.Clear();
         Connections.AddRange(newSymbol.Connections);
         InputDefinitions.Clear();

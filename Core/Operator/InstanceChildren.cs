@@ -11,6 +11,16 @@ namespace T3.Core.Operator;
 // TODO: Making this a IReadOnlyDictionary and causes excessive GC allocations. It's cleaned but causes frame drops on larger graphs. 
 public sealed class InstanceChildren : IReadOnlyDictionary<Guid, Instance>
 {
+    /** Swapped as a whole, so threads never see an instance list paired with the wrong version */
+    private sealed class ResolvedChildInstances(int childrenVersion, Instance[] instances, bool isComplete)
+    {
+        public readonly int ChildrenVersion = childrenVersion;
+        public readonly Instance[] Instances = instances;
+
+        /** False if a child failed to instantiate; it is retried on the next access, as it was before caching */
+        public readonly bool IsComplete = isComplete;
+    }
+
     /** The symbol child of the instance this collection belongs to */
     private readonly Symbol.Child _asChild; 
     
@@ -46,40 +56,18 @@ public sealed class InstanceChildren : IReadOnlyDictionary<Guid, Instance>
     {
         get
         {
-            foreach (var child in _asChild.Symbol.Children)
+            foreach (var instance in GetResolvedChildInstances())
             {
-                if (TryGetChildInstance(child.Key, out var instance))
-                {
-                    yield return child.Key;
-                }
-                else
-                {
-                    Log.Error($"Child {child.Key} not found in {this}");
-                }
+                yield return instance.SymbolChildId;
             }
         }
     }
 
-    public IEnumerable<Instance> Values 
-    {
-        get
-        {
-            if(_asChild.Symbol.Children.Count == 0)
-                yield break;
-            
-            foreach (var child in _asChild.Symbol.Children.Values)
-            {
-                if (TryGetChildInstance(child.Id, out var instance))
-                {
-                    yield return instance;
-                }
-                else
-                {
-                    Log.Error($"Child {child.Id} not found in {this}");
-                }
-            }
-        }
-    }
+    /// <summary>
+    /// All child instances, created on demand. Resolving each child walks the instance path under the symbol's
+    /// creation lock, so the result is cached until the symbol's children change or one of the instances is disposed.
+    /// </summary>
+    public IEnumerable<Instance> Values => GetResolvedChildInstances();
     
     internal IEnumerable<Instance> PreExistingValues
     {
@@ -184,16 +172,9 @@ public sealed class InstanceChildren : IReadOnlyDictionary<Guid, Instance>
 
     public IEnumerator<KeyValuePair<Guid, Instance>> GetEnumerator()
     {
-        foreach (var child in _asChild.Symbol.Children)
+        foreach (var instance in GetResolvedChildInstances())
         {
-            if (TryGetChildInstance(child.Key, out var instance))
-            {
-                yield return new KeyValuePair<Guid, Instance>(child.Key, instance);
-            }
-            else
-            {
-                Log.Error($"Child {child.Key} not found in {this}");
-            }
+            yield return new KeyValuePair<Guid, Instance>(instance.SymbolChildId, instance);
         }
     }
 
@@ -201,4 +182,51 @@ public sealed class InstanceChildren : IReadOnlyDictionary<Guid, Instance>
     {
         return GetEnumerator();
     }
+
+    private Instance[] GetResolvedChildInstances()
+    {
+        var symbol = _asChild.Symbol;
+        var cached = _resolvedChildInstances;
+        if (cached != null
+            && cached.IsComplete
+            && cached.ChildrenVersion == symbol.ChildrenVersion
+            && !ContainsDisposed(cached.Instances))
+            return cached.Instances;
+
+        // Read before resolving: a change that lands while resolving bumps past it and triggers another rebuild.
+        var childrenVersion = symbol.ChildrenVersion;
+
+        var children = symbol.Children;
+        var instances = new List<Instance>(children.Count);
+        var isComplete = true;
+        foreach (var child in children.Values)
+        {
+            if (TryGetChildInstance(child.Id, out var instance))
+            {
+                instances.Add(instance);
+            }
+            else
+            {
+                isComplete = false;
+                Log.Error($"Child {child.Id} not found in {this}");
+            }
+        }
+
+        var resolved = new ResolvedChildInstances(childrenVersion, instances.ToArray(), isComplete);
+        _resolvedChildInstances = resolved;
+        return resolved.Instances;
+    }
+
+    private static bool ContainsDisposed(Instance[] instances)
+    {
+        foreach (var instance in instances)
+        {
+            if (instance.IsDisposed)
+                return true;
+        }
+
+        return false;
+    }
+
+    private volatile ResolvedChildInstances? _resolvedChildInstances;
 }
