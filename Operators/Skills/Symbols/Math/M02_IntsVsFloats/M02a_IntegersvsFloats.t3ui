@@ -5,6 +5,24 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
+      "ChildId": "0b664b96-2bda-4189-8922-f924cf422d84",
+      "SymbolName": "Lib.numbers.anim.time.Time",
+      "SectionId": "e6c23f9a-10b0-4f31-9608-4fd8354ef828",
+      "Position": {
+        "X": 1196.4569,
+        "Y": 2320.5745
+      }
+    },
+    {
+      "ChildId": "0ba78983-7a11-4cec-a53d-66428851d338",
+      "SymbolName": "Lib.string.logic.PickString",
+      "SectionId": "e6c23f9a-10b0-4f31-9608-4fd8354ef828",
+      "Position": {
+        "X": 1476.4569,
+        "Y": 2215.5745
+      }
+    },
+    {
       "ChildId": "299fa52b-70f3-4fd2-aeda-04e59aa10ed0",
       "SymbolName": "Lib.flow.skillQuest.DrawQuiz",
       "Position": {
@@ -13,21 +31,112 @@
       }
     },
     {
-      "ChildId": "ad554b63-2002-4551-8ed1-c3ed6f502c58",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "2daf1152-50d0-43ca-9318-642756bff614",
+      "SymbolName": "Lib.numbers.anim.time.Time",
       "Position": {
-        "X": 1366.8816,
-        "Y": 1568.3276
-      }
+        "X": 1030.8059,
+        "Y": 1749.5636
+      },
+      "SnapshotGroupIndex": "1"
     },
     {
-      "ChildId": "f1374291-dc56-44ab-bfe7-3bb41b8d6d8f",
+      "ChildId": "39e55409-006f-46cb-a958-03c96c6beb20",
       "SymbolName": "Lib.render.basic.Text",
       "SectionId": "e6c23f9a-10b0-4f31-9608-4fd8354ef828",
       "Position": {
-        "X": 1244.7633,
-        "Y": 2141.3435
+        "X": 1476.4569,
+        "Y": 2355.5745
       }
+    },
+    {
+      "ChildId": "5e78b899-9932-496f-a785-7c471496e623",
+      "SymbolName": "Types.Values.String",
+      "SectionId": "e6c23f9a-10b0-4f31-9608-4fd8354ef828",
+      "Position": {
+        "X": 1336.4569,
+        "Y": 2215.5745
+      }
+    },
+    {
+      "ChildId": "68eb40b9-9af2-4357-a8e8-d93e85232b55",
+      "SymbolName": "Types.Values.String",
+      "Position": {
+        "X": 1229.0349,
+        "Y": 1716.5903
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "707a5bbe-67cc-418a-bd6c-2b76926638d5",
+      "SymbolName": "Types.Values.String",
+      "SectionId": "e6c23f9a-10b0-4f31-9608-4fd8354ef828",
+      "Position": {
+        "X": 1336.4569,
+        "Y": 2250.5745
+      }
+    },
+    {
+      "ChildId": "84e46f27-1144-488c-a485-84860e4567d9",
+      "SymbolName": "Types.Values.String",
+      "SectionId": "e6c23f9a-10b0-4f31-9608-4fd8354ef828",
+      "Position": {
+        "X": 1336.4569,
+        "Y": 2285.5745
+      }
+    },
+    {
+      "ChildId": "ad554b63-2002-4551-8ed1-c3ed6f502c58",
+      "SymbolName": "Lib.render.basic.Text",
+      "Position": {
+        "X": 1369.0349,
+        "Y": 1786.5903
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "b1e24ab8-0192-426f-b33d-0b3b63aba2f5",
+      "SymbolName": "Lib.numbers.int.process.FloatToInt",
+      "SectionId": "e6c23f9a-10b0-4f31-9608-4fd8354ef828",
+      "Position": {
+        "X": 1336.4569,
+        "Y": 2320.5745
+      }
+    },
+    {
+      "ChildId": "bdfdf6d4-38bf-4d77-962a-7ef9d56112dc",
+      "SymbolName": "Lib.numbers.int.process.FloatToInt",
+      "Position": {
+        "X": 1229.0349,
+        "Y": 1751.5903
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "c1229f68-1fbf-408c-b432-6e5ce410308d",
+      "SymbolName": "Types.Values.String",
+      "Position": {
+        "X": 1229.0349,
+        "Y": 1646.5903
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "f24533b6-b475-4115-9bc1-220b50df98f1",
+      "SymbolName": "Types.Values.String",
+      "Position": {
+        "X": 1229.0349,
+        "Y": 1681.5903
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "fce7b6bf-dc17-4f54-aaa4-c907da0f8d86",
+      "SymbolName": "Lib.string.logic.PickString",
+      "Position": {
+        "X": 1369.0349,
+        "Y": 1646.5903
+      },
+      "SnapshotGroupIndex": "1"
     }
   ],
   "OutputUis": [
@@ -55,15 +164,15 @@
         "Y": 2052.5103
       },
       "Size": {
-        "X": 525.0,
-        "Y": 187.48975
+        "X": 573.54224,
+        "Y": 450.35986
       }
     }
   ],
   "TourPoints": [
     {
       "Id": "e10fc4fe-c421-4798-979c-05ad7f5b4f72",
-      "Description": "For computers, values are not all the same. They come in different formats.\nIn TiXL, three numeric types are commonly used.\nFloating-point values are used for most parameters: time, radius, strength, positions, and animation inputs.   While their precision or range may differ depending on the parameter, internally they all behave the same.\nInteger values are different. They can only change in steps of one.   They are used for counts, indices, and many mode or selection parameters."
+      "Description": "For some computers, values are not all the same. They come in different formats.\nIn TiXL, three numeric types are commonly used.\nFloating-point values are used for most parameters: time, radius, strength, positions, and animation inputs.   While their precision or range may differ depending on the parameter, internally they all behave the same.\nInteger values are different. They can only change in steps of one.   They are used for counts, indices, and many mode or selection parameters."
     },
     {
       "Id": "88f41e89-2d30-4428-b64a-1605e6362af7",
@@ -76,7 +185,8 @@
     },
     {
       "Id": "b3afb16a-46fe-4c8d-a865-ea044440a582",
-      "Description": "Let’s start with a small example.\nUse time (a floating-point value) to control which text is shown.\nComplete the example.",
+      "ChildId": "2daf1152-50d0-43ca-9318-642756bff614",
+      "Description": "Let’s start with a small example.\nUse [Time] (a floating-point value) to control which text is shown.\nComplete the example.",
       "Style": "CallToAction"
     }
   ]
