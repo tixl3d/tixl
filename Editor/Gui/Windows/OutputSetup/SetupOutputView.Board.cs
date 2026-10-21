@@ -914,6 +914,7 @@ internal sealed partial class SetupOutputView
         var handleStyle = CanvasPointHandle.Style.Default(isSelected ? hue : hue.Fade(0.6f), CanvasPointHandle.Shapes.Square, editable: !IsDrawingPlan);
         ImGui.PushID(plan.Id.GetHashCode());
         DrawPlanDrawEntries(plan, origin, isSelected);
+        DrawPlanFloorRect(setup, selection, plan, origin);
         for (var i = 0; i < count; i++)
         {
             ImGui.PushID(i);
@@ -1002,9 +1003,9 @@ internal sealed partial class SetupOutputView
             SetupPopup.End();
         }
 
-        // Each edge's middle is a handle too: a click raises or takes down the wall on it (the dot is filled while
-        // one stands there), a drag slides the edge sideways with the neighbouring walls following along their
-        // own lines, and a right-click offers to split the edge.
+        // Each edge's middle is a handle too: filled while a wall stands there, a click selects that wall (the plan
+        // when there is none), a drag slides the edge sideways with the neighbouring walls following along their own
+        // lines, and its right-click menu raises or takes down the wall and splits the edge. A click never edits.
         for (var segment = 0; segment < plan.SegmentCount; segment++)
         {
             plan.GetSegment(segment, out var start, out var end);
@@ -1029,6 +1030,10 @@ internal sealed partial class SetupOutputView
                 _hoveredPlanHandlePlanId = plan.Id;
                 if (hasWall)
                     FrameStats.RequestCrossHighlight(plan.WallOf(segment));
+
+                if (!dragging)
+                    CustomComponents.TooltipForLastItem(hasWall ? "Wall" : "Open edge",
+                                                        "Click selects; drag slides the edge. Right-click to raise or take down the wall.");
             }
 
             switch (phase)
@@ -1073,12 +1078,17 @@ internal sealed partial class SetupOutputView
                     EndGesture(setup);
                     _planEdgeSegment = -1;
 
-                    // A press that never moved is a click: the wall on this edge comes or goes.
-                    if (!_planEdgeMoved)
+                    // A press that never moved is a click: it selects what the dot stands for.
+                    if (!_planEdgeMoved && selection != null)
                     {
-                        var index = segment;
-                        var raise = !hasWall;
-                        SetupUndo.RunUndoable(raise ? "Raise wall" : "Take down wall", setup, () => FloorPlanSync.SetWall(setup, plan, index, raise));
+                        if (hasWall)
+                        {
+                            selection.Select(SetupEntityKinds.Surface, plan.WallOf(segment));
+                        }
+                        else
+                        {
+                            selection.Select(SetupEntityKinds.FloorPlan, plan.Id);
+                        }
                     }
 
                     break;

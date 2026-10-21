@@ -80,6 +80,16 @@ Select "Wall 1" and type `12` into the first Size (m) field.
 - After 3: its Position and Rotation are editable and its card no longer mentions the plan. Ticking
   Edge 3 again on the plan's card brings this same "Wall 3" back, with its content.
 
+## Step: A wall named like a patch is kept when taken down
+
+**Action:**
+1. On an output, add a patch and name it exactly like a wall that has no content or mapping, e.g. "Wall 1".
+2. On the plan's card untick that wall's edge, then tick it again.
+
+**Expected:**
+- After 2: the edge's row reads "… · Wall 1 lowered" in between, and ticking brings back the same "Wall 1"
+  (not a new "Wall 5"), so StageGeometry still finds its patch by name.
+
 ## Step: Start a plan from a surface
 
 **Action:**
@@ -123,6 +133,26 @@ right and release.
 - After 3: the chosen edge ends up at the top of the card, facing the arrow, and the ring sits on the corner.
 - After 4: each step undoes on its own and the plan, walls and origin are back where they started. A
   projector calibrated before step 1 still lines up after each step.
+
+## Step: A floor rectangle for a concave room
+
+**Action:**
+1. On a closed plan with a floor, drag one corner outward so the footprint gets a bump the floor patch
+   should not cover. Select "Floor" in SURFACES.
+2. On the plan card, drag the handle in the middle of the floor outline's side that the bump pushed out back
+   onto the original corners, until it snaps, and release.
+3. Select the plan; on its card type a **Floor rotation** of `10`, then tick **Floor fits bounds**.
+4. With a rectangle set again (step 2), use the stage origin's **Make Left Side the Front**.
+
+**Expected:**
+- After 1: an outline of the floor and a dot in the middle of each of its sides appear on the plan card.
+- After 2: the outline stops at the original corners; "Floor"'s Size (m) shrinks to match, and the plan's
+  card shows **Floor fits bounds** unticked. With **StageGeometry** in OutputCanvas mode the floor patch covers
+  the main area again and the bump gets the patch's edge pixels beyond it.
+- After 3: the outline turns by 10° and "Floor"'s Rotation yaw follows; ticking the box snaps it back to the
+  bounding box. Each change undoes in one step.
+- After 4: the room turns on its card, and the floor's Size (m) and its picture in StageGeometry stay
+  exactly as they were.
 
 ## Step: Draw walls from an open run
 
@@ -171,13 +201,24 @@ right and release.
 - After 2: each wall shows the part of the pixel map that its patch or mapping covers on the output
   canvas, the right way up, and changing the plan on the Board moves the quads at once.
 
+## Step: A wall without a place on the canvas stays out of DrawStageCanvas
+
+**Action:**
+1. Feed **StageGeometry** → **GeometryToMesh** into **DrawStageCanvas** with an equirectangular image, for an
+   output whose patches are named like the walls.
+2. Raise a wall on an edge that has no patch of its name (it gets a name like "Wall 9").
+
+**Expected:**
+- After 2: the other walls keep their picture and their corners still line up; the new wall paints nothing.
+  StageGeometry shows a warning naming "Wall 9". Renaming the wall like a patch, or adding such a patch, paints it.
+
 ## Step: Edges and corners
 
 **Action:**
 1. On a closed rectangular plan with walls on every edge, drag the small dot in the middle of the
    top edge upward by about 2 m and release.
 2. Right-click the dot in the middle of the right edge and choose **Split Edge**. Then click the dot
-   of the new second half once, and once more.
+   of the new second half; right-click it and choose **Take Down Wall**, then **Raise Wall**.
 3. Right-click the new corner and choose **Remove Corner**.
 4. Right-click any corner of a plan with only three corners.
 
@@ -185,8 +226,8 @@ right and release.
 - After 1: the top edge moves up, staying parallel; the left and right walls grow by 2 m and their
   labels say so; the top wall keeps its width. Ctrl+Z puts it back in one step.
 - After 2: a corner appears in the middle of the right edge and a new wall stands on the second half,
-  so the room stays closed. The first click takes that wall down (the dot turns hollow), the second
-  raises it again.
+  so the room stays closed. The click only selects that wall (SURFACES highlights it, nothing changes);
+  **Take Down Wall** takes it down (the dot turns hollow) and **Raise Wall** raises it again.
 - After 3: the corner is gone, the right edge is one segment again with one wall; the other wall's
   surface is gone too if it had no content, or stays in SURFACES if it had.
 - After 4: **Remove Corner** is disabled.

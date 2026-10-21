@@ -37,9 +37,24 @@ internal static class StageOrigin
                                       0, 0, 0, 1);
         var stageTurnRotation = Quaternion.Normalize(Quaternion.CreateFromRotationMatrix(stageTurn));
         var stageOrigin = FloorPlanSync.PlanToStage(Vector2.Zero, newOrigin);
+        var isTurning = MathF.Abs(sin) > 0.000001f || cos < 0;
+        var turnDegrees = MathF.Atan2(sin, cos) * 180 / MathF.PI;
 
         foreach (var plan in setup.FloorPlans)
         {
+            // A floor following the bounding box would be re-fitted to the turned box; pinning its rectangle first
+            // keeps the floor and the patch on it where they are, at any angle.
+            if (isTurning && plan.FloorRect == null && plan.RaisedFloorId != Guid.Empty && plan.TryGetFloorRect(out var bounds))
+                plan.FloorRect = bounds;
+
+            if (plan.FloorRect is { } floorRect)
+            {
+                var offset = floorRect.Centre - newOrigin;
+                floorRect.Centre = new Vector2(cos * offset.X - sin * offset.Y, sin * offset.X + cos * offset.Y);
+                floorRect.RotationDegrees = NormalizeDegrees(floorRect.RotationDegrees + turnDegrees);
+                plan.FloorRect = floorRect;
+            }
+
             for (var vertexIndex = 0; vertexIndex < plan.Vertices.Count; vertexIndex++)
             {
                 var offset = plan.Vertices[vertexIndex] - newOrigin;
@@ -72,7 +87,7 @@ internal static class StageOrigin
                 point.StagePosition = TransformPoint(point.StagePosition, stageOrigin, stageTurn);
         }
 
-        // Derived surfaces are re-derived from the moved plans; a turn that isn't a quarter turn changes a floor's bounding box.
+        // Derived surfaces are re-derived from the moved plans.
         foreach (var plan in setup.FloorPlans)
             FloorPlanSync.Apply(setup, plan);
     }
@@ -103,6 +118,22 @@ internal static class StageOrigin
         var facesLeft = !plan.IsClosed || plan.SignedAreaTwice() >= 0;
         var wallNormal = facesLeft ? new Vector2(-direction.Y, direction.X) : new Vector2(direction.Y, -direction.X);
         return -wallNormal;
+    }
+
+    /** Into −180..180, so a few turns back and forth don't pile up a rotation nobody typed. */
+    private static float NormalizeDegrees(float degrees)
+    {
+        degrees %= 360;
+        if (degrees > 180)
+        {
+            degrees -= 360;
+        }
+        else if (degrees <= -180)
+        {
+            degrees += 360;
+        }
+
+        return degrees;
     }
 
     private static Pose TransformPose(in Pose pose, Vector3 stageOrigin, in Matrix4x4 stageTurn, Quaternion stageTurnRotation)

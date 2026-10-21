@@ -65,15 +65,31 @@ internal static class FloorPlanSync
         if (floor == null)
             return;
 
-        // The floor surface is a rectangle, so it covers the footprint's bounding box.
-        if (!plan.TryGetBounds(out var min, out var max))
+        // The floor surface is a rectangle: the plan's floor rectangle, or the footprint's bounding box without one.
+        if (!plan.TryGetFloorRect(out var rect))
             return;
 
-        var size = Vector2.Max(max - min, new Vector2(SurfaceGeometry.MinSize));
+        var size = Vector2.Max(rect.Size, new Vector2(SurfaceGeometry.MinSize));
         if ((floor.SizeInMeters - size).Length() > 0.0005f)
             SurfaceMetrics.RemeterSurface(setup, floor, size);
 
-        StagePlacing.PoseFloor(floor, PlanToStage(origin, min));
+        StagePlacing.PoseFloor(floor, PlanToStage(origin, rect.BottomLeft), rect.RotationDegrees);
+    }
+
+    /// <summary>
+    /// Gives the floor a typed size, as if its rectangle's top and right edges were moved: the bottom-left corner stays.
+    /// A floor following the bounding box gets a rectangle of its own from here on.
+    /// </summary>
+    public static void SetFloorSize(Setup setup, FloorPlan plan, Vector2 size)
+    {
+        if (!plan.TryGetFloorRect(out var rect))
+            return;
+
+        var bottomLeft = rect.BottomLeft;
+        rect.Size = Vector2.Max(size, new Vector2(SurfaceGeometry.MinSize));
+        rect.Centre = bottomLeft + rect.AxisX * (rect.Size.X * 0.5f) + rect.AxisY * (rect.Size.Y * 0.5f);
+        plan.FloorRect = rect;
+        Apply(setup, plan);
     }
 
     /// <summary>A closed rectangle of <paramref name="size"/>, counter-clockwise from its near-left corner.</summary>
@@ -125,7 +141,7 @@ internal static class FloorPlanSync
 
     /// <summary>
     /// Raises a wall on a segment, or takes it down: a wall nothing was done to is removed, one that carries
-    /// content, a projection, a trace or regions is lowered — it stays linked to the edge but stops following
+    /// content, a projection, a trace, regions or a patch of its name is lowered — it stays linked to the edge but stops following
     /// the plan, and ticking the edge again raises that same surface.
     /// </summary>
     /// <summary>
@@ -203,13 +219,13 @@ internal static class FloorPlanSync
             return;
         }
 
-        if (!plan.TryGetBounds(out var min, out var max))
+        if (!plan.TryGetFloorRect(out var rect))
             return;
 
         var floor = new Surface
                         {
                             Name = "Floor",
-                            SizeInMeters = Vector2.Max(max - min, new Vector2(SurfaceGeometry.MinSize)),
+                            SizeInMeters = Vector2.Max(rect.Size, new Vector2(SurfaceGeometry.MinSize)),
                         };
         setup.Surfaces.Add(floor);
         plan.FloorSurfaceId = floor.Id;
@@ -451,7 +467,10 @@ internal static class FloorPlanSync
             SliceUvAnchoring.ApplyCrop(setup, sliceId, uvStart, oldMin, oldMax, newMin, newMax);
     }
 
-    /// <summary>Whether anything was done to the surface beyond the plan raising it — what makes it worth keeping.</summary>
+    /// <summary>
+    /// Whether anything was done to the surface beyond the plan raising it — what makes it worth keeping. A patch named
+    /// like the surface counts: [StageGeometry] finds a wall's picture by that name, so a new wall would lose it.
+    /// </summary>
     public static bool IsInUse(Setup setup, Surface surface)
     {
         if (surface.SliceId != Guid.Empty || surface.OutputMappings.Count > 0 || surface.Trace != null || surface.Annotations.Count > 0)
@@ -461,6 +480,18 @@ internal static class FloorPlanSync
         {
             if (other.ParentId == surface.Id)
                 return true;
+        }
+
+        if (string.IsNullOrEmpty(surface.Name))
+            return false;
+
+        foreach (var output in setup.Outputs)
+        {
+            foreach (var patch in output.Patches)
+            {
+                if (string.Equals(patch.Name, surface.Name, StringComparison.OrdinalIgnoreCase))
+                    return true;
+            }
         }
 
         return false;
