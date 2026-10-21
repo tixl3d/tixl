@@ -1,5 +1,6 @@
 #nullable enable
 using ImGuiNET;
+using T3.Editor.App.Gestures;
 using T3.Core.Animation;
 using T3.Core.Operator.Interfaces;
 using T3.Core.Utils;
@@ -142,7 +143,16 @@ internal sealed class CameraInteraction
             return false;
 
         var modified = false;
-        modified |= HandleMouseWheel();
+        if (PointerGestures.PansWithScroll)
+        {
+            modified |= HandleTrackpadScroll();
+        }
+        else
+        {
+            modified |= HandleMouseWheel();
+        }
+
+        modified |= HandlePinch();
         if (ImGui.IsMouseDragging(ImGuiMouseButton.Left))
         {
             if (ImGui.GetIO().KeyAlt)
@@ -232,6 +242,53 @@ internal sealed class CameraInteraction
         return true;
     }
 
+    /**
+     * Two fingers orbit like a left drag; Shift pans, Alt zooms and Ctrl looks around, so a trackpad needs no buttons.
+     */
+    private bool HandleTrackpadScroll()
+    {
+        // Includes the glide after a flick, so the view keeps turning for a moment without input.
+        var panInPixels = PointerGestures.PanDelta;
+        if (panInPixels.LengthSquared() < 0.0001f)
+            return false;
+
+        // The direction a drag would take, so the scene follows the fingers as the graph canvas does.
+        var dragDelta = new Vector2(-panInPixels.X, panInPixels.Y);
+        var io = ImGui.GetIO();
+        if (io.KeyCtrl)
+        {
+            LookAroundByPixels(dragDelta);
+        }
+        else if (io.KeyAlt)
+        {
+            var viewDistance = _intendedSetup.Position - _intendedSetup.Target;
+            _intendedSetup.Position = _intendedSetup.Target + viewDistance * MathF.Exp(dragDelta.Y * TrackpadZoomPerPixel);
+            _manipulatedByMouseWheel = true;
+        }
+        else if (io.KeyShift)
+        {
+            PanByPixels(dragDelta);
+        }
+        else
+        {
+            ApplyOrbitVelocity(new Vector2(-dragDelta.X, dragDelta.Y) * TrackpadOrbitRadiansPerPixel);
+        }
+
+        return true;
+    }
+
+    private bool HandlePinch()
+    {
+        var zoomFactor = PointerGestures.ZoomFactor;
+        if (zoomFactor == 1)
+            return false;
+
+        var viewDistance = _intendedSetup.Position - _intendedSetup.Target;
+        _intendedSetup.Position = _intendedSetup.Target + viewDistance / zoomFactor;
+        _manipulatedByMouseWheel = true;
+        return true;
+    }
+
     private bool LookAround()
     {
         if (!ImGui.IsWindowHovered())
@@ -241,6 +298,12 @@ internal sealed class CameraInteraction
         if (dragDelta.Length() == 0)
             return false;
 
+        LookAroundByPixels(dragDelta);
+        return true;
+    }
+
+    private void LookAroundByPixels(Vector2 dragDelta)
+    {
         var factorX = -dragDelta.X * CameraInteractionParameters.RotateMouseSensitivity * 1.5f;
         var factorY = dragDelta.Y * CameraInteractionParameters.RotateMouseSensitivity * 1.5f;
         var rotAroundY = Matrix4x4.CreateFromAxisAngle(_viewAxis.Up, factorX);
@@ -255,7 +318,6 @@ internal sealed class CameraInteraction
 
         var newTarget = _intendedSetup.Position + new Vector3(viewDirRotated.X, viewDirRotated.Y, viewDirRotated.Z);
         _intendedSetup.Target = newTarget;
-        return true;
     }
 
     private void ApplyOrbitVelocity(Vector2 orbitVelocity)
@@ -314,6 +376,12 @@ internal sealed class CameraInteraction
         if (dragDelta.Length() == 0)
             return false;
 
+        PanByPixels(dragDelta);
+        return false;
+    }
+
+    private void PanByPixels(Vector2 dragDelta)
+    {
         var factorX = dragDelta.X / CameraInteractionParameters.RenderWindowHeight;
         var factorY = dragDelta.Y / CameraInteractionParameters.RenderWindowHeight;
 
@@ -323,7 +391,6 @@ internal sealed class CameraInteraction
 
         _intendedSetup.Position += delta;
         _intendedSetup.Target += delta;
-        return false;
     }
 
     private bool ManipulateCameraByKeyboard()
@@ -420,6 +487,12 @@ internal sealed class CameraInteraction
     private ViewAxis _viewAxis;
     private readonly CameraSetup _smoothedSetup = new();
     private readonly CameraSetup _intendedSetup = new();
+
+    /** Matches where a left drag ends up once its orbit velocity has decayed. */
+    private const float TrackpadOrbitRadiansPerPixel = 0.008f;
+
+    /** Exponential, so each swipe zooms by the same ratio however far away the target is. */
+    private const float TrackpadZoomPerPixel = 0.005f;
 
     private static float FrameDurationFactor => ImGui.GetIO().DeltaTime;
     private bool _manipulatedByMouseWheel;
