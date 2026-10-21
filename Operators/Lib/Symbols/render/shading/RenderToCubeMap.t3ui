@@ -1,0 +1,93 @@
+{
+  "FormatVersion": 3,
+  "Id": "8f2cc172-318d-4b78-9db4-d3049240bec0"/*RenderToCubeMap*/,
+  "Description": "Renders the connected scene six times from one point into a cube map, e.g. for [DrawStageCanvas] or [SetEnvironment].\n\nThe cube map is placed with Position and Rotation, or follows a camera connected to CameraReference. Each face uses a 90° field of view. Cameras inside the connected scene are bypassed. During each face the int variable `CubeFace` holds the face index in cube map order (+X, -X, +Y, -Y, +Z, -Z).\n\nThe scene is evaluated six times per frame. Operators that advance state on every evaluation, like particle simulations or feedback effects, run six times as fast.\n\nAKA: cubemap, environment map, skybox, reflection probe, 360\n\nSee also: [TextureToCubeMap], [Equirectangle], [RenderTarget]",
+  "InputUis": [
+    {
+      "InputId": "5cf3ed9a-03d9-4443-aa8f-727d929af6c2"/*Position*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 375.0
+      },
+      "Description": "Center of the cube map in world space. Ignored when CameraReference is connected."
+    },
+    {
+      "InputId": "7bc55c92-cd9b-4217-b958-9a06ec994364"/*ClearColor*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "Description": "Background color of each face."
+    },
+    {
+      "InputId": "9199affe-5613-4cfd-a09e-0b79e6b108f0"/*TextureFormat*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      },
+      "Description": "Format of the cube map. sRGB formats are not supported."
+    },
+    {
+      "InputId": "9e04c55a-daa7-4014-8347-70efb65bdc8f"/*Resolution*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      },
+      "Description": "Width and height of each cube face in pixels."
+    },
+    {
+      "InputId": "cad58ac3-b764-4e46-8b85-c0b05598aab1"/*GenerateMips*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 300.0
+      },
+      "Description": "Generates mip levels, e.g. for blurred reflections."
+    },
+    {
+      "InputId": "d7181b91-ee60-4ac2-9e70-b99bc357b52b"/*ClipPlanes*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 525.0
+      },
+      "Description": "Near and far clip distance of the faces. Ignored when a perspective camera is connected to CameraReference."
+    },
+    {
+      "InputId": "f292b2fe-c340-40a0-9fd3-d1e19702f0bb"/*CameraReference*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 600.0
+      },
+      "Description": "Optional camera whose position, rotation and clip planes override the parameters above."
+    },
+    {
+      "InputId": "f3ebee9c-250f-4e74-9773-ad3fcba4f43b"/*Command*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "The scene rendered into each face."
+    },
+    {
+      "InputId": "f52ba308-2ce7-4d50-a3ff-2df86160063a"/*Rotation*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 450.0
+      },
+      "Description": "Rotation of the cube map in degrees. Keep at zero for reflections and environment lookups, which expect world-aligned cube maps. Ignored when CameraReference is connected."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "f511ab15-1641-44ef-ab2f-5a2f67a57478"/*CubeMap*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    }
+  ]
+}

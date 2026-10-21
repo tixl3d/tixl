@@ -89,12 +89,7 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
                                        VkPipelineStageFlags2.Clear, VkAccessFlags2.TransferWrite);
 
         VkClearColorValue value = new(color.X, color.Y, color.Z, color.W);
-        VkImageSubresourceRange range = new()
-                                            {
-                                                aspectMask = VkImageAspectFlags.Color,
-                                                levelCount = VK_REMAINING_MIP_LEVELS,
-                                                layerCount = VK_REMAINING_ARRAY_LAYERS,
-                                            };
+        var range = GetClearRange(view, VkImageAspectFlags.Color);
 
         backend.Api.vkCmdClearColorImage(_commandBuffer, view.Texture.Image, VkImageLayout.TransferDstOptimal, &value, 1, &range);
     }
@@ -117,14 +112,29 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
         if (clearStencil && VulkanConvert.HasStencil(view.Texture.Description.Format))
             aspect |= VkImageAspectFlags.Stencil;
 
-        VkImageSubresourceRange range = new()
-                                            {
-                                                aspectMask = aspect,
-                                                levelCount = VK_REMAINING_MIP_LEVELS,
-                                                layerCount = VK_REMAINING_ARRAY_LAYERS,
-                                            };
+        var range = GetClearRange(view, aspect);
 
         backend.Api.vkCmdClearDepthStencilImage(_commandBuffer, view.Texture.Image, VkImageLayout.TransferDstOptimal, &value, 1, &range);
+    }
+
+    /// <summary>
+    /// Like D3D11, a clear only covers the view's mip and slices: clearing the whole image would also wipe
+    /// the faces of a cube map that were rendered before.
+    /// </summary>
+    private static VkImageSubresourceRange GetClearRange(VulkanTextureView view, VkImageAspectFlags aspect)
+    {
+        var description = view.Description;
+
+        // A 3D image has a single layer; its depth slices are not addressable by a clear.
+        var is3D = description.Dimension == TextureDimension.Texture3D;
+        return new VkImageSubresourceRange
+                   {
+                       aspectMask = aspect,
+                       baseMipLevel = (uint)description.FirstMip,
+                       levelCount = description.MipCount == 0 ? VK_REMAINING_MIP_LEVELS : (uint)description.MipCount,
+                       baseArrayLayer = is3D ? 0 : (uint)description.FirstArraySlice,
+                       layerCount = is3D ? 1 : (uint)Math.Max(1, description.ArraySize),
+                   };
     }
 
     public void SetViewport(in Viewport viewport)

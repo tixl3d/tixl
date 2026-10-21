@@ -1,0 +1,60 @@
+{
+  "FormatVersion": 3,
+  "Id": "8f2cc172-318d-4b78-9db4-d3049240bec0"/*RenderToCubeMap*/,
+  "Inputs": [
+    {
+      "Id": "5cf3ed9a-03d9-4443-aa8f-727d929af6c2"/*Position*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "7bc55c92-cd9b-4217-b958-9a06ec994364"/*ClearColor*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0,
+        "W": 1.0
+      }
+    },
+    {
+      "Id": "9199affe-5613-4cfd-a09e-0b79e6b108f0"/*TextureFormat*/,
+      "DefaultValue": "R8G8B8A8_UNorm"
+    },
+    {
+      "Id": "9e04c55a-daa7-4014-8347-70efb65bdc8f"/*Resolution*/,
+      "DefaultValue": 2048
+    },
+    {
+      "Id": "cad58ac3-b764-4e46-8b85-c0b05598aab1"/*GenerateMips*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "d7181b91-ee60-4ac2-9e70-b99bc357b52b"/*ClipPlanes*/,
+      "DefaultValue": {
+        "X": 0.01,
+        "Y": 1000.0
+      }
+    },
+    {
+      "Id": "f292b2fe-c340-40a0-9fd3-d1e19702f0bb"/*CameraReference*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "f3ebee9c-250f-4e74-9773-ad3fcba4f43b"/*Command*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "f52ba308-2ce7-4d50-a3ff-2df86160063a"/*Rotation*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}
