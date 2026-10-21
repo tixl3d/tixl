@@ -225,7 +225,7 @@ internal static class SetupParameterView
         {
             FormInputs.ApplyIndent();
             CustomComponents.StylizedText(planSegment < 0
-                                              ? $"Floor of {plan.Name} — its size and place follow the plan."
+                                              ? $"Floor of {plan.Name} — its size and place follow the plan's floor rectangle."
                                               : $"Wall on edge {planSegment + 1} of {plan.Name} — its width and place follow the plan.",
                                           Fonts.FontSmall, UiColors.TextMuted);
         }
@@ -297,7 +297,12 @@ internal static class SetupParameterView
                 SurfaceMetrics.RemeterSurface(setup, surface, new Vector2(surface.SizeInMeters.X, typed.Y));
                 FloorPlanSync.SetSegmentLength(setup, plan, planSegment, typed.X);
             }
-            else if (plan == null)
+            else if (plan != null)
+            {
+                // The floor's size is its plan's floor rectangle.
+                FloorPlanSync.SetFloorSize(setup, plan, typed);
+            }
+            else
             {
                 SurfaceMetrics.RemeterSurface(setup, surface, typed);
             }
@@ -418,8 +423,11 @@ internal static class SetupParameterView
         {
             var hasFloor = setup.FindSurface(plan.RaisedFloorId) != null;
             if (FormInputs.AddCheckBox("Floor surface", ref hasFloor,
-                                       "A surface lying on the footprint. Unticking removes it, unless content, a projection or regions were put on it — then it is kept, free of the plan, and ticking again brings it back."))
+                                       "A surface lying on the footprint. Unticking removes it, unless content, a projection, regions or a patch of its name were put on it — then it is kept, free of the plan, and ticking again brings it back."))
                 SetupUndo.RunUndoable(hasFloor ? "Add floor" : "Take up floor", setup, () => FloorPlanSync.SetFloor(setup, plan, hasFloor));
+
+            if (hasFloor)
+                DrawFloorRectRows(setup, plan);
         }
 
         Span<float> height = [plan.WallHeight];
@@ -447,7 +455,7 @@ internal static class SetupParameterView
                         : lowered != null ? $"Edge {segment + 1} · {(end - start).Length():0.##} m · {lowered.Name} lowered"
                         : $"Edge {segment + 1} · {(end - start).Length():0.##} m";
             if (FormInputs.AddCheckBox(label, ref hasWall,
-                                       "A wall standing on this edge, facing in. Unticking removes it, unless content, a projection, a trace or regions were put on it — then it is kept, free of the plan, and ticking again brings it back."))
+                                       "A wall standing on this edge, facing in. Unticking removes it, unless content, a projection, a trace, regions or a patch of its name were put on it — then it is kept, free of the plan, and ticking again brings it back."))
             {
                 var index = segment;
                 SetupUndo.RunUndoable(hasWall ? "Raise wall" : "Take down wall", setup, () => FloorPlanSync.SetWall(setup, plan, index, hasWall));
@@ -455,6 +463,63 @@ internal static class SetupParameterView
 
             ImGui.PopID();
         }
+    }
+
+    /// <summary>
+    /// The rectangle the floor surface and its patch stand for. It follows the footprint's bounding box until one of
+    /// its fields is edited; a concave room usually wants it on the main hall, with a niche reaching past it.
+    /// </summary>
+    private static void DrawFloorRectRows(Setup setup, FloorPlan plan)
+    {
+        if (!plan.TryGetFloorRect(out var rect))
+            return;
+
+        var fitsBounds = plan.FloorRect == null;
+        if (FormInputs.AddCheckBox("Floor fits bounds", ref fitsBounds,
+                                   "The floor surface covers the footprint's bounding box. Editing the floor rectangle below, or its edges on the Board while the floor is selected, sets one of its own."))
+        {
+            SetupUndo.RunUndoable(fitsBounds ? "Fit floor to bounds" : "Keep floor rectangle", setup, () =>
+                                                                                                    {
+                                                                                                        plan.FloorRect = fitsBounds ? null : rect;
+                                                                                                        FloorPlanSync.Apply(setup, plan);
+                                                                                                    });
+        }
+
+        Span<float> centre = [rect.Centre.X, rect.Centre.Y];
+        var centreState = DrawFloatsRow("Floor centre (m)", centre, "In plan metres from the stage origin, Y towards the front.");
+        BeginFieldUndo(setup, centreState);
+        if ((centreState & InputEditStateFlags.Modified) != 0)
+        {
+            rect.Centre = new Vector2(centre[0], centre[1]);
+            plan.FloorRect = rect;
+            FloorPlanSync.Apply(setup, plan);
+        }
+
+        CommitFieldUndo(setup, "Move floor", centreState);
+
+        Span<float> size = [rect.Size.X, rect.Size.Y];
+        var sizeState = DrawFloatsRow("Floor size (m)", size, "Width and depth of what the floor's patch shows, e.g. as printed on the pixel-map sheet.");
+        BeginFieldUndo(setup, sizeState);
+        if ((sizeState & InputEditStateFlags.Modified) != 0)
+        {
+            rect.Size = Vector2.Max(new Vector2(size[0], size[1]), new Vector2(SurfaceGeometry.MinSize));
+            plan.FloorRect = rect;
+            FloorPlanSync.Apply(setup, plan);
+        }
+
+        CommitFieldUndo(setup, "Resize floor", sizeState);
+
+        Span<float> rotation = [rect.RotationDegrees];
+        var rotationState = DrawFloatsRow("Floor rotation (°)", rotation, "Counter-clockwise seen from above, from the plan's X axis.", speed: 0.1f);
+        BeginFieldUndo(setup, rotationState);
+        if ((rotationState & InputEditStateFlags.Modified) != 0)
+        {
+            rect.RotationDegrees = rotation[0];
+            plan.FloorRect = rect;
+            FloorPlanSync.Apply(setup, plan);
+        }
+
+        CommitFieldUndo(setup, "Turn floor", rotationState);
     }
 
     private static void DrawOutputCard(Setup setup, MachineConfig machineConfig, Guid id)

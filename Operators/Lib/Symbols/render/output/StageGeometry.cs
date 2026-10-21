@@ -11,7 +11,7 @@ namespace Lib.render.output;
 /// so texturing with that output's composite (or its pixel map) puts every wall's picture on its wall.
 /// </summary>
 [Guid("98aac8ba-480c-4a28-8391-23c7d1ae11d9")]
-internal sealed class StageGeometry : Instance<StageGeometry>
+internal sealed class StageGeometry : Instance<StageGeometry>, IStatusProvider
 {
     [Output(Guid = "fcdaba8f-c63c-4913-b5d2-90b586ddc5f4", DirtyFlagTrigger = DirtyFlagTrigger.Always)]
     public readonly Slot<MeshGeometry?> Geometry = new();
@@ -76,6 +76,9 @@ internal sealed class StageGeometry : Instance<StageGeometry>
         var face = 0;
         var corner = 0;
         var part = 0;
+        var placedCount = 0;
+        var unplacedCount = 0;
+        string? firstUnplacedName = null;
         foreach (var surface in setup.Surfaces)
         {
             if (!IsStageSurface(surface))
@@ -85,14 +88,24 @@ internal sealed class StageGeometry : Instance<StageGeometry>
             // that output — the pixel-map workflow, where patches are typed from the venue's sheet and named like
             // the walls — else its first mapping anywhere. Read into the TL, TR, BR, BL scratch either way.
             var hasCanvasQuad = TryGetCanvasQuad(setup, surface, outputId, _canvasQuad);
+            if (hasCanvasQuad)
+            {
+                placedCount++;
+            }
+            else
+            {
+                unplacedCount++;
+                firstUnplacedName ??= surface.Name;
+            }
+
             var faceStart = face;
             var plan = FindClosedPlanFloor(setup, surface);
             if (plan != null)
             {
-                // The footprint lies on the ground; its bounding box is the rectangle the surface (and its patch) stands for.
+                // The footprint lies on the ground; the plan's floor rectangle is what the surface (and its patch) stands for,
+                // so a part of the footprint reaching past it, like a stage niche, gets coordinates beyond 0..1.
                 plan.Triangulate(_triangles);
-                plan.TryGetBounds(out var planMin, out var planMax);
-                var planSize = Vector2.Max(planMax - planMin, new Vector2(0.0001f));
+                plan.TryGetFloorRect(out var floorRect);
                 var pointBase = point;
                 for (var v = 0; v < plan.Vertices.Count; v++)
                     _geometry.Positions[point++] = PlanToStage(plan.Vertices[v]);
@@ -103,13 +116,13 @@ internal sealed class StageGeometry : Instance<StageGeometry>
                     for (var k = 0; k < 3; k++)
                     {
                         var vertex = _triangles[t + k];
-                        var inRect = (plan.Vertices[vertex] - planMin) / planSize; // 0..1, y away from the viewer
+                        var inRect = floorRect.ToFractions(plan.Vertices[vertex]); // 0..1 inside the rectangle, y along its depth
                         var position = _geometry.Positions[pointBase + vertex];
                         _geometry.CornerPointIndices[corner] = pointBase + vertex;
                         normals.Values[corner] = Vector3.UnitY;
                         var canvasUv = hasCanvasQuad ? BilinearCanvas(_canvasQuad, inRect.X, 1 - inRect.Y) : new Vector2(inRect.X, 1 - inRect.Y);
                         texCoords.Values[corner] = TexCoordFor(uvMode, uvScale, position, Vector3.UnitY, inRect, canvasUv);
-                        canvasCoords.Values[corner] = canvasUv;
+                        canvasCoords.Values[corner] = hasCanvasQuad ? canvasUv : OffCanvas;
                         corner++;
                     }
                 }
@@ -134,7 +147,7 @@ internal sealed class StageGeometry : Instance<StageGeometry>
                     var inRect = new Vector2(sign.X > 0 ? 1 : 0, sign.Y > 0 ? 1 : 0);
                     var canvasUv = hasCanvasQuad ? _canvasQuad[_cornerToQuadIndex[c]] : new Vector2(inRect.X, 1 - inRect.Y);
                     texCoords.Values[corner] = TexCoordFor(uvMode, uvScale, position, normal, inRect, canvasUv);
-                    canvasCoords.Values[corner] = canvasUv;
+                    canvasCoords.Values[corner] = hasCanvasQuad ? canvasUv : OffCanvas;
                     point++;
                     corner++;
                 }
@@ -148,7 +161,28 @@ internal sealed class StageGeometry : Instance<StageGeometry>
         _geometry.FaceCornerOffsets[face] = corner;
         _geometry.InvalidateTopologyCaches();
         Geometry.Value = _geometry;
+        UpdateUnplacedWarning(placedCount > 0 ? unplacedCount : 0, firstUnplacedName);
     }
+
+    /** Rebuilt only when what it reports changes, so a steady setup costs no string per frame. */
+    private void UpdateUnplacedWarning(int unplacedCount, string? firstUnplacedName)
+    {
+        if (unplacedCount == _unplacedCount && ReferenceEquals(firstUnplacedName, _firstUnplacedName))
+            return;
+
+        _unplacedCount = unplacedCount;
+        _firstUnplacedName = firstUnplacedName;
+        _unplacedWarning = unplacedCount == 0
+                               ? null
+                               : unplacedCount == 1
+                                   ? $"'{firstUnplacedName}' has no patch of its name and no mapping on the output, so [DrawStageCanvas] leaves it out."
+                                   : $"'{firstUnplacedName}' and {unplacedCount - 1} more surfaces have no patch of their name and no mapping on the output, so [DrawStageCanvas] leaves them out.";
+    }
+
+    IStatusProvider.StatusLevel IStatusProvider.GetStatusLevel() =>
+        _unplacedWarning == null ? IStatusProvider.StatusLevel.Success : IStatusProvider.StatusLevel.Warning;
+
+    string? IStatusProvider.GetStatusMessage() => _unplacedWarning;
 
     /// <summary>
     /// TexCoord in the mesh shaders' convention (v up). Surface and canvas coordinates arrive v down and are
@@ -287,6 +321,16 @@ internal sealed class StageGeometry : Instance<StageGeometry>
     private readonly MeshGeometry _geometry = new();
     private readonly List<int> _triangles = [];
     private readonly Vector2[] _canvasQuad = new Vector2[4];
+
+    /**
+     * Where a surface with no patch or mapping lands on the canvas: one point outside it, so its triangles cover nothing.
+     * Spread over the whole canvas instead, it would be painted over every other wall.
+     */
+    private static readonly Vector2 OffCanvas = new(-2, -2);
+
+    private int _unplacedCount;
+    private string? _firstUnplacedName;
+    private string? _unplacedWarning;
 
     [Input(Guid = "e64bc3c3-cbe2-4460-91a6-d0fc207c1743")]
     public readonly InputSlot<Guid> OutputRef = new();

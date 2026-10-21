@@ -16,6 +16,61 @@ namespace T3.Core.Output;
 /// </summary>
 public sealed class FloorPlan
 {
+    /// <summary>
+    /// A rectangle on the ground in plan metres, turnable: <see cref="RotationDegrees"/> runs counter-clockwise from
+    /// the plan's X axis, seen from above. Its width runs along its own X, its depth along its own Y.
+    /// </summary>
+    public struct FloorRectangle
+    {
+        public Vector2 Centre;
+        public Vector2 Size;
+        public float RotationDegrees;
+
+        public FloorRectangle(Vector2 centre, Vector2 size, float rotationDegrees)
+        {
+            Centre = centre;
+            Size = size;
+            RotationDegrees = rotationDegrees;
+        }
+
+        /// <summary>The unit direction its width runs along.</summary>
+        public readonly Vector2 AxisX
+        {
+            get
+            {
+                var angle = RotationDegrees * MathF.PI / 180;
+                return new Vector2(MathF.Cos(angle), MathF.Sin(angle));
+            }
+        }
+
+        /// <summary>The unit direction its depth runs along, a quarter turn left of <see cref="AxisX"/>.</summary>
+        public readonly Vector2 AxisY
+        {
+            get
+            {
+                var axisX = AxisX;
+                return new Vector2(-axisX.Y, axisX.X);
+            }
+        }
+
+        /// <summary>The corner where both of its axes start.</summary>
+        public readonly Vector2 BottomLeft => Centre - AxisX * (Size.X * 0.5f) - AxisY * (Size.Y * 0.5f);
+
+        /// <summary>A plan point in the rectangle's own fractions: 0..1 inside it, beyond that outside.</summary>
+        public readonly Vector2 ToFractions(Vector2 planPoint)
+        {
+            var offset = planPoint - BottomLeft;
+            var size = Vector2.Max(Size, new Vector2(0.0001f));
+            return new Vector2(Vector2.Dot(offset, AxisX) / size.X, Vector2.Dot(offset, AxisY) / size.Y);
+        }
+
+        /// <summary>A point given in the rectangle's own fractions, in plan metres.</summary>
+        public readonly Vector2 FromFractions(Vector2 fractions)
+        {
+            return BottomLeft + AxisX * (fractions.X * Size.X) + AxisY * (fractions.Y * Size.Y);
+        }
+    }
+
     public Guid Id = Guid.NewGuid();
     public string Name = string.Empty;
 
@@ -45,6 +100,13 @@ public sealed class FloorPlan
 
     /// <summary>Its card's place on the Board; null until the Board seeded one.</summary>
     public BoardPlacement? BoardPlacement;
+
+    /// <summary>
+    /// What the floor surface stands for: its size, its pose and the patch showing on it. A concave room's footprint
+    /// can reach past it (a stage niche), and those parts get texture coordinates outside 0..1. Null follows the
+    /// footprint's bounding box.
+    /// </summary>
+    public FloorRectangle? FloorRect;
 
     /// <summary>How many segments the run has: every vertex pair, plus the closing one.</summary>
     public int SegmentCount => Vertices.Count < 2 ? 0 : IsClosed ? Vertices.Count : Vertices.Count - 1;
@@ -94,6 +156,23 @@ public sealed class FloorPlan
             max = Vector2.Max(max, Vertices[i]);
         }
 
+        return true;
+    }
+
+    /// <summary>The floor's rectangle: <see cref="FloorRect"/> when set, else the bounding box; false while there are no vertices.</summary>
+    public bool TryGetFloorRect(out FloorRectangle rect)
+    {
+        if (FloorRect is { } floorRect)
+        {
+            rect = floorRect;
+            return true;
+        }
+
+        rect = default;
+        if (!TryGetBounds(out var min, out var max))
+            return false;
+
+        rect = new FloorRectangle((min + max) * 0.5f, max - min, 0);
         return true;
     }
 
@@ -238,6 +317,16 @@ public sealed class FloorPlan
             BoardPlacement.WriteToJson(writer);
         }
 
+        if (FloorRect is { } floorRect)
+        {
+            writer.WritePropertyName("FloorRect");
+            writer.WriteStartObject();
+            writer.WriteVector2("Centre", floorRect.Centre);
+            writer.WriteVector2("Size", floorRect.Size);
+            writer.WriteValue("Rotation", floorRect.RotationDegrees);
+            writer.WriteEndObject();
+        }
+
         writer.WriteEndObject();
     }
 
@@ -273,6 +362,10 @@ public sealed class FloorPlan
         plan.EnsureWallSlots();
         if (token["BoardPlacement"] is JObject placement)
             plan.BoardPlacement = BoardPlacement.ReadFromJson(placement);
+
+        if (token["FloorRect"] is JObject floorRect)
+            plan.FloorRect = new FloorRectangle(OutputJson.ReadVector2(floorRect["Centre"]), OutputJson.ReadVector2(floorRect["Size"]),
+                                                floorRect.ReadValueSafe("Rotation", 0f));
 
         return plan;
     }

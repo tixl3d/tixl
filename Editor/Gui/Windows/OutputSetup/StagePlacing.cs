@@ -36,15 +36,19 @@ internal static class StagePlacing
     }
 
     /// <summary>
-    /// Lays <paramref name="floor"/> flat on the ground, its bottom-left corner at <paramref name="bottomLeft"/> and
-    /// its own up pointing away from the viewer (−Z), so its normal points up.
+    /// Lays <paramref name="floor"/> flat on the ground, its bottom-left corner at <paramref name="bottomLeft"/> and its
+    /// normal pointing up. Unturned its own up points away from the viewer (−Z); <paramref name="rotationDegrees"/>
+    /// turns it counter-clockwise seen from above, like a plan's floor rectangle.
     /// </summary>
-    public static void PoseFloor(Surface floor, Vector3 bottomLeft)
+    public static void PoseFloor(Surface floor, Vector3 bottomLeft, float rotationDegrees = 0)
     {
+        var turn = rotationDegrees * MathF.PI / 180;
+        var orientation = Quaternion.Concatenate(Quaternion.CreateFromAxisAngle(Vector3.UnitX, -MathF.PI * 0.5f),
+                                                 Quaternion.CreateFromAxisAngle(Vector3.UnitY, turn));
         var anchor = floor.AnchorInMeters;
-        var position = bottomLeft + new Vector3(anchor.X, 0, -anchor.Y);
+        var position = bottomLeft + Vector3.Transform(new Vector3(anchor.X, 0, -anchor.Y), Quaternion.CreateFromAxisAngle(Vector3.UnitY, turn));
         floor.Placement ??= new Surface.StagePlacement();
-        floor.Placement.Pose = new Pose(position, Quaternion.CreateFromAxisAngle(Vector3.UnitX, -MathF.PI * 0.5f));
+        floor.Placement.Pose = new Pose(position, Quaternion.Normalize(orientation));
     }
 
     /// <summary>Yaw (about Y), pitch (about X) and roll (about Z) in degrees, the way the card shows a pose.</summary>
