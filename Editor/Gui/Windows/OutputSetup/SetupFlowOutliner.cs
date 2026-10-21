@@ -401,8 +401,10 @@ internal sealed class SetupFlowOutliner
     {
         // A fence starts only on the frame the button goes down, and only on empty space — a press on an item is
         // that item's (a pick, a routing drag), and picking it up mid-press would end as a click that clears.
+        // A press in another window must not start one either, or it would catch the rows scrolled out of view.
         if (_fence.State == SelectionFence.States.Inactive
-            && (!ImGui.IsMouseClicked(ImGuiMouseButton.Left) || ImGui.IsAnyItemHovered() || ImGui.IsAnyItemActive()))
+            && (!ImGui.IsMouseClicked(ImGuiMouseButton.Left) || !ImGui.IsWindowHovered()
+                || ImGui.IsAnyItemHovered() || ImGui.IsAnyItemActive()))
         {
             return;
         }
