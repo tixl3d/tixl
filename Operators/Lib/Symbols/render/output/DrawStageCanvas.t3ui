@@ -53,6 +53,7 @@
     },
     {
       "InputId": "acd9fcfb-5693-49e5-890f-95ffce4d0d32"/*CubeMap*/,
+      "Relevancy": "Required",
       "Position": {
         "X": -200.0,
         "Y": 90.0
@@ -61,6 +62,7 @@
     },
     {
       "InputId": "d5dee94b-5dbc-448b-b8eb-c44eb6e36539"/*Image*/,
+      "Relevancy": "Required",
       "Position": {
         "X": -200.0,
         "Y": 45.0

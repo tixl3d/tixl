@@ -992,6 +992,12 @@ internal sealed partial class SetupOutputView
                 SetupUndo.RunUndoable("Remove corner", setup, () => FloorPlanSync.RemoveVertex(setup, plan, vertex));
             }
 
+            if (CustomComponents.DrawMenuItem(2, "Move Origin Here") && _planMenuVertex < plan.Vertices.Count)
+            {
+                var point = plan.Vertices[_planMenuVertex];
+                SetupUndo.RunUndoable("Move origin", setup, () => StageOrigin.Move(setup, point, Vector2.UnitY));
+            }
+
             CustomComponents.MenuItemsFlushLeft = false;
             SetupPopup.End();
         }
@@ -1114,6 +1120,19 @@ internal sealed partial class SetupOutputView
                     _planLengthValue = (b - a).Length();
                     _planLengthPopupPending = true;
                 }
+
+                if (CustomComponents.DrawMenuItem(5, "Move Origin Here"))
+                {
+                    plan.GetSegment(menuSegment, out var a, out var b);
+                    var point = (a + b) * 0.5f;
+                    SetupUndo.RunUndoable("Move origin", setup, () => StageOrigin.Move(setup, point, Vector2.UnitY));
+                }
+
+                if (CustomComponents.DrawMenuItem(6, "Make This Edge the Front"))
+                {
+                    var front = StageOrigin.FrontFacingSegment(plan, menuSegment);
+                    SetupUndo.RunUndoable("Turn origin", setup, () => StageOrigin.Move(setup, Vector2.Zero, front));
+                }
             }
 
             CustomComponents.MenuItemsFlushLeft = false;
@@ -1149,6 +1168,7 @@ internal sealed partial class SetupOutputView
             SetupPopup.End();
         }
 
+        DrawPlanOrigin(setup, plan, origin, isSelected);
         ImGui.PopID();
 
         _picker.AddTarget(SetupEntityKinds.FloorPlan, plan.Id, sMin, sMax, isBackground: true);
