@@ -47,6 +47,8 @@ internal static class SetupParameterView
             return false;
         }
 
+        // The Parameter window disables its own scrolling, so long cards (a floor plan with many walls) need a child.
+        ImGui.BeginChild("setupEntity", Vector2.Zero, ImGuiChildFlags.None, ImGuiWindowFlags.NoBackground);
         FormInputs.SetIndentToParameters();
         FormInputs.AddVerticalSpace(5);
         DrawHeader(setup, kind, id);
@@ -89,6 +91,7 @@ internal static class SetupParameterView
             CustomComponents.StylizedText($"+{selection.Count - 1} more selected", Fonts.FontSmall, UiColors.TextMuted);
         }
 
+        ImGui.EndChild();
         return true;
     }
 

@@ -102,6 +102,28 @@ right and release.
 - The card moves; "Wall 1"'s Position (m) and "Floor"'s are unchanged — the plan's corners are stage
   metres, the card's place on the Board is only presentation.
 
+## Step: Moving and turning the stage origin
+
+**Action:**
+1. On "Floor Plan 1" (the 10 × 8 m room), find the ring with an arrow at its bottom-left corner. Drag the
+   ring (not the corner square inside it) towards the middle of the room until it snaps there, and release.
+   Note "Wall 1"'s Position (m).
+2. Right-click the ring and choose **Make Left Side the Front**.
+3. Right-click the middle dot of any edge and choose **Make This Edge the Front**, then right-click a
+   corner and choose **Move Origin Here**.
+4. Press Ctrl+Z four times.
+
+**Expected:**
+- The ring and arrow show on every plan card; hovering the ring explains it.
+- After 1: the room stays still on the Board while the ring moves; it snaps to the plan's centre, and also
+  to corners and edge middles on the way (Shift drags freely). Afterwards "Floor"'s and "Wall 1"'s
+  Positions are shifted by (-5, 0, +4).
+- After 2: the room turns a quarter on its card around the ring, the arrow still pointing up, and the
+  wall that was on the left now sits at the top. Wall widths and the floor size are unchanged.
+- After 3: the chosen edge ends up at the top of the card, facing the arrow, and the ring sits on the corner.
+- After 4: each step undoes on its own and the plan, walls and origin are back where they started. A
+  projector calibrated before step 1 still lines up after each step.
+
 ## Step: Draw walls from an open run
 
 **Action:**
