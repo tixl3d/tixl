@@ -23,6 +23,14 @@ internal sealed class HasTimeChanged : Instance<HasTimeChanged>
         // Support double evaluation of animated outputs 
         if (Playback.FrameCount == _lastFrameUpdate)
         {
+            // A repeated pass of the same frame (motion blur, cube map faces) must not report the advance a second time.
+            if ((Modes)Mode.GetValue(context) == Modes.DidAdvancedWithMotionBlur
+                && context.IntVariables.TryGetValue("__MotionBlurPass", out var repeatPass)
+                && repeatPass > 0)
+            {
+                HasChanged.Value = false;
+            }
+
             return;
         }
         _lastFrameUpdate = Playback.FrameCount;
