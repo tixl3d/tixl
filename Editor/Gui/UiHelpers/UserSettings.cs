@@ -240,6 +240,7 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         public bool EnableGCProfiling = false;
         public bool EnableMidiDebugLogging = false;
         public bool ShowOperatorStats = false;
+        public int DebugServerPort = 9042;
         
         // Gated Debug Logging
         public bool LogAudioDetails = false;

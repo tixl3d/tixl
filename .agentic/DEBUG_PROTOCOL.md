@@ -19,7 +19,8 @@ errors in the log.
 - **Launch with the build folder as the working directory.** Several paths are resolved relative to it,
   among them `.tixl/Tests/` - the visual suite's reference images. Started from the repo root the suite
   still runs, finds no references, and reports `SUCCESS:   0 / 0`, which reads like a pass.
-- `--debug-server <port>` starts the bridge (localhost only). Without the flag it is off.
+- `--debug-server <port>` starts the bridge (localhost only). Without the flag it is off, but a
+  running editor can start or stop it under Settings → Profiling → Debug Bridge (port saved, default 9042).
 - `--window WxH` forces a predictable windowed size; `--no-splash` skips the splash screen.
 - Startup until the port accepts connections takes roughly 10–20 s. Poll with retries.
 - A running server shows a blinking IO icon in the app title bar; its tooltip lists recent

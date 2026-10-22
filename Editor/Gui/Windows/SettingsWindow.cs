@@ -495,6 +495,44 @@ internal sealed partial class SettingsWindow : Window
                                                       UserSettings.Defaults.EnableMidiDebugLogging);
                     FormInputs.AddVerticalSpace();
 
+                    // Debug bridge group
+                    FormInputs.SetIndentToLeft();
+                    FormInputs.AddSectionSubHeader("Debug Bridge");
+                    FormInputs.AddVerticalSpace();
+                    FormInputs.SetIndentToParameters();
+                    var isDebugServerRunning = App.DebugProtocol.DebugServer.IsRunning;
+                    if (isDebugServerRunning)
+                    {
+                        // Show the port in use, which differs from the setting when started with --debug-server.
+                        var activePort = App.DebugProtocol.DebugServer.Port;
+                        ImGui.BeginDisabled();
+                        FormInputs.AddInt("Port", ref activePort, 1, 65535, 0.1f, DebugServerPortTooltip);
+                        ImGui.EndDisabled();
+                    }
+                    else
+                    {
+                        changed |= FormInputs.AddInt("Port",
+                                                     ref UserSettings.Config.DebugServerPort,
+                                                     1, 65535, 0.1f,
+                                                     DebugServerPortTooltip,
+                                                     UserSettings.Defaults.DebugServerPort);
+                    }
+
+                    FormInputs.ApplyIndent();
+                    if (ImGui.Button(isDebugServerRunning ? "Stop Debug Bridge" : "Start Debug Bridge"))
+                    {
+                        if (isDebugServerRunning)
+                        {
+                            App.DebugProtocol.DebugServer.Stop();
+                        }
+                        else
+                        {
+                            App.DebugProtocol.DebugServer.Start(UserSettings.Config.DebugServerPort);
+                        }
+                    }
+
+                    FormInputs.AddVerticalSpace();
+
                     // Audio System group
                     FormInputs.SetIndentToLeft();
                     FormInputs.AddSectionSubHeader("Audio System");
@@ -608,6 +646,8 @@ internal sealed partial class SettingsWindow : Window
     {
         return new List<Window>();
     }
+
+    private const string DebugServerPortTooltip = "Local TCP port (127.0.0.1) for scripts and agents to drive the editor. Same as starting with --debug-server <port>.";
 
     private static bool _projectDirectoriesRequireRestart;
 }
