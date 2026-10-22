@@ -58,6 +58,21 @@ Both are already sketched in the data-model plan as `OutputMapping` growth (`War
   falls out for free: the content renders once per frame (later pulls hit the cache) and each extra output
   only costs its composite blit. Spanning one wide viewer across both screens is the workaround today.
 
+- **Walls bound to patches by name only (2026-10-21):** in the pixel-map workflow, walls are never connected to
+  their patches; `StageGeometry.TryFindPatchQuadByName` falls back to a patch whose name matches the surface's
+  (case-insensitive). Renaming a wall, or re-raising it under a default name ("Wall 15" replacing "WallSud"),
+  silently loses its picture, and a surface with no quad at all used to be painted over the whole
+  ProjectOntoStage canvas (now kept off-canvas with a warning). The real link already exists: dropping a surface
+  onto a patch in the flow outliner creates a Guid-bound mapping from the patch's quad, which StageGeometry
+  prefers. Plan:
+  1. **Connect Surfaces to Patches by Name** on the output's menu: runs that drop for every name-matched
+     surface/patch pair, one undo step — a single pass after typing a venue's pixel map.
+  2. StageGeometry warns when a surface only finds its patch by name ("connect it"); later decide whether to
+     drop the name fallback entirely.
+  3. Open question: the drop *copies* the patch quad, so later patch edits don't follow. If that matters, the
+     mapping would remember its source patch id (a Core field) — wait for a real need.
+  Once the fallback goes, `FloorPlanSync.IsInUse` no longer needs its "a patch carries the surface's name" rule.
+
 - Setup menu should provide options to rename setup
 - In straight mode selecting different surfaces should have a view transition 
 - Setup menu should have a hover indication (e.g. change font color ForeGroundFull)

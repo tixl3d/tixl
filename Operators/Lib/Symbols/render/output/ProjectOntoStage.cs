@@ -18,12 +18,12 @@ namespace Lib.render.output;
 /// the viewer's position would see it. Wire: [StageGeometry] → [GeometryToMesh] → this → [SendToOutput].
 /// </summary>
 [Guid("533eb7f8-f18d-41bf-a094-167e0557eae8")]
-internal sealed class DrawStageCanvas : Instance<DrawStageCanvas>, IStatusProvider
+internal sealed class ProjectOntoStage : Instance<ProjectOntoStage>, IStatusProvider
 {
     [Output(Guid = "6befcc3f-1d7d-4d94-85da-633723eb3d79")]
     public readonly Slot<Texture2D?> Output = new();
 
-    public DrawStageCanvas()
+    public ProjectOntoStage()
     {
         Output.UpdateAction = Update;
         _vertexShader = ResourceManager.CreateShaderResource<VertexShader>(ShaderPath, this, () => "vsMain");
@@ -224,7 +224,7 @@ internal sealed class DrawStageCanvas : Instance<DrawStageCanvas>, IStatusProvid
         public Vector2 Padding;
     }
 
-    private const string ShaderPath = "Lib:shaders/3d/mesh/mesh-DrawStageCanvas.hlsl";
+    private const string ShaderPath = "Lib:shaders/3d/mesh/mesh-ProjectOntoStage.hlsl";
 
     private readonly Resource<VertexShader> _vertexShader;
     private readonly Resource<PixelShader> _pixelShader;
