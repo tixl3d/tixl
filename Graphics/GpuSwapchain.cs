@@ -77,6 +77,12 @@ public readonly record struct SwapchainDescription
 
     /// <summary>Allows the borderless-fullscreen path to change the display mode, as the Player's does.</summary>
     public bool AllowModeSwitch { get; init; }
+
+    /// <summary>
+    /// Another swap chain paces the loop. With vsync, Vulkan presents this one in mailbox mode: the newest frame
+    /// at its display's refresh, never tearing, never blocking the loop on a second display clock.
+    /// </summary>
+    public bool IsPacedByOtherSwapchain { get; init; }
 }
 
 /// <summary>

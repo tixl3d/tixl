@@ -316,6 +316,7 @@ internal static unsafe class ProgramWindows
         window.SetDevice(_device, _deviceContext);
         window.SetSize(width, height);
         window.SetSizeable();
+        window.IsPacedByMainWindow = true;
         window.InitViewSwapChain();
         window.InitializeWindow(maximized: false, canClose: null);
         return window;

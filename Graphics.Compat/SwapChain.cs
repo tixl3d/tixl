@@ -19,6 +19,7 @@ public sealed class SwapChain : IDisposable
                                                                BufferCount = description.BufferCount,
                                                                WaitableForLatency = description.UseFrameLatencyWaitableObject,
                                                                AllowModeSwitch = description.AllowModeSwitch,
+                                                               IsPacedByOtherSwapchain = description.IsPacedByOtherSwapchain,
                                                            },
                                                        target, label);
 
@@ -105,4 +106,7 @@ public struct SwapChainDescription
     public bool UseFrameLatencyWaitableObject;
 
     public bool AllowModeSwitch;
+
+    /// <summary>A secondary window (output, viewer) that must not hold up the editor's frame loop.</summary>
+    public bool IsPacedByOtherSwapchain;
 }

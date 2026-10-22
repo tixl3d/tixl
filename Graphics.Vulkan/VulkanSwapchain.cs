@@ -25,6 +25,7 @@ internal sealed unsafe class VulkanSwapchain : GpuSwapchain
             backend.Api.vkCreateSemaphore(&semaphoreInfo, null, out _imageAvailable[i]).CheckResult();
         }
 
+        _supportedPresentModes = QuerySupportedPresentModes();
         Create(description.Width, description.Height);
     }
 
@@ -301,10 +302,23 @@ internal sealed unsafe class VulkanSwapchain : GpuSwapchain
 
     private VkPresentModeKHR PickPresentMode()
     {
-        // Fifo is the only mode every driver has, and it is what a sync interval of 1 means.
-        if (_presentSyncInterval > 0)
-            return VkPresentModeKHR.Fifo;
+        var hasMailbox = Array.IndexOf(_supportedPresentModes, VkPresentModeKHR.Mailbox) >= 0;
 
+        // Fifo is the only mode every driver has, and it is what a sync interval of 1 means. A second Fifo chain
+        // would make the loop wait for two vblanks that never line up, about 1.5 refreshes per frame.
+        if (_presentSyncInterval > 0)
+            return Description.IsPacedByOtherSwapchain && hasMailbox ? VkPresentModeKHR.Mailbox : VkPresentModeKHR.Fifo;
+
+        // Mailbox before Immediate: both present without waiting, but Mailbox does not tear.
+        if (hasMailbox)
+            return VkPresentModeKHR.Mailbox;
+
+        return Array.IndexOf(_supportedPresentModes, VkPresentModeKHR.Immediate) >= 0 ? VkPresentModeKHR.Immediate : VkPresentModeKHR.Fifo;
+    }
+
+    /// <summary>Queried once: <see cref="PickPresentMode"/> runs every present, and a surface's modes don't change.</summary>
+    private VkPresentModeKHR[] QuerySupportedPresentModes()
+    {
         uint count = 0;
         _backend.InstanceApi.vkGetPhysicalDeviceSurfacePresentModesKHR(_backend.PhysicalDevice, _surface, &count, null).CheckResult();
         var modes = new VkPresentModeKHR[count];
@@ -314,11 +328,7 @@ internal sealed unsafe class VulkanSwapchain : GpuSwapchain
             _backend.InstanceApi.vkGetPhysicalDeviceSurfacePresentModesKHR(_backend.PhysicalDevice, _surface, &count, pointer).CheckResult();
         }
 
-        // Mailbox before Immediate: both present without waiting, but Mailbox does not tear.
-        if (Array.IndexOf(modes, VkPresentModeKHR.Mailbox) >= 0)
-            return VkPresentModeKHR.Mailbox;
-
-        return Array.IndexOf(modes, VkPresentModeKHR.Immediate) >= 0 ? VkPresentModeKHR.Immediate : VkPresentModeKHR.Fifo;
+        return modes;
     }
 
     private static Format FromVulkan(VkFormat format)
@@ -383,6 +393,7 @@ internal sealed unsafe class VulkanSwapchain : GpuSwapchain
     private int _imageIndex;
     private int _presentSyncInterval = 1;
     private VkPresentModeKHR _presentMode = VkPresentModeKHR.Fifo;
+    private readonly VkPresentModeKHR[] _supportedPresentModes;
     private bool _acquired;
     private bool _needsRecreation;
 

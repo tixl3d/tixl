@@ -53,6 +53,9 @@ internal sealed unsafe class AppWindow
     /// </summary>
     internal bool UseFrameLatencyWaitable { get; set; }
 
+    /// <summary>Set before swap-chain creation, for windows whose presents must not pace the editor's loop.</summary>
+    internal bool IsPacedByMainWindow { get; set; }
+
     internal bool IsMinimized => (SDL_GetWindowFlags(_window) & SDL_WindowFlags.SDL_WINDOW_MINIMIZED) != 0;
     public Texture2D? Texture { get; set; }
     public Texture2D BackBufferTexture => _backBufferTexture;
@@ -217,6 +220,7 @@ internal sealed unsafe class AppWindow
                                                  Format = Format.R8G8B8A8_UNorm,
                                                  BufferCount = 3,
                                                  UseFrameLatencyWaitableObject = UseFrameLatencyWaitable,
+                                                 IsPacedByOtherSwapchain = IsPacedByMainWindow,
                                              },
                                          target, "editor window")
                      ?? throw new InvalidOperationException("Could not create a swap chain for the editor window.");
