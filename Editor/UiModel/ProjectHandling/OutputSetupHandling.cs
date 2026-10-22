@@ -27,16 +27,28 @@ internal static class OutputSetupHandling
         var package = ProjectView.Focused?.OpenedProject.Package;
         if (package == null)
         {
+            if (ActiveSetup.Current != null)
+                ActiveSetup.NotifyChanged();
+
             ActiveSetup.Current = null;
             ActiveSetup.Machine = null;
             return;
         }
 
         var entry = GetOrLoadEntry(package.Folder);
+        var switched = !ReferenceEquals(ActiveSetup.Current, entry.Setup);
         ActiveSetup.Current = entry.Setup;
         ActiveSetup.Machine = entry.MachineConfig;
         ResolveCanvasResolutions(entry.Setup, entry.MachineConfig);
+        if (switched)
+            ActiveSetup.NotifyChanged();
     }
+
+    /// <summary>
+    /// For edits applied live, before the gesture's undo step saves them: a drag on a canvas, a field being dragged.
+    /// Operators reading the setup follow along each frame instead of jumping at the release.
+    /// </summary>
+    public static void NotifyLiveEdit() => ActiveSetup.NotifyChanged();
 
     /// <summary>Drops a closed project's cached setup, so reopening reloads from disk.</summary>
     public static void OnProjectClosed(string projectFolder)
@@ -67,6 +79,7 @@ internal static class OutputSetupHandling
     public static void SaveActive()
     {
         StructureVersion++;
+        ActiveSetup.NotifyChanged();
 
         // A setup edit (re-routing, a new slice, a moved patch) changes what the cards show, so they render once more.
         T3.Core.Output.Rendering.OutputPreviewRefresh.InvalidateAll();

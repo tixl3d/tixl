@@ -5,7 +5,6 @@ using SharpDX.Direct3D11;
 using SharpDX.DXGI;
 using SharpDX.Mathematics.Interop;
 using T3.Core.DataTypes;
-using T3.Core.Output;
 using T3.Core.Rendering;
 using T3.Core.Utils;
 using Utilities = T3.Core.Utils.Utilities;
@@ -66,13 +65,10 @@ internal sealed class DrawStageCanvas : Instance<DrawStageCanvas>, IStatusProvid
             return;
         }
 
-        // The canvas size: as set, else the referenced output's, else what the host requests - a [SendToOutput]
-        // passes down the canvas of the output it is routed to.
+        // The canvas size: as set, else what the host requests - a [SendToOutput] passes down the canvas of the
+        // output it is routed to.
         if (resolution.Width <= 0 || resolution.Height <= 0)
-        {
-            var output = ActiveSetup.FindOutput(OutputRef.GetValue(context));
-            resolution = output?.ResolvedResolution ?? context.RequestedResolution;
-        }
+            resolution = context.RequestedResolution;
 
         resolution = new T3.Core.DataTypes.Vector.Int2(Math.Clamp(resolution.Width, 1, 16384), Math.Clamp(resolution.Height, 1, 16384));
         EnsureTarget(resolution);
@@ -255,9 +251,6 @@ internal sealed class DrawStageCanvas : Instance<DrawStageCanvas>, IStatusProvid
 
     [Input(Guid = "a17c5fd5-04f8-4ed1-bc89-c389d845f152")]
     public readonly InputSlot<Vector3> ViewerPosition = new();
-
-    [Input(Guid = "379b6223-920b-448f-a508-c93dccb06316")]
-    public readonly InputSlot<Guid> OutputRef = new();
 
     [Input(Guid = "2fb9a2cb-8583-49bc-9745-438a5d2eed63")]
     public readonly InputSlot<T3.Core.DataTypes.Vector.Int2> Resolution = new();
