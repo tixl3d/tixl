@@ -62,7 +62,7 @@ Both are already sketched in the data-model plan as `OutputMapping` growth (`War
   their patches; `StageGeometry.TryFindPatchQuadByName` falls back to a patch whose name matches the surface's
   (case-insensitive). Renaming a wall, or re-raising it under a default name ("Wall 15" replacing "WallSud"),
   silently loses its picture, and a surface with no quad at all used to be painted over the whole
-  DrawStageCanvas canvas (now kept off-canvas with a warning). The real link already exists: dropping a surface
+  ProjectOntoStage canvas (now kept off-canvas with a warning). The real link already exists: dropping a surface
   onto a patch in the flow outliner creates a Guid-bound mapping from the patch's quad, which StageGeometry
   prefers. Plan:
   1. **Connect Surfaces to Patches by Name** on the output's menu: runs that drop for every name-matched

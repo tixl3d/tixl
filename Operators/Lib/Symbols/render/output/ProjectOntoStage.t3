@@ -1,6 +1,6 @@
 {
   "FormatVersion": 3,
-  "Id": "533eb7f8-f18d-41bf-a094-167e0557eae8"/*DrawStageCanvas*/,
+  "Id": "533eb7f8-f18d-41bf-a094-167e0557eae8"/*ProjectOntoStage*/,
   "Inputs": [
     {
       "Id": "0f0b5a2e-4b9e-4f3a-9c2d-7a1e6d8c5b41"/*RotateY*/,

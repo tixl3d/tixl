@@ -188,8 +188,8 @@ internal sealed class StageGeometry : Instance<StageGeometry>, IStatusProvider
         _unplacedWarning = unplacedCount == 0
                                ? null
                                : unplacedCount == 1
-                                   ? $"'{firstUnplacedName}' has no patch of its name and no mapping on the output, so [DrawStageCanvas] leaves it out."
-                                   : $"'{firstUnplacedName}' and {unplacedCount - 1} more surfaces have no patch of their name and no mapping on the output, so [DrawStageCanvas] leaves them out.";
+                                   ? $"'{firstUnplacedName}' has no patch of its name and no mapping on the output, so [ProjectOntoStage] leaves it out."
+                                   : $"'{firstUnplacedName}' and {unplacedCount - 1} more surfaces have no patch of their name and no mapping on the output, so [ProjectOntoStage] leaves them out.";
     }
 
     IStatusProvider.StatusLevel IStatusProvider.GetStatusLevel() =>
@@ -354,7 +354,7 @@ internal sealed class StageGeometry : Instance<StageGeometry>, IStatusProvider
     [Input(Guid = "c1d2e3f4-5a6b-4c7d-8e9f-0a1b2c3d4e5f")]
     public readonly InputSlot<float> UvScale = new();
 
-    /// <summary>What TexCoord carries; TexCoord2 always keeps the output-canvas coordinates, so one mesh serves the previz and [DrawStageCanvas] alike.</summary>
+    /// <summary>What TexCoord carries; TexCoord2 always keeps the output-canvas coordinates, so one mesh serves the previz and [ProjectOntoStage] alike.</summary>
     private enum UvModes
     {
         /// <summary>0..1 over each surface, the image's top at the surface's top.</summary>

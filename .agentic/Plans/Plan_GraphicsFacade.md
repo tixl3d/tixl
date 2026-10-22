@@ -479,7 +479,7 @@ The whole repository now compiles against the facade: `Core`, all ten operator p
   is what carried most operator files.
 - Hand-rewritten with push/pop: the `_dx11` stage operators (`OutputMergerStage`, `Rasterizer`, `Draw`,
   `SetPixelAndVertexShaderStage`, the four `Gfx` stage operators), the effect helpers (`_ExecuteBloomPasses`,
-  `_ExecuteFastBlurPasses`, `_SpecularPrefilter`, `RenderTarget`, `DrawStageCanvas`, `_DispatchSceneDraws`,
+  `_ExecuteFastBlurPasses`, `_SpecularPrefilter`, `RenderTarget`, `ProjectOntoStage`, `_DispatchSceneDraws`,
   `SliceViewPort`, `LoadGltfScene`, `Texture3dOutputUi`, `CommandOutputUi`), the readback and video helpers,
   the NDI sender, and the editor's ImGui renderer — two dozen driver reads became one push and one pop there.
 - Three bugs the plan had predicted are fixed by construction: the previous state taken from the vertex stage

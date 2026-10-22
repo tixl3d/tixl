@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "8f2cc172-318d-4b78-9db4-d3049240bec0"/*RenderToCubeMap*/,
-  "Description": "Renders the connected scene six times from one point into a cube map, e.g. for [DrawStageCanvas] or [SetEnvironment].\n\nThe cube map is placed with Position and Rotation, or follows a camera connected to CameraReference. Each face uses a 90° field of view. Cameras inside the connected scene are bypassed. During each face the int variable `CubeFace` holds the face index in cube map order (+X, -X, +Y, -Y, +Z, -Z).\n\nThe scene is evaluated six times per frame. Operators that advance state on every evaluation, like particle simulations or feedback effects, run six times as fast.\n\nAKA: cubemap, environment map, skybox, reflection probe, 360\n\nSee also: [TextureToCubeMap], [Equirectangle], [RenderTarget]",
+  "Description": "Renders the connected scene six times from one point into a cube map, e.g. for [ProjectOntoStage] or [SetEnvironment].\n\nThe cube map is placed with Position and Rotation, or follows a camera connected to CameraReference. Each face uses a 90° field of view. Cameras inside the connected scene are bypassed. During each face the int variable `CubeFace` holds the face index in cube map order (+X, -X, +Y, -Y, +Z, -Z).\n\nThe scene is evaluated six times per frame. Operators that advance state on every evaluation, like particle simulations or feedback effects, run six times as fast.\n\nAKA: cubemap, environment map, skybox, reflection probe, 360\n\nSee also: [TextureToCubeMap], [Equirectangle], [RenderTarget]",
   "InputUis": [
     {
       "InputId": "4b8e2f61-9c3a-4d7e-b5f0-2a6c8d1e3f97"/*Multisampling*/,
@@ -9,7 +9,7 @@
         "X": -200.0,
         "Y": 337.5
       },
-      "Description": "Multisample anti-aliasing for the faces. Smooths geometry edges that would otherwise show as staircases wherever the cube map is magnified, e.g. on [DrawStageCanvas] walls. Costs one face-sized multisampled buffer and a resolve per face."
+      "Description": "Multisample anti-aliasing for the faces. Smooths geometry edges that would otherwise show as staircases wherever the cube map is magnified, e.g. on [ProjectOntoStage] walls. Costs one face-sized multisampled buffer and a resolve per face."
     },
     {
       "InputId": "5cf3ed9a-03d9-4443-aa8f-727d929af6c2"/*Position*/,

@@ -201,10 +201,10 @@ right and release.
 - After 2: each wall shows the part of the pixel map that its patch or mapping covers on the output
   canvas, the right way up, and changing the plan on the Board moves the quads at once.
 
-## Step: A wall without a place on the canvas stays out of DrawStageCanvas
+## Step: A wall without a place on the canvas stays out of ProjectOntoStage
 
 **Action:**
-1. Feed **StageGeometry** → **GeometryToMesh** into **DrawStageCanvas** with an equirectangular image, for an
+1. Feed **StageGeometry** → **GeometryToMesh** into **ProjectOntoStage** with an equirectangular image, for an
    output whose patches are named like the walls.
 2. Raise a wall on an edge that has no patch of its name (it gets a name like "Wall 9").
 
