@@ -188,7 +188,7 @@ internal sealed class FakeCommandList : ICommandList
     public void CopyTextureRegion(GpuTexture source, int sourceSubresource, GpuTexture destination, int destinationSubresource,
                                   int x, int y, int z) => Copies++;
 
-    public void ResolveTexture(GpuTexture source, GpuTexture destination, Format format) { }
+    public void ResolveTexture(GpuTexture source, int sourceSubresource, GpuTexture destination, int destinationSubresource, Format format) { }
     public void GenerateMips(GpuTextureView view) { }
     public void PushDebugGroup(string name) { }
     public void PopDebugGroup() { }
