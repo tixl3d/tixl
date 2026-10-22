@@ -66,11 +66,12 @@ internal sealed class DrawStageCanvas : Instance<DrawStageCanvas>, IStatusProvid
             return;
         }
 
-        // The canvas size: as set, else the referenced output's, else the default output size.
+        // The canvas size: as set, else the referenced output's, else what the host requests - a [SendToOutput]
+        // passes down the canvas of the output it is routed to.
         if (resolution.Width <= 0 || resolution.Height <= 0)
         {
             var output = ActiveSetup.FindOutput(OutputRef.GetValue(context));
-            resolution = output?.ResolvedResolution ?? new T3.Core.DataTypes.Vector.Int2(1920, 1080);
+            resolution = output?.ResolvedResolution ?? context.RequestedResolution;
         }
 
         resolution = new T3.Core.DataTypes.Vector.Int2(Math.Clamp(resolution.Width, 1, 16384), Math.Clamp(resolution.Height, 1, 16384));
@@ -121,7 +122,20 @@ internal sealed class DrawStageCanvas : Instance<DrawStageCanvas>, IStatusProvid
         _resources[1] = mesh.IndicesBuffer.Srv;
         _resources[2] = image is { IsDisposed: false } ? SrvManager.GetSrvForTexture(image) : null;
         _resources[3] = useCubeMap ? SrvManager.GetSrvForTexture(cubeMap!) : null;
-        _samplers[0] = DefaultRenderingStates.DefaultSamplerState;
+        // Filtered and mip-mapped: walls see the environment strongly magnified and, at grazing angles, minified.
+        // The default point sampler would show both as jagged staircases and crawling grid lines.
+        // U wraps so the equirect seam behind the viewer blends instead of clamping.
+        _samplerState ??= new SamplerState(device, new SamplerStateDescription
+                                                       {
+                                                           Filter = Filter.Anisotropic,
+                                                           AddressU = TextureAddressMode.Wrap,
+                                                           AddressV = TextureAddressMode.Clamp,
+                                                           AddressW = TextureAddressMode.Clamp,
+                                                           MaximumAnisotropy = 16,
+                                                           ComparisonFunction = Comparison.Never,
+                                                           MaximumLod = float.MaxValue,
+                                                       });
+        _samplers[0] = _samplerState;
         _constantBuffers[0] = _parameterBuffer;
 
         deviceContext.VertexShader.Set(vs);
@@ -195,6 +209,7 @@ internal sealed class DrawStageCanvas : Instance<DrawStageCanvas>, IStatusProvid
         Utilities.Dispose(ref _target);
         Utilities.Dispose(ref _parameterBuffer);
         Utilities.Dispose(ref _cullNoneState);
+        Utilities.Dispose(ref _samplerState);
     }
 
     IStatusProvider.StatusLevel IStatusProvider.GetStatusLevel() =>
@@ -221,6 +236,7 @@ internal sealed class DrawStageCanvas : Instance<DrawStageCanvas>, IStatusProvid
     private RenderTargetView? _targetView;
     private SharpDX.Direct3D11.Buffer? _parameterBuffer;
     private RasterizerState? _cullNoneState;
+    private SamplerState? _samplerState;
     private string? _lastError;
 
     // Scratch arrays for the stage calls, reused every frame.

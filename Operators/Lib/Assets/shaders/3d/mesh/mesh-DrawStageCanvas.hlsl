@@ -61,7 +61,21 @@ float4 psMain(psInput pin) : SV_TARGET
     else
     {
         float2 uv = float2(0.5 + atan2(dir.x, dir.z) / (2 * PI), acos(clamp(dir.y, -1, 1)) / PI);
-        color = Image.Sample(texSampler, uv);
+
+        // atan2 jumps from 1 to 0 behind the viewer; the derivative there would pick the smallest mip and draw a
+        // seam. A copy of u shifted by half a turn is continuous there, so take whichever changes less.
+        float uShifted = frac(uv.x + 0.5);
+        float2 dx = float2(ddx(uv.x), ddx(uv.y));
+        float2 dy = float2(ddy(uv.x), ddy(uv.y));
+        float dxShifted = ddx(uShifted);
+        float dyShifted = ddy(uShifted);
+        if (abs(dxShifted) + abs(dyShifted) < abs(dx.x) + abs(dy.x))
+        {
+            dx.x = dxShifted;
+            dy.x = dyShifted;
+        }
+
+        color = Image.SampleGrad(texSampler, uv, dx, dy);
     }
 
     return color * Color;

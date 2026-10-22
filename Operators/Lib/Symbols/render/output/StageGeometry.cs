@@ -13,13 +13,26 @@ namespace Lib.render.output;
 [Guid("98aac8ba-480c-4a28-8391-23c7d1ae11d9")]
 internal sealed class StageGeometry : Instance<StageGeometry>, IStatusProvider
 {
-    [Output(Guid = "fcdaba8f-c63c-4913-b5d2-90b586ddc5f4", DirtyFlagTrigger = DirtyFlagTrigger.Always)]
+    [Output(Guid = "fcdaba8f-c63c-4913-b5d2-90b586ddc5f4")]
     public readonly Slot<MeshGeometry?> Geometry = new();
 
     public StageGeometry()
     {
         Geometry.UpdateAction = Update;
+
+        // Re-derived only when the setup changes, so the mesh compiled downstream stays cached between edits.
+        ActiveSetup.Changed += OnSetupChanged;
     }
+
+    protected override void Dispose(bool isDisposing)
+    {
+        if (isDisposing)
+            ActiveSetup.Changed -= OnSetupChanged;
+
+        base.Dispose(isDisposing);
+    }
+
+    private void OnSetupChanged() => Geometry.DirtyFlag.ForceInvalidate();
 
     private void Update(EvaluationContext context)
     {

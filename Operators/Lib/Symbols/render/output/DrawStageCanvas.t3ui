@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "533eb7f8-f18d-41bf-a094-167e0557eae8"/*DrawStageCanvas*/,
-  "Description": "Paints an output canvas from the room's geometry, looking from a viewer into an environment.\n\nThe stage mesh is rasterized where each surface lands on the canvas (its second UV set), and every pixel looks from ViewerPosition through its point on the wall into the environment: an equirectangular Image, or a CubeMap when one is connected. One scene rendered once lands continuous across every wall, the way a spectator standing at the viewer's position would see it. The canvas takes the size of Resolution, else of the output named by OutputRef.\n\nWire [StageGeometry] → [GeometryToMesh] → DrawStageCanvas → [SendToOutput] bound to the same output. RotateY turns the environment around the viewer; FlipHorizontal mirrors it.\n\nAKA: immersive, projection, cubemap, equirect, panorama, dome, room, cave",
+  "Description": "Paints an output canvas from the room's geometry, looking from a viewer into an environment.\n\nThe stage mesh is rasterized where each surface lands on the canvas (its second UV set), and every pixel looks from ViewerPosition through its point on the wall into the environment: an equirectangular Image, or a CubeMap when one is connected. One scene rendered once lands continuous across every wall, the way a spectator standing at the viewer's position would see it. The canvas takes the size of Resolution, else of the output named by OutputRef, else the requested resolution - the canvas of the output a [SendToOutput] routes it to.\n\nWire [StageGeometry] → [GeometryToMesh] → DrawStageCanvas → [SendToOutput] bound to the same output. RotateY turns the environment around the viewer; FlipHorizontal mirrors it.\n\nAKA: immersive, projection, cubemap, equirect, panorama, dome, room, cave",
   "InputUis": [
     {
       "InputId": "0f0b5a2e-4b9e-4f3a-9c2d-7a1e6d8c5b41"/*RotateY*/,
@@ -20,7 +20,7 @@
         "X": -200.0,
         "Y": 225.0
       },
-      "Description": "Size of the canvas. 0x0 uses the size of the output named by OutputRef (or 1920x1080 if there is none)."
+      "Description": "Size of the canvas. 0x0 uses the size of the output named by OutputRef, or without one the requested resolution - e.g. the canvas of the output a [SendToOutput] routes it to."
     },
     {
       "InputId": "379b6223-920b-448f-a508-c93dccb06316"/*OutputRef*/,
