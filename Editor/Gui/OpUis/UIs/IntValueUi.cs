@@ -69,15 +69,15 @@ internal static class IntValueUi
         double value = (isAnimated || data.Int.HasInputConnections)
                         ? data.Int.GetCurrentValue()
                         : data.Int.TypedInputValue.Value;
-       
         // Interaction
+        var isActive = false;
         {
             ImGui.PushID(instance.GetHashCode());
-            var editingUnlocked = ImGui.GetIO().KeyCtrl || _activeJogDialInputSlot != null;
             var inputSlot = data.Int;
+            var editingUnlocked = ImGui.GetIO().KeyCtrl || _activeJogDialInputSlot == inputSlot;
             if (editingUnlocked)
             {
-        
+                isActive = true;
                 ImGui.SetCursorScreenPos(selectableScreenRect.Min);
                 ImGui.InvisibleButton("button", selectableScreenRect.GetSize());
 
@@ -144,7 +144,8 @@ internal static class IntValueUi
         return OpUi.CustomUiResult.Rendered
                | OpUi.CustomUiResult.PreventOpenSubGraph
                | OpUi.CustomUiResult.PreventInputLabels
-               | OpUi.CustomUiResult.PreventTooltip;
+               | OpUi.CustomUiResult.PreventTooltip
+               | (isActive ? OpUi.CustomUiResult.IsActive : OpUi.CustomUiResult.None);
     }
 
     private static Vector2 _jogDialCenter;
