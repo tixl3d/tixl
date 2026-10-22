@@ -10,7 +10,7 @@ using T3.IoServices.Midi;
 namespace T3.Editor.Gui.Interaction.Midi.CompatibleDevices;
 
 [SuppressMessage("ReSharper", "UnusedMember.Local")]
-[MidiDeviceProduct("APC mini mk2")]
+[MidiDeviceProduct("APC mini mk2;APC mini mk2 Control")]
 public sealed class ApcMiniMk2 : CompatibleMidiDevice
 {
     public ApcMiniMk2()
