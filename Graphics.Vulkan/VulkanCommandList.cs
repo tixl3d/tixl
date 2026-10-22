@@ -706,7 +706,7 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
                                    1, &copy);
     }
 
-    public void ResolveTexture(GpuTexture source, GpuTexture destination, Format format)
+    public void ResolveTexture(GpuTexture source, int sourceSubresource, GpuTexture destination, int destinationSubresource, Format format)
     {
         if (source is not VulkanTexture from || destination is not VulkanTexture to || from.Image.IsNull || to.Image.IsNull)
             return;
@@ -717,10 +717,26 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
         VulkanBarriers.TransitionImage(backend, _commandBuffer, to, VkImageLayout.TransferDstOptimal,
                                        VkPipelineStageFlags2.Resolve, VkAccessFlags2.TransferWrite);
 
+        // D3D11 numbers subresources mip-major, so the slice is what the index divides into.
+        var sourceMips = Math.Max(1, from.Description.MipLevels);
+        var destinationMips = Math.Max(1, to.Description.MipLevels);
+
         VkImageResolve resolve = new()
                                      {
-                                         srcSubresource = new VkImageSubresourceLayers { aspectMask = from.Aspect, layerCount = 1 },
-                                         dstSubresource = new VkImageSubresourceLayers { aspectMask = to.Aspect, layerCount = 1 },
+                                         srcSubresource = new VkImageSubresourceLayers
+                                                              {
+                                                                  aspectMask = from.Aspect,
+                                                                  mipLevel = (uint)(sourceSubresource % sourceMips),
+                                                                  baseArrayLayer = (uint)(sourceSubresource / sourceMips),
+                                                                  layerCount = 1,
+                                                              },
+                                         dstSubresource = new VkImageSubresourceLayers
+                                                              {
+                                                                  aspectMask = to.Aspect,
+                                                                  mipLevel = (uint)(destinationSubresource % destinationMips),
+                                                                  baseArrayLayer = (uint)(destinationSubresource / destinationMips),
+                                                                  layerCount = 1,
+                                                              },
                                          extent = ExtentOf(to.Description),
                                      };
 

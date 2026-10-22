@@ -3,6 +3,10 @@
   "Id": "8f2cc172-318d-4b78-9db4-d3049240bec0"/*RenderToCubeMap*/,
   "Inputs": [
     {
+      "Id": "4b8e2f61-9c3a-4d7e-b5f0-2a6c8d1e3f97"/*Multisampling*/,
+      "DefaultValue": 4
+    },
+    {
       "Id": "5cf3ed9a-03d9-4443-aa8f-727d929af6c2"/*Position*/,
       "DefaultValue": {
         "X": 0.0,
@@ -26,6 +30,10 @@
     {
       "Id": "9e04c55a-daa7-4014-8347-70efb65bdc8f"/*Resolution*/,
       "DefaultValue": 2048
+    },
+    {
+      "Id": "c27d5a94-1e8b-4f3c-a6d2-8b9e0f4a7c15"/*PostAntiAliasing*/,
+      "DefaultValue": 0
     },
     {
       "Id": "cad58ac3-b764-4e46-8b85-c0b05598aab1"/*GenerateMips*/,

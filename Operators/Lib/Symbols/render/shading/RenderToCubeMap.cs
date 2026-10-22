@@ -17,12 +17,14 @@ internal sealed class RenderToCubeMap : Instance<RenderToCubeMap>
     {
         CubeMap.UpdateAction += Update;
         _copyShaderResource = ResourceManager.CreateShaderResource<ComputeShader>(CopyShaderPath, null, () => "main");
+        _copyFxaaShaderResource = ResourceManager.CreateShaderResource<ComputeShader>(CopyShaderPath, null, () => "mainFxaa");
     }
 
     private void Update(EvaluationContext context)
     {
         var size = Resolution.GetValue(context);
         var generateMips = GenerateMips.GetValue(context);
+        var sampleCount = Multisampling.GetValue(context).Clamp(1, 8);
         var clearColor = ClearColor.GetValue(context);
         var position = Position.GetValue(context);
         var rotation = Rotation.GetValue(context);
@@ -42,7 +44,8 @@ internal sealed class RenderToCubeMap : Instance<RenderToCubeMap>
             return;
         }
 
-        var copyShader = _copyShaderResource.Value;
+        var postAntiAliasing = (PostAntiAliasingModes)PostAntiAliasing.GetValue(context);
+        var copyShader = postAntiAliasing == PostAntiAliasingModes.Fxaa ? _copyFxaaShaderResource.Value : _copyShaderResource.Value;
         if (copyShader == null)
         {
             Log.Warning("Failed to load cube map copy shader", this);
@@ -50,7 +53,7 @@ internal sealed class RenderToCubeMap : Instance<RenderToCubeMap>
         }
 
         var device = ResourceManager.Device;
-        if (!UpdateTextures(device, size, format, generateMips))
+        if (!UpdateTextures(device, size, format, generateMips, sampleCount))
         {
             CubeMap.Value = null;
             return;
@@ -92,7 +95,8 @@ internal sealed class RenderToCubeMap : Instance<RenderToCubeMap>
 
         for (var faceIndex = 0; faceIndex < FaceCount; faceIndex++)
         {
-            var faceRtv = _faceRtvs[faceIndex];
+            // With MSAA every face is drawn into the one multisampled buffer and resolved into its slice right after.
+            var faceRtv = sampleCount > 1 ? _multiSampledRtv : _faceRtvs[faceIndex];
             deviceContext.Rasterizer.SetViewport(new T3.Graphics.Viewport(0, 0, size, size, 0.0f, 1.0f));
             deviceContext.OutputMerger.SetTargets(_depthDsv, faceRtv);
             deviceContext.ClearRenderTargetView(faceRtv, clearColor);
@@ -109,6 +113,9 @@ internal sealed class RenderToCubeMap : Instance<RenderToCubeMap>
             DirtyFlag.GlobalInvalidationTick++;
             Command.InvalidateGraph();
             Command.GetValue(context);
+
+            if (sampleCount > 1)
+                deviceContext.ResolveSubresource(_multiSampled!, 0, _faces!, faceIndex, format);
         }
 
         if (hadFaceVariable)
@@ -153,6 +160,7 @@ internal sealed class RenderToCubeMap : Instance<RenderToCubeMap>
 
         csStage.Set(copyShader);
         csStage.SetShaderResource(0, _facesSrv);
+        csStage.SetSampler(0, ResourceManager.DefaultSamplerState);
         csStage.SetUnorderedAccessView(0, _cubeMapUav, 0);
         var groupCount = (size + CopyThreadGroupSize - 1) / CopyThreadGroupSize;
         deviceContext.Dispatch(groupCount, groupCount, FaceCount);
@@ -189,14 +197,15 @@ internal sealed class RenderToCubeMap : Instance<RenderToCubeMap>
         far = extractedFar;
     }
 
-    private bool UpdateTextures(Device device, int size, Format format, bool generateMips)
+    private bool UpdateTextures(Device device, int size, Format format, bool generateMips, int sampleCount)
     {
         var mipLevels = generateMips ? (int)MathUtils.Log2(size) + 1 : 1;
 
         var isValid = _cubeMap is { IsDisposed: false }
                       && _cubeMap.Description.Width == size
                       && _cubeMap.Description.Format == format
-                      && _cubeMap.Description.MipLevels == mipLevels;
+                      && _cubeMap.Description.MipLevels == mipLevels
+                      && (_multiSampled?.Description.SampleDescription.Count ?? 1) == sampleCount;
         if (isValid)
             return true;
 
@@ -251,6 +260,29 @@ internal sealed class RenderToCubeMap : Instance<RenderToCubeMap>
                                                                 });
             }
 
+            if (sampleCount > 1)
+            {
+                _multiSampled = Texture2D.CreateTexture2D(new Texture2DDescription
+                                                              {
+                                                                  ArraySize = 1,
+                                                                  BindFlags = BindFlags.RenderTarget,
+                                                                  CpuAccessFlags = CpuAccessFlags.None,
+                                                                  Format = format,
+                                                                  Width = size,
+                                                                  Height = size,
+                                                                  MipLevels = 1,
+                                                                  OptionFlags = ResourceOptionFlags.None,
+                                                                  SampleDescription = new SampleDescription(sampleCount, 0),
+                                                                  Usage = ResourceUsage.Default,
+                                                              });
+                _multiSampledRtv = new RenderTargetView(device, _multiSampled,
+                                                        new RenderTargetViewDescription
+                                                            {
+                                                                Format = format,
+                                                                Dimension = RenderTargetViewDimension.Texture2DMultisampled,
+                                                            });
+            }
+
             _depth = Texture2D.CreateTexture2D(new Texture2DDescription
                                                    {
                                                        ArraySize = 1,
@@ -261,14 +293,16 @@ internal sealed class RenderToCubeMap : Instance<RenderToCubeMap>
                                                        Height = size,
                                                        MipLevels = 1,
                                                        OptionFlags = ResourceOptionFlags.None,
-                                                       SampleDescription = new SampleDescription(1, 0),
+                                                       SampleDescription = new SampleDescription(sampleCount, 0),
                                                        Usage = ResourceUsage.Default,
                                                    });
             _depthDsv = new DepthStencilView(device, _depth,
                                              new DepthStencilViewDescription
                                                  {
                                                      Format = Format.D32_Float,
-                                                     Dimension = DepthStencilViewDimension.Texture2D,
+                                                     Dimension = sampleCount > 1
+                                                                     ? DepthStencilViewDimension.Texture2DMultisampled
+                                                                     : DepthStencilViewDimension.Texture2D,
                                                  });
         }
         catch (Exception e)
@@ -296,6 +330,9 @@ internal sealed class RenderToCubeMap : Instance<RenderToCubeMap>
         T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _facesSrv);
         T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _faces);
 
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _multiSampledRtv);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _multiSampled);
+
         T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _depthDsv);
         T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _depth);
     }
@@ -320,6 +357,20 @@ internal sealed class RenderToCubeMap : Instance<RenderToCubeMap>
                 GraphicsMath.LookAtRH(Vector3.Zero, Vector3.UnitZ, Vector3.UnitY),
                 GraphicsMath.LookAtRH(Vector3.Zero, -Vector3.UnitZ, Vector3.UnitY),
             ];
+    }
+
+    private enum PostAntiAliasingModes
+    {
+        None = 0,
+        Fxaa = 1,
+    }
+
+    private enum Samples
+    {
+        No_MSAA = 1,
+        MSAA_2Samples = 2,
+        MSAA_4Samples = 4,
+        MSAA_8Samples = 8,
     }
 
     private enum Resolutions
@@ -351,6 +402,12 @@ internal sealed class RenderToCubeMap : Instance<RenderToCubeMap>
     [Input(Guid = "cad58ac3-b764-4e46-8b85-c0b05598aab1")]
     public readonly InputSlot<bool> GenerateMips = new();
 
+    [Input(Guid = "4b8e2f61-9c3a-4d7e-b5f0-2a6c8d1e3f97", MappedType = typeof(Samples))]
+    public readonly InputSlot<int> Multisampling = new();
+
+    [Input(Guid = "c27d5a94-1e8b-4f3c-a6d2-8b9e0f4a7c15", MappedType = typeof(PostAntiAliasingModes))]
+    public readonly InputSlot<int> PostAntiAliasing = new();
+
     [Input(Guid = "5cf3ed9a-03d9-4443-aa8f-727d929af6c2")]
     public readonly InputSlot<Vector3> Position = new();
 
@@ -372,6 +429,7 @@ internal sealed class RenderToCubeMap : Instance<RenderToCubeMap>
     private static readonly Matrix4x4[] _cameraToFaceViews = CreateCameraToFaceViews();
 
     private readonly Resource<ComputeShader> _copyShaderResource;
+    private readonly Resource<ComputeShader> _copyFxaaShaderResource;
 
     private Texture2D? _cubeMap;
     private ShaderResourceView? _cubeMapSrv;
@@ -380,6 +438,9 @@ internal sealed class RenderToCubeMap : Instance<RenderToCubeMap>
     private Texture2D? _faces;
     private ShaderResourceView? _facesSrv;
     private readonly RenderTargetView?[] _faceRtvs = new RenderTargetView?[FaceCount];
+
+    private Texture2D? _multiSampled;
+    private RenderTargetView? _multiSampledRtv;
 
     private Texture2D? _depth;
     private DepthStencilView? _depthDsv;

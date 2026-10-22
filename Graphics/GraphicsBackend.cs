@@ -196,7 +196,7 @@ public interface ICommandList
 
     /// <summary>Copies one subresource into another at an offset, which is how a texture array is filled.</summary>
     void CopyTextureRegion(GpuTexture source, int sourceSubresource, GpuTexture destination, int destinationSubresource, int x, int y, int z);
-    void ResolveTexture(GpuTexture source, GpuTexture destination, Format format);
+    void ResolveTexture(GpuTexture source, int sourceSubresource, GpuTexture destination, int destinationSubresource, Format format);
     void GenerateMips(GpuTextureView view);
 
     /// <summary>

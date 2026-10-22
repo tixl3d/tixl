@@ -503,6 +503,7 @@ internal static partial class Program
                                                            });
         ActiveSetup.Current = setup;
         ActiveSetup.Machine = machineConfig;
+        ActiveSetup.NotifyChanged();
         Log.Info($"Loaded output setup \"{setup.Name}\": {setup.Outputs.Count} output(s), {setup.Surfaces.Count} surface(s).");
     }
 

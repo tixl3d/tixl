@@ -264,10 +264,10 @@ internal sealed class D3D11CommandList(D3D11Device device) : ICommandList
             Context.CopySubresourceRegion(from.Resource, sourceSubresource, null, to.Resource, destinationSubresource, x, y, z);
     }
 
-    public void ResolveTexture(GpuTexture source, GpuTexture destination, Format format)
+    public void ResolveTexture(GpuTexture source, int sourceSubresource, GpuTexture destination, int destinationSubresource, Format format)
     {
         if (source is D3D11Texture from && destination is D3D11Texture to)
-            Context.ResolveSubresource(from.Resource, 0, to.Resource, 0, Convert.ToDxgi(format));
+            Context.ResolveSubresource(from.Resource, sourceSubresource, to.Resource, destinationSubresource, Convert.ToDxgi(format));
     }
 
     public void GenerateMips(GpuTextureView view)

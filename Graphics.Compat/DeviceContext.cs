@@ -245,7 +245,7 @@ public sealed class DeviceContext
             return;
 
         EndRendering();
-        Commands.ResolveTexture(from, to, format);
+        Commands.ResolveTexture(from, sourceSubresource, to, destinationSubresource, format);
     }
 
     public void GenerateMips(ShaderResourceView view)
