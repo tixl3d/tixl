@@ -43,10 +43,17 @@
       }
     },
     {
+      "InputId": "57987441-daea-4fac-8739-3b69c1ab659a"/*ImageMask*/,
+      "Position": {
+        "X": 516.6387,
+        "Y": 573.9053
+      }
+    },
+    {
       "InputId": "6022a4b0-c6fc-49a3-811a-179dcceb8b44"/*WrapMode*/,
       "Position": {
-        "X": 443.26324,
-        "Y": 622.2332
+        "X": 460.05383,
+        "Y": 684.7637
       }
     },
     {
@@ -60,8 +67,8 @@
     {
       "InputId": "9997e726-3951-4822-af7e-ffbf26164723"/*TextureFilter*/,
       "Position": {
-        "X": 335.6264,
-        "Y": 705.1414
+        "X": 317.09882,
+        "Y": 742.7755
       }
     },
     {
@@ -99,11 +106,27 @@
       }
     },
     {
+      "ChildId": "07f17b5e-ddbb-4cb3-bb2b-4b9ce931123a",
+      "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
+      "Position": {
+        "X": 796.6387,
+        "Y": 573.9053
+      }
+    },
+    {
       "ChildId": "0a63766d-6a4c-453e-9c7b-bc910c7392ad",
       "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
       "Position": {
         "X": 320.21426,
         "Y": 478.1083
+      }
+    },
+    {
+      "ChildId": "336c2c0a-02be-40b8-aa10-f52fde24b3d6",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
+      "Position": {
+        "X": 516.6387,
+        "Y": 608.9053
       }
     },
     {
@@ -142,8 +165,8 @@
       "ChildId": "5013dc38-aeb3-4776-b642-87bc9ef8d350",
       "SymbolName": "Types.Gfx.SamplerState",
       "Position": {
-        "X": 583.26324,
-        "Y": 587.2332
+        "X": 600.05383,
+        "Y": 649.7637
       }
     },
     {
@@ -167,7 +190,7 @@
       "SymbolName": "Types.Gfx.SamplerState",
       "Position": {
         "X": 796.6387,
-        "Y": 608.90515
+        "Y": 643.90515
       }
     },
     {
@@ -216,6 +239,14 @@
       "Position": {
         "X": 144.81728,
         "Y": 374.25833
+      }
+    },
+    {
+      "ChildId": "dd188c88-ebc6-4009-a33f-101765886923",
+      "SymbolName": "Lib.image.use.UseFallbackTexture",
+      "Position": {
+        "X": 656.6387,
+        "Y": 573.9053
       }
     },
     {
