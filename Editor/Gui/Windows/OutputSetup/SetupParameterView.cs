@@ -1451,9 +1451,17 @@ internal static class SetupParameterView
     private static void BeginFieldUndo(Setup setup, InputEditStateFlags state)
     {
         if ((state & InputEditStateFlags.Started) != 0)
+        {
             _fieldEditOldJson = setup.ToJsonString();
+        }
         else if ((state & InputEditStateFlags.Modified) != 0)
+        {
             _fieldEditOldJson ??= setup.ToJsonString();
+        }
+
+        // The edit lands right after this and is saved only when the field is let go.
+        if ((state & InputEditStateFlags.Modified) != 0)
+            OutputSetupHandling.NotifyLiveEdit();
     }
 
     private static void CommitFieldUndo(Setup setup, string name, InputEditStateFlags state)

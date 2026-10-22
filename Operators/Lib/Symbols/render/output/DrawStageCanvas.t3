@@ -14,10 +14,6 @@
       }
     },
     {
-      "Id": "379b6223-920b-448f-a508-c93dccb06316"/*OutputRef*/,
-      "DefaultValue": "00000000-0000-0000-0000-000000000000"
-    },
-    {
       "Id": "3c7d9e11-2a6f-4d5b-8e4c-1f9a0b7c6d52"/*FlipHorizontal*/,
       "DefaultValue": false
     },

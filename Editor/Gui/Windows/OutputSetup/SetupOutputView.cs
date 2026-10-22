@@ -130,6 +130,10 @@ internal sealed partial class SetupOutputView
         OpenedReferenceImageId = Guid.Empty;
         ResolveEditMode(setup, output, outputId);
 
+        // A drag edits the setup live and only saves at the release; ops reading the setup follow it frame by frame.
+        if (_gesture.IsLive)
+            OutputSetupHandling.NotifyLiveEdit();
+
         // What is being edited keeps evaluating every frame; everything else renders once and then holds.
         MarkEditedPreviews(setup, output, selection);
 
