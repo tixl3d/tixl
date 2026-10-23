@@ -34,7 +34,7 @@ internal sealed partial class SettingsWindow : Window
         Midi,
         SpaceMouse,
         Keyboard,
-        Profiling,
+        Diagnostics,
     }
 
     private Categories _activeCategory;
@@ -71,7 +71,9 @@ internal sealed partial class SettingsWindow : Window
         {
             foreach (var category in Enum.GetValues<Categories>())
             {
-                var name = CustomComponents.HumanReadablePascalCase(Enum.GetName(category));
+                var name = category == Categories.Midi
+                               ? "Midi & OSC"
+                               : CustomComponents.HumanReadablePascalCase(Enum.GetName(category));
                 if (NavigationSidebar.Item(name, _activeCategory == category))
                     _activeCategory = category;
             }
@@ -304,6 +306,9 @@ internal sealed partial class SettingsWindow : Window
                                                       "Suspend rendering and update when Tooll's editor window is minimized. This will reduce energy consumption significantly.",
                                                       UserSettings.Defaults.SuspendRenderingWhenHidden);
 
+                    FormInputs.AddVerticalSpace();
+                    FormInputs.AddSectionSubHeader("Frame rate");
+                    FormInputs.SetIndentToParameters();
                     changed |= Analyze.PerformanceWindow.DrawPresentationSettings();
 
                     break;
@@ -398,15 +403,6 @@ internal sealed partial class SettingsWindow : Window
                                                       UserSettings.Defaults.SaveWindowLayoutsWithProjects
                                                      );
 
-                    FormInputs.AddVerticalSpace();
-                    changed |= FormInputs.AddCheckBox("Load multi-threaded",
-                                                      ref UserSettings.Config.LoadMultiThreaded,
-                                                      """
-                                                      Using multi-threading for loading projects can significantly increase startup time.
-                                                      During development or if loading freezes during startup it might be useful to disable this setting.
-                                                      """,
-                                                      UserSettings.Config.LoadMultiThreaded);
-
                     FormInputs.AddSectionSubHeader("Performance");
                     FormInputs.SetIndentToLeft();
 
@@ -424,14 +420,6 @@ internal sealed partial class SettingsWindow : Window
                                                                      """,
                                                                      CoreSettings.Defaults.EnableDirectXDebug);
                     FormInputs.SetIndentToParameters();
-                    FormInputs.AddSectionSubHeader("OSC");
-
-                    projectSettingsChanged |= FormInputs.AddInt("Default Port", ref CoreSettings.Config.DefaultOscPort,
-                                                                0, 65535, 1,
-                                                                "If a valid port is set, Tooll will listen for OSC messages on this port by default.\nChanging the port requires a restart.",
-                                                                CoreSettings.Defaults.DefaultOscPort);
-
-                    FormInputs.SetIndentToParameters();
 
                     break;
                 }
@@ -443,6 +431,15 @@ internal sealed partial class SettingsWindow : Window
                 case Categories.Midi:
                 {
                     DrawMidiPanel(ref projectSettingsChanged);
+
+                    FormInputs.AddVerticalSpace();
+                    FormInputs.SetIndentToLeft();
+                    FormInputs.AddSectionSubHeader("OSC");
+                    FormInputs.SetIndentToParameters();
+                    projectSettingsChanged |= FormInputs.AddInt("Default Port", ref CoreSettings.Config.DefaultOscPort,
+                                                                0, 65535, 1,
+                                                                "If a valid port is set, Tooll will listen for OSC messages on this port by default.\nChanging the port requires a restart.",
+                                                                CoreSettings.Defaults.DefaultOscPort);
                     break;
                 }
                 case Categories.SpaceMouse:
@@ -466,7 +463,7 @@ internal sealed partial class SettingsWindow : Window
                     CustomComponents.HelpText("The keyboard layout can't be edited yet. Working on it");
                     KeyMapEditor.DrawEditor();
                     break;
-                case Categories.Profiling:
+                case Categories.Diagnostics:
                 {
                     FormInputs.AddVerticalSpace();
 
@@ -635,10 +632,10 @@ internal sealed partial class SettingsWindow : Window
                                                                         Categories.Theme      => "Color Theme",
                                                                         Categories.Projects   => "Project specific settings",
                                                                         Categories.Audio      => "Audio System",
-                                                                        Categories.Midi       => "Midi",
+                                                                        Categories.Midi       => "Midi & OSC",
                                                                         Categories.SpaceMouse => "Space Mouse",
                                                                         Categories.Keyboard   => "Keyboard Shortcuts",
-                                                                        Categories.Profiling  => "Profiling and debugging",
+                                                                        Categories.Diagnostics => "Diagnostics and debugging",
                                                                         _                     => string.Empty,
                                                                     };
 

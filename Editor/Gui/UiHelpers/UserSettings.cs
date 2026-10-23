@@ -234,7 +234,6 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         public float ProxyMinFreeDiskGb = 5f; // refuse to generate a proxy if the target drive has less free space
 
         // Profiling and debugging
-        public bool LoadMultiThreaded = true;
         public bool EnableFrameProfiling = true;
         public bool KeepTraceForLogMessages = false;
         public bool EnableGCProfiling = false;

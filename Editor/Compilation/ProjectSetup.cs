@@ -157,8 +157,6 @@ internal static partial class ProjectSetup
 
     private static void UpdateSymbolPackagesInternal(EditorSymbolPackage[] packages)
     {
-        var parallel = UserSettings.Config.LoadMultiThreaded;
-        
         var stopWatch = Stopwatch.StartNew();
         // Actually update the symbol packages
         // this switch statement exists to avoid the overhead of parallelization for a single package, e.g. when compiling changes to a single project
@@ -170,16 +168,16 @@ internal static partial class ProjectSetup
             case 1:
             {
                 
-                Log.Debug("Updating symbol packages " + (parallel ? "(parallel)":""));
+                Log.Debug("Updating symbol packages");
                 var package = packages[0];
                 
                 // ADD THIS: Ensure context is generated and types are scanned
                 // before symbols are loaded and children are instantiated.
                 package.AssemblyInformation.GenerateLoadContext();
                 
-                package.LoadSymbols(parallel, out var newlyRead, out var allNewSymbols);
+                package.LoadSymbols(true, out var newlyRead, out var allNewSymbols);
                 SymbolPackage.ApplySymbolChildren(newlyRead);
-                package.LoadUiFiles(parallel, allNewSymbols, out var newlyLoadedUis, out var preExistingUis);
+                package.LoadUiFiles(true, allNewSymbols, out var newlyLoadedUis, out var preExistingUis);
                 package.LocateSourceCodeFiles();
                 package.RegisterUiSymbols(newlyLoadedUis, preExistingUis);
 
@@ -212,27 +210,14 @@ internal static partial class ProjectSetup
 
         var contextsMs = stopWatch.ElapsedMilliseconds;
         Log.Info("Loading symbols...");
-        if (parallel)
-        {
-            packages
-               .AsParallel()
-               .ForAll(package => //pull out for non-editable ones too
-                       {
-                           package.LoadSymbols(parallel, out var newlyRead, out var allNewSymbols);
-                           loadedSymbols.TryAdd(package, newlyRead);
-                           loadedOrCreatedSymbols.TryAdd(package, allNewSymbols);
-                       });
-        }
-        else
-        {
-            for (var index = packages.Length - 1; index >= 0; index--)
-            {
-                var package = packages[index];
-                package.LoadSymbols(parallel, out var newlyRead, out var allNewSymbols);
-                loadedSymbols.TryAdd(package, newlyRead);
-                loadedOrCreatedSymbols.TryAdd(package, allNewSymbols);
-            }
-        }
+        packages
+           .AsParallel()
+           .ForAll(package => //pull out for non-editable ones too
+                   {
+                       package.LoadSymbols(true, out var newlyRead, out var allNewSymbols);
+                       loadedSymbols.TryAdd(package, newlyRead);
+                       loadedOrCreatedSymbols.TryAdd(package, allNewSymbols);
+                   });
 
         var symbolsMs = stopWatch.ElapsedMilliseconds;
         Log.Info("Applying children...");
