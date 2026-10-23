@@ -4,6 +4,8 @@ using T3.Editor.Gui.Windows.Output;
 using T3.Core.Operator;
 using T3.Core.Output;
 using T3.Editor.Gui.Input;
+using T3.Editor.Gui.Interaction;
+using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.Styling;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
@@ -130,7 +132,7 @@ internal sealed class OutputSetupModeView
     /// <summary>The "Show Flow Outliner" toggle — hung inside the output window's breadcrumb menu.</summary>
     public void DrawOutlinerMenuItem()
     {
-        if (CustomComponents.DrawMenuItem(1, "Show Flow Outliner", isChecked: IsSetupMode))
+        if (CustomComponents.DrawMenuItem(1, "Show Flow Outliner", UserActions.ToggleOutputSetup.ListShortcuts(), isChecked: IsSetupMode))
             _viewMode = IsSetupMode ? ViewModes.Operator : ViewModes.Setup;
     }
 
@@ -154,6 +156,10 @@ internal sealed class OutputSetupModeView
         CustomComponents.StylizedText("Edit the output setup", Fonts.FontNormal, UiColors.Text);
         CustomComponents.StylizedText("Surfaces, outputs and what is routed where, with the Flow Outliner under the canvas.",
                                       Fonts.FontNormal, UiColors.Text.Fade(0.7f));
+        var shortcut = UserActions.ToggleOutputSetup.ListKeyboardShortcutsForActionWithLabel();
+        if (!string.IsNullOrEmpty(shortcut))
+            CustomComponents.StylizedText(shortcut, Fonts.FontNormal, UiColors.TextMuted);
+
         FormInputs.AddVerticalSpace(5);
         OutputsIndicator.DrawActiveOutputsSummary();
     }

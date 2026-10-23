@@ -226,6 +226,12 @@ internal sealed partial class OutputWindow : Window
     /// <inheritdoc cref="OutputSetupModeView.TryLeaveSetupMode"/>
     internal bool TryLeaveSetupMode() => _setupMode.TryLeaveSetupMode();
 
+    internal void ToggleSetupMode()
+    {
+        if (!_setupMode.TryLeaveSetupMode())
+            _setupMode.EnterSetupMode();
+    }
+
     /// <summary>
     /// Requests the automatic "Show in Graph" that follows opening a project. Deferred, because the
     /// Output View only learns which project it belongs to when it next syncs its state.
