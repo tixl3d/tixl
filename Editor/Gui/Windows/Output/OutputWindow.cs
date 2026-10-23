@@ -123,6 +123,8 @@ internal sealed partial class OutputWindow : Window
         // Sync copy-based fields to State every frame so saves always capture current values
         SyncCopyFieldsToState();
 
+        _imageCanvas.TextureFiltering = State.TextureFiltering;
+
         Pinning.TryGetPinnedOrSelectedInstance(out var drawnInstance, out var graphCanvas);
 
         // The Flow Outliner strip sits under the canvas; the canvas child takes what it leaves.

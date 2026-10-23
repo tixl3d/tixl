@@ -23,12 +23,40 @@ namespace T3.Editor.Gui.Windows.Output;
 
 internal sealed partial class OutputWindow
 {
-    /// <summary>Output-specific items appended to the breadcrumb menu. Display binding lives on the outliner's
-    /// OUTPUT rows (right-click → Bind to display); the setup itself is entered by the toolbar's last button.</summary>
+    /// <summary>Output-specific view items appended to the breadcrumb menu: the setup entries and the image
+    /// filtering mode. Display binding lives on the outliner's OUTPUT rows (right-click → Bind to display);
+    /// the setup itself is entered by the toolbar's last button.</summary>
     private void DrawOutputMenuExtras()
     {
         _setupMode.DrawOutlinerMenuItem();
         _setupMode.DrawPinMenuItem();
+
+        CustomComponents.SeparatorLine();
+        if (CustomComponents.DrawSubMenu(_textureFilteringMenuId, "Texture Filtering"))
+        {
+            if (CustomComponents.DrawMenuItem(_linearFilteringId, "Linear (smooth)",
+                                             isChecked: State.TextureFiltering == TextureFilteringModes.Linear))
+                SetTextureFiltering(TextureFilteringModes.Linear);
+
+            if (CustomComponents.DrawMenuItem(_autoFilteringId, "Auto (smooth when reduced)",
+                                             isChecked: State.TextureFiltering == TextureFilteringModes.Auto))
+                SetTextureFiltering(TextureFilteringModes.Auto);
+
+            if (CustomComponents.DrawMenuItem(_pointFilteringId, "Point (pixelated)",
+                                             isChecked: State.TextureFiltering == TextureFilteringModes.Point))
+                SetTextureFiltering(TextureFilteringModes.Point);
+
+            ImGui.EndMenu();
+        }
+    }
+
+    private void SetTextureFiltering(TextureFilteringModes mode)
+    {
+        if (State.TextureFiltering == mode)
+            return;
+
+        State.TextureFiltering = mode;
+        FlagSymbolUiAsModified();
     }
 
     private void DrawToolbar(Type? drawnType)
@@ -257,6 +285,11 @@ internal sealed partial class OutputWindow
         CustomComponents.PopToolbarIconBackground();
         ImGui.EndChild();
     }
+
+    private static readonly int _textureFilteringMenuId = nameof(_textureFilteringMenuId).GetHashCode();
+    private static readonly int _linearFilteringId = nameof(_linearFilteringId).GetHashCode();
+    private static readonly int _autoFilteringId = nameof(_autoFilteringId).GetHashCode();
+    private static readonly int _pointFilteringId = nameof(_pointFilteringId).GetHashCode();
 
     // Render-icon tooltip: the range mode, then duration, resolution, format, and rough size / render-time estimates.
     private static string BuildRenderSummaryTooltip()

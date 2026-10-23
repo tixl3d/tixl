@@ -92,7 +92,9 @@ internal sealed class ViewSelectionPinning
         }
 
         ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-        var open = ImGui.BeginCombo("##pinning", symbolName + suffix);
+        // HeightLargest lets the menu show its view options (setup entries and texture filtering) without
+        // forcing a scroll; the default eight-row popup cuts them off.
+        var open = ImGui.BeginCombo("##pinning", symbolName + suffix, ImGuiComboFlags.HeightLargest);
         ImGui.PopStyleColor();
 
         if (open)

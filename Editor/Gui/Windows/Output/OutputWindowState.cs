@@ -26,6 +26,10 @@ internal sealed class OutputWindowState
     [JsonConverter(typeof(StringEnumConverter))]
     public TransformGizmoModes TransformGizmoMode = TransformGizmoModes.Move;
 
+    /// <summary>How the output image is resampled: smooth, crisp, or crisp only at native resolution and above.</summary>
+    [JsonConverter(typeof(StringEnumConverter))]
+    public TextureFilteringModes TextureFiltering = TextureFilteringModes.Linear;
+
     // Background
     public float[] BackgroundColor = [0.1f, 0.1f, 0.1f, 1.0f];
 
