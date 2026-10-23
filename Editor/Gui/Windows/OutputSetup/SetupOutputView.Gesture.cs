@@ -86,6 +86,7 @@ internal sealed partial class SetupOutputView
         None,
         BoardCard,  // a card (or prop) on the Board; the drag moves the selected cards
         Label,      // a surface's, region's or patch's name chip on a canvas; the drag moves that entity
+        ClickOnly,  // anything else nothing here drags (a slice's chip); the press can only act at its release
     }
 
     /// <summary>
@@ -100,18 +101,21 @@ internal sealed partial class SetupOutputView
         public SetupEntityKinds Kind;
         public Guid Id;
 
-        /// <summary>A plain press on an already selected card keeps the whole selection, so the drag moves the group.</summary>
-        public bool KeepsSelection;
+        /** What a release without a drag selects; empty when the press already selected what it meant. */
+        public SetupEntityKinds ReleaseKind;
+
+        public Guid ReleaseId;
 
         public readonly bool IsArmed => Origin != PressOrigins.None;
 
-        public void Arm(Vector2 screenPos, PressOrigins origin, SetupEntityKinds kind, Guid id, bool keepsSelection)
+        public void Arm(Vector2 screenPos, PressOrigins origin, SetupEntityKinds kind, Guid id, SetupEntityKinds releaseKind, Guid releaseId)
         {
             ScreenPos = screenPos;
             Origin = origin;
             Kind = kind;
             Id = id;
-            KeepsSelection = keepsSelection;
+            ReleaseKind = releaseKind;
+            ReleaseId = releaseId;
         }
 
         public void Cancel()
@@ -158,16 +162,19 @@ internal sealed partial class SetupOutputView
     }
 
     /// <summary>
-    /// A press that never became a drag must not linger. A plain press on an already selected card kept the
-    /// selection (for a group drag), so it is the release that selects that card alone.
+    /// A press that never became a drag must not linger. A plain press on something selected kept the selection
+    /// (so a drag would have moved it), so it is the release that clicks: it narrows a group to the pressed item,
+    /// or walks on to the next item stacked under the cursor.
     /// </summary>
     private void ReleasePressHandoff(SetupEntitySelection? selection)
     {
         if (!_pressHandoff.IsArmed || ImGui.IsMouseDown(ImGuiMouseButton.Left))
             return;
 
-        if (_pressHandoff.Origin == PressOrigins.BoardCard && _pressHandoff.KeepsSelection)
-            selection?.Select(_pressHandoff.Kind, _pressHandoff.Id);
+        // A press that travelled was a drag even when nothing took it; a click would select something unseen.
+        var wasClick = (ImGui.GetMousePos() - _pressHandoff.ScreenPos).Length() <= UserSettings.Config.ClickThreshold;
+        if (wasClick && _pressHandoff.ReleaseId != Guid.Empty)
+            selection?.Select(_pressHandoff.ReleaseKind, _pressHandoff.ReleaseId);
 
         _pressHandoff.Cancel();
     }

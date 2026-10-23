@@ -120,13 +120,13 @@ internal sealed partial class SetupOutputView
         if (pulse > 0.001f)
             dl.AddQuadFilled(screen[0], screen[1], screen[2], screen[3], hue.Fade(pulse * 0.15f * fade));
 
-        // The frame is the pick target, not its name chip. On the Board the parent card hands the pick down
-        // (hierarchy rules); anywhere else the region's own rectangle is a background target of its own.
+        // The frame is the pick target, not its name chip. On the Board the parent card stacks its regions under
+        // the cursor; anywhere else the region's own rectangle is a background target of its own.
         var onBoard = ReferenceEquals(projection.View, _boardProjection);
         if (!onBoard && fade >= 0.999f)
         {
             CanvasDraw.Bounds(screen, out var bMin, out var bMax);
-            _picker.AddTarget(SetupEntityKinds.Surface, child.Id, bMin, bMax, isBackground: true);
+            _picker.AddTarget(SetupEntityKinds.Surface, child.Id, bMin, bMax, isBackground: true, isSelected: isSelected);
         }
 
         if (!editable)
@@ -291,7 +291,7 @@ internal sealed partial class SetupOutputView
     }
 
     /// <summary>
-    /// The region's body as its move grip: the press selected it (through the picker); the held button moves
+    /// The region's body as its move grip: the picker gave it the press; the held button moves
     /// it. Alt at the press pans the content under the region instead. Free movement, but a nearly-straight
     /// drag snaps flat and draws the axis it locked to — placing a region level with its neighbours is the
     /// common case.
