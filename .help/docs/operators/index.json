@@ -830,7 +830,7 @@
     },
     "Lib.io.dmx.PointsToDmxLights": {
       "url": "/operators/lib/io/dmx/PointsToDmxLights/",
-      "summary": "Converts 3D points into DMX channel values for lighting fixtures. Supports position, rotation (pan/tilt), color, and custom features."
+      "summary": "Converts 3D points into DMX channel values for lighting fixtures. Supports position, rotation (pan/tilt), color and custom features, with universe packing options for multi-universe rigs."
     },
     "Lib.io.dmx.SacnInput": {
       "url": "/operators/lib/io/dmx/SacnInput/",
