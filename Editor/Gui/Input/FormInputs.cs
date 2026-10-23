@@ -1141,12 +1141,19 @@ internal static class FormInputs
 
     private static void DrawHelpMarker(string tooltip)
     {
+        var lineTop = ImGui.GetCursorScreenPos().Y;
         ImGui.PushFont(Icons.IconFont);
         ImGui.AlignTextToFramePadding();
         ImGui.TextUnformatted("" + (char) Icon.Help);
         ImGui.PopFont();
 
-        if (!ImGui.IsItemHovered())
+        // The icon glyphs are taller than the icon font's line height, so the text item only covers the
+        // glyph's upper part. Hit-test the whole row height instead.
+        var itemMin = ImGui.GetItemRectMin();
+        var itemMax = ImGui.GetItemRectMax();
+        if (!ImGui.IsWindowHovered()
+            || !ImGui.IsMouseHoveringRect(new Vector2(itemMin.X, lineTop),
+                                          new Vector2(itemMax.X, lineTop + ImGui.GetFrameHeight())))
             return;
 
         // Tooltip — rendered as Markdown so parameter docs can use **bold**, "- " lists and [OpRef] links.
