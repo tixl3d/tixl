@@ -76,8 +76,8 @@ internal sealed class ReadPointsFromGpu : Instance<ReadPointsFromGpu>
                         _bufferWithViewsCpuAccess.Buffer?.Dispose();
                         var bufferDesc = new BufferDescription
                                              {
-                                                 Usage = ResourceUsage.Default,
-                                                 BindFlags = BindFlags.UnorderedAccess | BindFlags.ShaderResource,
+                                                 Usage = ResourceUsage.Staging,
+                                                 BindFlags = BindFlags.None,
                                                  SizeInBytes = pointBuffer.Buffer.Description.SizeInBytes,
                                                  OptionFlags = ResourceOptionFlags.BufferStructured,
                                                  StructureByteStride = pointBuffer.Buffer.Description.StructureByteStride,
@@ -91,8 +91,6 @@ internal sealed class ReadPointsFromGpu : Instance<ReadPointsFromGpu>
                     Log.Error("Failed to setup structured buffer " + e.Message, this);
                     return;
                 }
-
-                ResourceManager.CreateStructuredBufferSrv(_bufferWithViewsCpuAccess.Buffer, ref _bufferWithViewsCpuAccess.Srv);
 
                 // Keep a copy of the texture which can be accessed by CPU
                 immediateContext.CopyResource(pointBuffer.Buffer, _bufferWithViewsCpuAccess.Buffer);
