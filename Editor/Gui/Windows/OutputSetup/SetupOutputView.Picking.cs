@@ -38,7 +38,7 @@ internal sealed partial class SetupOutputView
 
         var rect = CornerPinHandles.GetCenteredLabelRect(screenQuad, name);
         if (pickable)
-            _picker.AddTarget(kind, id, rect.Min, rect.Max);
+            _picker.AddTarget(kind, id, rect.Min, rect.Max, isSelected: isSelected);
 
         var alpha = (_picker.IsPicked(id) ? 1f : 0.9f) * emphasis;
         var selectedColor = frameColor ?? SetupColors.ForKind(kind);
@@ -68,9 +68,10 @@ internal sealed partial class SetupOutputView
     }
 
     /// <summary>
-    /// One pick pass for every labeled frame on the canvas — surfaces, regions, slices. Left-click selects the
-    /// label under the cursor (cycling through a stack on repeated clicks), right-click opens that entity's
-    /// context menu, and the picked label pulses. Selection and menu dispatch by the target's kind; everything
+    /// One pick pass for every labeled frame on the canvas — surfaces, regions, slices. A press on something
+    /// selected keeps the selection, so the drag moves it; its release, if it didn't move, narrows a group to that
+    /// item or walks on to the next one stacked under the cursor. A press on anything else selects the topmost
+    /// item at once. Right-click opens the pressed entity's context menu, and the picked label pulses. Selection and menu dispatch by the target's kind; everything
     /// else — hit-test, overlap cycling, isolate gating, the right-drag guard — is identical across kinds.
     /// </summary>
     private void ResolvePicking(Setup setup, SetupEntitySelection? selection)
@@ -93,24 +94,8 @@ internal sealed partial class SetupOutputView
             // and its menu opens); the others are inert until picked in the sidebar. (Slices aren't isolated.)
             var canPick = !_isolatesFocusedSurface || hit.Id == _shownSurfaceId;
 
-            // A Board press arms the card under the cursor — unless the pick resolves to something drawn on that
-            // card (a region's or traced quad's label), which wins over the card beneath it.
-            if (_pressHandoff.Origin == PressOrigins.BoardCard && hit.Id != _pressHandoff.Id)
-                _pressHandoff.Cancel();
-
-            // A drag on the selected region's label moves it, so that press mustn't also count as a pick — nor
-            // does a Board press that keeps the selection for a group drag.
-            if (canPick && hit.LeftClicked && _gesture.Kind is not (GestureKinds.RegionMove or GestureKinds.SurfaceMove or GestureKinds.ContentPan) && !_pressHandoff.KeepsSelection)
-            {
-                SelectPicked(selection, hit.Kind, hit.Id);
-
-                // Arm the held-grab: if the button stays down on this surface's label, its move starts next
-                // frame — select-and-drag in one gesture. Plain presses only; a modifier press is a
-                // selection edit, not a grab. A card press that survived above keeps its own handoff.
-                var io = ImGui.GetIO();
-                if (hit.Kind is SetupEntityKinds.Surface or SetupEntityKinds.Patch && !io.KeyCtrl && !io.KeyShift && !_pressHandoff.IsArmed)
-                    _pressHandoff.Arm(ImGui.GetMousePos(), PressOrigins.Label, hit.Kind, hit.Id, keepsSelection: false);
-            }
+            if (canPick && hit.LeftClicked && _gesture.Kind is not (GestureKinds.RegionMove or GestureKinds.SurfaceMove or GestureKinds.ContentPan))
+                PressPicked(selection, hit);
 
             if (canPick && hit.MenuRequested)
             {
@@ -231,6 +216,42 @@ internal sealed partial class SetupOutputView
         {
             SetupActions.DuplicateEntity(selection, setup, duplicateKind, duplicateId);
         }
+    }
+
+    /// <summary>
+    /// Arms the press → drag handoff on what the press took — select-and-drag in one gesture. Plain presses only;
+    /// a modifier press is a selection edit, not a grab. A press taken by a pick is never the start of a fence.
+    /// </summary>
+    private void PressPicked(SetupEntitySelection? selection, CanvasItemPicker<SetupEntityKinds>.Result hit)
+    {
+        _boardFence.Reset();
+
+        var io = ImGui.GetIO();
+        var isPlain = !io.KeyCtrl && !io.KeyShift;
+        var keepsSelection = isPlain && hit.IsSelected;
+        if (!keepsSelection)
+            SelectPicked(selection, hit.Kind, hit.Id);
+
+        if (!isPlain)
+            return;
+
+        var origin = _boardCardsUnderMouse.Contains(hit.Id)
+                         ? PressOrigins.BoardCard
+                         : hit.Kind is SetupEntityKinds.Surface or SetupEntityKinds.Patch
+                             ? PressOrigins.Label
+                             : PressOrigins.ClickOnly;
+
+        // The second press of a double-click enters a card; walking the stack under it would undo that selection.
+        var releaseKind = SetupEntityKinds.None;
+        var releaseId = Guid.Empty;
+        if (keepsSelection && !ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
+        {
+            var narrowsGroup = selection is { Count: > 1 };
+            releaseKind = narrowsGroup ? hit.Kind : hit.NextKind;
+            releaseId = narrowsGroup ? hit.Id : hit.NextId;
+        }
+
+        _pressHandoff.Arm(ImGui.GetMousePos(), origin, hit.Kind, hit.Id, releaseKind, releaseId);
     }
 
     private void SelectPicked(SetupEntitySelection? selection, SetupEntityKinds kind, Guid id)

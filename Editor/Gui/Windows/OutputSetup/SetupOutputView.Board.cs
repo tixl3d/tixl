@@ -81,6 +81,7 @@ internal sealed partial class SetupOutputView
 
         FitBoardIfNeeded(setup);
         ReleasePressHandoff(selection);
+        _boardCardsUnderMouse.Clear();
         _hoveredPlanHandlePlanId = Guid.Empty;
 
         var pixelsPerMeter = MathF.Abs(_boardCanvas.Scale.X);
@@ -467,19 +468,17 @@ internal sealed partial class SetupOutputView
             return;
 
         // The whole card is its pick and grab area (the picker cycles stacked cards on repeated clicks), and
-        // what the fence catches. A selected surface card hands the pick down to the region under the cursor.
-        // Resolved only under the cursor — anywhere else the card's background target can't be hit.
+        // what the fence catches. A surface card's regions under the cursor stack right beneath it.
         var cardSurface = kind == SetupEntityKinds.Surface ? setup.FindSurface(id) : null;
-        var pickId = id;
         if (cardSurface != null && ImGui.IsMouseHoveringRect(sMin, sMax))
-            pickId = ResolveBoardPickInCard(setup, selection, cardSurface, min + cardSurface.AnchorInMeters, _boardProjection.ScreenToCanvas(ImGui.GetMousePos()));
+            AddBoardCardPickStack(setup, selection, cardSurface, min + cardSurface.AnchorInMeters, sMin, sMax, isSelected);
+        else
+            _picker.AddTarget(kind, id, sMin, sMax, isBackground: true, isSelected: isSelected);
 
-        _picker.AddTarget(kind, pickId, sMin, sMax, isBackground: true);
         // The label is a foreground target: it wins over any card stacked beneath it.
-        _picker.AddTarget(kind, id, labelMin, labelMax);
+        _picker.AddTarget(kind, id, labelMin, labelMax, isSelected: isSelected);
         _boardFenceCandidates.Add((kind, id, new ImRect(sMin, sMax)));
-        if (pickId == id)
-            GrabBoardCard(kind, id, hovered, isSelected);
+        NoteBoardCardUnderMouse(id, hovered);
 
         // Double-click enters the card's space: the canvas that edits it.
         if (hovered && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
@@ -697,18 +696,11 @@ internal sealed partial class SetupOutputView
         }
     }
 
-    /// <summary>
-    /// Arms a card's press → drag handoff. A plain press on a card that is already selected keeps the whole
-    /// selection (so the drag moves the group) and defers the single-select to the release.
-    /// </summary>
-    private void GrabBoardCard(SetupEntityKinds kind, Guid id, bool hovered, bool isSelected)
+    /** A press the picker hands to a card under the cursor becomes a card drag rather than a label move. */
+    private void NoteBoardCardUnderMouse(Guid id, bool hovered)
     {
-        if (!hovered || !ImGui.IsMouseClicked(ImGuiMouseButton.Left) || ImGui.IsAnyItemHovered()
-            || _boardDragKind != SetupEntityKinds.None || IsDrawingPlan || IsSettingScale)
-            return;
-
-        var io = ImGui.GetIO();
-        _pressHandoff.Arm(ImGui.GetMousePos(), PressOrigins.BoardCard, kind, id, keepsSelection: isSelected && !io.KeyCtrl && !io.KeyShift);
+        if (hovered && _boardDragKind == SetupEntityKinds.None)
+            _boardCardsUnderMouse.Add(id);
     }
 
     /// <summary>A labelled sub-rect inside a card (a slice, a region): thin inner outline, its own pick target.</summary>
@@ -850,9 +842,9 @@ internal sealed partial class SetupOutputView
         if (!interactive)
             return;
 
-        _picker.AddTarget(SetupEntityKinds.Prop, prop.Id, sMin, sMax, isBackground: true);
+        _picker.AddTarget(SetupEntityKinds.Prop, prop.Id, sMin, sMax, isBackground: true, isSelected: isSelected);
         _boardFenceCandidates.Add((SetupEntityKinds.Prop, prop.Id, new ImRect(sMin, sMax)));
-        GrabBoardCard(SetupEntityKinds.Prop, prop.Id, hovered, isSelected);
+        NoteBoardCardUnderMouse(prop.Id, hovered);
     }
 
     /// <summary>
@@ -1230,11 +1222,11 @@ internal sealed partial class SetupOutputView
         DrawPlanOrigin(setup, plan, origin, isSelected);
         ImGui.PopID();
 
-        _picker.AddTarget(SetupEntityKinds.FloorPlan, plan.Id, sMin, sMax, isBackground: true);
+        _picker.AddTarget(SetupEntityKinds.FloorPlan, plan.Id, sMin, sMax, isBackground: true, isSelected: isSelected);
         // The label is a foreground target: it wins over any card stacked beneath it.
-        _picker.AddTarget(SetupEntityKinds.FloorPlan, plan.Id, labelMin, labelMax);
+        _picker.AddTarget(SetupEntityKinds.FloorPlan, plan.Id, labelMin, labelMax, isSelected: isSelected);
         _boardFenceCandidates.Add((SetupEntityKinds.FloorPlan, plan.Id, new ImRect(sMin, sMax)));
-        GrabBoardCard(SetupEntityKinds.FloorPlan, plan.Id, hovered, isSelected);
+        NoteBoardCardUnderMouse(plan.Id, hovered);
     }
 
     /// <summary>Aligns a dragged corner with its two neighbours' x or y when within the snap threshold.</summary>
@@ -1520,7 +1512,7 @@ internal sealed partial class SetupOutputView
         // Not IsAnyItemActive: a press on empty window space makes the window's move-id the active item, which
         // would veto every fence. The scale handle is the only other gesture, and it holds the snapshot.
         if (selection == null || _boardDragKind != SetupEntityKinds.None
-            || _pressHandoff.Origin == PressOrigins.BoardCard || _gesture.IsLive || _sliceLabelDragging)
+            || _pressHandoff.IsArmed || _gesture.IsLive || _sliceLabelDragging)
         {
             _boardFence.Reset();
             return;
@@ -1629,67 +1621,80 @@ internal sealed partial class SetupOutputView
     }
 
     /// <summary>
-    /// What a click on a surface card picks: the card itself — unless it is selected, in which case a region
-    /// under the cursor, and so on down while each level is selected (the first click selects the container and
-    /// unlocks the next level). Among overlapping regions of one level, repeated clicks cycle: the click after
-    /// the selected one goes to the next in draw order — unless the selected one has a region of its own under
-    /// the cursor, which is the deeper level and wins. Ctrl pushes straight through to the deepest, topmost one.
+    /// A surface card's pick stack under the cursor: the card, then its regions there — each followed by its own
+    /// regions, topmost sibling first — so repeated clicks walk from the container down through everything nested
+    /// at that point and back. Ctrl pushes straight through to the deepest, topmost region.
     /// </summary>
-    private Guid ResolveBoardPickInCard(Setup setup, SetupEntitySelection? selection, Surface card, Vector2 originOnBoard, Vector2 pointOnBoard)
+    private void AddBoardCardPickStack(Setup setup, SetupEntitySelection? selection, Surface card, Vector2 originOnBoard,
+                                       Vector2 screenMin, Vector2 screenMax, bool isCardSelected)
     {
-        var pushThrough = ImGui.GetIO().KeyCtrl;
-        var current = card;
-        var origin = originOnBoard;
-        while (pushThrough || (selection?.IsSelected(SetupEntityKinds.Surface, current.Id) ?? false))
+        var pointOnBoard = _boardProjection.ScreenToCanvas(ImGui.GetMousePos());
+        _pickHits.Clear();
+        if (ImGui.GetIO().KeyCtrl)
         {
-            // The regions of this level under the cursor, in draw order.
-            _pickHits.Clear();
-            for (var i = 0; i < setup.Surfaces.Count; i++)
-            {
-                var child = setup.Surfaces[i];
-                if (child.ParentId == current.Id && ContainsInParentSpace(child, pointOnBoard - origin))
-                    _pickHits.Add(child);
-            }
+            AddDeepestRegionUnder(setup, card, originOnBoard, pointOnBoard);
+        }
+        else
+        {
+            AddRegionsUnder(setup, card, originOnBoard, pointOnBoard);
+        }
 
-            if (_pickHits.Count == 0)
-                break;
+        // Added bottom-up: the picker reads targets added later as drawn on top.
+        for (var hitIndex = _pickHits.Count - 1; hitIndex >= 0; hitIndex--)
+        {
+            var regionId = _pickHits[hitIndex].Id;
+            _picker.AddTarget(SetupEntityKinds.Surface, regionId, screenMin, screenMax, isBackground: true,
+                              isSelected: selection?.IsSelected(SetupEntityKinds.Surface, regionId) ?? false);
+        }
 
-            Surface next;
-            if (pushThrough)
-            {
-                next = _pickHits[^1];
-            }
-            else
-            {
-                var selectedIndex = -1;
-                for (var i = 0; i < _pickHits.Count; i++)
-                {
-                    if (selection!.IsSelected(SetupEntityKinds.Surface, _pickHits[i].Id))
-                        selectedIndex = i;
-                }
+        if (_pickHits.Count == 0 || !ImGui.GetIO().KeyCtrl)
+            _picker.AddTarget(SetupEntityKinds.Surface, card.Id, screenMin, screenMax, isBackground: true, isSelected: isCardSelected);
+    }
 
-                if (selectedIndex < 0)
-                {
-                    next = _pickHits[^1]; // nothing of this level selected yet: the topmost
-                }
-                else
-                {
-                    var selected = _pickHits[selectedIndex];
-                    var selectedOrigin = OriginOf(selected, origin);
-                    if (HasRegionUnder(setup, selected, pointOnBoard - selectedOrigin))
-                        next = selected; // its own region is under the cursor: go deeper
-                    else if (_pickHits.Count == 1)
-                        return selected.Id; // alone and selected: stays
-                    else
-                        return _pickHits[(selectedIndex + 1) % _pickHits.Count].Id; // cycle the stack
-                }
-            }
+    /** Pre-order, topmost sibling first: a region's own regions follow it before its next sibling. */
+    private void AddRegionsUnder(Setup setup, Surface parent, Vector2 parentOrigin, Vector2 pointOnBoard)
+    {
+        for (var i = setup.Surfaces.Count - 1; i >= 0; i--)
+        {
+            var child = setup.Surfaces[i];
+            if (child.ParentId != parent.Id || !ContainsInParentSpace(child, pointOnBoard - parentOrigin))
+                continue;
 
+            _pickHits.Add(child);
+            AddRegionsUnder(setup, child, OriginOf(child, parentOrigin), pointOnBoard);
+        }
+    }
+
+    private void AddDeepestRegionUnder(Setup setup, Surface card, Vector2 cardOrigin, Vector2 pointOnBoard)
+    {
+        var current = card;
+        var origin = cardOrigin;
+        Surface? deepest = null;
+        while (TryFindTopmostRegionUnder(setup, current, pointOnBoard - origin, out var next))
+        {
+            deepest = next;
             origin = OriginOf(next, origin);
             current = next;
         }
 
-        return current.Id;
+        if (deepest != null)
+            _pickHits.Add(deepest);
+    }
+
+    private static bool TryFindTopmostRegionUnder(Setup setup, Surface parent, Vector2 pointInParent, out Surface region)
+    {
+        for (var i = setup.Surfaces.Count - 1; i >= 0; i--)
+        {
+            var child = setup.Surfaces[i];
+            if (child.ParentId == parent.Id && ContainsInParentSpace(child, pointInParent))
+            {
+                region = child;
+                return true;
+            }
+        }
+
+        region = null!;
+        return false;
     }
 
     private static bool ContainsInParentSpace(Surface child, Vector2 pointInParent)
@@ -1702,18 +1707,6 @@ internal sealed partial class SetupOutputView
     private static Vector2 OriginOf(Surface child, Vector2 parentOrigin)
     {
         return parentOrigin + child.LocalPosition + child.AnchorInMeters;
-    }
-
-    private static bool HasRegionUnder(Setup setup, Surface parent, Vector2 pointInParent)
-    {
-        for (var i = 0; i < setup.Surfaces.Count; i++)
-        {
-            var child = setup.Surfaces[i];
-            if (child.ParentId == parent.Id && ContainsInParentSpace(child, pointInParent))
-                return true;
-        }
-
-        return false;
     }
 
     /// <summary>Enter: the selected containers' regions. Escape: their parents — or, with nothing nested selected, nothing at all.</summary>
@@ -2356,9 +2349,12 @@ internal sealed partial class SetupOutputView
     private readonly List<(SetupEntityKinds Kind, Guid Id, ImRect Rect)> _boardFenceCandidates = [];
     private Setup? _boardSetupForFence;
 
-    // Hierarchy picking scratch: one level's regions under the cursor, and the selection step down a hierarchy.
+    // Hierarchy picking scratch: a card's regions under the cursor, and the selection step down a hierarchy.
     private readonly List<Surface> _pickHits = [];
     private readonly List<Guid> _hierarchyStep = [];
+
+    /** The cards (and props, plans) under the cursor this frame — a press the picker gives one of them drags cards. */
+    private readonly List<Guid> _boardCardsUnderMouse = [];
 
     // Card metadata strings by entity id, rebuilt per structure change.
     private readonly Dictionary<Guid, string> _boardMeta = new();

@@ -12,6 +12,9 @@ namespace T3.Editor.Gui.Interaction.CanvasEditing;
 /// slices, and (later) the points and lines of geometry operators. It owns only the parts that don't care what
 /// is being edited: collecting screen-space pick rects for the frame, hit-testing them, cycling through a stack
 /// under the cursor on repeated clicks, and reporting a fresh left-click or a right-click-menu request.
+/// <para>A stack under the cursor has two answers. A press (and the drag it may become) takes a selected item if
+/// one is there, so a selection is never lost to whatever is drawn over it; otherwise the topmost. A click —
+/// a press released without moving — walks the stack: it picks the item after the current one.</para>
 /// <para>Everything downstream of a hit — what "select" means, which context menu opens, isolate rules — stays
 /// with the caller, which knows the domain. <typeparamref name="TKind"/> is the caller's own discriminator,
 /// carried through so the caller can dispatch on it.</para>
@@ -22,66 +25,76 @@ namespace T3.Editor.Gui.Interaction.CanvasEditing;
 /// </summary>
 internal sealed class CanvasItemPicker<TKind> where TKind : struct
 {
-    public readonly record struct Result(bool HasHit, TKind Kind, Guid Id, bool LeftClicked, bool MenuRequested);
+    /// <param name="Kind">With <see cref="Id"/>: what a press under the cursor takes and a drag moves.</param>
+    /// <param name="IsSelected">Whether that item was added as selected — a press on it keeps the selection.</param>
+    /// <param name="NextKind">With <see cref="NextId"/>: what a click walking the stack selects next.</param>
+    public readonly record struct Result(bool HasHit, TKind Kind, Guid Id, bool IsSelected, TKind NextKind, Guid NextId,
+                                         bool LeftClicked, bool MenuRequested);
 
+    /// <summary>Targets added later are drawn over earlier ones; the stack under the cursor runs topmost first.</summary>
     /// <param name="isBackground">A large area target (a card) that only picks where no foreground target
     /// (a label, a handle chip) is under the cursor — so a label on a card never cycles to the card.</param>
-    public void AddTarget(TKind kind, Guid id, Vector2 min, Vector2 max, bool isBackground = false)
+    public void AddTarget(TKind kind, Guid id, Vector2 min, Vector2 max, bool isBackground = false, bool isSelected = false)
     {
-        _targets.Add((kind, id, min, max, isBackground));
+        _targets.Add((kind, id, min, max, isBackground, isSelected));
     }
 
-    /// <summary>Whether <paramref name="id"/> was the top of the stack under the cursor at the last resolve —
-    /// i.e. the one a click would act on. Used to brighten that label.</summary>
+    /// <summary>Whether <paramref name="id"/> is what a press under the cursor took at the last resolve — the
+    /// item a drag moves. Used to brighten that label and to hand the press to its move.</summary>
     public bool IsPicked(Guid id)
     {
         return id != Guid.Empty && id == _pickedId;
     }
 
     /// <summary>
-    /// Hit-tests the collected targets, cycling to the entry after <paramref name="current"/> so repeated
-    /// clicks on a stack walk it. Returns the picked entry and whether this frame carried a fresh left-click or
-    /// a right-click-without-drag (a menu request). Clears the targets for the next frame.
+    /// Hit-tests the collected targets: what a press takes (a selected item under the cursor, else the topmost)
+    /// and what a click selects (the entry after <paramref name="current"/>, so repeated clicks walk the stack).
+    /// Also reports whether this frame carried a fresh left-click or a right-click-without-drag (a menu request).
+    /// Clears the targets for the next frame.
     /// </summary>
     public Result Resolve(Guid current)
     {
         _underMouse.Clear();
         _backgroundUnderMouse.Clear();
         var mouse = ImGui.GetMousePos();
-        foreach (var (kind, id, min, max, isBackground) in _targets)
+        for (var targetIndex = _targets.Count - 1; targetIndex >= 0; targetIndex--)
         {
+            var (kind, id, min, max, isBackground, isSelected) = _targets[targetIndex];
             if (mouse.X < min.X || mouse.X > max.X || mouse.Y < min.Y || mouse.Y > max.Y)
                 continue;
 
             if (isBackground)
-                _backgroundUnderMouse.Add((kind, id));
+                _backgroundUnderMouse.Add((kind, id, isSelected));
             else
-                _underMouse.Add((kind, id));
+                _underMouse.Add((kind, id, isSelected));
         }
 
         _targets.Clear();
-        if (_underMouse.Count == 0)
-            _underMouse.AddRange(_backgroundUnderMouse);
 
-        // Not over any label, or the pointer is busy with a handle/button — nothing to pick.
-        if (_underMouse.Count == 0 || ImGui.IsAnyItemHovered())
+        // Not over any target, or the pointer is busy with a handle/button — nothing to pick.
+        if ((_underMouse.Count == 0 && _backgroundUnderMouse.Count == 0) || ImGui.IsAnyItemHovered())
         {
             _pickedId = Guid.Empty;
             return default;
         }
 
-        var index = -1; // -1 (not in stack) → first
-        for (var i = 0; i < _underMouse.Count; i++)
+        // A selected card under a label still takes the press, so its drag isn't lost to what is drawn over it.
+        if (!TryFindSelected(_underMouse, out var grab) && !TryFindSelected(_backgroundUnderMouse, out grab))
+            grab = _underMouse.Count > 0 ? _underMouse[0] : _backgroundUnderMouse[0];
+
+        var stack = _underMouse.Count > 0 ? _underMouse : _backgroundUnderMouse;
+        var index = -1; // -1 (not in stack) → topmost
+        for (var i = 0; i < stack.Count; i++)
         {
-            if (_underMouse[i].Id == current)
+            if (stack[i].Id == current)
             {
                 index = i;
                 break;
             }
         }
 
-        var (pickKind, pickId) = _underMouse[(index + 1) % _underMouse.Count];
-        _pickedId = pickId;
+        var next = stack[(index + 1) % stack.Count];
+        _pickedId = grab.Id;
 
         var leftClicked = ImGui.IsMouseClicked(ImGuiMouseButton.Left);
 
@@ -90,11 +103,26 @@ internal sealed class CanvasItemPicker<TKind> where TKind : struct
         var wasDraggingRight = ImGui.GetMouseDragDelta(ImGuiMouseButton.Right).Length() > UserSettings.Config.ClickThreshold;
         var menuRequested = ImGui.IsMouseReleased(ImGuiMouseButton.Right) && !wasDraggingRight;
 
-        return new Result(true, pickKind, pickId, leftClicked, menuRequested);
+        return new Result(true, grab.Kind, grab.Id, grab.IsSelected, next.Kind, next.Id, leftClicked, menuRequested);
     }
 
-    private readonly List<(TKind Kind, Guid Id, Vector2 Min, Vector2 Max, bool IsBackground)> _targets = [];
-    private readonly List<(TKind Kind, Guid Id)> _underMouse = [];
-    private readonly List<(TKind Kind, Guid Id)> _backgroundUnderMouse = [];
+    private static bool TryFindSelected(List<(TKind Kind, Guid Id, bool IsSelected)> hits, out (TKind Kind, Guid Id, bool IsSelected) selected)
+    {
+        for (var i = 0; i < hits.Count; i++)
+        {
+            if (!hits[i].IsSelected)
+                continue;
+
+            selected = hits[i];
+            return true;
+        }
+
+        selected = default;
+        return false;
+    }
+
+    private readonly List<(TKind Kind, Guid Id, Vector2 Min, Vector2 Max, bool IsBackground, bool IsSelected)> _targets = [];
+    private readonly List<(TKind Kind, Guid Id, bool IsSelected)> _underMouse = [];
+    private readonly List<(TKind Kind, Guid Id, bool IsSelected)> _backgroundUnderMouse = [];
     private Guid _pickedId;
 }

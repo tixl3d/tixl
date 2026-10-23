@@ -452,7 +452,7 @@ internal sealed partial class SetupOutputView
 
         // On this canvas the output *is* the frame — the Board's card stands in for it everywhere else, which is
         // why it had no pick target here and its context menu never opened. Registered as a background target,
-        // so a patch, surface or label under the cursor still wins.
+        // and never as selected, so a patch, surface or label under the cursor still takes the press.
         if (_editMode == EditModes.Output && !_isolatesFocusedSurface)
         {
             CanvasDraw.Bounds(canvasOutline, out var outlineMin, out var outlineMax);

@@ -211,6 +211,10 @@ down to 0%, then up to 100% (or double-click it and type).
    then click three times on the overlap, with a pause between the clicks.
 10. With "Region 1" selected, click exactly on its name chip; then click on the "ApmtWall" name
     chip at the card's top-left.
+11. Select "Region 1" by clicking the overlap until it is selected. Press on the overlap and drag
+    20 cm to the right; release; press Ctrl+Z.
+12. Select "ApmtWall" itself, then press inside "Region 1" and drag the card 20 cm; release;
+    press Ctrl+Z.
 
 **Expected:**
 - After 1: the "ApmtWall" card is selected, not the region; the region does not light up on
@@ -228,10 +232,16 @@ down to 0%, then up to 100% (or double-click it and type).
 - After 8: the first Shift-click adds "Brick Wall" to the selection, the second removes it
   again.
 - After 9: the first click selects "ApmtWall", the second the region drawn on top (the newer
-  one), the third cycles to "Region 1" underneath; a fourth would return to the top one.
+  one), the third cycles to "Region 1" underneath; a fourth returns to "ApmtWall". Each click
+  changes the selection on release, not on press.
 - After 10: the name chip is not a pick target of its own: the click lands on the frame under
-  it and behaves like any click on that frame (the region stays selected). The card's chip
-  click selects the card like a click anywhere on it.
+  it and behaves like any click on that frame (it walks on from "Region 1" to the next item
+  under the cursor). The card's chip click selects the card like a click anywhere on it.
+- After 11: "Region 1" stays selected the moment the button goes down and is the one that
+  moves, although the other region is drawn over it; nothing else is selected after release.
+  The hover highlight sat on "Region 1" before the press. Ctrl+Z puts it back in one step.
+- After 12: the card moves with its regions; "ApmtWall" stays selected (the press on a selected
+  card does not hand down to the region under the cursor). Ctrl+Z puts it back.
 
 ## Step: Presentation scale of a pixel card
 
