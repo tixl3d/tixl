@@ -10,10 +10,17 @@ Server code: `Editor/App/DebugProtocol/DebugServer.cs`. Typed .NET client:
 ## Launching
 
 ```
-Editor/bin/Debug/net10.0-windows/TiXL.exe --debug-server 9042 --window 1600x900 --no-splash
+Editor/bin/Debug/net10.0/TiXL.exe --debug-server 9042 --window 1600x900 --no-splash
 ```
 
-- `--debug-server <port>` starts the bridge (localhost only). Without the flag it is off.
+On Linux the executable is `Editor/bin/Debug/net10.0/TiXL`; add `TIXL_VULKAN_VALIDATION=1` to see validation
+errors in the log.
+
+- **Launch with the build folder as the working directory.** Several paths are resolved relative to it,
+  among them `.tixl/Tests/` - the visual suite's reference images. Started from the repo root the suite
+  still runs, finds no references, and reports `SUCCESS:   0 / 0`, which reads like a pass.
+- `--debug-server <port>` starts the bridge (localhost only). Without the flag it is off, but a
+  running editor can start or stop it under Settings → Diagnostics → Debug Bridge (port saved, default 9042).
 - `--window WxH` forces a predictable windowed size; `--no-splash` skips the splash screen.
 - Startup until the port accepts connections takes roughly 10–20 s. Poll with retries.
 - A running server shows a blinking IO icon in the app title bar; its tooltip lists recent
@@ -59,6 +66,12 @@ the chord (1.00 = a straight line) and the largest deviation from the chord.
 
 Parameter shapes are defined in `DebugServer.cs` — read the handler when unsure. Notes:
 
+- **Never guess the settings folder — ask `getPaths`.** It is version-suffixed
+  (`~/.config/TiXL4.4-alpha`, `%APPDATA%\TiXL4.4-alpha`), so the previous release's folder usually sits
+  right beside it, and the editor also logs the one it opened. Editing the wrong one is silent: settings
+  appear not to apply and planted files are never found. `getPaths` returns `settings`, `log`, `temp` and
+  `projects`.
+
 - **Start from what the user is looking at.** `getContext` returns the focused
   composition, `selectedChildren` (ids + names) and `outputView` (the op the output
   window shows, whether it is pinned, and the evaluation-start op if that differs).
@@ -69,12 +82,7 @@ Parameter shapes are defined in `DebugServer.cs` — read the handler when unsur
   back in a `COMPILE_FAILED` detail). Built-in packages like `Lib` need an editor restart.
 - `setVSync` (`value`: bool, optional) switches the user's Use VSync setting and returns `useVSync`; without
   `value` it only reports. Restore the previous value after a measurement — the setting is saved.
-  `setTargetFrameRate` (`value`: fps, 0 = every refresh) works the same way for the Frame Rate setting, and
-  `setFrameLatency` (`value`: 1 or 2 frames in flight) for the Frame Latency setting.
-- `getFrameSamples` returns the Performance window's rolling window (400 frames, oldest first) as
-  `frameMs`, `cpuMs` and `presentMs` arrays plus `totalFrames` — the data of its CSV export. Use it to judge
-  frame pacing (doubled frames, mean against the refresh period) without a manual export; `totalFrames` lets
-  consecutive calls be stitched into longer recordings.
+  `setTargetFrameRate` (`value`: fps, 0 = every refresh) works the same way for the Frame Rate setting.
 - `stallMainThread` sleeps on the main thread to exercise the stall overlay (`StallWatchdog`).
   With an `estimateKey` it runs inside a `MainThreadActivity` scope, so the second run with the
   same key shows estimated progress. The overlay is presented by another thread, so neither
@@ -91,6 +99,13 @@ Parameter shapes are defined in `DebugServer.cs` — read the handler when unsur
   geometry ops without screenshots. Add `dumpObj: "<path>"` to also write the
   geometry as OBJ (one object per part, `# cut` before IsCut faces) for offline
   analysis of exactly which edges are open.
+- `getOutput` on a `Texture2D` slot returns its shape (size, format, mips, array size, bind/option
+  flags, disposed) - enough to see whether an op produced a texture at all.
+- `getOutput` on a `BufferWithViews` (GPU) or `StructuredList` (CPU) slot returns size, stride and
+  element count. Add `readCount` (and optionally `readOffset`) to also get the elements: a 64-byte
+  stride is decoded as a `Point` (`position`, `f1`, `orientation`, `color`, `scale`, `f2`), anything
+  else as one float array per element. A GPU read flushes and waits for the GPU - fine for a probe.
+  Compare the same query across machines (e.g. Mac vs Linux) to find the first op whose values differ.
 - `getOutput update:true` starts a fresh invalidation tick before pulling, so
   upstream changes propagate through the chain. Ops upstream with `Async` on
   still return their *previous* result while a job runs - set `Async` false on
@@ -99,6 +114,23 @@ Parameter shapes are defined in `DebugServer.cs` — read the handler when unsur
   `.cs` files on exit, which leaves them older than the previous DLL and makes
   MSBuild skip the compile. `touch` the edited files before building, and check
   that the built DLL actually changed.
+
+## Shader printf on Vulkan
+
+When a compute or pixel shader seems to do nothing on Linux or macOS, the validation layer can print from
+inside it. Add `printf("...", values)` to the shader (Slang emits the debug-printf extension), write a layer
+settings file
+
+```
+khronos_validation.enables = VK_VALIDATION_FEATURE_ENABLE_DEBUG_PRINTF_EXT
+khronos_validation.printf_to_stdout = true
+```
+
+and start the editor with `TIXL_VULKAN_VALIDATION=1 VK_LAYER_SETTINGS_PATH=<that file>`. The output lands
+on the editor's stdout, not in the log, and without a `\n` every message joins the previous line. Guard the
+printf with a thread check (`if (id.x == 0 && id.y == 0)`), or one dispatch floods the buffer. Reading a
+texel the previous frame wrote (`Packed[uint2(5, 5)]`) and printing it tells whether writes persist in the
+image - which separates a dispatch that does nothing from a readback copy that does nothing.
 
 ## Looking at the graph
 
@@ -194,10 +226,18 @@ frame**. Setting an input does not run the graph.
 Operator packages hot-reload via `reload`, but Editor/Core changes need a restart:
 
 1. Send `shutdown` (fire-and-forget; the response may not arrive). Debug builds close
-   immediately; teardown takes ~2–10 s — poll the process list.
+   immediately; teardown takes ~2–10 s — poll with `pgrep -x TiXL`. Never match on the full
+   command line: `pgrep -f <path>` and `pkill -f <pattern>` also match the shell running them,
+   so the wait never ends and the kill takes out your own command.
 2. `dotnet build` the affected project. Never build the configuration of a still-running
    editor (Debug incremental is safe once it exited).
 3. Relaunch with the flags above and wait for the port.
+
+**A Debug editor loads the *Release* operator packages.** Rebuilding an operator package
+(`Operators/Lib`, `Operators/Video`, …) in Debug alone leaves the editor running the previous
+code, and the obvious conclusion — "my change had no effect" — is wrong. Build operator
+packages with `-c Release`, or both. A stack trace from the running editor is the quickest
+check: its line numbers will match the old source.
 
 ## Running the visual reference test suite
 
