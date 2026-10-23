@@ -330,5 +330,5 @@ public sealed class ApcMiniMk2 : CompatibleMidiDevice
     private static readonly ButtonRange SceneLaunch7Note = new(118);
     private static readonly ButtonRange SceneLaunch8ClipStopAll = new(119);
 
-    private static readonly ButtonRange Shift = new(123);
+    private static readonly ButtonRange Shift = new(122);
 }
