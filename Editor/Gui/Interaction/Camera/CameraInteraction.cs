@@ -1,6 +1,7 @@
 #nullable enable
 using ImGuiNET;
 using T3.Core.Animation;
+using T3.Core.Operator;
 using T3.Core.Operator.Interfaces;
 using T3.Core.Utils;
 using T3.Core.Utils.Geometry;
@@ -32,11 +33,21 @@ internal sealed class CameraInteraction
             camera.CameraPosition = _intendedSetup.Position;
         }
         
+        // Writing into an animated camera sets a key at the current time, so any damping or sliding
+        // that outlives a time change would leave a key on every frame the time moves on.
+        var timeInBars = Playback.Current.TimeInBars;
+        var animationTimeChanged = timeInBars != _lastTimeInBars;
+        _lastTimeInBars = timeInBars;
+        if (animationTimeChanged && IsAnimated(camera))
+        {
+            StopAndSyncTo(camera);
+            return;
+        }
+
         var cameraNodeModified = !_smoothedSetup.Matches(camera) && !_intendedSetup.Matches(camera);
         if (cameraNodeModified)
         {
-            _intendedSetup.SetTo(camera);
-            _smoothedSetup.SetTo(camera);
+            StopAndSyncTo(camera);
             return;
         }
 
@@ -47,9 +58,7 @@ internal sealed class CameraInteraction
         var cameraSwitched = camera != _lastCameraNode;
         if (cameraSwitched)
         {
-            _intendedSetup.SetTo(camera);
-            _smoothedSetup.SetTo(camera);
-            _moveVelocity = Vector3.Zero;
+            StopAndSyncTo(camera);
             _lastCameraNode = camera;
         }
 
@@ -84,9 +93,21 @@ internal sealed class CameraInteraction
 
     public void SetView(ICamera camera)
     {
+        StopAndSyncTo(camera);
+    }
+
+    private void StopAndSyncTo(ICamera camera)
+    {
         _moveVelocity = Vector3.Zero;
+        _orbitVelocity = Vector2.Zero;
         _intendedSetup.SetTo(camera);
         _smoothedSetup.SetTo(camera);
+    }
+
+    private static bool IsAnimated(ICamera camera)
+    {
+        return camera is Instance { Parent: not null } instance
+               && instance.Parent.Symbol.Animator.IsInstanceAnimated(instance);
     }
 
     private bool ComputeSmoothMovement(bool isInteracting)
@@ -428,5 +449,6 @@ internal sealed class CameraInteraction
     private Vector3 _moveVelocity;
     private Vector2 _orbitVelocity;
     private ICamera? _lastCameraNode;
+    private double _lastTimeInBars;
     private float _deltaTime;
 }
