@@ -488,8 +488,8 @@ internal sealed class CameraInteraction
     private readonly CameraSetup _smoothedSetup = new();
     private readonly CameraSetup _intendedSetup = new();
 
-    /** Matches where a left drag ends up once its orbit velocity has decayed. */
-    private const float TrackpadOrbitRadiansPerPixel = 0.008f;
+    /** A quarter gentler than a left drag, which felt too twitchy under two fingers. */
+    private const float TrackpadOrbitRadiansPerPixel = 0.006f;
 
     /** Exponential, so each swipe zooms by the same ratio however far away the target is. */
     private const float TrackpadZoomPerPixel = 0.005f;
