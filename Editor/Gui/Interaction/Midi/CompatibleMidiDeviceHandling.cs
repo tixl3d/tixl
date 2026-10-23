@@ -35,15 +35,40 @@ internal static class CompatibleMidiDeviceHandling
             MidiConnectionManager.Rescan();
         }
 
-        // Dispose devices
+        DisposeCompatibleDevices();
+        CreateConnectedCompatibleDevices();
+    }
+
+    /// <summary>
+    /// Reopens all MIDI devices and recreates the controllers for them.
+    /// </summary>
+    /// <remarks>
+    /// The controllers are disposed before the rescan: disposing the last consumer closes all devices, which
+    /// would otherwise undo the rescan.
+    /// </remarks>
+    internal static void Rescan()
+    {
+        DisposeCompatibleDevices();
+        MidiConnectionManager.Rescan();
+        CreateConnectedCompatibleDevices();
+        MidiDeviceCombo.RefreshConnectedDevices();
+    }
+
+    /// <summary>Picks up devices the OS reported as connected or removed.</summary>
+    internal static void RescanIfDevicesChanged()
+    {
+        if (MidiConnectionManager.TryConsumeDeviceChange())
+            Rescan();
+    }
+
+    private static void DisposeCompatibleDevices()
+    {
         foreach (var device in _connectedMidiDevices)
         {
             device.Dispose();
         }
 
         _connectedMidiDevices.Clear();
-        
-        CreateConnectedCompatibleDevices();
     }
 
     internal static void UpdateConnectedDevices()

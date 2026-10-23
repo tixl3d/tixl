@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace T3.IoServices.Midi;
 
@@ -35,6 +36,26 @@ public abstract class MidiDeviceProvider
 
     /// <summary>Releases backend-wide state after the last device was closed.</summary>
     public abstract void Shutdown();
+
+    /// <summary>
+    /// True once the OS reported ports appearing or disappearing and has been quiet since for
+    /// <see cref="DeviceChangeSettleTimeMs"/>. Clears the report, so each burst of changes is consumed once.
+    /// </summary>
+    public bool TryConsumeDeviceChange()
+    {
+        var reportedAt = Interlocked.Read(ref _lastDeviceChangeTicks);
+        if (reportedAt == 0 || Environment.TickCount64 - reportedAt < DeviceChangeSettleTimeMs)
+            return false;
+
+        // A change reported meanwhile keeps its newer timestamp and is consumed on a later frame.
+        return Interlocked.CompareExchange(ref _lastDeviceChangeTicks, 0, reportedAt) == reportedAt;
+    }
+
+    /// <summary>Called from the backend's notification thread whenever the OS reports a device change.</summary>
+    protected void ReportDeviceChange()
+    {
+        Interlocked.Exchange(ref _lastDeviceChangeTicks, Environment.TickCount64);
+    }
 
     private static MidiDeviceProvider CreateForPlatform()
     {
@@ -71,4 +92,9 @@ public abstract class MidiDeviceProvider
         {
         }
     }
+
+    /** A USB device reports its client and every port separately; waiting turns the burst into one rescan. */
+    private const int DeviceChangeSettleTimeMs = 500;
+
+    private long _lastDeviceChangeTicks;
 }

@@ -22,6 +22,13 @@ internal static class CoreMidiInterop
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate void MidiReadProc(IntPtr packetList, IntPtr readProcRefCon, IntPtr sourceConnectionRefCon);
 
+    /// <summary><c>MIDINotifyProc</c>: called on the run loop that was current when the client was created.</summary>
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    internal delegate void MidiNotifyProc(IntPtr notification, IntPtr notifyRefCon);
+
+    /** kMIDIMsgSetupChanged: sent after any change to the setup, such as endpoints being added or removed. */
+    internal const int MessageSetupChanged = 1;
+
     // MIDIPacketList and MIDIPacket are packed to 4 bytes: the list's packet count is followed directly by the
     // first packet, whose 8-byte timestamp is followed by a 16-bit length and the data. On Apple Silicon the
     // next packet starts at the following 4-byte boundary.

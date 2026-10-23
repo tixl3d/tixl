@@ -102,6 +102,16 @@ public static class MidiConnectionManager
         }
     }
 
+    /// <summary>
+    /// True once the OS reported devices being connected or removed and auto-detection is enabled. Polled once per
+    /// frame on the main thread, which then rescans: the consumers are subscribed to the devices being replaced.
+    /// </summary>
+    public static bool TryConsumeDeviceChange()
+    {
+        // Consumed even when disabled, so enabling the setting later does not act on a stale report.
+        return MidiDeviceProvider.Current.TryConsumeDeviceChange() && CoreSettings.Config.AutoDetectMidiDevices;
+    }
+
     public static void Rescan()
     {
         CloseMidiDevices();

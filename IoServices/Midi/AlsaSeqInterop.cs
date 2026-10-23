@@ -31,6 +31,9 @@ internal static class AlsaSeqInterop
         [FieldOffset(14)] public byte DestClient;
         [FieldOffset(15)] public byte DestPort;
         [FieldOffset(16)] public uint ExtLen;
+
+        /// <summary>For announcements, the client that started, exited or changed.</summary>
+        [FieldOffset(16)] public byte AnnouncedClient;
         [FieldOffset(20)] public IntPtr ExtPtr;
     }
 
@@ -38,6 +41,12 @@ internal static class AlsaSeqInterop
     internal const uint CapRead = 1, CapWrite = 2, CapSubsRead = 32, CapSubsWrite = 64;
     internal const uint TypeMidiGeneric = 2, TypeApplication = 1048576;
     internal const byte EventSysex = 130, QueueDirect = 253;
+
+    /// <summary>
+    /// Announcements from SND_SEQ_EVENT_CLIENT_START to SND_SEQ_EVENT_PORT_CHANGE. The subscription events
+    /// that follow are left out: every connection TiXL makes itself would trigger them.
+    /// </summary>
+    internal const byte EventClientStart = 60, EventPortChange = 65;
 
     /// <summary>Negated errno values as libasound returns them.</summary>
     internal const int ErrorInterrupted = -4, ErrorTryAgain = -11, ErrorNoSpace = -28;
@@ -47,6 +56,9 @@ internal static class AlsaSeqInterop
 
     /// <summary>ALSA's own client, which owns the Timer and Announce ports rather than any instrument.</summary>
     internal const int SystemClientId = 0;
+
+    /** The System client's port that announces clients and ports starting, exiting or changing. */
+    internal const int AnnouncePort = 1;
 
     [DllImport(Lib)] internal static extern int snd_seq_open(out IntPtr handle, string name, int streams, int mode);
     [DllImport(Lib)] internal static extern int snd_seq_close(IntPtr handle);

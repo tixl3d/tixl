@@ -25,12 +25,17 @@ internal sealed partial class SettingsWindow
         FormInputs.AddVerticalSpace();
         if (CustomComponents.DrawCtaButton("Rescan Devices", Icon.Refresh, CustomComponents.ButtonStates.Default))
         {
-            MidiConnectionManager.Rescan();
-            CompatibleMidiDeviceHandling.InitializeConnectedDevices();
+            CompatibleMidiDeviceHandling.Rescan();
             RefreshMidiPanel();
         }
 
         CustomComponents.TooltipForLastItem("Reopens all MIDI devices and rescans the loaded projects for device names.");
+
+        FormInputs.AddVerticalSpace();
+        coreSettingsChanged |= FormInputs.AddCheckBox("Auto-Detect Devices",
+                                                      ref CoreSettings.Config.AutoDetectMidiDevices,
+                                                      "Reopens all MIDI devices when one is connected or removed. Disable it if reopening interrupts a running show.",
+                                                      true);
 
         DrawAliasTable();
         DrawDeviceSpecificNames();

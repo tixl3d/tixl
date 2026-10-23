@@ -71,7 +71,9 @@ internal sealed class CoreMidiDeviceProvider : MidiDeviceProvider
             var outputName = CreateCfString(ClientName + " out");
             try
             {
-                if (MIDIClientCreate(clientName, IntPtr.Zero, IntPtr.Zero, out _client) != 0)
+                // Like the read proc, the notify delegate must outlive the client.
+                _notifyProc = OnNotification;
+                if (MIDIClientCreate(clientName, Marshal.GetFunctionPointerForDelegate(_notifyProc), IntPtr.Zero, out _client) != 0)
                 {
                     Log.Debug("Could not create a CoreMIDI client; MIDI devices will not be found.");
                     return false;
@@ -102,6 +104,13 @@ internal sealed class CoreMidiDeviceProvider : MidiDeviceProvider
         }
 
         return true;
+    }
+
+    private void OnNotification(IntPtr notification, IntPtr notifyRefCon)
+    {
+        // MIDINotification starts with its message id.
+        if (Marshal.ReadInt32(notification) == MessageSetupChanged)
+            ReportDeviceChange();
     }
 
     private static string GetDisplayName(uint endpoint)
@@ -374,6 +383,7 @@ internal sealed class CoreMidiDeviceProvider : MidiDeviceProvider
     private uint _outputPort;
     private bool? _availability;
     private MidiReadProc? _readProc;
+    private MidiNotifyProc? _notifyProc;
     private int _lastConnectionKey;
     private IntPtr _packetBuffer;
     private int _packetBufferSize;

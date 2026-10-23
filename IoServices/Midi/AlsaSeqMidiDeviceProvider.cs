@@ -174,6 +174,12 @@ internal sealed class AlsaSeqMidiDeviceProvider : MidiDeviceProvider
         _inputPort = snd_seq_create_simple_port(_seq, ClientName + " in", CapWrite | CapSubsWrite, portType);
         _outputPort = snd_seq_create_simple_port(_seq, ClientName + " out", CapRead | CapSubsRead, portType);
 
+        // Delivered to the reading thread like any input, so detecting device changes costs no extra thread.
+        if (snd_seq_connect_from(_seq, _inputPort, SystemClientId, AnnouncePort) < 0)
+        {
+            Log.Debug("Could not subscribe to ALSA announcements; connected MIDI devices will not be detected.");
+        }
+
         // Running status would carry decoder state between two devices sharing this parser.
         snd_midi_event_new((UIntPtr)MessageBufferSize, out _decoder);
         snd_midi_event_init(_decoder);
@@ -233,6 +239,16 @@ internal sealed class AlsaSeqMidiDeviceProvider : MidiDeviceProvider
             }
 
             var sequencerEvent = Marshal.PtrToStructure<SeqEvent>(eventPointer);
+            if (sequencerEvent.SourceClient == SystemClientId)
+            {
+                if (IsDeviceChange(sequencerEvent))
+                {
+                    ReportDeviceChange();
+                }
+
+                continue;
+            }
+
             AlsaMidiInputDevice? device;
             lock (_inputsByAddress)
             {
@@ -319,6 +335,13 @@ internal sealed class AlsaSeqMidiDeviceProvider : MidiDeviceProvider
             snd_seq_event_output_direct(_seq, ref wakeEvent);
             snd_seq_drain_output(_seq);
         }
+    }
+
+    /** TiXL's own client is left out, so reopening it on a rescan does not trigger the next rescan. */
+    private bool IsDeviceChange(SeqEvent announcement)
+    {
+        return announcement.Type is >= EventClientStart and <= EventPortChange
+               && announcement.AnnouncedClient != _clientId;
     }
 
     private static int ToAddressKey(byte client, byte port)

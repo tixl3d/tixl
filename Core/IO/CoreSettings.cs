@@ -18,6 +18,9 @@ public sealed class CoreSettings : Settings<CoreSettings.ConfigData>
 
         public string LimitMidiDeviceCapture = null;
 
+        /// <summary>Rescans the MIDI devices when the OS reports one being connected or removed.</summary>
+        public bool AutoDetectMidiDevices = true;
+
         // Escape hatch: revert to pre-4.3 per-process shadow copies (fresh copy of every editable
         // package on each editor start) in case the shared content-keyed cache misbehaves.
         public bool UseProcessScopedShadowCopies = false;

@@ -15,6 +15,7 @@ using Texture2D = T3.Core.DataTypes.Texture2D;
 
 using System.Numerics;
 using T3.Core.Audio.Input;
+using T3.IoServices.Midi;
 
 namespace T3.Player;
 
@@ -33,6 +34,9 @@ internal static partial class Program
         // bracketing, which is why the render loop never had it.
         _device.BeginFrame();
         AudioInput.StartFrame(_playback.Settings);
+        if (MidiConnectionManager.TryConsumeDeviceChange())
+            MidiConnectionManager.Rescan();
+
         _playback.Update();
 
         //Log.Debug($" render at playback time {_playback.TimeInSecs:0.00}s");

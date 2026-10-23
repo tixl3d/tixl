@@ -81,6 +81,7 @@ public static partial class T3Ui
         SrvManager.RemoveForDisposedTextures();
         KeyActionHandling.InitializeFrame();
 
+        CompatibleMidiDeviceHandling.RescanIfDevicesChanged();
         CompatibleMidiDeviceHandling.UpdateConnectedDevices();
 
         var nodeSelection = ProjectView.Focused?.NodeSelection;
