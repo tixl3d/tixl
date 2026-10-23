@@ -223,6 +223,9 @@ internal sealed partial class OutputWindow : Window
     public static readonly List<Window> OutputWindowInstances = [];
     public ViewSelectionPinning Pinning { get; } = new();
 
+    /// <inheritdoc cref="OutputSetupModeView.TryLeaveSetupMode"/>
+    internal bool TryLeaveSetupMode() => _setupMode.TryLeaveSetupMode();
+
     /// <summary>
     /// Requests the automatic "Show in Graph" that follows opening a project. Deferred, because the
     /// Output View only learns which project it belongs to when it next syncs its state.

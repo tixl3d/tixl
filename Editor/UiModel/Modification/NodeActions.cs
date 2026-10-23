@@ -196,6 +196,11 @@ internal static class NodeActions
             return;
         }
 
+        // The setup view hides the operator output, so pinning from it leaves it — and must not toggle the pin
+        // off, or the key would only ever unpin what the window can't show yet.
+        if (outputWindow.TryLeaveSetupMode())
+            unpinIfAlreadySelected = false;
+
         if (selection.Count == 0)
         {
             outputWindow.Pinning.PinInstance(compositionOp, components, unpinIfAlreadySelected);
