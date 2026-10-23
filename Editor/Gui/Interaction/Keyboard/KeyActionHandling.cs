@@ -140,6 +140,7 @@ internal static class KeyActionHandling
         RegisterActionsFlags(UserActions.Disconnect, Flags.NeedsWindowFocus);
         RegisterActionsFlags(UserActions.PinToOutputWindow, Flags.KeyPressOnly);
         RegisterActionsFlags(UserActions.ShowInGraph, Flags.KeyPressOnly);
+        RegisterActionsFlags(UserActions.ToggleOutputSetup, Flags.KeyPressOnly);
         RegisterActionsFlags(UserActions.ClearBackgroundImage, Flags.NeedsWindowFocus);
 
         RegisterActionsFlags(UserActions.AddSection, Flags.NeedsWindowFocus | Flags.KeyPressOnly);

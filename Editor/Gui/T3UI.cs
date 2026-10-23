@@ -79,6 +79,11 @@ public static partial class T3Ui
                 outputWindow.Pinning.ShowInGraph();
             }
         }
+        else if (UserActions.ToggleOutputSetup.Triggered())
+        {
+            if (OutputWindow.TryGetPrimaryOutputWindow(out var outputWindow))
+                outputWindow.ToggleSetupMode();
+        }
     }
 
     /// <summary>
