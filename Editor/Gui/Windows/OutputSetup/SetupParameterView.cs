@@ -242,6 +242,18 @@ internal static class SetupParameterView
 
         CommitFieldUndo(setup, "Move surface", posState);
 
+        if (plan != null && planSegment >= 0)
+        {
+            Span<float> elevation = [plan.ElevationOf(surface.Id)];
+            var elevationState = DrawFloatsRow("Elevation (m)", elevation,
+                                               "How far the wall's bottom edge is lifted above the ground, for a wall the projection only covers from some height up. The wall keeps its height and rises as a whole.");
+            BeginFieldUndo(setup, elevationState);
+            if ((elevationState & InputEditStateFlags.Modified) != 0)
+                FloorPlanSync.SetWallElevation(setup, plan, surface.Id, MathF.Max(elevation[0], 0));
+
+            CommitFieldUndo(setup, "Change wall elevation", elevationState);
+        }
+
         if (surface.Kind == Surface.Kinds.Physical)
             DrawStageOrientationRows(setup, surface, readOnly: plan != null);
 

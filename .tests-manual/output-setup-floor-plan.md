@@ -64,6 +64,23 @@ Select "Wall 1" and type `12` into the first Size (m) field.
 - The plan's second corner moves so Edge 1 is 12 m long, the Board label reads "Wall 1 · 12 m", and
   the floor grows to 12 m wide. The wall's height stays 4.
 
+## Step: Lift a wall off the ground
+
+**Action:**
+1. Select "Wall 1", note its Position (m), and type `1.2` into **Elevation (m)**.
+2. Drag one of the plan's corners on Edge 1 a little.
+3. Press Ctrl+Z twice.
+
+**Expected:**
+- After 1: Position (m)'s Y grows by 1.2 while X and Z stay; Size (m) is unchanged, so the wall now
+  spans 1.2–5.2 m. "Wall 3"'s Position (m) is untouched.
+- After 1, on the Board: "Wall 1"'s card rises 1.2 m above the floor line. Below it a hatched ground
+  line sits on the floor line, dashed lines drop to it from the card's bottom corners, and the gap is
+  labelled "1.2 m above ground". Typing a negative value is clamped to 0.
+- After 2: the wall follows the edge and keeps its 1.2 m elevation.
+- After 3: the corner returns, then Elevation (m) reads 0 and the wall stands on the ground again.
+- Saving and reopening the setup keeps the elevation.
+
 ## Step: Taking a wall down removes it, unless it is in use
 
 **Action:**

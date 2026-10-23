@@ -189,6 +189,7 @@ internal sealed partial class SetupOutputView
             DrawBoardCard(setup, selection, dl, SetupEntityKinds.Surface, surface.Id, min, max,
                           surface.Name, BoardMeta(surface.Id), fragment, true, uvMin, uvMax);
             DrawBoardRegions(setup, selection, dl, surface, min + surface.AnchorInMeters);
+            DrawBoardWallElevation(setup, dl, surface, min, max);
             if (SurfaceMetrics.CountPoints(surface) > 0)
             {
                 _boardPointProjection.View = _boardProjection;
@@ -762,6 +763,54 @@ internal sealed partial class SetupOutputView
             SurfaceGeometry.RegionBounds(child, out var localMin, out _);
             DrawBoardRegions(setup, selection, dl, child, parentAnchorOnBoard + localMin + child.AnchorInMeters);
         }
+    }
+
+    /// <summary>
+    /// Under a wall its plan lifts off the ground: the hatched ground it stands above and the gap down to it,
+    /// measured — so a card floating over the floor line reads as raised on purpose, not misplaced.
+    /// </summary>
+    private void DrawBoardWallElevation(Setup setup, ImDrawListPtr dl, Surface surface, Vector2 min, Vector2 max)
+    {
+        var elevation = FloorPlanSync.ElevationOf(setup, surface.Id);
+        if (elevation <= 0.0005f)
+            return;
+
+        var scale = T3Ui.UiScaleFactor;
+        var color = UiColors.TextMuted.Fade(0.7f * _boardLayerFade);
+        var bottom = _boardProjection.CanvasToScreen(min);
+        var ground = _boardProjection.CanvasToScreen(new Vector2(max.X, min.Y - elevation));
+        var left = MathF.Min(bottom.X, ground.X);
+        var right = MathF.Max(bottom.X, ground.X);
+
+        SetupStrokes.DrawCrispLine(dl, new Vector2(left, ground.Y), new Vector2(right, ground.Y), color, 1);
+
+        // Hatching below the line, the drawing sign for solid ground.
+        var hatch = 6 * scale;
+        var hatchThickness = MathF.Max(1, MathF.Round(scale));
+        for (var x = left + hatch; x <= right; x += hatch)
+            dl.AddLine(new Vector2(x, ground.Y), new Vector2(x - hatch, ground.Y + hatch), color, hatchThickness);
+
+        // Dashed drops from the card's bottom corners: the wall's lower part, not covered by the surface.
+        var dash = 4 * scale;
+        var dashGap = 3 * scale;
+        for (var y = bottom.Y; y < ground.Y; y += dash + dashGap)
+        {
+            var dashEnd = MathF.Min(y + dash, ground.Y);
+            SetupStrokes.DrawCrispLine(dl, new Vector2(left, y), new Vector2(left, dashEnd), color, 1);
+            SetupStrokes.DrawCrispLine(dl, new Vector2(right, y), new Vector2(right, dashEnd), color, 1);
+        }
+
+        var font = Fonts.FontSmall;
+        if (ground.Y - bottom.Y < font.FontSize + 4 * scale)
+            return;
+
+        if (!_wallElevationLabels.TryGetValue(surface.Id, out var cached) || cached.Elevation != elevation)
+        {
+            cached = (elevation, $"{elevation:0.###} m above ground");
+            _wallElevationLabels[surface.Id] = cached;
+        }
+
+        dl.AddText(font, font.FontSize, new Vector2(left + 4 * scale, (bottom.Y + ground.Y - font.FontSize) * 0.5f), color, cached.Label);
     }
 
     /// <summary>A prop as a figure at true scale, standing where its position says — the Board's ruler.</summary>
@@ -1747,7 +1796,7 @@ internal sealed partial class SetupOutputView
 
             if (surface.BoardPlacement == null)
             {
-                surface.BoardPlacement = new BoardPlacement { Position = new Vector2(x, 0) + surface.AnchorInMeters };
+                surface.BoardPlacement = new BoardPlacement { Position = new Vector2(x, FloorPlanSync.ElevationOf(setup, surface.Id)) + surface.AnchorInMeters };
                 seeded = true;
             }
 
@@ -2314,4 +2363,7 @@ internal sealed partial class SetupOutputView
     // Card metadata strings by entity id, rebuilt per structure change.
     private readonly Dictionary<Guid, string> _boardMeta = new();
     private int _boardMetaVersion = -1;
+
+    /** The lifted walls' gap labels, formatted only when an elevation changes — the Board draws per frame. */
+    private readonly Dictionary<Guid, (float Elevation, string Label)> _wallElevationLabels = new();
 }

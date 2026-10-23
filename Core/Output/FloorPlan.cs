@@ -98,6 +98,12 @@ public sealed class FloorPlan
     /// <summary>Height a newly raised wall gets; existing walls keep their own.</summary>
     public float WallHeight = 4f;
 
+    /// <summary>
+    /// How far a wall's bottom edge is lifted above the ground, keyed by wall surface — for a wall the projection
+    /// only covers from some height up. Walls without an entry stand on the ground.
+    /// </summary>
+    public Dictionary<Guid, float> WallElevations = [];
+
     /// <summary>Its card's place on the Board; null until the Board seeded one.</summary>
     public BoardPlacement? BoardPlacement;
 
@@ -127,6 +133,9 @@ public sealed class FloorPlan
 
     /// <summary>The surface linked to a segment, lowered or not; safe for any index.</summary>
     public Guid SlotOf(int segment) => segment >= 0 && segment < WallSurfaceIds.Count ? WallSurfaceIds[segment] : Guid.Empty;
+
+    /// <summary>How far the wall's bottom edge is lifted above the ground; 0 for one standing on it.</summary>
+    public float ElevationOf(Guid wallId) => WallElevations.TryGetValue(wallId, out var elevation) ? elevation : 0;
 
     /// <summary>The floor lying on the footprint, or <see cref="Guid.Empty"/> when there is none or it is lowered.</summary>
     public Guid RaisedFloorId => LoweredSurfaceIds.Contains(FloorSurfaceId) ? Guid.Empty : FloorSurfaceId;
@@ -311,6 +320,16 @@ public sealed class FloorPlan
             writer.WriteEndArray();
         }
 
+        if (WallElevations.Count > 0)
+        {
+            writer.WritePropertyName("WallElevations");
+            writer.WriteStartObject();
+            foreach (var (wallId, elevation) in WallElevations)
+                writer.WriteValue(wallId.ToString(), elevation);
+
+            writer.WriteEndObject();
+        }
+
         if (BoardPlacement != null)
         {
             writer.WritePropertyName("BoardPlacement");
@@ -357,6 +376,15 @@ public sealed class FloorPlan
         {
             foreach (var id in lowered)
                 plan.LoweredSurfaceIds.Add(OutputJson.ReadGuid(id));
+        }
+
+        if (token["WallElevations"] is JObject elevations)
+        {
+            foreach (var property in elevations.Properties())
+            {
+                if (Guid.TryParse(property.Name, out var wallId))
+                    plan.WallElevations[wallId] = property.Value.Value<float>();
+            }
         }
 
         plan.EnsureWallSlots();
