@@ -55,7 +55,8 @@ internal static class FloorPlanSync
                 CropWall(setup, wall, length, cropLeft);
             }
 
-            StagePlacing.PoseWall(wall, PlanToStage(origin, (start + end) * 0.5f), new Vector3(normal.X, 0, -normal.Y));
+            var bottomCentre = PlanToStage(origin, (start + end) * 0.5f) + new Vector3(0, plan.ElevationOf(wall.Id), 0);
+            StagePlacing.PoseWall(wall, bottomCentre, new Vector3(normal.X, 0, -normal.Y));
         }
 
         if (setup.FindSurface(plan.FloorSurfaceId) == null)
@@ -140,10 +141,31 @@ internal static class FloorPlanSync
     }
 
     /// <summary>
-    /// Raises a wall on a segment, or takes it down: a wall nothing was done to is removed, one that carries
-    /// content, a projection, a trace, regions or a patch of its name is lowered — it stays linked to the edge but stops following
-    /// the plan, and ticking the edge again raises that same surface.
+    /// Lifts a wall's bottom edge above the ground, or back onto it at 0. The wall keeps its size and rises as a
+    /// whole, so its top goes up by the same amount.
     /// </summary>
+    public static void SetWallElevation(Setup setup, FloorPlan plan, Guid wallId, float elevation)
+    {
+        var previous = plan.ElevationOf(wallId);
+        if (MathF.Abs(elevation) < 0.0005f)
+            plan.WallElevations.Remove(wallId);
+        else
+            plan.WallElevations[wallId] = elevation;
+
+        // The Board shows walls head-on above its floor line, so the card rises along.
+        if (setup.FindSurface(wallId)?.BoardPlacement is { } placement)
+            placement.Position += new Vector2(0, plan.ElevationOf(wallId) - previous);
+
+        Apply(setup, plan);
+    }
+
+    /// <summary>How far a plan lifts the surface off the ground; 0 for anything that is not a plan's wall.</summary>
+    public static float ElevationOf(Setup setup, Guid surfaceId)
+    {
+        var plan = setup.FindFloorPlanOf(surfaceId, out var segment);
+        return plan != null && segment >= 0 ? plan.ElevationOf(surfaceId) : 0;
+    }
+
     /// <summary>
     /// Applies the plan's wall height to the walls standing on it. A wall whose height still matches what the
     /// plan asked for before follows along; one that was given a height of its own keeps it — that difference
@@ -164,6 +186,11 @@ internal static class FloorPlanSync
         Apply(setup, plan);
     }
 
+    /// <summary>
+    /// Raises a wall on a segment, or takes it down: a wall nothing was done to is removed, one that carries
+    /// content, a projection, a trace, regions or a patch of its name is lowered — it stays linked to the edge but stops following
+    /// the plan, and ticking the edge again raises that same surface.
+    /// </summary>
     public static void SetWall(Setup setup, FloorPlan plan, int segment, bool on)
     {
         plan.EnsureWallSlots();
@@ -441,6 +468,9 @@ internal static class FloorPlanSync
         foreach (var plan in setup.FloorPlans)
         {
             plan.LoweredSurfaceIds.RemoveWhere(surfaceIds.Contains);
+            foreach (var id in surfaceIds)
+                plan.WallElevations.Remove(id);
+
             if (surfaceIds.Contains(plan.FloorSurfaceId))
                 plan.FloorSurfaceId = Guid.Empty;
 

@@ -13,7 +13,7 @@ namespace T3.Editor.Gui.Windows.OutputSetup;
 internal static class StagePlacing
 {
     /// <summary>
-    /// Stands <paramref name="wall"/> upright on the ground with its bottom-centre at <paramref name="bottomCentre"/>,
+    /// Stands <paramref name="wall"/> upright with its bottom-centre at <paramref name="bottomCentre"/>,
     /// facing along <paramref name="normal"/> (horizontal, unit length). Size is left alone.
     /// </summary>
     public static void PoseWall(Surface wall, Vector3 bottomCentre, Vector3 normal)
