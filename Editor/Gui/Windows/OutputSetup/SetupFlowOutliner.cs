@@ -36,6 +36,7 @@ internal sealed class SetupFlowOutliner
     {
         _requestAddPlugMenu = _ => _addPlugMenuRequested = true;
         _drawDisplayTooltip = DrawDisplayTooltip;
+        _drawSendParentTooltip = DrawSendParentTooltip;
     }
 
     /// <param name="onToggleCollapse">Collapses the strip to its header bar, or expands it again.</param>
@@ -632,6 +633,18 @@ internal sealed class SetupFlowOutliner
         DisplayLayoutView.DrawTooltip(_tooltipDisplayIndex);
     }
 
+    /// <summary>
+    /// Where a send lives when it isn't in the composition open in the graph, so a row whose op can't be seen there
+    /// still says where to find it.
+    /// </summary>
+    private void DrawSendParentTooltip()
+    {
+        if (_tooltipSendParent == null)
+            return;
+
+        ImGui.TextUnformatted("In composition parent " + _tooltipSendParent.SymbolChild.ReadableName);
+    }
+
     private static bool IsPlugBound(Setup setup, MachineConfig machineConfig, Guid plugId)
     {
         foreach (var binding in machineConfig.Bindings)
@@ -672,6 +685,10 @@ internal sealed class SetupFlowOutliner
             // The implicit full-frame slice is the source itself here: no item, its connections start at the source.
             var sliceCount = source == null ? 0 : SetupRelations.CountListedSlicesOfSource(setup, source.Id);
             var expanded = !_collapsedSources.Contains(childId);
+            var parent = instance.Parent;
+            var isNested = parent != null && parent != ProjectView.Focused?.CompositionInstance;
+            if (isNested)
+                _tooltipSendParent = parent;
 
             var args = new OutlinerItem.Args
                            {
@@ -682,6 +699,7 @@ internal sealed class SetupFlowOutliner
                                KeepsExpanderColumn = true,
                                // Nothing shows this source, so it steps back visually.
                                IsMuted = source == null || SetupRelations.CountConsumersOfSource(setup, source.Id) == 0,
+                               DrawTooltip = isNested ? _drawSendParentTooltip : null,
                            };
             if (DrawItem(selection, setup, ref args) == OutlinerItem.Actions.ToggleExpanded)
                 ToggleSourceExpanded(childId);
@@ -948,6 +966,10 @@ internal sealed class SetupFlowOutliner
     // would allocate a closure for every plug row every frame.
     private int _tooltipDisplayIndex;
     private readonly Action _drawDisplayTooltip;
+
+    // The parent op of the content row being drawn, read by its tooltip — a field for the same reason as above.
+    private Instance? _tooltipSendParent;
+    private readonly Action _drawSendParentTooltip;
     private readonly Action<SetupEntitySelection> _requestAddPlugMenu;
 
     // The column the items currently draw into (screen x + width); 0 width = whole window.

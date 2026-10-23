@@ -116,6 +116,17 @@ internal sealed class OutputSetupModeView
         return true;
     }
 
+    /// <summary>Returns to the operator output, e.g. so a freshly pinned op is what the window shows.</summary>
+    /// <returns>False if the window wasn't in setup mode.</returns>
+    public bool TryLeaveSetupMode()
+    {
+        if (!IsSetupMode)
+            return false;
+
+        _viewMode = ViewModes.Operator;
+        return true;
+    }
+
     /// <summary>The "Show Flow Outliner" toggle — hung inside the output window's breadcrumb menu.</summary>
     public void DrawOutlinerMenuItem()
     {
