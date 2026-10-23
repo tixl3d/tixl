@@ -389,6 +389,7 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
         _deviceContext.VertexShader.SetConstantBuffer(0, _vertexConstantBuffer);
         _deviceContext.PixelShader.SetShader(_pixelShader, null, 0);
         _deviceContext.PixelShader.SetSampler(0, _imGuiSampler);
+        var boundSampler = _imGuiSampler;
 
         //make sure we have no tessel/gs
         _deviceContext.HullShader.Set(null);
@@ -408,30 +409,51 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
         for (int n = 0; n < drawData.CmdListsCount; n++)
         {
             var cmdList = drawData.CmdLists[n];
+            var usePointFiltering = false;
             for (int cmdI = 0; cmdI < cmdList.CmdBuffer.Size; cmdI++)
             {
                 var cmd = cmdList.CmdBuffer[cmdI];
                 if (cmd.UserCallback != IntPtr.Zero)
                 {
-                    throw new NotImplementedException();
+                    // Zero-size commands used by ImageOutputCanvas to select point sampling for the image
+                    // quad that follows. They draw nothing themselves.
+                    if (cmd.UserCallback == ImGuiSamplerCallbacks.PointFilteringOn)
+                    {
+                        usePointFiltering = true;
+                    }
+                    else if (cmd.UserCallback == ImGuiSamplerCallbacks.PointFilteringOff)
+                    {
+                        usePointFiltering = false;
+                    }
+                    else
+                    {
+                        throw new NotImplementedException();
+                    }
+
+                    continue;
                 }
-                else
+
+                _deviceContext.Rasterizer.SetScissorRectangle((int)(cmd.ClipRect.X - pos.X), (int)(cmd.ClipRect.Y - pos.Y),
+                                                              (int)(cmd.ClipRect.Z - pos.X), (int)(cmd.ClipRect.W - pos.Y));
+
+                var sampler = usePointFiltering && _pointSampler != null ? _pointSampler : _imGuiSampler;
+                if (sampler != boundSampler)
                 {
-                    _deviceContext.Rasterizer.SetScissorRectangle((int)(cmd.ClipRect.X - pos.X), (int)(cmd.ClipRect.Y - pos.Y),
-                                                                  (int)(cmd.ClipRect.Z - pos.X), (int)(cmd.ClipRect.W - pos.Y));
-
-                    //This set native pointer without using QueryInterface or new, which allows a "GC free" cast
-
-                    _customImageView.NativePointer = cmd.TextureId;
-                    _deviceContext.PixelShader.SetShaderResource(0, _customImageView);
-                    _deviceContext.DrawIndexed((int)cmd.ElemCount,
-                                               idxOffset + (int)cmd.IdxOffset,
-                                               vtxOffset + (int)cmd.VtxOffset);
-
-                    //Set to IntPtr.Zero since that would create issue when disposing (on application Exit)
-                    //Internally it only resets the pointer and deref the device if it was queried (which in this case, did not)
-                    _customImageView.NativePointer = IntPtr.Zero;
+                    _deviceContext.PixelShader.SetSampler(0, sampler);
+                    boundSampler = sampler;
                 }
+
+                //This set native pointer without using QueryInterface or new, which allows a "GC free" cast
+
+                _customImageView.NativePointer = cmd.TextureId;
+                _deviceContext.PixelShader.SetShaderResource(0, _customImageView);
+                _deviceContext.DrawIndexed((int)cmd.ElemCount,
+                                           idxOffset + (int)cmd.IdxOffset,
+                                           vtxOffset + (int)cmd.VtxOffset);
+
+                //Set to IntPtr.Zero since that would create issue when disposing (on application Exit)
+                //Internally it only resets the pointer and deref the device if it was queried (which in this case, did not)
+                _customImageView.NativePointer = IntPtr.Zero;
             }
 
             idxOffset += cmdList.IdxBuffer.Size;
@@ -634,6 +656,23 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
 
         depthStencilDesc.BackFace = depthStencilDesc.FrontFace;
         _depthStencilState = new DepthStencilState(_device, depthStencilDesc);
+
+        // Point sampling for the Output View's unfiltered image mode. The default ImGui sampler stays linear
+        // for text and icons; ImageOutputCanvas brackets its image with callbacks that select this one only
+        // for that quad. Lod is clamped to 0 so the rendered pixels are shown as they are, not their mips.
+        DisposeObj(ref _pointSampler);
+        _pointSampler = new SamplerState(_device,
+                                         new SamplerStateDescription
+                                             {
+                                                 Filter = Filter.MinMagMipPoint,
+                                                 AddressU = TextureAddressMode.Clamp,
+                                                 AddressV = TextureAddressMode.Clamp,
+                                                 AddressW = TextureAddressMode.Clamp,
+                                                 MipLodBias = 0.0f,
+                                                 ComparisonFunction = Comparison.Always,
+                                                 MinimumLod = 0.0f,
+                                                 MaximumLod = 0.0f,
+                                             });
         return true;
     }
 
@@ -660,6 +699,7 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
             // Sadly a resource leak causes this to trigger memory exceptions.
             // So disabled for now
 
+            DisposeObj(ref _pointSampler);
             DisposeObj(ref _imGuiSampler);
             DisposeObj(ref _fontTextureView);
             DisposeObj(ref _ib);
@@ -692,6 +732,7 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
     private ShaderBytecode _pixelShaderBlob;
     private PixelShader _pixelShader;
     private SamplerState _imGuiSampler;
+    private SamplerState _pointSampler;
     private ShaderResourceView _fontTextureView;
     private RasterizerState _rasterizerState;
     private BlendState _blendState;

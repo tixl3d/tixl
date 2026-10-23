@@ -8,9 +8,23 @@ using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.OutputUi;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.UiContentDrawing;
 using T3.SystemUi;
 
 namespace T3.Editor.Gui.Windows;
+
+/// <summary>How the output image is resampled when it is drawn into the window.</summary>
+internal enum TextureFilteringModes
+{
+    /// <summary>Always bilinear, with mips: smooth at every zoom level.</summary>
+    Linear,
+
+    /// <summary>Always point sampled: the rendered texels stay crisp blocks.</summary>
+    Point,
+
+    /// <summary>Linear while the image is reduced, point once it is shown at its native size or larger.</summary>
+    Auto,
+}
 
 internal sealed class ImageOutputCanvas : ScalableCanvas
 {
@@ -44,6 +58,14 @@ internal sealed class ImageOutputCanvas : ScalableCanvas
     /// <summary>Set by the window when the shown op was already evaluated this frame but had to render again for
     /// this window's resolution preset; the caption then carries a warning.</summary>
     public bool IsRenderedTwice;
+
+    /// <summary>Resampling mode for the image. Set by the window from its persisted view state; other users
+    /// of this canvas keep the default linear filtering.</summary>
+    public TextureFilteringModes TextureFiltering = TextureFilteringModes.Linear;
+
+    /// <summary>Sub-pixel tolerance for <see cref="TextureFilteringModes.Auto"/>: a fitted image whose scale
+    /// rounds a fraction below 1 should still count as being shown at its native resolution.</summary>
+    private const float NativeResolutionTolerance = 0.5f;
         
     public void DrawTexture(Texture2D? texture)
     {
@@ -73,8 +95,27 @@ internal sealed class ImageOutputCanvas : ScalableCanvas
 
         var sizeOnScreen = Current.TransformDirection(size);
 
+        var usePointFiltering = TextureFiltering switch
+                                    {
+                                        TextureFilteringModes.Point => true,
+                                        // Point only once the image is not being reduced. Below that, the default
+                                        // linear sampler (with mips) avoids aliasing a large texture into a small view.
+                                        TextureFilteringModes.Auto => sizeOnScreen.X + NativeResolutionTolerance >= size.X
+                                                                      && sizeOnScreen.Y + NativeResolutionTolerance >= size.Y,
+                                        _ => false,
+                                    };
+
         var srv = SrvManager.GetSrvForTexture(texture);
+
+        // The ImGui renderer binds one sampler for all commands (linear, needed for text and icons). Bracket
+        // the image with zero-size callbacks so it can switch to point sampling for just this quad.
+        if (usePointFiltering)
+            ImGui.GetWindowDrawList().AddCallback(ImGuiSamplerCallbacks.PointFilteringOn, IntPtr.Zero);
+
         ImGui.Image((IntPtr)srv, sizeOnScreen);
+
+        if (usePointFiltering)
+            ImGui.GetWindowDrawList().AddCallback(ImGuiSamplerCallbacks.PointFilteringOff, IntPtr.Zero);
 
         if (ImGui.IsMouseHoveringRect(topLeftOnScreen, topLeftOnScreen + sizeOnScreen))
         {
