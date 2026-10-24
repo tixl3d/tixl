@@ -1,0 +1,442 @@
+{
+  "FormatVersion": 3,
+  "Id": "0102bb5f-f874-4f4b-a833-c610c9e7fdf3"/*RaymarchToCubeMap*/,
+  "Description": "Raymarches an SDF field into a cube map, e.g. for [DrawStageCanvas] or [SetEnvironment].\n\nEvery texel casts its own ray from Position, so the faces need no camera. With EquiAngular the texels are spaced evenly by angle, which evens out the resolution across each face; the cube map is marked as such, and consumers that support it decode it automatically.\n\nThe field is shaded like in [RaymarchField]. Material overrides the material from the context; lights and fog come from where the cube map is used.\n\nAKA: cubemap, environment map, skybox, reflection probe, 360, EAC\n\nSee also: [RaymarchField], [RenderToCubeMap], [TextureToCubeMap]",
+  "SymbolTags": "1",
+  "InputUis": [
+    {
+      "InputId": "02ff65d1-0f72-4faa-b70c-2a32bb556f0d"/*Color*/,
+      "Position": {
+        "X": -486.14932,
+        "Y": 794.4215
+      },
+      "Description": "Color multiplier. Alternatively use [SetSDFMaterial] or [SetMaterial]."
+    },
+    {
+      "InputId": "11fea42c-3529-4e04-aeb8-11d6cd566e8d"/*SdfField*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 574.1129,
+        "Y": 382.27707
+      }
+    },
+    {
+      "InputId": "165a2e29-f25c-4c1d-965a-9e0b59cc01a7"/*MinDistance*/,
+      "Position": {
+        "X": 104.6602,
+        "Y": 720.8185
+      },
+      "Description": "The distance threshold when the raymarching is marked as completed.",
+      "Min": 0.0,
+      "Max": 0.01,
+      "Scale": 0.001
+    },
+    {
+      "InputId": "31298feb-7887-4fa7-8556-8f74e69b513d"/*StepSize*/,
+      "Position": {
+        "X": 104.6602,
+        "Y": 685.8185
+      },
+      "Description": "An initial scaling factor. Lowering this can be useful to reduce artifacts caused by invalid Lipschitz continuities (e.g. by applying noise).",
+      "Min": 0.9,
+      "Max": 1.1
+    },
+    {
+      "InputId": "39c62c6b-911c-49ee-8f71-abb3a7fc4ad6"/*Resolution*/,
+      "Position": {
+        "X": 104.6602,
+        "Y": 1270.8185
+      },
+      "Description": "Width and height of each cube face in pixels."
+    },
+    {
+      "InputId": "3bc4d148-6ace-4e75-b940-4e9498e8195c"/*UVMapping*/,
+      "Position": {
+        "X": 261.91522,
+        "Y": 491.31775
+      },
+      "Description": "Defines how texture coordinates for [SetMaterial] are generated: global or local triplanar, or a planar projection in local space."
+    },
+    {
+      "InputId": "5c700dc8-adee-4094-947e-b95e984dbe3f"/*AoDistance*/,
+      "Position": {
+        "X": 104.66019,
+        "Y": 1105.8182
+      },
+      "GroupTitle": "Appearance",
+      "Description": "Controls the distance and intensity of the Ambient Occlusion."
+    },
+    {
+      "InputId": "64fbb6c8-08e9-4599-8615-1a7cbdd5f276"/*AmbientOcclusion*/,
+      "Position": {
+        "X": -35.339844,
+        "Y": 930.8185
+      },
+      "Description": "Will apply an ambient occlusion color depending on the AO Distance parameter.\nYou can use the alpha channel to control the intensity.\nAlso try light colors to add some kind of inner glow effect.",
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "6c92f61f-cf24-4eaa-a72e-382b25b8aa07"/*MaxSteps*/,
+      "Position": {
+        "X": 104.6602,
+        "Y": 650.8185
+      },
+      "GroupTitle": "Quality",
+      "Description": "The number of raymarching steps. This has a major impact on the quality and performance. Normal values are between 50 and 150.\n",
+      "Min": 0.0,
+      "Max": 150.0,
+      "ClampMin": true
+    },
+    {
+      "InputId": "71641e7a-e7cb-43d5-af82-6a55d8d67b82"/*Rotation*/,
+      "Position": {
+        "X": 104.6602,
+        "Y": 1510.8185
+      },
+      "Description": "Rotation of the cube map in degrees. Keep at zero for reflections and environment lookups, which expect world-aligned cube maps."
+    },
+    {
+      "InputId": "8a7b385c-2346-4ff9-94f7-7e8de315f5d6"/*NormalSamplingD*/,
+      "Position": {
+        "X": 104.66019,
+        "Y": 1140.8185
+      },
+      "Description": "Defines the look-up distance when calculating the surface normal. This controls how sharp objects appear.\nToo small values will cause artifacts. Larger values will apply some sort of smoothing effect.",
+      "AddPadding": "True",
+      "Min": 0.0,
+      "Max": 0.1
+    },
+    {
+      "InputId": "90c4b4d6-ef09-48f1-ac8d-0d9763ce895a"/*GenerateMips*/,
+      "Position": {
+        "X": 104.6602,
+        "Y": 1390.8185
+      },
+      "Description": "Generates mip levels, e.g. for blurred reflections."
+    },
+    {
+      "InputId": "982f00a7-b57f-4aa5-8784-0bb5b340c2be"/*EquiAngular*/,
+      "Position": {
+        "X": 104.6602,
+        "Y": 1630.8185
+      },
+      "Description": "Spaces texels evenly by angle (EAC). Consumers have to support it."
+    },
+    {
+      "InputId": "9cec66d9-b274-4f34-89df-ec99994982e5"/*Position*/,
+      "Position": {
+        "X": 104.6602,
+        "Y": 1450.8185
+      },
+      "Description": "Origin of all rays in world space."
+    },
+    {
+      "InputId": "bc2060a0-edde-4691-86ae-1658e64abe02"/*DistToColor*/,
+      "Position": {
+        "X": 104.6602,
+        "Y": 1175.8185
+      },
+      "Description": "Blends the edges of the surface into the background to reduce artifacts when compositing."
+    },
+    {
+      "InputId": "cb08b59b-0863-4e87-aaf1-4e90962bffa0"/*MaxDistance*/,
+      "Position": {
+        "X": 104.66019,
+        "Y": 755.8185
+      },
+      "Description": "A threshold after which the raymarching is aborted.",
+      "Min": 0.0,
+      "Max": 1000.0
+    },
+    {
+      "InputId": "d62dc70b-700d-4aaf-aa1c-c716792184df"/*ClearColor*/,
+      "Position": {
+        "X": 104.6602,
+        "Y": 1330.8185
+      },
+      "Description": "Color where rays miss the field."
+    },
+    {
+      "InputId": "e2d60235-bbea-45da-8f7a-9d11d76253a4"/*Material*/,
+      "Position": {
+        "X": 104.6602,
+        "Y": 1570.8185
+      },
+      "Description": "Optional material that overrides the one from the context."
+    },
+    {
+      "InputId": "fab31a66-baf8-4bed-b364-91dde35e0ef9"/*TextureScale*/,
+      "Position": {
+        "X": 104.6602,
+        "Y": 1070.8182
+      },
+      "Description": "Scales the texture defined by [SetMaterial]."
+    },
+    {
+      "InputId": "fe0f0372-4a57-454e-9f6a-b65ad1d283a2"/*SpecularAA*/,
+      "Position": {
+        "X": 104.66019,
+        "Y": 1210.8185
+      },
+      "Description": "Increases roughness where normals change quickly to reduce flickering highlights.",
+      "Min": 0.0,
+      "Max": 5.0,
+      "ClampMin": true
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "04a18d89-8990-464a-8ecc-0f603b44b21d",
+      "SymbolName": "Lib.render._dx11.fxsetup.SetPixelAndVertexShaderStage",
+      "Position": {
+        "X": 992.9934,
+        "Y": 508.54218
+      }
+    },
+    {
+      "ChildId": "05e4ebe9-4a6a-4d64-a941-9a496839cc68",
+      "SymbolName": "Lib.render._dx11.api.InputAssemblerStage",
+      "Position": {
+        "X": 1350.3239,
+        "Y": 609.25226
+      }
+    },
+    {
+      "ChildId": "0667216d-478f-4854-a1e6-6b311b598306",
+      "SymbolName": "Lib.string.logic.PickStringPart",
+      "Position": {
+        "X": 401.91522,
+        "Y": 456.31775
+      }
+    },
+    {
+      "ChildId": "09f45b55-216a-4b5c-bc33-05f7308923dc",
+      "SymbolName": "Lib.render._dx11.api.Rasterizer",
+      "Position": {
+        "X": 1350.3239,
+        "Y": 644.25226
+      }
+    },
+    {
+      "ChildId": "1d29ab95-330a-48d5-a0f3-76ce20ba669b",
+      "SymbolName": "Lib.render._dx11.api.Draw",
+      "Position": {
+        "X": 1350.3239,
+        "Y": 784.25214
+      }
+    },
+    {
+      "ChildId": "1e4f59e7-18e4-40b0-b8cf-f18f2b5a346d",
+      "SymbolName": "Types.Gfx.RenderTargetBlendDescription",
+      "Position": {
+        "X": 889.58496,
+        "Y": 272.71463
+      }
+    },
+    {
+      "ChildId": "2f96c1fb-bf32-4e73-8be2-879a5e0578cc",
+      "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
+      "Position": {
+        "X": 852.9934,
+        "Y": 963.5422
+      }
+    },
+    {
+      "ChildId": "3e87843d-7eb1-414e-9857-0e8db741ac3b",
+      "SymbolName": "Types.Gfx.SamplerState",
+      "Position": {
+        "X": 852.9934,
+        "Y": 1068.5422
+      }
+    },
+    {
+      "ChildId": "41605222-0a75-4d34-a466-0aa5e3c5cb91",
+      "SymbolName": "Lib.io.file.ReadFile",
+      "Position": {
+        "X": 237.25018,
+        "Y": 389.74982
+      }
+    },
+    {
+      "ChildId": "54c99ee5-78cc-4825-a28b-e4024bb6679d",
+      "SymbolName": "Lib.flow.Execute",
+      "Position": {
+        "X": 1490.3239,
+        "Y": 574.2522
+      }
+    },
+    {
+      "ChildId": "6fab49c8-3846-4d35-817f-40c2dc58be67",
+      "SymbolName": "Lib.render.shading._.GetPbrParameters",
+      "Position": {
+        "X": 577.4992,
+        "Y": 753.232
+      }
+    },
+    {
+      "ChildId": "73b6c36a-91b1-4895-8712-d2d2cb77cf1e",
+      "SymbolName": "Types.Gfx.SamplerState",
+      "Position": {
+        "X": 852.9934,
+        "Y": 1033.5422
+      }
+    },
+    {
+      "ChildId": "76868d26-3617-45f2-b272-1b595539d353",
+      "SymbolName": "Types.Gfx.PixelShaderFromSource",
+      "Position": {
+        "X": 852.9934,
+        "Y": 543.5422
+      }
+    },
+    {
+      "ChildId": "78c0ec94-be6d-4c71-943c-5e43905ce3b8",
+      "SymbolName": "Types.Gfx.RasterizerState",
+      "Position": {
+        "X": 1210.3239,
+        "Y": 644.25226
+      }
+    },
+    {
+      "ChildId": "85b077d8-bcb1-4b8a-a04b-58c4d0a5abca",
+      "SymbolName": "Types.Gfx.DepthStencilState",
+      "Position": {
+        "X": 771.728,
+        "Y": 1310.7704
+      }
+    },
+    {
+      "ChildId": "963ef259-cf61-4a33-bbcb-479da9d729c5",
+      "SymbolName": "Lib.numbers.color.BlendColors",
+      "Position": {
+        "X": -346.14932,
+        "Y": 794.4215
+      }
+    },
+    {
+      "ChildId": "a1c062cb-6c68-43c5-9169-610bb57773eb",
+      "SymbolName": "Lib.render._dx11.api.FloatsToBuffer",
+      "Style": "Resizable",
+      "Size": {
+        "X": 53.72168,
+        "Y": 751.5494
+      },
+      "Position": {
+        "X": 244.66019,
+        "Y": 615.8185
+      }
+    },
+    {
+      "ChildId": "a6abf7ea-3d55-4136-ad8e-c25828bb6f0c",
+      "SymbolName": "Types.Gfx.BlendState",
+      "Position": {
+        "X": 1029.585,
+        "Y": 272.71463
+      }
+    },
+    {
+      "ChildId": "b4daa0f0-428e-4c3a-9b80-16b884d430a2",
+      "SymbolName": "Types.Gfx.VertexShader",
+      "Position": {
+        "X": 992.9934,
+        "Y": 473.54218
+      }
+    },
+    {
+      "ChildId": "b8773240-5218-4217-8475-975199bc0235",
+      "SymbolName": "Lib.field.render._.GenerateShaderGraphCode",
+      "Position": {
+        "X": 574.1129,
+        "Y": 417.27707
+      }
+    },
+    {
+      "ChildId": "bbf2f626-f317-46e9-b551-e7e257f81205",
+      "SymbolName": "Types.Gfx.DepthStencilState",
+      "Position": {
+        "X": 1029.585,
+        "Y": 307.71463
+      }
+    },
+    {
+      "ChildId": "d211bef5-f50f-447f-aa59-fd771fb0115d",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
+      "Position": {
+        "X": 104.66019,
+        "Y": 790.8185
+      }
+    },
+    {
+      "ChildId": "db0daf0f-2e6b-4252-86f6-cb6c882bf3ed",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
+      "Position": {
+        "X": 104.66019,
+        "Y": 930.8185
+      }
+    },
+    {
+      "ChildId": "e39b8798-65df-44f0-9cdb-6e0a151f6c21",
+      "SymbolName": "Lib.render._dx11.api._TransformsCBuffer",
+      "Position": {
+        "X": 852.9934,
+        "Y": 648.5422
+      }
+    },
+    {
+      "ChildId": "eb67bccc-023e-4816-942f-03500c49420e",
+      "SymbolName": "Lib.render.shading._.ContextCBuffers",
+      "Position": {
+        "X": 852.9934,
+        "Y": 683.5422
+      }
+    },
+    {
+      "ChildId": "eca458f1-7e62-479e-aae9-c439199e8dd9",
+      "SymbolName": "Lib.render._dx11.api.OutputMergerStage",
+      "Position": {
+        "X": 1169.585,
+        "Y": 272.71463
+      }
+    },
+    {
+      "ChildId": "fe2fd76e-15eb-4ea0-9356-042577214232",
+      "SymbolName": "Lib.flow.context.GetForegroundColor",
+      "Position": {
+        "X": -486.14932,
+        "Y": 829.4215
+      }
+    },
+    {
+      "ChildId": "cce7cd0b-bce3-4a64-9e85-ba5d6c6017b4",
+      "SymbolName": "Lib.field.render._._RenderCubeMapFaces",
+      "Position": {
+        "X": 1690.3239,
+        "Y": 574.2522
+      }
+    },
+    {
+      "ChildId": "efeb7291-5b7b-4e8a-b7bf-9d2e535dcfe0",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
+      "Position": {
+        "X": 44.66019,
+        "Y": 915.8185
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "6c747f6f-6d26-4362-a6e0-bc519c9fe0c7",
+      "Position": {
+        "X": 1940.3239,
+        "Y": 574.2522
+      }
+    },
+    {
+      "OutputId": "b239b3b1-6417-4fc0-9e45-ebb3bd2d881b",
+      "Position": {
+        "X": 2065.2878,
+        "Y": 819.34204
+      }
+    }
+  ]
+}

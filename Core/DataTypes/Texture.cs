@@ -17,8 +17,25 @@ namespace T3.Core.DataTypes;
 
 public sealed class Texture2D(T3.Graphics.Compat.Texture2D texture) : Texture<T3.Graphics.Compat.Texture2D>(texture)
 {
+    /// <summary>
+    /// How the texels of a cube map map to directions.
+    /// </summary>
+    public enum CubeMapLayouts
+    {
+        Standard,
+
+        /** Texels are spaced evenly by angle, which evens out the resolution across a face. */
+        EquiAngular,
+    }
+
     public override string Name { get => TextureObject.DebugName ?? string.Empty; set => TextureObject.DebugName = value; }
     public readonly Texture2DDescription Description = texture.Description;
+
+    /// <summary>
+    /// Set by the operator that renders the cube map and read by the ones sampling it. A cube map derived
+    /// from another one does not inherit it.
+    /// </summary>
+    public CubeMapLayouts CubeMapLayout { get; set; }
 
     [SupportedOSPlatform("windows")]
     public static Texture2D CreateFromBitmap(Device device, BitmapSource bitmapSource)
