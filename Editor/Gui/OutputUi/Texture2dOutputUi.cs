@@ -27,6 +27,13 @@ internal sealed class Texture2dOutputUi : OutputUi<Texture2D>
             if (texture == null || texture.IsDisposed)
                 return;
 
+            if ((texture.Description.OptionFlags & T3.Graphics.Compat.ResourceOptionFlags.TextureCube) != 0)
+            {
+                _cubeMapPreview ??= new CubeMapPreview();
+                _cubeMapPreview.Draw(texture);
+                return;
+            }
+
             try
             {
                 if (texture.Description.ArraySize > 1)
@@ -47,4 +54,6 @@ internal sealed class Texture2dOutputUi : OutputUi<Texture2D>
             Debug.Assert(false);
         }
     }
+
+    private CubeMapPreview _cubeMapPreview;
 }
