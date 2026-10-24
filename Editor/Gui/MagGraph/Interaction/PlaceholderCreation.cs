@@ -384,6 +384,19 @@ internal sealed class PlaceholderCreation
                 {
                     var newItemOutput = newInstance.Outputs[0];
 
+                    // Below the lowest op of a stack the new op becomes the stack's end, so it takes over
+                    // the connections leaving to the right. Within a stack only the part below moves on.
+                    var hasConnectionBelow = false;
+                    foreach (var mc in _snappedSourceOutputLine.ConnectionsOut)
+                    {
+                        if (mc.Style is MagGraphConnection.ConnectionStyles.BottomToTop
+                            or MagGraphConnection.ConnectionStyles.MainOutToMainInSnappedVertical)
+                        {
+                            hasConnectionBelow = true;
+                            break;
+                        }
+                    }
+
                     // Reroute original connections...
                     foreach (var mc in _snappedSourceOutputLine.ConnectionsOut)
                     {
@@ -394,7 +407,8 @@ internal sealed class PlaceholderCreation
                         }
 
                         var splitVertically = _connectionOrientation == MagGraphItem.Directions.Vertical
-                                              && mc.Style == MagGraphConnection.ConnectionStyles.BottomToTop;
+                                              && (mc.Style == MagGraphConnection.ConnectionStyles.BottomToTop
+                                                  || (!hasConnectionBelow && mc.Style == MagGraphConnection.ConnectionStyles.RightToLeft));
 
                         var splitHorizontal = _connectionOrientation == MagGraphItem.Directions.Horizontal
                                               && mc.Style == MagGraphConnection.ConnectionStyles.RightToLeft;
