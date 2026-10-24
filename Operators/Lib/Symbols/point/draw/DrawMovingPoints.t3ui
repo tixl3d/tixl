@@ -56,8 +56,8 @@
       "InputId": "5df235ec-5147-4e6b-bea3-8c2e76045c19"/*GPoints*/,
       "Relevancy": "Required",
       "Position": {
-        "X": 1250.2985,
-        "Y": 3759.3318
+        "X": 1339.8723,
+        "Y": 3737.1438
       }
     },
     {
@@ -165,8 +165,8 @@
       "ChildId": "13cf69b5-f67a-44d1-bd96-ef5d7d60781f",
       "SymbolName": "Lib.image.generate.basic.Blob",
       "Position": {
-        "X": 1794.1873,
-        "Y": 4561.5557
+        "X": 2449.8691,
+        "Y": 4375.3174
       }
     },
     {
@@ -265,14 +265,6 @@
       "Position": {
         "X": 2449.8691,
         "Y": 4007.346
-      }
-    },
-    {
-      "ChildId": "75268f34-5013-4490-a4d3-001517bd40bf",
-      "SymbolName": "Lib.image.generate.load.LoadImage",
-      "Position": {
-        "X": 2215.0034,
-        "Y": 4401.4136
       }
     },
     {

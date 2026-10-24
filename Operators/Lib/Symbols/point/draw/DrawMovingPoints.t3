@@ -226,9 +226,14 @@
       "SymbolName": "Lib.numbers.anim.time.HasTimeChanged",
       "InputValues": [
         {
+          "Id": "5ac02169-6b75-4176-ae0a-04cab6c4ce13"/*WhichTime*/,
+          "Type": "System.Int32",
+          "Value": 1
+        },
+        {
           "Id": "bc112889-77a8-4967-a9b7-683b7c7017fe"/*Mode*/,
           "Type": "System.Int32",
-          "Value": 2
+          "Value": 3
         }
       ],
       "Outputs": []
@@ -276,19 +281,6 @@
       "SymbolId": "cd43942a-887e-4e34-bc54-0c2e5e8bc2af",
       "SymbolName": "Lib.numbers.bool.convert.BoolToInt",
       "InputValues": [],
-      "Outputs": []
-    },
-    {
-      "Id": "75268f34-5013-4490-a4d3-001517bd40bf"/*LoadImage*/,
-      "SymbolId": "0b3436db-e283-436e-ba85-2f3a1de76a9d",
-      "SymbolName": "Lib.image.generate.load.LoadImage",
-      "InputValues": [
-        {
-          "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
-          "Type": "System.String",
-          "Value": "Lib:images/basic/white-dot-256px.png"
-        }
-      ],
       "Outputs": []
     },
     {
@@ -687,6 +679,12 @@
       "SourceSlotId": "5df235ec-5147-4e6b-bea3-8c2e76045c19",
       "TargetParentOrChildId": "7ea9e363-105e-432c-b9e4-17bb4d5065fe",
       "TargetSlotId": "07ca7e81-02b8-4cb4-92f4-7afaaa07b751"
+    },
+    {
+      "SourceParentOrChildId": "3c19f3a1-74e6-45dc-adf6-abe5e907aa1a",
+      "SourceSlotId": "4883b1ec-16c1-422f-8db6-c74c3d48e5be",
+      "TargetParentOrChildId": "7ea9e363-105e-432c-b9e4-17bb4d5065fe",
+      "TargetSlotId": "513d0146-e0c0-4e27-a3dc-862c1f56e219"
     },
     {
       "SourceParentOrChildId": "7ea9e363-105e-432c-b9e4-17bb4d5065fe",

@@ -1,4 +1,5 @@
 #nullable enable
+using T3.Core.Animation;
 using T3.Core.Rendering;
 
 namespace Lib.render._dx11.api;
@@ -6,6 +7,22 @@ namespace Lib.render._dx11.api;
 [Guid("a60adc26-d7c6-4615-af78-8d2d6da46b79")]
 internal sealed class _TransformsCBuffer : Instance<_TransformsCBuffer>
 {
+    /** The transforms one repeated pass of a frame wrote this frame and the frame before. */
+    private sealed class PassBuffers
+    {
+        public Buffer? Current;
+        public Buffer? Previous;
+        public int LastUpdateFrame = -1;
+
+        public void Dispose()
+        {
+            Current?.Dispose();
+            Current = null;
+            Previous?.Dispose();
+            Previous = null;
+        }
+    }
+
     [Output(Guid = "7A76D147-4B8E-48CF-AA3E-AAC3AA90E888", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
     public readonly Slot<Buffer?> Buffer = new();
 
@@ -18,59 +35,67 @@ internal sealed class _TransformsCBuffer : Instance<_TransformsCBuffer>
         Buffer.UpdateAction += Update;
     }
 
-    private void EnsureAllocated()
-    {
-        if (_cbA != null && !_cbA.IsDisposed) return;
-
-        var dev = ResourceManager.Device;
-
-        int size = System.Runtime.InteropServices.Marshal.SizeOf(typeof(TransformBufferLayout));
-        size = (size + 15) & ~15; // 16-byte alignment for CBs
-
-        _cbA = new Buffer(dev, size,
-            ResourceUsage.Default,
-            BindFlags.ConstantBuffer,
-            CpuAccessFlags.None,
-            ResourceOptionFlags.None,
-            0);
-
-        _cbB = new Buffer(dev, size,
-            ResourceUsage.Default,
-            BindFlags.ConstantBuffer,
-            CpuAccessFlags.None,
-            ResourceOptionFlags.None,
-            0);
-
-        _cbA.DebugName = nameof(_TransformsCBuffer) + "_A";
-        _cbB.DebugName = nameof(_TransformsCBuffer) + "_B";
-    }
-
     private void Update(EvaluationContext context)
     {
-        EnsureAllocated();
+        // Cube map faces and motion blur samples re-evaluate within one frame with different cameras.
+        // Each pass keeps its own history, so Prev is the same view one frame earlier and not the previous pass.
+        context.IntVariables.TryGetValue(RepeatPassVariableName, out var passIndex);
+        var pass = GetPassBuffers(Math.Clamp(passIndex, 0, MaxRepeatPasses - 1));
 
+        var isFirstUse = pass.Current == null || pass.Current.IsDisposed;
+        if (isFirstUse)
+        {
+            pass.Dispose();
+            pass.Current = CreateConstBuffer("A");
+            pass.Previous = CreateConstBuffer("B");
+        }
+        else if (pass.LastUpdateFrame != Playback.FrameCount)
+        {
+            (pass.Current, pass.Previous) = (pass.Previous, pass.Current);
+        }
 
-        // Swap roles: _current will be written this frame, _previous is what we output as ‘Prev’
-        var current = _toggle ? _cbA : _cbB;
-        var previous = _toggle ? _cbB : _cbA;
+        pass.LastUpdateFrame = Playback.FrameCount;
 
         var hasCam = TryGetCamera(context, out var camera);
 
-        // Write *current* with this frame’s data
         var data = hasCam
             ? new TransformBufferLayout(camera!.CameraToClipSpace, camera.WorldToCamera, context.ObjectToWorld)
             : new TransformBufferLayout(context.CameraToClipSpace, context.WorldToCamera, context.ObjectToWorld);
 
-        if(current != null)
-            ResourceManager.UpdateConstBuffer(data, current);
+        ResourceManager.UpdateConstBuffer(data, pass.Current!);
 
-        // Expose buffers
-        Buffer.Value = current;
-        PrevBuffer.Value = previous;
+        // Without history, report no motion instead of reprojecting through uninitialized matrices.
+        if (isFirstUse)
+            ResourceManager.UpdateConstBuffer(data, pass.Previous!);
+
+        Buffer.Value = pass.Current;
+        PrevBuffer.Value = pass.Previous;
         Buffer.DirtyFlag.Clear();
         PrevBuffer.DirtyFlag.Clear();
+    }
 
-        _toggle = !_toggle;
+    private PassBuffers GetPassBuffers(int passIndex)
+    {
+        if (passIndex >= _passes.Length)
+            Array.Resize(ref _passes, passIndex + 1);
+
+        return _passes[passIndex] ??= new PassBuffers();
+    }
+
+    private static Buffer CreateConstBuffer(string suffix)
+    {
+        int size = System.Runtime.InteropServices.Marshal.SizeOf(typeof(TransformBufferLayout));
+        size = (size + 15) & ~15; // 16-byte alignment for CBs
+
+        return new Buffer(ResourceManager.Device, size,
+                          ResourceUsage.Default,
+                          BindFlags.ConstantBuffer,
+                          CpuAccessFlags.None,
+                          ResourceOptionFlags.None,
+                          0)
+                   {
+                       DebugName = nameof(_TransformsCBuffer) + "_" + suffix
+                   };
     }
 
     private bool TryGetCamera(EvaluationContext context, [NotNullWhen(true)] out ICameraPropertiesProvider? camera)
@@ -95,17 +120,20 @@ internal sealed class _TransformsCBuffer : Instance<_TransformsCBuffer>
     protected override void Dispose(bool disposing)
     {
         if (!disposing) return;
-        _cbA?.Dispose();
-        _cbA = null;
-        _cbB?.Dispose();
-        _cbB = null;
+        foreach (var pass in _passes)
+        {
+            pass?.Dispose();
+        }
     }
 
 
     [Input(Guid = "55DBF5B7-B3D2-4D61-86D5-AC3B167244B7")]
     public readonly InputSlot<Object> CameraReference = new();
 
+    private const string RepeatPassVariableName = "__MotionBlurPass";
 
-    private Buffer? _cbA, _cbB; // ping-pong
-    private bool _toggle;
+    /** Bounds the per-pass history against unexpected pass indices. */
+    private const int MaxRepeatPasses = 64;
+
+    private PassBuffers?[] _passes = new PassBuffers?[1];
 }
