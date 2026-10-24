@@ -480,7 +480,8 @@ PSOutput psMain(vsOutput input)
     litColor *= fieldColor;
 
     // Fog
-    float depth = dot(eye - p, -input.viewDir);
+    // Along the ray rather than along the view axis, so fog matches where views meet, e.g. on cube map faces.
+    float depth = length(p - eye);
     float fog = FogDistance <= 0 ? 0 : pow(saturate(depth / FogDistance), FogBias);
 
     litColor.rgb = lerp(litColor.rgb * fieldColor.rgb, FogColor.rgb, fog * FogColor.a);
@@ -495,7 +496,8 @@ PSOutput psMain(vsOutput input)
     // result.color = DEBUG_RESULT * float4(0, 0, 1, 1);
 
     float viewZ = mul(float4(p, 1), WorldToCamera).z;
-    result.depth = ComputeDepthFromViewZ(viewZ);
+    // A ray that only came close to the surface is faded by DistToColor and has no surface to put into the depth buffer.
+    result.depth = a >= 0.999 ? ComputeDepthFromViewZ(viewZ) : 1;
     result.Normal = float4(normal, 1.0);
     return result;
 }

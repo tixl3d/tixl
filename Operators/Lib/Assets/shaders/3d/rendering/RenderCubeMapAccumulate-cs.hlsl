@@ -1,8 +1,9 @@
-#include "shared/cubemap-eac.hlsl"
-
-// Progressive refinement of a raymarched cube map. Each frame raymarches one texel per tile into Current.
-// resolveMain blends those samples into the history (reprojected when the cube moved), fillMain fills texels
-// that have no sample yet from the finest grid the sampling order has completed.
+// Progressive rendering for [RenderToCubeMap]. Each frame renders one texel per tile of every face into Current.
+// resolveMain blends those samples into the history (reprojected when the cube moved), fillMain fills texels that
+// have no sample yet from the finest grid the sampling order has completed.
+//
+// Everything here is in the faces' rendered orientation. The faces are rendered with right-handed views, so they
+// are mirrored against the cube map's texel layout; only the conversions between texels and directions flip.
 
 cbuffer Params : register(b0)
 {
@@ -15,75 +16,46 @@ cbuffer Params : register(b0)
 
     int ResetHistory;
     int IsMoving;
-    int EquiAngular;
     float MaxSamples;
-
     float MaxSamplesWhileMoving;
+
     float DisocclusionThreshold;
     int LatticeSpacing;
     float NeighborhoodClipping;
+    float NearClip;
 
-    float4 MissColor;
+    float FarClip;
 }
 
 // Both passes share these: resolve reads the previous history and writes the new one,
-// fill reads the new history and writes the cube map into ResultColor.
+// fill reads the new history and writes the filled faces into ResultColor.
 Texture2DArray<float4> Current : register(t0);
 Texture2DArray<float4> SourceColor : register(t1);
 Texture2DArray<float2> SourceData : register(t2);
+Texture2DArray<float> CurrentDepth : register(t3);
 
 RWTexture2DArray<float4> ResultColor : register(u0);
 RWTexture2DArray<float2> ResultData : register(u1);
 
-// Same table as _RenderCubeMapFaces, in cube map order +X, -X, +Y, -Y, +Z, -Z.
+// In cube map order +X, -X, +Y, -Y, +Z, -Z, as the cube map addresses its texels.
 static const float3 FaceRight[6] = { float3(0, 0, -1), float3(0, 0, 1), float3(1, 0, 0), float3(1, 0, 0), float3(1, 0, 0), float3(-1, 0, 0) };
 static const float3 FaceDown[6] = { float3(0, -1, 0), float3(0, -1, 0), float3(0, 0, 1), float3(0, 0, -1), float3(0, -1, 0), float3(0, -1, 0) };
 static const float3 FaceForward[6] = { float3(1, 0, 0), float3(-1, 0, 0), float3(0, 1, 0), float3(0, -1, 0), float3(0, 0, 1), float3(0, 0, -1) };
 
-float3 TexelToCubeDirection(uint3 texel)
+float2 TexelFaceCoordinates(uint3 texel)
 {
     float2 uv = (texel.xy + 0.5) / Size * 2 - 1;
-    if (EquiAngular != 0)
-        uv = EacToCubeFace(uv);
+    uv.x = -uv.x;
+    return uv;
+}
 
+float3 TexelToCubeDirection(uint3 texel)
+{
+    float2 uv = TexelFaceCoordinates(texel);
     return normalize(FaceForward[texel.z] + uv.x * FaceRight[texel.z] + uv.y * FaceDown[texel.z]);
 }
 
-// Current holds the hit distance in alpha, a near miss's coverage negated, or 0 where the ray missed.
-float4 DecodeSample(float4 sample, out float hitDistance)
-{
-    bool isHit = sample.a > 0;
-    hitDistance = isHit ? sample.a : -1;
-    float coverage = isHit ? 1 : saturate(-sample.a);
-    return float4(lerp(MissColor.rgb, sample.rgb, coverage), lerp(MissColor.a, 1, coverage));
-}
-
-// Unsampled texels have no hit distance of their own this frame, so reprojection takes it from the coarse samples:
-// the texel's own tile if that hit, otherwise the closest neighbor tile, so edges reproject with the foreground.
-float GetCurrentHitDistance(uint3 texel)
-{
-    int2 tile = (int2)texel.xy / TileSize;
-    float ownDistance = Current[uint3(tile, texel.z)].a;
-    if (ownDistance > 0)
-        return ownDistance;
-
-    int lastTile = Size / TileSize - 1;
-    float closest = -1;
-    for (int y = -1; y <= 1; y++)
-    {
-        for (int x = -1; x <= 1; x++)
-        {
-            int2 neighbor = clamp(tile + int2(x, y), 0, lastTile);
-            float distance = Current[uint3(neighbor, texel.z)].a;
-            if (distance > 0 && (closest < 0 || distance < closest))
-                closest = distance;
-        }
-    }
-
-    return closest;
-}
-
-// Position on a face in texels, continuous, so it can be filtered.
+// Position on a face in rendered texels, continuous, so it can be filtered.
 float2 CubeDirectionToFacePosition(float3 direction, out uint face)
 {
     float3 a = abs(direction);
@@ -93,9 +65,7 @@ float2 CubeDirectionToFacePosition(float3 direction, out uint face)
 
     float major = dot(direction, FaceForward[face]);
     float2 uv = float2(dot(direction, FaceRight[face]), dot(direction, FaceDown[face])) / major;
-    if (EquiAngular != 0)
-        uv = CubeFaceToEac(uv);
-
+    uv.x = -uv.x;
     return (uv * 0.5 + 0.5) * Size;
 }
 
@@ -104,6 +74,51 @@ uint3 CubeDirectionToTexel(float3 direction)
     uint face;
     float2 position = CubeDirectionToFacePosition(direction, face);
     return uint3((uint2)clamp(position, 0, Size - 1), face);
+}
+
+int2 TileOf(uint3 texel)
+{
+    return (int2)texel.xy / TileSize;
+}
+
+// Distance from the face plane, or -1 where nothing was drawn.
+float PlanarDepthOfTile(int2 tile, uint face)
+{
+    int lastTile = Size / TileSize - 1;
+    float depth = CurrentDepth[uint3(clamp(tile, 0, lastTile), face)];
+    if (depth >= 1)
+        return -1;
+
+    return NearClip * FarClip / (FarClip - depth * (FarClip - NearClip));
+}
+
+// Along the texel's own ray instead of the face's axis, as the history stores it.
+float PlanarToRayDistance(float planarDepth, uint3 texel)
+{
+    return planarDepth * length(float3(TexelFaceCoordinates(texel), 1));
+}
+
+// Unsampled texels have no depth of their own this frame, so reprojection takes it from the coarse samples:
+// the texel's own tile if something was drawn there, otherwise the closest neighbor tile, so edges reproject
+// with the foreground.
+float GetCurrentRayDistance(uint3 texel)
+{
+    int2 tile = TileOf(texel);
+    float planarDepth = PlanarDepthOfTile(tile, texel.z);
+    if (planarDepth < 0)
+    {
+        for (int y = -1; y <= 1; y++)
+        {
+            for (int x = -1; x <= 1; x++)
+            {
+                float neighborDepth = PlanarDepthOfTile(tile + int2(x, y), texel.z);
+                if (neighborDepth > 0 && (planarDepth < 0 || neighborDepth < planarDepth))
+                    planarDepth = neighborDepth;
+            }
+        }
+    }
+
+    return planarDepth > 0 ? PlanarToRayDistance(planarDepth, texel) : -1;
 }
 
 // Reprojecting every frame with the nearest texel leaves edges ragged, and bilinear filtering blurs them a little more
@@ -159,7 +174,7 @@ float3 YCoCgToRgb(float3 c)
 // of over many frames. The box is the samples' mean ± NeighborhoodClipping standard deviations.
 float4 ClipToNeighborhood(float4 history, uint3 texel)
 {
-    int2 tile = (int2)texel.xy / TileSize;
+    int2 tile = TileOf(texel);
     int lastTile = Size / TileSize - 1;
     float3 sum = 0;
     float3 sumOfSquares = 0;
@@ -169,8 +184,7 @@ float4 ClipToNeighborhood(float4 history, uint3 texel)
     {
         for (int x = -1; x <= 1; x++)
         {
-            float unusedDistance;
-            float4 neighbor = DecodeSample(Current[uint3(clamp(tile + int2(x, y), 0, lastTile), texel.z)], unusedDistance);
+            float4 neighbor = Current[uint3(clamp(tile + int2(x, y), 0, lastTile), texel.z)];
             float3 neighborYCoCg = RgbToYCoCg(neighbor.rgb);
             sum += neighborYCoCg;
             sumOfSquares += neighborYCoCg * neighborYCoCg;
@@ -198,7 +212,7 @@ void resolveMain(uint3 texel : SV_DispatchThreadID)
         return;
 
     float4 color = 0;
-    float2 data = float2(-1, 0); // hit distance (negative for a miss), sample count
+    float2 data = float2(-1, 0); // distance along the ray (negative where nothing was drawn), sample count
 
     if (ResetHistory == 0)
     {
@@ -209,12 +223,12 @@ void resolveMain(uint3 texel : SV_DispatchThreadID)
             float3 direction = mul(TexelToCubeDirection(texel), (float3x3)CubeToWorld);
             float3 origin = CubeToWorld[3].xyz;
 
-            float hitDistance = GetCurrentHitDistance(texel);
-            if (hitDistance > 0)
+            float rayDistance = GetCurrentRayDistance(texel);
+            if (rayDistance > 0)
             {
                 // Look up where the surface point was seen from the previous center, and keep it only if the
                 // history saw the same surface there.
-                float3 previousPoint = mul(float4(origin + direction * hitDistance, 1), WorldToPrevCube).xyz;
+                float3 previousPoint = mul(float4(origin + direction * rayDistance, 1), WorldToPrevCube).xyz;
                 historyDirection = previousPoint;
                 source = CubeDirectionToTexel(previousPoint);
                 float expectedDistance = length(previousPoint);
@@ -225,8 +239,8 @@ void resolveMain(uint3 texel : SV_DispatchThreadID)
             }
             else
             {
-                // Nothing near was hit: the background is infinitely far away, so only the rotation moves it. History
-                // that saw geometry there belongs to something that has moved away.
+                // Nothing near was drawn: the background is infinitely far away, so only the rotation moves it.
+                // History that saw geometry there belongs to something that has moved away.
                 historyDirection = mul(direction, (float3x3)WorldToPrevCube);
                 source = CubeDirectionToTexel(historyDirection);
                 data = SourceData[source];
@@ -250,11 +264,12 @@ void resolveMain(uint3 texel : SV_DispatchThreadID)
     bool isSampled = all(texel.xy % (uint)TileSize == (uint2)SampleOffset);
     if (isSampled)
     {
-        float hitDistance;
-        float4 sampleColor = DecodeSample(Current[uint3(texel.xy / (uint)TileSize, texel.z)], hitDistance);
+        int2 tile = TileOf(texel);
+        float4 sampleColor = Current[uint3(tile, texel.z)];
+        float planarDepth = PlanarDepthOfTile(tile, texel.z);
         float sampleCount = min(data.y + 1, MaxSamples);
         color = data.y > 0 ? lerp(color, sampleColor, 1 / sampleCount) : sampleColor;
-        data = float2(hitDistance, sampleCount);
+        data = float2(planarDepth > 0 ? PlanarToRayDistance(planarDepth, texel) : -1, sampleCount);
     }
 
     ResultColor[texel] = color;
@@ -293,8 +308,5 @@ void fillMain(uint3 texel : SV_DispatchThreadID)
         weightSum += w;
     }
 
-    float unusedDistance;
-    ResultColor[texel] = weightSum > 0
-                         ? sum / weightSum
-                         : DecodeSample(Current[uint3(texel.xy / (uint)TileSize, texel.z)], unusedDistance);
+    ResultColor[texel] = weightSum > 0 ? sum / weightSum : Current[uint3(TileOf(texel), texel.z)];
 }

@@ -1,8 +1,24 @@
 {
   "FormatVersion": 3,
   "Id": "8f2cc172-318d-4b78-9db4-d3049240bec0"/*RenderToCubeMap*/,
-  "Description": "Renders the connected scene six times from one point into a cube map, e.g. for [ProjectOntoStage] or [SetEnvironment].\n\nThe cube map is placed with Position and Rotation, or follows a camera connected to CameraReference. Each face uses a 90° field of view. Cameras inside the connected scene are bypassed. During each face the int variable `CubeFace` holds the face index in cube map order (+X, -X, +Y, -Y, +Z, -Z).\n\nThe scene is evaluated six times per frame. Operators that advance state on every evaluation, like particle simulations or feedback effects, run six times as fast.\n\nAKA: cubemap, environment map, skybox, reflection probe, 360\n\nSee also: [TextureToCubeMap], [Equirectangle], [RenderTarget]",
+  "Description": "Renders the connected scene six times from one point into a cube map, e.g. for [ProjectOntoStage] or [SetEnvironment].\n\nThe cube map is placed with Position and Rotation, or follows a camera connected to CameraReference. Each face uses a 90° field of view. Cameras inside the connected scene are bypassed. During each face the int variable `CubeFace` holds the face index in cube map order (+X, -X, +Y, -Y, +Z, -Z).\n\nWith a TileSize above 1x1, each frame renders only one texel per tile and refines the rest over the following frames, from a coarse grid to every texel. With MaxSamples above 1, jittered samples keep accumulating, which anti-aliases the result. Moving the cube reprojects what was accumulated; changes to the scene are not detected, so use Reset or NeighborhoodClipping. Content that depends on the render resolution, like texture mip selection, point sizes or screen-space effects inside the scene, sees the reduced resolution.\n\nThe scene is evaluated six times per frame. Operators that advance state on every evaluation, like particle simulations or feedback effects, run six times as fast.\n\nAKA: cubemap, environment map, skybox, reflection probe, 360\n\nSee also: [TextureToCubeMap], [Equirectangle], [RenderTarget]",
   "InputUis": [
+    {
+      "InputId": "05e9a142-8821-4f0e-85f8-de3a6aa6a401"/*MaxSamples*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 690.0
+      },
+      "Description": "Number of jittered samples averaged per texel, which anti-aliases the result. Higher values smooth further but react slower to changes. 1 renders every frame afresh, as without accumulation."
+    },
+    {
+      "InputId": "0bebe9a7-ad9f-466a-899c-19e886c8940e"/*Reset*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 780.0
+      },
+      "Description": "Discards the accumulated samples, e.g. after changing the scene."
+    },
     {
       "InputId": "4b8e2f61-9c3a-4d7e-b5f0-2a6c8d1e3f97"/*Multisampling*/,
       "Position": {
@@ -20,15 +36,25 @@
       "Description": "Center of the cube map in world space. Ignored when CameraReference is connected."
     },
     {
+      "InputId": "75cbea04-c06b-4794-ad8d-a1426a351c3e"/*NeighborhoodClipping*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 735.0
+      },
+      "Description": "Limits the accumulated colors to what this frame's samples around each texel allow, so animation and moving edges stop ghosting. 0 disables it; around 1 is tight, higher values keep more fine detail. With large tiles, detail smaller than a tile can flicker when it is tight.",
+      "Min": 0.0,
+      "Max": 4.0
+    },
+    {
       "InputId": "7bc55c92-cd9b-4217-b958-9a06ec994364"/*ClearColor*/,
       "Position": {
         "X": -200.0,
         "Y": 150.0
       },
+      "Description": "Background color of each face.",
       "Min": 0.0,
       "Max": 1.0,
-      "ClampMin": true,
-      "Description": "Background color of each face."
+      "ClampMin": true
     },
     {
       "InputId": "9199affe-5613-4cfd-a09e-0b79e6b108f0"/*TextureFormat*/,
@@ -69,6 +95,14 @@
         "Y": 525.0
       },
       "Description": "Near and far clip distance of the faces. Ignored when a perspective camera is connected to CameraReference."
+    },
+    {
+      "InputId": "ec428f51-8929-495f-b548-946d4290e416"/*TileSize*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 645.0
+      },
+      "Description": "Renders only one texel per tile each frame and refines the rest over the following frames, from a coarse grid to every texel. 8x8 costs about 1/64 of a full render for pixel-heavy content like [RaymarchField] and needs 64 frames until every texel has a sample. Mesh vertices are still processed in full every frame. 1x1 renders every texel."
     },
     {
       "InputId": "f292b2fe-c340-40a0-9fd3-d1e19702f0bb"/*CameraReference*/,

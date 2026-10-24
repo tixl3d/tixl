@@ -3,6 +3,14 @@
   "Id": "8f2cc172-318d-4b78-9db4-d3049240bec0"/*RenderToCubeMap*/,
   "Inputs": [
     {
+      "Id": "05e9a142-8821-4f0e-85f8-de3a6aa6a401"/*MaxSamples*/,
+      "DefaultValue": 1
+    },
+    {
+      "Id": "0bebe9a7-ad9f-466a-899c-19e886c8940e"/*Reset*/,
+      "DefaultValue": false
+    },
+    {
       "Id": "4b8e2f61-9c3a-4d7e-b5f0-2a6c8d1e3f97"/*Multisampling*/,
       "DefaultValue": 4
     },
@@ -13,6 +21,10 @@
         "Y": 0.0,
         "Z": 0.0
       }
+    },
+    {
+      "Id": "75cbea04-c06b-4794-ad8d-a1426a351c3e"/*NeighborhoodClipping*/,
+      "DefaultValue": 0.05
     },
     {
       "Id": "7bc55c92-cd9b-4217-b958-9a06ec994364"/*ClearColor*/,
@@ -45,6 +57,10 @@
         "X": 0.01,
         "Y": 1000.0
       }
+    },
+    {
+      "Id": "ec428f51-8929-495f-b548-946d4290e416"/*TileSize*/,
+      "DefaultValue": 1
     },
     {
       "Id": "f292b2fe-c340-40a0-9fd3-d1e19702f0bb"/*CameraReference*/,
