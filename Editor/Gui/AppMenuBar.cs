@@ -63,6 +63,7 @@ internal static class AppMenuBar
             ImGui.PopStyleVar(3);
 
             DrawVersionIndicator();
+            AutoBackup.UnsavedChangesIndicator.Draw();
             DrawErrorsIndicator();
             DrawGpuMemoryIndicator();
             Windows.OutputSetup.OutputsIndicator.Draw();
