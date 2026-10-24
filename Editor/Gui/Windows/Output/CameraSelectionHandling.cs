@@ -215,6 +215,10 @@ internal sealed class CameraSelectionHandling
         if (TransformGizmoHandling.IsDragging)
             PreventCameraInteraction = true;
 
+        // A 2D output stays pannable unless a camera actually takes the mouse instead.
+        if (cameraForManipulation == null || PreventCameraInteraction)
+            PreventImageCanvasInteraction = false;
+
         if (cameraForManipulation != null)
         {
             _cameraInteraction.Update(cameraForManipulation, !PreventCameraInteraction);

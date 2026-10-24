@@ -170,8 +170,7 @@ internal sealed partial class OutputWindow : Window
                 var drawnType = UpdateAndDrawOutput(drawnInstance);
                 ImageOutputCanvas.Deactivate();
                 _camSelectionHandling.Update(drawnInstance, drawnType);
-                var editingFlags = _camSelectionHandling.PreventCameraInteraction 
-                                   | _camSelectionHandling.PreventImageCanvasInteraction
+                var editingFlags = _camSelectionHandling.PreventImageCanvasInteraction
                                    | SkillTraining.IsInPlayMode
                                    | drawnType != typeof(Texture2D)
                                        ? T3Ui.EditingFlags.PreventMouseInteractions
