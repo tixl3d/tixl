@@ -16,8 +16,37 @@ internal sealed class ImageOutputCanvas : ScalableCanvas
 {
     public void Update(T3Ui.EditingFlags editingFlags = T3Ui.EditingFlags.None)
     {
+        if (_isInteractionBlocked)
+            editingFlags |= T3Ui.EditingFlags.PreventMouseInteractions;
+
+        _isInteractionBlocked = false;
         UpdateCanvas(out var interactionState, editingFlags);
         UpdateViewMode(interactionState);
+    }
+
+    /// <summary>
+    /// Lets an output UI that handles the mouse itself, like the orbiting cube map preview, keep the canvas from
+    /// panning and zooming. Has to be called again every frame while drawing.
+    /// </summary>
+    internal void BlockInteractionThisFrame()
+    {
+        _isInteractionBlocked = true;
+    }
+
+    /// <summary>
+    /// Keeps <paramref name="areaOnCanvas"/> fitted to the window while the view is in fitted mode, as
+    /// <see cref="DrawTexture"/> does for a texture.
+    /// </summary>
+    internal void FitAreaIfFitted(ImRect areaOnCanvas)
+    {
+        if (_viewMode != Modes.Fitted)
+            return;
+
+        FitAreaOnCanvas(areaOnCanvas);
+        if (DisableDamping)
+        {
+            Scale = ScaleTarget;
+        }
     }
 
     public void SetAsCurrent()
@@ -56,16 +85,7 @@ internal sealed class ImageOutputCanvas : ScalableCanvas
             return;
 
         var size = new Vector2(texture.Description.Width, texture.Description.Height);
-        var area = new ImRect(0, 0, size.X, size.Y);
-
-        if (_viewMode == Modes.Fitted)
-        {
-            Current.FitAreaOnCanvas(area);
-            if (DisableDamping)
-            {
-                Scale = ScaleTarget;
-            }                
-        }
+        Current.FitAreaIfFitted(new ImRect(0, 0, size.X, size.Y));
 
         var topLeft = Vector2.Zero;
         var topLeftOnScreen = Current.TransformPosition(topLeft);
@@ -84,51 +104,45 @@ internal sealed class ImageOutputCanvas : ScalableCanvas
             
         if (UserSettings.Config.ShowToolbar)
         {
-            string format;
-            if (srv == null || srv.IsDisposed)
-            {
-                format = "null?";
-            } 
-            else if (UserSettings.Config.ShowExplicitTextureFormatInOutputWindow)
-            {
-                format = srv.Description.Format.ToString();
-            }
-            else
-            {
-                switch (srv.Description.Format)
-                {
-                    case Format.R16G16B16A16_Float:
-                        format = "RGBA:16";
-                        break;
-                    case Format.R8G8B8A8_SNorm:
-                        format = "RGBA:8";
-                        break;
-                    default:
-                        format = srv.Description.Format.ToString();
-                        break;
-                }
-            }
-                
-            ImGui.PushFont(Fonts.FontSmall);
+            var format = srv == null || srv.IsDisposed ? "null?" : GetFormatLabel(srv.Description.Format);
             var zoom = Math.Abs(Scale.X) < 0.001f ? "" : $" ×{Scale.X:G2}";
-            var description = $"{size.X}x{size.Y}  {format} {zoom}";
-            var descriptionWidth = ImGui.CalcTextSize(description).X;
-
-            var textPos = new Vector2(WindowPos.X + (WindowSize.X - descriptionWidth) / 2,
-                                      WindowPos.Y + WindowSize.Y - 14 * T3Ui.UiScaleFactor);
-
-            var drawList = ImGui.GetWindowDrawList();
-            var shadowColor = UiColors.BackgroundFull.Fade(0.5f);
-            drawList.AddText(textPos + new Vector2(1,0), shadowColor, description );
-            drawList.AddText(textPos + new Vector2(-1,0), shadowColor, description );
-            drawList.AddText(textPos + new Vector2(0,1), shadowColor, description );
-            drawList.AddText(textPos + new Vector2(0,-1), shadowColor, description );
-            drawList.AddText(textPos, UiColors.ForegroundFull, description );
-            ImGui.PopFont();
-
-            if (IsRenderedTwice)
-                DrawRenderedTwiceWarning(drawList, textPos);
+            DrawCaption($"{size.X}x{size.Y}  {format} {zoom}");
         }
+    }
+
+    internal static string GetFormatLabel(Format format)
+    {
+        if (UserSettings.Config.ShowExplicitTextureFormatInOutputWindow)
+            return format.ToString();
+
+        return format switch
+                   {
+                       Format.R16G16B16A16_Float => "RGBA:16",
+                       Format.R8G8B8A8_SNorm     => "RGBA:8",
+                       _                         => format.ToString(),
+                   };
+    }
+
+    /// <summary>The line at the bottom of the window that describes what is shown.</summary>
+    internal void DrawCaption(string description)
+    {
+        ImGui.PushFont(Fonts.FontSmall);
+        var descriptionWidth = ImGui.CalcTextSize(description).X;
+
+        var textPos = new Vector2(WindowPos.X + (WindowSize.X - descriptionWidth) / 2,
+                                  WindowPos.Y + WindowSize.Y - 14 * T3Ui.UiScaleFactor);
+
+        var drawList = ImGui.GetWindowDrawList();
+        var shadowColor = UiColors.BackgroundFull.Fade(0.5f);
+        drawList.AddText(textPos + new Vector2(1,0), shadowColor, description );
+        drawList.AddText(textPos + new Vector2(-1,0), shadowColor, description );
+        drawList.AddText(textPos + new Vector2(0,1), shadowColor, description );
+        drawList.AddText(textPos + new Vector2(0,-1), shadowColor, description );
+        drawList.AddText(textPos, UiColors.ForegroundFull, description );
+        ImGui.PopFont();
+
+        if (IsRenderedTwice)
+            DrawRenderedTwiceWarning(drawList, textPos);
     }
         
     //private static readonly Color ShadowColor = new Color(0.0f, 0.0f, 0.0f, 0.6f);
@@ -192,6 +206,8 @@ internal sealed class ImageOutputCanvas : ScalableCanvas
         }
     }
 
+
+    private bool _isInteractionBlocked;
 
     public enum Modes
     {
