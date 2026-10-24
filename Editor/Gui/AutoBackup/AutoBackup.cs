@@ -22,6 +22,11 @@ internal static class AutoBackup
 
     public static int SecondsBetweenSaves { get; set; } = 3 * 60;
 
+    /** Each backup also saves all modified operators, so this is when unsaved changes reach the disk. */
+    public static double SecondsUntilNextSave => Math.Max(0, SecondsBetweenSaves - _stopwatch.Elapsed.TotalSeconds);
+
+    public static double? SecondsSinceLastBackup => _hasBackedUpInSession ? _stopwatch.Elapsed.TotalSeconds : null;
+
     /// <summary>
     /// Per-project subfolder where backup zips are written, relative to a project's root folder.
     /// </summary>
@@ -44,6 +49,7 @@ internal static class AutoBackup
         ProjectView.SnapshotWindowLayoutForFocusedProject();
         Task.Run(CreateBackupCallback);
         _stopwatch.Restart();
+        _hasBackedUpInSession = true;
     }
 
     /// <summary>
@@ -894,5 +900,6 @@ internal static class AutoBackup
     };
 
     private static readonly Stopwatch _stopwatch = Stopwatch.StartNew();
+    private static bool _hasBackedUpInSession;
     private static bool _isSaving;
 }
