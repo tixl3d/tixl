@@ -857,6 +857,9 @@ internal sealed partial class MagGraphView
         }
 
         // Draw output sockets...
+        var isTabInsertionItem = GraphStates.TryGetItemForTabInsertion(context, out var tabInsertionItem) && tabInsertionItem == item;
+        var tabInsertionDirection = GraphStates.TabInsertionDirection;
+
         var count = item.GetOutputAnchorCount();
         MagGraphItem.OutputAnchorPoint outputAnchor = default;
         for (var index = 0; index < count; index++)
@@ -927,10 +930,16 @@ internal sealed partial class MagGraphView
                                   && Vector2.Distance(ImGui.GetMousePos(), center) < 7 * CanvasScale
                                   && context.StateMachine.CurrentState == GraphStates.Default;
             
+            // Previews where Tab would insert, which is always at the first output line.
+            var isTabInsertionAnchor = isTabInsertionItem
+                                       && outputAnchor.OutputLineIndex == 0
+                                       && outputAnchor.Direction == tabInsertionDirection;
+            var showPlus = isOutputHovered || isTabInsertionAnchor;
+
             var anchorOutlineColor = ColorVariations.OperatorOutline.Apply(type2UiProperties.Color);
 
             var fillColor = ColorVariations.OperatorBackground.Apply(type2UiProperties.Color);
-            if (isOutputHovered)
+            if (showPlus)
             {
                 fillColor = ColorVariations.Highlight.Apply(type2UiProperties.Color);
             }
@@ -939,18 +948,18 @@ internal sealed partial class MagGraphView
                 fillColor = ColorVariations.ConnectionLines.Apply(type2UiProperties.Color).Fade(Blink);
             }
 
-            var hoverOutputFactor = isOutputHovered ? 1.3f : 1;
+            var hoverOutputFactor = showPlus ? 1.3f : 1;
  
             if (!hasSnappedConnection
                 || isItemHovered
-                || isOutputHovered)
+                || showPlus)
             {
                 var radius = MathF.Min((2 + 2 * hoverOutputFactor) , 10) * CanvasScale;
                 drawList.AddCircleFilled(center, radius - 1, fillColor, 12);
                 drawList.AddCircle(center, radius, anchorOutlineColor, 12);
             }
 
-            if (isOutputHovered)
+            if (showPlus)
             {
                 var e = MathF.Round(2 * CanvasScale);
                 drawList.AddRectFilled(center + new Vector2(-e, 0),
@@ -960,7 +969,10 @@ internal sealed partial class MagGraphView
                 drawList.AddRectFilled(center + new Vector2(0, -e),
                                        center + new Vector2(1, e + 1),
                                        anchorOutlineColor);
+            }
 
+            if (isOutputHovered)
+            {
                 // This will later be used for by DefaultState to create a connection
                 var contextActiveSourceOutputId = outputAnchor.SlotId;
                 _context.ActiveSourceItem = item;
