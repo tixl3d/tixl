@@ -235,7 +235,8 @@ internal static class NodeActions
 
     // todo - better encapsulate this in SymbolJson
 
-    public static void PasteClipboard(NodeSelection nodeSelection, ScalableCanvas canvas, Instance compositionOp)
+    /// <param name="screenPosition">Where to paste; the mouse by default. Callers outside the graph, like the app menu, pass a point in it.</param>
+    public static void PasteClipboard(NodeSelection nodeSelection, ScalableCanvas canvas, Instance compositionOp, Vector2? screenPosition = null)
     {
         try
         {
@@ -268,7 +269,7 @@ internal static class NodeActions
             }
 
             var compositionSymbolUi = compositionOp.GetSymbolUi();
-            var targetPosition = canvas.InverseTransformPositionFloat(ImGui.GetMousePos());
+            var targetPosition = canvas.InverseTransformPositionFloat(screenPosition ?? ImGui.GetMousePos());
             var cmd = new CopySymbolChildrenCommand(containerSymbolUi,
                                                     null,
                                                     containerSymbolUi.Sections.Values.ToList(),

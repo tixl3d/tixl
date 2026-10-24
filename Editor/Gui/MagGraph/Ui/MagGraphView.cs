@@ -187,6 +187,9 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
 
     public bool HasActiveInteraction => _context.StateMachine.CurrentState != GraphStates.Default;
 
+    /** For the app menu, which offers the graph's edit actions without being part of its drawing. */
+    internal GraphUiContext Context => _context;
+
     /// <summary>Runs the layout action bound to G, as the debug bridge drives it.</summary>
     internal bool LayoutInputsOfSelection()
     {
