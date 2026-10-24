@@ -71,6 +71,18 @@ internal sealed class RaymarchToCubeMap : Instance<RaymarchToCubeMap>
     [Input(Guid = "982f00a7-b57f-4aa5-8784-0bb5b340c2be")]
     public readonly InputSlot<bool> EquiAngular = new();
 
+    [Input(Guid = "94014f67-3e79-4a4b-b6ed-3fb59966ef6e", MappedType = typeof(TileSizes))]
+    public readonly InputSlot<int> TileSize = new();
+
+    [Input(Guid = "857855d9-713c-43e1-9bf5-6a8364269f30")]
+    public readonly InputSlot<int> MaxSamples = new();
+
+    [Input(Guid = "6c66b93f-0ab4-4a48-a1ad-e045fd3759bf")]
+    public readonly InputSlot<bool> Reset = new();
+
+    [Input(Guid = "f4c0abdd-004f-4c9a-b062-044f94ee25b4")]
+    public readonly InputSlot<float> NeighborhoodClipping = new();
+
     private enum MappingModes
     {
         Global_Triplanar,
@@ -78,6 +90,14 @@ internal sealed class RaymarchToCubeMap : Instance<RaymarchToCubeMap>
         Local_XY,
         Local_YZ,
         Local_XZ,
+    }
+
+    private enum TileSizes
+    {
+        _1x1 = 1,
+        _2x2 = 2,
+        _4x4 = 4,
+        _8x8 = 8,
     }
 
     private enum Resolutions

@@ -3,6 +3,14 @@
   "Id": "a5fbe295-0e13-4589-9191-1304f33dc1ae"/*_RenderCubeMapFaces*/,
   "Inputs": [
     {
+      "Id": "2aab8a5f-30eb-4746-9862-40e49d70171b"/*MaxSamples*/,
+      "DefaultValue": 64
+    },
+    {
+      "Id": "585d34f9-d2aa-4498-a9ef-ae951c6756ec"/*Reset*/,
+      "DefaultValue": false
+    },
+    {
       "Id": "6f2476e9-ff1f-4ad4-ad48-0d36da22202b"/*Position*/,
       "DefaultValue": {
         "X": 0.0,
@@ -44,8 +52,16 @@
       "DefaultValue": false
     },
     {
+      "Id": "cd8e3e81-e4a8-41aa-a79f-e10f3496ad30"/*TileSize*/,
+      "DefaultValue": 8
+    },
+    {
       "Id": "e4a5a468-faf6-4800-8f38-e0d83a4e5e75"/*Material*/,
       "DefaultValue": null
+    },
+    {
+      "Id": "f9df273d-2a77-4ec7-8843-b9382d83cee0"/*NeighborhoodClipping*/,
+      "DefaultValue": 0.0
     }
   ],
   "Children": [],

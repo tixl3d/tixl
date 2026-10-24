@@ -3,6 +3,7 @@
 // environment — an equirectangular image or a cube map — so one scene renders once and lands continuous
 // across every wall. Consumes the mesh [StageGeometry] → [GeometryToMesh] produce.
 #include "shared/pbr.hlsl"
+#include "shared/cubemap-eac.hlsl"
 
 cbuffer Params : register(b0)
 {
@@ -11,7 +12,8 @@ cbuffer Params : register(b0)
     float4 Color;
     float RotateY;
     float FlipHorizontal;
-    float2 __padding;
+    float EquiAngular;
+    float __padding;
 };
 
 struct psInput
@@ -56,7 +58,7 @@ float4 psMain(psInput pin) : SV_TARGET
     float4 color;
     if (UseCubeMap > 0.5)
     {
-        color = CubeMap.Sample(texSampler, dir);
+        color = CubeMap.Sample(texSampler, EquiAngular > 0.5 ? EncodeEacDirection(dir) : dir);
     }
     else
     {

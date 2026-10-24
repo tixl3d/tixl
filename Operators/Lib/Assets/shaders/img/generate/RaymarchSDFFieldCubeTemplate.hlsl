@@ -374,9 +374,10 @@ TriPlanarN TriplanarNormal2(float3 p, float h, float scale, Texture2D texN, Samp
 PSOutput psMain(vsOutput input)
 {
     // The cube map operator sets a camera whose rows are the face's right, down and forward directions,
-    // so a texel's face coordinates turn into its ray without a projection.
+    // so a texel's face coordinates turn into its ray without a projection. Its clip space only offsets them
+    // to the texel a progressive frame samples.
     float3 eye = CameraToWorld[3].xyz;
-    float2 faceUv = input.texCoord.xy * 2 - 1;
+    float2 faceUv = mul(float4(input.texCoord.xy * 2 - 1, 0, 1), ClipSpaceToCamera).xy;
     if (EquiAngular > 0.5)
         faceUv = EacToCubeFace(faceUv);
 
@@ -485,7 +486,9 @@ PSOutput psMain(vsOutput input)
     litColor.rgb = lerp(AmbientOcclusion.rgb, litColor.rgb, ComputeAO(p, normal, AODistance, 3, AmbientOcclusion.a * (1 - fog)));
 
     PSOutput result;
-    result.color = clamp(litColor, 0, float4(1000, 1000, 1000, 1));
+    // Alpha carries the hit distance for the accumulation, which needs it to reproject. A ray that ended close to
+    // the surface without reaching it passes its partial coverage negated instead, so it is still blended as before.
+    result.color = float4(clamp(litColor.rgb, 0, 1000), a >= 0.999 ? length(p - eye) : -a);
     // result.color = DEBUG_RESULT * float4(0, 0, 1, 1);
     return result;
 }

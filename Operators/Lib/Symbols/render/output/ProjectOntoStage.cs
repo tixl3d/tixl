@@ -80,6 +80,7 @@ internal sealed class ProjectOntoStage : Instance<ProjectOntoStage>, IStatusProv
                                  Color = color,
                                  RotateY = rotateY,
                                  FlipHorizontal = flip ? 1 : 0,
+                                 EquiAngular = useCubeMap && cubeMap!.CubeMapLayout == Texture2D.CubeMapLayouts.EquiAngular ? 1 : 0,
                              };
         ResourceManager.SetupConstBuffer(parameters, ref _parameterBuffer);
 
@@ -196,7 +197,8 @@ internal sealed class ProjectOntoStage : Instance<ProjectOntoStage>, IStatusProv
         public Vector4 Color;
         public float RotateY;
         public float FlipHorizontal;
-        public Vector2 Padding;
+        public float EquiAngular;
+        private float _padding;
     }
 
     private const string ShaderPath = "Lib:shaders/3d/mesh/mesh-ProjectOntoStage.hlsl";

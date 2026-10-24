@@ -1,14 +1,14 @@
 {
   "FormatVersion": 3,
   "Id": "0102bb5f-f874-4f4b-a833-c610c9e7fdf3"/*RaymarchToCubeMap*/,
-  "Description": "Raymarches an SDF field into a cube map, e.g. for [DrawStageCanvas] or [SetEnvironment].\n\nEvery texel casts its own ray from Position, so the faces need no camera. With EquiAngular the texels are spaced evenly by angle, which evens out the resolution across each face; the cube map is marked as such, and consumers that support it decode it automatically.\n\nThe field is shaded like in [RaymarchField]. Material overrides the material from the context; lights and fog come from where the cube map is used.\n\nAKA: cubemap, environment map, skybox, reflection probe, 360, EAC\n\nSee also: [RaymarchField], [RenderToCubeMap], [TextureToCubeMap]",
+  "Description": "Raymarches an SDF field into a cube map, e.g. for [DrawStageCanvas] or [SetEnvironment].\n\nEvery texel casts its own ray from Position, so the faces need no camera. With EquiAngular the texels are spaced evenly by angle, which evens out the resolution across each face; the cube map is marked as such, and consumers that support it decode it automatically.\n\nWith a TileSize above 1x1, each frame raymarches only one texel per tile and refines the rest over the following frames, from a coarse grid to every texel. Afterwards jittered samples keep accumulating, which anti-aliases the result. Moving the cube reprojects what was accumulated. Changes to the field are not detected; use Reset after editing it.\n\nThe field is shaded like in [RaymarchField]. Material overrides the material from the context; lights and fog come from where the cube map is used.\n\nAKA: cubemap, environment map, skybox, reflection probe, 360, EAC\n\nSee also: [RaymarchField], [RenderToCubeMap], [TextureToCubeMap]",
   "SymbolTags": "1",
   "InputUis": [
     {
       "InputId": "02ff65d1-0f72-4faa-b70c-2a32bb556f0d"/*Color*/,
       "Position": {
-        "X": -486.14932,
-        "Y": 794.4215
+        "X": 1060.3239,
+        "Y": 1169.2522
       },
       "Description": "Color multiplier. Alternatively use [SetSDFMaterial] or [SetMaterial]."
     },
@@ -23,8 +23,8 @@
     {
       "InputId": "165a2e29-f25c-4c1d-965a-9e0b59cc01a7"/*MinDistance*/,
       "Position": {
-        "X": 104.6602,
-        "Y": 720.8185
+        "X": 1340.3239,
+        "Y": 1099.2522
       },
       "Description": "The distance threshold when the raymarching is marked as completed.",
       "Min": 0.0,
@@ -34,8 +34,8 @@
     {
       "InputId": "31298feb-7887-4fa7-8556-8f74e69b513d"/*StepSize*/,
       "Position": {
-        "X": 104.6602,
-        "Y": 685.8185
+        "X": 1340.3239,
+        "Y": 1064.2522
       },
       "Description": "An initial scaling factor. Lowering this can be useful to reduce artifacts caused by invalid Lipschitz continuities (e.g. by applying noise).",
       "Min": 0.9,
@@ -44,8 +44,8 @@
     {
       "InputId": "39c62c6b-911c-49ee-8f71-abb3a7fc4ad6"/*Resolution*/,
       "Position": {
-        "X": 104.6602,
-        "Y": 1270.8185
+        "X": 2353.499,
+        "Y": 645.27277
       },
       "Description": "Width and height of each cube face in pixels."
     },
@@ -60,8 +60,8 @@
     {
       "InputId": "5c700dc8-adee-4094-947e-b95e984dbe3f"/*AoDistance*/,
       "Position": {
-        "X": 104.66019,
-        "Y": 1105.8182
+        "X": 1340.3239,
+        "Y": 1484.252
       },
       "GroupTitle": "Appearance",
       "Description": "Controls the distance and intensity of the Ambient Occlusion."
@@ -69,17 +69,25 @@
     {
       "InputId": "64fbb6c8-08e9-4599-8615-1a7cbdd5f276"/*AmbientOcclusion*/,
       "Position": {
-        "X": -35.339844,
-        "Y": 930.8185
+        "X": 1200.3239,
+        "Y": 1309.2522
       },
       "Description": "Will apply an ambient occlusion color depending on the AO Distance parameter.\nYou can use the alpha channel to control the intensity.\nAlso try light colors to add some kind of inner glow effect.",
       "AddPadding": "True"
     },
     {
+      "InputId": "6c66b93f-0ab4-4a48-a1ad-e045fd3759bf"/*Reset*/,
+      "Position": {
+        "X": 2353.499,
+        "Y": 960.27277
+      },
+      "Description": "Discards the accumulated samples, e.g. after changing the field."
+    },
+    {
       "InputId": "6c92f61f-cf24-4eaa-a72e-382b25b8aa07"/*MaxSteps*/,
       "Position": {
-        "X": 104.6602,
-        "Y": 650.8185
+        "X": 1340.3239,
+        "Y": 1029.2522
       },
       "GroupTitle": "Quality",
       "Description": "The number of raymarching steps. This has a major impact on the quality and performance. Normal values are between 50 and 150.\n",
@@ -90,16 +98,24 @@
     {
       "InputId": "71641e7a-e7cb-43d5-af82-6a55d8d67b82"/*Rotation*/,
       "Position": {
-        "X": 104.6602,
-        "Y": 1510.8185
+        "X": 2353.499,
+        "Y": 785.27277
       },
       "Description": "Rotation of the cube map in degrees. Keep at zero for reflections and environment lookups, which expect world-aligned cube maps."
     },
     {
+      "InputId": "857855d9-713c-43e1-9bf5-6a8364269f30"/*MaxSamples*/,
+      "Position": {
+        "X": 2353.499,
+        "Y": 925.27277
+      },
+      "Description": "Number of samples averaged per texel. Higher values smooth the result further but react slower to changes. 1 disables the accumulation."
+    },
+    {
       "InputId": "8a7b385c-2346-4ff9-94f7-7e8de315f5d6"/*NormalSamplingD*/,
       "Position": {
-        "X": 104.66019,
-        "Y": 1140.8185
+        "X": 1340.3239,
+        "Y": 1519.2522
       },
       "Description": "Defines the look-up distance when calculating the surface normal. This controls how sharp objects appear.\nToo small values will cause artifacts. Larger values will apply some sort of smoothing effect.",
       "AddPadding": "True",
@@ -109,40 +125,48 @@
     {
       "InputId": "90c4b4d6-ef09-48f1-ac8d-0d9763ce895a"/*GenerateMips*/,
       "Position": {
-        "X": 104.6602,
-        "Y": 1390.8185
+        "X": 2353.499,
+        "Y": 715.27277
       },
       "Description": "Generates mip levels, e.g. for blurred reflections."
     },
     {
+      "InputId": "94014f67-3e79-4a4b-b6ed-3fb59966ef6e"/*TileSize*/,
+      "Position": {
+        "X": 2353.499,
+        "Y": 890.27277
+      },
+      "Description": "Raymarches one texel per tile each frame and refines the rest over the following frames. 8x8 costs 1/64 of a full render and needs 64 frames until every texel has a sample."
+    },
+    {
       "InputId": "982f00a7-b57f-4aa5-8784-0bb5b340c2be"/*EquiAngular*/,
       "Position": {
-        "X": 104.6602,
-        "Y": 1630.8185
+        "X": 709.21265,
+        "Y": 903.22
       },
       "Description": "Spaces texels evenly by angle (EAC). Consumers have to support it."
     },
     {
       "InputId": "9cec66d9-b274-4f34-89df-ec99994982e5"/*Position*/,
       "Position": {
-        "X": 104.6602,
-        "Y": 1450.8185
+        "X": 2353.499,
+        "Y": 750.27277
       },
       "Description": "Origin of all rays in world space."
     },
     {
       "InputId": "bc2060a0-edde-4691-86ae-1658e64abe02"/*DistToColor*/,
       "Position": {
-        "X": 104.6602,
-        "Y": 1175.8185
+        "X": 1340.3239,
+        "Y": 1554.2522
       },
       "Description": "Blends the edges of the surface into the background to reduce artifacts when compositing."
     },
     {
       "InputId": "cb08b59b-0863-4e87-aaf1-4e90962bffa0"/*MaxDistance*/,
       "Position": {
-        "X": 104.66019,
-        "Y": 755.8185
+        "X": 1340.3239,
+        "Y": 1134.2522
       },
       "Description": "A threshold after which the raymarching is aborted.",
       "Min": 0.0,
@@ -151,32 +175,42 @@
     {
       "InputId": "d62dc70b-700d-4aaf-aa1c-c716792184df"/*ClearColor*/,
       "Position": {
-        "X": 104.6602,
-        "Y": 1330.8185
+        "X": 2353.499,
+        "Y": 680.27277
       },
       "Description": "Color where rays miss the field."
     },
     {
       "InputId": "e2d60235-bbea-45da-8f7a-9d11d76253a4"/*Material*/,
       "Position": {
-        "X": 104.6602,
-        "Y": 1570.8185
+        "X": 2353.499,
+        "Y": 820.27277
       },
       "Description": "Optional material that overrides the one from the context."
     },
     {
-      "InputId": "fab31a66-baf8-4bed-b364-91dde35e0ef9"/*TextureScale*/,
+      "InputId": "f4c0abdd-004f-4c9a-b062-044f94ee25b4"/*NeighborhoodClipping*/,
       "Position": {
         "X": 104.6602,
-        "Y": 1070.8182
+        "Y": 1649.2522
+      },
+      "Description": "Limits the accumulated colors to what this frame's coarse samples around each texel allow, so animation and moving edges stop ghosting. 0 disables it; around 1 is tight, higher values keep more fine detail. Detail smaller than a tile can flicker when it is tight.",
+      "Min": 0.0,
+      "Max": 4.0
+    },
+    {
+      "InputId": "fab31a66-baf8-4bed-b364-91dde35e0ef9"/*TextureScale*/,
+      "Position": {
+        "X": 1340.3239,
+        "Y": 1449.252
       },
       "Description": "Scales the texture defined by [SetMaterial]."
     },
     {
       "InputId": "fe0f0372-4a57-454e-9f6a-b65ad1d283a2"/*SpecularAA*/,
       "Position": {
-        "X": 104.66019,
-        "Y": 1210.8185
+        "X": 1340.3239,
+        "Y": 1589.2522
       },
       "Description": "Increases roughness where normals change quickly to reduce flickering highlights.",
       "Min": 0.0,
@@ -186,71 +220,39 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "04a18d89-8990-464a-8ecc-0f603b44b21d",
-      "SymbolName": "Lib.render._dx11.fxsetup.SetPixelAndVertexShaderStage",
+      "ChildId": "00059798-16eb-77c3-7292-41d7ada7a52a",
+      "SymbolName": "Lib.flow.Execute",
       "Position": {
-        "X": 992.9934,
-        "Y": 508.54218
+        "X": 2493.499,
+        "Y": 435.27277
       }
     },
     {
-      "ChildId": "05e4ebe9-4a6a-4d64-a941-9a496839cc68",
-      "SymbolName": "Lib.render._dx11.api.InputAssemblerStage",
-      "Position": {
-        "X": 1350.3239,
-        "Y": 609.25226
-      }
-    },
-    {
-      "ChildId": "0667216d-478f-4854-a1e6-6b311b598306",
-      "SymbolName": "Lib.string.logic.PickStringPart",
-      "Position": {
-        "X": 401.91522,
-        "Y": 456.31775
-      }
-    },
-    {
-      "ChildId": "09f45b55-216a-4b5c-bc33-05f7308923dc",
-      "SymbolName": "Lib.render._dx11.api.Rasterizer",
-      "Position": {
-        "X": 1350.3239,
-        "Y": 644.25226
-      }
-    },
-    {
-      "ChildId": "1d29ab95-330a-48d5-a0f3-76ce20ba669b",
-      "SymbolName": "Lib.render._dx11.api.Draw",
-      "Position": {
-        "X": 1350.3239,
-        "Y": 784.25214
-      }
-    },
-    {
-      "ChildId": "1e4f59e7-18e4-40b0-b8cf-f18f2b5a346d",
+      "ChildId": "068dadc7-3025-a52d-0e91-9c3a4039dbf8",
       "SymbolName": "Types.Gfx.RenderTargetBlendDescription",
       "Position": {
-        "X": 889.58496,
-        "Y": 272.71463
+        "X": 1200.3239,
+        "Y": 1694.2522
       }
     },
     {
-      "ChildId": "2f96c1fb-bf32-4e73-8be2-879a5e0578cc",
-      "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
+      "ChildId": "10bcdc70-c2c0-7632-f8a6-a2e7b0e54a87",
+      "SymbolName": "Lib.flow.context.GetForegroundColor",
       "Position": {
-        "X": 852.9934,
-        "Y": 963.5422
+        "X": 1060.3239,
+        "Y": 1204.2522
       }
     },
     {
-      "ChildId": "3e87843d-7eb1-414e-9857-0e8db741ac3b",
-      "SymbolName": "Types.Gfx.SamplerState",
+      "ChildId": "191d218f-3feb-80b2-3926-9a99376a01b1",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "Position": {
-        "X": 852.9934,
-        "Y": 1068.5422
+        "X": 1340.3239,
+        "Y": 1169.2522
       }
     },
     {
-      "ChildId": "41605222-0a75-4d34-a466-0aa5e3c5cb91",
+      "ChildId": "252574f7-639a-172c-c9f8-97c22be72cb0",
       "SymbolName": "Lib.io.file.ReadFile",
       "Position": {
         "X": 237.25018,
@@ -258,92 +260,23 @@
       }
     },
     {
-      "ChildId": "54c99ee5-78cc-4825-a28b-e4024bb6679d",
-      "SymbolName": "Lib.flow.Execute",
-      "Position": {
-        "X": 1490.3239,
-        "Y": 574.2522
-      }
-    },
-    {
-      "ChildId": "6fab49c8-3846-4d35-817f-40c2dc58be67",
-      "SymbolName": "Lib.render.shading._.GetPbrParameters",
-      "Position": {
-        "X": 577.4992,
-        "Y": 753.232
-      }
-    },
-    {
-      "ChildId": "73b6c36a-91b1-4895-8712-d2d2cb77cf1e",
-      "SymbolName": "Types.Gfx.SamplerState",
-      "Position": {
-        "X": 852.9934,
-        "Y": 1033.5422
-      }
-    },
-    {
-      "ChildId": "76868d26-3617-45f2-b272-1b595539d353",
-      "SymbolName": "Types.Gfx.PixelShaderFromSource",
-      "Position": {
-        "X": 852.9934,
-        "Y": 543.5422
-      }
-    },
-    {
-      "ChildId": "78c0ec94-be6d-4c71-943c-5e43905ce3b8",
-      "SymbolName": "Types.Gfx.RasterizerState",
-      "Position": {
-        "X": 1210.3239,
-        "Y": 644.25226
-      }
-    },
-    {
-      "ChildId": "85b077d8-bcb1-4b8a-a04b-58c4d0a5abca",
-      "SymbolName": "Types.Gfx.DepthStencilState",
-      "Position": {
-        "X": 771.728,
-        "Y": 1310.7704
-      }
-    },
-    {
-      "ChildId": "963ef259-cf61-4a33-bbcb-479da9d729c5",
+      "ChildId": "2ddcaa80-a768-208b-2422-8470a5a7c9d3",
       "SymbolName": "Lib.numbers.color.BlendColors",
       "Position": {
-        "X": -346.14932,
-        "Y": 794.4215
+        "X": 1200.3239,
+        "Y": 1169.2522
       }
     },
     {
-      "ChildId": "a1c062cb-6c68-43c5-9169-610bb57773eb",
-      "SymbolName": "Lib.render._dx11.api.FloatsToBuffer",
-      "Style": "Resizable",
-      "Size": {
-        "X": 53.72168,
-        "Y": 751.5494
-      },
+      "ChildId": "3ddc672a-a42c-993f-a891-25d75b03510e",
+      "SymbolName": "Lib.string.logic.PickStringPart",
       "Position": {
-        "X": 244.66019,
-        "Y": 615.8185
+        "X": 401.91522,
+        "Y": 456.31775
       }
     },
     {
-      "ChildId": "a6abf7ea-3d55-4136-ad8e-c25828bb6f0c",
-      "SymbolName": "Types.Gfx.BlendState",
-      "Position": {
-        "X": 1029.585,
-        "Y": 272.71463
-      }
-    },
-    {
-      "ChildId": "b4daa0f0-428e-4c3a-9b80-16b884d430a2",
-      "SymbolName": "Types.Gfx.VertexShader",
-      "Position": {
-        "X": 992.9934,
-        "Y": 473.54218
-      }
-    },
-    {
-      "ChildId": "b8773240-5218-4217-8475-975199bc0235",
+      "ChildId": "7c7e2f00-7802-f876-7d1d-523ecf6315ea",
       "SymbolName": "Lib.field.render._.GenerateShaderGraphCode",
       "Position": {
         "X": 574.1129,
@@ -351,75 +284,176 @@
       }
     },
     {
-      "ChildId": "bbf2f626-f317-46e9-b551-e7e257f81205",
-      "SymbolName": "Types.Gfx.DepthStencilState",
-      "Position": {
-        "X": 1029.585,
-        "Y": 307.71463
-      }
-    },
-    {
-      "ChildId": "d211bef5-f50f-447f-aa59-fd771fb0115d",
-      "SymbolName": "Lib.numbers.vec4.Vector4Components",
-      "Position": {
-        "X": 104.66019,
-        "Y": 790.8185
-      }
-    },
-    {
-      "ChildId": "db0daf0f-2e6b-4252-86f6-cb6c882bf3ed",
-      "SymbolName": "Lib.numbers.vec4.Vector4Components",
-      "Position": {
-        "X": 104.66019,
-        "Y": 930.8185
-      }
-    },
-    {
-      "ChildId": "e39b8798-65df-44f0-9cdb-6e0a151f6c21",
-      "SymbolName": "Lib.render._dx11.api._TransformsCBuffer",
-      "Position": {
-        "X": 852.9934,
-        "Y": 648.5422
-      }
-    },
-    {
-      "ChildId": "eb67bccc-023e-4816-942f-03500c49420e",
-      "SymbolName": "Lib.render.shading._.ContextCBuffers",
-      "Position": {
-        "X": 852.9934,
-        "Y": 683.5422
-      }
-    },
-    {
-      "ChildId": "eca458f1-7e62-479e-aae9-c439199e8dd9",
+      "ChildId": "7f679a52-9f33-6661-9a37-5a0add685653",
       "SymbolName": "Lib.render._dx11.api.OutputMergerStage",
       "Position": {
-        "X": 1169.585,
-        "Y": 272.71463
+        "X": 1480.3239,
+        "Y": 1694.2522
       }
     },
     {
-      "ChildId": "fe2fd76e-15eb-4ea0-9356-042577214232",
-      "SymbolName": "Lib.flow.context.GetForegroundColor",
+      "ChildId": "850e7c75-cec1-8411-ac0c-158456b02d11",
+      "SymbolName": "Lib.render._dx11.api._TransformsCBuffer",
       "Position": {
-        "X": -486.14932,
-        "Y": 829.4215
+        "X": 1550.3239,
+        "Y": 163.00464
+      }
+    },
+    {
+      "ChildId": "8a2bcb4c-b6d4-9e45-68bf-09b42fe0f2c6",
+      "SymbolName": "Lib.render._dx11.fxsetup.SetPixelAndVertexShaderStage",
+      "Position": {
+        "X": 1690.3239,
+        "Y": 23.004639
+      }
+    },
+    {
+      "ChildId": "968c7ab8-3ad7-6f7f-f9bb-ab5de6795c65",
+      "SymbolName": "Lib.render.shading._.GetPbrParameters",
+      "Position": {
+        "X": 1410.3239,
+        "Y": 268.00464
+      }
+    },
+    {
+      "ChildId": "9ee6677a-4f2a-fc82-7ffa-465bdc4196cf",
+      "SymbolName": "Types.Gfx.SamplerState",
+      "Position": {
+        "X": 1550.3239,
+        "Y": 548.0047
+      }
+    },
+    {
+      "ChildId": "a84795e7-51a9-ab8a-1e1f-f9899b23e01c",
+      "SymbolName": "Lib.render._dx11.api.FloatsToBuffer",
+      "Style": "Resizable",
+      "Size": {
+        "X": 53.72168,
+        "Y": 751.5494
+      },
+      "Position": {
+        "X": 1480.3239,
+        "Y": 994.2522
+      }
+    },
+    {
+      "ChildId": "a9873fac-89fb-1f94-5473-af4a50f82843",
+      "SymbolName": "Lib.render._dx11.api.Rasterizer",
+      "Position": {
+        "X": 2353.499,
+        "Y": 505.27283
+      }
+    },
+    {
+      "ChildId": "afad25cc-ac27-cc23-dae9-1210367ae762",
+      "SymbolName": "Types.Gfx.SamplerState",
+      "Position": {
+        "X": 1550.3239,
+        "Y": 583.0047
+      }
+    },
+    {
+      "ChildId": "b426b088-f4d6-e4ef-16f4-6b6ce9463025",
+      "SymbolName": "Types.Gfx.BlendState",
+      "Position": {
+        "X": 1340.3239,
+        "Y": 1694.2522
+      }
+    },
+    {
+      "ChildId": "c0352c4c-b4d0-bb78-33c9-ba75d64b5d53",
+      "SymbolName": "Types.Gfx.RasterizerState",
+      "Position": {
+        "X": 2213.499,
+        "Y": 505.27283
       }
     },
     {
       "ChildId": "cce7cd0b-bce3-4a64-9e85-ba5d6c6017b4",
       "SymbolName": "Lib.field.render._._RenderCubeMapFaces",
       "Position": {
+        "X": 2493.499,
+        "Y": 610.27277
+      }
+    },
+    {
+      "ChildId": "da2d92d3-ae8b-dbc3-16a0-e74622a6fd7e",
+      "SymbolName": "Types.Gfx.VertexShader",
+      "Position": {
         "X": 1690.3239,
-        "Y": 574.2522
+        "Y": -11.995361
+      }
+    },
+    {
+      "ChildId": "dc6ef116-827f-9f42-3197-0d2a33768e8e",
+      "SymbolName": "Lib.render._dx11.api.InputAssemblerStage",
+      "Position": {
+        "X": 2353.499,
+        "Y": 470.27283
+      }
+    },
+    {
+      "ChildId": "df694c16-37c5-f38c-796b-df83f6e47bc7",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
+      "Position": {
+        "X": 1340.3239,
+        "Y": 1309.2522
+      }
+    },
+    {
+      "ChildId": "df96c100-c17f-6325-04cd-a5d1c189ac64",
+      "SymbolName": "Types.Gfx.PixelShaderFromSource",
+      "Position": {
+        "X": 1550.3239,
+        "Y": 58.00464
+      }
+    },
+    {
+      "ChildId": "e8dfb02a-da32-587d-1913-533464637ed8",
+      "SymbolName": "Types.Gfx.DepthStencilState",
+      "Position": {
+        "X": 771.728,
+        "Y": 1310.7704
+      }
+    },
+    {
+      "ChildId": "e956805c-84a0-cbef-5994-d780b0b5dc23",
+      "SymbolName": "Lib.render._dx11.api.Draw",
+      "Position": {
+        "X": 2353.499,
+        "Y": 575.27277
+      }
+    },
+    {
+      "ChildId": "e9f04c4a-0fc3-9429-6aa1-7619bd1f1100",
+      "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
+      "Position": {
+        "X": 1550.3239,
+        "Y": 478.00464
       }
     },
     {
       "ChildId": "efeb7291-5b7b-4e8a-b7bf-9d2e535dcfe0",
       "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
       "Position": {
-        "X": 44.66019,
-        "Y": 915.8185
+        "X": 1340.3239,
+        "Y": 1624.2522
+      }
+    },
+    {
+      "ChildId": "effcf33b-ea4a-816e-11a0-06abb808fbc2",
+      "SymbolName": "Types.Gfx.DepthStencilState",
+      "Position": {
+        "X": 1340.3239,
+        "Y": 1729.2522
+      }
+    },
+    {
+      "ChildId": "f01d7cac-40de-54cd-c362-f93be949ad5e",
+      "SymbolName": "Lib.render.shading._.ContextCBuffers",
+      "Position": {
+        "X": 1550.3239,
+        "Y": 198.00464
       }
     }
   ],
@@ -427,15 +461,15 @@
     {
       "OutputId": "6c747f6f-6d26-4362-a6e0-bc519c9fe0c7",
       "Position": {
-        "X": 1940.3239,
-        "Y": 574.2522
+        "X": 2493.499,
+        "Y": 995.2729
       }
     },
     {
       "OutputId": "b239b3b1-6417-4fc0-9e45-ebb3bd2d881b",
       "Position": {
-        "X": 2065.2878,
-        "Y": 819.34204
+        "X": 773.96484,
+        "Y": 188.31128
       }
     }
   ]
