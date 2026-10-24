@@ -9,7 +9,8 @@
       "Position": {
         "X": 197.0,
         "Y": 448.0
-      }
+      },
+      "GroupTitle": "Advanced..."
     },
     {
       "InputId": "76cf4a72-2d25-48cb-a1ec-08d0ddabb053"/*Interpolation*/,
