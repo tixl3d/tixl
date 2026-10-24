@@ -204,27 +204,38 @@ namespace T3.Editor.Gui.MagGraph.States
     
 
         /// <summary>
-        /// Active while long tapping on background for insertion
+        /// Active while the mouse is held on the background. Releasing after a long tap without moving opens
+        /// the placeholder; moving further than the click threshold leaves the gesture to fence selection.
         /// </summary>
         internal static State<GraphUiContext> HoldBackground
             = new(
                   Enter: _ => { },
                   Update: context =>
                           {
-                              if (!ImGui.IsMouseDown(ImGuiMouseButton.Left)
-                                  || !context.View.IsFocused
-                                  || ImGui.IsMouseDragging(ImGuiMouseButton.Left))
+                              if (!context.View.IsFocused)
                               {
                                   context.StateMachine.SetState(Default, context);
                                   return;
                               }
 
+                              // Decided on release, so a fence drag that starts slowly never opens the placeholder.
+                              var movedSincePress = ImGui.GetIO().MouseDragMaxDistanceAbs[0].Length() >= UserSettings.Config.ClickThreshold;
                               const float longTapDuration = 0.3f;
                               var longTapProgress = context.StateMachine.StateTime / longTapDuration;
-                              MagItemMovement.UpdateLongPressIndicator(longTapProgress);
 
-                              if (!(longTapProgress > 1))
+                              if (ImGui.IsMouseDown(ImGuiMouseButton.Left))
+                              {
+                                  if (!movedSincePress)
+                                      MagItemMovement.UpdateLongPressIndicator(MathF.Min(longTapProgress, 1));
+
                                   return;
+                              }
+
+                              if (movedSincePress || longTapProgress < 1)
+                              {
+                                  context.StateMachine.SetState(Default, context);
+                                  return;
+                              }
 
                               // TODO: setting both, state and placeholder, feels awkward.
                               context.StateMachine.SetState(Placeholder, context);
