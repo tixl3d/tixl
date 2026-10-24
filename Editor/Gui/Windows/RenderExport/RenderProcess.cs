@@ -11,6 +11,7 @@ using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.Gui.Windows.Output;
+using T3.Editor.SystemUi;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.ProjectHandling;
 
@@ -72,9 +73,18 @@ internal static class RenderProcess
         if (!Directory.Exists(folder))
             Directory.CreateDirectory(folder);
 
-        var filename = Path.Join(folder, $"{DateTime.Now:yyyy_MM_dd-HH_mm_ss_fff}.png");
-        ScreenshotWriter.StartSavingToFile(RenderProcess.MainOutputTexture, filename, ScreenshotWriter.FileFormats.Png);
-        Log.Debug("Screenshot saved in: " + folder);
+        var filename = Path.GetFullPath(Path.Join(folder, $"{DateTime.Now:yyyy_MM_dd-HH_mm_ss_fff}.png"));
+        ScreenshotWriter.StartSavingToFile(RenderProcess.MainOutputTexture, filename, ScreenshotWriter.FileFormats.Png, OnScreenshotSaved);
+    }
+
+    /** The path goes to the clipboard so the screenshot can be pasted straight into a chat or an issue. */
+    private static void OnScreenshotSaved(string? filepath)
+    {
+        if (string.IsNullOrEmpty(filepath) || !File.Exists(filepath))
+            return;
+
+        EditorUi.Instance.SetClipboardText(filepath);
+        Log.Info($"Screenshot saved, path copied to clipboard: {filepath}");
     }
 
     public static bool TryStartVideoExport()
