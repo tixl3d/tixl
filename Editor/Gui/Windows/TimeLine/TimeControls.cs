@@ -272,9 +272,12 @@ internal static class TimeControls
                 UserSettings.Config.EnableIdleMotion = !UserSettings.Config.EnableIdleMotion;
             }
 
-            // Tooltip (same as before)
-            CustomComponents.TooltipForLastItem("Idle Motion - Keeps beat time running",
-                                                "This will keep updating the output [Time]\nwhich is useful for procedural animation and syncing.");
+            if (ImGui.IsItemHovered())
+            {
+                CustomComponents.TooltipForLastItem("Idle Motion - Keeps beat time running",
+                                                    "This will keep updating the output [Time]\nwhich is useful for procedural animation and syncing.\n\n"
+                                                    + UserActions.ToggleIdleMotion.ListKeyboardShortcutsForActionWithLabel());
+            }
 
             var drawList = ImGui.GetWindowDrawList();
             var min = ImGui.GetItemRectMin();

@@ -37,6 +37,7 @@ internal enum UserActions
     PlaybackJumpToEndTime,
     PlaybackJumpToStartTime,
     PlaybackScrubTime,
+    ToggleIdleMotion,
 
     // Timeline
     SetStartTime,
