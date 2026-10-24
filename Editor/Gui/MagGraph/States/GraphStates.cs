@@ -16,6 +16,29 @@ namespace T3.Editor.Gui.MagGraph.States
 {
     internal static class GraphStates
     {
+        /// <summary>
+        /// The op that pressing Tab appends to: the single visible selected op, if it has an output.
+        /// </summary>
+        internal static bool TryGetItemForTabInsertion(GraphUiContext context, out MagGraphItem item)
+        {
+            item = null;
+            if (context.StateMachine.CurrentState != Default
+                || !context.View.IsFocused
+                || !context.View.IsHovered
+                || ImGui.IsAnyItemActive()
+                || context.Selector.Selection.Count != 1)
+                return false;
+
+            var selected = context.Selector.Selection[0];
+            return context.View.IsItemVisible(selected)
+                   && context.Layout.Items.TryGetValue(selected.Id, out item)
+                   && item.OutputLines.Length > 0;
+        }
+
+        /** Shift inserts to the right of the op instead of below it. */
+        internal static MagGraphItem.Directions TabInsertionDirection
+            => ImGui.GetIO().KeyShift ? MagGraphItem.Directions.Horizontal : MagGraphItem.Directions.Vertical;
+
         internal static State<GraphUiContext> Default
             = new(
                   Enter: context =>
@@ -50,21 +73,12 @@ namespace T3.Editor.Gui.MagGraph.States
                                   && !ImGui.IsAnyItemActive())
                               {
                                   // Tab create placeholder
-                                  if (ImGui.IsKeyReleased(ImGuiKey.Tab) && !ImGui.GetIO().KeyShift)
+                                  if (ImGui.IsKeyReleased(ImGuiKey.Tab))
                                   {
-                                      var focusedObject =
-                                          context.Selector.Selection.Count == 1 &&
-                                          context.View.IsItemVisible(context.Selector.Selection[0])
-                                              ? context.Selector.Selection[0]
-                                              : null;
-
-                                      if (focusedObject != null
-                                          && context.Layout.Items.TryGetValue(focusedObject.Id, out var focusedItem))
+                                      if (TryGetItemForTabInsertion(context, out var focusedItem))
                                       {
-                                          if (focusedItem.OutputLines.Length > 0)
-                                          {
-                                              context.Placeholder.OpenForItemOutput(context, focusedItem, focusedItem.OutputLines[0]);
-                                          }
+                                          context.Placeholder.OpenForItemOutput(context, focusedItem, focusedItem.OutputLines[0],
+                                                                                TabInsertionDirection);
                                       }
                                       else
                                       {
