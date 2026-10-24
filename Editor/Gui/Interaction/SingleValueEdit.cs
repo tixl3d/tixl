@@ -218,7 +218,12 @@ internal static class SingleValueEdit
                 return InputEditStateFlags.Finished;
             }
 
-            return modified ? InputEditStateFlags.Modified : InputEditStateFlags.Started;
+            if (modified)
+                return InputEditStateFlags.Modified;
+
+            // Callers capture the original value on Started, so repeating it between keystrokes
+            // would make the partially typed value the undo target.
+            return shouldFocus ? InputEditStateFlags.Started : InputEditStateFlags.Nothing;
         }
 
         ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, new Vector2(horizontalAlign,0.5f));
@@ -235,6 +240,7 @@ internal static class SingleValueEdit
             _startValue = value;
             _jogDialText = FormatValueForButton(ref value, true);
             SetState(InputStates.Dialing);
+            return InputEditStateFlags.Started;
         }
         else
         {
