@@ -1,0 +1,27 @@
+{
+  "FormatVersion": 3,
+  "Id": "182bdf23-84d7-4ae4-b806-5f1a20229ce0"/*CubeMapToEquirectangular*/,
+  "Inputs": [
+    {
+      "Id": "0e30f49d-260a-4dac-aa2e-e7e05f0090c7"/*GenerateMips*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "2f5ca948-6e1f-4189-a98b-f8baa676d6da"/*CubeMap*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "56b58333-61cb-44d3-a99d-3c6973f9cb01"/*Orientation*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "cbb5fa2a-cc44-43d9-935f-4a0de771ebb3"/*Resolution*/,
+      "DefaultValue": {
+        "X": 0,
+        "Y": 0
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

@@ -1,0 +1,50 @@
+{
+  "FormatVersion": 3,
+  "Id": "182bdf23-84d7-4ae4-b806-5f1a20229ce0"/*CubeMapToEquirectangular*/,
+  "Description": "Unwraps a cube map into a panorama image that shows all directions at once, e.g. to save or post-process a [RenderToCubeMap] or [RaymarchToCubeMap] result.\n\nThe image covers all directions around in its width and from straight up to straight down in its height, the layout [ProjectOntoStage] and most 360° tools read. Equi-angular cube maps are decoded automatically.\n\nAKA: equirectangular, panorama, latlong, 360, unwrap, cubemap\n\nSee also: [TextureToCubeMap], [RenderToCubeMap], [RaymarchToCubeMap], [ProjectOntoStage]",
+  "InputUis": [
+    {
+      "InputId": "0e30f49d-260a-4dac-aa2e-e7e05f0090c7"/*GenerateMips*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 135.0
+      },
+      "Description": "Generates mip levels, so the image can be sampled smaller without flickering."
+    },
+    {
+      "InputId": "2f5ca948-6e1f-4189-a98b-f8baa676d6da"/*CubeMap*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "The cube map to unwrap."
+    },
+    {
+      "InputId": "56b58333-61cb-44d3-a99d-3c6973f9cb01"/*Orientation*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      },
+      "Description": "Turns the panorama around the vertical axis, in full turns."
+    },
+    {
+      "InputId": "cbb5fa2a-cc44-43d9-935f-4a0de771ebb3"/*Resolution*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Description": "Size of the image. At 0 it is four times the face size wide and two times high, which keeps the detail of the cube map."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "43584ce0-a2c1-490d-8822-cf8d2fded3ce"/*Texture*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    }
+  ]
+}
