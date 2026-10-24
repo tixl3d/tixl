@@ -84,6 +84,10 @@ public static partial class T3Ui
             if (OutputWindow.TryGetPrimaryOutputWindow(out var outputWindow))
                 outputWindow.ToggleSetupMode();
         }
+        else if (UserActions.ToggleIdleMotion.Triggered())
+        {
+            UserSettings.Config.EnableIdleMotion = !UserSettings.Config.EnableIdleMotion;
+        }
     }
 
     /// <summary>
