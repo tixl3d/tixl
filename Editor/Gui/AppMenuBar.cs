@@ -11,6 +11,8 @@ using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.Interaction.StartupCheck;
+using T3.Editor.Gui.MagGraph.Interaction;
+using T3.Editor.Gui.MagGraph.Ui;
 using T3.Editor.Migrations.AssetPaths;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
@@ -281,7 +283,7 @@ internal static class AppMenuBar
     // Thin wrappers over the styled menu components so the AppMenu dropdowns match the graph context menu.
     // The label seeds a stable id (DrawMenuItem also keys its hit-test off the label), and the active
     // toggle is emphasized while everything else is muted — same model as the context menu.
-    private static bool MenuItem(string label, string? shortcut = null, bool isChecked = false, bool isEnabled = true)
+    internal static bool MenuItem(string label, string? shortcut = null, bool isChecked = false, bool isEnabled = true)
         => CustomComponents.DrawMenuItem(label.GetHashCode(), Icon.None, label, shortcut, isChecked, isEnabled,
                                          reserveIconColumn: false,
                                          state: isChecked ? CustomComponents.ButtonStates.Emphasized : CustomComponents.ButtonStates.Default);
@@ -296,55 +298,30 @@ internal static class AppMenuBar
     }
 
     // Nested submenu header (NOT for the horizontal top-level bar entries, which stay native ImGui.BeginMenu).
-    private static bool BeginSubMenu(string label, bool isEnabled = true)
+    internal static bool BeginSubMenu(string label, bool isEnabled = true)
         => CustomComponents.DrawSubMenu(label.GetHashCode(), label, isEnabled);
 
     private static void DrawMainMenu()
     {
         if (ImGui.BeginMenu("TiXL"))
         {
-            var currentProject = ProjectView.Focused?.OpenedProject.Package;
+            var projectView = ProjectView.Focused;
+            var currentProject = projectView?.OpenedProject.Package;
             UserSettings.Config.ShowMainMenu = true;
 
-            var showNewTemplateOption = !T3Ui.IsCurrentlySaving && currentProject != null;
-            
+            CustomComponents.DrawMenuGroupLabel("Projects");
+
+            // Deferred to the end of the menu bar, because the items below still read the project view.
+            if (MenuItem("Show Projects", isEnabled: projectView != null))
+                _projectViewToClose = projectView;
+
             if (MenuItem("New Project..."))
             {
                 T3Ui.NewProjectDialog.ShowNextFrame();
             }
 
-            if (MenuItem("New Operator...", UserActions.New.ListShortcuts(), isEnabled: showNewTemplateOption))
+            if (currentProject is EditableSymbolProject { IsReadOnly: false } project)
             {
-                T3Ui.CreateFromTemplateDialog.ShowNextFrame();
-            }
-
-            if (BeginSubMenu("Recent Projects", !T3Ui.IsCurrentlySaving && EditableSymbolProject.AllProjects.Any(x => x.HasHome)))
-            {
-                foreach (var package in EditableSymbolProject.AllProjects)
-                {
-                    if (!package.HasHome)
-                        continue;
-
-                    var name = package.DisplayName;
-
-                    if (MenuItem(name))
-                    {
-                        if (GraphWindow.GraphWindowInstances.Count > 0)
-                        {
-                            BlockingWindow.Instance.ShowMessageBox("Would you like to open this project in a new window?", "Opening " + name, "Yes", "No");
-                        }
-
-                        Log.Error("Not implemented yet");
-                    }
-                }
-                
-                ImGui.EndMenu();
-            }
-
-            if (currentProject is { IsReadOnly: false } && currentProject is EditableSymbolProject project)
-            {
-                //ImGui.Separator();
-
                 if (BeginSubMenu("Open Project in"))
                 {
                     if (MenuItem("File Explorer"))
@@ -366,14 +343,24 @@ internal static class AppMenuBar
                 }
             }
 
-            CustomComponents.SeparatorLine();
+            if (MenuItem("Edit Output Setup", UserActions.ToggleOutputSetup.ListShortcuts(), isEnabled: projectView != null))
+                Windows.Output.OutputWindow.EnterSetupOnPrimaryWindow();
 
-            // Disabled, at least for now, as this is an incomplete (or not even started) operation on the Main branch atm
-            if (MenuItem("Import Operators", isEnabled: !T3Ui.IsCurrentlySaving))
+            if (MenuItem("Edit Composition Settings", isEnabled: projectView != null))
+                WindowManager.ProjectSettingsWindow.Config.Visible = true;
+
+            if (MenuItem("Save Project Thumbnail", isEnabled: currentProject != null && RenderProcess.MainOutputTexture != null))
             {
-                BlockingWindow.Instance.ShowMessageBox("This feature is not yet available in the main branch. Stay tuned for updates!",
-                                                       "Not yet implemented");
-                //_importDialog.ShowNextFrame();
+                ThumbnailManager.SaveThumbnail(currentProject!.Id, currentProject, RenderProcess.MainOutputTexture!, ThumbnailManager.Categories.PackageMeta);
+            }
+
+            var exportChildUis = projectView?.NodeSelection.GetSelectedChildUis().ToList();
+            var canExport = projectView?.CompositionInstance != null && exportChildUis is { Count: 1 }
+                            && projectView.CompositionInstance.Children.TryGetChildInstance(exportChildUis[0].SymbolChild.Id, out var exportTarget)
+                            && PlayerExporter.CanExport(exportTarget);
+            if (MenuItem("Export as Executable", isEnabled: canExport))
+            {
+                PlayerExporter.ExportAndReport(projectView!.CompositionInstance!, exportChildUis![0]);
             }
 
             CustomComponents.SeparatorLine();
@@ -388,91 +375,9 @@ internal static class AppMenuBar
                 T3Ui.SaveInBackground(saveAll: true);
             }
 
-            if (MenuItem("Set Project Thumbnail", isEnabled: RenderProcess.MainOutputTexture != null))
-            {
-                if (currentProject != null && RenderProcess.MainOutputTexture != null)
-                {
-                    ThumbnailManager.SaveThumbnail(currentProject.Id, currentProject, RenderProcess.MainOutputTexture, ThumbnailManager.Categories.PackageMeta);
-                }
-            }
-
-            CustomComponents.SeparatorLine();
-
-            if (BeginSubMenu("Development Tools"))
-            {
-                if (MenuItem("Skill Map Editor"))
-                    SkillMapEditor.ShowNextFrame();
-
-                if (MenuItem("Tour Point Editor"))
-                    EditTourPointsPopup.ShowNextFrame();
-
-                CustomComponents.SeparatorLine();
-
-                if (MenuItem("Fix Asset Paths"))
-                    ConformAssetPaths.ConformAllPaths();
-
-                if (MenuItem("Check Symbol Dependencies"))
-                {
-                    SymbolAnalysis.LogInvalidSymbolDependencies();
-                    SymbolAnalysis.LogInvalidAssetReference();
-                }
-
-                if (BeginSubMenu("Clear Shader Cache"))
-                {
-                    if (MenuItem("Editor Only"))
-                        ShaderCompiler.DeleteShaderCache(all: false);
-
-                    if (MenuItem("All Editor and Player Versions"))
-                        ShaderCompiler.DeleteShaderCache(all: true);
-
-                    ImGui.EndMenu();
-                }
-
-                if (BeginSubMenu("Documentation"))
-                {
-                    if (MenuItem("Export as WIKI"))
-                        ExportWikiDocumentation.ExportWiki();
-
-                    if (MenuItem("Export to JSON"))
-                        ExportDocumentationStrings.ExportDocumentationAsJson();
-
-                    if (MenuItem("Import from JSON"))
-                        ExportDocumentationStrings.ImportDocumentationAsJson();
-
-                    ImGui.EndMenu();
-                }
-
-                if (BeginSubMenu("Debug"))
-                {
-                    if (MenuItem("ImGUI Demo", isChecked: WindowManager.DemoWindowVisible))
-                        WindowManager.DemoWindowVisible = !WindowManager.DemoWindowVisible;
-
-                    if (MenuItem("ImGUI Metrics", isChecked: WindowManager.MetricsWindowVisible))
-                        WindowManager.MetricsWindowVisible = !WindowManager.MetricsWindowVisible;
-
-                    ImGui.EndMenu();
-                }
-
-                WindowManager.UtilitiesWindow.DrawMenuItemToggle();
-                WindowManager.GuidedFeatureTestsWindow.DrawMenuItemToggle();
-
-                ImGui.EndMenu();
-            }
-
             CustomComponents.SeparatorLine();
 
             WindowManager.SettingsWindow.DrawMenuItemToggle();
-            {
-                var hasSettings = ProjectView.Focused?.CompositionInstance?.Symbol.CompositionSettings is { Enabled: true };
-                var window = WindowManager.ProjectSettingsWindow;
-                if (MenuItem("Composition Settings", isChecked: hasSettings))
-                {
-                    window.Config.Visible = !window.Config.Visible;
-                }
-            }
-
-            if (MenuItem("Edit Output Setup", isEnabled: ProjectView.Focused != null))
-                Windows.Output.OutputWindow.EnterSetupOnPrimaryWindow();
 
             CustomComponents.SeparatorLine();
 
@@ -492,48 +397,18 @@ internal static class AppMenuBar
         if (ImGui.BeginMenu("Edit"))
         {
             UserSettings.Config.ShowMainMenu = true;
-            if (MenuItem("Undo", "CTRL+Z", isEnabled: UndoRedoStack.CanUndo))
+            if (MenuItem("Undo", UserActions.Undo.ListShortcuts(), isEnabled: UndoRedoStack.CanUndo))
             {
                 UndoRedoStack.Undo();
             }
 
-            if (MenuItem("Redo", "CTRL+SHIFT+Z", isEnabled: UndoRedoStack.CanRedo))
+            if (MenuItem("Redo", UserActions.Redo.ListShortcuts(), isEnabled: UndoRedoStack.CanRedo))
             {
                 UndoRedoStack.Redo();
             }
 
-            CustomComponents.SeparatorLine();
-
-            var sectionView = ProjectView.Focused;
-            var canAddSection = sectionView?.CompositionInstance != null && !T3Ui.IsCurrentlySaving;
-            if (MenuItem("Add Section", UserActions.AddSection.ListShortcuts(), isEnabled: canAddSection))
-            {
-                // Placed around the selection, or at the center of the graph view
-                var canvas = sectionView!.GraphView.Canvas;
-                var centerScreen = canvas.WindowPos + canvas.WindowSize / 2;
-                NodeActions.AddSection(sectionView.NodeSelection, canvas, sectionView.CompositionInstance!, centerScreen);
-                sectionView.GraphView.FlagStructureAsChanged();
-            }
-
-            CustomComponents.SeparatorLine();
-
-            if (BeginSubMenu("Bookmarks"))
-            {
-                GraphBookmarkNavigation.DrawBookmarksMenu();
-                ImGui.EndMenu();
-            }
-
-            CustomComponents.SeparatorLine();
-
-            var exportView = ProjectView.Focused;
-            var exportChildUis = exportView?.NodeSelection.GetSelectedChildUis().ToList();
-            var canExport = exportView?.CompositionInstance != null && exportChildUis is { Count: 1 }
-                            && exportView.CompositionInstance.Children.TryGetChildInstance(exportChildUis[0].SymbolChild.Id, out var exportTarget)
-                            && PlayerExporter.CanExport(exportTarget);
-            if (MenuItem("Export as Executable", isEnabled: canExport))
-            {
-                PlayerExporter.ExportAndReport(exportView!.CompositionInstance!, exportChildUis![0]);
-            }
+            if (ProjectView.Focused?.GraphView is MagGraphView { Context: not null } magGraphView)
+                GraphEditMenu.Draw(magGraphView.Context);
 
             ImGui.EndMenu();
         }
@@ -563,6 +438,14 @@ internal static class AppMenuBar
             if (MenuItem("Focus Mode", UserActions.ToggleFocusMode.ListShortcuts(), isChecked: LayoutHandling.FocusMode))
             {
                 UiConfig.ToggleFocusMode();
+            }
+
+            CustomComponents.SeparatorLine();
+
+            if (BeginSubMenu("Bookmarks", isEnabled: ProjectView.Focused != null))
+            {
+                GraphBookmarkNavigation.DrawBookmarksMenu();
+                ImGui.EndMenu();
             }
 
             ImGui.EndMenu();
@@ -626,6 +509,10 @@ internal static class AppMenuBar
 
             CustomComponents.SeparatorLine();
 
+            DrawDevelopmentToolsMenu();
+
+            CustomComponents.SeparatorLine();
+
             _licenseLink.DrawMenuItem();
 
             if (MenuItem("About TiXL"))
@@ -635,7 +522,79 @@ internal static class AppMenuBar
 
             ImGui.EndMenu();
         }
+
+        if (_projectViewToClose != null)
+        {
+            _projectViewToClose.Close();
+            _projectViewToClose = null;
+        }
     }
+
+    private static void DrawDevelopmentToolsMenu()
+    {
+        if (BeginSubMenu("Development Tools"))
+        {
+            if (MenuItem("Skill Map Editor"))
+                SkillMapEditor.ShowNextFrame();
+
+            if (MenuItem("Tour Point Editor"))
+                EditTourPointsPopup.ShowNextFrame();
+
+            CustomComponents.SeparatorLine();
+
+            if (MenuItem("Fix Asset Paths"))
+                ConformAssetPaths.ConformAllPaths();
+
+            if (MenuItem("Check Symbol Dependencies"))
+            {
+                SymbolAnalysis.LogInvalidSymbolDependencies();
+                SymbolAnalysis.LogInvalidAssetReference();
+            }
+
+            if (BeginSubMenu("Clear Shader Cache"))
+            {
+                if (MenuItem("Editor Only"))
+                    ShaderCompiler.DeleteShaderCache(all: false);
+
+                if (MenuItem("All Editor and Player Versions"))
+                    ShaderCompiler.DeleteShaderCache(all: true);
+
+                ImGui.EndMenu();
+            }
+
+            if (BeginSubMenu("Documentation"))
+            {
+                if (MenuItem("Export as WIKI"))
+                    ExportWikiDocumentation.ExportWiki();
+
+                if (MenuItem("Export to JSON"))
+                    ExportDocumentationStrings.ExportDocumentationAsJson();
+
+                if (MenuItem("Import from JSON"))
+                    ExportDocumentationStrings.ImportDocumentationAsJson();
+
+                ImGui.EndMenu();
+            }
+
+            if (BeginSubMenu("Debug"))
+            {
+                if (MenuItem("ImGUI Demo", isChecked: WindowManager.DemoWindowVisible))
+                    WindowManager.DemoWindowVisible = !WindowManager.DemoWindowVisible;
+
+                if (MenuItem("ImGUI Metrics", isChecked: WindowManager.MetricsWindowVisible))
+                    WindowManager.MetricsWindowVisible = !WindowManager.MetricsWindowVisible;
+
+                ImGui.EndMenu();
+            }
+
+            WindowManager.UtilitiesWindow.DrawMenuItemToggle();
+            WindowManager.GuidedFeatureTestsWindow.DrawMenuItemToggle();
+
+            ImGui.EndMenu();
+        }
+    }
+
+    private static ProjectView? _projectViewToClose;
 
     private sealed class HelpLink(string title, string url, string toolTip = "")
     {
