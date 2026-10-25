@@ -8,6 +8,7 @@ using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.OutputUi;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.UiContentDrawing;
 using T3.SystemUi;
 
 namespace T3.Editor.Gui.Windows;
@@ -94,7 +95,10 @@ internal sealed class ImageOutputCanvas : ScalableCanvas
         var sizeOnScreen = Current.TransformDirection(size);
 
         var srv = SrvManager.GetSrvForTexture(texture);
+        var drawList = ImGui.GetWindowDrawList();
+        WindowsUiContentDrawer.BeginPixelSampling(drawList);
         ImGui.Image((IntPtr)srv, sizeOnScreen);
+        WindowsUiContentDrawer.EndPixelSampling(drawList);
 
         if (ImGui.IsMouseHoveringRect(topLeftOnScreen, topLeftOnScreen + sizeOnScreen))
         {
