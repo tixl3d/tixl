@@ -10,8 +10,7 @@ namespace T3.Editor.App;
 /// <summary>
 /// The borderless windows that carry output composites onto displays — one per display an output is bound to,
 /// claimed afresh each frame. A window whose output goes away is hidden rather than closed: its swap chain is
-/// driven by the render loop, and closing one is what the displayWindow window's disabled close button already guards
-/// against. Displays are few and long-lived, so a hidden window costs less than the teardown would.
+/// driven by the render loop, and closing one is what its disabled close button guards against. Displays are few and long-lived, so a hidden window costs less than the teardown would.
 /// </summary>
 internal static class OutputWindowHandling
 {
@@ -148,7 +147,7 @@ internal static class OutputWindowHandling
         if (displayIndex < 0 || displayIndex >= AppWindow.DisplayCount)
             return null;
 
-        var window = ProgramWindows.CreateViewerWindow($"TiXL Output {displayIndex + 1}", 640, 360);
+        var window = ProgramWindows.CreateOutputWindow($"TiXL Output {displayIndex + 1}", 640, 360);
         window.SetFullScreen(displayIndex);
         var displayWindow = new DisplayWindow(window);
         _windows[displayIndex] = displayWindow;
