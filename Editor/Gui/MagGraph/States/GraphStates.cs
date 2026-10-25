@@ -370,6 +370,7 @@ namespace T3.Editor.Gui.MagGraph.States
                          {
                              context.ItemMovement.PrepareDragInteraction();
                              context.ItemMovement.StartDragOperation(context);
+                             EdgeScrolling.Reset();
                          },
                   Update: context =>
                           {
@@ -381,6 +382,7 @@ namespace T3.Editor.Gui.MagGraph.States
                                   return;
                               }
 
+                              EdgeScrolling.Update(context.View);
                               context.ItemMovement.UpdateDragging(context);
                           },
                   Exit: context => { context.ItemMovement.StopDragOperation(); }
@@ -549,7 +551,7 @@ namespace T3.Editor.Gui.MagGraph.States
     
         internal static State<GraphUiContext> DragConnectionEnd
             = new(
-                  Enter: _ => { },
+                  Enter: _ => EdgeScrolling.Reset(),
                   Update: context =>
                           {
                               if (ImGui.IsKeyDown(ImGuiKey.Escape))
@@ -558,6 +560,7 @@ namespace T3.Editor.Gui.MagGraph.States
                                   return;
                               }
 
+                              EdgeScrolling.Update(context.View);
                               var posOnCanvas = context.View.InverseTransformPositionFloat(ImGui.GetMousePos());
                               context.PeekAnchorInCanvas = posOnCanvas;
 
@@ -679,7 +682,7 @@ namespace T3.Editor.Gui.MagGraph.States
 
         internal static State<GraphUiContext> DragConnectionBeginning
             = new(
-                  Enter: _ => { },
+                  Enter: _ => EdgeScrolling.Reset(),
                   Update: context =>
                           {
                               if (!ImGui.IsMouseDown(ImGuiMouseButton.Left))
@@ -715,7 +718,10 @@ namespace T3.Editor.Gui.MagGraph.States
                                   context.CancelMacroCommand();
                                   context.Layout.FlagStructureAsChanged();
                                   context.StateMachine.SetState(Default, context);
+                                  return;
                               }
+
+                              EdgeScrolling.Update(context.View);
                           },
                   Exit: _ => { });
 
