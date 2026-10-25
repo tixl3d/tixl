@@ -10,7 +10,7 @@ namespace T3.Editor.Gui.MagGraph.Interaction;
 /// <summary>
 /// Grows a tree layout from the current selection one level per invocation: operators feeding the
 /// selected items are snapped into place (main input stacked above or, for input drivers, left of the row; other
-/// inputs left of their row)
+/// inputs and all lines of a multi-input group left of their row)
 /// and added to the selection, so repeating the action walks further up and left through the graph.
 /// Selected items that feed other selected items are arranged as well, so a box selection gets tidied.
 /// Already snapped sources are kept where they are. A source snaps horizontally into a row only if the rows it
@@ -123,8 +123,12 @@ internal static class TreeLayouting
                     continue;
 
                 // A tall item snapped into a row covers the rows below it - fine as long as nothing else wants to
-                // snap there. Stacking above allows any height.
-                var canStack = canSnap && snapRow == 0 && CountOutgoingConnections(source) == 1;
+                // snap there. Stacking above allows any height. Sources of a multi-input group line up in one
+                // column, so the first one doesn't stack.
+                var canStack = canSnap
+                               && snapRow == 0
+                               && CountOutgoingConnections(source) == 1
+                               && !IsPartOfMultiInputGroup(target, snapRow);
                 var maySnapIntoRow = canSnap && CoveredRowsAreFree(target, snapRow, source);
                 var snaps = maySnapIntoRow || canStack;
 
@@ -287,6 +291,24 @@ internal static class TreeLayouting
         }
 
         return snapRow >= 0;
+    }
+
+    /// <summary>
+    /// True if the row belongs to a multi-input that is shown with more than one line.
+    /// </summary>
+    private static bool IsPartOfMultiInputGroup(MagGraphItem target, int row)
+    {
+        var line = target.InputLines[row];
+        if (line.InputUi?.InputDefinition.IsMultiInput != true)
+            return false;
+
+        for (var index = 0; index < target.InputLines.Length; index++)
+        {
+            if (index != row && target.InputLines[index].Id == line.Id)
+                return true;
+        }
+
+        return false;
     }
 
     private static bool AllConsumersAreIn(MagGraphItem source, HashSet<MagGraphItem> set, HashSet<MagGraphItem>? orSet = null)
