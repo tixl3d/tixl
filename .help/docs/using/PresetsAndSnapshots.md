@@ -50,7 +50,7 @@ All actions are undoable, and the view stays in sync with the Variations window 
 
 ### Controlling individual parameters
 
-Snapshot control can be limited to individual parameters: right-click a parameter in the Parameter window and choose **"Control with Snapshots"**. Controlled parameters show a green knob icon in the connection area next to their name.
+Snapshot control can be limited to individual parameters: right-click a parameter in the Parameter window and choose **"Control with Snapshots"**, or `Ctrl+Shift`+click the connection area left of its name. Controlled parameters show a green knob icon in the connection area next to their name.
 
 - Enabling a parameter on an operator that wasn't snapshot-enabled yet enables the operator with just that parameter.
 - Disabling the last controlled parameter disables the operator for snapshots entirely.

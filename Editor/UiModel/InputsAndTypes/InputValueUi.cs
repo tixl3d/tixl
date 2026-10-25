@@ -815,7 +815,8 @@ internal static class InputArea
         if (tempConnections.Count == 0)
         {
             var io = ImGui.GetIO();
-            if (io.KeyCtrl && io.KeyAlt && IsSnapshotControllable(symbolChildUi, input))
+            // Ctrl+Alt is the original binding, kept for muscle memory; it doubles as AltGr on many layouts
+            if (io.KeyCtrl && (io.KeyShift || io.KeyAlt) && IsSnapshotControllable(symbolChildUi, input))
             {
                 inputOperation = InputOperations.ToggleSnapshotControl;
             }
@@ -935,7 +936,7 @@ internal static class InputArea
 
             if (IsSnapshotControllable(symbolChildUi, input))
             {
-                ImGui.TextUnformatted("CTRL+ALT+Click to control with snapshots");
+                ImGui.TextUnformatted("CTRL+SHIFT+Click to control with snapshots");
             }
 
             ImGui.PopFont();
