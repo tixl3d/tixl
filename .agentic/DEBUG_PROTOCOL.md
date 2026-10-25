@@ -54,7 +54,8 @@ buffer's alpha is render residue and would make the PNG see-through.
 Control surface: `openProject` (`name`), `newProject`, `select` (`childId`), `setInput`
 (`childId`, `inputName`, `value`), `addOp`, `connect`, `deleteOp`, `pin`, `pumpFrames`
 (`count`), `layoutSelection` (runs the G layout action on the current selection; returns `changed` and
-the grown `selectedIds`), `resetView`, `reload`, `undo`, `redo`, `setTime`, `setPlayback`, `shutdown`,
+the grown `selectedIds`), `deleteSelection` (runs the Del action on the current selection, `disconnect: true`
+for Ctrl+Del; returns `deleted` and the `selectedIds` picked afterwards), `resetView`, `reload`, `undo`, `redo`, `setTime`, `setPlayback`, `shutdown`,
 `outputSetup` (`entity`: a setup entity's display name to select, e.g. `"Surface 1"`; `mode`: the
 strip's toolbar tab — `Board`, `Straight`, `Output`; either optional), `openWindow` (`name`: a window's
 type name such as `SettingsWindow`, `ParameterWindow`; optional `section` picks a settings category, e.g.
