@@ -9,6 +9,14 @@ implemented yet. Phase 0 and Phase 1 are detailed enough to build from.
 frequent). Reorder (Alt+↑/↓ in snapped stacks) already exists and is rarely useful because connection types
 change along chains — leave it as is.
 
+## Status
+
+- **Phase 2, first step — implemented (uncommitted):** arrow keys move the selection in MagGraph when the graph
+  has focus (`Editor/Gui/MagGraph/Interaction/SelectionNavigation.cs`, wired in `KeyboardActions`). Ranking by
+  rect gap along the direction with a sideways penalty, connected items preferred; with nothing selected the
+  item nearest the view centre is picked; the view pans to keep the selection visible. Not yet: active-op
+  model, Shift+arrow extend, Space marks, zoom-to-edit-level.
+
 ## Design principles
 
 - **Nested modes with a visible stack.** Root (graph, nothing active) → Cursor (active op) → Param (`s`) →

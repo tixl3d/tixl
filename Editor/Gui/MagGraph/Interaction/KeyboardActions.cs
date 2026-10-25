@@ -184,26 +184,20 @@ internal static class KeyboardActions
         //if (navigationPath != null)
         //    _window.TrySetCompositionOp(navigationPath);
 
-        // Todo: Implement
-        // if (KeyboardBinding.Triggered(UserActions.SelectToAbove))
-        // {
-        //     NodeNavigation.SelectAbove();
-        // }
-        //
-        // if (KeyboardBinding.Triggered(UserActions.SelectToRight))
-        // {
-        //     NodeNavigation.SelectRight();
-        // }
-        //
-        // if (KeyboardBinding.Triggered(UserActions.SelectToLeft))
-        // {
-        //     NodeNavigation.SelectLeft();
-        // }
-        //
-        // if (KeyboardBinding.Triggered(UserActions.SelectToBelow))
-        // {
-        //     NodeNavigation.SelectBelow();
-        // }
+        if (context.StateMachine.CurrentState == GraphStates.Default)
+        {
+            if (UserActions.SelectToAbove.Triggered())
+                SelectionNavigation.MoveSelection(context, SelectionNavigation.Directions.Up);
+
+            if (UserActions.SelectToRight.Triggered())
+                SelectionNavigation.MoveSelection(context, SelectionNavigation.Directions.Right);
+
+            if (UserActions.SelectToBelow.Triggered())
+                SelectionNavigation.MoveSelection(context, SelectionNavigation.Directions.Down);
+
+            if (UserActions.SelectToLeft.Triggered())
+                SelectionNavigation.MoveSelection(context, SelectionNavigation.Directions.Left);
+        }
 
         if (UserActions.AddComment.Triggered())
         {
