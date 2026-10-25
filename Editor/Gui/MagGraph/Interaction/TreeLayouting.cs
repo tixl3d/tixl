@@ -10,7 +10,7 @@ namespace T3.Editor.Gui.MagGraph.Interaction;
 /// <summary>
 /// Grows a tree layout from the current selection one level per invocation: operators feeding the
 /// selected items are snapped into place (main input stacked above or, for input drivers, left of the row; other
-/// inputs and all lines of a multi-input group left of their row)
+/// inputs and all lines of a multi-input group left of their row). Chains feeding a parameter row stay horizontal.
 /// and added to the selection, so repeating the action walks further up and left through the graph.
 /// Selected items that feed other selected items are arranged as well, so a box selection gets tidied.
 /// Already snapped sources are kept where they are. A source snaps horizontally into a row only if the rows it
@@ -157,6 +157,9 @@ internal static class TreeLayouting
 
         orderedPlacements.Sort((a, b) => a.order != b.order ? a.order.CompareTo(b.order) : a.index.CompareTo(b.index));
 
+        // Items snapped horizontally into a parameter row during this pass, before connection styles reflect it
+        var horizontalChainItems = new HashSet<MagGraphItem>();
+
         var movedCount = 0;
         context.StartMacroCommand("Layout inputs");
 
@@ -174,9 +177,16 @@ internal static class TreeLayouting
             }
 
             var isSnapped = false;
+            var isInRow = false;
+            var isTargetInChain = IsInHorizontalChain(placement.Target, horizontalChainItems);
             var found = placement.Snaps
-                            ? TryFindSnappedPosition(placement, obstacles, targetBlock, pendingItems, out var newPos, out isSnapped)
+                            ? TryFindSnappedPosition(placement, isTargetInChain, obstacles, targetBlock, pendingItems, out var newPos, out isSnapped, out isInRow)
                             : TryFindPositionLeftOfConsumers(placement, obstacles, targetBlock, pendingItems, out newPos);
+
+            if (isInRow && (placement.SnapRow > 0 || isTargetInChain))
+            {
+                horizontalChainItems.Add(placement.Source);
+            }
 
             // From here on the cluster blocks at its final position, whether it moved or not
             pendingItems.ExceptWith(placement.Cluster);
@@ -360,25 +370,67 @@ internal static class TreeLayouting
     }
 
     /// <summary>
-    /// Main input: stacked above the target, or snapped left of its row. Input drivers prefer the row, where they
-    /// pack tighter; operators prefer the stack. If neither exact spot is free, or the source would cover connected
-    /// rows below, it falls back to the loose placement - the connection then becomes a curve.
+    /// True if the item feeds a parameter row through horizontal snaps only, e.g. a value chain driving a
+    /// light's position. Its sources then continue the row instead of stacking above.
     /// </summary>
-    private static bool TryFindSnappedPosition(in Placement placement, HashSet<MagGraphItem> obstacles, HashSet<MagGraphItem> targetBlock,
-                                               HashSet<MagGraphItem> pendingItems, out Vector2 position, out bool isSnapped)
+    private static bool IsInHorizontalChain(MagGraphItem item, HashSet<MagGraphItem> horizontalChainItems)
+    {
+        for (var step = 0; step < MaxSearchSteps; step++)
+        {
+            if (horizontalChainItems.Contains(item))
+                return true;
+
+            if (CountOutgoingConnections(item) != 1)
+                return false;
+
+            MagGraphConnection? connectionOut = null;
+            foreach (var outputLine in item.OutputLines)
+            {
+                if (outputLine.ConnectionsOut.Count > 0)
+                    connectionOut = outputLine.ConnectionsOut[0];
+            }
+
+            switch (connectionOut?.Style)
+            {
+                case MagGraphConnection.ConnectionStyles.MainOutToInputSnappedHorizontal:
+                    return true;
+                case MagGraphConnection.ConnectionStyles.MainOutToMainInSnappedHorizontal:
+                    item = connectionOut.TargetItem;
+                    continue;
+                default:
+                    return false;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Main input: stacked above the target, or snapped left of its row. Input drivers and sources continuing a
+    /// horizontal chain prefer the row; other operators prefer the stack. If neither exact spot is free, or the
+    /// source would cover connected rows below, it falls back to the loose placement - the connection then
+    /// becomes a curve.
+    /// </summary>
+    private static bool TryFindSnappedPosition(in Placement placement, bool isTargetInChain, HashSet<MagGraphItem> obstacles,
+                                               HashSet<MagGraphItem> targetBlock, HashSet<MagGraphItem> pendingItems,
+                                               out Vector2 position, out bool isSnapped, out bool isInRow)
     {
         isSnapped = true;
-        var rowFirst = placement.Source.Variant == MagGraphItem.Variants.Input;
+        isInRow = true;
+        var rowFirst = placement.Source.Variant == MagGraphItem.Variants.Input || isTargetInChain;
         if (rowFirst && TryGetRowPosition(placement, obstacles, targetBlock, pendingItems, out position))
             return true;
 
+        isInRow = false;
         if (TryGetStackPosition(placement, obstacles, targetBlock, pendingItems, out position))
             return true;
 
+        isInRow = true;
         if (!rowFirst && TryGetRowPosition(placement, obstacles, targetBlock, pendingItems, out position))
             return true;
 
         isSnapped = false;
+        isInRow = false;
         return TryFindPositionLeftOfConsumers(placement, obstacles, targetBlock, pendingItems, out position);
     }
 

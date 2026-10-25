@@ -35,9 +35,27 @@ namespace T3.Editor.Gui.MagGraph.States
                    && item.OutputLines.Length > 0;
         }
 
-        /** Shift inserts to the right of the op instead of below it. */
-        internal static MagGraphItem.Directions TabInsertionDirection
-            => ImGui.GetIO().KeyShift ? MagGraphItem.Directions.Horizontal : MagGraphItem.Directions.Vertical;
+        /// <summary>
+        /// Tab continues the op's existing flow: below it, or to the right if its first output already snaps horizontally.
+        /// Shift switches to the other direction.
+        /// </summary>
+        internal static MagGraphItem.Directions GetTabInsertionDirection(MagGraphItem item)
+        {
+            var isHorizontal = HasHorizontalSnappedOutput(item.OutputLines[0]) != ImGui.GetIO().KeyShift;
+            return isHorizontal ? MagGraphItem.Directions.Horizontal : MagGraphItem.Directions.Vertical;
+        }
+
+        private static bool HasHorizontalSnappedOutput(MagGraphItem.OutputLine outputLine)
+        {
+            foreach (var c in outputLine.ConnectionsOut)
+            {
+                if (c.Style is MagGraphConnection.ConnectionStyles.MainOutToMainInSnappedHorizontal
+                    or MagGraphConnection.ConnectionStyles.MainOutToInputSnappedHorizontal)
+                    return true;
+            }
+
+            return false;
+        }
 
         internal static State<GraphUiContext> Default
             = new(
@@ -78,7 +96,7 @@ namespace T3.Editor.Gui.MagGraph.States
                                       if (TryGetItemForTabInsertion(context, out var focusedItem))
                                       {
                                           context.Placeholder.OpenForItemOutput(context, focusedItem, focusedItem.OutputLines[0],
-                                                                                TabInsertionDirection);
+                                                                                GetTabInsertionDirection(focusedItem));
                                       }
                                       else
                                       {
