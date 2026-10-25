@@ -960,6 +960,17 @@ internal static class SetupParameterView
 
     private static void DrawContentCard(Setup setup, Guid childId)
     {
+        if (EditorUiContent.IsEditorUi(childId))
+        {
+            OutputContentResolver.TryGetPreviewContent(childId, out var frame);
+            FormInputs.ApplyIndent();
+            CustomComponents.StylizedText(frame is { IsDisposed: false }
+                                              ? $"mirrors the editor window, {frame.Description.Width}×{frame.Description.Height}"
+                                              : "mirrors the editor window",
+                                          Fonts.FontSmall, UiColors.TextMuted);
+            return;
+        }
+
         var instance = ContentSourceSync.FindSendInstance(childId);
         if (instance is not IContentSupplier supplier)
             return;
@@ -968,8 +979,11 @@ internal static class SetupParameterView
         var context = OutputContentResolver.Context;
 
         var update = supplier.GetUpdateEnabled(context);
-        if (FormInputs.AddCheckBox("Update", ref update, "When off, freezes this content at its last frame."))
+        if (FormInputs.AddCheckBox("Update", ref update, "When off, freezes this content at its last frame.")
+            && supplier.UpdateInput != null)
+        {
             SetInputUndoable(instance, supplier.UpdateInput, update);
+        }
 
         // 0×0 means "whatever the output asks for", so the content follows the projector or display it is routed
         // to; a set value pins it. The line underneath says what that resolves to right now.
@@ -977,7 +991,7 @@ internal static class SetupParameterView
         Span<int> resolution = [requested.Width, requested.Height];
         var state = DrawIntsRow("Render at (px)", resolution,
                                 "0 follows the output this content is routed to. Set a size to render at it regardless.");
-        if ((state & InputEditStateFlags.Modified) != 0)
+        if ((state & InputEditStateFlags.Modified) != 0 && supplier.ResolutionInput != null)
         {
             SetInputUndoable(instance, supplier.ResolutionInput,
                              new T3.Core.DataTypes.Vector.Int2(Math.Clamp(resolution[0], 0, 16384),

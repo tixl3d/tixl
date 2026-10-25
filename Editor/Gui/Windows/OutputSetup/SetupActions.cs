@@ -723,7 +723,17 @@ internal static class SetupActions
     {
         if (kind == SetupEntityKinds.ContentSource)
         {
-            ContentSourceSync.RenameContentSourceOp(id, newName);
+            // The editor UI has no op, so its name is setup state like any other.
+            var uiSource = EditorUiContent.IsEditorUi(id) ? setup.FindSourceByChildId(id) : null;
+            if (uiSource != null)
+            {
+                SetupUndo.RunUndoable("Rename", setup, () => uiSource.Name = newName);
+            }
+            else
+            {
+                ContentSourceSync.RenameContentSourceOp(id, newName);
+            }
+
             return;
         }
 
@@ -740,8 +750,12 @@ internal static class SetupActions
 
     // ---- Delete ------------------------------------------------------------------------------------
 
-    /// <summary>A content source is a graph op (delete the op instead); everything else deletes here.</summary>
-    internal static bool CanDeleteDirectly(SetupEntityKinds kind) => SetupEntityKindInfo.Of(kind).CanDelete;
+    /// <summary>A content source is a graph op (delete the op instead) unless it is the editor UI, which has none;
+    /// everything else deletes here.</summary>
+    internal static bool CanDeleteDirectly(SetupEntityKinds kind, Guid id)
+    {
+        return SetupEntityKindInfo.Of(kind).CanDelete || (kind == SetupEntityKinds.ContentSource && EditorUiContent.IsEditorUi(id));
+    }
 
     /// <summary>
     /// How many of the selected entities can actually be deleted here. A content source is a graph op and a
@@ -752,7 +766,7 @@ internal static class SetupActions
         var count = 0;
         for (var i = 0; i < selection.Targets.Count; i++)
         {
-            if (CanDeleteDirectly(selection.Targets[i].Kind))
+            if (CanDeleteDirectly(selection.Targets[i].Kind, selection.Targets[i].EntityId))
                 count++;
         }
 
@@ -869,6 +883,21 @@ internal static class SetupActions
                 if (setup.FindPatch(id, out var owner) != null)
                     owner!.Patches.RemoveAll(p => p.Id == id);
 
+                break;
+
+            case SetupEntityKinds.ContentSource:
+                // Only the editor UI's source deletes here; a send's goes with its op.
+                var uiSource = EditorUiContent.IsEditorUi(id) ? setup.FindSourceByChildId(id) : null;
+                if (uiSource == null)
+                    break;
+
+                for (var s = setup.Slices.Count - 1; s >= 0; s--)
+                {
+                    if (setup.Slices[s].SourceId == uiSource.Id)
+                        DeleteSliceInternal(setup, setup.Slices[s].Id);
+                }
+
+                setup.ContentSources.Remove(uiSource);
                 break;
         }
     }

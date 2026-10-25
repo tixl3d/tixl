@@ -197,7 +197,7 @@ internal static class SetupRouting
             {
                 var output = setup.FindOutput(targetId);
                 if (output != null)
-                    FeedOutputDirectly(output, sliceId);
+                    FeedOutputDirectly(setup, output, sliceId);
             }
 
             return;
@@ -252,7 +252,7 @@ internal static class SetupRouting
     /// drop re-feeds it instead of stacking a second one exactly over it. An output already split into tiles
     /// keeps them: the drop adds the full-canvas layer it asked for, which the tiles then sit under.
     /// </summary>
-    private static void FeedOutputDirectly(OutputDefinition output, Guid sliceId)
+    private static void FeedOutputDirectly(Setup setup, OutputDefinition output, Guid sliceId)
     {
         foreach (var existing in output.Patches)
         {
@@ -263,13 +263,21 @@ internal static class SetupRouting
 
         // The full-canvas layer the output already has is the one the drop asks for, however many tiles sit
         // over it. Without one it is inserted underneath them, not appended, or it would cover them.
-        if (SetupRelations.TryGetImplicitPatch(output, out var implicitPatch))
+        if (!SetupRelations.TryGetImplicitPatch(output, out var patch))
         {
-            implicitPatch!.SliceId = sliceId;
-            return;
+            patch = SetupActions.CreateFullCanvasPatch(sliceId);
+            output.Patches.Insert(0, patch);
         }
 
-        output.Patches.Insert(0, SetupActions.CreateFullCanvasPatch(sliceId));
+        patch!.SliceId = sliceId;
+
+        // The editor UI keeps its window's aspect: letterboxed onto the canvas rather than stretched across it.
+        if (EditorUiContent.TryGetSliceAspect(setup, sliceId, out var aspectRatio))
+        {
+            patch.ScaleMode = PatchScaleModes.Fit;
+            patch.AspectRatio = aspectRatio;
+            patch.TryFitQuad(output.CanvasSize);
+        }
     }
 
     /// <summary>

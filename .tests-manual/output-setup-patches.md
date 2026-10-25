@@ -19,7 +19,7 @@ helpers, and promoting a patch to a surface.
 ## Step: Build the test setup
 
 **Action:**
-1. Connect the LoadImage op to a new **SendToOutput** op (`+` on **CONTENT** creates one
+1. Connect the LoadImage op to a new **SendToOutput** op (`+` on **CONTENT** → **SendToOutput Op** creates one
    to the right of a selected texture op).
 2. Click `+` on **OUTPUTS**.
 

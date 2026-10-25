@@ -69,6 +69,10 @@ internal static class ContentSourceSync
     /// <summary>Whether a content source's send op lies under the active composition, instantiated or not.</summary>
     public static bool IsSourceInScope(Guid childId)
     {
+        // The editor UI belongs to no composition.
+        if (EditorUiContent.IsEditorUi(childId))
+            return true;
+
         var instance = FindSendInstance(childId);
         return instance != null ? IsInScope(instance) : _scopeSendChildIds.Contains(childId);
     }
@@ -272,7 +276,7 @@ internal static class ContentSourceSync
         for (var i = setup.ContentSources.Count - 1; i >= 0; i--)
         {
             var source = setup.ContentSources[i];
-            if (!IsChildConfirmedDeleted(source.SymbolChildId))
+            if (EditorUiContent.IsEditorUi(source.SymbolChildId) || !IsChildConfirmedDeleted(source.SymbolChildId))
                 continue;
 
             var sourceId = source.Id;

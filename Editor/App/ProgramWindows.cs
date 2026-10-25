@@ -470,7 +470,8 @@ internal static unsafe class ProgramWindows
 
     /// <summary>
     /// Keeps a copy of the frame that is about to be presented. The flip-model swap chain discards
-    /// its back buffer, so this copy is what <see cref="StallWatchdog"/> shows during a stall.
+    /// its back buffer, so this copy is what <see cref="StallWatchdog"/> shows during a stall and what the
+    /// output setup maps as the editor UI.
     /// </summary>
     public static void CaptureUiFrame()
     {
@@ -506,10 +507,11 @@ internal static unsafe class ProgramWindows
             OptionFlags = ResourceOptionFlags.None
         };
 
-        if (_uiCopyTexture is { IsDisposed: false })
-            _uiCopyTexture.Dispose();
+        // The wrapper owns the native texture, so disposing it frees both.
+        UiFrame?.Dispose();
 
         _uiCopyTexture = new Texture2D(_device, textureDesc);
+        UiFrame = new T3.Core.DataTypes.Texture2D(_uiCopyTexture);
         UiCopyTextureDescription = textureDesc;
 
         if (UiCopyTextureSrv is { IsDisposed: false })
@@ -559,6 +561,9 @@ internal static unsafe class ProgramWindows
     private static Texture2D _uiCopyTexture;
     private static Action<T3.Core.DataTypes.Texture2D> _pendingUiCapture;
     public static ShaderResourceView UiCopyTextureSrv { get; private set; }
+
+    /// <summary>The last presented UI frame, kept by <see cref="CaptureUiFrame"/>; null until the first one.</summary>
+    public static T3.Core.DataTypes.Texture2D UiFrame { get; private set; }
 
     internal static Texture2DDescription UiCopyTextureDescription { get; private set; }
 

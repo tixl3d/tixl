@@ -242,7 +242,11 @@ internal sealed unsafe class AppWindow
         _deviceContext.Rasterizer.SetViewport(new Viewport(0, 0, width, height, 0.0f, 1.0f));
         _deviceContext.OutputMerger.SetTargets(_renderTargetView);
 
-        _deviceContext.ClearRenderTargetView(_renderTargetView, UiColors.WindowBackground.Rgba);
+        // Opaque even where the theme's background is translucent: the window ignores alpha, but the UI frame
+        // copied from this buffer is composited as content, where alpha counts.
+        var clearColor = UiColors.WindowBackground.Rgba;
+        clearColor.W = 1;
+        _deviceContext.ClearRenderTargetView(_renderTargetView, clearColor);
     }
 
     /// <summary>

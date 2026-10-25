@@ -21,8 +21,8 @@ public interface IContentSupplier
     bool GetUpdateEnabled(EvaluationContext context);
 
     /// <summary>The op input behind <see cref="GetUpdateEnabled"/>, so a host edits it through its own undoable
-    /// input command rather than writing the slot directly.</summary>
-    IInputSlot UpdateInput { get; }
+    /// input command rather than writing the slot directly. Null for content a host supplies without an op.</summary>
+    IInputSlot? UpdateInput { get; }
 
     /// <summary>
     /// The resolution this content is rendered at, or 0×0 to inherit the one the host asks for — the canvas of
@@ -32,7 +32,7 @@ public interface IContentSupplier
     Int2 GetResolution(EvaluationContext context);
 
     /// <summary>The op input behind <see cref="GetResolution"/>; see <see cref="UpdateInput"/>.</summary>
-    IInputSlot ResolutionInput { get; }
+    IInputSlot? ResolutionInput { get; }
 
     /// <summary>Marks the content input graph dirty so a following <see cref="GetContent"/> re-evaluates
     /// time-dependent upstream ops (the manager pulls content manually, outside the normal output path).</summary>

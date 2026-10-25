@@ -316,6 +316,7 @@ internal static class Program
         // Setup file watching the operator source
         // The compositor draws the calibration overlay through this; a player installs none and gets a bare composite.
         CalibrationOverlay.Install();
+        EditorUiContent.Register();
         T3Ui.InitializeEnvironment();
         SkillTraining.Initialize();
             

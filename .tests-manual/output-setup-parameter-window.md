@@ -20,7 +20,7 @@ refers to, so names match exactly.
 
 **Action:**
 In the Flow Outliner, click the `+` at the right of each column header, in this order:
-1. `+` on **CONTENT**
+1. `+` on **CONTENT**, then **SendToOutput Op**
 2. `+` on **SURFACES**
 3. `+` on **OUTPUTS**
 

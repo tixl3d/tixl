@@ -73,7 +73,7 @@ internal static class SetupEntityContextMenu
             if (deletable > 0 && CustomComponents.DrawMenuItem(2, $"Delete {deletable}"))
                 SetupActions.DeleteSelection(selection, setup);
         }
-        else if (SetupActions.CanDeleteDirectly(kind) && CustomComponents.DrawMenuItem(2, "Delete"))
+        else if (SetupActions.CanDeleteDirectly(kind, id) && CustomComponents.DrawMenuItem(2, "Delete"))
         {
             SetupActions.DeleteEntity(setup, kind, id);
         }

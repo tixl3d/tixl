@@ -35,6 +35,7 @@ internal sealed class SetupFlowOutliner
     public SetupFlowOutliner()
     {
         _requestAddPlugMenu = _ => _addPlugMenuRequested = true;
+        _requestAddContentMenu = _ => _addContentMenuRequested = true;
         _drawDisplayTooltip = DrawDisplayTooltip;
         _drawSendParentTooltip = DrawSendParentTooltip;
     }
@@ -207,7 +208,7 @@ internal sealed class SetupFlowOutliner
         var gap = ColumnGap * scale;
 
         BeginColumn(origin.X + gap * 0.5f, origin.Y, columnWidth - gap);
-        DrawColumnHeader("CONTENT", "##addContent", selection, ContentSourceSync.AddContentSend, SetupEntityKinds.ContentSource);
+        DrawColumnHeader("CONTENT", "##addContent", selection, _requestAddContentMenu, SetupEntityKinds.ContentSource);
         DrawContentSends(selection, setup);
         maxY = MathF.Max(maxY, ImGui.GetCursorScreenPos().Y);
 
@@ -680,42 +681,21 @@ internal sealed class SetupFlowOutliner
 
             drawnCount++;
 
-            var childId = instance.SymbolChildId;
-            var source = setup.FindSourceByChildId(childId);
-            // The implicit full-frame slice is the source itself here: no item, its connections start at the source.
-            var sliceCount = source == null ? 0 : SetupRelations.CountListedSlicesOfSource(setup, source.Id);
-            var expanded = !_collapsedSources.Contains(childId);
             var parent = instance.Parent;
             var isNested = parent != null && parent != ProjectView.Focused?.CompositionInstance;
             if (isNested)
                 _tooltipSendParent = parent;
 
-            var args = new OutlinerItem.Args
-                           {
-                               Kind = SetupEntityKinds.ContentSource,
-                               Id = childId,
-                               Name = ContentSourceSync.SendName(instance),
-                               IsExpanded = sliceCount > 0 ? expanded : null,
-                               KeepsExpanderColumn = true,
-                               // Nothing shows this source, so it steps back visually.
-                               IsMuted = source == null || SetupRelations.CountConsumersOfSource(setup, source.Id) == 0,
-                               DrawTooltip = isNested ? _drawSendParentTooltip : null,
-                           };
-            if (DrawItem(selection, setup, ref args) == OutlinerItem.Actions.ToggleExpanded)
-                ToggleSourceExpanded(childId);
+            DrawSourceItem(selection, setup, instance.SymbolChildId, ContentSourceSync.SendName(instance),
+                           isNested ? _drawSendParentTooltip : null);
+        }
 
-            if (source == null || sliceCount == 0 || !expanded)
-                continue;
-
-            // Indexed: an item's context menu can delete its slice mid-walk, which an enumerator would refuse.
-            for (var s = 0; s < setup.Slices.Count; s++)
-            {
-                var slice = setup.Slices[s];
-                if (slice.SourceId != source.Id)
-                    continue;
-
-                DrawSliceItem(selection, setup, slice);
-            }
+        // No op lists the editor UI; it shows while the setup holds its source.
+        var editorUiSource = setup.FindSourceByChildId(EditorUiContent.SourceChildId);
+        if (editorUiSource != null)
+        {
+            drawnCount++;
+            DrawSourceItem(selection, setup, EditorUiContent.SourceChildId, editorUiSource.Name, null);
         }
 
         if (drawnCount == 0)
@@ -723,6 +703,63 @@ internal sealed class SetupFlowOutliner
             ImGui.Indent(8 * T3Ui.UiScaleFactor);
             CustomComponents.StylizedText("no SendToOutput ops in this composition", Fonts.FontSmall, UiColors.TextMuted.Fade(0.6f));
             ImGui.Unindent(8 * T3Ui.UiScaleFactor);
+        }
+
+        if (_addContentMenuRequested)
+        {
+            ImGui.OpenPopup(AddContentMenuId);
+            _addContentMenuRequested = false;
+        }
+
+        if (SetupPopup.Begin(AddContentMenuId))
+        {
+            if (CustomComponents.DrawMenuItem(0, "SendToOutput Op"))
+                ContentSourceSync.AddContentSend(selection);
+
+            CustomComponents.TooltipForLastItem("Adds a SendToOutput op to the open composition.",
+                                                "A selected texture op is wired straight into it.");
+
+            if (CustomComponents.DrawMenuItem(1, EditorUiContent.DefaultName, isEnabled: editorUiSource == null))
+                EditorUiContent.AddSource(selection, setup);
+
+            CustomComponents.TooltipForLastItem("Mirrors the editor window as content, to map onto a display.",
+                                                "For tutorials and live sets: much cheaper than letting the OS duplicate a screen.");
+            SetupPopup.End();
+        }
+    }
+
+    /// <summary>A source and, unless folded, its slices.</summary>
+    private void DrawSourceItem(SetupEntitySelection selection, Setup setup, Guid childId, string name, Action? drawTooltip)
+    {
+        var source = setup.FindSourceByChildId(childId);
+        // The implicit full-frame slice is the source itself here: no item, its connections start at the source.
+        var sliceCount = source == null ? 0 : SetupRelations.CountListedSlicesOfSource(setup, source.Id);
+        var expanded = !_collapsedSources.Contains(childId);
+        var args = new OutlinerItem.Args
+                       {
+                           Kind = SetupEntityKinds.ContentSource,
+                           Id = childId,
+                           Name = name,
+                           IsExpanded = sliceCount > 0 ? expanded : null,
+                           KeepsExpanderColumn = true,
+                           // Nothing shows this source, so it steps back visually.
+                           IsMuted = source == null || SetupRelations.CountConsumersOfSource(setup, source.Id) == 0,
+                           DrawTooltip = drawTooltip,
+                       };
+        if (DrawItem(selection, setup, ref args) == OutlinerItem.Actions.ToggleExpanded)
+            ToggleSourceExpanded(childId);
+
+        if (source == null || sliceCount == 0 || !expanded)
+            return;
+
+        // Indexed: an item's context menu can delete its slice mid-walk, which an enumerator would refuse.
+        for (var s = 0; s < setup.Slices.Count; s++)
+        {
+            var slice = setup.Slices[s];
+            if (slice.SourceId != source.Id)
+                continue;
+
+            DrawSliceItem(selection, setup, slice);
         }
     }
 
@@ -956,11 +993,14 @@ internal sealed class SetupFlowOutliner
     private static readonly List<(int Width, int Height, string Label)> _resolutionLabels = [];
 
     private const string AddPlugMenuId = "##addPlugMenu";
+    private const string AddContentMenuId = "##addContentMenu";
     private Action? _onLeave;
     private const string AddBoardItemMenuId = "##addBoardItemMenu";
     private const string HelpDocId = "OutputSetup";
     private const string HelpWikiUrl = "https://github.com/tixl3d/tixl/wiki/help.OutputSetup";
     private bool _addPlugMenuRequested;
+    private bool _addContentMenuRequested;
+    private readonly Action<SetupEntitySelection> _requestAddContentMenu;
 
     // The display whose row is being drawn, read by the tooltip; a field rather than a captured lambda, which
     // would allocate a closure for every plug row every frame.

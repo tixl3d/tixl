@@ -542,8 +542,9 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
         blendDesc.RenderTarget[0].SourceBlend = BlendOption.SourceAlpha;
         blendDesc.RenderTarget[0].DestinationBlend = BlendOption.InverseSourceAlpha;
         blendDesc.RenderTarget[0].BlendOperation = BlendOperation.Add;
-        blendDesc.RenderTarget[0].SourceAlphaBlend = BlendOption.InverseSourceAlpha;
-        blendDesc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
+        // Alpha accumulates over the opaque clear and stays opaque, so the captured UI frame composites as a solid layer.
+        blendDesc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
+        blendDesc.RenderTarget[0].DestinationAlphaBlend = BlendOption.InverseSourceAlpha;
         blendDesc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
         blendDesc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
         _blendState = new BlendState(_device, blendDesc);

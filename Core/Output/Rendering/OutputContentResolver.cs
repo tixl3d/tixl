@@ -20,6 +20,16 @@ public static class OutputContentResolver
     public static EvaluationContext Context => _context ??= new EvaluationContext();
 
     /// <summary>
+    /// Content a host supplies itself rather than through a graph op, such as the editor's own UI. Its source
+    /// carries <paramref name="sourceChildId"/> in place of a SymbolChildId; a host that registers none resolves
+    /// such a source to nothing.
+    /// </summary>
+    public static void RegisterHostSupplier(Guid sourceChildId, IContentSupplier supplier)
+    {
+        _hostSuppliers[sourceChildId] = supplier;
+    }
+
+    /// <summary>
     /// Readies the shared evaluation context for pulling content this frame: fresh state, the resolution the
     /// content is asked to render at, and the once-per-frame invalidation tick — whichever entry point pulls
     /// first (a composite, or a source preview on the Board) opens the frame.
@@ -87,7 +97,8 @@ public static class OutputContentResolver
     /// </summary>
     public static bool TryGetPreviewContent(Guid symbolChildId, out Texture2D? content)
     {
-        if (!OutputPreviewRefresh.ShouldRefresh(symbolChildId))
+        // Host content is already rendered and costs nothing to pull, so it never waits for the preview budget.
+        if (!_hostSuppliers.ContainsKey(symbolChildId) && !OutputPreviewRefresh.ShouldRefresh(symbolChildId))
         {
             content = _lastContentByChildId.GetValueOrDefault(symbolChildId);
             return content is { IsDisposed: false };
@@ -252,6 +263,9 @@ public static class OutputContentResolver
 
     private static IContentSupplier? FindSendByChildId(Guid childId)
     {
+        if (_hostSuppliers.TryGetValue(childId, out var hostSupplier))
+            return hostSupplier;
+
         foreach (var supplier in ContentSupplierRegistry.Suppliers)
         {
             if (supplier is Instance instance && instance.SymbolChildId == childId)
@@ -291,6 +305,7 @@ public static class OutputContentResolver
     private static readonly Dictionary<Guid, (bool Found, Slice? Slice, Texture2D? Content)> _surfaceSlices = new();
     private static int _surfaceSliceFrame = -1;
     private static readonly Dictionary<IContentSupplier, Texture2D?> _pulledContent = new();
+    private static readonly Dictionary<Guid, IContentSupplier> _hostSuppliers = new();
 
     /** Kept across frames so a preview that isn't evaluating this frame still has something to show. */
     private static readonly Dictionary<Guid, Texture2D?> _lastContentByChildId = new();

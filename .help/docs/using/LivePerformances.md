@@ -21,7 +21,7 @@ TiXL supports many input channels that you can use to control or sync your visua
 
 Bind an output to a display in the [Output Setup](OutputSetup.md) and it opens fullscreen there. Every bound output gets its own window, so several projectors run side by side. Beyond that you have the following options:
 
-- Duplicate the display and use the output in the background (this is great for live patching) and sharing with the audience what you're doing.
+- Show the editor itself on a display by adding the **Editor UI** as content in the Output Setup — great for live patching, and for sharing with the audience what you're doing. It is much cheaper than letting the operating system duplicate the display.
 - Extend to two displays and use the primary notebook screen for controlling TiXL and the secondary display as fullscreen output connected via HDMI, USB-C, or DisplayPort.
 - Use various other tricks to output and split video signals (like HDMI mixers, splitters, Spout output, etc.).
 
@@ -37,11 +37,10 @@ Here are the steps for starting a simple setup for live patching:
 1. Use Display Settings advanced and make sure the connected display is running with 1920x1080x60fps. Other resolutions are okay, but a different framerate can impact performance.
 1. Start TiXL (either as Stand-Alone or via IDE). For performance reasons, I prefer Release mode when starting from IDE.
 1. If you already have a project, open it by double-clicking. Otherwise, create a new project by selecting "New → Empty Project" (giving it a meaningful title won't hurt). Then, double-click your new project to open it.
-1. Enable "Window → 2nd Render Window." This will open a second TiXL window that mirrors the operator pinned to the output panel. If the two windows are swapped (i.e. the main window is shown on your projector), activate "Windows → Settings → User Interface → Fullscreen Window Swap."
-1. For performance reasons, the output result will only be rendered once and used for both the output panel of TiXL's main window and the render output window. For that reason, you need to adjust the resolution of your output and switch the resolution selector in the output panel toolbar from "Fill" to "1080p".
-1. If not already, switch to full-screen mode (View → Fullscreen UI).
-1. Create an operator with a texture output, e.g. [RyojiPattern2].
-1. Pin that operator to the output either using the pin icon in the output panel toolbar or by pressing "P" on your keyboard.
+1. If not already, switch to full-screen mode (View → Fullscreen UI) on your primary display.
+1. Create an operator with a texture output, e.g. [RyojiPattern2], and select it.
+1. Open the [Output Setup](OutputSetup.md) and click **+** on the Content column, then **SendToOutput Op**. The new op is wired to the selected operator.
+1. Drag the new content row onto the projector under Local Bindings. TiXL creates an output bound to that display and opens it fullscreen there.
 
 ## Connecting Audio Reaction
 
