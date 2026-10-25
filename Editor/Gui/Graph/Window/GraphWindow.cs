@@ -26,7 +26,7 @@ internal sealed class GraphWindow : Windows.Window
     #region Window implementation --------------------
     public GraphWindow()
     {
-        Config.Title = LayoutHandling.GraphPrefix + _instanceNumber;
+        Config.Title = GetUnusedInstanceTitle(LayoutHandling.GraphPrefix, GraphWindowInstances);
         Config.Visible = true;
 
         AllowMultipleInstances = true;
@@ -34,15 +34,12 @@ internal sealed class GraphWindow : Windows.Window
         Config.Visible = true;
         WindowFlags = ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse;
 
-        _instanceNumber++;
         GraphWindowInstances.Add(this);
     }
 
     // The graph editor canvas (and the Hub it hosts) get their own themeable backdrop, separate from
     // regular panels' Panel Background.
     protected override T3.Core.DataTypes.Vector.Color? InnerBackgroundColor => UiColors.EditorBackground;
-
-    private readonly int _instanceNumber;
 
     internal override IReadOnlyList<Gui.Windows.Window> GetInstances() => GraphWindowInstances;
     internal static readonly List<GraphWindow> GraphWindowInstances = [];

@@ -1,6 +1,7 @@
 #nullable enable
 
 using System.IO;
+using System.Text;
 using ImGuiNET;
 using Newtonsoft.Json;
 using T3.Core.Settings;
@@ -173,6 +174,10 @@ internal static class LayoutHandling
                 continue;
             }
 
+            // Older layouts also list hidden windows. Recreating those only piles up hidden instances.
+            if (!config.Visible)
+                continue;
+
             var matchingWindow = WindowManager.GetAllWindows()
                                               .FirstOrDefault(window => window.Config.Title == config.Title);
             if (matchingWindow == null)
@@ -204,7 +209,7 @@ internal static class LayoutHandling
         // Close Windows without configurations
         foreach (var w in WindowManager.GetAllWindows())
         {
-            var hasConfig = layout.WindowConfigs.Any(config => config.Title == w.Config.Title);
+            var hasConfig = layout.WindowConfigs.Any(config => config.Visible && config.Title == w.Config.Title);
             if (!hasConfig)
             {
                 w.Config.Visible = false;
@@ -228,17 +233,66 @@ internal static class LayoutHandling
         var serializer = JsonSerializer.Create();
         serializer.Formatting = Formatting.Indented;
 
+        var shownWindowConfigs = new List<Window.WindowConfig>();
+        var shownWindowTitles = new HashSet<string>();
+        foreach (var window in WindowManager.GetAllWindows())
+        {
+            if (window.Config.Visible && shownWindowTitles.Add(window.Config.Title))
+                shownWindowConfigs.Add(window.Config);
+        }
+
         var completePath = Path.Combine(LayoutFolder, GetLayoutFilename(index));
         using var file = File.CreateText(completePath);
         var layout = new Layout
                          {
-                             WindowConfigs = WindowManager.GetAllWindows().Select(window => window.Config).ToList(),
-                             ImGuiSettings = ImGui.SaveIniSettingsToMemory(),
+                             WindowConfigs = shownWindowConfigs,
+                             ImGuiSettings = RemoveUnusedImGuiSettings(ImGui.SaveIniSettingsToMemory(), shownWindowTitles),
                              ImGuiVersion = ImGui.GetVersion(),
                          };
 
         serializer.Serialize(file, layout);
         UserSettings.Config.WindowLayoutIndex = index;
+    }
+
+    /// <summary>
+    /// Removes the settings of windows that are not shown and the dock trees of dock spaces that are no
+    /// longer submitted. ImGui keeps settings for every window it has ever seen, so otherwise each saved
+    /// layout carries all of them forward.
+    /// </summary>
+    internal static string RemoveUnusedImGuiSettings(string iniSettings, HashSet<string> shownWindowTitles)
+    {
+        var mainDockSpaceIdTag = $" ID=0x{MainDockSpaceId:X8} ";
+        var result = new StringBuilder(iniSettings.Length);
+        var keepSection = true;
+        var isDockingSection = false;
+        var keepDockTree = true;
+
+        foreach (var line in iniSettings.Split('\n'))
+        {
+            if (line.StartsWith('['))
+            {
+                isDockingSection = line.StartsWith(DockingSectionHeader);
+                keepSection = !line.StartsWith(WindowSectionPrefix)
+                              || shownWindowTitles.Contains(line[WindowSectionPrefix.Length..^1]);
+            }
+            else if (isDockingSection && line.Length > 0 && line[0] != ' ')
+            {
+                // Child dock nodes are indented below their top-level node.
+                keepDockTree = MainDockSpaceId == 0
+                               || !line.StartsWith("DockSpace")
+                               || line.Contains(mainDockSpaceIdTag);
+            }
+
+            if (!keepSection || (isDockingSection && !keepDockTree))
+                continue;
+
+            if (result.Length > 0)
+                result.Append('\n');
+
+            result.Append(line);
+        }
+
+        return result.ToString();
     }
 
     private static string GetLayoutFilename(int index)
@@ -334,8 +388,13 @@ internal static class LayoutHandling
     }
 
     private const string LayoutFileNameFormat = "layout{0}.json";
+    private const string WindowSectionPrefix = "[Window][";
+    private const string DockingSectionHeader = "[Docking]";
     private static string LayoutSubfolder => "Layouts";
     public static string LayoutFolder => Path.Combine(FileLocations.SettingsDirectory, LayoutSubfolder);
     public static int ChangeCounter { get; private set; }
     public static bool FocusMode = false;
+
+    /** Id of the dock space covering the main viewport. Dock trees of any other dock space are stale. */
+    internal static uint MainDockSpaceId;
 }

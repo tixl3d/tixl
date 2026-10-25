@@ -247,6 +247,30 @@ internal abstract class Window
     {
     }
 
+    /// <summary>
+    /// Returns the lowest-numbered title not yet taken by an instance. A shared title would
+    /// make two instances draw into the same ImGui window.
+    /// </summary>
+    protected static string GetUnusedInstanceTitle(string prefix, IReadOnlyList<Window> instances)
+    {
+        for (var number = 0;; number++)
+        {
+            var title = prefix + number;
+            var isTaken = false;
+            for (var i = 0; i < instances.Count; i++)
+            {
+                if (instances[i].Config.Title != title)
+                    continue;
+
+                isTaken = true;
+                break;
+            }
+
+            if (!isTaken)
+                return title;
+        }
+    }
+
     protected virtual void AddAnotherInstance()
     {
     }
