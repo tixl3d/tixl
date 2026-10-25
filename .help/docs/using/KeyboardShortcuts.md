@@ -36,6 +36,7 @@ The following is a list of the **default keyboard** short-cuts. With v4.0.4 you 
 | Duplicate                 | Ctrl + D (focus)                                     |
 | Duplicate with Connections| Ctrl + Shift + D (focus)                             |
 | Delete Selection          | Delete or Backspace (focus)                          |
+| Delete and Disconnect     | Ctrl + Delete or Ctrl + Backspace (focus)            |
 | Copy to Clipboard         | Ctrl + C (focus)                                     |
 | Paste from Clipboard      | Ctrl + V (focus)                                     |
 | Paste Values              | Ctrl + Shift + V                                     |

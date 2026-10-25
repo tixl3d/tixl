@@ -39,7 +39,7 @@ internal static class GraphContextMenu
         Disabled, Bypassed, Disconnect, ControlSnapshots, Rename, AddComment, AlignLeft, LayoutInputs,
         DisplayMenu, DisplaySmall, DisplayResizable, DisplayExpanded, DisplayBackground, DisplayPin,
         GenerateProxy,
-        Copy, Duplicate, Paste, Delete, RenameOutput,
+        Copy, Duplicate, Paste, Delete, DeleteAndDisconnect, RenameOutput,
         MoreMenu, CopyKeyframes, CopySymbolName, CopyDependencies, DuplicateConnected, PasteValues,
         OpenFolderMenu, OpenProjectFolder, OpenResourcesFolder,
         AddNode, AddSection, AddInput, AddOutput,
@@ -335,9 +335,10 @@ internal static class GraphContextMenu
 
         var canDelete = (someOpsSelected || selectedInputUis.Count > 0 || selectedOutputUis.Count > 0) && !isSaving;
         if (CustomComponents.DrawMenuItem((int)MenuItemIds.Delete, Icon.None, "Delete",
-                                          "Del", isChecked: false, isEnabled: canDelete, reserveIconColumn: false, state: muted))
+                                          UserActions.DeleteSelection.ListShortcuts(), isChecked: false, isEnabled: canDelete,
+                                          reserveIconColumn: false, state: muted))
         {
-            NodeActions.DeleteSelectedElements(nodeSelection, compositionSymbolUi, selectedChildUis, selectedInputUis, selectedOutputUis);
+            Modifications.DeleteSelection(context);
             context.Layout.FlagStructureAsChanged();
         }
 
@@ -496,6 +497,15 @@ internal static class GraphContextMenu
                                           state: muted))
         {
             Modifications.DuplicateWithConnections(context);
+            context.Layout.FlagStructureAsChanged();
+        }
+
+        if (CustomComponents.DrawMenuItem((int)MenuItemIds.DeleteAndDisconnect, Icon.None, "Delete and Disconnect",
+                                          UserActions.DeleteSelectionAndConnections.ListShortcuts(), isChecked: false,
+                                          isEnabled: someOpsSelected && !isSaving, reserveCheckmarkColumn: false, reserveIconColumn: false,
+                                          state: muted))
+        {
+            Modifications.DeleteSelection(context, keepConnections: false);
             context.Layout.FlagStructureAsChanged();
         }
 

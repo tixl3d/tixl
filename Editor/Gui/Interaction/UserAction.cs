@@ -17,6 +17,7 @@ internal enum UserActions
     Save,
     FocusSelection,
     DeleteSelection,
+    DeleteSelectionAndConnections,
     CopyToClipboard,
     PasteFromClipboard,
     PasteValues,
