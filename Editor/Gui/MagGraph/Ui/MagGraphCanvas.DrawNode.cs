@@ -858,7 +858,7 @@ internal sealed partial class MagGraphView
 
         // Draw output sockets...
         var isTabInsertionItem = GraphStates.TryGetItemForTabInsertion(context, out var tabInsertionItem) && tabInsertionItem == item;
-        var tabInsertionDirection = GraphStates.TabInsertionDirection;
+        var tabInsertionDirection = isTabInsertionItem ? GraphStates.GetTabInsertionDirection(item) : MagGraphItem.Directions.Vertical;
 
         var count = item.GetOutputAnchorCount();
         MagGraphItem.OutputAnchorPoint outputAnchor = default;
