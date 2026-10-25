@@ -135,7 +135,26 @@ internal static class TreeLayouting
                 handled.UnionWith(cluster);
                 obstacles.UnionWith(cluster);
                 pendingItems.UnionWith(cluster);
-                placements.Add(new Placement(target, snapRow, source, cluster, snaps, canStack, maySnapIntoRow));
+                placements.Add(new Placement(target, lineIndex, snapRow, source, cluster, snaps, canStack, maySnapIntoRow));
+            }
+        }
+
+        // A multi-input group snaps only as a whole. Snapping some of its sources would put them above the loose
+        // ones regardless of their input order, so if any source has to go loose, all of them do.
+        var looseGroups = new HashSet<(MagGraphItem target, Guid inputId)>();
+        foreach (var placement in placements)
+        {
+            if (!placement.Snaps && IsPartOfMultiInputGroup(placement.Target, placement.LineIndex))
+                looseGroups.Add((placement.Target, placement.Target.InputLines[placement.LineIndex].Id));
+        }
+
+        if (looseGroups.Count > 0)
+        {
+            for (var index = 0; index < placements.Count; index++)
+            {
+                var placement = placements[index];
+                if (placement.Snaps && looseGroups.Contains((placement.Target, placement.Target.InputLines[placement.LineIndex].Id)))
+                    placements[index] = placement with { Snaps = false, CanStack = false, MaySnapIntoRow = false };
             }
         }
 
@@ -226,8 +245,10 @@ internal static class TreeLayouting
         return movedCount > 0 || newlySelected.Count > 0;
     }
 
+    /// <param name="LineIndex">Target input line the connection to the source lands in</param>
     /// <param name="SnapRow">Target input row the source's first output line aligns with when snapped horizontally</param>
     private readonly record struct Placement(MagGraphItem Target,
+                                             int LineIndex,
                                              int SnapRow,
                                              MagGraphItem Source,
                                              HashSet<MagGraphItem> Cluster,
