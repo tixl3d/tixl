@@ -1,0 +1,192 @@
+{
+  "FormatVersion": 3,
+  "Id": "d48b02de-8967-4a03-9f7f-843e443470dd"/*OrientPointsToMovement*/,
+  "Description": "Rotates points so that their z-axis points in the direction they moved since the last frame.\n\nUseful for instancing meshes like fish, birds or arrows on animated points. Unlike a fixed up vector, the up axis of the previous frame is carried over, so points can move in any direction without flipping around. AlignToUpVector slowly pulls them back upright.\n\nThe rotations are kept between frames, so points must not change their order. Points that don't move keep their last rotation.\n\nAKA: velocity, direction, heading, align, look along, motion\n\nSee also: [OrientPoints], [ReorientLinePoints], [DrawMovingPoints]",
+  "SymbolTags": "1",
+  "InputUis": [
+    {
+      "InputId": "00731dd7-5956-4f9b-bdc5-52b708699843"/*Reset*/,
+      "Position": {
+        "X": -30.0,
+        "Y": 975.0
+      },
+      "Description": "Resets the rotations to those of the input points."
+    },
+    {
+      "InputId": "15631d43-e3b6-4203-a0ec-c76be4f35a39"/*MinMovement*/,
+      "Position": {
+        "X": -30.0,
+        "Y": 800.0
+      },
+      "GroupTitle": "Movement",
+      "Description": "Points that move less than this distance per frame keep their rotation.",
+      "Min": 0.0,
+      "Max": 0.01,
+      "ClampMin": true
+    },
+    {
+      "InputId": "3dd8ec3d-3e94-4d1c-a36d-d328050dfa05"/*Points*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -450.0,
+        "Y": 565.0
+      }
+    },
+    {
+      "InputId": "5fc4a0d0-5bd4-4b85-b263-8eddd5e50ef1"/*UpVector*/,
+      "Position": {
+        "X": -30.0,
+        "Y": 700.0
+      },
+      "GroupTitle": "Up Vector",
+      "Description": "The direction the up axis (y) of the points is pulled toward."
+    },
+    {
+      "InputId": "61aa155b-a917-4ce2-ae9d-4941ecf78f32"/*AlignToUpVector*/,
+      "Position": {
+        "X": -30.0,
+        "Y": 735.0
+      },
+      "Description": "0 keeps the previous up axis to avoid sudden flips, but lets the roll drift. 1 always uses UpVector, which flips when moving along it.",
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "656aea6e-7757-4be2-85ff-f714c9366612"/*Flip*/,
+      "Position": {
+        "X": -30.0,
+        "Y": 940.0
+      },
+      "Description": "Aligns the negative z-axis with the movement instead."
+    },
+    {
+      "InputId": "cad872c2-a0d9-4cbe-9fb5-662c0ecbc42c"/*Smoothing*/,
+      "Position": {
+        "X": -30.0,
+        "Y": 600.0
+      },
+      "Description": "Blends from the previous rotation toward the movement direction each frame. 0 follows the movement immediately.",
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "fdeb9f33-f942-45d1-bd94-7a7a64a54d96"/*JumpThreshold*/,
+      "Position": {
+        "X": -30.0,
+        "Y": 835.0
+      },
+      "Description": "Points that move further than this per frame are treated as teleported and keep their rotation. 0 disables the check.",
+      "Min": 0.0,
+      "Max": 5.0,
+      "ClampMin": true
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "05332ffc-6524-4e5a-a386-1bc100e095b2",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
+      "Position": {
+        "X": 110.0,
+        "Y": 940.0
+      }
+    },
+    {
+      "ChildId": "1e909bc8-7f51-4056-9ff7-b3c2e3a2e35d",
+      "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
+      "Position": {
+        "X": -10.0,
+        "Y": 1100.0
+      }
+    },
+    {
+      "ChildId": "2403a96e-44ed-4c8f-b9f4-f5ad5e499c5c",
+      "SymbolName": "Lib.render._dx11.api.FloatsToBuffer",
+      "Style": "Resizable",
+      "Size": {
+        "X": 104.0,
+        "Y": 330.0
+      },
+      "Position": {
+        "X": 250.0,
+        "Y": 700.0
+      }
+    },
+    {
+      "ChildId": "35648310-fa6a-4c5f-8003-107905a8ffa7",
+      "SymbolName": "Types.Gfx.ComputeShader",
+      "Position": {
+        "X": 110.0,
+        "Y": 500.0
+      }
+    },
+    {
+      "ChildId": "38b52cb4-9453-4d48-a962-26e5ffdc0012",
+      "SymbolName": "Types.Gfx.StructuredBufferWithViews",
+      "Position": {
+        "X": -150.0,
+        "Y": 1050.0
+      }
+    },
+    {
+      "ChildId": "3cb52f04-7e93-48a1-98fd-49f033760b76",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
+      "Position": {
+        "X": 110.0,
+        "Y": 975.0
+      }
+    },
+    {
+      "ChildId": "46934292-75ea-4570-835b-903701a5c3e6",
+      "SymbolName": "Lib.render._dx11.api.CalcDispatchCount",
+      "Position": {
+        "X": 250.0,
+        "Y": 535.0
+      }
+    },
+    {
+      "ChildId": "5f3af74f-5b45-44a2-8c1d-2ff6a46a01c5",
+      "SymbolName": "Lib.numbers.vec3.Vector3Components",
+      "Position": {
+        "X": 110.0,
+        "Y": 700.0
+      }
+    },
+    {
+      "ChildId": "90aa74cd-0eef-444f-96ba-69396263af87",
+      "SymbolName": "Lib.render._dx11.fxsetup.ExecuteBufferUpdate",
+      "Position": {
+        "X": 580.0,
+        "Y": 730.0
+      }
+    },
+    {
+      "ChildId": "c66849db-284d-4323-a56f-f7b30da4749f",
+      "SymbolName": "Types.Gfx.ComputeShaderStage",
+      "Position": {
+        "X": 580.0,
+        "Y": 490.0
+      }
+    },
+    {
+      "ChildId": "ec7e0367-46d9-46e6-8e25-a63b61687206",
+      "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
+      "Position": {
+        "X": -450.0,
+        "Y": 600.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "72850d93-fbd8-4b1c-a3b3-33a92ba5fa76"/*Output*/,
+      "Position": {
+        "X": 580.0,
+        "Y": 800.0
+      }
+    }
+  ]
+}
