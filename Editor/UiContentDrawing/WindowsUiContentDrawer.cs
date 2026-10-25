@@ -372,7 +372,19 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
                 var cmd = cmdList.CmdBuffer[cmdI];
                 if (cmd.UserCallback != IntPtr.Zero)
                 {
-                    throw new NotImplementedException();
+                    // Markers rather than functions: the sampler switch is the only callback the editor emits.
+                    if (cmd.UserCallback == PixelSamplingCallback)
+                    {
+                        _deviceContext.PixelShader.SetSampler(0, _pixelSampler);
+                    }
+                    else if (cmd.UserCallback == SmoothSamplingCallback)
+                    {
+                        _deviceContext.PixelShader.SetSampler(0, _imGuiSampler);
+                    }
+                    else
+                    {
+                        throw new NotImplementedException();
+                    }
                 }
                 else
                 {
@@ -433,11 +445,26 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
             lock (StallWatchdog.PresentLock)
             {
                 FontAtlasGenerator.CreateFontAtlasWithIcons(_device, _imguiContext, out _fontTextureView, out _imGuiSampler);
+                _pixelSampler ??= CreatePixelSampler(_device);
                 StallOverlay.SnapshotFonts();
             }
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// Images drawn after this, up to <see cref="EndPixelSampling"/>, show their pixels as sharp squares when
+    /// magnified, so a zoomed-in texture can be inspected pixel by pixel. Shrunk, they still filter smoothly.
+    /// </summary>
+    internal static void BeginPixelSampling(ImDrawListPtr drawList)
+    {
+        drawList.AddCallback(PixelSamplingCallback, IntPtr.Zero);
+    }
+
+    internal static void EndPixelSampling(ImDrawListPtr drawList)
+    {
+        drawList.AddCallback(SmoothSamplingCallback, IntPtr.Zero);
     }
 
     /// <summary>
@@ -459,6 +486,21 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
         context.OutputMerger.SetDepthStencilState(_depthStencilState, 0);
         context.Rasterizer.State = _rasterizerState;
         return true;
+    }
+
+    /** Point when magnified, linear across the mip chain when shrunk, clamped so the edges don't wrap. */
+    private static SamplerState CreatePixelSampler(Device device)
+    {
+        return new SamplerState(device, new SamplerStateDescription
+                                            {
+                                                Filter = Filter.MinLinearMagPointMipLinear,
+                                                AddressU = TextureAddressMode.Clamp,
+                                                AddressV = TextureAddressMode.Clamp,
+                                                AddressW = TextureAddressMode.Clamp,
+                                                ComparisonFunction = Comparison.Always,
+                                                MinimumLod = 0.0f,
+                                                MaximumLod = float.MaxValue,
+                                            });
     }
 
     private bool CreateShaders()
@@ -614,6 +656,7 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
             // So disabled for now
 
             DisposeObj(ref _imGuiSampler);
+            DisposeObj(ref _pixelSampler);
             DisposeObj(ref _fontTextureView);
             DisposeObj(ref _ib);
             DisposeObj(ref _vb);
@@ -645,6 +688,12 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
     private T3.Core.DataTypes.PixelShader _pixelShaderResource;
     private PixelShader _pixelShader;
     private SamplerState _imGuiSampler;
+    private SamplerState _pixelSampler;
+
+    // ImGui never calls a callback itself; it only hands the pointer back, so any value the renderer knows will do.
+    // ImGui reserves -8 for its own reset marker.
+    private static readonly IntPtr PixelSamplingCallback = new(-1);
+    private static readonly IntPtr SmoothSamplingCallback = new(-2);
     private ShaderResourceView _fontTextureView;
     private RasterizerState _rasterizerState;
     private BlendState _blendState;
