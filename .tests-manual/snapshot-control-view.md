@@ -442,6 +442,18 @@ With a snapshot active that contains values for both operators
 - If the parameter had a non-default value, existing snapshots now include it (applying another snapshot resets it).
 - `Ctrl+Z` reverts both the toggle and the snapshot updates.
 
+## Step: Toggling a parameter with Ctrl+Shift+Click
+
+**Action:**
+1. Hold `Ctrl+Shift` and hover the connection area left of another value parameter of the same operator.
+2. Click it.
+3. `Ctrl+Shift`+click it again.
+
+**Expected:**
+- While hovering with `Ctrl+Shift` held, the area previews a green knob icon; its tooltip lists "CTRL+SHIFT+Click to control with snapshots".
+- The first click enables the parameter exactly like the context menu entry; the second click disables it again.
+- `Ctrl+Alt`+click does the same.
+
 ## Step: Disabling a single parameter of a fully enabled op
 
 **Action:**
