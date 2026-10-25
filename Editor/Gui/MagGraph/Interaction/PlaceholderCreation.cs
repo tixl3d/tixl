@@ -205,6 +205,18 @@ internal sealed class PlaceholderCreation
         return upstreamItems;
     }
 
+    private static bool HasHorizontalSnapRight(MagGraphItem.OutputLine outputLine)
+    {
+        foreach (var c in outputLine.ConnectionsOut)
+        {
+            if (c.Style is MagGraphConnection.ConnectionStyles.MainOutToMainInSnappedHorizontal
+                or MagGraphConnection.ConnectionStyles.MainOutToInputSnappedHorizontal)
+                return true;
+        }
+
+        return false;
+    }
+
     private static Type? SnappedOutputValueType(MagGraphItem.OutputLine outputLine, MagGraphItem.Directions direction)
     {
         if (outputLine.ConnectionsOut.Count == 0)
@@ -425,7 +437,7 @@ internal sealed class PlaceholderCreation
             var connectedInputId = Guid.Empty;
             if (newInstance.Inputs.Count > 0)
             {
-                if (_snappedSourceOutputLine.ConnectionsOut.Count > 0)
+                if (_snappedSourceOutputLine.ConnectionsOut.Count > 0 && newInstance.Outputs.Count > 0)
                 {
                     var newItemOutput = newInstance.Outputs[0];
 
@@ -507,27 +519,35 @@ internal sealed class PlaceholderCreation
                 }
             }
 
-            // At the end of a horizontal chain the new op moves up, so that a connected parameter row
-            // (e.g. a value feeding "Scale") lines up with the source's output and snaps
+            // A connected parameter row (e.g. a value feeding "Scale") can only snap horizontally. At the end of a
+            // chain or stack the new op goes right of the source, moved up so that row lines up with the output.
             var newItemLines = CollectNewItemLines(context, symbol, newChildUi, newInstance);
             var shiftedRows = 0;
-            if (_connectionOrientation == MagGraphItem.Directions.Horizontal && !hasSplitConnection && connectedInputId != Guid.Empty)
+            if (!hasSplitConnection && connectedInputId != Guid.Empty)
             {
+                var connectedRow = 0;
                 for (var lineIndex = 0; lineIndex < newItemLines.inputLines.Count; lineIndex++)
                 {
                     if (newItemLines.inputLines[lineIndex].Id != connectedInputId)
                         continue;
 
-                    shiftedRows = lineIndex;
+                    connectedRow = lineIndex;
                     break;
                 }
 
-                if (shiftedRows > 0)
+                var placeRight = connectedRow > 0
+                                 && (_connectionOrientation == MagGraphItem.Directions.Horizontal
+                                     || (_upstreamItems == null && !HasHorizontalSnapRight(_snappedSourceOutputLine)));
+                if (placeRight)
                 {
+                    var outputRowPos = _snappedSourceItem.PosOnCanvas
+                                       + new Vector2(_snappedSourceItem.Size.X, MagGraphItem.GridSize.Y * _snappedSourceOutputLine.VisibleIndex);
+
                     var moveNewChildCommand = new ModifyCanvasElementsCommand(parentSymbol.Id, [newChildUi], context.Selector);
                     context.MacroCommand.AddExecutedCommandForUndo(moveNewChildCommand);
-                    newChildUi.PosOnCanvas -= new Vector2(0, MagGraphItem.GridSize.Y * shiftedRows);
+                    newChildUi.PosOnCanvas = outputRowPos - new Vector2(0, MagGraphItem.GridSize.Y * connectedRow);
                     moveNewChildCommand.StoreCurrentValues();
+                    shiftedRows = connectedRow;
                 }
             }
 
