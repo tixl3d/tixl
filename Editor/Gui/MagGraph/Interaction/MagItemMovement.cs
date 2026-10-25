@@ -1543,7 +1543,43 @@ internal sealed partial class MagItemMovement
         MoveItems(context, movableItems, new Vector2(xDistance,0));
     }
 
-    private static void MoveItems(GraphUiContext context, IEnumerable<MagGraphItem> movableItems, Vector2 offset)
+    /// <summary>
+    /// Creates and applies a command to move the items above <paramref name="yThreshold"/>, leaving the items below in place
+    /// </summary>
+    public static void MoveSnappedItemsAbove(GraphUiContext context, HashSet<MagGraphItem> snappedItems, float yThreshold, float yDistance)
+    {
+        var movableItems = new List<MagGraphItem>();
+        foreach (var otherItem in snappedItems)
+        {
+            if (otherItem.PosOnCanvas.Y < yThreshold)
+                movableItems.Add(otherItem);
+        }
+
+        if (movableItems.Count == 0)
+            return;
+
+        MoveItems(context, movableItems, new Vector2(0, yDistance));
+    }
+
+    /// <summary>
+    /// Creates and applies a command to move the items left of <paramref name="xThreshold"/>, leaving the items right of it in place
+    /// </summary>
+    public static void MoveSnappedItemsLeftOf(GraphUiContext context, HashSet<MagGraphItem> snappedItems, float xThreshold, float xDistance)
+    {
+        var movableItems = new List<MagGraphItem>();
+        foreach (var otherItem in snappedItems)
+        {
+            if (otherItem.PosOnCanvas.X < xThreshold)
+                movableItems.Add(otherItem);
+        }
+
+        if (movableItems.Count == 0)
+            return;
+
+        MoveItems(context, movableItems, new Vector2(xDistance, 0));
+    }
+
+    internal static void MoveItems(GraphUiContext context, IEnumerable<MagGraphItem> movableItems, Vector2 offset)
     {
         Debug.Assert(context.MacroCommand != null);
         
