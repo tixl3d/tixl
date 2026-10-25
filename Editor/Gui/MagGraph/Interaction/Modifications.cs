@@ -607,18 +607,18 @@ internal static class Modifications
         var movedItems = new List<ISelectableCanvasObject>(movableItems);
         var moveCommand = new ModifyCanvasElementsCommand(context.CompositionInstance.Symbol.Id, movedItems, context.Selector);
 
-        // Closing the lowest / rightmost gap first keeps the cached positions of the remaining gaps valid
+        // Closing the top / leftmost gap first keeps the cached positions of the remaining gaps valid
         var anythingMoved = false;
-        foreach (var bridge in snappedBridges.OrderByDescending(b => b.InConnection.SourcePos.Y))
+        foreach (var bridge in snappedBridges.OrderBy(b => b.InConnection.SourcePos.Y))
         {
             if (IsVertical(bridge.InConnection) && IsVertical(bridge.OutConnection))
-                anythingMoved |= MagItemMovement.MoveToCollapseVerticalGaps(bridge.InConnection, bridge.OutConnection, movableItems, dryRun: false).Count > 0;
+                anythingMoved |= CloseGapTowardsTarget(bridge.InConnection.SourcePos.Y, bridge.OutConnection.TargetPos.Y, true, movableItems);
         }
 
-        foreach (var bridge in snappedBridges.OrderByDescending(b => b.InConnection.SourcePos.X))
+        foreach (var bridge in snappedBridges.OrderBy(b => b.InConnection.SourcePos.X))
         {
             if (!IsVertical(bridge.InConnection) && !IsVertical(bridge.OutConnection))
-                anythingMoved |= MoveToCollapseHorizontalGaps(bridge.InConnection, bridge.OutConnection, movableItems);
+                anythingMoved |= CloseGapTowardsTarget(bridge.InConnection.SourcePos.X, bridge.OutConnection.TargetPos.X, false, movableItems);
         }
 
         if (!anythingMoved)
@@ -633,39 +633,44 @@ internal static class Modifications
     }
 
     /// <summary>
-    /// Moves items right of each free column between the two connections one column to the left.
+    /// Moves the items above (or left of) each free grid line of the gap one step down (or right), so the
+    /// downstream block keeps its place and the spacing to its neighbours doesn't grow with every delete.
     /// </summary>
-    private static bool MoveToCollapseHorizontalGaps(MagGraphConnection ca, MagGraphConnection cb, HashSet<MagGraphItem> movableItems)
+    private static bool CloseGapTowardsTarget(float gapStart, float gapEnd, bool isVertical, HashSet<MagGraphItem> movableItems)
     {
-        var minX = ca.SourcePos.X;
-        var maxX = cb.TargetPos.X;
-        var columnWidth = MagGraphItem.GridSize.X;
+        var stepSize = isVertical ? MagGraphItem.GridSize.Y : MagGraphItem.GridSize.X;
+        var step = isVertical ? new Vector2(0, stepSize) : new Vector2(stepSize, 0);
+        var lineCount = (int)((gapEnd - gapStart) / stepSize + 0.5f);
 
-        var columnCount = (int)((maxX - minX) / columnWidth + 0.5f);
+        // Top-down, because each step moves the upstream items into the line just checked
         var anythingMoved = false;
-        for (var columnIndex = columnCount - 1; columnIndex >= 0; columnIndex--)
+        for (var lineIndex = 0; lineIndex < lineCount; lineIndex++)
         {
-            var middleColumnX = minX + (0.5f + columnIndex) * columnWidth;
+            var middleOfLine = gapStart + (0.5f + lineIndex) * stepSize;
 
-            var isColumnBlocked = false;
+            var isLineBlocked = false;
             foreach (var item in movableItems)
             {
-                if (item.Area.Min.X >= middleColumnX || item.Area.Max.X <= middleColumnX)
+                var area = item.Area;
+                var min = isVertical ? area.Min.Y : area.Min.X;
+                var max = isVertical ? area.Max.Y : area.Max.X;
+                if (min >= middleOfLine || max <= middleOfLine)
                     continue;
 
-                isColumnBlocked = true;
+                isLineBlocked = true;
                 break;
             }
 
-            if (isColumnBlocked)
+            if (isLineBlocked)
                 continue;
 
             foreach (var item in movableItems)
             {
-                if (item.PosOnCanvas.X < middleColumnX)
+                var itemStart = isVertical ? item.PosOnCanvas.Y : item.PosOnCanvas.X;
+                if (itemStart >= middleOfLine)
                     continue;
 
-                item.PosOnCanvas -= new Vector2(columnWidth, 0);
+                item.PosOnCanvas += step;
                 anythingMoved = true;
             }
         }
