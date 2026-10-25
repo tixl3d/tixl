@@ -371,6 +371,12 @@ public partial class ScalableCanvas
         Scroll = s.Scroll;
     }
 
+    /** Moves the view by a distance in screen pixels. The view follows with the usual damping. */
+    internal void ScrollByScreenPixels(Vector2 deltaInScreen)
+    {
+        ScrollTarget += deltaInScreen / ScaleTarget;
+    }
+
     internal void SetWindowRect(Vector2 pos, Vector2 size)
     {
         WindowPos = pos;
