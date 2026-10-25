@@ -141,6 +141,8 @@ public class Slot<T> : ISlot, ITimeClipRemapTarget
             _hasValueBeforeBypass = false;
         }
 
+        _targetInputForBypass = null;
+
         // This will happen when operators are recompiled and output slots are InputConnections[0]
         if (_keepOriginalUpdateAction == null)
         {
@@ -348,6 +350,18 @@ public class Slot<T> : ISlot, ITimeClipRemapTarget
         }
 
         DirtyFlag.InvalidationVisits++;
+
+        // Must precede the connected and override branches: those copy the version of the graph the bypassed op
+        // no longer reads, which drops the toggle's ForceInvalidate and hides upstream changes from consumers.
+        if (_targetInputForBypass != null)
+        {
+            _targetInputForBypass.InvalidateGraph();
+            if (_dirtyFlag.IsDirty || _targetInputForBypass.DirtyFlag.IsDirty)
+                return _dirtyFlag.Invalidate();
+
+            _dirtyFlag.InvalidationTick = globalTick;
+            return _dirtyFlag.SourceVersion;
+        }
 
         // MultiInputSlot, TimeClipSlot, TransformCallbackSlot, etc
         if (HasInvalidationOverride) 
