@@ -111,7 +111,7 @@ internal static class KeyActionHandling
         RegisterActionsFlags(UserActions.Duplicate, Flags.NeedsWindowFocus);
         RegisterActionsFlags(UserActions.DuplicateWithConnections, Flags.NeedsWindowFocus);
         RegisterActionsFlags(UserActions.DeleteSelection, Flags.NeedsWindowFocus);
-        RegisterActionsFlags(UserActions.DeleteSelection, Flags.NeedsWindowFocus);
+        RegisterActionsFlags(UserActions.DeleteSelectionAndConnections, Flags.NeedsWindowFocus);
         RegisterActionsFlags(UserActions.CopyToClipboard, Flags.NeedsWindowFocus);
         RegisterActionsFlags(UserActions.PasteFromClipboard, Flags.NeedsWindowFocus);
         RegisterActionsFlags(UserActions.PasteValues, Flags.NeedsWindowFocus);

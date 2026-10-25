@@ -53,6 +53,13 @@ internal static class KeyboardActions
             result |= Modifications.DeleteSelection(context);
         }
 
+        if (!T3Ui.IsCurrentlySaving && UserActions.DeleteSelectionAndConnections.Triggered()
+                                    && nodeSelection.Selection.Count > 0
+                                    && context.StateMachine.CurrentState == GraphStates.Default)
+        {
+            result |= Modifications.DeleteSelection(context, keepConnections: false);
+        }
+
         if (!T3Ui.IsCurrentlySaving
             && UserActions.AlignSelectionLeft.Triggered()
             && nodeSelection.Selection.Count > 1

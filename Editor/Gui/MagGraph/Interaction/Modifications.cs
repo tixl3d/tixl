@@ -1,4 +1,5 @@
-﻿using ImGuiNET;
+﻿using System.Diagnostics.CodeAnalysis;
+using ImGuiNET;
 using T3.Core.Operator;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.States;
@@ -15,6 +16,9 @@ namespace T3.Editor.Gui.MagGraph.Interaction;
 
 internal static class Modifications
 {
+    /** A connection to add after deleting operators, feeding a surviving target from a surviving source */
+    private sealed record PendingBridge(MagGraphConnection InConnection, MagGraphConnection OutConnection, int MultiInputIndex);
+
     /// <summary>
     /// Duplicates the selected operators while preserving their external wiring: connections feeding the
     /// selection from the outside are recreated on the duplicates, and any external multi-inputs the originals
@@ -191,10 +195,12 @@ internal static class Modifications
     
     
     /// <summary>
-    /// Deletes the selected items and tries to collapse the gaps and patches the connection gaps is possible
+    /// Deletes the selected items. With <paramref name="keepConnections"/> the deleted operators are dissolved:
+    /// their downstream targets get reconnected to the upstream source (when the types match) and gaps in
+    /// snapped stacks are closed. Afterwards the item snapped above or left of the deleted ones gets selected,
+    /// so repeated deletes keep working.
     /// </summary>
-    /// <param name="context"></param>
-    internal static ChangeSymbol.SymbolModificationResults DeleteSelection(GraphUiContext context)
+    internal static ChangeSymbol.SymbolModificationResults DeleteSelection(GraphUiContext context, bool keepConnections = true)
     {
         var results = ChangeSymbol.SymbolModificationResults.Nothing;
         
@@ -243,7 +249,6 @@ internal static class Modifications
                     continue;
                 }
 
-                //uiItems.Add(new ItemWithChildUi(item, childUi));
                 deletedItems.Add(item);
                 deletedChildUis.Add(childUi);
             }
@@ -325,64 +330,46 @@ internal static class Modifications
             && deletedSections.Count==0)
             return results;
 
+        var deletedItemSet = new HashSet<MagGraphItem>(deletedItems);
+        var itemToSelect = FindSnappedUpstreamSurvivor(deletedItems, deletedItemSet);
+
         var macroCommand = new MacroCommand("Delete items");
         if (deletedChildUis.Count > 0)
         {
-            var collapsableConnectionPairs= MagItemMovement.FindLinkedVerticalCollapsableConnectionPairs(obsoleteConnections.ToList());
-
-            // The bridge index must be computed before the deletion below removes
-            // other connections into the same multi-input and shifts the positions.
+            var symbol = context.CompositionInstance.Symbol;
             var deletedChildIds = new HashSet<Guid>();
             foreach (var childUi in deletedChildUis)
             {
                 deletedChildIds.Add(childUi.Id);
             }
 
-            var bridgeMultiInputIndices = new List<int>(collapsableConnectionPairs.Count);
-            foreach (var pair in collapsableConnectionPairs)
-            {
-                bridgeMultiInputIndices.Add(ComputeMultiInputIndexAfterDeletion(context.CompositionInstance.Symbol, pair.Cb, deletedChildIds));
-            }
+            // Bridge indices must be computed before the deletion below removes
+            // other connections into the same multi-input and shifts the positions.
+            var bridges = keepConnections
+                              ? CollectBridges(symbol, obsoleteConnections, deletedItems, deletedItemSet, deletedChildIds)
+                              : [];
 
             // Delete items...
             macroCommand.AddAndExecCommand(new DeleteSymbolChildrenCommand(compositionUi, deletedChildUis));
 
-            // Collapse vertical gaps
-            var relevantItems = MagItemMovement.CollectSnappedItems(deletedItems);
-            var movableItems = new HashSet<MagGraphItem>(relevantItems.Except(deletedItems));
+            CollapseSnappedGaps(context, macroCommand, bridges, deletedItems);
 
-            for (var pairIndex = 0; pairIndex < collapsableConnectionPairs.Count; pairIndex++)
+            foreach (var bridge in bridges)
             {
-                var pair = collapsableConnectionPairs[pairIndex];
-                var mci = pair.Ca;
-                var mco = pair.Cb;
-                var affectedItems = MagItemMovement.MoveToCollapseVerticalGaps(mci, mco, movableItems, true);
-                if (affectedItems.Count == 0)
-                    continue;
-                
-                var affectedItemsAsNodes = movableItems.Select(i => i as ISelectableCanvasObject).ToList();
-                var newMoveCommand = new ModifyCanvasElementsCommand(context.CompositionInstance.Symbol.Id, affectedItemsAsNodes, context.Selector);
-                macroCommand.AddExecutedCommandForUndo(newMoveCommand);
-            
-                MagItemMovement.MoveToCollapseVerticalGaps(mci, mco, movableItems, dryRun:false);
-                
-                newMoveCommand.StoreCurrentValues();
-            
-                macroCommand.AddAndExecCommand(new AddConnectionCommand(context.CompositionInstance.Symbol,
-                                                                        new Symbol.Connection(mci.SourceItem.Id,
-                                                                                                  mci.SourceOutput.Id,
-                                                                                                  mco.TargetItem.Id,
-                                                                                                  mco.TargetInput.Id),
-                                                                        bridgeMultiInputIndices[pairIndex]));
+                macroCommand.AddAndExecCommand(new AddConnectionCommand(symbol,
+                                                                        new Symbol.Connection(bridge.InConnection.SourceParentOrChildId,
+                                                                                              bridge.InConnection.SourceOutput.Id,
+                                                                                              bridge.OutConnection.TargetParentOrChildId,
+                                                                                              bridge.OutConnection.TargetInput.Id),
+                                                                        bridge.MultiInputIndex));
             }
 
             // Removing a connection can also free an input row on a surviving target
             // (e.g. an extra multi-input line): move snapped items below up to close the gap.
             var rebridgedConnections = new HashSet<MagGraphConnection>();
-            foreach (var pair in collapsableConnectionPairs)
+            foreach (var bridge in bridges)
             {
-                rebridgedConnections.Add(pair.Ca);
-                rebridgedConnections.Add(pair.Cb);
+                rebridgedConnections.Add(bridge.OutConnection);
             }
 
             foreach (var obsoleteConnection in obsoleteConnections)
@@ -391,7 +378,7 @@ internal static class Modifications
                     continue;
 
                 var targetItem = obsoleteConnection.TargetItem;
-                if (targetItem == null || deletedItems.Contains(targetItem))
+                if (targetItem == null || deletedItemSet.Contains(targetItem))
                     continue;
 
                 var lines = targetItem.InputLines;
@@ -421,7 +408,7 @@ internal static class Modifications
                 foreach (var snappedItem in snappedItems)
                 {
                     if (snappedItem != targetItem
-                        && !deletedItems.Contains(snappedItem)
+                        && !deletedItemSet.Contains(snappedItem)
                         && snappedItem.PosOnCanvas.Y > yThreshold)
                     {
                         itemsBelow.Add(snappedItem);
@@ -466,8 +453,224 @@ internal static class Modifications
         
         context.Layout.FlagStructureAsChanged();
         context.Selector.Clear();
-        context.Layout.FlagStructureAsChanged();
+        itemToSelect?.Select(context.Selector);
         return results;
+    }
+
+    /// <summary>
+    /// Finds the connections that replace the deleted operators: each surviving target of a deleted operator's
+    /// primary output gets fed by the first surviving source found by walking up the primary inputs.
+    /// </summary>
+    private static List<PendingBridge> CollectBridges(Symbol symbol, HashSet<MagGraphConnection> obsoleteConnections,
+                                                      List<MagGraphItem> deletedItems, HashSet<MagGraphItem> deletedItemSet,
+                                                      HashSet<Guid> deletedChildIds)
+    {
+        var bridges = new List<PendingBridge>();
+        var bridgedOutConnections = new HashSet<MagGraphConnection>();
+
+        // Snapped vertical stacks first, so their gaps are closed and reconnected as one unit
+        var stackPairs = MagItemMovement.FindLinkedVerticalCollapsableConnectionPairs(obsoleteConnections.ToList());
+        foreach (var pair in stackPairs)
+        {
+            if (deletedItemSet.Contains(pair.Ca.SourceItem) || deletedItemSet.Contains(pair.Cb.TargetItem))
+                continue;
+
+            bridges.Add(new PendingBridge(pair.Ca, pair.Cb, ComputeMultiInputIndexAfterDeletion(symbol, pair.Cb, deletedChildIds)));
+            bridgedOutConnections.Add(pair.Cb);
+        }
+
+        foreach (var deletedItem in deletedItems)
+        {
+            if (deletedItem.OutputLines.Length == 0)
+                continue;
+
+            foreach (var outConnection in deletedItem.OutputLines[0].ConnectionsOut)
+            {
+                if (bridgedOutConnections.Contains(outConnection)
+                    || outConnection.TargetItem == null
+                    || deletedItemSet.Contains(outConnection.TargetItem))
+                    continue;
+
+                if (!TryFindSurvivingUpstreamConnection(deletedItem, deletedItemSet, out var inConnection)
+                    || inConnection.Type != outConnection.Type)
+                    continue;
+
+                bridges.Add(new PendingBridge(inConnection, outConnection,
+                                              ComputeMultiInputIndexAfterDeletion(symbol, outConnection, deletedChildIds)));
+                bridgedOutConnections.Add(outConnection);
+            }
+        }
+
+        // Several bridges into one multi-input: each earlier insertion shifts the later ones by one
+        var orderedBridges = bridges.OrderBy(b => b.OutConnection.TargetItem.Id)
+                                    .ThenBy(b => b.OutConnection.TargetInput.Id)
+                                    .ThenBy(b => b.MultiInputIndex)
+                                    .ToList();
+        for (var index = 1; index < orderedBridges.Count; index++)
+        {
+            var previous = orderedBridges[index - 1];
+            var current = orderedBridges[index];
+            if (previous.OutConnection.TargetItem == current.OutConnection.TargetItem
+                && previous.OutConnection.TargetInput.Id == current.OutConnection.TargetInput.Id
+                && current.MultiInputIndex <= previous.MultiInputIndex)
+            {
+                orderedBridges[index] = current with { MultiInputIndex = previous.MultiInputIndex + 1 };
+            }
+        }
+
+        return orderedBridges;
+    }
+
+    /// <summary>
+    /// Walks up the primary inputs through deleted operators and returns the connection coming from the first surviving item.
+    /// Gives up on multi-inputs with several connections, where the upstream source would be ambiguous.
+    /// </summary>
+    private static bool TryFindSurvivingUpstreamConnection(MagGraphItem deletedItem, HashSet<MagGraphItem> deletedItemSet,
+                                                           [NotNullWhen(true)] out MagGraphConnection? connection)
+    {
+        connection = null;
+        var item = deletedItem;
+        for (var step = 0; step <= deletedItemSet.Count; step++)
+        {
+            if (!item.TryGetPrimaryInConnection(out var inConnection))
+                return false;
+
+            var connectedLinesForPrimarySlot = 0;
+            foreach (var line in item.InputLines)
+            {
+                if (line.Id == item.InputLines[0].Id && line.ConnectionIn != null)
+                    connectedLinesForPrimarySlot++;
+            }
+
+            if (connectedLinesForPrimarySlot > 1)
+                return false;
+
+            if (!deletedItemSet.Contains(inConnection.SourceItem))
+            {
+                connection = inConnection;
+                return true;
+            }
+
+            if (inConnection.OutputLineIndex != 0)
+                return false;
+
+            item = inConnection.SourceItem;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// The item snapped above or left of the first deleted operator, looking through deleted chains.
+    /// </summary>
+    private static MagGraphItem? FindSnappedUpstreamSurvivor(List<MagGraphItem> deletedItems, HashSet<MagGraphItem> deletedItemSet)
+    {
+        foreach (var deletedItem in deletedItems)
+        {
+            var item = deletedItem;
+            for (var step = 0; step <= deletedItemSet.Count; step++)
+            {
+                if (!item.TryGetPrimaryInConnection(out var inConnection) || !inConnection.IsSnapped)
+                    break;
+
+                if (!deletedItemSet.Contains(inConnection.SourceItem))
+                    return inConnection.SourceItem;
+
+                item = inConnection.SourceItem;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Moves the remaining snapped items together where a bridge replaces a snapped chain of deleted operators.
+    /// </summary>
+    private static void CollapseSnappedGaps(GraphUiContext context, MacroCommand macroCommand, List<PendingBridge> bridges,
+                                            List<MagGraphItem> deletedItems)
+    {
+        var snappedBridges = new List<PendingBridge>();
+        foreach (var bridge in bridges)
+        {
+            if (bridge.InConnection.IsSnapped && bridge.OutConnection.IsSnapped)
+                snappedBridges.Add(bridge);
+        }
+
+        if (snappedBridges.Count == 0)
+            return;
+
+        var movableItems = MagItemMovement.CollectSnappedItems(deletedItems);
+        movableItems.ExceptWith(deletedItems);
+        if (movableItems.Count == 0)
+            return;
+
+        var movedItems = new List<ISelectableCanvasObject>(movableItems);
+        var moveCommand = new ModifyCanvasElementsCommand(context.CompositionInstance.Symbol.Id, movedItems, context.Selector);
+
+        // Closing the lowest / rightmost gap first keeps the cached positions of the remaining gaps valid
+        var anythingMoved = false;
+        foreach (var bridge in snappedBridges.OrderByDescending(b => b.InConnection.SourcePos.Y))
+        {
+            if (IsVertical(bridge.InConnection) && IsVertical(bridge.OutConnection))
+                anythingMoved |= MagItemMovement.MoveToCollapseVerticalGaps(bridge.InConnection, bridge.OutConnection, movableItems, dryRun: false).Count > 0;
+        }
+
+        foreach (var bridge in snappedBridges.OrderByDescending(b => b.InConnection.SourcePos.X))
+        {
+            if (!IsVertical(bridge.InConnection) && !IsVertical(bridge.OutConnection))
+                anythingMoved |= MoveToCollapseHorizontalGaps(bridge.InConnection, bridge.OutConnection, movableItems);
+        }
+
+        if (!anythingMoved)
+            return;
+
+        moveCommand.StoreCurrentValues();
+        macroCommand.AddExecutedCommandForUndo(moveCommand);
+        return;
+
+        static bool IsVertical(MagGraphConnection c) => c.Style is MagGraphConnection.ConnectionStyles.MainOutToMainInSnappedVertical
+                                                                  or MagGraphConnection.ConnectionStyles.AdditionalOutToMainInputSnappedVertical;
+    }
+
+    /// <summary>
+    /// Moves items right of each free column between the two connections one column to the left.
+    /// </summary>
+    private static bool MoveToCollapseHorizontalGaps(MagGraphConnection ca, MagGraphConnection cb, HashSet<MagGraphItem> movableItems)
+    {
+        var minX = ca.SourcePos.X;
+        var maxX = cb.TargetPos.X;
+        var columnWidth = MagGraphItem.GridSize.X;
+
+        var columnCount = (int)((maxX - minX) / columnWidth + 0.5f);
+        var anythingMoved = false;
+        for (var columnIndex = columnCount - 1; columnIndex >= 0; columnIndex--)
+        {
+            var middleColumnX = minX + (0.5f + columnIndex) * columnWidth;
+
+            var isColumnBlocked = false;
+            foreach (var item in movableItems)
+            {
+                if (item.Area.Min.X >= middleColumnX || item.Area.Max.X <= middleColumnX)
+                    continue;
+
+                isColumnBlocked = true;
+                break;
+            }
+
+            if (isColumnBlocked)
+                continue;
+
+            foreach (var item in movableItems)
+            {
+                if (item.PosOnCanvas.X < middleColumnX)
+                    continue;
+
+                item.PosOnCanvas -= new Vector2(columnWidth, 0);
+                anythingMoved = true;
+            }
+        }
+
+        return anythingMoved;
     }
 
     //private record ItemWithChildUi(MagGraphItem Item, SymbolUi.Child UiChild);
@@ -483,7 +686,7 @@ internal static class Modifications
         var slotConnectionIndex = 0;
         foreach (var connection in symbol.Connections)
         {
-            if (connection.TargetParentOrChildId != replacedConnection.TargetItem.Id
+            if (connection.TargetParentOrChildId != replacedConnection.TargetParentOrChildId
                 || connection.TargetSlotId != replacedConnection.TargetInput.Id)
                 continue;
 

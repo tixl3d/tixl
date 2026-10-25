@@ -57,6 +57,13 @@ internal static class GraphEditMenu
             context.Layout.FlagStructureAsChanged();
         }
 
+        if (AppMenuBar.MenuItem("Delete and Disconnect", UserActions.DeleteSelectionAndConnections.ListShortcuts(),
+                                isEnabled: nodeSelection.Selection.Count > 0 && isIdle && !isSaving))
+        {
+            Modifications.DeleteSelection(context, keepConnections: false);
+            context.Layout.FlagStructureAsChanged();
+        }
+
         CustomComponents.SeparatorLine();
         CustomComponents.DrawMenuGroupLabel("Add");
 

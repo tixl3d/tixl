@@ -494,6 +494,27 @@ internal static class DebugServer
                 break;
             }
 
+            case "deleteSelection":
+            {
+                var view = ProjectView.Focused;
+                if (view?.GraphView is not MagGraphView magGraphView)
+                {
+                    context.SendError("NO_COMPOSITION", "No graph view focused");
+                    break;
+                }
+
+                var keepConnections = request["disconnect"]?.Value<bool>() != true;
+                var deleted = magGraphView.DeleteSelection(keepConnections);
+                var selectedIds = new JArray();
+                foreach (var selectable in view.NodeSelection.Selection)
+                {
+                    selectedIds.Add(selectable.Id.ToString());
+                }
+
+                context.SendOk(new JObject { ["deleted"] = deleted, ["selectedIds"] = selectedIds });
+                break;
+            }
+
             case "undo":
                 if (UndoRedoStack.CanUndo)
                     UndoRedoStack.Undo();

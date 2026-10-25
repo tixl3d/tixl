@@ -196,6 +196,16 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
         return !HasActiveInteraction && TreeLayouting.LayoutInputsOfSelection(_context);
     }
 
+    /// <summary>Runs the delete action bound to Del (or Ctrl+Del without <paramref name="keepConnections"/>), as the debug bridge drives it.</summary>
+    internal bool DeleteSelection(bool keepConnections)
+    {
+        if (HasActiveInteraction || _projectView.NodeSelection.Selection.Count == 0)
+            return false;
+
+        Modifications.DeleteSelection(_context, keepConnections);
+        return true;
+    }
+
     void IGraphView.Close()
     {
         _destroyed = true;
