@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using System.Runtime.CompilerServices;
 using ImGuiNET;
+using T3.Editor.App.Gestures;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Stats;
 using T3.Core.Utils;
@@ -45,6 +46,17 @@ internal static class InfinitySliderOverlay
             _isManipulating = false;
         }
 
+        // The slider owns the pointer while open, so canvases behind it ignore trackpad gestures.
+        FrameStats.Current.OpenedPopupCapturedMouse = true;
+
+        // A trackpad swipe slides the scale under the pointer, following the fingers like a pan of the graph,
+        // so a pointer stuck at a screen edge can keep changing the value or the range.
+        var panDelta = PointerGestures.PanDelta;
+        if (PointerGestures.PansWithScroll && panDelta.LengthSquared() > 0.0001f)
+        {
+            _center += new Vector2(-panDelta.X, panDelta.Y);
+        }
+
         // Update value...
         var mousePosX = (int)(_io.MousePos.X * 2) / 2;
         var xOffset = mousePosX - _center.X;
@@ -63,7 +75,6 @@ internal static class InfinitySliderOverlay
         var isDraggingWidgetPosition = ImGui.IsMouseDown(ImGuiMouseButton.Right);
         if (isDraggingWidgetPosition)
         {
-            FrameStats.Current.OpenedPopupCapturedMouse = true;
             _center = _dragCenterStart + ImGui.GetMouseDragDelta(ImGuiMouseButton.Right);
         }
         else

@@ -284,7 +284,7 @@ public partial class ScalableCanvas
         {
             if (PointerGestures.PansWithScroll)
             {
-                if (isDirectlyHovered)
+                if (isDirectlyHovered && !isAnotherItemActive)
                 {
                     // The pan carries the glide after a flick, so it keeps arriving for a moment with no input.
                     var panInPixels = PointerGestures.PanDelta;
@@ -302,7 +302,7 @@ public partial class ScalableCanvas
 
             // Only a trackpad pinches, so a pinch zooms even before a scroll has shown the device to be one.
             // It zooms around the fingers; an emulated one has no focus of its own and uses the pointer.
-            if (isDirectlyHovered && PointerGestures.ZoomFactor != 1)
+            if (isDirectlyHovered && !isAnotherItemActive && PointerGestures.ZoomFactor != 1)
             {
                 var focus = PointerGestures.HasZoomFocus ? PointerGestures.ZoomFocus : mouseState.Position;
                 ApplyZoomDelta(focus, PointerGestures.ZoomFactor, out var pinchZoomed);
