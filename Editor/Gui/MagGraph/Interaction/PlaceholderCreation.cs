@@ -421,6 +421,8 @@ internal sealed class PlaceholderCreation
         // Connect to focus node...
         if (_snappedSourceItem != null)
         {
+            var hasSplitConnection = false;
+            var connectedInputId = Guid.Empty;
             if (newInstance.Inputs.Count > 0)
             {
                 if (_snappedSourceOutputLine.ConnectionsOut.Count > 0)
@@ -458,6 +460,8 @@ internal sealed class PlaceholderCreation
 
                         if (!splitVertically && !splitHorizontal)
                             continue;
+
+                        hasSplitConnection = true;
 
                         context.MacroCommand
                                .AddAndExecCommand(new DeleteConnectionCommand(context.CompositionInstance.Symbol,
@@ -499,12 +503,37 @@ internal sealed class PlaceholderCreation
                                                                                              matchingInputSlot.Id
                                                                                             ),
                                                                        0));
+                    connectedInputId = matchingInputSlot.Id;
+                }
+            }
+
+            // At the end of a horizontal chain the new op moves up, so that a connected parameter row
+            // (e.g. a value feeding "Scale") lines up with the source's output and snaps
+            var newItemLines = CollectNewItemLines(context, symbol, newChildUi, newInstance);
+            var shiftedRows = 0;
+            if (_connectionOrientation == MagGraphItem.Directions.Horizontal && !hasSplitConnection && connectedInputId != Guid.Empty)
+            {
+                for (var lineIndex = 0; lineIndex < newItemLines.inputLines.Count; lineIndex++)
+                {
+                    if (newItemLines.inputLines[lineIndex].Id != connectedInputId)
+                        continue;
+
+                    shiftedRows = lineIndex;
+                    break;
+                }
+
+                if (shiftedRows > 0)
+                {
+                    var moveNewChildCommand = new ModifyCanvasElementsCommand(parentSymbol.Id, [newChildUi], context.Selector);
+                    context.MacroCommand.AddExecutedCommandForUndo(moveNewChildCommand);
+                    newChildUi.PosOnCanvas -= new Vector2(0, MagGraphItem.GridSize.Y * shiftedRows);
+                    moveNewChildCommand.StoreCurrentValues();
                 }
             }
 
             // Push snapped ops further down if new op exceed initial default height
             {
-                var newHeight = ComputeNewItemUnitsHeight(context, symbol, newChildUi, newInstance);
+                var newHeight = newItemLines.inputLines.Count + newItemLines.outputLines.Count - 1 - shiftedRows;
                 if (newHeight > 1)
                 {
                     var extraHeight = MagGraphItem.GridSize.Y * (newHeight - 1);
@@ -657,6 +686,13 @@ internal sealed class PlaceholderCreation
     private static int ComputeNewItemUnitsHeight(GraphUiContext context, Symbol symbol, SymbolUi.Child newChildUi,
                                                  Instance newInstance)
     {
+        var (inputLines, outputLines) = CollectNewItemLines(context, symbol, newChildUi, newInstance);
+        return inputLines.Count + outputLines.Count - 1;
+    }
+
+    private static (List<MagGraphItem.InputLine> inputLines, List<MagGraphItem.OutputLine> outputLines)
+        CollectNewItemLines(GraphUiContext context, Symbol symbol, SymbolUi.Child newChildUi, Instance newInstance)
+    {
         var newItem = new MagGraphItem
                           {
                               Variant = MagGraphItem.Variants.Operator,
@@ -671,9 +707,7 @@ internal sealed class PlaceholderCreation
         List<MagGraphItem.InputLine> inputLines = [];
         List<MagGraphItem.OutputLine> outputLines = [];
         MagGraphLayout.CollectVisibleLines(context, newItem, inputLines, outputLines);
-
-        var newHeight = inputLines.Count + outputLines.Count - 1;
-        return newHeight;
+        return (inputLines, outputLines);
     }
 
     private void Complete(GraphUiContext context)
