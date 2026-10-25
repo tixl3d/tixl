@@ -1,4 +1,4 @@
-#nullable enable
+﻿#nullable enable
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using NewTek;
@@ -111,7 +111,15 @@ internal sealed class NdiSender : IOutputStreamSender
 
         // Checked before any GPU work: with nobody listening, reading 46 megapixels back only to drop them is waste.
         // No timeout — waiting here would stall the render loop every frame nobody watches.
-        if (NDIlib.send_get_no_connections(_ndiSender, 0) <= 0)
+        var connections = NDIlib.send_get_no_connections(_ndiSender, 0);
+        if (connections != _lastConnectionCount)
+        {
+            // Logged on change only, so the network path can be checked without a receiver-side tool.
+            Log.Debug($"NDI '{_openedName}': {connections} receiver(s), {width}x{height} {FourCcFor(format, packsToUyvy)} @{FrameRate} fps");
+            _lastConnectionCount = connections;
+        }
+
+        if (connections <= 0)
         {
             DropQueuedFrames();
             _nextSendTimeSec = 0;
@@ -353,6 +361,8 @@ internal sealed class NdiSender : IOutputStreamSender
             _ndiSender = IntPtr.Zero;
         }
 
+        _lastConnectionCount = 0;
+
         UnmapInFlightSlot();
         _queuedSlots.Clear();
         foreach (var stagingTexture in _stagingTextures)
@@ -406,6 +416,7 @@ internal sealed class NdiSender : IOutputStreamSender
     private readonly List<Texture2D> _stagingTextures = [];
     private readonly Queue<int> _queuedSlots = new();
     private int _inFlightSlot = -1;
+    private int _lastConnectionCount;
 
     /** Visual-clock time the next frame is due at; 0 restarts the schedule. */
     private double _nextSendTimeSec;
