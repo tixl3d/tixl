@@ -124,7 +124,6 @@ public static partial class T3Ui
     internal static bool DragFieldHovered { private get; set; }
     internal static bool DragFieldWasHoveredLastFrame { get; private set; }
 
-    internal static bool ShowSecondaryRenderWindow => WindowManager.ShowSecondaryRenderWindow;
     internal const string FloatNumberFormat = "{0:F2}";
 
     // ReSharper disable once InconsistentlySynchronizedField

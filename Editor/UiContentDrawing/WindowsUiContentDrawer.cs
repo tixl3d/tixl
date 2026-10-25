@@ -165,7 +165,7 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
                 Program.NewImGuiLayoutDefinition = string.Empty;
             }
 
-            // Release any modifier whose key-up we never saw (Alt+Tab between the main and viewer windows is
+            // Release any modifier whose key-up we never saw (Alt+Tab between the main and output windows is
             // the usual culprit) before it can strand canvas interaction for the whole frame.
             SdlImGuiInput.ReconcileStuckModifiers();
 
@@ -178,50 +178,10 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
 
             // Drive projection-mapping outputs: renders each bound output's composite every frame
             // (so its content evaluates even when nothing shows it) and hands it to that output's
-            // display window. Must run before any viewer back buffer is bound below.
+            // display window. Must run before the output windows' back buffers are bound below.
             OutputPresentation.UpdatePresentation();
 
             DrawOutputWindows();
-
-            // Render 2nd view
-            ProgramWindows.Viewer.SetVisible(T3Ui.ShowSecondaryRenderWindow);
-
-            if (T3Ui.ShowSecondaryRenderWindow)
-            {
-                var viewer = ProgramWindows.Viewer;
-                ProgramWindows.Viewer.PrepareRenderingFrame();
-
-                ProgramWindows.SetVertexShader(SharedResources.FullScreenVertexShaderResource);
-                ProgramWindows.SetPixelShader(SharedResources.FullScreenPixelShaderResource);
-
-                if (UserSettings.Config.MirrorUiOnSecondView)
-                {
-                    if (ProgramWindows.UiCopyTextureSrv != null && !ProgramWindows.UiCopyTextureSrv.IsDisposed)
-                    {
-                        ProgramWindows.SetRasterizerState(SharedResources.ViewWindowRasterizerState);
-                        ProgramWindows.SetPixelShaderSRV(ProgramWindows.UiCopyTextureSrv);
-                        ProgramWindows.DrawTextureToSecondaryRenderOutput();
-                    }
-                }
-                else
-                {
-                    // No texture yet (bound output with nothing composited, or update paused) — the
-                    // window just stays cleared this frame. Not an error, so don't log per-frame.
-                    if (viewer.Texture is { IsDisposed: false })
-                    {
-                        if (_viewWindowBackgroundSrv == null ||
-                            _viewWindowBackgroundSrv.Resource.NativePointer != viewer.Texture.NativePointer)
-                        {
-                            _viewWindowBackgroundSrv?.Dispose();
-                            _viewWindowBackgroundSrv = new ShaderResourceView(Program.Device, viewer.Texture);
-                        }
-
-                        ProgramWindows.SetRasterizerState(SharedResources.ViewWindowRasterizerState);
-                        ProgramWindows.SetPixelShaderSRV(_viewWindowBackgroundSrv);
-                        ProgramWindows.DrawTextureToSecondaryRenderOutput();
-                    }
-                }
-            }
 
             ProgramWindows.Main.PrepareRenderingFrame();
 
@@ -285,7 +245,7 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
 
             displayWindow.Window.PrepareRenderingFrame();
             ProgramWindows.SetPixelShaderSRV(textureView);
-            ProgramWindows.DrawTextureToSecondaryRenderOutput();
+            ProgramWindows.DrawFullScreenTexture();
         }
     }
 
@@ -692,7 +652,6 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
 
     private int _windowWidth;
     private int _windowHeight;
-    private static ShaderResourceView _viewWindowBackgroundSrv;
 
     private readonly Vector2 _scaleFactor = Vector2.One;
 }

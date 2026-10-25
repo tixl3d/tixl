@@ -275,11 +275,6 @@ internal sealed partial class SettingsWindow : Window
                                                       "If enabled, scrolling the mouse wheel while holding left of right mouse button will control navigation speed with WASD keys. This is similar to Unity and Unreal",
                                                       UserSettings.Defaults.AdjustCameraSpeedWithMouseWheel);
 
-                    changed |= FormInputs.AddCheckBox("Mirror UI on second view",
-                                                      ref UserSettings.Config.MirrorUiOnSecondView,
-                                                      "On Windows mirroring displays can be extremely slow. This settings is will copy the UI to the second view instead of mirroring it.",
-                                                      UserSettings.Defaults.MirrorUiOnSecondView);
-
                     changed |= FormInputs.AddCheckBox("Balance soundtrack visualizer",
                                                       ref UserSettings.Config.ExpandSpectrumVisualizerVertically,
                                                       "If true, changes the visualized pitch's logarithmic scale from base 'e' to base 10.\nLower frequencies will become more visible, making the frequency spectrum\n appear more \"balanced\"",

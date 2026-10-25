@@ -113,12 +113,6 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         /** Frames per second to render at with vsync; 0 renders every refresh of the pacing display. */
         public int TargetFrameRate = 0;
 
-        /** Windows' implementation of mirroring a display is extremely slow and can
-        * take up to 50% of the GPU time. Enabling this work around will copy the Main window
-        * SwapChain buffer into a texture that is used for the 2nd viewer window.
-        */
-        public bool MirrorUiOnSecondView = false;
-
         public bool EnableKeyboardShortCuts = true;
 
         public GraphStyles GraphStyle = GraphStyles.Magnetic;

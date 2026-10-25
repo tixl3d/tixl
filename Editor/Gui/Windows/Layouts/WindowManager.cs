@@ -130,9 +130,6 @@ internal static partial class WindowManager
                 yield return window;
             }
         }
-
-        foreach (var window in GraphWindow.GraphWindowInstances)
-            yield return window;
     }
 
     public static bool IsAnyInstanceVisible<T>() where T : Window
@@ -185,7 +182,6 @@ internal static partial class WindowManager
     /// Contains all possible window types and used for updating and layout management
     /// </summary>
     private static List<Window> _windows = [];
-    
-    public static bool ShowSecondaryRenderWindow { get; set; }
+
     private static bool _hasBeenInitialized;
 }

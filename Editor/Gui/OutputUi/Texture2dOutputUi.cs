@@ -47,7 +47,6 @@ internal sealed class Texture2dOutputUi : OutputUi<Texture2D>
                 Log.Warning("Failed to access texture description:" + e.Message);
             }
             ImageOutputCanvas.Current.DrawTexture(texture);
-            ProgramWindows.Viewer?.SetTexture(texture);
         }
         else
         {

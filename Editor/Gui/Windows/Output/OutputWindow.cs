@@ -28,14 +28,13 @@ internal sealed partial class OutputWindow : Window
     #region Window implementation
     public OutputWindow()
     {
-        Config.Title = LayoutHandling.OutputPrefix + _instanceCounter;
+        Config.Title = GetUnusedInstanceTitle(LayoutHandling.OutputPrefix, OutputWindowInstances);
         Config.Visible = true;
 
         AllowMultipleInstances = true;
         Config.Visible = true;
         WindowFlags = ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse;
 
-        _instanceCounter++;
         _camSelectionHandling = new CameraSelectionHandling();
         _drawOutputMenuExtras = DrawOutputMenuExtras;
         OutputWindowInstances.Add(this);
@@ -267,7 +266,6 @@ internal sealed partial class OutputWindow : Window
     private readonly ImageOutputCanvas _imageCanvas = new();
     private readonly CameraSelectionHandling _camSelectionHandling;
     private readonly System.Action _drawOutputMenuExtras;
-    private static int _instanceCounter;
     private ResolutionHandling.Resolution _selectedResolution = ResolutionHandling.DefaultResolution;
     internal Int2 RequestedResolution { get; private set; }
     private readonly EditResolutionDialog _resolutionDialog = new();

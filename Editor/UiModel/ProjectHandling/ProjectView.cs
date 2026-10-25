@@ -426,15 +426,20 @@ internal sealed partial class ProjectView
         if (symbolUi == null)
             return;
 
-        var imGuiSettings = ImGui.SaveIniSettingsToMemory();
-        var imGuiVersion = ImGui.GetVersion();
-
         var windowVisibility = new Dictionary<string, bool>();
+        var shownWindowTitles = new HashSet<string>();
         foreach (var window in WindowManager.GetAllWindows())
         {
-            if (!string.IsNullOrEmpty(window.Config.Title))
-                windowVisibility[window.Config.Title] = window.Config.Visible;
+            if (string.IsNullOrEmpty(window.Config.Title))
+                continue;
+
+            windowVisibility[window.Config.Title] = window.Config.Visible;
+            if (window.Config.Visible)
+                shownWindowTitles.Add(window.Config.Title);
         }
+
+        var imGuiSettings = LayoutHandling.RemoveUnusedImGuiSettings(ImGui.SaveIniSettingsToMemory(), shownWindowTitles);
+        var imGuiVersion = ImGui.GetVersion();
 
         var unchanged = symbolUi.WindowLayout == imGuiSettings
                         && symbolUi.WindowLayoutImGuiVersion == imGuiVersion

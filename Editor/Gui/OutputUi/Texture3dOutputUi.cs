@@ -63,14 +63,7 @@ internal sealed class Texture3dOutputUi : OutputUi<Texture3dWithViews>
         {
             Texture3dWithViews texture3d = typedSlot.Value;
             Texture2D texture = RenderTo2dTexture(texture3d);
-            if (ImageOutputCanvas.Current != null)
-            {
-                ImageOutputCanvas.Current.DrawTexture(texture);
-                if (texture != null && !texture.IsDisposed)
-                {
-                    ProgramWindows.Viewer?.SetTexture(texture);
-                }
-            }
+            ImageOutputCanvas.Current?.DrawTexture(texture);
             ImGui.SliderInt("z-pos", ref _zPosIndex, 0, texture3d?.Texture?.Description.Depth - 1 ?? 0);
         }
         else

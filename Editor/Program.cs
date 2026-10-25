@@ -331,9 +331,6 @@ internal static class Program
             splashScreen.Dispose();
         }
 
-        // Initialize optional Viewer Windows
-        ProgramWindows.InitializeSecondaryViewerWindow("TiXL Viewer", 640, 360);
-
         StartUp.FlagStartupSequenceComplete();
 
         startupStopWatch.Stop();

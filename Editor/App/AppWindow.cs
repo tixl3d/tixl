@@ -18,8 +18,8 @@ using Vector2 = System.Numerics.Vector2;
 namespace T3.Editor.App;
 
 /// <summary>
-/// An SDL window with the swap chain that presents into it: the editor itself, the secondary viewer, and one per
-/// display an output is bound to. Sizes are in pixels throughout, as the swap chain and ImGui count them.
+/// An SDL window with the swap chain that presents into it: the editor itself, and one per display an output is
+/// bound to. Sizes are in pixels throughout, as the swap chain and ImGui count them.
 /// </summary>
 internal sealed unsafe class AppWindow
 {
@@ -48,8 +48,7 @@ internal sealed unsafe class AppWindow
 
     /// <summary>
     /// Set before swap-chain creation. When true, the swap chain is created with a frame-latency waitable object
-    /// and <see cref="WaitForFrameLatency"/> paces the loop, instead of the accidental pacing the viewer's second
-    /// Present used to provide.
+    /// and <see cref="WaitForFrameLatency"/> paces the loop.
     /// </summary>
     internal bool UseFrameLatencyWaitable { get; set; }
 
@@ -96,7 +95,7 @@ internal sealed unsafe class AppWindow
 
     public void SetVisible(bool isVisible)
     {
-        // Called every frame for the viewer; SDL maps and unmaps windows even when nothing changes.
+        // SDL maps and unmaps windows even when nothing changes.
         var isHidden = (SDL_GetWindowFlags(_window) & SDL_WindowFlags.SDL_WINDOW_HIDDEN) != 0;
         if (isVisible != isHidden)
             return;
@@ -313,7 +312,7 @@ internal sealed unsafe class AppWindow
     /// <param name="maximized">Applied when the window is first shown.</param>
     /// <param name="canClose">
     /// Asked when the user closes the window; false keeps it open. A window without one ignores close requests —
-    /// the viewer's, because closing it used to crash in the swap chain.
+    /// an output window's, because closing it used to crash in the swap chain.
     /// </param>
     internal void InitializeWindow(bool maximized, Func<bool>? canClose)
     {
@@ -347,11 +346,6 @@ internal sealed unsafe class AppWindow
         DisposeBackBufferViews();
         _swapChain?.Dispose();
         SDL_DestroyWindow(_window);
-    }
-
-    public void SetTexture(Texture2D texture)
-    {
-        Texture = texture;
     }
 
     private void HandleEvent(in SDL_Event sdlEvent)

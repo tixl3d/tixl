@@ -31,7 +31,7 @@ internal static unsafe class SdlImGuiInput
         switch (sdlEvent.Type)
         {
             case SDL_EventType.SDL_EVENT_MOUSE_MOTION:
-                // The viewer shows the output; pointer input belongs to the main window only.
+                // Output windows only show content; pointer input belongs to the main window.
                 if (IsMainWindow(sdlEvent.motion.windowID))
                     io.MousePos = ToPixels(sdlEvent.motion.x, sdlEvent.motion.y);
 
@@ -42,7 +42,7 @@ internal static unsafe class SdlImGuiInput
             {
                 var down = sdlEvent.Type == SDL_EventType.SDL_EVENT_MOUSE_BUTTON_DOWN;
 
-                // A press in the viewer is ignored, a release is not: a drag that ends over it must still end.
+                // A press in an output window is ignored, a release is not: a drag that ends over it must still end.
                 if (down && !IsMainWindow(sdlEvent.button.windowID))
                     break;
 
@@ -89,7 +89,7 @@ internal static unsafe class SdlImGuiInput
             {
                 var down = sdlEvent.Type == SDL_EventType.SDL_EVENT_KEY_DOWN;
 
-                // The keyboard belongs to the editor even while a viewer on a projector has focus; releases are
+                // The keyboard belongs to the editor even while an output window on a projector has focus; releases are
                 // kept so a key held while focus moved does not stick.
                 if (down && !IsMainWindow(sdlEvent.key.windowID))
                     break;
@@ -277,7 +277,7 @@ internal static unsafe class SdlImGuiInput
     {
         if (!IsMainWindow(windowId) || _droppedFiles.Count == 0)
         {
-            // A drag that left the window, or was dropped on the viewer.
+            // A drag that left the window, or was dropped on an output window.
             DragAndDropHandling.CancelExternalDrag();
             _droppedFiles.Clear();
             return;
