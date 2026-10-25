@@ -110,6 +110,19 @@ internal sealed class PlaceholderCreation
         Debug.Assert(item.OutputLines.Length > 0);
         context.StartMacroCommand("Insert Operator");
 
+        // Within a stack the part above (or left of) the insertion makes room, so the downstream
+        // block keeps its place and the spacing to its neighbours doesn't grow with every insert.
+        // Keep for after creation because inserted node might exceed unit height and further pushing is required... 
+        _snappedItems = MagItemMovement.CollectSnappedItems(item);
+        _upstreamItems = CollectUpstreamItems(item, outputLine, direction, _snappedItems);
+        if (_upstreamItems != null)
+        {
+            var offset = direction == MagGraphItem.Directions.Vertical
+                             ? new Vector2(0, -MagGraphItem.GridSize.Y)
+                             : new Vector2(-MagGraphItem.GridSize.X, 0);
+            MagItemMovement.MoveItems(context, _upstreamItems, offset);
+        }
+
         var focusedItemPosOnCanvas = direction == MagGraphItem.Directions.Vertical
                                          ? item.PosOnCanvas + new Vector2(0, item.Size.Y)
                                          : item.PosOnCanvas + new Vector2(item.Size.X, MagGraphItem.GridSize.Y * outputLine.VisibleIndex);
@@ -122,30 +135,6 @@ internal sealed class PlaceholderCreation
                                   Size = MagGraphItem.GridSize,
                                   Variant = MagGraphItem.Variants.Placeholder,
                               };
-
-        // Make space vertically
-        if (direction == MagGraphItem.Directions.Vertical)
-        {
-            // Keep for after creation because inserted node might exceed unit height and further pushing is required... 
-            _snappedItems = MagItemMovement.CollectSnappedItems(item);
-
-            MagItemMovement
-               .MoveSnappedItemsVertically(context,
-                                           _snappedItems,
-                                           item.PosOnCanvas.Y + item.Size.Y - MagGraphItem.GridSize.Y / 2,
-                                           MagGraphItem.GridSize.Y);
-        }
-        else
-        {
-            // Keep for after creation because inserted node might exceed unit height and further pushing is required... 
-            _snappedItems = MagItemMovement.CollectSnappedItems(item);
-
-            MagItemMovement
-               .MoveSnappedItemsHorizontally(context,
-                                             _snappedItems,
-                                             item.PosOnCanvas.X + item.Size.X - MagGraphItem.GridSize.X / 2,
-                                             MagGraphItem.GridSize.X);
-        }
 
         context.Selector.Selection.Clear();
         context.Layout.Items[PlaceHolderId] = PlaceholderItem;
@@ -160,6 +149,60 @@ internal sealed class PlaceholderCreation
         _snappedSourceOutputLine = outputLine;
         _snappedSourceItem = item;
         _connectionOrientation = direction;
+    }
+
+    /// <summary>
+    /// If the insertion cuts a snapped connection, returns the items on the item's side of it, including those
+    /// snapped beside them (e.g. a multi-input block hanging below a horizontal row). Returns null if nothing is
+    /// snapped beyond the insertion point, so there is no stack to open.
+    /// </summary>
+    private static HashSet<MagGraphItem>? CollectUpstreamItems(MagGraphItem item, MagGraphItem.OutputLine outputLine,
+                                                              MagGraphItem.Directions direction, HashSet<MagGraphItem> snappedItems)
+    {
+        var isVertical = direction == MagGraphItem.Directions.Vertical;
+        MagGraphConnection? cutConnection = null;
+        if (isVertical)
+        {
+            foreach (var line in item.OutputLines)
+            {
+                foreach (var c in line.ConnectionsOut)
+                {
+                    if (c.Style is MagGraphConnection.ConnectionStyles.MainOutToMainInSnappedVertical
+                        or MagGraphConnection.ConnectionStyles.AdditionalOutToMainInputSnappedVertical)
+                        cutConnection = c;
+                }
+            }
+        }
+        else
+        {
+            foreach (var c in outputLine.ConnectionsOut)
+            {
+                if (c.Style is MagGraphConnection.ConnectionStyles.MainOutToMainInSnappedHorizontal
+                    or MagGraphConnection.ConnectionStyles.MainOutToInputSnappedHorizontal)
+                    cutConnection = c;
+            }
+        }
+
+        if (cutConnection == null)
+            return null;
+
+        var upstreamItems = MagItemMovement.CollectSnappedItems(item, ignoreConnectionHash: cutConnection.ConnectionHash);
+        if (!upstreamItems.Contains(cutConnection.TargetItem))
+            return upstreamItems;
+
+        // Both sides are linked by other snaps around the insertion point: split by position instead
+        upstreamItems.Clear();
+        var threshold = isVertical
+                            ? item.PosOnCanvas.Y + item.Size.Y - MagGraphItem.GridSize.Y / 2
+                            : item.PosOnCanvas.X + item.Size.X - MagGraphItem.GridSize.X / 2;
+        foreach (var snappedItem in snappedItems)
+        {
+            var itemStart = isVertical ? snappedItem.PosOnCanvas.Y : snappedItem.PosOnCanvas.X;
+            if (itemStart < threshold)
+                upstreamItems.Add(snappedItem);
+        }
+
+        return upstreamItems;
     }
 
     private static Type? SnappedOutputValueType(MagGraphItem.OutputLine outputLine, MagGraphItem.Directions direction)
@@ -464,11 +507,25 @@ internal sealed class PlaceholderCreation
                 var newHeight = ComputeNewItemUnitsHeight(context, symbol, newChildUi, newInstance);
                 if (newHeight > 1)
                 {
-                    MagItemMovement
-                       .MoveSnappedItemsVertically(context,
-                                                   _snappedItems,
-                                                   _snappedSourceItem.PosOnCanvas.Y + _snappedSourceItem.Size.Y - MagGraphItem.GridSize.Y / 2,
-                                                   MagGraphItem.GridSize.Y * (newHeight - 1));
+                    var extraHeight = MagGraphItem.GridSize.Y * (newHeight - 1);
+                    var yThreshold = _snappedSourceItem.PosOnCanvas.Y + _snappedSourceItem.Size.Y - MagGraphItem.GridSize.Y / 2;
+                    if (_connectionOrientation == MagGraphItem.Directions.Vertical)
+                    {
+                        // Outside a stack nothing is snapped below the new op that would need to make room
+                        if (_upstreamItems != null)
+                        {
+                            MagItemMovement.MoveItems(context, _upstreamItems, new Vector2(0, -extraHeight));
+
+                            var moveNewChildCommand = new ModifyCanvasElementsCommand(parentSymbol.Id, [newChildUi], context.Selector);
+                            context.MacroCommand.AddExecutedCommandForUndo(moveNewChildCommand);
+                            newChildUi.PosOnCanvas -= new Vector2(0, extraHeight);
+                            moveNewChildCommand.StoreCurrentValues();
+                        }
+                    }
+                    else
+                    {
+                        MagItemMovement.MoveSnappedItemsVertically(context, _snappedItems, yThreshold, extraHeight);
+                    }
                 }
             }
         }
@@ -647,4 +704,5 @@ internal sealed class PlaceholderCreation
     private static MagGraphItem.Directions _connectionOrientation = MagGraphItem.Directions.Horizontal;
     private MagGraphItem.OutputLine _snappedSourceOutputLine;
     private HashSet<MagGraphItem> _snappedItems = [];
+    private HashSet<MagGraphItem>? _upstreamItems;
 }
