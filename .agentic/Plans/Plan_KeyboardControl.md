@@ -11,11 +11,21 @@ change along chains — leave it as is.
 
 ## Status
 
-- **Phase 2, first step — implemented (uncommitted):** arrow keys move the selection in MagGraph when the graph
-  has focus (`Editor/Gui/MagGraph/Interaction/SelectionNavigation.cs`, wired in `KeyboardActions`). Ranking by
-  rect gap along the direction with a sideways penalty, connected items preferred; with nothing selected the
-  item nearest the view centre is picked; the view pans to keep the selection visible. Not yet: active-op
-  model, Shift+arrow extend, Space marks, zoom-to-edit-level.
+- **Phase 2, first step — implemented:** arrow keys move the selection in MagGraph when the graph has focus
+  (`Editor/Gui/MagGraph/Interaction/SelectionNavigation.cs`, wired in `KeyboardActions`). Ranking by rect gap
+  along the direction with a sideways penalty, connected items preferred; with nothing selected the item nearest
+  the view centre is picked; the view pans to keep the selection visible. A trail makes the opposite key always
+  walk back. While keyboard navigation is active (until the selection changes otherwise) subtle marks show each
+  arrow's target, growing in staggered after each move. Manual test: `.tests-manual/graph-arrow-navigation.md`.
+  Not yet: Shift+arrow extend, Space marks, zoom-to-edit-level.
+- **Already exists from other work:** Tab inserts below / Shift+Tab to the right of the selected op; delete keeps
+  connections and closes gaps (Ctrl+Del deletes and disconnects).
+- **Phase 1 prototype — in progress:** `s` parameter prompt (`Editor/Gui/MagGraph/Interaction/ParameterPrompt.cs`,
+  `UserActions.EditParameter` on S, graph focus). A prompt line at the bottom of the graph window filters the
+  selected op's parameters (name prefix → word prefix → initials → substring); the Parameter Window highlights the
+  focused row and dims non-matching ones. Space/digit/sign ends the filter; float/int/bool values preview live
+  (`+ * /` relative, `-5` absolute); `r` resets; Enter applies as one undo step, Esc or clicking away reverts.
+  Not yet: ←/→ nudge, verbs `i c g x`, vectors/enums/colors, hint labels, multi-selection.
 
 ## Design principles
 

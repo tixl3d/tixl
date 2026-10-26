@@ -168,6 +168,7 @@ internal sealed partial class MagGraphView
             DrawOffscreenIndicators(drawList);
             DrawAutoCollectIndicators(drawList);
             SelectionNavigation.DrawTargetIndicators(_context, drawList);
+            ParameterPrompt.Draw(_context);
 
             // Draw special overlays
             if (_context.StateMachine.CurrentState == GraphStates.RenameChild)

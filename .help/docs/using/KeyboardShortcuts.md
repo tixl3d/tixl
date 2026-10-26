@@ -31,8 +31,8 @@ The following is a list of the **default keyboard** short-cuts. With v4.0.4 you 
 | Rename Child              | Enter                                                |
 | Navigate Backwards        | Alt + Left                                           |
 | Navigate Forward          | Alt + Right                                          |
-| Select to Above / Below   | Up / Down                                            |
-| Select to Left / Right    | Left / Right                                         |
+| Select to Above / Below   | Up / Down (focus)                                    |
+| Select to Left / Right    | Left / Right (focus)                                 |
 | Duplicate                 | Ctrl + D (focus)                                     |
 | Duplicate with Connections| Ctrl + Shift + D (focus)                             |
 | Delete Selection          | Delete or Backspace (focus)                          |

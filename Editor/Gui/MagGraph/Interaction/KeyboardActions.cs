@@ -197,6 +197,9 @@ internal static class KeyboardActions
 
             if (UserActions.SelectToLeft.Triggered())
                 SelectionNavigation.MoveSelection(context, SelectionNavigation.Directions.Left);
+
+            if (UserActions.EditParameter.Triggered())
+                ParameterPrompt.Open(context);
         }
 
         if (UserActions.AddComment.Triggered())

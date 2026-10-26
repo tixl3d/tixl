@@ -64,6 +64,7 @@ internal enum UserActions
     AddSection,
     AddComment,
     RenameChild,
+    EditParameter,
     ToggleSnapshotControl,
 
     // Navigation
