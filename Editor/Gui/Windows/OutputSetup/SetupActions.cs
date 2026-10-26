@@ -118,27 +118,9 @@ internal static class SetupActions
         if (selected.Count < 2)
             return;
 
-        // Walls first, plan by plan and edge by edge around each; then whatever is left, west to east.
+        // The same order a wallpaper layout cuts its strip in, so the Board row reads like the strip.
         var ordered = new List<Surface>(selected.Count);
-        foreach (var plan in setup.FloorPlans)
-        {
-            for (var segment = 0; segment < plan.SegmentCount; segment++)
-            {
-                var wall = setup.FindSurface(plan.WallOf(segment));
-                if (wall != null && selected.Contains(wall) && !ordered.Contains(wall))
-                    ordered.Add(wall);
-            }
-        }
-
-        var rest = new List<Surface>();
-        foreach (var surface in selected)
-        {
-            if (!ordered.Contains(surface))
-                rest.Add(surface);
-        }
-
-        rest.Sort((a, b) => LeftEdgeOf(a).CompareTo(LeftEdgeOf(b)));
-        ordered.AddRange(rest);
+        WallpaperLayout.OrderAroundRoom(setup, selected, ordered, out _);
 
         // The row starts where the selection already is, so an arrange doesn't fling the cards across the Board.
         var left = float.MaxValue;
@@ -874,6 +856,18 @@ internal static class SetupActions
     }
 
     /// <summary>Deleting a slice clears it from anything showing it — the reference would mean nothing.</summary>
+    /// <summary>Drops a content source and its slices, and with them every route that showed them.</summary>
+    internal static void RemoveContentSource(Setup setup, ContentSource source)
+    {
+        for (var s = setup.Slices.Count - 1; s >= 0; s--)
+        {
+            if (setup.Slices[s].SourceId == source.Id)
+                DeleteSliceInternal(setup, setup.Slices[s].Id);
+        }
+
+        setup.ContentSources.Remove(source);
+    }
+
     private static void DeleteSliceInternal(Setup setup, Guid sliceId)
     {
         foreach (var surface in setup.Surfaces)

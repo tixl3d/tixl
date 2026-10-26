@@ -342,6 +342,40 @@ internal static class SetupRelations
         return count;
     }
 
+    /// <summary>
+    /// Where a surface sits on an output's canvas (TL, TR, BR, BL in canvas 0..1): its first mapping, else a patch
+    /// carrying its name, in the patch's turned corner order — a venue's pixel map names its areas after the walls.
+    /// </summary>
+    public static bool TryFindCanvasQuad(Setup setup, Surface surface, Vector2[] quad, out Guid outputId)
+    {
+        if (surface.OutputMappings.Count > 0 && surface.OutputMappings[0].Quad.Length >= 4)
+        {
+            Array.Copy(surface.OutputMappings[0].Quad, quad, 4);
+            outputId = surface.OutputMappings[0].OutputId;
+            return true;
+        }
+
+        outputId = Guid.Empty;
+        if (string.IsNullOrEmpty(surface.Name))
+            return false;
+
+        for (var o = 0; o < setup.Outputs.Count; o++)
+        {
+            var patches = setup.Outputs[o].Patches;
+            for (var p = 0; p < patches.Count; p++)
+            {
+                if (patches[p].Quad.Length < 4 || !string.Equals(patches[p].Name, surface.Name, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                patches[p].CopyTurnedCorners(quad);
+                outputId = setup.Outputs[o].Id;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public static int CountChildren(Setup setup, Guid parentId)
     {
         var count = 0;

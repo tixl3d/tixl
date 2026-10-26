@@ -1,6 +1,8 @@
 #nullable enable
+using System.Diagnostics.CodeAnalysis;
 using ImGuiNET;
 using T3.Core.DataTypes;
+using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.Output;
@@ -8,7 +10,7 @@ using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Graph;
-using T3.Editor.UiModel.Modification;
+using T3.Editor.UiModel.Commands.Setup;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
 
@@ -80,14 +82,26 @@ internal static class ContentSourceSync
     /// </summary>
     public static void AddContentSend(SetupEntitySelection selection)
     {
+        var macro = new MacroCommand("Add SendToOutput");
+        if (TryAddSendOp(macro, string.Empty, out _))
+            UndoRedoStack.Add(macro);
+    }
+
+    /// <summary>
+    /// Adds a <c>SendToOutput</c> op like <see cref="AddContentSend"/>, executing its commands into
+    /// <paramref name="macro"/> so a caller can fold them into one undo step with its own edits.
+    /// </summary>
+    public static bool TryAddSendOp(MacroCommand macro, string name, out Guid childId)
+    {
+        childId = Guid.Empty;
         var projectView = ProjectView.Focused;
         var composition = projectView?.CompositionInstance;
         if (projectView == null || composition == null)
-            return;
+            return false;
 
         if (!composition.Symbol.TryGetSymbolUi(out var compositionUi)
-            || !SymbolUiRegistry.TryGetSymbolUi(SendToOutputSymbolId, out var sendSymbolUi))
-            return;
+            || !SymbolUiRegistry.TryGetSymbolUi(SendToOutputSymbolId, out _))
+            return false;
 
         // A selected texture op becomes the feed: place the send op to its right and wire it up.
         var selected = projectView.NodeSelection.GetSelectedInstanceWithoutComposition();
@@ -97,16 +111,90 @@ internal static class ContentSourceSync
                       ? selectedUi.PosOnCanvas + new Vector2(selectedUi.Size.X + 40, 0)
                       : Vector2.Zero;
 
-        var newChildUi = GraphOperations.AddSymbolChild(sendSymbolUi.Symbol, compositionUi, pos);
+        var addCommand = new AddSymbolChildCommand(compositionUi.Symbol, SendToOutputSymbolId) { PosOnCanvas = pos, ChildName = name };
+        macro.AddAndExecCommand(addCommand);
+        childId = addCommand.AddedChildId;
 
         if (sourceSlot != null && selectedUi != null)
         {
-            var connection = new Symbol.Connection(selectedUi.Id, sourceSlot.Id, newChildUi.Id, SendToOutputTextureInputId);
-            UndoRedoStack.AddAndExecute(new AddConnectionCommand(compositionUi.Symbol, connection, 0));
+            var connection = new Symbol.Connection(selectedUi.Id, sourceSlot.Id, childId, SendToOutputTextureInputId);
+            macro.AddAndExecCommand(new AddConnectionCommand(compositionUi.Symbol, connection, 0));
         }
 
-        projectView.NodeSelection.TrySelectCompositionChild(composition, newChildUi.Id, add: false);
+        projectView.NodeSelection.TrySelectCompositionChild(composition, childId, add: false);
         projectView.FocusViewToSelection();
+        return true;
+    }
+
+    /// <summary>
+    /// Pins a send op's render size, as an undoable input change collected into <paramref name="macro"/>.
+    /// The op is found through its parent symbol, so one that isn't instantiated can still be set.
+    /// </summary>
+    public static bool TrySetSendResolution(MacroCommand macro, Guid childId, Int2 resolution)
+    {
+        if (!TryFindSendParent(childId, out var parent)
+            || !parent.Children[childId].Inputs.TryGetValue(SendToOutputResolutionInputId, out var input))
+            return false;
+
+        macro.AddAndExecCommand(new ChangeInputValueCommand(parent, childId, input, new InputValue<Int2>(resolution)));
+        return true;
+    }
+
+    /// <summary>
+    /// Deletes a content source's send op from the graph. Its slices and the routes showing them go in the same
+    /// undo step, so an undo brings the routing back with the op instead of a bare, re-adopted source.
+    /// </summary>
+    public static void DeleteSendOp(Setup setup, Guid childId)
+    {
+        if (!TryFindSendParent(childId, out var parent)
+            || !parent.TryGetSymbolUi(out var parentUi)
+            || !parentUi.ChildUis.TryGetValue(childId, out var childUi))
+            return;
+
+        var oldJson = setup.ToJsonString();
+        if (setup.FindSourceByChildId(childId) is { } source)
+            SetupActions.RemoveContentSource(setup, source);
+
+        var macro = new MacroCommand("Delete content");
+        macro.AddExecutedCommandForUndo(new SetupSnapshotCommand("Delete content", setup.Id, oldJson, setup.ToJsonString()));
+        macro.AddAndExecCommand(new DeleteSymbolChildrenCommand(parentUi, [childUi]));
+        UndoRedoStack.Add(macro);
+        OutputSetupHandling.SaveActive();
+    }
+
+    /// <summary>Whether a send op with this id exists in some symbol, instantiated or not.</summary>
+    public static bool HasSendOp(Guid childId) => TryFindSendParent(childId, out _);
+
+    /// <summary>Blinks the send op behind a hovered content source, or behind the source of a hovered slice, in the graph.</summary>
+    public static void HighlightSendOpInGraph(Setup setup, SetupEntityKinds kind, Guid id)
+    {
+        if (kind == SetupEntityKinds.ContentSource)
+        {
+            FrameStats.AddHoveredId(id);
+        }
+        else if (kind == SetupEntityKinds.Slice && setup.FindSlice(id) is { } slice && setup.FindSource(slice.SourceId) is { } source)
+        {
+            FrameStats.AddHoveredId(source.SymbolChildId);
+        }
+    }
+
+    /** The op is found through its parent symbol, so one that isn't instantiated can still be edited. */
+    private static bool TryFindSendParent(Guid childId, [NotNullWhen(true)] out Symbol? parent)
+    {
+        foreach (var package in EditorSymbolPackage.AllPackages)
+        {
+            foreach (var symbol in package.Symbols.Values)
+            {
+                if (!symbol.Children.ContainsKey(childId))
+                    continue;
+
+                parent = symbol;
+                return true;
+            }
+        }
+
+        parent = null;
+        return false;
     }
 
     /// <summary>The live send op with this SymbolChildId, or null while it isn't instantiated.</summary>
@@ -351,7 +439,8 @@ internal static class ContentSourceSync
         return !string.IsNullOrEmpty(childUi?.SymbolChild.Name);
     }
 
-    // Lib SendToOutput op and its texture input — the CONTENT "+" instantiates this and wires a selected feed in.
+    // Lib SendToOutput op and its inputs — the CONTENT "+" instantiates this and wires a selected feed in.
     private static readonly Guid SendToOutputSymbolId = new("0b8f2d4e-6a1c-47d3-9f5e-8c2a1b7d4e60");
     private static readonly Guid SendToOutputTextureInputId = new("8a4dd1b3-2e6f-4c25-9d0a-7f3b61c8e942");
+    private static readonly Guid SendToOutputResolutionInputId = new("3c7f1e58-0a94-4d62-b8f3-2e5d9a0c4b17");
 }

@@ -289,7 +289,12 @@ internal sealed class SetupFlowOutliner
                 _connections.Add(new Connection(SetupEntityKinds.Slice, surface.SliceId, SetupEntityKinds.Surface, surface.Id));
 
             foreach (var mapping in surface.OutputMappings)
-                _connections.Add(new Connection(SetupEntityKinds.Surface, surface.Id, SetupEntityKinds.Output, mapping.OutputId));
+            {
+                var patchId = FindLayoutPatchUnder(setup, mapping);
+                _connections.Add(patchId != Guid.Empty
+                                     ? new Connection(SetupEntityKinds.Surface, surface.Id, SetupEntityKinds.Patch, patchId)
+                                     : new Connection(SetupEntityKinds.Surface, surface.Id, SetupEntityKinds.Output, mapping.OutputId));
+            }
         }
 
         foreach (var output in setup.Outputs)
@@ -309,6 +314,38 @@ internal sealed class SetupFlowOutliner
                 _connections.Add(new Connection(SetupEntityKinds.Output, output.Id, SetupEntityKinds.Plug, Plugs.BoundPlugId(binding)));
         }
     }
+
+    /// <summary>
+    /// The content-less patch a surface's pin sits exactly on — a venue's pixel map traced as patches, which the
+    /// surface was dropped onto — so the link leads to that area rather than to the output as a whole.
+    /// </summary>
+    private Guid FindLayoutPatchUnder(Setup setup, Surface.OutputMapping mapping)
+    {
+        var output = setup.FindOutput(mapping.OutputId);
+        if (output == null || mapping.IsFilling || mapping.Quad.Length < 4)
+            return Guid.Empty;
+
+        foreach (var patch in output.Patches)
+        {
+            if (patch.SliceId != Guid.Empty || patch.Quad.Length < 4)
+                continue;
+
+            patch.CopyTurnedCorners(_patchCorners);
+            var matches = true;
+            for (var corner = 0; corner < 4 && matches; corner++)
+            {
+                matches = Vector2.DistanceSquared(_patchCorners[corner], mapping.Quad[corner]) < SamePinToleranceSquared;
+            }
+
+            if (matches)
+                return patch.Id;
+        }
+
+        return Guid.Empty;
+    }
+
+    /** Canvas 0..1 units: far below a pixel on any output, well above float noise from the corner turn. */
+    private const float SamePinToleranceSquared = 1e-8f;
 
     private readonly record struct Connection(SetupEntityKinds FromKind, Guid FromId,
                                               SetupEntityKinds ToKind, Guid ToId);
@@ -979,6 +1016,7 @@ internal sealed class SetupFlowOutliner
     private int _cacheVersion = -1;
     private Guid _cacheSetupId;
     private readonly List<Connection> _connections = [];
+    private readonly Vector2[] _patchCorners = new Vector2[4];
     private readonly Dictionary<Guid, string> _sliceLabels = [];
     private readonly Dictionary<Guid, string> _patchLabels = [];
 

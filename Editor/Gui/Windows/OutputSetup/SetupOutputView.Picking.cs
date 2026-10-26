@@ -89,6 +89,7 @@ internal sealed partial class SetupOutputView
         if (picksThisFrame && hit.HasHit)
         {
             FrameStats.RequestCrossHighlight(hit.Id);
+            ContentSourceSync.HighlightSendOpInGraph(setup, hit.Kind, hit.Id);
 
             // Isolate takes selection off the canvas: only the focused frame's label still acts (so it can move
             // and its menu opens); the others are inert until picked in the sidebar. (Slices aren't isolated.)
