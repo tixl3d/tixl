@@ -68,6 +68,7 @@ internal static class FactoryKeyMap
                 new(UserActions.OpenOperator, new KeyCombination(Key.I)),
                 new(UserActions.CloseOperator, new KeyCombination(Key.U)),
                 new(UserActions.RenameChild, new KeyCombination(Key.Return)),
+                new(UserActions.EditParameter, new KeyCombination(Key.S)),
                 new(UserActions.AlignSelectionLeft, new KeyCombination(Key.A, alt:true)),
 
                 // Navigation

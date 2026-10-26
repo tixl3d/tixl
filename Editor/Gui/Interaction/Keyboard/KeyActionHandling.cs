@@ -149,6 +149,7 @@ internal static class KeyActionHandling
         RegisterActionsFlags(UserActions.OpenOperator, Flags.NeedsWindowFocus);
         RegisterActionsFlags(UserActions.CloseOperator, Flags.NeedsWindowFocus);
         //RegisterActionsFlags(UserActions.RenameChild, Flags.NeedsWindowFocus);
+        RegisterActionsFlags(UserActions.EditParameter, Flags.NeedsWindowFocus | Flags.KeyPressOnly);
 
         // Navigation
         RegisterActionsFlags(UserActions.SelectToAbove, Flags.NeedsWindowFocus);
