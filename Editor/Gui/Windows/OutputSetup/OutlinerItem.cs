@@ -154,8 +154,7 @@ internal sealed class OutlinerItem
         if (isHovered)
         {
             FrameStats.RequestCrossHighlight(args.Id);
-            if (args.Kind == SetupEntityKinds.ContentSource)
-                FrameStats.AddHoveredId(args.Id);
+            ContentSourceSync.HighlightSendOpInGraph(setup, args.Kind, args.Id);
 
             if (args.DrawTooltip != null)
             {
