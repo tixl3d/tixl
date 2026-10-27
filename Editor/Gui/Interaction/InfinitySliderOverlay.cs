@@ -99,7 +99,8 @@ internal static class InfinitySliderOverlay
         }
 
         _value = MathUtils.OptionalClamp(_value, min, clampMin, max, clampMax);
-        DrawUi(out roundedValue, min, max, valueRange, mousePosX, drawList,disableRounding);
+        DrawUi(out roundedValue, min, max, valueRange, new Vector2(mousePosX, _io.MousePos.Y), drawList, disableRounding || _io.KeyCtrl,
+               showScaleIndicators: true);
 
         roundedValue = MathUtils.OptionalClamp(roundedValue, min, clampMin, max, clampMax);
 
@@ -107,29 +108,91 @@ internal static class InfinitySliderOverlay
             roundedValue = _originalValue;
     }
 
-    private static bool DrawUi(out double roundedValue, double min, double max, double valueRange, int mousePosX,
-                               ImDrawListPtr drawList, bool disableRounding)
+    /// <summary>
+    /// Keyboard-driven variant, drawn above <paramref name="anchor"/>. <paramref name="direction"/> is -1 or 1 while
+    /// Left or Right is held and 0 otherwise. A press moves one rounding step; holding accelerates and stops dead on
+    /// release. Shift narrows the range ×0.1, Ctrl widens it ×10.
+    /// </summary>
+    internal static void DrawForKeyboard(ref double roundedValue,
+                                         bool restarted,
+                                         Vector2 anchor,
+                                         int direction,
+                                         bool wasPressed,
+                                         double min = double.NegativeInfinity,
+                                         double max = double.PositiveInfinity,
+                                         float scale = 0.1f,
+                                         bool clampMin = false,
+                                         bool clampMax = false)
+    {
+        var drawList = ImGui.GetForegroundDrawList();
+        _io = ImGui.GetIO();
+        var deltaTime = FrameTiming.VisualDeltaSec;
+
+        if (restarted)
+        {
+            _value = roundedValue;
+            _originalValue = roundedValue;
+            _dampedModifierScaleFactor = 1;
+            _keyHoldTime = 0;
+        }
+
+        var modifierScaleFactor = _io.KeyCtrl ? 10 : _io.KeyShift ? 0.1 : 1;
+        _dampedModifierScaleFactor = MathUtils.Lerp(_dampedModifierScaleFactor, modifierScaleFactor, MathUtils.BlendForFrame(0.1f, deltaTime));
+        var valueRange = Math.Pow(10, KeyboardLog10Distance) * scale * 0.25f * _dampedModifierScaleFactor * 600;
+
+        if (direction == 0)
+        {
+            _keyHoldTime = 0;
+        }
+        else if (wasPressed)
+        {
+            var roundInterval = GetRoundInterval(valueRange, out _, out _);
+            _value = Math.Round(_value / roundInterval) * roundInterval + direction * roundInterval;
+            _keyHoldTime = 0;
+        }
+        else
+        {
+            _keyHoldTime += deltaTime;
+            if (_keyHoldTime > KeyHoldDelaySec)
+            {
+                var acceleration = Math.Min((_keyHoldTime - KeyHoldDelaySec) / KeyAccelerationSec, 1);
+                var rangesPerSecond = MinRangesPerSecond * Math.Pow(MaxRangesPerSecond / MinRangesPerSecond, acceleration);
+                _value += direction * valueRange * rangesPerSecond * deltaTime;
+            }
+        }
+
+        _value = MathUtils.OptionalClamp(_value, min, clampMin, max, clampMax);
+        DrawUi(out roundedValue, min, max, valueRange, anchor, drawList, disableRounding: false, showScaleIndicators: false);
+        roundedValue = MathUtils.OptionalClamp(roundedValue, min, clampMin, max, clampMax);
+    }
+
+    private static double GetRoundInterval(double valueRange, out double tickValueInterval, out double logRemainder)
     {
         var log10 = Math.Log10(valueRange);
         var iLog10 = Math.Floor(log10);
-        var logRemainder = log10 - iLog10;
-        var tickValueInterval = Math.Pow(10, iLog10 - 1) ;
-        var roundInterval = logRemainder switch
-                                {
-                                    > 0.8 => tickValueInterval / 1,
-                                    _     => tickValueInterval / 10
-                                };
+        logRemainder = log10 - iLog10;
+        tickValueInterval = Math.Pow(10, iLog10 - 1);
+        return logRemainder > 0.8 ? tickValueInterval : tickValueInterval / 10;
+    }
 
-        roundedValue = (_io.KeyCtrl || disableRounding) ? _value : Math.Round(_value / roundInterval) * roundInterval;
+    /// <param name="pointerPos">Where the current value sits: the mouse, or the keyboard anchor</param>
+    private static bool DrawUi(out double roundedValue, double min, double max, double valueRange, Vector2 pointerPos,
+                               ImDrawListPtr drawList, bool disableRounding, bool showScaleIndicators)
+    {
+        var mousePosX = (int)pointerPos.X;
+        var roundInterval = GetRoundInterval(valueRange, out var tickValueInterval, out var logRemainder);
+
+        roundedValue = disableRounding ? _value : Math.Round(_value / roundInterval) * roundInterval;
 
         var rSize = new Vector2(Width, 40) * T3Ui.UiScaleFactor;
-        var rCenter = new Vector2(mousePosX, _io.MousePos.Y - rSize.Y);
+        var rCenter = new Vector2(mousePosX, pointerPos.Y - rSize.Y);
         var rect = new ImRect(rCenter - rSize / 2, rCenter + rSize / 2);
 
         var numberOfTicks = valueRange / tickValueInterval;
         var valueTickRemainder = MathUtils.Fmod(_value, tickValueInterval);
 
         // Draw scale range indicates
+        if (showScaleIndicators)
         {
             for (var yIndex = -2; yIndex < 4; yIndex++)
             {
@@ -311,6 +374,14 @@ internal static class InfinitySliderOverlay
 
     private static double _originalValue;
     private static bool _isManipulating;
+    private static double _keyHoldTime;
+
+    /** Matches the range the mouse variant starts with */
+    private const double KeyboardLog10Distance = 0.5;
+    private const double KeyHoldDelaySec = 0.25;
+    private const double KeyAccelerationSec = 2;
+    private const double MinRangesPerSecond = 0.05;
+    private const double MaxRangesPerSecond = 1.5;
 
     private static ImGuiIOPtr _io;
 }

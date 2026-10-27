@@ -20,12 +20,53 @@ change along chains — leave it as is.
   Not yet: Shift+arrow extend, Space marks, zoom-to-edit-level.
 - **Already exists from other work:** Tab inserts below / Shift+Tab to the right of the selected op; delete keeps
   connections and closes gaps (Ctrl+Del deletes and disconnects).
-- **Phase 1 prototype — in progress:** `s` parameter prompt (`Editor/Gui/MagGraph/Interaction/ParameterPrompt.cs`,
-  `UserActions.EditParameter` on S, graph focus). A prompt line at the bottom of the graph window filters the
-  selected op's parameters (name prefix → word prefix → initials → substring); the Parameter Window highlights the
-  focused row and dims non-matching ones. Space/digit/sign ends the filter; float/int/bool values preview live
-  (`+ * /` relative, `-5` absolute); `r` resets; Enter applies as one undo step, Esc or clicking away reverts.
-  Not yet: ←/→ nudge, verbs `i c g x`, vectors/enums/colors, hint labels, multi-selection.
+- **Phase 1 prototype, second iteration — in progress:** "complete this step, continue with the most common
+  next one". Grey suggestion text after the cursor says what Space does next.
+  - Tab browser (`PlaceHolderUi`): `lp` → Space switches the list to LinePoints presets ("Default" first) →
+    `tw` filters, ↑↓ picks → Enter inserts with the preset (one undo step with the insertion), a further
+    Space inserts and opens the parameter prompt.
+  - Parameter prompt (`ParameterPrompt`, also on S): spreadsheet-style cursor. ↑↓ move; typing a value
+    previews it; ↓/Tab apply and move on, Enter applies and closes, Esc reverts. Letters filter parameters;
+    numbers (`10 +1 *2`), vectors (`0 1 0`, ` x 1`), Space toggles bools, Space on a dropdown (enum or
+    int mapped to an enum) filters its options with ↑↓, ` r` resets. Colors (all Vector4 inputs): names with
+    completion incl. `transparent`/`invisibleWhite`/`invisibleBlack` (`ColorValueParsing`), hex `#f80`,
+    channels `a 0.5`, `orange a 0.5`, `*0.5` scales RGB only.
+  - Hints: keys as keycap chips, text to type bright, descriptions faint (`KeyHintText`).
+  - ←/→ nudge (number params, empty input): `InfinitySliderOverlay.DrawForKeyboard` shows the slider above the
+    prompt bar. Press = one rounding step, hold = exponential acceleration (0.05 → 1.5 ranges/s over 2 s after
+    0.25 s), stops on release. Shift ×0.1, Ctrl ×10 (mouse path still Alt ×10). Range/scale/clamping from the
+    input's `FloatInputUi`/`IntInputUi`. ↓/Tab/Enter apply, Esc reverts the adjustment only.
+  - ←/→ on other kinds: dropdowns step options, bools toggle; vectors `␣x` + ←/→ adjust a component (slider
+    range from the vector's own UI settings); colors ←/→ adjust brightness (HSV value, HDR > 1 allowed),
+    `␣h` hue (wraps), `␣s` saturation (0..1), `␣r g b a` channels. The arrow press turns the typed letter into a
+    selector, so `␣g` + Enter is still gray and `␣r` + Enter still reset. HSV is captured at start so hue
+    survives grays.
+  - Verbs: `␣i` inserts an operator connected to the input (like clicking the input), `␣r` resets; immediate on
+    numbers/vectors/bools/untypeable inputs, on Enter for colors and dropdowns.
+  - **Popover (replaces the bottom bar and the Parameter Window highlighting):** bottom-centered in the graph,
+    lists all parameters (max 9 rows, thin scrollbar); the focused row keeps its slot while the list moves.
+    Typing goes into a hidden ImGui input (callback keeps the caret at the end); rows draw name (filter matches
+    underlined), value code-style right after it (animated orange, connected blue, modified brighter, defaults
+    faint, color swatches), and in the focused row the typed value with caret and a faint result/suggestion.
+    Help area: key chips for the current step plus the parameter's description. Tab (`⇥`) edits the value, Space
+    still works. An operator typed first on a number inserts the current value (`*` → `100*`), expressions with
+    `+ - * / % ^ ( ) pi` show `= 200`, `=` forces an absolute value (`=-5`). Esc steps back (value → filter →
+    close). Applied values flash. Initial focus: the parameter last edited on that operator (session memory),
+    else the first unconnected one. Closing by keyboard re-focuses the graph window.
+  - Next: vector names (`up`, `+x`); decide whether the mouse slider moves ×10 from Alt to Ctrl; return to the
+    prompt after `␣i` inserted an operator; dropdown options as popover rows.
+
+### Backlog of ideas (from the popover review)
+
+- Remember previously entered values per parameter; Alt+←/→ steps through them; show them as markers on the
+  infinity slider.
+- While the popover is open, draw the selected operator's outline much thicker (blinking is probably too much).
+- Short transition from the operator's outline to the popover border when opening.
+- Show the graph's key-hint row only once keyboard navigation is used.
+- Graph shortcuts should work whenever no other window holds keyboard focus — e.g. after the symbol browser
+  closes, re-focus the graph window the way the popover already does.
+- Space vs Tab in the symbol browser (presets) — consider switching it to Tab as well.
+  - Not yet: verbs `i c g x`, strings, preset names with spaces, multi-selection.
 
 ## Design principles
 

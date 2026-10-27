@@ -2,6 +2,8 @@
 using System.Diagnostics;
 using ImGuiNET;
 using T3.Core.Operator;
+using T3.Editor.Gui.Interaction.Variations;
+using T3.Editor.Gui.Interaction.Variations.Model;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.UiHelpers;
@@ -381,7 +383,9 @@ internal sealed class PlaceholderCreation
         var uiResult = PlaceHolderUi.Draw(context, out var selectedUi);
         if (uiResult.HasFlag(PlaceHolderUi.UiResults.Create) && selectedUi != null)
         {
-            CreateInstance(context, selectedUi.Symbol);
+            CreateInstance(context, selectedUi.Symbol, PlaceHolderUi.SelectedPreset);
+            if (uiResult.HasFlag(PlaceHolderUi.UiResults.EditParameters))
+                ParameterPrompt.Open(context);
         }
         else if (uiResult.HasFlag(PlaceHolderUi.UiResults.Cancel))
         {
@@ -389,7 +393,7 @@ internal sealed class PlaceholderCreation
         }
     }
 
-    private void CreateInstance(GraphUiContext context, Symbol symbol)
+    private void CreateInstance(GraphUiContext context, Symbol symbol, Variation? preset)
     {
         if (context.MacroCommand == null || PlaceholderItem == null)
         {
@@ -695,7 +699,11 @@ internal sealed class PlaceholderCreation
             }
         }
 
-        // TODO: add preset selection...
+        if (preset != null && SymbolVariationPool.TryCreateApplyPresetCommand(newInstance, preset, out var applyPresetCommand))
+        {
+            context.MacroCommand.AddAndExecCommand(applyPresetCommand);
+            VariationHandling.GetOrLoadVariations(symbol.Id).SetActiveVariationWithoutApply(preset);
+        }
 
         ParameterPopUp.NodeIdRequestedForParameterWindowActivation = newSymbolChild.Id;
         context.Layout.FlagStructureAsChanged();

@@ -1063,7 +1063,7 @@ internal sealed class SymbolVariationPool
         return true;
     }
 
-    private static bool TryCreateApplyPresetCommand(Instance instance, Variation variation, [NotNullWhen(true)] out MacroCommand? newMacroCommand)
+    internal static bool TryCreateApplyPresetCommand(Instance instance, Variation variation, [NotNullWhen(true)] out MacroCommand? newMacroCommand)
     {
         newMacroCommand = null;
         if (instance.Parent == null)

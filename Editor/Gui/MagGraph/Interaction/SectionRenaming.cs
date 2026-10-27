@@ -37,6 +37,43 @@ internal static class SectionRenaming
     /// </summary>
     private static ChangeSectionTextCommand? _changeSectionTextCommand;
 
+    private const float LabelWidth = 350;
+
+    /** The label plus the first lines of the description. */
+    private const float VisibleRows = 3;
+
+    private const float ViewPadding = 20;
+
+    /// <summary>
+    /// Scrolls the graph just enough to show the label field and the start of the description, which sit at
+    /// the section's top-left corner and can be off-screen when a large section is opened for editing.
+    /// </summary>
+    private static void ScrollInputIntoView(GraphUiContext context, Vector2 inputTopLeft)
+    {
+        var view = context.View;
+        var padding = new Vector2(ViewPadding * T3Ui.UiScaleFactor);
+        var viewMin = view.WindowPos + padding;
+        var viewMax = view.WindowPos + view.WindowSize - padding;
+        var inputBottomRight = inputTopLeft + new Vector2(LabelWidth * T3Ui.UiScaleFactor, ImGui.GetFrameHeight() * VisibleRows);
+
+        var delta = new Vector2(GetDistanceOutside(inputTopLeft.X, inputBottomRight.X, viewMin.X, viewMax.X),
+                                GetDistanceOutside(inputTopLeft.Y, inputBottomRight.Y, viewMin.Y, viewMax.Y));
+        if (delta != Vector2.Zero)
+            view.ScrollByScreenPixels(delta);
+    }
+
+    /** How far the view has to move so [min, max] fits into [viewMin, viewMax], keeping min visible first. */
+    private static float GetDistanceOutside(float min, float max, float viewMin, float viewMax)
+    {
+        if (min < viewMin)
+            return min - viewMin;
+
+        if (max > viewMax)
+            return MathF.Min(max - viewMax, min - viewMin);
+
+        return 0;
+    }
+
     /// <summary>
     /// Draws the section renaming UI and handles user interaction.
     /// </summary>
@@ -67,12 +104,13 @@ internal static class SectionRenaming
             _labelBuffer = section.Label ?? string.Empty;
             _titleBuffer = section.Title ?? string.Empty;
             _originalTitle = section.Title;
+            ScrollInputIntoView(context, screenArea.Min);
         }
 
         // --- Label editing UI ---
         ImGui.SetCursorScreenPos(screenArea.Min);
         ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(4, 4));
-        ImGui.SetNextItemWidth(350 * T3Ui.UiScaleFactor);
+        ImGui.SetNextItemWidth(LabelWidth * T3Ui.UiScaleFactor);
         ImGui.InputText("##renameSectionLabel", ref _labelBuffer, 256, ImGuiInputTextFlags.AutoSelectAll);
         var isLabelActive = ImGui.IsItemActive();
         ImGui.PopStyleVar();

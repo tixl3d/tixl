@@ -67,6 +67,7 @@ internal static class SectionDragging
                 }
 
                 _moveCommand = new ModifyCanvasElementsCommand(instViewSymbolUi, _draggedNodes, context.Selector);
+                EdgeScrolling.Reset();
             }
 
             if (started)
@@ -75,6 +76,8 @@ internal static class SectionDragging
 
         // Update dragging...
         {
+            EdgeScrolling.Update(context.View);
+
             var minSize = MathF.Min(MagGraphItem.GridSize.X, MagGraphItem.GridSize.Y);
             var gridSize = Vector2.One * minSize;
 

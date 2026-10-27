@@ -23,6 +23,8 @@ internal sealed class CameraInteraction
 
     internal void Update(ICamera? camera, bool allowCameraInteraction)
     {
+        TrackWhereDragsStarted();
+
         if (camera == null)
             return;
         
@@ -174,7 +176,7 @@ internal sealed class CameraInteraction
         }
 
         modified |= HandlePinch();
-        if (ImGui.IsMouseDragging(ImGuiMouseButton.Left))
+        if (IsDraggingFromInside(ImGuiMouseButton.Left))
         {
             if (ImGui.GetIO().KeyAlt)
             {
@@ -195,16 +197,35 @@ internal sealed class CameraInteraction
                 }
             }
         }
-        else if (ImGui.IsMouseDragging(ImGuiMouseButton.Right) && !CustomComponents.IsDragScrolling && !ScalableCanvas.IsAnyCanvasDragged)
+        else if (IsDraggingFromInside(ImGuiMouseButton.Right) && !CustomComponents.IsDragScrolling && !ScalableCanvas.IsAnyCanvasDragged)
         {
             modified |= Pan();
         }
-        else if (ImGui.IsMouseDragging(ImGuiMouseButton.Middle))
+        else if (IsDraggingFromInside(ImGuiMouseButton.Middle))
         {
             modified |= LookAround();
         }
 
         return modified;
+    }
+
+    /// <summary>
+    /// Remembers for each button whether it was pressed over this view. A drag that started elsewhere, like moving an
+    /// operator in the graph, must not steer the camera when it passes over the output.
+    /// </summary>
+    private void TrackWhereDragsStarted()
+    {
+        var isHovered = ImGui.IsWindowHovered(ImGuiHoveredFlags.AllowWhenBlockedByPopup | ImGuiHoveredFlags.ChildWindows);
+        for (var buttonIndex = 0; buttonIndex < _dragStartedInView.Length; buttonIndex++)
+        {
+            if (ImGui.IsMouseClicked((ImGuiMouseButton)buttonIndex))
+                _dragStartedInView[buttonIndex] = isHovered;
+        }
+    }
+
+    private bool IsDraggingFromInside(ImGuiMouseButton button)
+    {
+        return _dragStartedInView[(int)button] && ImGui.IsMouseDragging(button);
     }
 
     private bool HandleMouseWheel()
@@ -523,5 +544,8 @@ internal sealed class CameraInteraction
     private Vector2 _orbitVelocity;
     private ICamera? _lastCameraNode;
     private double _lastTimeInBars;
+
+    /** Indexed by <see cref="ImGuiMouseButton"/>: left, right, middle. */
+    private readonly bool[] _dragStartedInView = new bool[3];
     private float _deltaTime;
 }
