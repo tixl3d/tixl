@@ -1,7 +1,7 @@
 #nullable enable
 using System.Globalization;
 
-namespace T3.Editor.Gui.MagGraph.Interaction;
+namespace T3.Editor.Gui.MagGraph.Interaction.KeyboardEditing;
 
 /// <summary>
 /// Turns typed color names and hex codes into RGBA values for keyboard parameter entry.

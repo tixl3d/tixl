@@ -509,8 +509,18 @@ internal static class PlaceHolderUi
         return result;
     }
 
-    /** A space after the symbol name switches the list to that symbol's presets */
-    private static bool IsChoosingPreset => Filter.SearchString.IndexOf(' ') > 0;
+    /// <summary>
+    /// A space after the symbol name switches the list to that symbol's presets. Without a typed name it uses the
+    /// symbol picked with the arrow keys.
+    /// </summary>
+    private static bool IsChoosingPreset
+    {
+        get
+        {
+            var spaceIndex = Filter.SearchString.IndexOf(' ');
+            return spaceIndex > 0 || spaceIndex == 0 && _selectedSymbolUi != null;
+        }
+    }
 
     /// <summary>The preset filter is the text after the first space; <paramref name="rawSearch"/> keeps trailing spaces.</summary>
     private static string GetPresetSearch(out string rawSearch)
@@ -542,7 +552,7 @@ internal static class PlaceHolderUi
             wasMovedByKey = true;
         }
 
-        CustomComponents.StylizedText(symbolUi.Symbol.Name + " Presets", Fonts.FontSmall, UiColors.TextMuted);
+        CustomComponents.StylizedText(_presetHeader, Fonts.FontSmall, UiColors.TextMuted);
         if (_presetMatches.Count == 0)
         {
             CustomComponents.StylizedText("No matching preset", Fonts.FontNormal, UiColors.TextDisabled);
@@ -573,6 +583,9 @@ internal static class PlaceHolderUi
         var filter = GetPresetSearch(out _).Trim();
         if (symbolUi == _presetSymbolUi && filter == _lastPresetFilter)
             return;
+
+        if (symbolUi != _presetSymbolUi)
+            _presetHeader = symbolUi.Symbol.Name + " Presets";
 
         _presetSymbolUi = symbolUi;
         _lastPresetFilter = filter;
@@ -619,34 +632,41 @@ internal static class PlaceHolderUi
     /// </summary>
     private static void DrawSuggestion(ImDrawListPtr drawList, Vector2 padding)
     {
-        if (_selectedSymbolUi == null || Filter.SearchString.Length == 0)
+        if (_selectedSymbolUi == null)
             return;
 
-        string completion;
-        string next;
-        if (IsChoosingPreset)
+        // Rebuilt only when what it describes changes
+        if (_selectedSymbolUi != _suggestionSymbolUi
+            || Filter.SearchString != _suggestionSearch
+            || _presetIndex != _suggestionPresetIndex)
         {
-            var presetSearch = GetPresetSearch(out _);
-            var title = SelectedPreset?.Title ?? (_presetMatches.Count > 0 ? DefaultPresetLabel : string.Empty);
-            completion = title.StartsWith(presetSearch, StringComparison.OrdinalIgnoreCase) ? title[presetSearch.Length..] : string.Empty;
-            next = presetSearch.Length == 0 ? "   type a preset,  [Space] insert and edit" : "   [Space] insert and edit";
-        }
-        else
-        {
-            var name = _selectedSymbolUi.Symbol.Name;
-            completion = name.StartsWith(Filter.SearchString, StringComparison.OrdinalIgnoreCase) ? name[Filter.SearchString.Length..] : string.Empty;
-            next = "   [Space] presets";
-        }
-
-        if (completion != _lastSuggestionCompletion || next != _lastSuggestionNext)
-        {
-            _lastSuggestionCompletion = completion;
-            _lastSuggestionNext = next;
-            KeyHintText.Parse(completion.Length > 0 ? "{" + completion + "}" + next : next, _suggestionSegments);
+            _suggestionSymbolUi = _selectedSymbolUi;
+            _suggestionSearch = Filter.SearchString;
+            _suggestionPresetIndex = _presetIndex;
+            KeyHintText.Parse(BuildSuggestion(_selectedSymbolUi), _suggestionSegments);
         }
 
         var textPos = ImGui.GetItemRectMin() + padding + new Vector2(ImGui.CalcTextSize(Filter.SearchString).X, 0);
         KeyHintText.Draw(drawList, textPos, _suggestionSegments);
+    }
+
+    private static string BuildSuggestion(SymbolUi selectedSymbolUi)
+    {
+        if (Filter.SearchString.Length == 0)
+            return "[Space] " + selectedSymbolUi.Symbol.Name + " presets";
+
+        if (IsChoosingPreset)
+        {
+            var presetSearch = GetPresetSearch(out _);
+            var title = SelectedPreset?.Title ?? (_presetMatches.Count > 0 ? DefaultPresetLabel : string.Empty);
+            var completion = title.StartsWith(presetSearch, StringComparison.OrdinalIgnoreCase) ? title[presetSearch.Length..] : string.Empty;
+            var next = presetSearch.Length == 0 ? "   type a preset,  [Space] insert and edit" : "   [Space] insert and edit";
+            return completion.Length > 0 ? "{" + completion + "}" + next : next;
+        }
+
+        var name = selectedSymbolUi.Symbol.Name;
+        var nameCompletion = name.StartsWith(Filter.SearchString, StringComparison.OrdinalIgnoreCase) ? name[Filter.SearchString.Length..] : string.Empty;
+        return nameCompletion.Length > 0 ? "{" + nameCompletion + "}   [Space] presets" : "   [Space] presets";
     }
 
     private static bool IsRelevantNamespace(GraphUiContext context, string symbolNamespace)
@@ -670,11 +690,13 @@ internal static class PlaceHolderUi
 
     private static readonly List<Variation?> _presetMatches = new(16);
     private static SymbolUi? _presetSymbolUi;
+    private static string _presetHeader = string.Empty;
     private static string _lastPresetFilter = string.Empty;
     private static int _presetIndex;
     private static readonly List<KeyHintText.Segment> _suggestionSegments = new(4);
-    private static string _lastSuggestionCompletion = string.Empty;
-    private static string _lastSuggestionNext = string.Empty;
+    private static SymbolUi? _suggestionSymbolUi;
+    private static string? _suggestionSearch;
+    private static int _suggestionPresetIndex = -1;
 
     private static bool _focusInputNextTime = true;
     private static SymbolUi? _selectedSymbolUi;

@@ -1,6 +1,7 @@
 #nullable enable
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Keyboard;
+using T3.Editor.Gui.MagGraph.Interaction.KeyboardEditing;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.Windows.Layouts;
@@ -199,7 +200,7 @@ internal static class KeyboardActions
                 SelectionNavigation.MoveSelection(context, SelectionNavigation.Directions.Left);
 
             if (UserActions.EditParameter.Triggered())
-                ParameterPrompt.Open(context);
+                ParameterPopover.Open(context);
         }
 
         if (UserActions.AddComment.Triggered())

@@ -25,13 +25,15 @@ change along chains — leave it as is.
   - Tab browser (`PlaceHolderUi`): `lp` → Space switches the list to LinePoints presets ("Default" first) →
     `tw` filters, ↑↓ picks → Enter inserts with the preset (one undo step with the insertion), a further
     Space inserts and opens the parameter prompt.
-  - Parameter prompt (`ParameterPrompt`, also on S): spreadsheet-style cursor. ↑↓ move; typing a value
+  - Parameter prompt (`ParameterPopover`, also on S): spreadsheet-style cursor. ↑↓ move; typing a value
     previews it; ↓/Tab apply and move on, Enter applies and closes, Esc reverts. Letters filter parameters;
     numbers (`10 +1 *2`), vectors (`0 1 0`, ` x 1`), Space toggles bools, Space on a dropdown (enum or
     int mapped to an enum) filters its options with ↑↓, ` r` resets. Colors (all Vector4 inputs): names with
     completion incl. `transparent`/`invisibleWhite`/`invisibleBlack` (`ColorValueParsing`), hex `#f80`,
     channels `a 0.5`, `orange a 0.5`, `*0.5` scales RGB only.
-  - Hints: keys as keycap chips, text to type bright, descriptions faint (`KeyHintText`).
+  - Hints: keys as keycap chips, text to type bright, descriptions faint (`Gui/UiHelpers/KeyHintText`).
+  - Code: `MagGraph/Interaction/KeyboardEditing/` — `ParameterPopover` (partial: state and keys, `.Drawing`,
+    `.Nudging`, `.Values`), `ParameterValueParsing` (pure parsing), `ValueExpression`, `ColorValueParsing`.
   - ←/→ nudge (number params, empty input): `InfinitySliderOverlay.DrawForKeyboard` shows the slider above the
     prompt bar. Press = one rounding step, hold = exponential acceleration (0.05 → 1.5 ranges/s over 2 s after
     0.25 s), stops on release. Shift ×0.1, Ctrl ×10 (mouse path still Alt ×10). Range/scale/clamping from the
@@ -44,7 +46,8 @@ change along chains — leave it as is.
   - Verbs: `␣i` inserts an operator connected to the input (like clicking the input), `␣r` resets; immediate on
     numbers/vectors/bools/untypeable inputs, on Enter for colors and dropdowns.
   - **Popover (replaces the bottom bar and the Parameter Window highlighting):** bottom-centered in the graph,
-    lists all parameters (max 9 rows, thin scrollbar); the focused row keeps its slot while the list moves.
+    lists all parameters (max 9 rows, thin scrollbar), shrinks to the filter matches and scrolls only when the
+    focus would leave the visible rows (a fixed focus row was tried and felt worse).
     Typing goes into a hidden ImGui input (callback keeps the caret at the end); rows draw name (filter matches
     underlined), value code-style right after it (animated orange, connected blue, modified brighter, defaults
     faint, color swatches), and in the focused row the typed value with caret and a faint result/suggestion.
