@@ -159,6 +159,50 @@ public partial class ScalableCanvas
         ScrollTarget += shift;
     }
 
+    /** Whether the area, padded by <paramref name="screenPadding"/> px, lies inside the view the canvas is heading to. */
+    internal bool IsAreaVisible(ImRect areaOnCanvas, float screenPadding = 0)
+    {
+        var padding = new Vector2(screenPadding) / ScaleTarget;
+        var visibleMin = ScrollTarget + padding;
+        var visibleMax = ScrollTarget + WindowSize / ScaleTarget - padding;
+        return areaOnCanvas.Min.X >= visibleMin.X && areaOnCanvas.Min.Y >= visibleMin.Y
+               && areaOnCanvas.Max.X <= visibleMax.X && areaOnCanvas.Max.Y <= visibleMax.Y;
+    }
+
+    /// <summary>
+    /// Brings <paramref name="target"/> into view and keeps <paramref name="anchor"/> visible as well, zooming out only
+    /// as far as both need. Returns false and leaves the view unchanged if that needs a zoom below <paramref name="minScale"/>.
+    /// </summary>
+    internal bool TryRevealKeepingAnchor(ImRect anchor, ImRect target, float screenPadding, float minScale)
+    {
+        var both = anchor;
+        both.Add(target);
+
+        var availableSize = WindowSize - new Vector2(screenPadding * 2);
+        if (availableSize.X <= 0 || availableSize.Y <= 0)
+            return false;
+
+        var bothSize = both.GetSize();
+        var fittingScale = MathF.Min(availableSize.X / MathF.Max(bothSize.X, 1), availableSize.Y / MathF.Max(bothSize.Y, 1));
+        var newScale = MathF.Min(ScaleTarget.X, fittingScale);
+        if (newScale < minScale)
+            return false;
+
+        // Zoom around the view's center first, so the scroll that follows is as short as possible.
+        var viewCenter = ScrollTarget + WindowSize / ScaleTarget * 0.5f;
+        ScaleTarget = new Vector2(newScale);
+        ScrollTarget = viewCenter - WindowSize / ScaleTarget * 0.5f;
+        ScrollToMakeAreaVisible(both, screenPadding);
+        return true;
+    }
+
+    /** Centers the view on the area at the given zoom. */
+    internal void ShowAreaAtScale(ImRect areaOnCanvas, float scale)
+    {
+        ScaleTarget = new Vector2(scale);
+        ScrollTarget = areaOnCanvas.GetCenter() - WindowSize / ScaleTarget * 0.5f;
+    }
+
     internal ImRect GetVisibleCanvasArea()
     {
         UpdateWindowRect();
