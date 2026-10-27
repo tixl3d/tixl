@@ -625,7 +625,8 @@ internal sealed partial class MagGraphView
                 }
 
                 Icons.DrawIconOnLastItem(Icon.Comment, UiColors.ForegroundFull);
-                CustomComponents.TooltipForLastItem(UiColors.Text, item.ChildUi.Comment, null, false);
+                if (!_context.HideHoverTooltips)
+                    CustomComponents.TooltipForLastItem(UiColors.Text, item.ChildUi.Comment, null, false);
 
                 ImGui.PopID();
             }
@@ -715,7 +716,7 @@ internal sealed partial class MagGraphView
                         _context.ActiveTargetItem = item;
 
                         // Show tooltip with output name and type
-                        if (item.Variant == MagGraphItem.Variants.Operator)
+                        if (item.Variant == MagGraphItem.Variants.Operator && !_context.HideHoverTooltips)
                         {
                             var inputLine = inputAnchor.InputLine;
                             ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(5, 5));
@@ -776,7 +777,7 @@ internal sealed partial class MagGraphView
                     _context.ActiveItem = item;
 
                     // Show tooltip with output name and type
-                    if (item.Variant == MagGraphItem.Variants.Operator)
+                    if (item.Variant == MagGraphItem.Variants.Operator && !_context.HideHoverTooltips)
                     {
                         var inputLine = inputAnchor.InputLine;
                         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(5, 5));
@@ -980,7 +981,7 @@ internal sealed partial class MagGraphView
                 _context.ActiveOutputDirection = outputAnchor.Direction;
 
                 // Show tooltip with output name and type
-                if (item.Variant == MagGraphItem.Variants.Operator)
+                if (item.Variant == MagGraphItem.Variants.Operator && !_context.HideHoverTooltips)
                 {
                     var outputLine = item.OutputLines.FirstOrDefault(o => o.Id == contextActiveSourceOutputId);
 
@@ -1048,8 +1049,10 @@ internal sealed partial class MagGraphView
 
                     if (isToggleHovered)
                     {
-                        ImGui.SetNextWindowPos(p - new Vector2(15, 15));
-                        if (CustomComponents.BeginTooltip())
+                        if (!_context.HideHoverTooltips)
+                            ImGui.SetNextWindowPos(p - new Vector2(15, 15));
+
+                        if (!_context.HideHoverTooltips && CustomComponents.BeginTooltip())
                         {
                             CustomComponents.HintLabel("Show more outputs...");
                             foreach (var o in item.SymbolUi!.OutputUis.Values)
@@ -1126,7 +1129,7 @@ internal sealed partial class MagGraphView
                                 }).Fade(badgeAlpha);
                 var icon = statusLevel == IStatusProvider.StatusLevel.Tip ? Icon.Tip : Icon.Warning;
                 Icons.DrawIconOnLastItem(icon, color);
-                if (ImGui.IsItemHovered())
+                if (ImGui.IsItemHovered() && !_context.HideHoverTooltips)
                 {
                     CustomComponents.TooltipForLastItem(color, statusLevel.ToString(), statusMessage, false);
                 }
@@ -1155,7 +1158,7 @@ internal sealed partial class MagGraphView
                 ImGui.InvisibleButton("#status", new Vector2(s, s));
                 Icons.DrawIconOnLastItem(Icon.HelpOutline, Color.White with {A = 0.1f});
 
-                if (ImGui.BeginItemTooltip())
+                if (!_context.HideHoverTooltips && ImGui.BeginItemTooltip())
                 {
                     DrawInstanceStatus(instance);
                     ImGui.EndTooltip();
@@ -1220,7 +1223,7 @@ internal sealed partial class MagGraphView
         // Multi-input rows share the same input definition, so the index is needed for a unique ID
         ImGui.PushID(inputLine.InputUi.InputDefinition.Id.GetHashCode() + inputLine.MultiInputIndex);
         ImGui.InvisibleButton("##missingInput", new Vector2(s2, s2));
-        if (ImGui.IsItemHovered())
+        if (ImGui.IsItemHovered() && !_context.HideHoverTooltips)
         {
             CustomComponents.TooltipForLastItem("Requires " + inputLine.InputUi.InputDefinition.Name);
         }
@@ -1273,7 +1276,7 @@ internal sealed partial class MagGraphView
         {
             var mousePos = ImGui.GetMousePos();
             var area= new ImRect(pMin, pMax);
-            if (IsHovered && area.Contains(mousePos))
+            if (IsHovered && !_context.HideHoverTooltips && area.Contains(mousePos))
             {
                 ImGui.BeginTooltip();
                 ImGui.TextUnformatted(tooltip);

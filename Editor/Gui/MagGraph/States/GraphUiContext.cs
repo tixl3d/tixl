@@ -83,6 +83,9 @@ internal sealed class GraphUiContext
     internal float GraphOpacity = 1;
 
     internal bool PreventInteraction => ProjectView.GraphImageBackground.HasInteractionFocus;
+
+    /** Set each frame from <see cref="SelectionNavigation.HidesHoverTooltips"/>. */
+    internal bool HideHoverTooltips;
     
     internal readonly MagGraphView View;
     internal readonly MagItemMovement ItemMovement;

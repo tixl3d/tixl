@@ -85,7 +85,7 @@ internal sealed partial class MagGraphView
                 DrawMissingItemLabel(drawList, missingItem, pMin, color);
             }
 
-            if (_context.PreventInteraction || !ImGui.IsWindowHovered() || !ImGui.IsMouseHoveringRect(pMin, pMax))
+            if (_context.PreventInteraction || _context.HideHoverTooltips || !ImGui.IsWindowHovered() || !ImGui.IsMouseHoveringRect(pMin, pMax))
                 continue;
 
             ImGui.BeginTooltip();
