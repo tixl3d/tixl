@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using ImGuiNET;
 using T3.Core.Operator;
+using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Styling;
 using T3.Editor.UiModel.ProjectHandling;
 
@@ -55,12 +56,17 @@ internal static class GraphTitleAndBreadCrumbs
         }
 
         var isProject = true;
-        foreach (var p in _parentInstances)
+        for (var index = 0; index < _parentInstances.Count; index++)
         {
+            var p = _parentInstances[index];
             var icon = isProject ? Icon.FolderOpen : Icon.None;
             if (DrawBreadCrumbItem(p.Symbol.Name, icon))
             {
-                projectView.TrySetCompositionOpToParent();
+                // Select the child we came through, so the jump out keeps the user's bearings.
+                var cameFrom = index + 1 < _parentInstances.Count ? _parentInstances[index + 1] : composition;
+                var path = new List<Guid>();
+                Structure.PopulateInstancePath(p, path);
+                projectView.TrySetCompositionOp(path, ScalableCanvas.Transition.JumpOut, cameFrom.SymbolChildId);
             }
 
             DrawSeparator();
