@@ -85,9 +85,8 @@ namespace T3.Editor.Gui.MagGraph.States
                                   return;
                               }
                           
-                              // Check keyboard commands if focused...
+                              // Keyboard commands need the graph focused, not hovered
                               if (context.View.IsFocused
-                                  && context.View.IsHovered
                                   && !ImGui.IsAnyItemActive())
                               {
                                   // Tab create placeholder
@@ -100,7 +99,10 @@ namespace T3.Editor.Gui.MagGraph.States
                                       }
                                       else
                                       {
-                                          var posOnCanvas = context.View.InverseTransformPositionFloat(ImGui.GetMousePos());
+                                          // Without the mouse over the graph, insert in the middle of the view
+                                          var posOnCanvas = context.View.IsHovered
+                                                                ? context.View.InverseTransformPositionFloat(ImGui.GetMousePos())
+                                                                : context.View.GetVisibleCanvasArea().GetCenter();
                                           context.Placeholder.OpenOnCanvas(context, posOnCanvas);
                                       }
 

@@ -1,7 +1,7 @@
 #nullable enable
 using System.Globalization;
 
-namespace T3.Editor.Gui.MagGraph.Interaction;
+namespace T3.Editor.Gui.MagGraph.Interaction.KeyboardEditing;
 
 /// <summary>
 /// Evaluates small arithmetic expressions typed as parameter values: + - * / % ^, parentheses, unary minus and pi,

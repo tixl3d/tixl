@@ -4,6 +4,7 @@ using ImGuiNET;
 using T3.Core.Operator;
 using T3.Editor.Gui.Interaction.Variations;
 using T3.Editor.Gui.Interaction.Variations.Model;
+using T3.Editor.Gui.MagGraph.Interaction.KeyboardEditing;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.UiHelpers;
@@ -385,7 +386,7 @@ internal sealed class PlaceholderCreation
         {
             CreateInstance(context, selectedUi.Symbol, PlaceHolderUi.SelectedPreset);
             if (uiResult.HasFlag(PlaceHolderUi.UiResults.EditParameters))
-                ParameterPrompt.Open(context);
+                ParameterPopover.Open(context);
         }
         else if (uiResult.HasFlag(PlaceHolderUi.UiResults.Cancel))
         {

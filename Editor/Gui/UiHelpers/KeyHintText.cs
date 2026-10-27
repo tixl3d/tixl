@@ -2,7 +2,7 @@
 using ImGuiNET;
 using T3.Editor.Gui.Styling;
 
-namespace T3.Editor.Gui.MagGraph.Interaction;
+namespace T3.Editor.Gui.UiHelpers;
 
 /// <summary>
 /// Draws suggestion and key-hint text in three styles: keys as outlined keycap chips, text to type brightly, and
@@ -49,7 +49,8 @@ internal static class KeyHintText
     }
 
     /// <param name="position">Top left of the first line of text</param>
-    internal static void Draw(ImDrawListPtr drawList, Vector2 position, List<Segment> segments)
+    /// <param name="maxWidth">Wraps before a key that wouldn't fit together with its description</param>
+    internal static void Draw(ImDrawListPtr drawList, Vector2 position, List<Segment> segments, float maxWidth = float.PositiveInfinity)
     {
         var scale = T3Ui.UiScaleFactor;
         var chipPadding = MathF.Round(ChipPaddingPx * scale);
@@ -58,10 +59,18 @@ internal static class KeyHintText
         var chipColor = UiColors.Text.Fade(ChipOutlineOpacity);
         var descriptionColor = UiColors.Text.Fade(DescriptionOpacity);
         var lineHeight = ImGui.GetTextLineHeight();
+        var lineStartX = position.X;
 
-        foreach (var segment in segments)
+        for (var index = 0; index < segments.Count; index++)
         {
+            var segment = segments[index];
             var textWidth = ImGui.CalcTextSize(segment.Text).X;
+            if (StartsNewLine(segments, index, position.X - lineStartX, maxWidth, chipPadding))
+            {
+                position.X = lineStartX;
+                position.Y += lineHeight + LineGapPx * scale;
+            }
+
             if (segment.Kind != Kinds.Key)
             {
                 drawList.AddText(position, segment.Kind == Kinds.Typed ? brightColor : descriptionColor, segment.Text);
@@ -79,6 +88,43 @@ internal static class KeyHintText
         }
     }
 
+    /** Number of lines the segments take when wrapped at <paramref name="maxWidth"/> */
+    internal static int CountLines(List<Segment> segments, float maxWidth)
+    {
+        var chipPadding = MathF.Round(ChipPaddingPx * T3Ui.UiScaleFactor);
+        var lines = segments.Count > 0 ? 1 : 0;
+        var x = 0f;
+        for (var index = 0; index < segments.Count; index++)
+        {
+            if (StartsNewLine(segments, index, x, maxWidth, chipPadding))
+            {
+                lines++;
+                x = 0;
+            }
+
+            var width = ImGui.CalcTextSize(segments[index].Text).X;
+            x += segments[index].Kind == Kinds.Key ? width + chipPadding * 3 : width;
+        }
+
+        return lines;
+    }
+
+    internal static float GetLineHeight() => ImGui.GetTextLineHeight() + LineGapPx * T3Ui.UiScaleFactor;
+
+    /** A key starts a new line when it and the description after it don't fit anymore */
+    private static bool StartsNewLine(List<Segment> segments, int index, float lineWidth, float maxWidth, float chipPadding)
+    {
+        if (lineWidth <= 0 || segments[index].Kind != Kinds.Key)
+            return false;
+
+        var needed = ImGui.CalcTextSize(segments[index].Text).X + chipPadding * 3;
+        if (index + 1 < segments.Count && segments[index + 1].Kind == Kinds.Description)
+            needed += ImGui.CalcTextSize(segments[index + 1].Text.AsSpan().TrimEnd()).X;
+
+        return lineWidth + needed > maxWidth;
+    }
+
+    private const float LineGapPx = 4;
     private const float BrightOpacity = 0.6f;
     private const float ChipOutlineOpacity = 0.3f;
     private const float DescriptionOpacity = 0.3f;
