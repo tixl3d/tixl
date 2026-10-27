@@ -96,11 +96,12 @@ internal sealed class RenderToCubeMap : Instance<RenderToCubeMap>
         for (var faceIndex = 0; faceIndex < FaceCount; faceIndex++)
         {
             // With MSAA every face is drawn into the one multisampled buffer and resolved into its slice right after.
-            var faceRtv = sampleCount > 1 ? _multiSampledRtv : _faceRtvs[faceIndex];
+            // A successful UpdateTextures() guarantees these views exist.
+            var faceRtv = (sampleCount > 1 ? _multiSampledRtv : _faceRtvs[faceIndex])!;
             deviceContext.Rasterizer.SetViewport(new T3.Graphics.Viewport(0, 0, size, size, 0.0f, 1.0f));
             deviceContext.OutputMerger.SetTargets(_depthDsv, faceRtv);
             deviceContext.ClearRenderTargetView(faceRtv, clearColor);
-            deviceContext.ClearDepthStencilView(_depthDsv, DepthStencilClearFlags.Depth, 1.0f, 0);
+            deviceContext.ClearDepthStencilView(_depthDsv!, DepthStencilClearFlags.Depth, 1.0f, 0);
 
             context.ObjectToWorld = prevObjectToWorld;
             context.WorldToCamera = worldToCubeCenter * _cameraToFaceViews[faceIndex];

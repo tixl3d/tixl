@@ -37,7 +37,6 @@ using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.ProjectHandling;
-using T3.Core.Settings;
 
 namespace T3.Editor.App.DebugProtocol;
 

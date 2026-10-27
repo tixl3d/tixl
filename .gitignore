@@ -331,3 +331,4 @@ shadertoolsconfig.json
 # Nix build symlinks
 result
 result-*
+Installer/dependencies/downloads/*.exe

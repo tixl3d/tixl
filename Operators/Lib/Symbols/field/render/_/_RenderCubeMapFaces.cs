@@ -71,7 +71,8 @@ internal sealed class _RenderCubeMapFaces : Instance<_RenderCubeMapFaces>
 
         for (var faceIndex = 0; faceIndex < FaceCount; faceIndex++)
         {
-            var faceRtv = _faceRtvs[faceIndex];
+            // A successful UpdateTextures() guarantees all face views exist.
+            var faceRtv = _faceRtvs[faceIndex]!;
             deviceContext.Rasterizer.SetViewport(new T3.Graphics.Viewport(0, 0, size, size, 0.0f, 1.0f));
             deviceContext.OutputMerger.SetTargets(faceRtv);
             deviceContext.ClearRenderTargetView(faceRtv, clearColor);
