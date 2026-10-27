@@ -425,6 +425,7 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
                 && (_context.StateMachine.CurrentState == GraphStates.Default
                     || _context.StateMachine.CurrentState == GraphStates.HoldBackground)
                 && _context.StateMachine.StateTime > 0.01f // Prevent glitches when coming from other states.
+                && !FrameStats.Last.OpenedPopupCapturedMouse
             ;
 
         if (!shouldBeActive)

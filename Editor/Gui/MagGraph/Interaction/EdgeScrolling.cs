@@ -5,8 +5,8 @@ using T3.Editor.Gui.Interaction;
 namespace T3.Editor.Gui.MagGraph.Interaction;
 
 /// <summary>
-/// Scrolls the graph while a drag holds the pointer near or past the edge of the view, so dragged operators or
-/// the dragged end of a connection stay in sight. The deeper the pointer is in the edge zone, the faster it scrolls.
+/// Scrolls the graph while a drag holds the pointer near or past the edge of the view, so dragged operators,
+/// sections or the dragged end of a connection stay in sight. The deeper the pointer is in the edge zone, the faster it scrolls.
 /// </summary>
 internal static class EdgeScrolling
 {

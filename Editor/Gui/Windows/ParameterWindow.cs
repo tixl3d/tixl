@@ -1,6 +1,5 @@
 #nullable enable
 using ImGuiNET;
-using T3.Editor.Gui.MagGraph.Interaction;
 using System.Diagnostics.CodeAnalysis;
 using T3.Editor.Gui.Windows.OutputSetup;
 using T3.Editor.Gui.Help;
@@ -854,21 +853,9 @@ internal sealed class ParameterWindow : Window
             // Draw the actual parameter line implemented
             // in the generic InputValueUi<T>.DrawParameterEdit() method
 
-            var promptRowState = ParameterPrompt.GetRowState(instance, inputSlot.Id);
-            if (promptRowState == ParameterPrompt.RowStates.NotMatching)
-                ImGui.PushStyleVar(ImGuiStyleVar.Alpha, ImGui.GetStyle().Alpha * PromptDimmedRowAlpha);
-
-            var rowTop = ImGui.GetCursorScreenPos().Y;
-
             ImGui.PushID(inputSlot.Id.GetHashCode());
             var editState = inputUi.DrawParameterEdit(inputSlot, compositionSymbolUi, symbolChildUi, hideNonEssentials: hideNonEssentials, skipIfDefault);
             ImGui.PopID();
-
-            if (promptRowState == ParameterPrompt.RowStates.NotMatching)
-                ImGui.PopStyleVar();
-
-            if (promptRowState == ParameterPrompt.RowStates.Focused)
-                DrawPromptFocusHighlight(rowTop);
 
             HandleInputEditState(instance, inputSlot, editState);
 
@@ -887,21 +874,6 @@ internal sealed class ParameterWindow : Window
 
         if (groupState == GroupState.InsideOpened)
             FormInputs.EndGroup();
-    }
-
-    private static void DrawPromptFocusHighlight(float rowTop)
-    {
-        var rowBottom = ImGui.GetCursorScreenPos().Y;
-        var left = MathF.Floor(ImGui.GetWindowPos().X);
-        var right = MathF.Floor(left + ImGui.GetWindowWidth());
-        var top = MathF.Floor(rowTop);
-        var bottom = MathF.Floor(rowBottom);
-        var drawList = ImGui.GetWindowDrawList();
-        drawList.AddRectFilled(new Vector2(left, top), new Vector2(right, bottom), UiColors.StatusActivated.Fade(0.12f));
-        drawList.AddRectFilled(new Vector2(left, top), new Vector2(left + MathF.Round(2 * T3Ui.UiScaleFactor), bottom), UiColors.StatusActivated);
-
-        if (ParameterPrompt.ConsumeScrollRequest())
-            ImGui.SetScrollHereY(0.5f);
     }
 
     /// <summary>
@@ -1069,7 +1041,6 @@ internal sealed class ParameterWindow : Window
     }
 
     private ViewModes _viewMode = ViewModes.Parameters;
-    private const float PromptDimmedRowAlpha = 0.35f;
 
     public static bool IsAnyInstanceVisible()
     {
