@@ -95,6 +95,7 @@ internal sealed partial class MagGraphView
             }
 
             _context.ItemMovement.PrepareFrame(_context);
+            _context.HideHoverTooltips = SelectionNavigation.HidesHoverTooltips(_context);
 
             if (_context.StateMachine.CurrentState == GraphStates.Default)
             {

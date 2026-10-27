@@ -122,7 +122,7 @@ internal sealed class ConnectionHovering
                 drawList.AddCircle(outputPosInScreen, hoverIndicatorRadius, firstHover.Color, 24, 2);
             }
 
-            if (!disabled)
+            if (!disabled && !context.HideHoverTooltips)
             {
                 ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(5, 5));
                 ImGui.BeginTooltip();
@@ -138,7 +138,7 @@ internal sealed class ConnectionHovering
 
         //else if (firstOutput != null)
         //{
-        if (!disabled)
+        if (!disabled && !context.HideHoverTooltips)
         {
             DrawTooltipForSingleOutput(firstHover);
         }

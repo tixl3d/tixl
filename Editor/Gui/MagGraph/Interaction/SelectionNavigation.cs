@@ -1,6 +1,7 @@
 #nullable enable
 using ImGuiNET;
 using T3.Core.Utils;
+using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.Styling;
@@ -41,7 +42,7 @@ internal static class SelectionNavigation
         {
             var closestItem = FindItemClosestToViewCenter(context);
             if (closestItem != null)
-                SelectAndReveal(context, closestItem, direction);
+                SelectAndReveal(context, null, closestItem, direction);
 
             return;
         }
@@ -66,7 +67,7 @@ internal static class SelectionNavigation
             _trail.Add(new TrailStep(current.Id, target.Id, direction));
         }
 
-        SelectAndReveal(context, target, direction);
+        SelectAndReveal(context, current, target, direction);
     }
 
     /// <summary>
@@ -127,6 +128,16 @@ internal static class SelectionNavigation
         }
     }
 
+    /// <summary>
+    /// True while the cursor keys drive the selection and the mouse has rested since the last step. The view scrolls
+    /// under the resting pointer then, so the tooltips of whatever passes below it would only cover the graph.
+    /// </summary>
+    internal static bool HidesHoverTooltips(GraphUiContext context)
+    {
+        return IsKeyboardNavigationActive(context)
+               && Vector2.Distance(ImGui.GetMousePos(), _mousePosAtLastMove) < MouseRestDistancePx * T3Ui.UiScaleFactor;
+    }
+
     /** The last selected item is the cursor; with multiple selected, navigation continues from it. */
     private static MagGraphItem? GetCursorItem(GraphUiContext context)
     {
@@ -140,14 +151,40 @@ internal static class SelectionNavigation
         return null;
     }
 
-    private static void SelectAndReveal(GraphUiContext context, MagGraphItem item, Directions direction)
+    private static void SelectAndReveal(GraphUiContext context, MagGraphItem? previous, MagGraphItem item, Directions direction)
     {
         item.Select(context.Selector);
-        context.View.ScrollToMakeAreaVisible(item.Area, EdgeMarginPx * T3Ui.UiScaleFactor);
+        Reveal(context.View, previous, item);
 
         _selectionChangeCounterAfterMove = context.Selector.ChangeCounter;
         _lastMoveDirection = direction;
         _lastMoveTime = ImGui.GetTime();
+        _mousePosAtLastMove = ImGui.GetMousePos();
+    }
+
+    /// <summary>
+    /// Leaves the view alone while the item is visible. Otherwise zooms out just enough to keep the previous item in
+    /// view as well, so the step stays readable. If that would get too small to read, or the zoom is already outside
+    /// the readable range, the view resets to the default zoom around the item.
+    /// </summary>
+    private static void Reveal(ScalableCanvas view, MagGraphItem? previous, MagGraphItem item)
+    {
+        var margin = EdgeMarginPx * T3Ui.UiScaleFactor;
+        if (view.IsAreaVisible(item.Area, margin))
+            return;
+
+        var scale = view.GetTargetScope().Scale.X;
+        var isScaleReadable = scale is >= MinReadableScale and <= MaxReadableScale;
+        if (isScaleReadable && previous != null && view.TryRevealKeepingAnchor(previous.Area, item.Area, margin, MinReadableScale))
+            return;
+
+        if (isScaleReadable && previous == null)
+        {
+            view.ScrollToMakeAreaVisible(item.Area, margin);
+            return;
+        }
+
+        view.ShowAreaAtScale(item.Area, DefaultScale);
     }
 
     private static bool IsKeyboardNavigationActive(GraphUiContext context)
@@ -301,6 +338,14 @@ internal static class SelectionNavigation
     /** Screen distance kept between the selected item and the view edge when scrolling to it */
     private const float EdgeMarginPx = 80;
 
+    /** Zoom the view resets to when navigation leaves the readable range; labels stay comfortable on high-DPI screens. */
+    private const float DefaultScale = 1.5f;
+
+    /** Zooming out to keep both items in view stops here; further out labels get too small to read. */
+    private const float MinReadableScale = 0.75f;
+
+    private const float MaxReadableScale = 3f;
+
     /** Items whose centers barely move along the direction count as beside, not beyond the current one */
     private const float MinCenterAdvance = 1;
 
@@ -309,6 +354,9 @@ internal static class SelectionNavigation
     private const float ConnectedCostFactor = 0.6f;
 
     private const int MaxTrailLength = 64;
+
+    /** Moving the mouse further than this hands the graph back to it, tooltips included. */
+    private const float MouseRestDistancePx = 4;
 
     private const float IndicatorOpacity = 0.35f;
     private const float IndicatorWidth = 2;
@@ -327,4 +375,5 @@ internal static class SelectionNavigation
     private static int _selectionChangeCounterAfterMove = -1;
     private static Directions _lastMoveDirection;
     private static double _lastMoveTime;
+    private static Vector2 _mousePosAtLastMove;
 }
