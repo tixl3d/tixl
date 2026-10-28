@@ -40,6 +40,7 @@ public abstract partial class ShaderCompiler
 
         var hash = ComputeStableHash(args.SourceCode, args.EntryPoint, typeof(TShader).Name);
         bool success = false;
+        bool loadedFromCache = false;
         byte[]? compiledBlob;
 
         if (useCache)
@@ -49,6 +50,7 @@ public abstract partial class ShaderCompiler
                 if (!forceRecompile && TryLoadCached(hash, out compiledBlob, out reason))
                 {
                     success = true;
+                    loadedFromCache = true;
                     Interlocked.Increment(ref _cachedShaderCount);
                     RecordCacheOwner(hash, args.Owner);
                 }
@@ -85,7 +87,8 @@ public abstract partial class ShaderCompiler
         {
             Instance.CreateShaderInstance(name, compiledBlob, out TShader s);
             shader = s; // make nullable happy
-            Log.Debug($"Compiled {name} @{args.EntryPoint} ({reason})"); 
+            if (!loadedFromCache || CoreSettings.Config.LogFileEvents)
+                Log.Debug($"Compiled {name} @{args.EntryPoint} ({reason})");
             return true;
         }
 
