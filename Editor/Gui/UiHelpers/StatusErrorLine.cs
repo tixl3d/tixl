@@ -10,8 +10,15 @@ namespace T3.Editor.Gui.UiHelpers;
 /// </summary>
 internal sealed class StatusErrorLine : ILogWriter
 {
+    /** Screen position where the drawn log message starts, so overlays can cover it; infinite without a message */
+    internal float MessageMinX { get; private set; } = float.PositiveInfinity;
+
+    /** Screen position of the top of the line's text, which lines up with the menu labels; NaN until drawn once */
+    internal float TextTop { get; private set; } = float.NaN;
+
     internal void Draw()
     {
+        MessageMinX = float.PositiveInfinity;
         var hasEntries = false;
         var isMessageHovered = false;
 
@@ -20,6 +27,7 @@ internal sealed class StatusErrorLine : ILogWriter
             if (_logEntries.Count == 0)
             {
                 ImGui.TextUnformatted("Log empty");
+                TextTop = ImGui.GetItemRectMin().Y;
             }
             else
             {
@@ -47,8 +55,10 @@ internal sealed class StatusErrorLine : ILogWriter
                     var reservedSlots = App.DebugProtocol.DebugServer.IsRunning ? 2f : 1f;
                     var availableSpace = ImGui.GetWindowSize().X;
                     ImGui.SetCursorPosX(availableSpace - width - ImGui.GetFrameHeight() * reservedSlots);
+                    MessageMinX = ImGui.GetCursorScreenPos().X;
 
                     ImGui.TextColored(color, firstLine);
+                    TextTop = ImGui.GetItemRectMin().Y;
                     ImGui.PopFont();
 
                     // Clicking a message must not destroy it: reveal it in the console instead.

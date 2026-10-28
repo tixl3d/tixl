@@ -86,6 +86,11 @@ internal static class AppMenuBar
             Program.StatusErrorLine.Draw();
             DrawDebugServerIndicator();
 
+            // Toasts cover the log message and its clear button, left of the debug server indicator
+            var reservedRight = App.DebugProtocol.DebugServer.IsRunning ? ImGui.GetFrameHeight() : 0;
+            ActionToast.SetMenuBarArea(ImRect.RectWithSize(ImGui.GetWindowPos(), ImGui.GetWindowSize()), reservedRight,
+                                       Program.StatusErrorLine.MessageMinX, Program.StatusErrorLine.TextTop);
+
             ImGui.EndMainMenuBar();
         }
 

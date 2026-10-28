@@ -294,6 +294,11 @@ internal sealed class ViewSelectionPinning
         _isPinned = true;
     }
 
+    public bool IsPinnedTo(Instance instance)
+    {
+        return _isPinned && instance.InstancePath.SequenceEqual(_pinnedInstancePath);
+    }
+
     /// <summary>
     /// Remembers the current pin before showing another operator for a moment (holding P). <see cref="EndPeek"/>
     /// brings the remembered pin back, <see cref="CommitPeek"/> keeps what is shown now.

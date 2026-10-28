@@ -201,6 +201,18 @@ internal sealed partial class SettingsWindow : Window
                                                       "Preview a value while hovering its entry in an open parameter dropdown. Turn this off to avoid unintended changes while live performing.",
                                                       UserSettings.Defaults.ApplyDropdownValuesOnHover);
 
+                    changed |= FormInputs.AddCheckBox("Show action notifications",
+                                                      ref UserSettings.Config.Toasts.Enabled,
+                                                      "Short messages in the menu bar that tell what a keyboard shortcut did, and tips about related shortcuts.",
+                                                      UserSettings.Defaults.Toasts.Enabled);
+
+                    FormInputs.ApplyIndent();
+                    if (ImGui.Button("Show Tips Again"))
+                    {
+                        ActionToast.ResetTips();
+                        changed = true;
+                    }
+
                     FormInputs.AddVerticalSpace();
                     FormInputs.AddSectionSubHeader("Input");
 

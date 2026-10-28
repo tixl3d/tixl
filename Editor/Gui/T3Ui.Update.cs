@@ -157,6 +157,7 @@ public static partial class T3Ui
         }
 
         KeyboardAndMouseOverlay.Draw();
+        ActionToast.Draw();
 
         Playback.OpNotReady = false;
         AutoBackup.AutoBackup.CheckForSave();
