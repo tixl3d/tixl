@@ -80,6 +80,10 @@ internal static class PlaceHolderUi
 
         uiResult |= DrawSearchInput(context, drawList);
 
+        // The help window previews the suggestion picked with the keys; hovering an entry later this frame wins
+        if (_selectedSymbolUi != null)
+            HoveredHelpTarget.SetOperator(_selectedSymbolUi.Symbol.Id);
+
         var pMin = context.View.TransformPosition(_placeholderItem.PosOnCanvas);
         var pMax = context.View.TransformPosition(_placeholderItem.Area.Max);
 
