@@ -106,15 +106,6 @@ internal static class KeyboardActions
 
         OutputPeek.Handle(context);
 
-        if (UserActions.DisplayImageAsBackground.Triggered())
-        {
-            var selectedImage = nodeSelection.GetFirstSelectedInstance();
-            if (selectedImage != null && ProjectView.Focused != null)
-            {
-                ProjectView.Focused.SetBackgroundOutput(selectedImage);
-            }
-        }
-
         if (UserActions.CopyToClipboard.Triggered())
         {
             // Prevent node graph copy if a text input is active (e.g., section description)

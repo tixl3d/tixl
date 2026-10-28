@@ -41,6 +41,9 @@ internal sealed class GraphImageBackground
         get => _structure.GetInstanceFromIdPath(_backgroundNodePath);
     }
 
+    /** Cheap enough for per-node checks, unlike <see cref="OutputInstance"/> which resolves the path. */
+    public Guid OutputSymbolChildId => _backgroundNodePath is { Count: > 0 } path ? path[^1] : Guid.Empty;
+
     /// <summary>
     /// The most recently rendered background texture. In focus mode the output window is hidden and
     /// the output renders here instead, so the render export reads its source texture from this.

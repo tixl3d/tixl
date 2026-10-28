@@ -15,6 +15,7 @@ using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.OpUis;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.Gui.UiHelpers.Thumbnails;
 using T3.Editor.Skills.Training;
 using T3.Editor.UiModel.Helpers;
@@ -580,8 +581,11 @@ internal sealed partial class MagGraphView
                 DrawIndicator(drawList, UiColors.StatusAnimated, idleFadeFactor, pMin, pMax, CanvasScale, ref indicatorCount, "is animated");
             }
 
-            // Pinned indicator
-            if (context.Selector.PinnedIds.Contains(item.Instance.SymbolChildId))
+            // Pinned indicator. Focus mode has no output window, so the background takes its place.
+            var isPinned = LayoutHandling.FocusMode
+                               ? context.ProjectView.GraphImageBackground.OutputSymbolChildId == item.Instance.SymbolChildId
+                               : context.Selector.PinnedIds.Contains(item.Instance.SymbolChildId);
+            if (isPinned)
             {
                 DrawIndicator(drawList, UiColors.Selection, idleFadeFactor, pMin, pMax, CanvasScale, ref indicatorCount, "is pinned");
             }
