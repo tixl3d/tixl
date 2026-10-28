@@ -293,6 +293,16 @@ internal sealed class GraphWindow : Windows.Window
                 if (!LayoutHandling.FocusMode)
                     CustomComponents.DrawWindowFocusFrame();
 
+                // Without any focused window keyboard shortcuts would go nowhere, so the graph takes the focus back
+                if (ProjectView == ProjectView.Focused
+                    && !ImGui.IsWindowFocused(ImGuiFocusedFlags.AnyWindow)
+                    && !T3Ui.IsAnyPopupOpen
+                    && !ImGui.IsAnyItemActive()
+                    && !ImGui.IsAnyMouseDown())
+                {
+                    ImGui.SetWindowFocus();
+                }
+
                 if (ImGui.IsWindowFocused())
                 {
                     ProjectView?.SetAsFocused();

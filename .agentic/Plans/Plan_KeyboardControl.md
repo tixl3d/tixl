@@ -86,8 +86,9 @@ change along chains — leave it as is.
 - While the popover is open, draw the selected operator's outline much thicker (blinking is probably too much).
 - Short transition from the operator's outline to the popover border when opening.
 - Show the graph's key-hint row only once keyboard navigation is used.
-- Graph shortcuts should work whenever no other window holds keyboard focus — e.g. after the symbol browser
-  closes, re-focus the graph window the way the popover already does.
+- ~~Graph shortcuts should work whenever no other window holds keyboard focus~~ — done: when no window is
+  focused (and no popup, active item or mouse button), the visible graph window of the focused project view takes
+  the focus back (`GraphWindow`).
 - Space vs Tab in the symbol browser (presets) — consider switching it to Tab as well.
   - Not yet: verbs `i c g x`, strings, preset names with spaces, multi-selection.
 
