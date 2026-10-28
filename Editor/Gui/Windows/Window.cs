@@ -55,9 +55,22 @@ internal abstract class Window
     /// frames because on a window's creation frame the focus can be consumed before its docking
     /// is resolved.
     /// </summary>
-    internal void RequestWindowFocus()
+    internal virtual void RequestWindowFocus()
     {
         _focusRequestFramesLeft = 20;
+    }
+
+    /** The window holding the keyboard focus, or the last one that did. */
+    internal static Window? FocusedWindow { get; private set; }
+
+    /// <summary>
+    /// Like <see cref="RequestWindowFocus"/>, but waits until a layout change has settled. Windows that appear with
+    /// the new layout grab the focus on their first frame.
+    /// </summary>
+    internal void RequestFocusAfterLayoutChange()
+    {
+        _windowToFocusAfterLayoutChange = this;
+        _layoutChangeFocusFrame = ImGui.GetFrameCount() + LayoutChangeSettleFrames;
     }
 
     private void DrawOneInstance()
@@ -79,6 +92,12 @@ internal abstract class Window
             }
 
             _wasVisible = true;
+        }
+
+        if (_windowToFocusAfterLayoutChange == this && ImGui.GetFrameCount() >= _layoutChangeFocusFrame)
+        {
+            _windowToFocusAfterLayoutChange = null;
+            RequestWindowFocus();
         }
 
         if (_focusRequestFramesLeft > 0)
@@ -115,6 +134,9 @@ internal abstract class Window
             );
 
             _wasDockedLastFrame = ImGui.IsWindowDocked();
+
+            if (ImGui.IsWindowFocused(ImGuiFocusedFlags.RootAndChildWindows))
+                FocusedWindow = this;
 
             // Prevent window header from becoming invisible 
             var windowPos = ImGui.GetWindowPos();
@@ -188,6 +210,12 @@ internal abstract class Window
 
     private bool _wasVisible;
     private int _focusRequestFramesLeft;
+
+    /** The new ImGui layout is loaded on the next frame, and its dock nodes and tabs take another frame or two. */
+    private const int LayoutChangeSettleFrames = 3;
+
+    private static Window? _windowToFocusAfterLayoutChange;
+    private static int _layoutChangeFocusFrame;
 
     internal void DrawMenuItemToggle()
     {
