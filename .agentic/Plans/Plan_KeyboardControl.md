@@ -18,6 +18,9 @@ change along chains — leave it as is.
   walk back. While keyboard navigation is active (until the selection changes otherwise) subtle marks show each
   arrow's target, growing in staggered after each move. Manual test: `.tests-manual/graph-arrow-navigation.md`.
   Not yet: Shift+arrow extend, Space marks, zoom-to-edit-level.
+- **Peek on P — implemented:** P pins right away (also in focus mode as graph background); releasing after
+  0.25 s restores the previous output (`OutputPeek`, `ViewSelectionPinning.BeginPeek/CommitPeek/EndPeek`).
+  P on the pinned op no longer unpins. The generic `TapOrHold` key flag is still open.
 - **Operator bookmarks — implemented:** Shift+digit toggles a bookmark on the selected operator (one digit per
   operator), the digit selects it and frames it via `ProjectView.TrySetCompositionOp(parentPath, …, childId)`,
   opening its composition. Stored per project (key: home symbol) in `UserSettings.Config.OperatorBookmarks` as
