@@ -29,7 +29,7 @@ internal static class ColorEditPopup
 
         var edited = InputEditStateFlags.Nothing;
         var cColor = new Color(color);
-        ImGui.SetNextWindowSize(new Vector2(257, 360) * T3Ui.UiScaleFactor);
+        ImGui.SetNextWindowSize(new Vector2(257, 356) * T3Ui.UiScaleFactor);
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Vector2.Zero);
         var dontCloseIfColorPicking = ImGui.GetIO().KeyAlt ? ImGuiWindowFlags.Modal : ImGuiWindowFlags.None;
 
@@ -47,6 +47,7 @@ internal static class ColorEditPopup
             }
 
             var drawList = ImGui.GetForegroundDrawList();
+            DrawDragHandle(drawList);
             ImGui.ColorConvertRGBtoHSV(color.X, color.Y, color.Z, out var hNormalized, out var linearSaturation, out var v);
 
             var compareColor = _isHoveringColor ? _hoveredColor : (Color)previousColor;
@@ -80,6 +81,27 @@ internal static class ColorEditPopup
         color = cColor.Rgba;
         ImGui.PopStyleVar();
         return edited;
+    }
+
+    /** Popups open at the mouse and can end up covering what is being colored, so the grip lets users move it aside. */
+    private static void DrawDragHandle(ImDrawListPtr drawList)
+    {
+        var scale = T3Ui.UiScaleFactor;
+        var handlePos = (ImGui.GetWindowPos() + new Vector2(6, 6) * scale).Floor();
+        var handleSize = new Vector2(Icons.FontSize);
+
+        ImGui.SetCursorScreenPos(handlePos);
+        ImGui.InvisibleButton("##moveColorPopup", handleSize);
+        var isHovered = ImGui.IsItemHovered();
+        var isActive = ImGui.IsItemActive();
+        if (isHovered || isActive)
+            ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeAll);
+
+        if (isActive)
+            ImGui.SetWindowPos(ImGui.GetWindowPos() + ImGui.GetIO().MouseDelta);
+
+        var gripColor = isHovered || isActive ? UiColors.Text : UiColors.TextMuted.Fade(0.5f);
+        Icons.DrawIconAtScreenPosition(Icon.DragIndicator, handlePos, drawList, gripColor);
     }
 
     private static InputEditStateFlags PickColor(ref Color cColor)
@@ -122,6 +144,14 @@ internal static class ColorEditPopup
 
     private static Vector4 _dampedCompareColor;
 
+    /** How far a drag has to be pulled past the top of the brightness bar before values above 1.0 become editable. */
+    private const float HdrUnlockDistance = 20;
+
+    private const float MaxHdrValue = 1000;
+
+    /** Set once the current brightness drag started on an HDR value or was pulled past the unlock distance. */
+    private static bool _isHdrUnlocked;
+
     private static InputEditStateFlags DrawCircleAndSliders(ref Color cColor, Vector4 compareColor, ref float hNormalized, ref float linearSaturation,
                                                         float v,
                                                         ImDrawListPtr drawList)
@@ -132,14 +162,13 @@ internal static class ColorEditPopup
                                    out var compareValue);
 
         var edited = InputEditStateFlags.Nothing;
-        ImGui.Dummy(new Vector2(10, 10));
 
-        var wheelRadius = 209f * T3Ui.UiScaleFactor;
-        var windowPos = ImGui.GetCursorScreenPos() + new Vector2(10, 10);
+        var wheelRadius = 215f * T3Ui.UiScaleFactor;
+        var windowPos = ImGui.GetWindowPos() + new Vector2(10, 10) * T3Ui.UiScaleFactor;
         var size = new Vector2(wheelRadius, wheelRadius);
         var clampedV = v.Clamp(0, 1);
 
-        const float colorEdgeWidth = 3;
+        var colorEdgeWidth = 3 * T3Ui.UiScaleFactor;
         drawList.AddImage((IntPtr)SharedResources.ColorPickerImageSrv, windowPos - Vector2.One * colorEdgeWidth,
                           windowPos + size + Vector2.One * colorEdgeWidth);
         drawList.AddImage((IntPtr)SharedResources.ColorPickerImageSrv, windowPos, windowPos + size, Vector2.Zero, Vector2.One,
@@ -163,7 +192,7 @@ internal static class ColorEditPopup
             drawList.AddCircle(windowPos + pickedColorPos, 4, UiColors.ForegroundFull);
         }
 
-        ImGui.SetCursorPosX(10);
+        ImGui.SetCursorScreenPos(windowPos);
         ImGui.InvisibleButton("colorWheel", size);
         if (ImGui.IsItemActive())
         {
@@ -200,17 +229,54 @@ internal static class ColorEditPopup
         var borderThickness = Vector2.One* T3Ui.UiScaleFactor;
         // Draw value slider 
         {
-            var barHeight = wheelRadius;
+            // Starts below the wheel's top to leave room for the HDR hint, but ends with the wheel.
+            var hdrHintHeight = 20 * T3Ui.UiScaleFactor;
+            var barHeight = wheelRadius - hdrHintHeight;
             var barWidth = 10 * T3Ui.UiScaleFactor;
-            var pMin = windowPos + new Vector2(size.X + barWidth, 0);
+            var pMin = windowPos + new Vector2(size.X + 12 * T3Ui.UiScaleFactor, hdrHintHeight);
             var visibleBarSize = new Vector2(barWidth, barHeight);
             var pMax = pMin + visibleBarSize;
+            var hdrUnlockDistance = HdrUnlockDistance * T3Ui.UiScaleFactor;
 
-            var hrdEditEnabled = ImGui.GetIO().KeyCtrl;
-            if (hrdEditEnabled)
+            ImGui.SetCursorScreenPos(pMin - new Vector2(10, 0) * T3Ui.UiScaleFactor);
+            ImGui.InvisibleButton("intensitySlider", new Vector2(visibleBarSize.X * 4, visibleBarSize.Y));
+            if (ImGui.IsItemActivated())
             {
-                var hdrOffset = new Vector2(0, -300);
-                drawList.AddRectFilled(pMin - borderThickness + hdrOffset, pMax + borderThickness, Color.Black);
+                _isHdrUnlocked = cColor.V > 1;
+                edited |= InputEditStateFlags.Started;
+            }
+
+            var isDragging = ImGui.IsItemActive();
+            var mouseY = ImGui.GetMousePos().Y;
+            var pullAboveBar = isDragging ? pMin.Y - mouseY : 0;
+            if (pullAboveBar >= hdrUnlockDistance)
+                _isHdrUnlocked = true;
+
+            var hdrEditEnabled = ImGui.GetIO().KeyCtrl || (isDragging && _isHdrUnlocked);
+            if (isDragging)
+            {
+                cColor.V = GetValueFromBarY(mouseY, pMin.Y, barHeight, hdrEditEnabled);
+                edited |= InputEditStateFlags.Modified;
+            }
+
+            if (ImGui.IsItemDeactivated())
+            {
+                edited |= InputEditStateFlags.Finished;
+            }
+
+            var brightColor = cColor;
+            brightColor.V = 1;
+            brightColor.A = 1;
+
+            if (hdrEditEnabled)
+            {
+                var hdrRangeTop = pMin - new Vector2(0, 300 * T3Ui.UiScaleFactor);
+                drawList.AddRectFilled(hdrRangeTop - borderThickness, pMax + borderThickness, Color.Black);
+                drawList.AddRectFilledMultiColor(hdrRangeTop, new Vector2(pMax.X, pMin.Y),
+                                                 ImGui.ColorConvertFloat4ToU32(UiColors.ForegroundFull),
+                                                 ImGui.ColorConvertFloat4ToU32(UiColors.ForegroundFull),
+                                                 ImGui.ColorConvertFloat4ToU32(brightColor),
+                                                 ImGui.ColorConvertFloat4ToU32(brightColor));
             }
             else
             {
@@ -225,6 +291,10 @@ internal static class ColorEditPopup
                                                UiColors.ForegroundFull
                                               );
                 }
+                else
+                {
+                    DrawHdrUnlockHint(drawList, pMin, barWidth, pullAboveBar / hdrUnlockDistance);
+                }
             }
 
             if (cColor.V > 1)
@@ -234,10 +304,6 @@ internal static class ColorEditPopup
                 drawList.AddText(pMin - new Vector2(labelWidth.X+10, +20), UiColors.Text, label);
             }
 
-            var brightColor = cColor;
-            brightColor.V = 1;
-            brightColor.A = 1;
-                
             drawList.AddRectFilledMultiColor(pMin, pMax,
                                              ImGui.ColorConvertFloat4ToU32(brightColor),
                                              ImGui.ColorConvertFloat4ToU32(brightColor),
@@ -245,42 +311,18 @@ internal static class ColorEditPopup
                                              ImGui.ColorConvertFloat4ToU32(transparentColor));
 
             // Draw compare value
-            if(compareValue <= 1 || hrdEditEnabled) 
+            if(compareValue <= 1 || hdrEditEnabled) 
             {
-                var mappedHdrValue = GetYFromHdr(compareValue);
-                var handlePos = new Vector2(0, barHeight * (1 - mappedHdrValue)) + pMin;
+                var handlePos = new Vector2(pMin.X, GetBarYFromValue(compareValue, pMin.Y, barHeight));
                 drawList.AddRectFilled(handlePos, handlePos + new Vector2(barWidth + 2, 2 * T3Ui.UiScaleFactor), UiColors.ForegroundFull.Fade(0.5f));
             }
 
             // Draw indicator
-            if(cColor.V <= 1 || hrdEditEnabled) 
+            if(cColor.V <= 1 || hdrEditEnabled) 
             {
-                var mappedHdrValue = GetYFromHdr(cColor.V);
-
-                var handlePos = new Vector2(0, barHeight * (1 - mappedHdrValue)) + pMin;
+                var handlePos = new Vector2(pMin.X, GetBarYFromValue(cColor.V, pMin.Y, barHeight));
                 drawList.AddRectFilled(handlePos - borderThickness, handlePos + new Vector2(barWidth + 2, 3 * T3Ui.UiScaleFactor), UiColors.BackgroundFull);
                 drawList.AddRectFilled(handlePos, handlePos + new Vector2(barWidth + 2, 2* T3Ui.UiScaleFactor) , UiColors.ForegroundFull);
-            }
-            ImGui.SetCursorScreenPos(pMin - new Vector2(10, 0));
-            ImGui.InvisibleButton("intensitySlider", new Vector2(visibleBarSize.X * 4, visibleBarSize.Y));
-            if (ImGui.IsItemActive())
-            {
-                var clampUpperValue = hrdEditEnabled ? 100 : 1;
-                var normalizedValue = (1 - (ImGui.GetMousePos() - pMin).Y / barHeight).Clamp(float.Epsilon, clampUpperValue); 
-                normalizedValue = GetHdrYValue(normalizedValue);
-
-                cColor.V = normalizedValue.Clamp(float.Epsilon, 1000); 
-                edited |= InputEditStateFlags.Modified;
-            }
-
-            if (ImGui.IsItemActivated())
-            {
-                edited |= InputEditStateFlags.Started;
-            }
-
-            if (ImGui.IsItemDeactivated())
-            {
-                edited |= InputEditStateFlags.Finished;
             }
         }
 
@@ -319,7 +361,7 @@ internal static class ColorEditPopup
                                        handlePos + new Vector2(2 * T3Ui.UiScaleFactor, barHeight + 2), UiColors.ForegroundFull);
             }
 
-            ImGui.SetCursorScreenPos(pMin - new Vector2(0, 10));
+            ImGui.SetCursorScreenPos(pMin - new Vector2(0, 10) * T3Ui.UiScaleFactor);
 
             ImGui.InvisibleButton("alphaSlider", new Vector2(barSize.X, barSize.Y * 3));
             if (ImGui.IsItemActive())
@@ -341,14 +383,55 @@ internal static class ColorEditPopup
         return edited;
     }
 
-    private static float GetYFromHdr(float value)
+    private static float GetBarYFromValue(float value, float barTop, float barHeight)
     {
-        return  value < 1 ? value : MathF.Pow((value).Clamp(0,1000), 1/3f);
+        if (value <= 1)
+            return barTop + barHeight * (1 - value);
+
+        return barTop - barHeight * (MathF.Pow(value.Clamp(1, MaxHdrValue), 1 / 3f) - 1);
     }
-        
-    private static float GetHdrYValue(float value)
+
+    private static float GetValueFromBarY(float y, float barTop, float barHeight, bool allowHdr)
     {
-        return  value < 1 ? value : MathF.Pow((value).Clamp(0,1000), 3f);
+        if (y >= barTop || !allowHdr)
+            return (1 - (y - barTop) / barHeight).Clamp(float.Epsilon, 1);
+
+        return MathF.Pow(1 + (barTop - y) / barHeight, 3f).Clamp(1, MaxHdrValue);
+    }
+
+    /** Signals that pulling past the top of the brightness bar unlocks HDR. A barrier line shrinks as the pull approaches the unlock distance. */
+    private static void DrawHdrUnlockHint(ImDrawListPtr drawList, Vector2 barTopLeft, float barWidth, float unlockProgress)
+    {
+        var scale = T3Ui.UiScaleFactor;
+        var progress = unlockProgress.Clamp(0, 1);
+        var centerX = MathF.Round(barTopLeft.X + barWidth / 2);
+        var barTop = MathF.Round(barTopLeft.Y);
+
+        if (progress > 0)
+        {
+            var halfWidth = MathF.Round((barWidth / 2 + 7 * scale) * (1 - progress));
+            var thickness = MathF.Max(1, MathF.Round(2 * scale));
+            var lineTop = barTop - thickness - MathF.Max(1, MathF.Round(scale));
+            drawList.AddRectFilled(new Vector2(centerX - halfWidth, lineTop),
+                                   new Vector2(centerX + halfWidth, lineTop + thickness),
+                                   UiColors.ForegroundFull);
+        }
+
+        var hintColor = Color.Mix(UiColors.TextMuted, UiColors.ForegroundFull, progress);
+        var triangleBottom = barTop - 5 * scale;
+        var triangleHalfWidth = 3 * scale;
+        var triangleHeight = 3 * scale;
+        drawList.AddTriangleFilled(new Vector2(centerX - triangleHalfWidth, triangleBottom),
+                                   new Vector2(centerX, triangleBottom - triangleHeight),
+                                   new Vector2(centerX + triangleHalfWidth, triangleBottom),
+                                   hintColor);
+
+        const string label = "HDR";
+        var font = Fonts.FontSmall;
+        var labelSize = font.CalcTextSizeA(font.FontSize, float.MaxValue, 0, label);
+        var labelPos = new Vector2(MathF.Round(centerX - labelSize.X / 2),
+                                   MathF.Round(triangleBottom - triangleHeight - 1 * scale - labelSize.Y));
+        drawList.AddText(font, font.FontSize, labelPos, hintColor, label);
     }
 
     private enum ColorInputModes
@@ -653,7 +736,7 @@ internal static class ColorEditPopup
 
                 var min = ImGui.GetItemRectMin();
                 var max = ImGui.GetItemRectMax() - Vector2.One * T3Ui.UiScaleFactor;
-                wdl.AddText(Icons.IconFont, 13 * T3Ui.UiScaleFactor, min, new Color(0.1f), "" + (char)T3.Editor.Gui.Styling.Icon.Stripe4PxPattern);
+                Icons.DrawIconAtScreenPosition(Icon.Stripe4PxPattern, min, max - min, wdl, new Color(0.1f));
 
 
                 var isHDR = usedColor.X > 1 || usedColor.Y > 1 || usedColor.Z > 1;
