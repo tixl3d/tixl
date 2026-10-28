@@ -99,25 +99,7 @@ internal static class KeyboardActions
                 view.OpenAndFocusInstance(navigationPath);
         }
 
-        if (UserActions.PinToOutputWindow.Triggered())
-        {
-            if (LayoutHandling.FocusMode)
-            {
-                var selectedImage = nodeSelection.GetFirstSelectedInstance();
-                if (selectedImage != null && ProjectView.Focused != null)
-                {
-                    ProjectView.Focused.SetBackgroundOutput(selectedImage);
-                }
-            }
-            else
-            {
-                if (ProjectView.Focused != null)
-                    NodeActions.PinSelectedToOutputWindow(ProjectView.Focused, 
-                                                          nodeSelection, 
-                                                          compositionOp, 
-                                                          true);
-            }
-        }
+        OutputPeek.Handle(context);
 
         if (UserActions.DisplayImageAsBackground.Triggered())
         {

@@ -48,7 +48,7 @@ The following is a list of the **default keyboard** short-cuts. With v4.0.4 you 
 | Align Selection Left      | Alt + A                                              |
 | Add Section               | Shift + S, alias Shift + A (focus)                   |
 | Add Comment               | Ctrl + Shift + C                                     |
-| Pin to Output Window      | P (focus)                                            |
+| Pin to Output Window      | P (focus); hold P to only peek at the selection     |
 | Show in Graph             | Shift + P                                            |
 | Display Image as Background | Ctrl + P                                           |
 | Clear Background Image    | Ctrl + Shift + P (focus) or use the Clear BG button  |
