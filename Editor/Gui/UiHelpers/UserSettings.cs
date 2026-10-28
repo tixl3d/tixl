@@ -90,6 +90,8 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         public List<string> ProjectDirectories = [];
         public bool EnableUsbProjectDetection = true;
 
+        public readonly ToastSettings Toasts = new();
+
         // UI-Elements
         public bool ShowThumbnails = true;
         public bool ShowMainMenu = true;

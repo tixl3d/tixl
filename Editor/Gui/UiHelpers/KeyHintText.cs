@@ -50,14 +50,18 @@ internal static class KeyHintText
 
     /// <param name="position">Top left of the first line of text</param>
     /// <param name="maxWidth">Wraps before a key that wouldn't fit together with its description</param>
-    internal static void Draw(ImDrawListPtr drawList, Vector2 position, List<Segment> segments, float maxWidth = float.PositiveInfinity)
+    /// <param name="isProminent">For messages that are read rather than glanced at: the message in normal text color,
+    /// keys and the rest muted</param>
+    internal static void Draw(ImDrawListPtr drawList, Vector2 position, List<Segment> segments, float maxWidth = float.PositiveInfinity,
+                              float opacity = 1, bool isProminent = false)
     {
         var scale = T3Ui.UiScaleFactor;
         var chipPadding = MathF.Round(ChipPaddingPx * scale);
         var chipRounding = ChipRoundingPx * scale;
-        var brightColor = UiColors.Text.Fade(BrightOpacity);
-        var chipColor = UiColors.Text.Fade(ChipOutlineOpacity);
-        var descriptionColor = UiColors.Text.Fade(DescriptionOpacity);
+        var brightColor = (isProminent ? UiColors.Text : UiColors.Text.Fade(BrightOpacity)).Fade(opacity);
+        var keyColor = (isProminent ? UiColors.TextMuted : UiColors.Text.Fade(BrightOpacity)).Fade(opacity);
+        var chipColor = (isProminent ? UiColors.TextMuted.Fade(ProminentChipOutlineOpacity) : UiColors.Text.Fade(ChipOutlineOpacity)).Fade(opacity);
+        var descriptionColor = (isProminent ? UiColors.TextMuted : UiColors.Text.Fade(DescriptionOpacity)).Fade(opacity);
         var lineHeight = ImGui.GetTextLineHeight();
         var lineStartX = position.X;
 
@@ -83,7 +87,7 @@ internal static class KeyHintText
             var min = new Vector2(MathF.Floor(position.X - chipPadding), MathF.Floor(position.Y));
             var max = new Vector2(MathF.Floor(position.X + textWidth + chipPadding), MathF.Floor(position.Y + lineHeight));
             drawList.AddRect(min, max, chipColor, chipRounding);
-            drawList.AddText(position, brightColor, segment.Text);
+            drawList.AddText(position, keyColor, segment.Text);
             position.X += textWidth + chipPadding * 2;
         }
     }
@@ -109,6 +113,20 @@ internal static class KeyHintText
         return lines;
     }
 
+    /** Width of the segments on a single line, including key chips */
+    internal static float GetWidth(List<Segment> segments)
+    {
+        var chipPadding = MathF.Round(ChipPaddingPx * T3Ui.UiScaleFactor);
+        var width = 0f;
+        foreach (var segment in segments)
+        {
+            var textWidth = ImGui.CalcTextSize(segment.Text).X;
+            width += segment.Kind == Kinds.Key ? textWidth + chipPadding * 3 : textWidth;
+        }
+
+        return width;
+    }
+
     internal static float GetLineHeight() => ImGui.GetTextLineHeight() + LineGapPx * T3Ui.UiScaleFactor;
 
     /** A key starts a new line when it and the description after it don't fit anymore */
@@ -126,6 +144,7 @@ internal static class KeyHintText
 
     private const float LineGapPx = 4;
     private const float BrightOpacity = 0.6f;
+    private const float ProminentChipOutlineOpacity = 0.6f;
     private const float ChipOutlineOpacity = 0.3f;
     private const float DescriptionOpacity = 0.3f;
     private const float ChipPaddingPx = 3;

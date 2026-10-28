@@ -4,6 +4,7 @@ using T3.Editor.App;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.MagGraph.States;
+using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.Gui.Windows.Output;
 using T3.Editor.UiModel.Modification;
@@ -14,7 +15,7 @@ namespace T3.Editor.Gui.MagGraph.Interaction;
 /// <summary>
 /// P shows the selected operator in the output window (in focus mode: as the graph background). A tap keeps it
 /// pinned; holding P only peeks at it and brings the previous output back on release. Pressing P again on the
-/// pinned operator keeps it pinned instead of unpinning it.
+/// pinned operator keeps it pinned instead of unpinning it. A tip tells about peeking until it was used.
 /// </summary>
 internal static class OutputPeek
 {
@@ -30,13 +31,25 @@ internal static class OutputPeek
             return;
 
         _isKeyDown = false;
+
+        // Nothing was shown on the press (no selection, or already in the output)
+        if (_shownName == null)
+            return;
+
         var wasHeld = ImGui.GetTime() - _pressTime > TapMaxSec;
         if (wasHeld)
+        {
             End(context);
+            ActionToast.MarkLearned(PeekTipId);
+        }
         else
+        {
             _peekingWindow?.Pinning.CommitPeek();
+            ActionToast.ShowTip(PeekTipId, (LayoutHandling.FocusMode ? "{Background shows " : "{Output shows ") + _shownName + "}   hold [P] to only peek");
+        }
 
         _peekingWindow = null;
+        _shownName = null;
         _previousBackgroundPath = null;
     }
 
@@ -48,6 +61,8 @@ internal static class OutputPeek
 
         _isKeyDown = true;
         _pressTime = ImGui.GetTime();
+        _shownName = null;
+        _peekingWindow = null;
 
         if (LayoutHandling.FocusMode)
         {
@@ -58,12 +73,23 @@ internal static class OutputPeek
             _previousBackgroundPath = projectView.GraphImageBackground.OutputInstance?.InstancePath;
             _hadBackground = _previousBackgroundPath != null;
             projectView.SetBackgroundOutput(selectedInstance);
+            _shownName = selectedInstance.Symbol.Name;
             return;
         }
 
-        _peekingWindow = GetVisibleOutputWindow();
+        var outputWindow = GetVisibleOutputWindow();
+        var shownInstance = context.Selector.GetFirstSelectedInstance() ?? context.CompositionInstance;
+        if (outputWindow != null && outputWindow.Pinning.IsPinnedTo(shownInstance))
+        {
+            // P no longer unpins, so tell where that moved
+            ActionToast.Show("{" + shownInstance.Symbol.Name + " is already in the output}   unpin it in the output window");
+            return;
+        }
+
+        _peekingWindow = outputWindow;
         _peekingWindow?.Pinning.BeginPeek();
         NodeActions.PinSelectedToOutputWindow(projectView, context.Selector, context.CompositionInstance);
+        _shownName = outputWindow != null ? shownInstance.Symbol.Name : null;
     }
 
     private static void End(GraphUiContext context)
@@ -109,6 +135,8 @@ internal static class OutputPeek
         return false;
     }
 
+    private const string PeekTipId = "OutputPeek";
+
     /** Releasing P later than this counts as holding it */
     private const double TapMaxSec = 0.25;
 
@@ -117,4 +145,5 @@ internal static class OutputPeek
     private static OutputWindow? _peekingWindow;
     private static IReadOnlyList<Guid>? _previousBackgroundPath;
     private static bool _hadBackground;
+    private static string? _shownName;
 }

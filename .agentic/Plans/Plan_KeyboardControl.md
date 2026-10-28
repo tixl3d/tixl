@@ -21,6 +21,14 @@ change along chains — leave it as is.
 - **Peek on P — implemented:** P pins right away (also in focus mode as graph background); releasing after
   0.25 s restores the previous output (`OutputPeek`, `ViewSelectionPinning.BeginPeek/CommitPeek/EndPeek`).
   P on the pinned op no longer unpins. The generic `TapOrHold` key flag is still open.
+- **Action toasts — first version:** `Gui/UiHelpers/ActionToast` (bottom center of the main window, one at a time,
+  `KeyHintText` markup, ~2.5 s, hover keeps it). Used by P: "Output shows X — hold P to only peek" until peek was
+  used once (`UserSettings.Config.HasUsedOutputPeek`), and "X is already in the output — unpin it in the output
+  window". Wording avoids "pinning" in messages. A tip icon (`Icon.Tip`, info blue) leads each message so it isn't
+  mistaken for a log error. State lives in `UserSettings.Config.Toasts` (`ToastSettings`: Enabled, LearnedTips,
+  TipShowCounts, MutedActions) keyed by string tip ids; `ActionToast.ShowTip(id, markup, maxTimes = 5)`,
+  `MarkLearned(id)`, `ResetTips()`. Settings: "Show action notifications" and "Show Tips Again".
+  Not yet: per-action mute UI (⚙) and the (?) help link.
 - **Operator bookmarks — implemented:** Shift+digit toggles a bookmark on the selected operator (one digit per
   operator), the digit selects it and frames it via `ProjectView.TrySetCompositionOp(parentPath, …, childId)`,
   opening its composition. Stored per project (key: home symbol) in `UserSettings.Config.OperatorBookmarks` as
