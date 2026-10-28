@@ -56,10 +56,10 @@ internal static class ParameterPopUp
 
     private static Vector2 DefaultWindowSize => new Vector2(310, 250) * T3Ui.UiScaleFactor;
 
-    private static void Close(bool refocusGraph = false)
+    internal static void Close(bool refocusGraph = false)
     {
+        _refocusGraph = refocusGraph && _isOpen;
         _isOpen = false;
-        _refocusGraph = refocusGraph;
     }
 
     public static void DrawParameterPopUp(ProjectView graphWindow)

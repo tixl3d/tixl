@@ -42,7 +42,10 @@ internal static class SelectionNavigation
         {
             var closestItem = FindItemClosestToViewCenter(context);
             if (closestItem != null)
+            {
+                ParameterPopUp.Close(refocusGraph: true);
                 SelectAndReveal(context, null, closestItem, direction);
+            }
 
             return;
         }
@@ -67,6 +70,7 @@ internal static class SelectionNavigation
             _trail.Add(new TrailStep(current.Id, target.Id, direction));
         }
 
+        ParameterPopUp.Close(refocusGraph: true);
         SelectAndReveal(context, current, target, direction);
     }
 
