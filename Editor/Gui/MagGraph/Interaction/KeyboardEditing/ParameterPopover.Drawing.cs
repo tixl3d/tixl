@@ -7,6 +7,7 @@ using T3.Core.Stats;
 using T3.Core.Utils;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Gui.Windows.TimeLine;
 
 namespace T3.Editor.Gui.MagGraph.Interaction.KeyboardEditing;
 
@@ -52,8 +53,10 @@ internal static partial class ParameterPopover
         var helpHeight = helpLineCount * helpLineHeight + 2 * padding;
         var height = listHeight + helpHeight + 2 * padding;
         var fullHeight = Math.Min(_entries.Count, MaxVisibleRows) * rowHeight + _maxHelpLineCount * helpLineHeight + 4 * padding;
+        // Above the timeline toolbar at the bottom of the graph window
+        var toolbarHeight = UserSettings.Config.ShowToolbar ? TimeControls.ControlSize.Y + 1 : 0;
         var min = new Vector2(MathF.Floor(windowPos.X + (windowSize.X - width) / 2),
-                              MathF.Floor(windowPos.Y + windowSize.Y - fullHeight - 2 * padding));
+                              MathF.Floor(windowPos.Y + windowSize.Y - toolbarHeight - fullHeight - 2 * padding));
         var max = new Vector2(MathF.Floor(min.X + width), MathF.Floor(min.Y + height));
         _popoverRect = new ImRect(min, max);
 
