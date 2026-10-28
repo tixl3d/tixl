@@ -81,9 +81,10 @@ internal static class SelectionNavigation
     /// </summary>
     internal static void DrawTargetIndicators(GraphUiContext context, ImDrawListPtr drawList)
     {
-        // Only while an arrow key would really move the selection; an active input (like the parameter popover)
-        // or a popup takes the keys
-        if (!context.View.IsFocused
+        // Only while an arrow key would really move the selection, so this mirrors the key bindings' focus check;
+        // View.IsFocused also counts siblings like the timeline, and active inputs or popups take the keys.
+        if (!UserSettings.Config.EnableKeyboardShortCuts
+            || !ImGui.IsWindowFocused(ImGuiFocusedFlags.ChildWindows)
             || context.StateMachine.CurrentState != GraphStates.Default
             || ImGui.IsAnyItemActive()
             || T3Ui.IsAnyPopupOpen

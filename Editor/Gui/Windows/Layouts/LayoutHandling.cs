@@ -11,6 +11,7 @@ using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.Output;
+using T3.Editor.UiModel.ProjectHandling;
 
 namespace T3.Editor.Gui.Windows.Layouts;
 
@@ -154,10 +155,33 @@ internal static class LayoutHandling
             graphWindow.SetWindowToNormal();
         }
 
+        var windowToFocus = Window.FocusedWindow is { Config.Visible: true } focusedWindow
+                                ? focusedWindow
+                                : FindVisibleGraphWindowOfFocusedProject();
+        windowToFocus?.RequestFocusAfterLayoutChange();
+
         if (switchingBackFromFocusMode)
         {
             UiConfig.RestoreBackgroundAfterFocusMode();
         }
+    }
+
+    /** Falls back to any visible graph window, so keyboard shortcuts keep working. */
+    private static GraphWindow? FindVisibleGraphWindowOfFocusedProject()
+    {
+        GraphWindow? firstVisible = null;
+        foreach (var graphWindow in GraphWindow.GraphWindowInstances)
+        {
+            if (!graphWindow.Config.Visible)
+                continue;
+
+            if (graphWindow.ProjectView != null && graphWindow.ProjectView == ProjectView.Focused)
+                return graphWindow;
+
+            firstVisible ??= graphWindow;
+        }
+
+        return firstVisible;
     }
 
     public static string GraphPrefix => "Graph View##";

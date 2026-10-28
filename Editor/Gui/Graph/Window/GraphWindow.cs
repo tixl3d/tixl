@@ -44,6 +44,13 @@ internal sealed class GraphWindow : Windows.Window
     internal override IReadOnlyList<Gui.Windows.Window> GetInstances() => GraphWindowInstances;
     internal static readonly List<GraphWindow> GraphWindowInstances = [];
 
+    /** Arrow key navigation and other graph shortcuts need the canvas focused, not just the window around it. */
+    internal override void RequestWindowFocus()
+    {
+        base.RequestWindowFocus();
+        _focusOnNextFrame = true;
+    }
+
     public void SetWindowToNormal()
     {
         WindowFlags &= ~(ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBringToFrontOnFocus | ImGuiWindowFlags.NoMove |
