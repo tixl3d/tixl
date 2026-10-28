@@ -18,9 +18,11 @@ internal sealed class ExitDialog : ModalDialog
 {
     internal void Draw()
     {
-        DialogSize = new Vector2(420, 120);
+        // No minimum height, so the dialog hugs its content without empty space below the buttons.
+        DialogSize = new Vector2(420, 0);
 
-        // ImGui 1.90 rejects empty popup ids; use ### to keep the title bar visually empty.
+        // The header is part of the content and Cancel/Escape close it, so a title bar would only repeat both.
+        Flags = ImGuiWindowFlags.NoTitleBar;
         if (BeginDialog("###ExitDialog"))
         {
             FormInputs.AddSectionHeader("Are you leaving?");
@@ -47,21 +49,20 @@ internal sealed class ExitDialog : ModalDialog
                 ImGui.CloseCurrentPopup();
             }
 
-            // Cancel sits left, the outcome buttons are pushed to the right edge.
+            // All buttons are right-aligned, with the default action at the far right.
             var itemSpacing = ImGui.GetStyle().ItemSpacing.X;
-            var cancelWidth = CustomComponents.GetCtaButtonSize("Cancel").X;
-            var exitWidth = CustomComponents.GetCtaButtonSize("Exit").X;
-            var rightWidth = hasChanges
-                                 ? CustomComponents.GetCtaButtonSize("Save and Exit").X + itemSpacing + exitWidth
-                                 : exitWidth;
-            var gap = MathF.Max(itemSpacing, ImGui.GetContentRegionAvail().X - cancelWidth - rightWidth);
+            var buttonsWidth = CustomComponents.GetCtaButtonSize("Cancel").X + itemSpacing + CustomComponents.GetCtaButtonSize("Exit").X;
+            if (hasChanges)
+                buttonsWidth += itemSpacing + CustomComponents.GetCtaButtonSize("Save and Exit").X;
+
+            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + MathF.Max(0, ImGui.GetContentRegionAvail().X - buttonsWidth));
 
             if (CustomComponents.DrawCtaButton("Cancel", Icon.None, CustomComponents.ButtonStates.Default))
             {
                 ImGui.CloseCurrentPopup();
             }
 
-            ImGui.SameLine(0, gap);
+            ImGui.SameLine();
 
             if (hasChanges)
             {

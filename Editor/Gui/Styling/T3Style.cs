@@ -52,7 +52,8 @@ public static class T3Style
 
         style.Colors[(int)ImGuiCol.ResizeGrip] = UiColors.WindowResizeHandle;
 
-        style.Colors[(int)ImGuiCol.ModalWindowDimBg] = Color.Transparent;
+        // Shade everything behind a blocking dialog so it doesn't look clickable.
+        style.Colors[(int)ImGuiCol.ModalWindowDimBg] = UiColors.BackgroundFull.Fade(0.3f);
 
         style.Colors[(int)ImGuiCol.MenuBarBg] = UiColors.BackgroundGaps;
 

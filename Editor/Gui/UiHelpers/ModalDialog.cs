@@ -1,4 +1,5 @@
 ﻿using ImGuiNET;
+using T3.Editor.Gui.Styling;
 
 namespace T3.Editor.Gui.UiHelpers;
 
@@ -64,7 +65,7 @@ public abstract class ModalDialog
 
         bool isOpen = true;
         // ImGuiWindowFlags.Popup is an internal-only flag in ImGui 1.90; passing it crashes the native call.
-        if (!ImGui.BeginPopupModal(title, ref isOpen, Flags | ImGuiWindowFlags.AlwaysAutoResize))
+        if (!BeginPopupModalWithBorder(title, ref isOpen, Flags | ImGuiWindowFlags.AlwaysAutoResize))
             return false;
             
         ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, ItemSpacing);
@@ -100,7 +101,7 @@ public abstract class ModalDialog
     internal static bool BeginStaticDialog(string title, ref bool isOpen, ImGuiWindowFlags flags = ImGuiWindowFlags.AlwaysAutoResize)
     {
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(DefaultPadding, DefaultPadding) * T3Ui.UiScaleFactor);
-        if (!ImGui.BeginPopupModal(title, ref isOpen, flags))
+        if (!BeginPopupModalWithBorder(title, ref isOpen, flags))
         {
             ImGui.PopStyleVar();
             return false;
@@ -114,6 +115,17 @@ public abstract class ModalDialog
     {
         ImGui.PopStyleVar(2);
         ImGui.EndPopup();
+    }
+
+    /** Modals take their frame width from WindowBorderSize (globally 0), not PopupBorderSize. Both are read inside Begin, so they must not leak into the content. */
+    private static bool BeginPopupModalWithBorder(string title, ref bool isOpen, ImGuiWindowFlags flags)
+    {
+        ImGui.PushStyleColor(ImGuiCol.Border, UiColors.BackgroundFull.Rgba);
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, MathF.Max(1, MathF.Round(2 * T3Ui.UiScaleFactor)));
+        var isVisible = ImGui.BeginPopupModal(title, ref isOpen, flags);
+        ImGui.PopStyleVar();
+        ImGui.PopStyleColor();
+        return isVisible;
     }
 
     private bool _shouldShowNextFrame;
