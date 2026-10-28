@@ -225,16 +225,6 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
                 }
             }
 
-            if (UserActions.DisplayImageAsBackground.Triggered())
-            {
-                var selectedImage = _nodeSelection.GetFirstSelectedInstance();
-                if (selectedImage != null && ProjectView.Focused != null)
-                {
-                    ProjectView.Focused.SetBackgroundOutput(selectedImage);
-                    //GraphWindow.Focused.SetBackgroundInstanceForCurrentGraph(selectedImage);
-                }
-            }
-
             if (UserActions.CopyToClipboard.Triggered())
             {
                 NodeActions.CopySelectedNodesToClipboard(_nodeSelection, compositionOp);
@@ -297,15 +287,6 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
             if (UserActions.SelectToLeft.Triggered())
             {
                 _nodeNavigation.SelectLeft();
-            }
-
-            if (UserActions.DisplayImageAsBackground.Triggered())
-            {
-                var selectedImage = _nodeSelection.GetFirstSelectedInstance();
-                if (selectedImage != null)
-                {
-                    _projectView.GraphImageBackground.OutputInstance = selectedImage;
-                }
             }
         }
 

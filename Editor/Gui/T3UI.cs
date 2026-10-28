@@ -2,6 +2,7 @@
 using ImGuiNET;
 using T3.IoServices;
 using T3.Core.Animation;
+using T3.Core.Operator;
 using T3.Core.DataTypes.DataSet;
 using T3.Editor.Gui.Dialog;
 using T3.Editor.Gui.Dialogs;
@@ -16,6 +17,7 @@ using T3.Editor.Gui.Windows.Output;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Helpers;
+using T3.Editor.UiModel.ProjectHandling;
 using T3.IoServices.Midi;
 
 namespace T3.Editor.Gui;
@@ -84,11 +86,45 @@ public static partial class T3Ui
             if (OutputWindow.TryGetPrimaryOutputWindow(out var outputWindow))
                 outputWindow.ToggleSetupMode();
         }
+        else if (UserActions.DisplayImageAsBackground.Triggered())
+        {
+            ToggleOutputAsGraphBackground();
+        }
         else if (UserActions.ToggleIdleMotion.Triggered())
         {
             UserSettings.Config.EnableIdleMotion = !UserSettings.Config.EnableIdleMotion;
             ActionToast.Show(UserSettings.Config.EnableIdleMotion ? "{Idle motion on}" : "{Idle motion off}");
         }
+    }
+
+    /// <summary>
+    /// Shows what the output window displays (or the selected operator in layouts without one) behind the graph,
+    /// or clears the background if one is shown.
+    /// </summary>
+    private static void ToggleOutputAsGraphBackground()
+    {
+        var projectView = ProjectView.Focused;
+        if (projectView == null)
+            return;
+
+        if (projectView.GraphImageBackground.IsActive)
+        {
+            projectView.GraphImageBackground.ClearBackground();
+            ActionToast.Show("{Graph background cleared}");
+            return;
+        }
+
+        Instance? instance = null;
+        if (OutputWindow.TryGetPrimaryOutputWindow(out var outputWindow))
+            outputWindow.Pinning.TryGetPinnedOrSelectedInstance(out instance, out _);
+
+        instance ??= projectView.NodeSelection.GetFirstSelectedInstance();
+        if (instance == null)
+            return;
+
+        projectView.SetBackgroundOutput(instance);
+        ActionToast.Show("{Graph background shows " + instance.Symbol.Name + "}   ["
+                         + UserActions.DisplayImageAsBackground.ListShortcuts() + "] to clear");
     }
 
     /// <summary>
