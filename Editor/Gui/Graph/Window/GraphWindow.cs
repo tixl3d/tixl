@@ -145,6 +145,7 @@ internal sealed class GraphWindow : Windows.Window
             OutputWindow.RequestShowInGraphOnProjectOpen();
         }
 
+        OpenedProject.MarkShownAndUnloadStale(project);
         return true;
     }
 

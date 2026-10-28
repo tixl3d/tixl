@@ -21,14 +21,25 @@ internal sealed class Structure
         _getRootAction = getRootAction;
     }
 
+    /// <summary>
+    /// Set once the project was unloaded and its instances destroyed. Lookups would otherwise create the root
+    /// instance again for whatever view or pin still holds this structure.
+    /// </summary>
+    public void MarkUnloaded() => _isUnloaded = true;
+
+    private bool _isUnloaded;
+
     public Instance? GetRootInstance()
     {
+        if (_isUnloaded)
+            return null;
+
         return GetInstanceFromIdPath([_getRootAction().Id]);
     }
     
     public Instance? GetInstanceFromIdPath(IReadOnlyList<Guid>? childPath)
     {
-        if (childPath == null || childPath.Count == 0)
+        if (childPath == null || childPath.Count == 0 || _isUnloaded)
         {
             return null;
         }

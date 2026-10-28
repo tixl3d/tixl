@@ -60,6 +60,8 @@ internal sealed unsafe class VulkanTexture(VulkanBackend backend, VkImage image,
                        });
     }
 
+    protected override bool ReleasesFromFinalizer => true;
+
     protected override void ReleaseFromFinalizer()
     {
         if (backend.ReleaseOrphan(this))
@@ -94,6 +96,8 @@ internal sealed class VulkanTextureView : GpuTextureView
         _backend.UnregisterImGuiTexture(ImGuiTextureId);
         _backend.Retire(api => api.vkDestroyImageView(view));
     }
+
+    protected override bool ReleasesFromFinalizer => true;
 
     protected override void ReleaseFromFinalizer()
     {
@@ -164,6 +168,8 @@ internal sealed unsafe class VulkanBuffer(VulkanBackend backend, VkBuffer buffer
                        });
     }
 
+    protected override bool ReleasesFromFinalizer => true;
+
     protected override void ReleaseFromFinalizer()
     {
         if (backend.ReleaseOrphan(this))
@@ -182,6 +188,8 @@ internal sealed class VulkanSampler(VulkanBackend backend, VkSampler sampler, Sa
         var sampler = Sampler;
         backend.Retire(api => api.vkDestroySampler(sampler));
     }
+
+    protected override bool ReleasesFromFinalizer => true;
 
     protected override void ReleaseFromFinalizer()
     {
@@ -207,6 +215,8 @@ internal sealed class VulkanQuery(VulkanBackend backend, VkQueryPool pool, GpuQu
             backend.Retire(api => api.vkDestroyQueryPool(queryPool));
     }
 
+    protected override bool ReleasesFromFinalizer => true;
+
     protected override void ReleaseFromFinalizer()
     {
         if (backend.ReleaseOrphan(this))
@@ -228,6 +238,8 @@ internal sealed class VulkanShader(VulkanBackend backend, VkShaderModule module,
         var module = Module;
         backend.Retire(api => api.vkDestroyShaderModule(module));
     }
+
+    protected override bool ReleasesFromFinalizer => true;
 
     protected override void ReleaseFromFinalizer()
     {

@@ -1087,8 +1087,28 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
             return false;
 
         var count = Interlocked.Increment(ref _orphanCount);
-        GraphicsLog.Debug?.Invoke($"Released undisposed {resource.GetType().Name} '{resource.Label}' ({count} so far)");
+        GraphicsLog.Debug?.Invoke($"Released undisposed {resource.GetType().Name} {DescribeOrphan(resource)} ({count} so far)");
         return true;
+    }
+
+    /// <summary>Labels are mostly empty, so the shape is what tells which operator dropped it.</summary>
+    private static string DescribeOrphan(GpuResource resource)
+    {
+        var texture = resource switch
+                          {
+                              GpuTextureView view => view.Texture,
+                              GpuTexture t        => t,
+                              _                   => null,
+                          };
+
+        var label = !string.IsNullOrEmpty(resource.Label) ? resource.Label : texture?.Label;
+        var shape = texture != null
+                        ? $"{texture.Description.Width}x{texture.Description.Height} {texture.Description.Format}"
+                        : resource is GpuBuffer buffer
+                            ? $"{buffer.Description.SizeInBytes} bytes"
+                            : string.Empty;
+
+        return string.IsNullOrEmpty(label) ? shape : $"'{label}' {shape}";
     }
 
     /// <summary>

@@ -419,6 +419,15 @@ internal sealed partial class SettingsWindow : Window
                                                       UserSettings.Defaults.ReopenLastProjectOnStartup
                                                      );
 
+                    changed |= FormInputs.AddInt("Keep Projects Loaded",
+                                                 ref UserSettings.Config.KeepLoadedProjectCount,
+                                                 1, 10, 0.1f,
+                                                 """
+                                                 How many recently shown projects stay loaded, including the current one.
+                                                 Switching back to a loaded project is instant. Older ones are unloaded to free GPU memory and are rebuilt when opened again.
+                                                 """,
+                                                 UserSettings.Defaults.KeepLoadedProjectCount);
+
                     FormInputs.AddSectionSubHeader("Performance");
                     FormInputs.SetIndentToLeft();
 

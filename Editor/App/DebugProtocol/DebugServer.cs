@@ -1131,6 +1131,18 @@ internal static class DebugServer
 
     private static JToken TryGetGpuMemoryInfo()
     {
+        // Vulkan reports its heap budget itself; D3D11 answers zeros and is asked through DXGI below.
+        var report = Program.Device?.Backend.QueryMemory() ?? default;
+        if (report.BudgetBytes > 0 || report.ResourceBytes > 0)
+        {
+            return new JObject
+                       {
+                           ["currentUsageMb"] = Math.Round(report.UsedBytes / (1024.0 * 1024.0), 1),
+                           ["budgetMb"] = Math.Round(report.BudgetBytes / (1024.0 * 1024.0), 1),
+                           ["resourceMb"] = Math.Round(report.ResourceBytes / (1024.0 * 1024.0), 1),
+                       };
+        }
+
         try
         {
             if (_gpuAdapter == null)

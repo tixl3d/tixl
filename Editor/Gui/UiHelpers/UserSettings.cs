@@ -91,6 +91,9 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         public bool EnableUsbProjectDetection = true;
         public bool ReopenLastProjectOnStartup = true;
 
+        /// <summary>Projects switched away from stay loaded for a quick return; older ones are unloaded.</summary>
+        public int KeepLoadedProjectCount = 3;
+
         /// <summary>Folder of the project that was open when the editor closed; empty if it closed in the project hub.</summary>
         public string LastOpenProjectFolder = string.Empty;
 

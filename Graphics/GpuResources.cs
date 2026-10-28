@@ -23,7 +23,7 @@ public abstract class GpuResource : IDisposable
 
     public void Dispose()
     {
-        if (IsDisposed)
+        if (Interlocked.Exchange(ref _released, 1) != 0)
             return;
 
         IsDisposed = true;
@@ -46,13 +46,24 @@ public abstract class GpuResource : IDisposable
     /// </summary>
     ~GpuResource()
     {
+        // A wrapper finalized in the same collection may dispose this concurrently (AbstractTexture does), so
+        // exactly one of the two may release.
+        if (!ReleasesFromFinalizer || Interlocked.Exchange(ref _released, 1) != 0)
+            return;
+
+        IsDisposed = true;
         ReleaseFromFinalizer();
     }
+
+    /// <summary>False leaves an undisposed resource to its wrappers' finalizers, as D3D11 always did.</summary>
+    protected virtual bool ReleasesFromFinalizer => false;
 
     /// <summary>Runs on the finalizer thread, so it may only hand work to something thread-safe.</summary>
     protected virtual void ReleaseFromFinalizer()
     {
     }
+
+    private int _released;
 }
 
 /// <summary>A texture of any dimension; the description says which.</summary>
