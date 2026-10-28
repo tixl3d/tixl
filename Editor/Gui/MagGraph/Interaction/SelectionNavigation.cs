@@ -2,6 +2,7 @@
 using ImGuiNET;
 using T3.Core.Utils;
 using T3.Editor.Gui.Interaction;
+using T3.Editor.Gui.MagGraph.Interaction.KeyboardEditing;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.Styling;
@@ -80,8 +81,13 @@ internal static class SelectionNavigation
     /// </summary>
     internal static void DrawTargetIndicators(GraphUiContext context, ImDrawListPtr drawList)
     {
+        // Only while an arrow key would really move the selection; an active input (like the parameter popover)
+        // or a popup takes the keys
         if (!context.View.IsFocused
             || context.StateMachine.CurrentState != GraphStates.Default
+            || ImGui.IsAnyItemActive()
+            || T3Ui.IsAnyPopupOpen
+            || ParameterPopover.IsOpen
             || !IsKeyboardNavigationActive(context))
             return;
 
