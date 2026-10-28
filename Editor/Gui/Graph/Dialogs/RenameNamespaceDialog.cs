@@ -23,6 +23,8 @@ internal sealed class RenameNamespaceDialog : ModalDialog
                 _projectToCopyTo = _projectToCopyFrom;
             }
 
+            var canRename = false;
+            var namespaceValid = false;
             var hasProjectToCopyFrom = _projectToCopyFrom != null;
             if (hasProjectToCopyFrom)
             {
@@ -30,18 +32,35 @@ internal sealed class RenameNamespaceDialog : ModalDialog
 
                 if (_projectToCopyTo != null)
                 {
-                    DrawRenameFields();
-                    ImGui.SameLine();
+                    canRename = DrawRenameFields(out namespaceValid);
                 }
             }
             else
             {
                 ImGui.TextColored(UiColors.StatusError.Rgba, $"No source project found for namespace {_nameSpace}");
             }
-                
+
+            if (canRename)
+            {
+                AlignCtaButtons("Cancel", "Rename");
+            }
+            else
+            {
+                AlignCtaButtons("Cancel");
+            }
+
             if (CustomComponents.DrawCtaButton("Cancel", Icon.None, CustomComponents.ButtonStates.Emphasized))
             {
                 Close();
+            }
+
+            if (canRename)
+            {
+                ImGui.SameLine();
+                if (CustomComponents.DrawCtaButton("Rename", namespaceValid))
+                {
+                    RenameNamespace();
+                }
             }
 
             EndDialogContent();
@@ -50,34 +69,40 @@ internal sealed class RenameNamespaceDialog : ModalDialog
         EndDialog();
     }
 
-    private static void DrawRenameFields()
+    /** Returns false if the project data is incomplete and no rename can be offered. */
+    private static bool DrawRenameFields(out bool namespaceValid)
     {
+        namespaceValid = false;
         if (ImGui.IsWindowAppearing())
             ImGui.SetKeyboardFocusHere();
 
         if (_projectToCopyTo == null || _node == null || _projectToCopyFrom == null)
         {
             ImGui.Text("invalid project data");
-            return;
+            return false;
         }
         
-        _ = SymbolModificationInputs.DrawNamespaceInput(ref _nameSpace, _projectToCopyTo, false, out var namespaceValid);
+        _ = SymbolModificationInputs.DrawNamespaceInput(ref _nameSpace, _projectToCopyTo, false, out namespaceValid);
 
         CustomComponents.HelpText("Careful now. This operator might affect a lot of operator definitions");
+        return true;
+    }
 
-        if (CustomComponents.DrawCtaButton("Rename", namespaceValid))
+    private static void RenameNamespace()
+    {
+        if (_projectToCopyTo == null || _node == null || _projectToCopyFrom == null)
+            return;
+
+        if (EditableSymbolProject.RenameNameSpaces(_node, _projectToCopyFrom, _projectToCopyTo, _nameSpace, out var reason))
         {
-            if (EditableSymbolProject.RenameNameSpaces(_node, _projectToCopyFrom, _projectToCopyTo, _nameSpace, out var reason))
-            {
-                T3Ui.Save(false);
-            }
-            else
-            {
-                BlockingWindow.Instance.ShowMessageBox(reason, "Could not rename namespace");
-            }
-
-            Close();
+            T3Ui.Save(false);
         }
+        else
+        {
+            BlockingWindow.Instance.ShowMessageBox(reason, "Could not rename namespace");
+        }
+
+        Close();
     }
 
     private static void Close()

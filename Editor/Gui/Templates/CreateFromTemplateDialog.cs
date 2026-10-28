@@ -124,26 +124,39 @@ internal sealed class CreateFromTemplateDialog : ModalDialog
                     
                 //_ = SymbolModificationInputs.DrawProjectDropdown(ref _newNameSpace, ref _projectToCopyTo);
 
-                if (_projectToCopyTo != null)
+                var hasTargetProject = _projectToCopyTo != null;
+                var isNewSymbolNameValid = false;
+                if (hasTargetProject)
                 {
-                    _ = SymbolModificationInputs.DrawSymbolNameAndNamespaceInputs(ref _newSymbolName, ref _newNameSpace, _projectToCopyTo, out var isNewSymbolNameValid);
+                    _ = SymbolModificationInputs.DrawSymbolNameAndNamespaceInputs(ref _newSymbolName, ref _newNameSpace, _projectToCopyTo, out isNewSymbolNameValid);
 
                     FormInputs.AddStringInput("Description", ref _newDescription);
 
                     ImGui.Dummy(new Vector2(10, 10));
+                }
 
-                    if (CustomComponents.DrawCtaButton("Create", isNewSymbolNameValid))
-                    {
-                        TemplateUse.TryToApplyTemplate(_selectedTemplate, _newSymbolName, _newNameSpace, _newDescription, _projectToCopyTo);
-                        ImGui.CloseCurrentPopup();
-                    }
-
-                    ImGui.SameLine();
+                if (hasTargetProject)
+                {
+                    AlignCtaButtons("Cancel", "Create");
+                }
+                else
+                {
+                    AlignCtaButtons("Cancel");
                 }
 
                 if (CustomComponents.DrawCtaButton("Cancel", Icon.None, CustomComponents.ButtonStates.Emphasized))
                 {
                     ImGui.CloseCurrentPopup();
+                }
+
+                if (hasTargetProject)
+                {
+                    ImGui.SameLine();
+                    if (CustomComponents.DrawCtaButton("Create", isNewSymbolNameValid))
+                    {
+                        TemplateUse.TryToApplyTemplate(_selectedTemplate, _newSymbolName, _newNameSpace, _newDescription, _projectToCopyTo);
+                        ImGui.CloseCurrentPopup();
+                    }
                 }
             }
             ImGui.EndGroup();

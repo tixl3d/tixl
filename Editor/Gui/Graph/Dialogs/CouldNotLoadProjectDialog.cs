@@ -143,17 +143,19 @@ internal sealed class CouldNotLoadProjectDialog : ModalDialog
                 FormInputs.AddVerticalSpace(2);
             }
 
+            AlignCtaButtons("Cancel", "Move and Restart");
+            if (CustomComponents.DrawCtaButton("Cancel", Icon.None, CustomComponents.ButtonStates.Default))
+                ImGui.CloseCurrentPopup();
+
+            ImGui.SameLine();
             if (CustomComponents.DrawCtaButton("Move and Restart", isEnabled: targetValid && _conflictingTargets.Count == 0))
             {
                 _resultMessage = TryMoveAndRestart(targetFolder!);
             }
-
-            ImGui.SameLine();
-            if (CustomComponents.DrawCtaButton("Cancel", Icon.None, CustomComponents.ButtonStates.Default))
-                ImGui.CloseCurrentPopup();
         }
         else
         {
+            AlignCtaButtons("Close");
             if (CustomComponents.DrawCtaButton("Close", Icon.None, CustomComponents.ButtonStates.Default))
                 ImGui.CloseCurrentPopup();
         }

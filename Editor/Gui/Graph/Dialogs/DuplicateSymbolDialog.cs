@@ -79,7 +79,10 @@ internal sealed class DuplicateSymbolDialog : ModalDialog
             
             _ = SymbolModificationInputs.DrawProjectDropdown(ref nameSpace, ref _projectToCopyTo);
 
-            if (_projectToCopyTo != null)
+            var hasTargetProject = _projectToCopyTo != null;
+            var symbolNamesValid = false;
+            var isBlocked = false;
+            if (hasTargetProject)
             {
                 // The check parses the source file, so only redo it when symbol or target change
                 if (selectionChanged || !ReferenceEquals(_checkedProject, _projectToCopyTo))
@@ -88,7 +91,7 @@ internal sealed class DuplicateSymbolDialog : ModalDialog
                     Duplicate.TryGetDuplicationBlocker(s, _projectToCopyTo, out _blockReason);
                 }
 
-                var isBlocked = _blockReason != null;
+                isBlocked = _blockReason != null;
                 if (isBlocked)
                 {
                     ImGui.PushStyleColor(ImGuiCol.Text, UiColors.StatusWarning.Rgba);
@@ -97,14 +100,34 @@ internal sealed class DuplicateSymbolDialog : ModalDialog
                     ImGui.Spacing();
                 }
 
-                _ = SymbolModificationInputs.DrawSymbolNameAndNamespaceInputs(ref newTypeName, ref nameSpace, _projectToCopyTo, out var symbolNamesValid);
+                _ = SymbolModificationInputs.DrawSymbolNameAndNamespaceInputs(ref newTypeName, ref nameSpace, _projectToCopyTo, out symbolNamesValid);
                 ImGui.Spacing();
 
                 FormInputs.DrawInputLabel("Description");
                 ImGui.InputTextMultiline("##description", ref description, 1024, new Vector2(450, 60) * T3Ui.UiScaleFactor);
 
                 FormInputs.AddHint("Duplicating creates a new operator and can't be undone — this clears the undo history.");
+            }
 
+            if (hasTargetProject)
+            {
+                AlignCtaButtons("Cancel", "Duplicate");
+            }
+            else
+            {
+                AlignCtaButtons("Cancel");
+            }
+
+            if (CustomComponents.DrawCtaButton("Cancel", Icon.None, CustomComponents.ButtonStates.Emphasized))
+            {
+                ImGui.CloseCurrentPopup();
+                _completedReloadPrompt = false;
+                Closed?.Invoke();
+            }
+
+            if (hasTargetProject)
+            {
+                ImGui.SameLine();
                 if (CustomComponents.DrawCtaButton("Duplicate", symbolNamesValid && !isBlocked))
                 {
                     if(!SymbolUiRegistry.TryGetSymbolUi(symbolGuid, out var compositionSymbolUi))
@@ -141,15 +164,6 @@ internal sealed class DuplicateSymbolDialog : ModalDialog
                     _completedReloadPrompt = false;
                     Closed?.Invoke();
                 }
-
-                ImGui.SameLine();
-            }
-
-            if (CustomComponents.DrawCtaButton("Cancel", Icon.None, CustomComponents.ButtonStates.Emphasized))
-            {
-                ImGui.CloseCurrentPopup();
-                _completedReloadPrompt = false;
-                Closed?.Invoke();
             }
 
             EndDialogContent();

@@ -75,6 +75,7 @@ internal sealed class MissingOperatorsDialog : ModalDialog
             ImGui.EndChild();
 
             FormInputs.AddVerticalSpace(6);
+            AlignCtaButtons("Close");
             if (CustomComponents.DrawCtaButton("Close", Icon.None, CustomComponents.ButtonStates.Default))
                 ImGui.CloseCurrentPopup();
 

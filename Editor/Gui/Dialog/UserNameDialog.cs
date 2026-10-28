@@ -40,6 +40,7 @@ internal sealed class UserNameDialog : ModalDialog
             FormInputs.AddVerticalSpace();
             FormInputs.ApplyIndent();
 
+            AlignCtaButtons("Okay");
             if (CustomComponents.DrawCtaButton("Okay", isValidProjectName))
             {
                 try

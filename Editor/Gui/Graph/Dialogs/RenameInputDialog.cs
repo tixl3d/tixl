@@ -23,7 +23,7 @@ internal sealed class RenameInputDialog : ModalDialog
         EndDialog();
     }
 
-    private static void DrawContent()
+    private void DrawContent()
     {
         var isWindowAppearing = ImGui.IsWindowAppearing();
 
@@ -64,6 +64,13 @@ internal sealed class RenameInputDialog : ModalDialog
         
         FormInputs.ApplyIndent();
 
+        AlignCtaButtons("Cancel", "Rename input");
+        if (CustomComponents.DrawCtaButton("Cancel", Icon.None, CustomComponents.ButtonStates.Emphasized))
+        {
+            ImGui.CloseCurrentPopup();
+        }
+
+        ImGui.SameLine();
         if (CustomComponents.DrawCtaButton("Rename input", isValid))
         {
             // Validate with a dry run before committing the recompile to the undo stack.
@@ -72,12 +79,6 @@ internal sealed class RenameInputDialog : ModalDialog
                 UndoRedoStack.AddAndExecute(new RenameSlotCommand(symbol.Id, _inputId, inputDef.Name, _newInputName, isInput: true));
                 ImGui.CloseCurrentPopup();
             }
-        }
-
-        ImGui.SameLine();
-        if (CustomComponents.DrawCtaButton("Cancel", Icon.None, CustomComponents.ButtonStates.Emphasized))
-        {
-            ImGui.CloseCurrentPopup();
         }
     }
 

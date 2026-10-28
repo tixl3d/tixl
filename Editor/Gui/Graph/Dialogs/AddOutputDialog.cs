@@ -40,17 +40,18 @@ internal sealed class AddOutputDialog : ModalDialog
             FormInputs.AddCheckBox("Is time clip", ref _isTimeClip);
                 
             FormInputs.ApplyIndent();
+            AlignCtaButtons("Cancel", "Add");
+            if (CustomComponents.DrawCtaButton("Cancel", Icon.None, CustomComponents.ButtonStates.Emphasized))
+            {
+                ImGui.CloseCurrentPopup();
+            }
+
+            ImGui.SameLine();
             if (CustomComponents.DrawCtaButton("Add", isValid))
             {
                 UndoRedoStack.AddAndExecute(new AddOutputCommand(symbol.Id, _parameterName, _selectedType, _isTimeClip, _posOnCanvas));
                 _parameterName = string.Empty;
                 _posOnCanvas += new Vector2(0, MagGraphItem.GridSize.Y);
-            }
-
-            ImGui.SameLine();
-            if (CustomComponents.DrawCtaButton("Cancel", Icon.None, CustomComponents.ButtonStates.Emphasized))
-            {
-                ImGui.CloseCurrentPopup();
             }
 
             EndDialogContent();

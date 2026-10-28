@@ -1,4 +1,5 @@
 ﻿using ImGuiNET;
+using T3.Core.Utils;
 using T3.Editor.Gui.Styling;
 
 namespace T3.Editor.Gui.UiHelpers;
@@ -68,6 +69,7 @@ public abstract class ModalDialog
         if (!BeginPopupModalWithBorder(title, ref isOpen, Flags | ImGuiWindowFlags.AlwaysAutoResize))
             return false;
             
+        _minContentBottomY = ImGui.GetWindowPos().Y + minSize.Y - ImGui.GetStyle().WindowPadding.Y;
         ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, ItemSpacing);
         FrameStats.Current.OpenedPopUpName = title;
         FrameStats.Current.IsModalDialogOpen = true;
@@ -117,6 +119,28 @@ public abstract class ModalDialog
         ImGui.EndPopup();
     }
 
+    /// <summary>
+    /// Moves the cursor so the following row of CTA buttons sits in the dialog's bottom-right corner. Pass the labels
+    /// in draw order — Cancel first, the default action last — and separate the buttons with <see cref="ImGui.SameLine()"/>.
+    /// </summary>
+    protected void AlignCtaButtons(params ReadOnlySpan<string> labels)
+    {
+        var buttonsWidth = (labels.Length - 1) * ImGui.GetStyle().ItemSpacing.X;
+        var buttonHeight = 0f;
+        foreach (var label in labels)
+        {
+            var size = CustomComponents.GetCtaButtonSize(label);
+            buttonsWidth += size.X;
+            buttonHeight = MathF.Max(buttonHeight, size.Y);
+        }
+
+        // Anchored to the minimum height rather than the current one, which would hold a grown dialog at its size.
+        var cursor = ImGui.GetCursorScreenPos();
+        var x = cursor.X + MathF.Max(0, ImGui.GetContentRegionAvail().X - buttonsWidth);
+        var y = MathF.Max(cursor.Y, _minContentBottomY - buttonHeight);
+        ImGui.SetCursorScreenPos(new Vector2(x, y).Floor());
+    }
+
     /** Modals take their frame width from WindowBorderSize (globally 0), not PopupBorderSize. Both are read inside Begin, so they must not leak into the content. */
     private static bool BeginPopupModalWithBorder(string title, ref bool isOpen, ImGuiWindowFlags flags)
     {
@@ -129,6 +153,7 @@ public abstract class ModalDialog
     }
 
     private bool _shouldShowNextFrame;
+    private float _minContentBottomY;
     protected Vector2 DialogSize = new(500, 350);
     protected Vector2 ItemSpacing = DefaultItemSpacing;
     protected float Padding = DefaultPadding;

@@ -49,13 +49,14 @@ internal sealed class ExitDialog : ModalDialog
                 ImGui.CloseCurrentPopup();
             }
 
-            // All buttons are right-aligned, with the default action at the far right.
-            var itemSpacing = ImGui.GetStyle().ItemSpacing.X;
-            var buttonsWidth = CustomComponents.GetCtaButtonSize("Cancel").X + itemSpacing + CustomComponents.GetCtaButtonSize("Exit").X;
             if (hasChanges)
-                buttonsWidth += itemSpacing + CustomComponents.GetCtaButtonSize("Save and Exit").X;
-
-            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + MathF.Max(0, ImGui.GetContentRegionAvail().X - buttonsWidth));
+            {
+                AlignCtaButtons("Cancel", "Exit", "Save and Exit");
+            }
+            else
+            {
+                AlignCtaButtons("Cancel", "Exit");
+            }
 
             if (CustomComponents.DrawCtaButton("Cancel", Icon.None, CustomComponents.ButtonStates.Default))
             {
