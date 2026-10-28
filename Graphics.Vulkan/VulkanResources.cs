@@ -37,9 +37,13 @@ internal sealed unsafe class VulkanTexture(VulkanBackend backend, VkImage image,
     /// <summary>False for a swapchain's images: the swapchain owns them and destroying them would be a bug.</summary>
     internal bool OwnsImage = true;
 
+    /// <summary>What the backend counted against its memory total when it allocated this.</summary>
+    internal long AllocatedBytes;
+
     protected override void ReleaseWhenRetired()
     {
         backend.Untrack(this);
+        backend.AccountRelease(AllocatedBytes);
         var image = OwnsImage ? Image : VkImage.Null;
         var staging = StagingBuffer;
         var memory = Memory;
@@ -54,6 +58,12 @@ internal sealed unsafe class VulkanTexture(VulkanBackend backend, VkImage image,
                            if (!memory.IsNull)
                                api.vkFreeMemory(memory);
                        });
+    }
+
+    protected override void ReleaseFromFinalizer()
+    {
+        if (backend.ReleaseOrphan(this))
+            ReleaseWhenRetired();
     }
 }
 
@@ -83,6 +93,12 @@ internal sealed class VulkanTextureView : GpuTextureView
         var view = View;
         _backend.UnregisterImGuiTexture(ImGuiTextureId);
         _backend.Retire(api => api.vkDestroyImageView(view));
+    }
+
+    protected override void ReleaseFromFinalizer()
+    {
+        if (_backend.ReleaseOrphan(this))
+            ReleaseWhenRetired();
     }
 
     private readonly VulkanBackend _backend;
@@ -123,6 +139,9 @@ internal sealed unsafe class VulkanBuffer(VulkanBackend backend, VkBuffer buffer
     internal VkPipelineStageFlags2 LastStage = VkPipelineStageFlags2.TopOfPipe;
     internal VkAccessFlags2 LastAccess = VkAccessFlags2.None;
 
+    /// <summary>What the backend counted against its memory total when it allocated this.</summary>
+    internal long AllocatedBytes;
+
     protected override void ReleaseWhenRetired()
     {
         if (PendingWrite != null)
@@ -132,6 +151,7 @@ internal sealed unsafe class VulkanBuffer(VulkanBackend backend, VkBuffer buffer
         }
 
         backend.Untrack(this);
+        backend.AccountRelease(AllocatedBytes);
         var buffer = Buffer;
         var memory = Memory;
         backend.Retire(api =>
@@ -142,6 +162,12 @@ internal sealed unsafe class VulkanBuffer(VulkanBackend backend, VkBuffer buffer
                            if (!memory.IsNull)
                                api.vkFreeMemory(memory);
                        });
+    }
+
+    protected override void ReleaseFromFinalizer()
+    {
+        if (backend.ReleaseOrphan(this))
+            ReleaseWhenRetired();
     }
 }
 
@@ -155,6 +181,12 @@ internal sealed class VulkanSampler(VulkanBackend backend, VkSampler sampler, Sa
         backend.Untrack(this);
         var sampler = Sampler;
         backend.Retire(api => api.vkDestroySampler(sampler));
+    }
+
+    protected override void ReleaseFromFinalizer()
+    {
+        if (backend.ReleaseOrphan(this))
+            ReleaseWhenRetired();
     }
 }
 
@@ -174,6 +206,12 @@ internal sealed class VulkanQuery(VulkanBackend backend, VkQueryPool pool, GpuQu
         if (!queryPool.IsNull)
             backend.Retire(api => api.vkDestroyQueryPool(queryPool));
     }
+
+    protected override void ReleaseFromFinalizer()
+    {
+        if (backend.ReleaseOrphan(this))
+            ReleaseWhenRetired();
+    }
 }
 
 internal sealed class VulkanShader(VulkanBackend backend, VkShaderModule module, ShaderStage stage, ShaderBinding[] bindings, string? label)
@@ -189,6 +227,12 @@ internal sealed class VulkanShader(VulkanBackend backend, VkShaderModule module,
         backend.Untrack(this);
         var module = Module;
         backend.Retire(api => api.vkDestroyShaderModule(module));
+    }
+
+    protected override void ReleaseFromFinalizer()
+    {
+        if (backend.ReleaseOrphan(this))
+            ReleaseWhenRetired();
     }
 }
 

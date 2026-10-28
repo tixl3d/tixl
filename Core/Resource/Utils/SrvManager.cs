@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using T3.Graphics.Compat;
 using T3.Core.Logging;
 
@@ -22,7 +23,7 @@ public static class SrvManager
         if (srv == null)
             return null;
             
-        _srvForTextures[texture]= srv;
+        _srvForTextures.AddOrUpdate(texture, srv);
         return srv;
     }
 
@@ -45,22 +46,30 @@ public static class SrvManager
         
     public static void RemoveForDisposedTextures()
     {
-        var keysForRemoval = new List<KeyValuePair<Texture2D, ShaderResourceView>>();
-        foreach (var pair in _srvForTextures)
+        _keysForRemoval.Clear();
+        foreach (var pair in (IEnumerable<KeyValuePair<Texture2D, ShaderResourceView>>)_srvForTextures)
         {
             if (pair.Key.IsDisposed)
             {
-                keysForRemoval.Add(pair);
+                _keysForRemoval.Add(pair);
             }
         }
 
-        foreach (var (texture,srv) in keysForRemoval)
+        foreach (var (texture,srv) in _keysForRemoval)
         {
             //Log.Debug("Disposing SRV...");
             _srvForTextures.Remove(texture);
             srv.Dispose();
         }
+
+        _keysForRemoval.Clear();
     }
 
-    private static readonly Dictionary<Texture2D, ShaderResourceView> _srvForTextures = new();
+    /// <summary>
+    /// Weak by texture: a texture an operator dropped without disposing must not be kept alive by its view,
+    /// or neither can ever be collected.
+    /// </summary>
+    private static readonly ConditionalWeakTable<Texture2D, ShaderResourceView> _srvForTextures = new();
+
+    private static readonly List<KeyValuePair<Texture2D, ShaderResourceView>> _keysForRemoval = new();
 }

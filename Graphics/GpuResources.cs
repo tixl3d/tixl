@@ -39,6 +39,20 @@ public abstract class GpuResource : IDisposable
 
     /// <summary>Hands the native object to the backend's deferred-destruction queue.</summary>
     protected abstract void ReleaseWhenRetired();
+
+    /// <summary>
+    /// Only reached for a resource nobody disposed. Operators drop textures without disposing them, which
+    /// D3D11's driver forgave; a backend that can release from the finalizer thread does it here.
+    /// </summary>
+    ~GpuResource()
+    {
+        ReleaseFromFinalizer();
+    }
+
+    /// <summary>Runs on the finalizer thread, so it may only hand work to something thread-safe.</summary>
+    protected virtual void ReleaseFromFinalizer()
+    {
+    }
 }
 
 /// <summary>A texture of any dimension; the description says which.</summary>

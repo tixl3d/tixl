@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using T3.Graphics;
 using Vortice.Vulkan;
@@ -324,7 +325,7 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         if (description.Memory != MemoryKind.DeviceLocal)
         {
             var staging = CreateBufferCore(SizeOf(description), VkBufferUsageFlags.TransferSrc | VkBufferUsageFlags.TransferDst,
-                                           description.Memory, out var stagingMemory, out var mapped);
+                                           description.Memory, out var stagingMemory, out var mapped, out var stagingBytes);
 
             if (staging.IsNull)
             {
@@ -332,7 +333,9 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
                 return new VulkanTexture(this, VkImage.Null, VkDeviceMemory.Null, description, label);
             }
 
-            var stagingTexture = Track(new VulkanTexture(this, VkImage.Null, stagingMemory, description, label) { StagingBuffer = staging, Mapped = mapped });
+            AccountAllocation(stagingBytes);
+            var stagingTexture = Track(new VulkanTexture(this, VkImage.Null, stagingMemory, description, label)
+                                           { StagingBuffer = staging, Mapped = mapped, AllocatedBytes = stagingBytes });
 
             if (!initialData.IsEmpty)
                 initialData.CopyTo(new Span<byte>(mapped, initialData.Length));
@@ -383,9 +386,9 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         }
 
         Api.vkBindImageMemory(image, memory, 0).CheckResult();
-        Interlocked.Add(ref _allocatedBytes, (long)requirements.size);
+        AccountAllocation((long)requirements.size);
 
-        var texture = Track(new VulkanTexture(this, image, memory, description, label));
+        var texture = Track(new VulkanTexture(this, image, memory, description, label) { AllocatedBytes = (long)requirements.size });
         SetDebugName(VkObjectType.Image, image.Handle, label);
 
         if (!initialData.IsEmpty)
@@ -418,7 +421,7 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
             total = AlignUp(total, alignment) + (ulong)SubresourceByteSize(description, i % mipLevels, initialData[i]);
         }
 
-        var staging = CreateBufferCore(total, VkBufferUsageFlags.TransferSrc, MemoryKind.Upload, out var stagingMemory, out var mapped);
+        var staging = CreateBufferCore(total, VkBufferUsageFlags.TransferSrc, MemoryKind.Upload, out var stagingMemory, out var mapped, out _);
         ulong offset = 0;
 
         for (var i = 0; i < regions.Length; i++)
@@ -499,7 +502,7 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         var slices = description.Memory == MemoryKind.Upload ? FramesInFlight : 1;
         var stride = AlignUp(size, BufferSliceAlignment(description.Usage));
 
-        var buffer = CreateBufferCore(stride * (ulong)slices, usage, description.Memory, out var memory, out var mapped);
+        var buffer = CreateBufferCore(stride * (ulong)slices, usage, description.Memory, out var memory, out var mapped, out var allocatedBytes);
 
         if (buffer.IsNull)
         {
@@ -512,8 +515,10 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
                              Mapped = mapped,
                              SliceCount = slices,
                              SliceStride = stride,
+                             AllocatedBytes = allocatedBytes,
                          };
 
+        AccountAllocation(allocatedBytes);
         Track(result);
         SetDebugName(VkObjectType.Buffer, buffer.Handle, label);
 
@@ -528,10 +533,16 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         return result;
     }
 
-    private VkBuffer CreateBufferCore(ulong size, VkBufferUsageFlags usage, MemoryKind memory, out VkDeviceMemory deviceMemory, out void* mapped)
+    /// <param name="allocatedBytes">
+    /// Not counted against the memory total here: a temporary staging buffer is destroyed before anyone asks,
+    /// so only callers that hand out a resource account for it.
+    /// </param>
+    private VkBuffer CreateBufferCore(ulong size, VkBufferUsageFlags usage, MemoryKind memory, out VkDeviceMemory deviceMemory, out void* mapped,
+                                      out long allocatedBytes)
     {
         deviceMemory = VkDeviceMemory.Null;
         mapped = null;
+        allocatedBytes = 0;
 
         if (memory != MemoryKind.DeviceLocal)
             usage |= VkBufferUsageFlags.TransferSrc | VkBufferUsageFlags.TransferDst;
@@ -565,7 +576,7 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         }
 
         Api.vkBindBufferMemory(buffer, deviceMemory, 0).CheckResult();
-        Interlocked.Add(ref _allocatedBytes, (long)requirements.size);
+        allocatedBytes = (long)requirements.size;
 
         if (memory != MemoryKind.DeviceLocal)
         {
@@ -1026,6 +1037,10 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
     {
         lock (_frames)
         {
+            // A finalizer can still run after the device is gone; the process is exiting then anyway.
+            if (_deviceDestroyed)
+                return;
+
             _frames[_frameIndex].Retired.Add(release);
         }
     }
@@ -1033,35 +1048,69 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
     /// <summary>
     /// Records a resource as alive until it is released, so <see cref="Dispose"/> can destroy what nobody did.
     /// A device's objects have to be gone before the device is; under D3D11, exiting the process was enough.
+    /// Weak, so a resource nobody references any more can still be collected and released by its finalizer.
     /// </summary>
     private T Track<T>(T resource) where T : GpuResource
     {
-        lock (_liveResources)
-        {
-            _liveResources.Add(resource);
-        }
-
+        _liveResources.AddOrUpdate(resource, _trackedMarker);
         return resource;
     }
 
+    /// <summary>Walks the table, so it is meant for diagnostics, not per-frame code.</summary>
     public int LiveResourceCount
     {
         get
         {
-            lock (_liveResources)
+            var count = 0;
+            foreach (var _ in (IEnumerable<KeyValuePair<GpuResource, object>>)_liveResources)
             {
-                return _liveResources.Count;
+                count++;
             }
+
+            return count;
         }
     }
 
     /// <summary>Called by a resource as it is released.</summary>
     internal void Untrack(GpuResource resource)
     {
-        lock (_liveResources)
-        {
-            _liveResources.Remove(resource);
-        }
+        _liveResources.Remove(resource);
+    }
+
+    /// <summary>
+    /// Called on the finalizer thread for a resource that was dropped without being disposed. Its native
+    /// objects then go through the retirement queue as a dispose would. False once the device is gone.
+    /// </summary>
+    internal bool ReleaseOrphan(GpuResource resource)
+    {
+        if (_deviceDestroyed)
+            return false;
+
+        var count = Interlocked.Increment(ref _orphanCount);
+        GraphicsLog.Debug?.Invoke($"Released undisposed {resource.GetType().Name} '{resource.Label}' ({count} so far)");
+        return true;
+    }
+
+    /// <summary>
+    /// The GC cannot see GPU memory, so a few small wrappers holding gigabytes of textures would never prompt
+    /// a collection. Reporting the bytes as pressure lets dropped resources be finalized when VRAM fills up.
+    /// </summary>
+    private void AccountAllocation(long bytes)
+    {
+        if (bytes <= 0)
+            return;
+
+        Interlocked.Add(ref _allocatedBytes, bytes);
+        GC.AddMemoryPressure(bytes);
+    }
+
+    internal void AccountRelease(long bytes)
+    {
+        if (bytes <= 0)
+            return;
+
+        Interlocked.Add(ref _allocatedBytes, -bytes);
+        GC.RemoveMemoryPressure(bytes);
     }
 
     /// <summary>
@@ -1070,11 +1119,18 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
     /// </summary>
     private void ReleaseSurvivors()
     {
-        GpuResource[] survivors;
-        lock (_liveResources)
+        // Resources that are already unreachable must be queued now: finalized after the device is gone, they
+        // could no longer be destroyed.
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+
+        var survivorList = new List<GpuResource>();
+        foreach (var (resource, _) in (IEnumerable<KeyValuePair<GpuResource, object>>)_liveResources)
         {
-            survivors = [.._liveResources];
+            survivorList.Add(resource);
         }
+
+        var survivors = survivorList.ToArray();
 
         if (survivors.Length == 0)
             return;
@@ -1365,7 +1421,7 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
     /// </summary>
     private void UploadTexture(VulkanTexture texture, ReadOnlySpan<byte> data)
     {
-        var staging = CreateBufferCore((ulong)data.Length, VkBufferUsageFlags.TransferSrc, MemoryKind.Upload, out var stagingMemory, out var mapped);
+        var staging = CreateBufferCore((ulong)data.Length, VkBufferUsageFlags.TransferSrc, MemoryKind.Upload, out var stagingMemory, out var mapped, out _);
 
         if (staging.IsNull)
         {
@@ -1408,7 +1464,7 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
 
     private void UploadBuffer(VulkanBuffer buffer, ReadOnlySpan<byte> data)
     {
-        var staging = CreateBufferCore((ulong)data.Length, VkBufferUsageFlags.TransferSrc, MemoryKind.Upload, out var stagingMemory, out var mapped);
+        var staging = CreateBufferCore((ulong)data.Length, VkBufferUsageFlags.TransferSrc, MemoryKind.Upload, out var stagingMemory, out var mapped, out _);
 
         if (staging.IsNull)
         {
@@ -1467,7 +1523,7 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         lock (_imGuiTextures)
         {
             var id = ++_nextImGuiTextureId;
-            _imGuiTextures[id] = view;
+            _imGuiTextures[id] = new WeakReference<VulkanTextureView>(view);
             return id;
         }
     }
@@ -1485,9 +1541,14 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
     {
         lock (_imGuiTextures)
         {
-            var found = _imGuiTextures.TryGetValue(id, out var result);
-            view = result;
-            return found;
+            if (_imGuiTextures.TryGetValue(id, out var reference) && reference.TryGetTarget(out var result))
+            {
+                view = result;
+                return true;
+            }
+
+            view = null;
+            return false;
         }
     }
     #endregion
@@ -1835,6 +1896,11 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
             Api.vkDestroyCommandPool(_frames[i].Pool);
         }
 
+        lock (_frames)
+        {
+            _deviceDestroyed = true;
+        }
+
         Api.vkDestroyDevice();
 
         if (!_debugMessenger.IsNull)
@@ -1934,13 +2000,17 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
     private readonly FrameSlot[] _frames = new FrameSlot[FramesInFlight];
     private readonly Dictionary<GraphicsPipelineDescription, VulkanPipeline?> _pipelines = [];
     private readonly Dictionary<ComputePipelineDescription, VulkanPipeline?> _computePipelines = [];
-    private readonly Dictionary<ulong, VulkanTextureView> _imGuiTextures = [];
+    /// <summary>Weak: an id handed to ImGui must not keep a view, and through it a texture, alive forever.</summary>
+    private readonly Dictionary<ulong, WeakReference<VulkanTextureView>> _imGuiTextures = [];
     private readonly List<VulkanSwapchain> _pendingPresents = [];
     private readonly List<VulkanSwapchain> _acquiredSwapchains = [];
-    private readonly HashSet<GpuResource> _liveResources = [];
+    private readonly ConditionalWeakTable<GpuResource, object> _liveResources = new();
+    private static readonly object _trackedMarker = new();
 
     private VulkanNullResources? _nullResources;
     private long _allocatedBytes;
+    private int _orphanCount;
+    private volatile bool _deviceDestroyed;
     private ulong _nextImGuiTextureId;
     private int _frameIndex;
     private long _lastStartedFrameSerial;
