@@ -4,6 +4,7 @@ using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.MagGraph.Interaction.KeyboardEditing;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.States;
+using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Modification;
@@ -13,6 +14,8 @@ namespace T3.Editor.Gui.MagGraph.Interaction;
 
 internal static class KeyboardActions
 {
+    private const string DeleteKeepsConnectionsTipId = "DeleteKeepsConnections";
+
     internal static ChangeSymbol.SymbolModificationResults HandleKeyboardActions(GraphUiContext context)
     {
         var result = ChangeSymbol.SymbolModificationResults.Nothing;
@@ -52,12 +55,14 @@ internal static class KeyboardActions
                                     && context.StateMachine.CurrentState == GraphStates.Default)
         {
             result |= Modifications.DeleteSelection(context);
+            ActionToast.ShowTip(DeleteKeepsConnectionsTipId, "{Deleted, connections were kept}   [" + KeyCombination.CtrlLabel + "+Del] also disconnects");
         }
 
         if (!T3Ui.IsCurrentlySaving && UserActions.DeleteSelectionAndConnections.Triggered()
                                     && nodeSelection.Selection.Count > 0
                                     && context.StateMachine.CurrentState == GraphStates.Default)
         {
+            ActionToast.MarkLearned(DeleteKeepsConnectionsTipId);
             result |= Modifications.DeleteSelection(context, keepConnections: false);
         }
 
@@ -115,7 +120,9 @@ internal static class KeyboardActions
             // Prevent node graph copy if a text input is active (e.g., section description)
             if (!ImGuiNET.ImGui.IsAnyItemActive())
             {
-                NodeActions.CopySelectedNodesToClipboard(nodeSelection, compositionOp);
+                var copiedCount = nodeSelection.Selection.Count;
+                if (NodeActions.CopySelectedNodesToClipboard(nodeSelection, compositionOp))
+                    ActionToast.Show("{Copied " + copiedCount + (copiedCount == 1 ? " operator}" : " operators}") + "   paste as text into a message to share");
             }
         }
 
@@ -131,8 +138,10 @@ internal static class KeyboardActions
 
         if (!T3Ui.IsCurrentlySaving && UserActions.PasteValues.Triggered())
         {
-            NodeActions.PasteValues(nodeSelection, context.View, context.CompositionInstance);
+            var pastedCount = NodeActions.PasteValues(nodeSelection, context.View, context.CompositionInstance);
             context.Layout.FlagStructureAsChanged();
+            if (pastedCount > 0)
+                ActionToast.Show("{Pasted " + pastedCount + (pastedCount == 1 ? " value}" : " values}"));
         }
 
         if (!T3Ui.IsCurrentlySaving

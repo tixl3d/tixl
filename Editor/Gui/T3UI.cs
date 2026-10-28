@@ -87,6 +87,7 @@ public static partial class T3Ui
         else if (UserActions.ToggleIdleMotion.Triggered())
         {
             UserSettings.Config.EnableIdleMotion = !UserSettings.Config.EnableIdleMotion;
+            ActionToast.Show(UserSettings.Config.EnableIdleMotion ? "{Idle motion on}" : "{Idle motion off}");
         }
     }
 

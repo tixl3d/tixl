@@ -72,7 +72,7 @@ internal static class OperatorBookmarks
             || item.Variant != Model.MagGraphItem.Variants.Operator
             || item.Instance == null)
         {
-            Log.Debug($"Select an operator to bookmark it on {_digitLabels[index]}");
+            ActionToast.Show("{Select an operator to bookmark it on " + _digitLabels[index] + "}");
             return;
         }
 
@@ -81,7 +81,7 @@ internal static class OperatorBookmarks
         if (bookmarks[index] == path)
         {
             bookmarks[index] = null;
-            Log.Info($"Removed bookmark {_digitLabels[index]} from {item.ReadableName}");
+            ActionToast.Show("{Removed bookmark " + _digitLabels[index] + " from " + item.ReadableName + "}");
         }
         else
         {
@@ -93,7 +93,8 @@ internal static class OperatorBookmarks
             }
 
             bookmarks[index] = path;
-            Log.Info($"Bookmarked {item.ReadableName} on {_digitLabels[index]}");
+            ActionToast.MarkLearned(EmptyBookmarkTipId);
+            ActionToast.Show("{Bookmarked " + item.ReadableName + " on " + _digitLabels[index] + "}   [" + _digitLabels[index] + "] jumps to it");
         }
 
         _pathsProjectId = Guid.Empty;
@@ -105,7 +106,8 @@ internal static class OperatorBookmarks
         var path = GetPaths(context)[index];
         if (path == null)
         {
-            Log.Debug($"No operator bookmarked on {_digitLabels[index]}. Shift+{_digitLabels[index]} bookmarks the selected one.");
+            ActionToast.ShowTip(EmptyBookmarkTipId,
+                                "{No operator bookmarked on " + _digitLabels[index] + "}   [⇧" + _digitLabels[index] + "] bookmarks the selected one");
             return;
         }
 
@@ -184,6 +186,7 @@ internal static class OperatorBookmarks
         return true;
     }
 
+    private const string EmptyBookmarkTipId = "EmptyOperatorBookmark";
     private const int SlotCount = 10;
     private const float BadgePaddingPx = 2.5f;
 

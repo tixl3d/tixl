@@ -29,6 +29,10 @@ change along chains — leave it as is.
   TipShowCounts, MutedActions) keyed by string tip ids; `ActionToast.ShowTip(id, markup, maxTimes = 5)`,
   `MarkLearned(id)`, `ResetTips()`. Settings: "Show action notifications" and "Show Tips Again".
   Not yet: per-action mute UI (⚙) and the (?) help link.
+  Messages so far: P (peek tip, already shown), save window layout, save view bookmark, operator bookmark
+  set/removed/no selection, idle motion on/off, copy ("paste as text into a message to share"), paste values,
+  loop start/end (B/N), screenshot saved. Tips: delete keeps connections (learned by Ctrl+Del), empty operator
+  bookmark slot (learned by setting one). Only the keyboard paths show them; menus stay quiet.
 - **Operator bookmarks — implemented:** Shift+digit toggles a bookmark on the selected operator (one digit per
   operator), the digit selects it and frames it via `ProjectView.TrySetCompositionOp(parentPath, …, childId)`,
   opening its composition. Stored per project (key: home symbol) in `UserSettings.Config.OperatorBookmarks` as

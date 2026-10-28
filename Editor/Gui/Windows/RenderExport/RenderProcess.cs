@@ -85,6 +85,7 @@ internal static class RenderProcess
 
         EditorUi.Instance.SetClipboardText(filepath);
         Log.Info($"Screenshot saved, path copied to clipboard: {filepath}");
+        ActionToast.Show("{Screenshot saved}   its path was copied to the clipboard");
     }
 
     public static bool TryStartVideoExport()
