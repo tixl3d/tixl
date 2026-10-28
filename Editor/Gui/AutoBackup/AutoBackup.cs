@@ -47,6 +47,7 @@ internal static class AutoBackup
         // Refresh the layout snapshot here on the UI thread — the backup task
         // saves modified symbols and must not call into ImGui.
         ProjectView.SnapshotWindowLayoutForFocusedProject();
+        ProjectView.SaveSessionForFocusedProject();
         Task.Run(CreateBackupCallback);
         _stopwatch.Restart();
         _hasBackedUpInSession = true;

@@ -223,7 +223,8 @@ internal sealed partial class ProjectView
         graphImageBackground = new GraphImageBackground(nodeSelection, structure);
     }
 
-    private void SaveUsersViewForCurrentComposition()
+    /// <param name="useLastFrameArea">Required when not called while drawing the graph window.</param>
+    private void SaveUsersViewForCurrentComposition(bool useLastFrameArea = false)
     {
         Debug.Assert(CompositionInstance != null);
 
@@ -232,7 +233,9 @@ internal sealed partial class ProjectView
     
         var lastSymbolChildId = CompositionInstance.SymbolChildId;
 
-        var visibleCanvasArea = canvas.GetVisibleCanvasArea();
+        var visibleCanvasArea = useLastFrameArea
+                                    ? canvas.GetLastVisibleCanvasArea()
+                                    : canvas.GetVisibleCanvasArea();
         UserSettings.Config.ViewedCanvasAreaForSymbolChildId[lastSymbolChildId] = visibleCanvasArea;
         UserSettings.Save();
     }
@@ -359,8 +362,9 @@ internal sealed partial class ProjectView
 
     public void Close()
     {
-        if(CompositionInstance != null)
-            SaveUsersViewForCurrentComposition();
+        SaveSession();
+        if (Focused == this)
+            LastOpenProject.ForgetIfCurrent(OpenedProject.Package);
 
         // Setup state is persisted on every change, so evicting just forces a reload from disk on reopen.
         var packageFolder = OpenedProject.Package?.Folder;
@@ -398,13 +402,14 @@ internal sealed partial class ProjectView
         Focused = null;
     }
     
-    public void SetAsFocused()
+    /// <param name="session">When set, its window layout takes precedence over the one saved in the project.</param>
+    public void SetAsFocused(ProjectSession? session = null)
     {
         var projectChanged = Focused != this;
         Focused = this;
 
         if (projectChanged)
-            RestoreWindowLayoutFromProject();
+            RestoreWindowLayoutFromProject(session);
     }
 
     /// <summary>
@@ -419,26 +424,15 @@ internal sealed partial class ProjectView
 
     private void SaveWindowLayoutToProject()
     {
-        if (!UserSettings.Config.SaveWindowLayoutsWithProjects)
+        // Focus mode's layout hides the output window. The session resumes focus mode itself instead.
+        if (!UserSettings.Config.SaveWindowLayoutsWithProjects || LayoutHandling.FocusMode)
             return;
 
         var symbolUi = RootInstance?.Symbol.GetSymbolUi();
         if (symbolUi == null)
             return;
 
-        var windowVisibility = new Dictionary<string, bool>();
-        var shownWindowTitles = new HashSet<string>();
-        foreach (var window in WindowManager.GetAllWindows())
-        {
-            if (string.IsNullOrEmpty(window.Config.Title))
-                continue;
-
-            windowVisibility[window.Config.Title] = window.Config.Visible;
-            if (window.Config.Visible)
-                shownWindowTitles.Add(window.Config.Title);
-        }
-
-        var imGuiSettings = LayoutHandling.RemoveUnusedImGuiSettings(ImGui.SaveIniSettingsToMemory(), shownWindowTitles);
+        CaptureWindowLayout(out var imGuiSettings, out var windowVisibility);
         var imGuiVersion = ImGui.GetVersion();
 
         var unchanged = symbolUi.WindowLayout == imGuiSettings
@@ -451,6 +445,23 @@ internal sealed partial class ProjectView
         symbolUi.WindowLayoutImGuiVersion = imGuiVersion;
         symbolUi.WindowVisibility = windowVisibility;
         symbolUi.FlagAsModified();
+    }
+
+    private static void CaptureWindowLayout(out string imGuiSettings, out Dictionary<string, bool> windowVisibility)
+    {
+        windowVisibility = new Dictionary<string, bool>();
+        var shownWindowTitles = new HashSet<string>();
+        foreach (var window in WindowManager.GetAllWindows())
+        {
+            if (string.IsNullOrEmpty(window.Config.Title))
+                continue;
+
+            windowVisibility[window.Config.Title] = window.Config.Visible;
+            if (window.Config.Visible)
+                shownWindowTitles.Add(window.Config.Title);
+        }
+
+        imGuiSettings = LayoutHandling.RemoveUnusedImGuiSettings(ImGui.SaveIniSettingsToMemory(), shownWindowTitles);
     }
 
     private static bool IsVisibilityUnchanged(Dictionary<string, bool>? saved, Dictionary<string, bool> current)
@@ -469,22 +480,33 @@ internal sealed partial class ProjectView
         return true;
     }
 
-    private void RestoreWindowLayoutFromProject()
+    private void RestoreWindowLayoutFromProject(ProjectSession? session)
     {
         if (!UserSettings.Config.SaveWindowLayoutsWithProjects)
             return;
+
+        if (session != null && !string.IsNullOrEmpty(session.WindowLayout))
+        {
+            Log.Debug($"Restoring window layout of the last session in frame {ImGui.GetFrameCount()}.");
+            ApplyWindowLayout(session.WindowLayout, session.WindowLayoutImGuiVersion, session.WindowVisibility);
+            return;
+        }
 
         var symbolUi = RootInstance?.Symbol.GetSymbolUi();
         if (symbolUi == null)
             return;
 
-        // Restore window visibility
-        if (symbolUi.WindowVisibility is { Count: > 0 })
+        ApplyWindowLayout(symbolUi.WindowLayout, symbolUi.WindowLayoutImGuiVersion, symbolUi.WindowVisibility);
+    }
+
+    private static void ApplyWindowLayout(string? imGuiSettings, string? imGuiVersion, Dictionary<string, bool>? windowVisibility)
+    {
+        if (windowVisibility is { Count: > 0 })
         {
             foreach (var window in WindowManager.GetAllWindows())
             {
                 if (!string.IsNullOrEmpty(window.Config.Title)
-                    && symbolUi.WindowVisibility.TryGetValue(window.Config.Title, out var visible))
+                    && windowVisibility.TryGetValue(window.Config.Title, out var visible))
                 {
                     window.Config.Visible = visible;
                 }
@@ -492,18 +514,15 @@ internal sealed partial class ProjectView
         }
 
         // Restore ImGui docking layout
-        if (string.IsNullOrEmpty(symbolUi.WindowLayout))
+        if (string.IsNullOrEmpty(imGuiSettings) || string.IsNullOrEmpty(imGuiVersion))
             return;
 
-        if (!string.IsNullOrEmpty(symbolUi.WindowLayoutImGuiVersion))
+        if (Version.TryParse(imGuiVersion, out var savedVersion)
+            && Version.TryParse(ImGui.GetVersion(), out var currentVersion)
+            && savedVersion.Major == currentVersion.Major
+            && savedVersion.Minor == currentVersion.Minor)
         {
-            if (Version.TryParse(symbolUi.WindowLayoutImGuiVersion, out var savedVersion)
-                && Version.TryParse(ImGui.GetVersion(), out var currentVersion)
-                && savedVersion.Major == currentVersion.Major
-                && savedVersion.Minor == currentVersion.Minor)
-            {
-                Program.NewImGuiLayoutDefinition = symbolUi.WindowLayout;
-            }
+            Program.NewImGuiLayoutDefinition = imGuiSettings;
         }
     }
 

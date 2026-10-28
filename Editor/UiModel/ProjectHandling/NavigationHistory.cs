@@ -115,6 +115,38 @@ internal sealed class NavigationHistory
         return null;
     }
 
+    /// <summary>
+    /// Copies up to <paramref name="maxCount"/> paths, most recent first, so the history can be stored with a session.
+    /// </summary>
+    internal void CollectRecentPaths(List<IReadOnlyList<Guid>> paths, int maxCount)
+    {
+        var count = Math.Min(maxCount, _previousSelections.Count);
+        for (var index = 0; index < count; index++)
+        {
+            paths.Add(_previousSelections[index]);
+        }
+    }
+
+    /// <summary>
+    /// Replaces the history with paths stored by <see cref="CollectRecentPaths"/>. Paths that no longer resolve stay
+    /// in the list; navigation already skips them.
+    /// </summary>
+    internal void Restore(IReadOnlyList<IReadOnlyList<Guid>> pathsMostRecentFirst)
+    {
+        _previousSelections.Clear();
+        _idPathsByHash.Clear();
+        _currentIndex = 0;
+
+        foreach (var path in pathsMostRecentFirst)
+        {
+            var hash = GetHashForIdPath(path);
+            if (!_idPathsByHash.TryAdd(hash, path))
+                continue;
+
+            _previousSelections.Add(path);
+        }
+    }
+
     private long GetHashForIdPath(IReadOnlyList<Guid> path)
     {
         long hash = 31.GetHashCode();

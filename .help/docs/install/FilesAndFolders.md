@@ -72,6 +72,7 @@ the suffix, so `TIXL_OVERRIDE_VERSION_ID=experiment` gives you `TiXL4.4-experime
 userSettings.json        preferences, window layout, recently used projects
 projectSettings.json     per-project playback and audio settings
 versionMarker.json       the version you last ran, so the welcome window knows what is new
+ProjectSessions/         where you left off in read-only projects, like the installed examples
 Themes/                  colour themes
 KeyBindings/             custom shortcuts
 Log/                     one timestamped log per launch, plus crash reports
@@ -91,12 +92,14 @@ MyProject/
     Assets/              images, videos, soundtracks the project uses
     dependencies/        native libraries this project needs
     .meta/               output and projection setups
-    .temp/               build output — and Backup/, the auto-backups
+    .temp/               build output, EditorSession.json — and Backup/, the auto-backups
     Render/              rendered image sequences and videos
     Export/              exported players
 ```
 
-Everything in a project folder is yours and travels with it, except `.temp/`. Note that `.temp/Backup/`
+Everything in a project folder is yours and travels with it, except `.temp/`. `EditorSession.json` remembers
+where you left off — the open operator, selection, navigation history and window layout — and deleting it
+only means the project opens on its saved layout next time. Note that `.temp/Backup/`
 holds the automatic backups, so it is the one part of `.temp/` worth keeping — see
 [Backups](../using/Backups.md).
 

@@ -1,5 +1,6 @@
 #nullable enable
 using T3.Core.Animation;
+using T3.Core.Operator;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.Output;
 using T3.Editor.UiModel.ProjectHandling;
@@ -19,7 +20,7 @@ internal static class UiConfig
 
         if (!LayoutHandling.FocusMode)
         {
-            TrySwitchToFocusMode(projectView);
+            SwitchToFocusMode(projectView);
         }
         else
         {
@@ -27,23 +28,39 @@ internal static class UiConfig
         }
     }
 
-    private static bool TrySwitchToFocusMode(ProjectView projectView)
+    private static void SwitchToFocusMode(ProjectView projectView)
     {
-        if (!OutputWindow.TryGetPrimaryOutputWindow(out var oldOutputWindow))
-            return false;
-        
+        // Without an output window (e.g. a layout that hides it) the background keeps what it showed before
+        var background = projectView.GraphImageBackground.OutputInstance;
+        if (OutputWindow.TryGetPrimaryOutputWindow(out var oldOutputWindow))
+            oldOutputWindow.Pinning.TryGetPinnedOrSelectedInstance(out background, out _);
+
         // We keep this to restore state when switching to a layout from focus mode.
-        _uiStateBeforeFocusMode = KeepUiState(); 
-        
-        oldOutputWindow.Pinning.TryGetPinnedOrSelectedInstance(out var instance, out _);
-        projectView.GraphImageBackground.OutputInstance = instance;
+        EnterFocusMode(projectView, KeepUiState(), background);
+    }
+
+    /// <summary>
+    /// Resumes focus mode from a project session. The ui elements hidden by focus mode are user settings that
+    /// survive a restart, so the state to return to has to come from the session.
+    /// </summary>
+    internal static void RestoreFocusMode(ProjectView projectView, UiState stateBeforeFocusMode, Instance? background)
+    {
+        EnterFocusMode(projectView, stateBeforeFocusMode, background);
+    }
+
+    /** The ui state to return to when leaving focus mode, or null if not in focus mode. */
+    internal static UiState? StateBeforeFocusMode => LayoutHandling.FocusMode ? _uiStateBeforeFocusMode : null;
+
+    private static void EnterFocusMode(ProjectView projectView, UiState stateBeforeFocusMode, Instance? background)
+    {
+        _uiStateBeforeFocusMode = stateBeforeFocusMode;
+        projectView.GraphImageBackground.OutputInstance = background;
 
         HideAllUiElements();
 
         LayoutHandling.LoadAndApplyLayoutOrFocusMode(LayoutHandling.Layouts.FocusMode);
-        
+
         LayoutHandling.FocusMode = true;
-        return true;
     }
 
     /// <summary>

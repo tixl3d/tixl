@@ -13,6 +13,7 @@ public static partial class T3Ui
         // Refresh the layout snapshot here on the UI thread — Save() may run on a
         // background task and must not call into ImGui.
         ProjectView.SnapshotWindowLayoutForFocusedProject();
+        ProjectView.SaveSessionForFocusedProject();
         Task.Run(() => Save(saveAll));
     }
 
