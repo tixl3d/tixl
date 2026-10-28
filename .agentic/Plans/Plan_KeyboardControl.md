@@ -18,6 +18,11 @@ change along chains — leave it as is.
   walk back. While keyboard navigation is active (until the selection changes otherwise) subtle marks show each
   arrow's target, growing in staggered after each move. Manual test: `.tests-manual/graph-arrow-navigation.md`.
   Not yet: Shift+arrow extend, Space marks, zoom-to-edit-level.
+- **Operator bookmarks — implemented:** Shift+digit toggles a bookmark on the selected operator (one digit per
+  operator), the digit selects it and frames it via `ProjectView.TrySetCompositionOp(parentPath, …, childId)`,
+  opening its composition. Stored per project (key: home symbol) in `UserSettings.Config.OperatorBookmarks` as
+  path strings; badges with the digit at the operator's top left (`MagGraph/Interaction/OperatorBookmarks.cs`).
+  The pop-out slot 0 idea is open; 0 is a normal slot for now. Unchecked: digit keys on AZERTY via SDL.
 - **Already exists from other work:** Tab inserts below / Shift+Tab to the right of the selected op; delete keeps
   connections and closes gaps (Ctrl+Del deletes and disconnects).
 - **Phase 1 prototype, second iteration — in progress:** "complete this step, continue with the most common

@@ -201,6 +201,8 @@ internal static class KeyboardActions
 
             if (UserActions.EditParameter.Triggered())
                 ParameterPopover.Open(context);
+
+            OperatorBookmarks.HandleKeyboard(context);
         }
 
         if (UserActions.AddComment.Triggered())

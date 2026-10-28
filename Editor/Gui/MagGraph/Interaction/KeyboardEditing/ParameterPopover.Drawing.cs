@@ -214,7 +214,7 @@ internal static partial class ParameterPopover
         {
             var swatchSize = MathF.Round(lineHeight * 0.7f);
             var swatchMin = new Vector2(MathF.Floor(valuePos.X), MathF.Floor(valuePos.Y + (lineHeight - swatchSize) / 2));
-            drawList.AddRectFilled(swatchMin, swatchMin + new Vector2(swatchSize), new Color(colorValue.Value).Fade(opacity), 2 * scale);
+            DrawColorSwatch(drawList, colorValue.Value, swatchMin, swatchSize, opacity);
             valuePos.X += swatchSize + 4 * scale;
         }
 
@@ -230,6 +230,26 @@ internal static partial class ParameterPopover
             drawList.AddText(notePos, UiColors.StatusActivated.Fade(0.8f * opacity), _nudgeLabel);
         else if (_focusedDescription.Length > 0)
             drawList.AddText(notePos, UiColors.TextMuted.Fade(0.6f * opacity), _focusedDescription);
+    }
+
+    /// <summary>
+    /// HDR colors are scaled down by their brightest channel so the swatch keeps their hue, and get the same
+    /// triangle marker as the color buttons in the Parameter Window.
+    /// </summary>
+    private static void DrawColorSwatch(ImDrawListPtr drawList, Vector4 color, Vector2 min, float size, float opacity)
+    {
+        var isHdr = MathUtils.HasHdrRange(color, out var intensity);
+        if (isHdr)
+        {
+            var brightest = MathF.Max(color.X, MathF.Max(color.Y, color.Z));
+            if (brightest > 1)
+                color = new Vector4(color.X / brightest, color.Y / brightest, color.Z / brightest, color.W);
+        }
+
+        var max = min + new Vector2(size);
+        drawList.AddRectFilled(min, max, new Color(color).Fade(opacity), 2 * T3Ui.UiScaleFactor);
+        if (isHdr)
+            drawList.DrawTriangleUp((min + max) / 2, Color.Black.Fade(opacity), intensity * 4 * T3Ui.UiScaleFactor);
     }
 
     /** Typed value with the caret, followed by the faint suggestion or result ("= 200"). */

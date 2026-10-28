@@ -111,6 +111,8 @@ internal static class FactoryKeyMap
 
             keyBindings.Add(new KeyBinding(loadAction, new KeyCombination(numberKeys[i], ctrl: true)));
             keyBindings.Add(new KeyBinding(saveAction, new KeyCombination(numberKeys[i], ctrl: true, shift: true)));
+            keyBindings.Add(new KeyBinding(UserActions.SelectOperatorBookmark0 + i, new KeyCombination(numberKeys[i])));
+            keyBindings.Add(new KeyBinding(UserActions.SetOperatorBookmark0 + i, new KeyCombination(numberKeys[i], shift: true)));
         }
 
         var fKeys = new[] { Key.F1, Key.F2, Key.F3, Key.F4, Key.F5, Key.F6, Key.F7, Key.F8, Key.F9, Key.F10 };
