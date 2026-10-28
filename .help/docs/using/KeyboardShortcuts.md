@@ -90,10 +90,14 @@ The following is a list of the **default keyboard** short-cuts. With v4.0.4 you 
 
 ### Bookmarks and Layouts
 
+View bookmarks (Ctrl) remember a graph view. Operator bookmarks remember an operator in the current project: Shift and a digit bookmarks the selected operator (pressing it again removes the bookmark), the digit alone selects it and brings it into view, opening its composition if needed. Bookmarked operators show their digit in the graph.
+
 | Action          | Key                  |
 | --------------- | -------------------- |
 | Load Bookmark   | Ctrl + 1 … 9, 0      |
 | Save Bookmark   | Ctrl + Shift + 1 … 9, 0 |
+| Bookmark Operator | Shift + 1 … 9, 0 (focus) |
+| Go to Bookmarked Operator | 1 … 9, 0 (focus) |
 | Load Layout 0–9 | F1 … F10             |
 | Save Layout 0–9 | Ctrl + F1 … F10      |
 

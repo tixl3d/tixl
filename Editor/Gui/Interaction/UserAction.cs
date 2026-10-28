@@ -116,6 +116,12 @@ internal enum UserActions
     LoadBookmark5, LoadBookmark6, LoadBookmark7, LoadBookmark8, LoadBookmark9,
     SaveBookmark0, SaveBookmark1, SaveBookmark2, SaveBookmark3, SaveBookmark4,
     SaveBookmark5, SaveBookmark6, SaveBookmark7, SaveBookmark8, SaveBookmark9,
+
+    // Operator bookmarks (0-9)
+    SelectOperatorBookmark0, SelectOperatorBookmark1, SelectOperatorBookmark2, SelectOperatorBookmark3, SelectOperatorBookmark4,
+    SelectOperatorBookmark5, SelectOperatorBookmark6, SelectOperatorBookmark7, SelectOperatorBookmark8, SelectOperatorBookmark9,
+    SetOperatorBookmark0, SetOperatorBookmark1, SetOperatorBookmark2, SetOperatorBookmark3, SetOperatorBookmark4,
+    SetOperatorBookmark5, SetOperatorBookmark6, SetOperatorBookmark7, SetOperatorBookmark8, SetOperatorBookmark9,
     
     // Misc
     RenderScreenshot,

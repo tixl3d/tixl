@@ -157,6 +157,12 @@ internal static class KeyActionHandling
         RegisterActionsFlags(UserActions.SelectToBelow, Flags.NeedsWindowFocus);
         RegisterActionsFlags(UserActions.SelectToLeft, Flags.NeedsWindowFocus);
 
+        for (var index = 0; index < 10; index++)
+        {
+            RegisterActionsFlags(UserActions.SelectOperatorBookmark0 + index, Flags.NeedsWindowFocus | Flags.KeyPressOnly);
+            RegisterActionsFlags(UserActions.SetOperatorBookmark0 + index, Flags.NeedsWindowFocus | Flags.KeyPressOnly);
+        }
+
         // Camera controls
         RegisterActionsFlags(UserActions.CameraLeft, Flags.NeedsWindowHover | Flags.KeyHoldOnly | Flags.RemainActiveWhenItemActive);
         RegisterActionsFlags(UserActions.CameraRight, Flags.NeedsWindowHover | Flags.KeyHoldOnly | Flags.RemainActiveWhenItemActive);

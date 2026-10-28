@@ -170,6 +170,7 @@ internal sealed partial class MagGraphView
             DrawOffscreenIndicators(drawList);
             DrawAutoCollectIndicators(drawList);
             SelectionNavigation.DrawTargetIndicators(_context, drawList);
+            OperatorBookmarks.DrawBadges(_context, drawList);
             ParameterPopover.Draw(_context);
 
             // Draw special overlays

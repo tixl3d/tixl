@@ -77,6 +77,12 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
 
         public readonly Dictionary<string, Guid> LastOpsForWindows = new();
 
+        /// <summary>
+        /// Operator bookmarks per project, keyed by the project's root symbol. The index is the digit key; each entry
+        /// is an instance path of Guids joined by '/', stored as text because Guid lists don't deserialize reliably.
+        /// </summary>
+        public readonly Dictionary<Guid, string?[]> OperatorBookmarks = new();
+
         [JsonConverter(typeof(StringEnumConverter))]
         public GraphHoverModes HoverMode = GraphHoverModes.LastValue;
 
