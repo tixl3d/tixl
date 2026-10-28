@@ -89,6 +89,10 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         // Projects
         public List<string> ProjectDirectories = [];
         public bool EnableUsbProjectDetection = true;
+        public bool ReopenLastProjectOnStartup = true;
+
+        /// <summary>Folder of the project that was open when the editor closed; empty if it closed in the project hub.</summary>
+        public string LastOpenProjectFolder = string.Empty;
 
         public readonly ToastSettings Toasts = new();
 

@@ -210,6 +210,15 @@ public partial class ScalableCanvas
         return InverseTransformRect(rectWithSize);
     }
 
+    /// <summary>
+    /// The visible area as of the last drawn frame. Unlike <see cref="GetVisibleCanvasArea"/> it doesn't query ImGui,
+    /// so it can be called outside the canvas window, e.g. from a menu or after the render loop has ended.
+    /// </summary>
+    internal ImRect GetLastVisibleCanvasArea()
+    {
+        return InverseTransformRect(ImRect.RectWithSize(WindowPos, WindowSize));
+    }
+
 
 
     /// <summary>

@@ -59,7 +59,7 @@ You can click on the parameter name to reset it.
 
 The Ryoji-Operator also has some color parameters. You can click on the color field to bring up the color picker. It's looks and works similar like other applications. But is as a couple of hidden tricks: 
 
-1. You can hold ctrl to enable HDR editing and pick colors brighter than one. By default TiXL uses hdr colors which looks great with glow and color grading.
+1. You can drag the brightness slider up past its top (where it says HDR) to pick colors brighter than one. By default TiXL uses hdr colors which looks great with glow and color grading.
 2. You can hold the alt key to pick colors from the screen.
  
 There is one more trick when working with colors: You can drag a color switch and drag up or down to adjust its opacity -- or when dragging with the right mouse button -- its brightness.

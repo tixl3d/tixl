@@ -47,7 +47,9 @@ it, then press `Shift+P`.
 
 **Action:**
 Open a project, pin an operator to the Output View, and save. Pan the graph somewhere else so
-the pinned operator is off-screen. Close and reopen the project.
+the pinned operator is off-screen. Close the project, delete `.temp/EditorSession.json` in the
+project folder, and reopen the project. (With that file present the project resumes where it was
+closed instead; see the Project Session Restore test.)
 
 **Expected:**
 - Once the project has loaded, the graph shows the pinned operator, selected and framed.

@@ -414,6 +414,15 @@ internal sealed partial class SettingsWindow : Window
                                                       UserSettings.Defaults.SaveWindowLayoutsWithProjects
                                                      );
 
+                    changed |= FormInputs.AddCheckBox("Reopen Last Project on Startup",
+                                                      ref UserSettings.Config.ReopenLastProjectOnStartup,
+                                                      """
+                                                      When enabled, TiXL starts with the project that was open when it was closed, showing the same operator and selection.
+                                                      If the editor was closed in the project hub, it starts there.
+                                                      """,
+                                                      UserSettings.Defaults.ReopenLastProjectOnStartup
+                                                     );
+
                     FormInputs.AddSectionSubHeader("Performance");
                     FormInputs.SetIndentToLeft();
 

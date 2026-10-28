@@ -30,6 +30,7 @@ using T3.Editor.SystemUi;
 using T3.Editor.UiContentDrawing;
 using T3.Editor.UiModel.Helpers;
 using T3.MsForms;
+using T3.Editor.UiModel.ProjectHandling;
 using T3.SystemUi;
 using ShaderCompiler = T3.Core.Resource.ShaderCompiling.ShaderCompiler;
 
@@ -283,6 +284,10 @@ internal static class Program
         // ReSharper disable once AccessToDisposedClosure
         ProgramWindows.Main.RunRenderLoop(UiContentContentDrawer.RenderCallback);
         IsShuttingDown = true;
+
+        // ImGui is still alive here, and the user settings that hold the canvas views are written on process exit.
+        ProjectView.SaveSessionForFocusedProject();
+        LastOpenProject.ReleaseReopenGuard();
         StallWatchdog.Stop();
         App.DebugProtocol.DebugServer.Stop();
 

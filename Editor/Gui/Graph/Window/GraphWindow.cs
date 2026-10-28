@@ -71,11 +71,23 @@ internal sealed class GraphWindow : Windows.Window
             return false;
         }
 
+        ProjectView?.SaveSession();
+
+        // Programmatic opens (debug server, skills, missing operators) set up their own view and are not
+        // where the user left off.
+        var isUserOpen = tryRestoreViewArea && project.Package.OverrideHomeGuid == Guid.Empty;
+        ProjectSession? session = null;
+        if (isUserOpen)
+        {
+            ProjectSession.TryLoad(project.Package, out session);
+            LastOpenProject.Remember(project.Package);
+        }
+
         ProjectView = UserSettings.Config.GraphStyle == UserSettings.GraphStyles.Magnetic
                           ? MagGraphView.CreateWithComponents(project)
                           : Legacy.GraphView.CreateWithComponents(project);
 
-        ProjectView.SetAsFocused();
+        ProjectView.SetAsFocused(session);
         // ProjectView = MagGraphCanvas.CreateWithComponents(project);
         // ProjectView = Legacy.GraphCanvas.CreateWithComponents(project);
         ProjectView.OnCompositionChanged += CompositionChangedHandler;
@@ -84,7 +96,14 @@ internal sealed class GraphWindow : Windows.Window
         var rootSymbolChildId = rootInstance.SymbolChildId;
         var rootPath = rootInstance.InstancePath;
         var startPath = rootPath;
-        if (project.Package.OverrideHomeGuid == Guid.Empty)
+        if (session != null
+            && ProjectSession.TryParsePath(session.CompositionPath, out var sessionPath)
+            && sessionPath[0] == rootSymbolChildId
+            && ProjectView.Structure.GetInstanceFromIdPath(sessionPath) != null)
+        {
+            startPath = sessionPath;
+        }
+        else if (project.Package.OverrideHomeGuid == Guid.Empty)
         {
             var opId = UserSettings.GetLastOpenOpForWindow(Config.Title);
             if (opId != Guid.Empty && opId != rootSymbolChildId)
@@ -104,11 +123,17 @@ internal sealed class GraphWindow : Windows.Window
             return false;
         }
 
+        if (session != null)
+        {
+            ProjectView.RestoreSelectionAndHistory(session);
+            ProjectView.RestoreFocusMode(session);
+        }
+
         _focusOnNextFrame = true;
 
-        // Opening a project also frames whatever the Output View shows. Programmatic opens pass
-        // tryRestoreViewArea: false because they set the view themselves.
-        if (tryRestoreViewArea)
+        // Opening a project also frames whatever the Output View shows, unless the user's session was
+        // restored. Programmatic opens pass tryRestoreViewArea: false because they set the view themselves.
+        if (tryRestoreViewArea && session == null)
         {
             OutputWindow.RequestShowInGraphOnProjectOpen();
         }
