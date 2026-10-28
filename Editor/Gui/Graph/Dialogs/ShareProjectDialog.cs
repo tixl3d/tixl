@@ -46,6 +46,7 @@ internal sealed class ShareProjectDialog : ModalDialog
             if (_analysis == null)
             {
                 ImGui.TextColored(UiColors.StatusError, "Failed to analyze the project - see log for details.");
+                AlignCtaButtons("Close");
                 if (CustomComponents.DrawCtaButton("Close", Icon.None, CustomComponents.ButtonStates.Emphasized))
                 {
                     ImGui.CloseCurrentPopup();
@@ -104,6 +105,21 @@ internal sealed class ShareProjectDialog : ModalDialog
             FormInputs.AddVerticalSpace(5);
 
             var canExport = !hasCrossProjectReferences && Directory.Exists(_targetFolder);
+            FormInputs.SetIndentToLeft();
+            FormInputs.AddHint("""
+                               Saves the project as a single package file that others can import.
+                               Operators from built-in packages like Lib are listed as requirements
+                               but not included.
+                               """);
+            FormInputs.SetIndentToParameters();
+
+            AlignCtaButtons("Cancel", "Export");
+            if (CustomComponents.DrawCtaButton("Cancel", Icon.None, CustomComponents.ButtonStates.Emphasized))
+            {
+                ImGui.CloseCurrentPopup();
+            }
+
+            ImGui.SameLine();
             if (CustomComponents.DrawCtaButton("Export", isEnabled: canExport))
             {
                 if (ProjectPackageExporter.TryExport(analysis, _targetFolder,
@@ -128,20 +144,6 @@ internal sealed class ShareProjectDialog : ModalDialog
                     BlockingWindow.Instance.ShowMessageBox(reason, "Failed to share project");
                 }
             }
-
-            ImGui.SameLine();
-            if (CustomComponents.DrawCtaButton("Cancel", Icon.None, CustomComponents.ButtonStates.Emphasized))
-            {
-                ImGui.CloseCurrentPopup();
-            }
-
-            FormInputs.SetIndentToLeft();
-            FormInputs.AddHint("""
-                               Saves the project as a single package file that others can import.
-                               Operators from built-in packages like Lib are listed as requirements
-                               but not included.
-                               """);
-            FormInputs.SetIndentToParameters();
 
             EndDialogContent();
         }

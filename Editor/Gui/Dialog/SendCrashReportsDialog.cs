@@ -58,19 +58,19 @@ internal sealed class SendCrashReportsDialog : ModalDialog
             FormInputs.AddVerticalSpace();
             FormInputs.ApplyIndent();
 
-            if (CustomComponents.DrawCtaButton("Send", true))
+            AlignCtaButtons("Not now", "Send");
+            // Declining also clears the markers: the reports stay on disk, but a decline that is re-asked
+            // on every launch is worse than losing one report.
+            if (CustomComponents.DrawCtaButton("Not now", Icon.None, CustomComponents.ButtonStates.Default))
             {
-                PendingCrashReports.Send(_reports);
+                PendingCrashReports.Discard(_reports);
                 Close();
             }
 
             ImGui.SameLine();
-
-            // Declining also clears the markers: the reports stay on disk, but a decline that is re-asked
-            // on every launch is worse than losing one report.
-            if (ImGui.Button("Not now"))
+            if (CustomComponents.DrawCtaButton("Send", true))
             {
-                PendingCrashReports.Discard(_reports);
+                PendingCrashReports.Send(_reports);
                 Close();
             }
 

@@ -34,9 +34,11 @@ internal sealed class CombineToSymbolDialog : ModalDialog
 
             _ = SymbolModificationInputs.DrawProjectDropdown(ref nameSpace, ref _projectToCopyTo);
 
-            if (_projectToCopyTo != null)
+            var hasTargetProject = _projectToCopyTo != null;
+            var symbolNamesValid = false;
+            if (hasTargetProject)
             {
-                _ = SymbolModificationInputs.DrawSymbolNameAndNamespaceInputs(ref combineName, ref nameSpace, _projectToCopyTo, out var symbolNamesValid);
+                _ = SymbolModificationInputs.DrawSymbolNameAndNamespaceInputs(ref combineName, ref nameSpace, _projectToCopyTo, out symbolNamesValid);
 
                 ImGui.Spacing();
 
@@ -55,7 +57,25 @@ internal sealed class CombineToSymbolDialog : ModalDialog
                                                     """);
 
                 FormInputs.AddHint("Combining creates a new operator and can't be undone — this clears the undo history.");
+            }
 
+            if (hasTargetProject)
+            {
+                AlignCtaButtons("Cancel", "Combine");
+            }
+            else
+            {
+                AlignCtaButtons("Cancel");
+            }
+
+            if (CustomComponents.DrawCtaButton("Cancel", Icon.None, CustomComponents.ButtonStates.Emphasized))
+            {
+                ImGui.CloseCurrentPopup();
+            }
+
+            if (hasTargetProject)
+            {
+                ImGui.SameLine();
                 if (CustomComponents.DrawCtaButton("Combine", symbolNamesValid))
                 {
                     if(!SymbolUiRegistry.TryGetSymbolUi(symbolGuid, out var compositionSymbolUi))
@@ -67,13 +87,6 @@ internal sealed class CombineToSymbolDialog : ModalDialog
                     result = ChangeSymbol.SymbolModificationResults.StructureChanged;
                     ImGui.CloseCurrentPopup();
                 }
-
-                ImGui.SameLine();
-            }
-
-            if (CustomComponents.DrawCtaButton("Cancel", Icon.None, CustomComponents.ButtonStates.Emphasized))
-            {
-                ImGui.CloseCurrentPopup();
             }
 
             EndDialogContent();

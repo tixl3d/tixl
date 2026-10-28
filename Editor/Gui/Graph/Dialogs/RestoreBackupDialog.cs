@@ -61,14 +61,15 @@ internal sealed class RestoreBackupDialog : ModalDialog
         ImGui.Checkbox("Archive current state before restoring", ref _archiveCurrentState);
         FormInputs.AddVerticalSpace(6);
 
+        AlignCtaButtons("Cancel", "Restore and Restart");
+        if (CustomComponents.DrawCtaButton("Cancel", Icon.None, CustomComponents.ButtonStates.Default))
+            ImGui.CloseCurrentPopup();
+
+        ImGui.SameLine();
         if (CustomComponents.DrawCtaButton("Restore and Restart", Icon.None, CustomComponents.ButtonStates.Emphasized))
         {
             _resultMessage = TryRestoreAndRestart();
         }
-
-        ImGui.SameLine();
-        if (CustomComponents.DrawCtaButton("Cancel", Icon.None, CustomComponents.ButtonStates.Default))
-            ImGui.CloseCurrentPopup();
     }
 
     /// <summary>Returns a message only when something failed or the restart couldn't be triggered — success exits the process.</summary>

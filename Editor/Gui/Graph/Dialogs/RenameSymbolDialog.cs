@@ -33,13 +33,7 @@ internal sealed class RenameSymbolDialog : ModalDialog
                 ImGui.CloseCurrentPopup();
                 return;
             }
-            ImGui.PushFont(Fonts.FontSmall);
-            ImGui.TextUnformatted("Name");
-            ImGui.PopFont();
 
-            ImGui.SetNextItemWidth(150);
-
-            
             var symbol = symbolUi.SymbolChild.Symbol;
             _ = SymbolModificationInputs.DrawSymbolNameInput(ref name, 
                                                              symbol.Namespace, 
@@ -49,15 +43,16 @@ internal sealed class RenameSymbolDialog : ModalDialog
 
             ImGui.Spacing();
                 
-            if (CustomComponents.DrawCtaButton("Rename", isNameValid))
+            AlignCtaButtons("Cancel", "Rename");
+            if (CustomComponents.DrawCtaButton("Cancel", Icon.None, CustomComponents.ButtonStates.Emphasized))
             {
-                SymbolNaming.RenameSymbol(symbol, name);
                 ImGui.CloseCurrentPopup();
             }
 
             ImGui.SameLine();
-            if (CustomComponents.DrawCtaButton("Cancel", Icon.None, CustomComponents.ButtonStates.Emphasized))
+            if (CustomComponents.DrawCtaButton("Rename", isNameValid))
             {
+                SymbolNaming.RenameSymbol(symbol, name);
                 ImGui.CloseCurrentPopup();
             }
 

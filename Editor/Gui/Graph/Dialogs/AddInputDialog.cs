@@ -44,17 +44,18 @@ internal sealed class AddInputDialog : ModalDialog
             FormInputs.AddVerticalSpace(5);
             FormInputs.ApplyIndent();
             
+            AlignCtaButtons("Cancel", "Add");
+            if (CustomComponents.DrawCtaButton("Cancel", Icon.None, CustomComponents.ButtonStates.Emphasized))
+            {
+                ImGui.CloseCurrentPopup();
+            }
+
+            ImGui.SameLine();
             if (CustomComponents.DrawCtaButton("Add", isValid))
             {
                 UndoRedoStack.AddAndExecute(new AddInputCommand(symbol.Id, _parameterName, _selectedType!, _multiInput, _posOnCanvas));
                 _parameterName = string.Empty;
                 _posOnCanvas += new Vector2(0, MagGraphItem.GridSize.Y);
-            }
-
-            ImGui.SameLine();
-            if (CustomComponents.DrawCtaButton("Cancel", Icon.None, CustomComponents.ButtonStates.Emphasized))
-            {
-                ImGui.CloseCurrentPopup();
             }
 
             EndDialogContent();

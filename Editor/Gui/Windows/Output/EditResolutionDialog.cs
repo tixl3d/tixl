@@ -33,13 +33,7 @@ internal sealed class EditResolutionDialog : ModalDialog
                 
             ImGui.Checkbox("Use as aspect ratio", ref resolution.UseAsAspectRatio);
 
-            if (CustomComponents.DrawCtaButton("Add", resolution.IsValid))
-            {
-                ImGui.CloseCurrentPopup();
-                success = true;
-            }
-
-            ImGui.SameLine();
+            AlignCtaButtons("Cancel", "Add");
             if (CustomComponents.DrawCtaButton("Cancel", Icon.None, CustomComponents.ButtonStates.Emphasized))
             {
                 if (!resolution.IsValid)
@@ -47,6 +41,13 @@ internal sealed class EditResolutionDialog : ModalDialog
                     ResolutionHandling.Resolutions.Remove(resolution);
                 }
                 ImGui.CloseCurrentPopup();
+            }
+
+            ImGui.SameLine();
+            if (CustomComponents.DrawCtaButton("Add", resolution.IsValid))
+            {
+                ImGui.CloseCurrentPopup();
+                success = true;
             }
 
             EndDialogContent();

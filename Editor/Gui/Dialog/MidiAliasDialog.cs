@@ -151,6 +151,11 @@ internal sealed class MidiAliasDialog : ModalDialog
                                        _                       => "Add",
                                    };
 
+            AlignCtaButtons("Cancel", confirmLabel);
+            if (CustomComponents.DrawCtaButton("Cancel", Icon.None, CustomComponents.ButtonStates.Default))
+                ImGui.CloseCurrentPopup();
+
+            ImGui.SameLine();
             if (CustomComponents.DrawCtaButton(confirmLabel, isValid && !isUnchanged, true))
             {
                 UpsertAlias(fullAlias, keepsTargetMapping ? string.Empty : _productName);
@@ -166,10 +171,6 @@ internal sealed class MidiAliasDialog : ModalDialog
                 changed = true;
                 ImGui.CloseCurrentPopup();
             }
-
-            ImGui.SameLine();
-            if (CustomComponents.DrawCtaButton("Cancel", Icon.None, CustomComponents.ButtonStates.Default))
-                ImGui.CloseCurrentPopup();
 
             EndDialogContent();
         }

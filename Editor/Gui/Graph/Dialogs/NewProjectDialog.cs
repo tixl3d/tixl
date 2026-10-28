@@ -112,6 +112,22 @@ internal sealed class NewProjectDialog : ModalDialog
                 ImGui.TextColored(UiColors.StatusWarning, "Warning: there is no way to change this without editing the project code at this time.");
             }
                 
+            FormInputs.SetIndentToLeft();
+            var projectFolder = System.IO.Path.Combine(primaryProjectDirectory, _newProjectName);
+            FormInputs.AddHint($"""
+                                Creates a new project. Projects are used to group operators and resources. 
+                                You can find your project in "{projectFolder}".
+                                """); 
+
+            FormInputs.SetIndentToParameters();                
+
+            AlignCtaButtons("Cancel", "Create");
+            if (CustomComponents.DrawCtaButton("Cancel", Icon.None, CustomComponents.ButtonStates.Emphasized))
+            {
+                ImGui.CloseCurrentPopup();
+            }
+
+            ImGui.SameLine();
             if (CustomComponents.DrawCtaButton("Create", isEnabled: allValid))
             {
                 if (ProjectSetup.TryCreateProject(fullName, _shareResources, out var project, out var failureLog))
@@ -170,22 +186,6 @@ internal sealed class NewProjectDialog : ModalDialog
                 }
             }
 
-            ImGui.SameLine();
-            if (CustomComponents.DrawCtaButton("Cancel", Icon.None, CustomComponents.ButtonStates.Emphasized))
-            {
-                ImGui.CloseCurrentPopup();
-            }
-
-            
-            FormInputs.SetIndentToLeft();
-            var projectFolder = System.IO.Path.Combine(primaryProjectDirectory, _newProjectName);
-            FormInputs.AddHint($"""
-                                Creates a new project. Projects are used to group operators and resources. 
-                                You can find your project in "{projectFolder}".
-                                """); 
-
-                
-            FormInputs.SetIndentToParameters();                
 
             EndDialogContent();
         }
