@@ -56,13 +56,22 @@ internal static class ParameterPopUp
 
     private static Vector2 DefaultWindowSize => new Vector2(310, 250) * T3Ui.UiScaleFactor;
 
-    private static void Close()
+    private static void Close(bool refocusGraph = false)
     {
         _isOpen = false;
+        _refocusGraph = refocusGraph;
     }
 
     public static void DrawParameterPopUp(ProjectView graphWindow)
     {
+        // The popup took focus from the graph. Without handing it back, ImGui falls back to the
+        // root window and graph shortcuts like arrow key navigation stop working.
+        if (_refocusGraph)
+        {
+            ImGui.SetWindowFocus();
+            _refocusGraph = false;
+        }
+
         if (!_isOpen || _selectedInstance == null || graphWindow.CompositionInstance == null)
             return;
 
@@ -99,7 +108,7 @@ internal static class ParameterPopUp
         {
             if (ImGui.IsKeyDown(ImGuiKey.Escape))
             {
-                Close();
+                Close(refocusGraph: true);
             }
             FrameStats.Current.OpenedPopUpName = ParameterPopUpName;
             ImGui.GetWindowDrawList().AddRectFilled(ImGui.GetWindowPos(),
@@ -267,6 +276,7 @@ internal static class ParameterPopUp
     private const float MinHeight = 50;
 
     private static bool _isOpen;
+    private static bool _refocusGraph;
     private static int _focusDelayCount;
     private static object _parameterPopUpReference = new();
 
