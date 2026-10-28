@@ -319,6 +319,14 @@ internal sealed class GenerateShaderGraphCode : Instance<GenerateShaderGraphCode
             Log.Warning("Failed to creat float value buffer" + e.Message);
         }        
     }    
+
+    protected override void Dispose(bool isDisposing)
+    {
+        if (!isDisposing)
+            return;
+
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref FloatParams.Value);
+    }
     
     private bool TryLoadTemplate(FileResource file, string currentValue, out string newValue, out string failureReason)
     {

@@ -74,6 +74,14 @@ internal sealed class FloatsToBuffer : Instance<FloatsToBuffer>
             Log.Warning("Failed to setup shader parameters:" + e.Message);
         }
     }
+
+    protected override void Dispose(bool isDisposing)
+    {
+        if (!isDisposing)
+            return;
+
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref Buffer.Value);
+    }
         
     [Input(Guid = "914EA6E8-ABC6-4294-B895-8BFBE5AFEA0E")]
     public readonly MultiInputSlot<Vector4[]> Vec4Params = new();
