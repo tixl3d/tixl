@@ -27,6 +27,7 @@ internal static class GraphBookmarkNavigation
             if (KeyActionHandling.Triggered(_saveBookmarkActions[i]))
             {
                 SaveBookmark(components, i);
+                ActionToast.Show("{Saved view bookmark " + i + "}   [" + KeyCombination.CtrlLabel + "+" + i + "] returns to it");
                 _lastInteractionFrame = ImGui.GetFrameCount();
                 break;
             }

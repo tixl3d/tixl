@@ -30,6 +30,7 @@ internal static class LayoutHandling
             if (_saveLayoutActions[i].Triggered())
             {
                 SaveLayout(i);
+                ActionToast.Show("{Saved window layout " + (i + 1) + "}   [F" + (i + 1) + "] restores it");
                 break;
             }
 
