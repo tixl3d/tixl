@@ -12,6 +12,9 @@ internal  struct KeyCombination(Key key, bool ctrl = false, bool alt = false, bo
     public bool Ctrl = ctrl;
     public bool Alt = alt;
     public bool Shift = shift;
+
+    /// <summary>What the Ctrl modifier is called on this platform: Cmd on macOS, where the Cmd key acts as Ctrl.</summary>
+    internal static readonly string CtrlLabel = OperatingSystem.IsMacOS() ? "Cmd" : "Ctrl";
     
     internal bool ModifiersMatch(ImGuiIOPtr io)
     {

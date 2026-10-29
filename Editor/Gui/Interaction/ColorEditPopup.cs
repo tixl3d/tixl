@@ -16,6 +16,7 @@ using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
 using Color = T3.Core.DataTypes.Vector.Color;
+using Icon = T3.Editor.Gui.Styling.Icon;
 using Point = System.Drawing.Point;
 
 namespace T3.Editor.Gui.Interaction;
