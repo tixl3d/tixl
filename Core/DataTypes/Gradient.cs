@@ -154,9 +154,7 @@ public class Gradient : IEditableInputType
                     break;
 
                 case Interpolations.OkLab:
-                    var vector4 = OkLab.Mix(previousStep.Color, step.Color, fraction);
-                    Vector4.Max(vector4, Vector4.Zero);
-                    return vector4;
+                    return OkLab.Mix(previousStep.Color, step.Color, fraction);
 
                 case Interpolations.Spline:
                     return SampleSpline(t);

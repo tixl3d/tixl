@@ -77,7 +77,9 @@ public static class OkLab
         var c2Linear = Degamma(Vector4.Max(c2, Vector4.Zero));
                 
         var labMix= MathUtils.Lerp( RgbAToOkLab(c1Linear), RgbAToOkLab(c2Linear), t);
-        return ToGamma(OkLab.OkLabToRgba(labMix));
+        
+        // Straight lines in OkLab can leave the sRGB gamut, and a negative channel would turn into NaN in ToGamma.
+        return ToGamma(Vector4.Max(OkLabToRgba(labMix), Vector4.Zero));
     }
     
     
