@@ -1,4 +1,4 @@
-using System.Drawing;
+using StbImageSharp;
 using T3.Core.Utils;
 using Utilities = T3.Core.Utils.Utilities;
 
@@ -26,9 +26,6 @@ internal sealed class BuildAsciiFontSorting : Instance<BuildAsciiFontSorting>
         }
 
         var filterCharacters = FilterCharacters.GetValue(context); 
-        if (!WindowsOnlyFeature.IsAvailable("ASCII font sorting"))
-            return;
-
         var brightnessTable = SortAsciiLetters(absolutePath, filterCharacters);
         if (brightnessTable == null)
         {
@@ -72,15 +69,14 @@ internal sealed class BuildAsciiFontSorting : Instance<BuildAsciiFontSorting>
         }
     }
 
-    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
     private BrightnessEntry[] SortAsciiLetters( string imageFilePath,string filterCharacters)
     {
-        Bitmap bitmapImage;
+        ImageResult image;
 
         try
         {
-            bitmapImage = new Bitmap(imageFilePath);
+            using var stream = File.OpenRead(imageFilePath);
+            image = ImageResult.FromStream(stream, ColorComponents.RedGreenBlue);
         }
         catch (Exception e)
         {
@@ -100,12 +96,13 @@ internal sealed class BuildAsciiFontSorting : Instance<BuildAsciiFontSorting>
         }
 
         // Add brightness
-        for (var xIndex = 0; xIndex < bitmapImage.Width; xIndex++)
+        var pixels = image.Data;
+        for (var xIndex = 0; xIndex < image.Width; xIndex++)
         {
-            for (var yIndex = 0; yIndex < bitmapImage.Height; yIndex++)
+            for (var yIndex = 0; yIndex < image.Height; yIndex++)
             {
-                var letterColumnIndex = (int)((float)xIndex / bitmapImage.Width * Columns);
-                var letterRowIndex = (int)((float)yIndex / bitmapImage.Height * Rows);
+                var letterColumnIndex = (int)((float)xIndex / image.Width * Columns);
+                var letterRowIndex = (int)((float)yIndex / image.Height * Rows);
                 var letterIndex = letterRowIndex * Columns + letterColumnIndex;
                 if (letterIndex >= letterBrightnessArray.Length)
                 {
@@ -113,8 +110,8 @@ internal sealed class BuildAsciiFontSorting : Instance<BuildAsciiFontSorting>
                     continue;
                 }
 
-                var pixel = bitmapImage.GetPixel(xIndex, yIndex);
-                letterBrightnessArray[letterIndex].Brightness += (pixel.R + pixel.G + pixel.B) * 1f;
+                var pixelOffset = (yIndex * image.Width + xIndex) * 3;
+                letterBrightnessArray[letterIndex].Brightness += (pixels[pixelOffset] + pixels[pixelOffset + 1] + pixels[pixelOffset + 2]) * 1f;
             }
         }       
 
