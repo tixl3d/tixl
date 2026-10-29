@@ -23,6 +23,39 @@ namespace T3.Editor.Gui.Windows.Layouts;
 /// </summary>    
 internal static class LayoutHandling
 {
+    /// <summary>
+    /// Submits the dock space covering the main viewport. Mirrors <c>ImGui.DockSpaceOverViewport()</c> with the same
+    /// host window name, so dock ids and saved layouts stay valid, but lets us check the host window's focus.
+    /// </summary>
+    internal static void DrawMainDockSpace()
+    {
+        var viewport = ImGui.GetMainViewport();
+        if (viewport.ID != _dockHostViewportId)
+        {
+            _dockHostViewportId = viewport.ID;
+            _dockHostWindowName = $"WindowOverViewport_{viewport.ID:X8}";
+        }
+
+        ImGui.SetNextWindowPos(viewport.WorkPos);
+        ImGui.SetNextWindowSize(viewport.WorkSize);
+        ImGui.SetNextWindowViewport(viewport.ID);
+
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowRounding, 0);
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, 0);
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Vector2.Zero);
+        ImGui.Begin(_dockHostWindowName, DockHostWindowFlags);
+        ImGui.PopStyleVar(3);
+
+        MainDockSpaceId = ImGui.GetID("DockSpace");
+        ImGui.DockSpace(MainDockSpaceId, Vector2.Zero);
+
+        // Dragging a dock splitter focuses the dock space's child window, where keyboard shortcuts go nowhere
+        if (ImGui.IsWindowFocused(ImGuiFocusedFlags.ChildWindows) && !ImGui.IsAnyMouseDown())
+            FindWindowToRestoreFocus()?.RequestWindowFocus();
+
+        ImGui.End();
+    }
+
     public static void ProcessKeyboardShortcuts()
     {
         // Process Keyboard shortcuts
@@ -155,15 +188,19 @@ internal static class LayoutHandling
             graphWindow.SetWindowToNormal();
         }
 
-        var windowToFocus = Window.FocusedWindow is { Config.Visible: true } focusedWindow
-                                ? focusedWindow
-                                : FindVisibleGraphWindowOfFocusedProject();
-        windowToFocus?.RequestFocusAfterLayoutChange();
+        FindWindowToRestoreFocus()?.RequestFocusAfterLayoutChange();
 
         if (switchingBackFromFocusMode)
         {
             UiConfig.RestoreBackgroundAfterFocusMode();
         }
+    }
+
+    private static Window? FindWindowToRestoreFocus()
+    {
+        return Window.FocusedWindow is { Config.Visible: true } focusedWindow
+                   ? focusedWindow
+                   : FindVisibleGraphWindowOfFocusedProject();
     }
 
     /** Falls back to any visible graph window, so keyboard shortcuts keep working. */
@@ -422,4 +459,12 @@ internal static class LayoutHandling
 
     /** Id of the dock space covering the main viewport. Dock trees of any other dock space are stale. */
     internal static uint MainDockSpaceId;
+
+    private const ImGuiWindowFlags DockHostWindowFlags = ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoCollapse
+                                                       | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove
+                                                       | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoBringToFrontOnFocus
+                                                       | ImGuiWindowFlags.NoNavFocus;
+
+    private static uint _dockHostViewportId;
+    private static string _dockHostWindowName = "WindowOverViewport_00000000";
 }
