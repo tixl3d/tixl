@@ -1,0 +1,211 @@
+{
+  "FormatVersion": 3,
+  "Id": "4bf07ce8-b92b-4191-b14b-8c3862df9c01"/*NewBlend*/,
+  "Description": "Blend image B on image A using a blending mode whose coefficient allows for interpolation between image A and f(A,B)\n\nFor more information watch https://en.wikipedia.org/wiki/Blend_modes\n\nSee also: [BlendImages], [BlendWithMask], [Combine3Images]\n",
+  "InputUis": [
+    {
+      "InputId": "18824d11-859c-4a2e-9853-2bea1fc94ff9"/*ColorA*/,
+      "Position": {
+        "X": 411.1845,
+        "Y": 107.255646
+      },
+      "Description": "Color multiplied with ImageA.",
+      "Scale": 0.01
+    },
+    {
+      "InputId": "2bb75121-2bec-483a-8fc1-af7f25f29585"/*Resolution*/,
+      "Position": {
+        "X": 551.1845,
+        "Y": 632.2557
+      },
+      "Description": "Overrides the output resolution. If 0, the resolution of ImageA is used."
+    },
+    {
+      "InputId": "5dfaade0-c157-4d8a-8bc5-6dfbae040ee0"/*GenerateMips*/,
+      "Position": {
+        "X": 551.1845,
+        "Y": 667.2557
+      },
+      "Description": "Generates mipmap levels."
+    },
+    {
+      "InputId": "6049030b-6e3c-4e16-8166-5fab3418fac1"/*Factor*/,
+      "Position": {
+        "X": 551.1845,
+        "Y": 527.2557
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "66e6556e-138b-4e7c-9df1-55395fee3ca7"/*ImageMask*/,
+      "Position": {
+        "X": 551.1845,
+        "Y": 702.2557
+      },
+      "GroupTitle": "Advanced Settings",
+      "Description": "Black areas of the mask show ImageA, white areas ImageB, and values in between interpolate between the two."
+    },
+    {
+      "InputId": "84312dab-efa1-413f-a8c5-8ddaf4ca5161"/*ImageA*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 551.1845,
+        "Y": 37.255646
+      },
+      "Description": "The background image. Defines the resolution of the output."
+    },
+    {
+      "InputId": "889ff315-8794-4287-b409-f39e7dacbd4e"/*ClampFactor*/,
+      "Position": {
+        "X": 411.1845,
+        "Y": 562.2557
+      },
+      "Description": "Clamp the Factor value between [0,1]"
+    },
+    {
+      "InputId": "90b60dd5-ac4b-4291-8b93-853b74c81ac4"/*BlendMode*/,
+      "Position": {
+        "X": 411.1845,
+        "Y": 387.25565
+      },
+      "GroupTitle": "Settings",
+      "Description": "How the colors of ImageB are combined with ImageA:\n\n- Normal: B\n- Add: A+B\n- Sub: A-B\n- Difference: abs(A,B)\n- Multiply: A*B\n- Div: A/B\n- Overlay: 1-2(1-B)(1-A)\n- Color dodge: A/(1-B)\n- Color burn: 1-(1-A)/B\n- MixUsingImageB_A: lerp(A,B,B.alpha)\n- Linear light: (A+2*B)- 1\n- Soft light: (1-2B)*a^2+2AB\n- Darken: min(A,B)\n- Lighten: max(A,B)\n- Hue: preserves the luma and chroma of A, while adopting the hue of B\n- Saturation: preserves the luma and hue of A, while adopting the chroma of B\n- Color: blend mode preserves the luma of A, while adopting the hue and chroma of B\n- Blend mode preserves the hue and chroma of A, while adopting the luma of B"
+    },
+    {
+      "InputId": "9ad9834f-984a-441f-ae45-ababb164fd0a"/*ColorB*/,
+      "Position": {
+        "X": 411.1845,
+        "Y": 247.25565
+      },
+      "Description": "Color multiplied with ImageB. Its alpha can be used to fade out the image.\n\nConsider connecting a [SampleGradient].",
+      "Scale": 0.01
+    },
+    {
+      "InputId": "a6d4e532-706e-4ff5-a9b1-5a518d75a045"/*AlphaMode*/,
+      "Position": {
+        "X": 411.1845,
+        "Y": 422.25565
+      },
+      "Description": "Various modes for how the alpha channels are combined.",
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "b2987d6e-e11c-4d7a-abe5-1596d6fd588f"/*ImageB*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 551.1845,
+        "Y": 72.255646
+      },
+      "Description": "The image blended on top of the background image."
+    },
+    {
+      "InputId": "dbc5fc3c-dd29-4b3d-9669-156a519ebd3c"/*NormalForUpperHalf*/,
+      "Position": {
+        "X": 411.1845,
+        "Y": 457.25568
+      },
+      "Description": "If used with blend modes other than normal, that blend mode will only be used if the alpha channel is below 0.5.\nAbove that, the image will be fully blended with normal mode.\n\nAs an example: If blended with Screen mode...\n- Alpha = 0.0: none of the image will be visible\n- Alpha = 0.5: the image will be fully visible with screen mode\n- Alpha = 1.0: the image will be fully visible with normal mode\n\n"
+    },
+    {
+      "InputId": "f70cdc3e-477a-4e00-81b8-9520fd51432a"/*ScaleMode*/,
+      "Position": {
+        "X": 411.1845,
+        "Y": 492.25568
+      }
+    },
+    {
+      "InputId": "f711ae92-4697-409e-9de0-3d0c51973466"/*ClampOutput*/,
+      "Position": {
+        "X": 411.18454,
+        "Y": 597.2557
+      },
+      "Description": "Clamp the values of the output image between [0,1]"
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "00abc72b-ce15-4734-8802-acccea2f2d26",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
+      "Position": {
+        "X": 551.1845,
+        "Y": 457.25568
+      }
+    },
+    {
+      "ChildId": "33ffd42d-27dc-4c5a-851e-85f23077162b",
+      "SymbolName": "Lib.image.fx._._multiImageFxSetupStatic",
+      "Position": {
+        "X": 691.1845,
+        "Y": 2.2556763
+      }
+    },
+    {
+      "ChildId": "4885ee13-56d3-461c-8020-cee03c167d33",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
+      "Position": {
+        "X": 551.1845,
+        "Y": 422.25565
+      }
+    },
+    {
+      "ChildId": "49d8a682-0e72-4978-ab58-e54e355316d0",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
+      "Position": {
+        "X": 551.1845,
+        "Y": 107.255646
+      }
+    },
+    {
+      "ChildId": "49dd392d-1eef-4183-85cc-21a8d490ad43",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
+      "Position": {
+        "X": 551.1845,
+        "Y": 247.25565
+      }
+    },
+    {
+      "ChildId": "9c5bfb81-6f32-4357-89d0-6e70ca39f225",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
+      "Position": {
+        "X": 551.1845,
+        "Y": 597.2557
+      }
+    },
+    {
+      "ChildId": "cb769555-0890-46cf-9b08-f241860d45bd",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
+      "Position": {
+        "X": 551.1845,
+        "Y": 387.25565
+      }
+    },
+    {
+      "ChildId": "f04d7c68-9292-4ef0-80c0-d0362c04ec2f",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
+      "Position": {
+        "X": 551.1845,
+        "Y": 492.25568
+      }
+    },
+    {
+      "ChildId": "f7890525-b75f-4551-acc7-88d2b756c808",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
+      "Position": {
+        "X": 551.1845,
+        "Y": 562.2557
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "8871c07c-ff14-4254-a7b8-2440a3f05ccf"/*Output*/,
+      "Position": {
+        "X": 926.4041,
+        "Y": -8.463083
+      }
+    }
+  ]
+}
