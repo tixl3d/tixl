@@ -94,6 +94,9 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         /// <summary>Projects switched away from stay loaded for a quick return; older ones are unloaded.</summary>
         public int KeepLoadedProjectCount = 3;
 
+        /// <summary>0 keeps them for as long as their project is loaded.</summary>
+        public int ReleaseUnusedRenderTargetsAfterSeconds = 30;
+
         /// <summary>Folder of the project that was open when the editor closed; empty if it closed in the project hub.</summary>
         public string LastOpenProjectFolder = string.Empty;
 

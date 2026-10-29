@@ -79,6 +79,7 @@ public static partial class T3Ui
 
         FitViewToSelectionHandling.ProcessNewFrame();
         SrvManager.RemoveForDisposedTextures();
+        GpuResourceReleasing.Update();
         KeyActionHandling.InitializeFrame();
 
         CompatibleMidiDeviceHandling.RescanIfDevicesChanged();

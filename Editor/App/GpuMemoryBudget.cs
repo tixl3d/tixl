@@ -20,11 +20,17 @@ internal static class GpuMemoryBudget
     public static long UsageBytes { get; private set; }
     public static long BudgetBytes { get; private set; }
 
+    /// <summary>Close enough to the budget that unused resources are worth releasing before anything pages.</summary>
+    public static bool IsNearlyFull => BudgetBytes > 0 && UsageBytes > BudgetBytes * 9 / 10;
+
     public static void Initialize(T3.Graphics.Compat.Device device)
     {
-        // DXGI only knows the D3D11 device; the Vulkan backend would report its budget via VK_EXT_memory_budget.
+        // DXGI only knows the D3D11 device; the Vulkan backend reports its budget via VK_EXT_memory_budget.
         if (ProgramWindows.UseVulkanBackend)
+        {
+            _backend = device.Backend;
             return;
+        }
 
         try
         {
@@ -44,7 +50,7 @@ internal static class GpuMemoryBudget
     /// <summary>Samples the budget at most once every <see cref="PollIntervalSec"/>; call from the frame loop.</summary>
     public static void UpdateFrame()
     {
-        if (_adapter == null)
+        if (_adapter == null && _backend == null)
             return;
 
         var now = Playback.RunTimeInSecs;
@@ -52,6 +58,15 @@ internal static class GpuMemoryBudget
             return;
 
         _lastPollTime = now;
+        if (_backend != null)
+        {
+            var report = _backend.QueryMemory();
+            UsageBytes = report.UsedBytes;
+            BudgetBytes = report.BudgetBytes;
+            IsOversubscribed = report.BudgetBytes > 0 && report.UsedBytes > report.BudgetBytes + report.BudgetBytes / 50;
+            return;
+        }
+
         try
         {
             var info = _adapter.QueryVideoMemoryInfo(0, MemorySegmentGroup.Local);
@@ -79,5 +94,6 @@ internal static class GpuMemoryBudget
     private const double PollIntervalSec = 2;
 
     private static Adapter3? _adapter;
+    private static T3.Graphics.IGraphicsBackend? _backend;
     private static double _lastPollTime;
 }

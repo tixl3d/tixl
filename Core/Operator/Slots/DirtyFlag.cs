@@ -100,6 +100,13 @@ public sealed class DirtyFlag
     }
 
     internal int InvalidationTick = -1;
+
+    /// <summary>
+    /// The <see cref="GlobalInvalidationTick"/> of the last invalidation pass that reached this slot. A pass walks
+    /// everything it evaluates, unchanged parts included, so this tells whether anything still pulls the slot even
+    /// when its value has not been updated for a long time.
+    /// </summary>
+    public int LastInvalidationTick => InvalidationTick;
     private const int GlobalTickDiffPerFrame = 100; // each frame differs with 100 ticks to last one
     private static int _globalTickCount;
     private int _lastUpdateTick;

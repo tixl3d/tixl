@@ -428,6 +428,15 @@ internal sealed partial class SettingsWindow : Window
                                                  """,
                                                  UserSettings.Defaults.KeepLoadedProjectCount);
 
+                    changed |= FormInputs.AddInt("Release Unused Render Targets",
+                                                 ref UserSettings.Config.ReleaseUnusedRenderTargetsAfterSeconds,
+                                                 0, 600, 0.5f,
+                                                 """
+                                                 Seconds after which render targets that nothing shows give up their GPU memory. They re-render when shown again.
+                                                 Targets that accumulate content or are frozen are kept. 0 keeps all of them.
+                                                 """,
+                                                 UserSettings.Defaults.ReleaseUnusedRenderTargetsAfterSeconds);
+
                     FormInputs.AddSectionSubHeader("Performance");
                     FormInputs.SetIndentToLeft();
 

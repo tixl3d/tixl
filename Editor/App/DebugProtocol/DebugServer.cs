@@ -453,6 +453,14 @@ internal static class DebugServer
                 break;
             }
 
+            case "releaseGpuResources":
+            {
+                // What "Free GPU Memory" does; it runs at the start of the next frame, so pump one before measuring.
+                App.GpuResourceReleasing.RequestReleaseAll();
+                context.SendOk(new JObject());
+                break;
+            }
+
             case "setTargetFrameRate":
             {
                 // 0 renders every refresh; without a value it only reports.

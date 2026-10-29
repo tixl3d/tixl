@@ -1,12 +1,14 @@
 using T3.Graphics.Compat;
+using T3.Core.Operator.Interfaces;
 using T3.Core.Utils;
+using T3.Graphics;
 using Device = T3.Graphics.Compat.Device;
 using Utilities = T3.Core.Utils.Utilities;
 
 namespace Lib.image.generate.basic;
 
 [Guid("f9fe78c5-43a6-48ae-8e8c-6cdbbc330dd1")]
-internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvider
+internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvider, IReleasableGpuResources
 {
     [Output(Guid = "7A4C4FEB-BE2F-463E-96C6-CD9A6BAD77A2")]
     public readonly Slot<Texture2D> ColorBuffer = new();
@@ -23,6 +25,7 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
         DepthBuffer.UpdateAction += Update;
         NormalBuffer.UpdateAction += Update;
         SetupResolveShaderResources();
+        ReleasableGpuResources.Register(this);
 
         lock (_lock)
         {
@@ -48,6 +51,10 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
         var clearColor = ClearColor.GetValue(context);
         var reference = TextureReference.GetValue(context);
         var enableUpdate = EnableUpdate.GetValue(context);
+
+        // A re-render reproduces the content only if every update starts from a cleared target and nothing
+        // outside reads the textures through the reference.
+        _isRebuildable = clear && enableUpdate && !TextureReference.HasInputConnections;
             
         if (size.Width == 0 || size.Height == 0)
         {
@@ -566,13 +573,53 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
     }
 
 
+    public long ReleasableBytes => SizeInBytes(_multiSampledColorBuffer) + SizeInBytes(_resolvedColorBuffer)
+                                   + SizeInBytes(_multiSampledDepthBuffer) + SizeInBytes(_resolvedDepthBuffer)
+                                   + SizeInBytes(_multiSampledNormalBuffer) + SizeInBytes(_resolvedNormalBuffer);
+
+    public bool TryReleaseGpuResources()
+    {
+        if (!_isRebuildable || _multiSampledColorBuffer == null)
+            return false;
+
+        DisposeTextures();
+        _wasClearedOnce = false;
+
+        // The textures are gone; consumers pulling before the next update must not get them.
+        ColorBuffer.Value = null;
+        DepthBuffer.Value = null;
+        NormalBuffer.Value = null;
+        ColorBuffer.DirtyFlag.ForceInvalidate();
+        DepthBuffer.DirtyFlag.ForceInvalidate();
+        NormalBuffer.DirtyFlag.ForceInvalidate();
+        return true;
+    }
+
+    private static long SizeInBytes(Texture2D texture)
+    {
+        if (texture == null)
+            return 0;
+
+        var description = texture.Description;
+        var bytes = (long)description.Width * description.Height
+                    * Math.Max(1, FormatSizes.BytesPerPixel(description.Format))
+                    * Math.Max(1, description.SampleDescription.Count);
+
+        // A full mip chain adds a third.
+        return description.MipLevels > 1 ? bytes * 4 / 3 : bytes;
+    }
+
     protected override void Dispose(bool isDisposing)
     {
         if (!isDisposing)
             return;
 
-        //Log.Debug("Disposing RenderTarget", this);
-        
+        ReleasableGpuResources.Unregister(this);
+        DisposeTextures();
+    }
+
+    private void DisposeTextures()
+    {
         T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _multiSampledColorBuffer);
         T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _multiSampledColorBufferSrv);
         T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _multiSampledColorBufferRtv);
@@ -628,6 +675,7 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
     private RenderTargetView _multiSampledNormalBufferRtv;
  
     private bool _wasClearedOnce;
+    private bool _isRebuildable;
 
     private Texture2D ColorTexture => _sampleCount > 1 ? _resolvedColorBuffer : _multiSampledColorBuffer ;
     private Texture2D DepthTexture => _sampleCount > 1 ? _resolvedDepthBuffer : _multiSampledDepthBuffer;

@@ -368,6 +368,12 @@ internal static class AppMenuBar
                 PlayerExporter.ExportAndReport(projectView!.CompositionInstance!, exportChildUis![0]);
             }
 
+            if (MenuItem("Free GPU Memory"))
+                App.GpuResourceReleasing.RequestReleaseAll();
+
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("Releases every render target that can be rebuilt. Each one re-renders when it is next shown.");
+
             CustomComponents.SeparatorLine();
 
             if (MenuItem("Save Changes", UserActions.Save.ListShortcuts(), isEnabled: !T3Ui.IsCurrentlySaving))

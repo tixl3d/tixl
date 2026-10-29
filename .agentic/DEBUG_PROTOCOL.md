@@ -81,6 +81,9 @@ Parameter shapes are defined in `DebugServer.cs` — read the handler when unsur
 
 - `reload` works on **editable projects only** (synchronous recompile; MSBuild errors come
   back in a `COMPILE_FAILED` detail). Built-in packages like `Lib` need an editor restart.
+- `releaseGpuResources` does what the main menu's Free GPU Memory does: every render target that can rebuild its
+  content releases its textures and re-renders when next pulled. It runs at the start of the next frame, so
+  `pumpFrames` before reading `getMetrics`.
 - `setVSync` (`value`: bool, optional) switches the user's Use VSync setting and returns `useVSync`; without
   `value` it only reports. Restore the previous value after a measurement — the setting is saved.
   `setTargetFrameRate` (`value`: fps, 0 = every refresh) works the same way for the Frame Rate setting.
