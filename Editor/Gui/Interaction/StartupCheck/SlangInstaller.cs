@@ -1,5 +1,5 @@
 #nullable enable
-using System.Formats.Tar;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Net.Http;
@@ -99,11 +99,24 @@ internal static class SlangInstaller
             return;
         }
 
-        using var file = File.OpenRead(archivePath);
-        using var decompressed = new GZipStream(file, CompressionMode.Decompress);
+        // Not System.Formats.Tar: the macOS release carries code-signature xattrs as binary PAX values, which
+        // TarReader rejects as "invalid records". The system tar reads them and restores the executable bit.
+        var startInfo = new ProcessStartInfo("tar")
+                            {
+                                RedirectStandardError = true,
+                                UseShellExecute = false,
+                                CreateNoWindow = true,
+                            };
+        startInfo.ArgumentList.Add("-xzf");
+        startInfo.ArgumentList.Add(archivePath);
+        startInfo.ArgumentList.Add("-C");
+        startInfo.ArgumentList.Add(targetDirectory);
 
-        // Restores the executable bit from the archive, which slangc needs to run at all.
-        TarFile.ExtractToDirectory(decompressed, targetDirectory, overwriteFiles: true);
+        using var process = Process.Start(startInfo) ?? throw new InvalidOperationException("Could not start tar.");
+        var errors = process.StandardError.ReadToEnd().Trim();
+        process.WaitForExit();
+        if (process.ExitCode != 0)
+            throw new InvalidDataException($"tar exited with {process.ExitCode}: {errors}");
     }
 
     /// <summary>
