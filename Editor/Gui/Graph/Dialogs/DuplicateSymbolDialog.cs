@@ -82,13 +82,13 @@ internal sealed class DuplicateSymbolDialog : ModalDialog
             var hasTargetProject = _projectToCopyTo != null;
             var symbolNamesValid = false;
             var isBlocked = false;
-            if (hasTargetProject)
+            if (_projectToCopyTo is { } targetProject)
             {
                 // The check parses the source file, so only redo it when symbol or target change
-                if (selectionChanged || !ReferenceEquals(_checkedProject, _projectToCopyTo))
+                if (selectionChanged || !ReferenceEquals(_checkedProject, targetProject))
                 {
-                    _checkedProject = _projectToCopyTo;
-                    Duplicate.TryGetDuplicationBlocker(s, _projectToCopyTo, out _blockReason);
+                    _checkedProject = targetProject;
+                    Duplicate.TryGetDuplicationBlocker(s, targetProject, out _blockReason);
                 }
 
                 isBlocked = _blockReason != null;
@@ -100,7 +100,7 @@ internal sealed class DuplicateSymbolDialog : ModalDialog
                     ImGui.Spacing();
                 }
 
-                _ = SymbolModificationInputs.DrawSymbolNameAndNamespaceInputs(ref newTypeName, ref nameSpace, _projectToCopyTo, out symbolNamesValid);
+                _ = SymbolModificationInputs.DrawSymbolNameAndNamespaceInputs(ref newTypeName, ref nameSpace, targetProject, out symbolNamesValid);
                 ImGui.Spacing();
 
                 FormInputs.DrawInputLabel("Description");

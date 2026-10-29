@@ -71,6 +71,9 @@ internal static class GpuMemoryBudget
             return;
         }
 
+        if (_adapter == null)
+            return;
+
         try
         {
             var info = _adapter.QueryVideoMemoryInfo(0, MemorySegmentGroup.Local);
