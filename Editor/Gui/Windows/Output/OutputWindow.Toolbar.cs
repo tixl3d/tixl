@@ -35,13 +35,15 @@ internal sealed partial class OutputWindow
     {
         // Set cursor to top of the window
         ImGui.SetCursorPos(ImGui.GetCursorStartPos());
-
         // Calculate available width
         var availableWidth = ImGui.GetWindowSize().X;
-        var toolbarHeight = ImGui.GetTextLineHeight() + 22;
-        
-        // Begin a horizontally scrollable child region
-        ImGui.BeginChild("##toolbar_scroll", new Vector2(availableWidth, toolbarHeight), ImGuiChildFlags.None, ImGuiWindowFlags.HorizontalScrollbar);
+        var frameHeight = ImGui.GetFrameHeight();
+        var toolbarHeight = frameHeight + ImGui.GetStyle().ScrollbarSize + 3;
+
+        ImGui.BeginChild("##toolbar_scroll",
+                         new Vector2(availableWidth, toolbarHeight),
+                         ImGuiChildFlags.None,
+                         ImGuiWindowFlags.HorizontalScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
         // Keep filled backgrounds so the toolbar reads as a continuous bar.
         CustomComponents.PushToolbarIconBackground();
 
@@ -168,7 +170,7 @@ internal sealed partial class OutputWindow
             ImGui.PopID();
         }
 
-        // the background color button got me confused as it has no effect for Texture2D so I decided to only show it for Command
+        // the background color button got me confused as it has no effect for Texture2D, I decided to only show it for Command
         if (drawnType == typeof(Command))
         {
             ImGui.SameLine();
