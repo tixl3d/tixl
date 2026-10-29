@@ -8,9 +8,10 @@ using T3.Editor.Gui.UiHelpers;
 namespace T3.Editor.App;
 
 /// <summary>
-/// Releases the GPU resources of operators that can rebuild them (<see cref="IReleasableGpuResources"/>): those
-/// no evaluation has reached for a while, the largest ones when GPU memory runs short, and all of them on request.
-/// A released operator re-renders the next time something pulls it.
+/// Releases the GPU resources of operators that can rebuild them (<see cref="IReleasableGpuResources"/>): the largest
+/// unused ones while TiXL is over its GPU memory limit, optionally any that went unused for a set time, and all of
+/// them on request. A released operator re-renders the next time something pulls it, which can cost a frame — so
+/// by default nothing is released while memory is plentiful.
 /// </summary>
 /// <remarks>
 /// "Reached" is the invalidation walk, not an update: a render target whose inputs never change is not updated,
@@ -42,10 +43,11 @@ internal static class GpuResourceReleasing
         RecordTick(now);
 
         GpuMemoryBudget.UpdateFrame();
-        if (GpuMemoryBudget.IsNearlyFull && TryGetTickAt(now - PressureMinUnusedSec, out var recentTick))
+        if (GpuMemoryBudget.IsOverLimit && TryGetTickAt(now - PressureMinUnusedSec, out var recentTick))
         {
-            var excess = GpuMemoryBudget.UsageBytes - (long)(GpuMemoryBudget.BudgetBytes * PressureTargetFraction);
-            Release(recentTick, excess, "GPU memory is nearly full");
+            // Releasing down to a margin below the limit, so usage hovering at it does not release every second.
+            var target = GpuMemoryBudget.LimitBytes - GpuMemoryBudget.BudgetBytes * LimitMarginPercent / 100;
+            Release(recentTick, GpuMemoryBudget.UsageBytes - target, "over the GPU memory limit");
             return;
         }
 
@@ -143,7 +145,7 @@ internal static class GpuResourceReleasing
     /** Under pressure, anything unused for this long goes — still long enough not to release what a cut back to would show. */
     private const double PressureMinUnusedSec = 2;
 
-    private const double PressureTargetFraction = 0.8;
+    private const long LimitMarginPercent = 10;
 
     private static bool _releaseAllRequested;
     private static double _lastPassTime = double.NegativeInfinity;

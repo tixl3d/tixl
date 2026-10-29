@@ -94,8 +94,14 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         /// <summary>Projects switched away from stay loaded for a quick return; older ones are unloaded.</summary>
         public int KeepLoadedProjectCount = 3;
 
-        /// <summary>0 keeps them for as long as their project is loaded.</summary>
-        public int ReleaseUnusedRenderTargetsAfterSeconds = 30;
+        /// <summary>
+        /// Share of the GPU memory budget the driver grants TiXL. Above it, render targets nothing shows are
+        /// released; below it, nothing is, so a show that fits never pays for a rebuild.
+        /// </summary>
+        public int GpuMemoryLimitPercent = 90;
+
+        /// <summary>0 keeps them for as long as their project is loaded, which avoids rebuild hitches.</summary>
+        public int ReleaseUnusedRenderTargetsAfterSeconds = 0;
 
         /// <summary>Folder of the project that was open when the editor closed; empty if it closed in the project hub.</summary>
         public string LastOpenProjectFolder = string.Empty;

@@ -38,6 +38,8 @@ internal sealed partial class SettingsWindow : Window
     }
 
     private Categories _activeCategory;
+    /** All categories share one content panel, so its scroll offset would otherwise carry over. */
+    private bool _scrollContentToTop;
 
     /// <summary>Selects a category by its enum name; used by the debug bridge.</summary>
     internal bool TrySelectCategory(string name)
@@ -45,8 +47,17 @@ internal sealed partial class SettingsWindow : Window
         if (!Enum.TryParse<Categories>(name, true, out var category))
             return false;
 
-        _activeCategory = category;
+        SelectCategory(category);
         return true;
+    }
+
+    private void SelectCategory(Categories category)
+    {
+        if (category == _activeCategory)
+            return;
+
+        _activeCategory = category;
+        _scrollContentToTop = true;
     }
 
     /// <summary>Pinned to the bottom of the sidebar: opens the per-version settings folder in the OS file browser.</summary>
@@ -75,7 +86,7 @@ internal sealed partial class SettingsWindow : Window
                                ? "Midi & OSC"
                                : CustomComponents.HumanReadablePascalCase(Enum.GetName(category));
                 if (NavigationSidebar.Item(name, _activeCategory == category))
-                    _activeCategory = category;
+                    SelectCategory(category);
             }
 
             DrawOpenSettingsFolderButton();
@@ -84,6 +95,12 @@ internal sealed partial class SettingsWindow : Window
 
         NavigationSidebar.BeginContentPanel(CategoryTitle(_activeCategory), this);
         {
+            if (_scrollContentToTop)
+            {
+                ImGui.SetScrollY(0);
+                _scrollContentToTop = false;
+            }
+
             FormInputs.SetIndentToParameters();
             switch (_activeCategory)
             {
@@ -419,24 +436,6 @@ internal sealed partial class SettingsWindow : Window
                                                       UserSettings.Defaults.ReopenLastProjectOnStartup
                                                      );
 
-                    changed |= FormInputs.AddInt("Keep Projects Loaded",
-                                                 ref UserSettings.Config.KeepLoadedProjectCount,
-                                                 1, 10, 0.1f,
-                                                 """
-                                                 How many recently shown projects stay loaded, including the current one.
-                                                 Switching back to a loaded project is instant. Older ones are unloaded to free GPU memory and are rebuilt when opened again.
-                                                 """,
-                                                 UserSettings.Defaults.KeepLoadedProjectCount);
-
-                    changed |= FormInputs.AddInt("Release Unused Render Targets",
-                                                 ref UserSettings.Config.ReleaseUnusedRenderTargetsAfterSeconds,
-                                                 0, 600, 0.5f,
-                                                 """
-                                                 Seconds after which render targets that nothing shows give up their GPU memory. They re-render when shown again.
-                                                 Targets that accumulate content or are frozen are kept. 0 keeps all of them.
-                                                 """,
-                                                 UserSettings.Defaults.ReleaseUnusedRenderTargetsAfterSeconds);
-
                     FormInputs.AddSectionSubHeader("Performance");
                     FormInputs.SetIndentToLeft();
 
@@ -454,6 +453,34 @@ internal sealed partial class SettingsWindow : Window
                                                                      """,
                                                                      CoreSettings.Defaults.EnableDirectXDebug);
                     FormInputs.SetIndentToParameters();
+
+                    FormInputs.AddVerticalSpace();
+                    changed |= FormInputs.AddInt("Keep Projects Loaded",
+                                                 ref UserSettings.Config.KeepLoadedProjectCount,
+                                                 1, 10, 0.1f,
+                                                 """
+                                                 How many recently shown projects stay loaded, including the current one.
+                                                 Switching back to a loaded project is instant. Older ones are unloaded to free GPU memory and are rebuilt when opened again.
+                                                 """,
+                                                 UserSettings.Defaults.KeepLoadedProjectCount);
+
+                    changed |= FormInputs.AddInt("GPU Memory Limit %",
+                                                 ref UserSettings.Config.GpuMemoryLimitPercent,
+                                                 10, 100, 0.2f,
+                                                 """
+                                                 How much of the GPU memory the driver grants TiXL it may use. Above this, render targets that nothing currently shows give up their memory, largest first, and re-render when shown again — which can cost a frame.
+                                                 Below it nothing is released, so a show that fits in memory runs without such hitches.
+                                                 """,
+                                                 UserSettings.Defaults.GpuMemoryLimitPercent);
+
+                    changed |= FormInputs.AddInt("Release Unused Render Targets",
+                                                 ref UserSettings.Config.ReleaseUnusedRenderTargetsAfterSeconds,
+                                                 0, 600, 0.5f,
+                                                 """
+                                                 Seconds after which render targets that nothing shows give up their GPU memory, even below the limit. They re-render when shown again, which can cost a frame — for example when the timeline reaches a clip.
+                                                 Targets that accumulate content or are frozen are kept. 0 (the default) never releases them for being unused.
+                                                 """,
+                                                 UserSettings.Defaults.ReleaseUnusedRenderTargetsAfterSeconds);
 
                     break;
                 }

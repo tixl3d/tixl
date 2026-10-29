@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using SharpDX.DXGI;
 using T3.Core.Animation;
 using T3.Core.Logging;
+using T3.Editor.Gui.UiHelpers;
 
 namespace T3.Editor.App;
 
@@ -20,8 +21,11 @@ internal static class GpuMemoryBudget
     public static long UsageBytes { get; private set; }
     public static long BudgetBytes { get; private set; }
 
-    /// <summary>Close enough to the budget that unused resources are worth releasing before anything pages.</summary>
-    public static bool IsNearlyFull => BudgetBytes > 0 && UsageBytes > BudgetBytes * 9 / 10;
+    /// <summary>The part of the budget TiXL may fill, from <see cref="UserSettings.ConfigData.GpuMemoryLimitPercent"/>.</summary>
+    public static long LimitBytes => BudgetBytes * Math.Clamp(UserSettings.Config.GpuMemoryLimitPercent, 10, 100) / 100;
+
+    /// <summary>Using more than the user allowed: unused resources are released before anything pages.</summary>
+    public static bool IsOverLimit => BudgetBytes > 0 && UsageBytes > LimitBytes;
 
     public static void Initialize(T3.Graphics.Compat.Device device)
     {
