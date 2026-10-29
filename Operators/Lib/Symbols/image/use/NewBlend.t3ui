@@ -72,7 +72,7 @@
         "Y": 387.25565
       },
       "GroupTitle": "Settings",
-      "Description": "How the colors of ImageB are combined with ImageA:\n\n- Normal: B\n- Add: A+B\n- Sub: A-B\n- Difference: abs(A,B)\n- Multiply: A*B\n- Div: A/B\n- Overlay: 1-2(1-B)(1-A)\n- Color dodge: A/(1-B)\n- Color burn: 1-(1-A)/B\n- MixUsingImageB_A: lerp(A,B,B.alpha)\n- Linear light: (A+2*B)- 1\n- Soft light: (1-2B)*a^2+2AB\n- Darken: min(A,B)\n- Lighten: max(A,B)\n- Hue: preserves the luma and chroma of A, while adopting the hue of B\n- Saturation: preserves the luma and hue of A, while adopting the chroma of B\n- Color: blend mode preserves the luma of A, while adopting the hue and chroma of B\n- Blend mode preserves the hue and chroma of A, while adopting the luma of B"
+      "Description": "How the colors of ImageB are combined with ImageA:\n\n- Normal: B\n- Add: A+B\n- Sub: A-B\n- Difference: abs(A,B)\n- Multiply: A*B\n- Div: A/B\n- Overlay: 1-2(1-B)(1-A)\n- Color dodge: A/(1-B)\n- Color burn: 1-(1-A)/B\n- MixUsingImageB_A: lerp(A,B,B.alpha)\n- Linear light: (A+2*B)- 1\n- Soft light: (1-2B)*a^2+2AB\n- Darken: min(A,B)\n- Lighten: max(A,B)\n- Hue: preserves the luma and chroma of A, while adopting the hue of B\n- Saturation: preserves the luma and hue of A, while adopting the chroma of B\n- Color: blend mode preserves the luma of A, while adopting the hue and chroma of B\n- Luminosity: lend mode preserves the hue and chroma of A, while adopting the luma of B"
     },
     {
       "InputId": "9ad9834f-984a-441f-ae45-ababb164fd0a"/*ColorB*/,
