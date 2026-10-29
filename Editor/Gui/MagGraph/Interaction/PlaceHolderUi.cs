@@ -181,6 +181,11 @@ internal static class PlaceHolderUi
                             MaxSearchLength,
                             ImGuiInputTextFlags.AutoSelectAll);
             ImGui.PopID();
+            
+            if (Filter.SearchString.Length > 0 && Filter.SearchString[0] == ' ')
+            {
+                Filter.SearchString = Filter.SearchString.TrimStart();
+            }
 
             DrawSuggestion(drawList, padding);
 
@@ -657,7 +662,7 @@ internal static class PlaceHolderUi
     private static string BuildSuggestion(SymbolUi selectedSymbolUi)
     {
         if (Filter.SearchString.Length == 0)
-            return "[Space] " + selectedSymbolUi.Symbol.Name + " presets";
+            return "";
 
         if (IsChoosingPreset)
         {
