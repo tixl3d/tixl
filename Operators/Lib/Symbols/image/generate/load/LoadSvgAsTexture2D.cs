@@ -1,7 +1,9 @@
+extern alias skiasvg;
 using Lib.Utils;
-using SharpDX.WIC;
-using Svg;
-using Svg.Transforms;
+using SkiaSharp;
+using Svg.Skia;
+using skiasvg::Svg;
+using skiasvg::Svg.Transforms;
 
 namespace Lib.image.generate.load;
 
@@ -13,7 +15,7 @@ internal sealed class LoadSvgAsTexture2D : Instance<LoadSvgAsTexture2D>, IDescri
 
     public LoadSvgAsTexture2D()
     {
-        _svgResource = new Resource<SvgDocument>(Path, SvgLoader.TryLoad);
+        _svgResource = new Resource<SvgDocument>(Path, SkiaSvgGeometry.TryLoad);
 
         _svgResource.AddDependentSlots(Texture);
 
@@ -22,177 +24,180 @@ internal sealed class LoadSvgAsTexture2D : Instance<LoadSvgAsTexture2D>, IDescri
 
     private void UpdateTexture(EvaluationContext context)
     {
-        // The SVG library draws through System.Drawing, which is Windows-only since .NET 7 and fails
-        // while this method is being prepared - no try inside it can catch that. Hence the split.
-        if (!T3.Core.Utils.WindowsOnlyFeature.IsAvailable("SVG rasterizing"))
+        if (!_svgResource.TryGetValue(context, out var svgDocument) || svgDocument == null)
         {
-            Texture.Value = null;
-            return;
-        }
-
-        UpdateTextureFromSvg(context);
-    }
-
-    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
-    private void UpdateTextureFromSvg(EvaluationContext context)
-    {
-        if (_svgResource.TryGetValue(context, out var svgDocument))
-        {
-            var resolution = Resolution.GetValue(context);
-            var useViewBox = UseViewBox.GetValue(context);
-            var scale = Scale.GetValue(context);
-            var selectLayerRange = SelectLayerRange.GetValue(context);
-            var splitToLayers = SplitToLayers.GetValue(context);
-
-            if (svgDocument == null)
-            {
-                return;
-            }
-
-            try
-            {
-                // Work with an SvgDocument to preserve coordinate systems
-                var workingDocument = svgDocument;
-
-                if (splitToLayers)
-                {
-                    // Get actual content layers with their parent attributes
-                    var contentLayersWithParents = GetContentLayersWithParentAttributes(svgDocument).ToList();
-                    Log.Info($"Found {contentLayersWithParents.Count} layers in {Path.Value}", this);
-                    if (contentLayersWithParents.Count > 0)
-                    {
-                        // Validate and normalize range
-                        var startIndex = Math.Max(0, Math.Min(selectLayerRange.X, contentLayersWithParents.Count - 1));
-                        var endIndex = Math.Max(0, Math.Min(selectLayerRange.Y, contentLayersWithParents.Count - 1));
-
-                        // Make sure start <= end
-                        if (startIndex > endIndex)
-                        {
-                            (endIndex, startIndex) = (startIndex, endIndex);
-                        }
-
-                        // Create a new document with the same properties
-                        workingDocument = new SvgDocument
-                        {
-                            ViewBox = svgDocument.ViewBox,
-                            AspectRatio = svgDocument.AspectRatio,
-                            Width = svgDocument.Width,
-                            Height = svgDocument.Height
-                        };
-
-                        // Copy document-level definitions if they exist (important for styles, gradients, etc.)
-                        var defs = svgDocument.Children.OfType<SvgDefinitionList>().FirstOrDefault();
-                        if (defs != null)
-                        {
-                            workingDocument.Children.Add((SvgElement)defs.DeepCopy());
-                        }
-
-                        // Add selected layers to the new document
-                        // ElementRange 0,1 means layers at index 0 and 1 (first two layers)
-                        // ElementRange 1,5 means layers at indices 1,2,3,4,5
-                        for (var i = startIndex; i <= endIndex; i++)
-                        {
-                            var (element, parentGroup) = contentLayersWithParents[i];
-
-                            // Deep copy to preserve entire hierarchy
-                            var clonedElement = (SvgElement)element.DeepCopy();
-
-                            // If there was a parent group with attributes, wrap the element
-                            if (parentGroup != null)
-                            {
-                                // Create a wrapper group with all parent attributes
-                                var wrapperGroup = (SvgGroup)parentGroup.DeepCopy();
-                                // Clear any children from the parent copy
-                                wrapperGroup.Children.Clear();
-                                // Add our cloned element
-                                wrapperGroup.Children.Add(clonedElement);
-                                workingDocument.Children.Add(wrapperGroup);
-                            }
-                            else
-                            {
-                                // No parent attributes, add directly
-                                workingDocument.Children.Add(clonedElement);
-                            }
-                        }     
-                    }      
-                }
-
-                // Rasterize the SVG to a bitmap
-                System.Drawing.Bitmap rasterizedBitmap;
-                var width = 0;
-                var height = 0;
-
-                if (resolution.X == 0 && resolution.Y == 0 && !useViewBox)
-                {
-                    height = context.RequestedResolution.Height;
-                }
-                else if (!useViewBox)
-                {
-                    width = resolution.X;
-                    height = resolution.Y;
-                }
-                else
-                {
-                    width = (int)(workingDocument.ViewBox.Width * scale);
-                    height = (int)(workingDocument.ViewBox.Height * scale);
-                }
-
-                // Render to bitmap at the desired resolution
-                rasterizedBitmap = workingDocument.Draw(width, height);
-
-                if (rasterizedBitmap == null)
-                {
-                    _lastErrorMessage = "Failed to rasterize SVG: " + Path.Value;
-                    Log.Warning(_lastErrorMessage, this);
-                    Texture.Value = null;
-                    Texture.DirtyFlag.Clear();
-                    return;
-                }
-
-                // Convert System.Drawing.Bitmap to Texture2D using SharpDX
-                Texture.Value = ConvertBitmapToTexture2D(rasterizedBitmap);
-                Texture.DirtyFlag.Clear();
-
-                // Dispose the bitmap after conversion
-                rasterizedBitmap.Dispose();
-
-                if (Texture.Value == null)
-                {
-                    _lastErrorMessage = "Failed to convert bitmap to texture: " + Path.Value;
-                    Log.Warning(_lastErrorMessage, this);
-                    return;
-                }
-
-                var currentSrv = SrvManager.GetSrvForTexture(Texture.Value);
-
-                try
-                {
-                    ResourceManager.Device.ImmediateContext.GenerateMips(currentSrv);
-                }
-                catch (Exception exception)
-                {
-                    Log.Error($"Failed to generate mipmaps for texture {Path.Value}: " + exception);
-                }
-                
-                _lastErrorMessage = string.Empty;
-            }
-            catch (Exception ex)
-            {
-                _lastErrorMessage = $"Error processing SVG: {ex.Message}";
-                Log.Error(_lastErrorMessage, this);
-                Texture.Value = null;
-                Texture.DirtyFlag.Clear();
-            }
-        }
-        else
-        {
-            // Handle loading failure
             _lastErrorMessage = "Failed to load SVG document: " + Path.Value;
             Log.Warning(_lastErrorMessage, this);
             Texture.Value = null;
             Texture.DirtyFlag.Clear();
+            return;
         }
+
+        var resolution = Resolution.GetValue(context);
+        var useViewBox = UseViewBox.GetValue(context);
+        var scale = Scale.GetValue(context);
+        var selectLayerRange = SelectLayerRange.GetValue(context);
+        var splitToLayers = SplitToLayers.GetValue(context);
+
+        try
+        {
+            // Work with an SvgDocument to preserve coordinate systems
+            var workingDocument = svgDocument;
+
+            if (splitToLayers)
+            {
+                // Get actual content layers with their parent attributes
+                var contentLayersWithParents = GetContentLayersWithParentAttributes(svgDocument).ToList();
+                Log.Info($"Found {contentLayersWithParents.Count} layers in {Path.Value}", this);
+                if (contentLayersWithParents.Count > 0)
+                {
+                    // Validate and normalize range
+                    var startIndex = Math.Max(0, Math.Min(selectLayerRange.X, contentLayersWithParents.Count - 1));
+                    var endIndex = Math.Max(0, Math.Min(selectLayerRange.Y, contentLayersWithParents.Count - 1));
+
+                    // Make sure start <= end
+                    if (startIndex > endIndex)
+                    {
+                        (endIndex, startIndex) = (startIndex, endIndex);
+                    }
+
+                    // Create a new document with the same properties
+                    workingDocument = new SvgDocument
+                    {
+                        ViewBox = svgDocument.ViewBox,
+                        AspectRatio = svgDocument.AspectRatio,
+                        Width = svgDocument.Width,
+                        Height = svgDocument.Height
+                    };
+
+                    // Copy document-level definitions if they exist (important for styles, gradients, etc.)
+                    var defs = svgDocument.Children.OfType<SvgDefinitionList>().FirstOrDefault();
+                    if (defs != null)
+                    {
+                        workingDocument.Children.Add((SvgElement)defs.DeepCopy());
+                    }
+
+                    // Add selected layers to the new document
+                    // ElementRange 0,1 means layers at index 0 and 1 (first two layers)
+                    // ElementRange 1,5 means layers at indices 1,2,3,4,5
+                    for (var i = startIndex; i <= endIndex; i++)
+                    {
+                        var (element, parentGroup) = contentLayersWithParents[i];
+
+                        // Deep copy to preserve entire hierarchy
+                        var clonedElement = (SvgElement)element.DeepCopy();
+
+                        // If there was a parent group with attributes, wrap the element
+                        if (parentGroup != null)
+                        {
+                            // Create a wrapper group with all parent attributes
+                            var wrapperGroup = (SvgGroup)parentGroup.DeepCopy();
+                            // Clear any children from the parent copy
+                            wrapperGroup.Children.Clear();
+                            // Add our cloned element
+                            wrapperGroup.Children.Add(clonedElement);
+                            workingDocument.Children.Add(wrapperGroup);
+                        }
+                        else
+                        {
+                            // No parent attributes, add directly
+                            workingDocument.Children.Add(clonedElement);
+                        }
+                    }
+                }
+            }
+
+            var width = 0;
+            var height = 0;
+
+            if (resolution.X == 0 && resolution.Y == 0 && !useViewBox)
+            {
+                height = context.RequestedResolution.Height;
+            }
+            else if (!useViewBox)
+            {
+                width = resolution.X;
+                height = resolution.Y;
+            }
+            else
+            {
+                width = (int)(workingDocument.ViewBox.Width * scale);
+                height = (int)(workingDocument.ViewBox.Height * scale);
+            }
+
+            var texture = Rasterize(workingDocument, width, height);
+            if (texture == null)
+            {
+                _lastErrorMessage = "Failed to rasterize SVG: " + Path.Value;
+                Log.Warning(_lastErrorMessage, this);
+                Texture.Value = null;
+                Texture.DirtyFlag.Clear();
+                return;
+            }
+
+            _texture?.Dispose();
+            _texture = texture;
+            Texture.Value = _texture;
+            Texture.DirtyFlag.Clear();
+            _lastErrorMessage = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            _lastErrorMessage = $"Error processing SVG: {ex.Message}";
+            Log.Error(_lastErrorMessage, this);
+            Texture.Value = null;
+            Texture.DirtyFlag.Clear();
+        }
+    }
+
+    /// <summary>
+    /// Renders the document at the given pixel size. A zero side follows the document's aspect ratio and two
+    /// given sides stretch it, as System.Drawing's SvgDocument.Draw did.
+    /// </summary>
+    private static Texture2D Rasterize(SvgDocument document, int width, int height)
+    {
+        using var skSvg = SKSvg.CreateFromSvgDocument(document);
+        var picture = skSvg.Picture;
+        if (picture == null)
+            return null;
+
+        var bounds = picture.CullRect;
+        if (bounds.Width <= 0 || bounds.Height <= 0)
+            return null;
+
+        if (width <= 0 && height <= 0)
+        {
+            width = (int)MathF.Round(bounds.Width);
+            height = (int)MathF.Round(bounds.Height);
+        }
+        else if (width <= 0)
+        {
+            width = (int)MathF.Round(height * bounds.Width / bounds.Height);
+        }
+        else if (height <= 0)
+        {
+            height = (int)MathF.Round(width * bounds.Height / bounds.Width);
+        }
+
+        if (width <= 0 || height <= 0)
+            return null;
+
+        // Skia only draws into premultiplied targets; the textures elsewhere hold straight alpha.
+        using var surface = SKSurface.Create(new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Premul));
+        if (surface == null)
+            return null;
+
+        var canvas = surface.Canvas;
+        canvas.Clear(SKColors.Transparent);
+        canvas.Scale(width / bounds.Width, height / bounds.Height);
+        canvas.Translate(-bounds.Left, -bounds.Top);
+        canvas.DrawPicture(picture);
+
+        using var pixels = new SKBitmap(new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Unpremul));
+        if (!surface.ReadPixels(pixels.Info, pixels.GetPixels(), pixels.RowBytes, 0, 0))
+            return null;
+
+        return Texture2D.CreateFromRgba(ResourceManager.Device, width, height, pixels.GetPixelSpan());
     }
 
     /// <summary>
@@ -283,33 +288,6 @@ internal sealed class LoadSvgAsTexture2D : Instance<LoadSvgAsTexture2D>, IDescri
         return merged;
     }
 
-    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
-    private static Texture2D ConvertBitmapToTexture2D(System.Drawing.Bitmap bitmap)
-    {
-        using var memoryStream = new MemoryStream();
-
-        // Save the bitmap to a memory stream as PNG
-        bitmap.Save(memoryStream, System.Drawing.Imaging.ImageFormat.Png);
-        memoryStream.Position = 0;
-
-        // Use WIC to load the bitmap
-        using var factory = new ImagingFactory();
-        using var bitmapDecoder = new BitmapDecoder(factory, memoryStream, DecodeOptions.CacheOnDemand);
-        using var formatConverter = new FormatConverter(factory);
-        using var bitmapFrameDecode = bitmapDecoder.GetFrame(0);
-
-        // Convert to RGBA format
-        formatConverter.Initialize(
-            bitmapFrameDecode,
-            PixelFormat.Format32bppRGBA,
-            BitmapDitherType.None,
-            null,
-            0.0,
-            BitmapPaletteType.Custom);
-
-        return Texture2D.CreateFromBitmap(ResourceManager.Device, formatConverter);
-    }
-
     public InputSlot<string> SourcePathSlot => Path;
 
     private readonly Resource<SvgDocument> _svgResource;
@@ -320,6 +298,7 @@ internal sealed class LoadSvgAsTexture2D : Instance<LoadSvgAsTexture2D>, IDescri
     string IStatusProvider.GetStatusMessage() => _lastErrorMessage;
 
     private string _lastErrorMessage = string.Empty;
+    private Texture2D _texture;
 
     [Input(Guid = "f4860e75-eff7-4e6e-a144-016ff5bb054e")]
     public readonly InputSlot<string> Path = new();
