@@ -33,22 +33,30 @@ public static class FileLocations
     /// </summary>
     public static string TempFolder => Path.Combine(Path.GetTempPath(), VersionedAppFolderName);
 
-#if RELEASE
-    public static string TestReferencesFolder => Path.Combine(SettingsDirectory, TestsSubFolder);
-#else
-public static string TestReferencesFolder => Path.Combine(".tixl", TestsSubFolder);
-#endif
-
     /// <summary>
     /// We extract this because this will later not be available for published versions.
-    /// Providing this at this location will help refactoring later. 
+    /// Providing this at this location will help refactoring later.
     /// </summary>
     public static string StartFolder => AppContext.BaseDirectory;
-    
+
     /// <summary>
     /// A subfolder next in the editor start folder.
     /// </summary>
     public static string ReadOnlySettingsPath => Path.Combine(StartFolder, ".tixl");
+
+    /// <summary>
+    /// The visual test reference images that ship with the editor.
+    /// </summary>
+    public static string TestReferencesFolder => Path.Combine(ReadOnlySettingsPath, TestsSubFolder);
+
+    /// <summary>
+    /// Where visual tests write updated references and failure images.
+    /// </summary>
+#if RELEASE
+    public static string TestOutputFolder => Path.Combine(SettingsDirectory, TestsSubFolder); // The install folder may be read-only
+#else
+    public static string TestOutputFolder => TestReferencesFolder;
+#endif
 
     /// <summary>
     /// Resolves where files marked as <see cref="T:T3.Core.Settings.UserData.UserDataLocation.Defaults"/>

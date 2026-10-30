@@ -69,7 +69,6 @@ Source: "..\..\Operators\Lib\.meta\*";      DestDir: "{app}\Operators\Lib\.meta"
 Source: "..\..\Operators\Examples\.meta\*"; DestDir: "{app}\Operators\Examples\.meta"; Excludes: "*.proxy.mov,*.waveform.png,*.waveform.jpg,win-x86,win-arm64,osx*,linux-*,android*,ios,maccatalyst-*,unix"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "dependencies\downloads\{#DotNetSdkInstaller}"; DestDir: "{tmp}"; Flags: deleteafterinstall
 Source: "dependencies\downloads\VC_redist.x64.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall
-Source: "..\..\.Defaults\Tests\*"; DestDir: "{userappdata}\TiXL\Tests"; Excludes: "*.proxy.mov,*.waveform.png,*.waveform.jpg,win-x86,win-arm64,osx*,linux-*,android*,ios,maccatalyst-*,unix"; Flags: ignoreversion recursesubdirs
 
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"

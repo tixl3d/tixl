@@ -189,14 +189,7 @@ internal sealed class VisualTest : Instance<VisualTest>
         T3.Graphics.Compat.Texture2D diffColorImage = null;
         for (; _testIndex < _stepCount; _testIndex++)
         {
-            var referenceFilepath = GetReferenceFilepath(_testIndex);
             var testName = GetTestName(_testIndex);
-            
-            if (!TryLoadTextureFromFile(ResourceManager.Device, referenceFilepath, out var referenceImage))
-            {
-                Log.Warning($"Can't find image... {referenceFilepath}");
-                continue;
-            }
 
             var ready = TryUpdateImage(context, _testIndex, out var time, out var image);
             if (!ready)
@@ -211,8 +204,18 @@ internal sealed class VisualTest : Instance<VisualTest>
                 return;
             }
             
+            var referenceFilepath = GetReferenceFilepathToRead(_testIndex);
+            var hasReference = TryLoadTextureFromFile(ResourceManager.Device, referenceFilepath, out var referenceImage);
+            if (!hasReference)
+                Log.Warning($"Can't find image... {referenceFilepath}");
+
             var currentWithCpuAccess = _textureBgraReadAccess.ConvertToCpuReadableBgra(image);
-            var deviation = CompareImage(currentWithCpuAccess, referenceImage);
+            var deviation = hasReference ? CompareImage(currentWithCpuAccess, referenceImage) : ComparisonFailed;
+            var failureReason = !hasReference
+                                    ? "reference missing"
+                                    : deviation == ComparisonFailed
+                                        ? "comparison failed"
+                                        : $"{deviation:0.00} > {_threshold}";
             var failPath = GetReferenceFilepath(_testIndex, "FAIL");
 
             var timeLabel = time == 0 ? string.Empty : $"@{time:0.00}";
@@ -220,7 +223,7 @@ internal sealed class VisualTest : Instance<VisualTest>
             var isIgnored = context.ObjectVariables.TryGetValue(TestIgnoreKey, out var ignoreObj)
                             && ignoreObj is HashSet<int> ignoredIds
                             && ignoredIds.Contains(testId);
-            if (deviation < _threshold)
+            if (deviation != ComparisonFailed && deviation < _threshold)
             {
                 if (File.Exists(failPath))
                 {
@@ -231,12 +234,12 @@ internal sealed class VisualTest : Instance<VisualTest>
             }
             else if (isIgnored)
             {
-                testResult.Add($"{testName} {timeLabel}: IGNORED ({deviation:0.00} > {_threshold}) #{testId}");
+                testResult.Add($"{testName} {timeLabel}: IGNORED ({failureReason}) #{testId}");
             }
             else
             {
                 SaveTexture(image, GetReferenceFilepath(_testIndex, "FAIL"));
-                testResult.Add($"{testName} {timeLabel}: FAILED ({deviation:0.00} > {_threshold}) #{testId}");
+                testResult.Add($"{testName} {timeLabel}: FAILED ({failureReason}) #{testId}");
             }
             
             T3.Graphics.Compat.GraphicsUtilities.Dispose(ref diffColorImage);
@@ -270,7 +273,23 @@ internal sealed class VisualTest : Instance<VisualTest>
         return string.Join(" / ", parts);
     }
 
-    private string GetReferenceFilepath(int index, string suffix =null)
+    /// <summary>
+    /// A reference updated on this machine takes precedence over the shipped one, so that updating has an effect.
+    /// </summary>
+    private string GetReferenceFilepathToRead(int index)
+    {
+        var updatedFilepath = GetReferenceFilepath(index);
+        return File.Exists(updatedFilepath)
+                   ? updatedFilepath
+                   : Path.Join(FileLocations.TestReferencesFolder, GetCompositionName(), GetReferenceFilename(index));
+    }
+
+    private string GetReferenceFilepath(int index, string suffix = null)
+    {
+        return Path.Join(FileLocations.TestOutputFolder, GetCompositionName(), GetReferenceFilename(index, suffix));
+    }
+
+    private string GetReferenceFilename(int index, string suffix = null)
     {
         List<string> parts = [];
 
@@ -289,7 +308,7 @@ internal sealed class VisualTest : Instance<VisualTest>
         var baseName = string.Join('_', parts);
         baseName += ".png";
 
-        return Path.Join( FileLocations.TestReferencesFolder, GetCompositionName(), baseName);
+        return baseName;
     }
 
     /// <summary>
@@ -375,13 +394,13 @@ internal sealed class VisualTest : Instance<VisualTest>
                 currentBgraWithCpuAccess.Description.Height != reference.Description.Height)
             {
                 Log.Warning($"{GetReferenceFilepath(0)} incorrect size? {currentBgraWithCpuAccess?.Description.Width}x{currentBgraWithCpuAccess?.Description.Height} vs {reference?.Description.Width}×{reference?.Description.Height}");
-                return -1f;
+                return ComparisonFailed;
             }
 
             if (currentBgraWithCpuAccess.Description.Format != Format.B8G8R8A8_UNorm)
             {
                 Log.Warning($"Source image format {currentBgraWithCpuAccess.Description.Format} is expected to be BGRA8");
-                return -1f;
+                return ComparisonFailed;
             }
             
             
@@ -448,7 +467,7 @@ internal sealed class VisualTest : Instance<VisualTest>
         catch (Exception ex)
         {
             Log.Error(" Failed to compare " + ex.Message, this);
-            return -1;
+            return ComparisonFailed;
         }
     }
 
@@ -522,6 +541,9 @@ internal sealed class VisualTest : Instance<VisualTest>
 
     private const double ReferenceFrameDurationSec = 1.0 / 60.0;
 
+    /** Below every threshold, so it has to be excluded explicitly or the test would pass. */
+    private const float ComparisonFailed = -1f;
+
     private States _state = States.Waiting;
     private int _testIndex;
 
@@ -530,15 +552,6 @@ internal sealed class VisualTest : Instance<VisualTest>
     private float _threshold;
     private Vector2 _timeRange;
     private bool _complainedOnce;
-
-    // private const string ReferencesSubFolder = "tests";
-    // private const string ReferencesSourceFolder = ".tixl";
-    //
-    // #if DEBUG
-    // private const string ReferencesTargetFolder = FileLocations.AppSubFolder;
-    // #else
-    // private const string ReferencesTargetFolder = ".tixl";
-    // #endif
 
     // private const int DefaultHeight = 120;
     // private const int DefaultWidth = (int)(DefaultHeight * (16f / 9));

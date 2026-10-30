@@ -16,9 +16,9 @@ Editor/bin/Debug/net10.0/TiXL.exe --debug-server 9042 --window 1600x900 --no-spl
 On Linux the executable is `Editor/bin/Debug/net10.0/TiXL`; add `TIXL_VULKAN_VALIDATION=1` to see validation
 errors in the log.
 
-- **Launch with the build folder as the working directory.** Several paths are resolved relative to it,
-  among them `.tixl/Tests/` - the visual suite's reference images. Started from the repo root the suite
-  still runs, finds no references, and reports `SUCCESS:   0 / 0`, which reads like a pass.
+- **Launch with the build folder as the working directory.** Several paths are resolved relative to it.
+  The visual suite's reference images are not among them: they resolve from the executable's folder, and a
+  missing reference reports `FAILED (reference missing)`.
 - `--debug-server <port>` starts the bridge (localhost only). Without the flag it is off, but a
   running editor can start or stop it under Settings → Diagnostics → Debug Bridge (port saved, default 9042).
 - `--window WxH` forces a predictable windowed size; `--no-splash` skips the splash screen.
