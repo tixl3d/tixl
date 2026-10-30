@@ -33,6 +33,7 @@ internal static class PlaceHolderUi
         bool onlyMultiInputs = false)
     {
         _selectedSymbolUi = null;
+        _wasPickedWithKeys = false;
         _focusInputNextTime = true;
         ResetPresets();
 
@@ -59,6 +60,7 @@ internal static class PlaceHolderUi
         Filter.Reset();
         _placeholderItem = null;
         _selectedSymbolUi = null;
+        _wasPickedWithKeys = false;
         ResetPresets();
         _rowHeight = 0;
         _focusInputNextTime = false;
@@ -181,8 +183,9 @@ internal static class PlaceHolderUi
                             MaxSearchLength,
                             ImGuiInputTextFlags.AutoSelectAll);
             ImGui.PopID();
-            
-            if (Filter.SearchString.Length > 0 && Filter.SearchString[0] == ' ')
+
+            // A leading space only opens presets for an operator picked on purpose, not one left over from deleted text
+            if (Filter.SearchString.Length > 0 && Filter.SearchString[0] == ' ' && !_wasPickedWithKeys)
             {
                 Filter.SearchString = Filter.SearchString.TrimStart();
             }
@@ -229,6 +232,7 @@ internal static class PlaceHolderUi
             _selectedSymbolUi = Filter.MatchingSymbolUis.Count > 0
                                     ? Filter.MatchingSymbolUis[0]
                                     : null;
+            _wasPickedWithKeys = false;
             _rowHeight = 0;
             uiResult |= UiResults.SelectionChanged;
         }
@@ -386,11 +390,13 @@ internal static class PlaceHolderUi
         if (ImGui.IsKeyReleased(Key.CursorDown.ToImGuiKey()))
         {
             UiListHelpers.AdvanceSelectedItem(filter.MatchingSymbolUis!, ref _selectedSymbolUi, 1);
+            _wasPickedWithKeys = true;
             result = UiResults.SelectionChanged;
         }
         else if (ImGui.IsKeyReleased(Key.CursorUp.ToImGuiKey()))
         {
             UiListHelpers.AdvanceSelectedItem(filter.MatchingSymbolUis!, ref _selectedSymbolUi, -1);
+            _wasPickedWithKeys = true;
             result = UiResults.SelectionChanged;
         }
 
@@ -638,10 +644,12 @@ internal static class PlaceHolderUi
 
     /// <summary>
     /// Grey text after the typed search that completes the selected item and tells what a space does next.
+    /// When the field is too narrow, the key hint moves outside to its right so it never covers the search.
     /// </summary>
     private static void DrawSuggestion(ImDrawListPtr drawList, Vector2 padding)
     {
-        if (_selectedSymbolUi == null)
+        // Without typed text it would cover the "search..." placeholder, and a leading space is ignored anyway
+        if (_selectedSymbolUi == null || Filter.SearchString.Length == 0)
             return;
 
         // Rebuilt only when what it describes changes
@@ -652,30 +660,49 @@ internal static class PlaceHolderUi
             _suggestionSymbolUi = _selectedSymbolUi;
             _suggestionSearch = Filter.SearchString;
             _suggestionPresetIndex = _presetIndex;
-            KeyHintText.Parse(BuildSuggestion(_selectedSymbolUi), _suggestionSegments);
+            BuildSuggestion(_selectedSymbolUi, out var completion, out var keyHint);
+            KeyHintText.Parse("{" + completion + "}", _completionSegments);
+            KeyHintText.Parse(keyHint, _keyHintSegments);
         }
 
         var textPos = ImGui.GetItemRectMin() + padding + new Vector2(ImGui.CalcTextSize(Filter.SearchString).X, 0);
-        KeyHintText.Draw(drawList, textPos, _suggestionSegments);
+        var fieldRight = ImGui.GetItemRectMax().X - padding.X;
+        var completionWidth = KeyHintText.GetWidth(_completionSegments);
+        var completionFits = textPos.X + completionWidth <= fieldRight;
+        if (completionFits)
+            KeyHintText.Draw(drawList, textPos, _completionSegments);
+
+        var keyHintPos = new Vector2(textPos.X + completionWidth, textPos.Y);
+        if (!completionFits || keyHintPos.X + KeyHintText.GetWidth(_keyHintSegments) > fieldRight)
+        {
+            // The placeholder box and the input field differ in width when the canvas is zoomed
+            keyHintPos.X = MathF.Max(ImGui.GetItemRectMax().X, _placeholderAreaOnScreen.Max.X);
+        }
+
+        KeyHintText.Draw(drawList, keyHintPos, _keyHintSegments);
     }
 
-    private static string BuildSuggestion(SymbolUi selectedSymbolUi)
+    /// <param name="completion">The rest of the selected name after the typed text</param>
+    /// <param name="keyHint">What to type or press next, in <see cref="KeyHintText"/> markup</param>
+    private static void BuildSuggestion(SymbolUi selectedSymbolUi, out string completion, out string keyHint)
     {
+        completion = string.Empty;
+        keyHint = string.Empty;
         if (Filter.SearchString.Length == 0)
-            return "";
+            return;
 
         if (IsChoosingPreset)
         {
             var presetSearch = GetPresetSearch(out _);
             var title = SelectedPreset?.Title ?? (_presetMatches.Count > 0 ? DefaultPresetLabel : string.Empty);
-            var completion = title.StartsWith(presetSearch, StringComparison.OrdinalIgnoreCase) ? title[presetSearch.Length..] : string.Empty;
-            var next = presetSearch.Length == 0 ? "   type a preset,  [Space] insert and edit" : "   [Space] insert and edit";
-            return completion.Length > 0 ? "{" + completion + "}" + next : next;
+            completion = title.StartsWith(presetSearch, StringComparison.OrdinalIgnoreCase) ? title[presetSearch.Length..] : string.Empty;
+            keyHint = presetSearch.Length == 0 ? "   type a preset,  [Space] insert and edit" : "   [Space] insert and edit";
+            return;
         }
 
         var name = selectedSymbolUi.Symbol.Name;
-        var nameCompletion = name.StartsWith(Filter.SearchString, StringComparison.OrdinalIgnoreCase) ? name[Filter.SearchString.Length..] : string.Empty;
-        return nameCompletion.Length > 0 ? "{" + nameCompletion + "}   [Space] presets" : "   [Space] presets";
+        completion = name.StartsWith(Filter.SearchString, StringComparison.OrdinalIgnoreCase) ? name[Filter.SearchString.Length..] : string.Empty;
+        keyHint = "   [Space] presets";
     }
 
     private static bool IsRelevantNamespace(GraphUiContext context, string symbolNamespace)
@@ -702,13 +729,17 @@ internal static class PlaceHolderUi
     private static string _presetHeader = string.Empty;
     private static string _lastPresetFilter = string.Empty;
     private static int _presetIndex;
-    private static readonly List<KeyHintText.Segment> _suggestionSegments = new(4);
+    private static readonly List<KeyHintText.Segment> _completionSegments = new(1);
+    private static readonly List<KeyHintText.Segment> _keyHintSegments = new(4);
     private static SymbolUi? _suggestionSymbolUi;
     private static string? _suggestionSearch;
     private static int _suggestionPresetIndex = -1;
 
     private static bool _focusInputNextTime = true;
     private static SymbolUi? _selectedSymbolUi;
+
+    /** Up/Down chose the selection since the search last changed */
+    private static bool _wasPickedWithKeys;
     private static ImRect _placeholderAreaOnScreen;
     internal static readonly SymbolFilter Filter = new();
     private static MagGraphItem? _placeholderItem;
