@@ -102,7 +102,8 @@ internal sealed class ExitDialog : ModalDialog
             {
                 foreach (var x in package.Symbols.Values)
                 {
-                    if (x.GetSymbolUi().HasBeenModified)
+                    // Edits to read-only symbols can't be saved, so counting them would keep "Save and Exit" from ever finishing.
+                    if (x.GetSymbolUi().NeedsSaving)
                     {
                         changeCount++;
                     }

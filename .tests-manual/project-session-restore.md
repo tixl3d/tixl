@@ -30,6 +30,16 @@ to an unusual spot. Hide the Parameters window and resize the Output window. Qui
 - The Parameters window is still hidden and the Output window keeps its size.
 - The project has no unsaved changes (no dot in the top bar).
 
+## Step: Changes to read-only operators don't block exiting
+
+**Action:**
+In a release build, open an operator from a built-in package such as `Examples`, change a
+parameter of one of its children, then quit TiXL with `Ctrl+Q`.
+
+**Expected:**
+- With no other unsaved changes, the dialog offers **Cancel** and **Exit** and mentions no unsaved changes.
+- After also changing an operator in your own project, **Save and Exit** saves it and closes TiXL.
+
 ## Step: Navigation history survives the restart
 
 **Action:**
