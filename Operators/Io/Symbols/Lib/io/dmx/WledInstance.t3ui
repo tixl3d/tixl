@@ -1,15 +1,15 @@
 {
   "FormatVersion": 3,
   "Id": "a7b3c8d2-1e4f-4a5b-9c6d-2e8f3a1b5c7d"/*WledInstance*/,
-  "Description": "Discovers WLED devices on the network via mDNS/Zeroconf and exposes their E1.31/sACN sync settings as outputs.\n\nUse this operator to find WLED controllers and automatically configure sACN parameters (universe, start address, sync mode, timeout). Chain the outputs into a [SacnOutput] operator to send DMX data to the discovered WLED device.\n\nAll parameters have both inputs (for manual/static values) and outputs (for chaining). When discovery is enabled and a matching instance name is selected, the discovered values override the manual inputs.\n\nFeatures:\n- WLED device discovery via mDNS/Zeroconf\n- Fetches sync settings (universe, start address, sync enabled, sync mode, timeout) from each device's web UI\n- Static input values work without discovery\n- Outputs can be chained to other operators (e.g. SacnOutput)\n- Discovery is shared across all WledInstance instances\n\nTips:\n- Enable `Discover` and select a device from the `InstanceName` dropdown to auto-configure all parameters\n- Without discovery, set `Universe`, `StartAddress`, `SyncEnabled`, etc. manually\n- Chain `IpAddress` into SacnOutput's `TargetIpAddress`, `Universe` into `SyncUniverse`, etc.\n\nAKA: wled, discovery, mdns, zeroconf, e1.31, sacn, led, dmx",
+  "Description": "Discovers WLED devices on the network via mDNS/Zeroconf and exposes their E1.31/sACN sync settings as outputs.\n\nUse this operator to find WLED controllers and automatically configure sACN parameters (universe, start address, dmx mode, timeout). Chain the outputs into a [SacnOutput] operator to send DMX data to the discovered WLED device.\n\nAll parameters have both inputs (for manual/static values) and outputs (for chaining). When discovery is enabled and a matching instance name is selected, the discovered values override the manual inputs.\n\nFeatures:\n- WLED device discovery via mDNS/Zeroconf\n- Fetches sync settings (universe, start address, sync enabled, sync mode, timeout) from each device's web UI\n- Static input values work without discovery\n- Outputs can be chained to other operators (e.g. SacnOutput)\n- Discovery is shared across all WledInstance instances\n\nTips:\n- Enable `Discover` and select a device from the `InstanceName` dropdown to auto-configure all parameters\n- Without discovery, set `Universe`, `StartAddress`, `Multicast`, etc. manually\n- Chain `IpAddress` into SacnOutput's `TargetIpAddress`, `Universe` into `SyncUniverse`, etc.\n\nAKA: wled, discovery, mdns, zeroconf, e1.31, sacn, led, dmx",
   "InputUis": [
     {
-      "InputId": "a6b7c8d9-e0f1-4a2b-3c4d-5e6f7a8b9c0d"/*SyncEnabledInput*/,
+      "InputId": "a6b7c8d9-e0f1-4a2b-3c4d-5e6f7a8b9c0d"/*MulticastInput*/,
       "Position": {
         "X": -200.0,
         "Y": 450.0
       },
-      "Description": "Whether E1.31/sACN sync (DMX input) is enabled on the WLED device. When discovery finds a matching device, this is set from the device's sync type setting."
+      "Description": "Whether Multicast is enabled on the WLED device. When discovery finds a matching device, this is set from the device's sync type setting."
     },
     {
       "InputId": "b1c2d3e4-f5a6-4b7c-8d9e-0f1a2b3c4d5e"/*Discover*/,
@@ -20,12 +20,12 @@
       "Description": "If enabled, discovers WLED devices on the network via mDNS/Zeroconf and populates the `InstanceName` dropdown. When a device is selected, its sync settings override the manual inputs."
     },
     {
-      "InputId": "b7c8d9e0-f1a2-4b3c-4d5e-6f7a8b9c0d1e"/*SyncModeInput*/,
+      "InputId": "b7c8d9e0-f1a2-4b3c-4d5e-6f7a8b9c0d1e"/*DmxModeInput*/,
       "Position": {
         "X": -200.0,
         "Y": 525.0
       },
-      "Description": "The sync mode (0 = multi-universe, 1 = single-universe). When discovery finds a matching device, this is set from the device's sync mode setting."
+      "Description": "The DMX mode (Single RGB, Multi RGB, effect, etc). When discovery finds a matching device, this is set from the device's sync DMX mode setting."
     },
     {
       "InputId": "c2d3e4f5-a6b7-4c8d-9e0f-1a2b3c4d5e6f"/*InstanceNameInput*/,
@@ -125,14 +125,14 @@
       }
     },
     {
-      "OutputId": "b3c4d5e6-f7a8-4b9c-0d1e-2f3a4b5c6d7f"/*SyncEnabled*/,
+      "OutputId": "b3c4d5e6-f7a8-4b9c-0d1e-2f3a4b5c6d7f"/*Multicast*/,
       "Position": {
         "X": 300.0,
         "Y": 450.0
       }
     },
     {
-      "OutputId": "c4d5e6f7-a8b9-4c0d-1e2f-3a4b5c6d7e8a"/*SyncMode*/,
+      "OutputId": "c4d5e6f7-a8b9-4c0d-1e2f-3a4b5c6d7e8a"/*DmxMode*/,
       "Position": {
         "X": 300.0,
         "Y": 525.0

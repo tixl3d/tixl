@@ -21,19 +21,19 @@ internal sealed class WledInstance : Instance<WledInstance>, IStatusProvider, IC
         public readonly string IpAddress;
         public readonly int SyncUniverse;
         public readonly int StartAddress;
-        public readonly bool SyncEnabled;
-        public readonly int SyncMode;
+        public readonly bool Multicast;
+        public readonly int DmxMode;
         public readonly int SyncTimeout;
         public readonly int LedCount;
 
-        public DiscoveredWled(string name, string ipAddress, int syncUniverse, int startAddress, bool syncEnabled, int syncMode, int syncTimeout, int ledCount)
+        public DiscoveredWled(string name, string ipAddress, int syncUniverse, int startAddress, bool multicast, int dmxMode, int syncTimeout, int ledCount)
         {
             Name = name;
             IpAddress = ipAddress;
             SyncUniverse = syncUniverse;
             StartAddress = startAddress;
-            SyncEnabled = syncEnabled;
-            SyncMode = syncMode;
+            Multicast = multicast;
+            DmxMode = dmxMode;
             SyncTimeout = syncTimeout;
             LedCount = ledCount;
         }
@@ -63,8 +63,8 @@ internal sealed class WledInstance : Instance<WledInstance>, IStatusProvider, IC
         Universe.UpdateAction = Update;
         StartAddress.UpdateAction = Update;
         LedCount.UpdateAction = Update;
-        SyncEnabled.UpdateAction = Update;
-        SyncMode.UpdateAction = Update;
+        Multicast.UpdateAction = Update;
+        DmxMode.UpdateAction = Update;
         SyncTimeout.UpdateAction = Update;
     }
 
@@ -81,8 +81,8 @@ internal sealed class WledInstance : Instance<WledInstance>, IStatusProvider, IC
         // Default outputs from inputs
         var universe = UniverseInput.GetValue(context);
         var startAddress = StartAddressInput.GetValue(context);
-        var syncEnabled = SyncEnabledInput.GetValue(context);
-        var syncMode = SyncModeInput.GetValue(context);
+        var multicast = MulticastInput.GetValue(context);
+        var dmxMode = SyncModeInput.GetValue(context);
         var syncTimeout = SyncTimeoutInput.GetValue(context);
         var ledCount = LedCountInput.GetValue(context);
         var ipAddress = IpAddressInput.GetValue(context) ?? string.Empty;
@@ -98,8 +98,8 @@ internal sealed class WledInstance : Instance<WledInstance>, IStatusProvider, IC
             {
                 universe = match.SyncUniverse;
                 startAddress = match.StartAddress;
-                syncEnabled = match.SyncEnabled;
-                syncMode = match.SyncMode;
+                multicast = match.Multicast;
+                dmxMode = match.DmxMode;
                 syncTimeout = match.SyncTimeout;
                 ledCount = match.LedCount;
                 ipAddress = match.IpAddress;
@@ -113,8 +113,8 @@ internal sealed class WledInstance : Instance<WledInstance>, IStatusProvider, IC
         StartAddress.Value = startAddress;
         StartIndex.Value = startAddress-1;
         LedCount.Value = ledCount;
-        SyncEnabled.Value = syncEnabled;
-        SyncMode.Value = syncMode;
+        Multicast.Value = multicast;
+        DmxMode.Value = dmxMode;
         SyncTimeout.Value = syncTimeout;
         
         UniverseInput.SetTypedInputValue(universe);
@@ -196,7 +196,7 @@ internal sealed class WledInstance : Instance<WledInstance>, IStatusProvider, IC
                     _discoveredWleds[ipAddress] = new DiscoveredWled(
                         hostName, ipAddress,
                         settings.SyncUniverse, settings.StartAddress,
-                        settings.SyncEnabled, settings.SyncMode, settings.SyncTimeout,
+                        settings.Multicast, settings.DmxMode, settings.SyncTimeout,
                         ledCount);
                 }
             }
@@ -211,7 +211,7 @@ internal sealed class WledInstance : Instance<WledInstance>, IStatusProvider, IC
         }
     }
 
-    private static async Task<(int SyncUniverse, int StartAddress, bool SyncEnabled, int SyncMode, int SyncTimeout)> FetchWledSyncSettingsAsync(string ipAddress, CancellationToken token)
+    private static async Task<(int SyncUniverse, int StartAddress, bool Multicast, int DmxMode, int SyncTimeout)> FetchWledSyncSettingsAsync(string ipAddress, CancellationToken token)
     {
         try
         {
@@ -232,7 +232,7 @@ internal sealed class WledInstance : Instance<WledInstance>, IStatusProvider, IC
                 int.TryParse(modeStr, out var mode);
                 int.TryParse(timeoutStr, out var timeout);
 
-                Log.Debug($"WLED sync settings from {ipAddress}: universe={universe}, address={address}, enabled={syncType}, mode={mode}, timeout={timeout}");
+                Log.Debug($"WLED sync settings from {ipAddress}: universe={universe}, address={address}, multicast={syncType}, mode={mode}, timeout={timeout}");
                 return (universe, address, syncType == "1", mode, timeout);
             }
         }
@@ -336,7 +336,7 @@ internal sealed class WledInstance : Instance<WledInstance>, IStatusProvider, IC
     public readonly InputSlot<int> LedCountInput = new();
 
     [Input(Guid = "a6b7c8d9-e0f1-4a2b-3c4d-5e6f7a8b9c0d")]
-    public readonly InputSlot<bool> SyncEnabledInput = new();
+    public readonly InputSlot<bool> MulticastInput = new();
 
     [Input(Guid = "b7c8d9e0-f1a2-4b3c-4d5e-6f7a8b9c0d1e")]
     public readonly InputSlot<int> SyncModeInput = new();
@@ -365,10 +365,10 @@ internal sealed class WledInstance : Instance<WledInstance>, IStatusProvider, IC
     public readonly Slot<int> StartAddress = new();
 
     [Output(Guid = "b3c4d5e6-f7a8-4b9c-0d1e-2f3a4b5c6d7f", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
-    public readonly Slot<bool> SyncEnabled = new();
+    public readonly Slot<bool> Multicast = new();
 
     [Output(Guid = "c4d5e6f7-a8b9-4c0d-1e2f-3a4b5c6d7e8a", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
-    public readonly Slot<int> SyncMode = new();
+    public readonly Slot<int> DmxMode = new();
 
     [Output(Guid = "d5e6f7a8-b9c0-4d1e-2f3a-3a4b5c6d7e8a", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
     public readonly Slot<int> SyncTimeout = new();

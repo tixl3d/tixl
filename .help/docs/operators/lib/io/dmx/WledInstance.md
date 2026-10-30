@@ -18,7 +18,7 @@ Features:
 
 Tips:
 - Enable `Discover` and select a device from the `InstanceName` dropdown to auto-configure all parameters
-- Without discovery, set `Universe`, `StartAddress`, `SyncEnabled`, etc. manually
+- Without discovery, set `Universe`, `StartAddress`, `Multicast`, etc. manually
 - Chain `IpAddress` into SacnOutput's `TargetIpAddress`, `Universe` into `SyncUniverse`, etc.
 
 AKA: wled, discovery, mdns, zeroconf, e1.31, sacn, led, dmx
@@ -32,8 +32,8 @@ AKA: wled, discovery, mdns, zeroconf, e1.31, sacn, led, dmx
 | **UniverseInput** (Int32) | The sACN/E1.31 universe number. When discovery finds a matching device, this is set from the device's sync universe setting. |
 | **StartAddressInput** (Int32) | The DMX start address within the universe. When discovery finds a matching device, this is set from the device's DMX address setting. |
 | **LedCountInput** (Int32) | The number of LEDs on the WLED device. Set manually or leave at 0 when using discovery (the discovered count will be used from the device's `/json/` API). |
-| **SyncEnabledInput** (Boolean) | Whether E1.31/sACN sync (DMX input) is enabled on the WLED device. When discovery finds a matching device, this is set from the device's sync type setting. |
-| **SyncModeInput** (Int32) | The sync mode (0 = multi-universe, 1 = single-universe). When discovery finds a matching device, this is set from the device's sync mode setting. |
+| **MulticastInput** (Boolean) | Whether Multicast is enabled on the WLED device. When discovery finds a matching device, this is set from the device's sync type setting. |
+| **DmxModeInput** (Int32) | The DMX mode (Single RGB, Multi RGB, effect, etc). When discovery finds a matching device, this is set from the device's sync mode setting. |
 | **SyncTimeoutInput** (Int32) | The sync timeout in milliseconds. When discovery finds a matching device, this is set from the device's sync timeout setting. |
 
 ## Outputs
@@ -44,6 +44,6 @@ AKA: wled, discovery, mdns, zeroconf, e1.31, sacn, led, dmx
 | **Universe** | System.Int32 |
 | **StartAddress** | System.Int32 |
 | **LedCount** | System.Int32 |
-| **SyncEnabled** | System.Boolean |
-| **SyncMode** | System.Int32 |
+| **Multicast** | System.Boolean |
+| **DmxMode** | System.Int32 |
 | **SyncTimeout** | System.Int32 |
