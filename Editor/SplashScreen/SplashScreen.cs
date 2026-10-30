@@ -30,7 +30,9 @@ internal sealed unsafe class SplashScreen : ISplashScreen
             return;
         }
 
-        _window = SDL_CreateWindow("TiXL", image.Width, image.Height,
+        var width = image.Width / ImagePixelDensity;
+        var height = image.Height / ImagePixelDensity;
+        _window = SDL_CreateWindow("TiXL", width, height,
                                    SDL_WindowFlags.SDL_WINDOW_HIDDEN | SDL_WindowFlags.SDL_WINDOW_BORDERLESS
                                    | SDL_WindowFlags.SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WindowFlags.SDL_WINDOW_UTILITY);
         if (_window == null)
@@ -42,14 +44,15 @@ internal sealed unsafe class SplashScreen : ISplashScreen
         SDL_ShowWindow(_window);
         SDL_SyncWindow(_window);
 
-        // The image is drawn for 96 dpi. A mapped window knows both its display's scale and how many pixels
-        // make a point, which sizes it alike on Windows (points are pixels) and Wayland (points are scaled).
+        // The window is sized for 96 dpi, so a 200% display shows the image 1:1. A mapped window knows both its
+        // display's scale and how many pixels make a point, which sizes it alike on Windows (points are pixels)
+        // and Wayland (points are scaled).
         var displayScale = SDL_GetWindowDisplayScale(_window);
         var pixelDensity = SDL_GetWindowPixelDensity(_window);
         if (displayScale > 0 && pixelDensity > 0)
         {
             var toPoints = displayScale / pixelDensity;
-            SDL_SetWindowSize(_window, (int)MathF.Round(image.Width * toPoints), (int)MathF.Round(image.Height * toPoints));
+            SDL_SetWindowSize(_window, (int)MathF.Round(width * toPoints), (int)MathF.Round(height * toPoints));
         }
 
         SDL_SetWindowPosition(_window, (int)SDL_WINDOWPOS_CENTERED_MASK, (int)SDL_WINDOWPOS_CENTERED_MASK);
@@ -246,6 +249,9 @@ internal sealed unsafe class SplashScreen : ISplashScreen
 
         SDL_RenderPresent(_renderer);
     }
+
+    /** The image is authored at twice its displayed size to stay sharp on high-dpi displays. */
+    private const int ImagePixelDensity = 2;
 
     private const float DebugFontSize = 8;
     private const float FontSize = 13;
