@@ -346,6 +346,9 @@ internal sealed class WledInstance : Instance<WledInstance>, IStatusProvider, IC
     #endregion
 
     #region Outputs
+    [Output(Guid = "e6f7a8b9-c0d1-4e2f-3a4b-5c6d7e8f9a0b", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
+    public readonly Slot<int> LedCount = new();
+    
     [Output(Guid = "a2b3c4d5-e6f7-4a8b-9c0d-1e2f3a4b5c4e", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
     public readonly Slot<int> StartIndex = new();
 
@@ -360,9 +363,6 @@ internal sealed class WledInstance : Instance<WledInstance>, IStatusProvider, IC
 
     [Output(Guid = "a2b3c4d5-e6f7-4a8b-9c0d-1e2f3a4b5c6e", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
     public readonly Slot<int> StartAddress = new();
-
-    [Output(Guid = "e6f7a8b9-c0d1-4e2f-3a4b-5c6d7e8f9a0b", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
-    public readonly Slot<int> LedCount = new();
 
     [Output(Guid = "b3c4d5e6-f7a8-4b9c-0d1e-2f3a4b5c6d7f", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
     public readonly Slot<bool> SyncEnabled = new();
