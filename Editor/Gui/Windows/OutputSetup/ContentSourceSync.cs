@@ -125,6 +125,9 @@ internal static class ContentSourceSync
             macro.AddAndExecCommand(new AddConnectionCommand(compositionUi.Symbol, connection, 0));
         }
 
+        // The graph's layout only refreshes when flagged, and this edit doesn't come from its own interactions.
+        projectView.FlagChanges(ProjectView.ChangeTypes.Children | ProjectView.ChangeTypes.Connections);
+
         projectView.NodeSelection.TrySelectCompositionChild(composition, childId, add: false);
 
         // Only scrolls when the op landed out of view, so the graph keeps its zoom and doesn't jump.
@@ -166,6 +169,7 @@ internal static class ContentSourceSync
         macro.AddAndExecCommand(new DeleteSymbolChildrenCommand(parentUi, [childUi]));
         UndoRedoStack.Add(macro);
         OutputSetupHandling.SaveActive();
+        ProjectView.Focused?.FlagChanges(ProjectView.ChangeTypes.Children | ProjectView.ChangeTypes.Connections);
     }
 
     /// <summary>Whether a send op with this id exists in some symbol, instantiated or not.</summary>
