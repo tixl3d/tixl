@@ -4,7 +4,6 @@ using System.IO;
 using ImGuiNET;
 using T3.Core.Model;
 using T3.Core.Settings;
-using T3.Editor.App.DebugProtocol;
 using T3.Editor.Gui;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
@@ -98,8 +97,7 @@ internal static class LastOpenProject
         if (!UserSettings.Config.ReopenLastProjectOnStartup || string.IsNullOrEmpty(UserSettings.Config.LastOpenProjectFolder))
             return false;
 
-        // Scripted sessions open their own projects and expect a predictable start.
-        if (DebugServer.IsRunning)
+        if (Program.SkipProjectReopen)
             return false;
 
         if (File.Exists(ReopenGuardFilePath))

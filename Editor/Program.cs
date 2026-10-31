@@ -321,9 +321,12 @@ internal static class Program
     /// <summary>Set via <c>--no-splash</c> — skips showing the splash screen (e.g. for protocol-driven sessions).</summary>
     internal static bool SkipSplash { get; private set; }
 
+    /// <summary>Set via <c>--no-reopen</c> — starts in the project hub, so scripted sessions get a predictable start.</summary>
+    internal static bool SkipProjectReopen { get; private set; }
+
     /// <summary>
     /// Honors <c>--window=&lt;w&gt;x&lt;h&gt;</c> (or <c>--window &lt;w&gt;x&lt;h&gt;</c>) for a predictable
-    /// non-maximized window, and <c>--no-splash</c>.
+    /// non-maximized window, <c>--no-splash</c> and <c>--no-reopen</c>.
     /// </summary>
     private static void ApplyWindowArgs(string[] args)
     {
@@ -334,6 +337,12 @@ internal static class Program
             if (arg.Equals("--no-splash", StringComparison.OrdinalIgnoreCase))
             {
                 SkipSplash = true;
+                continue;
+            }
+
+            if (arg.Equals("--no-reopen", StringComparison.OrdinalIgnoreCase))
+            {
+                SkipProjectReopen = true;
                 continue;
             }
 
