@@ -70,13 +70,13 @@ internal sealed class OutputSetupModeView
     /// <summary>
     /// Draws an output-editing view if one applies to the current focus, and returns true; returns false
     /// when the caller should draw the operator output instead. A picked entity takes precedence over a
-    /// focused send op; both are dropped when the focused op changes (graph selection wins). A window pinned
-    /// to an op (<paramref name="opPinned"/>) keeps showing it: neither the graph focus nor the shared entity
-    /// selection pulls it into the setup.
+    /// focused send op; both are dropped when the focused op changes (graph selection wins). With
+    /// <paramref name="keepsPinnedOp"/> the window keeps showing its pinned op: neither the graph focus nor the
+    /// shared entity selection pulls it into the setup.
     /// </summary>
-    public bool TryDrawEditingView(Instance? focusedInstance, EvaluationContext context, bool opPinned = false)
+    public bool TryDrawEditingView(Instance? focusedInstance, EvaluationContext context, bool keepsPinnedOp = false)
     {
-        _opPinned = opPinned;
+        _keepsPinnedOp = keepsPinnedOp;
         FollowGraphFocus();
         _outputView.IsHeaderHostedByStrip = IsSetupMode;
 
@@ -252,8 +252,8 @@ internal sealed class OutputSetupModeView
 
     private bool IsSetupMode => _viewMode == ViewModes.Setup;
 
-    /** Whether the host window is pinned to an op this frame, so focus and selection leave its view alone. */
-    private bool _opPinned;
+    /** Whether the host window keeps showing its pinned op this frame, so focus and selection leave its view alone. */
+    private bool _keepsPinnedOp;
     private Action? _leaveSetup;
 
     /// <summary>
@@ -279,11 +279,11 @@ internal sealed class OutputSetupModeView
             _entitySelection.Mirror(SetupEntityKinds.ContentSource, focusedId);
         }
 
-        if (graphOwnsInspection && focusTransition && !_opPinned)
+        if (graphOwnsInspection && focusTransition && !_keepsPinnedOp)
         {
             // A focused SendToOutput enters Setup (its surfaces/outputs are at hand); selecting any other op —
             // or clicking the graph background — leaves it. Only on the transition, so the mode can still be
-            // toggled by hand while the focus stays put. A window pinned to an op is looking at that op.
+            // toggled by hand while the focus stays put.
             _viewMode = selectedInGraph is IContentSupplier ? ViewModes.Setup : ViewModes.Operator;
         }
 

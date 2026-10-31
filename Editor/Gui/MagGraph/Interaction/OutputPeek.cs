@@ -81,6 +81,10 @@ internal static class OutputPeek
         var shownInstance = context.Selector.GetFirstSelectedInstance() ?? context.CompositionInstance;
         if (outputWindow != null && outputWindow.Pinning.IsPinnedTo(shownInstance))
         {
+            // The setup view hides the pinned op, so it isn't really in the output yet.
+            if (outputWindow.TryLeaveSetupMode())
+                return;
+
             // P no longer unpins, so tell where that moved
             ActionToast.Show("{" + shownInstance.Symbol.Name + " is already in the output}   unpin it in the output window");
             return;
@@ -138,7 +142,7 @@ internal static class OutputPeek
     private const string PeekTipId = "OutputPeek";
 
     /** Releasing P later than this counts as holding it */
-    private const double TapMaxSec = 0.25;
+    private const double TapMaxSec = 0.35; 
 
     private static bool _isKeyDown;
     private static double _pressTime;

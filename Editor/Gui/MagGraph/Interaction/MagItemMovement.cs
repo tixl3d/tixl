@@ -2,6 +2,8 @@
 
 using System.Diagnostics;
 using ImGuiNET;
+using T3.Core.Output;
+using T3.Editor.Gui.Windows.Output;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Stats;
 using T3.Core.Utils;
@@ -333,6 +335,10 @@ internal sealed partial class MagItemMovement
             if (append)
             {
                 context.Selector.DeselectNode(item, item.Instance);
+            }
+            else if (item.Instance is IContentSupplier)
+            {
+                OutputWindow.EnterSetupModeForSendOpClick();
             }
         }
         else

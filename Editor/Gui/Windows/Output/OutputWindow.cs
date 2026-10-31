@@ -149,7 +149,7 @@ internal sealed partial class OutputWindow : Window
             // and does not emit items, so submit an empty Dummy as an extent marker.
             ImGui.Dummy(Vector2.Zero);
 
-            if (_setupMode.TryDrawEditingView(drawnInstance, EvaluationContext, opPinned: Pinning.IsPinned))
+            if (_setupMode.TryDrawEditingView(drawnInstance, EvaluationContext, keepsPinnedOp: KeepsPinnedOp()))
             {
                 // Output-editing view (focused send op or picked entity) was drawn — give it the
                 // breadcrumb so the outliner and op selection stay reachable while editing. With the strip
@@ -229,6 +229,31 @@ internal sealed partial class OutputWindow : Window
     {
         if (!_setupMode.TryLeaveSetupMode())
             _setupMode.EnterSetupMode();
+    }
+
+    /// <summary>For a click on a send op that was already selected, which the mode's following of the graph focus can't see.</summary>
+    internal static void EnterSetupModeForSendOpClick()
+    {
+        foreach (var window in OutputWindowInstances)
+        {
+            if (window is OutputWindow { Config.Visible: true } outputWindow && !outputWindow.KeepsPinnedOp())
+                outputWindow._setupMode.EnterSetupMode();
+        }
+    }
+
+    /** A pin keeps the op on view only while another window can take the setup; a lone window would otherwise never open it from the graph. */
+    private bool KeepsPinnedOp()
+    {
+        if (!Pinning.IsPinned)
+            return false;
+
+        foreach (var window in OutputWindowInstances)
+        {
+            if (window != this && window.Config.Visible && window is OutputWindow { Pinning.IsPinned: false })
+                return true;
+        }
+
+        return false;
     }
 
     /// <summary>
