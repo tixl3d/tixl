@@ -58,10 +58,11 @@ internal static class UiContentUpdate
         const string fileExtension = ".ttf";
         var format = $"{rootFilePath}{{0}}{fileExtension}";
 
-        var normalFont = new TtfFont(string.Format(format, "Regular"), 16f * dpiAwareScale);
-        var boldFont = new TtfFont(string.Format(format, "SemiBold"), 16f * dpiAwareScale);
-        var smallFont = new TtfFont(string.Format(format, "Regular"), 13f * dpiAwareScale);
-        var largeFont = new TtfFont(string.Format(format, "Light"), 30f * dpiAwareScale);
+        var interEmToImGuiSize = dpiAwareScale * InterLineHeightPerEm;
+        var normalFont = new TtfFont(string.Format(format, "Regular"), 16f * interEmToImGuiSize);
+        var boldFont = new TtfFont(string.Format(format, "SemiBold"), 16f * interEmToImGuiSize);
+        var smallFont = new TtfFont(string.Format(format, "Regular"), 13f * interEmToImGuiSize);
+        var largeFont = new TtfFont(string.Format(format, "Light"), 30f * interEmToImGuiSize);
 
         var ranges = GetExtendedGlyphRanges();
         Fonts.FontNormal = fontAtlasPtr.AddFontFromFileTTF(normalFont.Path, normalFont.PixelSize, default, ranges);
@@ -108,6 +109,9 @@ internal static class UiContentUpdate
         _glyphRangesPtr = _glyphRangesHandle.AddrOfPinnedObject();
         return _glyphRangesPtr;
     }
+
+    /** ImGui font sizes are line heights while Figma's are em sizes, so this makes both agree for Inter. */
+    private const float InterLineHeightPerEm = (1984f + 494f) / 2048f;
 
     private static ushort[]? _extendedGlyphRanges;
     private static GCHandle _glyphRangesHandle;
