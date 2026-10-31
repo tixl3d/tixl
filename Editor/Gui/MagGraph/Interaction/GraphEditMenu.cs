@@ -7,6 +7,7 @@ using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.Windows.SymbolLib;
 using T3.Editor.UiModel;
+using T3.Editor.UiModel.Helpers;
 using T3.Editor.UiModel.Modification;
 
 namespace T3.Editor.Gui.MagGraph.Interaction;
@@ -122,8 +123,11 @@ internal static class GraphEditMenu
     private static void InsertOperator(GraphUiContext context, Symbol symbol, Vector2 viewCenter)
     {
         var composition = context.CompositionInstance;
-        var posOnCanvas = context.View.InverseTransformPositionFloat(viewCenter);
-        var childUi = GraphOperations.AddSymbolChild(symbol, composition.GetSymbolUi(), posOnCanvas);
+        var compositionUi = composition.GetSymbolUi();
+        var posOnCanvas = GraphUtils.FindFreePosition(compositionUi,
+                                                      context.View.InverseTransformPositionFloat(viewCenter),
+                                                      SymbolUi.Child.DefaultOpSize);
+        var childUi = GraphOperations.AddSymbolChild(symbol, compositionUi, posOnCanvas);
         if (composition.Children.TryGetChildInstance(childUi.Id, out var instance))
             context.Selector.SetSelection(childUi, instance);
 

@@ -6,11 +6,13 @@ using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.Output;
+using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.Commands.Setup;
+using T3.Editor.UiModel.Helpers;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
 
@@ -76,7 +78,7 @@ internal static class ContentSourceSync
     }
 
     /// <summary>
-    /// Drops a <c>SendToOutput</c> op into the focused composition, selects it, and frames the view on it. When a
+    /// Drops a <c>SendToOutput</c> op into a free spot of the visible graph and selects it. When a
     /// texture-outputting op is selected it lands to its right and is wired straight in, so the feed shows up in
     /// the setup at once (the CONTENT item appears next frame, once the sync adopts it).
     /// </summary>
@@ -107,9 +109,11 @@ internal static class ContentSourceSync
         var selected = projectView.NodeSelection.GetSelectedInstanceWithoutComposition();
         var sourceSlot = selected == null ? null : FindTextureOutput(selected);
         var selectedUi = selected?.GetChildUi();
-        var pos = selectedUi != null
-                      ? selectedUi.PosOnCanvas + new Vector2(selectedUi.Size.X + 40, 0)
-                      : Vector2.Zero;
+        var pos = sourceSlot != null && selectedUi != null
+                      ? GraphUtils.FindFreePosition(compositionUi,
+                                                    selectedUi.PosOnCanvas + new Vector2(selectedUi.Size.X + 40, 0),
+                                                    SymbolUi.Child.DefaultOpSize)
+                      : GraphUtils.FindFreePositionInView(compositionUi);
 
         var addCommand = new AddSymbolChildCommand(compositionUi.Symbol, SendToOutputSymbolId) { PosOnCanvas = pos, ChildName = name };
         macro.AddAndExecCommand(addCommand);
@@ -122,7 +126,9 @@ internal static class ContentSourceSync
         }
 
         projectView.NodeSelection.TrySelectCompositionChild(composition, childId, add: false);
-        projectView.FocusViewToSelection();
+
+        // Only scrolls when the op landed out of view, so the graph keeps its zoom and doesn't jump.
+        projectView.GraphView.Canvas.ScrollToMakeAreaVisible(ImRect.RectWithSize(pos, MagGraphItem.GridSize), RevealPaddingOnScreen * T3Ui.UiScaleFactor);
         return true;
     }
 
@@ -440,6 +446,7 @@ internal static class ContentSourceSync
     }
 
     // Lib SendToOutput op and its inputs — the CONTENT "+" instantiates this and wires a selected feed in.
+    private const float RevealPaddingOnScreen = 40f;
     private static readonly Guid SendToOutputSymbolId = new("0b8f2d4e-6a1c-47d3-9f5e-8c2a1b7d4e60");
     private static readonly Guid SendToOutputTextureInputId = new("8a4dd1b3-2e6f-4c25-9d0a-7f3b61c8e942");
     private static readonly Guid SendToOutputResolutionInputId = new("3c7f1e58-0a94-4d62-b8f3-2e5d9a0c4b17");
