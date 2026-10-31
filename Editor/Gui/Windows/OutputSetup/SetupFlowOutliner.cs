@@ -42,12 +42,10 @@ internal sealed class SetupFlowOutliner
     /// <param name="bodyVisible">False while collapsed: only the header draws.</param>
     /// <param name="drawGrip">The strip's resize grip, drawn first in the header.</param>
     /// <param name="drawToolbar">The canvas' toolbar (mode switch and its actions), drawn after the setup switcher.</param>
-    /// <param name="drawMenuExtras">Window-level entries appended to the setup menu (outliner toggle, pin).</param>
     /// <param name="onLeave">Leaves the setup for the operator view; drawn as the header's close button.</param>
     public void Draw(SetupEntitySelection selection, Action? onToggleCollapse, bool bodyVisible,
-                     Action? drawGrip = null, Action? drawToolbar = null, Action? drawMenuExtras = null, Action? onLeave = null)
+                     Action? drawGrip = null, Action? drawToolbar = null, Action? onLeave = null)
     {
-        _drawMenuExtras = drawMenuExtras;
         _onLeave = onLeave;
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out var machineConfig))
         {
@@ -62,11 +60,11 @@ internal sealed class SetupFlowOutliner
         if (_cacheVersion != OutputSetupHandling.StructureVersion || _cacheSetupId != setup.Id)
             RefreshCaches(setup, machineConfig);
 
-        // Del removes the selection while the strip has focus — the same verb as the items' context menu.
+        // Del or Backspace removes the selection while the strip has focus — the same verb as the items' context menu.
         if (bodyVisible && selection.Count > 0
             && ImGui.IsWindowFocused(ImGuiFocusedFlags.RootAndChildWindows)
             && !ImGui.IsAnyItemActive()
-            && ImGui.IsKeyPressed(ImGuiKey.Delete, false))
+            && (ImGui.IsKeyPressed(ImGuiKey.Delete, false) || ImGui.IsKeyPressed(ImGuiKey.Backspace, false)))
         {
             SetupActions.DeleteSelection(selection, setup);
         }
@@ -961,7 +959,7 @@ internal sealed class SetupFlowOutliner
             for (var i = 0; i < _availableNames.Count; i++)
             {
                 var name = _availableNames[i];
-                if (CustomComponents.DrawMenuItem(i, name, isChecked: name == setup.Name) && name != setup.Name)
+                if (CustomComponents.DrawMenuItem(i, name, isChecked: name == setup.Name, reserveIconColumn: false) && name != setup.Name)
                 {
                     if (OutputSetupHandling.TrySwitchTo(name))
                         selection.Clear();
@@ -969,21 +967,21 @@ internal sealed class SetupFlowOutliner
             }
 
             CustomComponents.SeparatorLine();
-            if (CustomComponents.DrawMenuItem(903, "Rename"))
+            if (CustomComponents.DrawMenuItem(903, "Rename", reserveIconColumn: false))
             {
                 _isRenamingSetup = true;
                 _setupRenameFocusPending = true;
                 _setupRenameBuffer = setup.Name;
             }
 
-            if (CustomComponents.DrawMenuItem(900, "Duplicate Current"))
+            if (CustomComponents.DrawMenuItem(900, "Duplicate Current", reserveIconColumn: false))
             {
                 OutputSetupHandling.TryDuplicateActive(GetFreeName(setup.Name + " copy"));
             }
             CustomComponents.TooltipForLastItem("Duplicates the setup for another venue.",
                                                 "Entity ids are preserved, so operator bindings stay intact.");
 
-            if (CustomComponents.DrawMenuItem(901, "New (Empty)"))
+            if (CustomComponents.DrawMenuItem(901, "New (Empty)", reserveIconColumn: false))
             {
                 if (OutputSetupHandling.TryCreateNew(GetFreeName("Setup")))
                     selection.Clear();
@@ -991,16 +989,15 @@ internal sealed class SetupFlowOutliner
             CustomComponents.TooltipForLastItem("Creates a fresh setup with new entity ids.",
                                                 "Operator bindings into it will be unresolved until re-assigned.");
 
-            if (_availableNames.Count > 1 && CustomComponents.DrawMenuItem(902, "Delete"))
+            if (CustomComponents.DrawMenuItem(904, "Reveal in Explorer", reserveIconColumn: false))
+                OutputSetupHandling.RevealActiveFile();
+
+            CustomComponents.TooltipForLastItem("Shows this setup's file in the project's .meta folder.");
+
+            if (_availableNames.Count > 1 && CustomComponents.DrawMenuItem(902, "Delete", reserveIconColumn: false))
             {
                 if (OutputSetupHandling.TryDeleteActive())
                     selection.Clear();
-            }
-
-            if (_drawMenuExtras != null)
-            {
-                CustomComponents.SeparatorLine();
-                _drawMenuExtras();
             }
 
             SetupPopup.End();
@@ -1098,7 +1095,6 @@ internal sealed class SetupFlowOutliner
     private readonly Dictionary<Guid, string> _sliceLabels = [];
     private readonly Dictionary<Guid, string> _patchLabels = [];
 
-    private Action? _drawMenuExtras;
 
     private bool _isRenamingSetup;
     private bool _setupRenameFocusPending;

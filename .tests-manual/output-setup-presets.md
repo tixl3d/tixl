@@ -63,7 +63,7 @@ Click the entry for the second display.
 ## Step: Opening the Setup Panel
 
 **Action:**
-In the Output Window toolbar, open the breadcrumb menu and enable "Show Flow Outliner".
+In the Output Window toolbar, click the "Output Setup" button.
 
 **Expected:**
 - The Flow Outliner appears under the canvas with columns CONTENT, SURFACES, OUTPUTS, LOCAL BINDINGS — the first three with a `+` button.

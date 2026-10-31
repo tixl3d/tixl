@@ -27,7 +27,6 @@ internal sealed partial class OutputWindow
     /// OUTPUT rows (right-click → Bind to display); the setup itself is entered by the toolbar's last button.</summary>
     private void DrawOutputMenuExtras()
     {
-        _setupMode.DrawOutlinerMenuItem();
         _setupMode.DrawPinMenuItem();
     }
 

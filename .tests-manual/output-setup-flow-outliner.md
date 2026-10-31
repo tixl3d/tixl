@@ -44,13 +44,22 @@ Click the SendToOutput op in the graph window.
   icon is still there.
 - After 3: the strip closes and the window shows its pinned SendToOutput.
 
+## Step: Reveal the setup file
+
+**Action:**
+Click the setup name in the strip's header and choose **Reveal in Explorer**.
+
+**Expected:**
+- A file manager window opens on the project's `.meta/Setups` folder with `<setup name>.setup.json`
+  selected. The menu closes and the setup is unchanged.
+
 ## Step: Splitter and collapse
 
 **Action:**
 1. Drag the strip's top edge upward by about 100 px, then downward past the middle of the
    window; then drag the dotted grip at the header's left the same way.
 2. Click the chevron at the right end of the header, then click it again.
-3. Open the setup-name menu and untick **Show Flow Outliner**; then click the "Output Setup" button at
+3. Click **Close** at the right end of the header; then click the "Output Setup" button at
    the left of the toolbar that reappears.
 
 **Expected:**
@@ -176,7 +185,7 @@ the "SendToOutput" item.
 3. Press Ctrl+Z.
 
 **Expected:**
-- After 1: that patch is gone from under "P1".
+- After 1: that patch is gone from under "P1". Backspace does the same as Del.
 - After 2: Del only edits the text; "Patch 1" survives.
 - After 3: it is back.
 
