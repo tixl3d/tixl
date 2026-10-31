@@ -30,6 +30,20 @@ Click the SendToOutput op in the graph window.
   dimmed item per display of this machine, labelled "Local / Display N" with its resolution.
 - Nothing docks to the left of the canvas anymore.
 
+## Step: Clicking the send op reopens the setup
+
+**Action:**
+1. With the SendToOutput op still selected, press **O** to close the strip, then click the
+   same op once in the graph.
+2. Press **P** with the op selected, so the output window is pinned to it and the strip closes.
+   Click the op once again.
+3. Click an op that is not a SendToOutput.
+
+**Expected:**
+- After 1 and 2: the strip opens again, although the selection didn't change. After 2 the pin
+  icon is still there.
+- After 3: the strip closes and the window shows its pinned SendToOutput.
+
 ## Step: Splitter and collapse
 
 **Action:**
@@ -113,6 +127,22 @@ Image**; then use it again for **Add Prop**.
   it ends at "Patch 1" again.
 - After 4: four curves fan out from "Slice 1" to "Patch 1" … "Patch 4", one per tile; the
   undo returns to one.
+
+## Step: Items show that they can be dragged
+
+**Action:**
+1. Look at the right edge of "Surface 1" and "Local / Display 1" with nothing hovered.
+2. Hover "Surface 1", then select it and hover it again.
+3. Press on "Surface 1" and drag about 200 px to the right, without releasing; then move the
+   mouse left of the item, and release over empty space in the gap between two columns.
+
+**Expected:**
+- After 1: "Surface 1" has a small dot in its kind colour on its right edge; "Local / Display 1"
+  has none, as nothing follows it.
+- After 2: the dot grows smoothly while hovered and shrinks again afterwards. The selected item
+  also gets brighter while hovered.
+- After 3: a temporary curve follows the mouse from the item's right edge, or from its left edge
+  once the mouse is left of it. It disappears on release and no connection is added.
 
 ## Step: Pills are always visible
 

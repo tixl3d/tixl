@@ -43,6 +43,18 @@ never leaves the Board; only a double-click enters an entity's space. Fading bet
 - After 3: the Straight canvas opens for the surface; the Board tab brings the Board back with
   "Surface 1" highlighted and the same layout as before.
 
+## Step: Empty columns explain themselves
+
+**Action:**
+1. Click the setup's name in the outliner header and choose **New (Empty)**.
+2. Click the **+** in the SURFACES column.
+3. Click the setup's name, then **Delete**, to remove the empty setup again.
+
+**Expected:**
+- After 1: CONTENT, SURFACES, OUTPUTS and LOCAL BINDINGS each show a gray sentence in the normal font, centered horizontally and in the free height below the items. LOCAL BINDINGS keeps its displays listed above its sentence, which says to drag an output onto one. If the project's graph contains a SendToOutput, CONTENT lists it instead of showing the sentence.
+- After 2: "Surface 1" appears and the SURFACES sentence is gone; the other three remain.
+- After 3: the previous setup is back with no sentences in columns that have items.
+
 ## Step: Selection look and the Board menu
 
 **Action:**

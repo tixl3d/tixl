@@ -280,6 +280,26 @@ internal sealed class SetupFlowOutliner
             var c = _connections[i];
             DrawConnection(dl, selection, c.FromKind, c.FromId, c.ToKind, c.ToId, setup);
         }
+
+        DrawDraggedConnection(dl, setup);
+    }
+
+    /// <summary>The temporary connection of a routing drag, from the dragged item to the mouse.</summary>
+    private void DrawDraggedConnection(ImDrawListPtr dl, Setup setup)
+    {
+        if (!DragAndDropHandling.TryGetDragData(DragAndDropHandling.DragTypes.SetupEntity, out var dragData)
+            || !SetupRouting.TryParseDrag(dragData, out var kind, out var id)
+            || !TryGetAnchor(setup, kind, id, out var anchor))
+            return;
+
+        var scale = T3Ui.UiScaleFactor;
+        var mouse = ImGui.GetMousePos();
+
+        // Routing is direction-agnostic, so the line leaves the item on the side the mouse is on.
+        var direction = mouse.X < anchor.Left ? -1f : 1f;
+        var start = new Vector2(direction < 0 ? anchor.Left : anchor.Right, anchor.Y);
+        var reach = direction * MathF.Max(24 * scale, MathF.Abs(mouse.X - start.X) * 0.4f);
+        dl.AddBezierCubic(start, start + new Vector2(reach, 0), mouse - new Vector2(reach, 0), mouse, SetupColors.ForKind(kind), 2.5f * scale);
     }
 
     /// <summary>
