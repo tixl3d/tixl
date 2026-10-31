@@ -74,7 +74,13 @@ internal sealed class SetupFlowOutliner
         DrawHeader(setup, selection, onToggleCollapse, bodyVisible, drawGrip, drawToolbar);
 
         if (bodyVisible)
+        {
+            var separatorStart = ImGui.GetCursorScreenPos();
+            var separatorEnd = separatorStart + new Vector2(ImGui.GetContentRegionAvail().X, 0);
+            SetupStrokes.DrawCrispLine(ImGui.GetWindowDrawList(), separatorStart, separatorEnd, UiColors.BackgroundFull.Fade(0.6f), 1);
+
             DrawColumns(setup, machineConfig, selection);
+        }
 
         OutlinerItem.ApplyPendingMove(setup);
         _hoveredKind = _pendingHoveredKind;
@@ -204,24 +210,33 @@ internal sealed class SetupFlowOutliner
 
         // Items are inset from the column boundaries so the gutters between columns have room for the connections.
         var gap = ColumnGap * scale;
+        _columnBodyBottom = origin.Y + avail.Y;
 
         BeginColumn(origin.X + gap * 0.5f, origin.Y, columnWidth - gap);
-        DrawColumnHeader("CONTENT", "##addContent", selection, ContentSourceSync.AddContentSend, SetupEntityKinds.ContentSource);
+        DrawColumnHeader("CONTENT", "##addContent", selection, ContentSourceSync.AddContentSend,
+                         "Add content", "Adds a [SendToOutput] to the graph. If a texture operator is selected, it gets connected to it.",
+                         SetupEntityKinds.ContentSource);
         DrawContentSends(selection, setup);
         maxY = MathF.Max(maxY, ImGui.GetCursorScreenPos().Y);
 
         BeginColumn(origin.X + columnWidth + gap * 0.5f, origin.Y, columnWidth - gap);
-        DrawColumnHeader("SURFACES", "##addSurface", selection, s => SetupActions.AddSurface(s), SetupEntityKinds.Surface);
+        DrawColumnHeader("SURFACES", "##addSurface", selection, s => SetupActions.AddSurface(s),
+                         "Add a surface", "A physical area in the venue, like a wall or a screen, that shows a slice of the content.",
+                         SetupEntityKinds.Surface);
         DrawSurfaces(selection, setup);
         maxY = MathF.Max(maxY, ImGui.GetCursorScreenPos().Y);
 
         BeginColumn(origin.X + 2 * columnWidth + gap * 0.5f, origin.Y, columnWidth - gap);
-        DrawColumnHeader("OUTPUTS", "##addOutput", selection, SetupActions.AddOutput, SetupEntityKinds.Output);
+        DrawColumnHeader("OUTPUTS", "##addOutput", selection, SetupActions.AddOutput,
+                         "Add an output", "A display, projector or video stream that surfaces get mapped onto.",
+                         SetupEntityKinds.Output);
         DrawOutputs(selection, setup, machineConfig);
         maxY = MathF.Max(maxY, ImGui.GetCursorScreenPos().Y);
 
         BeginColumn(origin.X + 3 * columnWidth + gap * 0.5f, origin.Y, columnWidth - gap);
-        DrawColumnHeader("LOCAL BINDINGS", "##addPlug", selection, _requestAddPlugMenu, SetupEntityKinds.Plug);
+        DrawColumnHeader("LOCAL BINDINGS", "##addPlug", selection, _requestAddPlugMenu,
+                         "Add a stream sender", "Lets this machine send an output to other applications, e.g. over Spout or NDI. Its displays are listed already.",
+                         SetupEntityKinds.Plug);
         DrawLocalBindings(selection, setup, machineConfig);
         maxY = MathF.Max(maxY, ImGui.GetCursorScreenPos().Y);
 
@@ -233,7 +248,7 @@ internal sealed class SetupFlowOutliner
         for (var i = 1; i <= 3; i++)
         {
             var x = (float)Math.Round(origin.X + i * columnWidth);
-            dl.AddLine(new Vector2(x, origin.Y), new Vector2(x, dividerBottom), UiColors.BackgroundFull, 1 * scale);
+            dl.AddLine(new Vector2(x, origin.Y), new Vector2(x, dividerBottom), UiColors.BackgroundFull.Fade(0.6f), 1 * scale);
         }
 
         DrawConnections(dl, setup, machineConfig, selection);
@@ -488,7 +503,7 @@ internal sealed class SetupFlowOutliner
 
     /// <summary>A column's persistent title, tinted in its kind's colour, with its `+` at the right end (none for the plug inventory).</summary>
     private void DrawColumnHeader(string title, string? addButtonId, SetupEntitySelection selection, Action<SetupEntitySelection>? onAdd,
-                                  SetupEntityKinds kind = SetupEntityKinds.None)
+                                  string addTooltip, string addTooltipNotes, SetupEntityKinds kind = SetupEntityKinds.None)
     {
         var scale = T3Ui.UiScaleFactor;
         // Anchored on the column's x: a spacer before a second header (the shelf) resets the cursor's x to the window.
@@ -507,6 +522,7 @@ internal sealed class SetupFlowOutliner
             if (CustomComponents.IconButton(Icon.Plus, Vector2.Zero))
                 onAdd(selection);
 
+            CustomComponents.TooltipForLastItem(addTooltip, addTooltipNotes);
             ImGui.PopID();
         }
 
@@ -516,12 +532,15 @@ internal sealed class SetupFlowOutliner
 
     private void DrawOutputs(SetupEntitySelection selection, Setup setup, MachineConfig machineConfig)
     {
+        var drawnCount = 0;
         for (var i = 0; i < setup.Outputs.Count; i++)
         {
             var output = setup.Outputs[i];
             // The Default output is the editor's internal preview, not something you present or map — hide it.
             if (output.Kind == OutputDefinition.Kinds.Default)
                 continue;
+
+            drawnCount++;
 
             // The implicit full-canvas patch is the output itself here: no item, and its slice connection
             // lands on the output item (TryGetAnchor folds an undrawn patch onto its output).
@@ -561,6 +580,9 @@ internal sealed class SetupFlowOutliner
                     DrawPatchItem(selection, setup, output, output.Patches[p]);
             }
         }
+
+        if (drawnCount == 0)
+            DrawColumnHint("The pixel canvases of your projectors and displays.");
     }
 
     /// <summary>
@@ -621,6 +643,10 @@ internal sealed class SetupFlowOutliner
             DrawItem(selection, setup, ref args);
         }
 
+        // Displays are always listed, so this column explains itself until the first output is bound rather than when empty.
+        if (!HasBoundOutput(setup, machineConfig))
+            DrawColumnHint("Drag an output onto a display or stream to show it there.");
+
         if (_addPlugMenuRequested)
         {
             ImGui.OpenPopup(AddPlugMenuId);
@@ -679,6 +705,17 @@ internal sealed class SetupFlowOutliner
             return;
 
         ImGui.TextUnformatted("In composition parent " + _tooltipSendParent.SymbolChild.ReadableName);
+    }
+
+    private static bool HasBoundOutput(Setup setup, MachineConfig machineConfig)
+    {
+        foreach (var binding in machineConfig.Bindings)
+        {
+            if (setup.FindOutput(binding.OutputId) != null)
+                return true;
+        }
+
+        return false;
     }
 
     private static bool IsPlugBound(Setup setup, MachineConfig machineConfig, Guid plugId)
@@ -755,12 +792,29 @@ internal sealed class SetupFlowOutliner
         }
 
         if (drawnCount == 0)
-        {
-            ImGui.Indent(8 * T3Ui.UiScaleFactor);
-            CustomComponents.StylizedText("no SendToOutput ops in this composition", Fonts.FontSmall, UiColors.TextMuted.Fade(0.6f));
-            ImGui.Unindent(8 * T3Ui.UiScaleFactor);
-        }
+            DrawColumnHint("What your graph renders for this setup.");
     }
+
+    /// <summary>
+    /// Explains a column in the free space below its items. The child window only gives the centered message
+    /// its bounds: it takes no input, so a click on it still counts as a click on empty strip.
+    /// </summary>
+    private void DrawColumnHint(string hint)
+    {
+        var top = new Vector2(_columnMinX, ImGui.GetCursorScreenPos().Y);
+        var height = MathF.Max(_columnBodyBottom - top.Y, MinColumnHintLines * ImGui.GetTextLineHeight());
+
+        ImGui.SetCursorScreenPos(top);
+        ImGui.BeginChild(hint, new Vector2(_columnWidth, height), ImGuiChildFlags.None,
+                         ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoScrollbar);
+        CustomComponents.EmptyWindowMessage(hint);
+        ImGui.EndChild();
+
+        // Stacked columns measure their end from the cursor; the hint shouldn't count as content there.
+        ImGui.SetCursorScreenPos(top);
+    }
+
+    private const int MinColumnHintLines = 4;
 
     /// <summary>A slice under its source. A slice nothing shows reads as "unused".</summary>
     private void DrawSliceItem(SetupEntitySelection selection, Setup setup, Slice slice)
@@ -804,6 +858,9 @@ internal sealed class SetupFlowOutliner
             if (setup.Surfaces[i].ParentId == Guid.Empty)
                 DrawSurfaceItem(selection, setup, setup.Surfaces[i], 0);
         }
+
+        if (setup.Surfaces.Count == 0)
+            DrawColumnHint("The physical planes light lands on, like a wall or a screen.");
     }
 
     private void DrawSurfaceItem(SetupEntitySelection selection, Setup setup, Surface surface, int depth)
@@ -1011,6 +1068,7 @@ internal sealed class SetupFlowOutliner
     // The column the items currently draw into (screen x + width); 0 width = whole window.
     private float _columnMinX;
     private float _columnWidth;
+    private float _columnBodyBottom;
 
     // Per-structure caches (see RefreshCaches), keyed on the structure version and the setup.
     private int _cacheVersion = -1;
