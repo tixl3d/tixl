@@ -499,7 +499,7 @@ internal sealed partial class SetupOutputView
         }
 
         if (cardSurface != null && isSelected)
-            DrawBoardSurfaceEdges(setup, cardSurface, min, max);
+            DrawBoardSurfaceEdges(setup, selection, cardSurface, min, max);
 
         // The scale handle at the top-right corner. On a pixel card (square) it is presentation only — the
         // card's px-per-metre, never resolution, routing or projection. On a surface (circle) it is physical:
@@ -514,24 +514,16 @@ internal sealed partial class SetupOutputView
             ImGui.PopID();
             if (phase == CanvasPointHandle.DragPhases.Started)
             {
-                BeginGesture(setup, GestureKinds.BoardScale, isSurface ? "Scale surface" : "Scale card", id);
-                _boardScaleStartWidth = max.X - min.X;
-                _boardScaleApplied = Vector2.One;
+                var isGroup = selection is { Count: > 1 };
+                BeginGesture(setup, GestureKinds.BoardScale, isGroup ? "Scale selection" : isSurface ? "Scale surface" : "Scale card", id);
+                BeginBoardScale(setup, selection, kind, id);
             }
 
             if (phase == CanvasPointHandle.DragPhases.Dragging)
             {
-                if (isSurface && setup.FindSurface(id) is { } scaledSurface)
-                {
-                    var factor = MathF.Max(corner.X - min.X, SurfaceGeometry.MinSize) / MathF.Max(_boardScaleStartWidth, SurfaceGeometry.MinSize);
-                    ApplyBoardScale(setup, scaledSurface, new Vector2(factor, factor), fixedCorner: 3);
-                }
-                else if (TryGetPlacement(setup, kind, id, out var placement))
-                {
-                    var pixelWidth = BoardPixelSize(setup, kind, id).X;
-                    var newWidth = MathF.Max(corner.X - min.X, 0.05f);
-                    placement.CardScale = Math.Clamp(pixelWidth / newWidth, 10f, 100000f);
-                }
+                var factor = MathF.Max(corner.X - _boardScaleGroupMin.X, SurfaceGeometry.MinSize)
+                             / MathF.Max(_boardScaleGrabMax.X - _boardScaleGroupMin.X, SurfaceGeometry.MinSize);
+                ApplyBoardScale(setup, selection, kind, id, new Vector2(factor, factor), fixedCorner: 3);
             }
 
             if (phase == CanvasPointHandle.DragPhases.Completed)
@@ -547,17 +539,96 @@ internal sealed partial class SetupOutputView
         }
     }
 
+    /** Measures the grabbed item and the whole selection at the press, what a scale drag's factor is read against. */
+    private void BeginBoardScale(Setup setup, SetupEntitySelection? selection, SetupEntityKinds kind, Guid id)
+    {
+        _boardScaleApplied = Vector2.One;
+        TryGetCardBounds(setup, kind, id, out _boardScaleGrabMin, out _boardScaleGrabMax);
+        _boardScaleGroupMin = _boardScaleGrabMin;
+        _boardScaleGroupMax = _boardScaleGrabMax;
+        if (selection == null)
+            return;
+
+        for (var i = 0; i < selection.Targets.Count; i++)
+        {
+            var target = selection.Targets[i];
+            if (!TryGetCardBounds(setup, target.Kind, target.EntityId, out var itemMin, out var itemMax))
+                continue;
+
+            _boardScaleGroupMin = Vector2.Min(_boardScaleGroupMin, itemMin);
+            _boardScaleGroupMax = Vector2.Max(_boardScaleGroupMax, itemMax);
+        }
+    }
+
     /// <summary>
-    /// Scales a surface about one of its corners (TL, TR, BR, BL of its own rectangle) by the total
-    /// <paramref name="factor"/> since the gesture began: the footprint, the corner pins (re-projected), the
-    /// measuring lines and the regions all scale together. Applied incrementally, so a live drag never
-    /// compounds and never needs a per-frame restore of the whole subtree.
+    /// Scales the grabbed item and everything selected with it as one group by the total <paramref name="factor"/>
+    /// since the gesture began: sizes and the gaps between items alike, about the group's corner opposite the handle.
+    /// Applied incrementally, so a live drag never compounds and never needs a per-frame restore of the whole subtree.
     /// </summary>
-    private void ApplyBoardScale(Setup setup, Surface surface, Vector2 factor, int fixedCorner)
+    private void ApplyBoardScale(Setup setup, SetupEntitySelection? selection, SetupEntityKinds kind, Guid id, Vector2 factor, int fixedCorner)
     {
         var increment = new Vector2(factor.X / MathF.Max(_boardScaleApplied.X, 0.0001f), factor.Y / MathF.Max(_boardScaleApplied.Y, 0.0001f));
         _boardScaleApplied = factor;
 
+        var groupCorner = fixedCorner == 3 ? _boardScaleGroupMin : _boardScaleGroupMax;
+        if (selection == null)
+        {
+            ScaleBoardItem(setup, kind, id, increment, fixedCorner, groupCorner);
+            return;
+        }
+
+        for (var i = 0; i < selection.Targets.Count; i++)
+        {
+            var target = selection.Targets[i];
+
+            // A region already scales with its parent; doing it again would apply the factor twice.
+            if (target.Kind == SetupEntityKinds.Surface && setup.FindSurface(target.EntityId) is { } surface
+                                                        && selection.IsSelected(SetupEntityKinds.Surface, surface.ParentId))
+                continue;
+
+            ScaleBoardItem(setup, target.Kind, target.EntityId, increment, fixedCorner, groupCorner);
+        }
+    }
+
+    /// <summary>
+    /// Resizes one item, then places it where the group's scale about <paramref name="groupCorner"/> puts it. What
+    /// a resize means differs per kind: a surface's real size, a person's height, a pixel card's presentation size.
+    /// </summary>
+    private void ScaleBoardItem(Setup setup, SetupEntityKinds kind, Guid id, Vector2 increment, int fixedCorner, Vector2 groupCorner)
+    {
+        // Only surfaces can change proportions, so an edge's single-axis scale leaves the others alone.
+        var isSurface = kind == SetupEntityKinds.Surface;
+        if (!isSurface && increment.X != increment.Y)
+            return;
+
+        if (!TryGetCardBounds(setup, kind, id, out var oldMin, out _))
+            return;
+
+        if (isSurface)
+        {
+            if (setup.FindSurface(id) is { } surface)
+                ScaleBoardSurface(setup, surface, increment, fixedCorner);
+        }
+        else if (kind == SetupEntityKinds.Prop)
+        {
+            if (setup.FindProp(id) is { } prop)
+                prop.HeightInMeters = MathF.Max(prop.HeightInMeters * increment.X, 0.1f);
+        }
+        else if (kind != SetupEntityKinds.FloorPlan && TryGetPlacement(setup, kind, id, out var placement))
+        {
+            placement.CardScale = Math.Clamp(placement.CardScale / increment.X, 10f, 100000f);
+        }
+
+        if (TryGetBoardPosition(setup, kind, id, out var position) && TryGetCardBounds(setup, kind, id, out var newMin, out _))
+            SetBoardPosition(setup, kind, id, position + groupCorner + (oldMin - groupCorner) * increment - newMin);
+    }
+
+    /// <summary>
+    /// Scales a surface about one of its corners (TL, TR, BR, BL of its own rectangle): the footprint, the corner
+    /// pins (re-projected), the measuring lines and the regions all scale together.
+    /// </summary>
+    private static void ScaleBoardSurface(Setup setup, Surface surface, Vector2 increment, int fixedCorner)
+    {
         SurfaceGeometry.LocalBounds(surface, out var min, out var max);
         var fixedPoint = fixedCorner switch
                              {
@@ -597,7 +668,7 @@ internal sealed partial class SetupOutputView
     /// rectangle is kept and only its mapping changes). Both wear the circle handle; they differ because the
     /// Board is where a surface's real size is stated, and the canvases are where it is aimed.</para>
     /// </summary>
-    private void DrawBoardSurfaceEdges(Setup setup, Surface surface, Vector2 min, Vector2 max)
+    private void DrawBoardSurfaceEdges(Setup setup, SetupEntitySelection? selection, Surface surface, Vector2 min, Vector2 max)
     {
         _boardEdgeQuad[0] = new Vector2(min.X, max.Y);
         _boardEdgeQuad[1] = max;
@@ -651,28 +722,25 @@ internal sealed partial class SetupOutputView
                     BeginContentEdit(setup, surface);
 
                 _boardEdgeScaling = scaling;
-                _boardScaleApplied = Vector2.One;
-                SurfaceGeometry.LocalBounds(surface, out _boardEdgeStartMin, out _boardEdgeStartMax);
+                BeginBoardScale(setup, selection, SetupEntityKinds.Surface, surface.Id);
 
                 break;
 
             case CanvasPointHandle.DragPhases.Dragging when _gesture.Is(GestureKinds.SurfaceResize, surface.Id) && _boardEdgeScaling:
             {
-                // Scale along the dragged edge's axis, the opposite edge fixed; the trace is the same wall, so it stays.
-                var origin = surface.BoardPlacement?.Position ?? Vector2.Zero;
-                var pos = edgePos - origin;
-                var startSize = Vector2.Max(_boardEdgeStartMax - _boardEdgeStartMin, new Vector2(SurfaceGeometry.MinSize));
+                // Scale along the dragged edge's axis, the group's opposite edge fixed; the trace is the same wall, so it stays.
+                var minSize = SurfaceGeometry.MinSize;
                 var factor = Vector2.One;
                 var fixedCorner = 3;
                 switch (edge)
                 {
-                    case 0: factor.Y = MathF.Max(pos.Y - _boardEdgeStartMin.Y, SurfaceGeometry.MinSize) / startSize.Y; fixedCorner = 3; break;
-                    case 1: factor.X = MathF.Max(pos.X - _boardEdgeStartMin.X, SurfaceGeometry.MinSize) / startSize.X; fixedCorner = 3; break;
-                    case 2: factor.Y = MathF.Max(_boardEdgeStartMax.Y - pos.Y, SurfaceGeometry.MinSize) / startSize.Y; fixedCorner = 1; break;
-                    default: factor.X = MathF.Max(_boardEdgeStartMax.X - pos.X, SurfaceGeometry.MinSize) / startSize.X; fixedCorner = 1; break;
+                    case 0: factor.Y = MathF.Max(edgePos.Y - _boardScaleGroupMin.Y, minSize) / MathF.Max(_boardScaleGrabMax.Y - _boardScaleGroupMin.Y, minSize); fixedCorner = 3; break;
+                    case 1: factor.X = MathF.Max(edgePos.X - _boardScaleGroupMin.X, minSize) / MathF.Max(_boardScaleGrabMax.X - _boardScaleGroupMin.X, minSize); fixedCorner = 3; break;
+                    case 2: factor.Y = MathF.Max(_boardScaleGroupMax.Y - edgePos.Y, minSize) / MathF.Max(_boardScaleGroupMax.Y - _boardScaleGrabMin.Y, minSize); fixedCorner = 1; break;
+                    default: factor.X = MathF.Max(_boardScaleGroupMax.X - edgePos.X, minSize) / MathF.Max(_boardScaleGroupMax.X - _boardScaleGrabMin.X, minSize); fixedCorner = 1; break;
                 }
 
-                ApplyBoardScale(setup, surface, factor, fixedCorner);
+                ApplyBoardScale(setup, selection, SetupEntityKinds.Surface, surface.Id, factor, fixedCorner);
                 break;
             }
 
@@ -2274,8 +2342,8 @@ internal sealed partial class SetupOutputView
     // Scale gestures (top-right handle, Ctrl + edge): the mode held for the drag, the start bounds, and the
     // total factor applied so far — the increment per frame is total / applied.
     private bool _boardEdgeScaling;
-    private Vector2 _boardEdgeStartMin, _boardEdgeStartMax;
-    private float _boardScaleStartWidth;
+    private Vector2 _boardScaleGrabMin, _boardScaleGrabMax;
+    private Vector2 _boardScaleGroupMin, _boardScaleGroupMax;
     private Vector2 _boardScaleApplied = Vector2.One;
 
     // The live card drag (every selected card, from its start position); the press → drag handoff is _pressHandoff.
