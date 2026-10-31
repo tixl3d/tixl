@@ -575,7 +575,7 @@ internal sealed class SetupFlowOutliner
                            {
                                Kind = SetupEntityKinds.Output,
                                Id = output.Id,
-                               Name = output.Name,
+                               Name = SetupLabels.OutputLabel(output),
                                // Nothing presents it yet — said in words, where the plug connection would otherwise start.
                                Status = machineConfig.FindBinding(output.Id) == null ? "unbound" : null,
                                IsExpanded = hasPatches ? isExpanded : null,
@@ -880,7 +880,7 @@ internal sealed class SetupFlowOutliner
         }
 
         if (setup.Surfaces.Count == 0)
-            DrawColumnHint("The physical planes light lands on, like a wall or a screen.");
+            DrawColumnHint("Physical surfaces\nlike a walls or screens.");
     }
 
     private void DrawSurfaceItem(SetupEntitySelection selection, Setup setup, Surface surface, int depth)

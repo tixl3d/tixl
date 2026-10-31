@@ -211,7 +211,7 @@ internal sealed partial class SetupOutputView
             var composite = OutputCompositor.RenderPreview(output.Id);
             var srv = composite is { IsDisposed: false } ? SrvManager.GetSrvForTexture(composite) : null;
             DrawBoardCard(setup, selection, dl, SetupEntityKinds.Output, output.Id, min, max,
-                          output.Name, BoardMeta(output.Id), srv, true);
+                          SetupLabels.OutputLabel(output), BoardMeta(output.Id), srv, true);
 
             // The pixel map over the card's composite, as on the output canvas, so patches are placed against it here too.
             var pixelMap = setup.FindReferenceImage(output.ReferenceImageId);

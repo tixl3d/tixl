@@ -122,8 +122,8 @@ internal static class ResolutionHandling
             var binding = machineConfig.FindBinding(output.Id);
             var isBindable = output.Kind is OutputDefinition.Kinds.Projector or OutputDefinition.Kinds.Display;
             var label = binding == null
-                            ? $"{output.Name}  ·  {output.ResolvedResolution.Width}×{output.ResolvedResolution.Height}"
-                            : $"{output.Name}  →  {Plugs.BindingLabel(machineConfig, binding)}";
+                            ? $"{SetupLabels.OutputLabel(output)}  ·  {output.ResolvedResolution.Width}×{output.ResolvedResolution.Height}"
+                            : $"{SetupLabels.OutputLabel(output)}  →  {Plugs.BindingLabel(machineConfig, binding)}";
 
             if (isBindable)
             {

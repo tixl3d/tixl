@@ -127,7 +127,7 @@ public sealed class OutputDefinition
     {
         public Guid Id = Guid.NewGuid();
 
-        /// <summary>Empty = labelled by position ("Patch N"), so the default reads right after reordering.</summary>
+        /// <summary>Empty = labelled by position ("Patch N"), which only an output's implicit patch relies on: patches get a name when created.</summary>
         public string Name = string.Empty;
 
         /// <summary>The slice shown here; <see cref="Guid.Empty"/> while nothing is routed yet.</summary>

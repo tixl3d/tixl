@@ -45,9 +45,9 @@ internal static class SetupActions
                                                       var min = new Vector2(0.25f, 0.25f);
                                                       var max = new Vector2(0.75f, 0.75f);
 
-                                                      // Left unnamed: the label is derived from its position (see SetupLabels.PatchLabel).
                                                       var patch = new OutputDefinition.Patch
                                                                       {
+                                                                          Name = NextPatchName(output),
                                                                           Quad = [min, new Vector2(max.X, min.Y), max, new Vector2(min.X, max.Y)],
                                                                       };
                                                       output.Patches.Add(patch);
@@ -55,10 +55,27 @@ internal static class SetupActions
                                                   });
     }
 
+    /** A name that stays with the patch when the list is reordered, and that no other patch of the output carries. */
+    private static string NextPatchName(OutputDefinition output)
+    {
+        for (var ordinal = SetupRelations.CountListedPatches(output) + 1;; ordinal++)
+        {
+            var name = $"Patch {ordinal}";
+            var isTaken = false;
+            foreach (var other in output.Patches)
+            {
+                isTaken |= SetupLabels.PatchLabel(output, other) == name;
+            }
+
+            if (!isTaken)
+                return name;
+        }
+    }
+
     /// <summary>A full-canvas patch fed by a slice; the caller places it on an output and owns the undo step.</summary>
     internal static OutputDefinition.Patch CreateFullCanvasPatch(Guid sliceId)
     {
-        // Left unnamed: the label is derived from its position (see SetupLabels.PatchLabel).
+        // Left unnamed, which is what makes it the output's implicit patch (SetupRelations.TryGetImplicitPatch).
         return new OutputDefinition.Patch { SliceId = sliceId, Quad = OutputDefinition.FullCanvasQuad() };
     }
 
@@ -485,6 +502,7 @@ internal static class SetupActions
                                                                              var max = new Vector2((column + 1) / (float)columns, (row + 1) / (float)rows);
                                                                              output.Patches.Add(new OutputDefinition.Patch
                                                                                                     {
+                                                                                                        Name = NextPatchName(output),
                                                                                                         SliceId = feed,
                                                                                                         QuarterTurns = turns,
                                                                                                         Quad = [min, new Vector2(max.X, min.Y), max, new Vector2(min.X, max.Y)],
@@ -1033,8 +1051,7 @@ internal static class SetupActions
 
                 // Same place on the canvas: the copy is meant to be re-fed or moved, not hidden under the original.
                 copy.Id = Guid.NewGuid();
-                if (!string.IsNullOrEmpty(copy.Name))
-                    copy.Name += " copy";
+                copy.Name = string.IsNullOrEmpty(copy.Name) ? NextPatchName(owner) : copy.Name + " copy";
 
                 owner.Patches.Add(copy);
                 selection.Select(SetupEntityKinds.Patch, copy.Id);

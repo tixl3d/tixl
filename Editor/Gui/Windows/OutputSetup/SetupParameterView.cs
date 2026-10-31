@@ -183,6 +183,12 @@ internal static class SetupParameterView
     private static void DrawNameField(Setup setup, SetupEntityKinds kind, Guid id)
     {
         var currentName = SetupLabels.NameForEntity(kind, id);
+
+        // An output or patch without a name of its own shows its derived one as a placeholder; clearing the field returns to it.
+        var hasDerivedName = TryGetStoredName(setup, kind, id, out var storedName);
+        if (hasDerivedName)
+            currentName = storedName;
+
         if (_renameTargetId != id)
         {
             // The card moved on while a name was being typed: that name belongs to the entity it was typed for.
@@ -207,12 +213,32 @@ internal static class SetupParameterView
         FormInputs.DrawInputLabel("Name");
         ImGui.PushID(id.GetHashCode());
         ImGui.SetNextItemWidth(FormInputs.GetAvailableInputSize(null, false, fillWidth: true, maxWidth: FormInputs.MaxNumberInputWidth).X);
-        ImGui.InputText("##entityName", ref _renameBuffer, 256);
+        if (hasDerivedName)
+        {
+            ImGui.InputTextWithHint("##entityName", SetupLabels.NameForEntity(kind, id), ref _renameBuffer, 256);
+        }
+        else
+        {
+            ImGui.InputText("##entityName", ref _renameBuffer, 256);
+        }
+
         _renameFieldActive = ImGui.IsItemActive();
-        if (ImGui.IsItemDeactivatedAfterEdit() && !string.IsNullOrWhiteSpace(_renameBuffer) && _renameBuffer.Trim() != currentName)
+        if (ImGui.IsItemDeactivatedAfterEdit() && (hasDerivedName || !string.IsNullOrWhiteSpace(_renameBuffer)) && _renameBuffer.Trim() != currentName)
             SetupActions.RenameEntity(setup, kind, id, _renameBuffer.Trim());
 
         ImGui.PopID();
+    }
+
+    /** The name as stored, possibly empty, for the kinds that derive a label when they have none. */
+    private static bool TryGetStoredName(Setup setup, SetupEntityKinds kind, Guid id, out string storedName)
+    {
+        storedName = kind switch
+                         {
+                             SetupEntityKinds.Output => setup.FindOutput(id)?.Name,
+                             SetupEntityKinds.Patch  => setup.FindPatch(id, out _)?.Name,
+                             _                       => null,
+                         } ?? string.Empty;
+        return kind is SetupEntityKinds.Output or SetupEntityKinds.Patch;
     }
 
     private static void DrawSurfaceCard(Setup setup, Guid id)
@@ -372,7 +398,7 @@ internal static class SetupParameterView
 
             var mode = mapping.Mode;
             ImGui.PushID(mapping.OutputId.GetHashCode());
-            if (FormInputs.AddSegmentedButtonWithLabel(ref mode, $"On {output.Name}",
+            if (FormInputs.AddSegmentedButtonWithLabel(ref mode, $"On {SetupLabels.OutputLabel(output)}",
                                                        "Fill takes the whole canvas and stays there however the surface is resized. "
                                                        + "Corner pin is aimed: you drag its corners onto the wall, and reshaping the surface on the wall moves it along."))
             {
@@ -550,9 +576,19 @@ internal static class SetupParameterView
         // The canvas every route onto this output is measured in, and what its content is asked to render at:
         // an unset resolution upstream (a RenderTarget at 0×0) resolves to this, so it is the one place the
         // pixel size of a projector or a stream is decided.
-        Span<int> canvas = [output.CanvasResolution.Width, output.CanvasResolution.Height];
+        var isDefaultResolution = output.FollowsPlug;
+        Span<int> canvas = [output.ResolvedResolution.Width, output.ResolvedResolution.Height];
+        if (isDefaultResolution)
+            ImGui.PushStyleVar(ImGuiStyleVar.Alpha, DefaultValueAlpha * ImGui.GetStyle().Alpha);
+
         var canvasState = DrawIntsRow("Resolution (px)", canvas,
-                                      "The output's pixel size, or 0 to take it from whatever is plugged in. Content rendering at 'Fill' follows it, and a stream sends at it.");
+                                      "The output's pixel size. It follows whatever is plugged in until set here. Content rendering at 'Fill' follows it, and a stream sends at it.");
+        if (isDefaultResolution)
+            ImGui.PopStyleVar();
+
+        if (FormInputs.AppendResetButton(!isDefaultResolution, "resetResolution"))
+            SetupUndo.RunUndoable("Reset resolution", setup, () => output.CanvasResolution = default);
+
         BeginFieldUndo(setup, canvasState);
         if ((canvasState & InputEditStateFlags.Modified) != 0)
         {
@@ -565,15 +601,18 @@ internal static class SetupParameterView
 
         var binding = machineConfig.FindBinding(output.Id);
         var boundTo = binding == null ? "unbound" : Plugs.BindingLabel(machineConfig, binding);
-        FormInputs.AddHint(output.FollowsPlug
-                               ? $"Using {boundTo} · {output.ResolvedResolution.Width}×{output.ResolvedResolution.Height}"
-                               : boundTo);
+        FormInputs.AddHint(binding == null ? "Not bound to a display or stream yet."
+                           : output.FollowsPlug ? $"Using {boundTo}"
+                           : $"Shown on {boundTo}");
 
         DrawCardDivider();
         DrawPatchTable(setup, output, Guid.Empty);
         DrawCardDivider();
         DrawReferenceLayoutRows(setup, output);
     }
+
+    /** Matches how FormInputs fades a field that holds its default value. */
+    private const float DefaultValueAlpha = 0.7f;
 
     private static void DrawCardDivider()
     {
@@ -602,7 +641,7 @@ internal static class SetupParameterView
                                                                {
                                                                    image = new ReferenceImage
                                                                                {
-                                                                                   Name = $"{output.Name} map",
+                                                                                   Name = $"{SetupLabels.OutputLabel(output)} map",
                                                                                    Kind = ReferenceImage.Kinds.PixelMap,
                                                                                    FilePath = path,
                                                                                };
@@ -642,14 +681,14 @@ internal static class SetupParameterView
         {
             FormInputs.AddHint("Not loaded yet — it shows once this output is open.");
         }
-        else if (image.Width == output.CanvasResolution.Width && image.Height == output.CanvasResolution.Height)
+        else if (image.Width == output.ResolvedResolution.Width && image.Height == output.ResolvedResolution.Height)
         {
             FormInputs.AddHint($"{image.Width}×{image.Height} px · matches the resolution");
         }
         else
         {
             FormInputs.ApplyIndent();
-            CustomComponents.StylizedText($"{image.Width}×{image.Height} px · resolution is {output.CanvasResolution.Width}×{output.CanvasResolution.Height}",
+            CustomComponents.StylizedText($"{image.Width}×{image.Height} px · resolution is {output.ResolvedResolution.Width}×{output.ResolvedResolution.Height}",
                                           Fonts.FontSmall, UiColors.StatusAttention);
             ImGui.SameLine(0, 6 * T3Ui.UiScaleFactor);
             if (ImGui.SmallButton("Use as Resolution"))
@@ -685,6 +724,8 @@ internal static class SetupParameterView
     /** The section title, the unit switch in the parameter column, and the add button at the list's right end. */
     private static void DrawPatchListHeader(Setup setup, OutputDefinition output, SetupEntitySelection selection, float listScreenX, float listWidth)
     {
+        var padding = PatchHeaderPadding * T3Ui.UiScaleFactor;
+        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + padding);
         ImGui.AlignTextToFramePadding();
         CustomComponents.StylizedText("Patches", Fonts.FontBold, UiColors.TextMuted);
         ImGui.SameLine();
@@ -697,7 +738,7 @@ internal static class SetupParameterView
         }
 
         var addWidth = ImGui.CalcTextSize("Add").X + ImGui.GetStyle().FramePadding.X * 2;
-        ImGui.SameLine(listScreenX + listWidth - addWidth - ImGui.GetWindowPos().X);
+        ImGui.SameLine(listScreenX + listWidth - addWidth - padding - ImGui.GetWindowPos().X);
         if (ImGui.Button("Add"))
             SetupActions.AddPatch(selection, setup, output);
 
@@ -713,7 +754,7 @@ internal static class SetupParameterView
         var gripWidth = FormInputs.ListRowGripWidth;
         var drawList = ImGui.GetWindowDrawList();
 
-        var cellUnit = MathF.Max(listWidth - gripWidth - rowHeight, 1) / (PatchNameColumnUnits + _patchCellX.Length);
+        var cellUnit = MathF.Max(listWidth - gripWidth - rowHeight * PatchRowIconCount, 1) / (PatchNameColumnUnits + _patchCellX.Length);
         var nameWidth = cellUnit * PatchNameColumnUnits;
         for (var cell = 0; cell < _patchCellX.Length; cell++)
         {
@@ -730,16 +771,25 @@ internal static class SetupParameterView
             drawList.AddText(new Vector2(_patchCellX[cell] + PatchCellTextInset * scale, labelY), UiColors.TextMuted, _patchColumnLabels[cell + 1]);
         }
 
+        // The grips read this spacing back for their row stride, so it has to hold for the whole list.
+        ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(ImGui.GetStyle().ItemSpacing.X, MathF.Round(PatchRowGap * scale)));
         ImGui.Dummy(new Vector2(listWidth, ImGui.GetTextLineHeight()));
         ImGui.PopFont();
 
         var canvas = output.CanvasSize;
         var moveFromIndex = -1;
         var moveToIndex = -1;
+
+        // Placed explicitly: a line grows with its tallest item, which would turn the gap into more than the spacing.
+        var rowsTop = MathF.Floor(ImGui.GetCursorScreenPos().Y);
+        var rowStride = rowHeight + ImGui.GetStyle().ItemSpacing.Y;
         for (var index = 0; index < output.Patches.Count; index++)
         {
             var patch = output.Patches[index];
-            ImGui.PushID(index);
+
+            // By patch, not by index: the grip being dragged has to stay active when its row changes places.
+            ImGui.PushID(patch.Id.GetHashCode());
+            ImGui.SetCursorScreenPos(new Vector2(listScreenX, rowsTop + index * rowStride));
             var isCurrent = patch.Id == highlightedPatchId || selection.IsSelected(SetupEntityKinds.Patch, patch.Id);
 
             var rowMin = ImGui.GetCursorScreenPos().Floor();
@@ -770,19 +820,46 @@ internal static class SetupParameterView
             DrawPatchRectCells(setup, output, patch, canvas, rowHeight);
             ImGui.PopStyleColor();
 
-            ImGui.SameLine(rowMax.X - rowHeight - ImGui.GetWindowPos().X);
-            if (CustomComponents.IconButton(Icon.Settings, new Vector2(rowHeight)))
+            // Quarter turns only: anything else isn't a pure reordering of the quad's corners.
+            var iconSize = new Vector2(rowHeight);
+            ImGui.SameLine(rowMax.X - rowHeight * PatchRowIconCount - ImGui.GetWindowPos().X);
+            if (CustomComponents.IconButton(Icon.RotateCounterClockwise, iconSize))
+                SetupUndo.RunUndoable("Rotate patch", setup, () => SetupActions.TurnPatch(output, patch, -1));
+
+            CustomComponents.TooltipForLastItem("Turn a quarter counter-clockwise", PatchTurnTooltipNotes);
+
+            ImGui.SameLine(0, 0);
+            if (CustomComponents.IconButton(Icon.RotateClockwise, iconSize))
+                SetupUndo.RunUndoable("Rotate patch", setup, () => SetupActions.TurnPatch(output, patch, 1));
+
+            CustomComponents.TooltipForLastItem("Turn a quarter clockwise", PatchTurnTooltipNotes);
+
+            ImGui.SameLine(0, 0);
+            if (CustomComponents.IconButton(Icon.Settings2, iconSize))
                 selection.Select(SetupEntityKinds.Patch, patch.Id);
 
             CustomComponents.TooltipForLastItem("Show this patch's settings", "Its content, fit and corners.");
             ImGui.PopID();
         }
 
+        // An ImGui window's extent must not rest on a bare cursor set, so the end of the list is claimed with an item.
+        ImGui.SetCursorScreenPos(new Vector2(listScreenX, rowsTop + output.Patches.Count * rowStride));
+        ImGui.Dummy(Vector2.Zero);
+        ImGui.PopStyleVar();
+
         // Dragging a grip past a neighbour swaps the two: the list is the composite order (later patches draw over
-        // earlier ones), and the ordinal names follow it. One undo step for the whole drag.
+        // earlier ones). One undo step for the whole drag.
         if (moveFromIndex >= 0)
         {
             _patchReorderOldJson ??= setup.ToJsonString();
+
+            // A patch still labelled by its position would change its name under the cursor.
+            foreach (var patch in output.Patches)
+            {
+                if (string.IsNullOrEmpty(patch.Name) && !SetupRelations.IsImplicitPatch(output, patch))
+                    patch.Name = SetupLabels.PatchLabel(output, patch);
+            }
+
             (output.Patches[moveFromIndex], output.Patches[moveToIndex]) = (output.Patches[moveToIndex], output.Patches[moveFromIndex]);
         }
 
@@ -885,6 +962,10 @@ internal static class SetupParameterView
     /** How many value cells wide the name column is. */
     private const float PatchNameColumnUnits = 1.6f;
     private const float PatchCellTextInset = 4f;
+    private const float PatchHeaderPadding = 6f;
+    private const float PatchRowGap = 2f;
+    private const int PatchRowIconCount = 3;
+    private const string PatchTurnTooltipNotes = "Turns the patch around its centre, its shape and its picture together — for a display or LED panel mounted on its side.";
     private static readonly string[] _patchColumnLabels = ["Name", "X", "Y", "Width", "Height", "Rotation"];
     private static readonly float[] _patchCellX = new float[5]; // screen x of the value cells in the list drawn now
     private static float _patchCellWidth;
@@ -899,7 +980,7 @@ internal static class SetupParameterView
     private static void DrawPlugCard(Setup setup, MachineConfig machineConfig, Guid id)
     {
         var boundOutput = Plugs.TryGetBoundOutput(setup, machineConfig, id);
-        var boundLabel = boundOutput == null ? "nothing bound" : $"presenting {boundOutput.Name}";
+        var boundLabel = boundOutput == null ? "nothing bound" : $"presenting {SetupLabels.OutputLabel(boundOutput)}";
 
         if (Plugs.TryGetDisplayIndex(id, out var displayIndex))
         {
@@ -935,7 +1016,7 @@ internal static class SetupParameterView
             resolution[0] = boundOutput.ResolvedResolution.Width;
             resolution[1] = boundOutput.ResolvedResolution.Height;
             var resolutionState = DrawIntsRow("Sends at (px)", resolution,
-                                              $"The canvas of \"{boundOutput.Name}\", the output bound here — changing it resizes that output.");
+                                              $"The canvas of \"{SetupLabels.OutputLabel(boundOutput)}\", the output bound here — changing it resizes that output.");
             BeginFieldUndo(setup, resolutionState);
             if ((resolutionState & InputEditStateFlags.Modified) != 0)
             {
@@ -1111,14 +1192,10 @@ internal static class SetupParameterView
         var slice = setup.FindSlice(patch.SliceId);
         FormInputs.AddHint(slice == null
                                ? "Nothing routed yet — drop a slice or content onto this patch."
-                               : $"Shows {SetupLabels.SliceLabel(setup, slice)} on {output.Name}");
+                               : $"Shows {SetupLabels.SliceLabel(setup, slice)} on {SetupLabels.OutputLabel(output)}");
 
-        // Ahead of the geometry, which a warped quad skips: turning the picture applies to any patch.
-        DrawPatchRotationRow(setup, output, patch);
-        if (DrawPatchScaleRows(setup, output, patch))
-            return;
-
-        if (patch.Quad.Length < 4)
+        DrawPatchScaleRows(setup, output, patch);
+        if (patch.IsFitted || patch.Quad.Length < 4)
             return;
 
         var quad = patch.Quad;
@@ -1126,49 +1203,14 @@ internal static class SetupParameterView
         var isAxisAligned = MathF.Abs(quad[0].Y - quad[1].Y) < aligned && MathF.Abs(quad[2].Y - quad[3].Y) < aligned
                             && MathF.Abs(quad[0].X - quad[3].X) < aligned && MathF.Abs(quad[1].X - quad[2].X) < aligned;
         if (!isAxisAligned)
-        {
-            FormInputs.AddHint("Warped quad — its corners are on the output canvas; these rows move and scale its bounds.");
-        }
-
-        // Stored as ratios of the canvas; shown in whichever unit is selected. The round trip only touches what
-        // was edited, so a field left alone keeps its stored value bit for bit.
-        DrawUnitSwitch();
-        var canvas = output.CanvasSize;
-
-        // Measured as the bounding box, like the table and the label: a corner drag may leave the quad skewed by a
-        // fraction of a pixel, and the three readouts must still agree. Typing here squares it again.
-        CanvasDraw.Bounds(quad, out var quadMin, out var quadMax);
-        Span<float> position = [ToUnit(quadMin.X, canvas.X), ToUnit(quadMin.Y, canvas.Y)];
-        var positionState = DrawRectRow("Position", position, "Top-left corner on the output canvas.");
-        BeginFieldUndo(setup, positionState);
-        if ((positionState & InputEditStateFlags.Modified) != 0)
-        {
-            var delta = new Vector2(FromUnit(position[0], canvas.X), FromUnit(position[1], canvas.Y)) - quadMin;
-            for (var i = 0; i < 4; i++)
-                quad[i] += delta;
-        }
-
-        CommitFieldUndo(setup, "Move patch", positionState);
-
-        var covered = quadMax - quadMin;
-        Span<float> size = [ToUnit(covered.X, canvas.X), ToUnit(covered.Y, canvas.Y)];
-        var sizeState = DrawRectRow("Size", size);
-        BeginFieldUndo(setup, sizeState);
-        if ((sizeState & InputEditStateFlags.Modified) != 0)
-        {
-            var newSize = new Vector2(MathF.Max(FromUnit(size[0], canvas.X), 0.0001f), MathF.Max(FromUnit(size[1], canvas.Y), 0.0001f));
-            ApplyBoundsToQuad(quad, isAxisAligned, quadMin, quadMax, quadMin, newSize);
-        }
-
-        CommitFieldUndo(setup, "Resize patch", sizeState);
+            FormInputs.AddHint("Warped quad — its corners are on the output canvas; its row in the list below moves and scales its bounds.");
     }
 
     /// <summary>
-    /// The scale mode and, for a fitted patch, its aspect pair and scale. Returns true for a fitted patch: its
-    /// place and size are derived from these, so the free Position and Size rows below don't apply to it.
+    /// The scale mode and, for a fitted patch, its aspect pair and scale, from which its place and size derive.
     /// Every change re-fits at once, inside its undo step, so the snapshot holds the quad that is drawn.
     /// </summary>
-    private static bool DrawPatchScaleRows(Setup setup, OutputDefinition output, OutputDefinition.Patch patch)
+    private static void DrawPatchScaleRows(Setup setup, OutputDefinition output, OutputDefinition.Patch patch)
     {
         var mode = patch.ScaleMode;
         if (FormInputs.AddSegmentedButtonWithLabel(ref mode, "Scale mode",
@@ -1184,7 +1226,7 @@ internal static class SetupParameterView
         }
 
         if (!patch.IsFitted)
-            return false;
+            return;
 
         Span<float> aspect = [patch.AspectRatio.X, patch.AspectRatio.Y];
         var aspectState = DrawFloatsRow("Aspect ratio", aspect,
@@ -1216,8 +1258,6 @@ internal static class SetupParameterView
             var pixels = (patch.Quad[2] - patch.Quad[0]) * output.CanvasSize;
             FormInputs.AddHint(FittedSizeLabel(pixels));
         }
-
-        return true;
     }
 
     /// <summary>The fitted size line, rebuilt only when the pixel size changes: the card draws every frame.</summary>
@@ -1235,30 +1275,6 @@ internal static class SetupParameterView
         return _fittedLabel;
     }
 
-    /// <summary>
-    /// The picture's turn inside the patch, as the same angle field every rotation input in TiXL uses — its
-    /// rotate buttons included, stepping a quarter turn here. Shown in degrees, positive counter-clockwise as
-    /// everywhere else; stored as clockwise quarter turns, because only a quarter turn is a pure reordering of
-    /// the quad's corners. A dragged or typed angle snaps to the nearest one.
-    /// </summary>
-    private static void DrawPatchRotationRow(Setup setup, OutputDefinition output, OutputDefinition.Patch patch)
-    {
-        const string tooltip = "Turns the patch around its centre in quarter turns, its shape and its picture together — for a display or LED panel mounted on its side.";
-        _rotationScratch[0] = DegreesOfTurns(patch.QuarterTurns);
-
-        var size = BeginValuesRow("Rotation", tooltip, 1, false, 0, out _);
-        var rightPadding = ImGui.GetContentRegionAvail().X - size.X - InputArea.ValueEditRightMargin;
-        var state = VectorValueEdit.Draw(_rotationScratch, -180, 180, 1f, clampMin: false, clampMax: false,
-                                         rightPadding, "{0:0}°", rotationStep: 90f);
-        EndValuesRow(tooltip, false);
-
-        BeginFieldUndo(setup, state);
-        if ((state & InputEditStateFlags.Modified) != 0)
-            SetupActions.TurnPatch(output, patch, TurnsOfDegrees(_rotationScratch[0]) - patch.QuarterTurns);
-
-        CommitFieldUndo(setup, "Rotate patch", state);
-    }
-
     /// <summary>Clockwise quarter turns → the counter-clockwise angle the field shows, folded into -90..180.</summary>
     private static float DegreesOfTurns(int quarterTurns) => OutputDefinition.Patch.NormalizeTurns(quarterTurns) switch
                                                                  {
@@ -1274,8 +1290,6 @@ internal static class SetupParameterView
         var counterClockwiseQuarters = (int)MathF.Round(degrees / 90f);
         return OutputDefinition.Patch.NormalizeTurns(-counterClockwiseQuarters);
     }
-
-    private static readonly float[] _rotationScratch = new float[1];
 
     private const float MinAspectComponent = 0.01f;
     private static int _fittedLabelWidth = -1;
@@ -1603,7 +1617,7 @@ internal static class SetupParameterView
             for (var i = 0; i < setup.Outputs.Count; i++)
             {
                 var output = setup.Outputs[i];
-                if (ImGui.Selectable($"{output.Name}##o{i}", output.Id == current))
+                if (ImGui.Selectable($"{SetupLabels.OutputLabel(output)}##o{i}", output.Id == current))
                 {
                     picked = output.Id;
                     changed = true;
@@ -1633,7 +1647,7 @@ internal static class SetupParameterView
 
         var output = setup.FindOutput(id);
         if (output != null)
-            return output.Name;
+            return SetupLabels.OutputLabel(output);
 
         return "(missing)";
     }

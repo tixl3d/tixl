@@ -235,7 +235,6 @@ internal static class SetupRouting
                                                    {
                                                        created = new OutputDefinition
                                                                      {
-                                                                         Name = Plugs.PlugName(machineConfig, plugId),
                                                                          Kind = OutputDefinition.Kinds.Display,
                                                                      };
                                                        setup.Outputs.Add(created);

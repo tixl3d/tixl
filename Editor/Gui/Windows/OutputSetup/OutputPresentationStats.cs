@@ -33,7 +33,7 @@ internal static class OutputPresentationStats
                            : durationMs;
 
         _smoothedMsByOutput[output.Id] = smoothed;
-        _entries.Add(new Entry(output.Id, output.Name, smoothed));
+        _entries.Add(new Entry(output.Id, SetupLabels.OutputLabel(output), smoothed));
         TotalMs += smoothed;
     }
 

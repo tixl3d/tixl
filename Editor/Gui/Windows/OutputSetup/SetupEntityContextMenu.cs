@@ -187,7 +187,7 @@ internal static class SetupEntityContextMenu
                         continue;
 
                     var boundOutput = setup.FindOutput(binding.OutputId);
-                    if (boundOutput != null && CustomComponents.DrawMenuItem(15, $"Unbind {boundOutput.Name}"))
+                    if (boundOutput != null && CustomComponents.DrawMenuItem(15, $"Unbind {SetupLabels.OutputLabel(boundOutput)}"))
                     {
                         Plugs.UnbindOutput(plugMachineConfig, boundOutput.Id);
                         break;
@@ -312,7 +312,7 @@ internal static class SetupEntityContextMenu
                             CustomComponents.DrawMenuGroupLabel("Pin to Patch");
 
                         var patchId = patch.Id;
-                        if (CustomComponents.DrawMenuItem(300 + patchOrdinal, $"{SetupLabels.PatchLabel(patchOutput, patch)} on {patchOutput.Name}"))
+                        if (CustomComponents.DrawMenuItem(300 + patchOrdinal, $"{SetupLabels.PatchLabel(patchOutput, patch)} on {SetupLabels.OutputLabel(patchOutput)}"))
                             SetupRouting.ApplyDrop(setup, SetupEntityKinds.Surface, surface.Id, SetupEntityKinds.Patch, patchId);
 
                         patchOrdinal++;
