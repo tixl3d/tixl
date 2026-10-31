@@ -3,7 +3,7 @@
 Scope extension decided 2026-07-29: the Setup grows from "projection output routing" toward a **venue
 description** — stage lighting fixtures (moving heads, LED strips, lasers), 3D models of the physical
 stage/room, and 3D-anchored reference points linked to reference images. **Status: direction-setting
-notes**, sequenced after the [`ui-restructuring-plan.md`](output-setup/ui-restructuring-plan.md)
+notes**, sequenced after the [`ui-restructuring-plan.md`](archive/output-setup/ui-restructuring-plan.md)
 phases; one model decision (§5, reference points) affects
 [`camera-calibration.md`](output-setup/camera-calibration.md) and should be settled before that plan
 builds annotations.

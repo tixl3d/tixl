@@ -9,7 +9,7 @@ active clips through the graph, so it drives nested compositions and **exported*
 Remaining: the Phase 4 soundtrack migration, and per-type drop-duration probes (only audio probed today).
 See *Status* under each phase below.
 Re-implements timeline **layer** audio clips as `TimeClip`-backed
-operators, mirroring [`VideoClip`/`VideoClipPlayer`](Plan_VideoClipPlayer.md). Replaces the bespoke
+operators, mirroring [`VideoClip`/`VideoClipPlayer`](../Plan_VideoClipPlayer.md). Replaces the bespoke
 `TimelineAudioClip` layer-clip system (data in `CompositionSettings.Playback.AudioClips`, hand-rolled
 selection / drag / trim / snap / delete / split / inspector) so audio clips become "just another op-clip" and
 inherit the entire shared interaction model for free.
@@ -72,7 +72,7 @@ Three existing mechanisms make the new path cheap:
   per-channel overlays into a `DataClip` op-clip body; `AudioClipBodyRenderer` mirrors it, reusing the existing
   waveform cache (`Editor/Gui/Audio/AudioImageGenerator.cs` + the `TryGetWaveformSrv` path that
   `TimelineAudioClipItem` uses today). `[AudioClip]` implements the `IContentTimeClip` marker
-  ([`TimeClipSlot.cs:41`](../../Core/Operator/Slots/TimeClipSlot.cs)) — same as `VideoClip` — to signal "renders
+  ([`TimeClipSlot.cs:41`](../../../Core/Operator/Slots/TimeClipSlot.cs)) — same as `VideoClip` — to signal "renders
   its own body."
 - **Sibling scan has a precedent.** `GetAllSpatialAudioPlayers` and `_ProcessVideoClips` both walk
   `Parent.Children` for a marker interface — exactly the `AutoCollect` / `AutoPlay` scan.
@@ -82,7 +82,7 @@ Three existing mechanisms make the new path cheap:
 Video is **pulled** — a texture per frame, composited by the player into a render target. Audio is
 **scheduled** — BASS plays it continuously on its own thread; the per-frame job is only to tell the engine
 "this clip, at this source offset, is active now" via `AudioEngine.UseSoundtrackClip(handle, time)`
-([`AudioEngine.cs:149`](../../Core/Audio/AudioEngine.cs)), with `AudioEngine.CompleteFrame` advancing it. So:
+([`AudioEngine.cs:149`](../../../Core/Audio/AudioEngine.cs)), with `AudioEngine.CompleteFrame` advancing it. So:
 
 - Neither the registrar nor `[AudioClipPlayer]` *composites* anything — they **register** active clips. There's
   no render target, no `DrawScreenQuad`, no `RenderTargetReference` indirection. Much simpler than the video helper.
@@ -161,22 +161,22 @@ Update(context):
 
 ## Current state — what exists to reuse / delete
 
-- [`Core/Audio/AudioEngine.cs`](../../Core/Audio/AudioEngine.cs) — `UseSoundtrackClip` (149) / `CompleteFrame`
+- [`Core/Audio/AudioEngine.cs`](../../../Core/Audio/AudioEngine.cs) — `UseSoundtrackClip` (149) / `CompleteFrame`
   (174); handle-keyed `SoundtrackClipStreams`. Registration target, **unchanged**.
-- [`Core/Audio/TimelineAudioClip.cs`](../../Core/Audio/TimelineAudioClip.cs) — the data model + `AudioClipResourceHandle`.
+- [`Core/Audio/TimelineAudioClip.cs`](../../../Core/Audio/TimelineAudioClip.cs) — the data model + `AudioClipResourceHandle`.
   `AudioClipResourceHandle` is **reused** by `[AudioClip]`; the `TimelineAudioClip` POCO stays only for the main
   soundtrack until Phase 4.
-- [`Editor/Gui/Interaction/Timing/PlaybackUtils.cs:25-37`](../../Editor/Gui/Interaction/Timing/PlaybackUtils.cs) —
+- [`Editor/Gui/Interaction/Timing/PlaybackUtils.cs:25-37`](../../../Editor/Gui/Interaction/Timing/PlaybackUtils.cs) —
   the loop that registers `CompositionSettings.Playback.AudioClips`. Soundtrack half stays; layer half → registrar.
-- [`Editor/Gui/Windows/TimeLine/TimeClips/DataClipBodyRenderer.cs`](../../Editor/Gui/Windows/TimeLine/TimeClips/DataClipBodyRenderer.cs)
+- [`Editor/Gui/Windows/TimeLine/TimeClips/DataClipBodyRenderer.cs`](../../../Editor/Gui/Windows/TimeLine/TimeClips/DataClipBodyRenderer.cs)
   — body-overlay template for `AudioClipBodyRenderer`.
-- [`Editor/Gui/Audio/AudioImageGenerator.cs`](../../Editor/Gui/Audio/AudioImageGenerator.cs) + the
+- [`Editor/Gui/Audio/AudioImageGenerator.cs`](../../../Editor/Gui/Audio/AudioImageGenerator.cs) + the
   `TryGetWaveformSrv` path in `TimelineAudioClipItem` — waveform image + cache, reused by the body renderer.
 - [`Operators/Lib/io/video/VideoClip.cs`](../../Operators/Lib/io/video/VideoClip.cs) /
   [`_ProcessVideoClips.cs`](../../Operators/Lib/io/video/_ProcessVideoClips.cs) — op + provider + AutoCollect template.
 - [`Operators/Lib/io/audio/_/GetAllSpatialAudioPlayers.cs`](../../Operators/Lib/io/audio/_/GetAllSpatialAudioPlayers.cs) —
   sibling-scan-by-marker template.
-- [`Editor/Gui/Windows/TimeLine/RecordingSession.cs`](../../Editor/Gui/Windows/TimeLine/RecordingSession.cs) —
+- [`Editor/Gui/Windows/TimeLine/RecordingSession.cs`](../../../Editor/Gui/Windows/TimeLine/RecordingSession.cs) —
   already creates a `LoadDataClip` **op** for data; Phase 3 makes it create an `[AudioClip]` op for audio (symmetry).
 - The **delete list** in *Why this is mostly deletion* above.
 
@@ -214,12 +214,12 @@ runtime-verified, and the old system is NOT yet deleted (deliberate — see belo
   **`DisplayAs` was deliberately dropped** from v1 — per the VideoClipPlayer lesson "don't ship a dead input
   before its consumer exists"; it's additive and lands with the Phase-4 soundtrack migration.
 - **Core contract** (justified Core additions, mirroring `ITimeClipProvider`):
-  [`Core/Audio/IAudioClipProvider.cs`](../../Core/Audio/IAudioClipProvider.cs) +
-  [`Core/Audio/AudioClipCollector.cs`](../../Core/Audio/AudioClipCollector.cs) (the AutoPlay registrar — scans
+  [`Core/Audio/IAudioClipProvider.cs`](../../../Core/Audio/IAudioClipProvider.cs) +
+  [`Core/Audio/AudioClipCollector.cs`](../../../Core/Audio/AudioClipCollector.cs) (the AutoPlay registrar — scans
   `composition.Children` for `IAudioClipProvider`+AutoPlay, registers active ones via `UseSoundtrackClip`).
 - **Registrar wired** into `PlaybackUtils.UpdatePlaybackAndSyncing` (runs every frame, unconditional of
   AudioSource, coexists with the `CompositionSettings` loop).
-- **Waveform body** ([`AudioClipBodyRenderer.cs`](../../Editor/Gui/Windows/TimeLine/TimeClips/AudioClipBodyRenderer.cs))
+- **Waveform body** ([`AudioClipBodyRenderer.cs`](../../../Editor/Gui/Windows/TimeLine/TimeClips/AudioClipBodyRenderer.cs))
   hooked into `TimeClipItem` next to `DataClipBodyRenderer`; reuses `AudioImageFactory` + the SRV cache. v1 is a
   full-image stretch (no source-window UV crop) and no mute-fade yet.
 - **Deletion sweep — DONE (2026-06-09).** Removed `AudioClipInteractions`, `TimelineAudioClipItem`,

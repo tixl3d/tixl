@@ -9,7 +9,7 @@
 - `.agentic/DEBUG_PROTOCOL.md` -- TCP debug bridge for driving the editor (graphs, params, screenshots, visual tests)
 - `.agentic/BISECT_PROTOCOL.md` -- bisecting runtime regressions across editor versions (roles, per-commit loop, injected measure probe, pitfalls)
 - `.agentic/Reviews/FEATURE_REVIEW.md` -- feature review procedure (`/review-tixl-feature` is a stub pointing here)
-- `.agentic/Plans/` -- implementation plans for upcoming work (automatic tests, undo/redo coverage, timeline refactoring)
+- `.agentic/Plans/` -- implementation plans for upcoming work (automatic tests, undo/redo coverage)
 - `.tests-manual/` -- manual test sets (step-by-step walkthroughs for humans). See [`.tests-manual/README.md`](../.tests-manual/README.md) for format and process.
 
 ## Git Rules

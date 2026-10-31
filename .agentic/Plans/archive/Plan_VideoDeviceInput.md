@@ -38,8 +38,8 @@ It's caught on the worker thread (the op shows an error status); the editor does
 Native-DLL resolution of `OpenCvSharpExtern.dll` inside TiXL's custom `AssemblyLoadContext`. The DLL
 ships **only** under `runtimes/win-x64/native/`, but TiXL's `LoadUnmanagedDll` resolves
 operator-package natives **flat** from `MainDirectory`
-([TixlAssemblyLoadContext.cs:465-509](../../Core/Compilation/TixlAssemblyLoadContext.cs)); the
-`NativeDllResolver` ([:442-461](../../Core/Compilation/TixlAssemblyLoadContext.cs)) tries
+([TixlAssemblyLoadContext.cs:465-509](../../../Core/Compilation/TixlAssemblyLoadContext.cs)); the
+`NativeDllResolver` ([:442-461](../../../Core/Compilation/TixlAssemblyLoadContext.cs)) tries
 `NativeLibrary.TryLoad(name, assembly)` then a Root-assembly fallback. If none of those locate
 `runtimes/win-x64/native/OpenCvSharpExtern.dll`, the P/Invoke fails → `DllNotFoundException` →
 `TypeInitializationException`.

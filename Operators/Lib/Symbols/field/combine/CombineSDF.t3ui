@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "82270977-07b5-4d86-8544-5aebc638d46c"/*CombineSDF*/,
-  "Description": "Combines two or more connected SDFs with the selected boolean or blend method.\n\nThe fields are combined in the order they are connected. Colors defined with [SetSDFMaterial] are blended along.\n\nSee also: [StairCombineSDF], [BlendSDFWithSDF]",
+  "Description": "Combines two or more connected SDFs with the selected boolean or blend method.\n\nThe fields are combined in the order they are connected. Colors defined with [SetSDFMaterial] are blended along.\n\nWhen bypassed, only the first connected SDF is passed through.\n\nSee also: [StairCombineSDF], [BlendSDFWithSDF]",
   "SymbolTags": "1",
   "InputUis": [
     {

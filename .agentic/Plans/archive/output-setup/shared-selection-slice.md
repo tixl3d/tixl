@@ -1,6 +1,6 @@
 # Slice: Shared selection + per-window pinning (drafted 2026-08-31 · implemented 2026-08-31, awaiting user testing)
 
-Implements the 2026-08-29 scope decision ([`selection.md`](selection.md) §Selection scope,
+Implements the 2026-08-29 scope decision ([`selection.md`](../../output-setup/selection.md) §Selection scope,
 [`ui-restructuring-plan.md`](ui-restructuring-plan.md) §A.1): **one `SetupEntitySelection` shared
 across all output windows**, with each window carrying only a **pin** that freezes what it displays.
 First slice of the A→B→C pivot — small, self-contained, unblocks Phase A (the Parameter window will

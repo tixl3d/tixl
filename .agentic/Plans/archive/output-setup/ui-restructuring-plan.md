@@ -72,7 +72,7 @@ entity's outliner representation, never the model object — see Representations
 
 Supersedes the per-window model with an `ActiveEntitySelection` last-focused-wins indirection:
 selection is now **one shared `SetupEntitySelection` across all output windows** — full decision and
-consequences in [`selection.md`](selection.md) §Selection scope. The Parameter window reads it
+consequences in [`selection.md`](../../output-setup/selection.md) §Selection scope. The Parameter window reads it
 directly; there is no "which window feeds me" rule to implement.
 
 - What per-window selection actually provided — *each window deciding what it displays* — becomes an
@@ -200,7 +200,7 @@ Fixed columns with persistent muted headers + per-column `+` menus (reuse the ex
   single-machine setups show one implicit **Local** group. The column is an **inventory of available
   plugs** (unused ones listed dimmed), not a routing summary — edges show which are occupied. This
   resolves the Output-vs-binding ambiguity and is the outliner's hook for future render clients (see
-  [`multi-machine.md`](multi-machine.md) §4). Truly unbound outputs get a distinct edge-stub +
+  [`multi-machine.md`](../../output-setup/multi-machine.md) §4). Truly unbound outputs get a distinct edge-stub +
   `StatusAttention`; outputs claimed by *other* machines (later) render faded with a machine tag
   instead. This closes the data-model §2.7 UI gap.
 - **"Keep the entity, kill its visibility"** (data-model §2.5): outputs are auto-created when content
@@ -298,7 +298,7 @@ entity kinds live in, with the current views becoming *focus modes* of that scen
   (`canvas-interaction.md` §Edge dragging).
 - **Axes & anchors (2026-08-29):** board/stage space is **meters, Y-up, floor at y = 0**; anchors are
   **signed centered** (−1..1, center `(0,0)`, bottom-center `(0,−1)`). Full conventions table:
-  [`data-model.md`](data-model.md) §5.
+  [`data-model.md`](../../output-setup/data-model.md) §5.
 - Live thumbnails on cards ride the existing once-per-frame sink invalidation guard — no double
   content evaluation.
 - **Resolution badges follow the `0,0`-auto convention** (data-model §2.5): auto shows the resolved

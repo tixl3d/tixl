@@ -1,7 +1,7 @@
 # Variation picker
 
 A reusable variation/preset/snapshot selector that replaces the plain combo dropdown in the
-snapshot control view ([`Plan_SnapshotControlView.md`](Plan_SnapshotControlView.md)) with a richer
+snapshot control view ([`Plan_SnapshotControlView.md`](archive/Plan_SnapshotControlView.md)) with a richer
 custom widget: searchable list with thumbnails and per-row activation faders, plus an embedded
 canvas mode. Built generic over a pool so the same widget can later sit next to the instance
 title as a **preset** selector.

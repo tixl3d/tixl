@@ -3,7 +3,7 @@
 Implements GitHub issue **#1037 "Improve annotation interaction"**: rename Annotations to **Sections**, give them an explicit membership model (`sectionId` on graph items), and improve resize/expand/visibility UX for large graphs.
 
 Consumers of the new section tree beyond the graph itself:
-- [`Plan_SnapshotControlView.md`](Plan_SnapshotControlView.md) Phase C — grouping controlled ops by section.
+- [`Plan_SnapshotControlView.md`](archive/Plan_SnapshotControlView.md) Phase C — grouping controlled ops by section.
 - Timeline dope-sheet grouping/sorting of animated parameters (upcoming, per issue).
 - Potential graph navigation (breadcrumbs / center-on-section).
 

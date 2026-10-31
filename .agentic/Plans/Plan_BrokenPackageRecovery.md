@@ -27,7 +27,7 @@ Per-project incremental backups already live at `<projectFolder>/.temp/Backup/` 
 **2026-04-27** — NU1100 detection added: `Compiler.ExplainBuildFailure(string?)` ([Compiler.cs](Editor/Compilation/Compiler.cs)) recognises the missing-reference-pack error and returns a "install the matching .NET SDK / change the TFM" hint. Wired into [NewProjectDialog.cs](Editor/Gui/Graph/Dialogs/NewProjectDialog.cs) (replaces the "should never happen" dialog when the cause is known) and into the startup recompile log in [ProjectSetup.Startup.cs](Editor/Compilation/ProjectSetup.Startup.cs).
 
 **2026-07-07** — Phase 2 step 1 landed (de-risked slice, no startup-lifecycle changes). See also
-[Plan_PreUpgradeBackup](Plan_PreUpgradeBackup.md) for the pinned-backup primitive this builds on.
+[Plan_PreUpgradeBackup](archive/Plan_PreUpgradeBackup.md) for the pinned-backup primitive this builds on.
 - `AutoBackup.EnumerateBackupsFor(projectFolder)` → `IReadOnlyList<BackupEntry>` (index, timestamp,
   path, size, isPinned), newest first ([AutoBackup.cs](Editor/Gui/AutoBackup/AutoBackup.cs)).
 - `AutoBackup.RestoreFromArchive(projectFolder, zipPath)` extracted public from the private

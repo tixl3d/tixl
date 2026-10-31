@@ -6,13 +6,13 @@ When connecting a new display or projector, if have to stop presenting and repre
 
 ## Next major steps
 
-**1. Finish the canvas toolkit first: crop → sub-surfaces → duplicate → snap** — *landed (2026-09-09): edge crop, regions, Ctrl+D, snapping; synchronized crop, Alt pan and copy-on-write slice clone (see refactoring-plan progress). Open: Alt-drag duplicate, the provisional Ctrl parallelogram.*
+**1. Finish the canvas toolkit first: crop → sub-surfaces → duplicate → snap** — *landed (2026-09-09): edge crop, regions, Ctrl+D, snapping; synchronized crop, Alt pan and copy-on-write slice clone and later Alt-drag duplicate (see the archived refactoring-plan progress). Open: the provisional Ctrl parallelogram.*
 
 This is the biggest gap between what exists and the workflow *you already wrote*. Steps 10–14 of your straighten use case (crop the extent, add sub-regions, duplicate, snap) are all still missing, and the slice we just landed stops right where they'd begin.
 
 More importantly it's the **substrate everything else reuses**: annotation-line handles, slice rects, mask outlines and warp lattice points are all draggable canvas points with snapping. Building measurement or masking first means building them on an unfinished editing layer, then reworking. `CanvasPointHandle`/`CornerPinHandles` already prove the pattern — extend it once, benefit four times.
 
-**2. Slices — and note they now have an obvious home** — *landed (2026-09-09): the source space with rect editing, snapping, Match target aspect, numeric px editing in the Parameter window; draw-to-cut a new slice; slices and their consumers light each other on hover and every slice names what shows it. Open: rotation (stored, not edited or rendered), "Reset to full source", marking shared slices.*
+**2. Slices — and note they now have an obvious home** — *landed (2026-09-09): numeric px editing and Match target aspect in the Parameter window; slices and their consumers light each other on hover and every slice names what shows it. The source space and draw-to-cut were built, then removed on 2026-09-09. Open: rotation (stored, not edited or rendered), "Reset to full source", marking shared slices.*
 
 Worth calling out a synergy from what we just built: **the Content end of the morph is exactly the canvas where slice editing belongs.** You straighten onto a surface, keep pushing to Content, and you're looking at the source with the surface's crop — the natural place to drag a slice rect. `SendToOutput.SourceRect` already exists as a `Vector4` UV, so this is largely UI, not new plumbing. Sub-surfaces and slices are the two halves of "split one render across many targets," so they pair naturally right after (1).
 
@@ -30,13 +30,8 @@ Both are already sketched in the data-model plan as `OutputMapping` growth (`War
 
 ### General
 
-- Add a **point annotation** kind next to line annotations (position + label, string-discriminated,
-  same `CanvasPointHandle` + undo skeleton as line endpoints). Independently useful for manual survey
-  points/measurement anchors now; the enabler for camera-assisted calibration later (see
-  `camera-calibration.md` §4.1).
 - Regression: selection a [SendToOutput] op no longer selects the item
 - Selecting an operator should open the settings side panel
-- probably replace / retire Screen manager
 - Implement narrow Vec2 to support optional linked icon toggle
 
 
@@ -50,13 +45,6 @@ Both are already sketched in the data-model plan as `OutputMapping` growth (`War
   write, no extra 16-bit intermediate buffers or copy passes. The parameters (working space, output transfer
   function, tone-map curve/exposure) would become **project settings**, which is where they belong anyway;
   per-output overrides can come later. Keep the pass's constant buffer growable for this.
-
-- **More than one display per machine (2026-09-09):** `OutputManager.UpdatePresentation` drives the single
-  `ProgramWindows.Viewer` window and takes only the *first* display-bound output; every further one is
-  silently ignored. Streams already run several at once, so this is purely a presentation limit. Turning the
-  viewer into a small list keyed by display index lifts it, and mirroring the same content to two screens
-  falls out for free: the content renders once per frame (later pulls hit the cache) and each extra output
-  only costs its composite blit. Spanning one wide viewer across both screens is the workaround today.
 
 - **Walls bound to patches by name only (2026-10-21):** in the pixel-map workflow, walls are never connected to
   their patches; `StageGeometry.TryFindPatchQuadByName` falls back to a patch whose name matches the surface's
@@ -73,7 +61,6 @@ Both are already sketched in the data-model plan as `OutputMapping` growth (`War
      mapping would remember its source patch id (a Core field) — wait for a real need.
   Once the fallback goes, `FloorPlanSync.IsInUse` no longer needs its "a patch carries the surface's name" rule.
 
-- Setup menu should provide options to rename setup
 - In straight mode selecting different surfaces should have a view transition 
 - Setup menu should have a hover indication (e.g. change font color ForeGroundFull)
 - Unused surfaces (without any Content being routed into should be shown as unused)
@@ -92,6 +79,34 @@ Both are already sketched in the data-model plan as `OutputMapping` growth (`War
 - Fix gizmo initialization with output setup rendering and selecting `ITransformGizmoProvider` in graph
 
 
+
+## Carried Over from the Finished Execution Plans (2026-10-31)
+
+Not found in the code when these plans were archived (grep only; nothing was run). Details are in the archived
+`ui-restructuring-plan.md` and `refactoring-plan.md`.
+
+**Flow Outliner and Board**
+- Merged output/binding pill (only `IsImplicitPatch` folding exists)
+- Stubs for scrolled-out edges; mapping-stack badges
+- Auto/lock resolution badges
+- Surface size presets
+- "+ projector" and "split for machines" helpers
+- `Machine /` grouping (labels read `Local / Display N`, with no machine groups)
+- Stage view and view cube
+- Modifier stack
+- Check whether `TryDrawEditingView` can still collapse: the method and a reference-canvas dispatch remain in
+  `OutputSetupModeView.cs`
+
+Ghost frame and grid snapping were skipped by decision, so they are not listed.
+
+**Canvas and code debt**
+- Bring patch corners, slice corners and annotation endpoints into the sub-element selection plane (only surface
+  corners reach it today)
+- Replace the ambient `CustomComponents.MenuItemsDisabled` and `MenuItemsFlushLeft` globals
+- Decide whether Shift constrains to H/V/45 (it currently suspends snapping)
+- Check `SymbolChildId` double-instancing ambiguity in the new code
+- Key setups by id, not name (`SetupFiles.FilePathFor` builds the path from the name)
+- Decide whether `BoardPlacement` should leave Core
 
 ## More use-cases for surfaces
 

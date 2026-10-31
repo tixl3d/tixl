@@ -295,7 +295,7 @@ with an explanatory comment) — the row-callback API design made compliance imp
   (`OutputSetupHandling.EntitySelection`); windows follow it and carry only a per-window **entity pin**
   (breadcrumb menu + toolbar indicator, persisted via `OutputWindowState.PinnedEntityKind/Id`, stale pins
   self-revert). Also fixed in passing: the breadcrumb's `drawExtraMenuItems` callback was never invoked.
-  User-tested. Slice doc: `shared-selection-slice.md`.
+  User-tested. Slice doc: `../archive/output-setup/shared-selection-slice.md`.
 - **2026-09-04 (Phase A — properties → Parameter window):** new `SetupParameterView` draws the selected
   entity's card in the Parameter window; arbitration by recency via `GlobalSelectionHandling` version counters
   (`NodeSelection.LastChangeStamp` vs `SetupEntitySelection.LastChangeStamp` — most recent pick wins; a
@@ -347,7 +347,7 @@ with an explanatory comment) — the row-callback API design made compliance imp
   `SurfaceGeometry` rewritten around `LocalRect`/`LocalBounds`/`ApplyBounds`/`ChildBounds`: a crop re-derives
   the anchor so the origin never moves, which deleted the annotation counter-move and its undo snapshot.
   Region creation, snapping, edge drags, the raster origin and the Straight framing (`AnchoredRect`) all
-  converted; inventory + rationale in `anchor-yup-pass.md`. No legacy conversion (internal preview).
+  converted; inventory + rationale in `../archive/output-setup/anchor-yup-pass.md`. No legacy conversion (internal preview).
   Not yet user-tested.
 - **2026-09-05 (Patches, slice 1):** `OutputDefinition.Patches[]` replaces the single direct `SliceId`
   (data-model §2.5). Model + JSON + round-trip test; `Setup.FindPatch`; renderer draws patches under

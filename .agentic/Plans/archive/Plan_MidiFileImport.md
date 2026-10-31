@@ -6,9 +6,9 @@ Size: M   Milestone: —
 **Status: complete (2026-07-04)** — all phases implemented and verified in-editor, including a
 `WasHit` output on both samplers (event-start edge detection; added after testing showed
 same-velocity events are invisible in the sampled value). Help page:
-[MidiFileImport.md](../../.help/docs/using/MidiFileImport.md). Supersedes the earlier
+[MidiFileImport.md](../../../.help/docs/using/MidiFileImport.md). Supersedes the earlier
 `Plan_LoadMidiFilesAsDataClips.md` (archived); its open questions are settled by the decisions below.
-Manual test set: [midi-file-import.md](../../.tests-manual/midi-file-import.md).
+Manual test set: [midi-file-import.md](../../../.tests-manual/midi-file-import.md).
 
 ## Problem
 There is no way to bring a standard MIDI file (`.mid` / `.midi`) into TiXL. Live MIDI can be recorded

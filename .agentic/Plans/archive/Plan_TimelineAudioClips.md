@@ -52,13 +52,13 @@ JSON reader order: prefer new field names; fall back to old (`FilePath`, `StartT
 ## Current state — what exists
 
 - [`Core/Audio/SoundtrackClipDefinition.cs`](../../Core/Audio/SoundtrackClipDefinition.cs) — to be renamed and restructured.
-- [`Core/Settings/CompositionSettings.cs:259-269`](../../Core/Settings/CompositionSettings.cs) — already has BPM-from-first-soundtrack auto-copy logic; one-shot migration target.
-- [`Core/Audio/AudioEngine.cs:252`](../../Core/Audio/AudioEngine.cs#L252) — the `handledMainSoundtrack` privilege guard that needs splitting (playback vs. FFT/export).
-- [`Core/Audio/SoundtrackClipStream.cs:157`](../../Core/Audio/SoundtrackClipStream.cs#L157) — `UpdateSoundtrackTime` does bars-math today; needs rewriting for native-rate playback driven by `SourceOffsetSecs`.
-- [`Editor/Gui/Windows/TimeLine/TimeLineImage.cs`](../../Editor/Gui/Windows/TimeLine/TimeLineImage.cs) — main-soundtrack background-waveform renderer; stays as-is, only the "which clip" lookup changes.
+- [`Core/Settings/CompositionSettings.cs:259-269`](../../../Core/Settings/CompositionSettings.cs) — already has BPM-from-first-soundtrack auto-copy logic; one-shot migration target.
+- [`Core/Audio/AudioEngine.cs:252`](../../../Core/Audio/AudioEngine.cs#L252) — the `handledMainSoundtrack` privilege guard that needs splitting (playback vs. FFT/export).
+- [`Core/Audio/SoundtrackClipStream.cs:157`](../../../Core/Audio/SoundtrackClipStream.cs#L157) — `UpdateSoundtrackTime` does bars-math today; needs rewriting for native-rate playback driven by `SourceOffsetSecs`.
+- [`Editor/Gui/Windows/TimeLine/TimeLineImage.cs`](../../../Editor/Gui/Windows/TimeLine/TimeLineImage.cs) — main-soundtrack background-waveform renderer; stays as-is, only the "which clip" lookup changes.
 - [`Editor/Gui/Windows/TimeLine/TimeClips/LayersArea.cs`](../../Editor/Gui/Windows/TimeLine/TimeClips/LayersArea.cs) — today walks op-backed `CompositionTimeClips`; will gain a parallel walk of `Settings.Playback.AudioClips`.
-- [`Editor/Gui/Windows/TimeLine/TimeClips/TimeClipItem.cs`](../../Editor/Gui/Windows/TimeLine/TimeClips/TimeClipItem.cs) — today bound to a `SymbolChild`; needs a parallel rendering path for non-op clips.
-- [`Editor/Gui/MagGraph/Ui/DropHandling.cs`](../../Editor/Gui/MagGraph/Ui/DropHandling.cs) + [`Editor/Gui/Windows/AssetLib/`](../../Editor/Gui/Windows/AssetLib/) — model for the new LayersArea drop handler; `FileImport.TryImportDroppedFile` already handles asset-copy.
+- [`Editor/Gui/Windows/TimeLine/TimeClips/TimeClipItem.cs`](../../../Editor/Gui/Windows/TimeLine/TimeClips/TimeClipItem.cs) — today bound to a `SymbolChild`; needs a parallel rendering path for non-op clips.
+- [`Editor/Gui/MagGraph/Ui/DropHandling.cs`](../../../Editor/Gui/MagGraph/Ui/DropHandling.cs) + [`Editor/Gui/Windows/AssetLib/`](../../../Editor/Gui/Windows/AssetLib/) — model for the new LayersArea drop handler; `FileImport.TryImportDroppedFile` already handles asset-copy.
 
 ## Phases
 
@@ -163,7 +163,7 @@ Already shipped. Behaviour-preserving rename + back-compat JSON reader (`IsMainS
   - `SourceDurationSecs` (numeric, 0 = until file end)
   - `IsMainSoundtrack` (toggle — exclusive; turning on demotes the previous main)
 - Edits go through commands (`ChangeTimelineAudioClipParameterCommand` or similar) so undo/redo works.
-- Update [`.agentic/SOLUTION_OVERVIEW.md`](../SOLUTION_OVERVIEW.md) drag-drop section: audio files now target `LayersArea`, and the `.wav` registration in `AssetHandling.cs` has been removed.
+- Update [`.agentic/SOLUTION_OVERVIEW.md`](../../SOLUTION_OVERVIEW.md) drag-drop section: audio files now target `LayersArea`, and the `.wav` registration in `AssetHandling.cs` has been removed.
 - Update [`Plan_LiveSessionRecording.md`](Plan_LiveSessionRecording.md): Phase 2 description rewritten to reference this plan as completed; Phase 3 (DataClip design) still pending its own pass.
 - Add [`.tests-manual/audio-clip-playback.md`](../../.tests-manual/audio-clip-playback.md) covering drop / move / trim / delete / inspector / scrubbing / main-soundtrack-coexistence.
 
@@ -176,9 +176,9 @@ Already shipped. Behaviour-preserving rename + back-compat JSON reader (`IsMainS
 
 ## Documentation updates
 
-- [`.help/docs/using/Timeline.md`](../../.help/docs/using/Timeline.md) — new "Audio clips" section: drop-on-LayersArea flow, the inspector, the difference between an audio clip on the timeline and an `[AudioPlayer]` op in the graph.
-- [`.help/docs/using/LivePerformances.md`](../../.help/docs/using/LivePerformances.md) — cross-link.
-- [`.agentic/SOLUTION_OVERVIEW.md`](../SOLUTION_OVERVIEW.md) — drag-drop section updated to reflect that audio files target the timeline clip area (`ClipArea`), not the graph.
+- [`.help/docs/using/Timeline.md`](../../../.help/docs/using/Timeline.md) — new "Audio clips" section: drop-on-LayersArea flow, the inspector, the difference between an audio clip on the timeline and an `[AudioPlayer]` op in the graph.
+- [`.help/docs/using/LivePerformances.md`](../../../.help/docs/using/LivePerformances.md) — cross-link.
+- [`.agentic/SOLUTION_OVERVIEW.md`](../../SOLUTION_OVERVIEW.md) — drag-drop section updated to reflect that audio files target the timeline clip area (`ClipArea`), not the graph.
 
 ## Manual test sets
 

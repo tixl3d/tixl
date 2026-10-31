@@ -37,23 +37,23 @@ Generated from a full audit of the codebase. Most concerns from the exploration 
 
 | System | File | Change Required |
 |---|---|---|
-| ImGui init flags | [WindowsUiContentDrawer.cs:36-100](../../Editor/UiContentDrawing/WindowsUiContentDrawer.cs:36) | Add `ImGuiConfigFlags.ViewportsEnable` |
+| ImGui init flags | [WindowsUiContentDrawer.cs:36-100](../../../Editor/UiContentDrawing/WindowsUiContentDrawer.cs:36) | Add `ImGuiConfigFlags.ViewportsEnable` |
 | PlatformIO callbacks | new file | Implement ~15 managed delegates, assign to `ImGui.GetPlatformIO()` slots |
-| Render loop | [WindowsUiContentDrawer.cs:105-211](../../Editor/UiContentDrawing/WindowsUiContentDrawer.cs:105) | After `ImGui.Render()` call `UpdatePlatformWindows()` + iterate `PlatformIO.Viewports` and render each; present all swap chains |
-| `AppWindow` | [AppWindow.cs](../../Editor/App/AppWindow.cs) | Decouple from the two-window singleton pattern; make constructable on demand |
-| `ProgramWindows` | [ProgramWindows.cs](../../Editor/App/ProgramWindows.cs) | Add `Secondary` list alongside `Main` + `Viewer`. `Present()` iterates all swap chains |
+| Render loop | [WindowsUiContentDrawer.cs:105-211](../../../Editor/UiContentDrawing/WindowsUiContentDrawer.cs:105) | After `ImGui.Render()` call `UpdatePlatformWindows()` + iterate `PlatformIO.Viewports` and render each; present all swap chains |
+| `AppWindow` | [AppWindow.cs](../../../Editor/App/AppWindow.cs) | Decouple from the two-window singleton pattern; make constructable on demand |
+| `ProgramWindows` | [ProgramWindows.cs](../../../Editor/App/ProgramWindows.cs) | Add `Secondary` list alongside `Main` + `Viewer`. `Present()` iterates all swap chains |
 | WndProc / input | [ImGuiDx11RenderForm.cs:133-236](../../Editor/App/ImGuiDx11RenderForm.cs:133) | Every `RenderForm` (not just main) must forward input to ImGui, with viewport ID routing |
 | File drops | [ImGuiDx11RenderForm.cs:70-131](../../Editor/App/ImGuiDx11RenderForm.cs:70) | Route drops to the viewport under the cursor, not hardcoded main |
 | Keyboard shortcuts | WndProc filter at line 29 | Remove the "ignore if not main form" gate so shortcuts work from any viewport |
-| Layout serialization | [LayoutHandling.cs:209-235](../../Editor/Gui/Windows/Layouts/LayoutHandling.cs:209) | Extend JSON schema with `AppWindow` positions (monitor index + rect); version bump |
+| Layout serialization | [LayoutHandling.cs:209-235](../../../Editor/Gui/Windows/Layouts/LayoutHandling.cs:209) | Extend JSON schema with `AppWindow` positions (monitor index + rect); version bump |
 | `SymbolUi.WindowLayout` | See `Plan_ProjectSettings.md` "Editor State Persistence" | Same extension as `LayoutHandling`; layouts are stored per-project on root op's `.t3ui` |
-| DPI / scaling | [T3Ui.cs:109](../../Editor/Gui/T3UI.cs:109) global `UiScaleFactor` | Phase 1: keep global, rely on `DpiEnableScaleViewports`. Phase 2+: per-viewport scale if needed |
-| Font atlas | [FontAtlasGenerator.cs:34-157](../../Editor/UiContentDrawing/FontAtlasGenerator.cs:34) | No change initially. Rule: never rebuild atlas mid-frame or while any viewport is rendering |
-| `ProjectView.Focused` | [ProjectView.cs:478](../../Editor/UiModel/ProjectHandling/ProjectView.cs:478) | No change. Focus moves between viewports as user clicks; playback follows |
-| Undo/Redo | [UndoRedoStack.cs:104](../../Editor/UiModel/Commands/UndoRedoStack.cs:104) | No change. Single stack, global. Shortcut routing fix is what enables it from any viewport |
-| SpaceMouse | [SpaceMouse.Device.cs](../../Editor/Gui/Interaction/Camera/SpaceMouse.Device.cs) | Out of scope for phase 1. Continues to target main HWND |
-| Dialogs | [T3Ui.cs:115-120](../../Editor/Gui/T3UI.cs:115) | No change. Modal dialogs pop on whichever viewport is active |
-| `ProgramWindows.Viewer` | [ProgramWindows.cs:23](../../Editor/App/ProgramWindows.cs:23) | No change. Stays hardcoded, unrelated to multi-viewport |
+| DPI / scaling | [T3Ui.cs:109](../../../Editor/Gui/T3UI.cs:109) global `UiScaleFactor` | Phase 1: keep global, rely on `DpiEnableScaleViewports`. Phase 2+: per-viewport scale if needed |
+| Font atlas | [FontAtlasGenerator.cs:34-157](../../../Editor/UiContentDrawing/FontAtlasGenerator.cs:34) | No change initially. Rule: never rebuild atlas mid-frame or while any viewport is rendering |
+| `ProjectView.Focused` | [ProjectView.cs:478](../../../Editor/UiModel/ProjectHandling/ProjectView.cs:478) | No change. Focus moves between viewports as user clicks; playback follows |
+| Undo/Redo | [UndoRedoStack.cs:104](../../../Editor/UiModel/Commands/UndoRedoStack.cs:104) | No change. Single stack, global. Shortcut routing fix is what enables it from any viewport |
+| SpaceMouse | [SpaceMouse.Device.cs](../../../Editor/Gui/Interaction/Camera/SpaceMouse.Device.cs) | Out of scope for phase 1. Continues to target main HWND |
+| Dialogs | [T3Ui.cs:115-120](../../../Editor/Gui/T3UI.cs:115) | No change. Modal dialogs pop on whichever viewport is active |
+| `ProgramWindows.Viewer` | [ProgramWindows.cs:23](../../../Editor/App/ProgramWindows.cs:23) | No change. Stays hardcoded, unrelated to multi-viewport |
 
 ---
 

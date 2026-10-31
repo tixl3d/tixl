@@ -80,7 +80,7 @@ and `.help/release-notes/v4.2.md` mention.
 
 ## Related plans
 
-- [Plan_BrokenPackageRecovery](Plan_BrokenPackageRecovery.md) — its Phase 2/3 is the
+- [Plan_BrokenPackageRecovery](../Plan_BrokenPackageRecovery.md) — its Phase 2/3 is the
   in-editor "backup browser & restore" feature. The pinned-backup mechanism in Phase 1
   below is the primitive that feature will surface: the browser lists backups, and a
   "pin / keep" affordance marks any state as protected-from-pruning. The pre-upgrade
@@ -221,7 +221,7 @@ can see at a glance which projects predate their editor.
    project picker and the WelcomeWindow "Projects" tab / Hub), display
    `ReleaseInfo.EditorVersion`. It's already loaded per project. This quietly primes users
    to notice when a project predates their current editor, and it's the natural anchor for
-   the future backup-browser entry point (see [Plan_BrokenPackageRecovery](Plan_BrokenPackageRecovery.md)).
+   the future backup-browser entry point (see [Plan_BrokenPackageRecovery](../Plan_BrokenPackageRecovery.md)).
    - Reuse existing `CustomComponents` / styling helpers; no new widget infrastructure.
 
 3. **Release notes.** Ensure `.help/release-notes/v4.2.md` mentions the format change and
@@ -236,7 +236,7 @@ can see at a glance which projects predate their editor.
 - **Intra-version (alpha) format bumps** — separated releases; use git.
 - **Eager mass migration at startup** — replaced by lazy migrate-on-save.
 - **The in-editor backup browser / restore UI itself** — owned by
-  [Plan_BrokenPackageRecovery](Plan_BrokenPackageRecovery.md). This plan only provides the
+  [Plan_BrokenPackageRecovery](../Plan_BrokenPackageRecovery.md). This plan only provides the
   pin primitive it will consume.
 
 ---

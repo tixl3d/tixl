@@ -6,7 +6,7 @@ Only the two non-code items under §Risks are still open.
 
 Original framing follows. Small, well-understood fix — the same two defects already found and fixed for the
 audio graph on 2026-08-09 (see the "Bypass actually bypasses" note in
-[`Plan_AudioProcessingGraph.md`](Plan_AudioProcessingGraph.md)). This plan exists because the shader graph has
+[`Plan_AudioProcessingGraph.md`](../Plan_AudioProcessingGraph.md)). This plan exists because the shader graph has
 one extra concern audio doesn't — generated code — and because the op count is larger.
 
 ## Problem
@@ -131,4 +131,4 @@ live instead. The cases below are kept as the checklist to work through if this 
 
 The audio-graph equivalent, including the switch arm to copy and the per-update re-publish, landed 2026-08-09 —
 see `Instance.Connections.cs`, `Operators/Lib/io/audio/{CombineAudio,AudioReverb,AudioEcho,AudioCompressor,AudioLevel,AudioReaction}.cs`,
-and the "Bypass actually bypasses" note in [`Plan_AudioProcessingGraph.md`](Plan_AudioProcessingGraph.md).
+and the "Bypass actually bypasses" note in [`Plan_AudioProcessingGraph.md`](../Plan_AudioProcessingGraph.md).

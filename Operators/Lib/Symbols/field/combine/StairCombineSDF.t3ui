@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "dda268e8-fed6-4137-b21d-56ed907e3a51"/*StairCombineSDF*/,
-  "Description": "Combines two or more SDFs so that the seams become stairs, columns, grooves or tongues.\n\nSee also: [CombineSDF]",
+  "Description": "Combines two or more SDFs so that the seams become stairs, columns, grooves or tongues.\n\nWhen bypassed, only the first connected SDF is passed through.\n\nSee also: [CombineSDF]",
   "SymbolTags": "8",
   "InputUis": [
     {

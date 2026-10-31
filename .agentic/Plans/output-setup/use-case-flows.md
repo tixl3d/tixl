@@ -3,7 +3,7 @@
 Nine end-to-end flows across the long-term scope, from trivial to touring rig. Coarse granularity;
 **the point is mining potentials and gaps, not specification** — each flow ends with the ideas it
 surfaced (💡). Cross-cutting harvest at the end. Assumes the target design: flow outliner strip,
-properties in the Parameter window, unified canvas ([`ui-restructuring-plan.md`](ui-restructuring-plan.md)),
+properties in the Parameter window, unified canvas ([`ui-restructuring-plan.md`](../archive/output-setup/ui-restructuring-plan.md)),
 plus the long-term docs ([`camera-calibration.md`](camera-calibration.md),
 [`multi-machine.md`](multi-machine.md), [`Plan_StageExtension.md`](../Plan_StageExtension.md)).
 

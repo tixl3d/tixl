@@ -1,6 +1,6 @@
 # Reference lines — implicit relationships in the graph
 
-Generalises the hover-only variable-link primitive that already exists (`OpUi.DrawVariableReferences`, tracked by [`Plan_GetVarHoverLink.md`](Plan_GetVarHoverLink.md) / issue #1077) into a **persistent, dashed, dedicated render pass** that covers every "wireless" relationship in the graph — Set/Get variables, audio auto-collection, and a future Send/Receive — with an optional action to make a link explicit. Consumed by [`Plan_AudioProcessingGraph.md`](Plan_AudioProcessingGraph.md) for its clip→root auto-collection lines.
+Generalises the hover-only variable-link primitive that already exists (`OpUi.DrawVariableReferences`, tracked by [`Plan_GetVarHoverLink.md`](archive/Plan_GetVarHoverLink.md) / issue #1077) into a **persistent, dashed, dedicated render pass** that covers every "wireless" relationship in the graph — Set/Get variables, audio auto-collection, and a future Send/Receive — with an optional action to make a link explicit. Consumed by [`Plan_AudioProcessingGraph.md`](Plan_AudioProcessingGraph.md) for its clip→root auto-collection lines.
 
 ## Goal
 
@@ -9,7 +9,7 @@ Make invisible relationships visible. Any implicit / wireless link between two o
 ## What exists today
 
 - `OpUi.DrawVariableReferences` (`Editor/Gui/OpUis/OpUi.cs:132-164`) — draws a straight solid line between a hovered Set/Get var op and its **name-matched siblings in the same composition**, in `UiColors.StatusAutomated`. Hover-only; callers are the per-type `{Get,Set}*VarUi.cs` in `Editor/Gui/OpUis/UIs/`. `Matrix`/`Object` var types have no custom UI, so they draw nothing.
-- `Plan_GetVarHoverLink.md` (#1077, v4.2) — the narrow plan this supersedes.
+- [`Plan_GetVarHoverLink.md`](archive/Plan_GetVarHoverLink.md) (#1077, v4.2) — the narrow plan this supersedes.
 - **No** dashed-line primitive (`grep dashed/DrawDashed` → nothing; ImGui has no native dashed line), **no** persistent relationship pass, **no** realize action.
 
 ## Set/Get variable mechanics (the model to match)
@@ -66,7 +66,7 @@ Implement the named wireless-link ops with a reference slot pair so they render 
 2. **Many-to-many** — one Set name feeding N Gets (and vice versa): draw all lines, or a hub? Affects rendering *and* inline.
 3. **Reachability for inline** — when a Get is in a different sub-tree the direct wire isn't possible; grey out inline, or offer partial?
 4. **Cross-composition** — variables scope across nested comps via the eval-stack; render lines only within the current composition (like today) or across breadcrumbs?
-5. **Sequencing vs #1077** — if `Plan_GetVarHoverLink.md` is mid-flight for v4.2, does this absorb it or land after? (Maintainer call — depends on #1077's status.)
+5. **Sequencing vs #1077** — resolved: the hover link shipped ([`Plan_GetVarHoverLink.md`](archive/Plan_GetVarHoverLink.md)), so this plan builds on it.
 
 ## Relationship to other plans
 

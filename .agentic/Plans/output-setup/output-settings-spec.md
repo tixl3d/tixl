@@ -1,7 +1,7 @@
 # 2026-07-21 Output Settings Spec — ⚠️ SUPERSEDED (layout), kept for callout numbers
 
 > **⚠️ Status (2026-07-29): the sidebar this specifies no longer exists.** Layout is superseded by
-> [`ui-restructuring-plan.md`](ui-restructuring-plan.md) — properties moved to the Parameter window,
+> [`ui-restructuring-plan.md`](../archive/output-setup/ui-restructuring-plan.md) — properties moved to the Parameter window,
 > the tree became the Flow Outliner, gutter icons became real connections. **Do not implement from
 > this doc.** It is kept because other docs cite its **callout numbers** (data-model §2.2/§2.5/§2.9
 > reference callouts 22, 24, 25.4, 26) and because callouts 10–15 (field sizing, vector inputs,

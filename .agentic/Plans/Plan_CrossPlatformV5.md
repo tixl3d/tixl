@@ -515,7 +515,7 @@ Estimate: 25–50 commits, 50–120 agent hours.
 - Packages coming back: NDI, SDL3 camera input, Spout through Vulkan external memory, Syphon on macOS.
 - The Microsoft Store.
 - Hexa.NET.ImGui and ImGui 1.92.
-- Multi-viewport on SDL3, replacing the Win32 approach in [Plan_MultiViewport](Plan_MultiViewport.md).
+- Multi-viewport on SDL3, replacing the Win32 approach in [Plan_MultiViewport](archive/Plan_MultiViewport.md).
 - HDR.
 - Vulkan-only shader features for users (subgroup operations, 16-bit types).
 
@@ -586,9 +586,9 @@ Estimate: 25–50 commits, 50–120 agent hours.
   safe-start mode.
 - [Plan_PlayerExportCleanup](Plan_PlayerExportCleanup.md): its startup dialog moves off WinForms in
   Phase 2.
-- [Plan_MultiViewport](Plan_MultiViewport.md): rebuild on SDL3 after v5.0 instead of Win32.
-- [Plan_VideoDeviceInput](Plan_VideoDeviceInput.md): replaced by SDL3 camera input in v5.x.
-- [Plan_FfmpegEncode](Plan_FfmpegEncode.md): render export on Linux needs matching FFmpeg builds.
+- [Plan_MultiViewport](archive/Plan_MultiViewport.md): rebuild on SDL3 after v5.0 instead of Win32.
+- [Plan_VideoDeviceInput](archive/Plan_VideoDeviceInput.md): replaced by SDL3 camera input in v5.x.
+- [Plan_FfmpegEncode](archive/Plan_FfmpegEncode.md): render export on Linux needs matching FFmpeg builds.
 
 ## Open questions
 

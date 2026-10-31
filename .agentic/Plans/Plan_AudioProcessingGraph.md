@@ -1,6 +1,6 @@
 # Audio processing graph — clips as reference-emitting operators
 
-Supersedes the "audio clips as data" direction of [`Plan_TimelineAudioClips.md`](Plan_TimelineAudioClips.md). That plan's Phases A–C (the `TimelineAudioClip` payload shape, native-rate playback, N-clip engine) are **kept and reused**; its Phases D–F (rebuild a parallel non-op editing/render path, delete the `[AudioClip]` op) are **cancelled** — this plan goes the other way and makes the op canonical.
+Supersedes the "audio clips as data" direction of [`Plan_TimelineAudioClips.md`](archive/Plan_TimelineAudioClips.md). That plan's Phases A–C (the `TimelineAudioClip` payload shape, native-rate playback, N-clip engine) are **kept and reused**; its Phases D–F (rebuild a parallel non-op editing/render path, delete the `[AudioClip]` op) are **cancelled** — this plan goes the other way and makes the op canonical.
 
 ## Goal
 
@@ -289,6 +289,22 @@ Video transitions as `VideoReference` combinators (the "2 tex + float → 1 tex"
     - ✅ **Stale-bus gating landed:** an `[AudioBus]` that stops being evaluated no longer keeps playing a frozen last state (deaf to upstream parameter changes) — buses heartbeat into `AudioBusRegistry` (`Core/Audio`) on update, and `AudioEngine.CompleteFrame` pauses submixes that miss it (~2-frame slack); the next evaluation revives them. Rule: *evaluated bus = audible + live params; non-evaluated bus = silent.* Paused submixes also stop pulling their sources' decode streams.
     - ✅ **Transport gating landed** (all graph audio, not just loose): while `PlaybackSpeed == 0` both explicit `[AudioBus]` submixes and the implicit default bus pause (a paused submix also stops *pulling* generator streams, so tone `StreamProcedure`s genuinely halt) — matching soundtrack-clip behaviour. Stop = quiet is the natural off-switch. *Deferred:* idle-motion / live-use exemption as a per-project setting.
     - Still open: (b) a per-op "sounding" **indicator** (`StatusAnimated`/`StatusAttention`) + a global **"kill all audio"** (hang on `AudioMixerManager` global mute); (c) draw the implicit source→output relationship as a **reference line** ([`Plan_ReferenceLines.md`](Plan_ReferenceLines.md)) so it's visible, not magic.
+
+## Clip editing wishlist (carried over 2026-10-31)
+
+User ideas from the archived [`Plan_TimelineAudioClips.md`](archive/Plan_TimelineAudioClips.md), not committed to a
+phase. Clips are operators now, so several items are already covered: `[AudioClip]` has `Volume` and `Mute` inputs
+(replacing the proposed `ControlTimelineAudioClip`), cut at playhead exists as `SplitClipsAtTime`, and buses, FX and
+ducking cover the routing idea.
+
+- **Trim to playhead.** Snap the selected clip's start or end to the play time, clamped to available source content.
+- **Rename.** Per-clip display name, falling back to the asset filename.
+- **Source-range indicator.** While hovering or dragging, ghost the maximum available content range.
+- **Clip markers.** Per-clip waypoints with labels, e.g. transcription written back as SRT markers.
+- **Clip linking / groups.** Move, trim and delete propagate together, e.g. audio and its companion data clips from a
+  live recording.
+- **DataClip editing.** Extend the IO Window to select, delete, move, edit, quantize and filter events, and to inspect
+  and edit channels.
 
 ## Back-compat
 

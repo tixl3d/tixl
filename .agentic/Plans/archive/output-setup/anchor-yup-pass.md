@@ -1,6 +1,6 @@
 # Anchor / Y-up normalization pass — conversion inventory (2026-09-05)
 
-Implements [`data-model.md`](data-model.md) §5 and decision №7 in one coordinated pass: signed centered
+Implements [`data-model.md`](../../output-setup/data-model.md) §5 and decision №7 in one coordinated pass: signed centered
 anchors, surface-local space Y-up with its origin **at the anchor**, `Pivot` → `Anchor`. This file is the
 inventory the pass was agreed to start with — every site that converts between the old and new
 conventions, so the geometry is reviewed once, as a whole.

@@ -6,7 +6,7 @@
 > [`refactoring-plan.md`](refactoring-plan.md) (debt, with the live progress log). Kept for the
 > "Already built" baseline inventory and the deviation notes, which explain present-day code shapes.
 
-Dependency-ordered phases for building the [output-settings spec](output-settings-spec.md). Each phase is
+Dependency-ordered phases for building the [output-settings spec](../../output-setup/output-settings-spec.md). Each phase is
 **shippable** (build green, app runs, something works) and **testable**. This is a **migration**, not a
 greenfield build — a v1 of most pieces already exists on this branch and gets reshaped, not rewritten from
 zero. Grounded in `data-model.md` (the deltas) and the current `Core/Output/` + `Editor/Gui/Windows/OutputSetup/`

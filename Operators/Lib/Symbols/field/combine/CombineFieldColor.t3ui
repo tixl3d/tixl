@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "023fa572-a3e0-4dfc-9b42-79bc1f5c353e"/*CombineFieldColor*/,
-  "Description": "Combines the colors of two or more connected fields.\n\nSee also: [CombineSDF]",
+  "Description": "Combines the colors of two or more connected fields.\n\nWhen bypassed, only the first connected field is passed through.\n\nSee also: [CombineSDF]",
   "SymbolTags": "8",
   "InputUis": [
     {

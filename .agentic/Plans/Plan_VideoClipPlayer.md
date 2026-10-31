@@ -401,7 +401,7 @@ Phase 1 (wired) is unaffected.
   every child add/remove/copy-paste calls). The helper caches the sibling-clip list (child `Instance`s that are
   `IVideoClipProvider`) and rebuilds only when the composition instance changes (focus / hot-reload) or its
   `Symbol.VersionCounter` bumps. In the Player there's no `SymbolUi` so the mirror stays 0 and the static graph
-  builds once. (Shared with the audio system — see `Plan_AudioClipPlayer.md` open question #4, which drove the
+  builds once. (Shared with the audio system — see `archive/Plan_AudioClipPlayer.md` open question #4, which drove the
   Core counter.)
 - **Introduce the decode pool** (see *Decode pool, preroll & eviction*): clips become descriptors; the
   player owns N pooled controllers with temporal scheduling, preroll of upcoming clips, and eviction of far

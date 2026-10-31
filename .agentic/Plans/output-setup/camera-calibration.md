@@ -4,7 +4,7 @@ Camera-in-the-loop calibration for projection setups: a calibrated webcam observ
 automates what is hand-clicked today — projector solves, corner pins, alignment to physical features,
 drift detection, and latency measurement.
 
-**Status: long-term.** Sequenced after the [`ui-restructuring-plan.md`](ui-restructuring-plan.md)
+**Status: long-term.** Sequenced after the [`ui-restructuring-plan.md`](../archive/output-setup/ui-restructuring-plan.md)
 phases. One cheap enabler (point annotations, §4.1) is worth landing early. Related:
 [`multi-machine.md`](multi-machine.md) (remote outputs during calibration).
 

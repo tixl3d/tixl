@@ -446,7 +446,7 @@ output of a texture op even mean?" — the current shape invites meaningless wir
 **Migration assessment (2026-08-09): effectively none.** `[VideoClip]` shipped this cycle; known usage is
 ~2 placements the user can recreate — stale `.t3` output entries load with a warning and a default
 placement. `[AudioClip]` is explicitly **excluded**: it has real usage, and
-[`Plan_TimelineAudioClips.md`](Plan_TimelineAudioClips.md) supersedes the op with first-class timeline
+[`Plan_TimelineAudioClips.md`](archive/Plan_TimelineAudioClips.md) supersedes the op with first-class timeline
 audio clips anyway — reshaping a to-be-deleted op is waste. Downstream consumers are unaffected by the
 `VideoClip` change: timeline discovery and the player classify by scanning outputs for `ITimeClipProvider`,
 and `TimeClipSlot<Texture2D>` *is a* `Slot<Texture2D>` for wiring/interface purposes.
