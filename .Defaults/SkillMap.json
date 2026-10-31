@@ -671,7 +671,7 @@
         "1ad7270b-f246-4e05-ac92-02169a9a8fb5",
         "af08df40-a878-408f-a5b2-e1be361e50e5"
       ],
-      "Namespace": "Skills.Mesh.R02_DrawingMeshes",
+      "Namespace": "Skills.Render.R02_DrawingMeshes",
       "TopicType": "Command",
       "Requirement": "AllInputPaths"
     },
