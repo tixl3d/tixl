@@ -23,7 +23,7 @@ internal sealed class Expression : Instance<Expression>
 
     private void Update(EvaluationContext context)
     {
-        var expression = ExpressionInput.GetValue(context);
+        var expression = Formula.GetValue(context);
         var a = A.GetValue(context);
         var b = B.GetValue(context);
         var c = C.GetValue(context);
@@ -378,18 +378,18 @@ internal sealed class Expression : Instance<Expression>
         private int _nestingDepth;
     }
 
-    [Input(Guid = "c9d5e2f8-4b1a-4c7e-8f3d-2a9b6e0c5d1f")]
-    public readonly InputSlot<string> ExpressionInput = new("a + b");
+        [Input(Guid = "d0e6f3a9-5c2b-4d8f-9a4e-3b0c7f1d6e2a")]
+        public readonly InputSlot<float> A = new InputSlot<float>();
 
-    [Input(Guid = "d0e6f3a9-5c2b-4d8f-9a4e-3b0c7f1d6e2a")]
-    public readonly InputSlot<float> A = new();
+        [Input(Guid = "e1f7a4b0-6d3c-4e9a-0b5f-4c1d8a2e7f3b")]
+        public readonly InputSlot<float> B = new InputSlot<float>();
 
-    [Input(Guid = "e1f7a4b0-6d3c-4e9a-0b5f-4c1d8a2e7f3b")]
-    public readonly InputSlot<float> B = new();
+        [Input(Guid = "f2a8b5c1-7e4d-4f0b-1c6a-5d2e9b3f8a4c")]
+        public readonly InputSlot<float> C = new InputSlot<float>();
 
-    [Input(Guid = "f2a8b5c1-7e4d-4f0b-1c6a-5d2e9b3f8a4c")]
-    public readonly InputSlot<float> C = new();
+        [Input(Guid = "a3b9c6d2-8f5e-4a1c-2d7b-6e3f0c4a9b5d")]
+        public readonly InputSlot<float> D = new InputSlot<float>();
 
-    [Input(Guid = "a3b9c6d2-8f5e-4a1c-2d7b-6e3f0c4a9b5d")]
-    public readonly InputSlot<float> D = new();
+        [Input(Guid = "c9d5e2f8-4b1a-4c7e-8f3d-2a9b6e0c5d1f")]
+        public readonly InputSlot<string> Formula = new InputSlot<string>();
 }

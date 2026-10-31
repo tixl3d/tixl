@@ -5,13 +5,23 @@
   "SymbolTags": "1",
   "InputUis": [
     {
+      "InputId": "a3b9c6d2-8f5e-4a1c-2d7b-6e3f0c4a9b5d"/*D*/,
+      "Position": {
+        "X": 197.0,
+        "Y": 424.0
+      },
+      "Description": "Variable d - available in the expression",
+      "Min": -100.0,
+      "Max": 100.0
+    },
+    {
       "InputId": "c9d5e2f8-4b1a-4c7e-8f3d-2a9b6e0c5d1f"/*ExpressionInput*/,
-      "Relevancy": "Relevant",
       "Position": {
         "X": 36.0,
         "Y": 334.0
       },
-      "Description": "The formula to evaluate. Variables a, b, c, d are available. Math functions: Sin, Cos, Tan, Sqrt, Pow, Log, Abs, Floor, Ceil, Round, Min, Max, Clamp, Lerp, etc."
+      "Description": "The formula to evaluate. Variables a, b, c, d are available. Math functions: Sin, Cos, Tan, Sqrt, Pow, Log, Abs, Floor, Ceil, Round, Min, Max, Clamp, Lerp, etc.",
+      "Usage": "Multiline"
     },
     {
       "InputId": "d0e6f3a9-5c2b-4d8f-9a4e-3b0c7f1d6e2a"/*A*/,
@@ -40,16 +50,6 @@
         "Y": 424.0
       },
       "Description": "Variable c - available in the expression",
-      "Min": -100.0,
-      "Max": 100.0
-    },
-    {
-      "InputId": "a3b9c6d2-8f5e-4a1c-2d7b-6e3f0c4a9b5d"/*D*/,
-      "Position": {
-        "X": 197.0,
-        "Y": 424.0
-      },
-      "Description": "Variable d - available in the expression",
       "Min": -100.0,
       "Max": 100.0
     }

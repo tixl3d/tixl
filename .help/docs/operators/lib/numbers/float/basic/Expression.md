@@ -25,7 +25,7 @@ Constants: `PI`, `E`
 ## Input Parameters
 | Name (Relevancy & Type) | Description |
 |---|---|
-| **ExpressionInput** (String Relevant) | The formula to evaluate. Variables a, b, c, d are available. Math functions: Sin, Cos, Tan, Sqrt, Pow, Log, Abs, Floor, Ceil, Round, Min, Max, Clamp, Lerp, etc. |
+| **Formula** (String Relevant) | The formula to evaluate. Variables a, b, c, d are available. Math functions: Sin, Cos, Tan, Sqrt, Pow, Log, Abs, Floor, Ceil, Round, Min, Max, Clamp, Lerp, etc. |
 | **A** (Single) | Variable a - available in the expression |
 | **B** (Single) | Variable b - available in the expression |
 | **C** (Single) | Variable c - available in the expression |
