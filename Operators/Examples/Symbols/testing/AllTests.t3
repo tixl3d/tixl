@@ -1,7 +1,12 @@
 {
   "FormatVersion": 3,
   "Id": "b4a9f19a-bbb0-4d65-8d4a-560460e2505c"/*AllTests*/,
-  "Inputs": [],
+  "Inputs": [
+    {
+      "Id": "b03f932c-f88e-47ff-be67-3acbe2455ca6"/*TriggerTest*/,
+      "DefaultValue": false
+    }
+  ],
   "Children": [
     {
       "Id": "032369ea-6dfd-4f8c-ad77-32a37e01c6de"/*ExecuteTests*/,
@@ -276,6 +281,12 @@
       "SourceSlotId": "229a2dd4-419f-43b9-aecd-12eab9b25def",
       "TargetParentOrChildId": "10faad6c-183d-4705-bbf2-fda99f5c99e9",
       "TargetSlotId": "18023689-423a-4fb8-bc3c-9e74d0148c78"
+    },
+    {
+      "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "SourceSlotId": "b03f932c-f88e-47ff-be67-3acbe2455ca6",
+      "TargetParentOrChildId": "10faad6c-183d-4705-bbf2-fda99f5c99e9",
+      "TargetSlotId": "31937a13-1e53-45dd-8e6f-91ca5f3aaa19"
     },
     {
       "SourceParentOrChildId": "36284a42-864f-4028-97f5-1133530a9c97",

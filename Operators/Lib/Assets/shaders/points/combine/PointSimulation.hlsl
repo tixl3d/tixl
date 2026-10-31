@@ -17,16 +17,16 @@ cbuffer Params : register(b0)
 [numthreads(64,1,1)]
 void main(uint3 i : SV_DispatchThreadID)
 {
-    if(Reset > 0.5) {
-        ResultPoints[i.x] = SourcePoints[i.x];
-        return;
-    }
-
     uint sourcePointcount, stride;
     SourcePoints.GetDimensions(sourcePointcount, stride);
     
     if(i.x >= sourcePointcount) 
         return;
+
+    if(Reset > 0.5) {
+        ResultPoints[i.x] = SourcePoints[i.x];
+        return;
+    }
 
     float currentW = ResultPoints[i.x].FX1;
     float orgW = SourcePoints[i.x].FX1;

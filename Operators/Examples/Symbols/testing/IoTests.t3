@@ -14,7 +14,13 @@
       "Id": "1bd1c988-1555-44e5-bba5-85289b93334f"/*PlayVideo*/,
       "SymbolId": "914fb032-d7eb-414b-9e09-2bdd7049e049",
       "SymbolName": "Lib.io.video.PlayVideo",
-      "InputValues": [],
+      "InputValues": [
+        {
+          "Id": "e9c15b3f-8c4a-411d-b9b3-795d64d6bd20"/*ResyncThreshold*/,
+          "Type": "System.Single",
+          "Value": 0.02
+        }
+      ],
       "Outputs": []
     },
     {

@@ -9,7 +9,7 @@
       "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": -32.30002,
-        "Y": 251.841
+        "Y": 216.841
       }
     },
     {
@@ -17,7 +17,7 @@
       "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": -32.30002,
-        "Y": 216.841
+        "Y": 181.841
       }
     },
     {
@@ -25,7 +25,7 @@
       "SymbolName": "Examples.Lib.point.SetAttributesWithPointFieldsExamples",
       "Position": {
         "X": -172.30002,
-        "Y": 566.841
+        "Y": 531.841
       }
     },
     {
@@ -33,7 +33,7 @@
       "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": -32.30002,
-        "Y": 636.841
+        "Y": 601.841
       }
     },
     {
@@ -41,7 +41,7 @@
       "SymbolName": "Examples.Lib.point.DrawBillboardsExample",
       "Position": {
         "X": -172.30002,
-        "Y": 286.841
+        "Y": 251.841
       }
     },
     {
@@ -49,7 +49,7 @@
       "SymbolName": "Examples.Lib.point.SamplePointAttributesExample",
       "Position": {
         "X": -172.30002,
-        "Y": 461.841
+        "Y": 426.841
       }
     },
     {
@@ -57,7 +57,7 @@
       "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": -32.30002,
-        "Y": 531.841
+        "Y": 496.841
       }
     },
     {
@@ -65,7 +65,7 @@
       "SymbolName": "Examples.Lib.point.GainAndBiasExample",
       "Position": {
         "X": -172.30002,
-        "Y": 356.841
+        "Y": 321.841
       }
     },
     {
@@ -73,7 +73,7 @@
       "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": -32.30002,
-        "Y": 286.841
+        "Y": 251.841
       }
     },
     {
@@ -81,7 +81,7 @@
       "SymbolName": "Examples.Lib.mesh.DrawMeshChunksAtPointsExample",
       "Position": {
         "X": -172.30002,
-        "Y": 601.841
+        "Y": 566.841
       }
     },
     {
@@ -89,7 +89,7 @@
       "SymbolName": "Examples.Lib.point.DisplacePoints2dExample",
       "Position": {
         "X": -172.30002,
-        "Y": 251.841
+        "Y": 216.841
       }
     },
     {
@@ -97,7 +97,7 @@
       "SymbolName": "Examples.Lib.point.BoundingBoxPointsExample",
       "Position": {
         "X": -172.30002,
-        "Y": 216.841
+        "Y": 181.841
       }
     },
     {
@@ -105,7 +105,7 @@
       "SymbolName": "Examples.Lib.point.SelectPointsWithSDFExample",
       "Position": {
         "X": -172.30002,
-        "Y": 531.841
+        "Y": 496.841
       }
     },
     {
@@ -113,23 +113,23 @@
       "SymbolName": "Examples.Lib.point.ApplyRandomWalkExamples",
       "Position": {
         "X": -172.30002,
-        "Y": 181.841
+        "Y": 706.841
       }
     },
     {
       "ChildId": "7df5bc7b-5394-43a2-9dd4-05a3e8dd434b",
       "SymbolName": "Examples.testing.VisualTest",
       "Position": {
-        "X": -361.1878,
-        "Y": 567.2695
+        "X": -32.30002,
+        "Y": 671.841
       }
     },
     {
       "ChildId": "817835e8-3426-4e85-856a-0239a62cdc1d",
       "SymbolName": "Examples.Lib.point.TextureMapForceExample2",
       "Position": {
-        "X": -172.30002,
-        "Y": 671.841
+        "X": -172.29999,
+        "Y": 636.841
       }
     },
     {
@@ -137,7 +137,7 @@
       "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": -32.30002,
-        "Y": 391.841
+        "Y": 356.841
       }
     },
     {
@@ -145,7 +145,7 @@
       "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": -32.30002,
-        "Y": 426.841
+        "Y": 391.841
       }
     },
     {
@@ -161,8 +161,8 @@
       "SymbolName": "Examples.Lib.point.SnapToAnglesForceExample",
       "Comment": "This is unstable, probably be cause of triggeranim\n",
       "Position": {
-        "X": -501.1878,
-        "Y": 567.2695
+        "X": -172.29996,
+        "Y": 671.841
       }
     },
     {
@@ -170,7 +170,7 @@
       "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": -32.30002,
-        "Y": 566.841
+        "Y": 531.841
       }
     },
     {
@@ -178,7 +178,7 @@
       "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": -32.30002,
-        "Y": 321.841
+        "Y": 286.841
       }
     },
     {
@@ -186,7 +186,7 @@
       "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": -32.30002,
-        "Y": 461.841
+        "Y": 426.841
       }
     },
     {
@@ -194,7 +194,7 @@
       "SymbolName": "Examples.Lib.point.LineTextPointsExamples",
       "Position": {
         "X": -172.30002,
-        "Y": 426.841
+        "Y": 391.841
       }
     },
     {
@@ -202,7 +202,7 @@
       "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": -32.30002,
-        "Y": 356.841
+        "Y": 321.841
       }
     },
     {
@@ -210,7 +210,7 @@
       "SymbolName": "Examples.Lib.point.SamplePointAttributesExample2",
       "Position": {
         "X": -172.30002,
-        "Y": 496.841
+        "Y": 461.841
       }
     },
     {
@@ -218,7 +218,7 @@
       "SymbolName": "Examples.Lib.point.FindClosestPointsOnMeshExample",
       "Position": {
         "X": -172.30002,
-        "Y": 321.841
+        "Y": 286.841
       }
     },
     {
@@ -226,7 +226,7 @@
       "SymbolName": "Examples.Lib.point.GetPointDataFromListExample",
       "Position": {
         "X": -172.30002,
-        "Y": 391.841
+        "Y": 356.841
       }
     },
     {
@@ -234,7 +234,7 @@
       "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": -32.30002,
-        "Y": 181.841
+        "Y": 706.841
       }
     },
     {
@@ -242,7 +242,7 @@
       "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": -32.30002,
-        "Y": 671.841
+        "Y": 636.841
       }
     },
     {
@@ -250,7 +250,7 @@
       "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": -32.30002,
-        "Y": 496.841
+        "Y": 461.841
       }
     },
     {
@@ -266,7 +266,7 @@
       "SymbolName": "Examples.Lib.point.SplinePointsExample",
       "Position": {
         "X": -172.30002,
-        "Y": 636.841
+        "Y": 601.841
       }
     },
     {
@@ -274,7 +274,7 @@
       "SymbolName": "Examples.testing.VisualTest",
       "Position": {
         "X": -32.30002,
-        "Y": 601.841
+        "Y": 566.841
       }
     },
     {
@@ -291,7 +291,7 @@
       "OutputId": "a0f103c6-1d04-4391-97d7-2b9651bad1c3"/*Result*/,
       "Position": {
         "X": 107.69998,
-        "Y": 706.841
+        "Y": 741.841
       }
     }
   ]

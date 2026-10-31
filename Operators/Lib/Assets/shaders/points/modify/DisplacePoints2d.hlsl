@@ -44,7 +44,7 @@ RWStructuredBuffer<Point> Points : register(u0);    // output
 Texture2D<float4> DisplaceMap : register(t1);
 sampler texSampler : register(s0);
 
-[numthreads(256,4,1)]
+[numthreads(64,1,1)]
 void main(uint3 i : SV_DispatchThreadID)
 {
     uint index = i.x; 

@@ -2,7 +2,15 @@
   "FormatVersion": 3,
   "Id": "b4a9f19a-bbb0-4d65-8d4a-560460e2505c"/*AllTests*/,
   "Description": "",
-  "InputUis": [],
+  "InputUis": [
+    {
+      "InputId": "b03f932c-f88e-47ff-be67-3acbe2455ca6"/*TriggerTest*/,
+      "Position": {
+        "X": 296.762,
+        "Y": 751.0258
+      }
+    }
+  ],
   "SymbolChildUis": [
     {
       "ChildId": "032369ea-6dfd-4f8c-ad77-32a37e01c6de",

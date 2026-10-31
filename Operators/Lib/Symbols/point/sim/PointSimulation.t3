@@ -59,6 +59,13 @@
       "Outputs": []
     },
     {
+      "Id": "20907b7c-e77a-4d84-bd98-6bbf92a484f7"/*Or*/,
+      "SymbolId": "9786dec1-b0fc-49d7-bf79-c9a1d457f386",
+      "SymbolName": "Lib.numbers.bool.combine.Or",
+      "InputValues": [],
+      "Outputs": []
+    },
+    {
       "Id": "32ef5c54-56c3-4f1e-ac36-0e978b6b6fed"/*ComputeShaderStage*/,
       "SymbolId": "8bef116d-7d1c-4c1b-b902-25c1d5e925a9",
       "SymbolName": "Types.Gfx.ComputeShaderStage",
@@ -156,6 +163,19 @@
       "Outputs": []
     },
     {
+      "Id": "bcb48beb-52ab-4fee-b73a-37f6a1da8e07"/*HasTimeChanged*/,
+      "SymbolId": "2443b2fd-c397-4ea6-9588-b595f918cf01",
+      "SymbolName": "Lib.numbers.anim.time.HasTimeChanged",
+      "InputValues": [
+        {
+          "Id": "bc112889-77a8-4967-a9b7-683b7c7017fe"/*Mode*/,
+          "Type": "System.Int32",
+          "Value": 3
+        }
+      ],
+      "Outputs": []
+    },
+    {
       "Id": "e1971ec2-a655-4ed9-b262-fdc2affb20c1"/*ExecuteBufferUpdate*/,
       "SymbolId": "58351c8f-4a73-448e-b7bb-69412e71bd76",
       "SymbolName": "Lib.render._dx11.fxsetup.ExecuteBufferUpdate",
@@ -245,6 +265,18 @@
       "TargetSlotId": "7a13b834-21e5-4cef-ad5b-23c3770ea763"
     },
     {
+      "SourceParentOrChildId": "42550c43-a227-4932-a4da-067da5cb8b0c",
+      "SourceSlotId": "fc297ee7-2b25-4c34-98a4-3f2058040ff7",
+      "TargetParentOrChildId": "20907b7c-e77a-4d84-bd98-6bbf92a484f7",
+      "TargetSlotId": "50ed5538-8134-4d8d-aedc-61f19f60446e"
+    },
+    {
+      "SourceParentOrChildId": "bcb48beb-52ab-4fee-b73a-37f6a1da8e07",
+      "SourceSlotId": "4883b1ec-16c1-422f-8db6-c74c3d48e5be",
+      "TargetParentOrChildId": "20907b7c-e77a-4d84-bd98-6bbf92a484f7",
+      "TargetSlotId": "95ce0046-dbad-444e-bd31-0e34f00a62b9"
+    },
+    {
       "SourceParentOrChildId": "005e0bda-9a20-4128-bacb-495499277249",
       "SourceSlotId": "35c0e513-812f-49e2-96fa-17541751c19b",
       "TargetParentOrChildId": "32ef5c54-56c3-4f1e-ac36-0e978b6b6fed",
@@ -329,8 +361,8 @@
       "TargetSlotId": "51110d89-083e-42b8-b566-87b144dfbed9"
     },
     {
-      "SourceParentOrChildId": "f3f3405b-71fe-4fd1-908c-357ecdde9523",
-      "SourceSlotId": "c02d701d-a915-4d2e-bb31-5c6cd27a999e",
+      "SourceParentOrChildId": "20907b7c-e77a-4d84-bd98-6bbf92a484f7",
+      "SourceSlotId": "fc297ee7-2b25-4c34-98a4-3f2058040ff7",
       "TargetParentOrChildId": "e1971ec2-a655-4ed9-b262-fdc2affb20c1",
       "TargetSlotId": "6887f319-cf3f-4e87-9a8c-a7c912dbf5ad"
     },
