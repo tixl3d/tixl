@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using SharpDX.DXGI;
 using T3.Core.Logging;
 using T3.Core.Stats;
+using T3.Editor.Gui.UiHelpers;
 
 namespace T3.Editor.Gui.Windows.Analyze;
 
@@ -59,7 +60,9 @@ internal static class PresentationDiagnostics
         if (mode == CompositionMode)
             return;
 
-        Log.Debug($"Main window presentation changed from {Describe(CompositionMode)} to {Describe(mode)}");
+        if (UserSettings.Config.LogPresentationModeChanges)
+            Log.Debug($"Main window presentation changed from {Describe(CompositionMode)} to {Describe(mode)}");
+
         CompositionMode = mode;
     }
 

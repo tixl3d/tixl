@@ -462,11 +462,9 @@ internal sealed class PlaceholderCreation
                     // Reroute original connections...
                     foreach (var mc in _snappedSourceOutputLine.ConnectionsOut)
                     {
+                        // An op that converts the type can't take over the connection, so the new op branches off instead
                         if (newItemOutput.ValueType != mc.Type)
-                        {
-                            Log.Warning("Skipping mismatched connection type");
                             continue;
-                        }
 
                         var splitVertically = _connectionOrientation == MagGraphItem.Directions.Vertical
                                               && (mc.Style == MagGraphConnection.ConnectionStyles.BottomToTop

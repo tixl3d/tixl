@@ -594,6 +594,11 @@ internal sealed partial class SettingsWindow : Window
                         changed = true;
                     }
 
+                    changed |= FormInputs.AddCheckBox("Show Presentation Mode Changes",
+                                                      ref UserSettings.Config.LogPresentationModeChanges,
+                                                      "Logs when Windows switches the main window between DWM composition, hardware overlay and independent flip. Frame pacing differs between these modes, so this helps when frame intervals jitter.",
+                                                      UserSettings.Defaults.LogPresentationModeChanges);
+
                     FormInputs.AddVerticalSpace();
                     break;
                 }

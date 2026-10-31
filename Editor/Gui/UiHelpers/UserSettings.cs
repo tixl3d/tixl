@@ -256,6 +256,7 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         public bool LogAudioDetails = false;
         public bool LogAudioRenderingDetails = false;
         public bool LogVideoRenderingDetails = false;
+        public bool LogPresentationModeChanges = false;
 
         public CompilerOptions.Verbosity CompileCsVerbosity = CompilerOptions.Verbosity.Minimal;
 
