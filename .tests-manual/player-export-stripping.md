@@ -19,7 +19,7 @@ the optional libraries those operators declare, and no foreign-platform runtimes
 
 **Action:**
 Create a new symbol `StripTest`. Inside, connect a `[Blob]` to a `[SendToOutput]`.
-Add a second, **unconnected** `[VideoDeviceInput]` (webcam) operator next to it and an unconnected `[AudioClip]`
+Add a second, **unconnected** `[CameraCalibrator]` operator next to it and an unconnected `[AudioClip]`
 with `AutoPlay` on and a short audio file assigned.
 
 **Expected:**
@@ -44,7 +44,7 @@ Open the export folder `<project>/Export/StripTest/`.
 **Expected:**
 - `Operators/Lib/runtimes/` contains only `win-x64` (and possibly `win`); no `linux-*`, `osx-*`, `win-x86` folders.
 - `Operators/Lib/runtimes/win-x64/native/OpenCvSharpExtern.dll` is absent.
-- `Operators/<project>/Symbols/StripTest.t3` lists two children (`Blob` and `AudioClip`); the webcam op is gone.
+- `Operators/<project>/Symbols/StripTest.t3` lists two children (`Blob` and `AudioClip`); the calibrator op is gone.
 - `Operators/Lib/Symbols/` only contains the `.t3` files of operators used by `[Blob]` and `[AudioClip]`
   (dozens, not hundreds).
 
@@ -64,6 +64,6 @@ Uncheck `Strip Unused Operators` in `Project Settings` → `Executable` and expo
 
 **Expected:**
 - `Operators/<project>/Symbols/StripTest.t3` lists all three children again and
-  `Operators/Lib/runtimes/win-x64/native/OpenCvSharpExtern.dll` is present (the webcam op is shipped, so its
+  `Operators/Lib/runtimes/win-x64/native/OpenCvSharpExtern.dll` is present (the calibrator op is shipped, so its
   dependency is kept). Foreign-platform `runtimes/` folders stay excluded either way.
 - The export still runs.

@@ -1,8 +1,7 @@
 # Plan — `[VideoDeviceInput]` OpenCV native-init crash (deferred)
 
-**Status:** Deferred 2026-06-03. Webcam capture via `[VideoDeviceInput]` throws on first use.
-Not a release blocker. `[VideoDeviceInput]` is the **last remaining consumer of OpenCV's
-`VideoCapture`** after the FFmpeg migration ported `VideoStreamInput` off OpenCV.
+**Status:** Superseded 2026-10-31. `[VideoDeviceInput]` now captures through SDL3's camera API on every
+platform and no longer touches OpenCV or DirectShow. Kept for the history below; ready to archive.
 
 ## Symptom
 

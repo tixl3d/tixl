@@ -12,6 +12,7 @@ using T3.Core.IO;
 using T3.Core.Resource;
 using T3.Core.Resource.ShaderCompiling;
 using T3.Core.SystemUi;
+using T3.SystemUi;
 using T3.Core.Settings;
 using T3.IoServices.Midi;
 using T3.Editor.App;
@@ -156,6 +157,7 @@ internal static class Program
         // drops the first interaction after working in another application. A tool wants that click.
         SDL3.SDL_SetHint(SDL3.SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
 
+        Cameras.Provider = new SdlCameraProvider();
         SdlSurface.SetVulkanLibraryPath(T3.Graphics.Vulkan.VulkanLoader.FindLibraryPath());
         if (!SDL3.SDL_Init(SDL_InitFlags.SDL_INIT_VIDEO))
         {
@@ -375,6 +377,7 @@ internal static class Program
             Log.Warning("Exception freeing resources: " + e.Message);
         }
 
+        (Cameras.Provider as SdlCameraProvider)?.Shutdown();
         SDL3.SDL_Quit();
         Log.Debug("Shutdown complete");
     }

@@ -20,7 +20,6 @@ small, finished library can sit still for years and be fine. Read it together wi
 |---|---|---|---|
 | 12.8 y | Rug.Osc 1.2.5 | OSC input | one operator family |
 | 8.1 y | **SharpDX 4.2.0** | D3D11 | ~150 files — being replaced |
-| 6.0 y | DirectShowLib.Standard | video device input | Windows-only, one op |
 | 5.7 y | unsplasharp.api | stock images | one op |
 | 5.5 y | LibTessDotNet | tessellation | few ops |
 | 4.4 y | NDILibDotNet6 | NDI | Windows-only, few ops |
@@ -43,7 +42,7 @@ python3 .agentic/Plans/dependency-age.py --all  # including Microsoft.*, System.
 
 ## What the snapshot says
 
-- **The dormant ones are mostly harmless.** Rug.Osc, ArtNet, DirectShowLib, unsplasharp and friends are
+- **The dormant ones are mostly harmless.** Rug.Osc, ArtNet, unsplasharp and friends are
   small, finished, and each sits behind one operator. If one breaks, the blast radius is that operator.
 - **Two are worth watching because of reach, not age.** `ImGui.NET` is every pixel of the editor, and it has
   been quiet for ~1.7 years while Dear ImGui upstream has not. `Sdcb.FFmpeg` is the one we have already

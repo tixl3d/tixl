@@ -303,8 +303,7 @@ In:
   verified; encode is not), MIDI via RtMidi,
   OSC / Art-Net (after splitting the Io package).
 
-Out (v5.x or never): macOS, Microsoft Store, NDI, Spout, Mediapipe, webcams (later through SDL3's camera
-API, which also retires [Plan_VideoDeviceInput](Plan_VideoDeviceInput.md)'s OpenCV problem), screen
+Out (v5.x or never): macOS, Microsoft Store, NDI, Spout, Mediapipe, screen
 capture, SpaceMouse (unless SDL HID makes it trivial), Ableton Link, OpenCV ops, the legacy graph,
 Hexa.NET.ImGui / ImGui 1.92, multi-viewport, HDR.
 

@@ -235,7 +235,7 @@ operators show "NDI runtime not found" in their status and produce no output.
 A few features rely on Windows-only libraries:
 
 - Computer vision operators based on OpenCV and MediaPipe.
-- Webcams and screen capture.
+- Screen capture.
 - Recording what other programs play (loopback). Live input from a microphone or line-in works.
 - Spout video sharing, which only exists on Windows.
 - SpaceMouse support, gamepads and Ableton Link.
@@ -243,6 +243,12 @@ A few features rely on Windows-only libraries:
 [Platform support](PlatformSupport.md) has the full comparison of Windows, Linux and macOS.
 
 ## Troubleshooting
+
+### A webcam is not listed
+
+Check that `v4l2-ctl --list-devices` shows it and that your user may open the device. Most desktops grant this
+automatically; otherwise add yourself to the `video` group and log in again. A camera can only be used by one
+program or operator at a time, and `[VideoDeviceInput]` reports this in its status.
 
 ### Nothing happens when I start TiXL from the app menu
 

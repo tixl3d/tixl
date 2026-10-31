@@ -66,7 +66,7 @@ scenes. These are bugs being worked on, not missing features.
 | Video playback ([PlayVideo], video clips on the timeline) | Works | Works | Partial |
 | Network streams (RTSP) | Works | Works | Partial |
 | Hardware-accelerated video export | Works | Not yet | Not yet |
-| Webcams and capture cards | Works | Not yet | Planned |
+| Webcams and capture cards | Works | Works | Planned |
 | NDI input and output | Works | Partial | Not yet |
 | Spout (sharing video with other apps) | Works | — | — |
 | Syphon (sharing video with other apps) | — | — | Planned |
