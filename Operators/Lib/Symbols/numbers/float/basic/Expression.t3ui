@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "a3f7c2e1-9b4d-4e8f-b6a1-2c5d8e0f3a7b"/*Expression*/,
-  "Description": "Evaluates a C# expression with variables a, b, c, d\n\nThe expression is compiled with Roslyn and cached. Common math functions (Sin, Cos, Sqrt, Pow, etc.) are available.\n\nExample: (1 - a) + (b * 2 * c) - d / Sin(c)",
+  "Description": "Evaluates a math formula with variables a, b, c, d and outputs the result as a float\n\nThe formula is only recompiled when its text changes. Names are not case-sensitive. An invalid formula logs a warning and outputs NaN.\n\nExamples: `a + b`, `(1 - a) + (b * 2 * c) - d / Sin(c)`, `Lerp(a, b, c)`, `Max(a, b) * Sin(c * PI)`\n\nOperators: `+`, `-`, `*`, `/`, `%` and parentheses\n\nTrigonometry: `Sin`, `Cos`, `Tan`, `Asin`, `Acos`, `Atan`, `Atan2`, `Sinh`, `Cosh`, `Tanh`\n\nPower/Exponential: `Sqrt`, `Pow`, `Exp`, `Log`, `Log10`\n\nRounding: `Abs`, `Floor`, `Ceil`, `Ceiling`, `Round`\n\nMin/Max: `Min`, `Max`, `Clamp`, `Lerp`, `Sign`\n\nConversion: `DegToRad`, `RadToDeg`\n\nConstants: `PI`, `E`",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -11,7 +11,7 @@
         "X": 36.0,
         "Y": 334.0
       },
-      "Description": "The C# expression to evaluate. Variables a, b, c, d are available. Math functions: Sin, Cos, Tan, Sqrt, Pow, Log, Abs, Floor, Ceil, Round, Min, Max, Clamp, Lerp, etc."
+      "Description": "The formula to evaluate. Variables a, b, c, d are available. Math functions: Sin, Cos, Tan, Sqrt, Pow, Log, Abs, Floor, Ceil, Round, Min, Max, Clamp, Lerp, etc."
     },
     {
       "InputId": "d0e6f3a9-5c2b-4d8f-9a4e-3b0c7f1d6e2a"/*A*/,

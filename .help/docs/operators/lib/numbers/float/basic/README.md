@@ -4,7 +4,7 @@
 
 - [**Add**](Add.md) — Adds two float values and outputs the result as a float
 - [**Div**](Div.md) — Divides two float values and outputs the quotient / result as float
-- [**Expression**](Expression.md) — Evaluates a C# expression with variables a, b, c, d
+- [**Expression**](Expression.md) — Evaluates a math formula with variables a, b, c, d and outputs the result as a float
 - [**Log**](Log.md) — Calculates the result of a logarithmic function
 - [**Modulo**](Modulo.md) — Modulo for floats.
 - [**Multiply**](Multiply.md) — Multiplies two floats.
