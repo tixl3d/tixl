@@ -1,0 +1,67 @@
+{
+  "FormatVersion": 3,
+  "Id": "a3f7c2e1-9b4d-4e8f-b6a1-2c5d8e0f3a7b"/*Expression*/,
+  "Description": "Evaluates a math formula with variables a, b, c, d and outputs the result as a float\n\nThe formula is only recompiled when its text changes. Names are not case-sensitive. An invalid formula logs a warning and outputs NaN.\n\nExamples: `a + b`, `(1 - a) + (b * 2 * c) - d / Sin(c)`, `Lerp(a, b, c)`, `Max(a, b) * Sin(c * PI)`\n\nOperators: `+`, `-`, `*`, `/`, `%` and parentheses\n\nTrigonometry: `Sin`, `Cos`, `Tan`, `Asin`, `Acos`, `Atan`, `Atan2`, `Sinh`, `Cosh`, `Tanh`\n\nPower/Exponential: `Sqrt`, `Pow`, `Exp`, `Log`, `Log10`\n\nRounding: `Abs`, `Floor`, `Ceil`, `Ceiling`, `Round`\n\nMin/Max: `Min`, `Max`, `Clamp`, `Lerp`, `Sign`\n\nConversion: `DegToRad`, `RadToDeg`\n\nConstants: `PI`, `E`",
+  "SymbolTags": "1",
+  "InputUis": [
+    {
+      "InputId": "c9d5e2f8-4b1a-4c7e-8f3d-2a9b6e0c5d1f"/*ExpressionInput*/,
+      "Relevancy": "Relevant",
+      "Position": {
+        "X": 36.0,
+        "Y": 334.0
+      },
+      "Description": "The formula to evaluate. Variables a, b, c, d are available. Math functions: Sin, Cos, Tan, Sqrt, Pow, Log, Abs, Floor, Ceil, Round, Min, Max, Clamp, Lerp, etc."
+    },
+    {
+      "InputId": "d0e6f3a9-5c2b-4d8f-9a4e-3b0c7f1d6e2a"/*A*/,
+      "Position": {
+        "X": 36.0,
+        "Y": 379.0
+      },
+      "Description": "Variable a - available in the expression",
+      "Min": -100.0,
+      "Max": 100.0
+    },
+    {
+      "InputId": "e1f7a4b0-6d3c-4e9a-0b5f-4c1d8a2e7f3b"/*B*/,
+      "Position": {
+        "X": 197.0,
+        "Y": 379.0
+      },
+      "Description": "Variable b - available in the expression",
+      "Min": -100.0,
+      "Max": 100.0
+    },
+    {
+      "InputId": "f2a8b5c1-7e4d-4f0b-1c6a-5d2e9b3f8a4c"/*C*/,
+      "Position": {
+        "X": 36.0,
+        "Y": 424.0
+      },
+      "Description": "Variable c - available in the expression",
+      "Min": -100.0,
+      "Max": 100.0
+    },
+    {
+      "InputId": "a3b9c6d2-8f5e-4a1c-2d7b-6e3f0c4a9b5d"/*D*/,
+      "Position": {
+        "X": 197.0,
+        "Y": 424.0
+      },
+      "Description": "Variable d - available in the expression",
+      "Min": -100.0,
+      "Max": 100.0
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "b8e4d1f6-3a7c-4f2e-9d5b-1c6a8e0f4b2d"/*Result*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 38.0
+      }
+    }
+  ]
+}
