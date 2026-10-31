@@ -82,7 +82,7 @@ internal sealed class DuplicateSymbolDialog : ModalDialog
             var hasTargetProject = _projectToCopyTo != null;
             var symbolNamesValid = false;
             var isBlocked = false;
-            if (hasTargetProject)
+            if (_projectToCopyTo != null)
             {
                 // The check parses the source file, so only redo it when symbol or target change
                 if (selectionChanged || !ReferenceEquals(_checkedProject, _projectToCopyTo))

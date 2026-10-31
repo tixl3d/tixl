@@ -126,7 +126,7 @@ internal sealed class CreateFromTemplateDialog : ModalDialog
 
                 var hasTargetProject = _projectToCopyTo != null;
                 var isNewSymbolNameValid = false;
-                if (hasTargetProject)
+                if (_projectToCopyTo != null)
                 {
                     _ = SymbolModificationInputs.DrawSymbolNameAndNamespaceInputs(ref _newSymbolName, ref _newNameSpace, _projectToCopyTo, out isNewSymbolNameValid);
 
