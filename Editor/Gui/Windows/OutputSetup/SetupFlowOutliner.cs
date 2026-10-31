@@ -137,20 +137,18 @@ internal sealed class SetupFlowOutliner
         if (CustomComponents.IconButton(Icon.Plus, Vector2.Zero))
             ImGui.OpenPopup(AddBoardItemMenuId);
 
-        CustomComponents.TooltipForLastItem("Add to the Board", "A reference photo to trace surfaces on, a prop for scale, or a whole room.");
+        CustomComponents.TooltipForLastItem("Add to the Board", "A reference photo to trace surfaces on, a person for scale, or a whole room.");
 
         var openRoomDialog = false;
         if (SetupPopup.Begin(AddBoardItemMenuId))
         {
+            CustomComponents.MenuItemsFlushLeft = true;
             if (CustomComponents.DrawMenuItem(1, "Add Reference Image"))
                 SetupActions.AddReferenceImage(selection);
 
             CustomComponents.TooltipForLastItem("Adds an empty image card; pick its photo in the Parameter window.", "Or drop an image file onto the Board.");
 
-            if (CustomComponents.DrawMenuItem(2, "Add Prop"))
-                SetupActions.AddProp(selection);
-
-            CustomComponents.TooltipForLastItem("A box of known size on the Board — a doorway, a table — to judge the venue against.");
+            PersonImages.DrawAddMenu(2, selection);
 
             // The dialog can't open from inside the menu (it would close with it), so it is opened once the menu is gone.
             if (CustomComponents.DrawMenuItem(3, "Add Floor Plan..."))
@@ -158,6 +156,7 @@ internal sealed class SetupFlowOutliner
 
             CustomComponents.TooltipForLastItem("The venue seen from above: a footprint whose edges carry the walls, drawn at true scale.");
 
+            CustomComponents.MenuItemsFlushLeft = false;
             SetupPopup.End();
         }
 

@@ -174,14 +174,14 @@ internal static class SetupActions
     /** Enough of a seam to tell two walls apart, far less than a wall's own width. */
     private const float ArrangeGapInMeters = 0.1f;
 
-    internal static void AddProp(SetupEntitySelection selection, Vector2? boardPosition = null)
+    internal static void AddProp(SetupEntitySelection selection, PersonImages.Image image, Vector2? boardPosition = null)
     {
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
             return;
 
-        SetupUndo.RunUndoable("Add prop", setup, () =>
+        SetupUndo.RunUndoable("Add person", setup, () =>
                                                  {
-                                                     var prop = new Prop();
+                                                     var prop = new Prop { ImagePath = image.RelativePath, HeightInMeters = image.HeightInMeters };
                                                      if (boardPosition != null)
                                                          prop.Position = new Vector3(boardPosition.Value.X, boardPosition.Value.Y, prop.Position.Z);
 

@@ -1359,7 +1359,7 @@ internal static class SetupParameterView
         if ((heightState & InputEditStateFlags.Modified) != 0)
             prop.HeightInMeters = MathF.Max(height[0], 0.1f);
 
-        CommitFieldUndo(setup, "Resize prop", heightState);
+        CommitFieldUndo(setup, "Resize person", heightState);
     }
 
     /// <summary>

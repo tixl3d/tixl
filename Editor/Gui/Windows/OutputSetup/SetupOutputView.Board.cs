@@ -813,26 +813,25 @@ internal sealed partial class SetupOutputView
     {
         var scale = T3Ui.UiScaleFactor;
         var fade = _boardLayerFade;
-        var h = MathF.Max(prop.HeightInMeters, 0.1f);
-        var foot = new Vector2(prop.Position.X, prop.Position.Y);
         var isSelected = selection?.IsSelected(SetupEntityKinds.Prop, prop.Id) ?? false;
         var pulse = isSelected ? 0f : FrameStats.CrossHighlightAmount(prop.Id);
-        var color = (isSelected ? UiColors.Text : PulseColor(UiColors.TextMuted.Fade(0.8f), pulse)).Fade(fade);
-        var thickness = (isSelected ? 2.5f : 1.5f) * scale;
 
-        Vector2 P(float dx, float dy) => _boardProjection.CanvasToScreen(foot + new Vector2(dx * h, dy * h));
-
-        dl.AddCircle(P(0, 0.91f), 0.08f * h * MathF.Abs(_boardCanvas.Scale.X), color, 16, thickness);
-        dl.AddLine(P(0, 0.83f), P(0, 0.45f), color, thickness);
-        dl.AddLine(P(0, 0.45f), P(-0.13f, 0), color, thickness);
-        dl.AddLine(P(0, 0.45f), P(0.13f, 0), color, thickness);
-        dl.AddLine(P(0, 0.75f), P(-0.2f, 0.5f), color, thickness);
-        dl.AddLine(P(0, 0.75f), P(0.2f, 0.5f), color, thickness);
-
-        // Its bounding box is the pick/grab area; the label sits at the head.
+        // Its bounding box is the image, the pick/grab area; the label sits at the head.
         PropBounds(prop, out var min, out var max);
         var sMin = _boardProjection.CanvasToScreen(new Vector2(min.X, max.Y));
         var sMax = _boardProjection.CanvasToScreen(new Vector2(max.X, min.Y));
+
+        // The image is a white silhouette, so the tint is its color: the hue of the physical things on the Board.
+        _boardContext ??= new EvaluationContext();
+        if (PersonImages.For(prop)?.Texture.GetValue(_boardContext) is { IsDisposed: false } texture)
+        {
+            var color = PulseColor(SetupColors.ForKind(SetupEntityKinds.Surface).Fade(isSelected ? 1f : 0.3f), pulse).Fade(fade);
+            dl.AddImage(SrvManager.GetSrvForTexture(texture).NativePointer, sMin, sMax, Vector2.Zero, Vector2.One, color);
+        }
+
+        if (isSelected)
+            SetupStrokes.DrawFrame(dl, sMin, sMax, UiColors.ForegroundFull.Fade(fade), isSelected: true);
+
         var interactive = fade >= 0.999f;
         var hovered = interactive && ImGui.IsMouseHoveringRect(sMin, sMax) && ImGui.IsWindowHovered();
         if (hovered)
@@ -840,7 +839,7 @@ internal sealed partial class SetupOutputView
 
         var meta = BoardMeta(prop.Id) ?? "";
         dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize, new Vector2(sMin.X, sMin.Y - Fonts.FontSmall.FontSize - 2 * scale),
-                   (isSelected ? UiColors.Text : UiColors.TextMuted).Fade(fade), meta);
+                   SetupColors.LabelFor(SetupEntityKinds.Surface).Fade(fade), meta);
 
         if (!interactive)
             return;
@@ -1267,8 +1266,9 @@ internal sealed partial class SetupOutputView
     {
         var h = MathF.Max(prop.HeightInMeters, 0.1f);
         var foot = new Vector2(prop.Position.X, prop.Position.Y);
-        min = foot + new Vector2(-0.22f * h, 0);
-        max = foot + new Vector2(0.22f * h, h);
+        var aspect = PersonImages.For(prop)?.Aspect ?? 0.5f;
+        min = foot + new Vector2(-0.5f * aspect * h, 0);
+        max = foot + new Vector2(0.5f * aspect * h, h);
     }
 
     /// <summary>

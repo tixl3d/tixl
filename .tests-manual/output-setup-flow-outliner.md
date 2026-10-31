@@ -85,7 +85,7 @@ then right-click a row without dragging.
 
 **Action:**
 Click the **+** left of the **?** at the right end of the header, and pick **Add Reference
-Image**; then use it again for **Add Prop**.
+Image**; then use it again for **Add Person** → **Man Pointing**.
 
 **Expected:**
 - The menu offers exactly those two, each with a tooltip saying what it is for.

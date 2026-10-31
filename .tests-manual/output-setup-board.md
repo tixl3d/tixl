@@ -6,7 +6,7 @@ tags: [projection-mapping]
 added: 2026-09-05
 added-in-version: 4.3
 prerequisites:
-  - A writable project is open whose active setup has one SendToOutput with content, one surface mapped to an output, one patch, one prop and one reference image (the "Output Setup — Patches" and "Properties in the Parameter Window" sets build most of this).
+  - A writable project is open whose active setup has one SendToOutput with content, one surface mapped to an output, one patch, one person and one reference image (the "Output Setup — Patches" and "Properties in the Parameter Window" sets build most of this).
   - The graph window, the Parameter window and one output window with the Flow Outliner shown are visible.
 ---
 
@@ -31,7 +31,7 @@ never leaves the Board; only a double-click enters an entity's space. Fading bet
   cards laid out on it — the reference image at the far left, the content card with its live
   texture and the slice drawn as a labelled sub-rect, "Surface 1" standing on the floor at
   its metre size with "1×1 m" beside its name, the output card at the right with the live
-  composite and "Patch 1" drawn inside it, and a stick figure labelled "1.7 m" standing on
+  composite and "Patch 1" drawn inside it, and a person silhouette labelled "1.8 m" standing on
   the floor. The window has no toolbar of its own: the outliner strip's header row carries a
   grip, the setup's name in an outlined control with a chevron, and the segmented control
   **Board · Straight · Output** with **Board** active, then the **Overlay** percent field.
@@ -60,7 +60,7 @@ never leaves the Board; only a double-click enters an entity's space. Fading bet
 **Action:**
 1. Click the "Surface 1" card; hover the content card without clicking; move the mouse away.
 2. Right-click empty Board and choose **Add Reference Image**; right-click again and choose
-   **Add Prop**.
+   **Add Person** → **Man Pointing**.
 3. With the new image selected, click the **Straight** tab, then the **Board** tab.
 
 **Expected:**
@@ -69,7 +69,7 @@ never leaves the Board; only a double-click enters an entity's space. Fading bet
   beside the name. The hovered content card brightens its magenta frame and shows its
   resolution; both go back to muted when the mouse leaves. Nothing turns blue or white
   anywhere: hover and selection only change the hue's opacity and the line width.
-- After 2: an empty image card and a stick figure appear on the Board and are selected in
+- After 2: an empty image card and a person silhouette appear on the Board and are selected in
   turn; there is no REFERENCE IMAGES or PROPS column in the strip.
 - After 3: the Straight tab is disabled for an image without a traced surface, so the Board
   stays; the segmented control keeps its three tabs Board · Straight · Output.

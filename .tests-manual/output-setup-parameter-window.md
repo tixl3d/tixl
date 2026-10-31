@@ -105,13 +105,13 @@ uninterrupted drag, then press Ctrl+Z once.
 ## Step: Kinds without a canvas point to the Parameter window
 
 **Action:**
-Right-click empty Board and choose **Add Prop**, then again and choose **Add Reference
-Image**. Click the new prop card, then the new image card.
+Right-click empty Board and choose **Add Person** → **Man Pointing**, then again and choose **Add Reference
+Image**. Click the new person card, then the new image card.
 
 **Expected:**
-- For the prop: the output area shows a centered message naming it and pointing to
-  the Parameter window; the Parameter window shows **Prop** with an editable
-  **Height (m)** field (1.7).
+- For the person: the output area shows a centered message naming it and pointing to
+  the Parameter window; the Parameter window shows **Person** with an editable
+  **Height (m)** field (1.8).
 - For the reference image: the Parameter window shows **Reference Image** with a
   Name field and the hint to drop a photo; the output area shows the (empty)
   reference canvas.

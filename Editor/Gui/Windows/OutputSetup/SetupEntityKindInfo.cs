@@ -77,7 +77,7 @@ internal sealed class SetupEntityKindInfo
         Add(new SetupEntityKindInfo(SetupEntityKinds.None, Icon.Grid, "None", -1, false, false, false, false));
         Add(new SetupEntityKindInfo(SetupEntityKinds.ReferenceImage, Icon.FileImage, "Reference Image", -1, false, true, true, true));
         Add(new SetupEntityKindInfo(SetupEntityKinds.Surface, Icon.Grid, "Surface", 2, true, true, true, true));
-        Add(new SetupEntityKindInfo(SetupEntityKinds.Prop, Icon.Grid, "Prop", -1, false, false, true, true));
+        Add(new SetupEntityKindInfo(SetupEntityKinds.Prop, Icon.Grid, "Person", -1, false, false, true, true));
         Add(new SetupEntityKindInfo(SetupEntityKinds.FloorPlan, Icon.Mapping, "Floor Plan", -1, false, true, true, true));
         Add(new SetupEntityKindInfo(SetupEntityKinds.Output, Icon.Projector, "Output", 3, true, true, true, true));
         Add(new SetupEntityKindInfo(SetupEntityKinds.Slice, Icon.Slice, "Slice", 1, true, true, true, true));

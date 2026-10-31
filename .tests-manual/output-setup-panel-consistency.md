@@ -6,7 +6,7 @@ tags: [projection-mapping]
 added: 2026-07-27
 added-in-version: 4.3
 prerequisites:
-  - A writable project is open with a setup containing at least one content send (SendToOutput with a texture), one slice, one surface, one projector output, one reference image, and one prop.
+  - A writable project is open with a setup containing at least one content send (SendToOutput with a texture), one slice, one surface, one projector output, one reference image, and one person.
 ---
 
 Covers the uniform context-menu verbs across all setup entities, the parity between
@@ -17,7 +17,7 @@ connections.
 
 **Action:**
 In the Flow Outliner, right-click one item of each kind: a content send, a slice, a
-surface, an output, a reference image, and a prop.
+surface, an output, a reference image, and a person.
 
 **Expected:**
 - Every menu ends with the same core verbs where the kind supports them:
@@ -25,14 +25,14 @@ surface, an output, a reference image, and a prop.
 - Kind-specific extras come first: *Add slice* (content), *Add sub-region / Adjust
   aspect to slice / Clear content inputs* (surface), *Add Patch / Split into…* (projector
   or display output). No menu binds a plug — that is a drag onto the plug row.
-- A prop offers Duplicate and Delete but no Rename (props have no name).
+- A person offers Duplicate and Delete but no Rename (people have no name).
 - A content send offers Rename (renames the op) but no Duplicate/Delete (it *is* a
   graph op — duplicate or delete it in the graph).
 
 ## Step: Duplicate works for every duplicable kind
 
 **Action:**
-Use the menu's Duplicate on a slice, an output, a reference image, and a prop.
+Use the menu's Duplicate on a slice, an output, a reference image, and a person.
 
 **Expected:**
 - Each creates a copy (named "… copy" where named), selects it, and saves the setup.

@@ -148,8 +148,7 @@ internal sealed partial class SetupOutputView
 
                 CustomComponents.TooltipForLastItem("Adds an empty image card; pick its photo in the Parameter window.", "Or drop an image file onto the Board.");
 
-                if (CustomComponents.DrawMenuItem(3, "Add Prop"))
-                    SetupActions.AddProp(selection, _boardMenuPosition);
+                PersonImages.DrawAddMenu(3, selection, _boardMenuPosition);
 
                 // The dialog can't open from inside the menu (it would close with it), so it opens once the menu is gone.
                 if (CustomComponents.DrawMenuItem(4, "Add Floor Plan..."))
