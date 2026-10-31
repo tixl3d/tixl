@@ -7,7 +7,7 @@ using T3.SystemUi;
 namespace Lib.io.video;
 
 [Guid("cd5a182e-254b-4e65-820b-ff754122614c")]
-public class VideoDeviceInput : Instance<VideoDeviceInput>, ICustomDropdownHolder, IStatusProvider
+public class WebcamInput : Instance<WebcamInput>, ICustomDropdownHolder, IStatusProvider
 {
     [Output(Guid = "1d0159cc-33d2-46b1-9c0c-7054aa560df5", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
     public readonly Slot<Texture2D?> Texture = new();
@@ -60,7 +60,7 @@ public class VideoDeviceInput : Instance<VideoDeviceInput>, ICustomDropdownHolde
     [Input(Guid = "805602D5-52B2-4A73-A337-12E00C3C91F2")]
     public readonly InputSlot<Vector2> Scale = new();
 
-    public VideoDeviceInput()
+    public WebcamInput()
     {
         Texture.UpdateAction = Update;
         UpdateCount.UpdateAction = Update;

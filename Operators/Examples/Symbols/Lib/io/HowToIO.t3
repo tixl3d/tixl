@@ -4,9 +4,9 @@
   "Inputs": [],
   "Children": [
     {
-      "Id": "007ca2a6-37a4-4482-9621-1c89306cb3db"/*VideoDeviceInput*/,
+      "Id": "007ca2a6-37a4-4482-9621-1c89306cb3db"/*WebcamInput*/,
       "SymbolId": "cd5a182e-254b-4e65-820b-ff754122614c",
-      "SymbolName": "Lib.io.video.VideoDeviceInput",
+      "SymbolName": "Lib.io.video.WebcamInput",
       "InputValues": [],
       "Outputs": []
     },

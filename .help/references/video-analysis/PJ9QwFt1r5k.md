@@ -36,7 +36,7 @@ The v4.0 release walkthrough: the new install/export flow and project-data locat
 - 12:57→13:07 [DrawMesh][RaymarchField][DrawPointsShaded][DrawMeshAtPoints] · explained · scripted · Concept · 70% — The PBR path was aligned across all the main draw ops, and they can now all override color through fields.
 - 13:08→13:29 [SetEnvironment] · explained · scripted · Tip · 72% — Now auto-converts to a cube map and updates only when needed (no Live-Update toggle), with presets including a black one that fully disables environment light.
 - 14:01→14:11 [SetKeyframes] · explained · scripted · Example · 70% — New operators that generate keyframe tracks procedurally, for consistent timeline-driven animation.
-- 14:29→14:53 [VideoDeviceInput][MidiInput] · passing · scripted · Concept · 65% — Video device input now takes webcam input; Artnet/NDI/Spout/MIDI input ops were updated too.
+- 14:29→14:53 [WebcamInput][MidiInput] · passing · scripted · Concept · 65% — Video device input now takes webcam input; Artnet/NDI/Spout/MIDI input ops were updated too.
 - 15:14→15:27 [BuildGradient] · explained · scripted · Example · 75% — Turns a new color-list type into a gradient, with an optional float list to place the steps.
 - 15:51→16:09 [Sketch] · explained · scripted · Tip · 70% — The revamped sketch op stays useful for annotating animations or blocking out storyboards.
 

@@ -1032,8 +1032,8 @@
       "url": "/operators/lib/io/video/VideoClip/",
       "summary": ""
     },
-    "Lib.io.video.VideoDeviceInput": {
-      "url": "/operators/lib/io/video/VideoDeviceInput/",
+    "Lib.io.video.WebcamInput": {
+      "url": "/operators/lib/io/video/WebcamInput/",
       "summary": "Captures live video from a connected device like a webcam, capture card, or NDI source."
     },
     "Lib.io.video.VideoStreamInput": {
@@ -5219,8 +5219,8 @@
     "VideoClip": [
       "Lib.io.video.VideoClip"
     ],
-    "VideoDeviceInput": [
-      "Lib.io.video.VideoDeviceInput"
+    "WebcamInput": [
+      "Lib.io.video.WebcamInput"
     ],
     "VideoStreamInput": [
       "Lib.io.video.VideoStreamInput"

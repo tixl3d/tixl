@@ -11,7 +11,7 @@ deferred so the loose ends live in one place instead of five "done-but-not-quite
 reuses the finished encoder), and [`Plan_VideoHdrExport.md`](Plan_VideoHdrExport.md) (HDR / PQ / 10-bit export).
 
 **Not yet reviewed** (out of this pass; flag for a later consolidation): `Plan_VideoClipPlayer.md` (many-clip
-decode pool, referenced by the decode plan's M2) and `Plan_VideoDeviceInput.md`.
+decode pool, referenced by the decode plan's M2) and `Plan_WebcamInput.md`.
 
 ---
 
@@ -53,7 +53,7 @@ The `Video` package exists, FFmpeg ops + natives moved out of Lib, registration 
       `<Operators Include="Video"/>` or the GUIDs won't resolve. Decide: auto-add on load vs a "missing package"
       prompt. (First-party Examples/template already updated.)
 - [ ] **Move `SwiftCamDevice` (+ swiftcam.dll) into `Video`** — a later phase.
-- [ ] **OpenCV camera ops** (`VideoDeviceInput`, `CameraCalibrator`) — blocked: Lib only sheds EmguCV once
+- [ ] **OpenCV camera ops** (`WebcamInput`, `CameraCalibrator`) — blocked: Lib only sheds EmguCV once
       `OnvifCamera` (PTZ) and `Video2DPointScanner` (DMX) also move/drop OpenCV. Separate decision; not "video".
 
 ## From the decode milestone — M2 caching ([archive/Plan_FfmpegVideo.md](archive/Plan_FfmpegVideo.md) — M1 DONE, M2 partial)

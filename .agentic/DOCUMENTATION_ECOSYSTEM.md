@@ -71,7 +71,7 @@ text, url, ops[], issues[], notes[], section? } ] } ] }`
 
 `mentions.json` — `{ "<type>:<id>": [ { source:{type,id}, url, date, tLabel, category,
 durationMin, title, summary } ], ... }` — keys are typed references
-(`op:Lib.io.video.VideoDeviceInput`, `ui:PerformanceWindow`, …), so non-operator
+(`op:Lib.io.video.WebcamInput`, `ui:PerformanceWindow`, …), so non-operator
 entities slot in beside operators. Merged across all sources so the editor tooltip loads one file. `category` (emoji-derived) + `durationMin` (gap to the next chapter) qualify each
 mention — a 26-min op-reference vs a 1-min chat. `source.type` makes the platform explicit
 (future Vimeo / local). `summary` (plain "what you'll find" text) is filled by the LLM

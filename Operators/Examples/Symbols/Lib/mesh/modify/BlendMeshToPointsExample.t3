@@ -207,9 +207,9 @@
       "Outputs": []
     },
     {
-      "Id": "8c873b2b-fa74-4fed-ae10-37ff1c95d380"/*VideoDeviceInput*/,
+      "Id": "8c873b2b-fa74-4fed-ae10-37ff1c95d380"/*WebcamInput*/,
       "SymbolId": "cd5a182e-254b-4e65-820b-ff754122614c",
-      "SymbolName": "Lib.io.video.VideoDeviceInput",
+      "SymbolName": "Lib.io.video.WebcamInput",
       "InputValues": [
         {
           "Id": "236d4c5c-0022-4416-a22c-d6df73c306e2"/*Active*/,

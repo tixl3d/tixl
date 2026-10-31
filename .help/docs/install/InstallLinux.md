@@ -248,7 +248,7 @@ A few features rely on Windows-only libraries:
 
 Check that `v4l2-ctl --list-devices` shows it and that your user may open the device. Most desktops grant this
 automatically; otherwise add yourself to the `video` group and log in again. A camera can only be used by one
-program or operator at a time, and `[VideoDeviceInput]` reports this in its status.
+program or operator at a time, and `[WebcamInput]` reports this in its status.
 
 ### Nothing happens when I start TiXL from the app menu
 

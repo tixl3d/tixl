@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "bce9bc96-ff9b-443b-97f5-2286ddd30908"/*BlendMeshToPointsExample*/,
-  "Description": "MediaPipe [FaceLandmarkDetection] Example, make sure to select your webcam in [VideoDeviceInput] and activate it.",
+  "Description": "MediaPipe [FaceLandmarkDetection] Example, make sure to select your webcam in [WebcamInput] and activate it.",
   "InputUis": [],
   "SymbolChildUis": [
     {
@@ -139,7 +139,7 @@
     },
     {
       "ChildId": "8c873b2b-fa74-4fed-ae10-37ff1c95d380",
-      "SymbolName": "Lib.io.video.VideoDeviceInput",
+      "SymbolName": "Lib.io.video.WebcamInput",
       "SectionId": "9bddf185-79d1-4e0a-9602-85c1088075a3",
       "Comment": "Select your webcam",
       "Position": {

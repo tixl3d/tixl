@@ -18652,7 +18652,7 @@
       "style": "experiment",
       "purpose": "Example",
       "confidence": 85,
-      "note": "Feed it a [VideoDeviceInput] webcam to get a 21-point-per-hand buffer entirely on the GPU; visualize the points directly and build interactions from them without ever reading back to the CPU.",
+      "note": "Feed it a [WebcamInput] webcam to get a 21-point-per-hand buffer entirely on the GPU; visualize the points directly and build interactions from them without ever reading back to the CPU.",
       "score": 0.72
     },
     {
@@ -19278,7 +19278,7 @@
       "score": 0.3375
     }
   ],
-  "op:Lib.io.video.VideoDeviceInput": [
+  "op:Lib.io.video.WebcamInput": [
     {
       "video": "InYRdFAZBm8",
       "startSecond": 4860,

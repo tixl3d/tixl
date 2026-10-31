@@ -16,7 +16,7 @@
 - [**SpoutInput**](SpoutInput.md) — Spout live video input
 - [**SpoutOutput**](SpoutOutput.md) — Spout live video output. We recommend using the R8G8B8A8_UNorm texture format for output. You can adjust the render format by using a [RenderTarget] like in this example: [TorusMesh]->[DrawMesh]->[RenderTarget]->[SpoutOutput].
 - [**VideoClip**](VideoClip.md)
-- [**VideoDeviceInput**](VideoDeviceInput.md) — Captures live video from a connected device like a webcam, capture card, or NDI source.
+- [**WebcamInput**](WebcamInput.md) — Captures live video from a connected device like a webcam, capture card, or NDI source.
 - [**VideoStreamInput**](VideoStreamInput.md) — Receives a video stream from a network source.
 
 ---

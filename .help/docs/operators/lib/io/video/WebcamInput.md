@@ -1,4 +1,4 @@
-# VideoDeviceInput
+# WebcamInput
 
 *in [Lib.io.video](README.md)*
 

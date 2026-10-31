@@ -1,6 +1,6 @@
 {
   "FormatVersion": 3,
-  "Id": "62df21a2-901e-4cb9-a5ed-84d555860852"/*VideoDeviceInputExample*/,
+  "Id": "62df21a2-901e-4cb9-a5ed-84d555860852"/*WebcamInputExample*/,
   "Inputs": [],
   "Children": [
     {
@@ -318,9 +318,9 @@
       "Outputs": []
     },
     {
-      "Id": "e1606537-1e46-4f2e-ae56-ff96a7f00e49"/*VideoDeviceInput*/,
+      "Id": "e1606537-1e46-4f2e-ae56-ff96a7f00e49"/*WebcamInput*/,
       "SymbolId": "cd5a182e-254b-4e65-820b-ff754122614c",
-      "SymbolName": "Lib.io.video.VideoDeviceInput",
+      "SymbolName": "Lib.io.video.WebcamInput",
       "InputValues": [
         {
           "Id": "236d4c5c-0022-4416-a22c-d6df73c306e2"/*Active*/,

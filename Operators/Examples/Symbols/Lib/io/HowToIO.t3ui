@@ -6,7 +6,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "007ca2a6-37a4-4482-9621-1c89306cb3db",
-      "SymbolName": "Lib.io.video.VideoDeviceInput",
+      "SymbolName": "Lib.io.video.WebcamInput",
       "Position": {
         "X": -1211.1843,
         "Y": 1148.9813

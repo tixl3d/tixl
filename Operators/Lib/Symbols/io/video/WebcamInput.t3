@@ -1,6 +1,6 @@
 {
   "FormatVersion": 3,
-  "Id": "cd5a182e-254b-4e65-820b-ff754122614c"/*VideoDeviceInput*/,
+  "Id": "cd5a182e-254b-4e65-820b-ff754122614c"/*WebcamInput*/,
   "Inputs": [
     {
       "Id": "11f7432d-31f1-44b9-8f75-b1569b314b13"/*CustomFps*/,
