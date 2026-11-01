@@ -53,7 +53,7 @@ internal sealed class AppWindow
                                                                   OutputHandle = Form.Handle,
                                                                   SampleDescription = new SampleDescription(1, 0),
 
-                                                                  BufferCount = 2,
+                                                                  BufferCount = 3,
                                                                   SwapEffect = SwapEffect.FlipDiscard,
                                                                   Usage = Usage.RenderTargetOutput,
                                                                   Flags = UseFrameLatencyWaitable
@@ -120,7 +120,8 @@ internal sealed class AppWindow
     internal void InitViewSwapChain(Factory factory)
     {
         SwapChain = new SwapChain(factory, _device, SwapChainDescription);
-        SwapChain.ResizeBuffers(bufferCount: 3, Width, Height,
+        //mrvux : ensure the initial buffer count is picke instead
+        SwapChain.ResizeBuffers(bufferCount: SwapChain.Description.BufferCount, Width, Height,
                                 SwapChain.Description.ModeDescription.Format, SwapChain.Description.Flags);
         CaptureFrameLatencyWaitableHandleIfEnabled();
     }
@@ -320,7 +321,7 @@ internal sealed class AppWindow
 
         // Preserve the swap chain's existing flags (in particular FrameLatencyWaitableObject must
         // be carried across resize, otherwise the waitable handle becomes invalid).
-        _swapChain.ResizeBuffers(3, Form.ClientSize.Width, Form.ClientSize.Height, Format.Unknown, _swapChain.Description.Flags);
+        _swapChain.ResizeBuffers(_swapChain.Description.BufferCount, Form.ClientSize.Width, Form.ClientSize.Height, Format.Unknown, _swapChain.Description.Flags);
         _backBufferTexture = Resource.FromSwapChain<Texture2D>(_swapChain, 0);
         _renderTargetView = new RenderTargetView(_device, _backBufferTexture);
     }

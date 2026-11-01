@@ -37,6 +37,9 @@ internal static class ProgramWindows
     private static bool _isWaitingForVblanks;
     private static int _pacingFrameLatency = 1;
 
+    private static bool _mainUseFrameLatencyWaitable = true;
+    private static bool _windowUseFrameLatencyWaitable = true;
+
     /**
      * Fraction of a refresh period a frame may start early without waiting for another vblank. Large enough for
      * start jitter, small enough that a frame released half a period early (120 Hz clock, 60 Hz display) still waits.
@@ -100,7 +103,7 @@ internal static class ProgramWindows
         // Enable explicit frame-latency pacing on Main's swap chain. Replaces the accidental
         // pacing previously provided by Viewer's secondary `Present(1)` call. Must be set before
         // SwapChainDescription is consumed by Device.CreateWithSwapChain.
-        Main.UseFrameLatencyWaitable = true;
+        Main.UseFrameLatencyWaitable = _mainUseFrameLatencyWaitable;
         _pacingWindow = Main;
         device = null;
         string[] highPerformanceKeywords = ["dedicated", "high performance", "rtx", "gtx"];
@@ -279,7 +282,7 @@ internal static class ProgramWindows
         var window = new AppWindow(name, disableClose: true);
 
         // An output window paces the frame loop while an output is bound to its display.
-        window.UseFrameLatencyWaitable = true;
+        window.UseFrameLatencyWaitable = _windowUseFrameLatencyWaitable;
         window.SetDevice(_device, _deviceContext);
         window.SetSize(width, height);
         window.SetSizeable();
@@ -415,7 +418,7 @@ internal static class ProgramWindows
             }
 
             // Takes effect in the next frame's wait; windows on other displays just show each frame longer.
-            var vblanksPerFrame = useVSync ? GetVblanksPerFrame(UserSettings.Config.TargetFrameRate, FrameTiming.RefreshRate) : 1;
+            var vblanksPerFrame = useVSync ? GetVblanksPerFrame(UserSettings.Config.TargetFrameRate, FrameTiming.RefreshRate) : 0;
             FrameTiming.VblanksPerFrame = vblanksPerFrame;
             _pacingVblanksPerFrame = vblanksPerFrame;
             _isPacingWithVSync = useVSync;
