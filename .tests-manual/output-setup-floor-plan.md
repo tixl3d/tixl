@@ -117,6 +117,7 @@ Select "Wall 1" and type `12` into the first Size (m) field.
 - A "Floor Plan 2" card appears under the surface's card: an open run of two corners 6 m apart with
   one thick edge labelled with the surface's name and "6 m"; its card shows **Closed** unticked, no
   floor row, and one edge row ticked.
+- No line follows the cursor: drawing further walls only starts from the plus at the run's end, or **Draw Walls**.
 - The surface's card now says it is the wall on edge 1 of Floor Plan 2, with Rotation read-only.
 
 ## Step: A plan started from a surface matches the surface's sides
@@ -184,7 +185,8 @@ right and release.
 2. Right-click the ring and choose **Make Left Side the Front**.
 3. Right-click the middle dot of any edge and choose **Make This Edge the Front**, then right-click a
    corner and choose **Move Origin Here**.
-4. Press Ctrl+Z four times.
+4. Right-click an empty spot inside the plan's card, away from corners and edges, and choose **Move Origin Here**.
+5. Press Ctrl+Z five times.
 
 **Expected:**
 - The ring and arrow show on every plan card; hovering the ring explains it.
@@ -194,7 +196,8 @@ right and release.
 - After 2: the room turns a quarter on its card around the ring, the arrow still pointing up, and the
   wall that was on the left now sits at the top. Wall widths and the floor size are unchanged.
 - After 3: the chosen edge ends up at the top of the card, facing the arrow, and the ring sits on the corner.
-- After 4: each step undoes on its own and the plan, walls and origin are back where they started. A
+- After 4: the ring lands on the clicked spot and the room stays where it is on the Board.
+- After 5: each step undoes on its own and the plan, walls and origin are back where they started. A
   projector calibrated before step 1 still lines up after each step.
 
 ## Step: A floor rectangle for a concave room

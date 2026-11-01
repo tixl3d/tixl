@@ -119,6 +119,12 @@ internal sealed partial class SetupOutputView
 
                 _menuKind = hit.Kind;
                 _menuId = hit.Id;
+                if (hit.Kind == SetupEntityKinds.FloorPlan && setup.FindFloorPlan(hit.Id) is { BoardPlacement: { } placement })
+                {
+                    var pressedAt = ImGui.GetMousePos() - ImGui.GetMouseDragDelta(ImGuiMouseButton.Right);
+                    PlanMenuPointInPlan = _boardProjection.ScreenToCanvas(pressedAt) - placement.Position;
+                }
+
                 ImGui.OpenPopup(PickMenuId);
             }
         }

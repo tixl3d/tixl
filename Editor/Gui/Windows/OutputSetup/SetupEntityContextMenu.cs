@@ -163,6 +163,12 @@ internal static class SetupEntityContextMenu
                     SetupOutputView.PendingPlanDrawId = plan.Id;
 
                 CustomComponents.TooltipForLastItem("Continue the run from its last corner on the Board: each click plants a corner and raises a wall.");
+
+                if (CustomComponents.DrawMenuItem(28, "Move Origin Here"))
+                {
+                    var point = SetupOutputView.PlanMenuPointInPlan;
+                    SetupUndo.RunUndoable("Move origin", setup, () => StageOrigin.Move(setup, point, Vector2.UnitY));
+                }
                 break;
 
             case SetupEntityKinds.Output:
