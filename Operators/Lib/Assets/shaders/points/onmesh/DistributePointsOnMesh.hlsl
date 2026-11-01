@@ -8,8 +8,14 @@
 cbuffer EmitParameter : register(b0)
 {
     float Seed;
-    float UseVertexSelection;
+    float ExtraAttributes;
 };
+
+// Mirrors ExtraAttributeModes in PointsOnMesh.cs (values are 1-based, 0 = Default).
+static const uint ExtraAttributeTexCoord = 1;
+static const uint ExtraAttributeTexCoord2 = 2;
+static const uint ExtraAttributeVertexSelectF1 = 3;
+static const uint ExtraAttributeVertexSelectF2 = 4;
 
 uint wang_hash(in out uint seed)
 {
@@ -103,11 +109,39 @@ void main(uint3 i : SV_DispatchThreadID)
     p.Rotation = normalize(qFromMatrix3Precise(transpose(orientationDest)));
     p.FX1 = 1;
 
-
-
     float2 uv = Vertices[fIndices[0]].TexCoord * u 
             + Vertices[fIndices[1]].TexCoord * v
             + Vertices[fIndices[2]].TexCoord * w;
+
+    uint extraAttributeMode = (uint)(ExtraAttributes + 0.5);
+    if (extraAttributeMode == ExtraAttributeTexCoord)
+    {
+        p.FX1 = uv.x;
+        p.FX2 = uv.y;
+    }
+    else if (extraAttributeMode == ExtraAttributeTexCoord2)
+    {
+        float2 uv2 = Vertices[fIndices[0]].TexCoord2 * u
+                   + Vertices[fIndices[1]].TexCoord2 * v
+                   + Vertices[fIndices[2]].TexCoord2 * w;
+        p.FX1 = uv2.x;
+        p.FX2 = uv2.y;
+    }
+    else if (extraAttributeMode == ExtraAttributeVertexSelectF1
+          || extraAttributeMode == ExtraAttributeVertexSelectF2)
+    {
+        float selected = Vertices[fIndices[0]].Selected * u
+                       + Vertices[fIndices[1]].Selected * v
+                       + Vertices[fIndices[2]].Selected * w;
+        if (extraAttributeMode == ExtraAttributeVertexSelectF1)
+        {
+            p.FX1 = selected;
+        }
+        else
+        {
+            p.FX2 = selected;
+        }
+    }
 
     float4 color = ColorMap.SampleLevel(texSampler, uv* float2(1, -1), 0);
     ResultColors[i.x] = color;
