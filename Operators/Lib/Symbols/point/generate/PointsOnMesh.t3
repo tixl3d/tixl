@@ -42,7 +42,7 @@
           "Id": "180cae35-10e3-47f3-8191-f6ecea7d321c"/*Dispatch*/,
           "Type": "T3.Core.DataTypes.Vector.Int3",
           "Value": {
-            "X": 2,
+            "X": 1,
             "Y": 1,
             "Z": 1
           }

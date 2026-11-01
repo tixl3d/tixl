@@ -44,43 +44,28 @@ void main(uint3 i : SV_DispatchThreadID)
     ResultPoints.GetDimensions(pointCount, stride);
     FaceIndices.GetDimensions(faceCount, stride);
 
-    if (i.x >= pointCount)
+    if (i.x >= pointCount || faceCount == 0)
         return; 
 
-
-    uint rng_state = (i.x * (uint)(Seed * 10317));
+    // The point index has to enter the hash; using the seed alone gives every point the same state.
+    // Raw float bits keep negative and small seed changes distinguishable.
+    uint rng_state = asuint(Seed) + i.x * 0x9E3779B9u;
     float xi = (float(wang_hash(rng_state)) * (1.0 / 4294967296.0));
 
+    // CDFs[] holds normalized cumulative face areas: face k owns the range (cdf[k-1], cdf[k]].
+    // Binary search for the first face whose cumulative area exceeds xi.
     uint left = 0;
-    uint width = faceCount -2;
-    uint right = width;
-    uint steps = log2(width) + 1;
-    uint cdfIndex;
-    for (uint j = 0; j < steps; ++j)
+    uint right = faceCount - 1;
+    while (left < right)
     {
-        uint middle = (right + left) / 2 ; 
-        float cdfSegStart = CDFs[middle].cdf;
-        float cdfSegEnd = CDFs[middle + 1].cdf;
-        if (right == left || (cdfSegStart <= xi  && cdfSegEnd > xi))
-        {
-            cdfIndex = middle +1;
-        }
-        else {
-            if (xi < cdfSegStart)
-            {
-                right = middle;
-            }
-            else
-            {
-                left = middle +1;
-            }    
-        }
+        uint middle = (left + right) / 2;
+        if (xi < CDFs[middle].cdf)
+            right = middle;
+        else
+            left = middle + 1;
     }
 
-
-    uint faceIndex = cdfIndex;
-    if (faceIndex >= (uint)faceCount)
-        return;
+    uint faceIndex = left;
 
     float xi1 = (float(wang_hash(rng_state)) * (1.0 / 4294967296.0));
     float xi2 = float(wang_hash(rng_state)) * (1.0 / 4294967296.0);
@@ -127,6 +112,9 @@ void main(uint3 i : SV_DispatchThreadID)
     float4 color = ColorMap.SampleLevel(texSampler, uv* float2(1, -1), 0);
     ResultColors[i.x] = color;
     p.Color = color;
+    p.Color.rgb*=Vertices[fIndices[0]].ColorRGB * u
+    + Vertices[fIndices[1]].ColorRGB * v
+    + Vertices[fIndices[2]].ColorRGB * w; 
     ResultPoints[i.x] = p;
 }
 
