@@ -613,7 +613,8 @@ quad is nearly a point; then undo.
   arrow shrinks to nothing. The blinking outline moves to P2. Ctrl+Z puts the quad back and P2 back to the thin
   outline, still where it stands; Ctrl+Y restores both.
 - After 4: with three set points the quad shears; P1 and P2 stay put. **Release Point** returns P3 to the thin
-  outline, leaves it exactly where it is, and the quad does not change. The button is disabled again.
+  outline and moves its disc to where the pin lands it, so its arrow is gone. The quad does not change. The button
+  is disabled again.
 - After 5: Ctrl+Z sets P3 again; the double-click releases it the same way as the button.
 - After 6: with four set points the quad keystones and every mark is hit exactly, so no arrows remain. With
   five, the header shows "points miss by up to N px" with N above zero, and the points that miss keep an arrow
@@ -637,6 +638,30 @@ quad is nearly a point; then undo.
   disc sits where the pin lands its point, and no arrows or miss readout remain. **Release Point** is disabled.
 - After 2: Ctrl+Z brings back the aligned quad, set points and arrows in one step; Ctrl+Y resets again.
 - After 3: the same reset works after the reload.
+
+## Step: Aligning with a game controller
+
+**Action:**
+With an Xbox-compatible controller connected, "Surface 1" carrying at least three points and **Align Points** on:
+1. Press the right shoulder button three times, then the left one once. Then press d-pad up, down, left and right.
+2. Push the right stick about a third of the way up, then fully right, and let go. Press Ctrl+Z.
+3. Hold the left stick to the right. Release it without pressing.
+4. Hold the left stick to the right, press it down, and let go. Push the right stick up.
+5. With the active point set, press the right stick's button.
+6. With the left stick centred, press its button.
+7. Unplug the controller, then plug it in again.
+
+**Expected:**
+- After 1: within a second of connecting, one point's ring blinks. The right shoulder moves it one point forward in
+  list order, wrapping at the end, and the left moves it back. Each d-pad press moves it to the nearest point in that
+  direction on the wall, and it stays put if there is none.
+- After 2: the active point moves only a few pixels per second at a third of the way, and crosses about a quarter of
+  the canvas height per second at full deflection. It becomes set, and the pin follows. Ctrl+Z undoes the whole move in one step.
+- After 3: while held, an amber arrow reaches right from the active point, on the canvas and on the wall.
+- After 4: the point now moves to the right on the canvas, because the stick's up was set to that direction.
+- After 5: the point is released: thin outline, its disc back where the pin lands it, and the quad does not change.
+- After 6: the alignment resets as with **Reset Alignment**, in one undo step.
+- After 7: the editor keeps running without a hitch, and the controller works again within about a second.
 
 ## Step: Finding Align Points from the output
 

@@ -77,6 +77,12 @@ internal static class CalibrationOverlay
         _photo.Set(new CalibrationPhoto(surfaceId, srv, uv, radiusOfHeight, activePointId), ImGui.GetFrameCount());
     }
 
+    /// <summary>Shows an arrow around the active point in a direction on the canvas (Y down), while one is being chosen.</summary>
+    public static void SetUpDirectionPreview(Guid surfaceId, Vector2 direction)
+    {
+        _upDirectionPreview.Set(new UpDirectionPreview(surfaceId, direction), ImGui.GetFrameCount());
+    }
+
     /// <summary>
     /// Marks one of a surface's annotation lines as the one being edited, so the projected composite draws it
     /// thick and pulsing on the wall (the whole point of calibrating is watching that projection).
@@ -308,6 +314,9 @@ internal static class CalibrationOverlay
         {
             var white = UiColors.ForegroundFull.Rgba;
             AddRing(target, discRadius + outlineWidth, _activePointOutlineWidth, new Vector4(white.X, white.Y, white.Z, blink));
+
+            if (_upDirectionPreview.IsCurrent(ImGui.GetFrameCount()) && _upDirectionPreview.Value.SurfaceId == photo.SurfaceId)
+                AddArrow(target, target + _upDirectionPreview.Value.Direction * (discRadius + _upArrowReach), UiColors.StatusAnimated.Rgba);
         }
 
         var arm = _pointCrosshairSize * 0.5f;
@@ -316,19 +325,19 @@ internal static class CalibrationOverlay
         _overlayLines.Add(new OverlayLine(new Vector4(target.X - arm, target.Y, target.X + arm, target.Y), crosshairColor, crosshairWidth));
         _overlayLines.Add(new OverlayLine(new Vector4(target.X, target.Y - arm, target.X, target.Y + arm), crosshairColor, crosshairWidth));
 
-        var miss = projected - target;
-        var missLength = miss.Length();
-        if (missLength < _minVisibleMissPx)
-            return;
+        if ((projected - target).Length() >= _minVisibleMissPx)
+            AddArrow(target, projected, UiColors.StatusAttention.Rgba);
+    }
 
-        var direction = miss / missLength;
-        var side = new Vector2(-direction.Y, direction.X) * _missArrowHeadSize * 0.5f;
-        var headBase = projected - direction * _missArrowHeadSize;
-        var arrowColor = UiColors.StatusAttention.Rgba;
-        var arrowWidth = new Vector4(_annotationLineWidth, 0, 0, 0);
-        _overlayLines.Add(new OverlayLine(new Vector4(target.X, target.Y, projected.X, projected.Y), arrowColor, arrowWidth));
-        _overlayLines.Add(new OverlayLine(new Vector4(projected.X, projected.Y, headBase.X + side.X, headBase.Y + side.Y), arrowColor, arrowWidth));
-        _overlayLines.Add(new OverlayLine(new Vector4(projected.X, projected.Y, headBase.X - side.X, headBase.Y - side.Y), arrowColor, arrowWidth));
+    private static void AddArrow(Vector2 from, Vector2 to, Vector4 color)
+    {
+        var direction = Vector2.Normalize(to - from);
+        var side = new Vector2(-direction.Y, direction.X) * _arrowHeadSize * 0.5f;
+        var headBase = to - direction * _arrowHeadSize;
+        var width = new Vector4(_annotationLineWidth, 0, 0, 0);
+        _overlayLines.Add(new OverlayLine(new Vector4(from.X, from.Y, to.X, to.Y), color, width));
+        _overlayLines.Add(new OverlayLine(new Vector4(to.X, to.Y, headBase.X + side.X, headBase.Y + side.Y), color, width));
+        _overlayLines.Add(new OverlayLine(new Vector4(to.X, to.Y, headBase.X - side.X, headBase.Y - side.Y), color, width));
     }
 
     /** A ring whose inner edge sits at <paramref name="innerRadius"/>. */
@@ -461,6 +470,8 @@ internal static class CalibrationOverlay
 
     private readonly record struct EmphasizedAnnotation(Guid SurfaceId, int Index);
 
+    private readonly record struct UpDirectionPreview(Guid SurfaceId, Vector2 Direction);
+
     private readonly record struct PendingFragment(Surface Surface, Surface.OutputMapping Mapping, Matrix4x4 Homography);
 
     // Overlay instances. Every member is a float4 so the C# layout and the HLSL structured-buffer packing
@@ -490,7 +501,8 @@ internal static class CalibrationOverlay
     /** Reaches under the disc's soft edge (2 px in corner-pin-layer.hlsl) and the quad shader's 1 px of slack, so no gap shows. */
     private const float _outlineOverlapWithDisc = 3f;
     private const float _minVisibleMissPx = 6f;
-    private const float _missArrowHeadSize = 14f;
+    private const float _arrowHeadSize = 14f;
+    private const float _upArrowReach = 60f;
     private const float _aimLineWidth = 1.5f;
     private const float MinWarpablePinExtent = 8f;
     private const float MaxPhotoGrowthThroughPin = 8f;
@@ -503,6 +515,7 @@ internal static class CalibrationOverlay
     private static FrameStamped<AimPoint> _aim = new() { Frame = -10 };
     private static FrameStamped<CalibrationPhoto> _photo = new() { Frame = -10 };
     private static FrameStamped<EmphasizedAnnotation> _emphasized = new() { Frame = -10 };
+    private static FrameStamped<UpDirectionPreview> _upDirectionPreview = new() { Frame = -10 };
 
     private static readonly List<PendingFragment> _pendingFragments = [];
     private static readonly List<OverlayLine> _overlayLines = [];

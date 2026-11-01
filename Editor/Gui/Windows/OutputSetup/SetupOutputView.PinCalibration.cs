@@ -71,13 +71,7 @@ internal sealed partial class SetupOutputView
             else if (phase == CanvasPointHandle.DragPhases.Started)
             {
                 _activePointId = point.Id;
-                BeginGesture(setup, GestureKinds.AimPoint, "Aim reference point", surface.Id);
-                SeedPointAims(setup, surface);
-                if (mapping.QuadBeforeAligning == null)
-                {
-                    mapping.QuadBeforeAligning = (Vector2[])mapping.Quad.Clone();
-                    mapping.ModeBeforeAligning = mapping.Mode;
-                }
+                BeginPointMove(setup, surface, mapping);
             }
             else if (phase == CanvasPointHandle.DragPhases.Dragging && _gesture.Is(GestureKinds.AimPoint, surface.Id))
             {
@@ -91,6 +85,21 @@ internal sealed partial class SetupOutputView
 
             var markColor = isAimed ? green.Fade(0.9f * fade) : UiColors.ForegroundFull.Fade(0.5f * fade);
             DrawPointLabel(dl, _projection.CanvasToScreen(px), PointLabel(point.Name, ordinal), markColor);
+        }
+
+        if (editable)
+            UpdatePointsFromGamepad(setup, surface, mapping, pinCanvas);
+    }
+
+    /** Opens the undo step of moving a point, and remembers the pin if this is the first move of an alignment. */
+    private void BeginPointMove(Setup setup, Surface surface, Surface.OutputMapping mapping)
+    {
+        BeginGesture(setup, GestureKinds.AimPoint, "Aim reference point", surface.Id);
+        SeedPointAims(setup, surface);
+        if (mapping.QuadBeforeAligning == null)
+        {
+            mapping.QuadBeforeAligning = (Vector2[])mapping.Quad.Clone();
+            mapping.ModeBeforeAligning = mapping.Mode;
         }
     }
 
@@ -136,7 +145,7 @@ internal sealed partial class SetupOutputView
         ImGui.EndDisabled();
         if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
             ImGui.SetTooltip(canRelease
-                                 ? "The active point stops constraining the pin. It stays where it is, and the pin does not change."
+                                 ? "The active point stops constraining the pin and returns to where the pin lands it. The pin does not change."
                                  : "Drag a point to set it. The last one you moved is the active one.");
     }
 
@@ -152,9 +161,7 @@ internal sealed partial class SetupOutputView
         ImGui.BeginDisabled(!canReset);
         if (CustomComponents.StateButton("Reset Alignment", CustomComponents.ButtonStates.Default) && canReset)
         {
-            SetupUndo.RunUndoable("Reset alignment", setup, () => ResetAlignment(mapping!));
-            _pinResidualPx = 0;
-            _activePointId = Guid.Empty;
+            ResetAlignment(setup, mapping!);
         }
 
         ImGui.EndDisabled();
@@ -166,7 +173,14 @@ internal sealed partial class SetupOutputView
                                  : "The surface fills the canvas and no point has been moved.");
     }
 
-    private static void ResetAlignment(Surface.OutputMapping mapping)
+    private void ResetAlignment(Setup setup, Surface.OutputMapping mapping)
+    {
+        SetupUndo.RunUndoable("Reset alignment", setup, () => RestorePinBeforeAligning(mapping));
+        _pinResidualPx = 0;
+        _activePointId = Guid.Empty;
+    }
+
+    private static void RestorePinBeforeAligning(Surface.OutputMapping mapping)
     {
         mapping.PointAims.Clear();
         if (mapping.QuadBeforeAligning == null)
@@ -180,11 +194,10 @@ internal sealed partial class SetupOutputView
         mapping.QuadBeforeAligning = null;
     }
 
-    /** Back to idle: the mark stays where it is, it just stops constraining the pin. */
+    /** Back to idle: the point stops constraining the pin and returns to where the pin lands it. */
     private static void ReleasePoint(Setup setup, Surface.OutputMapping mapping, Guid pointId)
     {
-        SetupUndo.RunUndoable("Release reference point", setup,
-                              () => mapping.PointAims[pointId] = mapping.PointAims[pointId] with { IsAimed = false });
+        SetupUndo.RunUndoable("Release reference point", setup, () => mapping.PointAims.Remove(pointId));
     }
 
     /// <summary>
