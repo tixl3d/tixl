@@ -247,6 +247,7 @@ public partial class ScalableCanvas
                                                       | ImGuiHoveredFlags.AllowWhenBlockedByPopup
                                                       | ImGuiHoveredFlags.AllowWhenBlockedByActiveItem);
         var isInteractable = isDirectlyHovered && !FrameStats.Last.OpenedPopupHovered;
+        TrackWhereDragsStarted(isInteractable);
         var isPanning = _draggedCanvas == this;
         var isAnotherWindowPanning = _draggedCanvas != null && _draggedCanvas != this
                                      || CustomComponents.IsAnotherWindowDragScrolling(this);
@@ -263,9 +264,9 @@ public partial class ScalableCanvas
             && (isInteractable || isPanning)
             && (flags & T3Ui.EditingFlags.PreventPanningWithMouse) == 0
             && ((
-                    ImGui.IsMouseDragging(ImGuiMouseButton.Left) && ImGui.GetIO().KeyAlt && PansWithAltDrag)
-                || (!UserSettings.Config.MiddleMouseButtonZooms && ImGui.IsMouseDragging(ImGuiMouseButton.Middle) && !ImGui.GetIO().KeyAlt)
-                || (ImGui.IsMouseDragging(ImGuiMouseButton.Right) && !ImGui.GetIO().KeyAlt))
+                    IsDraggingFromInside(ImGuiMouseButton.Left) && ImGui.GetIO().KeyAlt && PansWithAltDrag)
+                || (!UserSettings.Config.MiddleMouseButtonZooms && IsDraggingFromInside(ImGuiMouseButton.Middle) && !ImGui.GetIO().KeyAlt)
+                || (IsDraggingFromInside(ImGuiMouseButton.Right) && !ImGui.GetIO().KeyAlt))
             )
         {
             var parentScaleTarget = Parent?.ScaleTarget ?? Vector2.One;
@@ -300,6 +301,26 @@ public partial class ScalableCanvas
         ZoomWithDrag();
         ScaleTarget = ClampScaleToValidRange(ScaleTarget);
     }
+
+    /// <summary>
+    /// Remembers for each button whether it was pressed over this canvas. A drag that started elsewhere, like orbiting
+    /// the camera in an output window, must not pan this canvas when it crosses into it.
+    /// </summary>
+    private void TrackWhereDragsStarted(bool isInteractable)
+    {
+        for (var buttonIndex = 0; buttonIndex < _dragStartedInCanvas.Length; buttonIndex++)
+        {
+            if (ImGui.IsMouseClicked((ImGuiMouseButton)buttonIndex))
+                _dragStartedInCanvas[buttonIndex] = isInteractable;
+        }
+    }
+
+    private bool IsDraggingFromInside(ImGuiMouseButton button)
+    {
+        return _dragStartedInCanvas[(int)button] && ImGui.IsMouseDragging(button);
+    }
+
+    private readonly bool[] _dragStartedInCanvas = new bool[3];
 
     private static ScalableCanvas? _draggedCanvas;
     internal static bool IsAnyCanvasDragged => _draggedCanvas != null;
@@ -505,7 +526,7 @@ public partial class ScalableCanvas
 
         var hotkeysMatch = UserSettings.Config.MiddleMouseButtonZooms || ImGui.GetIO().KeyShift;
 
-        if (ImGui.IsMouseClicked(mouseButton) && hotkeysMatch)
+        if (ImGui.IsMouseClicked(mouseButton) && hotkeysMatch && _dragStartedInCanvas[(int)mouseButton])
         {
             _isDragZooming = true;
             _lastZoomDelta = 1;
