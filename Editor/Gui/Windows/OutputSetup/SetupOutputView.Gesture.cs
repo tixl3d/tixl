@@ -85,8 +85,8 @@ internal sealed partial class SetupOutputView
     {
         None,
         BoardCard,  // a card (or prop) on the Board; the drag moves the selected cards
-        Label,      // a surface's, region's or patch's name chip on a canvas; the drag moves that entity
-        ClickOnly,  // anything else nothing here drags (a slice's chip); the press can only act at its release
+        Label,      // a surface's, region's, patch's or slice's name chip on a canvas; the drag moves that entity
+        ClickOnly,  // anything else nothing here drags; the press can only act at its release
     }
 
     /// <summary>

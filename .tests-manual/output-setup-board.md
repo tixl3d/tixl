@@ -106,6 +106,26 @@ zooming in on one corner of it; then zoom all the way out.
 - After 3: the figure moves and undo returns it.
 - After 4: nothing is selected and the Board stays.
 
+## Step: Alt-drag duplicates a slice
+
+**Action:**
+1. Click the "Slice 1" item in the CONTENT column, then drag the right edge handle of its sub-rect on the content
+   card to the middle of the card.
+2. Hold Alt, click the "Slice 1" label on the card and release without moving the mouse.
+3. Hold Alt and drag the "Slice 1" label to the right half of the card; release.
+4. Press Ctrl+Z once.
+5. Click an empty spot of the Board so nothing is selected, then hold Alt and drag the "Slice 1" label to the right
+   half of the card in one press; release.
+6. Press Ctrl+Z once, click an empty spot of the Board, then drag the "Slice 1" label 1 cm to the right in one press
+   without Alt; release.
+
+**Expected:**
+- After 2: no copy appears; the CONTENT column still lists one slice under the op.
+- After 3: "Slice 1 copy" sits in the right half and is selected, and "Slice 1" stays in the left half at its old size.
+- After 4: "Slice 1 copy" is gone and "Slice 1" is unchanged, in one undo step.
+- After 5: the same result as after 3, from a single press on the unselected slice.
+- After 6: "Slice 1" is selected and has moved with the cursor; no copy appears.
+
 ## Step: Fence and group drag
 
 **Action:**
@@ -180,6 +200,25 @@ down to 0%, then up to 100% (or double-click it and type).
 **Expected:**
 - After 1: the view eases so the figure fills most of the window.
 - After 2: the view eases back to frame every card.
+
+## Step: Scaling a multi-selection
+
+**Action:**
+1. Add a second surface, so "Surface 1" and "Surface 2" are both 1×1 m and stand on the floor, 1 m apart with
+   "Surface 2" on the right. Click "Surface 1", then Ctrl+click "Surface 2".
+2. Drag the top-right corner handle of "Surface 2" up and right until the selection is about twice as wide;
+   release.
+3. Press Ctrl+Z.
+4. Hold Ctrl and drag the right edge handle of "Surface 2" 1.5 m to the right; release.
+
+**Expected:**
+- After 2: the two surfaces scale as one group while the handle stays under the cursor: both read about
+  2×2 m, the gap between them doubles to about 2 m, and "Surface 1"'s bottom-left corner stays where it was.
+  They don't overlap, and both still stand on the floor.
+- After 3: sizes and positions return in one step.
+- After 4: both surfaces and the gap get wider by the same factor and both stay 1 m high.
+- With a person selected too, it scales with the group in step 2, feet staying on the floor, and is left
+  alone in step 4.
 
 ## Step: Cards snap to each other and to the floor
 

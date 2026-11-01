@@ -237,7 +237,7 @@ internal sealed partial class SetupOutputView
 
         var origin = _boardCardsUnderMouse.Contains(hit.Id)
                          ? PressOrigins.BoardCard
-                         : hit.Kind is SetupEntityKinds.Surface or SetupEntityKinds.Patch
+                         : hit.Kind is SetupEntityKinds.Surface or SetupEntityKinds.Patch or SetupEntityKinds.Slice
                              ? PressOrigins.Label
                              : PressOrigins.ClickOnly;
 

@@ -147,8 +147,11 @@ internal sealed partial class SetupOutputView
                                   && primaryKind == SetupEntityKinds.Slice
                                       ? primaryId
                                       : Guid.Empty;
-            foreach (var slice in setup.Slices)
+
+            // By index: an Alt-drag in EditSlice appends its copy to this list.
+            for (var sliceIndex = 0; sliceIndex < setup.Slices.Count; sliceIndex++)
             {
+                var slice = setup.Slices[sliceIndex];
                 if (slice.SourceId != source.Id)
                     continue;
 
@@ -156,7 +159,7 @@ internal sealed partial class SetupOutputView
                 {
                     _projection.Origin = new Vector2(min.X, max.Y);
                     _projection.PixelsPerMeter = textureSize.X / MathF.Max(size.X, 0.0001f);
-                    EditSlice(setup, dl, slice, slice.UvRect, Vector2.Zero, textureSize, Guid.Empty, dimOutside: false);
+                    EditSlice(setup, selection, dl, slice, slice.UvRect, Vector2.Zero, textureSize, Guid.Empty, dimOutside: false);
 
                     // A slice gesture is the slice's, not the card's — the card must not come along.
                     if (_sliceLabelDragging || _gesture.Kind == GestureKinds.Slice)
