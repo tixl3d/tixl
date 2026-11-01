@@ -1,10 +1,10 @@
 {
   "FormatVersion": 3,
   "Id": "98aac8ba-480c-4a28-8391-23c7d1ae11d9"/*StageGeometry*/,
-  "Description": "Emits the active output setup's physical surfaces as geometry in the stage.\n\nOne quad per surface and per region with a corner pin of its own, at its stage pose and real size in metres, so the room can be drawn, previewed and projected onto from the graph. TexCoord runs over each surface. UvMode decides what TexCoord carries: Surface (0..1 over each surface), OutputCanvas (where the surface lands on the output named by OutputRef: its mapping there, else a patch on that output carrying the surface's name, else its first mapping anywhere; textured with that output's composite or pixel map, every wall shows its own picture), StageTriplanar (the world position on each face's plane, in metres over UvScale, for a seamless material) or StageTopDown (the world position from above, for a floor plan image over the whole room). TexCoord2 keeps the canvas coordinates for [ProjectOntoStage].\n\nUse [GeometryToMesh] to compile it for [DrawMesh].\n\nAKA: room, floor plan, walls, venue, previz, stage, 3d",
+  "Description": "Emits the active output setup's physical surfaces as geometry in the stage.\n\nOne quad per surface and per region with a corner pin of its own, at its stage pose and real size in metres, so the room can be drawn, previewed and projected onto from the graph. TexCoord runs over each surface. TexCoordSource decides what TexCoord carries: Surface (0..1 over each surface), OutputCanvas (where the surface lands on the output named by Canvas: its mapping there, else a patch on that output carrying the surface's name, else its first mapping anywhere; textured with that output's composite or pixel map, every wall shows its own picture), StageTriplanar (the world position on each face's plane, in metres over UvScale, for a seamless material) or StageTopDown (the world position from above, for a floor plan image over the whole room). TexCoord2 keeps the canvas coordinates for [ProjectOntoStage].\n\nUse [GeometryToMesh] to compile it for [DrawMesh].\n\nAKA: room, floor plan, walls, venue, previz, stage, 3d",
   "InputUis": [
     {
-      "InputId": "b5066b38-41aa-4bbb-9d85-6f5bdf48c82d"/*UvMode*/,
+      "InputId": "b5066b38-41aa-4bbb-9d85-6f5bdf48c82d"/*TexCoordSource*/,
       "Position": {
         "X": -200.0,
         "Y": 90.0
@@ -23,12 +23,12 @@
       "Scale": 0.01
     },
     {
-      "InputId": "e64bc3c3-cbe2-4460-91a6-d0fc207c1743"/*OutputRef*/,
+      "InputId": "e64bc3c3-cbe2-4460-91a6-d0fc207c1743"/*Canvas*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
       },
-      "Description": "The output whose canvas the surfaces are placed on. None takes each surface's first mapping, which is all you need with a single output.",
+      "Description": "Where the surfaces are placed on the canvas. An output: on that output's canvas. None: each surface's first mapping, which is all you need with a single output. A surface: the picture is laid out as that surface is, which is what a [SendToOutput] cut by Create Slices from Regions expects, so a [ProjectOntoStage] feeding it lines up with the regions without the surface being on an output.",
       "Usage": "OutputSetupEntities"
     }
   ],

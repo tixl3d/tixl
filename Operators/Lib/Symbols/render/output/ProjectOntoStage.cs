@@ -74,7 +74,7 @@ internal sealed class ProjectOntoStage : Instance<ProjectOntoStage>, IStatusProv
         resolution = new T3.Core.DataTypes.Vector.Int2(Math.Clamp(resolution.Width, 1, 16384), Math.Clamp(resolution.Height, 1, 16384));
         EnsureTarget(resolution);
         _lastError = HasSurfaceOnCanvas() ? null : "No surface has a place on an output, so nothing lands on the canvas. "
-                                                   + "Link a surface or region to an output, or name a patch like the surface.";
+                                                   + "Link a surface or region to an output, name a patch like the surface, or set [StageGeometry]'s Canvas to a surface.";
 
         var parameters = new Parameters
                              {

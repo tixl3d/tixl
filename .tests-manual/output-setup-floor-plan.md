@@ -257,7 +257,7 @@ right and release.
 **Action:**
 1. In the graph, add **StageGeometry**, connect it to a **GeometryToMesh** and that to a **DrawMesh**;
    show the DrawMesh in an output window in operator mode.
-2. On StageGeometry, set **UvMode** to OutputCanvas. Put a **SetMaterial** after the DrawMesh with the
+2. On StageGeometry, set **TexCoordSource** to OutputCanvas. Put a **SetMaterial** after the DrawMesh with the
    pixel-map image (a LoadImage of the same file) as its BaseColorMap. Set the output window's camera
    to look at the room.
 
@@ -271,7 +271,7 @@ right and release.
 
 **Action:**
 1. Trace two surfaces on one reference image at a strong angle, and make both walls of a floor plan that meet at a corner.
-2. Keep the chain from the previous step, set **UvMode** on StageGeometry to ReferenceImage, and set the
+2. Keep the chain from the previous step, set **TexCoordSource** on StageGeometry to ReferenceImage, and set the
    LoadImage of the SetMaterial to the same photo file.
 3. On the Board, drag a corner of one traced quad on the image card 50 px and release.
 4. Raise a wall on another edge of the plan without tracing it.

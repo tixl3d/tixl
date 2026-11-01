@@ -83,6 +83,18 @@ Add another SendToOutput op. Select it in CONTENT, Ctrl+click "Wall", right-clic
 - After 3: the output still shows the projected picture in the two regions' places, and no status warning shows on
   [ProjectOntoStage]. It stays empty, with a warning, only when neither "Wall" nor any region has a place.
 
+## Step: Projecting into a slice layout
+
+**Action:**
+1. Keep the graph from the previous step, with "Wall" not on the output. Connect [ProjectOntoStage] to the "Wall"
+   SendToOutput that **Create Slices from Regions** made.
+2. Set [StageGeometry]'s **Canvas** to "Wall".
+
+**Expected:**
+- Before 2: the regions show mismatched parts of the picture, as the canvas is laid out by the output's patches.
+- After 2: the send's card shows one continuous picture of the whole wall, the regions show their parts of it, and
+  the picture continues across them. Nothing shows on the output outside the regions' patches.
+
 ## Step: Offered only where it applies
 
 **Action:**
