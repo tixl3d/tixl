@@ -45,9 +45,14 @@ public static class OutputContentResolver
             _pulledContent.Clear();
         }
 
-        // What this send was asked for, so it can warn when two outputs disagree about its size.
+        // The size this pull renders at, so the send can warn when two outputs disagree about it. Its own
+        // Resolution overrides what they ask for, which leaves nothing to disagree about.
         if (supplier is Instance instance)
-            OutputContentStats.NotePull(instance.SymbolChildId, context.RequestedResolution, frame);
+        {
+            var pinned = supplier.GetResolution(context);
+            var resolution = pinned.Width > 0 && pinned.Height > 0 ? pinned : context.RequestedResolution;
+            OutputContentStats.NotePull(instance.SymbolChildId, resolution, frame);
+        }
 
         // One evaluation per send and frame, however many patches and surfaces cut from it: a graph with an
         // always-dirty op renders again on every pull, and a second render lands in the same texture anyway,

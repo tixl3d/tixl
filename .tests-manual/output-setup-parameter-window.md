@@ -130,3 +130,17 @@ Image**. Click the new person card, then the new image card.
 - After 3: the figure is invisible, with only its height label left above where it stands.
 - After 4: the click selects the invisible figure, which shows its white frame; after reopening, the figure is
   still at 0.8.
+
+## Step: The size warning respects a set Resolution
+
+**Action:**
+1. Route one SendToOutput with two slices to two outputs of different sizes (1920×1080 and 2560×1440), with the
+   op's **Resolution** at 0×0. Click the op in the graph window.
+2. Set the op's **Resolution** to 3840×1080.
+3. Set **Resolution** back to 0×0.
+
+**Expected:**
+- After 1: the op shows the "Routed to outputs of different sizes" warning on hover, and the Parameter window shows
+  a magenta "also routed to an output of..." line under **Rendered (px)**.
+- After 2: the warning and the magenta line disappear, and **Rendered (px)** reads 3840×1080.
+- After 3: the warning and the magenta line come back.
