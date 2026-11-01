@@ -447,6 +447,25 @@ its width. Then open the Output tab and check the send's Resolution in the Param
   the metadata while dragging, and the green traced quad on the image card crops along with
   it.
 
+## Step: The line tool stays active
+
+**Action:**
+1. With "Surface 1" straightened, click **+ Line** in the header, then drag three separate lines on the photo.
+2. Press Esc.
+3. Click **+ Line**, drag a line, then start dragging another one and press Esc before releasing the mouse.
+4. Click **+ Line**, then click **Straighten**.
+5. Click **+ Line**, then double-click one of the lines.
+6. Press Esc to close the length popup, then click the **Board** tab and the **Straight** tab again.
+
+**Expected:**
+- After 1: all three lines exist, and **+ Line** stays highlighted with the hint "drag along something straight in
+  reality, Esc to finish" after each one.
+- After 2: **+ Line** is no longer highlighted, and dragging on empty photo draws nothing.
+- After 3: the first line stays, the line being dragged disappears, and **+ Line** is no longer highlighted.
+- After 4: **+ Line** is no longer highlighted.
+- After 5: the length popup opens and no new line appears.
+- After 6: the popup closes with **+ Line** still highlighted; after the tab switch it is no longer highlighted.
+
 ## Step: Reference points on the straightened photo
 
 **Action:**

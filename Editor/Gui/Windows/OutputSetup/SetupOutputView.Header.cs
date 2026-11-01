@@ -241,12 +241,11 @@ internal sealed partial class SetupOutputView
                 }
             }
 
-            // Nothing else on the canvas says a click or drag is now expected, and the tools disarm after
-            // one use — so say what to do with them while armed.
+            // Nothing else on the canvas says a click or drag is now expected, so say what to do while armed.
             if (_isLineToolArmed)
             {
                 ImGui.SameLine();
-                CustomComponents.StylizedText("drag along something straight in reality", Fonts.FontSmall, UiColors.StatusAnimated);
+                CustomComponents.StylizedText("drag along something straight in reality, Esc to finish", Fonts.FontSmall, UiColors.StatusAnimated);
             }
             else if (_isPointToolArmed)
             {
@@ -262,6 +261,7 @@ internal sealed partial class SetupOutputView
             ImGui.BeginDisabled(!canStraighten);
             if (ImGui.SmallButton("Straighten") && canStraighten)
             {
+                _isLineToolArmed = false;
                 if (tracedForLines != null)
                     SetupUndo.RunUndoable("Straighten trace from lines", setup, () => TryStraightenTraceFromLines(lineSubject));
                 else
@@ -276,7 +276,10 @@ internal sealed partial class SetupOutputView
             ImGui.SameLine();
             ImGui.BeginDisabled(!canApply);
             if (ImGui.SmallButton("Apply lengths") && canApply)
+            {
+                _isLineToolArmed = false;
                 SetupUndo.RunUndoable("Apply lengths", setup, () => TryApplyLengths(setup, lineSubject));
+            }
 
             ImGui.EndDisabled();
             if (!canApply && ImGui.IsItemHovered())
@@ -307,6 +310,7 @@ internal sealed partial class SetupOutputView
             var label = string.IsNullOrEmpty(surface.Name) ? "untitled" : surface.Name;
             if (ImGui.SmallButton("+ " + label))
             {
+                _isLineToolArmed = false;
                 SetupUndo.RunUndoable("Map surface", setup, () => SetupActions.AddMapping(surface, output));
             }
 

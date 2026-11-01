@@ -47,8 +47,21 @@ internal sealed partial class SetupOutputView
         var canEdit = editable;
         var annotations = carrier.Annotations;
 
-        // Arming the tool turns the next drag on empty canvas into a new line, then disarms — "create then
-        // edit", so you don't have to remember to leave a mode.
+        // Straightening takes several lines in a row, so the tool stays armed until Esc, another header button or
+        // a mode switch. Esc mid-drag also drops the line being drawn.
+        if (_isLineToolArmed && ImGui.IsKeyPressed(ImGuiKey.Escape, false) && !T3Ui.IsAnyPopupOpen
+            && ImGui.IsWindowFocused(ImGuiFocusedFlags.RootAndChildWindows) && !ImGui.GetIO().WantTextInput)
+        {
+            _isLineToolArmed = false;
+            if (_measureDraftIndex >= 0 && _measureDraftIndex < annotations.Count)
+            {
+                annotations.RemoveAt(_measureDraftIndex);
+                CancelGesture();
+            }
+
+            _measureDraftIndex = -1;
+        }
+
         if (canEdit && _isLineToolArmed && _measureDraftIndex < 0
             && ImGui.IsWindowHovered() && !ImGui.IsAnyItemHovered())
         {
@@ -60,7 +73,9 @@ internal sealed partial class SetupOutputView
             if (projected)
                 CalibrationOverlay.SetAimPoint(carrier.Id, start);
 
-            if (ImGui.IsMouseClicked(ImGuiMouseButton.Left) && ActiveSetup.Current is { } draftSetup)
+            // Not on a double-click: that gives an existing line its length, also while the tool is armed.
+            if (ImGui.IsMouseClicked(ImGuiMouseButton.Left) && !ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left)
+                && ActiveSetup.Current is { } draftSetup)
             {
                 // Snapshot before the draft exists, so the whole create-and-drag undoes as one step.
                 BeginGesture(draftSetup, GestureKinds.AnnotationDraft, "Add measuring line", carrier.Id);
@@ -94,7 +109,6 @@ internal sealed partial class SetupOutputView
                 }
 
                 _measureDraftIndex = -1;
-                _isLineToolArmed = false;
             }
         }
 
@@ -444,7 +458,7 @@ internal sealed partial class SetupOutputView
 
     private const float BlinkRate = 8f;
 
-    // Line tool: armed for the next click, the line being drawn, and the endpoint grabbed last frame (so its
+    // Line tool: armed for further lines, the line being drawn, and the endpoint grabbed last frame (so its
     // line can emphasize this frame).
     private bool _isLineToolArmed;
     private int _measureDraftIndex = -1;
