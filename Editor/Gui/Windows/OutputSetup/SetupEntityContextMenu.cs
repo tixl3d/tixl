@@ -156,10 +156,15 @@ internal static class SetupEntityContextMenu
         }
         else if (kind == SetupEntityKinds.ContentSource && ContentSourceSync.IsSendOpMissing(id))
         {
+            if (CustomComponents.DrawMenuItem(22, "Create SendToOutput"))
+                ContentSourceSync.CreateSendOpForMissingSource(setup, id);
+
+            CustomComponents.TooltipForLastItem("Adds a new SendToOutput op to the open graph, which keeps these slices and routes. Connect its texture input afterwards.");
+
             if (CustomComponents.DrawMenuItem(2, "Remove"))
                 ContentSourceSync.RemoveMissingSource(setup, id);
 
-            CustomComponents.TooltipForLastItem("The SendToOutput op is gone. Removes its slices and routes from the setup.");
+            CustomComponents.TooltipForLastItem("This project has no SendToOutput op for this content. Removes its slices and routes from the setup.");
         }
 
         CustomComponents.MenuItemsFlushLeft = false;

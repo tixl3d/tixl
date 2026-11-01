@@ -421,11 +421,24 @@ internal sealed class OutlinerItem
             || !SetupRouting.TryParseDrag(dragData, out var dragKind, out var dragId))
             return;
 
-        if (!SetupRouting.CanConnect(dragKind, kind) || dragId == id)
+        // Content onto content only connects a missing item to an op; it isn't a routing pair.
+        var connectsMissingContent = kind == SetupEntityKinds.ContentSource
+                                     && dragKind == SetupEntityKinds.ContentSource
+                                     && ContentSourceSync.IsSendOpMissing(dragId) != ContentSourceSync.IsSendOpMissing(id);
+        if ((!SetupRouting.CanConnect(dragKind, kind) && !connectsMissingContent) || dragId == id)
             return;
 
-        if (DragAndDropHandling.TryHandleDropOnItem(DragAndDropHandling.DragTypes.SetupEntity, out _) == DragAndDropHandling.DragInteractionResult.Dropped)
+        if (DragAndDropHandling.TryHandleDropOnItem(DragAndDropHandling.DragTypes.SetupEntity, out _) != DragAndDropHandling.DragInteractionResult.Dropped)
+            return;
+
+        if (connectsMissingContent)
+        {
+            ContentSourceSync.TryConnectMissingSource(setup, dragId, id);
+        }
+        else
+        {
             SetupRouting.ApplyDrop(setup, dragKind, dragId, kind, id);
+        }
     }
 
     private readonly Dictionary<Guid, float> _connectionDotGrowth = [];

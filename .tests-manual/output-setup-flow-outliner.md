@@ -228,6 +228,41 @@ the "SendToOutput" item.
 - After 2: the CONTENT item keeps its name and its curves, no "op missing" status appears, and "Surface 1" keeps showing the content.
 - After 3: the duplicate shows the same: the same item and curves, with content on "Surface 1".
 
+## Step: A missing content item connects to an op
+
+**Action:**
+1. In the graph window, select the SendToOutput op whose slice "Surface 1" shows and press Del. Its CONTENT item now reads
+   "op missing".
+2. Right-click that item and choose **Create SendToOutput**.
+3. Press Ctrl+Z. The item reads "op missing" again.
+4. In the graph, add a new SendToOutput op and connect a texture to it. A second CONTENT item appears.
+5. Drag the second CONTENT item onto the "op missing" item.
+6. Press Ctrl+Z.
+
+**Expected:**
+- After 2: a new SendToOutput op with the item's name is selected in the graph. The "op missing" status is gone, the curve to "Surface 1"
+  stays, and "Surface 1" stays empty until the op's texture input is connected.
+- After 3: that new op is gone from the graph.
+- After 5: one CONTENT item remains, without the status, with the curve to "Surface 1". "Surface 1" shows the new op's texture.
+- After 6: both CONTENT items and the "op missing" status are back.
+
+## Step: A setup moves to another project
+
+**Action:**
+1. Close the editor. Copy this project's `.meta/Setups/Setup 1.setup.json` into the `.meta/Setups` folder of a second project that has a
+   SendToOutput op, naming the copy `Moved.setup.json`.
+2. Open both projects, focus the second one, and choose "Moved" in the setup switcher.
+3. Right-click the "op missing" item and choose **Remove**, then press Ctrl+Z.
+4. Drag the second project's own CONTENT item onto the "op missing" item.
+5. Focus the first project.
+
+**Expected:**
+- After 2: "Surface 1", the output and its corners match the first project. CONTENT lists the second project's op, plus the first project's
+  op as an "op missing" item with its curve to "Surface 1".
+- After 3: the item's menu offered **Remove** and **Create SendToOutput**, not **Delete**, and the first project's op still exists.
+- After 4: "Surface 1" shows the second project's content.
+- After 5: the first project's setup and op are unchanged.
+
 ## Step: Bindings column reflects the machine
 
 **Action:**

@@ -52,6 +52,11 @@ slice; sources keyed by the op's `SymbolChildId`), and after review this is **bl
   re-instantiation and hot reloads without an op eval, duplicates with the venue, and reads sensibly from the
   file while nothing is instantiated. Slices as named entities (with `Unused` = unreferenced) fell out
   naturally; op-side would have re-scattered them across ops.
+- **A source is the setup's own slot (2026-11-02):** slices point at `ContentSource.Id`, and `SymbolChildId` is only which
+  op currently fills it. A source whose op isn't part of the focused project keeps its routing and reads as "op missing";
+  it can be connected to an existing op by a drop, given a new one by **Create SendToOutput**, or removed. So a setup file can
+  move to another project: surfaces, outputs and calibration carry over, and the slots are connected again there.
+  Reference images still have to be copied along by hand.
 - **Accepted costs (documented, not bugs):** duplicating a `SendToOutput` op does *not* carry routing (the
   source keys on the original `SymbolChildId` — the duplicate appears as a new unbound source); the
   `ContentSourceSync` adopt/rename/cascade subsystem is permanent (now frame-driven, save-debounced); a

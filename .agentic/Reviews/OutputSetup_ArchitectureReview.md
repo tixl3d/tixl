@@ -37,8 +37,8 @@ Format changes are cheap only until release. They are collected under "Before re
 #### 1. A send's child id is treated as permanent, and a sweep deletes routing when it changes (VERIFIED)
 
 **Status:** fixed after this review with decision 1(a), but not yet tested in the editor. A source with slices and no op now stays and reads as "op missing", with a Remove
-command, and `Combine` remaps the ids in every setup of the project. A source with no slices still goes on its own. Open: cut and paste still creates a new op with a new, unrouted source
-and leaves the old one missing, and missing sources have no Board card.
+command, and `Combine` remaps the ids in every setup of the project. A source with no slices still goes on its own. Missing now means missing from the focused project, and a missing item can be
+connected by dropping a send on it or by **Create SendToOutput**, which also covers cut and paste and setups copied between projects. Open: missing sources have no Board card.
 
 - **Assumes:** a child id that no loaded symbol lists means the user deleted the op, so its routing can go
   (`Core/Output/ContentSource.cs:10-14`, `OutputSetup/ContentSourceSync.cs:415-471`).
