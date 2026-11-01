@@ -256,7 +256,7 @@ internal static class SetupParameterView
         {
             FormInputs.AddHint(planSegment < 0
                                    ? $"Floor of {plan.Name} — its size and place follow the plan's floor rectangle."
-                                   : $"Wall on edge {planSegment + 1} of {plan.Name} — its width and place follow the plan.");
+                                   : $"Wall on edge {planSegment + 1} of {plan.Name} — its place follows the plan, and its width and the edge's length follow each other.");
         }
 
         var position = surface.Placement?.Pose.Position ?? Vector3.Zero;

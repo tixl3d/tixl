@@ -748,6 +748,11 @@ internal sealed partial class SetupOutputView
                 }
 
                 ApplyBoardScale(setup, selection, SetupEntityKinds.Surface, surface.Id, factor, fixedCorner);
+
+                // Not for a group: walls sharing a corner would crop each other while the scale still runs on their sizes.
+                if (selection is not { Count: > 1 })
+                    FloorPlanSync.FollowWallWidth(setup, surface, edge);
+
                 break;
             }
 
@@ -763,8 +768,7 @@ internal sealed partial class SetupOutputView
                 // The wall's pixels stay put: the slice window shrinks with the rectangle.
                 SurfaceGeometry.LocalBounds(surface, out var newMin, out var newMax);
                 KeepContentInPlace(setup, oldMin, oldMax, newMin, newMax);
-
-
+                FloorPlanSync.FollowWallWidth(setup, surface, edge);
                 break;
             }
 
@@ -1234,6 +1238,25 @@ internal sealed partial class SetupOutputView
 
                 if (CustomComponents.DrawMenuItem(1, menuHasWall ? "Take Down Wall" : "Raise Wall"))
                     SetupUndo.RunUndoable(menuHasWall ? "Take down wall" : "Raise wall", setup, () => FloorPlanSync.SetWall(setup, plan, menuSegment, !menuHasWall));
+
+                if (CustomComponents.DrawSubMenu(7, "Use Surface as Wall"))
+                {
+                    for (var i = 0; i < setup.Surfaces.Count; i++)
+                    {
+                        var candidate = setup.Surfaces[i];
+                        if (candidate.Kind != Surface.Kinds.Physical || candidate.ParentId != Guid.Empty
+                                                                     || setup.FindFloorPlanOf(candidate.Id, out _) != null)
+                            continue;
+
+                        if (CustomComponents.DrawMenuItem(100 + i, candidate.Name))
+                            SetupUndo.RunUndoable("Use surface as wall", setup, () => FloorPlanSync.AssignWall(setup, plan, menuSegment, candidate));
+                    }
+
+                    ImGui.EndMenu();
+                }
+
+                CustomComponents.TooltipForLastItem("Stands a surface on this edge at its measured size.",
+                                                    "The edge takes the surface's width, and the surface's height stays its own.");
 
                 if (CustomComponents.DrawMenuItem(2, "Split Edge"))
                 {

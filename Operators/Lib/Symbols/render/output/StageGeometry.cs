@@ -68,9 +68,10 @@ internal sealed class StageGeometry : Instance<StageGeometry>, IStatusProvider
             }
             else
             {
-                pointCount += 4;
-                faceCount += 1;
-                cornerCount += 4;
+                var cells = TryGetPhotoMap(setup, surface, uvMode, out var unusedMap) ? PhotoGridCells : 1;
+                pointCount += 4 * cells * cells;
+                faceCount += cells * cells;
+                cornerCount += 4 * cells * cells;
             }
         }
 
@@ -112,6 +113,7 @@ internal sealed class StageGeometry : Instance<StageGeometry>, IStatusProvider
             }
 
             var faceStart = face;
+            var hasPhoto = TryGetPhotoMap(setup, surface, uvMode, out var surfaceToPhoto);
             var plan = FindClosedPlanFloor(setup, surface);
             if (plan != null)
             {
@@ -134,7 +136,9 @@ internal sealed class StageGeometry : Instance<StageGeometry>, IStatusProvider
                         _geometry.CornerPointIndices[corner] = pointBase + vertex;
                         normals.Values[corner] = Vector3.UnitY;
                         var canvasUv = hasCanvasQuad ? BilinearCanvas(_canvasQuad, inRect.X, 1 - inRect.Y) : new Vector2(inRect.X, 1 - inRect.Y);
-                        texCoords.Values[corner] = TexCoordFor(uvMode, uvScale, position, Vector3.UnitY, inRect, canvasUv);
+                        texCoords.Values[corner] = hasPhoto
+                                                       ? surfaceToPhoto.TransformPoint(inRect)
+                                                       : TexCoordFor(uvMode, uvScale, position, Vector3.UnitY, inRect, canvasUv);
                         canvasCoords.Values[corner] = hasCanvasQuad ? canvasUv : OffCanvas;
                         corner++;
                     }
@@ -148,21 +152,33 @@ internal sealed class StageGeometry : Instance<StageGeometry>, IStatusProvider
                 var min = -surface.AnchorInMeters;
                 var max = min + surface.SizeInMeters;
 
-                _geometry.FaceCornerOffsets[face++] = corner;
-                // Counter-clockwise seen from the front: bottom-left, bottom-right, top-right, top-left.
-                for (var c = 0; c < 4; c++)
+                // Texture coordinates interpolate linearly, a photo's perspective doesn't: a single quad would show a
+                // kink along its diagonal, so a wall textured from its photo gets a grid fine enough to hide it.
+                var cells = hasPhoto ? PhotoGridCells : 1;
+                for (var row = 0; row < cells; row++)
                 {
-                    var sign = _cornerOrder[c];
-                    var position = Vector3.Transform(new Vector3(sign.X > 0 ? max.X : min.X, sign.Y > 0 ? max.Y : min.Y, 0), world);
-                    _geometry.Positions[point] = position;
-                    _geometry.CornerPointIndices[corner] = point;
-                    normals.Values[corner] = normal;
-                    var inRect = new Vector2(sign.X > 0 ? 1 : 0, sign.Y > 0 ? 1 : 0);
-                    var canvasUv = hasCanvasQuad ? _canvasQuad[_cornerToQuadIndex[c]] : new Vector2(inRect.X, 1 - inRect.Y);
-                    texCoords.Values[corner] = TexCoordFor(uvMode, uvScale, position, normal, inRect, canvasUv);
-                    canvasCoords.Values[corner] = hasCanvasQuad ? canvasUv : OffCanvas;
-                    point++;
-                    corner++;
+                    for (var column = 0; column < cells; column++)
+                    {
+                        _geometry.FaceCornerOffsets[face++] = corner;
+                        // Counter-clockwise seen from the front: bottom-left, bottom-right, top-right, top-left.
+                        for (var c = 0; c < 4; c++)
+                        {
+                            var sign = _cornerOrder[c];
+                            var inRect = new Vector2((column + (sign.X > 0 ? 1f : 0f)) / cells, (row + (sign.Y > 0 ? 1f : 0f)) / cells);
+                            var inSurface = min + (max - min) * inRect;
+                            var position = Vector3.Transform(new Vector3(inSurface.X, inSurface.Y, 0), world);
+                            _geometry.Positions[point] = position;
+                            _geometry.CornerPointIndices[corner] = point;
+                            normals.Values[corner] = normal;
+                            var canvasUv = hasCanvasQuad ? BilinearCanvas(_canvasQuad, inRect.X, 1 - inRect.Y) : new Vector2(inRect.X, 1 - inRect.Y);
+                            texCoords.Values[corner] = hasPhoto
+                                                           ? surfaceToPhoto.TransformPoint(inRect)
+                                                           : TexCoordFor(uvMode, uvScale, position, normal, inRect, canvasUv);
+                            canvasCoords.Values[corner] = hasCanvasQuad ? canvasUv : OffCanvas;
+                            point++;
+                            corner++;
+                        }
+                    }
                 }
             }
 
@@ -220,9 +236,33 @@ internal sealed class StageGeometry : Instance<StageGeometry>, IStatusProvider
             case UvModes.StageTopDown:
                 return new Vector2(position.X, -position.Z) / scale;
 
+            case UvModes.ReferenceImage:
+                return OffCanvas; // only surfaces without a trace get here
+
             default:
                 return inRect; // v up already: (0,0) is the surface's bottom-left
         }
+    }
+
+    /// <summary>
+    /// In <see cref="UvModes.ReferenceImage"/>, for a surface traced on an image: from 0..1 over the surface (v up)
+    /// to where that spot is in the photo, in the mesh shaders' texture coordinates.
+    /// </summary>
+    private bool TryGetPhotoMap(Setup setup, Surface surface, UvModes mode, out Homography surfaceToPhoto)
+    {
+        surfaceToPhoto = default;
+        if (mode != UvModes.ReferenceImage || surface.Trace is not { Quad.Length: >= 4 } trace)
+            return false;
+
+        var image = setup.FindReferenceImage(trace.ImageId);
+        if (image == null || image.Width <= 0 || image.Height <= 0)
+            return false;
+
+        // Traced in photo pixels, y down.
+        for (var i = 0; i < 4; i++)
+            _photoQuad[i] = new Vector2(trace.Quad[i].X / image.Width, 1 - trace.Quad[i].Y / image.Height);
+
+        return Homography.TryComputeQuadToQuad(_unitRectCorners, _photoQuad, out surfaceToPhoto);
     }
 
     /// <summary>A point inside the canvas quad (TL, TR, BR, BL) at fractions <paramref name="tx"/> across and <paramref name="ty"/> down.</summary>
@@ -326,14 +366,17 @@ internal sealed class StageGeometry : Instance<StageGeometry>, IStatusProvider
     /** Corner order bottom-left, bottom-right, top-right, top-left as signs of the local axes. */
     private static readonly Vector2[] _cornerOrder = [new(-1, -1), new(1, -1), new(1, 1), new(-1, 1)];
 
-    /** A canvas quad is TL, TR, BR, BL; the corner order above reads it BL, BR, TR, TL. */
-    private static readonly int[] _cornerToQuadIndex = [3, 2, 1, 0];
+    private const int PhotoGridCells = 16;
+
+    /** 0..1 over a surface (v up) in a traced quad's corner order: TL, TR, BR, BL. */
+    private static readonly Vector2[] _unitRectCorners = [new(0, 1), new(1, 1), new(1, 0), new(0, 0)];
 
     private static readonly string[] _cornerAttributeNames = [GeometryAttributeNames.Normal, GeometryAttributeNames.TexCoord, GeometryAttributeNames.TexCoord2];
 
     private readonly MeshGeometry _geometry = new();
     private readonly List<int> _triangles = [];
     private readonly Vector2[] _canvasQuad = new Vector2[4];
+    private readonly Vector2[] _photoQuad = new Vector2[4];
 
     /**
      * Where a surface with no patch or mapping lands on the canvas: one point outside it, so its triangles cover nothing.
@@ -368,5 +411,8 @@ internal sealed class StageGeometry : Instance<StageGeometry>, IStatusProvider
 
         /// <summary>The world position seen from above, in metres over UvScale: a floor plan image laid over the whole room.</summary>
         StageTopDown,
+
+        /// <summary>Where each surface is traced on its reference image: textured with that photo, every wall shows what it really looks like.</summary>
+        ReferenceImage,
     }
 }

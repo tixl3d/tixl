@@ -230,6 +230,7 @@ internal sealed partial class SetupOutputView
                 SurfaceGeometry.DragEdge(subject, edge, frameToSurface.TransformPoint(edgePos), keepDimensions: false);
                 SurfaceGeometry.LocalBounds(subject, out var newMin, out var newMax);
                 KeepContentInPlace(setup, oldMin, oldMax, newMin, newMax);
+                FloorPlanSync.FollowWallWidth(setup, subject, edge);
                 break;
             }
 
@@ -274,6 +275,7 @@ internal sealed partial class SetupOutputView
                                  : new Vector2(size.X, size.Y * wanted / was);
 
                 SurfaceMetrics.RemeterSurface(setup, subject, metres);
+                FloorPlanSync.FollowWallWidth(setup, subject, edge);
                 break;
             }
 

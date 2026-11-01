@@ -119,6 +119,52 @@ Select "Wall 1" and type `12` into the first Size (m) field.
   floor row, and one edge row ticked.
 - The surface's card now says it is the wall on edge 1 of Floor Plan 2, with Rotation read-only.
 
+## Step: A plan started from a surface matches the surface's sides
+
+**Action:**
+1. On the plan from the previous step, drag the right corner 1 m to the left and release; press Ctrl+Z.
+2. Drag the surface card's right edge handle 1 m to the left and release; press Ctrl+Z.
+3. Drag the surface card's left edge handle 1 m to the right and release.
+4. Drag the surface card's top edge handle 0.5 m down and release.
+
+**Expected:**
+- After 1: the surface card's right edge moves in; its left edge and the pixels it shows stay put. The edge label
+  reads "5 m" until the undo restores "6 m". The arrow at the plan's corner points down, toward the viewer.
+- After 2: the plan's right corner moves in with it, and the left corner stays. The label reads "5 m" while
+  dragging; Ctrl+Z restores surface and plan in one step.
+- After 3: the plan's left corner moves right by 1 m, and the label reads "5 m".
+- After 4: the plan doesn't change.
+
+## Step: Ctrl-dragging a wall's side edge updates the plan
+
+**Action:**
+1. Hold Ctrl and drag the right edge handle of the surface card from the previous step 1 m to the right; release.
+2. Press Ctrl+Z.
+3. Enter the surface's Straight view on a traced surface that is the wall of a plan. Hold Ctrl and drag the frame's
+   left edge handle until **Size (m)** reads 1 m wider; release.
+
+**Expected:**
+- After 1: the surface gets 1 m wider and its content stretches along; the plan's right corner moves out with the
+  cursor, the left corner stays, and the edge label follows the new width.
+- After 2: surface and plan return in one step.
+- After 3: the plan's left corner moves out by 1 m, and the right corner stays.
+
+## Step: Using an existing surface as a wall
+
+**Action:**
+1. Click `+` on SURFACES and set the new surface's Size (m) to `3` × `2.5`.
+2. On "Floor Plan 2", draw on from its open end with **Draw Walls**, clicking one corner 2 m toward the viewer, then
+   press Esc. Right-click the new edge and open **Use Surface as Wall**.
+3. Choose the new surface from the list.
+4. Press Ctrl+Z.
+
+**Expected:**
+- After 2: the list holds surfaces that are not walls or floors of a plan yet; regions and the plan's own walls are not
+  listed.
+- After 3: the edge becomes 3 m long, labelled with the surface's name, and the surface keeps its size of 3 × 2.5 m.
+  The wall that was raised on that edge is gone from SURFACES.
+- After 4: the edge, the raised wall and the surface are as they were, in one undo step.
+
 ## Step: Moving the card leaves the stage alone
 
 **Action:**
@@ -217,6 +263,21 @@ right and release.
   walls facing the room's inside.
 - After 2: each wall shows the part of the pixel map that its patch or mapping covers on the output
   canvas, the right way up, and changing the plan on the Board moves the quads at once.
+
+## Step: The reference photo as the stage's texture
+
+**Action:**
+1. Trace two surfaces on one reference image at a strong angle, and make both walls of a floor plan that meet at a corner.
+2. Keep the chain from the previous step, set **UvMode** on StageGeometry to ReferenceImage, and set the
+   LoadImage of the SetMaterial to the same photo file.
+3. On the Board, drag a corner of one traced quad on the image card 50 px and release.
+4. Raise a wall on another edge of the plan without tracing it.
+
+**Expected:**
+- After 2: each wall shows the part of the photo it was traced on, upright and not mirrored. Straight lines in the photo
+  stay straight across the wall, with no kink along its diagonal, and the two walls meet at the corner as in the photo.
+- After 3: that wall's picture follows the new trace once the drag updates the setup.
+- After 4: the untraced wall shows one flat colour instead of a part of the photo.
 
 ## Step: A wall without a place on the canvas stays out of ProjectOntoStage
 

@@ -845,6 +845,9 @@ internal sealed partial class SetupOutputView
                 SurfaceGeometry.DragEdge(surface, edge, surfacePos, _edgeDragStretches);
                 SurfaceGeometry.LocalBounds(surface, out var newMin, out var newMax);
                 KeepContentInPlace(setup, oldMin, oldMax, newMin, newMax);
+                if (!_edgeDragStretches)
+                    FloorPlanSync.FollowWallWidth(setup, surface, edge);
+
                 break;
             }
 
