@@ -1,10 +1,6 @@
 {
   "WindowConfigs": [
     {
-      "Title": "Variations",
-      "Visible": true
-    },
-    {
       "Title": "Output View##0",
       "Visible": true
     },
@@ -17,18 +13,10 @@
       "Visible": true
     },
     {
-      "Title": "Symbol Library",
-      "Visible": true
-    },
-    {
-      "Title": "Assets",
-      "Visible": true
-    },
-    {
       "Title": "Help",
       "Visible": true
     }
   ],
-  "ImGuiSettings": "[Window][Graph View##1]\nPos=201,26\nSize=1229,1391\nCollapsed=0\nDockId=0x00000003,0\n\n[Window][Variations]\nPos=1959,669\nSize=601,748\nCollapsed=0\nDockId=0x0000000A,0\n\n[Window][Output View##0]\nPos=1432,26\nSize=1128,641\nCollapsed=0\nDockId=0x00000007,0\n\n[Window][Symbol Library]\nPos=0,26\nSize=199,617\nCollapsed=0\nDockId=0x0000000D,0\n\n[Window][Parameters##1]\nPos=1432,669\nSize=525,748\nCollapsed=0\nDockId=0x00000009,0\n\n[Window][Assets]\nPos=0,645\nSize=199,772\nCollapsed=0\nDockId=0x0000000E,0\n\n[Window][Help]\nPos=1959,669\nSize=601,748\nCollapsed=0\nDockId=0x0000000A,1\n\n[Docking][Data]\nDockSpace         ID=0x08BD597D Window=0x1BBC0F80 Pos=0,26 Size=2560,1391 Split=X Selected=0x8995E68A\n  DockNode        ID=0x0000000B Parent=0x08BD597D SizeRef=199,1391 Split=Y Selected=0x42C24103\n    DockNode      ID=0x0000000D Parent=0x0000000B SizeRef=549,617 HiddenTabBar=1 Selected=0xD41FC2E2\n    DockNode      ID=0x0000000E Parent=0x0000000B SizeRef=549,772 HiddenTabBar=1 Selected=0x42C24103\n  DockNode        ID=0x0000000C Parent=0x08BD597D SizeRef=3140,1391 Split=X\n    DockNode      ID=0x00000003 Parent=0x0000000C SizeRef=2010,1391 CentralNode=1 HiddenTabBar=1 Selected=0x8995E68A\n    DockNode      ID=0x00000004 Parent=0x0000000C SizeRef=1128,1391 Split=Y Selected=0xC9567BC1\n      DockNode    ID=0x00000007 Parent=0x00000004 SizeRef=916,641 HiddenTabBar=1 Selected=0xC9567BC1\n      DockNode    ID=0x00000008 Parent=0x00000004 SizeRef=916,748 Split=X Selected=0x35577784\n        DockNode  ID=0x00000009 Parent=0x00000008 SizeRef=525,446 HiddenTabBar=1 Selected=0x35577784\n        DockNode  ID=0x0000000A Parent=0x00000008 SizeRef=601,446 Selected=0x742F3B5B",
+  "ImGuiSettings": "[Window][Graph View##1]\nPos=0,27\nSize=777,1390\nCollapsed=0\nDockId=0x00000001,0\n\n[Window][Output View##0]\nPos=1249,27\nSize=1263,1390\nCollapsed=0\nDockId=0x00000007,0\n\n[Window][Parameters##1]\nPos=779,27\nSize=468,933\nCollapsed=0\nDockId=0x00000005,0\n\n[Window][Help]\nPos=779,962\nSize=468,455\nCollapsed=0\nDockId=0x00000006,0\n\n[Docking][Data]\nDockSpace         ID=0x08BD597D Window=0x1BBC0F80 Pos=0,27 Size=2512,1390 Split=X Selected=0x8995E68A\n  DockNode        ID=0x0000000B Parent=0x08BD597D SizeRef=179,1391 Split=Y Selected=0x42C24103\n    DockNode      ID=0x0000000D Parent=0x0000000B SizeRef=549,493 Selected=0xD41FC2E2\n    DockNode      ID=0x0000000E Parent=0x0000000B SizeRef=549,896 Selected=0x42C24103\n  DockNode        ID=0x0000000C Parent=0x08BD597D SizeRef=1739,1391 Split=X\n    DockNode      ID=0x00000003 Parent=0x0000000C SizeRef=1247,1391 Split=X Selected=0x8995E68A\n      DockNode    ID=0x00000001 Parent=0x00000003 SizeRef=777,1390 CentralNode=1 HiddenTabBar=1 Selected=0x8995E68A\n      DockNode    ID=0x00000002 Parent=0x00000003 SizeRef=468,1390 Split=Y Selected=0x35577784\n        DockNode  ID=0x00000005 Parent=0x00000002 SizeRef=472,933 HiddenTabBar=1 Selected=0x35577784\n        DockNode  ID=0x00000006 Parent=0x00000002 SizeRef=472,455 HiddenTabBar=1 Selected=0x742F3B5B\n    DockNode      ID=0x00000004 Parent=0x0000000C SizeRef=1263,1391 Split=Y Selected=0xC9567BC1\n      DockNode    ID=0x00000007 Parent=0x00000004 SizeRef=916,519 HiddenTabBar=1 Selected=0xC9567BC1\n      DockNode    ID=0x00000008 Parent=0x00000004 SizeRef=916,510 Selected=0xB9CD16A2\n\n",
   "ImGuiVersion": "1.91.6"
 }
