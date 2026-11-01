@@ -1,5 +1,6 @@
 ﻿using ImGuiNET;
 using T3.Core.Utils;
+using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
 
 namespace T3.Editor.Gui.UiHelpers;
@@ -71,6 +72,10 @@ public abstract class ModalDialog
             
         _minContentBottomY = ImGui.GetWindowPos().Y + minSize.Y - ImGui.GetStyle().WindowPadding.Y;
         ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, ItemSpacing);
+
+        // The indent is static, so whatever window drew before the dialog would otherwise leak into its form rows.
+        FormInputs.SetIndentToParameters();
+
         FrameStats.Current.OpenedPopUpName = title;
         FrameStats.Current.IsModalDialogOpen = true;
         FrameStats.Current.OpenedPopupHovered = ImGui.IsWindowHovered();
