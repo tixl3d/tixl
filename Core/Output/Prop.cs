@@ -22,6 +22,11 @@ public sealed class Prop
     /// <summary>The image it is drawn with, relative to the editor's props folder. Empty = the editor's first one.</summary>
     public string ImagePath = string.Empty;
 
+    /// <summary>Faint by default, so a figure gives a sense of scale without covering what it stands in front of.</summary>
+    public const float DefaultOpacity = 0.3f;
+
+    public float Opacity = DefaultOpacity;
+
     public void WriteToJson(JsonTextWriter writer)
     {
         writer.WriteStartObject();
@@ -32,6 +37,7 @@ public sealed class Prop
         if (!string.IsNullOrEmpty(ImagePath))
             writer.WriteString("ImagePath", ImagePath);
 
+        writer.WriteValue("Opacity", Opacity);
         writer.WriteEndObject();
     }
 
@@ -44,6 +50,7 @@ public sealed class Prop
                        Position = OutputJson.ReadVector3(token["Position"]),
                        HeightInMeters = token.ReadValueSafe("HeightInMeters", 1.70f),
                        ImagePath = token.ReadValueSafe("ImagePath", string.Empty) ?? string.Empty,
+                       Opacity = token.ReadValueSafe("Opacity", DefaultOpacity),
                    };
     }
 }
