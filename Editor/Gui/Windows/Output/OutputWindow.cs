@@ -215,7 +215,8 @@ internal sealed partial class OutputWindow : Window
         }
         ImGui.EndChild();
 
-        _setupMode.DrawOutliner();
+        if (_setupMode.DrawOutliner())
+            FlagSymbolUiAsModified();
     }
 
 

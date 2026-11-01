@@ -48,10 +48,11 @@ internal sealed class OutputSetupModeView
 
     /// <summary>Draws the Flow Outliner strip: a full-width up/down splitter on its top edge, then the header
     /// and columns. Call after the canvas child, which leaves <see cref="OutlinerReservedHeight"/> free.</summary>
-    public void DrawOutliner()
+    /// <returns>True once a resize has finished, so the host can have the new height saved.</returns>
+    public bool DrawOutliner()
     {
         if (!IsSetupMode)
-            return;
+            return false;
 
         // A rename happens in the outliner's row, so a strip collapsed to its header has to open for it.
         if (OutlinerItem.RevealPendingId != Guid.Empty)
@@ -70,6 +71,13 @@ internal sealed class OutputSetupModeView
         _outliner.Draw(_entitySelection, _toggleOutlinerCollapse, !_outlinerCollapsed, _drawGrip, _drawHostedHeader, _leaveSetup, _outputView.VisibleBoardCentre);
         ImGui.EndChild();
         ImGui.PopStyleColor();
+
+        // Read when the button comes up rather than per frame of the drag: each save request dirties the project symbol.
+        if (_outlinerHeight == _savedOutlinerHeight || ImGui.IsMouseDown(ImGuiMouseButton.Left))
+            return false;
+
+        _savedOutlinerHeight = _outlinerHeight;
+        return true;
     }
 
     /// <summary>
@@ -228,6 +236,7 @@ internal sealed class OutputSetupModeView
     {
         state.PinnedEntityKind = _pinnedKind;
         state.PinnedEntityId = _pinnedId;
+        state.OutlinerHeight = _outlinerHeight;
     }
 
     public void LoadStateFrom(OutputWindowState state)
@@ -235,6 +244,8 @@ internal sealed class OutputSetupModeView
         // Restored blindly; the per-frame Exists check reverts a pin whose entity is gone.
         _pinnedKind = state.PinnedEntityKind;
         _pinnedId = state.PinnedEntityId;
+        _outlinerHeight = Math.Clamp(state.OutlinerHeight, MinOutlinerHeight, MaxOutlinerHeight);
+        _savedOutlinerHeight = _outlinerHeight;
     }
 
     public OutputSetupModeView()
@@ -373,7 +384,7 @@ internal sealed class OutputSetupModeView
         }
     }
 
-    /// <summary>The drag handle on the strip's top edge. Height is per-window session state (not persisted).</summary>
+    /// <summary>The drag handle on the strip's top edge. Height is per window and saved with the project's output window state.</summary>
     private void DrawOutlinerSplitter(float scale)
     {
         var thickness = SplitterThickness * scale;
@@ -489,7 +500,8 @@ internal sealed class OutputSetupModeView
 
     private ViewModes _viewMode;
     private bool _outlinerCollapsed;
-    private float _outlinerHeight = DefaultOutlinerHeight; // unscaled px; scaled at draw time
+    private float _outlinerHeight = OutputWindowState.DefaultOutlinerHeight; // unscaled px; scaled at draw time
+    private float _savedOutlinerHeight = OutputWindowState.DefaultOutlinerHeight;
     private Action? _toggleOutlinerCollapse; // cached so the strip draw doesn't allocate a closure each frame
     private Guid _lastFocusedId;
     private bool _graphOwnedInspection;
@@ -499,7 +511,6 @@ internal sealed class OutputSetupModeView
     private Guid _pinnedId;
     private static readonly int _pinViewMenuId = nameof(_pinViewMenuId).GetHashCode();
 
-    private const float DefaultOutlinerHeight = 220;
     private const float MinOutlinerHeight = 90;
     private const float MaxOutlinerHeight = 600;
     private const float SplitterThickness = 4;
