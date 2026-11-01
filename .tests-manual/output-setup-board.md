@@ -316,6 +316,8 @@ Select the content card and drag its square top-right handle inward until the ca
 its width. Then open the Output tab and check the send's Resolution in the Parameter window.
 
 **Expected:**
+- From the first pixel of the drag the handle stays under the cursor, also on a freshly dropped
+  reference image that was never scaled: the card doesn't jump to a large size.
 - The card shrinks keeping its aspect; its "1920×1080" metadata does not change, nor does the
   op's resolution or the patch on the output. Hovering the handle explains that it is
   presentation only.

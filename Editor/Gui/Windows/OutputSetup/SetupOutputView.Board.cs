@@ -608,7 +608,7 @@ internal sealed partial class SetupOutputView
         if (!isSurface && increment.X != increment.Y)
             return;
 
-        if (!TryGetCardBounds(setup, kind, id, out var oldMin, out _))
+        if (!TryGetCardBounds(setup, kind, id, out var oldMin, out var oldMax))
             return;
 
         if (isSurface)
@@ -623,7 +623,9 @@ internal sealed partial class SetupOutputView
         }
         else if (kind != SetupEntityKinds.FloorPlan && TryGetPlacement(setup, kind, id, out var placement))
         {
-            placement.CardScale = Math.Clamp(placement.CardScale / increment.X, 10f, 100000f);
+            // From the size on show: an unscaled card stores no scale of its own, it reads a default.
+            var newWidth = MathF.Max((oldMax.X - oldMin.X) * increment.X, 0.05f);
+            placement.CardScale = Math.Clamp(BoardPixelSize(setup, kind, id).X / newWidth, 10f, 100000f);
         }
 
         if (TryGetBoardPosition(setup, kind, id, out var position) && TryGetCardBounds(setup, kind, id, out var newMin, out _))
