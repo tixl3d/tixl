@@ -7,7 +7,8 @@ namespace Lib.render.output;
 /// <summary>
 /// The active setup's physical surfaces as geometry in the stage: one quad per surface at its stage pose and
 /// real size — and for a floor that belongs to a floor plan, the plan's footprint itself, so an L-shaped room
-/// gets an L-shaped floor. TexCoord follows UvMode; TexCoord2 is where the surface lands on an output's canvas,
+/// gets an L-shaped floor. A region with a corner pin of its own is a quad too: it has its own place on a canvas,
+/// which is how a stack of screens gets painted without its parent being mapped at all. TexCoord follows UvMode; TexCoord2 is where the surface lands on an output's canvas,
 /// so texturing with that output's composite (or its pixel map) puts every wall's picture on its wall.
 /// </summary>
 [Guid("98aac8ba-480c-4a28-8391-23c7d1ae11d9")]
@@ -106,7 +107,7 @@ internal sealed class StageGeometry : Instance<StageGeometry>, IStatusProvider
             {
                 placedCount++;
             }
-            else
+            else if (!HasRegionOnCanvas(setup, surface))
             {
                 unplacedCount++;
                 firstUnplacedName ??= surface.Name;
@@ -146,11 +147,8 @@ internal sealed class StageGeometry : Instance<StageGeometry>, IStatusProvider
             }
             else
             {
-                var pose = surface.Placement?.Pose ?? Pose.Identity;
-                var world = pose.ToWorldMatrix();
+                GetStageRect(setup, surface, out var world, out var min, out var max, out var lift);
                 var normal = Vector3.Normalize(Vector3.TransformNormal(Vector3.UnitZ, world));
-                var min = -surface.AnchorInMeters;
-                var max = min + surface.SizeInMeters;
 
                 // Texture coordinates interpolate linearly, a photo's perspective doesn't: a single quad would show a
                 // kink along its diagonal, so a wall textured from its photo gets a grid fine enough to hide it.
@@ -166,7 +164,7 @@ internal sealed class StageGeometry : Instance<StageGeometry>, IStatusProvider
                             var sign = _cornerOrder[c];
                             var inRect = new Vector2((column + (sign.X > 0 ? 1f : 0f)) / cells, (row + (sign.Y > 0 ? 1f : 0f)) / cells);
                             var inSurface = min + (max - min) * inRect;
-                            var position = Vector3.Transform(new Vector3(inSurface.X, inSurface.Y, 0), world);
+                            var position = Vector3.Transform(new Vector3(inSurface.X, inSurface.Y, lift), world);
                             _geometry.Positions[point] = position;
                             _geometry.CornerPointIndices[corner] = point;
                             normals.Values[corner] = normal;
@@ -336,7 +334,48 @@ internal sealed class StageGeometry : Instance<StageGeometry>, IStatusProvider
     /// <summary>Roots only: a Layout region rides its parent's plane and is already part of that quad.</summary>
     internal static bool IsStageSurface(Surface surface)
     {
-        return surface.Kind == Surface.Kinds.Physical && surface.ParentId == Guid.Empty;
+        return surface.ParentId == Guid.Empty
+                   ? surface.Kind == Surface.Kinds.Physical
+                   : surface.Kind == Surface.Kinds.Layout && surface.OutputMappings.Count > 0;
+    }
+
+    /// <summary>
+    /// A surface's rectangle in the space of its root's pose. A region sits in metres from its parent's anchor, all the
+    /// way up, and is lifted off its parent by a little per level so a draw of the mesh doesn't z-fight between them.
+    /// </summary>
+    private static void GetStageRect(Setup setup, Surface surface, out Matrix4x4 world, out Vector2 min, out Vector2 max, out float lift)
+    {
+        lift = 0;
+        var root = surface;
+        min = surface.ParentId == Guid.Empty ? -surface.AnchorInMeters : surface.LocalPosition;
+        for (var guard = 0; root.ParentId != Guid.Empty && guard < 16; guard++)
+        {
+            lift += RegionLiftInMeters;
+            if (setup.FindSurface(root.ParentId) is not { } parent)
+                break;
+
+            if (parent.ParentId != Guid.Empty)
+                min += parent.LocalPosition + parent.AnchorInMeters;
+
+            root = parent;
+        }
+
+        max = min + surface.SizeInMeters;
+        world = (root.Placement?.Pose ?? Pose.Identity).ToWorldMatrix();
+    }
+
+    private const float RegionLiftInMeters = 0.001f;
+
+    /** A parent left off the canvas on purpose: its regions have the places, so there is nothing to warn about. */
+    private static bool HasRegionOnCanvas(Setup setup, Surface parent)
+    {
+        foreach (var surface in setup.Surfaces)
+        {
+            if (surface.ParentId == parent.Id && IsStageSurface(surface))
+                return true;
+        }
+
+        return false;
     }
 
     /** Arrays sized for this frame's layout; reallocated only when a count changes. */

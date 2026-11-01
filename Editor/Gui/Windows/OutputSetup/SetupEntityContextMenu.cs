@@ -44,9 +44,26 @@ internal static class SetupEntityContextMenu
         // The common verbs are their own group. Whether the kind drew any rows is read off the cursor rather
         // than reported back from a dozen switch branches — a menu row is the only thing here that advances it.
         var beforeKindItems = ImGui.GetCursorPosY();
-        DrawKindMenuItems(selection, setup, kind, id);
+        DrawKindMenuItems(selection, setup, kind, id, multi);
+
+        ImGui.EndDisabled();
+        CustomComponents.MenuItemsDisabled = false;
+
+        // Takes the place of the per-item rows of the same name, acting on every selected item that has inputs.
+        if (multi && SetupActions.CanClearInputs(selection))
+        {
+            if (CustomComponents.DrawMenuItem(14, "Clear Inputs", isEnabled: SetupActions.SelectionHasInputs(setup, selection)))
+                SetupActions.ClearSelectionInputs(setup, selection);
+
+            CustomComponents.TooltipForLastItem("Disconnects whatever feeds the selected outputs, patches and surfaces.",
+                                                "The items themselves stay; only the routes into them are removed.");
+        }
+
         if (ImGui.GetCursorPosY() > beforeKindItems)
             CustomComponents.SeparatorLine();
+
+        CustomComponents.MenuItemsDisabled = multi;
+        ImGui.BeginDisabled(multi);
 
         if (SetupActions.CanDuplicate(kind) && CustomComponents.DrawMenuItem(5, "Duplicate"))
             SetupActions.DuplicateEntity(selection, setup, kind, id);
@@ -150,7 +167,7 @@ internal static class SetupEntityContextMenu
     }
 
     /// <summary>The kind-specific entries, one case per kind, side by side.</summary>
-    private static void DrawKindMenuItems(SetupEntitySelection selection, Setup setup, SetupEntityKinds kind, Guid id)
+    private static void DrawKindMenuItems(SetupEntitySelection selection, Setup setup, SetupEntityKinds kind, Guid id, bool multi)
     {
         switch (kind)
         {
@@ -185,11 +202,14 @@ internal static class SetupEntityContextMenu
                 if (CustomComponents.DrawMenuItem(11, "Split into 4×4"))
                     SetupActions.SplitOutput(selection, setup, output, 4, 4);
 
-                if (CustomComponents.DrawMenuItem(14, "Clear Inputs", isEnabled: SetupActions.OutputHasInputs(setup, output)))
-                    SetupActions.ClearOutputInputs(setup, output);
+                if (!multi)
+                {
+                    if (CustomComponents.DrawMenuItem(14, "Clear Inputs", isEnabled: SetupActions.OutputHasInputs(setup, output)))
+                        SetupActions.ClearOutputInputs(setup, output);
 
-                CustomComponents.TooltipForLastItem("Disconnects every surface and patch from this output.",
-                                                    "The surfaces and their content stay; only the routes into this canvas are removed.");
+                    CustomComponents.TooltipForLastItem("Disconnects the surfaces and content feeding this output directly.",
+                                                        "Its patches stay, along with whatever feeds them.");
+                }
 
                 // Content fed straight to the output rides a folded-away patch; turning it is the common case of
                 // a display mounted on its side, so it is offered here rather than making the patch explicit first.
@@ -262,14 +282,15 @@ internal static class SetupEntityContextMenu
                 CustomComponents.TooltipForLastItem("Turns this patch into a surface with a corner pin.",
                                                     "The quad stays exactly where it is; the surface adds real size, raster and straightening.");
 
-                if (setup.FindPatch(id, out _) is { } fedPatch
-                    && CustomComponents.DrawMenuItem(14, "Clear Inputs", isEnabled: fedPatch.SliceId != Guid.Empty))
+                if (!multi && setup.FindPatch(id, out _) is { } fedPatch)
                 {
-                    SetupActions.ClearPatchInput(setup, fedPatch);
+                    if (CustomComponents.DrawMenuItem(14, "Clear Inputs", isEnabled: SetupActions.PatchHasInputs(setup, fedPatch)))
+                        SetupActions.ClearPatchInput(setup, fedPatch);
+
+                    CustomComponents.TooltipForLastItem("Disconnects the content or surfaces feeding this patch.",
+                                                        "The patch keeps its place on the canvas, ready to be fed again.");
                 }
 
-                CustomComponents.TooltipForLastItem("Disconnects the content feeding this patch.",
-                                                    "The patch keeps its place on the canvas, ready to be fed again.");
                 break;
 
             case SetupEntityKinds.ReferenceImage:
@@ -370,7 +391,7 @@ internal static class SetupEntityContextMenu
                 if (surface.SliceId != Guid.Empty && CustomComponents.DrawMenuItem(9, "Adjust aspect to slice"))
                     SurfaceMetrics.MatchSurfaceToSliceAspect(setup, surface);
 
-                if (CustomComponents.DrawMenuItem(6, "Clear content inputs"))
+                if (!multi && CustomComponents.DrawMenuItem(6, "Clear content inputs"))
                     SetupActions.ClearContentInputs(surface.Id);
 
                 if (SetupActions.HasOwnPin(surface) && CustomComponents.DrawMenuItem(17, "Follow parent's pin"))

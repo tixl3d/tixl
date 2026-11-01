@@ -71,6 +71,18 @@ Add another SendToOutput op. Select it in CONTENT, Ctrl+click "Wall", right-clic
 **Expected:**
 - All three regions now show new slices of the selected content, and its Resolution is set to the surface's aspect.
 
+## Step: Regions with their own pin project without their parent
+
+**Action:**
+1. Build [StageGeometry] → [GeometryToMesh] → [ProjectOntoStage], with an image on its Image input and its Viewer
+   Position in front of "Wall", and view its output.
+2. Right-click "TV 1" and "TV 2" and give each a place of its own on the output, by dragging it onto a patch.
+3. Clear "Wall"'s own route to the output, so only the regions are on it.
+
+**Expected:**
+- After 3: the output still shows the projected picture in the two regions' places, and no status warning shows on
+  [ProjectOntoStage]. It stays empty, with a warning, only when neither "Wall" nor any region has a place.
+
 ## Step: Offered only where it applies
 
 **Action:**

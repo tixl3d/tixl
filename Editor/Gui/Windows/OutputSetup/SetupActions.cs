@@ -655,34 +655,96 @@ internal static class SetupActions
         return copy;
     }
 
-    /// <summary>Whether anything feeds the output: a surface mapped onto it, or a patch on its canvas.</summary>
+    /// <summary>Whether anything feeds the output directly: a surface mapped onto it, or content on its folded-away
+    /// patch. Listed patches have inputs of their own.</summary>
     internal static bool OutputHasInputs(Setup setup, OutputDefinition output)
     {
-        if (output.Patches.Count > 0)
+        if (SetupRelations.TryGetImplicitPatch(output, out var implicitPatch) && implicitPatch!.SliceId != Guid.Empty)
             return true;
 
         foreach (var surface in setup.Surfaces)
         {
-            if (SetupRelations.IsMappedTo(surface, output.Id))
-                return true;
+            foreach (var mapping in surface.OutputMappings)
+            {
+                if (IsDirectMappingOnto(setup, mapping, output))
+                    return true;
+            }
         }
 
         return false;
     }
 
     /// <summary>
-    /// Disconnects everything from an output: every surface's mapping onto it and all of its patches go. The
-    /// surfaces, their slices and the output itself stay — only the routes into this canvas are cut.
+    /// Disconnects what feeds an output directly: surface mappings onto it and the content on its folded-away
+    /// patch. Listed patches keep their place and whatever feeds them, including surfaces pinned onto them.
     /// </summary>
     internal static void ClearOutputInputs(Setup setup, OutputDefinition output)
     {
-        SetupUndo.RunUndoable("Clear output inputs", setup, () =>
-                                                            {
-                                                                foreach (var surface in setup.Surfaces)
-                                                                    surface.OutputMappings.RemoveAll(m => m.OutputId == output.Id);
+        SetupUndo.RunUndoable("Clear output inputs", setup, () => ClearOutputInputsInternal(setup, output));
+    }
 
-                                                                output.Patches.Clear();
-                                                            });
+    /// <summary>Whether the selection holds any kind of item that has inputs to clear.</summary>
+    internal static bool CanClearInputs(SetupEntitySelection selection)
+    {
+        for (var i = 0; i < selection.Targets.Count; i++)
+        {
+            if (selection.Targets[i].Kind is SetupEntityKinds.Output or SetupEntityKinds.Patch or SetupEntityKinds.Surface)
+                return true;
+        }
+
+        return false;
+    }
+
+    internal static bool SelectionHasInputs(Setup setup, SetupEntitySelection selection)
+    {
+        for (var i = 0; i < selection.Targets.Count; i++)
+        {
+            var target = selection.Targets[i];
+            var hasInputs = target.Kind switch
+                                {
+                                    SetupEntityKinds.Output  => setup.FindOutput(target.EntityId) is { } output && OutputHasInputs(setup, output),
+                                    SetupEntityKinds.Patch   => setup.FindPatch(target.EntityId, out _) is { } patch && PatchHasInputs(setup, patch),
+                                    SetupEntityKinds.Surface => setup.FindSurface(target.EntityId) is { } surface && surface.SliceId != Guid.Empty,
+                                    _                        => false,
+                                };
+            if (hasInputs)
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>Clears the inputs of every selected output, patch and surface in one undo step. The other kinds
+    /// have no inputs of their own, so a mixed selection simply skips them.</summary>
+    internal static void ClearSelectionInputs(Setup setup, SetupEntitySelection selection)
+    {
+        SetupUndo.RunUndoable("Clear inputs", setup, () =>
+                                                     {
+                                                         for (var i = 0; i < selection.Targets.Count; i++)
+                                                         {
+                                                             var target = selection.Targets[i];
+                                                             switch (target.Kind)
+                                                             {
+                                                                 case SetupEntityKinds.Output:
+                                                                     if (setup.FindOutput(target.EntityId) is { } output)
+                                                                         ClearOutputInputsInternal(setup, output);
+
+                                                                     break;
+
+                                                                 case SetupEntityKinds.Patch:
+                                                                     if (setup.FindPatch(target.EntityId, out _) is { } patch)
+                                                                         ClearPatchInputInternal(setup, patch);
+
+                                                                     break;
+
+                                                                 case SetupEntityKinds.Surface:
+                                                                     if (setup.FindSurface(target.EntityId) is { } surface)
+                                                                         surface.SliceId = Guid.Empty;
+
+                                                                     break;
+                                                             }
+                                                         }
+                                                     });
     }
 
     /// <summary>
@@ -703,7 +765,25 @@ internal static class SetupActions
 
     internal static void ClearPatchInput(Setup setup, OutputDefinition.Patch patch)
     {
-        SetupUndo.RunUndoable("Clear patch input", setup, () => patch.SliceId = Guid.Empty);
+        SetupUndo.RunUndoable("Clear patch input", setup, () => ClearPatchInputInternal(setup, patch));
+    }
+
+    /// <summary>Whether anything feeds the patch: a slice, or a surface pinned exactly onto it.</summary>
+    internal static bool PatchHasInputs(Setup setup, OutputDefinition.Patch patch)
+    {
+        if (patch.SliceId != Guid.Empty)
+            return true;
+
+        foreach (var surface in setup.Surfaces)
+        {
+            foreach (var mapping in surface.OutputMappings)
+            {
+                if (SetupRelations.FindLayoutPatchUnder(setup, mapping) == patch.Id)
+                    return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>
@@ -1157,6 +1237,29 @@ internal static class SetupActions
         }
 
         return copy;
+    }
+
+    private static bool IsDirectMappingOnto(Setup setup, Surface.OutputMapping mapping, OutputDefinition output)
+    {
+        return mapping.OutputId == output.Id && SetupRelations.FindLayoutPatchUnder(setup, mapping) == Guid.Empty;
+    }
+
+    private static void ClearPatchInputInternal(Setup setup, OutputDefinition.Patch patch)
+    {
+        foreach (var surface in setup.Surfaces)
+            surface.OutputMappings.RemoveAll(m => SetupRelations.FindLayoutPatchUnder(setup, m) == patch.Id);
+
+        patch.SliceId = Guid.Empty;
+    }
+
+    private static void ClearOutputInputsInternal(Setup setup, OutputDefinition output)
+    {
+        foreach (var surface in setup.Surfaces)
+            surface.OutputMappings.RemoveAll(m => IsDirectMappingOnto(setup, m, output));
+
+        // The folded-away patch has no place of its own to keep: it only exists to carry the route.
+        if (SetupRelations.TryGetImplicitPatch(output, out var implicitPatch))
+            output.Patches.Remove(implicitPatch!);
     }
 
     private static int CountProjectorOutputs(Setup setup)

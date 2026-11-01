@@ -71,6 +71,16 @@ Click the setup name in the strip's header and choose **Reveal in Explorer**.
 - After 3: the strip disappears entirely, the window's own toolbar returns with the list
   icon; clicking it brings the strip back at its previous height and the toolbar goes again.
 
+## Step: The project remembers the strip's height
+
+**Action:**
+1. Drag the strip's top edge upward by about 100 px and release.
+2. Save the project with Ctrl+S, close the editor and start it again with the same project.
+3. Open the output setup.
+
+**Expected:**
+- The strip opens at the height from step 1, not at its default. A project saved before this existed opens at the default.
+
 ## Step: Right-drag scrolls the list
 
 **Action:**

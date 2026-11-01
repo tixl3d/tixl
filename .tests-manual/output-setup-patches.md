@@ -251,16 +251,34 @@ Drag the surface item created by "Use on Surface" onto the "Patch 2" item in the
 ## Step: Clear Inputs on a patch
 
 **Action:**
-1. Right-click the unfed patch added in "A surface dropped on an empty patch keeps it" and look at
-   **Clear Inputs**.
-2. Drag "Slice 1" onto that patch's item, then right-click it → **Clear Inputs**.
-3. Press Ctrl+Z.
+1. Right-click the patch that the surface was pinned to in "A surface dropped on an empty patch
+   keeps it" and choose **Clear Inputs**.
+2. Right-click that patch again and look at **Clear Inputs**.
+3. Press Escape, drag "Slice 1" onto the patch's item, then right-click it → **Clear Inputs**.
+4. Press Ctrl+Z.
 
 **Expected:**
-- After 1: **Clear Inputs** is greyed out — nothing feeds the patch yet.
-- After 2: the connection from "Slice 1" disappears and the patch item turns dimmed, but it stays
+- After 1: the connection from the surface disappears. The surface item stays in SURFACES and the
+  patch stays under P1 at the same place on the canvas.
+- After 2: **Clear Inputs** is greyed out — nothing feeds the patch any more.
+- After 3: the connection from "Slice 1" disappears and the patch item turns dimmed, but it stays
   under P1 at the same place on the canvas.
-- After 3: the connection is back, in one undo step.
+- After 4: the connection from "Slice 1" is back, in one undo step.
+
+## Step: Clear Inputs on several selected items
+
+**Action:**
+1. Click the "Patch 1" item, then Ctrl+click the "Patch 2" item, so both are selected.
+2. Right-click "Patch 2" and look at the menu, then choose **Clear Inputs**.
+3. Right-click "Patch 2" again and look at **Clear Inputs**.
+4. Press Escape to close the menu, then press Ctrl+Z.
+
+**Expected:**
+- After 2: **Clear Inputs** is the one enabled row among the patch actions, next to **Delete 2**;
+  **Rotate 90°**, **Use on Surface**, **Duplicate** and **Rename** stay greyed out. Choosing it
+  removes the connections into both patches, both items turn dimmed and stay under P1.
+- After 3: **Clear Inputs** is greyed out — nothing feeds either patch any more.
+- After 4: both connections are back, in one undo step.
 
 ## Step: Deleting the slice unfeeds, deleting the patch removes
 
@@ -278,6 +296,7 @@ Drag the surface item created by "Use on Surface" onto the "Patch 2" item in the
 Right-click the "P1" item in the OUTPUTS column and choose **Clear Inputs**; then press Ctrl+Z.
 
 **Expected:**
-- Every connection into "P1" disappears: the surface mappings onto it and all of its patches
-  (the patch items under it are gone), while the surfaces and their slices remain. The entry
-  is greyed out on an output that has no inputs. Ctrl+Z restores everything in one step.
+- Every connection into the "P1" item itself disappears: the surface mappings onto it and content
+  dropped directly on it. The patch items stay under "P1" with their connections, including those
+  from surfaces pinned onto a patch, and the surfaces and their slices remain. The entry is greyed
+  out when only patches are fed. Ctrl+Z restores everything in one step.

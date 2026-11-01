@@ -143,6 +143,35 @@ internal static class SetupRelations
         return slice != null && slice.SourceId == sourceId;
     }
 
+    /// <summary>
+    /// The content-less patch a surface's pin sits exactly on — a venue's pixel map traced as patches, which the
+    /// surface was dropped onto — so the link leads to that area rather than to the output as a whole.
+    /// </summary>
+    public static Guid FindLayoutPatchUnder(Setup setup, Surface.OutputMapping mapping)
+    {
+        var output = setup.FindOutput(mapping.OutputId);
+        if (output == null || mapping.IsFilling || mapping.Quad.Length < 4)
+            return Guid.Empty;
+
+        foreach (var patch in output.Patches)
+        {
+            if (patch.SliceId != Guid.Empty || patch.Quad.Length < 4)
+                continue;
+
+            patch.CopyTurnedCorners(_patchCorners);
+            var matches = true;
+            for (var corner = 0; corner < 4 && matches; corner++)
+            {
+                matches = Vector2.DistanceSquared(_patchCorners[corner], mapping.Quad[corner]) < SamePinToleranceSquared;
+            }
+
+            if (matches)
+                return patch.Id;
+        }
+
+        return Guid.Empty;
+    }
+
     public static bool IsMappedTo(Surface surface, Guid outputId)
     {
         foreach (var mapping in surface.OutputMappings)
@@ -381,4 +410,9 @@ internal static class SetupRelations
 
         return count;
     }
+
+    /** Canvas 0..1 units: far below a pixel on any output, well above float noise from the corner turn. */
+    private const float SamePinToleranceSquared = 1e-8f;
+
+    private static readonly Vector2[] _patchCorners = new Vector2[4];
 }
