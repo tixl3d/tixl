@@ -68,6 +68,9 @@ internal sealed class CustomPointShader : Instance<CustomPointShader>,ITransform
         [Input(Guid = "18d79780-050c-4914-b1e3-ac2a164e45ea")]
         public readonly InputSlot<T3.Core.DataTypes.ShaderGraphNode> Field = new InputSlot<T3.Core.DataTypes.ShaderGraphNode>();
 
+        [Input(Guid = "c75e3d1b-f46a-4daf-a6fd-0ddcda60b9f9")]
+        public readonly MultiInputSlot<bool> UseSimBuffer = new MultiInputSlot<bool>();
+
         [Output(Guid = "3b249524-d36c-4502-8de5-d519799041b8")]
         public readonly Slot<string> ShaderCode_ = new Slot<string>();
 }

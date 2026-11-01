@@ -239,6 +239,51 @@
           "e9712b03-e7aa-4fe5-b5cf-f2c5d0c0b0df": "float4 c = Image.SampleLevel(Sampler, float2(Biased(f), 0.5),0);\np.Color = c;"
         }
       }
+    },
+    {
+      "Id": "08e066d2-48ad-4bc2-994f-83ef64a3ea08",
+      "IsPreset": true,
+      "ActivationIndex": 10,
+      "Title": "Color Flash Simulation",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 490.20224
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "a5c7863e-9c26-4109-9851-3244086b0ccc": 1.03,
+          "e5a7649f-684e-4938-8ae3-7289f5b9ff45": 0.42,
+          "377151fc-49a7-4407-bf85-74c4a7d5188d": {
+            "Gradient": {
+              "Interpolation": "OkLab",
+              "Steps": [
+                {
+                  "Id": "675de942-7005-4ec6-a902-62a564584d4c",
+                  "NormalizedPosition": 0.0,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.4198891,
+                    "B": 0.0,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "72961462-ac25-4061-ba55-34bb94117557",
+                  "NormalizedPosition": 1.0,
+                  "Color": {
+                    "R": 0.036815107,
+                    "G": 1.0,
+                    "B": 0.9253503,
+                    "A": 1.0
+                  }
+                }
+              ]
+            }
+          },
+          "e9712b03-e7aa-4fe5-b5cf-f2c5d0c0b0df": "// Sets the color of point at index A.\n// The incoming point buffer needs \n// to use [PointSimulation].\n\nif(A<0)\n return;\n\nint i = (int)A;\nResultPoints[i].Color= SampleGradient(B);\nreturn;",
+          "c75e3d1b-f46a-4daf-a6fd-0ddcda60b9f9": true
+        }
+      }
     }
   ]
 }

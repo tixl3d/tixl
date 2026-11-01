@@ -102,6 +102,14 @@
       }
     },
     {
+      "InputId": "c75e3d1b-f46a-4daf-a6fd-0ddcda60b9f9"/*UseSimBuffer*/,
+      "Position": {
+        "X": 3.0124817,
+        "Y": 473.9469
+      },
+      "Description": "Applies changes directly on the incoming buffer. This can be useful in combination with [PointSimulation].\nCheck out the Flash Simulation preset example."
+    },
+    {
       "InputId": "d669b4e9-8a3e-493c-93d1-da0267b41b1b"/*ShaderResources*/,
       "Position": {
         "X": 1045.2595,
@@ -119,8 +127,8 @@
       "InputId": "e77660e2-0fd0-45ea-8e0b-c607a757bb49"/*Points*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -271.28558,
-        "Y": 269.57233
+        "X": -321.79858,
+        "Y": 234.67242
       }
     },
     {
@@ -280,6 +288,14 @@
       }
     },
     {
+      "ChildId": "975c933e-64a8-4737-9b70-6b9311c10f40",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToInt",
+      "Position": {
+        "X": 143.01248,
+        "Y": 473.9469
+      }
+    },
+    {
       "ChildId": "a753dbdf-e14e-4256-801c-d9cc777a0eb3",
       "SymbolName": "Types.Gfx.SamplerState",
       "Position": {
@@ -293,6 +309,14 @@
       "Position": {
         "X": 146.2655,
         "Y": -605.90656
+      }
+    },
+    {
+      "ChildId": "ace0a08f-72e2-421e-82dc-657c61470dac",
+      "SymbolName": "Lib.point.combine.PickPointList",
+      "Position": {
+        "X": 283.01248,
+        "Y": 403.9469
       }
     },
     {
