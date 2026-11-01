@@ -87,6 +87,10 @@ recommended `SetupEdits.Defer` remain open.
 
 #### 3. Setup files can be overwritten or lost (VERIFIED for the first two, TRACED for the rest)
 
+**Status:** fixed after this review, with unit tests for the file behaviour but no test in the editor. The name now comes from the file name, a copied file gets a fresh `Setup.Id` when switched to directly
+from its original, saves are atomic, an unreadable setup is left in place and a default never takes its name, an unreadable machine file is copied to `.unreadable`, and Delete asks first.
+Open: no `.bak` of earlier versions, and the fallback after an unreadable active setup is reported only as a log warning.
+
 - **Name vs file:** the switcher lists file names, but `SaveActive` writes to the JSON `Name`
   (`OutputSetupHandling.cs:94,143-146,155-160`). Copy `Hall.setup.json` to `Hall_old.setup.json` in Explorer and pick
   `Hall_old`: `Hall.setup.json` is overwritten with the old content at once, and the session now edits `Hall`.

@@ -1015,9 +1015,12 @@ internal sealed class SetupFlowOutliner
 
             CustomComponents.TooltipForLastItem("Shows this setup's file in the project's .meta folder.");
 
-            if (_availableNames.Count > 1 && CustomComponents.DrawMenuItem(902, "Delete", reserveIconColumn: false))
+            if (_availableNames.Count > 1 && CustomComponents.DrawMenuItem(902, "Delete...", reserveIconColumn: false))
             {
-                if (OutputSetupHandling.TryDeleteActive())
+                const string deleteChoice = "Delete";
+                var choice = T3.Core.SystemUi.BlockingWindow.Instance.ShowMessageBox($"Delete the setup \"{setup.Name}\" and its file? This can't be undone.",
+                                                                                      "Delete Setup", deleteChoice, "Cancel");
+                if (choice == deleteChoice && OutputSetupHandling.TryDeleteActive())
                     selection.Clear();
             }
 

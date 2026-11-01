@@ -44,8 +44,8 @@ public static class SetupFiles
         if (activeName.Length > 0)
         {
             var preferred = FilePathFor(setupsFolder, activeName);
-            if (File.Exists(preferred))
-                Setup.TryLoadFromFile(preferred, out setup, out wasRepaired);
+            if (File.Exists(preferred) && !Setup.TryLoadFromFile(preferred, out setup, out wasRepaired))
+                Log.Warning($"The output setup \"{activeName}\" can't be read, so another one opens instead. Its file stays as it is.");
         }
 
         // The remembered setup is gone, or none was ever recorded.
@@ -108,6 +108,14 @@ public static class SetupFiles
         }
 
         return false;
+    }
+
+    /// <summary>Writes through a temporary file, so a crash during a save leaves the previous file whole. Throws what the file system throws.</summary>
+    public static void WriteFileAtomically(string filePath, string content)
+    {
+        var temporaryPath = filePath + ".tmp";
+        File.WriteAllText(temporaryPath, content);
+        File.Move(temporaryPath, filePath, overwrite: true);
     }
 
     /// <summary>The path a setup of this name is stored at.</summary>

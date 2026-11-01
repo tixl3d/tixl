@@ -181,6 +181,10 @@ internal static class OutputSetupHandling
         if (!Setup.TryLoadFromFile(SetupFilePath(setupsFolder, setupName), out var setup, out _))
             return false;
 
+        // A file copied by hand shares its id with the original, and undo would then cross between the two.
+        if (setup.Id == entry.Setup.Id)
+            setup.Id = Guid.NewGuid();
+
         entry.Setup = setup;
         OutputPresentation.ReleaseAll();
         SaveActive(); // records the new active setup name (and any load-time repair) so the switch survives a restart
@@ -277,18 +281,18 @@ internal static class OutputSetupHandling
 
         var names = new List<string>();
         GetAvailableSetupNames(names);
-        if (names.Count > 0)
+
+        // An unreadable file is skipped: staying on the deleted setup would write its file back at the next save.
+        foreach (var name in names)
         {
-            TrySwitchTo(names[0]);
-        }
-        else
-        {
-            entry.Setup = Setup.CreateDefault();
-            entry.IsSaved = false;
-            OutputPresentation.ReleaseAll();
-            StructureVersion++;
+            if (TrySwitchTo(name))
+                return true;
         }
 
+        entry.Setup = Setup.CreateDefault(FreeDefaultSetupName(setupsFolder));
+        entry.IsSaved = false;
+        OutputPresentation.ReleaseAll();
+        StructureVersion++;
         return true;
     }
 
@@ -375,7 +379,7 @@ internal static class OutputSetupHandling
         var isSaved = setup != null;
         if (setup == null)
         {
-            setup = Setup.CreateDefault();
+            setup = Setup.CreateDefault(FreeDefaultSetupName(setupsFolder));
         }
         else if (wasRepaired)
         {
@@ -386,6 +390,17 @@ internal static class OutputSetupHandling
         entry = new ProjectEntry { Setup = setup, MachineConfig = machineConfig, IsSaved = isSaved };
         _entriesByProjectFolder[projectFolder] = entry;
         return entry;
+    }
+
+    /** A name with no file behind it, so a default standing in for an unreadable "Setup 1" can't save over that file. */
+    private static string FreeDefaultSetupName(string setupsFolder)
+    {
+        for (var ordinal = 1;; ordinal++)
+        {
+            var name = $"Setup {ordinal}";
+            if (!File.Exists(SetupFilePath(setupsFolder, name)))
+                return name;
+        }
     }
 
     private static string SetupFilePath(string setupsFolder, string setupName)
