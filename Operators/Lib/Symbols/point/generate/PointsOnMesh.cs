@@ -3,6 +3,14 @@ namespace Lib.point.generate;
 [Guid("17188f49-1243-4511-a46c-1804cae10768")]
 internal sealed class PointsOnMesh : Instance<PointsOnMesh>
 {
+    private enum ExtraAttributeModes
+    {
+        Default = 0,
+        TexCoord = 1,
+        TexCoord2 = 2,
+        VertexSelectF1 = 3,
+        VertexSelectF2 = 4,
+    }
 
     [Output(Guid = "414724f2-1c7f-406a-a209-cfb3f6ad0265")]
     public readonly Slot<BufferWithViews> ResultPoints = new();
@@ -18,6 +26,9 @@ internal sealed class PointsOnMesh : Instance<PointsOnMesh>
 
     [Input(Guid = "d737860b-2864-472d-ad46-4061b63a12d4")]
     public readonly InputSlot<float> Seed = new InputSlot<float>();
+
+    [Input(Guid = "97764c5c-882e-42ef-9687-2e6dcf29ed32", MappedType = typeof(ExtraAttributeModes))]
+    public readonly InputSlot<int> ExtraAttributes = new InputSlot<int>();
 
     [Input(Guid = "132584c0-c27c-448a-b31d-ae72f0fb4baa")]
     public readonly InputSlot<Texture2D> Texture = new();

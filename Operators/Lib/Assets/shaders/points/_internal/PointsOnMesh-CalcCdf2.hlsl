@@ -16,18 +16,24 @@ StructuredBuffer<int3> FaceIndices : register(t1);
 
 RWStructuredBuffer<FaceProperties> FaceData : register(u0);
 
+// Building the CDF is sequential, so one thread computes the whole buffer (dispatched with 1,1,1).
 [numthreads(1,1,1)]
 void main(uint3 i : SV_DispatchThreadID)
 {
     uint faceCount, stride;
     FaceData.GetDimensions(faceCount, stride);
-    if (i.x >= (uint)faceCount)
+
+    uint indexCount, indexStride;
+    FaceIndices.GetDimensions(indexCount, indexStride);
+    faceCount = min(faceCount, indexCount);
+
+    if (i.x >= faceCount)
         return;
 
-    float sum;
+    float totalArea = 0;
 
-    // One declaration for all three loops: the loop variable lives in the function's scope.
-    int j;
+    // One declaration for all loops: the loop variable lives in the function's scope.
+    uint j;
     for (j = 0; j < faceCount; j++)
     {
         uint3 f = FaceIndices[j];
@@ -50,22 +56,20 @@ void main(uint3 i : SV_DispatchThreadID)
                         + Vertices[f[2]].Selected) 
                         : 1;
 
-        FaceData[j].normalizedFaceArea =  faceArea * selection;
-        sum += faceArea;
+        float weightedArea = faceArea * selection;
+        FaceData[j].normalizedFaceArea = weightedArea;
+        totalArea += weightedArea;
     }
 
-    sum = 0;
-    for (j = 0; j < faceCount; j++)
-    {
-        sum += FaceData[j].normalizedFaceArea;
-    }
-
-    sum = 1.0/sum;
-
+    // Degenerate meshes or empty vertex selections would divide by zero. In that case spread the
+    // points evenly over the faces instead of producing NaNs.
     float cdf = 0;
     for (j = 0; j < faceCount; j++)
     {
-        cdf += FaceData[j].normalizedFaceArea * sum;
+        float normalizedArea = totalArea > 0
+                                   ? FaceData[j].normalizedFaceArea / totalArea
+                                   : 1.0 / (float)faceCount;
+        cdf += normalizedArea;
         FaceData[j].cdf = cdf;
     }
 }
