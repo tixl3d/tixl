@@ -133,6 +133,12 @@ internal static class CalibrationOverlay
         var photo = _photo.Value;
         var radius = canvasResolution.Height * photo.RadiusOfHeight;
 
+        // The photo's whole texture is drawn rather than the surface's window, so a disc at the surface's edge isn't
+        // cut there: the pin's unit square is stretched to where the texture's corners lie in it.
+        var uvSpan = new Vector2(MathF.Max(photo.Uv.Z - photo.Uv.X, 0.0001f), MathF.Max(photo.Uv.W - photo.Uv.Y, 0.0001f));
+        var textureToPinUnit = Matrix4x4.CreateScale(1 / uvSpan.X, 1 / uvSpan.Y, 1)
+                               * Matrix4x4.CreateTranslation(-photo.Uv.X / uvSpan.X, -photo.Uv.Y / uvSpan.Y, 0);
+
         foreach (var pending in _pendingFragments)
         {
             if (!SurfaceGeometry.TryGetSurfaceToOutput(pending.Surface, pending.Mapping, canvasSize, out var surfaceToOutput))
@@ -149,7 +155,7 @@ internal static class CalibrationOverlay
                 // the gap between the disc and its crosshair is the miss — drag until the disc covers the real
                 // feature and the two come together.
                 var centre = surfaceToOutput.TransformPoint(annotation.P1);
-                drawItems.Add(new OutputCompositor.DrawItem(photo.Srv, pending.Homography, photo.Uv, Vector4.One,
+                drawItems.Add(new OutputCompositor.DrawItem(photo.Srv, textureToPinUnit * pending.Homography, new Vector4(0, 0, 1, 1), Vector4.One,
                                                             Vector4.Zero, Vector4.Zero, Vector4.Zero,
                                                             new Vector4(centre.X, centre.Y, radius, 1)));
             }

@@ -524,6 +524,17 @@ its width. Then open the Output tab and check the send's Resolution in the Param
   features. Inside the "Reference 1" image the same three points sit on the green traced
   quad, at the features they were placed on.
 
+## Step: Discs show the photo beyond the surface's edge
+
+**Action:**
+With "Project photo" on, add a reference point on the surface about 5 cm inside its right edge, on a traced
+photo that continues past that edge.
+
+**Expected:**
+- On the canvas and on the wall, the disc is a full circle: the part past the surface's edge shows the photo
+  that continues there, not a cut or an empty area.
+- The surface's Board card still shows only the surface, without any surround.
+
 ## Step: Discs survive a collapsed pin
 
 **Action:**

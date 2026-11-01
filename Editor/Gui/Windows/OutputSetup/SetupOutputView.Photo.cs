@@ -186,7 +186,7 @@ internal sealed partial class SetupOutputView
         var t = _referenceStraighten.Value;
         if (hasSubject && t > 0.001f
             && TryRenderStraightened(image, _referenceSubjectQuad, targetMin, targetMax, texture, t,
-                                     image.Id, 4096f,
+                                     image.Id, 4096f, surroundOfRegion: 1f,
                                      out var warped, out var bboxMin, out var bboxMax, out var regionMin, out var regionMax)
             && warped is { IsDisposed: false })
         {
@@ -261,7 +261,7 @@ internal sealed partial class SetupOutputView
     /// photo's warped corners in <see cref="_referencePhotoQuad"/>.
     /// </summary>
     private static bool TryRenderStraightened(ReferenceImage image, Vector2[] quad, Vector2 targetMin, Vector2 targetMax, Texture2D texture, float t,
-                                              Guid targetKey, float maxDimension,
+                                              Guid targetKey, float maxDimension, float surroundOfRegion,
                                               out Texture2D? warped, out Vector2 bboxMin, out Vector2 bboxMax, out Vector2 regionMin, out Vector2 regionMax)
     {
         warped = null;
@@ -290,9 +290,9 @@ internal sealed partial class SetupOutputView
         // Bounding to the region — not the whole warped photo — is essential: a steep rectification sends the
         // far photo corners toward infinity, so sizing to the full warp would blow the RT up and leave the
         // surface sub-pixel (it vanishes). The runaway surround is simply cropped to this window.
-        var regionSize = regionMax - regionMin;
-        bboxMin = regionMin - regionSize;
-        bboxMax = regionMax + regionSize;
+        var surround = (regionMax - regionMin) * surroundOfRegion;
+        bboxMin = regionMin - surround;
+        bboxMax = regionMax + surround;
 
         var bboxSize = bboxMax - bboxMin;
         var maxDim = Math.Max(bboxSize.X, bboxSize.Y);
@@ -407,15 +407,33 @@ internal sealed partial class SetupOutputView
 
     /// <summary>
     /// The straightened crop of the photo a traced surface stands for, for its Board card: the warp rendered
-    /// small into the surface's own target, and the uv window of the rectified region inside it.
+    /// into the surface's own target, and the uv window of the rectified region inside it.
     /// </summary>
     private bool TryGetTracedFragment(Setup setup, Surface surface, out SharpDX.Direct3D11.ShaderResourceView? srv, out Vector2 uvMin, out Vector2 uvMax)
     {
-        return TryGetTracedFragment(setup, surface, out srv, out _, out uvMin, out uvMax);
+        // A card only ever shows the region, so every pixel of the target goes to it.
+        return TryGetTracedFragment(setup, surface, 0f, surface.Id, out srv, out _, out uvMin, out uvMax);
     }
 
-    private bool TryGetTracedFragment(Setup setup, Surface surface, out SharpDX.Direct3D11.ShaderResourceView? srv, out Texture2D? warpedTexture,
-                                      out Vector2 uvMin, out Vector2 uvMax)
+    /// <summary>
+    /// The fragment for calibration discs, with photo around the region: a mark near the surface's edge still
+    /// shows what surrounds its feature. Telling the surface from its surroundings is easy for the person
+    /// aligning it, reconstructing what a crop cut off is not.
+    /// </summary>
+    private bool TryGetTracedFragmentWithSurround(Setup setup, Surface surface, out SharpDX.Direct3D11.ShaderResourceView? srv, out Texture2D? warpedTexture,
+                                                  out Vector2 uvMin, out Vector2 uvMax)
+    {
+        // A target of its own: sharing the card's would recreate it whenever their differing sizes alternate.
+        Span<byte> key = stackalloc byte[16];
+        surface.Id.TryWriteBytes(key);
+        key[0] ^= 0xFF;
+        return TryGetTracedFragment(setup, surface, DiscSurroundOfRegion, new Guid(key), out srv, out warpedTexture, out uvMin, out uvMax);
+    }
+
+    private const float DiscSurroundOfRegion = 0.5f;
+
+    private bool TryGetTracedFragment(Setup setup, Surface surface, float surroundOfRegion, Guid targetKey, out SharpDX.Direct3D11.ShaderResourceView? srv,
+                                      out Texture2D? warpedTexture, out Vector2 uvMin, out Vector2 uvMax)
     {
         srv = null;
         warpedTexture = null;
@@ -431,7 +449,7 @@ internal sealed partial class SetupOutputView
             return false;
 
         StraightTargetBounds(surface, out var targetMin, out var targetMax);
-        if (!TryRenderStraightened(image, binding.Quad, targetMin, targetMax, texture, 1f, surface.Id, 1024f,
+        if (!TryRenderStraightened(image, binding.Quad, targetMin, targetMax, texture, 1f, targetKey, 2048f, surroundOfRegion,
                                    out var warped, out var bboxMin, out var bboxMax, out var regionMin, out var regionMax)
             || warped is not { IsDisposed: false })
             return false;

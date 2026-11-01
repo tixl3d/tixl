@@ -172,6 +172,9 @@ internal sealed partial class SetupOutputView
         CanvasDraw.Crosshair(dl, to, color, 4f, 1f);
     }
 
+    /** How far beyond the pin's own extent the warp with its surround may reach before the pin counts as too steep. */
+    private const float MaxDiscWarpGrowth = 8f;
+
     /// <summary>
     /// A disc of the surface's straightened photo around each reference point: the wall's own picture, right
     /// where the feature is, so a mark can be walked onto it. Centred on the marks, not on where the pin
@@ -180,12 +183,29 @@ internal sealed partial class SetupOutputView
     private void DrawCanvasPhotoDiscs(Setup setup, ImDrawListPtr dl, Surface surface, Surface.OutputMapping mapping,
                                       in Homography surfaceToOutput, Vector2 canvasSize, float fade)
     {
-        if (!TryGetTracedFragment(setup, surface, out var fragmentSrv, out var photo, out var uvMin, out var uvMax))
+        if (!TryGetTracedFragmentWithSurround(setup, surface, out var fragmentSrv, out var photo, out var uvMin, out var uvMax))
             return;
+
+        SurfaceGeometry.LocalBounds(surface, out var surfaceMin, out var surfaceMax);
+        var surfaceSpan = Vector2.Max(surfaceMax - surfaceMin, new Vector2(0.0001f));
+        var uvSpan = uvMax - uvMin;
 
         // The pin is stored as fractions of the canvas; this warp works in its pixels, like the view around it.
         for (var c = 0; c < 4; c++)
             _canvasDiscQuad[c] = mapping.Quad[c] * canvasSize;
+
+        CanvasDraw.Bounds(_canvasDiscQuad, out var pinMin, out var pinMax);
+        var pinSize = pinMax - pinMin;
+
+        // The whole fragment goes through the pin, the photo around the surface included: its corners are the
+        // texture's, carried from uv into surface metres (Y-up) and on through the pin.
+        for (var c = 0; c < 4; c++)
+        {
+            var textureCorner = new Vector2(c is 1 or 2 ? 1 : 0, c is 2 or 3 ? 1 : 0);
+            var inSurface = (textureCorner - uvMin) / uvSpan;
+            _canvasDiscQuad[c] = surfaceToOutput.TransformPoint(new Vector2(surfaceMin.X + inSurface.X * surfaceSpan.X,
+                                                                            surfaceMax.Y - inSurface.Y * surfaceSpan.Y));
+        }
 
         CanvasDraw.Bounds(_canvasDiscQuad, out var bboxMin, out var bboxMax);
         var bboxSize = bboxMax - bboxMin;
@@ -193,8 +213,10 @@ internal sealed partial class SetupOutputView
         // A pin that has collapsed — or gone non-finite mid-solve — has no area to warp into: the target would
         // be a pixel or two across and every disc would come out a single smeared colour. That is the state you
         // are most likely to be in while fixing a bad pin, which is exactly when the discs have to be there.
+        // A steep pin can throw the surround's corners towards infinity, which is no better to warp into.
         var pinIsUsable = float.IsFinite(bboxSize.X) && float.IsFinite(bboxSize.Y)
-                          && bboxSize.X >= MinDiscWarpExtent && bboxSize.Y >= MinDiscWarpExtent;
+                          && pinSize.X >= MinDiscWarpExtent && pinSize.Y >= MinDiscWarpExtent
+                          && bboxSize.X <= pinSize.X * MaxDiscWarpGrowth && bboxSize.Y <= pinSize.Y * MaxDiscWarpGrowth;
 
         SharpDX.Direct3D11.ShaderResourceView? srv = null;
         if (pinIsUsable)
@@ -205,8 +227,7 @@ internal sealed partial class SetupOutputView
 
             var size = new T3.Core.DataTypes.Vector.Int2(Math.Max(1, (int)(bboxSize.X * scale)),
                                                          Math.Max(1, (int)(bboxSize.Y * scale)));
-            var warped = OutputCompositor.RenderWarpedTexture(photo, _canvasDiscQuad, size, _canvasDiscKey,
-                                                           new Vector4(uvMin.X, uvMin.Y, uvMax.X, uvMax.Y));
+            var warped = OutputCompositor.RenderWarpedTexture(photo, _canvasDiscQuad, size, _canvasDiscKey);
             srv = warped is { IsDisposed: false } ? SrvManager.GetSrvForTexture(warped) : null;
         }
 
@@ -219,9 +240,6 @@ internal sealed partial class SetupOutputView
         if (srv is not { IsDisposed: false })
             return;
 
-        SurfaceGeometry.LocalBounds(surface, out var surfaceMin, out var surfaceMax);
-        var surfaceSpan = Vector2.Max(surfaceMax - surfaceMin, new Vector2(0.0001f));
-        var uvSpan = uvMax - uvMin;
         var uvRadius = uvSpan * UserSettings.Config.OutputSetupPhotoDiscRadius;
 
         var radius = canvasSize.Y * UserSettings.Config.OutputSetupPhotoDiscRadius;
