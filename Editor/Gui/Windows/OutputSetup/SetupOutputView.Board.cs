@@ -32,6 +32,9 @@ internal sealed partial class SetupOutputView
     /// switching to the selected entity's canvas.</summary>
     public bool ShowsBoard => _editMode == EditModes.Board;
 
+    /// <summary>Where something added from outside the canvas lands, in board metres; null while the Board isn't shown.</summary>
+    public Vector2? VisibleBoardCentre => ShowsBoard ? _visibleBoardCentre : null;
+
     // A content source's space (its texture with the slices laid out) is entered from its card and left by
     // "Board"; it is not one of the tabs, so it rides beside the mode.
 
@@ -80,6 +83,7 @@ internal sealed partial class SetupOutputView
         _boardLayerFade = 1f - _spaceBlend.Value;
 
         FitBoardIfNeeded(setup);
+        _visibleBoardCentre = _boardProjection.ScreenToCanvas((screenMin + screenMax) * 0.5f);
         ReleasePressHandoff(selection);
         _boardCardsUnderMouse.Clear();
         _hoveredPlanHandlePlanId = Guid.Empty;

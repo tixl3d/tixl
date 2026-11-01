@@ -361,6 +361,8 @@ internal sealed partial class SetupOutputView
     private const string PickMenuId = "##canvasPickMenu";
     private const string BoardMenuId = "##boardMenu";
 
+    private Vector2 _visibleBoardCentre;
+
     /** Board metres where the Board's own menu was opened — what the menu offers depends on what lies there. */
     private Vector2 _boardMenuPosition;
 

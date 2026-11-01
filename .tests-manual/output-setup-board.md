@@ -106,6 +106,21 @@ zooming in on one corner of it; then zoom all the way out.
 - After 3: the figure moves and undo returns it.
 - After 4: nothing is selected and the Board stays.
 
+## Step: The + menu adds to the visible part of the Board
+
+**Action:**
+1. On the Board, right-drag the view until no card is visible, keeping about 20 m of the grid in view.
+2. Click the **+** at the right of the outliner header and choose **Add Person** → **Man Pointing**.
+3. Click **+** again and choose **Add Reference Image**.
+4. Click **+** again, choose **Add Floor Plan...** and click **Create**.
+5. Press Ctrl+Z three times.
+
+**Expected:**
+- After 2: the person stands with their feet at the centre of the view and is selected; the view doesn't move.
+- After 3: the image card's bottom-left corner sits at the centre of the view.
+- After 4: the floor plan's bottom-left corner sits at the centre of the view.
+- After 5: all three are gone.
+
 ## Step: Alt-drag duplicates a slice
 
 **Action:**

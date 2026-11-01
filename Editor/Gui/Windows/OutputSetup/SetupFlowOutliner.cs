@@ -44,9 +44,10 @@ internal sealed class SetupFlowOutliner
     /// <param name="drawToolbar">The canvas' toolbar (mode switch and its actions), drawn after the setup switcher.</param>
     /// <param name="onLeave">Leaves the setup for the operator view; drawn as the header's close button.</param>
     public void Draw(SetupEntitySelection selection, Action? onToggleCollapse, bool bodyVisible,
-                     Action? drawGrip = null, Action? drawToolbar = null, Action? onLeave = null)
+                     Action? drawGrip = null, Action? drawToolbar = null, Action? onLeave = null, Vector2? visibleBoardCentre = null)
     {
         _onLeave = onLeave;
+        _visibleBoardCentre = visibleBoardCentre;
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out var machineConfig))
         {
             CustomComponents.EmptyWindowMessage("No project focused");
@@ -144,11 +145,11 @@ internal sealed class SetupFlowOutliner
         {
             CustomComponents.MenuItemsFlushLeft = true;
             if (CustomComponents.DrawMenuItem(1, "Add Reference Image"))
-                SetupActions.AddReferenceImage(selection);
+                SetupActions.AddReferenceImage(selection, _visibleBoardCentre);
 
             CustomComponents.TooltipForLastItem("Adds an empty image card; pick its photo in the Parameter window.", "Or drop an image file onto the Board.");
 
-            PersonImages.DrawAddMenu(2, selection);
+            PersonImages.DrawAddMenu(2, selection, _visibleBoardCentre);
 
             // The dialog can't open from inside the menu (it would close with it), so it is opened once the menu is gone.
             if (CustomComponents.DrawMenuItem(3, "Add Floor Plan..."))
@@ -161,7 +162,7 @@ internal sealed class SetupFlowOutliner
         }
 
         if (openRoomDialog)
-            AddFloorPlanDialog.RequestOpen();
+            AddFloorPlanDialog.RequestOpen(_visibleBoardCentre);
 
         AddFloorPlanDialog.Draw(selection);
 
@@ -1066,6 +1067,7 @@ internal sealed class SetupFlowOutliner
 
     private const string AddPlugMenuId = "##addPlugMenu";
     private Action? _onLeave;
+    private Vector2? _visibleBoardCentre;
     private const string AddBoardItemMenuId = "##addBoardItemMenu";
     private const string HelpDocId = "OutputSetup";
     private const string HelpWikiUrl = "https://github.com/tixl3d/tixl/wiki/help.OutputSetup";

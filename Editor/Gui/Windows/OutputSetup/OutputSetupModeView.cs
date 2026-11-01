@@ -61,7 +61,7 @@ internal sealed class OutputSetupModeView
         _drawGrip ??= DrawOutlinerGrip;
         _drawHostedHeader ??= _outputView.DrawHostedHeader;
         _leaveSetup ??= () => _viewMode = ViewModes.Operator;
-        _outliner.Draw(_entitySelection, _toggleOutlinerCollapse, !_outlinerCollapsed, _drawGrip, _drawHostedHeader, _leaveSetup);
+        _outliner.Draw(_entitySelection, _toggleOutlinerCollapse, !_outlinerCollapsed, _drawGrip, _drawHostedHeader, _leaveSetup, _outputView.VisibleBoardCentre);
         ImGui.EndChild();
         ImGui.PopStyleColor();
     }
