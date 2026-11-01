@@ -217,7 +217,7 @@ internal static class SetupRelations
         // and undoing on its own item, which a folded-away patch has none of — and a fitted one only covers the
         // canvas while the display happens to match its aspect.
         var patch = output.Patches[0];
-        if (!string.IsNullOrEmpty(patch.Name) || !CoversFullCanvas(output, patch) || patch.QuarterTurns != 0 || patch.IsFitted)
+        if (!string.IsNullOrEmpty(patch.Name) || !CoversFullCanvas(patch) || patch.QuarterTurns != 0 || patch.IsFitted)
             return false;
 
         implicitPatch = patch;
@@ -235,7 +235,7 @@ internal static class SetupRelations
         return output.Patches.Count - (TryGetImplicitPatch(output, out _) ? 1 : 0);
     }
 
-    private static bool CoversFullCanvas(OutputDefinition output, OutputDefinition.Patch patch)
+    public static bool CoversFullCanvas(OutputDefinition.Patch patch)
     {
         if (patch.Quad.Length < 4)
             return false;

@@ -221,6 +221,14 @@ internal static class SetupEntityContextMenu
                 CustomComponents.TooltipForLastItem("Turns the patch a quarter clockwise around its centre, shape and picture together.",
                                                     "For a display or LED panel on its side. The Rotation row in its parameters sets it directly.");
 
+                // A fitted patch takes its place from its aspect and scale, so it has no dragged corners to drop.
+                if (setup.FindPatch(id, out var fillOwner) is { IsFitted: false } fillPatch && fillOwner != null
+                    && !SetupRelations.CoversFullCanvas(fillPatch)
+                    && CustomComponents.DrawMenuItem(25, $"Fill {SetupLabels.OutputLabel(fillOwner)}"))
+                {
+                    SetupActions.FillOutputWithPatch(selection, setup, fillOwner, fillPatch);
+                }
+
                 if (CustomComponents.DrawMenuItem(12, "Use on Surface"))
                     SetupActions.PromotePatchToSurface(selection, setup, id);
 

@@ -688,6 +688,18 @@ internal static class SetupActions
     /// Stops a patch showing its slice. The patch stays where it is — a traced pixel-map area keeps its place and
     /// can be fed again — only the route into it is cut.
     /// </summary>
+    /// <summary>Gives the patch the whole canvas again, dropping the corners it was dragged to. An unnamed first
+    /// patch folds back into its output, so the output takes over the selection.</summary>
+    internal static void FillOutputWithPatch(SetupEntitySelection selection, Setup setup, OutputDefinition output, OutputDefinition.Patch patch)
+    {
+        SetupUndo.RunUndoable("Fill output", setup, () =>
+                                                    {
+                                                        patch.Quad = OutputDefinition.FullCanvasQuad();
+                                                        if (SetupRelations.IsImplicitPatch(output, patch))
+                                                            selection.Select(SetupEntityKinds.Output, output.Id);
+                                                    });
+    }
+
     internal static void ClearPatchInput(Setup setup, OutputDefinition.Patch patch)
     {
         SetupUndo.RunUndoable("Clear patch input", setup, () => patch.SliceId = Guid.Empty);

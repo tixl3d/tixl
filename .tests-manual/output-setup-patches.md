@@ -55,6 +55,19 @@ Drag the "SendToOutput" CONTENT item onto the "P1" item.
   promoted it, because it no longer covers the whole canvas. Its label appears with it.
 - After 3: the corner goes back and the patch folds away again.
 
+## Step: Fill resets a dragged patch to the whole canvas
+
+**Action:**
+1. In **Output** mode with "P1" selected, drag one corner handle of the canvas a little way inward.
+2. Right-click the label that appeared on the patch and choose **Fill P1**.
+3. Press Ctrl+Z.
+4. Press Ctrl+Y, then right-click the "P1" item in the OUTPUTS column.
+
+**Expected:**
+- After 2: the image fills the canvas again, the label and the chevron on "P1" disappear, and "P1" is selected.
+- After 3: the dragged corner and the label come back in one undo step.
+- After 4: the image fills the canvas again, and the menu of "P1" lists no **Fill** entry.
+
 ## Step: The output frame's own context menu
 
 **Action:**
