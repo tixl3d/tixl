@@ -524,11 +524,12 @@ internal sealed partial class SetupOutputView
         }
 
         // The reference points on the plain projector canvas, where they can be walked onto the wall.
-        var pinMapping = focusCarrier?.FindMapping(outputId);
-        if (_editMode == EditModes.Output && !rectifying && focusCarrier != null && pinMapping != null && pinMapping.Quad.Length >= 4
-            && SurfaceMetrics.CountPoints(focusCarrier) > 0)
+        var alignSubject = _projectsPhoto && _editMode == EditModes.Output ? FindAlignSubject(setup, outputId, out _) : null;
+        var pinMapping = alignSubject?.FindMapping(outputId);
+        if (!rectifying && alignSubject != null && pinMapping != null && pinMapping.Quad.Length >= 4
+            && SurfaceMetrics.CountPoints(alignSubject) > 0)
         {
-            DrawReferencePointPins(setup, dl, focusCarrier, pinMapping, outputId, canvasSize, editable, handleFade);
+            DrawReferencePointPins(setup, dl, alignSubject, pinMapping, editable, handleFade);
         }
     }
 

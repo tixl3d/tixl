@@ -153,6 +153,9 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         /// <summary>Opacity of a surface's content previewed over its photo — on the traced quad and on its Board card.</summary>
         public float OutputSetupContentPreviewOpacity = 0.65f;
 
+        /// <summary>Opacity of an output's picture carried back through a corner pin onto a surface's Board card.</summary>
+        public float OutputSetupProjectionPreviewOpacity = 0f;
+
         /// <summary>Whether the output setup's rect fields read in pixels of what they sit on, or as ratios of it.
         /// The values are stored as ratios either way; this is only how they are shown and typed.</summary>
         public OutputSetupEditUnits OutputSetupEditUnits = OutputSetupEditUnits.Pixels;

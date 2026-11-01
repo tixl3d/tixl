@@ -425,25 +425,25 @@ internal sealed partial class SetupOutputView
             dl.AddRectFilled(sMin, sMax, UiColors.BackgroundPopup.Fade(0.85f * fade));
 
         // A surface's content over its photo backdrop, at the preview opacity — the same look as on the traced quad.
-        var preview = UserSettings.Config.OutputSetupContentPreviewOpacity;
-        if (kind == SetupEntityKinds.Surface && preview > 0.01f
-            && OutputContentResolver.TryGetSurfaceSlice(id, out _, out var surfaceContent, out var contentUv) && surfaceContent is { IsDisposed: false })
+        if (kind == SetupEntityKinds.Surface)
         {
-            var contentSrv = SrvManager.GetSrvForTexture(surfaceContent);
-            if (contentSrv is { IsDisposed: false })
-                dl.AddImage(contentSrv.NativePointer, sMin, sMax, new Vector2(contentUv.X, contentUv.Y), new Vector2(contentUv.Z, contentUv.W),
-                            UiColors.ForegroundFull.Fade(preview * fade));
-        }
-        else if (kind == SetupEntityKinds.Surface && preview > 0.01f && setup.FindSurface(id) is { } canvasFedSurface
-                 && SetupRelations.TryFindCanvasQuad(setup, canvasFedSurface, _canvasFedQuad, out var feedingOutputId)
-                 && OutputCompositor.RenderPreview(feedingOutputId) is { IsDisposed: false } composite
-                 && SrvManager.GetSrvForTexture(composite) is { IsDisposed: false } compositeSrv)
-        {
-            // No content of its own, but the surface has a place on an output's canvas: the wall shows what the
-            // canvas holds there, which is what will land on it when the canvas is sent as one picture.
-            dl.AddImageQuad(compositeSrv.NativePointer, sMin, new Vector2(sMax.X, sMin.Y), sMax, new Vector2(sMin.X, sMax.Y),
-                            _canvasFedQuad[0], _canvasFedQuad[1], _canvasFedQuad[2], _canvasFedQuad[3],
-                            UiColors.ForegroundFull.Fade(preview * fade));
+            var preview = UserSettings.Config.OutputSetupContentPreviewOpacity;
+            var projectionPreview = UserSettings.Config.OutputSetupProjectionPreviewOpacity;
+            if (OutputContentResolver.TryGetSurfaceSlice(id, out _, out var surfaceContent, out var contentUv) && surfaceContent is { IsDisposed: false })
+            {
+                var contentSrv = SrvManager.GetSrvForTexture(surfaceContent);
+                if (preview > 0.01f && contentSrv is { IsDisposed: false })
+                    dl.AddImage(contentSrv.NativePointer, sMin, sMax, new Vector2(contentUv.X, contentUv.Y), new Vector2(contentUv.Z, contentUv.W),
+                                UiColors.ForegroundFull.Fade(preview * fade));
+            }
+            else if (projectionPreview > 0.01f && setup.FindSurface(id) is { } canvasFedSurface
+                     && SetupRelations.TryFindCanvasQuad(setup, canvasFedSurface, _canvasFedQuad, out var feedingOutputId)
+                     && TryWarpCompositeOntoSurface(canvasFedSurface, feedingOutputId) is { IsDisposed: false } projectionSrv)
+            {
+                // No content of its own, but the surface has a place on an output's canvas: the wall shows what the
+                // canvas holds there, which is what will land on it when the canvas is sent as one picture.
+                dl.AddImage(projectionSrv.NativePointer, sMin, sMax, Vector2.Zero, Vector2.One, UiColors.ForegroundFull.Fade(projectionPreview * fade));
+            }
         }
 
         // The frame is the kind's hue, rounded; hovering lifts it. Selection is the white outline just outside
@@ -2385,7 +2385,47 @@ internal sealed partial class SetupOutputView
 
     // Marquee over the cards: candidates are collected as the cards draw (cleared per frame), and the fence
     // resolves containers against the setup set before it runs.
+    /// <summary>
+    /// An output's composite carried back through the corner pin in <see cref="_canvasFedQuad"/>, onto a target in
+    /// the surface's own aspect. Warped on the GPU: an image quad would interpolate each of its two triangles
+    /// on its own and crease along the diagonal. Null for a pin so steep that the canvas crosses its horizon.
+    /// </summary>
+    private SharpDX.Direct3D11.ShaderResourceView? TryWarpCompositeOntoSurface(Surface surface, Guid outputId)
+    {
+        var composite = OutputCompositor.RenderPreview(outputId);
+        if (composite is not { IsDisposed: false })
+            return null;
+
+        var size = surface.SizeInMeters;
+        var longestSide = MathF.Max(MathF.Max(size.X, size.Y), 0.0001f);
+        var targetSize = new T3.Core.DataTypes.Vector.Int2(Math.Max(1, (int)(size.X / longestSide * ProjectionPreviewMaxSide)),
+                                                           Math.Max(1, (int)(size.Y / longestSide * ProjectionPreviewMaxSide)));
+        _projectionPreviewRect[1] = new Vector2(targetSize.Width, 0);
+        _projectionPreviewRect[2] = new Vector2(targetSize.Width, targetSize.Height);
+        _projectionPreviewRect[3] = new Vector2(0, targetSize.Height);
+        if (!Homography.TryComputeQuadToQuad(_canvasFedQuad, _projectionPreviewRect, out var canvasToTarget))
+            return null;
+
+        for (var corner = 0; corner < 4; corner++)
+        {
+            var canvasCorner = new Vector2(corner is 1 or 2 ? 1 : 0, corner is 2 or 3 ? 1 : 0);
+            if (canvasToTarget.M31 * canvasCorner.X + canvasToTarget.M32 * canvasCorner.Y + canvasToTarget.M33 <= 0)
+                return null;
+
+            _projectionPreviewDest[corner] = canvasToTarget.TransformPoint(canvasCorner);
+        }
+
+        Span<byte> key = stackalloc byte[16];
+        surface.Id.TryWriteBytes(key);
+        key[1] ^= 0xFF;
+        var warped = OutputCompositor.RenderWarpedTexture(composite, _projectionPreviewDest, targetSize, new Guid(key));
+        return warped is { IsDisposed: false } ? SrvManager.GetSrvForTexture(warped) : null;
+    }
+
+    private const float ProjectionPreviewMaxSide = 1024f;
     private readonly Vector2[] _canvasFedQuad = new Vector2[4];
+    private readonly Vector2[] _projectionPreviewRect = new Vector2[4];
+    private readonly Vector2[] _projectionPreviewDest = new Vector2[4];
     private readonly SelectionFence _boardFence = new();
     private readonly List<(SetupEntityKinds Kind, Guid Id, ImRect Rect)> _boardFenceCandidates = [];
     private Setup? _boardSetupForFence;

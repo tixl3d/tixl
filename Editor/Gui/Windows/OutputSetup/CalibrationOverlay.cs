@@ -7,6 +7,7 @@ using SharpDX.Direct3D11;
 using T3.Core.Output;
 using T3.Core.Output.Rendering;
 using T3.Core.Resource;
+using T3.Editor.Gui.Interaction.CanvasEditing;
 using T3.Editor.Gui.Styling;
 using Buffer = SharpDX.Direct3D11.Buffer;
 using Color = T3.Core.DataTypes.Vector.Color;
@@ -68,12 +69,12 @@ internal static class CalibrationOverlay
 
     /// <summary>
     /// Projects discs of a surface's straightened photo around its reference points, for calibrating the pin
-    /// against the real wall.
+    /// against the real wall. The outline of <paramref name="activePointId"/> blinks, so it can be found there.
     /// </summary>
-    public static void SetCalibrationPhoto(Guid surfaceId, ShaderResourceView srv, Vector2 uvMin, Vector2 uvMax, float radiusOfHeight)
+    public static void SetCalibrationPhoto(Guid surfaceId, ShaderResourceView srv, Vector2 uvMin, Vector2 uvMax, float radiusOfHeight, Guid activePointId)
     {
         var uv = new Vector4(uvMin.X, uvMin.Y, uvMax.X, uvMax.Y);
-        _photo.Set(new CalibrationPhoto(surfaceId, srv, uv, radiusOfHeight), ImGui.GetFrameCount());
+        _photo.Set(new CalibrationPhoto(surfaceId, srv, uv, radiusOfHeight, activePointId), ImGui.GetFrameCount());
     }
 
     /// <summary>
@@ -119,9 +120,9 @@ internal static class CalibrationOverlay
     }
 
     /// <summary>
-    /// One disc of the straightened photo per reference point, warped through the pin like content would be.
-    /// Centred on the point's *projection* — where the photo's feature lands — so with an over-determined pin
-    /// the gap to the crosshair at its target is the miss, made visible.
+    /// One disc of the straightened photo per reference point, warped through the pin like content would be and
+    /// centred on the point's target. It stays under the cursor and stands still while other points are dragged,
+    /// so it can be walked onto the real feature while watching the wall.
     /// </summary>
     public static void CollectPhotoFragments(Int2 canvasResolution, List<OutputCompositor.DrawItem> drawItems)
     {
@@ -144,22 +145,80 @@ internal static class CalibrationOverlay
             if (!SurfaceGeometry.TryGetSurfaceToOutput(pending.Surface, pending.Mapping, canvasSize, out var surfaceToOutput))
                 continue;
 
+            SurfaceGeometry.LocalBounds(pending.Surface, out var surfaceMin, out var surfaceMax);
+            var surfaceSpan = Vector2.Max(surfaceMax - surfaceMin, new Vector2(0.0001f));
+            var isPinWarpable = IsPinWarpable(pending.Mapping, surfaceToOutput, surfaceMin, surfaceSpan, photo.Uv, uvSpan, canvasSize);
+
             foreach (var annotation in pending.Surface.Annotations)
             {
                 if (!annotation.IsPoint)
                     continue;
 
-                // Around where the pin actually lands this point, which is the one thing the wall can show: the
-                // mask cuts the warped photo at a canvas position, so cutting it at the mark would show whatever
-                // the photo covers there rather than this point's own feature. The crosshair stays at the mark, so
-                // the gap between the disc and its crosshair is the miss — drag until the disc covers the real
-                // feature and the two come together.
-                var centre = surfaceToOutput.TransformPoint(annotation.P1);
-                drawItems.Add(new OutputCompositor.DrawItem(photo.Srv, textureToPinUnit * pending.Homography, new Vector4(0, 0, 1, 1), Vector4.One,
+                var projected = surfaceToOutput.TransformPoint(annotation.P1);
+                var centre = pending.Mapping.PointAims.TryGetValue(annotation.Id, out var aim) ? aim.Position * canvasSize : projected;
+
+                Matrix4x4 textureToNdc;
+                if (isPinWarpable)
+                {
+                    // The warped photo is shifted, not only masked at the target: a mask alone would show whatever
+                    // the photo covers there rather than this point's own feature.
+                    var shift = (centre - projected) / canvasSize * 2;
+                    textureToNdc = textureToPinUnit * pending.Homography * Matrix4x4.CreateTranslation(shift.X, -shift.Y, 0);
+                }
+                else
+                {
+                    // Upright and a fixed size: wrong about the keystone and right about what the feature looks
+                    // like. A collapsed pin is the state you are most likely to be in while repairing it.
+                    var inSurface = (annotation.P1 - surfaceMin) / surfaceSpan;
+                    var featureUv = new Vector2(photo.Uv.X + uvSpan.X * inSurface.X, photo.Uv.Y + uvSpan.Y * (1 - inSurface.Y));
+                    var pixelsPerV = 1 / MathF.Max(uvSpan.Y * photo.RadiusOfHeight, 0.0001f) * radius;
+                    var pixelsPerU = pixelsPerV * (surfaceSpan.X / uvSpan.X) / (surfaceSpan.Y / uvSpan.Y);
+                    var textureOrigin = centre - featureUv * new Vector2(pixelsPerU, pixelsPerV);
+                    textureToNdc = new Matrix4x4
+                                       {
+                                           M11 = pixelsPerU / canvasSize.X * 2,
+                                           M22 = -pixelsPerV / canvasSize.Y * 2,
+                                           M33 = 1,
+                                           M41 = textureOrigin.X / canvasSize.X * 2 - 1,
+                                           M42 = 1 - textureOrigin.Y / canvasSize.Y * 2,
+                                           M44 = 1,
+                                       };
+                }
+
+                drawItems.Add(new OutputCompositor.DrawItem(photo.Srv, textureToNdc, new Vector4(0, 0, 1, 1), Vector4.One,
                                                             Vector4.Zero, Vector4.Zero, Vector4.Zero,
                                                             new Vector4(centre.X, centre.Y, radius, 1)));
             }
         }
+    }
+
+    /// <summary>
+    /// Whether the photo can be warped through the pin at all. A collapsed pin smears every disc into one colour,
+    /// and a steep one throws the corners of the photo's surround towards infinity.
+    /// </summary>
+    private static bool IsPinWarpable(Surface.OutputMapping mapping, in Homography surfaceToOutput, Vector2 surfaceMin, Vector2 surfaceSpan,
+                                      Vector4 uv, Vector2 uvSpan, Vector2 canvasSize)
+    {
+        Span<Vector2> corners = stackalloc Vector2[4];
+        for (var c = 0; c < 4; c++)
+            corners[c] = mapping.Quad[c] * canvasSize;
+
+        CanvasDraw.Bounds(corners, out var pinMin, out var pinMax);
+        var pinSize = pinMax - pinMin;
+
+        for (var c = 0; c < 4; c++)
+        {
+            var textureCorner = new Vector2(c is 1 or 2 ? 1 : 0, c is 2 or 3 ? 1 : 0);
+            var inSurface = (textureCorner - new Vector2(uv.X, uv.Y)) / uvSpan;
+            corners[c] = surfaceToOutput.TransformPoint(new Vector2(surfaceMin.X + inSurface.X * surfaceSpan.X,
+                                                                    surfaceMin.Y + (1 - inSurface.Y) * surfaceSpan.Y));
+        }
+
+        CanvasDraw.Bounds(corners, out var photoMin, out var photoMax);
+        var photoSize = photoMax - photoMin;
+        return float.IsFinite(photoSize.X) && float.IsFinite(photoSize.Y)
+               && pinSize.X >= MinWarpablePinExtent && pinSize.Y >= MinWarpablePinExtent
+               && photoSize.X <= pinSize.X * MaxPhotoGrowthThroughPin && photoSize.Y <= pinSize.Y * MaxPhotoGrowthThroughPin;
     }
 
     /// <summary>
@@ -197,26 +256,12 @@ internal static class CalibrationOverlay
         for (var i = 0; i < surface.Annotations.Count; i++)
         {
             var annotation = surface.Annotations[i];
-            var isEmphasizedPoint = i == emphasizedIndex;
 
-            // A reference point is a crosshair to walk onto its feature; the one being dragged pulses. It
-            // stands where it was placed on this output and stays there — the pin moving under it is the whole
-            // signal, and a crosshair that rides the pin can never show it. An aimed one reads brighter.
             if (annotation.IsPoint)
             {
-                // Stored as a fraction of the canvas; this overlay is drawn in its pixels. A point the editor
-                // has not seeded yet falls back to the pin, which is where the seed would land anyway.
-                var hasAim = mapping.PointAims.TryGetValue(annotation.Id, out var aim);
-                var p = hasAim ? aim.Position * canvasSize : surfaceToOutput.TransformPoint(annotation.P1);
+                if (ProjectsPhoto(surface.Id))
+                    CollectPoint(annotation, mapping, surfaceToOutput, canvasSize, blink);
 
-                var arm = (isEmphasizedPoint ? _pointCrosshairSize * 1.5f : _pointCrosshairSize) * 0.5f;
-                var baseColor = hasAim && aim.IsAimed ? _pointColor : _pointColor * new Vector4(0.6f, 0.6f, 0.6f, 1);
-                var pointColor = isEmphasizedPoint ? Vector4.Lerp(baseColor, white, blink) : baseColor;
-                var pointWidth = new Vector4(isEmphasizedPoint ? _aimLineWidth * 2f : _aimLineWidth, 0, 0, 0);
-                _overlayLines.Add(new OverlayLine(new Vector4(p.X - arm, p.Y, p.X + arm, p.Y), pointColor, pointWidth));
-                _overlayLines.Add(new OverlayLine(new Vector4(p.X, p.Y - arm, p.X, p.Y + arm), pointColor, pointWidth));
-                var ring = _annotationMarkerSize * 1.4f;
-                _overlayQuads.Add(new OverlayQuad(new Vector4(p.X, p.Y, ring, ring), Vector4.Lerp(pointColor, white, blink), new Vector4(0, ring * 0.5f, 0, 0)));
                 continue;
             }
 
@@ -239,6 +284,58 @@ internal static class CalibrationOverlay
             _overlayQuads.Add(new OverlayQuad(new Vector4(a.X, a.Y, markerSize, markerSize), markerColor, markerShape));
             _overlayQuads.Add(new OverlayQuad(new Vector4(b.X, b.Y, markerSize, markerSize), markerColor, markerShape));
         }
+    }
+
+    /// <summary>
+    /// The marks around a reference point's disc: an outline that says whether the point is set, a blinking one
+    /// on the active point, a crosshair on the target, and an arrow to where the solved pin lands the point.
+    /// </summary>
+    private static void CollectPoint(Annotation point, Surface.OutputMapping mapping, in Homography surfaceToOutput, Vector2 canvasSize, float blink)
+    {
+        // Stored as a fraction of the canvas; this overlay is drawn in its pixels. A point the editor has not
+        // seeded yet falls back to the pin, which is where the seed would land anyway.
+        var projected = surfaceToOutput.TransformPoint(point.P1);
+        var hasAim = mapping.PointAims.TryGetValue(point.Id, out var aim);
+        var target = hasAim ? aim.Position * canvasSize : projected;
+        var isSet = hasAim && aim.IsAimed;
+        var photo = _photo.Value;
+
+        var discRadius = canvasSize.Y * photo.RadiusOfHeight;
+        var outlineWidth = isSet ? _setPointOutlineWidth : _pointOutlineWidth;
+        AddRing(target, discRadius - _outlineOverlapWithDisc, outlineWidth + _outlineOverlapWithDisc, isSet ? _setPointOutlineColor : _pointOutlineColor);
+
+        if (point.Id == photo.ActivePointId)
+        {
+            var white = UiColors.ForegroundFull.Rgba;
+            AddRing(target, discRadius + outlineWidth, _activePointOutlineWidth, new Vector4(white.X, white.Y, white.Z, blink));
+        }
+
+        var arm = _pointCrosshairSize * 0.5f;
+        var crosshairColor = isSet ? _pointColor : _pointColor * new Vector4(0.6f, 0.6f, 0.6f, 1);
+        var crosshairWidth = new Vector4(_aimLineWidth, 0, 0, 0);
+        _overlayLines.Add(new OverlayLine(new Vector4(target.X - arm, target.Y, target.X + arm, target.Y), crosshairColor, crosshairWidth));
+        _overlayLines.Add(new OverlayLine(new Vector4(target.X, target.Y - arm, target.X, target.Y + arm), crosshairColor, crosshairWidth));
+
+        var miss = projected - target;
+        var missLength = miss.Length();
+        if (missLength < _minVisibleMissPx)
+            return;
+
+        var direction = miss / missLength;
+        var side = new Vector2(-direction.Y, direction.X) * _missArrowHeadSize * 0.5f;
+        var headBase = projected - direction * _missArrowHeadSize;
+        var arrowColor = UiColors.StatusAttention.Rgba;
+        var arrowWidth = new Vector4(_annotationLineWidth, 0, 0, 0);
+        _overlayLines.Add(new OverlayLine(new Vector4(target.X, target.Y, projected.X, projected.Y), arrowColor, arrowWidth));
+        _overlayLines.Add(new OverlayLine(new Vector4(projected.X, projected.Y, headBase.X + side.X, headBase.Y + side.Y), arrowColor, arrowWidth));
+        _overlayLines.Add(new OverlayLine(new Vector4(projected.X, projected.Y, headBase.X - side.X, headBase.Y - side.Y), arrowColor, arrowWidth));
+    }
+
+    /** A ring whose inner edge sits at <paramref name="innerRadius"/>. */
+    private static void AddRing(Vector2 centre, float innerRadius, float width, Vector4 color)
+    {
+        var size = (innerRadius + width) * 2;
+        _overlayQuads.Add(new OverlayQuad(new Vector4(centre.X, centre.Y, size, size), color, new Vector4(0, size * 0.5f, width, 0)));
     }
 
     /// <summary>
@@ -360,7 +457,7 @@ internal static class CalibrationOverlay
 
     private readonly record struct AimPoint(Guid SurfaceId, Vector2 InSurface);
 
-    private readonly record struct CalibrationPhoto(Guid SurfaceId, ShaderResourceView Srv, Vector4 Uv, float RadiusOfHeight);
+    private readonly record struct CalibrationPhoto(Guid SurfaceId, ShaderResourceView Srv, Vector4 Uv, float RadiusOfHeight, Guid ActivePointId);
 
     private readonly record struct EmphasizedAnnotation(Guid SurfaceId, int Index);
 
@@ -386,7 +483,19 @@ internal static class CalibrationOverlay
     private const float _annotationMarkerSize = 11f;
     private const float _aimCrosshairSize = 60f;
     private const float _pointCrosshairSize = 40f;
+    private const float _pointOutlineWidth = 2.5f;
+    private const float _setPointOutlineWidth = 3f;
+    private const float _activePointOutlineWidth = 6f;
+
+    /** Reaches under the disc's soft edge (2 px in corner-pin-layer.hlsl) and the quad shader's 1 px of slack, so no gap shows. */
+    private const float _outlineOverlapWithDisc = 3f;
+    private const float _minVisibleMissPx = 6f;
+    private const float _missArrowHeadSize = 14f;
     private const float _aimLineWidth = 1.5f;
+    private const float MinWarpablePinExtent = 8f;
+    private const float MaxPhotoGrowthThroughPin = 8f;
+    private static readonly Vector4 _pointOutlineColor = new(0.25f, 0.25f, 0.25f, 1);
+    private static readonly Vector4 _setPointOutlineColor = new(1, 1, 1, 1); // black would vanish on an unlit wall
     private const float _overlayBlinkRate = 8f; // matches the editor-canvas handles so the two stay in phase
     private static readonly Vector4 _pointColor = new(0.45f, 0.95f, 0.55f, 1); // the surface green, bright enough for a wall
 

@@ -62,6 +62,12 @@ public sealed class Surface
         /// <summary>Where each of the surface's reference points sits on this output, by point id.</summary>
         public Dictionary<Guid, PointAim> PointAims = new();
 
+        /// <summary>The quad as it was when the first reference point was aimed, which resetting the alignment restores. Null if none was aimed since.</summary>
+        public Vector2[]? QuadBeforeAligning;
+
+        /// <summary>The mode that went with <see cref="QuadBeforeAligning"/>: solving a pin turns a fill into a corner pin.</summary>
+        public MappingModes ModeBeforeAligning;
+
         /// <summary>Whether the quad covers the whole canvas by definition rather than by where it was dragged.</summary>
         public bool IsFilling => Mode == MappingModes.Fill;
 
@@ -108,6 +114,12 @@ public sealed class Surface
                 writer.WriteEndArray();
             }
 
+            if (QuadBeforeAligning != null)
+            {
+                writer.WriteQuad("QuadBeforeAligning", QuadBeforeAligning);
+                writer.WriteString("ModeBeforeAligning", ModeBeforeAligning.ToString());
+            }
+
             writer.WriteEndObject();
         }
 
@@ -121,6 +133,14 @@ public sealed class Surface
                                              : MappingModes.CornerPin,
                                   Quad = OutputJson.ReadQuad(token["Quad"]),
                               };
+
+            if (token["QuadBeforeAligning"] != null)
+            {
+                mapping.QuadBeforeAligning = OutputJson.ReadQuad(token["QuadBeforeAligning"]);
+                mapping.ModeBeforeAligning = Enum.TryParse<MappingModes>(token.ReadValueSafe("ModeBeforeAligning", string.Empty), out var modeBeforeAligning)
+                                                 ? modeBeforeAligning
+                                                 : MappingModes.CornerPin;
+            }
 
             // "PointAims", not the old "PointTargets": those held canvas pixels, which read as fractions would
             // put every mark a thousand canvases away. Dropping them re-seeds the marks from the pin.

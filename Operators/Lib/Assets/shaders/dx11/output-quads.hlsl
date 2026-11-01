@@ -10,7 +10,7 @@ struct QuadInstance
 {
     float4 Rect;   // xy = centre (px), zw = size (px)
     float4 Color;
-    float4 Params; // x = rotation (radians), y = corner radius (px); z..w spare (a texture slot later)
+    float4 Params; // x = rotation (radians), y = corner radius (px), z = outline width (px, 0 = filled); w spare (a texture slot later)
 };
 
 StructuredBuffer<QuadInstance> Quads : register(t0);
@@ -21,7 +21,7 @@ struct vsOutput
     float4 color : COLOR;
     float2 local : TEXCOORD0;  // offset from the centre, in pixels
     float2 extent : TEXCOORD1; // half size (px)
-    float2 shape : TEXCOORD2;  // x = corner radius (px)
+    float2 shape : TEXCOORD2;  // x = corner radius (px), y = outline width (px)
 };
 
 static const float2 Corners[6] =
@@ -55,7 +55,7 @@ vsOutput vsMain(uint vertexId : SV_VertexID)
     output.color = quad.Color;
     output.local = local;
     output.extent = halfSize;
-    output.shape = float2(quad.Params.y, 0);
+    output.shape = quad.Params.yz;
     return output;
 }
 
@@ -66,6 +66,10 @@ float4 psMain(vsOutput input) : SV_TARGET
     float radius = min(input.shape.x, min(input.extent.x, input.extent.y));
     float2 corner = abs(input.local) - (input.extent - radius);
     float dist = length(max(corner, 0)) + min(max(corner.x, corner.y), 0) - radius;
+
+    float outlineWidth = input.shape.y;
+    if (outlineWidth > 0)
+        dist = abs(dist + outlineWidth * 0.5) - outlineWidth * 0.5;
 
     float alpha = (1 - smoothstep(-0.5, 0.5, dist)) * input.color.a;
     if (alpha <= 0.001)

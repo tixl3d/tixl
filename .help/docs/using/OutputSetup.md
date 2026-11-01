@@ -53,7 +53,11 @@ The selected surface seen flat, as if you stood in front of it. Place its conten
 
 ### Output
 
-An output's canvas: the live composite the projector receives. Each mapped surface appears as a quad you corner-pin over the real wall while watching the projector. Once a surface carries reference points, aim them at their real positions and the pin is solved to hit them exactly. Patches appear as plain quads on the canvas.
+An output's canvas: the live composite the projector receives. Each mapped surface appears as a quad you corner-pin over the real wall while watching the projector. Patches appear as plain quads on the canvas.
+
+Once a surface carries reference points, turn on **Align Points** to project a disc of the photo around each one. Watch the wall and drag a point until its disc covers the real feature. That sets the point, shown by a thick white outline, and the pin is solved through every set point. The point you moved last blinks, and **Release Point** or a double-click stops a point from constraining the pin. **Reset Alignment** releases all of them and puts the pin back to where it was before you started aligning. An arrow shows where the pin misses a point. Turn **Align Points** off to check the result on your content.
+
+On the Board, a surface without content of its own can show what its output would project onto it with the current alignment. Raise **Projection Preview** to see that picture; it starts at 0%.
 
 **Pixel map.** Venues that take one video signal for a whole room hand out a pixel map: an image at the signal's resolution with every wall's rectangle drawn in. Select the output and pick that image as its **Reference Layout** in the Parameter window; it is drawn over the canvas at the **Opacity** you set, so patches can be placed against it while their content still shows through. The card warns when the image and the canvas differ in size, with a button to adopt the image's size. Below it, the **Patches** table lists every patch on the canvas with its top-left corner, size and rotation, in pixels or as ratios of the canvas, so a spec sheet can be typed in as printed. Clicking a name selects that patch; the same table sits on each patch's card, with that patch marked.
 

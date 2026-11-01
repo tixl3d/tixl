@@ -563,8 +563,8 @@ its width. Then open the Output tab and check the send's Resolution in the Param
 ## Step: Discs show the photo beyond the surface's edge
 
 **Action:**
-With "Project photo" on, add a reference point on the surface about 5 cm inside its right edge, on a traced
-photo that continues past that edge.
+Add a reference point on the surface about 5 cm inside its right edge, on a traced photo that continues past
+that edge. Then select the surface, click the **Output** tab and click **Align Points**.
 
 **Expected:**
 - On the canvas and on the wall, the disc is a full circle: the part past the surface's edge shows the photo
@@ -574,7 +574,7 @@ photo that continues past that edge.
 ## Step: Discs survive a collapsed pin
 
 **Action:**
-With "Project photo" on, drag three corners of the surface's quad almost onto the fourth so the
+With **Align Points** on, drag three corners of the surface's quad almost onto the fourth so the
 quad is nearly a point; then undo.
 
 **Expected:**
@@ -587,43 +587,96 @@ quad is nearly a point; then undo.
 
 **Action:**
 1. With "Surface 1" carrying three reference points (previous step) and mapped onto "Projector 1",
-   select "Surface 1", click the **Output** tab and click **Project photo** in the header.
+   select "Surface 1" and click the **Output** tab. Note there are no discs, handles or chips on the canvas.
+   Click **Align Points** in the header.
 2. Drag the P1 handle on the projector canvas 60 px to the right, release.
 3. Drag the P2 handle 40 px down, release; press Ctrl+Z; press Ctrl+Y.
-4. Drag the P3 handle 30 px left, release; then double-click P3.
-5. Add two more points on the straightened photo (see the previous step), return to **Output**,
-   drag both onto the canvas, then drag the fifth one 30 px further.
-6. Drag the percent field right of **Project photo** from 5% to 15%.
-7. Click **Project photo** again.
+4. Drag the P3 handle 30 px left, release; then click **Release Point**.
+5. Press Ctrl+Z, then double-click P3.
+6. Add two more points on the straightened photo (see the previous step), return to **Output**, click
+   **Align Points**, drag both new points, then drag the fifth one 30 px further.
+7. Drag the percent field right of **Align Points** from 5% to 15%.
+8. Click **Align Points** again, turn on "Show size raster" in the Parameter window, then click the **Board** tab.
 
 **Expected:**
-- After 1: the surface's content stays in the composite; around each point a disc of the
-  straightened photo (about a tenth of the canvas height across) is projected over it, with a
-  dim white crosshair. On the canvas every point shows the same disc under a white handle with
-  its "P1".."P3" chip — also a point whose projection falls outside the projector frame, which
-  has no disc on the wall but keeps its disc on the canvas so you can see which feature it marks.
-- After 2: while dragging, the whole quad shifts so the P1 disc follows the cursor; on release
-  P1 turns green (aimed) and stays exactly where it was dropped. **P2 and P3 do not move, and
-  neither does the picture inside their discs**: each disc keeps showing its own feature, so
-  only its distortion changes as the pin turns. Each grows an amber arrow to where the pin now
-  projects its point, which is the miss the drag just introduced there.
-- On the wall the disc goes where the pin actually lands the photo, while the crosshair stays at
-  the mark: the gap between them is the same miss, seen from the room.
-- After 3: with two aimed points the quad turns and scales so both sit at their marks; P1 does
-  not move, and its arrow shrinks to nothing once the pin sends the point onto the mark again.
-  Ctrl+Z puts the quad back and P2 back to idle (white, still where it stands); Ctrl+Y restores
-  both.
-- After 4: with three aimed points the quad shears; P1 and P2 stay put. The double-click turns
-  P3 white again, leaves it exactly where it is, and the quad does not change — un-aiming stops
-  a point constraining the pin, it does not move the mark.
-- After 5: with four aimed points the quad keystones and every mark is hit exactly, so no arrows
-  remain. With five, the header shows "points miss by up to N px" with N above zero, and the
-  points that miss keep an arrow each, pointing where the pin sends them.
-- After 6: the discs grow to three times their radius on the canvas and on the wall alike. Where
-  "Region 1" overlaps a disc, the disc draws over the region's content, on the wall as on the
-  canvas.
-- After 7: the discs and crosshairs leave the composite (unless "Show size raster" is on); the
-  handles and their green/white state stay on the canvas and survive a save and reload.
+- After 1: the same picture shows on the canvas and the wall. The surface's content stays; around each point
+  is a disc of the straightened photo (about a tenth of the canvas height across) with a thin dark outline and a
+  dim green crosshair. The canvas adds only a small handle and a "P1".."P3" chip per point. **Release Point** is
+  disabled, with a tooltip saying to drag a point first. The percent field and **Release Point** appear only
+  now.
+- After 2: the P1 disc stays under the cursor and the quad shifts with it. On release P1 stays exactly where it
+  was dropped, its outline is white and clearly thicker (set), its crosshair is bright, and an extra ring around
+  it blinks white (active). **P2 and P3 do not move, and neither does the picture inside their discs**: only the
+  distortion changes as the pin turns. Each grows a magenta arrow from its disc to where the pin now lands its
+  point, which is the miss the drag just introduced there.
+- After 3: with two set points the quad turns and scales so both sit at their marks; P1 does not move, and its
+  arrow shrinks to nothing. The blinking outline moves to P2. Ctrl+Z puts the quad back and P2 back to the thin
+  outline, still where it stands; Ctrl+Y restores both.
+- After 4: with three set points the quad shears; P1 and P2 stay put. **Release Point** returns P3 to the thin
+  outline, leaves it exactly where it is, and the quad does not change. The button is disabled again.
+- After 5: Ctrl+Z sets P3 again; the double-click releases it the same way as the button.
+- After 6: with four set points the quad keystones and every mark is hit exactly, so no arrows remain. With
+  five, the header shows "points miss by up to N px" with N above zero, and the points that miss keep an arrow
+  each, pointing where the pin sends them.
+- After 7: the discs grow to three times their radius on the canvas and on the wall alike. Where "Region 1"
+  overlaps a disc, the disc draws over the region's content.
+- After 8: discs, outlines, crosshairs, arrows, handles and chips are all gone from both the canvas and the wall,
+  also with the raster on. Set points keep their state through a save and reload. On the **Board** tab, **Align
+  Points** is not offered and nothing of it reaches the wall.
+
+## Step: Resetting the alignment
+
+**Action:**
+1. Drag the quad's corners to an obvious keystone, and note where they are. Turn on **Align Points**, drag
+   several points so the quad changes, then click **Reset Alignment**.
+2. Press Ctrl+Z, then Ctrl+Y.
+3. Save and reopen the project with some points moved, turn on **Align Points** and click **Reset Alignment**.
+
+**Expected:**
+- After 1: the quad is back at the noted corners and the content looks as it did. All outlines are thin, every
+  disc sits where the pin lands its point, and no arrows or miss readout remain. **Release Point** is disabled.
+- After 2: Ctrl+Z brings back the aligned quad, set points and arrows in one step; Ctrl+Y resets again.
+- After 3: the same reset works after the reload.
+
+## Step: Finding Align Points from the output
+
+**Action:**
+1. With "Surface 1" as the only surface with a photo mapped onto "Projector 1", click the "Projector 1" item in
+   the Flow Outliner and the **Output** tab.
+2. Click **Align Points**, drag a point, then click "Surface 1" and "Projector 1" in turn.
+3. Trace a second surface on a photo, map it onto "Projector 1", then click the "Projector 1" item again.
+4. Click "Surface 1".
+
+**Expected:**
+- After 1: **Align Points** is offered although the output is selected.
+- After 2: the toggle stays on and the points of "Surface 1" stay draggable through both clicks.
+- After 3: **Align Points** turns off and is gone. The header says "Select a surface to align its points".
+- After 4: the message is gone and **Align Points** is offered, off.
+
+## Step: The toolbar no longer maps surfaces
+
+**Action:**
+With at least one surface not mapped to "Projector 1", click the **Output** tab, then drag that surface's item
+onto the "Projector 1" item in the Flow Outliner.
+
+**Expected:**
+- The header has no "+ <surface name>" buttons.
+- The drag adds the surface's quad to the canvas, one undo step.
+
+## Step: The projection on a surface's Board card
+
+**Action:**
+1. Use a surface without content, mapped onto "Projector 1" with a strongly keystoned corner pin, and with "Show
+   size raster" on. Click the **Board** tab.
+2. Note the **Projection Preview** field reads 0% on a fresh user profile. Drag it up to 100%, then down to 0%.
+3. Drag the **Overlay** field to 0%.
+
+**Expected:**
+- After 2: only the output's picture on that card changes, fully opaque at 100% and gone at 0%. At 100% it is
+  straightened through the pin, and the raster's lines run straight across the whole card, with no bend along a
+  diagonal. Cards of surfaces with content of their own don't change.
+- After 3: with **Projection Preview** back above 0%, the projection stays. Content on cards of surfaces with their own content is gone. The Projection
+  Preview field is offered only on the **Board** tab.
 
 ## Step: Reference images come from the asset system
 

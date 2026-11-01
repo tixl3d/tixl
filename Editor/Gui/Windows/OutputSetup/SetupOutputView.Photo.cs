@@ -412,7 +412,7 @@ internal sealed partial class SetupOutputView
     private bool TryGetTracedFragment(Setup setup, Surface surface, out SharpDX.Direct3D11.ShaderResourceView? srv, out Vector2 uvMin, out Vector2 uvMax)
     {
         // A card only ever shows the region, so every pixel of the target goes to it.
-        return TryGetTracedFragment(setup, surface, 0f, surface.Id, out srv, out _, out uvMin, out uvMax);
+        return TryGetTracedFragment(setup, surface, 0f, surface.Id, out srv, out uvMin, out uvMax);
     }
 
     /// <summary>
@@ -420,23 +420,22 @@ internal sealed partial class SetupOutputView
     /// shows what surrounds its feature. Telling the surface from its surroundings is easy for the person
     /// aligning it, reconstructing what a crop cut off is not.
     /// </summary>
-    private bool TryGetTracedFragmentWithSurround(Setup setup, Surface surface, out SharpDX.Direct3D11.ShaderResourceView? srv, out Texture2D? warpedTexture,
+    private bool TryGetTracedFragmentWithSurround(Setup setup, Surface surface, out SharpDX.Direct3D11.ShaderResourceView? srv,
                                                   out Vector2 uvMin, out Vector2 uvMax)
     {
         // A target of its own: sharing the card's would recreate it whenever their differing sizes alternate.
         Span<byte> key = stackalloc byte[16];
         surface.Id.TryWriteBytes(key);
         key[0] ^= 0xFF;
-        return TryGetTracedFragment(setup, surface, DiscSurroundOfRegion, new Guid(key), out srv, out warpedTexture, out uvMin, out uvMax);
+        return TryGetTracedFragment(setup, surface, DiscSurroundOfRegion, new Guid(key), out srv, out uvMin, out uvMax);
     }
 
     private const float DiscSurroundOfRegion = 0.5f;
 
     private bool TryGetTracedFragment(Setup setup, Surface surface, float surroundOfRegion, Guid targetKey, out SharpDX.Direct3D11.ShaderResourceView? srv,
-                                      out Texture2D? warpedTexture, out Vector2 uvMin, out Vector2 uvMax)
+                                      out Vector2 uvMin, out Vector2 uvMax)
     {
         srv = null;
-        warpedTexture = null;
         uvMin = Vector2.Zero;
         uvMax = Vector2.One;
         var binding = surface.Trace;
@@ -458,7 +457,6 @@ internal sealed partial class SetupOutputView
         if (srv is not { IsDisposed: false })
             return false;
 
-        warpedTexture = warped;
         var bboxSize = Vector2.Max(bboxMax - bboxMin, new Vector2(0.001f));
         uvMin = (regionMin - bboxMin) / bboxSize;
         uvMax = (regionMax - bboxMin) / bboxSize;
