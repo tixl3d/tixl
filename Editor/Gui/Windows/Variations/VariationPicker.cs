@@ -482,17 +482,30 @@ internal sealed class VariationPicker
 
         drawList.AddRect(borderMin, borderMax, UiColors.ForegroundFull.Fade(0.2f), rounding);
 
-        // Index + title (clipped so a long title can't run into the weight cell).
+        // Index above title, centered as a block: the two line heights nearly fill the row.
         var textX = borderMax.X + 8 * scale;
-        drawList.PushClipRect(new Vector2(textX, rowMin.Y), new Vector2(cellMin.X - 4 * scale, rowMax.Y), true);
+        var textMaxX = cellMin.X - 4 * scale;
+        var indexY = MathF.Floor(rowMin.Y + (rowHeight - Fonts.FontSmall.FontSize - Fonts.FontBold.FontSize) / 2);
         ImGui.PushFont(Fonts.FontSmall);
-        drawList.AddText(new Vector2(textX, rowMin.Y + 4 * scale), UiColors.TextMuted, variation.ActivationIndex.ToString("00"));
+        drawList.AddText(new Vector2(textX, indexY), UiColors.TextMuted, variation.ActivationIndex.ToString("00"));
         ImGui.PopFont();
+
+        var title = GetTitle(variation);
+        ImGui.PushFont(Fonts.FontBold);
+        var titleOverflows = textX + ImGui.CalcTextSize(title).X > textMaxX;
+        ImGui.PopFont();
+
+        // Clip regions split the draw call, so only pay for one on titles long enough to reach the weight cell.
+        if (titleOverflows)
+            drawList.PushClipRect(new Vector2(textX, rowMin.Y), new Vector2(textMaxX, rowMax.Y), true);
+
         drawList.AddText(Fonts.FontBold, Fonts.FontBold.FontSize,
-                         new Vector2(textX, rowMin.Y + 4 * scale + Fonts.FontSmall.FontSize + 4 * scale),
+                         new Vector2(textX, indexY + Fonts.FontSmall.FontSize),
                          isSelected ? UiColors.ForegroundFull : UiColors.Text,
-                         GetTitle(variation));
-        drawList.PopClipRect();
+                         title);
+
+        if (titleOverflows)
+            drawList.PopClipRect();
 
         DrawWeightCellVisual(drawList, cellMin, cellMax, pool.GetBlendWeight(variation.Id), weightDragging, freeMode, flagSource);
 
