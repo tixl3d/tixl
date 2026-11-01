@@ -63,6 +63,7 @@ internal sealed class PerformanceWindow : Window
         return framesPerSecond switch
                    {
                        0   => GetMatchDisplayLabel(),
+                       144 => "144 fps",
                        120 => "120 fps",
                        60  => "60 fps",
                        50  => "50 fps",
@@ -86,7 +87,7 @@ internal sealed class PerformanceWindow : Window
 
     private static string FormatFrameLatency(int frames) => frames <= 1 ? "Low latency (1 frame)" : "Smooth (2 frames)";
 
-    private static readonly int[] TargetFrameRates = [0, 120, 60, 50, 30];
+    private static readonly int[] TargetFrameRates = [0, 144, 120, 60, 50, 30];
     private static readonly int[] FrameLatencies = [1, 2];
     private static int _matchDisplayLabelRate = -1;
     private static string _matchDisplayLabel = "Match Display";
