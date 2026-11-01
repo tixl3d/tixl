@@ -472,13 +472,12 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
 
     private Assembly? LoadCore(AssemblyName assemblyName)
     {
-        #if DEBUG
+        // Root is gone after unload, but code still running from this context (e.g. Dispose) can trigger late loads.
         if (_unloaded)
         {
             Log.Error($"{Name!}: Attempted to load assembly {assemblyName} after unload");
             return null;
         }
-        #endif
 
         var name = assemblyName.GetName();
 
