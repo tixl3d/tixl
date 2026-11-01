@@ -405,14 +405,16 @@ its width. Then open the Output tab and check the send's Resolution in the Param
     edge handle again and release. Hold Ctrl once more and look at the handles.
 3. Click **+ Line** in the header and drag along a mortar line of the brick wall; repeat for a
    vertical feature (a door frame); click **Straighten**.
-4. Double-click one of the lines, type its real length in metres, **Set**, then **Apply lengths**.
+4. Click one of the lines, type its real length in metres, **Set**, then **Apply lengths**.
 5. Right-click the "Surface 1" item in the SURFACES column and choose **Add region**.
 6. Click the **Board** tab.
 
 **Expected:**
 - After 1: the edge crops the wall — the frame widens with the cursor and the surface's **Size
   (m)** grows along X to match, so the picture keeps its proportions instead of squeezing into a
-  frame that kept its aspect. The traced quad on the image card crops along. Ctrl+Z restores
+  frame that kept its aspect. The left, top and bottom edges and the photo stay exactly where they
+  are on screen, also on a surface traced at a steep angle. The left edge handle behaves the same way,
+  with the right edge staying put. The traced quad on the image card crops along. Ctrl+Z restores
   both in one step.
 - After 2: a corner refines the trace instead: dragging pulls the wall's corner into the frame's
   corner, live, and the frame never re-centres. Lines and points already drawn travel with the
@@ -454,7 +456,7 @@ its width. Then open the Output tab and check the send's Resolution in the Param
 2. Press Esc.
 3. Click **+ Line**, drag a line, then start dragging another one and press Esc before releasing the mouse.
 4. Click **+ Line**, then click **Straighten**.
-5. Click **+ Line**, then double-click one of the lines.
+5. Click **+ Line**, then click one of the lines without moving the mouse.
 6. Press Esc to close the length popup, then click the **Board** tab and the **Straight** tab again.
 
 **Expected:**
@@ -465,6 +467,20 @@ its width. Then open the Output tab and check the send's Resolution in the Param
 - After 4: **+ Line** is no longer highlighted.
 - After 5: the length popup opens and no new line appears.
 - After 6: the popup closes with **+ Line** still highlighted; after the tab switch it is no longer highlighted.
+
+## Step: Clicking a line opens its popup
+
+**Action:**
+1. With at least two lines on the straightened "Surface 1", move the cursor onto the middle of one line and away again.
+2. Click that line without moving the mouse.
+3. Click an empty spot of the photo, then click the same line again and click **Delete**.
+4. Press Ctrl+Z, then drag one endpoint handle of that line 50 px and release.
+
+**Expected:**
+- After 1: the line is 1.5 times as thick while the cursor is on it, and the cursor shows a hand.
+- After 2: a small popup opens with "Real length in meters", **Set** and **Delete**.
+- After 3: the first click only closes the popup; the second opens it again, and **Delete** removes the line.
+- After 4: the line is back, and the endpoint drag moves it without opening the popup.
 
 ## Step: Reference points on the straightened photo
 

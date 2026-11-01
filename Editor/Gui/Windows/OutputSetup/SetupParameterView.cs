@@ -1360,6 +1360,15 @@ internal static class SetupParameterView
             prop.HeightInMeters = MathF.Max(height[0], 0.1f);
 
         CommitFieldUndo(setup, "Resize person", heightState);
+
+        var opacity = prop.Opacity;
+        var opacityState = FormInputs.AddFloatWithEditState("Opacity", ref opacity, 0, 1, 0.005f, clampMin: true, clampMax: true,
+                                                            "How strongly the figure shows on the Board.", defaultValue: Prop.DefaultOpacity);
+        BeginFieldUndo(setup, opacityState);
+        if ((opacityState & InputEditStateFlags.Modified) != 0)
+            prop.Opacity = opacity;
+
+        CommitFieldUndo(setup, "Change person opacity", opacityState);
     }
 
     /// <summary>

@@ -111,7 +111,22 @@ Image**. Click the new person card, then the new image card.
 **Expected:**
 - For the person: the output area shows a centered message naming it and pointing to
   the Parameter window; the Parameter window shows **Person** with an editable
-  **Height (m)** field (1.8).
+  **Height (m)** field (1.8) and an **Opacity** field (0.3).
 - For the reference image: the Parameter window shows **Reference Image** with a
   Name field and the hint to drop a photo; the output area shows the (empty)
   reference canvas.
+
+## Step: A person's opacity
+
+**Action:**
+1. Click the person card on the Board, then drag its **Opacity** field in the Parameter window up to 1.
+2. Press Ctrl+Z.
+3. Set **Opacity** to 0, then click an empty spot of the Board.
+4. Click where the figure stands, set **Opacity** to 0.8, save the project and reopen it.
+
+**Expected:**
+- After 1: the green silhouette gets stronger while dragging, up to fully solid.
+- After 2: it returns to 0.3 in one undo step.
+- After 3: the figure is invisible, with only its height label left above where it stands.
+- After 4: the click selects the invisible figure, which shows its white frame; after reopening, the figure is
+  still at 0.8.

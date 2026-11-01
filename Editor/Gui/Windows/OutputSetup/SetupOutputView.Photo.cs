@@ -318,8 +318,15 @@ internal sealed partial class SetupOutputView
         var quad = subject.Trace!.Quad;
 
         // The rect is where the wall was first put upright; refining the trace must not move or re-centre it.
-        // It is re-derived only for a new subject or a changed physical size (which changes its aspect).
-        if (subject.Id != _referenceSubjectId || subject.SizeInMeters != _referenceStickySize)
+        // It is re-derived only for a new subject or a changed physical size (which changes its aspect). A crop
+        // changes the size too, but only moves the dragged edge.
+        if (TryGetCroppedStraightRect(subject, out var croppedMin, out var croppedMax))
+        {
+            _referenceStickyMin = croppedMin;
+            _referenceStickyMax = croppedMax;
+            _referenceStickySize = subject.SizeInMeters;
+        }
+        else if (subject.Id != _referenceSubjectId || subject.SizeInMeters != _referenceStickySize)
         {
             StraightTargetBounds(subject, out _referenceStickyMin, out _referenceStickyMax);
             _referenceStickySize = subject.SizeInMeters;
@@ -369,6 +376,34 @@ internal sealed partial class SetupOutputView
         _referenceSubjectLastMax = targetMax;
     }
 
+
+    /// <summary>
+    /// The rect during a live crop: the one from the press with only the dragged edge moved, at the press' pixels
+    /// per metre. The trace's bounding box can't give this: under perspective it grows unevenly with the crop,
+    /// which would rescale and re-centre the frame. Kept to the press' scale, the photo doesn't move either.
+    /// </summary>
+    private bool TryGetCroppedStraightRect(Surface subject, out Vector2 min, out Vector2 max)
+    {
+        min = _straightCropPressMin;
+        max = _straightCropPressMax;
+        if (_straightCropEdge < 0 || !_gesture.Is(GestureKinds.SurfaceResize, subject.Id))
+        {
+            _straightCropEdge = -1;
+            return false;
+        }
+
+        var pixelsPerMetre = (max - min) / Vector2.Max(_straightCropPressSize, new Vector2(0.0001f));
+        var size = subject.SizeInMeters * pixelsPerMetre;
+        switch (_straightCropEdge)
+        {
+            case 0: min.Y = max.Y - size.Y; break;
+            case 1: max.X = min.X + size.X; break;
+            case 2: max.Y = min.Y + size.Y; break;
+            default: min.X = max.X - size.X; break;
+        }
+
+        return true;
+    }
 
     /// <summary>
     /// The straightened crop of the photo a traced surface stands for, for its Board card: the warp rendered
@@ -488,6 +523,8 @@ internal sealed partial class SetupOutputView
 
     // The rect the subject is put upright into — sticky across trace edits (see ResolveStraightSubject).
     private Vector2 _referenceStickyMin, _referenceStickyMax, _referenceStickySize;
+    private Vector2 _straightCropPressMin, _straightCropPressMax, _straightCropPressSize;
+    private int _straightCropEdge = -1;
 
     // Subject transition: the quad/target in use (eased between surfaces), where the ease started, and its progress.
     private Guid _referenceSubjectId;

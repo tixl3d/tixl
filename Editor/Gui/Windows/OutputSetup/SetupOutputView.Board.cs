@@ -896,7 +896,8 @@ internal sealed partial class SetupOutputView
         _boardContext ??= new EvaluationContext();
         if (PersonImages.For(prop)?.Texture.GetValue(_boardContext) is { IsDisposed: false } texture)
         {
-            var color = PulseColor(SetupColors.ForKind(SetupEntityKinds.Surface).Fade(isSelected ? 1f : 0.3f), pulse).Fade(fade);
+            // Selection shows in the frame below, not here: the Opacity field is edited while the figure is selected.
+            var color = PulseColor(SetupColors.ForKind(SetupEntityKinds.Surface).Fade(prop.Opacity), pulse).Fade(fade);
             dl.AddImage(SrvManager.GetSrvForTexture(texture).NativePointer, sMin, sMax, Vector2.Zero, Vector2.One, color);
         }
 

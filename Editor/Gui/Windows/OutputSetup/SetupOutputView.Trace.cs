@@ -211,6 +211,10 @@ internal sealed partial class SetupOutputView
         {
             case CanvasPointHandle.DragPhases.Started:
                 _edgeDragStretches = false;
+                _straightCropEdge = edge;
+                _straightCropPressMin = _referenceStickyMin;
+                _straightCropPressMax = _referenceStickyMax;
+                _straightCropPressSize = subject.SizeInMeters;
                 BeginGesture(setup, GestureKinds.SurfaceResize, "Crop surface", subject.Id, subject);
                 BeginContentEdit(setup, subject);
                 break;
@@ -283,11 +287,10 @@ internal sealed partial class SetupOutputView
 
     /// <summary>The rectified frame as it stood at the press, back into the surface's metres — what turns a
     /// cursor on the photo into one absolute edge position, however long the drag runs.</summary>
-    private static bool TryGetPressedFrameToSurface(Surface subject, out Homography frameToSurface)
+    private bool TryGetPressedFrameToSurface(Surface subject, out Homography frameToSurface)
     {
-        StraightTargetBounds(subject, out var pressMin, out var pressMax);
         Span<Vector2> frame = stackalloc Vector2[4];
-        SurfaceGeometry.WriteRectCorners(pressMin, pressMax, frame, yUp: false);
+        SurfaceGeometry.WriteRectCorners(_straightCropPressMin, _straightCropPressMax, frame, yUp: false);
         Span<Vector2> local = stackalloc Vector2[4];
         SurfaceGeometry.WriteLocalRect(subject, local);
         return Homography.TryComputeQuadToQuad(frame, local, out frameToSurface);

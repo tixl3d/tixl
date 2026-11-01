@@ -283,7 +283,7 @@ internal sealed partial class SetupOutputView
 
             ImGui.EndDisabled();
             if (!canApply && ImGui.IsItemHovered())
-                ImGui.SetTooltip("Double-click a line to give it a real length first.");
+                ImGui.SetTooltip("Click a line to give it a real length first.");
         }
         else
         {
