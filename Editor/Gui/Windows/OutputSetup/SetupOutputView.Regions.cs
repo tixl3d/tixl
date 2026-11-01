@@ -292,7 +292,7 @@ internal sealed partial class SetupOutputView
 
     /// <summary>
     /// The region's body as its move grip: the picker gave it the press; the held button moves
-    /// it. Alt at the press pans the content under the region instead. Free movement, but a nearly-straight
+    /// it. Alt drags a copy instead, and Alt+Shift pans the content under the region. Free movement, but a nearly-straight
     /// drag snaps flat and draws the axis it locked to — placing a region level with its neighbours is the
     /// common case.
     /// </summary>
@@ -304,7 +304,7 @@ internal sealed partial class SetupOutputView
 
         var phase = CanvasPointHandle.DragPhases.None;
         var panning = _gesture.Is(GestureKinds.ContentPan, child.Id)
-                      || (!_gesture.IsLive && ImGui.GetIO().KeyAlt && child.SliceId != Guid.Empty);
+                      || (!_gesture.IsLive && ImGui.GetIO().KeyAlt && ImGui.GetIO().KeyShift && child.SliceId != Guid.Empty);
         var kind = panning ? GestureKinds.ContentPan : GestureKinds.RegionMove;
         if (_gesture.Is(kind, child.Id))
         {
@@ -324,8 +324,17 @@ internal sealed partial class SetupOutputView
                 BeginGesture(setup, kind, panning ? "Pan content" : "Move region", child.Id, child,
                              grabPoint: projection.ScreenToCanvas(ImGui.GetMousePos()));
                 _childMoveAxis = RectSnapping.AxisLocks.None;
+                _regionDuplicatePending = !panning && ImGui.GetIO().KeyAlt;
                 if (panning)
                     BeginContentEdit(setup, child);
+
+                break;
+
+            // Copied only once the drag starts, so an Alt+click leaves nothing behind; inside the gesture's
+            // snapshot, so copy and move undo as one step. The copy takes the drag, the original stays.
+            case CanvasPointHandle.DragPhases.Dragging when _regionDuplicatePending && _gesture.Is(kind, child.Id):
+                if (ImGui.IsMouseDragging(ImGuiMouseButton.Left))
+                    StartDraggingRegionCopy(setup, child);
 
                 break;
 
@@ -388,6 +397,20 @@ internal sealed partial class SetupOutputView
         }
     }
 
+    private void StartDraggingRegionCopy(Setup setup, Surface original)
+    {
+        _regionDuplicatePending = false;
+        var selection = GlobalSelectionHandling.SetupEntities;
+        SetupActions.DuplicateEntityInternal(selection, setup, SetupEntityKinds.Surface, original.Id);
+        if (!selection.TryResolve(setup, out _, out var copyId) || copyId == original.Id || setup.FindSurface(copyId) is not { } copy)
+            return;
+
+        copy.LocalPosition = original.LocalPosition;
+        _gesture.HotId = copyId;
+        _gesture.Name = "Duplicate region";
+        _gesture.Snapshot = new SurfaceRectSnapshot(copy);
+    }
+
     /// <summary>
     /// Coordinates worth snapping to, in the parent's space: the parent's own edges and centre, plus every
     /// sibling's. Snapping in the parent's space (rather than on screen) means alignments survive the
@@ -444,4 +467,5 @@ internal sealed partial class SetupOutputView
 
     // The axis a nearly-straight region move locked to, so the guide can be drawn.
     private RectSnapping.AxisLocks _childMoveAxis;
+    private bool _regionDuplicatePending;
 }

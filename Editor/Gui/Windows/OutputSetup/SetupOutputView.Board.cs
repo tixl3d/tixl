@@ -247,6 +247,23 @@ internal sealed partial class SetupOutputView
         foreach (var prop in setup.Props)
             DrawBoardProp(setup, selection, dl, prop);
 
+        if (_boardCardToEnter is var (enterKind, enterId) && !_labelRenameStarted)
+        {
+            selection?.Select(enterKind, enterId);
+            if (enterKind == SetupEntityKinds.ReferenceImage)
+                OpenedReferenceImageId = enterId;
+
+            _editMode = enterKind switch
+                            {
+                                SetupEntityKinds.Surface => EditModes.Straight,
+                                SetupEntityKinds.Output => EditModes.Output,
+                                _ => _editMode,
+                            };
+        }
+
+        _boardCardToEnter = null;
+        _labelRenameStarted = false;
+
         // The card sub-editors above (a slice on its content card, the traces on each image card) borrow the
         // space projection for their own card. The space drawn after the Board layer is the entered one, so
         // put its origin and scale back — otherwise, while both layers show during a fold, the space renders
@@ -490,20 +507,10 @@ internal sealed partial class SetupOutputView
         _boardFenceCandidates.Add((kind, id, new ImRect(sMin, sMax)));
         NoteBoardCardUnderMouse(id, hovered);
 
-        // Double-click enters the card's space: the canvas that edits it.
+        // Double-click enters the card's space: the canvas that edits it. Decided once all cards are drawn, as
+        // the click may be on the label of a region or patch on this card, which are drawn after it and rename.
         if (hovered && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
-        {
-            selection?.Select(kind, id);
-            if (kind == SetupEntityKinds.ReferenceImage)
-                OpenedReferenceImageId = id;
-
-            _editMode = kind switch
-                            {
-                                SetupEntityKinds.Surface => EditModes.Straight,
-                                SetupEntityKinds.Output => EditModes.Output,
-                                _ => _editMode,
-                            };
-        }
+            _boardCardToEnter = (kind, id);
 
         if (cardSurface != null && isSelected)
             DrawBoardSurfaceEdges(setup, selection, cardSurface, min, max);
@@ -2375,6 +2382,8 @@ internal sealed partial class SetupOutputView
     // Scale gestures (top-right handle, Ctrl + edge): the mode held for the drag, the start bounds, and the
     // total factor applied so far — the increment per frame is total / applied.
     private bool _boardEdgeScaling;
+    private (SetupEntityKinds Kind, Guid Id)? _boardCardToEnter;
+    private bool _labelRenameStarted;
     private Vector2 _boardScaleGrabMin, _boardScaleGrabMax;
     private Vector2 _boardScaleGroupMin, _boardScaleGroupMax;
     private Vector2 _boardScaleApplied = Vector2.One;

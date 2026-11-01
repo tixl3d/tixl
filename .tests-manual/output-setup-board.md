@@ -322,6 +322,39 @@ its width. Then open the Output tab and check the send's Resolution in the Param
   op's resolution or the patch on the output. Hovering the handle explains that it is
   presentation only.
 
+## Step: Double-clicking a label renames
+
+**Action:**
+1. On the Board, add a region to "Surface 1" and collapse "Surface 1" in the outliner. Double-click the region's
+   centre label on the card.
+2. Type a new name and press Enter.
+3. Double-click the output card's "Patch 1" label, then press Escape.
+4. Double-click the region's frame away from its label.
+
+**Expected:**
+- After 1: the view stays on the Board. "Surface 1" unfolds and the region's outliner row shows its name field, focused.
+- After 2: the label on the card shows the new name.
+- After 3: the view stays on the Board and the patch's outliner row was in rename; Escape leaves the name as it was.
+- After 4: the view enters the surface's Straight space, as a double-click on a card does.
+
+## Step: Return renames, Alt+drag copies a region
+
+**Action:**
+1. Click a region once on the Board, then press Return with the mouse over the canvas.
+2. Type a name and press Return.
+3. Collapse the strip with the chevron in its header, then press Return again; press Escape.
+4. Ctrl+click a second region, so two are selected, and press Return.
+5. Click one region. Hold Alt and click its body without moving; then hold Alt and drag it 50 cm to the right; release.
+6. Press Ctrl+Z.
+
+**Expected:**
+- After 1: the region's outliner row shows its name field, focused.
+- After 2: the name changes and the field closes; that Return doesn't reopen it.
+- After 3: the strip opens with the field focused; Escape leaves the name as it was.
+- After 4: nothing happens.
+- After 5: the Alt+click adds nothing. The drag moves a new selected region and the original stays where it was.
+- After 6: the copy is gone in one step.
+
 ## Step: Double-click enters a space
 
 **Action:**

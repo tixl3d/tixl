@@ -51,6 +51,10 @@ internal sealed class OutputSetupModeView
         if (!IsSetupMode)
             return;
 
+        // A rename happens in the outliner's row, so a strip collapsed to its header has to open for it.
+        if (OutlinerItem.RevealPendingId != Guid.Empty)
+            _outlinerCollapsed = false;
+
         var scale = T3Ui.UiScaleFactor;
         DrawOutlinerSplitter(scale);
 
@@ -78,9 +82,25 @@ internal sealed class OutputSetupModeView
         _keepsPinnedOp = keepsPinnedOp;
         FollowGraphFocus();
         _outputView.IsHeaderHostedByStrip = IsSetupMode;
+        HandleRenameKey();
 
         var shown = ResolveShownView(focusedInstance);
         return Draw(shown);
+    }
+
+    /** Return renames the one selected entity, in its Flow Outliner row. A live text field has the key to itself. */
+    private void HandleRenameKey()
+    {
+        if (!IsSetupMode || _entitySelection.Count != 1
+            || !ImGui.IsWindowFocused(ImGuiFocusedFlags.RootAndChildWindows)
+            || ImGui.IsAnyItemActive() || ImGui.GetIO().WantTextInput
+            || !(ImGui.IsKeyPressed(ImGuiKey.Enter, false) || ImGui.IsKeyPressed(ImGuiKey.KeypadEnter, false)))
+            return;
+
+        var target = _entitySelection.Targets[0];
+        var canRename = target.Kind == SetupEntityKinds.Plug ? SetupActions.CanRenamePlug(target.EntityId) : SetupActions.CanRename(target.Kind);
+        if (canRename)
+            OutlinerItem.BeginRename(_entitySelection, target.Kind, target.EntityId, SetupLabels.NameForEntity(target.Kind, target.EntityId));
     }
 
     /// <summary>

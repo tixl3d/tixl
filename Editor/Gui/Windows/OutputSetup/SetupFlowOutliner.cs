@@ -775,6 +775,9 @@ internal sealed class SetupFlowOutliner
             var source = setup.FindSourceByChildId(childId);
             // The implicit full-frame slice is the source itself here: no item, its connections start at the source.
             var sliceCount = source == null ? 0 : SetupRelations.CountListedSlicesOfSource(setup, source.Id);
+            if (source != null && OutlinerItem.RevealPendingId != Guid.Empty && setup.FindSlice(OutlinerItem.RevealPendingId)?.SourceId == source.Id)
+                _collapsedSources.Remove(childId);
+
             var expanded = !_collapsedSources.Contains(childId);
             var parent = instance.Parent;
             var isNested = parent != null && parent != ProjectView.Focused?.CompositionInstance;
@@ -881,9 +884,30 @@ internal sealed class SetupFlowOutliner
             DrawColumnHint("Physical surfaces\nlike a walls or screens.");
     }
 
+    private static bool IsAncestorOfPendingRename(Setup setup, Guid surfaceId)
+    {
+        var reveal = OutlinerItem.RevealPendingId;
+        if (reveal == Guid.Empty)
+            return false;
+
+        var current = setup.FindSurface(reveal);
+        for (var guard = 0; current != null && current.ParentId != Guid.Empty && guard < 16; guard++)
+        {
+            if (current.ParentId == surfaceId)
+                return true;
+
+            current = setup.FindSurface(current.ParentId);
+        }
+
+        return false;
+    }
+
     private void DrawSurfaceItem(SetupEntitySelection selection, Setup setup, Surface surface, int depth)
     {
         var surfaceId = surface.Id;
+        if (IsAncestorOfPendingRename(setup, surfaceId))
+            _collapsedSurfaces.Remove(surfaceId);
+
         var hasChildren = SetupRelations.CountChildren(setup, surfaceId) > 0;
         var isExpanded = !_collapsedSurfaces.Contains(surfaceId);
 

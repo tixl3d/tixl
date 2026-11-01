@@ -40,6 +40,15 @@ internal sealed partial class SetupOutputView
         if (pickable)
             _picker.AddTarget(kind, id, rect.Min, rect.Max, isSelected: isSelected);
 
+        // A double-click on a label renames, where names are edited: the entity's row in the Flow Outliner.
+        if (SetupActions.CanRename(kind) && ImGui.IsWindowHovered() && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left)
+            && CanvasDraw.Contains(rect.Min, rect.Max, ImGui.GetMousePos()))
+        {
+            CancelGesture();
+            OutlinerItem.BeginRename(GlobalSelectionHandling.SetupEntities, kind, id, name);
+            _labelRenameStarted = true;
+        }
+
         var alpha = (_picker.IsPicked(id) ? 1f : 0.9f) * emphasis;
         var selectedColor = frameColor ?? SetupColors.ForKind(kind);
         var text = (isSelected ? selectedColor : SetupColors.LabelFor(kind)).Fade(alpha);

@@ -43,7 +43,7 @@ Each row's context menu offers Rename, Duplicate and Delete. `Del` removes the s
 
 The Board shows every entity as a card at its neutral placement, in metres: sources, surfaces, outputs, reference photos and people. It answers "what is in this venue and how big is it". Drag a card by its frame or its name label to move it; the handle at the top-right corner scales it. Selecting a card selects the entity everywhere else; right-click a card or its label for the entity's menu. Right-click empty Board to add a surface, a reference image, a prop or a floor plan.
 
-Double-clicking a card opens its tab: a surface opens **Straight**, an output opens **Output**. Choosing **Board**, or clicking empty strip, returns.
+Double-clicking a card opens its tab: a surface opens **Straight**, an output opens **Output**. Choosing **Board**, or clicking empty strip, returns. Double-clicking a name label renames instead, and so does pressing `Return` with one item selected. Alt+drag duplicates a card, region, slice or patch; on a region, Alt+Shift+drag pans its content.
 
 A send's card is already its texture seen flat, so slices live there rather than in a view of their own: each is drawn as a labelled sub-rect, with a line naming what shows it, and the selected one is edited in place — edges crop, corners scale with the aspect held, the label moves it, everything snapping to the source's borders and the sibling slices. Add slices from the send's context menu and duplicate them from the slice's.
 
