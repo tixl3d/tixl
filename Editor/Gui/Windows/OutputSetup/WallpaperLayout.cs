@@ -282,7 +282,7 @@ internal static class WallpaperLayout
     /// The sharpest density any wall is projected at: pixels on its output canvas per metre of wall. Walls that
     /// land on no canvas yet fall back to their own content resolution.
     /// </summary>
-    private static float FindPixelsPerMeter(Setup setup, IReadOnlyList<Surface> walls)
+    internal static float FindPixelsPerMeter(Setup setup, IReadOnlyList<Surface> walls)
     {
         var mapped = 0f;
         var own = 0f;
@@ -317,7 +317,7 @@ internal static class WallpaperLayout
     }
 
     /// <summary>The slice of this source the wall already shows, so a re-run re-cuts it in place.</summary>
-    private static Slice? FindReusableSlice(Setup setup, Surface wall, ContentSource source)
+    internal static Slice? FindReusableSlice(Setup setup, Surface wall, ContentSource source)
     {
         var current = setup.FindSlice(wall.SliceId);
         if (current == null || current.SourceId != source.Id)
@@ -327,7 +327,7 @@ internal static class WallpaperLayout
         return SetupRelations.CountConsumersOfSlice(setup, current.Id) <= 1 ? current : null;
     }
 
-    private static Slice CreateSlice(Setup setup, ContentSource source)
+    internal static Slice CreateSlice(Setup setup, ContentSource source)
     {
         var slice = new Slice { SourceId = source.Id };
         setup.Slices.Add(slice);

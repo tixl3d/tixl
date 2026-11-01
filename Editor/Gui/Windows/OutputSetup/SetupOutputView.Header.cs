@@ -212,7 +212,7 @@ internal sealed partial class SetupOutputView
             }
         }
 
-        if (_projectsPhoto && photoCarrier != null && TryGetTracedFragment(setup, photoCarrier, out var photoSrv, out var photoUvMin, out var photoUvMax))
+        if (_projectsPhoto && photoCarrier != null && TryGetTracedFragmentWithSurround(setup, photoCarrier, out var photoSrv, out _, out var photoUvMin, out var photoUvMax))
             CalibrationOverlay.SetCalibrationPhoto(photoCarrier.Id, photoSrv!, photoUvMin, photoUvMax, UserSettings.Config.OutputSetupPhotoDiscRadius);
 
         // Measuring only makes sense against the straightened surface — on the projector canvas the

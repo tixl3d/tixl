@@ -96,6 +96,27 @@ internal static class SetupEntityContextMenu
                                                     : "Re-cuts the selected content into one slice per wall and sets its resolution.");
         }
 
+        // Outside the disabled block as well: re-cutting selected content means a multi-selection.
+        if (kind == SetupEntityKinds.Surface && setup.FindSurface(id) is { } regionParent)
+        {
+            RegionSlices.CollectRegions(setup, regionParent, _regions);
+            if (_regions.Count > 0)
+            {
+                var selectedSource = WallpaperLayout.FindSelectedSource(setup, selection, kind, id);
+                var regionSource = selectedSource ?? RegionSlices.FindShownSource(setup, _regions);
+                var label = selectedSource != null ? $"Create Slices from Regions on {selectedSource.Name}"
+                            : regionSource != null ? "Update Slices from Regions"
+                            : "Create Slices from Regions";
+                if (CustomComponents.DrawMenuItem(27, label))
+                    RegionSlices.Create(selection, setup, regionParent, _regions, regionSource);
+
+                CustomComponents.TooltipForLastItem("Shows one picture across this surface's regions, each cut from where the region sits on the surface.",
+                                                    regionSource == null
+                                                        ? "Adds a SendToOutput sized to the surface and gives each region its slice of it."
+                                                        : "Re-cuts the content into one slice per region and sets its resolution; existing routes are kept.");
+            }
+        }
+
         // Deleting is the one action that reads the selection rather than the item, so it is offered even
         // from an item that isn't itself deletable.
         if (multi)
@@ -358,6 +379,7 @@ internal static class SetupEntityContextMenu
 
     private static readonly Action _drawMenuItemsCached = DrawMenuItemsForCurrent;
     private static readonly List<Surface> _wallpaperWalls = [];
+    private static readonly List<Surface> _regions = [];
     private static SetupEntitySelection? _menuSelection;
     private static Setup? _menuSetup;
     private static SetupEntityKinds _menuKind;
