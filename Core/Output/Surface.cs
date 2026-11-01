@@ -48,6 +48,10 @@ public sealed class Surface
         /// </summary>
         public Vector2[] Quad = new Vector2[4];
 
+        /// <summary>The patch this pin is linked to, whose quad it takes; empty for a pin aimed by itself. A surface
+        /// dropped on a patch links to it, and aiming the pin by hand ends the link.</summary>
+        public Guid PatchId;
+
 /// <summary>
         /// Where one of the surface's reference points sits on this output, in the same 0..1 canvas space.
         /// <para><see cref="IsAimed"/> means the user put it there and the pin is solved to project the point
@@ -75,12 +79,14 @@ public sealed class Surface
         public void PromoteToCornerPin()
         {
             Mode = MappingModes.CornerPin;
+            PatchId = Guid.Empty;
         }
 
         /// <summary>Takes the whole canvas, dropping the corners it was placed at.</summary>
         public void FillCanvas()
         {
             Mode = MappingModes.Fill;
+            PatchId = Guid.Empty;
             Quad = OutputDefinition.FullCanvasQuad();
         }
 
@@ -98,6 +104,9 @@ public sealed class Surface
             writer.WriteObject("OutputId", OutputId);
             writer.WriteString("Mode", Mode.ToString());
             writer.WriteQuad("Quad", Quad);
+            if (PatchId != Guid.Empty)
+                writer.WriteObject("PatchId", PatchId);
+
             if (PointAims.Count > 0)
             {
                 writer.WritePropertyName("PointAims");
@@ -132,6 +141,7 @@ public sealed class Surface
                                              ? mode
                                              : MappingModes.CornerPin,
                                   Quad = OutputJson.ReadQuad(token["Quad"]),
+                                  PatchId = OutputJson.ReadGuid(token["PatchId"]),
                               };
 
             if (token["QuadBeforeAligning"] != null)
@@ -168,6 +178,10 @@ public sealed class Surface
 
         /// <summary>Corners in reference-image pixels, same winding as <see cref="OutputMapping.Quad"/>.</summary>
         public Vector2[] Quad = new Vector2[4];
+
+        /// <summary>The patch this pin is linked to, whose quad it takes; empty for a pin aimed by itself. A surface
+        /// dropped on a patch links to it, and aiming the pin by hand ends the link.</summary>
+        public Guid PatchId;
 
         public List<Annotation> Annotations = [];
 

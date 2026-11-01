@@ -778,7 +778,7 @@ internal static class SetupActions
         {
             foreach (var mapping in surface.OutputMappings)
             {
-                if (SetupRelations.FindLayoutPatchUnder(setup, mapping) == patch.Id)
+                if (SetupRelations.LinkedPatchOf(setup, mapping) == patch.Id)
                     return true;
             }
         }
@@ -1188,7 +1188,9 @@ internal static class SetupActions
                 if (mapping.IsFilling)
                     continue;
 
-                // A nudge of the canvas rather than a pixel count, so it reads the same at any resolution.
+                // A nudge of the canvas rather than a pixel count, so it reads the same at any resolution. It leaves
+                // the patch, which stays the original's.
+                mapping.PatchId = Guid.Empty;
                 for (var i = 0; i < mapping.Quad.Length; i++)
                     mapping.Quad[i] += new Vector2(0.0125f, 0.0125f);
             }
@@ -1241,13 +1243,13 @@ internal static class SetupActions
 
     private static bool IsDirectMappingOnto(Setup setup, Surface.OutputMapping mapping, OutputDefinition output)
     {
-        return mapping.OutputId == output.Id && SetupRelations.FindLayoutPatchUnder(setup, mapping) == Guid.Empty;
+        return mapping.OutputId == output.Id && SetupRelations.LinkedPatchOf(setup, mapping) == Guid.Empty;
     }
 
     private static void ClearPatchInputInternal(Setup setup, OutputDefinition.Patch patch)
     {
         foreach (var surface in setup.Surfaces)
-            surface.OutputMappings.RemoveAll(m => SetupRelations.FindLayoutPatchUnder(setup, m) == patch.Id);
+            surface.OutputMappings.RemoveAll(m => SetupRelations.LinkedPatchOf(setup, m) == patch.Id);
 
         patch.SliceId = Guid.Empty;
     }

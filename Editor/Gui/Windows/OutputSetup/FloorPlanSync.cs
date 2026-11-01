@@ -552,6 +552,7 @@ internal static class FloorPlanSync
         var edgeX = fromLeft ? oldMax.X - width : oldMin.X + width;
         SurfaceGeometry.DragEdge(wall, fromLeft ? 3 : 1, new Vector2(edgeX, 0), keepDimensions: false);
 
+
         SurfaceGeometry.LocalBounds(wall, out var newMin, out var newMax);
         if (SliceUvAnchoring.TryBegin(setup, wall, out var sliceId, out var uvStart))
             SliceUvAnchoring.ApplyCrop(setup, sliceId, uvStart, oldMin, oldMax, newMin, newMax);

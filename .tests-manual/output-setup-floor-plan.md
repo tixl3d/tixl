@@ -97,6 +97,32 @@ Select "Wall 1" and type `12` into the first Size (m) field.
 - After 3: its Position and Rotation are editable and its card no longer mentions the plan. Ticking
   Edge 3 again on the plan's card brings this same "Wall 3" back, with its content.
 
+## Step: Walls on patches stay there when the plan changes
+
+**Action:**
+1. On an output, add three patches. Drag three neighbouring walls of a plan onto one patch each in the outliner.
+2. On the Board, drag the middle dot of the middle wall's edge, so the two neighbouring walls change their length.
+3. Press Ctrl+Z.
+
+**Expected:**
+- After 2: all three connections in the outliner still end at their patches, and the patches' quads on the output
+  haven't moved. The neighbouring walls' lengths on the Board have changed.
+- After 3: the old lengths return in one step.
+
+## Step: A wall's link to its patch is a real one
+
+**Action:**
+1. With the walls from the step above, open the output's canvas and drag one of the linked patches 100 px.
+2. Drag a corner of that patch's wall on the same canvas by 50 px.
+3. Drag the patch again.
+4. Save, close and reopen the project.
+
+**Expected:**
+- After 1: the wall's image moves with the patch, and the outliner connection still ends at the patch.
+- After 2: the connection now ends at the output instead: aiming the pin by hand ended the link.
+- After 3: the wall stays where it was aimed.
+- After 4: the other walls' connections still end at their patches.
+
 ## Step: A wall named like a patch is kept when taken down
 
 **Action:**

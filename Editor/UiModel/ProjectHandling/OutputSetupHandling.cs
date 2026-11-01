@@ -42,6 +42,7 @@ internal static class OutputSetupHandling
         ActiveSetup.Current = entry.Setup;
         ActiveSetup.Machine = entry.MachineConfig;
         ResolveCanvasResolutions(entry.Setup, entry.MachineConfig);
+        SetupRelations.SyncPinsToLinkedPatches(entry.Setup);
         if (switched)
             ActiveSetup.NotifyChanged();
     }
@@ -88,6 +89,7 @@ internal static class OutputSetupHandling
         if (!TryGetFocusedEntry(out var entry, out var setupsFolder))
             return;
 
+        SetupRelations.SyncPinsToLinkedPatches(entry.Setup);
         Directory.CreateDirectory(setupsFolder);
         if (entry.Setup.TrySaveToFile(SetupFilePath(setupsFolder, entry.Setup.Name)))
             entry.IsSaved = true;

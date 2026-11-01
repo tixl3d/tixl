@@ -97,6 +97,46 @@ public static class SetupRepair
             }
         }
 
+        changed |= LinkPinsSavedWithoutPatchIds(setup);
+        return changed;
+    }
+
+    /// <summary>
+    /// Back-compat for setups saved before pins stored their patch: a dropped surface only left a copy of the patch's
+    /// quad then, so a pin exactly on a content-less patch is taken to be linked to it.
+    /// </summary>
+    private static bool LinkPinsSavedWithoutPatchIds(Setup setup)
+    {
+        const float samePinToleranceSquared = 1e-8f;
+        var changed = false;
+        Span<Vector2> corners = stackalloc Vector2[4];
+        foreach (var surface in setup.Surfaces)
+        {
+            foreach (var mapping in surface.OutputMappings)
+            {
+                if (mapping.PatchId != Guid.Empty || mapping.IsFilling || mapping.Quad.Length < 4 || setup.FindOutput(mapping.OutputId) is not { } output)
+                    continue;
+
+                foreach (var patch in output.Patches)
+                {
+                    if (patch.SliceId != Guid.Empty || patch.Quad.Length < 4)
+                        continue;
+
+                    patch.CopyTurnedCorners(corners);
+                    var matches = true;
+                    for (var corner = 0; corner < 4 && matches; corner++)
+                        matches = Vector2.DistanceSquared(corners[corner], mapping.Quad[corner]) < samePinToleranceSquared;
+
+                    if (!matches)
+                        continue;
+
+                    mapping.PatchId = patch.Id;
+                    changed = true;
+                    break;
+                }
+            }
+        }
+
         return changed;
     }
 

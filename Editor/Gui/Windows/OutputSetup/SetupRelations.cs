@@ -143,33 +143,38 @@ internal static class SetupRelations
         return slice != null && slice.SourceId == sourceId;
     }
 
-    /// <summary>
-    /// The content-less patch a surface's pin sits exactly on — a venue's pixel map traced as patches, which the
-    /// surface was dropped onto — so the link leads to that area rather than to the output as a whole.
-    /// </summary>
-    public static Guid FindLayoutPatchUnder(Setup setup, Surface.OutputMapping mapping)
+    /// <summary>The patch this pin is linked to, if it still exists on the mapping's output.</summary>
+    public static Guid LinkedPatchOf(Setup setup, Surface.OutputMapping mapping)
     {
-        var output = setup.FindOutput(mapping.OutputId);
-        if (output == null || mapping.IsFilling || mapping.Quad.Length < 4)
-            return Guid.Empty;
+        return mapping.PatchId != Guid.Empty && setup.FindOutput(mapping.OutputId)?.FindPatch(mapping.PatchId) != null
+                   ? mapping.PatchId
+                   : Guid.Empty;
+    }
 
-        foreach (var patch in output.Patches)
+    /// <summary>
+    /// Gives every linked pin its patch's quad, so a wall follows a moved patch and a change to the wall leaves its
+    /// tile alone. Called per frame and before saving: whatever edited either side, the link wins.
+    /// </summary>
+    public static void SyncPinsToLinkedPatches(Setup setup)
+    {
+        foreach (var surface in setup.Surfaces)
         {
-            if (patch.SliceId != Guid.Empty || patch.Quad.Length < 4)
-                continue;
-
-            patch.CopyTurnedCorners(_patchCorners);
-            var matches = true;
-            for (var corner = 0; corner < 4 && matches; corner++)
+            foreach (var mapping in surface.OutputMappings)
             {
-                matches = Vector2.DistanceSquared(_patchCorners[corner], mapping.Quad[corner]) < SamePinToleranceSquared;
+                if (mapping.PatchId == Guid.Empty)
+                    continue;
+
+                var patch = setup.FindOutput(mapping.OutputId)?.FindPatch(mapping.PatchId);
+                if (patch == null)
+                {
+                    mapping.PatchId = Guid.Empty;
+                }
+                else if (patch.Quad.Length >= 4 && mapping.Quad.Length >= 4)
+                {
+                    patch.CopyTurnedCorners(mapping.Quad);
+                }
             }
-
-            if (matches)
-                return patch.Id;
         }
-
-        return Guid.Empty;
     }
 
     public static bool IsMappedTo(Surface surface, Guid outputId)
@@ -412,7 +417,5 @@ internal static class SetupRelations
     }
 
     /** Canvas 0..1 units: far below a pixel on any output, well above float noise from the corner turn. */
-    private const float SamePinToleranceSquared = 1e-8f;
 
-    private static readonly Vector2[] _patchCorners = new Vector2[4];
 }

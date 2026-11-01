@@ -323,7 +323,7 @@ internal sealed class SetupFlowOutliner
 
             foreach (var mapping in surface.OutputMappings)
             {
-                var patchId = SetupRelations.FindLayoutPatchUnder(setup, mapping);
+                var patchId = SetupRelations.LinkedPatchOf(setup, mapping);
                 _connections.Add(patchId != Guid.Empty
                                      ? new Connection(SetupEntityKinds.Surface, surface.Id, SetupEntityKinds.Patch, patchId)
                                      : new Connection(SetupEntityKinds.Surface, surface.Id, SetupEntityKinds.Output, mapping.OutputId));

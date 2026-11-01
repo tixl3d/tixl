@@ -154,8 +154,13 @@ internal static class SetupRouting
             }
             else
             {
-                surface.OutputMappings.Add(new Surface.OutputMapping { OutputId = patchOutput.Id, Quad = quad });
+                mapping = new Surface.OutputMapping { OutputId = patchOutput.Id, Quad = quad };
+                surface.OutputMappings.Add(mapping);
             }
+
+            // A patch that fed content goes below, handing over its place rather than staying to be linked to.
+            if (patch.SliceId == Guid.Empty)
+                mapping.PatchId = patch.Id;
 
             // Nothing shown here yet: adopt what the patch fed, so the drop doesn't silently drop its content.
             if (surface.SliceId == Guid.Empty)
