@@ -5,6 +5,7 @@ using SharpDX.Direct3D11;
 using SharpDX.DXGI;
 using SharpDX.Mathematics.Interop;
 using T3.Core.DataTypes;
+using T3.Core.Output;
 using T3.Core.Rendering;
 using T3.Core.Utils;
 using Utilities = T3.Core.Utils.Utilities;
@@ -72,7 +73,8 @@ internal sealed class ProjectOntoStage : Instance<ProjectOntoStage>, IStatusProv
 
         resolution = new T3.Core.DataTypes.Vector.Int2(Math.Clamp(resolution.Width, 1, 16384), Math.Clamp(resolution.Height, 1, 16384));
         EnsureTarget(resolution);
-        _lastError = null;
+        _lastError = HasSurfaceOnCanvas() ? null : "No surface has a place on an output, so nothing lands on the canvas. "
+                                                   + "Link a surface to an output, or name a patch like the surface.";
 
         var parameters = new Parameters
                              {
@@ -171,6 +173,24 @@ internal sealed class ProjectOntoStage : Instance<ProjectOntoStage>, IStatusProv
 
         Output.Value = _target;
     }
+
+    /** A surface without a place on any canvas is rasterized off it: without this check the result is silently empty. */
+    private static bool HasSurfaceOnCanvas()
+    {
+        var setup = ActiveSetup.Current;
+        if (setup == null)
+            return false;
+
+        foreach (var surface in setup.Surfaces)
+        {
+            if (StageGeometry.IsStageSurface(surface) && StageGeometry.TryGetCanvasQuad(setup, surface, Guid.Empty, _canvasQuadScratch))
+                return true;
+        }
+
+        return false;
+    }
+
+    private static readonly Vector2[] _canvasQuadScratch = new Vector2[4];
 
     /** The canvas texture at the wanted size, recreated only when the size changes. */
     private void EnsureTarget(T3.Core.DataTypes.Vector.Int2 size)

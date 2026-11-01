@@ -8,7 +8,8 @@
       "Position": {
         "X": -200.0,
         "Y": 90.0
-      }
+      },
+      "Description": "What TexCoord carries, for texturing the mesh with [DrawMesh]: Surface (0..1 over each surface), OutputCanvas (where the surface lands on the output), StageTriplanar (world position, for a seamless material), StageTopDown (world position from above, for a floor plan image) or ReferenceImage (where the surface is traced on its photo).\n\n[ProjectOntoStage] doesn't read this: it uses the canvas coordinates in TexCoord2."
     },
     {
       "InputId": "c1d2e3f4-5a6b-4c7d-8e9f-0a1b2c3d4e5f"/*UvScale*/,
@@ -27,6 +28,7 @@
         "X": -200.0,
         "Y": 0.0
       },
+      "Description": "The output whose canvas the surfaces are placed on. None takes each surface's first mapping, which is all you need with a single output.",
       "Usage": "OutputSetupEntities"
     }
   ],

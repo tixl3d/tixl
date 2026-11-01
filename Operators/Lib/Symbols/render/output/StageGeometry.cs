@@ -273,7 +273,7 @@ internal sealed class StageGeometry : Instance<StageGeometry>, IStatusProvider
         return top + (bottom - top) * ty;
     }
 
-    private static bool TryGetCanvasQuad(Setup setup, Surface surface, Guid outputId, Vector2[] quad)
+    internal static bool TryGetCanvasQuad(Setup setup, Surface surface, Guid outputId, Vector2[] quad)
     {
         var mapping = outputId != Guid.Empty ? surface.FindMapping(outputId) : null;
         if (mapping is { Quad.Length: >= 4 })
@@ -334,7 +334,7 @@ internal sealed class StageGeometry : Instance<StageGeometry>, IStatusProvider
     private static Vector3 PlanToStage(Vector2 point) => new(point.X, 0, -point.Y);
 
     /// <summary>Roots only: a Layout region rides its parent's plane and is already part of that quad.</summary>
-    private static bool IsStageSurface(Surface surface)
+    internal static bool IsStageSurface(Surface surface)
     {
         return surface.Kind == Surface.Kinds.Physical && surface.ParentId == Guid.Empty;
     }
