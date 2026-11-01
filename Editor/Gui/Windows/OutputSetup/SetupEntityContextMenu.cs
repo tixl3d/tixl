@@ -356,7 +356,9 @@ internal static class SetupEntityContextMenu
                 }
 
                 // The menu route to what a drop on a patch does: the surface takes the patch's place on its output.
+                // Applied after the loops: a drop on a fed patch removes it from the list being walked.
                 var patchOrdinal = 0;
+                var patchIdToPinTo = Guid.Empty;
                 foreach (var patchOutput in setup.Outputs)
                 {
                     foreach (var patch in patchOutput.Patches)
@@ -367,13 +369,15 @@ internal static class SetupEntityContextMenu
                         if (patchOrdinal == 0)
                             CustomComponents.DrawMenuGroupLabel("Pin to Patch");
 
-                        var patchId = patch.Id;
                         if (CustomComponents.DrawMenuItem(300 + patchOrdinal, $"{SetupLabels.PatchLabel(patchOutput, patch)} on {SetupLabels.OutputLabel(patchOutput)}"))
-                            SetupRouting.ApplyDrop(setup, SetupEntityKinds.Surface, surface.Id, SetupEntityKinds.Patch, patchId);
+                            patchIdToPinTo = patch.Id;
 
                         patchOrdinal++;
                     }
                 }
+
+                if (patchIdToPinTo != Guid.Empty)
+                    SetupRouting.ApplyDrop(setup, SetupEntityKinds.Surface, surface.Id, SetupEntityKinds.Patch, patchIdToPinTo);
 
                 if (surface.Kind == Surface.Kinds.Physical && setup.FindFloorPlanOf(surface.Id, out _) == null)
                 {

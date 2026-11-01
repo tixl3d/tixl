@@ -1063,6 +1063,7 @@ internal sealed partial class SetupOutputView
                 _hoveredPlanCorner = i;
             }
 
+            var mergedCorners = false;
             switch (phase)
             {
                 case CanvasPointHandle.DragPhases.Started:
@@ -1091,12 +1092,17 @@ internal sealed partial class SetupOutputView
                     {
                         var dropped = i;
                         FloorPlanSync.CloseByMerging(setup, plan, dropped);
+                        mergedCorners = true;
                     }
 
                     EndGesture(setup);
                     break;
                 }
             }
+
+            // The plan has one corner fewer than this loop's count now.
+            if (mergedCorners)
+                break;
 
             // A corner's own menu; the picker leaves a hovered corner alone, so the card's menu doesn't open with it.
             if (cornerHovered && ImGui.IsMouseClicked(ImGuiMouseButton.Right))

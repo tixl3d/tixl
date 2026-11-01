@@ -597,8 +597,10 @@ internal sealed class SetupFlowOutliner
             DrawItem(selection, setup, ref args);
         }
 
-        foreach (var binding in machineConfig.Bindings)
+        // By index: a row's drop or menu binds or unbinds an output, which changes this list.
+        for (var i = 0; i < machineConfig.Bindings.Count; i++)
         {
+            var binding = machineConfig.Bindings[i];
             if (binding.IsStream || binding.DisplayIndex < screens.Length || setup.FindOutput(binding.OutputId) == null)
                 continue;
 
