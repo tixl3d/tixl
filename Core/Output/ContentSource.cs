@@ -10,8 +10,8 @@ namespace T3.Core.Output;
 /// A source of pixels in the setup, standing 1:1 for the op that supplies them. The op is identified by its
 /// <see cref="SymbolChildId"/> — the durable graph entity — rather than by a live instance, which comes and
 /// goes with hot-reloads and with whichever part of the graph happens to be instantiated. A source with no
-/// live instance simply has no pixels this frame; a source whose op is *deleted* is removed along with its
-/// slices and every reference to them.
+/// live instance simply has no pixels this frame, and one whose op is gone keeps its slices and routes until it
+/// is removed by hand, so an op that returns picks its routing up again.
 /// </summary>
 public sealed class ContentSource
 {

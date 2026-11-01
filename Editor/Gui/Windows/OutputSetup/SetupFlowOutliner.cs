@@ -771,21 +771,46 @@ internal sealed class SetupFlowOutliner
             if (source == null || sliceCount == 0 || !expanded)
                 continue;
 
-            SetupRelations.TryGetImplicitSlice(setup, source.Id, out var implicitSlice);
+            DrawListedSlicesOfSource(selection, setup, source);
+        }
 
-            // Indexed: an item's context menu can delete its slice mid-walk, which an enumerator would refuse.
-            for (var s = 0; s < setup.Slices.Count; s++)
-            {
-                var slice = setup.Slices[s];
-                if (slice.SourceId != source.Id || ReferenceEquals(slice, implicitSlice))
-                    continue;
+        // Indexed: an item's context menu can remove its source mid-walk.
+        for (var i = 0; i < setup.ContentSources.Count; i++)
+        {
+            var source = setup.ContentSources[i];
+            if (!ContentSourceSync.IsSendOpMissing(source.SymbolChildId))
+                continue;
 
-                DrawSliceItem(selection, setup, slice);
-            }
+            drawnCount++;
+            var args = new OutlinerItem.Args
+                           {
+                               Kind = SetupEntityKinds.ContentSource,
+                               Id = source.SymbolChildId,
+                               Name = source.Name,
+                               Status = "op missing",
+                               IsMuted = true,
+                           };
+            DrawItem(selection, setup, ref args);
+            DrawListedSlicesOfSource(selection, setup, source);
         }
 
         if (drawnCount == 0)
             DrawColumnHint("What your graph renders for this setup.");
+    }
+
+    private void DrawListedSlicesOfSource(SetupEntitySelection selection, Setup setup, ContentSource source)
+    {
+        SetupRelations.TryGetImplicitSlice(setup, source.Id, out var implicitSlice);
+
+        // Indexed: an item's context menu can delete its slice mid-walk, which an enumerator would refuse.
+        for (var s = 0; s < setup.Slices.Count; s++)
+        {
+            var slice = setup.Slices[s];
+            if (slice.SourceId != source.Id || ReferenceEquals(slice, implicitSlice))
+                continue;
+
+            DrawSliceItem(selection, setup, slice);
+        }
     }
 
     /// <summary>

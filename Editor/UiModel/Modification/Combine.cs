@@ -317,6 +317,7 @@ internal static class Combine
         }
 
         RemoveUnusedSnapshotsFromParent(parentCompositionSymbol);
+        T3.Editor.UiModel.ProjectHandling.OutputSetupHandling.RemapContentSources(oldToNewIdMap);
 
         // Creating a new symbol/assembly can't be cleanly undone (undoing the children delete would
         // orphan the new operator), so drop the history rather than leave it inconsistent.

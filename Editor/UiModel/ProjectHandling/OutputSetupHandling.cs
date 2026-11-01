@@ -53,6 +53,32 @@ internal static class OutputSetupHandling
     /// </summary>
     public static void NotifyLiveEdit() => ActiveSetup.NotifyChanged();
 
+    /// <summary>
+    /// Moves routing along when send ops are re-created under new child ids. Covers every setup of the focused
+    /// project, not only the active one, because each file routes those ops by itself.
+    /// </summary>
+    public static void RemapContentSources(IReadOnlyDictionary<Guid, Guid> oldToNewChildIds)
+    {
+        if (!TryGetFocusedEntry(out var entry, out var setupsFolder))
+            return;
+
+        if (RemapContentSources(entry.Setup, oldToNewChildIds))
+            SaveActive();
+
+        if (!Directory.Exists(setupsFolder))
+            return;
+
+        var activeFilePath = SetupFilePath(setupsFolder, entry.Setup.Name);
+        foreach (var filePath in Directory.GetFiles(setupsFolder, "*" + Setup.FileSuffix))
+        {
+            if (string.Equals(filePath, activeFilePath, StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            if (Setup.TryLoadFromFile(filePath, out var setup, out _) && RemapContentSources(setup, oldToNewChildIds))
+                setup.TrySaveToFile(filePath);
+        }
+    }
+
     /// <summary>Drops a closed project's cached setup, so reopening reloads from disk.</summary>
     public static void OnProjectClosed(string projectFolder)
     {
@@ -264,6 +290,21 @@ internal static class OutputSetupHandling
         }
 
         return true;
+    }
+
+    private static bool RemapContentSources(Setup setup, IReadOnlyDictionary<Guid, Guid> oldToNewChildIds)
+    {
+        var changed = false;
+        foreach (var source in setup.ContentSources)
+        {
+            if (!oldToNewChildIds.TryGetValue(source.SymbolChildId, out var newChildId))
+                continue;
+
+            source.SymbolChildId = newChildId;
+            changed = true;
+        }
+
+        return changed;
     }
 
     private sealed class ProjectEntry

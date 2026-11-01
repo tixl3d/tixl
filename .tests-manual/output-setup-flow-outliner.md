@@ -201,6 +201,33 @@ the "SendToOutput" item.
 - After 2: Del only edits the text; "Patch 1" survives.
 - After 3: it is back.
 
+## Step: Routing survives a delete in the graph
+
+**Action:**
+1. In the graph window, select the SendToOutput op whose slice "Surface 1" shows and press Del.
+2. Press Ctrl+Z.
+3. Press Del on the op again. In the strip, right-click its CONTENT item and choose **Remove**.
+4. Press Ctrl+Z.
+
+**Expected:**
+- After 1: the op is gone from the graph. Its CONTENT item stays, dimmed, with the status "op missing", and the curve to
+  "Surface 1" stays. "Surface 1" shows no content.
+- After 2: the op is back, the status is gone, and "Surface 1" shows its content again.
+- After 3: the CONTENT item and its slices are gone, and "Surface 1" no longer has a curve from CONTENT.
+- After 4: the "op missing" item and the curve to "Surface 1" are back.
+
+## Step: Routing survives Combine
+
+**Action:**
+1. Make sure a second setup exists that also routes this op: open the setup switcher, duplicate the setup, and switch back
+   to the original.
+2. In the graph window, select only the SendToOutput op, right-click it, and combine it into a new symbol.
+3. In the setup switcher, switch to the duplicate.
+
+**Expected:**
+- After 2: the CONTENT item keeps its name and its curves, no "op missing" status appears, and "Surface 1" keeps showing the content.
+- After 3: the duplicate shows the same: the same item and curves, with content on "Surface 1".
+
 ## Step: Bindings column reflects the machine
 
 **Action:**

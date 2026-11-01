@@ -846,7 +846,8 @@ internal static class SetupActions
         for (var i = 0; i < selection.Targets.Count; i++)
         {
             var kind = selection.Targets[i].Kind;
-            if (CanDeleteDirectly(kind) || (kind == SetupEntityKinds.ContentSource && ContentSourceSync.HasSendOp(selection.Targets[i].EntityId)))
+            var id = selection.Targets[i].EntityId;
+            if (CanDeleteDirectly(kind) || (kind == SetupEntityKinds.ContentSource && (ContentSourceSync.HasSendOp(id) || ContentSourceSync.IsSendOpMissing(id))))
                 count++;
         }
 

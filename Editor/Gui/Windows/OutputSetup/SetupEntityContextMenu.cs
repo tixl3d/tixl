@@ -154,6 +154,13 @@ internal static class SetupEntityContextMenu
 
             CustomComponents.TooltipForLastItem("Deletes the SendToOutput op from the graph, with its slices and routes.");
         }
+        else if (kind == SetupEntityKinds.ContentSource && ContentSourceSync.IsSendOpMissing(id))
+        {
+            if (CustomComponents.DrawMenuItem(2, "Remove"))
+                ContentSourceSync.RemoveMissingSource(setup, id);
+
+            CustomComponents.TooltipForLastItem("The SendToOutput op is gone. Removes its slices and routes from the setup.");
+        }
 
         CustomComponents.MenuItemsFlushLeft = false;
     }

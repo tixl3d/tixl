@@ -23,9 +23,9 @@ namespace T3.Editor.Gui.Windows.OutputSetup;
 /// pixels, and is the setup side's way into the graph — placing, finding, naming and revealing a send op.
 /// <para>Bound to the op's <b>SymbolChild</b> — the durable graph entity — not to a live instance. Instances
 /// come and go with hot-reloads and with whichever part of the graph happens to be instantiated, so "no live
-/// send op" only means "no pixels this frame". A source is removed only once its child is confirmed *gone* from
-/// a symbol we can actually see, which is what makes deleting the op cascade to its slices and to every
-/// surface showing them.</para>
+/// send op" only means "no pixels this frame". A source whose op no loaded symbol lists keeps its slices and routes
+/// and reads as missing until it is removed by hand: the op may come back through an undo or a package that failed to
+/// load, and only <see cref="DeleteSendOp"/> deletes routing, inside an undo step.</para>
 /// <para>Scoped to the active composition — the nearest op up the breadcrumbs with composition settings, else the
 /// project root — because its sends are what an export of it ships. Sources of other compositions stay in the
 /// setup with their routing, they are only neither adopted nor shown while another composition is active.</para>
@@ -225,8 +225,18 @@ internal static class ContentSourceSync
         ProjectView.Focused?.FlagChanges(ProjectView.ChangeTypes.Children | ProjectView.ChangeTypes.Connections);
     }
 
+    /// <summary>Removes a source whose op is gone, with its slices and the routes showing them, as one undo step.</summary>
+    public static void RemoveMissingSource(Setup setup, Guid childId)
+    {
+        if (setup.FindSourceByChildId(childId) is { } source)
+            SetupUndo.RunUndoable("Remove content", setup, () => SetupActions.RemoveContentSource(setup, source));
+    }
+
     /// <summary>Whether a send op with this id exists in some symbol, instantiated or not.</summary>
     public static bool HasSendOp(Guid childId) => TryFindSendParent(childId, out _);
+
+    /// <summary>Whether this source still holds routing while no loaded symbol lists its op.</summary>
+    public static bool IsSendOpMissing(Guid childId) => _missingSendChildIds.Contains(childId);
 
     /// <summary>Blinks the send op behind a hovered content source, or behind the source of a hovered slice, in the graph.</summary>
     public static void HighlightSendOpInGraph(Setup setup, SetupEntityKinds kind, Guid id)
@@ -354,14 +364,17 @@ internal static class ContentSourceSync
             changed = true;
         }
 
-        // The deletion sweep scans the whole symbol library, so it only runs when a send could actually have
-        // gone away — i.e. when registry membership changed. Everything above is O(sends × sources) on two
-        // small lists, so it stays per-frame and keeps names live.
-        if (_sweptRegistryVersion != ContentSupplierRegistry.Version || _sweptSetupId != setup.Id)
+        // This scans the whole symbol library, so it only runs when a send could actually have gone away or the
+        // source list changed. Everything above is O(sends × sources) on two small lists, so it stays per-frame
+        // and keeps names live.
+        if (_sweptRegistryVersion != ContentSupplierRegistry.Version
+            || _sweptSetupId != setup.Id
+            || _sweptStructureVersion != OutputSetupHandling.StructureVersion)
         {
             _sweptRegistryVersion = ContentSupplierRegistry.Version;
             _sweptSetupId = setup.Id;
-            changed |= DropDeletedSources(setup);
+            _sweptStructureVersion = OutputSetupHandling.StructureVersion;
+            changed |= UpdateMissingSources(setup);
         }
 
         // Debounced: rename propagation changes the mirrored name once per keystroke, so saving
@@ -411,35 +424,27 @@ internal static class ContentSourceSync
     private static double? _pendingSaveSince;
     private static int _sweptRegistryVersion = -1;
     private static Guid _sweptSetupId;
+    private static int _sweptStructureVersion = -1;
+    private static readonly HashSet<Guid> _missingSendChildIds = [];
 
     /// <summary>
-    /// Removes sources whose op is provably gone, cascading to their slices and to any surface showing one.
-    /// "Provably" matters: a missing *instance* is normal, so the child is only treated as deleted once its
-    /// owning symbol is loaded and no longer lists it.
+    /// Finds the sources no loaded symbol lists an op for. One with slices stays and reads as missing. One without has
+    /// nothing to lose and goes: adding a send and undoing it shouldn't leave an item behind, and the op re-adopts if it returns.
     /// </summary>
-    private static bool DropDeletedSources(Setup setup)
+    private static bool UpdateMissingSources(Setup setup)
     {
+        _missingSendChildIds.Clear();
         var changed = false;
         for (var i = setup.ContentSources.Count - 1; i >= 0; i--)
         {
             var source = setup.ContentSources[i];
-            if (!IsChildConfirmedDeleted(source.SymbolChildId))
+            if (TryFindInstance(source.SymbolChildId, out _) || HasSendOp(source.SymbolChildId))
                 continue;
 
-            var sourceId = source.Id;
-            for (var s = setup.Slices.Count - 1; s >= 0; s--)
+            if (SetupRelations.CountSlicesOfSource(setup, source.Id) > 0)
             {
-                if (setup.Slices[s].SourceId != sourceId)
-                    continue;
-
-                var sliceId = setup.Slices[s].Id;
-                foreach (var surface in setup.Surfaces)
-                {
-                    if (surface.SliceId == sliceId)
-                        surface.SliceId = Guid.Empty;
-                }
-
-                setup.Slices.RemoveAt(s);
+                _missingSendChildIds.Add(source.SymbolChildId);
+                continue;
             }
 
             setup.ContentSources.RemoveAt(i);
@@ -447,27 +452,6 @@ internal static class ContentSourceSync
         }
 
         return changed;
-    }
-
-    private static bool IsChildConfirmedDeleted(Guid childId)
-    {
-        if (TryFindInstance(childId, out _))
-            return false;
-
-        // No instance is not evidence on its own — only a loaded symbol that no longer lists the child is.
-        foreach (var package in EditorSymbolPackage.AllPackages)
-        {
-            foreach (var symbol in package.Symbols.Values)
-            {
-                foreach (var child in symbol.Children.Values)
-                {
-                    if (child.Id == childId)
-                        return false;
-                }
-            }
-        }
-
-        return true;
     }
 
     private static bool TryFindInstance(Guid childId, out Instance? instance)
