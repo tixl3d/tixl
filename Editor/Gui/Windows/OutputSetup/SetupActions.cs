@@ -21,12 +21,17 @@ namespace T3.Editor.Gui.Windows.OutputSetup;
 /// </summary>
 internal static class SetupActions
 {
+    /// <summary>
+    /// Adds a slice as a visible cut — a centred quarter of the source. An unnamed full frame is the source's
+    /// implicit slice and is folded away in the views (<see cref="SetupRelations.TryGetImplicitSlice"/>), so a
+    /// slice added by hand has to be something you can see and drag.
+    /// </summary>
     internal static void AddSlice(SetupEntitySelection selection, Setup setup, ContentSource source)
     {
         SetupUndo.RunUndoable("Add slice", setup, () =>
                                                   {
                                                       // Left unnamed: the label is derived from the source, so it stays right when the op is later renamed.
-                                                      var slice = new Slice { SourceId = source.Id };
+                                                      var slice = new Slice { SourceId = source.Id, UvRect = new Vector4(0.25f, 0.25f, 0.75f, 0.75f) };
                                                       setup.Slices.Add(slice);
                                                       selection.Select(SetupEntityKinds.Slice, slice.Id);
                                                   });

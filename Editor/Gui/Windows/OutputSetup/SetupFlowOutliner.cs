@@ -801,11 +801,13 @@ internal sealed class SetupFlowOutliner
             if (source == null || sliceCount == 0 || !expanded)
                 continue;
 
+            SetupRelations.TryGetImplicitSlice(setup, source.Id, out var implicitSlice);
+
             // Indexed: an item's context menu can delete its slice mid-walk, which an enumerator would refuse.
             for (var s = 0; s < setup.Slices.Count; s++)
             {
                 var slice = setup.Slices[s];
-                if (slice.SourceId != source.Id)
+                if (slice.SourceId != source.Id || ReferenceEquals(slice, implicitSlice))
                     continue;
 
                 DrawSliceItem(selection, setup, slice);

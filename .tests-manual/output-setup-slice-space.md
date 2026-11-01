@@ -30,15 +30,28 @@ two-way link between a slice and what shows it.
   from the content row itself. The card shows the picture with no inner "Slice 1" frame. The
   op's Output Setup section reads "full frame → 2 targets".
 
-## Step: The slice appears once it stops being the whole frame
+## Step: An added slice is a visible cut
 
 **Action:**
 1. Right-click the "SendToOutput" row → **Add slice**, then Ctrl+Z.
 2. Right-click the send's **card** on the Board → **Add slice**.
 
 **Expected:**
-- After 1: "Slice 1" and "Slice 2" appear as rows, both full-frame; the undo folds them away.
+- After 1: one "Slice 1" row appears, selected, drawn on the card as a centred frame half the card's width and
+  height. The curves to "Surface 1" and "P1" still start at the content row. The undo removes the row.
 - After 2: the same, reached from the card — the card's menu is the row's menu.
+
+## Step: Dropping content next to cut slices shows the whole frame
+
+**Action:**
+1. With "Slice 1" still in place, right-click "P1" → **Clear Inputs**, and note that "Slice 1" is dimmed.
+2. Drag the "SendToOutput" row onto "P1".
+3. Press Ctrl+Z.
+
+**Expected:**
+- After 2: a curve runs from the "SendToOutput" row to "P1", not from "Slice 1", and "Slice 1" stays dimmed. No
+  new row appears under "SendToOutput". P1's canvas shows the whole picture.
+- After 3: the curve is gone; "Slice 1" is unchanged.
 
 ## Step: Editing a slice on the card
 
@@ -51,7 +64,7 @@ two-way link between a slice and what shows it.
 - After 1: the slice is drawn on the card with handles; the Parameter window shows its Position
   and Size in source pixels.
 - After 2: the edge crops it, the corner scales it with its aspect held, the label moves it.
-  Each snaps to the source's borders and midlines and to the other slice, drawing a guide line.
+  Each snaps to the source's borders and midlines, drawing a guide line.
 - After 3: each edit is reverted separately.
 
 ## Step: Duplicating a slice

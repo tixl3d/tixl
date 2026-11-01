@@ -272,14 +272,13 @@ internal static class SetupRouting
     }
 
     /// <summary>
-    /// A source's first slice, creating a full-frame one if it has none — assigning content needs a slice to
-    /// name, and "the whole image" is simply the identity rect.
+    /// A source's implicit full-frame slice, creating it if needed — assigning content needs a slice to name,
+    /// and "the whole image" is simply the identity rect. Never a cut slice: the drop asked for the whole source.
     /// </summary>
     private static Slice EnsureSlice(Setup setup, ContentSource source)
     {
-        var existing = setup.Slices.Find(s => s.SourceId == source.Id);
-        if (existing != null)
-            return existing;
+        if (SetupRelations.TryGetImplicitSlice(setup, source.Id, out var existing))
+            return existing!;
 
         // Unnamed: its label is derived from the source (see SetupLabels.SliceLabel), so renaming the op renames it too.
         var slice = new Slice { SourceId = source.Id };

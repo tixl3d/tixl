@@ -259,32 +259,25 @@ internal static class SetupRelations
     }
 
     /// <summary>
-    /// A source's implicit slice: its only slice, unnamed, uncut and unrotated — the full frame a drop onto a
+    /// A source's implicit slice: its first unnamed, uncut and unrotated slice — the full frame a drop onto a
     /// surface or output creates. It is the source as far as the user is concerned, so the views fold it into
-    /// the content row/card instead of listing it. It surfaces as a slice of its own the moment it is cut,
-    /// named, or joined by a second slice.
+    /// the content row/card instead of listing it, also next to cut slices. It surfaces as a slice of its own
+    /// the moment it is cut or named.
     /// </summary>
     public static bool TryGetImplicitSlice(Setup setup, Guid sourceId, out Slice? implicitSlice)
     {
-        implicitSlice = null;
-        Slice? only = null;
         for (var i = 0; i < setup.Slices.Count; i++)
         {
             var slice = setup.Slices[i];
-            if (slice.SourceId != sourceId)
-                continue;
-
-            if (only != null)
-                return false;
-
-            only = slice;
+            if (slice.SourceId == sourceId && IsFullFrame(slice))
+            {
+                implicitSlice = slice;
+                return true;
+            }
         }
 
-        if (only == null || !IsFullFrame(only))
-            return false;
-
-        implicitSlice = only;
-        return true;
+        implicitSlice = null;
+        return false;
     }
 
     public static bool IsImplicitSlice(Setup setup, Slice slice)
@@ -295,7 +288,8 @@ internal static class SetupRelations
     /// <summary>Slices the views list — the source's implicit full-frame slice is folded into the source.</summary>
     public static int CountListedSlicesOfSource(Setup setup, Guid sourceId)
     {
-        return TryGetImplicitSlice(setup, sourceId, out _) ? 0 : CountSlicesOfSource(setup, sourceId);
+        var count = CountSlicesOfSource(setup, sourceId);
+        return TryGetImplicitSlice(setup, sourceId, out _) ? count - 1 : count;
     }
 
     private static bool IsFullFrame(Slice slice)

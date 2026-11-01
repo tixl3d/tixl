@@ -22,13 +22,15 @@ internal static class SetupLabels
     /// <summary>
     /// A slice's display name: a name the user typed if there is one, otherwise a default derived from its
     /// source. Unnamed sources give "Slice N"; a renamed source gives "{name}.N", so naming the op renames
-    /// every one of its auto-named slices at once. N is the slice's position among its source's slices.
+    /// every one of its auto-named slices at once. N is the slice's position among its source's listed slices —
+    /// the implicit full-frame one reads as the source, so it takes no number.
     /// </summary>
     public static string SliceLabel(Setup setup, Slice slice)
     {
         if (!string.IsNullOrEmpty(slice.Name))
             return slice.Name;
 
+        SetupRelations.TryGetImplicitSlice(setup, slice.SourceId, out var implicitSlice);
         var ordinal = 1;
         foreach (var other in setup.Slices)
         {
@@ -38,7 +40,8 @@ internal static class SetupLabels
             if (other.Id == slice.Id)
                 break;
 
-            ordinal++;
+            if (!ReferenceEquals(other, implicitSlice))
+                ordinal++;
         }
 
         var source = setup.FindSource(slice.SourceId);
