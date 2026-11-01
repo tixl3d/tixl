@@ -49,7 +49,8 @@ internal static class RegionSlices
     /// <summary>
     /// Shows a slice on every region, as one undo step together with the graph edits. Without
     /// <paramref name="source"/> a new SendToOutput op is added; with one, that source is re-cut and the slices
-    /// its regions already show are kept, so their routing survives a re-run.
+    /// its regions already show are kept, so their routing survives a re-run. Each slice takes its region's name,
+    /// and the slices follow the regions' order.
     /// </summary>
     public static void Create(SetupEntitySelection selection, Setup setup, Surface parent, IReadOnlyList<Surface> regions, ContentSource? source)
     {
@@ -105,15 +106,14 @@ internal static class RegionSlices
             var bottom = MathF.Round((parentMax.Y - regionMin.Y) * pixelsPerMeter);
 
             var slice = WallpaperLayout.FindReusableSlice(setup, region, source) ?? WallpaperLayout.CreateSlice(setup, source);
-            if (string.IsNullOrEmpty(slice.Name))
-                slice.Name = region.Name;
-
+            slice.Name = region.Name;
             slice.Rotation = 0;
             slice.SetUvRect(new Vector4(left / resolution.Width, top / resolution.Height,
                                         right / resolution.Width, bottom / resolution.Height));
             region.SliceId = slice.Id;
         }
 
+        SortSlicesLikeRegions(setup, regions);
         selection.Select(SetupEntityKinds.ContentSource, childId);
 
         macro.AddExecutedCommandForUndo(new SetupSnapshotCommand("Create slices from regions", setup.Id, oldJson, setup.ToJsonString()));
@@ -121,5 +121,25 @@ internal static class RegionSlices
         OutputSetupHandling.SaveActive();
 
         Log.Info($"Slices from regions: {regions.Count} slices on a {resolution.Width}×{resolution.Height} source at {pixelsPerMeter:0} px/m.");
+    }
+
+    /** The regions' slices trade places among the list positions they already hold, so every other slice stays put. */
+    private static void SortSlicesLikeRegions(Setup setup, IReadOnlyList<Surface> regions)
+    {
+        var positions = new List<int>(regions.Count);
+        foreach (var region in regions)
+        {
+            var position = setup.Slices.FindIndex(slice => slice.Id == region.SliceId);
+            if (position >= 0 && !positions.Contains(position))
+                positions.Add(position);
+        }
+
+        var ordered = new List<Slice>(positions.Count);
+        foreach (var position in positions)
+            ordered.Add(setup.Slices[position]);
+
+        positions.Sort();
+        for (var i = 0; i < positions.Count; i++)
+            setup.Slices[positions[i]] = ordered[i];
     }
 }

@@ -185,7 +185,9 @@ the "SendToOutput" item.
 3. Press Ctrl+Z.
 
 **Expected:**
-- After 1: that patch is gone from under "P1". Backspace does the same as Del.
+- After 1: that patch is gone from under "P1". Backspace does the same as Del. On a CONTENT item either key
+  deletes its SendToOutput op from the graph along with its slices, and one Ctrl+Z brings op, slices and routes
+  back, also when other items were selected with it.
 - After 2: Del only edits the text; "Patch 1" survives.
 - After 3: it is back.
 

@@ -1732,37 +1732,27 @@ internal sealed partial class SetupOutputView
     }
 
     /// <summary>
-    /// A surface card's pick stack under the cursor: the card, then its regions there — each followed by its own
-    /// regions, topmost sibling first — so repeated clicks walk from the container down through everything nested
-    /// at that point and back. Ctrl pushes straight through to the deepest, topmost region.
+    /// A surface card's pick stack under the cursor: its regions there, the innermost and topmost first, then the
+    /// card. So a click selects what the cursor is on, and repeated clicks walk outward to the container and back.
     /// </summary>
     private void AddBoardCardPickStack(Setup setup, SetupEntitySelection? selection, Surface card, Vector2 originOnBoard,
                                        Vector2 screenMin, Vector2 screenMax, bool isCardSelected)
     {
         var pointOnBoard = _boardProjection.ScreenToCanvas(ImGui.GetMousePos());
         _pickHits.Clear();
-        if (ImGui.GetIO().KeyCtrl)
-        {
-            AddDeepestRegionUnder(setup, card, originOnBoard, pointOnBoard);
-        }
-        else
-        {
-            AddRegionsUnder(setup, card, originOnBoard, pointOnBoard);
-        }
+        AddRegionsUnder(setup, card, originOnBoard, pointOnBoard);
 
         // Added bottom-up: the picker reads targets added later as drawn on top.
+        _picker.AddTarget(SetupEntityKinds.Surface, card.Id, screenMin, screenMax, isBackground: true, isSelected: isCardSelected);
         for (var hitIndex = _pickHits.Count - 1; hitIndex >= 0; hitIndex--)
         {
             var regionId = _pickHits[hitIndex].Id;
             _picker.AddTarget(SetupEntityKinds.Surface, regionId, screenMin, screenMax, isBackground: true,
                               isSelected: selection?.IsSelected(SetupEntityKinds.Surface, regionId) ?? false);
         }
-
-        if (_pickHits.Count == 0 || !ImGui.GetIO().KeyCtrl)
-            _picker.AddTarget(SetupEntityKinds.Surface, card.Id, screenMin, screenMax, isBackground: true, isSelected: isCardSelected);
     }
 
-    /** Pre-order, topmost sibling first: a region's own regions follow it before its next sibling. */
+    /** Post-order, topmost sibling first: a region's own regions come before it, and it before its next sibling. */
     private void AddRegionsUnder(Setup setup, Surface parent, Vector2 parentOrigin, Vector2 pointOnBoard)
     {
         for (var i = setup.Surfaces.Count - 1; i >= 0; i--)
@@ -1771,41 +1761,9 @@ internal sealed partial class SetupOutputView
             if (child.ParentId != parent.Id || !ContainsInParentSpace(child, pointOnBoard - parentOrigin))
                 continue;
 
-            _pickHits.Add(child);
             AddRegionsUnder(setup, child, OriginOf(child, parentOrigin), pointOnBoard);
+            _pickHits.Add(child);
         }
-    }
-
-    private void AddDeepestRegionUnder(Setup setup, Surface card, Vector2 cardOrigin, Vector2 pointOnBoard)
-    {
-        var current = card;
-        var origin = cardOrigin;
-        Surface? deepest = null;
-        while (TryFindTopmostRegionUnder(setup, current, pointOnBoard - origin, out var next))
-        {
-            deepest = next;
-            origin = OriginOf(next, origin);
-            current = next;
-        }
-
-        if (deepest != null)
-            _pickHits.Add(deepest);
-    }
-
-    private static bool TryFindTopmostRegionUnder(Setup setup, Surface parent, Vector2 pointInParent, out Surface region)
-    {
-        for (var i = setup.Surfaces.Count - 1; i >= 0; i--)
-        {
-            var child = setup.Surfaces[i];
-            if (child.ParentId == parent.Id && ContainsInParentSpace(child, pointInParent))
-            {
-                region = child;
-                return true;
-            }
-        }
-
-        region = null!;
-        return false;
     }
 
     private static bool ContainsInParentSpace(Surface child, Vector2 pointInParent)
@@ -2188,6 +2146,10 @@ internal sealed partial class SetupOutputView
             case SetupEntityKinds.ContentSource:
                 if (OutputContentResolver.TryGetPreviewContent(id, out var content) && content is { IsDisposed: false })
                     return new Vector2(Math.Max(1, content.Description.Width), Math.Max(1, content.Description.Height));
+
+                // Nothing connected yet: the card still shows the shape its slices were cut for.
+                if (ContentSourceSync.TryGetSendResolution(id, out var pinned))
+                    return new Vector2(pinned.Width, pinned.Height);
 
                 return new Vector2(1920, 1080);
 

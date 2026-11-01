@@ -149,6 +149,19 @@ internal static class ContentSourceSync
         return true;
     }
 
+    /// <summary>The render size a live send op is pinned to; false while it follows what it is routed to, or isn't instantiated.</summary>
+    public static bool TryGetSendResolution(Guid childId, out Int2 resolution)
+    {
+        resolution = default;
+        if (FindSendInstance(childId)?.SymbolChild?.Inputs.TryGetValue(SendToOutputResolutionInputId, out var input) != true
+            || input!.Value is not InputValue<Int2> value
+            || value.Value.Width <= 0 || value.Value.Height <= 0)
+            return false;
+
+        resolution = value.Value;
+        return true;
+    }
+
     /// <summary>
     /// Deletes a content source's send op from the graph. Its slices and the routes showing them go in the same
     /// undo step, so an undo brings the routing back with the op instead of a bare, re-adopted source.
@@ -167,6 +180,46 @@ internal static class ContentSourceSync
         var macro = new MacroCommand("Delete content");
         macro.AddExecutedCommandForUndo(new SetupSnapshotCommand("Delete content", setup.Id, oldJson, setup.ToJsonString()));
         macro.AddAndExecCommand(new DeleteSymbolChildrenCommand(parentUi, [childUi]));
+        UndoRedoStack.Add(macro);
+        OutputSetupHandling.SaveActive();
+        ProjectView.Focused?.FlagChanges(ProjectView.ChangeTypes.Children | ProjectView.ChangeTypes.Connections);
+    }
+
+    /// <summary>
+    /// Deletes a selection that holds content: the send ops from the graph, everything else from the setup, as one
+    /// undo step. An undo brings the routing back with the ops, like <see cref="DeleteSendOp"/>.
+    /// </summary>
+    public static void DeleteSelectionWithSendOps(SetupEntitySelection selection, Setup setup)
+    {
+        var targets = new List<SelectionTarget>(selection.Targets);
+        var oldJson = setup.ToJsonString();
+        foreach (var target in targets)
+        {
+            if (target.Kind != SetupEntityKinds.ContentSource)
+            {
+                SetupActions.DeleteEntityInternal(setup, target.Kind, target.EntityId);
+            }
+            else if (setup.FindSourceByChildId(target.EntityId) is { } source)
+            {
+                SetupActions.RemoveContentSource(setup, source);
+            }
+        }
+
+        selection.Clear();
+
+        var macro = new MacroCommand("Delete selection");
+        macro.AddExecutedCommandForUndo(new SetupSnapshotCommand("Delete selection", setup.Id, oldJson, setup.ToJsonString()));
+        foreach (var target in targets)
+        {
+            if (target.Kind == SetupEntityKinds.ContentSource
+                && TryFindSendParent(target.EntityId, out var parent)
+                && parent.TryGetSymbolUi(out var parentUi)
+                && parentUi.ChildUis.TryGetValue(target.EntityId, out var childUi))
+            {
+                macro.AddAndExecCommand(new DeleteSymbolChildrenCommand(parentUi, [childUi]));
+            }
+        }
+
         UndoRedoStack.Add(macro);
         OutputSetupHandling.SaveActive();
         ProjectView.Focused?.FlagChanges(ProjectView.ChangeTypes.Children | ProjectView.ChangeTypes.Connections);

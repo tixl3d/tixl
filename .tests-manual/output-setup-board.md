@@ -266,7 +266,8 @@ down to 0%, then up to 100% (or double-click it and type).
 **Action:**
 1. With nothing selected, click inside "Region 1" on the "ApmtWall" card (not on its name chip).
 2. Click the same spot again.
-3. Click empty Board; hold Ctrl and hover over "Region 1", then Ctrl-click it.
+3. Click empty Board; click "Region 1"; then Ctrl-click a second region that doesn't overlap it; Shift-click
+   it again.
 4. With "Region 1" selected, press and drag inside its body (not on the name chip) by 20 cm;
    release; press Ctrl+Z.
 5. Press Escape; press Enter; press Escape twice.
@@ -283,11 +284,11 @@ down to 0%, then up to 100% (or double-click it and type).
     press Ctrl+Z.
 
 **Expected:**
-- After 1: the "ApmtWall" card is selected, not the region; the region does not light up on
-  hover before that click.
-- After 2: now "Region 1" is selected (the selected card handed the click down one level).
-- After 3: with Ctrl held the region lights up on hover straight away, and the click selects it
-  without the card being selected first. Ctrl does not toggle on the Board.
+- After 1: "Region 1" is selected, not the card.
+- After 2: now "ApmtWall" is selected (the click walked outward to the container); one more click on
+  that spot returns to "Region 1".
+- After 3: the Ctrl-click adds the second region, so both are selected; the Shift-click removes it again.
+  The card never gets selected along the way.
 - After 4: the region moves with the drag, snapping to the card's edges and centre like a name
   chip drag; Ctrl+Z puts it back in one step.
 - After 5: Escape selects the parent "ApmtWall"; Enter selects its regions ("Region 1"); the
@@ -297,11 +298,11 @@ down to 0%, then up to 100% (or double-click it and type).
 - After 7: "ApmtWall" itself is selected, not its region.
 - After 8: the first Shift-click adds "Brick Wall" to the selection, the second removes it
   again.
-- After 9: the first click selects "ApmtWall", the second the region drawn on top (the newer
-  one), the third cycles to "Region 1" underneath; a fourth returns to "ApmtWall". Each click
-  changes the selection on release, not on press.
+- After 9: the first click selects the region drawn on top (the newer one), at once on press. The
+  second selects "Region 1" underneath and the third "ApmtWall"; a fourth returns to the newer region.
+  These later clicks change the selection on release, not on press.
 - After 10: the name chip is not a pick target of its own: the click lands on the frame under
-  it and behaves like any click on that frame (it walks on from "Region 1" to the next item
+  it and behaves like any click on that frame (it walks on from "Region 1" to "ApmtWall", the next item
   under the cursor). The card's chip click selects the card like a click anywhere on it.
 - After 11: "Region 1" stays selected the moment the button goes down and is the one that
   moves, although the other region is drawn over it; nothing else is selected after release.

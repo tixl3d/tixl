@@ -28,8 +28,9 @@ internal sealed class CanvasItemPicker<TKind> where TKind : struct
     /// <param name="Kind">With <see cref="Id"/>: what a press under the cursor takes and a drag moves.</param>
     /// <param name="IsSelected">Whether that item was added as selected — a press on it keeps the selection.</param>
     /// <param name="NextKind">With <see cref="NextId"/>: what a click walking the stack selects next.</param>
+    /// <param name="TopKind">With <see cref="TopId"/>: the topmost item, what a selection edit with a modifier acts on.</param>
     public readonly record struct Result(bool HasHit, TKind Kind, Guid Id, bool IsSelected, TKind NextKind, Guid NextId,
-                                         bool LeftClicked, bool MenuRequested);
+                                         TKind TopKind, Guid TopId, bool LeftClicked, bool MenuRequested);
 
     /// <summary>Targets added later are drawn over earlier ones; the stack under the cursor runs topmost first.</summary>
     /// <param name="isBackground">A large area target (a card) that only picks where no foreground target
@@ -103,7 +104,7 @@ internal sealed class CanvasItemPicker<TKind> where TKind : struct
         var wasDraggingRight = ImGui.GetMouseDragDelta(ImGuiMouseButton.Right).Length() > UserSettings.Config.ClickThreshold;
         var menuRequested = ImGui.IsMouseReleased(ImGuiMouseButton.Right) && !wasDraggingRight;
 
-        return new Result(true, grab.Kind, grab.Id, grab.IsSelected, next.Kind, next.Id, leftClicked, menuRequested);
+        return new Result(true, grab.Kind, grab.Id, grab.IsSelected, next.Kind, next.Id, stack[0].Kind, stack[0].Id, leftClicked, menuRequested);
     }
 
     private static bool TryFindSelected(List<(TKind Kind, Guid Id, bool IsSelected)> hits, out (TKind Kind, Guid Id, bool IsSelected) selected)

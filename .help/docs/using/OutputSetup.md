@@ -81,7 +81,7 @@ Select the content along with the walls to re-cut existing content instead: afte
 
 ### One picture across regions
 
-For a group of screens that show one picture together, such as a stack of old TV sets, trace each screen as a region of a surface, name the regions, then right-click the surface and choose **Create Slices from Regions**. It adds a SendToOutput op named after the surface, at the surface's proportions, and gives each region a slice named after it, cut from where the region sits on the surface. Whatever crosses from one screen to the next lines up. **Update Slices from Regions** re-cuts the slices after a region was moved or added, keeping the routes. Select other content along with the surface to use that instead.
+For a group of screens that show one picture together, such as a stack of old TV sets, trace each screen as a region of a surface, name the regions, then right-click the surface and choose **Create Slices from Regions**. It adds a SendToOutput op named after the surface, at the surface's proportions, and gives each region a slice named after it, cut from where the region sits on the surface. Whatever crosses from one screen to the next lines up. **Update Slices from Regions** re-cuts the slices after a region was moved, renamed, added or reordered, keeping the routes; each slice takes its region's name and the slices follow the regions' order. Select other content along with the surface to use that instead.
 
 ## The stage in the graph
 

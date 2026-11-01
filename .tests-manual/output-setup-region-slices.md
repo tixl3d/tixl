@@ -25,7 +25,8 @@ each region sits on the surface.
 **Expected:**
 - A SendToOutput op named "Wall" is added to the graph and appears in CONTENT, selected, with slices "TV 1" and
   "TV 2" under it. Its Resolution has a 3 : 2 aspect.
-- On its Board card, the slice "TV 1" covers the left half and "TV 2" the right half.
+- On the Board, its card has the same 3 : 2 shape and shows that Resolution, although nothing is connected to
+  the op yet. The slice "TV 1" covers the left half and "TV 2" the right half.
 - SURFACES shows a connection from each slice to its region. A picture crossing the middle of the op's output
   continues without a jump from "TV 1" to "TV 2" on the output.
 
@@ -48,6 +49,18 @@ Press Ctrl+Z once.
 - No second op is added. "TV 2" now covers only its new area on the card, and "TV 3" gets a new slice.
 - The route from "TV 1" to the patch is still there, so that slice now has two consumers and "TV 1" gets a new
   slice of its own while the patch keeps the shared one.
+
+## Step: Updating follows names and order
+
+**Action:**
+1. Rename the region "TV 1" to "Left screen". In the outliner, drag "TV 3" above "TV 2" under "Wall".
+2. Right-click "Wall" and choose **Update Slices from Regions**.
+3. Press Ctrl+Z.
+
+**Expected:**
+- After 2: the slice shown on "Left screen" is now also called "Left screen", and the slices under the content
+  item are listed in the same order as the regions under "Wall". A name typed on a slice by hand is overwritten.
+- After 3: the old names and order return in one step.
 
 ## Step: Re-cutting selected content
 

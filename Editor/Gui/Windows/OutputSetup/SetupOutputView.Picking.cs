@@ -85,6 +85,8 @@ internal sealed partial class SetupOutputView
     /// </summary>
     private void ResolvePicking(Setup setup, SetupEntitySelection? selection)
     {
+        StartPendingRegionCopy(setup);
+
         // Cycle relative to whatever is currently the subject, so clicking a stack walks it. The primary
         // selection is that subject for either kind (the focused surface, or the selected slice).
         var current = selection != null && selection.TryResolve(setup, out _, out var primaryId) ? primaryId : Guid.Empty;
@@ -238,7 +240,11 @@ internal sealed partial class SetupOutputView
         var io = ImGui.GetIO();
         var isPlain = !io.KeyCtrl && !io.KeyShift;
         var keepsSelection = isPlain && hit.IsSelected;
-        if (!keepsSelection)
+        // A selected parent under the cursor takes a plain press, for its drag. A modifier edits the selection, and
+        // that is about the item the cursor is on.
+        if (!isPlain)
+            SelectPicked(selection, hit.TopKind, hit.TopId);
+        else if (!keepsSelection)
             SelectPicked(selection, hit.Kind, hit.Id);
 
         if (!isPlain)
@@ -267,10 +273,9 @@ internal sealed partial class SetupOutputView
     {
         if (selection != null)
         {
-            // Shift toggles, plain replaces. Ctrl toggles too — except on the Board, where it is the push-through
-            // into nested regions and the click it ends in is a plain pick.
+            // Shift and Ctrl toggle, plain replaces.
             var io = ImGui.GetIO();
-            if (io.KeyShift || (io.KeyCtrl && _editMode != EditModes.Board))
+            if (io.KeyShift || io.KeyCtrl)
                 selection.Toggle(kind, id);
             else
                 selection.Select(kind, id);

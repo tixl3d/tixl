@@ -334,7 +334,7 @@ internal sealed partial class SetupOutputView
             // snapshot, so copy and move undo as one step. The copy takes the drag, the original stays.
             case CanvasPointHandle.DragPhases.Dragging when _regionDuplicatePending && _gesture.Is(kind, child.Id):
                 if (ImGui.IsMouseDragging(ImGuiMouseButton.Left))
-                    StartDraggingRegionCopy(setup, child);
+                    _regionToCopyId = child.Id;
 
                 break;
 
@@ -397,8 +397,17 @@ internal sealed partial class SetupOutputView
         }
     }
 
-    private void StartDraggingRegionCopy(Setup setup, Surface original)
+    /** Run once the frame's drawing is done: the views walk the surface list while drawing, and a copy would change it under them. */
+    private void StartPendingRegionCopy(Setup setup)
     {
+        if (_regionToCopyId == Guid.Empty)
+            return;
+
+        var originalId = _regionToCopyId;
+        _regionToCopyId = Guid.Empty;
+        if (!_gesture.Is(GestureKinds.RegionMove, originalId) || setup.FindSurface(originalId) is not { } original)
+            return;
+
         _regionDuplicatePending = false;
         var selection = GlobalSelectionHandling.SetupEntities;
         SetupActions.DuplicateEntityInternal(selection, setup, SetupEntityKinds.Surface, original.Id);
@@ -468,4 +477,5 @@ internal sealed partial class SetupOutputView
     // The axis a nearly-straight region move locked to, so the guide can be drawn.
     private RectSnapping.AxisLocks _childMoveAxis;
     private bool _regionDuplicatePending;
+    private Guid _regionToCopyId;
 }

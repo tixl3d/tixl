@@ -764,7 +764,8 @@ internal static class SetupActions
         var count = 0;
         for (var i = 0; i < selection.Targets.Count; i++)
         {
-            if (CanDeleteDirectly(selection.Targets[i].Kind))
+            var kind = selection.Targets[i].Kind;
+            if (CanDeleteDirectly(kind) || (kind == SetupEntityKinds.ContentSource && ContentSourceSync.HasSendOp(selection.Targets[i].EntityId)))
                 count++;
         }
 
@@ -783,6 +784,16 @@ internal static class SetupActions
     /// </summary>
     internal static void DeleteSelection(SetupEntitySelection selection, Setup setup)
     {
+        // Content is a graph op, so its undo step has to carry a graph edit along with the setup's.
+        for (var i = 0; i < selection.Targets.Count; i++)
+        {
+            if (selection.Targets[i].Kind != SetupEntityKinds.ContentSource)
+                continue;
+
+            ContentSourceSync.DeleteSelectionWithSendOps(selection, setup);
+            return;
+        }
+
         SetupUndo.RunUndoable("Delete selection", setup, () =>
                                                          {
                                                              _deleteBuffer.Clear();
@@ -839,7 +850,7 @@ internal static class SetupActions
     }
 
     /// <summary>The delete cascades, one per kind, side by side.</summary>
-    private static void DeleteEntityInternal(Setup setup, SetupEntityKinds kind, Guid id)
+    internal static void DeleteEntityInternal(Setup setup, SetupEntityKinds kind, Guid id)
     {
         switch (kind)
         {
