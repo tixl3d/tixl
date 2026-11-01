@@ -5,6 +5,7 @@ using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
+using T3.Core.Resource.Assets;
 using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
@@ -19,7 +20,8 @@ namespace T3.Editor.Gui.MagGraph.Interaction.KeyboardEditing;
 /// spreadsheet: typing a value previews it live, and Down applies it and moves on.
 /// Letters filter the parameters (name prefix, word prefix, initials) without changing their order. Tab (or Space) edits the value: numbers and
 /// expressions ("10", "*2" which becomes "100*2", "=-5"), vectors ("0 1 0", "x 1", "*2" for all), colors
-/// ("orange", "#f80", "a 0.5"), bools toggle, and on a dropdown the value filters its options. A leading "-" is a
+/// ("orange", "#f80", "a 0.5"), bools toggle, on a dropdown the value filters its options, and on a file or folder
+/// path it searches the assets. A leading "-" is a
 /// negative number; the other operators continue from the current value. Shift+R resets the parameter to its
 /// default, Shift+I inserts an operator connected to it; both keep letters free for values.
 /// Left/Right change the value: numbers with the infinity slider (Shift fine, Ctrl coarse), "x" then Left/Right a
@@ -41,6 +43,7 @@ internal static partial class ParameterPopover
         Color,
         Bool,
         Options,
+        AssetPath,
     }
 
     internal static bool IsOpen => _childId != Guid.Empty;
@@ -109,6 +112,8 @@ internal static partial class ParameterPopover
             return;
 
         DrawPopover(instance);
+        if (DrawAssetMatches(instance))
+            return;
 
         if (ImGui.IsKeyPressed(ImGuiKey.Escape, false))
         {
@@ -143,7 +148,7 @@ internal static partial class ParameterPopover
 
         HandleNudging(instance);
 
-        var isPickingOption = _isValueMode && _valueKind == ValueKinds.Options;
+        var isPickingOption = _isValueMode && _valueKind is ValueKinds.Options or ValueKinds.AssetPath;
         if (ImGui.IsKeyPressed(ImGuiKey.Tab, false))
         {
             // Tab completes the parameter and starts its value; on a value it applies and moves on
@@ -508,16 +513,21 @@ internal static partial class ParameterPopover
 
     private static void MoveOptionFocus(Instance instance, int delta)
     {
-        if (_optionMatches.Count == 0)
+        var matchCount = _valueKind == ValueKinds.AssetPath ? _assetMatches.Count : _optionMatches.Count;
+        if (matchCount == 0)
             return;
 
-        _optionFocus = Math.Clamp(_optionFocus + delta, 0, _optionMatches.Count - 1);
+        _optionFocus = Math.Clamp(_optionFocus + delta, 0, matchCount - 1);
+        _scrollToFocusedAsset = true;
         UpdatePreview(instance, keepOptionFocus: true);
     }
 
     private static void Commit(Instance instance)
     {
         _isNudging = false;
+        if (_previewCommand == null)
+            PreviewFocusedAssetMatch(instance);
+
         if (_previewCommand != null)
         {
             UndoRedoStack.Add(_previewCommand);
@@ -581,6 +591,9 @@ internal static partial class ParameterPopover
         _matches.Clear();
         _matchedIds.Clear();
         _matchMasks.Clear();
+        _assetMatches.Clear();
+        _isAssetListHovered = false;
+        _isAssetListMouseActive = false;
         _refocusGraph = refocusGraph;
     }
     #endregion
@@ -640,6 +653,12 @@ internal static partial class ParameterPopover
     private static readonly Dictionary<Guid, Guid> _lastEditedInputIds = new();
     private static readonly List<EnumOption> _options = new(16);
     private static readonly List<int> _optionMatches = new(16);
+    private static readonly List<Asset> _assetMatches = new(64);
+    private static string _assetFileFilter = string.Empty;
+    private static bool _isPickingFolder;
+    private static bool _scrollToFocusedAsset;
+    private static bool _isAssetListHovered;
+    private static bool _isAssetListMouseActive;
     private static Guid _childId;
     private static Guid _compositionSymbolId;
     private static int _selectionChangeCounterAtOpen;

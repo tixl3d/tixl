@@ -3,6 +3,8 @@ using System.Globalization;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
+using T3.Editor.Gui.Input;
+using T3.Editor.Gui.InputUi.SimpleInputUis;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands.Graph;
@@ -22,12 +24,22 @@ internal static partial class ParameterPopover
             return;
 
         if (SymbolUiRegistry.TryGetSymbolUi(instance.Symbol.Id, out var symbolUi)
-            && symbolUi.InputUis.TryGetValue(slot.Id, out var inputUi)
-            && !string.IsNullOrEmpty(inputUi.Description))
+            && symbolUi.InputUis.TryGetValue(slot.Id, out var inputUi))
         {
-            var description = inputUi.Description;
-            var lineEnd = description.IndexOf('\n');
-            _focusedDescription = lineEnd < 0 ? description : description[..lineEnd];
+            if (!string.IsNullOrEmpty(inputUi.Description))
+            {
+                var description = inputUi.Description;
+                var lineEnd = description.IndexOf('\n');
+                _focusedDescription = lineEnd < 0 ? description : description[..lineEnd];
+            }
+
+            if (inputUi is StringInputUi { Usage: StringInputUi.UsageType.FilePath or StringInputUi.UsageType.DirectoryPath } pathInputUi)
+            {
+                _valueKind = ValueKinds.AssetPath;
+                _assetFileFilter = pathInputUi.FileFilter;
+                _isPickingFolder = pathInputUi.Usage == StringInputUi.UsageType.DirectoryPath;
+                return;
+            }
         }
 
         _editableValueLabel = slot.Input.Value switch
@@ -114,6 +126,28 @@ internal static partial class ParameterPopover
                                : new InputValue<int>(option.Value);
                 break;
 
+            case ValueKinds.AssetPath:
+                if (!keepOptionFocus)
+                    UpdateAssetMatches(slot);
+
+                if (_assetMatches.Count == 0)
+                {
+                    _valueError = "no matching asset";
+                    UpdateTexts();
+                    return;
+                }
+
+                // Only stepping through the list previews: loading the first match of every typed letter would stall the editor
+                var assetAddress = _assetMatches[_optionFocus].Address;
+                if (!keepOptionFocus || IsCurrentAssetPath(slot, assetAddress))
+                {
+                    UpdateTexts();
+                    return;
+                }
+
+                newValue = new InputValue<string>(assetAddress);
+                break;
+
             case ValueKinds.Bool when _valueText.Length == 0:
                 newValue = new InputValue<bool>(!((InputValue<bool>)slot.Input.Value).Value);
                 break;
@@ -158,11 +192,79 @@ internal static partial class ParameterPopover
                 break;
         }
 
+        StartPreview(instance, slot, newValue);
+        UpdateTexts();
+    }
+
+    private static void StartPreview(Instance instance, IInputSlot slot, InputValue newValue)
+    {
         _previewOriginalLabel = FormatValue(slot.Input.Value);
-        _previewCommand = new ChangeInputValueCommand(instance.Parent.Symbol, instance.SymbolChildId, slot.Input, null, instance);
+        _previewCommand = new ChangeInputValueCommand(instance.Parent!.Symbol, instance.SymbolChildId, slot.Input, null, instance);
         _previewCommand.AssignNewValue(newValue);
         _valueLabelsNeedUpdate = true;
-        UpdateTexts();
+    }
+
+    /** Without a filter the list starts at the current path, like in the Parameter Window. */
+    private static void UpdateAssetMatches(IInputSlot slot)
+    {
+        AssetInputWithTypeAheadSearch.FilterItems(_assetMatches, _valueText, _assetFileFilter, _isPickingFolder);
+        _optionFocus = 0;
+        _scrollToFocusedAsset = true;
+        for (var index = 0; index < _assetMatches.Count; index++)
+        {
+            if (IsCurrentAssetPath(slot, _assetMatches[index].Address))
+                _optionFocus = index;
+        }
+    }
+
+    private static bool IsCurrentAssetPath(IInputSlot slot, string address)
+    {
+        return slot.Input.Value is InputValue<string> current && current.Value == address;
+    }
+
+    /// <summary>
+    /// Draws the match list above the popover, because the popover sits at the bottom of the graph window.
+    /// </summary>
+    /// <returns>True if a click on a match closed the popover</returns>
+    private static bool DrawAssetMatches(Instance instance)
+    {
+        _isAssetListHovered = false;
+        if (!_isValueMode || _valueKind != ValueKinds.AssetPath || !TryGetFocusedSlot(instance, out var slot) || slot.HasInputConnections)
+            return false;
+
+        var listSize = AssetInputWithTypeAheadSearch.MatchListSizePx * T3Ui.UiScaleFactor;
+        var gap = PopoverPaddingPx * T3Ui.UiScaleFactor;
+        var position = new Vector2(MathF.Floor((_popoverRect.Min.X + _popoverRect.Max.X - listSize.X) / 2),
+                                   MathF.Floor(_popoverRect.Min.Y - listSize.Y - gap));
+
+        var wasClicked = AssetInputWithTypeAheadSearch.DrawMatches(position, _assetMatches, ref _optionFocus, _valueText,
+                                                                   isSearchResultWindowOpen: true, justOpened: false, _scrollToFocusedAsset,
+                                                                   out var clickedAddress, out _, out _isAssetListHovered);
+        _scrollToFocusedAsset = false;
+        if (!wasClicked)
+            return false;
+
+        RevertPreview();
+        if (!IsCurrentAssetPath(slot, clickedAddress))
+        {
+            StartPreview(instance, slot, new InputValue<string>(clickedAddress));
+            Commit(instance);
+        }
+
+        Close(refocusGraph: true);
+        return true;
+    }
+
+    /** Typing a filter only previews on Up/Down, so applying has to pick up the match the filter arrived at. */
+    private static void PreviewFocusedAssetMatch(Instance instance)
+    {
+        if (_valueKind != ValueKinds.AssetPath || !_isValueMode || _valueText.Length == 0 || _optionFocus >= _assetMatches.Count
+            || instance.Parent == null || !TryGetFocusedSlot(instance, out var slot) || slot.HasInputConnections)
+            return;
+
+        var address = _assetMatches[_optionFocus].Address;
+        if (!IsCurrentAssetPath(slot, address))
+            StartPreview(instance, slot, new InputValue<string>(address));
     }
 
     private static void UpdateOptionMatches(IInputSlot slot)
@@ -292,6 +394,7 @@ internal static partial class ParameterPopover
                        ValueKinds.Vector      => "{0 0 0}   {x 1} one   {*2} all   {x}[←→]",
                        ValueKinds.Color       => "{orange}   {#f80}   {a 0.5}   {h} {s} {r} {g} {b} {a}[←→]",
                        ValueKinds.Options     => "[↑↓] options",
+                       ValueKinds.AssetPath   => "type to search   [↑↓] select",
                        ValueKinds.Bool        => "toggled",
                        ValueKinds.Unsupported => "[⇧I] insert connected operator",
                        _                      => string.Empty,
@@ -306,7 +409,7 @@ internal static partial class ParameterPopover
 
         if (_isValueMode)
         {
-            return _valueKind == ValueKinds.Options
+            return _valueKind is ValueKinds.Options or ValueKinds.AssetPath
                        ? "[⇥] Apply and Next   [Enter] Apply"
                        : "[Enter] Apply   [⇧R] Reset   [⇧I] Input";
         }

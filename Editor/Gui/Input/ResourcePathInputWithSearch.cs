@@ -144,7 +144,7 @@ internal static class AssetInputWithTypeAheadSearch
             var filterNeedsUpdate = (justOpened || filterInputChanged) && !upDownKeysPressed;
             if (filterNeedsUpdate)
             {
-                FilterItems(fileExtensions, pickFolder);
+                FilterItems(State.Matches, State.SearchString, fileExtensions, pickFolder);
                 State.SelectedMatchIndex = -1;
                 
                 // Select active
@@ -168,7 +168,10 @@ internal static class AssetInputWithTypeAheadSearch
 
             shouldUpdateScroll |= justOpened;
 
-            if (DrawMatches(State.SearchString,
+            if (DrawMatches(new Vector2(ImGui.GetItemRectMin().X, ImGui.GetItemRectMax().Y),
+                            State.Matches,
+                            ref State.SelectedMatchIndex,
+                            State.SearchString,
                             isActive,
                             justOpened,
                             shouldUpdateScroll,
@@ -197,27 +200,29 @@ internal static class AssetInputWithTypeAheadSearch
         return wasSelected;
     }
 
-    private static bool DrawMatches(string searchString, bool isSearchResultWindowOpen, bool justOpened, bool shouldUpdateScroll,
-                                    out string selectedPath,
-                                    out bool clickedOutside,
-                                    out bool isPopupHovered)
+    /// <summary>
+    /// Draws the list of matching assets as a floating window of <see cref="MatchListSizePx"/> at the given screen position.
+    /// </summary>
+    /// <returns>True if an asset was clicked</returns>
+    internal static bool DrawMatches(Vector2 position, List<Asset> matches, ref int selectedMatchIndex,
+                                     string searchString, bool isSearchResultWindowOpen, bool justOpened, bool shouldUpdateScroll,
+                                     out string selectedPath,
+                                     out bool clickedOutside,
+                                     out bool isPopupHovered)
     {
         isPopupHovered = false;
         clickedOutside = false;
         selectedPath = string.Empty;
         var wasSelected = false;
 
-        var lastPosition = new Vector2(ImGui.GetItemRectMin().X, ImGui.GetItemRectMax().Y);
-        var size = new Vector2(ImGui.GetItemRectSize().X, 350 * T3Ui.UiScaleFactor);
-        ImGui.SetNextWindowPos(lastPosition);
-        ImGui.SetNextWindowSize(size);
+        ImGui.SetNextWindowPos(position);
 
         const ImGuiWindowFlags flags = ImGuiWindowFlags.NoTitleBar
                                        | ImGuiWindowFlags.NoMove
                                        | ImGuiWindowFlags.Tooltip // ugly as f**k. Sadly .PopUp will lead to random crashes.
                                        | ImGuiWindowFlags.NoFocusOnAppearing;
 
-        ImGui.SetNextWindowSize(new Vector2(750, 300) * T3Ui.UiScaleFactor);
+        ImGui.SetNextWindowSize(MatchListSizePx * T3Ui.UiScaleFactor);
         ImGui.PushStyleColor(ImGuiCol.PopupBg, UiColors.BackgroundFull.Rgba);
         if (ImGui.Begin("##typeAheadSearchPopup", ref isSearchResultWindowOpen, flags))
         {
@@ -226,20 +231,20 @@ internal static class AssetInputWithTypeAheadSearch
             var index = 0;
             var lastPackageId = Guid.Empty;
 
-            if (State.Matches.Count == 0)
+            if (matches.Count == 0)
             {
                 ImGui.TextUnformatted("No results found");
             }
 
             int separatorIndex = 0;
 
-            foreach (var asset in State.Matches)
+            foreach (var asset in matches)
             {
-                var isSelected = index == State.SelectedMatchIndex;
+                var isSelected = index == selectedMatchIndex;
 
-                if (State.SelectedMatchIndex == -1 && asset.Address == searchString)
+                if (selectedMatchIndex == -1 && asset.Address == searchString)
                 {
-                    State.SelectedMatchIndex = index;
+                    selectedMatchIndex = index;
                     isSelected = true;
                     shouldUpdateScroll = true;
                 }
@@ -358,19 +363,19 @@ internal static class AssetInputWithTypeAheadSearch
         return wasSelected;
     }
 
-    private static void FilterItems(string fileExtensions, bool pickFolder)
+    internal static void FilterItems(List<Asset> matches, string searchString, string fileExtensions, bool pickFolder)
     {
         var requiredExtensionIds = FileExtensionRegistry.GetExtensionIdsFromExtensionSetString(fileExtensions);
 
         var allItems = AssetRegistry.AllAssets
                                     .Where(a => a.IsDirectory == pickFolder &&
                                                 (requiredExtensionIds.Count == 0 || requiredExtensionIds.Contains(a.ExtensionId)))
-                                    .Where(a => string.IsNullOrEmpty(State.SearchString) ||
-                                                a.Address.Contains(State.SearchString, StringComparison.OrdinalIgnoreCase))
+                                    .Where(a => string.IsNullOrEmpty(searchString) ||
+                                                a.Address.Contains(searchString, StringComparison.OrdinalIgnoreCase))
                                     .OrderBy(a => a.Address);
 
-        State.Matches.Clear();
-        State.Matches.AddRange(allItems);
+        matches.Clear();
+        matches.AddRange(allItems);
     }
 
     private static class State
@@ -393,5 +398,6 @@ internal static class AssetInputWithTypeAheadSearch
         }
     }
 
+    internal static readonly Vector2 MatchListSizePx = new(750, 300);
     private const int MaxItemCount = 500;
 }
