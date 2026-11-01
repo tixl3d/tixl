@@ -16,9 +16,9 @@ namespace T3.Editor.Gui.Windows.OutputSetup;
 /// <summary>
 /// The output-editing side of an output window. It has two modes: <b>Operator</b> shows the operator output
 /// as always, <b>Setup</b> shows the Flow Outliner strip (which then hosts the toolbar) and makes the Board the
-/// home view. The mode follows focus — a focused <see cref="IContentSupplier"/> (SendToOutput) op enters Setup,
-/// any other op leaves it — and can be toggled by hand. Within either mode a picked entity shows its own
-/// canvas. The entity selection is the one instance shared by all output windows
+/// home view. A focused <see cref="IContentSupplier"/> (SendToOutput) op enters Setup; other than that the mode
+/// is toggled by hand, so working in the graph doesn't take the setup away. Within either mode a picked entity
+/// shows its own canvas. The entity selection is the one instance shared by all output windows
 /// (<see cref="GlobalSelectionHandling.SetupEntities"/>) — what stays per window is the <b>pin</b>: a pinned
 /// window keeps showing its target while the selection roams elsewhere. One per OutputWindow.
 /// </summary>
@@ -43,6 +43,8 @@ internal sealed class OutputSetupModeView
 
     /// <summary>Whether the strip is shown — and with it hosts the canvas' toolbar, so the window's own goes.</summary>
     public bool IsHeaderHostedByStrip => IsSetupMode;
+
+    public bool IsSetupMode => _viewMode == ViewModes.Setup;
 
     /// <summary>Draws the Flow Outliner strip: a full-width up/down splitter on its top edge, then the header
     /// and columns. Call after the canvas child, which leaves <see cref="OutlinerReservedHeight"/> free.</summary>
@@ -262,14 +264,12 @@ internal sealed class OutputSetupModeView
     /// <param name="ImageId">The reference image whose space is open (<see cref="ShownViews.ReferenceCanvas"/>).</param>
     private readonly record struct ShownView(ShownViews Kind, Guid OutputId = default, Guid EntityId = default, Guid ImageId = default);
 
-    private bool IsSetupMode => _viewMode == ViewModes.Setup;
-
     /** Whether the host window keeps showing its pinned op this frame, so focus and selection leave its view alone. */
     private bool _keepsPinnedOp;
     private Action? _leaveSetup;
 
     /// <summary>
-    /// Mirrors a graph pick into the entity selection and lets the mode follow focus. What's <i>drawn</i> may be
+    /// Mirrors a graph pick into the entity selection and enters Setup for a send op. What's <i>drawn</i> may be
     /// pinned, so it doesn't follow the graph; which CONTENT item is selected should follow the graph selection
     /// regardless — picking a send in the graph is how you get to it. Only a graph pick counts (it owns the
     /// inspection); an entity pick clears the graph too, and that change must not bounce back.
@@ -291,12 +291,11 @@ internal sealed class OutputSetupModeView
             _entitySelection.Mirror(SetupEntityKinds.ContentSource, focusedId);
         }
 
-        if (graphOwnsInspection && focusTransition && !_keepsPinnedOp)
+        if (graphOwnsInspection && focusTransition && !_keepsPinnedOp && selectedInGraph is IContentSupplier)
         {
-            // A focused SendToOutput enters Setup (its surfaces/outputs are at hand); selecting any other op —
-            // or clicking the graph background — leaves it. Only on the transition, so the mode can still be
-            // toggled by hand while the focus stays put.
-            _viewMode = selectedInGraph is IContentSupplier ? ViewModes.Setup : ViewModes.Operator;
+            // A focused SendToOutput enters Setup (its surfaces/outputs are at hand). Only on the transition, so
+            // the mode can still be toggled by hand while the focus stays put.
+            _viewMode = ViewModes.Setup;
         }
 
         _lastFocusedId = focusedId;

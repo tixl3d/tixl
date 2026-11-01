@@ -59,7 +59,25 @@ Click the "Surface 1" item.
 - After 3: it switches back to the op's parameters; "Surface 1" is no longer
   highlighted, the CONTENT item is.
 - After 4: the Parameter window shows the composition (no entity card), no item in the
-  outliner is highlighted, and the outliner closes.
+  outliner is highlighted, and the outliner stays open.
+
+## Step: Working in the graph keeps the setup open
+
+**Action:**
+1. Pin the output window to any op other than a SendToOutput, using the pin in its toolbar. Then open the
+   setup with the toolbar's "Output Setup" button.
+2. Click a different op in the graph window, one that is not a SendToOutput.
+3. Click the empty graph background.
+4. With that op selected again, press and hold `P` for a second, then release it.
+5. Press `P` briefly.
+
+**Expected:**
+- After 2 and 3: the output window keeps showing the Board and the Flow Outliner. The Parameter window
+  follows the graph selection.
+- During 4: the output window shows the selected op's output. After the release it is back on the Board with
+  the Flow Outliner.
+- After 5: the output window shows the selected op's output and stays there, with the toolbar's "Output
+  Setup" button back in its usual place.
 
 ## Step: A selected SendToOutput shows parameters plus the setup side
 

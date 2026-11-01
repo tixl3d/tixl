@@ -42,7 +42,7 @@ Click the SendToOutput op in the graph window.
 **Expected:**
 - After 1 and 2: the strip opens again, although the selection didn't change. After 2 the pin
   icon is still there.
-- After 3: the strip closes and the window shows its pinned SendToOutput.
+- After 3: the strip stays open and the window keeps showing the Board or canvas it was on.
 
 ## Step: Reveal the setup file
 

@@ -5,6 +5,7 @@ using Newtonsoft.Json.Linq;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.InputUi.SingleControl;
 using T3.Editor.Gui.Styling;
+using T3.Editor.Gui.Windows.OutputSetup;
 using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Serialization;
@@ -55,7 +56,7 @@ public sealed class GuidInputUi : SingleControlInputUi<Guid>
             if (Usage == UsageType.OutputSetupEntities && OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
             {
                 var itemId = 1;
-                modified |= DrawEntityGroup("Outputs", setup.Outputs, o => o.Id, o => o.Name, ref value, ref itemId);
+                modified |= DrawEntityGroup("Outputs", setup.Outputs, o => o.Id, SetupLabels.OutputLabel, ref value, ref itemId);
                 modified |= DrawEntityGroup("Surfaces", setup.Surfaces, s => s.Id, s => s.Name, ref value, ref itemId);
                 modified |= DrawEntityGroup("Reference Images", setup.ReferenceImages, r => r.Id, r => r.Name, ref value, ref itemId);
             }
@@ -147,7 +148,7 @@ public sealed class GuidInputUi : SingleControlInputUi<Guid>
             foreach (var output in setup.Outputs)
             {
                 if (output.Id == value)
-                    return output.Name;
+                    return SetupLabels.OutputLabel(output);
             }
 
             foreach (var surface in setup.Surfaces)

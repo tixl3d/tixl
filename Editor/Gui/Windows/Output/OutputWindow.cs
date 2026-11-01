@@ -225,6 +225,10 @@ internal sealed partial class OutputWindow : Window
     /// <inheritdoc cref="OutputSetupModeView.TryLeaveSetupMode"/>
     internal bool TryLeaveSetupMode() => _setupMode.TryLeaveSetupMode();
 
+    internal bool IsInSetupMode => _setupMode.IsSetupMode;
+
+    internal void EnterSetupMode() => _setupMode.EnterSetupMode();
+
     internal void ToggleSetupMode()
     {
         if (!_setupMode.TryLeaveSetupMode())

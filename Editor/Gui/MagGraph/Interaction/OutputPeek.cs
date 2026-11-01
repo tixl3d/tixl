@@ -91,6 +91,7 @@ internal static class OutputPeek
         }
 
         _peekingWindow = outputWindow;
+        _peekLeftSetupMode = outputWindow is { IsInSetupMode: true };
         _peekingWindow?.Pinning.BeginPeek();
         NodeActions.PinSelectedToOutputWindow(projectView, context.Selector, context.CompositionInstance);
         _shownName = outputWindow != null ? shownInstance.Symbol.Name : null;
@@ -114,6 +115,8 @@ internal static class OutputPeek
         }
 
         _peekingWindow?.Pinning.EndPeek();
+        if (_peekLeftSetupMode)
+            _peekingWindow?.EnterSetupMode();
     }
 
     private static OutputWindow? GetVisibleOutputWindow()
@@ -147,6 +150,7 @@ internal static class OutputPeek
     private static bool _isKeyDown;
     private static double _pressTime;
     private static OutputWindow? _peekingWindow;
+    private static bool _peekLeftSetupMode;
     private static IReadOnlyList<Guid>? _previousBackgroundPath;
     private static bool _hadBackground;
     private static string? _shownName;
