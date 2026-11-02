@@ -209,8 +209,9 @@ public static class AudioEngine
         // Process FFT data after filling the buffer from soundtrack
         // Skip during export - GetFullMixDownBuffer handles FFT processing during export
         // to ensure consistent behavior between soundtrack and external audio modes
+        // Not gated on the settings being enabled: an [AudioClip] plays without them, and has to be analysed too.
         if (!playback.IsRenderingToFile && 
-            playback.Settings is { Enabled: true, Playback.AudioSource: CompositionSettings.AudioSources.ProjectSoundTrack })
+            playback.Settings is { Playback.AudioSource: CompositionSettings.AudioSources.ProjectSoundTrack })
             AudioAnalysis.ProcessUpdate(playback.Settings.Playback.AudioGainFactor, playback.Settings.Playback.AudioDecayFactor);
 
         StopStaleOperators();
