@@ -74,9 +74,51 @@ float d = length(p.xyz - center);
 
 This one bit TiXL's own SDF operators during the port, so it is worth grepping your shaders for arithmetic between differently sized vectors.
 
+The same applies to assignments, return values and compound operators:
+
+```hlsl
+float3 color = tex.Sample(s, uv);     // error: type mismatch   -> .rgb
+c.rgb *= tex.Sample(s, uv);           // error: no overload     -> .rgb
+```
+
+### Two cbuffers with the same name
+
+```hlsl
+cbuffer Params : register(b0) { float A; }
+cbuffer Params : register(b1) { float B; }   // error
+```
+
+```
+error[E39999]: ambiguous reference to 'SLANG_ParameterGroup_Params'
+```
+
+Rename one of them, for example to `Params2`. Only the register connects a cbuffer to its operator, so nothing else has to change.
+
+### Writing to a constant
+
+```hlsl
+cbuffer Params : register(b0) { float A; }
+A = 2;                                       // error: left of '=' is not an l-value
+```
+
+Copy the value into a local variable and change that instead.
+
 ### "Undefined identifier" on a type name
 
-If Slang reports an undefined identifier where you used a type, it is usually a D3D9-era name that the compatibility define does not cover. `sampler` is handled; others are not. Replace it with the modern spelling — `SamplerState`, `Texture2D`, and so on.
+If Slang reports an undefined identifier where you used a type, it is usually a D3D9-era name that the compatibility define does not cover. `sampler` is handled; others are not. Replace it with the modern spelling — `SamplerState`, `Texture2D`, and so on. `sampler2D` and `tex2D` are the usual suspects: use a `Texture2D` with a `SamplerState` and call `Sample()`.
+
+### Names that left TiXL's shared includes
+
+Projects from older TiXL versions can also fail on names that are simply gone from `shared/*.hlsl`. This has nothing to do with Slang.
+
+| Removed | Use instead |
+|---|---|
+| `LegacyPoint` (removed in 4.3) | `Point`. The layout is the same, but `W` is now `FX1`, `Stretch` is `Scale` and `Selected` is `FX2`. |
+| `rotate_vector(v, q)` | `qRotateVec3(v, q)` |
+
+## Compiles, but cannot run yet
+
+`Buffer<T>` compiles, but the Vulkan backend cannot bind it, and TiXL logs a warning when it finds one. Use `StructuredBuffer<T>` until it does.
 
 ## Differences that compile but change the picture
 
@@ -130,12 +172,14 @@ float left = uv.x < Left ? 1.0 : 0.0;
 
 ## When a shader fails to compile
 
-The compiler's message appears in the log window, with the file, line and column. Slang's diagnostics are more precise than FXC's — they point at the exact expression, and they explain the overload that was not found rather than just saying the call failed.
+The first error appears in the log window with its line number and file, plus a hint if it is one of the causes on this page. Later errors are left out because they are often consequences of the first.
 
-For a generated shader — anything TiXL assembles from a field graph — there is no file on disk to open. TiXL therefore writes the exact source it handed the compiler into a `Tmp/ShaderErrors` folder inside its settings folder, named after the shader and the entry point. Open that file to see the code the error line numbers refer to, and compile it by hand if you want to iterate quickly:
+**A shader only compiles when something uses it.** An operator you have not opened since the upgrade may still be broken, so open the projects you depend on before you rely on them, and go through the scenes that are only reached at certain times on the timeline.
+
+For a generated shader — anything TiXL assembles from a field graph — there is no file on disk to open. TiXL therefore writes the exact source it handed the compiler into a `Log/ShaderErrors` folder inside its settings folder, named after the shader and the entry point. Open that file to see the code the error line numbers refer to, and compile it by hand if you want to iterate quickly:
 
 ```bash
-slangc ShaderErrors/PixelShader_psMain.01.hlsl -entry psMain -stage pixel -target spirv -o /tmp/out.spv
+slangc ShaderErrors/PixelShader_psMain.01.hlsl -entry psMain -stage fragment -target spirv -D sampler=SamplerState -o /tmp/out.spv
 ```
 
 ## Custom operators written against SharpDX
@@ -144,7 +188,7 @@ Operators you wrote in C# used SharpDX's Direct3D 11 types, either through the a
 
 - The project's aliases and assembly references point at `T3.Graphics` and `T3.Graphics.Compat` instead of SharpDX.
 - Your operator sources get the same rename: `using SharpDX.Direct3D11;` becomes `using T3.Graphics.Compat;`, qualified names such as `SharpDX.Direct3D11.TextureAddressMode` lose their SharpDX prefix, and the interop value types `RawVector4`, `RawRectangle` and `RawViewportF` become `Vector4`, `ScissorRect` and `Viewport`. Sources that never mentioned SharpDX are not touched.
-- The project recompiles once. A backup of the untouched project is pinned under its `.temp/Backup/` folder beforehand.
+- The project recompiles once. A backup of the untouched project is pinned under its `.temp/Backup/` folder beforehand. The rewritten operators no longer compile in TiXL 4.3 or earlier, so use that backup if you need to go back.
 
 Types that have no counterpart in the graphics layer stay as they are and are listed in the log: image decoding through `SharpDX.WIC`, shader compilation through `SharpDX.D3DCompiler`, and Direct2D. A project that still uses one of them keeps its SharpDX references so it continues to compile on Windows; running it on Linux or macOS needs that code replaced by hand.
 

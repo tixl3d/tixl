@@ -292,6 +292,30 @@ public class SlangShaderCompilerTests(ITestOutputHelper output)
         Assert.True(threadGroups.X > 0);
     }
 
+    [Fact]
+    public void AFailedCompileNamesTheCauseAndTheShader()
+    {
+        using var backend = TryCreateBackend();
+
+        if (backend == null)
+            return;
+
+        const string source = """
+                              float4 psMain(float4 position : SV_Position) : SV_Target
+                              {
+                                  float3 d = rotate_vector(float3(1, 0, 0), position);
+                                  return float4(d, 1);
+                              }
+                              """;
+
+        var compiler = new SlangShaderCompiler(new Device(backend));
+        var args = new ShaderCompiler.ShaderCompilationArgs(source, "psMain", new TestResourceConsumer(), "Migrated.hlsl", null);
+
+        Assert.False(compiler.TryCompileSource<PixelShader>(args, out _, out var reason));
+        Assert.StartsWith("Line 3: undefined identifier 'rotate_vector'.\n\nMigrated.hlsl", reason);
+        Assert.Contains("qRotateVec3", reason);
+    }
+
     /// <summary>The operator shaders in the repository, or null when the tests run from somewhere else.</summary>
     private static string? RepositoryShaderFolder()
     {

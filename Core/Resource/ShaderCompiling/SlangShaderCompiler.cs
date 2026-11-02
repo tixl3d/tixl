@@ -185,7 +185,7 @@ public sealed class SlangShaderCompiler : ShaderCompiler
 
             if (!TryRun(compiler, arguments, out var diagnostics))
             {
-                errorMessage = DX11ShaderCompiler.ExtractMeaningfulShaderErrorMessage(diagnostics);
+                errorMessage = SlangDiagnostics.DescribeFirstError(diagnostics, sourcePath, args.Name);
                 return false;
             }
 
