@@ -47,7 +47,7 @@ internal sealed class CommonPointSets : Instance<CommonPointSets>
             {
                 var p = definitionPoints[pointIndex];
                 p.Orientation = Quaternion.Identity;
-                p.Color = Vector4.One;
+                //p.Color = Vector4.One;
                 tmpBuffer.TypedElements[pointIndex] = p;
             }
 
@@ -226,6 +226,21 @@ internal sealed class CommonPointSets : Instance<CommonPointSets>
             new() { Position = new Vector3(S / 4, 0, S / 1.5f), F1 = 1, Color = Vector4.One, F2 = 1 },
             Point.Separator(), 
         };
+    private static Vector4 RedX = new Vector4(0.683f, 0.105f, 0.056f, 1f);
+    private static Vector4 GreenY = new Vector4(0.109f, 0.76f, 0.121f, 1f);
+    private static Vector4 BlueZ = new Vector4(0.102f, 0.573f, 0.895f, 1f);
+    private static readonly Point[] XYZ =
+        {
+            new() { Position = new Vector3(0, 0, 0), F1 = 1, Color = RedX, F2 = 1 },
+            new() { Position = new Vector3(1, 0, 0), F1 = 1, Color = RedX, F2 = 1 },
+            Point.Separator(),
+            new() { Position = new Vector3(0, 0, 0), F1 = 1, Color = GreenY, F2 = 1 },
+            new() { Position = new Vector3(0, 1, 0), F1 = 1, Color = GreenY, F2 = 1 },
+            Point.Separator(),
+            new() { Position = new Vector3(0, 0, 0), F1 = 1, Color = BlueZ, F2 = 1 },
+            new() { Position = new Vector3(0, 0, 1), F1 = 1, Color = BlueZ, F2 = 1 },
+            Point.Separator(),
+        };
 
     private enum Shapes
     {
@@ -236,6 +251,7 @@ internal sealed class CommonPointSets : Instance<CommonPointSets>
         ArrowX,
         ArrowY,
         ArrowZ,
+        XYZ,
     }
 
     private static readonly List<Point[]> Definitions = new()
@@ -247,5 +263,7 @@ internal sealed class CommonPointSets : Instance<CommonPointSets>
                                                                 ArrowXPoints,
                                                                 ArrowYPoints,
                                                                 ArrowZPoints,
+                                                                XYZ,
                                                             };
+
 }
