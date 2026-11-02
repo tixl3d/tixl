@@ -14,6 +14,7 @@ using T3.Editor.Gui.Templates;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.Gui.Windows.Output;
+using T3.Editor.Gui.Windows.RenderExport;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Helpers;
@@ -200,4 +201,8 @@ public static partial class T3Ui
         get => UserSettings.Config.UseVSync;
         set => UserSettings.Config.UseVSync = value;
     }
+
+    /// <summary>Whether this frame waits for the display. <see cref="UseVSync"/> holds the user's setting; an export
+    /// that steps playback overrides it because waiting would only slow the file down.</summary>
+    internal static bool IsPacedByDisplay => UseVSync && !RenderProcess.IsSteppingPlayback;
 }

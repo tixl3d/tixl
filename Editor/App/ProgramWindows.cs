@@ -370,7 +370,7 @@ internal static unsafe class ProgramWindows
     /// </summary>
     public static void HoldForTargetFrameRate()
     {
-        var vblanksPerFrame = T3Ui.UseVSync ? GetVblanksPerFrame(UserSettings.Config.TargetFrameRate, FrameTiming.RefreshRate) : 1;
+        var vblanksPerFrame = T3Ui.IsPacedByDisplay ? GetVblanksPerFrame(UserSettings.Config.TargetFrameRate, FrameTiming.RefreshRate) : 1;
         FrameTiming.VblanksPerFrame = vblanksPerFrame;
 
         if (vblanksPerFrame > 1)

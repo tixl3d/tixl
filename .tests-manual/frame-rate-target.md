@@ -57,3 +57,13 @@ Bind an output to the second display, set *Frame Rate* to *Match Display*, and p
 - The *Display* line shows the second display's refresh rate.
 - Motion on the second display is smooth; the editor window may skip frames if its screen runs at a different rate.
 - Unbinding the output logs pacing following the editor window again.
+
+## Step: Exports ignore the display's pace
+
+**Action:**
+With VSync on, export a video of a light scene from the [ui:RenderSettings|Render To File] window with a *Custom* range. Then start a *Continuous* capture with the *Realtime* clock, record for a few seconds and stop it.
+
+**Expected:**
+- The range export runs faster than the display's refresh rate if the scene and encoder allow it, and the file has the requested frame count.
+- During the realtime capture the frame time stays at one refresh period.
+- *Use VSync* stays checked throughout, and the frame rate returns to normal after each export.

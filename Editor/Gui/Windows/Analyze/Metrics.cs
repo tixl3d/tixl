@@ -23,7 +23,7 @@ internal static class T3Metrics
     {
         PerformanceMetrics.RecordFrame(ImGui.GetIO().DeltaTime * 1000);
         FrameTiming.SetRefreshRateFromDisplay(ProgramWindows.Main.DisplayRefreshRate);
-        FrameTiming.RecordFrameStart(Playback.RunTimeInSecs, T3Ui.UseVSync);
+        FrameTiming.RecordFrameStart(Playback.RunTimeInSecs, T3Ui.IsPacedByDisplay);
     }
 
     /// <summary>Starts timing the main thread's work for this frame.</summary>

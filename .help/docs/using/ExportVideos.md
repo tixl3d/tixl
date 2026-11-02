@@ -94,6 +94,7 @@ TiXL renders into a GPU texture (by default `R16G16B16A16_Float` — 16 bits per
 - Reading a texture back from the graphics card takes up to a few frames.
 - Converting between pixel formats (16-bit float to 8-bit, etc.) is comparatively slow.
 - Effects are often audio-reactive, but a **deterministic** export is not realtime — TiXL drives the timeline frame by frame so the result is exactly repeatable.
+- Rendering doesn't wait for your display's refresh during a deterministic export, whatever the *Use VSync* setting says, so a light scene can export faster than it plays. The preview may look choppy meanwhile.
 - Some operators are asynchronous (loading an image from the web, seeking a video). During a deterministic export TiXL waits for each to finish before writing the frame, trading speed for correctness.
 
 These are the reasons a *Continuous → Realtime* capture (which grabs the live output instead) trades that determinism for keeping pace with a live performance.

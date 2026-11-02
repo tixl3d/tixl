@@ -2013,6 +2013,8 @@ internal static class DebugServer
         settings.FrameRate = request["fps"]?.Value<float>() ?? 60f;
         settings.ExportAudio = request["exportAudio"]?.Value<bool>() ?? true;
         settings.AutoIncrementVersionNumber = false;
+        if (Enum.TryParse<T3.Core.Video.VideoExportCodec>(request["codec"]?.Value<string>(), true, out var codec))
+            settings.VideoCodec = codec;
 
         if (!RenderProcess.TryStartVideoExport(settings, path))
         {

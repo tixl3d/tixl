@@ -222,7 +222,7 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
 
         T3Metrics.CpuFrameCompleted();
 
-        ProgramWindows.Present(T3Ui.UseVSync);
+        ProgramWindows.Present(T3Ui.IsPacedByDisplay);
     }
 
     /// <summary>Blits each display-bound output's composite into that display's own window.</summary>
