@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Text;
 using T3.Core.Logging;
 
@@ -13,6 +14,14 @@ namespace T3.Core.Audio.Native;
 /// </summary>
 internal sealed unsafe class NativeAudioEngine : IDisposable
 {
+    /// <summary>The values match the Audio3DMode input of [PlaySpatialAudioSample].</summary>
+    internal enum SpatialMode
+    {
+        World = 0,
+        RelativeToListener = 1,
+        Off = 2,
+    }
+
     /// <summary>Null when the library is missing or the device can't open, so callers stay silent but running.</summary>
     public static NativeAudioEngine? TryCreate(NativeAudio.Mode mode, NativeAudio.Backend backend = NativeAudio.Backend.Default,
                                                uint sampleRate = 48000, uint periodFrames = 256)
@@ -101,6 +110,19 @@ internal sealed unsafe class NativeAudioEngine : IDisposable
     public void SetBusPlaying(AudioHandle bus, bool playing) => NativeAudio.BusSetPlaying(_engine, bus.Value, playing ? 1 : 0);
 
     public void SetOutputGain(float gain) => NativeAudio.SetOutputGain(_engine, gain);
+
+    /// <summary>
+    /// Places a spatial source. TiXL's world is left-handed and the native engine's right-handed, so every
+    /// vector crossing this boundary has its Z mirrored; a source at +X stays on the right.
+    /// </summary>
+    public void SetSpatial(AudioHandle source, Vector3 position, Vector3 direction, Vector3 velocity, float minDistance, float maxDistance,
+                           float rolloff, float dopplerFactor, float innerConeDegrees, float outerConeDegrees, float outerConeGain, SpatialMode mode)
+        => NativeAudio.SoundSetSpatial(_engine, source.Value,
+                                       position.X, position.Y, -position.Z, direction.X, direction.Y, -direction.Z, velocity.X, velocity.Y, -velocity.Z,
+                                       minDistance, maxDistance, rolloff, dopplerFactor, innerConeDegrees, outerConeDegrees, outerConeGain, (int)mode);
+
+    public void SetListener(Vector3 position, Vector3 forward, Vector3 up, Vector3 velocity)
+        => NativeAudio.SetListener(_engine, position.X, position.Y, -position.Z, forward.X, forward.Y, -forward.Z, up.X, up.Y, -up.Z, velocity.X, velocity.Y, -velocity.Z);
 
     public void SetPan(AudioHandle source, float pan) => NativeAudio.SoundSetPan(_engine, source.Value, pan);
 

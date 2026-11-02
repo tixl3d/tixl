@@ -197,5 +197,15 @@ internal static unsafe partial class NativeAudio
     [LibraryImport(Library, EntryPoint = "ta_capture_read")]
     internal static partial int CaptureRead(IntPtr engine, ulong startFrame, float* destination, int frameCount);
 
+    [LibraryImport(Library, EntryPoint = "ta_sound_set_spatial")]
+    internal static partial void SoundSetSpatial(IntPtr engine, int sound,
+                                                 float x, float y, float z, float dirX, float dirY, float dirZ, float velX, float velY, float velZ,
+                                                 float minDistance, float maxDistance, float rolloff, float dopplerFactor,
+                                                 float innerConeDegrees, float outerConeDegrees, float outerConeGain, int mode);
+
+    [LibraryImport(Library, EntryPoint = "ta_set_listener")]
+    internal static partial void SetListener(IntPtr engine, float x, float y, float z, float forwardX, float forwardY, float forwardZ,
+                                             float upX, float upY, float upZ, float velX, float velY, float velZ);
+
     private const string Library = "tixlaudio";
 }

@@ -242,7 +242,7 @@ internal sealed class SoundtrackClipStream
             _engine.Seek(_source, targetSourcePos);
 
         if (!clip.IsRoutedToGraph)
-            _engine.SetVolume(_source, clip.Volume * CompositionSettings.Current.Audio.SoundtrackVolume);
+            _engine.SetVolume(_source, clip.IsMuted ? 0f : clip.Volume * CompositionSettings.Current.Audio.SoundtrackVolume);
 
         _engine.Play(_source);
     }

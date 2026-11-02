@@ -897,7 +897,8 @@ TA_API ma_int32 ta_sound_load(ta_engine* engine, const char* path, ma_uint32 fla
     }
     else
     {
-        ma_decoder_config decoderConfig = ma_decoder_config_init(ma_format_f32, 0, 0);
+        /* A spatial source is a point: a stereo file is mixed down rather than panned channel by channel. */
+        ma_decoder_config decoderConfig = ma_decoder_config_init(ma_format_f32, (flags & TA_LOAD_SPATIAL) ? 1 : 0, 0);
         decoderConfig.seekPointCount = TA_MP3_SEEK_POINTS;
         result = ma_decoder_init_file(path, &decoderConfig, &slot->source.decoder);
         if (result != MA_SUCCESS)
@@ -1110,16 +1111,38 @@ TA_API void ta_sound_set_pitch(ta_engine* engine, ma_int32 handle, float pitch)
         ma_sound_set_pitch(&slot->sound, pitch);
 }
 
-TA_API void ta_sound_set_position(ta_engine* engine, ma_int32 handle, float x, float y, float z)
+/** mode: 0 = positioned in the world, 1 = relative to the listener, 2 = not spatialized. Angles are full cone angles in degrees. */
+TA_API void ta_sound_set_spatial(ta_engine* engine, ma_int32 handle,
+                                 float x, float y, float z, float dirX, float dirY, float dirZ, float velX, float velY, float velZ,
+                                 float minDistance, float maxDistance, float rolloff, float dopplerFactor,
+                                 float innerConeDegrees, float outerConeDegrees, float outerConeGain, ma_int32 mode)
 {
     ta_sound_slot* slot = ta_sound(engine, handle);
-    if (slot)
-        ma_sound_set_position(&slot->sound, x, y, z);
+    if (slot == NULL)
+        return;
+
+    ma_sound* sound = &slot->sound;
+    ma_sound_set_spatialization_enabled(sound, mode != 2);
+    ma_sound_set_positioning(sound, mode == 1 ? ma_positioning_relative : ma_positioning_absolute);
+    ma_sound_set_attenuation_model(sound, ma_attenuation_model_linear);
+    ma_sound_set_position(sound, x, y, z);
+    ma_sound_set_direction(sound, dirX, dirY, dirZ);
+    ma_sound_set_velocity(sound, velX, velY, velZ);
+    ma_sound_set_min_distance(sound, minDistance);
+    ma_sound_set_max_distance(sound, maxDistance);
+    ma_sound_set_rolloff(sound, rolloff);
+    ma_sound_set_doppler_factor(sound, dopplerFactor);
+    const float degreesToRadians = (float)(MA_PI / 180.0);
+    ma_sound_set_cone(sound, innerConeDegrees * degreesToRadians, outerConeDegrees * degreesToRadians, outerConeGain);
 }
 
-TA_API void ta_set_listener_position(ta_engine* engine, float x, float y, float z)
+TA_API void ta_set_listener(ta_engine* engine, float x, float y, float z, float forwardX, float forwardY, float forwardZ,
+                            float upX, float upY, float upZ, float velX, float velY, float velZ)
 {
     ma_engine_listener_set_position(&engine->engine, 0, x, y, z);
+    ma_engine_listener_set_direction(&engine->engine, 0, forwardX, forwardY, forwardZ);
+    ma_engine_listener_set_world_up(&engine->engine, 0, upX, upY, upZ);
+    ma_engine_listener_set_velocity(&engine->engine, 0, velX, velY, velZ);
 }
 
 TA_API void ta_set_tracked_sound(ta_engine* engine, ma_int32 handle)

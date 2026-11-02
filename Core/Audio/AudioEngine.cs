@@ -57,9 +57,6 @@ public static class AudioEngine
     private static Vector3 _listenerVelocity = Vector3.Zero;
     private static Vector3 _listenerForward = new(0, 0, 1);
     private static Vector3 _listenerUp = new(0, 1, 0);
-    private static bool _3dInitialized;
-    private static bool _3dListenerDirty;
-    private static bool _3dApplyNeeded;
 
     private static double _lastPlaybackSpeed = 1;
     private static bool _bassInitialized;
@@ -230,9 +227,6 @@ public static class AudioEngine
         // against the previous frame's token, not the current one.
         EnsureFrameTokenCurrent();
         
-        // Apply all 3D audio changes once per frame (batched for performance)
-        Apply3DChanges();
-
         _obsoleteSoundtrackHandles.Clear();
         _updatedSoundtrackClipTimes.Clear();
     }
@@ -435,11 +429,6 @@ public static class AudioEngine
     #region 3D Listener
 
     /// <summary>
-    /// Converts a System.Numerics.Vector3 to a ManagedBass.Vector3D.
-    /// </summary>
-    private static Vector3D ToBassVector(Vector3 v) => new(v.X, v.Y, v.Z);
-
-    /// <summary>
     /// Sets the 3D listener position and orientation for spatial audio.
     /// </summary>
     /// <param name="position">The world position of the listener.</param>
@@ -454,66 +443,7 @@ public static class AudioEngine
         _listenerPosition = position;
         _listenerForward = forward;
         _listenerUp = up;
-        _3dListenerDirty = true;
-
-        if (!_3dInitialized)
-        {
-            Initialize3DAudio();
-            _3dInitialized = true;
-            Log.Gated.Audio($"[AudioEngine] 3D audio initialized | Pos: {position}");
-        }
-    }
-
-    /// <summary>
-    /// Initializes BASS 3D audio with configured factors.
-    /// </summary>
-    private static void Initialize3DAudio()
-    {
-        // Set 3D factors for proper world scaling
-        Bass.Set3DFactors(
-            AudioConfig.DistanceFactor,
-            AudioConfig.RolloffFactor,
-            AudioConfig.DopplerFactor);
-        
-        // Apply initial listener position
-        ApplyListenerPosition();
-    }
-
-    /// <summary>
-    /// Applies the current listener position to BASS.
-    /// </summary>
-    private static void ApplyListenerPosition()
-    {
-        var pos = ToBassVector(_listenerPosition);
-        var vel = ToBassVector(_listenerVelocity);
-        var front = ToBassVector(_listenerForward);
-        var top = ToBassVector(_listenerUp);
-        
-        Bass.Set3DPosition(pos, vel, front, top);
-        _3dListenerDirty = false;
-    }
-
-    /// <summary>
-    /// Marks that a 3D apply is needed at the end of the frame.
-    /// Called by spatial streams when their positions are updated.
-    /// </summary>
-    internal static void Mark3DApplyNeeded() => _3dApplyNeeded = true;
-
-    /// <summary>
-    /// Applies all pending 3D changes (called once per frame in CompleteFrame).
-    /// </summary>
-    private static void Apply3DChanges()
-    {
-        if (_3dListenerDirty)
-        {
-            ApplyListenerPosition();
-        }
-        
-        if (_3dApplyNeeded || _3dListenerDirty)
-        {
-            Bass.Apply3D();
-            _3dApplyNeeded = false;
-        }
+        AudioMixerManager.NativeEngine?.SetListener(position, forward, up, _listenerVelocity);
     }
 
     /// <summary>
@@ -699,9 +629,6 @@ public static class AudioEngine
         
         if (!EnsureMixerInitialized()) return;
 
-        if (!_3dInitialized)
-            Set3DListenerPosition(Vector3.Zero, new Vector3(0, 0, 1), new Vector3(0, 1, 0));
-
         var state = GetOrCreateSpatialState(operatorId);
         
         // Mark this operator as updated for this frame (used for stale detection)
@@ -732,11 +659,8 @@ public static class AudioEngine
             if (orientation.HasValue && orientation.Value.Length() > 0.001f)
                 state.Stream.Set3DOrientation(orientation.Value);
 
-            if (Math.Abs(innerConeAngle - 360f) > 0.1f || Math.Abs(outerConeAngle - 360f) > 0.1f || Math.Abs(outerConeVolume - 1.0f) > 0.001f)
-                state.Stream.Set3DCone(innerConeAngle, outerConeAngle, outerConeVolume);
-
-            if (mode3D != 0)
-                state.Stream.Set3DMode((Mode3D)mode3D);
+            state.Stream.Set3DCone(innerConeAngle, outerConeAngle, outerConeVolume);
+            state.Stream.Set3DMode((NativeAudioEngine.SpatialMode)mode3D);
         }
     }
 
@@ -894,8 +818,7 @@ public static class AudioEngine
                 state.Stream = loadFunc(resolvedPath);
                 if (state.Stream == null)
                 {
-                    var bassError = Bass.LastError;
-                    var error = $"{resolvedPath} (BASS error: {bassError})";
+                    var error = $"{resolvedPath} could not be decoded";
                     Log.Error($"[AudioEngine] Failed to load stream for {operatorId}: {error}");
                     state.FailedFilePath = resolvedPath;
                     state.LastLoadError = error;
@@ -1042,11 +965,9 @@ public static class AudioEngine
                 state.FailedFilePath = resolvedPath;
                 state.LastLoadError = error;
             }
-            // Note: mixerHandle parameter is ignored for spatial streams - they play directly to BASS
-            else if (!SpatialOperatorAudioStream.TryLoadStream(resolvedPath, 0, out var stream))
+            else if (!SpatialOperatorAudioStream.TryLoadStream(resolvedPath, out var stream))
             {
-                var bassError = Bass.LastError;
-                var error = $"{resolvedPath} (BASS error: {bassError})";
+                var error = $"{resolvedPath} could not be decoded";
                 Log.Error($"[AudioEngine] Failed to load spatial stream for {operatorId}: {error}");
                 state.FailedFilePath = resolvedPath;
                 state.LastLoadError = error;
@@ -1326,7 +1247,6 @@ public static class AudioEngine
         {
             if (state.Stream != null)
             {
-                state.Stream.ClearExportMetering();
                 state.Stream.RestartAfterExport();
                 state.Stream.SetStale(false);
                 state.IsStale = false;

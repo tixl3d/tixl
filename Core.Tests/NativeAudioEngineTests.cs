@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Numerics;
 using T3.Core.Audio.Native;
 using Xunit;
 
@@ -447,6 +448,72 @@ public class NativeAudioEngineTests
         engine.StopCapture();
         Assert.False(engine.IsCaptureRunning);
         Assert.Equal(0, engine.ReadCapture(0, frames));
+    }
+
+    [Theory]
+    [InlineData(5f, true)]
+    [InlineData(-5f, false)]
+    public void SpatialSourceOnOneSideIsLouderOnThatSide(float x, bool expectRightLouder)
+    {
+        var (left, right) = RenderSpatial(new Vector3(x, 0, 0), minDistance: 1, maxDistance: 100);
+        Assert.Equal(expectRightLouder, right > left);
+        Assert.True(MathF.Abs(left - right) > 0.05f);
+    }
+
+    [Fact]
+    public void SpatialSourceFallsOffLinearlyBetweenItsDistances()
+    {
+        Assert.InRange(RenderSpatial(new Vector3(0, 0, 5), 10, 20).right, 0.1f, 1f);
+        var near = RenderSpatial(new Vector3(0, 0, 5), 10, 20).right;
+        var halfway = RenderSpatial(new Vector3(0, 0, 15), 10, 20).right;
+        Assert.InRange(halfway / near, 0.45f, 0.55f);
+        Assert.Equal(0f, RenderSpatial(new Vector3(0, 0, 25), 10, 20).right, 3);
+    }
+
+    [Fact]
+    public void SpatialConeAttenuatesBehindTheSource()
+    {
+        // The listener sits at the origin and the source 5 units ahead of it, so facing -Z points at the listener.
+        var facing = RenderSpatial(new Vector3(0, 0, 5), 1, 100, direction: new Vector3(0, 0, -1), innerCone: 60, outerCone: 120, outerGain: 0.25f).right;
+        var away = RenderSpatial(new Vector3(0, 0, 5), 1, 100, direction: new Vector3(0, 0, 1), innerCone: 60, outerCone: 120, outerGain: 0.25f).right;
+        Assert.InRange(away / facing, 0.2f, 0.3f);
+    }
+
+    [Fact]
+    public void SpatialModeOffIgnoresPositionAndRelativeFollowsTheListener()
+    {
+        var off = RenderSpatial(new Vector3(0, 0, 25), 1, 20, mode: NativeAudioEngine.SpatialMode.Off);
+        Assert.True(off.right > 0.3f && MathF.Abs(off.left - off.right) < 0.01f);
+
+        // In world mode this listener is 1000 units away; relative to it the source stays 5 units to the right.
+        var relative = RenderSpatial(new Vector3(5, 0, 0), 1, 100, mode: NativeAudioEngine.SpatialMode.RelativeToListener, listener: new Vector3(1000, 0, 0));
+        Assert.True(relative.right > relative.left);
+        Assert.True(relative.right > 0.1f);
+    }
+
+    private static (float left, float right) RenderSpatial(Vector3 position, float minDistance, float maxDistance, Vector3? direction = null,
+                                                           float innerCone = 360, float outerCone = 360, float outerGain = 1,
+                                                           NativeAudioEngine.SpatialMode mode = NativeAudioEngine.SpatialMode.World, Vector3? listener = null)
+    {
+        var path = WriteWav(seconds: 1, _ => 0.5f);
+        try
+        {
+            using var engine = NativeAudioEngine.TryCreate(NativeAudio.Mode.Offline, NativeAudio.Backend.Null, SampleRate);
+            Assert.NotNull(engine);
+
+            engine.SetListener(listener ?? Vector3.Zero, new Vector3(0, 0, 1), Vector3.UnitY, Vector3.Zero);
+            var source = engine.LoadFile(path, spatial: true);
+            engine.SetSpatial(source, position, direction ?? new Vector3(0, 0, 1), Vector3.Zero, minDistance, maxDistance, 1f, 0f, innerCone, outerCone, outerGain, mode);
+            PlayToOutput(engine, source);
+
+            var rendered = new float[4096 * 2];
+            engine.Render(rendered, 4096);
+            return (Math.Abs(rendered[4000 * 2]), Math.Abs(rendered[4000 * 2 + 1]));
+        }
+        finally
+        {
+            File.Delete(path);
+        }
     }
 
     private static void PlayToOutput(NativeAudioEngine engine, AudioHandle source)

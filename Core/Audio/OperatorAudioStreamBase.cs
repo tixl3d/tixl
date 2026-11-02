@@ -196,7 +196,7 @@ public abstract class OperatorAudioStreamBase
     }
 
     /// <summary>Loads a file as a stopped, silent source playing through the operator bus.</summary>
-    private protected static bool TryLoadSource(string filePath, NativeAudioEngine engine, out AudioHandle source, out double duration, out int channels, out int sampleRate)
+    private protected static bool TryLoadSource(string filePath, NativeAudioEngine engine, out AudioHandle source, out double duration, out int channels, out int sampleRate, bool spatial = false)
     {
         source = default;
         duration = 0;
@@ -206,7 +206,7 @@ public abstract class OperatorAudioStreamBase
         if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
             return false;
 
-        source = engine.LoadFile(filePath);
+        source = engine.LoadFile(filePath, spatial);
         if (!source.IsValid)
             return false;
 

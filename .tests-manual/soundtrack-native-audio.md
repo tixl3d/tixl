@@ -160,3 +160,15 @@ Record from the timeline toolbar while an input is active, also with the project
 **Expected:**
 - The WAV is complete, without gaps or clicks at the hitch.
 - With the project's own audio as the source, reactions keep following the project during the recording.
+
+## Step: Spatial audio
+
+**Action:**
+Play `[PlaySpatialAudioSample]` with several sources. Move a source around the listener, turn the listener, and set the cone angles. Then export a few seconds.
+
+**Expected:**
+- A source to the listener's right is louder on the right, and the sides swap when the listener turns around.
+- The level falls with distance and is silent past **MaxDistance**.
+- A source facing away is attenuated by its cone. With the default cone it is silent.
+- Moving a source quickly bends its pitch a little.
+- The export sounds like live playback, and spatial sources show in `[AudioReaction]`, `[AudioWaveform]` and the meters.

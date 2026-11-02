@@ -28,7 +28,6 @@ public static class AudioRendering
 
     // Reusable buffers to reduce per-frame allocations during export
     private static float[] _mixBuffer = Array.Empty<float>();
-    private static float[] _spatialStreamBuffer = Array.Empty<float>();
     
     private static readonly Fft _exportFft = new(AudioConfig.FftBufferSize * 2);
 
@@ -140,10 +139,8 @@ public static class AudioRendering
         RenderNativeGraph(mixBuffer, sampleCount, currentTime);
 
         // Mix operator audio (always included)
-        MixSpatialAudio(mixBuffer, currentTime, frameDurationInSeconds);
 
         LogMixStats(mixBuffer, floatCount, currentTime);
-        UpdateOperatorMetering();
         
         // Populate waveform buffers from export mixdown (maintains rolling window like live playback)
         // This ensures AudioWaveform, PlaybackFFT, AudioReaction, etc. work correctly during rendering
@@ -193,36 +190,6 @@ public static class AudioRendering
         _exportFft.ComputeMagnitudes(history, context.FftGainBuffer);
     }
 
-    private static void MixSpatialAudio(float[] mixBuffer, double currentTime, double frameDuration)
-    {
-        // Mix spatial operator audio (these are not in the mixer - they use native 3D)
-        // We need to render each spatial stream separately with manual 3D processing
-        MixSpatialOperatorAudio(mixBuffer, currentTime, frameDuration);
-    }
-
-    private static void MixSpatialOperatorAudio(float[] mixBuffer, double currentTime, double frameDuration)
-    {
-        foreach (var kvp in AudioEngine.GetAllSpatialOperatorStates())
-        {
-            var stream = kvp.Value.Stream;
-            if (stream == null || !stream.IsPlaying || stream.IsPaused || kvp.Value.IsStale)
-                continue;
-
-            // Use reusable buffer for this stream's contribution
-            var streamBuffer = EnsureBuffer(ref _spatialStreamBuffer, mixBuffer.Length);
-            
-            // RenderAudio handles 3D attenuation and panning for export
-            stream.RenderAudio(currentTime, frameDuration, streamBuffer, AudioConfig.MixerFrequency, 2);
-
-            // Mix into the main buffer
-            for (int i = 0; i < mixBuffer.Length; i++)
-            {
-                if (!float.IsNaN(streamBuffer[i]))
-                    mixBuffer[i] += streamBuffer[i];
-            }
-        }
-    }
-
     private static void LogMixStats(float[] mixBuffer, int floatCount, double currentTime)
     {
         if (_frameCount <= 3 || _frameCount % 60 == 0)
@@ -236,30 +203,6 @@ public static class AudioRendering
         }
     }
 
-
-    private static void UpdateOperatorMetering()
-    {
-        UpdateSpatialMeteringForStates(AudioEngine.GetAllSpatialOperatorStates());
-    }
-
-    private static void UpdateSpatialMeteringForStates(IEnumerable<KeyValuePair<Guid, (SpatialOperatorAudioStream? Stream, bool IsStale)>> states)
-    {
-        foreach (var kvp in states)
-        {
-            var stream = kvp.Value.Stream;
-            if (stream == null || !stream.IsPlaying || stream.IsPaused || kvp.Value.IsStale)
-                continue;
-
-            // For spatial streams during export, use Bass.ChannelGetLevel directly (not through mixer)
-            var level = Bass.ChannelGetLevel(stream.StreamHandle);
-            if (level != -1)
-            {
-                float left = (level & 0xFFFF) / 32768f;
-                float right = ((level >> 16) & 0xFFFF) / 32768f;
-                stream.UpdateFromBuffer([left, right]);
-            }
-        }
-    }
 
     public static void GetLastMixDownBuffer(double frameDurationInSeconds)
     {
