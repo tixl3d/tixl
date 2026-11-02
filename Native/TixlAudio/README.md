@@ -11,6 +11,7 @@ changing anything here, rebuild them:
 |---|---|---|
 | Linux | `./build.sh` | `Dependencies/linux-x64/libtixlaudio.so` |
 | Windows | `./build-windows.sh <zig>` (cross-compiles from Linux) | `Dependencies/tixlaudio.dll` |
+| macOS | `./build-macos.sh` (on a Mac; the macOS CI job runs it) | `Dependencies/osx/libtixlaudio.dylib`, not checked in |
 
 ## Changes to the vendored miniaudio.h
 
