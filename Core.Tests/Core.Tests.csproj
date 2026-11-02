@@ -18,6 +18,13 @@
         </PackageReference>
     </ItemGroup>
 
+    <ItemGroup Condition="$([MSBuild]::IsOSPlatform('Linux'))">
+        <Content Include="../Dependencies/linux-x64/libtixlaudio.so" Visible="false" Link="libtixlaudio.so" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+    <ItemGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
+        <Content Include="../Dependencies/tixlaudio.dll" Visible="false" Link="tixlaudio.dll" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+
     <ItemGroup>
         <ProjectReference Include="..\Core\Core.csproj" />
         <ProjectReference Include="..\Graphics\Graphics.csproj" />
