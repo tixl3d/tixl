@@ -53,6 +53,17 @@ public static class AudioMixerManager
     internal static void SetOperatorMute(bool mute)
         => _engine?.SetBusVolume(OperatorBus, mute ? 0f : CompositionSettings.Current.Audio.OperatorVolume);
 
+    /// <summary>Delay in seconds, feedback and mix 0..1.</summary>
+    public static void SetEcho(AudioHandle bus, float delaySecs, float feedback, float mix, bool pingPong)
+        => _engine?.SetEcho(bus, delaySecs, feedback, mix, pingPong);
+
+    public static void SetCompressor(AudioHandle bus, float thresholdDb, float ratio, float attackSecs, float releaseSecs, float makeupGainDb)
+        => _engine?.SetCompressor(bus, thresholdDb, ratio, attackSecs, releaseSecs, makeupGainDb);
+
+    /// <summary>Mix 0..1, decay in seconds to -60 dB, and how long high frequencies last relative to that, 0..1.</summary>
+    public static void SetReverb(AudioHandle bus, float mix, float decaySecs, float highFrequencyRatio)
+        => _engine?.SetReverb(bus, mix, decaySecs, highFrequencyRatio);
+
     /// <summary>
     /// Reads the duration of an audio file in seconds. Returns 0 on failure. Used by the timeline-drop handler
     /// to size a new clip's TimeRange at the moment of import, without going through the full playback path.

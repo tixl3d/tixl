@@ -2,8 +2,7 @@
 
 **Status:** Ready to merge — 2026-11, on branch `feat/miniaudio`. BASS is gone. The maintainer tested the editor on Linux, Windows
 and macOS and an exported Player; the `Native Audio Library` workflow passes on all three platforms. Open: the two upstream
-miniaudio reports, and the first run of the changed release workflows. Effects stay low
-priority (decision 8).
+miniaudio reports, and the first run of the changed release workflows. Effects are back as native nodes.
 Decisions from 2026-10-12 are folded in (§Decisions 6–10).
 **Scope:** All audio in Editor, Player and operators on Windows, Linux and macOS. Removes ManagedBass,
 BASSmix, BASSFLAC and BASSWASAPI.

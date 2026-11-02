@@ -50,11 +50,6 @@ public static class AudioRendering
 
         Log.Gated.AudioRender($"[AudioRendering] Export evaluation sources: {_exportEvaluationSources.Count} of {AudioExportSourceRegistry.Sources.Count} registered");
 
-        // Clear what live playback left ringing (effect tails, buffered samples) so the render doesn't open
-        // with a remnant of what was last heard — and so two renders of the same range match.
-        foreach (var source in _exportEvaluationSources)
-            source.ResetForExport();
-
         // Reset audio analysis state for clean export - ensures both modes start from same state
         AudioAnalysisContext.Default.Reset();
         WaveFormProcessing.ResetExportBuffer();
@@ -65,6 +60,11 @@ public static class AudioRendering
 
         // The export pulls the engine itself, so the graph keeps its state while no device runs.
         AudioMixerManager.NativeEngine?.DetachDevice();
+
+        // Clear what live playback left ringing (effect tails, buffered samples) so the render doesn't open
+        // with a remnant of what was last heard — and so two renders of the same range match.
+        foreach (var source in AudioExportSourceRegistry.Sources)
+            source.ResetForExport();
         foreach (var (_, clipStream) in AudioEngine.SoundtrackClipStreams)
             clipStream.PrepareForExport();
 

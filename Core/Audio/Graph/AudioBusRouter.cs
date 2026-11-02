@@ -150,7 +150,11 @@ public sealed class AudioBusRouter
     /// <summary>Clears every insert's internal state, so a tail still ringing from live playback can't leak into an export.</summary>
     public void ResetEffects()
     {
-        // No insert carries state yet: the effect operators pass their audio through.
+        if (_engine == null)
+            return;
+
+        foreach (var group in _fxGroups.Values)
+            _engine.ResetEffect(group.Bus);
     }
 
     /// <summary>Releases the buses without calling back into operators, so it is safe from a finalizer.</summary>
@@ -231,7 +235,7 @@ public sealed class AudioBusRouter
             return group;
         }
 
-        var bus = engine.CreateBus();
+        var bus = engine.CreateBus(fxNode.FxInsert?.Effect ?? AudioEffectKind.None);
         if (!bus.IsValid)
             return null;
 
@@ -271,7 +275,9 @@ public sealed class AudioBusRouter
             fxNode.FxInsert?.Remove(group.Bus);
 
             // Its sources move out later in this frame, so freeing it now would silence them for a moment.
-            _pendingFrees.Add((group.Bus, Playback.RunTimeInSecs + RetiredBusLifetimeSecs));
+            // An effect's tail then rings out instead of being cut.
+            engine.FadeOutEffect(group.Bus, RetiredEffectFadeSecs);
+            _pendingFrees.Add((group.Bus, Playback.RunTimeInSecs + RetiredEffectFadeSecs + RetiredBusLifetimeSecs));
         }
 
         for (var i = _pendingFrees.Count - 1; i >= 0; i--)
@@ -321,6 +327,7 @@ public sealed class AudioBusRouter
     }
 
     private const double RetiredBusLifetimeSecs = 0.1;
+    private const float RetiredEffectFadeSecs = 0.4f;
 
     /** The other bus stamps during its own evaluation, which may run after this router in a frame. */
     private const int CollectedFrameSlack = 2;

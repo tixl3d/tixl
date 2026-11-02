@@ -47,6 +47,9 @@ public sealed class AudioGraphNode
     /// Created once per op; must not allocate per frame.</summary>
     public sealed class AudioFxInsert
     {
+        /// <summary>The effect the nested bus runs; <see cref="AudioEffectKind.None"/> for a metering tap.</summary>
+        public AudioEffectKind Effect = AudioEffectKind.None;
+
         /// <summary>Called once when the nested bus is created.</summary>
         public required Action<AudioHandle> Apply;
 

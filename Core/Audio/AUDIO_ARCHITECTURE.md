@@ -51,6 +51,12 @@ runs it in 10 ms steps inside each frame, because the decay and onset detection 
 sound like live playback. Video audio is pushed synchronously per frame. Re-attaching resumes live playback. Without any
 output device the engine runs in offline mode, so exports keep their audio.
 
+## Effects
+
+`[AudioEcho]`, `[AudioCompressor]` and `[AudioReverb]` declare an insert, which `AudioBusRouter` realises as a nested bus with
+an effect node between its group and its tap. The node processes continuously, so a tail keeps sounding after its sources
+stop, and fades over 400 ms when the insert is unwired. An export clears every tail before its first block.
+
 ## Spatial audio
 
 Spatial sources are mono sources in the operator bus, using miniaudio's spatializer with a linear falloff. TiXL's world

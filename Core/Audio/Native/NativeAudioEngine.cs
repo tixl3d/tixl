@@ -57,9 +57,24 @@ internal sealed unsafe class NativeAudioEngine : IDisposable
         NativeAudio.SoundUnload(_engine, source.Value);
     }
 
-    public AudioHandle CreateBus()
+    public void SetEcho(AudioHandle bus, float delaySecs, float feedback, float mix, bool pingPong)
+        => NativeAudio.BusSetEffect(_engine, bus.Value, delaySecs, feedback, mix, pingPong ? 1f : 0f, 0f);
+
+    public void SetCompressor(AudioHandle bus, float thresholdDb, float ratio, float attackSecs, float releaseSecs, float makeupGainDb)
+        => NativeAudio.BusSetEffect(_engine, bus.Value, thresholdDb, ratio, attackSecs, releaseSecs, makeupGainDb);
+
+    public void SetReverb(AudioHandle bus, float mix, float decaySecs, float highFrequencyRatio)
+        => NativeAudio.BusSetEffect(_engine, bus.Value, mix, decaySecs, highFrequencyRatio, 0f, 0f);
+
+    /// <summary>Clears an effect's tail before its next block.</summary>
+    public void ResetEffect(AudioHandle bus) => NativeAudio.BusResetEffect(_engine, bus.Value);
+
+    /// <summary>Lets an effect's tail ring out and fade, for a bus about to be released.</summary>
+    public void FadeOutEffect(AudioHandle bus, float seconds) => NativeAudio.BusFadeOutEffect(_engine, bus.Value, seconds);
+
+    public AudioHandle CreateBus(AudioEffectKind effectKind = AudioEffectKind.None)
     {
-        var handle = NativeAudio.BusCreate(_engine);
+        var handle = NativeAudio.BusCreate(_engine, effectKind);
         if (handle < 0)
             Log.Warning($"Could not create an audio bus (error {handle}).");
 

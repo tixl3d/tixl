@@ -105,14 +105,17 @@ Wire `[AudioLevel]` inline before the bus, then branch a second `[AudioLevel]` o
 - Both `[AudioLevel]` outputs follow the audio and fall to 0 when it stops. The side branch works for clips too and shows no warning.
 - `[AudioBus]` **Level** and the operator, soundtrack and global meters move.
 
-## Step: Effects are passed through
+## Step: Effects
 
 **Action:**
-Wire a source through `[AudioReverb]`, `[AudioEcho]` and `[AudioCompressor]`.
+Wire a looping source through `[AudioEcho]`, `[AudioReverb]` and `[AudioCompressor]` in turn, into a bus. Change their parameters while playing, then unwire one, and export a few seconds twice.
 
 **Expected:**
-- The audio passes through unchanged and each op shows a warning that the effect isn't available.
-- Their parameters are still there.
+- Each effect is audible, and parameter changes take effect without loud clicks. Ping-pong moves the repeats between the sides.
+- `[AudioReverb]` **Time** changes how long the tail lasts, and a low **HighFreqRatio** makes it darker.
+- `[AudioCompressor]` makes a loud source quieter above **Threshold**, and **MakeupGainDb** brings it back up.
+- Unwiring lets the tail ring out and fade instead of cutting it.
+- The exports start without a remnant of what was playing, and sound identical.
 
 ## Step: Video audio
 

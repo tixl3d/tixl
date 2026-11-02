@@ -38,9 +38,6 @@ internal static unsafe partial class NativeAudio
         public uint Backend;
     }
 
-    [LibraryImport(Library, EntryPoint = "ta_now_ns")]
-    internal static partial ulong NowNs();
-
     [LibraryImport(Library, EntryPoint = "ta_create")]
     internal static partial IntPtr Create(Mode mode, Backend backend, uint sampleRate, uint periodFrames, out int result);
 
@@ -89,12 +86,6 @@ internal static unsafe partial class NativeAudio
     [LibraryImport(Library, EntryPoint = "ta_sound_set_pitch")]
     internal static partial void SoundSetPitch(IntPtr engine, int sound, float pitch);
 
-    [LibraryImport(Library, EntryPoint = "ta_set_tracked_sound")]
-    internal static partial void SetTrackedSound(IntPtr engine, int sound);
-
-    [LibraryImport(Library, EntryPoint = "ta_get_playback_seconds")]
-    internal static partial double GetPlaybackSeconds(IntPtr engine, ulong nowNs);
-
     [LibraryImport(Library, EntryPoint = "ta_output_read_stereo")]
     internal static partial void OutputReadStereo(IntPtr engine, float* destination, int frameCount);
 
@@ -132,7 +123,16 @@ internal static unsafe partial class NativeAudio
     internal static partial int Route(IntPtr engine, int source, int target);
 
     [LibraryImport(Library, EntryPoint = "ta_bus_create")]
-    internal static partial int BusCreate(IntPtr engine);
+    internal static partial int BusCreate(IntPtr engine, AudioEffectKind effectKind);
+
+    [LibraryImport(Library, EntryPoint = "ta_bus_set_effect")]
+    internal static partial void BusSetEffect(IntPtr engine, int bus, float p0, float p1, float p2, float p3, float p4);
+
+    [LibraryImport(Library, EntryPoint = "ta_bus_reset_effect")]
+    internal static partial void BusResetEffect(IntPtr engine, int bus);
+
+    [LibraryImport(Library, EntryPoint = "ta_bus_fade_out_effect")]
+    internal static partial void BusFadeOutEffect(IntPtr engine, int bus, float seconds);
 
     [LibraryImport(Library, EntryPoint = "ta_bus_destroy")]
     internal static partial void BusDestroy(IntPtr engine, int bus);

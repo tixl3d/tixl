@@ -532,6 +532,271 @@ public class NativeAudioEngineTests
         }
     }
 
+    private static (NativeAudioEngine Engine, AudioHandle Bus, AudioHandle Source, string Path) StartEffect(AudioEffectKind kind, Func<int, float> signal, int seconds = 2)
+    {
+        var path = WriteWav(seconds, signal);
+        var engine = NativeAudioEngine.TryCreate(NativeAudio.Mode.Offline, NativeAudio.Backend.Null, SampleRate);
+        Assert.NotNull(engine);
+        var bus = engine.CreateBus(kind);
+        Assert.True(bus.IsValid);
+        Assert.True(engine.Route(bus, AudioHandle.Output));
+        var source = engine.LoadFile(path);
+        Assert.True(engine.Route(source, bus));
+        return (engine, bus, source, path);
+    }
+
+    private static float[] RenderFrames(NativeAudioEngine engine, int frames)
+    {
+        var all = new float[frames * 2];
+        const int block = 512;
+        var block_ = new float[block * 2];
+        for (var offset = 0; offset < frames; offset += block)
+        {
+            engine.Render(block_, block);
+            Array.Copy(block_, 0, all, offset * 2, Math.Min(block, frames - offset) * 2);
+        }
+
+        return all;
+    }
+
+    [Fact]
+    public void EchoRepeatsAfterItsDelayAndKeepsRingingOnceTheSourceStops()
+    {
+        var (engine, bus, source, path) = StartEffect(AudioEffectKind.Echo, frame => frame < 480 ? 0.5f : 0f);
+        using (engine)
+        {
+            try
+            {
+                engine.SetEcho(bus, 0.25f, 0.5f, 0.5f, false);
+                engine.Play(source);
+                var rendered = RenderFrames(engine, 48000);
+
+                Assert.InRange(rendered[100 * 2], 0.2f, 0.3f); // dry at half mix
+                Assert.Equal(0f, rendered[6000 * 2], 4); // silent before the first repeat
+                Assert.InRange(rendered[(12000 + 100) * 2], 0.2f, 0.3f); // first repeat
+                Assert.InRange(rendered[(24000 + 100) * 2], 0.1f, 0.15f); // feedback halves the second
+
+                engine.Pause(source);
+                Assert.True(Peak(RenderFrames(engine, 24000)) > 0.01f); // the tail outlives the source
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
+    }
+
+    [Fact]
+    public void PingPongEchoAlternatesSides()
+    {
+        var (engine, bus, source, path) = StartEffect(AudioEffectKind.Echo, frame => frame < 480 ? 0.5f : 0f);
+        using (engine)
+        {
+            try
+            {
+                engine.SetEcho(bus, 0.25f, 0.5f, 1f, true);
+                engine.Play(source);
+                var rendered = RenderFrames(engine, 48000);
+
+                var first = (Left: Math.Abs(rendered[(12000 + 100) * 2]), Right: Math.Abs(rendered[(12000 + 100) * 2 + 1]));
+                var second = (Left: Math.Abs(rendered[(24000 + 100) * 2]), Right: Math.Abs(rendered[(24000 + 100) * 2 + 1]));
+                Assert.True(first.Left > 0.1f && first.Right < 0.01f);
+                Assert.True(second.Right > 0.1f && second.Left < 0.01f);
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
+    }
+
+    [Fact]
+    public void CompressorReducesWhatIsOverItsThresholdByItsRatio()
+    {
+        // 0.5 is -6 dB. Over a -18 dB threshold by 12 dB at 4:1 leaves 3 dB over: -15 dB, 0.178.
+        var (engine, bus, source, path) = StartEffect(AudioEffectKind.Compressor, _ => 0.5f);
+        using (engine)
+        {
+            try
+            {
+                engine.SetCompressor(bus, -18f, 4f, 0.001f, 0.05f, 0f);
+                engine.Play(source);
+                var rendered = RenderFrames(engine, 24000);
+                Assert.InRange(rendered[20000 * 2], 0.17f, 0.185f);
+
+                engine.SetCompressor(bus, -18f, 4f, 0.001f, 0.05f, 6f);
+                rendered = RenderFrames(engine, 2048);
+                Assert.InRange(rendered[2000 * 2], 0.34f, 0.37f); // 6 dB of makeup doubles it
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
+    }
+
+    [Fact]
+    public void CompressorLeavesQuietAudioAlone()
+    {
+        var (engine, bus, source, path) = StartEffect(AudioEffectKind.Compressor, _ => 0.05f);
+        using (engine)
+        {
+            try
+            {
+                engine.SetCompressor(bus, -18f, 4f, 0.001f, 0.05f, 0f);
+                engine.Play(source);
+                var rendered = RenderFrames(engine, 12000);
+                Assert.Equal(0.05f, rendered[10000 * 2], 3);
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
+    }
+
+    [Theory]
+    [InlineData(0.5f)]
+    [InlineData(1.5f)]
+    public void ReverbDecaysByAboutSixtyDecibelsOverItsTime(float decaySecs)
+    {
+        var (engine, bus, source, path) = StartEffect(AudioEffectKind.Reverb, frame => frame < 480 ? 0.5f : 0f);
+        using (engine)
+        {
+            try
+            {
+                engine.SetReverb(bus, 1f, decaySecs, 0.99f);
+                engine.Play(source);
+
+                var early = Rms(RenderFrames(engine, 9600).AsSpan(4800 * 2));
+                Assert.True(early > 1e-4f);
+                RenderFrames(engine, (int)(decaySecs * SampleRate) - 9600);
+                var late = Rms(RenderFrames(engine, 4800));
+
+                var dropDb = 20f * MathF.Log10(early / Math.Max(late, 1e-9f));
+                Assert.InRange(dropDb, 35f, 85f);
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
+    }
+
+    [Fact]
+    public void ReverbIsStereoAndMixZeroStaysDry()
+    {
+        var (engine, bus, source, path) = StartEffect(AudioEffectKind.Reverb, frame => frame < 480 ? 0.5f : 0f);
+        using (engine)
+        {
+            try
+            {
+                engine.SetReverb(bus, 1f, 1f, 0.5f);
+                engine.Play(source);
+                var rendered = RenderFrames(engine, 24000);
+                var differences = 0;
+                for (var frame = 4800; frame < 24000; frame++)
+                {
+                    if (Math.Abs(rendered[frame * 2] - rendered[frame * 2 + 1]) > 1e-5f)
+                        differences++;
+                }
+
+                Assert.True(differences > 1000);
+
+                engine.SetReverb(bus, 0f, 1f, 0.5f);
+                Assert.Equal(0f, Peak(RenderFrames(engine, 2048)), 5);
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
+    }
+
+    [Theory]
+    [InlineData(AudioEffectKind.Echo)]
+    [InlineData(AudioEffectKind.Reverb)]
+    public void ResettingAnEffectClearsItsTailAndFadingEndsIt(AudioEffectKind kind)
+    {
+        var (engine, bus, source, path) = StartEffect(kind, frame => frame < 4800 ? 0.5f : 0f);
+        using (engine)
+        {
+            try
+            {
+                if (kind == AudioEffectKind.Echo)
+                    engine.SetEcho(bus, 0.1f, 0.8f, 1f, false);
+                else
+                    engine.SetReverb(bus, 1f, 3f, 0.9f);
+
+                engine.Play(source);
+                RenderFrames(engine, 12000);
+                engine.Pause(source);
+                Assert.True(Peak(RenderFrames(engine, 2048)) > 0.0001f);
+
+                engine.ResetEffect(bus);
+                Assert.Equal(0f, Peak(RenderFrames(engine, 2048)), 6);
+
+                engine.Seek(source, 0);
+                engine.Play(source);
+                RenderFrames(engine, 12000);
+                engine.Pause(source);
+                engine.FadeOutEffect(bus, 0.1f);
+                RenderFrames(engine, 4800);
+                Assert.Equal(0f, Peak(RenderFrames(engine, 2048)), 6);
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
+    }
+
+    [Theory]
+    [InlineData(AudioEffectKind.Echo)]
+    [InlineData(AudioEffectKind.Compressor)]
+    [InlineData(AudioEffectKind.Reverb)]
+    public void EffectsRenderIdenticallyAfterAReset(AudioEffectKind kind)
+    {
+        var (engine, bus, source, path) = StartEffect(kind, frame => 0.4f * MathF.Sin(frame * 0.05f));
+        using (engine)
+        {
+            try
+            {
+                if (kind == AudioEffectKind.Echo)
+                    engine.SetEcho(bus, 0.1f, 0.5f, 0.5f, true);
+                else if (kind == AudioEffectKind.Compressor)
+                    engine.SetCompressor(bus, -20f, 4f, 0.01f, 0.2f, 0f);
+                else
+                    engine.SetReverb(bus, 0.5f, 1f, 0.5f);
+
+                float[] Pass()
+                {
+                    engine.Seek(source, 0.25);
+                    engine.ResetEffect(bus);
+                    engine.Play(source);
+                    var result = RenderFrames(engine, 24000);
+                    engine.Pause(source);
+                    return result;
+                }
+
+                Assert.Equal(Pass(), Pass());
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
+    }
+
+    private static float Rms(ReadOnlySpan<float> samples)
+    {
+        var sum = 0.0;
+        foreach (var sample in samples)
+            sum += sample * sample;
+
+        return (float)Math.Sqrt(sum / samples.Length);
+    }
+
     private static void PlayToOutput(NativeAudioEngine engine, AudioHandle source)
     {
         engine.Route(source, AudioHandle.Output);

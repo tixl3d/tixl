@@ -33,11 +33,8 @@
 #define TA_MAX_GENERATION (0x3FFFFFFFu >> TA_SOUND_SLOT_BITS)
 #define TA_HANDLE_OUTPUT 0x7FFFFFFF /* routes to the device output; meters what reaches it */
 #define TA_TAP_STALE_FRAMES 4096 /* a tap nothing wrote to for this long meters as silence (85 ms at 48 kHz) */
-#define TA_MAX_ECHOES 8
 #define TA_CAPTURE_RING_FRAMES (1 << 19) /* power of two; 10.9 s at 48 kHz, so a stalled frame loop doesn't lose a recording */
-#define TA_MAX_TAPS 8 /* index 0 is the device output */
 #define TA_TAP_CAPACITY 16384 /* mono frames, power of two */
-#define TA_ECHO_MAX_SECONDS 2
 #define TA_MP3_SEEK_POINTS 4096
 
 enum
@@ -57,38 +54,15 @@ enum
 
 enum
 {
-    TA_LOAD_STREAM_RESOURCE_MANAGER = 1, /* miniaudio's own streaming, which never builds an MP3 seek table */
-    TA_LOAD_DECODE_TO_MEMORY = 2,
     TA_LOAD_SPATIAL = 4,
-};
-
-enum
-{
-    TA_NODE_ENDPOINT = 0,
-    TA_NODE_SOUND = 1,
-    TA_NODE_BUS = 2,
-    TA_NODE_ECHO = 3,
-    TA_NODE_TAP = 4,
 };
 
 typedef enum
 {
     TA_SOURCE_FILE_DECODER,
-    TA_SOURCE_RESOURCE_MANAGER,
-    TA_SOURCE_WAVEFORM,
     TA_SOURCE_PUSH,
     TA_SOURCE_GENERATOR,
 } ta_source_kind;
-
-typedef struct
-{
-    ma_uint64 callbackCount;
-    ma_uint64 lateCallbackCount;
-    ma_uint64 maxCallbackGapNs;
-    ma_uint64 maxCallbackDurationNs;
-    ma_uint64 totalCallbackDurationNs;
-    ma_uint64 totalFramesRendered;
-} ta_stats;
 
 typedef struct
 {
@@ -104,7 +78,6 @@ typedef struct
 {
     float samples[TA_TAP_CAPACITY];
     ma_atomic_uint64 framesWritten;
-    ma_atomic_float peak;
     ma_atomic_uint64 lastWriteClock;
 } ta_tap_ring;
 
@@ -114,18 +87,6 @@ typedef struct
     ta_tap_ring ring;
     ma_atomic_uint64* clock; /* frames the engine has rendered, to tell a stopped source from a quiet one */
 } ta_tap_node;
-
-typedef struct
-{
-    ma_node_base base;
-    float* delayLine; /* interleaved stereo */
-    ma_uint32 capacityFrames;
-    ma_uint32 writeFrame;
-    ma_uint32 sampleRate;
-    ma_atomic_float delaySeconds;
-    ma_atomic_float feedback;
-    ma_atomic_float wetMix;
-} ta_echo_node;
 
 /* Pushed PCM (video audio, generators fed from the frame loop). Underruns play silence instead of ending the sound. */
 typedef struct
@@ -175,7 +136,6 @@ typedef struct
     union
     {
         ma_decoder decoder;
-        ma_waveform waveform;
         ta_push_source push;
         ta_generator_source generator;
     } source;
@@ -185,25 +145,57 @@ typedef struct
     ma_uint32 generation;
 } ta_sound_slot;
 
+/* ---- Effects: one insert node between a bus's group and its tap. ---- */
+
+enum { TA_EFFECT_NONE = 0, TA_EFFECT_ECHO = 1, TA_EFFECT_COMPRESSOR = 2, TA_EFFECT_REVERB = 3 };
+
+#define TA_EFFECT_PARAMETERS 5
+#define TA_ECHO_MAX_SECONDS 2
+#define TA_REVERB_COMBS 8
+#define TA_REVERB_ALLPASSES 4
+
+typedef struct
+{
+    float* buffer;
+    ma_uint32 length;
+    ma_uint32 position;
+    float state;
+} ta_delay_line;
+
+typedef struct
+{
+    ma_node_base base;
+    ma_int32 kind;
+    ma_uint32 sampleRate;
+    ma_atomic_float parameters[TA_EFFECT_PARAMETERS];
+    ma_atomic_int32 resetSignal;
+    ma_atomic_float fadeSeconds; /* > 0 fades the output out over this time */
+    float outputGain;
+
+    float* memory;
+    size_t memorySamples;
+
+    /* Echo */
+    float* echoLine; /* interleaved stereo */
+    ma_uint32 echoCapacity;
+    ma_uint32 echoWrite;
+
+    /* Compressor */
+    float gainReductionDb;
+
+    /* Reverb, per channel */
+    ta_delay_line combs[2][TA_REVERB_COMBS];
+    ta_delay_line allpasses[2][TA_REVERB_ALLPASSES];
+} ta_effect_node;
+
 typedef struct
 {
     ma_bool32 used;
     ma_uint32 generation;
     ma_sound_group group;
+    ta_effect_node* effect; /* null for a plain bus */
     ta_tap_node tap;
 } ta_bus_slot;
-
-typedef struct
-{
-    ma_bool32 used;
-    ta_echo_node node;
-} ta_echo_slot;
-
-typedef struct
-{
-    ma_bool32 used;
-    ta_tap_node node;
-} ta_tap_slot;
 
 /* Rewiring requested by the frame loop, applied by the audio thread between blocks so no block sees half a change. */
 #define TA_ROUTE_QUEUE_CAPACITY 256 /* power of two */
@@ -227,20 +219,9 @@ typedef struct
 
     ta_sound_slot sounds[TA_MAX_SOUNDS];
     ta_bus_slot buses[TA_MAX_BUSES];
-    ta_echo_slot echoes[TA_MAX_ECHOES];
-    ta_tap_slot taps[TA_MAX_TAPS];
     ta_tap_ring outputTap;
 
-    ta_stats stats;
-    ma_uint64 lastCallbackStartNs;
-    ma_uint32 lastCallbackFrames;
 
-    /* Seqlock: the audio thread publishes the tracked sound's cursor and when it was taken. */
-    ma_atomic_uint32 positionSequence;
-    ma_atomic_int32 trackedSound;
-    ma_uint64 trackedCursorFrames;
-    ma_uint64 trackedCursorTimeNs;
-    ma_uint32 trackedIsPlaying;
 
     /* Applied after the output tap, so analysis still sees the full signal when the output is muted. */
     ma_atomic_float outputGain;
@@ -260,60 +241,19 @@ typedef struct
     ma_atomic_uint64 renderClock;
 } ta_engine;
 
-static ma_uint64 ta_now_ns_internal(void)
-{
-#if defined(_WIN32)
-    LARGE_INTEGER counter, frequency;
-    QueryPerformanceCounter(&counter);
-    QueryPerformanceFrequency(&frequency);
-    return (ma_uint64)((double)counter.QuadPart * 1e9 / (double)frequency.QuadPart);
-#else
-    struct timespec now;
-    clock_gettime(CLOCK_MONOTONIC, &now);
-    return (ma_uint64)now.tv_sec * 1000000000ull + (ma_uint64)now.tv_nsec;
-#endif
-}
-
 /* ---- Tap ring ---- */
 
 static void ta_tap_ring_write(ta_tap_ring* ring, const float* frames, ma_uint32 frameCount, ma_uint32 channels)
 {
     ma_uint64 written = ma_atomic_uint64_get(&ring->framesWritten);
-    float peak = ma_atomic_float_get(&ring->peak);
     for (ma_uint32 frameIndex = 0; frameIndex < frameCount; frameIndex++)
     {
         float mono = channels >= 2
                          ? 0.5f * (frames[frameIndex * channels] + frames[frameIndex * channels + 1])
                          : frames[frameIndex * channels];
         ring->samples[(written + frameIndex) & (TA_TAP_CAPACITY - 1)] = mono;
-        float magnitude = mono < 0 ? -mono : mono;
-        if (magnitude > peak)
-            peak = magnitude;
     }
-    ma_atomic_float_set(&ring->peak, peak);
     ma_atomic_uint64_set(&ring->framesWritten, written + frameCount);
-}
-
-/**
- * Copies samples written after sinceFrame (at most maxCount, the newest ones if more arrived) and returns how
- * many were copied; *totalFrames receives the write position to pass as sinceFrame next time.
- */
-static ma_int32 ta_tap_ring_read_since(ta_tap_ring* ring, ma_uint64 sinceFrame, float* destination, ma_int32 maxCount, ma_uint64* totalFrames)
-{
-    if (maxCount > TA_TAP_CAPACITY / 2)
-        maxCount = TA_TAP_CAPACITY / 2;
-
-    ma_uint64 written = ma_atomic_uint64_get(&ring->framesWritten);
-    *totalFrames = written;
-    if (written <= sinceFrame)
-        return 0;
-
-    ma_uint64 available = written - sinceFrame;
-    ma_uint64 count = available < (ma_uint64)maxCount ? available : (ma_uint64)maxCount;
-    ma_uint64 start = written - count;
-    for (ma_uint64 index = 0; index < count; index++)
-        destination[index] = ring->samples[(start + index) & (TA_TAP_CAPACITY - 1)];
-    return (ma_int32)count;
 }
 
 /** Copies the newest count samples, zero-padded at the start if fewer exist; returns the write position. */
@@ -349,39 +289,171 @@ static void ta_tap_process(ma_node* node, const float** framesIn, ma_uint32* fra
 
 static ma_node_vtable g_tapVtable = { ta_tap_process, NULL, 1, 1, MA_NODE_FLAG_PASSTHROUGH };
 
-/* ---- Echo: custom DSP as a native node; parameters are atomics written from C#. ---- */
-
-static void ta_echo_process(ma_node* node, const float** framesIn, ma_uint32* frameCountIn, float** framesOut, ma_uint32* frameCountOut)
+static void ta_effect_clear(ta_effect_node* effect)
 {
-    ta_echo_node* echo = (ta_echo_node*)node;
-    const float* input = framesIn[0];
-    float* output = framesOut[0];
-    ma_uint32 frameCount = *frameCountOut;
-    (void)frameCountIn;
-
-    float feedback = ma_atomic_float_get(&echo->feedback);
-    float wetMix = ma_atomic_float_get(&echo->wetMix);
-    ma_uint32 delayFrames = (ma_uint32)(ma_atomic_float_get(&echo->delaySeconds) * (float)echo->sampleRate);
-    if (delayFrames < 1)
-        delayFrames = 1;
-    if (delayFrames >= echo->capacityFrames)
-        delayFrames = echo->capacityFrames - 1;
-
-    for (ma_uint32 frameIndex = 0; frameIndex < frameCount; frameIndex++)
+    memset(effect->memory, 0, effect->memorySamples * sizeof(float));
+    effect->echoWrite = 0;
+    effect->gainReductionDb = 0;
+    for (int channel = 0; channel < 2; channel++)
     {
-        ma_uint32 readFrame = (echo->writeFrame + echo->capacityFrames - delayFrames) % echo->capacityFrames;
-        for (ma_uint32 channel = 0; channel < 2; channel++)
+        for (int index = 0; index < TA_REVERB_COMBS; index++)
         {
-            float dry = input[frameIndex * 2 + channel];
-            float delayed = echo->delayLine[readFrame * 2 + channel];
-            echo->delayLine[echo->writeFrame * 2 + channel] = dry + delayed * feedback;
-            output[frameIndex * 2 + channel] = dry * (1.0f - wetMix) + delayed * wetMix;
+            effect->combs[channel][index].position = 0;
+            effect->combs[channel][index].state = 0;
         }
-        echo->writeFrame = (echo->writeFrame + 1) % echo->capacityFrames;
+        for (int index = 0; index < TA_REVERB_ALLPASSES; index++)
+            effect->allpasses[channel][index].position = 0;
     }
 }
 
-static ma_node_vtable g_echoVtable = { ta_echo_process, NULL, 1, 1, 0 };
+/** parameters: delay seconds, feedback 0..1, mix 0..1, ping-pong 0 or 1 */
+static void ta_effect_process_echo(ta_effect_node* effect, const float* input, float* output, ma_uint32 frameCount)
+{
+    float feedback = ma_atomic_float_get(&effect->parameters[1]);
+    float mix = ma_atomic_float_get(&effect->parameters[2]);
+    ma_bool32 pingPong = ma_atomic_float_get(&effect->parameters[3]) > 0.5f;
+    ma_uint32 delayFrames = (ma_uint32)(ma_atomic_float_get(&effect->parameters[0]) * (float)effect->sampleRate);
+    if (delayFrames < 1)
+        delayFrames = 1;
+    if (delayFrames >= effect->echoCapacity)
+        delayFrames = effect->echoCapacity - 1;
+
+    for (ma_uint32 frame = 0; frame < frameCount; frame++)
+    {
+        ma_uint32 read = (effect->echoWrite + effect->echoCapacity - delayFrames) % effect->echoCapacity;
+        float delayedLeft = effect->echoLine[read * 2];
+        float delayedRight = effect->echoLine[read * 2 + 1];
+        float dryLeft = input != NULL ? input[frame * 2] : 0;
+        float dryRight = input != NULL ? input[frame * 2 + 1] : 0;
+
+        /* Ping-pong feeds both channels in on the left and swaps sides on every repeat. */
+        effect->echoLine[effect->echoWrite * 2] = pingPong ? (dryLeft + dryRight) * 0.5f + delayedRight * feedback : dryLeft + delayedLeft * feedback;
+        effect->echoLine[effect->echoWrite * 2 + 1] = pingPong ? delayedLeft * feedback : dryRight + delayedRight * feedback;
+        output[frame * 2] = dryLeft * (1 - mix) + delayedLeft * mix;
+        output[frame * 2 + 1] = dryRight * (1 - mix) + delayedRight * mix;
+        effect->echoWrite = (effect->echoWrite + 1) % effect->echoCapacity;
+    }
+}
+
+/** parameters: threshold dB, ratio, attack seconds, release seconds, makeup gain dB. Feed-forward and stereo-linked. */
+static void ta_effect_process_compressor(ta_effect_node* effect, const float* input, float* output, ma_uint32 frameCount)
+{
+    float threshold = ma_atomic_float_get(&effect->parameters[0]);
+    float ratio = ma_atomic_float_get(&effect->parameters[1]);
+    float rate = (float)effect->sampleRate;
+    float attack = expf(-1.0f / (ma_atomic_float_get(&effect->parameters[2]) * rate));
+    float release = expf(-1.0f / (ma_atomic_float_get(&effect->parameters[3]) * rate));
+    float makeup = powf(10.0f, ma_atomic_float_get(&effect->parameters[4]) / 20.0f);
+    float slope = 1.0f - 1.0f / ratio;
+
+    for (ma_uint32 frame = 0; frame < frameCount; frame++)
+    {
+        float left = input != NULL ? input[frame * 2] : 0;
+        float right = input != NULL ? input[frame * 2 + 1] : 0;
+        float absLeft = fabsf(left), absRight = fabsf(right);
+        float peak = absLeft > absRight ? absLeft : absRight;
+
+        float target = 0;
+        if (peak > 1e-6f)
+        {
+            float over = 20.0f * log10f(peak) - threshold;
+            if (over > 0)
+                target = over * slope;
+        }
+
+        float coefficient = target > effect->gainReductionDb ? attack : release;
+        effect->gainReductionDb = target + coefficient * (effect->gainReductionDb - target);
+
+        float gain = powf(10.0f, -effect->gainReductionDb / 20.0f) * makeup;
+        output[frame * 2] = left * gain;
+        output[frame * 2 + 1] = right * gain;
+    }
+}
+
+/**
+ * parameters: mix 0..1, decay time seconds, high-frequency decay ratio 0..1. Freeverb's structure, with each comb's
+ * feedback derived from the decay time instead of a room-size constant, so the time input means RT60.
+ */
+static void ta_effect_process_reverb(ta_effect_node* effect, const float* input, float* output, ma_uint32 frameCount)
+{
+    const float inputGain = 0.03f;
+    const float wetScale = 1.0f;
+    float mix = ma_atomic_float_get(&effect->parameters[0]);
+    float decaySeconds = ma_atomic_float_get(&effect->parameters[1]);
+    float damping = (1.0f - ma_atomic_float_get(&effect->parameters[2])) * 0.8f;
+
+    float feedback[2][TA_REVERB_COMBS];
+    for (int channel = 0; channel < 2; channel++)
+    {
+        for (int index = 0; index < TA_REVERB_COMBS; index++)
+            feedback[channel][index] = powf(10.0f, -3.0f * (float)effect->combs[channel][index].length / ((float)effect->sampleRate * decaySeconds));
+    }
+
+    for (ma_uint32 frame = 0; frame < frameCount; frame++)
+    {
+        float dryLeft = input != NULL ? input[frame * 2] : 0;
+        float dryRight = input != NULL ? input[frame * 2 + 1] : 0;
+        float reverbInput = (dryLeft + dryRight) * inputGain;
+
+        for (int channel = 0; channel < 2; channel++)
+        {
+            float wet = 0;
+            for (int index = 0; index < TA_REVERB_COMBS; index++)
+            {
+                ta_delay_line* comb = &effect->combs[channel][index];
+                float delayed = comb->buffer[comb->position];
+                comb->state = delayed * (1 - damping) + comb->state * damping + 1e-20f;
+                comb->buffer[comb->position] = reverbInput + comb->state * feedback[channel][index];
+                comb->position = (comb->position + 1) % comb->length;
+                wet += delayed;
+            }
+            for (int index = 0; index < TA_REVERB_ALLPASSES; index++)
+            {
+                ta_delay_line* allpass = &effect->allpasses[channel][index];
+                float delayed = allpass->buffer[allpass->position];
+                allpass->buffer[allpass->position] = wet + delayed * 0.5f;
+                allpass->position = (allpass->position + 1) % allpass->length;
+                wet = delayed - wet;
+            }
+            float dry = channel == 0 ? dryLeft : dryRight;
+            output[frame * 2 + channel] = dry + wet * wetScale * mix;
+        }
+    }
+}
+
+static void ta_effect_process(ma_node* node, const float** framesIn, ma_uint32* frameCountIn, float** framesOut, ma_uint32* frameCountOut)
+{
+    ta_effect_node* effect = (ta_effect_node*)node;
+    ma_uint32 frameCount = *frameCountOut;
+    const float* input = framesIn != NULL && frameCountIn != NULL && frameCountIn[0] >= frameCount ? framesIn[0] : NULL;
+    float* output = framesOut[0];
+
+    if (ma_atomic_int32_exchange(&effect->resetSignal, 0))
+        ta_effect_clear(effect);
+
+    switch (effect->kind)
+    {
+        case TA_EFFECT_ECHO: ta_effect_process_echo(effect, input, output, frameCount); break;
+        case TA_EFFECT_COMPRESSOR: ta_effect_process_compressor(effect, input, output, frameCount); break;
+        default: ta_effect_process_reverb(effect, input, output, frameCount); break;
+    }
+
+    /* Retiring: lets a tail ring out and fade instead of being cut. */
+    float fadeSeconds = ma_atomic_float_get(&effect->fadeSeconds);
+    if (fadeSeconds > 0)
+    {
+        float step = 1.0f / (fadeSeconds * (float)effect->sampleRate);
+        for (ma_uint32 frame = 0; frame < frameCount; frame++)
+        {
+            effect->outputGain = effect->outputGain > step ? effect->outputGain - step : 0;
+            output[frame * 2] *= effect->outputGain;
+            output[frame * 2 + 1] *= effect->outputGain;
+        }
+    }
+}
+
+/* Continuous, so a tail keeps sounding after its sources have stopped or moved out. */
+static ma_node_vtable g_effectVtable = { ta_effect_process, NULL, 1, 1, MA_NODE_FLAG_CONTINUOUS_PROCESSING | MA_NODE_FLAG_ALLOW_NULL_INPUT };
 
 static ma_result ta_stereo_node_init(ta_engine* engine, const ma_node_vtable* vtable, ma_node* node)
 {
@@ -476,8 +548,9 @@ static void ta_apply_queued_routes(ta_engine* engine)
 
 static ta_sound_slot* ta_sound(ta_engine* engine, ma_int32 handle);
 static void ta_release_sound(ta_sound_slot* slot);
+static void ta_effect_destroy(ta_effect_node* effect);
 
-static void ta_render_block(ta_engine* engine, float* output, ma_uint32 frameCount, ma_uint64 startNs)
+static void ta_render_block(ta_engine* engine, float* output, ma_uint32 frameCount)
 {
     ta_apply_queued_routes(engine);
     ma_engine_read_pcm_frames(&engine->engine, output, frameCount, NULL);
@@ -499,47 +572,12 @@ static void ta_render_block(ta_engine* engine, float* output, ma_uint32 frameCou
         for (ma_uint32 index = 0; index < frameCount * 2; index++)
             output[index] *= gain;
     }
-
-    ma_int32 tracked = ma_atomic_int32_get(&engine->trackedSound);
-    ta_sound_slot* trackedSlot = ta_sound(engine, tracked);
-    if (trackedSlot != NULL)
-    {
-        ma_uint64 cursor = 0;
-        ma_sound_get_cursor_in_pcm_frames(&trackedSlot->sound, &cursor);
-        ma_atomic_uint32_fetch_add(&engine->positionSequence, 1);
-        engine->trackedCursorFrames = cursor;
-        engine->trackedCursorTimeNs = startNs;
-        engine->trackedIsPlaying = ma_sound_is_playing(&trackedSlot->sound);
-        ma_atomic_uint32_fetch_add(&engine->positionSequence, 1);
-    }
 }
 
 static void ta_data_callback(ma_device* device, void* output, const void* input, ma_uint32 frameCount)
 {
-    ta_engine* engine = (ta_engine*)device->pUserData;
-    ma_uint64 startNs = ta_now_ns_internal();
     (void)input;
-
-    if (engine->lastCallbackStartNs != 0)
-    {
-        ma_uint64 gapNs = startNs - engine->lastCallbackStartNs;
-        ma_uint64 expectedNs = (ma_uint64)engine->lastCallbackFrames * 1000000000ull / engine->sampleRate;
-        if (gapNs > engine->stats.maxCallbackGapNs)
-            engine->stats.maxCallbackGapNs = gapNs;
-        if (gapNs > expectedNs * 2)
-            engine->stats.lateCallbackCount++;
-    }
-    engine->lastCallbackStartNs = startNs;
-    engine->lastCallbackFrames = frameCount;
-
-    ta_render_block(engine, (float*)output, frameCount, startNs);
-
-    ma_uint64 durationNs = ta_now_ns_internal() - startNs;
-    if (durationNs > engine->stats.maxCallbackDurationNs)
-        engine->stats.maxCallbackDurationNs = durationNs;
-    engine->stats.totalCallbackDurationNs += durationNs;
-    engine->stats.totalFramesRendered += frameCount;
-    engine->stats.callbackCount++;
+    ta_render_block((ta_engine*)device->pUserData, (float*)output, frameCount);
 }
 
 /* ---- Devices ---- */
@@ -585,7 +623,6 @@ static ma_result ta_open_device(ta_engine* engine, ma_int32 deviceIndex)
     if (result != MA_SUCCESS)
         return result;
 
-    engine->lastCallbackStartNs = 0;
     result = ma_device_start(&engine->device);
     if (result != MA_SUCCESS)
     {
@@ -604,13 +641,6 @@ static void ta_close_device(ta_engine* engine)
     engine->hasDevice = MA_FALSE;
 }
 
-/* ---- Engine lifetime ---- */
-
-TA_API ma_uint64 ta_now_ns(void)
-{
-    return ta_now_ns_internal();
-}
-
 /**
  * Creates an engine. Device mode opens the default output on the given backend; offline mode has no device
  * and is rendered with ta_render.
@@ -627,7 +657,6 @@ TA_API ta_engine* ta_create(ma_int32 mode, ma_int32 backend, ma_uint32 sampleRat
     engine->mode = mode;
     engine->sampleRate = sampleRate;
     engine->requestedPeriodFrames = periodFrames;
-    ma_atomic_int32_set(&engine->trackedSound, -1);
     ma_atomic_float_set(&engine->outputGain, 1.0f);
 
     ma_engine_config engineConfig = ma_engine_config_init();
@@ -692,23 +721,12 @@ TA_API void ta_destroy(ta_engine* engine)
             continue;
         ta_release_sound(slot);
     }
-    for (ma_int32 index = 0; index < TA_MAX_ECHOES; index++)
-    {
-        if (!engine->echoes[index].used)
-            continue;
-        ma_node_uninit(&engine->echoes[index].node.base, NULL);
-        free(engine->echoes[index].node.delayLine);
-    }
-    for (ma_int32 index = 0; index < TA_MAX_TAPS; index++)
-    {
-        if (engine->taps[index].used)
-            ma_node_uninit(&engine->taps[index].node.base, NULL);
-    }
     for (ma_int32 index = 0; index < TA_MAX_BUSES; index++)
     {
         if (engine->buses[index].used)
         {
             ma_sound_group_uninit(&engine->buses[index].group);
+            ta_effect_destroy(engine->buses[index].effect);
             ma_node_uninit(&engine->buses[index].tap.base, NULL);
         }
     }
@@ -750,7 +768,7 @@ TA_API ma_int32 ta_render(ta_engine* engine, float* output, ma_uint32 frameCount
 {
     if (engine->hasDevice)
         return MA_INVALID_OPERATION;
-    ta_render_block(engine, output, frameCount, 0);
+    ta_render_block(engine, output, frameCount);
     return MA_SUCCESS;
 }
 
@@ -761,22 +779,6 @@ TA_API void ta_get_info(ta_engine* engine, ta_info* info)
     info->periodFrames = engine->hasDevice ? engine->device.playback.internalPeriodSizeInFrames : 0;
     info->periods = engine->hasDevice ? engine->device.playback.internalPeriods : 0;
     info->backend = engine->hasContext ? (ma_uint32)engine->context.backend : 0xFFFFFFFF;
-}
-
-TA_API const char* ta_backend_name(ma_uint32 backend)
-{
-    return backend == 0xFFFFFFFF ? "Offline" : ma_get_backend_name((ma_backend)backend);
-}
-
-/** Stats are written by the audio thread without locking; a torn read only skews one sample of a diagnostic. */
-TA_API void ta_get_stats(ta_engine* engine, ta_stats* stats)
-{
-    *stats = engine->stats;
-}
-
-TA_API void ta_reset_stats(ta_engine* engine)
-{
-    memset(&engine->stats, 0, sizeof(engine->stats));
 }
 
 TA_API void ta_set_output_gain(ta_engine* engine, float gain)
@@ -889,46 +891,18 @@ TA_API ma_int32 ta_sound_load(ta_engine* engine, const char* path, ma_uint32 fla
     ta_sound_slot* slot = &engine->sounds[handle];
     ma_uint32 soundFlags = ta_sound_flags(flags);
     ma_result result;
-    if (flags & (TA_LOAD_STREAM_RESOURCE_MANAGER | TA_LOAD_DECODE_TO_MEMORY))
-    {
-        soundFlags |= (flags & TA_LOAD_DECODE_TO_MEMORY) ? MA_SOUND_FLAG_DECODE : MA_SOUND_FLAG_STREAM;
-        result = ma_sound_init_from_file(&engine->engine, path, soundFlags, NULL, NULL, &slot->sound);
-        slot->kind = TA_SOURCE_RESOURCE_MANAGER;
-    }
-    else
-    {
-        /* A spatial source is a point: a stereo file is mixed down rather than panned channel by channel. */
-        ma_decoder_config decoderConfig = ma_decoder_config_init(ma_format_f32, (flags & TA_LOAD_SPATIAL) ? 1 : 0, 0);
-        decoderConfig.seekPointCount = TA_MP3_SEEK_POINTS;
-        result = ma_decoder_init_file(path, &decoderConfig, &slot->source.decoder);
-        if (result != MA_SUCCESS)
-            return result;
-        result = ma_sound_init_from_data_source(&engine->engine, &slot->source.decoder, soundFlags, NULL, &slot->sound);
-        if (result != MA_SUCCESS)
-            ma_decoder_uninit(&slot->source.decoder);
-        slot->kind = TA_SOURCE_FILE_DECODER;
-    }
+    /* A spatial source is a point: a stereo file is mixed down rather than panned channel by channel. */
+    ma_decoder_config decoderConfig = ma_decoder_config_init(ma_format_f32, (flags & TA_LOAD_SPATIAL) ? 1 : 0, 0);
+    decoderConfig.seekPointCount = TA_MP3_SEEK_POINTS;
+    result = ma_decoder_init_file(path, &decoderConfig, &slot->source.decoder);
     if (result != MA_SUCCESS)
         return result;
-    return ta_finish_sound(engine, handle);
-}
-
-/** A sine generator, the native counterpart of a tone operator. */
-TA_API ma_int32 ta_sound_create_sine(ta_engine* engine, double frequency, double amplitude)
-{
-    ma_int32 handle = ta_free_sound_slot(engine);
-    if (handle < 0)
-        return MA_TOO_BIG;
-
-    ta_sound_slot* slot = &engine->sounds[handle];
-    ma_waveform_config config = ma_waveform_config_init(ma_format_f32, 2, engine->sampleRate, ma_waveform_type_sine, amplitude, frequency);
-    ma_result result = ma_waveform_init(&config, &slot->source.waveform);
+    result = ma_sound_init_from_data_source(&engine->engine, &slot->source.decoder, soundFlags, NULL, &slot->sound);
+    if (result != MA_SUCCESS)
+        ma_decoder_uninit(&slot->source.decoder);
+    slot->kind = TA_SOURCE_FILE_DECODER;
     if (result != MA_SUCCESS)
         return result;
-    result = ma_sound_init_from_data_source(&engine->engine, &slot->source.waveform, ta_sound_flags(0), NULL, &slot->sound);
-    if (result != MA_SUCCESS)
-        return result;
-    slot->kind = TA_SOURCE_WAVEFORM;
     return ta_finish_sound(engine, handle);
 }
 
@@ -1000,20 +974,11 @@ TA_API ma_int32 ta_push_queued_frames(ta_engine* engine, ma_int32 handle)
     return slot != NULL && slot->kind == TA_SOURCE_PUSH ? (ma_int32)ma_pcm_rb_available_read(&slot->source.push.ring) : -1;
 }
 
-TA_API ma_uint64 ta_push_underrun_frames(ta_engine* engine, ma_int32 handle)
-{
-    ta_sound_slot* slot = ta_sound(engine, handle);
-    return slot != NULL && slot->kind == TA_SOURCE_PUSH ? ma_atomic_uint64_get(&slot->source.push.underrunFrames) : 0;
-}
-
 TA_API void ta_sound_unload(ta_engine* engine, ma_int32 handle)
 {
     ta_sound_slot* slot = ta_sound(engine, handle);
     if (slot == NULL)
         return;
-
-    if (ma_atomic_int32_get(&engine->trackedSound) == handle)
-        ma_atomic_int32_set(&engine->trackedSound, -1);
 
     ta_drain_routes(engine);
     ta_release_sound(slot);
@@ -1033,19 +998,6 @@ TA_API ma_int32 ta_sound_pause(ta_engine* engine, ma_int32 handle)
 {
     ta_sound_slot* slot = ta_sound(engine, handle);
     return slot ? ma_sound_stop(&slot->sound) : MA_INVALID_ARGS;
-}
-
-/**
- * Clears per-source processing history (input read ahead, resampler state) of sources that aren't seeked. Export calls it on every
- * source after detaching the device so a render doesn't depend on what was played before it.
- */
-TA_API void ta_sound_reset_state(ta_engine* engine, ma_int32 handle)
-{
-    ta_sound_slot* slot = ta_sound(engine, handle);
-    if (slot == NULL || engine->hasDevice)
-        return;
-    slot->sound.processingCacheFramesRemaining = 0;
-    ma_resampler_reset(&slot->sound.engineNode.resampler);
 }
 
 TA_API ma_int32 ta_sound_seek_seconds(ta_engine* engine, ma_int32 handle, double seconds)
@@ -1145,41 +1097,6 @@ TA_API void ta_set_listener(ta_engine* engine, float x, float y, float z, float 
     ma_engine_listener_set_velocity(&engine->engine, 0, velX, velY, velZ);
 }
 
-TA_API void ta_set_tracked_sound(ta_engine* engine, ma_int32 handle)
-{
-    ma_atomic_int32_set(&engine->trackedSound, handle);
-}
-
-/**
- * Playback position of the tracked sound, extrapolated from the last audio callback with the shared
- * monotonic clock so it advances smoothly between callbacks. Returns -1 before the first callback.
- */
-TA_API double ta_get_playback_seconds(ta_engine* engine, ma_uint64 nowNs)
-{
-    ta_sound_slot* slot = ta_sound(engine, ma_atomic_int32_get(&engine->trackedSound));
-    if (slot == NULL || slot->sourceSampleRate == 0)
-        return -1;
-
-    ma_uint64 cursorFrames, cursorTimeNs;
-    ma_uint32 isPlaying, sequence;
-    do
-    {
-        sequence = ma_atomic_uint32_get(&engine->positionSequence);
-        cursorFrames = engine->trackedCursorFrames;
-        cursorTimeNs = engine->trackedCursorTimeNs;
-        isPlaying = engine->trackedIsPlaying;
-    }
-    while ((sequence & 1) != 0 || sequence != ma_atomic_uint32_get(&engine->positionSequence));
-
-    if (cursorTimeNs == 0)
-        return -1;
-
-    double seconds = (double)cursorFrames / slot->sourceSampleRate;
-    if (isPlaying && nowNs > cursorTimeNs)
-        seconds += (double)(nowNs - cursorTimeNs) * 1e-9;
-    return seconds;
-}
-
 /** Copies the newest frameCount interleaved stereo output frames, zero-padded at the start if fewer exist. */
 TA_API void ta_output_read_stereo(ta_engine* engine, float* destination, ma_int32 frameCount)
 {
@@ -1208,8 +1125,85 @@ static ta_bus_slot* ta_bus(ta_engine* engine, ma_int32 handle)
     return slot->used && slot->generation == generation ? slot : NULL;
 }
 
-/** Returns a bus handle routed to the output, or a negative ma_result on failure. */
-TA_API ma_int32 ta_bus_create(ta_engine* engine)
+static ta_effect_node* ta_effect_create(ta_engine* engine, ma_int32 kind)
+{
+    /* Freeverb's delay lengths at 44.1 kHz; the right channel's are slightly longer, which is what makes it stereo. */
+    static const ma_uint32 combLengths[TA_REVERB_COMBS] = { 1116, 1188, 1277, 1356, 1422, 1491, 1557, 1617 };
+    static const ma_uint32 allpassLengths[TA_REVERB_ALLPASSES] = { 556, 441, 341, 225 };
+    const ma_uint32 stereoSpread = 23;
+
+    ta_effect_node* effect = (ta_effect_node*)calloc(1, sizeof(ta_effect_node));
+    if (effect == NULL)
+        return NULL;
+    effect->kind = kind;
+    effect->sampleRate = engine->sampleRate;
+    effect->outputGain = 1;
+
+    double scale = (double)engine->sampleRate / 44100.0;
+    size_t samples = 0;
+    if (kind == TA_EFFECT_ECHO)
+    {
+        effect->echoCapacity = engine->sampleRate * TA_ECHO_MAX_SECONDS + 1;
+        samples = (size_t)effect->echoCapacity * 2;
+    }
+    else if (kind == TA_EFFECT_REVERB)
+    {
+        for (ma_uint32 channel = 0; channel < 2; channel++)
+        {
+            for (int index = 0; index < TA_REVERB_COMBS; index++)
+                samples += effect->combs[channel][index].length = (ma_uint32)((combLengths[index] + channel * stereoSpread) * scale);
+            for (int index = 0; index < TA_REVERB_ALLPASSES; index++)
+                samples += effect->allpasses[channel][index].length = (ma_uint32)((allpassLengths[index] + channel * stereoSpread) * scale);
+        }
+    }
+
+    effect->memorySamples = samples;
+    effect->memory = (float*)calloc(samples > 0 ? samples : 1, sizeof(float));
+    if (effect->memory == NULL)
+    {
+        free(effect);
+        return NULL;
+    }
+
+    effect->echoLine = effect->memory;
+    float* next = effect->memory;
+    if (kind == TA_EFFECT_REVERB)
+    {
+        for (int channel = 0; channel < 2; channel++)
+        {
+            for (int index = 0; index < TA_REVERB_COMBS; index++)
+            {
+                effect->combs[channel][index].buffer = next;
+                next += effect->combs[channel][index].length;
+            }
+            for (int index = 0; index < TA_REVERB_ALLPASSES; index++)
+            {
+                effect->allpasses[channel][index].buffer = next;
+                next += effect->allpasses[channel][index].length;
+            }
+        }
+    }
+
+    if (ta_stereo_node_init(engine, &g_effectVtable, &effect->base) != MA_SUCCESS)
+    {
+        free(effect->memory);
+        free(effect);
+        return NULL;
+    }
+    return effect;
+}
+
+static void ta_effect_destroy(ta_effect_node* effect)
+{
+    if (effect == NULL)
+        return;
+    ma_node_uninit(&effect->base, NULL);
+    free(effect->memory);
+    free(effect);
+}
+
+/** Returns a bus handle routed to the output, or a negative ma_result on failure. effectKind is a TA_EFFECT value. */
+TA_API ma_int32 ta_bus_create(ta_engine* engine, ma_int32 effectKind)
 {
     for (ma_int32 index = 0; index < TA_MAX_BUSES; index++)
     {
@@ -1226,7 +1220,23 @@ TA_API ma_int32 ta_bus_create(ta_engine* engine)
             ma_sound_group_uninit(&slot->group);
             return result;
         }
-        ma_node_attach_output_bus(&slot->group, 0, &slot->tap.base, 0);
+        slot->effect = NULL;
+        if (effectKind != TA_EFFECT_NONE)
+        {
+            slot->effect = ta_effect_create(engine, effectKind);
+            if (slot->effect == NULL)
+            {
+                ma_node_uninit(&slot->tap.base, NULL);
+                ma_sound_group_uninit(&slot->group);
+                return MA_OUT_OF_MEMORY;
+            }
+            ma_node_attach_output_bus(&slot->group, 0, &slot->effect->base, 0);
+            ma_node_attach_output_bus(&slot->effect->base, 0, &slot->tap.base, 0);
+        }
+        else
+        {
+            ma_node_attach_output_bus(&slot->group, 0, &slot->tap.base, 0);
+        }
         ma_node_attach_output_bus(&slot->tap.base, 0, ma_engine_get_endpoint(&engine->engine), 0);
         slot->generation = ta_next_generation(slot->generation);
         slot->used = MA_TRUE;
@@ -1243,8 +1253,38 @@ TA_API void ta_bus_destroy(ta_engine* engine, ma_int32 handle)
         return;
     ta_drain_routes(engine);
     ma_sound_group_uninit(&slot->group);
+    ta_effect_destroy(slot->effect);
+    slot->effect = NULL;
     ma_node_uninit(&slot->tap.base, NULL);
     slot->used = MA_FALSE;
+}
+
+/** Meaning depends on the effect kind; see its process function. */
+TA_API void ta_bus_set_effect(ta_engine* engine, ma_int32 handle, float p0, float p1, float p2, float p3, float p4)
+{
+    ta_bus_slot* slot = ta_bus(engine, handle);
+    if (slot == NULL || slot->effect == NULL)
+        return;
+    ma_atomic_float_set(&slot->effect->parameters[0], p0);
+    ma_atomic_float_set(&slot->effect->parameters[1], p1);
+    ma_atomic_float_set(&slot->effect->parameters[2], p2);
+    ma_atomic_float_set(&slot->effect->parameters[3], p3);
+    ma_atomic_float_set(&slot->effect->parameters[4], p4);
+}
+
+/** Clears the effect's tail before its next block, so an export doesn't start with what live playback left ringing. */
+TA_API void ta_bus_reset_effect(ta_engine* engine, ma_int32 handle)
+{
+    ta_bus_slot* slot = ta_bus(engine, handle);
+    if (slot != NULL && slot->effect != NULL)
+        ma_atomic_int32_set(&slot->effect->resetSignal, 1);
+}
+
+TA_API void ta_bus_fade_out_effect(ta_engine* engine, ma_int32 handle, float seconds)
+{
+    ta_bus_slot* slot = ta_bus(engine, handle);
+    if (slot != NULL && slot->effect != NULL)
+        ma_atomic_float_set(&slot->effect->fadeSeconds, seconds);
 }
 
 TA_API void ta_bus_set_volume(ta_engine* engine, ma_int32 handle, float volume)
@@ -1366,179 +1406,7 @@ TA_API ma_int32 ta_route(ta_engine* engine, ma_int32 source, ma_int32 target)
     return MA_SUCCESS;
 }
 
-TA_API ma_int32 ta_echo_create(ta_engine* engine)
-{
-    for (ma_int32 index = 0; index < TA_MAX_ECHOES; index++)
-    {
-        ta_echo_slot* slot = &engine->echoes[index];
-        if (slot->used)
-            continue;
-
-        ta_echo_node* echo = &slot->node;
-        echo->sampleRate = engine->sampleRate;
-        echo->capacityFrames = engine->sampleRate * TA_ECHO_MAX_SECONDS;
-        echo->writeFrame = 0;
-        echo->delayLine = (float*)calloc((size_t)echo->capacityFrames * 2, sizeof(float));
-        if (echo->delayLine == NULL)
-            return MA_OUT_OF_MEMORY;
-        ma_atomic_float_set(&echo->delaySeconds, 0.3f);
-        ma_atomic_float_set(&echo->feedback, 0.4f);
-        ma_atomic_float_set(&echo->wetMix, 0.0f);
-
-        ma_result result = ta_stereo_node_init(engine, &g_echoVtable, &echo->base);
-        if (result != MA_SUCCESS)
-        {
-            free(echo->delayLine);
-            return result;
-        }
-        ma_node_attach_output_bus(&echo->base, 0, ma_engine_get_endpoint(&engine->engine), 0);
-        slot->used = MA_TRUE;
-        return index;
-    }
-    return MA_TOO_BIG;
-}
-
-TA_API void ta_echo_set(ta_engine* engine, ma_int32 echo, float delaySeconds, float feedback, float wetMix)
-{
-    if (echo < 0 || echo >= TA_MAX_ECHOES || !engine->echoes[echo].used)
-        return;
-    ta_echo_node* node = &engine->echoes[echo].node;
-    ma_atomic_float_set(&node->delaySeconds, delaySeconds);
-    ma_atomic_float_set(&node->feedback, feedback);
-    ma_atomic_float_set(&node->wetMix, wetMix);
-}
-
-/** Creates a pass-through tap node; tap 0 is reserved for the device output. */
-TA_API ma_int32 ta_tap_create(ta_engine* engine)
-{
-    for (ma_int32 index = 1; index < TA_MAX_TAPS; index++)
-    {
-        ta_tap_slot* slot = &engine->taps[index];
-        if (slot->used)
-            continue;
-        memset(&slot->node.ring, 0, sizeof(slot->node.ring));
-        ma_result result = ta_stereo_node_init(engine, &g_tapVtable, &slot->node.base);
-        if (result != MA_SUCCESS)
-            return result;
-        ma_node_attach_output_bus(&slot->node.base, 0, ma_engine_get_endpoint(&engine->engine), 0);
-        slot->used = MA_TRUE;
-        return index;
-    }
-    return MA_TOO_BIG;
-}
-
-static ta_tap_ring* ta_tap(ta_engine* engine, ma_int32 tap)
-{
-    if (tap == 0)
-        return &engine->outputTap;
-    if (tap < 0 || tap >= TA_MAX_TAPS || !engine->taps[tap].used)
-        return NULL;
-    return &engine->taps[tap].node.ring;
-}
-
-TA_API ma_uint64 ta_tap_read_latest(ta_engine* engine, ma_int32 tap, float* destination, ma_int32 count)
-{
-    ta_tap_ring* ring = ta_tap(engine, tap);
-    return ring ? ta_tap_ring_read_latest(ring, destination, count) : 0;
-}
-
-TA_API ma_int32 ta_tap_read_since(ta_engine* engine, ma_int32 tap, ma_uint64 sinceFrame, float* destination, ma_int32 maxCount, ma_uint64* totalFrames)
-{
-    ta_tap_ring* ring = ta_tap(engine, tap);
-    if (ring == NULL)
-    {
-        *totalFrames = 0;
-        return 0;
-    }
-    return ta_tap_ring_read_since(ring, sinceFrame, destination, maxCount, totalFrames);
-}
-
-/** Returns the highest absolute sample since the last call and resets it. */
-TA_API float ta_tap_take_peak(ta_engine* engine, ma_int32 tap)
-{
-    ta_tap_ring* ring = ta_tap(engine, tap);
-    return ring ? ma_atomic_exchange_f32(&ring->peak.value, 0.0f) : 0.0f;
-}
-
-
 /* ---- Waveform and analysis: decode without playback ---- */
-
-/**
- * Decodes a whole file to mono and writes min/max pairs for bucketCount equal slices. Runs on the caller's
- * thread; it's meant for a background job, not the frame loop.
- */
-TA_API ma_int32 ta_decode_peaks(const char* path, ma_int32 bucketCount, float* minMaxPairs, double* lengthSeconds)
-{
-    ma_decoder decoder;
-    ma_decoder_config config = ma_decoder_config_init(ma_format_f32, 1, 0);
-    ma_result result = ma_decoder_init_file(path, &config, &decoder);
-    if (result != MA_SUCCESS)
-        return result;
-
-    ma_uint64 totalFrames = 0;
-    result = ma_decoder_get_length_in_pcm_frames(&decoder, &totalFrames);
-    if (result != MA_SUCCESS || totalFrames == 0 || bucketCount <= 0)
-    {
-        ma_decoder_uninit(&decoder);
-        return result != MA_SUCCESS ? result : MA_INVALID_FILE;
-    }
-    *lengthSeconds = (double)totalFrames / decoder.outputSampleRate;
-
-    for (ma_int32 bucket = 0; bucket < bucketCount; bucket++)
-    {
-        minMaxPairs[bucket * 2] = 0;
-        minMaxPairs[bucket * 2 + 1] = 0;
-    }
-
-    float chunk[4096];
-    ma_uint64 frameIndex = 0;
-    for (;;)
-    {
-        ma_uint64 framesRead = 0;
-        result = ma_decoder_read_pcm_frames(&decoder, chunk, 4096, &framesRead);
-        for (ma_uint64 index = 0; index < framesRead; index++, frameIndex++)
-        {
-            ma_uint64 bucket = frameIndex * (ma_uint64)bucketCount / totalFrames;
-            if (bucket >= (ma_uint64)bucketCount)
-                bucket = (ma_uint64)bucketCount - 1;
-            float sample = chunk[index];
-            if (sample < minMaxPairs[bucket * 2])
-                minMaxPairs[bucket * 2] = sample;
-            if (sample > minMaxPairs[bucket * 2 + 1])
-                minMaxPairs[bucket * 2 + 1] = sample;
-        }
-        if (result != MA_SUCCESS || framesRead == 0)
-            break;
-    }
-
-    ma_decoder_uninit(&decoder);
-    return MA_SUCCESS;
-}
-
-/**
- * Decodes frameCount interleaved frames starting at startFrame (in the file's own rate) without resampling,
- * so the result can be compared sample by sample with another decoder.
- */
-TA_API ma_int32 ta_decode_window(const char* path, ma_uint64 startFrame, ma_uint32 frameCount, ma_uint32 channels, ma_int32 useSeekTable, float* output, ma_uint32* sampleRate)
-{
-    ma_decoder decoder;
-    ma_decoder_config config = ma_decoder_config_init(ma_format_f32, channels, 0);
-    config.seekPointCount = useSeekTable ? TA_MP3_SEEK_POINTS : 0;
-    ma_result result = ma_decoder_init_file(path, &config, &decoder);
-    if (result != MA_SUCCESS)
-        return result;
-
-    *sampleRate = decoder.outputSampleRate;
-    result = ma_decoder_seek_to_pcm_frame(&decoder, startFrame);
-    ma_uint64 framesRead = 0;
-    if (result == MA_SUCCESS)
-        result = ma_decoder_read_pcm_frames(&decoder, output, frameCount, &framesRead);
-    for (ma_uint64 index = framesRead * channels; index < (ma_uint64)frameCount * channels; index++)
-        output[index] = 0;
-
-    ma_decoder_uninit(&decoder);
-    return result == MA_AT_END ? MA_SUCCESS : result;
-}
 
 /* ---- Generator source ---- */
 

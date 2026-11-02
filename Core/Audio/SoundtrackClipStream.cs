@@ -204,6 +204,7 @@ internal sealed class SoundtrackClipStream
     {
         _engine.Pause(_source);
         _engine.SetPitch(_source, 1);
+        _isAwaitingFirstExportSeek = true;
     }
 
     /// <summary>
@@ -238,8 +239,12 @@ internal sealed class SoundtrackClipStream
             return;
         }
 
-        if (Math.Abs(_engine.GetCursorSecs(_source) - targetSourcePos) > ExportResyncThresholdSecs)
+        // Always seek first: a position left by live playback within the threshold would make two renders differ.
+        if (_isAwaitingFirstExportSeek || Math.Abs(_engine.GetCursorSecs(_source) - targetSourcePos) > ExportResyncThresholdSecs)
+        {
             _engine.Seek(_source, targetSourcePos);
+            _isAwaitingFirstExportSeek = false;
+        }
 
         if (!clip.IsRoutedToGraph)
             _engine.SetVolume(_source, clip.IsMuted ? 0f : clip.Volume * CompositionSettings.Current.Audio.SoundtrackVolume);
@@ -254,4 +259,5 @@ internal sealed class SoundtrackClipStream
 
     private readonly NativeAudioEngine _engine;
     private readonly AudioHandle _source;
+    private bool _isAwaitingFirstExportSeek;
 }
