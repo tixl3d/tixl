@@ -1,5 +1,8 @@
 # Audio processing graph — clips as reference-emitting operators
 
+**Status (2026-10-31):** Shipped and committed on both branches: buses, FX ops, ducking, level metering, clip migration, Player support.
+Left: `[BlendAudio]`/`[MixAudio]`, Direct/spatial routing, multi-send, reference lines and realize (Phase D), retiring `Playback.AudioClips` and `IsMainSoundtrack`, sounding indicator and kill-all, Phase G. Decide these against [`Plan_ReplaceBass.md`](Plan_ReplaceBass.md) first. Older notes saying "uncommitted" and some file paths are out of date.
+
 Supersedes the "audio clips as data" direction of [`Plan_TimelineAudioClips.md`](archive/Plan_TimelineAudioClips.md). That plan's Phases A–C (the `TimelineAudioClip` payload shape, native-rate playback, N-clip engine) are **kept and reused**; its Phases D–F (rebuild a parallel non-op editing/render path, delete the `[AudioClip]` op) are **cancelled** — this plan goes the other way and makes the op canonical.
 
 ## Goal

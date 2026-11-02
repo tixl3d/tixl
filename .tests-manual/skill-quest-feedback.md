@@ -9,7 +9,7 @@ prerequisites:
   - TiXL is open with no project loaded, or any project that is OK to leave running.
   - You have at least one snapshot defined on a Skills level (the default levels do).
 related-help:
-  - ../.agentic/Plans/Plan_SkillQuestFeedback.md
+  - ../.agentic/Plans/archive/Plan_SkillQuestFeedback.md
 ---
 
 [ui:SkillQuest] gives you gentle, in-level guidance as you learn. A blue **Tip** icon

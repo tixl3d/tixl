@@ -9,7 +9,7 @@ prerequisites:
   - Two TiXL builds available: one stable, one alpha (or two consecutive alpha builds where one was built before this change landed).
   - File Explorer (or any file manager) open at `%APPDATA%` and at `%USERPROFILE%\Documents`.
 related-help:
-  - ../.agentic/Plans/Plan_AlphaSeparation.md
+  - ../.agentic/Plans/archive/Plan_AlphaSeparation.md
 ---
 
 Verifies that an alpha build writes its settings, themes, layouts, keybindings, logs, and default project folder under a `-alpha`-suffixed sibling of the stable build's folder — so installing an alpha next to a stable cannot clobber the stable's data.

@@ -1,6 +1,8 @@
 # TiXL on macOS (Apple Silicon, Vulkan via MoltenVK)
 
-**Status:** Draft — 2026-10-07. Nothing implemented yet.
+**Status (2026-10-31):** In progress on `feat/linux-port`, none of it on `main`. Shipped: portability setup, CoreMIDI, Cmd
+mapping, `osx-arm64`, signed DMG script with slang, CI workflow. Left: visual suite (71/97 on 2026-10-08), cube
+placeholder, line-only OBJ, `.app` for exported players, FFmpeg in the DMG, settings folder decision. Later sections predate this.
 **Scope:** Editor and Player on Apple Silicon Macs (`osx-arm64`), Vulkan through MoltenVK (or LunarG's
 KosmicKrisp as a fallback ICD). Intel Macs are out of scope.
 **Builds on:** [Plan_CrossPlatformV5](Plan_CrossPlatformV5.md) (Vulkan backend, Slang, SDL3) and the Linux

@@ -3,7 +3,7 @@
 Loads `.help/docs/operators/index.json` (written by `ExportWikiDocumentation.cs`) once at
 build start, then rewrites bracketed operator references in every page's markdown.
 
-Resolution rules (see `.agentic/Plans/Plan_UpdateHelp.md`, Section 4c):
+Resolution rules (see `.agentic/Plans/archive/Plan_UpdateHelp.md`, Section 4c):
 
 - `[Lib.image.color.AdjustColors]` — full path → link to that operator.
 - `[lib.image.color.AdjustColors]` — lowercase-prefix tolerant → normalised and resolved.

@@ -2,8 +2,11 @@
 
 Inspired by text UIs like lazygit and Claude Code: a keyboard-first way to navigate graphs and edit
 operators that stays discoverable. Mouse work (layouting, wiring at a distance) keeps the mouse; the goal is to
-streamline the flows that dominate real sessions. This plan captures the design discussion; nothing is
-implemented yet. Phase 0 and Phase 1 are detailed enough to build from.
+streamline the flows that dominate real sessions.
+
+**Status (2026-10-31):** Shipped on both branches: arrow-key navigation, parameter popover, action toasts, operator
+bookmarks, output peek. Left: scoped keymap and hint bar (Phase 0), key-convention cleanup, slider ×10 still on Alt,
+popover multi-select and verbs, toast mute UI, toast and peek test sets. Sections describing the "current state" predate this.
 
 **Frequency of use drives priority:** parameter change ≫ insert op ≫ pop out ≫ reorder (each step ≈ ×50 less
 frequent). Reorder (Alt+↑/↓ in snapped stacks) already exists and is rarely useful because connection types

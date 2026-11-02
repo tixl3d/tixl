@@ -1,7 +1,8 @@
 # Plan: CPU Procedural Geometry (Curves, Meshes, Parts, Chunks)
 
-Status: **Phase 0 implemented (needs in-editor smoke test); Phases 1+ not started**
-Last update: 2026-09-02
+Status (2026-10-31): **core shipped in v4.3** (data types, 28 ops in `Operators/Lib/Symbols/geometry/`), on both branches.
+Left: missing ops from Phases 2-5 (`SelectGeometry`, `CombineGeometry`, `SetGeometryAttribute`, curve ops), fracture
+defects, static `_lengthList`, font licence, docs, demo graph. Phases 6-7+ not started. Progress notes saying "uncommitted" are out of date.
 
 ## Goal
 

@@ -1,6 +1,10 @@
 # Frame Timing, Pacing and Profiling — Research Report
 
-Status: research report, 2026-10-10. Nothing here is implemented yet except the fix noted in §1.
+Status (2026-10-31): research report from 2026-10-10, partly implemented. Shipped: `Core/Stats/FrameTiming.cs`, fixed
+frame duration and frame damping; on `feat/linux-port` also `present_wait`, Mailbox for secondary windows, GPU timestamps
+and refresh rate from the SDL display mode, with the estimator deleted (`main` keeps it).
+Left: `PerformanceMetrics` window and buckets, hard-coded 60s, MediaPipe `33333`, NDI timecode, blocking export readback,
+the 4.3 baseline. §A4 ("measured, not queried") and the Linux state in §6 are out of date.
 Scope: refresh-rate assumptions, the time step, presentation and vsync, the Vulkan merge, profiling, and
 what to expose to users. Grounded in `main` at `b81b15a87` and `origin/feat/linux-port` at `abb0fd313`.
 

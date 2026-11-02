@@ -59,14 +59,14 @@ calibrate once, drift detection saves the gig.
 | Concept | Home | Notes |
 |---|---|---|
 | Camera | `Setup.Cameras[]` (new) | Venue entity, mirror of an output: `Id, Name, Intrinsics{focal, principal, distortion[]}, Pose?` — intrinsics from the wizard (§3.1), pose solved (1.1) or manual. |
-| Physical device | `MachineConfig` (new list next to `DeviceBinding`) | Which webcam on which machine — same venue/machine split as outputs. |
+| Physical device | `MachineConfig` (new list next to `PlugBinding`) | Which webcam on which machine — same venue/machine split as outputs. |
 | Capture | per-camera captures (new) | `{ CameraId, Pose, frames }` — a camera can shoot from several positions; never assume one fixed viewpoint. Frames are transient (not serialized); poses persist. |
 | Point annotation | `ReferenceBinding.Annotations` | New string-discriminated annotation kind next to lines (§4.1). |
 | Solve results | existing fields | `ProjectorCamera.CalibrationPoints/ResidualPx`, `OutputMapping.Quad`, later `Warp`/`Mask`. No new storage for results — solvers write what manual editing writes, so undo (`SetupSnapshotCommand`) and the UI work unchanged. |
 
 **Package isolation rule:** the capture/CV subsystem goes in its own operator package or editor-side
-service — never coupled into Lib's hot-reload path (FFmpeg precedent). Build on the capture layer from
-`Plan_VideoDeviceInput`.
+service — never coupled into Lib's hot-reload path (FFmpeg precedent). Build on the SDL3 capture layer behind
+`[WebcamInput]` (`SystemUi/ICameraProvider.cs`, `SdlPlatform/SdlCameraProvider.cs`).
 
 ---
 

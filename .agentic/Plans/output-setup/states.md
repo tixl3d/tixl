@@ -62,4 +62,4 @@ its chip is aloft).
   `SetupPanel`). It takes the row's `SelectionTarget` state (from the two planes in [`selection.md`](selection.md))
   + reference/hover/bind status and picks a row above.
 - *Referenced* consumes the hover/selection cross-highlight rule; *Drop-Target* consumes the drag-drop hit-test;
-  *Unbound* consumes target/`DeviceBinding` resolution.
+  *Unbound* consumes target/`PlugBinding` resolution.

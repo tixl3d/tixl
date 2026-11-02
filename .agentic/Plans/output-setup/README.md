@@ -57,7 +57,7 @@ Specs, code, and discussions use these; aliases listed are **deprecated**.
   Content (ortho onto a source). Cameras entered via entities, not modes (open question 5).
 - **Flow Outliner** — the bottom panel: columns + pills + connections. *(avoid: "strip", "sidebar")*
 
-**Entities** (generic term: **Entity** — matches `SetupEntitySelection.EntityKind`; an *Item* is an
+**Entities** (generic term: **Entity** — matches `SetupEntityKinds`; an *Item* is an
 entity's outliner representation, never the model object — see Representations)
 - **Content** (source), **Slice**, **Surface**, **Region** (child surface — display name, settled),
   **Output**, **ReferenceImage**, **Prop**, **Machine**; future: Camera, Fixture, StageModel,
@@ -77,7 +77,7 @@ entity's outliner representation, never the model object — see Representations
 - **Mapping** — the surface → output edge; carries quad + modifiers.
 - **Binding** — the output → endpoint assignment, per machine. **Reserved for exactly this** — a
   Binding is *one kind* of connection, never the generic word for a line (collision resolved in
-  favor of `DeviceBinding`/`binding-examples.md` usage).
+  favor of `PlugBinding`/`binding-examples.md` usage).
 - **Derivation wire** (2026-08-31) — a **dashed** connection for authoring dependencies (reference
   jig → derived slices, data-model §2.10); solid wires are always the render path.
 

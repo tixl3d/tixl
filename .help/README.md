@@ -4,7 +4,7 @@ This directory is the source of truth for TiXL's user-facing documentation. It p
 
 - **Public landing page:** [`docs/index.md`](docs/index.md)
 - **Writing style and conventions:** [`docs/STYLE.md`](docs/STYLE.md) — read before opening a docs PR.
-- **Plan and open work:** [`../.agentic/Plans/Plan_UpdateHelp.md`](../.agentic/Plans/Plan_UpdateHelp.md)
+- **Migration plan (archived):** [`../.agentic/Plans/archive/Plan_UpdateHelp.md`](../.agentic/Plans/archive/Plan_UpdateHelp.md)
 - **Source material (scripts, release notes, etc.):** [`.src/`](.src/) — raw tutorial scripts and transcripts used as draft material. Not published.
 
 Developer-focused pages (building TiXL from source, coding conventions, CI, release process) stay on the [GitHub wiki](https://github.com/tixl3d/tixl/wiki). Don't mix the two — user-facing here, contributor-facing there.

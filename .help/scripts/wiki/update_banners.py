@@ -1,7 +1,7 @@
 """Rewrite `<!-- TIXL_MOVED_BANNER -->` blocks in the t3.wiki checkout to point at
 the rendered help.tixl.app URLs instead of the GitHub source.
 
-Reads the mapping table from `.agentic/Plans/Plan_UpdateHelp.md` (Section 5), so the
+Reads the mapping table from `.agentic/Plans/archive/Plan_UpdateHelp.md` (Section 5), so the
 plan stays the single source of truth. Idempotent — runs safely multiple times.
 
 Usage:
@@ -19,7 +19,7 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-PLAN_FILE = REPO_ROOT / ".agentic" / "Plans" / "Plan_UpdateHelp.md"
+PLAN_FILE = REPO_ROOT / ".agentic" / "Plans" / "archive" / "Plan_UpdateHelp.md"
 
 SITE_BASE = "https://help.tixl.app"
 

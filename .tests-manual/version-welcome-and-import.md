@@ -9,7 +9,7 @@ prerequisites:
   - A TiXL build to test (alpha or stable).
   - For import steps, a previous version's user folders present under `%APPDATA%` and `%USERPROFILE%\Documents` (e.g. a `TiXL4.2` folder while testing `4.3`).
 related-help:
-  - ../.agentic/Plans/Plan_AlphaSeparation.md
+  - ../.agentic/Plans/archive/Plan_AlphaSeparation.md
 ---
 
 The first time you run a new version of TiXL, a [ui:WelcomeWindow|welcome popup] greets you. It can also offer to bring your projects, settings, layouts, themes, and keymaps over from a version you had installed before, so you don't start from scratch. This test walks through that welcome and import.

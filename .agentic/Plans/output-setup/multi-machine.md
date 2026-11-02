@@ -34,8 +34,8 @@ fleet**: no machine knows the others' claims today.
      event-stream abstraction pointed at a socket instead of a file.
    - *Deployment:* project + setup copied ahead of time. **Never stream assets live** (vvvv's asset-
      drift lesson).
-   - Gate: `OutputManager` compositor extraction (refactoring-plan P2.4) — a render client is exactly
-     Player + compositor.
+   - Enabler, done: the compositor moved to `Core/Output/Rendering/OutputCompositor.cs` and the Player
+     calls it, so a render client is exactly Player + compositor.
 3. **Editing-time integration** — the killer feature: **remote calibration**. Master pushes setup
    edits live (all calibration flows through commands/`SetupSnapshotCommand` — a natural serialization
    point); the far wall moves while you drag. Also: fleet UI (§4), health states, and pattern display

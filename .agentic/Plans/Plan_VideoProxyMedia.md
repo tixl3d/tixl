@@ -1,6 +1,10 @@
 # Video Proxy Media (background transcode for fast seeking)
 
-**Status:** Draft — 2026-06-19. Design only, no code yet. The "background optimizer / `-optimized.mp4`"
+**Status (2026-10-31):** Mostly shipped on both branches: transcoder, eligibility, generation service, effective-path
+resolve, settings, graph-menu trigger. Left: Phase 3c prompt and auto-trigger (`EvaluateProxyNeed` has no callers), Phase 4
+render toggle, staleness, regenerate on settings change, LRU budget, Assets Library trigger, test set, playback tearing check.
+
+The "background optimizer / `-optimized.mp4`"
 pulled out of [`Plan_FfmpegVideo.md`](archive/Plan_FfmpegVideo.md)'s backlog into its own design, now that it has
 real UX (a prompt, a Generate/Use state machine, settings).
 

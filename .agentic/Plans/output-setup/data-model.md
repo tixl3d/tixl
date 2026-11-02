@@ -30,7 +30,7 @@ Design decisions this doc is measured against (from the design sessions / protot
 | — camera | `OutputDefinition.ProjectorCamera` | `Pose? Lens? CalibrationPoints[] ResidualPx Manual{Position,Target,FovY}` | Output |
 | Reference image | `ReferenceImage` | `Id Name Kind(Photo/Plan) FilePath W H MetersPerPixel` | Setup |
 | Prop | `Prop` | `Id Kind(Person) Position HeightInMeters` | Setup |
-| Device binding | `DeviceBinding` in `MachineConfig` | `OutputId DisplayName DisplayIndex Fullscreen` | `.meta/outputs.machine.json` (per-machine) |
+| Device binding | `PlugBinding` in `MachineConfig` | `OutputId DisplayName DisplayIndex Fullscreen` | `.meta/outputs.machine.json` (per-machine) |
 | Active setup | `ActiveSetup` (static) | `Current:Setup? Machine:MachineConfig?` + `TryFindSurface/Output` | runtime |
 | Content sink | `IOutputSink` / `OutputSinkRegistry` | `GetOutputId/GetSurfaceId/GetColor/GetContent + InvalidateContent` | live (graph) |
 | — op | `SendToOutput` | inputs `Texture, OutputRef:Guid, SurfaceRef:Guid, Color`; **no output slot** | graph |
@@ -232,7 +232,7 @@ top-left corner; `2nd Display` = first non-editor display, per-machine overridab
 "Default Audio Input" pattern applied verbatim: no new binding kind, a binding still points at a
 display; virtual names resolve in machine-wide settings before OS enumeration. Examples ship
 runnable. Details + resolution-timing rules in [`binding-examples.md`](binding-examples.md).
-`DeviceBinding`/`MachineConfig` fully model "which connector on which computer" (name-first, index-fallback,
+`PlugBinding`/`MachineConfig` fully model "which connector on which computer" (name-first, index-fallback,
 per-machine, gitignored). The spec's callout 24 side-note ("an output needs to be bound to a display and this
 should be indicated") is a **UI gap only** — surface the binding state on the Output row, and offer bind in
 the `+` menu (the existing `ResolutionHandling.DrawOutputBindingMenu` is the hook).

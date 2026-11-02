@@ -1,6 +1,6 @@
 # Manual Test Sets
 
-Human-run verification walkthroughs for TiXL features. Each file defines a **test set** — an ordered list of **steps** exercising one feature or flow. Tests are written in plain markdown so contributors can follow them without tooling; the frontmatter is structured so a future in-editor runner can parse and drive them (see [`Plan_ManualTestRunner.md`](../.agentic/Plans/Plan_ManualTestRunner.md)).
+Human-run verification walkthroughs for TiXL features. Each file defines a **test set** — an ordered list of **steps** exercising one feature or flow. Tests are written in plain markdown so contributors can follow them without tooling; the frontmatter is structured so a future in-editor runner can parse and drive them (see [`Plan_ManualTestRunner.md`](../.agentic/Plans/archive/Plan_ManualTestRunner.md)).
 
 ## Layout
 
