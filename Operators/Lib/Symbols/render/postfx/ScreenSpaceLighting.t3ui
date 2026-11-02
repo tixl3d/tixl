@@ -109,6 +109,18 @@
       "ClampMin": true
     },
     {
+      "InputId": "f34284e4-7090-554a-bde9-9f4bb821d74e",
+      "Position": {
+        "X": -300.0,
+        "Y": 380.0
+      },
+      "GroupTitle": "Highlights",
+      "Description": "Brightness above which occlusion and reflections fade out, gone at twice this value, so that glowing HDR materials keep their strength for [Bloom]. Strongly lit surfaces above it are affected too. Raise it if contact shading goes missing there.",
+      "Min": 0,
+      "Max": 8,
+      "ClampMin": true
+    },
+    {
       "InputId": "04f0e86f-c9b2-55ce-a278-bb790b07050f",
       "Position": {
         "X": -300.0,

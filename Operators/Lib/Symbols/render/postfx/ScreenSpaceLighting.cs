@@ -42,6 +42,9 @@ internal sealed class ScreenSpaceLighting : Instance<ScreenSpaceLighting>
     [Input(Guid = "2d098fe1-9c9e-5e3f-a910-5494b7138083")]
     public readonly InputSlot<float> ColorBleeding = new();
 
+    [Input(Guid = "f34284e4-7090-554a-bde9-9f4bb821d74e")]
+    public readonly InputSlot<float> HighlightThreshold = new();
+
     [Input(Guid = "04f0e86f-c9b2-55ce-a278-bb790b07050f")]
     public readonly InputSlot<float> ReflectionIntensity = new();
 

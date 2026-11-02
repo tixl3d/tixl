@@ -17,6 +17,7 @@ cbuffer ParamConstants : register(b0)
     float Reset;
     float FrameIndex;
     float MaxAccumulatedFrames;
+    float HighlightThreshold;
 }
 
 #include "shared/screen-space-tracing.hlsl"
@@ -239,5 +240,6 @@ float4 psComposite(vsOutput input) : SV_TARGET
     float fresnel = Reflectivity + (1.0 - Reflectivity) * grazing2 * grazing2 * grazing;
 
     float3 reflection = Accumulated.SampleLevel(texSampler, uv, 0).rgb;
-    return float4(lerp(image.rgb, reflection, saturate(fresnel * Intensity)), image.a);
+    float reflectionAmount = saturate(fresnel * Intensity) * (1.0 - GetHighlightProtection(image.rgb));
+    return float4(lerp(image.rgb, reflection, reflectionAmount), image.a);
 }

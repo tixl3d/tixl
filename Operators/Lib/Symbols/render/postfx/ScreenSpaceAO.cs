@@ -27,6 +27,9 @@ internal sealed class ScreenSpaceAO : Instance<ScreenSpaceAO>
     [Input(Guid = "06a7e39c-2f4b-45d1-b860-b4197d5af2ee")]
     public readonly InputSlot<float> Radius = new();
 
+    [Input(Guid = "e7b05af9-426d-4bc3-a80a-9f35b1c24e76")]
+    public readonly InputSlot<float> HighlightThreshold = new();
+
     [Input(Guid = "d6af49e8-315c-4ab2-97f9-8e24a0b13d65")]
     public readonly InputSlot<float> ColorBleeding = new();
 

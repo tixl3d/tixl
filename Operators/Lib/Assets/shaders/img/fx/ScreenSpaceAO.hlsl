@@ -16,6 +16,7 @@ cbuffer ParamConstants : register(b0)
     float FrameIndex;
     float MaxAccumulatedFrames;
     float ColorBleeding;
+    float HighlightThreshold;
 }
 
 #include "shared/screen-space-tracing.hlsl"
@@ -181,6 +182,7 @@ float4 psComposite(vsOutput input) : SV_TARGET
 
     // There is no albedo buffer, so the lit color stands in for it. The minimum keeps dark surfaces from going bright.
     float3 albedo = saturate(image.rgb / max(max(image.r, max(image.g, image.b)), 0.1));
-    float3 shaded = image.rgb * pow(saturate(visibility), max(Intensity, 0.0));
+    float shading = lerp(pow(saturate(visibility), max(Intensity, 0.0)), 1.0, GetHighlightProtection(image.rgb));
+    float3 shaded = image.rgb * shading;
     return float4(shaded + bleeding * albedo * ColorBleeding, image.a);
 }

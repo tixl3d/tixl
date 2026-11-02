@@ -30,6 +30,9 @@ internal sealed class ScreenSpaceReflections : Instance<ScreenSpaceReflections>
     [Input(Guid = "7fe290c6-d38a-44f7-ab19-c06384f2a57d")]
     public readonly InputSlot<float> Roughness = new();
 
+    [Input(Guid = "f8c16b0a-537e-4cd4-b91b-a046c2d35f87")]
+    public readonly InputSlot<float> HighlightThreshold = new();
+
     [Input(Guid = "80f3a1d7-e49b-4508-bc2a-d17495a3b68e")]
     public readonly InputSlot<float> MaxDistance = new();
 

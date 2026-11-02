@@ -77,6 +77,17 @@
       "ClampMax": true
     },
     {
+      "InputId": "f8c16b0a-537e-4cd4-b91b-a046c2d35f87",
+      "Position": {
+        "X": -600.0,
+        "Y": 260.0
+      },
+      "Description": "Brightness above which reflections fade out, gone at twice this value, so that glowing HDR materials stay bright. Strongly lit surfaces above it lose reflections too. Raise it if that happens.",
+      "Min": 0,
+      "Max": 8,
+      "ClampMin": true
+    },
+    {
       "InputId": "80f3a1d7-e49b-4508-bc2a-d17495a3b68e",
       "Position": {
         "X": -600.0,

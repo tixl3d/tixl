@@ -1,5 +1,5 @@
 // Shared by screen space effects that trace against the depth and normal buffers of a [RenderTarget] and
-// accumulate over frames. Expects its users to bind their parameters to b0, including BlendFactor and MaxAccumulatedFrames.
+// accumulate over frames. Expects its users to bind their parameters to b0, including BlendFactor, MaxAccumulatedFrames and HighlightThreshold.
 
 cbuffer Resolution : register(b1)
 {
@@ -124,6 +124,14 @@ bool IsOnScreen(float2 uv)
 /** Rare ray hits (rough reflections, color bleeding) vanish from most frames, so a clamp against the current
     neighborhood would remove their energy. They skip it and average over fewer frames, which limits their lag. */
 static const float MaxFramesForRareHits = 64.0;
+
+/** Returns 1 for pixels that count as emitting light, whose brightness neither occlusion nor reflections should reduce.
+    The image holds no emission channel, so HDR brightness stands in for it. */
+float GetHighlightProtection(float3 color)
+{
+    float brightest = max(color.r, max(color.g, color.b));
+    return saturate((brightest - HighlightThreshold) / max(HighlightThreshold, 1e-3));
+}
 
 struct TemporalOutput
 {

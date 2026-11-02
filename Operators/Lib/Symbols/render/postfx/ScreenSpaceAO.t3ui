@@ -64,6 +64,17 @@
       "ClampMin": true
     },
     {
+      "InputId": "e7b05af9-426d-4bc3-a80a-9f35b1c24e76",
+      "Position": {
+        "X": -600.0,
+        "Y": 220.0
+      },
+      "Description": "Brightness above which occlusion fades out, gone at twice this value, so that glowing HDR materials stay bright. Strongly lit surfaces above it lose occlusion too. Raise it if that happens.",
+      "Min": 0,
+      "Max": 8,
+      "ClampMin": true
+    },
+    {
       "InputId": "d6af49e8-315c-4ab2-97f9-8e24a0b13d65",
       "Position": {
         "X": -600.0,
