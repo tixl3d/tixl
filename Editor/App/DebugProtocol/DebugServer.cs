@@ -347,6 +347,28 @@ internal static class DebugServer
                 HandleAddOp(request, context);
                 break;
 
+            case "startRender":
+                HandleStartRender(request, context);
+                break;
+
+            case "getRenderStatus":
+                context.SendOk(new JObject
+                                   {
+                                       ["state"] = RenderProcess.State.ToString(),
+                                       ["isExporting"] = RenderProcess.IsExporting,
+                                       ["progress"] = RenderProcess.Progress,
+                                       ["frameIndex"] = RenderProcess.CapturedFrameCount,
+                                       ["message"] = RenderProcess.LastHelpString,
+                                   });
+                break;
+
+            case "cancelRender":
+                if (RenderProcess.IsExporting)
+                    RenderProcess.Cancel();
+
+                context.SendOk(new JObject { ["message"] = RenderProcess.LastHelpString });
+                break;
+
             case "connect":
                 HandleConnect(request, context);
                 break;
@@ -1926,6 +1948,46 @@ internal static class DebugServer
 
         symbol = focused;
         return true;
+    }
+
+    private static void HandleStartRender(JObject request, RequestContext context)
+    {
+        var path = request["path"]?.Value<string>();
+        if (string.IsNullOrEmpty(path) || !Path.IsPathRooted(path))
+        {
+            context.SendError("BAD_PATH", "startRender needs an absolute 'path'");
+            return;
+        }
+
+        var startSecs = request["startSecs"]?.Value<float>() ?? 0f;
+        var durationSecs = request["durationSecs"]?.Value<float>() ?? 0f;
+        if (durationSecs <= 0)
+        {
+            context.SendError("BAD_DURATION", "startRender needs a positive 'durationSecs'");
+            return;
+        }
+
+        var settings = RenderSettings.Current.Clone();
+        settings.RenderMode = RenderSettings.RenderModes.Video;
+        settings.TimeRange = RenderSettings.TimeRanges.Custom;
+        settings.TimeReference = RenderSettings.TimeReferences.Seconds;
+        settings.StartInBars = startSecs;
+        settings.EndInBars = startSecs + durationSecs;
+        settings.FrameRate = request["fps"]?.Value<float>() ?? 60f;
+        settings.ExportAudio = request["exportAudio"]?.Value<bool>() ?? true;
+        settings.AutoIncrementVersionNumber = false;
+
+        if (!RenderProcess.TryStartVideoExport(settings, path))
+        {
+            context.SendError("RENDER_NOT_READY", $"Render state is {RenderProcess.State}: pin an operator with a Texture2D output and keep the output window open");
+            return;
+        }
+
+        context.SendOk(new JObject
+                           {
+                               ["path"] = path,
+                               ["frameCount"] = RenderTiming.ComputeFrameCount(settings),
+                           });
     }
 
     private static void HandleAddOp(JObject request, RequestContext context)

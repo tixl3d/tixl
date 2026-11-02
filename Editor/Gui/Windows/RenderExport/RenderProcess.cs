@@ -104,13 +104,20 @@ internal static class RenderProcess
             settings.ResolutionFactor = 1f; // realtime grabs the live texture as-is — capture at native size
         }
 
+        return TryStartVideoExport(settings, GetTargetFilePath(settings.RenderMode));
+    }
+
+    /// <summary>Starts an export with its own settings and target, leaving the composition's saved render settings alone.</summary>
+    public static bool TryStartVideoExport(RenderSettings settings, string targetFilePath)
+    {
+        if (MainOutputTexture == null || MainOutputTexture.IsDisposed)
+            return false;
+
         if (State != States.ReadyForExport)
         {
             Log.Warning("Export not available");
             return false;
         }
-
-        var targetFilePath = GetTargetFilePath(settings.RenderMode);
 
         var directory = string.Empty;
         try
@@ -406,7 +413,7 @@ internal static class RenderProcess
 
         var duration = Playback.RunTimeInSecs - session.ExportStartedTime;
         var successful = savingSuccessful ? "successfully" : "unsuccessfully";
-        LastHelpString = $"Render {GetTargetFilePath(settings.RenderMode)} finished {successful} in {StringUtils.HumanReadableDurationFromSeconds(duration)}";
+        LastHelpString = $"Render {session.TargetFilePath} finished {successful} in {StringUtils.HumanReadableDurationFromSeconds(duration)}";
         Log.Debug(LastHelpString);
 
         if (savingSuccessful)

@@ -65,6 +65,13 @@ mouse. Every fold logs one `[fold] metrics …` line at Debug level (read it wit
 rectified surface's on-screen centre path as mean distance from the window centre, path length over
 the chord (1.00 = a straight line) and the largest deviation from the chord.
 
+Rendering: `startRender` (`path` absolute, `durationSecs`, optional `startSecs`, `fps`, `exportAudio`) exports the
+pinned `Texture2D` output to a video file through the same path as the render window, without touching the
+composition's saved render settings or version number. It returns at once with the `frameCount`; the export advances
+one frame per editor frame, so poll `getRenderStatus` (`isExporting`, `progress`, `frameIndex`, `message`) until
+`isExporting` is false. `cancelRender` stops it. Check the result with `ffprobe` / `ffmpeg`. Audio ops only stay in
+the export if they were evaluated just before it, so wire an `[AudioBus]` into the rendered chain.
+
 Parameter shapes are defined in `DebugServer.cs` — read the handler when unsure. Notes:
 
 - **Never guess the settings folder — ask `getPaths`.** It is version-suffixed
