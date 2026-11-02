@@ -1,8 +1,7 @@
 #nullable enable
-using ManagedBass;
-using ManagedBass.Mix;
 using T3.Core.Animation;
 using T3.Core.Audio;
+using T3.Core.Audio.Native;
 using T3.Core.Audio.Graph;
 
 namespace Lib.io.audio
@@ -87,21 +86,14 @@ namespace Lib.io.audio
                 frequency = 440f;
             }
 
-            if (duration <= 0)
-            {
-                duration = float.MaxValue;
-            }
-
-            _toneStream.Frequency = frequency;
-            _toneStream.WaveformType = (WaveformTypes)waveformType;
-            _toneStream.Adsr.SetParameters(attack, decay, sustain, release);
-            _toneStream.Adsr.SetMode(triggerMode);
-            _toneStream.Adsr.SetDuration(duration);
+            // The duration only limits the Trigger mode; a Gate sustains until it closes.
+            var durationSecs = triggerMode == AdsrCalculator.TriggerMode.Trigger && duration > 0 ? duration : -1f;
+            _toneStream.SetParameters(frequency, waveformType, attack, decay, sustain, release, durationSecs);
 
             if (resumedAfterGap)
             {
                 _previousTrigger = shouldPlay;
-                _toneStream.Adsr.Reset();
+                _toneStream.Reset();
             }
 
             var risingEdge = shouldPlay && !_previousTrigger;
@@ -110,28 +102,28 @@ namespace Lib.io.audio
 
             if (risingEdge)
             {
-                _toneStream.Adsr.TriggerAttack();
+                _toneStream.TriggerAttack();
             }
             else if (fallingEdge)
             {
                 if (triggerMode == AdsrCalculator.TriggerMode.Gate)
                 {
-                    _toneStream.Adsr.TriggerRelease();
+                    _toneStream.TriggerRelease();
                 }
             }
-            else if (!shouldPlay && !_toneStream.Adsr.IsActive)
+            else if (!shouldPlay && !_toneStream.IsActive)
             {
-                _toneStream.Adsr.Reset();
+                _toneStream.Reset();
             }
 
             // Volume/mute live on the node's gain (applied by whichever bus routes the channel), so group
             // and bus gain folds compose with it; the stream itself only renders waveform × envelope.
-            _node.SourceChannel = _toneStream.StreamHandle;
+            _node.SourceChannel = _toneStream.Handle;
             _node.Gain = mute ? 0f : volume;
             _node.SourceLabel = $"{frequency:0}Hz";
 
-            IsPlaying.Value = _toneStream.Adsr.IsActive;
-            GetLevel.Value = _toneStream.GetLevel();
+            IsPlaying.Value = _toneStream.IsActive;
+            GetLevel.Value = _toneStream.IsActive ? _toneStream.Level : 0f;
         }
 
         private void UpdateStatus(EvaluationContext context)
@@ -143,8 +135,8 @@ namespace Lib.io.audio
                 return;
             }
 
-            IsPlaying.Value = _toneStream.Adsr.IsActive;
-            GetLevel.Value = _toneStream.GetLevel();
+            IsPlaying.Value = _toneStream.IsActive;
+            GetLevel.Value = _toneStream.IsActive ? _toneStream.Level : 0f;
         }
 
         private void EnsureToneStream()
@@ -152,14 +144,8 @@ namespace Lib.io.audio
             if (_toneStream != null || _streamCreationFailed)
                 return;
 
-            if (!AudioMixerManager.IsInitialized)
-            {
-                AudioMixerManager.Initialize();
-                if (!AudioMixerManager.IsInitialized)
-                    return;
-            }
-
-            _toneStream = ProceduralToneStream.Create();
+            AudioMixerManager.Initialize();
+            _toneStream = ToneGeneratorSource.TryCreate();
             if (_toneStream == null)
                 _streamCreationFailed = true;
         }
@@ -179,148 +165,8 @@ namespace Lib.io.audio
             PinkNoise = 5
         }
 
-        /// <summary>
-        /// Renders waveform × ADSR into an unrouted BASS decode stream; the audio graph (an [AudioBus] or the
-        /// implicit collector) routes the channel and applies gain.
-        /// </summary>
-        private sealed class ProceduralToneStream
-        {
-            public int StreamHandle { get; private set; }
-            public readonly AdsrCalculator Adsr = new();
-
-            public float Frequency
-            {
-                get => _frequency;
-                set => _frequency = Math.Clamp(value, 20f, 20000f);
-            }
-
-            public WaveformTypes WaveformType
-            {
-                get => (WaveformTypes)_waveformType;
-                set => _waveformType = (int)value;
-            }
-
-            public static ProceduralToneStream? Create()
-            {
-                var instance = new ProceduralToneStream();
-                instance._gcHandle = GCHandle.Alloc(instance);
-
-                var streamHandle = Bass.CreateStream(AudioConfig.MixerFrequency,
-                                                     Channels,
-                                                     BassFlags.Float | BassFlags.Decode,
-                                                     instance._streamProc,
-                                                     GCHandle.ToIntPtr(instance._gcHandle));
-                if (streamHandle == 0)
-                {
-                    Log.Error($"[AudioToneGenerator] Failed to create tone stream: {Bass.LastError}");
-                    instance._gcHandle.Free();
-                    return null;
-                }
-
-                instance.StreamHandle = streamHandle;
-                return instance;
-            }
-
-            public float GetLevel()
-            {
-                if (!Adsr.IsActive)
-                    return 0f;
-
-                // Buffer-inspecting Ex variant — the plain ChannelGetLevel only sees data taken since the
-                // last call and mostly reads 0 between the device's coarse pulls.
-                if (BassMix.ChannelGetLevel(StreamHandle, _levelPair, 0.05f, 0) == -1)
-                    return _lastLevel;
-
-                _lastLevel = Math.Min(Math.Max(_levelPair[0], _levelPair[1]), 1f);
-                return _lastLevel;
-            }
-
-            public void Dispose()
-            {
-                Adsr.Reset();
-                BassMix.MixerRemoveChannel(StreamHandle);
-                Bass.StreamFree(StreamHandle);
-
-                if (_gcHandle.IsAllocated)
-                    _gcHandle.Free();
-            }
-
-            private ProceduralToneStream()
-            {
-                _streamProc = StreamCallback;
-                _sampleRate = AudioConfig.MixerFrequency;
-                Adsr.SetSampleRate(_sampleRate);
-            }
-
-            private int StreamCallback(int handle, IntPtr buffer, int length, IntPtr user)
-            {
-                var floatCount = length / sizeof(float);
-                if (_sampleBuffer.Length < floatCount)
-                    _sampleBuffer = new float[floatCount];
-
-                var phaseIncrement = 2.0 * Math.PI * _frequency / _sampleRate;
-                var waveType = _waveformType;
-
-                for (var i = 0; i < floatCount; i++)
-                {
-                    var envelopeGain = Adsr.UpdateSample();
-                    _sampleBuffer[i] = GenerateSample(_phase, waveType) * envelopeGain;
-                    _phase += phaseIncrement;
-
-                    if (_phase >= 2.0 * Math.PI)
-                        _phase -= 2.0 * Math.PI;
-                }
-
-                Marshal.Copy(_sampleBuffer, 0, buffer, floatCount);
-                return length;
-            }
-
-            private float GenerateSample(double phase, int waveType)
-            {
-                var t = phase / (2.0 * Math.PI);
-
-                switch (waveType)
-                {
-                    case (int)WaveformTypes.Sine:
-                        return (float)Math.Sin(phase);
-                    case (int)WaveformTypes.Square:
-                        return t < 0.5 ? 0.8f : -0.8f;
-                    case (int)WaveformTypes.Sawtooth:
-                        return (float)(2.0 * t - 1.0) * 0.8f;
-                    case (int)WaveformTypes.Triangle:
-                        return (float)(4.0 * Math.Abs(t - 0.5) - 1.0) * 0.8f;
-                    case (int)WaveformTypes.WhiteNoise:
-                        return (float)(_noiseRng.NextDouble() * 2.0 - 1.0) * 0.5f;
-                    case (int)WaveformTypes.PinkNoise:
-                    {
-                        var white = _noiseRng.NextDouble() * 2.0 - 1.0;
-                        _pinkB0 = 0.99765 * _pinkB0 + white * 0.0990460;
-                        _pinkB1 = 0.96300 * _pinkB1 + white * 0.2965164;
-                        _pinkB2 = 0.57000 * _pinkB2 + white * 1.0526913;
-                        var pink = _pinkB0 + _pinkB1 + _pinkB2 + white * 0.1848;
-                        return (float)(pink * 0.15);
-                    }
-                    default:
-                        return (float)Math.Sin(phase);
-                }
-            }
-
-            private const int Channels = 1;
-            private readonly StreamProcedure _streamProc;
-            private readonly int _sampleRate;
-            private GCHandle _gcHandle;
-            private volatile float _frequency = 440f;
-            private volatile int _waveformType;
-            private double _phase;
-            private float[] _sampleBuffer = [];
-            private float _lastLevel;
-            private readonly float[] _levelPair = new float[2];
-            private readonly Random _noiseRng = new();
-            private double _pinkB0, _pinkB1, _pinkB2;
-        }
-
         private readonly AudioGraphNode _node;
-        private ProceduralToneStream? _toneStream;
+        private ToneGeneratorSource? _toneStream;
         private bool _streamCreationFailed;
         private bool _previousTrigger;
         private int _lastApplyFrame = -1;

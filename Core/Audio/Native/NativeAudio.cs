@@ -25,17 +25,6 @@ internal static unsafe partial class NativeAudio
         Jack = 4,
     }
 
-    internal enum NodeKind
-    {
-        Endpoint = 0,
-        Sound = 1,
-        Bus = 2,
-        Tap = 4,
-    }
-
-    /** Tap index of the device output, recorded before the output gain. */
-    internal const int OutputTap = 0;
-
     /** Load flag: spatialize the sound. Without it the sound bypasses the spatializer. */
     internal const uint LoadSpatial = 4;
 
@@ -106,12 +95,6 @@ internal static unsafe partial class NativeAudio
     [LibraryImport(Library, EntryPoint = "ta_get_playback_seconds")]
     internal static partial double GetPlaybackSeconds(IntPtr engine, ulong nowNs);
 
-    [LibraryImport(Library, EntryPoint = "ta_tap_read_latest")]
-    internal static partial ulong TapReadLatest(IntPtr engine, int tap, float* destination, int count);
-
-    [LibraryImport(Library, EntryPoint = "ta_tap_take_peak")]
-    internal static partial float TapTakePeak(IntPtr engine, int tap);
-
     [LibraryImport(Library, EntryPoint = "ta_output_read_stereo")]
     internal static partial void OutputReadStereo(IntPtr engine, float* destination, int frameCount);
 
@@ -135,6 +118,60 @@ internal static unsafe partial class NativeAudio
 
     [LibraryImport(Library, EntryPoint = "ta_offline_close")]
     internal static partial void OfflineClose(IntPtr decoder);
+
+    [LibraryImport(Library, EntryPoint = "ta_sound_set_pan")]
+    internal static partial void SoundSetPan(IntPtr engine, int sound, float pan);
+
+    [LibraryImport(Library, EntryPoint = "ta_get_level")]
+    internal static partial float GetLevel(IntPtr engine, int handle, int frameCount);
+
+    [LibraryImport(Library, EntryPoint = "ta_read_latest")]
+    internal static partial int ReadLatest(IntPtr engine, int handle, float* destination, int count);
+
+    [LibraryImport(Library, EntryPoint = "ta_route")]
+    internal static partial int Route(IntPtr engine, int source, int target);
+
+    [LibraryImport(Library, EntryPoint = "ta_bus_create")]
+    internal static partial int BusCreate(IntPtr engine);
+
+    [LibraryImport(Library, EntryPoint = "ta_bus_destroy")]
+    internal static partial void BusDestroy(IntPtr engine, int bus);
+
+    [LibraryImport(Library, EntryPoint = "ta_bus_set_volume")]
+    internal static partial void BusSetVolume(IntPtr engine, int bus, float volume);
+
+    [LibraryImport(Library, EntryPoint = "ta_bus_set_playing")]
+    internal static partial void BusSetPlaying(IntPtr engine, int bus, int playing);
+
+    [LibraryImport(Library, EntryPoint = "ta_sound_create_push")]
+    internal static partial int SoundCreatePush(IntPtr engine, uint channels, uint sampleRate, uint capacityFrames);
+
+    [LibraryImport(Library, EntryPoint = "ta_push_write")]
+    internal static partial int PushWrite(IntPtr engine, int sound, float* frames, uint frameCount);
+
+    [LibraryImport(Library, EntryPoint = "ta_push_queued_frames")]
+    internal static partial int PushQueuedFrames(IntPtr engine, int sound);
+
+    [LibraryImport(Library, EntryPoint = "ta_push_clear")]
+    internal static partial void PushClear(IntPtr engine, int sound);
+
+    [LibraryImport(Library, EntryPoint = "ta_sound_create_generator")]
+    internal static partial int SoundCreateGenerator(IntPtr engine);
+
+    [LibraryImport(Library, EntryPoint = "ta_generator_set")]
+    internal static partial void GeneratorSet(IntPtr engine, int sound, float frequency, int waveform, float attackSeconds, float decaySeconds, float sustainLevel, float releaseSeconds, float durationSeconds);
+
+    [LibraryImport(Library, EntryPoint = "ta_generator_attack")]
+    internal static partial void GeneratorAttack(IntPtr engine, int sound);
+
+    [LibraryImport(Library, EntryPoint = "ta_generator_release")]
+    internal static partial void GeneratorRelease(IntPtr engine, int sound);
+
+    [LibraryImport(Library, EntryPoint = "ta_generator_reset")]
+    internal static partial void GeneratorReset(IntPtr engine, int sound);
+
+    [LibraryImport(Library, EntryPoint = "ta_generator_is_active")]
+    internal static partial int GeneratorIsActive(IntPtr engine, int sound);
 
     private const string Library = "tixlaudio";
 }

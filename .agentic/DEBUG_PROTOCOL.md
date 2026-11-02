@@ -237,10 +237,10 @@ Operator packages hot-reload via `reload`, but Editor/Core changes need a restar
    editor (Debug incremental is safe once it exited).
 3. Relaunch with the flags above and wait for the port.
 
-**A Debug editor loads the *Release* operator packages.** Rebuilding an operator package
-(`Operators/Lib`, `Operators/Video`, …) in Debug alone leaves the editor running the previous
-code, and the obvious conclusion — "my change had no effect" — is wrong. Build operator
-packages with `-c Release`, or both. A stack trace from the running editor is the quickest
+**Rebuild operator packages in both configurations.** Which one a Debug editor loads has differed
+between setups, and a package left behind runs the previous code — or, after a change to a public Core API,
+fails with `MissingFieldException` / `MissingMethodException` and takes the editor down. Build `Operators/Lib`,
+`Operators/Video`, … with and without `-c Release`. A stack trace from the running editor is the quickest
 check: its line numbers will match the old source.
 
 ## Running the visual reference test suite

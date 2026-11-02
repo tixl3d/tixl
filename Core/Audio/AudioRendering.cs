@@ -28,7 +28,6 @@ public static class AudioRendering
 
     // Reusable buffers to reduce per-frame allocations during export
     private static float[] _mixBuffer = Array.Empty<float>();
-    private static float[] _operatorBuffer = Array.Empty<float>();
     private static float[] _spatialStreamBuffer = Array.Empty<float>();
     
     private static readonly Fft _exportFft = new(AudioConfig.FftBufferSize * 2);
@@ -138,10 +137,10 @@ public static class AudioRendering
         var mixBuffer = EnsureBuffer(ref _mixBuffer, floatCount);
         double currentTime = Playback.Current.TimeInSecs;
 
-        RenderSoundtracks(mixBuffer, sampleCount, currentTime);
+        RenderNativeGraph(mixBuffer, sampleCount, currentTime);
 
         // Mix operator audio (always included)
-        MixOperatorAudio(mixBuffer, floatCount, currentTime, frameDurationInSeconds);
+        MixSpatialAudio(mixBuffer, currentTime, frameDurationInSeconds);
 
         LogMixStats(mixBuffer, floatCount, currentTime);
         UpdateOperatorMetering();
@@ -163,7 +162,8 @@ public static class AudioRendering
         return mixBuffer;
     }
 
-    private static void RenderSoundtracks(float[] mixBuffer, int frameCount, double currentTime)
+    /// <summary>Renders the whole native graph: soundtracks, operators, buses and video audio.</summary>
+    private static void RenderNativeGraph(float[] mixBuffer, int frameCount, double currentTime)
     {
         var engine = AudioMixerManager.NativeEngine;
         if (engine == null)
@@ -193,26 +193,8 @@ public static class AudioRendering
         _exportFft.ComputeMagnitudes(history, context.FftGainBuffer);
     }
 
-    private static void MixOperatorAudio(float[] mixBuffer, int floatCount, double currentTime, double frameDuration)
+    private static void MixSpatialAudio(float[] mixBuffer, double currentTime, double frameDuration)
     {
-        // Mix all operator audio from the operator mixer
-        // This includes:
-        // - Procedural/callback streams (e.g., AudioToneGenerator) 
-        // - File-based stereo streams (e.g., AudioPlayer) - these are NOT paused during export
-        // The OperatorMixer is a decode-only mixer, so it doesn't output to soundcard
-        var operatorBuffer = EnsureBuffer(ref _operatorBuffer, floatCount);
-        int bytesRead = Bass.ChannelGetData(AudioMixerManager.OperatorMixerHandle, operatorBuffer, floatCount * sizeof(float));
-
-        if (bytesRead > 0)
-        {
-            int samplesRead = bytesRead / sizeof(float);
-            for (int i = 0; i < Math.Min(samplesRead, mixBuffer.Length); i++)
-            {
-                if (!float.IsNaN(operatorBuffer[i]))
-                    mixBuffer[i] += operatorBuffer[i];
-            }
-        }
-
         // Mix spatial operator audio (these are not in the mixer - they use native 3D)
         // We need to render each spatial stream separately with manual 3D processing
         MixSpatialOperatorAudio(mixBuffer, currentTime, frameDuration);
@@ -257,26 +239,7 @@ public static class AudioRendering
 
     private static void UpdateOperatorMetering()
     {
-        UpdateStereoMeteringForStates(AudioEngine.GetAllStereoOperatorStates());
         UpdateSpatialMeteringForStates(AudioEngine.GetAllSpatialOperatorStates());
-    }
-
-    private static void UpdateStereoMeteringForStates(IEnumerable<KeyValuePair<Guid, (StereoOperatorAudioStream? Stream, bool IsStale)>> states)
-    {
-        foreach (var kvp in states)
-        {
-            var stream = kvp.Value.Stream;
-            if (stream == null || !stream.IsPlaying || stream.IsPaused || kvp.Value.IsStale)
-                continue;
-
-            var level = BassMix.ChannelGetLevel(stream.StreamHandle);
-            if (level != -1)
-            {
-                float left = (level & 0xFFFF) / 32768f;
-                float right = ((level >> 16) & 0xFFFF) / 32768f;
-                stream.UpdateFromBuffer([left, right]);
-            }
-        }
     }
 
     private static void UpdateSpatialMeteringForStates(IEnumerable<KeyValuePair<Guid, (SpatialOperatorAudioStream? Stream, bool IsStale)>> states)

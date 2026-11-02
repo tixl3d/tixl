@@ -1,6 +1,6 @@
 ---
 id: soundtrack-native-audio
-title: Soundtrack Playback on the Native Audio Engine
+title: Audio on the Native Engine
 scope: audio
 tags: [audio]
 added: 2026-11-02
@@ -10,7 +10,7 @@ prerequisites:
   - The audio output is audible.
 ---
 
-Covers soundtrack playback, sync, analysis, images and export after moving away from BASS.
+Covers soundtrack and operator playback, routing, metering, analysis, images and export after moving away from BASS.
 
 ## Step: Playing the soundtrack
 
@@ -75,3 +75,59 @@ Add an `[AudioClip]` with **AutoPlay** on and **Display** set to **Clip**, plus 
 **Expected:**
 - The clip is audible in the exported video, as it is in live playback.
 - The visuals react to it in the exported video.
+
+## Step: Routing a clip through a bus
+
+**Action:**
+Wire an `[AudioClip]` into an `[AudioBus]` that is part of the render chain, change the bus **Volume** while playing, then disconnect the clip.
+
+**Expected:**
+- The volume follows the bus without clicks, and the audio doesn't jump when the clip is connected or disconnected.
+- After disconnecting, the clip plays on at its own volume.
+- Stopping playback silences the bus.
+
+## Step: Samples and tones
+
+**Action:**
+Wire `[PlayAudioSample]` and `[AudioToneGenerator]` into the bus, and trigger them repeatedly with short pulses and with long gates.
+
+**Expected:**
+- Every trigger is heard, starting from the top of the sample.
+- The tone follows its envelope and fades out over its release time.
+- Sample speed, panning and seek work.
+
+## Step: Level meters
+
+**Action:**
+Wire `[AudioLevel]` inline before the bus, then branch a second `[AudioLevel]` off an `[AudioClip]` without wiring it into the bus. Open the audio panel in the settings window.
+
+**Expected:**
+- Both `[AudioLevel]` outputs follow the audio and fall to 0 when it stops. The side branch works for clips too and shows no warning.
+- `[AudioBus]` **Level** and the operator, soundtrack and global meters move.
+
+## Step: Effects are passed through
+
+**Action:**
+Wire a source through `[AudioReverb]`, `[AudioEcho]` and `[AudioCompressor]`.
+
+**Expected:**
+- The audio passes through unchanged and each op shows a warning that the effect isn't available.
+- Their parameters are still there.
+
+## Step: Video audio
+
+**Action:**
+Play a video with audio through `[PlayVideo]` wired into a bus, seek around, and export a few seconds.
+
+**Expected:**
+- The audio stays in sync with the picture after seeks.
+- The video's audio is in the export, in sync.
+
+## Step: Exporting the audio graph
+
+**Action:**
+Export a video with a clip, a triggered sample and a tone wired into a bus. Press play afterwards.
+
+**Expected:**
+- All three are audible at the levels heard live, and triggers land where they did live.
+- Live playback and all meters work again after the export.

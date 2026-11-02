@@ -1,5 +1,7 @@
 #nullable enable
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using T3.Core.Logging;
 
 namespace T3.Core.Audio.Native;
@@ -30,28 +32,140 @@ internal sealed unsafe class NativeAudioEngine : IDisposable
         return null;
     }
 
-    public AudioSourceHandle LoadFile(string path, bool spatial = false)
+    public AudioHandle LoadFile(string path, bool spatial = false)
     {
         var handle = NativeAudio.SoundLoad(_engine, path, spatial ? NativeAudio.LoadSpatial : 0);
         if (handle < 0)
             Log.Warning($"Could not load audio file {path} (error {handle}).");
 
-        return new AudioSourceHandle(handle);
+        return new AudioHandle(handle);
     }
 
-    public void Unload(AudioSourceHandle source) => NativeAudio.SoundUnload(_engine, source.Value);
-    public bool Play(AudioSourceHandle source) => NativeAudio.SoundPlay(_engine, source.Value) == 0;
-    public bool Pause(AudioSourceHandle source) => NativeAudio.SoundPause(_engine, source.Value) == 0;
-    public bool Seek(AudioSourceHandle source, double seconds) => NativeAudio.SoundSeekSeconds(_engine, source.Value, seconds) == 0;
-    public double GetLengthSecs(AudioSourceHandle source) => NativeAudio.SoundGetLengthSeconds(_engine, source.Value);
-    public void SetVolume(AudioSourceHandle source, float volume) => NativeAudio.SoundSetVolume(_engine, source.Value, volume);
-    public void SetPitch(AudioSourceHandle source, float pitch) => NativeAudio.SoundSetPitch(_engine, source.Value, pitch);
-    public bool IsPlaying(AudioSourceHandle source) => NativeAudio.SoundIsPlaying(_engine, source.Value) != 0;
+    public void Unload(AudioHandle source)
+    {
+        _routes.Remove(source);
+        NativeAudio.SoundUnload(_engine, source.Value);
+    }
+
+    public AudioHandle CreateBus()
+    {
+        var handle = NativeAudio.BusCreate(_engine);
+        if (handle < 0)
+            Log.Warning($"Could not create an audio bus (error {handle}).");
+
+        return new AudioHandle(handle);
+    }
+
+    public void DestroyBus(AudioHandle bus)
+    {
+        _routes.Remove(bus);
+        NativeAudio.BusDestroy(_engine, bus.Value);
+    }
+
+    /// <summary>Releases a source or bus on the main thread's next frame, for finalizers and worker threads.</summary>
+    public void ReleaseDeferred(AudioHandle handle) => _deferredReleases.Enqueue(handle);
+
+    /// <summary>Called once per frame on the main thread.</summary>
+    public void ProcessDeferredReleases()
+    {
+        while (_deferredReleases.TryDequeue(out var handle))
+        {
+            if ((handle.Value & BusHandleBit) != 0)
+                DestroyBus(handle);
+            else
+                Unload(handle);
+        }
+    }
+
+    /// <summary>Moves a source or bus into a bus or <see cref="AudioHandle.Output"/>; the default handle unroutes it.</summary>
+    public bool Route(AudioHandle source, AudioHandle target)
+    {
+        if (NativeAudio.Route(_engine, source.Value, target.Value) != 0)
+            return false;
+
+        if (target.IsValid)
+            _routes[source] = target;
+        else
+            _routes.Remove(source);
+
+        return true;
+    }
+
+    /// <summary>Where a source or bus is routed; the default handle while it is unrouted.</summary>
+    public AudioHandle GetRouteTarget(AudioHandle source) => _routes.GetValueOrDefault(source);
+
+    public void SetBusVolume(AudioHandle bus, float volume) => NativeAudio.BusSetVolume(_engine, bus.Value, volume);
+
+    /// <summary>A stopped bus no longer pulls its sources, so they keep their position and generators don't advance.</summary>
+    public void SetBusPlaying(AudioHandle bus, bool playing) => NativeAudio.BusSetPlaying(_engine, bus.Value, playing ? 1 : 0);
+
+    public void SetOutputGain(float gain) => NativeAudio.SetOutputGain(_engine, gain);
+
+    public void SetPan(AudioHandle source, float pan) => NativeAudio.SoundSetPan(_engine, source.Value, pan);
+
+    /// <summary>The highest recent sample of a source, a bus or the output. Reading doesn't consume anything, so any number of meters can share it.</summary>
+    public float GetLevel(AudioHandle handle, float windowSecs = DefaultLevelWindowSecs)
+        => NativeAudio.GetLevel(_engine, handle.Value, (int)(windowSecs * AudioConfig.MixerFrequency));
+
+    /// <summary>The newest samples of a source, a bus or the output as a mono mix. False and silence while it isn't playing.</summary>
+    public bool ReadLatestMono(AudioHandle handle, Span<float> samples)
+    {
+        fixed (float* destination = samples)
+        {
+            return NativeAudio.ReadLatest(_engine, handle.Value, destination, samples.Length) > 0;
+        }
+    }
+
+    public AudioHandle CreatePushSource(int channels, int sampleRate, int capacityFrames)
+    {
+        var handle = NativeAudio.SoundCreatePush(_engine, (uint)channels, (uint)sampleRate, (uint)capacityFrames);
+        if (handle < 0)
+            Log.Warning($"Could not create an audio push source (error {handle}).");
+
+        return new AudioHandle(handle);
+    }
+
+    /// <summary>Queues interleaved frames and returns how many fit.</summary>
+    public int PushWrite(AudioHandle source, ReadOnlySpan<float> interleaved, int frameCount)
+    {
+        fixed (float* frames = interleaved)
+        {
+            return NativeAudio.PushWrite(_engine, source.Value, frames, (uint)frameCount);
+        }
+    }
+
+    public int GetPushQueuedFrames(AudioHandle source) => NativeAudio.PushQueuedFrames(_engine, source.Value);
+    public void PushClear(AudioHandle source) => NativeAudio.PushClear(_engine, source.Value);
+
+    public AudioHandle CreateGenerator()
+    {
+        var handle = NativeAudio.SoundCreateGenerator(_engine);
+        if (handle < 0)
+            Log.Warning($"Could not create a tone generator (error {handle}).");
+
+        return new AudioHandle(handle);
+    }
+
+    public void SetGenerator(AudioHandle source, float frequency, int waveform, float attackSecs, float decaySecs, float sustainLevel, float releaseSecs, float durationSecs)
+        => NativeAudio.GeneratorSet(_engine, source.Value, frequency, waveform, attackSecs, decaySecs, sustainLevel, releaseSecs, durationSecs);
+
+    public void TriggerGeneratorAttack(AudioHandle source) => NativeAudio.GeneratorAttack(_engine, source.Value);
+    public void TriggerGeneratorRelease(AudioHandle source) => NativeAudio.GeneratorRelease(_engine, source.Value);
+    public void ResetGenerator(AudioHandle source) => NativeAudio.GeneratorReset(_engine, source.Value);
+    public bool IsGeneratorActive(AudioHandle source) => NativeAudio.GeneratorIsActive(_engine, source.Value) != 0;
+
+    public bool Play(AudioHandle source) => NativeAudio.SoundPlay(_engine, source.Value) == 0;
+    public bool Pause(AudioHandle source) => NativeAudio.SoundPause(_engine, source.Value) == 0;
+    public bool Seek(AudioHandle source, double seconds) => NativeAudio.SoundSeekSeconds(_engine, source.Value, seconds) == 0;
+    public double GetLengthSecs(AudioHandle source) => NativeAudio.SoundGetLengthSeconds(_engine, source.Value);
+    public void SetVolume(AudioHandle source, float volume) => NativeAudio.SoundSetVolume(_engine, source.Value, volume);
+    public void SetPitch(AudioHandle source, float pitch) => NativeAudio.SoundSetPitch(_engine, source.Value, pitch);
+    public bool IsPlaying(AudioHandle source) => NativeAudio.SoundIsPlaying(_engine, source.Value) != 0;
 
     /// <summary>The next source position to be mixed; ahead of what is audible by <see cref="OutputLatencySecs"/>.</summary>
-    public double GetCursorSecs(AudioSourceHandle source) => NativeAudio.SoundGetCursorSeconds(_engine, source.Value);
+    public double GetCursorSecs(AudioHandle source) => NativeAudio.SoundGetCursorSeconds(_engine, source.Value);
 
-    public bool TryGetFormat(AudioSourceHandle source, out int channels, out int sampleRate)
+    public bool TryGetFormat(AudioHandle source, out int channels, out int sampleRate)
     {
         var result = NativeAudio.SoundGetFormat(_engine, source.Value, out var nativeChannels, out var nativeRate);
         channels = (int)nativeChannels;
@@ -73,18 +187,6 @@ internal sealed unsafe class NativeAudioEngine : IDisposable
 
     /// <summary>Reattaches the default output device; false leaves the engine silent but usable.</summary>
     public bool AttachDefaultDevice() => NativeAudio.AttachDevice(_engine, DefaultDevice) == 0;
-
-    /// <summary>The highest output sample since the previous call.</summary>
-    public float TakeOutputPeak() => NativeAudio.TapTakePeak(_engine, NativeAudio.OutputTap);
-
-    /// <summary>The newest output samples as a mono mix, zero-padded at the start if fewer exist.</summary>
-    public void ReadOutputMono(Span<float> samples)
-    {
-        fixed (float* destination = samples)
-        {
-            NativeAudio.TapReadLatest(_engine, NativeAudio.OutputTap, destination, samples.Length);
-        }
-    }
 
     /// <summary>The newest output frames as interleaved stereo, zero-padded at the start if fewer exist.</summary>
     public void ReadOutputStereo(Span<float> interleaved)
@@ -116,6 +218,13 @@ internal sealed unsafe class NativeAudioEngine : IDisposable
     private NativeAudioEngine(IntPtr engine) => _engine = engine;
 
     private const int DefaultDevice = -1;
+    private const int BusHandleBit = 0x40000000;
+
+    /** Long enough that a meter read once per frame can't miss a peak between device callbacks. */
+    private const float DefaultLevelWindowSecs = 0.05f;
+
+    private readonly Dictionary<AudioHandle, AudioHandle> _routes = new();
+    private readonly ConcurrentQueue<AudioHandle> _deferredReleases = new();
 
     private IntPtr _engine;
 }

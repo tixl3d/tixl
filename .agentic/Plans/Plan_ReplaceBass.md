@@ -1,9 +1,9 @@
 # Replace BASS with a native miniaudio layer
 
-**Status:** In progress — 2026-11-02, on branch `feat/miniaudio`. Soundtracks, their analysis, their export, waveform
-images and duration probes run on the native engine; operators, buses, spatial audio, video audio and capture are
-still on BASS. Phase 0's seek fix is done; its Windows and macOS runs and the upstream reports are open. The spike
-lives on branch `spike/replace-bass`.
+**Status:** In progress — 2026-11-02, on branch `feat/miniaudio`. Soundtracks, stereo operators, buses, the tone generator,
+video audio, analysis, export of all of these, waveform images and duration probes run on the native engine. Spatial
+audio, audio input and BASS's own device setup are what's left on BASS. Phase 0's seek fix is done; its Windows and
+macOS runs and the upstream reports are open. The spike lives on branch `spike/replace-bass`.
 Decisions from 2026-10-12 are folded in (§Decisions 6–10).
 **Scope:** All audio in Editor, Player and operators on Windows, Linux and macOS. Removes ManagedBass,
 BASSmix, BASSFLAC and BASSWASAPI.
@@ -219,11 +219,11 @@ must not ship (decision 6). Measured in the running editor (null sink recording 
 0.999–1.000, constant offset, 8–26 ms behind the timeline through seeks, pause and 2× speed.
 
 Until the remaining phases land, on this branch:
-- Operator audio plays through BASS, so it's missing from the live FFT, waveform and soundtrack meter.
-- A clip wired into a bus plays directly at its clip volume (`AudioEngine.TryGetSoundtrackChannel` returns false).
-- Soundtracks ignore the output device BASS was given; the native engine follows the system default.
-- On macOS soundtracks stay silent, because there is no `libtixlaudio.dylib` yet.
-- `AppVolume` applies once to soundtracks; through BASS it applied twice (clip volume and global mixer).
+- Soundtracks and operators ignore the output device BASS was given; the native engine follows the system default.
+- Spatial audio still plays through BASS, so it's missing from the live FFT, waveform and meters.
+- On macOS everything but spatial audio is silent, because there is no `libtixlaudio.dylib` yet.
+- `[AudioReverb]`, `[AudioEcho]` and `[AudioCompressor]` pass their audio through with a status warning (decision 8).
+- The exported Player executable hasn't been run on the native engine; it needs a release build.
 
 The Editor registers clips before `Playback.Update` and the Player after it, which matters when judging sync.
 Mixing is fixed at 48 kHz (`AudioConfig.MixerFrequency` is const), which settles that open question.
@@ -239,6 +239,11 @@ Mixing is fixed at 48 kHz (`AudioConfig.MixerFrequency` is const), which settles
   reactions will differ slightly from earlier versions and should now match live.
 
 ### Phase 4 — graph, operators, effects, spatial, video audio
+
+**Done on `feat/miniaudio` except spatial.** Every source and bus routes through its own tap, so any of them can be
+metered and analysed; reading a level no longer consumes it, and BASS's rule that clip channels can't be metered as a
+side branch is gone, along with its warning. `AudioHandle` is the one handle type. Measured in the running editor:
+routed gains exact to three digits, no phase jump when a clip moves into a bus.
 
 - `AudioBusRouter`/`AudioGraphCollector`/`AudioBusRegistry` realise buses, inserts and taps natively.
 - `[AudioReverb]`/`[AudioEcho]`/`[AudioCompressor]` become pass-through with a status warning (decision 8);

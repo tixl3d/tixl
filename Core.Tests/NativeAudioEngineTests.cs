@@ -26,6 +26,7 @@ public class NativeAudioEngineTests
             Assert.True(source.IsValid);
             Assert.Equal(2.0, engine.GetLengthSecs(source), 3);
 
+            Assert.True(engine.Route(source, AudioHandle.Output));
             Assert.True(engine.Play(source));
             Assert.True(engine.Seek(source, 1.0));
 
@@ -80,7 +81,7 @@ public class NativeAudioEngineTests
             Assert.Equal(SampleRate, sampleRate);
 
             Assert.False(engine.IsPlaying(source));
-            engine.Play(source);
+            PlayToOutput(engine, source);
             Assert.True(engine.IsPlaying(source));
 
             engine.Seek(source, 0.5);
@@ -107,7 +108,7 @@ public class NativeAudioEngineTests
         {
             using var engine = NativeAudioEngine.TryCreate(NativeAudio.Mode.Offline, NativeAudio.Backend.Null, SampleRate);
             Assert.NotNull(engine);
-            engine.Play(engine.LoadFile(path));
+            PlayToOutput(engine, engine.LoadFile(path));
 
             var rendered = new float[1024 * 2];
             engine.Render(rendered, 1024);
@@ -115,7 +116,7 @@ public class NativeAudioEngineTests
             var stereo = new float[256 * 2];
             var mono = new float[256];
             engine.ReadOutputStereo(stereo);
-            engine.ReadOutputMono(mono);
+            engine.ReadLatestMono(AudioHandle.Output, mono);
 
             for (var frame = 0; frame < 256; frame++)
             {
@@ -125,8 +126,8 @@ public class NativeAudioEngineTests
                 Assert.Equal(rendered[renderedFrame * 2], mono[frame], 5);
             }
 
-            Assert.True(engine.TakeOutputPeak() > 0);
-            Assert.Equal(0f, engine.TakeOutputPeak());
+            Assert.True(engine.GetLevel(AudioHandle.Output) > 0);
+            Assert.True(engine.GetLevel(AudioHandle.Output) > 0); // reading a meter doesn't consume it
         }
         finally
         {
@@ -175,12 +176,12 @@ public class NativeAudioEngineTests
         {
             using var engine = NativeAudioEngine.TryCreate(NativeAudio.Mode.Offline, NativeAudio.Backend.Null, SampleRate);
             Assert.NotNull(engine);
-            engine.Play(engine.LoadFile(path));
+            PlayToOutput(engine, engine.LoadFile(path));
             engine.Render(new float[4096 * 2], 4096);
 
             var samples = new float[fftSize];
             var magnitudes = new float[fftSize / 2];
-            engine.ReadOutputMono(samples);
+            engine.ReadLatestMono(AudioHandle.Output, samples);
             new Fft(fftSize).ComputeMagnitudes(samples, magnitudes);
 
             Assert.InRange(magnitudes[bin], amplitude * 0.99f, amplitude * 1.01f);
@@ -214,6 +215,228 @@ public class NativeAudioEngineTests
         using var engine = NativeAudioEngine.TryCreate(NativeAudio.Mode.Offline, NativeAudio.Backend.Null, SampleRate);
         Assert.NotNull(engine);
         Assert.False(engine.LoadFile("/does/not/exist.wav").IsValid);
+    }
+
+    [Fact]
+    public void UnroutedSourceIsSilentAndBusAppliesItsVolume()
+    {
+        var path = WriteWav(seconds: 1, _ => 0.5f);
+        try
+        {
+            using var engine = NativeAudioEngine.TryCreate(NativeAudio.Mode.Offline, NativeAudio.Backend.Null, SampleRate);
+            Assert.NotNull(engine);
+
+            var source = engine.LoadFile(path);
+            engine.Play(source);
+            var rendered = new float[1024 * 2];
+            engine.Render(rendered, 1024);
+            Assert.Equal(0f, Peak(rendered));
+
+            var bus = engine.CreateBus();
+            Assert.True(bus.IsValid);
+            Assert.True(engine.Route(source, bus));
+            Assert.Equal(bus, engine.GetRouteTarget(source));
+            engine.SetBusVolume(bus, 0.5f);
+            engine.Render(rendered, 1024);
+
+            Assert.InRange(rendered[1000 * 2], 0.24f, 0.26f);
+            Assert.InRange(engine.GetLevel(source), 0.49f, 0.51f); // the source's own tap sits before the bus
+            Assert.InRange(engine.GetLevel(bus), 0.24f, 0.26f);
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [Fact]
+    public void NestedBusesFoldTheirVolumesAndStoppingOneStopsItsSources()
+    {
+        var path = WriteRampWav(seconds: 1);
+        try
+        {
+            using var engine = NativeAudioEngine.TryCreate(NativeAudio.Mode.Offline, NativeAudio.Backend.Null, SampleRate);
+            Assert.NotNull(engine);
+
+            var outer = engine.CreateBus();
+            var inner = engine.CreateBus();
+            Assert.True(engine.Route(inner, outer));
+            var source = engine.LoadFile(path);
+            Assert.True(engine.Route(source, inner));
+            engine.SetBusVolume(inner, 0.5f);
+            engine.SetBusVolume(outer, 0.5f);
+            engine.Play(source);
+
+            var rendered = new float[2048 * 2];
+            engine.Render(rendered, 2048);
+            Assert.InRange(Peak(rendered), 0.11f, 0.13f);
+
+            engine.SetBusPlaying(outer, false);
+            var cursorWhileStopped = engine.GetCursorSecs(source);
+            engine.Render(rendered, 2048);
+            Assert.Equal(0f, Peak(rendered));
+            Assert.Equal(cursorWhileStopped, engine.GetCursorSecs(source));
+
+            engine.SetBusPlaying(outer, true);
+            engine.Render(rendered, 2048);
+            Assert.True(Peak(rendered) > 0.1f);
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [Fact]
+    public void StoppedSourceMetersAsSilenceAndDestroyedBusRejectsItsHandle()
+    {
+        var path = WriteWav(seconds: 1, _ => 0.5f);
+        try
+        {
+            using var engine = NativeAudioEngine.TryCreate(NativeAudio.Mode.Offline, NativeAudio.Backend.Null, SampleRate);
+            Assert.NotNull(engine);
+
+            var source = engine.LoadFile(path);
+            PlayToOutput(engine, source);
+            var rendered = new float[8192 * 2];
+            engine.Render(rendered, 1024);
+            Assert.True(engine.GetLevel(source) > 0.4f);
+
+            engine.Pause(source);
+            engine.Render(rendered, 8192);
+            Assert.Equal(0f, engine.GetLevel(source));
+            Assert.False(engine.ReadLatestMono(source, new float[64]));
+
+            var bus = engine.CreateBus();
+            engine.DestroyBus(bus);
+            Assert.False(engine.Route(source, bus));
+            Assert.NotEqual(bus, engine.CreateBus());
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [Fact]
+    public void PanMovesASourceToOneSide()
+    {
+        var path = WriteWav(seconds: 1, _ => 0.5f);
+        try
+        {
+            using var engine = NativeAudioEngine.TryCreate(NativeAudio.Mode.Offline, NativeAudio.Backend.Null, SampleRate);
+            Assert.NotNull(engine);
+
+            var source = engine.LoadFile(path);
+            engine.SetPan(source, -1f);
+            PlayToOutput(engine, source);
+            var rendered = new float[1024 * 2];
+            engine.Render(rendered, 1024);
+
+            Assert.True(Math.Abs(rendered[1000 * 2]) > 0.4f);
+            Assert.True(Math.Abs(rendered[1000 * 2 + 1]) < 0.01f);
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [Fact]
+    public void GeneratorFollowsItsEnvelope()
+    {
+        using var engine = NativeAudioEngine.TryCreate(NativeAudio.Mode.Offline, NativeAudio.Backend.Null, SampleRate);
+        Assert.NotNull(engine);
+
+        var tone = engine.CreateGenerator();
+        Assert.True(engine.Route(tone, AudioHandle.Output));
+        engine.SetGenerator(tone, 480f, 0, attackSecs: 0.001f, decaySecs: 0.001f, sustainLevel: 0.5f, releaseSecs: 0.01f, durationSecs: -1f);
+
+        var rendered = new float[4800 * 2];
+        engine.Render(rendered, 4800);
+        Assert.Equal(0f, Peak(rendered));
+        Assert.False(engine.IsGeneratorActive(tone));
+
+        engine.TriggerGeneratorAttack(tone);
+        Assert.True(engine.IsGeneratorActive(tone));
+        engine.Render(rendered, 4800);
+        Assert.InRange(Peak(rendered.AsSpan(2400 * 2)), 0.49f, 0.51f); // sustain
+
+        engine.TriggerGeneratorRelease(tone);
+        engine.Render(rendered, 4800);
+        Assert.Equal(0f, Peak(rendered.AsSpan(1000 * 2))); // a 10 ms release is over after 480 frames
+        Assert.False(engine.IsGeneratorActive(tone));
+    }
+
+    [Fact]
+    public void GeneratorTriggerModeReleasesAfterItsDuration()
+    {
+        using var engine = NativeAudioEngine.TryCreate(NativeAudio.Mode.Offline, NativeAudio.Backend.Null, SampleRate);
+        Assert.NotNull(engine);
+
+        var tone = engine.CreateGenerator();
+        engine.Route(tone, AudioHandle.Output);
+        engine.SetGenerator(tone, 480f, 1, 0.001f, 0.001f, 1f, 0.001f, durationSecs: 0.05f);
+        engine.TriggerGeneratorAttack(tone);
+
+        var rendered = new float[4800 * 2];
+        engine.Render(rendered, 4800);
+        Assert.True(Peak(rendered.AsSpan(0, 1200 * 2)) > 0.7f);
+        Assert.Equal(0f, Peak(rendered.AsSpan(2600 * 2)));
+    }
+
+    [Fact]
+    public void PushSourcePlaysWhatIsFedThenSilence()
+    {
+        using var engine = NativeAudioEngine.TryCreate(NativeAudio.Mode.Offline, NativeAudio.Backend.Null, SampleRate);
+        Assert.NotNull(engine);
+
+        var source = engine.CreatePushSource(2, SampleRate, SampleRate);
+        PlayToOutput(engine, source);
+
+        var fed = new float[480 * 2];
+        Array.Fill(fed, 0.25f);
+        Assert.Equal(480, engine.PushWrite(source, fed, 480));
+        Assert.Equal(480, engine.GetPushQueuedFrames(source));
+
+        var rendered = new float[960 * 2];
+        engine.Render(rendered, 960);
+        Assert.InRange(rendered[100 * 2], 0.24f, 0.26f);
+        Assert.Equal(0f, Peak(rendered.AsSpan(480 * 2)));
+        Assert.Equal(0, engine.GetPushQueuedFrames(source));
+    }
+
+    [Fact]
+    public void DeferredReleaseHappensOnProcessing()
+    {
+        using var engine = NativeAudioEngine.TryCreate(NativeAudio.Mode.Offline, NativeAudio.Backend.Null, SampleRate);
+        Assert.NotNull(engine);
+
+        var bus = engine.CreateBus();
+        var tone = engine.CreateGenerator();
+        Assert.True(engine.Route(tone, bus));
+        engine.ReleaseDeferred(tone);
+        engine.ReleaseDeferred(bus);
+
+        Assert.True(engine.IsPlaying(tone));
+        engine.ProcessDeferredReleases();
+        Assert.False(engine.IsPlaying(tone));
+        Assert.False(engine.Route(bus, AudioHandle.Output));
+    }
+
+    private static void PlayToOutput(NativeAudioEngine engine, AudioHandle source)
+    {
+        engine.Route(source, AudioHandle.Output);
+        engine.Play(source);
+    }
+
+    private static float Peak(ReadOnlySpan<float> samples)
+    {
+        var peak = 0f;
+        foreach (var sample in samples)
+            peak = Math.Max(peak, Math.Abs(sample));
+
+        return peak;
     }
 
     private static float RampValueAt(int frame) => (frame % 1000) / 1000f - 0.5f;

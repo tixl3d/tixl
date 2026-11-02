@@ -63,7 +63,7 @@ public interface IVideoPlaybackEngine
     /// synchronously before this call returns, advancing one exported frame per call rather than with the wall
     /// clock, so the caller can pull a repeatable mixdown straight afterwards.</para>
     /// </summary>
-    int RequestAudio(Guid streamId, string absolutePath, double sourceSeconds, bool loop, bool renderingToFile);
+    T3.Core.Audio.Native.AudioHandle RequestAudio(Guid streamId, string absolutePath, double sourceSeconds, bool loop, bool renderingToFile);
 
     /// <summary>Releases the stream's decoder, cache and audio track. Call when the owning operator is disposed.</summary>
     void ReleaseStream(Guid streamId);

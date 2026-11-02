@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using T3.Core.Audio;
+using T3.Core.Audio.Native;
 using T3.Core.Logging;
 using T3.Core.Utils;
 
@@ -16,9 +17,9 @@ namespace T3.VideoServices;
 /// </summary>
 internal sealed class VideoAudioTrack : IDisposable
 {
-    /// <summary>The BASS channel for the audio graph to route; 0 until the worker has opened the track (or when
+    /// <summary>The source for the audio graph to route; invalid until the worker has opened the track (or when
     /// the file has no audio at all). Read from the evaluation thread.</summary>
-    public int Channel => Volatile.Read(ref _channel);
+    public AudioHandle Channel => new(Volatile.Read(ref _channel));
 
     /// <summary>
     /// Posts the source time this track should be playing. <paramref name="absolutePath"/> must be the original
@@ -45,7 +46,7 @@ internal sealed class VideoAudioTrack : IDisposable
     /// clock — the queue moves one exported frame per call — so two renders of the same range produce
     /// identical audio. Returns the channel for the graph to route, as <see cref="Request"/> does.
     /// </summary>
-    public int RequestForExport(string absolutePath, double sourceSeconds, bool loop)
+    public AudioHandle RequestForExport(string absolutePath, double sourceSeconds, bool loop)
     {
         lock (_workLock)
         {
@@ -55,7 +56,7 @@ internal sealed class VideoAudioTrack : IDisposable
             _lastExportRequestMs = now;
 
             if (!EnsureSource(absolutePath))
-                return 0;
+                return default;
 
             var target = TimeToFrameMapper.ResolvePlaybackSeconds(sourceSeconds, _session!.DurationSeconds, loop);
 
@@ -93,12 +94,10 @@ internal sealed class VideoAudioTrack : IDisposable
         }
 
         // The worker has exited, but the evaluation thread can still be inside RequestForExport, so take the
-        // same lock it holds. After a device change the stream's handle is already dead — freeing it again
-        // would act on a handle BASS has since re-issued.
+        // same lock it holds.
         lock (_workLock)
         {
-            if (_stream is { IsInvalidated: false })
-                _stream.Dispose();
+            _stream?.Dispose();
 
             _session?.Dispose();
             _stream = null;
@@ -245,9 +244,6 @@ internal sealed class VideoAudioTrack : IDisposable
     /// <summary>True once both <see cref="_session"/> and <see cref="_stream"/> are usable for this url.</summary>
     private bool EnsureSource(string url)
     {
-        if (_stream is { IsInvalidated: true })
-            DropAfterDeviceChange();
-
         if (url != _workerUrl || _sessionSampleRate != AudioConfig.MixerFrequency)
             OpenSource(url);
 
@@ -349,7 +345,7 @@ internal sealed class VideoAudioTrack : IDisposable
         if (_stream == null)
             return false;
 
-        Volatile.Write(ref _channel, _stream.Channel);
+        Volatile.Write(ref _channel, _stream.Channel.Value);
         return true;
     }
 
@@ -368,7 +364,7 @@ internal sealed class VideoAudioTrack : IDisposable
         AudioMixerManager.Initialize();
         _sessionSampleRate = AudioConfig.MixerFrequency;
 
-        // Resampling straight to the mixer's rate spares BASS a second conversion on every pull.
+        // Resampling straight to the mixer's rate spares the engine a second conversion on every pull.
         _session = AudioDecoderSession.TryOpen(url, _sessionSampleRate, out var error);
         if (error != null)
             Log.Warning($"[VideoAudio] {error}");
@@ -383,19 +379,6 @@ internal sealed class VideoAudioTrack : IDisposable
     // A device change frees every BASS handle and may change the mixer's rate, so the push stream and the
     // resampler (built for the old rate) both have to be rebuilt. The handles are already dead — freeing them
     // again would act on whatever BASS has since handed out.
-    private void DropAfterDeviceChange()
-    {
-        Volatile.Write(ref _channel, 0);
-        _stream = null;
-        _session?.Dispose();
-        _session = null;
-        _workerUrl = null;
-        _sessionSampleRate = 0;
-        _fedSeconds = double.NaN;
-        _lastTarget = double.NaN;
-        _forwardSteps = 0;
-    }
-
     private const int TickIntervalMs = 10;
     private const int SilenceAfterIdleMs = 100;
 

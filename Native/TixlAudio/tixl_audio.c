@@ -28,7 +28,11 @@
 
 #define TA_MAX_SOUNDS 256
 #define TA_SOUND_SLOT_BITS 8 /* a sound handle is (generation << bits) | slot */
-#define TA_MAX_BUSES 16
+#define TA_MAX_BUSES 64
+#define TA_BUS_HANDLE_BIT 0x40000000u
+#define TA_MAX_GENERATION (0x3FFFFFFFu >> TA_SOUND_SLOT_BITS)
+#define TA_HANDLE_OUTPUT 0x7FFFFFFF /* routes to the device output; meters what reaches it */
+#define TA_TAP_STALE_FRAMES 4096 /* a tap nothing wrote to for this long meters as silence (85 ms at 48 kHz) */
 #define TA_MAX_ECHOES 8
 #define TA_MAX_TAPS 8 /* index 0 is the device output */
 #define TA_TAP_CAPACITY 16384 /* mono frames, power of two */
@@ -72,6 +76,7 @@ typedef enum
     TA_SOURCE_RESOURCE_MANAGER,
     TA_SOURCE_WAVEFORM,
     TA_SOURCE_PUSH,
+    TA_SOURCE_GENERATOR,
 } ta_source_kind;
 
 typedef struct
@@ -99,12 +104,14 @@ typedef struct
     float samples[TA_TAP_CAPACITY];
     ma_atomic_uint64 framesWritten;
     ma_atomic_float peak;
+    ma_atomic_uint64 lastWriteClock;
 } ta_tap_ring;
 
 typedef struct
 {
     ma_node_base base;
     ta_tap_ring ring;
+    ma_atomic_uint64* clock; /* frames the engine has rendered, to tell a stopped source from a quiet one */
 } ta_tap_node;
 
 typedef struct
@@ -130,6 +137,36 @@ typedef struct
     ma_atomic_uint64 underrunFrames;
 } ta_push_source;
 
+/* Waveform × ADSR, computed on the audio thread. The frame loop only writes parameters and raises signals. */
+typedef struct
+{
+    ma_data_source_base base;
+    ma_uint32 sampleRate;
+    ma_uint64 cursor;
+
+    ma_atomic_float frequency;
+    ma_atomic_int32 waveform;
+    ma_atomic_float attackSeconds;
+    ma_atomic_float decaySeconds;
+    ma_atomic_float sustainLevel;
+    ma_atomic_float releaseSeconds;
+    ma_atomic_float durationSeconds; /* < 0: until released */
+    ma_atomic_int32 attackSignal;
+    ma_atomic_int32 releaseSignal;
+    ma_atomic_int32 resetSignal;
+    ma_atomic_int32 isActive;
+
+    ma_int32 stage;
+    float envelope;
+    double releaseStartValue;
+    ma_int64 stageFrames;
+    ma_int64 playedFrames;
+    ma_int64 durationFrames;
+    double phase;
+    ma_uint32 noiseState;
+    double pinkB0, pinkB1, pinkB2;
+} ta_generator_source;
+
 typedef struct
 {
     ma_bool32 used;
@@ -139,8 +176,10 @@ typedef struct
         ma_decoder decoder;
         ma_waveform waveform;
         ta_push_source push;
+        ta_generator_source generator;
     } source;
     ma_sound sound;
+    ta_tap_node tap; /* every source routes through its own tap, so any source can be metered and analysed */
     ma_uint32 sourceSampleRate;
     ma_uint32 generation;
 } ta_sound_slot;
@@ -148,7 +187,9 @@ typedef struct
 typedef struct
 {
     ma_bool32 used;
+    ma_uint32 generation;
     ma_sound_group group;
+    ta_tap_node tap;
 } ta_bus_slot;
 
 typedef struct
@@ -206,7 +247,6 @@ typedef struct
     ta_route_command routeQueue[TA_ROUTE_QUEUE_CAPACITY];
     ma_atomic_uint32 routeQueueWritten;
     ma_atomic_uint32 routeQueueApplied;
-    ma_atomic_int32 applyRoutesImmediately;
 
     ma_device captureDevice;
     ma_bool32 captureRunning;
@@ -215,6 +255,7 @@ typedef struct
     /* Interleaved stereo copy of the output for waveform displays; outputTap only keeps the mono mix. */
     float outputStereo[TA_TAP_CAPACITY * 2];
     ma_atomic_uint64 outputStereoWritten;
+    ma_atomic_uint64 renderClock;
 } ta_engine;
 
 static ma_uint64 ta_now_ns_internal(void)
@@ -300,6 +341,8 @@ static void ta_tap_process(ma_node* node, const float** framesIn, ma_uint32* fra
     if (framesOut[0] != framesIn[0])
         memcpy(framesOut[0], framesIn[0], (size_t)frameCount * 2 * sizeof(float));
     ta_tap_ring_write(&tap->ring, framesIn[0], frameCount, 2);
+    if (tap->clock != NULL)
+        ma_atomic_uint64_set(&tap->ring.lastWriteClock, ma_atomic_uint64_get(tap->clock));
 }
 
 static ma_node_vtable g_tapVtable = { ta_tap_process, NULL, 1, 1, MA_NODE_FLAG_PASSTHROUGH };
@@ -420,19 +463,24 @@ static void ta_apply_queued_routes(ta_engine* engine)
     while (applied != written)
     {
         ta_route_command* command = &engine->routeQueue[applied & (TA_ROUTE_QUEUE_CAPACITY - 1)];
-        ma_node_attach_output_bus(command->source, 0, command->target, 0);
+        if (command->target != NULL)
+            ma_node_attach_output_bus(command->source, 0, command->target, 0);
+        else
+            ma_node_detach_output_bus(command->source, 0);
         applied++;
     }
     ma_atomic_uint32_set(&engine->routeQueueApplied, applied);
 }
 
 static ta_sound_slot* ta_sound(ta_engine* engine, ma_int32 handle);
+static void ta_release_sound(ta_sound_slot* slot);
 
 static void ta_render_block(ta_engine* engine, float* output, ma_uint32 frameCount, ma_uint64 startNs)
 {
     ta_apply_queued_routes(engine);
     ma_engine_read_pcm_frames(&engine->engine, output, frameCount, NULL);
     ta_tap_ring_write(&engine->outputTap, output, frameCount, 2);
+    ma_atomic_uint64_set(&engine->renderClock, ma_atomic_uint64_get(&engine->renderClock) + frameCount);
 
     ma_uint64 stereoWritten = ma_atomic_uint64_get(&engine->outputStereoWritten);
     for (ma_uint32 frame = 0; frame < frameCount; frame++)
@@ -640,11 +688,7 @@ TA_API void ta_destroy(ta_engine* engine)
         ta_sound_slot* slot = &engine->sounds[index];
         if (!slot->used)
             continue;
-        ma_sound_uninit(&slot->sound);
-        if (slot->kind == TA_SOURCE_FILE_DECODER)
-            ma_decoder_uninit(&slot->source.decoder);
-        else if (slot->kind == TA_SOURCE_PUSH)
-            ma_pcm_rb_uninit(&slot->source.push.ring);
+        ta_release_sound(slot);
     }
     for (ma_int32 index = 0; index < TA_MAX_ECHOES; index++)
     {
@@ -661,7 +705,10 @@ TA_API void ta_destroy(ta_engine* engine)
     for (ma_int32 index = 0; index < TA_MAX_BUSES; index++)
     {
         if (engine->buses[index].used)
+        {
             ma_sound_group_uninit(&engine->buses[index].group);
+            ma_node_uninit(&engine->buses[index].tap.base, NULL);
+        }
     }
 
     ma_engine_uninit(&engine->engine);
@@ -739,11 +786,50 @@ TA_API void ta_set_output_gain(ta_engine* engine, float gain)
 
 static ta_sound_slot* ta_sound(ta_engine* engine, ma_int32 handle)
 {
-    if (handle < 0)
+    if (handle < 0 || handle == TA_HANDLE_OUTPUT || ((ma_uint32)handle & TA_BUS_HANDLE_BIT) != 0)
         return NULL;
     /* A handle kept past its unload must fail rather than reach whichever sound reused the slot. */
     ta_sound_slot* slot = &engine->sounds[handle & (TA_MAX_SOUNDS - 1)];
     return slot->used && slot->generation == ((ma_uint32)handle >> TA_SOUND_SLOT_BITS) ? slot : NULL;
+}
+
+/** Skips 0 so that a zeroed handle is never valid. */
+static ma_uint32 ta_next_generation(ma_uint32 generation)
+{
+    generation = (generation + 1) & TA_MAX_GENERATION;
+    return generation != 0 ? generation : 1;
+}
+
+static void ta_tap_node_prepare(ta_engine* engine, ta_tap_node* tap)
+{
+    memset(&tap->ring, 0, sizeof(tap->ring));
+    tap->clock = &engine->renderClock;
+}
+
+/** Releases what a sound owns, on every path that gives one up. */
+static void ta_release_sound(ta_sound_slot* slot)
+{
+    ma_sound_uninit(&slot->sound);
+    ma_node_uninit(&slot->tap.base, NULL);
+    if (slot->kind == TA_SOURCE_FILE_DECODER)
+        ma_decoder_uninit(&slot->source.decoder);
+    else if (slot->kind == TA_SOURCE_PUSH)
+        ma_pcm_rb_uninit(&slot->source.push.ring);
+}
+
+/** Queued routes hold raw node pointers, so they must be applied before any node is freed. */
+static void ta_drain_routes(ta_engine* engine)
+{
+    if (engine->hasDevice)
+    {
+        for (int attempt = 0; attempt < 100; attempt++)
+        {
+            if (ma_atomic_uint32_get(&engine->routeQueueApplied) == ma_atomic_uint32_get(&engine->routeQueueWritten))
+                return;
+            ma_sleep(1);
+        }
+    }
+    ta_apply_queued_routes(engine);
 }
 
 static ma_int32 ta_free_sound_slot(ta_engine* engine)
@@ -770,11 +856,24 @@ static ma_int32 ta_finish_sound(ta_engine* engine, ma_int32 handle)
     ma_uint32 sourceSampleRate = 0;
     ma_sound_get_data_format(&slot->sound, NULL, NULL, &sourceSampleRate, NULL, 0);
     slot->sourceSampleRate = sourceSampleRate;
+
+    /* Starts unrouted, so nothing can be heard until the caller has placed the source. */
+    ta_tap_node_prepare(engine, &slot->tap);
+    ma_result tapResult = ta_stereo_node_init(engine, &g_tapVtable, &slot->tap.base);
+    if (tapResult != MA_SUCCESS)
+    {
+        ma_sound_uninit(&slot->sound);
+        if (slot->kind == TA_SOURCE_FILE_DECODER)
+            ma_decoder_uninit(&slot->source.decoder);
+        else if (slot->kind == TA_SOURCE_PUSH)
+            ma_pcm_rb_uninit(&slot->source.push.ring);
+        return tapResult;
+    }
+    ma_node_attach_output_bus(&slot->sound, 0, &slot->tap.base, 0);
+
     slot->used = MA_TRUE;
     /* Wraps within the positive handle range; 0 is skipped so a zeroed handle is never valid. */
-    slot->generation = (slot->generation + 1) & (0x7FFFFFFFu >> TA_SOUND_SLOT_BITS);
-    if (slot->generation == 0)
-        slot->generation = 1;
+    slot->generation = ta_next_generation(slot->generation);
     return (ma_int32)((slot->generation << TA_SOUND_SLOT_BITS) | (ma_uint32)handle);
 }
 
@@ -913,11 +1012,8 @@ TA_API void ta_sound_unload(ta_engine* engine, ma_int32 handle)
     if (ma_atomic_int32_get(&engine->trackedSound) == handle)
         ma_atomic_int32_set(&engine->trackedSound, -1);
 
-    ma_sound_uninit(&slot->sound);
-    if (slot->kind == TA_SOURCE_FILE_DECODER)
-        ma_decoder_uninit(&slot->source.decoder);
-    else if (slot->kind == TA_SOURCE_PUSH)
-        ma_pcm_rb_uninit(&slot->source.push.ring);
+    ta_drain_routes(engine);
+    ta_release_sound(slot);
     ma_uint32 generation = slot->generation;
     memset(slot, 0, sizeof(*slot));
     slot->generation = generation;
@@ -955,6 +1051,13 @@ TA_API ma_int32 ta_sound_seek_seconds(ta_engine* engine, ma_int32 handle, double
     if (slot == NULL || seconds < 0)
         return MA_INVALID_ARGS;
     return ma_sound_seek_to_pcm_frame(&slot->sound, (ma_uint64)(seconds * slot->sourceSampleRate));
+}
+
+TA_API void ta_sound_set_pan(ta_engine* engine, ma_int32 handle, float pan)
+{
+    ta_sound_slot* slot = ta_sound(engine, handle);
+    if (slot != NULL)
+        ma_sound_set_pan(&slot->sound, pan);
 }
 
 TA_API ma_int32 ta_sound_is_playing(ta_engine* engine, ma_int32 handle)
@@ -1071,6 +1174,16 @@ TA_API void ta_output_read_stereo(ta_engine* engine, float* destination, ma_int3
 
 /* ---- Buses, effects, taps and routing ---- */
 
+static ta_bus_slot* ta_bus(ta_engine* engine, ma_int32 handle)
+{
+    if (handle <= 0 || handle == TA_HANDLE_OUTPUT || ((ma_uint32)handle & TA_BUS_HANDLE_BIT) == 0)
+        return NULL;
+    ta_bus_slot* slot = &engine->buses[((ma_uint32)handle & (TA_MAX_SOUNDS - 1)) % TA_MAX_BUSES];
+    ma_uint32 generation = ((ma_uint32)handle & ~TA_BUS_HANDLE_BIT) >> TA_SOUND_SLOT_BITS;
+    return slot->used && slot->generation == generation ? slot : NULL;
+}
+
+/** Returns a bus handle routed to the output, or a negative ma_result on failure. */
 TA_API ma_int32 ta_bus_create(ta_engine* engine)
 {
     for (ma_int32 index = 0; index < TA_MAX_BUSES; index++)
@@ -1081,16 +1194,151 @@ TA_API ma_int32 ta_bus_create(ta_engine* engine)
         ma_result result = ma_sound_group_init(&engine->engine, MA_SOUND_FLAG_NO_SPATIALIZATION | MA_SOUND_FLAG_NO_PITCH, NULL, &slot->group);
         if (result != MA_SUCCESS)
             return result;
+        ta_tap_node_prepare(engine, &slot->tap);
+        result = ta_stereo_node_init(engine, &g_tapVtable, &slot->tap.base);
+        if (result != MA_SUCCESS)
+        {
+            ma_sound_group_uninit(&slot->group);
+            return result;
+        }
+        ma_node_attach_output_bus(&slot->group, 0, &slot->tap.base, 0);
+        ma_node_attach_output_bus(&slot->tap.base, 0, ma_engine_get_endpoint(&engine->engine), 0);
+        slot->generation = ta_next_generation(slot->generation);
         slot->used = MA_TRUE;
-        return index;
+        return (ma_int32)(TA_BUS_HANDLE_BIT | (slot->generation << TA_SOUND_SLOT_BITS) | (ma_uint32)index);
     }
     return MA_TOO_BIG;
 }
 
-TA_API void ta_bus_set_volume(ta_engine* engine, ma_int32 bus, float volume)
+/** Whatever is still routed into the bus goes silent until it is routed elsewhere. */
+TA_API void ta_bus_destroy(ta_engine* engine, ma_int32 handle)
 {
-    if (bus >= 0 && bus < TA_MAX_BUSES && engine->buses[bus].used)
-        ma_sound_group_set_volume(&engine->buses[bus].group, volume);
+    ta_bus_slot* slot = ta_bus(engine, handle);
+    if (slot == NULL)
+        return;
+    ta_drain_routes(engine);
+    ma_sound_group_uninit(&slot->group);
+    ma_node_uninit(&slot->tap.base, NULL);
+    slot->used = MA_FALSE;
+}
+
+TA_API void ta_bus_set_volume(ta_engine* engine, ma_int32 handle, float volume)
+{
+    ta_bus_slot* slot = ta_bus(engine, handle);
+    if (slot != NULL)
+        ma_sound_group_set_volume(&slot->group, volume);
+}
+
+/** A stopped bus no longer pulls its sources, so they keep their position and generators don't advance. */
+TA_API void ta_bus_set_playing(ta_engine* engine, ma_int32 handle, ma_int32 playing)
+{
+    ta_bus_slot* slot = ta_bus(engine, handle);
+    if (slot == NULL)
+        return;
+    if (playing)
+        ma_sound_group_start(&slot->group);
+    else
+        ma_sound_group_stop(&slot->group);
+}
+
+static ta_tap_ring* ta_handle_ring(ta_engine* engine, ma_int32 handle)
+{
+    if (handle == TA_HANDLE_OUTPUT)
+        return &engine->outputTap;
+    ta_sound_slot* sound = ta_sound(engine, handle);
+    if (sound != NULL)
+        return &sound->tap.ring;
+    ta_bus_slot* bus = ta_bus(engine, handle);
+    return bus != NULL ? &bus->tap.ring : NULL;
+}
+
+static ma_bool32 ta_ring_is_stale(ta_engine* engine, ma_int32 handle, ta_tap_ring* ring)
+{
+    return handle != TA_HANDLE_OUTPUT
+           && ma_atomic_uint64_get(&engine->renderClock) - ma_atomic_uint64_get(&ring->lastWriteClock) > TA_TAP_STALE_FRAMES;
+}
+
+/** The highest sample of a sound, bus or the output in its newest frames. Doesn't consume anything, so any number of meters can read it. */
+TA_API float ta_get_level(ta_engine* engine, ma_int32 handle, ma_int32 frameCount)
+{
+    ta_tap_ring* ring = ta_handle_ring(engine, handle);
+    if (ring == NULL || ta_ring_is_stale(engine, handle, ring))
+        return 0;
+
+    if (frameCount > TA_TAP_CAPACITY / 2)
+        frameCount = TA_TAP_CAPACITY / 2;
+    ma_uint64 written = ma_atomic_uint64_get(&ring->framesWritten);
+    ma_uint64 count = written < (ma_uint64)frameCount ? written : (ma_uint64)frameCount;
+    float peak = 0;
+    for (ma_uint64 index = 0; index < count; index++)
+    {
+        float sample = ring->samples[(written - 1 - index) & (TA_TAP_CAPACITY - 1)];
+        float magnitude = sample < 0 ? -sample : sample;
+        if (magnitude > peak)
+            peak = magnitude;
+    }
+    return peak;
+}
+
+/** Copies the newest mono samples of a sound, bus or the output; returns 0 and silence for a stale handle or a stopped source. */
+TA_API ma_int32 ta_read_latest(ta_engine* engine, ma_int32 handle, float* destination, ma_int32 count)
+{
+    ta_tap_ring* ring = ta_handle_ring(engine, handle);
+    if (ring == NULL || ta_ring_is_stale(engine, handle, ring))
+    {
+        memset(destination, 0, (size_t)count * sizeof(float));
+        return 0;
+    }
+    ta_tap_ring_read_latest(ring, destination, count);
+    return count;
+}
+
+/**
+ * Routes a sound or bus into a bus, to TA_HANDLE_OUTPUT, or to nothing (target 0). With a running device the
+ * change is queued and applied by the audio thread before its next block, so no block sees half a change.
+ */
+TA_API ma_int32 ta_route(ta_engine* engine, ma_int32 source, ma_int32 target)
+{
+    ma_node* sourceNode = NULL;
+    ta_sound_slot* sound = ta_sound(engine, source);
+    if (sound != NULL)
+    {
+        sourceNode = &sound->tap.base;
+    }
+    else
+    {
+        ta_bus_slot* bus = ta_bus(engine, source);
+        if (bus != NULL)
+            sourceNode = &bus->tap.base;
+    }
+    if (sourceNode == NULL)
+        return MA_INVALID_ARGS;
+
+    ma_node* targetNode = NULL;
+    if (target == TA_HANDLE_OUTPUT)
+    {
+        targetNode = ma_engine_get_endpoint(&engine->engine);
+    }
+    else if (target != 0)
+    {
+        ta_bus_slot* bus = ta_bus(engine, target);
+        if (bus == NULL)
+            return MA_INVALID_ARGS;
+        targetNode = &bus->group;
+    }
+
+    if (!engine->hasDevice)
+    {
+        ta_apply_queued_routes(engine);
+        return targetNode != NULL ? ma_node_attach_output_bus(sourceNode, 0, targetNode, 0) : ma_node_detach_output_bus(sourceNode, 0);
+    }
+
+    ma_uint32 written = ma_atomic_uint32_get(&engine->routeQueueWritten);
+    if (written - ma_atomic_uint32_get(&engine->routeQueueApplied) >= TA_ROUTE_QUEUE_CAPACITY)
+        return MA_BUSY;
+    engine->routeQueue[written & (TA_ROUTE_QUEUE_CAPACITY - 1)] = (ta_route_command){ sourceNode, targetNode };
+    ma_atomic_uint32_set(&engine->routeQueueWritten, written + 1);
+    return MA_SUCCESS;
 }
 
 TA_API ma_int32 ta_echo_create(ta_engine* engine)
@@ -1187,55 +1435,6 @@ TA_API float ta_tap_take_peak(ta_engine* engine, ma_int32 tap)
     return ring ? ma_atomic_exchange_f32(&ring->peak.value, 0.0f) : 0.0f;
 }
 
-static ma_node* ta_node(ta_engine* engine, ma_int32 kind, ma_int32 index)
-{
-    switch (kind)
-    {
-        case TA_NODE_ENDPOINT:
-            return ma_engine_get_endpoint(&engine->engine);
-        case TA_NODE_SOUND:
-        {
-            ta_sound_slot* slot = ta_sound(engine, index);
-            return slot ? (ma_node*)&slot->sound : NULL;
-        }
-        case TA_NODE_BUS:
-            return index >= 0 && index < TA_MAX_BUSES && engine->buses[index].used ? (ma_node*)&engine->buses[index].group : NULL;
-        case TA_NODE_ECHO:
-            return index >= 0 && index < TA_MAX_ECHOES && engine->echoes[index].used ? (ma_node*)&engine->echoes[index].node.base : NULL;
-        case TA_NODE_TAP:
-            return index > 0 && index < TA_MAX_TAPS && engine->taps[index].used ? (ma_node*)&engine->taps[index].node.base : NULL;
-        default:
-            return NULL;
-    }
-}
-
-/**
- * Routes a node's output into another node, replacing its previous target. With a running device the change
- * is queued and applied by the audio thread before its next block.
- */
-TA_API ma_int32 ta_connect(ta_engine* engine, ma_int32 sourceKind, ma_int32 sourceIndex, ma_int32 targetKind, ma_int32 targetIndex)
-{
-    ma_node* source = ta_node(engine, sourceKind, sourceIndex);
-    ma_node* target = ta_node(engine, targetKind, targetIndex);
-    if (source == NULL || target == NULL || sourceKind == TA_NODE_ENDPOINT)
-        return MA_INVALID_ARGS;
-
-    if (!engine->hasDevice || ma_atomic_int32_get(&engine->applyRoutesImmediately))
-        return ma_node_attach_output_bus(source, 0, target, 0);
-
-    ma_uint32 written = ma_atomic_uint32_get(&engine->routeQueueWritten);
-    if (written - ma_atomic_uint32_get(&engine->routeQueueApplied) >= TA_ROUTE_QUEUE_CAPACITY)
-        return MA_BUSY;
-    engine->routeQueue[written & (TA_ROUTE_QUEUE_CAPACITY - 1)] = (ta_route_command){ source, target };
-    ma_atomic_uint32_set(&engine->routeQueueWritten, written + 1);
-    return MA_SUCCESS;
-}
-
-/** For comparison only: rewire from the calling thread while the audio thread may be mid-block. */
-TA_API void ta_set_apply_routes_immediately(ta_engine* engine, ma_int32 immediately)
-{
-    ma_atomic_int32_set(&engine->applyRoutesImmediately, immediately);
-}
 
 /* ---- Waveform and analysis: decode without playback ---- */
 
@@ -1314,6 +1513,271 @@ TA_API ma_int32 ta_decode_window(const char* path, ma_uint64 startFrame, ma_uint
 
     ma_decoder_uninit(&decoder);
     return result == MA_AT_END ? MA_SUCCESS : result;
+}
+
+/* ---- Generator source ---- */
+
+enum { TA_STAGE_IDLE, TA_STAGE_ATTACK, TA_STAGE_DECAY, TA_STAGE_SUSTAIN, TA_STAGE_RELEASE };
+enum { TA_WAVE_SINE, TA_WAVE_SQUARE, TA_WAVE_SAWTOOTH, TA_WAVE_TRIANGLE, TA_WAVE_WHITE_NOISE, TA_WAVE_PINK_NOISE };
+#define TA_PI 3.14159265358979323846
+
+static float ta_generator_envelope(ta_generator_source* generator)
+{
+    if (ma_atomic_int32_exchange(&generator->resetSignal, 0))
+    {
+        generator->stage = TA_STAGE_IDLE;
+        generator->envelope = 0;
+        generator->stageFrames = 0;
+        generator->playedFrames = 0;
+    }
+
+    float rate = (float)generator->sampleRate;
+    if (ma_atomic_int32_exchange(&generator->attackSignal, 0))
+    {
+        generator->stage = TA_STAGE_ATTACK;
+        generator->stageFrames = 0;
+        generator->playedFrames = 0;
+        float duration = ma_atomic_float_get(&generator->durationSeconds);
+        generator->durationFrames = duration < 0 ? -1 : (ma_int64)(duration * rate);
+    }
+
+    ma_bool32 startRelease = ma_atomic_int32_exchange(&generator->releaseSignal, 0)
+                             || (generator->durationFrames >= 0 && generator->playedFrames >= generator->durationFrames);
+    if (startRelease && generator->stage != TA_STAGE_IDLE && generator->stage != TA_STAGE_RELEASE)
+    {
+        generator->releaseStartValue = generator->envelope;
+        generator->stageFrames = 0;
+        generator->stage = TA_STAGE_RELEASE;
+    }
+
+    float sustain = ma_atomic_float_get(&generator->sustainLevel);
+    switch (generator->stage)
+    {
+        case TA_STAGE_ATTACK:
+        {
+            ma_int64 frames = (ma_int64)(ma_atomic_float_get(&generator->attackSeconds) * rate);
+            if (generator->stageFrames < frames)
+            {
+                generator->envelope = (float)generator->stageFrames / (float)frames;
+            }
+            else
+            {
+                generator->envelope = 1;
+                generator->stageFrames = 0;
+                generator->stage = TA_STAGE_DECAY;
+            }
+            break;
+        }
+        case TA_STAGE_DECAY:
+        {
+            ma_int64 frames = (ma_int64)(ma_atomic_float_get(&generator->decaySeconds) * rate);
+            if (generator->stageFrames < frames)
+            {
+                generator->envelope = 1.0f - (float)generator->stageFrames / (float)frames * (1.0f - sustain);
+            }
+            else
+            {
+                generator->envelope = sustain;
+                generator->stageFrames = 0;
+                generator->stage = TA_STAGE_SUSTAIN;
+            }
+            break;
+        }
+        case TA_STAGE_SUSTAIN:
+            generator->envelope = sustain;
+            break;
+        case TA_STAGE_RELEASE:
+        {
+            ma_int64 frames = (ma_int64)(ma_atomic_float_get(&generator->releaseSeconds) * rate);
+            if (generator->stageFrames < frames)
+            {
+                generator->envelope = (float)(generator->releaseStartValue * (1.0 - (double)generator->stageFrames / (double)frames));
+            }
+            else
+            {
+                generator->envelope = 0;
+                generator->stageFrames = 0;
+                generator->stage = TA_STAGE_IDLE;
+            }
+            break;
+        }
+        default:
+            generator->envelope = 0;
+            break;
+    }
+
+    generator->stageFrames++;
+    if (generator->stage != TA_STAGE_IDLE && generator->stage != TA_STAGE_RELEASE)
+        generator->playedFrames++;
+    return generator->envelope;
+}
+
+static float ta_generator_noise(ta_generator_source* generator)
+{
+    /* xorshift32: no locks and no libc state, so it is safe on the audio thread. */
+    ma_uint32 x = generator->noiseState;
+    x ^= x << 13;
+    x ^= x >> 17;
+    x ^= x << 5;
+    generator->noiseState = x;
+    return (float)((double)x / 2147483648.0 - 1.0);
+}
+
+static float ta_generator_sample(ta_generator_source* generator, double phase, ma_int32 waveform)
+{
+    double t = phase / (2.0 * TA_PI);
+    switch (waveform)
+    {
+        case TA_WAVE_SQUARE:
+            return t < 0.5 ? 0.8f : -0.8f;
+        case TA_WAVE_SAWTOOTH:
+            return (float)(2.0 * t - 1.0) * 0.8f;
+        case TA_WAVE_TRIANGLE:
+            return (float)(4.0 * fabs(t - 0.5) - 1.0) * 0.8f;
+        case TA_WAVE_WHITE_NOISE:
+            return ta_generator_noise(generator) * 0.5f;
+        case TA_WAVE_PINK_NOISE:
+        {
+            double white = ta_generator_noise(generator);
+            generator->pinkB0 = 0.99765 * generator->pinkB0 + white * 0.0990460;
+            generator->pinkB1 = 0.96300 * generator->pinkB1 + white * 0.2965164;
+            generator->pinkB2 = 0.57000 * generator->pinkB2 + white * 1.0526913;
+            return (float)((generator->pinkB0 + generator->pinkB1 + generator->pinkB2 + white * 0.1848) * 0.15);
+        }
+        default:
+            return (float)sin(phase);
+    }
+}
+
+static ma_result ta_generator_read(ma_data_source* dataSource, void* framesOut, ma_uint64 frameCount, ma_uint64* framesRead)
+{
+    ta_generator_source* generator = (ta_generator_source*)dataSource;
+    float* output = (float*)framesOut;
+    double phaseIncrement = 2.0 * TA_PI * ma_atomic_float_get(&generator->frequency) / generator->sampleRate;
+    ma_int32 waveform = ma_atomic_int32_get(&generator->waveform);
+
+    for (ma_uint64 frame = 0; frame < frameCount; frame++)
+    {
+        float envelope = ta_generator_envelope(generator);
+        output[frame] = ta_generator_sample(generator, generator->phase, waveform) * envelope;
+        generator->phase += phaseIncrement;
+        if (generator->phase >= 2.0 * TA_PI)
+            generator->phase -= 2.0 * TA_PI;
+    }
+
+    /* A raised signal counts as active too, so a trigger reads as active before the audio thread has seen it. */
+    ma_int32 pending = ma_atomic_int32_get(&generator->attackSignal);
+    ma_atomic_int32_set(&generator->isActive, generator->stage != TA_STAGE_IDLE || pending);
+    generator->cursor += frameCount;
+    *framesRead = frameCount;
+    return MA_SUCCESS;
+}
+
+static ma_result ta_generator_seek(ma_data_source* dataSource, ma_uint64 frameIndex)
+{
+    (void)dataSource;
+    (void)frameIndex;
+    return MA_NOT_IMPLEMENTED;
+}
+
+static ma_result ta_generator_get_format(ma_data_source* dataSource, ma_format* format, ma_uint32* channels, ma_uint32* sampleRate, ma_channel* channelMap, size_t channelMapCap)
+{
+    ta_generator_source* generator = (ta_generator_source*)dataSource;
+    *format = ma_format_f32;
+    *channels = 1;
+    *sampleRate = generator->sampleRate;
+    ma_channel_map_init_standard(ma_standard_channel_map_default, channelMap, channelMapCap, 1);
+    return MA_SUCCESS;
+}
+
+static ma_data_source_vtable g_generatorVtable = { ta_generator_read, ta_generator_seek, ta_generator_get_format, NULL, NULL, NULL, 0 };
+
+/** Returns a playing sound that stays silent until ta_generator_signal triggers its envelope. */
+TA_API ma_int32 ta_sound_create_generator(ta_engine* engine)
+{
+    ma_int32 handle = ta_free_sound_slot(engine);
+    if (handle < 0)
+        return MA_TOO_BIG;
+
+    ta_sound_slot* slot = &engine->sounds[handle];
+    ta_generator_source* generator = &slot->source.generator;
+    memset(generator, 0, sizeof(*generator));
+    generator->sampleRate = engine->sampleRate;
+    generator->noiseState = 0x9E3779B9u + (ma_uint32)handle;
+    generator->durationFrames = -1;
+    ma_atomic_float_set(&generator->frequency, 440.0f);
+    ma_atomic_float_set(&generator->attackSeconds, 0.01f);
+    ma_atomic_float_set(&generator->decaySeconds, 0.1f);
+    ma_atomic_float_set(&generator->sustainLevel, 0.7f);
+    ma_atomic_float_set(&generator->releaseSeconds, 0.3f);
+    ma_atomic_float_set(&generator->durationSeconds, -1.0f);
+
+    ma_data_source_config sourceConfig = ma_data_source_config_init();
+    sourceConfig.vtable = &g_generatorVtable;
+    ma_result result = ma_data_source_init(&sourceConfig, &generator->base);
+    if (result != MA_SUCCESS)
+        return result;
+    result = ma_sound_init_from_data_source(&engine->engine, generator, ta_sound_flags(0) | MA_SOUND_FLAG_NO_PITCH, NULL, &slot->sound);
+    if (result != MA_SUCCESS)
+        return result;
+    slot->kind = TA_SOURCE_GENERATOR;
+    ma_int32 finished = ta_finish_sound(engine, handle);
+    if (finished > 0)
+        ma_sound_start(&slot->sound);
+    return finished;
+}
+
+static ta_generator_source* ta_generator(ta_engine* engine, ma_int32 handle)
+{
+    ta_sound_slot* slot = ta_sound(engine, handle);
+    return slot != NULL && slot->kind == TA_SOURCE_GENERATOR ? &slot->source.generator : NULL;
+}
+
+/** durationSeconds < 0 sustains until a release signal. */
+TA_API void ta_generator_set(ta_engine* engine, ma_int32 handle, float frequency, ma_int32 waveform, float attackSeconds, float decaySeconds, float sustainLevel, float releaseSeconds, float durationSeconds)
+{
+    ta_generator_source* generator = ta_generator(engine, handle);
+    if (generator == NULL)
+        return;
+    ma_atomic_float_set(&generator->frequency, frequency < 20.0f ? 20.0f : (frequency > 20000.0f ? 20000.0f : frequency));
+    ma_atomic_int32_set(&generator->waveform, waveform);
+    ma_atomic_float_set(&generator->attackSeconds, attackSeconds < 0.001f ? 0.001f : attackSeconds);
+    ma_atomic_float_set(&generator->decaySeconds, decaySeconds < 0.001f ? 0.001f : decaySeconds);
+    ma_atomic_float_set(&generator->sustainLevel, sustainLevel < 0 ? 0 : (sustainLevel > 1 ? 1 : sustainLevel));
+    ma_atomic_float_set(&generator->releaseSeconds, releaseSeconds < 0.001f ? 0.001f : releaseSeconds);
+    ma_atomic_float_set(&generator->durationSeconds, durationSeconds);
+}
+
+TA_API void ta_generator_attack(ta_engine* engine, ma_int32 handle)
+{
+    ta_generator_source* generator = ta_generator(engine, handle);
+    if (generator == NULL)
+        return;
+    ma_atomic_int32_set(&generator->attackSignal, 1);
+    ma_atomic_int32_set(&generator->isActive, 1);
+}
+
+TA_API void ta_generator_release(ta_engine* engine, ma_int32 handle)
+{
+    ta_generator_source* generator = ta_generator(engine, handle);
+    if (generator != NULL)
+        ma_atomic_int32_set(&generator->releaseSignal, 1);
+}
+
+TA_API void ta_generator_reset(ta_engine* engine, ma_int32 handle)
+{
+    ta_generator_source* generator = ta_generator(engine, handle);
+    if (generator == NULL)
+        return;
+    ma_atomic_int32_set(&generator->attackSignal, 0);
+    ma_atomic_int32_set(&generator->resetSignal, 1);
+    ma_atomic_int32_set(&generator->isActive, 0);
+}
+
+TA_API ma_int32 ta_generator_is_active(ta_engine* engine, ma_int32 handle)
+{
+    ta_generator_source* generator = ta_generator(engine, handle);
+    return generator != NULL && ma_atomic_int32_get(&generator->isActive);
 }
 
 /* ---- Offline decoders: independent of any engine, so analysis can run on worker threads. ---- */

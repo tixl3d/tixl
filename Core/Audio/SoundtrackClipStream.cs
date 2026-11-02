@@ -3,7 +3,6 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using T3.Core.Animation;
 using T3.Core.Audio.Native;
-using T3.Core.IO;
 using T3.Core.Settings;
 using T3.Core.Logging;
 
@@ -15,7 +14,7 @@ namespace T3.Core.Audio;
 /// </summary>
 internal sealed class SoundtrackClipStream
 {
-    private SoundtrackClipStream(NativeAudioEngine engine, AudioSourceHandle source)
+    private SoundtrackClipStream(NativeAudioEngine engine, AudioHandle source)
     {
         _engine = engine;
         _source = source;
@@ -28,6 +27,7 @@ internal sealed class SoundtrackClipStream
 
     internal AudioClipResourceHandle ResourceHandle = null!;
 
+    internal AudioHandle Source => _source;
     internal int ChannelCount { get; private set; }
     internal int SampleRate { get; private set; }
 
@@ -85,6 +85,11 @@ internal sealed class SoundtrackClipStream
         engine.TryGetFormat(source, out var channels, out var sampleRate);
         handle.Clip.LengthInSeconds = (float)duration;
 
+        // A graph-routed clip is placed by its [AudioBus]; a detour through the soundtrack bus
+        // would blip it at full volume for the frame before the bus takes it.
+        if (!handle.Clip.IsRoutedToGraph)
+            engine.Route(source, AudioMixerManager.SoundtrackBus);
+
         stream = new SoundtrackClipStream(engine, source)
                      {
                          ResourceHandle = handle,
@@ -115,6 +120,12 @@ internal sealed class SoundtrackClipStream
         }
 
         var clip = ResourceHandle.Clip;
+
+        // Graph hand-off: while the clip's AudioReference is wired into a bus, the graph owns its routing and
+        // level. Checking the real route every frame instead of a one-shot transition avoids racing the bus,
+        // whose release can run later in the same frame.
+        if (!clip.IsRoutedToGraph && !_engine.GetRouteTarget(_source).IsValid)
+            _engine.Route(_source, AudioMixerManager.SoundtrackBus);
 
         // Elapsed seconds since the clip's TimeRange.Start on the timeline.
         // (TargetTime is set externally to the current playback time-in-seconds.)
@@ -171,13 +182,14 @@ internal sealed class SoundtrackClipStream
         var soundDelta = (audiblePosSecs - targetSourcePosSecs) * speed;
 
         var audio = CompositionSettings.Current.Audio;
-        _engine.SetVolume(_source,
-                          clip.Volume
-                          * audio.SoundtrackVolume
-                          * CoreSettings.Config.AppVolume
-                          * (clip.IsMuted ? 0f : 1f)
-                          * (audio.SoundtrackMute ? 0f : 1f)
-                          * (CoreSettings.Config.AppMute ? 0f : 1f));
+        if (!clip.IsRoutedToGraph)
+        {
+            _engine.SetVolume(_source,
+                              clip.Volume
+                              * audio.SoundtrackVolume
+                              * (clip.IsMuted ? 0f : 1f)
+                              * (audio.SoundtrackMute ? 0f : 1f));
+        }
 
         // We may not fall behind or skip ahead in playback
         var maxSoundDelta = audio.AudioResyncThreshold * Math.Abs(speed);
@@ -229,7 +241,9 @@ internal sealed class SoundtrackClipStream
         if (Math.Abs(_engine.GetCursorSecs(_source) - targetSourcePos) > ExportResyncThresholdSecs)
             _engine.Seek(_source, targetSourcePos);
 
-        _engine.SetVolume(_source, clip.Volume * CompositionSettings.Current.Audio.SoundtrackVolume * CoreSettings.Config.AppVolume);
+        if (!clip.IsRoutedToGraph)
+            _engine.SetVolume(_source, clip.Volume * CompositionSettings.Current.Audio.SoundtrackVolume);
+
         _engine.Play(_source);
     }
 
@@ -239,5 +253,5 @@ internal sealed class SoundtrackClipStream
     private const double ExportResyncThresholdSecs = 0.015;
 
     private readonly NativeAudioEngine _engine;
-    private readonly AudioSourceHandle _source;
+    private readonly AudioHandle _source;
 }

@@ -39,7 +39,7 @@ internal sealed class AudioClip : Instance<AudioClip>, IAudioClipProvider, ICont
     {
         TimeSlot.UpdateAction += Update;
 
-        _node = new AudioGraphNode(this) { ExternallyManagedChannel = true };
+        _node = new AudioGraphNode(this);
         AudioReference.Value = _node;
         AudioReference.UpdateAction += UpdateAudioReference;
     }
@@ -69,9 +69,9 @@ internal sealed class AudioClip : Instance<AudioClip>, IAudioClipProvider, ICont
         AudioClipCollector.RegisterIfActive(this, context.Playback.TimeInBars, context.Playback.TimeInSecs);
         _lastManagedFrame = Playback.FrameCount;
 
-        // The stream is created lazily on the first heartbeat, so the channel can be 0 for a frame — the
+        // The stream is created lazily on the first heartbeat, so the source can be invalid for a frame — the
         // bus routes it on the next. Position stays engine-synced; the node carries membership + gain only.
-        _node.SourceChannel = AudioEngine.TryGetSoundtrackChannel(_handle, out var ch) ? ch : 0;
+        AudioEngine.TryGetSoundtrackChannel(_handle, out _node.SourceChannel);
         _node.Gain = Mute.GetValue(context) ? 0f : Volume.GetValue(context);
         _node.SourceLabel = string.IsNullOrEmpty(_clip.AssetPath)
                                 ? null

@@ -1,8 +1,7 @@
 #nullable enable
 using System.Collections.Generic;
-using ManagedBass;
-using ManagedBass.Mix;
 using T3.Core.Animation;
+using T3.Core.Audio.Native;
 using T3.Core.DataTypes;
 using T3.Core.Logging;
 using T3.Core.Operator;
@@ -10,9 +9,9 @@ using T3.Core.Operator;
 namespace T3.Core.Audio.Graph;
 
 /// <summary>
-/// Plays a set of audio-graph nodes as one bus: a submix under the operator mixer that holds every collected
-/// source channel, with each FX insert realised as a nested submix. Routing is reconciled live as the graph
-/// changes. Drives the [AudioBus] operator and the editor's output-window audio preview.
+/// Plays a set of audio-graph nodes as one bus: a native bus under the operator bus that holds every collected
+/// source, with each insert realised as a nested bus. Routing is reconciled live as the graph changes. Drives
+/// the [AudioBus] operator and the editor's output-window audio preview.
 /// </summary>
 /// <remarks>
 /// Call <see cref="BeginFrame"/>, then <see cref="Add"/> for each root node, then <see cref="Route"/> — once
@@ -21,8 +20,8 @@ namespace T3.Core.Audio.Graph;
 public sealed class AudioBusRouter
 {
     /// <param name="yieldsToOtherBuses">
-    /// True for a preview: it leaves alone every source that another bus currently plays. A BASS channel can
-    /// only sit in one mixer, so two buses that both claim a source would steal it from each other every frame.
+    /// True for a preview: it leaves alone every source that another bus currently plays. A source can only be
+    /// routed to one bus, so two buses that both claim a source would steal it from each other every frame.
     /// </param>
     /// <param name="logSource">The operator warnings are attributed to; null for the editor preview.</param>
     public AudioBusRouter(bool yieldsToOtherBuses, Instance? logSource)
@@ -34,42 +33,22 @@ public sealed class AudioBusRouter
     /// <summary>Sources collected in the current frame, with their effective gain.</summary>
     public IReadOnlyList<AudioGraphNode.CollectedSource> Collected => _collected;
 
-    /// <summary>Peak level of the bus submix (post source gains, pre bus volume), measured in <see cref="Route"/>.</summary>
+    /// <summary>Peak level of the bus (post source gains, post bus volume), measured in <see cref="Route"/>.</summary>
     public float Level { get; private set; }
 
-    /// <summary>Starts a frame's collection. Returns false while no submix can be created (audio not initialised).</summary>
+    /// <summary>Starts a frame's collection. Returns false while no bus can be created (audio not initialised).</summary>
     public bool BeginFrame()
     {
-        // A device change tears down BASS entirely — every cached mixer handle is dead. Drop all routing
-        // state so the submix and FX groups rebuild from scratch (inserts re-Apply on the new submixes);
-        // without this the reconciler retries dead handles every frame.
-        if (_mixerGeneration != AudioMixerManager.ResetGeneration)
-        {
-            _mixerGeneration = AudioMixerManager.ResetGeneration;
-            if (_submix != 0)
-            {
-                AudioBusRegistry.Unregister(_submix);
-                _submix = 0;
-            }
-
-            foreach (var (fxNode, group) in _fxGroups)
-                fxNode.FxInsert?.Remove(group.Submix);
-
-            _fxGroups.Clear();
-            _routedTargets.Clear();
-            _pendingFrees.Clear();
-        }
-
         _collected.Clear();
         _fxEdges.Clear();
 
-        EnsureSubmix();
-        if (_submix == 0)
+        EnsureBus();
+        if (!_bus.IsValid)
             return false;
 
-        // Heartbeat: if this bus stops being driven, the engine pauses its submix (instead of leaving it
+        // Heartbeat: if this bus stops being driven, the engine stops it (instead of leaving it
         // playing a frozen last state that ignores upstream parameter changes).
-        AudioBusRegistry.MarkAlive(_submix);
+        AudioBusRegistry.MarkAlive(_bus);
         return true;
     }
 
@@ -83,240 +62,200 @@ public sealed class AudioBusRouter
     /// Routes this frame's collected sources into the bus and applies <paramref name="volume"/>. Returns true
     /// when the routing changed.
     /// </summary>
-    /// <param name="transportStopped">Pauses the submix, which also stops pulling generator streams.</param>
+    /// <param name="transportStopped">Stops the bus, which also stops pulling its sources.</param>
     public bool Route(float volume, bool transportStopped)
     {
-        // Realise the FX nesting as a chain of nested submixes. Edges arrive parent-before-child, so
-        // an enclosing FX group's submix exists before its inner groups need it as their parent.
+        var engine = _engine!;
+
+        // Realise the insert nesting as a chain of nested buses. Edges arrive parent-before-child, so
+        // an enclosing group's bus exists before its inner groups need it as their parent.
         for (var i = 0; i < _fxEdges.Count; i++)
         {
             var edge = _fxEdges[i];
-            var parentMixer = _submix;
+            var parent = _bus;
             if (edge.Parent != null && _fxGroups.TryGetValue(edge.Parent, out var parentGroup))
-                parentMixer = parentGroup.Submix;
+                parent = parentGroup.Bus;
 
-            var group = EnsureFxGroup(edge.Fx, parentMixer);
+            var group = EnsureFxGroup(engine, edge.Fx, parent);
             if (group != null)
                 group.LastAliveFrame = Playback.FrameCount;
         }
 
-        // Resolve each source's target mixer: its nearest FX group's submix, or the bus when routed dry.
+        // Resolve each source's target: its nearest insert's bus, or this bus when routed dry.
         _desiredTargets.Clear();
-        _externallyManaged.Clear();
         for (var i = 0; i < _collected.Count; i++)
         {
             var src = _collected[i];
             if (src.Leaf.Routing == AudioGraphNode.RoutingKind.Direct)
-                continue; // spatial/HW-3D bypasses the bus
+                continue; // spatial sources bypass the bus
 
-            var ch = src.Leaf.SourceChannel;
-            if (ch == 0)
+            var source = src.Leaf.SourceChannel;
+            if (!source.IsValid)
                 continue;
 
-            if (_yieldsToOtherBuses && IsPlayedByAnotherBus(src.Leaf, ch))
+            if (_yieldsToOtherBuses && IsPlayedByAnotherBus(engine, src.Leaf, source))
                 continue;
 
-            var target = _submix;
+            var target = _bus;
             if (src.FxNode != null && _fxGroups.TryGetValue(src.FxNode, out var group))
-                target = group.Submix;
+                target = group.Bus;
 
-            _desiredTargets[ch] = target;
-            if (src.Leaf.ExternallyManagedChannel)
-                _externallyManaged.Add(ch);
+            _desiredTargets[source] = target;
             src.Leaf.LastCollectedFrame = Playback.FrameCount;
-            Bass.ChannelSetAttribute(ch, ChannelAttribute.Volume, src.Gain);
+            engine.SetVolume(source, src.Gain);
         }
 
-        // Push current FX parameters and retire groups whose FX node vanished from the collection —
-        // with a short gain fade so an effect tail isn't truncated.
-        RefreshAndRetireFxGroups();
+        RefreshAndRetireFxGroups(engine);
 
         var changed = false;
-        foreach (var (ch, target) in _desiredTargets)
+        foreach (var (source, target) in _desiredTargets)
         {
-            // Trust BASS, not our bookkeeping: another subsystem (engine reclaim, export) may have moved
-            // the channel elsewhere since we routed it — re-add whenever it isn't actually in the target.
-            if (_routedTargets.TryGetValue(ch, out var current) && current == target
-                && BassMix.ChannelGetMixer(ch) == target)
+            // Trust the engine's routing, not our bookkeeping: another subsystem may have moved the source since.
+            if (_routedTargets.TryGetValue(source, out var current) && current == target && engine.GetRouteTarget(source) == target)
                 continue;
 
-            // A BASS channel can only be in one mixer — pull it out of wherever it currently sits
-            // (the engine's SoundtrackMixer for clip channels, or another bus's submix after a
-            // pin/rewire handoff) before adding. Clip channels are added un-buffered: MixerChanBuffer
-            // latency would break the engine's per-frame seek/resync of the clip position.
-            var externallyManaged = _externallyManaged.Contains(ch);
-            if (BassMix.ChannelGetMixer(ch) != 0)
-                BassMix.MixerRemoveChannel(ch);
-
-            var flags = externallyManaged ? BassFlags.Default : BassFlags.MixerChanBuffer;
-            if (BassMix.MixerAddChannel(target, ch, flags))
+            if (engine.Route(source, target))
             {
-                _routedTargets[ch] = target;
+                _routedTargets[source] = target;
                 changed = true;
             }
             else
             {
-                LogWarning($"[AudioBus] failed to route channel {ch}: {Bass.LastError}");
-                _routedTargets.Remove(ch);
+                // A source whose owner released it this frame, or a full route queue: both resolve by the next frame.
+                Log.Gated.Audio($"[AudioBus] could not route source {source.Value}");
+                _routedTargets.Remove(source);
             }
         }
 
         _toRemove.Clear();
-        foreach (var ch in _routedTargets.Keys)
-            if (!_desiredTargets.ContainsKey(ch))
-                _toRemove.Add(ch);
+        foreach (var source in _routedTargets.Keys)
+        {
+            if (!_desiredTargets.ContainsKey(source))
+                _toRemove.Add(source);
+        }
 
         for (var i = 0; i < _toRemove.Count; i++)
         {
-            ReleaseChannel(_toRemove[i]);
+            ReleaseSource(engine, _toRemove[i]);
             changed = true;
         }
 
-        Bass.ChannelSetAttribute(_submix, ChannelAttribute.Volume, volume);
-        BassMix.ChannelFlags(_submix, transportStopped ? BassFlags.MixerChanPause : 0, BassFlags.MixerChanPause);
+        engine.SetBusVolume(_bus, volume);
+        engine.SetBusPlaying(_bus, !transportStopped);
 
-        MeasureLevel();
+        Level = System.Math.Min(engine.GetLevel(_bus), 1f);
         return changed;
     }
 
-    /// <summary>Clears every effect's internal state, so a tail still ringing from live playback can't leak into an export.</summary>
+    /// <summary>Clears every insert's internal state, so a tail still ringing from live playback can't leak into an export.</summary>
     public void ResetEffects()
     {
-        foreach (var (_, group) in _fxGroups)
-        {
-            if (group.Submix != 0)
-                Bass.FXReset(group.Submix);
-        }
-
-        if (_submix != 0)
-            Bass.FXReset(_submix);
+        // No insert carries state yet: the effect operators pass their audio through.
     }
 
-    /// <summary>Frees the BASS handles without calling back into operators, so it is safe from a finalizer.</summary>
+    /// <summary>Releases the buses without calling back into operators, so it is safe from a finalizer.</summary>
     public void FreeHandles()
     {
+        if (_engine == null)
+            return;
+
         foreach (var group in _fxGroups.Values)
-            Bass.StreamFree(group.Submix);
+            _engine.ReleaseDeferred(group.Bus);
 
         _fxGroups.Clear();
 
         for (var i = 0; i < _pendingFrees.Count; i++)
-            Bass.StreamFree(_pendingFrees[i].Submix);
+            _engine.ReleaseDeferred(_pendingFrees[i].Bus);
 
         _pendingFrees.Clear();
         _routedTargets.Clear();
 
-        if (_submix == 0)
+        if (!_bus.IsValid)
             return;
 
-        AudioBusRegistry.Unregister(_submix);
-        Bass.StreamFree(_submix);
-        _submix = 0;
+        AudioBusRegistry.Unregister(_bus);
+        _engine.ReleaseDeferred(_bus);
+        _bus = default;
     }
 
-    // One nested submix per FX-declaring node currently flowing into this bus. ParentMixer is the
-    // submix of the enclosing FX group (or the bus submix) — chained inserts nest.
+    // One nested bus per insert-declaring node currently flowing into this bus. Parent is the bus of the
+    // enclosing group (or this bus) — chained inserts nest.
     private sealed class FxGroup
     {
-        public int Submix;
-        public int ParentMixer;
+        public AudioHandle Bus;
+        public AudioHandle Parent;
         public int LastAliveFrame;
     }
 
-    // The other bus stamps the leaf when it collects it; the channel then sits in one of that bus's mixers.
-    private bool IsPlayedByAnotherBus(AudioGraphNode leaf, int channel)
+    // The other bus stamps the leaf when it collects it; the source then sits in one of that bus's groups.
+    private bool IsPlayedByAnotherBus(NativeAudioEngine engine, AudioGraphNode leaf, AudioHandle source)
     {
         if (Playback.FrameCount - leaf.LastCollectedFrame > CollectedFrameSlack)
             return false;
 
-        var mixer = BassMix.ChannelGetMixer(channel);
-        return mixer != 0 && !IsOwnMixer(mixer);
+        var target = engine.GetRouteTarget(source);
+        return target.IsValid && !IsOwnBus(target);
     }
 
-    private bool IsOwnMixer(int mixer)
+    private bool IsOwnBus(AudioHandle bus)
     {
-        if (mixer == _submix)
+        if (bus == _bus)
             return true;
 
         foreach (var group in _fxGroups.Values)
         {
-            if (group.Submix == mixer)
+            if (group.Bus == bus)
                 return true;
         }
 
         return false;
     }
 
-    // Only pull the channel if it is still where this bus put it — another bus may have taken it over since.
-    private void ReleaseChannel(int channel)
+    // Only unroute the source if it is still where this bus put it — another bus may have taken it over since.
+    private void ReleaseSource(NativeAudioEngine engine, AudioHandle source)
     {
-        if (_routedTargets.TryGetValue(channel, out var target) && BassMix.ChannelGetMixer(channel) == target)
-            BassMix.MixerRemoveChannel(channel);
+        if (_routedTargets.TryGetValue(source, out var target) && engine.GetRouteTarget(source) == target)
+            engine.Route(source, default);
 
-        _routedTargets.Remove(channel);
+        _routedTargets.Remove(source);
     }
 
-    // Single measurement point for the submix level. BassMix.ChannelGetLevel consumes the data window since
-    // the last call, so a second reader in the same frame would read ~0. Uses the buffer-inspecting variant:
-    // the device pulls the mixer chain in coarse chunks, so the plain per-frame call mostly reads 0.
-    private void MeasureLevel()
-    {
-        if (_lastLevelFrame == Playback.FrameCount)
-            return;
-
-        _lastLevelFrame = Playback.FrameCount;
-
-        if (BassMix.ChannelGetLevel(_submix, _levelPair, 0.05f, 0) == -1)
-            return;
-
-        Level = System.Math.Min(System.Math.Max(_levelPair[0], _levelPair[1]), 1f);
-    }
-
-    private FxGroup? EnsureFxGroup(AudioGraphNode fxNode, int parentMixer)
+    private FxGroup? EnsureFxGroup(NativeAudioEngine engine, AudioGraphNode fxNode, AudioHandle parent)
     {
         if (_fxGroups.TryGetValue(fxNode, out var group))
         {
-            // Rewiring can change what encloses this insert — move the submix to its new parent.
-            if (group.ParentMixer != parentMixer)
-            {
-                BassMix.MixerRemoveChannel(group.Submix);
-                if (BassMix.MixerAddChannel(parentMixer, group.Submix, BassFlags.MixerChanBuffer))
-                    group.ParentMixer = parentMixer;
-                else
-                    LogWarning($"[AudioBus] failed to re-parent FX submix: {Bass.LastError}");
-            }
+            // Rewiring can change what encloses this insert — move the bus to its new parent.
+            if (group.Parent != parent && engine.Route(group.Bus, parent))
+                group.Parent = parent;
 
             return group;
         }
 
-        var submix = BassMix.CreateMixerStream(AudioConfig.MixerFrequency, 2, BassFlags.MixerNonStop | BassFlags.Decode | BassFlags.Float);
-        if (submix == 0)
+        var bus = engine.CreateBus();
+        if (!bus.IsValid)
+            return null;
+
+        if (!engine.Route(bus, parent))
         {
-            LogWarning($"[AudioBus] failed to create FX submix: {Bass.LastError}");
+            LogWarning("[AudioBus] failed to route an insert into its bus");
+            engine.DestroyBus(bus);
             return null;
         }
 
-        if (!BassMix.MixerAddChannel(parentMixer, submix, BassFlags.MixerChanBuffer))
-        {
-            LogWarning($"[AudioBus] failed to add FX submix to bus: {Bass.LastError}");
-            Bass.StreamFree(submix);
-            return null;
-        }
-
-        group = new FxGroup { Submix = submix, ParentMixer = parentMixer, LastAliveFrame = Playback.FrameCount };
+        group = new FxGroup { Bus = bus, Parent = parent, LastAliveFrame = Playback.FrameCount };
         _fxGroups.Add(fxNode, group);
-        fxNode.FxInsert?.Apply(submix);
+        fxNode.FxInsert?.Apply(bus);
         return group;
     }
 
-    private void RefreshAndRetireFxGroups()
+    private void RefreshAndRetireFxGroups(NativeAudioEngine engine)
     {
         _fxGroupsToRetire.Clear();
         foreach (var (fxNode, group) in _fxGroups)
         {
             if (group.LastAliveFrame == Playback.FrameCount)
             {
-                fxNode.FxInsert?.UpdateParams(group.Submix);
+                fxNode.FxInsert?.UpdateParams(group.Bus);
             }
             else
             {
@@ -329,11 +268,10 @@ public sealed class AudioBusRouter
             var fxNode = _fxGroupsToRetire[i];
             var group = _fxGroups[fxNode];
             _fxGroups.Remove(fxNode);
-            fxNode.FxInsert?.Remove(group.Submix);
+            fxNode.FxInsert?.Remove(group.Bus);
 
-            // Fade instead of truncating so a reverb/echo tail rings out before the submix is freed.
-            Bass.ChannelSlideAttribute(group.Submix, ChannelAttribute.Volume, 0f, FxRetireFadeMs);
-            _pendingFrees.Add((group.Submix, Playback.RunTimeInSecs + FxRetireFadeMs / 1000.0 + 0.1));
+            // Its sources move out later in this frame, so freeing it now would silence them for a moment.
+            _pendingFrees.Add((group.Bus, Playback.RunTimeInSecs + RetiredBusLifetimeSecs));
         }
 
         for (var i = _pendingFrees.Count - 1; i >= 0; i--)
@@ -341,33 +279,33 @@ public sealed class AudioBusRouter
             if (Playback.RunTimeInSecs < _pendingFrees[i].FreeAfter)
                 continue;
 
-            BassMix.MixerRemoveChannel(_pendingFrees[i].Submix);
-            Bass.StreamFree(_pendingFrees[i].Submix);
+            engine.DestroyBus(_pendingFrees[i].Bus);
             _pendingFrees.RemoveAt(i);
         }
     }
 
-    private void EnsureSubmix()
+    private void EnsureBus()
     {
-        if (_submix != 0)
+        if (_bus.IsValid)
             return;
 
-        if (!AudioMixerManager.IsInitialized)
-        {
-            AudioMixerManager.Initialize();
-            if (AudioMixerManager.OperatorMixerHandle == 0)
-                return;
-        }
+        AudioMixerManager.Initialize();
+        _engine = AudioMixerManager.NativeEngine;
+        if (_engine == null)
+            return;
 
-        _submix = BassMix.CreateMixerStream(AudioConfig.MixerFrequency, 2, BassFlags.MixerNonStop | BassFlags.Decode | BassFlags.Float);
-        if (_submix == 0)
+        var bus = _engine.CreateBus();
+        if (!bus.IsValid)
+            return;
+
+        if (!_engine.Route(bus, AudioMixerManager.OperatorBus))
         {
-            LogWarning($"[AudioBus] failed to create bus submix: {Bass.LastError}");
+            Log.Error("[AudioBus] failed to route the bus into the operator bus", _logSource);
+            _engine.DestroyBus(bus);
             return;
         }
 
-        if (!BassMix.MixerAddChannel(AudioMixerManager.OperatorMixerHandle, _submix, BassFlags.MixerChanBuffer))
-            Log.Error($"[AudioBus] failed to add bus to operator mixer: {Bass.LastError}", _logSource);
+        _bus = bus;
     }
 
     private void LogWarning(string message)
@@ -382,7 +320,7 @@ public sealed class AudioBusRouter
         }
     }
 
-    private const int FxRetireFadeMs = 400;
+    private const double RetiredBusLifetimeSecs = 0.1;
 
     /** The other bus stamps during its own evaluation, which may run after this router in a frame. */
     private const int CollectedFrameSlack = 2;
@@ -391,15 +329,12 @@ public sealed class AudioBusRouter
     private readonly Instance? _logSource;
     private readonly List<AudioGraphNode.CollectedSource> _collected = new();
     private readonly List<AudioGraphNode.FxEdge> _fxEdges = new();
-    private readonly Dictionary<int, int> _desiredTargets = new();  // channel → target mixer
-    private readonly HashSet<int> _externallyManaged = new();
-    private readonly Dictionary<int, int> _routedTargets = new();   // channel → mixer it sits in
-    private readonly List<int> _toRemove = new();
+    private readonly Dictionary<AudioHandle, AudioHandle> _desiredTargets = new();
+    private readonly Dictionary<AudioHandle, AudioHandle> _routedTargets = new();
+    private readonly List<AudioHandle> _toRemove = new();
     private readonly Dictionary<AudioGraphNode, FxGroup> _fxGroups = new();
     private readonly List<AudioGraphNode> _fxGroupsToRetire = new();
-    private readonly List<(int Submix, double FreeAfter)> _pendingFrees = new();
-    private readonly float[] _levelPair = new float[2];
-    private int _submix;
-    private int _mixerGeneration;
-    private int _lastLevelFrame = -1;
+    private readonly List<(AudioHandle Bus, double FreeAfter)> _pendingFrees = new();
+    private NativeAudioEngine? _engine;
+    private AudioHandle _bus;
 }

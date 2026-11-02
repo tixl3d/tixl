@@ -42,10 +42,17 @@ public static class AudioMixerManager
     internal static NativeAudioEngine? NativeEngine => _nativeEngine;
     private static NativeAudioEngine? _nativeEngine;
     private static bool _nativeEngineCreationAttempted;
-    private static float _nativeOutputLevel;
+    private static AudioHandle _nativeOperatorBus;
+    private static AudioHandle _nativeSoundtrackBus;
+
+    /// <summary>Where sources not routed through the audio graph play.</summary>
+    internal static AudioHandle OperatorBus => _nativeOperatorBus;
+
+    /// <summary>Where soundtrack clips not routed through the audio graph play.</summary>
+    internal static AudioHandle SoundtrackBus => _nativeSoundtrackBus;
 
     internal static int GlobalMixerHandle => _globalMixerHandle;
-    public static int OperatorMixerHandle => _operatorMixerHandle;
+    internal static int OperatorMixerHandle => _operatorMixerHandle;
     internal static int SoundtrackMixerHandle => _soundtrackMixerHandle;
     public static bool IsInitialized => _initialized;
 
@@ -77,6 +84,11 @@ public static class AudioMixerManager
             {
                 _nativeEngineCreationAttempted = true;
                 _nativeEngine = NativeAudioEngine.TryCreate(NativeAudio.Mode.Device, sampleRate: (uint)AudioConfig.MixerFrequency);
+                if (_nativeEngine != null)
+                {
+                    _nativeOperatorBus = _nativeEngine.CreateBus();
+                    _nativeSoundtrackBus = _nativeEngine.CreateBus();
+                }
             }
 
             // Asking first, because everything below P/Invokes BASS and a missing library throws from the
@@ -347,12 +359,14 @@ public static class AudioMixerManager
 
     public static void SetOperatorMixerVolume(float volume)
     {
+        _nativeEngine?.SetBusVolume(_nativeOperatorBus, volume);
         if (!_initialized) return;
         Bass.ChannelSetAttribute(_operatorMixerHandle, ChannelAttribute.Volume, volume);
     }
 
     public static void SetSoundtrackMixerVolume(float volume)
     {
+        _nativeEngine?.SetBusVolume(_nativeSoundtrackBus, volume);
         if (!_initialized) return;
         Bass.ChannelSetAttribute(_soundtrackMixerHandle, ChannelAttribute.Volume, volume);
     }
@@ -397,6 +411,7 @@ public static class AudioMixerManager
 
     internal static void SetOperatorMute(bool mute)
     {
+        _nativeEngine?.SetBusVolume(_nativeOperatorBus, mute ? 0f : CompositionSettings.Current.Audio.OperatorVolume);
         if (!_initialized) return;
         if (mute)
         {
@@ -443,12 +458,24 @@ public static class AudioMixerManager
         }
     }
 
-    /// <summary>Called once per frame, because reading the peak resets it and two meters show it.</summary>
-    internal static void UpdateNativeOutputLevel()
+    /// <summary>
+    /// Called once per frame. An export renders at the app volume whatever is muted for monitoring,
+    /// and the analysis taps sit before this gain, so neither mute nor volume changes what operators react to.
+    /// </summary>
+    internal static void UpdateNativeEngine()
     {
-        if (_nativeEngine != null)
-            _nativeOutputLevel = Math.Min(_nativeEngine.TakeOutputPeak(), 1f);
+        if (_nativeEngine == null)
+            return;
+
+        _nativeEngine.ProcessDeferredReleases();
+        var config = IO.CoreSettings.Config;
+        _nativeEngine.SetOutputGain(config.AppMute && !AudioRendering.IsRecording ? 0f : config.AppVolume);
     }
+
+    /// <summary>The highest recent sample of a source or bus in the audio graph (0.0 to 1.0).</summary>
+    public static float GetLevel(AudioHandle handle) => _nativeEngine != null ? Math.Min(_nativeEngine.GetLevel(handle), 1f) : 0f;
+
+    private static float NativeOutputLevel => GetLevel(AudioHandle.Output);
 
     /// <summary>
     /// Gets the current audio level from the global mixer (0.0 to 1.0 normalized).
@@ -463,45 +490,22 @@ public static class AudioMixerManager
     public static float GetGlobalMixerLevel()
     {
         if (!_initialized || _globalMixerHandle == 0)
-            return _nativeOutputLevel;
+            return NativeOutputLevel;
 
         // Use ChannelGetLevel (level-ex variant) with configurable time window for responsive metering.
         // The float[] overload returns RMS levels over the specified window, normalized to 0.0-1.0.
         float[] levels = new float[2];
         if (!Bass.ChannelGetLevel(_globalMixerHandle, levels, AudioConfig.LevelMeteringWindowSeconds, LevelRetrievalFlags.Stereo))
-            return _nativeOutputLevel;
+            return NativeOutputLevel;
 
-        return Math.Max(_nativeOutputLevel, Math.Max(levels[0], levels[1]));
+        return Math.Max(NativeOutputLevel, Math.Max(levels[0], levels[1]));
     }
 
-    /// <summary>
-    /// Gets the current audio level from the operator mixer (0.0 to 1.0 normalized).
-    /// Returns the maximum of left and right channels.
-    /// </summary>
-    /// <remarks>
-    /// Uses BassMix.ChannelGetLevel for decode streams added to a mixer with MixerChanBuffer flag.
-    /// This reads from the mixer's internal buffer without consuming audio data.
-    /// Note: Decode streams require BassMix.ChannelGetLevel, not Bass.ChannelGetLevel.
-    /// </remarks>
-    public static float GetOperatorMixerLevel()
-    {
-        if (!_initialized || _operatorMixerHandle == 0)
-            return 0f;
-
-        // For decode streams with MixerChanBuffer, use BassMix.ChannelGetLevel (integer variant)
-        // The float[] level-ex variant doesn't work correctly for decode streams
-        var level = BassMix.ChannelGetLevel(_operatorMixerHandle);
-        if (level == -1)
-            return 0f;
-
-        // Low 16 bits = left channel, high 16 bits = right channel (0-32768 range)
-        var left = (level & 0xFFFF) / 32768f;
-        var right = ((level >> 16) & 0xFFFF) / 32768f;
-        return Math.Max(left, right);
-    }
+    /// <summary>Gets the highest recent level of the operator mix (0.0 to 1.0).</summary>
+    public static float GetOperatorMixerLevel() => GetLevel(_nativeOperatorBus);
 
     /// <summary>Gets the highest level of the soundtrack output in the last frame (0.0 to 1.0).</summary>
-    public static float GetSoundtrackMixerLevel() => _nativeOutputLevel;
+    public static float GetSoundtrackMixerLevel() => GetLevel(_nativeSoundtrackBus);
 
     /// <summary>
     /// Queries the default output device's sample rate with a throwaway BASS init: BASS reports the device's

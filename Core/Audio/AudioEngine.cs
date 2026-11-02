@@ -175,12 +175,19 @@ public static class AudioEngine
     }
 
     /// <summary>
-    /// Soundtrack clips play in the native engine and have no BASS channel a bus could route,
-    /// so a clip wired into the audio graph keeps playing directly until buses move there too.
+    /// Exposes a soundtrack clip's live source so the audio-processing graph (an [AudioBus]) can route it.
+    /// Only valid while the clip is in use — its stream is created lazily on the first <see cref="UseSoundtrackClip"/>
+    /// (i.e. the clip must be AutoPlay or driven by a player). Returns false until then.
     /// </summary>
-    public static bool TryGetSoundtrackChannel(AudioClipResourceHandle? handle, out int channel)
+    public static bool TryGetSoundtrackChannel(AudioClipResourceHandle? handle, out AudioHandle channel)
     {
-        channel = 0;
+        if (handle != null && SoundtrackClipStreams.TryGetValue(handle, out var stream))
+        {
+            channel = stream.Source;
+            return true;
+        }
+
+        channel = default;
         return false;
     }
 
@@ -203,7 +210,7 @@ public static class AudioEngine
         }
 
         ProcessSoundtrackClips(playback, frameDurationInSeconds);
-        AudioMixerManager.UpdateNativeOutputLevel();
+        AudioMixerManager.UpdateNativeEngine();
 
         // Process FFT data after filling the buffer from soundtrack
         // Skip during export - GetFullMixDownBuffer handles FFT processing during export
@@ -389,7 +396,7 @@ public static class AudioEngine
             return;
 
         // All metering (AudioWaveform, AudioFrequencies, AudioReaction, ...) monitors the complete output.
-        engine.ReadOutputMono(_fftSamples);
+        engine.ReadLatestMono(AudioHandle.Output, _fftSamples);
         _fft.ComputeMagnitudes(_fftSamples, context.FftGainBuffer);
 
         if (!context.WaveformRequested)
@@ -552,15 +559,15 @@ public static class AudioEngine
     /// Exposes an operator stream's live BASS channel so the audio-processing graph (an [AudioBus]) can route
     /// it. The stream is created lazily on the first playback update, so this returns false until then.
     /// </summary>
-    public static bool TryGetOperatorChannel(Guid operatorId, out int channel)
+    public static bool TryGetOperatorChannel(Guid operatorId, out AudioHandle channel)
     {
-        if (_stereoOperatorStates.TryGetValue(operatorId, out var state) && state.Stream is { StreamHandle: not 0 })
+        if (_stereoOperatorStates.TryGetValue(operatorId, out var state) && state.Stream != null)
         {
-            channel = state.Stream.StreamHandle;
+            channel = state.Stream.Source;
             return true;
         }
 
-        channel = 0;
+        channel = default;
         return false;
     }
 
@@ -585,7 +592,7 @@ public static class AudioEngine
         var resolvedPath = ResolveFilePath(filePath);
 
         if (!HandleFileChange(state, resolvedPath, operatorId,
-            path => StereoOperatorAudioStream.TryLoadStream(path, AudioMixerManager.OperatorMixerHandle, out var s) ? s : null))
+            path => StereoOperatorAudioStream.TryLoadStream(path, out var s) ? s : null))
             return;
 
         if (state.Stream == null) return;
@@ -596,7 +603,7 @@ public static class AudioEngine
         // so take it back. Checking real membership every frame rather than a one-shot transition avoids racing
         // the bus, whose own removal can run later in the same frame.
         if (!routedToGraph)
-            state.Stream.ReclaimMixerMembership(AudioMixerManager.OperatorMixerHandle);
+            state.Stream.ReclaimRouting();
 
         // Store the pending seek position - will be applied on next play trigger
         if (seek >= 0f && seek <= 1f)
@@ -1306,7 +1313,6 @@ public static class AudioEngine
         {
             if (state.Stream != null)
             {
-                state.Stream.ClearExportMetering();
                 state.Stream.RestartAfterExport();
                 state.Stream.SetStale(false);
                 state.IsStale = false;
