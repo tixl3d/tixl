@@ -21,6 +21,9 @@ runs:
         # This confirms global.json is unchanged but was overridden for SDK setup
         type ./global.json # Or 'cat ./global.json' on Linux runners 
 
+    - name: Build Native Audio Library
+      uses: ./.github/actions/build-audio-dll
+
     - name: Restore dependencies
       shell: pwsh
       run: dotnet restore # Consider adding YourSolution.sln if not at root

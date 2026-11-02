@@ -37,6 +37,9 @@ jobs:
           key: nuget-windows-${{ hashFiles('**/*.csproj', 'Tixl.props', 'Directory.Build.props') }}
           restore-keys: nuget-windows-
 
+      - name: Build Native Audio Library
+        uses: ./.github/actions/build-audio-dll
+
       - name: Install Inno Setup
         run: choco install innosetup --no-progress -y
 

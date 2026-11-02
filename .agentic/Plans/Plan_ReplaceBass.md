@@ -1,8 +1,9 @@
 # Replace BASS with a native miniaudio layer
 
 **Status:** Nearly done — 2026-11-02, on branch `feat/miniaudio`. BASS is gone: code, natives, packages and packaging metadata.
-Before merging: run the exported Player on a release build, run `tixlaudio.dll` on Windows (including loopback), build
-`libtixlaudio.dylib` on a Mac, build the natives in CI, and file the two upstream miniaudio reports. Effects stay low
+Tested by the maintainer on Linux and Windows (2026-11). Before merging: run the exported Player on a release build, run
+the macOS CI build and test its DMG on a Mac, confirm the `Native Audio Library` workflow passes, and file the two upstream
+miniaudio reports. Effects stay low
 priority (decision 8). The spike lives on branch `spike/replace-bass`.
 Decisions from 2026-10-12 are folded in (§Decisions 6–10).
 **Scope:** All audio in Editor, Player and operators on Windows, Linux and macOS. Removes ManagedBass,

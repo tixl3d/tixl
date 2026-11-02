@@ -1,0 +1,79 @@
+name: Native Audio Library
+
+# Builds tixlaudio on every platform when its sources change, so a change that breaks one of them shows up
+# without a full installer build. Release jobs build it again themselves; the artifacts here are what to
+# copy over the checked-in Linux and Windows binaries that developers run.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'Native/TixlAudio/**'
+      - '.github/actions/build-audio-dll/**'
+      - '.github/workflows/native-audio.yml'
+  pull_request:
+    paths:
+      - 'Native/TixlAudio/**'
+      - '.github/actions/build-audio-dll/**'
+      - '.github/workflows/native-audio.yml'
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    # The same container as the release build, so the library's glibc requirement matches what ships.
+    container: ubuntu:22.04
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Install Build Tools
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends gcc libc6-dev git ca-certificates
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Build Library
+        run: Native/TixlAudio/build.sh
+
+      - name: Upload Library
+        uses: actions/upload-artifact@v4
+        with:
+          name: tixlaudio-linux-x64
+          path: Dependencies/linux-x64/libtixlaudio.so
+          retention-days: 14
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Build Library
+        uses: ./.github/actions/build-audio-dll
+
+      - name: Upload Library
+        uses: actions/upload-artifact@v4
+        with:
+          name: tixlaudio-windows-x64
+          path: Dependencies/tixlaudio.dll
+          retention-days: 14
+
+  macos:
+    runs-on: macos-15
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Build Library
+        run: Native/TixlAudio/build-macos.sh
+
+      - name: Upload Library
+        uses: actions/upload-artifact@v4
+        with:
+          name: tixlaudio-osx-arm64
+          path: Dependencies/osx/libtixlaudio.dylib
+          retention-days: 14

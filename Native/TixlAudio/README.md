@@ -4,13 +4,15 @@ The native audio library: mixing, decoding, DSP nodes, taps and device callbacks
 [miniaudio](https://miniaud.io) (public domain / MIT-0) and stb_vorbis. Nothing managed runs on the audio
 thread; C# calls the flat `ta_*` functions through `Core/Audio/Native/NativeAudio.cs`.
 
-The built libraries are checked in next to the other natives, so building TiXL needs no C compiler. After
-changing anything here, rebuild them:
+The Linux and Windows libraries are checked in next to the other natives, so building TiXL needs no C compiler. After
+changing anything here, rebuild them, or take them from the artifacts of the `Native Audio Library` workflow, which builds
+every platform when these sources change. Release builds compile the library themselves, so what ships always matches
+the source.
 
 | Platform | Command | Output |
 |---|---|---|
 | Linux | `./build.sh` | `Dependencies/linux-x64/libtixlaudio.so` |
-| Windows | `./build-windows.sh <zig>` (cross-compiles from Linux) | `Dependencies/tixlaudio.dll` |
+| Windows | `./build-windows.sh <zig>` (Zig 0.14.1, runs on Linux and Windows) | `Dependencies/tixlaudio.dll` |
 | macOS | `./build-macos.sh` (on a Mac; the macOS CI job runs it) | `Dependencies/osx/libtixlaudio.dylib`, not checked in |
 
 ## Changes to the vendored miniaudio.h
