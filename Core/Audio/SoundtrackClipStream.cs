@@ -70,6 +70,11 @@ internal sealed class SoundtrackClipStream
     {
         stream = null;
 
+        // Stamp which file this attempt is for. Both outcomes matter: on success it tells the engine the
+        // stream matches the clip's current path, and on failure it stops the failure from turning into an
+        // endless retry — while still letting a path *change* trigger a fresh attempt.
+        handle.AttemptedAssetPath = handle.CurrentAssetPath;
+
         if (handle.LoadingAttemptFailed)
             return false;
         
