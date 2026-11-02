@@ -424,6 +424,31 @@ public class NativeAudioEngineTests
         Assert.False(engine.Route(bus, AudioHandle.Output));
     }
 
+    [Fact]
+    public void CaptureFillsARingThatCanBeReadByPosition()
+    {
+        using var engine = NativeAudioEngine.TryCreate(NativeAudio.Mode.Device, NativeAudio.Backend.Null, SampleRate);
+        Assert.NotNull(engine);
+        Assert.False(engine.IsCaptureRunning);
+        Assert.Equal(0, engine.ReadCapture(0, new float[16]));
+
+        Assert.Equal(0, engine.StartCapture(-1, loopback: false));
+        Assert.True(engine.IsCaptureRunning);
+
+        var deadline = Environment.TickCount64 + 5000;
+        while (engine.CaptureFramesWritten < 960 && Environment.TickCount64 < deadline)
+            System.Threading.Thread.Sleep(5);
+
+        Assert.True(engine.CaptureFramesWritten >= 960);
+        var frames = new float[480 * 2];
+        Assert.Equal(480, engine.ReadCapture(0, frames));
+        Assert.Equal(0, engine.ReadCapture(engine.CaptureFramesWritten + 100000, frames));
+
+        engine.StopCapture();
+        Assert.False(engine.IsCaptureRunning);
+        Assert.Equal(0, engine.ReadCapture(0, frames));
+    }
+
     private static void PlayToOutput(NativeAudioEngine engine, AudioHandle source)
     {
         engine.Route(source, AudioHandle.Output);

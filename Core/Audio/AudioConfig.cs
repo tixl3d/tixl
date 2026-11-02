@@ -1,4 +1,3 @@
-using ManagedBass;
 
 namespace T3.Core.Audio;
 
@@ -67,11 +66,6 @@ public static class AudioConfig
     /// FFT buffer size for frequency analysis.
     /// </summary>
     internal const int FftBufferSize = 1024;
-
-    /// <summary>
-    /// BASS data flag corresponding to the FFT buffer size.
-    /// </summary>
-    public const DataFlags BassFftDataFlag = DataFlags.FFT2048;
 
     /// <summary>
     /// Number of frequency bands for audio analysis.

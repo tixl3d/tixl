@@ -34,6 +34,7 @@
 #define TA_HANDLE_OUTPUT 0x7FFFFFFF /* routes to the device output; meters what reaches it */
 #define TA_TAP_STALE_FRAMES 4096 /* a tap nothing wrote to for this long meters as silence (85 ms at 48 kHz) */
 #define TA_MAX_ECHOES 8
+#define TA_CAPTURE_RING_FRAMES (1 << 19) /* power of two; 10.9 s at 48 kHz, so a stalled frame loop doesn't lose a recording */
 #define TA_MAX_TAPS 8 /* index 0 is the device output */
 #define TA_TAP_CAPACITY 16384 /* mono frames, power of two */
 #define TA_ECHO_MAX_SECONDS 2
@@ -250,7 +251,8 @@ typedef struct
 
     ma_device captureDevice;
     ma_bool32 captureRunning;
-    ma_atomic_float capturePeak;
+    float* captureRing; /* interleaved stereo */
+    ma_atomic_uint64 captureFramesWritten;
 
     /* Interleaved stereo copy of the output for waveform displays; outputTap only keeps the mono mix. */
     float outputStereo[TA_TAP_CAPACITY * 2];
@@ -1861,17 +1863,16 @@ static void ta_capture_callback(ma_device* device, void* output, const void* inp
 {
     ta_engine* engine = (ta_engine*)device->pUserData;
     const float* samples = (const float*)input;
-    ma_uint32 sampleCount = frameCount * device->capture.channels;
-    float peak = ma_atomic_float_get(&engine->capturePeak);
+    ma_uint64 written = ma_atomic_uint64_get(&engine->captureFramesWritten);
     (void)output;
 
-    for (ma_uint32 index = 0; index < sampleCount; index++)
+    for (ma_uint32 frame = 0; frame < frameCount; frame++)
     {
-        float magnitude = samples[index] < 0 ? -samples[index] : samples[index];
-        if (magnitude > peak)
-            peak = magnitude;
+        ma_uint64 slot = (written + frame) & (TA_CAPTURE_RING_FRAMES - 1);
+        engine->captureRing[slot * 2] = samples[frame * 2];
+        engine->captureRing[slot * 2 + 1] = samples[frame * 2 + 1];
     }
-    ma_atomic_float_set(&engine->capturePeak, peak);
+    ma_atomic_uint64_set(&engine->captureFramesWritten, written + frameCount);
 }
 
 /**
@@ -1886,6 +1887,8 @@ TA_API ma_int32 ta_capture_start(ta_engine* engine, ma_int32 deviceIndex, ma_int
     ma_device_config config = ma_device_config_init(loopback ? ma_device_type_loopback : ma_device_type_capture);
     config.capture.format = ma_format_f32;
     config.capture.channels = 2;
+    config.sampleRate = engine->sampleRate; /* miniaudio converts, so analysis and recordings see one format */
+    config.periodSizeInMilliseconds = 10;
     config.dataCallback = ta_capture_callback;
     config.pUserData = engine;
     if (deviceIndex >= 0)
@@ -1900,14 +1903,25 @@ TA_API ma_int32 ta_capture_start(ta_engine* engine, ma_int32 deviceIndex, ma_int
         config.capture.pDeviceID = &infos[deviceIndex].id;
     }
 
+    engine->captureRing = (float*)calloc(TA_CAPTURE_RING_FRAMES * 2, sizeof(float));
+    if (engine->captureRing == NULL)
+        return MA_OUT_OF_MEMORY;
+    ma_atomic_uint64_set(&engine->captureFramesWritten, 0);
+
     ma_result result = ma_device_init(&engine->context, &config, &engine->captureDevice);
     if (result != MA_SUCCESS)
+    {
+        free(engine->captureRing);
+        engine->captureRing = NULL;
         return result;
+    }
 
     result = ma_device_start(&engine->captureDevice);
     if (result != MA_SUCCESS)
     {
         ma_device_uninit(&engine->captureDevice);
+        free(engine->captureRing);
+        engine->captureRing = NULL;
         return result;
     }
     engine->captureRunning = MA_TRUE;
@@ -1919,11 +1933,44 @@ TA_API void ta_capture_stop(ta_engine* engine)
     if (!engine->captureRunning)
         return;
     ma_device_uninit(&engine->captureDevice);
+    free(engine->captureRing);
+    engine->captureRing = NULL;
     engine->captureRunning = MA_FALSE;
 }
 
-/** Returns the highest absolute sample since the last call and resets it. */
-TA_API float ta_capture_take_peak(ta_engine* engine)
+/** False once the device has stopped by itself, e.g. after being unplugged. */
+TA_API ma_int32 ta_capture_is_running(ta_engine* engine)
 {
-    return ma_atomic_exchange_f32(&engine->capturePeak.value, 0.0f);
+    return engine->captureRunning && ma_device_is_started(&engine->captureDevice);
+}
+
+TA_API ma_uint64 ta_capture_frames_written(ta_engine* engine)
+{
+    return ma_atomic_uint64_get(&engine->captureFramesWritten);
+}
+
+TA_API ma_int32 ta_capture_ring_capacity(void)
+{
+    return TA_CAPTURE_RING_FRAMES;
+}
+
+/** Copies interleaved stereo frames starting at an absolute frame position; returns how many were copied. */
+TA_API ma_int32 ta_capture_read(ta_engine* engine, ma_uint64 startFrame, float* destination, ma_int32 frameCount)
+{
+    if (!engine->captureRunning)
+        return 0;
+
+    ma_uint64 written = ma_atomic_uint64_get(&engine->captureFramesWritten);
+    if (startFrame >= written || written - startFrame > TA_CAPTURE_RING_FRAMES)
+        return 0;
+
+    ma_uint64 available = written - startFrame;
+    ma_int32 count = available < (ma_uint64)frameCount ? (ma_int32)available : frameCount;
+    for (ma_int32 frame = 0; frame < count; frame++)
+    {
+        ma_uint64 slot = (startFrame + (ma_uint64)frame) & (TA_CAPTURE_RING_FRAMES - 1);
+        destination[frame * 2] = engine->captureRing[slot * 2];
+        destination[frame * 2 + 1] = engine->captureRing[slot * 2 + 1];
+    }
+    return count;
 }

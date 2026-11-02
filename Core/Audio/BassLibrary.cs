@@ -3,7 +3,6 @@ using System;
 using System.Threading;
 using ManagedBass;
 using ManagedBass.Mix;
-using ManagedBass.Wasapi;
 using T3.Core.Logging;
 
 namespace T3.Core.Audio;
@@ -26,12 +25,6 @@ public static class BassLibrary
 
     /// <summary>True when BASSmix can be called. Without it there are no mixers, so no operator audio.</summary>
     public static bool IsMixAvailable => IsAvailable && _mix.Value;
-
-    /// <summary>
-    /// True when BASSWASAPI can be called, which means Windows. Live audio input goes through it, so
-    /// elsewhere the external-device source stays unavailable until it is replaced by BASS's record API.
-    /// </summary>
-    public static bool IsWasapiAvailable => IsAvailable && _wasapi.Value;
 
     /// <summary>
     /// One component's answer, worked out once. Reading a version only queries the loaded library: it needs
@@ -81,5 +74,4 @@ public static class BassLibrary
 
     private static readonly Component _core = new("BASS", () => Bass.Version);
     private static readonly Component _mix = new("BASSmix", () => BassMix.Version);
-    private static readonly Component _wasapi = new("BASSWASAPI", () => BassWasapi.Version);
 }

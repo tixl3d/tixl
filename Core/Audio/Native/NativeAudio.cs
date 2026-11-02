@@ -173,5 +173,29 @@ internal static unsafe partial class NativeAudio
     [LibraryImport(Library, EntryPoint = "ta_generator_is_active")]
     internal static partial int GeneratorIsActive(IntPtr engine, int sound);
 
+    [LibraryImport(Library, EntryPoint = "ta_get_device_count")]
+    internal static partial int GetDeviceCount(IntPtr engine, int capture);
+
+    [LibraryImport(Library, EntryPoint = "ta_get_device_name")]
+    internal static partial int GetDeviceName(IntPtr engine, int capture, int index, byte* buffer, int bufferLength);
+
+    [LibraryImport(Library, EntryPoint = "ta_capture_start")]
+    internal static partial int CaptureStart(IntPtr engine, int deviceIndex, int loopback);
+
+    [LibraryImport(Library, EntryPoint = "ta_capture_stop")]
+    internal static partial void CaptureStop(IntPtr engine);
+
+    [LibraryImport(Library, EntryPoint = "ta_capture_is_running")]
+    internal static partial int CaptureIsRunning(IntPtr engine);
+
+    [LibraryImport(Library, EntryPoint = "ta_capture_frames_written")]
+    internal static partial ulong CaptureFramesWritten(IntPtr engine);
+
+    [LibraryImport(Library, EntryPoint = "ta_capture_ring_capacity")]
+    internal static partial int CaptureRingCapacity();
+
+    [LibraryImport(Library, EntryPoint = "ta_capture_read")]
+    internal static partial int CaptureRead(IntPtr engine, ulong startFrame, float* destination, int frameCount);
+
     private const string Library = "tixlaudio";
 }

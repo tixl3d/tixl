@@ -72,6 +72,11 @@ one frame per editor frame, so poll `getRenderStatus` (`isExporting`, `progress`
 `isExporting` is false. `cancelRender` stops it. Check the result with `ffprobe` / `ffmpeg`. Audio ops only stay in
 the export if they were evaluated just before it, so wire an `[AudioBus]` into the rendered chain.
 
+Audio input: `getAudioInputs` lists the capture devices with the `active` one and its `level`; `setAudioInput` (`device`)
+makes the composition analyse that device, and an empty name goes back to its own audio. The change is in memory but
+gets saved with the project, so reset it when done. `startAudioRecording` / `stopAudioRecording` write the input to a WAV
+and return its path. To test without a microphone, play a known file into a PipeWire null sink and capture its monitor.
+
 Parameter shapes are defined in `DebugServer.cs` — read the handler when unsure. Notes:
 
 - **Never guess the settings folder — ask `getPaths`.** It is version-suffixed

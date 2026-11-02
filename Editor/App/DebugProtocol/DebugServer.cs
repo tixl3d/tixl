@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using ImGuiNET;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using T3.Editor.Gui.Interaction.Timing;
 using T3.Core.Animation;
 using T3.Core.Settings;
 using T3.Core.Stats;
@@ -345,6 +346,42 @@ internal static class DebugServer
 
             case "addOp":
                 HandleAddOp(request, context);
+                break;
+
+            case "getAudioInputs":
+            {
+                var devices = new JArray();
+                foreach (var device in T3.Core.Audio.Input.AudioInput.InputDevices)
+                    devices.Add(new JObject { ["name"] = device.Name, ["isLoopback"] = device.IsLoopback });
+
+                context.SendOk(new JObject
+                                   {
+                                       ["devices"] = devices,
+                                       ["active"] = T3.Core.Audio.Input.AudioInput.ActiveInputDeviceName,
+                                       ["level"] = T3.Core.Audio.Input.AudioInput.DecayingAudioLevel,
+                                   });
+                break;
+            }
+
+            case "setAudioInput":
+            {
+                // An empty device name goes back to analysing the project's own audio.
+                var deviceName = request["device"]?.Value<string>() ?? string.Empty;
+                var settings = PlaybackUtils.FindCompositionSettings(out _);
+                settings.Playback.AudioInputDeviceName = deviceName;
+                settings.Playback.AudioSource = deviceName.Length > 0
+                                                    ? CompositionSettings.AudioSources.ExternalDevice
+                                                    : CompositionSettings.AudioSources.ProjectSoundTrack;
+                context.SendOk(new JObject { ["audioSource"] = settings.Playback.AudioSource.ToString() });
+                break;
+            }
+
+            case "startAudioRecording":
+                context.SendOk(new JObject { ["path"] = T3.Core.Audio.Input.AudioInput.BeginRecording() });
+                break;
+
+            case "stopAudioRecording":
+                context.SendOk(new JObject { ["path"] = T3.Core.Audio.Input.AudioInput.EndRecording() });
                 break;
 
             case "startRender":

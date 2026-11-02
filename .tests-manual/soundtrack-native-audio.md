@@ -131,3 +131,32 @@ Export a video with a clip, a triggered sample and a tone wired into a bus. Pres
 **Expected:**
 - All three are audible at the levels heard live, and triggers land where they did live.
 - Live playback and all meters work again after the export.
+
+## Step: Reacting to an audio input
+
+**Action:**
+In the project settings, set the audio source to the external device and pick a microphone or line input. Make sound while playback runs, with a graph using `[AudioReaction]` and `[AudioWaveform]`. Compare with the last release.
+
+**Expected:**
+- The level meter next to the device follows the input.
+- Reactions and waveform follow the input with the same strength and decay as in the last release.
+- Other apps can use the microphone at the same time.
+- Beat locking with onset detection and with the dance model still locks to music.
+- Switching the input device doesn't interrupt playing audio.
+
+## Step: Capturing system audio
+
+**Action:**
+Pick a loopback entry as the input: on Linux a `Monitor of ...` device, on Windows a device ending in `(Loopback)`. Play music in another app.
+
+**Expected:**
+- Reactions follow what the other app plays.
+
+## Step: Recording the input
+
+**Action:**
+Record from the timeline toolbar while an input is active, also with the project's own audio selected as the source. Cause a hitch during the recording, for example by opening a large project window. Open the resulting WAV.
+
+**Expected:**
+- The WAV is complete, without gaps or clicks at the hitch.
+- With the project's own audio as the source, reactions keep following the project during the recording.

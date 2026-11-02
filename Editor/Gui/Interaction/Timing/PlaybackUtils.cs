@@ -110,7 +110,7 @@ public static class PlaybackUtils
         Playback.Current.Settings = settings;
     }
 
-    private static CompositionSettings FindCompositionSettings(out IResourceConsumer? owner)
+    internal static CompositionSettings FindCompositionSettings(out IResourceConsumer? owner)
     {
         var composition = ProjectView.Focused?.CompositionInstance;
 

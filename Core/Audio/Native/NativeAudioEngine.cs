@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Text;
 using T3.Core.Logging;
 
 namespace T3.Core.Audio.Native;
@@ -183,6 +184,44 @@ internal sealed unsafe class NativeAudioEngine : IDisposable
         }
     }
 
+    /// <summary>A capture or playback device's name, or null past the end of the list.</summary>
+    public string? GetDeviceName(bool capture, int index)
+    {
+        Span<byte> name = stackalloc byte[MaxDeviceNameBytes];
+        fixed (byte* buffer = name)
+        {
+            var length = NativeAudio.GetDeviceName(_engine, capture ? 1 : 0, index, buffer, name.Length);
+            return length > 0 ? Encoding.UTF8.GetString(name[..length]) : null;
+        }
+    }
+
+    public int GetDeviceCount(bool capture) => NativeAudio.GetDeviceCount(_engine, capture ? 1 : 0);
+
+    /// <summary>Starts capturing as interleaved stereo at the mix rate. Returns the native error code; 0 is success.</summary>
+    public int StartCapture(int deviceIndex, bool loopback)
+    {
+        NativeAudio.CaptureStop(_engine);
+        return NativeAudio.CaptureStart(_engine, deviceIndex, loopback ? 1 : 0);
+    }
+
+    public void StopCapture() => NativeAudio.CaptureStop(_engine);
+    public bool IsCaptureRunning => NativeAudio.CaptureIsRunning(_engine) != 0;
+
+    /// <summary>Counts every frame since capture started; reads address frames by this position.</summary>
+    public ulong CaptureFramesWritten => NativeAudio.CaptureFramesWritten(_engine);
+
+    /// <summary>How far a reader can fall behind before frames are overwritten.</summary>
+    public static int CaptureRingCapacity => NativeAudio.CaptureRingCapacity();
+
+    /// <summary>Copies interleaved frames from an absolute position and returns how many arrived.</summary>
+    public int ReadCapture(ulong startFrame, Span<float> interleaved)
+    {
+        fixed (float* destination = interleaved)
+        {
+            return NativeAudio.CaptureRead(_engine, startFrame, destination, interleaved.Length / 2);
+        }
+    }
+
     public void DetachDevice() => NativeAudio.DetachDevice(_engine);
 
     /// <summary>Reattaches the default output device; false leaves the engine silent but usable.</summary>
@@ -219,6 +258,7 @@ internal sealed unsafe class NativeAudioEngine : IDisposable
 
     private const int DefaultDevice = -1;
     private const int BusHandleBit = 0x40000000;
+    private const int MaxDeviceNameBytes = 512;
 
     /** Long enough that a meter read once per frame can't miss a peak between device callbacks. */
     private const float DefaultLevelWindowSecs = 0.05f;

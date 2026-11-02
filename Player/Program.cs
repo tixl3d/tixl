@@ -10,7 +10,6 @@ using System.Numerics;
 using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Text;
-using ManagedBass;
 using Newtonsoft.Json;
 using T3.Graphics.Compat;
 using T3.Graphics;

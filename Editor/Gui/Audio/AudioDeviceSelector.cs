@@ -1,8 +1,6 @@
 #nullable enable
 using System.Text;
 using ImGuiNET;
-using ManagedBass;
-using ManagedBass.Wasapi;
 using T3.Core.Audio;
 using T3.Core.IO;
 using T3.Editor.Gui.Styling;
@@ -11,7 +9,7 @@ using T3.Core.Audio.Input;
 namespace T3.Editor.Gui.Audio;
 
 /// <summary>
-/// Shared WASAPI input-device picker used by the project settings and the global settings window.
+/// Shared input-device picker used by the project settings and the global settings window.
 /// A project stores an empty device name to mean "use this machine's default input"; the actual
 /// machine-local device lives in <see cref="CoreSettings"/> so shared projects stay portable.
 /// </summary>
@@ -47,9 +45,6 @@ internal static class AudioDeviceSelector
 
         PopComboStyle();
 
-        if (changed)
-            AudioEngine.OnAudioDeviceChanged();
-
         return changed;
     }
 
@@ -78,7 +73,6 @@ internal static class AudioDeviceSelector
         {
             CoreSettings.Config.LocalAudioInputDeviceName = current;
             CoreSettings.Save();
-            AudioEngine.OnAudioDeviceChanged();
         }
 
         return changed;
@@ -110,7 +104,6 @@ internal static class AudioDeviceSelector
             var isSelected = d.Name == selectedName;
             if (ImGui.Selectable(d.Name, isSelected, ImGuiSelectableFlags.NoAutoClosePopups))
             {
-                Bass.Configure(Configuration.UpdateThreads, false);
                 selectedName = d.Name;
                 changed = true;
             }

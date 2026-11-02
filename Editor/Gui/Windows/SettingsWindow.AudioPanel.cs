@@ -67,7 +67,7 @@ internal sealed partial class SettingsWindow
 
         FormInputs.AddVerticalSpace();
         FormInputs.AddSectionSubHeader("Default Input Device");
-        CustomComponents.HelpText("The WASAPI input device used when a project leaves its input set to \"" +
+        CustomComponents.HelpText("The input device used when a project leaves its input set to \"" +
                                   AudioDeviceSelector.DefaultDeviceLabel + "\". Stored per machine, so shared projects stay portable.");
         FormInputs.DrawInputLabel("Device");
         changed |= AudioDeviceSelector.DrawLocalDefaultDeviceCombo("##SettingsLocalAudioDevice");

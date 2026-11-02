@@ -1,9 +1,10 @@
 # Replace BASS with a native miniaudio layer
 
-**Status:** In progress — 2026-11-02, on branch `feat/miniaudio`. Soundtracks, stereo operators, buses, the tone generator,
-video audio, analysis, export of all of these, waveform images and duration probes run on the native engine. Spatial
-audio, audio input and BASS's own device setup are what's left on BASS. Phase 0's seek fix is done; its Windows and
-macOS runs and the upstream reports are open. The spike lives on branch `spike/replace-bass`.
+**Status:** In progress — 2026-11-02, on branch `feat/miniaudio`. Everything but spatial audio runs on the native engine:
+soundtracks, stereo operators, buses, the tone generator, video audio, audio input and recording, analysis, export,
+waveform images and duration probes. BASS is only initialised for `SpatialOperatorAudioStream`. Effects stay low priority
+(decision 8). Phase 0's seek fix is done; its Windows and macOS runs and the upstream reports are open. The spike lives
+on branch `spike/replace-bass`.
 Decisions from 2026-10-12 are folded in (§Decisions 6–10).
 **Scope:** All audio in Editor, Player and operators on Windows, Linux and macOS. Removes ManagedBass,
 BASSmix, BASSFLAC and BASSWASAPI.
@@ -233,7 +234,11 @@ Mixing is fixed at 48 kHz (`AudioConfig.MixerFrequency` is const), which settles
 - Live FFT from the output tap (or the soundtrack bus, per Plan_AudioProcessingGraph §3), per-source FFT from
   tap inserts, `FFTRemoveDC` for input. Verify with the spike's comparison that every `[AudioReaction]` mode
   produces the same values as BASS on the example projects.
-- Capture via native input + ring buffer; move `AudioInput.OnCapturedData` work to the main thread.
+- **Done:** capture goes through the native input into a 10.9 s ring buffer, and analysis, beat tracking and recording run
+  on the main thread in 10 ms steps, which keeps the decay and onset tuning of the per-callback version. Measured with a
+  null sink's monitor as input: a recording stays sample-aligned through a 1.5 s main-thread stall. Saved device names
+  can differ from the BASS ones (Linux in particular), so such projects need the input picked again; WASAPI loopback is
+  implemented but has never run.
 - Live and export FFT are already on the managed `Fft`; what's left is input and per-source FFT, and comparing values
   against BASS on real projects. Export's FFT window now holds real history instead of zero padding, so export
   reactions will differ slightly from earlier versions and should now match live.
