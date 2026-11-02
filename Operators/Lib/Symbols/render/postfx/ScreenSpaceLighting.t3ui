@@ -1,0 +1,288 @@
+{
+  "FormatVersion": 3,
+  "Id": "f2a60c18-9d47-4b13-8e5a-c7b31d04e692",
+  "Description": "Adds contact shading, color bleeding and reflections of what is visible on screen, using the depth and normal buffers of a [RenderTarget].\n\nIt combines [ScreenSpaceAO] and [ScreenSpaceReflections] in one operator with shared inputs, so that reflections show the already shaded image. Use those operators directly to control their temporal settings separately.\n\nRequirements:\n\n- Enable WithNormalBuffer on the source [RenderTarget].\n- The scene camera must be connected to CameraReference.\n\nOnly content visible on screen contributes. The whole scene is treated as one material; the Occlusion and Reflections outputs allow applying the effects through a mask.\n\nAKA: SSGI, global illumination, indirect light, SSR, SSAO\n\nTips:\n\n- Noise fades over a few seconds after movement. Lower MaxAccumulatedFrames settles faster but leaves more grain.\n- Place [TXAA] after this operator to clean up the remaining edges.",
+  "SymbolTags": "1216",
+  "InputUis": [
+    {
+      "InputId": "954e8e61-963b-5ab2-b6af-e6ebd979c67b",
+      "Relevancy": "Required",
+      "Position": {
+        "X": -300.0,
+        "Y": 0.0
+      },
+      "Description": "The rendered scene color. It must come from the same render pass and camera as DepthMap and NormalMap."
+    },
+    {
+      "InputId": "51bda255-4188-55e2-a6e9-9e2f2f53c7c0",
+      "Relevancy": "Required",
+      "Position": {
+        "X": -300.0,
+        "Y": 40.0
+      },
+      "Description": "The scene depth buffer. Only content that writes depth takes part."
+    },
+    {
+      "InputId": "b14dc3e3-8d42-586a-b06f-1b7ecbe783de",
+      "Relevancy": "Required",
+      "Position": {
+        "X": -300.0,
+        "Y": 80.0
+      },
+      "Description": "The NormalBuffer output of the [RenderTarget], which needs WithNormalBuffer enabled."
+    },
+    {
+      "InputId": "6fd50e91-9ae7-5378-b8e3-688f4d212a78",
+      "Relevancy": "Required",
+      "Position": {
+        "X": -300.0,
+        "Y": 120.0
+      },
+      "Description": "Reference output of the scene camera ([Camera] or [OrbitCamera])."
+    },
+    {
+      "InputId": "e1f4deec-22fd-5652-a3c3-37b46a5eab6c",
+      "Position": {
+        "X": -300.0,
+        "Y": 160.0
+      },
+      "GroupTitle": "Occlusion",
+      "Description": "Strength of the darkening in creases and contact areas. 0 disables it.",
+      "Min": 0,
+      "Max": 3,
+      "ClampMin": true
+    },
+    {
+      "InputId": "385129ec-175f-5821-ac8b-ca4bb2d0b287",
+      "Position": {
+        "X": -300.0,
+        "Y": 200.0
+      },
+      "Description": "How far surfaces can darken and tint each other, in world units.",
+      "Min": 0,
+      "Max": 2,
+      "ClampMin": true
+    },
+    {
+      "InputId": "2cb78d66-f7d9-5118-88cb-295c76e01ccf",
+      "Position": {
+        "X": -300.0,
+        "Y": 240.0
+      },
+      "Description": "How deep an object is assumed to be behind its visible surface, for occlusion and bleeding.",
+      "Min": 0,
+      "Max": 2,
+      "ClampMin": true
+    },
+    {
+      "InputId": "69fe1eda-0a88-524f-b5ac-8872e33d9eb7",
+      "Position": {
+        "X": -300.0,
+        "Y": 280.0
+      },
+      "Description": "Occlusion rays per pixel and frame. More rays reduce noise during motion and cost more.",
+      "Min": 1,
+      "Max": 16,
+      "ClampMin": true
+    },
+    {
+      "InputId": "045b64b3-c3c6-55be-b124-c7ed34776ecc",
+      "Position": {
+        "X": -300.0,
+        "Y": 320.0
+      },
+      "Description": "Samples along each occlusion ray. Increase it for a large OcclusionRadius.",
+      "Min": 2,
+      "Max": 32,
+      "ClampMin": true
+    },
+    {
+      "InputId": "2d098fe1-9c9e-5e3f-a910-5494b7138083",
+      "Position": {
+        "X": -300.0,
+        "Y": 360.0
+      },
+      "GroupTitle": "Color Bleeding",
+      "Description": "Adds light picked up from nearby surfaces. It estimates surface colors from the rendered image, so it gives a soft tint rather than accurate indirect light.",
+      "Min": 0,
+      "Max": 4,
+      "ClampMin": true
+    },
+    {
+      "InputId": "04f0e86f-c9b2-55ce-a278-bb790b07050f",
+      "Position": {
+        "X": -300.0,
+        "Y": 400.0
+      },
+      "GroupTitle": "Reflections",
+      "Description": "Multiplier for the reflection strength after the Fresnel term. 0 hides reflections.",
+      "Min": 0,
+      "Max": 2,
+      "ClampMin": true
+    },
+    {
+      "InputId": "0ba63e58-f702-5800-a992-96696cc44784",
+      "Position": {
+        "X": -300.0,
+        "Y": 440.0
+      },
+      "Description": "Reflection strength when looking straight at a surface. It rises toward 1 at grazing angles.",
+      "Min": 0,
+      "Max": 1,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "bbcf597d-db03-5380-acab-6223b7ed1338",
+      "Position": {
+        "X": -300.0,
+        "Y": 480.0
+      },
+      "Description": "Scatters the reflection rays into blurred reflections, which take longer to settle.",
+      "Min": 0,
+      "Max": 1,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "398af543-56c1-580f-9355-ad83c8737982",
+      "Position": {
+        "X": -300.0,
+        "Y": 520.0
+      },
+      "Description": "Longest reflection ray in world units.",
+      "Min": 0,
+      "Max": 50,
+      "ClampMin": true
+    },
+    {
+      "InputId": "5da494ec-cdf2-5d07-b15d-75540ff2c63b",
+      "Position": {
+        "X": -300.0,
+        "Y": 560.0
+      },
+      "Description": "How far behind a surface a reflection ray still counts as hitting it, in world units.",
+      "Min": 0,
+      "Max": 2,
+      "ClampMin": true
+    },
+    {
+      "InputId": "e6d9b567-dbcf-5ce3-9862-cd1003bbee90",
+      "Position": {
+        "X": -300.0,
+        "Y": 600.0
+      },
+      "Description": "Steps per reflection ray. This is the main performance control for reflections.",
+      "Min": 8,
+      "Max": 128,
+      "ClampMin": true
+    },
+    {
+      "InputId": "797e795f-9700-5bf9-9674-d2bd39356f3c",
+      "Position": {
+        "X": -300.0,
+        "Y": 640.0
+      },
+      "Description": "Screen margin over which reflections fade out.",
+      "Min": 0,
+      "Max": 0.5,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "9f05525d-3b27-528f-bc16-e2ab9a230e1e",
+      "Position": {
+        "X": -300.0,
+        "Y": 680.0
+      },
+      "GroupTitle": "Temporal Accumulation",
+      "Description": "Share of the history kept each frame while the image changes.",
+      "Min": 0,
+      "Max": 1,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "f5c3947d-c580-5739-b123-d5f7ff6a8ef3",
+      "Position": {
+        "X": -300.0,
+        "Y": 720.0
+      },
+      "Description": "How many frames a still pixel averages before it stops changing. Higher values settle cleaner but take longer.",
+      "Min": 1,
+      "Max": 1024,
+      "ClampMin": true
+    },
+    {
+      "InputId": "863dafd8-10c4-571f-bddc-648857c595cc",
+      "Position": {
+        "X": -300.0,
+        "Y": 760.0
+      },
+      "Description": "How far the history may differ from the current frame.",
+      "Min": 0,
+      "Max": 1,
+      "ClampMin": true
+    },
+    {
+      "InputId": "53f228d1-c7b1-5778-aa52-03c29e16cbc7",
+      "Position": {
+        "X": -300.0,
+        "Y": 800.0
+      },
+      "Description": "Relative camera distance difference above which history is rejected as disoccluded.",
+      "Min": 0,
+      "Max": 0.2,
+      "ClampMin": true
+    },
+    {
+      "InputId": "2a9d43a4-a3b9-58aa-bb9e-9a1dc0534fad",
+      "Position": {
+        "X": -300.0,
+        "Y": 840.0
+      },
+      "Description": "Ignores the history while enabled, for example after a hard camera cut."
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0f34008e-0505-5717-a72a-229201a2f9f9",
+      "SymbolName": "Lib.render.postfx.ScreenSpaceAO",
+      "Position": {
+        "X": 0.0,
+        "Y": 100.0
+      }
+    },
+    {
+      "ChildId": "56a90bc3-309f-5fe1-9ab8-8b300ccd9ff5",
+      "SymbolName": "Lib.render.postfx.ScreenSpaceReflections",
+      "Position": {
+        "X": 300.0,
+        "Y": 100.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "76c6f273-504a-5ec4-a478-667277e75d42",
+      "Position": {
+        "X": 600.0,
+        "Y": 100.0
+      }
+    },
+    {
+      "OutputId": "c3e5a849-3ebd-5d73-b126-9061fe017779",
+      "Position": {
+        "X": 600.0,
+        "Y": 200.0
+      }
+    },
+    {
+      "OutputId": "48ed1801-2123-576c-bf4b-6c27214e32ac",
+      "Position": {
+        "X": 600.0,
+        "Y": 300.0
+      }
+    }
+  ]
+}

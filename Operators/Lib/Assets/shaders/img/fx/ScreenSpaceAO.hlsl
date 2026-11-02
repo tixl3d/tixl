@@ -15,6 +15,7 @@ cbuffer ParamConstants : register(b0)
     float Reset;
     float FrameIndex;
     float MaxAccumulatedFrames;
+    float ColorBleeding;
 }
 
 #include "shared/screen-space-tracing.hlsl"
@@ -36,12 +37,13 @@ float3 ReconstructNormal(float2 uv, float3 surface)
     return dot(normal, EyePosition() - surface) < 0.0 ? -normal : normal;
 }
 
+/** Traced light from what the rays hit in rgb, share of unblocked rays in alpha. */
 float4 psTrace(vsOutput input) : SV_TARGET
 {
     float2 uv = input.texCoord;
     float depth = FetchDepth(uv);
     if (depth >= BackgroundDepth)
-        return float4(1, 1, 1, 1);
+        return float4(0, 0, 0, 1);
 
     float3 surface = UvDepthToWorld(uv, depth);
     float3 normal;
@@ -55,6 +57,7 @@ float4 psTrace(vsOutput input) : SV_TARGET
     int rayCount = clamp((int)RaysPerPixel, 1, 32);
     int stepCount = clamp((int)StepsPerRay, 1, 64);
     float occlusion = 0.0;
+    float3 bleeding = 0.0;
 
     [loop]
     for (int rayIndex = 0; rayIndex < rayCount; ++rayIndex)
@@ -89,31 +92,38 @@ float4 psTrace(vsOutput input) : SV_TARGET
             float behindScene = ViewDepth(sampleUv, clip.z / clip.w) - ViewDepth(sampleUv, sceneDepth);
             if (behindScene > selfHitBias && behindScene < Thickness)
             {
-                occlusion += 1.0 - progress;
+                float hitWeight = 1.0 - progress;
+                occlusion += hitWeight;
+                bleeding += Source.SampleLevel(texSampler, sampleUv, 0).rgb * hitWeight;
                 break;
             }
         }
     }
 
-    float visibility = 1.0 - occlusion / rayCount;
-    return float4(visibility, visibility, visibility, 1);
+    return float4(bleeding / rayCount, 1.0 - occlusion / rayCount);
 }
 
+/** Color target holds visibility in rgb, so that the Occlusion output is plain grayscale. Bleeding travels with the frame count. */
 TemporalOutput psTemporal(vsOutput input)
 {
     float2 uv = input.texCoord;
     float2 texel = float2(1.0 / TargetWidth, 1.0 / TargetHeight);
-    float raw = Source.SampleLevel(texSampler, uv, 0).r;
+    float4 raw = Source.SampleLevel(texSampler, uv, 0);
 
+    TemporalOutput output;
     float depth = FetchDepth(uv);
     if (depth >= BackgroundDepth)
-        return MakeTemporalOutput(float3(1, 1, 1), 0, 0);
+    {
+        output.Color = float4(1, 1, 1, 0);
+        output.AccumulatedFrames = float4(1, 0, 0, 0);
+        return output;
+    }
 
     float3 surface = UvDepthToWorld(uv, depth);
     float2 previousUv = ReprojectToPreviousUv(surface);
 
-    float sum = 0.0;
-    float sumSquared = 0.0;
+    float4 sum = 0.0;
+    float4 sumSquared = 0.0;
 
     [unroll]
     for (int y = -1; y <= 1; ++y)
@@ -121,41 +131,57 @@ TemporalOutput psTemporal(vsOutput input)
         [unroll]
         for (int x = -1; x <= 1; ++x)
         {
-            float neighbor = Source.SampleLevel(texSampler, uv + float2(x, y) * texel, 0).r;
+            float4 neighbor = Source.SampleLevel(texSampler, uv + float2(x, y) * texel, 0);
             sum += neighbor;
             sumSquared += neighbor * neighbor;
         }
     }
 
-    float mean = sum / 9.0;
-    float deviation = sqrt(max(sumSquared / 9.0 - mean * mean, 0.0));
+    float4 mean = sum / 9.0;
+    float4 deviation = sqrt(max(sumSquared / 9.0 - mean * mean, 0.0));
 
     // Single rays differ strongly between neighbors, which would make a min/max box accept almost any history.
     // The minimum is about three standard deviations of the mean of the neighborhood's few rays. Without it a
     // converged history would snap to the current frame where all neighbors happen to miss.
-    float allowedDeviation = max(deviation * (1.0 + NeighborhoodClamp * 3.0), 0.25);
+    float4 allowedDeviation = max(deviation * (1.0 + NeighborhoodClamp * 3.0), 0.25);
 
-    float4 historySample = Accumulated.SampleLevel(texSampler, previousUv, 0);
-    float history = clamp(historySample.r, mean - allowedDeviation, mean + allowedDeviation);
+    float4 historyColor = Accumulated.SampleLevel(texSampler, previousUv, 0);
+    float4 historyFrames = AccumulatedFrameCount.SampleLevel(texSampler, previousUv, 0);
+    float4 historySignal = float4(historyFrames.gba, historyColor.r);
+    float4 history = clamp(historySignal, mean - allowedDeviation, mean + allowedDeviation);
 
     float expectedDistance = distance(surface, PreviousEyePosition());
-    float relativeGap = abs(historySample.a - expectedDistance) / max(expectedDistance, 1e-4);
+    float relativeGap = abs(historyColor.a - expectedDistance) / max(expectedDistance, 1e-4);
 
     float confidence = 1.0 - saturate(relativeGap / max(DepthRejection, 1e-5));
-    if (!IsOnScreen(previousUv) || historySample.a <= 0.0 || Reset > 0.5)
+    if (!IsOnScreen(previousUv) || historyColor.a <= 0.0 || Reset > 0.5)
         confidence = 0.0;
 
-    float frames = GetAccumulatedFrames(uv, previousUv, confidence, saturate(abs(historySample.r - mean) / 0.25));
+    float visibilityChange = abs(historySignal.a - mean.a) / 0.25;
+    float bleedingChange = length(historySignal.rgb - mean.rgb) / max(0.25, dot(mean.rgb, 0.333));
+    float frames = GetAccumulatedFrames(uv, previousUv, confidence, saturate(max(visibilityChange, bleedingChange)));
 
     // Newly revealed pixels have no history to hide their noise, so they start from the neighborhood average.
-    float current = lerp(mean, raw, saturate(frames * 0.25));
-    float resolved = lerp(current, history, frames / (frames + 1.0));
-    return MakeTemporalOutput(float3(resolved, resolved, resolved), length(surface - EyePosition()), frames);
+    float4 current = lerp(mean, raw, saturate(frames * 0.25));
+    float4 resolved = lerp(current, history, frames / (frames + 1.0));
+
+    output.Color = float4(resolved.aaa, length(surface - EyePosition()));
+    output.AccumulatedFrames = float4(frames + 1.0, resolved.rgb);
+    return output;
 }
 
 float4 psComposite(vsOutput input) : SV_TARGET
 {
-    float4 image = Source.SampleLevel(texSampler, input.texCoord, 0);
-    float visibility = Accumulated.SampleLevel(texSampler, input.texCoord, 0).r;
-    return float4(image.rgb * pow(saturate(visibility), max(Intensity, 0.0)), image.a);
+    float2 uv = input.texCoord;
+    float4 image = Source.SampleLevel(texSampler, uv, 0);
+    if (FetchDepth(uv) >= BackgroundDepth)
+        return image;
+
+    float visibility = Accumulated.SampleLevel(texSampler, uv, 0).r;
+    float3 bleeding = AccumulatedFrameCount.SampleLevel(texSampler, uv, 0).gba;
+
+    // There is no albedo buffer, so the lit color stands in for it. The minimum keeps dark surfaces from going bright.
+    float3 albedo = saturate(image.rgb / max(max(image.r, max(image.g, image.b)), 0.1));
+    float3 shaded = image.rgb * pow(saturate(visibility), max(Intensity, 0.0));
+    return float4(shaded + bleeding * albedo * ColorBleeding, image.a);
 }

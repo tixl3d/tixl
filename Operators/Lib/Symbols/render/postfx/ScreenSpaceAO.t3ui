@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "8e2f6b14-a7c3-4d59-b0e8-3c91f5d27a66",
-  "Description": "Darkens creases and contact areas by tracing short rays through the depth and normal buffers of a [RenderTarget].\n\nEach pixel traces a few random rays around its normal and is darkened by the share that hit something nearby. The noisy result is accumulated over frames, following the camera motion. Compared to [SSAO] it measures Radius in world units and respects the surface direction, but it requires normals and the camera reference.\n\nRequirements:\n\n- Enable WithNormalBuffer on the source [RenderTarget].\n- The scene camera must be connected to CameraReference.\n\nOnly content visible on screen can cause occlusion. Moving objects are only handled by the clamp on the history, so they can show a slight delay.\n\nAKA: ambient occlusion, HBAO, GTAO, contact shadows\n\nTips:\n\n- Use the Occlusion output to tint the shading or apply it to a part of the image.\n- Set Radius to match the scale of the details that should be shaded.",
+  "Description": "Darkens creases and contact areas by tracing short rays through the depth and normal buffers of a [RenderTarget].\n\nEach pixel traces a few random rays around its normal and is darkened by the share that hit something nearby. The noisy result is accumulated over frames, following the camera motion. Compared to [SSAO] it measures Radius in world units and respects the surface direction, but it requires normals and the camera reference.\n\nRequirements:\n\n- Enable WithNormalBuffer on the source [RenderTarget].\n- The scene camera must be connected to CameraReference.\n\nColorBleeding also tints surfaces with the color of what those rays hit.\n\nOnly content visible on screen can cause occlusion or bleeding. Moving objects are only handled by the clamp on the history, so they can show a slight delay.\n\nAKA: ambient occlusion, HBAO, GTAO, contact shadows\n\nTips:\n\n- Use the Occlusion output to tint the shading or apply it to a part of the image.\n- Set Radius to match the scale of the details that should be shaded.",
   "SymbolTags": "1216",
   "InputUis": [
     {
@@ -61,6 +61,18 @@
       "Description": "How far surfaces can darken each other, in world units. Larger values give wider, softer shading and need more steps.",
       "Min": 0,
       "Max": 2,
+      "ClampMin": true
+    },
+    {
+      "InputId": "d6af49e8-315c-4ab2-97f9-8e24a0b13d65",
+      "Position": {
+        "X": -600.0,
+        "Y": 220.0
+      },
+      "GroupTitle": "Color Bleeding",
+      "Description": "Adds light picked up from nearby surfaces that the rays hit. It estimates surface colors from the rendered image, so it gives a soft tint rather than accurate indirect light. 0 disables it.",
+      "Min": 0,
+      "Max": 4,
       "ClampMin": true
     },
     {
@@ -719,6 +731,22 @@
       "Position": {
         "X": -200.0,
         "Y": 510.0
+      }
+    },
+    {
+      "ChildId": "d373f929-a26a-50dd-8fd5-d6b59643e89d",
+      "SymbolName": "Lib.image.use.PickTexture",
+      "Position": {
+        "X": 2300.0,
+        "Y": 180.0
+      }
+    },
+    {
+      "ChildId": "df938be3-52e8-57ca-9b41-7419e0e7b656",
+      "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
+      "Position": {
+        "X": 2700.0,
+        "Y": 340.0
       }
     }
   ],
