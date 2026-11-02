@@ -69,57 +69,63 @@ inline float3 TwistFunction(float3 position, float twistAmount)
     return (twisted + TwistPivot);
 }
 
-[numthreads(64, 1, 1)] void main(uint3 i : SV_DispatchThreadID)
+float3 DeformPosition(float3 pos, float s)
+{
+    float3 spherePos = NormalizeToSphere(pos, Radius);
+    pos = lerp(pos, lerp(pos, spherePos, Spherize), s);
+
+    float3 tapered = pos;
+    switch ((int)TaperAxis)
+    {
+    case 0: tapered.yz *= TaperFunction(pos.x, Taper2 * TaperAmount); break;
+    case 1: tapered.xz *= TaperFunction(pos.y, Taper2 * TaperAmount); break;
+    case 2: tapered.xy *= TaperFunction(pos.z, Taper2 * TaperAmount); break;
+    }
+    pos = lerp(pos, tapered, s);
+
+    float3 twisted = TwistFunction(pos, radians(TwistAmount));
+    return lerp(pos, twisted, s);
+}
+
+[numthreads(64, 1, 1)]
+void main(uint3 i : SV_DispatchThreadID)
 {
     uint numStructs, stride;
     SourceVerts.GetDimensions(numStructs, stride);
     if (i.x >= numStructs)
-    {
         return;
-    }
 
     float s = UseVertexSelection > 0.5 ? SourceVerts[i.x].Selected : 1;
 
-    float3 pos = SourceVerts[i.x].Position;
+    float3 p  = SourceVerts[i.x].Position;
+    float3 p0 = DeformPosition(p, s);
 
-    float3 twisted = SourceVerts[i.x].Position; // for twist
+    // Columns of the Jacobian: how the deformed position changes along each source axis
+    const float eps = 1e-3;
+    float3 a = (DeformPosition(p + float3(eps, 0, 0), s) - p0) / eps;
+    float3 b = (DeformPosition(p + float3(0, eps, 0), s) - p0) / eps;
+    float3 c = (DeformPosition(p + float3(0, 0, eps), s) - p0) / eps;
 
-    // Normalize the position to be on a sphere with a desired radius
-    float3 spherePos = NormalizeToSphere(pos, Radius);
-    pos = lerp(pos, lerp(pos, spherePos, Spherize), s);
-    float3 tapered = pos;
+    ResultVerts[i.x].Position = p0;
 
-    // Apply taper transformation
-    switch ((int)TaperAxis)
-    {
-    case 0:
-        tapered.yz *= TaperFunction(pos.x, Taper2 * TaperAmount) ; //Tapering on X axis
-        break;
-   
-    case 1:
-        tapered.xz *= TaperFunction(pos.y, Taper2 * TaperAmount); //Tapering on Y axis
-        break;
- 
-    case 2:
-        tapered.xy *= TaperFunction(pos.z, Taper2 * TaperAmount); //Tapering on Z axis
-        break;
-   
-    }
-    pos = lerp(pos, tapered, s);
+    // Normal: inverse transpose of J (via cofactors, sign-corrected for mirroring)
+    float3 n = SourceVerts[i.x].Normal;
+    float3 newN = n.x * cross(b, c) + n.y * cross(c, a) + n.z * cross(a, b);
+    newN *= (dot(a, cross(b, c)) < 0) ? -1 : 1;
+    float len = length(newN);
+    ResultVerts[i.x].Normal = len > 1e-12 ? newN / len : n;
 
-    //  Apply twist transformation 
-    twisted = TwistFunction(pos, radians(TwistAmount)) ;
+    // Tangent / bitangent: lie in the surface, so they transform with J itself
+    float3 t = SourceVerts[i.x].Tangent;
+    float3 tn = t.x * a + t.y * b + t.z * c;
+    ResultVerts[i.x].Tangent = lerp(t, normalize(tn), s);
 
-    // Results
-    ResultVerts[i.x].Position = lerp(pos, twisted, s);
-
-    ResultVerts[i.x].Normal = SourceVerts[i.x].Normal;
-    ResultVerts[i.x].Tangent = SourceVerts[i.x].Tangent;
-    ResultVerts[i.x].Bitangent = SourceVerts[i.x].Bitangent;
+    float3 bt = SourceVerts[i.x].Bitangent;
+    float3 bn = bt.x * a + bt.y * b + bt.z * c;
+    ResultVerts[i.x].Bitangent = lerp(bt, normalize(bn), s);
 
     ResultVerts[i.x].TexCoord = SourceVerts[i.x].TexCoord;
     ResultVerts[i.x].TexCoord2 = SourceVerts[i.x].TexCoord2;
-
     ResultVerts[i.x].Selected = SourceVerts[i.x].Selected;
     ResultVerts[i.x].ColorRGB = SourceVerts[i.x].ColorRGB;
 }
