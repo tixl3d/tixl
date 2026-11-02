@@ -7,7 +7,7 @@ using T3.Core.Operator;
 namespace T3.Core.Audio;
 
 /// <summary>
-/// Converts sample data from BASS into a list of buffers that can then be used by Operators like [AudioWaveform].
+/// Converts sample data into a list of buffers that can then be used by Operators like [AudioWaveform].
 /// 
 /// <para><b>Note:</b> This static class delegates to <see cref="AudioAnalysisContext.Default"/>.
 /// For multi-threaded analysis, create separate <see cref="AudioAnalysisContext"/> instances.</para>
@@ -19,13 +19,13 @@ public static class WaveFormProcessing
     #region Buffer Accessors (delegate to default context)
 
     /// <summary>
-    /// Interleaved stereo sample buffer from BASS.
+    /// Interleaved stereo sample buffer.
     /// Delegates to <see cref="AudioAnalysisContext.Default"/>.
     /// </summary>
     internal static float[] InterleavenSampleBuffer => Context.InterleavedSampleBuffer;
 
     /// <summary>
-    /// Result code from last BASS waveform data fetch.
+    /// Result code from the last waveform data fetch.
     /// </summary>
     internal static int LastFetchResultCode
     {
@@ -34,7 +34,7 @@ public static class WaveFormProcessing
     }
 
     /// <summary>
-    /// To avoid unnecessary processing we only fetch wave data from BASS when requested once from an Operator.
+    /// To avoid unnecessary processing we only fetch wave data when requested once from an Operator.
     /// </summary>
     internal static bool RequestedOnce
     {

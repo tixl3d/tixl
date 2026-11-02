@@ -1,7 +1,6 @@
 #nullable enable
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using ManagedBass;
 using T3.Core.Animation;
 using T3.Core.Audio;
 using T3.Core.Model;

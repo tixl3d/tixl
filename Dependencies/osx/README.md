@@ -1,13 +1,13 @@
-# BASS natives for macOS
+# Native libraries for macOS
 
-Copied into the Editor and Player output on macOS only (see the `osx` item groups in `Editor/Editor.csproj`
-and `Player/Player.csproj`). They are universal binaries; the arm64 slice is the one TiXL uses.
+Dylibs here are copied into the Editor and Player output on macOS (see the `osx` item groups in
+`Editor/Editor.csproj` and `Player/Player.csproj`).
 
-| File                | Package (un4seen.com/files/) | Take from the archive |
-|---------------------|------------------------------|-----------------------|
-| `libbass.dylib`     | `bass24-osx.zip`             | `libbass.dylib`       |
-| `libbassmix.dylib`  | `bassmix24-osx.zip`          | `libbassmix.dylib`    |
-| `libbassflac.dylib` | `bassflac24-osx.zip`         | `libbassflac.dylib`   |
+`libtixlaudio.dylib` is built from `Native/TixlAudio/` and needs Apple's SDK, so it has to be built on a Mac:
 
-`ManagedBass` P/Invokes the plain names `bass`, `bassmix` and `bassflac`; .NET maps those to `lib<name>.dylib`
-on macOS. As on Linux, there is no BASSWASAPI, so live audio input is unavailable for now.
+```
+cc -std=c99 -O2 -fPIC -dynamiclib -fvisibility=hidden -o libtixlaudio.dylib ../../Native/TixlAudio/tixl_audio.c \
+    -framework CoreFoundation -framework CoreAudio -framework AudioToolbox
+```
+
+Until it is here, audio stays silent on macOS.

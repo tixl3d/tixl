@@ -6,15 +6,10 @@
   outputs =
     { self, nixpkgs }:
     let
-      # The shipped BASS natives and the Slang build are x86-64 only.
+      # The committed audio library and the Slang build are x86-64 only.
       system = "x86_64-linux";
 
-      # tixl is unfree only because it ships BASS (free for non-commercial use). Allowing exactly this
-      # package keeps `nix run` working without NIXPKGS_ALLOW_UNFREE for everything else.
-      pkgs = import nixpkgs {
-        inherit system;
-        config.allowUnfreePredicate = package: (package.pname or "") == "tixl";
-      };
+      pkgs = import nixpkgs { inherit system; };
 
       lib = pkgs.lib;
 
@@ -29,7 +24,7 @@
       );
 
       # SDL3 declares the backends it may load (video, input, audio) in its dlopen notes, which autoPatchelf
-      # reads as dependencies. The rest - BASS's audio, .NET's ICU and OpenSSL, fonts - is loaded without
+      # reads as dependencies. The rest - the audio backends, .NET's ICU and OpenSSL, fonts - is loaded without
       # being declared anywhere, so the whole set also goes on the wrapper's library path.
       runtimeLibraries = [
         pkgs.vulkan-loader
@@ -183,12 +178,7 @@
         meta = {
           description = "Real-time motion graphics and VJ tool";
           homepage = "https://tixl.app";
-          # MIT, plus the bundled BASS audio library: free for non-commercial use, commercial use needs a
-          # license from un4seen.
-          license = [
-            lib.licenses.mit
-            lib.licenses.unfree
-          ];
+          license = lib.licenses.mit;
           sourceProvenance = [
             lib.sourceTypes.fromSource
             lib.sourceTypes.binaryNativeCode

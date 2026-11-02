@@ -238,7 +238,7 @@ internal sealed class VideoAudioTrack : IDisposable
         TopUp(loop, TargetFillSeconds);
     }
 
-    // Opens the source and push stream for this url, rebuilding both when a device change invalidated them:
+    // Opens the source and push stream for this url:
     // the push stream declares the rate of the data fed into it, so a session resampling to a different rate
     // would be played back at the wrong pitch rather than merely re-resampled.
     /// <summary>True once both <see cref="_session"/> and <see cref="_stream"/> are usable for this url.</summary>
@@ -358,9 +358,6 @@ internal sealed class VideoAudioTrack : IDisposable
         _pendingStart = double.NaN;
         _forwardSteps = 0;
 
-        // BASS init is what settles AudioConfig.MixerFrequency from the output device — until then it reads a
-        // 48 kHz placeholder. Initializing here (idempotent) rather than relying on the push stream to do it
-        // keeps the resampler's target and the stream's declared rate from disagreeing on the very first tick.
         AudioMixerManager.Initialize();
         _sessionSampleRate = AudioConfig.MixerFrequency;
 
@@ -376,9 +373,6 @@ internal sealed class VideoAudioTrack : IDisposable
                             + $"{_session.DurationSeconds:0.00}s");
     }
 
-    // A device change frees every BASS handle and may change the mixer's rate, so the push stream and the
-    // resampler (built for the old rate) both have to be rebuilt. The handles are already dead — freeing them
-    // again would act on whatever BASS has since handed out.
     private const int TickIntervalMs = 10;
     private const int SilenceAfterIdleMs = 100;
 

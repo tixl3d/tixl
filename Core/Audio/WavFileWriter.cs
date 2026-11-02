@@ -13,8 +13,7 @@ namespace T3.Core.Audio;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Thread-safe: <see cref="AppendFloat32Samples"/> is called from the BASS WASAPI
-/// capture callback while <see cref="Dispose"/> is typically called from the main thread.
+/// Thread-safe: <see cref="AppendFloat32Samples"/> and <see cref="Dispose"/> may run on different threads.
 /// A single lock guards both. The lock is uncontended in the common case (one writer per
 /// recording session, one callback firing every ~10 ms).
 /// </para>
@@ -65,7 +64,7 @@ public sealed class WavFileWriter : IDisposable
     /// Appends a buffer of interleaved float32 samples to the WAV file.
     /// Samples are clamped to [-1, 1] and converted to 16-bit PCM little-endian.
     /// </summary>
-    /// <param name="buffer">Pointer to the source buffer (BASS callback's <c>buffer</c>).</param>
+    /// <param name="buffer">Pointer to the source buffer .</param>
     /// <param name="byteCount">Number of bytes available at <paramref name="buffer"/>.</param>
     public void AppendFloat32Samples(IntPtr buffer, int byteCount)
     {

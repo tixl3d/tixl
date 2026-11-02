@@ -28,9 +28,7 @@ namespace Lib.io.audio
             _router = new AudioBusRouter(yieldsToOtherBuses: false, logSource: this);
         }
 
-        // Reports the level measured during Update. BassMix.ChannelGetLevel consumes the data window since
-        // the last call, so the submix is measured exactly once per frame, by the router. Only meaningful
-        // while the bus is evaluated.
+        // Reports the level measured during Update. Only meaningful while the bus is evaluated.
         private void UpdateLevel(EvaluationContext context)
         {
             Level.Value = _router.Level;

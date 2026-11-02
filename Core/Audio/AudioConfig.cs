@@ -17,35 +17,9 @@ public static class AudioConfig
     /// are the same on every machine; the device connection converts where its rate differs.
     /// </summary>
     public const int MixerFrequency = 48000;
-
-    /// <summary>
-    /// BASS update period in milliseconds for low-latency playback.
-    /// </summary>
-    internal const int UpdatePeriodMs = 10;
-
-    /// <summary>
-    /// Number of BASS update threads.
-    /// </summary>
-    internal const int UpdateThreads = 2;
-
-    /// <summary>
-    /// Playback buffer length in milliseconds.
-    /// </summary>
-    internal const int PlaybackBufferLengthMs = 100;
-
-    /// <summary>
-    /// Device buffer length in milliseconds for low-latency output.
-    /// </summary>
-    internal const int DeviceBufferLengthMs = 20;
     #endregion
 
     #region 3D Audio Configuration
-    /// <summary>
-    /// Distance factor for 3D audio. This is the number of units per meter.
-    /// Default is 1.0 (1 unit = 1 meter). Set to 100 if your world uses centimeters.
-    /// </summary>
-    internal static float DistanceFactor { get; set; } = 1.0f;
-
     /// <summary>
     /// Rolloff factor for 3D audio distance attenuation.
     /// 0 = no rolloff, 1 = real-world rolloff, higher = faster rolloff.
@@ -86,14 +60,5 @@ public static class AudioConfig
     /// High-pass filter cutoff frequency (Hz) for high frequency separation.
     /// </summary>
     internal const float HighPassCutoffFrequency = 2000f;
-    #endregion
-
-    #region Metering Configuration
-    /// <summary>
-    /// Time window in seconds for level metering via Bass.ChannelGetLevel (level-ex variant).
-    /// Shorter values = more responsive but noisier, longer values = smoother but more latency.
-    /// 0.05s (50ms) provides a good balance for visual metering.
-    /// </summary>
-    internal const float LevelMeteringWindowSeconds = 0.05f;
     #endregion
 }

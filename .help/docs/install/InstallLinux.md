@@ -34,9 +34,7 @@ TiXL then appears in your app menu. Inside the Flatpak, settings and logs live i
 `~/.var/app/app.tixl.TiXL/config/`; projects stay in `~/Documents`. To update, install the next bundle the same way.
 To remove TiXL, run `flatpak uninstall --user app.tixl.TiXL`.
 
-TiXL currently includes the BASS audio library ([un4seen.com](https://www.un4seen.com)), in the Flatpak as in the
-download below. BASS is free for non-commercial use; using TiXL commercially requires a BASS license from un4seen
-until TiXL switches to its own audio backend. The license text is in the `licenses` folder of every download.
+Audio goes through PipeWire or PulseAudio where they run, and ALSA otherwise. The licenses of everything TiXL includes are in the `licenses` folder of every download.
 
 ## Install the dependencies
 

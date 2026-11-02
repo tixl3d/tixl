@@ -7,35 +7,22 @@ pkgrel=1
 pkgdesc="Real-time motion graphics and VJ tool"
 arch=('x86_64')
 url="https://tixl.app"
-# BASS is free for non-commercial use only; see Dependencies/linux-x64/README.md.
-license=('MIT' 'LicenseRef-BASS')
+license=('MIT')
 # shader-slang from extra provides slangc; TiXL is tested with its 2026.18 line.
-depends=('dotnet-sdk>=10' 'vulkan-icd-loader' 'shader-slang' 'alsa-lib' 'gcc-libs' 'glibc')
+depends=('dotnet-sdk>=10' 'vulkan-icd-loader' 'shader-slang' 'gcc-libs' 'glibc')
 makedepends=('git' 'file')
-optdepends=('vulkan-validation-layers: diagnostics for the Vulkan backend')
+optdepends=('vulkan-validation-layers: diagnostics for the Vulkan backend'
+            'libpulse: audio through PipeWire or PulseAudio'
+            'alsa-lib: audio through ALSA')
 provides=('tixl')
 conflicts=('tixl')
 options=('!strip' '!debug')
-source=("tixl::git+https://github.com/tixl3d/tixl.git#branch=feat/linux-port"
-        "https://www.un4seen.com/files/bass24-linux.zip"
-        "https://www.un4seen.com/files/bassmix24-linux.zip"
-        "https://www.un4seen.com/files/bassflac24-linux.zip")
-noextract=('bass24-linux.zip' 'bassmix24-linux.zip' 'bassflac24-linux.zip')
-# The un4seen URLs are unversioned, so their checksums can't be pinned.
-sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP')
+source=("tixl::git+https://github.com/tixl3d/tixl.git#branch=feat/linux-port")
+sha256sums=('SKIP')
 
 pkgver() {
     cd tixl
     printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
-}
-
-prepare() {
-    local name
-    for name in bass bassmix bassflac; do
-        mkdir -p "$name"
-        bsdtar -xf "${name}24-linux.zip" -C "$name"
-        find "$name" -name "lib$name.so" -path '*64*' -exec cp {} tixl/Dependencies/linux-x64/ \; -quit
-    done
 }
 
 build() {

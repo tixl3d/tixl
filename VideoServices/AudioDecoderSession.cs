@@ -18,7 +18,7 @@ namespace T3.VideoServices;
 /// </summary>
 public sealed class AudioDecoderSession : IDisposable
 {
-    /// <summary>Decoded PCM is always downmixed/upmixed to stereo — what the BASS mixers expect.</summary>
+    /// <summary>Decoded PCM is always downmixed/upmixed to stereo — what the mix expects.</summary>
     public const int OutputChannels = 2;
 
     public int OutputSampleRate { get; }

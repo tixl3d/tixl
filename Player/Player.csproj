@@ -21,7 +21,6 @@
 
     <ItemGroup>
         <PackageReference Include="CommandLineParser" Version="2.9.1" />
-        <PackageReference Include="ManagedBass.Mix" Version="4.0.2" />
         <PackageReference Include="ppy.SDL3-CS" Version="2026.722.0" />
         <!-- Some operators (SVG loading, GDI+ text, OpenCV bitmaps) need System.Drawing.Common, which
              net10.0-windows packages get from the Windows Desktop runtime. The Player no longer ships that runtime. -->
@@ -40,7 +39,7 @@
         </Content>
     </ItemGroup>
 
-    <!-- See Editor.csproj: BASS's Linux and macOS natives are copied only on their own platform. -->
+    <!-- See Editor.csproj: Linux and macOS natives are copied only on their own platform. -->
     <ItemGroup Condition="$([MSBuild]::IsOSPlatform('Linux'))">
         <Content Include="../Dependencies/linux-x64/*.so" Visible="false">
             <Link>%(Filename)%(Extension)</Link>

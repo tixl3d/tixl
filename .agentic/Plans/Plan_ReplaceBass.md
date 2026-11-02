@@ -1,9 +1,9 @@
 # Replace BASS with a native miniaudio layer
 
-**Status:** In progress — 2026-11-02, on branch `feat/miniaudio`. All audio runs on the native engine, including spatial
-audio; BASS is still initialised but plays nothing, and removing it is next. Effects stay low priority (decision 8). Phase
-0's seek fix is done; its Windows and macOS runs and the upstream reports are open. The spike lives on branch
-`spike/replace-bass`.
+**Status:** Nearly done — 2026-11-02, on branch `feat/miniaudio`. BASS is gone: code, natives, packages and packaging metadata.
+Before merging: run the exported Player on a release build, run `tixlaudio.dll` on Windows (including loopback), build
+`libtixlaudio.dylib` on a Mac, build the natives in CI, and file the two upstream miniaudio reports. Effects stay low
+priority (decision 8). The spike lives on branch `spike/replace-bass`.
 Decisions from 2026-10-12 are folded in (§Decisions 6–10).
 **Scope:** All audio in Editor, Player and operators on Windows, Linux and macOS. Removes ManagedBass,
 BASSmix, BASSFLAC and BASSWASAPI.

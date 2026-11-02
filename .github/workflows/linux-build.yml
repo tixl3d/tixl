@@ -44,9 +44,6 @@ jobs:
           key: nuget-linux-${{ hashFiles('**/*.csproj', 'Tixl.props', 'Directory.Build.props') }}
           restore-keys: nuget-linux-
 
-      - name: Fetch BASS
-        run: Installer/Linux/fetch-bass.sh
-
       - name: Build Tarball
         run: Installer/Linux/build-tarball.sh
 

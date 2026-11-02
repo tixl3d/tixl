@@ -33,10 +33,6 @@ nix run --impure github:nix-community/nixGL#nixGLNvidia -- \
 }
 ```
 
-The package is unfree, because it ships the BASS audio library: free for non-commercial use, commercial use
-needs a license from un4seen. No `allowUnfree` setting is needed on either side — the flake allows this one
-package where it builds it, so neither `nix run` nor a configuration referencing it has to opt in.
-
 ## Dependency locking
 
 `deps.json` pins every NuGet package the restore pulls, because the build sandbox has no network.

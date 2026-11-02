@@ -53,8 +53,8 @@ public interface IVideoPlaybackEngine
                                   bool renderingToFile, VideoPlaybackOptimization optimization);
 
     /// <summary>
-    /// Drives the stream's audio track toward <paramref name="sourceSeconds"/> and returns its BASS channel
-    /// handle for the audio graph to route — 0 while the track is still opening, or when the file has no audio.
+    /// Drives the stream's audio track toward <paramref name="sourceSeconds"/> and returns its source
+    /// for the audio graph to route — invalid while the track is still opening, or when the file has no audio.
     /// <paramref name="absolutePath"/> must be the original file: a preview proxy carries no audio track.
     /// <para>Separate from <see cref="RequestFrame"/> on purpose. Audio decodes on its own demuxer and its own
     /// cadence, and callers must be able to keep pulling frames while staying silent — a timeline clip

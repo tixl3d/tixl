@@ -105,9 +105,8 @@
         </Content>
     </ItemGroup>
 
-    <!-- BASS ships one native per platform under the same managed name, so the Linux and macOS libraries live
-         in their own folders and are copied only there - the flat copy above would otherwise drop them into a
-         Windows build as dead weight. BASSWASAPI is Windows-only; audio input is gated on it at runtime. -->
+    <!-- Linux and macOS natives live in their own folders and are copied only there - the flat copy above
+         would otherwise drop them into a Windows build as dead weight. -->
     <ItemGroup Condition="$([MSBuild]::IsOSPlatform('Linux'))">
         <Content Include="../Dependencies/linux-x64/*.so" Visible="false">
             <Link>%(Filename)%(Extension)</Link>

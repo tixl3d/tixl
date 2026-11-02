@@ -808,8 +808,6 @@ internal sealed class ProjectSettingsWindow : Window
                                            "Only ship operators connected to the exported output (plus auto-playing audio ops)\nand the libraries they need. Disable if the exported executable misses content.",
                                            defaults.StripUnusedOperators);
 
-        FormInputs.AddVerticalSpace(3);
-        CustomComponents.HelpText(PlayerExporter.BassLicenseNote);
         FormInputs.AddVerticalSpace();
         DrawExportButtons(composition);
 

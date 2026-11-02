@@ -1,7 +1,6 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
-using ManagedBass;
 using T3.Core.Animation;
 using T3.Core.Audio.Graph;
 using T3.Core.Audio.Native;
@@ -59,8 +58,6 @@ public static class AudioEngine
     private static Vector3 _listenerUp = new(0, 1, 0);
 
     private static double _lastPlaybackSpeed = 1;
-    private static bool _bassInitialized;
-    private static bool _bassInitFailed;
 
     private static readonly Fft _fft = new(AudioConfig.FftBufferSize * 2);
     private static readonly float[] _fftSamples = new float[AudioConfig.FftBufferSize * 2];
@@ -196,9 +193,9 @@ public static class AudioEngine
     /// <param name="frameDurationInSeconds">The duration of the current frame in seconds.</param>
     public static void CompleteFrame(Playback playback, double frameDurationInSeconds)
     {
-        if (!EnsureBassInitialized())
+        if (!EnsureAudioInitialized())
         {
-            // Without BASS there are no streams, buses or 3D sources to service. Only the bookkeeping other
+            // Without audio there are no streams, buses or 3D sources to service. Only the bookkeeping other
             // systems read has to stay current, so they don't mistake a silent frame for a stalled one.
             EnsureFrameTokenCurrent();
             _obsoleteSoundtrackHandles.Clear();
@@ -231,41 +228,11 @@ public static class AudioEngine
         _updatedSoundtrackClipTimes.Clear();
     }
 
-    /// <summary>False when audio is unavailable and the caller has to skip everything that touches BASS.</summary>
-    private static bool EnsureBassInitialized()
+    /// <summary>False when audio is unavailable and the caller has to skip everything that touches the engine.</summary>
+    private static bool EnsureAudioInitialized()
     {
-        if (_bassInitialized) return true;
-        if (_bassInitFailed) return false;
-
-        if (!BassLibrary.IsAvailable)
-        {
-            _bassInitFailed = true;
-            return false;
-        }
-
-        try
-        {
-            AudioMixerManager.Initialize();
-        }
-        catch (Exception e) when (e is DllNotFoundException or EntryPointNotFoundException or BadImageFormatException)
-        {
-            // The BASS native library is not there, or is built for another platform. Rendering does not
-            // depend on audio, so carry on without it rather than taking the whole render loop down.
-            Log.Warning($"[AudioEngine] BASS is unavailable; audio disabled. {e.Message}");
-            _bassInitFailed = true;
-            return false;
-        }
-
-        if (AudioMixerManager.OperatorMixerHandle == 0)
-        {
-            Log.Error("[AudioEngine] Failed to initialize AudioMixerManager; audio disabled.");
-            _bassInitFailed = true;
-            return false;
-        }
-
-        _bassInitialized = true;
-        InitializeGlobalVolumeFromSettings();
-        return true;
+        AudioMixerManager.Initialize();
+        return AudioMixerManager.NativeEngine != null;
     }
 
     private static void ProcessSoundtrackClips(Playback playback, double frameDurationInSeconds)
@@ -486,7 +453,7 @@ public static class AudioEngine
     /// and triggering play in the same frame for predictable behavior.
     /// </param>
     /// <summary>
-    /// Exposes an operator stream's live BASS channel so the audio-processing graph (an [AudioBus]) can route
+    /// Exposes an operator stream's live source so the audio-processing graph (an [AudioBus]) can route
     /// it. The stream is created lazily on the first playback update, so this returns false until then.
     /// </summary>
     public static bool TryGetOperatorChannel(Guid operatorId, out AudioHandle channel)
@@ -596,7 +563,6 @@ public static class AudioEngine
 
     /// <summary>
     /// Updates the playback state of a spatial (3D) audio stream for an operator.
-    /// Spatial streams play directly to BASS output for hardware-accelerated 3D audio.
     /// </summary>
     /// <param name="operatorId">The unique identifier of the operator.</param>
     /// <param name="filePath">The file path of the audio file to play.</param>
@@ -738,20 +704,7 @@ public static class AudioEngine
 
     #region Common Operator Helpers
 
-    private static bool EnsureMixerInitialized()
-    {
-        if (AudioMixerManager.IsInitialized) return true;
-
-        Log.Gated.Audio("[AudioEngine] Mixer not initialized, initializing...");
-        AudioMixerManager.Initialize();
-
-        if (AudioMixerManager.OperatorMixerHandle == 0)
-        {
-            // Don't log every time - Initialize() already logs the failure once
-            return false;
-        }
-        return true;
-    }
+    private static bool EnsureMixerInitialized() => EnsureAudioInitialized();
 
     private static OperatorAudioState<T> GetOrCreateState<T>(Dictionary<Guid, OperatorAudioState<T>> states, Guid operatorId)
         where T : OperatorAudioStreamBase
@@ -1213,18 +1166,8 @@ public static class AudioEngine
     {
         IsExporting = false;
         
-        if (AudioMixerManager.GlobalMixerHandle != 0)
-        {
-            if (Bass.ChannelIsActive(AudioMixerManager.GlobalMixerHandle) != PlaybackState.Playing)
-                Bass.ChannelPlay(AudioMixerManager.GlobalMixerHandle);
-            Bass.ChannelUpdate(AudioMixerManager.GlobalMixerHandle, 0);
-        }
-
         RestoreOperatorStreams(_stereoOperatorStates);
         RestoreSpatialOperatorStreams();
-
-        if (AudioMixerManager.GlobalMixerHandle != 0)
-            Bass.ChannelUpdate(AudioMixerManager.GlobalMixerHandle, 0);
     }
 
     private static void RestoreOperatorStreams<T>(Dictionary<Guid, OperatorAudioState<T>> states)
@@ -1259,68 +1202,12 @@ public static class AudioEngine
     #region Device & Volume Management
 
     /// <summary>
-    /// Handles audio device changes by reinitializing all audio streams.
-    /// </summary>
-    /// <summary>
-    /// Handles audio device changes by disposing all audio streams and reinitializing.
-    /// This ensures no stale BASS handles remain after Bass.Free() is called.
-    /// </summary>
-    public static void OnAudioDeviceChanged()
-    {
-        // Dispose ALL streams before calling AudioMixerManager.Shutdown() / Bass.Free()
-        // This prevents invalid handle errors when streams are accessed after device change
-        DisposeAllAudioStreams();
-
-        AudioMixerManager.Shutdown();
-        _bassInitialized = false; // Reset flag to allow proper reinitialization
-        _bassInitFailed = false;  // Reset failure flag to allow retry
-        AudioMixerManager.Initialize();
-
-        Log.Gated.Audio("[AudioEngine] Audio device changed: all streams disposed and reinitialized.");
-    }
-
-    /// <summary>
-    /// Disposes all audio streams (stereo operators, spatial operators, and soundtracks).
-    /// Called during device changes to prevent invalid BASS handle errors.
-    /// </summary>
-    private static void DisposeAllAudioStreams()
-    {
-        // Dispose stereo operator streams
-        foreach (var state in _stereoOperatorStates.Values)
-            state.Stream?.Dispose();
-        _stereoOperatorStates.Clear();
-
-        // Dispose spatial operator streams
-        foreach (var state in _spatialOperatorStates.Values)
-            state.Stream?.Dispose();
-        _spatialOperatorStates.Clear();
-
-        // Dispose soundtrack streams
-        foreach (var (_, clipStream) in SoundtrackClipStreams)
-            clipStream.DisableSoundtrackStream();
-        SoundtrackClipStreams.Clear();
-        _updatedSoundtrackClipTimes.Clear();
-        _obsoleteSoundtrackHandles.Clear();
-
-        Log.Gated.Audio("[AudioEngine] Disposed all audio streams (stereo, spatial, soundtrack).");
-    }
-
-    /// <summary>
     /// Sets the global audio volume level.
     /// </summary>
     /// <param name="volume">The volume level (0.0 to 1.0).</param>
     public static void SetGlobalVolume(float volume)
     {
         CoreSettings.Config.AppVolume = volume;
-        AudioMixerManager.SetGlobalVolume(volume);
-    }
-
-    /// <summary>
-    /// Initializes the global volume from the stored project settings.
-    /// </summary>
-    public static void InitializeGlobalVolumeFromSettings()
-    {
-        AudioMixerManager.SetGlobalVolume(CoreSettings.Config.AppVolume);
     }
 
     /// <summary>
@@ -1329,7 +1216,6 @@ public static class AudioEngine
     /// <param name="mute">True to mute all audio, false to unmute.</param>
     public static void SetGlobalMute(bool mute)
     {
-        AudioMixerManager.SetGlobalMute(mute);
         CoreSettings.Config.AppMute = mute;
     }
 

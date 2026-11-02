@@ -6,7 +6,7 @@ namespace T3.Core.Audio.Graph;
 
 /// <summary>
 /// Implemented by audio-graph <b>source</b> operators (ops that emit an <see cref="AudioGraphNode"/> leaf with a
-/// playable BASS channel). Lets <see cref="AudioGraphCollector"/> realise a <i>loose</i> source — one whose
+/// playable source). Lets <see cref="AudioGraphCollector"/> realise a <i>loose</i> source — one whose
 /// output isn't wired into any bus/combinator — from static input values, without an <c>EvaluationContext</c>.
 /// Mirrors how <see cref="IAudioClipProvider"/> exposes clips to <see cref="AudioClipCollector"/>.
 /// </summary>

@@ -1,8 +1,6 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
-using ManagedBass;
-using ManagedBass.Mix;
 using T3.Core.Animation;
 using T3.Core.Audio.Native;
 using T3.Core.IO;
@@ -14,7 +12,7 @@ namespace T3.Core.Audio;
 
 /// <summary>
 /// Handles audio rendering/export functionality.
-/// For export, we temporarily remove soundtrack streams from the mixer and read directly from them.
+/// An export detaches the output device and pulls the same graph the editor plays through.
 /// </summary>
 public static class AudioRendering
 {
@@ -22,7 +20,6 @@ public static class AudioRendering
     public static bool IsRecording => _isRecording;
 
     private static bool _isRecording;
-    private static readonly ExportState _exportState = new();
     private static readonly List<IAudioExportSource> _exportEvaluationSources = new();
     private static int _frameCount;
 
@@ -53,8 +50,6 @@ public static class AudioRendering
         _isRecording = true;
         _frameCount = 0;
 
-        _exportState.SaveState();
-
         // Snapshot which audio ops (buses) were organically evaluated when export starts — those get
         // force-evaluated every exported frame so graph audio keeps flowing even though export only
         // evaluates the exported op-chain. Ops that were already silent/stale stay out, matching live.
@@ -76,9 +71,6 @@ public static class AudioRendering
         AudioAnalysisContext.Default.Reset();
         WaveFormProcessing.ResetExportBuffer();
 
-        Bass.ChannelPause(AudioMixerManager.GlobalMixerHandle);
-        Log.Gated.AudioRender("[AudioRendering] GlobalMixer PAUSED for export");
-
         AudioEngine.ResetAllOperatorStreamsForExport();
 
         Array.Clear(_exportFftSamples);
@@ -99,14 +91,13 @@ public static class AudioRendering
         Log.Gated.AudioRender($"[AudioRendering] EndRecording: Exported {_frameCount} frames");
 
         var engine = AudioMixerManager.NativeEngine;
-        if (engine != null && !engine.AttachDefaultDevice())
+        if (engine != null && AudioMixerManager.HasOutputDevice && !engine.AttachDefaultDevice())
             Log.Warning("[AudioRendering] Could not reopen the audio device after the export; audio stays silent.");
 
         // The speed only gets reapplied when it changes, and the export has reset it to 1.
         foreach (var (_, clipStream) in AudioEngine.SoundtrackClipStreams)
             clipStream.UpdateSoundtrackPlaybackSpeed(playback.PlaybackSpeed);
 
-        _exportState.RestoreState();
         AudioEngine.RestoreOperatorAudioStreams();
     }
 
@@ -227,29 +218,6 @@ public static class AudioRendering
                 {
                     Log.Gated.AudioRender($"Failed to evaluate output: {ex.Message}");
                 }
-            }
-        }
-    }
-
-    private sealed class ExportState
-    {
-        private float _savedVolume;
-        private bool _wasPlaying;
-
-        public void SaveState()
-        {
-            Bass.ChannelGetAttribute(AudioMixerManager.GlobalMixerHandle, ChannelAttribute.Volume, out _savedVolume);
-            if (_savedVolume <= 0) _savedVolume = 1.0f;
-            _wasPlaying = Bass.ChannelIsActive(AudioMixerManager.GlobalMixerHandle) == PlaybackState.Playing;
-        }
-
-        public void RestoreState()
-        {
-            Bass.ChannelSetAttribute(AudioMixerManager.GlobalMixerHandle, ChannelAttribute.Volume, _savedVolume);
-            if (_wasPlaying)
-            {
-                Bass.ChannelPlay(AudioMixerManager.GlobalMixerHandle);
-                Log.Gated.AudioRender("[AudioRendering] GlobalMixer RESUMED");
             }
         }
     }

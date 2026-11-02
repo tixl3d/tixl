@@ -17,7 +17,6 @@ namespace T3.Core.Audio;
 /// <list type="number">
 ///   <item>Create separate <see cref="AudioAnalysisContext"/> instances per thread/consumer</item>
 ///   <item>Pass the context explicitly to analysis methods instead of using <see cref="Default"/></item>
-///   <item>Ensure BASS channel reads are synchronized (BASS itself may have thread constraints)</item>
 ///   <item>Use locks or concurrent collections if sharing results between threads</item>
 /// </list>
 /// 
@@ -27,10 +26,7 @@ namespace T3.Core.Audio;
 /// var backgroundContext = new AudioAnalysisContext();
 /// 
 /// // On background thread:
-/// lock (bassLock)
-/// {
-///     AudioEngine.UpdateFftBuffer(streamHandle, backgroundContext);
-/// }
+/// AudioEngine.UpdateFftBuffer(streamHandle, backgroundContext);
 /// backgroundContext.ProcessFftUpdate();
 /// 
 /// // Access results from backgroundContext.FrequencyBands, etc.
@@ -50,7 +46,7 @@ public sealed class AudioAnalysisContext
     #region FFT Buffers
 
     /// <summary>
-    /// Raw FFT gain values from BASS. Written by <see cref="AudioEngine.UpdateFftBufferFromSoundtrack"/>.
+    /// Raw FFT gain values. Written by <see cref="AudioEngine.UpdateFftBufferFromSoundtrack"/>.
     /// </summary>
     internal readonly float[] FftGainBuffer = new float[AudioConfig.FftBufferSize];
 
@@ -99,12 +95,12 @@ public sealed class AudioAnalysisContext
     #region Waveform Buffers
 
     /// <summary>
-    /// Interleaved stereo sample buffer from BASS. Written by <see cref="AudioEngine.UpdateFftBufferFromSoundtrack"/>.
+    /// Interleaved stereo sample buffer. Written by <see cref="AudioEngine.UpdateFftBufferFromSoundtrack"/>.
     /// </summary>
     internal readonly float[] InterleavedSampleBuffer = new float[AudioConfig.WaveformSampleCount * 2];
 
     /// <summary>
-    /// Result code from last BASS waveform data fetch.
+    /// Result code from the last waveform data fetch.
     /// </summary>
     internal int LastWaveformFetchResult;
 

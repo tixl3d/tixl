@@ -4,7 +4,7 @@
   Entitlements for TiXL's executables under the hardened runtime, which notarization requires.
   - allow-jit / allow-unsigned-executable-memory: .NET compiles IL to machine code at run time, operators included.
   - disable-library-validation: TiXL runs on the system's .NET install (signed by Microsoft, not by us) and loads
-    native libraries that other parties signed, such as BASS and Homebrew's FFmpeg.
+    native libraries that other parties signed, such as Homebrew's FFmpeg.
   - device.audio-input: live audio input from a microphone or line-in.
 -->
 <plist version="1.0">

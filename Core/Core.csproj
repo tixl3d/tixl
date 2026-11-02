@@ -23,9 +23,6 @@
     <ItemGroup>
         <PackageReference Include="Delaunator" Version="1.0.11" />
         <PackageReference Include="JeremyAnsel.Media.Dds" Version="2.0.7" />
-        <PackageReference Include="ManagedBass" Version="4.0.2" />
-        <PackageReference Include="ManagedBass.Flac" Version="4.0.2" />
-        <PackageReference Include="ManagedBass.Mix" Version="4.0.2" />
         <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="5.6.0" />
         <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="10.0.10" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />

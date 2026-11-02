@@ -1,11 +1,11 @@
 namespace Lib.render.gizmo;
 
 /// <summary>
-/// Generates points for drawing a wireframe audio cone visualization matching BASS/ManagedBass 3D audio cone behavior.
-/// BASS cones are simple conical shapes defined by full angles (0-360 degrees).
+/// Generates points for drawing a wireframe audio cone visualization matching the audio engine's 3D audio cone behavior.
+/// Audio cones are simple conical shapes defined by full angles (0-360 degrees).
 /// The cone extends from the origin in the -Z direction (forward).
 /// Generates line segments for: base circle, and radial lines from apex to base.
-/// No rounded cap is used as BASS implements a hard cone boundary.
+/// No rounded cap is used as the cone boundary is hard.
 /// 
 /// Output points can be fed into DrawLines for rendering.
 /// </summary>
@@ -27,8 +27,8 @@ internal sealed class ConeGizmo : Instance<ConeGizmo>
         var segments = Math.Max(3, Segments.GetValue(context));
         var rayCount = Math.Max(0, RayCount.GetValue(context));
 
-        // Calculate radius at base using BASS cone geometry
-        // BASS uses full angle (spread from edge to edge), so we use half for the geometry
+        // Calculate radius at base using the cone geometry
+        // The engine uses full angle (spread from edge to edge), so we use half for the geometry
         var halfAngleRadians = angleDegrees * 0.5f * MathF.PI / 180f;
         var radius = MathF.Tan(halfAngleRadians) * length;
 

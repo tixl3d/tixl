@@ -83,8 +83,8 @@ while IFS= read -r -d '' dll; do
     fi
 done < <(find "$stage" -name '*.dll' -print0)
 
-if [[ ! -f "$stage/libbass.so" ]]; then
-    echo "Warning: libbass.so is missing - audio won't work. See Dependencies/linux-x64/README.md." >&2
+if [[ ! -f "$stage/libtixlaudio.so" ]]; then
+    echo "Warning: libtixlaudio.so is missing - audio won't work. See Native/TixlAudio/README.md." >&2
 fi
 
 share="$stage/share"
