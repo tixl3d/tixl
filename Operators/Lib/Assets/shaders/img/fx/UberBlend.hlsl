@@ -16,7 +16,6 @@ struct vsOutput {
   float4 position : SV_POSITION;
   float2 texCoord : TEXCOORD;
 };
-
 Texture2D<float4> ImageA : register(t0);
 Texture2D<float4> ImageB : register(t1);
 Texture2D<float4> ImageMask : register(t2);
@@ -144,14 +143,14 @@ float4 psMain(vsOutput psInput) : SV_TARGET {
     rgba = tA * (f*((1 - 2 * tB) * tA + 2 * tB)+fc);
     break;
 
-  // darken min(A,B)
+  // lighten max(A,B)
   case 13:
-    rgba = lerp(tA,min(tA, tB),f);
+    rgba = lerp(tA,max(tA, tB),f);
     break;
 
-  // lighten max(A,B)
+  // darken min(A,B)
   case 14:
-    rgba = lerp(tA,max(tA, tB),f);
+    rgba = lerp(tA,min(tA, tB),f);
     break;
 
   // hue
