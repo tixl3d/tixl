@@ -152,16 +152,25 @@ public sealed class FfmpegVideoEncoderFactory : IVideoEncoderFactory
                                                                                   _ => codec.ToString(),
                                                                               };
 
+    /** Rounding to a whole rate would stamp 29.97 fps video as 30, which plays it too fast against its audio. */
+    private static AVRational ToFrameRateFraction(double frameRate)
+    {
+        const int denominator = 1000;
+        var numerator = Math.Max(1, (int)Math.Round(frameRate * denominator));
+        var divisor = (int)System.Numerics.BigInteger.GreatestCommonDivisor(numerator, denominator);
+        return new AVRational(numerator / divisor, denominator / divisor);
+    }
+
     private static VideoEncoderSettings BuildEncoderSettings(VideoExportSettings s)
     {
-        var fps = Math.Max(1, (int)Math.Round(s.FrameRate)); // integer rate, matching the previous MF writer
+        var frameRate = ToFrameRateFraction(s.FrameRate);
 
         var common = new VideoEncoderSettings
                          {
                              FilePath = s.FilePath,
                              Width = s.Width,
                              Height = s.Height,
-                             FrameRate = new AVRational(fps, 1),
+                             FrameRate = frameRate,
                              BitRate = s.BitRate,
                              SourceFormat = AVPixelFormat.Rgba,
                              SourceBytesPerPixel = 4,
