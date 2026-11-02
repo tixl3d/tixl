@@ -80,7 +80,7 @@
         "X": -225.14398,
         "Y": 678.38007
       },
-      "Description": "World-space distance above which a surface is treated as newly revealed (disocclusion) and its history is rejected. Smaller values give harder, cleaner edges when objects move in front of each other; too small rejects history everywhere.",
+      "Description": "World-space distance above which a surface is treated as newly revealed (disocclusion) and its history is rejected. Smaller values give harder, cleaner edges when objects move in front of each other; too small rejects history everywhere. Silhouettes against an empty background have a very large gap, so they stay aliased unless this is raised well above the far clip distance.",
       "Min": 0.0,
       "Max": 2000.0,
       "ClampMin": true
@@ -337,7 +337,7 @@
     },
     {
       "ChildId": "c25c64b0-68b1-4797-8aad-118b6a97e1c3",
-      "SymbolName": "Lib.numbers.int.logic.CountInt",
+      "SymbolName": "Lib.render.postfx._._CountFrames",
       "Position": {
         "X": -405.6495,
         "Y": -121.644196

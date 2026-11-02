@@ -46,8 +46,11 @@ float4 psTrace(vsOutput input) : SV_TARGET
     float2 pixelSeed = uv * float2(TargetWidth, TargetHeight) + fmod(FrameIndex, 1024.0) * float2(17.13, 31.71);
 
     float3 rayDirection = reflect(viewDirection, RoughenNormal(normal, pixelSeed));
-    if (dot(rayDirection, normal) <= 0.0)
-        rayDirection = reflect(viewDirection, normal);
+
+    // Flipping keeps the scatter of rays that point into the surface. Falling back to the mirror ray would sharpen high roughness.
+    float belowSurface = dot(rayDirection, normal);
+    if (belowSurface < 0.0)
+        rayDirection -= 2.0 * belowSurface * normal;
 
     float3 rayStart = surface + normal * 0.001 * length(surface - EyePosition());
     float4 startClip = mul(float4(rayStart, 1.0), WorldToClipSpace);
@@ -200,7 +203,10 @@ TemporalOutput psTemporal(vsOutput input)
     float3 historyYCoCg = RgbToYCoCg(history);
     float3 clampedYCoCg = clamp(historyYCoCg, boxCenter - boxExtent, boxCenter + boxExtent);
     float disagreement = saturate(length(historyYCoCg - clampedYCoCg) / 0.05);
-    history = YCoCgToRgb(clampedYCoCg);
+
+    float rareHits = saturate(Roughness * 4.0);
+    history = lerp(YCoCgToRgb(clampedYCoCg), history, rareHits);
+    disagreement *= 1.0 - rareHits;
 
     // Half floats hold nonlinear depth poorly but give a camera distance constant relative precision.
     float storedDistance = Accumulated.SampleLevel(texSampler, surfaceUv, 0).a;
@@ -212,6 +218,7 @@ TemporalOutput psTemporal(vsOutput input)
         confidence = 0.0;
 
     float frames = GetAccumulatedFrames(uv, surfaceUv, confidence, disagreement);
+    frames = lerp(frames, min(frames, MaxFramesForRareHits), rareHits);
     float3 resolved = lerp(raw.rgb, history, frames / (frames + 1.0));
     return MakeTemporalOutput(resolved, length(viewRay), frames);
 }

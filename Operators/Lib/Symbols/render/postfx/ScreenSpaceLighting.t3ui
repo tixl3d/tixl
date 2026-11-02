@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "f2a60c18-9d47-4b13-8e5a-c7b31d04e692",
-  "Description": "Adds contact shading, color bleeding and reflections of what is visible on screen, using the depth and normal buffers of a [RenderTarget].\n\nIt combines [ScreenSpaceAO] and [ScreenSpaceReflections] in one operator with shared inputs, so that reflections show the already shaded image. Use those operators directly to control their temporal settings separately.\n\nRequirements:\n\n- Enable WithNormalBuffer on the source [RenderTarget].\n- The scene camera must be connected to CameraReference.\n\nOnly content visible on screen contributes. The whole scene is treated as one material; the Occlusion and Reflections outputs allow applying the effects through a mask.\n\nAKA: SSGI, global illumination, indirect light, SSR, SSAO\n\nTips:\n\n- Noise fades over a few seconds after movement. Lower MaxAccumulatedFrames settles faster but leaves more grain.\n- Place [TXAA] after this operator to clean up the remaining edges.",
+  "Description": "Adds contact shading, color bleeding and reflections of what is visible on screen, using the depth and normal buffers of a [RenderTarget].\n\nIt combines [ScreenSpaceAO], [ScreenSpaceReflections] and [TXAA] in one operator with shared inputs, so that reflections show the already shaded image. Use those operators directly to control their temporal settings separately.\n\nRequirements:\n\n- Enable WithNormalBuffer on the source [RenderTarget].\n- The scene camera must be connected to CameraReference.\n\nOnly content visible on screen contributes. The whole scene is treated as one material; the Occlusion and Reflections outputs allow applying the effects through a mask.\n\nAKA: SSGI, global illumination, indirect light, SSR, SSAO\n\nTips:\n\n- Noise fades over a few seconds after movement. Lower MaxAccumulatedFrames settles faster but leaves more grain.\n- Thin lines stay smoothest when they are at least one pixel wide.",
   "SymbolTags": "1216",
   "InputUis": [
     {
@@ -242,6 +242,27 @@
         "Y": 840.0
       },
       "Description": "Ignores the history while enabled, for example after a hard camera cut."
+    },
+    {
+      "InputId": "bf7efb01-73a0-57a4-8a3e-be714dad9a27",
+      "Position": {
+        "X": -300.0,
+        "Y": 900.0
+      },
+      "GroupTitle": "Anti-Aliasing",
+      "Description": "Smooths edges by accumulating frames rendered with sub-pixel camera jitter, as [TXAA] does. All content must write depth, otherwise it can smear while the camera moves. Disable it to use a separate [TXAA] or for a sharper image."
+    },
+    {
+      "InputId": "033a11bf-feb2-57d5-b6e1-2cee59cf230a",
+      "Position": {
+        "X": -300.0,
+        "Y": 940.0
+      },
+      "Description": "How much of the accumulated image is kept each frame. Higher values are smoother but react slower.",
+      "Min": 0,
+      "Max": 1,
+      "ClampMin": true,
+      "ClampMax": true
     }
   ],
   "SymbolChildUis": [
@@ -260,27 +281,51 @@
         "X": 300.0,
         "Y": 100.0
       }
-    }
-  ],
-  "OutputUis": [
+    },
     {
-      "OutputId": "76c6f273-504a-5ec4-a478-667277e75d42",
+      "ChildId": "ed988d3b-132f-534d-b38f-c945cbcfb2d8",
+      "SymbolName": "Lib.render.postfx.TXAA",
       "Position": {
         "X": 600.0,
         "Y": 100.0
       }
     },
     {
-      "OutputId": "c3e5a849-3ebd-5d73-b126-9061fe017779",
+      "ChildId": "003de6d6-ad3d-556c-824b-82f618148fad",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToInt",
       "Position": {
         "X": 600.0,
+        "Y": 240.0
+      }
+    },
+    {
+      "ChildId": "6d72dd8b-b5d0-510d-8f86-59a76eebc341",
+      "SymbolName": "Lib.image.use.PickTexture",
+      "Position": {
+        "X": 800.0,
+        "Y": 100.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "76c6f273-504a-5ec4-a478-667277e75d42",
+      "Position": {
+        "X": 1000.0,
+        "Y": 100.0
+      }
+    },
+    {
+      "OutputId": "c3e5a849-3ebd-5d73-b126-9061fe017779",
+      "Position": {
+        "X": 1000.0,
         "Y": 200.0
       }
     },
     {
       "OutputId": "48ed1801-2123-576c-bf4b-6c27214e32ac",
       "Position": {
-        "X": 600.0,
+        "X": 1000.0,
         "Y": 300.0
       }
     }

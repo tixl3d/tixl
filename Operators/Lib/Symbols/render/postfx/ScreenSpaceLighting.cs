@@ -77,4 +77,10 @@ internal sealed class ScreenSpaceLighting : Instance<ScreenSpaceLighting>
 
     [Input(Guid = "2a9d43a4-a3b9-58aa-bb9e-9a1dc0534fad")]
     public readonly InputSlot<bool> Reset = new();
+
+    [Input(Guid = "bf7efb01-73a0-57a4-8a3e-be714dad9a27")]
+    public readonly InputSlot<bool> AntiAliasing = new();
+
+    [Input(Guid = "033a11bf-feb2-57d5-b6e1-2cee59cf230a")]
+    public readonly InputSlot<float> AntiAliasingBlend = new();
 }

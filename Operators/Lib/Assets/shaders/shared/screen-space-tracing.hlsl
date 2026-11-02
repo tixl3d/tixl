@@ -121,6 +121,10 @@ bool IsOnScreen(float2 uv)
     return uv.x >= 0.0 && uv.x <= 1.0 && uv.y >= 0.0 && uv.y <= 1.0;
 }
 
+/** Rare ray hits (rough reflections, color bleeding) vanish from most frames, so a clamp against the current
+    neighborhood would remove their energy. They skip it and average over fewer frames, which limits their lag. */
+static const float MaxFramesForRareHits = 64.0;
+
 struct TemporalOutput
 {
     float4 Color : SV_Target0;

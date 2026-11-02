@@ -143,12 +143,11 @@ TemporalOutput psTemporal(vsOutput input)
     // Single rays differ strongly between neighbors, which would make a min/max box accept almost any history.
     // The minimum is about three standard deviations of the mean of the neighborhood's few rays. Without it a
     // converged history would snap to the current frame where all neighbors happen to miss.
-    float4 allowedDeviation = max(deviation * (1.0 + NeighborhoodClamp * 3.0), 0.25);
+    float allowedDeviation = max(deviation.a * (1.0 + NeighborhoodClamp * 3.0), 0.25);
 
     float4 historyColor = Accumulated.SampleLevel(texSampler, previousUv, 0);
-    float4 historyFrames = AccumulatedFrameCount.SampleLevel(texSampler, previousUv, 0);
-    float4 historySignal = float4(historyFrames.gba, historyColor.r);
-    float4 history = clamp(historySignal, mean - allowedDeviation, mean + allowedDeviation);
+    float3 historyBleeding = AccumulatedFrameCount.SampleLevel(texSampler, previousUv, 0).gba;
+    float historyVisibility = clamp(historyColor.r, mean.a - allowedDeviation, mean.a + allowedDeviation);
 
     float expectedDistance = distance(surface, PreviousEyePosition());
     float relativeGap = abs(historyColor.a - expectedDistance) / max(expectedDistance, 1e-4);
@@ -157,16 +156,16 @@ TemporalOutput psTemporal(vsOutput input)
     if (!IsOnScreen(previousUv) || historyColor.a <= 0.0 || Reset > 0.5)
         confidence = 0.0;
 
-    float visibilityChange = abs(historySignal.a - mean.a) / 0.25;
-    float bleedingChange = length(historySignal.rgb - mean.rgb) / max(0.25, dot(mean.rgb, 0.333));
-    float frames = GetAccumulatedFrames(uv, previousUv, confidence, saturate(max(visibilityChange, bleedingChange)));
+    float frames = GetAccumulatedFrames(uv, previousUv, confidence, saturate(abs(historyColor.r - mean.a) / 0.25));
+    float bleedingFrames = min(frames, MaxFramesForRareHits);
 
     // Newly revealed pixels have no history to hide their noise, so they start from the neighborhood average.
     float4 current = lerp(mean, raw, saturate(frames * 0.25));
-    float4 resolved = lerp(current, history, frames / (frames + 1.0));
+    float visibility = lerp(current.a, historyVisibility, frames / (frames + 1.0));
+    float3 bleeding = lerp(current.rgb, historyBleeding, bleedingFrames / (bleedingFrames + 1.0));
 
-    output.Color = float4(resolved.aaa, length(surface - EyePosition()));
-    output.AccumulatedFrames = float4(frames + 1.0, resolved.rgb);
+    output.Color = float4(visibility, visibility, visibility, length(surface - EyePosition()));
+    output.AccumulatedFrames = float4(frames + 1.0, bleeding);
     return output;
 }
 
