@@ -1,0 +1,16 @@
+{
+  "FormatVersion": 3,
+  "Id": "d4a81f36-2c97-4e05-b1a6-73f0e9c5d218",
+  "Description": "Counts the frames in which this operator was evaluated, including while playback is paused.",
+  "InputUis": [],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "e5b92a47-3da8-4f16-82b7-8401fad6e329",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

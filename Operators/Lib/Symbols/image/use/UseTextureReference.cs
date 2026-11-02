@@ -12,11 +12,15 @@ internal sealed class UseTextureReference : Instance<UseTextureReference>
     [Output(Guid = "FB232E1D-A09B-4B02-8E2F-408CD9AC1FFF", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
     public readonly Slot<Texture2D> DepthTexture = new();
 
+    [Output(Guid = "3c8e41f7-6a2d-4b95-8e07-d19f5a2c7b34", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
+    public readonly Slot<Texture2D> NormalTexture = new();
+
         
     public UseTextureReference()
     {
         Texture.UpdateAction += UpdateTexture;
         DepthTexture.UpdateAction += UpdateTexture;
+        NormalTexture.UpdateAction += UpdateTexture;
         Reference.UpdateAction += UpdateTexture;
     }
         
@@ -25,8 +29,10 @@ internal sealed class UseTextureReference : Instance<UseTextureReference>
         Reference.Value = _renderTargetReference;
         Texture.Value = _renderTargetReference.ColorTexture;
         DepthTexture.Value = _renderTargetReference.DepthTexture;
+        NormalTexture.Value = _renderTargetReference.NormalTexture;
             
         DepthTexture.DirtyFlag.Clear();
+        NormalTexture.DirtyFlag.Clear();
         Texture.DirtyFlag.Clear();
     }
 

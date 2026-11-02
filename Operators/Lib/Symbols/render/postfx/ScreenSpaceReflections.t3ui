@@ -1,0 +1,758 @@
+{
+  "FormatVersion": 3,
+  "Id": "c3e7a1d4-5b82-4f06-9a3e-1d6c8b2f7e40",
+  "Description": "Adds reflections of what is visible on screen to surfaces, using the depth and normal buffers of a [RenderTarget].\n\nRays are traced through the depth buffer from each pixel. Hits are accumulated over frames with the camera motion, following the reflected image rather than the surface so that mirror reflections stay stable while the camera moves. As with [TXAA], moving objects are only handled by the color clamp.\n\nRequirements:\n\n- Enable WithNormalBuffer on the source [RenderTarget]. Only shaders that output normals reflect, such as [DrawMesh] and [DrawPointsShaded].\n- The scene camera must be connected to CameraReference.\n\nOnly content visible on screen can be reflected. Where a ray finds nothing, the original image remains, including any reflections from [SetEnvironment].\n\nThe whole scene is treated as one material. To limit reflections to certain surfaces, combine the Reflections output with the image through a mask.\n\nAKA: SSR, screen space reflections, realtime reflections\n\nTips:\n\n- Place [TXAA] after this operator to clean up the remaining edges.\n- Keep MaxSteps low and raise it only when reflections break apart.",
+  "SymbolTags": "1216",
+  "InputUis": [
+    {
+      "InputId": "1f8c3a60-7d24-4e91-85b3-6a0d2e9c4f17",
+      "Relevancy": "Required",
+      "Position": {
+        "X": -600.0,
+        "Y": 0.0
+      },
+      "Description": "The rendered scene color. It must come from the same render pass and camera as DepthMap and NormalMap."
+    },
+    {
+      "InputId": "2a9d4b71-8e35-4fa2-96c4-7b1e3fad5028",
+      "Relevancy": "Required",
+      "Position": {
+        "X": -600.0,
+        "Y": 40.0
+      },
+      "Description": "The scene depth buffer. All content that should appear in reflections must write depth."
+    },
+    {
+      "InputId": "3bae5c82-9f46-40b3-a7d5-8c2f40be6139",
+      "Relevancy": "Required",
+      "Position": {
+        "X": -600.0,
+        "Y": 80.0
+      },
+      "Description": "The NormalBuffer output of the [RenderTarget], which needs WithNormalBuffer enabled. Pixels without a normal do not reflect."
+    },
+    {
+      "InputId": "4cbf6d93-a057-41c4-b8e6-9d3051cf724a",
+      "Relevancy": "Required",
+      "Position": {
+        "X": -600.0,
+        "Y": 120.0
+      },
+      "Description": "Reference output of the scene camera ([Camera] or [OrbitCamera])."
+    },
+    {
+      "InputId": "5dc07ea4-b168-42d5-89f7-ae4162d0835b",
+      "Position": {
+        "X": -600.0,
+        "Y": 160.0
+      },
+      "Description": "Multiplier for the reflection strength after the Fresnel term.",
+      "Min": 0,
+      "Max": 2,
+      "GroupTitle": "Reflection",
+      "ClampMin": true
+    },
+    {
+      "InputId": "6ed18fb5-c279-43e6-9a08-bf5273e1946c",
+      "Position": {
+        "X": -600.0,
+        "Y": 200.0
+      },
+      "Description": "Reflection strength when looking straight at a surface. It rises toward 1 at grazing angles. Dielectrics are near 0.04, polished metals near 1.",
+      "Min": 0,
+      "Max": 1,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "7fe290c6-d38a-44f7-ab19-c06384f2a57d",
+      "Position": {
+        "X": -600.0,
+        "Y": 240.0
+      },
+      "Description": "Scatters the rays. Accumulation averages the noise into blurred reflections, so higher values take longer to settle.",
+      "Min": 0,
+      "Max": 1,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "80f3a1d7-e49b-4508-bc2a-d17495a3b68e",
+      "Position": {
+        "X": -600.0,
+        "Y": 280.0
+      },
+      "Description": "Longest reflection ray in world units. Reflections fade out toward this distance.",
+      "Min": 0,
+      "Max": 50,
+      "GroupTitle": "Ray Tracing",
+      "ClampMin": true
+    },
+    {
+      "InputId": "9104b2e8-f5ac-4619-8d3b-e285a6b4c79f",
+      "Position": {
+        "X": -600.0,
+        "Y": 320.0
+      },
+      "Description": "How far behind a surface in the depth buffer a ray still counts as hitting it, in world units. Too low lets rays pass through objects, too high makes reflections smear behind them.",
+      "Min": 0,
+      "Max": 2,
+      "ClampMin": true
+    },
+    {
+      "InputId": "a215c3f9-06bd-472a-9e4c-f396b7c5d8a0",
+      "Position": {
+        "X": -600.0,
+        "Y": 360.0
+      },
+      "Description": "Number of ray steps per pixel. This is the main performance control. Increase it when long rays miss thin objects.",
+      "Min": 8,
+      "Max": 128,
+      "ClampMin": true
+    },
+    {
+      "InputId": "b326d40a-17ce-483b-af5d-04a7c8d6e9b1",
+      "Position": {
+        "X": -600.0,
+        "Y": 400.0
+      },
+      "Description": "Screen margin over which reflections fade out, because a ray leaving the image has nothing to show.",
+      "Min": 0,
+      "Max": 0.5,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "c437e51b-28df-494c-806e-15b8d9e7fac2",
+      "Position": {
+        "X": -600.0,
+        "Y": 440.0
+      },
+      "Description": "Share of the history kept each frame while the image changes. Higher values are smoother but react slower.",
+      "Min": 0,
+      "Max": 1,
+      "GroupTitle": "Temporal Accumulation",
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "b48d27c6-1f3a-4e90-a5d7-6c02e8f91b43",
+      "Position": {
+        "X": -600.0,
+        "Y": 460.0
+      },
+      "Description": "How many frames a still pixel averages before it stops changing. Higher values settle to a cleaner result but take longer, and a moving shadow reaches settled areas later.",
+      "Min": 1,
+      "Max": 1024,
+      "ClampMin": true
+    },
+    {
+      "InputId": "d548f62c-39e0-4a5d-917f-26c9eaf80bd3",
+      "Position": {
+        "X": -600.0,
+        "Y": 480.0
+      },
+      "Description": "Widens the color range the history is allowed to differ from the current frame. Higher values smooth rough reflections at the risk of ghosting.",
+      "Min": 0,
+      "Max": 1,
+      "ClampMin": true
+    },
+    {
+      "InputId": "e659073d-4af1-4b6e-a280-37dafb091ce4",
+      "Position": {
+        "X": -600.0,
+        "Y": 520.0
+      },
+      "Description": "Relative camera distance difference above which history is rejected as disoccluded.",
+      "Min": 0,
+      "Max": 0.1,
+      "ClampMin": true
+    },
+    {
+      "InputId": "f76a184e-5b02-4c7f-b391-48eb0c1a2df5",
+      "Position": {
+        "X": -600.0,
+        "Y": 560.0
+      },
+      "Description": "Ignores the history while enabled, for example after a hard camera cut."
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "bd22a224-b8ba-5890-8808-d8f0ae2f9833",
+      "SymbolName": "Lib.render._dx11.api.GetTextureSize",
+      "Position": {
+        "X": -200.0,
+        "Y": 700.0
+      }
+    },
+    {
+      "ChildId": "208bc340-1131-5498-910d-dea3d959a55a",
+      "SymbolName": "Lib.render._dx11.api.ResolutionConstBuffer",
+      "Position": {
+        "X": 0.0,
+        "Y": 740.0
+      }
+    },
+    {
+      "ChildId": "1d3677a3-e849-5877-927b-169555886a71",
+      "SymbolName": "Lib.render.shading._._TransformsCBufferFromCam",
+      "Position": {
+        "X": 0.0,
+        "Y": 800.0
+      }
+    },
+    {
+      "ChildId": "ab316130-812a-5f9e-91f0-5279c977d6f8",
+      "SymbolName": "Lib.render._dx11.api.FloatsToBuffer",
+      "Position": {
+        "X": 0.0,
+        "Y": 500.0
+      }
+    },
+    {
+      "ChildId": "04db5219-f6c5-5e46-be87-928bc5752aaa",
+      "SymbolName": "Lib.render.postfx._._CountFrames",
+      "Position": {
+        "X": -400.0,
+        "Y": 420.0
+      }
+    },
+    {
+      "ChildId": "c5041f96-f84b-5c91-b491-4619723615a2",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
+      "Position": {
+        "X": -200.0,
+        "Y": 430.0
+      }
+    },
+    {
+      "ChildId": "a8850c7d-3abd-5cf7-b7db-1ca9b7a3e6fd",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
+      "Position": {
+        "X": -200.0,
+        "Y": 470.0
+      }
+    },
+    {
+      "ChildId": "a346f242-b248-54ac-8abc-f330bbbcd206",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
+      "Position": {
+        "X": -200.0,
+        "Y": 450.0
+      }
+    },
+    {
+      "ChildId": "e57840ba-7fc5-57e6-8d1f-9e9b61dd671b",
+      "SymbolName": "Lib.render._dx11.api.InputAssemblerStage",
+      "Position": {
+        "X": 700.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "76a2bb4b-3189-5703-9fac-c4711517bc18",
+      "SymbolName": "Types.Gfx.RasterizerState",
+      "Position": {
+        "X": 500.0,
+        "Y": 40.0
+      }
+    },
+    {
+      "ChildId": "8d9f629d-167c-5d1f-ad09-80ce79f22a32",
+      "SymbolName": "Lib.render._dx11.api.Rasterizer",
+      "Position": {
+        "X": 700.0,
+        "Y": 40.0
+      }
+    },
+    {
+      "ChildId": "a7dcfd5c-96db-54a3-9f45-8489044cec9e",
+      "SymbolName": "Types.Gfx.RenderTargetBlendDescription",
+      "Position": {
+        "X": 300.0,
+        "Y": 80.0
+      }
+    },
+    {
+      "ChildId": "c5d260a4-33e6-59ef-acf8-a044b65ea347",
+      "SymbolName": "Types.Gfx.BlendState",
+      "Position": {
+        "X": 500.0,
+        "Y": 80.0
+      }
+    },
+    {
+      "ChildId": "23dd51fd-1323-5161-93bf-bb2b3c3e173e",
+      "SymbolName": "Lib.render._dx11.api.OutputMergerStage",
+      "Position": {
+        "X": 700.0,
+        "Y": 80.0
+      }
+    },
+    {
+      "ChildId": "be526823-a3a3-5299-87e5-1202abd49e17",
+      "SymbolName": "Lib.render._dx11.fxsetup.SetPixelAndVertexShaderStage",
+      "Position": {
+        "X": 700.0,
+        "Y": 120.0
+      }
+    },
+    {
+      "ChildId": "7ba48e4a-bd4f-58bc-9e5d-201c5965a9de",
+      "SymbolName": "Types.Gfx.VertexShader",
+      "Position": {
+        "X": 500.0,
+        "Y": 120.0
+      }
+    },
+    {
+      "ChildId": "2f208305-fb1e-555e-973a-2bfd13157d57",
+      "SymbolName": "Types.Gfx.PixelShader",
+      "Position": {
+        "X": 500.0,
+        "Y": 150.0
+      }
+    },
+    {
+      "ChildId": "f03ba3ad-6795-5000-906e-8409ab4411b3",
+      "SymbolName": "Types.Gfx.SamplerState",
+      "Position": {
+        "X": 500.0,
+        "Y": 180.0
+      }
+    },
+    {
+      "ChildId": "02441370-721e-541f-813b-536317387f8b",
+      "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
+      "Position": {
+        "X": 500.0,
+        "Y": 210.0
+      }
+    },
+    {
+      "ChildId": "6c14377f-4763-53ed-811b-d9b82d146245",
+      "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
+      "Position": {
+        "X": 500.0,
+        "Y": 240.0
+      }
+    },
+    {
+      "ChildId": "2da5c0ab-4d14-5463-81ef-72d9f77c7bb8",
+      "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
+      "Position": {
+        "X": 500.0,
+        "Y": 270.0
+      }
+    },
+    {
+      "ChildId": "830fcd00-74ac-5958-9238-887e9b368545",
+      "SymbolName": "Lib.render._dx11.api.Draw",
+      "Position": {
+        "X": 700.0,
+        "Y": 160.0
+      }
+    },
+    {
+      "ChildId": "264487e4-22eb-531f-8eb2-3c02a141ade2",
+      "SymbolName": "Lib.flow.Execute",
+      "Position": {
+        "X": 900.0,
+        "Y": 80.0
+      }
+    },
+    {
+      "ChildId": "6625d59f-133f-5958-b818-54a9421c0088",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "Position": {
+        "X": 1000.0,
+        "Y": 80.0
+      }
+    },
+    {
+      "ChildId": "e6fbc46b-303f-51af-bb10-1fbe05dd9628",
+      "SymbolName": "Lib.image.use.UseTextureReference",
+      "Position": {
+        "X": 1000.0,
+        "Y": 500.0
+      }
+    },
+    {
+      "ChildId": "30b60b49-217d-52ad-a121-6ee39f408f6c",
+      "SymbolName": "Lib.image.use.UseTextureReference",
+      "Position": {
+        "X": 1000.0,
+        "Y": 560.0
+      }
+    },
+    {
+      "ChildId": "4b69bff4-64e3-5800-a3f0-8aa680f5a933",
+      "SymbolName": "Lib.image.use.PickTexture",
+      "Position": {
+        "X": 1200.0,
+        "Y": 540.0
+      }
+    },
+    {
+      "ChildId": "dd583040-dbb1-5e2f-8b5b-dd6ee1f77976",
+      "SymbolName": "Lib.numbers.int.basic.AddInt",
+      "Position": {
+        "X": 800.0,
+        "Y": 500.0
+      }
+    },
+    {
+      "ChildId": "684e8196-5ba9-5aa0-bb71-6ce0b97d5916",
+      "SymbolName": "Lib.numbers.int.basic.ModInt",
+      "Position": {
+        "X": 1000.0,
+        "Y": 620.0
+      }
+    },
+    {
+      "ChildId": "adc9b43f-4686-5297-b39b-7a5ce402fbb7",
+      "SymbolName": "Lib.render._dx11.api.InputAssemblerStage",
+      "Position": {
+        "X": 1800.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "c5c84ce3-c94f-5b73-b47e-933bfa3c1838",
+      "SymbolName": "Types.Gfx.RasterizerState",
+      "Position": {
+        "X": 1600.0,
+        "Y": 40.0
+      }
+    },
+    {
+      "ChildId": "1768a182-650b-5c89-8aa9-73b5f7f14e21",
+      "SymbolName": "Lib.render._dx11.api.Rasterizer",
+      "Position": {
+        "X": 1800.0,
+        "Y": 40.0
+      }
+    },
+    {
+      "ChildId": "7a829321-480b-5fa9-a5d0-4a03a0ab2ca5",
+      "SymbolName": "Types.Gfx.RenderTargetBlendDescription",
+      "Position": {
+        "X": 1400.0,
+        "Y": 80.0
+      }
+    },
+    {
+      "ChildId": "693e57f3-aa8f-5651-a1f1-ee3768dc8299",
+      "SymbolName": "Types.Gfx.BlendState",
+      "Position": {
+        "X": 1600.0,
+        "Y": 80.0
+      }
+    },
+    {
+      "ChildId": "a43289be-13ac-5b0d-b720-adfc87bfed4d",
+      "SymbolName": "Lib.render._dx11.api.OutputMergerStage",
+      "Position": {
+        "X": 1800.0,
+        "Y": 80.0
+      }
+    },
+    {
+      "ChildId": "5bd08167-1a64-5626-a868-ece8b1d2bd8d",
+      "SymbolName": "Lib.render._dx11.fxsetup.SetPixelAndVertexShaderStage",
+      "Position": {
+        "X": 1800.0,
+        "Y": 120.0
+      }
+    },
+    {
+      "ChildId": "39bbff5a-ff5a-5a67-946a-1a83aaa3fd23",
+      "SymbolName": "Types.Gfx.VertexShader",
+      "Position": {
+        "X": 1600.0,
+        "Y": 120.0
+      }
+    },
+    {
+      "ChildId": "ed111511-7fc3-5cd6-a00e-27b9c6048b3e",
+      "SymbolName": "Types.Gfx.PixelShader",
+      "Position": {
+        "X": 1600.0,
+        "Y": 150.0
+      }
+    },
+    {
+      "ChildId": "40312db9-f95d-56ce-8407-c556d2c9d4df",
+      "SymbolName": "Types.Gfx.SamplerState",
+      "Position": {
+        "X": 1600.0,
+        "Y": 180.0
+      }
+    },
+    {
+      "ChildId": "362a8ebc-d7ba-5e4f-9d76-07a0c5158704",
+      "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
+      "Position": {
+        "X": 1600.0,
+        "Y": 210.0
+      }
+    },
+    {
+      "ChildId": "2c918073-749d-59cc-8343-88c7795483c1",
+      "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
+      "Position": {
+        "X": 1600.0,
+        "Y": 240.0
+      }
+    },
+    {
+      "ChildId": "c89a519f-9c6d-5762-a577-dbe69094937a",
+      "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
+      "Position": {
+        "X": 1600.0,
+        "Y": 270.0
+      }
+    },
+    {
+      "ChildId": "8959d0aa-94f3-58a6-9453-7176b5165620",
+      "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
+      "Position": {
+        "X": 1600.0,
+        "Y": 300.0
+      }
+    },
+    {
+      "ChildId": "f2f7a43d-5d4a-55c3-b5fe-9f5f55366386",
+      "SymbolName": "Lib.render.shading._._TransformsCBufferFromCam",
+      "Position": {
+        "X": 1400.0,
+        "Y": 400.0
+      }
+    },
+    {
+      "ChildId": "cbfa3461-05b1-5134-8a6d-c7514845ca9c",
+      "SymbolName": "Lib.render._dx11.api.Draw",
+      "Position": {
+        "X": 1800.0,
+        "Y": 160.0
+      }
+    },
+    {
+      "ChildId": "726111a6-5fbe-5475-9eb3-43f0d7f4e28f",
+      "SymbolName": "Lib.flow.Execute",
+      "Position": {
+        "X": 2000.0,
+        "Y": 80.0
+      }
+    },
+    {
+      "ChildId": "0cf0aad1-377e-5d2c-8bb9-f241f35521c2",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "Position": {
+        "X": 2100.0,
+        "Y": 60.0
+      }
+    },
+    {
+      "ChildId": "505f911e-d5a0-542f-9d5c-cbf6e5908139",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "Position": {
+        "X": 2100.0,
+        "Y": 120.0
+      }
+    },
+    {
+      "ChildId": "06b27796-92d9-554d-a9c0-1b204f293670",
+      "SymbolName": "Lib.numbers.int.basic.ModInt",
+      "Position": {
+        "X": 2100.0,
+        "Y": 200.0
+      }
+    },
+    {
+      "ChildId": "314a13e1-0711-5cd6-abd3-e8c440d9f7eb",
+      "SymbolName": "Lib.image.use.PickTexture",
+      "Position": {
+        "X": 2300.0,
+        "Y": 120.0
+      }
+    },
+    {
+      "ChildId": "2b9268e3-85ea-5cf8-9131-df23fa76d668",
+      "SymbolName": "Lib.render._dx11.api.InputAssemblerStage",
+      "Position": {
+        "X": 2900.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "d746a44d-4d85-5789-984f-546438b2f60d",
+      "SymbolName": "Types.Gfx.RasterizerState",
+      "Position": {
+        "X": 2700.0,
+        "Y": 40.0
+      }
+    },
+    {
+      "ChildId": "fc207ab8-2996-5f40-9078-1db452fa7571",
+      "SymbolName": "Lib.render._dx11.api.Rasterizer",
+      "Position": {
+        "X": 2900.0,
+        "Y": 40.0
+      }
+    },
+    {
+      "ChildId": "57cc866e-d342-5060-bf23-166244462368",
+      "SymbolName": "Types.Gfx.RenderTargetBlendDescription",
+      "Position": {
+        "X": 2500.0,
+        "Y": 80.0
+      }
+    },
+    {
+      "ChildId": "cb0e0ba4-bcbf-568f-993d-ae4b67c88b10",
+      "SymbolName": "Types.Gfx.BlendState",
+      "Position": {
+        "X": 2700.0,
+        "Y": 80.0
+      }
+    },
+    {
+      "ChildId": "12991384-ae3a-5ae3-9b34-a5662e165a5d",
+      "SymbolName": "Lib.render._dx11.api.OutputMergerStage",
+      "Position": {
+        "X": 2900.0,
+        "Y": 80.0
+      }
+    },
+    {
+      "ChildId": "66bc02c5-1018-519e-872f-d26d5c888c2c",
+      "SymbolName": "Lib.render._dx11.fxsetup.SetPixelAndVertexShaderStage",
+      "Position": {
+        "X": 2900.0,
+        "Y": 120.0
+      }
+    },
+    {
+      "ChildId": "bfdf52aa-80ab-5dab-be78-e8f073a2ece7",
+      "SymbolName": "Types.Gfx.VertexShader",
+      "Position": {
+        "X": 2700.0,
+        "Y": 120.0
+      }
+    },
+    {
+      "ChildId": "722c3d10-c889-5863-8ee8-0a8ab6dddfc4",
+      "SymbolName": "Types.Gfx.PixelShader",
+      "Position": {
+        "X": 2700.0,
+        "Y": 150.0
+      }
+    },
+    {
+      "ChildId": "45b5f17b-4a63-56ce-9feb-0652947da56e",
+      "SymbolName": "Types.Gfx.SamplerState",
+      "Position": {
+        "X": 2700.0,
+        "Y": 180.0
+      }
+    },
+    {
+      "ChildId": "feb34371-20b9-58f4-9294-241159138995",
+      "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
+      "Position": {
+        "X": 2700.0,
+        "Y": 210.0
+      }
+    },
+    {
+      "ChildId": "f25e9daa-72cb-52b3-99c7-b8cd927a86bb",
+      "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
+      "Position": {
+        "X": 2700.0,
+        "Y": 240.0
+      }
+    },
+    {
+      "ChildId": "0415c4a7-5ba8-5e46-80cd-d605d531ffae",
+      "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
+      "Position": {
+        "X": 2700.0,
+        "Y": 270.0
+      }
+    },
+    {
+      "ChildId": "d4955d0e-cc71-58e1-abb2-65090910ffe6",
+      "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
+      "Position": {
+        "X": 2700.0,
+        "Y": 300.0
+      }
+    },
+    {
+      "ChildId": "a5d303cb-d5ff-5b68-bba4-2193fbbdf64d",
+      "SymbolName": "Lib.render._dx11.api.Draw",
+      "Position": {
+        "X": 2900.0,
+        "Y": 160.0
+      }
+    },
+    {
+      "ChildId": "5c68c0b1-3bc5-5b17-91e9-66e757500aad",
+      "SymbolName": "Lib.flow.Execute",
+      "Position": {
+        "X": 3100.0,
+        "Y": 80.0
+      }
+    },
+    {
+      "ChildId": "78167862-a0b7-5134-95c2-29e14c047695",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "Position": {
+        "X": 3200.0,
+        "Y": 80.0
+      }
+    },
+    {
+      "ChildId": "68f39bcf-b895-5753-b007-725c4aa60e79",
+      "SymbolName": "Lib.image.use.PickTexture",
+      "Position": {
+        "X": 1200.0,
+        "Y": 600.0
+      }
+    },
+    {
+      "ChildId": "4fe02625-9d9b-51d6-b695-9b48b0e3e354",
+      "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
+      "Position": {
+        "X": 1600.0,
+        "Y": 340.0
+      }
+    },
+    {
+      "ChildId": "196e35f8-3fff-5181-a748-7fc8cdc05965",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
+      "Position": {
+        "X": -200.0,
+        "Y": 510.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "4a9d2c17-8e35-4b60-a1f7-2c5e9d03b681",
+      "Position": {
+        "X": 3500.0,
+        "Y": 80.0
+      }
+    },
+    {
+      "OutputId": "7b1e5f92-3c48-4d07-b6a2-9e4d1c8f3a05",
+      "Position": {
+        "X": 3500.0,
+        "Y": 160.0
+      }
+    }
+  ]
+}
