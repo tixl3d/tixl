@@ -2,12 +2,14 @@
 using ImGuiNET;
 using T3.Core.Utils;
 using T3.Editor.Gui.Interaction;
+using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.MagGraph.Interaction.KeyboardEditing;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.OutputSetup;
+using T3.Editor.UiModel.ProjectHandling;
 
 namespace T3.Editor.Gui.MagGraph.Interaction;
 
@@ -32,6 +34,20 @@ internal static class SelectionNavigation
     }
 
     private readonly record struct TrailStep(Guid FromId, Guid ToId, Directions Direction);
+
+    /// <summary>
+    /// Selection navigation and parameter editing go to the graph of the focused project view, whichever window
+    /// has the focus. They only move the selection or open an editor, so a wrong guess can't change any data.
+    /// </summary>
+    internal static bool CanUseKeyboardFromAnyWindow(GraphUiContext context)
+    {
+        return UserSettings.Config.EnableKeyboardShortCuts
+               && context.ProjectView == ProjectView.Focused
+               && context.StateMachine.CurrentState == GraphStates.Default
+               && !ImGui.IsAnyItemActive()
+               && !T3Ui.IsAnyPopupOpen
+               && !ParameterPopover.IsOpen;
+    }
 
     internal static void MoveSelection(GraphUiContext context, Directions direction)
     {
@@ -81,14 +97,9 @@ internal static class SelectionNavigation
     /// </summary>
     internal static void DrawTargetIndicators(GraphUiContext context, ImDrawListPtr drawList)
     {
-        // Only while an arrow key would really move the selection, so this mirrors the key bindings' focus check;
-        // View.IsFocused also counts siblings like the timeline, and active inputs or popups take the keys.
-        if (!UserSettings.Config.EnableKeyboardShortCuts
-            || !ImGui.IsWindowFocused(ImGuiFocusedFlags.ChildWindows)
-            || context.StateMachine.CurrentState != GraphStates.Default
-            || ImGui.IsAnyItemActive()
-            || T3Ui.IsAnyPopupOpen
-            || ParameterPopover.IsOpen
+        // Only while an arrow key would really move the selection.
+        if (!CanUseKeyboardFromAnyWindow(context)
+            || KeyActionHandling.AreArrowKeysClaimed
             || !IsKeyboardNavigationActive(context))
             return;
 

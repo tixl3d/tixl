@@ -64,6 +64,14 @@ Also:
 - Match existing naming and slot conventions
 - Avoid hidden side effects unless explicitly intended
 
+### Operator parameter layout
+
+Set these in the `.t3ui` (or the editor's parameter settings) when designing an operator:
+
+- **Group related parameters.** Set `GroupTitle` ("Display as: Start with group") on the first parameter of each group once an operator has more than a handful, for example `Occlusion`, `Ray Tracing`, `Temporal Accumulation`. Keep required inputs ungrouped at the top.
+- **Give numeric parameters a reasonable `Min` and `Max`.** The range drives the virtual slider and the drag speed, so it should span the values people actually use, not everything that is technically valid.
+- **Clamp only real limits.** `ClampMin` / `ClampMax` are for values that break or lose their meaning outside the range, such as a negative radius or a blend factor above 1. Leave the other end open where larger values remain useful.
+
 ### Operators vs. helper classes in an operator package
 
 The loader identifies operators **by type, not by folder**: a class is an operator iff it derives

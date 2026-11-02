@@ -5,16 +5,18 @@ using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
+using T3.Editor.Gui.Window;
 using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Graph;
+using FocusableWindow = T3.Editor.Gui.Windows.Window;
 
 namespace T3.Editor.Gui.MagGraph.Interaction.KeyboardEditing;
 
 /// <summary>
-/// Keyboard popover for editing the parameters of the selected operator, opened with S. It lists the parameters
+/// Keyboard popover for editing the parameters of the selected operator, opened with its keyboard shortcut. It lists the parameters
 /// with their values and shrinks to the matches of the filter. Up/Down move through the list like in a
 /// spreadsheet: typing a value previews it live, and Down applies it and moves on.
 /// Letters filter the parameters (name prefix, word prefix, initials) without changing their order. Tab (or Space) edits the value: numbers and
@@ -72,6 +74,7 @@ internal static partial class ParameterPopover
         _compositionSymbolId = instance.Parent.Symbol.Id;
         _selectionChangeCounterAtOpen = context.Selector.ChangeCounter;
         _openFrame = ImGui.GetFrameCount();
+        _windowFocusedAtOpen = FocusableWindow.FocusedWindow;
         _focusedInputId = GetInitialFocus(instance);
         _appliedTimes.Clear();
         _firstVisibleRow = 0;
@@ -87,11 +90,20 @@ internal static partial class ParameterPopover
     {
         if (!IsOpen)
         {
-            // Closing with the keyboard hands the keyboard back to the graph
+            // Closing with the keyboard hands the keyboard back to where it was when the popover opened
             if (_refocusGraph)
             {
-                ImGui.SetWindowFocus();
+                if (_windowFocusedAtOpen is null or GraphWindow)
+                {
+                    ImGui.SetWindowFocus();
+                }
+                else
+                {
+                    _windowFocusedAtOpen.RequestWindowFocus();
+                }
+
                 _refocusGraph = false;
+                _windowFocusedAtOpen = null;
             }
 
             return;
@@ -649,6 +661,7 @@ internal static partial class ParameterPopover
     private static string _focusedDescription = string.Empty;
     private static string _editableValueLabel = string.Empty;
     private static bool _refocusGraph;
+    private static FocusableWindow? _windowFocusedAtOpen;
     private static string _text = string.Empty;
     private static string _lastText = string.Empty;
     private static string _lastFilter = string.Empty;

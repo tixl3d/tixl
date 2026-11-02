@@ -58,10 +58,7 @@ internal sealed class KeyBinding
 
     public KeyBinding Clone()
     {
-        return new KeyBinding(Action, KeyCombination)
-                   {
-                       _flags = KeyActionHandling.Flags.None
-                   };
+        return new KeyBinding(Action, KeyCombination);
     }
 
     private KeyActionHandling.Flags _flags; // This is of caching to speed up

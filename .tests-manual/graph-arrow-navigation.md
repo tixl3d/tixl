@@ -77,3 +77,21 @@ Press `Tab` to open the symbol browser and use `Up` / `Down` in its list. Close 
 **Expected:**
 - The symbol browser list and the rename field use the arrow keys as before.
 - The graph selection does not change while they are open.
+
+## Step: Arrow keys work from other windows
+
+**Action:**
+Select an operator, click the Output Window so it has the focus, then press `Down`. Press `Delete` afterwards and undo with `Ctrl+Z`.
+
+**Expected:**
+- The selection moves in the graph and the Graph Window takes the focus.
+- `Delete` acts on the operator in the graph.
+
+## Step: Windows using the arrow keys keep them
+
+**Action:**
+Click into the snapshot controls in the Parameter Window of an operator with snapshots, then press `Left` and `Right`.
+
+**Expected:**
+- The snapshots change and the graph selection stays where it is.
+- The jump-target marks in the graph are hidden meanwhile.

@@ -92,6 +92,7 @@ change along chains — leave it as is.
 - ~~Graph shortcuts should work whenever no other window holds keyboard focus~~ — done: when no window is
   focused (and no popup, active item or mouse button), the visible graph window of the focused project view takes
   the focus back (`GraphWindow`).
+- Graph navigation from any window — done: arrows and the popover key reach the focused view's graph unless a popup or active item blocks them. Windows reading arrows call `KeyActionHandling.ClaimArrowKeys()`; the first use moves focus to the graph, and closing the popover returns it. The popover is on Alt+S (S collides with WASD), or Space with Shift+Space for playback through the `UseSpaceToEditParameters` setting, a runtime override in `KeyActionHandling` that applies to every keymap. "Space marks" needs another key while it is on.
 - Space vs Tab in the symbol browser (presets) — consider switching it to Tab as well.
   - Not yet: verbs `i c g x`, strings, preset names with spaces, multi-selection.
 

@@ -29,11 +29,11 @@ The following is a list of the **default keyboard** short-cuts. With v4.0.4 you 
 | Open Operator             | I                                                    |
 | Close Operator            | U                                                    |
 | Rename Child              | Enter                                                |
-| Edit Parameters           | S (focus), see below                                 |
+| Edit Parameters           | Alt + S, see below                                   |
 | Navigate Backwards        | Alt + Left                                           |
 | Navigate Forward          | Alt + Right                                          |
-| Select to Above / Below   | Up / Down (focus)                                    |
-| Select to Left / Right    | Left / Right (focus)                                 |
+| Select to Above / Below   | Up / Down                                            |
+| Select to Left / Right    | Left / Right                                         |
 | Duplicate                 | Ctrl + D (focus)                                     |
 | Duplicate with Connections| Ctrl + Shift + D (focus)                             |
 | Delete Selection          | Delete or Backspace (focus)                          |
@@ -103,7 +103,11 @@ View bookmarks (Ctrl) remember a graph view. Operator bookmarks remember an oper
 
 ## Editing Parameters with the Keyboard
 
-Press `S` with an operator selected and the graph focused to open the **parameter popover** at the bottom of the graph. It lists the operator's parameters with their values. Animated values are orange, connected ones blue, and changed values are brighter than defaults. The popover works in Focus Mode too, where the Parameter Window is hidden.
+Press `Alt + S` with an operator selected to open the **parameter popover** at the bottom of the graph. This works from any window, as long as no dialog is open and no text field is active. The arrow keys also reach the graph from any window, except windows that use them themselves, such as snapshot controls.
+
+If you edit parameters a lot, turn on **Use Space to edit parameters** in the *Interface* section of the *Settings*: `Space` opens the popover and `Shift + Space` toggles playback.
+
+The popover lists the operator's parameters with their values. Animated values are orange, connected ones blue, and changed values are brighter than defaults. The popover works in Focus Mode too, where the Parameter Window is hidden.
 
 ### Finding a parameter
 

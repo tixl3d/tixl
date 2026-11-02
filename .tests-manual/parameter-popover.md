@@ -12,16 +12,16 @@ related-help:
   - ../.help/docs/using/KeyboardShortcuts.md
 ---
 
-Checks editing parameters with the keyboard in the popover that `S` opens. Every
+Checks editing parameters with the keyboard in the popover that `Alt+S` opens. Every
 change previews while you type and is undone in one step with `Ctrl+Z`.
 
 ## Step: Opening the popover
 
 **Action:**
-With the operator selected and the Graph Window focused, press `S`.
+With the operator selected, click the Output Window so it has the focus, then press `Alt+S`.
 
 **Expected:**
-- A popover appears at the bottom of the graph, listing the operator's parameters with their values.
+- The Graph Window takes the focus and a popover appears at the bottom of the graph, listing the operator's parameters with their values.
 - The first parameter that isn't connected has the focus, shown by a darker row.
 - The help line at the bottom shows the keys for the focused parameter.
 
@@ -112,7 +112,42 @@ Type a filter, press `Tab`, type a value, then press `Esc` three times.
 ## Step: Remembering the last parameter
 
 **Action:**
-Apply a value to the third parameter, close the popover, and press `S` again.
+Apply a value to the third parameter, close the popover, and press `Alt+S` again.
 
 **Expected:**
 - The popover opens with the focus on the parameter you edited last.
+
+## Step: Closing returns the focus
+
+**Action:**
+Click the Timeline Window, press `Alt+S`, then press `Esc`.
+
+**Expected:**
+- The popover closes and the Timeline Window has the focus again.
+
+## Step: Dialogs and text fields block the popover
+
+**Action:**
+Open a dialog such as the graph search (`Ctrl+F`) and press `Alt+S`. Close it, click into a text field in the Parameter Window and type `s` while holding `Alt`.
+
+**Expected:**
+- The popover does not open behind the dialog or while the text field is active.
+
+## Step: Use Space to edit parameters
+
+**Action:**
+In the Interface section of the Settings, turn on **Use Space to edit parameters**. Select an operator, hover the Output Window and press `Space`. Press `Esc`, then press `Shift+Space` twice. Hold `S` over the Output Window with a camera in view. Finally turn the setting off.
+
+**Expected:**
+- `Space` opens the popover and does not start playback.
+- `Shift+Space` starts and stops playback.
+- `S` moves the camera back and doesn't open the popover.
+- With the setting off, `Space` toggles playback again and `Alt+S` opens the popover.
+
+## Step: Cloned key maps keep their focus rules
+
+**Action:**
+Press **Clone** in the key map settings. Move the mouse away from the Output Window and hold `W`.
+
+**Expected:**
+- The camera doesn't move without hovering the Output Window.

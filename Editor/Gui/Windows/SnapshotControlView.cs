@@ -6,6 +6,7 @@ using T3.Core.Operator.Slots;
 using T3.Core.Utils;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Interaction;
+using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.Interaction.Variations;
 using T3.Editor.Gui.Interaction.Variations.Model;
 using T3.Editor.Gui.Styling;
@@ -213,6 +214,8 @@ internal sealed class SnapshotControlView
     {
         if (!ImGui.IsWindowFocused(ImGuiFocusedFlags.RootAndChildWindows))
             return;
+
+        KeyActionHandling.ClaimArrowKeys();
 
         var drawList = ImGui.GetWindowDrawList();
         var min = ImGui.GetWindowPos();

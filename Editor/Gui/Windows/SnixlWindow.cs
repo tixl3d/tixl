@@ -1,4 +1,5 @@
 using ImGuiNET;
+using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.Styling;
 
 namespace T3.Editor.Gui.Windows;
@@ -66,6 +67,8 @@ internal sealed class SnixlWindow : Window
             // Handle direction input and update game logic
             if (_gameState == GameState.Playing)
             {
+                KeyActionHandling.ClaimArrowKeys();
+
                 if (ImGui.IsKeyPressed(ImGuiKey.UpArrow, false) && _currentDirection != Direction.Down) _nextDirection = Direction.Up;
                 else if (ImGui.IsKeyPressed(ImGuiKey.DownArrow, false) && _currentDirection != Direction.Up) _nextDirection = Direction.Down;
                 else if (ImGui.IsKeyPressed(ImGuiKey.LeftArrow, false) && _currentDirection != Direction.Right) _nextDirection = Direction.Left;
