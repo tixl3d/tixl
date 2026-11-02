@@ -149,7 +149,8 @@ internal sealed partial class OutputWindow
 
         ImGui.SameLine();
 
-        _camSelectionHandling.DrawCameraControlSelection();
+        if (_camSelectionHandling.DrawCameraControlSelection())
+            SaveStateToProject();
 
         // Camera speed
         {

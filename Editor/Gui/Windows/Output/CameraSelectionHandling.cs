@@ -93,6 +93,7 @@ internal sealed class CameraSelectionHandling
 
         // Update recently used cameras (this is expensive!)
         UpdateRecentCameras(drawnInstance);
+        TryRestorePickedCamera();
 
         ICamera? cameraForManipulation = null;
         CameraForRendering = null;
@@ -119,6 +120,7 @@ internal sealed class CameraSelectionHandling
             if (!isPickStillValid)
             {
                 _controlMode = _lastControlMode;
+                _pickedCameraId = Guid.Empty;
             }
         }
 
@@ -264,10 +266,13 @@ internal sealed class CameraSelectionHandling
         _firstCamInGraph = _recentlyUsedCameras.Count > 0 ? _recentlyUsedCameras[0] : null;
     }
 
-    public void DrawCameraControlSelection()
+    /// <returns>True if the user changed the selection, so that callers can persist it.</returns>
+    public bool DrawCameraControlSelection()
     {
         if (_drawnInstance == null)
-            return;
+            return false;
+
+        var wasChanged = false;
 
         ImGui.SetNextItemWidth(145*T3Ui.UiScaleFactor);
 
@@ -322,8 +327,8 @@ internal sealed class CameraSelectionHandling
                                              isChecked:_controlMode == ControlModes.AutoUseFirstCam, 
                                              isEnabled:true))
             {
-                _controlMode = ControlModes.AutoUseFirstCam;
-                _pickedCameraId = Guid.Empty;
+                SelectMode(ControlModes.AutoUseFirstCam);
+                wasChanged = true;
             }
 
             CustomComponents.TooltipForLastItem("Shows the first scene camera. For manipulation select the camera operator in graph or in the list below.");
@@ -334,8 +339,8 @@ internal sealed class CameraSelectionHandling
                                              isChecked:_controlMode == ControlModes.UseViewer, 
                                              isEnabled:_drawnTypeIsCommand))
             {
-                _controlMode = ControlModes.UseViewer;
-                _pickedCameraId = Guid.Empty;
+                SelectMode(ControlModes.UseViewer);
+                wasChanged = true;
             }
 
             CustomComponents.TooltipForLastItem("Ignores scene cameras. This can be useful in combination with [ShowCamGizmos].");
@@ -345,8 +350,8 @@ internal sealed class CameraSelectionHandling
                                              isEnabled:_drawnTypeIsCommand))
 
             {
-                _controlMode = ControlModes.SceneViewerFollowing;
-                _pickedCameraId = Guid.Empty;
+                SelectMode(ControlModes.SceneViewerFollowing);
+                wasChanged = true;
             }
 
             if (ImGui.IsItemHovered() && _firstCamInGraph is Instance camInstance2 && NodeSelection != null)
@@ -376,9 +381,13 @@ internal sealed class CameraSelectionHandling
                               && CustomComponents.DrawMenuItem(9999+index, symbolChild.ReadableName, isChecked:cameraInstance.SymbolChildId == _pickedCameraId) 
                             )
                         {
-                            _lastControlMode = _controlMode;
+                            if (_controlMode != ControlModes.PickedACamera)
+                                _lastControlMode = _controlMode;
+
                             _controlMode = ControlModes.PickedACamera;
                             _pickedCameraId = cameraInstance.SymbolChildId;
+                            _cameraIdToRestore = Guid.Empty;
+                            wasChanged = true;
                             GraphCanvasUtils.SelectAndCenterChildIdInView(symbolChild.Id);
                         }
 
@@ -401,6 +410,7 @@ internal sealed class CameraSelectionHandling
         }
 
         ImGui.SameLine();
+        return wasChanged;
     }
 
     public void ResetView()
@@ -410,7 +420,11 @@ internal sealed class CameraSelectionHandling
 
     internal void SaveStateTo(OutputWindowState state)
     {
-        state.CameraControlMode = (OutputWindowState.CameraControlModes)(int)_controlMode;
+        var isRestorePending = _cameraIdToRestore != Guid.Empty;
+        state.CameraControlMode = isRestorePending
+                                      ? OutputWindowState.CameraControlModes.PickedACamera
+                                      : (OutputWindowState.CameraControlModes)(int)_controlMode;
+        state.PickedCameraId = isRestorePending ? _cameraIdToRestore : _pickedCameraId;
         var position = _outputWindowViewCamera.CameraPosition;
         var target = _outputWindowViewCamera.CameraTarget;
         OutputWindowState.CopyInto(ref state.CameraPosition, position.X, position.Y, position.Z);
@@ -420,7 +434,17 @@ internal sealed class CameraSelectionHandling
 
     internal void LoadStateFrom(OutputWindowState state)
     {
+        _pickedCameraId = Guid.Empty;
+        _cameraIdToRestore = Guid.Empty;
+        _lastControlMode = ControlModes.AutoUseFirstCam;
         _controlMode = (ControlModes)(int)state.CameraControlMode;
+
+        if (_controlMode == ControlModes.PickedACamera)
+        {
+            _controlMode = ControlModes.AutoUseFirstCam;
+            _cameraIdToRestore = state.PickedCameraId;
+        }
+
         if (state.CameraPosition.Length == 3)
         {
             _outputWindowViewCamera.CameraPosition = new Vector3(state.CameraPosition[0], state.CameraPosition[1], state.CameraPosition[2]);
@@ -433,6 +457,31 @@ internal sealed class CameraSelectionHandling
         _cameraInteraction.SetView(_outputWindowViewCamera);
     }
 
+    private void SelectMode(ControlModes mode)
+    {
+        _controlMode = mode;
+        _pickedCameraId = Guid.Empty;
+        _cameraIdToRestore = Guid.Empty;
+    }
+
+    private void TryRestorePickedCamera()
+    {
+        if (_cameraIdToRestore == Guid.Empty)
+            return;
+
+        foreach (var recentCam in _recentlyUsedCameras)
+        {
+            if (recentCam is not Instance camInstance || camInstance.SymbolChildId != _cameraIdToRestore)
+                continue;
+
+            _lastControlMode = _controlMode;
+            _controlMode = ControlModes.PickedACamera;
+            _pickedCameraId = _cameraIdToRestore;
+            _cameraIdToRestore = Guid.Empty;
+            return;
+        }
+    }
+
     private bool _drawnTypeIsCommand;
     private ControlModes _controlMode = ControlModes.AutoUseFirstCam;
     private readonly ViewCamera _outputWindowViewCamera = new();
@@ -442,6 +491,9 @@ internal sealed class CameraSelectionHandling
     private bool _hasAnimationTimeChanged;
 
     private Guid _pickedCameraId = Guid.Empty;
+
+    /** A loaded pick waits here because cameras only count as active once they have been evaluated. */
+    private Guid _cameraIdToRestore = Guid.Empty;
 
     private Instance? _drawnInstance;
     private readonly List<ICamera> _recentlyUsedCameras = [];

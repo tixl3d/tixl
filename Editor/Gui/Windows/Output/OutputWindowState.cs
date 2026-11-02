@@ -59,6 +59,8 @@ internal sealed class OutputWindowState
     [JsonConverter(typeof(StringEnumConverter))]
     public CameraControlModes CameraControlMode = CameraControlModes.AutoUseFirstCam;
 
+    public Guid PickedCameraId = Guid.Empty;
+
     public float[] CameraPosition = [0, 0, 2.4142134f]; // DefaultCameraDistance
     public float[] CameraTarget = [0, 0, 0];
     public float CameraRoll;
