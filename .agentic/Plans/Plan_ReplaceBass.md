@@ -1,10 +1,9 @@
 # Replace BASS with a native miniaudio layer
 
-**Status:** Nearly done — 2026-11-02, on branch `feat/miniaudio`. BASS is gone: code, natives, packages and packaging metadata.
-Tested by the maintainer on Linux and Windows (2026-11). Before merging: run the exported Player on a release build, run
-the macOS CI build and test its DMG on a Mac, confirm the `Native Audio Library` workflow passes, and file the two upstream
-miniaudio reports. Effects stay low
-priority (decision 8). The spike lives on branch `spike/replace-bass`.
+**Status:** Ready to merge — 2026-11, on branch `feat/miniaudio`. BASS is gone. The maintainer tested the editor on Linux, Windows
+and macOS and an exported Player; the `Native Audio Library` workflow passes on all three platforms. Open: the two upstream
+miniaudio reports, and the first run of the changed release workflows. Effects stay low
+priority (decision 8).
 Decisions from 2026-10-12 are folded in (§Decisions 6–10).
 **Scope:** All audio in Editor, Player and operators on Windows, Linux and macOS. Removes ManagedBass,
 BASSmix, BASSFLAC and BASSWASAPI.
@@ -144,8 +143,8 @@ Workarounds for what the spike hit, and what's still to decide:
 
 ## Fix along the way (bugs the survey found)
 
-- Export rounds each frame's sample count without a remainder: −110 ms / +150 ms drift over 10 min at
-  23.976 / 29.97 fps. Fixed by §Export step 3 (spike: 0 drift).
+- Fixed: export rounded each frame's sample count without a remainder, which at the fixed 48 kHz meant +150 ms over 10
+  minutes at 29.97 fps. Each frame's samples now come from its index.
 - Export FFT runs on a push stream holding ~1024 frames, likely zero-padded — fixed by §Export step 4.
 - The bin-to-band table is `static readonly` from `MixerFrequency` at type load (48 kHz) — stale on 44.1 kHz.
 - `AudioInput.OnCapturedData` runs analysis, beat tracking and WAV writing on the capture thread, racing

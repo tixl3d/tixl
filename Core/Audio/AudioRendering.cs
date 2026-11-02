@@ -31,18 +31,6 @@ public static class AudioRendering
     /** The newest mono samples of the export mix: a video frame holds fewer samples than one FFT window. */
     private static readonly float[] _exportFftSamples = new float[AudioConfig.FftBufferSize * 2];
 
-    /// <summary>
-    /// Ensures the buffer has at least the required capacity, reallocating if necessary.
-    /// Clears the buffer up to the required length before returning.
-    /// </summary>
-    private static float[] EnsureBuffer(ref float[] buffer, int requiredLength)
-    {
-        if (buffer.Length < requiredLength)
-            buffer = new float[requiredLength];
-        Array.Clear(buffer, 0, requiredLength);
-        return buffer;
-    }
-
     public static void PrepareRecording(Playback playback, double fps)
     {
         if (_isRecording) return;
@@ -115,16 +103,23 @@ public static class AudioRendering
 
     public static float[] GetFullMixDownBuffer(double frameDurationInSeconds)
     {
-        _frameCount++;
-        
+        var frameIndex = _frameCount++;
+
         // Update stale states - this marks which operators were active in the previous frame.
         // Streams that weren't updated will be marked stale, but during export they won't be paused
         // (handled in SetStale). We use the stale flag to know which streams to include in the mix.
         AudioEngine.UpdateStaleStatesForExport();
 
-        int sampleCount = (int)Math.Max(Math.Round(frameDurationInSeconds * AudioConfig.MixerFrequency), 1);
-        int floatCount = sampleCount * 2; // stereo
-        var mixBuffer = EnsureBuffer(ref _mixBuffer, floatCount);
+        var sampleCount = GetFrameSampleCount(frameIndex, frameDurationInSeconds, AudioConfig.MixerFrequency);
+        var floatCount = sampleCount * 2; // stereo
+
+        // The returned length is what gets encoded, and it differs by a sample between frames.
+        if (_mixBuffer.Length != floatCount)
+            _mixBuffer = new float[floatCount];
+        else
+            Array.Clear(_mixBuffer);
+
+        var mixBuffer = _mixBuffer;
         double currentTime = Playback.Current.TimeInSecs;
 
         RenderNativeGraph(mixBuffer, sampleCount, currentTime);
@@ -148,6 +143,17 @@ public static class AudioRendering
         AudioAnalysis.ProcessUpdate(gainFactor, decayFactor);
 
         return mixBuffer;
+    }
+
+    /// <summary>
+    /// How many samples a video frame covers. Derived from the frame's index, because rounding each frame's
+    /// length on its own adds up against the picture: +150 ms over 10 minutes at 29.97 fps.
+    /// </summary>
+    internal static int GetFrameSampleCount(int frameIndex, double frameDurationSecs, int sampleRate)
+    {
+        var start = Math.Round(frameIndex * frameDurationSecs * sampleRate);
+        var end = Math.Round((frameIndex + 1) * frameDurationSecs * sampleRate);
+        return (int)(end - start);
     }
 
     /// <summary>Renders the whole native graph: soundtracks, operators, buses and video audio.</summary>

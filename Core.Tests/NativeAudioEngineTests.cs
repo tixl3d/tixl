@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Numerics;
+using T3.Core.Audio;
 using T3.Core.Audio.Native;
 using Xunit;
 
@@ -216,6 +217,21 @@ public class NativeAudioEngineTests
         using var engine = NativeAudioEngine.TryCreate(NativeAudio.Mode.Offline, NativeAudio.Backend.Null, SampleRate);
         Assert.NotNull(engine);
         Assert.False(engine.LoadFile("/does/not/exist.wav").IsValid);
+    }
+
+    [Theory]
+    [InlineData(29.97, 17982)]
+    [InlineData(23.976, 14386)]
+    [InlineData(59.94, 35964)]
+    [InlineData(60.0, 36000)]
+    public void ExportedFramesAddUpToTheVideoDuration(double fps, int frameCount)
+    {
+        var frameDuration = 1.0 / fps;
+        long total = 0;
+        for (var frame = 0; frame < frameCount; frame++)
+            total += AudioRendering.GetFrameSampleCount(frame, frameDuration, SampleRate);
+
+        Assert.InRange(total - frameCount * frameDuration * SampleRate, -1.0, 1.0);
     }
 
     [Fact]
