@@ -27,6 +27,9 @@ public sealed class ToneGeneratorSource
     public void SetParameters(float frequency, int waveform, float attackSecs, float decaySecs, float sustainLevel, float releaseSecs, float durationSecs)
         => _engine.SetGenerator(Handle, frequency, waveform, attackSecs, decaySecs, sustainLevel, releaseSecs, durationSecs);
 
+    /// <summary>-1 is full left, 1 full right.</summary>
+    public void SetPanning(float panning) => _engine.SetPan(Handle, panning);
+
     public void TriggerAttack() => _engine.TriggerGeneratorAttack(Handle);
     public void TriggerRelease() => _engine.TriggerGeneratorRelease(Handle);
     public void Reset() => _engine.ResetGenerator(Handle);

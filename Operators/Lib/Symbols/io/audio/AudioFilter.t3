@@ -1,0 +1,28 @@
+{
+  "FormatVersion": 3,
+  "Id": "58e37f7f-602d-4567-9155-c193a9d9a0ee"/*AudioFilter*/,
+  "Inputs": [
+    {
+      "Id": "40ddd8d4-571c-41d4-98a6-06cc486c9d9f"/*Input*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "7c65cd76-b026-461c-b01a-629553c015d2"/*Volume*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "d70b95b5-a547-4b1e-9e29-5879319d84aa"/*Mode*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "32ee6dca-f277-49f5-8a6f-2f6c00bcdb7d"/*Cutoff*/,
+      "DefaultValue": 1000.0
+    },
+    {
+      "Id": "eecb4b94-5069-4a81-b1b8-79b7b9fabd91"/*Resonance*/,
+      "DefaultValue": 0.707
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

@@ -117,6 +117,16 @@ Wire a looping source through `[AudioEcho]`, `[AudioReverb]` and `[AudioCompress
 - Unwiring lets the tail ring out and fade instead of cutting it.
 - The exports start without a remnant of what was playing, and sound identical.
 
+## Step: Filter and tone panning
+
+**Action:**
+Wire a source through `[AudioFilter]` into a bus, sweep **Cutoff** while playing in both modes, and raise **Resonance**. Then move **Panning** on `[AudioToneGenerator]`.
+
+**Expected:**
+- LowPass makes the sound darker as Cutoff falls, and HighPass thinner as it rises, without clicks.
+- High Resonance adds a peak that follows Cutoff.
+- The tone moves between the sides.
+
 ## Step: Video audio
 
 **Action:**

@@ -788,6 +788,113 @@ public class NativeAudioEngineTests
         }
     }
 
+    [Theory]
+    [InlineData(false, 100f, 0.98f, 1.02f)] // low-pass passes what is below the cutoff
+    [InlineData(false, 8000f, 0f, 0.03f)] // and takes out what is above it, 12 dB per octave
+    [InlineData(false, 1000f, 0.68f, 0.73f)] // -3 dB at the cutoff itself
+    [InlineData(true, 8000f, 0.98f, 1.02f)]
+    [InlineData(true, 100f, 0f, 0.02f)]
+    [InlineData(true, 1000f, 0.68f, 0.73f)]
+    public void FilterAttenuatesByFrequency(bool highPass, float frequency, float minGain, float maxGain)
+    {
+        var (engine, bus, source, path) = StartEffect(AudioEffectKind.Filter, frame => 0.5f * MathF.Sin(2 * MathF.PI * frequency * frame / SampleRate));
+        using (engine)
+        {
+            try
+            {
+                engine.SetFilter(bus, highPass, 1000f, 0.707f);
+                engine.Play(source);
+                var settled = RenderFrames(engine, 24000).AsSpan(12000 * 2);
+                Assert.InRange(Rms(settled) * MathF.Sqrt(2f) / 0.5f, minGain, maxGain);
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
+    }
+
+    [Fact]
+    public void FilterResonanceBoostsAtTheCutoffAndCutoffChangesGlide()
+    {
+        var (engine, bus, source, path) = StartEffect(AudioEffectKind.Filter, frame => 0.1f * MathF.Sin(2 * MathF.PI * 1000f * frame / SampleRate));
+        using (engine)
+        {
+            try
+            {
+                engine.SetFilter(bus, false, 1000f, 4f);
+                engine.Play(source);
+                Assert.InRange(Rms(RenderFrames(engine, 24000).AsSpan(12000 * 2)) * MathF.Sqrt(2f) / 0.1f, 3.8f, 4.2f);
+
+                // A jump from far above to far below the tone stays continuous, with no step between samples.
+                engine.SetFilter(bus, false, 20000f, 0.707f);
+                RenderFrames(engine, 12000);
+                engine.SetFilter(bus, false, 200f, 0.707f);
+                var sweep = RenderFrames(engine, 12000);
+                var largestStep = 0f;
+                for (var frame = 1; frame < 12000; frame++)
+                    largestStep = Math.Max(largestStep, Math.Abs(sweep[frame * 2] - sweep[(frame - 1) * 2]));
+
+                Assert.True(largestStep < 0.03f, $"largest step {largestStep}");
+                Assert.True(Peak(sweep.AsSpan(9000 * 2)) < 0.01f);
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
+    }
+
+    [Fact]
+    public void FilterRendersIdenticallyAfterAReset()
+    {
+        var (engine, bus, source, path) = StartEffect(AudioEffectKind.Filter, frame => 0.4f * MathF.Sin(frame * 0.05f));
+        using (engine)
+        {
+            try
+            {
+                engine.SetFilter(bus, true, 500f, 2f);
+
+                float[] Pass()
+                {
+                    engine.Seek(source, 0.25);
+                    engine.ResetEffect(bus);
+                    engine.Play(source);
+                    var result = RenderFrames(engine, 24000);
+                    engine.Pause(source);
+                    return result;
+                }
+
+                Assert.Equal(Pass(), Pass());
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
+    }
+
+    [Theory]
+    [InlineData(-1f, true)]
+    [InlineData(1f, false)]
+    public void GeneratorPansToOneSide(float pan, bool expectLeft)
+    {
+        using var engine = NativeAudioEngine.TryCreate(NativeAudio.Mode.Offline, NativeAudio.Backend.Null, SampleRate);
+        Assert.NotNull(engine);
+
+        var tone = engine.CreateGenerator();
+        engine.Route(tone, AudioHandle.Output);
+        engine.SetPan(tone, pan);
+        engine.SetGenerator(tone, 480f, 1, 0.001f, 0.001f, 1f, 0.01f, durationSecs: -1f);
+        engine.TriggerGeneratorAttack(tone);
+
+        var rendered = new float[4800 * 2];
+        engine.Render(rendered, 4800);
+        var left = Math.Abs(rendered[4000 * 2]);
+        var right = Math.Abs(rendered[4000 * 2 + 1]);
+        Assert.True(expectLeft ? left > 0.5f && right < 0.01f : right > 0.5f && left < 0.01f, $"left {left} right {right}");
+    }
+
     private static float Rms(ReadOnlySpan<float> samples)
     {
         var sum = 0.0;

@@ -66,6 +66,9 @@ internal sealed unsafe class NativeAudioEngine : IDisposable
     public void SetReverb(AudioHandle bus, float mix, float decaySecs, float highFrequencyRatio)
         => NativeAudio.BusSetEffect(_engine, bus.Value, mix, decaySecs, highFrequencyRatio, 0f, 0f);
 
+    public void SetFilter(AudioHandle bus, bool highPass, float cutoffHz, float resonance)
+        => NativeAudio.BusSetEffect(_engine, bus.Value, highPass ? 1f : 0f, cutoffHz, resonance, 0f, 0f);
+
     /// <summary>Clears an effect's tail before its next block.</summary>
     public void ResetEffect(AudioHandle bus) => NativeAudio.BusResetEffect(_engine, bus.Value);
 

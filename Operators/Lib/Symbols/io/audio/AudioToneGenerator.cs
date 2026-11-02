@@ -54,6 +54,7 @@ namespace Lib.io.audio
                         Duration.GetValue(context),
                         Volume.GetValue(context),
                         Mute.GetValue(context),
+                        Panning.GetValue(context),
                         WaveformType.GetValue(context),
                         TriggerMode.GetValue(context),
                         Envelope.GetValue(context));
@@ -62,7 +63,7 @@ namespace Lib.io.audio
         // Frame-keyed so evaluating several outputs in one frame doesn't double-run the trigger edge
         // detection; after an evaluation gap (unwired, then rewired) the envelope restarts from silence
         // instead of firing a phantom edge from the stale trigger state.
-        private void ApplyParams(bool shouldPlay, float frequency, float duration, float volume, bool mute,
+        private void ApplyParams(bool shouldPlay, float frequency, float duration, float volume, bool mute, float panning,
                                  int waveformType, int triggerModeValue, Vector4 envelope)
         {
             if (_lastApplyFrame == Playback.FrameCount)
@@ -118,6 +119,7 @@ namespace Lib.io.audio
 
             // Volume/mute live on the node's gain (applied by whichever bus routes the channel), so group
             // and bus gain folds compose with it; the stream itself only renders waveform × envelope.
+            _toneStream.SetPanning(Math.Clamp(panning, -1f, 1f));
             _node.SourceChannel = _toneStream.Handle;
             _node.Gain = mute ? 0f : volume;
             _node.SourceLabel = $"{frequency:0}Hz";
@@ -185,6 +187,9 @@ namespace Lib.io.audio
 
         [Input(Guid = "1a3f4b7c-12d3-4a5b-9c7d-8e1f2a3b4c5d")]
         public readonly InputSlot<bool> Mute = new();
+
+        [Input(Guid = "5b3c95f4-b415-4497-b7d1-72fe10b1d720")]
+        public readonly InputSlot<float> Panning = new();
 
         [Input(Guid = "5a7e9f2c-8d4b-4c1f-9a5e-3b2d6f7c8a4e", MappedType = typeof(WaveformTypes))]
         public readonly InputSlot<int> WaveformType = new();

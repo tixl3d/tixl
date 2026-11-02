@@ -64,6 +64,10 @@ public static class AudioMixerManager
     public static void SetReverb(AudioHandle bus, float mix, float decaySecs, float highFrequencyRatio)
         => _engine?.SetReverb(bus, mix, decaySecs, highFrequencyRatio);
 
+    /// <summary>A 12 dB per octave filter; a resonance of 0.707 has no peak at the cutoff.</summary>
+    public static void SetFilter(AudioHandle bus, bool highPass, float cutoffHz, float resonance)
+        => _engine?.SetFilter(bus, highPass, cutoffHz, resonance);
+
     /// <summary>
     /// Reads the duration of an audio file in seconds. Returns 0 on failure. Used by the timeline-drop handler
     /// to size a new clip's TimeRange at the moment of import, without going through the full playback path.

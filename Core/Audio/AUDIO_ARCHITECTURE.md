@@ -53,7 +53,7 @@ output device the engine runs in offline mode, so exports keep their audio.
 
 ## Effects
 
-`[AudioEcho]`, `[AudioCompressor]` and `[AudioReverb]` declare an insert, which `AudioBusRouter` realises as a nested bus with
+`[AudioEcho]`, `[AudioCompressor]`, `[AudioReverb]` and `[AudioFilter]` declare an insert, which `AudioBusRouter` realises as a nested bus with
 an effect node between its group and its tap. The node processes continuously, so a tail keeps sounding after its sources
 stop, and fades over 400 ms when the insert is unwired. An export clears every tail before its first block.
 

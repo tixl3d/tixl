@@ -7,4 +7,5 @@ public enum AudioEffectKind
     Echo = 1,
     Compressor = 2,
     Reverb = 3,
+    Filter = 4,
 }

@@ -147,9 +147,11 @@ typedef struct
 
 /* ---- Effects: one insert node between a bus's group and its tap. ---- */
 
-enum { TA_EFFECT_NONE = 0, TA_EFFECT_ECHO = 1, TA_EFFECT_COMPRESSOR = 2, TA_EFFECT_REVERB = 3 };
+enum { TA_EFFECT_NONE = 0, TA_EFFECT_ECHO = 1, TA_EFFECT_COMPRESSOR = 2, TA_EFFECT_REVERB = 3, TA_EFFECT_FILTER = 4 };
 
 #define TA_EFFECT_PARAMETERS 5
+#define TA_FILTER_PI 3.14159265358979323846
+#define TA_FILTER_GLIDE_SECONDS 0.02f
 #define TA_ECHO_MAX_SECONDS 2
 #define TA_REVERB_COMBS 8
 #define TA_REVERB_ALLPASSES 4
@@ -182,6 +184,13 @@ typedef struct
 
     /* Compressor */
     float gainReductionDb;
+
+    /* Filter: normalized biquad coefficients and per-channel state */
+    double filterB0, filterB1, filterB2, filterA1, filterA2;
+    double filterZ1[2], filterZ2[2];
+    float filterCutoff; /* gliding toward the parameter; 0 until the first block */
+    float filterMode;
+    float filterQ;
 
     /* Reverb, per channel */
     ta_delay_line combs[2][TA_REVERB_COMBS];
@@ -294,6 +303,9 @@ static void ta_effect_clear(ta_effect_node* effect)
     memset(effect->memory, 0, effect->memorySamples * sizeof(float));
     effect->echoWrite = 0;
     effect->gainReductionDb = 0;
+    effect->filterZ1[0] = effect->filterZ1[1] = 0;
+    effect->filterZ2[0] = effect->filterZ2[1] = 0;
+    effect->filterCutoff = 0;
     for (int channel = 0; channel < 2; channel++)
     {
         for (int index = 0; index < TA_REVERB_COMBS; index++)
@@ -421,6 +433,66 @@ static void ta_effect_process_reverb(ta_effect_node* effect, const float* input,
     }
 }
 
+static void ta_filter_update_coefficients(ta_effect_node* effect, float mode)
+{
+    double omega = 2.0 * TA_FILTER_PI * effect->filterCutoff / effect->sampleRate;
+    double cosine = cos(omega);
+    double alpha = sin(omega) / (2.0 * effect->filterQ);
+    double a0 = 1.0 + alpha;
+    double side = mode > 0.5f ? (1.0 + cosine) * 0.5 : (1.0 - cosine) * 0.5;
+    effect->filterB0 = side / a0;
+    effect->filterB1 = (mode > 0.5f ? -2.0 * side : 2.0 * side) / a0;
+    effect->filterB2 = side / a0;
+    effect->filterA1 = -2.0 * cosine / a0;
+    effect->filterA2 = (1.0 - alpha) / a0;
+    effect->filterMode = mode;
+}
+
+/**
+ * parameters: mode (0 low-pass, 1 high-pass), cutoff Hz, resonance Q. A 12 dB per octave biquad. Cutoff and Q glide
+ * in short steps, on a log scale for the cutoff because that's how pitch is heard: a jump would click, and an
+ * animated cutoff is the common use.
+ */
+static void ta_effect_process_filter(ta_effect_node* effect, const float* input, float* output, ma_uint32 frameCount)
+{
+    const ma_uint32 stepFrames = 32;
+    float mode = ma_atomic_float_get(&effect->parameters[0]);
+    float targetCutoff = ma_atomic_float_get(&effect->parameters[1]);
+    float targetQ = ma_atomic_float_get(&effect->parameters[2]);
+    float glide = 1.0f - expf(-(float)stepFrames / (TA_FILTER_GLIDE_SECONDS * (float)effect->sampleRate));
+
+    if (effect->filterCutoff <= 0)
+    {
+        effect->filterCutoff = targetCutoff;
+        effect->filterQ = targetQ;
+        ta_filter_update_coefficients(effect, mode);
+    }
+
+    for (ma_uint32 start = 0; start < frameCount; start += stepFrames)
+    {
+        ma_uint32 end = start + stepFrames < frameCount ? start + stepFrames : frameCount;
+        if (effect->filterCutoff != targetCutoff || effect->filterQ != targetQ || effect->filterMode != mode)
+        {
+            float ratio = targetCutoff / effect->filterCutoff;
+            effect->filterCutoff = fabsf(ratio - 1.0f) < 0.0005f ? targetCutoff : effect->filterCutoff * powf(ratio, glide);
+            effect->filterQ = fabsf(targetQ - effect->filterQ) < 0.0005f ? targetQ : effect->filterQ + (targetQ - effect->filterQ) * glide;
+            ta_filter_update_coefficients(effect, mode);
+        }
+
+        for (ma_uint32 frame = start; frame < end; frame++)
+        {
+            for (int channel = 0; channel < 2; channel++)
+            {
+                double in = input != NULL ? input[frame * 2 + channel] : 0.0;
+                double out = effect->filterB0 * in + effect->filterZ1[channel];
+                effect->filterZ1[channel] = effect->filterB1 * in - effect->filterA1 * out + effect->filterZ2[channel];
+                effect->filterZ2[channel] = effect->filterB2 * in - effect->filterA2 * out;
+                output[frame * 2 + channel] = (float)out;
+            }
+        }
+    }
+}
+
 static void ta_effect_process(ma_node* node, const float** framesIn, ma_uint32* frameCountIn, float** framesOut, ma_uint32* frameCountOut)
 {
     ta_effect_node* effect = (ta_effect_node*)node;
@@ -435,6 +507,7 @@ static void ta_effect_process(ma_node* node, const float** framesIn, ma_uint32* 
     {
         case TA_EFFECT_ECHO: ta_effect_process_echo(effect, input, output, frameCount); break;
         case TA_EFFECT_COMPRESSOR: ta_effect_process_compressor(effect, input, output, frameCount); break;
+        case TA_EFFECT_FILTER: ta_effect_process_filter(effect, input, output, frameCount); break;
         default: ta_effect_process_reverb(effect, input, output, frameCount); break;
     }
 
