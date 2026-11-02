@@ -4,8 +4,8 @@ using System.Drawing;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
-using ManagedBass;
 using T3.Core.Audio;
+using T3.Core.Audio.Native;
 using T3.Core.Resource;
 using T3.Core.Resource.Assets;
 using T3.Core.Settings;
@@ -63,25 +63,23 @@ internal static class AudioImageGenerator
             return false;
         }
 
-        // Use the offline analysis stream from AudioMixerManager instead of calling Bass.Init()
-        // This prevents interference with live playback and operator audio streams
-        var stream = AudioMixerManager.CreateOfflineAnalysisStream(soundFilePathAbsolute);
-        if (stream == 0)
+        if (!OfflineAudioDecoder.TryOpen(soundFilePathAbsolute, out var decoder))
         {
-            Log.Error($"Failed to create offline analysis stream for: {soundFilePathAbsolute}");
+            Log.Error($"Failed to open audio file for image generation: {soundFilePathAbsolute}");
             imagePathAbsolute = null;
             return false;
         }
 
-        try
+        using (decoder)
         {
             if (style != AudioClipStyle.Spectrum)
-                return GenerateAmplitudeImage(stream, style, ref imagePathAbsolute);
-            var streamLength = Bass.ChannelGetLength(stream);
+                return GenerateAmplitudeImage(decoder, style, ref imagePathAbsolute);
+
+            var streamLength = decoder.FrameCount;
 
             const double samplingResolution = 1.0 / 100;
 
-            var sampleLength = Bass.ChannelSeconds2Bytes(stream, samplingResolution);
+            var sampleLength = (long)(decoder.SampleRate * samplingResolution);
             // Short samples (e.g. a one-shot drum hit) can yield <1 column at 0.01s resolution;
             // a zero/negative width makes the image allocation throw. Use at least one column so the
             // generator works for short clips, not just long soundtracks.
@@ -105,8 +103,6 @@ internal static class AudioImageGenerator
                 Log.Debug($"Limiting texture size to {numSamples} samples");
             }
 
-            // Note: For decode-only streams, we don't call ChannelPlay - we just read data directly
-
             var spectrumImage = new RgbaImage((int)numSamples, ImageHeight);
 
             var intensityPalette = IntensityPalette;
@@ -118,16 +114,19 @@ internal static class AudioImageGenerator
             var logarithmicExponent = UserSettings.Config.ExpandSpectrumVisualizerVertically ? 10d : Math.E;
             var precalculatedLogMultiplier = 1d / Math.Log(logarithmicExponent) * f;
 
-            const int channelLength = (int)DataFlags.FFT2048;
+            var fft = new Fft(FftBufferSize * 2);
             var fftBuffer = new float[FftBufferSize];
+            var monoSamples = new float[FftBufferSize * 2];
+            var interleavedSamples = new float[FftBufferSize * 2 * decoder.Channels];
 
             int logCounter = 0;
 
             for (var sampleIndex = 0; sampleIndex < numSamples; ++sampleIndex)
             {
-                // Seek to position and get FFT data (decode-only streams use SetPosition, not Play)
-                Bass.ChannelSetPosition(stream, sampleIndex * sampleLength);
-                Bass.ChannelGetData(stream, fftBuffer, channelLength);
+                decoder.Seek(sampleIndex * sampleLength);
+                var framesRead = decoder.Read(interleavedSamples);
+                MixToMono(interleavedSamples, framesRead, decoder.Channels, monoSamples);
+                fft.ComputeMagnitudes(monoSamples, fftBuffer);
 
                 for (var rowIndex = 0; rowIndex < ImageHeight; ++rowIndex)
                 {
@@ -181,23 +180,33 @@ internal static class AudioImageGenerator
 
             return success;
         }
-        finally
+    }
+
+    /** Frames past the end of the file are silent, which keeps the last column's FFT window full. */
+    private static void MixToMono(float[] interleaved, int frameCount, int channels, float[] mono)
+    {
+        for (var frame = 0; frame < frameCount; frame++)
         {
-            // Always free the offline analysis stream
-            AudioMixerManager.FreeOfflineAnalysisStream(stream);
+            var sum = 0f;
+            for (var channel = 0; channel < channels; channel++)
+                sum += interleaved[frame * channels + channel];
+
+            mono[frame] = sum / channels;
         }
+
+        Array.Clear(mono, frameCount, mono.Length - frameCount);
     }
 
     /// <summary>
     /// Renders an amplitude-based image (peak waveform or RMS volume envelope) by sequentially decoding
     /// the stream in ~10 ms columns. White-on-transparent so renderers can tint it to the theme.
     /// </summary>
-    private static bool GenerateAmplitudeImage(int stream, AudioClipStyle style, ref string? imagePathAbsolute)
+    private static bool GenerateAmplitudeImage(OfflineAudioDecoder decoder, AudioClipStyle style, ref string? imagePathAbsolute)
     {
-        var streamLength = Bass.ChannelGetLength(stream);
+        var streamLength = decoder.FrameCount;
 
         const double samplingResolution = 1.0 / 100;
-        var sampleLength = Bass.ChannelSeconds2Bytes(stream, samplingResolution);
+        var sampleLength = (long)(decoder.SampleRate * samplingResolution);
         var numSamples = sampleLength > 0 ? streamLength / sampleLength : 0;
         if (numSamples < 1)
         {
@@ -221,17 +230,15 @@ internal static class AudioImageGenerator
         var columns = (int)numSamples;
         var peaks = new float[columns];
         var rms = new float[columns];
-        var sampleBuffer = new float[sampleLength / sizeof(float) + 1];
+        var sampleBuffer = new float[sampleLength * decoder.Channels];
 
-        Bass.ChannelSetPosition(stream, 0);
         for (var column = 0; column < columns; column++)
         {
-            // The offline stream decodes as 32-bit float (BassFlags.Float), so a plain byte count reads floats.
-            var bytesRead = Bass.ChannelGetData(stream, sampleBuffer, (int)sampleLength);
-            if (bytesRead <= 0)
+            var framesRead = decoder.Read(sampleBuffer);
+            if (framesRead <= 0)
                 break;
 
-            var floatCount = Math.Min(bytesRead / sizeof(float), sampleBuffer.Length);
+            var floatCount = framesRead * decoder.Channels;
             var peak = 0f;
             var sumOfSquares = 0.0;
             for (var i = 0; i < floatCount; i++)

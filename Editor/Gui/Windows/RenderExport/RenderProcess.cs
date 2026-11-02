@@ -52,6 +52,11 @@ internal static class RenderProcess
     public static bool IsContinuousActive
         => _activeExportSession is { Settings.TimeRange: RenderSettings.TimeRanges.Continuous };
 
+    /// <summary>True while an export advances playback one file frame at a time, unlike realtime continuous capture,
+    /// which samples the live output against the wall clock.</summary>
+    public static bool IsSteppingPlayback
+        => IsExporting && _activeExportSession != null && !IsRealtimeContinuous(_activeExportSession.Settings);
+
     /// <summary>Frames written so far by the active export (for the continuous-capture activity readout).</summary>
     public static int CapturedFrameCount => _activeExportSession?.FrameIndex ?? 0;
 
@@ -104,13 +109,20 @@ internal static class RenderProcess
             settings.ResolutionFactor = 1f; // realtime grabs the live texture as-is — capture at native size
         }
 
+        return TryStartVideoExport(settings, GetTargetFilePath(settings.RenderMode));
+    }
+
+    /// <summary>Starts an export with its own settings and target, leaving the composition's saved render settings alone.</summary>
+    public static bool TryStartVideoExport(RenderSettings settings, string targetFilePath)
+    {
+        if (MainOutputTexture == null || MainOutputTexture.IsDisposed)
+            return false;
+
         if (State != States.ReadyForExport)
         {
             Log.Warning("Export not available");
             return false;
         }
-
-        var targetFilePath = GetTargetFilePath(settings.RenderMode);
 
         var directory = string.Empty;
         try
@@ -320,6 +332,10 @@ internal static class RenderProcess
         ExportOutputTexture(MainOutputTexture, _activeExportSession);
     }
 
+    private static bool IsRealtimeContinuous(RenderSettings settings)
+        => settings.TimeRange == RenderSettings.TimeRanges.Continuous
+           && settings.ContinuousClock == RenderSettings.ContinuousCaptureClock.Realtime;
+
     private static void ExportOutputTexture(Texture2D mainOutputTexture, ExportSession session)
     {
         var settings = session.Settings;
@@ -349,10 +365,7 @@ internal static class RenderProcess
                 return;
         }
 
-        var isRealtimeContinuous = settings.TimeRange == RenderSettings.TimeRanges.Continuous
-                                   && settings.ContinuousClock == RenderSettings.ContinuousCaptureClock.Realtime;
-
-        if (isRealtimeContinuous)
+        if (IsRealtimeContinuous(settings))
         {
             // Grab the live output without taking over playback, paced to the target FPS.
             savingSuccessful = WriteRealtimeContinuousFrames(session, mainOutputTexture);
@@ -406,7 +419,7 @@ internal static class RenderProcess
 
         var duration = Playback.RunTimeInSecs - session.ExportStartedTime;
         var successful = savingSuccessful ? "successfully" : "unsuccessfully";
-        LastHelpString = $"Render {GetTargetFilePath(settings.RenderMode)} finished {successful} in {StringUtils.HumanReadableDurationFromSeconds(duration)}";
+        LastHelpString = $"Render {session.TargetFilePath} finished {successful} in {StringUtils.HumanReadableDurationFromSeconds(duration)}";
         Log.Debug(LastHelpString);
 
         if (savingSuccessful)

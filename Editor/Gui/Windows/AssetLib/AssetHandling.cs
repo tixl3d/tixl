@@ -83,9 +83,7 @@ internal static class AssetHandling
                                        IconId = (uint)Icon.FileVideo,
                                        Subfolders = ["videos", "video", "media"],
                                    });
-        // Audio plays through BASS (not FFmpeg): wav/mp3/ogg/aiff natively, flac via the bundled
-        // bassflac plugin, aac/m4a/wma through the Media Foundation fallback on Windows.
-        // Opus stays out — it would need the bassopus plugin, which isn't shipped.
+        // What the native audio engine decodes itself; audio doesn't go through FFmpeg.
         AssetType.RegisterType(new AssetType("Audio", [
                                        FileExtensionRegistry.GetUniqueId("wav"),
                                        FileExtensionRegistry.GetUniqueId("mp3"),
@@ -93,9 +91,6 @@ internal static class AssetHandling
                                        FileExtensionRegistry.GetUniqueId("flac"),
                                        FileExtensionRegistry.GetUniqueId("aiff"),
                                        FileExtensionRegistry.GetUniqueId("aif"),
-                                       FileExtensionRegistry.GetUniqueId("m4a"),
-                                       FileExtensionRegistry.GetUniqueId("aac"),
-                                       FileExtensionRegistry.GetUniqueId("wma"),
                                    ])
                                    {
                                        PrimaryOperators = [new Guid("65e95f77-4743-437f-ab31-f34b831d28d7")], // PlayAudioSample (graph)

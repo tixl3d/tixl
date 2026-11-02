@@ -78,8 +78,8 @@ namespace Lib.io.audio
             GetLevel.UpdateAction += UpdateStatus;
 
             // The engine owns the stream's lifetime, triggers and position; routed into a bus, the graph owns
-            // only its mixer membership and gain. Un-buffered, so a trigger stays as responsive as before.
-            _node = new AudioGraphNode(this) { ExternallyManagedChannel = true };
+            // only its routing and gain.
+            _node = new AudioGraphNode(this);
             AudioReference.Value = _node;
             AudioReference.UpdateAction += UpdateAudioReference;
         }
@@ -201,7 +201,7 @@ namespace Lib.io.audio
             // The graph applies the level the engine just stood down from, envelope included, so a group
             // volume or a duck scales the sampler the same way it scales any other source.
             _node.Gain = mute ? 0f : envelopeModulatedVolume;
-            _node.SourceChannel = AudioEngine.TryGetOperatorChannel(_operatorId, out var channel) ? channel : 0;
+            AudioEngine.TryGetOperatorChannel(_operatorId, out _node.SourceChannel);
 
             IsPlaying.Value = AudioEngine.IsOperatorStreamPlaying(_operatorId);
             GetLevel.Value = AudioEngine.GetOperatorLevel(_operatorId);

@@ -70,6 +70,18 @@
       }
     },
     {
+      "InputId": "5b3c95f4-b415-4497-b7d1-72fe10b1d720"/*Panning*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 200.0
+      },
+      "Description": "Stereo position from -1 (full left) to 1 (full right).",
+      "Min": -1.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
       "InputId": "d4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f8a"/*TriggerMode*/,
       "Position": {
         "X": -200.0,

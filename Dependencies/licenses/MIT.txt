@@ -10,7 +10,6 @@ covering tooll's use of:
 - Silk.NET
 - CommandLineParser
 - CppSharpRuntime
-- ManagedBass
 - OpenGl.net
 - Palink.Artnet
 - Unsplash.api

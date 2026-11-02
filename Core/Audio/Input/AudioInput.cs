@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using ManagedBass;
+using T3.Core.Audio.Native;
 using T3.Core.Animation;
 using T3.Core.Audio.Timing;
 using T3.Core.IO;
@@ -16,9 +16,8 @@ namespace T3.Core.Audio.Input;
 /// soundtrack, which <see cref="AudioEngine"/> analyses directly.
 /// </summary>
 /// <remarks>
-/// Manages the lifecycle of capture - device enumeration, starting, and frame-by-frame processing - and
-/// feeds FFT and level data to the playback system. Which devices exist, and whether loopback is among
-/// them, is up to <see cref="AudioInputBackend"/>.
+/// The native engine captures into a ring buffer, and everything else - analysis, beat tracking, recording -
+/// runs here on the main thread, so no managed code runs on the capture thread and none of it races the frame.
 /// </remarks>
 public static class AudioInput
 {
@@ -36,11 +35,17 @@ public static class AudioInput
         if (settings == null)
             return;
 
+        UpdateCaptureState(settings);
+        ProcessCapturedAudio();
+    }
+
+    private static void UpdateCaptureState(CompositionSettings settings)
+    {
         var wantsCaptureForFft = settings.Playback.AudioSource == CompositionSettings.AudioSources.ExternalDevice;
         var wantsCaptureForRecording = _isCaptureNeededForRecording;
 
         // Without a usable backend there is no capture to start and nothing to stop.
-        if ((wantsCaptureForFft || wantsCaptureForRecording) && !AudioInputBackend.Current.IsAvailable)
+        if ((wantsCaptureForFft || wantsCaptureForRecording) && AudioMixerManager.NativeEngine == null)
             return;
 
         if (!wantsCaptureForFft && !wantsCaptureForRecording)
@@ -59,7 +64,7 @@ public static class AudioInput
             if(!_failedToGetLastFffData)
                 return;
 
-            Log.Debug("Trying to restart WASAPI...");
+            Log.Debug("Trying to restart the audio input...");
             _failedToGetLastFffData = false;
         }
             
@@ -74,7 +79,7 @@ public static class AudioInput
                 if (_complainedOnce)
                     return;
 
-                Log.Warning("Can't switch to WASAPI device without a name");
+                Log.Warning("Can't switch to an audio input device without a name");
                 _complainedOnce = true;
                 return;
             }
@@ -114,7 +119,7 @@ public static class AudioInput
     }
 
     /// <summary>
-    /// Gets the list of available WASAPI input devices.
+    /// Gets the list of available audio input devices.
     /// </summary>
     /// <value>
     /// A list of <see cref="AudioInputDevice"/> instances representing available audio input devices.
@@ -124,7 +129,7 @@ public static class AudioInput
     {
         get
         {
-            if (!AudioInputBackend.Current.IsAvailable)
+            if (AudioMixerManager.NativeEngine == null)
                 return _inputDevices ??= [];
 
             if (_inputDevices == null)
@@ -134,66 +139,45 @@ public static class AudioInput
         }
     }
 
-    /// <summary>
-    /// Initializes and starts WASAPI audio capture for the specified device.
-    /// </summary>
-    /// <param name="device">
-    /// The WASAPI input device to capture from. If null, attempts to use the default input device.
-    /// </param>
-    /// <remarks>
-    /// Configures WASAPI with the device's native mix frequency and minimum update period.
-    /// It ensures BASS is initialized before WASAPI setup and registers <see cref="ProcessDataCallback"/>
-    /// for asynchronous audio data processing.
-    /// </remarks>
+    /// <summary>Starts capturing from the specified device, replacing what ran before.</summary>
     private static void StartInputCapture(AudioInputDevice device)
     {
-        if (device == null)
-        {
-            if (_inputDevices.Count == 0)
-            {
-                Log.Error("No audio input devices found");
-                return;
-            }
+        var engine = AudioMixerManager.NativeEngine;
+        if (engine == null)
+            return;
 
-            device = _inputDevices[0];
-            Log.Error($"Attempting first input '{device.Name}'.");
-        }
-        else
-        {
-            Log.Info($"Initializing {AudioInputBackend.Current.Name} audio input for {device.Name}... ");
-        }
+        Log.Info($"Initializing audio input for {device.Name}... ");
 
-        SampleRate = device.SampleRate;
-
-        if (!AudioInputBackend.Current.TryStartCapture(device, OnCapturedData))
+        var result = engine.StartCapture(device.NativeIndex, device.IsLoopback && OperatingSystem.IsWindows());
+        if (result != 0)
         {
+            Log.Error($"Can't open audio input '{device.Name}' (error {result}).");
             return;
         }
 
+        _nextCaptureFrame = 0;
         ActiveInputDeviceName = device.Name;
     }
-        
+
     /// <summary>
-    /// Stops the WASAPI audio capture and releases associated resources.
+    /// Stops the audio capture and releases associated resources.
     /// Any active recording session is finalised first so the WAV file isn't left
     /// with a placeholder header.
     /// </summary>
     private static void Stop()
     {
-        //Log.Debug("Wasapi.Stop()");
-
         if (_activeRecording != null)
         {
             EndRecording();
         }
 
-        AudioInputBackend.Current.StopCapture();
+        AudioMixerManager.NativeEngine?.StopCapture();
         ActiveInputDeviceName = null;
         DanceAiPhaseTracker.Reset();
     }
 
     /// <summary>
-    /// Starts writing the live WASAPI capture to an uncompressed 16-bit PCM WAV file in
+    /// Starts writing the live capture to an uncompressed 16-bit PCM WAV file in
     /// <see cref="RecordingPaths.TempRecordingsDirectory"/>.
     /// </summary>
     /// <param name="suffix">Optional source identifier appended to the filename
@@ -208,7 +192,7 @@ public static class AudioInput
         }
 
         // Mark capture as needed for recording so StartFrame won't tear it down even if
-        // the composition's AudioSource is something other than ExternalDevice. If WASAPI
+        // the composition's AudioSource is something other than ExternalDevice. If capture
         // isn't running yet, bring it up on demand using whatever input device is
         // configured — or fall back to the system default.
         _isCaptureNeededForRecording = true;
@@ -220,7 +204,7 @@ public static class AudioInput
         if (string.IsNullOrEmpty(ActiveInputDeviceName))
         {
             _isCaptureNeededForRecording = false;
-            Log.Warning("Cannot start WAV recording: no WASAPI input device available.");
+            Log.Warning("Cannot start WAV recording: no audio input device available.");
             return null;
         }
 
@@ -242,12 +226,12 @@ public static class AudioInput
         var fileName = RecordingPaths.BuildFileName(RecordingPaths.AudioRecordingPrefix, sessionIndex, ".wav", suffix);
         var path = Path.Combine(directory, fileName);
 
-        var sampleRate = SampleRate > 0 ? SampleRate : 48000;
-        var channels = AudioInputBackend.Current.ActiveChannelCount > 0 ? AudioInputBackend.Current.ActiveChannelCount : 2;
+        var sampleRate = SampleRate;
+        const int channels = CaptureChannelCount;
 
         try
         {
-            // Assign last so the capture callback only sees a fully constructed writer.
+            // Assign last so nothing reads a partly constructed writer.
             var writer = new WavFileWriter(path, sampleRate, channels);
             _activeRecording = writer;
             Log.Debug($"WAV recording started: {path} ({sampleRate} Hz, {channels} ch)");
@@ -271,9 +255,6 @@ public static class AudioInput
         if (writer == null)
             return null;
 
-        // Clear the field before disposing so the callback stops feeding the writer
-        // the moment it next observes the change. The writer's own lock guards against
-        // a callback that may already be inside AppendFloat32Samples.
         _activeRecording = null;
         writer.Dispose();
 
@@ -284,7 +265,7 @@ public static class AudioInput
 
         if (writer.BytesWritten == 0)
         {
-            // A finalised-but-silent WAV means capture ran yet WASAPI never delivered frames —
+            // A finalised-but-silent WAV means capture ran yet the device never delivered frames —
             // typically another app holds the device in exclusive mode (e.g. Audacity), the input
             // is muted, or the wrong device is selected in Playback settings.
             Log.Warning($"Audio recording captured no samples — '{Path.GetFileName(writer.Path)}' is silent. "
@@ -300,7 +281,7 @@ public static class AudioInput
     }
 
     /// <summary>
-    /// Brings WASAPI capture up on demand when a recording is requested but no capture
+    /// Brings capture up on demand when a recording is requested but no capture
     /// is currently active (because the composition's AudioSource isn't ExternalDevice).
     /// Picks the configured input device if one is set, else the first available.
     /// </summary>
@@ -317,7 +298,7 @@ public static class AudioInput
 
         if (device == null)
         {
-            Log.Warning("Cannot start WASAPI capture for recording: no input devices available.");
+            Log.Warning("Cannot start capture for recording: no input devices available.");
             return;
         }
 
@@ -337,121 +318,162 @@ public static class AudioInput
     private static bool _complainedOnce;
 
     /// <summary>
-    /// True while a recording session needs WASAPI capture running, regardless of the
+    /// True while a recording session needs capture running, regardless of the
     /// composition's <see cref="CompositionSettings.PlaybackConfig.AudioSource"/>. Set by
     /// <see cref="BeginRecording"/>, cleared by <see cref="EndRecording"/>. Lets the
-    /// FFT-input and recording paths use the WASAPI input independently — the OS allows
+    /// FFT-input and recording paths use the input independently — the OS allows
     /// simultaneous render-and-capture, so there's no hardware reason to couple them.
     /// </summary>
     private static bool _isCaptureNeededForRecording;
     
-    /// <summary>
-    /// Enumerates and initializes the list of available WASAPI input devices.
-    /// </summary>
-    /// <remarks>
-    /// Populates <see cref="_inputDevices"/> with all enabled input and loopback devices.
-    /// Requires BASS to be initialized before enumeration.
-    /// </remarks>
+    /// <summary>Enumerates capture devices, plus the outputs that can be recorded where WASAPI offers loopback.</summary>
     private static void InitializeInputDeviceList()
     {
         _inputDevices = [];
-        AudioInputBackend.Current.EnumerateDevices(_inputDevices);
+        var engine = AudioMixerManager.NativeEngine;
+        if (engine == null)
+            return;
+
+        for (var index = 0; index < engine.GetDeviceCount(capture: true); index++)
+        {
+            var name = engine.GetDeviceName(capture: true, index);
+            if (name == null)
+                continue;
+
+            // PipeWire and PulseAudio list what an output plays as an ordinary capture device.
+            var isMonitor = name.StartsWith("Monitor of", StringComparison.OrdinalIgnoreCase);
+            _inputDevices.Add(new AudioInputDevice { Name = name, IsLoopback = isMonitor, NativeIndex = index });
+            Log.Debug($"Found audio input ID:{_inputDevices.Count - 1} {name}");
+        }
+
+        if (!OperatingSystem.IsWindows())
+            return;
+
+        for (var index = 0; index < engine.GetDeviceCount(capture: false); index++)
+        {
+            var name = engine.GetDeviceName(capture: false, index);
+            if (name != null)
+                _inputDevices.Add(new AudioInputDevice { Name = name + " (Loopback)", IsLoopback = true, NativeIndex = index });
+        }
     }
 
     /// <summary>
-    /// Callback invoked asynchronously by WASAPI when new audio data arrives.
-    /// Processes FFT data, audio levels, and triggers audio analysis updates.
+    /// Works through what was captured since the last frame in steps of about 10 ms, because beat tracking
+    /// and the analysis decay are tuned to that rate. After a long stall only the newest steps are analysed;
+    /// a recording still receives every frame.
     /// </summary>
-    /// <param name="buffer">Pointer to the audio sample buffer.</param>
-    /// <param name="length">The length of the buffer in bytes.</param>
-    /// <param name="user">User data pointer (unused).</param>
-    /// <returns>The length parameter, indicating all data was processed.</returns>
-    /// <remarks>
-    /// This callback may be invoked multiple times per frame. It handles:
-    /// <list type="bullet">
-    /// <item>Waveform sample buffer updates (skipped during file export)</item>
-    /// <item>FFT gain buffer population for audio analysis</item>
-    /// <item>Stereo level calculation for metering</item>
-    /// <item>Beat synchronization updates when enabled</item>
-    /// </list>
-    /// </remarks>
-    private static void OnCapturedData(IntPtr buffer, int length)
+    private static void ProcessCapturedAudio()
     {
-        // Skip all capture processing during export - AudioRendering handles FFT/waveform
+        var engine = AudioMixerManager.NativeEngine;
+        if (engine == null || string.IsNullOrEmpty(ActiveInputDeviceName))
+            return;
+
+        if (!engine.IsCaptureRunning)
+        {
+            _failedToGetLastFffData = true;
+            return;
+        }
+
+        var written = engine.CaptureFramesWritten;
+
+        // An export stops this loop and handles analysis itself, so what arrived meanwhile is out of date.
         if (Playback.Current.IsRenderingToFile)
-            return;
-
-        // Stream the raw captured samples to the active WAV recording, if any.
-        // Read directly from the callback's buffer instead of issuing another GetData()
-        // call — GetData consumes BASS's internal queue and would compete with the
-        // analysis paths below for the same samples.
-        var writer = _activeRecording;
-        if (writer != null && buffer != IntPtr.Zero && length > 0)
         {
-            writer.AppendFloat32Samples(buffer, length);
-        }
-
-        var time = Playback.RunTimeInSecs;  // Keep because timer is still running
-        TimeSinceLastUpdate = time - LastUpdateTime;
-        LastUpdateTime = time;
-
-        // Skip waveform buffer updates during export - AudioRendering handles this
-        if (WaveFormProcessing.RequestedOnce && !Playback.Current.IsRenderingToFile)
-        {
-            var sizeInBytes = AudioConfig.WaveformSampleCount << 2 << 1;
-            WaveFormProcessing.LastFetchResultCode = AudioInputBackend.Current.GetData(WaveFormProcessing.InterleavenSampleBuffer,
-                                                                                       sizeInBytes);
-        }
-        
-        var resultCode = AudioInputBackend.Current.GetData(AudioAnalysis.FftGainBuffer,
-                                                           (int)(AudioAnalysis.BassFlagForFftBufferSize | DataFlags.FFTRemoveDC));
-        _failedToGetLastFffData = resultCode < 0;
-        if (_failedToGetLastFffData)
-        {
-            Log.Debug($"Can't get FFT data from the audio input: {Bass.LastError}");
+            _nextCaptureFrame = written;
             return;
         }
-        
-        // level is an int32 carrying per-channel level, such as: "0xRRRRLLLL"
-        // convert to M/S, and scale it.
-        // more info : https://documentation.help/BASSWASAPI/BASS_WASAPI_GetLevel.html
-        var level = AudioInputBackend.Current.GetLevel();
-        if (level != -1) // exactly -1 is a capture error, do not measure it
+
+        var capacity = (ulong)NativeAudioEngine.CaptureRingCapacity;
+        if (written - _nextCaptureFrame > capacity)
         {
-            var left = level & 0xffff;
-            var right = (level >> 16) & 0xffff;
-            _lastAudioLevel = (left + right + Math.Abs(left-right)) * short.MaxValue * 0.00001f;
+            if (_activeRecording != null)
+                Log.Warning("The frame loop stalled for too long; the audio recording lost samples.");
+
+            _nextCaptureFrame = written - capacity;
         }
 
-        var playbackSettings = Playback.Current?.Settings;
-        
-        if (playbackSettings == null) 
-            return;
-        
-        AudioAnalysis.ProcessUpdate(playbackSettings.Playback.AudioGainFactor,
-                                    playbackSettings.Playback.AudioDecayFactor);
+        var stepsLeft = (long)((written - _nextCaptureFrame) / CaptureStepFrames);
+        var now = Playback.RunTimeInSecs;
+        var stepSecs = CaptureStepFrames / (double)SampleRate;
 
-        if (playbackSettings.Playback.EnableAudioBeatLocking)
+        for (; stepsLeft > 0; stepsLeft--)
         {
-            if (playbackSettings.Playback.BeatLockSource != CompositionSettings.BeatLockSources.OnsetDetection)
+            if (engine.ReadCapture(_nextCaptureFrame, _captureStep) < CaptureStepFrames)
+                return;
+
+            _nextCaptureFrame += CaptureStepFrames;
+            ConsumeStep(stepsLeft <= MaxAnalysedStepsPerFrame, now - (stepsLeft - 1) * stepSecs, stepSecs);
+        }
+    }
+
+    private static unsafe void ConsumeStep(bool analyse, double stepTime, double stepSecs)
+    {
+        fixed (float* samples = _captureStep)
+        {
+            var buffer = (IntPtr)samples;
+            _activeRecording?.AppendFloat32Samples(buffer, _captureStep.Length * sizeof(float));
+
+            var settings = Playback.Current?.Settings;
+            if (settings is { Playback.EnableAudioBeatLocking: true }
+                && settings.Playback.BeatLockSource != CompositionSettings.BeatLockSources.OnsetDetection)
             {
-                DanceAiPhaseTracker.FeedCapture(buffer, length, AudioInputBackend.Current.ActiveChannelCount, SampleRate);
+                DanceAiPhaseTracker.FeedCapture(buffer, _captureStep.Length * sizeof(float), CaptureChannelCount, SampleRate);
             }
-            else
-            {
-                BeatSynchronizer.UpdateBeatTimer();
-            }
+        }
+
+        // Recording alone doesn't take over the analysis, which then follows the project's own audio.
+        if (Playback.Current?.Settings is not { Playback.AudioSource: CompositionSettings.AudioSources.ExternalDevice } playbackSettings)
+            return;
+
+        Array.Copy(_monoHistory, CaptureStepFrames, _monoHistory, 0, _monoHistory.Length - CaptureStepFrames);
+        var interleaved = WaveFormProcessing.InterleavenSampleBuffer;
+        Array.Copy(interleaved, _captureStep.Length, interleaved, 0, interleaved.Length - _captureStep.Length);
+        Array.Copy(_captureStep, 0, interleaved, interleaved.Length - _captureStep.Length, _captureStep.Length);
+        WaveFormProcessing.LastFetchResultCode = interleaved.Length;
+
+        var peak = 0f;
+        var writeIndex = _monoHistory.Length - CaptureStepFrames;
+        for (var frame = 0; frame < CaptureStepFrames; frame++)
+        {
+            var left = _captureStep[frame * 2];
+            var right = _captureStep[frame * 2 + 1];
+            _monoHistory[writeIndex + frame] = (left + right) * 0.5f;
+            peak = Math.Max(peak, Math.Max(Math.Abs(left), Math.Abs(right)));
+        }
+
+        if (!analyse)
+            return;
+
+        TimeSinceLastUpdate = stepSecs;
+        LastUpdateTime = stepTime;
+        _lastAudioLevel = peak * LevelMeterScale;
+
+        var mean = 0f;
+        for (var index = 0; index < _monoHistory.Length; index++)
+            mean += _monoHistory[index];
+
+        mean /= _monoHistory.Length;
+        for (var index = 0; index < _monoHistory.Length; index++)
+            _fftSamples[index] = _monoHistory[index] - mean;
+
+        _fft.ComputeMagnitudes(_fftSamples, AudioAnalysis.FftGainBuffer);
+        AudioAnalysis.ProcessUpdate(playbackSettings.Playback.AudioGainFactor, playbackSettings.Playback.AudioDecayFactor);
+
+        if (playbackSettings.Playback.EnableAudioBeatLocking
+            && playbackSettings.Playback.BeatLockSource == CompositionSettings.BeatLockSources.OnsetDetection)
+        {
+            BeatSynchronizer.UpdateBeatTimer();
         }
     }
 
     /// <summary>
-    /// Flag indicating whether the last FFT data fetch from WASAPI failed.
+    /// Flag indicating that the capture device stopped by itself.
     /// Used to trigger capture restart on the next frame.
     /// </summary>
     private static bool _failedToGetLastFffData;
 
     /// <summary>
-    /// Internal cache of enumerated WASAPI input devices.
+    /// Internal cache of enumerated input devices.
     /// </summary>
     private static List<AudioInputDevice> _inputDevices;
     
@@ -466,37 +488,12 @@ public static class AudioInput
     internal static double LastUpdateTime;
     
     /// <summary>
-    /// The sample rate in Hz of the currently active audio capture device.
-    /// Defaults to 48000 Hz if device sample rate cannot be determined.
+    /// The sample rate in Hz captured audio arrives at, whatever the device runs at.
     /// </summary>
-    internal static int SampleRate;
+    internal const int SampleRate = AudioConfig.MixerFrequency;
 
     /// <summary>
-    /// Initializes the sample rate from the audio system.
-    /// </summary>
-    /// <remarks>
-    /// Attempts to get the device sample rate from <see cref="AudioMixerManager"/>.
-    /// Falls back to 48000 Hz if initialization fails.
-    /// </remarks>
-    static AudioInput()
-    {
-        try
-        {
-            // Ensure AudioMixerManager has a chance to query the device sample rate.
-            AudioMixerManager.Initialize();
-
-            var deviceRate = AudioConfig.MixerFrequency; // AudioMixerManager sets this during Initialize
-            SampleRate = deviceRate > 0 ? deviceRate : 48000; //Set to device rate if valid, fallback to 48kHz if not
-        }
-        catch (Exception ex)
-        {
-            Log.Debug($"AudioInput: Failed to initialize sample rate from AudioMixerManager: {ex.Message}");
-            SampleRate = 48000;
-        }
-    }
-
-    /// <summary>
-    /// Gets the name of the currently active WASAPI input device.
+    /// Gets the name of the currently active input device.
     /// </summary>
     /// <value>
     /// The device name string if capture is active; otherwise, <c>null</c>.
@@ -504,14 +501,13 @@ public static class AudioInput
     public static string ActiveInputDeviceName { get; private set; }
     
     /// <summary>
-    /// The raw audio level value from the last WASAPI level measurement.
+    /// The raw audio level value from the last measurement.
     /// </summary>
     private static float _lastAudioLevel;
 
     /// <summary>
     /// Active WAV writer. Set by <see cref="BeginRecording"/>, cleared by
-    /// <see cref="EndRecording"/> and <see cref="Stop"/>. Read on the BASS capture thread
-    /// inside the callback.
+    /// <see cref="EndRecording"/> and <see cref="Stop"/>.
     /// </summary>
     private static WavFileWriter _activeRecording;
 
@@ -527,4 +523,21 @@ public static class AudioInput
     /// The decay creates a smooth falloff effect for visual representation.
     /// </remarks>
     public static float DecayingAudioLevel => (float)(_lastAudioLevel / Math.Max(1, (Playback.RunTimeInSecs - LastUpdateTime) * 100));
+
+    /** Everything is captured as interleaved stereo, which the analysis and the WAV writer expect. */
+    private const int CaptureChannelCount = 2;
+
+    /** 10 ms at the mix rate. */
+    private const int CaptureStepFrames = 480;
+
+    private const int MaxAnalysedStepsPerFrame = 16;
+
+    /** Scales a 0..1 peak into the range the gain meter in the playback settings was calibrated to. */
+    private const float LevelMeterScale = 21474f;
+
+    private static readonly float[] _captureStep = new float[CaptureStepFrames * CaptureChannelCount];
+    private static readonly float[] _monoHistory = new float[AudioConfig.FftBufferSize * 2];
+    private static readonly float[] _fftSamples = new float[AudioConfig.FftBufferSize * 2];
+    private static readonly Fft _fft = new(AudioConfig.FftBufferSize * 2);
+    private static ulong _nextCaptureFrame;
 }

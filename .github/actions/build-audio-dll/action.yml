@@ -1,0 +1,23 @@
+name: "Build Audio DLL"
+description: "Cross-compile tixlaudio.dll into Dependencies with a pinned Zig, on a Windows runner"
+runs:
+  using: "composite"
+  steps:
+    - name: Install Zig
+      shell: pwsh
+      env:
+        ZIG_VERSION: "0.14.1"
+        ZIG_SHA256: "554f5378228923ffd558eac35e21af020c73789d87afeabf4bfd16f2e6feed2c"
+      run: |
+        $name = "zig-x86_64-windows-$env:ZIG_VERSION"
+        $archive = Join-Path $env:RUNNER_TEMP "$name.zip"
+        Invoke-WebRequest "https://ziglang.org/download/$env:ZIG_VERSION/$name.zip" -OutFile $archive
+        $hash = (Get-FileHash $archive -Algorithm SHA256).Hash
+        if ($hash -ine $env:ZIG_SHA256) { throw "Zig archive checksum mismatch: $hash" }
+        Expand-Archive $archive -DestinationPath $env:RUNNER_TEMP
+        $zig = (Join-Path $env:RUNNER_TEMP "$name/zig.exe") -replace '\\', '/'
+        "ZIG_EXE=$zig" >> $env:GITHUB_ENV
+
+    - name: Build tixlaudio.dll
+      shell: bash
+      run: Native/TixlAudio/build-windows.sh "$ZIG_EXE"

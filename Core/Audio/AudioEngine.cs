@@ -1,9 +1,9 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
-using ManagedBass;
 using T3.Core.Animation;
 using T3.Core.Audio.Graph;
+using T3.Core.Audio.Native;
 using T3.Core.IO;
 using T3.Core.Logging;
 using T3.Core.Settings;
@@ -56,13 +56,11 @@ public static class AudioEngine
     private static Vector3 _listenerVelocity = Vector3.Zero;
     private static Vector3 _listenerForward = new(0, 0, 1);
     private static Vector3 _listenerUp = new(0, 1, 0);
-    private static bool _3dInitialized;
-    private static bool _3dListenerDirty;
-    private static bool _3dApplyNeeded;
 
     private static double _lastPlaybackSpeed = 1;
-    private static bool _bassInitialized;
-    private static bool _bassInitFailed;
+
+    private static readonly Fft _fft = new(AudioConfig.FftBufferSize * 2);
+    private static readonly float[] _fftSamples = new float[AudioConfig.FftBufferSize * 2];
 
     /// <summary>
     /// Common state for operator audio streams using mixer (stereo).
@@ -160,7 +158,7 @@ public static class AudioEngine
     {
         if (SoundtrackClipStreams.TryGetValue(handle, out var stream))
         {
-            Bass.StreamFree(stream.StreamHandle);
+            stream.DisableSoundtrackStream();
             SoundtrackClipStreams.Remove(handle);
         }
 
@@ -171,19 +169,19 @@ public static class AudioEngine
     }
 
     /// <summary>
-    /// Exposes a soundtrack clip's live BASS channel so the audio-processing graph (an [AudioBus]) can route it.
+    /// Exposes a soundtrack clip's live source so the audio-processing graph (an [AudioBus]) can route it.
     /// Only valid while the clip is in use — its stream is created lazily on the first <see cref="UseSoundtrackClip"/>
     /// (i.e. the clip must be AutoPlay or driven by a player). Returns false until then.
     /// </summary>
-    public static bool TryGetSoundtrackChannel(AudioClipResourceHandle? handle, out int channel)
+    public static bool TryGetSoundtrackChannel(AudioClipResourceHandle? handle, out AudioHandle channel)
     {
-        if (handle != null && SoundtrackClipStreams.TryGetValue(handle, out var stream) && stream.StreamHandle != 0)
+        if (handle != null && SoundtrackClipStreams.TryGetValue(handle, out var stream))
         {
-            channel = stream.StreamHandle;
+            channel = stream.Source;
             return true;
         }
 
-        channel = 0;
+        channel = default;
         return false;
     }
 
@@ -195,9 +193,9 @@ public static class AudioEngine
     /// <param name="frameDurationInSeconds">The duration of the current frame in seconds.</param>
     public static void CompleteFrame(Playback playback, double frameDurationInSeconds)
     {
-        if (!EnsureBassInitialized())
+        if (!EnsureAudioInitialized())
         {
-            // Without BASS there are no streams, buses or 3D sources to service. Only the bookkeeping other
+            // Without audio there are no streams, buses or 3D sources to service. Only the bookkeeping other
             // systems read has to stay current, so they don't mistake a silent frame for a stalled one.
             EnsureFrameTokenCurrent();
             _obsoleteSoundtrackHandles.Clear();
@@ -206,12 +204,14 @@ public static class AudioEngine
         }
 
         ProcessSoundtrackClips(playback, frameDurationInSeconds);
+        AudioMixerManager.UpdateNativeEngine();
 
         // Process FFT data after filling the buffer from soundtrack
         // Skip during export - GetFullMixDownBuffer handles FFT processing during export
         // to ensure consistent behavior between soundtrack and external audio modes
+        // Not gated on the settings being enabled: an [AudioClip] plays without them, and has to be analysed too.
         if (!playback.IsRenderingToFile && 
-            playback.Settings is { Enabled: true, Playback.AudioSource: CompositionSettings.AudioSources.ProjectSoundTrack })
+            playback.Settings is { Playback.AudioSource: CompositionSettings.AudioSources.ProjectSoundTrack })
             AudioAnalysis.ProcessUpdate(playback.Settings.Playback.AudioGainFactor, playback.Settings.Playback.AudioDecayFactor);
 
         StopStaleOperators();
@@ -225,48 +225,15 @@ public static class AudioEngine
         // against the previous frame's token, not the current one.
         EnsureFrameTokenCurrent();
         
-        // Apply all 3D audio changes once per frame (batched for performance)
-        Apply3DChanges();
-
         _obsoleteSoundtrackHandles.Clear();
         _updatedSoundtrackClipTimes.Clear();
     }
 
-    /// <summary>False when audio is unavailable and the caller has to skip everything that touches BASS.</summary>
-    private static bool EnsureBassInitialized()
+    /// <summary>False when audio is unavailable and the caller has to skip everything that touches the engine.</summary>
+    private static bool EnsureAudioInitialized()
     {
-        if (_bassInitialized) return true;
-        if (_bassInitFailed) return false;
-
-        if (!BassLibrary.IsAvailable)
-        {
-            _bassInitFailed = true;
-            return false;
-        }
-
-        try
-        {
-            AudioMixerManager.Initialize();
-        }
-        catch (Exception e) when (e is DllNotFoundException or EntryPointNotFoundException or BadImageFormatException)
-        {
-            // The BASS native library is not there, or is built for another platform. Rendering does not
-            // depend on audio, so carry on without it rather than taking the whole render loop down.
-            Log.Warning($"[AudioEngine] BASS is unavailable; audio disabled. {e.Message}");
-            _bassInitFailed = true;
-            return false;
-        }
-
-        if (AudioMixerManager.OperatorMixerHandle == 0)
-        {
-            Log.Error("[AudioEngine] Failed to initialize AudioMixerManager; audio disabled.");
-            _bassInitFailed = true;
-            return false;
-        }
-
-        _bassInitialized = true;
-        InitializeGlobalVolumeFromSettings();
-        return true;
+        AudioMixerManager.Initialize();
+        return AudioMixerManager.NativeEngine != null;
     }
 
     private static void ProcessSoundtrackClips(Playback playback, double frameDurationInSeconds)
@@ -313,11 +280,6 @@ public static class AudioEngine
             // clip into ExportAudioFrame (which drives FFT for the rendered frames).
             if (playback.IsRenderingToFile)
             {
-                // Except graph-routed clips: they stay in their bus submix during export (the export mixer
-                // skips them), so their seek/pause sync must keep running or they'd stay paused and silent.
-                if (clipStream.ResourceHandle.Clip.IsRoutedToGraph)
-                    clipStream.UpdateSoundtrackTime(playback);
-
                 if (!handledMainSoundtrack && clipStream.ResourceHandle.Clip.IsMainSoundtrack)
                 {
                     handledMainSoundtrack = true;
@@ -391,22 +353,19 @@ public static class AudioEngine
         if (playback.IsRenderingToFile)
             return;
 
-        // Get FFT data from the GlobalMixer to include both soundtrack AND operator audio
-        // This ensures all audio metering (AudioWaveform, AudioFrequencies, AudioReaction, etc.)
-        // monitors the complete audio output including operator-generated sounds
-        var mixerHandle = AudioMixerManager.GlobalMixerHandle;
-        if (mixerHandle == 0)
+        var engine = AudioMixerManager.NativeEngine;
+        if (engine == null)
             return;
 
-        const int dataFlags = (int)DataFlags.FFT2048;
-        _ = Bass.ChannelGetData(mixerHandle, context.FftGainBuffer, dataFlags);
+        // All metering (AudioWaveform, AudioFrequencies, AudioReaction, ...) monitors the complete output.
+        engine.ReadLatestMono(AudioHandle.Output, _fftSamples);
+        _fft.ComputeMagnitudes(_fftSamples, context.FftGainBuffer);
 
         if (!context.WaveformRequested)
             return;
 
-        int lengthInBytes = AudioConfig.WaveformSampleCount << 2 << 1;
-        context.LastWaveformFetchResult = Bass.ChannelGetData(mixerHandle,
-            context.InterleavedSampleBuffer, lengthInBytes);
+        engine.ReadOutputStereo(context.InterleavedSampleBuffer);
+        context.LastWaveformFetchResult = context.InterleavedSampleBuffer.Length;
     }
 
     /// <summary>
@@ -418,8 +377,7 @@ public static class AudioEngine
     {
         if (handle == null || !SoundtrackClipStreams.TryGetValue(handle, out var clipStream))
             return 2;
-        Bass.ChannelGetInfo(clipStream.StreamHandle, out var info);
-        return info.Channels;
+        return clipStream.ChannelCount;
     }
 
     /// <summary>
@@ -431,18 +389,12 @@ public static class AudioEngine
     {
         if (clip == null || !SoundtrackClipStreams.TryGetValue(clip, out var stream))
             return 48000;
-        Bass.ChannelGetInfo(stream.StreamHandle, out var info);
-        return info.Frequency;
+        return stream.SampleRate;
     }
 
     #endregion
 
     #region 3D Listener
-
-    /// <summary>
-    /// Converts a System.Numerics.Vector3 to a ManagedBass.Vector3D.
-    /// </summary>
-    private static Vector3D ToBassVector(Vector3 v) => new(v.X, v.Y, v.Z);
 
     /// <summary>
     /// Sets the 3D listener position and orientation for spatial audio.
@@ -459,66 +411,7 @@ public static class AudioEngine
         _listenerPosition = position;
         _listenerForward = forward;
         _listenerUp = up;
-        _3dListenerDirty = true;
-
-        if (!_3dInitialized)
-        {
-            Initialize3DAudio();
-            _3dInitialized = true;
-            Log.Gated.Audio($"[AudioEngine] 3D audio initialized | Pos: {position}");
-        }
-    }
-
-    /// <summary>
-    /// Initializes BASS 3D audio with configured factors.
-    /// </summary>
-    private static void Initialize3DAudio()
-    {
-        // Set 3D factors for proper world scaling
-        Bass.Set3DFactors(
-            AudioConfig.DistanceFactor,
-            AudioConfig.RolloffFactor,
-            AudioConfig.DopplerFactor);
-        
-        // Apply initial listener position
-        ApplyListenerPosition();
-    }
-
-    /// <summary>
-    /// Applies the current listener position to BASS.
-    /// </summary>
-    private static void ApplyListenerPosition()
-    {
-        var pos = ToBassVector(_listenerPosition);
-        var vel = ToBassVector(_listenerVelocity);
-        var front = ToBassVector(_listenerForward);
-        var top = ToBassVector(_listenerUp);
-        
-        Bass.Set3DPosition(pos, vel, front, top);
-        _3dListenerDirty = false;
-    }
-
-    /// <summary>
-    /// Marks that a 3D apply is needed at the end of the frame.
-    /// Called by spatial streams when their positions are updated.
-    /// </summary>
-    internal static void Mark3DApplyNeeded() => _3dApplyNeeded = true;
-
-    /// <summary>
-    /// Applies all pending 3D changes (called once per frame in CompleteFrame).
-    /// </summary>
-    private static void Apply3DChanges()
-    {
-        if (_3dListenerDirty)
-        {
-            ApplyListenerPosition();
-        }
-        
-        if (_3dApplyNeeded || _3dListenerDirty)
-        {
-            Bass.Apply3D();
-            _3dApplyNeeded = false;
-        }
+        AudioMixerManager.NativeEngine?.SetListener(position, forward, up, _listenerVelocity);
     }
 
     /// <summary>
@@ -561,18 +454,18 @@ public static class AudioEngine
     /// and triggering play in the same frame for predictable behavior.
     /// </param>
     /// <summary>
-    /// Exposes an operator stream's live BASS channel so the audio-processing graph (an [AudioBus]) can route
+    /// Exposes an operator stream's live source so the audio-processing graph (an [AudioBus]) can route
     /// it. The stream is created lazily on the first playback update, so this returns false until then.
     /// </summary>
-    public static bool TryGetOperatorChannel(Guid operatorId, out int channel)
+    public static bool TryGetOperatorChannel(Guid operatorId, out AudioHandle channel)
     {
-        if (_stereoOperatorStates.TryGetValue(operatorId, out var state) && state.Stream is { StreamHandle: not 0 })
+        if (_stereoOperatorStates.TryGetValue(operatorId, out var state) && state.Stream != null)
         {
-            channel = state.Stream.StreamHandle;
+            channel = state.Stream.Source;
             return true;
         }
 
-        channel = 0;
+        channel = default;
         return false;
     }
 
@@ -597,7 +490,7 @@ public static class AudioEngine
         var resolvedPath = ResolveFilePath(filePath);
 
         if (!HandleFileChange(state, resolvedPath, operatorId,
-            path => StereoOperatorAudioStream.TryLoadStream(path, AudioMixerManager.OperatorMixerHandle, out var s) ? s : null))
+            path => StereoOperatorAudioStream.TryLoadStream(path, out var s) ? s : null))
             return;
 
         if (state.Stream == null) return;
@@ -608,7 +501,7 @@ public static class AudioEngine
         // so take it back. Checking real membership every frame rather than a one-shot transition avoids racing
         // the bus, whose own removal can run later in the same frame.
         if (!routedToGraph)
-            state.Stream.ReclaimMixerMembership(AudioMixerManager.OperatorMixerHandle);
+            state.Stream.ReclaimRouting();
 
         // Store the pending seek position - will be applied on next play trigger
         if (seek >= 0f && seek <= 1f)
@@ -671,7 +564,6 @@ public static class AudioEngine
 
     /// <summary>
     /// Updates the playback state of a spatial (3D) audio stream for an operator.
-    /// Spatial streams play directly to BASS output for hardware-accelerated 3D audio.
     /// </summary>
     /// <param name="operatorId">The unique identifier of the operator.</param>
     /// <param name="filePath">The file path of the audio file to play.</param>
@@ -704,9 +596,6 @@ public static class AudioEngine
         
         if (!EnsureMixerInitialized()) return;
 
-        if (!_3dInitialized)
-            Set3DListenerPosition(Vector3.Zero, new Vector3(0, 0, 1), new Vector3(0, 1, 0));
-
         var state = GetOrCreateSpatialState(operatorId);
         
         // Mark this operator as updated for this frame (used for stale detection)
@@ -737,11 +626,8 @@ public static class AudioEngine
             if (orientation.HasValue && orientation.Value.Length() > 0.001f)
                 state.Stream.Set3DOrientation(orientation.Value);
 
-            if (Math.Abs(innerConeAngle - 360f) > 0.1f || Math.Abs(outerConeAngle - 360f) > 0.1f || Math.Abs(outerConeVolume - 1.0f) > 0.001f)
-                state.Stream.Set3DCone(innerConeAngle, outerConeAngle, outerConeVolume);
-
-            if (mode3D != 0)
-                state.Stream.Set3DMode((Mode3D)mode3D);
+            state.Stream.Set3DCone(innerConeAngle, outerConeAngle, outerConeVolume);
+            state.Stream.Set3DMode((NativeAudioEngine.SpatialMode)mode3D);
         }
     }
 
@@ -819,20 +705,7 @@ public static class AudioEngine
 
     #region Common Operator Helpers
 
-    private static bool EnsureMixerInitialized()
-    {
-        if (AudioMixerManager.IsInitialized) return true;
-
-        Log.Gated.Audio("[AudioEngine] Mixer not initialized, initializing...");
-        AudioMixerManager.Initialize();
-
-        if (AudioMixerManager.OperatorMixerHandle == 0)
-        {
-            // Don't log every time - Initialize() already logs the failure once
-            return false;
-        }
-        return true;
-    }
+    private static bool EnsureMixerInitialized() => EnsureAudioInitialized();
 
     private static OperatorAudioState<T> GetOrCreateState<T>(Dictionary<Guid, OperatorAudioState<T>> states, Guid operatorId)
         where T : OperatorAudioStreamBase
@@ -899,8 +772,7 @@ public static class AudioEngine
                 state.Stream = loadFunc(resolvedPath);
                 if (state.Stream == null)
                 {
-                    var bassError = Bass.LastError;
-                    var error = $"{resolvedPath} (BASS error: {bassError})";
+                    var error = $"{resolvedPath} could not be decoded";
                     Log.Error($"[AudioEngine] Failed to load stream for {operatorId}: {error}");
                     state.FailedFilePath = resolvedPath;
                     state.LastLoadError = error;
@@ -1047,11 +919,9 @@ public static class AudioEngine
                 state.FailedFilePath = resolvedPath;
                 state.LastLoadError = error;
             }
-            // Note: mixerHandle parameter is ignored for spatial streams - they play directly to BASS
-            else if (!SpatialOperatorAudioStream.TryLoadStream(resolvedPath, 0, out var stream))
+            else if (!SpatialOperatorAudioStream.TryLoadStream(resolvedPath, out var stream))
             {
-                var bassError = Bass.LastError;
-                var error = $"{resolvedPath} (BASS error: {bassError})";
+                var error = $"{resolvedPath} could not be decoded";
                 Log.Error($"[AudioEngine] Failed to load spatial stream for {operatorId}: {error}");
                 state.FailedFilePath = resolvedPath;
                 state.LastLoadError = error;
@@ -1297,18 +1167,8 @@ public static class AudioEngine
     {
         IsExporting = false;
         
-        if (AudioMixerManager.GlobalMixerHandle != 0)
-        {
-            if (Bass.ChannelIsActive(AudioMixerManager.GlobalMixerHandle) != PlaybackState.Playing)
-                Bass.ChannelPlay(AudioMixerManager.GlobalMixerHandle);
-            Bass.ChannelUpdate(AudioMixerManager.GlobalMixerHandle, 0);
-        }
-
         RestoreOperatorStreams(_stereoOperatorStates);
         RestoreSpatialOperatorStreams();
-
-        if (AudioMixerManager.GlobalMixerHandle != 0)
-            Bass.ChannelUpdate(AudioMixerManager.GlobalMixerHandle, 0);
     }
 
     private static void RestoreOperatorStreams<T>(Dictionary<Guid, OperatorAudioState<T>> states)
@@ -1318,7 +1178,6 @@ public static class AudioEngine
         {
             if (state.Stream != null)
             {
-                state.Stream.ClearExportMetering();
                 state.Stream.RestartAfterExport();
                 state.Stream.SetStale(false);
                 state.IsStale = false;
@@ -1332,7 +1191,6 @@ public static class AudioEngine
         {
             if (state.Stream != null)
             {
-                state.Stream.ClearExportMetering();
                 state.Stream.RestartAfterExport();
                 state.Stream.SetStale(false);
                 state.IsStale = false;
@@ -1345,68 +1203,12 @@ public static class AudioEngine
     #region Device & Volume Management
 
     /// <summary>
-    /// Handles audio device changes by reinitializing all audio streams.
-    /// </summary>
-    /// <summary>
-    /// Handles audio device changes by disposing all audio streams and reinitializing.
-    /// This ensures no stale BASS handles remain after Bass.Free() is called.
-    /// </summary>
-    public static void OnAudioDeviceChanged()
-    {
-        // Dispose ALL streams before calling AudioMixerManager.Shutdown() / Bass.Free()
-        // This prevents invalid handle errors when streams are accessed after device change
-        DisposeAllAudioStreams();
-
-        AudioMixerManager.Shutdown();
-        _bassInitialized = false; // Reset flag to allow proper reinitialization
-        _bassInitFailed = false;  // Reset failure flag to allow retry
-        AudioMixerManager.Initialize();
-
-        Log.Gated.Audio("[AudioEngine] Audio device changed: all streams disposed and reinitialized.");
-    }
-
-    /// <summary>
-    /// Disposes all audio streams (stereo operators, spatial operators, and soundtracks).
-    /// Called during device changes to prevent invalid BASS handle errors.
-    /// </summary>
-    private static void DisposeAllAudioStreams()
-    {
-        // Dispose stereo operator streams
-        foreach (var state in _stereoOperatorStates.Values)
-            state.Stream?.Dispose();
-        _stereoOperatorStates.Clear();
-
-        // Dispose spatial operator streams
-        foreach (var state in _spatialOperatorStates.Values)
-            state.Stream?.Dispose();
-        _spatialOperatorStates.Clear();
-
-        // Dispose soundtrack streams
-        foreach (var (_, clipStream) in SoundtrackClipStreams)
-            clipStream.DisableSoundtrackStream();
-        SoundtrackClipStreams.Clear();
-        _updatedSoundtrackClipTimes.Clear();
-        _obsoleteSoundtrackHandles.Clear();
-
-        Log.Gated.Audio("[AudioEngine] Disposed all audio streams (stereo, spatial, soundtrack).");
-    }
-
-    /// <summary>
     /// Sets the global audio volume level.
     /// </summary>
     /// <param name="volume">The volume level (0.0 to 1.0).</param>
     public static void SetGlobalVolume(float volume)
     {
         CoreSettings.Config.AppVolume = volume;
-        AudioMixerManager.SetGlobalVolume(volume);
-    }
-
-    /// <summary>
-    /// Initializes the global volume from the stored project settings.
-    /// </summary>
-    public static void InitializeGlobalVolumeFromSettings()
-    {
-        AudioMixerManager.SetGlobalVolume(CoreSettings.Config.AppVolume);
     }
 
     /// <summary>
@@ -1415,7 +1217,6 @@ public static class AudioEngine
     /// <param name="mute">True to mute all audio, false to unmute.</param>
     public static void SetGlobalMute(bool mute)
     {
-        AudioMixerManager.SetGlobalMute(mute);
         CoreSettings.Config.AppMute = mute;
     }
 

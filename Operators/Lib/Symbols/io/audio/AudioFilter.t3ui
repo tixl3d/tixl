@@ -1,0 +1,68 @@
+{
+  "FormatVersion": 3,
+  "Id": "58e37f7f-602d-4567-9155-c193a9d9a0ee"/*AudioFilter*/,
+  "Description": "Filters the audio flowing through it with a low-pass or high-pass filter.\n\nEverything wired into Input shares the effect. Wire Result into an [AudioBus], directly or through other audio ops.\n\nAKA: LPF, HPF, EQ, equalizer, cutoff, resonance, sweep\n\nTips\n\nAnimate Cutoff for filter sweeps; changes glide, so it doesn't click.",
+  "InputUis": [
+    {
+      "InputId": "40ddd8d4-571c-41d4-98a6-06cc486c9d9f"/*Input*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "Audio sources or audio graph nodes to process."
+    },
+    {
+      "InputId": "7c65cd76-b026-461c-b01a-629553c015d2"/*Volume*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Description": "Gain folded into all contained sources. 1 keeps the level unchanged.",
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true
+    },
+    {
+      "InputId": "d70b95b5-a547-4b1e-9e29-5879319d84aa"/*Mode*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      },
+      "Description": "LowPass keeps what is below Cutoff, HighPass what is above it."
+    },
+    {
+      "InputId": "32ee6dca-f277-49f5-8a6f-2f6c00bcdb7d"/*Cutoff*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 135.0
+      },
+      "Description": "Frequency in Hz where the filter starts to attenuate at 12 dB per octave, clamped to 20..20000.",
+      "Min": 20.0,
+      "Max": 20000.0,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "eecb4b94-5069-4a81-b1b8-79b7b9fabd91"/*Resonance*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 180.0
+      },
+      "Description": "Emphasis around Cutoff, clamped to 0.1..20. 0.707 has no peak; higher values boost and ring.",
+      "Min": 0.1,
+      "Max": 20.0,
+      "ClampMin": true,
+      "ClampMax": true
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "77108a3f-7ae8-4005-bdc6-a4e9ff372757"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

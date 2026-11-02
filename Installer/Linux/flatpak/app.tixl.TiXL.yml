@@ -1,5 +1,5 @@
 # Flatpak for testers: repackages the staged tarball build (Installer/Linux/build-tarball.sh --stage-only).
-# Flathub would additionally need a build from source and permission to redistribute BASS.
+# Flathub would additionally need a build from source.
 id: app.tixl.TiXL
 runtime: org.freedesktop.Platform
 runtime-version: '26.08'

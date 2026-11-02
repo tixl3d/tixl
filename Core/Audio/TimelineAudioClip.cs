@@ -119,7 +119,7 @@ public sealed class TimelineAudioClip
     #endregion
 
     /// <summary>
-    /// Initialized by <see cref="SoundtrackClipStream.TryLoadSoundtrackClip"/> after BASS reports it.
+    /// Initialized by <see cref="SoundtrackClipStream.TryLoadSoundtrackClip"/> once the file is loaded.
     /// </summary>
     public double LengthInSeconds;
 

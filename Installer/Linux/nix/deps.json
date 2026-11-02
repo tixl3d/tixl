@@ -85,26 +85,6 @@
     "hash": "sha256-oIJvZYVAnqG8utlUvqGgo6rtT/x9HqHym8L7HlCqdBY="
   },
   {
-    "pname": "ManagedBass",
-    "version": "4.0.2",
-    "hash": "sha256-yORaVJV6FQ3XUrJzu6DiOub0kOH3o5qGtb8NcCt4Pcc="
-  },
-  {
-    "pname": "ManagedBass.Flac",
-    "version": "4.0.2",
-    "hash": "sha256-WsWfK68GaObTirKSJHQYoZsUJHul7GvnqxHcnn6LEOc="
-  },
-  {
-    "pname": "ManagedBass.Mix",
-    "version": "4.0.2",
-    "hash": "sha256-MB+SULzPrZjhH7XTUBF3gXnkS+KS9Ik6DEVzNH8P3SA="
-  },
-  {
-    "pname": "ManagedBass.Wasapi",
-    "version": "4.0.2",
-    "hash": "sha256-aOD1I19UgEdLM/kYtWtZqrDOuHDI/O6QdbBf9LQQspk="
-  },
-  {
     "pname": "Microsoft.Build",
     "version": "18.8.2",
     "hash": "sha256-iwpopyko0Zy6WXYfnTeYvQ4VhZcLlMEKizlPyfMkBhU="

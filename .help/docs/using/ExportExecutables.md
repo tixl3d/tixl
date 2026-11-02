@@ -15,7 +15,7 @@ With v4.0.6 (2025-09-15)…
 
 ## Licenses of bundled libraries
 
-An exported executable includes third-party libraries, and their license texts are copied into the `licenses/` folder of every export. Most of them are open source. The **BASS** audio library, which plays the soundtrack and audio, is different: it is free for non-commercial use only. If you distribute an exported executable commercially, for example by selling it or delivering it to a client as part of paid work, you need a BASS license from [un4seen](https://www.un4seen.com). TiXL shows this note in the `Executable` settings and after every export.
+An exported executable includes third-party libraries, and their license texts are copied into the `licenses/` folder of every export. Most of them are open source.
 
 ---
 

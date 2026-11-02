@@ -2,8 +2,6 @@
 using System.IO;
 using System.Text;
 using ImGuiNET;
-using ManagedBass;
-using ManagedBass.Wasapi;
 using T3.Core.Animation;
 using T3.Core.Audio;
 using T3.Core.Audio.Timing;
@@ -295,7 +293,6 @@ internal sealed class ProjectSettingsWindow : Window
         if (!isDefaultDevice && FormInputs.AppendResetButton(true, "##resetInputDevice"))
         {
             playback.AudioInputDeviceName = string.Empty;
-            AudioEngine.OnAudioDeviceChanged();
             modified = true;
             isDefaultDevice = true;
         }
@@ -715,7 +712,7 @@ internal sealed class ProjectSettingsWindow : Window
 
         modified |= FormInputs.AddCheckBox("Capture Audio",
                                            ref recording.CaptureAudio,
-                                           "Record the active WASAPI input device while the session is running. The device is configured under Playback → Audio Source.",
+                                           "Record the active input device while the session is running. The device is configured under Playback → Audio Source.",
                                            defaults.CaptureAudio);
 
         FormInputs.AddVerticalSpace();
@@ -811,8 +808,6 @@ internal sealed class ProjectSettingsWindow : Window
                                            "Only ship operators connected to the exported output (plus auto-playing audio ops)\nand the libraries they need. Disable if the exported executable misses content.",
                                            defaults.StripUnusedOperators);
 
-        FormInputs.AddVerticalSpace(3);
-        CustomComponents.HelpText(PlayerExporter.BassLicenseNote);
         FormInputs.AddVerticalSpace();
         DrawExportButtons(composition);
 

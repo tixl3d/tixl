@@ -1,70 +1,52 @@
 #nullable enable
 using System;
 using System.Diagnostics.CodeAnalysis;
-using ManagedBass;
-using ManagedBass.Mix;
 using T3.Core.Animation;
-using T3.Core.IO;
+using T3.Core.Audio.Native;
 using T3.Core.Settings;
 using T3.Core.Logging;
 
 namespace T3.Core.Audio;
 
 /// <summary>
-/// Controls the playback of a <see cref="TimelineAudioClip"/> with BASS by the <see cref="AudioEngine"/>.
-/// 
-/// The stream is created as a decode stream and added to the SoundtrackMixer.
-/// For live playback, audio flows through: Stream -> SoundtrackMixer -> GlobalMixer -> Soundcard
-/// For export, we read directly from the stream using BassMix.ChannelGetData().
+/// Controls the playback of a <see cref="TimelineAudioClip"/> by the <see cref="AudioEngine"/>, as a sound in
+/// the native engine. The timeline is the master: playback runs freely and is reseeked once it drifts too far.
 /// </summary>
 internal sealed class SoundtrackClipStream
 {
-    // Private constructor
-    private SoundtrackClipStream()
+    private SoundtrackClipStream(NativeAudioEngine engine, AudioHandle source)
     {
+        _engine = engine;
+        _source = source;
     }
 
     public double Duration;
-    internal int StreamHandle;
     internal bool IsInUse;
     public bool IsNew = true;
-    private float DefaultPlaybackFrequency { get; init; }
     internal double TargetTime { get; set; }
 
     internal AudioClipResourceHandle ResourceHandle = null!;
 
-    /// <summary>
-    /// Gets the native/default playback frequency of this stream.
-    /// This is the original sample rate of the audio file.
-    /// </summary>
-    public float GetDefaultFrequency() => DefaultPlaybackFrequency;
+    internal AudioHandle Source => _source;
+    internal int ChannelCount { get; private set; }
+    internal int SampleRate { get; private set; }
 
     internal void UpdateSoundtrackPlaybackSpeed(double newSpeed)
     {
         if (newSpeed == 0.0)
         {
-            // Pause in mixer
-            BassMix.ChannelFlags(StreamHandle, BassFlags.MixerChanPause, BassFlags.MixerChanPause);
+            _engine.Pause(_source);
+            return;
         }
-        else if (newSpeed < 0.0)
-        {
-            // Play backwards
-            Bass.ChannelSetAttribute(StreamHandle, ChannelAttribute.ReverseDirection, -1);
-            Bass.ChannelSetAttribute(StreamHandle, ChannelAttribute.Frequency, DefaultPlaybackFrequency * -newSpeed);
-            BassMix.ChannelFlags(StreamHandle, 0, BassFlags.MixerChanPause); // Unpause
-        }
-        else
-        {
-            // Play forward
-            Bass.ChannelSetAttribute(StreamHandle, ChannelAttribute.ReverseDirection, 1);
-            Bass.ChannelSetAttribute(StreamHandle, ChannelAttribute.Frequency, DefaultPlaybackFrequency * newSpeed);
-            BassMix.ChannelFlags(StreamHandle, 0, BassFlags.MixerChanPause); // Unpause
-        }
+
+        // Reverse playback isn't supported: backwards scrubbing plays forward at the same rate and is
+        // kept near the playhead by the resync in UpdateSoundtrackTime.
+        _engine.SetPitch(_source, (float)Math.Abs(newSpeed));
+        _engine.Play(_source);
     }
 
     /// <summary>
-    /// Creates a <see cref="SoundtrackClipStream"/> by loading an <see cref="AudioClipResourceHandle"/>. 
-    /// The stream is created as a decode stream and added to the SoundtrackMixer.
+    /// Creates a <see cref="SoundtrackClipStream"/> by loading an <see cref="AudioClipResourceHandle"/>.
     /// </summary>
     internal static bool TryLoadSoundtrackClip(AudioClipResourceHandle handle, [NotNullWhen(true)] out SoundtrackClipStream? stream)
     {
@@ -91,94 +73,59 @@ internal sealed class SoundtrackClipStream
             return false;
         }
 
-        var path = fileInfo.FullName;
-        
-        // Create as a DECODE stream so we can add it to the SoundtrackMixer
-        var streamHandle = Bass.CreateStream(path, 0, 0, BassFlags.Decode | BassFlags.Prescan | BassFlags.Float);
-
-        if (streamHandle == 0)
-        {
-            Log.Error($"Error loading audio clip '{path}': {Bass.LastError}.");
+        var engine = AudioMixerManager.NativeEngine;
+        if (engine == null)
             return false;
-        }
 
-        Bass.ChannelGetAttribute(streamHandle, ChannelAttribute.Frequency, out var defaultPlaybackFrequency);
-
-        var bytes = Bass.ChannelGetLength(streamHandle);
-        if (bytes < 0)
-        {
-            Log.Error($"Failed to get length for audio clip {path}.");
-            Bass.StreamFree(streamHandle);
+        var source = engine.LoadFile(fileInfo.FullName);
+        if (!source.IsValid)
             return false;
-        }
 
-        var duration = (float)Bass.ChannelBytes2Seconds(streamHandle, bytes);
-        handle.Clip.LengthInSeconds = duration;
+        var duration = engine.GetLengthSecs(source);
+        engine.TryGetFormat(source, out var channels, out var sampleRate);
+        handle.Clip.LengthInSeconds = (float)duration;
 
-        // Add to SoundtrackMixer for live playback
-        // The SoundtrackMixer feeds into the GlobalMixer for output
-        // Note: We do NOT use MixerChanBuffer for soundtracks because we need accurate
-        // position tracking for sync. The buffer would introduce latency that's hard to compensate.
-        // Skip when the clip is already graph-routed: the [AudioBus] owns its mixer membership, and adding it
-        // here would blip it at full volume through the SoundtrackMixer for the frame before the bus grabs it.
-        if (AudioMixerManager.SoundtrackMixerHandle != 0 && !handle.Clip.IsRoutedToGraph)
-        {
-            if (!BassMix.MixerAddChannel(AudioMixerManager.SoundtrackMixerHandle, streamHandle,
-                    BassFlags.MixerChanPause))
-            {
-                Log.Warning($"Failed to add soundtrack to mixer: {Bass.LastError}. Audio may not play correctly.");
-            }
-            else
-            {
-                Log.Gated.Audio($"[SoundtrackClipStream] Added '{handle.Clip.AssetPath}' to SoundtrackMixer");
-            }
-        }
+        // A graph-routed clip is placed by its [AudioBus]; a detour through the soundtrack bus
+        // would blip it at full volume for the frame before the bus takes it.
+        if (!handle.Clip.IsRoutedToGraph)
+            engine.Route(source, AudioMixerManager.SoundtrackBus);
 
-        stream = new SoundtrackClipStream()
-                         {
-                             ResourceHandle = handle,
-                             StreamHandle = streamHandle,
-                             DefaultPlaybackFrequency = defaultPlaybackFrequency,
-                             Duration = duration,
-                         };
+        stream = new SoundtrackClipStream(engine, source)
+                     {
+                         ResourceHandle = handle,
+                         Duration = duration,
+                         ChannelCount = channels,
+                         SampleRate = sampleRate,
+                     };
 
-        // Start playing (unpaused in mixer)
         stream.UpdateSoundtrackPlaybackSpeed(1.0);
         handle.LoadingAttemptFailed = false;
         return true;
     }
 
     /// <summary>
-    /// We try to find a compromise between letting bass play the audio clip in the correct playback speed which
-    /// eventually will drift away from Tooll's Playback time. If the delta between playback and audio-clip time exceeds
-    /// a threshold, we resync.
+    /// We try to find a compromise between letting the engine play the audio clip in the correct playback speed
+    /// which eventually will drift away from Tooll's Playback time. If the delta between playback and audio-clip
+    /// time exceeds a threshold, we resync.
     /// 
     /// Frequent resync causes audio glitches.
     /// Too large of a threshold can disrupt syncing and increase latency.
     /// </summary>
     internal void UpdateSoundtrackTime(Playback playback)
     {
-        // Render-export steps time with PlaybackSpeed 0, so recording counts as running.
-        if (playback.PlaybackSpeed == 0 && !AudioRendering.IsRecording)
+        if (playback.PlaybackSpeed == 0)
         {
-            BassMix.ChannelFlags(StreamHandle, BassFlags.MixerChanPause, BassFlags.MixerChanPause);
+            _engine.Pause(_source);
             return;
         }
 
         var clip = ResourceHandle.Clip;
 
-        // Graph hand-off: while the clip's AudioReference is wired into a bus, the graph moves this channel out
-        // of the SoundtrackMixer into its submix and owns its level. When it stops being routed, reclaim it into
-        // the SoundtrackMixer — but only once the bus has actually released it (a channel lives in exactly one
-        // mixer). Checking real membership every frame instead of a one-shot transition avoids racing the bus,
-        // whose removal can run later in the same frame. Position-sync (below) is a per-channel BASS op and
-        // works in whichever mixer holds the channel.
-        if (!clip.IsRoutedToGraph
-            && AudioMixerManager.SoundtrackMixerHandle != 0
-            && BassMix.ChannelGetMixer(StreamHandle) == 0)
-        {
-            BassMix.MixerAddChannel(AudioMixerManager.SoundtrackMixerHandle, StreamHandle, BassFlags.MixerChanPause);
-        }
+        // Graph hand-off: while the clip's AudioReference is wired into a bus, the graph owns its routing and
+        // level. Checking the real route every frame instead of a one-shot transition avoids racing the bus,
+        // whose release can run later in the same frame.
+        if (!clip.IsRoutedToGraph && !_engine.GetRouteTarget(_source).IsValid)
+            _engine.Route(_source, AudioMixerManager.SoundtrackBus);
 
         // Elapsed seconds since the clip's TimeRange.Start on the timeline.
         // (TargetTime is set externally to the current playback time-in-seconds.)
@@ -213,121 +160,104 @@ internal sealed class SoundtrackClipStream
                             || targetSourcePosSecs < 0
                             || targetSourcePosSecs >= sourceEndSecs
                             || (hasClipEnd && TargetTime >= clipEndSecs);
-        
-        // Check if paused in mixer
-        var flags = BassMix.ChannelFlags(StreamHandle, 0, 0);
-        var isPaused = (flags & BassFlags.MixerChanPause) != 0;
+
+        var isPlaying = _engine.IsPlaying(_source);
 
         if (isOutOfBounds)
         {
-            if (!isPaused)
-            {
-                BassMix.ChannelFlags(StreamHandle, BassFlags.MixerChanPause, BassFlags.MixerChanPause);
-            }
+            if (isPlaying)
+                _engine.Pause(_source);
+
             return;
         }
 
-        if (isPaused)
-        {
-            BassMix.ChannelFlags(StreamHandle, 0, BassFlags.MixerChanPause); // Unpause
-        }
+        if (!isPlaying)
+            _engine.Play(_source);
 
-        // Export steps time with PlaybackSpeed 0 — sync as if playing at 1× speed, otherwise the
-        // speed-scaled drift and threshold both collapse to 0 and clips never reseek into the render range.
-        var effectiveSpeed = AudioRendering.IsRecording ? 1.0 : playback.PlaybackSpeed;
+        var speed = playback.PlaybackSpeed;
 
-        // Get the current playback position from the mixer
-        var currentStreamBufferPos = BassMix.ChannelGetPosition(StreamHandle);
-        var currentPosInSec = Bass.ChannelBytes2Seconds(StreamHandle, currentStreamBufferPos) - AudioSyncingOffset;
-        var soundDelta = (currentPosInSec - targetSourcePosSecs) * effectiveSpeed;
+        // The cursor is what's being mixed right now, and that reaches the speakers one output latency later.
+        var latencyInSourceSecs = _engine.OutputLatencySecs * Math.Abs(speed);
+        var audiblePosSecs = _engine.GetCursorSecs(_source) - latencyInSourceSecs;
+        var soundDelta = (audiblePosSecs - targetSourcePosSecs) * speed;
 
-        // Set volume on the stream — unless the graph owns this clip's level (routed into a bus), in which case
-        // the [AudioBus] applies the per-source gain and setting it here too would fight that every frame.
         var audio = CompositionSettings.Current.Audio;
         if (!clip.IsRoutedToGraph)
         {
-            Bass.ChannelSetAttribute(StreamHandle, ChannelAttribute.Volume,
-                                     clip.Volume
-                                     * audio.SoundtrackVolume
-                                     * CoreSettings.Config.AppVolume
-                                     * (clip.IsMuted ? 0f:1f)
-                                     * (audio.SoundtrackMute ? 0f:1f)
-                                     * (CoreSettings.Config.AppMute ? 0f:1f));
+            _engine.SetVolume(_source,
+                              clip.Volume
+                              * audio.SoundtrackVolume
+                              * (clip.IsMuted ? 0f : 1f)
+                              * (audio.SoundtrackMute ? 0f : 1f));
         }
 
         // We may not fall behind or skip ahead in playback
-        var maxSoundDelta = audio.AudioResyncThreshold * Math.Abs(effectiveSpeed);
+        var maxSoundDelta = audio.AudioResyncThreshold * Math.Abs(speed);
         if (Math.Abs(soundDelta) <= maxSoundDelta)
             return;
 
-        // Resync
-        var resyncOffset = AudioTriggerDelayOffset * effectiveSpeed + AudioSyncingOffset;
-        var newStreamPos = Bass.ChannelSeconds2Bytes(StreamHandle, targetSourcePosSecs + resyncOffset);
-        BassMix.ChannelSetPosition(StreamHandle, newStreamPos, PositionFlags.Bytes | PositionFlags.MixerReset);
+        _engine.Seek(_source, Math.Max(targetSourcePosSecs + latencyInSourceSecs, 0));
+    }
+
+    /// <summary>Stops the sound and resets its speed, so that <see cref="UpdateForExport"/> alone drives it.</summary>
+    internal void PrepareForExport()
+    {
+        _engine.Pause(_source);
+        _engine.SetPitch(_source, 1);
+        _isAwaitingFirstExportSeek = true;
     }
 
     /// <summary>
-    /// Update time when recording, returns number of bytes of the position from the stream start
+    /// Positions the sound for the next rendered block. Contiguous frames read sequentially, so it only reseeks
+    /// on a real discontinuity: activation, render-range start or a loop wrap.
     /// </summary>
-    internal long UpdateTimeWhileRecording(Playback playback, double fps, bool reinitialize)
+    internal void UpdateForExport(double currentTime)
     {
-        // Offset timing dependent on position in clip. SourceOffsetSecs lets a clip skip
-        // into the middle of the file at its start; defaults to 0 for migrated clips.
         var clip = ResourceHandle.Clip;
-        var elapsedInClipSecs = playback.TimeInSecs - playback.SecondsFromBars(clip.TimeRange.Start);
-        var targetSourcePosSecs = clip.SourceOffsetSecs + elapsedInClipSecs + RecordSyncingOffset;
-        var newStreamPos = targetSourcePosSecs < 0
-                               ? -Bass.ChannelSeconds2Bytes(StreamHandle, -targetSourcePosSecs)
-                               : Bass.ChannelSeconds2Bytes(StreamHandle, targetSourcePosSecs);
 
-        // Re-initialize playback?
-        if (!reinitialize)
-            return newStreamPos;
+        var elapsedInClip = currentTime - Playback.Current.SecondsFromBars(clip.TimeRange.Start);
+        var targetSourcePos = clip.SourceOffsetSecs + elapsedInClip;
+        var sourceEnd = clip.SourceDurationSecs > 0
+                            ? clip.SourceOffsetSecs + clip.SourceDurationSecs
+                            : clip.LengthInSeconds;
 
-        Bass.ChannelSetAttribute(StreamHandle, ChannelAttribute.NoRamp, 1);
-        Bass.ChannelSetAttribute(StreamHandle, ChannelAttribute.Volume, 1);
-        Bass.ChannelSetAttribute(StreamHandle, ChannelAttribute.ReverseDirection, 1);
-        Bass.ChannelSetAttribute(StreamHandle, ChannelAttribute.Frequency, DefaultPlaybackFrequency);
-        
-        // Position in the mixer
-        BassMix.ChannelSetPosition(StreamHandle, Math.Max(newStreamPos, 0), 
-            PositionFlags.Bytes | PositionFlags.MixerNoRampIn | PositionFlags.MixerReset);
+        // Looping clips wrap back into their valid source window for as long as the clip lasts.
+        var loopStart = Math.Max(clip.SourceOffsetSecs, 0);
+        var loopLength = Math.Min(sourceEnd, clip.LengthInSeconds) - loopStart;
+        if (clip.IsLooping && loopLength > 0.01 && elapsedInClip >= 0)
+            targetSourcePos = loopStart + elapsedInClip % loopLength;
 
-        return newStreamPos;
+        // A negative source position means the clip was start-extended before the file's content:
+        // it stays silent until the playhead reaches valid source time.
+        var isActive = elapsedInClip >= 0 && targetSourcePos >= 0 && targetSourcePos < sourceEnd;
+        if (clip.IsLooping && clip.TimeRange.End > clip.TimeRange.Start)
+            isActive &= currentTime < Playback.Current.SecondsFromBars(clip.TimeRange.End);
+
+        if (!isActive)
+        {
+            _engine.Pause(_source);
+            return;
+        }
+
+        // Always seek first: a position left by live playback within the threshold would make two renders differ.
+        if (_isAwaitingFirstExportSeek || Math.Abs(_engine.GetCursorSecs(_source) - targetSourcePos) > ExportResyncThresholdSecs)
+        {
+            _engine.Seek(_source, targetSourcePos);
+            _isAwaitingFirstExportSeek = false;
+        }
+
+        if (!clip.IsRoutedToGraph)
+            _engine.SetVolume(_source, clip.IsMuted ? 0f : clip.Volume * CompositionSettings.Current.Audio.SoundtrackVolume);
+
+        _engine.Play(_source);
     }
 
-    internal void DisableSoundtrackStream()
-    {
-        // Remove from mixer first
-        BassMix.MixerRemoveChannel(StreamHandle);
-        Bass.StreamFree(StreamHandle);
-    }
+    internal void DisableSoundtrackStream() => _engine.Unload(_source);
 
-    /// <summary>
-    /// Render audio for export, filling the buffer at the requested sample rate and channel count.
-    /// </summary>
-    public int RenderAudio(double startTime, double duration, float[] outputBuffer, int targetSampleRate, int targetChannels)
-    {
-        int nativeSampleRate = AudioEngine.GetClipSampleRate(ResourceHandle);
-        int nativeChannels = AudioEngine.GetClipChannelCount(ResourceHandle);
-        OperatorAudioUtils.FillAndResample(
-            RenderNativeAudio,
-            startTime, duration, outputBuffer,
-            nativeSampleRate, nativeChannels, targetSampleRate, targetChannels);
-        return outputBuffer.Length;
-    }
+    /** Roughly half a frame at 30 fps: lets contiguous frames read on, while staying inaudible. */
+    private const double ExportResyncThresholdSecs = 0.015;
 
-    // Native render: fill buffer at native sample rate/channels
-    private int RenderNativeAudio(double startTime, double duration, float[] buffer)
-    {
-        int sampleCount = buffer.Length / AudioEngine.GetClipChannelCount(ResourceHandle);
-        int bytesToRead = sampleCount * AudioEngine.GetClipChannelCount(ResourceHandle) * sizeof(float);
-        // Use BassMix.ChannelGetData for streams in a mixer
-        int bytesRead = BassMix.ChannelGetData(StreamHandle, buffer, bytesToRead);
-        return bytesRead > 0 ? bytesRead / sizeof(float) : 0;
-    }
-
-    private const double AudioSyncingOffset = -2.0 / 60.0;
-    private const double AudioTriggerDelayOffset = 2.0 / 60.0;
-    private const double RecordSyncingOffset = -1.0 / 60.0;
+    private readonly NativeAudioEngine _engine;
+    private readonly AudioHandle _source;
+    private bool _isAwaitingFirstExportSeek;
 }

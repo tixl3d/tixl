@@ -11,7 +11,7 @@ namespace T3.Core.Audio;
 /// graph-independent "drop a clip and hear it" path that doesn't need an <c>[AudioClipPlayer]</c>.
 /// </summary>
 /// <remarks>
-/// Registration is a heartbeat: <see cref="AudioEngine.UseSoundtrackClip"/> creates the BASS stream
+/// Registration is a heartbeat: <see cref="AudioEngine.UseSoundtrackClip"/> creates the stream
 /// on first call, seeks / pauses / volumes it via <c>SoundtrackClipStream</c>, and frees it the first
 /// frame it isn't called again (stale eviction). So this method only declares "active now" — it never
 /// starts, stops, seeks, or frees streams itself. Called from the editor playback update and the

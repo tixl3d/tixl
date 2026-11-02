@@ -1,6 +1,8 @@
 # Replace BASS with a native miniaudio layer
 
-**Status:** Draft — 2026-10-12. Spike done (`Spikes/MiniaudioSpike/`), nothing in Core changed yet.
+**Status:** Ready to merge — 2026-11, on branch `feat/miniaudio`. BASS is gone. The maintainer tested the editor on Linux, Windows
+and macOS and an exported Player; the `Native Audio Library` workflow passes on all three platforms. Open: the two upstream
+miniaudio reports, and the first run of the changed release workflows. Effects are back as native nodes.
 Decisions from 2026-10-12 are folded in (§Decisions 6–10).
 **Scope:** All audio in Editor, Player and operators on Windows, Linux and macOS. Removes ManagedBass,
 BASSmix, BASSFLAC and BASSWASAPI.
@@ -59,16 +61,18 @@ Run `dotnet run -c Release --project Spikes/MiniaudioSpike -- all --null --gc-st
 | Push streams (video audio) | 0 underruns at a 100 ms target fill; drift control still needed (+53 ms/min) |
 | Device switch | 4–18 ms, playback continues, graph untouched |
 | PipeWire latency | 16 ms buffer at 256-frame periods, no late callbacks (BASS: 20 ms) |
-| Seeking a 10.5 min MP3 | < 0.1 ms with a seek table (but see the seek bug below) |
+| Seeking a 10.5 min MP3 | avg 0.2 ms, worst 0.7 ms with the fixed seek table (4096 points); sample-exact |
 | Windows build | cross-compiles with Zig, imports only UCRT + KERNEL32; **not run yet** |
 
 ## Known problems to solve (found by the spike)
 
-1. **dr_mp3 seek-table seeks land one MP3 frame (1152 samples) late** vs. its own linear decode; brute-force
-   seeks are exact. The seek-table path (`ma_dr_mp3_seek_to_pcm_frame__seek_table`) and linear decoding
-   disagree about the gapless delay. Fix locally in the vendored header, report upstream, keep the spike's
-   `bass` check as the regression test. Without a seek table, seeking a long MP3 means decoding from the
-   start — too slow for scrubbing.
+1. **dr_mp3 seek-table seeks were wrong — fixed in the vendored header, upstream report open.** There were
+   several causes: a frame short of bit reservoir decodes to nothing and is skipped silently, which made the
+   discard count one frame short (the +1152 the spike saw); seeks ignored the gapless delay on tagged files;
+   the first seek point restarted at byte 0, before ID3/Xing data; leading frames weren't synthesized, so the
+   first audible frame lacked its overlap state; building a table from a non-zero position failed on tagged
+   files. `Native/TixlAudio/tests/mp3_seek_test.c` checks 400 seeks per file against linear decoding:
+   bit-exact on CBR, VBR, MPEG-2, ID3 and LAME-tagged files.
 2. **MP3 start offset vs. BASS: 529 samples (12 ms at 44.1 kHz)** — the libraries trim the decoder delay
    differently. Accepted (decision 7). The spike's `bass` check keeps reporting it as a failed check; that's
    the known offset, not a regression.
@@ -130,10 +134,6 @@ Workarounds for what the spike hit, and what's still to decide:
   `ma_decoder`s (decision in §Known problems 3).
 - *Stale audio after a seek* → miniaudio patch (§Known problems 5).
 - *Push sources reading ahead* → no pitch on push sources (§Known problems 6).
-- *Seek-table offset* (§Known problems 1) → until dr_mp3 is fixed, export can avoid it: export only moves
-  forward, so one brute-force seek at the start (~0.5 s for a 10 min MP3) plus linear reads is exact.
-  Alternatively decode MP3 soundtracks to memory in the background after loading (≈ 57 MB as 16-bit for
-  10 min stereo), which makes every seek exact, live and in export.
 - *Export rate differs per machine* → render at a fixed 48 kHz independent of the device.
 - *Clip jumps during export* (loops, cuts) → reseek only on real discontinuities, as `VideoAudioTrack` does,
   never on drift — there is no clock to drift against when pulling.
@@ -142,8 +142,8 @@ Workarounds for what the spike hit, and what's still to decide:
 
 ## Fix along the way (bugs the survey found)
 
-- Export rounds each frame's sample count without a remainder: −110 ms / +150 ms drift over 10 min at
-  23.976 / 29.97 fps. Fixed by §Export step 3 (spike: 0 drift).
+- Fixed: export rounded each frame's sample count without a remainder, which at the fixed 48 kHz meant +150 ms over 10
+  minutes at 29.97 fps. Each frame's samples now come from its index.
 - Export FFT runs on a push stream holding ~1024 frames, likely zero-padded — fixed by §Export step 4.
 - The bin-to-band table is `static readonly` from `MixerFrequency` at type load (48 kHz) — stale on 44.1 kHz.
 - `AudioInput.OnCapturedData` runs analysis, beat tracking and WAV writing on the capture thread, racing
@@ -162,9 +162,11 @@ BASS `int` handles appear in: `AudioMixerManager.OperatorMixerHandle`,
 `FxInsert` `Action<int>` callbacks, `AudioBusRegistry.MarkAlive(int)`, `ChannelAudioAnalysis.Update(int)`,
 `VideoAudioStream.Channel`/`VideoAudioTrack.Channel`, `StreamHandle` inside operators,
 `AudioConfig.BassFftDataFlag` (a ManagedBass type), and `AudioInputBackend.GetData(flags)`/packed `GetLevel`.
-Operators calling BASS directly: Reverb, Echo, Compressor, ToneGenerator, AudioLevel, AudioBus,
-PlaySpatialAudioSample. Editor: AudioImageGenerator, AudioDeviceSelector, AudioClipsToOps,
-AudioClipDurationCache, TimelineClipDrop.
+Operators calling BASS directly: Reverb, Echo, Compressor, ToneGenerator, AudioLevel, AudioReaction (through
+`ChannelAudioAnalysis`), PlaySpatialAudioSample. `AudioClip` and `PlayAudioSample` take channel ints from
+`AudioEngine`. Editor: AudioImageGenerator, AudioDeviceSelector, AudioClipsToOps. `AudioClipDurationCache` and
+`TimelineClipDrop` only need `TryProbeAudioDurationSecs` to keep its signature. Unused `using ManagedBass` lines in
+`ProjectSettingsWindow` and `Player/Program.cs` break the build once the package goes.
 
 ## Native API shape
 
@@ -180,8 +182,11 @@ Grown from the spike's `ta_*` functions; keep it flat C with integer handles and
   queued and applied by the audio thread between blocks.
 - **Analysis input:** capture device (+ WASAPI loopback) into a tap ring; the main thread reads it.
 - **Offline helpers:** decode peaks (waveform), decode window (spectrum images, BASS comparison), duration.
-- Every function is safe to call from the main thread only (except `render` on the export thread);
-  the audio thread never calls back.
+- Every engine function is safe to call from the main thread only (except `render` on the export thread);
+  the audio thread never calls back. The offline helpers take no engine and run on worker threads, because
+  duration probes and image generation do today (`Task.Run`). They must not initialize an engine.
+- Load calls return a negative `ma_result` on failure. Sound handles carry a generation; buses and taps get
+  one when they can be freed.
 
 ## Phases
 
@@ -206,18 +211,43 @@ Each phase ends with the editor running on all three platforms and a short manua
 
 ### Phase 2 — soundtrack, timeline, waveform
 
-- `SoundtrackClipStream` on a native file source; position, speed (pitch), looping, out-of-range pause.
-- Retune sync constants against the native position; test with a click track at 60 fps and in the Player.
-- Waveform/spectrum images and duration probes on native offline decode (background tasks as today).
+**Done on `feat/miniaudio`, in a different cut than first planned.** The phase can't stand alone: export, the live FFT
+and graph routing all read the soundtrack's handle. So the soundtrack moved together with its FFT and its share of
+export, while both engines run side by side on the branch. The branch stays playable that way, but this coexistence
+must not ship (decision 6). Measured in the running editor (null sink recording against the decoded source): correlation
+0.999–1.000, constant offset, 8–26 ms behind the timeline through seeks, pause and 2× speed.
+
+Until the remaining phases land, on this branch:
+- Soundtracks and operators ignore the output device BASS was given; the native engine follows the system default.
+- On macOS all audio is silent, because there is no `libtixlaudio.dylib` yet.
+- `[AudioReverb]`, `[AudioEcho]` and `[AudioCompressor]` pass their audio through with a status warning (decision 8).
+- The exported Player executable hasn't been run on the native engine; it needs a release build.
+
+The Editor registers clips before `Playback.Update` and the Player after it, which matters when judging sync.
+Mixing is fixed at 48 kHz (`AudioConfig.MixerFrequency` is const), which settles that open question.
 
 ### Phase 3 — analysis
 
 - Live FFT from the output tap (or the soundtrack bus, per Plan_AudioProcessingGraph §3), per-source FFT from
   tap inserts, `FFTRemoveDC` for input. Verify with the spike's comparison that every `[AudioReaction]` mode
   produces the same values as BASS on the example projects.
-- Capture via native input + ring buffer; move `AudioInput.OnCapturedData` work to the main thread.
+- **Done:** capture goes through the native input into a 10.9 s ring buffer, and analysis, beat tracking and recording run
+  on the main thread in 10 ms steps, which keeps the decay and onset tuning of the per-callback version. Measured with a
+  null sink's monitor as input: a recording stays sample-aligned through a 1.5 s main-thread stall. Saved device names
+  can differ from the BASS ones (Linux in particular), so such projects need the input picked again; WASAPI loopback is
+  implemented but has never run.
+- Live and export FFT are already on the managed `Fft`; what's left is input and per-source FFT, and comparing values
+  against BASS on real projects. Export's FFT window now holds real history instead of zero padding, so export
+  reactions will differ slightly from earlier versions and should now match live.
 
 ### Phase 4 — graph, operators, effects, spatial, video audio
+
+**Done on `feat/miniaudio`.** Spatial sources are mono sources in the operator bus with miniaudio's spatializer, and
+linear falloff replaces the BASS inverse rolloff that was stacked under TiXL's own, so live and export now measure the same.
+A centred source sits about 3 dB below BASS's equal-power pan; the far side keeps 20% rather than going silent. Every source and bus routes through its own tap, so any of them can be
+metered and analysed; reading a level no longer consumes it, and BASS's rule that clip channels can't be metered as a
+side branch is gone, along with its warning. `AudioHandle` is the one handle type. Measured in the running editor:
+routed gains exact to three digits, no phase jump when a clip moves into a bus.
 
 - `AudioBusRouter`/`AudioGraphCollector`/`AudioBusRegistry` realise buses, inserts and taps natively.
 - `[AudioReverb]`/`[AudioEcho]`/`[AudioCompressor]` become pass-through with a status warning (decision 8);
@@ -243,7 +273,4 @@ and (b) export parity — making every source kind resettable and every video fr
 
 ## Open questions
 
-- Fixed 48 kHz engine rate with device-side conversion, or follow the device rate as today?
-- MP3 seeks until dr_mp3 is fixed: patch the seek-table path ourselves, or decode MP3 soundtracks to memory
-  in the background (exact seeks everywhere, ~57 MB per 10 min)?
 - Effects later: Freeverb-style reverb and a feed-forward compressor, or none until someone asks?

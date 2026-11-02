@@ -65,6 +65,18 @@ mouse. Every fold logs one `[fold] metrics …` line at Debug level (read it wit
 rectified surface's on-screen centre path as mean distance from the window centre, path length over
 the chord (1.00 = a straight line) and the largest deviation from the chord.
 
+Rendering: `startRender` (`path` absolute, `durationSecs`, optional `startSecs`, `fps`, `exportAudio`, `codec`) exports the
+pinned `Texture2D` output to a video file through the same path as the render window, without touching the
+composition's saved render settings or version number. It returns at once with the `frameCount`; the export advances
+one frame per editor frame, so poll `getRenderStatus` (`isExporting`, `progress`, `frameIndex`, `message`) until
+`isExporting` is false. `cancelRender` stops it. Check the result with `ffprobe` / `ffmpeg`. Audio ops only stay in
+the export if they were evaluated just before it, so wire an `[AudioBus]` into the rendered chain.
+
+Audio input: `getAudioInputs` lists the capture devices with the `active` one and its `level`; `setAudioInput` (`device`)
+makes the composition analyse that device, and an empty name goes back to its own audio. The change is in memory but
+gets saved with the project, so reset it when done. `startAudioRecording` / `stopAudioRecording` write the input to a WAV
+and return its path. To test without a microphone, play a known file into a PipeWire null sink and capture its monitor.
+
 Parameter shapes are defined in `DebugServer.cs` — read the handler when unsure. Notes:
 
 - **Never guess the settings folder — ask `getPaths`.** It is version-suffixed
@@ -237,10 +249,10 @@ Operator packages hot-reload via `reload`, but Editor/Core changes need a restar
    editor (Debug incremental is safe once it exited).
 3. Relaunch with the flags above and wait for the port.
 
-**A Debug editor loads the *Release* operator packages.** Rebuilding an operator package
-(`Operators/Lib`, `Operators/Video`, …) in Debug alone leaves the editor running the previous
-code, and the obvious conclusion — "my change had no effect" — is wrong. Build operator
-packages with `-c Release`, or both. A stack trace from the running editor is the quickest
+**Rebuild operator packages in both configurations.** Which one a Debug editor loads has differed
+between setups, and a package left behind runs the previous code — or, after a change to a public Core API,
+fails with `MissingFieldException` / `MissingMethodException` and takes the editor down. Build `Operators/Lib`,
+`Operators/Video`, … with and without `-c Release`. A stack trace from the running editor is the quickest
 check: its line numbers will match the old source.
 
 ## Running the visual reference test suite

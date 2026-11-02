@@ -6,7 +6,7 @@ using T3.Core.Audio.Input;
 namespace Lib.io.audio;
 
 [Guid("03477b9a-860e-4887-81c3-5fe51621122c")]
-public sealed class AudioReaction : Instance<AudioReaction>, IStatusProvider
+public sealed class AudioReaction : Instance<AudioReaction>
 {
     [Output(Guid = "E1749C60-41F0-4E8F-9317-909EF31EEEF1", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
     public readonly Slot<float> Level = new();
@@ -202,16 +202,6 @@ public sealed class AudioReaction : Instance<AudioReaction>, IStatusProvider
         _sourceAnalysis.Update(channel);
         return _sourceAnalysis;
     }
-
-    // Same trap [AudioLevel] documents: a side-branch tap silently reads zero for engine-owned channels.
-    IStatusProvider.StatusLevel IStatusProvider.GetStatusLevel()
-        => Source.HasInputConnections && _node.RealisedSubmixes.Count == 0 && _node.HasExternallyManagedLeaf()
-               ? IStatusProvider.StatusLevel.Warning
-               : IStatusProvider.StatusLevel.Success;
-
-    string IStatusProvider.GetStatusMessage()
-        => "As a side branch this can't analyse timeline clips or video audio — they read as silence.\n"
-           + "Wire it inline: source → AudioReaction → bus (directly or through combines/effects).";
 
     private readonly AudioGraphNode _node;
     private ChannelAudioAnalysis _sourceAnalysis;

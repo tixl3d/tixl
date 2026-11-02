@@ -3,6 +3,8 @@ using System.IO;
 using T3.Core.Settings;
 using T3.Core.Video;
 
+using T3.Core.Audio.Native;
+
 namespace T3.VideoServices;
 
 /// <summary>
@@ -57,10 +59,10 @@ public sealed class VideoPlaybackEngine : IVideoPlaybackEngine
                                     controller.IsReady, controller.ErrorMessage);
     }
 
-    public int RequestAudio(Guid streamId, string absolutePath, double sourceSeconds, bool loop, bool renderingToFile)
+    public AudioHandle RequestAudio(Guid streamId, string absolutePath, double sourceSeconds, bool loop, bool renderingToFile)
     {
         if (!FfmpegLibrary.EnsureInitialized())
-            return 0;
+            return default;
 
         var stream = GetOrCreateStream(streamId, Environment.TickCount64);
 

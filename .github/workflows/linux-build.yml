@@ -27,7 +27,7 @@ jobs:
       - name: Install Build Tools
         run: |
           apt-get update
-          apt-get install -y --no-install-recommends git ca-certificates curl file unzip libicu70 libssl3 zlib1g
+          apt-get install -y --no-install-recommends gcc libc6-dev git ca-certificates curl file unzip libicu70 libssl3 zlib1g
 
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -44,8 +44,8 @@ jobs:
           key: nuget-linux-${{ hashFiles('**/*.csproj', 'Tixl.props', 'Directory.Build.props') }}
           restore-keys: nuget-linux-
 
-      - name: Fetch BASS
-        run: Installer/Linux/fetch-bass.sh
+      - name: Build Native Audio Library
+        run: Native/TixlAudio/build.sh
 
       - name: Build Tarball
         run: Installer/Linux/build-tarball.sh

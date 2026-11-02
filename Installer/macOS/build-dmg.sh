@@ -99,8 +99,8 @@ while IFS= read -r -d '' dll; do
     fi
 done < <(find "$payload" -name '*.dll' -print0)
 
-if [[ ! -f "$payload/libbass.dylib" ]]; then
-    echo "Warning: libbass.dylib is missing - audio won't work. See Dependencies/osx/README.md." >&2
+if [[ ! -f "$payload/libtixlaudio.dylib" ]]; then
+    echo "Warning: libtixlaudio.dylib is missing - audio won't work. See Dependencies/osx/README.md." >&2
 fi
 
 # Vulkan: the loader next to the executable (VulkanLoader looks there first), and MoltenVK registered through

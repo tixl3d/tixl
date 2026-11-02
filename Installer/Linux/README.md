@@ -40,9 +40,7 @@ The full list with package names per distro is in [`DEPENDENCIES.md`](DEPENDENCI
 - `slangc` (Slang 2026.18) for shader compilation, found on `PATH` or through `TIXL_SLANGC`. A package that
   ships its distribution's Slang instead sets `TIXL_SLANGC_UNPINNED=1`, which turns the startup check's
   version complaint into a log line and keys the shader cache on the version in use.
-- BASS for audio (`libbass.so`, `libbassmix.so`, `libbassflac.so`). These are committed under
-  `Dependencies/linux-x64/`; see its README for un4seen's terms. `fetch-bass.sh` restores them if they go
-  missing and refreshes them with `--force`.
+- `libtixlaudio.so` for audio, committed under `Dependencies/linux-x64/` and built from `Native/TixlAudio/`.
 
 ## Where TiXL writes
 
@@ -58,7 +56,6 @@ The install folder is treated as read-only (the Windows installer puts it in Pro
 
 TiXL is MIT. Bundled third-party licenses are in `Dependencies/licenses/`. Two need attention:
 
-- **BASS**: free for non-commercial use only (`LicenseRef-BASS` on Arch, `unfree` in nixpkgs).
 - **NDI**: proprietary runtime, used by the Ndi operator package. Not bundled on Linux; users install it
   themselves (see `DEPENDENCIES.md`).
 
@@ -70,7 +67,7 @@ it as a workflow artifact, and a tag also attaches it to that tag's release.
 
 ## Formats
 
-- `aur/PKGBUILD`: reference `tixl-git` package. It downloads BASS and installs to `/usr/lib/tixl`
+- `aur/PKGBUILD`: reference `tixl-git` package. It installs to `/usr/lib/tixl`
   with a `/usr/bin/tixl` symlink.
 - `flatpak/app.tixl.TiXL.yml`: tester bundle that repackages the staged tarball build, with the full .NET 10
   SDK (dotnet10 extension) and Slang 2026.18 inside. Stage first, then build and export a bundle:
@@ -83,5 +80,5 @@ it as a workflow artifact, and a tag also attaches it to that tag's release.
   flatpak build-bundle Installer/Linux/Output/flatpak-repo Installer/Linux/Output/tixl.flatpak app.tixl.TiXL
   ```
 
-  Flathub would additionally need a build from source and permission to redistribute BASS.
+  Flathub would additionally need a build from source.
 - `nix/`: flake that builds from source with `buildDotnetModule`. See [nix/README.md](nix/README.md).

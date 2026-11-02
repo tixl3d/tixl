@@ -42,6 +42,9 @@ jobs:
           key: nuget-macos-${{ hashFiles('**/*.csproj', 'Tixl.props', 'Directory.Build.props') }}
           restore-keys: nuget-macos-
 
+      - name: Build Native Audio Library
+        run: Native/TixlAudio/build-macos.sh
+
       # build-dmg.sh copies the Vulkan loader and MoltenVK into the bundle from Homebrew's lib folder.
       - name: Install Vulkan Loader and MoltenVK
         run: brew install molten-vk vulkan-loader

@@ -1,5 +1,4 @@
 ﻿﻿#nullable enable
-using ManagedBass;
 using T3.Core.Audio;
 // ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable UnusedMember.Local
@@ -252,27 +251,6 @@ namespace Lib.io.audio
         /// <param name="duration">The duration to render in seconds.</param>
         /// <param name="buffer">The buffer to write audio samples to.</param>
         /// <returns>The number of samples written to the buffer.</returns>
-        public int RenderAudio(double startTime, double duration, float[] buffer)
-        {
-            if (AudioEngine.TryGetSpatialOperatorStream(_operatorId, out var stream) && stream != null)
-                return stream.RenderAudio(startTime, duration, buffer, AudioConfig.MixerFrequency, 2);
-
-            Array.Clear(buffer, 0, buffer.Length);
-            return buffer.Length;
-        }
-
-        /// <summary>
-        /// Restores the volume level after an audio export operation.
-        /// </summary>
-        public void RestoreVolumeAfterExport()
-        {
-            if (AudioEngine.TryGetSpatialOperatorStream(_operatorId, out var stream) && stream != null)
-                Bass.ChannelSetAttribute(stream.StreamHandle, ChannelAttribute.Volume, Volume.Value);
-        }
-
-        /// <summary>
-        /// Finalizer that unregisters the operator from the audio engine.
-        /// </summary>
         ~PlaySpatialAudioSample()
         {
             if (_operatorId != Guid.Empty)

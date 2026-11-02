@@ -1,7 +1,6 @@
 #nullable enable
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using ManagedBass;
 using T3.Core.Animation;
 using T3.Core.Audio;
 using T3.Core.Model;
@@ -263,23 +262,8 @@ internal static class AudioClipsToOps
         if (absolutePath == null)
             return false;
 
-        var stream = AudioMixerManager.CreateOfflineAnalysisStream(absolutePath);
-        if (stream == 0)
-            return false;
-
-        try
-        {
-            var lengthBytes = Bass.ChannelGetLength(stream);
-            if (lengthBytes <= 0)
-                return false;
-
-            durationSecs = Bass.ChannelBytes2Seconds(stream, lengthBytes);
-            return durationSecs > 0;
-        }
-        finally
-        {
-            AudioMixerManager.FreeOfflineAnalysisStream(stream);
-        }
+        durationSecs = AudioMixerManager.TryProbeAudioDurationSecs(absolutePath);
+        return durationSecs > 0;
     }
 
     /// <summary>Resource context of a symbol without an instance: its own package and all shared packages.</summary>

@@ -1,8 +1,7 @@
 #nullable enable
 using System.Collections.Generic;
-using ManagedBass;
-using ManagedBass.Mix;
 using T3.Core.Animation;
+using T3.Core.Audio.Native;
 using T3.Core.DataTypes;
 using T3.Core.Logging;
 using T3.Core.Operator;
@@ -23,15 +22,6 @@ public static class AudioGraphCollector
         if (composition == null)
             return;
 
-        // A device change frees every BASS handle, so the cached bus and routing set are dead ints. Without
-        // this the non-zero _defaultBus is reused forever and loose graph audio stays silent until restart.
-        if (_resetGeneration != AudioMixerManager.ResetGeneration)
-        {
-            _resetGeneration = AudioMixerManager.ResetGeneration;
-            _defaultBus = 0;
-            _routed.Clear();
-        }
-
         RebuildLooseListIfChanged(composition);
 
         if (_looseSources.Count == 0 && _routed.Count == 0)
@@ -44,7 +34,8 @@ public static class AudioGraphCollector
         // giving stop=quiet as the natural off-switch for implicitly playing audio.
         // Render-export steps time with PlaybackSpeed 0, so recording counts as running.
         var transportStopped = (Playback.Current?.PlaybackSpeed ?? 0) == 0 && !AudioRendering.IsRecording;
-        BassMix.ChannelFlags(_defaultBus, transportStopped ? BassFlags.MixerChanPause : 0, BassFlags.MixerChanPause);
+        var engine = _engine!;
+        engine.SetBusPlaying(_defaultBus, !transportStopped);
 
         // Ensure each loose source's channel (from static inputs) and build the desired set.
         _desired.Clear();
@@ -54,7 +45,7 @@ public static class AudioGraphCollector
             src.EnsureChannelFromStaticInputs();
 
             var node = src.AudioReferenceOutput.Value;
-            if (node == null || node.SourceChannel == 0 || node.Routing == AudioGraphNode.RoutingKind.Direct)
+            if (node == null || !node.SourceChannel.IsValid || node.Routing == AudioGraphNode.RoutingKind.Direct)
                 continue;
 
             // An auto-collecting [AudioBus] / [CombineAudio] stamps every leaf it takes. Leaving those to the
@@ -64,7 +55,7 @@ public static class AudioGraphCollector
                 continue;
 
             _desired.Add(node.SourceChannel);
-            Bass.ChannelSetAttribute(node.SourceChannel, ChannelAttribute.Volume, node.Gain);
+            engine.SetVolume(node.SourceChannel, node.Gain);
         }
 
         // Route newly-loose channels into the default bus.
@@ -73,11 +64,7 @@ public static class AudioGraphCollector
             if (_routed.Contains(ch))
                 continue;
 
-            // A preview that stopped leaves the channel in its paused submix.
-            if (BassMix.ChannelGetMixer(ch) != 0)
-                BassMix.MixerRemoveChannel(ch);
-
-            if (BassMix.MixerAddChannel(_defaultBus, ch, BassFlags.MixerChanBuffer))
+            if (engine.Route(ch, _defaultBus))
                 _routed.Add(ch);
         }
 
@@ -90,8 +77,8 @@ public static class AudioGraphCollector
         for (var i = 0; i < _toRemove.Count; i++)
         {
             // The bus or preview that took the channel over has already moved it; removing it now would mute it there.
-            if (BassMix.ChannelGetMixer(_toRemove[i]) == _defaultBus)
-                BassMix.MixerRemoveChannel(_toRemove[i]);
+            if (engine.GetRouteTarget(_toRemove[i]) == _defaultBus)
+                engine.Route(_toRemove[i], default);
             _routed.Remove(_toRemove[i]);
         }
     }
@@ -133,26 +120,19 @@ public static class AudioGraphCollector
 
     private static bool EnsureDefaultBus()
     {
-        if (_defaultBus != 0)
+        if (_defaultBus.IsValid)
             return true;
 
-        if (!AudioMixerManager.IsInitialized)
-        {
-            AudioMixerManager.Initialize();
-            if (AudioMixerManager.OperatorMixerHandle == 0)
-                return false;
-        }
-
-        _defaultBus = BassMix.CreateMixerStream(AudioConfig.MixerFrequency, 2, BassFlags.MixerNonStop | BassFlags.Decode | BassFlags.Float);
-        if (_defaultBus == 0)
-        {
-            Log.Warning($"[AudioGraphCollector] failed to create default bus: {Bass.LastError}");
+        AudioMixerManager.Initialize();
+        _engine = AudioMixerManager.NativeEngine;
+        if (_engine == null)
             return false;
-        }
 
-        if (!BassMix.MixerAddChannel(AudioMixerManager.OperatorMixerHandle, _defaultBus, BassFlags.MixerChanBuffer))
-            Log.Error($"[AudioGraphCollector] failed to add default bus to operator mixer: {Bass.LastError}");
+        var bus = _engine.CreateBus();
+        if (!bus.IsValid || !_engine.Route(bus, AudioMixerManager.OperatorBus))
+            return false;
 
+        _defaultBus = bus;
         return true;
     }
 
@@ -162,9 +142,9 @@ public static class AudioGraphCollector
     private static Instance? _cachedComposition;
     private static int _cachedStructureVersion = -1;
     private static readonly List<IAudioSource> _looseSources = new();
-    private static readonly HashSet<int> _desired = new();
-    private static readonly HashSet<int> _routed = new();
-    private static readonly List<int> _toRemove = new();
-    private static int _defaultBus;
-    private static int _resetGeneration = -1;
+    private static readonly HashSet<AudioHandle> _desired = new();
+    private static readonly HashSet<AudioHandle> _routed = new();
+    private static readonly List<AudioHandle> _toRemove = new();
+    private static NativeAudioEngine? _engine;
+    private static AudioHandle _defaultBus;
 }
