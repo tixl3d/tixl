@@ -485,8 +485,7 @@ public static class AudioInput
             // Ensure AudioMixerManager has a chance to query the device sample rate.
             AudioMixerManager.Initialize();
 
-            var deviceRate = AudioConfig.MixerFrequency; // AudioMixerManager sets this during Initialize
-            SampleRate = deviceRate > 0 ? deviceRate : 48000; //Set to device rate if valid, fallback to 48kHz if not
+            SampleRate = AudioConfig.MixerFrequency;
         }
         catch (Exception ex)
         {

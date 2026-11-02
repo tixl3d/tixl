@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Threading;
 using ManagedBass;
 using ManagedBass.Mix;
+using T3.Core.Audio.Native;
 using T3.Core.Logging;
 using T3.Core.Settings;
 
@@ -33,10 +34,15 @@ public static class AudioMixerManager
     private static bool _initialized;
     private static bool _initializationFailed;
     private static int _flacPluginHandle;
-    private static readonly Lock _offlineStreamLock = new();
     private static readonly Lock _initLock = new();
 
     private static float _globalMixerVolume = 1.0f;
+
+    /// <summary>The engine playing soundtracks; null when audio is unavailable. It outlives BASS resets, so its handles stay valid.</summary>
+    internal static NativeAudioEngine? NativeEngine => _nativeEngine;
+    private static NativeAudioEngine? _nativeEngine;
+    private static bool _nativeEngineCreationAttempted;
+    private static float _nativeOutputLevel;
 
     internal static int GlobalMixerHandle => _globalMixerHandle;
     public static int OperatorMixerHandle => _operatorMixerHandle;
@@ -65,6 +71,12 @@ public static class AudioMixerManager
             {
                 // Don't spam logs with repeated init attempts after a failure
                 return;
+            }
+
+            if (!_nativeEngineCreationAttempted)
+            {
+                _nativeEngineCreationAttempted = true;
+                _nativeEngine = NativeAudioEngine.TryCreate(NativeAudio.Mode.Device, sampleRate: (uint)AudioConfig.MixerFrequency);
             }
 
             // Asking first, because everything below P/Invokes BASS and a missing library throws from the
@@ -99,9 +111,6 @@ public static class AudioMixerManager
             Log.Warning("[AudioMixer] BASS was already initialized by something else - our low-latency config may not apply!");
             Log.Warning("[AudioMixer] To fix this, ensure AudioMixerManager.Initialize() is called BEFORE any Bass.Init() calls.");
             Bass.GetInfo(out var info);
-            
-            // Set the mixer frequency to the device's actual sample rate
-            AudioConfig.MixerFrequency = info.SampleRate;
             Log.Gated.Audio($"[AudioMixer] Existing BASS - SampleRate: {info.SampleRate}Hz, MinBuffer: {info.MinBufferLength}ms, Latency: {info.Latency}ms");
         }
         else
@@ -212,9 +221,6 @@ public static class AudioMixerManager
             
             // Get actual device info after init
             Bass.GetInfo(out var info);
-            
-            // Set the mixer frequency to the device's actual sample rate
-            AudioConfig.MixerFrequency = info.SampleRate;
             var freqSource = usedDeviceDefault ? "device default" : $"fallback ({usedFrequency}Hz requested)";
             Log.Debug($"[AudioMixer] BASS initialized - SampleRate: {info.SampleRate}Hz ({freqSource}), Device: {Bass.CurrentDevice}, Method: {initMethod}, Latency: {info.Latency}ms");
         }
@@ -420,75 +426,28 @@ public static class AudioMixerManager
     }
 
     /// <summary>
-    /// Creates a decode-only stream for offline analysis (waveform image generation, FFT, etc.)
-    /// This stream is NOT connected to any output and will not interfere with playback.
-    /// The caller is responsible for freeing the stream with Bass.StreamFree() when done.
-    /// </summary>
-    /// <param name="filePath">Absolute path to the audio file</param>
-    /// <returns>Stream handle, or 0 if creation failed</returns>
-    public static int CreateOfflineAnalysisStream(string filePath)
-    {
-        if (!BassLibrary.IsAvailable)
-            return 0;
-
-        // Ensure BASS is initialized
-        if (!_initialized)
-        {
-            Initialize();
-        }
-
-        lock (_offlineStreamLock)
-        {
-            // Create a decode-only stream (no output to soundcard)
-            var stream = Bass.CreateStream(filePath, 0, 0, BassFlags.Decode | BassFlags.Prescan | BassFlags.Float);
-            if (stream == 0)
-            {
-                var error = Bass.LastError;
-                Log.Warning($"[AudioMixer] Failed to create offline analysis stream for '{filePath}': {error}");
-                return 0;
-            }
-
-            Log.Gated.Audio($"[AudioMixer] Created offline analysis stream: Handle={stream} for '{filePath}'");
-            return stream;
-        }
-    }
-
-    /// <summary>
-    /// Reads the duration of an audio file in seconds by opening a temporary decode stream.
-    /// Returns 0 on failure. Used by the timeline-drop handler to size a new clip's TimeRange
-    /// at the moment of import, without going through the full playback path.
+    /// Reads the duration of an audio file in seconds. Returns 0 on failure. Used by the timeline-drop handler
+    /// to size a new clip's TimeRange at the moment of import, without going through the full playback path.
     /// </summary>
     public static double TryProbeAudioDurationSecs(string filePath)
     {
-        var stream = CreateOfflineAnalysisStream(filePath);
-        if (stream == 0)
+        if (!OfflineAudioDecoder.TryOpen(filePath, out var decoder))
+        {
+            Log.Warning($"[AudioMixer] Could not read audio file '{filePath}'.");
             return 0;
-        try
-        {
-            var bytes = Bass.ChannelGetLength(stream);
-            if (bytes < 0)
-                return 0;
-            return Bass.ChannelBytes2Seconds(stream, bytes);
         }
-        finally
+
+        using (decoder)
         {
-            FreeOfflineAnalysisStream(stream);
+            return decoder.DurationSecs;
         }
     }
 
-    /// <summary>
-    /// Frees an offline analysis stream created by CreateOfflineAnalysisStream.
-    /// </summary>
-    public static void FreeOfflineAnalysisStream(int streamHandle)
+    /// <summary>Called once per frame, because reading the peak resets it and two meters show it.</summary>
+    internal static void UpdateNativeOutputLevel()
     {
-        if (streamHandle == 0)
-            return;
-
-        lock (_offlineStreamLock)
-        {
-            Bass.StreamFree(streamHandle);
-            Log.Gated.Audio($"[AudioMixer] Freed offline analysis stream: Handle={streamHandle}");
-        }
+        if (_nativeEngine != null)
+            _nativeOutputLevel = Math.Min(_nativeEngine.TakeOutputPeak(), 1f);
     }
 
     /// <summary>
@@ -504,15 +463,15 @@ public static class AudioMixerManager
     public static float GetGlobalMixerLevel()
     {
         if (!_initialized || _globalMixerHandle == 0)
-            return 0f;
+            return _nativeOutputLevel;
 
         // Use ChannelGetLevel (level-ex variant) with configurable time window for responsive metering.
         // The float[] overload returns RMS levels over the specified window, normalized to 0.0-1.0.
         float[] levels = new float[2];
         if (!Bass.ChannelGetLevel(_globalMixerHandle, levels, AudioConfig.LevelMeteringWindowSeconds, LevelRetrievalFlags.Stereo))
-            return 0f;
+            return _nativeOutputLevel;
 
-        return Math.Max(levels[0], levels[1]);
+        return Math.Max(_nativeOutputLevel, Math.Max(levels[0], levels[1]));
     }
 
     /// <summary>
@@ -541,31 +500,8 @@ public static class AudioMixerManager
         return Math.Max(left, right);
     }
 
-    /// <summary>
-    /// Gets the current audio level from the soundtrack mixer (0.0 to 1.0 normalized).
-    /// Returns the maximum of left and right channels.
-    /// </summary>
-    /// <remarks>
-    /// Uses BassMix.ChannelGetLevel for decode streams added to a mixer with MixerChanBuffer flag.
-    /// This reads from the mixer's internal buffer without consuming audio data.
-    /// Note: Decode streams require BassMix.ChannelGetLevel, not Bass.ChannelGetLevel.
-    /// </remarks>
-    public static float GetSoundtrackMixerLevel()
-    {
-        if (!_initialized || _soundtrackMixerHandle == 0)
-            return 0f;
-
-        // For decode streams with MixerChanBuffer, use BassMix.ChannelGetLevel (integer variant)
-        // The float[] level-ex variant doesn't work correctly for decode streams
-        var level = BassMix.ChannelGetLevel(_soundtrackMixerHandle);
-        if (level == -1)
-            return 0f;
-
-        // Low 16 bits = left channel, high 16 bits = right channel (0-32768 range)
-        var left = (level & 0xFFFF) / 32768f;
-        var right = ((level >> 16) & 0xFFFF) / 32768f;
-        return Math.Max(left, right);
-    }
+    /// <summary>Gets the highest level of the soundtrack output in the last frame (0.0 to 1.0).</summary>
+    public static float GetSoundtrackMixerLevel() => _nativeOutputLevel;
 
     /// <summary>
     /// Queries the default output device's sample rate with a throwaway BASS init: BASS reports the device's

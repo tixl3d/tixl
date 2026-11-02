@@ -11,15 +11,13 @@ public static class AudioConfig
 {
 
     #region Mixer Configuration
-    // Note: MixerFrequency is determined at runtime from the device's sample rate.
     // Other values are const because they are used for static array initialization.
 
     /// <summary>
-    /// Sample rate for all mixer streams (Hz).
-    /// This is set at runtime to match the device's current sample rate.
-    /// Default value is 48000Hz until Bass is initialized.
+    /// Sample rate of all mixing (Hz). Fixed rather than following the device, so that exports and analysis
+    /// are the same on every machine; the device connection converts where its rate differs.
     /// </summary>
-    public static int MixerFrequency { get; internal set; } = 48000;
+    public const int MixerFrequency = 48000;
 
     /// <summary>
     /// BASS update period in milliseconds for low-latency playback.

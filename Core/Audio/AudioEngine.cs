@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using ManagedBass;
 using T3.Core.Animation;
 using T3.Core.Audio.Graph;
+using T3.Core.Audio.Native;
 using T3.Core.IO;
 using T3.Core.Logging;
 using T3.Core.Settings;
@@ -63,6 +64,9 @@ public static class AudioEngine
     private static double _lastPlaybackSpeed = 1;
     private static bool _bassInitialized;
     private static bool _bassInitFailed;
+
+    private static readonly Fft _fft = new(AudioConfig.FftBufferSize * 2);
+    private static readonly float[] _fftSamples = new float[AudioConfig.FftBufferSize * 2];
 
     /// <summary>
     /// Common state for operator audio streams using mixer (stereo).
@@ -160,7 +164,7 @@ public static class AudioEngine
     {
         if (SoundtrackClipStreams.TryGetValue(handle, out var stream))
         {
-            Bass.StreamFree(stream.StreamHandle);
+            stream.DisableSoundtrackStream();
             SoundtrackClipStreams.Remove(handle);
         }
 
@@ -171,18 +175,11 @@ public static class AudioEngine
     }
 
     /// <summary>
-    /// Exposes a soundtrack clip's live BASS channel so the audio-processing graph (an [AudioBus]) can route it.
-    /// Only valid while the clip is in use — its stream is created lazily on the first <see cref="UseSoundtrackClip"/>
-    /// (i.e. the clip must be AutoPlay or driven by a player). Returns false until then.
+    /// Soundtrack clips play in the native engine and have no BASS channel a bus could route,
+    /// so a clip wired into the audio graph keeps playing directly until buses move there too.
     /// </summary>
     public static bool TryGetSoundtrackChannel(AudioClipResourceHandle? handle, out int channel)
     {
-        if (handle != null && SoundtrackClipStreams.TryGetValue(handle, out var stream) && stream.StreamHandle != 0)
-        {
-            channel = stream.StreamHandle;
-            return true;
-        }
-
         channel = 0;
         return false;
     }
@@ -206,6 +203,7 @@ public static class AudioEngine
         }
 
         ProcessSoundtrackClips(playback, frameDurationInSeconds);
+        AudioMixerManager.UpdateNativeOutputLevel();
 
         // Process FFT data after filling the buffer from soundtrack
         // Skip during export - GetFullMixDownBuffer handles FFT processing during export
@@ -313,11 +311,6 @@ public static class AudioEngine
             // clip into ExportAudioFrame (which drives FFT for the rendered frames).
             if (playback.IsRenderingToFile)
             {
-                // Except graph-routed clips: they stay in their bus submix during export (the export mixer
-                // skips them), so their seek/pause sync must keep running or they'd stay paused and silent.
-                if (clipStream.ResourceHandle.Clip.IsRoutedToGraph)
-                    clipStream.UpdateSoundtrackTime(playback);
-
                 if (!handledMainSoundtrack && clipStream.ResourceHandle.Clip.IsMainSoundtrack)
                 {
                     handledMainSoundtrack = true;
@@ -391,22 +384,19 @@ public static class AudioEngine
         if (playback.IsRenderingToFile)
             return;
 
-        // Get FFT data from the GlobalMixer to include both soundtrack AND operator audio
-        // This ensures all audio metering (AudioWaveform, AudioFrequencies, AudioReaction, etc.)
-        // monitors the complete audio output including operator-generated sounds
-        var mixerHandle = AudioMixerManager.GlobalMixerHandle;
-        if (mixerHandle == 0)
+        var engine = AudioMixerManager.NativeEngine;
+        if (engine == null)
             return;
 
-        const int dataFlags = (int)DataFlags.FFT2048;
-        _ = Bass.ChannelGetData(mixerHandle, context.FftGainBuffer, dataFlags);
+        // All metering (AudioWaveform, AudioFrequencies, AudioReaction, ...) monitors the complete output.
+        engine.ReadOutputMono(_fftSamples);
+        _fft.ComputeMagnitudes(_fftSamples, context.FftGainBuffer);
 
         if (!context.WaveformRequested)
             return;
 
-        int lengthInBytes = AudioConfig.WaveformSampleCount << 2 << 1;
-        context.LastWaveformFetchResult = Bass.ChannelGetData(mixerHandle,
-            context.InterleavedSampleBuffer, lengthInBytes);
+        engine.ReadOutputStereo(context.InterleavedSampleBuffer);
+        context.LastWaveformFetchResult = context.InterleavedSampleBuffer.Length;
     }
 
     /// <summary>
@@ -418,8 +408,7 @@ public static class AudioEngine
     {
         if (handle == null || !SoundtrackClipStreams.TryGetValue(handle, out var clipStream))
             return 2;
-        Bass.ChannelGetInfo(clipStream.StreamHandle, out var info);
-        return info.Channels;
+        return clipStream.ChannelCount;
     }
 
     /// <summary>
@@ -431,8 +420,7 @@ public static class AudioEngine
     {
         if (clip == null || !SoundtrackClipStreams.TryGetValue(clip, out var stream))
             return 48000;
-        Bass.ChannelGetInfo(stream.StreamHandle, out var info);
-        return info.Frequency;
+        return stream.SampleRate;
     }
 
     #endregion

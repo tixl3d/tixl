@@ -18,12 +18,12 @@ public static class PlaybackUtils
     public static BpmProvider BpmProvider = BpmProvider.Instance;
     public static TapProvider TapProvider = TapProvider.Instance;
 
-    internal static void UpdatePlaybackAndSyncing()
+    /// <summary>
+    /// Declares the clips audible at the current playhead. Live playback and video export both call this,
+    /// so that an export renders what was heard: the engine frees a stream the first frame it isn't registered.
+    /// </summary>
+    internal static void RegisterAudioClips(CompositionSettings settings, IResourceConsumer? audioComposition)
     {
-        var settings = FindCompositionSettings(out var audioComposition);
-
-        AudioInput.StartFrame(settings);
-
         if (settings.Playback.AudioSource == CompositionSettings.AudioSources.ProjectSoundTrack)
         {
             // Register every clip in the composition's AudioClips list so the engine
@@ -44,6 +44,15 @@ public static class PlaybackUtils
         AudioClipCollector.RegisterAutoPlayClips(ProjectView.Focused?.CompositionInstance,
                                                  Playback.Current.TimeInBars,
                                                  Playback.Current.TimeInSecs);
+    }
+
+    internal static void UpdatePlaybackAndSyncing()
+    {
+        var settings = FindCompositionSettings(out var audioComposition);
+
+        AudioInput.StartFrame(settings);
+
+        RegisterAudioClips(settings, audioComposition);
 
         // Play "loose" audio-graph sources (whose output isn't wired into any bus) through an implicit
         // default bus, so basic audio plays without an [AudioBus] op. Wired sources go through their bus.

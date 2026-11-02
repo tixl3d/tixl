@@ -109,11 +109,32 @@ internal static unsafe partial class NativeAudio
     [LibraryImport(Library, EntryPoint = "ta_tap_read_latest")]
     internal static partial ulong TapReadLatest(IntPtr engine, int tap, float* destination, int count);
 
-    [LibraryImport(Library, EntryPoint = "ta_decode_peaks", StringMarshalling = StringMarshalling.Utf8)]
-    internal static partial int DecodePeaks(string path, int bucketCount, float* minMaxPairs, out double lengthSeconds);
+    [LibraryImport(Library, EntryPoint = "ta_tap_take_peak")]
+    internal static partial float TapTakePeak(IntPtr engine, int tap);
 
-    [LibraryImport(Library, EntryPoint = "ta_decode_window", StringMarshalling = StringMarshalling.Utf8)]
-    internal static partial int DecodeWindow(string path, ulong startFrame, uint frameCount, uint channels, int useSeekTable, float* output, out uint sampleRate);
+    [LibraryImport(Library, EntryPoint = "ta_output_read_stereo")]
+    internal static partial void OutputReadStereo(IntPtr engine, float* destination, int frameCount);
+
+    [LibraryImport(Library, EntryPoint = "ta_sound_is_playing")]
+    internal static partial int SoundIsPlaying(IntPtr engine, int sound);
+
+    [LibraryImport(Library, EntryPoint = "ta_sound_get_cursor_seconds")]
+    internal static partial double SoundGetCursorSeconds(IntPtr engine, int sound);
+
+    [LibraryImport(Library, EntryPoint = "ta_sound_get_format")]
+    internal static partial int SoundGetFormat(IntPtr engine, int sound, out uint channels, out uint sampleRate);
+
+    [LibraryImport(Library, EntryPoint = "ta_offline_open", StringMarshalling = StringMarshalling.Utf8)]
+    internal static partial IntPtr OfflineOpen(string path, out uint channels, out uint sampleRate, out ulong frameCount, out int result);
+
+    [LibraryImport(Library, EntryPoint = "ta_offline_seek")]
+    internal static partial int OfflineSeek(IntPtr decoder, ulong frame);
+
+    [LibraryImport(Library, EntryPoint = "ta_offline_read")]
+    internal static partial long OfflineRead(IntPtr decoder, float* output, ulong frameCount);
+
+    [LibraryImport(Library, EntryPoint = "ta_offline_close")]
+    internal static partial void OfflineClose(IntPtr decoder);
 
     private const string Library = "tixlaudio";
 }

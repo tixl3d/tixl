@@ -46,6 +46,54 @@ internal sealed unsafe class NativeAudioEngine : IDisposable
     public double GetLengthSecs(AudioSourceHandle source) => NativeAudio.SoundGetLengthSeconds(_engine, source.Value);
     public void SetVolume(AudioSourceHandle source, float volume) => NativeAudio.SoundSetVolume(_engine, source.Value, volume);
     public void SetPitch(AudioSourceHandle source, float pitch) => NativeAudio.SoundSetPitch(_engine, source.Value, pitch);
+    public bool IsPlaying(AudioSourceHandle source) => NativeAudio.SoundIsPlaying(_engine, source.Value) != 0;
+
+    /// <summary>The next source position to be mixed; ahead of what is audible by <see cref="OutputLatencySecs"/>.</summary>
+    public double GetCursorSecs(AudioSourceHandle source) => NativeAudio.SoundGetCursorSeconds(_engine, source.Value);
+
+    public bool TryGetFormat(AudioSourceHandle source, out int channels, out int sampleRate)
+    {
+        var result = NativeAudio.SoundGetFormat(_engine, source.Value, out var nativeChannels, out var nativeRate);
+        channels = (int)nativeChannels;
+        sampleRate = (int)nativeRate;
+        return result == 0;
+    }
+
+    /// <summary>How long audio takes from the mix to the device's output; 0 while no device is attached.</summary>
+    public double OutputLatencySecs
+    {
+        get
+        {
+            NativeAudio.GetInfo(_engine, out var info);
+            return info.SampleRate > 0 ? (double)(info.PeriodFrames * info.Periods) / info.SampleRate : 0;
+        }
+    }
+
+    public void DetachDevice() => NativeAudio.DetachDevice(_engine);
+
+    /// <summary>Reattaches the default output device; false leaves the engine silent but usable.</summary>
+    public bool AttachDefaultDevice() => NativeAudio.AttachDevice(_engine, DefaultDevice) == 0;
+
+    /// <summary>The highest output sample since the previous call.</summary>
+    public float TakeOutputPeak() => NativeAudio.TapTakePeak(_engine, NativeAudio.OutputTap);
+
+    /// <summary>The newest output samples as a mono mix, zero-padded at the start if fewer exist.</summary>
+    public void ReadOutputMono(Span<float> samples)
+    {
+        fixed (float* destination = samples)
+        {
+            NativeAudio.TapReadLatest(_engine, NativeAudio.OutputTap, destination, samples.Length);
+        }
+    }
+
+    /// <summary>The newest output frames as interleaved stereo, zero-padded at the start if fewer exist.</summary>
+    public void ReadOutputStereo(Span<float> interleaved)
+    {
+        fixed (float* destination = interleaved)
+        {
+            NativeAudio.OutputReadStereo(_engine, destination, interleaved.Length / 2);
+        }
+    }
 
     /// <summary>Renders interleaved frames. Only works while no device is attached.</summary>
     public bool Render(Span<float> interleaved, uint frameCount)
@@ -66,6 +114,8 @@ internal sealed unsafe class NativeAudioEngine : IDisposable
     }
 
     private NativeAudioEngine(IntPtr engine) => _engine = engine;
+
+    private const int DefaultDevice = -1;
 
     private IntPtr _engine;
 }

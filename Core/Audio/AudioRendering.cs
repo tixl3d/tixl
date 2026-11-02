@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using ManagedBass;
 using ManagedBass.Mix;
 using T3.Core.Animation;
+using T3.Core.Audio.Native;
 using T3.Core.IO;
 using T3.Core.Logging;
 using T3.Core.Operator;
@@ -30,14 +31,10 @@ public static class AudioRendering
     private static float[] _operatorBuffer = Array.Empty<float>();
     private static float[] _spatialStreamBuffer = Array.Empty<float>();
     
-    // Export mixer handle - BASS handles resampling and mixing for us
-    private static int _exportMixerHandle;
-    private static bool _exportMixerInitialized;
+    private static readonly Fft _exportFft = new(AudioConfig.FftBufferSize * 2);
 
-    // Max deviation between a clip stream's source position and the timeline target before the export
-    // reseeks it. Roughly half a frame at 30 fps — large enough to let contiguous frames read
-    // sequentially despite per-frame sample rounding, small enough to stay inaudible.
-    private const double ExportResyncThresholdSecs = 0.015;
+    /** The newest mono samples of the export mix: a video frame holds fewer samples than one FFT window. */
+    private static readonly float[] _exportFftSamples = new float[AudioConfig.FftBufferSize * 2];
 
     /// <summary>
     /// Ensures the buffer has at least the required capacity, reallocating if necessary.
@@ -86,54 +83,12 @@ public static class AudioRendering
 
         AudioEngine.ResetAllOperatorStreamsForExport();
 
-        // Create export mixer - BASS handles resampling when adding streams
-        // This replaces manual ResampleAndMix with BASS's optimized resampler
-        _exportMixerHandle = BassMix.CreateMixerStream(
-            AudioConfig.MixerFrequency, 
-            2, // stereo output
-            BassFlags.Decode | BassFlags.Float | BassFlags.MixerNonStop);
-        
-        if (_exportMixerHandle == 0)
-        {
-            Log.Error($"[AudioRendering] Failed to create export mixer: {Bass.LastError}");
-            _exportMixerInitialized = false;
-        }
-        else
-        {
-            _exportMixerInitialized = true;
-            Log.Gated.AudioRender($"[AudioRendering] Export mixer created: Handle={_exportMixerHandle}, Freq={AudioConfig.MixerFrequency}Hz");
-        }
+        Array.Clear(_exportFftSamples);
 
-        // Remove soundtrack streams from live mixer and add to export mixer
-        foreach (var (handle, clipStream) in AudioEngine.SoundtrackClipStreams)
-        {
-            // A graph-routed clip stays in its bus submix: the graph owns its routing, gain, ducking and FX,
-            // and its audio reaches the export through the OperatorMixer read. Stealing it here would strip
-            // the graph processing from the exported audio and strand it in the SoundtrackMixer afterwards.
-            if (handle.Clip.IsRoutedToGraph)
-                continue;
-
-            BassMix.MixerRemoveChannel(clipStream.StreamHandle);
-            
-            // Reset stream attributes for export
-            float nativeFrequency = clipStream.GetDefaultFrequency();
-            Bass.ChannelSetAttribute(clipStream.StreamHandle, ChannelAttribute.Frequency, nativeFrequency);
-            Bass.ChannelSetAttribute(clipStream.StreamHandle, ChannelAttribute.NoRamp, 1);
-            
-            if (_exportMixerInitialized)
-            {
-                // Add to export mixer - BASS will handle resampling from native frequency to mixer frequency
-                // Use MixerChanNoRamping for sample-accurate seeking during export
-                if (!BassMix.MixerAddChannel(_exportMixerHandle, clipStream.StreamHandle, BassFlags.MixerChanNoRampin | BassFlags.MixerChanPause))
-                {
-                    Log.Warning($"[AudioRendering] Failed to add soundtrack to export mixer: {Bass.LastError}");
-                }
-                else
-                {
-                    Log.Gated.AudioRender($"[AudioRendering] Soundtrack '{handle.Clip.AssetPath}' added to export mixer");
-                }
-            }
-        }
+        // The export pulls the engine itself, so the graph keeps its state while no device runs.
+        AudioMixerManager.NativeEngine?.DetachDevice();
+        foreach (var (_, clipStream) in AudioEngine.SoundtrackClipStreams)
+            clipStream.PrepareForExport();
 
         Log.Gated.AudioRender($"[AudioRendering] PrepareRecording: fps={fps}");
     }
@@ -145,33 +100,14 @@ public static class AudioRendering
         _isRecording = false;
         Log.Gated.AudioRender($"[AudioRendering] EndRecording: Exported {_frameCount} frames");
 
-        // Remove soundtrack streams from export mixer and re-add to live mixer
-        foreach (var (handle, clipStream) in AudioEngine.SoundtrackClipStreams)
-        {
-            if (handle.Clip.IsRoutedToGraph)
-                continue; // stayed in its bus submix — see PrepareRecording
+        var engine = AudioMixerManager.NativeEngine;
+        if (engine != null && !engine.AttachDefaultDevice())
+            Log.Warning("[AudioRendering] Could not reopen the audio device after the export; audio stays silent.");
 
-            if (_exportMixerInitialized)
-            {
-                BassMix.MixerRemoveChannel(clipStream.StreamHandle);
-            }
-            
-            if (!BassMix.MixerAddChannel(AudioMixerManager.SoundtrackMixerHandle, clipStream.StreamHandle, BassFlags.MixerChanPause))
-            {
-                Log.Warning($"[AudioRendering] Failed to re-add soundtrack: {Bass.LastError}");
-            }
-            clipStream.UpdateTimeWhileRecording(playback, fps, true);
-        }
-        
-        // Clean up export mixer
-        if (_exportMixerInitialized && _exportMixerHandle != 0)
-        {
-            Bass.StreamFree(_exportMixerHandle);
-            _exportMixerHandle = 0;
-            _exportMixerInitialized = false;
-            Log.Gated.AudioRender("[AudioRendering] Export mixer freed");
-        }
-        
+        // The speed only gets reapplied when it changes, and the export has reset it to 1.
+        foreach (var (_, clipStream) in AudioEngine.SoundtrackClipStreams)
+            clipStream.UpdateSoundtrackPlaybackSpeed(playback.PlaybackSpeed);
+
         _exportState.RestoreState();
         AudioEngine.RestoreOperatorAudioStreams();
     }
@@ -202,11 +138,7 @@ public static class AudioRendering
         var mixBuffer = EnsureBuffer(ref _mixBuffer, floatCount);
         double currentTime = Playback.Current.TimeInSecs;
 
-        // Mix soundtrack streams using BASS export mixer (handles resampling automatically)
-        if (_exportMixerInitialized)
-        {
-            MixSoundtracksFromExportMixer(mixBuffer, floatCount, currentTime);
-        }
+        RenderSoundtracks(mixBuffer, sampleCount, currentTime);
 
         // Mix operator audio (always included)
         MixOperatorAudio(mixBuffer, floatCount, currentTime, frameDurationInSeconds);
@@ -218,9 +150,8 @@ public static class AudioRendering
         // This ensures AudioWaveform, PlaybackFFT, AudioReaction, etc. work correctly during rendering
         WaveFormProcessing.PopulateFromExportBuffer(mixBuffer);
         
-        // Compute FFT from the accumulated waveform buffer (same as live playback uses)
         var context = AudioAnalysisContext.Default;
-        AudioAnalysis.ComputeFftFromBuffer(context.InterleavedSampleBuffer, context);
+        UpdateExportFft(mixBuffer, sampleCount, context);
         
         // Process FFT data to compute frequency bands, peaks, and attacks for AudioReaction
         // Use the same gain/decay factors from playback settings as used during normal playback
@@ -232,83 +163,34 @@ public static class AudioRendering
         return mixBuffer;
     }
 
-    /// <summary>
-    /// Mixes all soundtrack clips using the BASS export mixer.
-    /// BASS handles resampling from each clip's native frequency to the mixer frequency.
-    /// </summary>
-    private static void MixSoundtracksFromExportMixer(float[] mixBuffer, int floatCount, double currentTime)
+    private static void RenderSoundtracks(float[] mixBuffer, int frameCount, double currentTime)
     {
-        // Position each soundtrack clip and set its volume based on whether it should be active
-        foreach (var (handle, clipStream) in AudioEngine.SoundtrackClipStreams)
+        var engine = AudioMixerManager.NativeEngine;
+        if (engine == null)
+            return;
+
+        foreach (var (_, clipStream) in AudioEngine.SoundtrackClipStreams)
+            clipStream.UpdateForExport(currentTime);
+
+        engine.Render(mixBuffer, (uint)frameCount);
+    }
+
+    private static void UpdateExportFft(float[] mixBuffer, int frameCount, AudioAnalysisContext context)
+    {
+        var history = _exportFftSamples;
+        var newFrames = Math.Min(frameCount, history.Length);
+        Array.Copy(history, newFrames, history, 0, history.Length - newFrames);
+
+        var firstFrame = frameCount - newFrames;
+        var writeIndex = history.Length - newFrames;
+        for (var frame = 0; frame < newFrames; frame++)
         {
-            var clip = handle.Clip;
-            if (clip.IsRoutedToGraph)
-                continue; // graph-owned: bus applies gain, engine syncs position — don't fight either
-
-
-            double clipStart = Playback.Current.SecondsFromBars(clip.TimeRange.Start);
-            double elapsedInClip = currentTime - clipStart;
-            double targetSourcePos = clip.SourceOffsetSecs + elapsedInClip;
-            double sourceEnd = clip.SourceDurationSecs > 0
-                                   ? clip.SourceOffsetSecs + clip.SourceDurationSecs
-                                   : clip.LengthInSeconds;
-
-            // Looping clips wrap back into their valid source window for as long as the clip lasts.
-            var loopStart = Math.Max(clip.SourceOffsetSecs, 0);
-            var loopLength = Math.Min(sourceEnd, clip.LengthInSeconds) - loopStart;
-            if (clip.IsLooping && loopLength > 0.01 && elapsedInClip >= 0)
-                targetSourcePos = loopStart + elapsedInClip % loopLength;
-
-            // Check if clip is active at this time (negative source position = start-extended before
-            // the file's content — stays silent until the playhead reaches valid source time).
-            bool isActive = elapsedInClip >= 0 && targetSourcePos >= 0 && targetSourcePos < sourceEnd;
-            if (clip.IsLooping && clip.TimeRange.End > clip.TimeRange.Start)
-                isActive &= currentTime < Playback.Current.SecondsFromBars(clip.TimeRange.End);
-
-            if (isActive)
-            {
-                // Keep the stream at the correct source-file time. Mixer sources must be seeked through
-                // BASSmix (a plain Bass.ChannelSetPosition is ignored for plugged channels, which made
-                // clips play from their beginning when the render range didn't start at 0). Contiguous
-                // frames read sequentially, so only reseek when the position actually drifted
-                // (activation, render-range start, loop wrap).
-                var currentBytes = BassMix.ChannelGetPosition(clipStream.StreamHandle);
-                var currentPosSecs = Bass.ChannelBytes2Seconds(clipStream.StreamHandle, currentBytes);
-                if (Math.Abs(currentPosSecs - targetSourcePos) > ExportResyncThresholdSecs)
-                {
-                    long targetBytes = Bass.ChannelSeconds2Bytes(clipStream.StreamHandle, targetSourcePos);
-                    BassMix.ChannelSetPosition(clipStream.StreamHandle, targetBytes,
-                                               PositionFlags.Bytes | PositionFlags.MixerReset);
-                }
-
-
-                // Apply volume: clip.Volume * SoundtrackVolume * AppVolume
-                float effectiveVolume = handle.Clip.Volume
-                                        * CompositionSettings.Current.Audio.SoundtrackVolume
-                                        * CoreSettings.Config.AppVolume;
-                Bass.ChannelSetAttribute(clipStream.StreamHandle, ChannelAttribute.Volume, effectiveVolume);
-                
-                // Unpause for this frame
-                BassMix.ChannelFlags(clipStream.StreamHandle, 0, BassFlags.MixerChanPause);
-            }
-            else
-            {
-                // Pause clips that shouldn't be playing
-                BassMix.ChannelFlags(clipStream.StreamHandle, BassFlags.MixerChanPause, BassFlags.MixerChanPause);
-            }
+            var left = mixBuffer[(firstFrame + frame) * 2];
+            var right = mixBuffer[(firstFrame + frame) * 2 + 1];
+            history[writeIndex + frame] = (left + right) * 0.5f;
         }
-        
-        // Read mixed audio from export mixer - BASS handles all resampling
-        int bytesRead = Bass.ChannelGetData(_exportMixerHandle, mixBuffer, floatCount * sizeof(float));
-        
-        if (bytesRead < 0)
-        {
-            var error = Bass.LastError;
-            if (error != Errors.OK && error != Errors.Ended)
-            {
-                Log.Gated.AudioRender($"[AudioRendering] Export mixer read error: {error}");
-            }
-        }
+
+        _exportFft.ComputeMagnitudes(history, context.FftGainBuffer);
     }
 
     private static void MixOperatorAudio(float[] mixBuffer, int floatCount, double currentTime, double frameDuration)

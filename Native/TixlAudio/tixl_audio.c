@@ -211,6 +211,10 @@ typedef struct
     ma_device captureDevice;
     ma_bool32 captureRunning;
     ma_atomic_float capturePeak;
+
+    /* Interleaved stereo copy of the output for waveform displays; outputTap only keeps the mono mix. */
+    float outputStereo[TA_TAP_CAPACITY * 2];
+    ma_atomic_uint64 outputStereoWritten;
 } ta_engine;
 
 static ma_uint64 ta_now_ns_internal(void)
@@ -429,6 +433,15 @@ static void ta_render_block(ta_engine* engine, float* output, ma_uint32 frameCou
     ta_apply_queued_routes(engine);
     ma_engine_read_pcm_frames(&engine->engine, output, frameCount, NULL);
     ta_tap_ring_write(&engine->outputTap, output, frameCount, 2);
+
+    ma_uint64 stereoWritten = ma_atomic_uint64_get(&engine->outputStereoWritten);
+    for (ma_uint32 frame = 0; frame < frameCount; frame++)
+    {
+        ma_uint64 slot = (stereoWritten + frame) & (TA_TAP_CAPACITY - 1);
+        engine->outputStereo[slot * 2] = output[frame * 2];
+        engine->outputStereo[slot * 2 + 1] = output[frame * 2 + 1];
+    }
+    ma_atomic_uint64_set(&engine->outputStereoWritten, stereoWritten + frameCount);
 
     float gain = ma_atomic_float_get(&engine->outputGain);
     if (gain != 1.0f)
@@ -944,6 +957,30 @@ TA_API ma_int32 ta_sound_seek_seconds(ta_engine* engine, ma_int32 handle, double
     return ma_sound_seek_to_pcm_frame(&slot->sound, (ma_uint64)(seconds * slot->sourceSampleRate));
 }
 
+TA_API ma_int32 ta_sound_is_playing(ta_engine* engine, ma_int32 handle)
+{
+    ta_sound_slot* slot = ta_sound(engine, handle);
+    return slot != NULL && ma_sound_is_playing(&slot->sound);
+}
+
+/** The next source position to be mixed, or a seek target that hasn't been applied yet. -1 for a stale handle. */
+TA_API double ta_sound_get_cursor_seconds(ta_engine* engine, ma_int32 handle)
+{
+    ta_sound_slot* slot = ta_sound(engine, handle);
+    ma_uint64 cursor = 0;
+    if (slot == NULL || slot->sourceSampleRate == 0 || ma_sound_get_cursor_in_pcm_frames(&slot->sound, &cursor) != MA_SUCCESS)
+        return -1;
+    return (double)cursor / slot->sourceSampleRate;
+}
+
+TA_API ma_int32 ta_sound_get_format(ta_engine* engine, ma_int32 handle, ma_uint32* channels, ma_uint32* sampleRate)
+{
+    ta_sound_slot* slot = ta_sound(engine, handle);
+    if (slot == NULL)
+        return MA_INVALID_ARGS;
+    return ma_sound_get_data_format(&slot->sound, NULL, channels, sampleRate, NULL, 0);
+}
+
 TA_API double ta_sound_get_length_seconds(ta_engine* engine, ma_int32 handle)
 {
     ta_sound_slot* slot = ta_sound(engine, handle);
@@ -1013,6 +1050,23 @@ TA_API double ta_get_playback_seconds(ta_engine* engine, ma_uint64 nowNs)
     if (isPlaying && nowNs > cursorTimeNs)
         seconds += (double)(nowNs - cursorTimeNs) * 1e-9;
     return seconds;
+}
+
+/** Copies the newest frameCount interleaved stereo output frames, zero-padded at the start if fewer exist. */
+TA_API void ta_output_read_stereo(ta_engine* engine, float* destination, ma_int32 frameCount)
+{
+    if (frameCount > TA_TAP_CAPACITY / 2)
+        frameCount = TA_TAP_CAPACITY / 2;
+
+    ma_uint64 written = ma_atomic_uint64_get(&engine->outputStereoWritten);
+    ma_uint64 start = written >= (ma_uint64)frameCount ? written - (ma_uint64)frameCount : 0;
+    for (ma_int32 index = 0; index < frameCount; index++)
+    {
+        ma_uint64 frame = start + (ma_uint64)index;
+        ma_uint64 slot = frame & (TA_TAP_CAPACITY - 1);
+        destination[index * 2] = frame < written ? engine->outputStereo[slot * 2] : 0.0f;
+        destination[index * 2 + 1] = frame < written ? engine->outputStereo[slot * 2 + 1] : 0.0f;
+    }
 }
 
 /* ---- Buses, effects, taps and routing ---- */
@@ -1260,6 +1314,58 @@ TA_API ma_int32 ta_decode_window(const char* path, ma_uint64 startFrame, ma_uint
 
     ma_decoder_uninit(&decoder);
     return result == MA_AT_END ? MA_SUCCESS : result;
+}
+
+/* ---- Offline decoders: independent of any engine, so analysis can run on worker threads. ---- */
+
+TA_API ma_decoder* ta_offline_open(const char* path, ma_uint32* channels, ma_uint32* sampleRate, ma_uint64* frameCount, ma_int32* outResult)
+{
+    ma_decoder* decoder = (ma_decoder*)malloc(sizeof(ma_decoder));
+    if (decoder == NULL)
+    {
+        *outResult = MA_OUT_OF_MEMORY;
+        return NULL;
+    }
+
+    ma_decoder_config config = ma_decoder_config_init(ma_format_f32, 0, 0);
+    config.seekPointCount = TA_MP3_SEEK_POINTS;
+    ma_result result = ma_decoder_init_file(path, &config, decoder);
+    if (result == MA_SUCCESS)
+    {
+        result = ma_decoder_get_length_in_pcm_frames(decoder, frameCount);
+        if (result != MA_SUCCESS)
+            ma_decoder_uninit(decoder);
+    }
+    if (result != MA_SUCCESS)
+    {
+        free(decoder);
+        *outResult = result;
+        return NULL;
+    }
+
+    *channels = decoder->outputChannels;
+    *sampleRate = decoder->outputSampleRate;
+    *outResult = MA_SUCCESS;
+    return decoder;
+}
+
+TA_API ma_int32 ta_offline_seek(ma_decoder* decoder, ma_uint64 frame)
+{
+    return ma_decoder_seek_to_pcm_frame(decoder, frame);
+}
+
+/** Returns the number of interleaved frames read; fewer than asked for at the end of the file. */
+TA_API ma_int64 ta_offline_read(ma_decoder* decoder, float* output, ma_uint64 frameCount)
+{
+    ma_uint64 framesRead = 0;
+    ma_result result = ma_decoder_read_pcm_frames(decoder, output, frameCount, &framesRead);
+    return result == MA_SUCCESS || result == MA_AT_END ? (ma_int64)framesRead : result;
+}
+
+TA_API void ta_offline_close(ma_decoder* decoder)
+{
+    ma_decoder_uninit(decoder);
+    free(decoder);
 }
 
 /* ---- Capture ---- */

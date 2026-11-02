@@ -1,8 +1,9 @@
 # Replace BASS with a native miniaudio layer
 
-**Status:** In progress — 2026-11-02. Phase 1 is in place and additive (`Native/TixlAudio/`, `Core/Audio/Native/`):
-nothing plays through it yet and BASS still runs everything. Phase 0's seek fix is done; its Windows and macOS runs
-and the upstream reports are open. The spike lives on branch `spike/replace-bass`, not on the port branch.
+**Status:** In progress — 2026-11-02, on branch `feat/miniaudio`. Soundtracks, their analysis, their export, waveform
+images and duration probes run on the native engine; operators, buses, spatial audio, video audio and capture are
+still on BASS. Phase 0's seek fix is done; its Windows and macOS runs and the upstream reports are open. The spike
+lives on branch `spike/replace-bass`.
 Decisions from 2026-10-12 are folded in (§Decisions 6–10).
 **Scope:** All audio in Editor, Player and operators on Windows, Linux and macOS. Removes ManagedBass,
 BASSmix, BASSFLAC and BASSWASAPI.
@@ -211,15 +212,21 @@ Each phase ends with the editor running on all three platforms and a short manua
 
 ### Phase 2 — soundtrack, timeline, waveform
 
-**This phase can't stand alone.** `AudioRendering` reads `SoundtrackClipStream.StreamHandle`, the live FFT reads
-the BASS global mixer (`AudioEngine.UpdateFftBufferFromSoundtrack`), and `AudioClip` feeds the channel into the
-graph. Moving the soundtrack leaves export, `[AudioReaction]` and graph-routed clips broken until phases 3–5, so
-the phases 2–5 branch stays broken for those features until it is done. Replace the handle types first.
-The Editor registers clips before `Playback.Update` and the Player after it, which matters when retuning sync.
+**Done on `feat/miniaudio`, in a different cut than first planned.** The phase can't stand alone: export, the live FFT
+and graph routing all read the soundtrack's handle. So the soundtrack moved together with its FFT and its share of
+export, while both engines run side by side on the branch. The branch stays playable that way, but this coexistence
+must not ship (decision 6). Measured in the running editor (null sink recording against the decoded source): correlation
+0.999–1.000, constant offset, 8–26 ms behind the timeline through seeks, pause and 2× speed.
 
-- `SoundtrackClipStream` on a native file source; position, speed (pitch), looping, out-of-range pause.
-- Retune sync constants against the native position; test with a click track at 60 fps and in the Player.
-- Waveform/spectrum images and duration probes on native offline decode (background tasks as today).
+Until the remaining phases land, on this branch:
+- Operator audio plays through BASS, so it's missing from the live FFT, waveform and soundtrack meter.
+- A clip wired into a bus plays directly at its clip volume (`AudioEngine.TryGetSoundtrackChannel` returns false).
+- Soundtracks ignore the output device BASS was given; the native engine follows the system default.
+- On macOS soundtracks stay silent, because there is no `libtixlaudio.dylib` yet.
+- `AppVolume` applies once to soundtracks; through BASS it applied twice (clip volume and global mixer).
+
+The Editor registers clips before `Playback.Update` and the Player after it, which matters when judging sync.
+Mixing is fixed at 48 kHz (`AudioConfig.MixerFrequency` is const), which settles that open question.
 
 ### Phase 3 — analysis
 
@@ -227,6 +234,9 @@ The Editor registers clips before `Playback.Update` and the Player after it, whi
   tap inserts, `FFTRemoveDC` for input. Verify with the spike's comparison that every `[AudioReaction]` mode
   produces the same values as BASS on the example projects.
 - Capture via native input + ring buffer; move `AudioInput.OnCapturedData` work to the main thread.
+- Live and export FFT are already on the managed `Fft`; what's left is input and per-source FFT, and comparing values
+  against BASS on real projects. Export's FFT window now holds real history instead of zero padding, so export
+  reactions will differ slightly from earlier versions and should now match live.
 
 ### Phase 4 — graph, operators, effects, spatial, video audio
 
@@ -254,5 +264,4 @@ and (b) export parity — making every source kind resettable and every video fr
 
 ## Open questions
 
-- Fixed 48 kHz engine rate with device-side conversion, or follow the device rate as today?
 - Effects later: Freeverb-style reverb and a feed-forward compressor, or none until someone asks?

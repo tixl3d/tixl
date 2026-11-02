@@ -144,7 +144,9 @@ internal static class RenderTiming
         }
         var adaptedDelta = Math.Max(Playback.Current.TimeInSecs - oldSecs + session.Runtime.TimingOverhang, 0.0);
 
-        // audio clip for preview
+        PlaybackUtils.RegisterAudioClips(projectSettings, instanceWithSettings);
+
+        // The main soundtrack can live on a parent composition, which live clip registration doesn't scan.
         if (projectSettings.TryGetMainSoundtrack(instanceWithSettings, out var soundtrack))
             AudioEngine.UseSoundtrackClip(soundtrack, Playback.Current.TimeInSecs);
 

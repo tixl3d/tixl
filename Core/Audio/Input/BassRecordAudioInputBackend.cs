@@ -47,7 +47,7 @@ internal sealed class BassRecordAudioInputBackend : AudioInputBackend
             devices.Add(new AudioInputDevice
                             {
                                 Name = deviceInfo.Name,
-                                SampleRate = AudioConfig.MixerFrequency > 0 ? AudioConfig.MixerFrequency : DefaultSampleRate,
+                                SampleRate = AudioConfig.MixerFrequency,
                                 IsLoopback = deviceInfo.IsLoopback,
                                 BackendIndex = deviceIndex,
                             });
