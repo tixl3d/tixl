@@ -101,6 +101,7 @@ internal static partial class CustomComponents
     /// </summary>
     public static void SeparatorLine()
     {
+        ApplyPendingSubMenuRowOffset();
         FormInputs.AddVerticalSpace(4);
         var x = ImGui.GetCursorPosX();
         ImGui.SetCursorPosX(0);

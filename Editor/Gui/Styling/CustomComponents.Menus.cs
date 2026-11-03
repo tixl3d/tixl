@@ -57,6 +57,7 @@ internal static partial class CustomComponents
     /// </summary>
     public static void DrawMenuGroupLabel(string label)
     {
+        ApplyPendingSubMenuRowOffset();
         FormInputs.AddVerticalSpace(2);
         ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetStyle().ItemSpacing.X + Icons.FontSize * 1.4f);
         ImGui.PushFont(Fonts.FontSmall);
@@ -109,6 +110,7 @@ internal static partial class CustomComponents
                                     bool reserveCheckmarkColumn = true, bool reserveIconColumn = true,
                                     ButtonStates state = ButtonStates.Default)
     {
+        ApplyPendingSubMenuRowOffset();
         isEnabled &= !MenuItemsDisabled;
         if (MenuItemsFlushLeft)
         {
@@ -210,6 +212,7 @@ internal static partial class CustomComponents
     /// </summary>
     public static bool DrawSubMenu(int id, string label, bool isEnabled = true, bool reserveCheckmarkColumn = true)
     {
+        ApplyPendingSubMenuRowOffset();
         if (MenuItemsFlushLeft)
             reserveCheckmarkColumn = false;
 
@@ -239,13 +242,27 @@ internal static partial class CustomComponents
         var padCount = spaceWidth > 0.01f ? (int)MathF.Ceiling(reserve / spaceWidth) : 0;
         var sizingLabel = label + new string(' ', padCount);
 
+        // BeginMenu's hit rect is one text line padded by ItemSpacing.y, starting half that padding above the
+        // cursor. Pad it to the row height and shift it down, or its hover lands on the neighbouring header.
+        var rowPadding = h - ImGui.GetFontSize();
+        var hitRectShift = (int)(rowPadding * 0.5f);
+        ImGui.SetCursorScreenPos(rowStart + new Vector2(0, hitRectShift));
+
         var transparent = UiColors.ForegroundFull.Fade(0f).Rgba;
+        ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(imguiPadding.X, rowPadding));
         ImGui.PushStyleColor(ImGuiCol.Text, transparent);
         ImGui.PushStyleColor(ImGuiCol.Header, transparent);
         ImGui.PushStyleColor(ImGuiCol.HeaderHovered, transparent);
         ImGui.PushStyleColor(ImGuiCol.HeaderActive, transparent);
+        var parentStorage = ImGui.GetStateStorage();
         var isOpen = ImGui.BeginMenu($"{sizingLabel}##{id}", isEnabled);
         ImGui.PopStyleColor(4);
+        ImGui.PopStyleVar();
+
+        // The shift also pushed the parent's cursor down. An open submenu has already switched to its child
+        // window, so the next row in the parent takes the shift back.
+        parentStorage.SetInt(PendingRowOffsetFrameKey, ImGui.GetFrameCount() + 1);
+        parentStorage.SetInt(PendingRowOffsetKey, hitRectShift);
 
         if (isEnabled && (isOpen || ImGui.IsItemHovered()))
         {
@@ -261,6 +278,17 @@ internal static partial class CustomComponents
                                        parentDrawList, textColor);
 
         return isOpen;
+    }
+
+    /** Undoes the cursor shift a <see cref="DrawSubMenu"/> left in the current window this frame. */
+    private static void ApplyPendingSubMenuRowOffset()
+    {
+        var storage = ImGui.GetStateStorage();
+        if (storage.GetInt(PendingRowOffsetFrameKey) != ImGui.GetFrameCount() + 1)
+            return;
+
+        storage.SetInt(PendingRowOffsetFrameKey, 0);
+        ImGui.SetCursorPosY(ImGui.GetCursorPosY() - storage.GetInt(PendingRowOffsetKey));
     }
 
     // Menu-row label color. Distinct from GetStateColor (tool-icon tints) so the menu look can evolve on its own.
@@ -326,4 +354,8 @@ internal static partial class CustomComponents
         FormInputs.AddVerticalSpace(3);
         return changed;
     }
+
+    /** Arbitrary window-storage keys; stamped with frame count + 1 so a stale or missing entry never matches. */
+    private const uint PendingRowOffsetFrameKey = 0x5B3C_7A11;
+    private const uint PendingRowOffsetKey = 0x5B3C_7A12;
 }
