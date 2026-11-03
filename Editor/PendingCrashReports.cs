@@ -113,15 +113,14 @@ internal static class PendingCrashReports
     }
 
     /// <summary>
-    /// Sends each report as a fresh event carrying the saved report as an attachment. The original event
-    /// cannot be revived - Sentry does not read its own serialised form back - so the attachment is what
-    /// carries the stack, the context and the graph snapshot.
+    /// Sends each report as a fresh event rebuilt from the one saved in the report, so it arrives with the
+    /// crash's own stack and context. The report itself is attached as well.
     /// </summary>
     internal static void Send(IReadOnlyList<Report> reports)
     {
         foreach (var report in reports)
         {
-            Capture(report.Title, report.TimeUtc, [report.ReportPath], userComment: null);
+            Capture(report.Title, report.TimeUtc, report.ReportPath, [report.ReportPath], userComment: null);
             TryDelete(report.MarkerPath);
         }
 
@@ -132,9 +131,10 @@ internal static class PendingCrashReports
     /// Sends a session the user chose to share later, with whatever files describe it - its crash report, its
     /// log, or both - and an optional note on what they were doing.
     /// </summary>
-    internal static void Share(string title, DateTime timeUtc, IReadOnlyList<string> attachmentPaths, string userComment)
+    internal static void Share(string title, DateTime timeUtc, string? crashReportPath, IReadOnlyList<string> attachmentPaths,
+                               string userComment)
     {
-        Capture(title, timeUtc, attachmentPaths, userComment);
+        Capture(title, timeUtc, crashReportPath, attachmentPaths, userComment);
         SentrySdk.Flush(TimeSpan.FromSeconds(5));
     }
 
@@ -147,15 +147,12 @@ internal static class PendingCrashReports
         }
     }
 
-    private static void Capture(string title, DateTime timeUtc, IReadOnlyList<string> attachmentPaths, string? userComment)
+    private static void Capture(string title, DateTime timeUtc, string? crashReportPath, IReadOnlyList<string> attachmentPaths,
+                                string? userComment)
     {
         try
         {
-            var sentryEvent = new SentryEvent
-                                  {
-                                      Message = title,
-                                      Level = SentryLevel.Error,
-                                  };
+            var sentryEvent = CreateEvent(title, crashReportPath);
 
             sentryEvent.SetTag(DeferredTag, "true");
             sentryEvent.SetTag("Nickname", UserSettings.Config.UserName);
@@ -169,14 +166,108 @@ internal static class PendingCrashReports
                                                 {
                                                     foreach (var path in attachmentPaths)
                                                     {
-                                                        if (File.Exists(path))
-                                                            scope.AddAttachment(path);
+                                                        if (TryReadForAttachment(path, out var data))
+                                                            scope.AddAttachment(data, Path.GetFileName(path));
                                                     }
                                                 });
         }
         catch (Exception e)
         {
             Log.Warning($"Could not send a crash report from an earlier session: {e.Message}");
+        }
+    }
+
+    /// <summary>
+    /// A new event carrying the exception, contexts and tags of the crash saved in the report. It gets a new id
+    /// because Sentry drops an event whose id it has already received, and the crash may have been sent before.
+    /// Without a readable report, the title is all there is.
+    /// </summary>
+    private static SentryEvent CreateEvent(string title, string? crashReportPath)
+    {
+        var sentryEvent = new SentryEvent { Level = SentryLevel.Error };
+
+        var original = crashReportPath != null ? TryReadSavedEvent(crashReportPath) : null;
+        if (original?.SentryExceptions == null)
+        {
+            sentryEvent.Message = title;
+            return sentryEvent;
+        }
+
+        sentryEvent.SentryExceptions = original.SentryExceptions;
+        sentryEvent.Release = original.Release;
+        foreach (var (key, value) in original.Contexts)
+        {
+            sentryEvent.Contexts[key] = value;
+        }
+
+        foreach (var (key, value) in original.Tags)
+        {
+            sentryEvent.SetTag(key, value);
+        }
+
+        return sentryEvent;
+    }
+
+    /** The report holds the exception text followed by the event as written by <see cref="CrashReporting"/>. */
+    private static SentryEvent? TryReadSavedEvent(string crashReportPath)
+    {
+        try
+        {
+            var text = File.ReadAllText(crashReportPath);
+            var jsonStart = text.IndexOf("\n{", StringComparison.Ordinal);
+            if (jsonStart < 0)
+                return null;
+
+            using var document = JsonDocument.Parse(text.AsMemory(jsonStart + 1));
+            return SentryEvent.FromJson(document.RootElement);
+        }
+        catch (Exception e)
+        {
+            Log.Debug($"Could not read the crash from '{Path.GetFileName(crashReportPath)}': {e.Message}");
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Reads a file for attaching, cutting out its middle when it is too large: Sentry drops oversized attachments
+    /// entirely, while the start of a log tells how the session was set up and its end how it died.
+    /// </summary>
+    private static bool TryReadForAttachment(string path, out byte[] data)
+    {
+        data = [];
+        try
+        {
+            using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+            if (stream.Length <= MaxAttachmentBytes)
+            {
+                data = new byte[stream.Length];
+                stream.ReadExactly(data);
+                return true;
+            }
+
+            var head = new byte[AttachmentHeadBytes];
+            stream.ReadExactly(head);
+
+            var tail = new byte[MaxAttachmentBytes - AttachmentHeadBytes];
+            stream.Seek(-tail.Length, SeekOrigin.End);
+            stream.ReadExactly(tail);
+
+            // Cut at line breaks so neither half starts or ends with a broken line.
+            var headLength = Array.LastIndexOf(head, (byte)'\n') + 1;
+            var tailStart = Array.IndexOf(tail, (byte)'\n') + 1;
+            var skippedBytes = stream.Length - headLength - (tail.Length - tailStart);
+            var marker = System.Text.Encoding.UTF8.GetBytes($"\n[... {skippedBytes / 1024} KB cut from the middle to fit the size limit ...]\n\n");
+
+            data = new byte[headLength + marker.Length + tail.Length - tailStart];
+            head.AsSpan(0, headLength).CopyTo(data);
+            marker.CopyTo(data, headLength);
+            tail.AsSpan(tailStart).CopyTo(data.AsSpan(headLength + marker.Length));
+            return true;
+        }
+        catch (Exception e)
+        {
+            Log.Debug($"Could not attach '{Path.GetFileName(path)}': {e.Message}");
+            return false;
         }
     }
 
@@ -199,6 +290,11 @@ internal static class PendingCrashReports
 
     /** Sits beside the human-readable crash report and marks it as never offered to the user. */
     private const string MarkerExtension = ".unsent.json";
+
+    /** Well below Sentry's 20 MB attachment limit, so a report with both a crash file and a log still fits. */
+    private const int MaxAttachmentBytes = 4 * 1024 * 1024;
+
+    private const int AttachmentHeadBytes = 1024 * 1024;
 
     private sealed record MarkerFile(DateTime TimeUtc, string ExceptionType, string Message, string ReportFileName);
 }

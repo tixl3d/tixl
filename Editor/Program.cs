@@ -180,8 +180,8 @@ internal static class Program
         var startupStopWatch = new Stopwatch();
         startupStopWatch.Start();
 
-        // Also in debug builds: their crashes are only logged (see CrashReporting.CrashHandler), but a session
-        // can still be shared deliberately from Help > Show Folder > Logs.
+        // In every build: with a debugger attached, crashes are only logged (see CrashReporting.CrashHandler), but a
+        // session can still be shared deliberately from Help > Logs.
         CrashReporting.InitializeCrashReporting();
 
         ApplyWindowArgs(args);

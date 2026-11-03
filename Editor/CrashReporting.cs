@@ -1,5 +1,6 @@
 ﻿#nullable enable
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Text.Json;
@@ -34,6 +35,9 @@ internal static class CrashReporting
                            o.SendClientReports = false;
                            o.AutoSessionTracking = false;
                            o.SendDefaultPii = false;
+                           // Only reports shared from an earlier session come without an exception, and the stack of
+                           // the menu that sent them says nothing about the crash.
+                           o.AttachStacktrace = false;
                            o.Release = Program.Version.ToBasicVersionString();
                            o.SetBeforeSend(CrashHandler);
                        });
@@ -94,16 +98,16 @@ internal static class CrashReporting
 
         var reportPath = WriteCrashReportFile(sentryEvent);
 
-        // We only show crash report dialog in release mode 
-        
-        #if RELEASE
-        var inReleaseMode = true;
-        #else
-        var inReleaseMode = false;
-        #endif
-        
-        if (inReleaseMode)
+        // A debugger must see the exception untouched; everyone else, whatever the build, gets the dialog.
+        if (!Debugger.IsAttached)
         {
+            // The log is what people paste when they ask for help, so it needs the stack too, not only the report.
+            if (sentryEvent.Exception != null)
+            {
+                Log.Error($"Crash: {sentryEvent.Exception}");
+                FileWriter.Flush();
+            }
+
             // Left before the prompt, not after: the point of the marker is to survive a crash that never
             // gets as far as answering it.
             if (reportPath != null)

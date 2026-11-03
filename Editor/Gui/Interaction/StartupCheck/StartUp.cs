@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.IO;
 using T3.Core.SystemUi;
 using T3.Core.Settings;
@@ -17,11 +18,10 @@ public static class StartUp
     {
         WarnIfLowDiskSpace();
 
-        if (File.Exists(StartUpLockFilePath))
+        // Stopping a debugger during startup leaves the lock behind; that is not a failed start worth a prompt.
+        if (File.Exists(StartUpLockFilePath) && !Debugger.IsAttached)
         {
-            #if !DEBUG
             ShowLastStartupFailedMessageBox();
-            #endif
         }
 
         File.WriteAllText(StartUpLockFilePath, "Startup " + DateTime.Now);

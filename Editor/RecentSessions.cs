@@ -25,7 +25,14 @@ internal static class RecentSessions
         internal readonly string? LogPath = logPath;
 
         internal string? CrashReportPath { get; set; }
+        /** The exception type, short enough for a menu row. */
         internal string? CrashTitle { get; set; }
+
+        /** The exception message: the first line of the crash report. */
+        internal string? CrashMessage { get; set; }
+
+        /** The message the log ended with, which is often the best hint where an unreported crash happened. */
+        internal string? LastLogEntry { get; set; }
         internal bool EndedUnexpectedly { get; set; }
         internal bool IsShared { get; set; }
 
@@ -72,8 +79,8 @@ internal static class RecentSessions
         if (session.LogPath != null)
             attachments.Add(session.LogPath);
 
-        var title = session.CrashTitle ?? "Session ended unexpectedly";
-        PendingCrashReports.Share(title, session.EndTime.ToUniversalTime(), attachments, userComment);
+        PendingCrashReports.Share(BuildReportTitle(session), session.EndTime.ToUniversalTime(), session.CrashReportPath, attachments,
+                                  userComment);
 
         // Sharing answers the startup question about this crash as well.
         if (session.CrashReportPath != null)
@@ -116,7 +123,8 @@ internal static class RecentSessions
                     continue;
                 }
 
-                var endedCleanly = EndsWithCleanShutdown(logFile.FullName);
+                var tail = ReadLogTail(logFile.FullName);
+                var endedCleanly = tail == null || tail.Contains(Program.ShutdownCompleteMessage, StringComparison.Ordinal);
 
                 // Another editor that is still running looks exactly like one that died.
                 if (!endedCleanly && IsHeldByRunningEditor(logFile.FullName))
@@ -125,6 +133,7 @@ internal static class RecentSessions
                 _sessions.Add(new Session(startTime, logFile.LastWriteTime, logFile.FullName)
                                   {
                                       EndedUnexpectedly = !endedCleanly,
+                                      LastLogEntry = endedCleanly ? null : FindLastLogEntry(tail!),
                                   });
             }
 
@@ -149,6 +158,7 @@ internal static class RecentSessions
 
                 session.CrashReportPath = reportFile.FullName;
                 session.CrashTitle = ReadCrashTitle(reportFile.Name);
+                session.CrashMessage = ReadFirstLine(reportFile.FullName);
             }
 
             foreach (var session in _sessions)
@@ -188,9 +198,9 @@ internal static class RecentSessions
 
         var file = Path.GetFileName(session.CrashReportPath ?? session.LogPath);
         var description = session.CrashReportPath != null
-                              ? "Crashed and wrote a report."
+                              ? $"Crashed: {session.CrashMessage ?? session.CrashTitle}"
                               : session.EndedUnexpectedly
-                                  ? "The log stops without a clean shutdown - TiXL was killed or crashed natively."
+                                  ? $"The log stops without a clean shutdown - TiXL was killed or crashed.\nLast entry: {session.LastLogEntry ?? "none"}"
                                   : "Closed normally.";
 
         return $"""
@@ -220,7 +230,8 @@ internal static class RecentSessions
         return best;
     }
 
-    private static bool EndsWithCleanShutdown(string logPath)
+    /** Null if the log can't be read, which tells nothing either way and must not raise an alarm. */
+    private static string? ReadLogTail(string logPath)
     {
         try
         {
@@ -230,12 +241,66 @@ internal static class RecentSessions
 
             var buffer = new byte[length];
             stream.ReadExactly(buffer);
-            return Encoding.UTF8.GetString(buffer).Contains(Program.ShutdownCompleteMessage, StringComparison.Ordinal);
+            return Encoding.UTF8.GetString(buffer);
         }
         catch (Exception)
         {
-            // An unreadable log tells us nothing either way; don't raise an alarm over it.
-            return true;
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// The message of the last "12:04:34.888 (Debug): ..." line. Continuation lines of multi-line messages are
+    /// skipped, and the home folder is shortened to ~ so titles neither leak the user name nor differ by it.
+    /// </summary>
+    private static string? FindLastLogEntry(string tail)
+    {
+        var lines = tail.Split('\n');
+        for (var lineIndex = lines.Length - 1; lineIndex >= 0; lineIndex--)
+        {
+            var line = lines[lineIndex].TrimEnd('\r');
+            var messageStart = line.IndexOf("): ", StringComparison.Ordinal);
+            if (line.Length < 14 || line[2] != ':' || line[8] != '.' || line[12] != ' ' || line[13] != '(' || messageStart < 0)
+                continue;
+
+            var message = line[(messageStart + 3)..].Trim();
+            if (message.Length == 0)
+                continue;
+
+            if (_homeFolder.Length > 1)
+                message = message.Replace(_homeFolder, "~", StringComparison.Ordinal);
+
+            return message.Length > MaxLastEntryLength ? message[..MaxLastEntryLength] + "..." : message;
+        }
+
+        return null;
+    }
+
+    private static string BuildReportTitle(Session session)
+    {
+        if (session.CrashTitle != null)
+        {
+            return string.IsNullOrEmpty(session.CrashMessage)
+                       ? session.CrashTitle
+                       : $"{session.CrashTitle}: {session.CrashMessage}";
+        }
+
+        return session.LastLogEntry == null
+                   ? "Session ended unexpectedly"
+                   : $"Session ended unexpectedly after: {session.LastLogEntry}";
+    }
+
+    private static string? ReadFirstLine(string path)
+    {
+        try
+        {
+            using var reader = new StreamReader(path);
+            var line = reader.ReadLine()?.Trim();
+            return string.IsNullOrEmpty(line) ? null : line;
+        }
+        catch (Exception)
+        {
+            return null;
         }
     }
 
@@ -303,6 +368,10 @@ internal static class RecentSessions
 
     /** Enough to cover the shutdown message plus whatever is logged while the last resources are released. */
     private const int LogTailBytes = 2048;
+
+    private const int MaxLastEntryLength = 100;
+
+    private static readonly string _homeFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
     private static readonly TimeSpan _maxSessionAge = TimeSpan.FromDays(7);
     private static readonly TimeSpan _crashAfterLastLogTolerance = TimeSpan.FromMinutes(1);

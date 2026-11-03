@@ -26,7 +26,7 @@ Open **Help > Show Folder**. Hover each entry, then click **Settings**.
 ## Step: List recent sessions
 
 **Action:**
-Open **Help > Show Folder > Logs**.
+Open **Help > Logs**.
 
 **Expected:**
 - **Open Log Folder** at the top, then a **Recent Sessions** list with relative times like `2 min ago`, newest first.
@@ -36,7 +36,7 @@ Open **Help > Show Folder > Logs**.
 ## Step: Session that ended unexpectedly
 
 **Action:**
-Start TiXL, open any project, and kill the process (`kill -9 <pid>` or the task manager). Restart TiXL and open **Help > Show Folder > Logs**.
+Start TiXL, open any project, and kill the process (`kill -9 <pid>` or the task manager). Restart TiXL and open **Help > Logs**.
 
 **Expected:**
 - The killed session has a magenta warning icon and reads `... ago   Ended Unexpectedly`.
@@ -46,7 +46,7 @@ Start TiXL, open any project, and kill the process (`kill -9 <pid>` or the task 
 ## Step: Another editor still running
 
 **Action:**
-Start a second TiXL instance of the same version while the first one is still running. In the second one, open **Help > Show Folder > Logs**.
+Start a second TiXL instance of the same version while the first one is still running. In the second one, open **Help > Logs**.
 
 **Expected:**
 - The first instance's session is not listed as ended unexpectedly. It is not listed at all.
@@ -62,12 +62,15 @@ On the flagged session pick **Share with Developers...**, type a note, and click
 - Reopening the submenu shows a checked, disabled **Shared with Developers**. It stays that way after a restart.
 - The event appears in Sentry with the log attached and the note under `UserComment`.
 
-## Step: Debug build
+## Step: Crash with and without a debugger
 
 **Action:**
-In a debug build, throw an unhandled exception (or kill the process), restart, and share the session from **Help > Show Folder > Logs**.
+1. Start a Debug build from the IDE with the debugger attached and trigger an unhandled exception.
+2. Start the same Debug build from a file manager or terminal (no debugger) and trigger the exception again.
+3. Restart and open **Help > Logs**.
 
 **Expected:**
-- The exception still breaks in the IDE as before, and no crash dialog or startup popup appears.
-- The crashed session is listed with its crash report.
-- **Share with Developers...** is enabled, and the event arrives in Sentry tagged `Configuration: Debug`.
+- With the debugger: the exception breaks in the IDE, no crash dialog appears, and no startup popup follows.
+- Without the debugger: the crash dialog appears as in a release build, and the next start offers to send the report.
+- Both sessions are listed with their exception type and a crash report, and **Share with Developers...** is enabled.
+- Shared events arrive in Sentry with the crash's own stack trace, tagged `Configuration: Debug`.

@@ -85,7 +85,7 @@ crash additionally writes `crash <date> - <error> - <id>.txt` beside it. When Ti
 launcher script on Linux, the console output of the most recent two runs is also there as `console.log` and
 `console.previous.log` — which is the only record if TiXL dies before its own logging starts.
 
-**Help > Show Folder > Logs** lists the sessions of the last 7 days. Sessions that crashed, or whose log stops
+**Help > Logs** lists the sessions of the last 7 days. Sessions that crashed, or whose log stops
 without a clean shutdown, are marked with a warning: open their report or log from there, or pick **Share with
 Developers...** to send both to the TiXL team with a note on what you were doing.
 

@@ -12,12 +12,12 @@ using T3.Editor.UiModel.ProjectHandling;
 namespace T3.Editor.Gui;
 
 /// <summary>
-/// Help > Show Folder: opens the folders TiXL keeps its files in, and lists the recent sessions with their logs
-/// so a session that crashed can be found, opened and shared.
+/// The Help menu's Show Folder and Logs submenus: the folders TiXL keeps its files in, and the recent sessions
+/// with their logs, so a session that crashed can be found, opened and shared.
 /// </summary>
 internal static class ShowFolderMenu
 {
-    internal static void DrawContent()
+    internal static void DrawFoldersContent()
     {
         var projectDirectories = UserSettings.Config.ProjectDirectories;
         DrawFolderItem("Projects", projectDirectories.Count > 0 ? projectDirectories[0] : FileLocations.DefaultProjectFolder);
@@ -32,16 +32,14 @@ internal static class ShowFolderMenu
         DrawFolderItem("Cache", FileLocations.CacheDirectory);
         DrawFolderItem("Temp", _tempFolder);
 
-        CustomComponents.SeparatorLine();
-
-        if (AppMenuBar.BeginSubMenu("Logs"))
+        var logDirectory = FileWriter.Instance?.LogDirectory;
+        if (logDirectory != null)
         {
-            DrawLogsMenu();
-            ImGui.EndMenu();
+            DrawFolderItem("Logs", logDirectory);
         }
     }
 
-    private static void DrawLogsMenu()
+    internal static void DrawLogsContent()
     {
         var logDirectory = FileWriter.Instance?.LogDirectory;
         if (AppMenuBar.MenuItem("Open Log Folder", isEnabled: logDirectory != null) && logDirectory != null)
@@ -51,6 +49,7 @@ internal static class ShowFolderMenu
 
         var sessions = RecentSessions.GetSessions(refreshLabels: ImGui.IsWindowAppearing());
 
+        CustomComponents.SeparatorLine();
         CustomComponents.DrawMenuGroupLabel("Recent Sessions");
         if (sessions.Count == 0)
         {
