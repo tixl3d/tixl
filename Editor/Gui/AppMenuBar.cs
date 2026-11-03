@@ -361,7 +361,7 @@ internal static class AppMenuBar
 
             var exportChildUis = projectView?.NodeSelection.GetSelectedChildUis().ToList();
             var canExport = projectView?.CompositionInstance != null && exportChildUis is { Count: 1 }
-                            && projectView.CompositionInstance.Children.TryGetChildInstance(exportChildUis[0].SymbolChild.Id, out var exportTarget)
+                            && projectView.CompositionInstance.Children.TryGetChildInstance(exportChildUis[0].Id, out var exportTarget)
                             && PlayerExporter.CanExport(exportTarget);
             if (MenuItem("Export as Executable", isEnabled: canExport))
             {
