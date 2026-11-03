@@ -4,9 +4,12 @@ Inspired by text UIs like lazygit and Claude Code: a keyboard-first way to navig
 operators that stays discoverable. Mouse work (layouting, wiring at a distance) keeps the mouse; the goal is to
 streamline the flows that dominate real sessions.
 
-**Status (2026-10-31):** Shipped on both branches: arrow-key navigation, parameter popover, action toasts, operator
-bookmarks, output peek. Left: scoped keymap and hint bar (Phase 0), key-convention cleanup, slider ×10 still on Alt,
-popover multi-select and verbs, toast mute UI, toast and peek test sets. Sections describing the "current state" predate this.
+**Status (2026-11-03):** Shipped on both branches: arrow-key navigation, parameter popover (strings included),
+action toasts, operator bookmarks, output peek. Left: shared keycap renderer, infinity-slider modifiers aligned with
+the popover, popover verbs `␣g` and `␣x`, toast mute UI, toast and peek test sets, shipping the cleaned keymap as the
+new Default. Multi-selection editing moved to `Plan_MultiSelectionEditing.md`. The scoped keymap and hint bar
+(Phase 0) are obsolete. Parked: command palette, `␣c` connect, preset names in the popover, vector names, keyboard
+view panning. Sections describing the "current state" predate this.
 
 **Frequency of use drives priority:** parameter change ≫ insert op ≫ pop out ≫ reorder (each step ≈ ×50 less
 frequent). Reorder (Alt+↑/↓ in snapped stacks) already exists and is rarely useful because connection types
@@ -79,8 +82,11 @@ change along chains — leave it as is.
     `+ - * / % ^ ( ) pi` show `= 200`, `=` forces an absolute value (`=-5`). Esc steps back (value → filter →
     close). Applied values flash. Initial focus: the parameter last edited on that operator (session memory),
     else the first unconnected one. Closing by keyboard re-focuses the graph window.
-  - Next: vector names (`up`, `+x`); decide whether the mouse slider moves ×10 from Alt to Ctrl; return to the
-    prompt after `␣i` inserted an operator; dropdown options as popover rows.
+  - Next: verbs `␣g` (go to the op feeding a connected parameter) and `␣x` (disconnect); align the mouse slider's
+    modifiers with the popover (see Key convention); return to the prompt after `␣i` inserted an operator; dropdown
+    options as popover rows.
+  - Parked: vector names (`up`, `+x`), not needed so far; `␣c` connect mode; preset names in parameter editing.
+    The symbol browser already handles preset names; the popover would need a separate popup for them.
 
 ### Backlog of ideas (from the popover review)
 
@@ -94,7 +100,7 @@ change along chains — leave it as is.
   the focus back (`GraphWindow`).
 - Graph navigation from any window — done: arrows and the popover key reach the focused view's graph unless a popup or active item blocks them. Windows reading arrows call `KeyActionHandling.ClaimArrowKeys()`; the first use moves focus to the graph, and closing the popover returns it. The popover is on Alt+S (S collides with WASD), or Space with Shift+Space for playback through the `UseSpaceToEditParameters` setting, a runtime override in `KeyActionHandling` that applies to every keymap. "Space marks" needs another key while it is on.
 - Space vs Tab in the symbol browser (presets) — consider switching it to Tab as well.
-  - Not yet: verbs `i c g x`, strings, preset names with spaces, multi-selection.
+  - Done: strings. Multi-selection moved to `Plan_MultiSelectionEditing.md`.
 
 ## Design principles
 
@@ -119,7 +125,7 @@ The factory keymap gets a written convention; every new binding takes its key fr
 | none | main action in context. Reserved: playback (Space, J K L), Esc, Tab, Enter, Del, and mode keys (`s`, `v`, `p`, `t`) |
 | **Shift** | variant / store / reverse (extend selection, Shift+digit stores a bookmark, Shift+Tab inserts upstream, minor toggles like Shift+D disable). During continuous manipulation: **precision** (×0.1, snapping inverted while dragging) |
 | **Ctrl** (Cmd on macOS) | app/document commands (save, copy, undo, duplicate); Ctrl+P command palette. During continuous manipulation: **coarse** (×10) |
-| **Alt** | **navigation**: Alt+←/→ history (unchanged), Alt+↑/↓ parent composition / into the active op (I/U stay as aliases) |
+| **Alt** | **navigation**: Alt+←/→ history (unchanged), Alt+↑/↓ parent composition / into the active op (I/U stay as aliases). Exception: Alt+W/A/S/D align the selection top/left/bottom/right, as in Figma. Only Alt+A (align left) exists; Alt+S is the parameter popover and Alt+D is disconnect, so adding bottom/right alignment needs those moved first |
 | digits | 1–9 jump to op bookmark, Shift+1–9 store; 0 = slot for popped-out ops |
 | F-keys | F1–F10 load layout, Ctrl+F1–F10 save; F11 fullscreen, F12 focus mode |
 | tap vs hold | tap latches, hold is momentary while the key is down (`p` pin/peek, `t` scrub) |
@@ -128,7 +134,12 @@ Decisions:
 - **Alt is not view/pan.** Keyboard panning is unnecessary with cursor-follow. Alt is also a poor *mouse*
   modifier on Linux (KDE/GNOME grab Alt+drag for window moves).
 - **Infinity slider ×10 moves from Alt to Ctrl** (`InfinitySliderOverlay.GetKeyboardScaleFactor`), so the
-  modifier meaning is identical for mouse scrubbing and keyboard nudging.
+  modifier meaning is identical for mouse scrubbing and keyboard nudging. The mouse drag is aligned with the popover
+  (Shift ×0.1, Ctrl ×10), not the other way round. Conflict: on a mouse drag Ctrl currently turns off rounding to
+  the tick interval (`disableRounding || _io.KeyCtrl`), and Shift elsewhere inverts snapping, so Shift means "slow"
+  on the slider and "snapping" on drags. Keyboard nudging always rounds, so only the mouse path needs a new home
+  for "no rounding". Open: Alt pressed mid-drag (window managers only grab Alt at button-down), or drop the free
+  mode because Shift ×0.1 already shrinks the tick interval.
 - **No positional (scancode) bindings** — too much engineering for an editor that isn't a game. Instead the
   **layout-safe key rule**: factory bindings only use keys that are unshifted and not behind AltGr on US,
   German QWERTZ and French AZERTY:
@@ -143,10 +154,10 @@ Decisions:
   plumbing. `KeyMapSwitching` already supports named maps (the current one is "Default (QWERTY)").
 - **Command palette = Ctrl+P** (VS Code / Sublime), lists every `UserActions` entry with its current
   shortcut, so it doubles as a way to learn bindings. "Display as background" moves to Ctrl+Shift+P; "clear
-  background" becomes palette-only.
+  background" becomes palette-only. **Parked:** no palette for now, so Ctrl+P keeps the background image.
 - **Camera on arrow keys** (Shift pan, Alt zoom, Ctrl look around) is layout-independent but breaks the Shift
-  = precision and Alt = navigation rules. Open question; if adopted, document "in camera context modifiers
-  choose the motion axis".
+  = precision and Alt = navigation rules. **Parked**, together with keyboard view panning: unclear whether there is
+  a real use case.
 
 ### Current bindings that violate the convention
 
@@ -154,13 +165,12 @@ Decisions:
 |---|---|---|
 | Shift+←/→ previous/next frame | collides with Shift+arrow extend selection | move (open: `,` + something for keyframe jumps) |
 | `.` next keyframe | needs Shift on AZERTY | move |
-| Alt+D disconnect, Alt+A align left | Alt is navigation | Shift+key or palette-only |
-| Ctrl+P / Ctrl+Shift+P background image | Ctrl+P becomes palette | Ctrl+Shift+P / palette |
-| Z / X tap beat sync | Z moves on QWERTZ/AZERTY | acceptable as mnemonic-free pair? decide |
+| Alt+D disconnect | Alt is navigation; also Figma's align right | move only if align right is added (Shift+D is disable) |
+| Z / X tap beat sync | Z moves on QWERTZ/AZERTY | keep as is |
 | Timeline drag modifiers (Alt = source link, Ctrl+Alt = slip in `TimeClipInteractions`) | Alt meaning | mouse-drag modifiers inside the timeline; review once the keyboard rules settle |
 
-Consider shipping the cleaned map as the new "Default" and keeping today's map as "Legacy" so existing users
-keep their muscle memory.
+Decided: ship the cleaned map as the new "Default". No "Legacy" map. The Ctrl+P background image is off this list
+because the palette is parked.
 
 ## Modes and interactions
 
@@ -204,7 +214,7 @@ Types: vectors use Tab or `.x/.y/.z` for a component sub-cursor; enums cycle wit
 names; bools toggle with Space; colors use hex or an H/S/V sub-cursor. Connected parameters can't be nudged:
 the hint bar offers `g` and `x`. Typed values preview live; Esc reverts; commit = one undo entry.
 
-With several selected ops of the same type, `s` sets the value on all of them.
+Editing several selected ops at once: see `Plan_MultiSelectionEditing.md`.
 
 ### Nudge engine = keyboard-driven infinity slider
 
@@ -354,7 +364,9 @@ Afterwards the cursor moves to the upstream neighbour so repeated deletes keep w
 
 ## Phases (each shippable)
 
-**Phase 0 — scoped keymap + hint bar + convention.**
+**Phase 0 — scoped keymap + hint bar + convention.** *Mostly obsolete:* the shipped popover, toasts and arrow
+navigation work without a mode stack or hint bar. Still worth doing as a cleanup: one shared keycap renderer
+(`KeyHintText` chips, toast labels and `KeyCombination` labels currently draw keys separately).
 - Add a scope/mode dimension to `KeyBinding` (Root, Cursor, Param, ValueEntry, Palette, Timeline, Output…);
   a mode stack owned by the editor; the dispatcher resolves the innermost mode first, then falls through.
 - Hint bar listing the bindings of the active mode (allocation-free per frame: cache the label list per
@@ -363,13 +375,13 @@ Afterwards the cursor moves to the upstream neighbour so repeated deletes keep w
 - `KeyCombinationUi` keycap chips (shared by hint bar and toasts); action feedback toasts with
   `Flags.ShowFeedback` on the first set of actions (pin, layout/bookmark save, copy/paste, invisible toggles).
   Toast (?) and (⚙) icons: help topic keys `ui:action.<UserActionName>`, per-action mute, "change shortcut".
-- Apply the convention to the factory map (Alt-free nudging, Ctrl+P palette, moved bindings above); decide
-  Default vs Legacy map. Write the convention into `.help/` as user documentation.
+- Apply the convention to the factory map (Alt-free nudging, moved bindings above) and ship it as the new
+  Default (no Legacy map). Write the convention into `.help/` as user documentation.
 
 **Phase 1 — `s` parameter prompt + nudge engine.**
 - Prompt state machine (filter → locked → verb/value) driving the Parameter window; hint labels.
 - Nudge engine on `InfinitySliderOverlay` (keyboard input path, Ctrl ×10); per-gesture undo.
-- Verbs `r`, `i`, `c`, `g`, `x`; typed values with relative input; multi-selection set.
+- Verbs `r`, `i`, `g`, `x` (`c` parked); typed values with relative input. Multi-selection: separate plan.
 
 **Phase 2 — cursor navigation.** Active op, topology-first arrows, Space marks, viewport follow.
 (Can run in parallel with Phase 1 — `s` works on the selected op without a cursor.)
@@ -382,17 +394,17 @@ Afterwards the cursor moves to the upstream neighbour so repeated deletes keep w
 
 **Phase 6 — bookmarks badges, pop/put, dissolve-delete.**
 
-**Phase 7 — command palette (Ctrl+P), AZERTY factory map.**
+**Phase 7 — command palette (Ctrl+P, parked), AZERTY factory map.**
 
 Each phase adds a manual test set in `.tests-manual/` and updates `.help/`.
 
 ## Open questions
 
 1. Esc at Root: nothing, or go up to the parent composition?
-2. Camera on arrow keys with modifiers as motion axis, or WASD (+ AZERTY map) only?
-3. Default vs Legacy factory map split?
+2. ~~Camera on arrow keys~~ — parked with keyboard view panning.
+3. ~~Default vs Legacy~~ — new Default only, no Legacy.
 4. Typing a value on an animated parameter: keyframe at current time, or edit the base value?
-5. `s` with mixed-type selection: intersection of shared parameters, or only same-type selections?
+5. ~~Mixed-type selection~~ — moved to `Plan_MultiSelectionEditing.md`.
 6. Should "Mine" presets be syncable/exportable across machines?
 7. New home for frame stepping and keyframe jumps (Shift+←/→ and `.` are freed).
 8. Do digit bindings work on the SDL path with an AZERTY layout?

@@ -9,7 +9,7 @@ not trusted, because many are stale.
 
 ## At a Glance
 
-64 active documents: 53 plans here (one, `Plan_StructuredData`, on `main` only) and 11 in `output-setup/`. Another 20 were
+65 active documents: 54 plans here (one, `Plan_StructuredData`, on `main` only) and 11 in `output-setup/`. Another 20 were
 [cleared out](#archived-in-this-cleanup) in the first cleanup.
 
 | Bucket | Count | What to do |
@@ -17,7 +17,7 @@ not trusted, because many are stale.
 | [Nearly done](#nearly-done) | 5 | Close the small items or move them, then archive |
 | [Loose ends](#loose-ends) | 22 | Most shipped; rewrite the status as "what's left" |
 | [Active](#active) | 4 | In progress |
-| [Ready](#ready) | 15 | Not started or barely started, and still valid |
+| [Ready](#ready) | 16 | Not started or barely started, and still valid |
 | [Parked](#parked) | 9 | Keep; no work scheduled |
 | [Output Setup docs](#output-setup) | 9 | 6 design references, the index, the backlog, 1 historical spec |
 
@@ -126,7 +126,7 @@ These matter more than any filing decision.
 
 | Plan | State | Next |
 |---|---|---|
-| [Plan_KeyboardControl](Plan_KeyboardControl.md) | Navigation, popover, toasts, bookmarks and peek shipped, on both branches | Scoped keymap and hint bar, key-convention cleanup, slider ×10 still on Alt, multi-select, toast mute UI, toast/peek test set. |
+| [Plan_KeyboardControl](Plan_KeyboardControl.md) | Navigation, popover, toasts, bookmarks and peek shipped, on both branches | Shared keycap renderer, mouse slider modifiers aligned with the popover, verbs `␣g`/`␣x`, toast mute UI, toast/peek test set, new Default keymap. Phase 0 obsolete; palette parked |
 | [Plan_FrameTiming](Plan_FrameTiming.md) | Last commit 2026-10-22; branches diverge (linux deleted the estimator) | `PerformanceMetrics` window, hard-coded 60s, MediaPipe `33333`, NDI timecode, blocking export readback, 4.3 baseline. §A4 contradicts the decision to use SDL's display mode |
 | [Plan_CrossPlatformV5](Plan_CrossPlatformV5.md) | Foundation shipped on linux, up to v4.4.0.4 tags; none on `main` | Merge, sub-allocator, pipeline cache, SharpDX removal, `[SupportedPlatforms]`, tests in CI, Silk. See [decision 4](#decisions-for-you) |
 | [Plan_MacOS](Plan_MacOS.md) | Portability, CoreMIDI, DMG, CI shipped on linux | Visual suite (71/97 on 2026-10-08), cube placeholder, line-only OBJ, player `.app`, FFmpeg in DMG, settings folder. Cannot be verified from Linux |
@@ -135,6 +135,7 @@ These matter more than any filing decision.
 
 | Plan | State | Note |
 |---|---|---|
+| [Plan_MultiSelectionEditing](Plan_MultiSelectionEditing.md) | Nothing shipped; split out of Plan_KeyboardControl | Popover and Parameter window edit all selected ops; mixed-type rule undecided |
 | [Plan_AutomaticTests](Plan_AutomaticTests.md) | Some tests exist; runner phases don't | Start with CI. "No test projects" is false |
 | [Plan_CleanInstallLayout](Plan_CleanInstallLayout.md) | Nothing shipped | Do before InstallVerification and WindowsSigning: manifest paths and the signed exe depend on it |
 | [Plan_InstallVerificationAndSafeStartup](Plan_InstallVerificationAndSafeStartup.md) | Phase 1 shipped | Only one of the two resolve hooks registered; `--safe` absent |
