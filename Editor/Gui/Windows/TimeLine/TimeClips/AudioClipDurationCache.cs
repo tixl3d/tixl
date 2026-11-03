@@ -51,6 +51,9 @@ internal static class AudioClipDurationCache
         return false;
     }
 
+    /// <summary>Drops all cached durations, e.g. after a linked folder was pointed at another target.</summary>
+    public static void Clear() => _durationByAssetPath.Clear();
+
     private static readonly ConcurrentDictionary<string, double> _durationByAssetPath = new();
     private static readonly ConcurrentDictionary<string, bool> _probing = new();
 }

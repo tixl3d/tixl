@@ -77,6 +77,17 @@ internal static class VideoClipThumbnailCache
         return false;
     }
 
+    /// <summary>
+    /// Forgets resolved asset paths and per-frame entries (including failures), e.g. after a linked folder was
+    /// pointed at another target. Already generated thumbnails are found again through their PNG cache.
+    /// Draw thread only.
+    /// </summary>
+    public static void Clear()
+    {
+        _pathInfos.Clear();
+        _entries.Clear();
+    }
+
     #region Request queue and worker
     private static void EnqueueRequest(in Request request)
     {

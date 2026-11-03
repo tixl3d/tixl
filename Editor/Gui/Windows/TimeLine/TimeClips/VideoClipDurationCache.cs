@@ -18,20 +18,26 @@ internal static class VideoClipDurationCache
 {
     /// <summary>
     /// Returns true with the cached duration once known. The first call per asset kicks off an async probe and
-    /// returns false; later calls return the result. A failed probe (or no video backend loaded) caches 0 so it
-    /// isn't retried every frame.
+    /// returns false; later calls return the result. A failed probe caches 0 so it isn't retried every frame.
     /// </summary>
     public static bool TryGetDurationSecs(string assetPath, IResourceConsumer owner, out double durationSecs)
     {
         if (_durationByAssetPath.TryGetValue(assetPath, out durationSecs))
             return durationSecs > 0;
 
+        // The video backend loads lazily; caching a failure before it is up would stick for the whole session.
+        var factory = VideoExport.Factory;
+        if (factory == null)
+        {
+            durationSecs = 0;
+            return false;
+        }
+
         // First request for this asset: resolve the absolute path (cheap, on this thread) and probe the
         // duration on a worker so the draw thread never blocks on an FFmpeg file open.
         if (_probing.TryAdd(assetPath, true))
         {
-            var factory = VideoExport.Factory;
-            if (factory != null && AssetRegistry.TryResolveAddress(assetPath, owner, out var absolutePath, out _))
+            if (AssetRegistry.TryResolveAddress(assetPath, owner, out var absolutePath, out _))
             {
                 var path = absolutePath;
                 var key = assetPath;
@@ -51,6 +57,9 @@ internal static class VideoClipDurationCache
         durationSecs = 0;
         return false;
     }
+
+    /// <summary>Drops all cached durations, e.g. after a linked folder was pointed at another target.</summary>
+    public static void Clear() => _durationByAssetPath.Clear();
 
     private static readonly ConcurrentDictionary<string, double> _durationByAssetPath = new();
     private static readonly ConcurrentDictionary<string, bool> _probing = new();
