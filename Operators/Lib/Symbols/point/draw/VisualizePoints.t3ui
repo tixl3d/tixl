@@ -170,14 +170,6 @@
       }
     },
     {
-      "ChildId": "10b44b2f-d894-498c-bdbb-1985ee91f694",
-      "SymbolName": "Lib.point.transform.TransformPoints",
-      "Position": {
-        "X": 246.53864,
-        "Y": 312.21155
-      }
-    },
-    {
       "ChildId": "1617d7ad-dd24-479b-922a-645a39842bf5",
       "SymbolName": "Lib.point.draw.DrawLines",
       "Position": {
@@ -191,14 +183,6 @@
       "Position": {
         "X": -456.6507,
         "Y": 1268.965
-      }
-    },
-    {
-      "ChildId": "2cfad853-8244-4bfb-a144-5686e9bdf759",
-      "SymbolName": "Lib.point.combine.PairPointsForLines",
-      "Position": {
-        "X": 442.9129,
-        "Y": 312.83594
       }
     },
     {
@@ -226,6 +210,14 @@
       }
     },
     {
+      "ChildId": "342b5a30-92d1-465d-bacc-20f4b95af548",
+      "SymbolName": "Lib.point.generate.CommonPointSets",
+      "Position": {
+        "X": 739.4065,
+        "Y": 279.16986
+      }
+    },
+    {
       "ChildId": "355930a3-bb39-4a83-b3f6-5e933742cd63",
       "SymbolName": "Lib.point.draw.DrawLines",
       "Position": {
@@ -239,14 +231,6 @@
       "Position": {
         "X": -202.98257,
         "Y": 1827.5791
-      }
-    },
-    {
-      "ChildId": "44991d11-aa74-4f73-8a5f-83aafeb65c92",
-      "SymbolName": "Types.Values.Vector3",
-      "Position": {
-        "X": 115.017426,
-        "Y": 632.8033
       }
     },
     {
@@ -277,8 +261,8 @@
       "ChildId": "4c22b6a0-9ead-4c44-9143-55b4108e1b12",
       "SymbolName": "Lib.flow.Execute",
       "Position": {
-        "X": 867.2562,
-        "Y": 271.78073
+        "X": 879.4065,
+        "Y": 419.16986
       }
     },
     {
@@ -287,14 +271,6 @@
       "Position": {
         "X": 340.9535,
         "Y": 2150.09
-      }
-    },
-    {
-      "ChildId": "5132d19a-e6d9-4f87-90f2-4d59ce2f171c",
-      "SymbolName": "Lib.point.transform.TransformPoints",
-      "Position": {
-        "X": 255.01744,
-        "Y": 597.8033
       }
     },
     {
@@ -359,22 +335,6 @@
       }
     },
     {
-      "ChildId": "6a845d51-d184-4e05-9edf-605f161edbf4",
-      "SymbolName": "Lib.point.combine.PairPointsForLines",
-      "Position": {
-        "X": 444.6781,
-        "Y": 94.33612
-      }
-    },
-    {
-      "ChildId": "6c2502e8-5963-4cb4-931c-f5964e282835",
-      "SymbolName": "Lib.point.draw.DrawLines",
-      "Position": {
-        "X": 623.44635,
-        "Y": 323.22302
-      }
-    },
-    {
       "ChildId": "7523ee1c-0ecc-4e29-bc58-9ae4562524e3",
       "SymbolName": "Lib.point.transform.TransformPoints",
       "Position": {
@@ -407,14 +367,6 @@
       }
     },
     {
-      "ChildId": "8215662a-3c3b-4f87-960f-827f81f75aab",
-      "SymbolName": "Types.Values.Vector3",
-      "Position": {
-        "X": 106.53862,
-        "Y": 347.21155
-      }
-    },
-    {
       "ChildId": "83970c1c-5b7d-451e-b96d-dbe99fb0fe25",
       "SymbolName": "Lib.point.draw.DrawBillboards",
       "Position": {
@@ -423,35 +375,11 @@
       }
     },
     {
-      "ChildId": "83f8a08e-252a-4f4b-a9bc-f6e5db8b1a3b",
-      "SymbolName": "Lib.point.combine.PairPointsForLines",
-      "Position": {
-        "X": 454.01547,
-        "Y": 503.46558
-      }
-    },
-    {
-      "ChildId": "8ce0d9fd-4eff-4675-8281-39943cae74a0",
-      "SymbolName": "Types.Values.Vector3",
-      "Position": {
-        "X": -71.916046,
-        "Y": -161.57143
-      }
-    },
-    {
       "ChildId": "93881706-14f2-4c61-a0e7-fac1d1dea730",
       "SymbolName": "Lib.point.draw.DrawLines",
       "Position": {
-        "X": 617.8836,
-        "Y": 156.01953
-      }
-    },
-    {
-      "ChildId": "98b4f9bd-e800-445d-aca9-92ee273c0a3e",
-      "SymbolName": "Lib.point.draw.DrawLines",
-      "Position": {
-        "X": 619.89276,
-        "Y": 480.87646
+        "X": 879.4065,
+        "Y": 349.16986
       }
     },
     {
@@ -468,14 +396,6 @@
       "Position": {
         "X": 510.60645,
         "Y": 827.48706
-      }
-    },
-    {
-      "ChildId": "aa2a8b4a-bfe4-4012-9ed7-97a9c9786446",
-      "SymbolName": "Lib.point.transform.TransformPoints",
-      "Position": {
-        "X": 68.083954,
-        "Y": -196.57143
       }
     },
     {
@@ -572,6 +492,14 @@
       "Position": {
         "X": 375.5122,
         "Y": 980.86487
+      }
+    },
+    {
+      "ChildId": "fd218f6c-129e-4cd1-ada5-2e3df23f2fb3",
+      "SymbolName": "Lib.point.generate.RepeatAtPoints",
+      "Position": {
+        "X": 879.4065,
+        "Y": 244.16986
       }
     },
     {
