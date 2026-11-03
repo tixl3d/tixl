@@ -9,9 +9,9 @@
   #endif
 #endif
 
-; Overridable from the command line: iscc /DMyAppVersion=4.4.0.4 /DMyAppName=TiXL-v4.4.0.4
+; Overridable from the command line: iscc /DMyAppVersion=4.4.0.5 /DMyAppName=TiXL-v4.4.0.5
 #ifndef MyAppVersion
-  #define MyAppVersion "4.4.0.4"
+  #define MyAppVersion "4.4.0.5"
 #endif
 #ifndef MyAppName
   #define MyAppName "TiXL-v" + MyAppVersion
