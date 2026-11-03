@@ -51,6 +51,14 @@ internal sealed partial class SettingsWindow : Window
         return true;
     }
 
+    /// <summary>Shows the window on the Projects category, e.g. to edit the project folders.</summary>
+    internal void ShowProjectsCategory()
+    {
+        Config.Visible = true;
+        SelectCategory(Categories.Projects);
+        RequestWindowFocus();
+    }
+
     private void SelectCategory(Categories category)
     {
         if (category == _activeCategory)
