@@ -314,7 +314,8 @@ internal sealed partial class SettingsWindow : Window
 
                     changed |= FormInputs.AddCheckBox("Suspend rendering when hidden",
                                                       ref UserSettings.Config.SuspendRenderingWhenHidden,
-                                                      "Suspend rendering and update when Tooll's editor window is minimized. This will reduce energy consumption significantly.",
+                                                      "Suspend rendering and update when Tooll's editor window is minimized. This will reduce energy consumption significantly.\n" +
+                                                      "Not applied during playback or while outputs are shown on other displays.",
                                                       UserSettings.Defaults.SuspendRenderingWhenHidden);
 
                     FormInputs.AddVerticalSpace();
