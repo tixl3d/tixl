@@ -119,6 +119,11 @@ internal sealed class ClipArea : ITimeObjectManipulation, IValueSnapAttractor
             OpClips.DuplicateSelectedClips(compositionOp);
         }
 
+        if (UserActions.DuplicateWithConnections.Triggered() && _context.ClipSelection.Count > 0)
+        {
+            OpClips.DuplicateSelectedClipsToCurrentTime(compositionOp);
+        }
+
         // Ripple-edit selection: everything starting at/after the playback time, on all layers — the
         // same anchor as the context-menu action, so shortcut and menu behave identically. (An earlier
         // mouse-position anchor proved confusing next to the menu variant.)
