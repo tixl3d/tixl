@@ -17,6 +17,8 @@ Deleting the cache or temp folder costs you nothing but a slower next start. Del
 
 ## Where they are
 
+The quickest way there is **Help > Show Folder** in the editor, which opens each of them. Hovering an entry shows its full path.
+
 === "Linux"
 
     ```
@@ -82,6 +84,10 @@ Log/                     one timestamped log per launch, plus crash reports
 crash additionally writes `crash <date> - <error> - <id>.txt` beside it. When TiXL is started through its
 launcher script on Linux, the console output of the most recent two runs is also there as `console.log` and
 `console.previous.log` — which is the only record if TiXL dies before its own logging starts.
+
+**Help > Show Folder > Logs** lists the sessions of the last 7 days. Sessions that crashed, or whose log stops
+without a clean shutdown, are marked with a warning: open their report or log from there, or pick **Share with
+Developers...** to send both to the TiXL team with a note on what you were doing.
 
 ## What is in a project
 

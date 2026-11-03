@@ -121,35 +121,20 @@ internal static class PendingCrashReports
     {
         foreach (var report in reports)
         {
-            try
-            {
-                var sentryEvent = new SentryEvent
-                                      {
-                                          Message = report.Title,
-                                          Level = SentryLevel.Error,
-                                      };
-
-                sentryEvent.SetTag(DeferredTag, "true");
-                sentryEvent.SetTag("Nickname", UserSettings.Config.UserName);
-                sentryEvent.SetExtra("CrashTimeUtc", report.TimeUtc.ToString("u"));
-
-                if (File.Exists(report.ReportPath))
-                {
-                    SentrySdk.CaptureEvent(sentryEvent, scope => scope.AddAttachment(report.ReportPath));
-                }
-                else
-                {
-                    SentrySdk.CaptureEvent(sentryEvent);
-                }
-            }
-            catch (Exception e)
-            {
-                Log.Warning($"Could not send a crash report from an earlier session: {e.Message}");
-            }
-
+            Capture(report.Title, report.TimeUtc, [report.ReportPath], userComment: null);
             TryDelete(report.MarkerPath);
         }
 
+        SentrySdk.Flush(TimeSpan.FromSeconds(5));
+    }
+
+    /// <summary>
+    /// Sends a session the user chose to share later, with whatever files describe it - its crash report, its
+    /// log, or both - and an optional note on what they were doing.
+    /// </summary>
+    internal static void Share(string title, DateTime timeUtc, IReadOnlyList<string> attachmentPaths, string userComment)
+    {
+        Capture(title, timeUtc, attachmentPaths, userComment);
         SentrySdk.Flush(TimeSpan.FromSeconds(5));
     }
 
@@ -159,6 +144,39 @@ internal static class PendingCrashReports
         foreach (var report in reports)
         {
             TryDelete(report.MarkerPath);
+        }
+    }
+
+    private static void Capture(string title, DateTime timeUtc, IReadOnlyList<string> attachmentPaths, string? userComment)
+    {
+        try
+        {
+            var sentryEvent = new SentryEvent
+                                  {
+                                      Message = title,
+                                      Level = SentryLevel.Error,
+                                  };
+
+            sentryEvent.SetTag(DeferredTag, "true");
+            sentryEvent.SetTag("Nickname", UserSettings.Config.UserName);
+            sentryEvent.SetExtra("CrashTimeUtc", timeUtc.ToString("u"));
+            if (!string.IsNullOrWhiteSpace(userComment))
+            {
+                sentryEvent.SetExtra("UserComment", userComment);
+            }
+
+            SentrySdk.CaptureEvent(sentryEvent, scope =>
+                                                {
+                                                    foreach (var path in attachmentPaths)
+                                                    {
+                                                        if (File.Exists(path))
+                                                            scope.AddAttachment(path);
+                                                    }
+                                                });
+        }
+        catch (Exception e)
+        {
+            Log.Warning($"Could not send a crash report from an earlier session: {e.Message}");
         }
     }
 

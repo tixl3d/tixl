@@ -508,6 +508,12 @@ internal static class AppMenuBar
 
             CustomComponents.SeparatorLine();
 
+            if (BeginSubMenu("Show Folder"))
+            {
+                ShowFolderMenu.DrawContent();
+                ImGui.EndMenu();
+            }
+
             if (BeginSubMenu("Send Feedback"))
             {
                 foreach (var link in _feedbackLinks)

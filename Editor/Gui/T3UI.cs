@@ -182,6 +182,7 @@ public static partial class T3Ui
     private static readonly CouldNotLoadProjectDialog _couldNotLoadProjectDialog = new();
     private static readonly MissingOperatorsDialog _missingOperatorsDialog = new();
     private static readonly SendCrashReportsDialog _sendCrashReportsDialog = new();
+    internal static readonly ShareSessionDialog ShareSessionDialog = new();
     internal static readonly ExitDialog ExitDialog = new();
     private static readonly List<EditableSymbolProject> _modifiedProjects = new();
 

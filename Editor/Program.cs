@@ -43,6 +43,9 @@ namespace T3.Editor;
 /// </summary>
 internal static class Program
 {
+    /** The last line of every cleanly closed log. Its absence marks a session that died. */
+    internal const string ShutdownCompleteMessage = "Shutdown complete";
+
     public static IUiContentDrawer? UiContentContentDrawer;
     public static Device? Device { get; private set; }
 
@@ -177,9 +180,9 @@ internal static class Program
         var startupStopWatch = new Stopwatch();
         startupStopWatch.Start();
 
-        #if !DEBUG
+        // Also in debug builds: their crashes are only logged (see CrashReporting.CrashHandler), but a session
+        // can still be shared deliberately from Help > Show Folder > Logs.
         CrashReporting.InitializeCrashReporting();
-        #endif
 
         ApplyWindowArgs(args);
 
@@ -379,7 +382,7 @@ internal static class Program
 
         (Cameras.Provider as SdlCameraProvider)?.Shutdown();
         SDL3.SDL_Quit();
-        Log.Debug("Shutdown complete");
+        Log.Debug(ShutdownCompleteMessage);
     }
 
     /// <summary>Client-area size requested via <c>--window &lt;w&gt;x&lt;h&gt;</c>; null starts maximized as usual.</summary>

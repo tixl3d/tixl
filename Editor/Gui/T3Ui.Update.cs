@@ -125,6 +125,7 @@ public static partial class T3Ui
         _couldNotLoadProjectDialog.Draw();
         _missingOperatorsDialog.Draw();
         _sendCrashReportsDialog.Draw();
+        ShareSessionDialog.Draw();
         CreateFromTemplateDialog.Draw();
         _userNameDialog.Draw();
         Windows.AssetLib.FolderImportDialog.Instance.Draw();
