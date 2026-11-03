@@ -418,6 +418,10 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
                     {
                         _deviceContext.PixelShader.SetSampler(0, _pixelSampler);
                     }
+                    else if (cmd.UserCallback == NearestSamplingCallback)
+                    {
+                        _deviceContext.PixelShader.SetSampler(0, _nearestSampler);
+                    }
                     else if (cmd.UserCallback == SmoothSamplingCallback)
                     {
                         _deviceContext.PixelShader.SetSampler(0, _imGuiSampler);
@@ -505,6 +509,7 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
             {
                 FontAtlasGenerator.CreateFontAtlasWithIcons(_device, _imguiContext, out _fontTextureView, out _imGuiSampler);
                 _pixelSampler ??= CreatePixelSampler(_device);
+                _nearestSampler ??= CreateNearestSampler(_device);
                 StallOverlay.SnapshotFonts();
             }
         }
@@ -522,6 +527,25 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
     }
 
     internal static void EndPixelSampling(ImDrawListPtr drawList)
+    {
+        drawList.AddCallback(SmoothSamplingCallback, IntPtr.Zero);
+    }
+
+    /// <summary>
+    /// Images drawn after this, up to <see cref="EndNearestSampling"/>, sample only the base mip level, point
+    /// filtered on both axes. Use it for images that are stretched far more along one axis than the other — a
+    /// timeline waveform squeezed into a clip row is minified vertically no matter how far the timeline is
+    /// zoomed in, and the hardware takes the <b>max</b> of both axis derivatives when it picks its filter and
+    /// mip: that vertical minification alone drives the sample several mip levels down and blurs the columns
+    /// that are actually magnified on screen. <see cref="BeginPixelSampling"/> cannot help there, because it
+    /// only switches the magnification filter.
+    /// </summary>
+    internal static void BeginNearestSampling(ImDrawListPtr drawList)
+    {
+        drawList.AddCallback(NearestSamplingCallback, IntPtr.Zero);
+    }
+
+    internal static void EndNearestSampling(ImDrawListPtr drawList)
     {
         drawList.AddCallback(SmoothSamplingCallback, IntPtr.Zero);
     }
@@ -559,6 +583,21 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
                                                 ComparisonFunction = Comparison.Always,
                                                 MinimumLod = 0.0f,
                                                 MaximumLod = float.MaxValue,
+                                            });
+    }
+
+    /** Point in all three legs (minify, magnify, mip) and pinned to the base level — see <see cref="BeginNearestSampling"/>. */
+    private static SamplerState CreateNearestSampler(Device device)
+    {
+        return new SamplerState(device, new SamplerStateDescription
+                                            {
+                                                Filter = Filter.MinMagMipPoint,
+                                                AddressU = TextureAddressMode.Clamp,
+                                                AddressV = TextureAddressMode.Clamp,
+                                                AddressW = TextureAddressMode.Clamp,
+                                                ComparisonFunction = Comparison.Always,
+                                                MinimumLod = 0.0f,
+                                                MaximumLod = 0.0f,
                                             });
     }
 
@@ -704,6 +743,7 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
 
             DisposeObj(ref _imGuiSampler);
             DisposeObj(ref _pixelSampler);
+            DisposeObj(ref _nearestSampler);
             DisposeObj(ref _fontTextureView);
             DisposeObj(ref _ib);
             DisposeObj(ref _vb);
@@ -736,11 +776,13 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
     private PixelShader _pixelShader;
     private SamplerState _imGuiSampler;
     private SamplerState _pixelSampler;
+    private SamplerState _nearestSampler;
 
     // ImGui never calls a callback itself; it only hands the pointer back, so any value the renderer knows will do.
     // ImGui reserves -8 for its own reset marker.
     private static readonly IntPtr PixelSamplingCallback = new(-1);
     private static readonly IntPtr SmoothSamplingCallback = new(-2);
+    private static readonly IntPtr NearestSamplingCallback = new(-3);
     private ShaderResourceView _fontTextureView;
     private RasterizerState _rasterizerState;
     private BlendState _blendState;

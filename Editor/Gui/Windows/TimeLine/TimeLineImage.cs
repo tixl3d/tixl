@@ -6,6 +6,7 @@ using T3.Core.DataTypes;
 using T3.Core.Resource;
 using T3.Editor.Gui.Audio;
 using T3.Editor.Gui.Windows.TimeLine.TimeClips;
+using T3.Editor.UiContentDrawing;
 using Texture2D = T3.Core.DataTypes.Texture2D;
 
 namespace T3.Editor.Gui.Windows.TimeLine;
@@ -66,12 +67,30 @@ internal sealed class TimeLineImage
 
         if (_srv is { IsDisposed: false })
         {
+            // Same rule as the clip-body waveform: the generated image (~10 ms columns, 256 rows) is squashed
+            // into the timeline height, and that vertical minification would otherwise drag the whole sample
+            // several mip levels down and blur the columns that are magnified once the timeline is zoomed in.
+            // While a column is smaller than a pixel, the mip chain keeps the zoomed-out overview smooth.
+            var textureWidth = _textureResource?.Value?.Description.Width ?? 0;
+            var sharpSampling = false;
+            if (textureWidth > 0 && xMax > xMin)
+            {
+                var texelsPerPixel = (u1 - u0) * textureWidth / (xMax - xMin);
+                sharpSampling = texelsPerPixel < 1;
+            }
+
+            if (sharpSampling)
+                WindowsUiContentDrawer.BeginNearestSampling(drawList);
+
             drawList.AddImage((IntPtr)_srv,
                               new Vector2(xMin, yMin),
                               new Vector2(xMax, yMin + size.Y),
                               new Vector2(u0, 0),
                               new Vector2(u1, 1),
                               _imageTint);
+
+            if (sharpSampling)
+                WindowsUiContentDrawer.EndNearestSampling(drawList);
         }
     }
 
