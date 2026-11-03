@@ -1,9 +1,11 @@
 #nullable enable
+using System.IO;
 using ImGuiNET;
 using T3.Core.Resource.Assets;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Gui.Windows.TimeLine.TimeClips;
 
 namespace T3.Editor.Gui.Windows.AssetLib;
 
@@ -63,19 +65,21 @@ internal sealed partial class AssetLibrary
 
         ImGui.TextUnformatted($"Point \"{mount.MountName}\" at another folder.");
 
-        CustomComponents.StylizedText("""
-                                      In the Windows Explorer right-click the folder and choose "Copy as path"
-                                      (or press Ctrl+Shift+C), then paste it below.
-                                      """,
-                                      Fonts.FontSmall, UiColors.TextMuted);
+        FormInputs.AddVerticalSpace();
+
+        if (CustomComponents.DrawCtaButton("Choose folder...", Icon.None, CustomComponents.ButtonStates.Emphasized))
+        {
+            var pickedFolder = FileOperations.TryPickAbsoluteFolder(FindNearestExistingFolder(_relinkPath));
+            if (!string.IsNullOrEmpty(pickedFolder))
+                _relinkPath = pickedFolder;
+        }
 
         FormInputs.AddVerticalSpace();
 
         FormInputs.AddStringInput("Folder",
                                   ref _relinkPath,
                                   "C:/Users/.../Dropbox/Footage",
-                                  _relinkProblem,
-                                  autoFocus: ImGui.IsWindowAppearing());
+                                  _relinkProblem);
 
         CustomComponents.StylizedText("The previous path is remembered, so this link keeps working on the other machine.",
                                       Fonts.FontSmall, UiColors.TextMuted);
@@ -87,6 +91,11 @@ internal sealed partial class AssetLibrary
         {
             if (AssetLinkFolders.TryRelink(mount, _relinkPath, out var error))
             {
+                // Clips drawn while the link was broken cached their lookups as failed.
+                VideoClipDurationCache.Clear();
+                AudioClipDurationCache.Clear();
+                VideoClipThumbnailCache.Clear();
+
                 _relinkDialogOpen = false;
                 ImGui.CloseCurrentPopup();
             }
@@ -107,6 +116,28 @@ internal sealed partial class AssetLibrary
         }
 
         ModalDialog.EndStaticDialog();
+    }
+
+    /** The old target usually doesn't exist on the new machine, so the picker starts at its closest surviving parent. */
+    private static string? FindNearestExistingFolder(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            return null;
+
+        try
+        {
+            var folder = Path.GetFullPath(path);
+            while (!string.IsNullOrEmpty(folder) && !Directory.Exists(folder))
+            {
+                folder = Path.GetDirectoryName(folder);
+            }
+
+            return string.IsNullOrEmpty(folder) ? null : folder;
+        }
+        catch (Exception)
+        {
+            return null;
+        }
     }
 
     private static Guid _relinkMountId;

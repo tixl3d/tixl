@@ -59,11 +59,14 @@ public static class FileOperations
     /// <summary>
     /// Shows the system folder picker and returns the chosen absolute folder, or null if canceled or failed.
     /// </summary>
-    internal static string TryPickAbsoluteFolder()
+    internal static string TryPickAbsoluteFolder(string initialDirectory = null)
     {
         try
         {
             using var folderBrowser = EditorUi.Instance.CreateFilePicker();
+            if (!string.IsNullOrEmpty(initialDirectory))
+                folderBrowser.InitialDirectory = initialDirectory;
+
             folderBrowser.ValidateNames = false;
             folderBrowser.CheckFileExists = false;
             folderBrowser.CheckPathExists = true;
