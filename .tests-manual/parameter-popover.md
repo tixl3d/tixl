@@ -72,6 +72,30 @@ Focus a dropdown parameter, press `Tab` and type the first letters of an option,
 - The best matching option is previewed and completed faintly.
 - `Down` and `Up` switch between the matching options without leaving the parameter.
 
+## Step: Searching an asset path
+
+**Action:**
+Select a [LoadObj] operator (or another one with a file path parameter) and press `S`. Focus Path and press `Tab`. Type part of a file name, press `Down` twice, then press `Enter`. Open the popover again, press `Tab`, and click an entry in the list.
+
+**Expected:**
+- After `Tab`, a list of assets with the operator's file types appears above the popover, with the current path highlighted.
+- Typing narrows the list and underlines the match, but the operator doesn't load anything yet.
+- `Down` moves the highlight and the operator previews that file.
+- `Enter` applies the highlighted file and closes the popover; one `Ctrl+Z` restores the previous path.
+- Clicking an entry applies it and closes the popover. Dragging the list's scrollbar keeps the popover open, and typing continues after releasing it.
+- Typing text without any match shows `no matching asset`, and `Enter` leaves the path unchanged.
+
+## Step: Typing text
+
+**Action:**
+Select a [Text] operator (or another one with a text parameter) and press `S`. Focus Text, press `Tab` and type `Rock and Roll  ` (with two trailing spaces), then press `Enter`.
+
+**Expected:**
+- The output shows the typed text while typing, including the capital `R`, without resetting the parameter.
+- `Enter` applies it and closes the popover; the Parameter Window shows the text with its trailing spaces.
+- One `Ctrl+Z` restores the previous text.
+- Pressing `Tab` and then `Esc` without typing leaves the text unchanged.
+
 ## Step: Adjusting with the slider
 
 **Action:**

@@ -126,8 +126,14 @@ Press Tab to edit the focused value, then type it. The value is previewed while 
 | `x 1`             | sets one component                                                |
 | `orange`, `#f80`  | sets a color by name or hex code; `a 0.5` sets its alpha          |
 | `sim`             | picks the matching dropdown option, Up and Down show the others   |
+| `marble`          | on a file or folder path, searches the assets in a list above the popover |
+| `Hello world`     | on any other text, replaces it                                    |
 
-Down applies the value and moves to the next parameter, Up to the previous one. Enter applies and closes the popover. Esc steps back: first the typed value, then the filter, then the popover.
+On a path, typing only searches. Up and Down preview the matches, and you can also click one. Paths that don't exist yet can only be entered in the Parameter Window, except output paths, which take typed text.
+
+On text, Shift+R and Shift+I type capital letters, so reset or insert before pressing Tab.
+
+Down applies the value and moves to the next parameter, Up to the previous one. On dropdowns and paths, where Up and Down pick a match, Tab applies and moves on instead. Enter applies and closes the popover. Esc steps back: first the typed value, then the filter, then the popover.
 
 ### Adjusting a value
 
