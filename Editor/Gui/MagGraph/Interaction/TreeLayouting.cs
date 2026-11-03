@@ -245,6 +245,71 @@ internal static class TreeLayouting
         return movedCount > 0 || newlySelected.Count > 0;
     }
 
+    /// <summary>
+    /// Places a source just connected to the target the way the layout action would: snapped into its row, or
+    /// loosely left of the target when that row is blocked, the source would cover connected rows, or it joins a
+    /// multi-input group whose other sources already sit loose. The target with everything snapped to it and the
+    /// clusters of its other sources are obstacles, so the new source never lands on its siblings.
+    /// </summary>
+    internal static void PlaceNewSource(GraphUiContext context, MagGraphItem target, MagGraphItem source)
+    {
+        var lineIndex = -1;
+        for (var index = 0; index < target.InputLines.Length; index++)
+        {
+            if (target.InputLines[index].ConnectionIn?.SourceItem != source)
+                continue;
+
+            lineIndex = index;
+            break;
+        }
+
+        if (lineIndex < 0)
+            return;
+
+        var targetBlock = MagItemMovement.CollectSnappedItems(target);
+        targetBlock.Remove(source);
+
+        var obstacles = new HashSet<MagGraphItem>(targetBlock);
+        var joinsLooseGroup = false;
+        var groupInputId = target.InputLines[lineIndex].Id;
+        foreach (var inputLine in target.InputLines)
+        {
+            var connection = inputLine.ConnectionIn;
+            if (connection == null || connection.IsTemporary || connection.SourceItem == source)
+                continue;
+
+            if (!connection.IsSnapped)
+            {
+                MagItemMovement.CollectSnappedItems(connection.SourceItem, obstacles);
+                if (inputLine.Id == groupInputId)
+                    joinsLooseGroup = true;
+            }
+        }
+
+        obstacles.Remove(source);
+
+        var canSnap = TryGetSnapRow(source, target, out var snapRow);
+        var canStack = canSnap
+                       && snapRow == 0
+                       && CountOutgoingConnections(source) == 1
+                       && !IsPartOfMultiInputGroup(target, snapRow);
+        var maySnapIntoRow = canSnap && CoveredRowsAreFree(target, snapRow, source);
+        var snaps = !joinsLooseGroup && (maySnapIntoRow || canStack);
+
+        var placement = new Placement(target, lineIndex, snapRow, source, [source], snaps, canStack, maySnapIntoRow);
+        var noPendingItems = new HashSet<MagGraphItem>();
+        var isTargetInChain = IsInHorizontalChain(target, noPendingItems);
+        var found = snaps
+                        ? TryFindSnappedPosition(placement, isTargetInChain, obstacles, targetBlock, noPendingItems, out var newPos, out _, out _)
+                        : TryFindPositionLeftOfConsumers(placement, obstacles, targetBlock, noPendingItems, out newPos);
+
+        if (!found || newPos == source.PosOnCanvas)
+            return;
+
+        MoveCluster(context, placement.Cluster, newPos - source.PosOnCanvas);
+        context.Layout.FlagStructureAsChanged();
+    }
+
     /// <param name="LineIndex">Target input line the connection to the source lands in</param>
     /// <param name="SnapRow">Target input row the source's first output line aligns with when snapped horizontally</param>
     private readonly record struct Placement(MagGraphItem Target,

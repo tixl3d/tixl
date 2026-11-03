@@ -263,9 +263,14 @@ internal sealed class PlaceholderCreation
         Vector2 focusedItemPosOnCanvas;
 
         var shouldPushDown = false;
-        
+        _snappedTargetMultiInputIndex = 0;
+
         if (direction == MagGraphItem.Directions.Horizontal)
         {
+            // Horizontally the placeholder sits below the last line of a multi-input group, so it appends
+            if (input.IsMultiInput)
+                _snappedTargetMultiInputIndex = CountConnectionsInto(context.CompositionInstance.Symbol, targetItem.Id, selectedInputId);
+
             // Find insertion index
             var visibleInputLines = targetItem.InputLines;
             var allInputSlots = targetItem.Instance.Inputs;
@@ -316,7 +321,7 @@ internal sealed class PlaceholderCreation
                                             TargetPos = default,
                                             TargetItem = targetItem,
                                             InputLineIndex = insertionLineIndex,
-                                            MultiInputIndex = 0,
+                                            MultiInputIndex = _snappedTargetMultiInputIndex,
                                             OutputLineIndex = 0,
                                             VisibleOutputIndex = 0,
                                             ConnectionHash = 0,
@@ -324,7 +329,7 @@ internal sealed class PlaceholderCreation
                                         });
 
         context.DisconnectedInputHashes.Add(MagGraphConnection.GetItemInputHash(targetItem.Id, selectedInputId,
-                                                                                0)); // keep input visible until state is complete
+                                                                                _snappedTargetMultiInputIndex)); // keep input visible until state is complete
         context.Layout.FlagStructureAsChanged();
 
         PlaceHolderUi.Open(context,
@@ -363,6 +368,7 @@ internal sealed class PlaceholderCreation
         _snappedSourceItem = null;
         _snappedTargetItem = null;
         _snappedTargetInputId = Guid.Empty;
+        _snappedTargetMultiInputIndex = 0;
         context.DisconnectedInputHashes.Clear();
         context.Layout.FlagStructureAsChanged();
         context.ConnectionHovering.ConnectionHoversWhenClicked.Clear();
@@ -602,15 +608,32 @@ internal sealed class PlaceholderCreation
                                                                                      _snappedTargetItem.Id,
                                                                                      _snappedTargetInputId
                                                                                     ),
-                                                               0));
-            var newHeight = ComputeNewItemUnitsHeight(context, symbol, newChildUi, newInstance);
-            if (newHeight > 1)
+                                                               _snappedTargetMultiInputIndex));
+
+            // Joining a multi-input group: place it like the layout action would, so it lines up with the
+            // group's other sources instead of overlapping them.
+            if (_snappedTargetMultiInputIndex > 0)
             {
-                MagItemMovement
-                   .MoveSnappedItemsVertically(context,
-                                               _snappedItems,
-                                               newChildUi.PosOnCanvas.Y + MagGraphItem.GridSize.Y / 2,
-                                               MagGraphItem.GridSize.Y * (newHeight - 1));
+                context.DisconnectedInputHashes.Clear();
+                context.Layout.FlagStructureAsChanged();
+                context.Layout.ComputeLayout(context);
+                if (context.Layout.Items.TryGetValue(_snappedTargetItem.Id, out var targetItem)
+                    && context.Layout.Items.TryGetValue(newChildUi.Id, out var newItem))
+                {
+                    TreeLayouting.PlaceNewSource(context, targetItem, newItem);
+                }
+            }
+            else
+            {
+                var newHeight = ComputeNewItemUnitsHeight(context, symbol, newChildUi, newInstance);
+                if (newHeight > 1)
+                {
+                    MagItemMovement
+                       .MoveSnappedItemsVertically(context,
+                                                   _snappedItems,
+                                                   newChildUi.PosOnCanvas.Y + MagGraphItem.GridSize.Y / 2,
+                                                   MagGraphItem.GridSize.Y * (newHeight - 1));
+                }
             }
         }
         else if (context.TempConnections.Count <= 1 && context.TryGetActiveOutputLine(out _))
@@ -719,6 +742,18 @@ internal sealed class PlaceholderCreation
         return inputLines.Count + outputLines.Count - 1;
     }
 
+    private static int CountConnectionsInto(Symbol compositionSymbol, Guid targetId, Guid inputId)
+    {
+        var count = 0;
+        foreach (var connection in compositionSymbol.Connections)
+        {
+            if (connection.IsTargetOf(targetId, inputId))
+                count++;
+        }
+
+        return count;
+    }
+
     private static (List<MagGraphItem.InputLine> inputLines, List<MagGraphItem.OutputLine> outputLines)
         CollectNewItemLines(GraphUiContext context, Symbol symbol, SymbolUi.Child newChildUi, Instance newInstance)
     {
@@ -763,6 +798,9 @@ internal sealed class PlaceholderCreation
     private MagGraphItem? _snappedTargetItem;
 
     private Guid _snappedTargetInputId;
+
+    /** Index the new connection takes in the target input: past the existing ones of a multi-input, otherwise 0 */
+    private int _snappedTargetMultiInputIndex;
 
     private static MagGraphItem.Directions _connectionOrientation = MagGraphItem.Directions.Horizontal;
     private MagGraphItem.OutputLine _snappedSourceOutputLine;
