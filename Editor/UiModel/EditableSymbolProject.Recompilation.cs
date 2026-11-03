@@ -59,9 +59,6 @@ internal partial class EditableSymbolProject
             return false;
         }
 
-        // non-breaking change - increment build number
-        CsProjectFile.IncrementBuildNumber(1);
-        
         if (TryRecompile(true, out failureLog))
         {
             newSymbolUi = null;
@@ -75,9 +72,6 @@ internal partial class EditableSymbolProject
             _allProjectsCache = null;
             return gotSymbol;
         }
-        
-        // we failed compilation, so we revert the build number
-        CsProjectFile.IncrementBuildNumber(-1);
         
         if (!alreadyExists)
         {
@@ -124,16 +118,12 @@ internal partial class EditableSymbolProject
         var symbolUi = SymbolUiDict[id];
         symbolUi.FlagAsModified();
             
-        CsProjectFile.UpdateVersionForIOChange(1);
-
         if (TryRecompile(true, out var failureLog))
         {
             reason = null;
             return true;
         }
             
-        CsProjectFile.UpdateVersionForIOChange(-1);
-
         _pendingSource[id] = currentSourceCode;
         symbolUi.FlagAsModified();
         SaveModifiedSymbols();

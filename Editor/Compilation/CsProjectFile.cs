@@ -16,7 +16,7 @@ namespace T3.Editor.Compilation;
 /// A class that assists in the creation, modification, and compilation of a csproj file.
 /// Each editable project is currently represented by a csproj file, which is compiled and loaded at runtime.
 /// There are several unusual properties in the csproj file that are used to accommodate T3's feature set - see <see cref="ProjectXml"/>
-/// for more details. This can be considered a higher-level utility class that handles versioning, provides simple compilation methods, and provides
+/// for more details. This can be considered a higher-level utility class that provides simple compilation methods, and provides
 /// straightforward access to properties within the csproj file.
 /// </summary>
 internal sealed class CsProjectFile
@@ -46,11 +46,6 @@ internal sealed class CsProjectFile
     /// </summary>
     public string VersionString => _projectRootElement.GetOrAddProperty(PropertyType.VersionPrefix, "1.0.0");
 
-    /// <summary>
-    /// The version of the project, as defined in the csproj file.
-    /// </summary>
-    public Version Version => new(VersionString);
-    
     public Guid PackageId
     {
         get
@@ -451,15 +446,15 @@ internal sealed class CsProjectFile
             if (!NeedsRecompile && !file.IsArchived)
             {
                 var versionInfoDirectory = file.GetBuildTargetDirectory();
-                if (!AssemblyInformation.TryLoadReleaseInfo(versionInfoDirectory, out var releaseInfo))
+                if (!AssemblyInformation.TryLoadReleaseInfo(versionInfoDirectory, out _))
                 {
                     NeedsRecompile = true;
                     Warnings.Add($"{file.Name} needs to be compiled because the version info file does not exist.");
                 }
-                else if (releaseInfo.Version != file.Version)
+                else if (!SourceManifest.IsBuildCurrent(file, versionInfoDirectory, out var reason))
                 {
                     NeedsRecompile = true;
-                    Warnings.Add($"{file.Name} needs to be compiled because the existing build is a different version from our project file: ({releaseInfo.Version}) vs ({file.Version}).");
+                    Warnings.Add($"{file.Name} needs to be compiled because {reason}.");
                 }
             }
         }
@@ -535,34 +530,14 @@ internal sealed class CsProjectFile
     public bool TryRecompile(bool nugetRestore, [NotNullWhen(false)] out string? output)
     {
         using var activity = MainThreadActivity.Begin(nugetRestore ? "compile-restore" : "compile", $"Compiling {Name}...");
+        var sources = SourceManifest.Capture(this);
         if (!Compiler.TryCompile(this, EditorBuildMode, nugetRestore, out output))
         {
             return false;
         }
 
+        sources.SaveForBuild(GetBuildTargetDirectory(EditorBuildMode));
         return true;
-    }
-
-    public void UpdateVersionForIOChange(int modifyAmount)
-    {
-        ModifyBuildVersion(0, Math.Clamp(modifyAmount, -1, 1), 0);
-    }
-
-    private void ModifyBuildVersion(int majorModify, int minorModify, int buildModify)
-    {
-        _projectRootElement.SetOrAddProperty(PropertyType.EditorVersion, Program.Version.ToBasicVersionString());
-        var version = Version;
-        var newVersion = new Version(version.Major + majorModify, version.Minor + minorModify, version.Build + buildModify);
-        _projectRootElement.SetOrAddProperty(PropertyType.VersionPrefix, newVersion.ToBasicVersionString());
-        try
-        {
-            _projectRootElement.Save();
-            _fileInfo.Refresh();
-        }
-        catch (Exception e)
-        {
-            Log.Error($"{Name}: Failed to save project file {_projectRootElement.FullPath} after modifying version: {e}");
-        }
     }
 
     /// <summary>
@@ -677,12 +652,4 @@ internal sealed class CsProjectFile
     private readonly string _debugRootDirectory;
     private readonly ProjectRootElement _projectRootElement;
     private readonly FileInfo _fileInfo;
-
-    public void IncrementBuildNumber(int amount)
-    {
-        if (amount == 0)
-            return;
-
-        ModifyBuildVersion(0, 0, amount);
-    }
 }
