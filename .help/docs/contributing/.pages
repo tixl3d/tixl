@@ -1,4 +1,7 @@
 title: Contributing
 nav:
   - README.md
+  - DocumentationStructure.md
+  - CodeStructure.md
+  - StyleConventions.md
   - "..."

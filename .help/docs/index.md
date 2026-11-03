@@ -87,4 +87,8 @@ Every operator in the `Lib.*` namespace has a reference page generated from its 
 
 ## [Contributing](contributing/README.md)
 
-Docs, bug reports, and contributing to TiXL itself — entry points and where developer docs live.
+Why contributions matter and how to get started — from bug reports to pull requests.
+
+- [Documentation structure](contributing/DocumentationStructure.md) — manual, operator reference, embedded help, examples, Skill Quest, videos, wiki: what lives where and how it is built.
+- [Code structure](contributing/CodeStructure.md) — the repository layout and where to find what.
+- [Style conventions](contributing/StyleConventions.md) — writing, wiki, operator description, UI label and code conventions.
