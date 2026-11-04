@@ -150,6 +150,7 @@ These matter more than any filing decision.
 | [Plan_CreateSnapshotFromEmptySlot](Plan_CreateSnapshotFromEmptySlot.md) | Nothing shipped | Small; 4 interaction decisions |
 | [Plan_ReferenceLines](Plan_ReferenceLines.md) | Nothing shipped | `AutoCollectIndicators` covers part of it; decide whether to absorb |
 | [Plan_RenameSimulateIoDataToDataClipPlayer](Plan_RenameSimulateIoDataToDataClipPlayer.md) | Nothing shipped | Op path in the plan is stale; two help pages also need updating |
+| [Plan_OperatorVersioning](Plan_OperatorVersioning.md) | Nothing shipped; written 2026-11-04 | `{Name}_v{N}` naming, `Supersedes` record on successor, undoable Upgrade built on `ChangeSymbol`. Decisions settled; start with Phase 0 |
 | [Plan_UiTimelapse](Plan_UiTimelapse.md) | Nothing shipped | Its encoder gate looks set to disable it on the Radeon machine, since the probe has no VAAPI candidate (not run). Cursor code paths are stale |
 
 ## Parked

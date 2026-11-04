@@ -2,6 +2,7 @@
 using System.Text;
 using ImGuiNET;
 using T3.Core.DataTypes;
+using T3.Editor.App;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.Styling;
@@ -10,11 +11,14 @@ using T3.Editor.UiModel;
 using T3.Editor.UiModel.Helpers;
 using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.ProjectHandling;
+using T3.SystemUi;
 
 namespace T3.Editor.Gui.MagGraph.Interaction;
 
 /// <summary>
-/// Draws a curated overview of essential symbols structured by categories and namespaces
+/// Draws a curated overview of essential symbols structured by categories and namespaces. Besides the mouse it can
+/// be browsed with the arrow keys: Return opens the focused namespace or inserts the focused symbol, Backspace goes
+/// back up.
 /// </summary>
 internal static class SymbolBrowsing
 {
@@ -29,6 +33,9 @@ internal static class SymbolBrowsing
 
         if (_path.Count == 0)
             return PlaceHolderUi.UiResults.Cancel;
+
+        _focus.BeginFrame();
+        var activateFocused = HandleKeys();
 
         
         // Find active page
@@ -79,10 +86,13 @@ internal static class SymbolBrowsing
             foreach (var symbolUi in orderedEnumerable)
             {
                 uiResult |= PlaceHolderUi.DrawSymbolUiEntry(context, symbolUi, false);
+                RegisterSymbolEntry(symbolUi);
                 WindowContentExtend.ExtendToLastItem();
             }
         }
 
+        ApplyRequestedPath();
+        _groupToFocusAfterReturn = null;
         return uiResult;
 
         void DrawItemTree(List<Group> groupPath, Group group, int levelOnPage = 0)
@@ -115,6 +125,7 @@ internal static class SymbolBrowsing
                     ImGui.PushStyleColor(ImGuiCol.Text, color.Rgba);
                     ImGui.TextUnformatted($"{group.Name}...");
                     ImGui.PopStyleColor();
+                    var isPageFocused = RegisterGroupEntry(group);
 
                     if (ImGui.IsItemHovered())
                     {
@@ -124,11 +135,11 @@ internal static class SymbolBrowsing
                             UiColors.ForegroundFull.Fade(0.3f), 3);
                     }
 
-                    if (ImGui.IsItemClicked())
+                    var openPageWithKey = isPageFocused && activateFocused;
+                    if (ImGui.IsItemClicked() || openPageWithKey)
                     {
-                        _path.Clear();
-                        _path.AddRange([..groupPath, group]);
-                        ImGui.SetScrollY(0);
+                        _requestedPath = [..groupPath, group];
+                        _isRequestedWithKeys = openPageWithKey;
                     }
 
                     break;
@@ -161,6 +172,7 @@ internal static class SymbolBrowsing
                     {
                         ImGui.SetNextItemWidth(100);
                         uiResult |= PlaceHolderUi.DrawSymbolUiEntry(context, symbolUi, false);
+                        RegisterSymbolEntry(symbolUi);
                         WindowContentExtend.ExtendToLastItem();
                         ColumnLayout.ExtendWidth(ImGui.GetItemRectSize().X);
                     }
@@ -174,6 +186,7 @@ internal static class SymbolBrowsing
                     ImGui.PushStyleColor(ImGuiCol.Text, color.Rgba);
                     ImGui.TextUnformatted(group.Name + "/");
                     ImGui.PopStyleColor();
+                    var isNamespaceFocused = RegisterGroupEntry(group);
                     WindowContentExtend.ExtendToLastItem();
 
                     if (ImGui.IsItemHovered())
@@ -184,11 +197,11 @@ internal static class SymbolBrowsing
                             UiColors.ForegroundFull.Fade(0.3f), 3);
                     }
 
-                    if (ImGui.IsItemClicked())
+                    var openNamespaceWithKey = isNamespaceFocused && activateFocused;
+                    if (ImGui.IsItemClicked() || openNamespaceWithKey)
                     {
-                        _path.Clear();
-                        _path.AddRange([..groupPath, group]);
-                        ImGui.SetScrollY(0);
+                        _requestedPath = [..groupPath, group];
+                        _isRequestedWithKeys = openNamespaceWithKey;
                     }
 
                     break;
@@ -215,6 +228,10 @@ internal static class SymbolBrowsing
     public static void Reset()
     {
         _path = [_libTree];
+        _requestedPath = null;
+        _groupToFocusAfterReturn = null;
+        _lastDrawnFrame = NotDrawn;
+        _focus.Reset();
     }
 
     public static bool IsFilterActive => _path.Count > 1;
@@ -238,6 +255,103 @@ internal static class SymbolBrowsing
         }
 
         return _stringBuilder.ToString();
+    }
+
+    /// <returns>True if Return should open or insert the focused entry</returns>
+    private static bool HandleKeys()
+    {
+        // The Return or Backspace that opened the browser or emptied its search must not also act in here
+        var frameCount = ImGui.GetFrameCount();
+        var wasDrawnLastFrame = _lastDrawnFrame == frameCount - 1;
+        _lastDrawnFrame = frameCount;
+        if (!wasDrawnLastFrame)
+            return false;
+
+        if (ImGui.IsKeyPressed(Key.CursorUp.ToImGuiKey()))
+        {
+            _focus.Move(SelectionNavigation.Directions.Up);
+        }
+        else if (ImGui.IsKeyPressed(Key.CursorDown.ToImGuiKey()))
+        {
+            _focus.Move(SelectionNavigation.Directions.Down);
+        }
+        else if (ImGui.IsKeyPressed(Key.CursorLeft.ToImGuiKey()))
+        {
+            _focus.Move(SelectionNavigation.Directions.Left);
+        }
+        else if (ImGui.IsKeyPressed(Key.CursorRight.ToImGuiKey()))
+        {
+            _focus.Move(SelectionNavigation.Directions.Right);
+        }
+
+        if (ImGui.IsKeyPressed(Key.Backspace.ToImGuiKey(), false) && _path.Count > 1)
+        {
+            GoUp();
+            return false;
+        }
+
+        return _focus.HasFocus && ImGui.IsKeyPressed(Key.Return.ToImGuiKey(), false);
+    }
+
+    /** Steps back to the previous level that has its own view; categories and groupings are only headers. */
+    private static void GoUp()
+    {
+        _groupToFocusAfterReturn = _path[^1];
+        _path.RemoveAt(_path.Count - 1);
+        while (_path.Count > 1 && _path[^1].Variant is Variants.NamespaceCategory or Variants.Grouping)
+        {
+            _path.RemoveAt(_path.Count - 1);
+        }
+
+        _focus.Reset();
+        ImGui.SetScrollY(0);
+
+        if (_path.Count == 1)
+            PlaceHolderUi.FocusSearchInputNextFrame();
+    }
+
+    /** Changing the path while drawing would let the rest of the old view react to the same click or key. */
+    private static void ApplyRequestedPath()
+    {
+        if (_requestedPath == null)
+            return;
+
+        _path = _requestedPath;
+        _requestedPath = null;
+        ImGui.SetScrollY(0);
+
+        _focus.Reset();
+        if (_isRequestedWithKeys)
+            _focus.FocusFirst();
+    }
+
+    /// <returns>True if the entry has the keyboard focus</returns>
+    private static bool RegisterGroupEntry(Group group)
+    {
+        var index = _focus.Register(out var isFocused);
+
+        // The tree is rebuilt every frame, so the group left with Backspace is found again by its content
+        var returnTarget = _groupToFocusAfterReturn;
+        if (returnTarget != null
+            && returnTarget.Variant == group.Variant
+            && returnTarget.Type == group.Type
+            && returnTarget.Name == group.Name)
+        {
+            _focus.Focus(index);
+            _groupToFocusAfterReturn = null;
+        }
+
+        if (isFocused)
+            PlaceHolderUi.SelectSymbolFromBrowsing(null);
+
+        return isFocused;
+    }
+
+    private static void RegisterSymbolEntry(SymbolUi symbolUi)
+    {
+        _focus.Register(out var isFocused);
+        if (isFocused)
+            PlaceHolderUi.SelectSymbolFromBrowsing(symbolUi);
     }
 
     private static void DrawGroupHeader(Group group)
@@ -396,4 +510,11 @@ internal static class SymbolBrowsing
     private static string ActiveNamespaceString => GetNamespaceString(_path);
     private static readonly StringBuilder _stringBuilder = new();
     private static List<Group> _path = [];
+    private static List<Group>? _requestedPath;
+    private static bool _isRequestedWithKeys;
+    private static Group? _groupToFocusAfterReturn;
+
+    private const int NotDrawn = -2;
+    private static int _lastDrawnFrame = NotDrawn;
+    private static readonly FocusNavigator _focus = new();
 }

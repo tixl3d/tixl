@@ -66,6 +66,22 @@ internal static class PlaceHolderUi
         _focusInputNextTime = false;
     }
 
+    /// <summary>
+    /// Makes the symbol focused in the browser the one Return inserts and the help window previews; null while the
+    /// focus is on a namespace.
+    /// </summary>
+    internal static void SelectSymbolFromBrowsing(SymbolUi? symbolUi)
+    {
+        _selectedSymbolUi = symbolUi;
+        _wasPickedWithKeys = symbolUi != null;
+    }
+
+    /** The search input comes back when browsing returns to the top level and needs the keyboard again. */
+    internal static void FocusSearchInputNextFrame()
+    {
+        _focusInputNextTime = true;
+    }
+
     internal static UiResults Draw(GraphUiContext context, out SymbolUi? selectedUi)
     {
         selectedUi = null;
