@@ -6,6 +6,7 @@ using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.Utils;
 using T3.Editor.Gui.Interaction;
+using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.OpUis.WidgetUi;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
@@ -41,9 +42,9 @@ internal static class PickTextureUi
             return OpUi.CustomUiResult.None;
 
         var canvasScaleY = canvas.Scale.Y;
-
-        var font = Fonts.FontNormal;
-        var fontSize = Fonts.FontNormal.FontSize * canvasScaleY * .9f;
+        var font = canvasScaleY > 1.8f ? Fonts.FontLarge : Fonts.FontNormal;
+        var factor = canvasScaleY > 1.8f ? .5f : .9f;
+        var fontSize = font.FontSize * canvasScaleY * factor;
         var labelColor = WidgetElements.GetPrimaryLabelColor(canvasScaleY);
 
         // Current index
@@ -84,6 +85,14 @@ internal static class PickTextureUi
             var buttonMinX = workingRect.Min.X;
             var buttonWidth = workingRect.GetWidth();
 
+            // In the magnetic graph the output texture preview sits in the top-right corner and overlaps
+            // the first button. Its width is capped at 1.6x a grid line height (see TryDrawTexturePreview),
+            // which is exactly how wide a 16:9 texture is drawn. Reserving that width keeps the first label
+            // from reflowing with the texture's aspect ratio. The legacy graph draws the preview above the
+            // node instead, so there is nothing to reserve there.
+            var isLegacyGraph = UserSettings.Config.GraphStyle == UserSettings.GraphStyles.Legacy;
+            var previewMaxWidth = isLegacyGraph ? 0 : (MagGraphItem.GridSize.Y - 5) * canvasScaleY * 1.6f;
+
             for (var i = 0; i < connections.Count; i++)
             {
                 var srcSlot = connections[i];
@@ -92,14 +101,7 @@ internal static class PickTextureUi
                 var srcInstance = srcSlot?.Parent;
                 if (srcInstance != null)
                 {
-                    if (!string.IsNullOrWhiteSpace(srcInstance.SymbolChild.Name))
-                    {
-                        label = srcInstance.SymbolChild.Name;
-                    }
-                    else if (!string.IsNullOrWhiteSpace(srcInstance.Symbol.Name))
-                    {
-                        label = srcInstance.Symbol.Name;
-                    }
+                    label = srcInstance.SymbolChild.ReadableName;
                 }
 
                 var buttonY = buttonMinY + i * (buttonHeight + buttonSpacing);
@@ -126,10 +128,21 @@ internal static class PickTextureUi
                 // Draw button background
                 drawList.AddRectFilled(buttonRect.Min, buttonRect.Max, buttonColor);
 
-                // Draw button text (left-aligned)
+                // Draw button text (left-aligned), shrinking it to fit the button width
                 var textPadding = margin;
-                var textPos = new Vector2(buttonRect.Min.X + textPadding, buttonRect.GetCenter().Y - fontSize / 2);
-                drawList.AddText(font, fontSize, textPos, labelColor, label);
+                var labelText = label.AddSpacesForImGuiOutput();
+                var availableWidth = buttonWidth - textPadding * 2;
+                if (i == 0)
+                {
+                    availableWidth -= previewMaxWidth;
+                }
+                availableWidth = MathF.Max(1, availableWidth);
+                var labelWidth = font.CalcTextSizeA(fontSize, float.MaxValue, 0, labelText).X;
+                var fitFactor = labelWidth > 0 ? (availableWidth / labelWidth).Clamp(0.1f, 1f) : 1f;
+                var labelFontSize = fontSize * fitFactor;
+                var textPos = new Vector2(buttonRect.Min.X + textPadding,
+                                          buttonRect.GetCenter().Y - labelFontSize / 2);
+                drawList.AddText(font, labelFontSize, textPos, labelColor, labelText);
 
                 // Handle click
                 if (isHovered && ImGui.IsMouseClicked(ImGuiMouseButton.Left) && !indexIsConnected)
