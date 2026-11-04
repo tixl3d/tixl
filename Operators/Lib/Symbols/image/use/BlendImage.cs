@@ -1,18 +1,20 @@
 namespace Lib.image.use;
 
 [Guid("4bf07ce8-b92b-4191-b14b-8c3862df9c01")]
-internal sealed class UberBlend : Instance<UberBlend> {
+internal sealed class BlendImage :Instance<BlendImage>{
   [Output(Guid = "8871c07c-ff14-4254-a7b8-2440a3f05ccf")]
   public readonly Slot<Texture2D> Output = new();
 
-  [Input(Guid = "84312dab-efa1-413f-a8c5-8ddaf4ca5161")]
-  public readonly InputSlot<Texture2D> ImageA = new InputSlot<Texture2D>();
+  [Input(Guid = "abe2be55-1bb3-4612-ad3a-71fdf25d77d5")]
+  public readonly InputSlot<T3.Core.DataTypes.Texture2D> ImageA =
+      new InputSlot<T3.Core.DataTypes.Texture2D>();
 
   [Input(Guid = "18824d11-859c-4a2e-9853-2bea1fc94ff9")]
   public readonly InputSlot<Vector4> ColorA = new InputSlot<Vector4>();
 
-  [Input(Guid = "b2987d6e-e11c-4d7a-abe5-1596d6fd588f")]
-  public readonly InputSlot<Texture2D> ImageB = new InputSlot<Texture2D>();
+  [Input(Guid = "c2195943-a74b-455e-8cb2-ab037a894d58")]
+  public readonly InputSlot<T3.Core.DataTypes.Texture2D> ImageB =
+      new InputSlot<T3.Core.DataTypes.Texture2D>();
 
   [Input(Guid = "9ad9834f-984a-441f-ae45-ababb164fd0a")]
   public readonly InputSlot<Vector4> ColorB = new InputSlot<Vector4>();
@@ -37,6 +39,13 @@ internal sealed class UberBlend : Instance<UberBlend> {
   [Input(Guid = "66e6556e-138b-4e7c-9df1-55395fee3ca7")]
   public readonly InputSlot<T3.Core.DataTypes.Texture2D> ImageMask =
       new InputSlot<T3.Core.DataTypes.Texture2D>();
+
+  [Input(Guid = "60101b2c-46e6-4895-a3af-06d81bcd8463")]
+  public readonly MultiInputSlot<T3.Core.DataTypes.Texture2D> AddImages =
+      new MultiInputSlot<T3.Core.DataTypes.Texture2D>();
+
+  [Input(Guid = "61c01e20-6e0b-4c38-9c91-988f0ea95aaf")]
+  public readonly InputSlot<float> InitFactor = new InputSlot<float>();
 
   [Input(Guid = "dbc5fc3c-dd29-4b3d-9669-156a519ebd3c")]
   public readonly InputSlot<bool> NormalForUpperHalf = new InputSlot<bool>();
