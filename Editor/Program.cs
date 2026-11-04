@@ -168,6 +168,8 @@ internal static class Program
             return;
         }
 
+        T3.IoServices.SdlGamepads.Initialize();
+
         // Console.WriteLine("Validating startup location");
         // StartupValidation.ValidateNotRunningFromSystemFolder();
         
@@ -381,6 +383,7 @@ internal static class Program
         }
 
         (Cameras.Provider as SdlCameraProvider)?.Shutdown();
+        T3.IoServices.SdlGamepads.Shutdown();
         SDL3.SDL_Quit();
         Log.Debug(ShutdownCompleteMessage);
     }

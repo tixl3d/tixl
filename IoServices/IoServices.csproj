@@ -10,6 +10,7 @@
     <Configurations>Debug;Release</Configurations>
     <Platforms>AnyCPU</Platforms>
     <Deterministic>true</Deterministic>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>$(NoWarn);NU1900;NU1701</NoWarn>
   </PropertyGroup>
 
@@ -18,6 +19,7 @@
     <PackageReference Include="Rug.Osc" Version="1.2.5">
       <NoWarn>NU1701</NoWarn>
     </PackageReference>
+    <PackageReference Include="ppy.SDL3-CS" Version="2026.722.0" />
     <PackageReference Include="SharpDX.XInput" Version="4.2.0" />
     <PackageReference Include="System.IO.Ports" Version="10.0.10" />
     <PackageReference Include="System.Management" Version="10.0.10" />

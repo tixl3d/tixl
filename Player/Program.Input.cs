@@ -3,6 +3,7 @@ using SDL;
 using T3.Core.Animation;
 using T3.Core.Settings;
 using T3.Core.SystemUi;
+using T3.IoServices;
 using T3.SdlPlatform;
 using T3.SystemUi;
 using static SDL.SDL3;
@@ -55,6 +56,8 @@ internal static partial class Program
             }
         }
 
+        // The poll above refreshed the controllers; take one snapshot for all operators of the coming frame
+        SdlGamepads.Update();
         return !_closeRequested;
     }
 

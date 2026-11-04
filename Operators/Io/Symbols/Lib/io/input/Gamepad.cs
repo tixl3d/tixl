@@ -22,24 +22,17 @@ internal sealed class Gamepad : Instance<Gamepad>, IStatusProvider
     private void Update(EvaluationContext context)
     {
         var index = Index.GetValue(context).Clamp(0,3);
-        var controllers = new SharpDX.XInput.Controller[4];
-        controllers[0] = new SharpDX.XInput.Controller(SharpDX.XInput.UserIndex.One);
-        controllers[1] = new SharpDX.XInput.Controller(SharpDX.XInput.UserIndex.Two);
-        controllers[2] = new SharpDX.XInput.Controller(SharpDX.XInput.UserIndex.Three);
-        controllers[3] = new SharpDX.XInput.Controller(SharpDX.XInput.UserIndex.Four);
-
-        var currentController = controllers[index];
-        if (!currentController.IsConnected)
+        if (!SdlGamepads.TryGetStateForOperators(index, out var state))
         {
             _lastErrorMessage = $"Controller {index} is not connected";
             IsConnected.Value = false;
             return;
         }
-            
-        _lastErrorMessage = "";
+
+        _lastErrorMessage = SdlGamepads.IsAvailableToOperators
+                                ? ""
+                                : "The editor uses the game controller. Switch it with the controller icon in the menu bar.";
         IsConnected.Value = true;
-            
-        var state = XInputGamepad.GetState(currentController);
 
         _floatDict["LeftThumbX"] = state.LeftThumb.X;
         _floatDict["LeftThumbY"] = state.LeftThumb.Y;

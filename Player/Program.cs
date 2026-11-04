@@ -81,6 +81,8 @@ internal static partial class Program
             return;
         }
 
+        T3.IoServices.SdlGamepads.Initialize();
+
         var settingsPath = Path.Combine(FileLocations.StartFolder, ExportSettings.FileName);
         if (!JsonUtils.TryLoadingJson(settingsPath, out ExportSettings exportSettings) || exportSettings.Export == null)
         {

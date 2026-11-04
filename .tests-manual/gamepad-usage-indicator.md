@@ -1,0 +1,77 @@
+---
+id: gamepad-usage-indicator
+title: Game Controller Usage Indicator
+scope: io
+tags: [user]
+added: 2026-11-05
+added-in-version: 4.4
+prerequisites:
+  - A game controller (Xbox, PlayStation or Switch) is at hand but not yet connected.
+  - A project with the [GamePadExample] operator is open, or a [Gamepad] operator whose State output is shown in the Output Window.
+---
+
+Checks that game controllers are read through SDL on every platform, and that the menu bar indicator decides
+whether the controller drives operators, the editor, or nothing.
+
+## Step: The indicator appears with a controller
+
+**Action:**
+Look at the menu bar, then connect the controller.
+
+**Expected:**
+- Before connecting, no controller icon is shown in the menu bar.
+- Within a second of connecting, a small controller icon appears next to the outputs indicator.
+- Hovering it shows the controller's name and "Game controller drives operators".
+
+## Step: The indicator flashes on input
+
+**Action:**
+Press a few buttons and move a stick.
+
+**Expected:**
+- The icon lights up with each input and fades back to a dim resting state shortly after.
+
+## Step: Operators receive the controller
+
+**Action:**
+Move the left stick and press A while watching the [Gamepad] operator's State output.
+
+**Expected:**
+- `LeftThumbX` and `LeftThumbY` follow the stick, with up being positive.
+- `Buttons/A` is 1 while the bottom face button is held.
+- A resting stick reports exactly 0.
+
+## Step: Switching the controller to the editor
+
+**Action:**
+Click the controller icon once.
+
+**Expected:**
+- A toast says "Game controller drives the editor" and the icon turns green.
+- The [Gamepad] operator's outputs stay at rest while the stick moves, and the operator shows a warning that the editor uses the controller.
+
+## Step: Switching the controller off
+
+**Action:**
+Click the icon again, then once more.
+
+**Expected:**
+- The first click shows "Game controller is off" and dims the icon; it no longer flashes on input.
+- The second click returns to "Game controller drives operators" and the operator follows the stick again.
+
+## Step: The choice survives a restart
+
+**Action:**
+Switch to "drives the editor", restart TiXL and connect the controller.
+
+**Expected:**
+- The icon is green and the tooltip says "Game controller drives the editor".
+
+## Step: Disconnecting
+
+**Action:**
+Disconnect the controller.
+
+**Expected:**
+- The icon disappears.
+- The [Gamepad] operator reports that the controller is not connected.

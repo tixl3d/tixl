@@ -139,6 +139,10 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
 
         public bool EnableKeyboardShortCuts = true;
 
+        /** Whether a connected game controller drives operators like [Gamepad] or the editor itself. */
+        [JsonConverter(typeof(StringEnumConverter))]
+        public GamepadUsages GamepadUsage = GamepadUsages.Operators;
+
         public GraphStyles GraphStyle = GraphStyles.Magnetic;
 
         // Interaction
@@ -307,6 +311,13 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
     {
         Legacy,
         Magnetic,
+    }
+
+    public enum GamepadUsages
+    {
+        Operators,
+        Editor,
+        Off,
     }
 
     internal static bool IsUserNameDefined()

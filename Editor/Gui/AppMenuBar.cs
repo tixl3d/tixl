@@ -69,6 +69,7 @@ internal static class AppMenuBar
             DrawErrorsIndicator();
             DrawGpuMemoryIndicator();
             Windows.OutputSetup.OutputsIndicator.Draw();
+            Interaction.Gamepad.GamepadIndicator.Draw();
             T3Metrics.DrawRenderPerformanceGraph();
 
             ImGui.SameLine();

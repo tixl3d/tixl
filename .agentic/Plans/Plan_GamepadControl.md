@@ -9,8 +9,12 @@ action toasts are enough feedback and invisible modes are acceptable.
 namespace drill with the arrow keys (Return opens or inserts, Backspace goes up and refocuses the entry it came
 from). Moves keep their axis: up/down stay in the column and only continue into the neighbouring column past its
 end; left/right go to the closest-height entry of the next column. Possible refinement: a remembered goal height
-for left/right if offset rows make the focus drift. No manual test set yet. No gamepad code yet. Reference
-controller: Xbox (XInput layout).
+for left/right if offset rows make the focus drift. Test set: `.tests-manual/symbol-browser-keyboard-navigation.md`.
+Phase 1 implemented, verified on Linux with an Xbox Series controller over USB (`[Gamepad]` dict follows the pad, hot-plug works): `IoServices/SdlGamepads` (SDL3, background events on,
+radial dead zones, 0.5 s hot-plug scan, initialised by Editor and Player), `[Gamepad]` reads it instead of
+XInput, `Gamepad/GamepadIndicator` in the menu bar cycles `UserSettings.GamepadUsage` (Operators → Editor → Off).
+`XInputGamepad` and the SharpDX.XInput package stay until main's calibration is ported. Test set:
+`.tests-manual/gamepad-usage-indicator.md`. Reference controller: Xbox.
 
 Much of what this needs already exists for keyboard control (`Plan_KeyboardControl.md`): arrow-key selection
 navigation, the parameter popover, Tab insert, operator bookmarks, action toasts. **The gamepad is another
