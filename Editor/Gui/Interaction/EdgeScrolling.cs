@@ -1,12 +1,11 @@
 #nullable enable
 using ImGuiNET;
-using T3.Editor.Gui.Interaction;
-
-namespace T3.Editor.Gui.MagGraph.Interaction;
+namespace T3.Editor.Gui.Interaction;
 
 /// <summary>
-/// Scrolls the graph while a drag holds the pointer near or past the edge of the view, so dragged operators,
-/// sections or the dragged end of a connection stay in sight. The deeper the pointer is in the edge zone, the faster it scrolls.
+/// Scrolls a canvas while a drag holds the pointer near or past the edge of the view, so dragged operators,
+/// sections, the dragged end of a connection or a growing selection fence stay in sight. The deeper the pointer
+/// is in the edge zone, the faster it scrolls.
 /// </summary>
 internal static class EdgeScrolling
 {
@@ -16,7 +15,9 @@ internal static class EdgeScrolling
         _hasBeenInside = false;
     }
 
-    internal static void Update(ScalableCanvas canvas)
+    /// <param name="scrollVertically">False for canvases whose vertical axis carries no content, like the
+    /// timeline's dope sheet, where only time should scroll.</param>
+    internal static void Update(ScalableCanvas canvas, bool scrollVertically = true)
     {
         var margin = EdgeMargin * T3Ui.UiScaleFactor;
         if (canvas.WindowSize.X < margin * 4 || canvas.WindowSize.Y < margin * 4 || !ImGui.IsMousePosValid())
@@ -26,7 +27,7 @@ internal static class EdgeScrolling
         var innerMax = canvas.WindowPos + canvas.WindowSize - new Vector2(margin);
         var mousePos = ImGui.GetMousePos();
         var depthInEdge = new Vector2(GetDepthInEdge(mousePos.X, innerMin.X, innerMax.X),
-                                      GetDepthInEdge(mousePos.Y, innerMin.Y, innerMax.Y));
+                                      scrollVertically ? GetDepthInEdge(mousePos.Y, innerMin.Y, innerMax.Y) : 0);
 
         if (depthInEdge == Vector2.Zero)
         {

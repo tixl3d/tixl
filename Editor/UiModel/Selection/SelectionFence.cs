@@ -1,6 +1,7 @@
 ﻿using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Editor.Gui;
+using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.SystemUi;
 using T3.SystemUi;
@@ -12,7 +13,12 @@ namespace T3.Editor.UiModel.Selection;
 /// </summary>
 public sealed class SelectionFence
 {
-    internal States UpdateAndDraw(out SelectModes selectMode, bool allowRectOutOfBounds = true)
+    /// <param name="canvas">When given, the fence's start stays pinned to the canvas content while the view
+    /// moves, and dragging to the edge of the view scrolls the canvas so the fence can reach content
+    /// outside of it.</param>
+    /// <param name="scrollVertically">Whether that edge scrolling also moves the canvas vertically.</param>
+    internal States UpdateAndDraw(out SelectModes selectMode, bool allowRectOutOfBounds = true,
+                                  ScalableCanvas canvas = null, bool scrollVertically = true)
     {
         if (_state is States.CompletedAsArea or States.CompletedAsClick)
             _state = States.Inactive;
@@ -40,9 +46,18 @@ public sealed class SelectionFence
             }
 
             _startPositionInScreen = imguiMousePos;
+            if (canvas != null)
+            {
+                _startPositionOnCanvas = canvas.InverseTransformPositionFloat(imguiMousePos);
+                EdgeScrolling.Reset();
+            }
+
             _state = States.PressedButNotMoved;
             return States.PressedButNotMoved;
         }
+
+        if (canvas != null)
+            _startPositionInScreen = canvas.TransformPositionFloat(_startPositionOnCanvas);
 
         // ImGui's position, not the desktop cursor's: the two only agree on an unscaled display with the window
         // at the origin, and elsewhere the fence would start at a fraction of the distance to the pointer.
@@ -70,6 +85,9 @@ public sealed class SelectionFence
         var totalPositionDelta = globalMousePos - _startPositionInScreen;
         if (_state == States.PressedButNotMoved && totalPositionDelta.LengthSquared() < clickThreshold * clickThreshold)
             return _state;
+
+        if (canvas != null)
+            EdgeScrolling.Update(canvas, scrollVertically);
 
         var drawList = ImGui.GetWindowDrawList();
         var drawRect = allowRectOutOfBounds ? BoundsUnclamped : BoundsInScreen;
@@ -121,4 +139,5 @@ public sealed class SelectionFence
     internal ImRect BoundsInScreen;
     internal ImRect BoundsUnclamped;
     private Vector2 _startPositionInScreen;
+    private Vector2 _startPositionOnCanvas;
 }

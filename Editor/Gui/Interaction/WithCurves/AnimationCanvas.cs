@@ -54,9 +54,16 @@ internal abstract class AnimationCanvas : ScalableCanvas, ITimeObjectManipulatio
         ImGui.EndChild();
     }
 
+    /** Whether dragging a fence to the edge of the view scrolls the canvas. Off for small embedded canvases,
+     * whose edge zones would cover most of the view. */
+    protected virtual bool FenceScrollsAtEdges => false;
+
+    protected virtual bool FenceScrollsVertically => true;
+
     private void HandleFenceUpdate(SelectionFence selectionFence, out SelectionFence.SelectModes selectMode)
     {
-        switch (selectionFence.UpdateAndDraw(out selectMode))
+        var scrollCanvas = FenceScrollsAtEdges ? this : null;
+        switch (selectionFence.UpdateAndDraw(out selectMode, canvas: scrollCanvas, scrollVertically: FenceScrollsVertically))
         {
             case SelectionFence.States.Updated:
             case SelectionFence.States.CompletedAsClick:

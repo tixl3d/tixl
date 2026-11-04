@@ -35,6 +35,11 @@ internal sealed class TimeLineCanvas : AnimationCanvas
     /** Alt + drag is the timeline's own gesture. */
     internal protected override bool PansWithAltDrag => false;
 
+    protected override bool FenceScrollsAtEdges => true;
+
+    // The dope sheet's rows scroll as an ImGui child, not with the canvas: only time scrolls there.
+    protected override bool FenceScrollsVertically => Mode == Modes.CurveEditor;
+
     public TimeLineCanvas(NodeSelection nodeSelection, Func<Instance> getCompositionOp, Func<Guid, bool> requestChildCompositionFunc)
     {
         _nodeSelection = nodeSelection;
@@ -248,7 +253,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
                             // outer-fence behaviour the user expects.
                             if (!T3Ui.IsAnyPopupOpen)
                             {
-                                switch (_dopeFence.UpdateAndDraw(out var selectMode))
+                                switch (_dopeFence.UpdateAndDraw(out var selectMode, canvas: this, scrollVertically: false))
                                 {
                                     case SelectionFence.States.Updated:
                                     case SelectionFence.States.CompletedAsClick:

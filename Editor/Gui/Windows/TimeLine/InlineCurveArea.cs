@@ -168,7 +168,13 @@ internal sealed class InlineCurveArea : ScalableCanvas
         if (T3Ui.IsAnyPopupOpen)
             return;
 
-        switch (_fence.UpdateAndDraw(out var selectMode))
+        var state = _fence.UpdateAndDraw(out var selectMode, canvas: this);
+
+        // Edge scrolling moved this pane's time, which the timeline canvas owns: hand it back like a pan.
+        if (state == SelectionFence.States.Updated)
+            SyncXTo(_timeLineCanvas);
+
+        switch (state)
         {
             case SelectionFence.States.Updated:
             case SelectionFence.States.CompletedAsClick:
