@@ -1,5 +1,6 @@
 #nullable enable
 using T3.Graphics.Compat;
+using T3.Core.Utils;
 using Utilities = T3.Core.Utils.Utilities;
 
 namespace Lib.numbers.floats.process;
@@ -62,6 +63,8 @@ internal sealed class ValuesToTexture : Instance<ValuesToTexture>
         if (Math.Abs(pow) < 0.001f)
             return;
 
+        var gainAndBias = GainAndBias.GetValue(context);
+
         var requiredFloats = listCount * sampleCount;
         if (_uploadBuffer.Length < requiredFloats)
         {
@@ -81,7 +84,7 @@ internal sealed class ValuesToTexture : Instance<ValuesToTexture>
             {
                 for (int i = 0; i < sampleCount; i++)
                 {
-                    float v = i < list.Count ? (float)Math.Pow((list[i] + offset) * gain, pow) : 0f;
+                    float v = i < list.Count ? ComputeValue(list[i], offset, gain, pow, gainAndBias) : 0f;
                     _uploadBuffer[o++] = v;
                 }
             }
@@ -92,7 +95,7 @@ internal sealed class ValuesToTexture : Instance<ValuesToTexture>
             {
                 foreach (var list in _valueListsTmp)
                 {
-                    float v = i < list.Count ? (float)Math.Pow((list[i] + offset) * gain, pow) : 0f;
+                    float v = i < list.Count ? ComputeValue(list[i], offset, gain, pow, gainAndBias) : 0f;
                     _uploadBuffer[o++] = v;
                 }
             }
@@ -133,6 +136,16 @@ internal sealed class ValuesToTexture : Instance<ValuesToTexture>
 
         Values.DirtyFlag.Clear();
     }
+
+    /** Gain and bias only shape the 0..1 range; values outside it pass through so they are not clamped. */
+    private static float ComputeValue(float value, float offset, float gain, float pow, Vector2 gainAndBias)
+    {
+        var v = (float)Math.Pow((value + offset) * gain, pow);
+        if (v is > 0f and < 1f)
+            v = v.ApplyGainAndBias(gainAndBias.X, gainAndBias.Y);
+
+        return v;
+    }
     
     // Reused, pinned upload buffer (avoid per-frame allocations)
     private float[] _uploadBuffer = [];
@@ -152,6 +165,9 @@ internal sealed class ValuesToTexture : Instance<ValuesToTexture>
 
     [Input(Guid = "51545316-69FC-441F-B59F-44979E32972C")]
     public readonly InputSlot<float> Pow = new();
+
+    [Input(Guid = "3B6E0F2A-8C41-4D7E-9A15-6F2C8E4B7D90")]
+    public readonly InputSlot<Vector2> GainAndBias = new();
 
     [Input(Guid = "63E90D86-5AD5-4333-8B99-7F8D285C4913", MappedType = typeof(Directions))]
     public readonly InputSlot<int> Direction = new();

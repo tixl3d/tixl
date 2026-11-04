@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "55cc0f79-96c9-482e-9794-934dc0f87708"/*ValuesToTexture*/,
-  "Description": "Converts lists of values into pixels of a float texture in real time.\n\nEach pixel is computed as ((value + Offset) * Gain) ^ Pow. See the example of how this can be used to create audio reactive visualizers with [PlaybackFFT] and [LinearSamplePointAttributes].\n\nSee also: [ValuesToTexture2], [CurvesToTexture]",
+  "Description": "Converts lists of values into pixels of a float texture in real time.\n\nEach pixel is computed as ((value + Offset) * Gain) ^ Pow, then shaped by GainAndBias where the result lies between 0 and 1. See the example of how this can be used to create audio reactive visualizers with [PlaybackFFT] and [LinearSamplePointAttributes].\n\nSee also: [ValuesToTexture2], [CurvesToTexture]",
   "InputUis": [
     {
       "InputId": "092c8d1f-a70e-4298-b5df-52c9d62f8e04"/*Values*/,
@@ -19,6 +19,20 @@
         "Y": 180.0
       },
       "Description": "Exponent applied to each value. Values near 0 stop updating the texture."
+    },
+    {
+      "InputId": "3b6e0f2a-8c41-4d7e-9a15-6f2c8e4b7d90"/*GainAndBias*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 200.0
+      },
+      "Description": "X: gain, Y: bias. Shapes results between 0 and 1 after Pow; values outside that range are left unchanged. 0.5 / 0.5 has no effect.",
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true,
+      "Format": "{0:0.000}",
+      "UseVec2Control": "GainAndBias"
     },
     {
       "InputId": "63e90d86-5ad5-4333-8b99-7f8d285c4913"/*Direction*/,

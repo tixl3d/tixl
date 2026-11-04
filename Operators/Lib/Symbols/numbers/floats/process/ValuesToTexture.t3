@@ -17,6 +17,13 @@
       "DefaultValue": 0
     },
     {
+      "Id": "3b6e0f2a-8c41-4d7e-9a15-6f2c8e4b7d90"/*GainAndBias*/,
+      "DefaultValue": {
+        "X": 0.5,
+        "Y": 0.5
+      }
+    },
+    {
       "Id": "748fe756-c7ee-4cc1-929e-078f99bea628"/*Offset*/,
       "DefaultValue": 0.0
     },
