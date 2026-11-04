@@ -25,6 +25,13 @@
         <Content Include="../Dependencies/tixlaudio.dll" Visible="false" Link="tixlaudio.dll" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
 
+    <!-- The layout rewriter has no ImGui dependency, so it is tested as linked source instead of referencing the Editor. -->
+    <ItemGroup>
+        <Compile Include="../Editor/Gui/Windows/Layouts/ImGuiLayoutScaling.cs" Link="Layouts/ImGuiLayoutScaling.cs" />
+        <None Include="../.Defaults/Layouts/layout0.json" Link="Layouts/layout0.json" CopyToOutputDirectory="PreserveNewest" />
+        <None Include="../.Defaults/Layouts/layout12.json" Link="Layouts/layout12.json" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+
     <ItemGroup>
         <ProjectReference Include="..\Core\Core.csproj" />
         <ProjectReference Include="..\Graphics\Graphics.csproj" />

@@ -111,19 +111,88 @@ internal static class LayoutHandling
             SaveLayout(0);
     }
 
-    public static void UpdateAfterResize(Vector2 newSize)
+    /// <summary>
+    /// Fits a queued ImGui layout to the current dock space right before ImGui loads it, so every split keeps
+    /// the proportion it was saved with.
+    /// </summary>
+    internal static string FitImGuiLayoutToDockSpace(string imGuiSettings)
     {
-        if (newSize == Vector2.Zero)
+        var viewport = ImGui.GetMainViewport();
+        var dockSpaceSize = viewport.WorkSize;
+        if (dockSpaceSize.X < 1 || dockSpaceSize.Y < 1)
+        {
+            // Before the first frame the viewport has no size yet. Keep the size the layout was saved for, so the
+            // refit after the first resize can derive the right proportions.
+            if (ImGuiLayoutScaling.TryReadDockSpaceSize(imGuiSettings, MainDockSpaceId, out var savedSize))
+                _layoutAuthoredDockSpaceSize = savedSize;
+
+            return imGuiSettings;
+        }
+
+        _layoutAuthoredDockSpaceSize = dockSpaceSize;
+        return ImGuiLayoutScaling.Rescale(imGuiSettings,
+                                          viewport.WorkPos,
+                                          dockSpaceSize,
+                                          GetVisibleWindowTitles(),
+                                          MinPanelSizeInPoints * T3Ui.UiScaleFactor,
+                                          MainDockSpaceId);
+    }
+
+    /// <summary>
+    /// ImGui keeps every panel beside the graph at a fixed pixel size when the dock space is resized. Once the
+    /// size has settled, this re-applies the proportions the layout had before the resize.
+    /// </summary>
+    internal static void KeepLayoutProportionsOnResize()
+    {
+        var viewport = ImGui.GetMainViewport();
+        var dockSpaceSize = viewport.WorkSize;
+        if (dockSpaceSize != _lastDockSpaceSize)
+        {
+            _lastDockSpaceSize = dockSpaceSize;
+            _framesSinceDockSpaceResize = 0;
+            return;
+        }
+
+        if (_framesSinceDockSpaceResize > FramesUntilResizeSettled)
             return;
 
-        ApplyLayout(new Layout
-                        {
-                            WindowConfigs = WindowManager
-                                           .GetAllWindows()
-                                           .Select(window => window.Config)
-                                           .Where(config => config != null)
-                                           .ToList()
-                        });
+        _framesSinceDockSpaceResize++;
+        if (_framesSinceDockSpaceResize <= FramesUntilResizeSettled)
+            return;
+
+        if (dockSpaceSize.X < 1 || dockSpaceSize.Y < 1 || dockSpaceSize == _layoutAuthoredDockSpaceSize)
+            return;
+
+        if (_layoutAuthoredDockSpaceSize.X < 1 || _layoutAuthoredDockSpaceSize.Y < 1)
+        {
+            _layoutAuthoredDockSpaceSize = dockSpaceSize;
+            return;
+        }
+
+        // A layout switch is already queued and gets fitted when loaded.
+        if (!string.IsNullOrEmpty(Program.NewImGuiLayoutDefinition))
+            return;
+
+        Program.NewImGuiLayoutDefinition = ImGuiLayoutScaling.Rescale(ImGui.SaveIniSettingsToMemory(),
+                                                                      viewport.WorkPos,
+                                                                      dockSpaceSize,
+                                                                      GetVisibleWindowTitles(),
+                                                                      MinPanelSizeInPoints * T3Ui.UiScaleFactor,
+                                                                      MainDockSpaceId,
+                                                                      _layoutAuthoredDockSpaceSize);
+        ChangeCounter++;
+    }
+
+    private static HashSet<string> GetVisibleWindowTitles()
+    {
+        var titles = new HashSet<string>();
+        foreach (var window in WindowManager.GetAllWindows())
+        {
+            if (window.Config.Visible && !string.IsNullOrEmpty(window.Config.Title))
+                titles.Add(window.Config.Title);
+        }
+
+        return titles;
     }
 
     public static void LoadAndApplyLayoutOrFocusMode(Layouts layoutId)
@@ -459,6 +528,18 @@ internal static class LayoutHandling
 
     /** Id of the dock space covering the main viewport. Dock trees of any other dock space are stale. */
     internal static uint MainDockSpaceId;
+
+    /** Below this a panel is unusable. Only enforced when a layout made for a big screen opens on a small one. */
+    private const float MinPanelSizeInPoints = 120;
+
+    /** A window drag-resize changes the size every frame; refitting each of those frames would make panels jump. */
+    private const int FramesUntilResizeSettled = 10;
+
+    /** The dock space size the live layout's split sizes were made for: the last fit, or the size a layout was saved with. */
+    private static Vector2 _layoutAuthoredDockSpaceSize;
+
+    private static Vector2 _lastDockSpaceSize;
+    private static int _framesSinceDockSpaceResize;
 
     private const ImGuiWindowFlags DockHostWindowFlags = ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoCollapse
                                                        | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove

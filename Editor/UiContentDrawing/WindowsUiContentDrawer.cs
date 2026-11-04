@@ -17,6 +17,7 @@ using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows;
 using T3.Editor.Gui.Windows.Analyze;
+using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.Gui.Windows.Output;
 using T3.Editor.SystemUi;
 using T3.Editor.UiModel.ProjectHandling;
@@ -161,7 +162,7 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
 
             if (!string.IsNullOrEmpty(Program.NewImGuiLayoutDefinition))
             {
-                ImGui.LoadIniSettingsFromMemory(Program.NewImGuiLayoutDefinition);
+                ImGui.LoadIniSettingsFromMemory(LayoutHandling.FitImGuiLayoutToDockSpace(Program.NewImGuiLayoutDefinition));
                 Program.NewImGuiLayoutDefinition = string.Empty;
             }
 
