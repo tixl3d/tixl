@@ -170,8 +170,9 @@ internal sealed partial class SetupOutputView
         // feature; the pin re-solves so every set point stays exactly where it was dropped. It draws on the real
         // projector, so it never outlives the Output tab.
         var hasSeveralAlignCandidates = false;
-        var photoCarrier = _editMode == EditModes.Output ? FindAlignSubject(setup, outputId, out hasSeveralAlignCandidates) : null;
-        if (photoCarrier == null)
+        var alignSubject = default(AlignSubject);
+        var hasAlignSubject = _editMode == EditModes.Output && TryFindAlignSubject(setup, outputId, out alignSubject, out hasSeveralAlignCandidates);
+        if (!hasAlignSubject)
             _projectsPhoto = false;
 
         if (!_projectsPhoto)
@@ -184,7 +185,7 @@ internal sealed partial class SetupOutputView
             CustomComponents.StylizedText("Select a surface to align its points", Fonts.FontSmall, UiColors.TextMuted);
         }
 
-        if (photoCarrier != null)
+        if (hasAlignSubject)
         {
             ImGui.SameLine();
             if (CustomComponents.StateButton("Align Points", _projectsPhoto ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Emphasized))
@@ -210,9 +211,9 @@ internal sealed partial class SetupOutputView
                     CustomComponents.TooltipForLastItem("Disc radius", "Radius of the photo disc around each reference point, in percent of the canvas height. Drag, or double-click to type.");
 
                 ImGui.SameLine();
-                DrawReleasePointButton(setup, photoCarrier, outputId);
+                DrawReleasePointButton(setup, alignSubject.Pinned, outputId);
                 ImGui.SameLine();
-                DrawResetAlignmentButton(setup, photoCarrier, outputId);
+                DrawResetAlignmentButton(setup, alignSubject.Pinned, outputId);
 
                 if (_pinResidualPx > 0.5f)
                 {
@@ -222,8 +223,12 @@ internal sealed partial class SetupOutputView
                         ImGui.SetTooltip("More than four points over-determine a corner pin; the solve averages them.\nA large miss means a point is misplaced, or the wall isn't flat.\nEach point's arrow shows which way its own miss goes.");
                 }
 
-                if (TryGetTracedFragmentWithSurround(setup, photoCarrier, out var photoSrv, out var photoUvMin, out var photoUvMax))
-                    CalibrationOverlay.SetCalibrationPhoto(photoCarrier.Id, photoSrv!, photoUvMin, photoUvMax, UserSettings.Config.OutputSetupPhotoDiscRadius, _activePointId);
+                if (TryGetTracedFragmentWithSurround(setup, alignSubject.Traced, out var photoSrv, out var photoUvMin, out var photoUvMax))
+                {
+                    NarrowPhotoUvToPinned(alignSubject, ref photoUvMin, ref photoUvMax);
+                    CalibrationOverlay.SetCalibrationPhoto(alignSubject.Pinned.Id, photoSrv!, photoUvMin, photoUvMax, UserSettings.Config.OutputSetupPhotoDiscRadius,
+                                                           _activePointId, alignSubject.Traced, alignSubject.TracedToPinned);
+                }
             }
         }
 

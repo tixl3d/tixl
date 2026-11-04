@@ -193,7 +193,11 @@ internal sealed partial class SetupOutputView
 
         // A gesture with a surface snapshot is one that moves its pins; its marks must be placed before they move.
         if (snapshotOf != null)
-            SeedPointAims(setup, snapshotOf);
+        {
+            SeedPointAims(setup, TryGetAlignSubject(setup, snapshotOf, out var subject)
+                                     ? subject
+                                     : new AlignSubject(snapshotOf, snapshotOf, Vector2.Zero));
+        }
     }
 
     /// <summary>

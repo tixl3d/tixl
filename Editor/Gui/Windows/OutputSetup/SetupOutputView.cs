@@ -524,10 +524,10 @@ internal sealed partial class SetupOutputView
         }
 
         // The reference points on the plain projector canvas, where they can be walked onto the wall.
-        var alignSubject = _projectsPhoto && _editMode == EditModes.Output ? FindAlignSubject(setup, outputId, out _) : null;
-        var pinMapping = alignSubject?.FindMapping(outputId);
-        if (!rectifying && alignSubject != null && pinMapping != null && pinMapping.Quad.Length >= 4
-            && SurfaceMetrics.CountPoints(alignSubject) > 0)
+        if (!rectifying && _projectsPhoto && _editMode == EditModes.Output
+            && TryFindAlignSubject(setup, outputId, out var alignSubject, out _)
+            && alignSubject.Pinned.FindMapping(outputId) is { Quad.Length: >= 4 } pinMapping
+            && SurfaceMetrics.CountPoints(alignSubject.Traced) > 0)
         {
             DrawReferencePointPins(setup, dl, alignSubject, pinMapping, editable, handleFade);
         }

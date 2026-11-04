@@ -16,8 +16,9 @@ namespace T3.Editor.Gui.Windows.OutputSetup;
 /// </summary>
 internal sealed partial class SetupOutputView
 {
-    private void UpdatePointsFromGamepad(Setup setup, Surface surface, Surface.OutputMapping mapping, Vector2 canvasSize)
+    private void UpdatePointsFromGamepad(Setup setup, AlignSubject subject, Surface.OutputMapping mapping, Vector2 canvasSize)
     {
+        var traced = subject.Traced;
         if (!TryPollGamepad(out var pad))
         {
             FinishGamepadMove(setup);
@@ -27,27 +28,27 @@ internal sealed partial class SetupOutputView
         var wallRightOnCanvas = new Vector2(-_wallUpOnCanvas.Y, _wallUpOnCanvas.X);
         if (WasPressed(pad.LeftShoulder, _lastPad.LeftShoulder))
         {
-            CycleActivePoint(surface, -1);
+            CycleActivePoint(traced, -1);
         }
-        else if (WasPressed(pad.RightShoulder, _lastPad.RightShoulder) || !TryFindPoint(surface, _activePointId, out _))
+        else if (WasPressed(pad.RightShoulder, _lastPad.RightShoulder) || !TryFindPoint(traced, _activePointId, out _))
         {
-            CycleActivePoint(surface, 1);
+            CycleActivePoint(traced, 1);
         }
         else if (WasPressed(pad.DirectionalPad.Left, _lastPad.DirectionalPad.Left))
         {
-            SelectPointInDirection(surface, mapping, canvasSize, -wallRightOnCanvas);
+            SelectPointInDirection(subject, mapping, canvasSize, -wallRightOnCanvas);
         }
         else if (WasPressed(pad.DirectionalPad.Right, _lastPad.DirectionalPad.Right))
         {
-            SelectPointInDirection(surface, mapping, canvasSize, wallRightOnCanvas);
+            SelectPointInDirection(subject, mapping, canvasSize, wallRightOnCanvas);
         }
         else if (WasPressed(pad.DirectionalPad.Up, _lastPad.DirectionalPad.Up))
         {
-            SelectPointInDirection(surface, mapping, canvasSize, _wallUpOnCanvas);
+            SelectPointInDirection(subject, mapping, canvasSize, _wallUpOnCanvas);
         }
         else if (WasPressed(pad.DirectionalPad.Down, _lastPad.DirectionalPad.Down))
         {
-            SelectPointInDirection(surface, mapping, canvasSize, -_wallUpOnCanvas);
+            SelectPointInDirection(subject, mapping, canvasSize, -_wallUpOnCanvas);
         }
 
         var hasDirection = pad.LeftThumb.Length() > MinThumbForDirection;
@@ -55,7 +56,7 @@ internal sealed partial class SetupOutputView
         // The stick's up is the canvas' up, so the arrow is off on the wall by however the projector is mounted.
         var thumbDirection = hasDirection ? Vector2.Normalize(new Vector2(pad.LeftThumb.X, -pad.LeftThumb.Y)) : Vector2.Zero;
         if (hasDirection)
-            CalibrationOverlay.SetUpDirectionPreview(surface.Id, thumbDirection);
+            CalibrationOverlay.SetUpDirectionPreview(subject.Pinned.Id, thumbDirection);
 
         if (WasPressed(pad.LeftStickButton, _lastPad.LeftStickButton))
         {
@@ -79,10 +80,10 @@ internal sealed partial class SetupOutputView
 
         _lastPad = pad;
 
-        MoveActivePoint(setup, surface, mapping, canvasSize, pad.RightThumb);
+        MoveActivePoint(setup, subject, mapping, canvasSize, pad.RightThumb);
     }
 
-    private void MoveActivePoint(Setup setup, Surface surface, Surface.OutputMapping mapping, Vector2 canvasSize, Vector2 thumb)
+    private void MoveActivePoint(Setup setup, AlignSubject subject, Surface.OutputMapping mapping, Vector2 canvasSize, Vector2 thumb)
     {
         var deflection = thumb.Length();
         if (deflection <= 0)
@@ -91,8 +92,8 @@ internal sealed partial class SetupOutputView
             return;
         }
 
-        if (!TryFindPoint(surface, _activePointId, out var point)
-            || !SurfaceGeometry.TryGetSurfaceToOutput(surface, mapping, canvasSize, out var surfaceToOutput))
+        if (!TryFindPoint(subject.Traced, _activePointId, out var point)
+            || !SurfaceGeometry.TryGetSurfaceToOutput(subject.Pinned, mapping, canvasSize, out var surfaceToOutput))
             return;
 
         if (!_isGamepadMovingPoint)
@@ -101,7 +102,7 @@ internal sealed partial class SetupOutputView
             if (_gesture.IsLive)
                 return;
 
-            BeginPointMove(setup, surface, mapping);
+            BeginPointMove(setup, subject, mapping);
             _isGamepadMovingPoint = true;
         }
 
@@ -110,9 +111,9 @@ internal sealed partial class SetupOutputView
 
         // Speed grows with the cube of the deflection: full travel crosses the wall, a light touch sets single pixels.
         var pixels = direction * deflection * deflection * MaxPointSpeedOfCanvasHeightPerSec * canvasSize.Y * ImGui.GetIO().DeltaTime;
-        var aim = AimOf(mapping, point!.Id, point.P1, surfaceToOutput, canvasSize);
+        var aim = AimOf(mapping, point!.Id, point.P1 + subject.TracedToPinned, surfaceToOutput, canvasSize);
         mapping.PointAims[point.Id] = new Surface.OutputMapping.PointAim(aim.Position + pixels / canvasSize, true);
-        SolvePinFromTargets(surface, mapping, canvasSize);
+        SolvePinFromTargets(subject, mapping, canvasSize);
     }
 
     /** Ends the undo step of a stick move, once the stick is back at rest or the tool went away. */
@@ -145,21 +146,21 @@ internal sealed partial class SetupOutputView
     /// Goes to the closest point lying in a direction from the active one, as seen on the wall. Sideways distance
     /// counts double, so the press favours what is straight ahead. Stays put with nothing in that direction.
     /// </summary>
-    private void SelectPointInDirection(Surface surface, Surface.OutputMapping mapping, Vector2 canvasSize, Vector2 direction)
+    private void SelectPointInDirection(AlignSubject subject, Surface.OutputMapping mapping, Vector2 canvasSize, Vector2 direction)
     {
-        if (!TryFindPoint(surface, _activePointId, out var active)
-            || !SurfaceGeometry.TryGetSurfaceToOutput(surface, mapping, canvasSize, out var surfaceToOutput))
+        if (!TryFindPoint(subject.Traced, _activePointId, out var active)
+            || !SurfaceGeometry.TryGetSurfaceToOutput(subject.Pinned, mapping, canvasSize, out var surfaceToOutput))
             return;
 
-        var activePosition = AimOf(mapping, active!.Id, active.P1, surfaceToOutput, canvasSize).Position * canvasSize;
+        var activePosition = AimOf(mapping, active!.Id, active.P1 + subject.TracedToPinned, surfaceToOutput, canvasSize).Position * canvasSize;
         var sideways = new Vector2(-direction.Y, direction.X);
         var bestCost = float.MaxValue;
-        foreach (var candidate in surface.Annotations)
+        foreach (var candidate in subject.Traced.Annotations)
         {
             if (!candidate.IsPoint || candidate.Id == _activePointId)
                 continue;
 
-            var offset = AimOf(mapping, candidate.Id, candidate.P1, surfaceToOutput, canvasSize).Position * canvasSize - activePosition;
+            var offset = AimOf(mapping, candidate.Id, candidate.P1 + subject.TracedToPinned, surfaceToOutput, canvasSize).Position * canvasSize - activePosition;
             var ahead = Vector2.Dot(offset, direction);
             if (ahead <= 0)
                 continue;

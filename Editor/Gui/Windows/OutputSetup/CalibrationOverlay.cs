@@ -70,11 +70,14 @@ internal static class CalibrationOverlay
     /// <summary>
     /// Projects discs of a surface's straightened photo around its reference points, for calibrating the pin
     /// against the real wall. The outline of <paramref name="activePointId"/> blinks, so it can be found there.
+    /// The points belong to <paramref name="pointSource"/>, which for a region is its traced ancestor;
+    /// <paramref name="pointOffset"/> carries them into the pinned surface's space.
     /// </summary>
-    public static void SetCalibrationPhoto(Guid surfaceId, ShaderResourceView srv, Vector2 uvMin, Vector2 uvMax, float radiusOfHeight, Guid activePointId)
+    public static void SetCalibrationPhoto(Guid surfaceId, ShaderResourceView srv, Vector2 uvMin, Vector2 uvMax, float radiusOfHeight, Guid activePointId,
+                                           Surface pointSource, Vector2 pointOffset)
     {
         var uv = new Vector4(uvMin.X, uvMin.Y, uvMax.X, uvMax.Y);
-        _photo.Set(new CalibrationPhoto(surfaceId, srv, uv, radiusOfHeight, activePointId), ImGui.GetFrameCount());
+        _photo.Set(new CalibrationPhoto(surfaceId, srv, uv, radiusOfHeight, activePointId, pointSource, pointOffset), ImGui.GetFrameCount());
     }
 
     /// <summary>Shows an arrow around the active point in a direction on the canvas (Y down), while one is being chosen.</summary>
@@ -155,12 +158,13 @@ internal static class CalibrationOverlay
             var surfaceSpan = Vector2.Max(surfaceMax - surfaceMin, new Vector2(0.0001f));
             var isPinWarpable = IsPinWarpable(pending.Mapping, surfaceToOutput, surfaceMin, surfaceSpan, photo.Uv, uvSpan, canvasSize);
 
-            foreach (var annotation in pending.Surface.Annotations)
+            foreach (var annotation in photo.PointSource.Annotations)
             {
                 if (!annotation.IsPoint)
                     continue;
 
-                var projected = surfaceToOutput.TransformPoint(annotation.P1);
+                var pointInSurface = annotation.P1 + photo.PointOffset;
+                var projected = surfaceToOutput.TransformPoint(pointInSurface);
                 var centre = pending.Mapping.PointAims.TryGetValue(annotation.Id, out var aim) ? aim.Position * canvasSize : projected;
 
                 Matrix4x4 textureToNdc;
@@ -175,7 +179,7 @@ internal static class CalibrationOverlay
                 {
                     // Upright and a fixed size: wrong about the keystone and right about what the feature looks
                     // like. A collapsed pin is the state you are most likely to be in while repairing it.
-                    var inSurface = (annotation.P1 - surfaceMin) / surfaceSpan;
+                    var inSurface = (pointInSurface - surfaceMin) / surfaceSpan;
                     var featureUv = new Vector2(photo.Uv.X + uvSpan.X * inSurface.X, photo.Uv.Y + uvSpan.Y * (1 - inSurface.Y));
                     var pixelsPerV = 1 / MathF.Max(uvSpan.Y * photo.RadiusOfHeight, 0.0001f) * radius;
                     var pixelsPerU = pixelsPerV * (surfaceSpan.X / uvSpan.X) / (surfaceSpan.Y / uvSpan.Y);
@@ -259,17 +263,21 @@ internal static class CalibrationOverlay
                                   ? _emphasized.Value.Index
                                   : -1;
 
+        if (ProjectsPhoto(surface.Id))
+        {
+            var photo = _photo.Value;
+            foreach (var annotation in photo.PointSource.Annotations)
+            {
+                if (annotation.IsPoint)
+                    CollectPoint(annotation.Id, annotation.P1 + photo.PointOffset, mapping, surfaceToOutput, canvasSize, blink);
+            }
+        }
+
         for (var i = 0; i < surface.Annotations.Count; i++)
         {
             var annotation = surface.Annotations[i];
-
             if (annotation.IsPoint)
-            {
-                if (ProjectsPhoto(surface.Id))
-                    CollectPoint(annotation, mapping, surfaceToOutput, canvasSize, blink);
-
                 continue;
-            }
 
             LineRectifier.IsHorizontal(annotation.P1, annotation.P2, out var deviation);
             var color = AlignmentColor(deviation).Rgba;
@@ -296,12 +304,13 @@ internal static class CalibrationOverlay
     /// The marks around a reference point's disc: an outline that says whether the point is set, a blinking one
     /// on the active point, a crosshair on the target, and an arrow to where the solved pin lands the point.
     /// </summary>
-    private static void CollectPoint(Annotation point, Surface.OutputMapping mapping, in Homography surfaceToOutput, Vector2 canvasSize, float blink)
+    private static void CollectPoint(Guid pointId, Vector2 pointInSurface, Surface.OutputMapping mapping, in Homography surfaceToOutput, Vector2 canvasSize,
+                                     float blink)
     {
         // Stored as a fraction of the canvas; this overlay is drawn in its pixels. A point the editor has not
         // seeded yet falls back to the pin, which is where the seed would land anyway.
-        var projected = surfaceToOutput.TransformPoint(point.P1);
-        var hasAim = mapping.PointAims.TryGetValue(point.Id, out var aim);
+        var projected = surfaceToOutput.TransformPoint(pointInSurface);
+        var hasAim = mapping.PointAims.TryGetValue(pointId, out var aim);
         var target = hasAim ? aim.Position * canvasSize : projected;
         var isSet = hasAim && aim.IsAimed;
         var photo = _photo.Value;
@@ -310,7 +319,7 @@ internal static class CalibrationOverlay
         var outlineWidth = isSet ? _setPointOutlineWidth : _pointOutlineWidth;
         AddRing(target, discRadius - _outlineOverlapWithDisc, outlineWidth + _outlineOverlapWithDisc, isSet ? _setPointOutlineColor : _pointOutlineColor);
 
-        if (point.Id == photo.ActivePointId)
+        if (pointId == photo.ActivePointId)
         {
             var white = UiColors.ForegroundFull.Rgba;
             AddRing(target, discRadius + outlineWidth, _activePointOutlineWidth, new Vector4(white.X, white.Y, white.Z, blink));
@@ -466,7 +475,8 @@ internal static class CalibrationOverlay
 
     private readonly record struct AimPoint(Guid SurfaceId, Vector2 InSurface);
 
-    private readonly record struct CalibrationPhoto(Guid SurfaceId, ShaderResourceView Srv, Vector4 Uv, float RadiusOfHeight, Guid ActivePointId);
+    private readonly record struct CalibrationPhoto(Guid SurfaceId, ShaderResourceView Srv, Vector4 Uv, float RadiusOfHeight, Guid ActivePointId,
+                                                    Surface PointSource, Vector2 PointOffset);
 
     private readonly record struct EmphasizedAnnotation(Guid SurfaceId, int Index);
 
