@@ -400,7 +400,6 @@ namespace T3.Editor.Gui.MagGraph.States
                           {
                               var sourceItem = context.ActiveItem;
                               Debug.Assert(sourceItem != null);
-                              Debug.Assert(sourceItem.OutputLines.Length > 0);
                               Debug.Assert(context.ActiveSourceOutputId != Guid.Empty);
 
                               // Click
@@ -608,13 +607,6 @@ namespace T3.Editor.Gui.MagGraph.States
                   Enter: InputPicking.Init,
                   Update: InputPicking.DrawHiddenInputSelector,
                   Exit: InputPicking.Reset
-                 );
-
-        internal static State<GraphUiContext> PickOutput
-            = new(
-                  Enter: OutputPicking.Init,
-                  Update => { }, //OutputPicking.DrawHiddenOutputSelector,
-                  Exit: OutputPicking.Reset
                  );
 
 

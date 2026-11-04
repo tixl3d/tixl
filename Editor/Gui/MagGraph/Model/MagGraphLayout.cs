@@ -635,7 +635,7 @@ internal sealed class MagGraphLayout
         var instance = item.Instance;
         Debug.Assert(instance != null && item.SymbolUi != null);
         int visibleIndex = 0;
-        item.HasHiddenOutputs = false;
+        List<int>? hiddenOutputIndices = null;
 
         for (var inputLineIndex = 0; inputLineIndex < instance.Inputs.Count; inputLineIndex++)
         {
@@ -807,7 +807,7 @@ internal sealed class MagGraphLayout
             var isConnected = connectedOutputs != null && connectedOutputs.Contains(outputHash2);
             if (outputIndex > 0 && !isConnected)
             {
-                item.HasHiddenOutputs = true;
+                (hiddenOutputIndices ??= []).Add(outputIndex);
                 continue;
             }
 
@@ -833,6 +833,7 @@ internal sealed class MagGraphLayout
         }
 
         // Fix height
+        item.HiddenOutputIndices = hiddenOutputIndices?.ToArray() ?? Array.Empty<int>();
 
         return visibleIndex;
     }

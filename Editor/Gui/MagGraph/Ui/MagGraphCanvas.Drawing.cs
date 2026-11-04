@@ -217,14 +217,21 @@ internal sealed partial class MagGraphView
                 // Dragging end to new target input...
                 if (tc.SourceItem != null)
                 {
-                    var sourcePos = new Vector2(tc.SourceItem.Area.Max.X,
-                                                tc.SourceItem.Area.Min.Y + MagGraphItem.GridSize.Y * (0.5f + tc.OutputLineIndex));
-                    if (tc.Style is MagGraphConnection.ConnectionStyles.BottomToTop or MagGraphConnection.ConnectionStyles.BottomToLeft)
+                    if (tc.SourceOutput != null && TryGetAdditionalOutputMarkerPosition(tc.SourceItem, tc.SourceOutput, out var markerPosition))
                     {
-                        sourcePos = new Vector2(sourcePos.X - (tc.SourceItem.Area.GetWidth() / 2.0f), tc.SourceItem.Area.Max.Y);
+                        sourcePosOnScreen = markerPosition;
                     }
+                    else
+                    {
+                        var sourcePos = new Vector2(tc.SourceItem.Area.Max.X,
+                                                    tc.SourceItem.Area.Min.Y + MagGraphItem.GridSize.Y * (0.5f + tc.OutputLineIndex));
+                        if (tc.Style is MagGraphConnection.ConnectionStyles.BottomToTop or MagGraphConnection.ConnectionStyles.BottomToLeft)
+                        {
+                            sourcePos = new Vector2(sourcePos.X - (tc.SourceItem.Area.GetWidth() / 2.0f), tc.SourceItem.Area.Max.Y);
+                        }
 
-                    sourcePosOnScreen = TransformPosition(sourcePos);
+                        sourcePosOnScreen = TransformPosition(sourcePos);
+                    }
 
                     if (_context.StateMachine.CurrentState == GraphStates.DragConnectionEnd
                         && InputSnapper.BestInputMatch.Item != null)
@@ -294,6 +301,8 @@ internal sealed partial class MagGraphView
             OutputSnapper.Update(_context);
             InputSnapper.Update(_context);
 
+            DrawPendingOutputConnection(drawList);
+
             _context.ConnectionHovering.PrepareNewFrame(_context);
             _context.Placeholder.Update(_context);
 
@@ -316,6 +325,37 @@ internal sealed partial class MagGraphView
 
             _context.StateMachine.UpdateAfterDraw(_context);
         }
+    }
+
+    /// <summary>
+    /// Shows the pending connection from an additional output to the open Symbol Browser placeholder.
+    /// The line drops from the output circle and turns into the vertical middle of the placeholder.
+    /// </summary>
+    private void DrawPendingOutputConnection(ImDrawListPtr drawList)
+    {
+        if (!_context.Placeholder.TryGetPendingOutputConnection(out var sourceItem, out var outputLine))
+            return;
+
+        var placeholder = _context.Placeholder.PlaceholderItem;
+        if (placeholder == null || sourceItem == null)
+            return;
+
+        if (!TryGetAdditionalOutputAnchorPosition(sourceItem, outputLine, out var sourcePosOnScreen))
+            return;
+
+        var placeholderMin = TransformPosition(placeholder.PosOnCanvas);
+        var placeholderMax = TransformPosition(placeholder.PosOnCanvas + placeholder.Size);
+        var targetPosOnScreen = new Vector2(placeholderMin.X, (placeholderMin.Y + placeholderMax.Y) * 0.5f);
+
+        var color = TypeUiRegistry.GetPropertiesForType(outputLine.Output.ValueType).Color.Fade(0.6f);
+        var thickness = 2 * CanvasScale;
+
+        var corner = new Vector2(sourcePosOnScreen.X, targetPosOnScreen.Y);
+        drawList.PathClear();
+        drawList.PathLineTo(sourcePosOnScreen);
+        drawList.PathLineTo(corner);
+        drawList.PathLineTo(targetPosOnScreen);
+        drawList.PathStroke(color, ImDrawFlags.None, thickness);
     }
 
     /// <summary>

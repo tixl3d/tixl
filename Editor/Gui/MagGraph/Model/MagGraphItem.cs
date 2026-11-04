@@ -110,7 +110,9 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
 
     public InputLine[] InputLines = Array.Empty<InputLine>();
     public OutputLine[] OutputLines = Array.Empty<OutputLine>();
-    public bool HasHiddenOutputs;
+
+    /** Indices into Instance.Outputs of outputs that have no row on the right edge, e.g. unconnected secondary outputs. */
+    public int[] HiddenOutputIndices = Array.Empty<int>();
 
     public enum InputLineStates
     {
@@ -273,6 +275,53 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
 
     public int GetOutputAnchorCount() => OutputLines.Length == 0 ? 0 : OutputLines.Length + 1;
 
+    /// <summary>
+    /// Resolves an output to the line used by output interactions. Outputs without a row get a
+    /// synthetic line so they can be clicked and dragged like the primary output. Its visible index
+    /// is the row the output will occupy once connected (additional outputs are appended below the
+    /// current rows), which is where an operator inserted from it gets snapped.
+    /// </summary>
+    public bool TryGetOutputLine(Guid outputId, out OutputLine outputLine)
+    {
+        foreach (var line in OutputLines)
+        {
+            if (line.Id != outputId)
+                continue;
+
+            outputLine = line;
+            return true;
+        }
+
+        outputLine = default;
+        var instance = Instance;
+        if (Variant != Variants.Operator || instance == null)
+            return false;
+
+        foreach (var outputIndex in HiddenOutputIndices)
+        {
+            if (outputIndex >= instance.Outputs.Count)
+                continue;
+
+            var output = instance.Outputs[outputIndex];
+            if (output.Id != outputId)
+                continue;
+
+            IOutputUi? outputUi = null;
+            SymbolUi?.OutputUis.TryGetValue(outputId, out outputUi);
+            outputLine = new OutputLine
+                             {
+                                 Id = outputId,
+                                 Output = output,
+                                 OutputUi = outputUi,
+                                 OutputIndex = outputIndex,
+                                 VisibleIndex = (int)MathF.Round(Size.Y / LineHeight),
+                                 ConnectionsOut = [],
+                             };
+            return true;
+        }
+
+        return false;
+    }
 
     /// <summary>
     /// Get input anchors with current position and orientation for drawing and snapping
