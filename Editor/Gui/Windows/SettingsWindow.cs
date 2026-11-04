@@ -214,11 +214,6 @@ internal sealed partial class SettingsWindow : Window
                                                       "This might prevent unintended user interactions while live performing with [KeyInput] operators.",
                                                       UserSettings.Defaults.EnableKeyboardShortCuts);
 
-                    changed |= FormInputs.AddCheckBox("Use Space to edit parameters",
-                                                      ref UserSettings.Config.UseSpaceToEditParameters,
-                                                      "Space opens the parameter popover instead of toggling playback. Playback moves to Shift+Space. This applies to every key map.",
-                                                      UserSettings.Defaults.UseSpaceToEditParameters);
-
                     changed |= FormInputs.AddCheckBox("Display names with spaces",
                                                       ref UserSettings.Config.AddSpacesToParameterNames,
                                                       """

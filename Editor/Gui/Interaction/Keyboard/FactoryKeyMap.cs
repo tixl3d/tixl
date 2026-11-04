@@ -70,7 +70,7 @@ internal static class FactoryKeyMap
                 new(UserActions.OpenOperator, new KeyCombination(Key.CursorDown, alt: true)),
                 new(UserActions.CloseOperator, new KeyCombination(Key.CursorUp, alt: true)),
                 new(UserActions.RenameChild, new KeyCombination(Key.Return)),
-                new(UserActions.EditParameter, new KeyCombination(Key.S, alt: true)),
+                new(UserActions.EditParameter, new KeyCombination(Key.S)),
                 new(UserActions.AlignSelectionLeft, new KeyCombination(Key.A, alt:true)),
 
                 // Navigation

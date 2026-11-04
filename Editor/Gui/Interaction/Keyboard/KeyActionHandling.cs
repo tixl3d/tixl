@@ -15,9 +15,13 @@ internal static class KeyActionHandling
     private static bool _initialized;
     private static bool _anyKeysPressed;
     private static bool _arrowKeysClaimedThisFrame;
+    private static bool _cameraKeysClaimedThisFrame;
 
     /** Holds the previous frame's claims, so the result doesn't depend on the order windows are drawn in. */
     internal static bool AreArrowKeysClaimed { get; private set; }
+
+    /** Previous frame's claim, like <see cref="AreArrowKeysClaimed"/>. */
+    internal static bool AreCameraKeysClaimed { get; private set; }
 
     /// <summary>
     /// Keeps the arrow keys from reaching graph navigation. Windows that read the arrow keys themselves call this
@@ -28,10 +32,21 @@ internal static class KeyActionHandling
         _arrowKeysClaimedThisFrame = true;
     }
 
+    /// <summary>
+    /// Keeps letter keys shared with the WASD camera, such as S for the parameter popover, from reaching the graph.
+    /// The camera calls this every frame while it can be steered by keyboard.
+    /// </summary>
+    internal static void ClaimCameraKeys()
+    {
+        _cameraKeysClaimedThisFrame = true;
+    }
+
     internal static void InitializeFrame()
     {
         AreArrowKeysClaimed = _arrowKeysClaimedThisFrame;
         _arrowKeysClaimedThisFrame = false;
+        AreCameraKeysClaimed = _cameraKeysClaimedThisFrame;
+        _cameraKeysClaimedThisFrame = false;
         OperatorKeyboardCapture.BeginFrame(ImGui.GetIO().WantTextInput);
 
         if (!_initialized)
@@ -60,31 +75,12 @@ internal static class KeyActionHandling
             return false;
         
         var io = ImGui.GetIO();
-        var spaceEditsParameters = UserSettings.Config.UseSpaceToEditParameters;
         var isKeyboardCapturedByOperator = OperatorKeyboardCapture.CapturedBy != Guid.Empty;
-
-        if (spaceEditsParameters && !isKeyboardCapturedByOperator)
-        {
-            var spaceBinding = action switch
-                                   {
-                                       UserActions.EditParameter  => _spaceEditsParameterBinding,
-                                       UserActions.PlaybackToggle => _shiftSpaceTogglesPlaybackBinding,
-                                       _                          => null
-                                   };
-
-            if (spaceBinding != null && spaceBinding.IsContextValid() && spaceBinding.IsTriggered(io))
-                return true;
-        }
 
         // Todo: Refactor this with lookup list
         foreach (var binding in KeyMapSwitching.CurrentKeymap.Bindings)
         {
             if (binding.Action != action)
-                continue;
-
-            if (spaceEditsParameters
-                && action == UserActions.PlaybackToggle
-                && binding.KeyCombination is { Key: Key.Space, Ctrl: false, Alt: false, Shift: false })
                 continue;
 
             if (!binding.IsContextValid())
@@ -103,15 +99,6 @@ internal static class KeyActionHandling
 
     internal static string ListShortcuts(this UserActions action)
     {
-        if (UserSettings.Config.UseSpaceToEditParameters)
-        {
-            if (action == UserActions.EditParameter)
-                return _spaceLabel;
-
-            if (action == UserActions.PlaybackToggle)
-                return _shiftSpaceLabel;
-        }
-
         var currentKeymapShortCutsLabelsForActions = KeyMapSwitching.CurrentKeymap.ShortCutsLabelsForActions;
         var index = (int)action;
         if (index >= currentKeymapShortCutsLabelsForActions.Length)
@@ -222,10 +209,6 @@ internal static class KeyActionHandling
         RegisterActionsFlags(UserActions.CameraFocusSelection, Flags.NeedsWindowHover);
         RegisterActionsFlags(UserActions.RenderAnimation, Flags.KeyPressOnly);
 
-        // Created here because a binding reads its action's flags when constructed
-        _spaceEditsParameterBinding = new KeyBinding(UserActions.EditParameter, new KeyCombination(Key.Space));
-        _shiftSpaceTogglesPlaybackBinding = new KeyBinding(UserActions.PlaybackToggle, new KeyCombination(Key.Space, shift: true));
-
         return;
 
         void RegisterActionsFlags(UserActions action, Flags flags)
@@ -241,10 +224,6 @@ internal static class KeyActionHandling
         }
     }
 
-    private static KeyBinding? _spaceEditsParameterBinding;
-    private static KeyBinding? _shiftSpaceTogglesPlaybackBinding;
-    private static readonly string _spaceLabel = new KeyCombination(Key.Space).ToString();
-    private static readonly string _shiftSpaceLabel = new KeyCombination(Key.Space, shift: true).ToString();
 
     private const int UserActionsCount = (int)UserActions.__Count;
     private static readonly Flags[] _flagsForActions = new Flags[UserActionsCount];

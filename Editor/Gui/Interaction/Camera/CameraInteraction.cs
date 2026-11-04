@@ -442,7 +442,8 @@ internal sealed class CameraInteraction
 
         if (!ImGui.IsWindowFocused(ImGuiFocusedFlags.ChildWindows))
             return false;
-        
+
+        KeyActionHandling.ClaimCameraKeys();
 
         var acc = CameraInteractionParameters.CameraAcceleration * UserSettings.Config.CameraSpeed * _deltaTime * 60;
         var wasModified = false;

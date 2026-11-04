@@ -29,7 +29,7 @@ The following is a list of the **default keyboard** short-cuts. With v4.0.4 you 
 | Open Operator             | I                                                    |
 | Close Operator            | U                                                    |
 | Rename Child              | Enter                                                |
-| Edit Parameters           | Alt + S, see below                                   |
+| Edit Parameters           | S, see below                                         |
 | Navigate Backwards        | Alt + Left                                           |
 | Navigate Forward          | Alt + Right                                          |
 | Select to Above / Below   | Up / Down                                            |
@@ -103,9 +103,7 @@ View bookmarks (Ctrl) remember a graph view. Operator bookmarks remember an oper
 
 ## Editing Parameters with the Keyboard
 
-Press `Alt + S` with an operator selected to open the **parameter popover** at the bottom of the graph. This works from any window, as long as no dialog is open and no text field is active. The arrow keys also reach the graph from any window, except windows that use them themselves, such as snapshot controls.
-
-If you edit parameters a lot, turn on **Use Space to edit parameters** in the *Interface* section of the *Settings*: `Space` opens the popover and `Shift + Space` toggles playback.
+Press `S` with an operator selected to open the **parameter popover** at the bottom of the graph. This works from any window, as long as no dialog is open and no text field is active. Over the Output Window, while it has the focus and shows a camera you can move, `S` moves the camera back instead. The arrow keys also reach the graph from any window, except windows that use them themselves, such as snapshot controls.
 
 The popover lists the operator's parameters with their values. Animated values are orange, connected ones blue, and changed values are brighter than defaults. The popover works in Focus Mode too, where the Parameter Window is hidden.
 

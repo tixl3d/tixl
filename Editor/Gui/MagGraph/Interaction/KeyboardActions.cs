@@ -185,7 +185,7 @@ internal static class KeyboardActions
                     MoveSelectionAndTakeFocus(context, SelectionNavigation.Directions.Left);
             }
 
-            if (UserActions.EditParameter.Triggered())
+            if (!KeyActionHandling.AreCameraKeysClaimed && UserActions.EditParameter.Triggered())
             {
                 ParameterPopover.Open(context);
                 if (ParameterPopover.IsOpen)

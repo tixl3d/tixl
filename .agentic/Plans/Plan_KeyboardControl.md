@@ -98,7 +98,7 @@ change along chains — leave it as is.
 - ~~Graph shortcuts should work whenever no other window holds keyboard focus~~ — done: when no window is
   focused (and no popup, active item or mouse button), the visible graph window of the focused project view takes
   the focus back (`GraphWindow`).
-- Graph navigation from any window — done: arrows and the popover key reach the focused view's graph unless a popup or active item blocks them. Windows reading arrows call `KeyActionHandling.ClaimArrowKeys()`; the first use moves focus to the graph, and closing the popover returns it. The popover is on Alt+S (S collides with WASD), or Space with Shift+Space for playback through the `UseSpaceToEditParameters` setting, a runtime override in `KeyActionHandling` that applies to every keymap. "Space marks" needs another key while it is on.
+- Graph navigation from any window — done: arrows reach the focused view's graph unless a popup or active item blocks them. Windows reading arrows call `KeyActionHandling.ClaimArrowKeys()`; the first use moves focus to the graph. The popover is on S and works from any window too. `CameraInteraction` calls `KeyActionHandling.ClaimCameraKeys()` while its window is hovered and focused, so S over a steerable camera stays WASD. (Alt+S and a Space setting were tried and reverted.) The same claim could resolve the F and C overlaps.
 - Space vs Tab in the symbol browser (presets) — consider switching it to Tab as well.
   - Done: strings. Multi-selection moved to `Plan_MultiSelectionEditing.md`.
 
@@ -125,7 +125,7 @@ The factory keymap gets a written convention; every new binding takes its key fr
 | none | main action in context. Reserved: playback (Space, J K L), Esc, Tab, Enter, Del, and mode keys (`s`, `v`, `p`, `t`) |
 | **Shift** | variant / store / reverse (extend selection, Shift+digit stores a bookmark, Shift+Tab inserts upstream, minor toggles like Shift+D disable). During continuous manipulation: **precision** (×0.1, snapping inverted while dragging) |
 | **Ctrl** (Cmd on macOS) | app/document commands (save, copy, undo, duplicate); Ctrl+P command palette. During continuous manipulation: **coarse** (×10) |
-| **Alt** | **navigation**: Alt+←/→ history (unchanged), Alt+↑/↓ parent composition / into the active op (I/U stay as aliases). Exception: Alt+W/A/S/D align the selection top/left/bottom/right, as in Figma. Only Alt+A (align left) exists; Alt+S is the parameter popover and Alt+D is disconnect, so adding bottom/right alignment needs those moved first |
+| **Alt** | **navigation**: Alt+←/→ history (unchanged), Alt+↑/↓ parent composition / into the active op (I/U stay as aliases). Exception: Alt+W/A/S/D align the selection top/left/bottom/right, as in Figma. Only Alt+A (align left) exists; Alt+S is free, Alt+D is disconnect and needs moving before align right is added |
 | digits | 1–9 jump to op bookmark, Shift+1–9 store; 0 = slot for popped-out ops |
 | F-keys | F1–F10 load layout, Ctrl+F1–F10 save; F11 fullscreen, F12 focus mode |
 | tap vs hold | tap latches, hold is momentary while the key is down (`p` pin/peek, `t` scrub) |

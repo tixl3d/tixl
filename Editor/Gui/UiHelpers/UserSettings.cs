@@ -138,7 +138,6 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         public int TargetFrameRate = 0;
 
         public bool EnableKeyboardShortCuts = true;
-        public bool UseSpaceToEditParameters;
 
         public GraphStyles GraphStyle = GraphStyles.Magnetic;
 
