@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "8e6ed99c-a3e0-42c0-9f81-a89b1e340757"/*Sketch*/,
-  "Description": "Draws freehand sketches over the output as annotations or storyboards.\n\nSketches are stored in pages that are bound to the time at which they were drawn, so a storyboard or frame-by-frame animation can be created by drawing at different times. Strokes are saved automatically to a file.\n\nWhile the operator is selected and the mouse is over the output window, it takes over the keyboard shortcuts (Ctrl shortcuts like undo keep working):\n- P: draw mode (Shift+drag continues the last stroke as a straight line)\n- E: erase mode, also erases the selection\n- S: lasso select (Shift adds to the selection), Esc clears it\n- G / R: move / scale the selection, click or Enter applies, Esc cancels\n- C: copy the selection, or the whole page if nothing is selected\n- X: cut the selection, or the whole page\n- V: paste and select the copied strokes, also onto an empty frame or into another sketch\n- 1-9: select brush size, [ / ] make it smaller / larger (ß / ´ on German keyboards), Ctrl+drag left or right resizes it\n- K: color square around the current color: horizontal is opacity, vertical is brightness, Shift with horizontal movement changes the hue. Click or K applies, Esc cancels. With a selection it recolors the selection, otherwise it sets the stroke color.\n\nChanging the stroke color while strokes are selected recolors them. All edits can be undone with Ctrl+Z.\n\nAKA: draw, paint, annotate, storyboard, doodle",
+  "Description": "Draws freehand sketches over the output as annotations or storyboards.\n\nSketches are stored in pages that are bound to the time at which they were drawn, so a storyboard or frame-by-frame animation can be created by drawing at different times. Strokes are saved automatically to a file.\n\nWhile the operator is selected and the mouse is over the output window, it takes over the keyboard shortcuts (Ctrl shortcuts like undo keep working):\n- B: brush mode (Shift+drag continues the last stroke as a straight line)\n- F: fill mode, each stroke becomes a filled shape in the stroke color\n- E: erase mode, also erases the selection\n- S: lasso select (Shift adds to the selection), Esc clears it\n- G / R: move / scale the selection, click or Enter applies, Esc cancels\n- C: copy the selection, or the whole page if nothing is selected\n- X: cut the selection, or the whole page\n- V: paste and select the copied strokes, also onto an empty frame or into another sketch\n- 1-9: select brush size, [ / ] make it smaller / larger (ß / ´ on German keyboards), Ctrl+drag resizes it (right or up grows)\n- Q: color square around the current color: horizontal is opacity, vertical is brightness, Shift with horizontal movement changes the hue. Click or Q applies, Esc cancels; hold Q, move and release to apply in one go. With a selection it recolors the selection, otherwise it sets the stroke color.\n\nChanging the stroke color while strokes are selected recolors them. All edits can be undone with Ctrl+Z.\n\nAKA: draw, paint, annotate, storyboard, doodle",
   "SymbolTags": "64",
   "InputUis": [
     {
@@ -112,6 +112,22 @@
     }
   ],
   "SymbolChildUis": [
+    {
+      "ChildId": "f7a2c9e1-3b5d-4e8f-a6c4-9d1e2b7f5a38"/*Fills*/,
+      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "Position": {
+        "X": 680.0,
+        "Y": 139.09628
+      }
+    },
+    {
+      "ChildId": "c4e8b2d6-9a1f-4c3e-b7d5-2e6f8a1c9b47"/*Draw Fills*/,
+      "SymbolName": "Lib.point._experimental._DrawPointTriangles",
+      "Position": {
+        "X": 680.0,
+        "Y": 200.0
+      }
+    },
     {
       "ChildId": "023cdfc3-edaa-499e-9ff2-0afb6fed08ce",
       "SymbolName": "Lib.point.generate.RadialPoints",

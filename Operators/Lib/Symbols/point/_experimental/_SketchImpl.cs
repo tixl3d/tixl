@@ -1,4 +1,5 @@
 #nullable enable
+using LibTessDotNet;
 using Newtonsoft.Json;
 using T3.Core.Animation;
 using T3.Core.DataTypes.Vector;
@@ -13,6 +14,7 @@ using T3.SystemUi;
 namespace Lib.point._experimental;
 
 [Guid("b238b288-6e9b-4b91-bac9-3d7566416028")]
+[ExportDependencies("LibTessDotNet.dll")]
 internal sealed class _SketchImpl : Instance<_SketchImpl>
 {
     [Output(Guid = "EB2272B3-8B4A-46B1-A193-8B10BDC2B038")]
@@ -34,12 +36,17 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
     [Output(Guid = "6C3E9D41-2B7A-4F0E-9A51-8D2F4C7B1E63")]
     public readonly Slot<StructuredList> OverlayPoints = new();
 
+    /** Filled shapes of the active page, three points per triangle. */
+    [Output(Guid = "A41F7C2E-5D83-4B96-8E0A-3C9B6D2F7E15")]
+    public readonly Slot<StructuredList> FillTriangles = new();
+
     public _SketchImpl()
     {
         OutPages.UpdateAction += Update;
         CursorPosInWorld.UpdateAction += Update;
         StatusMessage.UpdateAction += Update;
         OverlayPoints.UpdateAction += Update;
+        FillTriangles.UpdateAction += Update;
 
         _keyframeSync = new KeyframeSync(this);
         _paging = new Paging(this);
@@ -116,9 +123,14 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
 
         // Switch colors
         var colorMode = ColorMode.GetEnumValue<ColorModes>(context);
-        var isColorDirty = StrokeColor.IsDirty;
+        // Compares values instead of the dirty flag: the color square sets the brush color right away, and the
+        // parameter it writes only reaches this input later, so a stale value must not overwrite it.
         var color = StrokeColor.GetValue(context);
-        _strokeColor = color;
+        var isColorDirty = !_hasReadStrokeColor || color != _lastReadStrokeColor;
+        _lastReadStrokeColor = color;
+        if (isColorDirty)
+            _strokeColor = color;
+
         var colorNeedsUpdate = colorMode != _colorMode || isColorDirty;
         if (colorNeedsUpdate)
         {
@@ -153,7 +165,7 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
                                  TransformModes.Scale => "SCALE (CLICK TO APPLY / ESC TO CANCEL)",
                                  _ => _drawMode switch
                                           {
-                                              DrawModes.Draw  => "PEN",
+                                              DrawModes.Draw  => _isFillBrush ? "FILL" : "PEN",
                                               DrawModes.Erase => "ERASE",
                                               DrawModes.Lasso => "LASSO",
                                               _               => "VIEW",
@@ -169,6 +181,8 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
             _lastModificationTime = Playback.RunTimeInSecs;
             _sketchRevision++;
         }
+
+        FillTriangles.Value = BuildFillTriangles();
 
         var needsSave = _lastSavedSketchVersion < _sketchRevision;
 
@@ -257,14 +271,22 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
         for (var index = 0; index < _numberKeys.Length; index++)
         {
             if (WasKeyPressed(_numberKeys[index]))
-                _brushSize = (index * index + 0.5f) * 0.1f;
+                SetBrushSize((index * index + 0.5f) * 0.1f);
         }
 
         if (WasKeyPressed(Key.SquareBracketLeft))
-            _brushSize = Math.Clamp(_brushSize / BrushSizeStepFactor, MinBrushSize, MaxBrushSize);
+            SetBrushSize(_brushSize / BrushSizeStepFactor);
 
         if (WasKeyPressed(Key.SquareBracketRight))
-            _brushSize = Math.Clamp(_brushSize * BrushSizeStepFactor, MinBrushSize, MaxBrushSize);
+            SetBrushSize(_brushSize * BrushSizeStepFactor);
+    }
+
+    /** Also writes the Stroke Size parameter, so it shows the size in use and is saved with the project. */
+    private void SetBrushSize(float size)
+    {
+        _brushSize = Math.Clamp(size, MinBrushSize, MaxBrushSize);
+        if (Parent?.Inputs.FirstOrDefault(i => i.Id == _strokeSizeInputId) is InputSlot<float> strokeSizeInput)
+            strokeSizeInput.SetTypedInputValue(_brushSize);
     }
 
     private bool HandleShortcuts(EvaluationContext context)
@@ -280,7 +302,19 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
                 return true;
             }
 
-            if (WasKeyPressed(Key.Return) || WasKeyPressed(Key.K))
+            // Hold Q, move and release applies; a tap without moving keeps the square open.
+            if (_isPickerKeyHeld && !KeyHandler.PressedKeys[(int)Key.Q])
+            {
+                _isPickerKeyHeld = false;
+                var movedDistance = Vector2.Distance(MousePos.GetValue(context), _pickerStartMousePos);
+                if (movedDistance > MinPickerMoveForHoldToApply)
+                {
+                    ConfirmColorPicking();
+                    return true;
+                }
+            }
+
+            if (WasKeyPressed(Key.Return) || WasKeyPressed(Key.Q))
             {
                 ConfirmColorPicking();
                 return true;
@@ -306,9 +340,10 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
             return false;
         }
 
-        if (WasKeyPressed(Key.P))
+        if (WasKeyPressed(Key.B) || WasKeyPressed(Key.F))
         {
             _drawMode = DrawModes.Draw;
+            _isFillBrush = WasKeyPressed(Key.F);
             ClearSelection();
             return true;
         }
@@ -337,7 +372,7 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
             return false;
         }
 
-        if (WasKeyPressed(Key.K))
+        if (WasKeyPressed(Key.Q))
         {
             StartColorPicking(context);
             return false;
@@ -695,8 +730,9 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
 
     #region color picking
     /// <summary>
-    /// Opens a square centered on the current color: horizontal is opacity, vertical is brightness, Shift with
-    /// horizontal movement changes the hue. With a selection, the selection's color is edited live.
+    /// Opens a square placed so the cursor starts on the current color: horizontal is opacity, vertical runs from
+    /// black over the color to white, Shift with horizontal movement changes the hue. With a selection, the
+    /// selection's color is edited live.
     /// </summary>
     private void StartColorPicking(EvaluationContext context)
     {
@@ -712,11 +748,14 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
             _colorPickerEdit = BeginEdit();
         }
 
-        new Color(baseColor).GetHSV(out _pickerHue, out _pickerSaturation, out _pickerBaseValue);
+        new Color(baseColor).GetHSV(out _pickerHue, out _pickerSaturation, out var value);
+        _pickerStartTone = value < 1 ? value / 2 : 0.5f;
         _pickerBaseColor = baseColor;
         _pickedColor = baseColor;
         _pickerAnchorMousePos = MousePos.GetValue(context);
         _lastPickerMousePos = _pickerAnchorMousePos;
+        _pickerStartMousePos = _pickerAnchorMousePos;
+        _isPickerKeyHeld = true;
         _isPickingColor = true;
     }
 
@@ -734,8 +773,8 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
             _pickerAnchorMousePos.X += mouseDelta.X;
         }
 
-        var (opacityOffset, brightnessOffset) = GetPickerOffsets(mousePos);
-        _pickedColor = GetPickerColor(opacityOffset, brightnessOffset);
+        var (opacity, tone) = GetPickerCoordinates(mousePos);
+        _pickedColor = GetPickerColor(opacity, tone);
 
         if (_colorPickerEdit != null)
             RecolorSelection(_pickedColor);
@@ -756,6 +795,8 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
             return;
         }
 
+        _strokeColor = _pickedColor;
+
         // Writes the parameter, so the picked color shows in the parameter window and is saved with the project.
         if (Parent?.Inputs.FirstOrDefault(i => i.Id == _strokeColorInputId) is InputSlot<Vector4> strokeColorInput)
             strokeColorInput.SetTypedInputValue(_pickedColor);
@@ -769,32 +810,33 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
         edit?.Revert(this);
     }
 
-    /** Offsets of the cursor from the square's center in -1..1, as opacity (horizontal) and brightness (vertical). */
-    private (float Opacity, float Brightness) GetPickerOffsets(Vector2 mousePos)
+    /** The square's center, offset from where it was opened so that point shows the starting color. */
+    private Vector2 GetPickerCenterInClipSpace()
     {
-        var offsetInClipSpace = MouseToClipSpace(mousePos) - MouseToClipSpace(_pickerAnchorMousePos);
-        var opacity = Math.Clamp(offsetInClipSpace.X / (PickerHalfHeightInClipSpace / _aspectRatio), -1, 1);
-        var brightness = Math.Clamp(offsetInClipSpace.Y / PickerHalfHeightInClipSpace, -1, 1);
-        return (opacity, brightness);
+        var halfWidth = PickerHalfHeightInClipSpace / _aspectRatio;
+        var offset = new Vector2((0.5f - _pickerBaseColor.W) * 2 * halfWidth,
+                                 (0.5f - _pickerStartTone) * 2 * PickerHalfHeightInClipSpace);
+        return MouseToClipSpace(_pickerAnchorMousePos) + offset;
     }
 
-    /** Upwards the color fades to white, downwards to black, so the top edge is a tint and the bottom a shade. */
-    private Vector4 GetPickerColor(float opacityOffset, float brightnessOffset)
+    /** The cursor's position in the square, as opacity (horizontal) and tone (vertical), both 0..1. */
+    private (float Opacity, float Tone) GetPickerCoordinates(Vector2 mousePos)
     {
-        var value = BlendFromCenter(_pickerBaseValue, brightnessOffset);
-        var saturation = brightnessOffset > 0
-                             ? MathUtils.Lerp(_pickerSaturation, 0, brightnessOffset)
+        var halfWidth = PickerHalfHeightInClipSpace / _aspectRatio;
+        var offsetInClipSpace = MouseToClipSpace(mousePos) - GetPickerCenterInClipSpace();
+        var opacity = Math.Clamp(offsetInClipSpace.X / (2 * halfWidth) + 0.5f, 0, 1);
+        var tone = Math.Clamp(offsetInClipSpace.Y / (2 * PickerHalfHeightInClipSpace) + 0.5f, 0, 1);
+        return (opacity, tone);
+    }
+
+    /** The lower half darkens the color to black, the upper half fades it to white. */
+    private Vector4 GetPickerColor(float opacity, float tone)
+    {
+        var value = tone < 0.5f ? tone * 2 : 1;
+        var saturation = tone > 0.5f
+                             ? MathUtils.Lerp(_pickerSaturation, 0, (tone - 0.5f) * 2)
                              : _pickerSaturation;
-        var alpha = BlendFromCenter(_pickerBaseColor.W, opacityOffset);
-        return Color.FromHSV(_pickerHue, saturation, value, alpha).Rgba;
-    }
-
-    /** The center keeps the base value; the edges reach 0 and 1, so small moves stay precise near the current color. */
-    private static float BlendFromCenter(float baseValue, float offset)
-    {
-        return offset < 0
-                   ? MathUtils.Lerp(baseValue, 0, -offset)
-                   : MathUtils.Lerp(baseValue, 1, offset);
+        return Color.FromHSV(_pickerHue, saturation, value, opacity).Rgba;
     }
 
     private bool RecolorSelection(Vector4 color)
@@ -878,7 +920,7 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
 
     private void AddColorPickerToOverlay(EvaluationContext context)
     {
-        var center = MouseToClipSpace(_pickerAnchorMousePos);
+        var center = GetPickerCenterInClipSpace();
         var halfHeight = PickerHalfHeightInClipSpace;
         var halfWidth = halfHeight / _aspectRatio;
         var bandHeight = 2 * halfHeight / PickerBandCount;
@@ -887,11 +929,11 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
         var bandScale = bandHeight / 0.2f;
         for (var bandIndex = 0; bandIndex < PickerBandCount; bandIndex++)
         {
-            var brightnessOffset = -1 + (bandIndex + 0.5f) * 2 / PickerBandCount;
-            var y = center.Y + brightnessOffset * halfHeight;
+            var tone = (bandIndex + 0.5f) / PickerBandCount;
+            var y = center.Y + (tone * 2 - 1) * halfHeight;
             for (var column = -1; column <= 1; column++)
             {
-                var color = GetPickerColor(column, brightnessOffset);
+                var color = GetPickerColor((column + 1) * 0.5f, tone);
                 AddOverlayPoint(ClipSpaceToWorld(context, new Vector2(center.X + column * halfWidth, y)), color, bandScale);
             }
 
@@ -946,6 +988,102 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
     private static Vector3 ClipSpaceToWorld(EvaluationContext context, Vector2 posInClipSpace)
     {
         return CalcPosInWorld(context, new Vector2(posInClipSpace.X / 2 + 0.5f, 0.5f - posInClipSpace.Y / 2));
+    }
+    #endregion
+
+    #region fills
+    private static bool IsFillPoint(in Point point) => point.F1 < 0 && !Point.IsSeparator(point);
+
+    /// <summary>
+    /// Tessellates every fill stroke of the active page into triangles. Only runs when the page or the sketch
+    /// changed, so it allocates while drawing but not while idle.
+    /// </summary>
+    private StructuredList BuildFillTriangles()
+    {
+        var page = _paging.ActivePage;
+        if (page == null)
+            return _emptyFill;
+
+        if (page == _filledPage && _sketchRevision == _filledSketchRevision)
+            return _fillCount == 0 ? _emptyFill : _fillPoints;
+
+        _filledPage = page;
+        _filledSketchRevision = _sketchRevision;
+        _fillCount = 0;
+
+        var points = page.PointsList.TypedElements;
+        // While drawing, the tail point that follows the cursor sits at the write index.
+        var count = Math.Min(page.WriteIndex + (_hasTailPoint ? 1 : 0), points.Length);
+        var runStart = -1;
+        for (var index = 0; index <= count; index++)
+        {
+            var isInRun = index < count && IsFillPoint(points[index]);
+            if (isInRun)
+            {
+                if (runStart < 0)
+                    runStart = index;
+
+                continue;
+            }
+
+            if (runStart >= 0 && index - runStart >= 3)
+                AddFillTriangles(points, runStart, index - runStart);
+
+            runStart = -1;
+        }
+
+        if (_fillCount == 0)
+            return _emptyFill;
+
+        if (_fillPoints.NumElements != _fillCount)
+            _fillPoints.SetLength(_fillCount);
+
+        Array.Copy(_fillBuffer, _fillPoints.TypedElements, _fillCount);
+        return _fillPoints;
+    }
+
+    /** Non-zero winding, so a shape that crosses itself is filled solid like in other drawing apps. */
+    private void AddFillTriangles(Point[] points, int start, int length)
+    {
+        var contour = new ContourVertex[length];
+        for (var index = 0; index < length; index++)
+        {
+            var position = points[start + index].Position;
+            contour[index] = new ContourVertex(new Vec3(position.X, position.Y, position.Z));
+        }
+
+        var tess = new Tess();
+        tess.AddContour(contour, ContourOrientation.Original);
+        tess.Tessellate(WindingRule.NonZero, ElementType.Polygons, 3);
+
+        var color = points[start].Color;
+        var vertices = tess.Vertices;
+        var elements = tess.Elements;
+        for (var triangleIndex = 0; triangleIndex < tess.ElementCount; triangleIndex++)
+        {
+            var i0 = elements[triangleIndex * 3];
+            var i1 = elements[triangleIndex * 3 + 1];
+            var i2 = elements[triangleIndex * 3 + 2];
+            if (i0 == Tess.Undef || i1 == Tess.Undef || i2 == Tess.Undef)
+                continue;
+
+            AddFillVertex(vertices[i0].Position, color);
+            AddFillVertex(vertices[i1].Position, color);
+            AddFillVertex(vertices[i2].Position, color);
+        }
+    }
+
+    private void AddFillVertex(Vec3 position, Vector4 color)
+    {
+        if (_fillCount >= _fillBuffer.Length)
+            Array.Resize(ref _fillBuffer, _fillBuffer.Length * 2);
+
+        _fillBuffer[_fillCount++] = new Point
+                                        {
+                                            Position = new Vector3(position.X, position.Y, position.Z),
+                                            Color = color,
+                                            Scale = Vector3.One,
+                                        };
     }
     #endregion
 
@@ -1016,7 +1154,7 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
             // axes feel alike; exponential, so the same distance feels alike for small and large brushes.
             var dragDistance = (mousePos.X - _brushResizeStartMousePos.X) * _aspectRatio - (mousePos.Y - _brushResizeStartMousePos.Y);
             var scale = MathF.Exp(dragDistance * BrushResizeSpeed);
-            _brushSize = Math.Clamp(_brushSizeAtResizeStart * scale, MinBrushSize, MaxBrushSize);
+            SetBrushSize(_brushSizeAtResizeStart * scale);
             visibleBrushSize = _drawMode == DrawModes.Erase ? _brushSize * 4 : _brushSize;
             posInWorld = _brushResizeAnchorPos;
             return false;
@@ -1156,7 +1294,9 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
                         {
                             Position = posInWorld,
                             Color = _strokeColor,
-                            Scale = Vector3.One * (visibleBrushSize / 2 + 0.002f),
+                            // A thin outline gives the filled shape antialiased edges.
+                            Scale = Vector3.One * (_isFillBrush ? FillOutlineScale : visibleBrushSize / 2 + 0.002f),
+                            F1 = _isFillBrush ? FillStrokeMarker : 1,
                             F2 = 0, // Not selected by default
                         });
         AppendPoint(Point.Separator(), advanceIndex: false);
@@ -1305,7 +1445,7 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
     private Vector2 _brushResizeStartMousePos;
     private float _brushSizeAtResizeStart;
     private Vector3 _brushResizeAnchorPos;
-    private const float BrushResizeSpeed = 2.5f;
+    private const float BrushResizeSpeed = 5f;
     private const float BrushSizeStepFactor = 1.25f;
     private const float MinBrushSize = 0.02f;
     private const float MaxBrushSize = 20f;
@@ -1314,12 +1454,16 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
     private SketchEdit? _colorPickerEdit;
     private Vector2 _pickerAnchorMousePos;
     private Vector2 _lastPickerMousePos;
+    private Vector2 _pickerStartMousePos;
+    private bool _isPickerKeyHeld;
+    private const float MinPickerMoveForHoldToApply = 0.01f;
     private Vector4 _pickerBaseColor;
     private Vector4 _pickedColor;
     private float _pickerHue;
     private float _pickerSaturation;
-    private float _pickerBaseValue;
+    private float _pickerStartTone;
     private bool _hasReadStrokeColor;
+    private Vector4 _lastReadStrokeColor;
     private float _aspectRatio = 1;
     private const float PickerHalfHeightInClipSpace = 0.25f;
     private const int PickerBandCount = 64;
@@ -1333,6 +1477,16 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
     private readonly StructuredList<Point> _emptyOverlay = new(1);
     private int _overlayCount;
     private int _lastOverlayCount;
+
+    private bool _isFillBrush;
+    private const float FillStrokeMarker = -1;
+    private const float FillOutlineScale = 0.012f;
+    private Point[] _fillBuffer = new Point[3000];
+    private readonly StructuredList<Point> _fillPoints = new(3);
+    private readonly StructuredList<Point> _emptyFill = new(1);
+    private int _fillCount;
+    private Page? _filledPage;
+    private int _filledSketchRevision = -1;
 
     private bool _isLassoActive;
     private readonly List<Vector2> _lassoPointsInClipSpace = new(256);
@@ -1576,6 +1730,7 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
     
     private readonly Guid _pathPathInputId = new("2ded8235-157d-486b-a997-87d09d18f998");
     private readonly Guid _strokeColorInputId = new("31f3942e-bac5-407f-ad44-6d09920754d9");
+    private readonly Guid _strokeSizeInputId = new("1c5d0d86-c000-449e-903a-3212d19d8e1d");
     private readonly Guid _overrideKeyframeIndexInputId = new("37093302-053a-47b2-ace6-b9d310d3f4b7");
 
     private readonly int[] _numberKeys =
