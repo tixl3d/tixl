@@ -360,24 +360,16 @@ internal static partial class CustomComponents
             _projectsForDropdown.AddRange(EditableSymbolProject.AllProjects);
             _projectsForDropdown.Sort(_projectDropdownOrder);
 
-            var drewReadOnlyLabel = false;
+            var drewBuiltInLabel = false;
             foreach (var project in _projectsForDropdown)
             {
-                // Keep a built-in selectable while it's the active one, so debug builds can still
-                // edit inside Lib once they are already there.
-                if (project.IsBuiltIn && project != selectedValue)
+                // Built-ins only show up here when they are compiled as editable projects (debug builds),
+                // so they are valid targets — just listed after the user's own projects.
+                if (project.IsBuiltIn && !drewBuiltInLabel)
                 {
-                    if (!drewReadOnlyLabel)
-                    {
-                        drewReadOnlyLabel = true;
-                        FormInputs.AddVerticalSpace(2);
-                        StylizedText("Read Only", Fonts.FontSmall, UiColors.TextMuted);
-                    }
-
-                    ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-                    ImGui.Selectable(project.DisplayName, false, ImGuiSelectableFlags.Disabled);
-                    ImGui.PopStyleColor();
-                    continue;
+                    drewBuiltInLabel = true;
+                    FormInputs.AddVerticalSpace(2);
+                    StylizedText("Built-in", Fonts.FontSmall, UiColors.TextMuted);
                 }
 
                 var isSelected = project == selectedValue;
