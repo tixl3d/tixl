@@ -547,6 +547,18 @@ When a major feature wraps — the last planned phase ships, or the user signals
 
 The point isn't to slip more work into the current PR — it's to make decisions visible. Often the user will defer all of them and that's fine. But not surfacing them at the natural breakpoint means each one resurfaces later as friction.
 
+## Cross-Platform Changes
+
+TiXL runs on Windows (D3D11 or Vulkan), Linux and macOS (Vulkan). A change that works on the machine it was written on can fail on the others. Before reporting done, check whether the change touches anything platform-specific:
+
+- native libraries: names, extensions, folder layout, exported symbols (C++ manglings differ between MSVC and Itanium)
+- processes, shells, environment variables and executable names (`.exe`)
+- file paths: separators, case sensitivity, path length, user and cache folders
+- graphics backend: D3D11 versus Vulkan, shader compiler (FXC versus Slang)
+- OS-only APIs: WinForms, Win32, `System.Drawing`, and the installers and packaging
+
+If it does, verify each platform with what is at hand without running it there. For example, inspect the official release artifacts (`objdump -p` for a PE DLL's exports, the export trie for a Mach-O dylib), read the installer scripts, or check the code that picks the backend. Then **warn explicitly**: list which platforms are verified, how, and what still needs a run on real hardware. Never imply that something works on a platform no one has checked.
+
 ## Change Workflow
 ### Before editing
 1. Check whether the target code runs every frame
@@ -571,6 +583,7 @@ The point isn't to slip more work into the current PR — it's to make decisions
 - [ ] Style rules above are followed
 - [ ] Diff remains focused and minimal
 - [ ] Any frame-time/UI-responsiveness risk is explicitly mentioned
+- [ ] Platform-specific code (native libs, paths, processes, backend) is checked for Windows, Linux and macOS, with anything unverified stated
 
 ## Communication Expectations
 When reporting changes:

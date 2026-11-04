@@ -19,9 +19,9 @@ namespace T3.Core.Resource.ShaderCompiling;
 /// <see cref="ShaderSlots"/>, which the backend resolves them with.
 /// </summary>
 /// <remarks>
-/// Runs slangc as a process. The compiler's own API would avoid that, but a process per shader is only paid
-/// on a cache miss — the compiled blob is cached on disk by source hash like any other — and it keeps TiXL
-/// free of a native dependency it would have to ship for three platforms.
+/// Runs slangc's command line in-process through the libslang that ships beside slangc
+/// (<see cref="SlangLibrary"/>), and falls back to a slangc process when that library cannot be loaded.
+/// Either way the compiled blob is cached on disk by source hash like any other.
 /// </remarks>
 public sealed class SlangShaderCompiler : ShaderCompiler
 {
@@ -183,7 +183,12 @@ public sealed class SlangShaderCompiler : ShaderCompiler
 
             var arguments = BuildArguments(sourcePath, args, stage, spirvPath, reflectionPath);
 
-            if (!TryRun(compiler, arguments, out var diagnostics))
+            string diagnostics;
+            var succeeded = SlangLibrary.TryLoad(compiler)
+                                ? SlangLibrary.Compile(arguments, out diagnostics)
+                                : TryRun(compiler, arguments, out diagnostics);
+
+            if (!succeeded)
             {
                 errorMessage = SlangDiagnostics.DescribeFirstError(diagnostics, sourcePath, args.Name);
                 return false;
