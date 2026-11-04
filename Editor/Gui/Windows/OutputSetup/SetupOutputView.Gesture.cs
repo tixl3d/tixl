@@ -39,6 +39,7 @@ internal sealed partial class SetupOutputView
         PlanOrigin,     // the stage origin dragged on a floor plan's Board card
         PlanFloorRect,  // a side of a floor plan's floor rectangle on its Board card
         ScaleLine,      // a plan image's scale line endpoint on its Board card
+        ImageCrop,      // a reference image card's edge, cropping what the card shows
         BoardScale,     // the Board scale handle
         TraceCorner,    // a traced quad's corner on the image card / in the photo
         TraceRefine,    // the straightened rect's handles refining the trace

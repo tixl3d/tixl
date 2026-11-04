@@ -97,8 +97,8 @@ internal sealed partial class SetupOutputView
     {
         var fade = _boardLayerFade;
         var pixelSize = BoardPixelSize(setup, SetupEntityKinds.ReferenceImage, image.Id);
-        _projection.Origin = new Vector2(min.X, max.Y);
         _projection.PixelsPerMeter = pixelSize.X / MathF.Max(max.X - min.X, 0.0001f);
+        _projection.Origin = ImageOriginOnBoard(image, min, max, _projection.PixelsPerMeter);
         DrawTracedQuads(setup, image, selection, dl, fade >= 0.999f, fade);
     }
 

@@ -32,6 +32,29 @@ public sealed class ReferenceImage
     public int Width;
     public int Height;
 
+    /// <summary>The part of the image its Board card shows, in image pixels (top-left, Y down). Both zero shows
+    /// the whole image. Traces and the scale line stay in full-image pixels, so a crop never moves them.</summary>
+    public Vector2 CropMin;
+
+    public Vector2 CropMax;
+
+    public bool HasCrop => CropMax.X > CropMin.X && CropMax.Y > CropMin.Y;
+
+    /// <summary>The pixel rect the card shows: the crop kept inside the image, or the whole image.</summary>
+    public void GetVisiblePixelRect(out Vector2 min, out Vector2 max)
+    {
+        var size = new Vector2(Width, Height);
+        if (!HasCrop || Width <= 0 || Height <= 0)
+        {
+            min = Vector2.Zero;
+            max = size;
+            return;
+        }
+
+        min = Vector2.Clamp(CropMin, Vector2.Zero, size);
+        max = Vector2.Clamp(CropMax, min, size);
+    }
+
     /// <summary>Scale for plans; ignored for photos (their scale comes from annotations).</summary>
     public float MetersPerPixel;
 
@@ -63,6 +86,12 @@ public sealed class ReferenceImage
         writer.WriteString("FilePath", FilePath);
         writer.WriteValue("Width", Width);
         writer.WriteValue("Height", Height);
+        if (HasCrop)
+        {
+            writer.WriteVector2("CropMin", CropMin);
+            writer.WriteVector2("CropMax", CropMax);
+        }
+
         if (MetersPerPixel > 0)
             writer.WriteValue("MetersPerPixel", MetersPerPixel);
 
@@ -98,6 +127,8 @@ public sealed class ReferenceImage
                             FilePath = token.ReadValueSafe("FilePath", string.Empty) ?? string.Empty,
                             Width = token.ReadValueSafe("Width", 0),
                             Height = token.ReadValueSafe("Height", 0),
+                            CropMin = OutputJson.ReadVector2(token["CropMin"]),
+                            CropMax = OutputJson.ReadVector2(token["CropMax"]),
                             MetersPerPixel = token.ReadValueSafe("MetersPerPixel", 0f),
                             ScaleLineStart = OutputJson.ReadVector2(token["ScaleLineStart"]),
                             ScaleLineEnd = OutputJson.ReadVector2(token["ScaleLineEnd"]),

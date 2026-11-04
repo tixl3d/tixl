@@ -96,6 +96,10 @@ internal sealed partial class SetupOutputView
         {
             RefreshSurfaceMeta(resizedSurface);
         }
+        else if (_gesture.Kind == GestureKinds.ImageCrop && setup.FindReferenceImage(_gesture.HotId) is { } croppedImage)
+        {
+            RefreshImageMeta(croppedImage);
+        }
 
         // Fully inside a space nothing of the Board is left to draw or to click.
         if (_boardLayerFade <= 0.001f)
@@ -116,8 +120,14 @@ internal sealed partial class SetupOutputView
                 continue;
 
             var srv = TryGetReferenceSrv(image);
+            GetCropUv(image, out var cropUvMin, out var cropUvMax);
             DrawBoardCard(setup, selection, dl, SetupEntityKinds.ReferenceImage, image.Id, min, max,
-                          image.Name, BoardMeta(image.Id), srv, true);
+                          image.Name, BoardMeta(image.Id), srv, true, cropUvMin, cropUvMax);
+
+            // A crop drag moved the card's edges this frame; the overlays follow the new bounds right away.
+            if (!TryGetBoardBounds(setup, SetupEntityKinds.ReferenceImage, image.Id, out min, out max))
+                continue;
+
             DrawBoardTraces(setup, selection, dl, image, min, max);
             DrawBoardScaleLine(setup, dl, image, min, max);
         }
@@ -457,9 +467,9 @@ internal sealed partial class SetupOutputView
         SetupStrokes.DrawFrame(dl, sMin, sMax, frameColor.Fade(fade), isSelected, rounding);
 
         // A locked image is a backdrop: it shows its lock beside the name and takes no press of any kind.
-        if (kind == SetupEntityKinds.ReferenceImage && setup.FindReferenceImage(id) is { IsLocked: true })
+        if (kind == SetupEntityKinds.ReferenceImage && setup.FindReferenceImage(id) is { IsLocked: true } lockedImage)
         {
-            Icons.DrawIconAtScreenPosition(Icon.Locked, new Vector2(labelMax.X + pad, labelMin.Y + pad * 0.5f));
+            DrawUnlockButton(setup, lockedImage, new Vector2(labelMax.X + pad, labelMin.Y + pad * 0.5f), interactive);
 
             // Its label lies outside the card, so the Board menu is told about it separately — a right-click on
             // the title is the obvious place to look for Unlock.
@@ -500,6 +510,9 @@ internal sealed partial class SetupOutputView
 
         if (cardSurface != null && isSelected)
             DrawBoardSurfaceEdges(setup, cardSurface, min, max);
+
+        if (kind == SetupEntityKinds.ReferenceImage && isSelected && setup.FindReferenceImage(id) is { } croppableImage)
+            DrawBoardImageCropEdges(setup, dl, croppableImage, min, max);
 
         // The scale handle at the top-right corner. On a pixel card (square) it is presentation only — the
         // card's px-per-metre, never resolution, routing or projection. On a surface (circle) it is physical:
@@ -697,6 +710,171 @@ internal sealed partial class SetupOutputView
                 EndGesture(setup);
                 break;
         }
+    }
+
+    /// <summary>
+    /// The selected image card's edge handles crop what the card shows, in whole pixels of the image: the image
+    /// stays where it is on the Board and the card's edge moves over it. Nothing stretches. While a crop runs,
+    /// a faint outline shows the whole image, so what was cut away stays findable.
+    /// </summary>
+    private void DrawBoardImageCropEdges(Setup setup, ImDrawListPtr dl, ReferenceImage image, Vector2 min, Vector2 max)
+    {
+        // A pixel map is laid 1:1 over an output canvas; a crop of its card would disagree with that overlay.
+        if (image.Width <= 0 || image.Height <= 0 || image.Kind == ReferenceImage.Kinds.PixelMap || image.BoardPlacement == null)
+            return;
+
+        var pixelsPerMeter = PixelsPerMeterOf(image.BoardPlacement, image);
+        var imageOrigin = ImageOriginOnBoard(image, min, max, pixelsPerMeter);
+        var imageSize = new Vector2(image.Width, image.Height);
+
+        if (_gesture.Is(GestureKinds.ImageCrop, image.Id))
+        {
+            var fullMin = _boardProjection.CanvasToScreen(imageOrigin);
+            var fullMax = _boardProjection.CanvasToScreen(new Vector2(imageOrigin.X + imageSize.X / pixelsPerMeter,
+                                                                      imageOrigin.Y - imageSize.Y / pixelsPerMeter));
+            SetupStrokes.SnapRect(ref fullMin, ref fullMax);
+            SetupStrokes.DrawInlineRect(dl, fullMin, fullMax, SetupColors.ForKind(SetupEntityKinds.ReferenceImage).Fade(0.35f), isSelected: false);
+        }
+
+        _boardEdgeQuad[0] = new Vector2(min.X, max.Y);
+        _boardEdgeQuad[1] = max;
+        _boardEdgeQuad[2] = new Vector2(max.X, min.Y);
+        _boardEdgeQuad[3] = min;
+
+        ImGui.PushID(image.Id.GetHashCode());
+        var style = CornerPinHandles.Style.ForSurface(null, editable: true, selected: true, hue: SetupColors.ForKind(SetupEntityKinds.ReferenceImage));
+        style.EdgeHandleShape = CanvasPointHandle.Shapes.Square;
+        var phase = CornerPinHandles.DrawEdgeHandles(_boardEdgeQuad, _boardProjection, style, out var edge, out var edgePos);
+        ImGui.PopID();
+        if (edge < 0)
+            return;
+
+        // The dragged edge snaps to the other cards' edges and the floor (Shift drags free), as a surface crop does.
+        if (phase == CanvasPointHandle.DragPhases.Dragging && !ImGui.GetIO().KeyShift)
+        {
+            CollectBoardSnapCandidates(setup, image.Id, excludeDragItems: false);
+            var threshold = BoardSnapThreshold();
+            if (edge is 1 or 3)
+            {
+                Span<float> x = [edgePos.X];
+                if (_snapping.TrySnap(RectSnapping.Axes.X, x, threshold, out var offsetX, out var targetX))
+                {
+                    edgePos.X += offsetX;
+                    _boardSnapGuideX = targetX;
+                }
+            }
+            else
+            {
+                Span<float> y = [edgePos.Y];
+                if (_snapping.TrySnap(RectSnapping.Axes.Y, y, threshold, out var offsetY, out var targetY))
+                {
+                    edgePos.Y += offsetY;
+                    _boardSnapGuideY = targetY;
+                }
+            }
+        }
+
+        switch (phase)
+        {
+            case CanvasPointHandle.DragPhases.Started:
+                BeginGesture(setup, GestureKinds.ImageCrop, "Crop image", image.Id);
+                break;
+
+            case CanvasPointHandle.DragPhases.Dragging when _gesture.Is(GestureKinds.ImageCrop, image.Id):
+            {
+                var pixel = new Vector2(MathF.Round((edgePos.X - imageOrigin.X) * pixelsPerMeter),
+                                        MathF.Round((imageOrigin.Y - edgePos.Y) * pixelsPerMeter));
+                image.GetVisiblePixelRect(out var cropMin, out var cropMax);
+                switch (edge)
+                {
+                    case 0: cropMin.Y = MathF.Max(0, MathF.Min(pixel.Y, cropMax.Y - MinCropPixels)); break;
+                    case 1: cropMax.X = MathF.Min(imageSize.X, MathF.Max(pixel.X, cropMin.X + MinCropPixels)); break;
+                    case 2: cropMax.Y = MathF.Min(imageSize.Y, MathF.Max(pixel.Y, cropMin.Y + MinCropPixels)); break;
+                    default: cropMin.X = MathF.Max(0, MathF.Min(pixel.X, cropMax.X - MinCropPixels)); break;
+                }
+
+                SetImageCrop(image, cropMin, cropMax);
+                break;
+            }
+
+            case CanvasPointHandle.DragPhases.Completed:
+                EndGesture(setup);
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Sets what an image's card shows, the image held in place on the Board: the card's corner moves instead.
+    /// A crop that covers the whole image is cleared.
+    /// </summary>
+    internal static void SetImageCrop(ReferenceImage image, Vector2 cropMin, Vector2 cropMax)
+    {
+        var imageSize = new Vector2(image.Width, image.Height);
+        var showsAll = cropMin == Vector2.Zero && cropMax == imageSize;
+        if (image.BoardPlacement != null && image.Width > 0 && image.Height > 0)
+        {
+            var pixelsPerMeter = PixelsPerMeterOf(image.BoardPlacement, image);
+            image.GetVisiblePixelRect(out var oldMin, out var oldMax);
+            var position = image.BoardPlacement.Position;
+            var imageTopLeft = new Vector2(position.X - oldMin.X / pixelsPerMeter, position.Y + oldMax.Y / pixelsPerMeter);
+            image.BoardPlacement.Position = new Vector2(imageTopLeft.X + cropMin.X / pixelsPerMeter, imageTopLeft.Y - cropMax.Y / pixelsPerMeter);
+        }
+
+        image.CropMin = showsAll ? Vector2.Zero : cropMin;
+        image.CropMax = showsAll ? Vector2.Zero : cropMax;
+    }
+
+    /// <summary>Where the image's top-left pixel sits on the Board: the card's top-left, moved out by the part a
+    /// crop cuts away. Traces, the scale line and the image's own space are all placed from here.</summary>
+    private static Vector2 ImageOriginOnBoard(ReferenceImage image, Vector2 cardMin, Vector2 cardMax, float pixelsPerMeter)
+    {
+        image.GetVisiblePixelRect(out var visibleMin, out _);
+        return new Vector2(cardMin.X - visibleMin.X / pixelsPerMeter, cardMax.Y + visibleMin.Y / pixelsPerMeter);
+    }
+
+    /** The card's texture window: the crop as a fraction of the image. */
+    private static void GetCropUv(ReferenceImage image, out Vector2 uvMin, out Vector2 uvMax)
+    {
+        uvMin = Vector2.Zero;
+        uvMax = Vector2.One;
+        if (!image.HasCrop || image.Width <= 0 || image.Height <= 0)
+            return;
+
+        image.GetVisiblePixelRect(out var cropMin, out var cropMax);
+        var imageSize = new Vector2(image.Width, image.Height);
+        uvMin = cropMin / imageSize;
+        uvMax = cropMax / imageSize;
+    }
+
+    /// <summary>The lock beside a backdrop's name. Clicking it unlocks the image and selects it, ready to edit.</summary>
+    private void DrawUnlockButton(Setup setup, ReferenceImage image, Vector2 pos, bool interactive)
+    {
+        var size = new Vector2(Icons.FontSize);
+        var dl = ImGui.GetWindowDrawList();
+        if (!interactive)
+        {
+            Icons.DrawIconAtScreenPosition(Icon.Locked, pos, size, dl, UiColors.ForegroundFull.Fade(0.7f * _boardLayerFade));
+            return;
+        }
+
+        ImGui.SetCursorScreenPos(pos);
+        ImGui.PushID(image.Id.GetHashCode());
+        ImGui.InvisibleButton("##unlock", size);
+        ImGui.PopID();
+        var hovered = ImGui.IsItemHovered();
+        Icons.DrawIconAtScreenPosition(Icon.Locked, pos, size, dl, UiColors.ForegroundFull.Fade(hovered ? 1f : 0.7f));
+
+        if (ImGui.IsItemActivated())
+        {
+            SetupUndo.RunUndoable("Unlock image", setup, () => image.IsLocked = false);
+
+            // A click-only press keeps the Board's fence from reading this click as an empty one that clears the selection.
+            _pressHandoff.Arm(ImGui.GetMousePos(), PressOrigins.ClickOnly, SetupEntityKinds.ReferenceImage, image.Id,
+                              SetupEntityKinds.ReferenceImage, image.Id);
+        }
+
+        if (hovered)
+            CustomComponents.TooltipForLastItem("Unlock", "Makes the image editable again: it can be picked, moved and cropped.");
     }
 
     /** A press the picker hands to a card under the cursor becomes a card drag rather than a label move. */
@@ -2072,7 +2250,7 @@ internal sealed partial class SetupOutputView
         }
     }
 
-    /// <summary>The pixel extent a pixel card represents: the texture's, the canvas', the image's.</summary>
+    /// <summary>The pixel extent a pixel card represents: the texture's, the canvas', the image's (cropped) part.</summary>
     private static Vector2 BoardPixelSize(Setup setup, SetupEntityKinds kind, Guid id)
     {
         switch (kind)
@@ -2093,9 +2271,11 @@ internal sealed partial class SetupOutputView
             case SetupEntityKinds.ReferenceImage:
             {
                 var image = setup.FindReferenceImage(id);
-                return image == null || image.Width <= 0 || image.Height <= 0
-                           ? new Vector2(1600, 1200)
-                           : new Vector2(image.Width, image.Height);
+                if (image == null || image.Width <= 0 || image.Height <= 0)
+                    return new Vector2(1600, 1200);
+
+                image.GetVisiblePixelRect(out var visibleMin, out var visibleMax);
+                return Vector2.Max(visibleMax - visibleMin, Vector2.One);
             }
             default:
                 return Vector2.One;
@@ -2188,7 +2368,7 @@ internal sealed partial class SetupOutputView
         }
 
         foreach (var image in setup.ReferenceImages)
-            _boardMeta[image.Id] = image.Width > 0 ? $"{image.Width}×{image.Height}" : "no image";
+            RefreshImageMeta(image);
 
         foreach (var prop in setup.Props)
             _boardMeta[prop.Id] = $"{prop.HeightInMeters:0.##} m";
@@ -2198,6 +2378,22 @@ internal sealed partial class SetupOutputView
             plan.TryGetBounds(out var min, out var max);
             _boardMeta[plan.Id] = $"{max.X - min.X:0.##}×{max.Y - min.Y:0.##} m · {(plan.IsClosed ? "closed" : "open")}";
         }
+    }
+
+    /** The visible part's pixels, and its real size once the image has a scale. */
+    private void RefreshImageMeta(ReferenceImage image)
+    {
+        if (image.Width <= 0)
+        {
+            _boardMeta[image.Id] = "no image";
+            return;
+        }
+
+        image.GetVisiblePixelRect(out var visibleMin, out var visibleMax);
+        var pixels = visibleMax - visibleMin;
+        _boardMeta[image.Id] = image.MetersPerPixel > 0
+                                   ? $"{pixels.X:0}×{pixels.Y:0} · {pixels.X * image.MetersPerPixel:0.##}×{pixels.Y * image.MetersPerPixel:0.##} m"
+                                   : $"{pixels.X:0}×{pixels.Y:0}";
     }
 
     private void RefreshSurfaceMeta(Surface surface)
@@ -2256,6 +2452,9 @@ internal sealed partial class SetupOutputView
     }
 
     private const float DefaultBoardPixelsPerMeter = 1000;
+
+    /** The smallest part of an image a crop leaves, so the card's edge handles never collapse onto each other. */
+    private const float MinCropPixels = 16;
 
     // The Board camera, its projection, and the setup it was last fitted to.
     private readonly BoardCanvas _boardCanvas = new() { FillMode = ScalableCanvas.FillModes.FillAvailableContentRegion };

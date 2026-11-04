@@ -49,8 +49,8 @@ internal sealed partial class SetupOutputView
         if (!image.HasScaleLine)
             return;
 
-        var start = ImageToBoard(image.ScaleLineStart, cardMin, cardMax, pixelsPerMeter);
-        var end = ImageToBoard(image.ScaleLineEnd, cardMin, cardMax, pixelsPerMeter);
+        var start = ImageToBoard(image.ScaleLineStart, image, cardMin, cardMax, pixelsPerMeter);
+        var end = ImageToBoard(image.ScaleLineEnd, image, cardMin, cardMax, pixelsPerMeter);
         var a = _boardProjection.CanvasToScreen(start);
         var b = _boardProjection.CanvasToScreen(end);
         dl.AddLine(a, b, hue.Fade(0.9f * fade), 2 * scale);
@@ -82,7 +82,7 @@ internal sealed partial class SetupOutputView
                     break;
 
                 case CanvasPointHandle.DragPhases.Dragging when _gesture.Is(GestureKinds.ScaleLine, image.Id):
-                    var px = BoardToImage(pos, cardMin, cardMax, pixelsPerMeter);
+                    var px = BoardToImage(pos, image, cardMin, cardMax, pixelsPerMeter);
                     if (endpoint == 0)
                         image.ScaleLineStart = px;
                     else
@@ -119,7 +119,7 @@ internal sealed partial class SetupOutputView
         var cursor = ImGui.GetMousePos();
         if (_scaleToolHasStart)
         {
-            var a = _boardProjection.CanvasToScreen(ImageToBoard(_scaleToolStart, cardMin, cardMax, pixelsPerMeter));
+            var a = _boardProjection.CanvasToScreen(ImageToBoard(_scaleToolStart, image, cardMin, cardMax, pixelsPerMeter));
             dl.AddLine(a, cursor, hue.Fade(0.9f), 2 * scale);
             dl.AddCircleFilled(a, 4 * scale, hue);
         }
@@ -131,7 +131,7 @@ internal sealed partial class SetupOutputView
         if (!ImGui.IsWindowHovered() || ImGui.IsAnyItemHovered() || !ImGui.IsMouseClicked(ImGuiMouseButton.Left))
             return;
 
-        var px = BoardToImage(cursorOnBoard, cardMin, cardMax, pixelsPerMeter);
+        var px = BoardToImage(cursorOnBoard, image, cardMin, cardMax, pixelsPerMeter);
         if (!_scaleToolHasStart)
         {
             _scaleToolStart = px;
@@ -213,15 +213,31 @@ internal sealed partial class SetupOutputView
             image.BoardPlacement.CardScale = 0;
     }
 
-    /** Image pixels (top-left, Y down) to Board metres on this card. */
-    private static Vector2 ImageToBoard(Vector2 px, Vector2 cardMin, Vector2 cardMax, float pixelsPerMeter)
+    /// <summary>
+    /// States the image's scale directly, as a typed size does. A scale line is kept in step: it now reads the
+    /// length that scale gives it. Any presentation scale on the card is let go, as with <see cref="ApplyScaleLine"/>.
+    /// </summary>
+    public static void ApplyMetersPerPixel(ReferenceImage image, float metersPerPixel)
     {
-        return new Vector2(cardMin.X + px.X / pixelsPerMeter, cardMax.Y - px.Y / pixelsPerMeter);
+        image.MetersPerPixel = metersPerPixel;
+        if (image.HasScaleLine)
+            image.ScaleLineMeters = (image.ScaleLineEnd - image.ScaleLineStart).Length() * metersPerPixel;
+
+        if (image.BoardPlacement != null)
+            image.BoardPlacement.CardScale = 0;
     }
 
-    private static Vector2 BoardToImage(Vector2 board, Vector2 cardMin, Vector2 cardMax, float pixelsPerMeter)
+    /** Image pixels (top-left, Y down) to Board metres on this card. */
+    private static Vector2 ImageToBoard(Vector2 px, ReferenceImage image, Vector2 cardMin, Vector2 cardMax, float pixelsPerMeter)
     {
-        return new Vector2((board.X - cardMin.X) * pixelsPerMeter, (cardMax.Y - board.Y) * pixelsPerMeter);
+        var origin = ImageOriginOnBoard(image, cardMin, cardMax, pixelsPerMeter);
+        return new Vector2(origin.X + px.X / pixelsPerMeter, origin.Y - px.Y / pixelsPerMeter);
+    }
+
+    private static Vector2 BoardToImage(Vector2 board, ReferenceImage image, Vector2 cardMin, Vector2 cardMax, float pixelsPerMeter)
+    {
+        var origin = ImageOriginOnBoard(image, cardMin, cardMax, pixelsPerMeter);
+        return new Vector2((board.X - origin.X) * pixelsPerMeter, (origin.Y - board.Y) * pixelsPerMeter);
     }
 
     private Guid _scaleToolImageId;
