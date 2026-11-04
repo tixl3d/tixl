@@ -496,7 +496,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
         else
         {
             var posOnScreen = new Vector2(
-                                          TimeLineCanvas.Current.TransformX(hoverTime) - KeyframeIconWidth / 2 + 1,
+                                          TimeLineCanvas.Current.TransformX(hoverTime) - KeyframeIconWidth * T3Ui.UiScaleFactor / 2 + 1,
                                           layerArea.Min.Y);
             Icons.DrawIconAtScreenPosition(Icon.DopeSheetKeyframeLinear, posOnScreen);
         }
@@ -769,8 +769,8 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
 
             if (availableSpace > 30)
             {
-                var labelPos = new Vector2(posOnScreen.X + KeyframeIconWidth / 2 + 6,
-                                           layerArea.Min.Y + 3);
+                var labelPos = new Vector2(posOnScreen.X + (KeyframeIconWidth / 2 + 6) * T3Ui.UiScaleFactor,
+                                           layerArea.Min.Y + 3 * T3Ui.UiScaleFactor);
 
                 var color = UiColors.StatusAnimated.Fade(availableSpace.RemapAndClamp(30, 50, 0, 1).Clamp(0, 1));
                 ImGui.PushFont(Fonts.FontSmall);
@@ -810,7 +810,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
             ImGui.SetCursorScreenPos(posOnScreen);
 
             // Click released
-            var keyframeSize = new Vector2(10, 24);
+            var keyframeSize = new Vector2(KeyframeIconWidth, 24) * T3Ui.UiScaleFactor;
             if (ImGui.InvisibleButton("##key", keyframeSize))
             {
                 var justClicked = ImGui.GetMouseDragDelta().Length() < UserSettings.Config.ClickThreshold;
@@ -870,8 +870,8 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
                 var inputUi = symbolUi.InputUis[parameter.Input.Id];
                 if (inputUi is FloatInputUi floatInputUi)
                 {
-                    var size = new Vector2(60, 25);
-                    ImGui.SetCursorScreenPos(posOnScreen + new Vector2(-size.X / 2, keyframeSize.Y - 5));
+                    var size = new Vector2(60, 25) * T3Ui.UiScaleFactor;
+                    ImGui.SetCursorScreenPos(posOnScreen + new Vector2(-size.X / 2, keyframeSize.Y - 5 * T3Ui.UiScaleFactor));
                     ImGui.BeginChild($"##kf{keyHash}", size, ImGuiChildFlags.FrameStyle, ImGuiWindowFlags.NoScrollbar);
                     ImGui.PushFont(Fonts.FontSmall);
                     var tmp = (float)vDef.Value;
@@ -903,8 +903,8 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
                 }
                 else if (inputUi is IntInputUi intInputUi)
                 {
-                    var size = new Vector2(60, 25);
-                    ImGui.SetCursorScreenPos(posOnScreen + new Vector2(-size.X / 2, keyframeSize.Y - 5));
+                    var size = new Vector2(60, 25) * T3Ui.UiScaleFactor;
+                    ImGui.SetCursorScreenPos(posOnScreen + new Vector2(-size.X / 2, keyframeSize.Y - 5 * T3Ui.UiScaleFactor));
                     ImGui.BeginChild($"##kf{keyHash}", size, ImGuiChildFlags.FrameStyle, ImGuiWindowFlags.NoScrollbar);
                     ImGui.PushFont(Fonts.FontSmall);
                     var tmp = (int)vDef.Value;

@@ -225,7 +225,7 @@ internal static class LegacyConnectionDrawer
         if (drawList._Path.Size < 2)
             return false;
 
-        const float distance = 6;
+        var distance = 6 * T3Ui.UiScaleFactor;
 
         var p1 = drawList._Path[0];
         var p2 = drawList._Path[drawList._Path.Size - 1];

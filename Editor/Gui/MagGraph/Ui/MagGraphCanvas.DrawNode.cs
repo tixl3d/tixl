@@ -621,8 +621,10 @@ internal sealed partial class MagGraphView
             {
                 ImGui.PushID(item.Id.GetHashCode());
 
-                ImGui.SetCursorScreenPos(new Vector2(pMax.X, pMin.Y) + Vector2.Round(new Vector2(-5, -1) * (T3Ui.UiScaleFactor + CanvasScale)));
-                if (ImGui.InvisibleButton("#comment", new Vector2(15, 15)))
+                var commentIconSize = new Vector2(Icons.FontSize);
+                ImGui.SetCursorScreenPos(new Vector2(pMax.X, pMin.Y) + Vector2.Round(new Vector2(-5, -1) * (T3Ui.UiScaleFactor + CanvasScale)
+                                                                                       + (new Vector2(15) - commentIconSize) * 0.5f));
+                if (ImGui.InvisibleButton("#comment", commentIconSize))
                 {
                     context.Selector.SetSelection(item.ChildUi, item.Instance);
                     context.EditCommentDialog.ShowNextFrame();
@@ -1121,8 +1123,8 @@ internal sealed partial class MagGraphView
                 && badgeAlpha > 0f)
             {
                 ImGui.PushID(item.Id.GetHashCode());
-                ImGui.SetCursorScreenPos(pMinVisible + new Vector2(8, -7));
-                ImGui.InvisibleButton("#warning", new Vector2(15, 15));
+                ImGui.SetCursorScreenPos(pMinVisible + new Vector2(8, -7) * T3Ui.UiScaleFactor);
+                ImGui.InvisibleButton("#warning", new Vector2(Icons.FontSize));
                 var color = (statusLevel switch
                                 {
                                     IStatusProvider.StatusLevel.Tip     => UiColors.StatusActivated,

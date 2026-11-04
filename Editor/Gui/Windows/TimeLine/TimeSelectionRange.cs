@@ -137,7 +137,7 @@ internal sealed class TimeSelectionRange : IValueSnapAttractor
     private bool _isDragging;
     private double _lastDragU;
 
-    private static readonly Vector2 _timeRangeHandleSize = new(10, 20);
+    private static Vector2 _timeRangeHandleSize => new Vector2(10, 20) * T3Ui.UiScaleFactor;
     private static readonly Vector2 _timeRangeShadowSize = new(5, 9999);
     private static readonly Color _timeRangeShadowColor = new(0, 0, 0, 0.4f);
     private static readonly Color _timeRangeOutsideColor = new(0.0f, 0.0f, 0.0f, 0.2f);

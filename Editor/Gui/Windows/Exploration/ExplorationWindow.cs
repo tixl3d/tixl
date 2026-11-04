@@ -120,11 +120,12 @@ internal sealed class ExplorationWindow : Window
                         var keep = ImGui.GetCursorPos();
                         var formattedStrength = $"×{matchingParam.ScatterStrength:F1}";
                         var size = ImGui.CalcTextSize(formattedStrength);
-                        ImGui.SetCursorPosX(ImGui.GetContentRegionAvail().X- size.X - 5);
+                        ImGui.SetCursorPosX(ImGui.GetContentRegionAvail().X- size.X - 5 * T3Ui.UiScaleFactor);
                         ImGui.TextUnformatted(formattedStrength);
                         ImGui.SetCursorPos(keep);
-                        ImGui.SetCursorPosX(ImGui.GetContentRegionAvail().X- 50);
-                        ImGui.InvisibleButton("ScatterStrengthFactor", new Vector2(50, ImGui.GetTextLineHeight()));
+                        var dragWidth = MathF.Max(50 * T3Ui.UiScaleFactor, size.X + 5 * T3Ui.UiScaleFactor);
+                        ImGui.SetCursorPosX(ImGui.GetContentRegionAvail().X - dragWidth);
+                        ImGui.InvisibleButton("ScatterStrengthFactor", new Vector2(dragWidth, ImGui.GetTextLineHeight()));
                         if (ImGui.IsItemHovered() || ImGui.IsItemActive())
                         {
                             ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeEW);
@@ -228,12 +229,12 @@ internal sealed class ExplorationWindow : Window
                 
             // Header
             ImGui.PushFont(Fonts.FontBold);
-            var itemWidth = ImGui.GetContentRegionAvail().X - 16;
+            var itemWidth = ImGui.GetContentRegionAvail().X - 16 * T3Ui.UiScaleFactor;
             ImGui.TextUnformatted("Snapshots");
             ImGui.PopFont();
             ImGui.SameLine(itemWidth);
                 
-            if (CustomComponents.IconButton(Icon.Trash, new Vector2(16, 16)))
+            if (CustomComponents.IconButton(Icon.Trash, new Vector2(16) * T3Ui.UiScaleFactor))
             {
                 Log.Debug("Not implemented");
             }
@@ -247,7 +248,7 @@ internal sealed class ExplorationWindow : Window
                 ImGui.PushID(variation.GetHashCode());
                 {
                     var isSelected = _blendedVariations.Contains(variation);
-                    if (CustomComponents.IconButton(isSelected ? Icon.ChevronRight : Icon.Pin, new Vector2(16, 16)))
+                    if (CustomComponents.IconButton(isSelected ? Icon.ChevronRight : Icon.Pin, new Vector2(16) * T3Ui.UiScaleFactor))
                     {
                         if (isSelected)
                         {
@@ -301,7 +302,7 @@ internal sealed class ExplorationWindow : Window
                     ImGui.SameLine();
 
                     // Delete button
-                    if (CustomComponents.IconButton(variation.IsLiked ? Icon.Heart : Icon.HeartOutlined, new Vector2(16, 16)))
+                    if (CustomComponents.IconButton(variation.IsLiked ? Icon.Heart : Icon.HeartOutlined, new Vector2(16) * T3Ui.UiScaleFactor))
                     {
                         variation.IsLiked = !variation.IsLiked;
                         //deleteAfterIteration = variation;

@@ -261,12 +261,10 @@ internal static class ColorThemeEditor
     private static void DrawHelpIcon(string hint)
     {
         ImGui.SameLine(0, 6 * T3Ui.UiScaleFactor);
-        ImGui.PushFont(Icons.IconFont);
-        ImGui.AlignTextToFramePadding();
-        ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Fade(0.6f).Rgba);
-        ImGui.TextUnformatted(((char)Icon.Help).ToString());
-        ImGui.PopStyleColor();
-        ImGui.PopFont();
+        // The icon font's line height is shorter than its glyphs, so a text item would only be hoverable at the top.
+        Icons.GetGlyphDefinition(Icon.Help, out _, out var glyphSize);
+        ImGui.InvisibleButton("##help", new Vector2(glyphSize.X, ImGui.GetFrameHeight()));
+        Icons.DrawIconOnLastItem(Icon.Help, UiColors.TextMuted.Fade(0.6f));
         CustomComponents.TooltipForLastItem(hint);
     }
 

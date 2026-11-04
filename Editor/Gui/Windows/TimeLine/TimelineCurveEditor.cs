@@ -589,7 +589,7 @@ internal sealed class TimelineCurveEditor : AnimationParameterEditing, ITimeObje
     #endregion
 
     // Screen-space tolerance for curve-line hit-testing (≈4 px, squared for cheap compare).
-    private static readonly float CurveHoverToleranceSquared = (4f * T3Ui.UiScaleFactor) * (4f * T3Ui.UiScaleFactor);
+    private static float CurveHoverToleranceSquared => (4f * T3Ui.UiScaleFactor) * (4f * T3Ui.UiScaleFactor);
 
     /// <summary>
     /// True if the mouse is within <paramref name="toleranceSq"/> screen-space-squared of any

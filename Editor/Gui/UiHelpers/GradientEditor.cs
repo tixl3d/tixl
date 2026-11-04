@@ -181,7 +181,7 @@ public static class GradientEditor
                                                         ImGui.PushID(index);
                                                         var preset = GradientPresets.Presets[index];
 
-                                                        if (ImGui.InvisibleButton("" + index, new Vector2(100, ImGui.GetFrameHeight())))
+                                                        if (ImGui.InvisibleButton("" + index, new Vector2(100 * T3Ui.UiScaleFactor, ImGui.GetFrameHeight())))
                                                         {
                                                             var clone = preset.TypedClone();
                                                             gradientForEditing.Steps = clone.Steps;
@@ -285,7 +285,7 @@ public static class GradientEditor
                     step.NormalizedPosition = ((ImGui.GetMousePos().X - areaOnScreen.Min.X) / areaOnScreen.GetWidth()).Clamp(0, 1);
                 }
 
-                isDraggedOutside = ImGui.GetMousePos().Y > areaOnScreen.Max.Y + RemoveThreshold;
+                isDraggedOutside = ImGui.GetMousePos().Y > areaOnScreen.Max.Y + RemoveThreshold * T3Ui.UiScaleFactor;
 
                 stepModified = InputEditStateFlags.Modified;
             }
@@ -293,13 +293,13 @@ public static class GradientEditor
             // Draw handle
             if (isDraggedOutside)
             {
-                handleArea.Min.Y += 25;
-                handleArea.Max.Y += 25;
+                handleArea.Min.Y += 25 * T3Ui.UiScaleFactor;
+                handleArea.Max.Y += 25 * T3Ui.UiScaleFactor;
             }
 
             if (ImGui.IsItemDeactivated())
             {
-                var mouseOutsideThresholdAfterDrag = ImGui.GetMousePos().Y > areaOnScreen.Max.Y + RemoveThreshold;
+                var mouseOutsideThresholdAfterDrag = ImGui.GetMousePos().Y > areaOnScreen.Max.Y + RemoveThreshold * T3Ui.UiScaleFactor;
                 if (mouseOutsideThresholdAfterDrag && gradientForEditing.Steps.Count > 1)
                     removedStep = step;
                     

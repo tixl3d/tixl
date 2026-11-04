@@ -90,11 +90,13 @@ internal static class CurvePoint
 
         // Scale click area based on handle screen length — shrink when small, disable when tiny
         var handleScreenLength = handleOffset.Length();
-        var clickSize = handleScreenLength < MinClickableHandleLength
+        var minClickableLength = MinClickableHandleLength * T3Ui.UiScaleFactor;
+        var fullClickableLength = FullClickableHandleLength * T3Ui.UiScaleFactor;
+        var clickSize = handleScreenLength < minClickableLength
                             ? Vector2.One // Too small to click — 1px dummy button
-                            : Vector2.Lerp(Vector2.One, _tangentHandleSize,
-                                           Math.Clamp((handleScreenLength - MinClickableHandleLength)
-                                                      / (FullClickableHandleLength - MinClickableHandleLength), 0f, 1f));
+                            : Vector2.Lerp(Vector2.One, _tangentHandleSize * T3Ui.UiScaleFactor,
+                                           Math.Clamp((handleScreenLength - minClickableLength)
+                                                      / (fullClickableLength - minClickableLength), 0f, 1f));
 
         ImGui.SetCursorScreenPos(handleCenter - clickSize * 0.5f);
         ImGui.InvisibleButton(buttonId, clickSize);
@@ -158,7 +160,7 @@ internal static class CurvePoint
         var handleColor = isHovered ? UiColors.ForegroundFull : knobColor;
         if (isWeighted)
         {
-            _drawList.AddRectFilled(handleCenter - _tangentSizeHalf, handleCenter + _tangentSize, handleColor);
+            _drawList.AddRectFilled(handleCenter - _tangentSizeHalf, handleCenter + _tangentSizeHalf, handleColor);
         }
         else
         {
@@ -351,14 +353,15 @@ internal static class CurvePoint
         snappedAngle = rawAngle;
         snappedTension = rawTension;
         var snaps = TangentSnaps.None;
+        var snapThreshold = SnapThresholdPx * T3Ui.UiScaleFactor;
         var mouseOffset = mouseScreenPos - keyScreenPos;
         var handleDistance = mouseOffset.Length();
 
         // Disable angle snaps when handle is too short — snap zones dominate at small radii
-        var enableAngleSnaps = handleDistance > 50f;
+        var enableAngleSnaps = handleDistance > 50f * T3Ui.UiScaleFactor;
 
         // 1. Horizontal — perpendicular pixel distance to horizontal line
-        if (enableAngleSnaps && Math.Abs(mouseOffset.Y) < SnapThresholdPx)
+        if (enableAngleSnaps && Math.Abs(mouseOffset.Y) < snapThreshold)
         {
             snappedAngle = Math.Round(snappedAngle / Math.PI) * Math.PI;
             snaps |= TangentSnaps.Horizontal;
@@ -372,7 +375,7 @@ internal static class CurvePoint
             if (lineLen > 0.001f)
             {
                 var perpDist = Math.Abs(mouseOffset.X * lineDir.Y - mouseOffset.Y * lineDir.X) / lineLen;
-                if (perpDist < SnapThresholdPx)
+                if (perpDist < snapThreshold)
                 {
                     snappedAngle = neighborAngle.Value;
                     snaps |= TangentSnaps.Linear;
@@ -383,7 +386,7 @@ internal static class CurvePoint
         // 3. Default length (tension=1.0) — distance from mouse to reference radius (proportional to segment)
         var segmentPixels = (float)segmentWidth * Math.Abs(_curveEditCanvas.Scale.X);
         var refLength = segmentPixels / 3.0f * T3Ui.UiScaleFactor;
-        if (Math.Abs(mouseOffset.Length() - refLength) < SnapThresholdPx)
+        if (Math.Abs(mouseOffset.Length() - refLength) < snapThreshold)
         {
             snappedTension = 1.0f;
             snaps |= TangentSnaps.DefaultLength;
@@ -501,15 +504,15 @@ internal static class CurvePoint
 
     #region Style constants
 
-    private static readonly Vector2 _controlSize = new(21, 21);
-    private static readonly Vector2 _controlSizeHalf = _controlSize * 0.5f;
+    /** Sized from the icon font, not UiScaleFactor: embedded curve editors draw with UiScaleFactor forced to 1 while the keyframe glyph stays atlas-scaled. */
+    private static Vector2 _controlSize => new(MathF.Round(Icons.FontSize * 1.4f));
+    private static Vector2 _controlSizeHalf => _controlSize * 0.5f;
     private static readonly Color _tangentHandleColor = new(0.3f);
     private static readonly Vector2 _tangentHandleSize = new(15, 15);
-    private static readonly Vector2 _tangentHandleSizeHalf = _tangentHandleSize * 0.5f;
     private const float MinClickableHandleLength = 10f;
     private const float FullClickableHandleLength = 20f;
     private static Vector2 _tangentSize => new(3 * T3Ui.UiScaleFactor);
-    private static readonly Vector2 _tangentSizeHalf = _tangentSize * 0.5f;
+    private static Vector2 _tangentSizeHalf => _tangentSize * 0.5f;
 
     #endregion
 }

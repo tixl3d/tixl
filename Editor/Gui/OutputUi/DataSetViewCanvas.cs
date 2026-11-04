@@ -401,7 +401,8 @@ internal sealed class DataSetViewCanvas
             }
 
             const int maxVisibleEvents = 500;
-            const float layerHeight = 20f;
+            // Frame height rather than UiScaleFactor: the embedded path draws with UiScaleFactor forced to 1.
+            var layerHeight = MathF.Max(20f, ImGui.GetFrameHeight());
             var plotCurvePoints = new Vector2[maxVisibleEvents];
 
             _pathTreeDrawer.Reset();

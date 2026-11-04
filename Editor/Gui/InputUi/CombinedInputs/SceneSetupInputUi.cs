@@ -119,7 +119,7 @@ public static class SceneSetupPopup
         ImGui.SameLine(1);
 
 
-        if (CustomComponents.IconButton(icon, new Vector2(16, 16), CustomComponents.ButtonStates.Default))
+        if (CustomComponents.IconButton(icon, new Vector2(16) * T3Ui.UiScaleFactor, CustomComponents.ButtonStates.Default))
         {
             if (nodeSettings == null)
             {

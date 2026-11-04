@@ -39,7 +39,7 @@ internal sealed class CreateFromTemplateDialog : ModalDialog
             }
                 
             //_selectedTemplate = null;
-            ImGui.BeginChild("templates", new Vector2(200, -1));
+            ImGui.BeginChild("templates", new Vector2(200 * T3Ui.UiScaleFactor, -1));
             {
                 var windowMin = ImGui.GetWindowPos();
                 ImGui.GetWindowDrawList().AddRectFilled(windowMin,
@@ -59,7 +59,7 @@ internal sealed class CreateFromTemplateDialog : ModalDialog
                     if (isSelected)
                         _selectedTemplate = template;
 
-                    if (ImGui.Selectable("##template.Title", isSelected, ImGuiSelectableFlags.None, new Vector2(ImGui.GetContentRegionAvail().X, 45)))
+                    if (ImGui.Selectable("##template.Title", isSelected, ImGuiSelectableFlags.None, new Vector2(ImGui.GetContentRegionAvail().X, 45 * T3Ui.UiScaleFactor)))
                     {
                         _selectedTemplateIndex = index;
                         ApplyTemplateSwitch();
@@ -73,11 +73,11 @@ internal sealed class CreateFromTemplateDialog : ModalDialog
                     ImGui.GetWindowDrawList().AddRectFilled(itemRectMin, itemRectMax, isSelected ? UiColors.BackgroundActive : UiColors.BackgroundButton);
                         
                     // Title
-                    ImGui.SetCursorScreenPos(itemRectMin + new Vector2(10, 5));
+                    ImGui.SetCursorScreenPos(itemRectMin + new Vector2(10, 5) * T3Ui.UiScaleFactor);
                     ImGui.TextUnformatted(template.Title);
                         
                     // summary
-                    ImGui.SetCursorScreenPos(itemRectMin + new Vector2(10, 25));
+                    ImGui.SetCursorScreenPos(itemRectMin + new Vector2(10, 25) * T3Ui.UiScaleFactor);
                     ImGui.PushFont(Fonts.FontSmall);
                     ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
                     ImGui.TextWrapped(template.Summary);

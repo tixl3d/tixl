@@ -8,6 +8,7 @@ using T3.Core.DataTypes;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.Utils;
+using T3.Editor.App.Gestures;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.Interaction.Snapping;
@@ -263,6 +264,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
                             }
 
                             CustomComponents.HandleDragScrolling(this);
+                            ScrollRowsWithTrackpad();
                             _lastDopeContentHeight = MathF.Max(0f, ImGui.GetCursorScreenPos().Y - dopeContentStartY);
                             ImGui.EndChild();
 
@@ -310,7 +312,11 @@ internal sealed class TimeLineCanvas : AnimationCanvas
                 // When the details pane is up, the top-pane child already handles its
                 // own drag-scroll; outer call would hit ImGuiTitle (no overflow).
                 if (!detailsActive)
+                {
                     CustomComponents.HandleDragScrolling(this);
+                    if (Mode == Modes.DopeView)
+                        ScrollRowsWithTrackpad();
+                }
             }
 
             ImGui.EndChild();
@@ -937,6 +943,22 @@ internal sealed class TimeLineCanvas : AnimationCanvas
         var canvasDelta = screenDeltaX / Scale.X;
         Scroll = new Vector2(startScrollX - canvasDelta, Scroll.Y);
         ScrollTarget = new Vector2(startScrollX - canvasDelta, ScrollTarget.Y);
+    }
+
+    /// <summary>
+    /// The dope sheet's rows are laid out by ImGui, so the canvas's own Y pan never shows there. A trackpad's
+    /// vertical movement scrolls the rows instead, leaving the pinch to zoom time.
+    /// </summary>
+    private static void ScrollRowsWithTrackpad()
+    {
+        if (!PointerGestures.PansWithScroll || !ImGui.IsWindowHovered(ImGuiHoveredFlags.ChildWindows))
+            return;
+
+        var panY = PointerGestures.PanDelta.Y;
+        if (MathF.Abs(panY) < 0.01f)
+            return;
+
+        ImGui.SetScrollY(ImGui.GetScrollY() - panY);
     }
 
     #endregion
