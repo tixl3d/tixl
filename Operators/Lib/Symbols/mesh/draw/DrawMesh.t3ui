@@ -33,8 +33,8 @@
     {
       "InputId": "2fdf0184-1459-4589-9633-2c739462ed66"/*FragmentField*/,
       "Position": {
-        "X": 1816.4573,
-        "Y": 3098.7122
+        "X": 1778.2278,
+        "Y": 3092.3406
       },
       "GroupTitle": "Field Overrides...",
       "Description": "Optional field whose color is multiplied with each fragment, evaluated at the world position.\n\nTry [SphereSDF] -> [SDFToColor] -> FragmentField."
@@ -59,8 +59,8 @@
     {
       "InputId": "96df9e72-189f-4efc-82a6-b2f482166e34"/*ShaderDefines*/,
       "Position": {
-        "X": 1816.4573,
-        "Y": 3133.7122
+        "X": 1778.2278,
+        "Y": 3127.3406
       },
       "Description": "Additional HLSL code inserted into the generated shader, e.g. #define statements or helper functions. Invalid code breaks rendering.",
       "Usage": "Multiline"
@@ -168,8 +168,8 @@
       "ChildId": "151209ef-f52b-4c88-9d9c-5a8882fb0e1d",
       "SymbolName": "Lib.field.render._.GenerateShaderGraphCode",
       "Position": {
-        "X": 1956.4573,
-        "Y": 3098.7122
+        "X": 1918.2278,
+        "Y": 3092.3406
       }
     },
     {
@@ -234,8 +234,8 @@
       "ChildId": "56be1fd2-548c-4814-9e1b-5ab09f95cf1d",
       "SymbolName": "Types.Gfx.PixelShaderFromSource",
       "Position": {
-        "X": 2096.4573,
-        "Y": 3098.7122
+        "X": 2058.228,
+        "Y": 3092.3406
       }
     },
     {

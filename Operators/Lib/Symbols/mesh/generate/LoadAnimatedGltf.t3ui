@@ -1,0 +1,58 @@
+{
+  "FormatVersion": 3,
+  "Id": "1bd6ebd0-0414-4d29-99df-4f4e123e0570"/*LoadAnimatedGltf*/,
+  "Description": "A small wrapper setup to load and pose an animated GLTF scene.",
+  "InputUis": [
+    {
+      "InputId": "b9ee9f01-0c73-45c7-a72d-5ce28cb56e3c"/*ClipIndex*/,
+      "Position": {
+        "X": -112.02832,
+        "Y": 137.56836
+      },
+      "Description": "Index of the animation clip. Wraps around the number of clips."
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "4a78396b-a8a8-437d-8aea-88b67a13ae24",
+      "SymbolName": "Lib.render.scene.LoadGltfScene",
+      "Position": {
+        "X": -276.61496,
+        "Y": -2.4053345
+      }
+    },
+    {
+      "ChildId": "67ec09fa-6e1b-4ab3-802b-1ceb2d75f68c",
+      "SymbolName": "Lib.render.skinning.PoseToSkinMatrices",
+      "Position": {
+        "X": 331.70996,
+        "Y": 74.98062
+      }
+    },
+    {
+      "ChildId": "bd315b66-e39b-4e7e-9348-98617ba1d5d6",
+      "SymbolName": "Lib.render.skinning.SkinMesh",
+      "Position": {
+        "X": 471.70996,
+        "Y": 4.9806213
+      }
+    },
+    {
+      "ChildId": "ca154d30-d139-44f7-9314-d21b7bb5009d",
+      "SymbolName": "Lib.render.skinning.SampleGltfAnimation",
+      "Position": {
+        "X": 191.70996,
+        "Y": 109.98062
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "dd53cc7e-736c-44dc-8c3e-ad79c919f35a"/*Result*/,
+      "Position": {
+        "X": 997.9717,
+        "Y": 81.28418
+      }
+    }
+  ]
+}
