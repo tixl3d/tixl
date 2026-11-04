@@ -267,6 +267,10 @@ internal sealed partial class SetupOutputView
         {
             _projection.Origin = new Vector2(min.X, max.Y);
             _projection.PixelsPerMeter = BoardPixelSize(setup, _spaceKind, _spaceId).X / MathF.Max(max.X - min.X, 0.0001f);
+
+            // An image's space is the whole image, while its card may show only a crop of it.
+            if (_spaceKind == SetupEntityKinds.ReferenceImage && setup.FindReferenceImage(_spaceId) is { } spaceImage)
+                _projection.Origin = ImageOriginOnBoard(spaceImage, min, max, _projection.PixelsPerMeter);
         }
 
         _spaceOrigin = _projection.Origin;

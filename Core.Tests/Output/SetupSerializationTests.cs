@@ -25,6 +25,8 @@ public class SetupSerializationTests
         Assert.Equal(ReferenceImage.Kinds.Photo, image.Kind);
         Assert.Equal("images/refs/corner.jpg", image.FilePath);
         Assert.Equal(4032, image.Width);
+        Assert.Equal(new Vector2(100, 50), image.CropMin);
+        Assert.Equal(new Vector2(3900, 2900), image.CropMax);
 
         var surface = Assert.Single(restored.Surfaces);
         Assert.Equal(setup.Surfaces[0].Id, surface.Id);
@@ -248,6 +250,8 @@ public class SetupSerializationTests
                             FilePath = "images/refs/corner.jpg",
                             Width = 4032,
                             Height = 3024,
+                            CropMin = new Vector2(100, 50),
+                            CropMax = new Vector2(3900, 2900),
                         };
 
         var projector = new OutputDefinition

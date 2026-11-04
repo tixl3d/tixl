@@ -744,3 +744,44 @@ project).
 - After 2: "P1" is selected and its context menu opens (Add Patch, Split…, Rename…).
 - After 3: the click selects "SendToOutput", not the surface card underneath — a label wins
   over cards beneath it.
+
+## Step: Cropping a reference image card
+
+**Action:**
+1. Select the "Image 1" card (a plan or photo with an empty margin; trace a surface on it first
+   if it has none). Drag the left edge handle (square) to the right by about a quarter of the
+   card, and keep the mouse button down for a moment.
+2. Release, then drag the top edge handle down past the bottom edge and far beyond the
+   image's right and bottom borders with the other handles.
+3. With the image selected, look at the Parameter window, then type `4` into the first
+   **Size (m)** field.
+4. Double-click the card to enter the image's space, then return to the Board.
+5. Click **Reset Crop** in the Parameter window, then press Ctrl+Z twice.
+
+**Expected:**
+- During 1: the card's left edge follows the mouse over the image; the image itself doesn't
+  move or stretch. A faint teal outline shows the whole image while the button is down. The
+  traced quads and the scale line stay on the same spots of the picture. The metadata next to
+  the name shows the cropped pixel size (and its metres once the image has a scale).
+- After 1: the outline disappears; Ctrl+Z restores the uncropped card in one step.
+- During 2: an edge stops 16 px short of the opposite edge and never goes past the image's
+  own border; the dragged edge snaps to other cards' edges (Shift drags free).
+- After 3: the card grows or shrinks around its bottom-left corner, the second Size field
+  follows with the same aspect, and the mm-per-pixel line (or the scale line's length)
+  reflects the new scale. The Parameter window shows "Cropped to W×H of W×H px".
+- After 4: the image's space shows the whole image, aligned with where the card showed its
+  part — no jump at the start or the end of the transition.
+- After 5: the card shows the whole image again, in place; the two undos bring back the crop
+  and then the typed size.
+
+## Step: Clicking the lock unlocks a backdrop
+
+**Action:**
+1. Right-click "Image 1" and choose **Lock**, then click an empty spot of the Board.
+2. Hover the lock icon beside the image's name, then click it.
+
+**Expected:**
+- After 1: the card is drawn as a backdrop with a lock beside its name and can't be picked.
+- After 2: the lock brightens on hover and shows an "Unlock" tooltip; the click unlocks the
+  image and selects it (its crop handles appear) — the selection is not cleared. Ctrl+Z
+  locks it again.

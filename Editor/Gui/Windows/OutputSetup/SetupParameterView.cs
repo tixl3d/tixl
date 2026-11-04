@@ -1326,6 +1326,39 @@ internal static class SetupParameterView
 
         CommitFieldUndo(setup, "Change image opacity", opacityState);
 
+        // The real size of what the card shows. Typing it states the image's scale; the aspect stays, nothing stretches.
+        if (image.Width > 0 && image.Kind != ReferenceImage.Kinds.PixelMap)
+        {
+            image.GetVisiblePixelRect(out var visibleMin, out var visibleMax);
+            var visiblePixels = visibleMax - visibleMin;
+            var oldSize = visiblePixels * image.MetersPerPixel;
+            Span<float> size = [oldSize.X, oldSize.Y];
+            var sizeState = DrawFloatsRow("Size (m)", size,
+                                          "The real size of what the card shows (its crop). Typing either side sets the image's scale; the aspect is kept.");
+            BeginFieldUndo(setup, sizeState);
+            if ((sizeState & InputEditStateFlags.Modified) != 0)
+            {
+                var metersPerPixel = MathF.Abs(size[0] - oldSize.X) >= MathF.Abs(size[1] - oldSize.Y)
+                                         ? size[0] / MathF.Max(visiblePixels.X, 1)
+                                         : size[1] / MathF.Max(visiblePixels.Y, 1);
+                if (metersPerPixel > 0)
+                    SetupOutputView.ApplyMetersPerPixel(image, metersPerPixel);
+            }
+
+            CommitFieldUndo(setup, "Change image size", sizeState);
+
+            if (image.HasCrop)
+            {
+                FormInputs.ApplyIndent();
+                CustomComponents.StylizedText($"Cropped to {visiblePixels.X:0}×{visiblePixels.Y:0} of {image.Width}×{image.Height} px",
+                                              Fonts.FontSmall, UiColors.TextMuted);
+                ImGui.SameLine();
+                if (ImGui.SmallButton("Reset Crop"))
+                    SetupUndo.RunUndoable("Reset image crop", setup,
+                                          () => SetupOutputView.SetImageCrop(image, Vector2.Zero, new Vector2(image.Width, image.Height)));
+            }
+        }
+
         // The scale line's length re-derives the image's scale; the line itself is drawn with Set Scale on the Board.
         if (image.HasScaleLine)
         {
@@ -1343,7 +1376,8 @@ internal static class SetupParameterView
         }
         else
         {
-            FormInputs.AddHint("No scale yet — Set Scale in the card's menu draws a line over a known length.");
+            FormInputs.ApplyIndent();
+            CustomComponents.StylizedText("No scale yet — type the size above, or Set Scale in the card's menu draws a line over a known length.", Fonts.FontSmall, UiColors.TextMuted);
         }
     }
 
