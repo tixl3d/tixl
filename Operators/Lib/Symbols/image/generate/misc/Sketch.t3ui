@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "8e6ed99c-a3e0-42c0-9f81-a89b1e340757"/*Sketch*/,
-  "Description": "Draws freehand sketches over the output as annotations or storyboards.\n\nSketches are stored in pages that are bound to the time at which they were drawn, so a storyboard or frame-by-frame animation can be created by drawing at different times. Strokes are saved automatically to a file.\n\nThe following keyboard shortcuts work while the operator is selected:\n- P: draw mode\n- E: erase mode\n- S: select mode\n- C: clear the selection\n- X: cut the current page\n- V: paste the cut page\n- 1-9: select brush size\n\nAKA: draw, paint, annotate, storyboard, doodle",
+  "Description": "Draws freehand sketches over the output as annotations or storyboards.\n\nSketches are stored in pages that are bound to the time at which they were drawn, so a storyboard or frame-by-frame animation can be created by drawing at different times. Strokes are saved automatically to a file.\n\nWhile the operator is selected and the mouse is over the output window, it takes over the keyboard shortcuts (Ctrl shortcuts like undo keep working):\n- P: draw mode (Shift+drag continues the last stroke as a straight line)\n- E: erase mode, also erases the selection\n- S: lasso select (Shift adds to the selection), Esc clears it\n- G / R: move / scale the selection, click or Enter applies, Esc cancels\n- C: copy the selection, or the whole page if nothing is selected\n- X: cut the selection, or the whole page\n- V: paste and select the copied strokes, also onto an empty frame or into another sketch\n- 1-9: select brush size, [ / ] make it smaller / larger (ß / ´ on German keyboards), Ctrl+drag left or right resizes it\n- K: color square around the current color: horizontal is opacity, vertical is brightness, Shift with horizontal movement changes the hue. Click or K applies, Esc cancels. With a selection it recolors the selection, otherwise it sets the stroke color.\n\nChanging the stroke color while strokes are selected recolors them. All edits can be undone with Ctrl+Z.\n\nAKA: draw, paint, annotate, storyboard, doodle",
   "SymbolTags": "64",
   "InputUis": [
     {
@@ -64,7 +64,7 @@
       "InputId": "44b88a09-6374-4180-9bc9-713ccfbb36f0"/*Background*/,
       "Position": {
         "X": 1278.6562,
-        "Y": -52.84836
+        "Y": -132.66202
       },
       "Min": 0.0,
       "Max": 1.0,
@@ -115,10 +115,9 @@
     {
       "ChildId": "023cdfc3-edaa-499e-9ff2-0afb6fed08ce",
       "SymbolName": "Lib.point.generate.RadialPoints",
-      "SectionId": "8432acf4-59cc-4410-bba7-4f8118fb828c",
       "Position": {
-        "X": 819.13983,
-        "Y": 225.05896
+        "X": 989.77594,
+        "Y": 792.9286
       }
     },
     {
@@ -140,7 +139,7 @@
       },
       "Position": {
         "X": 1418.6562,
-        "Y": -17.848358
+        "Y": -97.66202
       }
     },
     {
@@ -207,10 +206,9 @@
     {
       "ChildId": "3acc495f-6973-4af4-817f-b0d2ba985e7b",
       "SymbolName": "Lib.numbers.float.basic.Multiply",
-      "SectionId": "8432acf4-59cc-4410-bba7-4f8118fb828c",
       "Position": {
-        "X": 679.13995,
-        "Y": 365.05896
+        "X": 849.77606,
+        "Y": 932.9286
       }
     },
     {
@@ -225,8 +223,8 @@
       "ChildId": "470dce5e-62f1-474a-b822-17cc65cb1897",
       "SymbolName": "Lib.render.basic.Text",
       "Position": {
-        "X": 819.13983,
-        "Y": 448.0133
+        "X": 989.776,
+        "Y": 1014.0481
       }
     },
     {
@@ -317,10 +315,9 @@
     {
       "ChildId": "aee91aec-faeb-463b-b493-cfb99ec0a856",
       "SymbolName": "Lib.point.draw.DrawLines",
-      "SectionId": "8432acf4-59cc-4410-bba7-4f8118fb828c",
       "Position": {
-        "X": 819.13983,
-        "Y": 260.05896
+        "X": 989.77594,
+        "Y": 827.9286
       }
     },
     {
@@ -345,7 +342,7 @@
       "SymbolName": "Lib.render.basic.DrawScreenQuad",
       "Position": {
         "X": 1418.6562,
-        "Y": -87.84836
+        "Y": -167.66202
       }
     },
     {
@@ -365,11 +362,27 @@
       }
     },
     {
+      "ChildId": "d3a7e5c2-6f1b-4c8e-9a2d-5b7e1f0c3a94",
+      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "Position": {
+        "X": 849.7759,
+        "Y": 730.2633
+      }
+    },
+    {
       "ChildId": "df3cca6c-4dbc-47c0-ad8b-64ae1f628087",
       "SymbolName": "Lib.point._experimental._GetSketchPoints",
       "Position": {
         "X": 819.13983,
         "Y": -35.903717
+      }
+    },
+    {
+      "ChildId": "e8b4f1a6-2c9d-4e7b-8f3a-1d6c5b9e2a07",
+      "SymbolName": "Lib.point.draw.DrawLines",
+      "Position": {
+        "X": 989.7759,
+        "Y": 730.2633
       }
     },
     {
@@ -401,8 +414,8 @@
       "ChildId": "f6214762-274e-44f2-8f5d-bc46b00e699f",
       "SymbolName": "Lib.render.transform.Transform",
       "Position": {
-        "X": 819.13983,
-        "Y": 483.0133
+        "X": 989.776,
+        "Y": 1049.0481
       }
     },
     {
@@ -416,10 +429,9 @@
     {
       "ChildId": "fb5f0168-647c-47fb-aaf6-7fb27095cb38",
       "SymbolName": "Lib.render.transform.Transform",
-      "SectionId": "8432acf4-59cc-4410-bba7-4f8118fb828c",
       "Position": {
-        "X": 819.13983,
-        "Y": 295.05896
+        "X": 989.77594,
+        "Y": 862.9286
       }
     }
   ],
@@ -456,24 +468,6 @@
       "Size": {
         "X": 1032.6433,
         "Y": 357.56738
-      }
-    },
-    {
-      "Id": "8432acf4-59cc-4410-bba7-4f8118fb828c",
-      "Title": "Draw Brush Cursor",
-      "Color": {
-        "X": 0.6,
-        "Y": 0.6,
-        "Z": 0.6,
-        "W": 1.0
-      },
-      "Position": {
-        "X": 650.1301,
-        "Y": 222.19946
-      },
-      "Size": {
-        "X": 371.95102,
-        "Y": 197.82434
       }
     }
   ]

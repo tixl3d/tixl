@@ -114,6 +114,9 @@ internal sealed partial class OutputWindow : Window
         SyncStateWithProject();
         ConsumeRequestedShowInGraph();
 
+        if (ImGui.IsWindowHovered(ImGuiHoveredFlags.ChildWindows) || ImGui.IsWindowFocused(ImGuiFocusedFlags.ChildWindows))
+            T3.SystemUi.OperatorKeyboardCapture.MarkOutputWindowActive();
+
         // In skill training the toolbar is hidden, so force the window-fitting resolution
         // instead of whatever the level project saved (typically 1920x1080).
         if (SkillTraining.IsInPlayMode && _selectedResolution != ResolutionHandling.DefaultResolution)

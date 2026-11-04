@@ -31,6 +31,7 @@ public static partial class T3Ui
 
         Playback.Current = DefaultTimelinePlayback;
         ThemeHandling.Initialize();
+        OperatorEditCommand.RegisterAsOperatorUndoHandler();
     }
 
     internal static readonly Playback DefaultTimelinePlayback = new();

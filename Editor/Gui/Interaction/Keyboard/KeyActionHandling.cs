@@ -32,6 +32,7 @@ internal static class KeyActionHandling
     {
         AreArrowKeysClaimed = _arrowKeysClaimedThisFrame;
         _arrowKeysClaimedThisFrame = false;
+        OperatorKeyboardCapture.BeginFrame(ImGui.GetIO().WantTextInput);
 
         if (!_initialized)
         {
@@ -60,8 +61,9 @@ internal static class KeyActionHandling
         
         var io = ImGui.GetIO();
         var spaceEditsParameters = UserSettings.Config.UseSpaceToEditParameters;
+        var isKeyboardCapturedByOperator = OperatorKeyboardCapture.CapturedBy != Guid.Empty;
 
-        if (spaceEditsParameters)
+        if (spaceEditsParameters && !isKeyboardCapturedByOperator)
         {
             var spaceBinding = action switch
                                    {
@@ -86,6 +88,10 @@ internal static class KeyActionHandling
                 continue;
 
             if (!binding.IsContextValid())
+                continue;
+
+            // Ctrl combinations are document commands (undo, save) that must keep working while an operator owns the keyboard.
+            if (isKeyboardCapturedByOperator && !binding.KeyCombination.Ctrl)
                 continue;
 
             if (binding.IsTriggered(io))

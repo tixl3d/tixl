@@ -1,6 +1,7 @@
 #nullable enable
 using Newtonsoft.Json;
 using T3.Core.Animation;
+using T3.Core.DataTypes.Vector;
 using T3.Core.Resource.Assets;
 using T3.Core.Utils;
 using T3.Serialization;
@@ -29,11 +30,16 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
     [Output(Guid = "BD29C7D2-1296-48CB-AD85-F96C27A35B92")]
     public readonly Slot<string> StatusMessage = new();
 
+    /** Lasso outline and color picker, drawn on top of the sketch. */
+    [Output(Guid = "6C3E9D41-2B7A-4F0E-9A51-8D2F4C7B1E63")]
+    public readonly Slot<StructuredList> OverlayPoints = new();
+
     public _SketchImpl()
     {
         OutPages.UpdateAction += Update;
         CursorPosInWorld.UpdateAction += Update;
         StatusMessage.UpdateAction += Update;
+        OverlayPoints.UpdateAction += Update;
 
         _keyframeSync = new KeyframeSync(this);
         _paging = new Paging(this);
@@ -84,7 +90,7 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
         if (isFilePathDirty)
         {
             var filepath = FilePath.GetValue(context) ?? string.Empty;
-            _absolutePath = GetAbsolutePath(filepath);
+            RegisterFilePath(GetAbsolutePath(filepath));
             //Log.Debug($"Absolute path: {_absolutePath}", this);
             _paging.LoadPages(_absolutePath);
         }
@@ -103,26 +109,16 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
             
         }
 
-        // Switch Brush size
-        {
-            if (StrokeSize.DirtyFlag.IsDirty)
-            {
-                _brushSize = StrokeSize.GetValue(context);
-            }
+        if (IsOpSelected)
+            OperatorKeyboardCapture.Claim(Parent.SymbolChildId);
 
-            for (var index = 0; index < _numberKeys.Length; index++)
-            {
-                if (!KeyHandler.PressedKeys[_numberKeys[index]])
-                    continue;
-
-                _brushSize = (index * index + 0.5f) * 0.1f;
-            }
-        }
+        HandleBrushSizeKeys(context);
 
         // Switch colors
         var colorMode = ColorMode.GetEnumValue<ColorModes>(context);
         var isColorDirty = StrokeColor.IsDirty;
         var color = StrokeColor.GetValue(context);
+        _strokeColor = color;
         var colorNeedsUpdate = colorMode != _colorMode || isColorDirty;
         if (colorNeedsUpdate)
         {
@@ -131,55 +127,42 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
             {
                 ColorizePage(color);
             }
-        }
-
-        // Switch modes
-        if (IsOpSelected && !KeyHandler.PressedKeys[(int)Key.CtrlKey])
-        {
-            if (KeyHandler.PressedKeys[(int)Key.P])
+            else if (isColorDirty && _hasReadStrokeColor)
             {
-                _drawMode = DrawModes.Draw;
-                ClearSelection();
-                _sketchRevision++;
-            }
-            else if (KeyHandler.PressedKeys[(int)Key.E])
-            {
-                EraseSelection();
-                _drawMode = DrawModes.Erase;
-            }
-            else if (KeyHandler.PressedKeys[(int)Key.X])
-            {
-                _paging.Cut(_overridePageIndex);
-                _sketchRevision++;
-            }
-            else if (KeyHandler.PressedKeys[(int)Key.V])
-            {
-                _paging.Paste(context.LocalTime, _overridePageIndex);
-                _sketchRevision++;
-            }
-            else if (KeyHandler.PressedKeys[(int)Key.C])
-            {
-                ClearSelection();
-            }
-            else if (KeyHandler.PressedKeys[(int)Key.S])
-            {
-                _drawMode = DrawModes.Select;
+                // Undoing the parameter change recolors the selection back, so this needs no undo step of its own.
+                wasModified |= RecolorSelection(color);
             }
         }
 
+        _hasReadStrokeColor = true;
+
+        wasModified |= HandleShortcuts(context);
         wasModified |= DoSketch(context, out CursorPosInWorld.Value, out CurrentBrushSize.Value);
+        UpdatePreviousKeyStates();
 
         OutPages.Value = _paging.Pages;
         ActivePageIndexOutput.Value = _paging.ActivePageIndex;
         var pageTitle = _paging.HasActivePage ? $"PAGE{_paging.ActivePageIndex}" : "EMPTY PAGE";
         var tool = !IsOpSelected
                        ? "Not selected"
-                       : _drawMode == DrawModes.Draw
-                           ? "PEN"
-                           : "ERASE";
+                       : _isPickingColor
+                           ? "COLOR (SHIFT CHANGES HUE / CLICK TO APPLY / ESC TO CANCEL)"
+                       : _transformMode switch
+                             {
+                                 TransformModes.Move  => "MOVE (CLICK TO APPLY / ESC TO CANCEL)",
+                                 TransformModes.Scale => "SCALE (CLICK TO APPLY / ESC TO CANCEL)",
+                                 _ => _drawMode switch
+                                          {
+                                              DrawModes.Draw  => "PEN",
+                                              DrawModes.Erase => "ERASE",
+                                              DrawModes.Lasso => "LASSO",
+                                              _               => "VIEW",
+                                          },
+                             };
 
-        var cutSomething = _paging.HasCutPage ? "/ PASTE WITH V" : "";
-        StatusMessage.Value = $"{pageTitle}: {tool} {cutSomething}";
+        var pasteHint = Clipboard.Count > 0 ? "/ PASTE WITH V" : "";
+        StatusMessage.Value = $"{pageTitle}: {tool} {pasteHint}";
+        OverlayPoints.Value = BuildOverlay(context);
 
         if (wasModified)
         {
@@ -243,6 +226,181 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
         stringInput.SetTypedInputValue(path);
     }
 
+    private void RegisterFilePath(string absolutePath)
+    {
+        if (SketchesByFilePath.TryGetValue(_absolutePath, out var registered) && registered == this)
+            SketchesByFilePath.Remove(_absolutePath);
+
+        _absolutePath = absolutePath;
+        SketchesByFilePath[_absolutePath] = this;
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (SketchesByFilePath.TryGetValue(_absolutePath, out var registered) && registered == this)
+            SketchesByFilePath.Remove(_absolutePath);
+
+        base.Dispose(disposing);
+    }
+
+    #region keyboard
+    private void HandleBrushSizeKeys(EvaluationContext context)
+    {
+        if (StrokeSize.DirtyFlag.IsDirty)
+        {
+            _brushSize = StrokeSize.GetValue(context);
+        }
+
+        if (!HasKeyboard || KeyHandler.PressedKeys[(int)Key.CtrlKey] || KeyHandler.PressedKeys[(int)Key.ShiftKey])
+            return;
+
+        for (var index = 0; index < _numberKeys.Length; index++)
+        {
+            if (WasKeyPressed(_numberKeys[index]))
+                _brushSize = (index * index + 0.5f) * 0.1f;
+        }
+
+        if (WasKeyPressed(Key.SquareBracketLeft))
+            _brushSize = Math.Clamp(_brushSize / BrushSizeStepFactor, MinBrushSize, MaxBrushSize);
+
+        if (WasKeyPressed(Key.SquareBracketRight))
+            _brushSize = Math.Clamp(_brushSize * BrushSizeStepFactor, MinBrushSize, MaxBrushSize);
+    }
+
+    private bool HandleShortcuts(EvaluationContext context)
+    {
+        if (!HasKeyboard || KeyHandler.PressedKeys[(int)Key.CtrlKey])
+            return false;
+
+        if (_isPickingColor)
+        {
+            if (WasKeyPressed(Key.Esc))
+            {
+                CancelColorPicking();
+                return true;
+            }
+
+            if (WasKeyPressed(Key.Return) || WasKeyPressed(Key.K))
+            {
+                ConfirmColorPicking();
+                return true;
+            }
+
+            return false;
+        }
+
+        if (_transformMode != TransformModes.None)
+        {
+            if (WasKeyPressed(Key.Esc))
+            {
+                CancelTransform();
+                return true;
+            }
+
+            if (WasKeyPressed(Key.Return))
+            {
+                ConfirmTransform();
+                return true;
+            }
+
+            return false;
+        }
+
+        if (WasKeyPressed(Key.P))
+        {
+            _drawMode = DrawModes.Draw;
+            ClearSelection();
+            return true;
+        }
+
+        if (WasKeyPressed(Key.E))
+        {
+            _drawMode = DrawModes.Erase;
+            return DeleteSelection("Erase sketch selection");
+        }
+
+        if (WasKeyPressed(Key.S))
+        {
+            _drawMode = DrawModes.Lasso;
+            return false;
+        }
+
+        if (WasKeyPressed(Key.G))
+        {
+            StartTransform(TransformModes.Move, context);
+            return false;
+        }
+
+        if (WasKeyPressed(Key.R))
+        {
+            StartTransform(TransformModes.Scale, context);
+            return false;
+        }
+
+        if (WasKeyPressed(Key.K))
+        {
+            StartColorPicking(context);
+            return false;
+        }
+
+        if (WasKeyPressed(Key.C))
+        {
+            CopyToClipboard(out _);
+            return false;
+        }
+
+        if (WasKeyPressed(Key.X))
+        {
+            if (!CopyToClipboard(out var copiedSelection))
+                return false;
+
+            return copiedSelection
+                       ? DeleteSelection("Cut sketch selection")
+                       : CutPage();
+        }
+
+        if (WasKeyPressed(Key.V))
+            return PasteFromClipboard();
+
+        if (WasKeyPressed(Key.Esc))
+        {
+            ClearSelection();
+            return true;
+        }
+
+        return false;
+    }
+
+    /** KeyHandler only reports held keys; actions must fire once per press, not on every frame the key is down. */
+    private bool WasKeyPressed(Key key) => WasKeyPressed((int)key);
+
+    private bool WasKeyPressed(int keyCode) => KeyHandler.PressedKeys[keyCode] && !_previousKeyStates[keyCode];
+
+    private void UpdatePreviousKeyStates()
+    {
+        for (var keyCode = 0; keyCode < _previousKeyStates.Length; keyCode++)
+        {
+            _previousKeyStates[keyCode] = KeyHandler.PressedKeys[keyCode];
+        }
+    }
+    #endregion
+
+    #region selection, clipboard and undo
+    private static bool IsSelected(in Point point) => point.F2 > 0.5f && !Point.IsSeparator(point);
+
+    private static bool HasSelection(Page page)
+    {
+        var points = page.PointsList.TypedElements;
+        var count = Math.Min(page.WriteIndex, points.Length);
+        for (var index = 0; index < count; index++)
+        {
+            if (IsSelected(points[index]))
+                return true;
+        }
+
+        return false;
+    }
+
     private void ClearSelection()
     {
         if (_paging.ActivePage == null || CurrentPointList == null)
@@ -256,51 +414,569 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
         _sketchRevision++;
     }
 
-    private void EraseSelection()
-    {
-        if (_paging.ActivePage == null || CurrentPointList == null)
-            return;
-
-        for (var index = 0; index < CurrentPointList.TypedElements.Length; index++)
-        {
-            var selection = CurrentPointList.TypedElements[index].F2;
-            if (selection > 0.9f)
-            {
-                CurrentPointList.TypedElements[index].Scale = Vector3.One * float.NaN;
-            }
-        }
-
-        _sketchRevision++;
-    }
-
     private void ColorizePage(Vector4 fillColor)
     {
         if (_paging.ActivePage == null || CurrentPointList == null)
             return;
 
-        //Log.Debug("Colorize page " + fillColor, this);
-
         for (var index = 0; index < CurrentPointList.TypedElements.Length; index++)
         {
             CurrentPointList.TypedElements[index].Color = fillColor;
-            _sketchRevision++;
+        }
+
+        _sketchRevision++;
+    }
+
+    /** Turns the selected points into separators, which splits strokes where a selection ends. */
+    private bool DeleteSelection(string editName)
+    {
+        var page = _paging.ActivePage;
+        if (page == null || !HasSelection(page))
+            return false;
+
+        var edit = BeginEdit();
+        var points = page.PointsList.TypedElements;
+        var count = Math.Min(page.WriteIndex, points.Length);
+        for (var index = 0; index < count; index++)
+        {
+            if (IsSelected(points[index]))
+                points[index].Scale = Vector3.One * float.NaN;
+        }
+
+        CommitEdit(edit, editName);
+        return true;
+    }
+
+    /** Copies the selected strokes, or all strokes of the page if nothing is selected. */
+    private bool CopyToClipboard(out bool copiedSelection)
+    {
+        copiedSelection = false;
+        var page = _paging.ActivePage;
+        if (page == null)
+            return false;
+
+        copiedSelection = HasSelection(page);
+        Clipboard.Clear();
+
+        var points = page.PointsList.TypedElements;
+        var count = Math.Min(page.WriteIndex, points.Length);
+        for (var index = 0; index < count; index++)
+        {
+            var point = points[index];
+            var isIncluded = !Point.IsSeparator(point) && (!copiedSelection || IsSelected(point));
+            if (isIncluded)
+            {
+                point.F2 = 0;
+                Clipboard.Add(point);
+            }
+            else if (Clipboard.Count > 0 && !Point.IsSeparator(Clipboard[^1]))
+            {
+                Clipboard.Add(Point.Separator());
+            }
+        }
+
+        if (Clipboard.Count > 0 && !Point.IsSeparator(Clipboard[^1]))
+            Clipboard.Add(Point.Separator());
+
+        return Clipboard.Count > 0;
+    }
+
+    private bool CutPage()
+    {
+        if (_paging.ActivePage == null)
+            return false;
+
+        var edit = BeginEdit();
+        _paging.RemoveActivePage(_overridePageIndex);
+        CommitEdit(edit, "Cut sketch page");
+        return true;
+    }
+
+    /** Appends the copied strokes to the current page and selects them, so they can be moved right away. */
+    private bool PasteFromClipboard()
+    {
+        if (Clipboard.Count == 0)
+            return false;
+
+        var edit = BeginEdit();
+        if (!_paging.HasActivePage)
+            _paging.InsertNewPage();
+
+        ClearSelection();
+        foreach (var copiedPoint in Clipboard)
+        {
+            var point = copiedPoint;
+            if (!Point.IsSeparator(point))
+                point.F2 = 1;
+
+            AppendPoint(point);
+        }
+
+        CommitEdit(edit, "Paste sketch strokes");
+        return true;
+    }
+
+    private SketchEdit BeginEdit() => new(this);
+
+    private void CommitEdit(SketchEdit edit, string name)
+    {
+        edit.Complete(this);
+        OperatorUndoRedo.Add(name, edit.Undo, edit.Redo);
+    }
+
+    private void ApplyEdit(List<Page> pages, Page? page, PageContent? content)
+    {
+        _transformMode = TransformModes.None;
+        _transformEdit = null;
+        _isPickingColor = false;
+        _colorPickerEdit = null;
+        _strokeEdit = null;
+        _isLassoActive = false;
+        _currentStrokeLength = 0;
+        _hasTailPoint = false;
+
+        if (page != null && content != null)
+            page.Restore(content);
+
+        _paging.ReplacePages(pages);
+        _sketchRevision++;
+        _lastModificationTime = Playback.RunTimeInSecs;
+    }
+    #endregion
+
+    #region move and scale
+    private void StartTransform(TransformModes mode, EvaluationContext context)
+    {
+        var page = _paging.ActivePage;
+        if (page == null || _isMouseDown || !HasSelection(page))
+            return;
+
+        var points = page.PointsList.TypedElements;
+        var count = Math.Min(page.WriteIndex, points.Length);
+        var sum = Vector3.Zero;
+        var selectedCount = 0;
+        for (var index = 0; index < count; index++)
+        {
+            if (!IsSelected(points[index]))
+                continue;
+
+            sum += points[index].Position;
+            selectedCount++;
+        }
+
+        _transformEdit = BeginEdit();
+        _transformMode = mode;
+        _transformCenter = sum / selectedCount;
+        _transformStartPos = CalcPosInWorld(context, MousePos.GetValue(context));
+    }
+
+    /** Sets the selected points from their positions before the transform started, so the result never drifts. */
+    private bool ApplyTransform(Vector3 posInWorld)
+    {
+        var page = _paging.ActivePage;
+        var before = _transformEdit?.ContentBefore;
+        if (page == null || before == null || page != _transformEdit!.Page)
+        {
+            CancelTransform();
+            return true;
+        }
+
+        var offset = Vector3.Zero;
+        var scale = 1f;
+        if (_transformMode == TransformModes.Move)
+        {
+            offset = posInWorld - _transformStartPos;
+        }
+        else
+        {
+            var startDistance = Vector3.Distance(_transformStartPos, _transformCenter);
+            if (startDistance > 0.00001f)
+                scale = Vector3.Distance(posInWorld, _transformCenter) / startDistance;
+        }
+
+        var points = page.PointsList.TypedElements;
+        var originalPoints = before.Points.TypedElements;
+        var count = Math.Min(Math.Min(page.WriteIndex, points.Length), originalPoints.Length);
+        for (var index = 0; index < count; index++)
+        {
+            if (!IsSelected(points[index]))
+                continue;
+
+            var originalPos = originalPoints[index].Position;
+            points[index].Position = _transformCenter + (originalPos - _transformCenter) * scale + offset;
+        }
+
+        return true;
+    }
+
+    private void ConfirmTransform()
+    {
+        if (_transformEdit == null)
+            return;
+
+        CommitEdit(_transformEdit, _transformMode == TransformModes.Move ? "Move sketch strokes" : "Scale sketch strokes");
+        _transformEdit = null;
+        _transformMode = TransformModes.None;
+    }
+
+    private void CancelTransform()
+    {
+        var edit = _transformEdit;
+        _transformEdit = null;
+        _transformMode = TransformModes.None;
+        edit?.Revert(this);
+    }
+    #endregion
+
+    #region lasso
+    private bool ContinueLasso(Vector2 mousePos, Vector3 posInWorld)
+    {
+        if (!_isLassoActive || _paging.ActivePage == null || CurrentPointList == null)
+            return false;
+
+        var posInClipSpace = MouseToClipSpace(mousePos);
+        if (_lassoPointsInClipSpace.Count > 0
+            && Vector2.Distance(_lassoPointsInClipSpace[^1], posInClipSpace) < MinLassoPointDistanceInClipSpace)
+            return false;
+
+        if (_lassoPointsInWorld.Count >= MaxOverlayPoints - 2)
+            return false;
+
+        _lassoPointsInClipSpace.Add(posInClipSpace);
+        _lassoPointsInWorld.Add(posInWorld);
+        return true;
+    }
+
+    /** Tests in clip space, so strokes are selected by where they appear even if the camera moved since drawing. */
+    private void SelectInsideLasso(EvaluationContext context)
+    {
+        var page = _paging.ActivePage;
+        if (page == null || _lassoPointsInClipSpace.Count < 3)
+            return;
+
+        var worldToClipSpace = Matrix4x4.Multiply(context.WorldToCamera, context.CameraToClipSpace);
+        var points = page.PointsList.TypedElements;
+        var count = Math.Min(page.WriteIndex, points.Length);
+        for (var index = 0; index < count; index++)
+        {
+            if (Point.IsSeparator(points[index]))
+                continue;
+
+            var posInClipSpace = Vector4.Transform(new Vector4(points[index].Position, 1), worldToClipSpace);
+            if (posInClipSpace.W <= 0)
+                continue;
+
+            var projected = new Vector2(posInClipSpace.X, posInClipSpace.Y) / posInClipSpace.W;
+            if (IsInsidePolygon(_lassoPointsInClipSpace, projected))
+                points[index].F2 = 1;
         }
     }
 
+    /** Even-odd rule, so self-intersecting lassos behave predictably. */
+    private static bool IsInsidePolygon(List<Vector2> polygon, Vector2 point)
+    {
+        var isInside = false;
+        for (int index = 0, previousIndex = polygon.Count - 1; index < polygon.Count; previousIndex = index++)
+        {
+            var a = polygon[index];
+            var b = polygon[previousIndex];
+            if ((a.Y > point.Y) != (b.Y > point.Y)
+                && point.X < (b.X - a.X) * (point.Y - a.Y) / (b.Y - a.Y) + a.X)
+            {
+                isInside = !isInside;
+            }
+        }
+
+        return isInside;
+    }
+
+    private static Vector2 MouseToClipSpace(Vector2 mousePos) => new((mousePos.X - 0.5f) * 2, (-mousePos.Y + 0.5f) * 2);
+    #endregion
+
+    #region color picking
+    /// <summary>
+    /// Opens a square centered on the current color: horizontal is opacity, vertical is brightness, Shift with
+    /// horizontal movement changes the hue. With a selection, the selection's color is edited live.
+    /// </summary>
+    private void StartColorPicking(EvaluationContext context)
+    {
+        if (_isMouseDown)
+            return;
+
+        var page = _paging.ActivePage;
+        var baseColor = _strokeColor;
+        _colorPickerEdit = null;
+        if (page != null && TryGetFirstSelectedColor(page, out var selectedColor))
+        {
+            baseColor = selectedColor;
+            _colorPickerEdit = BeginEdit();
+        }
+
+        new Color(baseColor).GetHSV(out _pickerHue, out _pickerSaturation, out _pickerBaseValue);
+        _pickerBaseColor = baseColor;
+        _pickedColor = baseColor;
+        _pickerAnchorMousePos = MousePos.GetValue(context);
+        _lastPickerMousePos = _pickerAnchorMousePos;
+        _isPickingColor = true;
+    }
+
+    private bool UpdateColorPicking(Vector2 mousePos)
+    {
+        var mouseDelta = mousePos - _lastPickerMousePos;
+        _lastPickerMousePos = mousePos;
+        if (KeyHandler.PressedKeys[(int)Key.ShiftKey])
+        {
+            // The square follows the cursor while the hue changes, so opacity stays where it was.
+            _pickerHue = (_pickerHue + mouseDelta.X * HueChangePerScreenWidth) % 1f;
+            if (_pickerHue < 0)
+                _pickerHue += 1;
+
+            _pickerAnchorMousePos.X += mouseDelta.X;
+        }
+
+        var (opacityOffset, brightnessOffset) = GetPickerOffsets(mousePos);
+        _pickedColor = GetPickerColor(opacityOffset, brightnessOffset);
+
+        if (_colorPickerEdit != null)
+            RecolorSelection(_pickedColor);
+
+        return true;
+    }
+
+    private void ConfirmColorPicking()
+    {
+        if (!_isPickingColor)
+            return;
+
+        _isPickingColor = false;
+        if (_colorPickerEdit != null)
+        {
+            CommitEdit(_colorPickerEdit, "Recolor sketch selection");
+            _colorPickerEdit = null;
+            return;
+        }
+
+        // Writes the parameter, so the picked color shows in the parameter window and is saved with the project.
+        if (Parent?.Inputs.FirstOrDefault(i => i.Id == _strokeColorInputId) is InputSlot<Vector4> strokeColorInput)
+            strokeColorInput.SetTypedInputValue(_pickedColor);
+    }
+
+    private void CancelColorPicking()
+    {
+        _isPickingColor = false;
+        var edit = _colorPickerEdit;
+        _colorPickerEdit = null;
+        edit?.Revert(this);
+    }
+
+    /** Offsets of the cursor from the square's center in -1..1, as opacity (horizontal) and brightness (vertical). */
+    private (float Opacity, float Brightness) GetPickerOffsets(Vector2 mousePos)
+    {
+        var offsetInClipSpace = MouseToClipSpace(mousePos) - MouseToClipSpace(_pickerAnchorMousePos);
+        var opacity = Math.Clamp(offsetInClipSpace.X / (PickerHalfHeightInClipSpace / _aspectRatio), -1, 1);
+        var brightness = Math.Clamp(offsetInClipSpace.Y / PickerHalfHeightInClipSpace, -1, 1);
+        return (opacity, brightness);
+    }
+
+    /** Upwards the color fades to white, downwards to black, so the top edge is a tint and the bottom a shade. */
+    private Vector4 GetPickerColor(float opacityOffset, float brightnessOffset)
+    {
+        var value = BlendFromCenter(_pickerBaseValue, brightnessOffset);
+        var saturation = brightnessOffset > 0
+                             ? MathUtils.Lerp(_pickerSaturation, 0, brightnessOffset)
+                             : _pickerSaturation;
+        var alpha = BlendFromCenter(_pickerBaseColor.W, opacityOffset);
+        return Color.FromHSV(_pickerHue, saturation, value, alpha).Rgba;
+    }
+
+    /** The center keeps the base value; the edges reach 0 and 1, so small moves stay precise near the current color. */
+    private static float BlendFromCenter(float baseValue, float offset)
+    {
+        return offset < 0
+                   ? MathUtils.Lerp(baseValue, 0, -offset)
+                   : MathUtils.Lerp(baseValue, 1, offset);
+    }
+
+    private bool RecolorSelection(Vector4 color)
+    {
+        var page = _paging.ActivePage;
+        if (page == null)
+            return false;
+
+        var points = page.PointsList.TypedElements;
+        var count = Math.Min(page.WriteIndex, points.Length);
+        var wasModified = false;
+        for (var index = 0; index < count; index++)
+        {
+            if (!IsSelected(points[index]))
+                continue;
+
+            points[index].Color = color;
+            wasModified = true;
+        }
+
+        return wasModified;
+    }
+
+    private static bool TryGetFirstSelectedColor(Page page, out Vector4 color)
+    {
+        var points = page.PointsList.TypedElements;
+        var count = Math.Min(page.WriteIndex, points.Length);
+        for (var index = 0; index < count; index++)
+        {
+            if (!IsSelected(points[index]))
+                continue;
+
+            color = points[index].Color;
+            return true;
+        }
+
+        color = Vector4.One;
+        return false;
+    }
+    #endregion
+
+    #region overlay
+    /// <summary>
+    /// Fills the overlay with the lasso outline or the color picker. The picker is drawn as horizontal bands of
+    /// lines whose colors are interpolated along each line, which matches the piecewise linear mapping exactly.
+    /// </summary>
+    private StructuredList BuildOverlay(EvaluationContext context)
+    {
+        _aspectRatio = Math.Abs(context.CameraToClipSpace.M11) > 0.0001f
+                           ? context.CameraToClipSpace.M22 / context.CameraToClipSpace.M11
+                           : 1;
+
+        _overlayCount = 0;
+        if (_isLassoActive && _lassoPointsInWorld.Count > 1)
+        {
+            for (var index = 0; index <= _lassoPointsInWorld.Count; index++)
+            {
+                AddOverlayPoint(_lassoPointsInWorld[index % _lassoPointsInWorld.Count], LassoColor, LassoLineScale);
+            }
+
+            AddOverlaySeparator();
+        }
+        else if (_isPickingColor && IsOpSelected)
+        {
+            AddColorPickerToOverlay(context);
+        }
+
+        if (_overlayCount == 0)
+            return _emptyOverlay;
+
+        // Unused entries from earlier frames must not be drawn.
+        var points = _overlayPoints.TypedElements;
+        for (var index = _overlayCount; index < _lastOverlayCount; index++)
+        {
+            points[index] = Point.Separator();
+        }
+
+        _lastOverlayCount = _overlayCount;
+        return _overlayPoints;
+    }
+
+    private void AddColorPickerToOverlay(EvaluationContext context)
+    {
+        var center = MouseToClipSpace(_pickerAnchorMousePos);
+        var halfHeight = PickerHalfHeightInClipSpace;
+        var halfWidth = halfHeight / _aspectRatio;
+        var bandHeight = 2 * halfHeight / PickerBandCount;
+
+        // DrawLines widths are 0.2 * Scale in clip space units of the screen height.
+        var bandScale = bandHeight / 0.2f;
+        for (var bandIndex = 0; bandIndex < PickerBandCount; bandIndex++)
+        {
+            var brightnessOffset = -1 + (bandIndex + 0.5f) * 2 / PickerBandCount;
+            var y = center.Y + brightnessOffset * halfHeight;
+            for (var column = -1; column <= 1; column++)
+            {
+                var color = GetPickerColor(column, brightnessOffset);
+                AddOverlayPoint(ClipSpaceToWorld(context, new Vector2(center.X + column * halfWidth, y)), color, bandScale);
+            }
+
+            AddOverlaySeparator();
+        }
+
+        // Frame, and a bar above it comparing the original color (left) with the picked one (right).
+        var frameScale = PickerFrameLineWidthInClipSpace / 0.2f;
+        var left = center.X - halfWidth;
+        var right = center.X + halfWidth;
+        var bottom = center.Y - halfHeight;
+        var top = center.Y + halfHeight;
+        AddOverlayPoint(ClipSpaceToWorld(context, new Vector2(left, bottom)), PickerFrameColor, frameScale);
+        AddOverlayPoint(ClipSpaceToWorld(context, new Vector2(right, bottom)), PickerFrameColor, frameScale);
+        AddOverlayPoint(ClipSpaceToWorld(context, new Vector2(right, top)), PickerFrameColor, frameScale);
+        AddOverlayPoint(ClipSpaceToWorld(context, new Vector2(left, top)), PickerFrameColor, frameScale);
+        AddOverlayPoint(ClipSpaceToWorld(context, new Vector2(left, bottom)), PickerFrameColor, frameScale);
+        AddOverlaySeparator();
+
+        var barY = top + PickerComparisonBarHeightInClipSpace;
+        var barScale = PickerComparisonBarHeightInClipSpace / 0.2f;
+        AddOverlayPoint(ClipSpaceToWorld(context, new Vector2(left, barY)), _pickerBaseColor, barScale);
+        AddOverlayPoint(ClipSpaceToWorld(context, new Vector2(center.X, barY)), _pickerBaseColor, barScale);
+        AddOverlaySeparator();
+        AddOverlayPoint(ClipSpaceToWorld(context, new Vector2(center.X, barY)), _pickedColor, barScale);
+        AddOverlayPoint(ClipSpaceToWorld(context, new Vector2(right, barY)), _pickedColor, barScale);
+        AddOverlaySeparator();
+    }
+
+    private void AddOverlayPoint(Vector3 position, Vector4 color, float scale)
+    {
+        if (_overlayCount >= MaxOverlayPoints - 1)
+            return;
+
+        _overlayPoints.TypedElements[_overlayCount++] = new Point
+                                                            {
+                                                                Position = position,
+                                                                Color = color,
+                                                                Scale = Vector3.One * scale,
+                                                                F2 = 0,
+                                                            };
+    }
+
+    private void AddOverlaySeparator()
+    {
+        if (_overlayCount >= MaxOverlayPoints)
+            return;
+
+        _overlayPoints.TypedElements[_overlayCount++] = Point.Separator();
+    }
+
+    private static Vector3 ClipSpaceToWorld(EvaluationContext context, Vector2 posInClipSpace)
+    {
+        return CalcPosInWorld(context, new Vector2(posInClipSpace.X / 2 + 0.5f, 0.5f - posInClipSpace.Y / 2));
+    }
+    #endregion
+
+    #region strokes
     private bool DoSketch(EvaluationContext context, out Vector3 posInWorld, out float visibleBrushSize)
     {
         visibleBrushSize = _brushSize;
         if (_drawMode == DrawModes.Erase)
             visibleBrushSize *= 4;
 
-        posInWorld = CalcPosInWorld(context, MousePos.GetValue(context));
+        var mousePos = MousePos.GetValue(context);
+        posInWorld = CalcPosInWorld(context, mousePos);
 
         if (_drawMode == DrawModes.View || !IsOpSelected)
         {
+            var wasModified = EndStroke(context);
+            if (_transformMode != TransformModes.None)
+            {
+                CancelTransform();
+                wasModified = true;
+            }
+
+            if (_isPickingColor)
+            {
+                CancelColorPicking();
+                wasModified = true;
+            }
+
             _isMouseDown = false;
-            _currentStrokeLength = 0;
-            _hasTailPoint = false;
-            return false;
+            _isResizingBrush = false;
+            return wasModified;
         }
 
         var isMouseDown = IsMouseButtonDown.GetValue(context);
@@ -308,22 +984,200 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
         var justPressed = isMouseDown && !_isMouseDown;
         _isMouseDown = isMouseDown;
 
-        if (justReleased)
+        if (_ignoreMouseUntilReleased)
         {
-            if (_drawMode != DrawModes.Draw || !_paging.HasActivePage)
-                return false;
+            if (!isMouseDown)
+                _ignoreMouseUntilReleased = false;
 
+            return false;
+        }
+
+        if (_isPickingColor)
+        {
+            if (justPressed)
+            {
+                ConfirmColorPicking();
+                _ignoreMouseUntilReleased = true;
+                return true;
+            }
+
+            return UpdateColorPicking(mousePos);
+        }
+
+        if (_isResizingBrush)
+        {
+            if (!isMouseDown)
+            {
+                _isResizingBrush = false;
+                return false;
+            }
+
+            // Right or up grows, left or down shrinks. Horizontal moves are measured in screen heights, so both
+            // axes feel alike; exponential, so the same distance feels alike for small and large brushes.
+            var dragDistance = (mousePos.X - _brushResizeStartMousePos.X) * _aspectRatio - (mousePos.Y - _brushResizeStartMousePos.Y);
+            var scale = MathF.Exp(dragDistance * BrushResizeSpeed);
+            _brushSize = Math.Clamp(_brushSizeAtResizeStart * scale, MinBrushSize, MaxBrushSize);
+            visibleBrushSize = _drawMode == DrawModes.Erase ? _brushSize * 4 : _brushSize;
+            posInWorld = _brushResizeAnchorPos;
+            return false;
+        }
+
+        if (justPressed && _transformMode == TransformModes.None && KeyHandler.PressedKeys[(int)Key.CtrlKey])
+        {
+            // The brush preview stays where the drag started, so its size can be judged against the drawing.
+            _isResizingBrush = true;
+            _brushResizeStartMousePos = mousePos;
+            _brushSizeAtResizeStart = _brushSize;
+            _brushResizeAnchorPos = posInWorld;
+            return false;
+        }
+
+        if (_transformMode != TransformModes.None)
+        {
+            if (!justPressed)
+                return ApplyTransform(posInWorld);
+
+            ConfirmTransform();
+            _ignoreMouseUntilReleased = true;
+            return true;
+        }
+
+        if (justReleased)
+            return EndStroke(context);
+
+        if (!isMouseDown)
+            return false;
+
+        if (justPressed)
+            BeginStroke();
+
+        var isStrokeActive = _strokeEdit != null || _isLassoActive;
+        if (!isStrokeActive)
+            return false;
+
+        switch (_strokeMode)
+        {
+            case DrawModes.Draw:
+                return ContinueDrawing(posInWorld, visibleBrushSize, justPressed);
+
+            case DrawModes.Erase:
+                return EraseAt(posInWorld, visibleBrushSize);
+
+            case DrawModes.Lasso:
+                return ContinueLasso(mousePos, posInWorld);
+        }
+
+        return false;
+    }
+
+    private void BeginStroke()
+    {
+        _strokeMode = _drawMode;
+        switch (_strokeMode)
+        {
+            case DrawModes.Draw:
+            case DrawModes.Erase:
+                _strokeEdit = BeginEdit();
+                _strokeErasedPoints = false;
+                break;
+
+            case DrawModes.Lasso:
+                if (!_paging.HasActivePage)
+                    break;
+
+                _lassoPointsInClipSpace.Clear();
+                _lassoPointsInWorld.Clear();
+                _isLassoActive = true;
+                if (!KeyHandler.PressedKeys[(int)Key.ShiftKey])
+                    ClearSelection();
+
+                break;
+        }
+    }
+
+    private bool EndStroke(EvaluationContext context)
+    {
+        var edit = _strokeEdit;
+        _strokeEdit = null;
+
+        switch (_strokeMode)
+        {
+            case DrawModes.Draw:
+                if (edit == null)
+                    return false;
+
+                FinishDrawnStroke();
+                CommitEdit(edit, "Draw sketch stroke");
+                return true;
+
+            case DrawModes.Erase:
+                if (edit == null || !_strokeErasedPoints)
+                    return false;
+
+                CommitEdit(edit, "Erase sketch strokes");
+                return true;
+
+            case DrawModes.Lasso:
+                if (!_isLassoActive)
+                    return false;
+
+                _isLassoActive = false;
+                SelectInsideLasso(context);
+                return true;
+        }
+
+        return false;
+    }
+
+    private bool ContinueDrawing(Vector3 posInWorld, float visibleBrushSize, bool justPressed)
+    {
+        if (_currentStrokeLength > 0 && GetPreviousStrokePoint(out var lastPoint)
+                                     && Vector3.Distance(lastPoint.Position, posInWorld) < visibleBrushSize * MinPointDistanceForBrushSize)
+        {
+            UpdateTailPoint(lastPoint, posInWorld);
+            return true;
+        }
+
+        if (!_paging.HasActivePage)
+        {
+            _paging.InsertNewPage();
+            _sketchRevision++;
+        }
+
+        // Draw Lines with Shift
+        if (justPressed && KeyHandler.PressedKeys[(int)Key.ShiftKey] && _paging.ActivePage!.WriteIndex > 1)
+        {
+            // Discard last separator point
+            _paging.ActivePage.WriteIndex--;
+            _currentStrokeLength = 1;
+        }
+
+        AppendPoint(new Point
+                        {
+                            Position = posInWorld,
+                            Color = _strokeColor,
+                            Scale = Vector3.One * (visibleBrushSize / 2 + 0.002f),
+                            F2 = 0, // Not selected by default
+                        });
+        AppendPoint(Point.Separator(), advanceIndex: false);
+        _currentStrokeLength++;
+        _hasTailPoint = false;
+        return true;
+    }
+
+    private void FinishDrawnStroke()
+    {
+        if (_paging.HasActivePage && _currentStrokeLength > 0)
+        {
             // Add to points for single click to make it visible as a dot
             var wasClick = _currentStrokeLength == 1;
             if (wasClick)
             {
-                if (!GetPreviousStrokePoint(out var clickPoint))
+                if (GetPreviousStrokePoint(out var clickPoint))
                 {
-                    return false;
+                    clickPoint.Position += Vector3.UnitY * 0.02f * 2 * _brushSize;
+                    AppendPoint(clickPoint);
                 }
-
-                clickPoint.Position += Vector3.UnitY * 0.02f * 2 * visibleBrushSize;
-                AppendPoint(clickPoint);
             }
             else if (_hasTailPoint)
             {
@@ -332,89 +1186,32 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
             }
 
             AppendPoint(Point.Separator());
-            _currentStrokeLength = 0;
-            _hasTailPoint = false;
-            return true;
         }
 
-        if (!_isMouseDown)
+        _currentStrokeLength = 0;
+        _hasTailPoint = false;
+    }
+
+    private bool EraseAt(Vector3 posInWorld, float visibleBrushSize)
+    {
+        if (_paging.ActivePage == null || CurrentPointList == null)
             return false;
 
-        if (_currentStrokeLength > 0 && GetPreviousStrokePoint(out var lastPoint))
+        var wasModified = false;
+        for (var index = 0; index < CurrentPointList.NumElements; index++)
         {
-            var distance = Vector3.Distance(lastPoint.Position, posInWorld);
-            if (distance < visibleBrushSize * MinPointDistanceForBrushSize)
-            {
-                if (_drawMode != DrawModes.Draw)
-                    return false;
+            ref var point = ref CurrentPointList.TypedElements[index];
+            if (Point.IsSeparator(point) || !(Vector3.Distance(posInWorld, point.Position) < visibleBrushSize * 0.02f))
+                continue;
 
-                UpdateTailPoint(lastPoint, posInWorld);
-                return true;
-            }
+            point.Scale = Vector3.One * float.NaN;
+            wasModified = true;
         }
 
-        switch (_drawMode)
-        {
-            case DrawModes.Draw:
-                if (!_paging.HasActivePage)
-                {
-                    _paging.InsertNewPage();
-                    _sketchRevision++;
-                }
-
-                // Draw Lines with Shift
-                if (justPressed && KeyHandler.PressedKeys[(int)Key.ShiftKey] && _paging.ActivePage!.WriteIndex > 1)
-                {
-                    // Discard last separator point
-                    _paging.ActivePage.WriteIndex--;
-                    _currentStrokeLength = 1;
-                }
-
-                var color = StrokeColor.GetValue(context);
-
-                AppendPoint(new Point
-                                {
-                                    Position = posInWorld,
-                                    Color = color,
-                                    Scale = Vector3.One * (visibleBrushSize / 2 + 0.002f),
-                                    F2 = 0, // Not selected by default
-                                });
-                AppendPoint(Point.Separator(), advanceIndex: false);
-                _currentStrokeLength++;
-                _hasTailPoint = false;
-                return true;
-
-            case DrawModes.Erase:
-            case DrawModes.Select:
-            {
-                if (_paging.ActivePage == null || CurrentPointList == null)
-                    return false;
-
-                var wasModified = false;
-                for (var index = 0; index < CurrentPointList.NumElements; index++)
-                {
-                    var distanceToPoint = Vector3.Distance(posInWorld, CurrentPointList.TypedElements[index].Position);
-                    if (!(distanceToPoint < visibleBrushSize * 0.02f))
-                        continue;
-
-                    if (_drawMode == DrawModes.Erase)
-                    {
-                        CurrentPointList.TypedElements[index].Scale = Vector3.One * float.NaN;
-                    }
-                    else if (_drawMode == DrawModes.Select)
-                    {
-                        CurrentPointList.TypedElements[index].F2 = 1;
-                    }
-
-                    wasModified = true;
-                }
-
-                return wasModified;
-            }
-        }
-
-        return false;
+        _strokeErasedPoints |= wasModified;
+        return wasModified;
     }
+    #endregion
 
     private static Vector3 CalcPosInWorld(EvaluationContext context, Vector2 mousePos)
     {
@@ -492,6 +1289,65 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
 
     private int _currentStrokeLength;
     private bool _hasTailPoint;
+    private Vector4 _strokeColor = Vector4.One;
+
+    private DrawModes _strokeMode = DrawModes.Draw;
+    private SketchEdit? _strokeEdit;
+    private bool _strokeErasedPoints;
+    private bool _ignoreMouseUntilReleased;
+
+    private TransformModes _transformMode = TransformModes.None;
+    private SketchEdit? _transformEdit;
+    private Vector3 _transformCenter;
+    private Vector3 _transformStartPos;
+
+    private bool _isResizingBrush;
+    private Vector2 _brushResizeStartMousePos;
+    private float _brushSizeAtResizeStart;
+    private Vector3 _brushResizeAnchorPos;
+    private const float BrushResizeSpeed = 2.5f;
+    private const float BrushSizeStepFactor = 1.25f;
+    private const float MinBrushSize = 0.02f;
+    private const float MaxBrushSize = 20f;
+
+    private bool _isPickingColor;
+    private SketchEdit? _colorPickerEdit;
+    private Vector2 _pickerAnchorMousePos;
+    private Vector2 _lastPickerMousePos;
+    private Vector4 _pickerBaseColor;
+    private Vector4 _pickedColor;
+    private float _pickerHue;
+    private float _pickerSaturation;
+    private float _pickerBaseValue;
+    private bool _hasReadStrokeColor;
+    private float _aspectRatio = 1;
+    private const float PickerHalfHeightInClipSpace = 0.25f;
+    private const int PickerBandCount = 64;
+    private const float HueChangePerScreenWidth = 1f;
+    private const float PickerFrameLineWidthInClipSpace = 0.004f;
+    private const float PickerComparisonBarHeightInClipSpace = 0.06f;
+    private static readonly Vector4 PickerFrameColor = new(1, 1, 1, 0.8f);
+
+    private const int MaxOverlayPoints = 2048;
+    private readonly StructuredList<Point> _overlayPoints = new(MaxOverlayPoints);
+    private readonly StructuredList<Point> _emptyOverlay = new(1);
+    private int _overlayCount;
+    private int _lastOverlayCount;
+
+    private bool _isLassoActive;
+    private readonly List<Vector2> _lassoPointsInClipSpace = new(256);
+    private readonly List<Vector3> _lassoPointsInWorld = new(256);
+    private const float MinLassoPointDistanceInClipSpace = 0.01f;
+    private const float LassoLineScale = 0.03f;
+    private static readonly Vector4 LassoColor = new(1, 1, 1, 0.6f);
+
+    private readonly bool[] _previousKeyStates = new bool[KeyHandler.PressedKeys.Count];
+
+    /** Shared by all sketch instances, so strokes can be copied between sketches. */
+    private static readonly List<Point> Clipboard = new(1000);
+
+    /** Lets undo commands find the live sketch even after the operator was recreated by a reload. */
+    private static readonly Dictionary<string, _SketchImpl> SketchesByFilePath = new();
 
     /** Spacing of committed stroke points relative to the brush size; denser points fold the line geometry on every bend. */
     private const float MinPointDistanceForBrushSize = 0.03f;
@@ -500,6 +1356,9 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
 
     private bool IsOpSelected => MouseInput.SelectedChildId == Parent?.SymbolChildId;
 
+    /** Keys only reach the sketch while the editor grants it the keyboard, so they never double as editor shortcuts. */
+    private bool HasKeyboard => Parent != null && OperatorKeyboardCapture.IsCapturedBy(Parent.SymbolChildId);
+
     internal sealed class Page
     {
         public int WriteIndex;
@@ -507,6 +1366,16 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
 
         [JsonConverter(typeof(StructuredListConverter))]
         public StructuredList<Point> PointsList = new();
+
+        public PageContent CaptureContent() => new((StructuredList<Point>)PointsList.TypedClone(), WriteIndex, Time);
+
+        /** Restores in place, because undo snapshots of other edits refer to this page object. */
+        public void Restore(PageContent content)
+        {
+            PointsList = (StructuredList<Point>)content.Points.TypedClone();
+            WriteIndex = content.WriteIndex;
+            Time = content.Time;
+        }
 
         public Page Clone()
         {
@@ -517,6 +1386,54 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
                            PointsList = structuredList,
                        };
         }
+    }
+
+    internal sealed record PageContent(StructuredList<Point> Points, int WriteIndex, double Time);
+
+    /// <summary>
+    /// Undo snapshot of the page list and of the one page an edit changes. Resolves the sketch by its file path
+    /// when applied, so it never holds an operator instance.
+    /// </summary>
+    private sealed class SketchEdit
+    {
+        public SketchEdit(_SketchImpl sketch)
+        {
+            _sketchFilePath = sketch._absolutePath;
+            _pagesBefore = [..sketch._paging.Pages];
+            Page = sketch._paging.ActivePage;
+            ContentBefore = Page?.CaptureContent();
+        }
+
+        public Page? Page { get; private set; }
+        public PageContent? ContentBefore { get; }
+
+        /** An edit that starts on an empty frame creates its page, so the page is only known now. */
+        public void Complete(_SketchImpl sketch)
+        {
+            _pagesAfter = [..sketch._paging.Pages];
+            Page ??= sketch._paging.ActivePage;
+            _contentAfter = Page?.CaptureContent();
+        }
+
+        public void Undo() => ApplyToRegisteredSketch(_pagesBefore, ContentBefore);
+        public void Redo() => ApplyToRegisteredSketch(_pagesAfter, _contentAfter);
+        public void Revert(_SketchImpl sketch) => sketch.ApplyEdit(_pagesBefore, Page, ContentBefore);
+
+        private void ApplyToRegisteredSketch(List<Page> pages, PageContent? content)
+        {
+            if (!SketchesByFilePath.TryGetValue(_sketchFilePath, out var sketch) || sketch.IsDisposed)
+            {
+                Log.Warning($"Can't undo sketch edit, because {_sketchFilePath} is no longer open.");
+                return;
+            }
+
+            sketch.ApplyEdit(pages, Page, content);
+        }
+
+        private readonly string _sketchFilePath;
+        private readonly List<Page> _pagesBefore;
+        private List<Page> _pagesAfter = [];
+        private PageContent? _contentAfter;
     }
 
     /// <summary>
@@ -614,24 +1531,16 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
 
         public Page? ActivePage;
 
-        public bool HasCutPage => _cutPage != null;
-
-        public void Cut(int overridePageIndex)
+        /** With an override page index, an empty page keeps the indices of the following pages stable. */
+        public void RemoveActivePage(int overridePageIndex)
         {
             if (ActivePage == null)
                 return;
 
-            _cutPage = ActivePage;
             var activeIndex = Pages.IndexOf(ActivePage);
-
             Pages.Remove(ActivePage);
             if (overridePageIndex >= 0)
             {
-                if (activeIndex != overridePageIndex)
-                {
-                    Log.Warning($"Expected active page index to be {overridePageIndex} not {activeIndex}", this);
-                }
-
                 Pages.Insert(activeIndex, new Page
                                               {
                                                   Time = _lastContextTime,
@@ -642,24 +1551,16 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
             UpdatePageIndex(_lastContextTime, overridePageIndex);
         }
 
-        public void Paste(double time, int overridePageIndex)
+        public void ReplacePages(List<Page> pages)
         {
-            if (_cutPage == null || ActivePage == null)
-                return;
-
-            if (HasActivePage)
-                Pages.Remove(ActivePage);
-
-            _cutPage.Time = time;
-            Pages.Add(_cutPage);
-            UpdatePageIndex(_lastContextTime, overridePageIndex);
+            Pages = [..pages];
+            UpdatePageIndex(_lastContextTime, _sketch._overridePageIndex);
         }
 
         public int ActivePageIndex { get; private set; } = NoPageIndex;
         private _SketchImpl _sketch;
 
         public List<Page> Pages = [];
-        private Page? _cutPage;
         private double _lastContextTime;
 
         private const int NoPageIndex = -1;
@@ -674,6 +1575,7 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
     
     
     private readonly Guid _pathPathInputId = new("2ded8235-157d-486b-a997-87d09d18f998");
+    private readonly Guid _strokeColorInputId = new("31f3942e-bac5-407f-ad44-6d09920754d9");
     private readonly Guid _overrideKeyframeIndexInputId = new("37093302-053a-47b2-ace6-b9d310d3f4b7");
 
     private readonly int[] _numberKeys =
@@ -684,7 +1586,14 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
         View,
         Draw,
         Erase,
-        Select,
+        Lasso,
+    }
+
+    private enum TransformModes
+    {
+        None,
+        Move,
+        Scale,
     }
 
     public enum ColorModes
