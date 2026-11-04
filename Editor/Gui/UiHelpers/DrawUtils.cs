@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Editor.Gui.Styling;
@@ -81,6 +82,23 @@ public static class DrawUtils
         if (_keepNavEnableKeyboard)
             ImGui.GetIO().ConfigFlags |= ImGuiConfigFlags.NavEnableKeyboard;
     }
+
+    /// <summary>
+    /// ImGui starts window switching on Ctrl+Tab (and Ctrl+Shift+Tab) even with keyboard navigation disabled.
+    /// Call this every frame while the modifier is held: ownership must be in place the frame before the key
+    /// press to block the switch. Other code still sees the key through the regular <c>ImGui.IsKey*</c> calls.
+    /// </summary>
+    public static void ClaimKeyFromImGuiWindowSwitching(ImGuiKey key)
+    {
+        igSetKeyOwner(key, WindowSwitchingBlockerOwnerId, 0);
+    }
+
+    /** Internal ImGui API that ImGui.NET doesn't wrap; cimgui exports it on every platform. */
+    [DllImport("cimgui", CallingConvention = CallingConvention.Cdecl)]
+    private static extern void igSetKeyOwner(ImGuiKey key, uint ownerId, ImGuiInputFlags flags);
+
+    /** Any id other than ImGui's reserved 0 (any owner) and uint.MaxValue (no owner). */
+    private const uint WindowSwitchingBlockerOwnerId = 0x54614221;
 
     private static bool _keepNavEnableKeyboard;
 

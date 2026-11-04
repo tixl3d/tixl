@@ -8,6 +8,7 @@ The following is a list of the **default keyboard** short-cuts. With v4.0.4 you 
 | Action                   | Key                                       |
 | ------------------------ | ----------------------------------------- |
 | Add New Operator         | Tab (then type the operator name)         |
+| Insert Before Selection  | Ctrl + Tab                                |
 | Undo                     | Ctrl + Z                                  |
 | Redo                     | Ctrl + Shift + Z                          |
 | Save                     | Ctrl + S                                  |

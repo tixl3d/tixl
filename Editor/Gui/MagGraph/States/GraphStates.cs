@@ -18,6 +18,7 @@ namespace T3.Editor.Gui.MagGraph.States
     {
         /// <summary>
         /// The op that pressing Tab appends to: the single visible selected op, if it has an output.
+        /// With Ctrl held, Tab prepends instead, so the op needs an input.
         /// </summary>
         internal static bool TryGetItemForTabInsertion(GraphUiContext context, out MagGraphItem item)
         {
@@ -30,27 +31,78 @@ namespace T3.Editor.Gui.MagGraph.States
                 return false;
 
             var selected = context.Selector.Selection[0];
-            return context.View.IsItemVisible(selected)
-                   && context.Layout.Items.TryGetValue(selected.Id, out item)
-                   && item.OutputLines.Length > 0;
+            if (!context.View.IsItemVisible(selected)
+                || !context.Layout.Items.TryGetValue(selected.Id, out item))
+                return false;
+
+            return IsTabInsertingUpstream
+                       ? item.InputLines.Length > 0
+                       : item.OutputLines.Length > 0;
         }
+
+        /** Ctrl+Tab inserts before the selected op, into its first input. */
+        internal static bool IsTabInsertingUpstream => ImGui.GetIO().KeyCtrl;
 
         /// <summary>
         /// Tab continues the op's existing flow: below it, or to the right if its first output already snaps horizontally.
-        /// Shift switches to the other direction.
+        /// Ctrl+Tab mirrors this above or to the left. Shift switches to the other direction, except into a snapped
+        /// input, which can only be split along its snap.
         /// </summary>
         internal static MagGraphItem.Directions GetTabInsertionDirection(MagGraphItem item)
         {
-            var isHorizontal = HasHorizontalSnappedOutput(item.OutputLines[0]) != ImGui.GetIO().KeyShift;
+            bool isHorizontal;
+            if (IsTabInsertingUpstream)
+            {
+                var connectionIn = item.InputLines[0].ConnectionIn;
+                isHorizontal = connectionIn is { IsSnapped: true }
+                                   ? IsHorizontallySnapped(connectionIn)
+                                   : ImGui.GetIO().KeyShift;
+            }
+            else
+            {
+                isHorizontal = HasHorizontalSnappedOutput(item.OutputLines[0]) != ImGui.GetIO().KeyShift;
+            }
+
             return isHorizontal ? MagGraphItem.Directions.Horizontal : MagGraphItem.Directions.Vertical;
+        }
+
+        /// <summary>
+        /// Opens the placeholder at the given direction of the item. A snapped input is split from the
+        /// upstream op's side, which opens the stack instead of covering the op above.
+        /// </summary>
+        private static void OpenPlaceholderForTabInsertion(GraphUiContext context, MagGraphItem item)
+        {
+            var direction = GetTabInsertionDirection(item);
+            if (!IsTabInsertingUpstream)
+            {
+                context.Placeholder.OpenForItemOutput(context, item, item.OutputLines[0], direction);
+                return;
+            }
+
+            var mainInputLine = item.InputLines[0];
+            var connectionIn = mainInputLine.ConnectionIn;
+            if (connectionIn is { IsSnapped: true }
+                && connectionIn.OutputLineIndex < connectionIn.SourceItem.OutputLines.Length)
+            {
+                context.Placeholder.OpenForItemOutput(context, connectionIn.SourceItem,
+                                                      connectionIn.SourceItem.OutputLines[connectionIn.OutputLineIndex], direction);
+                return;
+            }
+
+            context.Placeholder.OpenForItemInput(context, item, mainInputLine.Id, direction);
+        }
+
+        private static bool IsHorizontallySnapped(MagGraphConnection connection)
+        {
+            return connection.Style is MagGraphConnection.ConnectionStyles.MainOutToMainInSnappedHorizontal
+                       or MagGraphConnection.ConnectionStyles.MainOutToInputSnappedHorizontal;
         }
 
         private static bool HasHorizontalSnappedOutput(MagGraphItem.OutputLine outputLine)
         {
             foreach (var c in outputLine.ConnectionsOut)
             {
-                if (c.Style is MagGraphConnection.ConnectionStyles.MainOutToMainInSnappedHorizontal
-                    or MagGraphConnection.ConnectionStyles.MainOutToInputSnappedHorizontal)
+                if (IsHorizontallySnapped(c))
                     return true;
             }
 
@@ -89,13 +141,16 @@ namespace T3.Editor.Gui.MagGraph.States
                               if (context.View.IsFocused
                                   && !ImGui.IsAnyItemActive())
                               {
+                                  // ImGui switches windows on Ctrl+Tab and would steal the focus from the graph
+                                  if (IsTabInsertingUpstream)
+                                      DrawUtils.ClaimKeyFromImGuiWindowSwitching(ImGuiKey.Tab);
+
                                   // Tab create placeholder
                                   if (ImGui.IsKeyReleased(ImGuiKey.Tab))
                                   {
                                       if (TryGetItemForTabInsertion(context, out var focusedItem))
                                       {
-                                          context.Placeholder.OpenForItemOutput(context, focusedItem, focusedItem.OutputLines[0],
-                                                                                GetTabInsertionDirection(focusedItem));
+                                          OpenPlaceholderForTabInsertion(context, focusedItem);
                                       }
                                       else
                                       {

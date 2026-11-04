@@ -656,6 +656,10 @@ internal sealed partial class MagGraphView
         if (CanvasScale < 0.5f)
             return;
 
+        var isTabInsertionItem = GraphStates.TryGetItemForTabInsertion(context, out var tabInsertionItem) && tabInsertionItem == item;
+        var tabInsertionDirection = isTabInsertionItem ? GraphStates.GetTabInsertionDirection(item) : MagGraphItem.Directions.Vertical;
+        var isTabInsertingUpstream = isTabInsertionItem && GraphStates.IsTabInsertingUpstream;
+
         // Draw free input sockets...
         MagGraphItem.InputAnchorPoint inputAnchor = default;
 
@@ -680,7 +684,12 @@ internal sealed partial class MagGraphView
                 Vector2.Distance(ImGui.GetMousePos(), center) < 7 * CanvasScale &&
                 context.StateMachine.CurrentState == GraphStates.Default;
 
-            var fillColor = isInputHovered
+            // Previews where Ctrl+Tab would insert: the first two anchors are the first input line, above and on the left.
+            var isTabInsertionAnchor = isTabInsertingUpstream
+                                       && inputIndex <= 1
+                                       && inputAnchor.Direction == tabInsertionDirection;
+
+            var fillColor = isInputHovered || isTabInsertionAnchor
                                 ? ColorVariations.Highlight.Apply(type2UiProperties.Color)
                                 : ColorVariations.OperatorOutline.Apply(type2UiProperties.Color);
             var anchorOutlineColor = ColorVariations.OperatorOutline.Apply(type2UiProperties.Color);
@@ -689,10 +698,9 @@ internal sealed partial class MagGraphView
             {
                 
                 var pp = new Vector2(center.X, pMinVisible.Y);
-                if (isInputHovered)
+                if (isInputHovered || isTabInsertionAnchor)
                 {
-                    //var showTriangleAnchor = true;
-                    var hoverOutputFactor = isInputHovered ? 1.3f : 1;
+                    const float hoverOutputFactor = 1.3f;
 
                     drawList.AddCircleFilled(center, (3 + 2 * hoverOutputFactor) * CanvasScale - 1, fillColor, 12);
                     drawList.AddCircle(center, (3 + 2 * hoverOutputFactor) * CanvasScale, anchorOutlineColor, 12);
@@ -710,7 +718,7 @@ internal sealed partial class MagGraphView
                     // This will later be used for by DefaultState to create a connection
                     
                     var hasSnappedConnection = inputAnchor.InputLine.ConnectionIn is { IsSnapped: true };
-                    if (hasSnappedConnection)
+                    if (hasSnappedConnection || !isInputHovered)
                     {
                         // Snapped connections are handled by outputs
                     }
@@ -757,9 +765,10 @@ internal sealed partial class MagGraphView
                 var showTriangleAnchor = true;
 
                 var hasSnappedConnection = inputAnchor.InputLine.ConnectionIn is { IsSnapped: true };
-                if (!hasSnappedConnection && isInputHovered)
+                var isFreeInputHovered = !hasSnappedConnection && isInputHovered;
+                if (isFreeInputHovered || isTabInsertionAnchor)
                 {
-                    var hoverOutputFactor = isInputHovered ? 1.3f : 1;
+                    const float hoverOutputFactor = 1.3f;
 
                     drawList.AddCircleFilled(center, (1 + 2 * hoverOutputFactor) * CanvasScale - 1, fillColor, 12);
                     drawList.AddCircle(center, (1 + 2 * hoverOutputFactor) * CanvasScale, anchorOutlineColor, 12);
@@ -773,7 +782,10 @@ internal sealed partial class MagGraphView
                     drawList.AddRectFilled(center + new Vector2(0, -e),
                                            center + new Vector2(1, e + 1),
                                            anchorOutlineColor);
+                }
 
+                if (isFreeInputHovered)
+                {
                     // This will later be used for by DefaultState to create a connection
                     //var contextActiveSourceOutputId = inputAnchor.SlotId;
                     // TODO: Only do this if not snapped. Otherwise output is preferred.
@@ -864,8 +876,6 @@ internal sealed partial class MagGraphView
         }
 
         // Draw output sockets...
-        var isTabInsertionItem = GraphStates.TryGetItemForTabInsertion(context, out var tabInsertionItem) && tabInsertionItem == item;
-        var tabInsertionDirection = isTabInsertionItem ? GraphStates.GetTabInsertionDirection(item) : MagGraphItem.Directions.Vertical;
 
         var count = item.GetOutputAnchorCount();
         MagGraphItem.OutputAnchorPoint outputAnchor = default;
@@ -939,6 +949,7 @@ internal sealed partial class MagGraphView
             
             // Previews where Tab would insert, which is always at the first output line.
             var isTabInsertionAnchor = isTabInsertionItem
+                                       && !isTabInsertingUpstream
                                        && outputAnchor.OutputLineIndex == 0
                                        && outputAnchor.Direction == tabInsertionDirection;
             var showPlus = isOutputHovered || isTabInsertionAnchor;
