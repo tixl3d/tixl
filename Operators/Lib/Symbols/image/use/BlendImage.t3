@@ -1,6 +1,6 @@
 {
   "FormatVersion": 3,
-  "Id": "4bf07ce8-b92b-4191-b14b-8c3862df9c01"/*BlendImages*/,
+  "Id": "4bf07ce8-b92b-4191-b14b-8c3862df9c01"/*BlendImage*/,
   "Inputs": [
     {
       "Id": "18824d11-859c-4a2e-9853-2bea1fc94ff9"/*ColorA*/,
@@ -141,7 +141,7 @@
         {
           "Id": "f6269be3-3331-43a6-91ec-138b47199f3e"/*ShaderPath*/,
           "Type": "System.String",
-          "Value": "Lib:shaders/img/fx/UberBlend.hlsl"
+          "Value": "Lib:shaders/img/fx/BlendImage.hlsl"
         }
       ],
       "Outputs": []
@@ -185,7 +185,7 @@
         {
           "Id": "f6269be3-3331-43a6-91ec-138b47199f3e"/*ShaderPath*/,
           "Type": "System.String",
-          "Value": "Lib:shaders/img/fx/UberBlend.hlsl"
+          "Value": "Lib:shaders/img/fx/BlendImage.hlsl"
         }
       ],
       "Outputs": []
@@ -244,7 +244,7 @@
         {
           "Id": "f6269be3-3331-43a6-91ec-138b47199f3e"/*ShaderPath*/,
           "Type": "System.String",
-          "Value": "Lib:shaders/img/fx/UberBlend.hlsl"
+          "Value": "Lib:shaders/img/fx/BlendImage.hlsl"
         }
       ],
       "Outputs": []

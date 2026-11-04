@@ -1,6 +1,6 @@
 {
   "FormatVersion": 3,
-  "Id": "4bf07ce8-b92b-4191-b14b-8c3862df9c01"/*BlendImages*/,
+  "Id": "4bf07ce8-b92b-4191-b14b-8c3862df9c01"/*BlendImage*/,
   "Description": "Blend image B on image A using a blending mode whose coefficient allows for interpolation between image A and f(A,B)\n\nFor more information watch https://en.wikipedia.org/wiki/Blend_modes\n\nSee also: [BlendImages], [BlendWithMask], [Combine3Images]\n",
   "InputUis": [
     {
