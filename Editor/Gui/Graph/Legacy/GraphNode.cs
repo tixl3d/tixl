@@ -158,7 +158,7 @@ internal sealed class GraphNode
                                        backgroundColorWithHover.Fade(opacity));
 
                 // Custom ui
-                customUiResult =  instance.DrawCustomUi(drawList, _selectableScreenRect, _view);
+                customUiResult =  instance.DrawCustomUi(drawList, _usableScreenRect, _view);
 
                 // Size toggle
                 if (customUiResult == OpUi.CustomUiResult.None && _view.Scale.X > 0.7f)

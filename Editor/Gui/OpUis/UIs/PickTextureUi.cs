@@ -85,11 +85,13 @@ internal static class PickTextureUi
             var buttonMinX = workingRect.Min.X;
             var buttonWidth = workingRect.GetWidth();
 
-            // The output texture preview sits in the top-right corner and overlaps the first button.
-            // Its width is capped at 1.6x a grid line height (see TryDrawTexturePreview), which is
-            // exactly how wide a 16:9 texture is drawn. Reserving that width keeps the first label
-            // from reflowing with the texture's aspect ratio.
-            var previewMaxWidth = (MagGraphItem.GridSize.Y - 5) * canvasScaleY * 1.6f;
+            // In the magnetic graph the output texture preview sits in the top-right corner and overlaps
+            // the first button. Its width is capped at 1.6x a grid line height (see TryDrawTexturePreview),
+            // which is exactly how wide a 16:9 texture is drawn. Reserving that width keeps the first label
+            // from reflowing with the texture's aspect ratio. The legacy graph draws the preview above the
+            // node instead, so there is nothing to reserve there.
+            var isLegacyGraph = UserSettings.Config.GraphStyle == UserSettings.GraphStyles.Legacy;
+            var previewMaxWidth = isLegacyGraph ? 0 : (MagGraphItem.GridSize.Y - 5) * canvasScaleY * 1.6f;
 
             for (var i = 0; i < connections.Count; i++)
             {
