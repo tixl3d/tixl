@@ -1,6 +1,9 @@
 #include "shared/point.hlsl"
 #include "shared/quat-functions.hlsl"
 
+/** Caps the corner offset (in half line widths) so sharp turns get blunted instead of spiking out. */
+static const float MiterLimit = 2;
+
 static const float3 Corners[] =
     {
         float3(0, -1, 0),
@@ -62,6 +65,12 @@ struct psInput
 
 sampler texSampler : register(s0);
 
+float3 SafeNormalize(float3 v, float3 fallback)
+{
+    float len = length(v);
+    return len > 1e-6 ? v / len : fallback;
+}
+
 StructuredBuffer<Point> Points : register(t0);
 Texture2D<float4> texture2 : register(t1);
 
@@ -81,8 +90,8 @@ psInput vsMain(uint id : SV_VertexID)
     Point pointAA = Points[particleId < 1 ? 0 : particleId - 1];
     Point pointA = Points[particleId];
     Point pointB = Points[particleId + 1];
-    Point pointBB = Points[particleId > SegmentCount - 2
-                               ? SegmentCount - 2
+    Point pointBB = Points[particleId + 2 > SegmentCount - 1
+                               ? SegmentCount - 1
                                : particleId + 2];
 
     float3 pointAPos = pointA.Position;
@@ -117,13 +126,14 @@ psInput vsMain(uint id : SV_VertexID)
     float3 directionA = particleId > 0
                             ? (aaInScreen - aInScreen).xyz
                             : direction;
-    float3 directionB = particleId < SegmentCount - 1
+    float3 directionB = particleId < SegmentCount - 2
                             ? (bInScreen - bbInScreen).xyz
                             : direction;
 
-    float3 normal = normalize(cross(direction, float3(0, 0, 1)));
-    float3 normalA = normalize(cross(directionA, float3(0, 0, 1)));
-    float3 normalB = normalize(cross(directionB, float3(0, 0, 1)));
+    // Duplicate points give zero-length directions; fall back instead of producing NaN vertices.
+    float3 normal = SafeNormalize(cross(direction, float3(0, 0, 1)), float3(0, 1, 0));
+    float3 normalA = SafeNormalize(cross(directionA, float3(0, 0, 1)), normal);
+    float3 normalB = SafeNormalize(cross(directionB, float3(0, 0, 1)), normal);
 
     if (IsSeparator(pointAA) || isinf(pointAA.Scale.x))
     {
@@ -134,8 +144,8 @@ psInput vsMain(uint id : SV_VertexID)
         normalB = normal;
     }
 
-    float3 neighboarNormal = lerp(normalA, normalB, f);
-    float3 meterNormal = (normal + neighboarNormal) / 2;
+    float3 neighbourNormal = lerp(normalA, normalB, f);
+    float3 miterNormal = SafeNormalize(normal + neighbourNormal, normal);
     float4 pos = lerp(aInScreen, bInScreen, f);
 
     float4 posInCamSpace = mul(float4(posInObject, 1), ObjectToCamera);
@@ -169,8 +179,8 @@ psInput vsMain(uint id : SV_VertexID)
     thickness *= widthAtPoint; // UseWForWidth < 0 ? lerp(1, 1-widthAtPoint, -UseWForWidth)
                                //: lerp(1, widthAtPoint, UseWForWidth) ;
 
-    float miter = dot(-meterNormal, normal);
-    pos += cornerFactors.y * 0.1 * thickness * float4(meterNormal, 0) / clamp(miter, -1, -0.01);
+    float miterScale = min(1 / max(dot(miterNormal, normal), 0.001), MiterLimit);
+    pos -= cornerFactors.y * 0.1 * thickness * miterScale * float4(miterNormal, 0);
 
     output.position = pos / aspect;
 

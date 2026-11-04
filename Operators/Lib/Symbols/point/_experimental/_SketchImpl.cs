@@ -299,6 +299,7 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
         {
             _isMouseDown = false;
             _currentStrokeLength = 0;
+            _hasTailPoint = false;
             return false;
         }
 
@@ -324,9 +325,15 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
                 clickPoint.Position += Vector3.UnitY * 0.02f * 2 * visibleBrushSize;
                 AppendPoint(clickPoint);
             }
+            else if (_hasTailPoint)
+            {
+                // End the stroke where the pen was lifted.
+                _paging.ActivePage!.WriteIndex++;
+            }
 
             AppendPoint(Point.Separator());
             _currentStrokeLength = 0;
+            _hasTailPoint = false;
             return true;
         }
 
@@ -336,15 +343,13 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
         if (_currentStrokeLength > 0 && GetPreviousStrokePoint(out var lastPoint))
         {
             var distance = Vector3.Distance(lastPoint.Position, posInWorld);
-            var minDistanceForBrushSize = 0.01f;
-
-            var updateLastPoint = distance < visibleBrushSize * minDistanceForBrushSize;
-            if (updateLastPoint)
+            if (distance < visibleBrushSize * MinPointDistanceForBrushSize)
             {
-                // Sadly, adding intermedia points causes too many artifacts
-                // lastPoint.Position = posInWorld;
-                // AppendPoint(lastPoint, advanceIndex: false);
-                return false;
+                if (_drawMode != DrawModes.Draw)
+                    return false;
+
+                UpdateTailPoint(lastPoint, posInWorld);
+                return true;
             }
         }
 
@@ -376,6 +381,7 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
                                 });
                 AppendPoint(Point.Separator(), advanceIndex: false);
                 _currentStrokeLength++;
+                _hasTailPoint = false;
                 return true;
 
             case DrawModes.Erase:
@@ -445,6 +451,23 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
             _paging.ActivePage.WriteIndex++;
     }
 
+    /// <summary>
+    /// Shows the stroke reaching the cursor before it moved far enough to commit a new point.
+    /// The tail sits in the slot that the next committed point overwrites, followed by the separator.
+    /// </summary>
+    private void UpdateTailPoint(Point lastCommittedPoint, Vector3 posInWorld)
+    {
+        if (_paging.ActivePage == null || CurrentPointList == null)
+            return;
+
+        lastCommittedPoint.Position = posInWorld;
+        AppendPoint(lastCommittedPoint, advanceIndex: false);
+
+        // AppendPoint keeps the buffer one element longer than the write index.
+        CurrentPointList.TypedElements[_paging.ActivePage.WriteIndex + 1] = Point.Separator();
+        _hasTailPoint = true;
+    }
+
     private bool GetPreviousStrokePoint(out Point point)
     {
         if (_paging.ActivePage == null || _currentStrokeLength == 0 || _paging.ActivePage.WriteIndex == 0 || CurrentPointList == null)
@@ -468,6 +491,10 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
     private bool _isMouseDown;
 
     private int _currentStrokeLength;
+    private bool _hasTailPoint;
+
+    /** Spacing of committed stroke points relative to the brush size; denser points fold the line geometry on every bend. */
+    private const float MinPointDistanceForBrushSize = 0.03f;
 
     private double _lastUpdateContextTime = -1;
 
