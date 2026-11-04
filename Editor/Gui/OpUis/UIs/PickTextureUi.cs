@@ -41,9 +41,9 @@ internal static class PickTextureUi
             return OpUi.CustomUiResult.None;
 
         var canvasScaleY = canvas.Scale.Y;
-
-        var font = Fonts.FontNormal;
-        var fontSize = Fonts.FontNormal.FontSize * canvasScaleY * .9f;
+        var font = canvasScaleY > 1.8f ? Fonts.FontLarge : Fonts.FontNormal;
+        var factor = canvasScaleY > 1.8f ? .5f : .9f;
+        var fontSize = font.FontSize * canvasScaleY * factor;
         var labelColor = WidgetElements.GetPrimaryLabelColor(canvasScaleY);
 
         // Current index

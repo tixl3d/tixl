@@ -43,4 +43,14 @@ internal sealed class PickTexture : Instance<PickTexture>
 
     [Input(Guid = "29e289be-e735-4dd4-8826-5e434cc995fa")]
     public readonly InputSlot<int> Index = new(0);
+
+    [Input(Guid = "7c1cc62e-0e54-4174-9354-7f9c8a689548", MappedType = typeof(Modes))]
+    public readonly InputSlot<int> PreviewMode = new();
+
+    private enum Modes
+    {
+        Default,
+        NoPreview,
+        Top,
+    }
 }
