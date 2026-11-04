@@ -49,8 +49,9 @@ internal static class LayoutHandling
         MainDockSpaceId = ImGui.GetID("DockSpace");
         ImGui.DockSpace(MainDockSpaceId, Vector2.Zero);
 
-        // Dragging a dock splitter focuses the dock space's child window, where keyboard shortcuts go nowhere
-        if (ImGui.IsWindowFocused(ImGuiFocusedFlags.ChildWindows) && !ImGui.IsAnyMouseDown())
+        // Dragging a dock splitter focuses the dock space's child window, where keyboard shortcuts go nowhere.
+        // Dock tab menus are popups of that window too, and moving the focus away would close them.
+        if (ImGui.IsWindowFocused(ImGuiFocusedFlags.ChildWindows | ImGuiFocusedFlags.NoPopupHierarchy) && !ImGui.IsAnyMouseDown())
             FindWindowToRestoreFocus()?.RequestWindowFocus();
 
         ImGui.End();

@@ -24,6 +24,7 @@ using T3.Editor.UiModel;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
 using T3.SystemUi;
+using T3.Editor.Gui.Windows.TimeLine;
 
 namespace T3.Editor.Gui;
 
@@ -93,6 +94,10 @@ public static partial class T3Ui
             MouseInput.SelectedChildId = selectedInstance?.SymbolChildId ?? Guid.Empty;
             NodeSelection.InvalidateSelectedOpsForTransformGizmo(nodeSelection);
         }
+
+        // Playback shortcuts are global and must fire once per frame, no matter how many timelines are shown.
+        TimeControls.HandleTimeControlActions();
+        RecordingSession.OnFrame();
 
         // Draw everything!
         LayoutHandling.DrawMainDockSpace();

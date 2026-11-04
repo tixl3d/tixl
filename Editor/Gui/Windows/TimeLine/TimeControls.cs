@@ -16,6 +16,7 @@ using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.InputsAndTypes;
+using T3.Editor.UiModel.ProjectHandling;
 using Icon = T3.Editor.Gui.Styling.Icon;
 using Vector2 = System.Numerics.Vector2;
 using Vector4 = System.Numerics.Vector4;
@@ -38,14 +39,8 @@ internal static class TimeControls
         if (UserActions.TapBeatSyncMeasure.Triggered())
             BeatTiming.TriggerResyncMeasure();
 
-        if (UserActions.PlaybackJumpToPreviousKeyframe.Triggered())
-            UserActionRegistry.QueueAction(UserActions.PlaybackJumpToPreviousKeyframe);
-
         if (UserActions.PlaybackJumpToStartTime.Triggered())
             JumpToStartTime(playback);
-
-        if (UserActions.PlaybackJumpToPreviousKeyframe.Triggered())
-            UserActionRegistry.QueueAction(UserActions.PlaybackJumpToPreviousKeyframe);
 
         {
             //const float editFrameRate = 30;
@@ -168,41 +163,56 @@ internal static class TimeControls
         if (UserActions.PlaybackJumpToPreviousKeyframe.Triggered())
             UserActionRegistry.QueueAction(UserActions.PlaybackJumpToPreviousKeyframe);
 
-
+        if (UserActions.ToggleAnimationPinning.Triggered())
+            ToggleAnimationPinning();
     }
 
+    private static void ToggleAnimationPinning()
+    {
+        UserSettings.Config.AutoPinAllAnimations = !UserSettings.Config.AutoPinAllAnimations;
+        if (!UserSettings.Config.AutoPinAllAnimations)
+            ProjectView.Focused?.TimeLineCanvas.DopeSheetArea.PinnedParametersHashes.Clear();
+    }
+
+    /// <summary>
+    /// The transport controls in one row, as shown at the bottom of the graph window while the timeline is attached.
+    /// </summary>
     internal static void DrawTimeControls(TimeLineCanvas timeLineCanvas, Instance composition)
     {
         var playback = Playback.Current;
+        PlaybackUtils.FindCompositionSettingsForInstance(composition, out _, out var settings);
 
-        // Settings
-        PlaybackUtils.FindCompositionSettingsForInstance(composition, out var compositionWithSettings, out var settings);
-        var opHasSettings = compositionWithSettings == composition;
-
-        
-        // if (CustomComponents.IconButton(CoreSettings.Config.AudioMuted ? Icon.ToggleAudioOff : Icon.ToggleAudioOn,
-        //                                 ControlSize,
-        //                                 CoreSettings.Config.AudioMuted
-        //                                     ? CustomComponents.ButtonStates.NeedsAttention
-        //                                     : CustomComponents.ButtonStates.Default
-        //                                ))
-        // {
-        //     CoreSettings.Config.AudioMuted = !CoreSettings.Config.AudioMuted;
-        //     AudioEngine.SetMute(CoreSettings.Config.AudioMuted);
-        // }
-        
-        if (CustomComponents.IconButton(Icon.Settings, ControlSize, opHasSettings
-                                                                        ? CustomComponents.ButtonStates.Emphasized
-                                                                        : CustomComponents.ButtonStates.Default))
+        DrawCurrentTime(playback, settings);
+        ImGui.SameLine();
+        DrawIdleMotionToggle(playback);
+        ImGui.SameLine();
+        DrawIoIndicator();
+        ImGui.SameLine();
+        if (settings.Playback.UsesBeatTapping)
         {
-            WindowManager.ToggleInstanceVisibility<ProjectSettingsWindow>();
+            DrawBeatTapping(composition);
+        }
+        else
+        {
+            DrawTransport(playback);
+            ImGui.SameLine();
+            DrawModeToggle(timeLineCanvas);
         }
 
-        CustomComponents.TooltipForLastItem("Project Settings",
-                                            "Switch between soundtrack and VJ modes. Control BPM and other inputs.");
+        ImGui.SameLine();
+        DrawMuteToggle();
+        if (FrameStats.Last.HasAnimatedParameters)
+        {
+            ImGui.SameLine();
+            DrawPinToggle();
+        }
 
         ImGui.SameLine();
+    }
 
+    /** Current playback time and the button that switches its display format. */
+    internal static void DrawCurrentTime(Playback playback, CompositionSettings settings)
+    {
         // Current Time
         var delta = 0.0;
         string formattedTime = "";
@@ -260,9 +270,10 @@ internal static class TimeControls
 
         CustomComponents.TooltipForLastItem("Timeline format",
                                             "Click to toggle through BPM, Frames and Normal time modes");
+    }
 
-        ImGui.SameLine();
-
+    internal static void DrawIdleMotionToggle(Playback playback)
+    {
         // Idle motion 
         {
             ImGui.PushStyleColor(ImGuiCol.Text, UserSettings.Config.EnableIdleMotion
@@ -346,233 +357,228 @@ internal static class TimeControls
             
 
             ImGui.PopStyleColor();
-            ImGui.SameLine();
+        }
+    }
+
+    /** Flashes on incoming MIDI and OSC events. */
+    internal static void DrawIoIndicator()
+    {
+        var timeSinceLastEvent = Playback.RunTimeInSecs - Math.Max(T3Ui.MidiDataRecording.LastEventTime, T3Ui.OscDataRecording.LastEventTime);
+        var flashFactor = MathF.Pow((float)timeSinceLastEvent.Clamp(0, 1), 0.5f);
+        var color = Color.Mix(UiColors.StatusAnimated, UiColors.BackgroundFull.Fade(0.3f), flashFactor);
+
+        if (CustomComponents.IconButton(Icon.IO, ControlSize, color))
+        {
+            WindowManager.ToggleInstanceVisibility<IoViewWindow>();
         }
 
-        // MidiIndicator
+        if (!ImGui.IsItemHovered())
+            return;
+
+        ImGui.BeginTooltip();
+        if (timeSinceLastEvent < 10)
         {
-            var timeSinceLastEvent = Playback.RunTimeInSecs - Math.Max(T3Ui.MidiDataRecording.LastEventTime, T3Ui.OscDataRecording.LastEventTime);
-            var flashFactor = MathF.Pow((float)timeSinceLastEvent.Clamp(0, 1) / 1, 0.5f);
-            var color = Color.Mix(UiColors.StatusAnimated, UiColors.BackgroundFull.Fade(0.3f), flashFactor);
-            
-            if (CustomComponents.IconButton(Icon.IO, ControlSize, color))
-            {
-                //T3Ui.MidiStreamRecorder.Reset();
-                //DataRecording.ActiveRecordingSet.WriteToFile();
-                WindowManager.ToggleInstanceVisibility<IoViewWindow>();
-            }
-
-            if (ImGui.IsItemHovered())
-            {
-                ImGui.BeginTooltip();
-                if (timeSinceLastEvent < 10)
-                {
-                    ImGui.BeginChild("canvas", new Vector2(400, 250));
-
-                    //DataSetOutputUi.DrawDataSet(dataSet);
-                    _dataSetView.Draw(DataRecording.ActiveRecordingSet);
-                    ImGui.EndChild();
-                }
-                else
-                {
-                    ImGui.Text("Midi and OSC input indicator\nClick to open IO window.");
-                }
-
-                ImGui.EndTooltip();
-            }
-
-            ImGui.SameLine();
-        }
-
-        if (settings.Playback.UsesBeatTapping)
-        {
-            var bpm = BeatTiming.Bpm;
-            if (SingleValueEdit.Draw(ref bpm, new Vector2(StandardWidth, ControlSize.Y), min: 1, max: 360, clampMin: true, clampMax: true, scale: 0.01f, format: "{0:0.0 BPM}") ==
-                InputEditStateFlags.Modified)
-            {
-                composition.Symbol.GetSymbolUi().FlagAsModified();
-                BeatTiming.SetBpmRate(bpm);
-            }
-
-            ImGui.SameLine();
-
-            ImGui.Button("Sync", SyncButton);
-            if (ImGui.IsItemHovered())
-            {
-                if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
-                {
-                    if (ImGui.GetIO().KeyCtrl)
-                    {
-                        var roundedBpm = Math.Round(BeatTiming.Bpm*2)/2;
-                        BeatTiming.SetBpmRate((float)roundedBpm);
-                    }
-                    else
-                    {
-                        BeatTiming.TriggerSyncTap();
-                    }
-                }
-                else if (ImGui.IsMouseClicked(ImGuiMouseButton.Right))
-                {
-                    BeatTiming.TriggerResyncMeasure();
-                }
-            }
-
-            CustomComponents.TooltipForLastItem("Click on beat to sync. Tap later once to refine. Click right to sync measure.\n"
-                                                + KeyCombination.CtrlLabel + "+Click to round BPM",
-                                                $"Tap: {UserActions.TapBeatSync.ListShortcuts()}\n"
-                                                + $"Resync: {UserActions.TapBeatSyncMeasure.ListShortcuts()}");
-
-            ImGui.SameLine();
+            ImGui.BeginChild("canvas", new Vector2(400, 250) * T3Ui.UiScaleFactor);
+            _dataSetView.Draw(DataRecording.ActiveRecordingSet);
+            ImGui.EndChild();
         }
         else
         {
-            // Jump to start
-            if (CustomComponents.IconButton(Icon.JumpToRangeStart,
-                                            ControlSize,
-                                            playback.TimeInBars != playback.LoopRange.Start
-                                                ? CustomComponents.ButtonStates.Default
-                                                : CustomComponents.ButtonStates.Disabled
-                                           )
-                || UserActions.PlaybackJumpToStartTime.Triggered()
-               )
-            {
-                JumpToStartTime(playback);
-            }
-
-            CustomComponents.TooltipForLastItem("Jump to beginning",
-                                                UserActions.PlaybackJumpToStartTime.ListShortcuts());
-
-            ImGui.SameLine();
-
-            // Prev Keyframe
-            if (CustomComponents.IconButton(Icon.JumpToPreviousKeyframe,
-                                            ControlSize,
-                                            FrameStats.Last.HasKeyframesBeforeCurrentTime
-                                                ? CustomComponents.ButtonStates.Default
-                                                : CustomComponents.ButtonStates.Disabled)
-               )
-            {
-                UserActionRegistry.QueueAction(UserActions.PlaybackJumpToPreviousKeyframe);
-            }
-
-            CustomComponents.TooltipForLastItem("Jump to previous keyframe",
-                                                UserActions.PlaybackJumpToPreviousKeyframe.ListShortcuts());
-
-            ImGui.SameLine();
-
-            // Play backwards
-            if (CustomComponents.IconButton(Icon.PlayBackwards,
-                                            ControlSize,
-                                            playback.PlaybackSpeed < 0
-                                                ? CustomComponents.ButtonStates.Activated
-                                                : CustomComponents.ButtonStates.Default
-                                           ))
-            {
-                if (playback.PlaybackSpeed != 0)
-                {
-                    playback.PlaybackSpeed = 0;
-                }
-                else if (playback.PlaybackSpeed == 0)
-                {
-                    playback.PlaybackSpeed = -1;
-                }
-            }
-
-            if (playback.PlaybackSpeed < -1)
-            {
-                ImGui.GetWindowDrawList().AddText(ImGui.GetItemRectMin() + new Vector2(20, 4), UiColors.ForegroundFull, $"×{-playback.PlaybackSpeed:0}");
-            }
-
-            CustomComponents.TooltipForLastItem("Play backwards",
-                                                "Play backwards (and faster): " +
-                                                UserActions.PlaybackBackwards.ListShortcuts() +
-                                                "\nPrevious frame:" + UserActions.PlaybackPreviousFrame.ListShortcuts());
-
-            ImGui.SameLine();
-
-            // Play forward
-            if (CustomComponents.IconButton(Icon.PlayForwards,
-                                            ControlSize,
-                                            playback.PlaybackSpeed > 0
-                                                ? CustomComponents.ButtonStates.Activated
-                                                : CustomComponents.ButtonStates.Default
-                                           ))
-            {
-                if (Math.Abs(playback.PlaybackSpeed) > 0.001f)
-                {
-                    playback.PlaybackSpeed = 0;
-                }
-                else if (Math.Abs(playback.PlaybackSpeed) < 0.001f)
-                {
-                    playback.PlaybackSpeed = 1;
-                }
-            }
-
-            if (playback.PlaybackSpeed > 1)
-            {
-                ImGui.GetWindowDrawList().AddText(ImGui.GetItemRectMin() + new Vector2(20, 4), UiColors.ForegroundFull, $"×{playback.PlaybackSpeed:0}");
-            }
-
-            CustomComponents.TooltipForLastItem("Start playback",
-                                                "Play forward (and faster): " +
-                                                UserActions.PlaybackForward.ListShortcuts() +
-                                                "\nPlay half speed (and slower): " +
-                                                UserActions.PlaybackForwardHalfSpeed.ListShortcuts() +
-                                                "\nNext frame:" + UserActions.PlaybackNextFrame.ListShortcuts());
-
-            ImGui.SameLine();
-
-            // Next Keyframe
-            if (CustomComponents.IconButton(Icon.JumpToNextKeyframe,
-                                            ControlSize,
-                                            FrameStats.Last.HasKeyframesAfterCurrentTime
-                                                ? CustomComponents.ButtonStates.Default
-                                                : CustomComponents.ButtonStates.Disabled)
-               )
-            {
-                UserActionRegistry.QueueAction(UserActions.PlaybackJumpToNextKeyframe);
-            }
-
-            CustomComponents.TooltipForLastItem("Jump to next keyframe",
-                                                UserActions.PlaybackJumpToNextKeyframe.ListShortcuts());
-            ImGui.SameLine();
-
-            // // End
-            // Loop
-            if (CustomComponents.IconButton(Icon.Loop,
-                                            ControlSize,
-                                            playback.IsLooping
-                                                ? CustomComponents.ButtonStates.Activated
-                                                : CustomComponents.ButtonStates.Default))
-            {
-                playback.IsLooping = !playback.IsLooping;
-                var loopRangeMatchesTime = playback.LoopRange.IsValid && playback.LoopRange.Contains(playback.TimeInBars);
-                if (playback.IsLooping && !loopRangeMatchesTime)
-                {
-                    playback.LoopRange.Start = (float)(playback.TimeInBars - playback.TimeInBars % 4);
-                    playback.LoopRange.Duration = 4;
-                }
-            }
-
-            CustomComponents.TooltipForLastItem("Loop playback", "This will initialize one bar around current time.");
-
-            ImGui.SameLine();
-
-            // Curve Mode
-            var hasKeyframes = FrameStats.Current.HasKeyframesAfterCurrentTime || FrameStats.Current.HasKeyframesAfterCurrentTime;
-            ImGui.PushStyleColor(ImGuiCol.Text, hasKeyframes ? UiColors.Text.Rgba : UiColors.TextMuted);
-            if (ImGui.Button(timeLineCanvas.Mode.ToString(), DopeCurve)) //
-            {
-                timeLineCanvas.Mode = (TimeLineCanvas.Modes)(((int)timeLineCanvas.Mode + 1) % Enum.GetNames(typeof(TimeLineCanvas.Modes)).Length);
-            }
-
-            ImGui.PopStyleColor();
-
-            CustomComponents.TooltipForLastItem("Toggle keyframe view between Dope sheet and Curve mode.");
-
-            ImGui.SameLine();
+            ImGui.TextUnformatted("Midi and OSC input indicator\nClick to open IO window.");
         }
 
+        ImGui.EndTooltip();
+    }
+
+    /** BPM field and the tap-to-sync button, shown instead of the transport while the project uses beat tapping. */
+    internal static void DrawBeatTapping(Instance composition)
+    {
+        var bpm = BeatTiming.Bpm;
+        if (SingleValueEdit.Draw(ref bpm, new Vector2(StandardWidth, ControlSize.Y), min: 1, max: 360, clampMin: true, clampMax: true, scale: 0.01f, format: "{0:0.0 BPM}") ==
+            InputEditStateFlags.Modified)
+        {
+            composition.Symbol.GetSymbolUi().FlagAsModified();
+            BeatTiming.SetBpmRate(bpm);
+        }
+
+        ImGui.SameLine();
+
+        ImGui.Button("Sync", SyncButton);
+        if (ImGui.IsItemHovered())
+        {
+            if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+            {
+                if (ImGui.GetIO().KeyCtrl)
+                {
+                    var roundedBpm = Math.Round(BeatTiming.Bpm*2)/2;
+                    BeatTiming.SetBpmRate((float)roundedBpm);
+                }
+                else
+                {
+                    BeatTiming.TriggerSyncTap();
+                }
+            }
+            else if (ImGui.IsMouseClicked(ImGuiMouseButton.Right))
+            {
+                BeatTiming.TriggerResyncMeasure();
+            }
+        }
+
+        CustomComponents.TooltipForLastItem("Click on beat to sync. Tap later once to refine. Click right to sync measure.\n"
+                                            + KeyCombination.CtrlLabel + "+Click to round BPM",
+                                            $"Tap: {UserActions.TapBeatSync.ListShortcuts()}\n"
+                                            + $"Resync: {UserActions.TapBeatSyncMeasure.ListShortcuts()}");
+    }
+
+    internal static void DrawTransport(Playback playback)
+    {
+        // Jump to start
+        if (CustomComponents.IconButton(Icon.JumpToRangeStart,
+                                        ControlSize,
+                                        playback.TimeInBars != playback.LoopRange.Start
+                                            ? CustomComponents.ButtonStates.Default
+                                            : CustomComponents.ButtonStates.Disabled
+                                       ))
+        {
+            JumpToStartTime(playback);
+        }
+
+        CustomComponents.TooltipForLastItem("Jump to beginning",
+                                            UserActions.PlaybackJumpToStartTime.ListShortcuts());
+
+        ImGui.SameLine();
+
+        // Prev Keyframe
+        if (CustomComponents.IconButton(Icon.JumpToPreviousKeyframe,
+                                        ControlSize,
+                                        FrameStats.Last.HasKeyframesBeforeCurrentTime
+                                            ? CustomComponents.ButtonStates.Default
+                                            : CustomComponents.ButtonStates.Disabled)
+           )
+        {
+            UserActionRegistry.QueueAction(UserActions.PlaybackJumpToPreviousKeyframe);
+        }
+
+        CustomComponents.TooltipForLastItem("Jump to previous keyframe",
+                                            UserActions.PlaybackJumpToPreviousKeyframe.ListShortcuts());
+
+        ImGui.SameLine();
+
+        // Play backwards
+        if (CustomComponents.IconButton(Icon.PlayBackwards,
+                                        ControlSize,
+                                        playback.PlaybackSpeed < 0
+                                            ? CustomComponents.ButtonStates.Activated
+                                            : CustomComponents.ButtonStates.Default
+                                       ))
+        {
+            if (playback.PlaybackSpeed != 0)
+            {
+                playback.PlaybackSpeed = 0;
+            }
+            else if (playback.PlaybackSpeed == 0)
+            {
+                playback.PlaybackSpeed = -1;
+            }
+        }
+
+        if (playback.PlaybackSpeed < -1)
+        {
+            ImGui.GetWindowDrawList().AddText(ImGui.GetItemRectMin() + new Vector2(20, 4), UiColors.ForegroundFull, $"×{-playback.PlaybackSpeed:0}");
+        }
+
+        CustomComponents.TooltipForLastItem("Play backwards",
+                                            "Play backwards (and faster): " +
+                                            UserActions.PlaybackBackwards.ListShortcuts() +
+                                            "\nPrevious frame:" + UserActions.PlaybackPreviousFrame.ListShortcuts());
+
+        ImGui.SameLine();
+
+        // Play forward
+        if (CustomComponents.IconButton(Icon.PlayForwards,
+                                        ControlSize,
+                                        playback.PlaybackSpeed > 0
+                                            ? CustomComponents.ButtonStates.Activated
+                                            : CustomComponents.ButtonStates.Default
+                                       ))
+        {
+            if (Math.Abs(playback.PlaybackSpeed) > 0.001f)
+            {
+                playback.PlaybackSpeed = 0;
+            }
+            else if (Math.Abs(playback.PlaybackSpeed) < 0.001f)
+            {
+                playback.PlaybackSpeed = 1;
+            }
+        }
+
+        if (playback.PlaybackSpeed > 1)
+        {
+            ImGui.GetWindowDrawList().AddText(ImGui.GetItemRectMin() + new Vector2(20, 4), UiColors.ForegroundFull, $"×{playback.PlaybackSpeed:0}");
+        }
+
+        CustomComponents.TooltipForLastItem("Start playback",
+                                            "Play forward (and faster): " +
+                                            UserActions.PlaybackForward.ListShortcuts() +
+                                            "\nPlay half speed (and slower): " +
+                                            UserActions.PlaybackForwardHalfSpeed.ListShortcuts() +
+                                            "\nNext frame:" + UserActions.PlaybackNextFrame.ListShortcuts());
+
+        ImGui.SameLine();
+
+        // Next Keyframe
+        if (CustomComponents.IconButton(Icon.JumpToNextKeyframe,
+                                        ControlSize,
+                                        FrameStats.Last.HasKeyframesAfterCurrentTime
+                                            ? CustomComponents.ButtonStates.Default
+                                            : CustomComponents.ButtonStates.Disabled)
+           )
+        {
+            UserActionRegistry.QueueAction(UserActions.PlaybackJumpToNextKeyframe);
+        }
+
+        CustomComponents.TooltipForLastItem("Jump to next keyframe",
+                                            UserActions.PlaybackJumpToNextKeyframe.ListShortcuts());
+        ImGui.SameLine();
+
+        // // End
+        // Loop
+        if (CustomComponents.IconButton(Icon.Loop,
+                                        ControlSize,
+                                        playback.IsLooping
+                                            ? CustomComponents.ButtonStates.Activated
+                                            : CustomComponents.ButtonStates.Default))
+        {
+            playback.IsLooping = !playback.IsLooping;
+            var loopRangeMatchesTime = playback.LoopRange.IsValid && playback.LoopRange.Contains(playback.TimeInBars);
+            if (playback.IsLooping && !loopRangeMatchesTime)
+            {
+                playback.LoopRange.Start = (float)(playback.TimeInBars - playback.TimeInBars % 4);
+                playback.LoopRange.Duration = 4;
+            }
+        }
+
+        CustomComponents.TooltipForLastItem("Loop playback", "This will initialize one bar around current time.");
+    }
+
+    /** Switches the keyframe view between dope sheet and curve editor. */
+    internal static void DrawModeToggle(TimeLineCanvas timeLineCanvas)
+    {
+        // Curve Mode
+        var hasKeyframes = FrameStats.Current.HasKeyframesAfterCurrentTime || FrameStats.Current.HasKeyframesAfterCurrentTime;
+        ImGui.PushStyleColor(ImGuiCol.Text, hasKeyframes ? UiColors.Text.Rgba : UiColors.TextMuted);
+        if (ImGui.Button(timeLineCanvas.Mode.ToString(), DopeCurve)) //
+        {
+            timeLineCanvas.Mode = (TimeLineCanvas.Modes)(((int)timeLineCanvas.Mode + 1) % Enum.GetNames(typeof(TimeLineCanvas.Modes)).Length);
+        }
+
+        ImGui.PopStyleColor();
+
+        CustomComponents.TooltipForLastItem("Toggle keyframe view between Dope sheet and Curve mode.");
+    }
+
+    internal static void DrawMuteToggle()
+    {
         // ToggleAudio
         if (CustomComponents.IconButton(CoreSettings.Config.AppMute ? Icon.ToggleAudioOff : Icon.ToggleAudioOn,
                                         ControlSize,
@@ -583,68 +589,23 @@ internal static class TimeControls
         {
             AudioEngine.SetGlobalMute(!CoreSettings.Config.AppMute);
         }
+    }
 
-        // ToggleHover
+    /** Keeps all animated parameters visible in the dope sheet. */
+    internal static void DrawPinToggle()
+    {
+        var state = UserSettings.Config.AutoPinAllAnimations
+                        ? CustomComponents.ButtonStates.Activated
+                        : CustomComponents.ButtonStates.Default;
+
+        if (CustomComponents.IconButton(Icon.PinParams, ControlSize, state))
         {
-            ImGui.SameLine();
-            Icon icon;
-            string hoverModeTooltip;
-            string hoverModeAdditionalTooltip = null;
-            CustomComponents.ButtonStates state = CustomComponents.ButtonStates.Emphasized;
-            switch (UserSettings.Config.HoverMode)
-            {
-                case UserSettings.GraphHoverModes.Disabled:
-                    state = CustomComponents.ButtonStates.Default;
-                    icon = Icon.HoverPreviewDisabled;
-                    hoverModeTooltip = "No preview images on hover";
-                    break;
-                case UserSettings.GraphHoverModes.Live:
-                    icon = Icon.HoverPreviewPlay;
-                    hoverModeTooltip = "Live Hover Preview - Render explicit thumbnail image.";
-                    hoverModeAdditionalTooltip = "This can interfere with the rendering of the current output.";
-                    break;
-                default:
-                    icon = Icon.HoverPreviewSmall;
-                    hoverModeTooltip = "Last - Show the current state of the operator.";
-                    hoverModeAdditionalTooltip = "This can be outdated if operator is not require for current output.";
-                    break;
-            }
-
-            if (CustomComponents.IconButton(icon, ControlSize, state))
-            {
-                UserSettings.Config.HoverMode =
-                    (UserSettings.GraphHoverModes)(((int)UserSettings.Config.HoverMode + 1) % Enum.GetNames(typeof(UserSettings.GraphHoverModes)).Length);
-            }
-
-            CustomComponents.TooltipForLastItem(hoverModeTooltip, hoverModeAdditionalTooltip);
+            ToggleAnimationPinning();
         }
-
-        if (FrameStats.Last.HasAnimatedParameters)
-        {
-            // Lock all animated parameters
-            ImGui.SameLine();
-            var state = UserSettings.Config.AutoPinAllAnimations
-                            ? CustomComponents.ButtonStates.Activated
-                            : CustomComponents.ButtonStates.Default;
-
-            if (CustomComponents.IconButton(Icon.PinParams, ControlSize, state) 
-                ||  UserActions.ToggleAnimationPinning.Triggered())
-            {
-                UserSettings.Config.AutoPinAllAnimations = !UserSettings.Config.AutoPinAllAnimations;
-
-                if (!UserSettings.Config.AutoPinAllAnimations)
-                {
-                    timeLineCanvas.DopeSheetArea.PinnedParametersHashes.Clear();
-                }
-            }
-            CustomComponents.TooltipForLastItem("Keep animated parameters visible",
-                                           "This can be useful when align animations between multiple operators. Toggle again to clear the visible animations.\n\n"
-                                           + UserActions.ToggleAnimationPinning.ListShortcuts()
-                                          );
-        }
-
-       
-        ImGui.SameLine();
+        CustomComponents.TooltipForLastItem("Keep animated parameters visible",
+                                       "This can be useful when align animations between multiple operators. Toggle again to clear the visible animations.\n\n"
+                                       + UserActions.ToggleAnimationPinning.ListShortcuts()
+                                      );
     }
 
     /// <summary>
@@ -688,16 +649,18 @@ internal static class TimeControls
     }
     // end of beat grid optimizations
 
-    private static float StandardWidth => 100f * T3Ui.UiScaleFactor;
-    public static Vector2 ControlSize => new Vector2(35, 28) * T3Ui.UiScaleFactor;
-    private static Vector2 DopeCurve => new Vector2(95, 28) * T3Ui.UiScaleFactor;
-    private static Vector2 SyncButton => new Vector2(45, 28) * T3Ui.UiScaleFactor;
-
     private static readonly DataSetViewCanvas _dataSetView = new()
                                                                  {
                                                                      ShowInteraction = false,
                                                                      MaxTreeLevel = 0,
                                                                  };
+
+    private static float StandardWidth => 100f * T3Ui.UiScaleFactor;
+    public static Vector2 ControlSize => new Vector2(35, 28) * T3Ui.UiScaleFactor;
+    private static Vector2 DopeCurve => new Vector2(95, 28) * T3Ui.UiScaleFactor;
+    private static Vector2 SyncButton => new Vector2(45, 28) * T3Ui.UiScaleFactor;
+
+
 
     public static bool JogDial(string label, ref double delta, Vector2 size)
     {

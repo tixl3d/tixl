@@ -73,6 +73,7 @@ internal static partial class WindowManager
                                                                    : new WelcomeWindow();
 
     internal static readonly HelpWindow HelpWindow = new();
+    internal static readonly TimelineWindow TimelineWindow = new();
 
 
     private static void TryToInitialize()
@@ -87,6 +88,7 @@ internal static partial class WindowManager
                 new VariationsWindow(),
                 new OutputWindow(),
                 new GraphWindow(),
+                TimelineWindow,
                 new ParameterWindow(),
                 SymbolLibrary,
                 new AssetLibrary(),

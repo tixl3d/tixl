@@ -433,7 +433,18 @@ internal static class AppMenuBar
             MenuItemToggle("Graph Title", ref UserSettings.Config.ShowTitleAndDescription);
             MenuItemToggle("Graph Minimap", ref UserSettings.Config.ShowMiniMap);
             MenuItemToggle("Graph Toolbar", ref UserSettings.Config.ShowToolbar);
-            MenuItemToggle("Timeline", ref UserSettings.Config.ShowTimeline);
+            // A detached timeline is shown or hidden with its window.
+            var timelineWindow = WindowManager.TimelineWindow;
+            if (MenuItem("Timeline", isChecked: UserSettings.Config.ShowTimeline, isEnabled: !timelineWindow.IsDetached))
+                UserSettings.Config.ShowTimeline = !UserSettings.Config.ShowTimeline;
+
+            if (MenuItem("Detach Timeline", isChecked: timelineWindow.IsDetached))
+            {
+                timelineWindow.Config.Visible = !timelineWindow.Config.Visible;
+                if (timelineWindow.Config.Visible)
+                    UserSettings.Config.ShowTimeline = true;
+            }
+
             if (MenuItem("Toggle All", UserActions.ToggleAllUiElements.ListShortcuts(), isEnabled: !T3Ui.IsCurrentlySaving))
             {
                 UiConfig.ToggleAllUiElements();

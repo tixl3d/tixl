@@ -204,7 +204,8 @@ internal sealed class GraphWindow : Windows.Window
 
         var windowContentHeight = (int)ImGui.GetWindowHeight();
 
-        if (UserSettings.Config.ShowTimeline)
+        var showsEmbeddedTimeline = UserSettings.Config.ShowTimeline && !WindowManager.TimelineWindow.IsDetached;
+        if (showsEmbeddedTimeline)
         {
             ProjectView.TimeLineCanvas.FoldingHeight.DrawSplit(ProjectView, out windowContentHeight);
         }
@@ -250,7 +251,7 @@ internal sealed class GraphWindow : Windows.Window
 
         ProjectView.CheckDisposal();
 
-        if (UserSettings.Config.ShowTimeline)
+        if (showsEmbeddedTimeline)
         {
             const int splitterWidth = 3;
             var availableRestHeight = ImGui.GetContentRegionAvail().Y;
@@ -277,7 +278,7 @@ internal sealed class GraphWindow : Windows.Window
         }
 
         if (UserSettings.Config.ShowMiniMap && GraphCanvas != null)
-            UiElements.DrawMiniMap(ProjectView.InstView, GraphCanvas.Canvas);
+            UiElements.DrawMiniMap(ProjectView.InstView, GraphCanvas.Canvas, GraphToolCluster.OccupiedHeight);
     }
 
     private void DrawGraphContent(ImDrawListPtr drawList)
@@ -304,7 +305,10 @@ internal sealed class GraphWindow : Windows.Window
             if (ProjectView == null)
                 return;
 
-            TimelineToolbar.Draw(ProjectView);
+            if (!WindowManager.TimelineWindow.IsDetached)
+                TimelineToolbar.DrawAsGraphOverlay(ProjectView);
+
+            GraphToolCluster.Draw(ProjectView);
         }
 
         // Draw content

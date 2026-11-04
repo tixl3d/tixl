@@ -11,24 +11,22 @@ using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Core.Audio.Input;
+using T3.Core.Operator;
+using T3.Core.Utils;
+using T3.Editor.Gui.Interaction.Timing;
 
 namespace T3.Editor.Gui.Windows.TimeLine;
 
 /// <summary>
-/// The transport / record toolbar that sits at the bottom of the graph window above the
-/// timeline. Owns the timeline-fold toggle, the play / scrub controls, the
-/// image-background tool cluster, and the record toggle.
+/// The timeline's transport row: playback controls, audio mute, keyframe pinning and the record toggle.
+/// Shown as an overlay at the bottom of the graph window while the timeline is attached, or as the
+/// top row of the <see cref="TimelineWindow"/> while it is detached.
 /// </summary>
 internal static class TimelineToolbar
 {
-    public static void Draw(ProjectView components)
+    /// <summary>Draws the row at the bottom of the graph window, including the timeline-fold toggle.</summary>
+    public static void DrawAsGraphOverlay(ProjectView projectView)
     {
-        TimeControls.HandleTimeControlActions();
-
-        // Extend the active recording's clip ranges before drawing so the visual reflects
-        // the latest TimeRange.End even on frames where playback isn't advancing.
-        RecordingSession.OnFrame();
-
         if (!UserSettings.Config.ShowToolbar)
             return;
 
@@ -43,33 +41,101 @@ internal static class TimelineToolbar
         // Transport buttons keep filled backgrounds so the toolbar reads as a continuous bar.
         CustomComponents.PushToolbarIconBackground();
         {
-            var icon = components.TimeLineCanvas.FoldingHeight.UsingCustomTimelineHeight
+            var icon = projectView.TimeLineCanvas.FoldingHeight.UsingCustomTimelineHeight
                            ? Icon.ChevronDown
                            : Icon.ChevronUp;
             if (CustomComponents.IconButton(icon, TimeControls.ControlSize, CustomComponents.ButtonStates.Default))
             {
-                components.TimeLineCanvas.FoldingHeight.Toggle();
+                projectView.TimeLineCanvas.FoldingHeight.Toggle();
                 UserSettings.Config.ShowTimeline = true;
             }
 
             ImGui.SameLine();
 
             ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, Vector2.Zero);
-            TimeControls.DrawTimeControls(components.TimeLineCanvas, components.CompositionInstance);
+            TimeControls.DrawTimeControls(projectView.TimeLineCanvas, projectView.CompositionInstance);
             ImGui.PopStyleVar();
-            // Use SameLine spacing instead of SetCursorPosX. SetCursorPosX flags the window
-            // as having a manual cursor move, and ImGui 1.91 then asserts at EndChild if the
-            // next code path does not submit an item.
-            ImGui.SameLine(0, 10);
 
-            ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(5, 5));
-            components.GraphImageBackground.DrawToolbarItems();
-
-            DrawRecordButton(components);
-            ImGui.PopStyleVar();
+            DrawRecordButton(projectView);
         }
         CustomComponents.PopToolbarIconBackground();
         ImGui.EndChild();
+    }
+
+    /// <summary>
+    /// Draws the header strip of the <see cref="TimelineWindow"/> at the cursor: idle motion, IO indicator and
+    /// keyframe pinning on the left, time, transport and record centered, the keyframe view mode and mute on the right.
+    /// </summary>
+    public static void DrawAsWindowHeader(ProjectView projectView, Instance composition)
+    {
+        var playback = Playback.Current;
+        PlaybackUtils.FindCompositionSettingsForInstance(composition, out _, out var settings);
+
+        var min = ImGui.GetCursorScreenPos().Floor();
+        var width = MathF.Floor(ImGui.GetContentRegionAvail().X);
+        var max = min + new Vector2(width, MathF.Round(TimeControls.ControlSize.Y));
+
+        // Same shade as the timeline ruler below, which draws the style's child background.
+        var drawList = ImGui.GetWindowDrawList();
+        drawList.AddRectFilled(min, max, ImGui.GetColorU32(ImGuiCol.ChildBg));
+        drawList.AddRectFilled(new Vector2(min.X, max.Y), new Vector2(max.X, max.Y + 1), UiColors.BackgroundFull.Fade(0.5f));
+
+        // Unlike the bar under the graph, the strip itself is the background: buttons only shade on hover.
+        ImGui.PushStyleColor(ImGuiCol.Button, Vector4.Zero);
+        ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, Vector2.Zero);
+        {
+            ImGui.SetCursorScreenPos(min);
+            ImGui.BeginGroup();
+            TimeControls.DrawIdleMotionToggle(playback);
+            ImGui.SameLine();
+            TimeControls.DrawIoIndicator();
+            if (FrameStats.Last.HasAnimatedParameters)
+            {
+                ImGui.SameLine();
+                TimeControls.DrawPinToggle();
+            }
+
+            ImGui.EndGroup();
+            var leftGroupEnd = ImGui.GetItemRectMax().X;
+
+            // Centered and right-aligned groups use the widths measured last frame.
+            var groupGap = GroupGap;
+            var centerX = MathF.Max(min.X + MathF.Floor((width - _lastCenterGroupWidth) / 2), leftGroupEnd + groupGap);
+            ImGui.SetCursorScreenPos(new Vector2(centerX, min.Y));
+            ImGui.BeginGroup();
+            TimeControls.DrawCurrentTime(playback, settings);
+            ImGui.SameLine();
+            if (settings.Playback.UsesBeatTapping)
+            {
+                TimeControls.DrawBeatTapping(composition);
+            }
+            else
+            {
+                TimeControls.DrawTransport(playback);
+            }
+
+            DrawRecordButton(projectView);
+            ImGui.EndGroup();
+            _lastCenterGroupWidth = ImGui.GetItemRectSize().X;
+            var centerGroupEnd = ImGui.GetItemRectMax().X;
+
+            var rightX = MathF.Max(max.X - _lastRightGroupWidth, centerGroupEnd + groupGap);
+            ImGui.SetCursorScreenPos(new Vector2(rightX, min.Y));
+            ImGui.BeginGroup();
+            if (!settings.Playback.UsesBeatTapping)
+            {
+                TimeControls.DrawModeToggle(projectView.TimeLineCanvas);
+                ImGui.SameLine();
+            }
+
+            TimeControls.DrawMuteToggle();
+            ImGui.EndGroup();
+            _lastRightGroupWidth = ImGui.GetItemRectSize().X;
+        }
+        ImGui.PopStyleVar();
+        ImGui.PopStyleColor();
+
+        ImGui.SetCursorScreenPos(new Vector2(min.X, max.Y + 1));
     }
 
     /// <summary>
@@ -157,4 +223,8 @@ internal static class TimelineToolbar
 
         RecordingSession.Start(composition);
     }
+
+    private static float GroupGap => 12 * T3Ui.UiScaleFactor;
+    private static float _lastCenterGroupWidth;
+    private static float _lastRightGroupWidth;
 }
