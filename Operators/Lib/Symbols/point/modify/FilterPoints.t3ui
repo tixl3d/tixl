@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "18251874-5d5a-4384-8dcd-fcf297e54886"/*FilterPoints*/,
-  "Description": "Picks a subset of points based on start index, step and count.\n\nCan be used to reduce the overall amount of points to increase performance.\n\nSee also: [ClearSomePoints], [DrawPoints], [MeshFacesPoints], [MeshVerticesToPoints]",
+  "Description": "Picks a subset of points based on start index, step and count or percentage.\n\nCan be used to reduce the overall amount of points to increase performance.\n\nSee also: [ClearSomePoints], [DrawPoints], [MeshFacesPoints], [MeshVerticesToPoints]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -19,7 +19,18 @@
         "Y": 731.94434
       },
       "GroupTitle": "Selection",
-      "Description": "Number of points in the result."
+      "Description": "Number of points in the result. Ignored while Percentage is 0 or larger."
+    },
+    {
+      "InputId": "c5e5a1d2-7b0f-4c39-9a51-3f6d2b8e4a17"/*Percentage*/,
+      "Position": {
+        "X": -1067.6749,
+        "Y": 801.94434
+      },
+      "Description": "Fraction of the incoming points to keep. When 0 or larger it replaces Count; 1 keeps all points, -1 disables it.",
+      "Min": -1.0,
+      "Max": 1.0,
+      "ClampMin": true
     },
     {
       "InputId": "537e6055-9c33-4b14-aa17-b34fd9d6bb61"/*Seed*/,
@@ -63,6 +74,46 @@
     }
   ],
   "SymbolChildUis": [
+    {
+      "ChildId": "6eb4ed5e-568e-452e-9ea6-cf5fdb363be3",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
+      "Position": {
+        "X": -927.6749,
+        "Y": 731.94434
+      }
+    },
+    {
+      "ChildId": "481e630e-dd63-4bcf-9bff-399e756e26d4",
+      "SymbolName": "Lib.numbers.float.basic.Multiply",
+      "Position": {
+        "X": -787.6749,
+        "Y": 731.94434
+      }
+    },
+    {
+      "ChildId": "4b0b5b96-5852-4492-b742-6c28b743e6ca",
+      "SymbolName": "Lib.numbers.int.process.FloatToInt",
+      "Position": {
+        "X": -647.6749,
+        "Y": 731.94434
+      }
+    },
+    {
+      "ChildId": "0ce5501d-7b4a-46e5-abd4-c03a4c11ec45",
+      "SymbolName": "Lib.numbers.float.logic.IsGreater",
+      "Position": {
+        "X": -647.6749,
+        "Y": 661.94434
+      }
+    },
+    {
+      "ChildId": "bd664739-a905-42ac-9d11-14ce57be4f5d",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToInt",
+      "Position": {
+        "X": -507.6749,
+        "Y": 696.94434
+      }
+    },
     {
       "ChildId": "11e4abb5-e38e-41cc-9134-be389b0abb4d",
       "SymbolName": "Lib.numbers.int.process.IntsToBuffer",

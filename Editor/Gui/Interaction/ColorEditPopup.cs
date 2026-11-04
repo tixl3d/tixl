@@ -991,6 +991,7 @@ internal static class ColorUsage
     /// </summary>
     private static readonly List<Vector4> _defaultColors = new() 
                                                                {
+                                                                   UiColors.StatusAttention, // TiXL's CI color
                                                                    new Vector4(0f, 0f, 0f, 1f),
                                                                    new Vector4(0.5f, 0.5f, 0.5f, 1f),
                                                                    new Vector4(1f, 1f, 1f, 1f),

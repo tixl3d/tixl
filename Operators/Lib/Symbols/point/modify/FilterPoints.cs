@@ -13,6 +13,9 @@ internal sealed class FilterPoints : Instance<FilterPoints>
     [Input(Guid = "519d77c0-5605-433a-b8ce-6d84f99edd7b")]
     public readonly InputSlot<int> Count = new InputSlot<int>();
 
+    [Input(Guid = "c5e5a1d2-7b0f-4c39-9a51-3f6d2b8e4a17")]
+    public readonly InputSlot<float> Percentage = new InputSlot<float>();
+
     [Input(Guid = "f32458a5-f19f-487b-8ae2-a575de0b4ff2")]
     public readonly InputSlot<int> StartIndex = new InputSlot<int>();
 

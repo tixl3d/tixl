@@ -239,6 +239,22 @@
           "e9712b03-e7aa-4fe5-b5cf-f2c5d0c0b0df": "float4 c = Image.SampleLevel(Sampler, float2(Biased(f), 0.5),0);\np.Color = c;"
         }
       }
+    },
+    {
+      "Id": "7be0af02-2a21-483e-ad96-218dcda2c612",
+      "IsPreset": true,
+      "ActivationIndex": 10,
+      "Title": "Fade In Points",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 490.20224
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "a5c7863e-9c26-4109-9851-3244086b0ccc": 0.883,
+          "e9712b03-e7aa-4fe5-b5cf-f2c5d0c0b0df": "// Fade in Points: A ratio\n\nif(f>A) \n p.Scale = 0;"
+        }
+      }
     }
   ]
 }
