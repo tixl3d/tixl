@@ -387,7 +387,7 @@ internal static partial class ParameterPopover
     }
 
     /** Clicks inside the popover keep it open and must not reach the graph below */
-    private static void HandleMouse()
+    private static void HandleMouse(Instance instance)
     {
         // Dragging the match list's scrollbar takes the keyboard focus, so it only returns on release
         if (_isAssetListHovered && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
@@ -416,9 +416,12 @@ internal static partial class ParameterPopover
             return;
         }
 
-        // Clicking elsewhere ends the popover
+        // Clicking elsewhere applies the edit and ends the popover
         if (!_isInputActive && ImGui.GetFrameCount() > _focusRequestFrame + 2)
-            Cancel(refocusGraph: false);
+        {
+            Commit(instance);
+            Close(refocusGraph: false);
+        }
     }
 
     private const int MaxVisibleRows = 9;

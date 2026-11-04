@@ -29,7 +29,7 @@ namespace T3.Editor.Gui.MagGraph.Interaction.KeyboardEditing;
 /// Left/Right change the value: numbers with the infinity slider (Shift fine, Ctrl coarse), "x" then Left/Right a
 /// vector component, on colors brightness, or "h" hue, "s" saturation and "r g b a" channels; dropdowns step;
 /// bools toggle. The input has no caret: typing always appends.
-/// Enter applies and closes; Esc steps back: the typed value, then the filter, then the popover.
+/// Enter or a click outside applies and closes; Esc steps back: the typed value, then the filter, then the popover.
 /// </summary>
 internal static partial class ParameterPopover
 {
@@ -113,10 +113,17 @@ internal static partial class ParameterPopover
             return;
         }
 
-        if (context.Selector.ChangeCounter != _selectionChangeCounterAtOpen
-            || !TryGetInstance(context, out var instance))
+        if (!TryGetInstance(context, out var instance))
         {
             Cancel(refocusGraph: false);
+            return;
+        }
+
+        // Clicking the graph background or another operator changes the selection; like any click outside, it applies.
+        if (context.Selector.ChangeCounter != _selectionChangeCounterAtOpen)
+        {
+            Commit(instance);
+            Close(refocusGraph: false);
             return;
         }
 
@@ -188,7 +195,7 @@ internal static partial class ParameterPopover
                 CommitAndMove(instance, 1);
         }
 
-        HandleMouse();
+        HandleMouse(instance);
     }
 
     #region text input
