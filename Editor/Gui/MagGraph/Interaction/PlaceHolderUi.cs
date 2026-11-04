@@ -8,6 +8,7 @@ using T3.Core.Model;
 using T3.Core.Utils;
 using T3.Editor.App;
 using T3.Editor.Gui.Help;
+using T3.Editor.Gui.Interaction.Gamepad;
 using T3.Editor.Gui.Interaction.Variations;
 using T3.Editor.Gui.Interaction.Variations.Model;
 using T3.Editor.Gui.MagGraph.Model;
@@ -35,6 +36,7 @@ internal static class PlaceHolderUi
         _selectedSymbolUi = null;
         _wasPickedWithKeys = false;
         _focusInputNextTime = true;
+        _scrollToSelected = true;
         ResetPresets();
 
         Filter.FilterInputType = inputFilter;
@@ -54,6 +56,8 @@ internal static class PlaceHolderUi
 
         _rowHeight = 0;
     }
+
+    internal static bool IsOpen => _placeholderItem != null;
 
     internal static void Reset()
     {
@@ -94,6 +98,7 @@ internal static class PlaceHolderUi
 
         FrameStats.Current.OpenedPopUpName = "SymbolBrowser";
 
+        HandleGamepadPresetButtons();
         Filter.UpdateIfNecessary(context.Selector);
 
         uiResult |= DrawSearchInput(context, drawList);
@@ -194,7 +199,7 @@ internal static class PlaceHolderUi
             ImGui.SetNextItemWidth(item.Size.X);
 
             ImGui.PushID("SymbolBrowserSearch");
-            ImGui.InputText("##symbolBrowserFilter",
+            ImGui.InputText(_searchInputLabel,
                             ref Filter.SearchString,
                             MaxSearchLength,
                             ImGuiInputTextFlags.AutoSelectAll);
@@ -249,6 +254,7 @@ internal static class PlaceHolderUi
                                     ? Filter.MatchingSymbolUis[0]
                                     : null;
             _wasPickedWithKeys = false;
+            _scrollToSelected = true;
             _rowHeight = 0;
             uiResult |= UiResults.SelectionChanged;
         }
@@ -403,16 +409,18 @@ internal static class PlaceHolderUi
     {
         var result = UiResults.None;
 
-        if (ImGui.IsKeyReleased(Key.CursorDown.ToImGuiKey()))
+        if (ImGui.IsKeyPressed(Key.CursorDown.ToImGuiKey()))
         {
             UiListHelpers.AdvanceSelectedItem(filter.MatchingSymbolUis!, ref _selectedSymbolUi, 1);
             _wasPickedWithKeys = true;
+            _scrollToSelected = true;
             result = UiResults.SelectionChanged;
         }
-        else if (ImGui.IsKeyReleased(Key.CursorUp.ToImGuiKey()))
+        else if (ImGui.IsKeyPressed(Key.CursorUp.ToImGuiKey()))
         {
             UiListHelpers.AdvanceSelectedItem(filter.MatchingSymbolUis!, ref _selectedSymbolUi, -1);
             _wasPickedWithKeys = true;
+            _scrollToSelected = true;
             result = UiResults.SelectionChanged;
         }
 
@@ -444,12 +452,25 @@ internal static class PlaceHolderUi
 
                 clipper.Begin(count, _rowHeight);
 
+                // The clipper skips rows outside the view, so the one to reveal is drawn on request and scrolls itself in
+                var rowToReveal = -1;
+                if (_scrollToSelected && _selectedSymbolUi != null)
+                {
+                    rowToReveal = filter.MatchingSymbolUis.IndexOf(_selectedSymbolUi);
+                    if (rowToReveal >= 0)
+                        clipper.IncludeItemByIndex(rowToReveal);
+
+                    _scrollToSelected = false;
+                }
+
                 while (clipper.Step())
                 {
                     for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++)
                     {
                         var symbolUi = filter.MatchingSymbolUis[i];
                         result |= DrawSymbolUiEntry(context, symbolUi);
+                        if (i == rowToReveal)
+                            ScrollLastItemIntoView();
                     }
                 }
 
@@ -459,6 +480,22 @@ internal static class PlaceHolderUi
 
         WindowContentExtend.ExtendToLastItem((int)(200 * T3Ui.UiScaleFactor));
         return result;
+    }
+
+    /** Scrolls only if the row is cut off, keeping some rows of context in the direction of travel. */
+    private static void ScrollLastItemIntoView()
+    {
+        var padding = ImGui.GetStyle().WindowPadding.Y;
+        var windowTop = ImGui.GetWindowPos().Y + padding;
+        var windowBottom = ImGui.GetWindowPos().Y + ImGui.GetWindowHeight() - padding;
+        if (ImGui.GetItemRectMin().Y < windowTop)
+        {
+            ImGui.SetScrollHereY(RevealMarginFraction);
+        }
+        else if (ImGui.GetItemRectMax().Y > windowBottom)
+        {
+            ImGui.SetScrollHereY(1 - RevealMarginFraction);
+        }
     }
 
     internal static UiResults DrawSymbolUiEntry(GraphUiContext context, SymbolUi symbolUi, bool showType=true)
@@ -544,7 +581,7 @@ internal static class PlaceHolderUi
     /// A space after the symbol name switches the list to that symbol's presets. Without a typed name it uses the
     /// symbol picked with the arrow keys.
     /// </summary>
-    private static bool IsChoosingPreset
+    internal static bool IsChoosingPreset
     {
         get
         {
@@ -649,6 +686,37 @@ internal static class PlaceHolderUi
         => IsChoosingPreset && _presetIndex >= 0 && _presetIndex < _presetMatches.Count
                ? _presetMatches[_presetIndex]
                : null;
+
+    /// <summary>
+    /// A game controller can't type the space that switches to presets: Y does it for the highlighted operator, and
+    /// B goes back to the operators instead of closing the browser.
+    /// </summary>
+    private static void HandleGamepadPresetButtons()
+    {
+        if (GamepadControl.WasPressed(GamepadControl.Buttons.Y) && !IsChoosingPreset && _selectedSymbolUi != null)
+        {
+            SetSearchText(Filter.SearchString.TrimEnd() + " ");
+            _wasPickedWithKeys = true;
+        }
+        else if (GamepadControl.WasPressed(GamepadControl.Buttons.B) && IsChoosingPreset)
+        {
+            var spaceIndex = Filter.SearchString.IndexOf(' ');
+            SetSearchText(spaceIndex > 0 ? Filter.SearchString[..spaceIndex] : string.Empty);
+            ResetPresets();
+        }
+    }
+
+    /** The active input keeps its own copy of the text, so a new label makes it take the changed one. */
+    private static void SetSearchText(string text)
+    {
+        Filter.SearchString = text;
+        _searchInputGeneration++;
+        _searchInputLabel = "##symbolBrowserFilter" + _searchInputGeneration;
+
+        // Inside a namespace the header button takes the input's place
+        if (!SymbolBrowsing.IsFilterActive)
+            _focusInputNextTime = true;
+    }
 
     private static void ResetPresets()
     {
@@ -756,6 +824,12 @@ internal static class PlaceHolderUi
 
     /** Up/Down chose the selection since the search last changed */
     private static bool _wasPickedWithKeys;
+    private static bool _scrollToSelected;
+    private static int _searchInputGeneration;
+    private static string _searchInputLabel = "##symbolBrowserFilter";
+
+    /** Where a revealed row lands, as a fraction of the list's height from the edge it came in at. */
+    private const float RevealMarginFraction = 0.2f;
     private static ImRect _placeholderAreaOnScreen;
     internal static readonly SymbolFilter Filter = new();
     private static MagGraphItem? _placeholderItem;

@@ -4,6 +4,7 @@ using ImGuiNET;
 using T3.Core.DataTypes;
 using T3.Editor.App;
 using T3.Editor.Gui.Input;
+using T3.Editor.Gui.Interaction.Gamepad;
 using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
@@ -18,7 +19,7 @@ namespace T3.Editor.Gui.MagGraph.Interaction;
 /// <summary>
 /// Draws a curated overview of essential symbols structured by categories and namespaces. Besides the mouse it can
 /// be browsed with the arrow keys: Return opens the focused namespace or inserts the focused symbol, Backspace goes
-/// back up.
+/// back up. A game controller's shoulder buttons step to the previous or next page or namespace of the overview.
 /// </summary>
 internal static class SymbolBrowsing
 {
@@ -290,6 +291,18 @@ internal static class SymbolBrowsing
             return false;
         }
 
+        if (GamepadControl.WasPressed(GamepadControl.Buttons.RightShoulder))
+        {
+            RequestAdjacentSection(1);
+            return false;
+        }
+
+        if (GamepadControl.WasPressed(GamepadControl.Buttons.LeftShoulder))
+        {
+            RequestAdjacentSection(-1);
+            return false;
+        }
+
         return _focus.HasFocus && ImGui.IsKeyPressed(Key.Return.ToImGuiKey(), false);
     }
 
@@ -308,6 +321,66 @@ internal static class SymbolBrowsing
 
         if (_path.Count == 1)
             PlaceHolderUi.FocusSearchInputNextFrame();
+    }
+
+    /// <summary>
+    /// Opens the page or namespace next to the current one, in the order the overview lists them, wrapping around.
+    /// From the overview it opens the first or last one.
+    /// </summary>
+    private static void RequestAdjacentSection(int step)
+    {
+        var sections = new List<List<Group>>();
+        foreach (var child in _libTree.Items)
+        {
+            if (IsSection(child))
+            {
+                sections.Add([_libTree, child]);
+                continue;
+            }
+
+            foreach (var item in child.Items)
+            {
+                if (IsSection(item))
+                    sections.Add([_libTree, child, item]);
+            }
+        }
+
+        if (sections.Count == 0)
+            return;
+
+        var currentIndex = step > 0 ? -1 : sections.Count;
+        if (_path.Count > 1)
+        {
+            for (var index = 0; index < sections.Count; index++)
+            {
+                if (IsSamePath(sections[index], _path))
+                {
+                    currentIndex = index;
+                    break;
+                }
+            }
+        }
+
+        var nextIndex = ((currentIndex + step) % sections.Count + sections.Count) % sections.Count;
+        _requestedPath = sections[nextIndex];
+        _isRequestedWithKeys = true;
+
+        static bool IsSection(Group group) => group.Variant is Variants.Page or Variants.Namespace;
+    }
+
+    /** Groups are rebuilt every frame, so paths are compared by content. */
+    private static bool IsSamePath(List<Group> a, List<Group> b)
+    {
+        if (a.Count != b.Count)
+            return false;
+
+        for (var index = 0; index < a.Count; index++)
+        {
+            if (a[index].Variant != b[index].Variant || a[index].Type != b[index].Type || a[index].Name != b[index].Name)
+                return false;
+        }
+
+        return true;
     }
 
     /** Changing the path while drawing would let the rest of the old view react to the same click or key. */

@@ -6,6 +6,7 @@ using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.UiModel.ProjectHandling;
 
 namespace T3.Editor.Gui.MagGraph.Interaction;
 
@@ -18,6 +19,18 @@ internal static class OperatorBookmarks
 {
     internal static void HandleKeyboard(GraphUiContext context)
     {
+        if (UserActions.SelectNextOperatorBookmark.Triggered())
+        {
+            JumpToAdjacentBookmark(context, 1);
+            return;
+        }
+
+        if (UserActions.SelectPreviousOperatorBookmark.Triggered())
+        {
+            JumpToAdjacentBookmark(context, -1);
+            return;
+        }
+
         for (var index = 0; index < SlotCount; index++)
         {
             if ((UserActions.SetOperatorBookmark0 + index).Triggered())
@@ -119,6 +132,58 @@ internal static class OperatorBookmarks
         }
 
         context.ProjectView.TrySetCompositionOp(instance.Parent.InstancePath, ScalableCanvas.Transition.JumpIn, instance.SymbolChildId);
+    }
+
+    /// <summary>
+    /// Jumps to the next set bookmark after the selected operator's, in digit order and wrapping around. Without a
+    /// bookmarked selection it starts at the first (or last) one.
+    /// </summary>
+    private static void JumpToAdjacentBookmark(GraphUiContext context, int step)
+    {
+        // Triggers that aren't bound to a focused window reach every graph window
+        if (context.ProjectView != ProjectView.Focused)
+            return;
+
+        var paths = GetPaths(context);
+        var currentIndex = step > 0 ? -1 : SlotCount;
+        var selectedPath = context.Selector.GetFirstSelectedInstance()?.InstancePath;
+        if (selectedPath != null)
+        {
+            for (var index = 0; index < SlotCount; index++)
+            {
+                if (paths[index] != null && IsSamePath(paths[index]!, selectedPath))
+                {
+                    currentIndex = index;
+                    break;
+                }
+            }
+        }
+
+        for (var offset = 1; offset <= SlotCount; offset++)
+        {
+            var index = ((currentIndex + offset * step) % SlotCount + SlotCount) % SlotCount;
+            if (paths[index] == null)
+                continue;
+
+            JumpToBookmark(context, index);
+            return;
+        }
+
+        ActionToast.ShowTip(EmptyBookmarkTipId, "{No operators bookmarked yet}   [⇧1] bookmarks the selected one");
+    }
+
+    private static bool IsSamePath(Guid[] path, IReadOnlyList<Guid> instancePath)
+    {
+        if (path.Length != instancePath.Count)
+            return false;
+
+        for (var index = 0; index < path.Length; index++)
+        {
+            if (path[index] != instancePath[index])
+                return false;
+        }
+
+        return true;
     }
 
     private static string?[] GetBookmarksForProject(GraphUiContext context)

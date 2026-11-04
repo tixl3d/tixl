@@ -14,7 +14,34 @@ Phase 1 implemented, verified on Linux with an Xbox Series controller over USB (
 radial dead zones, 0.5 s hot-plug scan, initialised by Editor and Player), `[Gamepad]` reads it instead of
 XInput, `Gamepad/GamepadIndicator` in the menu bar cycles `UserSettings.GamepadUsage` (Operators → Editor → Off).
 `XInputGamepad` and the SharpDX.XInput package stay until main's calibration is ported. Test set:
-`.tests-manual/gamepad-usage-indicator.md`. Reference controller: Xbox.
+`.tests-manual/gamepad-usage-indicator.md`.
+Phase 2 implemented, untested: `Gamepad/GamepadControl` triggers user actions in the graph through
+`KeyActionHandling.TriggerForThisFrame` (new actions `SelectPrevious/NextOperatorBookmark`), and while the symbol
+browser or parameter popover is open it injects ImGui key events (d-pad → arrows, A → Enter, B → Esc or Backspace
+inside the drill). X inserts after the selection or in the view centre without needing the mouse over the graph.
+After the first test: A without a selection inserts in the view centre, Y = P (tap pins to output, hold peeks),
+the left stick pans the graph (quadratic, 1500 px/s), and the right stick drives the popover's infinity slider
+(`InfinitySliderOverlay.DrawForStick`, cubic; LT/RT scale the range continuously ×0.1…×10), so Phase 3 is done
+apart from editing outside the popover.
+Second round: X opens the browser on release; while X is held the d-pad picks the side (Above/Left = before the
+input, Below/Right = after the output, snapped inputs follow their snap) with `GamepadInsertPreview` marking it.
+Right stick up/down changes the slider range in decades (`DrawForStick` keeps it until restart). Right stick
+pressed + tilt moves the selected op's snapped group (`GamepadGroupDrag`, one undo step; no unsnap/splice/snap yet).
+Third round: panning 375 px/s; browser result list moves on press with repeat and scrolls the selection into
+view (keyboard too); no axis lock on the slider; popover reads A (apply, toggles bools), B (apply and close), X
+(insert into the input, like Shift+I) itself; `HandleStickEditing` puts Vector2/3 on the sticks (right x/y,
+left-y z) and colors (right: hue/saturation, left: brightness/alpha) without a component selector.
+Later rounds: LB/RB undo/redo in the graph; X also accepts in the browser; Y in the browser opens the highlighted
+operator's presets (B back to the list); Y in the popover resets to default; inserting after the shown op of an
+unconnected chain end moves the output/background to the new op (all inserts, not only the pad).
+Camera: View toggles a Camera context (B or View returns, toast); `Camera/GamepadCamera` is an
+`ICameraManipulator` next to the SpaceMouse (left stick fly, right stick look, RT/LT lift, speed scales with the
+view distance and CameraSpeed). Focus mode moved from View to Share (`GamePadState.Share`, SDL MISC1). The
+background only takes camera input while a camera op is selected.
+Open cleanup: Y means "forward" (presets) in the browser but "revert" (reset) in the popover; find one meaning.
+Open ideas: a gain/bias control UI on the sticks, a visual color picker while editing colors, group drag with
+unsnap/snap like the mouse.
+Test set: `.tests-manual/gamepad-editor-control.md`. Reference controller: Xbox.
 
 Much of what this needs already exists for keyboard control (`Plan_KeyboardControl.md`): arrow-key selection
 navigation, the parameter popover, Tab insert, operator bookmarks, action toasts. **The gamepad is another
@@ -63,13 +90,15 @@ Xbox defaults, consistent with the projector calibration on `main` (`SetupOutput
 | Left stick | Pan | — |
 | LT / RT | Zoom out / in | — |
 | D-pad | Select the nearest op in that direction | `SelectToAbove/Right/Below/Left`, `SelectionNavigation` |
-| A | Edit parameters of the selected op | `EditParameter` → `ParameterPopover` |
+| A | Edit parameters of the selected op; without a selection insert in the view centre | `EditParameter` → `ParameterPopover` |
 | B | Deselect; with nothing selected, go up to the parent composition | — |
-| Hold X + flick left stick | Insert from the selected op in that direction; opens the browser type-filtered | Tab / Shift+Tab insert |
-| Y | Switch control between graph and background camera (toast) | — |
-| LB / RB | Previous / next set operator bookmark (select and frame) | `SelectOperatorBookmarkN` |
+| X | Insert after the selected op (or in the view centre); opens the browser type-filtered | Tab insert |
+| Hold X + d-pad, release X | Insert on the picked side, previewed while X is held | Tab / Shift+Tab / Ctrl+Tab insert |
+| Y | Show the selection in the output; hold to only peek (camera switching moves elsewhere) | `PinToOutputWindow` → `OutputPeek` |
+| LB / RB | Undo / redo (bookmark stepping stays bindable on the keyboard) | `Undo` / `Redo` |
 | Menu (☰) | Play / pause | — |
-| View (⧉) | Toggle focus mode | — |
+| View (⧉) | Steer the camera (View or B returns) | `GamepadCamera` |
+| Share | Toggle focus mode | `ToggleFocusMode` |
 
 Insert directions follow MagGraph's flow: right and down add after the selected op's output (Shift+Tab and Tab);
 left and up add before its input (new). Panning stops while X is held, and an arrow previews the direction.

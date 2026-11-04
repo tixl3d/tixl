@@ -7,6 +7,7 @@ using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.Resource.Assets;
 using T3.Editor.Gui.Window;
+using T3.Editor.Gui.Interaction.Gamepad;
 using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
@@ -141,6 +142,35 @@ internal static partial class ParameterPopover
             return;
         }
 
+        // A game controller applies with A and keeps going; B applies and closes, as it can't type to revert; X inserts
+        // an operator into the focused input like Shift+I, Y resets it like Shift+R
+        if (GamepadControl.WasPressed(GamepadControl.Buttons.B))
+        {
+            Commit(instance);
+            Close(refocusGraph: true);
+            return;
+        }
+
+        if (GamepadControl.WasPressed(GamepadControl.Buttons.X))
+        {
+            InsertConnectedOperator(context, instance);
+            return;
+        }
+
+        if (GamepadControl.WasPressed(GamepadControl.Buttons.Y))
+        {
+            ResetToDefault(instance);
+            return;
+        }
+
+        if (GamepadControl.WasPressed(GamepadControl.Buttons.A))
+        {
+            if (_valueKind == ValueKinds.Bool)
+                StepValue(instance, 1);
+
+            Commit(instance);
+        }
+
         if (ImGui.GetIO().KeyShift && ImGui.IsKeyPressed(ImGuiKey.I, false) && !IsTypingText)
         {
             InsertConnectedOperator(context, instance);
@@ -166,6 +196,7 @@ internal static partial class ParameterPopover
             ProcessText(instance);
         }
 
+        HandleStickEditing(instance);
         HandleNudging(instance);
 
         var isPickingOption = _isValueMode && _valueKind is ValueKinds.Options or ValueKinds.AssetPath;

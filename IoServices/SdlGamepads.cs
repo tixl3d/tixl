@@ -170,6 +170,7 @@ public static unsafe class SdlGamepads
                                                        IsDown(handle, SDL_GamepadButton.SDL_GAMEPAD_BUTTON_NORTH)),
                             Back = IsDown(handle, SDL_GamepadButton.SDL_GAMEPAD_BUTTON_BACK),
                             Start = IsDown(handle, SDL_GamepadButton.SDL_GAMEPAD_BUTTON_START),
+                            Share = IsDown(handle, SDL_GamepadButton.SDL_GAMEPAD_BUTTON_MISC1),
                             LeftShoulder = IsDown(handle, SDL_GamepadButton.SDL_GAMEPAD_BUTTON_LEFT_SHOULDER),
                             RightShoulder = IsDown(handle, SDL_GamepadButton.SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER),
                             LeftStickButton = IsDown(handle, SDL_GamepadButton.SDL_GAMEPAD_BUTTON_LEFT_STICK),
@@ -217,7 +218,7 @@ public static unsafe class SdlGamepads
                && state.RightTrigger < TriggerActivityThreshold
                && state.DirectionalPad is { Left: false, Right: false, Up: false, Down: false }
                && state.Buttons is { A: false, B: false, X: false, Y: false }
-               && !state.Back && !state.Start
+               && !state.Back && !state.Start && !state.Share
                && !state.LeftShoulder && !state.RightShoulder
                && !state.LeftStickButton && !state.RightStickButton;
     }

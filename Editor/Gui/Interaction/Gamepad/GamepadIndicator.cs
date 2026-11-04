@@ -20,6 +20,7 @@ internal static class GamepadIndicator
 
         // Applied every frame rather than on change, so the setting holds even while the menu bar is hidden
         SdlGamepads.IsAvailableToOperators = UserSettings.Config.GamepadUsage == UserSettings.GamepadUsages.Operators;
+        GamepadControl.Update();
     }
 
     internal static void Draw()

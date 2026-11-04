@@ -3,6 +3,7 @@ using T3.Core.DataTypes.Vector;
 using T3.Core.Operator.Interfaces;
 using T3.Core.Stats;
 using T3.Core.Utils;
+using T3.Editor.Gui.Interaction.Gamepad;
 using T3.Editor.Gui.MagGraph.Interaction;
 using T3.Editor.Gui.MagGraph.Interaction.KeyboardEditing;
 using T3.Editor.Gui.MagGraph.Model;
@@ -12,6 +13,7 @@ using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.Modification;
+using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
 
 namespace T3.Editor.Gui.MagGraph.Ui;
@@ -33,6 +35,11 @@ internal sealed partial class MagGraphView
         {
             KeyboardActions.HandleKeyboardActions(_context);
         }
+
+        if (_context.ProjectView == ProjectView.Focused)
+            GamepadControl.PanView(_context.View);
+
+        GamepadGroupDrag.Update(_context);
 
         if (_context.ProjectView.InstView is not { IsValid: true })
         {
@@ -170,6 +177,7 @@ internal sealed partial class MagGraphView
             DrawOffscreenIndicators(drawList);
             DrawAutoCollectIndicators(drawList);
             SelectionNavigation.DrawTargetIndicators(_context, drawList);
+            GamepadInsertPreview.Draw(_context, drawList);
             OperatorBookmarks.DrawBadges(_context, drawList);
             ParameterPopover.Draw(_context);
 

@@ -36,6 +36,9 @@ public struct GamePadState
     public bool Back;
     public bool Start;
 
+    /** The extra button in the middle of newer controllers (Share on Xbox Series, Capture on Switch). */
+    public bool Share;
+
     public Vector2 LeftThumb;
     public Vector2 RightThumb;
 

@@ -13,6 +13,8 @@ internal static class KeyActionHandling
     //private static readonly List<KeyBinding> _bindings = [];
 
     private static bool _initialized;
+    private static readonly bool[] _actionsTriggeredThisFrame = new bool[(int)UserActions.__Count];
+    private static bool _anyActionTriggeredThisFrame;
     private static bool _anyKeysPressed;
     private static bool _arrowKeysClaimedThisFrame;
     private static bool _cameraKeysClaimedThisFrame;
@@ -41,8 +43,24 @@ internal static class KeyActionHandling
         _cameraKeysClaimedThisFrame = true;
     }
 
+    /// <summary>
+    /// Makes <paramref name="action"/> count as triggered for the rest of this frame, regardless of keys and window
+    /// focus. Input sources other than the keyboard call it after <see cref="InitializeFrame"/>.
+    /// </summary>
+    internal static void TriggerForThisFrame(UserActions action)
+    {
+        _actionsTriggeredThisFrame[(int)action] = true;
+        _anyActionTriggeredThisFrame = true;
+    }
+
     internal static void InitializeFrame()
     {
+        if (_anyActionTriggeredThisFrame)
+        {
+            Array.Clear(_actionsTriggeredThisFrame);
+            _anyActionTriggeredThisFrame = false;
+        }
+
         AreArrowKeysClaimed = _arrowKeysClaimedThisFrame;
         _arrowKeysClaimedThisFrame = false;
         AreCameraKeysClaimed = _cameraKeysClaimedThisFrame;
@@ -71,6 +89,9 @@ internal static class KeyActionHandling
 
     internal static bool Triggered(this UserActions action)
     {
+        if (_anyActionTriggeredThisFrame && _actionsTriggeredThisFrame[(int)action])
+            return true;
+
         if (!_anyKeysPressed || !UserSettings.Config.EnableKeyboardShortCuts)
             return false;
         
@@ -190,6 +211,8 @@ internal static class KeyActionHandling
         //RegisterActionsFlags(UserActions.RenameChild, Flags.NeedsWindowFocus);
         RegisterActionsFlags(UserActions.EditParameter, Flags.KeyPressOnly);
 
+        RegisterActionsFlags(UserActions.SelectPreviousOperatorBookmark, Flags.NeedsWindowFocus | Flags.KeyPressOnly);
+        RegisterActionsFlags(UserActions.SelectNextOperatorBookmark, Flags.NeedsWindowFocus | Flags.KeyPressOnly);
         for (var index = 0; index < 10; index++)
         {
             RegisterActionsFlags(UserActions.SelectOperatorBookmark0 + index, Flags.NeedsWindowFocus | Flags.KeyPressOnly);

@@ -2,12 +2,14 @@
 using System.Diagnostics;
 using ImGuiNET;
 using T3.Core.Operator;
+using T3.Editor.Gui.Interaction.Gamepad;
 using T3.Editor.Gui.Interaction.Variations;
 using T3.Editor.Gui.Interaction.Variations.Model;
 using T3.Editor.Gui.MagGraph.Interaction.KeyboardEditing;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Gui.Windows.Output;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.Selection;
@@ -441,6 +443,10 @@ internal sealed class PlaceholderCreation
         //var newInstance = context.CompositionInstance.Children[newChildUi.Id];
         context.Selector.SetSelection(newChildUi, newInstance);
 
+        // Checked before the connections are rerouted: only an unconnected output is the end of its chain
+        if (_snappedSourceItem?.Instance != null && _snappedSourceOutputLine.ConnectionsOut.Count == 0)
+            ShowNewChainEnd(context, _snappedSourceItem.Instance, newInstance);
+
         // Connect to focus node...
         if (_snappedSourceItem != null)
         {
@@ -729,10 +735,36 @@ internal sealed class PlaceholderCreation
             VariationHandling.GetOrLoadVariations(symbol.Id).SetActiveVariationWithoutApply(preset);
         }
 
-        ParameterPopUp.NodeIdRequestedForParameterWindowActivation = newSymbolChild.Id;
+        // A game controller edits parameters on A; the popup would only cover the graph
+        if (!GamepadControl.IsDrivingEditor)
+            ParameterPopUp.NodeIdRequestedForParameterWindowActivation = newSymbolChild.Id;
+
         context.Layout.FlagStructureAsChanged();
 
         Complete(context);
+    }
+
+    /// <summary>
+    /// Extending the end of the chain that is shown (as graph background or pinned in an output window) moves the
+    /// display along to the new operator, so building a chain keeps showing its result.
+    /// </summary>
+    private static void ShowNewChainEnd(GraphUiContext context, Instance shownSource, Instance newInstance)
+    {
+        if (newInstance.Inputs.Count == 0 || newInstance.Outputs.Count == 0)
+            return;
+
+        var projectView = context.ProjectView;
+        if (projectView.GraphImageBackground.OutputSymbolChildId == shownSource.SymbolChildId
+            && projectView.GraphImageBackground.OutputInstance == shownSource)
+        {
+            projectView.SetBackgroundOutput(newInstance);
+        }
+
+        foreach (var window in OutputWindow.OutputWindowInstances)
+        {
+            if (window is OutputWindow outputWindow && outputWindow.Pinning.IsPinnedTo(shownSource))
+                outputWindow.Pinning.PinInstance(newInstance, projectView);
+        }
     }
 
     private static int ComputeNewItemUnitsHeight(GraphUiContext context, Symbol symbol, SymbolUi.Child newChildUi,

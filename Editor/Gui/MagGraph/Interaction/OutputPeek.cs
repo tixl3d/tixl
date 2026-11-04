@@ -2,6 +2,7 @@
 using ImGuiNET;
 using T3.Editor.App;
 using T3.Editor.Gui.Interaction;
+using T3.Editor.Gui.Interaction.Gamepad;
 using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.UiHelpers;
@@ -126,6 +127,9 @@ internal static class OutputPeek
     /** Checks the key alone, so pressing a modifier while holding P doesn't end the peek */
     private static bool IsPinKeyDown()
     {
+        if (GamepadControl.IsHeld(GamepadControl.Buttons.Y))
+            return true;
+
         foreach (var binding in KeyMapSwitching.CurrentKeymap.Bindings)
         {
             if (binding.Action == UserActions.PinToOutputWindow && ImGui.IsKeyDown(binding.KeyCombination.Key.ToImGuiKey()))

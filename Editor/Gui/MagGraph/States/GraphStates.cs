@@ -2,6 +2,7 @@ using ImGuiNET;
 using System.Diagnostics;
 using T3.Editor.Gui.MagGraph.Interaction;
 using T3.Editor.Gui.Interaction;
+using T3.Editor.Gui.Interaction.Gamepad;
 using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.UiHelpers;
@@ -40,6 +41,48 @@ namespace T3.Editor.Gui.MagGraph.States
                        : item.OutputLines.Length > 0;
         }
 
+        internal static bool TryGetSingleSelectedItem(GraphUiContext context, out MagGraphItem item)
+        {
+            item = null;
+            return context.Selector.Selection.Count == 1
+                   && context.Layout.Items.TryGetValue(context.Selector.Selection[0].Id, out item);
+        }
+
+        /// <summary>
+        /// Turns a side picked on a game controller into the Tab insertion it stands for: below and right continue
+        /// from the output, above and left insert before the first input. The default side is what Tab does. A
+        /// snapped input can only be split along its snap, so above and left both follow it there.
+        /// </summary>
+        /// <returns>False if the item has no output (or input) on that side</returns>
+        internal static bool TryResolveInsertSide(MagGraphItem item, GamepadControl.InsertSides side,
+                                                  out bool isUpstream, out MagGraphItem.Directions direction)
+        {
+            isUpstream = side is GamepadControl.InsertSides.Above or GamepadControl.InsertSides.Left;
+            direction = side is GamepadControl.InsertSides.Left or GamepadControl.InsertSides.Right
+                            ? MagGraphItem.Directions.Horizontal
+                            : MagGraphItem.Directions.Vertical;
+
+            if (isUpstream)
+            {
+                if (item.InputLines.Length == 0)
+                    return false;
+
+                var connectionIn = item.InputLines[0].ConnectionIn;
+                if (connectionIn is { IsSnapped: true })
+                    direction = IsHorizontallySnapped(connectionIn) ? MagGraphItem.Directions.Horizontal : MagGraphItem.Directions.Vertical;
+
+                return true;
+            }
+
+            if (item.OutputLines.Length == 0)
+                return false;
+
+            if (side == GamepadControl.InsertSides.Default && HasHorizontalSnappedOutput(item.OutputLines[0]))
+                direction = MagGraphItem.Directions.Horizontal;
+
+            return true;
+        }
+
         /** Ctrl+Tab inserts before the selected op, into its first input. */
         internal static bool IsTabInsertingUpstream => ImGui.GetIO().KeyCtrl;
 
@@ -72,8 +115,12 @@ namespace T3.Editor.Gui.MagGraph.States
         /// </summary>
         private static void OpenPlaceholderForTabInsertion(GraphUiContext context, MagGraphItem item)
         {
-            var direction = GetTabInsertionDirection(item);
-            if (!IsTabInsertingUpstream)
+            OpenPlaceholderForInsertion(context, item, IsTabInsertingUpstream, GetTabInsertionDirection(item));
+        }
+
+        private static void OpenPlaceholderForInsertion(GraphUiContext context, MagGraphItem item, bool isUpstream, MagGraphItem.Directions direction)
+        {
+            if (!isUpstream)
             {
                 context.Placeholder.OpenForItemOutput(context, item, item.OutputLines[0], direction);
                 return;
@@ -134,6 +181,28 @@ namespace T3.Editor.Gui.MagGraph.States
                               if (context.ProjectView.GraphImageBackground.HasInteractionFocus)
                               {
                                   context.StateMachine.SetState(BackgroundContentIsInteractive, context);
+                                  return;
+                              }
+
+                              // A game controller has no mouse over the graph, so it inserts beside the selection or in the view centre
+                              if (context.ProjectView == ProjectView.Focused && GamepadControl.TryTakeInsertRequest(out var insertSide))
+                              {
+                                  if (TryGetSingleSelectedItem(context, out var selectedItem))
+                                  {
+                                      if (!TryResolveInsertSide(selectedItem, insertSide, out var isUpstream, out var insertDirection))
+                                      {
+                                          ActionToast.Show(isUpstream ? "{" + selectedItem.ReadableName + " has no input}" : "{" + selectedItem.ReadableName + " has no output}");
+                                          return;
+                                      }
+
+                                      OpenPlaceholderForInsertion(context, selectedItem, isUpstream, insertDirection);
+                                  }
+                                  else
+                                  {
+                                      context.Placeholder.OpenOnCanvas(context, context.View.GetVisibleCanvasArea().GetCenter());
+                                  }
+
+                                  context.StateMachine.SetState(Placeholder, context);
                                   return;
                               }
                           

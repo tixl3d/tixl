@@ -3,8 +3,10 @@ using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
+using T3.Core.Utils;
 using T3.Editor.Gui.InputUi.VectorInputs;
 using T3.Editor.Gui.Interaction;
+using T3.Editor.Gui.Interaction.Gamepad;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.InputsAndTypes;
@@ -46,9 +48,13 @@ internal static partial class ParameterPopover
         }
 
         var direction = ImGui.IsKeyDown(ImGuiKey.RightArrow) ? 1 : ImGui.IsKeyDown(ImGuiKey.LeftArrow) ? -1 : 0;
+        // Vectors and colors take the sticks directly, see HandleStickEditing
+        var rightStick = _valueKind == ValueKinds.Number ? GamepadControl.PopoverRightStick : Vector2.Zero;
+        var stickDeflection = rightStick.X;
+        var rangeDeflection = rightStick.Y;
         if (!_isNudging)
         {
-            if (direction == 0
+            if (direction == 0 && stickDeflection == 0
                 || _valueKind is not (ValueKinds.Number or ValueKinds.Vector or ValueKinds.Color)
                 || !TryStartNudging(instance))
                 return;
@@ -57,8 +63,27 @@ internal static partial class ParameterPopover
         var wasPressed = ImGui.IsKeyPressed(ImGuiKey.RightArrow, false) || ImGui.IsKeyPressed(ImGuiKey.LeftArrow, false);
         var anchor = new Vector2((_popoverRect.Min.X + _popoverRect.Max.X) / 2, _popoverRect.Min.Y - SliderGapPx * T3Ui.UiScaleFactor);
         var value = _nudgeValue;
-        InfinitySliderOverlay.DrawForKeyboard(ref value, _restartNudging, anchor, direction, wasPressed,
-                                              _nudgeMin, _nudgeMax, _nudgeScale, _nudgeClampMin, _nudgeClampMax);
+        // A resting stick keeps the stick's slider, so the range it picked survives until the keys take over
+        if (direction != 0)
+        {
+            _isNudgingWithStick = false;
+        }
+        else if (stickDeflection != 0 || rangeDeflection != 0)
+        {
+            _isNudgingWithStick = true;
+        }
+
+        if (_isNudgingWithStick)
+        {
+            InfinitySliderOverlay.DrawForStick(ref value, _restartNudging, anchor, stickDeflection, rangeDeflection, GamepadControl.ValueRangeScaleFactor,
+                                               _nudgeMin, _nudgeMax, _nudgeScale, _nudgeClampMin, _nudgeClampMax);
+        }
+        else
+        {
+            InfinitySliderOverlay.DrawForKeyboard(ref value, _restartNudging, anchor, direction, wasPressed,
+                                                  _nudgeMin, _nudgeMax, _nudgeScale, _nudgeClampMin, _nudgeClampMax);
+        }
+
         _restartNudging = false;
 
         if (_isNudgingInt)
@@ -210,6 +235,97 @@ internal static partial class ParameterPopover
     /// property on colors ("r g b a", "h", "s", nothing for brightness). Other typed values stay pending and the
     /// adjustment continues from them.
     /// </summary>
+    /// <summary>
+    /// Lets a game controller's sticks change vectors and colors without picking a component first. Vectors: the right
+    /// stick changes x and y, the left stick's vertical axis z. Colors: the right stick changes hue (sideways) and
+    /// saturation (up and down), the left stick brightness (up and down) and alpha (sideways). The change is pending
+    /// like a typed value; the triggers make it finer or coarser.
+    /// </summary>
+    private static void HandleStickEditing(Instance instance)
+    {
+        if (_valueKind is not (ValueKinds.Vector or ValueKinds.Color))
+            return;
+
+        var right = GamepadControl.PopoverRightStick;
+        var left = GamepadControl.PopoverLeftStick;
+        if (right == Vector2.Zero && left == Vector2.Zero)
+            return;
+
+        if (instance.Parent == null || !TryGetFocusedSlot(instance, out var slot) || slot.HasInputConnections)
+            return;
+
+        // Applying or reverting ends the edit; the next one starts from the value then
+        var isNewEdit = _previewCommand == null || _previewCommand != _stickEditCommand;
+        var deltaTime = ImGui.GetIO().DeltaTime;
+        var speedFactor = (float)GamepadControl.ValueRangeScaleFactor * deltaTime;
+
+        InputValue? newValue;
+        if (_valueKind == ValueKinds.Color)
+        {
+            if (slot.Input.Value is not InputValue<Vector4> colorValue)
+                return;
+
+            if (isNewEdit)
+            {
+                new Color(colorValue.Value).GetHSV(out var hue, out var saturation, out var brightness);
+                _stickHsva = new Vector4(hue, saturation, brightness, colorValue.Value.W);
+            }
+
+            var hueStep = _stickHsva.X + Cubic(right.X) * StickHueTurnsPerSecond * speedFactor;
+            _stickHsva.X = hueStep - MathF.Floor(hueStep);
+            _stickHsva.Y = Math.Clamp(_stickHsva.Y + Cubic(right.Y) * StickColorUnitsPerSecond * speedFactor, 0, 1);
+            _stickHsva.Z = MathF.Max(0, _stickHsva.Z + Cubic(left.Y) * StickColorUnitsPerSecond * speedFactor);
+            _stickHsva.W = Math.Clamp(_stickHsva.W + Cubic(left.X) * StickColorUnitsPerSecond * speedFactor, 0, 1);
+            newValue = new InputValue<Vector4>(Color.FromHSV(_stickHsva.X, _stickHsva.Y, _stickHsva.Z, _stickHsva.W).Rgba);
+        }
+        else
+        {
+            Span<double> components = stackalloc double[4];
+            var count = GetComponents(slot.Input.Value, components);
+            if (count is < 2 or > 3)
+                return;
+
+            if (isNewEdit)
+            {
+                if (!SymbolUiRegistry.TryGetSymbolUi(instance.Symbol.Id, out var symbolUi)
+                    || !symbolUi.InputUis.TryGetValue(slot.Id, out var inputUi)
+                    || !TryGetSliderRange(inputUi))
+                {
+                    (_nudgeMin, _nudgeMax, _nudgeScale, _nudgeClampMin, _nudgeClampMax) = (double.NegativeInfinity, double.PositiveInfinity, 0.01f, false, false);
+                }
+
+                _stickComponents = new Vector3((float)components[0], (float)components[1], count > 2 ? (float)components[2] : 0);
+            }
+
+            var unitsPerSecond = _nudgeScale * StickUnitsPerSliderScale * speedFactor;
+            _stickComponents.X += Cubic(right.X) * unitsPerSecond;
+            _stickComponents.Y += Cubic(right.Y) * unitsPerSecond;
+            _stickComponents.Z += Cubic(left.Y) * unitsPerSecond;
+            for (var index = 0; index < count; index++)
+            {
+                var component = index switch { 0 => _stickComponents.X, 1 => _stickComponents.Y, _ => _stickComponents.Z };
+                components[index] = MathUtils.OptionalClamp(component, _nudgeMin, _nudgeClampMin, _nudgeMax, _nudgeClampMax);
+            }
+
+            newValue = CreateFromComponents(slot.Input.Value, components);
+        }
+
+        if (newValue == null)
+            return;
+
+        if (_previewCommand == null)
+        {
+            _previewOriginalLabel = FormatValue(slot.Input.Value);
+            _previewCommand = new ChangeInputValueCommand(instance.Parent.Symbol, instance.SymbolChildId, slot.Input, null, instance);
+        }
+
+        _stickEditCommand = _previewCommand;
+        _previewCommand.AssignNewValue(newValue);
+        _valueLabelsNeedUpdate = true;
+
+        static float Cubic(float deflection) => deflection * deflection * deflection;
+    }
+
     private static bool TryStartNudging(Instance instance)
     {
         if (instance.Parent == null
@@ -391,4 +507,15 @@ internal static partial class ParameterPopover
     private static bool _nudgeClampMax;
     private static string _nudgeOriginalLabel = string.Empty;
     private static string _nudgeLabel = string.Empty;
+
+    private static bool _isNudgingWithStick;
+    private static ChangeInputValueCommand? _stickEditCommand;
+    private static Vector4 _stickHsva;
+    private static Vector3 _stickComponents;
+
+    /** Full stick deflection moves a vector this many slider scale units per second, like the stick's number slider. */
+    private const float StickUnitsPerSliderScale = 70;
+
+    private const float StickHueTurnsPerSecond = 0.05f;
+    private const float StickColorUnitsPerSecond = 0.1f;
 }

@@ -126,6 +126,10 @@ internal enum UserActions
     // Misc
     RenderScreenshot,
     RenderAnimation,
+
+    // Stepping through the operator bookmarks in digit order, e.g. from a game controller's shoulder buttons
+    SelectPreviousOperatorBookmark,
+    SelectNextOperatorBookmark,
     
     // ReSharper disable once InconsistentNaming
     __Count,     

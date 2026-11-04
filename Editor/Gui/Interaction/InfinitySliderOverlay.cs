@@ -166,6 +166,49 @@ internal static class InfinitySliderOverlay
         roundedValue = MathUtils.OptionalClamp(roundedValue, min, clampMin, max, clampMax);
     }
 
+    /// <summary>
+    /// Game controller variant of <see cref="DrawForKeyboard"/>: <paramref name="deflection"/> (-1..1) sets the speed,
+    /// with a cubic response so a light touch moves single steps and full deflection crosses the range quickly.
+    /// <paramref name="rangeDeflection"/> widens (up) or narrows (down) the range in powers of ten while held, like
+    /// moving the mouse away from the slider; it stays where it was left until the slider restarts.
+    /// <paramref name="rangeScaleFactor"/> scales it further, like Shift and Ctrl.
+    /// </summary>
+    internal static void DrawForStick(ref double roundedValue,
+                                      bool restarted,
+                                      Vector2 anchor,
+                                      float deflection,
+                                      float rangeDeflection,
+                                      double rangeScaleFactor,
+                                      double min = double.NegativeInfinity,
+                                      double max = double.PositiveInfinity,
+                                      float scale = 0.1f,
+                                      bool clampMin = false,
+                                      bool clampMax = false)
+    {
+        var drawList = ImGui.GetForegroundDrawList();
+        _io = ImGui.GetIO();
+        var deltaTime = FrameTiming.VisualDeltaSec;
+
+        if (restarted)
+        {
+            _value = roundedValue;
+            _originalValue = roundedValue;
+            _dampedModifierScaleFactor = 1;
+            _stickRangeLog10 = 0;
+        }
+
+        _stickRangeLog10 = Math.Clamp(_stickRangeLog10 + rangeDeflection * MathF.Abs(rangeDeflection) * MaxStickDecadesPerSecond * deltaTime,
+                                      -MaxStickDecades, MaxStickDecades);
+        var targetScaleFactor = rangeScaleFactor * Math.Pow(10, _stickRangeLog10);
+        _dampedModifierScaleFactor = MathUtils.Lerp(_dampedModifierScaleFactor, targetScaleFactor, MathUtils.BlendForFrame(0.1f, deltaTime));
+        var valueRange = Math.Pow(10, KeyboardLog10Distance) * scale * 0.25f * _dampedModifierScaleFactor * 600;
+
+        _value += deflection * deflection * deflection * valueRange * MaxStickRangesPerSecond * deltaTime;
+        _value = MathUtils.OptionalClamp(_value, min, clampMin, max, clampMax);
+        DrawUi(out roundedValue, min, max, valueRange, anchor, drawList, disableRounding: false, showScaleIndicators: rangeDeflection != 0);
+        roundedValue = MathUtils.OptionalClamp(roundedValue, min, clampMin, max, clampMax);
+    }
+
     private static double GetRoundInterval(double valueRange, out double tickValueInterval, out double logRemainder)
     {
         var log10 = Math.Log10(valueRange);
@@ -382,6 +425,16 @@ internal static class InfinitySliderOverlay
     private const double KeyAccelerationSec = 2;
     private const double MinRangesPerSecond = 0.05;
     private const double MaxRangesPerSecond = 1.5;
+
+    /** Full stick deflection moves the value by this many ranges per second; slower than held keys, as a stick is held longer. */
+    private const double MaxStickRangesPerSecond = 0.15;
+
+    /** Full vertical stick deflection changes the range by this many powers of ten per second. */
+    private const double MaxStickDecadesPerSecond = 1.5;
+
+    private const double MaxStickDecades = 4;
+
+    private static double _stickRangeLog10;
 
     private static ImGuiIOPtr _io;
 }
