@@ -12,6 +12,7 @@ using T3.Core.Operator.Interfaces;
 using T3.Core.Resource;
 using T3.Editor.Gui.Audio;
 using T3.Editor.Gui.Styling;
+using T3.Editor.UiContentDrawing;
 using Texture2D = T3.Core.DataTypes.Texture2D;
 
 namespace T3.Editor.Gui.Windows.TimeLine.TimeClips;
@@ -46,7 +47,7 @@ internal static class AudioClipBodyRenderer
 
         var clipData = provider.GetResourceHandle().Clip;
         var style = clipData.Style;
-        if (!TryGetWaveformSrv(path, instance, style, out var srv))
+        if (!TryGetWaveformSrv(path, instance, style, out var srv, out var textureWidth))
             return;
 
         // Muted clips fade their waveform too, matching the faded clip body.
@@ -86,6 +87,7 @@ internal static class AudioClipBodyRenderer
                 var segmentWidth = (float)(loopSpanSecs / timeSpanSecs) * bodyWidth;
                 if (segmentWidth > 2)
                 {
+                    var sharpSampling = BeginSharpSamplingIfMagnified(drawList, textureWidth, u1 - u0, segmentWidth);
                     var borderColor = UiColors.BackgroundFull.Fade(0.6f);
                     var segmentStartX = bodyMin.X;
                     while (segmentStartX < bodyMax.X)
@@ -109,6 +111,7 @@ internal static class AudioClipBodyRenderer
                         segmentStartX += segmentWidth;
                     }
 
+                    EndSharpSampling(drawList, sharpSampling);
                     drawn = true;
                 }
             }
@@ -119,34 +122,69 @@ internal static class AudioClipBodyRenderer
                 var u0 = (float)(visibleStartSecs / lengthSecs);
                 var u1 = (float)(visibleEndSecs / lengthSecs);
 
+                var sharpSampling = BeginSharpSamplingIfMagnified(drawList, textureWidth, u1 - u0, (x1 - x0) * bodyWidth);
                 drawList.AddImage((IntPtr)srv,
                                   new Vector2(bodyMin.X + x0 * bodyWidth + 1, bodyMin.Y + 1),
                                   new Vector2(bodyMin.X + x1 * bodyWidth - 1, bodyMax.Y - 1),
                                   new Vector2(u0, 0), new Vector2(u1, 1),
                                   UiColors.ForegroundFull.Fade(contentFade));
+                EndSharpSampling(drawList, sharpSampling);
                 drawn = true;
             }
         }
 
         if (!drawn)
         {
+            var sharpSampling = BeginSharpSamplingIfMagnified(drawList, textureWidth, 1, bodyWidth);
             drawList.AddImage((IntPtr)srv,
                               bodyMin + new Vector2(1, 1),
                               bodyMax - new Vector2(1, 1),
                               Vector2.Zero, Vector2.One,
                               UiColors.ForegroundFull.Fade(0.5f * contentFade));
+            EndSharpSampling(drawList, sharpSampling);
         }
 
         drawList.PopClipRect();
     }
 
     /// <summary>
+    /// Picks the sampler for one waveform draw. The generated images have ~10 ms columns and
+    /// <see cref="AudioImageGenerator"/>'s 256-row height, and are stretched into a clip body only a few dozen
+    /// pixels tall — so they are always minified vertically, whatever the timeline zoom. That alone moves the
+    /// sample several mip levels down (the hardware takes the max of both axis derivatives) and blurs the
+    /// columns that <em>are</em> magnified once the timeline is zoomed in. Base-level point sampling keeps
+    /// those columns crisp; while a column is still smaller than a pixel the mip chain keeps the zoomed-out
+    /// overview smooth, exactly as before. Returns whether sampling was switched, to be passed to
+    /// <see cref="EndSharpSampling"/>.
+    /// </summary>
+    private static bool BeginSharpSamplingIfMagnified(ImDrawListPtr drawList, int textureWidth, float uvSpan, float drawnWidth)
+    {
+        if (textureWidth <= 0 || drawnWidth <= 0)
+            return false;
+
+        var texelsPerPixel = uvSpan * textureWidth / drawnWidth;
+        if (texelsPerPixel >= 1f)
+            return false;
+
+        WindowsUiContentDrawer.BeginNearestSampling(drawList);
+        return true;
+    }
+
+    private static void EndSharpSampling(ImDrawListPtr drawList, bool started)
+    {
+        if (started)
+            WindowsUiContentDrawer.EndNearestSampling(drawList);
+    }
+
+    /// <summary>
     /// (Cached) shader-resource view of the file's waveform image. First call per asset kicks off a
     /// background generation via <see cref="AudioImageFactory"/>; later calls return the loaded SRV.
     /// </summary>
-    private static bool TryGetWaveformSrv(string assetPath, Instance owner, AudioClipStyle style, [NotNullWhen(true)] out ShaderResourceView? srv)
+    private static bool TryGetWaveformSrv(string assetPath, Instance owner, AudioClipStyle style,
+                                         [NotNullWhen(true)] out ShaderResourceView? srv, out int textureWidth)
     {
         srv = null;
+        textureWidth = 0;
         var handle = new AudioClipResourceHandle(new TimelineAudioClip { AssetPath = assetPath }, owner);
         if (!AudioImageFactory.TryGetOrCreateImagePathForClip(handle, style, out var imagePath))
             return false;
@@ -154,6 +192,7 @@ internal static class AudioClipBodyRenderer
         if (_imageCache.TryGetValue(imagePath, out var entry))
         {
             srv = entry.Srv;
+            textureWidth = entry.Resource.Value?.Description.Width ?? 0;
             return srv is { IsDisposed: false };
         }
 
@@ -163,6 +202,7 @@ internal static class AudioClipBodyRenderer
 
         _imageCache[imagePath] = new CachedImage(resource, newSrv);
         srv = newSrv;
+        textureWidth = resource.Value?.Description.Width ?? 0;
         return srv is { IsDisposed: false };
     }
 
