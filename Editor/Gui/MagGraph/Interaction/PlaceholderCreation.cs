@@ -646,7 +646,9 @@ internal sealed class PlaceholderCreation
             var primaryInput = newInstance.Inputs.FirstOrDefault(i => i.ValueType == context.DraggedPrimaryOutputType);
             if (primaryInput != null)
             {
-                var connectionToAdd = new Symbol.Connection(context.ActiveSourceItem!.Id,
+                var sourceItem = context.ActiveSourceItem!;
+                var sourceParentOrChildId = sourceItem.Variant == MagGraphItem.Variants.Input ? Guid.Empty : sourceItem.Id;
+                var connectionToAdd = new Symbol.Connection(sourceParentOrChildId,
                                                             context.ActiveSourceOutputId,
                                                             newInstance.SymbolChildId,
                                                             primaryInput.Id);
