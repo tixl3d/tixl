@@ -283,67 +283,25 @@ internal sealed class CameraInteraction
         if (dragDelta.Length() == 0)
             return false;
 
-        var factorX = -dragDelta.X * CameraInteractionParameters.RotateMouseSensitivity * 1.5f;
-        var factorY = dragDelta.Y * CameraInteractionParameters.RotateMouseSensitivity * 1.5f;
-        var rotAroundY = Matrix4x4.CreateFromAxisAngle(_viewAxis.Up, factorX);
-        var rotAroundX = Matrix4x4.CreateFromAxisAngle(_viewAxis.Left, factorY);
-        var rot = Matrix4x4.Multiply(rotAroundX, rotAroundY);
-        
-        var viewDir2 = new Vector4(_intendedSetup.Target - _intendedSetup.Position, 0);
-        var length = viewDir2.Length();
-        
-        var viewDirRotated = Vector4.Transform(viewDir2, rot);
-        viewDirRotated = Vector4.Normalize(viewDirRotated) * length;
-
-        var newTarget = _intendedSetup.Position + new Vector3(viewDirRotated.X, viewDirRotated.Y, viewDirRotated.Z);
-        _intendedSetup.Target = newTarget;
+        var yawLeft = -dragDelta.X * CameraInteractionParameters.RotateMouseSensitivity * 1.5f;
+        var pitchUp = -dragDelta.Y * CameraInteractionParameters.RotateMouseSensitivity * 1.5f;
+        _intendedSetup.LookAround(yawLeft, pitchUp);
         return true;
     }
 
+    /// <summary>
+    /// Turns the camera around its target: X turns the view left, Y down (as the drag directions are). Stops at the
+    /// poles instead of flipping over.
+    /// </summary>
     private void ApplyOrbitVelocity(Vector2 orbitVelocity)
     {
+        _intendedSetup.Orbit(orbitVelocity.X, -orbitVelocity.Y);
+
+        // Speed adjusted with the wheel moves the pivot along with it, so orbiting stays proportional to the speed
         if (UserSettings.Config.AdjustCameraSpeedWithMouseWheel)
         {
-            var rotAroundX = Matrix4x4.CreateFromAxisAngle(_viewAxis.Left, orbitVelocity.Y);
-            var rotAroundY = Matrix4x4.CreateFromAxisAngle(_viewAxis.Up, orbitVelocity.X);
-            var rot = Matrix4x4.Multiply(rotAroundX, rotAroundY);
-
-            // The following was an attempt to offset rotation target with cameraSpeed.
-            // This approach had too many side effects. I'm leaving it here for reference...
-            //
-            // var view = _intendedSetup.Target - _intendedSetup.Position;
-            // var viewLength = view.Length();
-            // var viewDirection = view / viewLength;
-            //
-            // var rotatedViewDir = Vector3.Transform(viewDirection, rot);
-            //
-            // var tempTarget = _intendedSetup.Position + viewDirection * UserSettings.Config.CameraSpeed * 3;
-            // _intendedSetup.Position = tempTarget - rotatedViewDir  * UserSettings.Config.CameraSpeed * 3;
-            // _intendedSetup.Target = _intendedSetup.Position + rotatedViewDir * viewLength;
-
-            var viewDir = _intendedSetup.Target - _intendedSetup.Position;
-            var viewDirLength = viewDir.Length();
-            viewDir /= viewDirLength;
-
-            var newViewDir = Vector3.Transform(viewDir, rot);
-            var newViewVector = newViewDir * viewDirLength;
-            _intendedSetup.Position = _intendedSetup.Target - newViewVector;
-
-            _intendedSetup.Target = _intendedSetup.Position + newViewDir * UserSettings.Config.CameraSpeed * GraphicsMath.DefaultCameraDistance;
-        }
-        else
-        {
-            var viewDir = new Vector4(_intendedSetup.Target - _intendedSetup.Position, 1);
-            var viewDirLength = viewDir.Length();
-            viewDir /= viewDirLength;
-
-            var rotAroundX = Matrix4x4.CreateFromAxisAngle(_viewAxis.Left, orbitVelocity.Y);
-            var rotAroundY = Matrix4x4.CreateFromAxisAngle(_viewAxis.Up, orbitVelocity.X);
-            var rot = Matrix4x4.Multiply(rotAroundX, rotAroundY);
-
-            var newViewDir = Vector4.Transform(viewDir, rot);
-            newViewDir = Vector4.Normalize(newViewDir);
-            _intendedSetup.Position = _intendedSetup.Target - new Vector3(newViewDir.X, newViewDir.Y, newViewDir.Z) * viewDirLength;
+            var viewDirection = Vector3.Normalize(_intendedSetup.Target - _intendedSetup.Position);
+            _intendedSetup.Target = _intendedSetup.Position + viewDirection * UserSettings.Config.CameraSpeed * GraphicsMath.DefaultCameraDistance;
         }
     }
 
@@ -444,8 +402,10 @@ internal sealed class CameraInteraction
         {
             ViewDistance = camera.CameraTarget - camera.CameraPosition;
 
+            // Roll is in degrees and turns the camera's up against the view direction, as in CameraDefinition
             var worldUp = Vector3.UnitY;
-            var rolledUp = Vector3.Normalize(Vector3.Transform(worldUp, Matrix4x4.CreateFromAxisAngle(ViewDistance, camera.CameraRoll)));
+            var viewDirection = Vector3.Normalize(ViewDistance);
+            var rolledUp = Vector3.Normalize(Vector3.Transform(worldUp, Matrix4x4.CreateFromAxisAngle(viewDirection, -camera.CameraRoll * MathUtils.ToRad)));
 
             Left = Vector3.Normalize(Vector3.Cross(rolledUp, ViewDistance));
             Up = Vector3.Normalize(Vector3.Cross(ViewDistance, Left));

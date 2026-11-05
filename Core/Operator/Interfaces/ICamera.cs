@@ -136,7 +136,13 @@ public class ViewCamera : ICamera
 {
     public Vector3 CameraPosition { get; set; } = new(0, 0, GraphicsMath.DefaultCameraDistance);
     public Vector3 CameraTarget { get; set; }
+
+    /** Degrees, as in <see cref="CameraDefinition.Roll"/>. */
     public float CameraRoll { get; set; }
+
+    /** Vertical field of view in radians; taken over from a scene camera so switching to the viewer keeps the framing. */
+    public float FieldOfView { get; set; } = GraphicsMath.DefaultCamFovDegrees.ToRadians();
+
     public Matrix4x4 WorldToCamera { get; }
     public Matrix4x4 CameraToClipSpace { get; }
     public CameraDefinition CameraDefinition => new(); // Not implemented
