@@ -19,6 +19,9 @@ public static unsafe class SdlGamepads
 {
     public static int Count => _pads.Count;
 
+    /** False if SDL's gamepad subsystem failed to start; then no controller can be read at all. */
+    public static bool IsAvailable => _isInitialized;
+
     /** When input last arrived from any pad, for activity indicators; 0 if never. */
     public static long LastActivityTicksMs { get; private set; }
 
@@ -82,6 +85,13 @@ public static unsafe class SdlGamepads
             if (!IsReleased(pad.State))
                 LastActivityTicksMs = now;
         }
+    }
+
+    /** Looks for newly connected controllers right away instead of waiting for the next periodic scan. */
+    public static void Rescan()
+    {
+        if (_isInitialized)
+            ScanForPads();
     }
 
     /// <returns>False if no pad is connected at <paramref name="index"/></returns>

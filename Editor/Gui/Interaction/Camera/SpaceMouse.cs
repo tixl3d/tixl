@@ -100,8 +100,12 @@ public sealed partial class SpaceMouse : ICameraManipulator, IWin32MessageHandle
         // Todo: Think about what the buttons can be used for
     }
 
+    /** Raw input reports no connection state, so the last motion is the only sign that a SpaceMouse works. */
+    internal static long LastMotionTicksMs { get; private set; }
+
     private void SpaceMouseMotionHandler(object sender, SpaceMouseDevice.MotionEventArgs e)
     {
+        LastMotionTicksMs = Environment.TickCount64;
         if (e.TranslationVector != null)
         {
             _translationSum.X -= e.TranslationVector.X * UserSettings.Config.SpaceMouseMoveSpeedFactor;

@@ -239,6 +239,14 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         public float SpaceMouseMoveSpeedFactor = 1f;
         public float SpaceMouseDamping = 0.5f;
 
+        // Game controller camera
+        /** Seconds the camera takes to follow the sticks; longer is calmer, e.g. for live demos. */
+        public float GamepadCameraSmoothing = 0.4f;
+
+        public float GamepadCameraMoveSpeed = 1f;
+        public float GamepadCameraLookSpeed = 1f;
+        public bool GamepadCameraInvertLook;
+
         // Migration-only: these load from existing userSettings.json to preserve
         // the user's last render path counters. Not written back.
         [Obsolete("Migrated to per-symbol RenderSettings in .t3ui")]

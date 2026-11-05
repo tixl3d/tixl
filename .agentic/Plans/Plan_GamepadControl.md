@@ -14,6 +14,9 @@ explored and parked; its learnings live in `Plan_GamepadEditing.md` on branch `f
   `CameraSpeed`; pitch stops short of straight up/down.
 - `XInputGamepad` and the SharpDX.XInput package stay until main's projector calibration (which polls XInput) is
   ported onto `SdlGamepads`.
+- Settings → Input Devices (formerly Space Mouse) has a Game Controller group (status of connected controllers,
+  Rescan, usage, camera smoothing in seconds, move/look speed, invert look) and a SpaceMouse group (status from the
+  last motion, since raw input reports no connection; Windows only).
 - Test sets: `.tests-manual/gamepad-usage-indicator.md`.
 
 ## Next

@@ -32,7 +32,7 @@ internal sealed partial class SettingsWindow : Window
         Projects,
         Audio,
         Midi,
-        SpaceMouse,
+        InputDevices,
         Keyboard,
         Diagnostics,
     }
@@ -511,21 +511,8 @@ internal sealed partial class SettingsWindow : Window
                                                                 CoreSettings.Defaults.DefaultOscPort);
                     break;
                 }
-                case Categories.SpaceMouse:
-                    CustomComponents.HelpText("These settings only apply with a connected space mouse controller");
-                    FormInputs.AddVerticalSpace();
-
-                    changed |= FormInputs.AddFloat("Smoothing",
-                                                   ref UserSettings.Config.SpaceMouseDamping,
-                                                   0.0f, 10f, 0.01f, true, true);
-
-                    changed |= FormInputs.AddFloat("Move Speed",
-                                                   ref UserSettings.Config.SpaceMouseMoveSpeedFactor,
-                                                   0.0f, 10f, 0.01f, true, true);
-
-                    changed |= FormInputs.AddFloat("Rotation Speed",
-                                                   ref UserSettings.Config.SpaceMouseRotationSpeedFactor,
-                                                   0.0f, 10f, 0.01f, true, true);
+                case Categories.InputDevices:
+                    DrawInputDevicesPanel(ref changed);
                     break;
 
                 case Categories.Keyboard:
@@ -695,6 +682,140 @@ internal sealed partial class SettingsWindow : Window
         NavigationSidebar.EndContentPanel();
     }
 
+    /// <summary>
+    /// Devices beside mouse and keyboard: game controllers (for operators or the camera) and the SpaceMouse. Each
+    /// group starts with its connection status, the place for reconnecting.
+    /// </summary>
+    private static void DrawInputDevicesPanel(ref bool changed)
+    {
+        FormInputs.SetIndentToLeft();
+        FormInputs.AddSectionSubHeader("Game Controller");
+        FormInputs.AddVerticalSpace();
+        FormInputs.SetIndentToParameters();
+
+        // Both groups have a "Move Speed", and form inputs take their ID from the label
+        ImGui.PushID("GameController");
+
+        DrawGamepadStatus();
+        FormInputs.ApplyIndent();
+        if (ImGui.Button("Rescan"))
+            SdlGamepads.Rescan();
+
+        CustomComponents.TooltipForLastItem("Looks for newly connected controllers. Controllers are also found within a second on their own.",
+                                            "On Linux a Bluetooth Xbox controller may connect without sending input; a USB cable or the xpadneo driver helps.");
+        FormInputs.AddVerticalSpace();
+
+        changed |= FormInputs.AddEnumDropdown(ref UserSettings.Config.GamepadUsage,
+                                              "Use for",
+                                              "Operators: [Gamepad] reads the controller. Camera: the controller flies the camera of the output and [Gamepad] sees a released controller. Same as clicking the controller icon in the menu bar.",
+                                              UserSettings.Defaults.GamepadUsage,
+                                              usage => usage switch
+                                                           {
+                                                               UserSettings.GamepadUsages.Operators => "Operators",
+                                                               UserSettings.GamepadUsages.Editor    => "Camera",
+                                                               _                                    => "Off",
+                                                           });
+
+        changed |= FormInputs.AddFloat("Camera Smoothing",
+                                       ref UserSettings.Config.GamepadCameraSmoothing,
+                                       0f, 3f, 0.01f, true, true,
+                                       "Seconds the camera takes to follow the sticks. Longer gives calmer moves, e.g. for live demos.",
+                                       UserSettings.Defaults.GamepadCameraSmoothing);
+
+        changed |= FormInputs.AddFloat("Move Speed",
+                                       ref UserSettings.Config.GamepadCameraMoveSpeed,
+                                       0f, 10f, 0.01f, true, true,
+                                       "Scales flying with the left stick and the triggers.",
+                                       UserSettings.Defaults.GamepadCameraMoveSpeed);
+
+        changed |= FormInputs.AddFloat("Look Speed",
+                                       ref UserSettings.Config.GamepadCameraLookSpeed,
+                                       0f, 10f, 0.01f, true, true,
+                                       "Scales looking around with the right stick.",
+                                       UserSettings.Defaults.GamepadCameraLookSpeed);
+
+        changed |= FormInputs.AddCheckBox("Invert Look",
+                                          ref UserSettings.Config.GamepadCameraInvertLook,
+                                          "Pushing the right stick up looks down, as in flight games.",
+                                          UserSettings.Defaults.GamepadCameraInvertLook);
+        ImGui.PopID();
+
+        FormInputs.AddVerticalSpace();
+        FormInputs.SetIndentToLeft();
+        FormInputs.AddSectionSubHeader("SpaceMouse");
+        FormInputs.AddVerticalSpace();
+        FormInputs.SetIndentToParameters();
+
+        DrawSpaceMouseStatus();
+        FormInputs.AddVerticalSpace();
+
+        ImGui.PushID("SpaceMouse");
+
+        changed |= FormInputs.AddFloat("Smoothing",
+                                       ref UserSettings.Config.SpaceMouseDamping,
+                                       0.0f, 10f, 0.01f, true, true);
+
+        changed |= FormInputs.AddFloat("Move Speed",
+                                       ref UserSettings.Config.SpaceMouseMoveSpeedFactor,
+                                       0.0f, 10f, 0.01f, true, true);
+
+        changed |= FormInputs.AddFloat("Rotation Speed",
+                                       ref UserSettings.Config.SpaceMouseRotationSpeedFactor,
+                                       0.0f, 10f, 0.01f, true, true);
+        ImGui.PopID();
+    }
+
+    private static void DrawGamepadStatus()
+    {
+        if (!SdlGamepads.IsAvailable)
+        {
+            DrawStatusLine(UiColors.StatusAttention, "Game controllers are not available (see the log)");
+            return;
+        }
+
+        if (SdlGamepads.Count == 0)
+        {
+            DrawStatusLine(UiColors.TextMuted, "No controller connected");
+            return;
+        }
+
+        for (var index = 0; index < SdlGamepads.Count; index++)
+        {
+            DrawStatusLine(UiColors.StatusControlled, SdlGamepads.GetName(index));
+        }
+    }
+
+    private static void DrawSpaceMouseStatus()
+    {
+        if (!OperatingSystem.IsWindows())
+        {
+            DrawStatusLine(UiColors.TextMuted, "Only supported on Windows so far");
+            return;
+        }
+
+        var lastMotion = Interaction.Camera.SpaceMouse.LastMotionTicksMs;
+        if (lastMotion == 0)
+        {
+            DrawStatusLine(UiColors.TextMuted, "No input yet. Move the SpaceMouse to check its connection.");
+            return;
+        }
+
+        var secondsAgo = (Environment.TickCount64 - lastMotion) / 1000;
+        DrawStatusLine(UiColors.StatusControlled, secondsAgo < 2 ? "Receiving input" : $"Last input {secondsAgo} s ago");
+    }
+
+    /** A colored dot and a text, aligned with the parameters. */
+    private static void DrawStatusLine(Color color, string text)
+    {
+        FormInputs.ApplyIndent();
+        var height = ImGui.GetTextLineHeight();
+        var pos = ImGui.GetCursorScreenPos();
+        var radius = MathF.Round(3 * T3Ui.UiScaleFactor);
+        ImGui.GetWindowDrawList().AddCircleFilled(new Vector2(pos.X + radius, MathF.Round(pos.Y + height * 0.5f)), radius, color);
+        ImGui.SetCursorScreenPos(pos + new Vector2(radius * 2 + 6 * T3Ui.UiScaleFactor, 0));
+        ImGui.TextUnformatted(text);
+    }
+
     private static string CategoryTitle(Categories category) => category switch
                                                                     {
                                                                         Categories.Interface  => "User Interface",
@@ -702,7 +823,7 @@ internal sealed partial class SettingsWindow : Window
                                                                         Categories.Projects   => "Project specific settings",
                                                                         Categories.Audio      => "Audio System",
                                                                         Categories.Midi       => "Midi & OSC",
-                                                                        Categories.SpaceMouse => "Space Mouse",
+                                                                        Categories.InputDevices => "Input Devices",
                                                                         Categories.Keyboard   => "Keyboard Shortcuts",
                                                                         Categories.Diagnostics => "Diagnostics and debugging",
                                                                         _                     => string.Empty,

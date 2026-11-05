@@ -61,6 +61,18 @@ With the controller steering the camera, show a 3D scene in the output window (i
 - Looking straight up or down stops before the view flips.
 - The graph doesn't react to the controller.
 
+## Step: Input device settings
+
+**Action:**
+Open Settings → Input Devices. Raise Camera Smoothing to 1.5, fly the camera with a quick stick flick, then set it to 0 and flick again. Try Invert Look and Look Speed.
+
+**Expected:**
+- The Game Controller group lists the connected controller with a green dot; with none connected it says so, and Rescan finds a newly plugged one.
+- "Use for" shows the same choice as the menu bar icon and changes it.
+- With high smoothing the camera eases in and glides out after the stick is released; at 0 it follows the stick directly.
+- Invert Look flips up and down on the right stick; Look Speed and Move Speed scale the camera.
+- The SpaceMouse group shows its status (on Linux: only supported on Windows) and its settings.
+
 ## Step: Switching the controller off
 
 **Action:**
