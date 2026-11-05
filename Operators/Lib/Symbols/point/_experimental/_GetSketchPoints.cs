@@ -41,6 +41,13 @@ internal sealed class _GetSketchPoints : Instance<_GetSketchPoints>
                 return;
             }
 
+            var overriddenPageIndex = OverriddenPageIndex.GetValue(context);
+            if (overriddenPageIndex >= 0)
+            {
+                SetPage(orderedPages, overriddenPageIndex + pageIndexOffset, -pageIndexOffset * OnionSkinDistancePerPage);
+                return;
+            }
+
             var found = false;
             for (var index = 0; index < orderedPages.Count; index++)
             {
@@ -69,6 +76,15 @@ internal sealed class _GetSketchPoints : Instance<_GetSketchPoints>
         }
 
         var isValidIndex = pageIndex >= 0 && pageIndex < orderedPages.Count;
+        var distance = isValidIndex && orderedPages[pageIndex] != null
+                           ? (float)(context.LocalTime - orderedPages[pageIndex].Time)
+                           : 0;
+        SetPage(orderedPages, pageIndex, distance);
+    }
+
+    private void SetPage(List<_SketchImpl.Page> orderedPages, int pageIndex, float distance)
+    {
+        var isValidIndex = pageIndex >= 0 && pageIndex < orderedPages.Count;
         if (!isValidIndex || orderedPages[pageIndex] == null)
         {
             PointList.Value = _emptyList;
@@ -76,10 +92,15 @@ internal sealed class _GetSketchPoints : Instance<_GetSketchPoints>
             return;
         }
 
-        var activePage = orderedPages[pageIndex];
-        PointList.Value = activePage.PointsList;
-        DistanceToCurrentTime.Value = (float)(context.LocalTime - activePage.Time);
+        PointList.Value = orderedPages[pageIndex].PointsList;
+        DistanceToCurrentTime.Value = distance;
     }
+
+    /**
+     * With an overridden page index, page times say nothing about order, so neighbours are faded by their page offset.
+     * The sketch fades a page out at half the onion skin range, so at range 1 the direct neighbours show faded.
+     */
+    private const float OnionSkinDistancePerPage = 0.25f;
 
     private static readonly StructuredList<Point> _emptyList = new(1);
 
@@ -91,4 +112,8 @@ internal sealed class _GetSketchPoints : Instance<_GetSketchPoints>
 
     [Input(Guid = "DDBAC6AB-E547-4955-9346-680B2C5BF8A4")]
     public readonly InputSlot<bool> GetOnionSkin = new();
+
+    /** -1 while pages follow time. */
+    [Input(Guid = "7202B1A9-45C5-412C-9796-3451BA523CE5")]
+    public readonly InputSlot<int> OverriddenPageIndex = new();
 }

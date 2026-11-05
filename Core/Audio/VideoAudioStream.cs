@@ -46,15 +46,30 @@ public sealed class VideoAudioStream : IDisposable
     /// </summary>
     public double BufferedSeconds => _engine.GetPushQueuedFrames(Channel) / (double)SampleRate;
 
-    /// <summary>Queues interleaved stereo float samples for playback, continuing from whatever is already queued.</summary>
-    public void Feed(ReadOnlySpan<float> interleaved)
+    /// <summary>
+    /// Queues interleaved stereo float samples for playback, continuing from whatever is already queued.
+    /// Returns false once the source is gone, so the feeder stops instead of retrying every tick.
+    /// </summary>
+    public bool Feed(ReadOnlySpan<float> interleaved)
     {
         if (interleaved.IsEmpty)
-            return;
+            return true;
 
         var frameCount = interleaved.Length / Channels;
-        if (_engine.PushWrite(Channel, interleaved, frameCount) < frameCount)
-            Log.Warning("[VideoAudio] The audio queue is full; dropped samples.");
+        var written = _engine.PushWrite(Channel, interleaved, frameCount);
+        if (written >= frameCount)
+            return true;
+
+        // The feeder runs every 10 ms; warning per call would flood the log.
+        if (!_hasWarned)
+        {
+            _hasWarned = true;
+            Log.Warning(written < 0
+                            ? $"[VideoAudio] The audio source is no longer valid (error {written}); video audio stays silent."
+                            : "[VideoAudio] The audio queue is full; dropped samples.");
+        }
+
+        return written >= 0;
     }
 
     /// <summary>Drops everything queued, so the next <see cref="Feed"/> is heard immediately. Used on seek and mute.</summary>
@@ -74,4 +89,5 @@ public sealed class VideoAudioStream : IDisposable
     private const double QueueCapacitySecs = 4;
 
     private readonly NativeAudioEngine _engine;
+    private bool _hasWarned;
 }

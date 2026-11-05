@@ -100,7 +100,7 @@ public sealed partial class SpaceMouse : ICameraManipulator, IWin32MessageHandle
         // Tilting and twisting the cap turn the view; the pitch stops at the poles
         intendedSetup.LookAround(-_dampedRotation.Y / RawUnitsPerRadian, _dampedRotation.X / RawUnitsPerRadian);
     }
-        
+
     private static bool IsSteeringCamera => UserSettings.Config.SpaceMouseUsage == UserSettings.InputDeviceUsages.Editor;
 
     private void SpaceMouseButtonHandler(object sender, SpaceMouseDevice.ButtonEventArgs e)

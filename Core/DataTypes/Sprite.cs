@@ -33,7 +33,16 @@ public struct Sprite
     public uint LineIndex;
 
     [FieldOffset(15 * 4)]
-    public uint Extra;
+    public uint GroupIndex;
 
-    private const int StructSize = 16 * 4;
+    /// <summary>
+    /// Bounds of the sprite's group, relative to its point position and before the draw op's size is applied.
+    /// </summary>
+    [FieldOffset(16 * 4)]
+    public Vector2 GroupBoundsMin;
+
+    [FieldOffset(18 * 4)]
+    public Vector2 GroupBoundsMax;
+
+    private const int StructSize = 20 * 4;
 }

@@ -148,8 +148,7 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
             // Playback and display-bound outputs are only evaluated by these frames: suspending them would
             // leave audio streams running past their clip ends and freeze the outputs on other displays.
             var isIdle = Playback.Current.PlaybackSpeed == 0
-                         && OutputWindowHandling.Presenting.Count == 0
-                         && !T3Ui.ShowSecondaryRenderWindow;
+                         && OutputWindowHandling.Presenting.Count == 0;
             if (ProgramWindows.Main.IsMinimized && UserSettings.Config.SuspendRenderingWhenHidden && isIdle)
             {
                 Thread.Sleep(100);

@@ -3,6 +3,7 @@ using ImGuiNET;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Editor.Gui.Interaction;
+using T3.Editor.UiModel.InputsAndTypes;
 
 namespace T3.Editor.UiModel;
 
@@ -38,4 +39,5 @@ internal interface IGraphView
     void CreatePlaceHolderConnectedToInput(SymbolUi.Child symbolChildUi, Symbol.InputDefinition inputInputDefinition);
     void StartDraggingFromInputSlot(SymbolUi.Child symbolChildUi, Symbol.InputDefinition inputInputDefinition);
     void ExtractAsConnectedOperator<T>(InputSlot<T> inputSlot, SymbolUi.Child symbolChildUi, Symbol.Child.Input input);
+    void PublishAsInput(SymbolUi.Child symbolChildUi, Symbol.Child.Input input, IInputUi inputUi);
 }

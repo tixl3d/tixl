@@ -39,9 +39,10 @@ internal static class ColorEditPopup
 
         if (ImGui.BeginPopup(PopupId, dontCloseIfColorPicking))
         {
-            if (_openedId != id)
+            if (_openedId != id || _needsUsedColorRefresh)
             {
                 _openedId = id;
+                _needsUsedColorRefresh = false;
                 ColorUsage.CollectUsedColors(composition);
             }
 
@@ -58,7 +59,11 @@ internal static class ColorEditPopup
             edited |= DrawUsedColors(ref cColor);
 
             if (edited == InputEditStateFlags.ModifiedAndFinished)
-                ColorUsage.CollectUsedColors(composition);
+                _needsUsedColorRefresh = true;
+
+            // Escape in a text field only cancels that edit.
+            if (ImGui.IsKeyPressed(ImGuiKey.Escape, false) && !ImGui.GetIO().WantTextInput)
+                ImGui.CloseCurrentPopup();
 
             ImGui.EndPopup();
         }
@@ -874,6 +879,9 @@ internal static class ColorEditPopup
     private static bool _isHoveringColor;
     public  const string PopupId =  "##colorEdit";
     private static uint _openedId;
+
+    /** The caller writes the edited color to its parameter only after the popup returns, so collecting right away would list the old color as used. */
+    private static bool _needsUsedColorRefresh;
 }
 
 internal static class ColorUsage

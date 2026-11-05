@@ -1,0 +1,247 @@
+{
+  "FormatVersion": 3,
+  "Id": "2e4ecee7-2975-46e1-8f98-900935559176"/*AnimatedText*/,
+  "Description": "Draws text whose characters or words build in and out one after another.\n\nCombines [TextSprites], [TextBuildup] and [DrawPointSprites] with the most useful parameters. Each unit moves from a hidden state (offset, rotation, scale and the edges of the gradient) to its resting place when RangeEnd passes its index, and leaves again when RangeStart passes it.\n\nAKA: text animation, typewriter, reveal, kinetic typography, build in\n\nTips:\n- Animate RangeEnd from 0 to the number of words with linear keyframes.\n- Separate phrases with a GroupSeparator like \",\" to animate them as a whole.\n- For full control, combine [TextSprites], [TextBuildup] and [DrawPointSprites] directly.\n\nSee also: [Text], [TextSprites], [TextBuildup]",
+  "SymbolTags": "8",
+  "InputUis": [
+    {
+      "InputId": "031a5894-b13c-4cca-8c54-4722c3fd3274"/*Randomize*/,
+      "Position": {
+        "X": 160.0,
+        "Y": -280.0
+      },
+      "Description": "Blends the order of the units towards a random shuffle. Only 0 and 1 guarantee one unit at a time.",
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "1806bf13-4e8a-441b-b6c9-d57a063c6a76"/*Gradient*/,
+      "Position": {
+        "X": 160.0,
+        "Y": -35.0
+      },
+      "Description": "Color over a unit's whole life: the left edge before the build-in, the center while fully visible, the right edge after the build-out. The default fades units in and out."
+    },
+    {
+      "InputId": "2e873d7e-1eff-4662-b776-e3253f7b5311"/*Seed*/,
+      "Position": {
+        "X": 160.0,
+        "Y": -245.0
+      }
+    },
+    {
+      "InputId": "35b2c723-c605-44e3-b9dd-4c853570241e"/*GroupSeparator*/,
+      "Position": {
+        "X": -234.12149,
+        "Y": -340.9204
+      },
+      "Description": "Splits the text into the groups that are animated together. Empty means a space. Line breaks always start a new group.",
+      "Usage": "Default"
+    },
+    {
+      "InputId": "385917c7-7925-4f4d-b085-28e8ef6e8323"/*LineHeight*/,
+      "Position": {
+        "X": -234.12149,
+        "Y": -445.9204
+      },
+      "Min": 0.5,
+      "Max": 2.0
+    },
+    {
+      "InputId": "4b6b2893-f913-453b-89aa-7152358c55a0"/*Pivot*/,
+      "Position": {
+        "X": 160.0,
+        "Y": -105.0
+      },
+      "Description": "Center of rotation and scale within the bounds of the unit. (0,0) is the center, (-1,-1) the bottom left corner.",
+      "Min": -1.0,
+      "Max": 1.0
+    },
+    {
+      "InputId": "50721b83-b07f-41dc-bf5b-4b543bf02fe6"/*RangeEnd*/,
+      "Position": {
+        "X": 160.0,
+        "Y": -420.0
+      },
+      "Description": "Units with an index below this value are built in. Animate it from 0 to the unit count to reveal the text.",
+      "Min": 0.0,
+      "Max": 20.0
+    },
+    {
+      "InputId": "604da803-e6e8-401e-a238-aa003158ac13"/*OutDirection*/,
+      "Position": {
+        "X": 160.0,
+        "Y": -70.0
+      },
+      "Description": "Multiplies the position and rotation offsets while units build out. -1 lets them leave the opposite way they came in.",
+      "Min": -1.0,
+      "Max": 1.0
+    },
+    {
+      "InputId": "72e3e29b-ecc4-4b5c-9814-2b4353a5ee60"/*Text*/,
+      "Position": {
+        "X": -234.12149,
+        "Y": -585.9204
+      },
+      "Usage": "Multiline"
+    },
+    {
+      "InputId": "7ae847bd-8d12-46c3-90f5-47666149996b"/*Spread*/,
+      "Position": {
+        "X": 160.0,
+        "Y": -350.0
+      },
+      "Description": "Length of each unit's transition, in units. 1 plays them one after another, larger values overlap them, smaller values leave pauses.",
+      "Min": 0.0,
+      "Max": 5.0,
+      "ClampMin": true
+    },
+    {
+      "InputId": "85c71399-f382-4337-9a24-397864117702"/*RotationOffset*/,
+      "Position": {
+        "X": 160.0,
+        "Y": -175.0
+      },
+      "Description": "Rotation in degrees around the pivot before a unit is built in.",
+      "Min": -180.0,
+      "Max": 180.0
+    },
+    {
+      "InputId": "86cf8af8-2a75-4aa5-84bc-8e99cc89fab1"/*HorizontalAlign*/,
+      "Position": {
+        "X": -234.12149,
+        "Y": -375.9204
+      }
+    },
+    {
+      "InputId": "9993e5fc-f22b-4b58-905b-7a7c13ab1ea4"/*Unit*/,
+      "Position": {
+        "X": 160.0,
+        "Y": -455.0
+      },
+      "GroupTitle": "Animation",
+      "Description": "Animates single characters, or the groups defined by GroupSeparator."
+    },
+    {
+      "InputId": "9eef0588-949a-477d-ab40-6e93020c47be"/*Position*/,
+      "Position": {
+        "X": -234.12149,
+        "Y": -410.9204
+      },
+      "Min": -1.0,
+      "Max": 1.0
+    },
+    {
+      "InputId": "a0ccdc32-2948-4237-88ef-23858c6bcca5"/*Color*/,
+      "Position": {
+        "X": -234.12149,
+        "Y": -515.9204
+      },
+      "GroupTitle": "Text",
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "c1ce422e-00f4-4a18-ae04-c51c101357fb"/*PositionOffset*/,
+      "Position": {
+        "X": 160.0,
+        "Y": -210.0
+      },
+      "GroupTitle": "Hidden State",
+      "Description": "Offset of a unit before it is built in.",
+      "Min": -1.0,
+      "Max": 1.0
+    },
+    {
+      "InputId": "c513f9cb-1cbe-493d-8fea-08c0b056b535"/*Size*/,
+      "Position": {
+        "X": -234.12149,
+        "Y": -480.9204
+      },
+      "Min": 0.0,
+      "Max": 500.0,
+      "ClampMin": true
+    },
+    {
+      "InputId": "e8c60a31-8e55-4a47-bec1-c5998fe02a2a"/*GainAndBias*/,
+      "Position": {
+        "X": 160.0,
+        "Y": -315.0
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true,
+      "UseVec2Control": "GainAndBias"
+    },
+    {
+      "InputId": "ee6cdef1-705e-47c5-bbd5-9447bd263f33"/*Scale*/,
+      "Position": {
+        "X": 160.0,
+        "Y": -140.0
+      },
+      "Description": "Scale around the pivot before a unit is built in.",
+      "Min": 0.0,
+      "Max": 2.0
+    },
+    {
+      "InputId": "ef449f5e-dc47-489e-ba17-84acd7800dff"/*RangeStart*/,
+      "Position": {
+        "X": 160.0,
+        "Y": -385.0
+      },
+      "Description": "Units with an index below this value are built out again.",
+      "Min": 0.0,
+      "Max": 20.0
+    },
+    {
+      "InputId": "f0434b18-08fc-4429-ae39-b426bbdf9e39"/*Font*/,
+      "Position": {
+        "X": -234.12149,
+        "Y": -550.9204
+      },
+      "Description": "Path to a BMFont .fnt file. The MSDF .png texture with the same name is loaded from the same folder.",
+      "Usage": "FilePath",
+      "FileFilter": "fnt"
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "267685b7-3f4e-4144-ac7e-4f685a7ad181",
+      "SymbolName": "Lib.render.sprite.TextSprites",
+      "Position": {
+        "X": -94.12149,
+        "Y": -585.9204
+      }
+    },
+    {
+      "ChildId": "902b3a99-265c-415a-af8f-c6a37e37a525",
+      "SymbolName": "Lib.render.sprite.TextBuildup",
+      "Position": {
+        "X": 300.0,
+        "Y": -525.0
+      }
+    },
+    {
+      "ChildId": "ca0e6c23-4be5-4f02-b335-3cea23806c7a",
+      "SymbolName": "Lib.render.sprite.DrawPointSprites",
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "ad9aa97f-0089-4fe5-9aa6-bca5e0dd4886"/*Output*/,
+      "Position": {
+        "X": 550.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

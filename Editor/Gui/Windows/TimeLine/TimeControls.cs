@@ -201,11 +201,8 @@ internal static class TimeControls
 
         ImGui.SameLine();
         DrawMuteToggle();
-        if (FrameStats.Last.HasAnimatedParameters)
-        {
-            ImGui.SameLine();
-            DrawPinToggle();
-        }
+        ImGui.SameLine();
+        DrawPinToggle();
 
         ImGui.SameLine();
     }

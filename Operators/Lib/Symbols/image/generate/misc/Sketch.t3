@@ -104,33 +104,6 @@
       "Outputs": []
     },
     {
-      "Id": "f7a2c9e1-3b5d-4e8f-a6c4-9d1e2b7f5a38"/*ListToBuffer*/,
-      "SymbolId": "7e28c796-85e7-47ee-99bb-9599284dbeeb",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
-      "Name": "Fills",
-      "InputValues": [],
-      "Outputs": []
-    },
-    {
-      "Id": "c4e8b2d6-9a1f-4c3e-b7d5-2e6f8a1c9b47"/*_DrawPointTriangles*/,
-      "SymbolId": "b7db2c0f-8ea7-4c90-afe3-31ec7cdcc92f",
-      "SymbolName": "Lib.point._experimental._DrawPointTriangles",
-      "Name": "Draw Fills",
-      "InputValues": [
-        {
-          "Id": "e1144012-ca01-4bfa-8581-7eb4e44c8638"/*EnableZTest*/,
-          "Type": "System.Boolean",
-          "Value": false
-        },
-        {
-          "Id": "d8efac0b-92aa-401f-afc5-fa641aadb656"/*EnableZWrite*/,
-          "Type": "System.Boolean",
-          "Value": false
-        }
-      ],
-      "Outputs": []
-    },
-    {
       "Id": "174762d7-030a-47d1-8b28-626e0388f660"/*UseFallbackTexture*/,
       "SymbolId": "b470fdf9-ac0b-4eb9-9600-453b8c094e3f",
       "SymbolName": "Lib.image.use.UseFallbackTexture",
@@ -250,14 +223,14 @@
         {
           "Id": "d89c518c-a862-4f46-865b-0380350b7417"/*Size*/,
           "Type": "System.Single",
-          "Value": 11.0
+          "Value": 24.0
         },
         {
           "Id": "de0fed7d-d2af-4424-baf3-81606e26559f"/*Position*/,
           "Type": "System.Numerics.Vector2",
           "Value": {
-            "X": -0.7140853,
-            "Y": -0.39466074
+            "X": -1.6728013,
+            "Y": -0.9197756
           }
         }
       ],
@@ -573,6 +546,25 @@
       "Outputs": []
     },
     {
+      "Id": "c4e8b2d6-9a1f-4c3e-b7d5-2e6f8a1c9b47"/*Draw Fills*/,
+      "SymbolId": "b7db2c0f-8ea7-4c90-afe3-31ec7cdcc92f",
+      "SymbolName": "Lib.point._experimental._DrawPointTriangles",
+      "Name": "Draw Fills",
+      "InputValues": [
+        {
+          "Id": "d8efac0b-92aa-401f-afc5-fa641aadb656"/*EnableZWrite*/,
+          "Type": "System.Boolean",
+          "Value": false
+        },
+        {
+          "Id": "e1144012-ca01-4bfa-8581-7eb4e44c8638"/*EnableZTest*/,
+          "Type": "System.Boolean",
+          "Value": false
+        }
+      ],
+      "Outputs": []
+    },
+    {
       "Id": "c6288ad6-172c-4e84-b1d9-045bcd350f0a"/*DrawLines*/,
       "SymbolId": "836f211f-b387-417c-8316-658e0dc6e117",
       "SymbolName": "Lib.point.draw.DrawLines",
@@ -719,14 +711,16 @@
       "Outputs": []
     },
     {
-      "Id": "f6214762-274e-44f2-8f5d-bc46b00e699f"/*Transform*/,
-      "SymbolId": "284d2183-197d-47fd-b130-873cced78b1c",
-      "SymbolName": "Lib.render.transform.Transform",
+      "Id": "f7a2c9e1-3b5d-4e8f-a6c4-9d1e2b7f5a38"/*Fills*/,
+      "SymbolId": "7e28c796-85e7-47ee-99bb-9599284dbeeb",
+      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "Name": "Fills",
       "InputValues": [],
       "Outputs": []
     },
     {
       "Id": "f87a1bfb-733b-401d-85b5-b3ddfa5834a9"/*Camera*/,
+      "IsBypassed": true,
       "SymbolId": "746d886c-5ab6-44b1-bb15-f3ce2fadf7e6",
       "SymbolName": "Lib.render.camera.Camera",
       "InputValues": [
@@ -734,9 +728,9 @@
           "Id": "313596cc-3854-436b-89da-5fd40164ce76"/*Position*/,
           "Type": "System.Numerics.Vector3",
           "Value": {
-            "X": 0.0,
-            "Y": 0.0,
-            "Z": 0.999
+            "X": 0.060629714,
+            "Y": 2.3018353,
+            "Z": -0.69024694
           }
         },
         {
@@ -760,6 +754,12 @@
     }
   ],
   "Connections": [
+    {
+      "SourceParentOrChildId": "85c39d79-f072-474d-b8ef-5ae8b963343b",
+      "SourceSlotId": "0b62c9b3-f033-449e-b695-c3e58d90d734",
+      "TargetParentOrChildId": "afa68593-28e1-4aff-b467-434d9f90209b",
+      "TargetSlotId": "7202b1a9-45c5-412c-9796-3451ba523ce5"
+    },
     {
       "SourceParentOrChildId": "a8afb3c5-721b-4806-b1ca-6b33e0c8128e",
       "SourceSlotId": "c52dfa83-9820-4a54-b90b-62278dc8fe3f",
@@ -809,8 +809,8 @@
       "TargetSlotId": "9e961f73-1ee7-4369-9ac7-5c653e570b6f"
     },
     {
-      "SourceParentOrChildId": "f6214762-274e-44f2-8f5d-bc46b00e699f",
-      "SourceSlotId": "2d329133-29b9-4f56-b5a6-5ff7d83638fa",
+      "SourceParentOrChildId": "470dce5e-62f1-474a-b822-17cc65cb1897",
+      "SourceSlotId": "3f8b20a7-c8b8-45ab-86a1-0efcd927358e",
       "TargetParentOrChildId": "114509c3-e248-4280-8a23-80211222fb61",
       "TargetSlotId": "9e961f73-1ee7-4369-9ac7-5c653e570b6f"
     },
@@ -1037,6 +1037,12 @@
       "TargetSlotId": "4e8fecd0-00ca-404e-a9d4-1cb0d3e044f1"
     },
     {
+      "SourceParentOrChildId": "f7a2c9e1-3b5d-4e8f-a6c4-9d1e2b7f5a38",
+      "SourceSlotId": "c52dfa83-9820-4a54-b90b-62278dc8fe3f",
+      "TargetParentOrChildId": "c4e8b2d6-9a1f-4c3e-b7d5-2e6f8a1c9b47",
+      "TargetSlotId": "d0125887-e5f9-422f-883d-0c34d9b38a4b"
+    },
+    {
       "SourceParentOrChildId": "f31aa01e-c9de-43fa-a68f-567f9c1cfad1",
       "SourceSlotId": "babd085b-5099-4ddb-87d6-ab9d983067f1",
       "TargetParentOrChildId": "c6288ad6-172c-4e84-b1d9-045bcd350f0a",
@@ -1091,10 +1097,10 @@
       "TargetSlotId": "5ae4bb07-4214-4ec3-a499-24d9f6d404a5"
     },
     {
-      "SourceParentOrChildId": "470dce5e-62f1-474a-b822-17cc65cb1897",
-      "SourceSlotId": "3f8b20a7-c8b8-45ab-86a1-0efcd927358e",
-      "TargetParentOrChildId": "f6214762-274e-44f2-8f5d-bc46b00e699f",
-      "TargetSlotId": "dcd066ce-ac44-4e76-85b3-78821245d9dc"
+      "SourceParentOrChildId": "85c39d79-f072-474d-b8ef-5ae8b963343b",
+      "SourceSlotId": "a41f7c2e-5d83-4b96-8e0a-3c9b6d2f7e15",
+      "TargetParentOrChildId": "f7a2c9e1-3b5d-4e8f-a6c4-9d1e2b7f5a38",
+      "TargetSlotId": "08f181bb-9777-497c-871d-bcc1ff252f2f"
     },
     {
       "SourceParentOrChildId": "114509c3-e248-4280-8a23-80211222fb61",
@@ -1119,18 +1125,6 @@
       "SourceSlotId": "73ebf863-ba71-421c-bee7-312f13c5eff0",
       "TargetParentOrChildId": "fb5f0168-647c-47fb-aaf6-7fb27095cb38",
       "TargetSlotId": "dcd066ce-ac44-4e76-85b3-78821245d9dc"
-    },
-    {
-      "SourceParentOrChildId": "85c39d79-f072-474d-b8ef-5ae8b963343b",
-      "SourceSlotId": "a41f7c2e-5d83-4b96-8e0a-3c9b6d2f7e15",
-      "TargetParentOrChildId": "f7a2c9e1-3b5d-4e8f-a6c4-9d1e2b7f5a38",
-      "TargetSlotId": "08f181bb-9777-497c-871d-bcc1ff252f2f"
-    },
-    {
-      "SourceParentOrChildId": "f7a2c9e1-3b5d-4e8f-a6c4-9d1e2b7f5a38",
-      "SourceSlotId": "c52dfa83-9820-4a54-b90b-62278dc8fe3f",
-      "TargetParentOrChildId": "c4e8b2d6-9a1f-4c3e-b7d5-2e6f8a1c9b47",
-      "TargetSlotId": "d0125887-e5f9-422f-883d-0c34d9b38a4b"
     }
   ]
 }

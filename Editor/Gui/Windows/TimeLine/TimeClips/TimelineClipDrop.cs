@@ -148,7 +148,7 @@ internal static class TimelineClipDrop
     {
         var addCmd = new AddSymbolChildCommand(compositionOp.Symbol, opSymbolId)
                          {
-                             PosOnCanvas = GraphUtils.FindFreePositionInView(compositionOp.GetSymbolUi()),
+                             PosOnCanvas = GraphUtils.FindPositionForNewClipOp(compositionOp.GetSymbolUi(), opSymbolId),
                          };
         macro.AddAndExecCommand(addCmd);
         var childId = addCmd.AddedChildId;

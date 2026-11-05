@@ -459,6 +459,7 @@ internal static class PlaceHolderUi
                     _scrollToSelected = false;
                 }
 
+                var drawnRowCount = 0;
                 while (clipper.Step())
                 {
                     for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++)
@@ -468,9 +469,15 @@ internal static class PlaceHolderUi
                         if (i == rowToReveal)
                             ScrollLastItemIntoView();
                     }
+
+                    drawnRowCount += clipper.DisplayEnd - clipper.DisplayStart;
                 }
 
                 clipper.End();
+
+                // The list is sized from last frame's extent, so skipped rows must count or it never grows past its first size
+                if (drawnRowCount < count)
+                    ImGui.Dummy(Vector2.Zero);
             }
         }
 

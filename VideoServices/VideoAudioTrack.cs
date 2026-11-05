@@ -286,7 +286,9 @@ internal sealed class VideoAudioTrack : IDisposable
                 _pendingStart = double.NaN;
             }
 
-            stream.Feed(chunk);
+            if (!stream.Feed(chunk))
+                return;
+
             _fedSeconds = chunkStart + chunk.Length / floatsPerSecond;
             _chunksFed++;
         }

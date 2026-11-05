@@ -171,7 +171,9 @@ internal sealed partial class OutputWindow : Window
             {
                 var drawnType = UpdateAndDrawOutput(drawnInstance);
                 ImageOutputCanvas.Deactivate();
-                _camSelectionHandling.Update(drawnInstance, drawnType);
+                // An operator drawing in the output, like Sketch, uses the same drags that would steer the view camera.
+                var isInputCapturedByOperator = T3.SystemUi.OperatorKeyboardCapture.CapturedBy != Guid.Empty;
+                _camSelectionHandling.Update(drawnInstance, drawnType, isInputCapturedByOperator);
                 var editingFlags = _camSelectionHandling.PreventImageCanvasInteraction
                                    | SkillTraining.IsInPlayMode
                                    | drawnType != typeof(Texture2D)

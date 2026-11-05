@@ -16,6 +16,9 @@ internal sealed class TextSprites : Instance<TextSprites>
     [Output(Guid = "5BB66419-9FA8-4BD0-8476-D389E9EC78D5")]
     public readonly Slot<Texture2D> Texture = new();
 
+    [Output(Guid = "4b093262-68eb-4e06-b4b0-48c0ee06e45f")]
+    public readonly Slot<int> GroupCount = new();
+
     private Resource<Texture2D>? _texture;
     private ShaderResourceView? _textureSrv;
     private readonly Resource<BmFontDescription> _bmFont;
@@ -24,8 +27,10 @@ internal sealed class TextSprites : Instance<TextSprites>
         _bmFont = new Resource<BmFontDescription>(Filepath, TryGenerateFont);
         _bmFont.AddDependentSlots(SpriteBuffer);
         _bmFont.AddDependentSlots(PointBuffer);
+        _bmFont.AddDependentSlots(GroupCount);
         SpriteBuffer.UpdateAction += Update;
         PointBuffer.UpdateAction += Update;
+        GroupCount.UpdateAction += Update;
     }
 
     private bool TryGenerateFont(FileResource file, BmFontDescription? currentValue, [NotNullWhen(true)]out BmFontDescription? newValue, [NotNullWhen(false)]out string? failureReason)
@@ -59,6 +64,7 @@ internal sealed class TextSprites : Instance<TextSprites>
         // Prevent multiple evaluation because previously fetched SRV will be disposed
         SpriteBuffer.DirtyFlag.Clear();
         PointBuffer.DirtyFlag.Clear();
+        GroupCount.DirtyFlag.Clear();
     }
         
     private bool TryUpdateTexture(string imageFilePath)
@@ -139,6 +145,12 @@ internal sealed class TextSprites : Instance<TextSprites>
 
         var numLinesInText = text.Split('\n').Length;
 
+        var groupSeparator = GroupSeparator.GetValue(context);
+        if (string.IsNullOrEmpty(groupSeparator))
+            groupSeparator = " ";
+
+        var hideSeparator = HideSeparator.GetValue(context);
+
         var color = Color.GetValue(context);
         float textureWidth = bmFont.BmFont.Common.ScaleW;
         float textureHeight = bmFont.BmFont.Common.ScaleH;
@@ -169,8 +181,35 @@ internal sealed class TextSprites : Instance<TextSprites>
         var currentLineCharacterCount = 0;
         var lastCharId = 0;
 
-        foreach (var c in text)
+        var groupIndex = 0;
+        var groupHasGlyphs = false;
+        var startNewGroup = false;
+        var remainingSeparatorChars = 0;
+
+        for (var textIndex = 0; textIndex < text.Length; textIndex++)
         {
+            var c = text[textIndex];
+
+            if (remainingSeparatorChars == 0 && text.AsSpan(textIndex).StartsWith(groupSeparator))
+            {
+                startNewGroup = true;
+                if (hideSeparator)
+                {
+                    // Drawn as a space so neighbouring groups don't touch
+                    textIndex += groupSeparator.Length - 1;
+                    c = ' ';
+                }
+                else
+                {
+                    remainingSeparatorChars = groupSeparator.Length;
+                }
+            }
+
+            // Visible separator glyphs stay with the group they close.
+            var isSeparatorChar = remainingSeparatorChars > 0;
+            if (isSeparatorChar)
+                remainingSeparatorChars--;
+
             if (c == '\n')
             {
                 AdjustLineAlignment();
@@ -180,6 +219,7 @@ internal sealed class TextSprites : Instance<TextSprites>
                 currentLineCharacterCount = 0;
                 lastCharId = 0;
                 lineNumber++;
+                startNewGroup = true;
                 continue;
             }
 
@@ -207,6 +247,19 @@ internal sealed class TextSprites : Instance<TextSprites>
                                    );
             pivot *= scaleFactor;
 
+            if (startNewGroup && !isSeparatorChar && !char.IsWhiteSpace(c))
+            {
+                if (groupHasGlyphs)
+                {
+                    groupIndex++;
+                    groupHasGlyphs = false;
+                }
+
+                startNewGroup = false;
+            }
+
+            groupHasGlyphs = true;
+
             _sprites.Add(
                              new Sprite
                                  {
@@ -219,7 +272,7 @@ internal sealed class TextSprites : Instance<TextSprites>
                                      CharIndex = (uint)outputIndex,
                                      CharIndexInLine = (uint)currentLineCharacterCount,
                                      LineIndex = (uint)lineNumber,
-                                     Extra = 0
+                                     GroupIndex = (uint)groupIndex,
                                  });
 
             _points.Add(new Point
@@ -240,6 +293,10 @@ internal sealed class TextSprites : Instance<TextSprites>
         }
 
         AdjustLineAlignment();
+
+        var groupCount = groupHasGlyphs ? groupIndex + 1 : groupIndex;
+        WriteGroupBounds(groupCount);
+        GroupCount.Value = groupCount;
 
         var pointBuffer= new BufferWithViews();
         ResourceManager.SetupStructuredBuffer( _points.Count > 0 ? _points.ToArray() : _nonPoints, ref pointBuffer.Buffer);
@@ -270,6 +327,62 @@ internal sealed class TextSprites : Instance<TextSprites>
         }
     }
 
+    /// <summary>
+    /// Stores each group's bounds relative to every sprite's point, so they stay valid if the points are moved later.
+    /// </summary>
+    private void WriteGroupBounds(int groupCount)
+    {
+        _groupBoundsMin.Clear();
+        _groupBoundsMax.Clear();
+        for (var groupIndex = 0; groupIndex < groupCount; groupIndex++)
+        {
+            _groupBoundsMin.Add(new Vector2(float.PositiveInfinity));
+            _groupBoundsMax.Add(new Vector2(float.NegativeInfinity));
+        }
+
+        for (var spriteIndex = 0; spriteIndex < _sprites.Count; spriteIndex++)
+        {
+            var sprite = _sprites[spriteIndex];
+            if (sprite.Width <= 0 || sprite.Height <= 0)
+                continue;
+
+            GetSpriteRect(sprite, _points[spriteIndex], out var rectMin, out var rectMax);
+            var groupIndex = (int)sprite.GroupIndex;
+            _groupBoundsMin[groupIndex] = Vector2.Min(_groupBoundsMin[groupIndex], rectMin);
+            _groupBoundsMax[groupIndex] = Vector2.Max(_groupBoundsMax[groupIndex], rectMax);
+        }
+
+        for (var spriteIndex = 0; spriteIndex < _sprites.Count; spriteIndex++)
+        {
+            var sprite = _sprites[spriteIndex];
+            var groupIndex = (int)sprite.GroupIndex;
+            var groupMin = _groupBoundsMin[groupIndex];
+            var groupMax = _groupBoundsMax[groupIndex];
+            var groupIsEmpty = groupMin.X > groupMax.X;
+            if (groupIsEmpty)
+            {
+                sprite.GroupBoundsMin = Vector2.Zero;
+                sprite.GroupBoundsMax = Vector2.Zero;
+                _sprites[spriteIndex] = sprite;
+                continue;
+            }
+
+            var pointPosition = new Vector2(_points[spriteIndex].Position.X, _points[spriteIndex].Position.Y);
+            sprite.GroupBoundsMin = groupMin - pointPosition;
+            sprite.GroupBoundsMax = groupMax - pointPosition;
+            _sprites[spriteIndex] = sprite;
+        }
+    }
+
+    /** Matches the quad layout of [DrawPointSprites]: centered on the point, shifted by the negative pivot. */
+    private static void GetSpriteRect(in Sprite sprite, in Point point, out Vector2 rectMin, out Vector2 rectMax)
+    {
+        var center = new Vector2(point.Position.X, point.Position.Y) - sprite.Pivot;
+        var halfSize = new Vector2(sprite.Width, sprite.Height) * 0.5f;
+        rectMin = center - halfSize;
+        rectMax = center + halfSize;
+    }
+
     private readonly Sprite[] _nonSprite = { new()
                                                  {
                                                      Height = 0,
@@ -295,6 +408,8 @@ internal sealed class TextSprites : Instance<TextSprites>
 
     private readonly List<Sprite> _sprites = new(100);
     private readonly List<Point> _points = new(100);
+    private readonly List<Vector2> _groupBoundsMin = new(20);
+    private readonly List<Vector2> _groupBoundsMax = new(20);
 
     // Inputs ----------------------------------------------------
     [Input(Guid = "F2DD87B1-7F37-4B02-871B-B2E35972F246")]
@@ -326,4 +441,13 @@ internal sealed class TextSprites : Instance<TextSprites>
 
     [Input(Guid = "7094D22F-DCF9-4FD0-9570-7243E3284CF4")]
     public readonly InputSlot<float> OffsetBaseLine = new();
+
+    /// <summary>
+    /// Splits the text into groups for animation. Empty means a space. Line breaks always start a new group.
+    /// </summary>
+    [Input(Guid = "cf0701ff-b73e-4630-8a2f-380c7c2ec6af")]
+    public readonly InputSlot<string> GroupSeparator = new();
+
+    [Input(Guid = "cfdde6ca-7401-4d15-a782-bc558dbacfe7")]
+    public readonly InputSlot<bool> HideSeparator = new();
 }

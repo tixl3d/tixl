@@ -112,7 +112,7 @@ internal static class RecordingSession
         {
             var addCmd = new AddSymbolChildCommand(compositionOp.Symbol, _loadDataClipSymbolId)
                              {
-                                 PosOnCanvas = FindFreeCanvasPositionForClip(compositionOp.Symbol, _loadDataClipSymbolId),
+                                 PosOnCanvas = GraphUtils.FindPositionForNewClipOp(compositionOp.GetSymbolUi(), _loadDataClipSymbolId),
                              };
             _activeMacro.AddAndExecCommand(addCmd);
             _activeDataClipChildId = addCmd.AddedChildId;
@@ -129,7 +129,7 @@ internal static class RecordingSession
             var rowForAudio = captureIo ? audioLayer : dataLayer;
             var addAudioCmd = new AddSymbolChildCommand(compositionOp.Symbol, _audioClipSymbolId)
                                   {
-                                      PosOnCanvas = FindFreeCanvasPositionForClip(compositionOp.Symbol, _audioClipSymbolId),
+                                      PosOnCanvas = GraphUtils.FindPositionForNewClipOp(compositionOp.GetSymbolUi(), _audioClipSymbolId),
                                   };
             _activeMacro.AddAndExecCommand(addAudioCmd);
             _activeAudioClipChildId = addAudioCmd.AddedChildId;
@@ -445,47 +445,6 @@ internal static class RecordingSession
                 break;
             }
         }
-    }
-
-    /// <summary>
-    /// Canvas position for a fresh recording-clip op of type <paramref name="anchorSymbolId"/>.
-    /// Anchors below the lowest existing op of the same type (so successive recordings stay in a
-    /// tidy column), and falls back to <see cref="GraphUtils.FindFreePositionInView"/> when there
-    /// is no such op or that anchor is off-screen.
-    /// </summary>
-    private static Vector2 FindFreeCanvasPositionForClip(Symbol compositionSymbol, Guid anchorSymbolId)
-    {
-        const float spacingY = 80f;
-
-        if (!SymbolUiRegistry.TryGetSymbolUi(compositionSymbol.Id, out var compositionUi))
-            return new Vector2(0, 200);
-
-        var maxY = float.NegativeInfinity;
-        var anchorX = 0f;
-        foreach (var (childId, childUi) in compositionUi.ChildUis)
-        {
-            if (!compositionSymbol.Children.TryGetValue(childId, out var symbolChild))
-                continue;
-            if (symbolChild.Symbol.Id != anchorSymbolId)
-                continue;
-
-            if (childUi.PosOnCanvas.Y > maxY)
-            {
-                maxY = childUi.PosOnCanvas.Y;
-                anchorX = childUi.PosOnCanvas.X;
-            }
-        }
-
-        if (float.IsNegativeInfinity(maxY))
-            return GraphUtils.FindFreePositionInView(compositionUi);
-
-        var preferred = new Vector2(anchorX, maxY + spacingY);
-
-        // A clip landing far outside the viewport looks like nothing happened.
-        var isPreferredVisible = ProjectView.Focused?.GraphView.Canvas.GetLastVisibleCanvasArea().Contains(preferred) ?? false;
-        return isPreferredVisible
-                   ? GraphUtils.FindFreePosition(compositionUi, preferred, SymbolUi.Child.DefaultOpSize)
-                   : GraphUtils.FindFreePositionInView(compositionUi);
     }
 
     /// <summary>

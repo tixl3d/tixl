@@ -44,7 +44,12 @@ internal sealed unsafe class NativeAudioEngine : IDisposable
 
     public AudioHandle LoadFile(string path, bool spatial = false)
     {
-        var handle = NativeAudio.SoundLoad(_engine, path, spatial ? NativeAudio.LoadSpatial : 0);
+        int handle;
+        lock (_soundSlotLock)
+        {
+            handle = NativeAudio.SoundLoad(_engine, path, spatial ? NativeAudio.LoadSpatial : 0);
+        }
+
         if (handle < 0)
             Log.Warning($"Could not load audio file {path} (error {handle}).");
 
@@ -54,7 +59,10 @@ internal sealed unsafe class NativeAudioEngine : IDisposable
     public void Unload(AudioHandle source)
     {
         _routes.Remove(source);
-        NativeAudio.SoundUnload(_engine, source.Value);
+        lock (_soundSlotLock)
+        {
+            NativeAudio.SoundUnload(_engine, source.Value);
+        }
     }
 
     public void SetEcho(AudioHandle bus, float delaySecs, float feedback, float mix, bool pingPong)
@@ -159,14 +167,19 @@ internal sealed unsafe class NativeAudioEngine : IDisposable
 
     public AudioHandle CreatePushSource(int channels, int sampleRate, int capacityFrames)
     {
-        var handle = NativeAudio.SoundCreatePush(_engine, (uint)channels, (uint)sampleRate, (uint)capacityFrames);
+        int handle;
+        lock (_soundSlotLock)
+        {
+            handle = NativeAudio.SoundCreatePush(_engine, (uint)channels, (uint)sampleRate, (uint)capacityFrames);
+        }
+
         if (handle < 0)
             Log.Warning($"Could not create an audio push source (error {handle}).");
 
         return new AudioHandle(handle);
     }
 
-    /// <summary>Queues interleaved frames and returns how many fit.</summary>
+    /// <summary>Queues interleaved frames and returns how many fit, or a negative error if the source is gone.</summary>
     public int PushWrite(AudioHandle source, ReadOnlySpan<float> interleaved, int frameCount)
     {
         fixed (float* frames = interleaved)
@@ -180,7 +193,12 @@ internal sealed unsafe class NativeAudioEngine : IDisposable
 
     public AudioHandle CreateGenerator()
     {
-        var handle = NativeAudio.SoundCreateGenerator(_engine);
+        int handle;
+        lock (_soundSlotLock)
+        {
+            handle = NativeAudio.SoundCreateGenerator(_engine);
+        }
+
         if (handle < 0)
             Log.Warning($"Could not create a tone generator (error {handle}).");
 
@@ -305,6 +323,10 @@ internal sealed unsafe class NativeAudioEngine : IDisposable
 
     private readonly Dictionary<AudioHandle, AudioHandle> _routes = new();
     private readonly ConcurrentQueue<AudioHandle> _deferredReleases = new();
+
+    /** The native slot table is unsynchronized, and video push sources are created on their decode worker: two
+        concurrent allocations would claim the same slot and corrupt whichever sound finished first. */
+    private readonly object _soundSlotLock = new();
 
     private IntPtr _engine;
 }

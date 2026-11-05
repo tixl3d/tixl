@@ -8,5 +8,7 @@ struct SpriteDef
     uint CharIndex;
     uint CharIndexInLine;
     uint LineIndex;
-    uint Extra;
+    uint GroupIndex;
+    float2 GroupBoundsMin;
+    float2 GroupBoundsMax;
 };

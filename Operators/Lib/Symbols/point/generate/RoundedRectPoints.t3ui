@@ -1,0 +1,154 @@
+{
+  "FormatVersion": 3,
+  "Id": "bc8375b9-3da2-4978-8da5-10623bba96d6"/*RoundedRectPoints*/,
+  "Description": "Generates a closed outline of a rectangle with rounded corners as a GPU point buffer, ready for [DrawLines].\n\nThe rectangle lies in the XY plane around Center. CornerRadius 0 gives sharp corners; in Relative mode 1 rounds the shorter side completely, in Absolute mode the value is the radius in units (always limited to half the shorter side), so a square becomes a circle and a rectangle a pill shape. CornerPoints sets how many points each rounded corner gets: 1 gives a plain rectangle, 2 a chamfered (cut) corner, 3 and more an increasingly smooth arc. Each corner can be switched between round and sharp individually. SubdivisionLength optionally splits long segments into evenly spaced points. With Close enabled, the first point is repeated at the end and a separator point is appended. F1 is 1, F2 runs from 0 to 1 along the outline.\n\nAKA: rounded rectangle, rounded box, pill, chamfer, squircle, outline, frame\n\nSee also: [RadialPoints], [GridPoints], [DrawLines]",
+  "SymbolTags": "1",
+  "InputUis": [
+    {
+      "InputId": "0e5dbfad-a2c5-4737-b347-28483179eb4b"/*Center*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Relevancy": "Relevant",
+      "Description": "Center of the rectangle."
+    },
+    {
+      "InputId": "983f91ab-442e-490e-a460-b79efc93d04c"/*Pivot*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 630.0
+      },
+      "Min": -0.5,
+      "Max": 0.5,
+      "Description": "Offsets the rectangle from Center in units of its size, with Y pointing down. 0, 0.5 places the top edge at Center so it grows downwards."
+    },
+    {
+      "InputId": "d4142b7e-41ba-49ac-b370-3508b79df1b1"/*Size*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      },
+      "Min": 0.0,
+      "Max": 2.0,
+      "Description": "Width and height before UniformScale is applied."
+    },
+    {
+      "InputId": "728562da-70d4-417f-9d7f-457231a306b8"/*UniformScale*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 90.0
+      },
+      "Min": 0.0,
+      "Max": 2.0,
+      "Description": "Multiplies Size."
+    },
+    {
+      "InputId": "7c9696a7-e289-4a66-a79e-064f6a56cf63"/*CornerRadius*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 135.0
+      },
+      "GroupTitle": "Corners",
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "Description": "0 gives sharp corners. In Relative mode, 1 rounds the shorter side completely; in Absolute mode the value is the radius in units. Always limited to half the shorter side."
+    },
+    {
+      "InputId": "a246b542-052e-43ec-a59e-a19c85ee899d"/*CornerRadiusMode*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 675.0
+      },
+      "Description": "Relative: CornerRadius 1 rounds the shorter side completely. Absolute: CornerRadius is the radius in units. Both are limited to half the shorter side."
+    },
+    {
+      "InputId": "e3e3b412-eeda-411a-8143-caf24bdf3b30"/*CornerPoints*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 180.0
+      },
+      "Min": 1,
+      "Max": 32,
+      "ClampMin": true,
+      "Description": "Points per rounded corner: 1 plain rectangle, 2 chamfered corner, 3 or more an arc."
+    },
+    {
+      "InputId": "482c822e-e0b9-4b1c-b8b4-e0e814c62bc8"/*RoundTopLeft*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 225.0
+      }
+    },
+    {
+      "InputId": "bd4fcbb5-32b7-43d1-9e3d-5b3320ab86c9"/*RoundTopRight*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 270.0
+      }
+    },
+    {
+      "InputId": "427d3439-6142-45d9-a2a3-bae60ed4a5c0"/*RoundBottomRight*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 315.0
+      }
+    },
+    {
+      "InputId": "b1614dae-271c-4d85-bea4-d964159a9a77"/*RoundBottomLeft*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 360.0
+      }
+    },
+    {
+      "InputId": "9137d371-142d-46fe-aea3-e983a87e9cce"/*SubdivisionLength*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 495.0
+      },
+      "Min": 0.0,
+      "Max": 0.5,
+      "ClampMin": true,
+      "Description": "If larger than 0, segments longer than this are split into evenly spaced points. Useful for displacing or animating the outline."
+    },
+    {
+      "InputId": "3ab6b4e9-b75e-4939-abe2-1b302b02d81c"/*Close*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 585.0
+      },
+      "Description": "Repeats the first point at the end and appends a separator. When off, the outline ends at the last corner before the start."
+    },
+    {
+      "InputId": "20227bc3-a3c7-4174-bd94-5638b4824467"/*StrokeWidth*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 405.0
+      },
+      "GroupTitle": "Style",
+      "Min": 0.0,
+      "Max": 5.0,
+      "ClampMin": true,
+      "Description": "Written into the point Scale, which [DrawLines] uses as line width."
+    },
+    {
+      "InputId": "11553bae-3677-471e-9e4a-8adb372e34e7"/*Color*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 450.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "be858032-3446-4998-a1ed-512d54c350f9"/*OutBuffer*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

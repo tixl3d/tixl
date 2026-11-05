@@ -3,6 +3,7 @@ using System.Numerics;
 using T3.Editor.Gui;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.Ui;
+using T3.Editor.Gui.Interaction;
 using T3.Editor.UiModel.ProjectHandling;
 
 namespace T3.Editor.UiModel.Helpers;
@@ -114,6 +115,87 @@ internal static partial class GraphUtils
                    : new Vector2(minX, maxY + spacingY);
     }
 
+    /// <summary>
+    /// Canvas position for a clip op created outside the graph (timeline drop, recording), where there is no
+    /// mouse position to place it at. Stacks below the lowest clip of the same type, else beside the op that
+    /// collects it (e.g. [VideoClipPlayer]), else inside the graph's visible area.
+    /// </summary>
+    public static Vector2 FindPositionForNewClipOp(SymbolUi compositionUi, Guid clipSymbolId)
+    {
+        var size = SymbolUi.Child.DefaultOpSize;
+        var hasAnchor = TryGetBelowLowestChildOfType(compositionUi, clipSymbolId, out var preferred)
+                        || TryGetBesideCollector(compositionUi, clipSymbolId, size, out preferred);
+
+        if (!hasAnchor)
+        {
+            preferred = GetPositionBelowExistingChildren(compositionUi, new Vector2(0, 200));
+
+            // Called from other windows, so the graph's rect has to come from its last drawn frame.
+            if (ProjectView.Focused is { GraphView: ScalableCanvas canvas } view
+                && view.CompositionInstance?.Symbol.Id == compositionUi.Symbol.Id)
+            {
+                var visible = canvas.GetLastVisibleCanvasArea();
+                if (visible.GetWidth() > 0 && visible.GetHeight() > 0 && !visible.Contains(preferred))
+                    preferred = visible.GetCenter() - size * 0.5f;
+            }
+        }
+
+        return FindFreePosition(compositionUi, preferred, size);
+    }
+
+    private static bool TryGetBelowLowestChildOfType(SymbolUi compositionUi, Guid symbolId, out Vector2 position)
+    {
+        const float spacingY = 20f;
+        position = default;
+        var maxY = float.NegativeInfinity;
+        foreach (var (childId, childUi) in compositionUi.ChildUis)
+        {
+            if (!compositionUi.Symbol.Children.TryGetValue(childId, out var symbolChild) || symbolChild.Symbol.Id != symbolId)
+                continue;
+
+            var bottom = childUi.PosOnCanvas.Y + childUi.Size.Y;
+            if (bottom <= maxY)
+                continue;
+
+            maxY = bottom;
+            position = new Vector2(childUi.PosOnCanvas.X, bottom + spacingY);
+        }
+
+        return !float.IsNegativeInfinity(maxY);
+    }
+
+    /** Left of the collecting player, where its auto-collect link reads as an input. */
+    private static bool TryGetBesideCollector(SymbolUi compositionUi, Guid clipSymbolId, Vector2 size, out Vector2 position)
+    {
+        const float gapX = 60f;
+        position = default;
+
+        Guid collectorSymbolId;
+        if (clipSymbolId == _videoClipSymbolId)
+        {
+            collectorSymbolId = _videoClipPlayerSymbolId;
+        }
+        else if (clipSymbolId == _audioClipSymbolId)
+        {
+            collectorSymbolId = _audioClipPlayerSymbolId;
+        }
+        else
+        {
+            return false;
+        }
+
+        foreach (var (childId, childUi) in compositionUi.ChildUis)
+        {
+            if (!compositionUi.Symbol.Children.TryGetValue(childId, out var symbolChild) || symbolChild.Symbol.Id != collectorSymbolId)
+                continue;
+
+            position = new Vector2(childUi.PosOnCanvas.X - size.X - gapX, childUi.PosOnCanvas.Y);
+            return true;
+        }
+
+        return false;
+    }
+
     private static bool OverlapsAnyChild(SymbolUi symbolUi, Vector2 pos, Vector2 size, float margin)
     {
         foreach (var childUi in symbolUi.ChildUis.Values)
@@ -149,4 +231,10 @@ internal static partial class GraphUtils
 
     private const float FreeSpotMargin = 20f;
     private const float ViewEdgeInsetOnScreen = 40f;
+
+    // Clip ops and their auto-collecting players live in operator packages the editor can't reference.
+    private static readonly Guid _videoClipSymbolId = new("04c1a6dc-3042-48a8-81d2-0a5a162016dc");
+    private static readonly Guid _videoClipPlayerSymbolId = new("f98d28ed-5f30-4416-93be-f0d7a15a7f77");
+    private static readonly Guid _audioClipSymbolId = new("f0008b50-091d-4e9f-91eb-baa212acfa20");
+    private static readonly Guid _audioClipPlayerSymbolId = new("3f78a8a8-2c0b-4486-813e-f052e01e4248");
 }
