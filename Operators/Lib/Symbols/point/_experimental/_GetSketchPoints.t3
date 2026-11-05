@@ -13,6 +13,10 @@
     {
       "Id": "ddbac6ab-e547-4955-9346-680b2c5bf8a4"/*GetOnionSkin*/,
       "DefaultValue": false
+    },
+    {
+      "Id": "7202b1a9-45c5-412c-9796-3451ba523ce5"/*OverriddenPageIndex*/,
+      "DefaultValue": -1
     }
   ],
   "Children": [],

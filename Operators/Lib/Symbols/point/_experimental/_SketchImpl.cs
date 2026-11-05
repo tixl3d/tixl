@@ -32,6 +32,10 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
     [Output(Guid = "BD29C7D2-1296-48CB-AD85-F96C27A35B92")]
     public readonly Slot<string> StatusMessage = new();
 
+    /** The page index set by OverridePageIndex, or -1 while pages follow time, so onion skinning can count pages. */
+    [Output(Guid = "0B62C9B3-F033-449E-B695-C3E58D90D734")]
+    public readonly Slot<int> OverriddenPageIndex = new();
+
     /** Lasso outline and color picker, drawn on top of the sketch. */
     [Output(Guid = "6C3E9D41-2B7A-4F0E-9A51-8D2F4C7B1E63")]
     public readonly Slot<StructuredList> OverlayPoints = new();
@@ -45,6 +49,7 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
         OutPages.UpdateAction += Update;
         CursorPosInWorld.UpdateAction += Update;
         StatusMessage.UpdateAction += Update;
+        OverriddenPageIndex.UpdateAction += Update;
         OverlayPoints.UpdateAction += Update;
         FillTriangles.UpdateAction += Update;
 
@@ -116,6 +121,8 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
             
         }
 
+        OverriddenPageIndex.Value = _paging.IsOverridingPageIndex(_overridePageIndex) ? _overridePageIndex : -1;
+
         if (IsOpSelected)
             OperatorKeyboardCapture.Claim(Parent.SymbolChildId);
 
@@ -161,8 +168,8 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
                            ? "COLOR (SHIFT CHANGES HUE / CLICK TO APPLY / ESC TO CANCEL)"
                        : _transformMode switch
                              {
-                                 TransformModes.Move  => "MOVE (CLICK TO APPLY / ESC TO CANCEL)",
-                                 TransformModes.Scale => "SCALE (CLICK TO APPLY / ESC TO CANCEL)",
+                                 TransformModes.Move  => _hasStampedDuringTransform ? "MOVE (V TO STAMP / ESC TO STOP)" : "MOVE (CLICK TO APPLY / V TO STAMP / ESC TO CANCEL)",
+                                 TransformModes.Scale => _hasStampedDuringTransform ? "SCALE (V TO STAMP / ESC TO STOP)" : "SCALE (CLICK TO APPLY / V TO STAMP / ESC TO CANCEL)",
                                  _ => _drawMode switch
                                           {
                                               DrawModes.Draw  => _isFillBrush ? "FILL" : "PEN",
@@ -327,7 +334,15 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
         {
             if (WasKeyPressed(Key.Esc))
             {
-                CancelTransform();
+                if (_hasStampedDuringTransform)
+                {
+                    FinishStamping();
+                }
+                else
+                {
+                    CancelTransform();
+                }
+
                 return true;
             }
 
@@ -336,6 +351,9 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
                 ConfirmTransform();
                 return true;
             }
+
+            if (WasKeyPressed(Key.V))
+                return StampTransformedSelection();
 
             return false;
         }
@@ -357,7 +375,12 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
         if (WasKeyPressed(Key.S))
         {
             _drawMode = DrawModes.Lasso;
-            return false;
+            var page = _paging.ActivePage;
+            if (page == null || !HasSelection(page))
+                return false;
+
+            ClearSelection();
+            return true;
         }
 
         if (WasKeyPressed(Key.G))
@@ -492,28 +515,32 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
 
         copiedSelection = HasSelection(page);
         Clipboard.Clear();
+        CollectStrokes(page, copiedSelection, Clipboard);
+        return Clipboard.Count > 0;
+    }
 
+    /** Copies the strokes unselected, with a separator wherever a stroke or the selection ends. */
+    private static void CollectStrokes(Page page, bool onlySelected, List<Point> target)
+    {
         var points = page.PointsList.TypedElements;
         var count = Math.Min(page.WriteIndex, points.Length);
         for (var index = 0; index < count; index++)
         {
             var point = points[index];
-            var isIncluded = !Point.IsSeparator(point) && (!copiedSelection || IsSelected(point));
+            var isIncluded = !Point.IsSeparator(point) && (!onlySelected || IsSelected(point));
             if (isIncluded)
             {
                 point.F2 = 0;
-                Clipboard.Add(point);
+                target.Add(point);
             }
-            else if (Clipboard.Count > 0 && !Point.IsSeparator(Clipboard[^1]))
+            else if (target.Count > 0 && !Point.IsSeparator(target[^1]))
             {
-                Clipboard.Add(Point.Separator());
+                target.Add(Point.Separator());
             }
         }
 
-        if (Clipboard.Count > 0 && !Point.IsSeparator(Clipboard[^1]))
-            Clipboard.Add(Point.Separator());
-
-        return Clipboard.Count > 0;
+        if (target.Count > 0 && !Point.IsSeparator(target[^1]))
+            target.Add(Point.Separator());
     }
 
     private bool CutPage()
@@ -563,6 +590,8 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
     {
         _transformMode = TransformModes.None;
         _transformEdit = null;
+        _hasStampedDuringTransform = false;
+        _isTransformingWholePage = false;
         _isPickingColor = false;
         _colorPickerEdit = null;
         _strokeEdit = null;
@@ -580,11 +609,17 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
     #endregion
 
     #region move and scale
+    /** Without a selection, the whole page is transformed and stays unselected afterwards. */
     private void StartTransform(TransformModes mode, EvaluationContext context)
     {
         var page = _paging.ActivePage;
-        if (page == null || _isMouseDown || !HasSelection(page))
+        if (page == null || _isMouseDown)
             return;
+
+        var isWholePage = !HasSelection(page);
+        var edit = BeginEdit();
+        if (isWholePage)
+            SelectRange(page, 0, page.WriteIndex);
 
         var points = page.PointsList.TypedElements;
         var count = Math.Min(page.WriteIndex, points.Length);
@@ -599,8 +634,14 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
             selectedCount++;
         }
 
-        _transformEdit = BeginEdit();
+        if (selectedCount == 0)
+            return;
+
+        _transformEdit = edit;
         _transformMode = mode;
+        _hasStampedDuringTransform = false;
+        _isTransformingWholePage = isWholePage;
+        _wholePageEndIndex = page.WriteIndex;
         _transformCenter = sum / selectedCount;
         _transformStartPos = CalcPosInWorld(context, MousePos.GetValue(context));
     }
@@ -649,9 +690,90 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
         if (_transformEdit == null)
             return;
 
+        if (_isTransformingWholePage)
+            ClearSelection();
+
         CommitEdit(_transformEdit, _transformMode == TransformModes.Move ? "Move sketch strokes" : "Scale sketch strokes");
         _transformEdit = null;
         _transformMode = TransformModes.None;
+    }
+
+    private static void SelectRange(Page page, int startIndex, int endIndex)
+    {
+        var points = page.PointsList.TypedElements;
+        var clampedEndIndex = Math.Min(Math.Min(endIndex, page.WriteIndex), points.Length);
+        for (var index = startIndex; index < clampedEndIndex; index++)
+        {
+            if (!Point.IsSeparator(points[index]))
+                points[index].F2 = 1;
+        }
+    }
+
+    /// <summary>
+    /// Leaves a copy of the selection where the transform currently puts it, as an undo step of its own, and keeps
+    /// transforming the selection. Canceling the transform afterwards keeps the stamps.
+    /// </summary>
+    private bool StampTransformedSelection()
+    {
+        var page = _paging.ActivePage;
+        var transformEdit = _transformEdit;
+        if (page == null || transformEdit == null || page != transformEdit.Page)
+            return false;
+
+        _stampPoints.Clear();
+        CollectStrokes(page, onlySelected: true, _stampPoints);
+        if (_stampPoints.Count == 0)
+            return false;
+
+        var mode = _transformMode;
+        var isWholePage = _isTransformingWholePage;
+        var center = _transformCenter;
+        var startPos = _transformStartPos;
+
+        // The stamp has to be its own undo step, so the selection goes back to where the transform started.
+        transformEdit.Revert(this);
+
+        var stampEdit = BeginEdit();
+        _lastStampStartIndex = page.WriteIndex;
+        foreach (var point in _stampPoints)
+        {
+            AppendPoint(point);
+        }
+
+        _lastStampEndIndex = page.WriteIndex;
+        CommitEdit(stampEdit, "Stamp sketch strokes");
+
+        _transformEdit = BeginEdit();
+        if (isWholePage)
+            SelectRange(page, 0, _wholePageEndIndex);
+
+        _hasStampedDuringTransform = true;
+        _isTransformingWholePage = isWholePage;
+        _transformMode = mode;
+        _transformCenter = center;
+        _transformStartPos = startPos;
+        return true;
+    }
+
+    /** After stamping, the carried selection only served as the stamp, so it is dropped and the last stamp gets selected. */
+    private void FinishStamping()
+    {
+        var page = _paging.ActivePage;
+        var transformEdit = _transformEdit;
+        _hasStampedDuringTransform = false;
+        if (page == null || transformEdit == null || page != transformEdit.Page)
+        {
+            CancelTransform();
+            return;
+        }
+
+        var isWholePage = _isTransformingWholePage;
+        transformEdit.Revert(this);
+        if (isWholePage)
+            SelectRange(page, 0, _wholePageEndIndex);
+
+        DeleteSelection("Drop stamped sketch strokes");
+        SelectRange(page, _lastStampStartIndex, _lastStampEndIndex);
     }
 
     private void CancelTransform()
@@ -1440,6 +1562,14 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
     private SketchEdit? _transformEdit;
     private Vector3 _transformCenter;
     private Vector3 _transformStartPos;
+    private readonly List<Point> _stampPoints = [];
+    private bool _hasStampedDuringTransform;
+    private bool _isTransformingWholePage;
+
+    /** The page's points that existed when grabbing the whole page started; stamps are appended after them. */
+    private int _wholePageEndIndex;
+    private int _lastStampStartIndex;
+    private int _lastStampEndIndex;
 
     private bool _isResizingBrush;
     private Vector2 _brushResizeStartMousePos;
@@ -1607,10 +1737,11 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
         {
             _lastContextTime = contextLocalTime;
 
-            if (overridePageIndex >= 0 && !_sketch._enableKeyframeSync)
+            if (IsOverridingPageIndex(overridePageIndex))
             {
                 if (overridePageIndex >= Pages.Count)
                 {
+                    ActivePageIndex = NoPageIndex;
                     ActivePage = null;
                     return;
                 }
@@ -1635,15 +1766,27 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
             ActivePage = null;
         }
 
+        /// <summary>
+        /// Creates the page that is shown but doesn't exist yet. With an override page index, pages are addressed
+        /// by index, so empty pages fill the gap and the order stays untouched.
+        /// </summary>
         public void InsertNewPage()
-        { 
-            Pages.Add(new Page
-                          {
-                              Time = _lastContextTime,
-                              PointsList = new StructuredList<Point>(BufferIncreaseStep),
-                          });
-            Pages = Pages.OrderBy(p => p.Time).ToList();
-            UpdatePageIndex(_lastContextTime, NoPageIndex); // This is probably bad
+        {
+            var overridePageIndex = _sketch._overridePageIndex;
+            if (IsOverridingPageIndex(overridePageIndex))
+            {
+                while (Pages.Count <= overridePageIndex)
+                {
+                    Pages.Add(CreateEmptyPage());
+                }
+            }
+            else
+            {
+                Pages.Add(CreateEmptyPage());
+                Pages = Pages.OrderBy(p => p.Time).ToList();
+            }
+
+            UpdatePageIndex(_lastContextTime, overridePageIndex);
         }
 
         public void LoadPages(string filepath)
@@ -1695,11 +1838,7 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
             Pages.Remove(ActivePage);
             if (overridePageIndex >= 0)
             {
-                Pages.Insert(activeIndex, new Page
-                                              {
-                                                  Time = _lastContextTime,
-                                                  PointsList = new StructuredList<Point>(BufferIncreaseStep),
-                                              });
+                Pages.Insert(activeIndex, CreateEmptyPage());
             }
 
             UpdatePageIndex(_lastContextTime, overridePageIndex);
@@ -1712,6 +1851,15 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
         }
 
         public int ActivePageIndex { get; private set; } = NoPageIndex;
+
+        public bool IsOverridingPageIndex(int overridePageIndex) => overridePageIndex >= 0 && !_sketch._enableKeyframeSync;
+
+        private Page CreateEmptyPage() => new()
+                                              {
+                                                  Time = _lastContextTime,
+                                                  PointsList = new StructuredList<Point>(BufferIncreaseStep),
+                                              };
+
         private _SketchImpl _sketch;
 
         public List<Page> Pages = [];
