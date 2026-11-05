@@ -101,11 +101,7 @@ internal sealed class ImageOutputCanvas : ScalableCanvas
         ImGui.Image((IntPtr)srv.ImGuiTextureId, sizeOnScreen);
         WindowsUiContentDrawer.EndPixelSampling(drawList);
 
-        if (ImGui.IsMouseHoveringRect(topLeftOnScreen, topLeftOnScreen + sizeOnScreen))
-        {
-            var relativePosition = (ImGui.GetMousePos() - topLeftOnScreen) / sizeOnScreen;
-            MouseInput.Set(relativePosition, ImGui.IsMouseDown(ImGuiMouseButton.Left));
-        }
+        ForwardMouseInput(topLeftOnScreen, sizeOnScreen);
             
         if (UserSettings.Config.ShowToolbar)
         {
@@ -113,6 +109,33 @@ internal sealed class ImageOutputCanvas : ScalableCanvas
             var zoom = Math.Abs(Scale.X) < 0.001f ? "" : $" ×{Scale.X:G2}";
             DrawCaption($"{size.X}x{size.Y}  {format} {zoom}");
         }
+    }
+
+    /// <summary>
+    /// Passes the mouse to operators like Sketch. A held button only counts if it was pressed on the image itself,
+    /// so dragging inside a popup or window that covers the output, or the click that dismisses a popup, doesn't
+    /// reach them.
+    /// </summary>
+    private void ForwardMouseInput(Vector2 topLeftOnScreen, Vector2 sizeOnScreen)
+    {
+        var isImageHovered = ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenBlockedByActiveItem);
+        var isLeftDown = ImGui.IsMouseDown(ImGuiMouseButton.Left);
+        if (!isLeftDown)
+        {
+            _isLeftPressOnImage = false;
+        }
+        else if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+        {
+            _isLeftPressOnImage = isImageHovered && !_wasPopupOpenLastFrame;
+        }
+
+        _wasPopupOpenLastFrame = ImGui.IsPopupOpen("", ImGuiPopupFlags.AnyPopup);
+
+        if (!isImageHovered && !_isLeftPressOnImage)
+            return;
+
+        var relativePosition = (ImGui.GetMousePos() - topLeftOnScreen) / sizeOnScreen;
+        MouseInput.Set(relativePosition, isLeftDown && _isLeftPressOnImage);
     }
 
     internal static string GetFormatLabel(Format format)
@@ -213,6 +236,10 @@ internal sealed class ImageOutputCanvas : ScalableCanvas
 
 
     private bool _isInteractionBlocked;
+    private bool _isLeftPressOnImage;
+
+    /** Clicking outside a popup closes it before this frame's windows are drawn, so the state has to come from the frame before. */
+    private bool _wasPopupOpenLastFrame;
 
     public enum Modes
     {
