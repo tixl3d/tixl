@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System.Diagnostics;
 using ImGuiNET;
 using T3.Core.Operator;
@@ -110,7 +110,7 @@ internal sealed class PlaceholderCreation
                               MagGraphItem.OutputLine outputLine,
                               MagGraphItem.Directions direction = MagGraphItem.Directions.Vertical)
     {
-        Debug.Assert(item.OutputLines.Length > 0);
+        Debug.Assert(item.OutputLines.Length > 0 || item.HiddenOutputIndices.Length > 0);
         context.StartMacroCommand("Insert Operator");
 
         // Within a stack the part above (or left of) the insertion makes room, so the downstream
@@ -152,6 +152,19 @@ internal sealed class PlaceholderCreation
         _snappedSourceOutputLine = outputLine;
         _snappedSourceItem = item;
         _connectionOrientation = direction;
+    }
+
+    /// <summary>
+    /// The connection pending while the Symbol Browser is open for an additional output.
+    /// Primary outputs are excluded: their placeholder sits directly at the output, so a line would add nothing.
+    /// </summary>
+    internal bool TryGetPendingOutputConnection(out MagGraphItem? sourceItem, out MagGraphItem.OutputLine outputLine)
+    {
+        sourceItem = _snappedSourceItem;
+        outputLine = _snappedSourceOutputLine;
+        return PlaceholderItem != null
+               && sourceItem != null
+               && outputLine.OutputIndex > 0;
     }
 
     /// <summary>

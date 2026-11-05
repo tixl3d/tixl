@@ -100,6 +100,8 @@ However, we can't connect the output of the DrawMesh into the [Glow] because the
 1. Click on the output indicator of the [DrawMesh] and select [RenderTarget].
 2. Now, drag the first output of the renderTarget into the input of [Glow]. Nice.
 
+Some operators have more than one output. The main output is the larger circle under the node; additional outputs are the smaller circles in the node's bottom-right corner, colored like their type. Hover a circle to see the output's name and type, drag it into an input to use it, or click it to insert a connected operator to its right. Once an additional output is connected it also gets its own labelled row.
+
 To tidy up our graph, select the [Glow] operator and choose "arrange subgraph" from the context menu, or press G on your keyboard.
 
 You might have noticed that the Torus is now rendered with the default camera. This is because we're no longer using the camera of the output window. To add some animation to our scene, we can insert an Orbit camera:

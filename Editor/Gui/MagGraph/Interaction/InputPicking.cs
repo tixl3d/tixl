@@ -80,9 +80,9 @@ internal static class InputPicking
         Debug.Assert(context.MacroCommand != null);
         Debug.Assert(context.ItemForInputSelection.Variant == MagGraphItem.Variants.Operator); // This will bite us later...
         
-        if (context.ActiveSourceItem.OutputLines.Length == 0)
+        if (!context.TryGetActiveOutputLine(out _))
         {
-            Log.Warning("no visible output to connect?");
+            Log.Warning("no output to connect?");
             return;
         }
 

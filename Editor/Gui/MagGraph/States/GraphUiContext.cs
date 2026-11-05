@@ -130,23 +130,8 @@ internal sealed class GraphUiContext
     
     internal bool TryGetActiveOutputLine(out MagGraphItem.OutputLine outputLine)
     {
-        if (ActiveSourceItem == null || ActiveSourceItem.OutputLines.Length == 0)
-        {
-            outputLine = default;
-            return false;
-        }
-
-        foreach (var l in ActiveSourceItem
-                    .OutputLines)
-        {
-            if (l.Id != ActiveSourceOutputId) 
-                continue;
-            
-            outputLine = l;
-            return true;
-        }
         outputLine = default;
-        return false;
+        return ActiveSourceItem != null && ActiveSourceItem.TryGetOutputLine(ActiveSourceOutputId, out outputLine);
     }
     
     internal bool TryGetActiveInputLine(out MagGraphItem.InputLine inputLine)
