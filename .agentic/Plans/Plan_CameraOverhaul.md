@@ -5,8 +5,17 @@ or by rotation (euler or quaternion), blends continuously between perspective an
 down, and navigates like Unreal (WASD only while flying). Input devices (mouse, keyboard, SpaceMouse, game
 controller) share one set of camera operations.
 
-**Status (2026-11-05):** research only, nothing changed. Undecided whether it lands in 4.4 or 4.5; the phasing
-below keeps the editor part free of file-format changes so it can go first.
+**Status (2026-11-05):** Phase 1 slices 1 and 2 implemented, untested by a human (test set
+`.tests-manual/camera-pitch-stop.md`):
+- Slice 1: `ViewAxis` rolls by −roll in degrees around the normalized view direction (it used radians and an
+  unnormalized axis); `EvaluationContext.SetViewFromCamera` applies roll like `CameraDefinition` and takes the
+  field of view from `ViewCamera.FieldOfView`, copied from the scene camera when the viewer takes over (not stored
+  in `OutputWindowState` yet).
+- Slice 2: `CameraSetup.LookAround` and `Orbit` turn in world yaw/pitch and stop at ±89.9° (position/target can't
+  express exactly 90°); the stop only blocks moving further. Mouse, trackpad, SpaceMouse and `GamepadCamera` use them
+  and lost their own 0.95 guards. Verified numerically: small steps match the old rotations exactly. Yaw is now
+  around world up rather than the rolled camera up; pole yaw spins the image like Godot.
+- Not done: roll as its own axis (SpaceMouse side tilt), fly mode (slice 3), the pivot/quaternion model.
 
 ## Goals
 

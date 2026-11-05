@@ -75,24 +75,13 @@ public sealed partial class SpaceMouse : ICameraManipulator, IWin32MessageHandle
 
             
         var viewDir = intendedSetup.Target - intendedSetup.Position;
-            
-            
-            
         var upDir = new Vector3(0, 1, 0);
+
+        // Not normalized: moving sideways scales with the distance to the target, as tuned
         var sideDir = Vector3.Cross(upDir, viewDir);
-            
+
         var viewDirLength = viewDir.Length();
         viewDir /= viewDirLength;
-            
-        // Prevent gimbal lock
-        if (viewDir.Y > 0.95f)
-        {
-            _dampedRotation.X = MathF.Min(_dampedRotation.X, 0);
-        }
-        else if (viewDir.Y < -0.95f)
-        {
-            _dampedRotation.X = MathF.Max(_dampedRotation.X, 0);
-        }
 
         float translationVelocity = _dampedTranslation.Length() / 2000.0f;
         var direction = _dampedTranslation;
@@ -105,19 +94,11 @@ public sealed partial class SpaceMouse : ICameraManipulator, IWin32MessageHandle
             direction *= CameraInteractionParameters.MaxMoveVelocity;
 
         var moveDir = direction.X * sideDir - direction.Y * viewDir - direction.Z * upDir;
-
-        var rotAroundX = Matrix4x4.CreateFromAxisAngle(sideDir, -_dampedRotation.X / 8000.0f);
-        var rotAroundY = Matrix4x4.CreateFromAxisAngle(upDir, -_dampedRotation.Y / 8000.0f);
-        var rot = Matrix4x4.Multiply(rotAroundX, rotAroundY);
-        var newViewDir = Vector3.Transform(viewDir, rot);
-        newViewDir = Vector3.Normalize(newViewDir);
-
-        var oldPosition = intendedSetup.Position;
         intendedSetup.Position += moveDir;
+        intendedSetup.Target += moveDir;
 
-        intendedSetup.Target = oldPosition + (moveDir + newViewDir * viewDirLength);
-        //Log.Debug($"space mouse move: {moveDir}  eventCount:{_eventCount}");
-
+        // Tilting and twisting the cap turn the view; the pitch stops at the poles
+        intendedSetup.LookAround(-_dampedRotation.Y / RawUnitsPerRadian, _dampedRotation.X / RawUnitsPerRadian);
     }
         
     private static bool IsSteeringCamera => UserSettings.Config.SpaceMouseUsage == UserSettings.InputDeviceUsages.Editor;
@@ -174,6 +155,9 @@ public sealed partial class SpaceMouse : ICameraManipulator, IWin32MessageHandle
     private const float NominalReportsPerSecond = 125;
 
     private const double MaxPollGapSec = 0.1;
+
+    /** Summed raw rotation (about 350 per report at full deflection) per radian of turn. */
+    private const float RawUnitsPerRadian = 8000;
 
     public void ProcessMessage(int message, IntPtr wParam, IntPtr lParam) => _spaceMouseDevice?.ProcessMessage(message, wParam, lParam);
 }

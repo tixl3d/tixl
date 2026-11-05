@@ -72,16 +72,22 @@ public sealed class EvaluationContext
         return true;
     }
 
+    /// <summary>
+    /// Renders through the editor's viewer camera (or another <see cref="ICamera"/>) with its roll and field of view,
+    /// built like <see cref="CameraDefinition.BuildProjectionMatrices"/> so the view matches the scene camera it took
+    /// over from.
+    /// </summary>
     public void SetViewFromCamera(ICamera camera)
     {
-        var fov = GraphicsMath.DefaultCamFovDegrees.ToRadians();
+        var fov = camera is ViewCamera viewCamera ? viewCamera.FieldOfView : camera.CameraDefinition.FieldOfView;
+        if (!(fov > 0))
+            fov = GraphicsMath.DefaultCamFovDegrees.ToRadians();
+
         var aspectRatio = (float)RequestedResolution.Width / RequestedResolution.Height;
         CameraToClipSpace = GraphicsMath.PerspectiveFovRH(fov, aspectRatio, 0.01f, 1000);
 
-        Vector3 eye = new Vector3(camera.CameraPosition.X, camera.CameraPosition.Y, camera.CameraPosition.Z);
-        Vector3 target = new Vector3(camera.CameraTarget.X, camera.CameraTarget.Y, camera.CameraTarget.Z);
-        Vector3 up = VectorT3.Up;
-        WorldToCamera = GraphicsMath.LookAtRH(eye, target, up);
+        var rollRotation = Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, -camera.CameraRoll * MathUtils.ToRad);
+        WorldToCamera = GraphicsMath.LookAtRH(camera.CameraPosition, camera.CameraTarget, VectorT3.Up) * rollRotation;
 
         ObjectToWorld = Matrix4x4.Identity;
     }

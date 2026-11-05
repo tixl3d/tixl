@@ -37,28 +37,19 @@ internal sealed class GamepadCamera : ICameraManipulator
         var deltaTime = ImGui.GetIO().DeltaTime;
         var config = UserSettings.Config;
 
-        // Looking straight up or down would flip the view, as with the SpaceMouse
+        // The pitch stops at the poles
         var pitchInput = config.GamepadCameraInvertLook ? -_look.Y : _look.Y;
-        if (viewDir.Y > MaxPitchDot)
-        {
-            pitchInput = MathF.Min(pitchInput, 0);
-        }
-        else if (viewDir.Y < -MaxPitchDot)
-        {
-            pitchInput = MathF.Max(pitchInput, 0);
-        }
-
         var lookSpeed = config.GamepadCameraLookSpeed * deltaTime;
-        var yaw = -_look.X * YawRadiansPerSecond * lookSpeed;
-        var pitch = pitchInput * PitchRadiansPerSecond * lookSpeed;
-        var rotation = Matrix4x4.Multiply(Matrix4x4.CreateFromAxisAngle(left, -pitch), Matrix4x4.CreateFromAxisAngle(up, yaw));
-        var newViewDir = Vector3.Normalize(Vector3.TransformNormal(viewDir, rotation));
+        var yawLeft = -_look.X * YawRadiansPerSecond * lookSpeed;
+        var pitchUp = pitchInput * PitchRadiansPerSecond * lookSpeed;
+        intendedSetup.LookAround(yawLeft, pitchUp);
+        var newViewDir = Vector3.Normalize(intendedSetup.Target - intendedSetup.Position);
 
         var speed = viewDistance * ViewDistancesPerSecond * config.CameraSpeed * config.GamepadCameraMoveSpeed * deltaTime;
         var offset = (newViewDir * _move.Y - left * _move.X + up * _lift) * speed;
 
         intendedSetup.Position += offset;
-        intendedSetup.Target = intendedSetup.Position + newViewDir * viewDistance;
+        intendedSetup.Target += offset;
     }
 
     /// <summary>
@@ -96,7 +87,6 @@ internal sealed class GamepadCamera : ICameraManipulator
     private const float ViewDistancesPerSecond = 1f;
     private const float YawRadiansPerSecond = 1.5f;
     private const float PitchRadiansPerSecond = 1.0f;
-    private const float MaxPitchDot = 0.95f;
     private const float LiftDeadZone = 0.05f;
     private const float MinViewDistance = 0.0001f;
     private const float RestThreshold = 0.001f;

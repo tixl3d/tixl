@@ -152,6 +152,7 @@ internal sealed class CameraSelectionHandling
                         _outputWindowViewCamera.CameraPosition = _firstCamInGraph.CameraPosition;
                         _outputWindowViewCamera.CameraTarget = _firstCamInGraph.CameraTarget;
                         _outputWindowViewCamera.CameraRoll = _firstCamInGraph.CameraRoll;
+                        _outputWindowViewCamera.FieldOfView = _firstCamInGraph.CameraDefinition.FieldOfView;
                     }
                 }
 
