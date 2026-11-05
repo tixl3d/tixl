@@ -559,7 +559,7 @@ internal static class TimeControls
             ImGui.SameLine();
 
             // Curve Mode
-            var hasKeyframes = FrameStats.Current.HasKeyframesAfterCurrentTime || FrameStats.Current.HasKeyframesAfterCurrentTime;
+            var hasKeyframes = FrameStats.Current.HasKeyframesAfterCurrentTime || FrameStats.Current.HasKeyframesBeforeCurrentTime;
             ImGui.PushStyleColor(ImGuiCol.Text, hasKeyframes ? UiColors.Text.Rgba : UiColors.TextMuted);
             if (ImGui.Button(timeLineCanvas.Mode.ToString(), DopeCurve)) //
             {

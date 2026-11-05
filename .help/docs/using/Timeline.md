@@ -23,6 +23,9 @@ Playback shortcuts:
 - `.` / `,` — jump to next / previous keyframe.
 - `Shift + ←` / `Shift + →` — step 30 ms.
 
+The timeline mode button is bright when selected parameters have keyframes before or after the playhead.
+It is muted when neither side has keyframes.
+
 Hold `Shift` while scrubbing to snap to the bar raster and other timeline elements.
 
 ### Snapping and the time raster

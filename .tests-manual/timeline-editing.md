@@ -46,6 +46,17 @@ With the timeline paused, press `.` and `,` repeatedly.
   whichever is nearest in that direction.
 - When the target lies outside the visible range, the view scrolls to center it.
 
+## Step: Curve Mode indicator reflects keyframes on either side
+
+**Action:**
+In the timeline toolbar, watch the text color of the mode button.
+Move the playhead so selected parameters have keyframes only before it, then only after it.
+Finally, remove their keyframes.
+
+**Expected:**
+- The mode button text uses the active text color when keyframes exist before or after the playhead.
+- The mode button text is muted only when no keyframes exist on either side.
+
 ## Step: Ripple selection and gap editing
 
 **Action:**
