@@ -972,10 +972,11 @@ TA_API ma_int32 ta_sound_load(ta_engine* engine, const char* path, ma_uint32 fla
         return result;
     result = ma_sound_init_from_data_source(&engine->engine, &slot->source.decoder, soundFlags, NULL, &slot->sound);
     if (result != MA_SUCCESS)
+    {
         ma_decoder_uninit(&slot->source.decoder);
-    slot->kind = TA_SOURCE_FILE_DECODER;
-    if (result != MA_SUCCESS)
         return result;
+    }
+    slot->kind = TA_SOURCE_FILE_DECODER;
     return ta_finish_sound(engine, handle);
 }
 
