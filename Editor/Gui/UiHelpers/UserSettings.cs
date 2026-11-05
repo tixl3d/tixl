@@ -141,7 +141,7 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
 
         /** Whether a connected game controller drives operators like [Gamepad] or the editor (its camera). */
         [JsonConverter(typeof(StringEnumConverter))]
-        public GamepadUsages GamepadUsage = GamepadUsages.Operators;
+        public InputDeviceUsages GamepadUsage = InputDeviceUsages.Operators;
 
         public GraphStyles GraphStyle = GraphStyles.Magnetic;
 
@@ -235,9 +235,13 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         public float TimeRasterDensity = 1f;
 
         // Space mouse
-        public float SpaceMouseRotationSpeedFactor = 1f;
-        public float SpaceMouseMoveSpeedFactor = 1f;
-        public float SpaceMouseDamping = 0.5f;
+        public float SpaceMouseRotationSpeedFactor = 0.3f;
+        public float SpaceMouseMoveSpeedFactor = 0.2f;
+        public float SpaceMouseDamping = 0.95f;
+
+        /** Whether the SpaceMouse flies the camera (Editor) or drives operators like [SpaceMouse]. */
+        [JsonConverter(typeof(StringEnumConverter))]
+        public InputDeviceUsages SpaceMouseUsage = InputDeviceUsages.Editor;
 
         // Game controller camera
         /** Seconds the camera takes to follow the sticks; longer is calmer, e.g. for live demos. */
@@ -321,7 +325,8 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         Magnetic,
     }
 
-    public enum GamepadUsages
+    /** Who an input device drives; Editor means the camera of the output. Stored by name. */
+    public enum InputDeviceUsages
     {
         Operators,
         Editor,

@@ -276,13 +276,17 @@ internal static class Program
         UiContentContentDrawer = contentDrawer;
         contentDrawer.Initialize(device, ProgramWindows.Main.Width, ProgramWindows.Main.Height, imguiContextLock, out var context);
 
-        // The SpaceMouse is read through Win32 raw input, so it only exists on Windows.
+        // The SpaceMouse is read through Win32 raw input on Windows and from its input device on Linux
         if (OperatingSystem.IsWindows())
         {
             Log.Debug("Initialize Camera Interaction...");
             var spaceMouse = new SpaceMouse(ProgramWindows.Main.HwndHandle);
             CameraInteraction.ManipulationDevices = [spaceMouse];
             ProgramWindows.SetInteractionDevices(spaceMouse);
+        }
+        else
+        {
+            CameraInteraction.ManipulationDevices = [new SpaceMouse()];
         }
 
         CameraInteraction.ManipulationDevices = [..CameraInteraction.ManipulationDevices, new GamepadCamera()];

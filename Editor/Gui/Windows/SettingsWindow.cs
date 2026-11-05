@@ -711,8 +711,8 @@ internal sealed partial class SettingsWindow : Window
                                               UserSettings.Defaults.GamepadUsage,
                                               usage => usage switch
                                                            {
-                                                               UserSettings.GamepadUsages.Operators => "Operators",
-                                                               UserSettings.GamepadUsages.Editor    => "Camera",
+                                                               UserSettings.InputDeviceUsages.Operators => "Operators",
+                                                               UserSettings.InputDeviceUsages.Editor    => "Camera",
                                                                _                                    => "Off",
                                                            });
 
@@ -750,20 +750,40 @@ internal sealed partial class SettingsWindow : Window
         FormInputs.AddVerticalSpace();
 
         ImGui.PushID("SpaceMouse");
+        changed |= FormInputs.AddEnumDropdown(ref UserSettings.Config.SpaceMouseUsage,
+                                              "Use for",
+                                              "Camera: the SpaceMouse flies the camera of the output. Operators: [SpaceMouse] reads it and the camera ignores it.",
+                                              UserSettings.Defaults.SpaceMouseUsage,
+                                              usage => usage switch
+                                                           {
+                                                               UserSettings.InputDeviceUsages.Operators => "Operators",
+                                                               UserSettings.InputDeviceUsages.Editor    => "Camera",
+                                                               _                                        => "Off",
+                                                           });
+
 
         changed |= FormInputs.AddFloat("Smoothing",
                                        ref UserSettings.Config.SpaceMouseDamping,
-                                       0.0f, 10f, 0.01f, true, true);
+                                       0.0f, MaxSpaceMouseDamping, 0.01f, true, true,
+                                       "How much of the previous motion carries over each frame: 0 follows the cap directly, values close to 1 glide long.",
+                                       UserSettings.Defaults.SpaceMouseDamping);
 
         changed |= FormInputs.AddFloat("Move Speed",
                                        ref UserSettings.Config.SpaceMouseMoveSpeedFactor,
-                                       0.0f, 10f, 0.01f, true, true);
+                                       0.0f, 10f, 0.01f, true, true,
+                                       null,
+                                       UserSettings.Defaults.SpaceMouseMoveSpeedFactor);
 
         changed |= FormInputs.AddFloat("Rotation Speed",
                                        ref UserSettings.Config.SpaceMouseRotationSpeedFactor,
-                                       0.0f, 10f, 0.01f, true, true);
+                                       0.0f, 10f, 0.01f, true, true,
+                                       null,
+                                       UserSettings.Defaults.SpaceMouseRotationSpeedFactor);
         ImGui.PopID();
     }
+
+    /** At 1 the blend never takes new input, so the camera would keep drifting. */
+    internal const float MaxSpaceMouseDamping = 0.99f;
 
     private static void DrawGamepadStatus()
     {
@@ -787,21 +807,35 @@ internal sealed partial class SettingsWindow : Window
 
     private static void DrawSpaceMouseStatus()
     {
-        if (!OperatingSystem.IsWindows())
+        var isReceiving = Environment.TickCount64 - SpaceMouseInput.LastReportTicksMs < 500;
+        switch (SpaceMouseInput.State)
         {
-            DrawStatusLine(UiColors.TextMuted, "Only supported on Windows so far");
-            return;
+            case SpaceMouseInput.States.Connected:
+                var name = SpaceMouseInput.Description.Length > 0 ? SpaceMouseInput.Description : "SpaceMouse";
+                DrawStatusLine(UiColors.StatusControlled, isReceiving ? name + " (receiving input)" : name);
+                break;
+
+            case SpaceMouseInput.States.NoAccess:
+                DrawStatusLine(UiColors.StatusAttention, "No access to " + SpaceMouseInput.Description);
+                break;
+
+            default:
+                // Raw input on Windows reports no connection state, only motion
+                DrawStatusLine(UiColors.TextMuted, OperatingSystem.IsWindows()
+                                                       ? "No input yet. Move the SpaceMouse to check its connection."
+                                                       : "No SpaceMouse found");
+                break;
         }
 
-        var lastMotion = Interaction.Camera.SpaceMouse.LastMotionTicksMs;
-        if (lastMotion == 0)
-        {
-            DrawStatusLine(UiColors.TextMuted, "No input yet. Move the SpaceMouse to check its connection.");
+        if (!OperatingSystem.IsLinux())
             return;
-        }
 
-        var secondsAgo = (Environment.TickCount64 - lastMotion) / 1000;
-        DrawStatusLine(UiColors.StatusControlled, secondsAgo < 2 ? "Receiving input" : $"Last input {secondsAgo} s ago");
+        FormInputs.ApplyIndent();
+        if (ImGui.Button("Rescan##spaceMouse"))
+            SpaceMouseInput.Rescan();
+
+        CustomComponents.TooltipForLastItem("Looks for a SpaceMouse right away. It is also found within a few seconds after plugging it in.",
+                                            "The device is read from /dev/input directly, so no spacenavd is needed. Without access, add a udev rule granting it to your user, e.g. /etc/udev/rules.d/70-spacemouse.rules with:\nKERNEL==\"event*\", ATTRS{idVendor}==\"256f\", TAG+=\"uaccess\"\nKERNEL==\"event*\", ATTRS{idVendor}==\"046d\", ATTRS{idProduct}==\"c6*\", TAG+=\"uaccess\"\nThen replug the device.");
     }
 
     /** A colored dot and a text, aligned with the parameters. */

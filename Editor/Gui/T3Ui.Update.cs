@@ -86,6 +86,8 @@ public static partial class T3Ui
         CompatibleMidiDeviceHandling.RescanIfDevicesChanged();
         CompatibleMidiDeviceHandling.UpdateConnectedDevices();
         Interaction.Gamepad.GamepadIndicator.Update();
+        T3.IoServices.SpaceMouseInput.Update();
+        T3.IoServices.SpaceMouseInput.IsAvailableToOperators = UserSettings.Config.SpaceMouseUsage == UserSettings.InputDeviceUsages.Operators;
 
         var nodeSelection = ProjectView.Focused?.NodeSelection;
         if (nodeSelection != null)

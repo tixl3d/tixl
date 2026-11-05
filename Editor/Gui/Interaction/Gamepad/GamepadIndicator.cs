@@ -20,7 +20,7 @@ internal static class GamepadIndicator
         SdlGamepads.Update();
 
         // Applied every frame rather than on change, so the setting holds even while the menu bar is hidden
-        SdlGamepads.IsAvailableToOperators = UserSettings.Config.GamepadUsage == UserSettings.GamepadUsages.Operators;
+        SdlGamepads.IsAvailableToOperators = UserSettings.Config.GamepadUsage == UserSettings.InputDeviceUsages.Operators;
     }
 
     internal static void Draw()
@@ -42,11 +42,11 @@ internal static class GamepadIndicator
         var flash = Math.Clamp(1f - msSinceActivity / FlashDurationMs, 0f, 1f);
         var color = usage switch
                         {
-                            UserSettings.GamepadUsages.Operators => UiColors.StatusAutomated,
-                            UserSettings.GamepadUsages.Editor    => UiColors.StatusControlled,
+                            UserSettings.InputDeviceUsages.Operators => UiColors.StatusAutomated,
+                            UserSettings.InputDeviceUsages.Editor    => UiColors.StatusControlled,
                             _                                    => UiColors.TextMuted,
                         };
-        var opacity = usage == UserSettings.GamepadUsages.Off
+        var opacity = usage == UserSettings.InputDeviceUsages.Off
                           ? RestingOpacity
                           : RestingOpacity + (1 - RestingOpacity) * flash;
 
@@ -60,16 +60,16 @@ internal static class GamepadIndicator
     {
         var next = UserSettings.Config.GamepadUsage switch
                        {
-                           UserSettings.GamepadUsages.Operators => UserSettings.GamepadUsages.Editor,
-                           UserSettings.GamepadUsages.Editor    => UserSettings.GamepadUsages.Off,
-                           _                                    => UserSettings.GamepadUsages.Operators,
+                           UserSettings.InputDeviceUsages.Operators => UserSettings.InputDeviceUsages.Editor,
+                           UserSettings.InputDeviceUsages.Editor    => UserSettings.InputDeviceUsages.Off,
+                           _                                    => UserSettings.InputDeviceUsages.Operators,
                        };
         UserSettings.Config.GamepadUsage = next;
         UserSettings.Save();
         ActionToast.Show(GetUsageLabel(next));
     }
 
-    private static void DrawTooltip(UserSettings.GamepadUsages usage)
+    private static void DrawTooltip(UserSettings.InputDeviceUsages usage)
     {
         ImGui.BeginTooltip();
         for (var index = 0; index < SdlGamepads.Count; index++)
@@ -84,12 +84,12 @@ internal static class GamepadIndicator
         ImGui.EndTooltip();
     }
 
-    private static string GetUsageLabel(UserSettings.GamepadUsages usage)
+    private static string GetUsageLabel(UserSettings.InputDeviceUsages usage)
     {
         return usage switch
                    {
-                       UserSettings.GamepadUsages.Operators => "{Game controller drives operators}",
-                       UserSettings.GamepadUsages.Editor    => "{Game controller steers the camera}",
+                       UserSettings.InputDeviceUsages.Operators => "{Game controller drives operators}",
+                       UserSettings.InputDeviceUsages.Editor    => "{Game controller steers the camera}",
                        _                                    => "{Game controller is off}",
                    };
     }

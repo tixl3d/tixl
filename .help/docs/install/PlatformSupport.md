@@ -104,8 +104,8 @@ system audio through a virtual audio device such as BlackHole and select it as t
 | Art-Net, sACN, DMX | Works | Works | Works |
 | Serial devices (Arduino, WLED, steppers) | Works | Works | Works |
 | Ableton Link | Works | Not yet | Not yet |
-| Gamepads | Works | Not yet | Not yet |
-| SpaceMouse | Works | Planned | Planned |
+| Gamepads, also as camera control | Works | Works | Untested |
+| SpaceMouse | Works | Works (needs a udev rule) | Planned |
 | Trackpad pinch and two-finger pan | — | Works | Works |
 
 On macOS, **Cmd** takes the place of **Ctrl** in all shortcuts, and menus show the Mac key names. The

@@ -58,6 +58,10 @@ internal static partial class Program
 
         // The poll above refreshed the controllers; take one snapshot for all operators of the coming frame
         SdlGamepads.Update();
+
+        // The Player has no editor camera, so a SpaceMouse always drives operators
+        SpaceMouseInput.IsAvailableToOperators = true;
+        SpaceMouseInput.Update();
         return !_closeRequested;
     }
 

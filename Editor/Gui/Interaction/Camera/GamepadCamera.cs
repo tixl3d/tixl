@@ -70,7 +70,7 @@ internal sealed class GamepadCamera : ICameraManipulator
         var targetMove = Vector2.Zero;
         var targetLook = Vector2.Zero;
         var targetLift = 0f;
-        if (UserSettings.Config.GamepadUsage == UserSettings.GamepadUsages.Editor
+        if (UserSettings.Config.GamepadUsage == UserSettings.InputDeviceUsages.Editor
             && SdlGamepads.TryGetState(0, out var state))
         {
             targetMove = Squared(state.LeftThumb);

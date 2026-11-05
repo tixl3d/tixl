@@ -1,0 +1,38 @@
+{
+  "FormatVersion": 3,
+  "Id": "284beba2-abf3-43d0-b8fb-8c3fc348a0be"/*SpaceMouse*/,
+  "Description": "Reads the translation, rotation and buttons of a 3Dconnexion SpaceMouse.\n\nTranslation and Rotation are about -1..1 at full deflection, in TiXL's axes: X right, Y up, and pushing the cap away is -Z. The State dictionary holds the same values plus Button0 and Button1. While the SpaceMouse flies the camera (Settings → Input Devices → SpaceMouse → Use for), the outputs stay at rest.\n\nOn Linux the device is read directly, without spacenavd; the settings show whether it was found and how to grant access. In the Player it always drives operators.\n\nAKA: 3D mouse, SpaceNavigator\n\nUse in combination with [SelectFloatFromDict], [SelectBoolFromFloatDict] or the Vector3 outputs directly.",
+  "SymbolTags": "1",
+  "InputUis": [],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "e4f6c192-0b2f-43af-a1f1-1a5d38bcbcfd"/*State*/,
+      "Position": {
+        "X": 221.82373,
+        "Y": 1595.3228
+      }
+    },
+    {
+      "OutputId": "7c617e24-a001-4e9e-90da-a3a40ee27e10"/*Translation*/,
+      "Position": {
+        "X": 221.82373,
+        "Y": 1695.3228
+      }
+    },
+    {
+      "OutputId": "b0c41336-4e7e-472e-8946-d9fe20122708"/*Rotation*/,
+      "Position": {
+        "X": 221.82373,
+        "Y": 1795.3228
+      }
+    },
+    {
+      "OutputId": "bea02787-cd81-421e-bb62-f5ccb1ec0ac4"/*IsConnected*/,
+      "Position": {
+        "X": 221.82373,
+        "Y": 1895.3228
+      }
+    }
+  ]
+}

@@ -228,6 +228,25 @@ NDI finds sources on the network through Avahi, so `avahi-daemon` has to be runn
 installing the runtime: a running program doesn't see newly installed libraries. Without the runtime the NDI
 operators show "NDI runtime not found" in their status and produce no output.
 
+## Optional: SpaceMouse
+
+TiXL reads a 3Dconnexion SpaceMouse directly, so spacenavd isn't needed. Linux only lets your user read the
+device with a udev rule. Create it once and replug the SpaceMouse:
+
+```bash
+printf '%s\n' 'KERNEL=="event*", ATTRS{idVendor}=="256f", TAG+="uaccess"' \
+               'KERNEL=="event*", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c6*", TAG+="uaccess"' \
+  | sudo tee /etc/udev/rules.d/70-spacemouse.rules
+sudo udevadm control --reload && sudo udevadm trigger --subsystem-match=input
+```
+
+*Settings → Input Devices* shows whether TiXL found the SpaceMouse and can read it, and whether it flies the
+camera or drives the [SpaceMouse] operator. The same applies to the Flatpak. A running spacenavd can take the
+device for itself; if TiXL sees no input, stop it while using TiXL.
+
+Game controllers need no setup. On some distributions an Xbox controller connected by Bluetooth pairs but sends no
+input; a USB cable or the `xpadneo` driver helps.
+
 ## What doesn't work on Linux yet
 
 A few features rely on Windows-only libraries:
@@ -236,7 +255,7 @@ A few features rely on Windows-only libraries:
 - Screen capture.
 - Recording what other programs play (loopback). Live input from a microphone or line-in works.
 - Spout video sharing, which only exists on Windows.
-- SpaceMouse support, gamepads and Ableton Link.
+- Ableton Link.
 
 [Platform support](PlatformSupport.md) has the full comparison of Windows, Linux and macOS.
 
