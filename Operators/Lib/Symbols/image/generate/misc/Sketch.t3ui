@@ -113,22 +113,6 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "f7a2c9e1-3b5d-4e8f-a6c4-9d1e2b7f5a38"/*Fills*/,
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
-      "Position": {
-        "X": 680.0,
-        "Y": 139.09628
-      }
-    },
-    {
-      "ChildId": "c4e8b2d6-9a1f-4c3e-b7d5-2e6f8a1c9b47"/*Draw Fills*/,
-      "SymbolName": "Lib.point._experimental._DrawPointTriangles",
-      "Position": {
-        "X": 680.0,
-        "Y": 200.0
-      }
-    },
-    {
       "ChildId": "023cdfc3-edaa-499e-9ff2-0afb6fed08ce",
       "SymbolName": "Lib.point.generate.RadialPoints",
       "Position": {
@@ -370,6 +354,14 @@
       }
     },
     {
+      "ChildId": "c4e8b2d6-9a1f-4c3e-b7d5-2e6f8a1c9b47",
+      "SymbolName": "Lib.point._experimental._DrawPointTriangles",
+      "Position": {
+        "X": 680.0,
+        "Y": 200.0
+      }
+    },
+    {
       "ChildId": "c6288ad6-172c-4e84-b1d9-045bcd350f0a",
       "SymbolName": "Lib.point.draw.DrawLines",
       "Position": {
@@ -427,11 +419,11 @@
       }
     },
     {
-      "ChildId": "f6214762-274e-44f2-8f5d-bc46b00e699f",
-      "SymbolName": "Lib.render.transform.Transform",
+      "ChildId": "f7a2c9e1-3b5d-4e8f-a6c4-9d1e2b7f5a38",
+      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
       "Position": {
-        "X": 989.776,
-        "Y": 1049.0481
+        "X": 680.0,
+        "Y": 139.09628
       }
     },
     {
