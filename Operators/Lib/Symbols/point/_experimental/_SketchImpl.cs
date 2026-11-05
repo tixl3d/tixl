@@ -493,6 +493,14 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
             return false;
 
         var edit = BeginEdit();
+        MarkSelectionDeleted(page);
+        CommitEdit(edit, editName);
+        return true;
+    }
+
+    /** Turns the selected points into separators; committing the edit compacts them away. */
+    private static void MarkSelectionDeleted(Page page)
+    {
         var points = page.PointsList.TypedElements;
         var count = Math.Min(page.WriteIndex, points.Length);
         for (var index = 0; index < count; index++)
@@ -500,9 +508,6 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
             if (IsSelected(points[index]))
                 points[index].Scale = Vector3.One * float.NaN;
         }
-
-        CommitEdit(edit, editName);
-        return true;
     }
 
     /** Copies the selected strokes, or all strokes of the page if nothing is selected. */
@@ -582,6 +587,7 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
 
     private void CommitEdit(SketchEdit edit, string name)
     {
+        _paging.ActivePage?.Compact();
         edit.Complete(this);
         OperatorUndoRedo.Add(name, edit.Undo, edit.Redo);
     }
@@ -769,11 +775,15 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
 
         var isWholePage = _isTransformingWholePage;
         transformEdit.Revert(this);
+
+        // Compacting on commit shifts indices, so the last stamp is selected before.
+        var edit = BeginEdit();
         if (isWholePage)
             SelectRange(page, 0, _wholePageEndIndex);
 
-        DeleteSelection("Drop stamped sketch strokes");
+        MarkSelectionDeleted(page);
         SelectRange(page, _lastStampStartIndex, _lastStampEndIndex);
+        CommitEdit(edit, "Drop stamped sketch strokes");
     }
 
     private void CancelTransform()
@@ -1460,7 +1470,8 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
             return false;
 
         var wasModified = false;
-        for (var index = 0; index < CurrentPointList.NumElements; index++)
+        var count = Math.Min(_paging.ActivePage.WriteIndex, CurrentPointList.NumElements);
+        for (var index = 0; index < count; index++)
         {
             ref var point = ref CurrentPointList.TypedElements[index];
             if (Point.IsSeparator(point) || !(Vector3.Distance(posInWorld, point.Position) < visibleBrushSize * 0.02f))
@@ -1651,6 +1662,34 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
         [JsonConverter(typeof(StructuredListConverter))]
         public StructuredList<Point> PointsList = new();
 
+        /// <summary>
+        /// Drops erased points, repeated separators and unused capacity, so effects like transitions get a dense
+        /// list in which every stroke ends with exactly one separator. Indices of the remaining points shift.
+        /// </summary>
+        public void Compact()
+        {
+            var points = PointsList.TypedElements;
+            var count = Math.Min(WriteIndex, points.Length);
+            var keptCount = 0;
+            for (var readIndex = 0; readIndex < count; readIndex++)
+            {
+                var isRedundantSeparator = Point.IsSeparator(points[readIndex])
+                                           && (keptCount == 0 || Point.IsSeparator(points[keptCount - 1]));
+                if (isRedundantSeparator)
+                    continue;
+
+                points[keptCount++] = points[readIndex];
+            }
+
+            var isLastStrokeOpen = keptCount > 0 && !Point.IsSeparator(points[keptCount - 1]);
+            WriteIndex = isLastStrokeOpen ? keptCount + 1 : keptCount;
+
+            // An empty list would leave the point buffer without elements.
+            PointsList.SetLength(Math.Max(WriteIndex, 1));
+            if (isLastStrokeOpen || keptCount == 0)
+                PointsList.TypedElements[keptCount] = Point.Separator();
+        }
+
         public PageContent CaptureContent() => new((StructuredList<Point>)PointsList.TypedClone(), WriteIndex, Time);
 
         /** Restores in place, because undo snapshots of other edits refer to this page object. */
@@ -1803,19 +1842,10 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
                     Log.Debug("Failed reading sketch pages from json: " + e.Message, this);
                 }
 
+                // Files saved before pages were compacted on every edit can be full of erased points.
                 foreach (var page in Pages)
                 {
-                    if (page.PointsList.NumElements == 0)
-                    {
-                        page.PointsList = new StructuredList<Point>(BufferIncreaseStep);
-                        continue;
-                    }
-
-                    if (page.PointsList.NumElements > page.WriteIndex)
-                        continue;
-
-                    //Log.Warning($"Adjusting writing index {page.WriteIndex} -> {page.PointsList.NumElements}", this);
-                    page.WriteIndex = page.PointsList.NumElements + 1;
+                    page.Compact();
                 }
             }
             catch (Exception e)
