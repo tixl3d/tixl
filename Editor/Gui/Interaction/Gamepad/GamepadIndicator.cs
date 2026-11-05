@@ -8,8 +8,9 @@ using T3.IoServices;
 namespace T3.Editor.Gui.Interaction.Gamepad;
 
 /// <summary>
-/// Decides who a connected game controller drives: operators like [Gamepad], the editor, or nothing. The menu bar
-/// shows a controller icon only while one is connected; it flashes on input and cycles the usage when clicked.
+/// Decides who a connected game controller drives: operators like [Gamepad], the camera of the output (see
+/// <see cref="Camera.GamepadCamera"/>), or nothing. The menu bar shows a controller icon only while one is connected;
+/// it flashes on input and cycles the usage when clicked.
 /// </summary>
 internal static class GamepadIndicator
 {
@@ -78,7 +79,7 @@ internal static class GamepadIndicator
 
         ImGui.TextUnformatted(GetUsageLabel(usage));
         ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-        ImGui.TextUnformatted("Click to switch between operators, editor and off.");
+        ImGui.TextUnformatted("Click to switch between operators, camera and off.");
         ImGui.PopStyleColor();
         ImGui.EndTooltip();
     }
@@ -88,7 +89,7 @@ internal static class GamepadIndicator
         return usage switch
                    {
                        UserSettings.GamepadUsages.Operators => "{Game controller drives operators}",
-                       UserSettings.GamepadUsages.Editor    => "{Game controller drives the editor}",
+                       UserSettings.GamepadUsages.Editor    => "{Game controller steers the camera}",
                        _                                    => "{Game controller is off}",
                    };
     }

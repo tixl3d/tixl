@@ -11,7 +11,7 @@ prerequisites:
 ---
 
 Checks that game controllers are read through SDL on every platform, and that the menu bar indicator decides
-whether the controller drives operators, the editor, or nothing.
+whether the controller drives operators, the camera of the output, or nothing.
 
 ## Step: The indicator appears with a controller
 
@@ -41,14 +41,25 @@ Move the left stick and press A while watching the [Gamepad] operator's State ou
 - `Buttons/A` is 1 while the bottom face button is held.
 - A resting stick reports exactly 0.
 
-## Step: Switching the controller to the editor
+## Step: Switching the controller to the camera
 
 **Action:**
 Click the controller icon once.
 
 **Expected:**
-- A toast says "Game controller drives the editor" and the icon turns green.
+- A toast says "Game controller steers the camera" and the icon turns green.
 - The [Gamepad] operator's outputs stay at rest while the stick moves, and the operator shows a warning that the editor uses the controller.
+
+## Step: Flying the camera
+
+**Action:**
+With the controller steering the camera, show a 3D scene in the output window (in focus mode: select its camera operator so the background shows it). Move both sticks and pull both triggers.
+
+**Expected:**
+- The left stick flies sideways and forward, the right stick looks around, the right trigger lifts the camera and the left one lowers it.
+- A light touch moves gently; full deflection is fast but controllable.
+- Looking straight up or down stops before the view flips.
+- The graph doesn't react to the controller.
 
 ## Step: Switching the controller off
 
@@ -62,10 +73,10 @@ Click the icon again, then once more.
 ## Step: The choice survives a restart
 
 **Action:**
-Switch to "drives the editor", restart TiXL and connect the controller.
+Switch to "steers the camera", restart TiXL and connect the controller.
 
 **Expected:**
-- The icon is green and the tooltip says "Game controller drives the editor".
+- The icon is green and the tooltip says "Game controller steers the camera".
 
 ## Step: Disconnecting
 

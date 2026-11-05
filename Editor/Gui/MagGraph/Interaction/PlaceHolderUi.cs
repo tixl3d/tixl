@@ -35,6 +35,7 @@ internal static class PlaceHolderUi
         _selectedSymbolUi = null;
         _wasPickedWithKeys = false;
         _focusInputNextTime = true;
+        _scrollToSelected = true;
         ResetPresets();
 
         Filter.FilterInputType = inputFilter;
@@ -249,6 +250,7 @@ internal static class PlaceHolderUi
                                     ? Filter.MatchingSymbolUis[0]
                                     : null;
             _wasPickedWithKeys = false;
+            _scrollToSelected = true;
             _rowHeight = 0;
             uiResult |= UiResults.SelectionChanged;
         }
@@ -403,16 +405,18 @@ internal static class PlaceHolderUi
     {
         var result = UiResults.None;
 
-        if (ImGui.IsKeyReleased(Key.CursorDown.ToImGuiKey()))
+        if (ImGui.IsKeyPressed(Key.CursorDown.ToImGuiKey()))
         {
             UiListHelpers.AdvanceSelectedItem(filter.MatchingSymbolUis!, ref _selectedSymbolUi, 1);
             _wasPickedWithKeys = true;
+            _scrollToSelected = true;
             result = UiResults.SelectionChanged;
         }
-        else if (ImGui.IsKeyReleased(Key.CursorUp.ToImGuiKey()))
+        else if (ImGui.IsKeyPressed(Key.CursorUp.ToImGuiKey()))
         {
             UiListHelpers.AdvanceSelectedItem(filter.MatchingSymbolUis!, ref _selectedSymbolUi, -1);
             _wasPickedWithKeys = true;
+            _scrollToSelected = true;
             result = UiResults.SelectionChanged;
         }
 
@@ -444,12 +448,25 @@ internal static class PlaceHolderUi
 
                 clipper.Begin(count, _rowHeight);
 
+                // The clipper skips rows outside the view, so the one to reveal is drawn on request and scrolls itself in
+                var rowToReveal = -1;
+                if (_scrollToSelected && _selectedSymbolUi != null)
+                {
+                    rowToReveal = filter.MatchingSymbolUis.IndexOf(_selectedSymbolUi);
+                    if (rowToReveal >= 0)
+                        clipper.IncludeItemByIndex(rowToReveal);
+
+                    _scrollToSelected = false;
+                }
+
                 while (clipper.Step())
                 {
                     for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++)
                     {
                         var symbolUi = filter.MatchingSymbolUis[i];
                         result |= DrawSymbolUiEntry(context, symbolUi);
+                        if (i == rowToReveal)
+                            ScrollLastItemIntoView();
                     }
                 }
 
@@ -459,6 +476,22 @@ internal static class PlaceHolderUi
 
         WindowContentExtend.ExtendToLastItem((int)(200 * T3Ui.UiScaleFactor));
         return result;
+    }
+
+    /** Scrolls only if the row is cut off, keeping some rows of context in the direction of travel. */
+    private static void ScrollLastItemIntoView()
+    {
+        var padding = ImGui.GetStyle().WindowPadding.Y;
+        var windowTop = ImGui.GetWindowPos().Y + padding;
+        var windowBottom = ImGui.GetWindowPos().Y + ImGui.GetWindowHeight() - padding;
+        if (ImGui.GetItemRectMin().Y < windowTop)
+        {
+            ImGui.SetScrollHereY(RevealMarginFraction);
+        }
+        else if (ImGui.GetItemRectMax().Y > windowBottom)
+        {
+            ImGui.SetScrollHereY(1 - RevealMarginFraction);
+        }
     }
 
     internal static UiResults DrawSymbolUiEntry(GraphUiContext context, SymbolUi symbolUi, bool showType=true)
@@ -756,6 +789,10 @@ internal static class PlaceHolderUi
 
     /** Up/Down chose the selection since the search last changed */
     private static bool _wasPickedWithKeys;
+    private static bool _scrollToSelected;
+
+    /** Where a revealed row lands, as a fraction of the list's height from the edge it came in at. */
+    private const float RevealMarginFraction = 0.2f;
     private static ImRect _placeholderAreaOnScreen;
     internal static readonly SymbolFilter Filter = new();
     private static MagGraphItem? _placeholderItem;

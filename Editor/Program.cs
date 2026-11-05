@@ -285,6 +285,8 @@ internal static class Program
             ProgramWindows.SetInteractionDevices(spaceMouse);
         }
 
+        CameraInteraction.ManipulationDevices = [..CameraInteraction.ManipulationDevices, new GamepadCamera()];
+
         Log.Debug("Initialize Resource Manager...");
         ResourceManager.Init(device);
         SharedResources.Initialize();

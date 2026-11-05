@@ -130,6 +130,7 @@ These matter more than any filing decision.
 | [Plan_FrameTiming](Plan_FrameTiming.md) | Last commit 2026-10-22; branches diverge (linux deleted the estimator) | `PerformanceMetrics` window, hard-coded 60s, MediaPipe `33333`, NDI timecode, blocking export readback, 4.3 baseline. §A4 contradicts the decision to use SDL's display mode |
 | [Plan_CrossPlatformV5](Plan_CrossPlatformV5.md) | Foundation shipped on linux, up to v4.4.0.4 tags; none on `main` | Merge, sub-allocator, pipeline cache, SharpDX removal, `[SupportedPlatforms]`, tests in CI, Silk. See [decision 4](#decisions-for-you) |
 | [Plan_MacOS](Plan_MacOS.md) | Portability, CoreMIDI, DMG, CI shipped on linux | Visual suite (71/97 on 2026-10-08), cube placeholder, line-only OBJ, player `.app`, FFmpeg in DMG, settings folder. Cannot be verified from Linux |
+| [Plan_GamepadControl](Plan_GamepadControl.md) | SDL gamepads, `[Gamepad]` on Linux, usage indicator shipped; camera steering built 2026-11-05 | Test camera steering with a pad, port main's calibration off XInput, SpaceMouse on Linux |
 
 ## Ready
 
@@ -151,6 +152,7 @@ These matter more than any filing decision.
 | [Plan_ReferenceLines](Plan_ReferenceLines.md) | Nothing shipped | `AutoCollectIndicators` covers part of it; decide whether to absorb |
 | [Plan_RenameSimulateIoDataToDataClipPlayer](Plan_RenameSimulateIoDataToDataClipPlayer.md) | Nothing shipped | Op path in the plan is stale; two help pages also need updating |
 | [Plan_OperatorVersioning](Plan_OperatorVersioning.md) | Nothing shipped; written 2026-11-04 | `{Name}_v{N}` naming, `Supersedes` record on successor, undoable Upgrade built on `ChangeSymbol`. Decisions settled; start with Phase 0 |
+| [Plan_CameraOverhaul](Plan_CameraOverhaul.md) | Research only, written 2026-11-05 | Pivot + quaternion camera model, Godot pitch stop with roll, Unreal fly-mode WASD, persp/ortho blend. Phase 1 is editor-only and could land in 4.4 |
 | [Plan_UiTimelapse](Plan_UiTimelapse.md) | Nothing shipped | Its encoder gate looks set to disable it on the Radeon machine, since the probe has no VAAPI candidate (not run). Cursor code paths are stale |
 
 ## Parked
@@ -164,6 +166,7 @@ These matter more than any filing decision.
 | [Plan_StageExtension](Plan_StageExtension.md) | Direction notes; see [decision 3](#decisions-for-you) |
 | [Plan_ImageComposeTransform](Plan_ImageComposeTransform.md) | Nothing shipped. The name `TransformImage` is already taken by an op with different semantics |
 | [Plan_VideoHdrExport](Plan_VideoHdrExport.md) | Polish; needs an HDR display |
+| [Plan_GamepadEditing](Plan_GamepadEditing.md) | Graph editing from a controller: proof of concept on `feat/gamepad-control` (`ba18f1ec8`), parked as too fringe for its spread. Learnings and the consolidation path if revived |
 | [output-setup/multi-machine](output-setup/multi-machine.md) and [camera-calibration](output-setup/camera-calibration.md) | Pixel streaming shipped; machine id, heartbeat and calibration not. Calibrate tab is gone, so §6 needs rethinking |
 
 ## Output Setup

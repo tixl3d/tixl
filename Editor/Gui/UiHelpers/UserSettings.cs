@@ -139,7 +139,7 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
 
         public bool EnableKeyboardShortCuts = true;
 
-        /** Whether a connected game controller drives operators like [Gamepad] or the editor itself. */
+        /** Whether a connected game controller drives operators like [Gamepad] or the editor (its camera). */
         [JsonConverter(typeof(StringEnumConverter))]
         public GamepadUsages GamepadUsage = GamepadUsages.Operators;
 

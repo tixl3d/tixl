@@ -97,3 +97,21 @@ Press `Tab` again, then click a page or namespace with the mouse.
 **Expected:**
 - The browser opens the clicked entry.
 - No focus frame is shown until an arrow key is pressed.
+
+## Step: Moving through search results
+
+**Action:**
+Press `Tab` and type `t`, then hold `Down` until the list scrolls, and press `Up` a few times.
+
+**Expected:**
+- The highlight moves when a key goes down, not when it is released, and repeats while it is held.
+- The list scrolls so the highlighted operator stays visible, with a few rows of context.
+
+## Step: The output follows the end of the chain
+
+**Action:**
+Pin the last operator of a chain (nothing connected to its output) to the output window, or show it as background in focus mode. Select it, press `Tab` and insert an operator below it.
+
+**Expected:**
+- The output (or background) now shows the new operator.
+- Inserting below an operator whose output is already connected, or below one that isn't shown, leaves the output unchanged.
