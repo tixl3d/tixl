@@ -361,13 +361,24 @@ internal static class AppMenuBar
             }
 
             var exportChildUis = projectView?.NodeSelection.GetSelectedChildUis().ToList();
-            var canExport = projectView?.CompositionInstance != null && exportChildUis is { Count: 1 }
-                            && projectView.CompositionInstance.Children.TryGetChildInstance(exportChildUis[0].Id, out var exportTarget)
-                            && PlayerExporter.CanExport(exportTarget);
-            if (MenuItem("Export as Executable", isEnabled: canExport))
+            string? exportBlockedReason = null;
+            if (projectView?.CompositionInstance == null || exportChildUis is not { Count: 1 }
+                || !projectView.CompositionInstance.Children.TryGetChildInstance(exportChildUis[0].Id, out var exportTarget))
+            {
+                exportBlockedReason = "Select the one operator to export in the graph.";
+            }
+            else if (!PlayerExporter.CanExport(exportTarget))
+            {
+                exportBlockedReason = PlayerExporter.NoContentSupplierReason;
+            }
+
+            if (MenuItem("Export as Executable", isEnabled: exportBlockedReason == null))
             {
                 PlayerExporter.ExportAndReport(projectView!.CompositionInstance!, exportChildUis![0]);
             }
+
+            if (exportBlockedReason != null && ImGui.IsItemHovered())
+                ImGui.SetTooltip(exportBlockedReason);
 
             if (MenuItem("Free GPU Memory"))
                 App.GpuResourceReleasing.RequestReleaseAll();
