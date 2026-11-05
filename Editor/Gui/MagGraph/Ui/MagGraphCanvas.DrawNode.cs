@@ -319,10 +319,12 @@ internal sealed partial class MagGraphView
                 var indicatorPos = new Vector2(pMinVisible.X + 5 * CanvasScale, pMaxVisible.Y - 5 * CanvasScale);
 
                 var isSnappedToAnInput = InputSnapper.BestInputMatch.Item != null; 
-                
+
+                var segments = CanvasScale > 1.8f ? 12 : 8;
+
                 if (!isItemHovered || isSnappedToAnInput)
                 {
-                    drawList.AddCircle(indicatorPos, 3 * CanvasScale, UiColors.ForegroundFull.Fade(Blink),8,2f);
+                    drawList.AddCircle(indicatorPos, 3f * CanvasScale, UiColors.ForegroundFull.Fade(Blink), segments, 2f * CanvasScale);
                 }
                 else
                 {
