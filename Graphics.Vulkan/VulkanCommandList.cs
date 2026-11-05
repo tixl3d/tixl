@@ -84,14 +84,8 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
         if (target is not VulkanTextureView view || view.Texture.Image.IsNull)
             return;
 
-        EndRenderingIfActive();
-        VulkanBarriers.TransitionImage(backend, _commandBuffer, view.Texture, VkImageLayout.TransferDstOptimal,
-                                       VkPipelineStageFlags2.Clear, VkAccessFlags2.TransferWrite);
-
-        VkClearColorValue value = new(color.X, color.Y, color.Z, color.W);
-        var range = GetClearRange(view, VkImageAspectFlags.Color);
-
-        backend.Api.vkCmdClearColorImage(_commandBuffer, view.Texture.Image, VkImageLayout.TransferDstOptimal, &value, 1, &range);
+        VkClearValue value = new() { color = new VkClearColorValue(color.X, color.Y, color.Z, color.W) };
+        DeferClear(view.Texture, GetClearRange(view, VkImageAspectFlags.Color), value);
     }
 
     public void ClearDepthStencil(GpuTextureView target, float depth, byte stencil, bool clearDepth, bool clearStencil)
@@ -99,11 +93,6 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
         if (target is not VulkanTextureView view || view.Texture.Image.IsNull || (!clearDepth && !clearStencil))
             return;
 
-        EndRenderingIfActive();
-        VulkanBarriers.TransitionImage(backend, _commandBuffer, view.Texture, VkImageLayout.TransferDstOptimal,
-                                       VkPipelineStageFlags2.Clear, VkAccessFlags2.TransferWrite);
-
-        VkClearDepthStencilValue value = new(depth, stencil);
         var aspect = VkImageAspectFlags.None;
 
         if (clearDepth)
@@ -112,9 +101,101 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
         if (clearStencil && VulkanConvert.HasStencil(view.Texture.Description.Format))
             aspect |= VkImageAspectFlags.Stencil;
 
-        var range = GetClearRange(view, aspect);
+        if (aspect == VkImageAspectFlags.None)
+            return;
 
-        backend.Api.vkCmdClearDepthStencilImage(_commandBuffer, view.Texture.Image, VkImageLayout.TransferDstOptimal, &value, 1, &range);
+        VkClearValue value = new() { depthStencil = new VkClearDepthStencilValue(depth, stencil) };
+        DeferClear(view.Texture, GetClearRange(view, aspect), value);
+    }
+
+    /// <summary>
+    /// Leaves the clear waiting on the texture for the next pass to apply as its load operation. The open pass
+    /// ends either way, so draws after the clear land in a pass that sees it.
+    /// </summary>
+    private void DeferClear(VulkanTexture texture, in VkImageSubresourceRange range, in VkClearValue value)
+    {
+        EndRenderingIfActive();
+
+        // Only one clear waits per texture; a later clear of the same range simply replaces it.
+        if (texture.PendingClear.IsSet && !IsSameRange(texture.PendingClear.Range, range))
+            RecordPendingClear(texture);
+
+        texture.PendingClear = new VulkanTexture.DeferredClear(true, range, value);
+    }
+
+    /// <summary>Records the clear waiting on the texture as a transfer clear, for a use that is not a covering pass.</summary>
+    private void RecordPendingClear(VulkanTexture texture)
+    {
+        if (!texture.PendingClear.IsSet)
+            return;
+
+        var clear = texture.PendingClear;
+        texture.PendingClear = default;
+
+        EndRenderingIfActive();
+        var range = clear.Range;
+        var value = clear.Value;
+        VulkanBarriers.TransitionImage(backend, _commandBuffer, texture, VkImageLayout.TransferDstOptimal,
+                                       VkPipelineStageFlags2.Clear, VkAccessFlags2.TransferWrite, CoversWholeImage(texture, range));
+
+        if ((range.aspectMask & VkImageAspectFlags.Color) != 0)
+            backend.Api.vkCmdClearColorImage(_commandBuffer, texture.Image, VkImageLayout.TransferDstOptimal, &value.color, 1, &range);
+        else
+            backend.Api.vkCmdClearDepthStencilImage(_commandBuffer, texture.Image, VkImageLayout.TransferDstOptimal, &value.depthStencil, 1, &range);
+    }
+
+    /// <summary>Every texture use goes through here, so a clear still waiting on it is recorded first.</summary>
+    private void Transition(VulkanTexture texture, VkImageLayout layout, VkPipelineStageFlags2 stage, VkAccessFlags2 access)
+    {
+        RecordPendingClear(texture);
+        VulkanBarriers.TransitionImage(backend, _commandBuffer, texture, layout, stage, access);
+    }
+
+    /// <summary>
+    /// Takes the clear waiting on an attachment if the pass covers exactly its range, so the pass can clear on load.
+    /// </summary>
+    private static bool TryTakePendingClear(VulkanTextureView view, VkImageAspectFlags aspect, int width, int height, int layers,
+                                            out VkClearValue value, out bool discardContents)
+    {
+        value = default;
+        discardContents = false;
+
+        var texture = view.Texture;
+        var clear = texture.PendingClear;
+
+        if (!clear.IsSet || clear.Range.aspectMask != aspect || view.Description.Dimension == TextureDimension.Texture3D)
+            return false;
+
+        var range = clear.Range;
+        if (!IsSameRange(range, GetClearRange(view, aspect)) || MipCountOf(texture, range) != 1 || range.layerCount != (uint)layers)
+            return false;
+
+        var mip = view.Description.FirstMip;
+        if (width != Math.Max(1, texture.Description.Width >> mip) || height != Math.Max(1, texture.Description.Height >> mip))
+            return false;
+
+        value = clear.Value;
+        discardContents = CoversWholeImage(texture, range);
+        texture.PendingClear = default;
+        return true;
+    }
+
+    private static bool IsSameRange(in VkImageSubresourceRange a, in VkImageSubresourceRange b)
+        => a.aspectMask == b.aspectMask && a.baseMipLevel == b.baseMipLevel && a.levelCount == b.levelCount
+           && a.baseArrayLayer == b.baseArrayLayer && a.layerCount == b.layerCount;
+
+    private static uint MipCountOf(VulkanTexture texture, in VkImageSubresourceRange range)
+        => range.levelCount == VK_REMAINING_MIP_LEVELS
+               ? (uint)Math.Max(1, texture.Description.MipLevels) - range.baseMipLevel
+               : range.levelCount;
+
+    private static bool CoversWholeImage(VulkanTexture texture, in VkImageSubresourceRange range)
+    {
+        var description = texture.Description;
+        var imageLayers = description.Dimension == TextureDimension.Texture3D ? 1 : Math.Max(1, description.ArraySize);
+        return range.aspectMask == texture.Aspect
+               && range.baseMipLevel == 0 && MipCountOf(texture, range) == (uint)Math.Max(1, description.MipLevels)
+               && range.baseArrayLayer == 0 && range.layerCount == (uint)imageLayers;
     }
 
     /// <summary>
@@ -436,8 +517,8 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
 
         data[..required].CopyTo(new Span<byte>(staging.Mapped, required));
 
-        VulkanBarriers.TransitionImage(backend, _commandBuffer, texture, VkImageLayout.TransferDstOptimal,
-                                       VkPipelineStageFlags2.Copy, VkAccessFlags2.TransferWrite);
+        Transition(texture, VkImageLayout.TransferDstOptimal,
+                   VkPipelineStageFlags2.Copy, VkAccessFlags2.TransferWrite);
 
         var region = new VkBufferImageCopy
                          {
@@ -549,8 +630,8 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
         // A staging destination is a buffer, which is how a readback actually reaches the CPU.
         if (to.Image.IsNull && !to.StagingBuffer.IsNull)
         {
-            VulkanBarriers.TransitionImage(backend, _commandBuffer, from, VkImageLayout.TransferSrcOptimal,
-                                           VkPipelineStageFlags2.Copy, VkAccessFlags2.TransferRead);
+            Transition(from, VkImageLayout.TransferSrcOptimal,
+                       VkPipelineStageFlags2.Copy, VkAccessFlags2.TransferRead);
 
             VkBufferImageCopy region = new()
                                            {
@@ -568,8 +649,8 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
 
         if (from.Image.IsNull && !from.StagingBuffer.IsNull)
         {
-            VulkanBarriers.TransitionImage(backend, _commandBuffer, to, VkImageLayout.TransferDstOptimal,
-                                           VkPipelineStageFlags2.Copy, VkAccessFlags2.TransferWrite);
+            Transition(to, VkImageLayout.TransferDstOptimal,
+                       VkPipelineStageFlags2.Copy, VkAccessFlags2.TransferWrite);
 
             VkBufferImageCopy region = new()
                                            {
@@ -589,10 +670,10 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
         if (from.Image.IsNull || to.Image.IsNull)
             return;
 
-        VulkanBarriers.TransitionImage(backend, _commandBuffer, from, VkImageLayout.TransferSrcOptimal,
-                                       VkPipelineStageFlags2.Copy, VkAccessFlags2.TransferRead);
-        VulkanBarriers.TransitionImage(backend, _commandBuffer, to, VkImageLayout.TransferDstOptimal,
-                                       VkPipelineStageFlags2.Copy, VkAccessFlags2.TransferWrite);
+        Transition(from, VkImageLayout.TransferSrcOptimal,
+                   VkPipelineStageFlags2.Copy, VkAccessFlags2.TransferRead);
+        Transition(to, VkImageLayout.TransferDstOptimal,
+                   VkPipelineStageFlags2.Copy, VkAccessFlags2.TransferWrite);
 
         VkImageCopy copy = new()
                                {
@@ -651,8 +732,8 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
             }
 
             EndRenderingIfActive();
-            VulkanBarriers.TransitionImage(backend, _commandBuffer, to, VkImageLayout.TransferDstOptimal,
-                                           VkPipelineStageFlags2.Copy, VkAccessFlags2.TransferWrite);
+            Transition(to, VkImageLayout.TransferDstOptimal,
+                       VkPipelineStageFlags2.Copy, VkAccessFlags2.TransferWrite);
 
             var targetMips = Math.Max(1, to.Description.MipLevels);
             VkBufferImageCopy upload = new()
@@ -673,10 +754,10 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
         }
 
         EndRenderingIfActive();
-        VulkanBarriers.TransitionImage(backend, _commandBuffer, from, VkImageLayout.TransferSrcOptimal,
-                                       VkPipelineStageFlags2.Copy, VkAccessFlags2.TransferRead);
-        VulkanBarriers.TransitionImage(backend, _commandBuffer, to, VkImageLayout.TransferDstOptimal,
-                                       VkPipelineStageFlags2.Copy, VkAccessFlags2.TransferWrite);
+        Transition(from, VkImageLayout.TransferSrcOptimal,
+                   VkPipelineStageFlags2.Copy, VkAccessFlags2.TransferRead);
+        Transition(to, VkImageLayout.TransferDstOptimal,
+                   VkPipelineStageFlags2.Copy, VkAccessFlags2.TransferWrite);
 
         // D3D11 numbers subresources mip-major, so the slice is what the index divides into.
         var sourceMips = Math.Max(1, from.Description.MipLevels);
@@ -712,10 +793,10 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
             return;
 
         EndRenderingIfActive();
-        VulkanBarriers.TransitionImage(backend, _commandBuffer, from, VkImageLayout.TransferSrcOptimal,
-                                       VkPipelineStageFlags2.Resolve, VkAccessFlags2.TransferRead);
-        VulkanBarriers.TransitionImage(backend, _commandBuffer, to, VkImageLayout.TransferDstOptimal,
-                                       VkPipelineStageFlags2.Resolve, VkAccessFlags2.TransferWrite);
+        Transition(from, VkImageLayout.TransferSrcOptimal,
+                   VkPipelineStageFlags2.Resolve, VkAccessFlags2.TransferRead);
+        Transition(to, VkImageLayout.TransferDstOptimal,
+                   VkPipelineStageFlags2.Resolve, VkAccessFlags2.TransferWrite);
 
         // D3D11 numbers subresources mip-major, so the slice is what the index divides into.
         var sourceMips = Math.Max(1, from.Description.MipLevels);
@@ -756,8 +837,8 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
 
         EndRenderingIfActive();
         // Both directions: every level but the first is written by a blit that reads the level above it.
-        VulkanBarriers.TransitionImage(backend, _commandBuffer, texture, VkImageLayout.General,
-                                       VkPipelineStageFlags2.Blit, VkAccessFlags2.TransferRead | VkAccessFlags2.TransferWrite);
+        Transition(texture, VkImageLayout.General,
+                   VkPipelineStageFlags2.Blit, VkAccessFlags2.TransferRead | VkAccessFlags2.TransferWrite);
 
         var width = Math.Max(1, texture.Description.Width);
         var height = Math.Max(1, texture.Description.Height);
@@ -812,8 +893,8 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
     internal void TransitionToPresent(VulkanTexture texture)
     {
         EndRenderingIfActive();
-        VulkanBarriers.TransitionImage(backend, _commandBuffer, texture, VkImageLayout.PresentSrcKHR,
-                                       VkPipelineStageFlags2.BottomOfPipe, VkAccessFlags2.None);
+        Transition(texture, VkImageLayout.PresentSrcKHR,
+                   VkPipelineStageFlags2.BottomOfPipe, VkAccessFlags2.None);
     }
 
     public void PushDebugGroup(string name)
@@ -921,13 +1002,13 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
                 switch (binding.Kind)
                 {
                     case BindingKind.SampledTexture when binding.TextureView is VulkanTextureView sampled:
-                        VulkanBarriers.TransitionImage(backend, _commandBuffer, sampled.Texture, VkImageLayout.ShaderReadOnlyOptimal,
-                                                       stage, VkAccessFlags2.ShaderSampledRead);
+                        Transition(sampled.Texture, VkImageLayout.ShaderReadOnlyOptimal,
+stage, VkAccessFlags2.ShaderSampledRead);
                         break;
 
                     case BindingKind.StorageTexture when binding.TextureView is VulkanTextureView storage:
-                        VulkanBarriers.TransitionImage(backend, _commandBuffer, storage.Texture, VkImageLayout.General,
-                                                       stage, VkAccessFlags2.ShaderStorageRead | VkAccessFlags2.ShaderStorageWrite);
+                        Transition(storage.Texture, VkImageLayout.General,
+stage, VkAccessFlags2.ShaderStorageRead | VkAccessFlags2.ShaderStorageWrite);
                         break;
 
                     case BindingKind.StructuredBuffer or BindingKind.StorageBuffer when binding.Buffer is VulkanBuffer buffer:
@@ -960,15 +1041,15 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
                                  {
                                      BindingKind.SampledTexture when binding.TextureView is VulkanTextureView sampled
                                          => VulkanBarriers.NeedsTransition(sampled.Texture, VkImageLayout.ShaderReadOnlyOptimal,
-                                                                           VkAccessFlags2.ShaderSampledRead),
+                              VkAccessFlags2.ShaderSampledRead),
                                      BindingKind.StorageTexture when binding.TextureView is VulkanTextureView storage
                                          => VulkanBarriers.NeedsTransition(storage.Texture, VkImageLayout.General,
-                                                                           VkAccessFlags2.ShaderStorageRead | VkAccessFlags2.ShaderStorageWrite),
+                              VkAccessFlags2.ShaderStorageRead | VkAccessFlags2.ShaderStorageWrite),
                                      BindingKind.StructuredBuffer or BindingKind.StorageBuffer when binding.Buffer is VulkanBuffer buffer
                                          => VulkanBarriers.NeedsBarrier(buffer,
-                                                                        binding.Slot % ShaderSlots.StageStride >= ShaderSlots.UnorderedAccessBase
-                                                                            ? VkAccessFlags2.ShaderStorageRead | VkAccessFlags2.ShaderStorageWrite
-                                                                            : VkAccessFlags2.ShaderStorageRead),
+                           binding.Slot % ShaderSlots.StageStride >= ShaderSlots.UnorderedAccessBase
+                               ? VkAccessFlags2.ShaderStorageRead | VkAccessFlags2.ShaderStorageWrite
+                               : VkAccessFlags2.ShaderStorageRead),
                                      BindingKind.ConstantBuffer when binding.Buffer is VulkanBuffer constants
                                          => VulkanBarriers.NeedsBarrier(constants, VkAccessFlags2.UniformRead),
                                      _ => false,
@@ -1008,47 +1089,60 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
 
         for (var i = 0; i < _colorCount; i++)
         {
+            Fit(_colorTargets[i], ref width, ref height, ref layers);
+        }
+
+        if (_depthTarget != null)
+            Fit(_depthTarget, ref width, ref height, ref layers);
+
+        if (width == int.MaxValue)
+            width = height = layers = 1;
+
+        for (var i = 0; i < _colorCount; i++)
+        {
             var view = _colorTargets[i];
-            // Read as well as write: the attachment loads rather than clears (below), so the pass reads what is
-            // already there, and a barrier that only grants write access leaves that read unsynchronized.
+            var clearsOnLoad = TryTakePendingClear(view, VkImageAspectFlags.Color, width, height, layers, out var clearValue, out var discard);
+            if (!clearsOnLoad)
+                RecordPendingClear(view.Texture);
+
+            // Read as well as write: an attachment that loads reads what is already there, and a barrier that only
+            // grants write access leaves that read unsynchronized.
             VulkanBarriers.TransitionImage(backend, _commandBuffer, view.Texture, VkImageLayout.ColorAttachmentOptimal,
                                            VkPipelineStageFlags2.ColorAttachmentOutput,
-                                           VkAccessFlags2.ColorAttachmentRead | VkAccessFlags2.ColorAttachmentWrite);
+                                           VkAccessFlags2.ColorAttachmentRead | VkAccessFlags2.ColorAttachmentWrite, discard);
 
             attachments[i] = new VkRenderingAttachmentInfo
                                  {
                                      imageView = view.View,
                                      imageLayout = VkImageLayout.ColorAttachmentOptimal,
-
-                                     // Load, never clear: a clear is its own call in this API, as it is in D3D11.
-                                     loadOp = VkAttachmentLoadOp.Load,
+                                     loadOp = clearsOnLoad ? VkAttachmentLoadOp.Clear : VkAttachmentLoadOp.Load,
                                      storeOp = VkAttachmentStoreOp.Store,
+                                     clearValue = clearValue,
                                  };
-
-            Fit(view, ref width, ref height, ref layers);
         }
 
         VkRenderingAttachmentInfo depthAttachment = default;
 
         if (_depthTarget != null)
         {
+            // Only the depth aspect is attached, so a waiting clear that includes stencil is recorded on its own.
+            var clearsOnLoad = TryTakePendingClear(_depthTarget, VkImageAspectFlags.Depth, width, height, layers, out var clearValue, out var discard);
+            if (!clearsOnLoad)
+                RecordPendingClear(_depthTarget.Texture);
+
             VulkanBarriers.TransitionImage(backend, _commandBuffer, _depthTarget.Texture, VkImageLayout.DepthStencilAttachmentOptimal,
                                            VkPipelineStageFlags2.EarlyFragmentTests | VkPipelineStageFlags2.LateFragmentTests,
-                                           VkAccessFlags2.DepthStencilAttachmentRead | VkAccessFlags2.DepthStencilAttachmentWrite);
+                                           VkAccessFlags2.DepthStencilAttachmentRead | VkAccessFlags2.DepthStencilAttachmentWrite, discard);
 
             depthAttachment = new VkRenderingAttachmentInfo
                                   {
                                       imageView = _depthTarget.View,
                                       imageLayout = VkImageLayout.DepthStencilAttachmentOptimal,
-                                      loadOp = VkAttachmentLoadOp.Load,
+                                      loadOp = clearsOnLoad ? VkAttachmentLoadOp.Clear : VkAttachmentLoadOp.Load,
                                       storeOp = VkAttachmentStoreOp.Store,
+                                      clearValue = clearValue,
                                   };
-
-            Fit(_depthTarget, ref width, ref height, ref layers);
         }
-
-        if (width == int.MaxValue)
-            width = height = layers = 1;
 
         VkRenderingInfo renderingInfo = new()
                                             {

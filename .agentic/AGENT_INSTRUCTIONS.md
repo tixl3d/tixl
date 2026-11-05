@@ -589,6 +589,10 @@ If it does, verify each platform with what is at hand without running it there. 
 2. Verify no obvious regressions in hot paths
 3. Call out assumptions and risks
 
+### Commit messages
+- Start with an area prefix as in `git log` (`ui:`, `ops:`, `render:`, `vulkan:`), then a short imperative summary.
+- No `Co-Authored-By` or other agent attribution trailers, in commit messages or in code.
+
 ## Review Checklist
 - [ ] No new allocations or LINQ in per-frame paths
 - [ ] No new long-lived direct references where `Guid` should be used

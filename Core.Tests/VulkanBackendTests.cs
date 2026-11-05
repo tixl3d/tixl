@@ -724,6 +724,129 @@ public class VulkanBackendTests(ITestOutputHelper output)
         AssertValidationStayedQuiet();
     }
 
+    /// <summary>
+    /// A clear is applied by the next pass that renders into the target. With no draw after it, the clear still has
+    /// to reach the texture before anything reads it, even in a later frame.
+    /// </summary>
+    [Fact]
+    public void AClearWithoutADrawReachesTheNextRead()
+    {
+        using var backend = TryCreateBackend();
+
+        if (backend == null)
+            return;
+
+        var device = new Device(backend);
+        var context = device.ImmediateContext;
+
+        using var target = new Texture2D(device, Describe(BindFlags.RenderTarget | BindFlags.ShaderResource, ResourceUsage.Default));
+        using var targetView = new RenderTargetView(device, target);
+        using var staging = new Texture2D(device, Describe(BindFlags.None, ResourceUsage.Staging, CpuAccessFlags.Read));
+
+        device.BeginFrame();
+        context.ClearRenderTargetView(targetView, new Vector4(1, 0, 0, 1));
+        device.EndFrame();
+
+        device.BeginFrame();
+        context.CopyResource(target, staging);
+        var pixels = ReadPixels(context, staging);
+        device.EndFrame();
+
+        for (var i = 0; i < pixels.Length; i += 4)
+        {
+            Assert.Equal(255, pixels[i]);
+            Assert.Equal(0, pixels[i + 1]);
+            Assert.Equal(0, pixels[i + 2]);
+        }
+
+        AssertValidationStayedQuiet();
+    }
+
+    /// <summary>
+    /// A clear between two draws to the same target: the first draw is wiped, and the second, covering only the left
+    /// half, lands on the clear colour. The pass reopened after the clear clears on load.
+    /// </summary>
+    [Fact]
+    public void AClearBetweenDrawsWipesTheFirstDraw()
+    {
+        using var backend = TryCreateBackend();
+
+        if (backend == null)
+            return;
+
+        var device = new Device(backend);
+        var context = device.ImmediateContext;
+
+        using var source = new Texture2D(device, Describe(BindFlags.ShaderResource, ResourceUsage.Default), UniformPixels(200, 100, 50));
+        using var sourceView = new ShaderResourceView(device, source);
+        using var target = new Texture2D(device, Describe(BindFlags.RenderTarget | BindFlags.ShaderResource, ResourceUsage.Default));
+        using var targetView = new RenderTargetView(device, target);
+        using var staging = new Texture2D(device, Describe(BindFlags.None, ResourceUsage.Staging, CpuAccessFlags.Read));
+
+        var tint = new[] { 0.5f, 0.5f, 0.5f, 1f };
+        using var constants = new Buffer(device,
+                                         new BufferDescription
+                                             {
+                                                 SizeInBytes = 16,
+                                                 BindFlags = BindFlags.ConstantBuffer,
+                                                 Usage = ResourceUsage.Dynamic,
+                                                 CpuAccessFlags = CpuAccessFlags.Write,
+                                             },
+                                         System.Runtime.InteropServices.MemoryMarshal.AsBytes<float>(tint));
+
+        using var sampler = new SamplerState(device, new SamplerStateDescription { Filter = Filter.MinMagMipPoint, MaximumLod = float.MaxValue });
+        using var vertexShader = new T3.Graphics.Compat.VertexShader(device, backend.CreateShader(ShaderStage.Vertex, VertexSpirv, "main", [], "vs"));
+        using var pixelShader = new T3.Graphics.Compat.PixelShader(device, backend.CreateShader(ShaderStage.Pixel, PixelSpirv, "main", PixelBindings,
+                                                                                                "ps"));
+        using var rasterizer = new RasterizerState(device, new RasterizerStateDescription { FillMode = FillMode.Solid, CullMode = CullMode.None });
+        using var depthStencil = new DepthStencilState(device, new DepthStencilStateDescription { IsDepthEnabled = false });
+
+        device.BeginFrame();
+        context.OutputMerger.SetTargets(targetView);
+        context.OutputMerger.SetDepthStencilState(depthStencil);
+        context.Rasterizer.State = rasterizer;
+        context.Rasterizer.SetViewport(0, 0, Size, Size);
+        context.ClearRenderTargetView(targetView, new Vector4(0, 0, 1, 1));
+        context.VertexShader.Set(vertexShader);
+        context.PixelShader.Set(pixelShader);
+        context.PixelShader.SetShaderResource(0, sourceView);
+        context.PixelShader.SetSampler(0, sampler);
+        context.PixelShader.SetConstantBuffer(0, constants);
+        context.Draw(3, 0);
+
+        context.ClearRenderTargetView(targetView, new Vector4(0, 1, 0, 1));
+        context.Rasterizer.SetViewport(0, 0, Size / 2, Size);
+        context.Draw(3, 0);
+        device.EndFrame();
+
+        device.BeginFrame();
+        context.CopyResource(target, staging);
+        var pixels = ReadPixels(context, staging);
+        device.EndFrame();
+
+        for (var y = 0; y < Size; y++)
+        {
+            for (var x = 0; x < Size; x++)
+            {
+                var i = (y * Size + x) * 4;
+
+                if (x < Size / 2)
+                {
+                    Assert.InRange(pixels[i], 95, 105);
+                    Assert.InRange(pixels[i + 1], 45, 55);
+                }
+                else
+                {
+                    Assert.Equal(0, pixels[i]);
+                    Assert.Equal(255, pixels[i + 1]);
+                    Assert.Equal(0, pixels[i + 2]);
+                }
+            }
+        }
+
+        AssertValidationStayedQuiet();
+    }
+
     private static byte[] ReadPixels(DeviceContext context, Texture2D staging)
     {
         var box = context.MapSubresource(staging, 0, MapMode.Read, MapFlags.None);

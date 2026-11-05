@@ -102,7 +102,7 @@ If the build fails, fix the build error before continuing. Do not hand off a bro
    <2-4 lines: what was happening, what the fix does, any caveats.>
    ```
 
-   Examples of `<area>`: `Core`, `Editor`, `Operators`, `Gui`. Match the project root the file lives in. Do **not** include `Co-Authored-By` unless the user has asked for it project-wide — check `git log` for the recent convention.
+   Examples of `<area>`: `Core`, `Editor`, `Operators`, `Gui`. Match the project root the file lives in. No `Co-Authored-By` trailer (see "Commit messages" in `.agentic/AGENT_INSTRUCTIONS.md`).
 3. State the next issue from the list (short-ID + title) so the user knows what's queued.
 
 ### 2h. Pause for the user

@@ -11,6 +11,8 @@ namespace T3.Graphics.Vulkan;
 internal sealed unsafe class VulkanTexture(VulkanBackend backend, VkImage image, VkDeviceMemory memory, TextureDescription description, string? label)
     : GpuTexture(description, label)
 {
+    internal readonly record struct DeferredClear(bool IsSet, VkImageSubresourceRange Range, VkClearValue Value);
+
     internal readonly VkImage Image = image;
     internal readonly VkDeviceMemory Memory = memory;
     internal readonly VkFormat VulkanFormat = VulkanConvert.ToVulkan(description.Format);
@@ -24,6 +26,13 @@ internal sealed unsafe class VulkanTexture(VulkanBackend backend, VkImage image,
 
     internal VkPipelineStageFlags2 LastStage = VkPipelineStageFlags2.TopOfPipe;
     internal VkAccessFlags2 LastAccess = VkAccessFlags2.None;
+
+    /// <summary>
+    /// A clear that is not recorded yet. The next render pass that covers its whole range clears on load instead,
+    /// which is far cheaper than a transfer clear on GPUs with compressed render targets; any other use records
+    /// it first.
+    /// </summary>
+    internal DeferredClear PendingClear;
 
     /// <summary>
     /// Set instead of <see cref="Image"/> for upload and readback textures. D3D11's staging textures are only

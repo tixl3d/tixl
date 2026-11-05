@@ -10,8 +10,13 @@ namespace T3.Graphics.Vulkan;
 /// </summary>
 internal static unsafe class VulkanBarriers
 {
+    /// <param name="discardContents">
+    /// Transitions from the undefined layout: the old contents may be dropped, so the driver can skip decompressing
+    /// them. Only for a use that overwrites the whole image.
+    /// </param>
     internal static void TransitionImage(VulkanBackend backend, VkCommandBuffer commandBuffer, VulkanTexture texture,
-                                         VkImageLayout layout, VkPipelineStageFlags2 stage, VkAccessFlags2 access)
+                                         VkImageLayout layout, VkPipelineStageFlags2 stage, VkAccessFlags2 access,
+                                         bool discardContents = false)
     {
         if (texture.Image.IsNull)
             return;
@@ -25,7 +30,7 @@ internal static unsafe class VulkanBarriers
                                                 srcAccessMask = texture.LastAccess,
                                                 dstStageMask = stage,
                                                 dstAccessMask = access,
-                                                oldLayout = texture.Layout,
+                                                oldLayout = discardContents ? VkImageLayout.Undefined : texture.Layout,
                                                 newLayout = layout,
                                                 srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
                                                 dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
@@ -99,6 +104,10 @@ internal static unsafe class VulkanBarriers
     {
         if (texture.Image.IsNull)
             return false;
+
+        // The waiting clear has to be recorded before the use, which needs a barrier of its own.
+        if (texture.PendingClear.IsSet)
+            return true;
 
         var isWrite = (access & WriteAccess) != 0;
         return texture.Layout != layout || isWrite || (texture.LastAccess & WriteAccess) != 0;
