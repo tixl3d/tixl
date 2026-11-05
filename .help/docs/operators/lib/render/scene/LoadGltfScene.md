@@ -4,6 +4,8 @@
 
 Experimental op for loading complex scene setups using the glTF Format. Scenes have to be connected to a [DrawScene]-Op to be rendered.
 This Operator supports *.glb and *.gltf + .bin + textures.
+Separate metallic/roughness and occlusion maps are combined for PBR rendering.
+The combined map uses the largest width and height across both sources.
 
 
 
