@@ -89,11 +89,8 @@ internal static class TimelineToolbar
             TimeControls.DrawIdleMotionToggle(playback);
             ImGui.SameLine();
             TimeControls.DrawIoIndicator();
-            if (FrameStats.Last.HasAnimatedParameters)
-            {
-                ImGui.SameLine();
-                TimeControls.DrawPinToggle();
-            }
+            ImGui.SameLine();
+            TimeControls.DrawPinToggle();
 
             ImGui.EndGroup();
             var leftGroupEnd = ImGui.GetItemRectMax().X;

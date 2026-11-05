@@ -65,7 +65,6 @@ internal static class FrameStats
     {
         internal bool HasKeyframesBeforeCurrentTime;
         internal bool HasKeyframesAfterCurrentTime;
-        internal bool HasAnimatedParameters => HasKeyframesBeforeCurrentTime || HasKeyframesAfterCurrentTime;
         internal bool IsItemContextMenuOpen;
         internal bool IsModalDialogOpen;
         internal bool OpenedPopupCapturedMouse;
