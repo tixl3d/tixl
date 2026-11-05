@@ -112,7 +112,7 @@ internal static class RecordingSession
         {
             var addCmd = new AddSymbolChildCommand(compositionOp.Symbol, _loadDataClipSymbolId)
                              {
-                                 PosOnCanvas = FindFreeCanvasPositionForClip(compositionOp.Symbol, _loadDataClipSymbolId),
+                                 PosOnCanvas = GraphUtils.FindPositionForNewClipOp(compositionOp.GetSymbolUi(), _loadDataClipSymbolId),
                              };
             _activeMacro.AddAndExecCommand(addCmd);
             _activeDataClipChildId = addCmd.AddedChildId;
@@ -129,7 +129,7 @@ internal static class RecordingSession
             var rowForAudio = captureIo ? audioLayer : dataLayer;
             var addAudioCmd = new AddSymbolChildCommand(compositionOp.Symbol, _audioClipSymbolId)
                                   {
-                                      PosOnCanvas = FindFreeCanvasPositionForClip(compositionOp.Symbol, _audioClipSymbolId),
+                                      PosOnCanvas = GraphUtils.FindPositionForNewClipOp(compositionOp.GetSymbolUi(), _audioClipSymbolId),
                                   };
             _activeMacro.AddAndExecCommand(addAudioCmd);
             _activeAudioClipChildId = addAudioCmd.AddedChildId;
@@ -445,57 +445,6 @@ internal static class RecordingSession
                 break;
             }
         }
-    }
-
-    /// <summary>
-    /// Canvas position for a fresh recording-clip op of type <paramref name="anchorSymbolId"/>.
-    /// Anchors below the lowest existing op of the same type (so successive recordings stay in a
-    /// tidy column), re-centres on the viewport when that anchor is off-screen, then hands the
-    /// preferred spot to <see cref="GraphUtils.FindFreePosition"/> for collision-avoidance —
-    /// without that last step, repeated recordings that all re-centre to the same viewport pile
-    /// up on top of each other.
-    /// </summary>
-    private static Vector2 FindFreeCanvasPositionForClip(Symbol compositionSymbol, Guid anchorSymbolId)
-    {
-        const float spacingY = 80f;
-        const float defaultX = 0f;
-        const float defaultY = 200f;
-
-        var preferred = new Vector2(defaultX, defaultY);
-
-        if (!SymbolUiRegistry.TryGetSymbolUi(compositionSymbol.Id, out var compositionUi))
-            return preferred;
-
-        var maxY = float.NegativeInfinity;
-        var anchorX = defaultX;
-        foreach (var (childId, childUi) in compositionUi.ChildUis)
-        {
-            if (!compositionSymbol.Children.TryGetValue(childId, out var symbolChild))
-                continue;
-            if (symbolChild.Symbol.Id != anchorSymbolId)
-                continue;
-
-            if (childUi.PosOnCanvas.Y > maxY)
-            {
-                maxY = childUi.PosOnCanvas.Y;
-                anchorX = childUi.PosOnCanvas.X;
-            }
-        }
-
-        if (!float.IsNegativeInfinity(maxY))
-            preferred = new Vector2(anchorX, maxY + spacingY);
-
-        // Re-centre on the visible canvas when the stack-anchor candidate is off-screen,
-        // so a new clip doesn't land far outside the viewport where it looks like nothing
-        // happened.
-        if (ProjectView.Focused?.GraphView is ScalableCanvas canvas)
-        {
-            var visible = canvas.GetVisibleCanvasArea();
-            if (visible.GetWidth() > 0 && visible.GetHeight() > 0 && !visible.Contains(preferred))
-                preferred = visible.GetCenter();
-        }
-
-        return GraphUtils.FindFreePosition(compositionUi, preferred, SymbolUi.Child.DefaultOpSize);
     }
 
     /// <summary>
