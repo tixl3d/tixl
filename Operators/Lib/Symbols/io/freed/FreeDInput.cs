@@ -205,7 +205,7 @@ internal sealed class FreeDInput : Instance<FreeDInput>, IStatusProvider, ICusto
     private static void UpdateGpuBuffer(ref BufferWithViews? buffer, Point[] array)
     {
         var num = array.Length;
-        if (num != (buffer?.Buffer.Description.SizeInBytes / Point.Stride ?? 0))
+        if (num != (buffer?.Buffer?.Description.SizeInBytes / Point.Stride ?? 0))
         {
             buffer?.Dispose();
             buffer = new BufferWithViews();

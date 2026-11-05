@@ -236,7 +236,7 @@ namespace Lib.io.posistage
         private static void UpdateGpuBuffer(ref BufferWithViews? buffer, PsnPoint[] array)
         {
             int count = array.Length;
-            if (count != (buffer?.Buffer.Description.SizeInBytes / PsnPoint.Stride ?? 0))
+            if (count != (buffer?.Buffer?.Description.SizeInBytes / PsnPoint.Stride ?? 0))
             {
                 buffer?.Dispose();
                 buffer = new BufferWithViews();
