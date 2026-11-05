@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using T3.Core.Logging;
+using T3.Core.Resource.Assets;
 using T3.Core.Settings;
 using T3.Core.SystemUi;
 using T3.Core.Utils;
@@ -264,6 +265,38 @@ public abstract partial class ShaderCompiler
         // Unsalted for FXC, so existing DXBC caches and those shipped with exports stay valid.
         var target = Instance.CacheTarget;
         return target.Length == 0 ? hash : target.ComputeStableHash(hash);
+    }
+
+    /// <summary>
+    /// Folds the content of all nested includes into the cache key, so editing a shared include
+    /// (e.g. a struct definition) invalidates every shader that uses it.
+    /// </summary>
+    private static ulong AddIncludedSourcesToHash(string sourceCode, IResourceConsumer? consumer, ulong hash, HashSet<string> visitedPaths)
+    {
+        foreach (var include in GetIncludesFrom(sourceCode))
+        {
+            if (!AssetRegistry.TryResolveAddress("Lib:shaders/" + include, consumer, out var absolutePath, out _))
+                continue;
+
+            if (!visitedPaths.Add(absolutePath))
+                continue;
+
+            string includeSource;
+            try
+            {
+                includeSource = File.ReadAllText(absolutePath);
+            }
+            catch (Exception)
+            {
+                // The compiler reports unreadable includes
+                continue;
+            }
+
+            hash = includeSource.ComputeStableHash(hash);
+            hash = AddIncludedSourcesToHash(includeSource, consumer, hash, visitedPaths);
+        }
+
+        return hash;
     }
 
     /// <summary>

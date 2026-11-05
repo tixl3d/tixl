@@ -44,6 +44,7 @@ public abstract partial class ShaderCompiler
             args.EntryPoint = "main";
 
         var hash = ComputeStableHash(args.SourceCode, args.EntryPoint, typeof(TShader).Name);
+        hash = AddIncludedSourcesToHash(args.SourceCode, consumer, hash, []);
         bool success = false;
         bool loadedFromCache = false;
         byte[]? compiledBlob;
