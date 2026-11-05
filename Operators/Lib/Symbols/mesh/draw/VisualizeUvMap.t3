@@ -131,7 +131,7 @@
         {
           "Id": "35a18838-b095-431f-a3af-2dba81dcc16f"/*ForceColorUpdate*/,
           "Type": "System.Boolean",
-          "Value": true
+          "Value": false
         },
         {
           "Id": "7db56b09-350e-4831-9620-fe68e0617b86"/*Scale*/,

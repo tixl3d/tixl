@@ -145,7 +145,7 @@ internal sealed partial class SettingsWindow : Window
                                                           "Graph Style",
                                                           """
                                                           Allows to switch between different graphical representations.
-                                                          This also will affect usability and performance
+                                                          This also will affect usability and performance. To make this change effective, you need to go back to the projects hub and open your project again. 
                                                           """, UserSettings.Defaults.GraphStyle
                                                          );
 
@@ -335,7 +335,8 @@ internal sealed partial class SettingsWindow : Window
 
                     changed |= FormInputs.AddCheckBox("Suspend rendering when hidden",
                                                       ref UserSettings.Config.SuspendRenderingWhenHidden,
-                                                      "Suspend rendering and update when Tooll's editor window is minimized. This will reduce energy consumption significantly.",
+                                                      "Suspend rendering and update when Tooll's editor window is minimized. This will reduce energy consumption significantly.\n" +
+                                                      "Not applied during playback or while outputs are shown on other displays.",
                                                       UserSettings.Defaults.SuspendRenderingWhenHidden);
 
                     FormInputs.AddVerticalSpace();
@@ -667,6 +668,11 @@ internal sealed partial class SettingsWindow : Window
                         Log.Gated.VideoRenderEnabled = UserSettings.Config.LogVideoRenderingDetails;
                         changed = true;
                     }
+
+                    changed |= FormInputs.AddCheckBox("Show Presentation Mode Changes",
+                                                      ref UserSettings.Config.LogPresentationModeChanges,
+                                                      "Logs when Windows switches the main window between DWM composition, hardware overlay and independent flip. Frame pacing differs between these modes, so this helps when frame intervals jitter.",
+                                                      UserSettings.Defaults.LogPresentationModeChanges);
 
                     FormInputs.AddVerticalSpace();
                     break;

@@ -231,6 +231,14 @@
       }
     },
     {
+      "ChildId": "7bdee669-caa1-4350-a38e-bb2733117c66",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToInt",
+      "Position": {
+        "X": 1355.0889,
+        "Y": 1687.9583
+      }
+    },
+    {
       "ChildId": "8137d62a-98c5-4a31-81f4-687e43405843",
       "SymbolName": "Lib.mesh._._AssembleMeshBuffers",
       "Position": {
@@ -292,14 +300,6 @@
       "Position": {
         "X": 935.0967,
         "Y": 1732.3811
-      }
-    },
-    {
-      "ChildId": "b4a84ba9-a1fe-4d40-8a27-b5cb9565663c",
-      "SymbolName": "Lib.mesh.modify.RecomputeNormals",
-      "Position": {
-        "X": 1668.6868,
-        "Y": 1051.6879
       }
     },
     {

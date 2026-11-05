@@ -48,6 +48,10 @@ public sealed class Surface
         /// </summary>
         public Vector2[] Quad = new Vector2[4];
 
+        /// <summary>The patch this pin is linked to, whose quad it takes; empty for a pin aimed by itself. A surface
+        /// dropped on a patch links to it, and aiming the pin by hand ends the link.</summary>
+        public Guid PatchId;
+
 /// <summary>
         /// Where one of the surface's reference points sits on this output, in the same 0..1 canvas space.
         /// <para><see cref="IsAimed"/> means the user put it there and the pin is solved to project the point
@@ -62,6 +66,12 @@ public sealed class Surface
         /// <summary>Where each of the surface's reference points sits on this output, by point id.</summary>
         public Dictionary<Guid, PointAim> PointAims = new();
 
+        /// <summary>The quad as it was when the first reference point was aimed, which resetting the alignment restores. Null if none was aimed since.</summary>
+        public Vector2[]? QuadBeforeAligning;
+
+        /// <summary>The mode that went with <see cref="QuadBeforeAligning"/>: solving a pin turns a fill into a corner pin.</summary>
+        public MappingModes ModeBeforeAligning;
+
         /// <summary>Whether the quad covers the whole canvas by definition rather than by where it was dragged.</summary>
         public bool IsFilling => Mode == MappingModes.Fill;
 
@@ -69,12 +79,14 @@ public sealed class Surface
         public void PromoteToCornerPin()
         {
             Mode = MappingModes.CornerPin;
+            PatchId = Guid.Empty;
         }
 
         /// <summary>Takes the whole canvas, dropping the corners it was placed at.</summary>
         public void FillCanvas()
         {
             Mode = MappingModes.Fill;
+            PatchId = Guid.Empty;
             Quad = OutputDefinition.FullCanvasQuad();
         }
 
@@ -92,6 +104,9 @@ public sealed class Surface
             writer.WriteObject("OutputId", OutputId);
             writer.WriteString("Mode", Mode.ToString());
             writer.WriteQuad("Quad", Quad);
+            if (PatchId != Guid.Empty)
+                writer.WriteObject("PatchId", PatchId);
+
             if (PointAims.Count > 0)
             {
                 writer.WritePropertyName("PointAims");
@@ -108,6 +123,12 @@ public sealed class Surface
                 writer.WriteEndArray();
             }
 
+            if (QuadBeforeAligning != null)
+            {
+                writer.WriteQuad("QuadBeforeAligning", QuadBeforeAligning);
+                writer.WriteString("ModeBeforeAligning", ModeBeforeAligning.ToString());
+            }
+
             writer.WriteEndObject();
         }
 
@@ -120,7 +141,16 @@ public sealed class Surface
                                              ? mode
                                              : MappingModes.CornerPin,
                                   Quad = OutputJson.ReadQuad(token["Quad"]),
+                                  PatchId = OutputJson.ReadGuid(token["PatchId"]),
                               };
+
+            if (token["QuadBeforeAligning"] != null)
+            {
+                mapping.QuadBeforeAligning = OutputJson.ReadQuad(token["QuadBeforeAligning"]);
+                mapping.ModeBeforeAligning = Enum.TryParse<MappingModes>(token.ReadValueSafe("ModeBeforeAligning", string.Empty), out var modeBeforeAligning)
+                                                 ? modeBeforeAligning
+                                                 : MappingModes.CornerPin;
+            }
 
             // "PointAims", not the old "PointTargets": those held canvas pixels, which read as fractions would
             // put every mark a thousand canvases away. Dropping them re-seeds the marks from the pin.
@@ -148,6 +178,10 @@ public sealed class Surface
 
         /// <summary>Corners in reference-image pixels, same winding as <see cref="OutputMapping.Quad"/>.</summary>
         public Vector2[] Quad = new Vector2[4];
+
+        /// <summary>The patch this pin is linked to, whose quad it takes; empty for a pin aimed by itself. A surface
+        /// dropped on a patch links to it, and aiming the pin by hand ends the link.</summary>
+        public Guid PatchId;
 
         public List<Annotation> Annotations = [];
 

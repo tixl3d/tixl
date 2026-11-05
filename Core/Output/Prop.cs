@@ -19,6 +19,14 @@ public sealed class Prop
     public Vector3 Position;
     public float HeightInMeters = 1.70f;
 
+    /// <summary>The image it is drawn with, relative to the editor's props folder. Empty = the editor's first one.</summary>
+    public string ImagePath = string.Empty;
+
+    /// <summary>Faint by default, so a figure gives a sense of scale without covering what it stands in front of.</summary>
+    public const float DefaultOpacity = 0.3f;
+
+    public float Opacity = DefaultOpacity;
+
     public void WriteToJson(JsonTextWriter writer)
     {
         writer.WriteStartObject();
@@ -26,6 +34,10 @@ public sealed class Prop
         writer.WriteString("Kind", Kind);
         writer.WriteVector3("Position", Position);
         writer.WriteValue("HeightInMeters", HeightInMeters);
+        if (!string.IsNullOrEmpty(ImagePath))
+            writer.WriteString("ImagePath", ImagePath);
+
+        writer.WriteValue("Opacity", Opacity);
         writer.WriteEndObject();
     }
 
@@ -37,6 +49,8 @@ public sealed class Prop
                        Kind = token.ReadValueSafe("Kind", Kinds.Person) ?? Kinds.Person,
                        Position = OutputJson.ReadVector3(token["Position"]),
                        HeightInMeters = token.ReadValueSafe("HeightInMeters", 1.70f),
+                       ImagePath = token.ReadValueSafe("ImagePath", string.Empty) ?? string.Empty,
+                       Opacity = token.ReadValueSafe("Opacity", DefaultOpacity),
                    };
     }
 }

@@ -28,74 +28,62 @@ struct vsOutput
 Texture2D<float4> Image : register(t0);
 sampler texSampler : register(s0);
 
+// Distance between two taps (in uv units)
+static const float Steps = 0.002;
+
+static const float ThresholdSoftness = 0.25;
+
+float4 SampleStreak(float2 uv, float2 offset)
+{
+    float4 s = Image.SampleLevel(texSampler, uv + offset, Quality);
+    float sum = s.r + s.g + s.b;
+    float t = Threshold * 3.0;
+    return s * smoothstep(t, t + ThresholdSoftness, sum);
+}
 
 float4 psMain(vsOutput input) : SV_TARGET
 {
     float2 uv = input.texCoord;
-    
+
     float width, height;
     Image.GetDimensions(width, height);
 
-    const float range = 0.3; // Length of glow streaks
-    const float steps = 0.002; // Number of texture samples / 2
+    int mode = (int)round(GlareModes);
+    bool diagonals = mode == 0 || mode == 2;
+    bool horizontal = mode == 1 || mode == 2 || mode == 3;
+    bool vertical = mode == 1 || mode == 2 || mode == 4;
 
-    float4 streaksColor = float4(0.0,0.0,0.0,1.0);
-    // (Composite > 0.5) ? Image.Sample(texSampler, uv )
-    //                                       : float4(0.0,0.0,0.0,1.0);
-   
-    
-    for (float i = -Range; i < Range; i += steps) {
-    
-        float falloff = 1.0 - abs(i / Range);
-    
-        float4 blur = Image.SampleLevel(texSampler, uv + i, Quality);
+    float range = max(Range, Steps);
+    float2 asp = height / float2(width, height);
 
-        if(GlareModes == 0  && GlareModes < 3 || GlareModes == 2 && GlareModes < 3)
+    // Taps sit on a fixed grid centered on the pixel (k * Steps), so changing
+    // Range only adds or removes taps at the far end, where falloff is ~0.
+    int count = (int)(range / Steps);
+
+    float4 streaksColor = float4(0.0, 0.0, 0.0, 1.0);
+
+    for (int k = -count; k <= count; k++)
+    {
+        float i = k * Steps;
+        float falloff = 1.0 - abs(i) / range;
+        float weight = falloff * Steps * Brightness;
+
+        if (diagonals)
         {
-            //Diagonal 1
-            if (blur.r + blur.g + blur.b > Threshold * 3.0)
-            {
-                streaksColor += blur * falloff * steps * Brightness;
-            }
-            
-            //Diagonal 2
-            blur = Image.SampleLevel(texSampler, uv + float2(i, -i), Quality);
-            if (blur.r + blur.g + blur.b > Threshold * 3.0)
-            {
-                streaksColor += blur * falloff * steps * Brightness;
-            }
+            streaksColor += SampleStreak(uv, i * asp) * weight;
+            streaksColor += SampleStreak(uv, float2(i, -i) * asp) * weight;
         }
-        if(GlareModes == 1 || GlareModes == 2 || GlareModes > 2 ){  
-
-            if(GlareModes == 3 || GlareModes == 1 || GlareModes == 2)
-            {
-                //Horizontal 
-                blur = Image.SampleLevel(texSampler, uv + float2(i, 0), Quality);
-                if (blur.r + blur.g + blur.b > Threshold * 3.0)
-                {
-                    streaksColor += blur * falloff * steps * Brightness;
-                }
-            }
-           
-             if(GlareModes == 4 || GlareModes == 1 || GlareModes == 2)
-            {
-            //Vertical
-                blur = Image.SampleLevel(texSampler, uv + float2(0, i*2), Quality);
-                if (blur.r + blur.g + blur.b > Threshold * 3.0)
-                {
-                    streaksColor += blur * falloff * steps * Brightness;
-                }
-            }
+        if (horizontal)
+        {
+            streaksColor += SampleStreak(uv, float2(i * 1.5, 0) * asp) * weight;
         }
-       
+        if (vertical)
+        {
+            streaksColor += SampleStreak(uv, float2(0, i * 1.5) * asp) * weight;
+        }
     }
-    
 
-    //float4 c= lerp(Fill, Background,  dBiased);
     float4 orgColor = Image.Sample(texSampler, uv) * OriginalColor;
-    //float a = clamp(orgColor.a + streaksColor.a - orgColor.a*streaksColor.a, 0,1);
 
-    return  BlendColors(orgColor, streaksColor * Color, (int)BlendMode);
-
-    //return (streaksColor);
+    return BlendColors(orgColor, streaksColor * Color, (int)BlendMode);
 }

@@ -275,7 +275,7 @@
       "SymbolName": "Lib.image.color.ToneMapping",
       "InputValues": [
         {
-          "Id": "b3ac35c2-7f59-49fb-a4ad-84dc5a8c3841"/*Exposure*/,
+          "Id": "b3ac35c2-7f59-49fb-a4ad-84dc5a8c3841"/*Scale*/,
           "Type": "System.Single",
           "Value": 2.0
         }
@@ -1520,7 +1520,7 @@
       "SymbolName": "Lib.image.color.ToneMapping",
       "InputValues": [
         {
-          "Id": "b3ac35c2-7f59-49fb-a4ad-84dc5a8c3841"/*Exposure*/,
+          "Id": "b3ac35c2-7f59-49fb-a4ad-84dc5a8c3841"/*Scale*/,
           "Type": "System.Single",
           "Value": 2.0
         }

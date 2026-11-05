@@ -93,7 +93,8 @@ internal sealed class PlayVideo : Instance<PlayVideo>, IStatusProvider, IAudioSo
         if (!isDisposing)
             return;
 
-        VideoPlaybackEngine.Instance.ReleaseStream(_streamId);
+        // Not Instance: an op that never played must not create the engine, possibly after its assembly context unloaded.
+        VideoPlayback.Engine?.ReleaseStream(_streamId);
     }
 
     public IStatusProvider.StatusLevel GetStatusLevel()

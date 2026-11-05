@@ -8,8 +8,14 @@
 cbuffer EmitParameter : register(b0)
 {
     float Seed;
-    float UseVertexSelection;
+    float ExtraAttributes;
 };
+
+// Mirrors ExtraAttributeModes in PointsOnMesh.cs (values are 1-based, 0 = Default).
+static const uint ExtraAttributeTexCoord = 1;
+static const uint ExtraAttributeTexCoord2 = 2;
+static const uint ExtraAttributeVertexSelectF1 = 3;
+static const uint ExtraAttributeVertexSelectF2 = 4;
 
 uint wang_hash(in out uint seed)
 {
@@ -44,43 +50,28 @@ void main(uint3 i : SV_DispatchThreadID)
     ResultPoints.GetDimensions(pointCount, stride);
     FaceIndices.GetDimensions(faceCount, stride);
 
-    if (i.x >= pointCount)
+    if (i.x >= pointCount || faceCount == 0)
         return; 
 
-
-    uint rng_state = (i.x * (uint)(Seed * 10317));
+    // The point index has to enter the hash; using the seed alone gives every point the same state.
+    // Raw float bits keep negative and small seed changes distinguishable.
+    uint rng_state = asuint(Seed) + i.x * 0x9E3779B9u;
     float xi = (float(wang_hash(rng_state)) * (1.0 / 4294967296.0));
 
+    // CDFs[] holds normalized cumulative face areas: face k owns the range (cdf[k-1], cdf[k]].
+    // Binary search for the first face whose cumulative area exceeds xi.
     uint left = 0;
-    uint width = faceCount -2;
-    uint right = width;
-    uint steps = log2(width) + 1;
-    uint cdfIndex;
-    for (uint j = 0; j < steps; ++j)
+    uint right = faceCount - 1;
+    while (left < right)
     {
-        uint middle = (right + left) / 2 ; 
-        float cdfSegStart = CDFs[middle].cdf;
-        float cdfSegEnd = CDFs[middle + 1].cdf;
-        if (right == left || (cdfSegStart <= xi  && cdfSegEnd > xi))
-        {
-            cdfIndex = middle +1;
-        }
-        else {
-            if (xi < cdfSegStart)
-            {
-                right = middle;
-            }
-            else
-            {
-                left = middle +1;
-            }    
-        }
+        uint middle = (left + right) / 2;
+        if (xi < CDFs[middle].cdf)
+            right = middle;
+        else
+            left = middle + 1;
     }
 
-
-    uint faceIndex = cdfIndex;
-    if (faceIndex >= (uint)faceCount)
-        return;
+    uint faceIndex = left;
 
     float xi1 = (float(wang_hash(rng_state)) * (1.0 / 4294967296.0));
     float xi2 = float(wang_hash(rng_state)) * (1.0 / 4294967296.0);
@@ -118,15 +109,46 @@ void main(uint3 i : SV_DispatchThreadID)
     p.Rotation = normalize(qFromMatrix3Precise(transpose(orientationDest)));
     p.FX1 = 1;
 
-
-
     float2 uv = Vertices[fIndices[0]].TexCoord * u 
             + Vertices[fIndices[1]].TexCoord * v
             + Vertices[fIndices[2]].TexCoord * w;
 
+    uint extraAttributeMode = (uint)(ExtraAttributes + 0.5);
+    if (extraAttributeMode == ExtraAttributeTexCoord)
+    {
+        p.FX1 = uv.x;
+        p.FX2 = uv.y;
+    }
+    else if (extraAttributeMode == ExtraAttributeTexCoord2)
+    {
+        float2 uv2 = Vertices[fIndices[0]].TexCoord2 * u
+                   + Vertices[fIndices[1]].TexCoord2 * v
+                   + Vertices[fIndices[2]].TexCoord2 * w;
+        p.FX1 = uv2.x;
+        p.FX2 = uv2.y;
+    }
+    else if (extraAttributeMode == ExtraAttributeVertexSelectF1
+          || extraAttributeMode == ExtraAttributeVertexSelectF2)
+    {
+        float selected = Vertices[fIndices[0]].Selected * u
+                       + Vertices[fIndices[1]].Selected * v
+                       + Vertices[fIndices[2]].Selected * w;
+        if (extraAttributeMode == ExtraAttributeVertexSelectF1)
+        {
+            p.FX1 = selected;
+        }
+        else
+        {
+            p.FX2 = selected;
+        }
+    }
+
     float4 color = ColorMap.SampleLevel(texSampler, uv* float2(1, -1), 0);
     ResultColors[i.x] = color;
     p.Color = color;
+    p.Color.rgb*=Vertices[fIndices[0]].ColorRGB * u
+    + Vertices[fIndices[1]].ColorRGB * v
+    + Vertices[fIndices[2]].ColorRGB * w; 
     ResultPoints[i.x] = p;
 }
 

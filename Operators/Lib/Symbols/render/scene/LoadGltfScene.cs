@@ -790,13 +790,13 @@ public class LoadGltfScene : Instance<LoadGltfScene>
         if (metallicRoughnessTexture != null)
         {
             width = Math.Max(width, metallicRoughnessTexture.Description.Width);
-            height = Math.Max(height, metallicRoughnessTexture.Description.Width);
+            height = Math.Max(height, metallicRoughnessTexture.Description.Height);
         }
 
         if (occlusionTexture != null)
         {
             width = Math.Max(width, occlusionTexture.Description.Width);
-            height = Math.Max(height, occlusionTexture.Description.Width);
+            height = Math.Max(height, occlusionTexture.Description.Height);
         }
 
         metallicRoughnessSrv ??= PbrMaterial.BlackPixelSrv;

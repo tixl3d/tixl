@@ -7,7 +7,8 @@ namespace Lib.render.output;
 /// <summary>
 /// The active setup's physical surfaces as geometry in the stage: one quad per surface at its stage pose and
 /// real size — and for a floor that belongs to a floor plan, the plan's footprint itself, so an L-shaped room
-/// gets an L-shaped floor. TexCoord follows UvMode; TexCoord2 is where the surface lands on an output's canvas,
+/// gets an L-shaped floor. A region with a corner pin of its own is a quad too: it has its own place on a canvas,
+/// which is how a stack of screens gets painted without its parent being mapped at all. TexCoord follows TexCoordSource; TexCoord2 is where the surface lands on an output's canvas,
 /// so texturing with that output's composite (or its pixel map) puts every wall's picture on its wall.
 /// </summary>
 [Guid("98aac8ba-480c-4a28-8391-23c7d1ae11d9")]
@@ -43,8 +44,8 @@ internal sealed class StageGeometry : Instance<StageGeometry>, IStatusProvider
             return;
         }
 
-        var outputId = OutputRef.GetValue(context);
-        var uvMode = (UvModes)UvMode.GetValue(context);
+        var canvasId = Canvas.GetValue(context);
+        var texCoordSource = (TexCoordSources)TexCoordSource.GetValue(context);
         var uvScale = MathF.Max(UvScale.GetValue(context), 0.001f);
 
         // Sizes first: each wall is a quad, a plan floor is its triangulated footprint.
@@ -68,9 +69,10 @@ internal sealed class StageGeometry : Instance<StageGeometry>, IStatusProvider
             }
             else
             {
-                pointCount += 4;
-                faceCount += 1;
-                cornerCount += 4;
+                var cells = TryGetPhotoMap(setup, surface, texCoordSource, out var unusedMap) ? PhotoGridCells : 1;
+                pointCount += 4 * cells * cells;
+                faceCount += cells * cells;
+                cornerCount += 4 * cells * cells;
             }
         }
 
@@ -100,18 +102,19 @@ internal sealed class StageGeometry : Instance<StageGeometry>, IStatusProvider
             // Where the surface lands on the canvas: its mapping on the output, else a patch of the same name on
             // that output — the pixel-map workflow, where patches are typed from the venue's sheet and named like
             // the walls — else its first mapping anywhere. Read into the TL, TR, BR, BL scratch either way.
-            var hasCanvasQuad = TryGetCanvasQuad(setup, surface, outputId, _canvasQuad);
+            var hasCanvasQuad = TryGetCanvasQuad(setup, surface, canvasId, _canvasQuad);
             if (hasCanvasQuad)
             {
                 placedCount++;
             }
-            else
+            else if (!HasRegionOnCanvas(setup, surface) && setup.FindSurface(canvasId) == null)
             {
                 unplacedCount++;
                 firstUnplacedName ??= surface.Name;
             }
 
             var faceStart = face;
+            var hasPhoto = TryGetPhotoMap(setup, surface, texCoordSource, out var surfaceToPhoto);
             var plan = FindClosedPlanFloor(setup, surface);
             if (plan != null)
             {
@@ -134,7 +137,9 @@ internal sealed class StageGeometry : Instance<StageGeometry>, IStatusProvider
                         _geometry.CornerPointIndices[corner] = pointBase + vertex;
                         normals.Values[corner] = Vector3.UnitY;
                         var canvasUv = hasCanvasQuad ? BilinearCanvas(_canvasQuad, inRect.X, 1 - inRect.Y) : new Vector2(inRect.X, 1 - inRect.Y);
-                        texCoords.Values[corner] = TexCoordFor(uvMode, uvScale, position, Vector3.UnitY, inRect, canvasUv);
+                        texCoords.Values[corner] = hasPhoto
+                                                       ? surfaceToPhoto.TransformPoint(inRect)
+                                                       : TexCoordFor(texCoordSource, uvScale, position, Vector3.UnitY, inRect, canvasUv);
                         canvasCoords.Values[corner] = hasCanvasQuad ? canvasUv : OffCanvas;
                         corner++;
                     }
@@ -142,27 +147,36 @@ internal sealed class StageGeometry : Instance<StageGeometry>, IStatusProvider
             }
             else
             {
-                var pose = surface.Placement?.Pose ?? Pose.Identity;
-                var world = pose.ToWorldMatrix();
+                GetStageRect(setup, surface, out var world, out var min, out var max, out var lift);
                 var normal = Vector3.Normalize(Vector3.TransformNormal(Vector3.UnitZ, world));
-                var min = -surface.AnchorInMeters;
-                var max = min + surface.SizeInMeters;
 
-                _geometry.FaceCornerOffsets[face++] = corner;
-                // Counter-clockwise seen from the front: bottom-left, bottom-right, top-right, top-left.
-                for (var c = 0; c < 4; c++)
+                // Texture coordinates interpolate linearly, a photo's perspective doesn't: a single quad would show a
+                // kink along its diagonal, so a wall textured from its photo gets a grid fine enough to hide it.
+                var cells = hasPhoto ? PhotoGridCells : 1;
+                for (var row = 0; row < cells; row++)
                 {
-                    var sign = _cornerOrder[c];
-                    var position = Vector3.Transform(new Vector3(sign.X > 0 ? max.X : min.X, sign.Y > 0 ? max.Y : min.Y, 0), world);
-                    _geometry.Positions[point] = position;
-                    _geometry.CornerPointIndices[corner] = point;
-                    normals.Values[corner] = normal;
-                    var inRect = new Vector2(sign.X > 0 ? 1 : 0, sign.Y > 0 ? 1 : 0);
-                    var canvasUv = hasCanvasQuad ? _canvasQuad[_cornerToQuadIndex[c]] : new Vector2(inRect.X, 1 - inRect.Y);
-                    texCoords.Values[corner] = TexCoordFor(uvMode, uvScale, position, normal, inRect, canvasUv);
-                    canvasCoords.Values[corner] = hasCanvasQuad ? canvasUv : OffCanvas;
-                    point++;
-                    corner++;
+                    for (var column = 0; column < cells; column++)
+                    {
+                        _geometry.FaceCornerOffsets[face++] = corner;
+                        // Counter-clockwise seen from the front: bottom-left, bottom-right, top-right, top-left.
+                        for (var c = 0; c < 4; c++)
+                        {
+                            var sign = _cornerOrder[c];
+                            var inRect = new Vector2((column + (sign.X > 0 ? 1f : 0f)) / cells, (row + (sign.Y > 0 ? 1f : 0f)) / cells);
+                            var inSurface = min + (max - min) * inRect;
+                            var position = Vector3.Transform(new Vector3(inSurface.X, inSurface.Y, lift), world);
+                            _geometry.Positions[point] = position;
+                            _geometry.CornerPointIndices[corner] = point;
+                            normals.Values[corner] = normal;
+                            var canvasUv = hasCanvasQuad ? BilinearCanvas(_canvasQuad, inRect.X, 1 - inRect.Y) : new Vector2(inRect.X, 1 - inRect.Y);
+                            texCoords.Values[corner] = hasPhoto
+                                                           ? surfaceToPhoto.TransformPoint(inRect)
+                                                           : TexCoordFor(texCoordSource, uvScale, position, normal, inRect, canvasUv);
+                            canvasCoords.Values[corner] = hasCanvasQuad ? canvasUv : OffCanvas;
+                            point++;
+                            corner++;
+                        }
+                    }
                 }
             }
 
@@ -201,14 +215,14 @@ internal sealed class StageGeometry : Instance<StageGeometry>, IStatusProvider
     /// TexCoord in the mesh shaders' convention (v up). Surface and canvas coordinates arrive v down and are
     /// flipped; the stage modes are written v up directly, so an image's top lands up on a wall and away on the floor.
     /// </summary>
-    private static Vector2 TexCoordFor(UvModes mode, float scale, Vector3 position, Vector3 normal, Vector2 inRect, Vector2 canvasUv)
+    private static Vector2 TexCoordFor(TexCoordSources mode, float scale, Vector3 position, Vector3 normal, Vector2 inRect, Vector2 canvasUv)
     {
         switch (mode)
         {
-            case UvModes.OutputCanvas:
+            case TexCoordSources.OutputCanvas:
                 return new Vector2(canvasUv.X, 1 - canvasUv.Y);
 
-            case UvModes.StageTriplanar:
+            case TexCoordSources.StageTriplanar:
             {
                 var absNormal = Vector3.Abs(normal);
                 if (absNormal.X > absNormal.Y && absNormal.X > absNormal.Z)
@@ -217,12 +231,36 @@ internal sealed class StageGeometry : Instance<StageGeometry>, IStatusProvider
                 return absNormal.Y > absNormal.Z ? new Vector2(position.X, -position.Z) / scale : new Vector2(position.X, position.Y) / scale;
             }
 
-            case UvModes.StageTopDown:
+            case TexCoordSources.StageTopDown:
                 return new Vector2(position.X, -position.Z) / scale;
+
+            case TexCoordSources.ReferenceImage:
+                return OffCanvas; // only surfaces without a trace get here
 
             default:
                 return inRect; // v up already: (0,0) is the surface's bottom-left
         }
+    }
+
+    /// <summary>
+    /// In <see cref="TexCoordSources.ReferenceImage"/>, for a surface traced on an image: from 0..1 over the surface (v up)
+    /// to where that spot is in the photo, in the mesh shaders' texture coordinates.
+    /// </summary>
+    private bool TryGetPhotoMap(Setup setup, Surface surface, TexCoordSources mode, out Homography surfaceToPhoto)
+    {
+        surfaceToPhoto = default;
+        if (mode != TexCoordSources.ReferenceImage || surface.Trace is not { Quad.Length: >= 4 } trace)
+            return false;
+
+        var image = setup.FindReferenceImage(trace.ImageId);
+        if (image == null || image.Width <= 0 || image.Height <= 0)
+            return false;
+
+        // Traced in photo pixels, y down.
+        for (var i = 0; i < 4; i++)
+            _photoQuad[i] = new Vector2(trace.Quad[i].X / image.Width, 1 - trace.Quad[i].Y / image.Height);
+
+        return Homography.TryComputeQuadToQuad(_unitRectCorners, _photoQuad, out surfaceToPhoto);
     }
 
     /// <summary>A point inside the canvas quad (TL, TR, BR, BL) at fractions <paramref name="tx"/> across and <paramref name="ty"/> down.</summary>
@@ -233,8 +271,11 @@ internal sealed class StageGeometry : Instance<StageGeometry>, IStatusProvider
         return top + (bottom - top) * ty;
     }
 
-    private static bool TryGetCanvasQuad(Setup setup, Surface surface, Guid outputId, Vector2[] quad)
+    internal static bool TryGetCanvasQuad(Setup setup, Surface surface, Guid outputId, Vector2[] quad)
     {
+        if (setup.FindSurface(outputId) is { } layoutSurface)
+            return TryGetQuadOnSurface(setup, surface, layoutSurface, quad);
+
         var mapping = outputId != Guid.Empty ? surface.FindMapping(outputId) : null;
         if (mapping is { Quad.Length: >= 4 })
         {
@@ -252,6 +293,40 @@ internal sealed class StageGeometry : Instance<StageGeometry>, IStatusProvider
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// With a surface as the reference the canvas is that surface: the picture is laid out as the wall is, which
+    /// is what slices cut from its regions expect. It and what lies on it land there; every other surface doesn't.
+    /// </summary>
+    private static bool TryGetQuadOnSurface(Setup setup, Surface surface, Surface layoutSurface, Vector2[] quad)
+    {
+        var min = -layoutSurface.AnchorInMeters;
+        if (surface != layoutSurface)
+        {
+            min = surface.LocalPosition;
+            var parent = setup.FindSurface(surface.ParentId);
+            for (var guard = 0; parent != layoutSurface; guard++)
+            {
+                if (parent == null || guard >= 16)
+                    return false;
+
+                min += parent.LocalPosition + parent.AnchorInMeters;
+                parent = setup.FindSurface(parent.ParentId);
+            }
+        }
+
+        var layoutSize = Vector2.Max(layoutSurface.SizeInMeters, new Vector2(0.0001f));
+        var layoutMin = -layoutSurface.AnchorInMeters;
+        var left = (min.X - layoutMin.X) / layoutSize.X;
+        var right = (min.X + surface.SizeInMeters.X - layoutMin.X) / layoutSize.X;
+        var top = 1 - (min.Y + surface.SizeInMeters.Y - layoutMin.Y) / layoutSize.Y;
+        var bottom = 1 - (min.Y - layoutMin.Y) / layoutSize.Y;
+        quad[0] = new Vector2(left, top);
+        quad[1] = new Vector2(right, top);
+        quad[2] = new Vector2(right, bottom);
+        quad[3] = new Vector2(left, bottom);
+        return true;
     }
 
     /// <summary>A patch on the output (or on any output when none is named) whose name is the surface's, in the turned corner order.</summary>
@@ -294,9 +369,50 @@ internal sealed class StageGeometry : Instance<StageGeometry>, IStatusProvider
     private static Vector3 PlanToStage(Vector2 point) => new(point.X, 0, -point.Y);
 
     /// <summary>Roots only: a Layout region rides its parent's plane and is already part of that quad.</summary>
-    private static bool IsStageSurface(Surface surface)
+    internal static bool IsStageSurface(Surface surface)
     {
-        return surface.Kind == Surface.Kinds.Physical && surface.ParentId == Guid.Empty;
+        return surface.ParentId == Guid.Empty
+                   ? surface.Kind == Surface.Kinds.Physical
+                   : surface.Kind == Surface.Kinds.Layout && surface.OutputMappings.Count > 0;
+    }
+
+    /// <summary>
+    /// A surface's rectangle in the space of its root's pose. A region sits in metres from its parent's anchor, all the
+    /// way up, and is lifted off its parent by a little per level so a draw of the mesh doesn't z-fight between them.
+    /// </summary>
+    private static void GetStageRect(Setup setup, Surface surface, out Matrix4x4 world, out Vector2 min, out Vector2 max, out float lift)
+    {
+        lift = 0;
+        var root = surface;
+        min = surface.ParentId == Guid.Empty ? -surface.AnchorInMeters : surface.LocalPosition;
+        for (var guard = 0; root.ParentId != Guid.Empty && guard < 16; guard++)
+        {
+            lift += RegionLiftInMeters;
+            if (setup.FindSurface(root.ParentId) is not { } parent)
+                break;
+
+            if (parent.ParentId != Guid.Empty)
+                min += parent.LocalPosition + parent.AnchorInMeters;
+
+            root = parent;
+        }
+
+        max = min + surface.SizeInMeters;
+        world = (root.Placement?.Pose ?? Pose.Identity).ToWorldMatrix();
+    }
+
+    private const float RegionLiftInMeters = 0.001f;
+
+    /** A parent left off the canvas on purpose: its regions have the places, so there is nothing to warn about. */
+    private static bool HasRegionOnCanvas(Setup setup, Surface parent)
+    {
+        foreach (var surface in setup.Surfaces)
+        {
+            if (surface.ParentId == parent.Id && IsStageSurface(surface))
+                return true;
+        }
+
+        return false;
     }
 
     /** Arrays sized for this frame's layout; reallocated only when a count changes. */
@@ -326,14 +442,17 @@ internal sealed class StageGeometry : Instance<StageGeometry>, IStatusProvider
     /** Corner order bottom-left, bottom-right, top-right, top-left as signs of the local axes. */
     private static readonly Vector2[] _cornerOrder = [new(-1, -1), new(1, -1), new(1, 1), new(-1, 1)];
 
-    /** A canvas quad is TL, TR, BR, BL; the corner order above reads it BL, BR, TR, TL. */
-    private static readonly int[] _cornerToQuadIndex = [3, 2, 1, 0];
+    private const int PhotoGridCells = 16;
+
+    /** 0..1 over a surface (v up) in a traced quad's corner order: TL, TR, BR, BL. */
+    private static readonly Vector2[] _unitRectCorners = [new(0, 1), new(1, 1), new(1, 0), new(0, 0)];
 
     private static readonly string[] _cornerAttributeNames = [GeometryAttributeNames.Normal, GeometryAttributeNames.TexCoord, GeometryAttributeNames.TexCoord2];
 
     private readonly MeshGeometry _geometry = new();
     private readonly List<int> _triangles = [];
     private readonly Vector2[] _canvasQuad = new Vector2[4];
+    private readonly Vector2[] _photoQuad = new Vector2[4];
 
     /**
      * Where a surface with no patch or mapping lands on the canvas: one point outside it, so its triangles cover nothing.
@@ -346,16 +465,16 @@ internal sealed class StageGeometry : Instance<StageGeometry>, IStatusProvider
     private string? _unplacedWarning;
 
     [Input(Guid = "e64bc3c3-cbe2-4460-91a6-d0fc207c1743")]
-    public readonly InputSlot<Guid> OutputRef = new();
+    public readonly InputSlot<Guid> Canvas = new();
 
-    [Input(Guid = "b5066b38-41aa-4bbb-9d85-6f5bdf48c82d", MappedType = typeof(UvModes))]
-    public readonly InputSlot<int> UvMode = new();
+    [Input(Guid = "b5066b38-41aa-4bbb-9d85-6f5bdf48c82d", MappedType = typeof(TexCoordSources))]
+    public readonly InputSlot<int> TexCoordSource = new();
 
     [Input(Guid = "c1d2e3f4-5a6b-4c7d-8e9f-0a1b2c3d4e5f")]
     public readonly InputSlot<float> UvScale = new();
 
     /// <summary>What TexCoord carries; TexCoord2 always keeps the output-canvas coordinates, so one mesh serves the previz and [ProjectOntoStage] alike.</summary>
-    private enum UvModes
+    private enum TexCoordSources
     {
         /// <summary>0..1 over each surface, the image's top at the surface's top.</summary>
         Surface,
@@ -368,5 +487,8 @@ internal sealed class StageGeometry : Instance<StageGeometry>, IStatusProvider
 
         /// <summary>The world position seen from above, in metres over UvScale: a floor plan image laid over the whole room.</summary>
         StageTopDown,
+
+        /// <summary>Where each surface is traced on its reference image: textured with that photo, every wall shows what it really looks like.</summary>
+        ReferenceImage,
     }
 }

@@ -74,7 +74,8 @@ cbuffer FloatParams : register(b6)
 
 struct psInput
 {
-    float2 texCoord : TEXCOORD;
+    float2 texCoord : TEXCOORD0;
+    float2 texCoord2 : TEXCOORD1;
     float4 pixelPosition : SV_POSITION;
     float3 worldPosition : POSITION;
     float3x3 tbnToWorld : TBASIS;
@@ -112,7 +113,7 @@ Texture2D<float4> Image : register(t10);
 psInput vsMain(uint id
                : SV_VertexID)
 {
-    psInput output;
+    psInput output=(psInput)0;
 
     uint faceCount, meshStride;
     FaceIndices.GetDimensions(faceCount, meshStride);
@@ -154,7 +155,7 @@ psInput vsMain(uint id
     // Texture Coordinates
     float2 uv = vertex.TexCoord;    
     output.texCoord = float2(uv.x, 1 - uv.y);
-
+    output.texCoord2 = float2( vertex.TexCoord2.x, 1 - vertex.TexCoord2.y );
     // Pass tangent space basis vectors (for normal mapping).
     float3x3 TBN = float3x3(vertex.Tangent, vertex.Bitangent, vertex.Normal);
     TBN = mul(TBN, (float3x3)orientationMatrix);

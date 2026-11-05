@@ -137,6 +137,9 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         /** Frames per second to render at with vsync; 0 renders every refresh of the pacing display. */
         public int TargetFrameRate = 0;
 
+        /** Frames the loop may run ahead of the display: 1 for the lowest input latency, 2 to absorb late frames. */
+        public int FrameLatency = 1;
+
         public bool EnableKeyboardShortCuts = true;
 
         /** Whether a connected game controller drives operators like [Gamepad] or the editor (its camera). */
@@ -162,6 +165,9 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
 
         /// <summary>Opacity of a surface's content previewed over its photo — on the traced quad and on its Board card.</summary>
         public float OutputSetupContentPreviewOpacity = 0.65f;
+
+        /// <summary>Opacity of an output's picture carried back through a corner pin onto a surface's Board card.</summary>
+        public float OutputSetupProjectionPreviewOpacity = 0f;
 
         /// <summary>Whether the output setup's rect fields read in pixels of what they sit on, or as ratios of it.
         /// The values are stored as ratios either way; this is only how they are shown and typed.</summary>
@@ -279,6 +285,7 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         public bool LogAudioDetails = false;
         public bool LogAudioRenderingDetails = false;
         public bool LogVideoRenderingDetails = false;
+        public bool LogPresentationModeChanges = false;
 
         public CompilerOptions.Verbosity CompileCsVerbosity = CompilerOptions.Verbosity.Minimal;
 

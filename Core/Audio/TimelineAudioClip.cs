@@ -60,6 +60,25 @@ public sealed record AudioClipResourceHandle(TimelineAudioClip Clip, IResourceCo
     /// Keep flag to prevent multiple error messages
     /// </summary>
     public bool LoadingAttemptFailed;
+
+    /// <summary>
+    /// The clip's file address, normalized to never be null.
+    /// </summary>
+    public string CurrentAssetPath => Clip.AssetPath ?? string.Empty;
+
+    /// <summary>
+    /// The <see cref="CurrentAssetPath"/> the engine last attempted to load for this handle. A clip's path
+    /// can change at runtime (an <c>[AudioClip]</c>'s Path input), but a BASS stream stays bound to the file
+    /// it was opened from — so comparing this against the clip's live path is how the engine notices that it
+    /// has to free the old stream and load the new file (see <c>AudioEngine.ProcessSoundtrackClips</c>).
+    /// Empty means "nothing attempted yet" and therefore always a pending change.
+    /// </summary>
+    public string AttemptedAssetPath = string.Empty;
+
+    /// <summary>
+    /// True when the clip now points at a different file than the one last handed to the engine.
+    /// </summary>
+    public bool HasAssetPathChange => !string.Equals(CurrentAssetPath, AttemptedAssetPath, StringComparison.Ordinal);
 }
 
 /// <summary>

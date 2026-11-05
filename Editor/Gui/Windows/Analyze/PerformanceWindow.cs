@@ -33,7 +33,7 @@ internal sealed class PerformanceWindow : Window
                                              ref UserSettings.Config.UseVSync,
                                              "Synchronise frame presentation to the display refresh rate. Turn off to uncap the frame rate (useful for benchmarking; can cause tearing).",
                                              UserSettings.Defaults.UseVSync);
-
+        FormInputs.SetIndentToParameters();
         changed |= FormInputs.AddDropdown(ref UserSettings.Config.TargetFrameRate,
                                           TargetFrameRates,
                                           "Frame Rate",
@@ -44,6 +44,17 @@ internal sealed class PerformanceWindow : Window
                                           Rates the display can't divide into round to the nearest one it can.
                                           Needs vsync; the pacing display is the first bound output, otherwise the editor window.
                                           """);
+        changed |= FormInputs.AddDropdown(ref UserSettings.Config.FrameLatency,
+                                          FrameLatencies,
+                                          "Frame Latency",
+                                          FormatFrameLatency,
+                                          """
+                                          Low latency lets CPU and GPU work on one frame at a time: the shortest delay between
+                                          input and picture, but when a frame misses its refresh (screen capture, streaming,
+                                          a heavy scene) the frame rate drops to half.
+                                          Smooth keeps one more frame in flight, like the Vulkan backend: one refresh more delay,
+                                          but a late frame no longer costs a whole refresh.
+                                          """);
         return changed;
     }
 
@@ -52,6 +63,7 @@ internal sealed class PerformanceWindow : Window
         return framesPerSecond switch
                    {
                        0   => GetMatchDisplayLabel(),
+                       144 => "144 fps",
                        120 => "120 fps",
                        60  => "60 fps",
                        50  => "50 fps",
@@ -73,7 +85,10 @@ internal sealed class PerformanceWindow : Window
         return _matchDisplayLabel;
     }
 
-    private static readonly int[] TargetFrameRates = [0, 120, 60, 50, 30];
+    private static string FormatFrameLatency(int frames) => frames <= 1 ? "Low latency (1 frame)" : "Smooth (2 frames)";
+
+    private static readonly int[] TargetFrameRates = [0, 144, 120, 60, 50, 30];
+    private static readonly int[] FrameLatencies = [1, 2];
     private static int _matchDisplayLabelRate = -1;
     private static string _matchDisplayLabel = "Match Display";
 

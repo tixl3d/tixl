@@ -284,6 +284,10 @@ internal static class DebugServer
                 HandleGetShaderErrors(request, context);
                 break;
 
+            case "getFrameSamples":
+                HandleGetFrameSamples(context);
+                break;
+
             case "screenshot":
                 HandleScreenshot(request, context);
                 break;
@@ -528,6 +532,17 @@ internal static class DebugServer
                     UserSettings.Config.TargetFrameRate = Math.Max(0, value.Value);
 
                 context.SendOk(new JObject { ["targetFrameRate"] = UserSettings.Config.TargetFrameRate });
+                break;
+            }
+
+            case "setFrameLatency":
+            {
+                // 1 or 2 frames in flight; without a value it only reports.
+                var value = request["value"]?.Value<int>();
+                if (value != null)
+                    UserSettings.Config.FrameLatency = Math.Clamp(value.Value, 1, 2);
+
+                context.SendOk(new JObject { ["frameLatency"] = UserSettings.Config.FrameLatency });
                 break;
             }
 
@@ -1194,6 +1209,21 @@ internal static class DebugServer
         result["gpuMemory"] = TryGetGpuMemoryInfo();
         result["liveGpuResources"] = Program.Device?.Backend.LiveResourceCount ?? 0;
         context.SendOk(result);
+    }
+
+    /// <summary>The Performance window's rolling frame, CPU and present durations (oldest first), the data of its CSV export.</summary>
+    private static void HandleGetFrameSamples(RequestContext context)
+    {
+        var frames = PerformanceMetrics.FrameDuration.AsOrderedSpan(new float[PerformanceMetrics.WindowSize]);
+        var cpus = PerformanceMetrics.CpuFrameDuration.AsOrderedSpan(new float[PerformanceMetrics.WindowSize]);
+        var presents = PerformanceMetrics.PresentDuration.AsOrderedSpan(new float[PerformanceMetrics.WindowSize]);
+        context.SendOk(new JObject
+                           {
+                               ["totalFrames"] = PerformanceMetrics.TotalFrameCount,
+                               ["frameMs"] = new JArray(frames.ToArray().Select(v => Math.Round(v, 2))),
+                               ["cpuMs"] = new JArray(cpus.ToArray().Select(v => Math.Round(v, 2))),
+                               ["presentMs"] = new JArray(presents.ToArray().Select(v => Math.Round(v, 2))),
+                           });
     }
 
     private static JToken TryGetGpuMemoryInfo()

@@ -154,18 +154,32 @@ public static class AudioEngine
     /// Reloads a soundtrack clip by freeing the existing stream and re-registering it.
     /// </summary>
     /// <param name="handle">The audio clip resource handle to reload.</param>
+    /// <remarks>
+    /// Only needed to force a re-read of the <b>same</b> path (e.g. the file was replaced on disk). A path
+    /// that was changed on the clip itself is picked up automatically — see <see cref="ProcessSoundtrackClips"/>.
+    /// </remarks>
     public static void ReloadSoundtrackClip(AudioClipResourceHandle handle)
     {
-        if (SoundtrackClipStreams.TryGetValue(handle, out var stream))
-        {
-            stream.DisableSoundtrackStream();
-            SoundtrackClipStreams.Remove(handle);
-        }
+        DiscardSoundtrackClip(handle);
 
         // Handles are now cached per clip, so a prior failed attempt would otherwise be sticky.
-        // An explicit reload should always re-attempt (e.g. after the file path was fixed).
-        handle.LoadingAttemptFailed = false;
+        // An explicit reload should always re-attempt (e.g. after the file path was fixed). Clearing the
+        // attempted path marks the clip's current path as pending again, which is what forces the reload.
+        handle.AttemptedAssetPath = string.Empty;
         UseSoundtrackClip(handle, 0);
+    }
+
+    /// <summary>
+    /// Frees a clip's stream (if it has one) and clears the per-handle load bookkeeping so the next
+    /// registration loads from the clip's current file.
+    /// </summary>
+    private static void DiscardSoundtrackClip(AudioClipResourceHandle handle)
+    {
+        if (SoundtrackClipStreams.Remove(handle, out var stream))
+            stream.DisableSoundtrackStream();
+
+        handle.LoadingAttemptFailed = false;
+        handle.AttemptedAssetPath = handle.CurrentAssetPath;
     }
 
     /// <summary>
@@ -244,6 +258,13 @@ public static class AudioEngine
 
         foreach (var (handle, time) in _updatedSoundtrackClipTimes)
         {
+            // A clip's file can change while it plays (an [AudioClip]'s Path input, a settings edit). A stream
+            // is bound to the file it was opened from, so reusing it would keep the previous audio playing
+            // while the timeline already shows the new one. Dropping the stream here also clears the sticky
+            // load-failure flag, so pointing a clip at a fixed / different path always gets a fresh attempt.
+            if (handle.HasAssetPathChange)
+                DiscardSoundtrackClip(handle);
+
             if (SoundtrackClipStreams.TryGetValue(handle, out var clip))
             {
                 clip.TargetTime = time;
@@ -251,6 +272,9 @@ public static class AudioEngine
             else if (!string.IsNullOrEmpty(handle.Clip.AssetPath) &&
                      SoundtrackClipStream.TryLoadSoundtrackClip(handle, out var soundtrackClipStream))
             {
+                // Position a freshly loaded stream in the same frame instead of leaving it at TargetTime 0
+                // until the next one (that would blip a just-loaded or just-swapped clip at the file start).
+                soundtrackClipStream.TargetTime = time;
                 SoundtrackClipStreams[handle] = soundtrackClipStream;
             }
         }

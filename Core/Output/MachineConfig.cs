@@ -126,7 +126,7 @@ public sealed class MachineConfig
     {
         try
         {
-            File.WriteAllText(filePath, ToJsonString());
+            SetupFiles.WriteFileAtomically(filePath, ToJsonString());
             return true;
         }
         catch (Exception e)
@@ -148,7 +148,23 @@ public sealed class MachineConfig
         {
             Log.Warning($"Can't load machine output config from {filePath}: {e.Message}");
             config = new MachineConfig();
+            KeepCopyOfUnreadableFile(filePath);
             return false;
+        }
+    }
+
+    /** The next save replaces the file with the empty config, which would erase the bindings and stream plugs it may still hold. */
+    private static void KeepCopyOfUnreadableFile(string filePath)
+    {
+        var copyPath = filePath + ".unreadable";
+        try
+        {
+            File.Copy(filePath, copyPath, overwrite: true);
+            Log.Warning($"The unreadable machine output config was kept as {copyPath}");
+        }
+        catch (Exception e)
+        {
+            Log.Warning($"Can't keep a copy of the unreadable machine output config {filePath}: {e.Message}");
         }
     }
 }

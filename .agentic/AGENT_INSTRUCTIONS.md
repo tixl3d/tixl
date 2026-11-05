@@ -43,6 +43,18 @@ Apply these rules where they matter — code that actually runs every frame and 
 - Prefer storing and resolving by `Guid`.
 - Be careful with stale references across reloads and graph changes.
 
+### Relationships are stored, not inferred
+
+A link between two entities is data: one stores the other's `Guid`. **Warning sign:** code that decides whether two
+things are connected by comparing their values — equal geometry within a tolerance, matching names, identical paths,
+"the one that happens to sit there". That reads as a link and behaves like one until an unrelated edit changes a value
+and the link silently vanishes, and it can't tell two identical candidates apart.
+
+When you meet this, stop and tell the user before building on it, even if the current task is only a symptom of it. Say
+what is inferred and what would break it, and propose storing the id. Don't patch the symptom by keeping the compared
+values equal. A name match is fine when finding things by name is the documented feature, and a comparison is fine
+as a one-time back-compat step that fills in the stored id.
+
 ### Undo / redo commands
 
 `ICommand` implementations live longer than any single graph state — they sit on the undo stack until the user closes the project (or further) and need to survive operator-package hot reloads, which recreate `Instance` objects under the same `Symbol`.
@@ -222,7 +234,8 @@ patch — sits inside its own rect (1px, 2px when selected), so the two never ov
 - Prefer a single draw list. Z-order is controlled by call sequence, not ImGui channels.
 - Only split the draw list (channels) when overlapping elements need independent z-order *and* the top one must receive clicks. Merge immediately after — extra channels cost draw calls.
 - For overlapping clickable elements, emit the topmost `InvisibleButton` last so it wins the hit test. If that is not feasible, split channels.
-- Avoid excessive `PushClipRect` — each clip region adds draw calls. Clip only when drawn content would genuinely overflow.
+- Avoid excessive `PushClipRect` — ImGui starts a new draw command whenever the clip rect changes, so a clip in a list row adds about two draw calls per row. Clip only when drawn content would genuinely overflow: for text, compare `CalcTextSize` against the available width and push the clip only for that case (see `VariationPicker.DrawRow`).
+- A clip rect can hide a layout bug. ImGui font sizes are line heights, and Inter's is about 1.21× its em size, so stacked text needs more room than the nominal sizes suggest. Size stacks from `Fonts.*.FontSize`.
 
 ### Prefer existing helpers over hand-rolled ImGui
 

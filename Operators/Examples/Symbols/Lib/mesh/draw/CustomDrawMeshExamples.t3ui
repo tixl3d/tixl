@@ -50,6 +50,15 @@
       }
     },
     {
+      "ChildId": "0cf98d00-6411-4a5f-be1a-2cb08470fae7",
+      "SymbolName": "Lib.render.basic.Layer2d",
+      "SectionId": "d612cd1d-969c-46eb-b1c9-8a8c2d3bb802",
+      "Position": {
+        "X": 462.88873,
+        "Y": 4664.061
+      }
+    },
+    {
       "ChildId": "0f0c8301-2bcc-4c9d-987d-efdaeebc9eaf",
       "SymbolName": "Lib.render.camera.OrbitCamera",
       "SectionId": "08084a05-fc09-489b-834c-13de7dbdef91",
@@ -59,12 +68,40 @@
       }
     },
     {
+      "ChildId": "10035510-6d61-4472-b2ee-50475b60cde3",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "SectionId": "d612cd1d-969c-46eb-b1c9-8a8c2d3bb802",
+      "Position": {
+        "X": 462.88873,
+        "Y": 4629.061
+      }
+    },
+    {
       "ChildId": "111d3e3c-3507-4daf-a045-c55336c2a768",
       "SymbolName": "Lib.point.modify.RandomizePoints",
       "SectionId": "668ac922-98dd-4570-8b85-2ebcb320e8f2",
       "Position": {
         "X": 406.18262,
         "Y": 3654.6577
+      }
+    },
+    {
+      "ChildId": "118a413e-1fb1-4a06-a73c-1aa15682b7bf",
+      "SymbolName": "Lib.mesh.draw.VisualizeUvMap",
+      "SectionId": "d612cd1d-969c-46eb-b1c9-8a8c2d3bb802",
+      "Position": {
+        "X": 280.7646,
+        "Y": 4613.63
+      }
+    },
+    {
+      "ChildId": "13b6f8db-c360-4a31-9d4c-f1b670687ece",
+      "SymbolName": "Lib.mesh.generate.CubeMesh",
+      "SectionId": "d612cd1d-969c-46eb-b1c9-8a8c2d3bb802",
+      "Comment": "Pay attention to the UV MAPPING",
+      "Position": {
+        "X": 60.0,
+        "Y": 4191.2188
       }
     },
     {
@@ -95,6 +132,24 @@
       }
     },
     {
+      "ChildId": "21c1ca9e-fdfd-468d-815c-60d07621acb0",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "SectionId": "d612cd1d-969c-46eb-b1c9-8a8c2d3bb802",
+      "Position": {
+        "X": 60.0,
+        "Y": 4289.8105
+      }
+    },
+    {
+      "ChildId": "24e8d0bd-7b76-4bab-840a-3a5539a7e1b6",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
+      "SectionId": "d612cd1d-969c-46eb-b1c9-8a8c2d3bb802",
+      "Position": {
+        "X": 60.0,
+        "Y": 4380.0503
+      }
+    },
+    {
       "ChildId": "25ed05ed-ae7f-4c5b-ad8d-904775425442",
       "SymbolName": "Lib.point.transform.TransformPoints",
       "SectionId": "668ac922-98dd-4570-8b85-2ebcb320e8f2",
@@ -119,6 +174,15 @@
       "Position": {
         "X": 462.18457,
         "Y": 2662.3164
+      }
+    },
+    {
+      "ChildId": "31c884de-cb17-408f-8776-7755a58a102b",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "SectionId": "d612cd1d-969c-46eb-b1c9-8a8c2d3bb802",
+      "Position": {
+        "X": 666.5418,
+        "Y": 4521.1777
       }
     },
     {
@@ -155,6 +219,15 @@
       "Position": {
         "X": 733.4551,
         "Y": 3485.9917
+      }
+    },
+    {
+      "ChildId": "4174193b-7177-4523-b967-687142e393eb",
+      "SymbolName": "Lib.render.shading.SetMaterial",
+      "SectionId": "d612cd1d-969c-46eb-b1c9-8a8c2d3bb802",
+      "Position": {
+        "X": 462.88873,
+        "Y": 4321.997
       }
     },
     {
@@ -239,6 +312,15 @@
       }
     },
     {
+      "ChildId": "6c4596db-7e51-45e5-9ebe-dd71388ac914",
+      "SymbolName": "Lib.render.basic.TextOutlines",
+      "SectionId": "d612cd1d-969c-46eb-b1c9-8a8c2d3bb802",
+      "Position": {
+        "X": 60.0,
+        "Y": 4254.8105
+      }
+    },
+    {
       "ChildId": "6d378c58-0619-4f1b-af80-6c7180999efe",
       "SymbolName": "Lib.point.generate.LinePoints",
       "SectionId": "552cd2be-9022-4a5b-8c4c-e2e2a83a1f64",
@@ -311,6 +393,15 @@
       }
     },
     {
+      "ChildId": "83a8bf1e-2126-456b-8286-e8063a8fb412",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "SectionId": "d612cd1d-969c-46eb-b1c9-8a8c2d3bb802",
+      "Position": {
+        "X": 888.9863,
+        "Y": 4556.8
+      }
+    },
+    {
       "ChildId": "86196b85-0cb7-4222-a156-898c0b4eab25",
       "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "SectionId": "668ac922-98dd-4570-8b85-2ebcb320e8f2",
@@ -326,6 +417,15 @@
       "Position": {
         "X": 527.6062,
         "Y": 547.2435
+      }
+    },
+    {
+      "ChildId": "8d8961db-610b-4e47-aaa6-d3d6ab892686",
+      "SymbolName": "Lib.mesh.draw.VisualizeUvMap",
+      "SectionId": "d612cd1d-969c-46eb-b1c9-8a8c2d3bb802",
+      "Position": {
+        "X": 280.7646,
+        "Y": 4523.0884
       }
     },
     {
@@ -362,6 +462,15 @@
       "Position": {
         "X": 243.03516,
         "Y": 1986.4639
+      }
+    },
+    {
+      "ChildId": "99d970db-4fab-4114-ab75-867612411c6c",
+      "SymbolName": "Lib.mesh.draw.CustomDrawMesh",
+      "SectionId": "d612cd1d-969c-46eb-b1c9-8a8c2d3bb802",
+      "Position": {
+        "X": 462.88873,
+        "Y": 4251.997
       }
     },
     {
@@ -419,6 +528,15 @@
       }
     },
     {
+      "ChildId": "a12c9bf4-ab73-4b5e-b4d3-7653a461f385",
+      "SymbolName": "Lib.render.transform.Group",
+      "SectionId": "d612cd1d-969c-46eb-b1c9-8a8c2d3bb802",
+      "Position": {
+        "X": 666.5418,
+        "Y": 4451.1777
+      }
+    },
+    {
       "ChildId": "a32822c9-0037-41bd-911c-1b149a0f637b",
       "SymbolName": "Lib.image.generate.basic.Blob",
       "SectionId": "b57cf2a0-bf7b-47dc-8ee8-d5dcacc23b73",
@@ -434,6 +552,15 @@
       "Position": {
         "X": 659.86523,
         "Y": 2906.546
+      }
+    },
+    {
+      "ChildId": "b0b6b2a1-ccb0-462f-a631-8fbc0d9d48a2",
+      "SymbolName": "Lib.render.transform.SpreadLayout",
+      "SectionId": "d612cd1d-969c-46eb-b1c9-8a8c2d3bb802",
+      "Position": {
+        "X": 462.8887,
+        "Y": 4559.061
       }
     },
     {
@@ -545,6 +672,15 @@
       }
     },
     {
+      "ChildId": "de5cd0e3-c79d-40cc-a5a3-c725c485e946",
+      "SymbolName": "Lib.render.camera.OrbitCamera",
+      "SectionId": "d612cd1d-969c-46eb-b1c9-8a8c2d3bb802",
+      "Position": {
+        "X": 462.88873,
+        "Y": 4391.997
+      }
+    },
+    {
       "ChildId": "e19545a6-f49d-4102-83f2-0ef11cb44dd0",
       "SymbolName": "Lib.render.shading.SetMaterial",
       "SectionId": "668ac922-98dd-4570-8b85-2ebcb320e8f2",
@@ -578,6 +714,15 @@
       "Position": {
         "X": 873.4551,
         "Y": 3695.992
+      }
+    },
+    {
+      "ChildId": "f5e41edc-cbe3-469e-87d2-e4813b97bf5e",
+      "SymbolName": "Lib.render.basic.Layer2d",
+      "SectionId": "d612cd1d-969c-46eb-b1c9-8a8c2d3bb802",
+      "Position": {
+        "X": 888.9863,
+        "Y": 4521.8
       }
     },
     {
@@ -706,6 +851,24 @@
       "Size": {
         "X": 1234.8848,
         "Y": 631.51074
+      }
+    },
+    {
+      "Id": "d612cd1d-969c-46eb-b1c9-8a8c2d3bb802",
+      "Label": "Combine Texture coordinates ",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 0.0,
+        "Y": 4067.5798
+      },
+      "Size": {
+        "X": 1058.9863,
+        "Y": 726.08203
       }
     }
   ]

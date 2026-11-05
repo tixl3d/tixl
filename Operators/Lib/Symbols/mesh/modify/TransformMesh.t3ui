@@ -7,8 +7,8 @@
     {
       "InputId": "1168094f-1eee-4ed7-95e2-9459e6171e08"/*Rotation*/,
       "Position": {
-        "X": 165.54813,
-        "Y": 965.0075
+        "X": 144.78683,
+        "Y": 944.2463
       },
       "Description": "Rotation in degrees around the X, Y and Z axes.",
       "Min": -180.0,
@@ -18,8 +18,8 @@
     {
       "InputId": "71531810-78ab-449e-bb13-bfe5fe3d2a69"/*UseVertexSelection*/,
       "Position": {
-        "X": 25.548126,
-        "Y": 1140.0073
+        "X": 4.7868347,
+        "Y": 1119.2461
       },
       "Description": "Weights the transformation by the vertex selection, e.g. from [SelectVertices].",
       "AddPadding": "True"
@@ -27,8 +27,8 @@
     {
       "InputId": "86791d0a-97c3-413a-89d9-aa2ddd40ce4a"/*UniformScale*/,
       "Position": {
-        "X": 165.54813,
-        "Y": 1035.0076
+        "X": 144.78683,
+        "Y": 1014.24634
       },
       "Description": "Scales the mesh uniformly.",
       "AddPadding": "True"
@@ -44,8 +44,8 @@
     {
       "InputId": "ccd89dd2-1baa-4a0c-8ec3-5a0e77551379"/*Pivot*/,
       "Position": {
-        "X": 165.54813,
-        "Y": 1070.0076
+        "X": 144.78683,
+        "Y": 1049.2463
       },
       "GroupTitle": "Transform Pivot",
       "Description": "Center of rotation and scaling."
@@ -53,8 +53,8 @@
     {
       "InputId": "da607ebd-6fec-4ae8-bf91-b70dcb794557"/*Translation*/,
       "Position": {
-        "X": 165.54813,
-        "Y": 930.0075
+        "X": 144.78683,
+        "Y": 909.2463
       },
       "GroupTitle": "Transform Mesh",
       "Description": "Moves the mesh."
@@ -62,8 +62,8 @@
     {
       "InputId": "f37c11a5-b210-4e83-8ebd-64ea49ee9b96"/*Scale*/,
       "Position": {
-        "X": 165.54813,
-        "Y": 1000.0075
+        "X": 144.78683,
+        "Y": 979.2463
       },
       "Description": "Scales the mesh along X, Y and Z."
     }
@@ -97,16 +97,16 @@
       "ChildId": "331e7588-3b1d-4f76-8021-b22147cd7972",
       "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
       "Position": {
-        "X": 165.54813,
-        "Y": 1140.0073
+        "X": 144.78683,
+        "Y": 1119.2461
       }
     },
     {
       "ChildId": "3f67b99a-f4c7-4b45-ba29-0e4f7c00444f",
       "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
       "Position": {
-        "X": 25.548124,
-        "Y": 1348.3009
+        "X": -25.744415,
+        "Y": 1307.9996
       }
     },
     {
@@ -121,8 +121,8 @@
       "ChildId": "55f0a2a3-093b-426a-8955-f225413a96c7",
       "SymbolName": "Lib.render._dx11.api.GetSRVProperties",
       "Position": {
-        "X": -138.03426,
-        "Y": 586.6556
+        "X": -218.94781,
+        "Y": 625.5264
       }
     },
     {
@@ -150,24 +150,24 @@
         "Y": 130.72499
       },
       "Position": {
-        "X": 305.54813,
-        "Y": 1105.0074
+        "X": 284.78683,
+        "Y": 1084.2462
       }
     },
     {
       "ChildId": "a616e533-23fa-424a-8eb4-d0d1b43b9482",
       "SymbolName": "Types.Values.IntValue",
       "Position": {
-        "X": -114.45187,
-        "Y": 1313.3009
+        "X": -165.74442,
+        "Y": 1272.9996
       }
     },
     {
       "ChildId": "b3de1c6c-3781-4512-b80e-c7e9f21a95bd",
       "SymbolName": "Lib.render._.TransformMatrix",
       "Position": {
-        "X": 305.54813,
-        "Y": 930.0075
+        "X": 284.78683,
+        "Y": 909.2463
       }
     },
     {
@@ -182,8 +182,8 @@
       "ChildId": "fb5aa285-2f39-4fdb-b00b-5114d61223ff",
       "SymbolName": "Types.Gfx.StructuredBufferWithViews",
       "Position": {
-        "X": 25.548124,
-        "Y": 1278.3009
+        "X": -25.744415,
+        "Y": 1237.9996
       }
     }
   ],

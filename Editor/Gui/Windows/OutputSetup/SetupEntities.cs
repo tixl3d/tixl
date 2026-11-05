@@ -72,7 +72,8 @@ internal static class SetupEntities
             case SetupEntityKinds.Output:
             {
                 var output = setup.FindOutput(id);
-                return TryName(output?.Name, label, output != null, out name);
+                name = output == null ? label : SetupLabels.OutputLabel(output);
+                return output != null;
             }
 
             case SetupEntityKinds.ReferenceImage:

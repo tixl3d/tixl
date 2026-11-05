@@ -83,9 +83,13 @@ public static partial class ResourceManager
         {
             if ((buffer.Description.OptionFlags & ResourceOptionFlags.BufferStructured) == 0)
             {
-                // Log.Warning($"{nameof(SrvFromStructuredBuffer)} - input buffer is not structured, skipping SRV creation.");
                 return;
             }
+            
+            if ((buffer.Description.BindFlags & BindFlags.UnorderedAccess) == 0 )
+            {
+                return;
+            }            
 
             var elementCount = buffer.Description.SizeInBytes / buffer.Description.StructureByteStride;
             if (uav != null && !uav.IsDisposed && IsViewOf(uav, buffer)

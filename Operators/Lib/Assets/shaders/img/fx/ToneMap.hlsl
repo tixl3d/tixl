@@ -8,6 +8,7 @@ cbuffer ParamConstants : register(b0)
     float CorrectGamma;
     float GammaValue;
     float Exposure;
+    float Scale;
 }
 
 struct vsOutput
@@ -83,7 +84,8 @@ float4 psMain(vsOutput psInput) : SV_TARGET
 {
     float2 uv = psInput.texCoord;
     float4 c = inputTexture.SampleLevel(texSampler, uv, 0.0);
-    c.rgb *= Exposure;
+    c.rgb *= Scale;
+    c.rgb *= exp2(Exposure);
     
     if(Mode < 0.5) {
         c= float4( tonemapAcesFilm(c.rgb), 1);
@@ -111,6 +113,6 @@ float4 psMain(vsOutput psInput) : SV_TARGET
          float gamma = GammaValue;
          c.rgb = pow(c.rgb , 1.0/gamma);
     }
-
+   
     return c;
 }

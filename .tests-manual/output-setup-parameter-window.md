@@ -59,7 +59,25 @@ Click the "Surface 1" item.
 - After 3: it switches back to the op's parameters; "Surface 1" is no longer
   highlighted, the CONTENT item is.
 - After 4: the Parameter window shows the composition (no entity card), no item in the
-  outliner is highlighted, and the outliner closes.
+  outliner is highlighted, and the outliner stays open.
+
+## Step: Working in the graph keeps the setup open
+
+**Action:**
+1. Pin the output window to any op other than a SendToOutput, using the pin in its toolbar. Then open the
+   setup with the toolbar's "Output Setup" button.
+2. Click a different op in the graph window, one that is not a SendToOutput.
+3. Click the empty graph background.
+4. With that op selected again, press and hold `P` for a second, then release it.
+5. Press `P` briefly.
+
+**Expected:**
+- After 2 and 3: the output window keeps showing the Board and the Flow Outliner. The Parameter window
+  follows the graph selection.
+- During 4: the output window shows the selected op's output. After the release it is back on the Board with
+  the Flow Outliner.
+- After 5: the output window shows the selected op's output and stays there, with the toolbar's "Output
+  Setup" button back in its usual place.
 
 ## Step: A selected SendToOutput shows parameters plus the setup side
 
@@ -105,13 +123,42 @@ uninterrupted drag, then press Ctrl+Z once.
 ## Step: Kinds without a canvas point to the Parameter window
 
 **Action:**
-Right-click empty Board and choose **Add Prop**, then again and choose **Add Reference
-Image**. Click the new prop card, then the new image card.
+Right-click empty Board and choose **Add Person** → **Man Pointing**, then again and choose **Add Reference
+Image**. Click the new person card, then the new image card.
 
 **Expected:**
-- For the prop: the output area shows a centered message naming it and pointing to
-  the Parameter window; the Parameter window shows **Prop** with an editable
-  **Height (m)** field (1.7).
+- For the person: the output area shows a centered message naming it and pointing to
+  the Parameter window; the Parameter window shows **Person** with an editable
+  **Height (m)** field (1.8) and an **Opacity** field (0.3).
 - For the reference image: the Parameter window shows **Reference Image** with a
   Name field and the hint to drop a photo; the output area shows the (empty)
   reference canvas.
+
+## Step: A person's opacity
+
+**Action:**
+1. Click the person card on the Board, then drag its **Opacity** field in the Parameter window up to 1.
+2. Press Ctrl+Z.
+3. Set **Opacity** to 0, then click an empty spot of the Board.
+4. Click where the figure stands, set **Opacity** to 0.8, save the project and reopen it.
+
+**Expected:**
+- After 1: the green silhouette gets stronger while dragging, up to fully solid.
+- After 2: it returns to 0.3 in one undo step.
+- After 3: the figure is invisible, with only its height label left above where it stands.
+- After 4: the click selects the invisible figure, which shows its white frame; after reopening, the figure is
+  still at 0.8.
+
+## Step: The size warning respects a set Resolution
+
+**Action:**
+1. Route one SendToOutput with two slices to two outputs of different sizes (1920×1080 and 2560×1440), with the
+   op's **Resolution** at 0×0. Click the op in the graph window.
+2. Set the op's **Resolution** to 3840×1080.
+3. Set **Resolution** back to 0×0.
+
+**Expected:**
+- After 1: the op shows the "Routed to outputs of different sizes" warning on hover, and the Parameter window shows
+  a magenta "also routed to an output of..." line under **Rendered (px)**.
+- After 2: the warning and the magenta line disappear, and **Rendered (px)** reads 3840×1080.
+- After 3: the warning and the magenta line come back.

@@ -871,7 +871,7 @@ namespace Lib.io.video.mediapipe
 
                 try
                 {
-                    if (_detectionBuffer == null || _detectionBuffer.Buffer.Description.SizeInBytes != newSize)
+                    if (_detectionBuffer == null || _detectionBuffer.Buffer?.Description.SizeInBytes != newSize)
                     {
                         _detectionBuffer?.Dispose();
                         

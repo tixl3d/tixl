@@ -52,7 +52,7 @@ public sealed class _ExecuteCombineBuffers : Instance<_ExecuteCombineBuffers>
             var isDirty = input.DirtyFlag.IsDirty;
             var bufferWithViews = input.GetValue(context);
 
-            if (bufferWithViews is not { Srv.IsDisposed: false })
+            if (bufferWithViews is not { Srv.IsDisposed: false, Buffer: not null })
                 continue;
 
             var inputStride = bufferWithViews.Buffer.Description.StructureByteStride;

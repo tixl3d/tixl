@@ -1,4 +1,4 @@
-﻿using ImGuiNET;
+using ImGuiNET;
 using T3.Core.Operator;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.UiHelpers;
@@ -44,9 +44,10 @@ internal sealed class LibWarningDialog : ModalDialog
                     DontWarnAgain = !DontWarnAgain;
                     UserSettings.Config.WarnBeforeLibEdit = !UserSettings.Config.WarnBeforeLibEdit;
                 }
+
+                ImGui.TreePop();
             }
             EndDialogContent();
-            ImGui.TreePop();
         }
         EndDialog();
     }

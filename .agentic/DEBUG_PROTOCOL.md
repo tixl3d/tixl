@@ -10,7 +10,7 @@ Server code: `Editor/App/DebugProtocol/DebugServer.cs`. Typed .NET client:
 ## Launching
 
 ```
-Editor/bin/Debug/net10.0/TiXL.exe --debug-server 9042 --window 1600x900 --no-splash
+Editor/bin/Debug/net10.0/TiXL.exe --debug-server 9042 --window 1600x900 --no-splash --no-reopen
 ```
 
 On Linux the executable is `Editor/bin/Debug/net10.0/TiXL`; add `TIXL_VULKAN_VALIDATION=1` to see validation
@@ -22,6 +22,8 @@ errors in the log.
 - `--debug-server <port>` starts the bridge (localhost only). Without the flag it is off, but a
   running editor can start or stop it under Settings → Diagnostics → Debug Bridge (port saved, default 9042).
 - `--window WxH` forces a predictable windowed size; `--no-splash` skips the splash screen.
+- `--no-reopen` starts in the project hub instead of reopening the last project. Scripted sessions
+  should pass it for a predictable start; a bridge alone doesn't prevent the reopen.
 - Startup until the port accepts connections takes roughly 10–20 s. Poll with retries.
 - A running server shows a blinking IO icon in the app title bar; its tooltip lists recent
   protocol messages — useful when a human is watching an agent session.

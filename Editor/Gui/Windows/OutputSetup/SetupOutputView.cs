@@ -528,11 +528,12 @@ internal sealed partial class SetupOutputView
         }
 
         // The reference points on the plain projector canvas, where they can be walked onto the wall.
-        var pinMapping = focusCarrier?.FindMapping(outputId);
-        if (_editMode == EditModes.Output && !rectifying && focusCarrier != null && pinMapping != null && pinMapping.Quad.Length >= 4
-            && SurfaceMetrics.CountPoints(focusCarrier) > 0)
+        if (!rectifying && _projectsPhoto && _editMode == EditModes.Output
+            && TryFindAlignSubject(setup, outputId, out var alignSubject, out _)
+            && alignSubject.Pinned.FindMapping(outputId) is { Quad.Length: >= 4 } pinMapping
+            && SurfaceMetrics.CountPoints(alignSubject.Traced) > 0)
         {
-            DrawReferencePointPins(setup, dl, focusCarrier, pinMapping, outputId, canvasSize, editable, handleFade);
+            DrawReferencePointPins(setup, dl, alignSubject, pinMapping, editable, handleFade);
         }
     }
 
@@ -849,6 +850,9 @@ internal sealed partial class SetupOutputView
                 SurfaceGeometry.DragEdge(surface, edge, surfacePos, _edgeDragStretches);
                 SurfaceGeometry.LocalBounds(surface, out var newMin, out var newMax);
                 KeepContentInPlace(setup, oldMin, oldMax, newMin, newMax);
+                if (!_edgeDragStretches)
+                    FloorPlanSync.FollowWallWidth(setup, surface, edge);
+
                 break;
             }
 

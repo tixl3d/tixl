@@ -56,7 +56,9 @@ internal static class MetricGridRaster
         // Darker than the Board, not lighter: the grid recedes behind photos and content instead of competing.
         var minorColor = UiColors.BackgroundFull.Fade(0.45f * fade * emphasis);
         var majorColor = UiColors.BackgroundFull.Fade(0.7f * emphasis);
-        var labelColor = UiColors.TextMuted.Fade(0.6f * emphasis);
+
+        // The ruler measures the physical space surfaces live in, so it reads in their hue.
+        var labelColor = SetupColors.LabelFor(SetupEntityKinds.Surface).Fade(0.6f * emphasis);
 
         DrawLines(dl, projection, boardMin, boardMax, screenMin, screenMax, minorSpacing, majorSpacing, minorColor, false, labelColor, scale);
         DrawLines(dl, projection, boardMin, boardMax, screenMin, screenMax, majorSpacing, 0, majorColor, true, labelColor, scale);

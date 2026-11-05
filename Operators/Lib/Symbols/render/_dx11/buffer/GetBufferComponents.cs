@@ -38,51 +38,23 @@ internal sealed class GetBufferComponents : Instance<GetBufferComponents>
     {
         var logWarnings = LogWarnings.GetValue(context);
         var bufferWithViews = BufferWithViews.GetValue(context);
-        if (bufferWithViews != null  
-            && bufferWithViews.Srv != null && !bufferWithViews.Srv.IsDisposed 
-            && bufferWithViews.Uav != null && !bufferWithViews.Uav.IsDisposed )
+
+        // The UAV is optional: a read-only buffer is valid with its SRV alone.
+        if (bufferWithViews is not { Buffer.IsDisposed: false, Srv.IsDisposed: false })
         {
-            IsValid.Value = true;
-            Buffer.Value = bufferWithViews.Buffer;
-            ShaderResourceView.Value = bufferWithViews.Srv;
-            UnorderedAccessView.Value = bufferWithViews.Uav;
-            if (ShaderResourceView?.Value == null)
-            {
-                if(logWarnings)
-                    Log.Warning("Can't access undefined shader resource view", this);
-                    
-                SetAsInvalid();
-            }
-            else
-            {
-                try
-                {
-                    Length.Value = ShaderResourceView.Value.Description.Buffer.ElementCount;
-                    Stride.Value = bufferWithViews.Buffer.Description.StructureByteStride;
-                    // Buffer.DirtyFlag.Clear();
-                    // ShaderResourceView.DirtyFlag.Clear();
-                    // UnorderedAccessView.DirtyFlag.Clear();
-                    // Length.DirtyFlag.Clear();
-                    // Stride.DirtyFlag.Clear();
-                }
-                catch (Exception e)
-                {
-                    if(logWarnings)
-                        Log.Warning("Can't access undefined SRV description: " + e.Message, this);
-                        
-                    SetAsInvalid();
-                }
-            }
-        }
-        else
-        {
+            if (logWarnings && bufferWithViews != null)
+                Log.Warning("Buffer has no shader resource view", this);
+
             SetAsInvalid();
+            return;
         }
-        // Buffer.DirtyFlag.Clear();
-        // ShaderResourceView.DirtyFlag.Clear();
-        // UnorderedAccessView.DirtyFlag.Clear();
-        // Length.DirtyFlag.Clear();
-        // Stride.DirtyFlag.Clear();
+
+        IsValid.Value = true;
+        Buffer.Value = bufferWithViews.Buffer;
+        ShaderResourceView.Value = bufferWithViews.Srv;
+        UnorderedAccessView.Value = bufferWithViews.Uav is { IsDisposed: false } uav ? uav : null;
+        Length.Value = bufferWithViews.ElementCount;
+        Stride.Value = bufferWithViews.ElementStride;
     }
  
     private void SetAsInvalid()

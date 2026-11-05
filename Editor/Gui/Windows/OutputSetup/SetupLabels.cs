@@ -22,13 +22,15 @@ internal static class SetupLabels
     /// <summary>
     /// A slice's display name: a name the user typed if there is one, otherwise a default derived from its
     /// source. Unnamed sources give "Slice N"; a renamed source gives "{name}.N", so naming the op renames
-    /// every one of its auto-named slices at once. N is the slice's position among its source's slices.
+    /// every one of its auto-named slices at once. N is the slice's position among its source's listed slices —
+    /// the implicit full-frame one reads as the source, so it takes no number.
     /// </summary>
     public static string SliceLabel(Setup setup, Slice slice)
     {
         if (!string.IsNullOrEmpty(slice.Name))
             return slice.Name;
 
+        SetupRelations.TryGetImplicitSlice(setup, slice.SourceId, out var implicitSlice);
         var ordinal = 1;
         foreach (var other in setup.Slices)
         {
@@ -38,7 +40,8 @@ internal static class SetupLabels
             if (other.Id == slice.Id)
                 break;
 
-            ordinal++;
+            if (!ReferenceEquals(other, implicitSlice))
+                ordinal++;
         }
 
         var source = setup.FindSource(slice.SourceId);
@@ -49,12 +52,28 @@ internal static class SetupLabels
 
     /// <summary>A patch's display name: the typed name, else "Patch N" by its position among the listed
     /// patches — the implicit full-canvas one reads as the output, so it takes no number.</summary>
+    /// <summary>A name the user typed if there is one, otherwise what the output is bound to on this machine, so
+    /// a setup moved to another machine doesn't carry the first machine's display names along.</summary>
+    public static string OutputLabel(OutputDefinition output)
+    {
+        if (!string.IsNullOrEmpty(output.Name))
+            return output.Name;
+
+        if (OutputSetupHandling.TryGetActiveSetup(out _, out var machineConfig) && machineConfig.FindBinding(output.Id) is { } binding)
+            return Plugs.PlugName(machineConfig, Plugs.BoundPlugId(binding));
+
+        return SetupEntityKindInfo.Of(SetupEntityKinds.Output).Label;
+    }
+
     public static string PatchLabel(OutputDefinition output, OutputDefinition.Patch patch)
     {
         if (!string.IsNullOrEmpty(patch.Name))
             return patch.Name;
 
         SetupRelations.TryGetImplicitPatch(output, out var implicitPatch);
+        if (ReferenceEquals(patch, implicitPatch))
+            return "Full Canvas";
+
         var ordinal = 1;
         foreach (var other in output.Patches)
         {

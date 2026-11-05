@@ -8,7 +8,7 @@
       "InputId": "132584c0-c27c-448a-b31d-ae72f0fb4baa"/*Texture*/,
       "Position": {
         "X": -599.49646,
-        "Y": 1484.1101
+        "Y": 1529.1101
       },
       "GroupTitle": "Advanced Options",
       "Description": "Optional image that defines the color of the points."
@@ -17,7 +17,7 @@
       "InputId": "1843683c-53a2-4862-a9a5-4b3afe729ace"/*UseVertexSelection*/,
       "Position": {
         "X": -599.49646,
-        "Y": 1529.1101
+        "Y": 1574.1101
       },
       "Description": "Defines whether an operator set in between, such as [SelectVertices], is taken into account.",
       "AddPadding": "True"
@@ -29,6 +29,14 @@
         "X": -601.2355,
         "Y": 1316.4998
       }
+    },
+    {
+      "InputId": "97764c5c-882e-42ef-9687-2e6dcf29ed32"/*ExtraAttributes*/,
+      "Position": {
+        "X": -599.49646,
+        "Y": 1484.1101
+      },
+      "Description": "Writes additional mesh data into the point's FX1 and FX2 attributes.\n\nTexCoord: interpolated UVs of the first UV set.\nTexCoord2: interpolated UVs of the second UV set.\nVertexSelectF1 / VertexSelectF2: interpolated vertex selection (see [SelectVertices]) written into FX1 or FX2."
     },
     {
       "InputId": "b3d526ee-b1f1-4254-b702-1980d659e557"/*Count*/,
@@ -52,7 +60,7 @@
       "InputId": "ed758e72-6977-44e0-a997-bf0ad83f6ceb"/*IsEnabled*/,
       "Position": {
         "X": -599.49646,
-        "Y": 1574.1101
+        "Y": 1619.1101
       }
     }
   ],
@@ -280,6 +288,15 @@
       "Position": {
         "X": 778.688,
         "Y": 1860.1914
+      }
+    },
+    {
+      "ChildId": "d96cfda4-8872-469d-b4fb-230cdfc7f8ba",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
+      "SectionId": "0a625795-2500-41f5-aadc-26eb9065716c",
+      "Position": {
+        "X": 520.0,
+        "Y": 1929.1914
       }
     }
   ],

@@ -117,7 +117,7 @@ Hover "Local / Display 2" in the LOCAL BINDINGS column.
 **Expected:**
 - After 2: only the second output is connected to the stream; "P1" reads "unbound" again. The
   same holds for a display item.
-- After 3: the second output's card shows **Canvas (px)** 3840 × 2160 — the stream's size is its
+- After 3: the second output's card shows **Resolution (px)** 3840 × 2160 — the stream's size is its
   output's canvas, set from either card. With nothing bound, the stream's row is read-only.
 
 ## Step: A large NDI stream doesn't stall the editor
@@ -125,7 +125,7 @@ Hover "Local / Display 2" in the LOCAL BINDINGS column.
 **Prerequisite:** an NDI receiver (e.g. NDI Studio Monitor) and the performance overlay (click the frame graph in the top left) are open.
 
 **Action:**
-1. Bind an output to an NDI stream in LOCAL BINDINGS and set its **Canvas (px)** to 8038 × 5798.
+1. Bind an output to an NDI stream in LOCAL BINDINGS and set its **Resolution (px)** to 8038 × 5798.
 2. Note the overlay's **Frame** time with the output's **Send** ticked off.
 3. Tick **Send** with the receiver closed, then with the receiver showing the stream.
 

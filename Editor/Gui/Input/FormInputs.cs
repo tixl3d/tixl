@@ -1139,7 +1139,7 @@ internal static class FormInputs
         DrawHelpMarker(tooltip);
     }
 
-    private static void DrawHelpMarker(string tooltip)
+    internal static void DrawHelpMarker(string tooltip)
     {
         var lineTop = ImGui.GetCursorScreenPos().Y;
         ImGui.PushFont(Icons.IconFont);

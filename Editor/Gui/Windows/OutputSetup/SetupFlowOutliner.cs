@@ -44,13 +44,12 @@ internal sealed class SetupFlowOutliner
     /// <param name="bodyVisible">False while collapsed: only the header draws.</param>
     /// <param name="drawGrip">The strip's resize grip, drawn first in the header.</param>
     /// <param name="drawToolbar">The canvas' toolbar (mode switch and its actions), drawn after the setup switcher.</param>
-    /// <param name="drawMenuExtras">Window-level entries appended to the setup menu (outliner toggle, pin).</param>
     /// <param name="onLeave">Leaves the setup for the operator view; drawn as the header's close button.</param>
     public void Draw(SetupEntitySelection selection, Action? onToggleCollapse, bool bodyVisible,
-                     Action? drawGrip = null, Action? drawToolbar = null, Action? drawMenuExtras = null, Action? onLeave = null)
+                     Action? drawGrip = null, Action? drawToolbar = null, Action? onLeave = null, Vector2? visibleBoardCentre = null)
     {
-        _drawMenuExtras = drawMenuExtras;
         _onLeave = onLeave;
+        _visibleBoardCentre = visibleBoardCentre;
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out var machineConfig))
         {
             CustomComponents.EmptyWindowMessage("No project focused");
@@ -64,11 +63,11 @@ internal sealed class SetupFlowOutliner
         if (_cacheVersion != OutputSetupHandling.StructureVersion || _cacheSetupId != setup.Id)
             RefreshCaches(setup, machineConfig);
 
-        // Del removes the selection while the strip has focus — the same verb as the items' context menu.
+        // Del or Backspace removes the selection while the strip has focus — the same verb as the items' context menu.
         if (bodyVisible && selection.Count > 0
             && ImGui.IsWindowFocused(ImGuiFocusedFlags.RootAndChildWindows)
             && !ImGui.IsAnyItemActive()
-            && ImGui.IsKeyPressed(ImGuiKey.Delete, false))
+            && (ImGui.IsKeyPressed(ImGuiKey.Delete, false) || ImGui.IsKeyPressed(ImGuiKey.Backspace, false)))
         {
             SetupActions.DeleteSelection(selection, setup);
         }
@@ -76,7 +75,13 @@ internal sealed class SetupFlowOutliner
         DrawHeader(setup, selection, onToggleCollapse, bodyVisible, drawGrip, drawToolbar);
 
         if (bodyVisible)
+        {
+            var separatorStart = ImGui.GetCursorScreenPos();
+            var separatorEnd = separatorStart + new Vector2(ImGui.GetContentRegionAvail().X, 0);
+            SetupStrokes.DrawCrispLine(ImGui.GetWindowDrawList(), separatorStart, separatorEnd, UiColors.BackgroundFull.Fade(0.6f), 1);
+
             DrawColumns(setup, machineConfig, selection);
+        }
 
         OutlinerItem.ApplyPendingMove(setup);
         _hoveredKind = _pendingHoveredKind;
@@ -135,20 +140,18 @@ internal sealed class SetupFlowOutliner
         if (CustomComponents.IconButton(Icon.Plus, Vector2.Zero))
             ImGui.OpenPopup(AddBoardItemMenuId);
 
-        CustomComponents.TooltipForLastItem("Add to the Board", "A reference photo to trace surfaces on, a prop for scale, or a whole room.");
+        CustomComponents.TooltipForLastItem("Add to the Board", "A reference photo to trace surfaces on, a person for scale, or a whole room.");
 
         var openRoomDialog = false;
         if (SetupPopup.Begin(AddBoardItemMenuId))
         {
+            CustomComponents.MenuItemsFlushLeft = true;
             if (CustomComponents.DrawMenuItem(1, "Add Reference Image"))
-                SetupActions.AddReferenceImage(selection);
+                SetupActions.AddReferenceImage(selection, _visibleBoardCentre);
 
             CustomComponents.TooltipForLastItem("Adds an empty image card; pick its photo in the Parameter window.", "Or drop an image file onto the Board.");
 
-            if (CustomComponents.DrawMenuItem(2, "Add Prop"))
-                SetupActions.AddProp(selection);
-
-            CustomComponents.TooltipForLastItem("A box of known size on the Board — a doorway, a table — to judge the venue against.");
+            PersonImages.DrawAddMenu(2, selection, _visibleBoardCentre);
 
             // The dialog can't open from inside the menu (it would close with it), so it is opened once the menu is gone.
             if (CustomComponents.DrawMenuItem(3, "Add Floor Plan..."))
@@ -156,11 +159,12 @@ internal sealed class SetupFlowOutliner
 
             CustomComponents.TooltipForLastItem("The venue seen from above: a footprint whose edges carry the walls, drawn at true scale.");
 
+            CustomComponents.MenuItemsFlushLeft = false;
             SetupPopup.End();
         }
 
         if (openRoomDialog)
-            AddFloorPlanDialog.RequestOpen();
+            AddFloorPlanDialog.RequestOpen(_visibleBoardCentre);
 
         AddFloorPlanDialog.Draw(selection);
 
@@ -206,24 +210,33 @@ internal sealed class SetupFlowOutliner
 
         // Items are inset from the column boundaries so the gutters between columns have room for the connections.
         var gap = ColumnGap * scale;
+        _columnBodyBottom = origin.Y + avail.Y;
 
         BeginColumn(origin.X + gap * 0.5f, origin.Y, columnWidth - gap);
-        DrawColumnHeader("CONTENT", "##addContent", selection, _requestAddContentMenu, SetupEntityKinds.ContentSource);
+        DrawColumnHeader("CONTENT", "##addContent", selection, _requestAddContentMenu,
+                         "Add content", "Adds a [SendToOutput] to the graph, or mirrors the editor UI as content.",
+                         SetupEntityKinds.ContentSource);
         DrawContentSends(selection, setup);
         maxY = MathF.Max(maxY, ImGui.GetCursorScreenPos().Y);
 
         BeginColumn(origin.X + columnWidth + gap * 0.5f, origin.Y, columnWidth - gap);
-        DrawColumnHeader("SURFACES", "##addSurface", selection, s => SetupActions.AddSurface(s), SetupEntityKinds.Surface);
+        DrawColumnHeader("SURFACES", "##addSurface", selection, s => SetupActions.AddSurface(s),
+                         "Add a surface", "A physical area in the venue, like a wall or a screen, that shows a slice of the content.",
+                         SetupEntityKinds.Surface);
         DrawSurfaces(selection, setup);
         maxY = MathF.Max(maxY, ImGui.GetCursorScreenPos().Y);
 
         BeginColumn(origin.X + 2 * columnWidth + gap * 0.5f, origin.Y, columnWidth - gap);
-        DrawColumnHeader("OUTPUTS", "##addOutput", selection, SetupActions.AddOutput, SetupEntityKinds.Output);
+        DrawColumnHeader("OUTPUTS", "##addOutput", selection, SetupActions.AddOutput,
+                         "Add an output", "A display, projector or video stream that surfaces get mapped onto.",
+                         SetupEntityKinds.Output);
         DrawOutputs(selection, setup, machineConfig);
         maxY = MathF.Max(maxY, ImGui.GetCursorScreenPos().Y);
 
         BeginColumn(origin.X + 3 * columnWidth + gap * 0.5f, origin.Y, columnWidth - gap);
-        DrawColumnHeader("LOCAL BINDINGS", "##addPlug", selection, _requestAddPlugMenu, SetupEntityKinds.Plug);
+        DrawColumnHeader("LOCAL BINDINGS", "##addPlug", selection, _requestAddPlugMenu,
+                         "Add a stream sender", "Lets this machine send an output to other applications, e.g. over Spout or NDI. Its displays are listed already.",
+                         SetupEntityKinds.Plug);
         DrawLocalBindings(selection, setup, machineConfig);
         maxY = MathF.Max(maxY, ImGui.GetCursorScreenPos().Y);
 
@@ -235,7 +248,7 @@ internal sealed class SetupFlowOutliner
         for (var i = 1; i <= 3; i++)
         {
             var x = (float)Math.Round(origin.X + i * columnWidth);
-            dl.AddLine(new Vector2(x, origin.Y), new Vector2(x, dividerBottom), UiColors.BackgroundFull, 1 * scale);
+            dl.AddLine(new Vector2(x, origin.Y), new Vector2(x, dividerBottom), UiColors.BackgroundFull.Fade(0.6f), 1 * scale);
         }
 
         DrawConnections(dl, setup, machineConfig, selection);
@@ -267,6 +280,26 @@ internal sealed class SetupFlowOutliner
             var c = _connections[i];
             DrawConnection(dl, selection, c.FromKind, c.FromId, c.ToKind, c.ToId, setup);
         }
+
+        DrawDraggedConnection(dl, setup);
+    }
+
+    /// <summary>The temporary connection of a routing drag, from the dragged item to the mouse.</summary>
+    private void DrawDraggedConnection(ImDrawListPtr dl, Setup setup)
+    {
+        if (!DragAndDropHandling.TryGetDragData(DragAndDropHandling.DragTypes.SetupEntity, out var dragData)
+            || !SetupRouting.TryParseDrag(dragData, out var kind, out var id)
+            || !TryGetAnchor(setup, kind, id, out var anchor))
+            return;
+
+        var scale = T3Ui.UiScaleFactor;
+        var mouse = ImGui.GetMousePos();
+
+        // Routing is direction-agnostic, so the line leaves the item on the side the mouse is on.
+        var direction = mouse.X < anchor.Left ? -1f : 1f;
+        var start = new Vector2(direction < 0 ? anchor.Left : anchor.Right, anchor.Y);
+        var reach = direction * MathF.Max(24 * scale, MathF.Abs(mouse.X - start.X) * 0.4f);
+        dl.AddBezierCubic(start, start + new Vector2(reach, 0), mouse - new Vector2(reach, 0), mouse, SetupColors.ForKind(kind), 2.5f * scale);
     }
 
     /// <summary>
@@ -292,7 +325,7 @@ internal sealed class SetupFlowOutliner
 
             foreach (var mapping in surface.OutputMappings)
             {
-                var patchId = FindLayoutPatchUnder(setup, mapping);
+                var patchId = SetupRelations.LinkedPatchOf(setup, mapping);
                 _connections.Add(patchId != Guid.Empty
                                      ? new Connection(SetupEntityKinds.Surface, surface.Id, SetupEntityKinds.Patch, patchId)
                                      : new Connection(SetupEntityKinds.Surface, surface.Id, SetupEntityKinds.Output, mapping.OutputId));
@@ -316,38 +349,6 @@ internal sealed class SetupFlowOutliner
                 _connections.Add(new Connection(SetupEntityKinds.Output, output.Id, SetupEntityKinds.Plug, Plugs.BoundPlugId(binding)));
         }
     }
-
-    /// <summary>
-    /// The content-less patch a surface's pin sits exactly on — a venue's pixel map traced as patches, which the
-    /// surface was dropped onto — so the link leads to that area rather than to the output as a whole.
-    /// </summary>
-    private Guid FindLayoutPatchUnder(Setup setup, Surface.OutputMapping mapping)
-    {
-        var output = setup.FindOutput(mapping.OutputId);
-        if (output == null || mapping.IsFilling || mapping.Quad.Length < 4)
-            return Guid.Empty;
-
-        foreach (var patch in output.Patches)
-        {
-            if (patch.SliceId != Guid.Empty || patch.Quad.Length < 4)
-                continue;
-
-            patch.CopyTurnedCorners(_patchCorners);
-            var matches = true;
-            for (var corner = 0; corner < 4 && matches; corner++)
-            {
-                matches = Vector2.DistanceSquared(_patchCorners[corner], mapping.Quad[corner]) < SamePinToleranceSquared;
-            }
-
-            if (matches)
-                return patch.Id;
-        }
-
-        return Guid.Empty;
-    }
-
-    /** Canvas 0..1 units: far below a pixel on any output, well above float noise from the corner turn. */
-    private const float SamePinToleranceSquared = 1e-8f;
 
     private readonly record struct Connection(SetupEntityKinds FromKind, Guid FromId,
                                               SetupEntityKinds ToKind, Guid ToId);
@@ -490,7 +491,7 @@ internal sealed class SetupFlowOutliner
 
     /// <summary>A column's persistent title, tinted in its kind's colour, with its `+` at the right end (none for the plug inventory).</summary>
     private void DrawColumnHeader(string title, string? addButtonId, SetupEntitySelection selection, Action<SetupEntitySelection>? onAdd,
-                                  SetupEntityKinds kind = SetupEntityKinds.None)
+                                  string addTooltip, string addTooltipNotes, SetupEntityKinds kind = SetupEntityKinds.None)
     {
         var scale = T3Ui.UiScaleFactor;
         // Anchored on the column's x: a spacer before a second header (the shelf) resets the cursor's x to the window.
@@ -509,6 +510,7 @@ internal sealed class SetupFlowOutliner
             if (CustomComponents.IconButton(Icon.Plus, Vector2.Zero))
                 onAdd(selection);
 
+            CustomComponents.TooltipForLastItem(addTooltip, addTooltipNotes);
             ImGui.PopID();
         }
 
@@ -518,12 +520,15 @@ internal sealed class SetupFlowOutliner
 
     private void DrawOutputs(SetupEntitySelection selection, Setup setup, MachineConfig machineConfig)
     {
+        var drawnCount = 0;
         for (var i = 0; i < setup.Outputs.Count; i++)
         {
             var output = setup.Outputs[i];
             // The Default output is the editor's internal preview, not something you present or map — hide it.
             if (output.Kind == OutputDefinition.Kinds.Default)
                 continue;
+
+            drawnCount++;
 
             // The implicit full-canvas patch is the output itself here: no item, and its slice connection
             // lands on the output item (TryGetAnchor folds an undrawn patch onto its output).
@@ -538,7 +543,7 @@ internal sealed class SetupFlowOutliner
                            {
                                Kind = SetupEntityKinds.Output,
                                Id = output.Id,
-                               Name = output.Name,
+                               Name = SetupLabels.OutputLabel(output),
                                // Nothing presents it yet — said in words, where the plug connection would otherwise start.
                                Status = machineConfig.FindBinding(output.Id) == null ? "unbound" : null,
                                IsExpanded = hasPatches ? isExpanded : null,
@@ -563,6 +568,9 @@ internal sealed class SetupFlowOutliner
                     DrawPatchItem(selection, setup, output, output.Patches[p]);
             }
         }
+
+        if (drawnCount == 0)
+            DrawColumnHint("The pixel canvases of your projectors and displays.");
     }
 
     /// <summary>
@@ -591,8 +599,10 @@ internal sealed class SetupFlowOutliner
             DrawItem(selection, setup, ref args);
         }
 
-        foreach (var binding in machineConfig.Bindings)
+        // By index: a row's drop or menu binds or unbinds an output, which changes this list.
+        for (var i = 0; i < machineConfig.Bindings.Count; i++)
         {
+            var binding = machineConfig.Bindings[i];
             if (binding.IsStream || binding.DisplayIndex < screens.Count || setup.FindOutput(binding.OutputId) == null)
                 continue;
 
@@ -622,6 +632,10 @@ internal sealed class SetupFlowOutliner
                            };
             DrawItem(selection, setup, ref args);
         }
+
+        // Displays are always listed, so this column explains itself until the first output is bound rather than when empty.
+        if (!HasBoundOutput(setup, machineConfig))
+            DrawColumnHint("Drag an output onto a display or stream to show it there.");
 
         if (_addPlugMenuRequested)
         {
@@ -683,6 +697,17 @@ internal sealed class SetupFlowOutliner
         ImGui.TextUnformatted("In composition parent " + _tooltipSendParent.SymbolChild.ReadableName);
     }
 
+    private static bool HasBoundOutput(Setup setup, MachineConfig machineConfig)
+    {
+        foreach (var binding in machineConfig.Bindings)
+        {
+            if (setup.FindOutput(binding.OutputId) != null)
+                return true;
+        }
+
+        return false;
+    }
+
     private static bool IsPlugBound(Setup setup, MachineConfig machineConfig, Guid plugId)
     {
         foreach (var binding in machineConfig.Bindings)
@@ -735,12 +760,28 @@ internal sealed class SetupFlowOutliner
             DrawSourceItem(selection, setup, EditorUiContent.SourceChildId, editorUiSource.Name, null);
         }
 
-        if (drawnCount == 0)
+        // Indexed: an item's context menu can remove its source mid-walk.
+        for (var i = 0; i < setup.ContentSources.Count; i++)
         {
-            ImGui.Indent(8 * T3Ui.UiScaleFactor);
-            CustomComponents.StylizedText("no SendToOutput ops in this composition", Fonts.FontSmall, UiColors.TextMuted.Fade(0.6f));
-            ImGui.Unindent(8 * T3Ui.UiScaleFactor);
+            var source = setup.ContentSources[i];
+            if (!ContentSourceSync.IsSendOpMissing(source.SymbolChildId))
+                continue;
+
+            drawnCount++;
+            var args = new OutlinerItem.Args
+                           {
+                               Kind = SetupEntityKinds.ContentSource,
+                               Id = source.SymbolChildId,
+                               Name = source.Name,
+                               Status = "op missing",
+                               IsMuted = true,
+                           };
+            DrawItem(selection, setup, ref args);
+            DrawListedSlicesOfSource(selection, setup, source);
         }
+
+        if (drawnCount == 0)
+            DrawColumnHint("What your graph renders for this setup.");
 
         if (_addContentMenuRequested)
         {
@@ -765,12 +806,30 @@ internal sealed class SetupFlowOutliner
         }
     }
 
+    private void DrawListedSlicesOfSource(SetupEntitySelection selection, Setup setup, ContentSource source)
+    {
+        SetupRelations.TryGetImplicitSlice(setup, source.Id, out var implicitSlice);
+
+        // Indexed: an item's context menu can delete its slice mid-walk, which an enumerator would refuse.
+        for (var s = 0; s < setup.Slices.Count; s++)
+        {
+            var slice = setup.Slices[s];
+            if (slice.SourceId != source.Id || ReferenceEquals(slice, implicitSlice))
+                continue;
+
+            DrawSliceItem(selection, setup, slice);
+        }
+    }
+
     /// <summary>A source and, unless folded, its slices.</summary>
     private void DrawSourceItem(SetupEntitySelection selection, Setup setup, Guid childId, string name, Action? drawTooltip)
     {
         var source = setup.FindSourceByChildId(childId);
         // The implicit full-frame slice is the source itself here: no item, its connections start at the source.
         var sliceCount = source == null ? 0 : SetupRelations.CountListedSlicesOfSource(setup, source.Id);
+        if (source != null && OutlinerItem.RevealPendingId != Guid.Empty && setup.FindSlice(OutlinerItem.RevealPendingId)?.SourceId == source.Id)
+            _collapsedSources.Remove(childId);
+
         var expanded = !_collapsedSources.Contains(childId);
         var args = new OutlinerItem.Args
                        {
@@ -789,16 +848,29 @@ internal sealed class SetupFlowOutliner
         if (source == null || sliceCount == 0 || !expanded)
             return;
 
-        // Indexed: an item's context menu can delete its slice mid-walk, which an enumerator would refuse.
-        for (var s = 0; s < setup.Slices.Count; s++)
-        {
-            var slice = setup.Slices[s];
-            if (slice.SourceId != source.Id)
-                continue;
-
-            DrawSliceItem(selection, setup, slice);
-        }
+        DrawListedSlicesOfSource(selection, setup, source);
     }
+
+    /// <summary>
+    /// Explains a column in the free space below its items. The child window only gives the centered message
+    /// its bounds: it takes no input, so a click on it still counts as a click on empty strip.
+    /// </summary>
+    private void DrawColumnHint(string hint)
+    {
+        var top = new Vector2(_columnMinX, ImGui.GetCursorScreenPos().Y);
+        var height = MathF.Max(_columnBodyBottom - top.Y, MinColumnHintLines * ImGui.GetTextLineHeight());
+
+        ImGui.SetCursorScreenPos(top);
+        ImGui.BeginChild(hint, new Vector2(_columnWidth, height), ImGuiChildFlags.None,
+                         ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoScrollbar);
+        CustomComponents.EmptyWindowMessage(hint);
+        ImGui.EndChild();
+
+        // Stacked columns measure their end from the cursor; the hint shouldn't count as content there.
+        ImGui.SetCursorScreenPos(top);
+    }
+
+    private const int MinColumnHintLines = 4;
 
     /// <summary>A slice under its source. A slice nothing shows reads as "unused".</summary>
     private void DrawSliceItem(SetupEntitySelection selection, Setup setup, Slice slice)
@@ -842,11 +914,35 @@ internal sealed class SetupFlowOutliner
             if (setup.Surfaces[i].ParentId == Guid.Empty)
                 DrawSurfaceItem(selection, setup, setup.Surfaces[i], 0);
         }
+
+        if (setup.Surfaces.Count == 0)
+            DrawColumnHint("Physical surfaces\nlike a walls or screens.");
+    }
+
+    private static bool IsAncestorOfPendingRename(Setup setup, Guid surfaceId)
+    {
+        var reveal = OutlinerItem.RevealPendingId;
+        if (reveal == Guid.Empty)
+            return false;
+
+        var current = setup.FindSurface(reveal);
+        for (var guard = 0; current != null && current.ParentId != Guid.Empty && guard < 16; guard++)
+        {
+            if (current.ParentId == surfaceId)
+                return true;
+
+            current = setup.FindSurface(current.ParentId);
+        }
+
+        return false;
     }
 
     private void DrawSurfaceItem(SetupEntitySelection selection, Setup setup, Surface surface, int depth)
     {
         var surfaceId = surface.Id;
+        if (IsAncestorOfPendingRename(setup, surfaceId))
+            _collapsedSurfaces.Remove(surfaceId);
+
         var hasChildren = SetupRelations.CountChildren(setup, surfaceId) > 0;
         var isExpanded = !_collapsedSurfaces.Contains(surfaceId);
 
@@ -922,7 +1018,7 @@ internal sealed class SetupFlowOutliner
             for (var i = 0; i < _availableNames.Count; i++)
             {
                 var name = _availableNames[i];
-                if (CustomComponents.DrawMenuItem(i, name, isChecked: name == setup.Name) && name != setup.Name)
+                if (CustomComponents.DrawMenuItem(i, name, isChecked: name == setup.Name, reserveIconColumn: false) && name != setup.Name)
                 {
                     if (OutputSetupHandling.TrySwitchTo(name))
                         selection.Clear();
@@ -930,21 +1026,21 @@ internal sealed class SetupFlowOutliner
             }
 
             CustomComponents.SeparatorLine();
-            if (CustomComponents.DrawMenuItem(903, "Rename"))
+            if (CustomComponents.DrawMenuItem(903, "Rename", reserveIconColumn: false))
             {
                 _isRenamingSetup = true;
                 _setupRenameFocusPending = true;
                 _setupRenameBuffer = setup.Name;
             }
 
-            if (CustomComponents.DrawMenuItem(900, "Duplicate Current"))
+            if (CustomComponents.DrawMenuItem(900, "Duplicate Current", reserveIconColumn: false))
             {
                 OutputSetupHandling.TryDuplicateActive(GetFreeName(setup.Name + " copy"));
             }
             CustomComponents.TooltipForLastItem("Duplicates the setup for another venue.",
                                                 "Entity ids are preserved, so operator bindings stay intact.");
 
-            if (CustomComponents.DrawMenuItem(901, "New (Empty)"))
+            if (CustomComponents.DrawMenuItem(901, "New (Empty)", reserveIconColumn: false))
             {
                 if (OutputSetupHandling.TryCreateNew(GetFreeName("Setup")))
                     selection.Clear();
@@ -952,16 +1048,18 @@ internal sealed class SetupFlowOutliner
             CustomComponents.TooltipForLastItem("Creates a fresh setup with new entity ids.",
                                                 "Operator bindings into it will be unresolved until re-assigned.");
 
-            if (_availableNames.Count > 1 && CustomComponents.DrawMenuItem(902, "Delete"))
-            {
-                if (OutputSetupHandling.TryDeleteActive())
-                    selection.Clear();
-            }
+            if (CustomComponents.DrawMenuItem(904, "Reveal in Explorer", reserveIconColumn: false))
+                OutputSetupHandling.RevealActiveFile();
 
-            if (_drawMenuExtras != null)
+            CustomComponents.TooltipForLastItem("Shows this setup's file in the project's .meta folder.");
+
+            if (_availableNames.Count > 1 && CustomComponents.DrawMenuItem(902, "Delete...", reserveIconColumn: false))
             {
-                CustomComponents.SeparatorLine();
-                _drawMenuExtras();
+                const string deleteChoice = "Delete";
+                var choice = T3.Core.SystemUi.BlockingWindow.Instance.ShowMessageBox($"Delete the setup \"{setup.Name}\" and its file? This can't be undone.",
+                                                                                      "Delete Setup", deleteChoice, "Cancel");
+                if (choice == deleteChoice && OutputSetupHandling.TryDeleteActive())
+                    selection.Clear();
             }
 
             SetupPopup.End();
@@ -1032,6 +1130,7 @@ internal sealed class SetupFlowOutliner
     private const string AddPlugMenuId = "##addPlugMenu";
     private const string AddContentMenuId = "##addContentMenu";
     private Action? _onLeave;
+    private Vector2? _visibleBoardCentre;
     private const string AddBoardItemMenuId = "##addBoardItemMenu";
     private const string HelpDocId = "OutputSetup";
     private const string HelpWikiUrl = "https://github.com/tixl3d/tixl/wiki/help.OutputSetup";
@@ -1052,16 +1151,15 @@ internal sealed class SetupFlowOutliner
     // The column the items currently draw into (screen x + width); 0 width = whole window.
     private float _columnMinX;
     private float _columnWidth;
+    private float _columnBodyBottom;
 
     // Per-structure caches (see RefreshCaches), keyed on the structure version and the setup.
     private int _cacheVersion = -1;
     private Guid _cacheSetupId;
     private readonly List<Connection> _connections = [];
-    private readonly Vector2[] _patchCorners = new Vector2[4];
     private readonly Dictionary<Guid, string> _sliceLabels = [];
     private readonly Dictionary<Guid, string> _patchLabels = [];
 
-    private Action? _drawMenuExtras;
 
     private bool _isRenamingSetup;
     private bool _setupRenameFocusPending;

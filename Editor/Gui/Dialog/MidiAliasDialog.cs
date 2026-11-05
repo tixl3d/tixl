@@ -92,9 +92,6 @@ internal sealed class MidiAliasDialog : ModalDialog
 
         if (BeginDialog(title))
         {
-            // The settings panel draws its sections at the left edge; form rows here need the label column
-            FormInputs.SetIndentToParameters();
-
             if (_sourceName != null)
             {
                 ImGui.TextUnformatted(_mode == Modes.RenameAlias ? $"Alias: {_sourceName}" : $"Device name: {_sourceName}");

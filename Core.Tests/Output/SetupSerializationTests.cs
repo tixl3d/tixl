@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Numerics;
 using Newtonsoft.Json.Linq;
 using T3.Core.DataTypes.Vector;
@@ -166,6 +167,73 @@ public class SetupSerializationTests
         var output = Assert.Single(setup.Outputs);
         Assert.Equal(OutputDefinition.Kinds.Default, output.Kind);
         Assert.Equal("Default", output.Name);
+    }
+
+    [Fact]
+    public void TryLoadFromFile_TakesNameFromFileName()
+    {
+        using var folder = new TemporaryFolder();
+        var copyPath = Path.Combine(folder.Path, "Hall_old" + Setup.FileSuffix);
+        Assert.True(Setup.CreateDefault("Hall").TrySaveToFile(copyPath));
+
+        Assert.True(Setup.TryLoadFromFile(copyPath, out var loaded, out _));
+
+        Assert.Equal("Hall_old", loaded.Name);
+    }
+
+    [Fact]
+    public void TrySaveToFile_ReplacesFileAndLeavesNoTemporaryFile()
+    {
+        using var folder = new TemporaryFolder();
+        var path = Path.Combine(folder.Path, "Hall" + Setup.FileSuffix);
+        Assert.True(Setup.CreateDefault("Hall").TrySaveToFile(path));
+
+        var edited = Setup.CreateDefault("Hall");
+        edited.Surfaces.Add(new Surface { Name = "Wall" });
+        Assert.True(edited.TrySaveToFile(path));
+
+        Assert.True(Setup.TryLoadFromFile(path, out var loaded, out _));
+        Assert.Single(loaded.Surfaces);
+        Assert.Single(Directory.GetFiles(folder.Path));
+    }
+
+    [Fact]
+    public void TryLoad_WithUnreadableActiveSetup_FallsBackAndLeavesItsFileAlone()
+    {
+        using var folder = new TemporaryFolder();
+        const string brokenContent = "{ not json";
+        var brokenPath = Path.Combine(folder.Path, "Hall" + Setup.FileSuffix);
+        File.WriteAllText(brokenPath, brokenContent);
+        Assert.True(Setup.CreateDefault("Club").TrySaveToFile(Path.Combine(folder.Path, "Club" + Setup.FileSuffix)));
+        Assert.True(new MachineConfig { ActiveSetupName = "Hall" }.TrySaveToFile(Path.Combine(folder.Path, MachineConfig.FileName)));
+
+        Assert.True(SetupFiles.TryLoad(folder.Path, out var setup, out _, out _));
+
+        Assert.Equal("Club", setup!.Name);
+        Assert.Equal(brokenContent, File.ReadAllText(brokenPath));
+    }
+
+    [Fact]
+    public void MachineConfigLoad_WhenUnreadable_KeepsACopyOfTheFile()
+    {
+        using var folder = new TemporaryFolder();
+        const string brokenContent = "{ not json";
+        var path = Path.Combine(folder.Path, MachineConfig.FileName);
+        File.WriteAllText(path, brokenContent);
+
+        Assert.False(MachineConfig.TryLoadFromFile(path, out var config));
+
+        Assert.Empty(config.Bindings);
+        Assert.Equal(brokenContent, File.ReadAllText(path + ".unreadable"));
+    }
+
+    private sealed class TemporaryFolder : IDisposable
+    {
+        public string Path { get; } = System.IO.Path.Combine(System.IO.Path.GetTempPath(), System.IO.Path.GetRandomFileName());
+
+        public TemporaryFolder() => Directory.CreateDirectory(Path);
+
+        public void Dispose() => Directory.Delete(Path, recursive: true);
     }
 
     private static Setup RoundTrip(Setup setup)

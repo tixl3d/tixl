@@ -1,11 +1,8 @@
 #nullable enable
 using ImGuiNET;
 using T3.Core.Output;
-using T3.Core.Output.Rendering;
-using T3.Core.Resource;
 using T3.Editor.Gui.Interaction.CanvasEditing;
 using T3.Editor.Gui.Styling;
-using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.Selection;
 using Vector2 = System.Numerics.Vector2;
 
@@ -13,29 +10,26 @@ namespace T3.Editor.Gui.Windows.OutputSetup;
 
 /// <summary>
 /// Calibrating a corner pin by its reference points, on the plain projector canvas: each point is a handle
-/// that can be walked onto the real feature, a disc of the straightened photo shows what to look for, and
-/// the pin is re-solved so every aimed point projects where it was dropped.
+/// that can be walked onto the real feature, a projected disc of the straightened photo shows what to look
+/// for, and the pin is re-solved so every set point projects where it was dropped.
 /// </summary>
 internal sealed partial class SetupOutputView
 {
     /// <summary>
     /// The focused surface's reference points as handles on the projector canvas. An idle point rides the pin
-    /// (it shows where the photo's feature currently lands); dragging it activates it — its target is where it
-    /// was dropped, in output pixels, and it never moves again on its own. The pin is re-solved from the
-    /// activated targets alone: exactly as free as they allow (one shifts, two turn and scale, three shear,
-    /// four keystone; beyond four the solve averages and the header reports the miss). Double-click resets a
-    /// point to idle. One undo step per drag or reset.
+    /// (it shows where the photo's feature currently lands); dragging it sets it — its target is where it was
+    /// dropped, in output pixels, and it never moves again on its own. The pin is re-solved from the set targets
+    /// alone: exactly as free as they allow (one shifts, two turn and scale, three shear, four keystone; beyond
+    /// four the solve averages and the header reports the miss). Double-click or "Release Point" returns a point
+    /// to idle. One undo step per drag or release. Everything but the handle and its label is in the composite,
+    /// so the canvas shows what the projector gets.
     /// </summary>
-    private void DrawReferencePointPins(Setup setup, ImDrawListPtr dl, Surface surface, Surface.OutputMapping mapping, Guid outputId,
-                                        Vector2 canvasSize, bool editable, float fade)
+    private void DrawReferencePointPins(Setup setup, ImDrawListPtr dl, AlignSubject subject, Surface.OutputMapping mapping, bool editable, float fade)
     {
+        var surface = subject.Pinned;
         var pinCanvas = SurfaceGeometry.CanvasSizeOf(setup, mapping.OutputId);
         if (!SurfaceGeometry.TryGetSurfaceToOutput(surface, mapping, pinCanvas, out var surfaceToOutput))
             return;
-
-        // The discs are always on the canvas — they are what says which feature a point marks; the toggle
-        // only decides whether they also go to the wall.
-        DrawCanvasPhotoDiscs(setup, dl, surface, mapping, surfaceToOutput, canvasSize, fade);
 
         var green = SetupColors.ForKind(SetupEntityKinds.Surface);
         var idleStyle = CanvasPointHandle.Style.Default(UiColors.ForegroundFull.Fade(0.6f * fade), CanvasPointHandle.Shapes.Circle, editable);
@@ -47,9 +41,10 @@ internal sealed partial class SetupOutputView
         activeStyle.Radius = 7;
 
         var ordinal = 0;
-        for (var i = 0; i < surface.Annotations.Count; i++)
+        var points = subject.Traced.Annotations;
+        for (var i = 0; i < points.Count; i++)
         {
-            var point = surface.Annotations[i];
+            var point = points[i];
             if (!point.IsPoint)
                 continue;
 
@@ -59,7 +54,7 @@ internal sealed partial class SetupOutputView
             // it first appeared on this output. Re-deriving it from the pin every frame would make it agree
             // with the pin by construction — and a mark that cannot disagree with the pin is worth nothing to
             // someone aligning one against a wall.
-            var aim = AimOf(mapping, point.Id, point.P1, surfaceToOutput, pinCanvas);
+            var aim = AimOf(mapping, point.Id, point.P1 + subject.TracedToPinned, surfaceToOutput, pinCanvas);
             var px = aim.Position * pinCanvas;
             var isAimed = aim.IsAimed;
 
@@ -70,40 +65,195 @@ internal sealed partial class SetupOutputView
 
             if (editable && hovered && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
             {
-                // Back to idle: the mark stays where it is, it just stops constraining the pin.
                 if (isAimed)
-                    SetupUndo.RunUndoable("Reset reference point", setup,
-                                             () => mapping.PointAims[point.Id] = aim with { IsAimed = false });
+                    ReleasePoint(setup, mapping, point.Id);
 
                 CancelGesture(); // the press that became this double-click must not also commit a drag
             }
             else if (phase == CanvasPointHandle.DragPhases.Started)
             {
-                BeginGesture(setup, GestureKinds.AimPoint, "Aim reference point", surface.Id);
-                SeedPointAims(setup, surface);
+                _activePointId = point.Id;
+                BeginPointMove(setup, subject, mapping);
             }
             else if (phase == CanvasPointHandle.DragPhases.Dragging && _gesture.Is(GestureKinds.AimPoint, surface.Id))
             {
                 mapping.PointAims[point.Id] = new Surface.OutputMapping.PointAim(px / pinCanvas, true);
-                SolvePinFromTargets(surface, mapping, pinCanvas);
+                SolvePinFromTargets(subject, mapping, pinCanvas);
             }
             else if (phase == CanvasPointHandle.DragPhases.Completed)
             {
                 EndGesture(setup);
             }
 
-            if (hovered || phase != CanvasPointHandle.DragPhases.None)
-                CalibrationOverlay.EmphasizeAnnotation(surface.Id, i);
-
-            // Where the pin currently sends this point. An arrow from the mark to it is the miss, drawn rather
-            // than hidden by moving the mark: it says which way and how far the pin is off at this point.
-            DrawProjectionArrow(dl, px, surfaceToOutput.TransformPoint(point.P1), fade);
-
-            var screen = _projection.CanvasToScreen(px);
             var markColor = isAimed ? green.Fade(0.9f * fade) : UiColors.ForegroundFull.Fade(0.5f * fade);
-            CanvasDraw.Crosshair(dl, screen, markColor, 9f, 1f);
-            DrawPointLabel(dl, screen, PointLabel(point.Name, ordinal), markColor);
+            DrawPointLabel(dl, _projection.CanvasToScreen(px), PointLabel(point.Name, ordinal), markColor);
         }
+
+        if (editable)
+            UpdatePointsFromGamepad(setup, subject, mapping, pinCanvas);
+    }
+
+    /** Opens the undo step of moving a point, and remembers the pin if this is the first move of an alignment. */
+    private void BeginPointMove(Setup setup, AlignSubject subject, Surface.OutputMapping mapping)
+    {
+        BeginGesture(setup, GestureKinds.AimPoint, "Aim reference point", subject.Pinned.Id);
+        SeedPointAims(setup, subject);
+        if (mapping.QuadBeforeAligning == null)
+        {
+            mapping.QuadBeforeAligning = (Vector2[])mapping.Quad.Clone();
+            mapping.ModeBeforeAligning = mapping.Mode;
+        }
+    }
+
+    /// <summary>
+    /// What "Align Points" calibrates: the surface whose pin is solved, and the traced surface whose photo and
+    /// reference points it is aligned by. Both are the same surface, unless a region has a pin of its own while
+    /// the photo belongs to an ancestor; then <see cref="TracedToPinned"/> carries the points into the region's space.
+    /// </summary>
+    private readonly record struct AlignSubject(Surface Pinned, Surface Traced, Vector2 TracedToPinned);
+
+    /// <summary>
+    /// The subject "Align Points" works on: the one the selection resolves to, or, with nothing on this output's
+    /// canvas selected, the only surface mapped here that has a photo. With several such surfaces the choice is
+    /// the user's, which <paramref name="hasSeveralCandidates"/> reports.
+    /// </summary>
+    private bool TryFindAlignSubject(Setup setup, Guid outputId, out AlignSubject subject, out bool hasSeveralCandidates)
+    {
+        hasSeveralCandidates = false;
+        var selected = SurfaceGeometry.FindMappingCarrier(setup, _shownSurfaceId, outputId);
+        if (selected != null)
+            return TryGetAlignSubject(setup, selected, out subject);
+
+        subject = default;
+        var isFound = false;
+        foreach (var surface in setup.Surfaces)
+        {
+            if (!surface.HasMapping(outputId) || !TryGetAlignSubject(setup, surface, out var candidate))
+                continue;
+
+            if (isFound)
+            {
+                hasSeveralCandidates = true;
+                subject = default;
+                return false;
+            }
+
+            subject = candidate;
+            isFound = true;
+        }
+
+        return isFound;
+    }
+
+    private static bool TryGetAlignSubject(Setup setup, Surface pinned, out AlignSubject subject)
+    {
+        subject = default;
+        var traced = FindTraceCarrier(setup, pinned.Id);
+        if (traced == null)
+            return false;
+
+        var tracedToPinned = Vector2.Zero;
+        if (traced != pinned)
+        {
+            if (!SurfaceGeometry.TryGetRegionRect(setup, traced, pinned, out var regionMin, out _, out _))
+                return false;
+
+            // Both spaces are metres on the same plane, measured from each surface's anchor.
+            tracedToPinned = -regionMin - pinned.AnchorInMeters;
+        }
+
+        subject = new AlignSubject(pinned, traced, tracedToPinned);
+        return true;
+    }
+
+    /// <summary>
+    /// The window of the traced surface's photo that the pinned region covers. The photo is straightened for the
+    /// traced surface, so its UV range has to be narrowed to where the region sits on it.
+    /// </summary>
+    private static void NarrowPhotoUvToPinned(AlignSubject subject, ref Vector2 uvMin, ref Vector2 uvMax)
+    {
+        if (subject.Traced == subject.Pinned)
+            return;
+
+        SurfaceGeometry.LocalBounds(subject.Traced, out var tracedMin, out var tracedMax);
+        var tracedSpan = Vector2.Max(tracedMax - tracedMin, new Vector2(0.0001f));
+        SurfaceGeometry.LocalBounds(subject.Pinned, out var pinnedMin, out var pinnedMax);
+        var regionMin = (pinnedMin - subject.TracedToPinned - tracedMin) / tracedSpan;
+        var regionMax = (pinnedMax - subject.TracedToPinned - tracedMin) / tracedSpan;
+
+        // Metres run up, V runs down.
+        var uvSpan = uvMax - uvMin;
+        var narrowedMin = new Vector2(uvMin.X + uvSpan.X * regionMin.X, uvMin.Y + uvSpan.Y * (1 - regionMax.Y));
+        var narrowedMax = new Vector2(uvMin.X + uvSpan.X * regionMax.X, uvMin.Y + uvSpan.Y * (1 - regionMin.Y));
+        uvMin = narrowedMin;
+        uvMax = narrowedMax;
+    }
+
+    /// <summary>"Release Point": the active point's way back to idle, disabled while it isn't set.</summary>
+    private void DrawReleasePointButton(Setup setup, Surface surface, Guid outputId)
+    {
+        var mapping = surface.FindMapping(outputId);
+        var canRelease = mapping != null && mapping.PointAims.TryGetValue(_activePointId, out var aim) && aim.IsAimed;
+        ImGui.BeginDisabled(!canRelease);
+        if (CustomComponents.StateButton("Release Point", CustomComponents.ButtonStates.Default) && canRelease)
+            ReleasePoint(setup, mapping!, _activePointId);
+
+        ImGui.EndDisabled();
+        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+            ImGui.SetTooltip(canRelease
+                                 ? "The active point stops constraining the pin and returns to where the pin lands it. The pin does not change."
+                                 : "Drag a point to set it. The last one you moved is the active one.");
+    }
+
+    /// <summary>
+    /// "Reset Alignment": forgets every target on this output and puts the pin back to where it was before the
+    /// first point was aimed. A pin aligned before that was remembered falls back to filling the canvas, which is
+    /// where a new mapping starts.
+    /// </summary>
+    private void DrawResetAlignmentButton(Setup setup, Surface surface, Guid outputId)
+    {
+        var mapping = surface.FindMapping(outputId);
+        var canReset = mapping != null && (mapping.PointAims.Count > 0 || mapping.QuadBeforeAligning != null || !mapping.IsFilling);
+        ImGui.BeginDisabled(!canReset);
+        if (CustomComponents.StateButton("Reset Alignment", CustomComponents.ButtonStates.Default) && canReset)
+        {
+            ResetAlignment(setup, mapping!);
+        }
+
+        ImGui.EndDisabled();
+        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+            ImGui.SetTooltip(canReset
+                                 ? mapping!.QuadBeforeAligning != null
+                                       ? "Releases every point and puts the corner pin back to where it was before aligning."
+                                       : "Releases every point and lets the surface fill the canvas again."
+                                 : "The surface fills the canvas and no point has been moved.");
+    }
+
+    private void ResetAlignment(Setup setup, Surface.OutputMapping mapping)
+    {
+        SetupUndo.RunUndoable("Reset alignment", setup, () => RestorePinBeforeAligning(mapping));
+        _pinResidualPx = 0;
+        _activePointId = Guid.Empty;
+    }
+
+    private static void RestorePinBeforeAligning(Surface.OutputMapping mapping)
+    {
+        mapping.PointAims.Clear();
+        if (mapping.QuadBeforeAligning == null)
+        {
+            mapping.FillCanvas();
+            return;
+        }
+
+        mapping.Quad = mapping.QuadBeforeAligning;
+        mapping.Mode = mapping.ModeBeforeAligning;
+        mapping.QuadBeforeAligning = null;
+    }
+
+    /** Back to idle: the point stops constraining the pin and returns to where the pin lands it. */
+    private static void ReleasePoint(Setup setup, Surface.OutputMapping mapping, Guid pointId)
+    {
+        SetupUndo.RunUndoable("Release reference point", setup, () => mapping.PointAims.Remove(pointId));
     }
 
     /// <summary>
@@ -127,141 +277,21 @@ internal sealed partial class SetupOutputView
     /// marks stand still while the pin moves, which is what makes the miss between them visible. Before that
     /// the two agree by construction, so nothing needs storing — and nothing gets written from a mere view.
     /// </summary>
-    private static void SeedPointAims(Setup setup, Surface surface)
+    private static void SeedPointAims(Setup setup, AlignSubject subject)
     {
-        foreach (var mapping in surface.OutputMappings)
+        foreach (var mapping in subject.Pinned.OutputMappings)
         {
             var canvasSize = SurfaceGeometry.CanvasSizeOf(setup, mapping.OutputId);
-            if (!SurfaceGeometry.TryGetSurfaceToOutput(surface, mapping, canvasSize, out var surfaceToOutput))
+            if (!SurfaceGeometry.TryGetSurfaceToOutput(subject.Pinned, mapping, canvasSize, out var surfaceToOutput))
                 continue;
 
-            foreach (var point in surface.Annotations)
+            foreach (var point in subject.Traced.Annotations)
             {
                 if (!point.IsPoint || mapping.PointAims.ContainsKey(point.Id))
                     continue;
 
-                mapping.PointAims[point.Id] = AimOf(mapping, point.Id, point.P1, surfaceToOutput, canvasSize);
+                mapping.PointAims[point.Id] = AimOf(mapping, point.Id, point.P1 + subject.TracedToPinned, surfaceToOutput, canvasSize);
             }
-        }
-    }
-
-    /// <summary>
-    /// The miss at one reference point: from its mark to where the current pin actually projects it. Nothing is
-    /// drawn while the two agree — an arrow that is always there stops being a signal.
-    /// </summary>
-    private void DrawProjectionArrow(ImDrawListPtr dl, Vector2 markInCanvas, Vector2 projectedInCanvas, float fade)
-    {
-        var from = _projection.CanvasToScreen(markInCanvas);
-        var to = _projection.CanvasToScreen(projectedInCanvas);
-        var delta = to - from;
-        var length = delta.Length();
-        var scale = T3Ui.UiScaleFactor;
-        if (length < 6 * scale)
-            return;
-
-        // Stops short of both ends so the mark and the projected spot stay readable under it.
-        var direction = delta / length;
-        var start = from + direction * 7 * scale;
-        var end = to - direction * 3 * scale;
-        var color = UiColors.StatusAttention.Fade(0.8f * fade);
-        dl.AddLine(start, end, color, 1.5f * scale);
-
-        var head = 5 * scale;
-        var side = new Vector2(-direction.Y, direction.X) * head * 0.5f;
-        dl.AddTriangleFilled(end, end - direction * head + side, end - direction * head - side, color);
-        CanvasDraw.Crosshair(dl, to, color, 4f, 1f);
-    }
-
-    /// <summary>
-    /// A disc of the surface's straightened photo around each reference point: the wall's own picture, right
-    /// where the feature is, so a mark can be walked onto it. Centred on the marks, not on where the pin
-    /// projects them — the disc belongs to its mark and stands still with it.
-    /// </summary>
-    private void DrawCanvasPhotoDiscs(Setup setup, ImDrawListPtr dl, Surface surface, Surface.OutputMapping mapping,
-                                      in Homography surfaceToOutput, Vector2 canvasSize, float fade)
-    {
-        if (!TryGetTracedFragment(setup, surface, out var fragmentSrv, out var photo, out var uvMin, out var uvMax))
-            return;
-
-        // The pin is stored as fractions of the canvas; this warp works in its pixels, like the view around it.
-        for (var c = 0; c < 4; c++)
-            _canvasDiscQuad[c] = mapping.Quad[c] * canvasSize;
-
-        CanvasDraw.Bounds(_canvasDiscQuad, out var bboxMin, out var bboxMax);
-        var bboxSize = bboxMax - bboxMin;
-
-        // A pin that has collapsed — or gone non-finite mid-solve — has no area to warp into: the target would
-        // be a pixel or two across and every disc would come out a single smeared colour. That is the state you
-        // are most likely to be in while fixing a bad pin, which is exactly when the discs have to be there.
-        var pinIsUsable = float.IsFinite(bboxSize.X) && float.IsFinite(bboxSize.Y)
-                          && bboxSize.X >= MinDiscWarpExtent && bboxSize.Y >= MinDiscWarpExtent;
-
-        T3.Graphics.Compat.ShaderResourceView? srv = null;
-        if (pinIsUsable)
-        {
-            var scale = MathF.Min(1f, 2048f / MathF.Max(bboxSize.X, bboxSize.Y));
-            for (var c = 0; c < 4; c++)
-                _canvasDiscQuad[c] = (_canvasDiscQuad[c] - bboxMin) * scale;
-
-            var size = new T3.Core.DataTypes.Vector.Int2(Math.Max(1, (int)(bboxSize.X * scale)),
-                                                         Math.Max(1, (int)(bboxSize.Y * scale)));
-            var warped = OutputCompositor.RenderWarpedTexture(photo, _canvasDiscQuad, size, _canvasDiscKey,
-                                                           new Vector4(uvMin.X, uvMin.Y, uvMax.X, uvMax.Y));
-            srv = warped is { IsDisposed: false } ? SrvManager.GetSrvForTexture(warped) : null;
-        }
-
-        // Fall back to the straightened photo itself: upright and a fixed size, so it is wrong about the
-        // keystone and right about what the feature looks like — which is all the disc is for.
-        var upright = srv is not { IsDisposed: false };
-        if (upright)
-            srv = fragmentSrv;
-
-        if (srv is not { IsDisposed: false })
-            return;
-
-        SurfaceGeometry.LocalBounds(surface, out var surfaceMin, out var surfaceMax);
-        var surfaceSpan = Vector2.Max(surfaceMax - surfaceMin, new Vector2(0.0001f));
-        var uvSpan = uvMax - uvMin;
-        var uvRadius = uvSpan * UserSettings.Config.OutputSetupPhotoDiscRadius;
-
-        var radius = canvasSize.Y * UserSettings.Config.OutputSetupPhotoDiscRadius;
-        var tint = UiColors.ForegroundFull.Fade(fade);
-        foreach (var point in surface.Annotations)
-        {
-            if (!point.IsPoint)
-                continue;
-
-            var centre = AimOf(mapping, point.Id, point.P1, surfaceToOutput, canvasSize).Position * canvasSize;
-            var min = centre - new Vector2(radius);
-            var max = centre + new Vector2(radius);
-
-            Vector2 uv0, uv1;
-            if (upright)
-            {
-                // The point's place in the surface's own rectangle, into the fragment's window. Surface metres
-                // run Y-up, the photo's V downward.
-                var inSurface = new Vector2((point.P1.X - surfaceMin.X) / surfaceSpan.X,
-                                            1f - (point.P1.Y - surfaceMin.Y) / surfaceSpan.Y);
-                var centreUv = uvMin + uvSpan * inSurface;
-                uv0 = centreUv - uvRadius;
-                uv1 = centreUv + uvRadius;
-            }
-            else
-            {
-                // Sampled around where the pin puts *this* point, not around the mark. The disc has to keep
-                // showing the feature it belongs to: reading the warp at the mark would show whatever the photo
-                // happens to cover there, so every disc's picture would slide whenever any other point is
-                // dragged. It still carries the pin's own distortion, which is what makes it comparable to the
-                // wall — only the feature inside it stays the same one.
-                var sampled = surfaceToOutput.TransformPoint(point.P1);
-                uv0 = (sampled - new Vector2(radius) - bboxMin) / bboxSize;
-                uv1 = (sampled + new Vector2(radius) - bboxMin) / bboxSize;
-            }
-
-            var screenMin = _projection.CanvasToScreen(min);
-            var screenMax = _projection.CanvasToScreen(max);
-            dl.AddImageRounded((IntPtr)srv.ImGuiTextureId, screenMin, screenMax, uv0, uv1, tint, (screenMax.X - screenMin.X) * 0.5f, ImDrawFlags.RoundCornersAll);
-            dl.AddCircle((screenMin + screenMax) * 0.5f, (screenMax.X - screenMin.X) * 0.5f, UiColors.BackgroundFull.Fade(0.5f * fade), 0, 1f);
         }
     }
 
@@ -270,8 +300,9 @@ internal sealed partial class SetupOutputView
     /// incremental — the transform taking the current projections to the targets, applied to the pin; from
     /// four on it is the (least-squares) homography from surface metres straight to the targets.
     /// </summary>
-    private void SolvePinFromTargets(Surface surface, Surface.OutputMapping mapping, Vector2 canvasSize)
+    private void SolvePinFromTargets(AlignSubject subject, Surface.OutputMapping mapping, Vector2 canvasSize)
     {
+        var surface = subject.Pinned;
         // Solved in the canvas' own 0..1 space, because that is what the quad it writes is stored in — a solve
         // in pixels would put pixel numbers into a normalized pin and throw the surface off the canvas.
         // Vector2.One: the mapping is read and written in the same space, so the two cancel.
@@ -281,16 +312,17 @@ internal sealed partial class SetupOutputView
         _pinFrom.Clear();
         _pinTargets.Clear();
         _pinSurfacePositions.Clear();
-        foreach (var point in surface.Annotations)
+        foreach (var point in subject.Traced.Annotations)
         {
             // Only aimed points constrain: an un-aimed mark is where the pin happened to put the point, so
             // feeding it back in would just ask the solve to keep the pin exactly as it already is.
             if (!point.IsPoint || !mapping.PointAims.TryGetValue(point.Id, out var aim) || !aim.IsAimed)
                 continue;
 
-            _pinFrom.Add(surfaceToOutput.TransformPoint(point.P1));
+            var pointInSurface = point.P1 + subject.TracedToPinned;
+            _pinFrom.Add(surfaceToOutput.TransformPoint(pointInSurface));
             _pinTargets.Add(aim.Position);
-            _pinSurfacePositions.Add(point.P1);
+            _pinSurfacePositions.Add(pointInSurface);
         }
 
         _pinResidualPx = 0;
@@ -336,11 +368,11 @@ internal sealed partial class SetupOutputView
     /// <summary>Canvas pixels a pin's bounding box must span before it is worth warping a photo through.</summary>
     private const float MinDiscWarpExtent = 8f;
 
-    // Projected photo discs: whether the traced photo is projected through the pin, its warp target, and the
-    // warp cache key.
+    /** Whether "Align Points" is on: the reference points are projected and can be dragged. */
     private bool _projectsPhoto;
-    private readonly Vector2[] _canvasDiscQuad = new Vector2[4];
-    private static readonly Guid _canvasDiscKey = new("6a1f0c2e-7b3d-4e8f-9a0b-1c2d3e4f5a6b");
+
+    /** The point moved last, whose outline blinks on the wall; further moves and "Release Point" apply to it. */
+    private Guid _activePointId;
 
     // Pin solve: the worst miss in pixels, and the scratch lists rebuilt per solve.
     private float _pinResidualPx;

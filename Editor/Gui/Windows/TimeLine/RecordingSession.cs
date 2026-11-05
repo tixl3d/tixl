@@ -450,24 +450,18 @@ internal static class RecordingSession
     /// <summary>
     /// Canvas position for a fresh recording-clip op of type <paramref name="anchorSymbolId"/>.
     /// Anchors below the lowest existing op of the same type (so successive recordings stay in a
-    /// tidy column), re-centres on the viewport when that anchor is off-screen, then hands the
-    /// preferred spot to <see cref="GraphUtils.FindFreePosition"/> for collision-avoidance —
-    /// without that last step, repeated recordings that all re-centre to the same viewport pile
-    /// up on top of each other.
+    /// tidy column), and falls back to <see cref="GraphUtils.FindFreePositionInView"/> when there
+    /// is no such op or that anchor is off-screen.
     /// </summary>
     private static Vector2 FindFreeCanvasPositionForClip(Symbol compositionSymbol, Guid anchorSymbolId)
     {
         const float spacingY = 80f;
-        const float defaultX = 0f;
-        const float defaultY = 200f;
-
-        var preferred = new Vector2(defaultX, defaultY);
 
         if (!SymbolUiRegistry.TryGetSymbolUi(compositionSymbol.Id, out var compositionUi))
-            return preferred;
+            return new Vector2(0, 200);
 
         var maxY = float.NegativeInfinity;
-        var anchorX = defaultX;
+        var anchorX = 0f;
         foreach (var (childId, childUi) in compositionUi.ChildUis)
         {
             if (!compositionSymbol.Children.TryGetValue(childId, out var symbolChild))
@@ -482,20 +476,16 @@ internal static class RecordingSession
             }
         }
 
-        if (!float.IsNegativeInfinity(maxY))
-            preferred = new Vector2(anchorX, maxY + spacingY);
+        if (float.IsNegativeInfinity(maxY))
+            return GraphUtils.FindFreePositionInView(compositionUi);
 
-        // Re-centre on the visible canvas when the stack-anchor candidate is off-screen,
-        // so a new clip doesn't land far outside the viewport where it looks like nothing
-        // happened.
-        if (ProjectView.Focused?.GraphView is ScalableCanvas canvas)
-        {
-            var visible = canvas.GetVisibleCanvasArea();
-            if (visible.GetWidth() > 0 && visible.GetHeight() > 0 && !visible.Contains(preferred))
-                preferred = visible.GetCenter();
-        }
+        var preferred = new Vector2(anchorX, maxY + spacingY);
 
-        return GraphUtils.FindFreePosition(compositionUi, preferred, SymbolUi.Child.DefaultOpSize);
+        // A clip landing far outside the viewport looks like nothing happened.
+        var isPreferredVisible = ProjectView.Focused?.GraphView.Canvas.GetLastVisibleCanvasArea().Contains(preferred) ?? false;
+        return isPreferredVisible
+                   ? GraphUtils.FindFreePosition(compositionUi, preferred, SymbolUi.Child.DefaultOpSize)
+                   : GraphUtils.FindFreePositionInView(compositionUi);
     }
 
     /// <summary>

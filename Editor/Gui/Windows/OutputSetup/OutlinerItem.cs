@@ -1,6 +1,8 @@
 #nullable enable
 using ImGuiNET;
+using T3.Core.DataTypes.Vector;
 using T3.Core.Output;
+using T3.Core.Utils;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.Selection;
@@ -248,7 +250,7 @@ internal sealed class OutlinerItem
         // hovering (from here or from the canvas) merely lifts.
         if (isSelected)
         {
-            dl.AddRectFilled(rowMin, rowMax, kindColor.Fade(0.6f), rounding);
+            dl.AddRectFilled(rowMin, rowMax, kindColor.Fade(isHovered || menuOpen ? 0.8f : 0.6f), rounding);
         }
         else
         {
@@ -348,6 +350,10 @@ internal sealed class OutlinerItem
             CustomComponents.StylizedText(args.Status, Fonts.FontSmall, UiColors.TextMuted.Fade(fade));
         }
 
+        if (kindInfo.IsRoutable && args.Kind != SetupEntityKinds.Plug)
+            DrawConnectionDot(dl, args.Id, new Vector2(rowMax.X, (rowMin.Y + rowMax.Y) * 0.5f), isHovered || isActive,
+                              (isSelected ? UiColors.ForegroundFull : kindColor).Fade(fade));
+
         // Next item starts a tight 2px below, independent of the content cursor above. Claimed with a zero-height
         // item (no spacing) rather than a bare cursor set: ImGui asserts on a window whose extent was only ever
         // extended by SetCursorPos, which is exactly what the last item of the last section would do.
@@ -383,6 +389,17 @@ internal sealed class OutlinerItem
     /// parent expands, the strip scrolls to it. Cleared once the row has drawn its field.</summary>
     public static Guid RevealPendingId => _renameFocusPending ? _renamingId : Guid.Empty;
 
+    /** Sits where the item's connections start, hinting that a drag from the item routes it to the next column. */
+    private void DrawConnectionDot(ImDrawListPtr dl, Guid id, Vector2 center, bool isEnlarged, Color color)
+    {
+        _connectionDotGrowth.TryGetValue(id, out var growth);
+        growth.DampTowards(isEnlarged ? 1f : 0f, 0.75f);
+        _connectionDotGrowth[id] = growth;
+
+        var radius = (2.5f + 2f * growth) * T3Ui.UiScaleFactor;
+        dl.AddCircleFilled(center, radius, color);
+    }
+
     private static void HandleDragDrop(Setup setup, SetupEntityKindInfo kindInfo, Guid id, bool allowSource)
     {
         // Every routable kind is both a drag source and a drop target — connections are direction-agnostic
@@ -404,12 +421,27 @@ internal sealed class OutlinerItem
             || !SetupRouting.TryParseDrag(dragData, out var dragKind, out var dragId))
             return;
 
-        if (!SetupRouting.CanConnect(dragKind, kind) || dragId == id)
+        // Content onto content only connects a missing item to an op; it isn't a routing pair.
+        var connectsMissingContent = kind == SetupEntityKinds.ContentSource
+                                     && dragKind == SetupEntityKinds.ContentSource
+                                     && ContentSourceSync.IsSendOpMissing(dragId) != ContentSourceSync.IsSendOpMissing(id);
+        if ((!SetupRouting.CanConnect(dragKind, kind) && !connectsMissingContent) || dragId == id)
             return;
 
-        if (DragAndDropHandling.TryHandleDropOnItem(DragAndDropHandling.DragTypes.SetupEntity, out _) == DragAndDropHandling.DragInteractionResult.Dropped)
+        if (DragAndDropHandling.TryHandleDropOnItem(DragAndDropHandling.DragTypes.SetupEntity, out _) != DragAndDropHandling.DragInteractionResult.Dropped)
+            return;
+
+        if (connectsMissingContent)
+        {
+            ContentSourceSync.TryConnectMissingSource(setup, dragId, id);
+        }
+        else
+        {
             SetupRouting.ApplyDrop(setup, dragKind, dragId, kind, id);
+        }
     }
+
+    private readonly Dictionary<Guid, float> _connectionDotGrowth = [];
 
     // The press being dragged, and whether its first movement made it a reorder rather than a routing drag.
     private static Guid _dragDecidedId;

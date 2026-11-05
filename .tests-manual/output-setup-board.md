@@ -6,7 +6,7 @@ tags: [projection-mapping]
 added: 2026-09-05
 added-in-version: 4.3
 prerequisites:
-  - A writable project is open whose active setup has one SendToOutput with content, one surface mapped to an output, one patch, one prop and one reference image (the "Output Setup — Patches" and "Properties in the Parameter Window" sets build most of this).
+  - A writable project is open whose active setup has one SendToOutput with content, one surface mapped to an output, one patch, one person and one reference image (the "Output Setup — Patches" and "Properties in the Parameter Window" sets build most of this).
   - The graph window, the Parameter window and one output window with the Flow Outliner shown are visible.
 ---
 
@@ -31,7 +31,7 @@ never leaves the Board; only a double-click enters an entity's space. Fading bet
   cards laid out on it — the reference image at the far left, the content card with its live
   texture and the slice drawn as a labelled sub-rect, "Surface 1" standing on the floor at
   its metre size with "1×1 m" beside its name, the output card at the right with the live
-  composite and "Patch 1" drawn inside it, and a stick figure labelled "1.7 m" standing on
+  composite and "Patch 1" drawn inside it, and a person silhouette labelled "1.8 m" standing on
   the floor. The window has no toolbar of its own: the outliner strip's header row carries a
   grip, the setup's name in an outlined control with a chevron, and the segmented control
   **Board · Straight · Output** with **Board** active, then the **Overlay** percent field.
@@ -43,12 +43,24 @@ never leaves the Board; only a double-click enters an entity's space. Fading bet
 - After 3: the Straight canvas opens for the surface; the Board tab brings the Board back with
   "Surface 1" highlighted and the same layout as before.
 
+## Step: Empty columns explain themselves
+
+**Action:**
+1. Click the setup's name in the outliner header and choose **New (Empty)**.
+2. Click the **+** in the SURFACES column.
+3. Click the setup's name, then **Delete**, to remove the empty setup again.
+
+**Expected:**
+- After 1: CONTENT, SURFACES, OUTPUTS and LOCAL BINDINGS each show a gray sentence in the normal font, centered horizontally and in the free height below the items. LOCAL BINDINGS keeps its displays listed above its sentence, which says to drag an output onto one. If the project's graph contains a SendToOutput, CONTENT lists it instead of showing the sentence.
+- After 2: "Surface 1" appears and the SURFACES sentence is gone; the other three remain.
+- After 3: the previous setup is back with no sentences in columns that have items.
+
 ## Step: Selection look and the Board menu
 
 **Action:**
 1. Click the "Surface 1" card; hover the content card without clicking; move the mouse away.
 2. Right-click empty Board and choose **Add Reference Image**; right-click again and choose
-   **Add Prop**.
+   **Add Person** → **Man Pointing**.
 3. With the new image selected, click the **Straight** tab, then the **Board** tab.
 
 **Expected:**
@@ -57,7 +69,7 @@ never leaves the Board; only a double-click enters an entity's space. Fading bet
   beside the name. The hovered content card brightens its magenta frame and shows its
   resolution; both go back to muted when the mouse leaves. Nothing turns blue or white
   anywhere: hover and selection only change the hue's opacity and the line width.
-- After 2: an empty image card and a stick figure appear on the Board and are selected in
+- After 2: an empty image card and a person silhouette appear on the Board and are selected in
   turn; there is no REFERENCE IMAGES or PROPS column in the strip.
 - After 3: the Straight tab is disabled for an image without a traced surface, so the Board
   stays; the segmented control keeps its three tabs Board · Straight · Output.
@@ -93,6 +105,41 @@ zooming in on one corner of it; then zoom all the way out.
   move.
 - After 3: the figure moves and undo returns it.
 - After 4: nothing is selected and the Board stays.
+
+## Step: The + menu adds to the visible part of the Board
+
+**Action:**
+1. On the Board, right-drag the view until no card is visible, keeping about 20 m of the grid in view.
+2. Click the **+** at the right of the outliner header and choose **Add Person** → **Man Pointing**.
+3. Click **+** again and choose **Add Reference Image**.
+4. Click **+** again, choose **Add Floor Plan...** and click **Create**.
+5. Press Ctrl+Z three times.
+
+**Expected:**
+- After 2: the person stands with their feet at the centre of the view and is selected; the view doesn't move.
+- After 3: the image card's bottom-left corner sits at the centre of the view.
+- After 4: the floor plan's bottom-left corner sits at the centre of the view.
+- After 5: all three are gone.
+
+## Step: Alt-drag duplicates a slice
+
+**Action:**
+1. Click the "Slice 1" item in the CONTENT column, then drag the right edge handle of its sub-rect on the content
+   card to the middle of the card.
+2. Hold Alt, click the "Slice 1" label on the card and release without moving the mouse.
+3. Hold Alt and drag the "Slice 1" label to the right half of the card; release.
+4. Press Ctrl+Z once.
+5. Click an empty spot of the Board so nothing is selected, then hold Alt and drag the "Slice 1" label to the right
+   half of the card in one press; release.
+6. Press Ctrl+Z once, click an empty spot of the Board, then drag the "Slice 1" label 1 cm to the right in one press
+   without Alt; release.
+
+**Expected:**
+- After 2: no copy appears; the CONTENT column still lists one slice under the op.
+- After 3: "Slice 1 copy" sits in the right half and is selected, and "Slice 1" stays in the left half at its old size.
+- After 4: "Slice 1 copy" is gone and "Slice 1" is unchanged, in one undo step.
+- After 5: the same result as after 3, from a single press on the unselected slice.
+- After 6: "Slice 1" is selected and has moved with the cursor; no copy appears.
 
 ## Step: Fence and group drag
 
@@ -169,6 +216,25 @@ down to 0%, then up to 100% (or double-click it and type).
 - After 1: the view eases so the figure fills most of the window.
 - After 2: the view eases back to frame every card.
 
+## Step: Scaling a multi-selection
+
+**Action:**
+1. Add a second surface, so "Surface 1" and "Surface 2" are both 1×1 m and stand on the floor, 1 m apart with
+   "Surface 2" on the right. Click "Surface 1", then Ctrl+click "Surface 2".
+2. Drag the top-right corner handle of "Surface 2" up and right until the selection is about twice as wide;
+   release.
+3. Press Ctrl+Z.
+4. Hold Ctrl and drag the right edge handle of "Surface 2" 1.5 m to the right; release.
+
+**Expected:**
+- After 2: the two surfaces scale as one group while the handle stays under the cursor: both read about
+  2×2 m, the gap between them doubles to about 2 m, and "Surface 1"'s bottom-left corner stays where it was.
+  They don't overlap, and both still stand on the floor.
+- After 3: sizes and positions return in one step.
+- After 4: both surfaces and the gap get wider by the same factor and both stay 1 m high.
+- With a person selected too, it scales with the group in step 2, feet staying on the floor, and is left
+  alone in step 4.
+
 ## Step: Cards snap to each other and to the floor
 
 **Action:**
@@ -200,7 +266,8 @@ down to 0%, then up to 100% (or double-click it and type).
 **Action:**
 1. With nothing selected, click inside "Region 1" on the "ApmtWall" card (not on its name chip).
 2. Click the same spot again.
-3. Click empty Board; hold Ctrl and hover over "Region 1", then Ctrl-click it.
+3. Click empty Board; click "Region 1"; then Ctrl-click a second region that doesn't overlap it; Shift-click
+   it again.
 4. With "Region 1" selected, press and drag inside its body (not on the name chip) by 20 cm;
    release; press Ctrl+Z.
 5. Press Escape; press Enter; press Escape twice.
@@ -217,11 +284,11 @@ down to 0%, then up to 100% (or double-click it and type).
     press Ctrl+Z.
 
 **Expected:**
-- After 1: the "ApmtWall" card is selected, not the region; the region does not light up on
-  hover before that click.
-- After 2: now "Region 1" is selected (the selected card handed the click down one level).
-- After 3: with Ctrl held the region lights up on hover straight away, and the click selects it
-  without the card being selected first. Ctrl does not toggle on the Board.
+- After 1: "Region 1" is selected, not the card.
+- After 2: now "ApmtWall" is selected (the click walked outward to the container); one more click on
+  that spot returns to "Region 1".
+- After 3: the Ctrl-click adds the second region, so both are selected; the Shift-click removes it again.
+  The card never gets selected along the way.
 - After 4: the region moves with the drag, snapping to the card's edges and centre like a name
   chip drag; Ctrl+Z puts it back in one step.
 - After 5: Escape selects the parent "ApmtWall"; Enter selects its regions ("Region 1"); the
@@ -250,9 +317,44 @@ Select the content card and drag its square top-right handle inward until the ca
 its width. Then open the Output tab and check the send's Resolution in the Parameter window.
 
 **Expected:**
+- From the first pixel of the drag the handle stays under the cursor, also on a freshly dropped
+  reference image that was never scaled: the card doesn't jump to a large size.
 - The card shrinks keeping its aspect; its "1920×1080" metadata does not change, nor does the
   op's resolution or the patch on the output. Hovering the handle explains that it is
   presentation only.
+
+## Step: Double-clicking a label renames
+
+**Action:**
+1. On the Board, add a region to "Surface 1" and collapse "Surface 1" in the outliner. Double-click the region's
+   centre label on the card.
+2. Type a new name and press Enter.
+3. Double-click the output card's "Patch 1" label, then press Escape.
+4. Double-click the region's frame away from its label.
+
+**Expected:**
+- After 1: the view stays on the Board. "Surface 1" unfolds and the region's outliner row shows its name field, focused.
+- After 2: the label on the card shows the new name.
+- After 3: the view stays on the Board and the patch's outliner row was in rename; Escape leaves the name as it was.
+- After 4: the view enters the surface's Straight space, as a double-click on a card does.
+
+## Step: Return renames, Alt+drag copies a region
+
+**Action:**
+1. Click a region once on the Board, then press Return with the mouse over the canvas.
+2. Type a name and press Return.
+3. Collapse the strip with the chevron in its header, then press Return again; press Escape.
+4. Ctrl+click a second region, so two are selected, and press Return.
+5. Click one region. Hold Alt and click its body without moving; then hold Alt and drag it 50 cm to the right; release.
+6. Press Ctrl+Z.
+
+**Expected:**
+- After 1: the region's outliner row shows its name field, focused.
+- After 2: the name changes and the field closes; that Return doesn't reopen it.
+- After 3: the strip opens with the field focused; Escape leaves the name as it was.
+- After 4: nothing happens.
+- After 5: the Alt+click adds nothing. The drag moves a new selected region and the original stays where it was.
+- After 6: the copy is gone in one step.
 
 ## Step: Double-click enters a space
 
@@ -354,14 +456,16 @@ its width. Then open the Output tab and check the send's Resolution in the Param
     edge handle again and release. Hold Ctrl once more and look at the handles.
 3. Click **+ Line** in the header and drag along a mortar line of the brick wall; repeat for a
    vertical feature (a door frame); click **Straighten**.
-4. Double-click one of the lines, type its real length in metres, **Set**, then **Apply lengths**.
+4. Click one of the lines, type its real length in metres, **Set**, then **Apply lengths**.
 5. Right-click the "Surface 1" item in the SURFACES column and choose **Add region**.
 6. Click the **Board** tab.
 
 **Expected:**
 - After 1: the edge crops the wall — the frame widens with the cursor and the surface's **Size
   (m)** grows along X to match, so the picture keeps its proportions instead of squeezing into a
-  frame that kept its aspect. The traced quad on the image card crops along. Ctrl+Z restores
+  frame that kept its aspect. The left, top and bottom edges and the photo stay exactly where they
+  are on screen, also on a surface traced at a steep angle. The left edge handle behaves the same way,
+  with the right edge staying put. The traced quad on the image card crops along. Ctrl+Z restores
   both in one step.
 - After 2: a corner refines the trace instead: dragging pulls the wall's corner into the frame's
   corner, live, and the frame never re-centres. Lines and points already drawn travel with the
@@ -396,6 +500,39 @@ its width. Then open the Output tab and check the send's Resolution in the Param
   the metadata while dragging, and the green traced quad on the image card crops along with
   it.
 
+## Step: The line tool stays active
+
+**Action:**
+1. With "Surface 1" straightened, click **+ Line** in the header, then drag three separate lines on the photo.
+2. Press Esc.
+3. Click **+ Line**, drag a line, then start dragging another one and press Esc before releasing the mouse.
+4. Click **+ Line**, then click **Straighten**.
+5. Click **+ Line**, then click one of the lines without moving the mouse.
+6. Press Esc to close the length popup, then click the **Board** tab and the **Straight** tab again.
+
+**Expected:**
+- After 1: all three lines exist, and **+ Line** stays highlighted with the hint "drag along something straight in
+  reality, Esc to finish" after each one.
+- After 2: **+ Line** is no longer highlighted, and dragging on empty photo draws nothing.
+- After 3: the first line stays, the line being dragged disappears, and **+ Line** is no longer highlighted.
+- After 4: **+ Line** is no longer highlighted.
+- After 5: the length popup opens and no new line appears.
+- After 6: the popup closes with **+ Line** still highlighted; after the tab switch it is no longer highlighted.
+
+## Step: Clicking a line opens its popup
+
+**Action:**
+1. With at least two lines on the straightened "Surface 1", move the cursor onto the middle of one line and away again.
+2. Click that line without moving the mouse.
+3. Click an empty spot of the photo, then click the same line again and click **Delete**.
+4. Press Ctrl+Z, then drag one endpoint handle of that line 50 px and release.
+
+**Expected:**
+- After 1: the line is 1.5 times as thick while the cursor is on it, and the cursor shows a hand.
+- After 2: a small popup opens with "Real length in meters", **Set** and **Delete**.
+- After 3: the first click only closes the popup; the second opens it again, and **Delete** removes the line.
+- After 4: the line is back, and the endpoint drag moves it without opening the popup.
+
 ## Step: Reference points on the straightened photo
 
 **Action:**
@@ -423,10 +560,21 @@ its width. Then open the Output tab and check the send's Resolution in the Param
   features. Inside the "Reference 1" image the same three points sit on the green traced
   quad, at the features they were placed on.
 
+## Step: Discs show the photo beyond the surface's edge
+
+**Action:**
+Add a reference point on the surface about 5 cm inside its right edge, on a traced photo that continues past
+that edge. Then select the surface, click the **Output** tab and click **Align Points**.
+
+**Expected:**
+- On the canvas and on the wall, the disc is a full circle: the part past the surface's edge shows the photo
+  that continues there, not a cut or an empty area.
+- The surface's Board card still shows only the surface, without any surround.
+
 ## Step: Discs survive a collapsed pin
 
 **Action:**
-With "Project photo" on, drag three corners of the surface's quad almost onto the fourth so the
+With **Align Points** on, drag three corners of the surface's quad almost onto the fourth so the
 quad is nearly a point; then undo.
 
 **Expected:**
@@ -439,43 +587,121 @@ quad is nearly a point; then undo.
 
 **Action:**
 1. With "Surface 1" carrying three reference points (previous step) and mapped onto "Projector 1",
-   select "Surface 1", click the **Output** tab and click **Project photo** in the header.
+   select "Surface 1" and click the **Output** tab. Note there are no discs, handles or chips on the canvas.
+   Click **Align Points** in the header.
 2. Drag the P1 handle on the projector canvas 60 px to the right, release.
 3. Drag the P2 handle 40 px down, release; press Ctrl+Z; press Ctrl+Y.
-4. Drag the P3 handle 30 px left, release; then double-click P3.
-5. Add two more points on the straightened photo (see the previous step), return to **Output**,
-   drag both onto the canvas, then drag the fifth one 30 px further.
-6. Drag the percent field right of **Project photo** from 5% to 15%.
-7. Click **Project photo** again.
+4. Drag the P3 handle 30 px left, release; then click **Release Point**.
+5. Press Ctrl+Z, then double-click P3.
+6. Add two more points on the straightened photo (see the previous step), return to **Output**, click
+   **Align Points**, drag both new points, then drag the fifth one 30 px further.
+7. Drag the percent field right of **Align Points** from 5% to 15%.
+8. Click **Align Points** again, turn on "Show size raster" in the Parameter window, then click the **Board** tab.
 
 **Expected:**
-- After 1: the surface's content stays in the composite; around each point a disc of the
-  straightened photo (about a tenth of the canvas height across) is projected over it, with a
-  dim white crosshair. On the canvas every point shows the same disc under a white handle with
-  its "P1".."P3" chip — also a point whose projection falls outside the projector frame, which
-  has no disc on the wall but keeps its disc on the canvas so you can see which feature it marks.
-- After 2: while dragging, the whole quad shifts so the P1 disc follows the cursor; on release
-  P1 turns green (aimed) and stays exactly where it was dropped. **P2 and P3 do not move, and
-  neither does the picture inside their discs**: each disc keeps showing its own feature, so
-  only its distortion changes as the pin turns. Each grows an amber arrow to where the pin now
-  projects its point, which is the miss the drag just introduced there.
-- On the wall the disc goes where the pin actually lands the photo, while the crosshair stays at
-  the mark: the gap between them is the same miss, seen from the room.
-- After 3: with two aimed points the quad turns and scales so both sit at their marks; P1 does
-  not move, and its arrow shrinks to nothing once the pin sends the point onto the mark again.
-  Ctrl+Z puts the quad back and P2 back to idle (white, still where it stands); Ctrl+Y restores
-  both.
-- After 4: with three aimed points the quad shears; P1 and P2 stay put. The double-click turns
-  P3 white again, leaves it exactly where it is, and the quad does not change — un-aiming stops
-  a point constraining the pin, it does not move the mark.
-- After 5: with four aimed points the quad keystones and every mark is hit exactly, so no arrows
-  remain. With five, the header shows "points miss by up to N px" with N above zero, and the
-  points that miss keep an arrow each, pointing where the pin sends them.
-- After 6: the discs grow to three times their radius on the canvas and on the wall alike. Where
-  "Region 1" overlaps a disc, the disc draws over the region's content, on the wall as on the
-  canvas.
-- After 7: the discs and crosshairs leave the composite (unless "Show size raster" is on); the
-  handles and their green/white state stay on the canvas and survive a save and reload.
+- After 1: the same picture shows on the canvas and the wall. The surface's content stays; around each point
+  is a disc of the straightened photo (about a tenth of the canvas height across) with a thin dark outline and a
+  dim green crosshair. The canvas adds only a small handle and a "P1".."P3" chip per point. **Release Point** is
+  disabled, with a tooltip saying to drag a point first. The percent field and **Release Point** appear only
+  now.
+- After 2: the P1 disc stays under the cursor and the quad shifts with it. On release P1 stays exactly where it
+  was dropped, its outline is white and clearly thicker (set), its crosshair is bright, and an extra ring around
+  it blinks white (active). **P2 and P3 do not move, and neither does the picture inside their discs**: only the
+  distortion changes as the pin turns. Each grows a magenta arrow from its disc to where the pin now lands its
+  point, which is the miss the drag just introduced there.
+- After 3: with two set points the quad turns and scales so both sit at their marks; P1 does not move, and its
+  arrow shrinks to nothing. The blinking outline moves to P2. Ctrl+Z puts the quad back and P2 back to the thin
+  outline, still where it stands; Ctrl+Y restores both.
+- After 4: with three set points the quad shears; P1 and P2 stay put. **Release Point** returns P3 to the thin
+  outline and moves its disc to where the pin lands it, so its arrow is gone. The quad does not change. The button
+  is disabled again.
+- After 5: Ctrl+Z sets P3 again; the double-click releases it the same way as the button.
+- After 6: with four set points the quad keystones and every mark is hit exactly, so no arrows remain. With
+  five, the header shows "points miss by up to N px" with N above zero, and the points that miss keep an arrow
+  each, pointing where the pin sends them.
+- After 7: the discs grow to three times their radius on the canvas and on the wall alike. Where "Region 1"
+  overlaps a disc, the disc draws over the region's content.
+- After 8: discs, outlines, crosshairs, arrows, handles and chips are all gone from both the canvas and the wall,
+  also with the raster on. Set points keep their state through a save and reload. On the **Board** tab, **Align
+  Points** is not offered and nothing of it reaches the wall.
+
+## Step: Resetting the alignment
+
+**Action:**
+1. Drag the quad's corners to an obvious keystone, and note where they are. Turn on **Align Points**, drag
+   several points so the quad changes, then click **Reset Alignment**.
+2. Press Ctrl+Z, then Ctrl+Y.
+3. Save and reopen the project with some points moved, turn on **Align Points** and click **Reset Alignment**.
+
+**Expected:**
+- After 1: the quad is back at the noted corners and the content looks as it did. All outlines are thin, every
+  disc sits where the pin lands its point, and no arrows or miss readout remain. **Release Point** is disabled.
+- After 2: Ctrl+Z brings back the aligned quad, set points and arrows in one step; Ctrl+Y resets again.
+- After 3: the same reset works after the reload.
+
+## Step: Aligning with a game controller
+
+**Action:**
+With an Xbox-compatible controller connected, "Surface 1" carrying at least three points and **Align Points** on:
+1. Press the right shoulder button three times, then the left one once. Then press d-pad up, down, left and right.
+2. Push the right stick about a third of the way up, then fully right, and let go. Press Ctrl+Z.
+3. Hold the left stick to the right. Release it without pressing.
+4. Hold the left stick to the right, press it down, and let go. Push the right stick up.
+5. With the active point set, press the right stick's button.
+6. With the left stick centred, press its button.
+7. Unplug the controller, then plug it in again.
+
+**Expected:**
+- After 1: within a second of connecting, one point's ring blinks. The right shoulder moves it one point forward in
+  list order, wrapping at the end, and the left moves it back. Each d-pad press moves it to the nearest point in that
+  direction on the wall, and it stays put if there is none.
+- After 2: the active point moves only a few pixels per second at a third of the way, and crosses about a quarter of
+  the canvas height per second at full deflection. It becomes set, and the pin follows. Ctrl+Z undoes the whole move in one step.
+- After 3: while held, an amber arrow reaches right from the active point, on the canvas and on the wall.
+- After 4: the point now moves to the right on the canvas, because the stick's up was set to that direction.
+- After 5: the point is released: thin outline, its disc back where the pin lands it, and the quad does not change.
+- After 6: the alignment resets as with **Reset Alignment**, in one undo step.
+- After 7: the editor keeps running without a hitch, and the controller works again within about a second.
+
+## Step: Finding Align Points from the output
+
+**Action:**
+1. With "Surface 1" as the only surface with a photo mapped onto "Projector 1", click the "Projector 1" item in
+   the Flow Outliner and the **Output** tab.
+2. Click **Align Points**, drag a point, then click "Surface 1" and "Projector 1" in turn.
+3. Trace a second surface on a photo, map it onto "Projector 1", then click the "Projector 1" item again.
+4. Click "Surface 1".
+
+**Expected:**
+- After 1: **Align Points** is offered although the output is selected.
+- After 2: the toggle stays on and the points of "Surface 1" stay draggable through both clicks.
+- After 3: **Align Points** turns off and is gone. The header says "Select a surface to align its points".
+- After 4: the message is gone and **Align Points** is offered, off.
+
+## Step: The toolbar no longer maps surfaces
+
+**Action:**
+With at least one surface not mapped to "Projector 1", click the **Output** tab, then drag that surface's item
+onto the "Projector 1" item in the Flow Outliner.
+
+**Expected:**
+- The header has no "+ <surface name>" buttons.
+- The drag adds the surface's quad to the canvas, one undo step.
+
+## Step: The projection on a surface's Board card
+
+**Action:**
+1. Use a surface without content, mapped onto "Projector 1" with a strongly keystoned corner pin, and with "Show
+   size raster" on. Click the **Board** tab.
+2. Note the **Projection Preview** field reads 0% on a fresh user profile. Drag it up to 100%, then down to 0%.
+3. Drag the **Overlay** field to 0%.
+
+**Expected:**
+- After 2: only the output's picture on that card changes, fully opaque at 100% and gone at 0%. At 100% it is
+  straightened through the pin, and the raster's lines run straight across the whole card, with no bend along a
+  diagonal. Cards of surfaces with content of their own don't change.
+- After 3: with **Projection Preview** back above 0%, the projection stays. Content on cards of surfaces with their own content is gone. The Projection
+  Preview field is offered only on the **Board** tab.
 
 ## Step: Reference images come from the asset system
 

@@ -13,6 +13,7 @@ using T3.Editor.Gui.MagGraph.Interaction;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.OpUis;
+using T3.Editor.Gui.OutputUi;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.Layouts;
@@ -167,7 +168,7 @@ internal sealed partial class MagGraphView
             // Custom Ui
             if (item.Variant == MagGraphItem.Variants.Operator)
             {
-                var additionalRightPadding = item.Instance.Outputs.Count> 1 ? 6 * CanvasScale:0; 
+                var additionalRightPadding = item.Instance.Outputs.Count> 1 ? 6 * CanvasScale:0;
                 customUiResult = item.Instance.DrawCustomUi(drawList, 
                                                             new ImRect(pMinVisible + Vector2.One, 
                                                                        pMaxVisible - Vector2.One - new Vector2(additionalRightPadding,0)), this, ref item.OpUiBinding);
@@ -318,10 +319,12 @@ internal sealed partial class MagGraphView
                 var indicatorPos = new Vector2(pMinVisible.X + 5 * CanvasScale, pMaxVisible.Y - 5 * CanvasScale);
 
                 var isSnappedToAnInput = InputSnapper.BestInputMatch.Item != null; 
-                
+
+                var segments = CanvasScale > 1.8f ? 12 : 8;
+
                 if (!isItemHovered || isSnappedToAnInput)
                 {
-                    drawList.AddCircle(indicatorPos, 3, UiColors.ForegroundFull.Fade(Blink));
+                    drawList.AddCircle(indicatorPos, 3f * CanvasScale, UiColors.ForegroundFull.Fade(Blink), segments, 2f * CanvasScale);
                 }
                 else
                 {
@@ -878,6 +881,7 @@ internal sealed partial class MagGraphView
         // Draw output sockets...
 
         var count = item.GetOutputAnchorCount();
+        var isAnyOutputAnchorHovered = false;
         MagGraphItem.OutputAnchorPoint outputAnchor = default;
         for (var index = 0; index < count; index++)
         {
@@ -953,9 +957,11 @@ internal sealed partial class MagGraphView
                                        && outputAnchor.OutputLineIndex == 0
                                        && outputAnchor.Direction == tabInsertionDirection;
             var showPlus = isOutputHovered || isTabInsertionAnchor;
+            isAnyOutputAnchorHovered |= isOutputHovered;
 
             var anchorOutlineColor = ColorVariations.OperatorOutline.Apply(type2UiProperties.Color);
 
+            // Additional outputs are colored like their type, so they read as belonging to it.
             var fillColor = ColorVariations.OperatorBackground.Apply(type2UiProperties.Color);
             if (showPlus)
             {
@@ -972,7 +978,7 @@ internal sealed partial class MagGraphView
                 || isItemHovered
                 || showPlus)
             {
-                var radius = MathF.Min((2 + 2 * hoverOutputFactor) , 10) * CanvasScale;
+                var radius =  4 * hoverOutputFactor * CanvasScale;
                 drawList.AddCircleFilled(center, radius - 1, fillColor, 12);
                 drawList.AddCircle(center, radius, anchorOutlineColor, 12);
             }
@@ -998,112 +1004,91 @@ internal sealed partial class MagGraphView
                 _context.ActiveOutputDirection = outputAnchor.Direction;
 
                 // Show tooltip with output name and type
-                if (item.Variant == MagGraphItem.Variants.Operator && !_context.HideHoverTooltips)
+                if (item.Variant == MagGraphItem.Variants.Operator
+                    && !_context.HideHoverTooltips
+                    && item.TryGetOutputLine(contextActiveSourceOutputId, out var outputLine))
                 {
-                    var outputLine = item.OutputLines.FirstOrDefault(o => o.Id == contextActiveSourceOutputId);
-
-                    if (outputLine.Id == contextActiveSourceOutputId)
-                    {
-                        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(5, 5));
-                        ImGui.BeginTooltip();
-                        ImGui.TextUnformatted(outputLine.OutputUi.OutputDefinition.Name);
-                        var type = outputLine.OutputUi.OutputDefinition.ValueType;
-                        var typeName = type.Name;
-                        if (typeName == "Single")
-                            typeName = "Float";
-
-                        var uiProperties = TypeUiRegistry.GetPropertiesForType(type);
-                        ImGui.PushStyleColor(ImGuiCol.Text, uiProperties.Color.Rgba);
-                        ImGui.TextUnformatted(typeName);
-                        ImGui.PopStyleColor();
-                        if (outputLine.Output.DirtyFlag.Trigger != DirtyFlagTrigger.None)
-                        {
-                            if (outputLine.Output.DirtyFlag.Trigger != DirtyFlagTrigger.Animated)
-                            {
-                                ImGui.TextUnformatted("(Cache invalidating)");
-                            }
-                            else if (outputLine.Output.DirtyFlag.Trigger != DirtyFlagTrigger.Always)
-                            {
-                                ImGui.TextUnformatted("(always evaluated)");
-                            }
-
-                        }
-                        ToolTipContentDrawer.DrawForOutput(outputLine.Output, out var xxx);
-
-                        ImGui.EndTooltip();
-                        ImGui.PopStyleVar();
-                    }
+                    DrawOutputTooltip(item, outputLine.Output);
                 }
             }
         }
 
-        // Draw additional output indicator
-        if (item.Variant == MagGraphItem.Variants.Operator)
+        // Additional outputs without a row are small circles in the node's bottom-right corner. They
+        // use their type's color and can be clicked and dragged like the primary output.
+        if (item.Variant == MagGraphItem.Variants.Operator && item.HiddenOutputIndices.Length > 0)
         {
-            if (item.HasHiddenOutputs)
+            var instance = item.Instance;
+            var hiddenIndices = item.HiddenOutputIndices;
+            var hiddenCount = hiddenIndices.Length;
+
+            var hoveredHiddenIndex = -1;
+            if (instance != null
+                && !isAnyOutputAnchorHovered
+                && IsHovered
+                && context.StateMachine.CurrentState == GraphStates.Default)
             {
-                if (_context.StateMachine.CurrentState == GraphStates.PickOutput && _context.ActiveItem == item)
+                var mousePos = ImGui.GetMousePos();
+                var hoveredDistance = float.MaxValue;
+                for (var hiddenIndex = 0; hiddenIndex < hiddenCount; hiddenIndex++)
                 {
-                    OutputPicking.DrawAdditionOutputSelector(context);
+                    var outputIndex = hiddenIndices[hiddenIndex];
+                    if (outputIndex >= instance.Outputs.Count)
+                        continue;
+
+                    var markerCenter = GetAdditionalOutputMarkerPosition(pMin, pMax, CanvasScale, hiddenIndex);
+                    var distance = Vector2.Distance(mousePos, markerCenter);
+                    if (distance > 6 * CanvasScale || distance >= hoveredDistance)
+                        continue;
+
+                    hoveredDistance = distance;
+                    hoveredHiddenIndex = hiddenIndex;
                 }
-                else
-                {
-                    var padding = 0.1f;
-                    var p = pMaxVisible - new Vector2(GridSizeOnScreen.Y * padding, GridSizeOnScreen.Y * padding);
-                    var area = new ImRect(p + new Vector2(-0.4f, -0.5f) * CanvasScale * 7,
-                                          p + new Vector2(0.4f, 0.5f) * CanvasScale * 7);
+            }
 
-                    // Don't react to the toggle (tooltip or click) when another window covers the graph.
-                    var isToggleHovered = IsHovered && area.Contains(ImGui.GetMousePos());
+            for (var hiddenIndex = 0; hiddenIndex < hiddenCount; hiddenIndex++)
+            {
+                var outputIndex = hiddenIndices[hiddenIndex];
+                if (instance == null || outputIndex >= instance.Outputs.Count)
+                    continue;
 
-                    //var opacity = hoverProgress.RemapAndClamp(0, 1, 0.1f, 0.7f);
-                    drawList.AddTriangleFilled(
-                                               p + new Vector2(-0.4f, -0.5f) * CanvasScale * 4,
-                                               p + new Vector2(0.4f, 0) * CanvasScale * 4,
-                                               p + new Vector2(-0.4f, 0.5f) * CanvasScale * 4,
-                                               UiColors.ForegroundFull.Fade(isToggleHovered ? 1 : 0.5f)
-                                              );
+                var output = instance.Outputs[outputIndex];
+                var typeProperties = TypeUiRegistry.GetPropertiesForType(output.ValueType);
+                var markerCenter = GetAdditionalOutputMarkerPosition(pMin, pMax, CanvasScale, hiddenIndex);
 
-                    if (isToggleHovered)
-                    {
-                        if (!_context.HideHoverTooltips)
-                            ImGui.SetNextWindowPos(p - new Vector2(15, 15));
+                var fillColor = hiddenIndex == hoveredHiddenIndex
+                                    ? ColorVariations.Highlight.Apply(typeProperties.Color)
+                                    : ColorVariations.OperatorBackgroundHover.Apply(typeProperties.Color);
+                var outlineColor = ColorVariations.OperatorOutline.Apply(typeProperties.Color);
 
-                        if (!_context.HideHoverTooltips && CustomComponents.BeginTooltip())
-                        {
-                            CustomComponents.HintLabel("Show more outputs...");
-                            foreach (var o in item.SymbolUi!.OutputUis.Values)
-                            {
-                                var isVisible = false;
-                                foreach (var visibleOutput in item.OutputLines)
-                                {
-                                    if (visibleOutput.Id != o.Id) continue;
-                                    isVisible = true;
-                                    break;
-                                }
+                var markerRadius = AdditionalOutputMarkerRadius * CanvasScale * (hiddenIndex == hoveredHiddenIndex ? 1.4f : 1);
 
-                                if (isVisible)
-                                    continue;
+                drawList.AddCircleFilled(markerCenter, markerRadius, fillColor, 12);
+                drawList.AddCircle(markerCenter, markerRadius, outlineColor, 12);
+            }
 
-                                ImGui.TextUnformatted(o.OutputDefinition.Name);
-                                ImGui.SameLine();
-                                ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-                                ImGui.TextUnformatted($" <{o.OutputDefinition.ValueType.Name}>");
-                                ImGui.PopStyleColor();
-                            }
+            if (hoveredHiddenIndex >= 0 && instance != null)
+            {
+                var output = instance.Outputs[hiddenIndices[hoveredHiddenIndex]];
+                var markerCenter = GetAdditionalOutputMarkerPosition(pMin, pMax, CanvasScale, hoveredHiddenIndex);
 
-                            CustomComponents.EndTooltip();
-                        }
+                _context.ActiveSourceItem = item;
+                _context.ActiveSourceOutputId = output.Id;
 
-                        if (ImGui.IsMouseClicked(ImGuiMouseButton.Left)
-                            || ImGui.IsMouseClicked(ImGuiMouseButton.Right))
-                        {
-                            ImGui.OpenPopup("pickOutput");
-                            _context.StateMachine.SetState(GraphStates.PickOutput, context);
-                            _context.ActiveItem = item;
-                        }
-                    }
-                }
+                // Clicking inserts the new operator to the right, so it snaps to the source once added.
+                _context.ActiveOutputDirection = MagGraphItem.Directions.Horizontal;
+
+                var plusColor = ColorVariations.OperatorOutline.Apply(TypeUiRegistry.GetPropertiesForType(output.ValueType).Color);
+                var e = MathF.Round(1.5f * CanvasScale);
+                drawList.AddRectFilled(markerCenter + new Vector2(-e, 0),
+                                       markerCenter + new Vector2(e + 1, 1),
+                                       plusColor);
+
+                drawList.AddRectFilled(markerCenter + new Vector2(0, -e),
+                                       markerCenter + new Vector2(1, e + 1),
+                                       plusColor);
+
+                if (!_context.HideHoverTooltips)
+                    DrawOutputTooltip(item, output);
             }
         }
 
@@ -1223,6 +1208,112 @@ internal sealed partial class MagGraphView
     }
 
 
+
+    /// <summary>
+    /// Positions a small circle for an output without a row. The circles are laid out in a row in the
+    /// node's bottom-right corner, with a constant gap, and stay inside its outline.
+    /// </summary>
+    private static Vector2 GetAdditionalOutputMarkerPosition(Vector2 nodeMin, Vector2 nodeMax, float canvasScale, int index)
+    {
+        var radius = AdditionalOutputMarkerRadius * canvasScale;
+        var spacing = AdditionalOutputMarkerSpacing * canvasScale;
+
+        // The drawn node background is inset from the logical node rect; these margins keep the
+        // circles inside it while matching positions between drawing and drag previews.
+        var marginX = radius + 3 * canvasScale;
+        var marginY = radius + 5 * canvasScale;
+
+        var x = nodeMax.X - marginX - index * spacing;
+        x = MathF.Max(x, nodeMin.X + marginX);
+        var y = nodeMax.Y - marginY;
+        return new Vector2(x, y);
+    }
+
+    /// <summary>
+    /// Screen position of the circle for an output without a row, so drag previews can start there.
+    /// </summary>
+    private bool TryGetAdditionalOutputMarkerPosition(MagGraphItem item, ISlot output, out Vector2 positionOnScreen)
+    {
+        positionOnScreen = default;
+        var hiddenIndices = item.HiddenOutputIndices;
+        if (hiddenIndices.Length == 0)
+            return false;
+
+        var instance = item.Instance;
+        if (instance == null)
+            return false;
+
+        var hiddenIndex = -1;
+        for (var i = 0; i < hiddenIndices.Length; i++)
+        {
+            var outputIndex = hiddenIndices[i];
+            if (outputIndex >= instance.Outputs.Count)
+                continue;
+
+            if (instance.Outputs[outputIndex].Id != output.Id)
+                continue;
+
+            hiddenIndex = i;
+            break;
+        }
+
+        if (hiddenIndex < 0)
+            return false;
+
+        var nodeMin = TransformPosition(item.DampedPosOnCanvas);
+        var nodeMax = TransformPosition(item.DampedPosOnCanvas + item.Size);
+        positionOnScreen = GetAdditionalOutputMarkerPosition(nodeMin, nodeMax, CanvasScale, hiddenIndex);
+        return true;
+    }
+
+    /// <summary>
+    /// Screen position of the circle of an additional output, whether it currently has a row or not.
+    /// </summary>
+    private bool TryGetAdditionalOutputAnchorPosition(MagGraphItem item, MagGraphItem.OutputLine outputLine, out Vector2 positionOnScreen)
+    {
+        if (TryGetAdditionalOutputMarkerPosition(item, outputLine.Output, out positionOnScreen))
+            return true;
+
+        var posOnCanvas = item.DampedPosOnCanvas + new Vector2(MagGraphItem.Width, (0.5f + outputLine.VisibleIndex) * MagGraphItem.LineHeight);
+        positionOnScreen = TransformPosition(posOnCanvas) + new Vector2(-2 * CanvasScale, 0);
+        return true;
+    }
+
+    private static void DrawOutputTooltip(MagGraphItem item, ISlot output)
+    {
+        IOutputUi? outputUi = null;
+        item.SymbolUi?.OutputUis.TryGetValue(output.Id, out outputUi);
+        if (outputUi == null)
+            return;
+
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(5, 5));
+        ImGui.BeginTooltip();
+        ImGui.TextUnformatted(outputUi.OutputDefinition.Name);
+        var type = outputUi.OutputDefinition.ValueType;
+        var typeName = type.Name;
+        if (typeName == "Single")
+            typeName = "Float";
+
+        var uiProperties = TypeUiRegistry.GetPropertiesForType(type);
+        ImGui.PushStyleColor(ImGuiCol.Text, uiProperties.Color.Rgba);
+        ImGui.TextUnformatted(typeName);
+        ImGui.PopStyleColor();
+        if (output.DirtyFlag.Trigger != DirtyFlagTrigger.None)
+        {
+            if (output.DirtyFlag.Trigger != DirtyFlagTrigger.Animated)
+            {
+                ImGui.TextUnformatted("(Cache invalidating)");
+            }
+            else if (output.DirtyFlag.Trigger != DirtyFlagTrigger.Always)
+            {
+                ImGui.TextUnformatted("(always evaluated)");
+            }
+        }
+
+        ToolTipContentDrawer.DrawForOutput(output, out _);
+        ImGui.EndTooltip();
+        ImGui.PopStyleVar();
+    }
 
     private void DrawMissingInputIndicator(ImDrawListPtr drawList, MagGraphItem item, Vector2 pMin, MagGraphItem.InputLine inputLine)
     {
@@ -1379,6 +1470,12 @@ internal sealed partial class MagGraphView
 
     /** Gap an input value needs beside its parameter name; below it the value moves to a second line. */
     private const float MinLabelValueGap = 4;
+
+    /** Radius of the circles for outputs without a row, in canvas units. */
+    private const float AdditionalOutputMarkerRadius = 2.5f;
+
+    /** Center-to-center distance of those circles, in canvas units. */
+    private const float AdditionalOutputMarkerSpacing = 9;
 
     private static Guid _hoveredForInputPickingId;
     private static float _hoverPickingProgress;

@@ -199,8 +199,8 @@
     {
       "InputId": "ede123e4-14cd-49f7-b7ce-c538ec381415"/*ShaderTemplatePath*/,
       "Position": {
-        "X": 1911.0857,
-        "Y": 4942.54
+        "X": 1519.9545,
+        "Y": 4863.2397
       },
       "Description": "Path of the HLSL template the shader code is inserted into.",
       "Usage": "FilePath"

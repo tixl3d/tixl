@@ -5,6 +5,9 @@ namespace Examples.testing{
         [Output(Guid = "f9ddc7da-91fa-4a7c-b59d-d1ba8fc5eb74")]
         public readonly Slot<string> Result = new Slot<string>();
 
+        [Input(Guid = "b03f932c-f88e-47ff-be67-3acbe2455ca6")]
+        public readonly InputSlot<bool> TriggerTest = new InputSlot<bool>();
+
 
     }
 }

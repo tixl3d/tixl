@@ -95,7 +95,7 @@ internal sealed class ViewSelectionPinning
         }
 
         ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-        var open = ImGui.BeginCombo("##pinning", symbolName + suffix);
+        var open = ImGui.BeginCombo("##pinning", symbolName + suffix, ImGuiComboFlags.HeightLarge);
         ImGui.PopStyleColor();
 
         if (open)
@@ -165,11 +165,7 @@ internal sealed class ViewSelectionPinning
                 }
             }
 
-            if (drawExtraMenuItems != null)
-            {
-                CustomComponents.SeparatorLine();
-                drawExtraMenuItems();
-            }
+            drawExtraMenuItems?.Invoke();
 
             CustomComponents.SeparatorLine();
             CustomComponents.DrawMenuItem(_showHoveredOutputsId, "Show Hovered Outputs", isEnabled: false, reserveIconColumn: false);

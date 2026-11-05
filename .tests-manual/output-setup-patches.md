@@ -55,6 +55,19 @@ Drag the "SendToOutput" CONTENT item onto the "P1" item.
   promoted it, because it no longer covers the whole canvas. Its label appears with it.
 - After 3: the corner goes back and the patch folds away again.
 
+## Step: Fill resets a dragged patch to the whole canvas
+
+**Action:**
+1. In **Output** mode with "P1" selected, drag one corner handle of the canvas a little way inward.
+2. Right-click the label that appeared on the patch and choose **Fill P1**.
+3. Press Ctrl+Z.
+4. Press Ctrl+Y, then right-click the "P1" item in the OUTPUTS column.
+
+**Expected:**
+- After 2: the image fills the canvas again, the label and the chevron on "P1" disappear, and "P1" is selected.
+- After 3: the dragged corner and the label come back in one undo step.
+- After 4: the image fills the canvas again, and the menu of "P1" lists no **Fill** entry.
+
 ## Step: The output frame's own context menu
 
 **Action:**
@@ -81,13 +94,13 @@ Right-click "P1" → **Add Patch**.
 ## Step: Patch geometry edits from the card
 
 **Action:**
-With "Patch 1" selected, set **Size (px)** to 960 × 540, then **Position (px)** to
-480 × 270. Press Ctrl+Z twice.
+With "Patch 1" selected, in its row of the patch list set **Width** and **Height** to 960 × 540,
+then **X** and **Y** to 480 × 270. Press Ctrl+Z four times.
 
 **Expected:**
 - After the size edit the image occupies the top-left quarter of P1's canvas; after the
   position edit it sits centred.
-- Each Ctrl+Z reverts exactly one of the two edits.
+- Each Ctrl+Z reverts exactly one of the four field edits.
 
 ## Step: A second patch, added empty and then fed
 
@@ -146,18 +159,17 @@ the right by a little and release.
 ## Step: Rotating a patch in quarter turns
 
 **Action:**
-1. Select "Patch 1" and click the clockwise rotate button next to **Rotation** in its parameters;
-   click it twice more; then type `100` into the field.
+1. In the row of "Patch 1" in the patch list, click the clockwise rotate icon left of the settings
+   icon; click it twice more; then type `100` into the row's **Rotation** field.
 2. Right-click "Patch 1" on the output canvas and choose **Rotate 90°** four times.
 3. With P1 fed directly (no listed patches), right-click "P1" and choose **Rotate Content 90°**.
 4. Rotate a patch to 90°, then **Split into 2×2**; then undo, and choose **Use on Surface** instead.
 
 **Expected:**
-- After 1: the field reads -90°, 180°, then 90°, the same angle field and buttons as any rotation
-  parameter, stepping a quarter turn here. Each click turns the whole patch clockwise around its
-  centre, its outline and its picture together: **Size (px)** goes from 960 × 540 to 540 × 960,
-  back to 960 × 540, then 540 × 960 again, and at 540 × 960 **Position (px)** reads 210 × -210 (the
-  patch pokes above the canvas top). The typed 100 snaps to 90° and changes nothing further. A
+- After 1: the **Rotation** field reads -90°, 180°, then 90°. Each click turns the whole patch
+  clockwise around its centre, its outline and its picture together: **Width** × **Height** goes from
+  960 × 540 to 540 × 960, back to 960 × 540, then 540 × 960 again, and at 540 × 960 **X** × **Y** reads
+  210 × -210 (the patch pokes above the canvas top). The typed 100 snaps to 90° and changes nothing further. A
   small wedge on the patch's outline, on the canvas and on the Board card, points out of the
   edge the picture's top now faces; at 0° it is gone. Each change is one undo step.
 - After 2: the patch and its picture step round a quarter per click; after the fourth they are
@@ -171,15 +183,15 @@ the right by a little and release.
 ## Step: Fitting a patch to an aspect ratio
 
 **Action:**
-1. Select "Patch 1", set **Rotation** back to 0°, then set **Scale mode** to **Fit**.
+1. Select "Patch 1", set the **Rotation** field of its row back to 0°, then set **Scale mode** to **Fit**.
 2. Set **Aspect ratio** to 2.39 : 1.
 3. Set **Scale** to 50%.
-4. Select "P1" and set its **Canvas (px)** to 1080 × 1920; then press Ctrl+Z.
+4. Select "P1" and set its **Resolution (px)** to 1080 × 1920; then press Ctrl+Z.
 5. Select "Patch 1" again and set **Scale mode** back to **Stretch**.
 
 **Expected:**
-- After 1: the **Position** and **Size** rows disappear and **Aspect ratio** (16 : 9) and **Scale**
-  (100%) appear instead. The card reads "1920 × 1080 px on the canvas, centred" and the patch covers
+- After 1: the X, Y, Width and Height of its row turn into read-only text, and **Aspect ratio**
+  (16 : 9) and **Scale** (100%) appear above the list. The card reads "1920 × 1080 px on the canvas, centred" and the patch covers
   the whole canvas. On the output canvas the patch has no corner or edge handles, and dragging its
   label does not move it.
 - After 2: the card reads "1920 × 803 px on the canvas, centred": the patch spans the full width,
@@ -187,8 +199,8 @@ the right by a little and release.
 - After 3: the card reads "960 × 402 px on the canvas, centred", still centred on the canvas.
 - After 4: the canvas turns portrait and the patch re-fits at once: the card reads "540 × 226 px on
   the canvas, centred". Ctrl+Z restores the 1920 × 1080 canvas and the patch returns to 960 × 402.
-- After 5: **Position** (about 480 × 339) and **Size** (about 960 × 402) come back, the handles return,
-  and the patch stays exactly where it was. Each of the five changes is one undo step.
+- After 5: the row's fields are editable again, reading about 480 × 339 and 960 × 402, the handles
+  return, and the patch stays exactly where it was. Each of the five changes is one undo step.
 
 ## Step: Use on Surface
 
@@ -239,16 +251,34 @@ Drag the surface item created by "Use on Surface" onto the "Patch 2" item in the
 ## Step: Clear Inputs on a patch
 
 **Action:**
-1. Right-click the unfed patch added in "A surface dropped on an empty patch keeps it" and look at
-   **Clear Inputs**.
-2. Drag "Slice 1" onto that patch's item, then right-click it → **Clear Inputs**.
-3. Press Ctrl+Z.
+1. Right-click the patch that the surface was pinned to in "A surface dropped on an empty patch
+   keeps it" and choose **Clear Inputs**.
+2. Right-click that patch again and look at **Clear Inputs**.
+3. Press Escape, drag "Slice 1" onto the patch's item, then right-click it → **Clear Inputs**.
+4. Press Ctrl+Z.
 
 **Expected:**
-- After 1: **Clear Inputs** is greyed out — nothing feeds the patch yet.
-- After 2: the connection from "Slice 1" disappears and the patch item turns dimmed, but it stays
+- After 1: the connection from the surface disappears. The surface item stays in SURFACES and the
+  patch stays under P1 at the same place on the canvas.
+- After 2: **Clear Inputs** is greyed out — nothing feeds the patch any more.
+- After 3: the connection from "Slice 1" disappears and the patch item turns dimmed, but it stays
   under P1 at the same place on the canvas.
-- After 3: the connection is back, in one undo step.
+- After 4: the connection from "Slice 1" is back, in one undo step.
+
+## Step: Clear Inputs on several selected items
+
+**Action:**
+1. Click the "Patch 1" item, then Ctrl+click the "Patch 2" item, so both are selected.
+2. Right-click "Patch 2" and look at the menu, then choose **Clear Inputs**.
+3. Right-click "Patch 2" again and look at **Clear Inputs**.
+4. Press Escape to close the menu, then press Ctrl+Z.
+
+**Expected:**
+- After 2: **Clear Inputs** is the one enabled row among the patch actions, next to **Delete 2**;
+  **Rotate 90°**, **Use on Surface**, **Duplicate** and **Rename** stay greyed out. Choosing it
+  removes the connections into both patches, both items turn dimmed and stay under P1.
+- After 3: **Clear Inputs** is greyed out — nothing feeds either patch any more.
+- After 4: both connections are back, in one undo step.
 
 ## Step: Deleting the slice unfeeds, deleting the patch removes
 
@@ -266,6 +296,7 @@ Drag the surface item created by "Use on Surface" onto the "Patch 2" item in the
 Right-click the "P1" item in the OUTPUTS column and choose **Clear Inputs**; then press Ctrl+Z.
 
 **Expected:**
-- Every connection into "P1" disappears: the surface mappings onto it and all of its patches
-  (the patch items under it are gone), while the surfaces and their slices remain. The entry
-  is greyed out on an output that has no inputs. Ctrl+Z restores everything in one step.
+- Every connection into the "P1" item itself disappears: the surface mappings onto it and content
+  dropped directly on it. The patch items stay under "P1" with their connections, including those
+  from surfaces pinned onto a patch, and the surfaces and their slices remain. The entry is greyed
+  out when only patches are fed. Ctrl+Z restores everything in one step.

@@ -19,16 +19,16 @@ public sealed class _ReadBackImageDifference : Instance<_ReadBackImageDifference
     {
         var bufferWithViews = Differences.GetValue(context);
 
-        if (bufferWithViews == null)
+        if (bufferWithViews is not { Buffer: { } buffer, Srv: { } srv })
         {
             Log.Warning("Missing input", this);
             Result.Value = -1;
             return;
         }
 
-        _bufferReader.InitiateRead(bufferWithViews.Buffer,
-                                   bufferWithViews.Srv.Description.Buffer.ElementCount,
-                                   bufferWithViews.Buffer.Description.StructureByteStride,
+        _bufferReader.InitiateRead(buffer,
+                                   srv.Description.Buffer.ElementCount,
+                                   buffer.Description.StructureByteStride,
                                    OnPointsReadComplete);
         _bufferReader.Update();
 

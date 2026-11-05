@@ -127,7 +127,7 @@ public sealed class OutputDefinition
     {
         public Guid Id = Guid.NewGuid();
 
-        /// <summary>Empty = labelled by position ("Patch N"), so the default reads right after reordering.</summary>
+        /// <summary>Empty = labelled by position ("Patch N"), which only an output's implicit patch relies on: patches get a name when created.</summary>
         public string Name = string.Empty;
 
         /// <summary>The slice shown here; <see cref="Guid.Empty"/> while nothing is routed yet.</summary>
@@ -280,6 +280,17 @@ public sealed class OutputDefinition
     }
 
     /// <summary>Whether this canvas takes its size from the plug it is bound to.</summary>
+    public Patch? FindPatch(Guid patchId)
+    {
+        foreach (var patch in Patches)
+        {
+            if (patch.Id == patchId)
+                return patch;
+        }
+
+        return null;
+    }
+
     public bool FollowsPlug => CanvasResolution.Width <= 0 || CanvasResolution.Height <= 0;
 
     /// <summary>

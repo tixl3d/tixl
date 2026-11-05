@@ -47,8 +47,21 @@ internal sealed partial class SetupOutputView
         var canEdit = editable;
         var annotations = carrier.Annotations;
 
-        // Arming the tool turns the next drag on empty canvas into a new line, then disarms — "create then
-        // edit", so you don't have to remember to leave a mode.
+        // Straightening takes several lines in a row, so the tool stays armed until Esc, another header button or
+        // a mode switch. Esc mid-drag also drops the line being drawn.
+        if (_isLineToolArmed && ImGui.IsKeyPressed(ImGuiKey.Escape, false) && !T3Ui.IsAnyPopupOpen
+            && ImGui.IsWindowFocused(ImGuiFocusedFlags.RootAndChildWindows) && !ImGui.GetIO().WantTextInput)
+        {
+            _isLineToolArmed = false;
+            if (_measureDraftIndex >= 0 && _measureDraftIndex < annotations.Count)
+            {
+                annotations.RemoveAt(_measureDraftIndex);
+                CancelGesture();
+            }
+
+            _measureDraftIndex = -1;
+        }
+
         if (canEdit && _isLineToolArmed && _measureDraftIndex < 0
             && ImGui.IsWindowHovered() && !ImGui.IsAnyItemHovered())
         {
@@ -94,7 +107,6 @@ internal sealed partial class SetupOutputView
                 }
 
                 _measureDraftIndex = -1;
-                _isLineToolArmed = false;
             }
         }
 
@@ -105,6 +117,13 @@ internal sealed partial class SetupOutputView
         var blink = MathF.Sin((float)ImGui.GetTime() * BlinkRate) * 0.5f + 0.5f;
         var white = UiColors.ForegroundFull.Fade(fade);
         var nextDragIndex = -1;
+
+        // A press that closes a popup or grabs a handle must not count as a click on the line under it.
+        if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+            _linePressCanClick = !T3Ui.IsAnyPopupOpen && ImGui.IsWindowHovered() && !ImGui.IsAnyItemHovered();
+
+        var canHoverLine = canEdit && _measureDraftIndex < 0 && !_gesture.IsLive && !T3Ui.IsAnyPopupOpen
+                           && ImGui.IsWindowHovered() && !ImGui.IsAnyItemHovered();
 
         for (var i = 0; i < annotations.Count; i++)
         {
@@ -132,8 +151,16 @@ internal sealed partial class SetupOutputView
             if (isDragging && projected)
                 CalibrationOverlay.EmphasizeAnnotation(carrier.Id, i);
 
+            // Overlapping lines answer one at a time, so a click can only open one popup.
+            var isHovered = canHoverLine && IsMouseNearSegment(_projection.CanvasToScreen(p1), _projection.CanvasToScreen(p2));
+            if (isHovered)
+            {
+                canHoverLine = false;
+                ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+            }
+
             var lineColor = isDragging ? Color.Mix(color, white, blink) : color;
-            var lineWidth = (isDragging && projected ? 6f : 2f) * scale;
+            var lineWidth = (isDragging && projected ? 6f : isHovered ? 3f : 2f) * scale;
             dl.AddLine(_projection.CanvasToScreen(p1), _projection.CanvasToScreen(p2), lineColor, lineWidth);
 
             if (canEdit && _measureDraftIndex < 0)
@@ -170,11 +197,10 @@ internal sealed partial class SetupOutputView
                     EndGesture(doneSetup); // value already applied live during the drag
             }
 
-            // Measuring is a separate act from aligning: a line is a reference line until double-clicking it
-            // gives it a real length, and clearing that length makes it one again.
-            var requestLength = canEdit && _measureDraftIndex < 0
-                                && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left) && !ImGui.IsAnyItemHovered()
-                                && IsMouseNearSegment(_projection.CanvasToScreen(p1), _projection.CanvasToScreen(p2));
+            // Measuring is a separate act from aligning: a line is a reference line until clicking it gives it a
+            // real length, and clearing that length makes it one again. On release, because a drag draws or pans.
+            var requestLength = isHovered && _linePressCanClick && ImGui.IsMouseReleased(ImGuiMouseButton.Left)
+                                && ImGui.GetMouseDragDelta(ImGuiMouseButton.Left).Length() <= UserSettings.Config.ClickThreshold;
 
             DrawAnnotationLabel(dl, annotation, i, measured, isMeasurement, _projection.CanvasToScreen((p1 + p2) * 0.5f),
                                 color, canEdit, requestLength);
@@ -444,11 +470,12 @@ internal sealed partial class SetupOutputView
 
     private const float BlinkRate = 8f;
 
-    // Line tool: armed for the next click, the line being drawn, and the endpoint grabbed last frame (so its
+    // Line tool: armed for further lines, the line being drawn, and the endpoint grabbed last frame (so its
     // line can emphasize this frame).
     private bool _isLineToolArmed;
     private int _measureDraftIndex = -1;
     private int _measureDragIndex = -1;
+    private bool _linePressCanClick;
 
     // Length popup and chip: the value being typed, the line to remove once iteration is done, and each line's
     // chip text with the length it was formatted for.

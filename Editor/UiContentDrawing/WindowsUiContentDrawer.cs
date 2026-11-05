@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using ImGuiNET;
+using T3.Core.Animation;
 using T3.Graphics.Compat;
 using T3.Graphics;
 using System.Numerics;
@@ -144,7 +145,12 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
             ImGui.SetCurrentContext(_imguiContext);
             UiContentUpdate.SetupResourcesAndFontsWithScaling();
 
-            if (ProgramWindows.Main.IsMinimized && UserSettings.Config.SuspendRenderingWhenHidden)
+            // Playback and display-bound outputs are only evaluated by these frames: suspending them would
+            // leave audio streams running past their clip ends and freeze the outputs on other displays.
+            var isIdle = Playback.Current.PlaybackSpeed == 0
+                         && OutputWindowHandling.Presenting.Count == 0
+                         && !T3Ui.ShowSecondaryRenderWindow;
+            if (ProgramWindows.Main.IsMinimized && UserSettings.Config.SuspendRenderingWhenHidden && isIdle)
             {
                 Thread.Sleep(100);
                 return;

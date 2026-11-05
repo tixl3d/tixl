@@ -94,7 +94,7 @@ internal sealed partial class SetupOutputView
     /// the aspect held, the middle moves it, everything snapping to the source's borders and midlines. Shared
     /// by the surface's Content view and the source view, which differ only in framing.
     /// </summary>
-    private void EditSlice(Setup setup, ImDrawListPtr dl, Slice slice, Vector4 uv,
+    private void EditSlice(Setup setup, SetupEntitySelection? selection, ImDrawListPtr dl, Slice slice, Vector4 uv,
                            Vector2 sourceOrigin, Vector2 sourceSize, Guid targetId, bool dimOutside)
     {
         if (sourceSize.X <= 0.0001f || sourceSize.Y <= 0.0001f)
@@ -159,7 +159,8 @@ internal sealed partial class SetupOutputView
             if (movePhase == CanvasPointHandle.DragPhases.Completed)
                 _sliceLabelDragging = false;
         }
-        else if (overLabel && !ImGui.IsAnyItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+        else if ((overLabel && !ImGui.IsAnyItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+                 || TryTakeLabelGrab(labelMin, labelMax))
         {
             _sliceLabelDragging = true;
             movePhase = CanvasPointHandle.DragPhases.Started;
@@ -296,6 +297,23 @@ internal sealed partial class SetupOutputView
             case CanvasPointHandle.DragPhases.Started:
                 // Recomputed from this snapshot each frame, so the move can't accumulate drift.
                 _sliceMoveStart = (cursorUv, uv);
+                _sliceDuplicatePending = ImGui.GetIO().KeyAlt;
+                break;
+
+            // Alt: a copy takes the drag, the original stays; copied inside the snapshot, so it undoes as one.
+            // Only once the press travels, because this gesture starts at the press and a click must copy nothing.
+            case CanvasPointHandle.DragPhases.Dragging when _sliceDuplicatePending && selection != null:
+                if (ImGui.GetMouseDragDelta(ImGuiMouseButton.Left).Length() <= UserSettings.Config.ClickThreshold)
+                    break;
+
+                _sliceDuplicatePending = false;
+                SetupActions.DuplicateEntityInternal(selection, setup, SetupEntityKinds.Slice, slice.Id);
+                if (selection.TryResolve(setup, out var copyKind, out var copyId) && copyKind == SetupEntityKinds.Slice && copyId != slice.Id)
+                {
+                    _gesture.HotId = copyId;
+                    _gesture.Name = "Duplicate slice";
+                }
+
                 break;
 
             case CanvasPointHandle.DragPhases.Dragging when _sliceMoveStart != null:
@@ -343,6 +361,7 @@ internal sealed partial class SetupOutputView
 
             case CanvasPointHandle.DragPhases.Completed:
                 _sliceMoveStart = null;
+                _sliceDuplicatePending = false;
                 break;
         }
     }
@@ -447,6 +466,7 @@ internal sealed partial class SetupOutputView
     // Slice editing: the label drag, its start, the slice's quad (reused per slice), and its menu.
     private bool _sliceLabelDragging;
     private (Vector2 Origin, Vector4 Uv)? _sliceMoveStart;
+    private bool _sliceDuplicatePending;
     private readonly Vector2[] _sliceQuadBuffer = new Vector2[4];
     private const string SliceMenuId = "##sliceMenu";
 

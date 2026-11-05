@@ -423,7 +423,7 @@ public sealed class Setup
     {
         try
         {
-            File.WriteAllText(filePath, ToJsonString());
+            SetupFiles.WriteFileAtomically(filePath, ToJsonString());
             return true;
         }
         catch (Exception e)
@@ -451,6 +451,12 @@ public sealed class Setup
             Log.Warning($"Can't load setup from {filePath}: {e.Message}");
             return false;
         }
+
+        // The file name is what the switcher lists and what a save writes to, so a copied or renamed file can't
+        // save over the file it was copied from.
+        var fileName = Path.GetFileName(filePath);
+        if (fileName.EndsWith(FileSuffix, StringComparison.OrdinalIgnoreCase))
+            setup.Name = fileName[..^FileSuffix.Length];
 
         wasRepaired = SetupRepair.Repair(setup);
         return true;

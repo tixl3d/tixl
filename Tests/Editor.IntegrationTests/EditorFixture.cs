@@ -29,7 +29,7 @@ public sealed class EditorFixture : IDisposable
         }
 
         var exePath = FindEditorExe();
-        _editorProcess = Process.Start(new ProcessStartInfo(exePath, $"--debug-server {port} --window 1280x720 --no-splash")
+        _editorProcess = Process.Start(new ProcessStartInfo(exePath, $"--debug-server {port} --window 1280x720 --no-splash --no-reopen")
                                            {
                                                WorkingDirectory = Path.GetDirectoryName(exePath)!,
                                                UseShellExecute = false,

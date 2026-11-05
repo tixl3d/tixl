@@ -7,8 +7,8 @@
     {
       "InputId": "41ee0e65-e2dc-4bf7-af40-bc90517c6c23"/*RotLookupDistance*/,
       "Position": {
-        "X": -70.61095,
-        "Y": 719.00464
+        "X": 485.05878,
+        "Y": 796.18225
       },
       "GroupTitle": "Additional Options",
       "Description": "Defines the rotation lookup distance"
@@ -16,8 +16,8 @@
     {
       "InputId": "536948f3-f76c-418a-9b76-2c9fed4dee33"/*IsEnabled*/,
       "Position": {
-        "X": -70.61095,
-        "Y": 809.00464
+        "X": 555.0588,
+        "Y": 411.18228
       },
       "Description": "Toggles the effect on / off"
     },
@@ -25,15 +25,15 @@
       "InputId": "679d6321-a5d7-41cc-a191-5e6cf353dfc4"/*GPoints*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -292.88382,
-        "Y": 213.58644
+        "X": 142.6006,
+        "Y": 300.0692
       }
     },
     {
       "InputId": "757c259a-118c-4438-bc09-cdc5708af2bc"/*Frequency*/,
       "Position": {
-        "X": -70.61095,
-        "Y": 539.00476
+        "X": 485.05878,
+        "Y": 586.18225
       },
       "GroupTitle": "Settings",
       "Description": "Spatial frequency of the noise. Higher values create smaller swirls."
@@ -41,8 +41,8 @@
     {
       "InputId": "7f73e109-b13a-4114-b2a5-fe9e86270893"/*AmountDistribution*/,
       "Position": {
-        "X": -70.61095,
-        "Y": 674.00464
+        "X": 345.05878,
+        "Y": 691.18225
       },
       "Description": "Multiplier for the individual axes to amplify / attenuate the noise in certain directions.",
       "AddPadding": "True"
@@ -50,24 +50,24 @@
     {
       "InputId": "a0982e6c-da72-4d7f-a562-1a6ff144db46"/*UseCurlNoise*/,
       "Position": {
-        "X": -70.61095,
-        "Y": 764.00464
+        "X": 345.05878,
+        "Y": 831.18225
       },
       "Description": "Uses divergence-free curl noise instead of simplex noise, which creates swirling, fluid-like movement."
     },
     {
       "InputId": "cb3ae9c7-5146-4bc6-9a87-3d17012fab52"/*Phase*/,
       "Position": {
-        "X": -70.61095,
-        "Y": 584.00464
+        "X": 485.05878,
+        "Y": 621.18225
       },
       "Description": "Defines the phase of the noise and can be animated with a [Value], e.g. using [Time]."
     },
     {
       "InputId": "cc98bda7-34a5-4c18-9b9e-fabe51b02d71"/*Amount*/,
       "Position": {
-        "X": -70.61095,
-        "Y": 494.005
+        "X": 485.05878,
+        "Y": 551.18225
       },
       "Description": "Strength of the movement per frame.",
       "AddPadding": "True"
@@ -75,8 +75,8 @@
     {
       "InputId": "ecdccc3c-b7a4-43f7-a4c8-0269ecff916a"/*Variation*/,
       "Position": {
-        "X": -70.61095,
-        "Y": 629.00464
+        "X": 485.05878,
+        "Y": 656.18225
       },
       "Description": "Randomly offsets the noise lookup per point, so neighboring points move less uniformly."
     }
@@ -86,40 +86,40 @@
       "ChildId": "1966c882-a885-41d2-916a-74881b78a6b5",
       "SymbolName": "Lib.numbers.anim.time.HasTimeChanged",
       "Position": {
-        "X": 9.138611,
-        "Y": 1016.23566
+        "X": 555.0588,
+        "Y": 446.1823
       }
     },
     {
       "ChildId": "1d3e4db2-aa81-4ca1-8a1d-876c02f83b6e",
       "SymbolName": "Lib.render._dx11.api.CalcDispatchCount",
       "Position": {
-        "X": 258.8332,
-        "Y": 349.5899
+        "X": 625.0588,
+        "Y": 236.18228
       }
     },
     {
       "ChildId": "782fc883-58e2-46b8-b975-5eb67313833b",
       "SymbolName": "Lib.numbers.bool.combine.And",
       "Position": {
-        "X": 237.54233,
-        "Y": 883.2104
+        "X": 695.0588,
+        "Y": 411.18228
       }
     },
     {
       "ChildId": "7fc8a7c6-eadf-4186-a469-876c1d1a5599",
       "SymbolName": "Lib.render._dx11.api.GetSRVProperties",
       "Position": {
-        "X": 64.20232,
-        "Y": 381.3481
+        "X": 485.05878,
+        "Y": 271.18228
       }
     },
     {
       "ChildId": "8203f913-4103-4828-a030-7051c2e46ae7",
       "SymbolName": "Lib.numbers.vec3.Vector3Components",
       "Position": {
-        "X": 59.389217,
-        "Y": 674.00464
+        "X": 485.05878,
+        "Y": 691.18225
       }
     },
     {
@@ -131,32 +131,32 @@
         "Y": 229.21771
       },
       "Position": {
-        "X": 264.61093,
-        "Y": 483.796
+        "X": 625.0588,
+        "Y": 516.18225
       }
     },
     {
       "ChildId": "b39d4bc7-9824-4ff6-a772-00989acddc9e",
       "SymbolName": "Types.Gfx.ComputeShaderStage",
       "Position": {
-        "X": 483.2537,
-        "Y": 316.74768
+        "X": 835.0588,
+        "Y": 201.18228
       }
     },
     {
       "ChildId": "bbb9fb73-911f-4a7e-b1bd-08879975ab42",
       "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
       "Position": {
-        "X": 59.389053,
-        "Y": 764.00464
+        "X": 485.05878,
+        "Y": 831.18225
       }
     },
     {
       "ChildId": "d29cee5a-3a68-43e8-a658-af02c6dd8e7d",
       "SymbolName": "Types.Gfx.ComputeShader",
       "Position": {
-        "X": 61.013245,
-        "Y": 301.01743
+        "X": 485.05878,
+        "Y": 201.18228
       }
     },
     {
@@ -171,8 +171,8 @@
       "ChildId": "f3fc7381-660a-4ae3-b3e3-b9329ba03712",
       "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
       "Position": {
-        "X": -67.777115,
-        "Y": 414.65637
+        "X": 142.6006,
+        "Y": 335.0692
       }
     }
   ],
@@ -180,8 +180,8 @@
     {
       "OutputId": "cf976e9a-ea57-44f7-aeb9-f57f2e712b41"/*OutBuffer*/,
       "Position": {
-        "X": 965.0588,
-        "Y": 341.18228
+        "X": 835.0588,
+        "Y": 446.18228
       }
     }
   ]

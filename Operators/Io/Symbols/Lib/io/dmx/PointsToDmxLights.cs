@@ -83,6 +83,9 @@ namespace Lib.io.dmx
         [Input(Guid = "850af6c3-d9ef-492c-9cfb-e2589ae5b9ac")]
         public readonly InputSlot<bool> FillUniverse = new();
 
+        [Input(Guid = "B2C3D4E5-F6A7-587C-9D0E-1F2A3B4C5D6E")]
+        public readonly InputSlot<int> FixturesPerUniverse = new();
+
         [Input(Guid = "23F23213-68E2-45F5-B452-4A86289004C0")]
         public readonly InputSlot<bool> DebugToLog = new();
 
@@ -365,8 +368,9 @@ namespace Lib.io.dmx
             int fixtureChannelSize = FixtureChannelSize.GetValue(context);
             int effectedPointsCount = points.Length;
             bool debugToLog = DebugToLog.GetValue(context);
+            int fixturesPerUniverse = FixturesPerUniverse.GetValue(context);
 
-            // Determine fixture → pixel mapping (reference based)
+            // Determine fixture → pixel mapping (reference based or 1-to-1)
             int fixtureCount;
             int pixelsPerFixture;
             bool useReferencePoints = _referencePoints.Length > 0;
@@ -390,6 +394,7 @@ namespace Lib.io.dmx
             }
             else
             {
+                // 1-to-1 mapping: each point is a fixture
                 fixtureCount = effectedPointsCount;
                 pixelsPerFixture = 1;
             }
@@ -415,20 +420,68 @@ namespace Lib.io.dmx
             for (int i = 0; i < fixtureChannelSize; i++)
                 _pointChannelValues.Add(0);
 
+            // Track universe state for fixtures per universe limiting
+            int currentChannelOffset = 0; // Offset in DMX channels (not absolute channel number)
+            int fixturesInCurrentBatch = 0;
+            int channelsBeforeLastFixture = 0; // Track position before adding fixture for FillUniverse
+
             // Process each fixture
             for (int fixtureIdx = 0; fixtureIdx < fixtureCount; fixtureIdx++)
             {
                 bool logThisFixture = debugToLog && fixtureIdx == 0;
 
+                // Check if we need to start a new batch based on fixtures per universe
+                if (fixturesPerUniverse > 0 && fixturesInCurrentBatch >= fixturesPerUniverse)
+                {
+                    // Pad to universe boundary for clean batch separation
+                    int currentUniverse = (currentChannelOffset / UniverseSize);
+                    int nextUniverseStart = (currentUniverse + 1) * UniverseSize;
+                    int paddingNeeded = nextUniverseStart - currentChannelOffset;
+
+                    for (int p = 0; p < paddingNeeded; p++)
+                        _resultItems.Add(0);
+
+                    currentChannelOffset = nextUniverseStart;
+                    fixturesInCurrentBatch = 0;
+                }
+
+                // Check if fixture would cross universe boundary (with FitInUniverse)
+                if (fitInUniverse && fixtureChannelSize > 0)
+                {
+                    int currentUniverseStart = (currentChannelOffset / UniverseSize) * UniverseSize;
+                    int spaceLeftInUniverse = UniverseSize - (currentChannelOffset - currentUniverseStart);
+
+                    if (fixtureChannelSize > spaceLeftInUniverse)
+                    {
+                        // Pad to next universe
+                        int paddingNeeded = spaceLeftInUniverse;
+                        for (int p = 0; p < paddingNeeded; p++)
+                            _resultItems.Add(0);
+
+                        currentChannelOffset += paddingNeeded;
+                    }
+                }
+
                 // Reset per‑fixture channel array
                 for (int i = 0; i < fixtureChannelSize; i++)
                     _pointChannelValues[i] = 0;
 
-                int firstPixelIdx = fixtureIdx * pixelsPerFixture;
-                Point transformPoint = points[firstPixelIdx];
-                Point referencePoint = useReferencePoints ? _referencePoints[fixtureIdx] : transformPoint;
+                // Store position before adding this fixture for FillUniverse tracking
+                channelsBeforeLastFixture = currentChannelOffset;
 
-                if (logThisFixture) Log.Debug("--- Fixture 0 Debug ---", this);
+                // Get point data for this fixture (cycle through available points)
+                int pointIdx = fixtureIdx % Math.Max(1, effectedPointsCount);
+                int firstPixelIdx = pointIdx * Math.Min(pixelsPerFixture, Math.Max(1, effectedPointsCount - pointIdx));
+                Point transformPoint = points[Math.Min(firstPixelIdx, effectedPointsCount - 1)];
+                Point referencePoint = useReferencePoints && fixtureIdx < _referencePoints.Length
+                    ? _referencePoints[fixtureIdx]
+                    : transformPoint;
+
+                bool logBoundaryFixture = debugToLog && (fixtureIdx == 789 || fixtureIdx == 790 || fixtureIdx == 791);
+                if (logThisFixture || logBoundaryFixture)
+                {
+                    Log.Debug($"--- Fixture {fixtureIdx} Debug --- PointIdx: {pointIdx}, Color: ({transformPoint.Color.X:F2}, {transformPoint.Color.Y:F2}, {transformPoint.Color.Z:F2}), Offset: {currentChannelOffset}", this);
+                }
 
                 // Process transformations
                 Vec3 finalVisPos;
@@ -457,23 +510,41 @@ namespace Lib.io.dmx
                 HandleColorAndFeatures(context, points, transformPoint, firstPixelIdx, pixelsPerFixture);
                 HandleCustomVariables(context);
 
-                // Universe fit
-                if (fitInUniverse)
-                {
-                    int remaining = UniverseSize - (_resultItems.Count % UniverseSize);
-                    if (fixtureChannelSize > remaining)
-                    {
-                        for (int i = 0; i < remaining; i++)
-                            _resultItems.Add(0);
-                    }
-                }
-
                 // Append fixture's DMX channel list
                 _resultItems.AddRange(_pointChannelValues);
+
+                // Update tracking
+                currentChannelOffset += fixtureChannelSize;
+                fixturesInCurrentBatch++;
+
+                // FillUniverse: If we just crossed a universe boundary, fill the completed universe
+                if (fillUniverse && fixtureChannelSize > 0)
+                {
+                    int universeBefore = channelsBeforeLastFixture / UniverseSize;
+                    int universeAfter = currentChannelOffset / UniverseSize;
+
+                    if (universeAfter > universeBefore)
+                    {
+                        // We crossed one or more universe boundaries
+                        for (int u = universeBefore; u < universeAfter; u++)
+                        {
+                            int universeEnd = (u + 1) * UniverseSize;
+                            if (currentChannelOffset < universeEnd)
+                            {
+                                // Fill to end of this universe
+                                int paddingNeeded = universeEnd - currentChannelOffset;
+                                for (int p = 0; p < paddingNeeded; p++)
+                                    _resultItems.Add(0);
+
+                                currentChannelOffset = universeEnd;
+                            }
+                        }
+                    }
+                }
             }
 
-            // Universe fill
-            if (fillUniverse)
+            // Final universe fill (only if not using fixtures per universe batching)
+            if (fillUniverse && fixturesPerUniverse == 0)
             {
                 int remainder = _resultItems.Count % UniverseSize;
                 if (remainder != 0)

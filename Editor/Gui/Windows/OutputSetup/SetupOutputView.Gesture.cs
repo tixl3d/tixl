@@ -86,8 +86,8 @@ internal sealed partial class SetupOutputView
     {
         None,
         BoardCard,  // a card (or prop) on the Board; the drag moves the selected cards
-        Label,      // a surface's, region's or patch's name chip on a canvas; the drag moves that entity
-        ClickOnly,  // anything else nothing here drags (a slice's chip); the press can only act at its release
+        Label,      // a surface's, region's, patch's or slice's name chip on a canvas; the drag moves that entity
+        ClickOnly,  // anything else nothing here drags; the press can only act at its release
     }
 
     /// <summary>
@@ -194,7 +194,11 @@ internal sealed partial class SetupOutputView
 
         // A gesture with a surface snapshot is one that moves its pins; its marks must be placed before they move.
         if (snapshotOf != null)
-            SeedPointAims(setup, snapshotOf);
+        {
+            SeedPointAims(setup, TryGetAlignSubject(setup, snapshotOf, out var subject)
+                                     ? subject
+                                     : new AlignSubject(snapshotOf, snapshotOf, Vector2.Zero));
+        }
     }
 
     /// <summary>

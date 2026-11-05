@@ -120,6 +120,11 @@ internal sealed class TimeClipInteractions
                 DuplicateSelectedClips(compositionOp);
             }
 
+            if (DrawClipMenuItem(_duplicateClipsToTimeId, "Duplicate to Current Time", UserActions.DuplicateWithConnections.ListShortcuts()))
+            {
+                DuplicateSelectedClipsToCurrentTime(compositionOp);
+            }
+
             if (DrawClipMenuItem(_editClipTimesId, "Edit Clip Times"))
             {
                 ClipTimingEditor.TimeClipEditorRequested = true;
@@ -527,6 +532,49 @@ internal sealed class TimeClipInteractions
         ProjectView.Focused?.FlagChanges(ProjectView.ChangeTypes.Children | ProjectView.ChangeTypes.Connections);
     }
 
+    /// <summary>
+    /// Duplicates the selected clips like <see cref="DuplicateSelectedClips"/>, but moves the copies so the earliest
+    /// one starts at the current time. Durations, source ranges and the clips' offsets to each other are kept.
+    /// </summary>
+    public void DuplicateSelectedClipsToCurrentTime(Instance compositionOp)
+    {
+        Debug.Assert(_playback != null);
+
+        // Materialized because copying adds children to the composition while we iterate the selection.
+        var selectedClips = _context.ClipSelection.GetSelectedClips().ToList();
+        if (selectedClips.Count == 0)
+            return;
+
+        var earliestStart = float.PositiveInfinity;
+        foreach (var clip in selectedClips)
+            earliestStart = MathF.Min(earliestStart, clip.TimeRange.Start);
+
+        var offset = (float)_playback.TimeInBars - earliestStart;
+
+        var commands = new List<ICommand>();
+        var newClips = new List<TimeClip>();
+        foreach (var clip in selectedClips)
+        {
+            if (!TryCopyClipOp(compositionOp, clip, commands, out var newTimeClip))
+                continue;
+
+            // The copy's ranges as just copied are the undo state; the shifted ones the redo state.
+            var moveCommand = new MoveTimeClipsCommand(compositionOp, [newTimeClip]);
+            newTimeClip.TimeRange = new TimeRange(clip.TimeRange.Start + offset, clip.TimeRange.End + offset);
+            moveCommand.StoreCurrentValues();
+            commands.Add(moveCommand);
+            newClips.Add(newTimeClip);
+        }
+
+        if (commands.Count == 0)
+            return;
+
+        UndoRedoStack.Add(new MacroCommand("Duplicate clips to current time", commands));
+
+        SelectClips(newClips);
+        ProjectView.Focused?.FlagChanges(ProjectView.ChangeTypes.Children | ProjectView.ChangeTypes.Connections);
+    }
+
     public void SplitClipsAtTime(Instance compositionOp)
     {
         Debug.Assert(_playback != null);
@@ -926,6 +974,7 @@ internal sealed class TimeClipInteractions
     private static readonly int _selectFollowingClipsId = nameof(_selectFollowingClipsId).GetHashCode();
     private static readonly int _cutAtTimeId = nameof(_cutAtTimeId).GetHashCode();
     private static readonly int _duplicateClipsId = nameof(_duplicateClipsId).GetHashCode();
+    private static readonly int _duplicateClipsToTimeId = nameof(_duplicateClipsToTimeId).GetHashCode();
     private static readonly int _editClipTimesId = nameof(_editClipTimesId).GetHashCode();
     private static readonly int _clearTimeStretchId = nameof(_clearTimeStretchId).GetHashCode();
     private static readonly int _resetSourceToExtentId = nameof(_resetSourceToExtentId).GetHashCode();

@@ -40,6 +40,15 @@ internal sealed partial class SetupOutputView
         if (pickable)
             _picker.AddTarget(kind, id, rect.Min, rect.Max, isSelected: isSelected);
 
+        // A double-click on a label renames, where names are edited: the entity's row in the Flow Outliner.
+        if (SetupActions.CanRename(kind) && ImGui.IsWindowHovered() && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left)
+            && CanvasDraw.Contains(rect.Min, rect.Max, ImGui.GetMousePos()))
+        {
+            CancelGesture();
+            OutlinerItem.BeginRename(GlobalSelectionHandling.SetupEntities, kind, id, name);
+            _labelRenameStarted = true;
+        }
+
         var alpha = (_picker.IsPicked(id) ? 1f : 0.9f) * emphasis;
         var selectedColor = frameColor ?? SetupColors.ForKind(kind);
         var text = (isSelected ? selectedColor : SetupColors.LabelFor(kind)).Fade(alpha);
@@ -76,6 +85,8 @@ internal sealed partial class SetupOutputView
     /// </summary>
     private void ResolvePicking(Setup setup, SetupEntitySelection? selection)
     {
+        StartPendingRegionCopy(setup);
+
         // Cycle relative to whatever is currently the subject, so clicking a stack walks it. The primary
         // selection is that subject for either kind (the focused surface, or the selected slice).
         var current = selection != null && selection.TryResolve(setup, out _, out var primaryId) ? primaryId : Guid.Empty;
@@ -108,6 +119,12 @@ internal sealed partial class SetupOutputView
 
                 _menuKind = hit.Kind;
                 _menuId = hit.Id;
+                if (hit.Kind == SetupEntityKinds.FloorPlan && setup.FindFloorPlan(hit.Id) is { BoardPlacement: { } placement })
+                {
+                    var pressedAt = ImGui.GetMousePos() - ImGui.GetMouseDragDelta(ImGuiMouseButton.Right);
+                    PlanMenuPointInPlan = _boardProjection.ScreenToCanvas(pressedAt) - placement.Position;
+                }
+
                 ImGui.OpenPopup(PickMenuId);
             }
         }
@@ -148,8 +165,7 @@ internal sealed partial class SetupOutputView
 
                 CustomComponents.TooltipForLastItem("Adds an empty image card; pick its photo in the Parameter window.", "Or drop an image file onto the Board.");
 
-                if (CustomComponents.DrawMenuItem(3, "Add Prop"))
-                    SetupActions.AddProp(selection, _boardMenuPosition);
+                PersonImages.DrawAddMenu(3, selection, _boardMenuPosition);
 
                 // The dialog can't open from inside the menu (it would close with it), so it opens once the menu is gone.
                 if (CustomComponents.DrawMenuItem(4, "Add Floor Plan..."))
@@ -230,7 +246,11 @@ internal sealed partial class SetupOutputView
         var io = ImGui.GetIO();
         var isPlain = !io.KeyCtrl && !io.KeyShift;
         var keepsSelection = isPlain && hit.IsSelected;
-        if (!keepsSelection)
+        // A selected parent under the cursor takes a plain press, for its drag. A modifier edits the selection, and
+        // that is about the item the cursor is on.
+        if (!isPlain)
+            SelectPicked(selection, hit.TopKind, hit.TopId);
+        else if (!keepsSelection)
             SelectPicked(selection, hit.Kind, hit.Id);
 
         if (!isPlain)
@@ -238,7 +258,7 @@ internal sealed partial class SetupOutputView
 
         var origin = _boardCardsUnderMouse.Contains(hit.Id)
                          ? PressOrigins.BoardCard
-                         : hit.Kind is SetupEntityKinds.Surface or SetupEntityKinds.Patch
+                         : hit.Kind is SetupEntityKinds.Surface or SetupEntityKinds.Patch or SetupEntityKinds.Slice
                              ? PressOrigins.Label
                              : PressOrigins.ClickOnly;
 
@@ -259,10 +279,9 @@ internal sealed partial class SetupOutputView
     {
         if (selection != null)
         {
-            // Shift toggles, plain replaces. Ctrl toggles too — except on the Board, where it is the push-through
-            // into nested regions and the click it ends in is a plain pick.
+            // Shift and Ctrl toggle, plain replaces.
             var io = ImGui.GetIO();
-            if (io.KeyShift || (io.KeyCtrl && _editMode != EditModes.Board))
+            if (io.KeyShift || io.KeyCtrl)
                 selection.Toggle(kind, id);
             else
                 selection.Select(kind, id);
@@ -361,6 +380,8 @@ internal sealed partial class SetupOutputView
     private Guid _menuId;
     private const string PickMenuId = "##canvasPickMenu";
     private const string BoardMenuId = "##boardMenu";
+
+    private Vector2 _visibleBoardCentre;
 
     /** Board metres where the Board's own menu was opened — what the menu offers depends on what lies there. */
     private Vector2 _boardMenuPosition;

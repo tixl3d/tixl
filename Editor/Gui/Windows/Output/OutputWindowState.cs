@@ -83,6 +83,11 @@ internal sealed class OutputWindowState
 
     public Guid PinnedEntityId = Guid.Empty;
 
+    /// <summary>The Flow Outliner strip's height in unscaled pixels.</summary>
+    public float OutlinerHeight = DefaultOutlinerHeight;
+
+    internal const float DefaultOutlinerHeight = 220;
+
     /// <summary>
     /// Camera control modes — mirrors CameraSelectionHandling.ControlModes
     /// but as a public enum for serialization.

@@ -24,9 +24,7 @@ internal static class FloorPlanSync
 
         // The plan's own space is the stage: its card's place on the Board is presentation, like every card's.
         var origin = Vector2.Zero;
-
-        // Walls face the inside of a room; on an open run they face left of the direction the run is drawn in.
-        var facesLeft = !plan.IsClosed || plan.SignedAreaTwice() >= 0;
+        var facesLeft = WallsFaceLeft(plan);
 
         for (var segment = 0; segment < plan.SegmentCount; segment++)
         {
@@ -78,6 +76,61 @@ internal static class FloorPlanSync
     }
 
     /// <summary>
+    /// The reverse of <see cref="Apply"/> for a side edge of a wall that was just cropped or scaled: the segment takes
+    /// the wall's new width, its corner on the other side staying put. Absolute, so a live drag can call it per frame.
+    /// </summary>
+    /// <param name="edge">The dragged edge of the wall: 1 = right, 3 = left. Top and bottom don't touch the plan.</param>
+    public static void FollowWallWidth(Setup setup, Surface wall, int edge)
+    {
+        if (edge is not (1 or 3))
+            return;
+
+        var plan = setup.FindFloorPlanOf(wall.Id, out var segment);
+        if (plan == null || plan.FloorSurfaceId == wall.Id || segment < 0 || segment >= plan.SegmentCount)
+            return;
+
+        plan.GetSegment(segment, out var start, out var end);
+        var direction = end - start;
+        var length = direction.Length();
+        if (length < 0.0001f)
+            return;
+
+        direction /= length;
+
+        // Seen from inside, a wall facing left of its segment has its right end at the segment's start.
+        var movesStart = edge == 1 == WallsFaceLeft(plan);
+        var movedVertex = movesStart ? segment : (segment + 1) % plan.Vertices.Count;
+        plan.Vertices[movedVertex] = movesStart
+                                         ? end - direction * wall.SizeInMeters.X
+                                         : start + direction * wall.SizeInMeters.X;
+        Apply(setup, plan, movedVertex);
+    }
+
+    /// <summary>
+    /// Stands an existing surface on a segment at the size it was measured: the segment takes the surface's width,
+    /// not the other way round. A surface the plan raised there before is removed, or just unlinked when in use.
+    /// </summary>
+    public static void AssignWall(Setup setup, FloorPlan plan, int segment, Surface wall)
+    {
+        plan.EnsureWallSlots();
+        if (segment < 0 || segment >= plan.SegmentCount)
+            return;
+
+        ReleaseSurfaces(setup, [wall.Id]);
+
+        var previous = setup.FindSurface(plan.WallSurfaceIds[segment]);
+        if (previous != null)
+        {
+            plan.LoweredSurfaceIds.Remove(previous.Id);
+            if (!IsInUse(setup, previous))
+                setup.Surfaces.Remove(previous);
+        }
+
+        plan.WallSurfaceIds[segment] = wall.Id;
+        SetSegmentLength(setup, plan, segment, wall.SizeInMeters.X);
+    }
+
+    /// <summary>
     /// Gives the floor a typed size, as if its rectangle's top and right edges were moved: the bottom-left corner stays.
     /// A floor following the bounding box gets a rectangle of its own from here on.
     /// </summary>
@@ -119,7 +172,8 @@ internal static class FloorPlanSync
         var plan = new FloorPlan
                        {
                            Name = $"Floor Plan {setup.FloorPlans.Count + 1}",
-                           Vertices = [Vector2.Zero, new Vector2(MathF.Max(wall.SizeInMeters.X, SurfaceGeometry.MinSize), 0)],
+                           // Drawn right to left, so the wall faces the plan's viewer and its left end is the plan's left.
+                           Vertices = [new Vector2(MathF.Max(wall.SizeInMeters.X, SurfaceGeometry.MinSize), 0), Vector2.Zero],
                            WallHeight = wall.SizeInMeters.Y,
                            BoardPlacement = PlacementUnder(wall, 0),
                        };
@@ -482,6 +536,12 @@ internal static class FloorPlanSync
         }
     }
 
+    /** Walls face the inside of a room; on an open run they face left of the direction the run is drawn in. */
+    private static bool WallsFaceLeft(FloorPlan plan)
+    {
+        return !plan.IsClosed || plan.SignedAreaTwice() >= 0;
+    }
+
     /// <summary>
     /// Sets a wall's width by cropping one side, like an edge drag on the Board: the other side and the pixels
     /// it shows stay put, the projection stays aligned. Not a re-metering, which would stretch the content.
@@ -491,6 +551,7 @@ internal static class FloorPlanSync
         SurfaceGeometry.LocalBounds(wall, out var oldMin, out var oldMax);
         var edgeX = fromLeft ? oldMax.X - width : oldMin.X + width;
         SurfaceGeometry.DragEdge(wall, fromLeft ? 3 : 1, new Vector2(edgeX, 0), keepDimensions: false);
+
 
         SurfaceGeometry.LocalBounds(wall, out var newMin, out var newMax);
         if (SliceUvAnchoring.TryBegin(setup, wall, out var sliceId, out var uvStart))

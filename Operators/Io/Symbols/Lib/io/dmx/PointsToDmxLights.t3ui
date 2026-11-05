@@ -1,28 +1,31 @@
 {
   "FormatVersion": 3,
   "Id": "c9d7cd19-7fc6-4491-8dfa-3808725c7857"/*PointsToDmxLights*/,
-  "Description": "Converts 3D points into DMX channel values for lighting fixtures. Supports position, rotation (pan/tilt), color, and custom features.",
+  "Description": "Converts 3D points into DMX channel values for lighting fixtures. Supports position, rotation (pan/tilt), color and custom features, with universe packing options for multi-universe rigs.",
   "InputUis": [
     {
       "InputId": "013cc355-91d6-4ea6-b9f7-f1817b89e4a3"/*RedChannel*/,
       "Position": {
         "X": -200.0,
-        "Y": 2700.0
-      }
+        "Y": 2775.0
+      },
+      "Description": "1-based DMX channel for the red component within the fixture (or per-pixel) color block. 0 disables red."
     },
     {
       "InputId": "032f3617-e1f3-4b41-a3be-61dd63b9f3ba"/*ForwardVector*/,
       "Position": {
         "X": -200.0,
-        "Y": 1050.0
-      }
+        "Y": 1125.0
+      },
+      "Description": "The fixture's local forward axis (beam direction at neutral orientation) used to extract the aiming direction from the rotation."
     },
     {
       "InputId": "0c57cdd5-e450-4425-954f-c9e4256f83e1"/*InvertZ*/,
       "Position": {
         "X": -200.0,
-        "Y": 1350.0
-      }
+        "Y": 1425.0
+      },
+      "Description": "Invert the Z component of the extracted aiming direction."
     },
     {
       "InputId": "1348ed7c-79f8-48c6-ac00-e60fb40050db"/*FixtureChannelSize*/,
@@ -30,102 +33,116 @@
         "X": -200.0,
         "Y": 150.0
       },
-      "GroupTitle": "Config"
+      "GroupTitle": "Config",
+      "Description": "Number of DMX channels each fixture occupies. All channel numbers below are 1-based within this fixture block. Set to 0 to disable DMX generation."
     },
     {
       "InputId": "1cb93e97-0161-4a77-bbc7-ff30c1972cf8"/*GetF2*/,
       "Position": {
         "X": -200.0,
-        "Y": 3375.0
+        "Y": 3450.0
       },
-      "GroupTitle": "F2"
+      "GroupTitle": "F2",
+      "Description": "Enable writing the second feature value (F2) of the points to DMX."
     },
     {
       "InputId": "1f532994-fb0e-44e4-8a80-7917e1851eae"/*PanAxis*/,
       "Position": {
         "X": -200.0,
-        "Y": 1425.0
-      }
+        "Y": 1500.0
+      },
+      "Description": "The fixture's mechanical pan (horizontal) axis in its local space."
     },
     {
       "InputId": "1f877cf6-10d9-4d0b-b087-974bd6855e0a"/*TiltAxis*/,
       "Position": {
         "X": -200.0,
-        "Y": 1575.0
-      }
+        "Y": 1650.0
+      },
+      "Description": "The fixture's mechanical tilt (vertical) axis in its local space."
     },
     {
       "InputId": "23f23213-68e2-45f5-b452-4a86289004c0"/*DebugToLog*/,
       "Position": {
         "X": -200.0,
-        "Y": 375.0
-      }
+        "Y": 450.0
+      },
+      "Description": "Log detailed debug output (pan/tilt angles, DMX mappings, custom variables) for the first fixture to the console."
     },
     {
       "InputId": "294b0515-b9f2-446a-8a97-01e3c8b715c0"/*VisPanAxis*/,
       "Position": {
         "X": -200.0,
-        "Y": 2400.0
+        "Y": 2475.0
       },
-      "GroupTitle": "Visualization"
+      "GroupTitle": "Visualization",
+      "Description": "Pan axis used when reassembling orientations for the VisualizeLights output. Falls back to PanAxis when Disabled."
     },
     {
       "InputId": "2bea2ccb-89f2-427b-bd9a-95c7038b715e"/*ReferencePoints*/,
       "Position": {
         "X": -200.0,
         "Y": 75.0
-      }
+      },
+      "Description": "Optional buffer with one reference point per fixture (e.g. its mounting position). EffectedPoints are grouped per reference point and positions/rotations are measured relative to it (look-at). Requires the EffectedPoints count to be a multiple of the reference count, otherwise falls back to 1-to-1 mapping."
     },
     {
       "InputId": "47d7294f-6f73-4e21-ac9a-0fc0817283fb"/*TiltChannel*/,
       "Position": {
         "X": -200.0,
-        "Y": 2100.0
-      }
+        "Y": 2175.0
+      },
+      "Description": "1-based coarse DMX channel within the fixture block for tilt. 0 disables tilt output."
     },
     {
       "InputId": "4922acd8-ab83-4394-8118-c555385c2ce9"/*GetRotation*/,
       "Position": {
         "X": -200.0,
-        "Y": 975.0
+        "Y": 1050.0
       },
-      "GroupTitle": "Rotation"
+      "GroupTitle": "Rotation",
+      "Description": "Enable pan/tilt calculation from the point orientation (or the look-at direction when ReferencePoints are connected) and write it to DMX."
     },
     {
       "InputId": "49fefbdb-2652-43db-ae52-ebc2df3e2856"/*InvertX*/,
       "Position": {
         "X": -200.0,
-        "Y": 1200.0
-      }
+        "Y": 1275.0
+      },
+      "Description": "Invert the X component of the extracted aiming direction."
     },
     {
       "InputId": "4a40e022-d206-447c-bda3-d534f231c816"/*TiltFineChannel*/,
       "Position": {
         "X": -200.0,
-        "Y": 2175.0
-      }
+        "Y": 2250.0
+      },
+      "Description": "Optional fine channel for 16-bit tilt output."
     },
     {
       "InputId": "4d4b3425-e6ad-4834-a8a7-06c9f9c2b909"/*PanFineChannel*/,
       "Position": {
         "X": -200.0,
-        "Y": 1950.0
-      }
+        "Y": 2025.0
+      },
+      "Description": "Optional fine channel for 16-bit pan output."
     },
     {
       "InputId": "5cdc69f7-45ec-4eec-bfb6-960d6245dafb"/*GetColor*/,
       "Position": {
         "X": -200.0,
-        "Y": 2550.0
+        "Y": 2625.0
       },
-      "GroupTitle": "Color"
+      "GroupTitle": "Color",
+      "Description": "Enable writing the point colors to DMX channels."
     },
     {
       "InputId": "5e96a7a3-5340-43f2-96b9-9972a69421e5"/*Is16BitColor*/,
       "Position": {
         "X": -200.0,
-        "Y": 3075.0
-      }
+        "Y": 3150.0
+      },
+      "Description": "Write each color component as a 16-bit coarse/fine channel pair, doubling the channels per component."
     },
     {
       "InputId": "61b48e46-c3d1-46e3-a470-810d55f30aa6"/*EffectedPoints*/,
@@ -133,233 +150,275 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "GroupTitle": "Points"
+      "GroupTitle": "Points",
+      "Description": "Buffer of points to convert into DMX channel values. Each point carries position, orientation, color and F1/F2 feature values for its fixture (or pixel)."
     },
     {
       "InputId": "628d96a8-466b-4148-9658-7786833ec989"/*PositionMeasureAxis*/,
       "Position": {
         "X": -200.0,
-        "Y": 600.0
-      }
+        "Y": 675.0
+      },
+      "Description": "World axis along which the position distance is measured (X, Y or Z). Disabled turns position measurement off."
     },
     {
       "InputId": "658a19df-e51b-45b4-9f91-cb97a891255a"/*PositionFineChannel*/,
       "Position": {
         "X": -200.0,
-        "Y": 900.0
-      }
+        "Y": 975.0
+      },
+      "Description": "Optional fine channel for 16-bit position output; coarse and fine combine into a 16-bit value."
     },
     {
       "InputId": "6d8fc457-0c80-4736-8c25-cc48f07cbbfd"/*InvertY*/,
       "Position": {
         "X": -200.0,
-        "Y": 1275.0
-      }
+        "Y": 1350.0
+      },
+      "Description": "Invert the Y component of the extracted aiming direction."
     },
     {
       "InputId": "6e8b4125-0e8c-430b-897d-2231bb4c8f6f"/*TiltRange*/,
       "Position": {
         "X": -200.0,
-        "Y": 2025.0
-      }
+        "Y": 2100.0
+      },
+      "Description": "Minimum and maximum tilt angle in degrees supported by the fixture (e.g. -90 to 90). Computed angles are shifted and clamped into this range."
     },
     {
       "InputId": "7449cd05-54be-484b-854a-d2143340f925"/*FitInUniverse*/,
       "Position": {
         "X": -200.0,
         "Y": 225.0
-      }
+      },
+      "Description": "Prevent a fixture's channel block from crossing a 512-channel universe boundary by padding with empty channels, so every fixture fits completely into a single universe."
     },
     {
       "InputId": "78a7e683-f4e7-4826-8e39-c8de08e50e5e"/*InvertPositionDirection*/,
       "Position": {
         "X": -200.0,
-        "Y": 675.0
-      }
+        "Y": 750.0
+      },
+      "Description": "Negate the measured distance before mapping it onto the DMX range."
     },
     {
       "InputId": "7bf3e057-b9eb-43d2-8e1a-64c1c3857ca1"/*InvertPan*/,
       "Position": {
         "X": -200.0,
-        "Y": 1500.0
-      }
+        "Y": 1575.0
+      },
+      "Description": "Mirror the pan angle within its range before writing it to DMX."
     },
     {
       "InputId": "850af6c3-d9ef-492c-9cfb-e2589ae5b9ac"/*FillUniverse*/,
       "Position": {
         "X": -200.0,
         "Y": 300.0
-      }
+      },
+      "Description": "Pad each universe with zero channels up to the full 512 slots, for interfaces that expect complete universes."
     },
     {
       "InputId": "8880c101-403f-46e0-901e-20ec2dd333e9"/*PositionDistanceRange*/,
       "Position": {
         "X": -200.0,
-        "Y": 750.0
-      }
+        "Y": 825.0
+      },
+      "Description": "Minimum and maximum distance (world units) mapped onto the 8- or 16-bit DMX range. Distances outside are clamped; min and max must differ."
     },
     {
       "InputId": "8ceece78-9a08-4c7b-8fea-740e8e5929a6"/*WhiteChannel*/,
       "Position": {
         "X": -200.0,
-        "Y": 3000.0
-      }
+        "Y": 3075.0
+      },
+      "Description": "Optional 1-based DMX channel for white, derived as the minimum of red, green and blue. 0 disables."
     },
     {
       "InputId": "9000c279-73e4-4de8-a1f8-c3914eaaf533"/*PanChannel*/,
       "Position": {
         "X": -200.0,
-        "Y": 1875.0
-      }
+        "Y": 1950.0
+      },
+      "Description": "1-based coarse DMX channel within the fixture block for pan. 0 disables pan output."
     },
     {
       "InputId": "91c78090-be10-4203-827e-d2ef1b93317e"/*GetF1*/,
       "Position": {
         "X": -200.0,
-        "Y": 3150.0
+        "Y": 3225.0
       },
-      "GroupTitle": "F1"
+      "GroupTitle": "F1",
+      "Description": "Enable writing the first feature value (F1) of the points to DMX."
     },
     {
       "InputId": "970769f4-116f-418d-87a7-cda28e44d063"/*GreenChannel*/,
       "Position": {
         "X": -200.0,
-        "Y": 2775.0
-      }
+        "Y": 2850.0
+      },
+      "Description": "1-based DMX channel for the green component within the fixture (or per-pixel) color block. 0 disables green."
     },
     {
       "InputId": "9c235473-346b-4861-9844-4b584e09f58a"/*RotationOrder*/,
       "Position": {
         "X": -200.0,
-        "Y": 1125.0
-      }
+        "Y": 1200.0
+      },
+      "Description": "Order in which pan and tilt rotations combine: PanThenTilt or TiltThenPan. Must match the fixture's mechanical rotation order."
     },
     {
       "InputId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"/*CustomVariableValues*/,
       "Position": {
         "X": -200.0,
-        "Y": 3675.0
-      }
+        "Y": 3750.0
+      },
+      "Description": "Raw DMX values (0-255) written to CustomVariableChannels. The list is padded with 128 or trimmed to match the channel list length."
+    },
+    {
+      "InputId": "b2c3d4e5-f6a7-587c-9d0e-1f2a3b4c5d6e"/*FixturesPerUniverse*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 375.0
+      },
+      "Description": "Maximum number of fixtures placed in each 512-channel universe before the next fixture starts at the next universe boundary. 0 disables the limit and packs fixtures by channel count only."
     },
     {
       "InputId": "b2c3d4e5-f6a7-8901-bcde-f23456789012"/*CustomVariableChannels*/,
       "Position": {
         "X": -200.0,
-        "Y": 3600.0
-      }
+        "Y": 3675.0
+      },
+      "GroupTitle": "Custom Variables",
+      "Description": "List of extra 1-based DMX channel numbers within the fixture block that receive fixed values (e.g. dimmer, strobe, zoom)."
     },
     {
       "InputId": "b7061834-66aa-4f7f-91f9-10ebfe16713f"/*F1Channel*/,
       "Position": {
         "X": -200.0,
-        "Y": 3300.0
-      }
+        "Y": 3375.0
+      },
+      "Description": "1-based DMX channel within the fixture block for F1. 0 disables F1 output."
     },
     {
       "InputId": "b8080f4e-4542-4e20-9844-8028bbaf223f"/*GetF2ByPixel*/,
       "Position": {
         "X": -200.0,
-        "Y": 3450.0
-      }
+        "Y": 3525.0
+      },
+      "Description": "Write F2 once per pixel (channel advances per pixel) instead of once per fixture."
     },
     {
       "InputId": "bec9e5a6-40a9-49b2-88bd-01a4ea03d28c"/*GetF1ByPixel*/,
       "Position": {
         "X": -200.0,
-        "Y": 3225.0
-      }
+        "Y": 3300.0
+      },
+      "Description": "Write F1 once per pixel (channel advances per pixel) instead of once per fixture."
     },
     {
       "InputId": "c9d7cd19-7fc6-4491-8dfa-3808725c7859"/*PanOffset*/,
       "Position": {
         "X": -200.0,
-        "Y": 2250.0
-      }
+        "Y": 2325.0
+      },
+      "Description": "Constant angle in degrees added to the computed pan before range mapping. A value of 90 means no offset."
     },
     {
       "InputId": "c9d7cd19-7fc6-4491-8dfa-3808725c7860"/*TiltOffset*/,
       "Position": {
         "X": -200.0,
-        "Y": 2325.0
-      }
+        "Y": 2400.0
+      },
+      "Description": "Constant angle in degrees added to the computed tilt before range mapping. A value of 90 means no offset."
     },
     {
       "InputId": "cf2c3308-8f3f-442d-a563-b419f12e7ad1"/*RgbToCmy*/,
       "Position": {
         "X": -200.0,
-        "Y": 2625.0
-      }
+        "Y": 2700.0
+      },
+      "Description": "Invert the color components for CMY fixtures (C=1-R, M=1-G, Y=1-B). White derives from the converted values."
     },
     {
       "InputId": "d755342b-9a9e-4c78-8376-81579d8c0909"/*BlueChannel*/,
       "Position": {
         "X": -200.0,
-        "Y": 2850.0
-      }
+        "Y": 2925.0
+      },
+      "Description": "1-based DMX channel for the blue component within the fixture (or per-pixel) color block. 0 disables blue."
     },
     {
       "InputId": "d77be0d1-5fb9-4d26-9e4a-e16497e4759c"/*F2Channel*/,
       "Position": {
         "X": -200.0,
-        "Y": 3525.0
-      }
+        "Y": 3600.0
+      },
+      "Description": "1-based DMX channel within the fixture block for F2. 0 disables F2 output."
     },
     {
       "InputId": "d8a90c30-4e5b-4f0b-bfa7-09daf3a4c71f"/*TestModeSelect*/,
       "Position": {
         "X": -200.0,
-        "Y": 450.0
-      }
+        "Y": 525.0
+      },
+      "Description": "Debug helper that overrides the rotation forward vector with a fixed axis direction to verify the pan/tilt channel mapping without live input data."
     },
     {
       "InputId": "df04fce0-c6e5-4039-b03f-e651fc0ec4a9"/*GetPosition*/,
       "Position": {
         "X": -200.0,
-        "Y": 525.0
+        "Y": 600.0
       },
-      "GroupTitle": "Position"
+      "GroupTitle": "Position",
+      "Description": "Enable deriving a distance from the point position and writing it to a DMX channel."
     },
     {
       "InputId": "e96655be-6bc7-4ca4-bf74-079a07570d74"/*ShortestPathPanTilt*/,
       "Position": {
         "X": -200.0,
-        "Y": 1725.0
-      }
+        "Y": 1800.0
+      },
+      "Description": "Track the previous pan/tilt per fixture and pick the equivalent angle - including the flipped solution (pan+180 degrees, 180 degrees minus tilt) - closest to the last value, avoiding full-range swings on wrap-around."
     },
     {
       "InputId": "f13edebd-b44f-49e9-985e-7e3feb886fea"/*AlphaChannel*/,
       "Position": {
         "X": -200.0,
-        "Y": 2925.0
-      }
+        "Y": 3000.0
+      },
+      "Description": "Optional 1-based DMX channel for the point's alpha (W) component. 0 disables."
     },
     {
       "InputId": "f50da250-606d-4a15-a25e-5458f540e527"/*PanRange*/,
       "Position": {
         "X": -200.0,
-        "Y": 1800.0
-      }
+        "Y": 1875.0
+      },
+      "Description": "Minimum and maximum pan angle in degrees supported by the fixture (e.g. 0 to 540). Computed angles are shifted and clamped into this range."
     },
     {
       "InputId": "f85ecf9f-0c3d-4c10-8ba7-480aa2c7a667"/*InvertTilt*/,
       "Position": {
         "X": -200.0,
-        "Y": 1650.0
-      }
+        "Y": 1725.0
+      },
+      "Description": "Mirror the tilt angle within its range before writing it to DMX."
     },
     {
       "InputId": "f98e8f19-c234-453d-9492-369f6b08035d"/*VisTiltAxis*/,
       "Position": {
         "X": -200.0,
-        "Y": 2475.0
-      }
+        "Y": 2550.0
+      },
+      "Description": "Tilt axis used when reassembling orientations for the VisualizeLights output. Falls back to TiltAxis when Disabled."
     },
     {
       "InputId": "fc3ec0d6-8567-4d5f-9a63-5c69fb5988cb"/*PositionChannel*/,
       "Position": {
         "X": -200.0,
-        "Y": 825.0
-      }
+        "Y": 900.0
+      },
+      "Description": "1-based coarse DMX channel within the fixture block receiving the position value. 0 disables position output."
     }
   ],
   "SymbolChildUis": [],

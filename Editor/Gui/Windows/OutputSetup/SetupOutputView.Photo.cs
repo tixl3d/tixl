@@ -186,7 +186,7 @@ internal sealed partial class SetupOutputView
         var t = _referenceStraighten.Value;
         if (hasSubject && t > 0.001f
             && TryRenderStraightened(image, _referenceSubjectQuad, targetMin, targetMax, texture, t,
-                                     image.Id, 4096f,
+                                     image.Id, 4096f, surroundOfRegion: 1f,
                                      out var warped, out var bboxMin, out var bboxMax, out var regionMin, out var regionMax)
             && warped is { IsDisposed: false })
         {
@@ -261,7 +261,7 @@ internal sealed partial class SetupOutputView
     /// photo's warped corners in <see cref="_referencePhotoQuad"/>.
     /// </summary>
     private static bool TryRenderStraightened(ReferenceImage image, Vector2[] quad, Vector2 targetMin, Vector2 targetMax, Texture2D texture, float t,
-                                              Guid targetKey, float maxDimension,
+                                              Guid targetKey, float maxDimension, float surroundOfRegion,
                                               out Texture2D? warped, out Vector2 bboxMin, out Vector2 bboxMax, out Vector2 regionMin, out Vector2 regionMax)
     {
         warped = null;
@@ -290,9 +290,9 @@ internal sealed partial class SetupOutputView
         // Bounding to the region — not the whole warped photo — is essential: a steep rectification sends the
         // far photo corners toward infinity, so sizing to the full warp would blow the RT up and leave the
         // surface sub-pixel (it vanishes). The runaway surround is simply cropped to this window.
-        var regionSize = regionMax - regionMin;
-        bboxMin = regionMin - regionSize;
-        bboxMax = regionMax + regionSize;
+        var surround = (regionMax - regionMin) * surroundOfRegion;
+        bboxMin = regionMin - surround;
+        bboxMax = regionMax + surround;
 
         var bboxSize = bboxMax - bboxMin;
         var maxDim = Math.Max(bboxSize.X, bboxSize.Y);
@@ -318,8 +318,15 @@ internal sealed partial class SetupOutputView
         var quad = subject.Trace!.Quad;
 
         // The rect is where the wall was first put upright; refining the trace must not move or re-centre it.
-        // It is re-derived only for a new subject or a changed physical size (which changes its aspect).
-        if (subject.Id != _referenceSubjectId || subject.SizeInMeters != _referenceStickySize)
+        // It is re-derived only for a new subject or a changed physical size (which changes its aspect). A crop
+        // changes the size too, but only moves the dragged edge.
+        if (TryGetCroppedStraightRect(subject, out var croppedMin, out var croppedMax))
+        {
+            _referenceStickyMin = croppedMin;
+            _referenceStickyMax = croppedMax;
+            _referenceStickySize = subject.SizeInMeters;
+        }
+        else if (subject.Id != _referenceSubjectId || subject.SizeInMeters != _referenceStickySize)
         {
             StraightTargetBounds(subject, out _referenceStickyMin, out _referenceStickyMax);
             _referenceStickySize = subject.SizeInMeters;
@@ -371,19 +378,64 @@ internal sealed partial class SetupOutputView
 
 
     /// <summary>
+    /// The rect during a live crop: the one from the press with only the dragged edge moved, at the press' pixels
+    /// per metre. The trace's bounding box can't give this: under perspective it grows unevenly with the crop,
+    /// which would rescale and re-centre the frame. Kept to the press' scale, the photo doesn't move either.
+    /// </summary>
+    private bool TryGetCroppedStraightRect(Surface subject, out Vector2 min, out Vector2 max)
+    {
+        min = _straightCropPressMin;
+        max = _straightCropPressMax;
+        if (_straightCropEdge < 0 || !_gesture.Is(GestureKinds.SurfaceResize, subject.Id))
+        {
+            _straightCropEdge = -1;
+            return false;
+        }
+
+        var pixelsPerMetre = (max - min) / Vector2.Max(_straightCropPressSize, new Vector2(0.0001f));
+        var size = subject.SizeInMeters * pixelsPerMetre;
+        switch (_straightCropEdge)
+        {
+            case 0: min.Y = max.Y - size.Y; break;
+            case 1: max.X = min.X + size.X; break;
+            case 2: max.Y = min.Y + size.Y; break;
+            default: min.X = max.X - size.X; break;
+        }
+
+        return true;
+    }
+
+    /// <summary>
     /// The straightened crop of the photo a traced surface stands for, for its Board card: the warp rendered
-    /// small into the surface's own target, and the uv window of the rectified region inside it.
+    /// into the surface's own target, and the uv window of the rectified region inside it.
     /// </summary>
     private bool TryGetTracedFragment(Setup setup, Surface surface, out T3.Graphics.Compat.ShaderResourceView? srv, out Vector2 uvMin, out Vector2 uvMax)
     {
-        return TryGetTracedFragment(setup, surface, out srv, out _, out uvMin, out uvMax);
+        // A card only ever shows the region, so every pixel of the target goes to it.
+        return TryGetTracedFragment(setup, surface, 0f, surface.Id, out srv, out uvMin, out uvMax);
     }
 
-    private bool TryGetTracedFragment(Setup setup, Surface surface, out T3.Graphics.Compat.ShaderResourceView? srv, out Texture2D? warpedTexture,
+    /// <summary>
+    /// The fragment for calibration discs, with photo around the region: a mark near the surface's edge still
+    /// shows what surrounds its feature. Telling the surface from its surroundings is easy for the person
+    /// aligning it, reconstructing what a crop cut off is not.
+    /// </summary>
+    private bool TryGetTracedFragmentWithSurround(Setup setup, Surface surface, out T3.Graphics.Compat.ShaderResourceView? srv,
+                                                  out Vector2 uvMin, out Vector2 uvMax)
+    {
+        // A target of its own: sharing the card's would recreate it whenever their differing sizes alternate.
+        Span<byte> key = stackalloc byte[16];
+        surface.Id.TryWriteBytes(key);
+        key[0] ^= 0xFF;
+        return TryGetTracedFragment(setup, surface, DiscSurroundOfRegion, new Guid(key), out srv, out uvMin, out uvMax);
+    }
+
+    private const float DiscSurroundOfRegion = 0.5f;
+
+    private bool TryGetTracedFragment(Setup setup, Surface surface, float surroundOfRegion, Guid targetKey, out T3.Graphics.Compat.ShaderResourceView? srv,
                                       out Vector2 uvMin, out Vector2 uvMax)
     {
         srv = null;
-        warpedTexture = null;
         uvMin = Vector2.Zero;
         uvMax = Vector2.One;
         var binding = surface.Trace;
@@ -396,7 +448,7 @@ internal sealed partial class SetupOutputView
             return false;
 
         StraightTargetBounds(surface, out var targetMin, out var targetMax);
-        if (!TryRenderStraightened(image, binding.Quad, targetMin, targetMax, texture, 1f, surface.Id, 1024f,
+        if (!TryRenderStraightened(image, binding.Quad, targetMin, targetMax, texture, 1f, targetKey, 2048f, surroundOfRegion,
                                    out var warped, out var bboxMin, out var bboxMax, out var regionMin, out var regionMax)
             || warped is not { IsDisposed: false })
             return false;
@@ -405,7 +457,6 @@ internal sealed partial class SetupOutputView
         if (srv is not { IsDisposed: false })
             return false;
 
-        warpedTexture = warped;
         var bboxSize = Vector2.Max(bboxMax - bboxMin, new Vector2(0.001f));
         uvMin = (regionMin - bboxMin) / bboxSize;
         uvMax = (regionMax - bboxMin) / bboxSize;
@@ -488,6 +539,8 @@ internal sealed partial class SetupOutputView
 
     // The rect the subject is put upright into — sticky across trace edits (see ResolveStraightSubject).
     private Vector2 _referenceStickyMin, _referenceStickyMax, _referenceStickySize;
+    private Vector2 _straightCropPressMin, _straightCropPressMax, _straightCropPressSize;
+    private int _straightCropEdge = -1;
 
     // Subject transition: the quad/target in use (eased between surfaces), where the ease started, and its progress.
     private Guid _referenceSubjectId;

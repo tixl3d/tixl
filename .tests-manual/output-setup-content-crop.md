@@ -56,8 +56,8 @@ it back up. Ctrl+Z twice. Then do the same on the **Output** canvas, and on a re
 
 **Action:**
 1. Select "Region 1" and drag its left edge to the right.
-2. Hold Alt, press inside the region's body and drag it 100 px to the right, release.
-3. Try the Alt-drag again, far past the point where the content would leave the source.
+2. Hold Alt+Shift, press inside the region's body and drag it 100 px to the right, release.
+3. Try the Alt+Shift drag again, far past the point where the content would leave the source.
 
 **Expected:**
 - After 1: the region's window shrinks over unmoved pixels, like the surface did.

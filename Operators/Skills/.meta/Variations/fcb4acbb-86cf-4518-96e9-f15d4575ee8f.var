@@ -1,0 +1,32 @@
+{
+  "Id": "fcb4acbb-86cf-4518-96e9-f15d4575ee8f",
+  "Variations": [
+    {
+      "Id": "8ff3a9a1-8b6d-4c49-bf3a-9ed0f695e949",
+      "IsPreset": false,
+      "ActivationIndex": 0,
+      "Title": "Solution",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "f24533b6-b475-4115-9bc1-220b50df98f1": {
+          "ceeae47b-d792-471d-a825-49e22749b7b9": "Yellow"
+        },
+        "2daf1152-50d0-43ca-9318-642756bff614": {
+          "e0f765f3-ac71-45c9-87a4-e9be3fa9a9a0": 10.0
+        },
+        "c1229f68-1fbf-408c-b432-6e5ce410308d": {
+          "ceeae47b-d792-471d-a825-49e22749b7b9": "Green"
+        },
+        "68eb40b9-9af2-4357-a8e8-d93e85232b55": {
+          "ceeae47b-d792-471d-a825-49e22749b7b9": "Sheep"
+        },
+        "ad554b63-2002-4551-8ed1-c3ed6f502c58": {
+          "f1f1be0e-d5bc-4940-bbc1-88bfa958f0e1": "Task"
+        }
+      }
+    }
+  ]
+}

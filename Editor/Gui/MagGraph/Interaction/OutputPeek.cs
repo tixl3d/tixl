@@ -81,12 +81,17 @@ internal static class OutputPeek
         var shownInstance = context.Selector.GetFirstSelectedInstance() ?? context.CompositionInstance;
         if (outputWindow != null && outputWindow.Pinning.IsPinnedTo(shownInstance))
         {
+            // The setup view hides the pinned op, so it isn't really in the output yet.
+            if (outputWindow.TryLeaveSetupMode())
+                return;
+
             // P no longer unpins, so tell where that moved
             ActionToast.Show("{" + shownInstance.Symbol.Name + " is already in the output}   unpin it in the output window");
             return;
         }
 
         _peekingWindow = outputWindow;
+        _peekLeftSetupMode = outputWindow is { IsInSetupMode: true };
         _peekingWindow?.Pinning.BeginPeek();
         NodeActions.PinSelectedToOutputWindow(projectView, context.Selector, context.CompositionInstance);
         _shownName = outputWindow != null ? shownInstance.Symbol.Name : null;
@@ -110,6 +115,8 @@ internal static class OutputPeek
         }
 
         _peekingWindow?.Pinning.EndPeek();
+        if (_peekLeftSetupMode)
+            _peekingWindow?.EnterSetupMode();
     }
 
     private static OutputWindow? GetVisibleOutputWindow()
@@ -138,11 +145,12 @@ internal static class OutputPeek
     private const string PeekTipId = "OutputPeek";
 
     /** Releasing P later than this counts as holding it */
-    private const double TapMaxSec = 0.25;
+    private const double TapMaxSec = 0.35; 
 
     private static bool _isKeyDown;
     private static double _pressTime;
     private static OutputWindow? _peekingWindow;
+    private static bool _peekLeftSetupMode;
     private static IReadOnlyList<Guid>? _previousBackgroundPath;
     private static bool _hadBackground;
     private static string? _shownName;

@@ -143,6 +143,40 @@ internal static class SetupRelations
         return slice != null && slice.SourceId == sourceId;
     }
 
+    /// <summary>The patch this pin is linked to, if it still exists on the mapping's output.</summary>
+    public static Guid LinkedPatchOf(Setup setup, Surface.OutputMapping mapping)
+    {
+        return mapping.PatchId != Guid.Empty && setup.FindOutput(mapping.OutputId)?.FindPatch(mapping.PatchId) != null
+                   ? mapping.PatchId
+                   : Guid.Empty;
+    }
+
+    /// <summary>
+    /// Gives every linked pin its patch's quad, so a wall follows a moved patch and a change to the wall leaves its
+    /// tile alone. Called per frame and before saving: whatever edited either side, the link wins.
+    /// </summary>
+    public static void SyncPinsToLinkedPatches(Setup setup)
+    {
+        foreach (var surface in setup.Surfaces)
+        {
+            foreach (var mapping in surface.OutputMappings)
+            {
+                if (mapping.PatchId == Guid.Empty)
+                    continue;
+
+                var patch = setup.FindOutput(mapping.OutputId)?.FindPatch(mapping.PatchId);
+                if (patch == null)
+                {
+                    mapping.PatchId = Guid.Empty;
+                }
+                else if (patch.Quad.Length >= 4 && mapping.Quad.Length >= 4)
+                {
+                    patch.CopyTurnedCorners(mapping.Quad);
+                }
+            }
+        }
+    }
+
     public static bool IsMappedTo(Surface surface, Guid outputId)
     {
         foreach (var mapping in surface.OutputMappings)
@@ -217,7 +251,7 @@ internal static class SetupRelations
         // and undoing on its own item, which a folded-away patch has none of — and a fitted one only covers the
         // canvas while the display happens to match its aspect.
         var patch = output.Patches[0];
-        if (!string.IsNullOrEmpty(patch.Name) || !CoversFullCanvas(output, patch) || patch.QuarterTurns != 0 || patch.IsFitted)
+        if (!string.IsNullOrEmpty(patch.Name) || !CoversFullCanvas(patch) || patch.QuarterTurns != 0 || patch.IsFitted)
             return false;
 
         implicitPatch = patch;
@@ -235,7 +269,7 @@ internal static class SetupRelations
         return output.Patches.Count - (TryGetImplicitPatch(output, out _) ? 1 : 0);
     }
 
-    private static bool CoversFullCanvas(OutputDefinition output, OutputDefinition.Patch patch)
+    public static bool CoversFullCanvas(OutputDefinition.Patch patch)
     {
         if (patch.Quad.Length < 4)
             return false;
@@ -259,32 +293,25 @@ internal static class SetupRelations
     }
 
     /// <summary>
-    /// A source's implicit slice: its only slice, unnamed, uncut and unrotated — the full frame a drop onto a
+    /// A source's implicit slice: its first unnamed, uncut and unrotated slice — the full frame a drop onto a
     /// surface or output creates. It is the source as far as the user is concerned, so the views fold it into
-    /// the content row/card instead of listing it. It surfaces as a slice of its own the moment it is cut,
-    /// named, or joined by a second slice.
+    /// the content row/card instead of listing it, also next to cut slices. It surfaces as a slice of its own
+    /// the moment it is cut or named.
     /// </summary>
     public static bool TryGetImplicitSlice(Setup setup, Guid sourceId, out Slice? implicitSlice)
     {
-        implicitSlice = null;
-        Slice? only = null;
         for (var i = 0; i < setup.Slices.Count; i++)
         {
             var slice = setup.Slices[i];
-            if (slice.SourceId != sourceId)
-                continue;
-
-            if (only != null)
-                return false;
-
-            only = slice;
+            if (slice.SourceId == sourceId && IsFullFrame(slice))
+            {
+                implicitSlice = slice;
+                return true;
+            }
         }
 
-        if (only == null || !IsFullFrame(only))
-            return false;
-
-        implicitSlice = only;
-        return true;
+        implicitSlice = null;
+        return false;
     }
 
     public static bool IsImplicitSlice(Setup setup, Slice slice)
@@ -295,7 +322,8 @@ internal static class SetupRelations
     /// <summary>Slices the views list — the source's implicit full-frame slice is folded into the source.</summary>
     public static int CountListedSlicesOfSource(Setup setup, Guid sourceId)
     {
-        return TryGetImplicitSlice(setup, sourceId, out _) ? 0 : CountSlicesOfSource(setup, sourceId);
+        var count = CountSlicesOfSource(setup, sourceId);
+        return TryGetImplicitSlice(setup, sourceId, out _) ? count - 1 : count;
     }
 
     private static bool IsFullFrame(Slice slice)
@@ -387,4 +415,7 @@ internal static class SetupRelations
 
         return count;
     }
+
+    /** Canvas 0..1 units: far below a pixel on any output, well above float noise from the corner turn. */
+
 }

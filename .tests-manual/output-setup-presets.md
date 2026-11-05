@@ -63,7 +63,7 @@ Click the entry for the second display.
 ## Step: Opening the Setup Panel
 
 **Action:**
-In the Output Window toolbar, open the breadcrumb menu and enable "Show Flow Outliner".
+In the Output Window toolbar, click the "Output Setup" button.
 
 **Expected:**
 - The Flow Outliner appears under the canvas with columns CONTENT, SURFACES, OUTPUTS, LOCAL BINDINGS — the first three with a `+` button.
@@ -101,12 +101,26 @@ entity in each window's panel.
 
 **Action:**
 In the panel title dropdown, choose "Duplicate Current". Then open the dropdown
-again and switch between the two setups. Finally delete the copy.
+again and switch between the two setups. With the copy active, choose "Delete..." and
+press Cancel. Then choose "Delete..." again and press Delete.
 
 **Expected:**
 - The duplicate (e.g. "Setup 1 copy") becomes active and appears in `.meta/Setups/`.
 - Entity ids in both files are identical (GUID-preserving duplication).
-- After deleting, the original setup is active again and the copy's file is gone.
+- After Cancel, the copy is still active and its file is still there.
+- After Delete, the original setup is active again and the copy's file is gone.
+
+## Step: A copied setup file doesn't save over its original
+
+**Action:**
+1. With the editor showing "Setup 1", copy `.meta/Setups/Setup 1.setup.json` in the file manager and name the copy
+   `Setup 1 backup.setup.json`.
+2. In the panel title dropdown, choose "Setup 1 backup".
+3. Change something in the setup, such as a surface's name.
+
+**Expected:**
+- The dropdown's title reads "Setup 1 backup", and the change lands in `Setup 1 backup.setup.json`.
+- `Setup 1.setup.json` keeps its old content.
 
 ## Step: Setup switcher renames
 

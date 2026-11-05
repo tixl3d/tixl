@@ -138,22 +138,14 @@ internal sealed partial class SetupOutputView
         if (!canIsolate)
             _isolatesFocusedSurface = false;
 
-        // How much of the surfaces' content shows over their photos, on the Board and the traced quads: a
-        // drag-edit field in percent, like the parameter fields.
-        ImGui.SameLine(0, 12 * T3Ui.UiScaleFactor);
-        ImGui.AlignTextToFramePadding();
-        CustomComponents.StylizedText("Overlay", Fonts.FontSmall, UiColors.TextMuted);
-        ImGui.SameLine(0, 4 * T3Ui.UiScaleFactor);
-        var previewPercent = UserSettings.Config.OutputSetupContentPreviewOpacity * 100f;
-        ImGui.PushID("contentPreview");
-        var previewState = SingleValueEdit.Draw(ref previewPercent, new Vector2(60 * T3Ui.UiScaleFactor, ImGui.GetFrameHeight()),
-                                                0f, 100f, clampMin: true, clampMax: true, scale: 0.5f, format: "{0:0}%", defaultValue: 65f);
-        ImGui.PopID();
-        if ((previewState & InputEditStateFlags.Modified) != 0)
-            UserSettings.Config.OutputSetupContentPreviewOpacity = previewPercent / 100f;
+        DrawOpacityField("Overlay", ref UserSettings.Config.OutputSetupContentPreviewOpacity, 65f,
+                         "Opacity of each surface's content over its photo — on the traced quads and the surface cards. Drag, or double-click to type.");
 
-        if (ImGui.IsItemHovered())
-            CustomComponents.TooltipForLastItem("Overlay opacity", "Opacity of each surface's content over its photo — on the traced quads and the surface cards. Drag, or double-click to type.");
+        if (_editMode == EditModes.Board)
+        {
+            DrawOpacityField("Projection Preview", ref UserSettings.Config.OutputSetupProjectionPreviewOpacity, 0f,
+                             "Opacity of what a surface without content of its own receives from its output: the output's picture carried back through the corner pin, which shows where it lands with the current alignment. Drag, or double-click to type.");
+        }
 
         // Isolate is an Output-canvas affair: it locks the corner-pin editing to one frame. Elsewhere it has
         // nothing to lock, so it isn't offered (and clears).
@@ -166,54 +158,79 @@ internal sealed partial class SetupOutputView
 
             ImGui.EndDisabled();
             if (canIsolate && ImGui.IsItemHovered())
-                ImGui.SetTooltip("Lock the canvas to the selected frame.\nOthers stay visible and snap, but change selection in the sidebar.");
+                ImGui.SetTooltip("Lock the canvas to the selected frame.\nOthers stay visible and snap, but change selection in the Flow Outliner.");
         }
         else
         {
             _isolatesFocusedSurface = false;
         }
 
-        // Calibrating against the photo: the straightened photo is projected in place of the content, and the
-        // reference points become handles on the projector canvas — drag one until its crosshair sits on the
-        // real feature; the pin re-solves so every placed point stays exactly where it was aimed.
-        var photoCarrier = straightCarrier is { Trace: not null } ? straightCarrier : null;
-        if (photoCarrier == null)
+        // Aligning against the photo: a disc of the straightened photo is projected around each reference point
+        // and the points become handles on the projector canvas — drag one until its disc sits on the real
+        // feature; the pin re-solves so every set point stays exactly where it was dropped. It draws on the real
+        // projector, so it never outlives the Output tab.
+        var hasSeveralAlignCandidates = false;
+        var alignSubject = default(AlignSubject);
+        var hasAlignSubject = _editMode == EditModes.Output && TryFindAlignSubject(setup, outputId, out alignSubject, out hasSeveralAlignCandidates);
+        if (!hasAlignSubject)
             _projectsPhoto = false;
 
-        if (_editMode is EditModes.Output or EditModes.Straight && photoCarrier != null)
+        if (!_projectsPhoto)
+            FinishGamepadMove(setup);
+
+        if (hasSeveralAlignCandidates)
         {
             ImGui.SameLine();
-            if (CustomComponents.StateButton("Project photo", _projectsPhoto ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Emphasized))
+            ImGui.AlignTextToFramePadding();
+            CustomComponents.StylizedText("Select a surface to align its points", Fonts.FontSmall, UiColors.TextMuted);
+        }
+
+        if (hasAlignSubject)
+        {
+            ImGui.SameLine();
+            if (CustomComponents.StateButton("Align Points", _projectsPhoto ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Emphasized))
                 _projectsPhoto = !_projectsPhoto;
 
             if (ImGui.IsItemHovered())
-                CustomComponents.TooltipForLastItem("Project the photo", "Projects a disc of the straightened photo around each reference point, with a crosshair. Drag a point on the canvas until the photo's feature lands on the real one; that activates it (green) and the pin is solved through every activated point. Double-click a point to reset it.");
+                CustomComponents.TooltipForLastItem("Align points", "Projects a disc of the straightened photo around each reference point. Drag a point while watching the wall until its disc covers the real feature. That sets the point, and the pin is solved through every set point. Turn it off to check the result on the content.\n\nGame controller: right stick moves the active point, the d-pad goes to the nearest point in its direction, the shoulder buttons cycle through all points, right stick button releases the active one. Hold the left stick until the arrow points up on the wall and press it to make that direction up. Pressing it centred resets the alignment.");
 
-            // The disc size, as a share of the canvas height — small enough to isolate one feature, large enough
-            // to recognise it.
-            ImGui.SameLine(0, 4 * T3Ui.UiScaleFactor);
-            var radiusPercent = UserSettings.Config.OutputSetupPhotoDiscRadius * 100f;
-            ImGui.PushID("photoDiscRadius");
-            var radiusState = SingleValueEdit.Draw(ref radiusPercent, new Vector2(52 * T3Ui.UiScaleFactor, ImGui.GetFrameHeight()),
-                                                   1f, 50f, clampMin: true, clampMax: true, scale: 0.2f, format: "{0:0}%", defaultValue: 5f);
-            ImGui.PopID();
-            if ((radiusState & InputEditStateFlags.Modified) != 0)
-                UserSettings.Config.OutputSetupPhotoDiscRadius = radiusPercent / 100f;
-
-            if (ImGui.IsItemHovered())
-                CustomComponents.TooltipForLastItem("Disc radius", "Radius of the photo disc around each reference point, in percent of the canvas height. Drag, or double-click to type.");
-
-            if (_projectsPhoto && _pinResidualPx > 0.5f)
+            if (_projectsPhoto)
             {
-                ImGui.SameLine();
-                CustomComponents.StylizedText($"points miss by up to {_pinResidualPx:0.0} px", Fonts.FontSmall, UiColors.TextMuted);
+                // The disc size, as a share of the canvas height — small enough to isolate one feature, large
+                // enough to recognise it.
+                ImGui.SameLine(0, 4 * T3Ui.UiScaleFactor);
+                var radiusPercent = UserSettings.Config.OutputSetupPhotoDiscRadius * 100f;
+                ImGui.PushID("photoDiscRadius");
+                var radiusState = SingleValueEdit.Draw(ref radiusPercent, new Vector2(52 * T3Ui.UiScaleFactor, ImGui.GetFrameHeight()),
+                                                       1f, 50f, clampMin: true, clampMax: true, scale: 0.2f, format: "{0:0}%", defaultValue: 5f);
+                ImGui.PopID();
+                if ((radiusState & InputEditStateFlags.Modified) != 0)
+                    UserSettings.Config.OutputSetupPhotoDiscRadius = radiusPercent / 100f;
+
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("More than four points over-determine a corner pin; the solve averages them.\nA large miss means a point is misplaced, or the wall isn't flat.\nEach point's arrow shows which way its own miss goes.");
+                    CustomComponents.TooltipForLastItem("Disc radius", "Radius of the photo disc around each reference point, in percent of the canvas height. Drag, or double-click to type.");
+
+                ImGui.SameLine();
+                DrawReleasePointButton(setup, alignSubject.Pinned, outputId);
+                ImGui.SameLine();
+                DrawResetAlignmentButton(setup, alignSubject.Pinned, outputId);
+
+                if (_pinResidualPx > 0.5f)
+                {
+                    ImGui.SameLine();
+                    CustomComponents.StylizedText($"points miss by up to {_pinResidualPx:0.0} px", Fonts.FontSmall, UiColors.TextMuted);
+                    if (ImGui.IsItemHovered())
+                        ImGui.SetTooltip("More than four points over-determine a corner pin; the solve averages them.\nA large miss means a point is misplaced, or the wall isn't flat.\nEach point's arrow shows which way its own miss goes.");
+                }
+
+                if (TryGetTracedFragmentWithSurround(setup, alignSubject.Traced, out var photoSrv, out var photoUvMin, out var photoUvMax))
+                {
+                    NarrowPhotoUvToPinned(alignSubject, ref photoUvMin, ref photoUvMax);
+                    CalibrationOverlay.SetCalibrationPhoto(alignSubject.Pinned.Id, photoSrv!, photoUvMin, photoUvMax, UserSettings.Config.OutputSetupPhotoDiscRadius,
+                                                           _activePointId, alignSubject.Traced, alignSubject.TracedToPinned);
+                }
             }
         }
-
-        if (_projectsPhoto && photoCarrier != null && TryGetTracedFragment(setup, photoCarrier, out var photoSrv, out var photoUvMin, out var photoUvMax))
-            CalibrationOverlay.SetCalibrationPhoto(photoCarrier.Id, photoSrv!, photoUvMin, photoUvMax, UserSettings.Config.OutputSetupPhotoDiscRadius);
 
         // Measuring only makes sense against the straightened surface — on the projector canvas the
         // lengths would be perspective-foreshortened and mean nothing.
@@ -241,12 +258,11 @@ internal sealed partial class SetupOutputView
                 }
             }
 
-            // Nothing else on the canvas says a click or drag is now expected, and the tools disarm after
-            // one use — so say what to do with them while armed.
+            // Nothing else on the canvas says a click or drag is now expected, so say what to do while armed.
             if (_isLineToolArmed)
             {
                 ImGui.SameLine();
-                CustomComponents.StylizedText("drag along something straight in reality", Fonts.FontSmall, UiColors.StatusAnimated);
+                CustomComponents.StylizedText("drag along something straight in reality, Esc to finish", Fonts.FontSmall, UiColors.StatusAnimated);
             }
             else if (_isPointToolArmed)
             {
@@ -262,6 +278,7 @@ internal sealed partial class SetupOutputView
             ImGui.BeginDisabled(!canStraighten);
             if (ImGui.SmallButton("Straighten") && canStraighten)
             {
+                _isLineToolArmed = false;
                 if (tracedForLines != null)
                     SetupUndo.RunUndoable("Straighten trace from lines", setup, () => TryStraightenTraceFromLines(lineSubject));
                 else
@@ -276,44 +293,39 @@ internal sealed partial class SetupOutputView
             ImGui.SameLine();
             ImGui.BeginDisabled(!canApply);
             if (ImGui.SmallButton("Apply lengths") && canApply)
+            {
+                _isLineToolArmed = false;
                 SetupUndo.RunUndoable("Apply lengths", setup, () => TryApplyLengths(setup, lineSubject));
+            }
 
             ImGui.EndDisabled();
             if (!canApply && ImGui.IsItemHovered())
-                ImGui.SetTooltip("Double-click a line to give it a real length first.");
+                ImGui.SetTooltip("Click a line to give it a real length first.");
         }
         else
         {
             _isLineToolArmed = false;
             _isPointToolArmed = false;
         }
+    }
 
-        // "+ <surface>" maps a surface onto this output — an Output-canvas action; the Board has no output to map to.
-        if (output == null || _editMode == EditModes.Board)
-            return;
+    /** A labelled drag-edit field in percent, like the parameter fields. The label is also its ImGui id. */
+    private static void DrawOpacityField(string label, ref float opacity, float defaultPercent, string tooltip)
+    {
+        ImGui.SameLine(0, 12 * T3Ui.UiScaleFactor);
+        ImGui.AlignTextToFramePadding();
+        CustomComponents.StylizedText(label, Fonts.FontSmall, UiColors.TextMuted);
+        ImGui.SameLine(0, 4 * T3Ui.UiScaleFactor);
+        var percent = opacity * 100f;
+        ImGui.PushID(label);
+        var state = SingleValueEdit.Draw(ref percent, new Vector2(60 * T3Ui.UiScaleFactor, ImGui.GetFrameHeight()),
+                                         0f, 100f, clampMin: true, clampMax: true, scale: 0.5f, format: "{0:0}%", defaultValue: defaultPercent);
+        ImGui.PopID();
+        if ((state & InputEditStateFlags.Modified) != 0)
+            opacity = percent / 100f;
 
-        for (var i = 0; i < setup.Surfaces.Count; i++)
-        {
-            var surface = setup.Surfaces[i];
-            if (surface.HasMapping(outputId))
-                continue;
-
-            // A Layout child rides its parent's corner pin — offering it one of its own would detach it.
-            if (surface.Kind == Surface.Kinds.Layout && surface.ParentId != Guid.Empty)
-                continue;
-
-            ImGui.SameLine();
-            ImGui.PushID(surface.Id.GetHashCode());
-            var label = string.IsNullOrEmpty(surface.Name) ? "untitled" : surface.Name;
-            if (ImGui.SmallButton("+ " + label))
-            {
-                SetupUndo.RunUndoable("Map surface", setup, () => SetupActions.AddMapping(surface, output));
-            }
-
-            CustomComponents.TooltipForLastItem("Map this surface onto the output",
-                                                "Drops a centered corner-pin quad you can then drag into place.");
-            ImGui.PopID();
-        }
+        if (ImGui.IsItemHovered())
+            CustomComponents.TooltipForLastItem(label, tooltip);
     }
 
     // The header the last drawn canvas deferred to the strip.
