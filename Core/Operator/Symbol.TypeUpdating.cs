@@ -78,10 +78,14 @@ public sealed partial class Symbol
                 var attribute = info.Attribute;
                 var alreadyExistingOutput = removedOutputDefinitions.FirstOrDefault(o => o.Id == attribute.Id);
                 if (alreadyExistingOutput != null)
+                    removedOutputDefinitions.Remove(alreadyExistingOutput);
+
+                // A slot that changed kind under the same id (e.g. Slot -> TimeClipSlot) gets a fresh definition
+                // so symbol children recreate their output data; its connections stay.
+                if (alreadyExistingOutput != null && alreadyExistingOutput.OutputDataType == info.OutputDataType)
                 {
                     alreadyExistingOutput.Name = info.Name; // pick up renames in place, like inputs above
                     OutputDefinitions.Add(alreadyExistingOutput);
-                    removedOutputDefinitions.Remove(alreadyExistingOutput);
                 }
                 else
                 {
@@ -250,9 +254,11 @@ public sealed partial class Symbol
             var id = outputDefinition.Id;
 
             // create new output if needed
-            if (!childOutputDict.TryGetValue(id, out var output) || output.OutputDefinition.ValueType != outputDefinition.ValueType)
+            if (!childOutputDict.TryGetValue(id, out var output)
+                || output.OutputDefinition.ValueType != outputDefinition.ValueType
+                || output.OutputDefinition.OutputDataType != outputDefinition.OutputDataType)
             {
-                OutputDefinition.TryGetNewValueType(outputDefinition, out var outputData);
+                OutputDefinition.TryGetNewOutputDataType(outputDefinition, out var outputData);
                 output = new Child.Output(outputDefinition, outputData);
             }
 

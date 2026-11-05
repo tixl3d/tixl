@@ -39,11 +39,6 @@ public sealed partial class Symbol
 
         private static readonly ConcurrentDictionary<Type, Func<object>> OutputValueConstructors = new();
 
-        public static bool TryGetNewValueType(OutputDefinition def, out IOutputData newData)
-        {
-            return TryCreateOutputType(def, out newData, def.ValueType);
-        }
-
         public static bool TryGetNewOutputDataType(OutputDefinition def, out IOutputData newData)
         {
             return TryCreateOutputType(def, out newData, def.OutputDataType);
