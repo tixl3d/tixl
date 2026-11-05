@@ -11,6 +11,7 @@ using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands.Graph;
+using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
 
@@ -264,6 +265,39 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
         }
 
         ParameterExtraction.ExtractAsConnectedOperator(inputSlot, symbolChildUi, input, focusedItemPosOnCanvas, collectInto: macro);
+        _context.Layout.FlagStructureAsChanged();
+        _context.CompleteMacroCommand();
+    }
+
+    /** Places the new input node like an op inserted at the input row, pushing snapped items below that row down. */
+    void IGraphView.PublishAsInput(SymbolUi.Child symbolChildUi, Symbol.Child.Input input, IInputUi inputUi)
+    {
+        if (_context.StateMachine.CurrentState != GraphStates.Default)
+        {
+            Log.Debug("Can't publish input while interaction is active");
+            return;
+        }
+
+        if (!_context.Layout.Items.TryGetValue(symbolChildUi.Id, out var targetItem) || targetItem.Instance == null)
+            return;
+
+        var insertionLineIndex = InputPicking.GetInsertionLineIndex(targetItem.Instance.Inputs,
+                                                                    targetItem.InputLines,
+                                                                    input.Id,
+                                                                    out var shouldPushDown);
+
+        var macro = _context.StartMacroCommand("Publish as Input");
+        if (shouldPushDown)
+        {
+            MagItemMovement
+               .MoveSnappedItemsVertically(_context,
+                                           MagItemMovement.CollectSnappedItems(targetItem, includeRoot: false),
+                                           targetItem.PosOnCanvas.Y + (insertionLineIndex - 0.5f) * MagGraphItem.GridSize.Y,
+                                           MagGraphItem.GridSize.Y);
+        }
+
+        var posOnCanvas = targetItem.PosOnCanvas + new Vector2(-MagGraphItem.GridSize.X, MagGraphItem.GridSize.Y * insertionLineIndex);
+        macro.AddAndExecCommand(new PublishAsInputCommand(_context.CompositionInstance.Symbol, symbolChildUi.Id, input, inputUi, posOnCanvas));
         _context.Layout.FlagStructureAsChanged();
         _context.CompleteMacroCommand();
     }

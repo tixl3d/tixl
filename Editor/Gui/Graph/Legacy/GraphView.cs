@@ -79,6 +79,14 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
         ParameterExtraction.ExtractAsConnectedOperator(inputSlot, symbolChildUi, input, freePosition);
     }
 
+    void IGraphView.PublishAsInput(SymbolUi.Child symbolChildUi, Symbol.Child.Input input, IInputUi inputUi)
+    {
+        if (_projectView?.InstView == null)
+            return;
+
+        InputArea.PublishAsInput(_projectView.InstView.Symbol, symbolChildUi, input, inputUi);
+    }
+
     public void StartDraggingFromInputSlot(SymbolUi.Child symbolChildUi, Symbol.InputDefinition inputInputDefinition)
     {
         if (_projectView.InstView == null)

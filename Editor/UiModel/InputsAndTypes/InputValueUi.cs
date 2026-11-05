@@ -569,7 +569,14 @@ public abstract class InputValueUi<T> : IInputUi
                      if (CustomComponents.DrawMenuItem(_publishAsInputItemId, Icon.None, "Publish as Input",
                                                        isEnabled: !compositionSymbol.SymbolPackage.IsReadOnly))
                      {
-                         InputArea.PublishAsInput(compositionSymbol, symbolChildUi, input, this);
+                         if (ProjectView.Focused?.GraphView is { } graphView)
+                         {
+                             graphView.PublishAsInput(symbolChildUi, input, this);
+                         }
+                         else
+                         {
+                             InputArea.PublishAsInput(compositionSymbol, symbolChildUi, input, this);
+                         }
                      }
 
                      if (CustomComponents.DrawMenuItem(_resetItemId, Icon.Reset, "Reset to Default",
