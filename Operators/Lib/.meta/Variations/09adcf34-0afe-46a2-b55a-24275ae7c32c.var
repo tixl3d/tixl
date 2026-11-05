@@ -1,0 +1,136 @@
+{
+  "Id": "09adcf34-0afe-46a2-b55a-24275ae7c32c",
+  "Variations": [
+    {
+      "Id": "eceae2c2-0180-4e9d-b788-1d0107077cb8",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Fold in words",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "8fd700f3-875a-4412-ad1d-2b8e867aa6f6": 1,
+          "38b4009b-7f3f-4ec6-87ee-0928e2f01d0f": {
+            "X": 0.10499999,
+            "Y": 0.52
+          },
+          "36be48ba-ee05-4370-a8a8-58f18cc90a98": {
+            "X": 0.0,
+            "Y": 1.0
+          },
+          "98d520ff-5fe1-4787-89f6-a081eb742f7b": {
+            "X": -1.0,
+            "Y": 0.0
+          }
+        }
+      }
+    },
+    {
+      "Id": "98c9a95d-a06e-4da5-9acc-ef7e389dad21",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Drop Down Words",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "8fd700f3-875a-4412-ad1d-2b8e867aa6f6": 1,
+          "38b4009b-7f3f-4ec6-87ee-0928e2f01d0f": {
+            "X": 0.52,
+            "Y": 0.7
+          },
+          "62aa1538-7fe3-45b7-9e7b-7fd4ade3de69": {
+            "X": 0.0,
+            "Y": 0.5,
+            "Z": 0.0
+          }
+        }
+      }
+    },
+    {
+      "Id": "707d4026-4715-40da-b37c-5878c317a46f",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "Autumn leaves",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "8fd700f3-875a-4412-ad1d-2b8e867aa6f6": 0,
+          "ff39bf17-e051-4bc7-92a6-bc9685b25cca": 6.73,
+          "38b4009b-7f3f-4ec6-87ee-0928e2f01d0f": {
+            "X": 0.18999997,
+            "Y": 0.615
+          },
+          "0fc0df7c-ff8c-413f-a218-93a1a1a8cc42": 0.81,
+          "62aa1538-7fe3-45b7-9e7b-7fd4ade3de69": {
+            "X": 0.0,
+            "Y": 1.97,
+            "Z": 0.0
+          },
+          "36be48ba-ee05-4370-a8a8-58f18cc90a98": {
+            "X": 0.55,
+            "Y": 0.45
+          }
+        }
+      }
+    },
+    {
+      "Id": "0c83bbdf-1dbb-47f8-ad49-412cae4b0b09",
+      "IsPreset": true,
+      "ActivationIndex": 4,
+      "Title": "Alien",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 122.55056
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "8fd700f3-875a-4412-ad1d-2b8e867aa6f6": 0,
+          "ff39bf17-e051-4bc7-92a6-bc9685b25cca": 1.0,
+          "38b4009b-7f3f-4ec6-87ee-0928e2f01d0f": {
+            "X": 0.18999997,
+            "Y": 0.615
+          },
+          "0fc0df7c-ff8c-413f-a218-93a1a1a8cc42": 1.0,
+          "36be48ba-ee05-4370-a8a8-58f18cc90a98": {
+            "X": 0.0,
+            "Y": 1.0
+          }
+        }
+      }
+    },
+    {
+      "Id": "ace45707-e8be-4755-ba1b-4399da776d7f",
+      "IsPreset": true,
+      "ActivationIndex": 5,
+      "Title": "Snappy from Left",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 122.55056
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "8fd700f3-875a-4412-ad1d-2b8e867aa6f6": 1,
+          "38b4009b-7f3f-4ec6-87ee-0928e2f01d0f": {
+            "X": 0.13000001,
+            "Y": 0.62
+          },
+          "62aa1538-7fe3-45b7-9e7b-7fd4ade3de69": {
+            "X": -0.59,
+            "Y": 0.0,
+            "Z": 0.0
+          },
+          "20d19099-d693-488f-bc7f-5a9c269c391e": -0.59
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,217 @@
+{
+  "FormatVersion": 3,
+  "Id": "de222a06-2d8c-481d-9c19-667aaaa3b254"/*TextBuildupExample*/,
+  "Description": "Shows how to combine [TextSprites], [TextBuildup] and [DrawPointSprites].",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "00a8674d-7be8-49fe-8368-6ed2b4e3fc47",
+      "SymbolName": "Lib.io.audio.AudioToneGenerator",
+      "Position": {
+        "X": -190.864,
+        "Y": 661.6568
+      }
+    },
+    {
+      "ChildId": "01862727-95b6-454b-9746-3f368b3bdea2",
+      "SymbolName": "Lib.render.sprite.TextSprites",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "02f80a54-f980-4f64-884d-568e5a7145ed",
+      "SymbolName": "Lib.io.audio.CombineAudio",
+      "Position": {
+        "X": 43.718536,
+        "Y": 542.0488
+      }
+    },
+    {
+      "ChildId": "0b67b96d-7b11-4688-9521-d019c95c480b",
+      "SymbolName": "Lib.io.audio.AudioEcho",
+      "Position": {
+        "X": 43.718536,
+        "Y": 402.04883
+      }
+    },
+    {
+      "ChildId": "1c6c68a7-26ff-4afd-9c72-4cabd9979eec",
+      "SymbolName": "Lib.render.sprite.TextBuildup",
+      "Position": {
+        "X": 347.87683,
+        "Y": -66.84961
+      }
+    },
+    {
+      "ChildId": "1dac1a2a-f137-42b5-a5d9-3e85c9a27c07",
+      "SymbolName": "Lib.numbers.anim._obsolete.Counter",
+      "Position": {
+        "X": -471.78745,
+        "Y": 504.83243
+      }
+    },
+    {
+      "ChildId": "2a732932-612f-4609-8d4d-b53f166fc3ca",
+      "SymbolName": "Lib.numbers.float.random.PerlinNoise",
+      "Position": {
+        "X": -348.86707,
+        "Y": 574.64
+      }
+    },
+    {
+      "ChildId": "2d9a07d8-5456-4aad-8d33-d5dc042618c5",
+      "SymbolName": "Lib.numbers.bool.logic.HasBooleanChanged",
+      "Position": {
+        "X": -471.78745,
+        "Y": 469.83243
+      }
+    },
+    {
+      "ChildId": "393e1f69-a09f-4ce6-95ed-e6a62d1c5fe4",
+      "SymbolName": "Lib.io.audio.CombineAudio",
+      "Position": {
+        "X": 43.718536,
+        "Y": 332.04883
+      }
+    },
+    {
+      "ChildId": "3e194c31-acd3-4274-b9d5-fb3140ecb4b8",
+      "SymbolName": "Lib.io.audio.AudioBus",
+      "Position": {
+        "X": 43.718536,
+        "Y": 612.0488
+      }
+    },
+    {
+      "ChildId": "3f05feac-39e6-41da-84e2-be02ad505e1a",
+      "SymbolName": "Lib.io.audio.AudioFilter",
+      "Position": {
+        "X": 43.718536,
+        "Y": 507.04883
+      }
+    },
+    {
+      "ChildId": "42ec79ba-d8a0-4c80-b6ef-147782175098",
+      "SymbolName": "Lib.render.sprite.DrawPointSprites",
+      "Position": {
+        "X": 347.87683,
+        "Y": 3.1503906
+      }
+    },
+    {
+      "ChildId": "58d3ce86-fdf6-45a2-bd4a-dab972daa6cf",
+      "SymbolName": "Lib.io.audio.AudioToneGenerator",
+      "Position": {
+        "X": 43.718536,
+        "Y": 262.04883
+      }
+    },
+    {
+      "ChildId": "689f5b98-b23a-4fe7-a62d-45ed4a1d435a",
+      "SymbolName": "Lib.image.fx.blur.Bloom",
+      "Position": {
+        "X": 517.6621,
+        "Y": 334.0659
+      }
+    },
+    {
+      "ChildId": "6e6ff4a6-3f49-4d62-842c-b7ed96d2ebaf",
+      "SymbolName": "Lib.image.fx.blur.DirectionalBlur",
+      "Position": {
+        "X": 463.89194,
+        "Y": 247.63348
+      }
+    },
+    {
+      "ChildId": "7cc2fa69-c4ac-4340-9dbd-120d445c2236",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "Position": {
+        "X": 347.87683,
+        "Y": 178.15039
+      }
+    },
+    {
+      "ChildId": "9876fab6-eca1-4976-9957-5ee531c64663",
+      "SymbolName": "Lib.numbers.float.random.PerlinNoise",
+      "Position": {
+        "X": -96.28146,
+        "Y": 297.04883
+      }
+    },
+    {
+      "ChildId": "a18d8f65-f863-4f81-ae22-0f2f6d17dd3f",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
+      "Position": {
+        "X": -330.864,
+        "Y": 696.6568
+      }
+    },
+    {
+      "ChildId": "a65133d8-769f-4ffa-89b2-5bb98f25bfaf",
+      "SymbolName": "Lib.image.use.Blend",
+      "Position": {
+        "X": 603.89197,
+        "Y": 212.63348
+      }
+    },
+    {
+      "ChildId": "a90a1241-acda-4a15-a3b7-19cc030ce1c9",
+      "SymbolName": "Lib.io.audio.AudioReverb",
+      "Position": {
+        "X": 43.718536,
+        "Y": 437.04883
+      }
+    },
+    {
+      "ChildId": "aa32a7d2-0650-4999-83aa-096478e3568d",
+      "SymbolName": "Lib.numbers.float.logic.Compare",
+      "Position": {
+        "X": -471.78745,
+        "Y": 434.83243
+      }
+    },
+    {
+      "ChildId": "b597f820-3000-406a-992e-deacbf3726ad",
+      "SymbolName": "Lib.numbers.float.random.PerlinNoise",
+      "Position": {
+        "X": -471.78745,
+        "Y": 399.83243
+      }
+    },
+    {
+      "ChildId": "bc2b3f9b-0472-4dde-8c5c-15b42ed4a47e",
+      "SymbolName": "Lib.io.audio.AudioFilter",
+      "Position": {
+        "X": 43.718536,
+        "Y": 472.04883
+      }
+    },
+    {
+      "ChildId": "c54c9928-8698-41cd-82ee-cffa77c4c10f",
+      "SymbolName": "Lib.io.audio.AudioToneGenerator",
+      "Position": {
+        "X": -223.6625,
+        "Y": 507.53
+      }
+    },
+    {
+      "ChildId": "ed96c28e-0785-42b5-bb92-fd4f55d95c20",
+      "SymbolName": "Lib.render.transform.Group",
+      "Position": {
+        "X": 347.87683,
+        "Y": 108.15039
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "c64d5027-9d99-45a4-a894-451980e96740"/*Result*/,
+      "Position": {
+        "X": 517.6621,
+        "Y": 369.0659
+      }
+    }
+  ]
+}

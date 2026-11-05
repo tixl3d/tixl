@@ -195,11 +195,14 @@ internal sealed class TextSprites : Instance<TextSprites>
                 startNewGroup = true;
                 if (hideSeparator)
                 {
+                    // Drawn as a space so neighbouring groups don't touch
                     textIndex += groupSeparator.Length - 1;
-                    continue;
+                    c = ' ';
                 }
-
-                remainingSeparatorChars = groupSeparator.Length;
+                else
+                {
+                    remainingSeparatorChars = groupSeparator.Length;
+                }
             }
 
             // Visible separator glyphs stay with the group they close.
