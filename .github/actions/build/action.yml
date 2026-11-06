@@ -4,7 +4,7 @@ runs:
   using: "composite"
   steps:
     - name: Setup .NET SDK for CI
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
       with:
         # Instead of reading global.json for the version,
         # explicitly specify the version for the CI environment.
