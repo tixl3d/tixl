@@ -35,7 +35,7 @@
         "Y": -317.386
       },
       "GroupTitle": "Advanced Settings",
-      "Description": "ImageA is at the indice X, ImageB is at the indice X+1. With addImage it is possible to add images C, D,... to the indices 2,3,... ."
+      "Description": "ImageA is at the index 0, ImageB is at the index 1. With addImage it is possible to add images C, D,... to the index 2,3,... . When factor flucuates between index X and index X+1 it blends both images"
     },
     {
       "InputId": "6049030b-6e3c-4e16-8166-5fab3418fac1"/*Factor*/,
