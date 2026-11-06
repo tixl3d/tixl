@@ -111,6 +111,7 @@ internal sealed class ClipRange : IValueSnapAttractor
         if (active && _command != null && ImGui.IsMouseDragging(ImGuiMouseButton.Left))
         {
             FrameStats.Current.OpenedPopupCapturedMouse = true;
+            canvas.RequestEdgeScrolling();
             UpdateDrag(canvas, timeClip, parentMapping, isStart);
         }
 

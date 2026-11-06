@@ -43,6 +43,7 @@ internal sealed class LoopRange : IValueSnapAttractor
 
             if (ImGui.IsItemActive() && ImGui.IsMouseDragging(ImGuiMouseButton.Left))
             {
+                canvas.RequestEdgeScrolling();
                 var newTime = canvas.InverseTransformX(ImGui.GetIO().MousePos.X);
                 if(snapHandler.TryCheckForSnapping( newTime, out var snappedValue, canvas.Scale.X, [this]))
                 {
@@ -82,6 +83,7 @@ internal sealed class LoopRange : IValueSnapAttractor
 
             if (ImGui.IsItemActive() && ImGui.IsMouseDragging(ImGuiMouseButton.Left))
             {
+                canvas.RequestEdgeScrolling();
                 var newTime = canvas.InverseTransformX(ImGui.GetIO().MousePos.X);
                 if (snapHandler.TryCheckForSnapping(newTime, out var snappedValue, canvas.Scale.X, [this]))
                 {

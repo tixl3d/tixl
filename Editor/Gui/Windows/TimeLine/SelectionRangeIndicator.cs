@@ -322,6 +322,7 @@ internal sealed class SelectionRangeIndicator : IValueSnapAttractor
         if (ImGui.IsItemActive() && ImGui.IsMouseDragging(ImGuiMouseButton.Left))
         {
             FrameStats.Current.OpenedPopupCapturedMouse = true;
+            _canvas.RequestEdgeScrolling();
             var u = _canvas.InverseTransformX(ImGui.GetIO().MousePos.X);
 
             if (_currentDragMode == DragMode.None)
@@ -405,6 +406,7 @@ internal sealed class SelectionRangeIndicator : IValueSnapAttractor
         if (ImGui.IsItemActive() && ImGui.IsMouseDragging(ImGuiMouseButton.Left))
         {
             FrameStats.Current.OpenedPopupCapturedMouse = true;
+            _canvas.RequestEdgeScrolling();
             var u = _canvas.InverseTransformX(ImGui.GetIO().MousePos.X);
 
             if (_currentDragMode == DragMode.None)
@@ -541,6 +543,7 @@ internal sealed class SelectionRangeIndicator : IValueSnapAttractor
             && ImGui.IsItemActive() && ImGui.IsMouseDragging(ImGuiMouseButton.Left))
         {
             FrameStats.Current.OpenedPopupCapturedMouse = true;
+            _canvas.RequestEdgeScrolling();
             var rawU = _canvas.InverseTransformX(ImGui.GetIO().MousePos.X);
             var (prev, next) = _handles.GetNeighbors(handleIdx, _range);
             const double minGap = 1e-4;

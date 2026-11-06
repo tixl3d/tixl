@@ -36,12 +36,13 @@ internal static class TimeClipItem
         var xEndTime = attr.LayerContext.TimeCanvas.TransformX(timeClip.TimeRange.End) + 1;
 
         // Horizontal off-screen cull. A clip entirely left or right of the visible layer
-        // area draws nothing and can't be interacted with — the item being dragged stays
-        // under the mouse, hence on-screen, so the active drag is never the culled one.
-        // This is the main win for compositions with many clips but only a few in view:
-        // it skips the body, the per-event DataClip/audio overlays, the label, and the
-        // interaction buttons entirely.
-        if (xEndTime < attr.LayerRect.Min.X || xStartTime > attr.LayerRect.Max.X)
+        // area draws nothing and can't be interacted with. This is the main win for
+        // compositions with many clips but only a few in view: it skips the body, the
+        // per-event DataClip/audio overlays, the label, and the interaction buttons entirely.
+        // Dragged clips are exempt: the pointer can leave the view mid-drag, and a clip that
+        // stops submitting its button loses ImGui's active item, which silently ends the drag.
+        if ((xEndTime < attr.LayerRect.Min.X || xStartTime > attr.LayerRect.Max.X)
+            && !(attr.MoveClipsCommand != null && attr.LayerContext.ClipSelection.SelectedClipsIds.Contains(timeClip.Id)))
             return;
 
         var position = new Vector2(xStartTime,
@@ -494,7 +495,11 @@ internal static class TimeClipItem
         
         if (!ImGui.IsMouseDragging(0, UserSettings.Config.ClickThreshold))
             return;
-        
+
+        // A drag locked to moving between layers keeps its time, so scrolling would carry the clip out of view.
+        if (mode != HandleDragMode.Body || !_isTimeLockedByVerticalDrag)
+            attr.LayerContext.TimeCanvas.RequestEdgeScrolling();
+
         var allowSnapping = !ImGui.GetIO().KeyShift && !(ImGui.GetIO().KeyAlt && ImGui.GetIO().KeyCtrl);
 
         // SelectionRangeIndicator's anchors are the selected clips' aggregate Start/End —

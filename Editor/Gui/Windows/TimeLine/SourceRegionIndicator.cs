@@ -116,7 +116,10 @@ internal sealed class SourceRegionIndicator
         }
 
         if (_dragClip == clip && ImGui.IsItemActive() && ImGui.IsMouseDragging(ImGuiMouseButton.Left))
+        {
+            _canvas.RequestEdgeScrolling();
             UpdateDrag(clip);
+        }
 
         if (ImGui.IsItemDeactivated() && _dragClip == clip)
             CompleteDrag();

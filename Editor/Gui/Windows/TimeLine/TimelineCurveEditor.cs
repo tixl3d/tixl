@@ -433,6 +433,7 @@ internal sealed class TimelineCurveEditor : AnimationParameterEditing, ITimeObje
             }
         }
 
+        TimeLineCanvas.Current.RequestEdgeScrolling();
         var newDragPosition = TimeLineCanvas.Current.InverseTransformPositionFloat(ImGui.GetIO().MousePos);
 
         var allowHorizontal = CurveInputEditing.MoveDirection == CurveInputEditing.MoveDirections.Both

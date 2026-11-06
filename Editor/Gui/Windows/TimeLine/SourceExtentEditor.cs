@@ -142,6 +142,7 @@ internal sealed class SourceExtentEditor : IValueSnapAttractor
         if (active && ImGui.IsMouseDragging(ImGuiMouseButton.Left))
         {
             FrameStats.Current.OpenedPopupCapturedMouse = true;
+            _canvas.RequestEdgeScrolling();
             // Snap in playback time (all anchors live there), then store in local time.
             double u = _canvas.InverseTransformX(ImGui.GetIO().MousePos.X);
             if (!ImGui.GetIO().KeyShift

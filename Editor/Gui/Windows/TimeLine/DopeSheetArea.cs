@@ -969,6 +969,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
             TimeLineCanvas.Current.StartDragCommand(compositionSymbolId);
         }
 
+        TimeLineCanvas.Current.RequestEdgeScrolling();
         var newDragTime = TimeLineCanvas.Current.InverseTransformX(ImGui.GetIO().MousePos.X);
 
         if (!ImGui.GetIO().KeyShift)

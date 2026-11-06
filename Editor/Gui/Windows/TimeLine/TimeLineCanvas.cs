@@ -324,6 +324,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
             TrimEdgePreview.EndIfMouseReleased(Playback);
             _currentTimeMarker.Draw(TrimEdgePreview.GetPlayheadTime(Playback), this);
             _timeSelectionRange.Draw(compositionOp, Drawlist);
+            UpdateEdgeScrolling();
 
             if (_selectionFence.State == SelectionFence.States.CompletedAsClick)
             {
@@ -603,6 +604,9 @@ internal sealed class TimeLineCanvas : AnimationCanvas
 
         if (ImGui.IsItemActive() && ImGui.IsMouseDragging(ImGuiMouseButton.Left) || ImGui.IsItemClicked())
         {
+            if (ImGui.IsItemActive())
+                RequestEdgeScrolling();
+
             var draggedTime = InverseTransformX(mouseX);
             if (ImGui.GetIO().KeyShift)
             {
@@ -616,6 +620,29 @@ internal sealed class TimeLineCanvas : AnimationCanvas
         }
 
         ImGui.SetCursorPos(Vector2.Zero);
+    }
+
+    /// <summary>
+    /// Called every frame by an active timeline drag (clips, keyframes, range handles, playhead) so the
+    /// view scrolls while the pointer is near or past its left or right edge.
+    /// </summary>
+    internal void RequestEdgeScrolling()
+    {
+        _isEdgeScrollingRequested = true;
+    }
+
+    private void UpdateEdgeScrolling()
+    {
+        if (_isEdgeScrollingRequested)
+        {
+            if (!_wasEdgeScrollingRequested)
+                EdgeScrolling.Reset();
+
+            EdgeScrolling.Update(this, scrollVertically: false);
+        }
+
+        _wasEdgeScrollingRequested = _isEdgeScrollingRequested;
+        _isEdgeScrollingRequested = false;
     }
 
     /// <summary>
@@ -1114,6 +1141,8 @@ internal sealed class TimeLineCanvas : AnimationCanvas
     private readonly TimelineDetailsArea _detailsArea;
 
     private readonly CurrentTimeMarker _currentTimeMarker = new();
+    private bool _isEdgeScrollingRequested;
+    private bool _wasEdgeScrollingRequested;
     private readonly TimeSelectionRange _timeSelectionRange;
     private readonly SelectionRangeIndicator _selectionRangeIndicator;
     private readonly SourceExtentEditor _sourceExtentEditor;

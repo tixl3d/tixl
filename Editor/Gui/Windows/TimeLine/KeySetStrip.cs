@@ -154,6 +154,7 @@ internal sealed class KeySetStrip
         if (_isDragging && isItemActive && _draggingKeys.Count > 0)
         {
             FrameStats.Current.OpenedPopupCapturedMouse = true;
+            _canvas.RequestEdgeScrolling();
 
             var mouseU = _canvas.InverseTransformX(ImGui.GetMousePos().X);
             var desiredAnchorU = mouseU - _dragGrabOffset;
