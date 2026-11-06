@@ -278,7 +278,7 @@ internal sealed partial class MagGraphView
                 var downScaleFactor = MathF.Min(1 / T3Ui.UiScaleFactor, availableLabelWidth / requiredLabelSize);
                 var fontSize = font.FontSize * (downScaleFactor * CanvasScale).Clamp(0.1f, 1);
 
-                var visibleLineHeight = Math.Min(pMaxVisible.Y - pMinVisible.Y, MagGraphItem.LineHeight * CanvasScale);
+                var visibleLineHeight =   (MagGraphItem.LineHeight - 4) * CanvasScale;
                 var labelPos = new Vector2(MathF.Round(pMin.X + 8 * CanvasScale),
                                            MathF.Round(pMin.Y + visibleLineHeight / 2 - fontSize / 2));
 
