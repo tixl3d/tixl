@@ -138,9 +138,9 @@ output together with the animated [PoseToSkinMatrices] matrices into a second
 
 **Action:**
 Create a spline or line of points (e.g. [SplinePoints]) and read it back with a
-[PointsToCPU] (leave **UpdateContinuously** off, trigger **TriggerUpdate** once);
+[ReadPointsFromGpu] (leave **UpdateContinuously** off, trigger **TriggerUpdate** once);
 connect its output to a [SkeletonFromPoints]. Read the same points back with a second
-[PointsToCPU] with **UpdateContinuously** enabled and connect it to a [PoseFromPoints]
+[ReadPointsFromGpu] with **UpdateContinuously** enabled and connect it to a [PoseFromPoints]
 together with the [SkeletonFromPoints] **Setup**. Route the pose through
 [PoseToSkinMatrices] (same **Setup**) into a [SkinMesh] whose mesh and weights come
 from a [BindToSkeleton] bound to a tube-like mesh along the chain. Then animate the

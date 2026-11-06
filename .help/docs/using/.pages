@@ -11,6 +11,8 @@ nav:
   - ImportingAssets.md
   # Working with graphs
   - FaqBuildingContent.md
+  - ProceduralGeometry.md
+  - CharacterAnimation.md
   # Connecting inputs
   - OSC.md
   - ArtnetAndDMX.md

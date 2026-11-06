@@ -5,6 +5,22 @@ retouch poses, and even rig your own procedural geometry to a skeleton. This pag
 through the whole chain — from loading an animated character to driving particles with
 its motion.
 
+> [!NOTE]
+> Character animation is **experimental and a work in progress**. The wiring between the
+> operators is still more involved than it should be, and operators and parameters may
+> change between releases. If a model doesn't load or animate correctly, please
+> [report it](../getting-started/ReportBugs.md) — ideally with the file.
+
+## Quick start
+
+The fastest way to see the whole chain is [LoadAnimatedGltf]. It is a small ready-made
+setup that loads a model, samples one of its clips and outputs the skinned mesh — the
+four operators described below, already wired. Its **ClipIndex** selects the animation.
+
+Open it (double-click) to see how [LoadGltfScene], [SampleGltfAnimation],
+[PoseToSkinMatrices] and [SkinMesh] connect, then copy those operators into your own
+graph and point [LoadGltfScene] to your model. The rest of this page explains each step.
+
 ## Loading a rigged model
 
 Add a [LoadGltfScene] and point its **Path** to a `.glb` or `.gltf` file that contains a
@@ -63,6 +79,22 @@ A pose is just a list of points, so poses can be mixed before they reach
 
 All of these output a pose again, so they chain freely.
 
+## Wiring checklist
+
+Most setups that don't work have one of these connections wrong:
+
+- **ResultSetup goes to several places.** [SampleGltfAnimation], [PoseToSkinMatrices]
+  and, when used, [BindToSkeleton] each need the **Setup** from the same
+  [LoadGltfScene]. The pose itself doesn't carry the skeleton.
+- **Mesh and SkinWeights must match.** Both come from the same [LoadGltfScene] and
+  follow its **MeshChildIndex** — together with **Material**. If a model consists of
+  several meshes, change **MeshChildIndex** until you get the skinned part, and use one
+  [LoadGltfScene] per part you want to deform.
+- **The pose goes into PoseToSkinMatrices, not into SkinMesh.** [SkinMesh] only takes
+  the mesh, the weights and the matrices.
+- **SkeletonIndex has to agree.** Files with more than one skeleton need the same
+  **SkeletonIndex** on every operator of a chain.
+
 ## Rigging your own geometry
 
 Geometry that never had a skeleton can be bound to one:
@@ -79,14 +111,14 @@ Geometry that never had a skeleton can be bound to one:
 ## Building a skeleton from points
 
 Skeletons don't have to come from files. [SkeletonFromPoints] turns a CPU point list —
-for example a spline read back with [PointsToCPU] — into a skeleton: each point becomes
+for example a spline read back with [ReadPointsFromGpu] — into a skeleton: each point becomes
 a joint, parented to the previous one (separator points split chains). Together with
 two more operators this rigs procedural geometry to procedural motion:
 
-1. Take a snapshot of your spline with [PointsToCPU] (leave **UpdateContinuously**
+1. Take a snapshot of your spline with [ReadPointsFromGpu] (leave **UpdateContinuously**
    off, trigger it once) and feed it to [SkeletonFromPoints] — this frozen shape is
    the rest pose.
-2. Read the same spline back continuously with a second [PointsToCPU]
+2. Read the same spline back continuously with a second [ReadPointsFromGpu]
    (**UpdateContinuously** on) and feed it to [PoseFromPoints] together with the
    skeleton — this converts the moving spline into a pose.
 3. Bind your mesh with [BindToSkeleton], then [PoseToSkinMatrices] → [SkinMesh]
@@ -112,5 +144,6 @@ Now the mesh follows the animated spline like a snake following its path.
 
 ## See also
 
+- [Procedural geometry](ProceduralGeometry.md)
 - [Importing assets](ImportingAssets.md)
 - [Timeline](Timeline.md)
