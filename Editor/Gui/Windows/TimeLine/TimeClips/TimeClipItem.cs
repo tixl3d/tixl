@@ -95,7 +95,7 @@ internal static class TimeClipItem
         // Body and outline
         var isConnected = attr.CompositionSymbolUi.Symbol.Connections.Any(c => c.SourceParentOrChildId == timeClip.Id);
 
-        var isWithinPlaybackTime = timeClip.TimeRange.Contains(attr.LayerContext.TimeCanvas.Playback.TimeInBars);
+        var isWithinPlaybackTime = timeClip.TimeRange.Contains(TrimEdgePreview.GetPlayheadTime(attr.LayerContext.TimeCanvas.Playback));
         var fadeIfInActive = (isConnected && isWithinPlaybackTime) ? 1 : 0.8f;
         
         var fadeIfNotConnected = isConnected ? 1f : 0.4f;
@@ -382,6 +382,7 @@ internal static class TimeClipItem
 
         if (aHandleClicked)
         {
+            TrimEdgePreview.End(attr.LayerContext.TimeCanvas.Playback);
             attr.LayerContext.TimeCanvas.CompleteDragCommand();
 
             if (attr.MoveClipsCommand != null)
@@ -569,6 +570,7 @@ internal static class TimeClipItem
                 }
 
                 attr.LayerContext.TimeCanvas.UpdateDragAtStartPointCommand(newDragStartTime - timeClip.TimeRange.Start, 0);
+                TrimEdgePreview.ShowStartEdge(attr.LayerContext.TimeCanvas.Playback, timeClip);
                 break;
 
             case HandleDragMode.End:
@@ -583,6 +585,7 @@ internal static class TimeClipItem
                 }
 
                 attr.LayerContext.TimeCanvas.UpdateDragAtEndPointCommand(newDragTime - timeClip.TimeRange.End, 0);
+                TrimEdgePreview.ShowEndEdge(attr.LayerContext.TimeCanvas.Playback, timeClip);
                 break;
 
             default:

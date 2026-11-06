@@ -241,7 +241,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
                                              | ImGuiWindowFlags.NoScrollWithMouse);
                             var dopeContentStartY = ImGui.GetCursorScreenPos().Y;
                             ClipArea.Draw(compositionOp, Playback, SnapHandlerForU);
-                            _currentTimeMarker.DrawLineInCurrentWindow(Playback.TimeInBars, this);
+                            _currentTimeMarker.DrawLineInCurrentWindow(TrimEdgePreview.GetPlayheadTime(Playback), this);
                             DopeSheetArea.Draw(compositionOp, _selectedAnimationParameters);
                             if (showClipWindow)
                                 _clipRange.DrawEdgeHandles(this, compositionOp, compositionTimeClip!);
@@ -278,7 +278,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
                         else
                         {
                             ClipArea.Draw(compositionOp, Playback, SnapHandlerForU);
-                            _currentTimeMarker.DrawLineInCurrentWindow(Playback.TimeInBars, this);
+                            _currentTimeMarker.DrawLineInCurrentWindow(TrimEdgePreview.GetPlayheadTime(Playback), this);
                             DopeSheetArea.Draw(compositionOp, _selectedAnimationParameters);
                             if (showClipWindow)
                                 _clipRange.DrawEdgeHandles(this, compositionOp, compositionTimeClip!);
@@ -321,7 +321,8 @@ internal sealed class TimeLineCanvas : AnimationCanvas
 
             ImGui.EndChild();
 
-            _currentTimeMarker.Draw(Playback.TimeInBars, this);
+            TrimEdgePreview.EndIfMouseReleased(Playback);
+            _currentTimeMarker.Draw(TrimEdgePreview.GetPlayheadTime(Playback), this);
             _timeSelectionRange.Draw(compositionOp, Drawlist);
 
             if (_selectionFence.State == SelectionFence.States.CompletedAsClick)
