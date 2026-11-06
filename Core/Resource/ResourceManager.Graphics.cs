@@ -121,10 +121,13 @@ public static partial class ResourceManager
     /// objects until their inputs change, so recreating a view on every data upload would
     /// hand them a disposed view whenever the producer re-ran unnoticed.
     /// </summary>
+    /// <remarks>
+    /// Compares the wrapper, not <see cref="Resource.NativePointer"/>: that is zero on non-COM backends, and the
+    /// view's <see cref="ResourceView.Resource"/> is the shared object itself, so it must not be disposed here.
+    /// </remarks>
     private static bool IsViewOf(ResourceView view, Buffer buffer)
     {
-        using var resource = view.Resource;
-        return resource.NativePointer == buffer.NativePointer;
+        return ReferenceEquals(view.Resource, buffer);
     }
 
     public static void CreateStructuredBufferSrv(Buffer? buffer, ref ShaderResourceView? srv)
