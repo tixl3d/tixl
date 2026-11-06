@@ -216,7 +216,7 @@ Hold `Shift` to disable snapping. Rename a clip by pressing `Return`.
 
 ### Time clip layers
 
-Drag clips vertically to distribute them across layers. Layers **do not** affect rendering order — connection order in the group does. TiXL distributes overlapping clips into separate layers automatically; `Ctrl + Shift` while dragging vertically adjusts only the layer index.
+Drag clips vertically to distribute them across layers. Layers **do not** affect rendering order — connection order in the group does. TiXL distributes overlapping clips into separate layers automatically. A drag that starts mostly vertical only changes the layer and keeps the clips' timing; one that starts horizontally moves freely in both directions. `Ctrl + Shift` while dragging vertically also adjusts only the layer index.
 
 ### Time remapping
 

@@ -423,9 +423,12 @@ internal static class TimeClipItem
         // narrow handle rect, and hover-only cursor setting made it flicker between resize and arrow.
         if (ImGui.IsItemHovered() || isActive)
         {
-            ImGui.SetMouseCursor(mode == HandleDragMode.Body
-                                     ? ImGuiMouseCursor.Hand
-                                     : ImGuiMouseCursor.ResizeEW);
+            // The move command only exists mid-drag, so a lock left over from the previous drag can't show.
+            var isLayerOnlyDrag = mode == HandleDragMode.Body && isActive
+                                  && attr.MoveClipsCommand != null && _isTimeLockedByVerticalDrag;
+            ImGui.SetMouseCursor(isLayerOnlyDrag ? ImGuiMouseCursor.ResizeNS
+                                 : mode == HandleDragMode.Body ? ImGuiMouseCursor.Hand
+                                 : ImGuiMouseCursor.ResizeEW);
         }
         if (!isActive && !isDeactivated )
             return;
@@ -479,6 +482,9 @@ internal static class TimeClipItem
             
             _timeWithinDraggedClip = currentDragTime - timeClip.TimeRange.Start;
             _posPosYOnDragStart = mousePos.Y;
+            _posXOnDragStart = mousePos.X;
+            _isDragAxisDecided = false;
+            _isTimeLockedByVerticalDrag = false;
             _dragStartMouseTime = currentDragTime;
             _originalDraggedClipStart = timeClip.TimeRange.Start;
             _lastAppliedDeltaTime = 0;
@@ -501,23 +507,39 @@ internal static class TimeClipItem
             case HandleDragMode.Body:
                 var dy = _posPosYOnDragStart - mousePos.Y;
 
+                // A drag that turns out mostly vertical only moves clips between layers, so a slight
+                // sideways wobble can't retime them. The axis is decided only after a clear distance;
+                // until then time follows the mouse, so small horizontal tweaks stay immediate.
+                if (!_isDragAxisDecided)
+                {
+                    var absDx = Math.Abs(mousePos.X - _posXOnDragStart);
+                    var absDy = Math.Abs(dy);
+                    var decisionDistance = Math.Max(UserSettings.Config.ClickThreshold * 3, 15);
+                    if (Math.Max(absDx, absDy) >= decisionDistance)
+                    {
+                        _isDragAxisDecided = true;
+                        _isTimeLockedByVerticalDrag = absDy > absDx;
+                    }
+                }
+
                 // Derive the unsnapped target from the ORIGINAL drag-start positions, not
                 // from incrementally accumulated state. This avoids the slow-drag artefact
                 // where snap was sticky for several frames and the cumulative "applied
                 // delta" diverged from the absolute mouse motion — leaving the clip stuck
                 // or jumping unexpectedly when the mouse finally left the snap range.
-                var rawDelta = currentDragTime - _dragStartMouseTime;
+                var rawDelta = _isTimeLockedByVerticalDrag ? 0 : currentDragTime - _dragStartMouseTime;
                 var unsnappedTargetStart = _originalDraggedClipStart + rawDelta;
                 var targetStart = unsnappedTargetStart;
 
-                if (allowSnapping && attr.LayerContext.SnapHandler.TryCheckForSnapping(unsnappedTargetStart,
+                var snapTime = allowSnapping && !_isTimeLockedByVerticalDrag;
+                if (snapTime && attr.LayerContext.SnapHandler.TryCheckForSnapping(unsnappedTargetStart,
                                                                                        out var snappedClipStartTime,
                                                                                        attr.LayerContext.TimeCanvas.Scale.X,
                                                                                        snapExclusions))
                 {
                     targetStart = (float)snappedClipStartTime;
                 }
-                else if (allowSnapping && attr.LayerContext.SnapHandler.TryCheckForSnapping(unsnappedTargetStart + timeClip.TimeRange.Duration,
+                else if (snapTime && attr.LayerContext.SnapHandler.TryCheckForSnapping(unsnappedTargetStart + timeClip.TimeRange.Duration,
                                                                                             out var snappedClipEndTime,
                                                                                             attr.LayerContext.TimeCanvas.Scale.X,
                                                                                             snapExclusions))
@@ -793,6 +815,9 @@ internal static class TimeClipItem
     private static readonly Vector2 _handleOffset = new(HandleWidth, 0);
     private static readonly Color _timeRemappingColor = UiColors.StatusAnimated.Fade(0.25f);
     private static float _posPosYOnDragStart;
+    private static float _posXOnDragStart;
+    private static bool _isDragAxisDecided;
+    private static bool _isTimeLockedByVerticalDrag;
 
     private static readonly FootageSnapAttractor _footageSnapAttractor = new();
     private static readonly IValueSnapAttractor[] _footageSnapAttractorList = [_footageSnapAttractor];
