@@ -267,16 +267,23 @@ internal sealed partial class MagGraphView
                     name = "   " + name;
                 }
                 // Log.Debug($"{CanvasScale}");
-                // Large font when zoomed in, normal otherwise
-                var font = CanvasScale > 1.8f ? Fonts.FontLarge : Fonts.FontNormal;
+                // Same recipe as the button labels in [PickTexture]: the text grows with the canvas zoom, and
+                // at 1.8 the large atlas takes over with a compensating size factor. Using the exact atlas
+                // ratio (PickTexture's .5/.9 leaves a ~4% step) makes the hand-over seamless - the switch only
+                // sharpens the label. Growth stops where the large atlas reaches its native size.
+                var useLargeFont = CanvasScale > 1.8f;
+                var font = useLargeFont ? Fonts.FontLarge : Fonts.FontNormal;
+                var atlasRatio = Fonts.FontLarge.FontSize / Fonts.FontNormal.FontSize;
+                var fontSizeFactor = useLargeFont ? 1 / atlasRatio : 1;
+                var labelSize = font.FontSize * fontSizeFactor * MathF.Min(CanvasScale / T3Ui.UiScaleFactor, atlasRatio);
                 var labelText = name.AddSpacesForImGuiOutput();
 
-                var requiredLabelSize = item.MeasuredLabel.GetWidth(font, font.FontSize * font.Scale, name, labelText);
-
+                // Shrink the label to the node's width, like the button labels do.
                 var paddingForPreview = hasPreview ? MagGraphItem.LineHeight + 15 : 0;
-                var availableLabelWidth = (MagGraphItem.Width - paddingForPreview) * 0.9f;
-                var downScaleFactor = MathF.Min(1 / T3Ui.UiScaleFactor, availableLabelWidth / requiredLabelSize);
-                var fontSize = font.FontSize * (downScaleFactor * CanvasScale).Clamp(0.1f, 1);
+                var availableLabelWidth = (MagGraphItem.Width - paddingForPreview) * 0.9f * CanvasScale;
+                var requiredLabelSize = item.MeasuredLabel.GetWidth(font, labelSize, name, labelText);
+                var fitFactor = (availableLabelWidth / requiredLabelSize).Clamp(0.1f, 1f);
+                var fontSize = labelSize * fitFactor;
 
                 var visibleLineHeight =   (MagGraphItem.LineHeight - 4) * CanvasScale;
                 var labelPos = new Vector2(MathF.Round(pMin.X + 8 * CanvasScale),
