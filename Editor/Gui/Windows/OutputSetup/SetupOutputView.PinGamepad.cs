@@ -1,6 +1,5 @@
 #nullable enable
 using ImGuiNET;
-using SharpDX.XInput;
 using T3.Core.Output;
 using T3.IoServices;
 using Vector2 = System.Numerics.Vector2;
@@ -189,50 +188,17 @@ internal sealed partial class SetupOutputView
         return false;
     }
 
-    /** XInput stalls for milliseconds when asked about an empty slot, so a missing controller is only looked for now and then. */
-    private bool TryPollGamepad(out GamePadState pad)
+    /** Reads the first controller through SDL, which works on every platform (XInput only exists on Windows). */
+    private static bool TryPollGamepad(out GamePadState pad)
     {
-        pad = default;
-        if (_gamepad == null)
-        {
-            var now = ImGui.GetTime();
-            if (now < _nextGamepadSearchTime)
-                return false;
-
-            _nextGamepadSearchTime = now + GamepadSearchIntervalSec;
-            foreach (var userIndex in _gamepadSlots)
-            {
-                var controller = new Controller(userIndex);
-                if (controller.IsConnected)
-                {
-                    _gamepad = controller;
-                    break;
-                }
-            }
-
-            if (_gamepad == null)
-                return false;
-        }
-
-        if (!_gamepad.GetState(out var state))
-        {
-            _gamepad = null;
-            return false;
-        }
-
-        pad = XInputGamepad.Create(state.Gamepad);
-        return true;
+        return SdlGamepads.TryGetState(0, out pad);
     }
 
     private static bool WasPressed(bool isDown, bool wasDown) => isDown && !wasDown;
 
     private const float MinThumbForDirection = 0.3f;
     private const float MaxPointSpeedOfCanvasHeightPerSec = 0.25f;
-    private const double GamepadSearchIntervalSec = 1;
-    private static readonly UserIndex[] _gamepadSlots = [UserIndex.One, UserIndex.Two, UserIndex.Three, UserIndex.Four];
 
-    private Controller? _gamepad;
-    private double _nextGamepadSearchTime;
     private GamePadState _lastPad;
     private bool _isGamepadMovingPoint;
 
