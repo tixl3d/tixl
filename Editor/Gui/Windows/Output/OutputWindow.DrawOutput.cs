@@ -20,6 +20,7 @@ using Texture2D = T3.Core.DataTypes.Texture2D;
 using Vector2 = System.Numerics.Vector2;
 
 using T3.Core.Operator.Slots;
+using T3.Core.Output;
 
 using T3.Editor.Gui.Windows.OutputSetup;
 
@@ -31,14 +32,32 @@ internal sealed partial class OutputWindow
     /// a separate start op used to exist and left windows stuck on an op with no output.</summary>
     private Type? UpdateAndDrawOutput(Instance? instance)
     {
-        if (instance == null || instance.Outputs.Count <= 0)
+        _imageCanvas.SourceLabel = null;
+        if (instance == null)
             return null;
 
-        var evaluatedSymbolUi = instance.GetSymbolUi();
-        var evalOutput = Pinning.GetPinnedOrDefaultOutput(instance.Outputs);
-
-        if (evalOutput == null || !evaluatedSymbolUi.OutputUis.TryGetValue(evalOutput.Id, out var evaluatedOutputUi))
+        // An op without outputs of its own — typically a project's home op, which has no parent to hold them —
+        // shows what its first send supplies, the same image a player of the project falls back to.
+        Instance? fallbackSend = null;
+        ISlot? evalOutput;
+        if (instance.Outputs.Count > 0)
+        {
+            evalOutput = Pinning.GetPinnedOrDefaultOutput(instance.Outputs);
+        }
+        else if (!_sendFallback.TryGetContentSlot(instance, out fallbackSend, out evalOutput))
+        {
+            // Nothing to show: drop the last image so screenshots and thumbnails don't save a stale one.
+            _imageCanvas.LastTexture = null;
+            CustomComponents.EmptyWindowMessage(NoOutputMessage);
             return null;
+        }
+
+        if (evalOutput == null
+            || !evalOutput.Parent.GetSymbolUi().OutputUis.TryGetValue(evalOutput.Id, out var evaluatedOutputUi))
+            return null;
+
+        if (fallbackSend != null)
+            _imageCanvas.SourceLabel = fallbackSend.SymbolChild.ReadableName;
 
         if (_imageCanvas.ViewMode != ImageOutputCanvas.Modes.Fitted
             && evaluatedOutputUi is CommandOutputUi)
@@ -54,6 +73,14 @@ internal sealed partial class OutputWindow
         RequestedResolution = RenderProcess.TryGetActiveExportResolution(out var overrideResolution)
             ? overrideResolution
             : _selectedResolution.ComputeResolution();
+        // A send with a Resolution of its own renders at it wherever it goes, so it does here too.
+        if (fallbackSend is IContentSupplier supplier && !RenderProcess.IsExporting)
+        {
+            var sendResolution = supplier.GetResolution(EvaluationContext);
+            if (sendResolution.Width > 0 && sendResolution.Height > 0)
+                RequestedResolution = sendResolution;
+        }
+
         EvaluationContext.RequestedResolution = RequestedResolution;
 
         // Set camera
@@ -129,6 +156,60 @@ internal sealed partial class OutputWindow
     }
 
     private const float AspectTolerance = 0.005f;
+
+    private const string NoOutputMessage = "This operator has no output.\nAdd a [SendToOutput] to show its content here.";
+
+    private readonly SendFallback _sendFallback = new();
+
+    /// <summary>
+    /// Finds the send of an op that has no outputs, and the texture output feeding it. The search walks
+    /// symbols, so it is cached and only repeated when the op is edited, its send goes away, or — throttled —
+    /// while nothing is found, since a send added deeper inside doesn't change the op's own version.
+    /// </summary>
+    private sealed class SendFallback
+    {
+        public bool TryGetContentSlot(Instance composition,
+                                      [NotNullWhen(true)] out Instance? send,
+                                      [NotNullWhen(true)] out ISlot? contentSlot)
+        {
+            contentSlot = null;
+            var now = ImGui.GetTime();
+            var isStale = !ReferenceEquals(_composition, composition)
+                          || _version != composition.Symbol.VersionCounter
+                          || _send is { IsDisposed: true }
+                          || (_send == null && now - _lastSearchTime > RetryInterval);
+            if (isStale)
+            {
+                _composition = composition;
+                _version = composition.Symbol.VersionCounter;
+                _lastSearchTime = now;
+                ContentSupplierSearch.CollectUnder(composition, _found);
+                _send = _found.Count > 0 ? _found[0] : null;
+                _found.Clear();
+            }
+
+            send = _send;
+            if (send == null)
+                return false;
+
+            // What the window shows is the texture output wired into the send's texture input.
+            var inputs = send.Inputs;
+            for (var index = 0; index < inputs.Count; index++)
+            {
+                if (inputs[index] is InputSlot<Texture2D> textureInput)
+                    return textureInput.TryGetFirstConnection(out contentSlot) && contentSlot is Slot<Texture2D>;
+            }
+
+            return false;
+        }
+
+        private const double RetryInterval = 1.0;
+        private readonly List<Instance> _found = [];
+        private Instance? _composition;
+        private Instance? _send;
+        private int _version = -1;
+        private double _lastSearchTime = double.NegativeInfinity;
+    }
 
     public Instance? ShownInstance
     {

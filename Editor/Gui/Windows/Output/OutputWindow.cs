@@ -92,6 +92,10 @@ internal sealed partial class OutputWindow : Window
         return _imageCanvas.LastTexture;
     }
 
+    /// <summary>The type of what the window drew last frame — the shown op's output, or the texture of the send an
+    /// op without outputs falls back to. Null while nothing is drawn.</summary>
+    public Type? ShownOutputType { get; private set; }
+
     protected override void Close()
     {
         SaveStateToProject();
@@ -124,6 +128,7 @@ internal sealed partial class OutputWindow : Window
         SyncCopyFieldsToState();
 
         Pinning.TryGetPinnedOrSelectedInstance(out var drawnInstance, out var graphCanvas);
+        ShownOutputType = drawnInstance is { Outputs.Count: > 0 } ? drawnInstance.Outputs[0].ValueType : null;
 
         // The Flow Outliner strip sits under the canvas; the canvas child takes what it leaves.
         var contentHeight = Math.Max(60 * T3Ui.UiScaleFactor, ImGui.GetContentRegionAvail().Y - _setupMode.OutlinerReservedHeight);
@@ -168,6 +173,7 @@ internal sealed partial class OutputWindow : Window
             else if (graphCanvas != null)
             {
                 var drawnType = UpdateAndDrawOutput(drawnInstance);
+                ShownOutputType = drawnType;
                 ImageOutputCanvas.Deactivate();
                 _camSelectionHandling.Update(drawnInstance, drawnType);
                 var editingFlags = _camSelectionHandling.PreventImageCanvasInteraction
