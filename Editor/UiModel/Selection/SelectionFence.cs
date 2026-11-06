@@ -3,8 +3,6 @@ using T3.Core.DataTypes.Vector;
 using T3.Editor.Gui;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.UiHelpers;
-using T3.Editor.SystemUi;
-using T3.SystemUi;
 
 namespace T3.Editor.UiModel.Selection;
 
@@ -23,12 +21,14 @@ public sealed class SelectionFence
         if (_state is States.CompletedAsArea or States.CompletedAsClick)
             _state = States.Inactive;
             
-        var globalMouse = EditorUi.Instance.Cursor;
-
         var io = ImGui.GetIO();
+        // ImGui's position, not the desktop cursor's: the two only agree on an unscaled display with the window
+        // at the origin, and elsewhere the fence would start at a fraction of the distance to the pointer.
         var imguiMousePos = io.MousePos;
         selectMode = GetSelectMode(io);
-        var isLeftButtonDown = globalMouse.IsButtonDown(MouseButtons.Left);
+        // ImGui's button state, not the desktop's: a tablet pen is no pointer button to the windowing system, and
+        // SDL keeps the pointer captured while pressed, so a release off-window still arrives here.
+        var isLeftButtonDown = ImGui.IsMouseDown(ImGuiMouseButton.Left);
             
         const ImGuiHoveredFlags hoverRules = ImGuiHoveredFlags.AllowWhenBlockedByPopup | ImGuiHoveredFlags.ChildWindows;
             
@@ -59,11 +59,8 @@ public sealed class SelectionFence
         if (canvas != null)
             _startPositionInScreen = canvas.TransformPositionFloat(_startPositionOnCanvas);
 
-        // ImGui's position, not the desktop cursor's: the two only agree on an unscaled display with the window
-        // at the origin, and elsewhere the fence would start at a fraction of the distance to the pointer.
-        var globalMousePos = imguiMousePos;
-        var interactionMin = Vector2.Max(_startPositionInScreen, globalMousePos);
-        var interactionMax = Vector2.Min(_startPositionInScreen, globalMousePos);
+        var interactionMin = Vector2.Max(_startPositionInScreen, imguiMousePos);
+        var interactionMax = Vector2.Min(_startPositionInScreen, imguiMousePos);
             
         // TiXL runs with style.WindowPadding = 0, so the window rect equals the inner content rect.
         var windowMin = ImGui.GetWindowPos();
@@ -72,7 +69,7 @@ public sealed class SelectionFence
         var onScreenMax = Vector2.Min(windowMax, interactionMax);
         
         BoundsInScreen = ImRect.RectBetweenPoints(onScreenMin, onScreenMax);
-        BoundsUnclamped = ImRect.RectBetweenPoints(_startPositionInScreen, globalMousePos);
+        BoundsUnclamped = ImRect.RectBetweenPoints(_startPositionInScreen, imguiMousePos);
 
         if (!isLeftButtonDown) // check for release - even if released off-window
         {
@@ -82,7 +79,7 @@ public sealed class SelectionFence
 
         var clickThreshold = UserSettings.Config.ClickThreshold;
             
-        var totalPositionDelta = globalMousePos - _startPositionInScreen;
+        var totalPositionDelta = imguiMousePos - _startPositionInScreen;
         if (_state == States.PressedButNotMoved && totalPositionDelta.LengthSquared() < clickThreshold * clickThreshold)
             return _state;
 
