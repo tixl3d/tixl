@@ -23,6 +23,9 @@ internal static class KeyActionHandling
     /** Previous frame's claim, like <see cref="AreArrowKeysClaimed"/>. */
     internal static bool AreCameraKeysClaimed { get; private set; }
 
+    /** Set during the current frame, because the focus shortcut it guards runs after all windows are drawn. */
+    internal static bool IsEscapeKeyClaimed { get; private set; }
+
     /// <summary>
     /// Keeps the arrow keys from reaching graph navigation. Windows that read the arrow keys themselves call this
     /// every frame while they are focused.
@@ -41,8 +44,17 @@ internal static class KeyActionHandling
         _cameraKeysClaimedThisFrame = true;
     }
 
+    /// <summary>
+    /// Keeps an Esc press that cancelled something in a window from also returning the focus to the graph.
+    /// </summary>
+    internal static void ClaimEscapeKey()
+    {
+        IsEscapeKeyClaimed = true;
+    }
+
     internal static void InitializeFrame()
     {
+        IsEscapeKeyClaimed = false;
         AreArrowKeysClaimed = _arrowKeysClaimedThisFrame;
         _arrowKeysClaimedThisFrame = false;
         AreCameraKeysClaimed = _cameraKeysClaimedThisFrame;
@@ -180,6 +192,7 @@ internal static class KeyActionHandling
         RegisterActionsFlags(UserActions.ShowInGraph, Flags.KeyPressOnly);
         RegisterActionsFlags(UserActions.ToggleOutputSetup, Flags.KeyPressOnly);
         RegisterActionsFlags(UserActions.ToggleFocusMode, Flags.KeyPressOnly);
+        RegisterActionsFlags(UserActions.FocusGraphWindow, Flags.KeyPressOnly);
         RegisterActionsFlags(UserActions.DisplayImageAsBackground, Flags.KeyPressOnly);
         RegisterActionsFlags(UserActions.ClearBackgroundImage, Flags.NeedsWindowFocus);
 

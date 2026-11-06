@@ -3,6 +3,7 @@ using ImGuiNET;
 using T3.Core.Output;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Interaction.CanvasEditing;
+using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.Selection;
@@ -111,6 +112,7 @@ internal sealed partial class SetupOutputView
         var focused = ImGui.IsWindowFocused(ImGuiFocusedFlags.RootAndChildWindows) && !ImGui.GetIO().WantTextInput;
         if (focused && (ImGui.IsKeyPressed(ImGuiKey.Escape, false) || ImGui.IsMouseClicked(ImGuiMouseButton.Right)))
         {
+            KeyActionHandling.ClaimEscapeKey();
             _scaleToolImageId = Guid.Empty;
             return;
         }

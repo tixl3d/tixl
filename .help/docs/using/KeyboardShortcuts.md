@@ -15,6 +15,7 @@ The following is a list of the **default keyboard** short-cuts. With v4.0.4 you 
 | Toggle Fullscreen        | F11                                       |
 | Toggle Focus Mode        | F12                                       |
 | Toggle All UI Elements   | Shift + Esc                               |
+| Focus Graph Window       | Esc, see below                            |
 | Toggle Variations Window | Alt + V                                   |
 | Toggle Console Window    | Ctrl + Shift + Alt + L                    |
 | Toggle Manual Test Window| Ctrl + Shift + Alt + T                    |
@@ -101,6 +102,12 @@ View bookmarks (Ctrl) remember a graph view. Operator bookmarks remember an oper
 | Go to Bookmarked Operator | 1 … 9, 0 (focus) |
 | Load Layout 0–9 | F1 … F10             |
 | Save Layout 0–9 | Ctrl + F1 … F10      |
+
+## Returning to the Graph
+
+Shortcuts like `Delete` or `Ctrl + C` only reach the graph while the Graph Window has the keyboard focus. After working in another window, press `Esc` to give the focus back to the graph without clicking into it.
+
+`Esc` keeps its usual meaning first: it cancels a text field, closes a popup or the parameter popover, and stops a tool in the output setup. Only the next press returns the focus. While an operator like [Sketch] owns the keyboard in the Output Window, `Esc` stays with that operator. The shortcut can be changed in *Settings → Keyboard*.
 
 ## Editing Parameters with the Keyboard
 

@@ -94,6 +94,7 @@ internal static class FactoryKeyMap
 
                 // Layout and window management
                 new(UserActions.ToggleAllUiElements, new KeyCombination(Key.Esc, shift: true)),
+                new(UserActions.FocusGraphWindow, new KeyCombination(Key.Esc)),
                 new(UserActions.ToggleFullscreen, new KeyCombination(Key.F11)),
                 new(UserActions.ToggleFocusMode, new KeyCombination(Key.F12)),
                 new(UserActions.ToggleManualTestWindow, new KeyCombination(Key.T, ctrl: true, shift: true, alt: true)),

@@ -4,6 +4,7 @@ using ImGuiNET;
 using T3.Core.Output;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.CanvasEditing;
+using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.Commands;
@@ -52,6 +53,7 @@ internal sealed partial class SetupOutputView
         if (_isLineToolArmed && ImGui.IsKeyPressed(ImGuiKey.Escape, false) && !T3Ui.IsAnyPopupOpen
             && ImGui.IsWindowFocused(ImGuiFocusedFlags.RootAndChildWindows) && !ImGui.GetIO().WantTextInput)
         {
+            KeyActionHandling.ClaimEscapeKey();
             _isLineToolArmed = false;
             if (_measureDraftIndex >= 0 && _measureDraftIndex < annotations.Count)
             {

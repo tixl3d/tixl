@@ -102,6 +102,8 @@ public static partial class T3Ui
         TimeControls.HandleTimeControlActions();
         RecordingSession.OnFrame();
 
+        CheckIfEscapeCouldCancelSomething();
+
         // Draw everything!
         LayoutHandling.DrawMainDockSpace();
 

@@ -99,6 +99,7 @@ internal enum UserActions
 
     // Layout and window management
     ToggleAllUiElements,
+    FocusGraphWindow,
     ToggleVariationsWindow,
     ToggleFullscreen,
     ToggleFocusMode,

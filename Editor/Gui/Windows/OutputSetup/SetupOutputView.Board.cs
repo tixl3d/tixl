@@ -1994,6 +1994,9 @@ internal sealed partial class SetupOutputView
             }
         }
 
+        if (escape && (_hierarchyStep.Count > 0 || selection.Targets.Count > 0))
+            KeyActionHandling.ClaimEscapeKey();
+
         if (_hierarchyStep.Count == 0)
         {
             if (escape)

@@ -9,9 +9,11 @@ using T3.Editor.Gui.Dialogs;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.Interaction.Timing;
+using T3.Editor.Gui.MagGraph.Interaction.KeyboardEditing;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.Templates;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Gui.Window;
 using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.Gui.Windows.Output;
 using T3.Editor.Gui.Windows.RenderExport;
@@ -96,6 +98,46 @@ public static partial class T3Ui
         {
             UserSettings.Config.EnableIdleMotion = !UserSettings.Config.EnableIdleMotion;
             ActionToast.Show(UserSettings.Config.EnableIdleMotion ? "{Idle motion on}" : "{Idle motion off}");
+        }
+        else if (UserActions.FocusGraphWindow.Triggered())
+        {
+            FocusGraphWindowOfFocusedProject();
+        }
+    }
+
+    /// <summary>
+    /// Must run before the windows are drawn: an Esc press closes text inputs, popups and the parameter popover
+    /// within the same frame, so afterward it no longer shows that the key was already used.
+    /// </summary>
+    private static void CheckIfEscapeCouldCancelSomething()
+    {
+        _couldEscapeCancelSomething = ImGui.IsAnyItemActive()
+                                      || ImGui.IsPopupOpen(string.Empty, ImGuiPopupFlags.AnyPopupId | ImGuiPopupFlags.AnyPopupLevel)
+                                      || ParameterPopover.IsOpen;
+    }
+
+    /// <summary>
+    /// Brings the keyboard focus back to the graph from any other window, unless the shortcut was used to cancel
+    /// something there. Operators that capture the keyboard (like [Sketch]) keep the key, too.
+    /// </summary>
+    private static void FocusGraphWindowOfFocusedProject()
+    {
+        if (_couldEscapeCancelSomething || KeyActionHandling.IsEscapeKeyClaimed || ImGui.IsAnyMouseDown())
+            return;
+
+        var focusedProjectView = ProjectView.Focused;
+        if (focusedProjectView == null)
+            return;
+
+        foreach (var graphWindow in GraphWindow.GraphWindowInstances)
+        {
+            if (graphWindow.ProjectView != focusedProjectView)
+                continue;
+
+            if (Gui.Windows.Window.FocusedWindow != graphWindow)
+                graphWindow.RequestWindowFocus();
+
+            return;
         }
     }
 
@@ -186,6 +228,7 @@ public static partial class T3Ui
     internal static readonly ShareSessionDialog ShareSessionDialog = new();
     internal static readonly ExitDialog ExitDialog = new();
     private static readonly List<EditableSymbolProject> _modifiedProjects = new();
+    private static bool _couldEscapeCancelSomething;
 
     [Flags]
     public enum EditingFlags
