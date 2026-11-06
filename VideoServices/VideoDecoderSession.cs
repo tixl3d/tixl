@@ -363,9 +363,13 @@ public sealed class VideoDecoderSession : IDisposable
         framePts = 0;
         while (true)
         {
-            var receive = _codecContext.ReceiveFrame(_frame);
+            // FFmpeg clears the receiving frame before reporting EOF, so decode into a scratch frame: at the end of
+            // the stream CurrentFrame keeps the final frame, which is what a target past the footage resolves to.
+            var receive = _codecContext.ReceiveFrame(_receivedFrame);
             if (receive == CodecResult.Success)
             {
+                _frame.Unref();
+                ffmpeg.av_frame_move_ref(_frame, _receivedFrame);
                 var pts = _frame.BestEffortTimestamp;
                 framePts = pts != NoPts ? pts : _frame.Pts;
 
@@ -444,6 +448,7 @@ public sealed class VideoDecoderSession : IDisposable
     public unsafe void Dispose()
     {
         _frame.Dispose();
+        _receivedFrame.Dispose();
         _swFrame.Dispose();
         _packet.Dispose();
         _codecContext.Dispose();
@@ -523,6 +528,7 @@ public sealed class VideoDecoderSession : IDisposable
     private readonly int _videoStreamIndex;
     private readonly Packet _packet = new();
     private readonly Frame _frame = new();
+    private readonly Frame _receivedFrame = new();
     private readonly Frame _swFrame = new();
     private unsafe AVBufferRef* _hwDeviceCtx;
     private readonly bool _zeroCopy;

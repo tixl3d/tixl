@@ -63,6 +63,24 @@ public class VideoDecoderSessionTests
         Assert.True(count >= 30, $"Expected at least 30 frames, decoded {count}");
     }
 
+    [Fact]
+    public void ReadPastEnd_KeepsFinalFrame()
+    {
+        using var session = VideoDecoderSession.TryOpen(TestAssets.Video720p, VideoPlaybackOptimization.FastSeeking, out _);
+        Assert.NotNull(session);
+
+        var endPts = TimeToFrameMapper.SecondsToPts(session!.DurationSeconds + 1, session.StreamStartPts, session.TimeBaseNum, session.TimeBaseDen);
+        session.SeekToKeyframeBefore(endPts);
+        var lastPts = long.MinValue;
+        while (session.TryReadNextFrame(out var pts))
+            lastPts = pts;
+
+        Assert.NotEqual(long.MinValue, lastPts);
+        Assert.Equal(session.Width, session.CurrentFrame.Width);
+        Assert.Equal(session.Height, session.CurrentFrame.Height);
+        Assert.Equal(lastPts, session.CurrentFrame.BestEffortTimestamp);
+    }
+
     [Theory]
     [InlineData(1.0)]
     [InlineData(2.0)]

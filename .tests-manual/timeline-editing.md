@@ -162,3 +162,20 @@ Then right-click a clip of any other type.
 - For the audio clip, a **Set as Main Soundtrack** row appears below a separator,
   under **Delete**.
 - For the other clip, that row is absent and no leftover separator remains.
+
+## Step: Trimming previews the cut frame
+
+**Action:**
+With playback stopped, place the playhead somewhere outside a video clip. Drag the clip's start
+handle left and right, then its end handle. Release, and repeat once while holding `Shift`
+(snapping off) and once with playback running.
+
+**Expected:**
+- While a handle is dragged, the output shows the frame at that edge: the first frame for the start
+  handle, the last frame for the end handle.
+- The playhead stays where it was and is drawn faded during the drag; the trim edge still snaps to it.
+- On release the playhead is back at full opacity and the output shows its frame again.
+- A plain click on a handle (no drag) does not change the output.
+- Dragging the end handle past the end of the footage holds the last frame; dragging the start handle
+  before the footage holds the first frame. The console shows no FFmpeg decode errors.
+- During playback, trimming does not jump the output; playback continues from the playhead.
