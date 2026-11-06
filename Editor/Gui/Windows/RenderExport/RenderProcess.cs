@@ -284,7 +284,7 @@ internal static class RenderProcess
         if (OutputWindow.TryGetPrimaryOutputWindow(out OutputWindow))
         {
             MainOutputTexture = OutputWindow.GetCurrentTexture();
-            MainOutputType = OutputWindow.ShownInstance?.Outputs.FirstOrDefault()?.ValueType;
+            MainOutputType = OutputWindow.ShownOutputType;
         }
         else if (LayoutHandling.FocusMode && ProjectView.Focused?.GraphImageBackground is { IsActive: true } background)
         {

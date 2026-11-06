@@ -75,6 +75,10 @@ internal sealed class ImageOutputCanvas : ScalableCanvas
     /// <summary>Set by the window when the shown op was already evaluated this frame but had to render again for
     /// this window's resolution preset; the caption then carries a warning.</summary>
     public bool IsRenderedTwice;
+
+    /// <summary>Set by the window when the image comes from somewhere other than the shown op's own output — the
+    /// name of the send it falls back to — and shown in the caption, so the image isn't mistaken for the op's.</summary>
+    public string? SourceLabel;
         
     public void DrawTexture(T3.Core.DataTypes.Texture2D? texture)
     {
@@ -107,7 +111,9 @@ internal sealed class ImageOutputCanvas : ScalableCanvas
         {
             var format = srv == null || srv.IsDisposed ? "null?" : GetFormatLabel(srv.Description.Format);
             var zoom = Math.Abs(Scale.X) < 0.001f ? "" : $" ×{Scale.X:G2}";
-            DrawCaption($"{size.X}x{size.Y}  {format} {zoom}");
+            DrawCaption(SourceLabel == null
+                            ? $"{size.X}x{size.Y}  {format} {zoom}"
+                            : $"via {SourceLabel}  {size.X}x{size.Y}  {format} {zoom}");
         }
     }
 
