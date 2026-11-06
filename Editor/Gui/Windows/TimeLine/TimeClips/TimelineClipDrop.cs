@@ -46,7 +46,7 @@ internal static class TimelineClipDrop
                 && TryComputeDrop(timeCanvas, layerTopY, minLayerIndex, maxLayerIndex, out var dropBars, out var dropLayer, out var playback))
             {
                 var macro = new MacroCommand("Drop timeline clip");
-                CreateClipOp(compositionOp, macro, opId, asset.Address, asset.FullPath, dropBars, dropLayer, playback);
+                CreateClipOp(compositionOp, macro, opId, asset, dropBars, dropLayer, playback);
                 FinishMacro(compositionOp, macro);
             }
             return;
@@ -85,7 +85,7 @@ internal static class TimelineClipDrop
                 continue;
             }
 
-            CreateClipOp(compositionOp, fileMacro, fileOpId, asset.Address, asset.FullPath, bars, layer, pb);
+            CreateClipOp(compositionOp, fileMacro, fileOpId, asset, bars, layer, pb);
             // Stack subsequent files on new layers so a multi-drop doesn't pile clips on top of each other.
             layer++;
             added++;
@@ -144,7 +144,7 @@ internal static class TimelineClipDrop
     }
 
     private static void CreateClipOp(Instance compositionOp, MacroCommand macro, Guid opSymbolId,
-                                     string assetAddress, string assetFullPath, float startBars, int layer, Playback playback)
+                                     Asset asset, float startBars, int layer, Playback playback)
     {
         var addCmd = new AddSymbolChildCommand(compositionOp.Symbol, opSymbolId)
                          {
@@ -156,7 +156,7 @@ internal static class TimelineClipDrop
         if (!compositionOp.Symbol.Children.TryGetValue(childId, out var symbolChild))
             return;
 
-        var durationSecs = ProbeDurationSecs(assetFullPath);
+        var durationSecs = ProbeDurationSecs(asset);
         var durationBars = durationSecs > 0 ? (float)playback.BarsFromSeconds(durationSecs) : 4f;
 
         // Content clips (video, audio) keep their source range in seconds; other clip ops in bars.
@@ -185,7 +185,7 @@ internal static class TimelineClipDrop
             && symbolChild.Inputs.TryGetValue(fileInputSlot.Id, out var childInput))
         {
             macro.AddAndExecCommand(new ChangeInputValueCommand(compositionOp.Symbol, childId, childInput,
-                                                                new InputValue<string>(assetAddress)));
+                                                                new InputValue<string>(asset.Address)));
         }
         else
         {
@@ -219,26 +219,25 @@ internal static class TimelineClipDrop
     }
 
     /// <summary>
-    /// Real duration of the dropped file in seconds — audio, video and MIDI are probed; types with no
-    /// probe (e.g. data) return 0 so the caller falls back to a placeholder length.
+    /// Real duration of the dropped asset in seconds, probed by its type; types with no probe (e.g. data)
+    /// return 0 so the caller falls back to a placeholder length. Videos skip the audio decoder: their
+    /// audio track may be undecodable (e.g. Apple spatial audio), which would log a misleading warning.
     /// </summary>
-    private static double ProbeDurationSecs(string absolutePath)
+    private static double ProbeDurationSecs(Asset asset)
     {
-        // MIDI goes first: the audio probe logs a FileFormat warning for non-audio files.
-        var durationSecs = TryProbeMidiDurationSecs(absolutePath);
-
-        if (durationSecs <= 0)
+        switch (asset.AssetType.Name)
         {
-            durationSecs = AudioMixerManager.TryProbeAudioDurationSecs(absolutePath);
+            case "Midi":
+                return TryProbeMidiDurationSecs(asset.FullPath);
+            case "Audio":
+                return AudioMixerManager.TryProbeAudioDurationSecs(asset.FullPath);
+            case "Video":
+                return VideoExport.Factory is { } factory && factory.TryProbeDurationSeconds(asset.FullPath, out var videoSecs)
+                           ? videoSecs
+                           : 0;
+            default:
+                return 0;
         }
-
-        if (durationSecs <= 0 && VideoExport.Factory is { } factory
-            && factory.TryProbeDurationSeconds(absolutePath, out var videoSecs))
-        {
-            durationSecs = videoSecs;
-        }
-
-        return durationSecs;
     }
 
     /// <summary>
