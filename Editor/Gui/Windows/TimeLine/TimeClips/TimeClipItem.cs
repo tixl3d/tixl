@@ -251,7 +251,7 @@ internal static class TimeClipItem
         }
 
         // Interaction and dragging
-        ImGui.SetCursorScreenPos(showSizeHandles ? (position + _handleOffset) : position);
+        ImGui.SetCursorScreenPos(showSizeHandles ? (position + new Vector2(HandleWidth, 0)) : position);
 
         var wasClickedDown = ImGui.InvisibleButton("body", bodySize);
         var bodyHovered = ImGui.IsItemHovered();
@@ -343,10 +343,10 @@ internal static class TimeClipItem
         var startHandleActive = ImGui.IsItemHovered() || ImGui.IsItemActive();
         if (startHandleActive)
         {
-            attr.DrawList.AddRectFilled(ImGui.GetItemRectMin() + new Vector2(2, 3),
-                                        ImGui.GetItemRectMax() - new Vector2(1, 4),
+            attr.DrawList.AddRectFilled(ImGui.GetItemRectMin() + new Vector2(2, 3) * T3Ui.UiScaleFactor,
+                                        ImGui.GetItemRectMax() - new Vector2(1, 4) * T3Ui.UiScaleFactor,
                                         UiColors.ForegroundFull.Fade(0.3f),
-                                        5);
+                                        5 * T3Ui.UiScaleFactor);
         }
 
         HandleDragging(attr, timeClip, isSelected, false, HandleDragMode.Start);
@@ -356,10 +356,10 @@ internal static class TimeClipItem
         var endHandleActive = ImGui.IsItemHovered() || ImGui.IsItemActive();
         if (endHandleActive)
         {
-            attr.DrawList.AddRectFilled(ImGui.GetItemRectMin() + new Vector2(0, 3),
-                                        ImGui.GetItemRectMax() - new Vector2(3, 4),
+            attr.DrawList.AddRectFilled(ImGui.GetItemRectMin() + new Vector2(0, 3) * T3Ui.UiScaleFactor,
+                                        ImGui.GetItemRectMax() - new Vector2(3, 4) * T3Ui.UiScaleFactor,
                                         UiColors.ForegroundFull.Fade(0.3f),
-                                        5);
+                                        5 * T3Ui.UiScaleFactor);
         }
 
         HandleDragging(attr, timeClip, isSelected, false, HandleDragMode.End);
@@ -806,7 +806,9 @@ internal static class TimeClipItem
     // [VideoClip] — media clips get their type color instead of the per-clip random hue.
     private static readonly Guid _videoClipSymbolId = new("04c1a6dc-3042-48a8-81d2-0a5a162016dc");
 
-    private const float HandleWidth = 7;
+    /** Width of the trim zone at each clip edge, in whole pixels so the clip body stays pixel-aligned. */
+    private static float HandleWidth => MathF.Round(7 * T3Ui.UiScaleFactor);
+
     private static float _timeWithinDraggedClip;
 
     // Drag-start snapshots. Body drag computes the target position from these +
@@ -815,7 +817,6 @@ internal static class TimeClipItem
     private static double _dragStartMouseTime;
     private static double _originalDraggedClipStart;
     private static double _lastAppliedDeltaTime;
-    private static readonly Vector2 _handleOffset = new(HandleWidth, 0);
     private static readonly Color _timeRemappingColor = UiColors.StatusAnimated.Fade(0.25f);
     private static float _posPosYOnDragStart;
     private static float _posXOnDragStart;
