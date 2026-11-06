@@ -10,6 +10,7 @@ using T3.Editor.UiModel.Commands.Sections;
 using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.Modification;
+using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
 
 namespace T3.Editor.Gui.MagGraph.Interaction;
@@ -157,6 +158,36 @@ internal static class Modifications
             {
                 context.Selector.AddSelection(section);
             }
+        }
+    }
+
+    /// <summary>
+    /// Replaces the selection with the selected operators and every operator feeding into them.
+    /// </summary>
+    internal static void SelectConnectedInputs(GraphUiContext context)
+    {
+        var startIds = new List<Guid>();
+        foreach (var childUi in context.Selector.GetSelectedChildUis())
+        {
+            startIds.Add(childUi.Id);
+        }
+
+        if (startIds.Count == 0)
+            return;
+
+        var connectedIds = new HashSet<Guid>();
+        Structure.CollectUpstreamChildIds(context.CompositionInstance.Symbol, startIds, connectedIds);
+
+        context.Selector.Clear();
+        var children = context.CompositionInstance.Children;
+        foreach (var id in connectedIds)
+        {
+            if (!children.TryGetChildInstance(id, out var instance))
+                continue;
+
+            var childUi = instance.GetChildUi();
+            if (childUi != null)
+                context.Selector.AddSelection(childUi, instance);
         }
     }
 

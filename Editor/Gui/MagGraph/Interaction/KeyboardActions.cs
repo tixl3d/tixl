@@ -144,6 +144,13 @@ internal static class KeyboardActions
             TreeLayouting.LayoutInputsOfSelection(context);
         }
 
+        if (UserActions.SelectConnectedInputs.Triggered()
+            && nodeSelection.Selection.Count > 0
+            && context.StateMachine.CurrentState == GraphStates.Default)
+        {
+            Modifications.SelectConnectedInputs(context);
+        }
+
         if (!T3Ui.IsCurrentlySaving && UserActions.AddSection.Triggered())
         {
             var newSection = NodeActions.AddSection(nodeSelection, context.View, compositionOp);

@@ -195,47 +195,63 @@ internal sealed class Structure
         }
     }
 
+    /// <summary>
+    /// Returns the child and every operator that feeds into it, directly or transitively.
+    /// </summary>
     internal static HashSet<Guid> CollectConnectedChildren(Symbol.Child child, Symbol compositionSymbol, HashSet<Guid>? set = null)
     {
         set ??= [];
-
-        set.Add(child.Id);
-        //var compositionSymbol = composition.Symbol;
-        var connectedChildren = (from con in compositionSymbol.Connections
-                                 where !con.IsConnectedToSymbolInput && !con.IsConnectedToSymbolOutput
-                                 from sourceChild in compositionSymbol.Children.Values
-                                 where con.SourceParentOrChildId == sourceChild.Id
-                                       && con.TargetParentOrChildId == child.Id
-                                 select sourceChild).Distinct().ToArray();
-
-        foreach (var connectedChild in connectedChildren)
-        {
-            set.Add(connectedChild.Id);
-            CollectConnectedChildren(connectedChild, compositionSymbol, set);
-        }
-
+        CollectUpstreamChildIds(compositionSymbol, [child.Id], set);
         return set;
     }
-    
-    internal static HashSet<Guid> CollectConnectedChildrenOut(Symbol.Child child, Symbol compositionSymbol, HashSet<Guid>? set = null)
-    {
-        set ??= [];
-        
-        set.Add(child.Id);
-        var connectedChildren = (from con in compositionSymbol.Connections
-                                 where !con.IsConnectedToSymbolInput && !con.IsConnectedToSymbolOutput
-                                 from targetChild in compositionSymbol.Children.Values
-                                 where (con.SourceParentOrChildId == child.Id
-                                       && con.TargetParentOrChildId ==targetChild.Id ) 
-                                 select targetChild).Distinct();
 
-        foreach (var connectedChild in connectedChildren)
+    /// <summary>
+    /// Adds the start children and every operator that feeds into them, directly or transitively, to <paramref name="result"/>.
+    /// </summary>
+    internal static void CollectUpstreamChildIds(Symbol compositionSymbol, IReadOnlyList<Guid> startChildIds, HashSet<Guid> result)
+    {
+        // Index sources by target once, so the walk is linear in the number of connections.
+        var sourceIdsByTargetId = new Dictionary<Guid, List<Guid>>();
+        foreach (var connection in compositionSymbol.Connections)
         {
-            set.Add(connectedChild.Id);
-            CollectConnectedChildrenOut(connectedChild, compositionSymbol, set);
+            if (connection.IsConnectedToSymbolInput || connection.IsConnectedToSymbolOutput)
+                continue;
+
+            if (!sourceIdsByTargetId.TryGetValue(connection.TargetParentOrChildId, out var sourceIds))
+            {
+                sourceIds = [];
+                sourceIdsByTargetId[connection.TargetParentOrChildId] = sourceIds;
+            }
+
+            sourceIds.Add(connection.SourceParentOrChildId);
         }
 
-        return set;
+        var pendingIds = new Stack<Guid>();
+        foreach (var startId in startChildIds)
+        {
+            result.Add(startId);
+            PushSources(startId);
+        }
+
+        while (pendingIds.Count > 0)
+        {
+            var id = pendingIds.Pop();
+            if (result.Add(id))
+                PushSources(id);
+        }
+
+        return;
+
+        void PushSources(Guid targetId)
+        {
+            if (!sourceIdsByTargetId.TryGetValue(targetId, out var sourceIds))
+                return;
+
+            foreach (var sourceId in sourceIds)
+            {
+                pendingIds.Push(sourceId);
+            }
+        }
     }
     
     internal static void CollectConnectedChildIds(Symbol compositionSymbol, List<Symbol.Child> selectedChildren, HashSet<Guid>? connectedIds)

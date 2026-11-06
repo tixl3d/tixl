@@ -274,31 +274,10 @@ internal static class GraphContextMenu
             }
 
             if (CustomComponents.DrawMenuItem((int)MenuItemIds.SelectConnectedInputs, Icon.None, "Select Connected Inputs",
+                                              UserActions.SelectConnectedInputs.ListShortcuts(),
                                               isEnabled: someOpsSelected, reserveCheckmarkColumn: false, reserveIconColumn: false))
             {
-                var connectedIds = new HashSet<Guid>();
-                foreach (var child in selectedChildUis)
-                {
-                    Structure.CollectConnectedChildren(child.SymbolChild,
-                                                       context.CompositionInstance.Symbol,
-                                                       connectedIds);
-                }
-
-                if (connectedIds.Count > 0)
-                {
-                    context.Selector.Clear();
-                    foreach (var id in connectedIds)
-                    {
-                        if (context.CompositionInstance.Children.TryGetChildInstance(id, out var instance))
-                        {
-                            var node = instance.GetChildUi();
-                            if (node != null)
-                            {
-                                context.Selector.AddSelection(node, instance);
-                            }
-                        }
-                    }
-                }
+                Modifications.SelectConnectedInputs(context);
             }
 
             ImGui.EndMenu();

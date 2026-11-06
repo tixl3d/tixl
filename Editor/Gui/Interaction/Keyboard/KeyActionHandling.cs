@@ -188,6 +188,7 @@ internal static class KeyActionHandling
         RegisterActionsFlags(UserActions.ToggleDisabled, Flags.NeedsWindowFocus);
         RegisterActionsFlags(UserActions.ToggleBypassed, Flags.NeedsWindowFocus);
         RegisterActionsFlags(UserActions.Disconnect, Flags.NeedsWindowFocus);
+        RegisterActionsFlags(UserActions.SelectConnectedInputs, Flags.NeedsWindowFocus | Flags.KeyPressOnly);
         RegisterActionsFlags(UserActions.PinToOutputWindow, Flags.KeyPressOnly);
         RegisterActionsFlags(UserActions.ShowInGraph, Flags.KeyPressOnly);
         RegisterActionsFlags(UserActions.ToggleOutputSetup, Flags.KeyPressOnly);

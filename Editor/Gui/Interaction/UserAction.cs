@@ -58,6 +58,7 @@ internal enum UserActions
     Duplicate,
     DuplicateWithConnections,
     LayoutSelection,
+    SelectConnectedInputs,
     ToggleDisabled,
     ToggleBypassed,
     Disconnect,
