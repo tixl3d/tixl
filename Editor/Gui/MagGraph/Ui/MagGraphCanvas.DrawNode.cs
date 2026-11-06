@@ -1410,7 +1410,7 @@ internal sealed partial class MagGraphView
             return false;
 
         ShaderResourceView previewTextureView;
-        float aspect = 1;
+        float aspect ;
         
         var texture = textureSlot.Value;
         var uvMin = Vector2.Zero;
@@ -1432,15 +1432,25 @@ internal sealed partial class MagGraphView
             uvMax = thumbnail.UvMax;
             aspect = 4 / 3.0f;
         }
-        
-        var unitScreenHeight = (MagGraphItem.GridSize.Y - 5) * CanvasScale;
-        var previewSize = new Vector2(unitScreenHeight * aspect, unitScreenHeight);
 
-        var maxAspect = 1.6f;
-        if (previewSize.X > unitScreenHeight * maxAspect)
+        var unitScreenHeight = (MagGraphItem.GridSize.Y - 6) * CanvasScale;
+        const float MaxAspect = 1.6f;
+        const float ReferenceAspect = 16f / 9f;
+
+        var maxWidth = unitScreenHeight * MaxAspect;
+
+        // Height a 16:9 image ends up with after the width clamp
+        var previewHeight = maxWidth / ReferenceAspect;
+        var previewWidth = previewHeight * aspect;
+
+        // Ultra-wide images (wider than 16:9) get shorter instead of wider
+        if (previewWidth > maxWidth)
         {
-            previewSize *= unitScreenHeight / (previewSize.X) * maxAspect;
+            previewHeight *= maxWidth / previewWidth;
+            previewWidth = maxWidth;
         }
+
+        var previewSize = new Vector2(previewWidth, previewHeight);
 
         var min = new Vector2(itemMax.X - previewSize.X - 2 * CanvasScale,
                               itemMin.Y
@@ -1455,16 +1465,16 @@ internal sealed partial class MagGraphView
                           uvMin,
                           uvMax,
                           Color.White);
-        if (CanvasScale > 0.5f)
+        if (CanvasScale > 1.8f)
         {
-            drawList.AddRect(min - Vector2.One * 0.5f * CanvasScale,
-                             min + previewSize + Vector2.One * 0.5f * CanvasScale,
+            var framePos = Vector2.One * 0.25f * CanvasScale;
+            drawList.AddRect(min - framePos,
+                             min + previewSize + framePos,
                              ColorVariations.ConnectionLines.Apply(typeColor),
-                             2 * CanvasScale,
-                             ImDrawFlags.RoundCornersAll,
-                             1 * CanvasScale);
+                             0,
+                             ImDrawFlags.RoundCornersNone,
+                             0.5f * CanvasScale);
         }
-
         return true;
     }
 
