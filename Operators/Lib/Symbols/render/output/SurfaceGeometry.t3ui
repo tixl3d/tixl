@@ -1,0 +1,38 @@
+{
+  "FormatVersion": 3,
+  "Id": "351c58d2-bb46-415d-871c-ae1c3db97444"/*SurfaceGeometry*/,
+  "Description": "Outputs one output-setup surface or region as a quad in the stage, at its real size and place.\n\nIt stands where the wall stands in the frame a projector camera is solved in, so whatever is drawn on it and rendered through [UseProjectorCam] lands on the real wall, together with 3D objects in front of it. Texture coordinates run 0..1 over it with the top at the surface's top, the layout of [SurfaceReferenceImage]: draw it with [DrawMeshUnlit] and that photo to design on the wall in 3D, or with a rendered [Layer2d] scene for 2D content on it. Wire it through [GeometryToMesh].\n\nA region is lifted a millimetre off its parent so both can be drawn. A surface without a stage position (Facing and Position in the output setup) is drawn at the origin, which is right only for the surface the projector camera was solved from.\n\nAKA: wall quad, surface mesh, projection surface, stage quad",
+  "InputUis": [
+    {
+      "InputId": "51069c93-bbfa-46c4-a98a-e4b2503060a2"/*Surface*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "The surface or region to output.",
+      "Usage": "OutputSetupEntities"
+    },
+    {
+      "InputId": "bc23e0b9-060f-4ce2-89bc-70956f73575f"/*Surround*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Description": "Grows the quad by this share of its size on each side, to match a [SurfaceReferenceImage] with the same Surround.",
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "5a5d850a-d301-451f-acda-a1e880cdf48d"/*Geometry*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

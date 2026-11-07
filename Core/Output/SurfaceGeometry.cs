@@ -22,6 +22,41 @@ public static class SurfaceGeometry
     /// <summary>Smallest slice extent, as a fraction of its source — shared by the canvas handles and the parameter fields.</summary>
     public const float MinSliceSize = 0.01f;
 
+    /// <summary>
+    /// A surface's rectangle in the space of its root's pose: the stage, where the root has a placement, else the
+    /// root's own frame, which is also the frame a projector camera is solved in when that root is the world. A
+    /// region sits in metres from its parent's anchor, all the way up, and is lifted off its parent by a little per
+    /// level, so a draw of the regions over their parent doesn't z-fight.
+    /// </summary>
+    /// <param name="world">The root's surface-to-stage transform.</param>
+    /// <param name="min">Bottom-left in the root's surface metres.</param>
+    /// <param name="max">Top-right in the root's surface metres.</param>
+    /// <param name="lift">Along the root's normal, in metres.</param>
+    public static void GetStageRect(Setup setup, Surface surface, out Matrix4x4 world, out Vector2 min,
+                                    out Vector2 max, out float lift)
+    {
+        lift = 0;
+        var root = surface;
+        min = surface.ParentId == Guid.Empty ? -surface.AnchorInMeters : surface.LocalPosition;
+        for (var guard = 0; root.ParentId != Guid.Empty && guard < 16; guard++)
+        {
+            lift += RegionLiftInMeters;
+            if (setup.FindSurface(root.ParentId) is not { } parent)
+                break;
+
+            if (parent.ParentId != Guid.Empty)
+                min += parent.LocalPosition + parent.AnchorInMeters;
+
+            root = parent;
+        }
+
+        max = min + surface.SizeInMeters;
+        world = (root.Placement?.Pose ?? Pose.Identity).ToWorldMatrix();
+    }
+
+    /** How far a region is lifted off its parent per level of nesting, in metres. */
+    public const float RegionLiftInMeters = 0.001f;
+
     /// <summary>The surface's own rectangle in its space, as a TL, TR, BR, BL quad — the frame the corner pin maps.</summary>
     /// <param name="corners">Caller-owned, at least 4 entries — this runs per frame, so it doesn't allocate.</param>
     public static void WriteLocalRect(Surface surface, Span<Vector2> corners)

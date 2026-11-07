@@ -1,0 +1,16 @@
+{
+  "FormatVersion": 3,
+  "Id": "351c58d2-bb46-415d-871c-ae1c3db97444"/*SurfaceGeometry*/,
+  "Inputs": [
+    {
+      "Id": "51069c93-bbfa-46c4-a98a-e4b2503060a2"/*Surface*/,
+      "DefaultValue": "00000000-0000-0000-0000-000000000000"
+    },
+    {
+      "Id": "bc23e0b9-060f-4ce2-89bc-70956f73575f"/*Surround*/,
+      "DefaultValue": 0.0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

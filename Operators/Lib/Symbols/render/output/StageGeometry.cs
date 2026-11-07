@@ -147,7 +147,7 @@ internal sealed class StageGeometry : Instance<StageGeometry>, IStatusProvider
             }
             else
             {
-                GetStageRect(setup, surface, out var world, out var min, out var max, out var lift);
+                T3.Core.Output.SurfaceGeometry.GetStageRect(setup, surface, out var world, out var min, out var max, out var lift);
                 var normal = Vector3.Normalize(Vector3.TransformNormal(Vector3.UnitZ, world));
 
                 // Texture coordinates interpolate linearly, a photo's perspective doesn't: a single quad would show a
@@ -376,32 +376,6 @@ internal sealed class StageGeometry : Instance<StageGeometry>, IStatusProvider
                    : surface.Kind == Surface.Kinds.Layout && surface.OutputMappings.Count > 0;
     }
 
-    /// <summary>
-    /// A surface's rectangle in the space of its root's pose. A region sits in metres from its parent's anchor, all the
-    /// way up, and is lifted off its parent by a little per level so a draw of the mesh doesn't z-fight between them.
-    /// </summary>
-    private static void GetStageRect(Setup setup, Surface surface, out Matrix4x4 world, out Vector2 min, out Vector2 max, out float lift)
-    {
-        lift = 0;
-        var root = surface;
-        min = surface.ParentId == Guid.Empty ? -surface.AnchorInMeters : surface.LocalPosition;
-        for (var guard = 0; root.ParentId != Guid.Empty && guard < 16; guard++)
-        {
-            lift += RegionLiftInMeters;
-            if (setup.FindSurface(root.ParentId) is not { } parent)
-                break;
-
-            if (parent.ParentId != Guid.Empty)
-                min += parent.LocalPosition + parent.AnchorInMeters;
-
-            root = parent;
-        }
-
-        max = min + surface.SizeInMeters;
-        world = (root.Placement?.Pose ?? Pose.Identity).ToWorldMatrix();
-    }
-
-    private const float RegionLiftInMeters = 0.001f;
 
     /** A parent left off the canvas on purpose: its regions have the places, so there is nothing to warn about. */
     private static bool HasRegionOnCanvas(Setup setup, Surface parent)
