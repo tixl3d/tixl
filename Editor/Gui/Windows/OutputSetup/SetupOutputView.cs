@@ -534,6 +534,8 @@ internal sealed partial class SetupOutputView
             && SurfaceMetrics.CountPoints(alignSubject.Traced) > 0)
         {
             DrawReferencePointPins(setup, dl, alignSubject, pinMapping, editable, handleFade);
+            if (setup.FindOutput(outputId) is { } calibratedOutput)
+                ProjectorCalibration.FollowPin(calibratedOutput, alignSubject.Pinned, pinMapping);
         }
     }
 

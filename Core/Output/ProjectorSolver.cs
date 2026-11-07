@@ -46,6 +46,25 @@ public static class ProjectorSolver
     public static bool TrySolveFromPlane(in Homography surfaceToPixels, in Pose surfaceToStage, Vector2 lensShift, Int2 canvasResolution,
                                          float fallbackFieldOfViewY, out Pose pose, out Projection lens, out bool usedFallbackZoom)
     {
+        return TrySolvePlane(surfaceToPixels, surfaceToStage, lensShift, canvasResolution, fallbackFieldOfViewY, false,
+                             out pose, out lens, out usedFallbackZoom);
+    }
+
+    /// <summary>
+    /// Solves only the pose from a single aligned surface, with the zoom known. For following a pin while it is
+    /// being aimed: re-reading the zoom from a half-aimed pin would make it jump with every point.
+    /// </summary>
+    /// <param name="fieldOfViewY">Vertical field of view in radians.</param>
+    public static bool TrySolvePoseFromPlane(in Homography surfaceToPixels, in Pose surfaceToStage, Vector2 lensShift, Int2 canvasResolution,
+                                             float fieldOfViewY, out Pose pose, out Projection lens)
+    {
+        return TrySolvePlane(surfaceToPixels, surfaceToStage, lensShift, canvasResolution, fieldOfViewY, true,
+                             out pose, out lens, out _);
+    }
+
+    private static bool TrySolvePlane(in Homography surfaceToPixels, in Pose surfaceToStage, Vector2 lensShift, Int2 canvasResolution,
+                                      float fallbackFieldOfViewY, bool isZoomFixed, out Pose pose, out Projection lens, out bool usedFallbackZoom)
+    {
         pose = default;
         lens = default;
         usedFallbackZoom = false;
@@ -76,7 +95,7 @@ public static class ProjectorSolver
         // A squarely seen plane has (nearly) no perspective terms, so g is noise around zero: no zoom to read.
         var perspective = pp > 1e-30 ? Math.Sqrt(c1 * c1 + c2 * c2) * Math.Max(width, height) / Math.Sqrt(Math.Sqrt(pp)) : 0;
         double f;
-        if (g > 0 && perspective >= MinPerspectiveForZoom)
+        if (!isZoomFixed && g > 0 && perspective >= MinPerspectiveForZoom)
         {
             f = 1 / Math.Sqrt(g);
         }

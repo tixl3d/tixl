@@ -1,12 +1,12 @@
 ---
 id: output-setup-projector-camera
-title: Output Setup — Projector Camera from an Aligned Surface
+title: Output Setup — Projector Camera from a Calibrated Surface
 scope: output-setup
 tags: [projection-mapping]
 added: 2026-11-07
 added-in-version: 4.4
 prerequisites:
-  - A projector bound to a Display or Projector output, a surface aligned on it (Align Points or dragged corners).
+  - A projector bound to a Display or Projector output, a surface aligned on it (Calibrate or dragged corners).
   - A graph with [UseProjectorCam] → [RenderTarget] → [SendToOutput] routed to the same output, drawing a small 3D object.
 related-help:
   - ../.help/docs/using/OutputSetup.md
@@ -27,7 +27,7 @@ Select the aligned surface. In its parameters, click **Floor**, then **Ceiling**
 ## Step: Solving the camera
 
 **Action:**
-Select the output. In **Projector Camera**, set **Lens shift** to the projector's (0 0 if unknown, about 0 +50 for a projector on a table) and click **Solve from Aligned Surface**.
+Select the output. In **Projector Camera**, set **Lens shift** to the projector's (0 0 if unknown, about 0 +50 for a projector on a table) and click **Solve from Calibrated Surface**.
 
 **Expected:**
 - The hint reads "Solved from '<surface>': N° vertical, misses by M px", with M below a few pixels.
@@ -51,10 +51,21 @@ Click **Use Manual Camera**, then press `Ctrl+Z`.
 - After the click the hint reads "Manual camera: not solved yet." and [UseProjectorCam] uses the manual look-at camera.
 - `Ctrl+Z` brings the solved camera back.
 
+## Step: The camera follows calibration
+
+**Action:**
+Solve the camera from a surface, wire a mesh in front of that surface through [UseProjectorCam] to the output, then select the surface and turn on **Calibrate**. Drag one reference point slowly, then press `Ctrl+Z`. Turn **Calibrate** off, then on again and cancel with B on a game controller.
+
+**Expected:**
+- While dragging, the mesh moves with the pin on the projected picture; the zoom in the output's Projector section stays the same, the distance and the "misses by" value update.
+- `Ctrl+Z` puts the point back and the mesh with it.
+- Cancelling with B puts the pin and the camera back to where they were when calibrating started.
+- A surface filling the same output (right-click → **Fill**) doesn't change what **Solve from Calibrated Surface** solves from.
+
 ## Step: Without an aligned surface
 
 **Action:**
-On an output with no surface mapped to it, click **Solve from Aligned Surface**.
+On an output with no surface mapped to it, click **Solve from Calibrated Surface**.
 
 **Expected:**
 - The hint asks to map and align a surface first; nothing else changes.
@@ -71,7 +82,7 @@ On a projector output, drag the side view's distance value, then type the pictur
 - With both ends equal (a fixed lens) the second value is faded; the slider and both height fields stay editable.
 - Typing 0.44 into the tele value of a 0.40 range is never interrupted, even when the value passes 0.4 on the way.
 - Entering the ends the wrong way round (tele wider than wide) swaps them once the field is left.
-- After **Solve from Aligned Surface**, the distance and zoom show the solved values.
+- After **Solve from Calibrated Surface**, the distance and zoom show the solved values.
 
 ## Step: Projector presets
 

@@ -111,9 +111,9 @@ internal static class SurfaceContent
         projectView.FlagChanges(ProjectView.ChangeTypes.Children | ProjectView.ChangeTypes.Connections);
         projectView.NodeSelection.TrySelectCompositionChild(composition, groupId, add: false);
 
-        var next = mappedOutput != null ? $"connected to {SetupLabels.OutputLabel(mappedOutput)}; align its points next"
-                   : setup.FindMappedAncestor(surface.Id) is { OutputMappings.Count: > 0 } ? "align its points next"
-                   : "connect it to an output, then align its points";
+        var next = mappedOutput != null ? $"connected to {SetupLabels.OutputLabel(mappedOutput)}; calibrate it next"
+                   : setup.FindMappedAncestor(surface.Id) is { OutputMappings.Count: > 0 } ? "calibrate it next"
+                   : "connect it to an output, then calibrate it";
         Log.Info($"New content for '{surface.Name}': add your content to the selected Group; the surface is {next}.");
     }
 

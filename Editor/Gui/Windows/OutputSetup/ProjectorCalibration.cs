@@ -13,7 +13,7 @@ namespace T3.Editor.Gui.Windows.OutputSetup;
 internal static class ProjectorCalibration
 {
     /// <summary>
-    /// Solves the output's camera from the largest top-level surface mapped to it, as one undo step. The message
+    /// Solves the output's camera from the largest top-level surface corner-pinned to it, as one undo step. The message
     /// says what was solved or why it couldn't be.
     /// </summary>
     public static bool TrySolveFromAlignedSurface(Setup setup, OutputDefinition output, out string message)
@@ -21,7 +21,7 @@ internal static class ProjectorCalibration
         var surface = FindLargestMappedSurface(setup, output, out var mapping);
         if (surface == null || mapping == null)
         {
-            message = "Map a surface onto this output and align it first.";
+            message = "Corner-pin a surface onto this output and calibrate it first. Surfaces that fill the output don't count.";
             return false;
         }
 
@@ -67,6 +67,50 @@ internal static class ProjectorCalibration
 
         message = DescribeSolve(setup, output.Camera!);
         return true;
+    }
+
+    /// <summary>
+    /// Keeps a solved camera on the pin it was solved from while that pin is being calibrated, so content rendered
+    /// through [UseProjectorCam] moves with the points being aimed. The zoom stays as solved or entered: read from a
+    /// half-aimed pin it would jump with every point. Only the pose follows, and only when the pin changed. No undo
+    /// step of its own: calibrating snapshots the whole setup, the camera included, and an undone pin is followed
+    /// back on the next frame.
+    /// </summary>
+    public static void FollowPin(OutputDefinition output, Surface surface, Surface.OutputMapping mapping)
+    {
+        if (output.Camera is not { Pose: not null, Lens: { } solvedLens } camera
+            || camera.SolvedFromSurfaceId != surface.Id
+            || mapping.IsFilling
+            || mapping.Quad.Length < 4)
+            return;
+
+        if (_followedOutputId == output.Id && _followedSurfaceId == surface.Id && _followedLensAxis == camera.LensAxis
+            && _followedQuad[0] == mapping.Quad[0] && _followedQuad[1] == mapping.Quad[1]
+            && _followedQuad[2] == mapping.Quad[2] && _followedQuad[3] == mapping.Quad[3])
+            return;
+
+        _followedOutputId = output.Id;
+        _followedSurfaceId = surface.Id;
+        _followedLensAxis = camera.LensAxis;
+        for (var i = 0; i < 4; i++)
+            _followedQuad[i] = mapping.Quad[i];
+
+        var canvas = output.ResolvedResolution;
+        var canvasSize = output.CanvasSize;
+        var placement = surface.Placement?.Pose ?? Pose.Identity;
+        if (!SurfaceGeometry.TryGetSurfaceToOutput(surface, mapping, canvasSize, out var surfaceToPixels)
+            || !ProjectorSolver.TrySolvePoseFromPlane(surfaceToPixels, placement, camera.LensAxis, canvas, solvedLens.FieldOfViewY,
+                                                      out var pose, out var lens))
+            return; // a folded or degenerate pin mid-aim: keep the last good camera
+
+        CollectCorrespondences(surface, mapping, placement, canvasSize, surfaceToPixels, _correspondences);
+        camera.Pose = pose;
+        camera.Lens = lens;
+        camera.ResidualPx = MathF.Max(MeanMissPx(pose, lens, canvas, _correspondences), 0.001f);
+        camera.CalibrationPoints.Clear();
+        camera.CalibrationPoints.AddRange(_correspondences);
+        if (TryGetDistanceToSurface(pose, surface, placement, out var distance))
+            camera.ThrowDistance = distance;
     }
 
     /// <summary>Drops the solve, so [UseProjectorCam] falls back to the manual camera.</summary>
@@ -117,8 +161,11 @@ internal static class ProjectorCalibration
         var bestArea = 0f;
         foreach (var surface in setup.Surfaces)
         {
+            // A filling mapping is the whole canvas by definition, never aimed at anything, and as the largest quad
+            // it would always win: a surface that carries a full-frame projector-camera render would solve a
+            // nonsense camera.
             if (surface.ParentId != Guid.Empty || surface.Kind != Surface.Kinds.Physical || surface.FindMapping(output.Id) is not { } mapping
-                || mapping.Quad.Length < 4)
+                || mapping.IsFilling || mapping.Quad.Length < 4)
                 continue;
 
             var area = MathF.Abs(QuadArea(mapping.Quad));
@@ -200,4 +247,8 @@ internal static class ProjectorCalibration
     }
 
     private static readonly List<CalibrationPoint> _correspondences = [];
+    private static readonly Vector2[] _followedQuad = new Vector2[4];
+    private static Guid _followedOutputId;
+    private static Guid _followedSurfaceId;
+    private static Vector2 _followedLensAxis;
 }

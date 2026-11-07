@@ -564,7 +564,7 @@ its width. Then open the Output tab and check the send's Resolution in the Param
 
 **Action:**
 Add a reference point on the surface about 5 cm inside its right edge, on a traced photo that continues past
-that edge. Then select the surface, click the **Output** tab and click **Align Points**.
+that edge. Then select the surface, click the **Output** tab and click **Calibrate**.
 
 **Expected:**
 - On the canvas and on the wall, the disc is a full circle: the part past the surface's edge shows the photo
@@ -574,7 +574,7 @@ that edge. Then select the surface, click the **Output** tab and click **Align P
 ## Step: Discs survive a collapsed pin
 
 **Action:**
-With **Align Points** on, drag three corners of the surface's quad almost onto the fourth so the
+With **Calibrate** on, drag three corners of the surface's quad almost onto the fourth so the
 quad is nearly a point; then undo.
 
 **Expected:**
@@ -588,15 +588,15 @@ quad is nearly a point; then undo.
 **Action:**
 1. With "Surface 1" carrying three reference points (previous step) and mapped onto "Projector 1",
    select "Surface 1" and click the **Output** tab. Note there are no discs, handles or chips on the canvas.
-   Click **Align Points** in the header.
+   Click **Calibrate** in the header.
 2. Drag the P1 handle on the projector canvas 60 px to the right, release.
 3. Drag the P2 handle 40 px down, release; press Ctrl+Z; press Ctrl+Y.
 4. Drag the P3 handle 30 px left, release; then click **Release Point**.
 5. Press Ctrl+Z, then double-click P3.
 6. Add two more points on the straightened photo (see the previous step), return to **Output**, click
-   **Align Points**, drag both new points, then drag the fifth one 30 px further.
-7. Drag the percent field right of **Align Points** from 5% to 15%.
-8. Click **Align Points** again, turn on "Show size raster" in the Parameter window, then click the **Board** tab.
+   **Calibrate**, drag both new points, then drag the fifth one 30 px further.
+7. Drag the percent field right of **Calibrate** from 5% to 15%.
+8. Click **Calibrate** again, turn on "Show size raster" in the Parameter window, then click the **Board** tab.
 
 **Expected:**
 - After 1: the same picture shows on the canvas and the wall. The surface's content stays; around each point
@@ -628,10 +628,10 @@ quad is nearly a point; then undo.
 ## Step: Resetting the alignment
 
 **Action:**
-1. Drag the quad's corners to an obvious keystone, and note where they are. Turn on **Align Points**, drag
+1. Drag the quad's corners to an obvious keystone, and note where they are. Turn on **Calibrate**, drag
    several points so the quad changes, then click **Reset**.
 2. Press Ctrl+Z, then Ctrl+Y.
-3. Save and reopen the project with some points moved, turn on **Align Points** and click **Reset**.
+3. Save and reopen the project with some points moved, turn on **Calibrate** and click **Reset**.
 
 **Expected:**
 - After 1: the quad is back at the noted corners and the content looks as it did. All outlines are thin, every
@@ -642,7 +642,7 @@ quad is nearly a point; then undo.
 ## Step: Aligning with a game controller
 
 **Action:**
-With an Xbox-compatible controller connected, "Surface 1" carrying at least three points and **Align Points** on:
+With an Xbox-compatible controller connected, "Surface 1" carrying at least three points and **Calibrate** on:
 1. Press the right shoulder button three times, then the left one once. Then press d-pad up, down, left and right.
 2. Push the right stick about a third of the way up, then fully right, and let go. Press Ctrl+Z.
 3. Hold the left stick to the right. Release it without pressing.
@@ -650,9 +650,9 @@ With an Xbox-compatible controller connected, "Surface 1" carrying at least thre
 5. With the active point set, press the right stick's button. Set it again and press X.
 6. With the left stick centred, press its button.
 7. Unplug the controller, then plug it in again.
-8. Press Y. Then hold either trigger and let go.
+8. Press Y. Then hold the right trigger and let go. Press the left trigger once, then three more times, then Ctrl+Z.
 9. Move a point, then press B. Press Ctrl+Z.
-10. Turn **Align Points** on again, move a point, and press A.
+10. Turn **Calibrate** on again, move a point, and press A.
 
 **Expected:**
 - After 1: within a second of connecting, one point's ring blinks. The right shoulder moves it forward through the four
@@ -668,25 +668,27 @@ With an Xbox-compatible controller connected, "Surface 1" carrying at least thre
 - After 6: the alignment resets as with **Reset**, in one undo step.
 - After 7: the editor keeps running without a hitch, and the controller works again within about a second.
 - After 8: a white ring closes in from about half the canvas height onto the active point's outline on the wall, within
-  about half a second. While a trigger is held, the photo discs on the wall show inverted colours; letting go restores them.
-- After 9: **Align Points** turns off and the pin is back where it was when aligning started. Ctrl+Z brings the moved
+  about half a second. While the right trigger is held, the photo discs on the wall show inverted colours; letting go restores them. Each left-trigger
+  press turns the pin with its points a quarter clockwise about its centre, keeping its proportions, and the right stick's
+  up turns with it; after four presses the pin is back where it was. Ctrl+Z undoes the last turn only.
+- After 9: **Calibrate** turns off and the pin is back where it was when calibrating started. Ctrl+Z brings the moved
   point back.
-- After 10: **Align Points** turns off and the moved point stays.
+- After 10: **Calibrate** turns off and the moved point stays.
 
-## Step: Finding Align Points from the output
+## Step: Finding Calibrate from the output
 
 **Action:**
 1. With "Surface 1" as the only surface with a photo mapped onto "Projector 1", click the "Projector 1" item in
    the Flow Outliner and the **Output** tab.
-2. Click **Align Points**, drag a point, then click "Surface 1" and "Projector 1" in turn.
+2. Click **Calibrate**, drag a point, then click "Surface 1" and "Projector 1" in turn.
 3. Trace a second surface on a photo, map it onto "Projector 1", then click the "Projector 1" item again.
 4. Click "Surface 1".
 
 **Expected:**
-- After 1: **Align Points** is offered although the output is selected.
+- After 1: **Calibrate** is offered although the output is selected.
 - After 2: the toggle stays on and the points of "Surface 1" stay draggable through both clicks.
-- After 3: **Align Points** turns off and is gone. The header says "Select a surface to align its points".
-- After 4: the message is gone and **Align Points** is offered, off.
+- After 3: **Calibrate** turns off and is gone. The header says "Select a surface to calibrate it".
+- After 4: the message is gone and **Calibrate** is offered, off.
 
 ## Step: The toolbar no longer maps surfaces
 
