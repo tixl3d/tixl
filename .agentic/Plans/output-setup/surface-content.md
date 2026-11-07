@@ -4,7 +4,12 @@ Make the straightened reference photo of a surface the design guide for its real
 label on the wall becomes the place a [Text] op is put, and that text lands on the label when projected.
 Four use cases of rising ambition, one graph shape, built in four shippable phases.
 
-**Status: phase 1 implemented (2026-11-07), awaiting a run in the editor.** Deviation: [SurfaceReferenceImage]
+**Status: phase 1 shipped; phase 3 route 1 implemented 2026-11-07, awaiting a run in the editor.** Phase 3 as built:
+`ProjectorSolver.TrySolveFromPlane` (Core) with a fallback zoom for squarely seen surfaces; `ProjectorCamera.LensAxis`,
+`SolvedFromSurfaceId`, `IsZoomEntered`; the output card's Projector Camera section (`ProjectorCalibration`); the
+surface card's Facing preset. Field note: on the 38 × 58 cm SpeakerBoxes pin the solved distance ranged 1.0–2.8 m
+over the full range of lens shift, so a small, nearly frontal surface needs the lens shift right; a large angled one
+doesn't. The editor shows the stored `LensAxis` as lens shift in % of the picture size, the way spec sheets give it. Deviation: [SurfaceReferenceImage]
 has no `Color` input — the [Layer2d] that draws it already tints and fades.
  Prompted by a projection-mapping demo (2026-11-06) where steps 2–5 below
 had to be done by hand and step 6 was not possible at all. Related: [`camera-calibration.md`](camera-calibration.md)

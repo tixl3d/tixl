@@ -43,6 +43,18 @@ public sealed class OutputDefinition
         public System.Numerics.Vector3 ManualTarget = System.Numerics.Vector3.Zero;
         public float ManualFovYDegrees = 45;
 
+        /// <summary>Where the lens axis passes through the picture, in NDC (−1..1 from its centre to its edges); the editor
+        /// shows it as lens shift, the picture's offset from the axis. One surface can't tell it, so a solve from a single
+        /// plane takes it as given.</summary>
+        public System.Numerics.Vector2 LensAxis;
+
+        /// <summary>The surface the last single-plane solve was made from; empty when solved otherwise or not at all.</summary>
+        public Guid SolvedFromSurfaceId;
+
+        /// <summary>Whether the last solve took its zoom from <see cref="ManualFovYDegrees"/> because the surface was seen
+        /// too squarely to measure it.</summary>
+        public bool IsZoomEntered;
+
         public void WriteToJson(JsonTextWriter writer)
         {
             writer.WriteStartObject();
@@ -61,6 +73,12 @@ public sealed class OutputDefinition
             writer.WriteVector3("ManualPosition", ManualPosition);
             writer.WriteVector3("ManualTarget", ManualTarget);
             writer.WriteValue("ManualFovY", ManualFovYDegrees);
+            writer.WriteVector2("LensAxis", LensAxis);
+            if (SolvedFromSurfaceId != Guid.Empty)
+                writer.WriteObject("SolvedFromSurface", SolvedFromSurfaceId);
+
+            if (IsZoomEntered)
+                writer.WriteValue("IsZoomEntered", true);
 
             writer.WritePropertyName("CalibrationPoints");
             writer.WriteStartArray();
@@ -84,6 +102,9 @@ public sealed class OutputDefinition
                                  ManualPosition = OutputJson.ReadVector3(token["ManualPosition"], new System.Numerics.Vector3(0, 1, 3)),
                                  ManualTarget = OutputJson.ReadVector3(token["ManualTarget"]),
                                  ManualFovYDegrees = token.ReadValueSafe("ManualFovY", 45f),
+                                 LensAxis = OutputJson.ReadVector2(token["LensAxis"]),
+                                 SolvedFromSurfaceId = OutputJson.ReadGuid(token["SolvedFromSurface"]),
+                                 IsZoomEntered = token.ReadValueSafe("IsZoomEntered", false),
                              };
 
             if (token["Position"] != null && token["Orientation"] != null)

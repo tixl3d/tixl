@@ -31,6 +31,120 @@ public static class ProjectorSolver
     public const int MinPointCount = 6;
 
     /// <summary>
+    /// Solves a projector's camera from a single aligned surface: its corner pin, as the homography from the
+    /// surface's own metres to canvas pixels, and its stage placement. One plane can't separate everything (see the
+    /// class summary), so the lens shift is taken as known — from the projector's spec, or entered by eye — and the
+    /// zoom and the pose are solved: the plane's two axes must come out perpendicular and of equal length, which
+    /// fixes the focal length, and the pose then follows from the homography. A surface seen too squarely shows no
+    /// zoom in its keystone; then <paramref name="fallbackFieldOfViewY"/> is used if given, else the solve fails.
+    /// </summary>
+    /// <param name="surfaceToPixels">Surface metres (from its anchor, Y up) → canvas pixels (Y down).</param>
+    /// <param name="surfaceToStage">The surface's placement: its local metres → stage.</param>
+    /// <param name="lensShift">Where the lens axis lands in the picture, in NDC (see <see cref="Projection.LensShift"/>).</param>
+    /// <param name="fallbackFieldOfViewY">Vertical field of view in radians for a squarely seen surface; 0 for none.</param>
+    /// <param name="usedFallbackZoom">Whether the zoom came from <paramref name="fallbackFieldOfViewY"/> rather than the keystone.</param>
+    public static bool TrySolveFromPlane(in Homography surfaceToPixels, in Pose surfaceToStage, Vector2 lensShift, Int2 canvasResolution,
+                                         float fallbackFieldOfViewY, out Pose pose, out Projection lens, out bool usedFallbackZoom)
+    {
+        pose = default;
+        lens = default;
+        usedFallbackZoom = false;
+        if (canvasResolution.Width <= 0 || canvasResolution.Height <= 0)
+            return false;
+
+        double width = canvasResolution.Width;
+        double height = canvasResolution.Height;
+
+        // The forward model's principal point: the lens axis lands at NDC = lensShift.
+        var cx = width * 0.5 * (1 + lensShift.X);
+        var cy = height * 0.5 * (1 - lensShift.Y);
+
+        // Columns of the homography with the principal point moved to the origin: diag(f, f, 1)·[r1 r2 t]·scale.
+        var h = surfaceToPixels;
+        double a1 = h.M11 - cx * h.M31, b1 = h.M21 - cy * h.M31, c1 = h.M31;
+        double a2 = h.M12 - cx * h.M32, b2 = h.M22 - cy * h.M32, c2 = h.M32;
+        double a3 = h.M13 - cx * h.M33, b3 = h.M23 - cy * h.M33, c3 = h.M33;
+
+        // r1·r2 = 0 and |r1| = |r2|, both linear in g = 1/f²: p·g + q = 0. Least squares over the two.
+        var p1 = a1 * a2 + b1 * b2;
+        var q1 = c1 * c2;
+        var p2 = a1 * a1 + b1 * b1 - a2 * a2 - b2 * b2;
+        var q2 = c1 * c1 - c2 * c2;
+        var pp = p1 * p1 + p2 * p2;
+        var g = pp > 1e-30 ? -(p1 * q1 + p2 * q2) / pp : 0;
+
+        // A squarely seen plane has (nearly) no perspective terms, so g is noise around zero: no zoom to read.
+        var perspective = pp > 1e-30 ? Math.Sqrt(c1 * c1 + c2 * c2) * Math.Max(width, height) / Math.Sqrt(Math.Sqrt(pp)) : 0;
+        double f;
+        if (g > 0 && perspective >= MinPerspectiveForZoom)
+        {
+            f = 1 / Math.Sqrt(g);
+        }
+        else if (fallbackFieldOfViewY > 0 && fallbackFieldOfViewY < MathF.PI)
+        {
+            f = height / (2 * Math.Tan(fallbackFieldOfViewY * 0.5));
+            usedFallbackZoom = true;
+        }
+        else
+        {
+            return false;
+        }
+
+        // Undo the intrinsics: the surface's axes and origin in camera coordinates (x right, y down, z forward).
+        var r1 = new Vector3D(a1 / f, b1 / f, c1);
+        var r2 = new Vector3D(a2 / f, b2 / f, c2);
+        var t = new Vector3D(a3 / f, b3 / f, c3);
+        var scale = 2 / (r1.Length + r2.Length);
+
+        // The surface lies in front of the projector.
+        if (t.Z * scale < 0)
+            scale = -scale;
+
+        r1 *= scale;
+        r2 *= scale;
+        t *= scale;
+
+        // Nearest rotation: orthonormalize symmetrically so neither axis is favoured.
+        var sum = (r1 + r2).Normalized();
+        var difference = (r1 - r2).Normalized();
+        var x = (sum + difference).Normalized();
+        var y = (sum - difference).Normalized();
+        var z = Vector3D.Cross(x, y);
+
+        // Surface → projector camera in the stage's convention (y up, looking down −z), as a row-vector matrix whose
+        // rows are the images of the surface's axes and origin.
+        var surfaceToCamera = new Matrix4x4((float)x.X, (float)-x.Y, (float)-x.Z, 0,
+                                            (float)y.X, (float)-y.Y, (float)-y.Z, 0,
+                                            (float)z.X, (float)-z.Y, (float)-z.Z, 0,
+                                            (float)t.X, (float)-t.Y, (float)-t.Z, 1);
+        if (!Matrix4x4.Invert(surfaceToCamera, out var cameraToSurface))
+            return false;
+
+        var cameraToStage = cameraToSurface * surfaceToStage.ToWorldMatrix();
+        if (!Matrix4x4.Decompose(cameraToStage, out _, out var orientation, out var position))
+            return false;
+
+        pose = new Pose(position, Quaternion.Normalize(orientation));
+        lens = Projection.CreatePerspective((float)(2 * Math.Atan(height / (2 * f))), lensShift);
+        return float.IsFinite(position.X) && float.IsFinite(position.Y) && float.IsFinite(position.Z)
+               && float.IsFinite(lens.FieldOfViewY);
+    }
+
+    /** How strongly the plane must be seen at an angle before its keystone tells the zoom; below, the solve declines. */
+    private const double MinPerspectiveForZoom = 0.02;
+
+    /** A double-precision vector for the solve, where float rounding would show up as a skewed rotation. */
+    private readonly record struct Vector3D(double X, double Y, double Z)
+    {
+        public double Length => Math.Sqrt(X * X + Y * Y + Z * Z);
+        public Vector3D Normalized() => this * (1 / Length);
+        public static Vector3D operator +(Vector3D a, Vector3D b) => new(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
+        public static Vector3D operator -(Vector3D a, Vector3D b) => new(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
+        public static Vector3D operator *(Vector3D a, double s) => new(a.X * s, a.Y * s, a.Z * s);
+        public static Vector3D Cross(Vector3D a, Vector3D b) => new(a.Y * b.Z - a.Z * b.Y, a.Z * b.X - a.X * b.Z, a.X * b.Y - a.Y * b.X);
+    }
+
+    /// <summary>
     /// Projects a stage point to output-canvas pixels (top-left origin, y down) through a
     /// camera model. This is the forward model the solver inverts — keep them in sync.
     /// Returns false when the point is behind the camera.

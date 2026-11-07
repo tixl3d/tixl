@@ -109,9 +109,7 @@ internal sealed partial class SetupOutputView
         var wallRightOnCanvas = new Vector2(-_wallUpOnCanvas.Y, _wallUpOnCanvas.X);
         var direction = _wallUpOnCanvas * thumb.Y + wallRightOnCanvas * thumb.X;
 
-        // A steep curve: full travel crosses the wall quickly, while the lower half of the stick stays below a few
-        // pixels per second for placing a point precisely.
-        var speed = MathF.Pow(deflection, PointSpeedCurveExponent) * MaxPointSpeedOfCanvasHeightPerSec * canvasSize.Y;
+        var speed = PointSpeedPxPerSec(deflection);
         var pixels = direction / deflection * speed * ImGui.GetIO().DeltaTime;
         var aim = AimOf(mapping, point!.Id, point.P1 + subject.TracedToPinned, surfaceToOutput, canvasSize);
         mapping.PointAims[point.Id] = new Surface.OutputMapping.PointAim(aim.Position + pixels / canvasSize, true);
@@ -199,10 +197,33 @@ internal sealed partial class SetupOutputView
     private static bool WasPressed(bool isDown, bool wasDown) => isDown && !wasDown;
 
     private const float MinThumbForDirection = 0.3f;
-    private const float MaxPointSpeedOfCanvasHeightPerSec = 0.25f;
 
-    /** Higher values slow small stick deflections further while full deflection keeps the top speed. */
-    private const float PointSpeedCurveExponent = 5f;
+    /// <summary>
+    /// Point speed in projector pixels per second for a stick deflection past the dead zone, from a table: a crawl
+    /// across the lower third for placing a point precisely, then fast enough to cross the wall. Between two speeds
+    /// the curve runs on a log scale, so it accelerates evenly instead of jumping.
+    /// </summary>
+    private static float PointSpeedPxPerSec(float deflection)
+    {
+        deflection = Math.Clamp(deflection, 0, 1);
+        for (var i = 1; i < _speedDeflections.Length; i++)
+        {
+            if (deflection > _speedDeflections[i])
+                continue;
+
+            var t = (deflection - _speedDeflections[i - 1]) / (_speedDeflections[i] - _speedDeflections[i - 1]);
+            var from = _speedsPxPerSec[i - 1];
+            var to = _speedsPxPerSec[i];
+            return from > 0 ? from * MathF.Pow(to / from, t) : to * t;
+        }
+
+        return _speedsPxPerSec[^1];
+    }
+
+    /** Stick deflections and the point speeds they give. */
+    private static readonly float[] _speedDeflections = [0f, 0.1f, 0.3f, 0.6f, 1f];
+
+    private static readonly float[] _speedsPxPerSec = [0f, 1f, 2f, 50f, 200f];
 
     private GamePadState _lastPad;
     private bool _isGamepadMovingPoint;

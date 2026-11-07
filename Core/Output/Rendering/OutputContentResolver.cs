@@ -421,8 +421,21 @@ public static class OutputContentResolver
         var heightPx = MathF.Max(((quad[3] - quad[0]) * canvas).Length(), ((quad[2] - quad[1]) * canvas).Length());
         var size = surface.SizeInMeters;
         var density = MathF.Max(widthPx / MathF.Max(size.X, 0.0001f), heightPx / MathF.Max(size.Y, 0.0001f));
-        return float.IsFinite(density) && density >= 1f ? density : fallback;
+        if (!float.IsFinite(density) || density < 1f)
+            return fallback;
+
+        // In steps of 2^(1/16), about 4.4%: an alignment drag then resizes the render only now and then, not every frame.
+        var steps = MathF.Round(MathF.Log2(density) * DensityStepsPerOctave);
+        density = MathF.Pow(2, steps / DensityStepsPerOctave);
+
+        // While points are aligned a pin passes through extreme shapes with corners far off the canvas. No surface
+        // needs more pixels along its longest side than the canvas has, and asking for more ran the GPU out of memory.
+        var longestSideInMeters = MathF.Max(MathF.Max(size.X, size.Y), 0.0001f);
+        return MathF.Max(1f, MathF.Min(density, MathF.Max(canvas.X, canvas.Y) / longestSideInMeters));
     }
+
+    /** How finely the projected density is stepped: this many steps per doubling. */
+    private const float DensityStepsPerOctave = 16;
 
     private static readonly Vector2[] _projectedQuadScratch = new Vector2[4];
 
