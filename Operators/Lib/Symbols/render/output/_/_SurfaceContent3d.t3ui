@@ -1,0 +1,73 @@
+{
+  "FormatVersion": 3,
+  "Id": "bc4b2ed5-02ad-4b2a-aa3d-0d3d908f6c51"/*_SurfaceContent3d*/,
+  "Description": "Template for the output setup's Connect... → New 3D Content; not an operator to use.\n\nConnect... copies these children into the open composition, points every surface input at the selected surface and every output input at the projector: [SurfaceGeometry] → [GeometryToMesh] → [DrawMeshUnlit] textured by [SurfaceReferenceImage], into a [Group] rendered through [UseProjectorCam] → [RenderTarget] cleared transparent → [SendToOutput] with Resolution From: Output. The send then fills the output as its front layer. Edit the chain here to change what New 3D Content builds.",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "e67f1026-899f-4970-82fd-9c46b03b6fd6",
+      "SymbolName": "Lib.render.output.SurfaceGeometry",
+      "Position": {
+        "X": 0,
+        "Y": 0
+      }
+    },
+    {
+      "ChildId": "7bc277be-8e5f-4dfb-b81a-718d31d66e00",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "Position": {
+        "X": 0,
+        "Y": 35.0
+      }
+    },
+    {
+      "ChildId": "991cec77-0009-4ff7-90db-6a18383fd86c",
+      "SymbolName": "Lib.mesh.draw.DrawMeshUnlit",
+      "Position": {
+        "X": 0,
+        "Y": 70.0
+      }
+    },
+    {
+      "ChildId": "e5daab13-9773-4259-9ea4-6c23d60539d8",
+      "SymbolName": "Lib.render.output.SurfaceReferenceImage",
+      "Position": {
+        "X": -140.0,
+        "Y": 105.0
+      }
+    },
+    {
+      "ChildId": "b1ef5e58-0517-4050-8d70-85f6c65a05de",
+      "SymbolName": "Lib.render.transform.Group",
+      "Position": {
+        "X": 0,
+        "Y": 140.0
+      }
+    },
+    {
+      "ChildId": "32a820b3-cc76-486b-8eda-0fe8aa242595",
+      "SymbolName": "Lib.render.output.UseProjectorCam",
+      "Position": {
+        "X": 0,
+        "Y": 175.0
+      }
+    },
+    {
+      "ChildId": "d9637506-79a5-42d0-8f6b-94b871a5c5b6",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "Position": {
+        "X": 0,
+        "Y": 210.0
+      }
+    },
+    {
+      "ChildId": "3235f019-03a1-4cbe-b696-65ff9c067ece",
+      "SymbolName": "Lib.render.output.SendToOutput",
+      "Position": {
+        "X": 0,
+        "Y": 245.0
+      }
+    }
+  ],
+  "OutputUis": []
+}

@@ -1,0 +1,49 @@
+{
+  "FormatVersion": 3,
+  "Id": "58b6f67e-f933-4b10-aa85-63ec745f15bf"/*_SurfaceContent2d*/,
+  "Description": "Template for the output setup's Connect... → New 2D Content; not an operator to use.\n\nConnect... copies these children into the open composition and points every surface input at the selected surface: [SurfaceReferenceImage] → [Layer2d] → [Group] → [RenderTarget] → [SendToOutput] with Resolution From: Surface Aspect. Edit the chain here to change what New 2D Content builds.",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "a4045409-14ca-4634-a49e-00ccc421c346",
+      "SymbolName": "Lib.render.output.SurfaceReferenceImage",
+      "Position": {
+        "X": 0,
+        "Y": 0
+      }
+    },
+    {
+      "ChildId": "9d987ba9-d69b-4322-bec1-0e033853e2b9",
+      "SymbolName": "Lib.render.basic.Layer2d",
+      "Position": {
+        "X": 0,
+        "Y": 35.0
+      }
+    },
+    {
+      "ChildId": "94f6ba86-cf49-4359-8f8a-c8e1ccc40483",
+      "SymbolName": "Lib.render.transform.Group",
+      "Position": {
+        "X": 0,
+        "Y": 70.0
+      }
+    },
+    {
+      "ChildId": "f5bbb4ef-9974-45e4-9659-bcddb1265df6",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "Position": {
+        "X": 0,
+        "Y": 105.0
+      }
+    },
+    {
+      "ChildId": "70971564-c1e7-4d44-a2cd-83ee0319f6bc",
+      "SymbolName": "Lib.render.output.SendToOutput",
+      "Position": {
+        "X": 0,
+        "Y": 140.0
+      }
+    }
+  ],
+  "OutputUis": []
+}
