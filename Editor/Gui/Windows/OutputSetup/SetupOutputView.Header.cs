@@ -211,7 +211,7 @@ internal sealed partial class SetupOutputView
 
         if (hasAlignSubject)
         {
-            ImGui.SameLine();
+            ImGui.SameLine(0, ToolbarGroupGap * T3Ui.UiScaleFactor);
             if (CustomComponents.StateButton("Align Points", _projectsPhoto ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Emphasized))
                 _projectsPhoto = !_projectsPhoto;
 
@@ -222,7 +222,7 @@ internal sealed partial class SetupOutputView
             {
                 // The disc size, as a share of the canvas height — small enough to isolate one feature, large
                 // enough to recognise it.
-                ImGui.SameLine(0, 4 * T3Ui.UiScaleFactor);
+                ImGui.SameLine(0, ToolbarGroupGap * T3Ui.UiScaleFactor);
                 var radiusPercent = UserSettings.Config.OutputSetupPhotoDiscRadius * 100f;
                 ImGui.PushID("photoDiscRadius");
                 var radiusState = SingleValueEdit.Draw(ref radiusPercent, new Vector2(52 * T3Ui.UiScaleFactor, ImGui.GetFrameHeight()),
@@ -234,17 +234,18 @@ internal sealed partial class SetupOutputView
                 if (ImGui.IsItemHovered())
                     CustomComponents.TooltipForLastItem("Disc radius", "Radius of the photo disc around each reference point, in percent of the canvas height. Drag, or double-click to type.");
 
-                ImGui.SameLine();
+                ImGui.SameLine(0, ToolbarGroupGap * T3Ui.UiScaleFactor);
                 DrawReleasePointButton(setup, alignSubject.Pinned, outputId);
                 ImGui.SameLine();
                 DrawResetAlignmentButton(setup, alignSubject.Pinned, outputId);
 
                 if (_pinResidualPx > 0.5f)
                 {
-                    ImGui.SameLine();
-                    CustomComponents.StylizedText($"points miss by up to {_pinResidualPx:0.0} px", Fonts.FontSmall, UiColors.TextMuted);
+                    ImGui.SameLine(0, ToolbarGroupGap * T3Ui.UiScaleFactor);
+                    CustomComponents.StylizedText($"Error: {_pinResidualPx:0.0} px", Fonts.FontSmall, UiColors.TextMuted);
                     if (ImGui.IsItemHovered())
                         ImGui.SetTooltip("""
+                                         The largest distance, in output pixels, between where a set point was dropped and where the pin lands it.
                                          The four points spread furthest apart define the corner pin; further points refine it.
                                          A point the pin misses by too much is ignored and shown faded until it agrees again.
                                          A large miss means a point is misplaced, or the wall isn't flat.
@@ -365,4 +366,7 @@ internal sealed partial class SetupOutputView
     private Guid _pendingHeaderSubjectId;
 
     private const string ConnectMenuId = "##connectSurfaceMenu";
+
+    /** Unscaled space between groups of toolbar controls. */
+    private const float ToolbarGroupGap = 12;
 }

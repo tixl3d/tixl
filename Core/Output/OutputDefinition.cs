@@ -55,6 +55,20 @@ public sealed class OutputDefinition
         /// too squarely to measure it.</summary>
         public bool IsZoomEntered;
 
+        /// <summary>Metres from the lens to the wall the picture is measured on: what the editor's side view shows the
+        /// picture's edges at, entered from a tape measure or set by a solve. Changes neither zoom nor lens shift.</summary>
+        public float ThrowDistance = DefaultThrowDistance;
+
+        public const float DefaultThrowDistance = 2f;
+
+        /// <summary>Vertical field of view in degrees at the zoom's wide (X) and tele (Y) end; equal for a fixed lens.
+        /// <see cref="ManualFovYDegrees"/> is where the zoom currently sits.</summary>
+        public System.Numerics.Vector2 ZoomRangeDegrees = new(45, 45);
+
+        /// <summary>The projector model the lens values were taken from, as the editor's preset list names it; empty when
+        /// they were entered or measured. Only a label: the values themselves are stored above.</summary>
+        public string ModelName = string.Empty;
+
         public void WriteToJson(JsonTextWriter writer)
         {
             writer.WriteStartObject();
@@ -79,6 +93,11 @@ public sealed class OutputDefinition
 
             if (IsZoomEntered)
                 writer.WriteValue("IsZoomEntered", true);
+
+            writer.WriteValue("ThrowDistance", ThrowDistance);
+            writer.WriteVector2("ZoomRange", ZoomRangeDegrees);
+            if (!string.IsNullOrEmpty(ModelName))
+                writer.WriteString("Model", ModelName);
 
             writer.WritePropertyName("CalibrationPoints");
             writer.WriteStartArray();
@@ -105,6 +124,8 @@ public sealed class OutputDefinition
                                  LensAxis = OutputJson.ReadVector2(token["LensAxis"]),
                                  SolvedFromSurfaceId = OutputJson.ReadGuid(token["SolvedFromSurface"]),
                                  IsZoomEntered = token.ReadValueSafe("IsZoomEntered", false),
+                                 ThrowDistance = token.ReadValueSafe("ThrowDistance", DefaultThrowDistance),
+                                 ModelName = token.ReadValueSafe("Model", string.Empty) ?? string.Empty,
                              };
 
             if (token["Position"] != null && token["Orientation"] != null)
@@ -112,6 +133,11 @@ public sealed class OutputDefinition
                 camera.Pose = new Pose(OutputJson.ReadVector3(token["Position"]),
                                        OutputJson.ReadQuaternion(token["Orientation"]));
             }
+
+            // Setups saved before projectors had a zoom range keep their single zoom as a fixed lens.
+            camera.ZoomRangeDegrees = token["ZoomRange"] != null
+                                          ? OutputJson.ReadVector2(token["ZoomRange"])
+                                          : new System.Numerics.Vector2(camera.ManualFovYDegrees, camera.ManualFovYDegrees);
 
             if (token["FieldOfViewY"] != null)
             {

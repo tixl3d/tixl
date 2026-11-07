@@ -617,7 +617,7 @@ quad is nearly a point; then undo.
   is disabled again.
 - After 5: Ctrl+Z sets P3 again; the double-click releases it the same way as the button.
 - After 6: with four set points the quad keystones and every mark is hit exactly, so no arrows remain. With
-  five, the header shows "points miss by up to N px" with N above zero, and the points that miss keep an arrow
+  five, the header shows "Error: N px" with N above zero, and the points that miss keep an arrow
   each, pointing where the pin sends them.
 - After 7: the discs grow to three times their radius on the canvas and on the wall alike. Where "Region 1"
   overlaps a disc, the disc draws over the region's content.
