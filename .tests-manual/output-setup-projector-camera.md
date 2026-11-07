@@ -67,23 +67,19 @@ Solve the camera from a surface, wire a mesh in front of that surface through [U
 **Action:**
 1. With the camera solved, select a surface or region on that output that shows nothing yet and that is traced on a
    reference photo, then open **Connect...** in the toolbar.
-2. Choose **New 3D Content**.
-3. Select another traced surface without content on the same projector and choose **New 3D Content** again.
-4. Choose it once more on the first surface. Press `Ctrl+Z` twice.
-5. Open **Connect...** on a surface whose output has no solved camera.
+2. Choose **New 3D Content**. Press `Ctrl+Z`, then `Ctrl+Shift+Z`.
+3. Open **Connect...** on a surface whose output has no solved camera.
 
 **Expected:**
 - After 1: **New 3D Content** sits below **New 2D Content**; with the surface on several solved projectors it is a
   submenu of their names.
-- After 2: the graph gains SurfaceGeometry → GeometryToMesh → DrawMeshUnlit (textured by SurfaceReferenceImage) →
-  Group → UseProjectorCam → RenderTarget → SendToOutput, with the Group selected. The output's **Layers** show a new
-  content item named after the projector with "3D", at the top. The projector shows the surface's photo on the
-  real surface, and the output's other layers still show around it.
-- After 3: only a SurfaceGeometry, GeometryToMesh, DrawMeshUnlit and SurfaceReferenceImage are added, below the first
-  branch, into the same Group; no second UseProjectorCam or send. The second surface's photo lands on it too.
-- After 4: nothing is added; the first surface's SurfaceGeometry is selected. Each `Ctrl+Z` removes one whole
-  addition, graph and setup together.
-- After 5: **New 3D Content** is greyed out, and its tooltip says to solve the projector camera first.
+- After 2: the graph gains one snapped column, SurfaceGeometry → GeometryToMesh → DrawMeshUnlit → Group →
+  UseProjectorCam → RenderTarget → a send named after the projector with "3D", with a SurfaceReferenceImage
+  snapped to DrawMeshUnlit's Texture input; all of them are selected. Both surface inputs point at the surface and
+  UseProjectorCam's Output Ref at the projector. The output's **Layers** show the new content at the top. The
+  projector shows the surface's photo on the real surface, and the output's other layers still show around it.
+  Undo removes the ops and the layer in one step; redo brings both back.
+- After 3: **New 3D Content** is greyed out, and its tooltip says to solve the projector camera first.
 
 ## Step: Without an aligned surface
 

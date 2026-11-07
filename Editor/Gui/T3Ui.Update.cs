@@ -122,7 +122,6 @@ public static partial class T3Ui
         RestoreBackupDialog.Draw();
         _couldNotLoadProjectDialog.Draw();
         _missingOperatorsDialog.Draw();
-        CreateFromTemplateDialog.Draw();
         _userNameDialog.Draw();
         Windows.AssetLib.FolderImportDialog.Instance.Draw();
         AboutDialog.Draw();

@@ -6,9 +6,10 @@ opened the template dialog, which hasn't been tested for a long time, and "Impor
 
 ## Current state
 
-- `Editor/Gui/Templates/CreateFromTemplateDialog.cs` is still drawn every frame (`T3Ui.Update`) but nothing
-  opens it any more. `TemplateDefinition.cs` defines two templates (Empty Scene, 3d Scene);
-  `TemplateDefinitions.cs` has the shader templates (point compute, image effect) commented out.
+- The template dialog and its definitions (`Editor/Gui/Templates/`) were deleted on 2026-11-08, with the Empty Scene
+  and 3d Scene template symbols: creating a project replaces them. The shader templates
+  (`Examples/Symbols/templates/_PointShaderTemplate`, `_ImgFxShaderTemplate`, and their HLSL in
+  `Lib/Assets/templates/`) are left as they are, unreferenced, until a New Symbol or ShaderToy import needs them.
 - `UserActions.New` is in the keymap but has no handler. It only labelled the removed menu item.
 - There is no import code. The menu item had a commented-out `_importDialog`.
 
@@ -17,8 +18,8 @@ opened the template dialog, which hasn't been tested for a long time, and "Impor
 Each entry creates a symbol in the focused project and opens or places it:
 
 1. **Empty Operator** — name + namespace, nothing else.
-2. **From Template** — the existing templates, verified one by one (scene, 3d scene, then the shader
-   templates once they compile under Slang/Vulkan).
+2. **From an example** — Duplicate as New Type on an example op; the shader templates above are candidates once
+   they compile under Slang/Vulkan.
 3. **Import from ShaderToy** — paste a ShaderToy URL or source, translate GLSL → HLSL for the
    image-effect template (mainImage, iTime/iResolution/iMouse/iChannel0..3 mapped to inputs).
 
@@ -34,5 +35,5 @@ this replaces copy/paste across projects.
 ## Open questions
 
 - Should New Symbol live under Projects or Edit › Add?
-- Is the template dialog worth repairing, or should templates become ordinary example symbols that
-  "Duplicate as New Type" already handles?
+- ~~Is the template dialog worth repairing?~~ No: projects made the scene templates obsolete, and the dialog was
+  deleted (2026-11-08).

@@ -235,12 +235,16 @@ surface on the output. Two routes to the same wall then have to agree, and (fixe
   its surface has no stage position while a camera was solved from another surface. The straightened photo has no
   perspective left, so one quad is exact, unlike [StageGeometry]'s 16×16 grid for the raw photo.
 - **Connect... → New 3D Content**, per projector output the surface's pin lies on whose camera is solved (a submenu
-  for several; greyed out with "Solve the projector camera first" for none). Builds [SurfaceGeometry] →
-  [GeometryToMesh] → [DrawMeshUnlit] (Texture: [SurfaceReferenceImage]) → [Group] → [UseProjectorCam(output)] →
-  [RenderTarget] (cleared transparent) → [SendToOutput] (Resolution From: Output). The send is a full-canvas patch on
-  the output, moved to the front layer — the Layers list replaced the filling carrier surface. A second surface on
-  the same output only adds its branch into that [Group], found through the [UseProjectorCam] whose Output Ref is
-  the output; a surface already drawn in the composition is selected, not added twice.
+  for several; greyed out with "Solve the projector camera first" for none). The send is a full-canvas patch on the
+  output, moved to the front layer — the Layers list replaced the filling carrier surface.
+- **Templates, not code (refactor the same day):** both Connect... chains are template symbols in Lib,
+  `render/output/_/_SurfaceContent2d` and `_SurfaceContent3d`. The editor copies a template's children with
+  `CopySymbolChildrenCommand`, points Guid inputs by their `GuidInputUi.Usage` (`OutputSetupEntities` → the surface,
+  `OutputSetupOutputs` → the output), names the one [SendToOutput], and does the setup half (source, slice or patch,
+  layer) in the same undo step. The editor knows two template ids and the [SendToOutput] contract instead of ~28
+  op and slot ids; layout, op choice and defaults are edited in the graph. Dropped with it: joining a second surface
+  into an existing projector-camera [Group] (each use builds its own chain; merging is a drag), and the
+  "already drawn" check.
 - **Open:** Connect... is offered only for a surface without content, so a surface that already has 2D content
   can't get 3D content from it; a surface context-menu entry would cover that.
 
