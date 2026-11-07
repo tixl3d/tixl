@@ -42,6 +42,28 @@ internal static class SetupRouting
                    };
     }
 
+    /// <summary>How many connections an entity takes from upstream, which its input slot shows.</summary>
+    internal enum InputSlots
+    {
+        None,
+        One,
+        Several,
+    }
+
+    /// <summary>
+    /// Several surfaces can map onto one output, and several can follow one patch; a surface shows one slice and a
+    /// plug presents one output. A drop onto a kind with several inputs can add to them or replace them.
+    /// </summary>
+    public static InputSlots InputSlotsOf(SetupEntityKinds kind)
+    {
+        return kind switch
+                   {
+                       SetupEntityKinds.Output or SetupEntityKinds.Patch => InputSlots.Several,
+                       SetupEntityKinds.Surface or SetupEntityKinds.Plug => InputSlots.One,
+                       _ => InputSlots.None,
+                   };
+    }
+
     /// <summary>The drag payload for an entity — the inverse of <see cref="TryParseDrag"/>.</summary>
     public static string DragPayload(SetupEntityKinds kind, Guid id) => $"{(int)kind}:{id}";
 
@@ -59,8 +81,10 @@ internal static class SetupRouting
         return true;
     }
 
+    /// <param name="replacesInputs">Disconnects what the target takes first, in the same undo step: the drop then
+    /// replaces its inputs instead of adding one. Only for a target with <see cref="InputSlots.Several"/>.</param>
     public static void ApplyDrop(Setup setup, SetupEntityKinds dragKind, Guid dragId,
-                                 SetupEntityKinds targetKind, Guid targetId)
+                                 SetupEntityKinds targetKind, Guid targetId, bool replacesInputs = false)
     {
 
         // A plug binding is machine state, not setup state: it saves on its own and sits outside the setup's undo.
@@ -99,7 +123,17 @@ internal static class SetupRouting
             return;
         }
 
-        SetupUndo.RunUndoable("Connect", setup, () => ApplyDropInternal(setup, dragKind, dragId, targetKind, targetId));
+        if (!replacesInputs)
+        {
+            SetupUndo.RunUndoable("Connect", setup, () => ApplyDropInternal(setup, dragKind, dragId, targetKind, targetId));
+            return;
+        }
+
+        SetupUndo.RunUndoable("Replace inputs", setup, () =>
+                                                       {
+                                                           SetupActions.ClearInputsInternal(setup, targetKind, targetId);
+                                                           ApplyDropInternal(setup, dragKind, dragId, targetKind, targetId);
+                                                       });
     }
 
     /// <summary>

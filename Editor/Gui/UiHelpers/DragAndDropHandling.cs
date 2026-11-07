@@ -191,7 +191,8 @@ internal static class DragAndDropHandling
     /// Internal drags are accepted on mouse release over the rect (no ImGui payload round-trip needed;
     /// the drag data lives in <see cref="_dataString"/> either way).
     /// </summary>
-    internal static DragInteractionResult TryHandleDropOnRect(DragTypes dragType, ImRect area, out string? data)
+    /// <param name="drawsOutline">False for a caller that draws its own drop indication, such as zones splitting one item.</param>
+    internal static DragInteractionResult TryHandleDropOnRect(DragTypes dragType, ImRect area, out string? data, bool drawsOutline = true)
     {
         data = string.Empty;
         if (_activeDragType != dragType)
@@ -204,8 +205,11 @@ internal static class DragAndDropHandling
         }
 
         var isHovered = area.Contains(ImGui.GetMousePos());
-        var color = Color.Orange.Fade(isHovered ? 1f : 0.5f);
-        ImGui.GetWindowDrawList().AddRect(area.Min, area.Max, color, 3, ImDrawFlags.None, isHovered ? 2f : 1f);
+        if (drawsOutline)
+        {
+            var color = Color.Orange.Fade(isHovered ? 1f : 0.5f);
+            ImGui.GetWindowDrawList().AddRect(area.Min, area.Max, color, 3, ImDrawFlags.None, isHovered ? 2f : 1f);
+        }
 
         if (!isHovered)
             return DragInteractionResult.None;
