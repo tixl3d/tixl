@@ -213,10 +213,10 @@ internal sealed partial class SetupOutputView
         {
             ImGui.SameLine(0, ToolbarGroupGap * T3Ui.UiScaleFactor);
             if (CustomComponents.StateButton("Align Points", _projectsPhoto ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Emphasized))
-                _projectsPhoto = !_projectsPhoto;
+                SetAligningPoints(setup, !_projectsPhoto);
 
             if (ImGui.IsItemHovered())
-                CustomComponents.TooltipForLastItem("Align points", "Projects a disc of the straightened photo around each reference point. Drag a point while watching the wall until its disc covers the real feature. That sets the point, and the pin is solved through every set point. Turn it off to check the result on the content.\n\nGame controller: right stick moves the active point, the d-pad goes to the nearest point in its direction, the shoulder buttons cycle through all points, right stick button releases the active one. Hold the left stick until the arrow points up on the wall and press it to make that direction up. Pressing it centred resets the alignment.");
+                CustomComponents.TooltipForLastItem("Align points", "Projects a disc of the straightened photo around each reference point. Drag a point while watching the wall until its disc covers the real feature. That sets the point, and the pin is solved through every set point. Turn it off to check the result on the content.\n\nGame controller: right stick moves the active point, the d-pad goes to the nearest point in its direction, the shoulder buttons cycle through all points, X or the right stick button releases the active one, Y flashes a ring to find it, and holding a trigger projects the photo inverted. A ends aligning, B ends it and undoes what was aligned since it started. Hold the left stick until the arrow points up on the wall and press it to make that direction up. Pressing it centred resets the alignment.");
 
             if (_projectsPhoto)
             {

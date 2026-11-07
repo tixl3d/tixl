@@ -647,21 +647,31 @@ With an Xbox-compatible controller connected, "Surface 1" carrying at least thre
 2. Push the right stick about a third of the way up, then fully right, and let go. Press Ctrl+Z.
 3. Hold the left stick to the right. Release it without pressing.
 4. Hold the left stick to the right, press it down, and let go. Push the right stick up.
-5. With the active point set, press the right stick's button.
+5. With the active point set, press the right stick's button. Set it again and press X.
 6. With the left stick centred, press its button.
 7. Unplug the controller, then plug it in again.
+8. Press Y. Then hold either trigger and let go.
+9. Move a point, then press B. Press Ctrl+Z.
+10. Turn **Align Points** on again, move a point, and press A.
 
 **Expected:**
-- After 1: within a second of connecting, one point's ring blinks. The right shoulder moves it one point forward in
-  list order, wrapping at the end, and the left moves it back. Each d-pad press moves it to the nearest point in that
+- After 1: within a second of connecting, one point's ring blinks. The right shoulder moves it forward through the four
+  outermost points going round, then the inner ones from the outside in, wrapping at the end; the left moves it back.
+  Each switch to another point flashes the same closing ring as Y on the wall. Each d-pad press moves it to the nearest point in that
   direction on the wall, and it stays put if there is none.
-- After 2: the active point moves only a few pixels per second at a third of the way, and crosses about a quarter of
-  the canvas height per second at full deflection. It becomes set, and the pin follows. Ctrl+Z undoes the whole move in one step.
+- After 2: the active point moves about 2 px per second at a third of the way, and about 400 px per second at full
+  deflection. It becomes set, and the pin follows. Ctrl+Z undoes the whole move in one step.
 - After 3: while held, an amber arrow reaches right from the active point, on the canvas and on the wall.
 - After 4: the point now moves to the right on the canvas, because the stick's up was set to that direction.
 - After 5: the point is released: thin outline, its disc back where the pin lands it, and the quad does not change.
+  X does the same.
 - After 6: the alignment resets as with **Reset**, in one undo step.
 - After 7: the editor keeps running without a hitch, and the controller works again within about a second.
+- After 8: a white ring closes in from about half the canvas height onto the active point's outline on the wall, within
+  about half a second. While a trigger is held, the photo discs on the wall show inverted colours; letting go restores them.
+- After 9: **Align Points** turns off and the pin is back where it was when aligning started. Ctrl+Z brings the moved
+  point back.
+- After 10: **Align Points** turns off and the moved point stays.
 
 ## Step: Finding Align Points from the output
 
