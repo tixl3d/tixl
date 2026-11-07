@@ -580,7 +580,7 @@ internal static class ContentSourceSync
 
     // Lib SendToOutput op and its inputs — the CONTENT "+" instantiates this and wires a selected feed in.
     private const float RevealPaddingOnScreen = 40f;
-    private static readonly Guid SendToOutputSymbolId = new("0b8f2d4e-6a1c-47d3-9f5e-8c2a1b7d4e60");
-    private static readonly Guid SendToOutputTextureInputId = new("8a4dd1b3-2e6f-4c25-9d0a-7f3b61c8e942");
+    internal static readonly Guid SendToOutputSymbolId = new("0b8f2d4e-6a1c-47d3-9f5e-8c2a1b7d4e60");
+    internal static readonly Guid SendToOutputTextureInputId = new("8a4dd1b3-2e6f-4c25-9d0a-7f3b61c8e942");
     private static readonly Guid SendToOutputResolutionInputId = new("3c7f1e58-0a94-4d62-b8f3-2e5d9a0c4b17");
 }

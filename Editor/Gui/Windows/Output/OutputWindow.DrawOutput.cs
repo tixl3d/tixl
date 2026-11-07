@@ -80,6 +80,12 @@ internal sealed partial class OutputWindow
             if (sendResolution.Width > 0 && sendResolution.Height > 0)
                 RequestedResolution = sendResolution;
         }
+        // An op feeding a send the output setup pulled this frame renders at that size here too while the preset
+        // is Fill: two sizes in one frame resize every render target and feedback buffer upstream back and forth.
+        else if (!RenderProcess.IsExporting && IsFillPreset(_selectedResolution) && TryGetPulledSendResolution(instance, out var pulledResolution))
+        {
+            RequestedResolution = pulledResolution;
+        }
 
         EvaluationContext.RequestedResolution = RequestedResolution;
 
@@ -160,6 +166,82 @@ internal sealed partial class OutputWindow
     private const string NoOutputMessage = "This operator has no output.\nAdd a [SendToOutput] to show its content here.";
 
     private readonly SendFallback _sendFallback = new();
+
+    private static bool IsFillPreset(ResolutionHandling.Resolution preset)
+    {
+        return preset.UseAsAspectRatio && (preset.Size.Width <= 0 || preset.Size.Height <= 0);
+    }
+
+    /** The size the setup pulled a send downstream of <paramref name="instance"/> at this frame, if one was. */
+    private bool TryGetPulledSendResolution(Instance instance, out Int2 resolution)
+    {
+        resolution = default;
+        var frame = ImGui.GetFrameCount();
+        if (!ReferenceEquals(instance, _downstreamSendOf) || frame - _downstreamSendFrame > DownstreamSendRefreshFrames)
+        {
+            _downstreamSendOf = instance;
+            _downstreamSendFrame = frame;
+            _downstreamSendChildId = FindDownstreamSend(instance)?.SymbolChildId ?? Guid.Empty;
+        }
+
+        return _downstreamSendChildId != Guid.Empty
+               && OutputContentStats.TryGetPulledResolution(_downstreamSendChildId, T3.Core.Output.Rendering.OutputFrame.Index, out resolution);
+    }
+
+    /// <summary>
+    /// The first send reached by following the op's outgoing connections, leaving a composition through its outputs
+    /// into the one above. Breadth-first and bounded, so a large graph costs a few steps, not a full walk.
+    /// </summary>
+    private static Instance? FindDownstreamSend(Instance instance)
+    {
+        _sendSearchQueue.Clear();
+        _sendSearchVisited.Clear();
+        _sendSearchQueue.Add(instance);
+        for (var index = 0; index < _sendSearchQueue.Count && index < MaxSendSearchSteps; index++)
+        {
+            var current = _sendSearchQueue[index];
+            var parent = current.Parent;
+            if (parent == null)
+                continue;
+
+            foreach (var connection in parent.Symbol.Connections)
+            {
+                if (connection.SourceParentOrChildId != current.SymbolChildId)
+                    continue;
+
+                // An empty target is the composition's own output: the search continues one level up.
+                Instance? next;
+                if (connection.TargetParentOrChildId == Guid.Empty)
+                {
+                    next = parent;
+                }
+                else if (!parent.Children.TryGetChildInstance(connection.TargetParentOrChildId, out next, allowCreate: false))
+                {
+                    continue;
+                }
+
+                if (next is IContentSupplier)
+                    return next;
+
+                if (_sendSearchVisited.Add(next))
+                    _sendSearchQueue.Add(next);
+            }
+        }
+
+        return null;
+    }
+
+    private Instance? _downstreamSendOf;
+    private int _downstreamSendFrame;
+    private Guid _downstreamSendChildId;
+    private static readonly List<Instance> _sendSearchQueue = [];
+    private static readonly HashSet<Instance> _sendSearchVisited = [];
+
+    /** Steps of the downstream search before it gives up; a send is normally a few ops away. */
+    private const int MaxSendSearchSteps = 64;
+
+    /** How often the downstream send is looked up again, so rewiring is picked up without walking every frame. */
+    private const int DownstreamSendRefreshFrames = 60;
 
     /// <summary>
     /// Finds the send of an op that has no outputs, and the texture output feeding it. The search walks

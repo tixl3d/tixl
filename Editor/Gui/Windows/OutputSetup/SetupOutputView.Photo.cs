@@ -70,20 +70,7 @@ internal sealed partial class SetupOutputView
     /// <summary>The surface itself when traced, else the nearest traced ancestor (a region rides its parent's photo).</summary>
     private static Surface? FindTraceCarrier(Setup setup, Guid surfaceId)
     {
-        var surface = setup.FindSurface(surfaceId);
-        for (var guard = 0; surface != null && guard < 16; guard++)
-        {
-            if (surface.Trace != null)
-                return surface;
-
-            if (surface.ParentId == Guid.Empty)
-                break;
-
-            var parentId = surface.ParentId;
-            surface = setup.FindSurface(parentId);
-        }
-
-        return null;
+        return StraightenedPhoto.FindTraceCarrier(setup, surfaceId);
     }
 
     /// <summary>
@@ -256,56 +243,16 @@ internal sealed partial class SetupOutputView
 
     /// <summary>
     /// Warps the photo so the surface's traced quad rectifies (to its bounding box), interpolated by
-    /// <paramref name="t"/>. Out: the warped texture, the warped-photo extent, and the surface-region extent —
-    /// all in photo pixels. Also leaves the interpolated quad in <see cref="_referenceInterpQuad"/> and the
-    /// photo's warped corners in <see cref="_referencePhotoQuad"/>.
+    /// <paramref name="t"/>; see <see cref="StraightenedPhoto.TryRender"/>. Also leaves the interpolated quad in
+    /// <see cref="_referenceInterpQuad"/> and the photo's warped corners in <see cref="_referencePhotoQuad"/>.
     /// </summary>
     private static bool TryRenderStraightened(ReferenceImage image, Vector2[] quad, Vector2 targetMin, Vector2 targetMax, Texture2D texture, float t,
                                               Guid targetKey, float maxDimension, float surroundOfRegion,
                                               out Texture2D? warped, out Vector2 bboxMin, out Vector2 bboxMax, out Vector2 regionMin, out Vector2 regionMax)
     {
-        warped = null;
-        bboxMin = bboxMax = regionMin = regionMax = Vector2.Zero;
-        var w = Math.Max(1, image.Width);
-        var h = Math.Max(1, image.Height);
-        Span<Vector2> targetRect = stackalloc Vector2[4];
-        SurfaceGeometry.WriteRectCorners(targetMin, targetMax, targetRect, yUp: false);
-
-        var interp = _referenceInterpQuad;
-        for (var i = 0; i < 4; i++)
-            interp[i] = Vector2.Lerp(quad[i], targetRect[i], t);
-
-        if (!Homography.TryComputeQuadToQuad(quad, interp, out var homography))
-            return false;
-
-        var dest = _referencePhotoQuad;
-        dest[0] = homography.TransformPoint(new Vector2(0, 0));
-        dest[1] = homography.TransformPoint(new Vector2(w, 0));
-        dest[2] = homography.TransformPoint(new Vector2(w, h));
-        dest[3] = homography.TransformPoint(new Vector2(0, h));
-
-        CanvasDraw.Bounds(interp, out regionMin, out regionMax);
-
-        // Extent = the rectified surface plus a margin of surround, so it isn't clipped to the photo rect.
-        // Bounding to the region — not the whole warped photo — is essential: a steep rectification sends the
-        // far photo corners toward infinity, so sizing to the full warp would blow the RT up and leave the
-        // surface sub-pixel (it vanishes). The runaway surround is simply cropped to this window.
-        var surround = (regionMax - regionMin) * surroundOfRegion;
-        bboxMin = regionMin - surround;
-        bboxMax = regionMax + surround;
-
-        var bboxSize = bboxMax - bboxMin;
-        var maxDim = Math.Max(bboxSize.X, bboxSize.Y);
-        var renderScale = maxDim > maxDimension ? maxDimension / maxDim : 1f;
-        var rtSize = new Int2(Math.Max(1, (int)(bboxSize.X * renderScale)), Math.Max(1, (int)(bboxSize.Y * renderScale)));
-
-        _referenceWarpDest[0] = (dest[0] - bboxMin) * renderScale;
-        _referenceWarpDest[1] = (dest[1] - bboxMin) * renderScale;
-        _referenceWarpDest[2] = (dest[2] - bboxMin) * renderScale;
-        _referenceWarpDest[3] = (dest[3] - bboxMin) * renderScale;
-
-        warped = OutputCompositor.RenderWarpedTexture(texture, _referenceWarpDest, rtSize, targetKey);
-        return warped is { IsDisposed: false };
+        return StraightenedPhoto.TryRender(new Int2(image.Width, image.Height), quad, targetMin, targetMax, texture, t, targetKey, maxDimension, surroundOfRegion,
+                                           new Vector4(0, 0, 1, 1), _referenceInterpQuad, _referencePhotoQuad,
+                                           out warped, out bboxMin, out bboxMax, out regionMin, out regionMax);
     }
 
     /// <summary>
@@ -463,23 +410,9 @@ internal sealed partial class SetupOutputView
         return true;
     }
 
-    /// <summary>
-    /// The rectangle a traced quad straightens to, in photo px: the surface's own aspect at the size the quad
-    /// was traced at, on the quad's centre. Only the aspect carries meaning here — how many photo pixels the
-    /// wall is drawn across is arbitrary — so the area is what is kept, not one of the sides. That keeps the
-    /// two axes symmetric: re-declaring the wall wider widens the frame instead of silently shortening it.
-    /// </summary>
     private static void StraightTargetBounds(Surface surface, out Vector2 min, out Vector2 max)
     {
-        CanvasDraw.Bounds(surface.Trace!.Quad, out var quadMin, out var quadMax);
-        var traced = new Vector2(MathF.Max(quadMax.X - quadMin.X, 1f), MathF.Max(quadMax.Y - quadMin.Y, 1f));
-        var aspect = surface.SizeInMeters.X / MathF.Max(surface.SizeInMeters.Y, 0.0001f);
-        var area = traced.X * traced.Y;
-        var height = MathF.Sqrt(area / MathF.Max(aspect, 0.0001f));
-        var width = MathF.Max(height * aspect, 1f);
-        var centre = (quadMin + quadMax) * 0.5f;
-        min = centre - new Vector2(width, height) * 0.5f;
-        max = centre + new Vector2(width, height) * 0.5f;
+        StraightenedPhoto.TargetBounds(surface, out min, out max);
     }
 
     /// <summary>The loaded image texture (cached per path), its pixel size synced onto the entity.</summary>
@@ -551,7 +484,6 @@ internal sealed partial class SetupOutputView
     private Vector2 _referenceSubjectFromMin, _referenceSubjectFromMax, _referenceSubjectLastMin, _referenceSubjectLastMax;
 
     // Photo warp scratch, reused every frame.
-    private static readonly Vector2[] _referenceWarpDest = new Vector2[4];
     private static readonly Vector2[] _referenceInterpQuad = new Vector2[4];
     private static readonly Vector2[] _referencePhotoQuad = new Vector2[4];
 

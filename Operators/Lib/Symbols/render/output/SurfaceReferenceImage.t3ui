@@ -1,0 +1,49 @@
+{
+  "FormatVersion": 3,
+  "Id": "6435a961-ef0a-4e1d-bbcd-76e665bd58b6"/*SurfaceReferenceImage*/,
+  "Description": "Outputs the straightened reference photo of an output-setup surface or region, cropped to it.\n\nThe wall as it really looks, put upright in the surface's own aspect: a design guide for placing content on it, such as a [Text] on a printed label. A region shows its part of the photo its traced surface was straightened on. The picture follows the setup: re-tracing or resizing the surface updates it.\n\nUse it under the content while designing and mute it for the show, so the wall's photo isn't projected onto the wall. Tint or fade it with the Color of the [Layer2d] that draws it.\n\nAKA: photo, reference, design guide, backdrop, wall picture",
+  "InputUis": [
+    {
+      "InputId": "1a5d05c4-b3e3-4b99-90cb-7c3da6920703"/*Surface*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "The surface or region whose photo is shown. It, or a surface it belongs to, must be traced on a reference photo.",
+      "Usage": "OutputSetupEntities"
+    },
+    {
+      "InputId": "24ce9a8f-7608-4f98-a7de-228ded5b27dd"/*Surround*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Description": "Photo kept around the surface, as a share of its size: 0 crops exactly to it, 0.5 adds half its width on each side. The surface then no longer fills the image.",
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "1afb2fda-0889-41b6-838e-f5bdfbbc3dd0"/*MaxSize*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      },
+      "Description": "The longest side of the image in pixels. The photo is never upscaled beyond what it was traced at.",
+      "Min": 256,
+      "Max": 8192,
+      "ClampMin": true
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "8ab20f20-5e19-4b4b-b846-4b8abbd82817"/*Texture*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

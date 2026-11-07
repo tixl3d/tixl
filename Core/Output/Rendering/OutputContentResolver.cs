@@ -316,6 +316,88 @@ public static class OutputContentResolver
     private static readonly Dictionary<Guid, Texture2D?> _lastContentByChildId = new();
     private static int _pulledContentFrame = -1;
 
+    /// <summary>
+    /// The size a send's content needs so the surface showing it gets a pixel per projector pixel: the surface's size
+    /// in metres at the density it is projected with (see <see cref="ProjectedPixelsPerMeter"/>), divided by the share
+    /// of the source its slice cuts, so a slice of a larger render lands 1:1 too. The render keeps the surface's
+    /// aspect. With several surfaces showing the send, the first decides and <paramref name="hasConflict"/> reports
+    /// whether another one needs a different aspect.
+    /// </summary>
+    public static bool TryGetSurfaceRequest(Setup setup, Guid symbolChildId, out Int2 resolution, out bool hasConflict)
+    {
+        resolution = default;
+        hasConflict = false;
+        var source = setup.FindSourceByChildId(symbolChildId);
+        if (source == null)
+            return false;
+
+        var isFound = false;
+        foreach (var surface in setup.Surfaces)
+        {
+            var slice = setup.FindSlice(surface.SliceId);
+            if (slice == null || slice.SourceId != source.Id)
+                continue;
+
+            var uvWidth = MathF.Max(slice.UvRect.Z - slice.UvRect.X, 0.0001f);
+            var uvHeight = MathF.Max(slice.UvRect.W - slice.UvRect.Y, 0.0001f);
+            var pixelsPerMeter = ProjectedPixelsPerMeter(setup, surface);
+            var width = surface.SizeInMeters.X * pixelsPerMeter / uvWidth;
+            var height = surface.SizeInMeters.Y * pixelsPerMeter / uvHeight;
+            if (!isFound)
+            {
+                resolution = new Int2(Math.Clamp((int)MathF.Round(width), 1, OutputDefinition.MaxResolution),
+                                      Math.Clamp((int)MathF.Round(height), 1, OutputDefinition.MaxResolution));
+                isFound = true;
+                continue;
+            }
+
+            // A one-percent tolerance: rounding to pixels must not read as a disagreement.
+            var aspect = resolution.Width / (float)resolution.Height;
+            if (MathF.Abs(width / MathF.Max(height, 1f) - aspect) > aspect * 0.01f)
+                hasConflict = true;
+        }
+
+        return isFound;
+    }
+
+    /// <summary>
+    /// Output pixels per metre where a surface is projected densest: the longest projected edge in each direction
+    /// over the surface's size along it, and the larger of the two, so even the near side of a keystone gets a pixel
+    /// per output pixel. A region measures its part of its mapped ancestor's pin. A surface on no output yet falls
+    /// back to its <see cref="Surface.PixelsPerMeter"/>.
+    /// </summary>
+    private static float ProjectedPixelsPerMeter(Setup setup, Surface surface)
+    {
+        var fallback = MathF.Max(surface.PixelsPerMeter, 1f);
+        var carrier = setup.FindMappedAncestor(surface.Id);
+        if (carrier == null || carrier.OutputMappings.Count == 0)
+            return fallback;
+
+        var mapping = carrier.OutputMappings[0];
+        var output = setup.FindOutput(mapping.OutputId);
+        if (output == null || mapping.Quad.Length < 4)
+            return fallback;
+
+        var quad = mapping.Quad;
+        if (!ReferenceEquals(carrier, surface))
+        {
+            if (!SurfaceGeometry.TryGetRegionQuad(setup, carrier, surface, mapping, Vector2.One, _projectedQuadScratch))
+                return fallback;
+
+            quad = _projectedQuadScratch;
+        }
+
+        // TL, TR, BR, BL in the canvas' 0..1 space.
+        var canvas = output.CanvasSize;
+        var widthPx = MathF.Max(((quad[1] - quad[0]) * canvas).Length(), ((quad[2] - quad[3]) * canvas).Length());
+        var heightPx = MathF.Max(((quad[3] - quad[0]) * canvas).Length(), ((quad[2] - quad[1]) * canvas).Length());
+        var size = surface.SizeInMeters;
+        var density = MathF.Max(widthPx / MathF.Max(size.X, 0.0001f), heightPx / MathF.Max(size.Y, 0.0001f));
+        return float.IsFinite(density) && density >= 1f ? density : fallback;
+    }
+
+    private static readonly Vector2[] _projectedQuadScratch = new Vector2[4];
+
     /// <summary>The first fitted patch on <paramref name="output"/> that shows this send's content, as a request.</summary>
     private static bool TryGetFittedPatchRequest(Setup setup, OutputDefinition output, Guid symbolChildId, out Int2 resolution)
     {

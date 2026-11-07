@@ -1,0 +1,20 @@
+{
+  "FormatVersion": 3,
+  "Id": "6435a961-ef0a-4e1d-bbcd-76e665bd58b6"/*SurfaceReferenceImage*/,
+  "Inputs": [
+    {
+      "Id": "1a5d05c4-b3e3-4b99-90cb-7c3da6920703"/*Surface*/,
+      "DefaultValue": "00000000-0000-0000-0000-000000000000"
+    },
+    {
+      "Id": "24ce9a8f-7608-4f98-a7de-228ded5b27dd"/*Surround*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "1afb2fda-0889-41b6-838e-f5bdfbbc3dd0"/*MaxSize*/,
+      "DefaultValue": 2048
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

@@ -114,7 +114,13 @@ The bindings are also reachable from the output's context menu and from the Outp
 
 ## Content from the graph
 
-[SendToOutput] supplies a texture to the setup. Its **Update** toggle freezes the content at its last frame when off. Its **Resolution** is 0 × 0 by default, which means "render at whatever the output asks for": an auto-sized [RenderTarget] upstream then follows the projector or display this content is routed to, so the same graph renders at 1080p or at 4K without being edited. Set a size to pin it regardless of where it goes.
+[SendToOutput] supplies a texture to the setup. Its **Update** toggle freezes the content at its last frame when off. Its **Resolution** is 0 × 0 by default, which means "render at whatever the output asks for": an auto-sized [RenderTarget] upstream then follows the projector or display this content is routed to, so the same graph renders at 1080p or at 4K without being edited. Set a size to pin it regardless of where it goes. Set **Size From** to **Surface** to render at the size of the surface or region showing the content instead: its proportions, at one pixel per output pixel where it is projected, so a [Layer2d] fills it without distortion and nothing is upscaled. A surface that is on no output yet uses its pixels per metre. **Resolution Factor** scales any size the op works out on its own, the surface's or the output's: 0.5 renders at half size for heavy content, 2 renders fine text sharper. A Resolution you type in is used exactly.
+
+### Content designed on a surface
+
+A traced surface's photo can be the guide for its content: put a [Text] over the printed label it should sit on. Select a surface or region that shows nothing yet and choose **Connect...** in the toolbar, then **New Content for This Surface**. It adds [SurfaceReferenceImage] → [Layer2d] → [Group] → [RenderTarget] → [SendToOutput] to the open composition, renders it at the surface's size, shows it on the surface and, when there is only one output and nothing above the surface is on it yet, connects the surface's top-level surface to that output, so a region keeps to its part of the wall. Add your content to the selected [Group], align the points, and mute the photo's [Layer2d] before the show so the wall's photo isn't projected onto the wall. **Connect...** also offers existing content and, for a surface with regions, **Create Slices from Regions**.
+
+[SurfaceReferenceImage] outputs the straightened photo of a surface or region on its own, for any graph that wants it.
 
 [UseProjectorCam] renders its content through an output's projector camera, so 3D geometry aligned to the stage lands correctly on that projector without a corner pin. Wire its result through a [RenderTarget] into a [SendToOutput] bound to the same output.
 

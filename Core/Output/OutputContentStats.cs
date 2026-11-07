@@ -40,6 +40,22 @@ public static class OutputContentStats
         }
     }
 
+    /// <summary>The size this send's content was first pulled at in <paramref name="frame"/>; false if it wasn't pulled then.</summary>
+    public static bool TryGetPulledResolution(Guid symbolChildId, int frame, out Int2 resolution)
+    {
+        lock (_pulls)
+        {
+            if (frame == _frame && _pulls.TryGetValue(symbolChildId, out var entry))
+            {
+                resolution = entry.First;
+                return true;
+            }
+        }
+
+        resolution = default;
+        return false;
+    }
+
     /// <summary>True when this send was asked for two different sizes in the last recorded frame.</summary>
     public static bool TryGetSizeConflict(Guid symbolChildId, out Int2 rendered, out Int2 other)
     {

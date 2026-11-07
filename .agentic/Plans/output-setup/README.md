@@ -24,6 +24,12 @@ prioritize.
 | [`binding-examples.md`](binding-examples.md) | Output vs. binding: storage layering and scenarios S1-S7. |
 | [`use-case-flows.md`](use-case-flows.md) | Nine end-to-end click flows and the cross-cutting harvest. |
 
+## Planned
+
+| Doc | Covers |
+|---|---|
+| [`surface-content.md`](surface-content.md) | Designing content on a surface against its reference photo: 2D guide, physical size, 3D scene, projecting onto an object such as a mask (2026-11-07). |
+
 ## Long-Term Scope (Not Scheduled)
 
 | Doc | Covers |
