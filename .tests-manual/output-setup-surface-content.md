@@ -12,7 +12,7 @@ related-help:
   - ../.help/docs/using/OutputSetup.md
 ---
 
-Covers **Connect...**, [SurfaceReferenceImage] and [SendToOutput]'s **Size From: Surface**.
+Covers **Connect...**, [SurfaceReferenceImage] and [SendToOutput]'s **Resolution From: Surface Aspect**.
 
 ## Step: Connect... appears only for a surface without content
 
@@ -30,7 +30,7 @@ Select the region, choose **Connect...** → **New Content for This Surface**.
 
 **Expected:**
 - The open composition gets a row of five ops: [SurfaceReferenceImage] → [Layer2d] → [Group] → [RenderTarget] → [SendToOutput], all connected. The [Group] is selected.
-- The [SendToOutput] is named after the region and its **Size From** is **Surface**.
+- The [SendToOutput] is named after the region and its **Resolution From** is **Surface Aspect**.
 - The Flow Outliner shows the new content with a slice connected to the region.
 - The region's parent surface (not the region) is connected to the output; the region shows no "own pin" status.
 - The console says to add content to the Group and to align the points.
@@ -63,7 +63,7 @@ Press `Ctrl+Z` once.
 - The five ops, the content source, the slice and the output connection are all gone.
 - `Ctrl+Shift+Z` (redo) brings all of them back.
 
-## Step: Size From warns without a surface
+## Step: Resolution From warns without a surface
 
 **Action:**
 Disconnect the region's content in the Flow Outliner.

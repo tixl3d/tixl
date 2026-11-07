@@ -95,7 +95,7 @@ internal static class SurfaceContent
         Connect(macro, parent, renderTargetId, _renderTargetColorBufferOutputId, sendId, ContentSourceSync.SendToOutputTextureInputId);
 
         SetInput(macro, parent, referenceId, _surfaceReferenceImageSurfaceInputId, new InputValue<Guid>(surface.Id));
-        SetInput(macro, parent, sendId, _sendToOutputSizeFromInputId, new InputValue<int>(SendSizeFromSurface));
+        SetInput(macro, parent, sendId, _sendToOutputResolutionFromInputId, new InputValue<int>(SendSizeFromSurface));
 
         // Registered right away rather than left to the sync's adoption next frame: the slice needs a source to name.
         var source = new ContentSource { SymbolChildId = sendId, Name = surface.Name, IsRenamed = true };
@@ -217,8 +217,8 @@ internal static class SurfaceContent
     /** The gap between the surface frame and the new content's card above it, as a share of the frame's height. */
     private const float CardGapOfFrameHeight = 0.3f;
 
-    /** SendToOutput's SizeFrom value for the surface's aspect: stable while the new surface is still being aligned. */
-    private const int SendSizeFromSurface = 2;
+    /** SendToOutput's Resolution From value for the surface's aspect: stable while the new surface is still being aligned. */
+    private const int SendSizeFromSurface = 0;
 
     private static readonly Guid _surfaceReferenceImageSymbolId = new("6435a961-ef0a-4e1d-bbcd-76e665bd58b6");
     private static readonly Guid _surfaceReferenceImageTextureOutputId = new("8ab20f20-5e19-4b4b-b846-4b8abbd82817");
@@ -232,5 +232,5 @@ internal static class SurfaceContent
     private static readonly Guid _renderTargetSymbolId = new("f9fe78c5-43a6-48ae-8e8c-6cdbbc330dd1");
     private static readonly Guid _renderTargetCommandInputId = new("4da253b7-4953-439a-b03f-1d515a78bddf");
     private static readonly Guid _renderTargetColorBufferOutputId = new("7A4C4FEB-BE2F-463E-96C6-CD9A6BAD77A2");
-    private static readonly Guid _sendToOutputSizeFromInputId = new("3125e84e-8644-46a9-8fae-e88ed06731f4");
+    private static readonly Guid _sendToOutputResolutionFromInputId = new("3125e84e-8644-46a9-8fae-e88ed06731f4");
 }
