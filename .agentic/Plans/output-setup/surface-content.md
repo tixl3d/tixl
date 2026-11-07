@@ -152,6 +152,10 @@ pin is where the surface's corners project). Flat content through sends and 3D c
   pixels. `PixelsPerMeter` remains the fallback for a surface on no output yet. A `ResolutionFactor` input
   (default 1, 0.25–4) scales any derived size, surface or output, so the automatic size can be overruled
   without giving up following the surface; a typed-in Resolution stays exact.
+- Second surface mode, added the same day: `SurfaceAspect` keeps the height the send would render at anyway
+  (Resolution, else the output's) and takes the width from the surface's metres. The projected mode changes
+  size with every alignment move, which resets feedback buffers while points are dragged; the aspect mode
+  doesn't, and is what Connect... sets. Enum: `Resolution | ProjectedSurface | SurfaceAspect` (stored 0 | 1 | 2).
 - The compositor already requests a patch's own size (`OutputContentResolver.TryGetFittedRequest`); the same
   path gives a surface's size to a send whose mode asks for it.
 - A send shown on several surfaces of different aspects warns, as the send already does for several outputs.
@@ -220,8 +224,8 @@ Each phase ships on its own: help page, manual test set, release-notes entry.
 ## 9. Adjacent work from the same demo
 
 Not part of this plan, but the Connect... flow leans on them:
-- **Projection rows in the outliner** — a surface's mapping onto an output listed under that output as a
-  "Projection", so the thing that was aligned has a row. Patches stay for pixel tiles.
+- ~~**Projection rows in the outliner**~~ — dropped 2026-11-07: the outliner's connection line already shows a
+  surface's mapping onto an output, and parked mappings keep its alignment through reconnecting.
 - **Region dropped on an output or patch** — pin the parent when the parent isn't on that output yet, and let
   the region ride it (today the region gets a full-patch pin of its own and its slice stretches over the
   parent's area).

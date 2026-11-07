@@ -260,6 +260,18 @@ public class SetupSerializationTests
         Assert.True(restoredParked.PointAims[pointId].IsAimed);
     }
 
+    [Fact]
+    public void MeasuringLines_FollowTheRaster_InSetupsSavedBeforeTheyHadTheirOwnSwitch()
+    {
+        var saved = JObject.Parse("""{ "Id": "6a0d1fcb-6824-49dd-a48b-852b49044d0c", "Name": "wall", "ShowGrid": true }""");
+        Assert.True(Surface.ReadFromJson(saved).ShowMeasuringLines);
+
+        var split = JObject.Parse("""{ "Id": "6a0d1fcb-6824-49dd-a48b-852b49044d0c", "Name": "wall", "ShowGrid": true, "ShowMeasuringLines": false }""");
+        var surface = Surface.ReadFromJson(split);
+        Assert.True(surface.ShowGrid);
+        Assert.False(surface.ShowMeasuringLines);
+    }
+
     private static Setup RoundTrip(Setup setup)
     {
         return Setup.ReadFromJson(JObject.Parse(setup.ToJsonString()));

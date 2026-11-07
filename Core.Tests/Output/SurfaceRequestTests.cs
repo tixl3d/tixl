@@ -61,6 +61,19 @@ public class SurfaceRequestTests
     }
 
     [Fact]
+    public void Aspect_FollowsTheSurfaceMetresAndTheSlice_NotTheProjection()
+    {
+        var (setup, sendId, source) = SetupWithSend();
+        var surface = AddSurface(setup, source, new Vector2(1, 2), 400, new Vector4(0, 0, 0.5f, 1));
+        surface.OutputMappings.Add(Surface.OutputMapping.CreateFilling(setup.Outputs[0].Id));
+
+        // 1 m by 2 m from half of the source: the full source is 2 by 2.
+        Assert.True(OutputContentResolver.TryGetSurfaceAspect(setup, sendId, out var aspect, out var hasConflict));
+        Assert.Equal(1f, aspect, 3);
+        Assert.False(hasConflict);
+    }
+
+    [Fact]
     public void SendNotShownOnASurface_HasNoRequest()
     {
         var (setup, sendId, _) = SetupWithSend();

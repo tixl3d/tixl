@@ -24,7 +24,7 @@
         "X": -200.0,
         "Y": 270.0
       },
-      "Description": "Where the render size comes from. Resolution: the Resolution input, or the size of the output this content is routed to when that is 0×0. Surface: the aspect of the surface or region showing this content, at a pixel per output pixel where it is projected densest, so a [Layer2d] fills it without distortion and nothing is upscaled. A surface on no output yet uses its pixels per metre."
+      "Description": "Where the render size comes from. Resolution: the Resolution input, or the size of the output this content is routed to when that is 0×0. Surface Aspect: the proportions of the surface or region showing this content, at the height it would render at anyway (the Resolution's, or the output's when that is 0×0); it doesn't change while the surface is aligned, so feedback keeps running. Projected Surface: those proportions at a pixel per output pixel where the surface is projected densest, so nothing is upscaled; it follows the alignment and changes while points are moved. A [Layer2d] fills either without distortion."
     },
     {
       "InputId": "fd8d094d-dd51-4659-8aab-ca9a028bee33"/*ResolutionFactor*/,
