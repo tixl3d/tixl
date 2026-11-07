@@ -1,6 +1,7 @@
 #nullable enable
 using ImGuiNET;
 using T3.Core.Logging;
+using T3.Core.Operator;
 using T3.Core.Output;
 using T3.Core.Output.Rendering;
 using T3.Core.Resource;
@@ -62,16 +63,26 @@ internal sealed partial class SetupOutputView
         DrawFrame(setup, machineConfig, output, outputId, shownSurfaceId, selection);
     }
 
+    /// <summary>The op this window is pinned to, set each frame. The content it feeds keeps rendering live, so
+    /// tweaking its parameters shows on the mapped surfaces while the graph holds the selection.</summary>
+    public Instance? PinnedInstance;
+
     /// <summary>
-    /// The previews that must stay live: the focused output's composite, and whatever the selection points at —
-    /// a surface or slice through to the source feeding it, so dragging content around shows the real thing.
-    /// Several selected take turns; everything else holds the content it rendered once.
+    /// The previews that must stay live: the focused output's composite, the sources fed by the pinned op, and
+    /// whatever the selection points at — a surface or slice through to the source feeding it, so dragging
+    /// content around shows the real thing. Several take turns; everything else holds the content it rendered once.
     /// </summary>
-    private static void MarkEditedPreviews(Setup setup, OutputDefinition? output, SetupEntitySelection? selection)
+    private void MarkEditedPreviews(Setup setup, OutputDefinition? output, SetupEntitySelection? selection)
     {
         OutputPreviewRefresh.BeginPriorityFrame();
         if (output != null)
             OutputPreviewRefresh.AddPriority(output.Id);
+
+        UpdateSendsFedByPin();
+        for (var i = 0; i < _sendsFedByPin.Count; i++)
+        {
+            OutputPreviewRefresh.AddPriority(_sendsFedByPin[i]);
+        }
 
         if (selection == null)
             return;
@@ -98,6 +109,32 @@ internal sealed partial class SetupOutputView
                     break;
             }
         }
+    }
+
+    /// <summary>
+    /// Re-collects the sends fed by the pinned op when the pin or the set of sends changes. A pinned op that
+    /// feeds nothing yet is looked at again every few frames, so wiring it in afterwards is picked up.
+    /// </summary>
+    private void UpdateSendsFedByPin()
+    {
+        var pinned = PinnedInstance;
+        if (pinned == null)
+        {
+            _sendsFedByPin.Clear();
+            _sendsFedByPinOp = null;
+            return;
+        }
+
+        var frame = ImGui.GetFrameCount();
+        if (pinned == _sendsFedByPinOp
+            && ContentSupplierRegistry.Version == _sendsFedByPinRegistryVersion
+            && (_sendsFedByPin.Count > 0 || frame - _sendsFedByPinFrame < UnfedPinRecheckFrames))
+            return;
+
+        _sendsFedByPinOp = pinned;
+        _sendsFedByPinRegistryVersion = ContentSupplierRegistry.Version;
+        _sendsFedByPinFrame = frame;
+        ContentSourceSync.CollectSendsFedBy(pinned, _sendsFedByPin);
     }
 
     private static Guid SourceChildIdOfSlice(Setup setup, Guid sliceId)
@@ -928,6 +965,13 @@ internal sealed partial class SetupOutputView
     private bool _isolatesFocusedSurface;
     private Guid _shownSurfaceId; // frame-scoped: what the caller passed to this Draw, never read across frames
     private (Guid OutputId, EditModes Mode, Vector2 Size) _fitKey;
+
+    // Sends fed by the pinned op. The op reference is only compared to detect a pin change, never dereferenced.
+    private const int UnfedPinRecheckFrames = 30;
+    private readonly List<Guid> _sendsFedByPin = [];
+    private Instance? _sendsFedByPinOp;
+    private int _sendsFedByPinRegistryVersion = -1;
+    private int _sendsFedByPinFrame = -1;
 
     // View morph: 0 = Original (projector space), 1 = Straight (focused surface rectified), one continuous
     // axis; the camera at a transition's start, so the framing eases from the user's view.

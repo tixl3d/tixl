@@ -307,6 +307,70 @@ internal static class ContentSourceSync
         }
     }
 
+    /// <summary>
+    /// Collects the send ops that <paramref name="op"/> feeds into, through its connections and across
+    /// composition boundaries. A send op counts as feeding itself.
+    /// </summary>
+    public static void CollectSendsFedBy(Instance op, List<Guid> sendChildIds)
+    {
+        sendChildIds.Clear();
+        foreach (var supplier in ContentSupplierRegistry.Suppliers)
+        {
+            if (supplier is Instance send && IsFedBy(send, op))
+                sendChildIds.Add(send.SymbolChildId);
+        }
+    }
+
+    /** Walks the send's slots upstream until it reaches the op. */
+    private static bool IsFedBy(Instance send, Instance op)
+    {
+        _walkVisited.Clear();
+        _walkStack.Clear();
+        foreach (var input in send.Inputs)
+        {
+            _walkStack.Push(input);
+        }
+
+        var isFed = false;
+        while (_walkStack.TryPop(out var slot))
+        {
+            if (!_walkVisited.Add(slot))
+                continue;
+
+            if (slot.Parent == op)
+            {
+                isFed = true;
+                break;
+            }
+
+            if (slot is IMultiInputSlot multiInput)
+            {
+                var sources = multiInput.GetCollectedInputs();
+                for (var i = 0; i < sources.Count; i++)
+                {
+                    _walkStack.Push(sources[i]);
+                }
+            }
+            else if (slot.TryGetFirstConnection(out var source))
+            {
+                // An input forwarded from the parent, or a composite's output linked to an inner child's.
+                _walkStack.Push(source);
+            }
+            else if (slot is not IInputSlot)
+            {
+                // An op's own output depends on all of its inputs.
+                foreach (var input in slot.Parent.Inputs)
+                {
+                    _walkStack.Push(input);
+                }
+            }
+        }
+
+        _walkVisited.Clear();
+        _walkStack.Clear();
+        return isFed;
+    }
+
     /** The op is found through its parent symbol, so one that isn't instantiated can still be edited. */
     private static bool TryFindSendParent(Guid childId, [NotNullWhen(true)] out Symbol? parent)
     {
@@ -495,6 +559,9 @@ internal static class ContentSourceSync
     private static int _sweptStructureVersion = -1;
     private static IReadOnlyList<Guid>? _sweptScopePath;
     private static readonly HashSet<Guid> _missingSendChildIds = [];
+
+    private static readonly HashSet<ISlot> _walkVisited = [];
+    private static readonly Stack<ISlot> _walkStack = new();
 
     /// <summary>
     /// Finds the sources whose op isn't part of the focused project. One with slices stays and reads as missing. One without

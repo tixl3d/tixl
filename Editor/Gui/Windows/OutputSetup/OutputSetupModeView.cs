@@ -85,13 +85,15 @@ internal sealed class OutputSetupModeView
     /// when the caller should draw the operator output instead. A picked entity takes precedence over a
     /// focused send op; both are dropped when the focused op changes (graph selection wins). With
     /// <paramref name="keepsPinnedOp"/> the window keeps showing its pinned op: neither the graph focus nor the
-    /// shared entity selection pulls it into the setup.
+    /// shared entity selection pulls it into the setup. The content fed by <paramref name="pinnedInstance"/>
+    /// keeps rendering live on the canvas.
     /// </summary>
-    public bool TryDrawEditingView(Instance? focusedInstance, EvaluationContext context, bool keepsPinnedOp = false)
+    public bool TryDrawEditingView(Instance? focusedInstance, Instance? pinnedInstance, EvaluationContext context, bool keepsPinnedOp = false)
     {
         _keepsPinnedOp = keepsPinnedOp;
         FollowGraphFocus();
         _outputView.IsHeaderHostedByStrip = IsSetupMode;
+        _outputView.PinnedInstance = pinnedInstance;
         HandleRenameKey();
 
         var shown = ResolveShownView(focusedInstance);
