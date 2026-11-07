@@ -461,6 +461,9 @@ internal sealed class OutlinerItem
     /** Half the height of the pill of an item taking several inputs, unscaled; its connections end spread along it. */
     internal const float InputPillHalfHeight = 6f;
 
+    /** Half the width of that pill, unscaled: the round cap at each end, which the connection ends keep clear of. */
+    internal const float InputPillHalfWidth = 2f;
+
     private static void DrawInputSlot(ImDrawListPtr dl, Vector2 center, SetupRouting.InputSlots slots, Color color)
     {
         var scale = T3Ui.UiScaleFactor;
@@ -470,7 +473,7 @@ internal sealed class OutlinerItem
             return;
         }
 
-        var halfWidth = MathF.Max(1, MathF.Round(2 * scale));
+        var halfWidth = MathF.Max(1, MathF.Round(InputPillHalfWidth * scale));
         var halfHeight = MathF.Round(InputPillHalfHeight * scale);
         var x = MathF.Round(center.X);
         var y = MathF.Round(center.Y);

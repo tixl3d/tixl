@@ -438,21 +438,12 @@ internal sealed partial class SetupOutputView
         if (kind == SetupEntityKinds.Surface)
         {
             var preview = UserSettings.Config.OutputSetupContentPreviewOpacity;
-            var projectionPreview = UserSettings.Config.OutputSetupProjectionPreviewOpacity;
             if (OutputContentResolver.TryGetSurfaceSlice(id, out _, out var surfaceContent, out var contentUv) && surfaceContent is { IsDisposed: false })
             {
                 var contentSrv = SrvManager.GetSrvForTexture(surfaceContent);
                 if (preview > 0.01f && contentSrv is { IsDisposed: false })
                     dl.AddImage(contentSrv.NativePointer, sMin, sMax, new Vector2(contentUv.X, contentUv.Y), new Vector2(contentUv.Z, contentUv.W),
                                 UiColors.ForegroundFull.Fade(preview * fade));
-            }
-            else if (projectionPreview > 0.01f && setup.FindSurface(id) is { } canvasFedSurface
-                     && SetupRelations.TryFindCanvasQuad(setup, canvasFedSurface, _canvasFedQuad, out var feedingOutputId)
-                     && TryWarpCompositeOntoSurface(canvasFedSurface, feedingOutputId) is { IsDisposed: false } projectionSrv)
-            {
-                // No content of its own, but the surface has a place on an output's canvas: the wall shows what the
-                // canvas holds there, which is what will land on it when the canvas is sent as one picture.
-                dl.AddImage(projectionSrv.NativePointer, sMin, sMax, Vector2.Zero, Vector2.One, UiColors.ForegroundFull.Fade(projectionPreview * fade));
             }
         }
 
@@ -645,7 +636,7 @@ internal sealed partial class SetupOutputView
         {
             // From the size on show: an unscaled card stores no scale of its own, it reads a default.
             var newWidth = MathF.Max((oldMax.X - oldMin.X) * increment.X, 0.05f);
-            placement.CardScale = Math.Clamp(BoardPixelSize(setup, kind, id).X / newWidth, 10f, 100000f);
+            placement.CardScale = Math.Clamp(BoardCardSize(setup, kind, id).X / newWidth, 10f, 100000f);
         }
 
         if (TryGetBoardPosition(setup, kind, id, out var position) && TryGetCardBounds(setup, kind, id, out var newMin, out _))
@@ -2055,7 +2046,7 @@ internal sealed partial class SetupOutputView
         var y = 0f;
         foreach (var source in setup.ContentSources)
         {
-            var size = BoardPixelSize(setup, SetupEntityKinds.ContentSource, source.SymbolChildId) / DefaultBoardPixelsPerMeter;
+            var size = BoardCardSize(setup, SetupEntityKinds.ContentSource, source.SymbolChildId) / DefaultBoardPixelsPerMeter;
             if (source.BoardPlacement == null)
             {
                 source.BoardPlacement = new BoardPlacement { Position = new Vector2(-gap - size.X, y) };
@@ -2076,7 +2067,7 @@ internal sealed partial class SetupOutputView
         y = 0f;
         foreach (var image in setup.ReferenceImages)
         {
-            var size = BoardPixelSize(setup, SetupEntityKinds.ReferenceImage, image.Id) / PixelsPerMeterOf(image.BoardPlacement, image);
+            var size = BoardCardSize(setup, SetupEntityKinds.ReferenceImage, image.Id) / PixelsPerMeterOf(image.BoardPlacement, image);
             if (image.BoardPlacement == null)
             {
                 image.BoardPlacement = new BoardPlacement { Position = new Vector2(contentLeft - gap - size.X, y) };
@@ -2093,7 +2084,7 @@ internal sealed partial class SetupOutputView
             if (output.Kind == OutputDefinition.Kinds.Default)
                 continue;
 
-            var size = BoardPixelSize(setup, SetupEntityKinds.Output, output.Id) / DefaultBoardPixelsPerMeter;
+            var size = BoardCardSize(setup, SetupEntityKinds.Output, output.Id) / DefaultBoardPixelsPerMeter;
             if (output.BoardPlacement == null)
             {
                 output.BoardPlacement = new BoardPlacement { Position = new Vector2(surfacesRight + gap, y) };
@@ -2285,7 +2276,7 @@ internal sealed partial class SetupOutputView
                     return false;
 
                 min = source.BoardPlacement.Position;
-                max = min + BoardPixelSize(setup, kind, id) / PixelsPerMeterOf(source.BoardPlacement);
+                max = min + BoardCardSize(setup, kind, id) / PixelsPerMeterOf(source.BoardPlacement);
                 return true;
             }
             case SetupEntityKinds.Output:
@@ -2295,7 +2286,7 @@ internal sealed partial class SetupOutputView
                     return false;
 
                 min = output.BoardPlacement.Position;
-                max = min + BoardPixelSize(setup, kind, id) / PixelsPerMeterOf(output.BoardPlacement);
+                max = min + BoardCardSize(setup, kind, id) / PixelsPerMeterOf(output.BoardPlacement);
                 return true;
             }
             case SetupEntityKinds.ReferenceImage:
@@ -2305,7 +2296,7 @@ internal sealed partial class SetupOutputView
                     return false;
 
                 min = image.BoardPlacement.Position;
-                max = min + BoardPixelSize(setup, kind, id) / PixelsPerMeterOf(image.BoardPlacement, image);
+                max = min + BoardCardSize(setup, kind, id) / PixelsPerMeterOf(image.BoardPlacement, image);
                 return true;
             }
             case SetupEntityKinds.FloorPlan:
@@ -2320,6 +2311,20 @@ internal sealed partial class SetupOutputView
             default:
                 return false;
         }
+    }
+
+    /// <summary>
+    /// A pixel card's extent in card pixels, which its <see cref="BoardPlacement.CardScale"/> turns into board metres:
+    /// a reference image's own pixels, and for content and outputs a fixed width with the aspect of what they render.
+    /// A resolution change then reshapes such a card but doesn't resize it, so the layout around it holds.
+    /// </summary>
+    private static Vector2 BoardCardSize(Setup setup, SetupEntityKinds kind, Guid id)
+    {
+        var pixels = BoardPixelSize(setup, kind, id);
+        if (kind is not (SetupEntityKinds.ContentSource or SetupEntityKinds.Output))
+            return pixels;
+
+        return new Vector2(BoardPlacement.NominalCardWidth, BoardPlacement.NominalCardWidth * pixels.Y / MathF.Max(pixels.X, 1));
     }
 
     /// <summary>The pixel extent a pixel card represents: the texture's, the canvas', the image's (cropped) part.</summary>
@@ -2590,47 +2595,6 @@ internal sealed partial class SetupOutputView
 
     // Marquee over the cards: candidates are collected as the cards draw (cleared per frame), and the fence
     // resolves containers against the setup set before it runs.
-    /// <summary>
-    /// An output's composite carried back through the corner pin in <see cref="_canvasFedQuad"/>, onto a target in
-    /// the surface's own aspect. Warped on the GPU: an image quad would interpolate each of its two triangles
-    /// on its own and crease along the diagonal. Null for a pin so steep that the canvas crosses its horizon.
-    /// </summary>
-    private SharpDX.Direct3D11.ShaderResourceView? TryWarpCompositeOntoSurface(Surface surface, Guid outputId)
-    {
-        var composite = OutputCompositor.RenderPreview(outputId);
-        if (composite is not { IsDisposed: false })
-            return null;
-
-        var size = surface.SizeInMeters;
-        var longestSide = MathF.Max(MathF.Max(size.X, size.Y), 0.0001f);
-        var targetSize = new T3.Core.DataTypes.Vector.Int2(Math.Max(1, (int)(size.X / longestSide * ProjectionPreviewMaxSide)),
-                                                           Math.Max(1, (int)(size.Y / longestSide * ProjectionPreviewMaxSide)));
-        _projectionPreviewRect[1] = new Vector2(targetSize.Width, 0);
-        _projectionPreviewRect[2] = new Vector2(targetSize.Width, targetSize.Height);
-        _projectionPreviewRect[3] = new Vector2(0, targetSize.Height);
-        if (!Homography.TryComputeQuadToQuad(_canvasFedQuad, _projectionPreviewRect, out var canvasToTarget))
-            return null;
-
-        for (var corner = 0; corner < 4; corner++)
-        {
-            var canvasCorner = new Vector2(corner is 1 or 2 ? 1 : 0, corner is 2 or 3 ? 1 : 0);
-            if (canvasToTarget.M31 * canvasCorner.X + canvasToTarget.M32 * canvasCorner.Y + canvasToTarget.M33 <= 0)
-                return null;
-
-            _projectionPreviewDest[corner] = canvasToTarget.TransformPoint(canvasCorner);
-        }
-
-        Span<byte> key = stackalloc byte[16];
-        surface.Id.TryWriteBytes(key);
-        key[1] ^= 0xFF;
-        var warped = OutputCompositor.RenderWarpedTexture(composite, _projectionPreviewDest, targetSize, new Guid(key));
-        return warped is { IsDisposed: false } ? SrvManager.GetSrvForTexture(warped) : null;
-    }
-
-    private const float ProjectionPreviewMaxSide = 1024f;
-    private readonly Vector2[] _canvasFedQuad = new Vector2[4];
-    private readonly Vector2[] _projectionPreviewRect = new Vector2[4];
-    private readonly Vector2[] _projectionPreviewDest = new Vector2[4];
     private readonly SelectionFence _boardFence = new();
     private readonly List<(SetupEntityKinds Kind, Guid Id, ImRect Rect)> _boardFenceCandidates = [];
     private Setup? _boardSetupForFence;

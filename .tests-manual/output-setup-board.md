@@ -700,21 +700,6 @@ onto the "Projector 1" item in the Flow Outliner.
 - The header has no "+ <surface name>" buttons.
 - The drag adds the surface's quad to the canvas, one undo step.
 
-## Step: The projection on a surface's Board card
-
-**Action:**
-1. Use a surface without content, mapped onto "Projector 1" with a strongly keystoned corner pin, and with "Show
-   size raster" on. Click the **Board** tab.
-2. Note the **Projection Preview** field reads 0% on a fresh user profile. Drag it up to 100%, then down to 0%.
-3. Drag the **Overlay** field to 0%.
-
-**Expected:**
-- After 2: only the output's picture on that card changes, fully opaque at 100% and gone at 0%. At 100% it is
-  straightened through the pin, and the raster's lines run straight across the whole card, with no bend along a
-  diagonal. Cards of surfaces with content of their own don't change.
-- After 3: with **Projection Preview** back above 0%, the projection stays. Content on cards of surfaces with their own content is gone. The Projection
-  Preview field is offered only on the **Board** tab.
-
 ## Step: Reference images come from the asset system
 
 **Action:**
@@ -797,3 +782,15 @@ project).
 - After 2: the lock brightens on hover and shows an "Unlock" tooltip; the click unlocks the
   image and selects it (its crop handles appear) — the selection is not cleared. Ctrl+Z
   locks it again.
+
+## Step: Cards keep their size when the resolution changes
+
+**Action:**
+1. On the Board, note the width of an output card and of a content card. Select the output and set its
+   **Resolution (px)** from 1920 × 1080 to 3840 × 2160, then to 1920 × 1200.
+2. Select the content's [SendToOutput] and set **Resolution Override** to 960 × 540, then to 1000 × 1000.
+
+**Expected:**
+- After 1: the output card keeps its width and position; 3840 × 2160 looks the same as 1920 × 1080, and
+  1920 × 1200 makes it a little taller. Its label shows the new resolution.
+- After 2: the content card keeps its width too: 960 × 540 changes nothing, 1000 × 1000 makes it square.

@@ -145,12 +145,6 @@ internal sealed partial class SetupOutputView
                              "Opacity of each surface's content over its photo — on the traced quads and the surface cards. Drag, or double-click to type.");
         }
 
-        if (_editMode == EditModes.Board)
-        {
-            DrawOpacityField("Projection Preview", ref UserSettings.Config.OutputSetupProjectionPreviewOpacity, 0f,
-                             "Opacity of what a surface without content of its own receives from its output: the output's picture carried back through the corner pin, which shows where it lands with the current alignment. Drag, or double-click to type.");
-        }
-
         // A surface that shows nothing yet gets one step to content, instead of creating, sizing and routing a
         // send by hand.
         if (primaryKind == SetupEntityKinds.Surface && setup.FindSurface(primaryId) is { } surfaceWithoutContent

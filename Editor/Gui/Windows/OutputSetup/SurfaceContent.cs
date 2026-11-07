@@ -4,7 +4,6 @@ using T3.Core.Logging;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.Output;
-using T3.Core.Output.Rendering;
 using T3.Editor.Gui.Styling;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
@@ -166,9 +165,9 @@ internal static class SurfaceContent
                                 Position = new Vector2(left, frameMax.Y + (frameMax.Y - frameMin.Y) * CardGapOfFrameHeight),
                             };
 
-        // Card pixels per metre: the render's width over the surface's, so the card is the surface's size.
-        if (OutputContentResolver.TryGetSurfaceRequest(setup, source.SymbolChildId, out var resolution, out _) && surface.SizeInMeters.X > 0)
-            placement.CardScale = resolution.Width / surface.SizeInMeters.X;
+        // Card pixels per metre: the card's fixed width over the surface's, so the card is the surface's size.
+        if (surface.SizeInMeters.X > 0)
+            placement.CardScale = BoardPlacement.NominalCardWidth / surface.SizeInMeters.X;
 
         source.BoardPlacement = placement;
     }
