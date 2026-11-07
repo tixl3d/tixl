@@ -353,6 +353,13 @@ public static class OutputCompositor
         OutputPreviewRefresh.InvalidateAll();
     }
 
+    /// <summary>Frees the target a <see cref="RenderWarpedTexture"/> caller rendered into under its own key.</summary>
+    public static void ReleaseScratchTarget(Guid targetKey)
+    {
+        if (_targets.Remove(targetKey, out var target))
+            target.Dispose();
+    }
+
     /// <summary>Frees a deleted output's composite target.</summary>
     public static void ReleaseOutput(Guid outputId)
     {

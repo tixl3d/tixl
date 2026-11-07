@@ -21,7 +21,13 @@ Item, Output, Endpoint, Route/Mapping/Binding, Modifier. Older docs predate it; 
 | [`states.md`](states.md) | State-token matrix (Default/Selected/Hovered/Referenced/Dragged/Drop-Target/Unbound/Unused). Tokens live; gutter anatomy superseded. |
 | [`long-term-features.md`](long-term-features.md) | The rolling backlog / next-major-steps list. Review periodically to prioritize. |
 
-## Reference — consult when the question comes up
+## Planned
+
+| Doc | Covers |
+|---|---|
+| [`surface-content.md`](surface-content.md) | Designing content on a surface against its reference photo: 2D guide, physical size, 3D scene, projecting onto an object such as a mask (2026-11-07). |
+
+## Long-Term Scope (Not Scheduled)
 
 | Doc | Covers |
 |---|---|

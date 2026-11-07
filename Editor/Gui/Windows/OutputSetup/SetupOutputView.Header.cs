@@ -147,6 +147,26 @@ internal sealed partial class SetupOutputView
                              "Opacity of what a surface without content of its own receives from its output: the output's picture carried back through the corner pin, which shows where it lands with the current alignment. Drag, or double-click to type.");
         }
 
+        // A surface that shows nothing yet gets one step to content, instead of creating, sizing and routing a
+        // send by hand.
+        if (primaryKind == SetupEntityKinds.Surface && setup.FindSurface(primaryId) is { } surfaceWithoutContent
+                                                      && SurfaceContent.NeedsContent(surfaceWithoutContent))
+        {
+            ImGui.SameLine(0, 12 * T3Ui.UiScaleFactor);
+            if (CustomComponents.StateButton("Connect...", CustomComponents.ButtonStates.Emphasized))
+                ImGui.OpenPopup(ConnectMenuId);
+
+            if (ImGui.IsItemHovered())
+                CustomComponents.TooltipForLastItem("Connect...",
+                                                    "This surface shows nothing yet. Add content built around its reference photo, use existing content, or cut slices across its regions.");
+
+            if (SetupPopup.Begin(ConnectMenuId))
+            {
+                SurfaceContent.DrawMenuItems(selection, setup, surfaceWithoutContent);
+                SetupPopup.End();
+            }
+        }
+
         // Isolate is an Output-canvas affair: it locks the corner-pin editing to one frame. Elsewhere it has
         // nothing to lock, so it isn't offered (and clears).
         if (_editMode == EditModes.Output)
@@ -339,4 +359,6 @@ internal sealed partial class SetupOutputView
     private string _pendingHeaderTitle = string.Empty;
     private Guid _pendingHeaderImageId;
     private Guid _pendingHeaderSubjectId;
+
+    private const string ConnectMenuId = "##connectSurfaceMenu";
 }
