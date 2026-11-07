@@ -10,8 +10,8 @@
       "SymbolName": "Lib.numbers.anim.animators.TriggerAnim",
       "SectionId": "e297379b-e86e-465d-9470-b7744aaf4b80",
       "Position": {
-        "X": 2887.6194,
-        "Y": 394.10345
+        "X": 2864.5935,
+        "Y": 419.32233
       }
     },
     {
@@ -19,8 +19,8 @@
       "SymbolName": "Lib.image.generate._obsolete._BlobOld",
       "SectionId": "e068acab-3f1f-4c4a-936a-2d5a631b18d1",
       "Position": {
-        "X": 1600.7869,
-        "Y": 165.33206
+        "X": 1699.4695,
+        "Y": 166.24576
       }
     },
     {
@@ -28,8 +28,8 @@
       "SymbolName": "Lib.numbers.bool.logic.Trigger",
       "SectionId": "6e01257e-ea2a-426e-95f1-57706f756c0c",
       "Position": {
-        "X": 1319.3451,
-        "Y": 499.1819
+        "X": 1314.6083,
+        "Y": 535.49713
       }
     },
     {
@@ -37,8 +37,8 @@
       "SymbolName": "Lib.numbers.anim.animators.TriggerAnim",
       "SectionId": "95812bb4-d98b-4bbe-b7e7-577c881298ca",
       "Position": {
-        "X": 2724.7239,
-        "Y": 209.30573
+        "X": 2704.688,
+        "Y": 238.54504
       }
     },
     {
@@ -46,8 +46,8 @@
       "SymbolName": "Lib.numbers.float.basic.Modulo",
       "SectionId": "02b96af0-3803-4ddb-af58-2f839afe52c1",
       "Position": {
-        "X": -153.33383,
-        "Y": 739.68634
+        "X": -197.0729,
+        "Y": 808.23035
       }
     },
     {
@@ -55,8 +55,17 @@
       "SymbolName": "Lib.numbers.float.basic.Modulo",
       "SectionId": "6e01257e-ea2a-426e-95f1-57706f756c0c",
       "Position": {
-        "X": 1469.3451,
-        "Y": 628.1819
+        "X": 1464.6083,
+        "Y": 664.49713
+      }
+    },
+    {
+      "ChildId": "148f3967-86fd-4cb3-9059-7483e09c99db",
+      "SymbolName": "Lib.numbers.anim.time.Time",
+      "SectionId": "531dc9b0-ad02-4259-9719-5977dcc4adba",
+      "Position": {
+        "X": -358.13828,
+        "Y": 571.683
       }
     },
     {
@@ -73,8 +82,8 @@
       "SymbolName": "Lib.render.basic.Layer2d",
       "SectionId": "61c00d70-55f1-496d-ab8b-d75387a440e6",
       "Position": {
-        "X": -188.91554,
-        "Y": 117.81756
+        "X": 27.697433,
+        "Y": 118.32245
       }
     },
     {
@@ -82,8 +91,8 @@
       "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "SectionId": "02b96af0-3803-4ddb-af58-2f839afe52c1",
       "Position": {
-        "X": -153.33383,
-        "Y": 795.68634
+        "X": -197.0729,
+        "Y": 864.23035
       }
     },
     {
@@ -91,8 +100,8 @@
       "SymbolName": "Lib.numbers.anim.animators.SequenceAnim",
       "SectionId": "d5214db2-60b4-42b3-9a43-3297dd325454",
       "Position": {
-        "X": 274.48932,
-        "Y": 636.6996
+        "X": 231.68253,
+        "Y": 649.39026
       }
     },
     {
@@ -100,8 +109,8 @@
       "SymbolName": "Lib.render.basic.Text",
       "SectionId": "10deadb1-757b-4c5a-a798-7184a5868feb",
       "Position": {
-        "X": 1913.9928,
-        "Y": 153.4797
+        "X": 2064.758,
+        "Y": 181.8053
       }
     },
     {
@@ -109,8 +118,8 @@
       "SymbolName": "Lib.numbers.float.basic.Pow",
       "SectionId": "02b96af0-3803-4ddb-af58-2f839afe52c1",
       "Position": {
-        "X": -3.3339539,
-        "Y": 739.68634
+        "X": -47.07303,
+        "Y": 808.23035
       }
     },
     {
@@ -118,8 +127,8 @@
       "SymbolName": "Lib.numbers.float.random.PerlinNoise",
       "SectionId": "d1a48210-aa37-4a47-bc5b-ecb4974738b2",
       "Position": {
-        "X": -192.5735,
-        "Y": 387.46695
+        "X": -236.31256,
+        "Y": 406.065
       }
     },
     {
@@ -136,8 +145,8 @@
       "SymbolName": "Lib.numbers.color.BlendColors",
       "SectionId": "95812bb4-d98b-4bbe-b7e7-577c881298ca",
       "Position": {
-        "X": 3022.9338,
-        "Y": 153.30573
+        "X": 3002.898,
+        "Y": 182.54504
       }
     },
     {
@@ -145,8 +154,8 @@
       "SymbolName": "Lib.io.audio.AudioReaction",
       "SectionId": "6e01257e-ea2a-426e-95f1-57706f756c0c",
       "Position": {
-        "X": 1319.3451,
-        "Y": 585.1819
+        "X": 1314.6083,
+        "Y": 621.49713
       }
     },
     {
@@ -163,8 +172,8 @@
       "SymbolName": "Lib.numbers.float.basic.Sum",
       "SectionId": "e297379b-e86e-465d-9470-b7744aaf4b80",
       "Position": {
-        "X": 3037.6194,
-        "Y": 394.10345
+        "X": 3115.2498,
+        "Y": 428.31335
       }
     },
     {
@@ -172,8 +181,8 @@
       "SymbolName": "Lib.numbers.color.SampleGradient",
       "SectionId": "95812bb4-d98b-4bbe-b7e7-577c881298ca",
       "Position": {
-        "X": 2872.9338,
-        "Y": 153.30573
+        "X": 2852.898,
+        "Y": 182.54504
       },
       "ConnectionStyleOverrides": [
         {
@@ -196,7 +205,7 @@
       "SymbolName": "Lib.numbers.vec3.PerlinNoise3",
       "SectionId": "363650ae-441e-4058-9319-6c33eea9d63f",
       "Position": {
-        "X": 278.6701,
+        "X": 236.35913,
         "Y": 1086.2256
       }
     },
@@ -223,8 +232,8 @@
       "SymbolName": "Lib.numbers.anim._obsolete.Counter",
       "SectionId": "e068acab-3f1f-4c4a-936a-2d5a631b18d1",
       "Position": {
-        "X": 1450.7869,
-        "Y": 284.33206
+        "X": 1523.8851,
+        "Y": 302.6066
       }
     },
     {
@@ -232,8 +241,8 @@
       "SymbolName": "Lib.numbers.anim._obsolete.Counter",
       "SectionId": "6e01257e-ea2a-426e-95f1-57706f756c0c",
       "Position": {
-        "X": 1970.3651,
-        "Y": 647.597
+        "X": 1965.6283,
+        "Y": 683.91223
       }
     },
     {
@@ -241,7 +250,7 @@
       "SymbolName": "Lib.numbers.vec2.PerlinNoise2",
       "SectionId": "363650ae-441e-4058-9319-6c33eea9d63f",
       "Position": {
-        "X": 278.6701,
+        "X": 236.35913,
         "Y": 1030.2256
       }
     },
@@ -259,8 +268,8 @@
       "SymbolName": "Lib.numbers.anim.animators.TriggerAnim",
       "SectionId": "6e01257e-ea2a-426e-95f1-57706f756c0c",
       "Position": {
-        "X": 1818.2223,
-        "Y": 491.1814
+        "X": 1813.4855,
+        "Y": 527.49664
       }
     },
     {
@@ -268,8 +277,8 @@
       "SymbolName": "Lib.numbers.anim._obsolete._Time_old",
       "SectionId": "6e01257e-ea2a-426e-95f1-57706f756c0c",
       "Position": {
-        "X": 1319.3451,
-        "Y": 628.1819
+        "X": 1314.6083,
+        "Y": 664.49713
       }
     },
     {
@@ -277,8 +286,8 @@
       "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "SectionId": "7333c3c1-a0f0-41c9-9fd8-518804226909",
       "Position": {
-        "X": 273.9935,
-        "Y": 389.04315
+        "X": 231.19638,
+        "Y": 381.4257
       }
     },
     {
@@ -287,7 +296,7 @@
       "SectionId": "e068acab-3f1f-4c4a-936a-2d5a631b18d1",
       "Position": {
         "X": 1300.7869,
-        "Y": 221.33206
+        "Y": 268.84586
       }
     },
     {
@@ -295,8 +304,8 @@
       "SymbolName": "Lib.numbers.float.basic.Add",
       "SectionId": "531dc9b0-ad02-4259-9719-5977dcc4adba",
       "Position": {
-        "X": -60.93071,
-        "Y": 517.6301
+        "X": -47.07289,
+        "Y": 564.01086
       }
     },
     {
@@ -313,8 +322,8 @@
       "SymbolName": "Lib.numbers.anim.animators.TriggerAnim",
       "SectionId": "e297379b-e86e-465d-9470-b7744aaf4b80",
       "Position": {
-        "X": 2759.863,
-        "Y": 448.03687
+        "X": 2761.5754,
+        "Y": 476.98376
       }
     },
     {
@@ -322,8 +331,17 @@
       "SymbolName": "Lib.numbers.anim.animators.TriggerAnim",
       "SectionId": "6e01257e-ea2a-426e-95f1-57706f756c0c",
       "Position": {
-        "X": 1818.2223,
-        "Y": 547.1814
+        "X": 1813.4855,
+        "Y": 583.49664
+      }
+    },
+    {
+      "ChildId": "7c817b05-8185-4241-aab5-c2f799ea60bb",
+      "SymbolName": "Lib.numbers.anim.time.Time",
+      "SectionId": "d1a48210-aa37-4a47-bc5b-ecb4974738b2",
+      "Position": {
+        "X": -395.7377,
+        "Y": 337.43445
       }
     },
     {
@@ -331,8 +349,8 @@
       "SymbolName": "Lib.numbers.bool.combine.Any",
       "SectionId": "6e01257e-ea2a-426e-95f1-57706f756c0c",
       "Position": {
-        "X": 1636.4865,
-        "Y": 491.0504
+        "X": 1631.7496,
+        "Y": 527.36566
       }
     },
     {
@@ -340,8 +358,8 @@
       "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "SectionId": "7333c3c1-a0f0-41c9-9fd8-518804226909",
       "Position": {
-        "X": 273.9935,
-        "Y": 475.04315
+        "X": 231.19638,
+        "Y": 467.4257
       }
     },
     {
@@ -349,8 +367,8 @@
       "SymbolName": "Lib.numbers.anim._obsolete.Counter",
       "SectionId": "6e01257e-ea2a-426e-95f1-57706f756c0c",
       "Position": {
-        "X": 1319.3451,
-        "Y": 542.1819
+        "X": 1314.6083,
+        "Y": 578.49713
       }
     },
     {
@@ -358,7 +376,7 @@
       "SymbolName": "Lib.numbers.anim._obsolete.Counter",
       "SectionId": "0f56d01a-e2bd-4948-8357-f52caa52a7ae",
       "Position": {
-        "X": 278.01907,
+        "X": 235.7081,
         "Y": 776.65234
       }
     },
@@ -367,8 +385,8 @@
       "SymbolName": "Lib.numbers.float.adjust.Remap",
       "SectionId": "6e01257e-ea2a-426e-95f1-57706f756c0c",
       "Position": {
-        "X": 1968.2223,
-        "Y": 491.1814
+        "X": 1963.4855,
+        "Y": 527.49664
       }
     },
     {
@@ -376,8 +394,8 @@
       "SymbolName": "Lib.numbers.float.process.HasValueDecreased",
       "SectionId": "6e01257e-ea2a-426e-95f1-57706f756c0c",
       "Position": {
-        "X": 1619.3451,
-        "Y": 628.1819
+        "X": 1614.6083,
+        "Y": 664.49713
       }
     },
     {
@@ -385,7 +403,7 @@
       "SymbolName": "Lib.numbers.anim._obsolete.Counter",
       "SectionId": "0f56d01a-e2bd-4948-8357-f52caa52a7ae",
       "Position": {
-        "X": 278.01907,
+        "X": 235.7081,
         "Y": 819.65234
       }
     },
@@ -394,8 +412,8 @@
       "SymbolName": "Lib.numbers.float.trigonometry.Sin",
       "SectionId": "531dc9b0-ad02-4259-9719-5977dcc4adba",
       "Position": {
-        "X": -210.93073,
-        "Y": 517.6301
+        "X": -197.0729,
+        "Y": 564.01086
       }
     },
     {
@@ -403,8 +421,8 @@
       "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "SectionId": "7333c3c1-a0f0-41c9-9fd8-518804226909",
       "Position": {
-        "X": 274.47964,
-        "Y": 299.85956
+        "X": 231.68253,
+        "Y": 292.2421
       }
     },
     {
@@ -444,8 +462,8 @@
       "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "SectionId": "7333c3c1-a0f0-41c9-9fd8-518804226909",
       "Position": {
-        "X": 274.47964,
-        "Y": 342.85962
+        "X": 231.68253,
+        "Y": 335.24216
       }
     },
     {
@@ -453,8 +471,8 @@
       "SymbolName": "Lib.numbers.anim._obsolete.Counter",
       "SectionId": "95812bb4-d98b-4bbe-b7e7-577c881298ca",
       "Position": {
-        "X": 2722.9338,
-        "Y": 153.30573
+        "X": 2702.898,
+        "Y": 182.54504
       }
     },
     {
@@ -462,26 +480,8 @@
       "SymbolName": "Types.Values.Vector3",
       "SectionId": "d1a48210-aa37-4a47-bc5b-ecb4974738b2",
       "Position": {
-        "X": -41.53813,
-        "Y": 271.41602
-      }
-    },
-    {
-      "ChildId": "ae379200-b3ef-42e0-b7a3-135e15b6623e",
-      "SymbolName": "Lib.numbers.anim._obsolete._Time_old",
-      "SectionId": "d1a48210-aa37-4a47-bc5b-ecb4974738b2",
-      "Position": {
-        "X": -344.7715,
-        "Y": 302.99454
-      }
-    },
-    {
-      "ChildId": "ae957e84-0280-43f4-81e6-6be75dc884e3",
-      "SymbolName": "Lib.numbers.anim._obsolete._Time_old",
-      "SectionId": "531dc9b0-ad02-4259-9719-5977dcc4adba",
-      "Position": {
-        "X": -351.99863,
-        "Y": 514.17896
+        "X": -6.806137,
+        "Y": 313.69794
       }
     },
     {
@@ -489,8 +489,8 @@
       "SymbolName": "Lib.numbers.color.SampleGradient",
       "SectionId": "95812bb4-d98b-4bbe-b7e7-577c881298ca",
       "Position": {
-        "X": 2872.9338,
-        "Y": 209.30573
+        "X": 2852.898,
+        "Y": 238.54504
       }
     },
     {
@@ -498,8 +498,8 @@
       "SymbolName": "Lib.numbers.float.random.PerlinNoise",
       "SectionId": "531dc9b0-ad02-4259-9719-5977dcc4adba",
       "Position": {
-        "X": -210.93073,
-        "Y": 573.6301
+        "X": -197.0729,
+        "Y": 620.01086
       }
     },
     {
@@ -516,8 +516,8 @@
       "SymbolName": "Lib.numbers.curve.SampleCurve",
       "SectionId": "6e01257e-ea2a-426e-95f1-57706f756c0c",
       "Position": {
-        "X": 1970.3651,
-        "Y": 591.597
+        "X": 1965.6283,
+        "Y": 627.91223
       }
     },
     {
@@ -552,14 +552,14 @@
       "SymbolName": "Lib.numbers.color.SampleGradient",
       "SectionId": "e068acab-3f1f-4c4a-936a-2d5a631b18d1",
       "Position": {
-        "X": 1450.7869,
-        "Y": 165.33206
+        "X": 1523.8851,
+        "Y": 164.4183
       }
     },
     {
       "ChildId": "c68df065-f78f-4bd2-9a0b-cc421158b84b",
       "SymbolName": "Lib.render.basic.Text",
-      "SectionId": "d0729712-35f1-4955-81db-6c74338387da",
+      "SectionId": "e297379b-e86e-465d-9470-b7744aaf4b80",
       "Position": {
         "X": 3334.3596,
         "Y": 395.9652
@@ -570,8 +570,8 @@
       "SymbolName": "Lib.numbers.anim.animators.SequenceAnim",
       "SectionId": "d5214db2-60b4-42b3-9a43-3297dd325454",
       "Position": {
-        "X": 274.48932,
-        "Y": 593.6996
+        "X": 231.68253,
+        "Y": 606.39026
       }
     },
     {
@@ -579,8 +579,8 @@
       "SymbolName": "Lib.numbers.float.trigonometry.Sin",
       "SectionId": "d1a48210-aa37-4a47-bc5b-ecb4974738b2",
       "Position": {
-        "X": -192.5735,
-        "Y": 331.46695
+        "X": -236.31256,
+        "Y": 350.06494
       }
     },
     {
@@ -588,8 +588,8 @@
       "SymbolName": "Lib.numbers.float.basic.Modulo",
       "SectionId": "d1a48210-aa37-4a47-bc5b-ecb4974738b2",
       "Position": {
-        "X": -191.53813,
-        "Y": 271.41602
+        "X": -236.31256,
+        "Y": 305.07227
       }
     },
     {
@@ -602,12 +602,21 @@
       }
     },
     {
+      "ChildId": "d62427f8-b0ca-46a6-b905-9c0b6996a2fd",
+      "SymbolName": "Lib.numbers.anim.time.Time",
+      "SectionId": "61c00d70-55f1-496d-ab8b-d75387a440e6",
+      "Position": {
+        "X": -112.30257,
+        "Y": 153.32245
+      }
+    },
+    {
       "ChildId": "d8264630-7310-4c0c-baf8-d4ada4ed4a83",
       "SymbolName": "Types.Values.Vector4",
       "SectionId": "6e01257e-ea2a-426e-95f1-57706f756c0c",
       "Position": {
-        "X": 2169.7395,
-        "Y": 535.13055
+        "X": 2165.0027,
+        "Y": 571.4458
       }
     },
     {
@@ -615,8 +624,8 @@
       "SymbolName": "Lib.numbers.anim._obsolete._Time_old",
       "SectionId": "02b96af0-3803-4ddb-af58-2f839afe52c1",
       "Position": {
-        "X": -303.33383,
-        "Y": 739.68634
+        "X": -347.0729,
+        "Y": 808.23035
       }
     },
     {
@@ -629,8 +638,8 @@
         "Y": 220.53563
       },
       "Position": {
-        "X": 805.50793,
-        "Y": 226.66878
+        "X": 946.38696,
+        "Y": 311.3427
       }
     },
     {
@@ -638,8 +647,8 @@
       "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "SectionId": "7333c3c1-a0f0-41c9-9fd8-518804226909",
       "Position": {
-        "X": 273.9935,
-        "Y": 432.04315
+        "X": 231.19638,
+        "Y": 424.4257
       }
     },
     {
@@ -647,8 +656,8 @@
       "SymbolName": "Lib.numbers.float.adjust.Remap",
       "SectionId": "e297379b-e86e-465d-9470-b7744aaf4b80",
       "Position": {
-        "X": 2887.6194,
-        "Y": 450.10345
+        "X": 2928.2278,
+        "Y": 477.73456
       }
     },
     {
@@ -656,7 +665,7 @@
       "SymbolName": "Lib.numbers.anim.animators.AnimValue",
       "SectionId": "363650ae-441e-4058-9319-6c33eea9d63f",
       "Position": {
-        "X": 278.6701,
+        "X": 236.35913,
         "Y": 974.22534
       }
     },
@@ -665,17 +674,8 @@
       "SymbolName": "Lib.numbers.float.adjust.Remap",
       "SectionId": "e068acab-3f1f-4c4a-936a-2d5a631b18d1",
       "Position": {
-        "X": 1450.7869,
-        "Y": 221.33206
-      }
-    },
-    {
-      "ChildId": "f78ae4f0-f4de-4c3e-afc6-e590ca446cca",
-      "SymbolName": "Lib.numbers.anim._obsolete._Time_old",
-      "SectionId": "61c00d70-55f1-496d-ab8b-d75387a440e6",
-      "Position": {
-        "X": -338.91553,
-        "Y": 117.81756
+        "X": 1523.8851,
+        "Y": 222.24582
       }
     },
     {
@@ -700,7 +700,7 @@
   "Sections": [
     {
       "Id": "0059af6e-4f43-4a20-81ee-064d0f932e1a",
-      "Title": "...and pick from a list of meshes to draw.",
+      "Label": "...and pick from a list of meshes to draw.",
       "ParentSectionId": "d0729712-35f1-4955-81db-6c74338387da",
       "Color": {
         "X": 0.6,
@@ -719,7 +719,8 @@
     },
     {
       "Id": "02b96af0-3803-4ddb-af58-2f839afe52c1",
-      "Title": "If values fall in the range between 0 and 1, nerds call them \"Normalized\" or \"Saturated\".\nThe Pow function is very useful to add easing to your normalized values.\n\n",
+      "Title": "nerds call them \"Normalized\" or \"Saturated\".\nThe Pow function is very useful to add easing to your normalized values.\n\n",
+      "Label": "If values fall in the range between 0 and 1, ",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -727,17 +728,18 @@
         "W": 1.0
       },
       "Position": {
-        "X": -363.33383,
-        "Y": 679.68634
+        "X": -407.0729,
+        "Y": 690.3607
       },
       "Size": {
-        "X": 606.36957,
-        "Y": 174.18112
+        "X": 600.57446,
+        "Y": 251.09338
       }
     },
     {
       "Id": "0f56d01a-e2bd-4948-8357-f52caa52a7ae",
-      "Title": "[Counter] is similar to [AnimValue].\nIt can be useful to drive continuous values like\nrotations and phases.",
+      "Title": "It can be useful to drive continuous values like rotations and phases.",
+      "Label": "[Counter] Similar to [AnimValue].",
       "ParentSectionId": "5f9df0dd-39ec-49e9-894b-e820413fdb70",
       "Color": {
         "X": 0.6,
@@ -746,17 +748,18 @@
         "W": 1.0
       },
       "Position": {
-        "X": 269.426,
+        "X": 227.11502,
         "Y": 701.56165
       },
       "Size": {
-        "X": 423.09723,
-        "Y": 157.78638
+        "X": 688.1935,
+        "Y": 184.6991
       }
     },
     {
       "Id": "10deadb1-757b-4c5a-a798-7184a5868feb",
-      "Title": "TiXL also provides possibilities for keyframe animations.\nYou can animate any scalar and vector parameter in the parameter window.\n\nAnimated operators have a small orange \"animation\" tag in the corner, \nlike this one:",
+      "Title": "\nYou can animate any scalar and vector parameter in the parameter window.\n\nAnimated operators have a small orange \"animation\" tag in the corner, \nlike this one:",
+      "Label": "TiXL also provides possibilities for keyframe animations.",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -774,7 +777,8 @@
     },
     {
       "Id": "1e8fabb8-c4ff-42e8-bf8a-a8063a46a54b",
-      "Title": "# TiXL is all about animation, so there are endless possibilities for it. This playground shows some examples. \nTry to select the operators at the end of each graph and play with them.\n\n(please activate the Idle Motion mode in the time controls)",
+      "Title": "This playground shows some examples. \nTry to select the operators at the end of each graph and play with them.\n\n(please activate the Idle Motion mode in the time controls)",
+      "Label": "TiXL is all about animation, so there are endless possibilities for it. ",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -782,17 +786,18 @@
         "W": 1.0
       },
       "Position": {
-        "X": -364.748,
-        "Y": -162.99341
+        "X": -407.8169,
+        "Y": -171.97456
       },
       "Size": {
-        "X": 1045.7872,
-        "Y": 182.38724
+        "X": 1527.809,
+        "Y": 204.4709
       }
     },
     {
       "Id": "363650ae-441e-4058-9319-6c33eea9d63f",
-      "Title": "[PerlinNoise] is the go-to algorithm to make things\njiggle in a natural way. Perfect for camera shaking\nand so many other things.",
+      "Title": "to make things jiggle in a natural way.\nPerfect for camera shaking and so many other things.",
+      "Label": "[PerlinNoise] is the go-to algorithm ",
       "ParentSectionId": "5f9df0dd-39ec-49e9-894b-e820413fdb70",
       "Color": {
         "X": 0.6,
@@ -801,17 +806,17 @@
         "W": 1.0
       },
       "Position": {
-        "X": 269.34183,
+        "X": 227.03085,
         "Y": 886.26074
       },
       "Size": {
-        "X": 423.1509,
-        "Y": 232.85461
+        "X": 688.2776,
+        "Y": 259.26575
       }
     },
     {
       "Id": "531dc9b0-ad02-4259-9719-5977dcc4adba",
-      "Title": "Keep in mind that you can always combine things.",
+      "Label": "You can always combine things.",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -819,8 +824,8 @@
         "W": 1.0
       },
       "Position": {
-        "X": -364.07782,
-        "Y": 457.23444
+        "X": -407.8169,
+        "Y": 466.30444
       },
       "Size": {
         "X": 599.6805,
@@ -829,7 +834,7 @@
     },
     {
       "Id": "558cb89d-7c4c-42fb-a837-fa6eec50fcf6",
-      "Title": "Click me",
+      "Label": "Click me",
       "ParentSectionId": "5f9df0dd-39ec-49e9-894b-e820413fdb70",
       "Color": {
         "X": 0.6,
@@ -838,17 +843,18 @@
         "W": 1.0
       },
       "Position": {
-        "X": 771.14,
-        "Y": 181.75502
+        "X": 915.3085,
+        "Y": 243.40295
       },
       "Size": {
-        "X": 101.524826,
-        "Y": 284.40936
+        "X": 201.4292,
+        "Y": 458.1587
       }
     },
     {
       "Id": "5f9df0dd-39ec-49e9-894b-e820413fdb70",
-      "Title": "# There are operators that are animated without a connection to [Time].\nThese operators are such powerful tools that we should explain them \nin detail:",
+      "Title": "These operators are such powerful tools that we should explain them \nin detail:",
+      "Label": "Some operators are animated.",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -856,17 +862,18 @@
         "W": 1.0
       },
       "Position": {
-        "X": 254.63885,
+        "X": 212.32788,
         "Y": 41.12854
       },
       "Size": {
-        "X": 748.5127,
-        "Y": 1238.0312
+        "X": 907.6642,
+        "Y": 1389.7975
       }
     },
     {
       "Id": "61c00d70-55f1-496d-ab8b-d75387a440e6",
-      "Title": "Using time. Notice that TiXL's time is not in secs but in musical bars -\n4 beats is 1 bar. 4 bars form a measure. This means that your animation\nwill work for all BPM rates!\n\n\n",
+      "Title": "Notice that TiXL's time is not in secs but in musical bars - 4 beats is 1 bar.\n4 bars form a measure. This means that your animation\nwill work for all BPM rates!\n\n\n",
+      "Label": "Using time. ",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -874,17 +881,18 @@
         "W": 1.0
       },
       "Position": {
-        "X": -364.07782,
-        "Y": 43.578026
+        "X": -407.8169,
+        "Y": 41.12854
       },
       "Size": {
-        "X": 597.5795,
-        "Y": 160.51302
+        "X": 599.6805,
+        "Y": 166.42197
       }
     },
     {
       "Id": "6e01257e-ea2a-426e-95f1-57706f756c0c",
-      "Title": "Another powerful option for procedural animation is [TriggerAnim].\nTake a look at the following example:\n\nA different version of effects is triggered if any of the events on the left occur.",
+      "Title": "Take a look at the following example:\n\nA different version of effects is triggered if any of the events on the left occur.",
+      "Label": "Another powerful option for procedural animation is [TriggerAnim].",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -896,13 +904,14 @@
         "Y": 389.44254
       },
       "Size": {
-        "X": 1168.9999,
-        "Y": 319.19763
+        "X": 1166.4122,
+        "Y": 378.22897
       }
     },
     {
       "Id": "7333c3c1-a0f0-41c9-9fd8-518804226909",
-      "Title": "Musicians might know the [AnimValue] operator as\n\"LFO\" (Low-frequency operator).\n\nYou can adjust its main parameters directly by holding \nthe CTRL key.\n- Drag Up/Down on the left adjusts the rate in steps /4x4\n- Drag the graph to adjust ratio and bias",
+      "Title": "AKA \"LFO\" (Low-frequency operator).\nYou can adjust its main parameters directly by holding \nthe CTRL key.\n- Drag Up/Down on the left adjusts the rate in steps /4x4\n- Drag the graph to adjust ratio and bias",
+      "Label": "[AnimValue] operator",
       "ParentSectionId": "5f9df0dd-39ec-49e9-894b-e820413fdb70",
       "Color": {
         "X": 0.6,
@@ -911,17 +920,18 @@
         "W": 1.0
       },
       "Position": {
-        "X": 267.27844,
-        "Y": 158.67024
+        "X": 225.75876,
+        "Y": 127.2958
       },
       "Size": {
-        "X": 422.06427,
-        "Y": 346.85812
+        "X": 689.5497,
+        "Y": 392.12656
       }
     },
     {
       "Id": "95812bb4-d98b-4bbe-b7e7-577c881298ca",
-      "Title": "We create a new clear color for our render target by cycling through a gradient. \nNotice how [Counter] uses a modulo to repeat the cycle.",
+      "Title": "by cycling through a gradient. Notice how [Counter] uses a modulo to repeat the cycle.",
+      "Label": "We create a new clear color for our render target ",
       "ParentSectionId": "d0729712-35f1-4955-81db-6c74338387da",
       "Color": {
         "X": 0.6,
@@ -934,13 +944,13 @@
         "Y": 83.77197
       },
       "Size": {
-        "X": 694.10455,
-        "Y": 240.68817
+        "X": 759.89307,
+        "Y": 250.1322
       }
     },
     {
       "Id": "c160e623-08f7-4ba0-b9ee-701fa728eec6",
-      "Title": "Use an integer count to pick a string from a list...",
+      "Label": "Use an integer count to pick a string from a list...",
       "ParentSectionId": "d0729712-35f1-4955-81db-6c74338387da",
       "Color": {
         "X": 0.6,
@@ -953,32 +963,32 @@
         "Y": 555.6715
       },
       "Size": {
-        "X": 696.65234,
+        "X": 754.751,
         "Y": 212.0
       }
     },
     {
       "Id": "c6d0cf73-962f-4e66-ade9-60fb8e72f0d4",
-      "Title": "* These are automatically connected to time.",
+      "Label": "* These are automatically connected to time.",
       "ParentSectionId": "5f9df0dd-39ec-49e9-894b-e820413fdb70",
       "Color": {
-        "X": 0.464539,
-        "Y": 0.464539,
-        "Z": 0.464539,
-        "W": 0.25882354
+        "X": 0.4627451,
+        "Y": 0.4627451,
+        "Z": 0.4627451,
+        "W": 1.0
       },
       "Position": {
-        "X": 270.53284,
-        "Y": 1160.5688
+        "X": 224.96747,
+        "Y": 1207.2716
       },
       "Size": {
-        "X": 480.41736,
-        "Y": 28.790668
+        "X": 891.7702,
+        "Y": 114.04358
       }
     },
     {
       "Id": "d0729712-35f1-4955-81db-6c74338387da",
-      "Title": "# Here is a more elaborate example of how to use an animation event...",
+      "Label": "Here is a more elaborate example of how to use an animation event...",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -996,7 +1006,8 @@
     },
     {
       "Id": "d1a48210-aa37-4a47-bc5b-ecb4974738b2",
-      "Title": "Math is your friend (even if you didn't love it in school).\nUnderstanding these 3 functions will be a game-changer for your work.",
+      "Title": "(even if you didn't love it in school).\nUnderstanding these 3 functions will be a game-changer for your work.",
+      "Label": "Math is your friend ",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -1004,8 +1015,8 @@
         "W": 1.0
       },
       "Position": {
-        "X": -363.76804,
-        "Y": 211.634
+        "X": -407.5071,
+        "Y": 219.70587
       },
       "Size": {
         "X": 601.00867,
@@ -1014,7 +1025,8 @@
     },
     {
       "Id": "d5214db2-60b4-42b3-9a43-3297dd325454",
-      "Title": "[SequenceAnim] is used to generate repetitive patterns.\nYou can adjust the steps by dragging with CTRL.\nCheck out the modes. It's very flexible.\n",
+      "Title": "You can adjust the steps by dragging with CTRL.\nCheck out the modes. It's very flexible.\n",
+      "Label": "[SequenceAnim] generates repetitive patterns.",
       "ParentSectionId": "5f9df0dd-39ec-49e9-894b-e820413fdb70",
       "Color": {
         "X": 0.6,
@@ -1023,17 +1035,18 @@
         "W": 1.0
       },
       "Position": {
-        "X": 268.06973,
+        "X": 225.75876,
         "Y": 519.42236
       },
       "Size": {
-        "X": 423.46725,
-        "Y": 168.11897
+        "X": 689.5497,
+        "Y": 170.93835
       }
     },
     {
       "Id": "e068acab-3f1f-4c4a-936a-2d5a631b18d1",
-      "Title": "Reactions to audio input or the current project soundtrack are an advanced topic.\nIt's probably easier to check out one of the tutorial videos for that.\n\nHere's a short example of what you could do with that.\nPress play to activate the soundtrack.",
+      "Title": "It's probably easier to check out one of the tutorial videos for that.\n\nHere's a short example of what you could do with that.\nPress play to activate the soundtrack.",
+      "Label": "Reactions to audio input or the current project soundtrack.",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -1051,7 +1064,8 @@
     },
     {
       "Id": "e297379b-e86e-465d-9470-b7744aaf4b80",
-      "Title": "Combine two [TriggerAnimation] with [Remap] to \ncreate a bouncy font size.",
+      "Title": "to create a bouncy font size.",
+      "Label": "Combine two [TriggerAnimation] with [Remap] ",
       "ParentSectionId": "d0729712-35f1-4955-81db-6c74338387da",
       "Color": {
         "X": 0.6,
@@ -1064,13 +1078,14 @@
         "Y": 333.90417
       },
       "Size": {
-        "X": 695.45483,
-        "Y": 212.00005
+        "X": 759.208,
+        "Y": 221.76733
       }
     },
     {
       "Id": "ed0d2b3a-8791-4b08-a04b-408338187908",
-      "Title": "If you click on \"Dope\" / \"Curve\" in the Time Control Bar,\nyou can toggle between Dopesheet and Curve mode.\nDragging keyframes while holding the Shift key toggles\nsnapping.",
+      "Title": "in the Time Control Bar, you can toggle between Dopesheet and Curve mode.\nDragging keyframes while holding the Shift key toggles\nsnapping.",
+      "Label": "Click on \"DopeView\" / \"CurveEditor\"",
       "ParentSectionId": "10deadb1-757b-4c5a-a798-7184a5868feb",
       "Color": {
         "X": 0.6,
@@ -1083,9 +1098,43 @@
         "Y": 249.09521
       },
       "Size": {
-        "X": 483.10703,
-        "Y": 104.82826
+        "X": 543.9248,
+        "Y": 117.68942
       }
     }
-  ]
+  ],
+  "Settings": {
+    "RenderExport": {
+  "TimeReference": "Bars",
+  "StartInBars": 0.0,
+  "EndInBars": 8.0,
+  "FrameRate": 60.0,
+  "OverrideMotionBlurSamples": -1,
+  "RenderMode": "Video",
+  "VideoCodec": "H264",
+  "Bitrate": 25000000,
+  "AutoIncrementVersionNumber": true,
+  "CreateSubFolder": true,
+  "AutoIncrementSubFolder": true,
+  "ExportAudio": true,
+  "FileFormat": "Png",
+  "TimeRange": "Custom",
+  "ContinuousClock": "Realtime",
+  "ContinuousFrameRate": "FixedFps",
+  "ResolutionFactor": 1.0,
+  "VideoFilePath": "./Render/render-v01.mp4",
+  "SequenceFilePath": "./ImageSequence/",
+  "SequenceFileName": "v01",
+  "SequencePrefix": "render"
+},
+    "Timeline": {
+  "ScaleX": 80.0,
+  "ScrollX": -5.79375,
+  "Mode": "DopeView",
+  "TimelineHeight": -1,
+  "InlineDataClipEditEnabled": false,
+  "DetailsAreaHeight": 200.0,
+  "InlineDataClipStripHeight": null
+}
+  }
 }
