@@ -9,7 +9,8 @@ namespace T3.Editor.Gui.Windows.OutputSetup;
 /// <summary>
 /// "Align Points" from a game controller, so the person aligning can stand at the wall: the right stick moves the
 /// active point, the d-pad goes to the nearest point in its direction, the shoulder buttons cycle through all of
-/// them, the right stick's button releases the active one. The left stick defines which way is
+/// them (the four outermost first, see <see cref="WritePointCycleOrder"/>), the right stick's button releases the
+/// active one. The left stick defines which way is
 /// up on the wall, which a projector mounted at an angle makes different from up on its canvas; its button sets
 /// that direction, or resets the alignment while the stick is centred.
 /// </summary>
@@ -27,11 +28,11 @@ internal sealed partial class SetupOutputView
         var wallRightOnCanvas = new Vector2(-_wallUpOnCanvas.Y, _wallUpOnCanvas.X);
         if (WasPressed(pad.LeftShoulder, _lastPad.LeftShoulder))
         {
-            CycleActivePoint(traced, -1);
+            CycleActivePoint(subject, -1);
         }
         else if (WasPressed(pad.RightShoulder, _lastPad.RightShoulder) || !TryFindPoint(traced, _activePointId, out _))
         {
-            CycleActivePoint(traced, 1);
+            CycleActivePoint(subject, 1);
         }
         else if (WasPressed(pad.DirectionalPad.Left, _lastPad.DirectionalPad.Left))
         {
@@ -108,8 +109,10 @@ internal sealed partial class SetupOutputView
         var wallRightOnCanvas = new Vector2(-_wallUpOnCanvas.Y, _wallUpOnCanvas.X);
         var direction = _wallUpOnCanvas * thumb.Y + wallRightOnCanvas * thumb.X;
 
-        // Speed grows with the cube of the deflection: full travel crosses the wall, a light touch sets single pixels.
-        var pixels = direction * deflection * deflection * MaxPointSpeedOfCanvasHeightPerSec * canvasSize.Y * ImGui.GetIO().DeltaTime;
+        // A steep curve: full travel crosses the wall quickly, while the lower half of the stick stays below a few
+        // pixels per second for placing a point precisely.
+        var speed = MathF.Pow(deflection, PointSpeedCurveExponent) * MaxPointSpeedOfCanvasHeightPerSec * canvasSize.Y;
+        var pixels = direction / deflection * speed * ImGui.GetIO().DeltaTime;
         var aim = AimOf(mapping, point!.Id, point.P1 + subject.TracedToPinned, surfaceToOutput, canvasSize);
         mapping.PointAims[point.Id] = new Surface.OutputMapping.PointAim(aim.Position + pixels / canvasSize, true);
         SolvePinFromTargets(subject, mapping, canvasSize);
@@ -125,20 +128,19 @@ internal sealed partial class SetupOutputView
         EndGesture(setup);
     }
 
-    /** Walks the annotations from the active point to the next point in that direction, wrapping around. */
-    private void CycleActivePoint(Surface surface, int step)
+    /** Steps the active point along the shoulder-button order, wrapping around; with none active, starts at an end. */
+    private void CycleActivePoint(AlignSubject subject, int step)
     {
-        var count = surface.Annotations.Count;
-        var activeIndex = surface.Annotations.FindIndex(annotation => annotation.Id == _activePointId);
-        for (var offset = 1; offset <= count; offset++)
-        {
-            var candidate = surface.Annotations[((activeIndex + step * offset) % count + count) % count];
-            if (candidate.IsPoint)
-            {
-                _activePointId = candidate.Id;
-                return;
-            }
-        }
+        WritePointCycleOrder(subject.Traced, subject.TracedToPinned);
+        var count = _cycleOrder.Count;
+        if (count == 0)
+            return;
+
+        var activeIndex = _cycleOrder.IndexOf(_activePointId);
+        var nextIndex = activeIndex < 0
+                            ? step > 0 ? 0 : count - 1
+                            : ((activeIndex + step) % count + count) % count;
+        _activePointId = _cycleOrder[nextIndex];
     }
 
     /// <summary>
@@ -198,6 +200,9 @@ internal sealed partial class SetupOutputView
 
     private const float MinThumbForDirection = 0.3f;
     private const float MaxPointSpeedOfCanvasHeightPerSec = 0.25f;
+
+    /** Higher values slow small stick deflections further while full deflection keeps the top speed. */
+    private const float PointSpeedCurveExponent = 5f;
 
     private GamePadState _lastPad;
     private bool _isGamepadMovingPoint;

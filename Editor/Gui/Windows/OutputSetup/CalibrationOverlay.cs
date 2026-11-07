@@ -73,11 +73,13 @@ internal static class CalibrationOverlay
     /// The points belong to <paramref name="pointSource"/>, which for a region is its traced ancestor;
     /// <paramref name="pointOffset"/> carries them into the pinned surface's space.
     /// </summary>
+    /// <param name="ignoredPointIds">Points the pin solve leaves out; their discs and marks are drawn faded.</param>
     public static void SetCalibrationPhoto(Guid surfaceId, ShaderResourceView srv, Vector2 uvMin, Vector2 uvMax, float radiusOfHeight, Guid activePointId,
-                                           Surface pointSource, Vector2 pointOffset)
+                                           Surface pointSource, Vector2 pointOffset, IReadOnlySet<Guid> ignoredPointIds)
     {
         var uv = new Vector4(uvMin.X, uvMin.Y, uvMax.X, uvMax.Y);
-        _photo.Set(new CalibrationPhoto(surfaceId, srv, uv, radiusOfHeight, activePointId, pointSource, pointOffset), ImGui.GetFrameCount());
+        _photo.Set(new CalibrationPhoto(surfaceId, srv, uv, radiusOfHeight, activePointId, pointSource, pointOffset, ignoredPointIds),
+                   ImGui.GetFrameCount());
     }
 
     /// <summary>Shows an arrow around the active point in a direction on the canvas (Y down), while one is being chosen.</summary>
@@ -195,7 +197,8 @@ internal static class CalibrationOverlay
                                        };
                 }
 
-                drawItems.Add(new OutputCompositor.DrawItem(photo.Srv, textureToNdc, new Vector4(0, 0, 1, 1), Vector4.One,
+                var opacity = photo.IgnoredPointIds.Contains(annotation.Id) ? IgnoredPointOpacity : 1f;
+                drawItems.Add(new OutputCompositor.DrawItem(photo.Srv, textureToNdc, new Vector4(0, 0, 1, 1), new Vector4(1, 1, 1, opacity),
                                                             Vector4.Zero, Vector4.Zero, Vector4.Zero,
                                                             new Vector4(centre.X, centre.Y, radius, 1)));
             }
@@ -317,7 +320,11 @@ internal static class CalibrationOverlay
 
         var discRadius = canvasSize.Y * photo.RadiusOfHeight;
         var outlineWidth = isSet ? _setPointOutlineWidth : _pointOutlineWidth;
-        AddRing(target, discRadius - _outlineOverlapWithDisc, outlineWidth + _outlineOverlapWithDisc, isSet ? _setPointOutlineColor : _pointOutlineColor);
+        var outlineColor = isSet ? _setPointOutlineColor : _pointOutlineColor;
+        if (photo.IgnoredPointIds.Contains(pointId))
+            outlineColor.W *= IgnoredPointOpacity;
+
+        AddRing(target, discRadius - _outlineOverlapWithDisc, outlineWidth + _outlineOverlapWithDisc, outlineColor);
 
         if (pointId == photo.ActivePointId)
         {
@@ -476,7 +483,7 @@ internal static class CalibrationOverlay
     private readonly record struct AimPoint(Guid SurfaceId, Vector2 InSurface);
 
     private readonly record struct CalibrationPhoto(Guid SurfaceId, ShaderResourceView Srv, Vector4 Uv, float RadiusOfHeight, Guid ActivePointId,
-                                                    Surface PointSource, Vector2 PointOffset);
+                                                    Surface PointSource, Vector2 PointOffset, IReadOnlySet<Guid> IgnoredPointIds);
 
     private readonly record struct EmphasizedAnnotation(Guid SurfaceId, int Index);
 
@@ -497,6 +504,9 @@ internal static class CalibrationOverlay
     {
         public Vector4 TargetSize;
     }
+
+    /** How opaque a point the pin solve ignores is drawn, on the wall and on the editor canvas alike. */
+    internal const float IgnoredPointOpacity = 0.35f;
 
     private const string LineShaderPath = "Lib:shaders/dx11/output-lines.hlsl";
     private const string QuadShaderPath = "Lib:shaders/dx11/output-quads.hlsl";
