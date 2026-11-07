@@ -3,6 +3,7 @@ using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Output;
 using T3.Core.Utils;
+using T3.Editor.Gui.MagGraph.Ui;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.Selection;
@@ -232,7 +233,7 @@ internal sealed class OutlinerItem
         }
 
         // The routing drag only starts once the press has been decided as one, so a reorder never carries a payload.
-        HandleDragDrop(setup, kindInfo, args.Id, allowSource: _dragDecidedId == args.Id && !_dragIsReorder);
+        HandleDragDrop(setup, kindInfo, args.Id, rowMin, rowMax, allowSource: _dragDecidedId == args.Id && !_dragIsReorder);
 
         if (args.Kind != SetupEntityKinds.None)
             SetupEntityContextMenu.DrawForLastItem(selection, setup, args.Kind, args.Id, args.Name);
@@ -350,6 +351,11 @@ internal sealed class OutlinerItem
             CustomComponents.StylizedText(args.Status, Fonts.FontSmall, UiColors.TextMuted.Fade(fade));
         }
 
+        var inputSlots = SetupRouting.InputSlotsOf(args.Kind);
+        if (inputSlots != SetupRouting.InputSlots.None)
+            DrawInputSlot(dl, new Vector2(rowMin.X, (rowMin.Y + rowMax.Y) * 0.5f), inputSlots,
+                          (isSelected ? UiColors.ForegroundFull : kindColor).Fade(fade));
+
         if (kindInfo.IsRoutable && args.Kind != SetupEntityKinds.Plug)
             DrawConnectionDot(dl, args.Id, new Vector2(rowMax.X, (rowMin.Y + rowMax.Y) * 0.5f), isHovered || isActive,
                               (isSelected ? UiColors.ForegroundFull : kindColor).Fade(fade));
@@ -400,7 +406,27 @@ internal sealed class OutlinerItem
         dl.AddCircleFilled(center, radius, color);
     }
 
-    private static void HandleDragDrop(Setup setup, SetupEntityKindInfo kindInfo, Guid id, bool allowSource)
+    /// <summary>
+    /// Where the item takes its connections: a dot for one input, a vertical pill for several. It sits on the row's
+    /// left edge, where the connections from the column before end.
+    /// </summary>
+    private static void DrawInputSlot(ImDrawListPtr dl, Vector2 center, SetupRouting.InputSlots slots, Color color)
+    {
+        var scale = T3Ui.UiScaleFactor;
+        if (slots == SetupRouting.InputSlots.One)
+        {
+            dl.AddCircleFilled(center, 2.5f * scale, color);
+            return;
+        }
+
+        var halfWidth = MathF.Max(1, MathF.Round(2 * scale));
+        var halfHeight = MathF.Round(6 * scale);
+        var x = MathF.Round(center.X);
+        var y = MathF.Round(center.Y);
+        dl.AddRectFilled(new Vector2(x - halfWidth, y - halfHeight), new Vector2(x + halfWidth, y + halfHeight), color, halfWidth);
+    }
+
+    private static void HandleDragDrop(Setup setup, SetupEntityKindInfo kindInfo, Guid id, Vector2 rowMin, Vector2 rowMax, bool allowSource)
     {
         // Every routable kind is both a drag source and a drop target — connections are direction-agnostic
         // (SetupRouting normalizes), so dragging an output onto a source works the same as the reverse.
@@ -428,6 +454,16 @@ internal sealed class OutlinerItem
         if ((!SetupRouting.CanConnect(dragKind, kind) && !connectsMissingContent) || dragId == id)
             return;
 
+        // Dragged in from upstream, an item with several inputs splits: the narrow left zone adds a connection, the
+        // rest replaces every connection it has, which spares clearing its inputs first.
+        if (!connectsMissingContent
+            && SetupRouting.InputSlotsOf(kind) == SetupRouting.InputSlots.Several
+            && SetupEntityKindInfo.Of(dragKind).RoutingRank < kindInfo.RoutingRank)
+        {
+            HandleSplitDrop(setup, dragKind, dragId, kind, id, rowMin, rowMax);
+            return;
+        }
+
         if (DragAndDropHandling.TryHandleDropOnItem(DragAndDropHandling.DragTypes.SetupEntity, out _) != DragAndDropHandling.DragInteractionResult.Dropped)
             return;
 
@@ -440,6 +476,59 @@ internal sealed class OutlinerItem
             SetupRouting.ApplyDrop(setup, dragKind, dragId, kind, id);
         }
     }
+
+    /** The add and replace zones of a row with several inputs, as drop targets and as their indication. */
+    private static void HandleSplitDrop(Setup setup, SetupEntityKinds dragKind, Guid dragId, SetupEntityKinds kind, Guid id,
+                                        Vector2 rowMin, Vector2 rowMax)
+    {
+        var addMaxX = MathF.Round(rowMin.X + (rowMax.X - rowMin.X) * AddZoneShareOfRow);
+        var addZone = new ImRect(rowMin, new Vector2(addMaxX, rowMax.Y));
+        var replaceZone = new ImRect(new Vector2(addMaxX, rowMin.Y), rowMax);
+
+        var addResult = DragAndDropHandling.TryHandleDropOnRect(DragAndDropHandling.DragTypes.SetupEntity, addZone, out _, drawsOutline: false);
+        var replaceResult = DragAndDropHandling.TryHandleDropOnRect(DragAndDropHandling.DragTypes.SetupEntity, replaceZone, out _, drawsOutline: false);
+        var isAddHovered = addResult != DragAndDropHandling.DragInteractionResult.None;
+        var isReplaceHovered = replaceResult != DragAndDropHandling.DragInteractionResult.None;
+
+        // The hovered zone and its "+" pulse together, from the editor's shared blink.
+        var pulse = 0.6f + 0.4f * MagGraphView.Blink;
+        var dl = ImGui.GetWindowDrawList();
+        var scale = T3Ui.UiScaleFactor;
+        var rounding = 3 * scale;
+        DrawZoneOutline(dl, addZone, isAddHovered, pulse, rounding);
+        DrawZoneOutline(dl, replaceZone, isReplaceHovered, pulse, rounding);
+
+        Icons.GetGlyphDefinition(Icon.Plus, out _, out var plusSize);
+        var plusPos = ((addZone.Min + addZone.Max - plusSize) * 0.5f).Floor();
+        Icons.DrawIconAtScreenPosition(Icon.Plus, plusPos, dl, Color.Orange.Fade(isAddHovered ? pulse : 0.5f));
+
+        if (isAddHovered)
+        {
+            ImGui.SetTooltip("Add as another input");
+        }
+        else if (isReplaceHovered)
+        {
+            ImGui.SetTooltip("Replace all inputs");
+        }
+
+        if (addResult == DragAndDropHandling.DragInteractionResult.Dropped)
+        {
+            SetupRouting.ApplyDrop(setup, dragKind, dragId, kind, id);
+        }
+        else if (replaceResult == DragAndDropHandling.DragInteractionResult.Dropped)
+        {
+            SetupRouting.ApplyDrop(setup, dragKind, dragId, kind, id, replacesInputs: true);
+        }
+    }
+
+    private static void DrawZoneOutline(ImDrawListPtr dl, ImRect zone, bool isHovered, float pulse, float rounding)
+    {
+        var thickness = MathF.Max(1, MathF.Round((isHovered ? 2 : 1) * T3Ui.UiScaleFactor));
+        dl.AddRect(zone.Min, zone.Max, Color.Orange.Fade(isHovered ? pulse : 0.5f), rounding, ImDrawFlags.None, thickness);
+    }
+
+    /** The share of a row's width the add zone takes when it splits for a drop; the replace zone gets the rest. */
+    private const float AddZoneShareOfRow = 0.3f;
 
     private readonly Dictionary<Guid, float> _connectionDotGrowth = [];
 

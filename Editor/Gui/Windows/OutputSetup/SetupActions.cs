@@ -1289,6 +1289,19 @@ internal static class SetupActions
         return mapping.OutputId == output.Id && SetupRelations.LinkedPatchOf(setup, mapping) == Guid.Empty;
     }
 
+    /// <summary>Disconnects what feeds an output or a patch, outside any undo step, the caller's. Other kinds are left alone.</summary>
+    internal static void ClearInputsInternal(Setup setup, SetupEntityKinds kind, Guid id)
+    {
+        if (kind == SetupEntityKinds.Output && setup.FindOutput(id) is { } output)
+        {
+            ClearOutputInputsInternal(setup, output);
+        }
+        else if (kind == SetupEntityKinds.Patch && setup.FindPatch(id, out _) is { } patch)
+        {
+            ClearPatchInputInternal(setup, patch);
+        }
+    }
+
     private static void ClearPatchInputInternal(Setup setup, OutputDefinition.Patch patch)
     {
         foreach (var surface in setup.Surfaces)
