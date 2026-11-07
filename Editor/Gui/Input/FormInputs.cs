@@ -795,10 +795,12 @@ internal static class FormInputs
         return modified;
     }
 
+    /// <param name="isFlushLeft">Starts at the left edge like a section header, for a checkbox that switches a whole section.</param>
     public static bool AddCheckBox(string label,
         ref bool value,
         string? tooltip = null,
-        bool? defaultValue = null)
+        bool? defaultValue = null,
+        bool isFlushLeft = false)
     {
         var hasDefault = defaultValue != null;
         var isDefault = defaultValue != null && value == (bool) defaultValue;
@@ -808,7 +810,9 @@ internal static class FormInputs
             ImGui.PushStyleVar(ImGuiStyleVar.Alpha, DefaultFadeAlpha * ImGui.GetStyle().Alpha);
         }
 
-        ImGui.SetCursorPosX(MathF.Max(LeftParameterPadding, 0) + 20 * T3Ui.UiScaleFactor);
+        if (!isFlushLeft)
+            ImGui.SetCursorPosX(MathF.Max(LeftParameterPadding, 0) + 20 * T3Ui.UiScaleFactor);
+
         var modified = DrawCheckbox(label, ref value);
 
         AppendTooltip(tooltip);
@@ -954,6 +958,13 @@ internal static class FormInputs
 
         ImGui.SameLine();
         SetCursorToParameterEdit();
+    }
+
+    /// <summary>Puts the cursor so a widget of <paramref name="width"/> ends where labels end: a control in the label column,
+    /// like a unit switch for the value beside it.</summary>
+    public static void SetCursorToLabelColumn(float width)
+    {
+        ImGui.SetCursorPosX(MathF.Max(LeftParameterPadding - width, 0) + 10);
     }
 
     public static void SetCursorToParameterEdit()

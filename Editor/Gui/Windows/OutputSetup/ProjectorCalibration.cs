@@ -45,6 +45,7 @@ internal static class ProjectorCalibration
 
         CollectCorrespondences(surface, mapping, placement, canvasSize, surfaceToPixels, _correspondences);
         var residual = MeanMissPx(pose, lens, canvas, _correspondences);
+        var hasDistance = TryGetDistanceToSurface(pose, surface, placement, out var distance);
 
         SetupUndo.RunUndoable("Solve projector camera", setup, () =>
                                                               {
@@ -55,6 +56,13 @@ internal static class ProjectorCalibration
                                                                   solved.SolvedFromSurfaceId = surface.Id;
                                                                   solved.IsZoomEntered = isZoomEntered;
                                                                   solved.CalibrationPoints = new List<CalibrationPoint>(_correspondences);
+
+                                                                  // The fields show what was solved, so the side view draws it and stays editable.
+                                                                  if (!isZoomEntered)
+                                                                      solved.ManualFovYDegrees = lens.FieldOfViewY * 180 / MathF.PI;
+
+                                                                  if (hasDistance)
+                                                                      solved.ThrowDistance = distance;
                                                               });
 
         message = DescribeSolve(setup, output.Camera!);
@@ -89,6 +97,16 @@ internal static class ProjectorCalibration
         var from = source != null ? $" from '{source}'" : string.Empty;
         var zoom = camera.IsZoomEntered ? "entered zoom, seen too squarely to measure" : $"{lens.FieldOfViewY * 180 / MathF.PI:0.#}° vertical";
         return $"Solved{from}: {zoom}, misses by {camera.ResidualPx:0.#} px.";
+    }
+
+    /** Distance along the projector's view to the surface's centre. */
+    private static bool TryGetDistanceToSurface(Pose projector, Surface surface, Pose placement, out float distance)
+    {
+        SurfaceGeometry.LocalBounds(surface, out var min, out var max);
+        var centre = System.Numerics.Vector3.Transform(new Vector3((min + max) * 0.5f, 0), placement.ToWorldMatrix());
+        var forward = System.Numerics.Vector3.Transform(-System.Numerics.Vector3.UnitZ, projector.Orientation);
+        distance = System.Numerics.Vector3.Dot(centre - projector.Position, forward);
+        return float.IsFinite(distance) && distance > 0.01f;
     }
 
     /** The top-level surface on this output covering the most of its canvas: the steadiest plane to solve from. */

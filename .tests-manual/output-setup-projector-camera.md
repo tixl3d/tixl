@@ -58,3 +58,27 @@ On an output with no surface mapped to it, click **Solve from Aligned Surface**.
 
 **Expected:**
 - The hint asks to map and align a surface first; nothing else changes.
+
+## Step: Measuring with the side view
+
+**Action:**
+On a projector output, drag the side view's distance value, then type the picture's height at the wide and the tele end and its lower edge's height above the lens, measured on a wall. Move the **Zoom** slider.
+
+**Expected:**
+- Changing the distance rescales the drawn picture and its edge values; **Zoom** and **Lens shift** stay.
+- The two heights set the ends of the zoom range; the **Zoom** slider moves the solid picture between the two faint ones; the lower edge changes the vertical **Lens shift**; the drawing follows. Each drag or typed value is one undo step.
+- With the switch on **Ratio**, a range of 1.48 1.62 on a 16:9 output reads about 21.5° 19.7° on **Zoom**, and the other way round.
+- With both ends equal (a fixed lens) the second value is faded; the slider and both height fields stay editable.
+- Typing 0.44 into the tele value of a 0.40 range is never interrupted, even when the value passes 0.4 on the way.
+- Entering the ends the wrong way round (tele wider than wide) swaps them once the field is left.
+- After **Solve from Aligned Surface**, the distance and zoom show the solved values.
+
+## Step: Projector presets
+
+**Action:**
+Open the **Model** dropdown, choose **Save as Preset...**, enter a manufacturer and model, and save. Then change the lens shift and pick the preset again.
+
+**Expected:**
+- The dropdown shows the new model, checked; the preset is listed in every project.
+- Picking it sets **Lens shift** and **Zoom** back to the preset's values. Right-click → **Remove** deletes it.
+

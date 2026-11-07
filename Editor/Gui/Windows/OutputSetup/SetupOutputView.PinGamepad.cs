@@ -221,9 +221,9 @@ internal sealed partial class SetupOutputView
     }
 
     /** Stick deflections and the point speeds they give. */
-    private static readonly float[] _speedDeflections = [0f, 0.1f, 0.3f, 0.6f, 1f];
+    private static readonly float[] _speedDeflections = [0f, 0.1f, 0.3f, 0.6f, 0.8f, 1f];
 
-    private static readonly float[] _speedsPxPerSec = [0f, 1f, 2f, 50f, 200f];
+    private static readonly float[] _speedsPxPerSec = [0f, 1f, 2f, 50f, 100f, 400f];
 
     private GamePadState _lastPad;
     private bool _isGamepadMovingPoint;
