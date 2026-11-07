@@ -4,7 +4,12 @@ Make the straightened reference photo of a surface the design guide for its real
 label on the wall becomes the place a [Text] op is put, and that text lands on the label when projected.
 Four use cases of rising ambition, one graph shape, built in four shippable phases.
 
-**Status: phase 1 shipped; phase 3 route 1 implemented 2026-11-07, awaiting a run in the editor.** Phase 3 as built:
+**Status (2026-11-07): phases 1 and 3 (route 1) shipped and used on a real projector.** Phase 3 grew a projector
+section on outputs: Is Projector, a Model dropdown with user presets and 26 researched built-in ones
+(`EditorResources/projector-presets.json`, each with source and note), lens shift, a zoom range with a Ratio | Zoom switch
+and a zoom slider, and a side view whose distance, wide/tele picture heights and lower-edge gap can be measured with a
+tape. Align Points gained gamepad confirm/cancel (A/B), release (X), find-point flash (Y, also on switching points) and
+a trigger-held inverted photo. Open: phase 2 ([SurfaceSpace]), phase 4 ([AlignmentPoints]). Phase 3 as built:
 `ProjectorSolver.TrySolveFromPlane` (Core) with a fallback zoom for squarely seen surfaces; `ProjectorCamera.LensAxis`,
 `SolvedFromSurfaceId`, `IsZoomEntered`; the output card's Projector Camera section (`ProjectorCalibration`); the
 surface card's Facing preset. Field note: on the 38 × 58 cm SpeakerBoxes pin the solved distance ranged 1.0–2.8 m

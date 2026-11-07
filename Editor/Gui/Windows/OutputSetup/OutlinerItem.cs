@@ -547,7 +547,10 @@ internal sealed class OutlinerItem
         DrawZoneOutline(dl, replaceZone, isReplaceHovered, pulse, rounding);
 
         Icons.GetGlyphDefinition(Icon.Plus, out _, out var plusSize);
-        var plusPos = ((addZone.Min + addZone.Max - plusSize) * 0.5f).Floor();
+        // In a square at the zone's left end, clear of the row's icon and name.
+        var zoneHeight = addZone.Max.Y - addZone.Min.Y;
+        var plusCentre = new Vector2(addZone.Min.X + zoneHeight * 0.5f, (addZone.Min.Y + addZone.Max.Y) * 0.5f);
+        var plusPos = (plusCentre - plusSize * 0.5f).Floor();
         Icons.DrawIconAtScreenPosition(Icon.Plus, plusPos, dl, Color.Orange.Fade(isAddHovered ? pulse : 0.5f));
 
         if (isAddHovered)
