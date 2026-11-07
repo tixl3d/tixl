@@ -199,7 +199,7 @@ internal sealed partial class MagGraphView
         // Label and description
         if (context.ActiveSectionId != magSection.Id || context.StateMachine.CurrentState != GraphStates.RenameSection)
         {
-            var labelHeight = 0f;
+            var labelHeight = 25f * T3Ui.UiScaleFactor;
             {
                 if (!string.IsNullOrEmpty(section.Label))
                 {

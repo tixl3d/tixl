@@ -108,7 +108,7 @@ internal static class SectionRenaming
         }
 
         // --- Label editing UI ---
-        ImGui.SetCursorScreenPos(screenArea.Min);
+        ImGui.SetCursorScreenPos(screenArea.Min + new Vector2(34,0));
         ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(4, 4));
         ImGui.SetNextItemWidth(LabelWidth * T3Ui.UiScaleFactor);
         ImGui.InputText("##renameSectionLabel", ref _labelBuffer, 256, ImGuiInputTextFlags.AutoSelectAll);
@@ -118,7 +118,7 @@ internal static class SectionRenaming
         // Draw placeholder if label is empty
         if (string.IsNullOrEmpty(_labelBuffer))
         {
-            ImGui.GetWindowDrawList().AddText(Fonts.FontNormal, Fonts.FontNormal.FontSize, ImGui.GetItemRectMin() + new Vector2(3, 4), UiColors.ForegroundFull.Fade(0.3f), "Label...");
+            ImGui.GetWindowDrawList().AddText(Fonts.FontNormal, Fonts.FontNormal.FontSize, ImGui.GetItemRectMin() + new Vector2(20, 4), UiColors.ForegroundFull.Fade(0.3f), "Label...");
         }
 
         ImGui.SetCursorScreenPos(new Vector2(ImGui.GetItemRectMin().X, ImGui.GetItemRectMax().Y));
