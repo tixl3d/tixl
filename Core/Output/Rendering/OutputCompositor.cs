@@ -11,6 +11,7 @@ using SharpDX.Mathematics.Interop;
 using T3.Core.Logging;
 using T3.Core.Operator.Slots;
 using T3.Core.Rendering;
+using T3.Core.Operator;
 using T3.Core.Resource;
 using Buffer = SharpDX.Direct3D11.Buffer;
 using Format = SharpDX.DXGI.Format;
@@ -69,7 +70,8 @@ public static class OutputCompositor
 
     // GridParams.w > 0.5 selects the analytic calibration grid (Srv unused); otherwise Srv is warped as content.
     public readonly record struct DrawItem(ShaderResourceView? Srv, Matrix4x4 Homography, Vector4 SourceRect, Vector4 Color,
-                                             Vector4 GridParams, Vector4 GridColor, Vector4 GridOrigin, Vector4 Mask);
+                                             Vector4 GridParams, Vector4 GridColor, Vector4 GridOrigin, Vector4 Mask,
+                                             LayerBlendModes BlendMode = LayerBlendModes.Normal);
 
     /// <summary>
     /// What an authoring host adds while calibrating, installed by that host. Null in a show, where nothing is
@@ -116,109 +118,33 @@ public static class OutputCompositor
         _drawItems.Clear();
         Overlay?.BeginCollect();
 
-        // Patches first: they are the canvas layer (pixels), and the surfaces (the room) composite over them.
-        // Painter's order among patches is list order.
-        foreach (var patch in output.Patches)
+        // Back to front, in the output's layer order: by default its patches (the canvas, in pixels) and then the
+        // surfaces mapped onto it (the room), each surface followed by the regions riding its pin.
+        OutputLayers.Collect(setup, output, _layers);
+        foreach (var layer in _layers)
         {
-            if (patch.Quad.Length < 4 || !OutputContentResolver.TryResolveSliceContent(setup, patch.SliceId, out var patchSend, out var patchRect))
-                continue;
-
-            // A fitted patch asks for its own size, so the content arrives in the patch's aspect; the context
-            // goes back to the canvas size for the next consumer.
-            var isFittedRequest = OutputContentResolver.TryGetFittedRequest(output, patch, patchRect, out var fittedResolution);
-            if (isFittedRequest)
-                context.RequestedResolution = fittedResolution;
-
-            var content = OutputContentResolver.PullContent(patchSend!);
-            if (isFittedRequest)
-                context.RequestedResolution = output.ResolvedResolution;
-
-            if (content is not { IsDisposed: false })
-                continue;
-
-            var srv = SrvManager.GetSrvForTexture(content);
-            if (srv is not { IsDisposed: false } || !TryComputeNdcHomography(TurnedQuad(patch), out var patchHomography))
-                continue;
-
-            _drawItems.Add(new DrawItem(srv, patchHomography, patchRect, patchSend!.GetColor(context), Vector4.Zero, Vector4.Zero, Vector4.Zero, Vector4.Zero));
-        }
-
-        foreach (var surface in setup.Surfaces)
-        {
-            if (!surface.IsRendered)
-                continue;
-
-            // A Layout child usually rides an ancestor's corner pin, so the mappings to walk (and the quad each
-            // one yields) come from that ancestor. Regions nest arbitrarily deep, so walk up to whichever one
-            // actually holds the pin — which is the region itself when it carries an override mapping. Which of
-            // the carrier's mappings applies is decided per output in the loop below.
-            var carrier = surface;
-            if (surface.Kind == Surface.Kinds.Layout && surface.ParentId != Guid.Empty)
+            if (layer.Patch is { } patch)
             {
-                carrier = setup.FindMappedAncestor(surface.Id);
-                if (carrier == null || !carrier.IsRendered)
-                    continue;
+                CollectPatch(setup, output, patch, context);
+                continue;
             }
 
-            OutputContentResolver.TryResolveSurfaceContent(setup, surface, out var supplier, out var resolvedRect);
-            var content = supplier == null ? null : OutputContentResolver.PullContent(supplier);
-            var srv = content is { IsDisposed: false } ? SrvManager.GetSrvForTexture(content) : null;
-            var hasContent = srv is { IsDisposed: false };
-            var color = hasContent ? supplier!.GetColor(context) : Vector4.One;
-            var sourceRect = hasContent ? resolvedRect : _fullSourceRect;
+            var carrier = layer.Surface!;
+            if (!carrier.IsRendered)
+                continue;
 
-            // While a surface is being calibrated against its photo, a disc of the photo is projected around each
-            // reference point: the wall's own picture, right where the feature is, so it can be walked onto it.
-            var projectsPhoto = Overlay != null && Overlay.ProjectsPhoto(surface.Id);
-
-            // Metres spanned by the surface, and the origin (its anchor) in source UV — the anchor is signed
-            // and Y-up while V runs downward from the top.
-            var metres = new Vector2(Math.Clamp(surface.SizeInMeters.X, 0.01f, 1000f),
-                                     Math.Clamp(surface.SizeInMeters.Y, 0.01f, 1000f));
-            var anchor01 = (surface.Anchor + Vector2.One) * 0.5f;
-            var gridOrigin = new Vector4(anchor01.X, 1f - anchor01.Y,
-                                         Math.Clamp(surface.GridSubdivisions, 1, 100), _gridMinorOpacity);
-
-            foreach (var mapping in carrier.OutputMappings)
+            foreach (var surface in setup.Surfaces)
             {
-                if (mapping.OutputId != outputId)
+                // A Layout child usually rides an ancestor's corner pin. Regions nest arbitrarily deep, so the
+                // pin is whichever ancestor actually holds one — the region itself when it carries an override
+                // mapping, which then makes it a layer of its own.
+                if (!surface.IsRendered
+                    || (!ReferenceEquals(surface, carrier)
+                        && (surface.Kind != Surface.Kinds.Layout || surface.ParentId == Guid.Empty
+                            || !ReferenceEquals(setup.FindMappedAncestor(surface.Id), carrier))))
                     continue;
 
-                var quad = mapping.Quad;
-                if (!ReferenceEquals(carrier, surface))
-                {
-                    // Buffer is consumed by TryComputeNdcHomography before the next iteration reuses it, and
-                    // that wants the canvas' 0..1 space — Vector2.One keeps the child's quad in it, where a
-                    // pixel size would hand it canvas pixels and throw the region off the canvas entirely.
-                    if (!SurfaceGeometry.TryGetRegionQuad(setup, carrier, surface, mapping, Vector2.One, _childQuadBuffer))
-                        continue;
-
-                    quad = _childQuadBuffer;
-                }
-
-                if (!TryComputeNdcHomography(quad, out var homography))
-                    continue;
-
-                if (hasContent)
-                    _drawItems.Add(new DrawItem(srv, homography, sourceRect, color, Vector4.Zero, Vector4.Zero, Vector4.Zero, Vector4.Zero));
-
-                if (projectsPhoto && ReferenceEquals(carrier, surface))
-                    Overlay?.DeferPhotoFragments(surface, mapping, homography);
-
-                // Calibration raster after the content, so it composites *over* it and stays readable while
-                // aligning. Emitted with or without content — with none, it's lines on the cleared black. Only while
-                // an authoring host is attached: a show never projects it, whatever the setup was saved with.
-                if (surface.ShowGrid && Overlay != null)
-                {
-                    _drawItems.Add(new DrawItem(null, homography, _fullSourceRect, Vector4.One,
-                                                new Vector4(metres.X, metres.Y, _gridLineThickness, 1), _gridColor, gridOrigin, Vector4.Zero));
-                }
-
-                // Annotations have to reach the wall to be usable at all: you align a line by nudging it until
-                // its *projection* lies along a real feature, and walk a point onto the feature it marks. They
-                // have their own switch, and Calibrate shows them too.
-                if ((surface.ShowMeasuringLines || projectsPhoto) && ReferenceEquals(carrier, surface))
-                    Overlay?.CollectAnnotations(surface, mapping, output.CanvasSize);
+                CollectSurface(setup, output, surface, carrier, layer.Mapping!, context);
             }
         }
 
@@ -262,11 +188,18 @@ public static class OutputCompositor
         deviceContext.PixelShader.Set(ps);
         deviceContext.PixelShader.SetSampler(0, LinearSampler);
         deviceContext.Rasterizer.State = CullNoneRasterizerState;
-        deviceContext.OutputMerger.BlendState = DefaultRenderingStates.DefaultBlendState;
         deviceContext.OutputMerger.DepthStencilState = DefaultRenderingStates.DisabledDepthStencilState;
 
+        // The shader writes premultiplied colour, so every blend mode is a fixed blend state.
+        var currentBlend = (LayerBlendModes)(-1);
         foreach (var item in _drawItems)
         {
+            if (item.BlendMode != currentBlend)
+            {
+                currentBlend = item.BlendMode;
+                deviceContext.OutputMerger.BlendState = GetBlendState(currentBlend);
+            }
+
             _shaderParams.Homography = item.Homography;
             _shaderParams.Color = item.Color;
             _shaderParams.GridParams = item.GridParams;
@@ -287,6 +220,95 @@ public static class OutputCompositor
         _statsCompositeUs += Microseconds(compositeStart);
         _compositeFrames[outputId] = (frame, true);
         return target.Texture;
+    }
+
+    /** The draw item of one patch layer: its slice, fitted or stretched onto the patch's quad. */
+    private static void CollectPatch(Setup setup, OutputDefinition output, OutputDefinition.Patch patch, EvaluationContext context)
+    {
+        if (patch.Quad.Length < 4 || !OutputContentResolver.TryResolveSliceContent(setup, patch.SliceId, out var patchSend, out var patchRect))
+            return;
+
+        // A fitted patch asks for its own size, so the content arrives in the patch's aspect; the context
+        // goes back to the canvas size for the next consumer.
+        var isFittedRequest = OutputContentResolver.TryGetFittedRequest(output, patch, patchRect, out var fittedResolution);
+        if (isFittedRequest)
+            context.RequestedResolution = fittedResolution;
+
+        var content = OutputContentResolver.PullContent(patchSend!);
+        if (isFittedRequest)
+            context.RequestedResolution = output.ResolvedResolution;
+
+        if (content is not { IsDisposed: false })
+            return;
+
+        var srv = SrvManager.GetSrvForTexture(content);
+        if (srv is not { IsDisposed: false } || !TryComputeNdcHomography(TurnedQuad(patch), out var patchHomography))
+            return;
+
+        _drawItems.Add(new DrawItem(srv, patchHomography, patchRect, patchSend!.GetColor(context) * patch.LayerColor, Vector4.Zero, Vector4.Zero,
+                                    Vector4.Zero, Vector4.Zero, patch.BlendMode));
+    }
+
+    /// <summary>
+    /// The draw items of one surface within its carrier's layer: its content through the carrier's pin, and while
+    /// an authoring host is attached, its calibration raster, photo discs and measuring lines.
+    /// </summary>
+    private static void CollectSurface(Setup setup, OutputDefinition output, Surface surface, Surface carrier, Surface.OutputMapping mapping,
+                                       EvaluationContext context)
+    {
+        OutputContentResolver.TryResolveSurfaceContent(setup, surface, out var supplier, out var resolvedRect);
+        var content = supplier == null ? null : OutputContentResolver.PullContent(supplier);
+        var srv = content is { IsDisposed: false } ? SrvManager.GetSrvForTexture(content) : null;
+        var hasContent = srv is { IsDisposed: false };
+        var color = hasContent ? supplier!.GetColor(context) * mapping.LayerColor : Vector4.One;
+        var sourceRect = hasContent ? resolvedRect : _fullSourceRect;
+
+        // While a surface is being calibrated against its photo, a disc of the photo is projected around each
+        // reference point: the wall's own picture, right where the feature is, so it can be walked onto it.
+        var isCarrier = ReferenceEquals(carrier, surface);
+        var projectsPhoto = Overlay != null && Overlay.ProjectsPhoto(surface.Id);
+
+        var quad = mapping.Quad;
+        if (!isCarrier)
+        {
+            // Buffer is consumed by TryComputeNdcHomography right below, and that wants the canvas' 0..1 space —
+            // Vector2.One keeps the child's quad in it, where a pixel size would hand it canvas pixels and throw
+            // the region off the canvas entirely.
+            if (!SurfaceGeometry.TryGetRegionQuad(setup, carrier, surface, mapping, Vector2.One, _childQuadBuffer))
+                return;
+
+            quad = _childQuadBuffer;
+        }
+
+        if (!TryComputeNdcHomography(quad, out var homography))
+            return;
+
+        if (hasContent)
+            _drawItems.Add(new DrawItem(srv, homography, sourceRect, color, Vector4.Zero, Vector4.Zero, Vector4.Zero, Vector4.Zero, mapping.BlendMode));
+
+        if (projectsPhoto && isCarrier)
+            Overlay?.DeferPhotoFragments(surface, mapping, homography);
+
+        // Calibration raster after the content, so it composites *over* it and stays readable while aligning.
+        // Emitted with or without content — with none, it's lines on the cleared black. Only while an authoring
+        // host is attached: a show never projects it, whatever the setup was saved with.
+        if (surface.ShowGrid && Overlay != null)
+        {
+            // Metres spanned by the surface, and the origin (its anchor) in source UV — the anchor is signed and
+            // Y-up while V runs downward from the top.
+            var metres = new Vector2(Math.Clamp(surface.SizeInMeters.X, 0.01f, 1000f),
+                                     Math.Clamp(surface.SizeInMeters.Y, 0.01f, 1000f));
+            var anchor01 = (surface.Anchor + Vector2.One) * 0.5f;
+            var gridOrigin = new Vector4(anchor01.X, 1f - anchor01.Y, Math.Clamp(surface.GridSubdivisions, 1, 100), _gridMinorOpacity);
+            _drawItems.Add(new DrawItem(null, homography, _fullSourceRect, Vector4.One,
+                                        new Vector4(metres.X, metres.Y, _gridLineThickness, 1), _gridColor, gridOrigin, Vector4.Zero));
+        }
+
+        // Annotations have to reach the wall to be usable at all: you align a line by nudging it until its
+        // *projection* lies along a real feature, and walk a point onto the feature it marks. They have their
+        // own switch, and Calibrate shows them too.
+        if ((surface.ShowMeasuringLines || projectsPhoto) && isCarrier)
+            Overlay?.CollectAnnotations(surface, mapping, output.CanvasSize);
     }
 
     /// <summary>
@@ -326,7 +348,7 @@ public static class OutputCompositor
         deviceContext.PixelShader.Set(_pixelShaderResource!.Value);
         deviceContext.PixelShader.SetSampler(0, LinearSampler);
         deviceContext.Rasterizer.State = CullNoneRasterizerState;
-        deviceContext.OutputMerger.BlendState = DefaultRenderingStates.DefaultBlendState;
+        deviceContext.OutputMerger.BlendState = GetBlendState(LayerBlendModes.Normal);
         deviceContext.OutputMerger.DepthStencilState = DefaultRenderingStates.DisabledDepthStencilState;
 
         _shaderParams.Homography = homography;
@@ -524,6 +546,42 @@ public static class OutputCompositor
 
     /// <summary>Creates the constant buffer once, then updates it in place: the compositor uploads once per draw
     /// item every frame, so a staging stream per upload would allocate in the hottest loop of the output path.</summary>
+    /// <summary>
+    /// The blend state for a layer's mode, made once. Colour arrives premultiplied by alpha, so a layer's opacity
+    /// fades every mode towards leaving the layers under it unchanged. Alpha accumulates as for Normal in each.
+    /// </summary>
+    private static BlendState GetBlendState(LayerBlendModes mode)
+    {
+        var index = (int)mode;
+        if ((uint)index >= (uint)_blendStates.Length)
+            index = 0;
+
+        if (_blendStates[index] is { IsDisposed: false } existing)
+            return existing;
+
+        var (source, destination) = mode switch
+                                        {
+                                            LayerBlendModes.Add      => (BlendOption.One, BlendOption.One),
+                                            LayerBlendModes.Multiply => (BlendOption.DestinationColor, BlendOption.InverseSourceAlpha),
+                                            LayerBlendModes.Screen   => (BlendOption.One, BlendOption.InverseSourceColor),
+                                            _                        => (BlendOption.One, BlendOption.InverseSourceAlpha),
+                                        };
+        var description = new BlendStateDescription();
+        description.RenderTarget[0].IsBlendEnabled = true;
+        description.RenderTarget[0].SourceBlend = source;
+        description.RenderTarget[0].DestinationBlend = destination;
+        description.RenderTarget[0].BlendOperation = BlendOperation.Add;
+        description.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
+        description.RenderTarget[0].DestinationAlphaBlend = BlendOption.InverseSourceAlpha;
+        description.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
+        description.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+        var state = new BlendState(ResourceManager.Device, description);
+        _blendStates[index] = state;
+        return state;
+    }
+
+    private static readonly BlendState?[] _blendStates = new BlendState?[4];
+
     private static void UploadShaderParams()
     {
         if (_paramBuffer is not { IsDisposed: false })
@@ -566,6 +624,7 @@ public static class OutputCompositor
     /** Which outputs were composited this frame, and whether anything was drawn. */
     private static readonly Dictionary<Guid, (int Frame, bool HasContent)> _compositeFrames = new();
     private static readonly List<DrawItem> _drawItems = [];
+    private static readonly List<OutputLayers.Layer> _layers = [];
     private static Resource<VertexShader>? _vertexShaderResource;
     private static Resource<PixelShader>? _pixelShaderResource;
     private static ShaderParams _shaderParams;

@@ -12,8 +12,8 @@ prerequisites:
 ---
 
 Covers Patches: an output's direct pipe is a list of **patches**, each a rectangle of
-output pixels fed by one slice. Patches composite underneath any surfaces mapped to the
-same output. The second half covers editing patches on the output canvas, the Split
+output pixels fed by one slice. By default patches composite underneath any surfaces mapped to the
+same output; the output's **Layers** list reorders them. The second half covers editing patches on the output canvas, the Split
 helpers, and promoting a patch to a surface.
 
 ## Step: Build the test setup
@@ -300,3 +300,27 @@ Right-click the "P1" item in the OUTPUTS column and choose **Clear Inputs**; the
   dropped directly on it. The patch items stay under "P1" with their connections, including those
   from surfaces pinned onto a patch, and the surfaces and their slices remain. The entry is greyed
   out when only patches are fed. Ctrl+Z restores everything in one step.
+
+## Step: Layers
+
+**Action:**
+1. With "Surface 1" mapped onto "P1" and "Patch 1" fed, select "P1" in the OUTPUTS column and look at the Parameter window.
+2. Drag the grip of the "Patch 1" layer above "Surface 1" and release. Press Ctrl+Z, then Ctrl+Shift+Z.
+3. Set the patch layer's blend mode to **Multiply**, then **Add**, then **Screen**, then back to **Normal**.
+4. Drag its opacity from 100% to 30%. Click its tint swatch and pick red.
+5. Save, close and reopen the project, then select "P1" again.
+6. Click the × on the "Surface 1" layer, then press Ctrl+Z.
+
+**Expected:**
+- After 1: a **Layers** section sits above **Patches**, front first: "Surface 1" on top, then the patch, labelled
+  with its content's name and a patch icon. Clicking a name shows that item's settings. Content dropped straight
+  onto an output (its whole-canvas patch, not listed under Patches) shows the content icon instead, and its click
+  selects the content item. In the Flow Outliner the lines into "P1" end spread along its input pill, front layer
+  at the top, and swap ends when the layers are reordered.
+  Hovering a layer row lights that item's frame on the canvas and its Flow Outliner item.
+- After 2: the patch draws over the surface on the output canvas and the projector. Undo and redo each take the
+  whole drag as one step.
+- After 3: Multiply darkens the surface below by the patch's picture, Add and Screen brighten it, Normal covers it.
+- After 4: the patch fades to 30% over what is below, then turns red; each drag or pick is one undo step.
+- After 5: order, blend mode, opacity and tint are as they were.
+- After 6: the surface disappears from the canvas and the list. Ctrl+Z brings it back with its corner pin unchanged.

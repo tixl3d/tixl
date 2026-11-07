@@ -52,6 +52,12 @@ public sealed class Surface
         /// dropped on a patch links to it, and aiming the pin by hand ends the link.</summary>
         public Guid PatchId;
 
+        /// <summary>Multiplies this surface's picture on this output, alpha included: the layer's tint and opacity.</summary>
+        public Vector4 LayerColor = Vector4.One;
+
+        /// <summary>How this surface combines with the layers under it on this output.</summary>
+        public LayerBlendModes BlendMode;
+
 /// <summary>
         /// Where one of the surface's reference points sits on this output, in the same 0..1 canvas space.
         /// <para><see cref="IsAimed"/> means the user put it there and the pin is solved to project the point
@@ -123,6 +129,12 @@ public sealed class Surface
                 writer.WriteEndArray();
             }
 
+            if (LayerColor != Vector4.One)
+                writer.WriteVector4("LayerColor", LayerColor);
+
+            if (BlendMode != LayerBlendModes.Normal)
+                writer.WriteString("Blend", BlendMode.ToString());
+
             if (QuadBeforeAligning != null)
             {
                 writer.WriteQuad("QuadBeforeAligning", QuadBeforeAligning);
@@ -142,6 +154,10 @@ public sealed class Surface
                                              : MappingModes.CornerPin,
                                   Quad = OutputJson.ReadQuad(token["Quad"]),
                                   PatchId = OutputJson.ReadGuid(token["PatchId"]),
+                                  LayerColor = OutputJson.ReadVector4(token["LayerColor"], Vector4.One),
+                                  BlendMode = Enum.TryParse<LayerBlendModes>(token.ReadValueSafe("Blend", string.Empty), out var blend)
+                                                  ? blend
+                                                  : LayerBlendModes.Normal,
                               };
 
             if (token["QuadBeforeAligning"] != null)
