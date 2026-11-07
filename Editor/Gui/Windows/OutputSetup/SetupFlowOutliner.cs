@@ -403,7 +403,10 @@ internal sealed class SetupFlowOutliner
             if (_layerScratch[index].Id != layerId)
                 continue;
 
-            var halfHeight = MathF.Round(OutlinerItem.InputPillHalfHeight * T3Ui.UiScaleFactor) - 1;
+            // Inset by the pill's round caps, so the outermost lines end on its straight part.
+            var scale = T3Ui.UiScaleFactor;
+            var halfHeight = MathF.Round(OutlinerItem.InputPillHalfHeight * scale)
+                             - MathF.Max(1, MathF.Round(OutlinerItem.InputPillHalfWidth * scale));
             var fromFront = count - 1 - index;
             return -halfHeight + 2 * halfHeight * fromFront / (count - 1);
         }
