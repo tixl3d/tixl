@@ -367,11 +367,48 @@ internal sealed class SetupFlowOutliner
         var color = emphasized ? kindColor : kindColor.Fade(0.6f);
         var thickness = (emphasized ? 2.5f : 1.5f) * scale;
 
-        // Flush with the items: a connection grows out of one pill and into the next.
+        // Flush with the items: a connection grows out of one pill and into the next. Into an output, the ends
+        // spread along its pill in layer order, front at the top, so the stacking reads off the lines.
         var a = new Vector2(from.Right, from.Y);
-        var b = new Vector2(to.Left, to.Y);
+        var b = new Vector2(to.Left, to.Y + OutputLayerEndOffset(setup, to, fromKind, fromId, toKind, toId));
         var reach = MathF.Max(24 * scale, MathF.Abs(b.X - a.X) * 0.4f);
         dl.AddBezierCubic(a, a + new Vector2(reach, 0), b - new Vector2(reach, 0), b, color, thickness);
+    }
+
+    /// <summary>
+    /// How far below the pill's centre a connection into an output ends: its layer's place in the stack, front
+    /// at the top. A surface mapped onto the output is its own layer; a patch drawn folded into its output is too.
+    /// </summary>
+    private float OutputLayerEndOffset(Setup setup, in Anchor to, SetupEntityKinds fromKind, Guid fromId, SetupEntityKinds toKind, Guid toId)
+    {
+        if (to.Kind != SetupEntityKinds.Output)
+            return 0;
+
+        var layerId = toKind switch
+                          {
+                              SetupEntityKinds.Output when fromKind == SetupEntityKinds.Surface => fromId,
+                              SetupEntityKinds.Patch                                          => toId,
+                              _                                                               => Guid.Empty,
+                          };
+        if (layerId == Guid.Empty || setup.FindOutput(to.Id) is not { } output)
+            return 0;
+
+        OutputLayers.Collect(setup, output, _layerScratch);
+        var count = _layerScratch.Count;
+        if (count < 2)
+            return 0;
+
+        for (var index = 0; index < count; index++)
+        {
+            if (_layerScratch[index].Id != layerId)
+                continue;
+
+            var halfHeight = MathF.Round(OutlinerItem.InputPillHalfHeight * T3Ui.UiScaleFactor) - 1;
+            var fromFront = count - 1 - index;
+            return -halfHeight + 2 * halfHeight * fromFront / (count - 1);
+        }
+
+        return 0;
     }
 
     private bool IsEmphasized(SetupEntitySelection selection, SetupEntityKinds kind, Guid id)
@@ -1167,6 +1204,7 @@ internal sealed class SetupFlowOutliner
 
     // Items drawn this frame, for the connections (cleared per frame; a few dozen entries, searched linearly).
     private readonly List<Anchor> _anchors = [];
+    private readonly List<OutputLayers.Layer> _layerScratch = [];
 
     private const float ColumnGap = 28; // unscaled px; the gutter the connections run through
 

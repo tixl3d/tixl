@@ -458,6 +458,9 @@ internal sealed class OutlinerItem
     /// Where the item takes its connections: a dot for one input, a vertical pill for several. It sits on the row's
     /// left edge, where the connections from the column before end.
     /// </summary>
+    /** Half the height of the pill of an item taking several inputs, unscaled; its connections end spread along it. */
+    internal const float InputPillHalfHeight = 6f;
+
     private static void DrawInputSlot(ImDrawListPtr dl, Vector2 center, SetupRouting.InputSlots slots, Color color)
     {
         var scale = T3Ui.UiScaleFactor;
@@ -468,7 +471,7 @@ internal sealed class OutlinerItem
         }
 
         var halfWidth = MathF.Max(1, MathF.Round(2 * scale));
-        var halfHeight = MathF.Round(6 * scale);
+        var halfHeight = MathF.Round(InputPillHalfHeight * scale);
         var x = MathF.Round(center.X);
         var y = MathF.Round(center.Y);
         dl.AddRectFilled(new Vector2(x - halfWidth, y - halfHeight), new Vector2(x + halfWidth, y + halfHeight), color, halfWidth);

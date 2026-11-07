@@ -206,6 +206,12 @@ public sealed class OutputDefinition
         /// 1 touches the canvas edges, 0.5 is half as wide and half as tall.</summary>
         public float Scale = 1f;
 
+        /// <summary>Multiplies this patch's picture, alpha included: the layer's tint and opacity.</summary>
+        public Vector4 LayerColor = Vector4.One;
+
+        /// <summary>How this patch combines with the layers under it.</summary>
+        public LayerBlendModes BlendMode;
+
         public bool IsFitted => ScaleMode == PatchScaleModes.Fit;
 
         /// <summary>Folds any integer into 0..3, so a rotate that keeps adding stays a valid turn count.</summary>
@@ -283,6 +289,12 @@ public sealed class OutputDefinition
                 writer.WriteValue("Scale", Scale);
             }
 
+            if (LayerColor != Vector4.One)
+                writer.WriteVector4("LayerColor", LayerColor);
+
+            if (BlendMode != LayerBlendModes.Normal)
+                writer.WriteString("Blend", BlendMode.ToString());
+
             writer.WriteEndObject();
         }
 
@@ -300,6 +312,10 @@ public sealed class OutputDefinition
                                            : PatchScaleModes.Stretch,
                            AspectRatio = OutputJson.ReadVector2(token["AspectRatio"], new Vector2(16, 9)),
                            Scale = token.ReadValueSafe("Scale", 1f),
+                           LayerColor = OutputJson.ReadVector4(token["LayerColor"], Vector4.One),
+                           BlendMode = Enum.TryParse<LayerBlendModes>(token.ReadValueSafe("Blend", string.Empty), out var blend)
+                                           ? blend
+                                           : LayerBlendModes.Normal,
                        };
         }
     }
@@ -351,8 +367,15 @@ public sealed class OutputDefinition
     /// <summary>Pause presenting to this output without dropping its device binding (e.g. mute an NDI feed).</summary>
     public bool IsSending = true;
 
-    /// <summary>Canvas regions on the direct pipe, composited in list order underneath the surfaces mapped here.</summary>
+    /// <summary>Canvas regions on the direct pipe. Where they draw among the surfaces is <see cref="LayerOrder"/>'s.</summary>
     public List<Patch> Patches = [];
+
+    /// <summary>
+    /// The composite order of what lands on this canvas, back to front: patch ids and the ids of the surfaces
+    /// mapped here. Empty until layers are reordered; ids missing from it (and every layer of an older setup) keep
+    /// the order from before layers could be ordered, patches under surfaces. See <see cref="OutputLayers"/>.
+    /// </summary>
+    public List<Guid> LayerOrder = [];
 
     /// <summary>Its card's place on the Board; null until the Board seeded one.</summary>
     public BoardPlacement? BoardPlacement;
@@ -415,6 +438,16 @@ public sealed class OutputDefinition
             writer.WriteEndArray();
         }
 
+        if (LayerOrder.Count > 0)
+        {
+            writer.WritePropertyName("LayerOrder");
+            writer.WriteStartArray();
+            foreach (var id in LayerOrder)
+                writer.WriteValue(id.ToString());
+
+            writer.WriteEndArray();
+        }
+
         if (Camera != null)
         {
             writer.WritePropertyName("Camera");
@@ -449,6 +482,16 @@ public sealed class OutputDefinition
                              ReferenceImageId = OutputJson.ReadGuid(token["ReferenceImage"]),
                              ReferenceOpacity = Math.Clamp(token.ReadValueSafe("ReferenceOpacity", 0.5f), 0f, 1f),
                          };
+
+        if (token["LayerOrder"] is JArray layerOrder)
+        {
+            foreach (var idToken in layerOrder)
+            {
+                var id = OutputJson.ReadGuid(idToken);
+                if (id != Guid.Empty)
+                    output.LayerOrder.Add(id);
+            }
+        }
 
         if (token["Camera"] is JObject cameraToken)
             output.Camera = ProjectorCamera.ReadFromJson(cameraToken);

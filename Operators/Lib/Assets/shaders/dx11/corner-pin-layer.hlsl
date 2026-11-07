@@ -77,7 +77,9 @@ float4 psMain(vsOutput input) : SV_TARGET
 
         // Alpha, not an opaque black backdrop: the raster is composited over the content so it stays readable
         // on top of it. Between the lines it's fully transparent, leaving content (or the cleared black) alone.
-        return float4(GridColor.rgb, max(major, minor) * GridColor.a);
+        // Premultiplied, like everything this shader writes: the compositor's blend states expect it.
+        float gridAlpha = max(major, minor) * GridColor.a;
+        return float4(GridColor.rgb * gridAlpha, gridAlpha);
     }
 
     float4 color = InputTexture.Sample(texSampler, input.texCoord) * Color;
@@ -94,5 +96,6 @@ float4 psMain(vsOutput input) : SV_TARGET
         color.a *= 1 - smoothstep(Mask.z - 2, Mask.z, d);
     }
 
-    return color;
+    // Premultiplied: lets one blend state per layer mode (Normal, Add, Multiply, Screen) honour the layer's opacity.
+    return float4(color.rgb * color.a, color.a);
 }

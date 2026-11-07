@@ -29,7 +29,7 @@ namespace T3.Editor.Gui.Windows.OutputSetup;
 /// (<see cref="GlobalSelectionHandling"/>); a graph pick takes the window back. Cards use the standard
 /// <see cref="FormInputs"/> conventions; continuous fields commit gesture-scoped snapshot undo steps.
 /// </summary>
-internal static class SetupParameterView
+internal static partial class SetupParameterView
 {
     /** How the projector's zoom is entered: as a spec sheet's throw ratio, or as a vertical field of view. */
     private enum ZoomUnits
@@ -657,6 +657,9 @@ internal static class SetupParameterView
                            : $"Shown on {boundTo}");
 
         DrawCardDivider();
+        if (DrawLayerList(setup, output))
+            DrawCardDivider();
+
         DrawPatchTable(setup, output, Guid.Empty);
         DrawCardDivider();
         DrawReferenceLayoutRows(setup, output);
@@ -977,8 +980,8 @@ internal static class SetupParameterView
         ImGui.Dummy(Vector2.Zero);
         ImGui.PopStyleVar();
 
-        // Dragging a grip past a neighbour swaps the two: the list is the composite order (later patches draw over
-        // earlier ones). One undo step for the whole drag.
+        // Dragging a grip past a neighbour swaps the two, here and in the output's layer order, so the later patch
+        // still draws over the earlier one. One undo step for the whole drag.
         if (moveFromIndex >= 0)
         {
             _patchReorderOldJson ??= setup.ToJsonString();
@@ -990,6 +993,7 @@ internal static class SetupParameterView
                     patch.Name = SetupLabels.PatchLabel(output, patch);
             }
 
+            SwapInLayerOrder(output, output.Patches[moveFromIndex].Id, output.Patches[moveToIndex].Id);
             (output.Patches[moveFromIndex], output.Patches[moveToIndex]) = (output.Patches[moveToIndex], output.Patches[moveFromIndex]);
         }
 
