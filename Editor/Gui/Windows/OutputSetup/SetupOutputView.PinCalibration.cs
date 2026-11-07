@@ -117,14 +117,14 @@ internal sealed partial class SetupOutputView
     }
 
     /// <summary>
-    /// What "Align Points" calibrates: the surface whose pin is solved, and the traced surface whose photo and
+    /// What "Calibrate" calibrates: the surface whose pin is solved, and the traced surface whose photo and
     /// reference points it is aligned by. Both are the same surface, unless a region has a pin of its own while
     /// the photo belongs to an ancestor; then <see cref="TracedToPinned"/> carries the points into the region's space.
     /// </summary>
     private readonly record struct AlignSubject(Surface Pinned, Surface Traced, Vector2 TracedToPinned);
 
     /// <summary>
-    /// The subject "Align Points" works on: the one the selection resolves to, or, with nothing on this output's
+    /// The subject "Calibrate" works on: the one the selection resolves to, or, with nothing on this output's
     /// canvas selected, the only surface mapped here that has a photo. With several such surfaces the choice is
     /// the user's, which <paramref name="hasSeveralCandidates"/> reports.
     /// </summary>
@@ -235,14 +235,14 @@ internal sealed partial class SetupOutputView
         if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
             ImGui.SetTooltip(canReset
                                  ? mapping!.QuadBeforeAligning != null
-                                       ? "Releases every point and puts the corner pin back to where it was before aligning."
+                                       ? "Releases every point and puts the corner pin back to where it was before calibrating."
                                        : "Releases every point and lets the surface fill the canvas again."
                                  : "The surface fills the canvas and no point has been moved.");
     }
 
     private void ResetAlignment(Setup setup, Surface.OutputMapping mapping)
     {
-        SetupUndo.RunUndoable("Reset alignment", setup, () => RestorePinBeforeAligning(mapping));
+        SetupUndo.RunUndoable("Reset calibration", setup, () => RestorePinBeforeAligning(mapping));
         _pinResidualPx = 0;
         _activePointId = Guid.Empty;
     }
@@ -595,7 +595,7 @@ internal sealed partial class SetupOutputView
     /// <summary>Canvas pixels a pin's bounding box must span before it is worth warping a photo through.</summary>
     private const float MinDiscWarpExtent = 8f;
 
-    /** Whether "Align Points" is on: the reference points are projected and can be dragged. */
+    /** Whether "Calibrate" is on: the reference points are projected and can be dragged. */
     private bool _projectsPhoto;
 
     /** The point moved last, whose outline blinks on the wall; further moves and "Release Point" apply to it. */

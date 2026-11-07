@@ -138,7 +138,7 @@ internal sealed partial class SetupOutputView
         if (!canIsolate)
             _isolatesFocusedSurface = false;
 
-        // Aligning points needs the room on the toolbar and doesn't use the overlay, so it steps aside meanwhile.
+        // Calibrating needs the room on the toolbar and doesn't use the overlay, so it steps aside meanwhile.
         if (!_projectsPhoto)
         {
             DrawOpacityField("Overlay", ref UserSettings.Config.OutputSetupContentPreviewOpacity, 65f,
@@ -177,7 +177,7 @@ internal sealed partial class SetupOutputView
         {
             _isolatesFocusedSurface = false;
         }
-        else if (!_projectsPhoto) // aligning points needs the room; isolating keeps its state until the button is back
+        else if (!_projectsPhoto) // calibrating needs the room; isolating keeps its state until the button is back
         {
             ImGui.SameLine(0, 12 * T3Ui.UiScaleFactor);
             ImGui.BeginDisabled(!canIsolate);
@@ -206,17 +206,17 @@ internal sealed partial class SetupOutputView
         {
             ImGui.SameLine();
             ImGui.AlignTextToFramePadding();
-            CustomComponents.StylizedText("Select a surface to align its points", Fonts.FontSmall, UiColors.TextMuted);
+            CustomComponents.StylizedText("Select a surface to calibrate it", Fonts.FontSmall, UiColors.TextMuted);
         }
 
         if (hasAlignSubject)
         {
             ImGui.SameLine(0, ToolbarGroupGap * T3Ui.UiScaleFactor);
-            if (CustomComponents.StateButton("Align Points", _projectsPhoto ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Emphasized))
+            if (CustomComponents.StateButton("Calibrate", _projectsPhoto ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Emphasized))
                 SetAligningPoints(setup, !_projectsPhoto);
 
             if (ImGui.IsItemHovered())
-                CustomComponents.TooltipForLastItem("Align points", "Projects a disc of the straightened photo around each reference point. Drag a point while watching the wall until its disc covers the real feature. That sets the point, and the pin is solved through every set point. Turn it off to check the result on the content.\n\nGame controller: right stick moves the active point, the d-pad goes to the nearest point in its direction, the shoulder buttons cycle through all points, X or the right stick button releases the active one, Y flashes a ring to find it, and holding a trigger projects the photo inverted. A ends aligning, B ends it and undoes what was aligned since it started. Hold the left stick until the arrow points up on the wall and press it to make that direction up. Pressing it centred resets the alignment.");
+                CustomComponents.TooltipForLastItem("Calibrate", "Projects a disc of the straightened photo around each reference point. Drag a point while watching the wall until its disc covers the real feature. That sets the point, and the pin is solved through every set point. A projector camera solved from this surface follows the points as they are aimed, so 3D content through [UseProjectorCam] shows the result live. Turn it off to check the result on the content.\n\nGame controller: right stick moves the active point, the d-pad goes to the nearest point in its direction, the shoulder buttons cycle through all points, X or the right stick button releases the active one, Y flashes a ring to find it, holding the right trigger projects the photo inverted, and the left trigger turns the pin and its points a quarter clockwise, for a projector on its side. A ends calibrating, B ends it and undoes everything since it started. Hold the left stick until the arrow points up on the wall and press it to make that direction up. Pressing it centred resets the calibration.");
 
             if (_projectsPhoto)
             {

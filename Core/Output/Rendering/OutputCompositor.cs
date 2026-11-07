@@ -213,7 +213,7 @@ public static class OutputCompositor
 
                 // Annotations have to reach the wall to be usable at all: you align a line by nudging it until
                 // its *projection* lies along a real feature, and walk a point onto the feature it marks. They
-                // have their own switch, and Align Points shows them too.
+                // have their own switch, and Calibrate shows them too.
                 if ((surface.ShowMeasuringLines || projectsPhoto) && ReferenceEquals(carrier, surface))
                     Overlay?.CollectAnnotations(surface, mapping, output.CanvasSize);
             }

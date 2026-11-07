@@ -389,7 +389,7 @@ internal static class SetupParameterView
 
         var showMeasuringLines = surface.ShowMeasuringLines;
         if (FormInputs.AddCheckBox("Show measuring lines", ref showMeasuringLines,
-                                   "Projects the surface's measuring lines onto the wall, so a line can be nudged until it lies along the real feature it was drawn on. Align Points shows them too while it is on."))
+                                   "Projects the surface's measuring lines onto the wall, so a line can be nudged until it lies along the real feature it was drawn on. Calibrate shows them too while it is on."))
         {
             SetupUndo.RunUndoable("Toggle measuring lines", setup, () => surface.ShowMeasuringLines = showMeasuringLines);
         }
@@ -714,15 +714,15 @@ internal static class SetupParameterView
         FormInputs.AddVerticalSpace(16);
 
         FormInputs.DrawInputLabel(string.Empty);
-        if (CustomComponents.StateButton("Solve from Aligned Surface", CustomComponents.ButtonStates.Default))
+        if (CustomComponents.StateButton("Solve from Calibrated Surface", CustomComponents.ButtonStates.Default))
         {
             _projectorSolveFailure = ProjectorCalibration.TrySolveFromAlignedSurface(setup, output, out var message)
                                          ? default
                                          : (output.Id, message);
         }
 
-        CustomComponents.TooltipForLastItem("Solves where the projector stands and how it zooms from the largest surface aligned on this output.",
-                                            "Align the surface first and set the lens shift. Turn the projector's own digital keystone correction off.");
+        CustomComponents.TooltipForLastItem("Solves where the projector stands and how it zooms from the largest surface calibrated on this output.",
+                                            "Calibrate the surface first and set the lens shift. While calibrating it again, the camera follows the points with the zoom kept; solve again to re-measure the zoom. Turn the projector's own digital keystone correction off.");
 
         var isSolved = camera?.Pose != null;
         ImGui.SameLine();
@@ -1335,6 +1335,7 @@ internal static class SetupParameterView
                                : $"Shows {SetupLabels.SliceLabel(setup, slice)} on {SetupLabels.OutputLabel(output)}");
 
         DrawPatchScaleRows(setup, output, patch);
+
         if (patch.IsFitted || patch.Quad.Length < 4)
             return;
 

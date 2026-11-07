@@ -10,10 +10,11 @@ using Vector2 = System.Numerics.Vector2;
 namespace T3.Editor.Gui.Windows.OutputSetup;
 
 /// <summary>
-/// "Align Points" from a game controller, so the person aligning can stand at the wall: the right stick moves the
+/// "Calibrate" from a game controller, so the person aligning can stand at the wall: the right stick moves the
 /// active point, the d-pad goes to the nearest point in its direction, the shoulder buttons cycle through all of
 /// them (the four outermost first, see <see cref="WritePointCycleOrder"/>), X or the right stick's button releases the
-/// active one and Y flashes a ring around it to find it. Holding a trigger projects the photo inverted. A ends
+/// active one and Y flashes a ring around it to find it. Holding the right trigger projects the photo inverted; the
+/// left trigger turns the pin a quarter clockwise, for a projector mounted on its side or upside down. A ends
 /// aligning; B ends it and undoes the session. The left stick defines which way is
 /// up on the wall, which a projector mounted at an angle makes different from up on its canvas; its button sets
 /// that direction, or resets the alignment while the stick is centred.
@@ -46,8 +47,15 @@ internal sealed partial class SetupOutputView
             CalibrationOverlay.FlashActivePoint();
 
         // Held, not toggled: a quick look at the inverted photo, gone as soon as the trigger is let go.
-        if (pad.LeftTrigger > TriggerHeldThreshold || pad.RightTrigger > TriggerHeldThreshold)
+        if (pad.RightTrigger > TriggerHeldThreshold)
             CalibrationOverlay.InvertPhotoThisFrame();
+
+        // A trigger is analog, so a press is the moment it crosses the threshold.
+        if (WasPressed(pad.LeftTrigger > TriggerHeldThreshold, _lastPad.LeftTrigger > TriggerHeldThreshold))
+        {
+            FinishGamepadMove(setup);
+            TurnPinClockwise(setup, mapping, canvasSize);
+        }
 
         var wallRightOnCanvas = new Vector2(-_wallUpOnCanvas.Y, _wallUpOnCanvas.X);
         var previousActivePointId = _activePointId;
@@ -146,7 +154,7 @@ internal sealed partial class SetupOutputView
     }
 
     /// <summary>
-    /// Turns "Align Points" on or off. Turning it on remembers the setup, so a cancel can go back to how it was before
+    /// Turns "Calibrate" on or off. Turning it on remembers the setup, so a cancel can go back to how it was before
     /// any point was moved in this session.
     /// </summary>
     private void SetAligningPoints(Setup setup, bool isOn)
@@ -162,7 +170,7 @@ internal sealed partial class SetupOutputView
         if (_alignSessionStartJson == null || _alignSessionStartJson == current)
             return;
 
-        UndoRedoStack.AddAndExecute(new SetupSnapshotCommand("Cancel alignment", setup.Id, current, _alignSessionStartJson));
+        UndoRedoStack.AddAndExecute(new SetupSnapshotCommand("Cancel calibration", setup.Id, current, _alignSessionStartJson));
         OutputSetupHandling.SaveActive();
     }
 
@@ -238,6 +246,48 @@ internal sealed partial class SetupOutputView
         return false;
     }
 
+    /// <summary>
+    /// Turns the pin a quarter clockwise on the wall, about its centre, with every aimed point: a projector on its
+    /// side shows the photo turned, and re-aiming each point by hand to fix it is tedious. The stick's up turns
+    /// along, since the surface's up is the wall's up once the photo stands upright. One undo step.
+    /// </summary>
+    private void TurnPinClockwise(Setup setup, Surface.OutputMapping mapping, Vector2 canvasSize)
+    {
+        if (mapping.Quad.Length < 4 || !(canvasSize.X > 0) || !(canvasSize.Y > 0))
+            return;
+
+        SetupUndo.RunUndoable("Turn calibration", setup, () =>
+                                                         {
+                                                             if (mapping.QuadBeforeAligning == null)
+                                                             {
+                                                                 mapping.QuadBeforeAligning = (Vector2[])mapping.Quad.Clone();
+                                                                 mapping.ModeBeforeAligning = mapping.Mode;
+                                                             }
+
+                                                             mapping.PromoteToCornerPin();
+                                                             var centre = (mapping.Quad[0] + mapping.Quad[1] + mapping.Quad[2] + mapping.Quad[3]) * 0.25f;
+                                                             for (var c = 0; c < 4; c++)
+                                                                 mapping.Quad[c] = TurnClockwise(mapping.Quad[c], centre, canvasSize);
+
+                                                             _turnedAims.Clear();
+                                                             foreach (var (pointId, aim) in mapping.PointAims)
+                                                                 _turnedAims.Add((pointId, aim with { Position = TurnClockwise(aim.Position, centre, canvasSize) }));
+
+                                                             foreach (var (pointId, aim) in _turnedAims)
+                                                                 mapping.PointAims[pointId] = aim;
+                                                         });
+
+        _wallUpOnCanvas = new Vector2(-_wallUpOnCanvas.Y, _wallUpOnCanvas.X);
+        CalibrationOverlay.FlashActivePoint();
+    }
+
+    /** A quarter turn clockwise on screen (Y down) about a centre, in pixels so the shape keeps its proportions. */
+    private static Vector2 TurnClockwise(Vector2 position01, Vector2 centre01, Vector2 canvasSize)
+    {
+        var offset = (position01 - centre01) * canvasSize;
+        return centre01 + new Vector2(-offset.Y, offset.X) / canvasSize;
+    }
+
     /** Reads the first controller through SDL, which works on every platform (XInput only exists on Windows). */
     private static bool TryPollGamepad(out GamePadState pad)
     {
@@ -280,7 +330,9 @@ internal sealed partial class SetupOutputView
 
     private GamePadState _lastPad;
 
-    /** The setup as it was when "Align Points" was turned on: what B goes back to. */
+    private readonly List<(Guid PointId, Surface.OutputMapping.PointAim Aim)> _turnedAims = [];
+
+    /** The setup as it was when "Calibrate" was turned on: what B goes back to. */
     private string? _alignSessionStartJson;
     private bool _isGamepadMovingPoint;
 

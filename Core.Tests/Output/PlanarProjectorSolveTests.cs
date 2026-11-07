@@ -45,6 +45,22 @@ public class PlanarProjectorSolveTests
         Assert.Equal(lens.FieldOfViewY, solvedLens.FieldOfViewY, 4);
     }
 
+    [Fact]
+    public void AngledWall_WithKnownZoom_RecoversPose()
+    {
+        // Following a pin while it is aimed: the zoom stays what it was solved as, only the pose moves.
+        var canvas = new Int2(1920, 1080);
+        var projector = new Pose(new Vector3(1.3f, 1.9f, 3.2f), Quaternion.CreateFromYawPitchRoll(0.3f, -0.35f, 0.05f));
+        var lens = Projection.CreatePerspective(33 * MathF.PI / 180, new Vector2(0.1f, -0.6f));
+        Assert.True(TryPin(projector, lens, canvas, Pose.Identity, new Vector2(2, 1.5f), out var pin));
+
+        Assert.True(ProjectorSolver.TrySolvePoseFromPlane(pin, Pose.Identity, lens.LensShift, canvas, lens.FieldOfViewY,
+                                                          out var solvedPose, out var solvedLens));
+        Assert.Equal(lens.FieldOfViewY, solvedLens.FieldOfViewY, 5);
+        Assert.True((solvedPose.Position - projector.Position).Length() < 0.01f, $"position {solvedPose.Position}");
+        Assert.True(Math.Abs(Quaternion.Dot(solvedPose.Orientation, projector.Orientation)) > 0.9999f, "orientation");
+    }
+
     private static void AssertRecovers(Pose placement, Vector2 surfaceSize, Vector2 rectMin)
     {
         var canvas = new Int2(1920, 1080);

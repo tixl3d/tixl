@@ -288,7 +288,7 @@ public sealed class Surface
     public int GridSubdivisions = 10;
 
     /// <summary>Projects the surface's measuring lines onto the wall, to align a line until it lies along the real
-    /// feature it was drawn on. Align Points projects them too while it is on.</summary>
+    /// feature it was drawn on. Calibrate projects them too while it is on.</summary>
     public bool ShowMeasuringLines;
 
     /// <summary>

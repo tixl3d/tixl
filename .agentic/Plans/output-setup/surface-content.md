@@ -9,7 +9,7 @@ section on outputs: Is Projector, a Model dropdown with user presets and 26 rese
 (`EditorResources/projector-presets.json`, each with source and note), lens shift, a zoom range with a Ratio | Zoom switch
 and a zoom slider, and a side view whose distance, wide/tele picture heights and lower-edge gap can be measured with a
 tape. Align Points gained gamepad confirm/cancel (A/B), release (X), find-point flash (Y, also on switching points) and
-a trigger-held inverted photo. Open: phase 2 ([SurfaceSpace]), phase 4 ([AlignmentPoints]). Phase 3 as built:
+a trigger-held inverted photo. "Align Points" is now **Calibrate**, and a solved camera follows its surface's pin live while calibrating (pose only, zoom kept). Open: phase 2 ([SurfaceSpace]), phase 2b (§7.9, 3D content through the projector camera), phase 4 ([AlignmentPoints]). Phase 3 as built:
 `ProjectorSolver.TrySolveFromPlane` (Core) with a fallback zoom for squarely seen surfaces; `ProjectorCamera.LensAxis`,
 `SolvedFromSurfaceId`, `IsZoomEntered`; the output card's Projector Camera section (`ProjectorCalibration`); the
 surface card's Facing preset. Field note: on the 38 × 58 cm SpeakerBoxes pin the solved distance ranged 1.0–2.8 m
@@ -220,12 +220,33 @@ surface's points; aiming works the same. The setup stores only the aims, keyed b
 index — a stored link, not inferred — and feeds them to the projector solve as `CalibrationPoints`. The setup
 never stores the mesh, its file or its pose.
 
+### 7.9 Connect... → content in 3D through the projector camera (phase 2b)
+Use case C's projector-eye route as one click, for a projector output whose camera is solved. Field case
+(2026-11-07): a mask render through [UseProjectorCam] plus [Layer2d] content designed on the SpeakerBoxes surface,
+on the same projector. Sending the [Layer2d] to the surface corner-pins it, and the mask render needs a filling
+surface on the output. Two routes to the same wall then have to agree, and (fixed) the filling surface used to win
+"Solve from Aligned Surface" as the largest mapped quad.
+
+- **[SurfaceGeometry]** (new op): `Surface` (Guid), `Texture` (optional; default the straightened reference photo),
+  `ShowReference`, `Color`. Draws the surface's rectangle in metres in the surface frame (origin at the anchor, X
+  right, Y up, Z out of the wall), with the stage placement applied when there is one. The same frame the projector
+  solve uses, so it lands on the wall through [UseProjectorCam] with no corner pin.
+- **Connect... → "Content in 3D (Projector Camera)"**, offered when the selected surface is corner-pinned to a projector
+  output with a solved camera. Adds [SurfaceReferenceImage] → [Layer2d] → [RenderTarget] → [SurfaceGeometry(Texture)]
+  → [Group] → [UseProjectorCam(output)] → [RenderTarget] → [SendToOutput], plus one filling surface on that output
+  (named after the projector) carrying the send. Reuses an existing projector-camera chain and its filling surface
+  if one is already connected to that output, so a second surface adds its geometry to the same [Group].
+- Undo and selection as §7.6.
+- **Open:** the filling carrier surface has no physical meaning. A per-output "full-frame content" slot (beside
+  patches, drawn over surfaces) would remove it; decide when building this.
+
 ## 8. Phases
 
 | Phase | Delivers | Use case |
 |---|---|---|
 | 1 | §7.1 send resolution mode, §7.2 straighten in Core, §7.3 [SurfaceReferenceImage], §7.6 Connect... | A |
 | 2 | §7.4 [SurfaceSpace] with the window camera; Connect... switches to it | B, C per surface |
+| 2b | §7.9 [SurfaceGeometry], Connect... → content in 3D through the projector camera | C per projector, D |
 | 3 | §7.5 projector pose from aligned points, with the entered lens shift (route 1); §7.7 Alignment preset | C per projector, D route 1 |
 | 4 | §7.8 [AlignmentPoints]: object points in the projector solve (route 2) | D route 2 |
 
