@@ -131,11 +131,10 @@ internal static class InputSnapper
             if (rowsToInsert > 0 && inputLineIndex < lines.Length)
             {
                 var insertionIndex = inputLineIndex + adjustedMultiInputIndex;
-                var collectSnappedItems = MagItemMovement.CollectSnappedItems(BestInputMatch.Item);
-                collectSnappedItems.Remove(BestInputMatch.Item);
+                var yThreshold = BestInputMatch.Item.PosOnCanvas.Y + MagGraphItem.GridSize.Y * (insertionIndex - 0.5f);
                 MagItemMovement.MoveSnappedItemsVertically(context,
-                                                           collectSnappedItems,
-                                                           BestInputMatch.Item.PosOnCanvas.Y + MagGraphItem.GridSize.Y * (insertionIndex - 0.5f),
+                                                           MagItemMovement.CollectSnappedItemsBelow(BestInputMatch.Item, yThreshold),
+                                                           yThreshold,
                                                            MagGraphItem.GridSize.Y * rowsToInsert);
             }
         }

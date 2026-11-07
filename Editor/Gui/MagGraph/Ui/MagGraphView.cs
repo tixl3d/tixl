@@ -257,11 +257,11 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
         var macro = _context.StartMacroCommand("Extract parameters");
         if (shouldPushDown)
         {
-            MagItemMovement
-               .MoveSnappedItemsVertically(_context,
-                                           MagItemMovement.CollectSnappedItems(sourceItem, includeRoot: false),
-                                           sourceItem.PosOnCanvas.Y + (insertionLineIndex - 0.5f) * MagGraphItem.GridSize.Y,
-                                           MagGraphItem.GridSize.Y);
+            var yThreshold = sourceItem.PosOnCanvas.Y + (insertionLineIndex - 0.5f) * MagGraphItem.GridSize.Y;
+            MagItemMovement.MoveSnappedItemsVertically(_context,
+                                                       MagItemMovement.CollectSnappedItemsBelow(sourceItem, yThreshold),
+                                                       yThreshold,
+                                                       MagGraphItem.GridSize.Y);
         }
 
         ParameterExtraction.ExtractAsConnectedOperator(inputSlot, symbolChildUi, input, focusedItemPosOnCanvas, collectInto: macro);
@@ -289,11 +289,11 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
         var macro = _context.StartMacroCommand("Publish as Input");
         if (shouldPushDown)
         {
-            MagItemMovement
-               .MoveSnappedItemsVertically(_context,
-                                           MagItemMovement.CollectSnappedItems(targetItem, includeRoot: false),
-                                           targetItem.PosOnCanvas.Y + (insertionLineIndex - 0.5f) * MagGraphItem.GridSize.Y,
-                                           MagGraphItem.GridSize.Y);
+            var yThreshold = targetItem.PosOnCanvas.Y + (insertionLineIndex - 0.5f) * MagGraphItem.GridSize.Y;
+            MagItemMovement.MoveSnappedItemsVertically(_context,
+                                                       MagItemMovement.CollectSnappedItemsBelow(targetItem, yThreshold),
+                                                       yThreshold,
+                                                       MagGraphItem.GridSize.Y);
         }
 
         var posOnCanvas = targetItem.PosOnCanvas + new Vector2(-MagGraphItem.GridSize.X, MagGraphItem.GridSize.Y * insertionLineIndex);
@@ -338,12 +338,10 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
 
             if (MagItemMovement.DisconnectedInputWouldCollapseLine(connectionIn))
             {
-                var snappedItems = MagItemMovement.CollectSnappedItems(connectionIn.TargetItem);
-                snappedItems.Remove(connectionIn.TargetItem);
+                var yThreshold = connectionIn.TargetItem.PosOnCanvas.Y + MagGraphItem.GridSize.Y * (connectionIn.InputLineIndex + 0.5f);
                 MagItemMovement.MoveSnappedItemsVertically(_context,
-                                                           snappedItems,
-                                                           connectionIn.TargetItem.PosOnCanvas.Y +
-                                                           MagGraphItem.GridSize.Y * (connectionIn.InputLineIndex + 0.5f),
+                                                           MagItemMovement.CollectSnappedItemsBelow(connectionIn.TargetItem, yThreshold),
+                                                           yThreshold,
                                                            -MagGraphItem.GridSize.Y);
             }
 

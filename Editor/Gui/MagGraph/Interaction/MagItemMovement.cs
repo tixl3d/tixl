@@ -1714,6 +1714,47 @@ internal sealed partial class MagItemMovement
         }
     }
 
+    /// <summary>
+    /// Collects the items snapped to <paramref name="rootItem"/> that lie below <paramref name="yThreshold"/>,
+    /// walking only through items that are below it themselves. Unlike filtering <see cref="CollectSnappedItems(MagGraphItem, HashSet{MagGraphItem}?, bool, int)"/>
+    /// by position, this skips stacks that hang below an upstream neighbour, which would otherwise be torn off it.
+    /// The root itself is never included.
+    /// </summary>
+    public static HashSet<MagGraphItem> CollectSnappedItemsBelow(MagGraphItem rootItem, float yThreshold)
+    {
+        var set = new HashSet<MagGraphItem>();
+        Visit(rootItem);
+        set.Remove(rootItem);
+        return set;
+
+        void Visit(MagGraphItem item)
+        {
+            for (var index = 0; index < item.InputLines.Length; index++)
+            {
+                var c = item.InputLines[index].ConnectionIn;
+                if (c != null && c.IsSnapped && !c.IsTemporary)
+                    TryAdd(c.SourceItem);
+            }
+
+            for (var index = 0; index < item.OutputLines.Length; index++)
+            {
+                foreach (var c in item.OutputLines[index].ConnectionsOut)
+                {
+                    if (c.IsSnapped)
+                        TryAdd(c.TargetItem);
+                }
+            }
+        }
+
+        void TryAdd(MagGraphItem item)
+        {
+            if (item == rootItem || item.PosOnCanvas.Y <= yThreshold || !set.Add(item))
+                return;
+
+            Visit(item);
+        }
+    }
+
     public static HashSet<MagGraphItem> CollectSnappedItems(IEnumerable<MagGraphItem> rootItems)
     {
         var set = new HashSet<MagGraphItem>();

@@ -312,15 +312,12 @@ internal sealed class PlaceholderCreation
         _snappedTargetInputId = selectedInputId;
 
         // Keep for after creation because inserted node might exceed unit height and further pushing is required... 
-        _snappedItems = MagItemMovement.CollectSnappedItems(targetItem, includeRoot: false);
+        var yThreshold = targetItem.PosOnCanvas.Y + (insertionLineIndex - 0.5f) * MagGraphItem.GridSize.Y;
+        _snappedItems = MagItemMovement.CollectSnappedItemsBelow(targetItem, yThreshold);
 
         if (shouldPushDown)
         {
-            MagItemMovement
-               .MoveSnappedItemsVertically(context,
-                                           _snappedItems,
-                                           targetItem.PosOnCanvas.Y + (insertionLineIndex - 0.5f) * MagGraphItem.GridSize.Y,
-                                           MagGraphItem.GridSize.Y);
+            MagItemMovement.MoveSnappedItemsVertically(context, _snappedItems, yThreshold, MagGraphItem.GridSize.Y);
         }
 
         context.Selector.Selection.Clear();

@@ -563,12 +563,10 @@ namespace T3.Editor.Gui.MagGraph.States
 
                                   if (MagItemMovement.DisconnectedInputWouldCollapseLine(connection))
                                   {
-                                      var collectSnappedItems = MagItemMovement.CollectSnappedItems(connection.TargetItem);
-                                      collectSnappedItems.Remove(connection.TargetItem);
+                                      var yThreshold = connection.TargetItem.PosOnCanvas.Y + MagGraphItem.GridSize.Y * (connection.InputLineIndex + 0.5f);
                                       MagItemMovement.MoveSnappedItemsVertically(context,
-                                                                                 collectSnappedItems,
-                                                                                 connection.TargetItem.PosOnCanvas.Y +
-                                                                                 MagGraphItem.GridSize.Y * (connection.InputLineIndex + 0.5f),
+                                                                                 MagItemMovement.CollectSnappedItemsBelow(connection.TargetItem, yThreshold),
+                                                                                 yThreshold,
                                                                                  -MagGraphItem.GridSize.Y);
                                   }
                                   // var deletedLineIndex = 0;

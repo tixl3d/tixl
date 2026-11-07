@@ -146,10 +146,13 @@ internal static class InputPicking
         var insertionLineIndex = GetInsertionLineIndex(allInputSlots, visibleInputLines, selectedInputId, out var shouldPushDown);
 
         if (shouldPushDown)
+        {
+            var yThreshold = context.ItemForInputSelection.PosOnCanvas.Y + MagGraphItem.GridSize.Y * (insertionLineIndex - 0.5f);
             MagItemMovement.MoveSnappedItemsVertically(context,
-                                                       MagItemMovement.CollectSnappedItems(context.ItemForInputSelection),
-                                                       context.ItemForInputSelection.PosOnCanvas.Y + MagGraphItem.GridSize.Y * (insertionLineIndex - 0.5f),
+                                                       MagItemMovement.CollectSnappedItemsBelow(context.ItemForInputSelection, yThreshold),
+                                                       yThreshold,
                                                        MagGraphItem.GridSize.Y * addedCount);
+        }
         
         context.ItemMovement.Reset();
         context.Layout.FlagStructureAsChanged();

@@ -128,11 +128,10 @@ internal static class Modifications
             if (originalLineIndex == -1)
                 continue;
 
-            var snappedItems = MagItemMovement.CollectSnappedItems(targetItem);
-            snappedItems.Remove(targetItem);
+            var yThreshold = targetItem.PosOnCanvas.Y + MagGraphItem.GridSize.Y * (originalLineIndex + 0.5f);
             MagItemMovement.MoveSnappedItemsVertically(context,
-                                                       snappedItems,
-                                                       targetItem.PosOnCanvas.Y + MagGraphItem.GridSize.Y * (originalLineIndex + 0.5f),
+                                                       MagItemMovement.CollectSnappedItemsBelow(targetItem, yThreshold),
+                                                       yThreshold,
                                                        MagGraphItem.GridSize.Y);
         }
 
