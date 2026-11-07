@@ -4,6 +4,8 @@ using T3.Core.Logging;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.Output;
+using System.Diagnostics.CodeAnalysis;
+using T3.Editor.Gui.InputUi.SimpleInputUis;
 using T3.Editor.Gui.Styling;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
@@ -32,13 +34,15 @@ internal static class SurfaceContent
     /// </summary>
     public static void DrawMenuItems(SetupEntitySelection selection, Setup setup, Surface surface)
     {
-        if (CustomComponents.DrawMenuItem(0, "New Content for This Surface", reserveIconColumn: false))
+        if (CustomComponents.DrawMenuItem(0, "New 2D Content", reserveIconColumn: false))
             CreateContent(setup, surface);
 
         CustomComponents.TooltipForLastItem("Adds a scene to the graph that renders onto this surface, with its reference photo as the backdrop.",
-                                            "Creates SurfaceReferenceImage → Layer2d → Group → RenderTarget → SendToOutput, sized to the surface, "
-                                            + "and connects the surface to the output if there is only one. Add your content to the Group, "
-                                            + "and mute the photo's Layer2d before the show.");
+                                            "Copies the chain of the _SurfaceContent2d template (SurfaceReferenceImage → Layer2d → Group → RenderTarget "
+                                            + "→ SendToOutput), sized to the surface, and connects the surface to the output if there is only one. "
+                                            + "Add your content to the Group, and mute the photo's Layer2d before the show.");
+
+        Draw3dContentItems(setup, surface);
 
         if (CustomComponents.DrawSubMenu(2, "Use Existing Content"))
         {
@@ -61,59 +65,203 @@ internal static class SurfaceContent
     }
 
     /// <summary>
-    /// Builds SurfaceReferenceImage → Layer2d → Group → RenderTarget → SendToOutput in the open composition, routes
-    /// the send to the surface sized from it, and maps the surface's root to the only output when nothing above it is
-    /// on one yet. One undo step for the graph and the setup.
+    /// Adds the 2D chain from its template to the open composition, routes the send to the surface, and maps the
+    /// surface's root to the only output when nothing above it is on one yet. One undo step for the graph and the setup.
     /// </summary>
     private static void CreateContent(Setup setup, Surface surface)
     {
-        var projectView = ProjectView.Focused;
-        var composition = projectView?.CompositionInstance;
-        if (projectView == null || composition == null || !composition.Symbol.TryGetSymbolUi(out var compositionUi))
-        {
-            Log.Warning("New content for a surface: no composition is open to add it to.");
-            return;
-        }
-
         var oldJson = setup.ToJsonString();
-        var macro = new MacroCommand("New content for surface");
-        var parent = compositionUi.Symbol;
-
-        // One row, left to right in the order the picture flows.
-        var start = GraphUtils.FindFreePositionInView(compositionUi);
-        var step = new Vector2(SymbolUi.Child.DefaultOpSize.X + 30, 0);
-        var referenceId = AddOp(macro, parent, _surfaceReferenceImageSymbolId, start, string.Empty);
-        var layerId = AddOp(macro, parent, _layer2dSymbolId, start + step, string.Empty);
-        var groupId = AddOp(macro, parent, _groupSymbolId, start + step * 2, string.Empty);
-        var renderTargetId = AddOp(macro, parent, _renderTargetSymbolId, start + step * 3, string.Empty);
-        var sendId = AddOp(macro, parent, ContentSourceSync.SendToOutputSymbolId, start + step * 4, surface.Name);
-
-        Connect(macro, parent, referenceId, _surfaceReferenceImageTextureOutputId, layerId, _layer2dTextureInputId);
-        Connect(macro, parent, layerId, _layer2dOutputId, groupId, _groupCommandsInputId);
-        Connect(macro, parent, groupId, _groupOutputId, renderTargetId, _renderTargetCommandInputId);
-        Connect(macro, parent, renderTargetId, _renderTargetColorBufferOutputId, sendId, ContentSourceSync.SendToOutputTextureInputId);
-
-        SetInput(macro, parent, referenceId, _surfaceReferenceImageSurfaceInputId, new InputValue<Guid>(surface.Id));
-        SetInput(macro, parent, sendId, _sendToOutputResolutionFromInputId, new InputValue<int>(SendSizeFromSurface));
+        if (!TryInsertTemplate(_surfaceContent2dTemplateId, "New 2D content for surface", surface, null, surface.Name, out var inserted))
+            return;
 
         // Registered right away rather than left to the sync's adoption next frame: the slice needs a source to name.
-        var source = new ContentSource { SymbolChildId = sendId, Name = surface.Name, IsRenamed = true };
+        var source = new ContentSource { SymbolChildId = inserted.SendId, Name = surface.Name, IsRenamed = true };
         setup.ContentSources.Add(source);
         surface.SliceId = WallpaperLayout.CreateSlice(setup, source).Id;
         var mappedOutput = MapRootToOnlyOutput(setup, surface);
         PlaceCardAboveFrame(setup, source, surface);
-
-        macro.AddExecutedCommandForUndo(new SetupSnapshotCommand("New content for surface", setup.Id, oldJson, setup.ToJsonString()));
-        UndoRedoStack.Add(macro);
-        OutputSetupHandling.SaveActive();
-
-        projectView.FlagChanges(ProjectView.ChangeTypes.Children | ProjectView.ChangeTypes.Connections);
-        projectView.NodeSelection.TrySelectCompositionChild(composition, groupId, add: false);
+        Finish(inserted, setup, oldJson);
 
         var next = mappedOutput != null ? $"connected to {SetupLabels.OutputLabel(mappedOutput)}; calibrate it next"
                    : setup.FindMappedAncestor(surface.Id) is { OutputMappings.Count: > 0 } ? "calibrate it next"
                    : "connect it to an output, then calibrate it";
-        Log.Info($"New content for '{surface.Name}': add your content to the selected Group; the surface is {next}.");
+        Log.Info($"New 2D content for '{surface.Name}': add your content to its Group; the surface is {next}.");
+    }
+
+    /// <summary>
+    /// "New 3D Content": for each projector output the surface is corner-pinned onto whose camera is solved. One
+    /// output is an item, several a submenu; none shows the item greyed out with what's missing.
+    /// </summary>
+    private static void Draw3dContentItems(Setup setup, Surface surface)
+    {
+        CollectProjectorOutputs(setup, surface, _projectorOutputs);
+        if (_projectorOutputs.Count == 0)
+        {
+            CustomComponents.DrawMenuItem(3, "New 3D Content", isEnabled: false, reserveIconColumn: false);
+            CustomComponents.TooltipForLastItem("Solve the projector camera first.",
+                                                "Corner-pin this surface onto a projector output, calibrate it, and choose Solve from Calibrated Surface "
+                                                + "in the output's Projector section.");
+            return;
+        }
+
+        if (_projectorOutputs.Count == 1)
+        {
+            if (CustomComponents.DrawMenuItem(3, "New 3D Content", reserveIconColumn: false))
+                Create3dContent(setup, surface, _projectorOutputs[0]);
+
+            CustomComponents.TooltipForLastItem(New3dContentTooltip, New3dContentChain);
+            return;
+        }
+
+        if (!CustomComponents.DrawSubMenu(3, "New 3D Content"))
+            return;
+
+        for (var i = 0; i < _projectorOutputs.Count; i++)
+        {
+            var output = _projectorOutputs[i];
+            if (CustomComponents.DrawMenuItem(200 + i, SetupLabels.OutputLabel(output), reserveIconColumn: false))
+                Create3dContent(setup, surface, output);
+
+            CustomComponents.TooltipForLastItem(New3dContentTooltip, New3dContentChain);
+        }
+
+        ImGui.EndMenu();
+    }
+
+    /** Outputs the surface's pin lies on whose projector camera is solved: where its 3D content can be rendered. */
+    private static void CollectProjectorOutputs(Setup setup, Surface surface, List<OutputDefinition> outputs)
+    {
+        outputs.Clear();
+        if (setup.FindMappedAncestor(surface.Id) is not { } carrier)
+            return;
+
+        foreach (var mapping in carrier.OutputMappings)
+        {
+            if (!mapping.IsFilling && setup.FindOutput(mapping.OutputId) is { Camera.Pose: not null } output && !outputs.Contains(output))
+                outputs.Add(output);
+        }
+    }
+
+    /// <summary>
+    /// Adds the 3D chain from its template to the open composition: the surface drawn with its photo through the
+    /// output's projector camera, the send filling the output as its front layer. One undo step for both.
+    /// </summary>
+    private static void Create3dContent(Setup setup, Surface surface, OutputDefinition output)
+    {
+        var oldJson = setup.ToJsonString();
+        var sendName = $"{SetupLabels.OutputLabel(output)} 3D";
+        if (!TryInsertTemplate(_surfaceContent3dTemplateId, "New 3D content for surface", surface, output, sendName, out var inserted))
+            return;
+
+        AddFrontLayer(setup, output, inserted.SendId, sendName);
+        Finish(inserted, setup, oldJson);
+        Log.Info($"New 3D content for '{surface.Name}' on {SetupLabels.OutputLabel(output)}: add 3D objects to its Group, in the surface's metres; "
+                 + "mute the photo before the show.");
+    }
+
+    /** What a template insert added: where, and the send among the new children. */
+    private sealed record InsertedTemplate(ProjectView View, Instance Composition, MacroCommand Macro, List<Guid> ChildIds, Guid SendId);
+
+    /// <summary>
+    /// Copies a template symbol's children into the open composition, at a free spot in view. Every Guid input marked
+    /// as picking a setup entity is pointed at the surface, every one picking an output at the output, so the template
+    /// says which ops to add and how they connect, and the editor only knows what to point them at. The send, the one
+    /// [SendToOutput] among them, gets the given name. Nothing is committed yet: <see cref="Finish"/> does, together
+    /// with the setup changes.
+    /// </summary>
+    private static bool TryInsertTemplate(Guid templateId, string undoName, Surface surface, OutputDefinition? output, string sendName,
+                                          [NotNullWhen(true)] out InsertedTemplate? inserted)
+    {
+        inserted = null;
+        var projectView = ProjectView.Focused;
+        var composition = projectView?.CompositionInstance;
+        if (projectView == null || composition == null || !composition.Symbol.TryGetSymbolUi(out var compositionUi))
+        {
+            Log.Warning($"{undoName}: no composition is open to add it to.");
+            return false;
+        }
+
+        if (!SymbolUiRegistry.TryGetSymbolUi(templateId, out var templateUi))
+        {
+            Log.Warning($"{undoName}: its template {templateId} is not loaded.");
+            return false;
+        }
+
+        var parent = compositionUi.Symbol;
+        var macro = new MacroCommand(undoName);
+        var copy = new CopySymbolChildrenCommand(templateUi, null, null, compositionUi, GraphUtils.FindFreePositionInView(compositionUi));
+        macro.AddAndExecCommand(copy);
+
+        var childIds = new List<Guid>(copy.OldToNewChildIds.Values);
+        var sendId = Guid.Empty;
+        foreach (var childId in childIds)
+        {
+            if (!parent.Children.TryGetValue(childId, out var child) || !child.Symbol.TryGetSymbolUi(out var childSymbolUi))
+                continue;
+
+            if (sendId == Guid.Empty && child.Symbol.Id == ContentSourceSync.SendToOutputSymbolId)
+                sendId = childId;
+
+            foreach (var inputUi in childSymbolUi.InputUis.Values)
+            {
+                if (inputUi is not GuidInputUi guidInputUi)
+                    continue;
+
+                var target = guidInputUi.Usage switch
+                                 {
+                                     GuidInputUi.UsageType.OutputSetupEntities => surface.Id,
+                                     GuidInputUi.UsageType.OutputSetupOutputs  => output?.Id ?? Guid.Empty,
+                                     _                                         => Guid.Empty,
+                                 };
+                if (target != Guid.Empty)
+                    SetInput(macro, parent, childId, guidInputUi.Id, new InputValue<Guid>(target));
+            }
+        }
+
+        if (sendId == Guid.Empty)
+        {
+            Log.Warning($"{undoName}: its template has no SendToOutput, so nothing reaches the setup.");
+            macro.Undo();
+            return false;
+        }
+
+        if (compositionUi.ChildUis.TryGetValue(sendId, out var sendUi))
+            macro.AddAndExecCommand(new ChangeSymbolChildNameCommand(sendUi, parent) { NewName = sendName });
+
+        inserted = new InsertedTemplate(projectView, composition, macro, childIds, sendId);
+        return true;
+    }
+
+    /** Commits the graph and setup changes as one undo step, saves, and selects what was added. */
+    private static void Finish(InsertedTemplate inserted, Setup setup, string oldSetupJson)
+    {
+        inserted.Macro.AddExecutedCommandForUndo(new SetupSnapshotCommand(inserted.Macro.Name, setup.Id, oldSetupJson, setup.ToJsonString()));
+        UndoRedoStack.Add(inserted.Macro);
+        OutputSetupHandling.SaveActive();
+
+        inserted.View.FlagChanges(ProjectView.ChangeTypes.Children | ProjectView.ChangeTypes.Connections);
+        for (var i = 0; i < inserted.ChildIds.Count; i++)
+            inserted.View.NodeSelection.TrySelectCompositionChild(inserted.Composition, inserted.ChildIds[i], add: i > 0);
+    }
+
+    /// <summary>
+    /// Registers the send as content shown on the whole canvas of the output, as the front layer: what the projector
+    /// camera renders stands in front of the wall, and its transparent background leaves the other layers visible.
+    /// </summary>
+    private static void AddFrontLayer(Setup setup, OutputDefinition output, Guid sendId, string name)
+    {
+        var source = new ContentSource { SymbolChildId = sendId, Name = name, IsRenamed = true };
+        setup.ContentSources.Add(source);
+        var patch = SetupActions.CreateFullCanvasPatch(WallpaperLayout.CreateSlice(setup, source).Id);
+        output.Patches.Add(patch);
+
+        var layers = new List<OutputLayers.Layer>();
+        OutputLayers.Collect(setup, output, layers);
+        for (var index = 0; index < layers.Count; index++)
+        {
+            if (layers[index].Id == patch.Id)
+                OutputLayers.Move(output, layers, index, layers.Count - 1);
+        }
     }
 
     /** The surface's root mapped to the output when there is exactly one to present on and nothing above the surface is on one. */
@@ -187,24 +335,11 @@ internal static class SurfaceContent
         return root;
     }
 
-    private static Guid AddOp(MacroCommand macro, Symbol parent, Guid symbolId, Vector2 position, string name)
-    {
-        var command = new AddSymbolChildCommand(parent, symbolId) { PosOnCanvas = position, ChildName = name };
-        macro.AddAndExecCommand(command);
-        return command.AddedChildId;
-    }
-
-    private static void Connect(MacroCommand macro, Symbol parent, Guid sourceChildId, Guid sourceSlotId, Guid targetChildId, Guid targetSlotId)
-    {
-        var connection = new Symbol.Connection(sourceChildId, sourceSlotId, targetChildId, targetSlotId);
-        macro.AddAndExecCommand(new AddConnectionCommand(parent, connection, 0));
-    }
-
     private static void SetInput(MacroCommand macro, Symbol parent, Guid childId, Guid inputId, InputValue value)
     {
         if (!parent.Children.TryGetValue(childId, out var child) || !child.Inputs.TryGetValue(inputId, out var input))
         {
-            Log.Warning($"New content for a surface: can't set input {inputId} on the new op.");
+            Log.Warning($"New content for a surface: can't set input {inputId} on a template's op.");
             return;
         }
 
@@ -212,24 +347,18 @@ internal static class SurfaceContent
     }
 
     private static readonly List<Surface> _regions = [];
+    private static readonly List<OutputDefinition> _projectorOutputs = [];
+
+    private const string New3dContentTooltip = "Draws this surface in 3D through the projector's camera, with its reference photo on it.";
+
+    private const string New3dContentChain =
+        "Copies the chain of the _SurfaceContent3d template (SurfaceGeometry → GeometryToMesh → DrawMeshUnlit with SurfaceReferenceImage, "
+        + "into a Group → UseProjectorCam → RenderTarget → SendToOutput) and shows the send on the whole output, in front. "
+        + "Add 3D objects to the Group in the surface's metres, and mute the photo before the show.";
 
     /** The gap between the surface frame and the new content's card above it, as a share of the frame's height. */
     private const float CardGapOfFrameHeight = 0.3f;
 
-    /** SendToOutput's Resolution From value for the surface's aspect: stable while the new surface is still being aligned. */
-    private const int SendSizeFromSurface = 0;
-
-    private static readonly Guid _surfaceReferenceImageSymbolId = new("6435a961-ef0a-4e1d-bbcd-76e665bd58b6");
-    private static readonly Guid _surfaceReferenceImageTextureOutputId = new("8ab20f20-5e19-4b4b-b846-4b8abbd82817");
-    private static readonly Guid _surfaceReferenceImageSurfaceInputId = new("1a5d05c4-b3e3-4b99-90cb-7c3da6920703");
-    private static readonly Guid _layer2dSymbolId = new("d8c5330f-59b5-4907-b845-a02def3042fa");
-    private static readonly Guid _layer2dTextureInputId = new("2a95ac54-5ef7-4d3c-a90b-ecd5b422bddc");
-    private static readonly Guid _layer2dOutputId = new("e4a8d926-7abd-4d2a-82a1-b7d140cb457f");
-    private static readonly Guid _groupSymbolId = new("a3f64d34-1fab-4230-86b3-1c3deba3f90b");
-    private static readonly Guid _groupCommandsInputId = new("9E961F73-1EE7-4369-9AC7-5C653E570B6F");
-    private static readonly Guid _groupOutputId = new("977ca2f4-cddb-4b9a-82b2-ff66453bbf9b");
-    private static readonly Guid _renderTargetSymbolId = new("f9fe78c5-43a6-48ae-8e8c-6cdbbc330dd1");
-    private static readonly Guid _renderTargetCommandInputId = new("4da253b7-4953-439a-b03f-1d515a78bddf");
-    private static readonly Guid _renderTargetColorBufferOutputId = new("7A4C4FEB-BE2F-463E-96C6-CD9A6BAD77A2");
-    private static readonly Guid _sendToOutputResolutionFromInputId = new("3125e84e-8644-46a9-8fae-e88ed06731f4");
+    private static readonly Guid _surfaceContent2dTemplateId = new("58b6f67e-f933-4b10-aa85-63ec745f15bf");
+    private static readonly Guid _surfaceContent3dTemplateId = new("bc4b2ed5-02ad-4b2a-aa3d-0d3d908f6c51");
 }

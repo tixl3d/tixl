@@ -9,7 +9,7 @@ section on outputs: Is Projector, a Model dropdown with user presets and 26 rese
 (`EditorResources/projector-presets.json`, each with source and note), lens shift, a zoom range with a Ratio | Zoom switch
 and a zoom slider, and a side view whose distance, wide/tele picture heights and lower-edge gap can be measured with a
 tape. Align Points gained gamepad confirm/cancel (A/B), release (X), find-point flash (Y, also on switching points) and
-a trigger-held inverted photo. "Align Points" is now **Calibrate**, and a solved camera follows its surface's pin live while calibrating (pose only, zoom kept). Open: phase 2 ([SurfaceSpace]), phase 2b (§7.9, 3D content through the projector camera), phase 4 ([AlignmentPoints]). Phase 3 as built:
+a trigger-held inverted photo. "Align Points" is now **Calibrate**, and a solved camera follows its surface's pin live while calibrating (pose only, zoom kept). Phase 2b (§7.9, New 3D Content) built 2026-11-07. Open: phase 2 ([SurfaceSpace]), phase 4 ([AlignmentPoints]). Phase 3 as built:
 `ProjectorSolver.TrySolveFromPlane` (Core) with a fallback zoom for squarely seen surfaces; `ProjectorCamera.LensAxis`,
 `SolvedFromSurfaceId`, `IsZoomEntered`; the output card's Projector Camera section (`ProjectorCalibration`); the
 surface card's Facing preset. Field note: on the 38 × 58 cm SpeakerBoxes pin the solved distance ranged 1.0–2.8 m
@@ -199,7 +199,7 @@ result as the output's camera; [UseProjectorCam] then works without hand-entered
 
 ### 7.6 Guidance: "Connect..." on an unconnected surface (phase 1)
 When a surface or region without content is selected, the output view's toolbar shows **Connect...** with:
-- **New Content for This Surface** — adds the use-case A chain ([SurfaceReferenceImage] → [Layer2d] → [Group]
+- **New 2D Content** — adds the use-case A chain ([SurfaceReferenceImage] → [Layer2d] → [Group]
   → [RenderTarget] → [SendToOutput(From Surface)]), a slice, the surface link and, when the surface's parent
   is already mapped or there is exactly one projector, the output mapping. Ends with Align Points open and the
   new [Group] selected in the graph. From phase 2 on, it offers the [SurfaceSpace] chain instead (B).
@@ -207,7 +207,7 @@ When a surface or region without content is selected, the output view's toolbar 
 - **Slices from Regions** — the existing action, for a surface with regions.
 - One undo step, as `RegionSlices.Create` does (MacroCommand of graph edits + setup snapshot).
 
-The manual steps of §1 become: select region → Connect... → New Content → align points → design.
+The manual steps of §1 become: select region → Connect... → New 2D Content → align points → design.
 
 ### 7.7 Alignment preset (phase 3)
 A `Wall | Floor | Ceiling` dropdown in the surface's parameters, writing `Surface.Placement`. A surface without
@@ -227,18 +227,22 @@ on the same projector. Sending the [Layer2d] to the surface corner-pins it, and 
 surface on the output. Two routes to the same wall then have to agree, and (fixed) the filling surface used to win
 "Solve from Aligned Surface" as the largest mapped quad.
 
-- **[SurfaceGeometry]** (new op): `Surface` (Guid), `Texture` (optional; default the straightened reference photo),
-  `ShowReference`, `Color`. Draws the surface's rectangle in metres in the surface frame (origin at the anchor, X
-  right, Y up, Z out of the wall), with the stage placement applied when there is one. The same frame the projector
-  solve uses, so it lands on the wall through [UseProjectorCam] with no corner pin.
-- **Connect... → "Content in 3D (Projector Camera)"**, offered when the selected surface is corner-pinned to a projector
-  output with a solved camera. Adds [SurfaceReferenceImage] → [Layer2d] → [RenderTarget] → [SurfaceGeometry(Texture)]
-  → [Group] → [UseProjectorCam(output)] → [RenderTarget] → [SendToOutput], plus one filling surface on that output
-  (named after the projector) carrying the send. Reuses an existing projector-camera chain and its filling surface
-  if one is already connected to that output, so a second surface adds its geometry to the same [Group].
-- Undo and selection as §7.6.
-- **Open:** the filling carrier surface has no physical meaning. A per-output "full-frame content" slot (beside
-  patches, drawn over surfaces) would remove it; decide when building this.
+**As built (2026-11-07):**
+- **[SurfaceGeometry]** outputs geometry, like [StageGeometry], rather than drawing: `Surface` (Guid) and `Surround`
+  (grows the quad to match a [SurfaceReferenceImage] with the same Surround). One quad in the frame the projector
+  solve uses, from `SurfaceGeometry.GetStageRect` in Core, now shared with [StageGeometry]; TexCoord 0..1 with the
+  top at the surface's top. No Texture or Color input: [DrawMeshUnlit] draws it, so any texture fits. It warns when
+  its surface has no stage position while a camera was solved from another surface. The straightened photo has no
+  perspective left, so one quad is exact, unlike [StageGeometry]'s 16×16 grid for the raw photo.
+- **Connect... → New 3D Content**, per projector output the surface's pin lies on whose camera is solved (a submenu
+  for several; greyed out with "Solve the projector camera first" for none). Builds [SurfaceGeometry] →
+  [GeometryToMesh] → [DrawMeshUnlit] (Texture: [SurfaceReferenceImage]) → [Group] → [UseProjectorCam(output)] →
+  [RenderTarget] (cleared transparent) → [SendToOutput] (Resolution From: Output). The send is a full-canvas patch on
+  the output, moved to the front layer — the Layers list replaced the filling carrier surface. A second surface on
+  the same output only adds its branch into that [Group], found through the [UseProjectorCam] whose Output Ref is
+  the output; a surface already drawn in the composition is selected, not added twice.
+- **Open:** Connect... is offered only for a surface without content, so a surface that already has 2D content
+  can't get 3D content from it; a surface context-menu entry would cover that.
 
 ## 8. Phases
 

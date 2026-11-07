@@ -26,7 +26,7 @@ Select the region in the Flow Outliner. Then select a surface that already shows
 ## Step: New content for a region
 
 **Action:**
-Select the region, choose **Connect...** → **New Content for This Surface**.
+Select the region, choose **Connect...** → **New 2D Content**.
 
 **Expected:**
 - The open composition gets a row of five ops: [SurfaceReferenceImage] → [Layer2d] → [Group] → [RenderTarget] → [SendToOutput], all connected. The [Group] is selected.
