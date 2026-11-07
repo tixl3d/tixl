@@ -30,6 +30,15 @@ namespace T3.Editor.Gui.Windows.OutputSetup;
 /// </summary>
 internal static class SetupParameterView
 {
+    /** How a surface lies in the stage, as the Facing preset offers it. */
+    private enum SurfaceFacings
+    {
+        Wall,
+        Floor,
+        Ceiling,
+        Tilted,
+    }
+
     /// <summary>
     /// Draws the primary entity's card and returns true while the entity selection owns the inspection.
     /// Returns false — and lets the inspection go — when nothing resolves anymore (entity deleted, setup gone).
@@ -427,6 +436,31 @@ internal static class SetupParameterView
     {
         var orientation = surface.Placement?.Pose.Orientation ?? System.Numerics.Quaternion.Identity;
         var degrees = StagePlacing.ToYawPitchRollDegrees(orientation);
+
+        // The common cases as one click: only the pitch changes, so a wall keeps the way it was turned.
+        if (!readOnly)
+        {
+            var facing = FacingOf(degrees.Y);
+            if (FormInputs.AddSegmentedButtonWithLabel(ref facing, "Facing",
+                                                       "Whether the surface stands upright, lies on the ground or hangs from the ceiling. "
+                                                       + "Picking one sets the pitch and keeps the turn and position; Tilted is any other pitch.")
+                && facing != SurfaceFacings.Tilted)
+            {
+                var pitch = facing switch
+                                {
+                                    SurfaceFacings.Floor => -90f,
+                                    SurfaceFacings.Ceiling => 90f,
+                                    _ => 0f,
+                                };
+                SetupUndo.RunUndoable($"Face {facing}", setup, () =>
+                                                              {
+                                                                  var placement = surface.Placement ??= new Surface.StagePlacement();
+                                                                  placement.Pose = new Pose(placement.Pose.Position,
+                                                                                            StagePlacing.FromYawPitchRollDegrees(new System.Numerics.Vector3(degrees.X, pitch, degrees.Z)));
+                                                              });
+                degrees = StagePlacing.ToYawPitchRollDegrees(surface.Placement!.Pose.Orientation);
+            }
+        }
         Span<float> rotation = [degrees.X, degrees.Y, degrees.Z];
         var rotationState = DrawFloatsRow("Rotation (°)", rotation,
                                           "Yaw, pitch and roll in the stage. An unturned surface stands upright facing the viewer; a floor is pitched -90.",
@@ -616,6 +650,83 @@ internal static class SetupParameterView
         DrawPatchTable(setup, output, Guid.Empty);
         DrawCardDivider();
         DrawReferenceLayoutRows(setup, output);
+
+        if (output.Kind is OutputDefinition.Kinds.Projector or OutputDefinition.Kinds.Display)
+        {
+            DrawCardDivider();
+            var isProjector = output.Kind == OutputDefinition.Kinds.Projector;
+            if (FormInputs.AddCheckBox("Is Projector", ref isProjector,
+                                       "A projector throws its picture into the room, so its position and zoom can be solved for [UseProjectorCam]. "
+                                       + "A display shows the canvas as it is."))
+            {
+                SetupUndo.RunUndoable(isProjector ? "Make projector" : "Make display", setup,
+                                      () => output.Kind = isProjector ? OutputDefinition.Kinds.Projector : OutputDefinition.Kinds.Display);
+            }
+
+            if (output.Kind == OutputDefinition.Kinds.Projector)
+                DrawProjectorCameraRows(setup, output);
+        }
+    }
+
+    /// <summary>
+    /// Where the projector stands and how it zooms, for [UseProjectorCam]: solved from the output's aligned surface
+    /// with the lens axis given, since one surface can't tell where the axis passes through the picture.
+    /// </summary>
+    private static void DrawProjectorCameraRows(Setup setup, OutputDefinition output)
+    {
+        var camera = output.Camera;
+
+        // Shown as spec sheets give it, the picture's shift off the lens axis in percent of its size; stored as where the
+        // axis lands in the picture (NDC), which is the opposite direction with half the picture as 1.
+        var lensAxis = camera?.LensAxis ?? Vector2.Zero;
+        Span<float> shift = [-lensAxis.X * 50, -lensAxis.Y * 50];
+        var shiftState = DrawFloatsRow("Lens shift (%)", shift,
+                                       "How far the picture is moved off the lens axis, in percent of its width and height, right and up. "
+                                       + "0 centres the picture on the lens. A projector on a table throwing up at a wall is usually about +50 up: "
+                                       + "the picture's bottom edge sits on the lens axis, which some spec sheets call 100% offset. A ceiling mount is about -50.",
+                                       speed: 0.5f, format: "{0:0.#}");
+        BeginFieldUndo(setup, shiftState);
+        if ((shiftState & InputEditStateFlags.Modified) != 0)
+            (output.Camera ??= new OutputDefinition.ProjectorCamera()).LensAxis = new Vector2(shift[0], shift[1]) / -50;
+
+        CommitFieldUndo(setup, "Change lens shift", shiftState);
+
+        Span<float> zoom = [camera?.ManualFovYDegrees ?? 45];
+        var zoomState = DrawFloatsRow("Zoom (°)", zoom,
+                                      "The vertical field of view. Used when the surface is seen too squarely for its keystone to tell the zoom, and by the manual camera.",
+                                      speed: 0.1f, format: "{0:0.#}");
+        BeginFieldUndo(setup, zoomState);
+        if ((zoomState & InputEditStateFlags.Modified) != 0)
+            (output.Camera ??= new OutputDefinition.ProjectorCamera()).ManualFovYDegrees = Math.Clamp(zoom[0], 1, 170);
+
+        CommitFieldUndo(setup, "Change zoom", zoomState);
+
+        FormInputs.AddVerticalSpace(4);
+        ProjectorSideView.Draw(setup, output.Camera ?? _unsolvedCamera);
+        FormInputs.AddVerticalSpace(4);
+
+        FormInputs.DrawInputLabel(string.Empty);
+        if (CustomComponents.StateButton("Solve from Aligned Surface", CustomComponents.ButtonStates.Default))
+        {
+            _projectorSolveFailure = ProjectorCalibration.TrySolveFromAlignedSurface(setup, output, out var message)
+                                         ? default
+                                         : (output.Id, message);
+        }
+
+        CustomComponents.TooltipForLastItem("Solves where the projector stands and how it zooms from the largest surface aligned on this output.",
+                                            "Align the surface first and set the lens shift. Turn the projector's own digital keystone correction off.");
+
+        var isSolved = camera?.Pose != null;
+        ImGui.SameLine();
+        ImGui.BeginDisabled(!isSolved);
+        if (CustomComponents.StateButton("Use Manual Camera", CustomComponents.ButtonStates.Default) && isSolved)
+            ProjectorCalibration.UseManualCamera(setup, output);
+
+        ImGui.EndDisabled();
+
+        FormInputs.AddHint(_projectorSolveFailure.OutputId == output.Id ? _projectorSolveFailure.Message
+                           : camera != null ? ProjectorCalibration.DescribeSolve(setup, camera)
+                           : "Manual camera: not solved yet.");
     }
 
     /** Matches how FormInputs fades a field that holds its default value. */
@@ -1714,4 +1825,19 @@ internal static class SetupParameterView
     private static SetupEntityKinds _renameTargetKind;
     private static string _renameBuffer = string.Empty;
     private static bool _renameFieldActive;
+
+    private static SurfaceFacings FacingOf(float pitchDegrees)
+    {
+        const float tolerance = 0.5f;
+        return MathF.Abs(pitchDegrees) < tolerance ? SurfaceFacings.Wall
+               : MathF.Abs(pitchDegrees + 90) < tolerance ? SurfaceFacings.Floor
+               : MathF.Abs(pitchDegrees - 90) < tolerance ? SurfaceFacings.Ceiling
+               : SurfaceFacings.Tilted;
+    }
+
+    /** Drawn for a projector that has no camera data yet: centred lens, the default zoom. */
+    private static readonly OutputDefinition.ProjectorCamera _unsolvedCamera = new();
+
+    /** Why the last solve on an output failed, shown until the next try. */
+    private static (Guid OutputId, string Message) _projectorSolveFailure;
 }

@@ -629,9 +629,9 @@ quad is nearly a point; then undo.
 
 **Action:**
 1. Drag the quad's corners to an obvious keystone, and note where they are. Turn on **Align Points**, drag
-   several points so the quad changes, then click **Reset Alignment**.
+   several points so the quad changes, then click **Reset**.
 2. Press Ctrl+Z, then Ctrl+Y.
-3. Save and reopen the project with some points moved, turn on **Align Points** and click **Reset Alignment**.
+3. Save and reopen the project with some points moved, turn on **Align Points** and click **Reset**.
 
 **Expected:**
 - After 1: the quad is back at the noted corners and the content looks as it did. All outlines are thin, every
@@ -660,7 +660,7 @@ With an Xbox-compatible controller connected, "Surface 1" carrying at least thre
 - After 3: while held, an amber arrow reaches right from the active point, on the canvas and on the wall.
 - After 4: the point now moves to the right on the canvas, because the stick's up was set to that direction.
 - After 5: the point is released: thin outline, its disc back where the pin lands it, and the quad does not change.
-- After 6: the alignment resets as with **Reset Alignment**, in one undo step.
+- After 6: the alignment resets as with **Reset**, in one undo step.
 - After 7: the editor keeps running without a hitch, and the controller works again within about a second.
 
 ## Step: Finding Align Points from the output

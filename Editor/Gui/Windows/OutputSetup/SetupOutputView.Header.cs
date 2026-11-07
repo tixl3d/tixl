@@ -138,8 +138,12 @@ internal sealed partial class SetupOutputView
         if (!canIsolate)
             _isolatesFocusedSurface = false;
 
-        DrawOpacityField("Overlay", ref UserSettings.Config.OutputSetupContentPreviewOpacity, 65f,
-                         "Opacity of each surface's content over its photo — on the traced quads and the surface cards. Drag, or double-click to type.");
+        // Aligning points needs the room on the toolbar and doesn't use the overlay, so it steps aside meanwhile.
+        if (!_projectsPhoto)
+        {
+            DrawOpacityField("Overlay", ref UserSettings.Config.OutputSetupContentPreviewOpacity, 65f,
+                             "Opacity of each surface's content over its photo — on the traced quads and the surface cards. Drag, or double-click to type.");
+        }
 
         if (_editMode == EditModes.Board)
         {
@@ -169,7 +173,11 @@ internal sealed partial class SetupOutputView
 
         // Isolate is an Output-canvas affair: it locks the corner-pin editing to one frame. Elsewhere it has
         // nothing to lock, so it isn't offered (and clears).
-        if (_editMode == EditModes.Output)
+        if (_editMode != EditModes.Output)
+        {
+            _isolatesFocusedSurface = false;
+        }
+        else if (!_projectsPhoto) // aligning points needs the room; isolating keeps its state until the button is back
         {
             ImGui.SameLine(0, 12 * T3Ui.UiScaleFactor);
             ImGui.BeginDisabled(!canIsolate);
@@ -179,10 +187,6 @@ internal sealed partial class SetupOutputView
             ImGui.EndDisabled();
             if (canIsolate && ImGui.IsItemHovered())
                 ImGui.SetTooltip("Lock the canvas to the selected frame.\nOthers stay visible and snap, but change selection in the Flow Outliner.");
-        }
-        else
-        {
-            _isolatesFocusedSurface = false;
         }
 
         // Aligning against the photo: a disc of the straightened photo is projected around each reference point

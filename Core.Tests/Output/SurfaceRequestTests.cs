@@ -28,12 +28,53 @@ public class SurfaceRequestTests
         var output = setup.Outputs[0];
         output.CanvasResolution = new T3.Core.DataTypes.Vector.Int2(1920, 1080);
 
-        // Fills the canvas: 1920 px across 1 m, 1080 px across 0.5 m. The denser direction wins.
+        // Fills the canvas: 1920 px across 1 m, 1080 px across 0.5 m. The denser direction wins, capped so the longest
+        // side doesn't exceed the canvas' 1920 px, and stepped by up to about 4.4%.
         surface.OutputMappings.Add(Surface.OutputMapping.CreateFilling(output.Id));
 
         Assert.True(OutputContentResolver.TryGetSurfaceRequest(setup, sendId, out var resolution, out _));
-        Assert.Equal(2160, resolution.Width);
-        Assert.Equal(1080, resolution.Height);
+        Assert.InRange(resolution.Width, 1840, 1920);
+        Assert.Equal(2f, resolution.Width / (float)resolution.Height, 2);
+    }
+
+    [Fact]
+    public void ExtremePin_IsCappedAtTheCanvasSize()
+    {
+        var (setup, sendId, source) = SetupWithSend();
+        var surface = AddSurface(setup, source, new Vector2(0.4f, 0.6f), 400, new Vector4(0, 0, 1, 1));
+        var output = setup.Outputs[0];
+        output.CanvasResolution = new T3.Core.DataTypes.Vector.Int2(1920, 1080);
+
+        // A pin mid-drag with a corner thrown far off the canvas.
+        surface.OutputMappings.Add(new Surface.OutputMapping
+                                       {
+                                           OutputId = output.Id,
+                                           Quad = [new Vector2(0.4f, 0.1f), new Vector2(40f, -30f), new Vector2(0.8f, 0.9f), new Vector2(0.4f, 0.9f)],
+                                       });
+
+        Assert.True(OutputContentResolver.TryGetSurfaceRequest(setup, sendId, out var resolution, out _));
+        Assert.True(resolution.Height <= 1920, $"{resolution.Width}×{resolution.Height}");
+    }
+
+    [Fact]
+    public void SmallPinChanges_KeepTheSameSize()
+    {
+        var (setup, sendId, source) = SetupWithSend();
+        var surface = AddSurface(setup, source, new Vector2(0.4f, 0.6f), 400, new Vector4(0, 0, 1, 1));
+        var output = setup.Outputs[0];
+        output.CanvasResolution = new T3.Core.DataTypes.Vector.Int2(1920, 1080);
+        var mapping = new Surface.OutputMapping
+                          {
+                              OutputId = output.Id,
+                              Quad = [new Vector2(0.40f, 0.10f), new Vector2(0.70f, 0.12f), new Vector2(0.71f, 0.90f), new Vector2(0.40f, 0.88f)],
+                          };
+        surface.OutputMappings.Add(mapping);
+        Assert.True(OutputContentResolver.TryGetSurfaceRequest(setup, sendId, out var before, out _));
+
+        // One pixel of drag on a corner.
+        mapping.Quad[2] += new Vector2(1f / 1920, 1f / 1080);
+        Assert.True(OutputContentResolver.TryGetSurfaceRequest(setup, sendId, out var after, out _));
+        Assert.Equal(before, after);
     }
 
     [Fact]

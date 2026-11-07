@@ -217,7 +217,7 @@ internal sealed partial class SetupOutputView
     }
 
     /// <summary>
-    /// "Reset Alignment": forgets every target on this output and puts the pin back to where it was before the
+    /// "Reset": forgets every target on this output and puts the pin back to where it was before the
     /// first point was aimed. A pin aligned before that was remembered falls back to filling the canvas, which is
     /// where a new mapping starts.
     /// </summary>
@@ -226,7 +226,7 @@ internal sealed partial class SetupOutputView
         var mapping = surface.FindMapping(outputId);
         var canReset = mapping != null && (mapping.PointAims.Count > 0 || mapping.QuadBeforeAligning != null || !mapping.IsFilling);
         ImGui.BeginDisabled(!canReset);
-        if (CustomComponents.StateButton("Reset Alignment", CustomComponents.ButtonStates.Default) && canReset)
+        if (CustomComponents.StateButton("Reset", CustomComponents.ButtonStates.Default) && canReset)
         {
             ResetAlignment(setup, mapping!);
         }

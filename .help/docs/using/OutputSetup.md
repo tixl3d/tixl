@@ -55,7 +55,7 @@ The selected surface seen flat, as if you stood in front of it. Place its conten
 
 An output's canvas: the live composite the projector receives. Each mapped surface appears as a quad you corner-pin over the real wall while watching the projector. Patches appear as plain quads on the canvas.
 
-Once a surface carries reference points, turn on **Align Points** to project a disc of the photo around each one. Watch the wall and drag a point until its disc covers the real feature. That sets the point, shown by a thick white outline, and the pin is solved through every set point. The point you moved last blinks, and **Release Point** or a double-click stops a point from constraining the pin. **Reset Alignment** releases all of them and puts the pin back to where it was before you started aligning. An arrow shows where the pin misses a point. Turn **Align Points** off to check the result on your content.
+Once a surface carries reference points, turn on **Align Points** to project a disc of the photo around each one. Watch the wall and drag a point until its disc covers the real feature. That sets the point, shown by a thick white outline, and the pin is solved through every set point. The point you moved last blinks, and **Release Point** or a double-click stops a point from constraining the pin. **Reset** releases all of them and puts the pin back to where it was before you started aligning. An arrow shows where the pin misses a point. Turn **Align Points** off to check the result on your content.
 
 A game controller lets you do this while standing at the wall. The right stick moves the active point, gently at a light touch. The d-pad goes to the nearest point in its direction, the shoulder buttons cycle through all points, and the right stick's button releases the active one. If the projector is mounted at an angle, hold the left stick until the arrow on the wall points up and press the stick: pushing the right stick up now moves points up on the wall. Pressing the left stick while it's centred resets the alignment.
 
@@ -123,6 +123,14 @@ A traced surface's photo can be the guide for its content: put a [Text] over the
 [SurfaceReferenceImage] outputs the straightened photo of a surface or region on its own, for any graph that wants it.
 
 [UseProjectorCam] renders its content through an output's projector camera, so 3D geometry aligned to the stage lands correctly on that projector without a corner pin. Wire its result through a [RenderTarget] into a [SendToOutput] bound to the same output.
+
+The camera is solved from a surface you have already aligned on that output. In the output's **Projector Camera** section, set **Lens shift**: how far the picture is moved off the projector's lens axis, in percent of its width and height, right and up. A projector on a table throwing up at a wall is usually about +50 up, with the picture's bottom edge on the lens axis; a ceiling mount about -50. Turn the projector's own digital keystone correction off. Then choose **Solve from Aligned Surface**. It uses the largest surface on the output and places the projector relative to that surface's stage position, set with **Facing** and **Position** in the surface's parameters; a surface without a position is the origin of the stage. A surface seen almost square-on shows little of the projector's zoom, so the solve then uses the **Zoom** you entered. A large surface seen at an angle gives the steadiest result; on a small one the result depends strongly on the lens shift. **Use Manual Camera** drops the solve.
+
+## The editor UI as content
+
+For tutorials, or a live set that shows the graph next to the visuals, the editor itself can be content. Choose **Editor UI** from the **+** of the Content column. It behaves like any other source: cut slices from it, show it on a surface, or drop it on an output. Dropped on an output, it lands as a fitted patch with the window's aspect, so it is letterboxed instead of stretched. Cut a slice to show only part of the window, such as the graph.
+
+This is much cheaper than duplicating a display through the operating system, which on Windows can cost a large share of the GPU time. The mirror shows the previous frame. Previews of it inside the editor show the editor again, so they nest like facing mirrors. It can be renamed and deleted in the setup, and an exported executable shows nothing in its place.
 
 ## Tips
 
