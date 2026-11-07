@@ -151,6 +151,8 @@ internal static class CalibrationOverlay
         var textureToPinUnit = Matrix4x4.CreateScale(1 / uvSpan.X, 1 / uvSpan.Y, 1)
                                * Matrix4x4.CreateTranslation(-photo.Uv.X / uvSpan.X, -photo.Uv.Y / uvSpan.Y, 0);
 
+        // Mask mode 2 in corner-pin-layer.hlsl: the disc and its colours inverted.
+        var isInverted = _invertPhoto.IsCurrent(ImGui.GetFrameCount());
         foreach (var pending in _pendingFragments)
         {
             if (!SurfaceGeometry.TryGetSurfaceToOutput(pending.Surface, pending.Mapping, canvasSize, out var surfaceToOutput))
@@ -200,7 +202,7 @@ internal static class CalibrationOverlay
                 var opacity = photo.IgnoredPointIds.Contains(annotation.Id) ? IgnoredPointOpacity : 1f;
                 drawItems.Add(new OutputCompositor.DrawItem(photo.Srv, textureToNdc, new Vector4(0, 0, 1, 1), new Vector4(1, 1, 1, opacity),
                                                             Vector4.Zero, Vector4.Zero, Vector4.Zero,
-                                                            new Vector4(centre.X, centre.Y, radius, 1)));
+                                                            new Vector4(centre.X, centre.Y, radius, isInverted ? 2 : 1)));
             }
         }
     }
@@ -332,7 +334,17 @@ internal static class CalibrationOverlay
             AddRing(target, discRadius + outlineWidth, _activePointOutlineWidth, new Vector4(white.X, white.Y, white.Z, blink));
 
             if (_upDirectionPreview.IsCurrent(ImGui.GetFrameCount()) && _upDirectionPreview.Value.SurfaceId == photo.SurfaceId)
-                AddArrow(target, target + _upDirectionPreview.Value.Direction * (discRadius + _upArrowReach), UiColors.StatusAnimated.Rgba);
+                AddArrow(target, target + _upDirectionPreview.Value.Direction * (discRadius + _upArrowReach), UiColors.StatusAnimated.Rgba, _annotationLineWidth);
+
+            // "Find point": a ring closing in from far out onto the point's outline, for a point lost on the wall.
+            var sinceFlash = (float)(ImGui.GetTime() - _flashStartTime);
+            if (sinceFlash >= 0 && sinceFlash < FlashDurationSec)
+            {
+                var progress = sinceFlash / FlashDurationSec;
+                var eased = 1 - (1 - progress) * (1 - progress) * (1 - progress);
+                var radius = discRadius + outlineWidth + (canvasSize.Y * FlashStartRadiusOfHeight - discRadius) * (1 - eased);
+                AddRing(target, radius, _activePointOutlineWidth * 1.5f, new Vector4(white.X, white.Y, white.Z, 1 - progress * 0.5f));
+            }
         }
 
         var arm = _pointCrosshairSize * 0.5f;
@@ -342,15 +354,27 @@ internal static class CalibrationOverlay
         _overlayLines.Add(new OverlayLine(new Vector4(target.X, target.Y - arm, target.X, target.Y + arm), crosshairColor, crosshairWidth));
 
         if ((projected - target).Length() >= _minVisibleMissPx)
-            AddArrow(target, projected, UiColors.StatusAttention.Rgba);
+            AddArrow(target, projected, UiColors.StatusAttention.Rgba, _missArrowLineWidth);
     }
 
-    private static void AddArrow(Vector2 from, Vector2 to, Vector4 color)
+    /// <summary>Projects the photo discs inverted this frame: dark print on a dark wall is easier to align as light on dark.</summary>
+    public static void InvertPhotoThisFrame()
+    {
+        _invertPhoto.Set(true, ImGui.GetFrameCount());
+    }
+
+    /// <summary>Flashes a ring that closes in on the active point on the wall, to find a point that is hard to see.</summary>
+    public static void FlashActivePoint()
+    {
+        _flashStartTime = ImGui.GetTime();
+    }
+
+    private static void AddArrow(Vector2 from, Vector2 to, Vector4 color, float lineWidth)
     {
         var direction = Vector2.Normalize(to - from);
         var side = new Vector2(-direction.Y, direction.X) * _arrowHeadSize * 0.5f;
         var headBase = to - direction * _arrowHeadSize;
-        var width = new Vector4(_annotationLineWidth, 0, 0, 0);
+        var width = new Vector4(lineWidth, 0, 0, 0);
         _overlayLines.Add(new OverlayLine(new Vector4(from.X, from.Y, to.X, to.Y), color, width));
         _overlayLines.Add(new OverlayLine(new Vector4(to.X, to.Y, headBase.X + side.X, headBase.Y + side.Y), color, width));
         _overlayLines.Add(new OverlayLine(new Vector4(to.X, to.Y, headBase.X - side.X, headBase.Y - side.Y), color, width));
@@ -511,6 +535,16 @@ internal static class CalibrationOverlay
     private const string LineShaderPath = "Lib:shaders/dx11/output-lines.hlsl";
     private const string QuadShaderPath = "Lib:shaders/dx11/output-quads.hlsl";
     private const float _annotationLineWidth = 2.5f;
+
+    /** Arrows from a set point to where the pin lands it: twice a line's width, as the miss is what is read from across the room. */
+    private const float _missArrowLineWidth = _annotationLineWidth * 2;
+
+    private const float FlashDurationSec = 0.6f;
+
+    /** Where the "find point" ring starts closing in from, as a share of the canvas height. */
+    private const float FlashStartRadiusOfHeight = 0.5f;
+
+    private static double _flashStartTime = double.NegativeInfinity;
     private const float _annotationMarkerSize = 11f;
     private const float _aimCrosshairSize = 60f;
     private const float _pointCrosshairSize = 40f;
@@ -536,6 +570,7 @@ internal static class CalibrationOverlay
     private static FrameStamped<CalibrationPhoto> _photo = new() { Frame = -10 };
     private static FrameStamped<EmphasizedAnnotation> _emphasized = new() { Frame = -10 };
     private static FrameStamped<UpDirectionPreview> _upDirectionPreview = new() { Frame = -10 };
+    private static FrameStamped<bool> _invertPhoto = new() { Frame = -10 };
 
     private static readonly List<PendingFragment> _pendingFragments = [];
     private static readonly List<OverlayLine> _overlayLines = [];

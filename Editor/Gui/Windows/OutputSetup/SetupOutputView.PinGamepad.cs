@@ -1,6 +1,9 @@
 #nullable enable
 using ImGuiNET;
 using T3.Core.Output;
+using T3.Editor.UiModel.Commands;
+using T3.Editor.UiModel.Commands.Setup;
+using T3.Editor.UiModel.ProjectHandling;
 using T3.IoServices;
 using Vector2 = System.Numerics.Vector2;
 
@@ -9,8 +12,9 @@ namespace T3.Editor.Gui.Windows.OutputSetup;
 /// <summary>
 /// "Align Points" from a game controller, so the person aligning can stand at the wall: the right stick moves the
 /// active point, the d-pad goes to the nearest point in its direction, the shoulder buttons cycle through all of
-/// them (the four outermost first, see <see cref="WritePointCycleOrder"/>), the right stick's button releases the
-/// active one. The left stick defines which way is
+/// them (the four outermost first, see <see cref="WritePointCycleOrder"/>), X or the right stick's button releases the
+/// active one and Y flashes a ring around it to find it. Holding a trigger projects the photo inverted. A ends
+/// aligning; B ends it and undoes the session. The left stick defines which way is
 /// up on the wall, which a projector mounted at an angle makes different from up on its canvas; its button sets
 /// that direction, or resets the alignment while the stick is centred.
 /// </summary>
@@ -25,7 +29,28 @@ internal sealed partial class SetupOutputView
             return;
         }
 
+        // Confirm or cancel the whole session; either way aligning ends, so nothing else on the pad applies this frame.
+        if (WasPressed(pad.Buttons.A, _lastPad.Buttons.A) || WasPressed(pad.Buttons.B, _lastPad.Buttons.B))
+        {
+            var isCancel = pad.Buttons.B && !_lastPad.Buttons.B;
+            _lastPad = pad;
+            FinishGamepadMove(setup);
+            if (isCancel)
+                UndoAlignSession(setup);
+
+            SetAligningPoints(setup, false);
+            return;
+        }
+
+        if (WasPressed(pad.Buttons.Y, _lastPad.Buttons.Y))
+            CalibrationOverlay.FlashActivePoint();
+
+        // Held, not toggled: a quick look at the inverted photo, gone as soon as the trigger is let go.
+        if (pad.LeftTrigger > TriggerHeldThreshold || pad.RightTrigger > TriggerHeldThreshold)
+            CalibrationOverlay.InvertPhotoThisFrame();
+
         var wallRightOnCanvas = new Vector2(-_wallUpOnCanvas.Y, _wallUpOnCanvas.X);
+        var previousActivePointId = _activePointId;
         if (WasPressed(pad.LeftShoulder, _lastPad.LeftShoulder))
         {
             CycleActivePoint(subject, -1);
@@ -51,6 +76,10 @@ internal sealed partial class SetupOutputView
             SelectPointInDirection(subject, mapping, canvasSize, -_wallUpOnCanvas);
         }
 
+        // The newly active point is easy to miss on a busy wall, so it gets the same ring as Y.
+        if (_activePointId != previousActivePointId)
+            CalibrationOverlay.FlashActivePoint();
+
         var hasDirection = pad.LeftThumb.Length() > MinThumbForDirection;
 
         // The stick's up is the canvas' up, so the arrow is off on the wall by however the projector is mounted.
@@ -71,7 +100,7 @@ internal sealed partial class SetupOutputView
             }
         }
 
-        if (WasPressed(pad.RightStickButton, _lastPad.RightStickButton)
+        if ((WasPressed(pad.RightStickButton, _lastPad.RightStickButton) || WasPressed(pad.Buttons.X, _lastPad.Buttons.X))
             && mapping.PointAims.TryGetValue(_activePointId, out var activeAim) && activeAim.IsAimed)
         {
             FinishGamepadMove(setup);
@@ -114,6 +143,27 @@ internal sealed partial class SetupOutputView
         var aim = AimOf(mapping, point!.Id, point.P1 + subject.TracedToPinned, surfaceToOutput, canvasSize);
         mapping.PointAims[point.Id] = new Surface.OutputMapping.PointAim(aim.Position + pixels / canvasSize, true);
         SolvePinFromTargets(subject, mapping, canvasSize);
+    }
+
+    /// <summary>
+    /// Turns "Align Points" on or off. Turning it on remembers the setup, so a cancel can go back to how it was before
+    /// any point was moved in this session.
+    /// </summary>
+    private void SetAligningPoints(Setup setup, bool isOn)
+    {
+        _projectsPhoto = isOn;
+        _alignSessionStartJson = isOn ? setup.ToJsonString() : null;
+    }
+
+    /** Puts the setup back to how it was when aligning started, as one undo step, so the cancel itself can be undone. */
+    private void UndoAlignSession(Setup setup)
+    {
+        var current = setup.ToJsonString();
+        if (_alignSessionStartJson == null || _alignSessionStartJson == current)
+            return;
+
+        UndoRedoStack.AddAndExecute(new SetupSnapshotCommand("Cancel alignment", setup.Id, current, _alignSessionStartJson));
+        OutputSetupHandling.SaveActive();
     }
 
     /** Ends the undo step of a stick move, once the stick is back at rest or the tool went away. */
@@ -198,6 +248,9 @@ internal sealed partial class SetupOutputView
 
     private const float MinThumbForDirection = 0.3f;
 
+    /** How far a trigger is pressed before it counts as held. */
+    private const float TriggerHeldThreshold = 0.5f;
+
     /// <summary>
     /// Point speed in projector pixels per second for a stick deflection past the dead zone, from a table: a crawl
     /// across the lower third for placing a point precisely, then fast enough to cross the wall. Between two speeds
@@ -226,6 +279,9 @@ internal sealed partial class SetupOutputView
     private static readonly float[] _speedsPxPerSec = [0f, 1f, 2f, 50f, 100f, 400f];
 
     private GamePadState _lastPad;
+
+    /** The setup as it was when "Align Points" was turned on: what B goes back to. */
+    private string? _alignSessionStartJson;
     private bool _isGamepadMovingPoint;
 
     /** Which way pushing the right stick up moves a point, as a unit vector on the canvas. Starts as the canvas' own up. */

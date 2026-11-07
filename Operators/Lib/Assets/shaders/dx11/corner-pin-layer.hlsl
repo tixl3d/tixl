@@ -7,7 +7,7 @@ cbuffer Params : register(b0)
     float4 GridParams; // xy = metres spanned by the surface, z = line thickness (px), w = grid mode (>0.5)
     float4 GridColor;
     float4 GridOrigin; // xy = raster origin in source UV, z = minor lines per metre, w = minor line opacity
-    float4 Mask;       // xy = centre (output px), z = radius (px), w = enabled (>0.5): only a disc of the layer shows
+    float4 Mask;       // xy = centre (output px), z = radius (px), w = enabled (>0.5): only a disc of the layer shows; >1.5 also inverts it
 }
 
 Texture2D<float4> InputTexture : register(t0);
@@ -81,6 +81,10 @@ float4 psMain(vsOutput input) : SV_TARGET
     }
 
     float4 color = InputTexture.Sample(texSampler, input.texCoord) * Color;
+
+    // A calibration fragment, inverted on request: dark print on a dark wall reads better as light on dark.
+    if (Mask.w > 1.5)
+        color.rgb = 1 - color.rgb;
 
     // A calibration fragment: the layer fades out beyond a disc around one point, so only the photo right
     // around the feature reaches the wall.
