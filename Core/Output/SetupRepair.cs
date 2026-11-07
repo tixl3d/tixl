@@ -53,6 +53,10 @@ public static class SetupRepair
                 changed = true;
             }
 
+            // A parked alignment only waits for its output to be connected again; once that output is gone it never will be.
+            if (surface.ParkedMappings.RemoveAll(parked => setup.FindOutput(parked.OutputId) == null || !QuadIsUsable(parked.Quad)) > 0)
+                changed = true;
+
             foreach (var mapping in surface.OutputMappings)
             {
                 // A fill's quad is the canvas by definition; anything else in the file is stale.

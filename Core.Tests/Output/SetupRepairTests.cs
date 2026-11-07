@@ -77,5 +77,20 @@ public class SetupRepairTests
         Assert.False(SetupRepair.Repair(setup));
     }
 
+    [Fact]
+    public void Repair_DropsParkedMappingsOfDeletedOutputs()
+    {
+        var setup = Setup.CreateDefault();
+        var output = setup.Outputs[0];
+        var wall = new Surface { Name = "wall" };
+        wall.ParkedMappings.Add(new Surface.OutputMapping { OutputId = output.Id, Quad = UnitQuad() });
+        wall.ParkedMappings.Add(new Surface.OutputMapping { OutputId = Guid.NewGuid(), Quad = UnitQuad() });
+        setup.Surfaces.Add(wall);
+
+        Assert.True(SetupRepair.Repair(setup));
+        var kept = Assert.Single(wall.ParkedMappings);
+        Assert.Equal(output.Id, kept.OutputId);
+    }
+
     private static Vector2[] UnitQuad() => [Vector2.Zero, new Vector2(1, 0), new Vector2(1, 1), new Vector2(0, 1)];
 }

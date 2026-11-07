@@ -305,7 +305,45 @@ internal static class SetupActions
     /// </summary>
     internal static void AddMapping(Surface surface, OutputDefinition output)
     {
-        surface.OutputMappings.Add(Surface.OutputMapping.CreateFilling(output.Id));
+        surface.OutputMappings.Add(TakeParkedMapping(surface, output.Id) ?? Surface.OutputMapping.CreateFilling(output.Id));
+    }
+
+    /// <summary>
+    /// Takes the mappings that <paramref name="match"/> picks off the surface's outputs, parking each with its
+    /// alignment instead of discarding it. Appended outside any undo step, the caller's.
+    /// </summary>
+    internal static void ParkMappings(Surface surface, Predicate<Surface.OutputMapping> match)
+    {
+        for (var i = surface.OutputMappings.Count - 1; i >= 0; i--)
+        {
+            var mapping = surface.OutputMappings[i];
+            if (!match(mapping))
+                continue;
+
+            surface.OutputMappings.RemoveAt(i);
+            surface.ParkedMappings.RemoveAll(parked => parked.OutputId == mapping.OutputId);
+            surface.ParkedMappings.Add(mapping);
+        }
+    }
+
+    /// <summary>
+    /// The alignment parked for this output, removed from the parked list, or null. It comes back as a direct
+    /// mapping: whatever patch it followed before was disconnected along with it.
+    /// </summary>
+    private static Surface.OutputMapping? TakeParkedMapping(Surface surface, Guid outputId)
+    {
+        for (var i = 0; i < surface.ParkedMappings.Count; i++)
+        {
+            var parked = surface.ParkedMappings[i];
+            if (parked.OutputId != outputId)
+                continue;
+
+            surface.ParkedMappings.RemoveAt(i);
+            parked.PatchId = Guid.Empty;
+            return parked;
+        }
+
+        return null;
     }
 
     /// <summary>Gives the surface the whole canvas on this output again, dropping the corners it was dragged to.</summary>
@@ -528,7 +566,7 @@ internal static class SetupActions
         if (surface == null || !HasOwnPin(surface))
             return;
 
-        SetupUndo.RunUndoable("Follow parent's pin", setup, () => surface.OutputMappings.Clear());
+        SetupUndo.RunUndoable("Follow parent's pin", setup, () => ParkMappings(surface, static _ => true));
     }
 
     /// <summary>
@@ -1067,7 +1105,10 @@ internal static class SetupActions
         setup.Outputs.RemoveAll(o => o.Id == outputId);
         OutputPresentation.ReleaseOutput(outputId);
         foreach (var surface in setup.Surfaces)
+        {
             surface.OutputMappings.RemoveAll(m => m.OutputId == outputId);
+            surface.ParkedMappings.RemoveAll(m => m.OutputId == outputId);
+        }
 
         machineConfig.Unbind(outputId);
     }
@@ -1248,6 +1289,7 @@ internal static class SetupActions
         var copy = CloneViaJson(source.WriteToJson, Surface.ReadFromJson) ?? new Surface();
         copy.Id = Guid.NewGuid();
         copy.SliceId = Guid.Empty;
+        copy.ParkedMappings.Clear(); // the original's projector history; restoring one would stack the copy on it
 
         foreach (var annotation in copy.Annotations)
         {
@@ -1272,7 +1314,7 @@ internal static class SetupActions
     private static void ClearPatchInputInternal(Setup setup, OutputDefinition.Patch patch)
     {
         foreach (var surface in setup.Surfaces)
-            surface.OutputMappings.RemoveAll(m => SetupRelations.LinkedPatchOf(setup, m) == patch.Id);
+            ParkMappings(surface, m => SetupRelations.LinkedPatchOf(setup, m) == patch.Id);
 
         patch.SliceId = Guid.Empty;
     }
@@ -1280,7 +1322,7 @@ internal static class SetupActions
     private static void ClearOutputInputsInternal(Setup setup, OutputDefinition output)
     {
         foreach (var surface in setup.Surfaces)
-            surface.OutputMappings.RemoveAll(m => IsDirectMappingOnto(setup, m, output));
+            ParkMappings(surface, m => IsDirectMappingOnto(setup, m, output));
 
         // The folded-away patch has no place of its own to keep: it only exists to carry the route.
         if (SetupRelations.TryGetImplicitPatch(output, out var implicitPatch))
