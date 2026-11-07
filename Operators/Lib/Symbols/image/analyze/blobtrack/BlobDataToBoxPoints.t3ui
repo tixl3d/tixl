@@ -1,0 +1,59 @@
+{
+  "FormatVersion": 3,
+  "Id": "38000677-49F7-48D7-A576-FA081AFC29D6"/*BlobDataToBoxPoints*/,
+  "Description": "",
+  "InputUis": [
+    {
+      "InputId": "9B5A4D84-80FF-48DC-9A24-D905906B3CFD"/*Scale*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      }
+    },
+    {
+      "InputId": "E6B707F4-7B2E-4BDE-B2D8-2B62F192A8E5"/*AspectRatio*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 270.0
+      }
+    },
+    {
+      "InputId": "6CE772FB-94E5-41BB-8A49-8E40B4BE139D"/*LineWidth*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 180.0
+      }
+    },
+    {
+      "InputId": "956CDFD4-1616-4639-BD04-E1A63BCF01A1"/*Color*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      }
+    },
+    {
+      "InputId": "B97C5F9F-76E5-49A8-96A1-9B5E3F2FE2AD"/*BlobData*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "89D92E71-0973-49EB-AB9D-87E97A35ED5D"/*GpuBuffer*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 90.0
+      }
+    },
+    {
+      "OutputId": "5C91E968-B6B9-4D78-A213-215720318DFE"/*Points*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      }
+    }
+  ]
+}
