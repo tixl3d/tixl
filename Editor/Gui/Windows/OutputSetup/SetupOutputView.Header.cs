@@ -220,14 +220,19 @@ internal sealed partial class SetupOutputView
                     ImGui.SameLine();
                     CustomComponents.StylizedText($"points miss by up to {_pinResidualPx:0.0} px", Fonts.FontSmall, UiColors.TextMuted);
                     if (ImGui.IsItemHovered())
-                        ImGui.SetTooltip("More than four points over-determine a corner pin; the solve averages them.\nA large miss means a point is misplaced, or the wall isn't flat.\nEach point's arrow shows which way its own miss goes.");
+                        ImGui.SetTooltip("""
+                                         The four points spread furthest apart define the corner pin; further points refine it.
+                                         A point the pin misses by too much is ignored and shown faded until it agrees again.
+                                         A large miss means a point is misplaced, or the wall isn't flat.
+                                         Each point's arrow shows which way its own miss goes.
+                                         """);
                 }
 
                 if (TryGetTracedFragmentWithSurround(setup, alignSubject.Traced, out var photoSrv, out var photoUvMin, out var photoUvMax))
                 {
                     NarrowPhotoUvToPinned(alignSubject, ref photoUvMin, ref photoUvMax);
                     CalibrationOverlay.SetCalibrationPhoto(alignSubject.Pinned.Id, photoSrv!, photoUvMin, photoUvMax, UserSettings.Config.OutputSetupPhotoDiscRadius,
-                                                           _activePointId, alignSubject.Traced, alignSubject.TracedToPinned);
+                                                           _activePointId, alignSubject.Traced, alignSubject.TracedToPinned, _ignoredPointIds);
                 }
             }
         }
