@@ -303,6 +303,13 @@ public sealed class Surface
 
     public List<OutputMapping> OutputMappings = [];
 
+    /// <summary>
+    /// Mappings whose connection was taken away, kept with their alignment: disconnecting a surface doesn't move the
+    /// projector, so connecting it to the same output again restores where it lands. At most one per output, and
+    /// never rendered.
+    /// </summary>
+    public List<OutputMapping> ParkedMappings = [];
+
     /// <summary>This surface's corner pin onto an output, if any — a plain loop, so per-frame callers don't pay a closure.</summary>
     public OutputMapping? FindMapping(Guid outputId)
     {
@@ -357,6 +364,16 @@ public sealed class Surface
 
         writer.WriteEndArray();
 
+        if (ParkedMappings.Count > 0)
+        {
+            writer.WritePropertyName("ParkedMappings");
+            writer.WriteStartArray();
+            foreach (var mapping in ParkedMappings)
+                mapping.WriteToJson(writer);
+
+            writer.WriteEndArray();
+        }
+
         if (Trace != null)
         {
             writer.WritePropertyName("Reference");
@@ -398,6 +415,7 @@ public sealed class Surface
                               GridSubdivisions = token.ReadValueSafe("GridSubdivisions", 10),
                               Annotations = token.ReadListSafe("Annotations", Annotation.ReadFromJson),
                               OutputMappings = token.ReadListSafe("OutputMappings", OutputMapping.ReadFromJson),
+                              ParkedMappings = token.ReadListSafe("ParkedMappings", OutputMapping.ReadFromJson),
                           };
 
         if (token["Reference"] is JObject referenceToken)

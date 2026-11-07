@@ -236,6 +236,30 @@ public class SetupSerializationTests
         public void Dispose() => Directory.Delete(Path, recursive: true);
     }
 
+    [Fact]
+    public void ParkedMappings_RoundTripWithTheirAlignment()
+    {
+        var setup = Setup.CreateDefault();
+        var output = setup.Outputs[0];
+        var pointId = Guid.NewGuid();
+        var parked = new Surface.OutputMapping
+                         {
+                             OutputId = output.Id,
+                             Quad = [new Vector2(0.1f, 0.2f), new Vector2(0.9f, 0.1f), new Vector2(0.8f, 0.9f), new Vector2(0.2f, 0.8f)],
+                         };
+        parked.PointAims[pointId] = new Surface.OutputMapping.PointAim(new Vector2(0.4f, 0.5f), true);
+        var wall = new Surface { Name = "wall" };
+        wall.ParkedMappings.Add(parked);
+        setup.Surfaces.Add(wall);
+
+        var restored = Assert.Single(RoundTrip(setup).Surfaces);
+        Assert.Empty(restored.OutputMappings);
+        var restoredParked = Assert.Single(restored.ParkedMappings);
+        Assert.Equal(output.Id, restoredParked.OutputId);
+        Assert.Equal(new Vector2(0.9f, 0.1f), restoredParked.Quad[1]);
+        Assert.True(restoredParked.PointAims[pointId].IsAimed);
+    }
+
     private static Setup RoundTrip(Setup setup)
     {
         return Setup.ReadFromJson(JObject.Parse(setup.ToJsonString()));

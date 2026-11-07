@@ -353,14 +353,14 @@ internal static class SetupEntityContextMenu
                 if (surface == null)
                     break;
 
-                // A pin can be taken off again: the surface then follows a same-named patch, or is simply unmapped.
+                // A pin can be taken off again. Its alignment is parked, so connecting the surface to that output restores it.
                 for (var m = 0; m < surface.OutputMappings.Count; m++)
                 {
                     var mapping = surface.OutputMappings[m];
                     var pinnedOutputId = mapping.OutputId;
                     var pinnedOutputName = setup.FindOutput(pinnedOutputId)?.Name ?? "Output";
                     if (CustomComponents.DrawMenuItem(400 + m, $"Unpin from {pinnedOutputName}"))
-                        SetupUndo.RunUndoable("Unpin surface", setup, () => surface.OutputMappings.RemoveAll(x => x.OutputId == pinnedOutputId));
+                        SetupUndo.RunUndoable("Unpin surface", setup, () => SetupActions.ParkMappings(surface, x => x.OutputId == pinnedOutputId));
 
                     // The way back to the whole canvas after a corner was dragged — how a display normally shows a surface.
                     if (!mapping.IsFilling && CustomComponents.DrawMenuItem(500 + m, $"Fill {pinnedOutputName}"))
