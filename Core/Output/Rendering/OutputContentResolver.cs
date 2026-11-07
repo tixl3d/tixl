@@ -326,6 +326,36 @@ public static class OutputContentResolver
     public static bool TryGetSurfaceRequest(Setup setup, Guid symbolChildId, out Int2 resolution, out bool hasConflict)
     {
         resolution = default;
+        if (!TryGetSurfaceExtent(setup, symbolChildId, projected: true, out var size, out hasConflict))
+            return false;
+
+        resolution = new Int2(Math.Clamp((int)MathF.Round(size.X), 1, OutputDefinition.MaxResolution),
+                              Math.Clamp((int)MathF.Round(size.Y), 1, OutputDefinition.MaxResolution));
+        return true;
+    }
+
+    /// <summary>
+    /// Width over height of the content a send needs for the surface showing it: the surface's aspect in metres,
+    /// corrected for the share of the source its slice cuts. Unlike <see cref="TryGetSurfaceRequest"/> it doesn't
+    /// change while the surface is being aligned, which keeps feedback and other size-bound state intact.
+    /// </summary>
+    public static bool TryGetSurfaceAspect(Setup setup, Guid symbolChildId, out float aspect, out bool hasConflict)
+    {
+        aspect = 1;
+        if (!TryGetSurfaceExtent(setup, symbolChildId, projected: false, out var size, out hasConflict))
+            return false;
+
+        aspect = size.X / MathF.Max(size.Y, 0.0001f);
+        return true;
+    }
+
+    /**
+     * The full content's extent for the first surface showing the send: in output pixels when
+     * <paramref name="projected"/>, else in metres. Reports whether another surface needs a different aspect.
+     */
+    private static bool TryGetSurfaceExtent(Setup setup, Guid symbolChildId, bool projected, out Vector2 size, out bool hasConflict)
+    {
+        size = default;
         hasConflict = false;
         var source = setup.FindSourceByChildId(symbolChildId);
         if (source == null)
@@ -340,20 +370,18 @@ public static class OutputContentResolver
 
             var uvWidth = MathF.Max(slice.UvRect.Z - slice.UvRect.X, 0.0001f);
             var uvHeight = MathF.Max(slice.UvRect.W - slice.UvRect.Y, 0.0001f);
-            var pixelsPerMeter = ProjectedPixelsPerMeter(setup, surface);
-            var width = surface.SizeInMeters.X * pixelsPerMeter / uvWidth;
-            var height = surface.SizeInMeters.Y * pixelsPerMeter / uvHeight;
+            var scale = projected ? ProjectedPixelsPerMeter(setup, surface) : 1f;
+            var extent = new Vector2(surface.SizeInMeters.X * scale / uvWidth, surface.SizeInMeters.Y * scale / uvHeight);
             if (!isFound)
             {
-                resolution = new Int2(Math.Clamp((int)MathF.Round(width), 1, OutputDefinition.MaxResolution),
-                                      Math.Clamp((int)MathF.Round(height), 1, OutputDefinition.MaxResolution));
+                size = extent;
                 isFound = true;
                 continue;
             }
 
-            // A one-percent tolerance: rounding to pixels must not read as a disagreement.
-            var aspect = resolution.Width / (float)resolution.Height;
-            if (MathF.Abs(width / MathF.Max(height, 1f) - aspect) > aspect * 0.01f)
+            // A one-percent tolerance: rounding must not read as a disagreement.
+            var aspect = size.X / MathF.Max(size.Y, 0.0001f);
+            if (MathF.Abs(extent.X / MathF.Max(extent.Y, 0.0001f) - aspect) > aspect * 0.01f)
                 hasConflict = true;
         }
 

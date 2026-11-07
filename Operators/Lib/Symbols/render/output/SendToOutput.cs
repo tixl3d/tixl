@@ -62,14 +62,27 @@ internal sealed class SendToOutput : Instance<SendToOutput>, IContentSupplier, I
     /** The size this send insists on, or 0×0 to take what the output asks for. */
     private Int2 GetPinnedResolution(EvaluationContext context)
     {
-        if ((SizeSources)SizeFrom.GetValue(context) == SizeSources.Surface
-            && ActiveSetup.Current is { } setup
-            && OutputContentResolver.TryGetSurfaceRequest(setup, SymbolChildId, out var surfaceResolution, out var hasConflict))
+        var sizeFrom = (SizeSources)SizeFrom.GetValue(context);
+        var resolution = OutputDefinition.ClampResolution(Resolution.GetValue(context));
+        if (sizeFrom == SizeSources.Resolution || ActiveSetup.Current is not { } setup)
+            return resolution;
+
+        if (sizeFrom == SizeSources.ProjectedSurface
+            && OutputContentResolver.TryGetSurfaceRequest(setup, SymbolChildId, out var projected, out var projectedConflict))
         {
-            return Scale(surfaceResolution, GetResolutionFactor(context));
+            return Scale(projected, GetResolutionFactor(context));
         }
 
-        return OutputDefinition.ClampResolution(Resolution.GetValue(context));
+        // The height it would render at anyway, the width from the surface: stable while the surface is aligned.
+        if (sizeFrom == SizeSources.SurfaceAspect
+            && OutputContentResolver.TryGetSurfaceAspect(setup, SymbolChildId, out var aspect, out var aspectConflict))
+        {
+            var height = resolution.Height > 0 ? resolution.Height : context.RequestedResolution.Height;
+            if (height > 0)
+                return Scale(new Int2(Math.Max(1, (int)MathF.Round(height * aspect)), height), GetResolutionFactor(context));
+        }
+
+        return resolution;
     }
 
     private float GetResolutionFactor(EvaluationContext context)
@@ -120,17 +133,18 @@ internal sealed class SendToOutput : Instance<SendToOutput>, IContentSupplier, I
     /** Why Size From Surface can't do what it says, or null. Read from the last value, as status is drawn outside evaluation. */
     private string? GetSurfaceSizeWarning()
     {
-        if ((SizeSources)SizeFrom.Value != SizeSources.Surface)
+        var sizeFrom = (SizeSources)SizeFrom.Value;
+        if (sizeFrom == SizeSources.Resolution)
             return null;
 
         if (ActiveSetup.Current is not { } setup
-            || !OutputContentResolver.TryGetSurfaceRequest(setup, SymbolChildId, out var resolution, out var hasConflict))
+            || !OutputContentResolver.TryGetSurfaceAspect(setup, SymbolChildId, out var aspect, out var hasConflict))
         {
-            return "Size From is Surface, but no surface shows this content; it renders at the Resolution or the output's size.";
+            return "Size From takes the size from a surface, but no surface shows this content; it renders at the Resolution or the output's size.";
         }
 
         return hasConflict
-                   ? $"Shown on surfaces of different aspects; it renders at {resolution.Width}×{resolution.Height} for the first of them."
+                   ? $"Shown on surfaces of different aspects; it renders at {aspect:0.###}:1 for the first of them."
                    : null;
     }
 
@@ -140,8 +154,13 @@ internal sealed class SendToOutput : Instance<SendToOutput>, IContentSupplier, I
         /// <summary>The Resolution input, or the output's size when it is 0×0.</summary>
         Resolution,
 
-        /// <summary>The surface showing this content: its aspect, at a pixel per output pixel where it is projected.</summary>
-        Surface,
+        /// <summary>The surface showing this content: its aspect, at a pixel per output pixel where it is projected.
+        /// Follows the alignment, so the size changes while points are aligned.</summary>
+        ProjectedSurface,
+
+        /// <summary>The surface's aspect at the height it would render at anyway: the Resolution's, or the output's when
+        /// that is 0×0. Doesn't change while the surface is aligned.</summary>
+        SurfaceAspect,
     }
 
     [Input(Guid = "3125e84e-8644-46a9-8fae-e88ed06731f4", MappedType = typeof(SizeSources))]

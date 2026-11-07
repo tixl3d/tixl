@@ -203,8 +203,9 @@ public static class OutputCompositor
                     Overlay?.DeferPhotoFragments(surface, mapping, homography);
 
                 // Calibration raster after the content, so it composites *over* it and stays readable while
-                // aligning. Emitted with or without content — with none, it's lines on the cleared black.
-                if (surface.ShowGrid)
+                // aligning. Emitted with or without content — with none, it's lines on the cleared black. Only while
+                // an authoring host is attached: a show never projects it, whatever the setup was saved with.
+                if (surface.ShowGrid && Overlay != null)
                 {
                     _drawItems.Add(new DrawItem(null, homography, _fullSourceRect, Vector4.One,
                                                 new Vector4(metres.X, metres.Y, _gridLineThickness, 1), _gridColor, gridOrigin, Vector4.Zero));
@@ -212,8 +213,8 @@ public static class OutputCompositor
 
                 // Annotations have to reach the wall to be usable at all: you align a line by nudging it until
                 // its *projection* lies along a real feature, and walk a point onto the feature it marks. They
-                // ride the raster's switch or the projected photo — both calibration sessions, neither a show.
-                if ((surface.ShowGrid || projectsPhoto) && ReferenceEquals(carrier, surface))
+                // have their own switch, and Align Points shows them too.
+                if ((surface.ShowMeasuringLines || projectsPhoto) && ReferenceEquals(carrier, surface))
                     Overlay?.CollectAnnotations(surface, mapping, output.CanvasSize);
             }
         }

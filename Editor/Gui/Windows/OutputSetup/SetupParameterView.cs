@@ -354,7 +354,7 @@ internal static class SetupParameterView
 
         var showGrid = surface.ShowGrid;
         if (FormInputs.AddCheckBox("Show size raster", ref showGrid,
-                                   "Projects a real-world grid (no content needed) so you can hand-align the corner-pin to physical wall features."))
+                                   "Projects a real-world grid (no content needed) so you can hand-align the corner-pin to physical wall features. Only while the editor runs: an exported show never projects it."))
         {
             SetupUndo.RunUndoable("Toggle raster", setup, () => surface.ShowGrid = showGrid);
         }
@@ -369,6 +369,13 @@ internal static class SetupParameterView
                 surface.GridSubdivisions = Math.Clamp(subdivisions[0], 1, 100);
 
             CommitFieldUndo(setup, "Change raster", gridCellState);
+        }
+
+        var showMeasuringLines = surface.ShowMeasuringLines;
+        if (FormInputs.AddCheckBox("Show measuring lines", ref showMeasuringLines,
+                                   "Projects the surface's measuring lines onto the wall, so a line can be nudged until it lies along the real feature it was drawn on. Align Points shows them too while it is on."))
+        {
+            SetupUndo.RunUndoable("Toggle measuring lines", setup, () => surface.ShowMeasuringLines = showMeasuringLines);
         }
 
         DrawMappingModeRows(setup, surface);

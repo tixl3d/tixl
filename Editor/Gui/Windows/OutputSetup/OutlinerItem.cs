@@ -78,7 +78,7 @@ internal sealed class OutlinerItem
         var scale = T3Ui.UiScaleFactor;
         var rounding = 4 * scale;
         // Odd height so a 15px icon centers exactly ((23-15)/2 = 4).
-        var height = (float)Math.Round(23 * scale);
+        var lineHeight = (float)Math.Round(23 * scale);
         var indent = args.Depth * 12 * scale;
 
         var fade = args.IsMuted ? 0.45f : 1f;
@@ -91,12 +91,19 @@ internal sealed class OutlinerItem
         var windowPos = ImGui.GetWindowPos();
         var spanLeft = args.ColumnWidth > 0 ? args.ColumnMinX : windowPos.X;
         var spanRight = args.ColumnWidth > 0 ? args.ColumnMinX + args.ColumnWidth : windowPos.X + ImGui.GetWindowWidth();
-        var rowMin = new Vector2((float)Math.Round(spanLeft + 4 * scale), (float)Math.Round(entryPos.Y));
-        var rowMax = new Vector2((float)Math.Round(spanRight - 4 * scale), rowMin.Y + height);
+        var kindInfo = SetupEntityKindInfo.Of(args.Kind);
+        var rowLeft = (float)Math.Round(spanLeft + 4 * scale);
+        var rowRight = (float)Math.Round(spanRight - 4 * scale);
+
+        // A status that doesn't fit beside the name gets a line of its own rather than being drawn over it.
+        var hasStatusLine = StatusNeedsOwnLine(in args, kindInfo, rowLeft, rowRight, indent, scale, out var smallLineHeight);
+        var height = hasStatusLine ? lineHeight + (float)Math.Round(smallLineHeight) : lineHeight;
+
+        var rowMin = new Vector2(rowLeft, (float)Math.Round(entryPos.Y));
+        var rowMax = new Vector2(rowRight, rowMin.Y + height);
         LastItemRect = (rowMin, rowMax);
         var dl = ImGui.GetWindowDrawList();
         var isSelected = selection.IsSelected(args.Kind, args.Id);
-        var kindInfo = SetupEntityKindInfo.Of(args.Kind);
         var kindColor = kindInfo.Color;
 
         // Full-item hit test — a selectable spanning the padded item; its own header background is suppressed
@@ -262,7 +269,7 @@ internal sealed class OutlinerItem
 
         // Content over the background (the selectable is transparent), vertically centered in the fixed item
         // (the -1px nudges the label up so it isn't sitting low).
-        var contentY = (float)Math.Round(rowMin.Y + (height - ImGui.GetTextLineHeight()) * 0.5f - 1 * scale);
+        var contentY = (float)Math.Round(rowMin.Y + (lineHeight - ImGui.GetTextLineHeight()) * 0.5f - 1 * scale);
         var iconY = contentY + 3 * scale; // glyphs render high vs the text baseline — drop them to match.
 
         var contentX = rowMin.X + 6 * scale + indent;
@@ -304,7 +311,7 @@ internal sealed class OutlinerItem
         {
             // Inline editor in place of the name. Full item height, seeded and focused on the first frame;
             // commits on Enter/blur, cancels on Escape.
-            var fieldY = (float)Math.Round(rowMin.Y + (height - ImGui.GetFrameHeight()) * 0.5f);
+            var fieldY = (float)Math.Round(rowMin.Y + (lineHeight - ImGui.GetFrameHeight()) * 0.5f);
             ImGui.SetCursorScreenPos(new Vector2(contentX, fieldY));
             ImGui.SetNextItemWidth(rowMax.X - contentX - 6 * scale);
             ImGui.PushStyleColor(ImGuiCol.FrameBg, UiColors.BackgroundInputField.Rgba);
@@ -346,7 +353,9 @@ internal sealed class OutlinerItem
             var statusWidth = ImGui.CalcTextSize(args.Status).X;
             ImGui.PopFont();
 
-            var statusY = (float)Math.Round(rowMin.Y + (height - smallHeight) * 0.5f - 1 * scale);
+            var statusY = hasStatusLine
+                              ? (float)Math.Round(rowMin.Y + lineHeight - 3 * scale)
+                              : (float)Math.Round(rowMin.Y + (lineHeight - smallHeight) * 0.5f - 1 * scale);
             ImGui.SetCursorScreenPos(new Vector2(rowMax.X - 6 * scale - statusWidth, statusY));
             CustomComponents.StylizedText(args.Status, Fonts.FontSmall, UiColors.TextMuted.Fade(fade));
         }
@@ -394,6 +403,45 @@ internal sealed class OutlinerItem
     /// <summary>The item a rename was just requested for and whose row must be brought into view — a collapsed
     /// parent expands, the strip scrolls to it. Cleared once the row has drawn its field.</summary>
     public static Guid RevealPendingId => _renameFocusPending ? _renamingId : Guid.Empty;
+
+    /// <summary>
+    /// Whether the name and the status are too wide to share the row. Measured with the bold name, so selecting a
+    /// row can't change its height. Reports the small font's line height, which the status line adds.
+    /// </summary>
+    private static bool StatusNeedsOwnLine(in Args args, SetupEntityKindInfo kindInfo, float rowLeft, float rowRight, float indent, float scale,
+                                           out float smallLineHeight)
+    {
+        smallLineHeight = 0;
+        if (string.IsNullOrEmpty(args.Status))
+            return false;
+
+        var contentX = rowLeft + 6 * scale + indent;
+        if (args.IsExpanded.HasValue || args.Depth > 0 || args.KeepsExpanderColumn)
+        {
+            Icons.GetGlyphDefinition(Icon.ChevronRight, out _, out var chevronSize);
+            contentX += chevronSize.X + 3 * scale;
+        }
+
+        if (args.Kind != SetupEntityKinds.None)
+        {
+            Icons.GetGlyphDefinition(args.LeadingIcon ?? kindInfo.Icon, out _, out var iconSize);
+            contentX += iconSize.X + 5 * scale;
+        }
+
+        ImGui.PushFont(Fonts.FontBold);
+        var nameWidth = ImGui.CalcTextSize(string.IsNullOrEmpty(args.Name) ? "untitled" : args.Name).X;
+        ImGui.PopFont();
+
+        ImGui.PushFont(Fonts.FontSmall);
+        var statusWidth = ImGui.CalcTextSize(args.Status).X;
+        smallLineHeight = ImGui.GetTextLineHeight();
+        ImGui.PopFont();
+
+        return contentX + nameWidth + StatusGap * scale + statusWidth > rowRight - 6 * scale;
+    }
+
+    /** Space kept between the name and a status beside it. */
+    private const float StatusGap = 8;
 
     /** Sits where the item's connections start, hinting that a drag from the item routes it to the next column. */
     private void DrawConnectionDot(ImDrawListPtr dl, Guid id, Vector2 center, bool isEnlarged, Color color)

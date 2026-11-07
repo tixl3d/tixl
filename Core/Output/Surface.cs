@@ -287,6 +287,10 @@ public sealed class Surface
     /// <summary>Minor raster lines per meter; 1 draws meter lines only. They fade out once too dense to resolve.</summary>
     public int GridSubdivisions = 10;
 
+    /// <summary>Projects the surface's measuring lines onto the wall, to align a line until it lies along the real
+    /// feature it was drawn on. Align Points projects them too while it is on.</summary>
+    public bool ShowMeasuringLines;
+
     /// <summary>
     /// ContentCanvas resolution policy: pixel size is derived (px/m × physical size, clamped),
     /// never stored — surfaces get resized during calibration and content must survive it.
@@ -346,6 +350,7 @@ public sealed class Surface
         writer.WriteValue("PixelsPerMeter", PixelsPerMeter);
         writer.WriteValue("ShowGrid", ShowGrid);
         writer.WriteValue("GridSubdivisions", GridSubdivisions);
+        writer.WriteValue("ShowMeasuringLines", ShowMeasuringLines);
 
         if (Annotations.Count > 0)
         {
@@ -413,6 +418,9 @@ public sealed class Surface
                               PixelsPerMeter = token.ReadValueSafe("PixelsPerMeter", 400f),
                               ShowGrid = token.ReadValueSafe("ShowGrid", false),
                               GridSubdivisions = token.ReadValueSafe("GridSubdivisions", 10),
+
+                              // Setups saved before the lines had a switch of their own showed them with the raster.
+                              ShowMeasuringLines = token.ReadValueSafe("ShowMeasuringLines", token.ReadValueSafe("ShowGrid", false)),
                               Annotations = token.ReadListSafe("Annotations", Annotation.ReadFromJson),
                               OutputMappings = token.ReadListSafe("OutputMappings", OutputMapping.ReadFromJson),
                               ParkedMappings = token.ReadListSafe("ParkedMappings", OutputMapping.ReadFromJson),

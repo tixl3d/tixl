@@ -217,8 +217,8 @@ internal static class SurfaceContent
     /** The gap between the surface frame and the new content's card above it, as a share of the frame's height. */
     private const float CardGapOfFrameHeight = 0.3f;
 
-    /** SendToOutput's SizeFrom value for "the surface showing it". */
-    private const int SendSizeFromSurface = 1;
+    /** SendToOutput's SizeFrom value for the surface's aspect: stable while the new surface is still being aligned. */
+    private const int SendSizeFromSurface = 2;
 
     private static readonly Guid _surfaceReferenceImageSymbolId = new("6435a961-ef0a-4e1d-bbcd-76e665bd58b6");
     private static readonly Guid _surfaceReferenceImageTextureOutputId = new("8ab20f20-5e19-4b4b-b846-4b8abbd82817");
