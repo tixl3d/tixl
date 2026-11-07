@@ -139,7 +139,7 @@ internal static class SetupParameterView
         }
 
         DrawIntsRow("Rendered (px)", resolution,
-                    "What this content actually rendered at: the canvas of the output it is routed to, unless the op's Resolution is set.",
+                    "What this content actually rendered at: the canvas of the output it is routed to, unless the op's Resolution Override or Resolution From says otherwise.",
                     readOnly: true);
 
         // Two outputs of different sizes fed by one send: it renders once, so the second shows the first's size.
@@ -839,22 +839,26 @@ internal static class SetupParameterView
         ImGui.PushID("patchTable");
         var listWidth = ImGui.GetContentRegionAvail().X - InputArea.ValueEditRightMargin;
         var listScreenX = ImGui.GetCursorScreenPos().X;
-        DrawPatchListHeader(setup, output, selection, listScreenX, listWidth);
-        if (output.Patches.Count > 0)
+        // The output's implicit full-canvas patch is the output itself, so it gets no row; with only that one, the
+        // section is its title and Add.
+        var hasListedPatches = SetupRelations.CountListedPatches(output) > 0;
+        DrawPatchListHeader(setup, output, selection, listScreenX, listWidth, hasListedPatches);
+        if (hasListedPatches)
             DrawPatchListRows(setup, output, selection, highlightedPatchId, listScreenX, listWidth);
 
         ImGui.PopID();
     }
 
     /** The section title, the unit switch in the parameter column, and the add button at the list's right end. */
-    private static void DrawPatchListHeader(Setup setup, OutputDefinition output, SetupEntitySelection selection, float listScreenX, float listWidth)
+    private static void DrawPatchListHeader(Setup setup, OutputDefinition output, SetupEntitySelection selection, float listScreenX, float listWidth,
+                                            bool hasListedPatches)
     {
         var padding = PatchHeaderPadding * T3Ui.UiScaleFactor;
         ImGui.SetCursorPosX(ImGui.GetCursorPosX() + padding);
         ImGui.AlignTextToFramePadding();
         CustomComponents.StylizedText("Patches", Fonts.FontBold, UiColors.TextMuted);
         ImGui.SameLine();
-        if (output.Patches.Count > 0)
+        if (hasListedPatches)
         {
             FormInputs.DrawInputLabel("in");
             var units = UserSettings.Config.OutputSetupEditUnits;

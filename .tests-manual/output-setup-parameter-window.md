@@ -153,9 +153,9 @@ Image**. Click the new person card, then the new image card.
 
 **Action:**
 1. Route one SendToOutput with two slices to two outputs of different sizes (1920×1080 and 2560×1440), with the
-   op's **Resolution** at 0×0. Click the op in the graph window.
-2. Set the op's **Resolution** to 3840×1080.
-3. Set **Resolution** back to 0×0.
+   op's **Resolution Override** at 0×0. Click the op in the graph window.
+2. Set the op's **Resolution Override** to 3840×1080.
+3. Set **Resolution Override** back to 0×0.
 
 **Expected:**
 - After 1: the op shows the "Routed to outputs of different sizes" warning on hover, and the Parameter window shows

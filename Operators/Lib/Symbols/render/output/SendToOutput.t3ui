@@ -19,12 +19,12 @@
       }
     },
     {
-      "InputId": "3125e84e-8644-46a9-8fae-e88ed06731f4"/*SizeFrom*/,
+      "InputId": "3125e84e-8644-46a9-8fae-e88ed06731f4"/*ResolutionFrom*/,
       "Position": {
         "X": -200.0,
         "Y": 270.0
       },
-      "Description": "Where the render size comes from. Resolution: the Resolution input, or the size of the output this content is routed to when that is 0×0. Surface Aspect: the proportions of the surface or region showing this content, at the height it would render at anyway (the Resolution's, or the output's when that is 0×0); it doesn't change while the surface is aligned, so feedback keeps running. Projected Surface: those proportions at a pixel per output pixel where the surface is projected densest, so nothing is upscaled; it follows the alignment and changes while points are moved. A [Layer2d] fills either without distortion."
+      "Description": "Where the render size comes from. Surface Aspect: the proportions of the surface or region showing this content, at the height it would render at anyway (the Resolution Override's, or the output's when that is 0×0); it doesn't change while the surface is aligned, so feedback keeps running. Projected Surface: those proportions at a pixel per output pixel where the surface is projected densest, so nothing is upscaled; it follows the alignment and changes while points are moved. A [Layer2d] fills either without distortion. Output: the Resolution Override, or the size of the output this content is routed to when that is 0×0. For a render through the projector's own camera ([UseProjectorCam]), which fills the whole output."
     },
     {
       "InputId": "fd8d094d-dd51-4659-8aab-ca9a028bee33"/*ResolutionFactor*/,
@@ -32,18 +32,18 @@
         "X": -200.0,
         "Y": 345.0
       },
-      "Description": "Scales a size this op works out on its own: the surface's size, or the output's size while Resolution is 0×0. 0.5 renders at half size for heavy content, 2 renders sharper fine text. A Resolution you type in is used exactly.",
+      "Description": "Scales a size this op works out on its own: the surface's size, or the output's size while Resolution Override is 0×0. 0.5 renders at half size for heavy content, 2 renders sharper fine text. A Resolution Override you type in is used exactly.",
       "Min": 0.25,
       "Max": 2.0,
       "ClampMin": true
     },
     {
-      "InputId": "3c7f1e58-0a94-4d62-b8f3-2e5d9a0c4b17"/*Resolution*/,
+      "InputId": "3c7f1e58-0a94-4d62-b8f3-2e5d9a0c4b17"/*ResolutionOverride*/,
       "Position": {
         "X": -200.0,
         "Y": 225.0
       },
-      "Description": "Resolution the content is rendered at. 0x0 uses the resolution of the output it is routed to."
+      "Description": "Renders at exactly this size, whatever Resolution From says (except Projected Surface). 0×0 leaves the size to Resolution From."
     },
     {
       "InputId": "8a4dd1b3-2e6f-4c25-9d0a-7f3b61c8e942"/*Texture*/,

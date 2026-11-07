@@ -31,8 +31,8 @@ internal sealed class SendToOutput : Instance<SendToOutput>, IContentSupplier, I
     Vector4 IContentSupplier.GetColor(EvaluationContext context) => Color.GetValue(context);
 
     /// <summary>
-    /// Pulls the content, rendered at <see cref="Resolution"/> when one is set, or at the size of the surface
-    /// showing it when <see cref="SizeFrom"/> asks for that. Left at 0×0 the host's requested resolution stands —
+    /// Pulls the content, rendered at <see cref="ResolutionOverride"/> when one is set, or at the size of the surface
+    /// showing it when <see cref="ResolutionFrom"/> asks for that. Left at 0×0 the host's requested resolution stands —
     /// the canvas of the output this content is routed to — so an auto-sized render target upstream follows the
     /// projector rather than needing a size of its own. A derived size is scaled by <see cref="ResolutionFactor"/>.
     /// </summary>
@@ -62,19 +62,19 @@ internal sealed class SendToOutput : Instance<SendToOutput>, IContentSupplier, I
     /** The size this send insists on, or 0×0 to take what the output asks for. */
     private Int2 GetPinnedResolution(EvaluationContext context)
     {
-        var sizeFrom = (SizeSources)SizeFrom.GetValue(context);
-        var resolution = OutputDefinition.ClampResolution(Resolution.GetValue(context));
-        if (sizeFrom == SizeSources.Resolution || ActiveSetup.Current is not { } setup)
+        var resolutionFrom = (ResolutionSources)ResolutionFrom.GetValue(context);
+        var resolution = OutputDefinition.ClampResolution(ResolutionOverride.GetValue(context));
+        if (resolutionFrom == ResolutionSources.Output || ActiveSetup.Current is not { } setup)
             return resolution;
 
-        if (sizeFrom == SizeSources.ProjectedSurface
+        if (resolutionFrom == ResolutionSources.ProjectedSurface
             && OutputContentResolver.TryGetSurfaceRequest(setup, SymbolChildId, out var projected, out var projectedConflict))
         {
             return Scale(projected, GetResolutionFactor(context));
         }
 
         // The height it would render at anyway, the width from the surface: stable while the surface is aligned.
-        if (sizeFrom == SizeSources.SurfaceAspect
+        if (resolutionFrom == ResolutionSources.SurfaceAspect
             && OutputContentResolver.TryGetSurfaceAspect(setup, SymbolChildId, out var aspect, out var aspectConflict))
         {
             var height = resolution.Height > 0 ? resolution.Height : context.RequestedResolution.Height;
@@ -98,7 +98,7 @@ internal sealed class SendToOutput : Instance<SendToOutput>, IContentSupplier, I
 
     private const float MinResolutionFactor = 0.25f;
     private const float MaxResolutionFactor = 4f;
-    IInputSlot IContentSupplier.ResolutionInput => Resolution;
+    IInputSlot IContentSupplier.ResolutionInput => ResolutionOverride;
 
     IStatusProvider.StatusLevel IStatusProvider.GetStatusLevel()
     {
@@ -118,7 +118,7 @@ internal sealed class SendToOutput : Instance<SendToOutput>, IContentSupplier, I
 
         return $"Routed to outputs of different sizes ({rendered.Width}×{rendered.Height} and {other.Width}×{other.Height}).\n"
                + "The content renders once per frame, at the first of them, so the other shows that size.\n"
-               + "Set this op's Resolution to pick one deliberately, or give each output its own send.";
+               + "Set this op's Resolution Override to pick one deliberately, or give each output its own send.";
     }
 
     [Input(Guid = "8a4dd1b3-2e6f-4c25-9d0a-7f3b61c8e942")]
@@ -130,17 +130,17 @@ internal sealed class SendToOutput : Instance<SendToOutput>, IContentSupplier, I
     [Input(Guid = "1d83a6f2-49c0-4e17-8b5d-c72e90fa4b36")]
     public readonly InputSlot<Vector4> Color = new();
 
-    /** Why Size From Surface can't do what it says, or null. Read from the last value, as status is drawn outside evaluation. */
+    /** Why Resolution From a surface can't do what it says, or null. Read from the last value, as status is drawn outside evaluation. */
     private string? GetSurfaceSizeWarning()
     {
-        var sizeFrom = (SizeSources)SizeFrom.Value;
-        if (sizeFrom == SizeSources.Resolution)
+        var resolutionFrom = (ResolutionSources)ResolutionFrom.Value;
+        if (resolutionFrom == ResolutionSources.Output)
             return null;
 
         if (ActiveSetup.Current is not { } setup
             || !OutputContentResolver.TryGetSurfaceAspect(setup, SymbolChildId, out var aspect, out var hasConflict))
         {
-            return "Size From takes the size from a surface, but no surface shows this content; it renders at the Resolution or the output's size.";
+            return "Resolution From takes the size from a surface, but no surface shows this content; it renders at the Resolution Override or the output's size.";
         }
 
         return hasConflict
@@ -149,25 +149,27 @@ internal sealed class SendToOutput : Instance<SendToOutput>, IContentSupplier, I
     }
 
     /// <summary>Where the render size comes from.</summary>
-    private enum SizeSources
+    /// <remarks>Stored by number, and the dropdown lists by number, so the order here is the menu's order. Output was
+    /// 0 before the surface options were moved to the front; the op's default stays Output.</remarks>
+    private enum ResolutionSources
     {
-        /// <summary>The Resolution input, or the output's size when it is 0×0.</summary>
-        Resolution,
+        /// <summary>The surface's aspect at the height it would render at anyway: the Resolution Override's, or the
+        /// output's when that is 0×0. Doesn't change while the surface is aligned.</summary>
+        SurfaceAspect = 0,
 
         /// <summary>The surface showing this content: its aspect, at a pixel per output pixel where it is projected.
         /// Follows the alignment, so the size changes while points are aligned.</summary>
-        ProjectedSurface,
+        ProjectedSurface = 1,
 
-        /// <summary>The surface's aspect at the height it would render at anyway: the Resolution's, or the output's when
-        /// that is 0×0. Doesn't change while the surface is aligned.</summary>
-        SurfaceAspect,
+        /// <summary>The Resolution Override, or the output's size when it is 0×0.</summary>
+        Output = 2,
     }
 
-    [Input(Guid = "3125e84e-8644-46a9-8fae-e88ed06731f4", MappedType = typeof(SizeSources))]
-    public readonly InputSlot<int> SizeFrom = new();
+    [Input(Guid = "3125e84e-8644-46a9-8fae-e88ed06731f4", MappedType = typeof(ResolutionSources))]
+    public readonly InputSlot<int> ResolutionFrom = new();
 
     [Input(Guid = "3c7f1e58-0a94-4d62-b8f3-2e5d9a0c4b17")]
-    public readonly InputSlot<Int2> Resolution = new();
+    public readonly InputSlot<Int2> ResolutionOverride = new();
 
     [Input(Guid = "fd8d094d-dd51-4659-8aab-ca9a028bee33")]
     public readonly InputSlot<float> ResolutionFactor = new();
