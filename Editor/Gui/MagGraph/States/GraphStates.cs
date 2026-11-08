@@ -373,7 +373,7 @@ namespace T3.Editor.Gui.MagGraph.States
 
                               if (!ImGui.IsMouseDown(ImGuiMouseButton.Left))
                               {
-                                  MagItemMovement.SelectActiveItem(context);
+                                  MagItemMovement.SelectActiveItem(context, openParametersIfSelected: true);
                                   context.ItemMovement.Reset();
                                   context.StateMachine.SetState(Default, context);
                                   return;

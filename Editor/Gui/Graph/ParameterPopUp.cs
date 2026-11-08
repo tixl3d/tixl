@@ -20,9 +20,15 @@ namespace T3.Editor.Gui;
 [HelpUiID("ParameterPopup")]
 internal static class ParameterPopUp
 {
-    public static void HandleOpenParameterPopUp(SymbolUi.Child childUi, Instance instance, OpUi.CustomUiResult customUiResult, ImRect nodeScreenRect)
+    /// <summary>
+    /// Opens the popup on a middle click, on a pending click on the already selected operator, or with
+    /// <paramref name="openOnLeftClick"/> on any left click.
+    /// </summary>
+    public static void HandleOpenParameterPopUp(SymbolUi.Child childUi, Instance instance, OpUi.CustomUiResult customUiResult, ImRect nodeScreenRect,
+                                                bool openOnLeftClick)
     {
-        var activatedWithLeftMouse = ImGui.IsItemHovered()
+        var activatedWithLeftMouse = openOnLeftClick
+                                     && ImGui.IsItemHovered()
                                      && ImGui.IsMouseReleased(ImGuiMouseButton.Left)
                                      && ImGui.GetMouseDragDelta(ImGuiMouseButton.Left, 0).Length() < UserSettings.Config.ClickThreshold
                                      && !ParameterWindow.IsAnyInstanceVisible()
@@ -32,10 +38,10 @@ internal static class ParameterPopUp
                                        && ImGui.IsMouseReleased(ImGuiMouseButton.Middle)
                                        && ImGui.GetMouseDragDelta(ImGuiMouseButton.Middle, 0).Length() < UserSettings.Config.ClickThreshold;
 
-        var activationRequested = NodeIdRequestedForParameterWindowActivation == instance.SymbolChildId
-                                  && !ParameterWindow.IsAnyInstanceVisible();
+        var activatedByClickOnSelected = _pendingOpenChildId == instance.SymbolChildId
+                                         && ImGui.GetTime() - _pendingOpenTime > ImGui.GetIO().MouseDoubleClickTime;
 
-        if ((activatedWithLeftMouse || activatedWithMiddleMouse || activationRequested)
+        if ((activatedWithLeftMouse || activatedWithMiddleMouse || activatedByClickOnSelected)
             && (customUiResult & OpUi.CustomUiResult.PreventOpenParameterPopUp) == 0
            )
         {
@@ -43,11 +49,23 @@ internal static class ParameterPopUp
         }
     }
 
+    /// <summary>
+    /// Opens the popup for a click on an already selected operator once the double-click time has passed,
+    /// so a double-click can still dive into the operator without the popup showing up.
+    /// </summary>
+    internal static void RequestOpenUnlessDoubleClicked(Guid symbolChildId)
+    {
+        if (ParameterWindow.IsAnyInstanceVisible() || ImGui.GetIO().MouseClickedLastCount[0] > 1)
+            return;
+
+        _pendingOpenChildId = symbolChildId;
+        _pendingOpenTime = ImGui.GetTime();
+    }
+
     public static void Open(Instance instance)
     {
         _selectedInstance = instance;
-
-        NodeIdRequestedForParameterWindowActivation = Guid.Empty;
+        _pendingOpenChildId = Guid.Empty;
 
         _isOpen = true;
         _lastRequiredHeight = 0;
@@ -72,6 +90,10 @@ internal static class ParameterPopUp
             _refocusGraph = false;
         }
 
+        // Any further click, including the second one of a double-click, cancels a pending open.
+        if (_pendingOpenChildId != Guid.Empty && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+            _pendingOpenChildId = Guid.Empty;
+
         if (!_isOpen || _selectedInstance == null || graphWindow.CompositionInstance == null)
             return;
 
@@ -92,7 +114,7 @@ internal static class ParameterPopUp
         var nodeScreenRect = graphWindow.GraphView.Canvas.TransformRect(ImRect.RectWithSize(symbolChildUi.PosOnCanvas, symbolChildUi.Size));
         var horizontalOffset = 25 * graphWindow.GraphView.Canvas.Scale.X;
         var screenPos = new Vector2(nodeScreenRect.Min.X + horizontalOffset, nodeScreenRect.Max.Y + 5);
-        var height = _lastRequiredHeight.Clamp(MinHeight, DefaultWindowSize.Y);
+        var height = _lastRequiredHeight.Clamp(MinHeight * T3Ui.UiScaleFactor, DefaultWindowSize.Y);
         ImGui.SetNextWindowPos(screenPos);
 
         var preventTabbingIntoUnfocusedStringInputs = ImGui.IsAnyItemActive() ? ImGuiWindowFlags.None : ImGuiWindowFlags.NoNavInputs;
@@ -134,7 +156,7 @@ internal static class ParameterPopUp
             {
                 ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(2,4) * T3Ui.UiScaleFactor);
                 ImGui.PushStyleColor(ImGuiCol.Button, Color.Transparent.Rgba);
-                ImGui.SetCursorPos( new Vector2(5,5));
+                ImGui.SetCursorPos(new Vector2(5, 5) * T3Ui.UiScaleFactor);
                 CustomComponents.AddSegmentedIconButton(ref _viewMode, _modeIcons);
                 ImGui.SameLine();
                 
@@ -192,18 +214,21 @@ internal static class ParameterPopUp
                 ImGui.PopStyleColor();
             }
 
+            // Required heights include the toolbar, so a content child that was clipped and skipped its items still grows the popup.
+            var contentTop = ImGui.GetCursorPosY();
+
             // Content
             switch (_viewMode)
             {
                 case ViewModes.Parameters:
                     
-                    ImGui.BeginChild("Scrolling", new Vector2(DefaultWindowSize.X, height - 20 ), ImGuiChildFlags.None);
+                    ImGui.BeginChild("Scrolling", new Vector2(DefaultWindowSize.X, height - contentTop), ImGuiChildFlags.None);
                     CustomComponents.HandleDragScrolling(_parameterPopUpReference);
                     ImGui.PushFont(Fonts.FontSmall);
                     ParameterWindow.DrawParameters(_selectedInstance, symbolUi, symbolChildUi, compositionSymbolUi, hideNonEssentials: true);
                     FormInputs.AddVerticalSpace();
                     ImGui.PopFont();
-                    _lastRequiredHeight = ImGui.GetCursorPosY() + ImGui.GetFrameHeight() + 0;
+                    _lastRequiredHeight = contentTop + ImGui.GetCursorPosY() + ImGui.GetFrameHeight();
                     ImGui.Dummy(new Vector2(10,10));
                     ImGui.EndChild();
                     break;
@@ -231,14 +256,14 @@ internal static class ParameterPopUp
                 case ViewModes.Help:
                     ImGui.BeginChild("Scrolling", 
                                      new Vector2(DefaultWindowSize.X, 
-                                                 height), 
+                                                 height - contentTop), 
                                      ImGuiChildFlags.None,
                                      ImGuiWindowFlags.NoBackground
                                     );
                     FormInputs.AddVerticalSpace();
                     OperatorHelp.DrawHelp(symbolUi);
                     FormInputs.AddVerticalSpace();
-                    _lastRequiredHeight = ImGui.GetCursorPosY() + ImGui.GetFrameHeight();
+                    _lastRequiredHeight = contentTop + ImGui.GetCursorPosY() + ImGui.GetFrameHeight();
                     // Draw a small border to separate from graph
                     ImGui.GetWindowDrawList().AddRect(ImGui.GetWindowPos()+ Vector2.One, ImGui.GetWindowPos() + ImGui.GetWindowSize() - new Vector2(2,2), UiColors.WindowBackground);
                     ImGui.EndChild();
@@ -283,5 +308,6 @@ internal static class ParameterPopUp
     private static ViewModes _viewMode = ViewModes.Parameters;
     private static Instance? _selectedInstance;
     private const string ParameterPopUpName = "parameterContextPopup";
-    public static Guid NodeIdRequestedForParameterWindowActivation;
+    private static Guid _pendingOpenChildId;
+    private static double _pendingOpenTime;
 }

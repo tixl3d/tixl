@@ -322,7 +322,11 @@ internal sealed partial class MagItemMovement
         _shakeDetector.ResetShaking();
     }
 
-    internal static void SelectActiveItem(GraphUiContext context)
+    /// <summary>
+    /// Applies a click to the selection. With <paramref name="openParametersIfSelected"/>, clicking an already
+    /// selected operator asks for its parameter popup.
+    /// </summary>
+    internal static void SelectActiveItem(GraphUiContext context, bool openParametersIfSelected = false)
     {
         var item = context.ActiveItem;
         if (item == null)
@@ -339,6 +343,10 @@ internal sealed partial class MagItemMovement
             else if (item.Instance is IContentSupplier)
             {
                 OutputWindow.EnterSetupModeForSendOpClick();
+            }
+            else if (openParametersIfSelected && item.Variant == MagGraphItem.Variants.Operator && item.Instance != null)
+            {
+                ParameterPopUp.RequestOpenUnlessDoubleClicked(item.Instance.SymbolChildId);
             }
         }
         else

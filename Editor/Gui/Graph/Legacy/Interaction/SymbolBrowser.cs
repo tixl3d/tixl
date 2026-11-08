@@ -635,7 +635,6 @@ internal sealed class SymbolBrowser
         // var newCommand = new MacroCommand("Insert Op", commands);
         // UndoRedoStack.Add(newCommand);
         ConnectionMaker.CompleteOperation(_graphView, commandsForUndo, "Insert Op " + newChildUi.SymbolChild.ReadableName);
-        ParameterPopUp.NodeIdRequestedForParameterWindowActivation = newSymbolChild.Id;
         Close();
     }
 

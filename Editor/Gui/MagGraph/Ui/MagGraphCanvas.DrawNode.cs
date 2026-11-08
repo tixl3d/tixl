@@ -208,7 +208,7 @@ internal sealed partial class MagGraphView
         // }
         
         {
-            ParameterPopUp.HandleOpenParameterPopUp(item.ChildUi, item.Instance, customUiResult, new ImRect(pMinVisible, pMaxVisible));
+            ParameterPopUp.HandleOpenParameterPopUp(item.ChildUi, item.Instance, customUiResult, new ImRect(pMinVisible, pMaxVisible), openOnLeftClick: false);
         }
 
         ImGui.PopID();

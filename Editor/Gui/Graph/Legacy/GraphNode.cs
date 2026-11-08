@@ -325,7 +325,7 @@ internal sealed class GraphNode
 
                 if (!justOpenedChild)
                 {
-                    ParameterPopUp.HandleOpenParameterPopUp(childUi, instance, customUiResult, _selectableScreenRect);
+                    ParameterPopUp.HandleOpenParameterPopUp(childUi, instance, customUiResult, _selectableScreenRect, openOnLeftClick: true);
                 }
 
                 DrawPreview(drawList, opacity);

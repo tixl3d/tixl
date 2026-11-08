@@ -744,7 +744,6 @@ internal sealed class PlaceholderCreation
             VariationHandling.GetOrLoadVariations(symbol.Id).SetActiveVariationWithoutApply(preset);
         }
 
-        ParameterPopUp.NodeIdRequestedForParameterWindowActivation = newSymbolChild.Id;
         context.Layout.FlagStructureAsChanged();
 
         Complete(context);
