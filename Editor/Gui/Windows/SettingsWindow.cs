@@ -277,6 +277,17 @@ internal sealed partial class SettingsWindow : Window
                     FormInputs.AddVerticalSpace();
                     FormInputs.AddSectionSubHeader("Output");
 
+                    changed |= FormInputs.AddEnumDropdown(ref UserSettings.Config.MaxWindowFillResolution,
+                                                          "Max Fill Resolution",
+                                                          """
+                                                          Limits the render resolution of outputs that take their size from the window,
+                                                          like "Fill" in the Output Window and the background in focus mode.
+                                                          On high-resolution displays this keeps the frame rate reasonable;
+                                                          the image is upscaled to fill the window. Fixed resolutions like 4k are not affected.
+                                                          """,
+                                                          UserSettings.Defaults.MaxWindowFillResolution,
+                                                          GetWindowFillLimitLabel);
+
                     changed |= FormInputs.AddFloat("Sequential screenshots",
                                                    ref UserSettings.Config.ContinuousScreenshotDelay,
                                                    0.1f, 60f, 0.1f, true, true,
@@ -854,6 +865,13 @@ internal sealed partial class SettingsWindow : Window
         ImGui.GetWindowDrawList().AddCircleFilled(new Vector2(pos.X + radius, MathF.Round(pos.Y + height * 0.5f)), radius, color);
         ImGui.SetCursorScreenPos(pos + new Vector2(radius * 2 + 6 * T3Ui.UiScaleFactor, 0));
         ImGui.TextUnformatted(text);
+    }
+
+    private static string GetWindowFillLimitLabel(UserSettings.WindowFillResolutionLimits limit)
+    {
+        return limit == UserSettings.WindowFillResolutionLimits.Unlimited
+                   ? "Unlimited"
+                   : $"{(int)limit}p";
     }
 
     private static string CategoryTitle(Categories category) => category switch

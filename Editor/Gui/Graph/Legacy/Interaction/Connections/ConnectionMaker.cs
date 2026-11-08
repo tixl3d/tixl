@@ -693,7 +693,6 @@ internal static class ConnectionMaker
         }
 
         CompleteOperation(inProgress, commandsForUndo, "Insert Op " + newChildUi.SymbolChild.ReadableName);
-        ParameterPopUp.NodeIdRequestedForParameterWindowActivation = newSymbolChild.Id;
     }
 
     public static void OpenBrowserWithSingleSelection(ProjectView components, SymbolUi.Child childUi, Instance instance, SymbolBrowser symbolBrowser)

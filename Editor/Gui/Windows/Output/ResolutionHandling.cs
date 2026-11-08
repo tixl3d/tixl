@@ -6,6 +6,7 @@ using T3.Core.Output;
 using T3.Core.Settings;
 using T3.Editor.App;
 using T3.Editor.Gui.Styling;
+using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Serialization;
@@ -201,16 +202,29 @@ internal static class ResolutionHandling
             
             if (Size.Width <= 0 || Size.Height <= 0)
             {
-                return new Int2((int)windowSize.X - paddingForFocusBorder * 2,
-                                (int)windowSize.Y - paddingForFocusBorder * 2);
+                return LimitToMaxWindowFillResolution(new Int2((int)windowSize.X - paddingForFocusBorder * 2,
+                                                               (int)windowSize.Y - paddingForFocusBorder * 2));
             }
 
             var windowAspectRatio = windowSize.X / windowSize.Y;
             var requestedAspectRatio = (float)Size.Width / Size.Height;
 
-            return (requestedAspectRatio > windowAspectRatio)
-                       ? new Int2((int)windowSize.X, (int)(windowSize.X / requestedAspectRatio))
-                       : new Int2((int)(windowSize.Y * requestedAspectRatio), (int)windowSize.Y);
+            return LimitToMaxWindowFillResolution(requestedAspectRatio > windowAspectRatio
+                                                      ? new Int2((int)windowSize.X, (int)(windowSize.X / requestedAspectRatio))
+                                                      : new Int2((int)(windowSize.Y * requestedAspectRatio), (int)windowSize.Y));
+        }
+
+        /** Scales a window-derived size down, keeping its aspect ratio, so its short side stays within the user's limit. */
+        private static Int2 LimitToMaxWindowFillResolution(Int2 size)
+        {
+            var maxShortSide = (int)UserSettings.Config.MaxWindowFillResolution;
+            var shortSide = Math.Min(size.Width, size.Height);
+            if (maxShortSide <= 0 || shortSide <= maxShortSide)
+                return size;
+
+            var scale = (float)maxShortSide / shortSide;
+            return new Int2(Math.Max(1, (int)MathF.Round(size.Width * scale)),
+                            Math.Max(1, (int)MathF.Round(size.Height * scale)));
         }
 
         public bool IsValid
