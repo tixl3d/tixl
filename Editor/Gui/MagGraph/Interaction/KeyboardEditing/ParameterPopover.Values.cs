@@ -74,6 +74,7 @@ internal static partial class ParameterPopover
                              InputValue<string>                                                                           => ValueKinds.Text,
                              _                                                                                            => ValueKinds.Unsupported,
                          };
+        _isTwoComponentVector = value is InputValue<Vector2> or InputValue<Int2>;
     }
 
     private static void UpdatePreview(Instance instance, bool keepOptionFocus = false)
@@ -410,7 +411,9 @@ internal static partial class ParameterPopover
         return _valueKind switch
                    {
                        ValueKinds.Number      => _editableValueLabel + "    {* / + ^} calculate   {-5} negative",
-                       ValueKinds.Vector      => "{0 0 0}   {x 1} one   {*2} all   {x}[←→]",
+                       ValueKinds.Vector      => _isTwoComponentVector
+                                                     ? "{0 0}   {1024} both   {x 1} one   {*2} relative   {x}[←→]"
+                                                     : "{0 0 0}   {1} all   {x 1} one   {*2} relative   {x}[←→]",
                        ValueKinds.Color       => "{orange}   {#f80}   {a 0.5}   {h} {s} {r} {g} {b} {a}[←→]",
                        ValueKinds.Options     => "[↑↓] options",
                        ValueKinds.AssetPath   => "type to search   [↑↓] select",

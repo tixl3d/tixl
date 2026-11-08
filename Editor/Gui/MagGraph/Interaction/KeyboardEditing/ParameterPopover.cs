@@ -688,6 +688,7 @@ internal static partial class ParameterPopover
     private static int _openFrame;
     private static Guid _focusedInputId;
     private static ValueKinds _valueKind;
+    private static bool _isTwoComponentVector;
     private static string _focusedDescription = string.Empty;
     private static string _editableValueLabel = string.Empty;
     private static bool _refocusGraph;

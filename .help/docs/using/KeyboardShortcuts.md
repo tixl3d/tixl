@@ -129,6 +129,7 @@ Press Tab to edit the focused value, then type it. The value is previewed while 
 | `*2`, `+1`, `/4`  | continues from the current value: `100*2`, shown as `= 200`       |
 | `(1+2)^2`, `pi*2` | calculates the value                                              |
 | `0 1 0`           | sets all components of a vector                                   |
+| `1024`            | a single number sets every component: `1024 1024` on a resolution |
 | `x 1`             | sets one component                                                |
 | `orange`, `#f80`  | sets a color by name or hex code; `a 0.5` sets its alpha          |
 | `sim`             | picks the matching dropdown option, Up and Down show the others   |
