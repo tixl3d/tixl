@@ -23,6 +23,8 @@ internal sealed class CubeGeometry : Instance<CubeGeometry>
             positions[i] = _unitCorners[i] * half;
         }
 
+        // The instance is reused, so bump its Version or caching consumers (e.g. async Bevel) keep stale results.
+        _geometry.InvalidateTopologyCaches();
         Geometry.Value = _geometry;
     }
 
