@@ -1,0 +1,263 @@
+{
+  "FormatVersion": 3,
+  "Id": "ca0e9c98-5830-4942-82b4-aaf36b8076fd"/*FlashPointAttributes*/,
+  "Description": "Flashes attributes onto a selection of points on a trigger and lets them recover to the incoming points over time.\n\nEach rising edge of TriggerFlash blends the enabled attributes (position, rotation, scale, F1, F2, color) into the points selected by Index, Count, Step and Scatter. The op keeps its own copy of the flashed values and a per-point age, so flashed points fade back to the live input while the input keeps animating. Flashing a point that is still recovering continues from its current state.\n\nThe op is stateful: it only advances while time runs and does not follow timeline scrubbing.\n\nCombines ideas of [PointSimulation], [SetPointAttributes] and [FilterPoints].\n\nAKA: pulse, highlight, hit, accent\n\nTips:\n- Flash one point per bar: connect an [AnimInt] to Index and an [AnimBoolean] to TriggerFlash.\n- Set Scatter to 1 to flash random points; the selection changes on each trigger.\n- Use a small GainAndBias bias for a fast fade-out with a long tail.",
+  "InputUis": [
+    {
+      "InputId": "14e19d37-c921-4a0d-9254-cda8870764c0"/*Points*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "2d013020-13c9-412b-890b-6360ee3261b6"/*TriggerFlash*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 45.0
+      },
+      "Description": "Flashes the selected points on each rising edge."
+    },
+    {
+      "InputId": "864ef3df-4a5c-43cc-a4c6-420825b8852e"/*Index*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 90.0
+      },
+      "GroupTitle": "Selection",
+      "Description": "Index of the first flashed point. Wraps around the point count, so an animated counter can step through the points.",
+      "Min": 0,
+      "Max": 100
+    },
+    {
+      "InputId": "5e7537fc-bbfb-416c-9f39-8d45d6e3c82e"/*Count*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 135.0
+      },
+      "Description": "Number of points flashed per trigger.",
+      "Min": 0,
+      "Max": 100,
+      "ClampMin": true
+    },
+    {
+      "InputId": "21d2b49f-4a2c-431d-b6f8-1dbc49d5811c"/*Step*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 180.0
+      },
+      "Description": "Index distance between flashed points.",
+      "Min": 0.0,
+      "Max": 10.0
+    },
+    {
+      "InputId": "ac4a5f51-6080-4c15-8c9b-e5d2bbe3e47e"/*Scatter*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 225.0
+      },
+      "Description": "Randomly offsets the selected indices. 1 picks from all points. The random pattern changes with each flash.",
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "229a9f10-ca06-4581-9bd8-a6ef3b881120"/*Seed*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 270.0
+      },
+      "Min": 0,
+      "Max": 100
+    },
+    {
+      "InputId": "ca15d267-1340-47d3-b49c-d99c070ad0e8"/*Strength*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 315.0
+      },
+      "GroupTitle": "Flash",
+      "Description": "How far the flashed attributes are blended from the current state toward the set values.",
+      "Min": 0.0,
+      "Max": 1.0
+    },
+    {
+      "InputId": "d161f5ff-3c38-474d-8468-1dedc42d9cf8"/*StrengthFactor*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 360.0
+      },
+      "Description": "Multiplies Strength with the F1 or F2 attribute of the source points."
+    },
+    {
+      "InputId": "d84b9184-335f-4672-9d00-9f6eb946d13b"/*SetPosition*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 405.0
+      }
+    },
+    {
+      "InputId": "00ab4d10-a25a-4645-b549-4798221da7d5"/*Position*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 450.0
+      },
+      "Min": -1.0,
+      "Max": 1.0
+    },
+    {
+      "InputId": "8e5269e6-0a01-49e0-983e-1ae100418f93"/*PositionMode*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 495.0
+      },
+      "Description": "Offset moves points by Position, Replace moves them to Position."
+    },
+    {
+      "InputId": "3a743635-33e5-46f0-9469-57112a4b949d"/*SetRotation*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 540.0
+      }
+    },
+    {
+      "InputId": "d7760cca-c53d-4024-b945-14a804db9598"/*RotationAxis*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 585.0
+      },
+      "Min": -1.0,
+      "Max": 1.0
+    },
+    {
+      "InputId": "fd27f41e-e47e-491f-b920-d5e7c158a632"/*RotationAngle*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 630.0
+      },
+      "Description": "Rotation in degrees applied on top of the current orientation.",
+      "Min": -180.0,
+      "Max": 180.0
+    },
+    {
+      "InputId": "f72f0236-76e0-431b-bd17-40c379f4f9d9"/*SetScale*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 675.0
+      }
+    },
+    {
+      "InputId": "b7dbf7fd-e521-4fba-b621-a34d934547f0"/*Scale*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 720.0
+      },
+      "Description": "Multiplies the current scale.",
+      "Min": 0.0,
+      "Max": 4.0
+    },
+    {
+      "InputId": "87c3c3c9-3376-435f-b723-ee029e739f00"/*SetFx1*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 765.0
+      }
+    },
+    {
+      "InputId": "ff2f9860-8a7e-4fbb-bc3a-9dc1be429976"/*Fx1*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 810.0
+      },
+      "Min": 0.0,
+      "Max": 1.0
+    },
+    {
+      "InputId": "4027a9c5-c925-4c1b-99c7-e5012f70270c"/*SetFx2*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 855.0
+      }
+    },
+    {
+      "InputId": "75796cae-7c64-4930-8606-ee5fda3d48d1"/*Fx2*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 900.0
+      },
+      "Min": 0.0,
+      "Max": 1.0
+    },
+    {
+      "InputId": "ca9de053-a43d-47cd-a112-aa7ee1fa1104"/*SetColor*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 945.0
+      }
+    },
+    {
+      "InputId": "5f1751eb-b3b5-4ca8-b0c7-0f705c0cac29"/*Color*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 990.0
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true
+    },
+    {
+      "InputId": "0b48aec5-f0aa-4b47-8e24-20d647a81acb"/*DecayMode*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 1035.0
+      },
+      "GroupTitle": "Recovery",
+      "Description": "Curve recovers fully within Duration, shaped by GainAndBias. HalfLife recovers exponentially, halving the flash every Duration."
+    },
+    {
+      "InputId": "aacce3e6-affc-4e67-a5a2-874f54a92dde"/*Duration*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 1080.0
+      },
+      "Description": "Recovery time in bars.",
+      "Min": 0.0,
+      "Max": 4.0,
+      "ClampMin": true
+    },
+    {
+      "InputId": "1fc950b7-9a1a-49e5-a12c-46c08b0e3676"/*GainAndBias*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 1125.0
+      },
+      "Description": "Shapes the Curve recovery. 0.5/0.5 is linear.",
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true,
+      "Format": "{0:0.000}",
+      "UseVec2Control": "GainAndBias"
+    },
+    {
+      "InputId": "ab434153-e29f-417f-8cd6-2effbd065da5"/*Reset*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 1170.0
+      },
+      "Description": "Clears all flashes."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "8dfc1d2a-ce23-4e71-821d-5b487ad996c3"/*Result*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}
