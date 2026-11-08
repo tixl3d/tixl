@@ -27,9 +27,9 @@ internal class ImGuiDx11RenderForm : RenderForm
 
         MouseMove += (_, e) =>
         {
-            // Only the main window drives ImGui's cursor position. The Viewer (and any
-            // other secondary form) has no ImGui content and must not overwrite the
-            // shared MousePos, otherwise hovering it moves the editor's UI cursor.
+            // Only the main window drives ImGui's cursor position. Output windows have no ImGui
+            // content and must not overwrite the shared MousePos, otherwise hovering one moves the
+            // editor's UI cursor.
             if (this != ProgramWindows.Main?.Form)
                 return;
 
@@ -76,11 +76,11 @@ internal class ImGuiDx11RenderForm : RenderForm
 
     private void OnDragEnter(object s, DragEventArgs e)
     {
-        if (this == ProgramWindows.Viewer?.Form)
+        if (this != ProgramWindows.Main?.Form)
         {
             e.Effect = DragDropEffects.None;
             return;
-        } // optional
+        }
 
         if (e.Data == null)
         {
@@ -103,8 +103,8 @@ internal class ImGuiDx11RenderForm : RenderForm
 
     private void OnDragDrop(object s, DragEventArgs e)
     {
-        if (this == ProgramWindows.Viewer?.Form || e.Data == null)
-            return; // optional
+        if (this != ProgramWindows.Main?.Form || e.Data == null)
+            return;
 
         var p = PointToClient(new System.Drawing.Point(e.X, e.Y));
         var pos = new Vector2(p.X, p.Y);
@@ -170,7 +170,8 @@ internal class ImGuiDx11RenderForm : RenderForm
             foreach (var inputMethod in InputMethods)
                 inputMethod.ProcessMessage(m);
 
-            var isViewer = this == ProgramWindows.Viewer?.Form;
+            // Output windows only show content; a press there is ignored, a release is not.
+            var isOutputWindow = this != ProgramWindows.Main?.Form;
 
             ImGuiIOPtr io = ImGui.GetIO();
 
@@ -183,7 +184,7 @@ internal class ImGuiDx11RenderForm : RenderForm
                 case WM_MBUTTONDOWN:
                 case WM_MBUTTONDBLCLK:
                 {
-                    if (isViewer)
+                    if (isOutputWindow)
                         return;
 
                     int button = 0;

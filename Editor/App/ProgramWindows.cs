@@ -23,7 +23,6 @@ namespace T3.Editor.App;
 internal static class ProgramWindows
 {
     public static AppWindow Main { get; private set; }
-    public static AppWindow Viewer { get; private set; } // Required it distinguish 2nd render view in mouse handling   
     private static Device _device;
     private static DeviceContext _deviceContext;
     private static Factory _factory;
@@ -100,8 +99,7 @@ internal static class ProgramWindows
     internal static void InitializeMainWindow(string version, out Device device)
     {
         Main = new AppWindow("TiXL " + version, disableClose: false);
-        // Enable explicit frame-latency pacing on Main's swap chain. Replaces the accidental
-        // pacing previously provided by Viewer's secondary `Present(1)` call. Must be set before
+        // Main's swap chain paces the loop through its frame-latency waitable. Must be set before
         // SwapChainDescription is consumed by Device.CreateWithSwapChain.
         Main.UseFrameLatencyWaitable = _mainUseFrameLatencyWaitable;
         _pacingWindow = Main;
@@ -253,12 +251,6 @@ internal static class ProgramWindows
         }
     }
 
-    internal static void InitializeSecondaryViewerWindow(string name, int width, int height)
-    {
-        Viewer = CreateViewerWindow(name, width, height);
-        Viewer.Show();
-    }
-
     /// <summary>The display a window sits on, by its index in the arrangement; 0 when it can't be placed.</summary>
     private static int IndexOfScreenUnder(AppWindow window)
     {
@@ -277,7 +269,7 @@ internal static class ProgramWindows
     /// A window for showing a rendered texture: its own swap chain, no ImGui content and no key tracking, so it
     /// can sit on a projector while the editor keeps the keyboard.
     /// </summary>
-    internal static AppWindow CreateViewerWindow(string name, int width, int height)
+    internal static AppWindow CreateOutputWindow(string name, int width, int height)
     {
         var window = new AppWindow(name, disableClose: true);
 
@@ -314,7 +306,6 @@ internal static class ProgramWindows
         OutputWindowHandling.Release();
         GpuFrameTimer.Release();
         Main.Release();
-        Viewer.Release();
         _device.ImmediateContext.ClearState();
         _deviceContext.Flush();
         _device.Dispose();
@@ -332,7 +323,7 @@ internal static class ProgramWindows
         _deviceContext.PixelShader.SetShaderResource(0, viewWindowBackgroundSrv);
     }
 
-    public static void DrawTextureToSecondaryRenderOutput()
+    public static void DrawFullScreenTexture()
     {
         _deviceContext.Draw(3, 0);
         _deviceContext.PixelShader.SetShaderResource(0, null);
@@ -434,13 +425,9 @@ internal static class ProgramWindows
             PresentationDiagnostics.Update(Main.SwapChain);
             PresentationDiagnostics.MeasureRefreshPeriod(_pacingWindow.SwapChain, _pacingWindow.HwndHandle);
 
-            // Only while its window is actually shown. Presenting a hidden flip-model swap chain is not the
-            // cheap no-op it looks like: DWM throttles presents to a window it isn't displaying, and with an
-            // output window up that wait measured 34ms per frame against 0.3ms for Main.
-            if (T3Ui.ShowSecondaryRenderWindow && Viewer != null)
-                PresentWindow(Viewer, syncInterval);
-
-            // Synced even when not pacing, so a projector never tears.
+            // Synced even when not pacing, so a projector never tears. Only claimed windows are presented: DWM
+            // throttles presents to a hidden flip-model swap chain, which measured 34ms per frame against 0.3ms
+            // for Main.
             for (var i = 0; i < outputWindows.Count; i++)
             {
                 PresentWindow(outputWindows[i].Window, syncInterval);
@@ -542,8 +529,7 @@ internal static class ProgramWindows
 
     /// <summary>
     /// Keeps a copy of the frame that is about to be presented. The flip-model swap chain discards
-    /// its back buffer, so this copy is what <see cref="StallWatchdog"/> shows during a stall and
-    /// what gets mirrored to the second view.
+    /// its back buffer, so this copy is what <see cref="StallWatchdog"/> shows during a stall.
     /// </summary>
     public static void CaptureUiFrame()
     {
@@ -592,26 +578,7 @@ internal static class ProgramWindows
     }
 
     /// <summary>
-    /// For things like presentations, demos or certain live performance situations it
-    /// can be desired to share also T3's UI content on a second display.
-    ///  
-    /// On Windows duplicating a display is extremely expensive. This work around
-    /// copies the last frame into a texture which is then presented on the second display.
-    /// </summary>
-    public static void CopyUiContentToShareTexture()
-    {
-        if (_uiCopyTexture == null || _uiCopyTexture.IsDisposed)
-        {
-            Log.Warning("Can't use undefined uiCopyTexture");
-            return;
-        }
-
-        _deviceContext.CopyResource(Main.BackBufferTexture, _uiCopyTexture);
-    }
-
-    /// <summary>
-    /// Captures the main window's next rendered UI frame — the same back-buffer copy the second-display
-    /// mirror makes — for the debug bridge. Served once by <see cref="ServePendingUiCapture"/>, after the
+    /// Captures the main window's next rendered UI frame for the debug bridge. Served once by <see cref="ServePendingUiCapture"/>, after the
     /// UI has rendered and before Present. The receiver owns the texture it gets and disposes it when done.
     /// </summary>
     public static void RequestUiCapture(Action<T3.Core.DataTypes.Texture2D> onCaptured)
@@ -628,7 +595,7 @@ internal static class ProgramWindows
         _pendingUiCapture = null;
 
         // A fresh copy per capture: the wrapper handed out disposes its native texture, so it must not be
-        // the mirror's shared one.
+        // the stall watchdog's kept frame.
         var mode = Main.SwapChain.Description.ModeDescription;
         var copy = new Texture2D(_device, new Texture2DDescription
                                               {

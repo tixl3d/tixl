@@ -38,8 +38,7 @@ internal sealed class AppWindow
     /// Set before swap-chain creation. When true, the swap chain is created with
     /// <see cref="SwapChainFlags.FrameLatencyWaitAbleObject"/>; the latency handle is captured
     /// after creation and <see cref="WaitForFrameLatency"/> can be called once per frame as the
-    /// pacing primitive — the proper replacement for the accidental pacing that was happening
-    /// via the secondary Viewer's `Present(1)` call.
+    /// pacing primitive.
     /// </summary>
     internal bool UseFrameLatencyWaitable { get; set; }
 
@@ -296,7 +295,7 @@ internal sealed class AppWindow
                                           return;
 
                                       RebuildBackBuffer();
-                                      // Only Main runs the render loop; Viewer has no callback
+                                      // Only Main runs the render loop; output windows have no callback
                                       if (_isResizingRightNow)
                                           _renderCallback?.Invoke();
                                   };
@@ -359,9 +358,4 @@ internal sealed class AppWindow
     private bool _isResizingRightNow;
     private Action _renderCallback;
     private Rectangle _boundsBeforeFullscreen;
-
-    public void SetTexture(Texture2D texture)
-    {
-        Texture = texture;
-    }
 }
