@@ -548,6 +548,8 @@ internal static class PlaceHolderUi
         // var dl = ImGui.GetForegroundDrawList();
         // dl.AddRect(ImGui.GetItemRectMin(), ImGui.GetItemRectMax(), Color.Green);
         
+        var isNonLib = !SymbolAnalysis.TryGetOperatorType(symbolUi.Symbol, out _);
+
         var isHovered = ImGui.IsItemHovered();
         if (isHovered)
         {
@@ -556,9 +558,19 @@ internal static class PlaceHolderUi
 
             if (!HelpWindow.HoverPreviewActive)
             {
+                // Custom symbols: show where they live
+                
                 ImGui.SetNextWindowSize(new Vector2(300 * T3Ui.UiScaleFactor, 0));
                 ImGui.BeginTooltip();
+                if (isNonLib)
+                {
+                    CustomComponents.StylizedText(symbolUi.Symbol.Namespace, Fonts.FontSmall, UiColors.TextMuted);
+                    ImGui.Spacing();
+                }
                 OperatorHelp.DrawHelpSummary(symbolUi, false);
+
+                
+
                 ImGui.EndTooltip();
             }
         }
@@ -566,11 +578,30 @@ internal static class PlaceHolderUi
         ImGui.SameLine(ImGui.GetItemRectMin().X - ImGui.GetWindowPos().X);
         ImGui.TextUnformatted(symbolUi.Symbol.Name);
 
+        // Non-Lib indicator (same check and color as in MagGraphCanvas.DrawNode)
+        if (isNonLib)
+        {
+            var nameRect = new ImRect(ImGui.GetItemRectMin(), ImGui.GetItemRectMax());
+            var scale = T3Ui.UiScaleFactor;
+            var indicatorSize = new Vector2(4, 3) * scale;
+
+            ImGui.SameLine(0, 6 * scale);
+            ImGui.Dummy(indicatorSize);
+
+            var pMin = new Vector2(ImGui.GetItemRectMin().X,
+                                   (nameRect.Min.Y + nameRect.Max.Y) * 0.5f - indicatorSize.Y * 0.5f);
+            var pMax = pMin + indicatorSize;
+
+            var dl = ImGui.GetWindowDrawList();
+            dl.AddRectFilled(pMin, pMax, UiColors.StatusActivated);
+            dl.AddRect(pMin - Vector2.One, pMax + Vector2.One, UiColors.WindowBackground.Fade(0.4f));
+        }
+
         if (showType && type != null)
         {
             ImGui.SameLine(0,10);
             ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 0.3f);
-            ImGui.TextUnformatted(type.Name.ToString());
+            ImGui.TextUnformatted(type.Name);
             ImGui.PopStyleVar();
         }
 
