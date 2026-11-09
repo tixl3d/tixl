@@ -134,7 +134,7 @@
       "SymbolName": "Lib.render.camera.Camera",
       "Position": {
         "X": 1737.693,
-        "Y": 256.74878
+        "Y": 186.74878
       }
     },
     {
@@ -160,7 +160,7 @@
       "SymbolName": "Lib.image.fx.blur.Bloom",
       "Position": {
         "X": 1737.693,
-        "Y": 326.74878
+        "Y": 361.74878
       }
     },
     {
@@ -213,7 +213,7 @@
       "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "Position": {
         "X": 1737.693,
-        "Y": 291.74878
+        "Y": 256.74878
       }
     }
   ],

@@ -72,11 +72,11 @@ sampler texSampler : register(s0);
 
     Point p = SourcePoints[index];
 
-    float3 totalForce;
+    float3 totalForce = 0;
     float totalWeight = 0;
 
     float4 totalColor = float4(0, 0, 0, 0);
-    float totalW;
+    float totalW = 0;
     int usedCount = 0;
 
     float noise = (hash11u(index) - 0.5) * Variation;
