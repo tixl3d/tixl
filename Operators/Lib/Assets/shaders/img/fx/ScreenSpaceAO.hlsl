@@ -95,7 +95,7 @@ float4 psTrace(vsOutput input) : SV_TARGET
             {
                 float hitWeight = 1.0 - progress;
                 occlusion += hitWeight;
-                bleeding += Source.SampleLevel(texSampler, sampleUv, 0).rgb * hitWeight;
+                bleeding += Finite(Source.SampleLevel(texSampler, sampleUv, 0)).rgb * hitWeight;
                 break;
             }
         }
@@ -109,7 +109,7 @@ TemporalOutput psTemporal(vsOutput input)
 {
     float2 uv = input.texCoord;
     float2 texel = float2(1.0 / TargetWidth, 1.0 / TargetHeight);
-    float4 raw = Source.SampleLevel(texSampler, uv, 0);
+    float4 raw = Finite(Source.SampleLevel(texSampler, uv, 0));
 
     TemporalOutput output;
     float depth = FetchDepth(uv);
@@ -132,7 +132,7 @@ TemporalOutput psTemporal(vsOutput input)
         [unroll]
         for (int x = -1; x <= 1; ++x)
         {
-            float4 neighbor = Source.SampleLevel(texSampler, uv + float2(x, y) * texel, 0);
+            float4 neighbor = Finite(Source.SampleLevel(texSampler, uv + float2(x, y) * texel, 0));
             sum += neighbor;
             sumSquared += neighbor * neighbor;
         }
@@ -146,8 +146,8 @@ TemporalOutput psTemporal(vsOutput input)
     // converged history would snap to the current frame where all neighbors happen to miss.
     float allowedDeviation = max(deviation.a * (1.0 + NeighborhoodClamp * 3.0), 0.25);
 
-    float4 historyColor = Accumulated.SampleLevel(texSampler, previousUv, 0);
-    float3 historyBleeding = AccumulatedFrameCount.SampleLevel(texSampler, previousUv, 0).gba;
+    float4 historyColor = Finite(Accumulated.SampleLevel(texSampler, previousUv, 0));
+    float3 historyBleeding = Finite(AccumulatedFrameCount.SampleLevel(texSampler, previousUv, 0)).gba;
     float historyVisibility = clamp(historyColor.r, mean.a - allowedDeviation, mean.a + allowedDeviation);
 
     float expectedDistance = distance(surface, PreviousEyePosition());
@@ -165,8 +165,8 @@ TemporalOutput psTemporal(vsOutput input)
     float visibility = lerp(current.a, historyVisibility, frames / (frames + 1.0));
     float3 bleeding = lerp(current.rgb, historyBleeding, bleedingFrames / (bleedingFrames + 1.0));
 
-    output.Color = float4(visibility, visibility, visibility, length(surface - EyePosition()));
-    output.AccumulatedFrames = float4(frames + 1.0, bleeding);
+    output.Color = Finite(float4(visibility, visibility, visibility, length(surface - EyePosition())));
+    output.AccumulatedFrames = Finite(float4(frames + 1.0, bleeding));
     return output;
 }
 
@@ -177,8 +177,8 @@ float4 psComposite(vsOutput input) : SV_TARGET
     if (FetchDepth(uv) >= BackgroundDepth)
         return image;
 
-    float visibility = Accumulated.SampleLevel(texSampler, uv, 0).r;
-    float3 bleeding = AccumulatedFrameCount.SampleLevel(texSampler, uv, 0).gba;
+    float visibility = Finite(Accumulated.SampleLevel(texSampler, uv, 0)).r;
+    float3 bleeding = Finite(AccumulatedFrameCount.SampleLevel(texSampler, uv, 0)).gba;
 
     // There is no albedo buffer, so the lit color stands in for it. The minimum keeps dark surfaces from going bright.
     float3 albedo = saturate(image.rgb / max(max(image.r, max(image.g, image.b)), 0.1));

@@ -35,7 +35,7 @@ float3 RoughenNormal(float3 normal, float2 pixelSeed)
 float4 psTrace(vsOutput input) : SV_TARGET
 {
     float2 uv = input.texCoord;
-    float3 image = Source.SampleLevel(texSampler, uv, 0).rgb;
+    float3 image = Finite(Source.SampleLevel(texSampler, uv, 0)).rgb;
 
     float depth = FetchDepth(uv);
     float3 normal;
@@ -140,7 +140,7 @@ float4 psTrace(vsOutput input) : SV_TARGET
     float distanceFactor = 1.0 - saturate(hitDistance / max(MaxDistance, 1e-4));
     float confidence = edgeFactor * sqrt(distanceFactor);
 
-    float3 reflection = Source.SampleLevel(texSampler, hitScreen.xy, 0).rgb;
+    float3 reflection = Finite(Source.SampleLevel(texSampler, hitScreen.xy, 0)).rgb;
 
     // Blending misses toward the image makes a separate confidence channel unnecessary: fading out needs no history reset.
     return float4(lerp(image, reflection, confidence), hitDistance);
@@ -164,7 +164,7 @@ TemporalOutput psTemporal(vsOutput input)
 {
     float2 uv = input.texCoord;
     float2 texel = float2(1.0 / TargetWidth, 1.0 / TargetHeight);
-    float4 raw = Source.SampleLevel(texSampler, uv, 0);
+    float4 raw = Finite(Source.SampleLevel(texSampler, uv, 0));
 
     float depth = FetchDepth(uv);
     if (depth >= BackgroundDepth)
@@ -190,7 +190,7 @@ TemporalOutput psTemporal(vsOutput input)
         [unroll]
         for (int x = -1; x <= 1; ++x)
         {
-            float3 neighbor = RgbToYCoCg(Source.SampleLevel(texSampler, uv + float2(x, y) * texel, 0).rgb);
+            float3 neighbor = RgbToYCoCg(Finite(Source.SampleLevel(texSampler, uv + float2(x, y) * texel, 0)).rgb);
             boxMin = min(boxMin, neighbor);
             boxMax = max(boxMax, neighbor);
         }
@@ -200,7 +200,7 @@ TemporalOutput psTemporal(vsOutput input)
     // The minimum keeps a converged history from snapping to the current frame where all neighbors happen to agree.
     float3 boxExtent = (boxMax - boxMin) * 0.5 * (1.0 + NeighborhoodClamp) + 0.02;
 
-    float3 history = Accumulated.SampleLevel(texSampler, reflectionUv, 0).rgb;
+    float3 history = Finite(Accumulated.SampleLevel(texSampler, reflectionUv, 0)).rgb;
     float3 historyYCoCg = RgbToYCoCg(history);
     float3 clampedYCoCg = clamp(historyYCoCg, boxCenter - boxExtent, boxCenter + boxExtent);
     float disagreement = saturate(length(historyYCoCg - clampedYCoCg) / 0.05);
@@ -210,7 +210,7 @@ TemporalOutput psTemporal(vsOutput input)
     disagreement *= 1.0 - rareHits;
 
     // Half floats hold nonlinear depth poorly but give a camera distance constant relative precision.
-    float storedDistance = Accumulated.SampleLevel(texSampler, surfaceUv, 0).a;
+    float storedDistance = Finite(Accumulated.SampleLevel(texSampler, surfaceUv, 0)).a;
     float expectedDistance = distance(surface, PreviousEyePosition());
     float relativeGap = abs(storedDistance - expectedDistance) / max(expectedDistance, 1e-4);
 
@@ -239,7 +239,7 @@ float4 psComposite(vsOutput input) : SV_TARGET
     float grazing2 = grazing * grazing;
     float fresnel = Reflectivity + (1.0 - Reflectivity) * grazing2 * grazing2 * grazing;
 
-    float3 reflection = Accumulated.SampleLevel(texSampler, uv, 0).rgb;
+    float3 reflection = Finite(Accumulated.SampleLevel(texSampler, uv, 0)).rgb;
     float reflectionAmount = saturate(fresnel * Intensity) * (1.0 - GetHighlightProtection(image.rgb));
     return float4(lerp(image.rgb, reflection, reflectionAmount), image.a);
 }

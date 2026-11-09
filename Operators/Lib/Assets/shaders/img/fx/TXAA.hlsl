@@ -69,12 +69,19 @@ float3 YCoCgToRgb(float3 c)
                   c.x - c.y - c.z);
 }
 
+/** NaN or infinity from one pixel would otherwise spread through the bilinear history reads, frame by frame, until
+    it floods the image. Replacing it with zero keeps any damage to that one pixel. */
+float4 Finite(float4 value)
+{
+    return any(isnan(value)) || any(isinf(value)) ? 0 : value;
+}
+
 float4 psMain(vsOutput psInput) : SV_TARGET
 {
     float2 uv = psInput.texCoord;
     float2 texel = float2(1.0 / TargetWidth, 1.0 / TargetHeight);
 
-    float4 current = Image.SampleLevel(texSampler, uv, 0);
+    float4 current = Finite(Image.SampleLevel(texSampler, uv, 0));
     float depth = DepthMap.SampleLevel(texSampler, uv, 0).r;
 
     // Reconstruct this pixel's world position from depth + the current camera. Clip-space
@@ -120,7 +127,7 @@ float4 psMain(vsOutput psInput) : SV_TARGET
             if (x == 0 && y == 0)
                 continue;
 
-            float3 neighbor = RgbToYCoCg(Image.SampleLevel(texSampler, uv + float2(x, y) * texel, 0).rgb);
+            float3 neighbor = RgbToYCoCg(Finite(Image.SampleLevel(texSampler, uv + float2(x, y) * texel, 0)).rgb);
             boxMin = min(boxMin, neighbor);
             boxMax = max(boxMax, neighbor);
         }
@@ -132,7 +139,7 @@ float4 psMain(vsOutput psInput) : SV_TARGET
     boxMax = boxCenter + boxExtent;
 
     // History carries the previous resolved color in rgb and that frame's scene depth in alpha.
-    float4 historySample = History.SampleLevel(texSampler, prevUv, 0);
+    float4 historySample = Finite(History.SampleLevel(texSampler, prevUv, 0));
 
     //return lerp(Image.SampleLevel(texSampler, uv, 0), historySample, BlendFactor); // <--- Debug test
 
@@ -165,5 +172,5 @@ float4 psMain(vsOutput psInput) : SV_TARGET
     float3 resolved = lerp(current.rgb, history, weight);
 
     // Store this frame's depth in alpha so next frame's disocclusion test can read it.
-    return float4(resolved, depth);
+    return Finite(float4(resolved, depth));
 }
