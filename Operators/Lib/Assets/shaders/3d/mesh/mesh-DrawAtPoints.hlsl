@@ -209,6 +209,9 @@ float GetDistance(float3 p3)
 
 #include "shared/pbr-render.hlsl"
 
+/** Set by psMain. Back faces of meshes drawn without culling need their normal flipped to face the viewer. */
+static bool IsFrontFacing = true;
+
 float3 ComputeNormal(psInput pin, float3x3 tbnToWorld)
 {
     float3 N;
@@ -238,6 +241,10 @@ float3 ComputeNormal(psInput pin, float3x3 tbnToWorld)
         float4 normalMap = NormalMap.Sample(WrappedSampler, pin.texCoord);
         N = normalize(2.0 * normalMap.rgb - 1.0);
         N = normalize(mul(N, tbnToWorld));
+
+        // The flat shading branch derives its normal from screen-space derivatives, which already faces the viewer.
+        if (!IsFrontFacing)
+            N = -N;
     }
     return N;
 }
@@ -258,8 +265,9 @@ float3 ComputeNormal(psInput pin, float3x3 tbnToWorld)
 //     return saturate(adjustedR);
 // }
 
-psOutput psMain(psInput pin) : SV_TARGET
+psOutput psMain(psInput pin, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
 {
+    IsFrontFacing = isFrontFace;
     psOutput output;
 
     float4 roughnessMetallicOcclusion = RSMOMap.Sample(WrappedSampler, pin.texCoord);
