@@ -568,9 +568,6 @@ internal static class PlaceHolderUi
                     ImGui.Spacing();
                 }
                 OperatorHelp.DrawHelpSummary(symbolUi, false);
-
-                
-
                 ImGui.EndTooltip();
             }
         }
