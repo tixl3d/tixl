@@ -25,7 +25,6 @@ namespace T3.Editor.Gui.MagGraph.States
             item = null;
             if (context.StateMachine.CurrentState != Default
                 || !context.View.IsFocused
-                || !context.View.IsHovered
                 || ImGui.IsAnyItemActive()
                 || context.Selector.Selection.Count != 1)
                 return false;
