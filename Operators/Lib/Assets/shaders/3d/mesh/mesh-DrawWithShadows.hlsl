@@ -155,7 +155,13 @@ inline float ComputeShadowFactor(float3 shadowCoord, float2 texelSize, float bia
 }
 
 // based on https://github.com/Nadrin/PBR/blob/master/data/shaders/hlsl/pbr.hlsl d
-float4 psMain(psInput pin) : SV_TARGET
+struct psOutput
+{
+    float4 Color : SV_Target0;
+    float4 Normal : SV_Target1;
+};
+
+psOutput psMain(psInput pin, bool isFrontFace : SV_IsFrontFace)
 {
     // return float4(pin.positionInLightClipSpace.xyz, 1);
     //  Sample input textures to get shading model params.
@@ -179,6 +185,10 @@ float4 psMain(psInput pin) : SV_TARGET
 
     float3 N = normalize(2.0 * normalMap.rgb - 1.0);
     N = normalize(mul(N, pin.tbnToWorld));
+
+    // Back faces of geometry drawn without culling need the normal facing the viewer.
+    if (!isFrontFace)
+        N = -N;
 
     // Angle between surface normal and outgoing light direction.
     float cosLo = abs(dot(N, Lo));
@@ -294,5 +304,8 @@ float4 psMain(psInput pin) : SV_TARGET
     litColor += float4(EmissiveColorMap.Sample(texSampler, pin.texCoord).rgb * EmissiveColor.rgb, 0);
     litColor.rgb = lerp(litColor.rgb, FogColor.rgb, pin.fog * FogColor.a);
     litColor.a *= albedo.a;
-    return litColor;
+    psOutput output;
+    output.Color = litColor;
+    output.Normal = float4(N, 1);
+    return output;
 }

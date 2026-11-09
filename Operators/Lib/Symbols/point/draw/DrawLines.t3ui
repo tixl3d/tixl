@@ -354,6 +354,22 @@
         "X": 984.7431,
         "Y": 202.72704
       }
+    },
+    {
+      "ChildId": "6e8c27e1-0bc7-5e87-a39a-27358e2c73c6",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
+      "Position": {
+        "X": 570.759,
+        "Y": 9.137100000000004
+      }
+    },
+    {
+      "ChildId": "5620b26f-ebd3-553e-b6f1-16de9829863c",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
+      "Position": {
+        "X": 570.759,
+        "Y": 49.137100000000004
+      }
     }
   ],
   "OutputUis": [

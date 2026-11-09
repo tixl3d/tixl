@@ -53,6 +53,13 @@ sampler texSampler : register(s0);
 static const float BackgroundDepth = 0.99999;
 static const int RefinementSteps = 5;
 
+/** NaN or infinity from one pixel would otherwise spread through the bilinear history reads, frame by frame, until
+    it floods the image. Replacing it with zero keeps any damage to that one pixel. */
+float4 Finite(float4 value)
+{
+    return any(isnan(value)) || any(isinf(value)) ? 0 : value;
+}
+
 float2 UvToNdc(float2 uv)
 {
     return float2(uv.x * 2.0 - 1.0, 1.0 - uv.y * 2.0);
@@ -82,7 +89,7 @@ float FetchDepth(float2 uv)
 /** Clear color and shaders without a normal output leave a zero vector, which marks a non-reflecting pixel. */
 bool TryFetchNormal(float2 uv, out float3 normal)
 {
-    normal = NormalMap.Load(int3(UvToTexel(uv), 0)).xyz;
+    normal = Finite(NormalMap.Load(int3(UvToTexel(uv), 0))).xyz;
     float lengthSquared = dot(normal, normal);
     if (lengthSquared < 0.25)
         return false;
@@ -155,13 +162,13 @@ float GetAccumulatedFrames(float2 uv, float2 previousUv, float confidence, float
     float motionInPixels = length((uv - previousUv) * float2(TargetWidth, TargetHeight));
     float change = max(disagreement * disagreement, saturate(motionInPixels * 4.0));
     float limit = lerp(framesWhenSettled, framesWhileChanging, change);
-    return min(AccumulatedFrameCount.SampleLevel(texSampler, previousUv, 0).r, limit);
+    return min(Finite(AccumulatedFrameCount.SampleLevel(texSampler, previousUv, 0)).r, limit);
 }
 
 TemporalOutput MakeTemporalOutput(float3 color, float distanceToCamera, float frames)
 {
     TemporalOutput output;
-    output.Color = float4(color, distanceToCamera);
+    output.Color = Finite(float4(color, distanceToCamera));
     output.AccumulatedFrames = float4(frames + 1.0, 0, 0, 1);
     return output;
 }

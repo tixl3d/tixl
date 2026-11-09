@@ -180,7 +180,13 @@ inline float ComputeShadowFactor(float3 shadowCoord, float2 texelSize, float bia
     return 1.0 - (shadow / samples);
 }
 
-float4 psMain(psInput pin) : SV_TARGET
+struct psOutput
+{
+    float4 Color : SV_Target0;
+    float4 Normal : SV_Target1;
+};
+
+psOutput psMain(psInput pin, bool isFrontFace : SV_IsFrontFace)
 {
     // Sample input textures to get shading model params.
     float4 albedo = BaseColorMap.Sample(texSampler, pin.texCoord) * pin.color;
@@ -201,6 +207,10 @@ float4 psMain(psInput pin) : SV_TARGET
 
     // return float4(pin.tbnToWorld[0],1);
     N = normalize(mul(N, pin.tbnToWorld));
+
+    // Back faces of geometry drawn without culling need the normal facing the viewer.
+    if (!isFrontFace)
+        N = -N;
 
     // Angle between surface normal and outgoing light direction.
     float cosLo = max(0.0, dot(N, Lo));
@@ -319,5 +329,8 @@ float4 psMain(psInput pin) : SV_TARGET
     litColor.a *= albedo.a;
     // if (!IsShadowPass)
     //     litColor.r = 0.5;
-    return litColor;
+    psOutput output;
+    output.Color = litColor;
+    output.Normal = float4(N, 1);
+    return output;
 }

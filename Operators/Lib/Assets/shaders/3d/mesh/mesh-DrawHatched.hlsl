@@ -102,7 +102,13 @@ psInput vsMain(uint id: SV_VertexID)
 //
 // based on https://github.com/Nadrin/PBR/blob/master/data/shaders/hlsl/pbr.hlsl
 
-float4 psMain(psInput pin) : SV_TARGET
+struct psOutput
+{
+    float4 Color : SV_Target0;
+    float4 Normal : SV_Target1;
+};
+
+psOutput psMain(psInput pin, bool isFrontFace : SV_IsFrontFace)
 {
     // Sample input textures to get shading model params.
     float4 albedo = BaseColorMap.Sample(texSampler, pin.texCoord);
@@ -122,6 +128,10 @@ float4 psMain(psInput pin) : SV_TARGET
      
     float3 randFaceOffset = hash31((float)pin.faceid);// * RandomFaceOffset;
     float3 N = Norg;// + randFaceOffset;
+
+    // Back faces of geometry drawn without culling need the normal facing the viewer.
+    if (!isFrontFace)
+        N = -N;
     
     
     // Angle between surface normal and outgoing light direction.
@@ -199,6 +209,9 @@ float4 psMain(psInput pin) : SV_TARGET
 
     float4 shadingOffset = ShadingGradient.Sample(texSampler, float2(brightness, 0));
     float hatch = saturate( (sin(p.x / (LineWidth * RequestedResolutionHeight / 500 /  (2 * PI))) + (shadingOffset.x * 3 -1)) * 1);
-    return lerp(BackgroundColor, ForegroundColor, hatch);
+    psOutput output;
+    output.Color = lerp(BackgroundColor, ForegroundColor, hatch);
+    output.Normal = float4(N, 1);
+    return output;
     //return float4(hatch.xxx,1);
 }

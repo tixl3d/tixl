@@ -276,7 +276,13 @@ psInput vsMain(uint id : SV_VertexID)
     return output;
 }
 
-float4 psMain(psInput pin) : SV_TARGET
+struct psOutput
+{
+    float4 Color : SV_Target0;
+    float4 Normal : SV_Target1;
+};
+
+psOutput psMain(psInput pin, bool isFrontFace : SV_IsFrontFace)
 {
     // Sample input textures to get shading model params.
     float4 albedo = BaseColorMap.Sample(texSampler, pin.texCoord) * pin.color;
@@ -298,6 +304,10 @@ float4 psMain(psInput pin) : SV_TARGET
 
     // return float4(pin.tbnToWorld[0],1);
     N = normalize(mul(N, pin.tbnToWorld));
+
+    // Back faces of geometry drawn without culling need the normal facing the viewer.
+    if (!isFrontFace)
+        N = -N;
 
     // Angle between surface normal and outgoing light direction.
     float cosLo = max(0.0, dot(N, Lo));
@@ -397,5 +407,8 @@ float4 psMain(psInput pin) : SV_TARGET
     litColor.rgb = lerp(litColor.rgb, FogColor.rgb, pin.fog);
     litColor += float4(EmissiveColorMap.Sample(texSampler, pin.texCoord).rgb * EmissiveColor.rgb, 0);
     litColor.a *= albedo.a;
-    return litColor;
+    psOutput output;
+    output.Color = litColor;
+    output.Normal = float4(N, 1);
+    return output;
 }

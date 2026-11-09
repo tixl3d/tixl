@@ -24,6 +24,8 @@ cbuffer Params : register(b0)
     float UvScale;
 
     float FadeTooLong;
+    float EnableZWrite;
+    float BlendMode;
 };
 
 cbuffer IntParams : register(b1)
@@ -61,6 +63,7 @@ struct psInput
     float4 color : COLOR;
     float2 texCoord : TEXCOORD;
     float fog : FOG;
+    float3 toCameraInCamSpace : TEXCOORD1;
 };
 
 sampler texSampler : register(s0);
@@ -190,6 +193,7 @@ psInput vsMain(uint id : SV_VertexID)
     n = normalize(n);
 
     output.fog = pow(saturate(-posInCamSpace.z / FogDistance), FogBias);
+    output.toCameraInCamSpace = -posInCamSpace.xyz;
 
     output.color = Color * lerp(pointA.Color, pointB.Color, cornerFactors.x);
 
@@ -198,12 +202,32 @@ psInput vsMain(uint id : SV_VertexID)
     return output;
 }
 
-float4 psMain(psInput input) : SV_TARGET
+struct psOutput
+{
+    float4 Color : SV_Target0;
+    float4 Normal : SV_Target1;
+};
+
+/** Lines face the camera position like a billboard. Lines that don't write depth or that blend additively must leave
+    the normal buffer untouched, so they write zero with zero alpha, which every blend mode except Multiply and Invert keeps. */
+float4 GetLineNormal(float3 toCameraInCamSpace)
+{
+    bool replacesSurface = EnableZWrite > 0.5 && (BlendMode < 0.5 || abs(BlendMode - 4.0) < 0.5);
+    if (!replacesSurface)
+        return 0;
+
+    return float4(normalize(mul(float4(toCameraInCamSpace, 0), CameraToWorld).xyz), 1);
+}
+
+psOutput psMain(psInput input)
 {
     float4 imgColor = texture2.Sample(texSampler, input.texCoord);
     float dFromLineCenter = abs(input.texCoord.y - 0.5) * 2;
 
     float4 col = input.color * imgColor;
     col.rgb = lerp(col.rgb, FogColor.rgb, input.fog);
-    return clamp(col, float4(0, 0, 0, 0), float4(1000, 1000, 1000, 1));
+    psOutput output;
+    output.Color = clamp(col, float4(0, 0, 0, 0), float4(1000, 1000, 1000, 1));
+    output.Normal = GetLineNormal(input.toCameraInCamSpace);
+    return output;
 }

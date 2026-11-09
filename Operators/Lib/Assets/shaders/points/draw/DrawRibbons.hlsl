@@ -36,6 +36,8 @@ cbuffer Params : register(b1)
     float TextureMode;
     float2 TextureRange;    
     float UseWAsWeight;
+    float EnableDepthWrite;
+    float BlendMode;
 };
 
 cbuffer FogParams : register(b2)
@@ -112,6 +114,17 @@ psInput vsMain(uint id: SV_VertexID)
 
     float3 normalTwisted =  float3(0, cos(spinRad + 3.141578/2), sin(spinRad + 3.141578/2));
     float3 normal = normalize(qRotateVec3(normalTwisted, p.Rotation));
+
+    // The point rotation doesn't say which way the ribbon runs, so the normal is taken across the actual strip:
+    // perpendicular to both the direction to the neighbouring points and the width direction.
+    int pointIndex = particleId + offset;
+    Point previous = Points[max(pointIndex - 1, 0)];
+    Point next = Points[min(pointIndex + 1, (int)pointCount - 1)];
+    float3 alongRibbon = (IsSeparator(next) ? p.Position : next.Position) - (IsSeparator(previous) ? p.Position : previous.Position);
+    float3 acrossRibbon = qRotateVec3(float3(cos(spinRad), 0, sin(spinRad)), p.Rotation);
+    float3 stripNormal = cross(alongRibbon, acrossRibbon);
+    if (dot(stripNormal, stripNormal) > 1e-12)
+        normal = normalize(stripNormal);
     float4 normalInScreen = mul(float4(normal,0), ObjectToClipSpace);
 
     output.texCoord = float2(cornerFactors.x , cornerFactors.y /2 +0.5);
@@ -138,7 +151,7 @@ psInput vsMain(uint id: SV_VertexID)
     TBN = mul(TBN, (float3x3)ObjectToWorld);
     output.tbnToWorld = TBN;
 
-    output.worldPosition =  mul(float4(pInObject,0), ObjectToWorld).xyz; 
+    output.worldPosition = mul(float4(pInObject, 1), ObjectToWorld).xyz;
 
     float4 pInScreen  = mul(float4(pInObject,1), ObjectToClipSpace);
 
@@ -155,7 +168,23 @@ psInput vsMain(uint id: SV_VertexID)
 }
 
 
-float4 psMain(psInput pin) : SV_TARGET
+struct psOutput
+{
+    float4 Color : SV_Target0;
+    float4 Normal : SV_Target1;
+};
+
+/** Ribbons that don't write depth or that blend additively must leave the normal buffer untouched, so they write zero
+    with zero alpha, which every blend mode except Multiply and Invert keeps as is. */
+float4 GetNormalOutput(float3 normal)
+{
+    bool replacesSurface = EnableDepthWrite > 0.5 && (BlendMode < 0.5 || abs(BlendMode - 4.0) < 0.5);
+    // Separator points collapse their segments through NaN positions; such pixels must not write a normal.
+    bool isFinite = !any(isnan(normal)) && !any(isinf(normal));
+    return replacesSurface && isFinite ? float4(normal, 1) : 0;
+}
+
+psOutput psMain(psInput pin)
 {
     // Sample input textures to get shading model params.
     float4 albedo = BaseColorMap.Sample(texSampler, pin.texCoord).rgba;
@@ -173,6 +202,10 @@ float4 psMain(psInput pin) : SV_TARGET
     
     float3 N = normalize(2.0 * normalMap.rgb - 1.0);
     N = normalize(mul(N, pin.tbnToWorld));
+
+    // Ribbons are thin two-sided strips, so the visible side always faces the viewer.
+    if (dot(N, Lo) < 0)
+        N = -N;
 
     // Angle between surface normal and outgoing light direction.
     float cosLo = abs( dot(N, Lo));
@@ -262,5 +295,9 @@ float4 psMain(psInput pin) : SV_TARGET
     litColor += float4(EmissiveColorMap.Sample(texSampler, pin.texCoord).rgb * EmissiveColor.rgb, 0);
     litColor.rgb = lerp(litColor.rgb, FogColor.rgb, pin.fog * FogColor.a);
     litColor.a *= albedo.a;
-    return litColor;
+
+    psOutput output;
+    output.Color = litColor;
+    output.Normal = GetNormalOutput(N);
+    return output;
 }

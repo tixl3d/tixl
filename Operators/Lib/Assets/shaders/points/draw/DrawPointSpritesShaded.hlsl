@@ -151,7 +151,13 @@ float median(float r, float g, float b) {
     return max(min(r, g), min(max(r, g), b));
 }
 
-float4 psMain(psInput psInput) : SV_TARGET
+struct psOutput
+{
+    float4 Color : SV_Target0;
+    float4 Normal : SV_Target1;
+};
+
+psOutput psMain(psInput psInput)
 {
     // Font SDF
     float3 smpl1 =  FontTexture.Sample(texSampler, psInput.texCoord).rgb;
@@ -301,5 +307,8 @@ float4 psMain(psInput psInput) : SV_TARGET
     litColor.rgb = lerp(litColor.rgb, FogColor.rgb, psInput.fog);
     litColor += float4(EmissiveColorMap.Sample(texSampler, psInput.texCoord).rgb * EmissiveColor.rgb, 0);
     litColor.a *= albedo.a;
-    return litColor * psInput.color;
+    psOutput output;
+    output.Color = litColor * psInput.color;
+    output.Normal = float4(N, 1);
+    return output;
 }
