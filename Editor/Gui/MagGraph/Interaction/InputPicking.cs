@@ -112,6 +112,7 @@ internal static class InputPicking
                 context.MacroCommand.AddAndExecCommand(new AddConnectionCommand(composition.Symbol,
                                                                                 connectionToAdd,
                                                                                 inputConnectionCount + addedCount));
+                MagItemMovement.MakeRoomForRevealedOutputRow(context, tempConnection.SourceItem, tempConnection.SourceOutput.Id);
                 addedCount++;
             }
 
@@ -135,6 +136,7 @@ internal static class InputPicking
             context.MacroCommand.AddAndExecCommand(new AddConnectionCommand(composition.Symbol,
                                                                             connectionToAdd,
                                                                             inputConnectionCount));
+            MagItemMovement.MakeRoomForRevealedOutputRow(context, context.ActiveSourceItem, context.ActiveSourceOutputId);
             addedCount = 1;
         }
 

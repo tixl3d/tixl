@@ -1509,6 +1509,37 @@ internal sealed partial class MagItemMovement
     }
 
     /// <summary>
+    /// An additional output gets a row appended to the bottom of its operator once it is connected.
+    /// Call this when connecting such an output, so the items snapped below make room for that row
+    /// instead of being overlapped by it.
+    /// </summary>
+    internal static void MakeRoomForRevealedOutputRow(GraphUiContext context, MagGraphItem sourceItem, Guid outputId)
+    {
+        var instance = sourceItem.Instance;
+        if (sourceItem.Variant != MagGraphItem.Variants.Operator || instance == null)
+            return;
+
+        var isHidden = false;
+        foreach (var outputIndex in sourceItem.HiddenOutputIndices)
+        {
+            if (outputIndex < instance.Outputs.Count && instance.Outputs[outputIndex].Id == outputId)
+            {
+                isHidden = true;
+                break;
+            }
+        }
+
+        if (!isHidden)
+            return;
+
+        var yThreshold = sourceItem.PosOnCanvas.Y + sourceItem.Size.Y - MagGraphItem.GridSize.Y / 2;
+        MoveSnappedItemsVertically(context,
+                                   CollectSnappedItemsBelow(sourceItem, yThreshold),
+                                   yThreshold,
+                                   MagGraphItem.GridSize.Y);
+    }
+
+    /// <summary>
     /// Creates and applies a command to move items vertically
     /// </summary>
     /// <returns>

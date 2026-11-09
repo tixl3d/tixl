@@ -100,6 +100,7 @@ internal static class InputSnapper
             context.MacroCommand!.AddAndExecCommand(new AddConnectionCommand(context.CompositionInstance.Symbol,
                                                                              connectionToAdd,
                                                                              adjustedMultiInputIndex + addedCount));
+            MagItemMovement.MakeRoomForRevealedOutputRow(context, tempConnection.SourceItem, tempConnection.SourceOutput.Id);
             addedCount++;
         }
 
