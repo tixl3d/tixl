@@ -1,0 +1,22 @@
+{
+  "Id": "dbaeebea-8d46-416f-9624-867af10d9c07",
+  "Variations": [
+    {
+      "Id": "ea075f79-602b-4ad1-af73-809c8edd3e81",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Small Flat Bevel",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "ce40061f-b853-41be-bbef-0db172bbad7f": 0.02,
+          "e9085eac-dc15-4ecf-862d-869e66981418": 1,
+          "c86a32c2-feeb-4c05-b2c0-cf54076247bb": true
+        }
+      }
+    }
+  ]
+}

@@ -15,7 +15,7 @@ internal sealed class CubeGeometry : Instance<CubeGeometry>
     private void Update(EvaluationContext context)
     {
         var size = Size.GetValue(context);
-        var half = size * 0.5f;
+        var half = size * UniformScale.GetValue(context) * 0.5f;
 
         var positions = _geometry.Positions;
         for (var i = 0; i < 8; i++)
@@ -77,4 +77,7 @@ internal sealed class CubeGeometry : Instance<CubeGeometry>
 
     [Input(Guid = "d5c13c76-103e-4264-8056-88a33a9f0e99")]
     public readonly InputSlot<Vector3> Size = new();
+
+    [Input(Guid = "e6b1a8f2-3c4d-4f7a-9b2e-5d8c1a6f3e47")]
+    public readonly InputSlot<float> UniformScale = new();
 }

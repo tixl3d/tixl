@@ -10,6 +10,13 @@
         "Y": 0.0
       },
       "Description": "Edge lengths of the cube."
+    },
+    {
+      "InputId": "e6b1a8f2-3c4d-4f7a-9b2e-5d8c1a6f3e47"/*UniformScale*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 75.0
+      }
     }
   ],
   "SymbolChildUis": [],

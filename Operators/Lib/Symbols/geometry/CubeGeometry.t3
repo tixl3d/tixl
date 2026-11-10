@@ -9,6 +9,10 @@
         "Y": 1.0,
         "Z": 1.0
       }
+    },
+    {
+      "Id": "e6b1a8f2-3c4d-4f7a-9b2e-5d8c1a6f3e47"/*UniformScale*/,
+      "DefaultValue": 1.0
     }
   ],
   "Children": [],
