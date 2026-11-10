@@ -14,9 +14,29 @@ namespace T3.Editor.Gui.UiHelpers;
 public static class GradientEditor
 {
     /// <summary>
+    /// Opens the gradient's context menu, as a right-click on it would. Must be called in the same ImGui ID
+    /// scope as <see cref="Draw"/>.
+    /// </summary>
+    public static void OpenContextMenu()
+    {
+        ImGui.OpenPopup(ContextMenuId);
+    }
+
+    /// <summary>
+    /// Opens the gradient in the larger <see cref="GradientEditorPopup"/> during the next <see cref="Draw"/>.
+    /// </summary>
+    public static void OpenPopup()
+    {
+        _isPopupRequested = true;
+    }
+
+    /// <summary>
     /// Draw a gradient control that returns true, if gradient has been modified
     /// </summary>
-    public static InputEditStateFlags Draw(ref Gradient gradientRef, ImDrawListPtr drawList, ImRect areaOnScreen, bool cloneIfModified = false)
+    /// <param name="allowPopup">Offers to open the gradient in a larger <see cref="GradientEditorPopup"/>.</param>
+    /// <param name="alwaysShowCurves">Draws the channel curves at all times instead of only while hovered or edited.</param>
+    public static InputEditStateFlags Draw(ref Gradient gradientRef, ImDrawListPtr drawList, ImRect areaOnScreen, bool cloneIfModified = false,
+                                           bool allowPopup = true, bool alwaysShowCurves = false)
     {
         var anyStepBeingDragged = false;
         Gradient.Step draggedStep = null;
@@ -120,59 +140,34 @@ public static class GradientEditor
         }
 
         // Draw CurveOverlays
-        if (ImGui.IsItemHovered() || editResult != InputEditStateFlags.Nothing)
+        if (alwaysShowCurves || ImGui.IsItemHovered() || editResult != InputEditStateFlags.Nothing)
         {
             DrawCurveLines(gradientRef, drawList, areaOnScreen);
         }
 
         CustomComponents.ContextMenuForItem(() =>
                                             {
-                                                if (CustomComponents.DrawMenuItem(_reverseId, "Reverse", reserveIconColumn: false))
+                                                if (allowPopup && CustomComponents.DrawMenuItem(_editInPopupId, Icon.None, "Edit Gradient...",
+                                                                                                reserveCheckmarkColumn: false, reserveIconColumn: false))
                                                 {
-                                                    foreach (var s in gradientForEditing.Steps)
-                                                    {
-                                                        s.NormalizedPosition = 1f - s.NormalizedPosition;
-                                                    }
+                                                    _isPopupRequested = true;
+                                                }
 
-                                                    gradientForEditing.SortHandles();
+                                                if (CustomComponents.DrawMenuItem(_reverseId, Icon.None, "Reverse", reserveCheckmarkColumn: false, reserveIconColumn: false))
+                                                {
+                                                    Reverse(gradientForEditing);
                                                     editResult = InputEditStateFlags.ModifiedAndFinished;
                                                 }
 
-                                                var isHold = gradientForEditing.Interpolation == Gradient.Interpolations.Hold;
-                                                var stepCount = gradientForEditing.Steps.Count;
-                                                var canDistribute = stepCount >= 2 || (stepCount == 1 && !isHold);
-                                                if (CustomComponents.DrawMenuItem(_distributeEvenlyId, "Distribute Evenly", isEnabled: canDistribute,
-                                                                                  reserveIconColumn: false))
+                                                if (CustomComponents.DrawMenuItem(_distributeEvenlyId, Icon.None, "Distribute Evenly",
+                                                                                  isEnabled: CanDistributeEvenly(gradientForEditing),
+                                                                                  reserveCheckmarkColumn: false, reserveIconColumn: false))
                                                 {
-                                                    var steps = gradientForEditing.Steps;
-                                                    if (isHold)
-                                                    {
-                                                        // Hold: split the gradient into equal-width color bands
-                                                        for (var index = 0; index < steps.Count; index++)
-                                                        {
-                                                            steps[index].NormalizedPosition = (float)index / steps.Count;
-                                                        }
-                                                    }
-                                                    else if (steps.Count == 1)
-                                                    {
-                                                        // Single stop with smooth interpolation -> center
-                                                        steps[0].NormalizedPosition = 0.5f;
-                                                    }
-                                                    else
-                                                    {
-                                                        // Smooth: anchor first/last to the corners, spread the rest evenly
-                                                        var divisor = steps.Count - 1;
-                                                        for (var index = 0; index < steps.Count; index++)
-                                                        {
-                                                            steps[index].NormalizedPosition = (float)index / divisor;
-                                                        }
-                                                    }
-
-                                                    gradientForEditing.SortHandles();
+                                                    DistributeEvenly(gradientForEditing);
                                                     editResult = InputEditStateFlags.ModifiedAndFinished;
                                                 }
 
-                                                if (CustomComponents.DrawSubMenu(_gradientPresetsId, "Gradient Presets"))
+                                                if (CustomComponents.DrawSubMenu(_gradientPresetsId, "Gradient Presets", reserveCheckmarkColumn: false))
                                                 {
                                                     var foregroundDrawList = ImGui.GetForegroundDrawList();
 
@@ -214,7 +209,7 @@ public static class GradientEditor
                                                     ImGui.EndMenu();
                                                 }
 
-                                                if (CustomComponents.DrawSubMenu(_interpolationId, "Interpolation"))
+                                                if (CustomComponents.DrawSubMenu(_interpolationId, "Interpolation", reserveCheckmarkColumn: false))
                                                 {
                                                     foreach (Gradient.Interpolations value in Enum.GetValues(typeof(Gradient.Interpolations)))
                                                     {
@@ -229,7 +224,7 @@ public static class GradientEditor
 
                                                     ImGui.EndMenu();
                                                 }
-                                            }, "Gradient", "gradientContextMenu");
+                                            }, null, ContextMenuId);
 
         if ((editResult & InputEditStateFlags.Modified) != 0 && cloneIfModified)
         {
@@ -237,7 +232,19 @@ public static class GradientEditor
             _hoveredGradientRef = null;
             _hoveredGradientForEditing = null;
         }
-        
+
+        if (allowPopup)
+        {
+            // The menu's own ID scope differs from ours, so the popup is opened here rather than from the menu item.
+            if (_isPopupRequested)
+            {
+                _isPopupRequested = false;
+                GradientEditorPopup.Open(areaOnScreen);
+            }
+
+            editResult |= GradientEditorPopup.Draw(ref gradientRef, cloneIfModified);
+        }
+
         return editResult;
 
         InputEditStateFlags DrawHandle(Gradient.Step step)
@@ -352,16 +359,66 @@ public static class GradientEditor
         }
     }
 
+    public static void Reverse(Gradient gradient)
+    {
+        foreach (var step in gradient.Steps)
+        {
+            step.NormalizedPosition = 1f - step.NormalizedPosition;
+        }
+
+        gradient.SortHandles();
+    }
+
+    /// <summary>
+    /// False when the steps already sit at their even positions, or for a single Hold step, which fills the
+    /// whole gradient anyway.
+    /// </summary>
+    public static bool CanDistributeEvenly(Gradient gradient)
+    {
+        var steps = gradient.Steps;
+        if (steps.Count == 0 || (steps.Count == 1 && gradient.Interpolation == Gradient.Interpolations.Hold))
+            return false;
+
+        for (var index = 0; index < steps.Count; index++)
+        {
+            var target = GetEvenPosition(index, steps.Count, gradient.Interpolation);
+            if (MathF.Abs(steps[index].NormalizedPosition - target) > DistributedTolerance)
+                return true;
+        }
+
+        return false;
+    }
+
+    public static void DistributeEvenly(Gradient gradient)
+    {
+        var steps = gradient.Steps;
+        for (var index = 0; index < steps.Count; index++)
+        {
+            steps[index].NormalizedPosition = GetEvenPosition(index, steps.Count, gradient.Interpolation);
+        }
+
+        gradient.SortHandles();
+    }
+
+    /** Hold splits the gradient into equal-width color bands; the other modes run from end to end, or center a single step. */
+    private static float GetEvenPosition(int index, int stepCount, Gradient.Interpolations interpolation)
+    {
+        if (interpolation == Gradient.Interpolations.Hold)
+            return (float)index / stepCount;
+
+        return stepCount == 1 ? 0.5f : (float)index / (stepCount - 1);
+    }
+
     private static void DrawCurveLines(Gradient gradientRef, ImDrawListPtr drawList, ImRect areaOnScreen)
     {
         var curveIndicationArea = areaOnScreen;
-        var count = 80;
+        const int count = CurveSampleCount;
         var fadeCurves = 0.7f;
-            
-        var pR = new Vector2[count];
-        var pG = new Vector2[count];
-        var pB = new Vector2[count];
-        var pA = new Vector2[count];
+
+        var pR = _curvePointsR;
+        var pG = _curvePointsG;
+        var pB = _curvePointsB;
+        var pA = _curvePointsA;
         for (var i = 0; i <count; i++)
         {
             var f = (float)i / (count - 1);
@@ -504,11 +561,23 @@ public static class GradientEditor
         }
     }
 
+    private const int CurveSampleCount = 80;
+    private static readonly Vector2[] _curvePointsR = new Vector2[CurveSampleCount];
+    private static readonly Vector2[] _curvePointsG = new Vector2[CurveSampleCount];
+    private static readonly Vector2[] _curvePointsB = new Vector2[CurveSampleCount];
+    private static readonly Vector2[] _curvePointsA = new Vector2[CurveSampleCount];
+
+    /** Below what the step list's three decimals can show. */
+    private const float DistributedTolerance = 0.0005f;
     private const float RemoveThreshold = 15;
     private const float RequiredHeightForHandles = 20;
     private const int MinInsertHeight = 15;
     public static Vector2 StepHandleSize => new Vector2(9, 15) * T3Ui.UiScaleFactor;
 
+    private const string ContextMenuId = "gradientContextMenu";
+    private static bool _isPopupRequested;
+
+    private static readonly int _editInPopupId = nameof(_editInPopupId).GetHashCode();
     private static readonly int _reverseId = nameof(_reverseId).GetHashCode();
     private static readonly int _distributeEvenlyId = nameof(_distributeEvenlyId).GetHashCode();
     private static readonly int _gradientPresetsId = nameof(_gradientPresetsId).GetHashCode();

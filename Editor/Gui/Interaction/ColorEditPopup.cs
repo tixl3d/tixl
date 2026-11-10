@@ -22,13 +22,20 @@ namespace T3.Editor.Gui.Interaction;
 [HelpUiID("ColorEditor")]
 internal static class ColorEditPopup
 {
+    /// <summary>
+    /// A screen rect the popup opens beside instead of below its swatch, so it doesn't cover a larger editor
+    /// the swatch is part of. Set it around the drawing of that editor and reset it to null afterwards.
+    /// </summary>
+    public static ImRect? OpenBesideRect;
+
     public static InputEditStateFlags DrawPopup(ref Vector4 color, Vector4 previousColor)
     {
         var composition = ProjectView.Focused?.CompositionInstance;
 
         var edited = InputEditStateFlags.Nothing;
         var cColor = new Color(color);
-        ImGui.SetNextWindowSize(new Vector2(257, 356) * T3Ui.UiScaleFactor);
+        var popupSize = new Vector2(257, 356) * T3Ui.UiScaleFactor;
+        ImGui.SetNextWindowSize(popupSize);
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Vector2.Zero);
         var dontCloseIfColorPicking = ImGui.GetIO().KeyAlt ? ImGuiWindowFlags.Modal : ImGuiWindowFlags.None;
 
@@ -39,6 +46,9 @@ internal static class ColorEditPopup
 
         if (ImGui.BeginPopup(PopupId, dontCloseIfColorPicking))
         {
+            if (_openedId != id && OpenBesideRect is { } besideRect)
+                ImGui.SetWindowPos(GetPositionBeside(besideRect, popupSize));
+
             if (_openedId != id || _needsUsedColorRefresh)
             {
                 _openedId = id;
@@ -85,6 +95,18 @@ internal static class ColorEditPopup
         color = cColor.Rgba;
         ImGui.PopStyleVar();
         return edited;
+    }
+
+    /** Right of the rect, or left of it where the display is too narrow, top-aligned and kept on the display. */
+    private static Vector2 GetPositionBeside(ImRect rect, Vector2 popupSize)
+    {
+        var gap = 4 * T3Ui.UiScaleFactor;
+        var displaySize = ImGui.GetIO().DisplaySize;
+        var x = rect.Max.X + gap + popupSize.X <= displaySize.X
+                    ? rect.Max.X + gap
+                    : rect.Min.X - gap - popupSize.X;
+        var y = MathF.Min(rect.Min.Y, displaySize.Y - popupSize.Y);
+        return new Vector2(MathF.Max(x, 0), MathF.Max(y, 0)).Floor();
     }
 
     /** Popups open at the mouse and can end up covering what is being colored, so the grip lets users move it aside. */
