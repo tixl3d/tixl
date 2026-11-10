@@ -320,6 +320,15 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
     {
         var format = VulkanConvert.ToVulkan(description.Format);
 
+        // An image without a format, or with a usage its format lacks, loses the device on first use.
+        // Leave it empty like a failed allocation; D3D11 refuses the same textures at creation.
+        if (description.Memory == MemoryKind.DeviceLocal && !Supports(description.Format, description.Usage))
+        {
+            var reason = format == VkFormat.Undefined ? "has no Vulkan equivalent" : $"does not support {description.Usage} on this GPU";
+            GraphicsLog.WarnOnce($"Can't create texture '{label}': {description.Format} {reason}.");
+            return new VulkanTexture(this, VkImage.Null, VkDeviceMemory.Null, description, label);
+        }
+
         // A staging texture is never bound, only copied to and mapped, so it is a buffer with a texture's
         // description — which is also how D3D11 uses it.
         if (description.Memory != MemoryKind.DeviceLocal)
@@ -777,7 +786,8 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
             VulkanPipeline? pipeline = null;
             try
             {
-                pipeline = VulkanPipelineFactory.CreateGraphics(this, description);
+                if (CanRenderInto(description))
+                    pipeline = VulkanPipelineFactory.CreateGraphics(this, description);
             }
             catch (VkException e)
             {
@@ -787,6 +797,29 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
             _pipelines[description] = pipeline;
             return pipeline;
         }
+    }
+
+    /** The targets of such a pipeline were refused at creation, so its draws are skipped anyway. Building it is invalid usage. */
+    private bool CanRenderInto(in GraphicsPipelineDescription description)
+    {
+        for (var i = 0; i < description.RenderTargetCount; i++)
+        {
+            var format = description.RenderTargetFormats[i];
+            if (!Supports(format, TextureUsage.RenderTarget))
+            {
+                GraphicsLog.WarnOnce($"Can't render into {format} on this GPU; draws into it are skipped.");
+                return false;
+            }
+        }
+
+        var depthFormat = description.DepthStencilFormat;
+        if (depthFormat != Format.Unknown && !Supports(depthFormat, TextureUsage.DepthStencil))
+        {
+            GraphicsLog.WarnOnce($"Can't use {depthFormat} as a depth buffer on this GPU; draws into it are skipped.");
+            return false;
+        }
+
+        return true;
     }
 
     public GpuPipeline? GetOrCreatePipeline(in ComputePipelineDescription description)
@@ -846,7 +879,7 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
 
     public bool Supports(Format format, TextureUsage usage)
     {
-        var vulkanFormat = VulkanConvert.ToVulkan(format);
+        var vulkanFormat = VulkanConvert.FindVulkanFormat(format);
 
         if (vulkanFormat == VkFormat.Undefined)
             return false;

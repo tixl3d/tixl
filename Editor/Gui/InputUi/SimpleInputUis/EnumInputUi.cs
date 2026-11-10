@@ -1,6 +1,8 @@
 ﻿using ImGuiNET;
 using T3.Core.Operator;
+using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Gui.UiHelpers.Enums;
 using T3.Editor.UiModel.InputsAndTypes;
 
 namespace T3.Editor.Gui.InputUi.SimpleInputUis;
@@ -77,11 +79,29 @@ public sealed class EnumInputUi<T> : InputValueUi<T> where T : Enum
             var editStateFlags = InputEditStateFlags.Nothing;
             var modified = false;
 
-            var preview = index >= 0 && index < enumInfo.ValueNames.Length
-                              ? enumInfo.ValueNames[index]
-                              : string.Empty;
+            var hasValue = index >= 0 && index < enumInfo.ValueNames.Length;
+            var preview = hasValue ? enumInfo.DisplayNames[index] : string.Empty;
+            var isValueUnavailable = hasValue && enumInfo.Hints[index].Relevance == OptionRelevance.Unavailable;
+
+            if (enumInfo.HasHints)
+            {
+                var maxPopupHeight = ImGui.GetMainViewport().WorkSize.Y * MaxPopupHeightRelativeToViewport;
+                ImGui.SetNextWindowSizeConstraints(new Vector2(ImGui.CalcItemWidth(), 0), new Vector2(float.MaxValue, maxPopupHeight));
+            }
+
+            // A project can hold a value this machine can't use, e.g. a texture format saved on another backend.
+            if (isValueUnavailable)
+                ImGui.PushStyleColor(ImGuiCol.Text, UiColors.StatusAttention.Rgba);
 
             var isOpen = ImGui.BeginCombo("##dropDownParam", preview);
+
+            if (isValueUnavailable)
+            {
+                ImGui.PopStyleColor();
+                if (!isOpen)
+                    CustomComponents.TooltipForLastItem(UiColors.StatusAttention, enumInfo.Hints[index].Tooltip, enumInfo.ValueNames[index]);
+            }
+
             if (isOpen)
             {
                 var hoveredIndex = -1;
@@ -91,18 +111,45 @@ public sealed class EnumInputUi<T> : InputValueUi<T> where T : Enum
                     _hasOriginalValue = true;
                 }
 
-                for (var i = 0; i < enumInfo.ValueNames.Length; i++)
+                for (var orderIndex = 0; orderIndex < enumInfo.DisplayOrder.Length; orderIndex++)
                 {
+                    if (orderIndex == 0 && enumInfo.ImportantCount > 0)
+                        CustomComponents.DrawMenuGroupLabel(enumInfo.ImportantGroupTitle, alignWithIconColumn: false);
+
+                    if (orderIndex == enumInfo.ImportantCount && orderIndex > 0)
+                        ImGui.Separator();
+
+                    var i = enumInfo.DisplayOrder[orderIndex];
+                    var hint = enumInfo.Hints[i];
                     var isSelected = i == index;
-                    if (ImGui.Selectable(enumInfo.ValueNames[i], isSelected))
+                    var isUnavailable = hint.Relevance == OptionRelevance.Unavailable;
+
+                    if (isUnavailable)
+                        ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
+
+                    var flags = isUnavailable ? ImGuiSelectableFlags.Disabled : ImGuiSelectableFlags.None;
+                    if (ImGui.Selectable(enumInfo.SelectableIds[i], isSelected, flags))
                     {
                         index = i;
                         modified = true;
                     }
 
-                    if (ImGui.IsItemHovered())
+                    if (isUnavailable)
+                        ImGui.PopStyleColor();
+
+                    // Unavailable values are never previewed on hover: applying one is exactly what must not happen.
+                    if (!isUnavailable && ImGui.IsItemHovered())
                     {
                         hoveredIndex = i;
+                    }
+
+                    if (hint.Label != null)
+                    {
+                        CustomComponents.TooltipForLastItem(UiColors.Text, enumInfo.ValueNames[i], hint.Tooltip);
+                    }
+                    else if (hint.Tooltip != null)
+                    {
+                        CustomComponents.TooltipForLastItem(isUnavailable ? UiColors.StatusAttention : UiColors.Text, hint.Tooltip);
                     }
 
                     if (isSelected)
@@ -150,8 +197,13 @@ public sealed class EnumInputUi<T> : InputValueUi<T> where T : Enum
 
     protected override void DrawReadOnlyControl(string name, ref T value)
     {
-        ImGui.TextUnformatted(value.ToString());
+        var enumInfo = EnumCache.Instance.GetTypedEnumEntry<T>();
+        var index = Array.IndexOf(enumInfo.Values, value);
+        ImGui.TextUnformatted(index >= 0 && !enumInfo.IsFlagEnum ? enumInfo.DisplayNames[index] : value.ToString());
     }
+
+    /** Long lists like texture formats would otherwise run off the screen. */
+    private const float MaxPopupHeightRelativeToViewport = 0.5f;
 
     private static int _lastHoveredComboItem = -1;
     private static T _originalValue;

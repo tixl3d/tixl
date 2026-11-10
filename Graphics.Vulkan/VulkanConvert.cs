@@ -14,6 +14,16 @@ internal static class VulkanConvert
     /// </summary>
     internal static VkFormat ToVulkan(Format format)
     {
+        var vulkanFormat = FindVulkanFormat(format);
+        if (vulkanFormat == VkFormat.Undefined && format != Format.Unknown)
+            GraphicsLog.WarnOnce($"{format} has no Vulkan equivalent and is treated as undefined.");
+
+        return vulkanFormat;
+    }
+
+    /** Undefined where Vulkan has no equivalent. Asking is not an error, so unlike <see cref="ToVulkan(Format)"/> this does not warn. */
+    internal static VkFormat FindVulkanFormat(Format format)
+    {
         return format switch
                    {
                        Format.R32G32B32A32_Float    => VkFormat.R32G32B32A32Sfloat,
@@ -88,15 +98,8 @@ internal static class VulkanConvert
                        Format.BC6H_Sf16             => VkFormat.Bc6hSfloatBlock,
                        Format.BC7_UNorm             => VkFormat.Bc7UnormBlock,
                        Format.BC7_UNorm_SRgb        => VkFormat.Bc7SrgbBlock,
-                       Format.Unknown               => VkFormat.Undefined,
-                       _                            => Unsupported(format),
+                       _                            => VkFormat.Undefined,
                    };
-    }
-
-    private static VkFormat Unsupported(Format format)
-    {
-        GraphicsLog.WarnOnce($"{format} has no Vulkan equivalent and is treated as undefined.");
-        return VkFormat.Undefined;
     }
 
     internal static bool IsDepth(Format format)

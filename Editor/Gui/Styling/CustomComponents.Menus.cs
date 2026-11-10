@@ -54,12 +54,15 @@ internal static partial class CustomComponents
 
     /// <summary>
     /// Small muted label to group menu items into sections, aligned with the icon column.
+    /// Lists without an icon column, like dropdowns, pass false for <paramref name="alignWithIconColumn"/>.
     /// </summary>
-    public static void DrawMenuGroupLabel(string label)
+    public static void DrawMenuGroupLabel(string label, bool alignWithIconColumn = true)
     {
         ApplyPendingSubMenuRowOffset();
         FormInputs.AddVerticalSpace(2);
-        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetStyle().ItemSpacing.X + Icons.FontSize * 1.4f);
+        if (alignWithIconColumn)
+            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetStyle().ItemSpacing.X + Icons.FontSize * 1.4f);
+
         ImGui.PushFont(Fonts.FontSmall);
         ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
         ImGui.TextUnformatted(label);

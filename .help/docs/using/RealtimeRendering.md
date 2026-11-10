@@ -44,7 +44,7 @@ Some advanced side notes: Depth-buffers are especially complicated in conjunctio
 
 ## Texture Formats
 
-DirectX is provides an [overwhelming list of texture formats](https://learn.microsoft.com/en-us/windows/win32/api/dxgiformat/ne-dxgiformat-dxgi_format). 99% of the will only by relevant in fringe situations. But many operators provide a format dropdown with this list. There are three parts that are relevant for each format:
+DirectX provides an [overwhelming list of texture formats](https://learn.microsoft.com/en-us/windows/win32/api/dxgiformat/ne-dxgiformat-dxgi_format). 99% of them are only relevant in fringe situations. But many operators provide a format dropdown with this list. There are three parts that are relevant for each format:
 
 1. The  **color channels** and their order (e.g. RGBA has for channels)
 2. The **resolution** of each channel (e.g. 8 bit  for 256 colors and 16 for 65536, 32bit for 4 billion)
@@ -57,8 +57,13 @@ When working with TiXL these formats might be relevant:
 - `R16G16B16A16_FLOAT` the default. Good compromise for HDR rendering.
 - `R32G32B32A32_FLOAT` in situations where high quality output is required.
 - `R8G8B8A8_UNorm` the default format when loading 8bit images.
-- `G8G8R8A8_UNorm` Look carefully! The G and R channels are swapped here. Sadly this format is used by many videos and can help to speed up [rendering videos](ExportVideos.md).
+- `B8G8R8A8_UNorm` Look carefully! The B and R channels are swapped here. Sadly this format is used by many videos and can help to speed up [rendering videos](ExportVideos.md).
 
+
+The format dropdowns help with this list:
+
+- The formats above, plus `R11G11B10_Float` (HDR without alpha at half the memory) and the single-channel `R16_Float` and `R32_Float`, are listed first under **Common** with a readable name like *RGBA 16-bit float*. Hover one to see its technical name and what it is good for. Projects store the technical name.
+- Formats that the graphics backend can't create on your machine are disabled, and hovering them tells you why. On Vulkan (Linux and macOS) this affects about 50 of the formats. If a project uses one of them, its dropdown shows the value in magenta and the texture stays empty instead of crashing.
 
 You can see the current texture format in the output window:
 
