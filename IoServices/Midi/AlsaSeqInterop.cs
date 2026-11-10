@@ -46,7 +46,7 @@ internal static class AlsaSeqInterop
     /// Announcements from SND_SEQ_EVENT_CLIENT_START to SND_SEQ_EVENT_PORT_CHANGE. The subscription events
     /// that follow are left out: every connection TiXL makes itself would trigger them.
     /// </summary>
-    internal const byte EventClientStart = 60, EventPortChange = 65;
+    internal const byte EventClientStart = 60, EventClientExit = 61, EventPortChange = 65;
 
     /// <summary>Negated errno values as libasound returns them.</summary>
     internal const int ErrorInterrupted = -4, ErrorTryAgain = -11, ErrorNoSpace = -28;
@@ -88,6 +88,7 @@ internal static class AlsaSeqInterop
     [DllImport(Lib)] internal static extern int snd_seq_client_info_get_client(IntPtr info);
     [DllImport(Lib)] internal static extern IntPtr snd_seq_client_info_get_name(IntPtr info);
     [DllImport(Lib)] internal static extern int snd_seq_query_next_client(IntPtr handle, IntPtr info);
+    [DllImport(Lib)] internal static extern int snd_seq_get_any_client_info(IntPtr handle, int client, IntPtr info);
 
     [DllImport(Lib)] internal static extern int snd_seq_port_info_malloc(out IntPtr info);
     [DllImport(Lib)] internal static extern void snd_seq_port_info_free(IntPtr info);

@@ -46,6 +46,11 @@ internal sealed class AlsaSeqMidiDeviceProvider : MidiDeviceProvider
 
         snd_seq_client_info_malloc(out var clientInfo);
         snd_seq_port_info_malloc(out var portInfo);
+        lock (_otherEditorClients)
+        {
+            _otherEditorClients.Clear();
+        }
+
         try
         {
             snd_seq_client_info_set_client(clientInfo, -1);
@@ -61,6 +66,14 @@ internal sealed class AlsaSeqMidiDeviceProvider : MidiDeviceProvider
                 }
 
                 var clientName = ReadString(snd_seq_client_info_get_name(clientInfo));
+                if (clientName == ClientName)
+                {
+                    lock (_otherEditorClients)
+                    {
+                        _otherEditorClients.Add(client);
+                    }
+                }
+
                 snd_seq_port_info_set_client(portInfo, client);
                 snd_seq_port_info_set_port(portInfo, -1);
 
@@ -337,11 +350,80 @@ internal sealed class AlsaSeqMidiDeviceProvider : MidiDeviceProvider
         }
     }
 
-    /** TiXL's own client is left out, so reopening it on a rescan does not trigger the next rescan. */
+    /// <summary>
+    /// Every rescan reopens TiXL's client, so the announcements of TiXL clients are left out: our own would
+    /// trigger the next rescan, and those of another running editor would make both rescan each other forever.
+    /// </summary>
+    /// <remarks>
+    /// A client start is skipped because it is announced before the client has set its name. The port
+    /// announcements following it identify the client, and a device always brings at least one port.
+    /// </remarks>
     private bool IsDeviceChange(SeqEvent announcement)
     {
-        return announcement.Type is >= EventClientStart and <= EventPortChange
-               && announcement.AnnouncedClient != _clientId;
+        if (announcement.Type is <= EventClientStart or > EventPortChange)
+        {
+            return false;
+        }
+
+        int client = announcement.AnnouncedClient;
+        if (client == _clientId)
+        {
+            return false;
+        }
+
+        if (announcement.Type == EventClientExit)
+        {
+            lock (_otherEditorClients)
+            {
+                return !_otherEditorClients.Remove(client);
+            }
+        }
+
+        lock (_otherEditorClients)
+        {
+            if (_otherEditorClients.Contains(client))
+            {
+                return false;
+            }
+        }
+
+        // A client that is already gone again is reported by its exit announcement.
+        if (!TryGetClientName(client, out var clientName))
+        {
+            return false;
+        }
+
+        if (clientName != ClientName)
+        {
+            return true;
+        }
+
+        lock (_otherEditorClients)
+        {
+            _otherEditorClients.Add(client);
+        }
+
+        return false;
+    }
+
+    private bool TryGetClientName(int client, out string clientName)
+    {
+        clientName = string.Empty;
+        snd_seq_client_info_malloc(out var clientInfo);
+        try
+        {
+            if (snd_seq_get_any_client_info(_seq, client, clientInfo) < 0)
+            {
+                return false;
+            }
+
+            clientName = ReadString(snd_seq_client_info_get_name(clientInfo));
+            return true;
+        }
+        finally
+        {
+            snd_seq_client_info_free(clientInfo);
+        }
     }
 
     private static int ToAddressKey(byte client, byte port)
@@ -577,4 +659,7 @@ internal sealed class AlsaSeqMidiDeviceProvider : MidiDeviceProvider
     private readonly object _decoderLock = new();
     private readonly object _outputLock = new();
     private readonly Dictionary<int, AlsaMidiInputDevice> _inputsByAddress = new();
+
+    /// <summary>The clients of other running TiXL instances, written by the enumeration and the reading thread.</summary>
+    private readonly HashSet<int> _otherEditorClients = new();
 }
