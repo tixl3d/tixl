@@ -88,7 +88,16 @@ public static class AssetRegistry
                        ? Directory.Exists(absolutePath)
                        : File.Exists(absolutePath);
         }
-
+        
+        // 4. Unix absolute paths (e.g. /home/user/file.png)
+        if (address.Length > 0 && address[0] == '/')
+        {
+            absolutePath = address;
+            return isFolder
+                       ? Directory.Exists(absolutePath)
+                       : File.Exists(absolutePath);
+        }
+        
         if (projectSeparator == -1)
         {
             if (logWarnings)
@@ -159,6 +168,13 @@ public static class AssetRegistry
 
         // Legacy windows absolute paths (e.g. C:/...)
         if (projectSeparator == 1)
+        {
+            absolutePath = address;
+            return true;
+        }
+        
+        // Unix absolute paths (e.g. /home/user/file.png)
+        if (address.Length > 0 && address[0] == '/')
         {
             absolutePath = address;
             return true;
