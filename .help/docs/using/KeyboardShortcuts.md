@@ -28,8 +28,8 @@ The following is a list of the **default keyboard** short-cuts. With v4.0.4 you 
 | ------------------------- | ---------------------------------------------------- |
 | Focus Selection           | F (hover)                                            |
 | Search Graph              | Ctrl + F                                             |
-| Open Operator             | I                                                    |
-| Close Operator            | U                                                    |
+| Open Operator             | I or Alt + Down (focus), opens the selected operator |
+| Close Operator            | U or Alt + Up (focus)                                |
 | Rename Child              | Enter                                                |
 | Edit Parameters           | S, see below                                         |
 | Navigate Backwards        | Alt + Left                                           |

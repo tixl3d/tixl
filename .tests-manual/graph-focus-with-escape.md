@@ -49,6 +49,16 @@ In the graph, press `S` to open the parameter popover, then press `Esc` until it
 **Expected:**
 - `Esc` steps back through the popover as before, and the popover closes normally.
 
+## Step: Leaving and reentering an operator
+
+**Action:**
+Select an operator that has children (not a plain C# operator), move the mouse over the Parameter Window and press `Esc`. Then press `Alt + Down`, `Alt + Up` and `Alt + Down` again without moving the mouse.
+
+**Expected:**
+- `Alt + Down` opens the selected operator, even with the mouse outside the graph.
+- `Alt + Up` returns to the parent and selects the operator you left.
+- The second `Alt + Down` opens that same operator again.
+
 ## Step: Sketch keeps Esc
 
 **Action:**

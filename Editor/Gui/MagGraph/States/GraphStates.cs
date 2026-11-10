@@ -91,6 +91,26 @@ namespace T3.Editor.Gui.MagGraph.States
             context.Placeholder.OpenForItemInput(context, item, mainInputLine.Id, direction);
         }
 
+        /// <summary>
+        /// The selection wins, so closing and reopening an operator works wherever the mouse rests: closing selects
+        /// the operator just left. Without a single selected operator, the one under the mouse opens.
+        /// </summary>
+        private static void OpenSelectedOrHoveredOperator(GraphUiContext context)
+        {
+            var instance = context.Selector.GetSelectedInstanceWithoutComposition();
+            if (instance == null)
+            {
+                var hoveredItem = context.ActiveItem ?? context.HoveredItem;
+                if (hoveredItem is { Variant: MagGraphItem.Variants.Operator })
+                    instance = hoveredItem.Instance;
+            }
+
+            if (instance == null || instance.Children.Count == 0)
+                return;
+
+            context.ProjectView.TrySetCompositionOpToChild(instance.SymbolChildId);
+        }
+
         private static bool IsHorizontallySnapped(MagGraphConnection connection)
         {
             return connection.Style is MagGraphConnection.ConnectionStyles.MainOutToMainInSnappedHorizontal
@@ -167,33 +187,20 @@ namespace T3.Editor.Gui.MagGraph.States
                                   // {
                                   //     Modifications.DeleteSelectedOps(context);
                                   // }
+
+                                  if (UserActions.CloseOperator.Triggered())
+                                  {
+                                      context.ProjectView.TrySetCompositionOpToParent();
+                                  }
+                                  else if (UserActions.OpenOperator.Triggered())
+                                  {
+                                      OpenSelectedOrHoveredOperator(context);
+                                  }
                               }
 
                               if (!context.View.IsHovered)
                                   return;
 
-                              // Open children or parent component with keyboard
-                              if (UserActions.CloseOperator.Triggered() && ProjectView.Focused != null)
-                              {
-                                  ProjectView.Focused.TrySetCompositionOpToParent();
-                              }
-
-                              if (UserActions.OpenOperator.Triggered() && ProjectView.Focused != null)
-                              {
-                                  var isWindowActive = ImGui.IsWindowFocused() || ImGui.IsWindowHovered(ImGuiHoveredFlags.AllowWhenBlockedByPopup);
-
-                                  // Check if we have either an active (selected) item or a hovered item
-                                  var itemToOpen = context.ActiveItem ?? context.HoveredItem;
-
-                                  if (isWindowActive && itemToOpen != null && itemToOpen.Variant == MagGraphItem.Variants.Operator)
-                                  {
-                                      Debug.Assert(itemToOpen.Instance != null);
-                                      if (itemToOpen.Instance.Children.Count > 0)
-                                      {
-                                          ProjectView.Focused.TrySetCompositionOpToChild(itemToOpen.Instance.SymbolChildId);
-                                      }
-                                  }
-                              }
                               // Mouse click
                               var clickedDown = ImGui.IsMouseClicked(ImGuiMouseButton.Left);
                               if (!clickedDown)
