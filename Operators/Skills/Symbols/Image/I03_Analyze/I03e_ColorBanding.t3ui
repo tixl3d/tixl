@@ -5,16 +5,24 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "412efdaa-860a-443d-918d-b4213f3083fb",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "2b812658-cb2b-4dd5-9dc6-55e27d87c761",
+      "SymbolName": "Lib.image.generate.noise.Grain",
       "Position": {
-        "X": 1366.8816,
-        "Y": 1568.3276
+        "X": 1334.9275,
+        "Y": 1712.1094
       }
     },
     {
-      "ChildId": "88c1b9d6-8539-4f83-886d-8027dcf241fe",
-      "SymbolName": "Lib.flow.skillQuest.DrawQuiz",
+      "ChildId": "31045c04-2b89-4388-9cd5-4987a4ecb11e",
+      "SymbolName": "Lib.image.analyze.ImageLevels",
+      "Position": {
+        "X": 1195.8662,
+        "Y": 1786.6936
+      }
+    },
+    {
+      "ChildId": "bf957490-3c50-4654-a9e4-53d40b6b3114",
+      "SymbolName": "Lib.flow.skillQuest.ImageQuiz",
       "Position": {
         "X": 1693.2708,
         "Y": 1786.6185
@@ -27,6 +35,14 @@
       "Position": {
         "X": 1244.7633,
         "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "f45b14c2-4e23-4a9a-830e-d56bce16ee3d",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
+      "Position": {
+        "X": 1195.8662,
+        "Y": 1751.6936
       }
     }
   ],

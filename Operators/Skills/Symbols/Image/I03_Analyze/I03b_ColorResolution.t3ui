@@ -5,29 +5,75 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "19ecb6f3-6525-4c32-b971-c081fdf9bf38",
-      "SymbolName": "Lib.flow.skillQuest.DrawQuiz",
+      "ChildId": "1f246044-9373-4a27-84d3-b2a649d5995b",
+      "SymbolName": "Lib.image.fx.blur.Blur",
+      "Position": {
+        "X": 1187.5371,
+        "Y": 1684.0367
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "20b8f45c-dfb6-4edb-8b9f-8a0afc0e44df",
+      "SymbolName": "Lib.flow.skillQuest.ImageQuiz",
       "Position": {
         "X": 1693.2708,
         "Y": 1786.6185
       }
     },
     {
-      "ChildId": "58b74a1c-5991-40a8-8937-907d17232f10",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "2ec5bbb6-a59a-467b-afe3-62b8eca1729d",
+      "SymbolName": "Lib.image.fx.blur.FastBlur",
+      "Position": {
+        "X": 993.08105,
+        "Y": 1687.7545
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "56b1b242-cd55-48e8-926b-8d148b959945",
+      "SymbolName": "Lib.image.analyze.ImageLevels",
       "SectionId": "b4c4ddaf-3d89-4913-a86c-41aea7b76f01",
       "Position": {
-        "X": 1244.7633,
-        "Y": 2141.3435
+        "X": 1311.2051,
+        "Y": 2184.0652
       }
     },
     {
-      "ChildId": "98ae4a8d-f8ef-4556-a8a8-c0f65757fb7a",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "74a64d8e-2545-4682-a404-95c5af8f8829",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
+      "SectionId": "b4c4ddaf-3d89-4913-a86c-41aea7b76f01",
       "Position": {
-        "X": 1366.8816,
-        "Y": 1568.3276
+        "X": 1311.2051,
+        "Y": 2114.065
       }
+    },
+    {
+      "ChildId": "882eddac-171a-4c81-806b-52cc8b38a58e",
+      "SymbolName": "Lib.image.analyze.ImageLevels",
+      "Position": {
+        "X": 1187.5371,
+        "Y": 1719.0367
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "bfe34f56-2952-4d83-b19d-20d33693eff4",
+      "SymbolName": "Lib.image.fx.blur.FastBlur",
+      "SectionId": "b4c4ddaf-3d89-4913-a86c-41aea7b76f01",
+      "Position": {
+        "X": 1311.2051,
+        "Y": 2149.0652
+      }
+    },
+    {
+      "ChildId": "d4a8a7f1-8154-4262-93dd-e80be5c0502f",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
+      "Position": {
+        "X": 1187.5371,
+        "Y": 1649.0367
+      },
+      "SnapshotGroupIndex": "1"
     }
   ],
   "OutputUis": [

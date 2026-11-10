@@ -5,29 +5,102 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "633ced57-d922-4eac-8e7d-f1aac78bca0e",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "1aa35c18-b727-4db9-884d-cc5f99634bf5",
+      "SymbolName": "Lib.image.color.ToneMapping",
       "SectionId": "9c825c68-d1c9-4a38-915e-80bbd7dbf1e8",
       "Position": {
-        "X": 1244.7633,
-        "Y": 2141.3435
+        "X": 1398.4249,
+        "Y": 2206.5996
       }
     },
     {
-      "ChildId": "a25f65fe-97c9-4994-be27-187e56ed126d",
-      "SymbolName": "Lib.flow.skillQuest.DrawQuiz",
+      "ChildId": "2f66779e-f01d-4154-96c8-ce419f4a0281",
+      "SymbolName": "Lib.flow.skillQuest.ImageQuiz",
       "Position": {
         "X": 1693.2708,
         "Y": 1786.6185
       }
     },
     {
-      "ChildId": "d85377ba-6f1d-4735-963e-34353f1ee826",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "3bfa9044-5825-45aa-a082-a77618e263f0",
+      "SymbolName": "Lib.image.analyze.ImageLevels",
+      "SectionId": "9c825c68-d1c9-4a38-915e-80bbd7dbf1e8",
       "Position": {
-        "X": 1366.8816,
-        "Y": 1568.3276
+        "X": 1398.4249,
+        "Y": 2241.5996
       }
+    },
+    {
+      "ChildId": "502044c3-9093-45a0-87e9-6bba18f5b54b",
+      "SymbolName": "Lib.image.analyze.ImageLevels",
+      "Position": {
+        "X": 1239.3274,
+        "Y": 1515.9551
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "60d2cfa9-8875-42e2-bd07-ac1af1efc277",
+      "SymbolName": "Lib.image.fx.blur.Bloom",
+      "SectionId": "9c825c68-d1c9-4a38-915e-80bbd7dbf1e8",
+      "Position": {
+        "X": 1398.4249,
+        "Y": 2171.5996
+      }
+    },
+    {
+      "ChildId": "853ef305-c0a0-4c1c-8013-7cd74fc47826",
+      "SymbolName": "Lib.image.color.RemapColor",
+      "Position": {
+        "X": 1421.281,
+        "Y": 1500.4052
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "9fae7457-17af-440e-bf0a-c33818f3b8c6",
+      "SymbolName": "Lib.image.color.ToneMapping",
+      "Position": {
+        "X": 1239.3273,
+        "Y": 1573.5814
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "ac86e687-093d-4a32-9549-708a055353af",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
+      "SectionId": "9c825c68-d1c9-4a38-915e-80bbd7dbf1e8",
+      "Position": {
+        "X": 1398.4249,
+        "Y": 2101.5996
+      }
+    },
+    {
+      "ChildId": "adc848f3-0dca-4803-b3c6-a1bacd7eedb0",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
+      "Position": {
+        "X": 1421.281,
+        "Y": 1465.4052
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "b48c3ae3-9b53-4df3-aebb-7ceea7f8b1e7",
+      "SymbolName": "Lib.image.color.RemapColor",
+      "SectionId": "9c825c68-d1c9-4a38-915e-80bbd7dbf1e8",
+      "Position": {
+        "X": 1398.4249,
+        "Y": 2136.5996
+      }
+    },
+    {
+      "ChildId": "b5ee26e7-3f34-407b-b0b6-b3921eb99cb9",
+      "SymbolName": "Lib.image.fx.blur.Bloom",
+      "Position": {
+        "X": 1421.281,
+        "Y": 1535.4052
+      },
+      "SnapshotGroupIndex": "1"
     }
   ],
   "OutputUis": [
@@ -55,8 +128,8 @@
         "Y": 2052.5103
       },
       "Size": {
-        "X": 525.0,
-        "Y": 187.48975
+        "X": 560.0,
+        "Y": 257.48975
       }
     }
   ],

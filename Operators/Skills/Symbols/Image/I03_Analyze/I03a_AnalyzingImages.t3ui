@@ -5,25 +5,44 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "1b5775db-491d-4b25-8ed8-976ea05cf57c",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "23907bc2-7f48-4179-8015-06318bda5530",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "SectionId": "7b530688-1b9b-489c-bddf-a300b96f9bcb",
       "Position": {
-        "X": 1244.7633,
-        "Y": 2141.3435
+        "X": 1210.0681,
+        "Y": 2147.4812
       }
     },
     {
-      "ChildId": "797196f5-7f64-4511-a0b0-5e7177478973",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "471dbc39-6bac-4ba5-ad32-9f043f0b5ea2",
+      "SymbolName": "Lib.image.analyze.ImageLevels",
+      "SectionId": "7b530688-1b9b-489c-bddf-a300b96f9bcb",
       "Position": {
-        "X": 1366.8816,
-        "Y": 1568.3276
+        "X": 1210.0681,
+        "Y": 2182.4812
       }
     },
     {
-      "ChildId": "e8a5b4db-2296-4c5e-8520-04f73167834d",
-      "SymbolName": "Lib.flow.skillQuest.DrawQuiz",
+      "ChildId": "5476bcea-1127-4222-aa0b-2415437bf4c8",
+      "SymbolName": "Lib.image.analyze.ImageLevels",
+      "Position": {
+        "X": 1188.5825,
+        "Y": 1837.5037
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "723bfd26-4395-4c56-ba12-fbfb1cee0963",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
+      "Position": {
+        "X": 1188.5825,
+        "Y": 1759.5708
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "b144cb5c-2478-4ae3-8a0a-fdbbdc74f146",
+      "SymbolName": "Lib.flow.skillQuest.ImageQuiz",
       "Position": {
         "X": 1693.2708,
         "Y": 1786.6185
@@ -91,6 +110,7 @@
     1.0
   ],
   "CameraControlMode": "AutoUseFirstCam",
+  "PickedCameraId": "00000000-0000-0000-0000-000000000000",
   "CameraPosition": [
     0.0,
     0.0,
@@ -113,7 +133,8 @@
   ],
   "PinnedOutputId": "00000000-0000-0000-0000-000000000000",
   "PinnedEntityKind": "None",
-  "PinnedEntityId": "00000000-0000-0000-0000-000000000000"
+  "PinnedEntityId": "00000000-0000-0000-0000-000000000000",
+  "OutlinerHeight": 220.0
 }
     ],
     "WindowLayout": "[Window][DockSpaceViewport_11111111]\nPos=0,26\nSize=1920,1054\nCollapsed=0\n\n[Window][Graph View##1]\nPos=0,0\nSize=1493,1440\nCollapsed=0\nDockId=0x00000009,0\n\n[Window][Parameters]\nPos=1661,710\nSize=442,568\nCollapsed=0\nDockId=0x00000005,0\n\n[Window][Variations]\nPos=1313,872\nSize=367,545\nCollapsed=0\nDockId=0x00000008,0\n\n[Window][Output View##0]\nPos=1821,0\nSize=739,1440\nCollapsed=0\nDockId=0x0000000F,0\n\n[Window][Debug##Default]\nPos=60,60\nSize=400,400\nCollapsed=0\n\n[Window][Explore Variations]\nPos=810,306\nSize=768,283\nCollapsed=0\n\n[Window][Console]\nPos=1336,1004\nSize=584,76\nCollapsed=0\nDockId=0x00000006,0\n\n[Window][Output View##1]\nPos=0,26\nSize=2304,712\nCollapsed=0\n\n[Window][Symbol Library]\nPos=0,26\nSize=179,365\nCollapsed=0\nDockId=0x0000000D,0\n\n[Window][Render as Video]\nPos=2105,710\nSize=455,568\nCollapsed=0\nDockId=0x00000006,1\n\n[Window][##typeAheadSearchPopup]\nPos=1692,821\nSize=450,300\nCollapsed=0\n\n[Window][Combine into symbol]\nPos=1030,545\nSize=500,350\nCollapsed=0\n\n[Window][Parameters##98]\nPos=0,576\nSize=323,864\nCollapsed=0\n\n[Window][Add output]\nPos=1030,595\nSize=500,250\nCollapsed=0\n\n[Window][Duplicate as new symbol]\nPos=1030,580\nSize=500,280\nCollapsed=0\n\n[Window][Output View##97]\nPos=0,26\nSize=1728,927\nCollapsed=0\n\n[Window][Output View##98]\nPos=0,26\nSize=2304,593\nCollapsed=0\n\n[Window][Parameters##1]\nPos=1495,0\nSize=324,1440\nCollapsed=0\nDockId=0x00000007,0\n\n[Window][Render To File]\nPos=1336,536\nSize=584,423\nCollapsed=0\nDockId=0x00000006,1\n\n[Window][Add parameter input]\nPos=1030,533\nSize=500,350\nCollapsed=0\n\n[Window][Variation Explorer]\nPos=0,26\nSize=1315,1414\nCollapsed=0\n\n[Window][Dear ImGui Demo]\nPos=650,46\nSize=550,680\nCollapsed=0\n\n[Window][Search]\nPos=710,390\nSize=500,300\nCollapsed=0\n\n[Window][##CurvePopup]\nPos=1164,199\nSize=500,400\nCollapsed=0\n\n[Window][Settings]\nPos=60,60\nSize=550,681\nCollapsed=0\n\n[Window][Output View##99]\nPos=763,26\nSize=1157,948\nCollapsed=0\n\n[Window][Rename symbol]\nPos=710,365\nSize=500,350\nCollapsed=0\n\n[Window][Edit description]\nPos=410,190\nSize=1100,700\nCollapsed=0\n\n[Window][Rename input]\nPos=710,365\nSize=500,350\nCollapsed=0\n\n[Window][Edit comment]\nPos=710,315\nSize=500,450\nCollapsed=0\n\n[Window][Output View##100]\nSize=550,448\nCollapsed=0\n\n[Window][WindowOverViewport_11111111]\nPos=0,0\nSize=2560,1440\nCollapsed=0\n\n[Window][Assets]\nPos=0,26\nSize=179,1031\nCollapsed=0\nDockId=0x0000000E,0\n\n[Window][Output View##101]\nPos=1682,724\nSize=878,693\nCollapsed=0\nDockId=0x00000010,0\n\n[Window][ProgressionPopup]\nPos=930,578\nSize=700,260\nCollapsed=0\n\n[Window][Skill Quest Overview]\nPos=880,408\nSize=800,600\nCollapsed=0\n\n[Window][###ExitDialog]\nPos=1070,620\nSize=420,200\nCollapsed=0\n\n[Window][Editor Feature Tests]\nPos=389,265\nSize=588,457\nCollapsed=0\n\n[Window][Welcome to the TiXL Alpha]\nPos=60,60\nSize=680,480\nCollapsed=0\n\n[Window][Composition Settings]\nPos=705,117\nSize=553,453\nCollapsed=0\n\n[Window][Help]\nPos=1432,24\nSize=1128,1274\nCollapsed=0\n\n[Window][Warning: Missing Symbols]\nPos=970,508\nSize=620,424\nCollapsed=0\n\n[Docking][Data]\nDockSpace         ID=0x08BD597D Window=0x1BBC0F80 Pos=0,0 Size=2560,1440 Split=X Selected=0x8995E68A\n  DockNode        ID=0x0000000B Parent=0x08BD597D SizeRef=179,1391 Split=Y Selected=0x42C24103\n    DockNode      ID=0x0000000D Parent=0x0000000B SizeRef=549,493 Selected=0xD41FC2E2\n    DockNode      ID=0x0000000E Parent=0x0000000B SizeRef=549,896 Selected=0x42C24103\n  DockNode        ID=0x0000000C Parent=0x08BD597D SizeRef=1739,1391 Split=X\n    DockNode      ID=0x00000003 Parent=0x0000000C SizeRef=965,1391 Split=X Selected=0x8995E68A\n      DockNode    ID=0x00000009 Parent=0x00000003 SizeRef=639,1031 CentralNode=1 HiddenTabBar=1 Selected=0x8995E68A\n      DockNode    ID=0x0000000A Parent=0x00000003 SizeRef=324,1031 Split=Y Selected=0x35577784\n        DockNode  ID=0x00000007 Parent=0x0000000A SizeRef=438,625 HiddenTabBar=1 Selected=0x35577784\n        DockNode  ID=0x00000008 Parent=0x0000000A SizeRef=438,404 Selected=0xB9CD16A2\n    DockNode      ID=0x00000004 Parent=0x0000000C SizeRef=739,1391 Split=Y Selected=0xC9567BC1\n      DockNode    ID=0x0000000F Parent=0x00000004 SizeRef=1038,259 HiddenTabBar=1 Selected=0xC9567BC1\n      DockNode    ID=0x00000010 Parent=0x00000004 SizeRef=1038,258 Selected=0x481AECB9\nDockSpace         ID=0x7C6B3D9B Pos=0,26 Size=1953,1101 CentralNode=1 HiddenTabBar=1 Selected=0xF7A0F8A9\nDockSpace         ID=0x8B93E3BD Pos=0,26 Size=1920,1054 Split=X Selected=0x1F46795C\n  DockNode        ID=0x00000001 Parent=0x8B93E3BD SizeRef=824,1391 CentralNode=1 Selected=0xF7A0F8A9\n  DockNode        ID=0x00000002 Parent=0x8B93E3BD SizeRef=916,1391 Split=X Selected=0x9CE63BF6\n    DockNode      ID=0x00000005 Parent=0x00000002 SizeRef=442,365 Selected=0x9CE63BF6\n    DockNode      ID=0x00000006 Parent=0x00000002 SizeRef=455,365 Selected=0x3BC11B9B\n\n",

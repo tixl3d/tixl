@@ -1,0 +1,57 @@
+{
+  "Id": "7941c133-12a3-4939-ae93-b9bf0c419184",
+  "Variations": [
+    {
+      "Id": "9d86340a-8ce8-4d68-9752-0cc2ce1f3fe3",
+      "IsPreset": false,
+      "ActivationIndex": 0,
+      "Title": "Solution",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "853ef305-c0a0-4c1c-8013-7cd74fc47826": {
+          "c45d487b-3221-44c7-bf9e-b982a65280f6": {
+            "Gradient": {
+              "Interpolation": "Linear",
+              "Steps": [
+                {
+                  "Id": "d3d97f3b-6697-4815-b311-b9049cd8aeb3",
+                  "NormalizedPosition": 0.0,
+                  "Color": {
+                    "R": 0.0,
+                    "G": 1.2159347E-11,
+                    "B": 1E-06,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "9f570ca9-d4b1-4fc0-ae17-7e9510d3e49e",
+                  "NormalizedPosition": 1.0,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.76825494,
+                    "B": 0.44846416,
+                    "A": 1.0
+                  }
+                }
+              ]
+            }
+          },
+          "e3363c0e-819a-45e2-8202-439bcce64d69": 0,
+          "97771732-56fb-4e0c-915d-c79321ba27b5": {
+            "X": 0.14,
+            "Y": 0.31
+          }
+        },
+        "b5ee26e7-3f34-407b-b0b6-b3921eb99cb9": {
+          "bb706662-2555-4f3b-a81e-60e04f052f36": 10.0
+        },
+        "adc848f3-0dca-4803-b3c6-a1bacd7eedb0": {
+          "76cc3811-4ae0-48b2-a119-890db5a4eeb2": "Examples:images/frog3.jpg"
+        }
+      }
+    }
+  ]
+}

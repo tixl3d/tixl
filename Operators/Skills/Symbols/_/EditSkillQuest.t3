@@ -312,13 +312,6 @@
       "Outputs": []
     },
     {
-      "Id": "5e559ed6-ca7d-48fe-826d-928eaa78f987"/*I02p_AnalyzeImageLevels*/,
-      "SymbolId": "50658462-5800-44ce-936f-2bf069a6ca7b",
-      "SymbolName": "Skills.Image.I02_Gradients.I02p_AnalyzeImageLevels",
-      "InputValues": [],
-      "Outputs": []
-    },
-    {
       "Id": "5fd74273-01fa-421e-b0c3-aef0fea2a8be"/*I02n_Polar*/,
       "SymbolId": "0a591e7e-5631-4f32-9ea2-5fddbdb6566f",
       "SymbolName": "Skills.Image.I02_Gradients.I02n_Polar",
