@@ -1,3 +1,4 @@
+using Lib.Utils;
 using T3.Core.Utils;
 
 namespace Lib.flow.context;
@@ -15,10 +16,7 @@ public sealed class GetIntVar : Instance<GetIntVar>, ICustomDropdownHolder
 
     private void Update(EvaluationContext context)
     {
-        if (VariableName.DirtyFlag.IsDirty)
-        {
-            _contextVariableNames = context.IntVariables.Keys.ToList();
-        }
+        _variableNames.CollectIfRequested(context.IntVariables);
             
         var logUpdates = LogUpdates.GetEnumValue<LogLevels>(context);
         var fallbackValue = FallbackValue.GetValue(context);
@@ -83,9 +81,8 @@ public sealed class GetIntVar : Instance<GetIntVar>, ICustomDropdownHolder
             return new List<string>(); 
         }
             
-        // Update the list of available variables when dropdown is shown
-        VariableName.DirtyFlag.Invalidate();
-        return _contextVariableNames;
+        _variableNames.Request();
+        return _variableNames.Names;
     }
         
     void ICustomDropdownHolder.HandleResultForInput(Guid inputId, string selected, bool isAListItem)
@@ -98,7 +95,7 @@ public sealed class GetIntVar : Instance<GetIntVar>, ICustomDropdownHolder
         VariableName.SetTypedInputValue(selected);
     }
         
-    private List<string> _contextVariableNames = new();
+    private readonly VariableNameOptions _variableNames = new();
         
     #endregion
 }

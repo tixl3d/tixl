@@ -1,3 +1,5 @@
+using Lib.Utils;
+
 namespace Lib.flow.context;
 
 [Guid("e6072ecf-30d2-4c52-afa1-3b195d61617b")]
@@ -13,8 +15,7 @@ public sealed class GetFloatVar : Instance<GetFloatVar>, ICustomDropdownHolder
 
     private void Update(EvaluationContext context)
     {
-        //if (VariableName.DirtyFlag.IsDirty && !VariableName.HasInputConnections)
-        _contextVariableNames= context.FloatVariables.Keys.ToList();
+        _variableNames.CollectIfRequested(context.FloatVariables);
             
         var variableName = VariableName.GetValue(context);
         if (variableName != null && context.FloatVariables.TryGetValue(variableName, out var value))
@@ -35,7 +36,8 @@ public sealed class GetFloatVar : Instance<GetFloatVar>, ICustomDropdownHolder
         
     IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid inputId)
     {
-        return _contextVariableNames;
+        _variableNames.Request();
+        return _variableNames.Names;
     }
         
     void ICustomDropdownHolder.HandleResultForInput(Guid inputId, string selected, bool isAListItem)
@@ -52,7 +54,7 @@ public sealed class GetFloatVar : Instance<GetFloatVar>, ICustomDropdownHolder
     #endregion
         
         
-    private  List<string> _contextVariableNames = new ();
+    private readonly VariableNameOptions _variableNames = new();
 
     [Input(Guid = "015d1ea0-ea51-4038-893a-4af2f8584631")]
     public readonly InputSlot<string> VariableName = new();

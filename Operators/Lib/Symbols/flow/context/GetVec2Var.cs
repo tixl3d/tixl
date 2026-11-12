@@ -1,3 +1,5 @@
+using Lib.Utils;
+
 namespace Lib.flow.context;
 
 [Guid("411d3dd4-778b-4012-a19f-05d855fa1baf")]
@@ -14,8 +16,7 @@ public sealed class GetVec2Var : Instance<GetVec2Var>
 
     private void Update(EvaluationContext context)
     {
-        if (VariableName.DirtyFlag.IsDirty && !VariableName.HasInputConnections)
-            _contextVariableNames = context.ObjectVariables.Keys.ToList();
+        _variableNames.CollectOfTypeIfRequested<Vector2>(context.ObjectVariables);
 
         var variableName = VariableName.GetValue(context);
         if (variableName != null && context.ObjectVariables.TryGetValue(variableName, out var value)
@@ -37,7 +38,8 @@ public sealed class GetVec2Var : Instance<GetVec2Var>
 
     IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid inputId)
     {
-        return _contextVariableNames;
+        _variableNames.Request();
+        return _variableNames.Names;
     }
 
     void ICustomDropdownHolder.HandleResultForInput(Guid inputId, string selected, bool isAListItem)
@@ -54,7 +56,7 @@ public sealed class GetVec2Var : Instance<GetVec2Var>
     #endregion
 
 
-    private List<string> _contextVariableNames = new ();
+    private readonly VariableNameOptions _variableNames = new();
 
     [Input(Guid = "05d0cc68-4f6b-4e03-871c-4de0e6ea0b24")]
     public readonly InputSlot<string> VariableName = new();
