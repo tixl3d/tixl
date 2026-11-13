@@ -280,6 +280,10 @@ internal static class DebugServer
                 HandleGetMetrics(context);
                 break;
 
+            case "getUpdateStats":
+                HandleGetUpdateStats(context);
+                break;
+
             case "getShaderErrors":
                 HandleGetShaderErrors(request, context);
                 break;
@@ -1177,6 +1181,86 @@ internal static class DebugServer
         }
 
         context.SendOk(new JObject { ["count"] = list.Count, ["failures"] = list });
+    }
+
+    /// <summary>
+    /// How many output slots below the focused composition ran their update in the previous frame, in total and per
+    /// symbol. Answers "how much of this graph re-evaluates although nothing changed" without a profiler. Instances
+    /// are not created on the way, so ops that never evaluated are not counted.
+    /// </summary>
+    private static void HandleGetUpdateStats(RequestContext context)
+    {
+        var composition = ProjectView.Focused?.CompositionInstance;
+        if (composition == null)
+        {
+            context.SendError("NO_COMPOSITION", "No composition is focused");
+            return;
+        }
+
+        var totals = new UpdateStats();
+        var bySymbol = new Dictionary<string, UpdateStats>();
+        CollectUpdateStats(composition, totals, bySymbol);
+
+        var symbols = new JObject();
+        foreach (var (name, stats) in bySymbol.OrderByDescending(pair => pair.Value.Updates))
+        {
+            symbols[name] = new JObject
+                                {
+                                    ["instances"] = stats.Instances,
+                                    ["outputsUpdated"] = stats.OutputsUpdated,
+                                    ["updates"] = stats.Updates,
+                                };
+        }
+
+        context.SendOk(new JObject
+                           {
+                               ["instances"] = totals.Instances,
+                               ["outputs"] = totals.Outputs,
+                               ["outputsUpdated"] = totals.OutputsUpdated,
+                               ["updates"] = totals.Updates,
+                               ["bySymbol"] = symbols,
+                           });
+    }
+
+    private static void CollectUpdateStats(Instance parent, UpdateStats totals, Dictionary<string, UpdateStats> bySymbol)
+    {
+        foreach (var child in parent.Symbol.Children.Values)
+        {
+            if (!parent.Children.TryGetChildInstance(child.Id, out var instance, allowCreate: false))
+                continue;
+
+            if (!bySymbol.TryGetValue(instance.Symbol.Name, out var symbolStats))
+            {
+                symbolStats = new UpdateStats();
+                bySymbol[instance.Symbol.Name] = symbolStats;
+            }
+
+            totals.Instances++;
+            symbolStats.Instances++;
+            foreach (var output in instance.Outputs)
+            {
+                totals.Outputs++;
+                // Requests are handled at the start of a frame, so "0 frames since" means the previous frame.
+                if (output.DirtyFlag.FramesSinceLastUpdate != 0)
+                    continue;
+
+                var updates = output.DirtyFlag.NumUpdatesWithinFrame;
+                totals.OutputsUpdated++;
+                totals.Updates += updates;
+                symbolStats.OutputsUpdated++;
+                symbolStats.Updates += updates;
+            }
+
+            CollectUpdateStats(instance, totals, bySymbol);
+        }
+    }
+
+    private sealed class UpdateStats
+    {
+        public int Instances;
+        public int Outputs;
+        public int OutputsUpdated;
+        public int Updates;
     }
 
     private static void HandleGetMetrics(RequestContext context)

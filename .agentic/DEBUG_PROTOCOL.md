@@ -95,6 +95,11 @@ Parameter shapes are defined in `DebugServer.cs` — read the handler when unsur
 
 - `reload` works on **editable projects only** (synchronous recompile; MSBuild errors come
   back in a `COMPILE_FAILED` detail). Built-in packages like `Lib` need an editor restart.
+- `getUpdateStats` counts the output slots below the focused composition (nested symbols included) that ran
+  their update in the previous frame: `instances`, `outputs`, `outputsUpdated`, `updates` (an output pulled
+  twice counts twice), and the same per symbol name in `bySymbol`, largest first. Instances are not created on
+  the way. With playback paused, everything it reports is work done although nothing changed: the cost that
+  caching would save. Combine with `getFrameSamples` for CPU time.
 - `releaseGpuResources` does what the main menu's Free GPU Memory does: every render target that can rebuild its
   content releases its textures and re-renders when next pulled. It runs at the start of the next frame, so
   `pumpFrames` before reading `getMetrics`.
