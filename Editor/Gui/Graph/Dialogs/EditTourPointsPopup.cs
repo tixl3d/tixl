@@ -173,8 +173,6 @@ internal static class EditTourPointsPopup
         return result;
     }
 
-    private static readonly Dictionary<int, float> _lastItemHeights = new();
-
     private static bool DrawItem(TourPoint tourPoint, int index)
     {
         Debug.Assert(_compositionUi != null);
@@ -189,12 +187,9 @@ internal static class EditTourPointsPopup
         ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 5);
         ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(5, 5)); // inner spacing
 
-        if (!_lastItemHeights.TryGetValue(index, out var height))
-        {
-            height = 0;
-        }
-
-        ImGui.BeginChild("item", new Vector2(-5, height), ImGuiChildFlags.Borders);
+        // AutoResizeY keeps the last measured height while the item is scrolled out of view.
+        // Measuring by hand collapses clipped items and makes the list jump between two layouts.
+        ImGui.BeginChild("item", new Vector2(-5, 0), ImGuiChildFlags.Borders | ImGuiChildFlags.AutoResizeY);
         {
             FormInputs.AddVerticalSpace(3);
             var padding = 10;
@@ -394,8 +389,6 @@ internal static class EditTourPointsPopup
             }
 
             FormInputs.AddVerticalSpace();
-
-            _lastItemHeights[index] = ImGui.GetCursorPosY();
         }
         ImGui.EndChild();
         ImGui.PopStyleVar(2);
