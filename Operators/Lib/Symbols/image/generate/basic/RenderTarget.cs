@@ -143,6 +143,11 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
             // Set default values for new sub tree
             context.RequestedResolution = size;
             context.SetDefaultCamera();
+            if (EvaluationContext.NotifyResolutionWrite(ref _lastWrittenResolution, size))
+            {
+                DirtyFlag.GlobalInvalidationTick++;
+                Command.InvalidateGraph();
+            }
 
             if (TextureReference.HasInputConnections && TextureReference != null)
             {
@@ -676,6 +681,7 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
  
     private bool _wasClearedOnce;
     private bool _isRebuildable;
+    private Int2 _lastWrittenResolution;
 
     private Texture2D ColorTexture => _sampleCount > 1 ? _resolvedColorBuffer : _multiSampledColorBuffer ;
     private Texture2D DepthTexture => _sampleCount > 1 ? _resolvedDepthBuffer : _multiSampledDepthBuffer;

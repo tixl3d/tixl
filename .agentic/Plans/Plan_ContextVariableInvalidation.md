@@ -1,6 +1,59 @@
 # Plan: Context Variable Invalidation
 
-Status: **not started**, written 2026-11-12 on `main` (ce3c9182f). Nothing built or run; findings come from reading.
+Status: **parked 2026-11-13.** Phase 0 shipped. The rest is not worth its complexity, judging by the Phase 0
+baseline: variable getters cost at most a few updates per frame, and the one big cost, ops reading the requested
+resolution, was solved by a targeted patch instead (below). Kept for the analysis, the baseline script and the
+design, in case variables show up in a profile later.
+
+## What Shipped Instead: Resolution Patch
+
+The same pattern `[MidiInput]` uses: outputs that read the requested resolution are cached (`DirtyFlagTrigger.None`)
+and switched to `Animated` only when the resolution changes.
+
+- `EvaluationContext.RequestedResolutionChanged` (Core), raised by two calls:
+  - `NotifyPullResolution`: for code that pulls a graph from outside. `OutputUi.StartInvalidation` covers every
+    editor output view and preview; the state is kept per `EvaluationContext`, which is one per view.
+    `OutputContentResolver.PullContent` covers the Board and the Player; the state is kept per send, since sends
+    share one context. A view reports a change only when its own size changes, so views at different sizes
+    don't disturb each other. A view resuming after a frame without a pull (a hover preview, a reappearing
+    window) reports a change if any view pulled at another size in this or the previous frame, or if none
+    pulled at all, because shared ops may be cached at another size. Without this, a reappearing view kept
+    showing another view's size. An earlier version reported every resumed pull, which made each new hover
+    re-render all resolution-dependent graphs.
+  - `NotifyResolutionWrite`: for ops setting a size for their subgraph (`RenderTarget`, `SetRequestedResolution`,
+    `SetRequestedResolutionCmd`, `SliceViewPort`, `SendToOutput`, `RenderToCubeMap`, `VisualTest`). It compares
+    against that op's own last write, so restoring the outer size isn't a change. On a change the op re-walks its
+    subgraph, because this frame's invalidation pass already ran.
+- `Operators/Lib/Utils/RequestedResolutionTracker.cs` switches the outputs back to `None` after a whole frame
+  without a change. An instance pulled at two sizes in one frame sees a change on every pull and stays animated.
+  It is used by `[RequestedResolution]` and by `[GetTextureSize]` in its "use context" mode. That op is the
+  second resolution accessor: image ops use it internally, and it was `Animated` in that mode.
+- Result: A1 (three image ops at the inherited resolution) went from **77 to 0** updates per frame.
+  [`resize_check.py`](context-variable-baseline/resize_check.py) checks that a size change still reaches the
+  chain: 256 → 640×360 → 256 through `[SetRequestedResolution]`.
+- Not covered: ops that read `context.RequestedResolution` directly and are plain cached value ops
+  (`GridPosition`, `CPointToCamera`, `PointToMatrix`, `ProjectOntoStage`, `LoadSvgAsTexture2D`). They were already
+  stale on a resize before the patch and are unchanged. Each could adopt the tracker if it matters.
+- Tested with the debug bridge's `probePull` as a second view
+  ([`multi_view_check.py`](context-variable-baseline/multi_view_check.py),
+  [`continuous_view_check.py`](context-variable-baseline/continuous_view_check.py)):
+  - a second view pulling another graph at 256×256 on every frame leaves the output's chain cached (0 updates);
+  - a view that pulls again after a pause gets its own size;
+  - a second view pulling the same chain on every frame gets 256×256 on every frame. The output window in Fill
+    mode then shows that texture, by its existing reuse rule, and returns to its own size once the probe stops.
+  - A hover-like view pulling the output's chain now and then at the output's size
+    ([`hover_check.py`](context-variable-baseline/hover_check.py)) no longer re-renders it. It went from 3 chain
+    updates per pull to 1, and that 1 is the probe's own forced pull.
+  - An intermittent view at another size (thumbnails) still re-evaluates on each pull: correct, and no worse
+    than before.
+  - [`session.sh`](context-variable-baseline/session.sh) runs a check in a fresh probe editor and reports any
+    save it did. It must not run while another editor is open.
+- Limit, not caused by this patch: a chain shared by two scopes at different sizes in the same frame
+  ([`shared_scopes_check.py`](context-variable-baseline/shared_scopes_check.py): one chain under two
+  `[SetRequestedResolution]` at 256 and 640 feeding one `[Blend]`) gives both the first size. After the first
+  scope the chain's slots are clean and nothing re-walks them. A slot holds one value anyway, so even a re-render
+  would leave both scopes holding the same resized texture. By reasoning (not re-tested on the old code),
+  `Always` behaved the same, only re-rendering once per frame.
 
 ## Goal
 
@@ -189,9 +242,34 @@ regardless. Move them to the slot API so they show up in the debug table and sto
   Vec2 and Vec3 dropdowns now list only names that hold that type, as Matrix already did. The list appears one
   frame after the dropdown is first drawn. This relies on the ops being `Animated`; once Phase 3 makes them
   cached, `Request()` must also invalidate the output.
-- Measure a baseline before touching anything: `OutputContentResolver.StatsInvalidationVisits`, evaluate time,
-  and slot update counts on two projects. One should be a `[RequestedResolution]`-heavy image chain, the other
-  a `[Loop]` + `[GetFloatVar]` scene. Record the numbers in this plan.
+- **Baseline measured 2026-11-12** (Debug editor, Linux/Vulkan, playback paused, nothing changing). Script:
+  [`context-variable-baseline/baseline.py`](context-variable-baseline/baseline.py). It builds the graphs in
+  `_agentTests` over the debug bridge. Back up that project first, because autosave can keep the probe ops.
+  The metric is the new bridge method `getUpdateStats`: output-slot updates in the previous frame below the
+  focused composition. CPU time (`getFrameSamples`) is the whole editor frame and only moves in the C1 case.
+
+  | Graph | Updates/frame |
+  |---|---:|
+  | A1 `[CheckerBoard]` → `[Blur]` → `[Blur]`, inherited resolution | 77 |
+  | A2 same, explicit 512×512 on all three | **0** |
+  | B `[Loop]` ×20 → `[Transform]` (`[GetFloatVar]` i × 0.3) → `[DrawMesh]` sphere | 581 |
+  | C0 `[Execute]` with 3 frame-mode `[SetFloatVar]` + a sphere draw, no getters | 30 |
+  | C the same, `[Vector3]` translation from three `[GetFloatVar]` | 34 |
+  | C1 C0 plus `[GetFloatVar]` x → `[SphereMesh]` Radius | 38 (+0.2 ms CPU, mesh regenerated every frame) |
+
+  What the numbers say:
+  - **Resolution is the big win (Phase 2).** Image ops at the inherited resolution re-render completely every
+    frame (about 25 updates each, including `RenderTarget` and `Draw`), because the image ops contain
+    `[RequestedResolution]` internally. With an explicit resolution they cost nothing. This is also GPU work.
+  - **Getters only pay off when they feed a value chain** (C1: a mesh is regenerated). A getter feeding a
+    Command op such as `[Transform]` saves almost nothing (C: 4 updates), because Command slots replay anyway.
+  - **`[Loop]` won't improve through variables.** 581 ≈ 20 × 29. That is the cost of one `[DrawMesh]` per
+    iteration, and it doesn't depend on the index getter. It comes from context reads that are always dirty:
+    `[GetPbrParameters]` (`Always`, reads `context.PbrMaterial`), `[ContextCBuffers]` (`Animated`),
+    `[Vector4Components]`. They make every draw cost about 30 updates even in C0. That makes open question 2
+    (other context fields as slots) worth more than this plan assumed.
+- Found on the way and fixed: `DirtyFlag.NumUpdatesWithinFrame` returned 0 for a slot that updated more than
+  once in the previous frame. Its only other user is the legacy graph's update indicator.
 
 ### Phase 1: Central table in Core
 
@@ -268,7 +346,10 @@ Core, because the Player evaluates these ops too.
 1. When is a persistent variable cleared? Candidates: playback restart or jump to start, project reload, an
    explicit `[ClearVar]` op, or never except by the inspector. They may also need to be saved with the
    project.
-2. Should other context fields (`ObjectToWorld`, camera matrices, `ForegroundColor`) eventually become slots
-   too? Same mechanism, but they're written by many more ops. Out of scope here; decide after Phase 3 numbers.
+2. Should other context fields (`PbrMaterial`, `ObjectToWorld`, camera matrices, `ForegroundColor`) become
+   slots too? Same mechanism, but they're written by many more ops. The baseline shows every `[DrawMesh]`
+   costs about 30 updates per frame from these reads alone (`[GetPbrParameters]` is `Always`), which is more
+   than variables cost in any measured graph except the resolution chain. That's likely its own plan, built on
+   Phase 1's slots.
 3. Is a reader dropdown fed by the **registry** (all names seen this session) good enough, or must it show only
    the names set in the current context?

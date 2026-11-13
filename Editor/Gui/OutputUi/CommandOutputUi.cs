@@ -47,7 +47,7 @@ internal sealed class CommandOutputUi : OutputUi<Command>
         var originalViewMatrix = context.CameraToClipSpace;
 
         // Invalidate
-        StartInvalidation(slot);
+        StartInvalidation(slot, context);
 
         // Setup render target - TODO: this should not be done for all 'Command' outputs as most of them don't produce image content
         var device = ResourceManager.Device;

@@ -1,3 +1,5 @@
+using Lib.Utils;
+
 namespace Lib.render._dx11.api;
 
 [Guid("daec568f-f7b4-4d81-a401-34d62462daab")]
@@ -25,6 +27,13 @@ internal sealed class GetTextureSize : Instance<GetTextureSize>
         TotalSize.UpdateAction += Update;
         IsTextureValid.UpdateAction += Update;
         IsCubeMap.UpdateAction += Update;
+        _resolutionTracker = new RequestedResolutionTracker(Size, SizeFloat, TotalSize, IsTextureValid, IsCubeMap);
+    }
+
+    protected override void Dispose(bool isDisposing)
+    {
+        if (isDisposing)
+            _resolutionTracker.Dispose();
     }
 
     private void Update(EvaluationContext context)
@@ -61,20 +70,15 @@ internal sealed class GetTextureSize : Instance<GetTextureSize>
             isCubeMap = (texture.Description.OptionFlags & ResourceOptionFlags.TextureCube) != 0;
         }
         
-        var alwaysDirty = mode == ResModes.UseContext;
-        if (alwaysDirty != _alwaysDirty)
+        if (mode == ResModes.UseContext)
         {
-            var dirtyFlagTrigger = alwaysDirty ? DirtyFlagTrigger.Animated : DirtyFlagTrigger.None;
-            Size.DirtyFlag.Trigger = dirtyFlagTrigger;
-            SizeFloat.DirtyFlag.Trigger = dirtyFlagTrigger;
-            TotalSize.DirtyFlag.Trigger = dirtyFlagTrigger;
-            IsTextureValid.DirtyFlag.Trigger = dirtyFlagTrigger;
-            IsCubeMap.DirtyFlag.Trigger = dirtyFlagTrigger;
-            
-            _alwaysDirty = alwaysDirty;
+            _resolutionTracker.Track(resolution);
+        }
+        else
+        {
+            _resolutionTracker.StopTracking();
         }
 
-        
         IsTextureValid.Value = isTextureValid;
         Size.Value = resolution;
         SizeFloat.Value = new Vector2(resolution.Width, resolution.Height);
@@ -95,7 +99,7 @@ internal sealed class GetTextureSize : Instance<GetTextureSize>
         UseOverride,
     }
 
-    private bool _alwaysDirty = false;
+    private readonly RequestedResolutionTracker _resolutionTracker;
 
     [Input(Guid = "8b15d8e1-10c7-41e1-84db-a85e31e0c909")]
     public readonly InputSlot<Texture2D> Texture = new();

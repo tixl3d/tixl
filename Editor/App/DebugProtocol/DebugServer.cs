@@ -146,6 +146,8 @@ internal static class DebugServer
             pump.Context.SendOk(new JObject());
         }
 
+        PullProbeSlot();
+
         while (_requestQueue.TryDequeue(out var request))
         {
             HandleRequestLine(request.Client, request.Line);
@@ -278,6 +280,10 @@ internal static class DebugServer
 
             case "getMetrics":
                 HandleGetMetrics(context);
+                break;
+
+            case "probePull":
+                HandleProbePull(request, context);
                 break;
 
             case "getUpdateStats":
@@ -1255,6 +1261,64 @@ internal static class DebugServer
         }
     }
 
+    private static EvaluationContext? _probePullContext;
+
+    /// <summary>
+    /// Starts pulling an output of the focused composition at <c>pullResolution</c> on every frame, the way a second
+    /// view at another size would, until called without <c>childId</c>. Stopping returns the texture sizes the
+    /// pulls produced, so a test can check that the second view always got its own size.
+    /// </summary>
+    private static void HandleProbePull(JObject request, RequestContext context)
+    {
+        if (!Guid.TryParse(request["childId"]?.Value<string>(), out var childId))
+        {
+            var sizes = new JArray();
+            foreach (var size in _probePullSizes)
+            {
+                sizes.Add(new JArray(size.Width, size.Height));
+            }
+
+            _probePullSlot = null;
+            _probePullSizes.Clear();
+            context.SendOk(new JObject { ["sizes"] = sizes });
+            return;
+        }
+
+        Instance? instance = null;
+        ProjectView.Focused?.CompositionInstance?.Children.TryGetChildInstance(childId, out instance);
+        if (instance == null || instance.Outputs.Count == 0)
+        {
+            context.SendError("NOT_FOUND", $"No instance with outputs for {childId} in the focused composition");
+            return;
+        }
+
+        _probePullContext ??= new EvaluationContext();
+        var pullResolution = request["pullResolution"];
+        _probePullContext.RequestedResolution = new T3.Core.DataTypes.Vector.Int2(pullResolution?["X"]?.Value<int>() ?? 256,
+                                                                                  pullResolution?["Y"]?.Value<int>() ?? 256);
+        _probePullSlot = instance.Outputs[0];
+        _probePullSizes.Clear();
+        context.SendOk(new JObject { ["outputType"] = _probePullSlot.ValueType.Name });
+    }
+
+    private static void PullProbeSlot()
+    {
+        if (_probePullSlot == null || _probePullContext == null)
+            return;
+
+        _probePullContext.NotifyPullResolution();
+        DirtyFlag.GlobalInvalidationTick++;
+        _probePullSlot.InvalidateGraph();
+        _probePullSlot.Update(_probePullContext);
+        if (_probePullSlot is Slot<T3.Core.DataTypes.Texture2D> { Value: { IsDisposed: false } texture } && _probePullSizes.Count < 256)
+        {
+            _probePullSizes.Add(new T3.Core.DataTypes.Vector.Int2(texture.Description.Width, texture.Description.Height));
+        }
+    }
+
+    private static ISlot? _probePullSlot;
+    private static readonly List<T3.Core.DataTypes.Vector.Int2> _probePullSizes = new();
+
     private sealed class UpdateStats
     {
         public int Instances;
@@ -1750,11 +1814,22 @@ internal static class DebugServer
             // defeats InvalidateGraph's once-per-tick visited guard, so the walk reaches
             // upstream inputs changed since the last frame (ForceInvalidate alone only
             // dirties this slot; a consumer would keep its cached input values).
+            // With a pullResolution the probe acts as one more view at that size, through a context that lives
+            // as long as a view's would; without it, a throwaway context as before.
+            var pullContext = new EvaluationContext();
+            if (request["pullResolution"] is JObject pullResolution)
+            {
+                _probePullContext ??= new EvaluationContext();
+                pullContext = _probePullContext;
+                pullContext.RequestedResolution = new T3.Core.DataTypes.Vector.Int2(pullResolution["X"]?.Value<int>() ?? 0, pullResolution["Y"]?.Value<int>() ?? 0);
+                pullContext.NotifyPullResolution();
+            }
+
             DirtyFlag.GlobalInvalidationTick++;
             slot.InvalidateGraph();
             slot.DirtyFlag.ForceInvalidate();
             var wasDirty = slot.DirtyFlag.IsDirty;
-            slot.Update(new EvaluationContext());
+            slot.Update(pullContext);
             Log.Debug($"debug-server: pulled {instance.Symbol.Name}.{slot.ValueType.Name} dirtyBefore={wasDirty} dirtyAfter={slot.DirtyFlag.IsDirty}");
         }
 

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using Texture2D = T3.Core.DataTypes.Texture2D;
@@ -78,6 +79,14 @@ public static class OutputContentResolver
         // Update=false freezes the content at its last frame, so it isn't invalidated at all.
         if (supplier.GetUpdateEnabled(context))
         {
+            // All sends share one context, so each keeps its own last size: two outputs at different sizes are not
+            // a change for either of them.
+            var sendId = supplier is Instance sendInstance ? sendInstance.SymbolChildId : Guid.Empty;
+            ref var lastPull = ref CollectionsMarshal.GetValueRefOrAddDefault(_lastPullBySend, sendId, out var existed);
+            if (!existed)
+                lastPull.Frame = int.MinValue / 2;
+
+            EvaluationContext.NotifyPullResolution(ref lastPull.Resolution, ref lastPull.Frame, context.RequestedResolution);
             var invalidateStart = Stopwatch.GetTimestamp();
             var visitsBefore = DirtyFlag.InvalidationVisits;
             supplier.InvalidateContent();
@@ -314,6 +323,16 @@ public static class OutputContentResolver
 
     /** Kept across frames so a preview that isn't evaluating this frame still has something to show. */
     private static readonly Dictionary<Guid, Texture2D?> _lastContentByChildId = new();
+
+    /** When and at which size each send was last pulled, so one send's size change isn't hidden by the others. */
+    private static readonly Dictionary<Guid, LastPull> _lastPullBySend = new();
+
+    private struct LastPull
+    {
+        public Int2 Resolution;
+        public int Frame;
+    }
+
     private static int _pulledContentFrame = -1;
 
     /// <summary>

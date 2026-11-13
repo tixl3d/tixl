@@ -50,6 +50,12 @@ internal sealed class SendToOutput : Instance<SendToOutput>, IContentSupplier, I
         }
 
         context.RequestedResolution = requested;
+        if (EvaluationContext.NotifyResolutionWrite(ref _lastWrittenResolution, requested))
+        {
+            DirtyFlag.GlobalInvalidationTick++;
+            Texture.InvalidateGraph();
+        }
+
         var texture = Texture.GetValue(context);
         context.RequestedResolution = inherited;
         return texture;
@@ -176,4 +182,6 @@ internal sealed class SendToOutput : Instance<SendToOutput>, IContentSupplier, I
 
     [Input(Guid = ContentSupplierSearch.ExposeToParentsInputGuid)]
     public readonly InputSlot<bool> ExposeToParents = new();
+
+    private Int2 _lastWrittenResolution;
 }

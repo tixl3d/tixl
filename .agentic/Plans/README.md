@@ -153,7 +153,7 @@ These matter more than any filing decision.
 | [Plan_RenameSimulateIoDataToDataClipPlayer](Plan_RenameSimulateIoDataToDataClipPlayer.md) | Nothing shipped | Op path in the plan is stale; two help pages also need updating |
 | [Plan_OperatorVersioning](Plan_OperatorVersioning.md) | Nothing shipped; written 2026-11-04 | `{Name}_v{N}` naming, `Supersedes` record on successor, undoable Upgrade built on `ChangeSymbol`. Decisions settled; start with Phase 0 |
 | [Plan_CameraOverhaul](Plan_CameraOverhaul.md) | Research only, written 2026-11-05 | Pivot + quaternion camera model, Godot pitch stop with roll, Unreal fly-mode WASD, persp/ortho blend. Phase 1 is editor-only and could land in 4.4 |
-| [Plan_ContextVariableInvalidation](Plan_ContextVariableInvalidation.md) | Nothing shipped; written 2026-11-12 | Value epochs + scoped re-walk so `Get*Var` / `[RequestedResolution]` stop being always-dirty. Phase 0 (drop per-frame `ToList` in `Get*Var`, baseline numbers) needs no Core change |
+| [Plan_ContextVariableInvalidation](Plan_ContextVariableInvalidation.md) | Parked 2026-11-13; Phase 0 and a targeted resolution patch shipped | Full variable redesign judged not worth it after the baseline. Keeps the analysis, the baseline scripts and the design |
 | [Plan_UiTimelapse](Plan_UiTimelapse.md) | Nothing shipped | Its encoder gate looks set to disable it on the Radeon machine, since the probe has no VAAPI candidate (not run). Cursor code paths are stale |
 
 ## Parked

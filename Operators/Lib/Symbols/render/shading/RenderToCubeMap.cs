@@ -186,6 +186,7 @@ internal sealed class RenderToCubeMap : Instance<RenderToCubeMap>
         context.BypassCameras = true;
         context.CameraToClipSpace = faceToClipSpace;
         context.RequestedResolution = new Int2(renderSize, renderSize);
+        EvaluationContext.NotifyResolutionWrite(ref _lastWrittenResolution, context.RequestedResolution);
         context.BackgroundColor = Vector4.One;
         context.ForegroundColor = Vector4.One;
 
@@ -865,4 +866,5 @@ internal sealed class RenderToCubeMap : Instance<RenderToCubeMap>
     private Matrix4x4 _prevCubeToWorld;
     private int _lastTileSize;
     private Vector4 _lastClearColor;
+    private Int2 _lastWrittenResolution;
 }

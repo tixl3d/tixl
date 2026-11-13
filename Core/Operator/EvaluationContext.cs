@@ -4,6 +4,7 @@ using T3.Core.Animation;
 using T3.Core.DataTypes;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator.Interfaces;
+using T3.Core.Output.Rendering;
 using T3.Core.Rendering;
 using T3.Core.Rendering.Material;
 using T3.Core.Utils;
@@ -125,6 +126,136 @@ public sealed class EvaluationContext
     #endregion
         
     public Int2 RequestedResolution { get; set; }
+
+    /// <summary>
+    /// Raised when the requested resolution changes for a pull or for an op's subgraph. [RequestedResolution] ops
+    /// cache their outputs and re-evaluate only after this, so whoever sets a resolution reports it through
+    /// <see cref="NotifyPullResolution"/> or <see cref="NotifyResolutionWrite"/>.
+    /// </summary>
+    public static event Action? RequestedResolutionChanged;
+
+    /// <summary>
+    /// Call before invalidating a graph that this context pulls from outside (an output window, a preview).
+    /// </summary>
+    public void NotifyPullResolution()
+    {
+        NotifyPullResolution(ref _lastPulledResolution, ref _lastPullFrame, RequestedResolution);
+    }
+
+    /// <summary>
+    /// For code that pulls graphs from outside, with one state per view (or per graph, when one context pulls
+    /// several at different sizes). A view pulling every frame reports a change only when its own size changes, even
+    /// while other views pull at other sizes; an op instance they share notices the alternating sizes itself.
+    /// A view resuming after a frame without a pull (a hover preview, a reappearing window) can't know at which size
+    /// shared ops were cached meanwhile: it reports a change if any view pulled at another size in this or the
+    /// previous frame, or if no view pulled at all.
+    /// </summary>
+    public static void NotifyPullResolution(ref Int2 lastResolution, ref int lastPullFrame, Int2 resolution)
+    {
+        var frame = OutputFrame.Index;
+        var isResumed = frame - lastPullFrame > 1;
+        lastPullFrame = frame;
+
+        RollRecentPulls(frame);
+        var isChanged = isResumed
+                            ? !RecentPullsAllMatch(resolution)
+                            : resolution != lastResolution;
+        RecordRecentPull(resolution);
+        lastResolution = resolution;
+
+        if (isChanged)
+            RequestedResolutionChanged?.Invoke();
+    }
+
+    /// <summary>
+    /// For an op that sets the resolution for its subgraph. Restoring the outer resolution afterwards is not
+    /// reported, only a size that differs from what this op set last time. On a change it returns true, and the
+    /// caller invalidates its subgraph again before pulling it, because this frame's invalidation pass already ran.
+    /// </summary>
+    public static bool NotifyResolutionWrite(ref Int2 lastWritten, Int2 resolution)
+    {
+        if (resolution == lastWritten)
+            return false;
+
+        lastWritten = resolution;
+        RequestedResolutionChanged?.Invoke();
+        return true;
+    }
+
+    private static void RollRecentPulls(int frame)
+    {
+        if (frame == _recentPullsFrame)
+            return;
+
+        if (frame == _recentPullsFrame + 1)
+        {
+            Array.Copy(_currentFramePulls, _previousFramePulls, _currentFramePullCount);
+            _previousFramePullCount = _currentFramePullCount;
+            _previousFramePullsOverflowed = _currentFramePullsOverflowed;
+        }
+        else
+        {
+            _previousFramePullCount = 0;
+            _previousFramePullsOverflowed = false;
+        }
+
+        _currentFramePullCount = 0;
+        _currentFramePullsOverflowed = false;
+        _recentPullsFrame = frame;
+    }
+
+    /** False when nothing was pulled recently or a size was dropped, because then the cached size is unknown. */
+    private static bool RecentPullsAllMatch(Int2 resolution)
+    {
+        if (_previousFramePullsOverflowed || _currentFramePullsOverflowed)
+            return false;
+
+        if (_previousFramePullCount + _currentFramePullCount == 0)
+            return false;
+
+        for (var index = 0; index < _previousFramePullCount; index++)
+        {
+            if (_previousFramePulls[index] != resolution)
+                return false;
+        }
+
+        for (var index = 0; index < _currentFramePullCount; index++)
+        {
+            if (_currentFramePulls[index] != resolution)
+                return false;
+        }
+
+        return true;
+    }
+
+    private static void RecordRecentPull(Int2 resolution)
+    {
+        for (var index = 0; index < _currentFramePullCount; index++)
+        {
+            if (_currentFramePulls[index] == resolution)
+                return;
+        }
+
+        if (_currentFramePullCount == _currentFramePulls.Length)
+        {
+            _currentFramePullsOverflowed = true;
+            return;
+        }
+
+        _currentFramePulls[_currentFramePullCount++] = resolution;
+    }
+
+    private const int MaxDistinctPullSizesPerFrame = 8;
+    private static readonly Int2[] _currentFramePulls = new Int2[MaxDistinctPullSizesPerFrame];
+    private static readonly Int2[] _previousFramePulls = new Int2[MaxDistinctPullSizesPerFrame];
+    private static int _currentFramePullCount;
+    private static int _previousFramePullCount;
+    private static bool _currentFramePullsOverflowed;
+    private static bool _previousFramePullsOverflowed;
+    private static int _recentPullsFrame = int.MinValue / 2;
+
+    private Int2 _lastPulledResolution;
+    private int _lastPullFrame = int.MinValue / 2;
 
     public Matrix4x4 CameraToClipSpace { get; set; } = Matrix4x4.Identity;
     public Matrix4x4 WorldToCamera { get; set; } = Matrix4x4.Identity;
