@@ -43,8 +43,12 @@ public sealed class GradientInputUi : InputValueUi<Gradient>
         var iconWidth = MathF.Round(Icons.FontSize + 4 * T3Ui.UiScaleFactor);
         var handleOverhang = GradientEditor.StepHandleSize.X * 0.5f;
         var origin = ImGui.GetCursorScreenPos();
-        var gradientWidth = ImGui.GetContentRegionAvail().X - iconWidth - handleOverhang;
-        ImGui.SetCursorScreenPos(new Vector2(origin.X + gradientWidth + handleOverhang, origin.Y));
+        var availableWidth = ImGui.GetContentRegionAvail().X;
+        var gradientWidth = availableWidth - iconWidth - handleOverhang;
+
+        // In a narrow parameter window the steps get too cramped to drag, so the gradient moves to its own line below.
+        var wrapsToNextLine = gradientWidth < MinInlineGradientWidth * T3Ui.UiScaleFactor;
+        ImGui.SetCursorScreenPos(new Vector2(origin.X + availableWidth - iconWidth, origin.Y));
         var opensPopup = ImGui.GetIO().KeyCtrl;
         if (CustomComponents.IconButton(opensPopup ? Icon.PopUp : Icon.Settings2, new Vector2(iconWidth, ImGui.GetFrameHeight())))
         {
@@ -69,7 +73,17 @@ public sealed class GradientInputUi : InputValueUi<Gradient>
                 CustomComponents.TooltipForLastItem("Gradient options", "Presets, interpolation, and a larger editor. Also on right-click.\nCtrl+click opens the larger editor directly.");
             }
         }
-        ImGui.SetCursorScreenPos(origin);
+
+        if (wrapsToNextLine)
+        {
+            // The icon ended the name row, so the cursor already sits at the start of the next line.
+            origin = ImGui.GetCursorScreenPos();
+            gradientWidth = ImGui.GetContentRegionAvail().X - handleOverhang;
+        }
+        else
+        {
+            ImGui.SetCursorScreenPos(origin);
+        }
 
         var size = new Vector2(gradientWidth, ImGui.GetFrameHeight());
         var area = new ImRect(origin + new Vector2(GradientEditor.StepHandleSize.X * 0.5f, 0),
@@ -90,4 +104,7 @@ public sealed class GradientInputUi : InputValueUi<Gradient>
     {
         ImGui.NewLine();
     }
+
+    /** Below this unscaled width the gradient wraps below the parameter name instead of sharing its row. */
+    private const float MinInlineGradientWidth = 150;
 }
