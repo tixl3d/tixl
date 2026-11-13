@@ -129,6 +129,13 @@ Parameter shapes are defined in `DebugServer.cs` — read the handler when unsur
   stride is decoded as a `Point` (`position`, `f1`, `orientation`, `color`, `scale`, `f2`), anything
   else as one float array per element. A GPU read flushes and waits for the GPU - fine for a probe.
   Compare the same query across machines (e.g. Mac vs Linux) to find the first op whose values differ.
+- `getOutput update:true` with `pullResolution` (`{"X":256,"Y":256}`) pulls at that size through one
+  long-lived probe context, the way a second view at another size would. Use it to test resolution caching
+  across views.
+- `probePull` (`childId`, `pullResolution`) pulls that op's first output at the given size at the start of every
+  frame, through the same probe context: a second view that pulls continuously, which a request round trip
+  (about 3 frames) can't imitate. Call it without `childId` to stop; the reply lists the texture `sizes` the
+  pulls produced.
 - `getOutput update:true` starts a fresh invalidation tick before pulling, so
   upstream changes propagate through the chain. Ops upstream with `Async` on
   still return their *previous* result while a job runs - set `Async` false on

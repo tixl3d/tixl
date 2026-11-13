@@ -88,14 +88,20 @@ public sealed class DirtyFlag
     internal bool TriggerIsEnabled;
     internal bool TriggerIsAnimated;
 
-    // editor-specific value
+    /// <summary>
+    /// Editor-specific: how often the slot updated in the current frame, or in the previous one if it hasn't
+    /// updated yet in this one. Each update within a frame advances the tick by one from the frame's start tick.
+    /// </summary>
     public int NumUpdatesWithinFrame
     {
         get
         {
-            var updatesSinceLastFrame = _lastUpdateTick - _globalTickCount;
-            var shift = (-updatesSinceLastFrame >= GlobalTickDiffPerFrame) ? GlobalTickDiffPerFrame : 0;
-            return Math.Max(updatesSinceLastFrame + shift + 1, 0); // shift corrects if update was one frame ago
+            var ticksSinceFrameStart = _lastUpdateTick - _globalTickCount;
+            if (ticksSinceFrameStart >= 0)
+                return ticksSinceFrameStart + 1;
+
+            var ticksSincePreviousFrameStart = ticksSinceFrameStart + GlobalTickDiffPerFrame;
+            return ticksSincePreviousFrameStart >= 0 ? ticksSincePreviousFrameStart + 1 : 0;
         }
     }
 
