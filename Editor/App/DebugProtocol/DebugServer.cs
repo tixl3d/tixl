@@ -192,7 +192,15 @@ internal static class DebugServer
             return;
         }
 
-        var method = request["method"]?.Value<string>();
+        // Check the type first because converting an object or array to a string can crash the editor.
+        var methodToken = request["method"];
+        if (methodToken != null && methodToken.Type != JTokenType.String)
+        {
+            new RequestContext(client, request["id"], null).SendError("INVALID_PARAM", "'method' must be a string");
+            return;
+        }
+
+        var method = methodToken?.Value<string>();
         if (method != "setAgentState" && method != "ping" && AgentState == "ready")
             AgentState = "busy";
 
