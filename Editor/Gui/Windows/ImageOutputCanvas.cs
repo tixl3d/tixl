@@ -99,13 +99,17 @@ internal sealed class ImageOutputCanvas : ScalableCanvas
 
         var sizeOnScreen = Current.TransformDirection(size);
 
+        // Depth-stencil textures (and failed creations) have no SRV, so only the caption is drawn.
         var srv = SrvManager.GetSrvForTexture(texture);
-        var drawList = ImGui.GetWindowDrawList();
-        WindowsUiContentDrawer.BeginPixelSampling(drawList);
-        ImGui.Image((IntPtr)srv.ImGuiTextureId, sizeOnScreen);
-        WindowsUiContentDrawer.EndPixelSampling(drawList);
+        if (srv != null)
+        {
+            var drawList = ImGui.GetWindowDrawList();
+            WindowsUiContentDrawer.BeginPixelSampling(drawList);
+            ImGui.Image((IntPtr)srv.ImGuiTextureId, sizeOnScreen);
+            WindowsUiContentDrawer.EndPixelSampling(drawList);
 
-        ForwardMouseInput(topLeftOnScreen, sizeOnScreen);
+            ForwardMouseInput(topLeftOnScreen, sizeOnScreen);
+        }
             
         if (UserSettings.Config.ShowToolbar)
         {
