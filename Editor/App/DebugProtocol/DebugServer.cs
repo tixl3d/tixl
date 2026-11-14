@@ -2108,6 +2108,13 @@ internal static class DebugServer
             return;
         }
 
+        // Reject unknown operators here so a failed add leaves undo and redo history intact.
+        if (!SymbolUiRegistry.TryGetSymbolUi(symbolIdToAdd, out _))
+        {
+            context.SendError("NOT_FOUND", $"No symbol with id {symbolIdToAdd}");
+            return;
+        }
+
         // Scripts that pass no position used to pile every op onto the origin, on top of
         // whatever the previous probe left there. Without coordinates, start a fresh row
         // below the lowest existing op instead.
