@@ -239,6 +239,10 @@ public sealed class TextureBgraReadAccess : IDisposable
     {
         if (_convertComputeShaderResource?.Value == null)
             return;
+
+        var srv = SrvManager.GetSrvForTexture(inputTexture);
+        if (srv == null)
+            return;
         
         var device = ResourceManager.Device;
         var deviceContext = device.ImmediateContext;
@@ -251,7 +255,6 @@ public sealed class TextureBgraReadAccess : IDisposable
         csStage.Set(convertShader);
 
         const int threadNumX = 16, threadNumY = 16;
-        var srv = SrvManager.GetSrvForTexture(inputTexture);
         csStage.SetShaderResource(0, srv);
         csStage.SetUnorderedAccessView(0, _conversionUav, 0);
 

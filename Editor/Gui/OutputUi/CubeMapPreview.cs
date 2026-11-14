@@ -213,6 +213,10 @@ internal sealed class CubeMapPreview
         if (shader == null || !TryUpdateViews(cubeMap, width, height))
             return false;
 
+        var cubeMapSrv = SrvManager.GetSrvForTexture(cubeMap);
+        if (cubeMapSrv == null)
+            return false;
+
         if (_paramBuffer == null)
         {
             ResourceManager.SetupConstBuffer(parameters, ref _paramBuffer);
@@ -228,7 +232,7 @@ internal sealed class CubeMapPreview
 
         csStage.Set(shader);
         csStage.SetConstantBuffer(0, _paramBuffer);
-        csStage.SetShaderResource(0, SrvManager.GetSrvForTexture(cubeMap));
+        csStage.SetShaderResource(0, cubeMapSrv);
         csStage.SetShaderResource(1, _facesSrv);
         csStage.SetSampler(0, ResourceManager.DefaultSamplerState);
         csStage.SetUnorderedAccessView(0, _previewUav, 0);

@@ -56,6 +56,8 @@ public sealed class ThumbnailCanvasRendering
             return;
             
         var previewTextureSrv = SrvManager.GetSrvForTexture(textureSlot.Value);
+        if (previewTextureSrv == null)
+            return;
 
         // Setup graphics pipeline for rendering into the canvas texture
         var deviceContext = ResourceManager.Device.ImmediateContext;

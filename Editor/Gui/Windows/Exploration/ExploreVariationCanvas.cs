@@ -78,7 +78,9 @@ internal sealed class ExploreVariationCanvas : ScalableCanvas
 
         var canvasSize = _thumbnailCanvasRendering.GetCanvasTextureSize();
         var rectOnScreen = ImRect.RectWithSize(WindowPos, canvasSize);
-        drawList.AddImage((IntPtr)_thumbnailCanvasRendering.CanvasTextureSrv.ImGuiTextureId, rectOnScreen.Min, rectOnScreen.Max);
+        var canvasSrv = _thumbnailCanvasRendering.CanvasTextureSrv;
+        if (canvasSrv != null)
+            drawList.AddImage((IntPtr)canvasSrv.ImGuiTextureId, rectOnScreen.Min, rectOnScreen.Max);
 
         foreach (var variation in _variationByGridIndex.Values)
         {

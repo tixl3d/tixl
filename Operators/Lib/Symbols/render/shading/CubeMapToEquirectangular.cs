@@ -87,13 +87,17 @@ internal sealed class CubeMapToEquirectangular : Instance<CubeMapToEquirectangul
             ResourceManager.UpdateConstBuffer(parameters, _paramsBuffer);
         }
 
+        var cubeMapSrv = SrvManager.GetSrvForTexture(cubeMap);
+        if (cubeMapSrv == null)
+            return;
+
         var deviceContext = device.ImmediateContext;
         var csStage = deviceContext.ComputeShader;
         deviceContext.PushState(StateGroups.ComputeShader);
 
         csStage.Set(shader);
         csStage.SetConstantBuffer(0, _paramsBuffer);
-        csStage.SetShaderResource(0, SrvManager.GetSrvForTexture(cubeMap));
+        csStage.SetShaderResource(0, cubeMapSrv);
         csStage.SetSampler(0, ResourceManager.DefaultSamplerState);
         csStage.SetUnorderedAccessView(0, _textureUav, 0);
         deviceContext.Dispatch((resolution.Width + ThreadGroupSize - 1) / ThreadGroupSize,

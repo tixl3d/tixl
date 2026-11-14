@@ -408,6 +408,10 @@ internal static class ThumbnailManager
             return;
         }
 
+        var sourceSrv = SrvManager.GetSrvForTexture(sourceTexture);
+        if (sourceSrv == null)
+            return;
+
         var isNew = false;
         if (!_slots.TryGetValue(guid, out var slot))
         {
@@ -447,8 +451,6 @@ internal static class ThumbnailManager
 
         using var tempTarget = new T3.Graphics.Compat.Texture2D(device, desc);
         using var rtv = new RenderTargetView(device, tempTarget);
-        var sourceSrv = SrvManager.GetSrvForTexture(sourceTexture);
-
         var sourceAspect = (float)sourceTexture.Description.Width / sourceTexture.Description.Height;
         var targetAspect = (float)targetWidth / targetHeight;
 
