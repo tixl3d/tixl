@@ -267,16 +267,23 @@ internal sealed partial class MagGraphView
                     name = "   " + name;
                 }
                 // Log.Debug($"{CanvasScale}");
-                // Large font when zoomed in, normal otherwise
-                var font = CanvasScale > 1.8f ? Fonts.FontLarge : Fonts.FontNormal;
+                // Same recipe as the button labels in [PickTexture]: the text grows with the canvas zoom, and
+                // at 1.8 the large atlas takes over with a compensating size factor. Using the exact atlas
+                // ratio (PickTexture's .5/.9 leaves a ~4% step) makes the hand-over seamless - the switch only
+                // sharpens the label. Growth stops where the large atlas reaches its native size.
+                var useLargeFont = CanvasScale > 1.8f;
+                var font = useLargeFont ? Fonts.FontLarge : Fonts.FontNormal;
+                var atlasRatio = Fonts.FontLarge.FontSize / Fonts.FontNormal.FontSize;
+                var fontSizeFactor = useLargeFont ? 1 / atlasRatio : 1;
+                var labelSize = font.FontSize * fontSizeFactor * MathF.Min(CanvasScale / T3Ui.UiScaleFactor, atlasRatio);
                 var labelText = name.AddSpacesForImGuiOutput();
 
-                var requiredLabelSize = item.MeasuredLabel.GetWidth(font, font.FontSize * font.Scale, name, labelText);
-
+                // Shrink the label to the node's width, like the button labels do.
                 var paddingForPreview = hasPreview ? MagGraphItem.LineHeight + 15 : 0;
-                var availableLabelWidth = (MagGraphItem.Width - paddingForPreview) * 0.9f;
-                var downScaleFactor = MathF.Min(1 / T3Ui.UiScaleFactor, availableLabelWidth / requiredLabelSize);
-                var fontSize = font.FontSize * (downScaleFactor * CanvasScale).Clamp(0.1f, 1);
+                var availableLabelWidth = (MagGraphItem.Width - paddingForPreview) * 0.9f * CanvasScale;
+                var requiredLabelSize = item.MeasuredLabel.GetWidth(font, labelSize, name, labelText);
+                var fitFactor = (availableLabelWidth / requiredLabelSize).Clamp(0.1f, 1f);
+                var fontSize = labelSize * fitFactor;
 
                 var visibleLineHeight = Math.Min(pMaxVisible.Y - pMinVisible.Y, MagGraphItem.LineHeight * CanvasScale);
                 var labelPos = new Vector2(MathF.Round(pMin.X + 8 * CanvasScale),
@@ -1410,7 +1417,7 @@ internal sealed partial class MagGraphView
             return false;
 
         ShaderResourceView previewTextureView;
-        float aspect = 1;
+        float aspect ;
         
         var texture = textureSlot.Value;
         var uvMin = Vector2.Zero;
@@ -1432,15 +1439,25 @@ internal sealed partial class MagGraphView
             uvMax = thumbnail.UvMax;
             aspect = 4 / 3.0f;
         }
-        
-        var unitScreenHeight = (MagGraphItem.GridSize.Y - 5) * CanvasScale;
-        var previewSize = new Vector2(unitScreenHeight * aspect, unitScreenHeight);
 
-        var maxAspect = 1.6f;
-        if (previewSize.X > unitScreenHeight * maxAspect)
+        var unitScreenHeight = (MagGraphItem.GridSize.Y - 6) * CanvasScale;
+        const float MaxAspect = 1.6f;
+        const float ReferenceAspect = 16f / 9f;
+
+        var maxWidth = unitScreenHeight * MaxAspect;
+
+        // Height a 16:9 image ends up with after the width clamp
+        var previewHeight = maxWidth / ReferenceAspect;
+        var previewWidth = previewHeight * aspect;
+
+        // Ultra-wide images (wider than 16:9) get shorter instead of wider
+        if (previewWidth > maxWidth)
         {
-            previewSize *= unitScreenHeight / (previewSize.X) * maxAspect;
+            previewHeight *= maxWidth / previewWidth;
+            previewWidth = maxWidth;
         }
+
+        var previewSize = new Vector2(previewWidth, previewHeight);
 
         var min = new Vector2(itemMax.X - previewSize.X - 2 * CanvasScale,
                               itemMin.Y
@@ -1455,16 +1472,16 @@ internal sealed partial class MagGraphView
                           uvMin,
                           uvMax,
                           Color.White);
-        if (CanvasScale > 0.5f)
+        if (CanvasScale > 1.8f)
         {
-            drawList.AddRect(min - Vector2.One * 0.5f * CanvasScale,
-                             min + previewSize + Vector2.One * 0.5f * CanvasScale,
+            var framePos = Vector2.One * 0.25f * CanvasScale;
+            drawList.AddRect(min - framePos,
+                             min + previewSize + framePos,
                              ColorVariations.ConnectionLines.Apply(typeColor),
-                             2 * CanvasScale,
-                             ImDrawFlags.RoundCornersAll,
-                             1 * CanvasScale);
+                             0,
+                             ImDrawFlags.RoundCornersNone,
+                             0.5f * CanvasScale);
         }
-
         return true;
     }
 
