@@ -33,7 +33,6 @@ using T3.Editor.UiModel.Helpers;
 using T3.Editor.UiModel.ProjectHandling;
 using SDL;
 using T3.SdlPlatform;
-using T3.SystemUi;
 using ShaderCompiler = T3.Core.Resource.ShaderCompiling.ShaderCompiler;
 
 namespace T3.Editor;

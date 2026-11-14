@@ -213,7 +213,7 @@ internal sealed class FreeDInput : Instance<FreeDInput>, IStatusProvider, ICusto
             ResourceManager.CreateStructuredBufferSrv(buffer.Buffer, ref buffer.Srv);
             ResourceManager.CreateStructuredBufferUav(buffer.Buffer, UnorderedAccessViewBufferFlags.None, ref buffer.Uav);
         }
-        else if (buffer != null)
+        else if (buffer?.Buffer != null)
         {
             ResourceManager.Device.ImmediateContext.UpdateSubresource(array, buffer.Buffer);
         }

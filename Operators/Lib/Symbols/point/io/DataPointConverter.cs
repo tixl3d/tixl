@@ -416,7 +416,7 @@ public sealed class DataPointConverter : Instance<DataPointConverter>
             ResourceManager.CreateStructuredBufferSrv(buffer.Buffer, ref buffer.Srv);
             ResourceManager.CreateStructuredBufferUav(buffer.Buffer, UnorderedAccessViewBufferFlags.None, ref buffer.Uav);
         }
-        else
+        else if (buffer.Buffer != null)
         {
             ResourceManager.Device.ImmediateContext.UpdateSubresource(array, buffer.Buffer);
         }

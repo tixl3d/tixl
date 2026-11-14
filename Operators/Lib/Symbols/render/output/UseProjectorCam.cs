@@ -1,3 +1,4 @@
+#nullable enable
 using T3.Core.Output;
 using T3.Core.Utils;
 using T3.Core.Utils.Geometry;

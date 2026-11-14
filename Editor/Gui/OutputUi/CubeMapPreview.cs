@@ -94,10 +94,11 @@ internal sealed class CubeMapPreview
                                  EquiAngular = cubeMap.CubeMapLayout == Texture2D.CubeMapLayouts.EquiAngular ? 1 : 0,
                              };
 
-        if (TryRender(cubeMap, (int)previewSize.X, (int)previewSize.Y, parameters))
+        if (TryRender(cubeMap, (int)previewSize.X, (int)previewSize.Y, parameters)
+            && SrvManager.GetSrvForTexture(_preview!) is { } previewSrv)
         {
             ImGui.SetCursorScreenPos(previewPos);
-            ImGui.Image((IntPtr)SrvManager.GetSrvForTexture(_preview!).ImGuiTextureId, previewSize);
+            ImGui.Image((IntPtr)previewSrv.ImGuiTextureId, previewSize);
         }
 
         if (UserSettings.Config.ShowToolbar)

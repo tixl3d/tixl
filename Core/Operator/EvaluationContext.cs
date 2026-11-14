@@ -132,7 +132,7 @@ public sealed class EvaluationContext
     /// cache their outputs and re-evaluate only after this, so whoever sets a resolution reports it through
     /// <see cref="NotifyPullResolution"/> or <see cref="NotifyResolutionWrite"/>.
     /// </summary>
-    public static event Action? RequestedResolutionChanged;
+    public static event Action RequestedResolutionChanged;
 
     /// <summary>
     /// Call before invalidating a graph that this context pulls from outside (an output window, a preview).

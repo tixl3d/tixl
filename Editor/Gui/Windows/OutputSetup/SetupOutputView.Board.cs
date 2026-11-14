@@ -1080,11 +1080,12 @@ internal sealed partial class SetupOutputView
 
         // The image is a white silhouette, so the tint is its color: the hue of the physical things on the Board.
         _boardContext ??= new EvaluationContext();
-        if (PersonImages.For(prop)?.Texture.GetValue(_boardContext) is { IsDisposed: false } texture)
+        if (PersonImages.For(prop)?.Texture.GetValue(_boardContext) is { IsDisposed: false } texture
+            && SrvManager.GetSrvForTexture(texture) is { } textureSrv)
         {
             // Selection shows in the frame below, not here: the Opacity field is edited while the figure is selected.
             var color = PulseColor(SetupColors.ForKind(SetupEntityKinds.Surface).Fade(prop.Opacity), pulse).Fade(fade);
-            dl.AddImage((IntPtr)SrvManager.GetSrvForTexture(texture).ImGuiTextureId, sMin, sMax, Vector2.Zero, Vector2.One, color);
+            dl.AddImage((IntPtr)textureSrv.ImGuiTextureId, sMin, sMax, Vector2.Zero, Vector2.One, color);
         }
 
         if (isSelected)
