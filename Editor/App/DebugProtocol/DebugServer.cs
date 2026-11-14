@@ -55,7 +55,7 @@ namespace T3.Editor.App.DebugProtocol;
 /// </summary>
 internal static class DebugServer
 {
-    public const int ProtocolVersion = 1;
+    public const int ProtocolVersion = 2;
 
     public static bool IsRunning => _listener != null;
     public static int Port { get; private set; }
@@ -194,7 +194,14 @@ internal static class DebugServer
             return;
         }
 
-        var method = request["method"]?.Value<string>();
+        // Checked before the try below: Value<string>() throws on a non-string token.
+        if (request["method"] is not JValue { Type: JTokenType.String } methodToken)
+        {
+            new RequestContext(client, request["id"], null).SendError("INVALID_REQUEST", "'method' must be a string");
+            return;
+        }
+
+        var method = methodToken.Value<string>();
         if (method != "setAgentState" && method != "ping" && AgentState == "ready")
             AgentState = "busy";
 
@@ -237,6 +244,7 @@ internal static class DebugServer
                                    {
                                        ["protocolVersion"] = ProtocolVersion,
                                        ["editorVersion"] = Assembly.GetExecutingAssembly().GetName().Version?.ToString(),
+                                       ["methods"] = new JArray(_supportedMethods),
                                    });
                 break;
 
@@ -381,6 +389,22 @@ internal static class DebugServer
             {
                 // An empty device name goes back to analysing the project's own audio.
                 var deviceName = request["device"]?.Value<string>() ?? string.Empty;
+                var deviceExists = deviceName.Length == 0;
+                foreach (var device in T3.Core.Audio.Input.AudioInput.InputDevices)
+                {
+                    if (device.Name != deviceName)
+                        continue;
+
+                    deviceExists = true;
+                    break;
+                }
+
+                if (!deviceExists)
+                {
+                    context.SendError("NOT_FOUND", $"No audio input device named '{deviceName}' (see getAudioInputs)");
+                    break;
+                }
+
                 var settings = PlaybackUtils.FindCompositionSettings(out _);
                 settings.Playback.AudioInputDeviceName = deviceName;
                 settings.Playback.AudioSource = deviceName.Length > 0
@@ -451,7 +475,21 @@ internal static class DebugServer
                 }
 
                 var bypassed = request["bypassed"]?.Value<bool>() ?? true;
-                UndoRedoStack.AddAndExecute(new ChangeInstanceBypassedCommand(bypassChild, bypassed));
+                if (bypassChild.IsBypassed != bypassed)
+                {
+                    var bypassCommand = new ChangeInstanceBypassedCommand(bypassChild, bypassed);
+                    bypassCommand.Do();
+
+                    // Symbol.Child ignores the change while its main output has no connection.
+                    if (bypassChild.IsBypassed != bypassed)
+                    {
+                        context.SendError("BYPASS_NOT_APPLIED", $"[{bypassChild.Symbol.Name}] ignored the bypass change (is its main output connected?)");
+                        break;
+                    }
+
+                    UndoRedoStack.Add(bypassCommand);
+                }
+
                 context.SendOk(new JObject { ["bypassed"] = bypassChild.IsBypassed });
                 break;
             }
@@ -678,8 +716,11 @@ internal static class DebugServer
     private static void HandleSelect(JObject request, RequestContext context, ProjectView view)
     {
         var ids = new List<Guid>();
-        if (Guid.TryParse(request["childId"]?.Value<string>(), out var singleId))
-            ids.Add(singleId);
+        if (!TryReadOptionalGuid(request, "childId", context, out var singleId))
+            return;
+
+        if (singleId.HasValue)
+            ids.Add(singleId.Value);
 
         if (request["childIds"] is JArray idArray)
         {
@@ -1422,6 +1463,7 @@ internal static class DebugServer
         }
 
         var format = path.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase)
+                     || path.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase)
                          ? ScreenshotWriter.FileFormats.Jpg
                          : ScreenshotWriter.FileFormats.Png;
 
@@ -1431,7 +1473,7 @@ internal static class DebugServer
         var target = request["target"]?.Value<string>() ?? "output";
         if (target == "ui")
         {
-            ProgramWindows.RequestUiCapture(uiTexture =>
+            var queuedUi = ProgramWindows.TryRequestUiCapture(uiTexture =>
                                             {
                                                 var startedUi = ScreenshotWriter.StartSavingToFile(uiTexture, path, format, opaque: true,
                                                                                                    onComplete: filename =>
@@ -1448,6 +1490,9 @@ internal static class DebugServer
                                                     context.SendError("SCREENSHOT_BUSY", "Screenshot queue rejected the request");
                                                 }
                                             });
+            if (!queuedUi)
+                context.SendError("SCREENSHOT_BUSY", "A ui capture is already pending - wait for its reply");
+
             return;
         }
 
@@ -1745,9 +1790,13 @@ internal static class DebugServer
     {
         Instance? instance = null;
         var view = ProjectView.Focused;
-        if (Guid.TryParse(request["childId"]?.Value<string>(), out var childId))
+        if (!TryReadOptionalGuid(request, "childId", context, out var childId)
+            || !TryReadOptionalGuid(request, "outputId", context, out var outputId))
+            return;
+
+        if (childId.HasValue)
         {
-            view?.CompositionInstance?.Children.TryGetChildInstance(childId, out instance);
+            view?.CompositionInstance?.Children.TryGetChildInstance(childId.Value, out instance);
         }
         else
         {
@@ -1763,11 +1812,11 @@ internal static class DebugServer
         // Output by guid, by name, or the first one
         ISlot? slot = null;
         var outputName = request["outputName"]?.Value<string>();
-        if (Guid.TryParse(request["outputId"]?.Value<string>(), out var outputId))
+        if (outputId.HasValue)
         {
             foreach (var candidate in instance.Outputs)
             {
-                if (candidate.Id == outputId)
+                if (candidate.Id == outputId.Value)
                 {
                     slot = candidate;
                     break;
@@ -2267,6 +2316,12 @@ internal static class DebugServer
             return;
         }
 
+        if (!SymbolRegistry.TryGetSymbol(symbolIdToAdd, out _))
+        {
+            context.SendError("NOT_FOUND", $"No symbol with id {symbolIdToAdd}");
+            return;
+        }
+
         // Scripts that pass no position used to pile every op onto the origin, on top of
         // whatever the previous probe left there. Without coordinates, start a fresh row
         // below the lowest existing op instead.
@@ -2285,6 +2340,27 @@ internal static class DebugServer
                                ["childId"] = command.AddedChildId.ToString(),
                                ["symbolId"] = symbolIdToAdd.ToString(),
                            });
+    }
+
+    /// <summary>
+    /// Reads an id that may be omitted. A present but malformed id is an error rather than "absent", so a typo
+    /// can't silently fall back to a default target.
+    /// </summary>
+    private static bool TryReadOptionalGuid(JObject request, string key, RequestContext context, out Guid? id)
+    {
+        id = null;
+        var text = request[key]?.Value<string>();
+        if (text == null)
+            return true;
+
+        if (!Guid.TryParse(text, out var parsed))
+        {
+            context.SendError("INVALID_PARAM", $"{key} '{text}' is not a Guid");
+            return false;
+        }
+
+        id = parsed;
+        return true;
     }
 
     /// <summary>Left edge of the graph, one row's height below its lowest op.</summary>
@@ -2616,6 +2692,24 @@ internal static class DebugServer
     }
 
     private const int RecentMessageCapacity = 8;
+
+    /// <summary>
+    /// Every method <see cref="ExecuteMethod"/> handles, reported by getVersion so clients can test for a command
+    /// instead of inferring support from <see cref="ProtocolVersion"/>. Keep in sync with the switch.
+    /// </summary>
+    private static readonly string[] _supportedMethods =
+        [
+            "ping", "setAgentState", "getVersion", "getPaths", "shutdown", "getStructureVersion", "getLogTail",
+            "getContext", "getGraphState", "getMetrics", "probePull", "getUpdateStats", "getShaderErrors",
+            "getFrameSamples", "screenshot", "screenshotWindow", "openProject", "openWindow", "select",
+            "getGraphView", "setGraphView", "focusGraphView", "setInput", "getOutput", "pumpFrames",
+            "newProject", "addOp", "getAudioInputs", "setAudioInput", "startAudioRecording",
+            "stopAudioRecording", "startRender", "getRenderStatus", "cancelRender", "connect", "deleteOp",
+            "pin", "setBypass", "outputSetup", "resetView", "reload", "stallMainThread", "setVSync",
+            "releaseGpuResources", "setTargetFrameRate", "setFrameLatency", "layoutSelection",
+            "deleteSelection", "undo", "redo", "setTime", "setPlayback"
+        ];
+
     private static readonly List<string> _recentMessages = new(RecentMessageCapacity);
     private static readonly List<PendingPump> _pendingPumps = new();
     private static TcpListener? _listener;

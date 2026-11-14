@@ -19,7 +19,8 @@ public sealed class ProtocolBasicsTests(EditorFixture editor)
     public void GetVersion_ReportsProtocolVersion()
     {
         var result = editor.Client.Call("getVersion").Require("getVersion");
-        Assert.Equal(1, result["protocolVersion"]!.Value<int>());
+        Assert.Equal(2, result["protocolVersion"]!.Value<int>());
+        Assert.Contains(result["methods"]!.Values<string>(), method => method == "getVersion");
     }
 
     [Fact]
