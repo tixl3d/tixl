@@ -1,3 +1,6 @@
+#nullable enable
+using Lib.Utils;
+using T3.Core.Animation;
 using T3.Graphics.Compat;
 
 namespace Lib.point.usse;
@@ -5,68 +8,133 @@ namespace Lib.point.usse;
 [Guid("c7752832-7155-4082-acd5-276c1abe7eb4")]
 internal sealed class KeepPreviousPointBuffer : Instance<KeepPreviousPointBuffer>
 {
+    /** Point memory held by all evaluations of one op instance. */
+    private sealed class MemoryBudget
+    {
+        public long AllocatedBytes;
+    }
+
+    /** The ping-pong pair of one evaluation within a frame: the copy made this frame and the one before. */
+    private sealed class PointHistory(MemoryBudget budget) : IDisposable
+    {
+        public BufferWithViews? A;
+        public BufferWithViews? B;
+        public BufferDescription Description;
+        public bool Toggle;
+
+        public BufferWithViews? Current => Toggle ? B : A;
+        public BufferWithViews? Previous => Toggle ? A : B;
+
+        public void Allocate(BufferDescription description)
+        {
+            Dispose();
+            A = CreateBuffer(description);
+            B = CreateBuffer(description);
+            Description = description;
+            budget.AllocatedBytes += 2L * description.SizeInBytes;
+        }
+
+        public void Dispose()
+        {
+            if (A != null || B != null)
+                budget.AllocatedBytes -= 2L * Description.SizeInBytes;
+
+            A?.Dispose();
+            B?.Dispose();
+            A = null;
+            B = null;
+            Description = default;
+        }
+    }
+
     [Output(Guid = "8c301f66-a743-4c1e-9f2b-fa9cb5904c98")]
-    public readonly Slot<BufferWithViews> BufferA = new();
+    public readonly Slot<BufferWithViews?> BufferA = new();
 
     [Output(Guid = "74a47202-3c66-476d-a850-fbb2b37dffe5")]
-    public readonly Slot<BufferWithViews> BufferB = new();
+    public readonly Slot<BufferWithViews?> BufferB = new();
 
     public KeepPreviousPointBuffer()
     {
         BufferA.UpdateAction += UpdateTexture;
         BufferB.UpdateAction += UpdateTexture;
+        _history = new EvaluationHistory<PointHistory>(CreatePointHistory, MaxCallsPerPass);
     }
 
     private void UpdateTexture(EvaluationContext context)
     {
-        var keep = Keep.GetValue(context);
-        if (!InputBuffer.HasInputConnections || !keep)
+        if (!InputBuffer.HasInputConnections)
             return;
+
+        // Loop iterations, motion blur passes and other windows evaluate this op several times per frame. Each
+        // evaluation keeps its own pair, so BufferB is the same evaluation one frame earlier.
+        if (!Keep.GetValue(context))
+        {
+            // Paused time or a repeated motion blur pass: show the matching evaluation of the first pass unchanged.
+            if (_history.TryGetFirstPassSlot(context, out var shown) && shown.Current != null)
+                SetOutputs(shown.Current, shown.Previous);
+
+            return;
+        }
 
         var src = InputBuffer.GetValue(context);
         if (src?.Buffer == null)
             return;
 
         var description = src.Buffer.Description;
-
-        // Must be structured
         if ((description.OptionFlags & ResourceOptionFlags.BufferStructured) == 0 || description.StructureByteStride == 0)
         {
-            Log.Warning("Input is not a structured buffer.");
+            Log.Warning("Input is not a structured buffer.", this);
             return;
         }
 
-        var changed =
-            _prevDesc.SizeInBytes == 0 ||
-            _a == null || _b == null ||
-            _a.Buffer == null || _b.Buffer == null ||
-            _a.Buffer.IsDisposed || _b.Buffer.IsDisposed ||
-            description.SizeInBytes != _prevDesc.SizeInBytes ||
-            description.StructureByteStride != _prevDesc.StructureByteStride;
+        var hasSlot = _history.TryGetSlot(context, out var history, out var isFirstEvaluation, out var previousSeenFrame);
+        if (!hasSlot)
+        {
+            SetOutputs(src, src);
+            return;
+        }
 
         try
         {
-            if (changed)
+            var deviceContext = ResourceManager.Device.ImmediateContext;
+            var needsBuffers = history!.A == null || history.B == null
+                               || history.A.Buffer == null || history.B.Buffer == null
+                               || history.A.Buffer.IsDisposed || history.B.Buffer.IsDisposed
+                               || description.SizeInBytes != history.Description.SizeInBytes
+                               || description.StructureByteStride != history.Description.StructureByteStride;
+            if (needsBuffers)
             {
-                DisposePrev();
+                history.Dispose();
+
+                // Loops and repeat passes multiply the copies; beyond the budget they get no history. The first
+                // evaluation always keeps it, as it did before evaluations were told apart.
+                var exceedsBudget = _budget.AllocatedBytes + 2L * description.SizeInBytes > MaxHistoryBytes;
+                if (exceedsBudget && !isFirstEvaluation)
+                {
+                    SetOutputs(src, src);
+                    return;
+                }
 
                 var newDesc = new BufferDescription
-                               {
-                                   SizeInBytes = description.SizeInBytes,
-                                   BindFlags = BindFlags.ShaderResource | BindFlags.UnorderedAccess,
-                                   CpuAccessFlags = CpuAccessFlags.None,
-                                   OptionFlags = ResourceOptionFlags.BufferStructured,
-                                   Usage = ResourceUsage.Default,
-                                   StructureByteStride = description.StructureByteStride
-                               };
-
-                _a = CreateBuffer(newDesc);
-                _b = CreateBuffer(newDesc);
-                _prevDesc = newDesc;
+                                  {
+                                      SizeInBytes = description.SizeInBytes,
+                                      BindFlags = BindFlags.ShaderResource | BindFlags.UnorderedAccess,
+                                      CpuAccessFlags = CpuAccessFlags.None,
+                                      OptionFlags = ResourceOptionFlags.BufferStructured,
+                                      Usage = ResourceUsage.Default,
+                                      StructureByteStride = description.StructureByteStride
+                                  };
+                history.Allocate(newDesc);
             }
 
-            var dst = _toggle ? _a.Buffer : _b.Buffer;
-            ResourceManager.Device.ImmediateContext.CopyResource(src.Buffer, dst);
+            history.Toggle = !history.Toggle;
+            deviceContext.CopyResource(src.Buffer, history.Current!.Buffer!);
+
+            // Without last frame's points (new buffers, or the op was bypassed for a while), report no motion instead
+            // of reading an uninitialized buffer or streaking from an old state. Paused frames still count as seen.
+            var hasPreviousFrame = !needsBuffers && previousSeenFrame == Playback.FrameCount - 1;
+            if (!hasPreviousFrame)
+                deviceContext.CopyResource(src.Buffer, history.Previous!.Buffer!);
         }
         catch (Exception e)
         {
@@ -74,14 +142,20 @@ internal sealed class KeepPreviousPointBuffer : Instance<KeepPreviousPointBuffer
             return;
         }
 
-        // Expose SRVs/UAVs
-        BufferA.Value = _toggle ? _a : _b;
-        BufferB.Value = _toggle ? _b : _a;
+        SetOutputs(history.Current, history.Previous);
+    }
 
+    private void SetOutputs(BufferWithViews? current, BufferWithViews? previous)
+    {
+        BufferA.Value = current;
+        BufferB.Value = previous;
         BufferA.DirtyFlag.Clear();
         BufferB.DirtyFlag.Clear();
+    }
 
-        _toggle = !_toggle;
+    private PointHistory CreatePointHistory()
+    {
+        return new PointHistory(_budget);
     }
 
     private static BufferWithViews CreateBuffer(BufferDescription desc)
@@ -120,21 +194,17 @@ internal sealed class KeepPreviousPointBuffer : Instance<KeepPreviousPointBuffer
     protected override void Dispose(bool disposing)
     {
         if (!disposing) return;
-        DisposePrev();
+        _history.Dispose();
     }
 
-    private void DisposePrev()
-    {
-        _a?.Dispose();
-        _b?.Dispose();
-        _a = null;
-        _b = null;
-        _prevDesc = default;
-    }
+    /** Bounds the history of an op inside a long loop; evaluations beyond it report no motion. */
+    private const int MaxCallsPerPass = 256;
 
-    private bool _toggle;
-    private BufferWithViews _a, _b;
-    private BufferDescription _prevDesc;
+    /** Point copies of all evaluations together stop here; loops and repeat passes would otherwise multiply them. */
+    private const long MaxHistoryBytes = 512L * 1024 * 1024;
+
+    private readonly MemoryBudget _budget = new();
+    private readonly EvaluationHistory<PointHistory> _history;
 
     [Input(Guid = "07ca7e81-02b8-4cb4-92f4-7afaaa07b751")]
     public readonly InputSlot<BufferWithViews> InputBuffer = new();

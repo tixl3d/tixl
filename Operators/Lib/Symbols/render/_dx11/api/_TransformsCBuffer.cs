@@ -1,4 +1,5 @@
 #nullable enable
+using Lib.Utils;
 using T3.Core.Animation;
 using T3.Core.Rendering;
 
@@ -7,12 +8,11 @@ namespace Lib.render._dx11.api;
 [Guid("a60adc26-d7c6-4615-af78-8d2d6da46b79")]
 internal sealed class _TransformsCBuffer : Instance<_TransformsCBuffer>
 {
-    /** The transforms one repeated pass of a frame wrote this frame and the frame before. */
-    private sealed class PassBuffers
+    /** The transforms one evaluation of a frame wrote this frame and the frame before. */
+    private sealed class TransformBuffers : IDisposable
     {
         public Buffer? Current;
         public Buffer? Previous;
-        public int LastUpdateFrame = -1;
 
         public void Dispose()
         {
@@ -33,28 +33,30 @@ internal sealed class _TransformsCBuffer : Instance<_TransformsCBuffer>
     public _TransformsCBuffer()
     {
         Buffer.UpdateAction += Update;
+        _history = new EvaluationHistory<TransformBuffers>(CreateTransformBuffers, MaxCallsPerPass);
     }
 
     private void Update(EvaluationContext context)
     {
-        // Cube map faces and motion blur samples re-evaluate within one frame with different cameras.
-        // Each pass keeps its own history, so Prev is the same view one frame earlier and not the previous pass.
-        context.IntVariables.TryGetValue(RepeatPassVariableName, out var passIndex);
-        var pass = GetPassBuffers(Math.Clamp(passIndex, 0, MaxRepeatPasses - 1));
+        // Loop iterations, motion blur passes, cube map faces and other windows evaluate this op several times per
+        // frame. Each evaluation keeps its own history, so Prev is the same evaluation one frame earlier.
+        var hasSlot = _history.TryGetSlot(context, out var buffers, out var isFirstEvaluation, out var previousSeenFrame);
+        if (!hasSlot)
+        {
+            buffers = _beyondCallLimit;
+        }
 
-        var isFirstUse = pass.Current == null || pass.Current.IsDisposed;
+        var isFirstUse = buffers!.Current == null || buffers.Current.IsDisposed;
         if (isFirstUse)
         {
-            pass.Dispose();
-            pass.Current = CreateConstBuffer("A");
-            pass.Previous = CreateConstBuffer("B");
+            buffers.Dispose();
+            buffers.Current = CreateConstBuffer("A");
+            buffers.Previous = CreateConstBuffer("B");
         }
-        else if (pass.LastUpdateFrame != Playback.FrameCount)
+        else
         {
-            (pass.Current, pass.Previous) = (pass.Previous, pass.Current);
+            (buffers.Current, buffers.Previous) = (buffers.Previous, buffers.Current);
         }
-
-        pass.LastUpdateFrame = Playback.FrameCount;
 
         var hasCam = TryGetCamera(context, out var camera);
 
@@ -62,24 +64,23 @@ internal sealed class _TransformsCBuffer : Instance<_TransformsCBuffer>
             ? new TransformBufferLayout(camera!.CameraToClipSpace, camera.WorldToCamera, context.ObjectToWorld)
             : new TransformBufferLayout(context.CameraToClipSpace, context.WorldToCamera, context.ObjectToWorld);
 
-        ResourceManager.UpdateConstBuffer(data, pass.Current!);
+        ResourceManager.UpdateConstBuffer(data, buffers.Current!);
 
-        // Without history, report no motion instead of reprojecting through uninitialized matrices.
-        if (isFirstUse)
-            ResourceManager.UpdateConstBuffer(data, pass.Previous!);
+        // Without last frame's matrices (new evaluation, skipped frames, beyond the call limit), report no motion
+        // instead of reprojecting through matrices that are uninitialized or seconds old.
+        var hasPreviousFrame = hasSlot && !isFirstUse && previousSeenFrame == Playback.FrameCount - 1;
+        if (!hasPreviousFrame)
+            ResourceManager.UpdateConstBuffer(data, buffers.Previous!);
 
-        Buffer.Value = pass.Current;
-        PrevBuffer.Value = pass.Previous;
+        Buffer.Value = buffers.Current;
+        PrevBuffer.Value = buffers.Previous;
         Buffer.DirtyFlag.Clear();
         PrevBuffer.DirtyFlag.Clear();
     }
 
-    private PassBuffers GetPassBuffers(int passIndex)
+    private static TransformBuffers CreateTransformBuffers()
     {
-        if (passIndex >= _passes.Length)
-            Array.Resize(ref _passes, passIndex + 1);
-
-        return _passes[passIndex] ??= new PassBuffers();
+        return new TransformBuffers();
     }
 
     private static Buffer CreateConstBuffer(string suffix)
@@ -120,20 +121,19 @@ internal sealed class _TransformsCBuffer : Instance<_TransformsCBuffer>
     protected override void Dispose(bool disposing)
     {
         if (!disposing) return;
-        foreach (var pass in _passes)
-        {
-            pass?.Dispose();
-        }
+        _history.Dispose();
+        _beyondCallLimit.Dispose();
     }
 
 
     [Input(Guid = "55DBF5B7-B3D2-4D61-86D5-AC3B167244B7")]
     public readonly InputSlot<Object> CameraReference = new();
 
-    private const string RepeatPassVariableName = "__MotionBlurPass";
+    /** Bounds the history of an op inside a long loop; evaluations beyond it report no motion. */
+    private const int MaxCallsPerPass = 256;
 
-    /** Bounds the per-pass history against unexpected pass indices. */
-    private const int MaxRepeatPasses = 64;
+    private readonly EvaluationHistory<TransformBuffers> _history;
 
-    private PassBuffers?[] _passes = new PassBuffers?[1];
+    /** Shared by all evaluations beyond <see cref="MaxCallsPerPass"/>; holds no history. */
+    private readonly TransformBuffers _beyondCallLimit = new();
 }
