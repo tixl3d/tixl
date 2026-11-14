@@ -1,13 +1,16 @@
 // Screen-space motion for temporal effects (TXAA, motion blur, reprojection).
 //
 // [RenderTarget] with WithVelocityBuffer binds an RGBA16F target as SV_Target2 and clears it to 0:
-//   rg  current uv - previous uv (as the jittered matrices give it; consumers remove the jitter delta)
-//   b   this surface's depth when written, to detect that a draw without velocity covered it later
-//   a   this surface's depth one frame earlier, 0 = no motion known (pixel falls back to camera-only reprojection)
+//   rg  current uv - previous uv without the projection jitter of temporal AA, so a still surface reads 0
+//   b   1 - this surface's depth when written, to detect that a draw without velocity covered it later
+//   a   1 when written, 0 = no motion known (pixel falls back to camera-only reprojection)
+// Draw ops blend all targets like the color target, so alpha stays 1: alpha blending then overwrites, and additive
+// blending corrupts b, which the depth check rejects. Depth is stored as 1 - depth: scene depth crowds near 1, where
+// half floats step by ~0.0005, but near 0 they are precise.
 // An unbound velocity map also reads 0, so consumers behave as before when nothing writes velocity.
 
-/** Depth difference above which the stored velocity belongs to a surface that has since been covered. */
-static const float VelocityDepthTolerance = 0.0001;
+/** Relative difference of (1 - depth) above which the stored velocity belongs to a surface that was covered later. */
+static const float VelocityDepthTolerance = 0.002;
 
 float2 ClipToUv(float4 clipPosition)
 {
@@ -15,19 +18,32 @@ float2 ClipToUv(float4 clipPosition)
     return float2(ndc.x * 0.5 + 0.5, 0.5 - ndc.y * 0.5);
 }
 
-/** For draw shaders: clip positions of the same vertex this frame and last frame. */
-float4 EncodeVelocity(float4 clipPosition, float4 previousClipPosition)
+/** The sub-pixel jitter (and lens shift) a projection adds, in uv. It sits in the NDC translation terms. */
+float2 JitterUv(float4x4 cameraToClipSpace)
 {
-    float2 velocity = ClipToUv(clipPosition) - ClipToUv(previousClipPosition);
-    float depth = clipPosition.z / clipPosition.w;
-    float previousDepth = max(previousClipPosition.z / previousClipPosition.w, 1e-6);
-    return float4(velocity, depth, previousDepth);
+    return float2(cameraToClipSpace._31, -cameraToClipSpace._32) * 0.5;
+}
+
+/**
+ * For draw shaders: clip positions of the same vertex this frame and last frame, and both frames' projections.
+ * Without previous transforms (an unbound cbuffer reads 0) it reports no motion known.
+ */
+float4 EncodeVelocity(float4 clipPosition, float4 previousClipPosition,
+                      float4x4 cameraToClipSpace, float4x4 previousCameraToClipSpace)
+{
+    if (previousClipPosition.w <= 1e-6)
+        return 0;
+
+    // The jitter moves the projected position by -JitterUv; adding the change back leaves only real motion.
+    float2 jitteredVelocity = ClipToUv(clipPosition) - ClipToUv(previousClipPosition);
+    float2 velocity = jitteredVelocity + JitterUv(cameraToClipSpace) - JitterUv(previousCameraToClipSpace);
+    return float4(velocity, 1 - clipPosition.z / clipPosition.w, 1);
 }
 
 /** True if the stored motion belongs to the surface now visible at this pixel (sceneDepth from the depth buffer). */
-bool TryDecodeVelocity(float4 encoded, float sceneDepth, out float2 velocity, out float previousDepth)
+bool TryDecodeVelocity(float4 encoded, float sceneDepth, out float2 velocity)
 {
     velocity = encoded.rg;
-    previousDepth = encoded.a;
-    return encoded.a > 0 && abs(encoded.b - sceneDepth) < VelocityDepthTolerance;
+    float inverseSceneDepth = 1 - sceneDepth;
+    return encoded.a > 0.5 && abs(encoded.b - inverseSceneDepth) <= VelocityDepthTolerance * inverseSceneDepth + 1e-7;
 }

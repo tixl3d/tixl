@@ -2,6 +2,7 @@
 #include "shared/quat-functions.hlsl"
 #include "shared/point-light.hlsl"
 #include "shared/pbr.hlsl"
+#include "shared/velocity-functions.hlsl"
 
 cbuffer Transforms : register(b0)
 {
@@ -53,6 +54,21 @@ cbuffer FloatParams : register(b5)
     /*{FLOAT_PARAMS}*/
 }
 
+/** Last frame's transforms of this draw, for the velocity target. Unbound (all 0) in [DrawScene]. */
+cbuffer PreviousTransforms : register(b6)
+{
+    float4x4 PrevCameraToClipSpace;
+    float4x4 PrevClipSpaceToCamera;
+    float4x4 PrevWorldToCamera;
+    float4x4 PrevCameraToWorld;
+    float4x4 PrevWorldToClipSpace;
+    float4x4 PrevClipSpaceToWorld;
+    float4x4 PrevObjectToWorld;
+    float4x4 PrevWorldToObject;
+    float4x4 PrevObjectToCamera;
+    float4x4 PrevObjectToClipSpace;
+};
+
 struct psInput
 {
     float2 texCoord : TEXCOORD;
@@ -61,12 +77,15 @@ struct psInput
     float3x3 tbnToWorld : TBASIS;
     float3 colorRGB : COLOR;
     float fog : VPOS;
+    float4 clipPosition : CLIP_POSITION;
+    float4 previousClipPosition : PREVIOUS_CLIP_POSITION;
 };
 
 struct psOutput
 {
     float4 Color : SV_Target0;
     float4 Normal : SV_Target1;
+    float4 Velocity : SV_Target2;
 };
 
 sampler WrappedSampler : register(s0);
@@ -97,6 +116,8 @@ psInput vsMain(uint id : SV_VertexID)
 
     float4 posInClipSpace = mul(posInObject, ObjectToClipSpace);
     output.pixelPosition = posInClipSpace;
+    output.clipPosition = posInClipSpace;
+    output.previousClipPosition = mul(posInObject, PrevObjectToClipSpace);
 
     float2 uv = vertex.TexCoord;
     output.texCoord = float2(uv.x, 1 - uv.y);
@@ -250,6 +271,7 @@ psOutput psMain(psInput pin, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
     output.Color = litColor;
     // Output to normal buffer (SV_Target1)
     output.Normal = float4(worldNormal, 1.0);
+    output.Velocity = EncodeVelocity(pin.clipPosition, pin.previousClipPosition, CameraToClipSpace, PrevCameraToClipSpace);
     
     return output;
 }

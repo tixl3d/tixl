@@ -13,11 +13,35 @@ Phases 1–3 with manual wiring:
   targets share one nested `ColorAttachment` class. With velocity on, a normal target always holds slot 1: the Vulkan
   backend packs bound targets (`VulkanCommandList.BeginRendering` skips nulls), so a gap would move velocity into the
   normal slot.
-- Layout in `Assets/shaders/shared/velocity-functions.hlsl`: rg = current uv − previous uv (jittered matrices),
-  b = depth when written (occlusion check against the depth buffer), a = previous depth, 0 = unknown.
-  The previous depth lets TXAA's disocclusion test follow a moving surface instead of rejecting it.
+- Layout in `Assets/shaders/shared/velocity-functions.hlsl`: rg = current uv − previous uv **without TAA jitter**
+  (writers add back `JitterUv(current) − JitterUv(previous)`; TXAA applies its jitter correction only on the camera
+  path; stored with jitter it flickered by up to a pixel per frame, reported by the user 2026-11-15),
+  b = 1 − depth when written (occlusion check against the depth buffer), a = 1 when written, 0 = unknown.
+  - Alpha is not data: `PickBlendMode`'s blend states don't enable independent blending, so every target blends
+    like the color target. With a = 1, alpha blending overwrites; additive blending corrupts b and fails the check.
+  - Depth is stored as 1 − depth because scene depth crowds near 1, where half floats step by ~0.0005.
+  - No previous depth: for moving pixels TXAA's disocclusion test compares view depth instead of world positions.
+    Surfaces moving in depth faster than `DepthRejection` per frame lose history (no AA, no ghosting).
+  - Screen space rather than world space: it is what TAA, motion blur and upscalers consume, and it needs fewer
+    channels.
+  - Verified over the bridge 2026-11-14: buffers allocate per toggle (velocity keeps a normal target), 4× MSAA
+    without errors, TXAA with an empty velocity map matches the unconnected one within frame-to-frame jitter noise.
 - `[TXAA]`: `VelocityMap` input (t3). Where the velocity is valid it replaces the camera reprojection; elsewhere and
   when unconnected the shader takes the old path.
+**M2 started 2026-11-15** for `[DrawMesh]`: `mesh-Draw.hlsl` binds `_TransformsCBuffer.PrevBuffer` as `b6`, passes
+current and previous clip positions and writes `EncodeVelocity` to SV_Target2. `[DrawScene]` shares the shader but
+binds only b0–b4, so b6 reads 0 and `EncodeVelocity` reports no motion known. Mesh deformation is not covered (rigid
+transforms and camera only).
+- Verified over the bridge 2026-11-15 (Vulkan with validation, debug returns in TXAA, reverted afterwards):
+  - A rotating `[DrawMesh]` writes velocity, and TXAA decodes it on the mesh (detected area = area with a = 1, depth
+    mismatch ~0).
+  - Static cube, moving camera: object velocity matches TXAA's camera-only estimate within ~4·10⁻⁶ uv while the camera
+    moves ~10⁻³ uv per frame, so sign, scale and jitter handling agree.
+  - Not shown yet: the visible gain. On a flat-shaded cube TXAA's neighborhood clamp hides wrong history, and fast
+    rotation exceeds `MotionThreshold`, so TXAA with and without velocity both stay close to the raw frame. Needs a
+    textured or detailed mesh.
+  - Seen once per new TXAA instance: a Vulkan validation error for TXAA's `History` texture (sampled while still in
+    color-attachment layout). Not touched by M1/M2; to be checked separately.
 
 ## Goal
 
@@ -230,7 +254,9 @@ M0 is independent and can ship first. M1 and later come after Phase 3 above; the
 - **M3. Moving points.** Gate `KeepPreviousPointBuffer` on the request flag in the instanced draws (`DrawMeshAtPoints`,
   `DrawPoints`, `DrawBillboards`). Move `DrawMovingPoints` onto the shared include.
 - **M4. Deformed meshes.** Previous vertex buffer for mesh ops that deform on the GPU, only when needed.
-- **M5. MotionBlur** reads the same velocity target.
+- **M5. MotionBlur** reads the same velocity target. Velocity is displacement per *frame*, which is what TXAA needs
+  (its history is one frame old), but it follows frame-duration jitter: motion blur must scale it by
+  shutter time / `Playback.LastFrameDuration`, or blur length jumps with frame timing (seen 2026-11-15).
 
 ## Research Findings (2026-11-14)
 
