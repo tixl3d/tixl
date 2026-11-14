@@ -21,10 +21,12 @@ public static class MathUtils
         var amplitude = 0.5f;
         for (var octave = 0; octave < octaves - 1; octave++)
         {
-            var v = value * frequency + seed * 12.468f;
-            var a = Noise((int)v, seed);
-            var b = Noise((int)v + 1, seed);
-            var t = Fade(v - (float)Math.Floor(v));
+            // Double: the seed offset makes v large, and in float the small per-frame advance of value would step.
+            var v = (double)value * frequency + seed * 12.468;
+            var cell = Math.Floor(v);
+            var a = Noise((int)cell, seed);
+            var b = Noise((int)cell + 1, seed);
+            var t = Fade((float)(v - cell));
             noiseSum += Lerp(a, b, t) * amplitude;
             frequency *= 2;
             amplitude *= 0.5f;
