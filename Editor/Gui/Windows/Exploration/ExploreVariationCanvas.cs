@@ -11,6 +11,7 @@ using T3.Editor.Gui.Windows.Output;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.ProjectHandling;
 using Vector2 = System.Numerics.Vector2;
+using T3.Editor.Gui.Windows.RenderExport;
 
 
 namespace T3.Editor.Gui.Windows.Exploration;
@@ -360,6 +361,10 @@ internal sealed class ExploreVariationCanvas : ScalableCanvas
         // Render variation
         _thumbnailCanvasRendering.EvaluationContext.Reset();
         _thumbnailCanvasRendering.EvaluationContext.LocalTime = 13.4f;
+
+        // At the output's size rather than the cell's, so render targets upstream aren't resized for every cell.
+        // CopyToCanvasTexture scales it into the cell.
+        _thumbnailCanvasRendering.EvaluationContext.RequestedResolution = RenderProcess.ActiveOutputResolution;
 
         // NOTE: This is horrible hack to prevent _imageCanvas from being rendered by ImGui
         // DrawValue will use the current ImageOutputCanvas for rendering
