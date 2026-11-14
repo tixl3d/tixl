@@ -1597,13 +1597,21 @@ internal static class DebugServer
     {
         Instance? instance = null;
         var view = ProjectView.Focused;
-        if (Guid.TryParse(request["childId"]?.Value<string>(), out var childId))
+        var childIdToken = request["childId"];
+        if (childIdToken == null)
         {
-            view?.CompositionInstance?.Children.TryGetChildInstance(childId, out instance);
+            instance = view?.RootInstance;
         }
         else
         {
-            instance = view?.RootInstance;
+            // Reject invalid child IDs so the request can't fall back to the root.
+            if (childIdToken.Type != JTokenType.String || !Guid.TryParse(childIdToken.Value<string>(), out var childId))
+            {
+                context.SendError("INVALID_PARAM", "childId must be a GUID string");
+                return;
+            }
+
+            view?.CompositionInstance?.Children.TryGetChildInstance(childId, out instance);
         }
 
         if (instance == null)
