@@ -464,9 +464,9 @@ public abstract partial class Instance
                     InvalidateParentInputs(connection);
                 }
             }
-            else
+            else if (bufferInput.FirstConnection is { } connection)
             {
-                var connection = bufferInput.FirstConnection;
+                // An unconnected input uses its own value and has no upstream slot to invalidate.
                 InvalidateParentInputs(connection);
             }
 
