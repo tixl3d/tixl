@@ -124,6 +124,25 @@
           }
         }
       }
+    },
+    {
+      "Id": "a0a00480-efa5-435d-a1e7-46552c5fe88f",
+      "IsPreset": true,
+      "ActivationIndex": 5,
+      "Title": "1024px x8",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 135.00189
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "e367bd72-c37c-4a7f-8441-698161ba75f8": 0.125,
+          "63ebb6c9-e8a5-43e4-97a4-3a34ad585474": {
+            "X": 1024,
+            "Y": 1024
+          }
+        }
+      }
     }
   ]
 }
