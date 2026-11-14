@@ -129,8 +129,9 @@ public static class AudioInput
     {
         get
         {
+            // Not cached: a query before the engine starts must not pin an empty list for the whole session.
             if (AudioMixerManager.NativeEngine == null)
-                return _inputDevices ??= [];
+                return _noInputDevices;
 
             if (_inputDevices == null)
                 InitializeInputDeviceList();
@@ -476,6 +477,8 @@ public static class AudioInput
     /// Internal cache of enumerated input devices.
     /// </summary>
     private static List<AudioInputDevice> _inputDevices;
+
+    private static readonly List<AudioInputDevice> _noInputDevices = [];
     
     /// <summary>
     /// The time in seconds since the last audio data update callback.
