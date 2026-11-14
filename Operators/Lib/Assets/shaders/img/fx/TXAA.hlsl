@@ -1,3 +1,5 @@
+#include "shared/velocity-functions.hlsl"
+
 cbuffer ParamConstants : register(b0)
 {
     float BlendFactor;        // History weight in steady state (0..1, ~0.9).
@@ -50,6 +52,7 @@ struct vsOutput
 Texture2D<float4> Image : register(t0);
 Texture2D<float4> DepthMap : register(t1);
 Texture2D<float4> History : register(t2);
+Texture2D<float4> VelocityMap : register(t3);
 sampler texSampler : register(s0);
 
 // YCoCg is the standard space for TAA neighborhood clamping: chroma separates from luma
@@ -90,10 +93,21 @@ float4 psMain(vsOutput psInput) : SV_TARGET
     float4 worldPos = mul(float4(ndc, depth, 1.0), ClipSpaceToWorld);
     worldPos /= worldPos.w;
 
-    // Project that world point through the previous camera to find where it was on screen.
+    // Where this surface was on screen last frame. Draws that write velocity know it (moving objects);
+    // elsewhere project the world point through the previous camera, which is right for static geometry.
+    float2 objectVelocity;
+    float objectPreviousDepth;
+    bool hasObjectMotion = TryDecodeVelocity(VelocityMap.SampleLevel(texSampler, uv, 0), depth,
+                                             objectVelocity, objectPreviousDepth);
+
     float4 prevClip = mul(worldPos, PrevWorldToClipSpace);
     prevClip /= prevClip.w;
     float2 prevUv = float2(prevClip.x * 0.5 + 0.5, 0.5 - prevClip.y * 0.5);
+    if (hasObjectMotion)
+    {
+        prevUv = uv - objectVelocity;
+        prevClip = float4(prevUv.x * 2.0 - 1.0, 1.0 - prevUv.y * 2.0, objectPreviousDepth, 1.0);
+    }
 
     // Un-jitter the reprojection so the accumulated history stays in stable (jitter-free) pixel
     // alignment: with a static camera prevUv then equals uv exactly, avoiding the per-frame
@@ -157,12 +171,18 @@ float4 psMain(vsOutput psInput) : SV_TARGET
     confidence *= 1.0 - saturate(length(velocity) / max(MotionThreshold, 1e-5));
 
     // Depth disocclusion: reconstruct the world point the previous frame actually recorded at
-    // prevUv (its stored depth + the previous camera). If it sits far from the current surface,
-    // a different/occluding surface was visible there last frame, so history is invalid and we
-    // reject it for a hard edge.
+    // prevUv (its stored depth + the previous camera). If it sits far from where this surface was
+    // last frame, a different/occluding surface was visible there, so history is invalid and we
+    // reject it for a hard edge. A moving surface was at its previous depth, a static one at worldPos.
     float4 prevWorld = mul(float4(prevClip.xy, historySample.a, 1.0), PrevClipSpaceToWorld);
     prevWorld /= prevWorld.w;
-    float surfaceGap = distance(worldPos.xyz, prevWorld.xyz);
+    float4 expectedPrevWorld = worldPos;
+    if (hasObjectMotion)
+    {
+        expectedPrevWorld = mul(float4(prevClip.xy, objectPreviousDepth, 1.0), PrevClipSpaceToWorld);
+        expectedPrevWorld /= expectedPrevWorld.w;
+    }
+    float surfaceGap = distance(expectedPrevWorld.xyz, prevWorld.xyz);
     confidence *= 1.0 - saturate(surfaceGap / max(DepthRejection, 1e-5));
 
     if (Reset > 0.5)

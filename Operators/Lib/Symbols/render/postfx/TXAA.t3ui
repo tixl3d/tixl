@@ -32,10 +32,17 @@
       "Description": "Reference output of the scene camera ([Camera] or [OrbitCamera]). Its matrices drive the reprojection of the previous frame."
     },
     {
+      "InputId": "48fefd6e-44d6-457a-a1b3-12b23be585ee"/*VelocityMap*/,
+      "Position": {
+        "X": 131.33911,
+        "Y": 965.6381
+      }
+    },
+    {
       "InputId": "5d6e7f80-91a2-43b4-8506-7d8e9f011223"/*BlendFactor*/,
       "Position": {
-        "X": -225.14398,
-        "Y": 573.38007
+        "X": 61.33911,
+        "Y": 1105.6382
       },
       "Description": "How much of the accumulated history is kept each frame. Higher values are smoother and more stable but react slower to changes; lower values are sharper but flicker more. Typical range: 0.85 … 0.93.",
       "Min": 0.0,
@@ -46,8 +53,8 @@
     {
       "InputId": "6e7f8091-a2b3-44c5-9607-8e9f01122334"/*NeighborhoodClamp*/,
       "Position": {
-        "X": -225.14398,
-        "Y": 608.38007
+        "X": 61.33911,
+        "Y": 1140.6382
       },
       "Description": "Widens the color range the history is allowed to differ from the current frame. 0 is strict: crisp and ghost-free, but noisy details (speculars, thin lines) keep flickering. Higher values smooth such flickering at the risk of ghost trails behind moving content.",
       "Min": 0.0,
@@ -66,8 +73,8 @@
     {
       "InputId": "7f8091a2-b3c4-45d6-a708-9f0112233445"/*MotionThreshold*/,
       "Position": {
-        "X": -225.14398,
-        "Y": 643.38007
+        "X": 61.33911,
+        "Y": 1175.6382
       },
       "Description": "Screen-space motion (as a fraction of the image size) above which the history is discarded. A safety net for jumps and cuts that the reprojection can't follow — keep it high (0.1 or more) so it doesn't reduce quality during normal camera motion.",
       "Min": 0.0,
@@ -77,8 +84,8 @@
     {
       "InputId": "8091a2b3-c4d5-46e7-b809-011223344556"/*DepthRejection*/,
       "Position": {
-        "X": -225.14398,
-        "Y": 678.38007
+        "X": 61.33911,
+        "Y": 1210.6382
       },
       "Description": "World-space distance above which a surface is treated as newly revealed (disocclusion) and its history is rejected. Smaller values give harder, cleaner edges when objects move in front of each other; too small rejects history everywhere. Silhouettes against an empty background have a very large gap, so they stay aliased unless this is raised well above the far clip distance.",
       "Min": 0.0,
@@ -88,8 +95,8 @@
     {
       "InputId": "91a2b3c4-d5e6-47f8-8910-112233445566"/*Reset*/,
       "Position": {
-        "X": -365.14404,
-        "Y": 713.37976
+        "X": -78.66095,
+        "Y": 1245.638
       },
       "Description": "Discards the accumulated history for this frame. Trigger on hard camera cuts to avoid a brief smear."
     }
@@ -131,24 +138,16 @@
       "ChildId": "1d873630-1c44-42bd-a9dd-279d18e3b06e",
       "SymbolName": "Lib.render._dx11.api.FloatsToBuffer",
       "Position": {
-        "X": -85.14398,
-        "Y": 538.38007
+        "X": 201.33911,
+        "Y": 1070.6382
       }
     },
     {
       "ChildId": "25049fb2-0b47-4c2f-afca-1044b5c02fe4",
       "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
       "Position": {
-        "X": -225.14398,
-        "Y": 713.37976
-      }
-    },
-    {
-      "ChildId": "25b812c6-c4ce-4ac2-8105-ff4956d9207b",
-      "SymbolName": "Lib.render.shading._._TransformsCBufferFromCam",
-      "Position": {
-        "X": -1178.4167,
-        "Y": 1598.534
+        "X": 61.33911,
+        "Y": 1245.638
       }
     },
     {
@@ -157,14 +156,6 @@
       "Position": {
         "X": 554.3516,
         "Y": 524.02124
-      }
-    },
-    {
-      "ChildId": "54f2fe80-4554-4ba4-b8d2-fc574b07147f",
-      "SymbolName": "Lib.flow.context.SetObjectVar",
-      "Position": {
-        "X": -636.82654,
-        "Y": 1698.5961
       }
     },
     {
@@ -180,7 +171,15 @@
       "SymbolName": "Types.Gfx.SamplerState",
       "Position": {
         "X": 271.3391,
-        "Y": 965.6382
+        "Y": 1000.6381
+      }
+    },
+    {
+      "ChildId": "63e36d32-a666-477f-82cf-bdb173a389ad",
+      "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
+      "Position": {
+        "X": 271.3391,
+        "Y": 965.6381
       }
     },
     {
@@ -224,14 +223,6 @@
       }
     },
     {
-      "ChildId": "778029d6-42b3-4ff9-bce4-d269115be2ee",
-      "SymbolName": "Lib.numbers.vec3.Vector3Components",
-      "Position": {
-        "X": -1434.1462,
-        "Y": 1319.5575
-      }
-    },
-    {
       "ChildId": "77f6bed6-e504-4da5-8e58-85cc0ec92135",
       "SymbolName": "Lib.numbers.vec2.Vec2JitterOffset",
       "Position": {
@@ -253,14 +244,6 @@
       "Position": {
         "X": 411.3391,
         "Y": 650.6381
-      }
-    },
-    {
-      "ChildId": "826b3cc1-797d-4d5d-a3cb-306a6cc76e07",
-      "SymbolName": "Lib.render._dx11.api._TransformsCBuffer",
-      "Position": {
-        "X": -1138.8926,
-        "Y": 1450.2217
       }
     },
     {
@@ -301,14 +284,6 @@
       "Position": {
         "X": 577.55066,
         "Y": -192.1865
-      }
-    },
-    {
-      "ChildId": "a55adcb3-615a-4a6e-a301-f8385288d53d",
-      "SymbolName": "Lib.render._dx11.api.TimeConstBuffer",
-      "Position": {
-        "X": -1169.6428,
-        "Y": 1514.3683
       }
     },
     {
@@ -381,14 +356,6 @@
       "Position": {
         "X": 71.088745,
         "Y": 395.33008
-      }
-    },
-    {
-      "ChildId": "e6e75fd2-f6cc-4461-9618-341a65ed1ead",
-      "SymbolName": "Lib.render._dx11.api.FloatsToBuffer",
-      "Position": {
-        "X": -1294.1462,
-        "Y": 1284.5574
       }
     },
     {

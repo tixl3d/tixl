@@ -7,6 +7,17 @@ Code checks and editor tests done 2026-11-14 (see "Research Findings").
 `_TransformsCBuffer` and `KeepPreviousPointBuffer` use it. Both report no motion when the evaluation wasn't seen last
 frame. With `Keep` off (paused, repeated motion blur pass) `KeepPreviousPointBuffer` shows the matching first-pass
 evaluation, as before. Per-context keying replaced the planned `KeepsHistory` flag, so Core is unchanged.
+**M1 implemented 2026-11-14, untested by a human** (test set `.tests-manual/velocity-buffer.md`), done before
+Phases 1–3 with manual wiring:
+- `[RenderTarget]`: `WithVelocityBuffer` / `VelocityBuffer` (RGBA16F, SV_Target2, cleared to 0). Normal and velocity
+  targets share one nested `ColorAttachment` class. With velocity on, a normal target always holds slot 1: the Vulkan
+  backend packs bound targets (`VulkanCommandList.BeginRendering` skips nulls), so a gap would move velocity into the
+  normal slot.
+- Layout in `Assets/shaders/shared/velocity-functions.hlsl`: rg = current uv − previous uv (jittered matrices),
+  b = depth when written (occlusion check against the depth buffer), a = previous depth, 0 = unknown.
+  The previous depth lets TXAA's disocclusion test follow a moving surface instead of rejecting it.
+- `[TXAA]`: `VelocityMap` input (t3). Where the velocity is valid it replaces the camera reprojection; elsewhere and
+  when unconnected the shader takes the old path.
 
 ## Goal
 

@@ -10,6 +10,92 @@ namespace Lib.image.generate.basic;
 [Guid("f9fe78c5-43a6-48ae-8e8c-6cdbbc330dd1")]
 internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvider, IReleasableGpuResources
 {
+    /** An extra RGBA16F target beside the color buffer (normals, velocity), with its MSAA resolve. */
+    private sealed class ColorAttachment(string name)
+    {
+        public RenderTargetView Rtv => _multiSampledRtv;
+
+        /** The resolved texture with MSAA, the rendered one without. */
+        public Texture2D Texture => _resolved ?? _multiSampled;
+
+        public long SizeInBytes => RenderTarget.SizeInBytes(_multiSampled) + RenderTarget.SizeInBytes(_resolved);
+
+        /** Returns true if the textures were recreated. */
+        public bool Update(Device device, Int2 size, int sampleCount, int mipLevels, bool required, Instance owner)
+        {
+            if (!required)
+            {
+                Dispose();
+                return false;
+            }
+
+            var isUpToDate = _multiSampled != null
+                             && _multiSampled.Description.Width == size.Width
+                             && _multiSampled.Description.Height == size.Height
+                             && _multiSampled.Description.SampleDescription.Count == sampleCount;
+            if (isUpToDate)
+                return false;
+
+            Dispose();
+            var downSamplingRequired = sampleCount > 1;
+            try
+            {
+                _multiSampled = Texture2D.CreateTexture2D(CreateDescription(size, downSamplingRequired ? 1 : mipLevels, sampleCount));
+                _multiSampledRtv = new RenderTargetView(device, _multiSampled);
+
+                if (downSamplingRequired)
+                    _resolved = Texture2D.CreateTexture2D(CreateDescription(size, mipLevels, 1));
+            }
+            catch (Exception e)
+            {
+                Dispose();
+                Log.Error($"Error creating {name} buffer: {e.Message}", owner);
+            }
+
+            return true;
+        }
+
+        public void Clear(DeviceContext deviceContext, Vector4 clearValue)
+        {
+            if (_multiSampledRtv != null)
+                deviceContext.ClearRenderTargetView(_multiSampledRtv, clearValue);
+        }
+
+        public void Resolve(DeviceContext deviceContext)
+        {
+            if (_multiSampled != null && _resolved != null)
+                deviceContext.ResolveSubresource(_multiSampled, 0, _resolved, 0, _resolved.Description.Format);
+        }
+
+        public void Dispose()
+        {
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _multiSampledRtv);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _multiSampled);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resolved);
+        }
+
+        private static Texture2DDescription CreateDescription(Int2 size, int mipLevels, int sampleCount)
+        {
+            return new Texture2DDescription
+                       {
+                           ArraySize = 1,
+                           BindFlags = BindFlags.RenderTarget | BindFlags.ShaderResource,
+                           CpuAccessFlags = CpuAccessFlags.None,
+                           Format = Format.R16G16B16A16_Float,
+                           Width = size.Width,
+                           Height = size.Height,
+                           MipLevels = mipLevels,
+                           OptionFlags = ResourceOptionFlags.None,
+                           SampleDescription = new SampleDescription(sampleCount, 0),
+                           Usage = ResourceUsage.Default
+                       };
+        }
+
+        private Texture2D _multiSampled;
+        private RenderTargetView _multiSampledRtv;
+        private Texture2D _resolved;
+    }
+
     [Output(Guid = "7A4C4FEB-BE2F-463E-96C6-CD9A6BAD77A2")]
     public readonly Slot<Texture2D> ColorBuffer = new();
 
@@ -19,11 +105,16 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
     [Output(Guid = "1CAEFB48-D7FB-40C1-B5B5-C2CF5837DFA9")]
     public readonly Slot<Texture2D> NormalBuffer = new();
 
+    /** Screen-space motion from draws that write it; layout in shared/velocity-functions.hlsl. */
+    [Output(Guid = "1c9e78c4-af13-4688-ab51-50360d738f07")]
+    public readonly Slot<Texture2D> VelocityBuffer = new();
+
     public RenderTarget()
     {
         ColorBuffer.UpdateAction += Update;
         DepthBuffer.UpdateAction += Update;
         NormalBuffer.UpdateAction += Update;
+        VelocityBuffer.UpdateAction += Update;
         SetupResolveShaderResources();
         ReleasableGpuResources.Register(this);
 
@@ -47,6 +138,7 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
         var generateMips = GenerateMips.GetValue(context);
         var withDepthBuffer = WithDepthBuffer.GetValue(context);
         var withNormalBuffer = WithNormalBuffer.GetValue(context);
+        var withVelocityBuffer = WithVelocityBuffer.GetValue(context);
         var clear = Clear.GetValue(context);
         var clearColor = ClearColor.GetValue(context);
         var reference = TextureReference.GetValue(context);
@@ -77,7 +169,7 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
             TextureFormat.SetTypedInputValue(textureFormat);
         }
             
-        var formatChanged = UpdateTextures(device, size, textureFormat, withDepthBuffer ? Format.R32_Typeless : Format.Unknown, generateMips, withNormalBuffer);
+        var formatChanged = UpdateTextures(device, size, textureFormat, withDepthBuffer ? Format.R32_Typeless : Format.Unknown, generateMips, withNormalBuffer, withVelocityBuffer);
 
         if (formatChanged || enableUpdate)
         {
@@ -101,10 +193,16 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
                 
                 
             deviceContext.Rasterizer.SetViewport(new T3.Graphics.Viewport(0, 0, size.Width, size.Height, 0.0f, 1.0f));
-            // Set render targets - include normal buffer if requested
-            if (withNormalBuffer && _multiSampledNormalBufferRtv != null)
+            // Draws write normals to SV_Target1 and velocity to SV_Target2. Velocity keeps a normal target in slot 1:
+            // the Vulkan backend packs bound targets, which would move velocity into the normal slot.
+            if (withVelocityBuffer && _normalTarget.Rtv != null && _velocityTarget.Rtv != null)
             {
-                deviceContext.OutputMerger.SetTargets(_multiSampledDepthBufferDsv, _multiSampledColorBufferRtv, _multiSampledNormalBufferRtv);
+                deviceContext.OutputMerger.SetTargets(_multiSampledDepthBufferDsv, _multiSampledColorBufferRtv, _normalTarget.Rtv,
+                                                      _velocityTarget.Rtv);
+            }
+            else if (withNormalBuffer && _normalTarget.Rtv != null)
+            {
+                deviceContext.OutputMerger.SetTargets(_multiSampledDepthBufferDsv, _multiSampledColorBufferRtv, _normalTarget.Rtv);
             }
             else
             {
@@ -119,10 +217,8 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
                 {
                     deviceContext.ClearRenderTargetView(_multiSampledColorBufferRtv, new Vector4(clearColor.X, clearColor.Y, clearColor.Z, clearColor.W));
 
-                    if (_multiSampledNormalBufferRtv != null)
-                    {
-                        deviceContext.ClearRenderTargetView(_multiSampledNormalBufferRtv, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
-                    }
+                    _normalTarget.Clear(deviceContext, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+                    _velocityTarget.Clear(deviceContext, Vector4.Zero);
 
 
                     if (_multiSampledDepthBufferDsv != null)
@@ -153,7 +249,7 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
             {
                 reference.ColorTexture = ColorTexture;
                 reference.DepthTexture = DepthTexture;
-                reference.NormalTexture = NormalTexture;
+                reference.NormalTexture = _normalTarget.Texture;
             }
 
             // Render
@@ -185,14 +281,8 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
                         ResolveDepthBuffer();
                     }
 
-                    // Resolve normal buffer if it exists
-                    if (withNormalBuffer && _multiSampledNormalBuffer != null && _resolvedNormalBuffer != null)
-                    {
-                        device.ImmediateContext.ResolveSubresource(_multiSampledNormalBuffer,
-                                                                   0,
-                                                                   _resolvedNormalBuffer, 0,
-                                                                   _resolvedNormalBuffer.Description.Format);
-                    }
+                    _normalTarget.Resolve(device.ImmediateContext);
+                    _velocityTarget.Resolve(device.ImmediateContext);
                 }
                 catch (Exception e)
                 {
@@ -218,8 +308,10 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
         ColorBuffer.DirtyFlag.Clear();
         DepthBuffer.Value = DepthTexture;
         DepthBuffer.DirtyFlag.Clear();
-        NormalBuffer.Value = NormalTexture;
+        NormalBuffer.Value = _normalTarget.Texture;
         NormalBuffer.DirtyFlag.Clear();
+        VelocityBuffer.Value = _velocityTarget.Texture;
+        VelocityBuffer.DirtyFlag.Clear();
 
         _statsCount++;
         _statsCountPixels += size.Height * size.Width;
@@ -279,7 +371,8 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
         deviceContext.PopState();
     }
 
-    private bool UpdateTextures(Device device, Int2 size, Format colorFormat, Format depthFormat, bool generateMips, bool withNormalBuffer)
+    private bool UpdateTextures(Device device, Int2 size, Format colorFormat, Format depthFormat, bool generateMips, bool withNormalBuffer,
+                                bool withVelocityBuffer)
     {
         var w = Math.Max(size.Width, size.Height);
         var mipLevels = generateMips ? (int)MathUtils.Log2(w) + 1 : 1;
@@ -385,97 +478,8 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
             _wasClearedOnce = false;
         }
 
-        var normalRequired = withNormalBuffer;
-        var normalInitialized = _multiSampledNormalBuffer != null;
-
-        var normalFormatChanged = (_multiSampledNormalBuffer == null)
-                                  || _multiSampledNormalBuffer.Description.Width != size.Width
-                                  || _multiSampledNormalBuffer.Description.Height != size.Height
-                                  || _multiSampledNormalBuffer.Description.SampleDescription.Count != _sampleCount;
-
-        if (normalFormatChanged || (!normalRequired && normalInitialized))
-        {
-            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _multiSampledNormalBufferRtv);
-            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resolvedNormalBufferRtv);
-            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resolvedNormalBufferSrv);
-            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _multiSampledNormalBuffer);
-            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resolvedNormalBuffer);
-        }
-
-        if (normalRequired && (normalFormatChanged || !normalInitialized))
-        {
-            wasChanged = true;
-
-            // Normal / Multi sampled
-            try
-            {
-                _multiSampledNormalBuffer = Texture2D.CreateTexture2D(
-                    new Texture2DDescription
-                        {
-                            ArraySize = 1,
-                            BindFlags = BindFlags.RenderTarget | BindFlags.ShaderResource,
-                            CpuAccessFlags = CpuAccessFlags.None,
-                            Format = Format.R16G16B16A16_Float,
-                            Width = size.Width,
-                            Height = size.Height,
-                            MipLevels = DownSamplingRequired ? 1 : mipLevels,
-                            OptionFlags = ResourceOptionFlags.None,
-                            SampleDescription = new SampleDescription(_sampleCount, 0),
-                            Usage = ResourceUsage.Default
-                        });
-                _multiSampledNormalBufferRtv = new RenderTargetView(device, _multiSampledNormalBuffer);
-            }
-            catch (Exception e)
-            {
-                T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _multiSampledNormalBuffer);
-                T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _multiSampledNormalBufferRtv);
-                Log.Error("Error creating multisampled normal buffer: " + e.Message, this);
-            }
-
-            // Normal / Resolved (for MSAA)
-            if (DownSamplingRequired)
-            {
-                try
-                {
-                    _resolvedNormalBuffer = Texture2D.CreateTexture2D(
-                        new Texture2DDescription
-                            {
-                                ArraySize = 1,
-                                BindFlags = BindFlags.RenderTarget | BindFlags.ShaderResource,
-                                CpuAccessFlags = CpuAccessFlags.None,
-                                Format = Format.R16G16B16A16_Float,
-                                Width = size.Width,
-                                Height = size.Height,
-                                MipLevels = mipLevels,
-                                OptionFlags = ResourceOptionFlags.None,
-                                SampleDescription = new SampleDescription(1, 0),
-                                Usage = ResourceUsage.Default
-                            });
-
-                    _resolvedNormalBufferSrv = new ShaderResourceView(device, _resolvedNormalBuffer);
-                    _resolvedNormalBufferRtv = new RenderTargetView(device, _resolvedNormalBuffer);
-                }
-                catch (Exception e)
-                {
-                    T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resolvedNormalBuffer);
-                    T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resolvedNormalBufferSrv);
-                    T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resolvedNormalBufferRtv);
-                    Log.Error("Error creating resolved normal buffer: " + e.Message, this);
-                }
-            }
-            else
-            {
-                // For non-MSAA, create SRV for the multisampled buffer
-                try
-                {
-                    _resolvedNormalBufferSrv = new ShaderResourceView(device, _multiSampledNormalBuffer);
-                }
-                catch (Exception e)
-                {
-                    Log.Error("Error creating normal buffer SRV: " + e.Message, this);
-                }
-            }
-        }
+        wasChanged |= _normalTarget.Update(device, size, _sampleCount, mipLevels, withNormalBuffer || withVelocityBuffer, this);
+        wasChanged |= _velocityTarget.Update(device, size, _sampleCount, mipLevels, withVelocityBuffer, this);
 
         // Depth buffer handling
         var depthRequired = depthFormat != Format.Unknown;
@@ -580,7 +584,7 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
 
     public long ReleasableBytes => SizeInBytes(_multiSampledColorBuffer) + SizeInBytes(_resolvedColorBuffer)
                                    + SizeInBytes(_multiSampledDepthBuffer) + SizeInBytes(_resolvedDepthBuffer)
-                                   + SizeInBytes(_multiSampledNormalBuffer) + SizeInBytes(_resolvedNormalBuffer);
+                                   + _normalTarget.SizeInBytes + _velocityTarget.SizeInBytes;
 
     public bool TryReleaseGpuResources()
     {
@@ -594,9 +598,11 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
         ColorBuffer.Value = null;
         DepthBuffer.Value = null;
         NormalBuffer.Value = null;
+        VelocityBuffer.Value = null;
         ColorBuffer.DirtyFlag.ForceInvalidate();
         DepthBuffer.DirtyFlag.ForceInvalidate();
         NormalBuffer.DirtyFlag.ForceInvalidate();
+        VelocityBuffer.DirtyFlag.ForceInvalidate();
         return true;
     }
 
@@ -640,12 +646,8 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
         T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resolvedDepthBuffer);
         T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resolvedDepthBufferUav);
 
-        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resolvedNormalBuffer);
-        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resolvedNormalBufferSrv);
-        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resolvedNormalBufferRtv);
-
-        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _multiSampledNormalBuffer);
-        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _multiSampledNormalBufferRtv);
+        _normalTarget.Dispose();
+        _velocityTarget.Dispose();
     }
     
 
@@ -672,12 +674,8 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
     private Texture2D _resolvedDepthBuffer;
     private UnorderedAccessView _resolvedDepthBufferUav;
 
-    private Texture2D _resolvedNormalBuffer;
-    private ShaderResourceView _resolvedNormalBufferSrv;
-    private RenderTargetView _resolvedNormalBufferRtv;
-
-    private Texture2D _multiSampledNormalBuffer;
-    private RenderTargetView _multiSampledNormalBufferRtv;
+    private readonly ColorAttachment _normalTarget = new("normal");
+    private readonly ColorAttachment _velocityTarget = new("velocity");
  
     private bool _wasClearedOnce;
     private bool _isRebuildable;
@@ -685,7 +683,6 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
 
     private Texture2D ColorTexture => _sampleCount > 1 ? _resolvedColorBuffer : _multiSampledColorBuffer ;
     private Texture2D DepthTexture => _sampleCount > 1 ? _resolvedDepthBuffer : _multiSampledDepthBuffer;
-    private Texture2D NormalTexture => _sampleCount > 1 ? _resolvedNormalBuffer : _multiSampledNormalBuffer;
     private bool DownSamplingRequired => _sampleCount > 1;
     private int _sampleCount;
 
@@ -715,6 +712,9 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
 
     [Input(Guid = "3782E42E-6A36-4BA2-AAA2-3EE401A3CDF1")]
     public readonly InputSlot<bool> WithNormalBuffer = new();
+
+    [Input(Guid = "db4ac4e3-2dd9-4f88-982b-a2e71dcb29f6")]
+    public readonly InputSlot<bool> WithVelocityBuffer = new();
 
     [Input(Guid = "f0cf3325-4967-4419-9beb-036cd6dbfd6a")]
     public readonly InputSlot<bool> GenerateMips = new();

@@ -15,6 +15,9 @@ internal sealed class TXAA : Instance<TXAA>
     [Input(Guid = "414b89a2-128c-40c1-a3c7-137a788bb320")]
     public readonly InputSlot<Object> CameraReference = new();
 
+    [Input(Guid = "48fefd6e-44d6-457a-a1b3-12b23be585ee")]
+    public readonly InputSlot<Texture2D> VelocityMap = new();
+
     [Input(Guid = "5d6e7f80-91a2-43b4-8506-7d8e9f011223")]
     public readonly InputSlot<float> BlendFactor = new();
 
