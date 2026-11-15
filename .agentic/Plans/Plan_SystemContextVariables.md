@@ -7,6 +7,15 @@ it around its scene, `[GetRenderPassState]` (`flow/context`, `Select` dropdown, 
 Bridge check 2026-11-15: `KeepPreviousPointBuffer` runs once per frame with `WithVelocityBuffer` on and not at all with
 it off; velocity on moving instances unchanged; no shader or log errors.
 
+**Phase 2 implemented 2026-11-15, untested by a human:** `RenderPassState.RepeatPass`, `CubeFace` and
+`IsRepeatOfFrame` (either > 0). All ten C# readers use `IsRepeatOfFrame`; `EvaluationHistory` keys by
+`RepeatPass * 6 + CubeFace`, so cube maps inside motion blur no longer collide. Compatibility instead of new graph ops
+for now: `[Loop]` sets `RepeatPass` when its index variable is named `RenderPassState.LegacyRepeatPassVariable`
+(`"__MotionBlurPass"`) and restores it after the loop; `[RenderToCubeMap]` sets `CubeFace` and still writes the legacy
+`"CubeFace"` variable, but no longer adds the face to the pass number. Side fix: `[Loop]` never restored its variable,
+so stateful ops evaluated after `[RenderWithMotionBlur]` in the same frame saw the last pass and stopped advancing; the
+typed state is restored. `[RepeatFrame]` (replacing the named loop in the two motion blur graphs) is still open.
+
 ## Goal
 
 Ops talk to each other through context variables with magic names (`"__MotionBlurPass"`, `"__IsShadowPassId"`,
