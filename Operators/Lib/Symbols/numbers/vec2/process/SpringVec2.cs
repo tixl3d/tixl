@@ -26,14 +26,10 @@ internal sealed class SpringVec2 : Instance<SpringVec2>
         if (Math.Abs(currentTime - _lastEvalTime) < MinTimeElapsedBeforeEvaluation)
             return;
 
-        if (context.IntVariables.TryGetValue("__MotionBlurPass", out var motionBlurPass))
-        {
-            if (motionBlurPass > 0)
-            {
-                //Log.Debug($"Skip motion blur pass {motionBlurPass}");
-                return;
-            }
-        }
+        // [RepeatFrame] subframes advance by their share of the frame; further cube faces and other repeats don't.
+        var stepSec = context.RenderPass.GetStepDurationSec(Playback.LastFrameDuration);
+        if (stepSec <= 0)
+            return;
 
         _lastEvalTime = currentTime;
 
@@ -41,9 +37,16 @@ internal sealed class SpringVec2 : Instance<SpringVec2>
         // based on https://x.com/itsmatharoo/status/1148297551931572224
         var targetValue = inputValue ;
 
-        _springedValue = MathUtils.Lerp(_springedValue, (targetValue - Result.Value) * test, tension);
-
-        Result.Value += _springedValue;
+        // Tuned as one step per 60 Hz frame; split into steps of at most one such frame so other rates and subframes match.
+        var framesAt60 = (float)(stepSec * 60);
+        var stepCount = Math.Max(1, (int)MathF.Ceiling(framesAt60));
+        var stepFrames = framesAt60 / stepCount;
+        var stepTension = tension is >= 0 and <= 1 ? 1 - MathF.Pow(1 - tension, stepFrames) : tension;
+        for (var stepIndex = 0; stepIndex < stepCount; stepIndex++)
+        {
+            _springedValue = MathUtils.Lerp(_springedValue, (targetValue - Result.Value) * test, stepTension);
+            Result.Value += _springedValue * stepFrames;
+        }
     }
 
 

@@ -1,0 +1,49 @@
+{
+  "FormatVersion": 3,
+  "Id": "33ab62b0-0517-4953-915d-8e43355f5b4c"/*RepeatFrame*/,
+  "Description": "Evaluates its subtree several times per frame at subframe times, for accumulating motion blur.\n\nThe subframes run in time order across the last part of the frame and end at the frame time. Ops that integrate over time ([Damp], [Spring], [Ease] and their variants, [OrbitCamera]) advance by each subframe's share of the frame, so damped motion is blurred too and keeps its speed at any pass count. Triggers and counters still fire once per frame.\n\nSee also: [RenderWithMotionBlur], [RepeatWithMotionBlur], [GetRenderPassState]",
+  "SymbolTags": "8",
+  "InputUis": [
+    {
+      "InputId": "3e1de341-2c26-442f-b5d2-365b6a6e8d01"/*Command*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "f299f6ae-9cf9-406a-84fc-77f9540d74d6"/*Passes*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Description": "Number of subframes. More passes give smoother blur and cost the subtree's render time each.",
+      "Min": 1,
+      "Max": 32,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "84fc2ace-2cd3-4d2f-82f5-1b5dfacc6b3f"/*Shutter*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      },
+      "Description": "Part of the last frame the subframes span: 1 covers the whole time since the previous frame, 0 renders all passes at the frame time. Limited to one frame.",
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "c950596a-eff7-4ed4-9705-55f6a092cb06"/*Output*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 100.0
+      }
+    }
+  ]
+}

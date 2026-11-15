@@ -41,14 +41,9 @@ public sealed class AudioReaction : Instance<AudioReaction>
         
     private void Update(EvaluationContext context)
     {
-        if (context.IntVariables.TryGetValue("__MotionBlurPass", out var motionBlurPass))
-        {
-            if (motionBlurPass > 0)
-            {
-                //Log.Debug($"Skip motion blur pass {motionBlurPass}");
-                return;
-            }
-        }
+        // A repeat of this frame (motion blur sample, cube face) must not advance the state again.
+        if (context.RenderPass.IsRepeatOfFrame)
+            return;
         
         if (Math.Abs(context.LocalFxTime - _lastEvalTime) < 0.001f)
             return;

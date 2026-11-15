@@ -16,6 +16,31 @@ for now: `[Loop]` sets `RepeatPass` when its index variable is named `RenderPass
 so stateful ops evaluated after `[RenderWithMotionBlur]` in the same frame saw the last pass and stopped advancing; the
 typed state is restored. `[RepeatFrame]` (replacing the named loop in the two motion blur graphs) is still open.
 
+Repeat-pass audit (2026-11-15, user noticed `[DampVec3]` getting snappier with more motion blur passes): stateful ops
+that never checked the repeat pass advanced once per pass. Now skipping repeats: `[DampVec3]`, `[DampVec2]`,
+`[DampAngle]`, `[DampFloatList]`, `[DampPeakDecay]`, `[OrbitCamera]` (damping). `[ActionCamera]` was already safe (it
+advances on `Playback.FrameCount`). Still to decide, they count or detect changes and would see one change per
+subframe: `[CountInt]`, `[HasValueChanged]`, `[HasIntChanged]`, `[HasVec2Changed]`, `[HasVec3Changed]`,
+`[DeltaSinceLastFrame]`, `[WasTrigger]`, `[PeakLevel]`, `[DetectPulse]`, `[DuckAudioLevel]`, `_DetectBeatOffset`.
+
+**Phase 2b done 2026-11-15 (user-tested: "works really well"): `[RepeatFrame]` with subframe steps.** Skipping repeats
+made damped values constant across motion blur subframes (no blur). Instead of interpolating, stateful ops now advance
+in smaller steps:
+- `RenderPassState.IsSubframe`, `SubframeStepSec`, `GetStepDurationSec(frameDurationSec)` (subframe share; 0 for further
+  cube faces and other repeats; otherwise the whole frame). `DampFunctions` overloads take the step duration.
+- `[RepeatFrame]` (`render/utils`): `Passes`, `Shutter` (window as part of the last frame, clamped to 0–1 because state
+  from before the previous frame is gone). Subframes run in time order and end at the frame time; the first step covers
+  the time since the previous frame, the rest split the window, so the steps add up to one frame.
+- `[RenderWithMotionBlur]` and `[RepeatWithMotionBlur]` use it instead of `[Loop]` + `[SetTime]` + `__MotionBlurPass`
+  (also fixes `[RepeatWithMotionBlur]` setting the pass via `[SetIntVar]`, which typed readers didn't see). `Strength`
+  is now the shutter; values above 1 act as 1.
+- Damping (`[Damp]`, `[DampVec2]`, `[DampVec3]`, `[DampAngle]`, `[DampFloatList]`, `[OrbitCamera]`) steps by
+  `GetStepDurationSec`. `[Spring]`/`[SpringVec2]`/`[SpringVec3]` became time-based (60 Hz steps split into partial steps
+  of at most one frame; identical at 60 fps). `[Ease]`/`[EaseVec2]`/`[EaseVec3]` start a new animation only on the
+  frame's first pass but evaluate the curve at each subframe's time. `[DampPeakDecay]` still advances once per frame
+  (it uses global time).
+- Result: damped motion is blurred and its speed doesn't depend on the pass count.
+
 ## Goal
 
 Ops talk to each other through context variables with magic names (`"__MotionBlurPass"`, `"__IsShadowPassId"`,

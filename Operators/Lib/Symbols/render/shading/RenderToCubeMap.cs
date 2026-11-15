@@ -140,7 +140,7 @@ internal sealed class RenderToCubeMap : Instance<RenderToCubeMap>
         var keepBackgroundColor = context.BackgroundColor;
         var keepForegroundColor = context.ForegroundColor;
         var hadFaceVariable = context.IntVariables.TryGetValue(FaceVariableName, out var prevFace);
-        var hadRepeatPass = context.IntVariables.TryGetValue(RepeatPassVariableName, out var prevRepeatPass);
+        var keepRenderPass = context.RenderPass;
 
         Matrix4x4 worldToCubeCenter;
         var near = clipPlanes.X;
@@ -208,8 +208,8 @@ internal sealed class RenderToCubeMap : Instance<RenderToCubeMap>
             context.WorldToCamera = worldToCubeCenter * _cameraToFaceViews[faceIndex];
             context.IntVariables[FaceVariableName] = faceIndex;
 
-            // Faces after the first repeat the same frame; simulations, dampers and audio reactions must not advance again.
-            context.IntVariables[RepeatPassVariableName] = prevRepeatPass + faceIndex;
+            // Faces after the first repeat the same frame (RenderPass.IsRepeatOfFrame); state must not advance again.
+            context.RenderPass.CubeFace = faceIndex;
 
             // Without invalidation the subtree would return its cached result after the first face.
             DirtyFlag.GlobalInvalidationTick++;
@@ -229,14 +229,7 @@ internal sealed class RenderToCubeMap : Instance<RenderToCubeMap>
             context.IntVariables.Remove(FaceVariableName);
         }
 
-        if (hadRepeatPass)
-        {
-            context.IntVariables[RepeatPassVariableName] = prevRepeatPass;
-        }
-        else
-        {
-            context.IntVariables.Remove(RepeatPassVariableName);
-        }
+        context.RenderPass = keepRenderPass;
 
         context.ObjectToWorld = prevObjectToWorld;
         context.WorldToCamera = prevWorldToCamera;
@@ -802,8 +795,7 @@ internal sealed class RenderToCubeMap : Instance<RenderToCubeMap>
 
     private const int FaceCount = 6;
     private const int CopyThreadGroupSize = 16;
-    private const string FaceVariableName = "CubeFace";
-    private const string RepeatPassVariableName = "__MotionBlurPass";
+    private const string FaceVariableName = RenderPassState.LegacyCubeFaceVariable;
     private const string CopyShaderPath = "Lib:shaders/3d/rendering/CopyFacesToCubeMap-cs.hlsl";
     private const string AccumulateShaderPath = "Lib:shaders/3d/rendering/RenderCubeMapAccumulate-cs.hlsl";
     private const int MaxTileSize = 8;

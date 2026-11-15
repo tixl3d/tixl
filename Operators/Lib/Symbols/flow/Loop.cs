@@ -1,3 +1,5 @@
+using T3.Core.Rendering;
+
 namespace Lib.flow;
 
 [Guid("3631c727-36a0-4f26-ae76-ee9c100efc33")]
@@ -19,11 +21,18 @@ internal sealed class Loop : Instance<Loop>
         var end = Count.GetValue(context);
             
         // TODO: may restore context variable after iterating.
-            
+
+        // Motion blur graphs repeat the frame with a loop named like the legacy variable; they also set the typed pass.
+        var setsRepeatPass = indexVariableName == RenderPassState.LegacyRepeatPassVariable;
+        var keepRenderPass = context.RenderPass;
+
         for (var i = 0; i < end; i ++)
         {
             context.FloatVariables[indexVariableName] = i;
             context.IntVariables[indexVariableName] = i;
+            if (setsRepeatPass)
+                context.RenderPass.RepeatPass = i;
+
             if (end == 1)
             {
                 context.FloatVariables[progressVariableName] = 0;
@@ -38,6 +47,9 @@ internal sealed class Loop : Instance<Loop>
             Command.InvalidateGraph();
             Command.GetValue(context);
         }
+
+        if (setsRepeatPass)
+            context.RenderPass = keepRenderPass;
     }
         
     [Input(Guid = "49552a0c-2060-4f03-ad39-388293bb6871")]

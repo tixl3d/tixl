@@ -24,6 +24,11 @@ internal sealed class DampFloatList : Instance<DampFloatList>
         if (Math.Abs(currentTime - _lastEvalTime) < MinTimeElapsedBeforeEvaluation)
             return;
 
+        // [RepeatFrame] subframes advance by their share of the frame; further cube faces and other repeats don't.
+        var stepSec = context.RenderPass.GetStepDurationSec(Playback.LastFrameDuration);
+        if (stepSec <= 0)
+            return;
+
         // Clean up result list
         if (inputList == null || inputList.Count == 0)
             return;
@@ -49,7 +54,7 @@ internal sealed class DampFloatList : Instance<DampFloatList>
         {
             var velocity = _velocities[i];
             var value = inputList[i];
-            var dampedValue = DampFunctions.DampenFloat(value, _dampedValues[i], damping, ref velocity, method);
+            var dampedValue = DampFunctions.DampenFloat(value, _dampedValues[i], damping, ref velocity, method, stepSec);
 
             MathUtils.ApplyDefaultIfInvalid(ref dampedValue, 0);
             MathUtils.ApplyDefaultIfInvalid(ref velocity, 0);

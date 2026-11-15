@@ -24,13 +24,18 @@ internal sealed class DampVec2 : Instance<DampVec2>
         if (Math.Abs(currentTime - _lastEvalTime) < minTimeElapsedBeforeEvaluation)
             return;
 
+        // [RepeatFrame] subframes advance by their share of the frame; further cube faces and other repeats don't.
+        var stepSec = context.RenderPass.GetStepDurationSec(Playback.LastFrameDuration);
+        if (stepSec <= 0)
+            return;
+
         _lastEvalTime = currentTime;
 
         var method = Method.GetValue(context).Clamp(0, 1);
         _dampedValue = method switch
                            {
-                               0 => MathUtils.Lerp(targetVector, _dampedValue, MathUtils.DampingForFrame(damping, Playback.LastFrameDuration)),
-                               1 => DampFunctions.SpringDampVec2(targetVector, _dampedValue, damping, ref _velocity),
+                               0 => MathUtils.Lerp(targetVector, _dampedValue, MathUtils.DampingForFrame(damping, stepSec)),
+                               1 => DampFunctions.SpringDampVec2(targetVector, _dampedValue, damping, ref _velocity, stepSec),
                                _ => targetVector,
                            };
         MathUtils.ApplyDefaultIfInvalid(ref _dampedValue, Vector2.Zero);

@@ -9,7 +9,7 @@ namespace Lib.Utils;
 /// cube map faces, and by other windows (thumbnails, previews) that use their own <see cref="EvaluationContext"/>.
 /// </summary>
 /// <remarks>
-/// Evaluations are matched by context, repeat pass (<c>__MotionBlurPass</c>) and call order within that pass. An
+/// Evaluations are matched by context, repeat pass and cube face (<see cref="EvaluationContext.RenderPass"/>) and call order within that pass. An
 /// instance reached in a different order with the same number of calls swaps slots unnoticed.
 /// </remarks>
 internal sealed class EvaluationHistory<TSlot> : IDisposable where TSlot : class, IDisposable
@@ -95,8 +95,8 @@ internal sealed class EvaluationHistory<TSlot> : IDisposable where TSlot : class
         contextHistory.LastUseFrame = frame;
         _contextHistory = contextHistory;
 
-        context.IntVariables.TryGetValue(RepeatPassVariableName, out passIndex);
-        passIndex = Math.Clamp(passIndex, 0, MaxPasses - 1);
+        // Motion blur samples and cube faces each keep their own history.
+        passIndex = Math.Clamp(context.RenderPass.RepeatPass * CubeFaceCount + context.RenderPass.CubeFace, 0, MaxPasses - 1);
 
         if (passIndex >= contextHistory.Passes.Length)
             Array.Resize(ref contextHistory.Passes, passIndex + 1);
@@ -200,11 +200,10 @@ internal sealed class EvaluationHistory<TSlot> : IDisposable where TSlot : class
         }
     }
 
-    /** Set by [RenderWithMotionBlur] and [RenderToCubeMap] for evaluations that repeat the current frame. */
-    private const string RepeatPassVariableName = "__MotionBlurPass";
+    private const int CubeFaceCount = 6;
 
-    /** Bounds the per-pass history against unexpected pass indices. */
-    private const int MaxPasses = 64;
+    /** Bounds the per-pass history against unexpected pass indices: 64 motion blur samples of up to 6 cube faces. */
+    private const int MaxPasses = 64 * CubeFaceCount;
 
     private const int ReleaseAfterFrames = 300;
 

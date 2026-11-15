@@ -25,8 +25,7 @@ internal sealed class HasTimeChanged : Instance<HasTimeChanged>
         {
             // A repeated pass of the same frame (motion blur, cube map faces) must not report the advance a second time.
             if ((Modes)Mode.GetValue(context) == Modes.DidAdvancedWithMotionBlur
-                && context.IntVariables.TryGetValue("__MotionBlurPass", out var repeatPass)
-                && repeatPass > 0)
+                && context.RenderPass.IsRepeatOfFrame)
             {
                 HasChanged.Value = false;
             }
@@ -85,17 +84,9 @@ internal sealed class HasTimeChanged : Instance<HasTimeChanged>
                 break;
 
             case Modes.DidAdvancedWithMotionBlur:
-                if (context.IntVariables.TryGetValue("__MotionBlurPass", out var pass))
+                if (context.RenderPass.IsRepeatOfFrame)
                 {
-                    if (pass == 0)
-                    {
-                        hasChanged = wasAdvanced;
-                            
-                    }
-                    else
-                    {
-                        wasAdditionalMotionBlurPass = true;
-                    }
+                    wasAdditionalMotionBlurPass = true;
                 }
                 else
                 {

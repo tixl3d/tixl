@@ -25,14 +25,10 @@ internal sealed class Damp : Instance<Damp>
         if (Math.Abs(currentTime - _lastEvalTime) < MinTimeElapsedBeforeEvaluation)
             return;
             
-        if (context.IntVariables.TryGetValue("__MotionBlurPass", out var motionBlurPass))
-        {
-            if (motionBlurPass > 0)
-            {
-                //Log.Debug($"Skip motion blur pass {motionBlurPass}");
-                return;
-            }                
-        }
+        // [RepeatFrame] subframes advance by their share of the frame; further cube faces and other repeats don't.
+        var stepSec = context.RenderPass.GetStepDurationSec(Playback.LastFrameDuration);
+        if (stepSec <= 0)
+            return;
 
         
         _lastEvalTime = currentTime;
@@ -45,7 +41,7 @@ internal sealed class Damp : Instance<Damp>
         else
         {
             var method = (DampFunctions.Methods)Method.GetValue(context).Clamp(0, 1);
-            _dampedValue = DampFunctions.DampenFloat(inputValue, _dampedValue, damping, ref _velocity, method);
+            _dampedValue = DampFunctions.DampenFloat(inputValue, _dampedValue, damping, ref _velocity, method, stepSec);
 
             MathUtils.ApplyDefaultIfInvalid(ref _dampedValue, 0);
             MathUtils.ApplyDefaultIfInvalid(ref _velocity, 0);

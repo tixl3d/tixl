@@ -1,0 +1,20 @@
+{
+  "FormatVersion": 3,
+  "Id": "33ab62b0-0517-4953-915d-8e43355f5b4c"/*RepeatFrame*/,
+  "Inputs": [
+    {
+      "Id": "3e1de341-2c26-442f-b5d2-365b6a6e8d01"/*Command*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "f299f6ae-9cf9-406a-84fc-77f9540d74d6"/*Passes*/,
+      "DefaultValue": 5
+    },
+    {
+      "Id": "84fc2ace-2cd3-4d2f-82f5-1b5dfacc6b3f"/*Shutter*/,
+      "DefaultValue": 1.0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

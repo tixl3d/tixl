@@ -299,7 +299,8 @@ M0 is independent and can ship first. M1 and later come after Phase 3 above; the
     order, so an `SV_Depth` member became color output 2 (the velocity slot). Removed in `DrawPointsShaded.hlsl` and
     `mesh-Draw.hlsl`; still present but harmless (color/normal only) in `mesh-DrawAtPoints.hlsl` and
     `mesh-CustomDraw-template.hlsl`. Any shader that adds SV_Target2 or SV_Depth must drop it.
-- **M5. MotionBlur** reads the same velocity target. Velocity is displacement per *frame*, which is what TXAA needs
+- **M5. MotionBlur** reads the same velocity target. A velocity-based blur needs one render pass instead of
+  `[RepeatFrame]`'s subframes (which since 2026-11-15 blur damped motion correctly too, via subframe steps). Velocity is displacement per *frame*, which is what TXAA needs
   (its history is one frame old), but it follows frame-duration jitter: motion blur must scale it by
   shutter time / `Playback.LastFrameDuration`, or blur length jumps with frame timing (seen 2026-11-15).
 

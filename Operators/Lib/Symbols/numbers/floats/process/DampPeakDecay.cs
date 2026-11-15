@@ -26,6 +26,10 @@ internal sealed class DampPeakDecay : Instance<DampPeakDecay>
             return;
         }
 
+        // A repeat of this frame (motion blur sample, cube face) must not advance the state again.
+        if (context.RenderPass.IsRepeatOfFrame)
+            return;
+
         _lastEvalTime = runTime;
 
         var value = Value.GetValue(context);

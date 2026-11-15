@@ -33,11 +33,9 @@ internal sealed class EaseVec2 : Instance<EaseVec2>
 
         _lastEvalTime = currentTime;
 
-        if (context.IntVariables.TryGetValue("__MotionBlurPass", out var motionBlurPass) && motionBlurPass > 0)
-            return;
-
         // Check if input has changed to trigger new animation
-        if (Vector2.Distance(inputValue, _previousInputValue) > 0.001f)
+        // Only the frame's first pass starts a new animation; subframes evaluate the curve at their own time.
+        if (!context.RenderPass.IsRepeatOfFrame && Vector2.Distance(inputValue, _previousInputValue) > 0.001f)
         {
             _startTime = currentTime;
             _initialValue = Result.Value;
@@ -51,7 +49,8 @@ internal sealed class EaseVec2 : Instance<EaseVec2>
         var easedProgress = EasingFunctions.ApplyEasing(progress, easeDirection, easeMode);
 
         Result.Value = MathUtils.Lerp(_initialValue, _targetValue, easedProgress);
-        _previousInputValue = inputValue;
+        if (!context.RenderPass.IsRepeatOfFrame)
+            _previousInputValue = inputValue;
     }
 
     private double _lastEvalTime;

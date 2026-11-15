@@ -125,7 +125,9 @@ internal sealed class OrbitCamera : Instance<OrbitCamera>
         //eye+= positionOffset;
         var target = eye + adjustedViewDirection;
 
-        var frameDamping = MathUtils.DampingForFrame(damping, Playback.LastFrameDuration);
+        // [RepeatFrame] subframes damp by their share of the frame; further cube faces and other repeats keep the camera.
+        var stepSec = context.RenderPass.GetStepDurationSec(Playback.LastFrameDuration);
+        var frameDamping = MathUtils.DampingForFrame(damping, stepSec);
         _dampedEye = Vector3.Lerp(eye, _dampedEye, frameDamping);
         _dampedTarget = Vector3.Lerp(target, _dampedTarget, frameDamping);
 

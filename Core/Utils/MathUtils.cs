@@ -734,23 +734,40 @@ public static class DampFunctions
 
     public static float DampenFloat(float inputValue, float previousValue, float damping, ref float velocity, Methods method)
     {
+        return DampenFloat(inputValue, previousValue, damping, ref velocity, method, Playback.LastFrameDuration);
+    }
+
+    /// <summary>Advances by <paramref name="durationSec"/> instead of the last frame (e.g. a motion blur subframe).</summary>
+    public static float DampenFloat(float inputValue, float previousValue, float damping, ref float velocity, Methods method,
+                                    double durationSec)
+    {
         return method switch
                    {
-                       Methods.LinearInterpolation => LinearDamp(inputValue, previousValue, damping),
-                       Methods.DampedSpring        => SpringDampFloat(inputValue, previousValue, damping, ref velocity),
+                       Methods.LinearInterpolation => LinearDamp(inputValue, previousValue, damping, durationSec),
+                       Methods.DampedSpring        => SpringDampFloat(inputValue, previousValue, damping, ref velocity, durationSec),
                        _                           => inputValue
                    };
     }
 
     public static float SpringDampFloat(float inputValue, float previousValue, float damping, ref float velocity)
     {
-        var stepCount = GetSpringSteps(out var step);
+        return SpringDampFloat(inputValue, previousValue, damping, ref velocity, Playback.LastFrameDuration);
+    }
+
+    public static float SpringDampFloat(float inputValue, float previousValue, float damping, ref float velocity, double durationSec)
+    {
+        var stepCount = GetSpringSteps(durationSec, out var step);
         return IntegrateSpring(inputValue, previousValue, ref velocity, SpringConstant(damping), stepCount, step);
     }
 
     public static Vector2 SpringDampVec2(Vector2 targetVec, Vector2 currentValue, float damping, ref Vector2 velocity)
     {
-        var stepCount = GetSpringSteps(out var step);
+        return SpringDampVec2(targetVec, currentValue, damping, ref velocity, Playback.LastFrameDuration);
+    }
+
+    public static Vector2 SpringDampVec2(Vector2 targetVec, Vector2 currentValue, float damping, ref Vector2 velocity, double durationSec)
+    {
+        var stepCount = GetSpringSteps(durationSec, out var step);
         var springConstant = SpringConstant(damping);
         return new Vector2(
                            IntegrateSpring(targetVec.X, currentValue.X, ref velocity.X, springConstant, stepCount, step),
@@ -759,7 +776,12 @@ public static class DampFunctions
 
     public static Vector3 SpringDampVec3(Vector3 targetVec, Vector3 currentValue, float damping, ref Vector3 velocity)
     {
-        var stepCount = GetSpringSteps(out var step);
+        return SpringDampVec3(targetVec, currentValue, damping, ref velocity, Playback.LastFrameDuration);
+    }
+
+    public static Vector3 SpringDampVec3(Vector3 targetVec, Vector3 currentValue, float damping, ref Vector3 velocity, double durationSec)
+    {
+        var stepCount = GetSpringSteps(durationSec, out var step);
         var springConstant = SpringConstant(damping);
         return new Vector3(
                            IntegrateSpring(targetVec.X, currentValue.X, ref velocity.X, springConstant, stepCount, step),
@@ -767,21 +789,21 @@ public static class DampFunctions
                            IntegrateSpring(targetVec.Z, currentValue.Z, ref velocity.Z, springConstant, stepCount, step));
     }
 
-    private static float LinearDamp(float targetValue, float currentValue, float damping)
+    private static float LinearDamp(float targetValue, float currentValue, float damping, double durationSec)
     {
-        return MathUtils.Lerp(targetValue, currentValue, MathUtils.DampingForFrame(damping, Playback.LastFrameDuration));
+        return MathUtils.Lerp(targetValue, currentValue, MathUtils.DampingForFrame(damping, durationSec));
     }
 
     private static float SpringConstant(float damping) => 0.5f / (damping + 0.001f);
 
     /// <summary>
-    /// Splits the last frame into equal steps no longer than <see cref="MaxSpringStepSec"/>. The explicit integrator
+    /// Splits a duration into equal steps no longer than <see cref="MaxSpringStepSec"/>. The explicit integrator
     /// becomes unstable for stiff springs at longer steps, and a single clamped step would run springs in slow motion
     /// below 60 fps (including 24, 25 and 30 fps exports).
     /// </summary>
-    private static int GetSpringSteps(out float step)
+    private static int GetSpringSteps(double durationSec, out float step)
     {
-        var frameDuration = (float)Playback.LastFrameDuration.Clamp(0, MaxSpringFrameSec);
+        var frameDuration = (float)durationSec.Clamp(0, MaxSpringFrameSec);
         var stepCount = Math.Max(1, (int)MathF.Ceiling(frameDuration / MaxSpringStepSec));
         step = frameDuration / stepCount;
         return stepCount;

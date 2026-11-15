@@ -31,14 +31,10 @@ internal sealed class EaseVec3 : Instance<EaseVec3>
         if (Math.Abs(currentTime - _lastEvalTime) < MinTimeElapsedBeforeEvaluation)
             return;
 
-        if (context.IntVariables.TryGetValue("__MotionBlurPass", out var motionBlurPass) && motionBlurPass > 0)
-        {
-            return;
-        }
-
         _lastEvalTime = currentTime;
 
-        if (Vector3.Distance(inputValue, _previousInputValue) > 0.001f)
+        // Only the frame's first pass starts a new animation; subframes evaluate the curve at their own time.
+        if (!context.RenderPass.IsRepeatOfFrame && Vector3.Distance(inputValue, _previousInputValue) > 0.001f)
         {
             _startTime = currentTime;
             _initialValue = Result.Value;
@@ -60,7 +56,8 @@ internal sealed class EaseVec3 : Instance<EaseVec3>
             );
 
 
-        _previousInputValue = inputValue;
+        if (!context.RenderPass.IsRepeatOfFrame)
+            _previousInputValue = inputValue;
     }
 
     private double _lastEvalTime;
