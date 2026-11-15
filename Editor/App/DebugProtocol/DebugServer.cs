@@ -480,10 +480,9 @@ internal static class DebugServer
                     var bypassCommand = new ChangeInstanceBypassedCommand(bypassChild, bypassed);
                     bypassCommand.Do();
 
-                    // Symbol.Child ignores the change while its main output has no connection.
                     if (bypassChild.IsBypassed != bypassed)
                     {
-                        context.SendError("BYPASS_NOT_APPLIED", $"[{bypassChild.Symbol.Name}] ignored the bypass change (is its main output connected?)");
+                        context.SendError("BYPASS_NOT_APPLIED", $"Could not change bypass for [{bypassChild.Symbol.Name}].");
                         break;
                     }
 
