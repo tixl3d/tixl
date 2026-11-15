@@ -1,6 +1,8 @@
 // Shared by screen space effects that trace against the depth and normal buffers of a [RenderTarget] and
 // accumulate over frames. Expects its users to bind their parameters to b0, including BlendFactor, MaxAccumulatedFrames and HighlightThreshold.
 
+#include "shared/velocity-functions.hlsl"
+
 cbuffer Resolution : register(b1)
 {
     float TargetWidth;
@@ -48,6 +50,9 @@ Texture2D<float4> DepthMap : register(t1);
 Texture2D<float4> NormalMap : register(t2);
 Texture2D<float4> Accumulated : register(t3);
 Texture2D<float4> AccumulatedFrameCount : register(t4);
+
+/** Screen-space motion from draws that write it (see velocity-functions.hlsl); unbound it reads 0, meaning unknown. */
+Texture2D<float4> VelocityMap : register(t5);
 sampler texSampler : register(s0);
 
 static const float BackgroundDepth = 0.99999;
@@ -121,6 +126,40 @@ float2 ReprojectToPreviousUv(float3 worldPosition)
     float2 currentJitterUv = float2(CameraToClipSpace._31, -CameraToClipSpace._32) * 0.5;
     float2 previousJitterUv = float2(PrevCameraToClipSpace._31, -PrevCameraToClipSpace._32) * 0.5;
     return NdcToUv(previousClip.xy / previousClip.w) + previousJitterUv - currentJitterUv;
+}
+
+/**
+ * Where the surface at uv was last frame: from the velocity map where its draw wrote motion, otherwise by projecting
+ * its world position through the previous camera, which only holds for static geometry.
+ */
+float2 PreviousUvOfSurface(float2 uv, float depth, float3 worldPosition, out bool isMoving)
+{
+    float2 velocity;
+    isMoving = TryDecodeVelocity(VelocityMap.Load(int3(UvToTexel(uv), 0)), depth, velocity);
+    return isMoving ? uv - velocity : ReprojectToPreviousUv(worldPosition);
+}
+
+/**
+ * The distance from the previous eye this surface had last frame, to compare with the stored history. A moving surface
+ * is elsewhere in the world; it is expected at about its current distance from the camera.
+ */
+float ExpectedPreviousDistance(float3 worldPosition, bool isMoving)
+{
+    return isMoving ? distance(worldPosition, EyePosition()) : distance(worldPosition, PreviousEyePosition());
+}
+
+float2 WorldToUv(float3 worldPosition)
+{
+    float4 clip = mul(float4(worldPosition, 1.0), WorldToClipSpace);
+    return NdcToUv(clip.xy / clip.w);
+}
+
+/** True if the surface visible at uv moved since last frame; draws without velocity count as not moving. */
+bool IsSurfaceMoving(float2 uv)
+{
+    float2 velocity;
+    return TryDecodeVelocity(VelocityMap.Load(int3(UvToTexel(uv), 0)), FetchDepth(uv), velocity)
+           && dot(velocity, velocity) > 1e-12;
 }
 
 bool IsOnScreen(float2 uv)

@@ -18,6 +18,9 @@ internal sealed class ScreenSpaceReflections : Instance<ScreenSpaceReflections>
     [Input(Guid = "3bae5c82-9f46-40b3-a7d5-8c2f40be6139")]
     public readonly InputSlot<Texture2D> NormalMap = new();
 
+    [Input(Guid = "446694a4-283f-437f-a7f1-5a0b78619a22")]
+    public readonly InputSlot<Texture2D> VelocityMap = new();
+
     [Input(Guid = "4cbf6d93-a057-41c4-b8e6-9d3051cf724a")]
     public readonly InputSlot<Object> CameraReference = new();
 

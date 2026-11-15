@@ -529,6 +529,14 @@
       }
     },
     {
+      "ChildId": "ef0fd9ce-1056-467e-9172-e50bbdbe51a7",
+      "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
+      "Position": {
+        "X": 1600.0,
+        "Y": 420.0000
+      }
+    },
+    {
       "ChildId": "1a0ac8f9-12c3-5082-97e9-dd49eacc9dd4",
       "SymbolName": "Lib.render.shading._._TransformsCBufferFromCam",
       "Position": {

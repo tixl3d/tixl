@@ -42,6 +42,9 @@ transforms and camera only).
     textured or detailed mesh.
   - Seen once per new TXAA instance: a Vulkan validation error for TXAA's `History` texture (sampled while still in
     color-attachment layout). Not touched by M1/M2; to be checked separately.
+    The same error appears for `[ScreenSpaceAO]`'s `Accumulated` / `AccumulatedFrameCount` on its first frame
+    (2026-11-15), so it is the feedback-texture pattern in general (a target read on the frame it was created),
+    not TXAA specifically.
 
 ## Goal
 
@@ -254,6 +257,29 @@ M0 is independent and can ship first. M1 and later come after Phase 3 above; the
 - **M3. Moving points.** Gate `KeepPreviousPointBuffer` on the request flag in the instanced draws (`DrawMeshAtPoints`,
   `DrawPoints`, `DrawBillboards`). Move `DrawMovingPoints` onto the shared include.
 - **M4. Deformed meshes.** Previous vertex buffer for mesh ops that deform on the GPU, only when needed.
+- **M2b. [ScreenSpaceLighting] temporal passes.** SSL is a composite of `[ScreenSpaceAO]`, `[ScreenSpaceReflections]`
+  and `[TXAA]`; all three accumulate history with camera-only reprojection (`ReprojectToPreviousUv` in
+  `shared/screen-space-tracing.hlsl`). SSL gets a `VelocityMap` input, passed to all three.
+  - One shared helper: where velocity is valid, previous uv = uv − velocity (jitter-free, so no jitter correction);
+    elsewhere the camera reprojection as before.
+  - The history distance checks (`expectedDistance` from the previous eye) assume static surfaces. For moving pixels
+    compare distance from the camera instead, like TXAA.
+  - Order: AO and the internal TXAA first; reflections after. Reflections need the velocity at the ray hit for the
+    reflected object's history, not only the surface's.
+  - `[SSAO]` (standalone) keeps no history and needs no velocity. Rule: every op that keeps history takes velocity.
+  - Started 2026-11-15: `screen-space-tracing.hlsl` has `VelocityMap` at t5, `PreviousUvOfSurface` and
+    `ExpectedPreviousDistance`; `[ScreenSpaceAO]`'s temporal pass uses them. SSL's `VelocityMap` input feeds its AO and
+    its TXAA. Reflections still use the camera-only path (t5 unbound reads 0 = unknown).
+    Wiring applied and built; bridge smoke test: no shader errors. The quality comparison was inconclusive in a
+    synthetic scene (too little contact occlusion); to be judged in a real scene.
+  - User test 2026-11-15 (A/B over the bridge, values restored with undo): velocity visibly cleans AO and TXAA. The
+    dark wash at roughness 1 and the trails around points come from the reflections (present with velocity on and off).
+  - Reflections (2026-11-15): the temporal pass uses `PreviousUvOfSurface` for the surface (a moving mirror carries
+    its image) and reconstructs the ray hit from surface, normal and stored hit distance (without the trace's roughness
+    jitter). If the hit moved, the clamp stays on and history is capped at 3 frames: no reprojection is possible
+    without the hit uv. The trace pass is not touched: it binds only t0–t2, and textures bind in order.
+  - Limits: reflected objects without velocity (points, until M3) still trail. Separate item: the dark wash of
+    reflections at high roughness is a look issue of the reflection pass, not of motion.
 - **M5. MotionBlur** reads the same velocity target. Velocity is displacement per *frame*, which is what TXAA needs
   (its history is one frame old), but it follows frame-duration jitter: motion blur must scale it by
   shutter time / `Playback.LastFrameDuration`, or blur length jumps with frame timing (seen 2026-11-15).

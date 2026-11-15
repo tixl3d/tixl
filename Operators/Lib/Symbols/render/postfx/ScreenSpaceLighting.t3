@@ -3,6 +3,10 @@
   "Id": "f2a60c18-9d47-4b13-8e5a-c7b31d04e692",
   "Inputs": [
     {
+      "Id": "5a84cf61-ac8d-49f7-8149-883657bb32b8"/*VelocityMap*/,
+      "DefaultValue": null
+    },
+    {
       "Id": "954e8e61-963b-5ab2-b6af-e6ebd979c67b",
       "DefaultValue": null
     },
@@ -158,6 +162,24 @@
     }
   ],
   "Connections": [
+    {
+      "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "SourceSlotId": "5a84cf61-ac8d-49f7-8149-883657bb32b8",
+      "TargetParentOrChildId": "56a90bc3-309f-5fe1-9ab8-8b300ccd9ff5",
+      "TargetSlotId": "446694a4-283f-437f-a7f1-5a0b78619a22"
+    },
+    {
+      "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "SourceSlotId": "5a84cf61-ac8d-49f7-8149-883657bb32b8",
+      "TargetParentOrChildId": "0f34008e-0505-5717-a72a-229201a2f9f9",
+      "TargetSlotId": "9956cb84-af49-406f-80e3-38000482ddec"
+    },
+    {
+      "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "SourceSlotId": "5a84cf61-ac8d-49f7-8149-883657bb32b8",
+      "TargetParentOrChildId": "ed988d3b-132f-534d-b38f-c945cbcfb2d8",
+      "TargetSlotId": "48fefd6e-44d6-457a-a1b3-12b23be585ee"
+    },
     {
       "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
       "SourceSlotId": "954e8e61-963b-5ab2-b6af-e6ebd979c67b",

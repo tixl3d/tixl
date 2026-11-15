@@ -160,6 +160,20 @@ float3 YCoCgToRgb(float3 c)
                   c.x - c.y - c.z);
 }
 
+/** Reflections of moving objects can't be reprojected (only the hit distance is kept), so they keep little history. */
+static const float MaxFramesForMovingReflections = 3.0;
+
+/** Reconstructs where the reflection ray hit, without the trace's roughness jitter, and checks whether that moved. */
+bool IsReflectedSurfaceMoving(float2 uv, float3 surface, float3 viewRay, float hitDistance)
+{
+    float3 normal;
+    if (hitDistance <= 0.0 || !TryFetchNormal(uv, normal))
+        return false;
+
+    float2 hitUv = WorldToUv(surface + reflect(normalize(viewRay), normal) * hitDistance);
+    return IsOnScreen(hitUv) && IsSurfaceMoving(hitUv);
+}
+
 TemporalOutput psTemporal(vsOutput input)
 {
     float2 uv = input.texCoord;
@@ -177,8 +191,11 @@ TemporalOutput psTemporal(vsOutput input)
     // Rough reflections have no single depth, so they blend toward moving with the surface.
     float virtualDistance = raw.a * (1.0 - saturate(Roughness * 2.0));
     float3 virtualPoint = surface + normalize(viewRay) * virtualDistance;
-    float2 reflectionUv = ReprojectToPreviousUv(virtualPoint);
-    float2 surfaceUv = ReprojectToPreviousUv(surface);
+    // A moving mirror carries its image along.
+    bool surfaceMoves;
+    float2 surfaceUv = PreviousUvOfSurface(uv, depth, surface, surfaceMoves);
+    float2 reflectionUv = surfaceMoves ? surfaceUv : ReprojectToPreviousUv(virtualPoint);
+    bool reflectionMoves = IsReflectedSurfaceMoving(uv, surface, viewRay, raw.a);
 
     float3 centerYCoCg = RgbToYCoCg(raw.rgb);
     float3 boxMin = centerYCoCg;
@@ -205,13 +222,14 @@ TemporalOutput psTemporal(vsOutput input)
     float3 clampedYCoCg = clamp(historyYCoCg, boxCenter - boxExtent, boxCenter + boxExtent);
     float disagreement = saturate(length(historyYCoCg - clampedYCoCg) / 0.05);
 
-    float rareHits = saturate(Roughness * 4.0);
+    // Rough reflections skip the clamp to keep their rare hits, but a moving reflected object would then trail.
+    float rareHits = reflectionMoves ? 0.0 : saturate(Roughness * 4.0);
     history = lerp(YCoCgToRgb(clampedYCoCg), history, rareHits);
     disagreement *= 1.0 - rareHits;
 
     // Half floats hold nonlinear depth poorly but give a camera distance constant relative precision.
     float storedDistance = Finite(Accumulated.SampleLevel(texSampler, surfaceUv, 0)).a;
-    float expectedDistance = distance(surface, PreviousEyePosition());
+    float expectedDistance = ExpectedPreviousDistance(surface, surfaceMoves);
     float relativeGap = abs(storedDistance - expectedDistance) / max(expectedDistance, 1e-4);
 
     float confidence = 1.0 - saturate(relativeGap / max(DepthRejection, 1e-5));
@@ -220,6 +238,8 @@ TemporalOutput psTemporal(vsOutput input)
 
     float frames = GetAccumulatedFrames(uv, surfaceUv, confidence, disagreement);
     frames = lerp(frames, min(frames, MaxFramesForRareHits), rareHits);
+    if (reflectionMoves)
+        frames = min(frames, MaxFramesForMovingReflections);
     float3 resolved = lerp(raw.rgb, history, frames / (frames + 1.0));
     return MakeTemporalOutput(resolved, length(viewRay), frames);
 }

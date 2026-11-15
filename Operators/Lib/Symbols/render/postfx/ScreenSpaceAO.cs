@@ -18,6 +18,9 @@ internal sealed class ScreenSpaceAO : Instance<ScreenSpaceAO>
     [Input(Guid = "d374b069-fc18-42ae-853d-81e64a27cfbb")]
     public readonly InputSlot<Texture2D> NormalMap = new();
 
+    [Input(Guid = "9956cb84-af49-406f-80e3-38000482ddec")]
+    public readonly InputSlot<Texture2D> VelocityMap = new();
+
     [Input(Guid = "e485c17a-0d29-43bf-964e-92f75b38d0cc")]
     public readonly InputSlot<Object> CameraReference = new();
 

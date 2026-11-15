@@ -21,6 +21,9 @@ internal sealed class ScreenSpaceLighting : Instance<ScreenSpaceLighting>
     [Input(Guid = "b14dc3e3-8d42-586a-b06f-1b7ecbe783de")]
     public readonly InputSlot<Texture2D> NormalMap = new();
 
+    [Input(Guid = "5a84cf61-ac8d-49f7-8149-883657bb32b8")]
+    public readonly InputSlot<Texture2D> VelocityMap = new();
+
     [Input(Guid = "6fd50e91-9ae7-5378-b8e3-688f4d212a78")]
     public readonly InputSlot<Object> CameraReference = new();
 

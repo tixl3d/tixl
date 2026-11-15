@@ -121,7 +121,8 @@ TemporalOutput psTemporal(vsOutput input)
     }
 
     float3 surface = UvDepthToWorld(uv, depth);
-    float2 previousUv = ReprojectToPreviousUv(surface);
+    bool isMoving;
+    float2 previousUv = PreviousUvOfSurface(uv, depth, surface, isMoving);
 
     float4 sum = 0.0;
     float4 sumSquared = 0.0;
@@ -150,7 +151,7 @@ TemporalOutput psTemporal(vsOutput input)
     float3 historyBleeding = Finite(AccumulatedFrameCount.SampleLevel(texSampler, previousUv, 0)).gba;
     float historyVisibility = clamp(historyColor.r, mean.a - allowedDeviation, mean.a + allowedDeviation);
 
-    float expectedDistance = distance(surface, PreviousEyePosition());
+    float expectedDistance = ExpectedPreviousDistance(surface, isMoving);
     float relativeGap = abs(historyColor.a - expectedDistance) / max(expectedDistance, 1e-4);
 
     float confidence = 1.0 - saturate(relativeGap / max(DepthRejection, 1e-5));

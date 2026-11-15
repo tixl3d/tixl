@@ -742,6 +742,14 @@
       }
     },
     {
+      "ChildId": "f2eae0f4-d4dd-48ab-b68a-38f9b0ac0997",
+      "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
+      "Position": {
+        "X": 1600.0,
+        "Y": 460.0000
+      }
+    },
+    {
       "ChildId": "196e35f8-3fff-5181-a748-7fc8cdc05965",
       "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "Position": {
