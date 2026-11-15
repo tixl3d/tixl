@@ -392,6 +392,14 @@ public class Slot<T> : ISlot, ITimeClipRemapTarget
             return _dirtyFlag.SourceVersion;
         }
 
+        // A disabled output returns its cached value without reading the operator's inputs.
+        // Keep its current version so consumers can still see changes already made to the slot.
+        if (_isDisabled && ReferenceEquals(_updateAction, EmptyAction))
+        {
+            _dirtyFlag.InvalidationTick = globalTick;
+            return _dirtyFlag.SourceVersion;
+        }
+
         // unconnected output slots
         var parentInputs = _parent.Inputs;
         var parentInputCount = parentInputs.Count;
