@@ -108,40 +108,27 @@ public partial class Symbol
             if (Parent == null)
                 return;
 
-            var outputDefinitions = Symbol.OutputDefinitions;
-
-            // Set disabled status on this child's outputs
-            foreach (var outputDef in outputDefinitions)
+            lock (_creationLock)
             {
-                if (outputDef == null)
+                var changeLiveBypass = _isBypassed && IsMainOutputDisabled != shouldBeDisabled && IsBypassable();
+                foreach (var output in Outputs.Values)
                 {
-                    Log.Warning($"{Symbol.GetType()} {Symbol.Name} contains a null {typeof(Symbol.OutputDefinition)}", Id);
-                    continue;
+                    output.IsDisabled = shouldBeDisabled;
                 }
 
-                if (Outputs.TryGetValue(outputDef.Id, out var childOutput))
+                foreach (var instance in _instancesOfSelf.Values)
                 {
-                    childOutput.IsDisabled = shouldBeDisabled;
+                    // Disabled and bypassed slots share a saved update action. Only one can own it at a time.
+                    if (changeLiveBypass && shouldBeDisabled)
+                        Instance.SetBypassFor(instance, false);
 
-                }
-                else
-                {
-                    Log.Warning($"{typeof(Symbol.Child)} {ReadableName} does not have the following child output as defined: " +
-                                $"{childOutput?.OutputDefinition.Name}({nameof(Guid)}{childOutput?.OutputDefinition.Id})");
-                }
-            }
+                    foreach (var slot in instance.Outputs)
+                    {
+                        slot.IsDisabled = shouldBeDisabled;
+                    }
 
-            // Set disabled status on outputs of each instanced copy of this child within all parents that contain it
-            foreach (var parentInstance in Parent.InstancesOfSelf)
-            {
-                // This parent doesn't have an instance of our SymbolChild. Ignoring and continuing.
-                if (!parentInstance.Children.TryGetChildInstance(Id, out var matchingChildInstance))
-                    continue;
-
-                // Set disabled status on all outputs of each instance
-                foreach (var slot in matchingChildInstance.Outputs)
-                {
-                    slot.IsDisabled = shouldBeDisabled;
+                    if (changeLiveBypass && !shouldBeDisabled)
+                        Instance.SetBypassFor(instance, true);
                 }
             }
         }
@@ -229,6 +216,10 @@ public partial class Symbol
 
         private bool _isBypassed;
 
+        internal bool IsMainOutputDisabled => Symbol.OutputDefinitions.Count > 0
+                                             && Outputs.TryGetValue(Symbol.OutputDefinitions[0].Id, out var output)
+                                             && output.IsDisabled;
+
         public bool IsBypassable()
         {
             if (Symbol.OutputDefinitions.Count == 0)
@@ -264,51 +255,23 @@ public partial class Symbol
 
         private void SetBypassed(bool shouldBypass)
         {
-            if (shouldBypass == _isBypassed)
-                return;
-
-            if (!IsBypassable())
-                return;
-
-            if (Parent == null)
-            {
-                // Clarify: shouldn't this be shouldBypass?
-                _isBypassed = shouldBypass; // during loading parents are not yet assigned. This flag will later be used when creating instances
-                return;
-            }
-
             lock (_creationLock)
             {
-                if (_instancesOfSelf.Count == 0)
-                {
-                    _isBypassed = shouldBypass; // while duplicating / cloning as new symbol there are no instances yet.
+                if (shouldBypass == _isBypassed || !IsBypassable())
                     return;
+
+                if (Parent != null && !IsMainOutputDisabled)
+                {
+                    // A bypass toggle updates existing slots. Looking up children through their parents can create instances.
+                    foreach (var instance in _instancesOfSelf.Values)
+                    {
+                        Instance.SetBypassFor(instance, shouldBypass);
+                    }
                 }
+
+                // Keep the preference while disabled and for instances created later.
+                _isBypassed = shouldBypass;
             }
-
-            // check if there is a connection
-            var isOutputConnected = false;
-            var mainOutputDef = Symbol.OutputDefinitions[0];
-            foreach (var connection in Parent.Connections)
-            {
-                if (connection.SourceSlotId != mainOutputDef.Id || connection.SourceParentOrChildId != Id)
-                    continue;
-
-                isOutputConnected = true;
-                break;
-            }
-
-            if (!isOutputConnected)
-                return;
-
-            var id = Id;
-            foreach (var parentInstance in Parent.InstancesOfSelf)
-            {
-                var instance = parentInstance.Children[id];
-                Instance.SetBypassFor(instance, shouldBypass);
-            }
-
-            _isBypassed = shouldBypass;
         }
         
         #endregion Bypass

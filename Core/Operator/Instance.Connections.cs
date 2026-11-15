@@ -91,7 +91,7 @@ public abstract partial class Instance
             // note: by accessing the Values property, all children are guaranteed to be created, even if they are not connected to anything
             symbol.Animator.CreateUpdateActionsForExistingCurves(instance.Children.Values);
 
-            if (child.IsBypassed)
+            if (child.IsBypassed && !child.IsMainOutputDisabled)
             {
                 SetBypassFor(instance, true, invalidate: false);
             }
