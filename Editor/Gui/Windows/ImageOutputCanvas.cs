@@ -115,9 +115,12 @@ internal sealed class ImageOutputCanvas : ScalableCanvas
         {
             var format = srv == null || srv.IsDisposed ? "null?" : GetFormatLabel(srv.Description.Format);
             var zoom = Math.Abs(Scale.X) < 0.001f ? "" : $" ×{Scale.X:G2}";
+
+            // A rendered scene carries depth, normals and velocity along with the color: "+DNV".
+            var bundle = texture.Bundle?.Label ?? "";
             DrawCaption(SourceLabel == null
-                            ? $"{size.X}x{size.Y}  {format} {zoom}"
-                            : $"via {SourceLabel}  {size.X}x{size.Y}  {format} {zoom}");
+                            ? $"{size.X}x{size.Y}  {format}{bundle} {zoom}"
+                            : $"via {SourceLabel}  {size.X}x{size.Y}  {format}{bundle} {zoom}");
         }
     }
 

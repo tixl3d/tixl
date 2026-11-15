@@ -37,6 +37,12 @@ public sealed class Texture2D(T3.Graphics.Compat.Texture2D texture) : Texture<T3
     /// </summary>
     public CubeMapLayouts CubeMapLayout { get; set; }
 
+    /// <summary>
+    /// Depth, normals, velocity and camera rendered together with this image, set by the render op that produced it.
+    /// The slot type stays Texture2D, so every image input accepts it; bundle-aware ops read the extra buffers from here.
+    /// </summary>
+    public T3.Core.Rendering.RenderBundle? Bundle { get; set; }
+
     [SupportedOSPlatform("windows")]
     public static Texture2D CreateFromBitmap(Device device, BitmapSource bitmapSource)
     {

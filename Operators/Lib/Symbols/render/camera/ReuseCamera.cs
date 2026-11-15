@@ -1,3 +1,4 @@
+using T3.Core.Rendering;
 namespace Lib.render.camera;
 
 [Guid("484bec1b-e441-440a-85b4-b3865c57b4ed")]
@@ -35,7 +36,11 @@ internal sealed class ReuseCamera : Instance<ReuseCamera>
             context.WorldToCamera = camera.WorldToCamera;
             context.CameraToClipSpace = camera.CameraToClipSpace;
 
+            // The innermost camera claims the rendered image for the render op's bundle.
+            var renderedCameraSerial = context.RenderPass.RenderedCameraSerial;
             Command.GetValue(context);
+            if (camera is ICameraPropertiesProvider reusedCamera)
+                context.RenderPass.RecordCamera(renderedCameraSerial, reusedCamera);
 
             context.CameraToClipSpace = prevCameraToClipSpace;
             context.WorldToCamera = prevWorldToCamera;

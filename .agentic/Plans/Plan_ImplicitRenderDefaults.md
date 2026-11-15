@@ -164,6 +164,18 @@ A render op's main output stays an ordinary `Texture2D` (the color image), but i
 5. **UI:** "from bundle" on unconnected buffer inputs; test set under `.tests-manual/`; help page for `[RenderScene]`
    and bundles.
 
+**Phases 1–2 implemented 2026-11-15, untested by a human:**
+- Core: `Core/Rendering/RenderBundle.cs` (`Depth`, `Normal`, `Velocity`, `Camera`, `Label` from a fixed table, no
+  allocation), `Texture2D.Bundle`; `RenderPassState.RenderedCamera`, `RenderedCameraSerial`, `RecordCamera()`.
+- Camera ops record themselves after their subtree (innermost wins): `[Camera]`, `[CameraWithRotation]`,
+  `[OrbitCamera]`, `[OrthographicCamera]`, `[BlendCameras]`; `[ReuseCamera]`/`[ReuseCamera2]` record the reused
+  camera. `[UseProjectorCam]` sets matrices without a provider object and records nothing (an outer camera may claim).
+- Deviation from the plan above: `[RenderTarget]` attaches the bundle too, with whatever buffers it has (attaching is
+  only references). It clears `RenderedCamera` before its subtree and keeps the recorded one. `[RenderScene]`
+  (`render/basic`) is a composite of `[RenderTarget]` with depth, normals and velocity always on, `Multisampling` 1 by
+  default, and the buffers also as separate outputs for effects that aren't bundle-aware yet. No duplicated render code.
+- Output window caption: `ImageOutputCanvas` appends `RenderBundle.Label`, e.g. `1920x1080 RGBA16F +DNV`.
+
 ## Naming
 
 - New op: **`[RenderScene]`**.

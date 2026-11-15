@@ -7,8 +7,8 @@
     {
       "InputId": "033a11bf-feb2-57d5-b6e1-2cee59cf230a"/*AntiAliasingBlend*/,
       "Position": {
-        "X": -300.0,
-        "Y": 940.0
+        "X": -272.33832,
+        "Y": 975.1299
       },
       "Description": "How much of the accumulated image is kept each frame. Higher values are smoother but react slower.",
       "Min": 0.0,
@@ -19,8 +19,8 @@
     {
       "InputId": "045b64b3-c3c6-55be-b124-c7ed34776ecc"/*StepsPerRay*/,
       "Position": {
-        "X": -300.0,
-        "Y": 320.0
+        "X": 118.308105,
+        "Y": 262.85504
       },
       "Description": "Samples along each occlusion ray. Increase it for a large OcclusionRadius.",
       "Min": 2,
@@ -30,8 +30,8 @@
     {
       "InputId": "04f0e86f-c9b2-55ce-a278-bb790b07050f"/*ReflectionIntensity*/,
       "Position": {
-        "X": -300.0,
-        "Y": 400.0
+        "X": 118.308105,
+        "Y": 682.85504
       },
       "GroupTitle": "Reflections",
       "Description": "Multiplier for the reflection strength after the Fresnel term. 0 hides reflections.",
@@ -42,8 +42,8 @@
     {
       "InputId": "0ba63e58-f702-5800-a992-96696cc44784"/*Reflectivity*/,
       "Position": {
-        "X": -300.0,
-        "Y": 440.0
+        "X": 118.308105,
+        "Y": 717.85504
       },
       "Description": "Reflection strength when looking straight at a surface. It rises toward 1 at grazing angles.",
       "Min": 0.0,
@@ -54,16 +54,16 @@
     {
       "InputId": "2a9d43a4-a3b9-58aa-bb9e-9a1dc0534fad"/*Reset*/,
       "Position": {
-        "X": -300.0,
-        "Y": 840.0
+        "X": -272.33832,
+        "Y": 875.1299
       },
       "Description": "Ignores the history while enabled, for example after a hard camera cut."
     },
     {
       "InputId": "2cb78d66-f7d9-5118-88cb-295c76e01ccf"/*OcclusionThickness*/,
       "Position": {
-        "X": -300.0,
-        "Y": 240.0
+        "X": 118.308105,
+        "Y": 192.85504
       },
       "Description": "How deep an object is assumed to be behind its visible surface, for occlusion and bleeding.",
       "Min": 0.0,
@@ -73,8 +73,8 @@
     {
       "InputId": "2d098fe1-9c9e-5e3f-a910-5494b7138083"/*ColorBleeding*/,
       "Position": {
-        "X": -300.0,
-        "Y": 360.0
+        "X": 118.308105,
+        "Y": 157.85504
       },
       "GroupTitle": "Color Bleeding",
       "Description": "Adds light picked up from nearby surfaces. It estimates surface colors from the rendered image, so it gives a soft tint rather than accurate indirect light.",
@@ -85,8 +85,8 @@
     {
       "InputId": "385129ec-175f-5821-ac8b-ca4bb2d0b287"/*OcclusionRadius*/,
       "Position": {
-        "X": -300.0,
-        "Y": 200.0
+        "X": 118.308105,
+        "Y": 87.85504
       },
       "Description": "How far surfaces can darken and tint each other, in world units.",
       "Min": 0.0,
@@ -96,8 +96,8 @@
     {
       "InputId": "398af543-56c1-580f-9355-ad83c8737982"/*MaxDistance*/,
       "Position": {
-        "X": -300.0,
-        "Y": 520.0
+        "X": 118.308105,
+        "Y": 822.85504
       },
       "Description": "Longest reflection ray in world units.",
       "Min": 0.0,
@@ -108,16 +108,16 @@
       "InputId": "51bda255-4188-55e2-a6e9-9e2f2f53c7c0"/*DepthMap*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -300.0,
-        "Y": 40.0
+        "X": -272.33832,
+        "Y": 75.12988
       },
       "Description": "The scene depth buffer. Only content that writes depth takes part."
     },
     {
       "InputId": "53f228d1-c7b1-5778-aa52-03c29e16cbc7"/*DepthRejection*/,
       "Position": {
-        "X": -300.0,
-        "Y": 800.0
+        "X": -272.33832,
+        "Y": 646.54987
       },
       "Description": "Relative camera distance difference above which history is rejected as disoccluded.",
       "Min": 0.0,
@@ -128,15 +128,15 @@
       "InputId": "5a84cf61-ac8d-49f7-8149-883657bb32b8"/*VelocityMap*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -300.0,
-        "Y": 155.0
+        "X": -272.33832,
+        "Y": 190.12988
       }
     },
     {
       "InputId": "5da494ec-cdf2-5d07-b15d-75540ff2c63b"/*ReflectionThickness*/,
       "Position": {
-        "X": -300.0,
-        "Y": 560.0
+        "X": 118.308105,
+        "Y": 857.85504
       },
       "Description": "How far behind a surface a reflection ray still counts as hitting it, in world units.",
       "Min": 0.0,
@@ -146,8 +146,8 @@
     {
       "InputId": "69fe1eda-0a88-524f-b5ac-8872e33d9eb7"/*RaysPerPixel*/,
       "Position": {
-        "X": -300.0,
-        "Y": 280.0
+        "X": 118.308105,
+        "Y": 227.85504
       },
       "Description": "Occlusion rays per pixel and frame. More rays reduce noise during motion and cost more.",
       "Min": 1,
@@ -158,16 +158,16 @@
       "InputId": "6fd50e91-9ae7-5378-b8e3-688f4d212a78"/*CameraReference*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -300.0,
-        "Y": 120.0
+        "X": -272.33832,
+        "Y": 155.12988
       },
       "Description": "Reference output of the scene camera ([Camera] or [OrbitCamera])."
     },
     {
       "InputId": "797e795f-9700-5bf9-9674-d2bd39356f3c"/*EdgeFade*/,
       "Position": {
-        "X": -300.0,
-        "Y": 640.0
+        "X": 118.308105,
+        "Y": 927.85504
       },
       "Description": "Screen margin over which reflections fade out.",
       "Min": 0.0,
@@ -178,8 +178,8 @@
     {
       "InputId": "863dafd8-10c4-571f-bddc-648857c595cc"/*NeighborhoodClamp*/,
       "Position": {
-        "X": -300.0,
-        "Y": 760.0
+        "X": -272.33832,
+        "Y": 576.54987
       },
       "Description": "How far the history may differ from the current frame.",
       "Min": 0.0,
@@ -190,16 +190,16 @@
       "InputId": "954e8e61-963b-5ab2-b6af-e6ebd979c67b"/*Image*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -300.0,
-        "Y": 0.0
+        "X": 118.308105,
+        "Y": -122.14496
       },
       "Description": "The rendered scene color. It must come from the same render pass and camera as DepthMap and NormalMap."
     },
     {
       "InputId": "9f05525d-3b27-528f-bc16-e2ab9a230e1e"/*BlendFactor*/,
       "Position": {
-        "X": -300.0,
-        "Y": 680.0
+        "X": -272.33832,
+        "Y": 436.54987
       },
       "GroupTitle": "Temporal Accumulation",
       "Description": "Share of the history kept each frame while the image changes.",
@@ -212,16 +212,16 @@
       "InputId": "b14dc3e3-8d42-586a-b06f-1b7ecbe783de"/*NormalMap*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -300.0,
-        "Y": 80.0
+        "X": 48.308105,
+        "Y": -52.14496
       },
       "Description": "The NormalBuffer output of the [RenderTarget], which needs WithNormalBuffer enabled."
     },
     {
       "InputId": "bbcf597d-db03-5380-acab-6223b7ed1338"/*Roughness*/,
       "Position": {
-        "X": -300.0,
-        "Y": 480.0
+        "X": 118.308105,
+        "Y": 752.85504
       },
       "Description": "Scatters the reflection rays into blurred reflections, which take longer to settle.",
       "Min": 0.0,
@@ -232,8 +232,8 @@
     {
       "InputId": "bf7efb01-73a0-57a4-8a3e-be714dad9a27"/*AntiAliasing*/,
       "Position": {
-        "X": -300.0,
-        "Y": 900.0
+        "X": -272.33832,
+        "Y": 935.1299
       },
       "GroupTitle": "Anti-Aliasing",
       "Description": "Smooths edges by accumulating frames rendered with sub-pixel camera jitter, as [TXAA] does. All content must write depth, otherwise it can smear while the camera moves. Disable it to use a separate [TXAA] or for a sharper image."
@@ -241,8 +241,8 @@
     {
       "InputId": "e1f4deec-22fd-5652-a3c3-37b46a5eab6c"/*OcclusionIntensity*/,
       "Position": {
-        "X": -300.0,
-        "Y": 160.0
+        "X": 118.308105,
+        "Y": 52.85504
       },
       "GroupTitle": "Occlusion",
       "Description": "Strength of the darkening in creases and contact areas. 0 disables it.",
@@ -253,8 +253,8 @@
     {
       "InputId": "e6d9b567-dbcf-5ce3-9862-cd1003bbee90"/*MaxSteps*/,
       "Position": {
-        "X": -300.0,
-        "Y": 600.0
+        "X": 118.308105,
+        "Y": 892.85504
       },
       "Description": "Steps per reflection ray. This is the main performance control for reflections.",
       "Min": 8,
@@ -264,8 +264,8 @@
     {
       "InputId": "f34284e4-7090-554a-bde9-9f4bb821d74e"/*HighlightThreshold*/,
       "Position": {
-        "X": -300.0,
-        "Y": 380.0
+        "X": -272.33832,
+        "Y": 366.54987
       },
       "GroupTitle": "Highlights",
       "Description": "Brightness above which occlusion and reflections fade out, gone at twice this value, so that glowing HDR materials keep their strength for [Bloom]. Strongly lit surfaces above it are affected too. Raise it if contact shading goes missing there.",
@@ -276,8 +276,8 @@
     {
       "InputId": "f5c3947d-c580-5739-b123-d5f7ff6a8ef3"/*MaxAccumulatedFrames*/,
       "Position": {
-        "X": -300.0,
-        "Y": 720.0
+        "X": -272.33832,
+        "Y": 506.54987
       },
       "Description": "How many frames a still pixel averages before it stops changing. Higher values settle cleaner but take longer.",
       "Min": 1,
@@ -290,40 +290,40 @@
       "ChildId": "003de6d6-ad3d-556c-824b-82f618148fad",
       "SymbolName": "Lib.numbers.bool.convert.BoolToInt",
       "Position": {
-        "X": 600.0,
-        "Y": 240.0
+        "X": 530.84607,
+        "Y": 1335.2565
       }
     },
     {
       "ChildId": "0f34008e-0505-5717-a72a-229201a2f9f9",
       "SymbolName": "Lib.render.postfx.ScreenSpaceAO",
       "Position": {
-        "X": 0.0,
-        "Y": 100.0
+        "X": 258.3081,
+        "Y": -122.14496
       }
     },
     {
       "ChildId": "56a90bc3-309f-5fe1-9ab8-8b300ccd9ff5",
       "SymbolName": "Lib.render.postfx.ScreenSpaceReflections",
       "Position": {
-        "X": 300.0,
-        "Y": 100.0
+        "X": 258.3081,
+        "Y": 507.85504
       }
     },
     {
       "ChildId": "6d72dd8b-b5d0-510d-8f86-59a76eebc341",
       "SymbolName": "Lib.image.use.PickTexture",
       "Position": {
-        "X": 800.0,
-        "Y": 100.0
+        "X": 670.84607,
+        "Y": 1265.2565
       }
     },
     {
       "ChildId": "ed988d3b-132f-534d-b38f-c945cbcfb2d8",
       "SymbolName": "Lib.render.postfx.TXAA",
       "Position": {
-        "X": 600.0,
-        "Y": 100.0
+        "X": 258.3081,
+        "Y": 1172.855
       }
     }
   ],
@@ -331,22 +331,22 @@
     {
       "OutputId": "76c6f273-504a-5ec4-a478-667277e75d42"/*Output*/,
       "Position": {
-        "X": 1000.0,
-        "Y": 100.0
+        "X": 670.84607,
+        "Y": 1370.2565
       }
     },
     {
       "OutputId": "c3e5a849-3ebd-5d73-b126-9061fe017779"/*Occlusion*/,
       "Position": {
-        "X": 1000.0,
-        "Y": 200.0
+        "X": 398.3081,
+        "Y": 472.85504
       }
     },
     {
       "OutputId": "48ed1801-2123-576c-bf4b-6c27214e32ac"/*Reflections*/,
       "Position": {
-        "X": 1000.0,
-        "Y": 300.0
+        "X": 398.3081,
+        "Y": 1137.855
       }
     }
   ]

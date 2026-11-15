@@ -1,4 +1,5 @@
 using T3.Graphics.Compat;
+using T3.Core.Rendering;
 using T3.Core.Operator.Interfaces;
 using T3.Core.Utils;
 using T3.Graphics;
@@ -255,7 +256,9 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
             // Render; draws keep velocity history only when this target can take it.
             var keepRenderPass = context.RenderPass;
             context.RenderPass.VelocityRequested = withVelocityBuffer;
+            context.RenderPass.RenderedCamera = null;
             Command.GetValue(context);
+            _bundle.Camera = context.RenderPass.RenderedCamera;
             context.RenderPass = keepRenderPass;
 
             // Restore context
@@ -307,6 +310,13 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
 
         }
             
+        // The color image carries the other buffers, so one connection hands a post effect the whole render.
+        _bundle.Depth = withDepthBuffer ? DepthTexture : null;
+        _bundle.Normal = _normalTarget.Texture;
+        _bundle.Velocity = _velocityTarget.Texture;
+        if (ColorTexture != null)
+            ColorTexture.Bundle = _bundle;
+
         ColorBuffer.Value = ColorTexture;
         ColorBuffer.DirtyFlag.Clear();
         DepthBuffer.Value = DepthTexture;
@@ -677,6 +687,7 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
     private Texture2D _resolvedDepthBuffer;
     private UnorderedAccessView _resolvedDepthBufferUav;
 
+    private readonly RenderBundle _bundle = new();
     private readonly ColorAttachment _normalTarget = new("normal");
     private readonly ColorAttachment _velocityTarget = new("velocity");
  

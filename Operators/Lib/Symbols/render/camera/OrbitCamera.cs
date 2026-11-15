@@ -42,7 +42,10 @@ internal sealed class OrbitCamera : Instance<OrbitCamera>
         context.CameraToClipSpace = CameraToClipSpace;
         context.WorldToCamera = WorldToCamera;
 
+        // The innermost camera claims the rendered image for the render op's bundle.
+        var renderedCameraSerial = context.RenderPass.RenderedCameraSerial;
         Command.GetValue(context);
+        context.RenderPass.RecordCamera(renderedCameraSerial, this);
 
         context.CameraToClipSpace = prevCameraToClipSpace;
         context.WorldToCamera = prevWorldToCamera;

@@ -1,3 +1,4 @@
+#nullable enable
 using System.Numerics;
 
 namespace T3.Core.Rendering;
@@ -48,6 +49,28 @@ public struct RenderPassState
 
     /// <summary>Sub-pixel projection offset of temporal anti-aliasing in pixels ([TXAA]); cameras add it to their projection.</summary>
     public Vector2 JitterOffset;
+
+    /// <summary>
+    /// The camera whose view the current render op's draws use: the innermost camera, since an inner camera overrides
+    /// the matrices of an outer one. Render ops clear it before their subtree and read it after.
+    /// </summary>
+    public ICameraPropertiesProvider? RenderedCamera;
+
+    /// <summary>Counts <see cref="RecordCamera"/> claims, so a camera can tell whether one inside its subtree claimed first.</summary>
+    public int RenderedCameraSerial;
+
+    /// <summary>
+    /// Call from a camera op after evaluating its subtree, with <see cref="RenderedCameraSerial"/> read before it. Claims
+    /// the rendered image unless a camera inside the subtree already did.
+    /// </summary>
+    public void RecordCamera(int serialBeforeSubtree, ICameraPropertiesProvider camera)
+    {
+        if (RenderedCameraSerial != serialBeforeSubtree)
+            return;
+
+        RenderedCamera = camera;
+        RenderedCameraSerial++;
+    }
 
     /// <summary>
     /// How far ops that integrate over time (damping, springs) advance in this evaluation, in seconds: a subframe's step,

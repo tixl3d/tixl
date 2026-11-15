@@ -1,0 +1,83 @@
+{
+  "FormatVersion": 3,
+  "Id": "b60072db-a16e-45f5-9425-bb80f5f9122c"/*RenderScene*/,
+  "Description": "Renders a shaded scene into an image that also carries its depth, normals, velocity and camera.\n\nConnect the scene (a [Camera] with draw operators) to Command. The Output is a normal image that every image operator accepts. Post effects that understand render bundles, like [ScreenSpaceLighting] and [TXAA], take depth, normals, velocity and the camera from it, so one connection is enough; an explicitly connected buffer input still wins. The output window shows the bundle after the format, e.g. 1920x1080 RGBA16F +DNV.\n\nThe separate buffer outputs are there for operators that need them connected explicitly.\n\nAKA: render, scene, gbuffer\n\nSee also: [RenderTarget], [ScreenSpaceLighting], [TXAA]",
+  "SymbolTags": "1",
+  "InputUis": [
+    {
+      "InputId": "1b69a1ec-5f03-4182-b002-21c6387a68cf"/*Command*/,
+      "Position": {
+        "X": -140.0,
+        "Y": 0.0
+      },
+      "Description": "The scene to render, usually a [Camera] with draw operators."
+    },
+    {
+      "InputId": "3db94583-6694-47e5-b775-23eb351e9f11"/*ClearColor*/,
+      "Position": {
+        "X": -140.0,
+        "Y": 70.0
+      }
+    },
+    {
+      "InputId": "5b838d3a-b693-4524-b8cd-b60530173d46"/*Resolution*/,
+      "Position": {
+        "X": -140.0,
+        "Y": 35.0
+      },
+      "Description": "Size in pixels. 0×0 uses the requested resolution, e.g. the output window's."
+    },
+    {
+      "InputId": "679fa6c5-7b78-4846-b462-4de672cd63b0"/*Multisampling*/,
+      "Position": {
+        "X": -140.0,
+        "Y": 105.0
+      },
+      "Description": "Samples per pixel (1, 2, 4 or 8). 1 is usually right when [TXAA] smooths the edges; multisampling averages normals and velocity at edges.",
+      "Min": 1,
+      "Max": 8,
+      "ClampMin": true,
+      "ClampMax": true
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "8429ba3d-fd88-4253-9f0a-ac12e44876f9",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "45777ce5-6408-4302-8a5a-a73b403b07c1"/*Output*/,
+      "Position": {
+        "X": 140.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "cb997fe3-ce39-4783-8625-51705c151217"/*DepthBuffer*/,
+      "Position": {
+        "X": 140.0,
+        "Y": 140.0
+      }
+    },
+    {
+      "OutputId": "82974b1e-aaca-40ee-b584-42e05c003ff9"/*NormalBuffer*/,
+      "Position": {
+        "X": 140.0,
+        "Y": 175.0
+      }
+    },
+    {
+      "OutputId": "9c72ee0a-5538-4f9e-80d2-1530666bddde"/*VelocityBuffer*/,
+      "Position": {
+        "X": 140.0,
+        "Y": 210.0
+      }
+    }
+  ]
+}
