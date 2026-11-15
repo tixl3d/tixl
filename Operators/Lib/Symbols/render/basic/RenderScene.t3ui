@@ -7,8 +7,8 @@
     {
       "InputId": "1b69a1ec-5f03-4182-b002-21c6387a68cf"/*Command*/,
       "Position": {
-        "X": -140.0,
-        "Y": 0.0
+        "X": 0.0,
+        "Y": -283.33188
       },
       "Description": "The scene to render, usually a [Camera] with draw operators."
     },
@@ -38,15 +38,70 @@
       "Max": 8,
       "ClampMin": true,
       "ClampMax": true
+    },
+    {
+      "InputId": "e67e7052-1f2f-4ad0-909f-f97190128c34"/*Index*/,
+      "Position": {
+        "X": -280.0,
+        "Y": -108.33188
+      }
     }
   ],
   "SymbolChildUis": [
+    {
+      "ChildId": "0141c5cf-0a9a-4b1a-bd6b-a048366bc7f3",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
+      "Position": {
+        "X": -419.9999,
+        "Y": -143.33188
+      }
+    },
+    {
+      "ChildId": "59341970-4d00-418a-8af6-2bfe6ac9ab4a",
+      "SymbolName": "Lib.render.shading._.SetContextTexture",
+      "Position": {
+        "X": 0.0,
+        "Y": -248.33188
+      }
+    },
     {
       "ChildId": "8429ba3d-fd88-4253-9f0a-ac12e44876f9",
       "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "Position": {
         "X": 0.0,
         "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "8bf967d7-16b2-4702-a5c5-c29edd78f869",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
+      "Position": {
+        "X": -280.0,
+        "Y": -213.33188
+      }
+    },
+    {
+      "ChildId": "918f64ea-70f1-42f6-b4a6-a581efc69b4a",
+      "SymbolName": "Lib.render.shading.TextureToCubeMap",
+      "Position": {
+        "X": -280.0,
+        "Y": -143.33188
+      }
+    },
+    {
+      "ChildId": "dfcb1ac2-146c-444e-b6e4-5550546737d1",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
+      "Position": {
+        "X": -280.0,
+        "Y": -178.33188
+      }
+    },
+    {
+      "ChildId": "e322ff67-2a72-4ee0-8637-8ebe3ec67094",
+      "SymbolName": "Lib.image.use.PickTexture",
+      "Position": {
+        "X": -140.0,
+        "Y": -213.33188
       }
     }
   ],

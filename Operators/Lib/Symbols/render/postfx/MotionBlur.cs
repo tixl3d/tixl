@@ -12,19 +12,18 @@ internal sealed class MotionBlur : Instance<MotionBlur>
     [Input(Guid = "3d99ccde-2bc3-4a25-962d-dab4fc6c554a")]
     public readonly InputSlot<Texture2D> DepthMap = new();
 
+    [Input(Guid = "8f1c6e2a-b374-4d59-9a0e-5c7d3b21f846")]
+    public readonly InputSlot<Texture2D> VelocityMap = new();
+
     [Input(Guid = "d757058a-a31e-487f-b002-cc06bc478535")]
     public readonly InputSlot<Object> CameraReference = new();
 
+    [Input(Guid = "4e7b2d90-6a1c-4f38-b5d2-e09a8c3f7165")]
+    public readonly InputSlot<float> Shutter = new();
+
+    [Input(Guid = "b2a95f07-3d4e-4c61-8e7b-19f6d0c2a538")]
+    public readonly InputSlot<float> MaxBlur = new();
+
     [Input(Guid = "df8bf08c-e576-4310-95b5-e34c6a001959")]
     public readonly InputSlot<int> SampleCount = new();
-
-    [Input(Guid = "db0d11c8-f4c0-4762-8821-4dd75c71fb9e")]
-    public readonly InputSlot<float> Strength = new();
-
-    [Input(Guid = "77ed2341-48f2-4e0f-913d-b2f368449088")]
-    public readonly InputSlot<float> ClampEffect = new();
-
-    [Input(Guid = "2ac4c1a2-c53e-4b78-90fc-15c0b69c8b28")]
-    public readonly InputSlot<Vector3> VelocityOffset = new InputSlot<Vector3>();
-
 }

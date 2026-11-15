@@ -344,6 +344,12 @@ M0 is independent and can ship first. M1 and later come after Phase 3 above; the
   `[RepeatFrame]`'s subframes (which since 2026-11-15 blur damped motion correctly too, via subframe steps). Velocity is displacement per *frame*, which is what TXAA needs
   (its history is one frame old), but it follows frame-duration jitter: motion blur must scale it by
   shutter time / `Playback.LastFrameDuration`, or blur length jumps with frame timing (seen 2026-11-15).
+  **Implemented 2026-11-15, untested:** `[MotionBlur]` rewritten as a tile-based reconstruction filter (McGuire 2012,
+  jittered as in Jimenez 2014). Same symbol id; `Image`/`DepthMap`/`CameraReference`/`SampleCount` kept, `VelocityMap`,
+  `Shutter` (0.5 = 180°), `MaxBlur` (pixels) new; `Strength`/`ClampEffect`/`VelocityOffset` removed (stale values
+  stripped from the examples). Resolves inputs with `[HandleTextureBundle]` and forwards the bundle. The passes run in
+  `_ExecuteMotionBlurPasses` (C#, like `_ExecuteFastBlurPasses`) because two of them run at tile resolution. Pixels
+  without velocity fall back to camera reprojection. Tile size = max(16, MaxBlur).
 
 ## Research Findings (2026-11-14)
 

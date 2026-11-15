@@ -699,18 +699,7 @@
       "Id": "2f4adea5-59c9-4062-a566-5746f4f14402"/*MotionBlur*/,
       "SymbolId": "196e14c7-3a71-4afd-a53b-e51d0fe8f414",
       "SymbolName": "Lib.render.postfx.MotionBlur",
-      "InputValues": [
-        {
-          "Id": "77ed2341-48f2-4e0f-913d-b2f368449088"/*ClampEffect*/,
-          "Type": "System.Single",
-          "Value": 0.031
-        },
-        {
-          "Id": "db0d11c8-f4c0-4762-8821-4dd75c71fb9e"/*Strength*/,
-          "Type": "System.Single",
-          "Value": 3.7
-        }
-      ],
+      "InputValues": [],
       "Outputs": []
     },
     {

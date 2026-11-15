@@ -26,4 +26,7 @@ internal sealed class RenderScene : Instance<RenderScene>
 
     [Input(Guid = "679fa6c5-7b78-4846-b462-4de672cd63b0")]
     public readonly InputSlot<int> Multisampling = new();
+
+        [Input(Guid = "e67e7052-1f2f-4ad0-909f-f97190128c34")]
+        public readonly InputSlot<int> Environment = new InputSlot<int>();
 }

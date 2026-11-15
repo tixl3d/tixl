@@ -8,8 +8,8 @@
       "InputId": "19b07ddf-ba1e-4f8b-b476-e93485348e91"/*Image*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -225.14397,
-        "Y": 944.8822
+        "X": -655.6495,
+        "Y": -322.79446
       },
       "Description": "The rendered scene color to be anti-aliased. Must come from the same render pass and camera as DepthMap."
     },
@@ -17,8 +17,8 @@
       "InputId": "24b786f7-75d2-47d4-96e8-f7fcf0cc9258"/*DepthMap*/,
       "Relevancy": "Required",
       "Position": {
-        "X": 131.33911,
-        "Y": 895.63794
+        "X": -795.6495,
+        "Y": -252.79443
       },
       "Description": "The scene's depth buffer, used to reconstruct where each pixel was in the previous frame. All content must write depth, otherwise it smears or vibrates."
     },
@@ -26,23 +26,23 @@
       "InputId": "414b89a2-128c-40c1-a3c7-137a788bb320"/*CameraReference*/,
       "Relevancy": "Required",
       "Position": {
-        "X": 131.33911,
-        "Y": 790.6382
+        "X": -865.6495,
+        "Y": -112.794464
       },
       "Description": "Reference output of the scene camera ([Camera] or [OrbitCamera]). Its matrices drive the reprojection of the previous frame."
     },
     {
       "InputId": "48fefd6e-44d6-457a-a1b3-12b23be585ee"/*VelocityMap*/,
       "Position": {
-        "X": 131.33911,
-        "Y": 965.6381
+        "X": -865.6495,
+        "Y": -182.79446
       }
     },
     {
       "InputId": "5d6e7f80-91a2-43b4-8506-7d8e9f011223"/*BlendFactor*/,
       "Position": {
-        "X": 61.33911,
-        "Y": 1105.6382
+        "X": -120.29828,
+        "Y": 759.44055
       },
       "Description": "How much of the accumulated history is kept each frame. Higher values are smoother and more stable but react slower to changes; lower values are sharper but flicker more. Typical range: 0.85 … 0.93.",
       "Min": 0.0,
@@ -53,8 +53,8 @@
     {
       "InputId": "6e7f8091-a2b3-44c5-9607-8e9f01122334"/*NeighborhoodClamp*/,
       "Position": {
-        "X": 61.33911,
-        "Y": 1140.6382
+        "X": -120.29828,
+        "Y": 794.44055
       },
       "Description": "Widens the color range the history is allowed to differ from the current frame. 0 is strict: crisp and ghost-free, but noisy details (speculars, thin lines) keep flickering. Higher values smooth such flickering at the risk of ghost trails behind moving content.",
       "Min": 0.0,
@@ -64,8 +64,8 @@
     {
       "InputId": "6e95bd44-ebf7-44a3-b98e-dea871a676a4"/*SampleCount*/,
       "Position": {
-        "X": -468.96283,
-        "Y": -275.29044
+        "X": 196.97263,
+        "Y": -235.52167
       },
       "Description": "Length of the repeating sub-pixel jitter pattern (a Halton sequence). It does not affect rendering speed. 8 or 16 are typical; higher values distribute the samples more finely but take longer to converge.",
       "AddPadding": "True"
@@ -73,8 +73,8 @@
     {
       "InputId": "7f8091a2-b3c4-45d6-a708-9f0112233445"/*MotionThreshold*/,
       "Position": {
-        "X": 61.33911,
-        "Y": 1175.6382
+        "X": -120.29828,
+        "Y": 829.44055
       },
       "Description": "Screen-space motion (as a fraction of the image size) above which the history is discarded. A safety net for jumps and cuts that the reprojection can't follow — keep it high (0.1 or more) so it doesn't reduce quality during normal camera motion.",
       "Min": 0.0,
@@ -84,8 +84,8 @@
     {
       "InputId": "8091a2b3-c4d5-46e7-b809-011223344556"/*DepthRejection*/,
       "Position": {
-        "X": 61.33911,
-        "Y": 1210.6382
+        "X": -120.29828,
+        "Y": 864.44055
       },
       "Description": "World-space distance above which a surface is treated as newly revealed (disocclusion) and its history is rejected. Smaller values give harder, cleaner edges when objects move in front of each other; too small rejects history everywhere. Silhouettes against an empty background have a very large gap, so they stay aliased unless this is raised well above the far clip distance.",
       "Min": 0.0,
@@ -95,29 +95,13 @@
     {
       "InputId": "91a2b3c4-d5e6-47f8-8910-112233445566"/*Reset*/,
       "Position": {
-        "X": -78.66095,
-        "Y": 1245.638
+        "X": -260.29834,
+        "Y": 899.4403
       },
       "Description": "Discards the accumulated history for this frame. Trigger on hard camera cuts to avoid a brief smear."
     }
   ],
   "SymbolChildUis": [
-    {
-      "ChildId": "c2e85a17-9f3b-4d40-a6c8-5b14e0d7f392",
-      "SymbolName": "Lib.render.postfx.HandleTextureBundle",
-      "Position": {
-        "X": -655.6495,
-        "Y": -287.79446
-      }
-    },
-    {
-      "ChildId": "81b4d6f0-3e29-47c5-b0a1-6c7f92e3d548",
-      "SymbolName": "Lib.render.postfx.AttachTextureBundle",
-      "Position": {
-        "X": 1098.2169,
-        "Y": 181.63057
-      }
-    },
     {
       "ChildId": "044e99cf-87e8-4e61-9a33-84c9bd4d5dc0",
       "SymbolName": "Lib.render._dx11.api.ResolutionConstBuffer",
@@ -154,16 +138,16 @@
       "ChildId": "1d873630-1c44-42bd-a9dd-279d18e3b06e",
       "SymbolName": "Lib.render._dx11.api.FloatsToBuffer",
       "Position": {
-        "X": 201.33911,
-        "Y": 1070.6382
+        "X": 19.701721,
+        "Y": 724.44055
       }
     },
     {
       "ChildId": "25049fb2-0b47-4c2f-afca-1044b5c02fe4",
       "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
       "Position": {
-        "X": 61.33911,
-        "Y": 1245.638
+        "X": -120.29828,
+        "Y": 899.4403
       }
     },
     {
@@ -218,8 +202,8 @@
       "ChildId": "714ab89c-548e-4d4a-92c0-c01d04e43931",
       "SymbolName": "Lib.image.use.UseTextureReference",
       "Position": {
-        "X": -328.60367,
-        "Y": 326.69193
+        "X": -328.6037,
+        "Y": 228.36972
       }
     },
     {
@@ -242,16 +226,16 @@
       "ChildId": "77f6bed6-e504-4da5-8e58-85cc0ec92135",
       "SymbolName": "Lib.numbers.vec2.Vec2JitterOffset",
       "Position": {
-        "X": 148.85208,
-        "Y": -287.79446
+        "X": 336.97263,
+        "Y": -270.52167
       }
     },
     {
       "ChildId": "7ef5a288-892c-4872-8f65-26befb9dd6c2",
       "SymbolName": "Lib.numbers.int.basic.ModInt",
       "Position": {
-        "X": -405.6495,
-        "Y": -51.644196
+        "X": -328.6037,
+        "Y": 35.034576
       }
     },
     {
@@ -260,6 +244,14 @@
       "Position": {
         "X": 411.3391,
         "Y": 650.6381
+      }
+    },
+    {
+      "ChildId": "81b4d6f0-3e29-47c5-b0a1-6c7f92e3d548",
+      "SymbolName": "Lib.render.postfx.AttachTextureBundle",
+      "Position": {
+        "X": 1098.2169,
+        "Y": 181.63057
       }
     },
     {
@@ -274,8 +266,8 @@
       "ChildId": "93932d0c-0318-40c7-a710-8d5c32f79d7a",
       "SymbolName": "Lib.numbers.int.basic.AddInt",
       "Position": {
-        "X": -405.6495,
-        "Y": -86.644196
+        "X": -328.6037,
+        "Y": 0.034576416
       }
     },
     {
@@ -330,16 +322,24 @@
       "ChildId": "c25c64b0-68b1-4797-8aad-118b6a97e1c3",
       "SymbolName": "Lib.render.postfx._._CountFrames",
       "Position": {
-        "X": -405.6495,
-        "Y": -121.644196
+        "X": -328.6037,
+        "Y": -34.965424
+      }
+    },
+    {
+      "ChildId": "c2e85a17-9f3b-4d40-a6c8-5b14e0d7f392",
+      "SymbolName": "Lib.render.postfx.HandleTextureBundle",
+      "Position": {
+        "X": -655.6495,
+        "Y": -287.79446
       }
     },
     {
       "ChildId": "c67a6164-db27-46e6-a953-22ba6add028f",
       "SymbolName": "Lib.image.use.PickTexture",
       "Position": {
-        "X": -53.08734,
-        "Y": 150.92499
+        "X": -58.477814,
+        "Y": 135.83167
       }
     },
     {
@@ -394,8 +394,8 @@
       "ChildId": "fe7062b8-6558-4e2c-b794-8e91460653c5",
       "SymbolName": "Lib.numbers.vec2.ScaleVector2",
       "Position": {
-        "X": 344.73483,
-        "Y": -269.08847
+        "X": 336.97263,
+        "Y": -200.52167
       }
     }
   ],

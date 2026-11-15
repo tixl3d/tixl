@@ -1,277 +1,156 @@
 {
   "FormatVersion": 3,
   "Id": "196e14c7-3a71-4afd-a53b-e51d0fe8f414"/*MotionBlur*/,
-  "Description": "Applies a post-processing motion blur caused by camera movement to a rendered image.\n\nThe motion of each pixel is reconstructed from the depth buffer and the change of the camera matrices since the previous frame, so moving objects in front of a static camera are not blurred.\n\nSee also: [RenderWithMotionBlur] for multi-pass rendering at higher quality and cost, [DepthOfField], [DirectionalBlur]",
+  "Description": "Blurs moving parts of a rendered image along their motion, like a camera with an open shutter.\n\nEach pixel's motion comes from the velocity buffer that [RenderScene] renders. Where nothing wrote velocity, the camera motion is reconstructed from the depth buffer, which only blurs static geometry. Fast objects smear over the background and the background shows through their edges.\n\nRender the scene with [RenderScene] and connect only Image. With a plain [RenderTarget], connect DepthMap, VelocityMap and the scene camera.\n\nPlace it after [TXAA] or [ScreenSpaceLighting], whose temporal history needs the unblurred image.\n\nOnly what is visible on screen can smear, and rotations blur along straight lines. For exports use [RepeatFrame], which renders the scene several times per frame.\n\nAKA: velocity blur, shutter\n\nSee also: [RepeatFrame], [DirectionalBlur], [DepthOfField]",
   "SymbolTags": "1",
   "InputUis": [
     {
-      "InputId": "2ac4c1a2-c53e-4b78-90fc-15c0b69c8b28"/*VelocityOffset*/,
+      "InputId": "3d99ccde-2bc3-4a25-962d-dab4fc6c554a"/*DepthMap*/,
       "Position": {
-        "X": -487.00583,
-        "Y": 920.5512
+        "X": -451.32935,
+        "Y": 272.5277
       },
-      "Description": "An additional offset that can be used to fake motion blur for static cameras.",
-      "Min": -0.01,
-      "Max": -0.01
+      "Description": "Overrides the depth buffer from the image's bundle."
     },
     {
-      "InputId": "3d99ccde-2bc3-4a25-962d-dab4fc6c554a"/*DepthMap*/,
-      "Relevancy": "Required",
+      "InputId": "4e7b2d90-6a1c-4f38-b5d2-e09a8c3f7165"/*Shutter*/,
       "Position": {
-        "X": 84.384766,
-        "Y": 958.59155
+        "X": -40.0,
+        "Y": 375.0
       },
-      "Description": "Depth buffer of the same [RenderTarget]."
+      "Description": "Share of the frame the shutter is open: 0.5 is a 180° shutter as in film, 1 blurs over a whole frame of motion. Higher values exaggerate. The length stays steady when frame times vary.",
+      "Min": 0.0,
+      "Max": 2.0,
+      "ClampMin": true
     },
     {
       "InputId": "619c2684-8495-4c19-a5b2-673728feaa00"/*Image*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -135.89685,
-        "Y": 1055.9735
+        "X": -311.32935,
+        "Y": 202.52771
       },
-      "Description": "Color buffer of the rendered scene, e.g. from [RenderTarget]."
+      "Description": "The rendered image. An image from [RenderScene] brings depth, velocity and camera along."
     },
     {
-      "InputId": "77ed2341-48f2-4e0f-913d-b2f368449088"/*ClampEffect*/,
+      "InputId": "8f1c6e2a-b374-4d59-9a0e-5c7d3b21f846"/*VelocityMap*/,
       "Position": {
-        "X": -347.00583,
-        "Y": 820.52246
+        "X": -451.32935,
+        "Y": 307.5277
       },
-      "Description": "Limits the blur length of very fast moving image areas.",
-      "AddPadding": "True"
+      "Description": "Overrides the velocity buffer from the image's bundle. Pixels without velocity use the camera motion."
+    },
+    {
+      "InputId": "b2a95f07-3d4e-4c61-8e7b-19f6d0c2a538"/*MaxBlur*/,
+      "Position": {
+        "X": -40.0,
+        "Y": 410.0
+      },
+      "Description": "Longest blur in each direction, in pixels. Larger values cost more, because the tiles grow with it.",
+      "Min": 1.0,
+      "Max": 128.0,
+      "ClampMin": true
     },
     {
       "InputId": "d757058a-a31e-487f-b002-cc06bc478535"/*CameraReference*/,
-      "Relevancy": "Required",
       "Position": {
-        "X": 84.38478,
-        "Y": 818.59155
+        "X": -451.32935,
+        "Y": 342.5277
       },
-      "Description": "Reference output of the [Camera] used to render the scene. Required."
-    },
-    {
-      "InputId": "db0d11c8-f4c0-4762-8821-4dd75c71fb9e"/*Strength*/,
-      "Position": {
-        "X": -347.00583,
-        "Y": 785.52234
-      },
-      "Description": "Controls the strength of the blur.\n\nTip: For precise adjustment it can help to reduce SampleCount to very low values, making the strength clearly visible."
+      "Description": "Overrides the camera from the image's bundle. Needed for the camera motion where no velocity was written."
     },
     {
       "InputId": "df8bf08c-e576-4310-95b5-e34c6a001959"/*SampleCount*/,
       "Position": {
-        "X": -487.0058,
-        "Y": 750.52234
+        "X": -40.0,
+        "Y": 445.0
       },
-      "Description": "Controls the fidelity of the effect (1 to 32).\nHigher numbers create smoother results at the cost of rendering speed.",
-      "AddPadding": "True",
-      "Min": -1,
-      "Max": 256,
-      "Scale": 1.0,
+      "Description": "Samples along the motion. More samples reduce the grain in long blurs.",
+      "Min": 2,
+      "Max": 64,
       "ClampMin": true,
       "ClampMax": true
     }
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "041d0140-1821-420b-b517-c073d8f7103b",
+      "ChildId": "0d6a3e91-5c27-4b84-a1f3-7e92c4b05d18",
+      "SymbolName": "Lib.render.postfx.HandleTextureBundle",
+      "Position": {
+        "X": -311.32935,
+        "Y": 237.52771
+      }
+    },
+    {
+      "ChildId": "1c7d4b28-93e6-4a05-bf21-6d8e0a3c9f57",
       "SymbolName": "Types.Gfx.PixelShader",
       "Position": {
-        "X": 224.38477,
-        "Y": 643.59155
+        "X": -40.0,
+        "Y": 515.0
       }
     },
     {
-      "ChildId": "0ac3a5df-0849-4370-82a7-aeb2521eb407",
-      "SymbolName": "Lib.render._dx11.api.Rasterizer",
+      "ChildId": "38c9f4a1-d6e2-4b75-8a03-c1f7e50b2d96",
+      "SymbolName": "Lib.render.postfx.AttachTextureBundle",
       "Position": {
-        "X": 412.48584,
-        "Y": 384.34088
+        "X": 100.0,
+        "Y": 690.0
       }
     },
     {
-      "ChildId": "1636cf95-fe4e-4d3b-a483-49cf9dc40787",
-      "SymbolName": "Lib.render._dx11.api.FloatsToBuffer",
+      "ChildId": "5a24c8e9-6f13-4d70-a2b8-91c3e6d04f7b",
+      "SymbolName": "Types.Gfx.PixelShader",
       "Position": {
-        "X": -207.00583,
-        "Y": 715.52234
+        "X": -40.0,
+        "Y": 585.0
       }
     },
     {
-      "ChildId": "18d512d1-6971-4c84-9c32-36cf52fe78b9",
-      "SymbolName": "Lib.render._dx11.api.GetTextureSize",
+      "ChildId": "6b2f8c47-e15a-4d03-9b6e-c38a71f2d9a4",
+      "SymbolName": "Lib.render.shading._._TransformsCBufferFromCam",
       "Position": {
-        "X": -135.89685,
-        "Y": 1090.9735
+        "X": -40.0,
+        "Y": 305.0
       }
     },
     {
-      "ChildId": "19c35c6b-0320-4d71-bd42-8ec46f456a8e",
-      "SymbolName": "Types.Values.Vector3",
+      "ChildId": "97b6d1f3-0e48-4c2a-b5d9-3f7a28c6e014",
+      "SymbolName": "Types.Gfx.PixelShader",
       "Position": {
-        "X": -721.1661,
-        "Y": 965.204
+        "X": -40.0,
+        "Y": 620.0
       }
     },
     {
-      "ChildId": "1eddc569-27cf-41fa-ac66-7bdf0dfa9842",
-      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
-      "Position": {
-        "X": -347.00583,
-        "Y": 750.52234
-      }
-    },
-    {
-      "ChildId": "20de1fab-5cc6-401d-b7f4-7b9d944648bb",
-      "SymbolName": "Lib.render._dx11.fxsetup.SetPixelAndVertexShaderStage",
-      "Position": {
-        "X": 364.38477,
-        "Y": 608.59155
-      }
-    },
-    {
-      "ChildId": "27e18eea-55ad-4c3d-b537-9c099d22b6b9",
-      "SymbolName": "Lib.image.generate.basic.RenderTarget",
-      "Position": {
-        "X": 799.8771,
-        "Y": 208.6107
-      }
-    },
-    {
-      "ChildId": "530a577e-b602-4847-a145-dd3472971533",
-      "SymbolName": "Lib.render._dx11.api.OutputMergerStage",
-      "Position": {
-        "X": 412.4858,
-        "Y": 419.34088
-      }
-    },
-    {
-      "ChildId": "56705a1f-00e2-4530-ac53-07d06d9bd775",
-      "SymbolName": "Lib.numbers.vec3.Vector3Components",
-      "Position": {
-        "X": -347.00583,
-        "Y": 920.5512
-      }
-    },
-    {
-      "ChildId": "7325f706-08ea-48cd-905e-04648eaa1644",
-      "SymbolName": "Types.Gfx.BlendState",
-      "Position": {
-        "X": 272.4858,
-        "Y": 419.34088
-      }
-    },
-    {
-      "ChildId": "829a1b5a-e771-464b-851c-065e9a5439ac",
-      "SymbolName": "Types.Gfx.RasterizerState",
-      "Position": {
-        "X": 272.48584,
-        "Y": 384.34088
-      }
-    },
-    {
-      "ChildId": "8a712dad-80c9-450c-971b-646e9ca2b27b",
-      "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
-      "Position": {
-        "X": 224.38477,
-        "Y": 923.59155
-      }
-    },
-    {
-      "ChildId": "a137f4f0-0f02-4be0-a989-0e766c86321f",
-      "SymbolName": "Lib.render._dx11.api.FloatsToBuffer",
-      "Position": {
-        "X": -207.00583,
-        "Y": 885.5512
-      }
-    },
-    {
-      "ChildId": "aaa07538-426e-41f7-9970-2a9d4cde38bf",
-      "SymbolName": "Lib.render._dx11.api._TransformsCBuffer",
-      "Position": {
-        "X": 224.38478,
-        "Y": 818.59155
-      }
-    },
-    {
-      "ChildId": "afd91956-b872-482c-a84e-e27ffba32118",
-      "SymbolName": "Lib.render._dx11.api.InputAssemblerStage",
-      "Position": {
-        "X": 412.48584,
-        "Y": 349.34088
-      }
-    },
-    {
-      "ChildId": "c353e0e5-8069-47a0-ad4f-5d010b588454",
-      "SymbolName": "Lib.render._dx11.api.TimeConstBuffer",
-      "Position": {
-        "X": 224.38477,
-        "Y": 748.59155
-      }
-    },
-    {
-      "ChildId": "c8d720df-8614-4697-8c6e-2c7687e58b54",
-      "SymbolName": "Lib.render._dx11.api.ResolutionConstBuffer",
-      "Position": {
-        "X": 224.38477,
-        "Y": 783.59155
-      }
-    },
-    {
-      "ChildId": "d46d1848-4733-411d-8beb-621817449140",
-      "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
-      "Position": {
-        "X": 224.38477,
-        "Y": 958.59155
-      }
-    },
-    {
-      "ChildId": "d76872fd-82e1-4cd6-b96c-d4f320eb7071",
+      "ChildId": "a8e31f05-7b4c-4c92-8d16-25f9e0b7c3d1",
       "SymbolName": "Types.Gfx.VertexShader",
       "Position": {
-        "X": 224.38477,
-        "Y": 608.59155
+        "X": -40.0,
+        "Y": 480.0
       }
     },
     {
-      "ChildId": "e31c88bd-7863-426b-b7fd-b0186cab562c",
-      "SymbolName": "Lib.flow.Execute",
-      "Position": {
-        "X": 552.48584,
-        "Y": 349.34088
-      }
-    },
-    {
-      "ChildId": "e382ae3f-b375-40c8-af48-64c97aae7320",
-      "SymbolName": "Types.Gfx.RenderTargetBlendDescription",
-      "Position": {
-        "X": 132.48581,
-        "Y": 419.34088
-      }
-    },
-    {
-      "ChildId": "e4d23e85-5814-4f21-9cde-c2cdedb56ec9",
-      "SymbolName": "Lib.render._dx11.api.Draw",
-      "Position": {
-        "X": 412.48584,
-        "Y": 489.34088
-      }
-    },
-    {
-      "ChildId": "e9d38708-7476-401f-a06e-ee3b1318a4fe",
+      "ChildId": "c2d85a7e-4f19-4b36-9e0d-a6713b8f5c42",
       "SymbolName": "Types.Gfx.SamplerState",
       "Position": {
-        "X": 224.38477,
-        "Y": 993.59155
+        "X": -40.0,
+        "Y": 655.0
       }
     },
     {
-      "ChildId": "ff7ffaa3-906c-4e63-a874-4f7e3327f7fc",
-      "SymbolName": "Lib.render._dx11.api._TransformsCBuffer",
+      "ChildId": "e3f90a6c-21d8-4b57-86ac-4b0d7e95f132",
+      "SymbolName": "Types.Gfx.PixelShader",
       "Position": {
-        "X": 224.38477,
-        "Y": 678.59155
+        "X": -40.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "fb16e7d2-8a35-4c09-b7f4-0e5d29c3a861",
+      "SymbolName": "Lib.render.postfx._._ExecuteMotionBlurPasses",
+      "Position": {
+        "X": 100.0,
+        "Y": 200.0
       }
     }
   ],
@@ -279,8 +158,8 @@
     {
       "OutputId": "1b237829-8cfd-4039-a6c5-8ca3dbb225f7"/*Output*/,
       "Position": {
-        "X": 949.8771,
-        "Y": 208.6107
+        "X": 500.0,
+        "Y": 200.0
       }
     }
   ]

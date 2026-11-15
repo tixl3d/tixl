@@ -155,16 +155,6 @@
       "SymbolName": "Lib.render.postfx.MotionBlur",
       "InputValues": [
         {
-          "Id": "77ed2341-48f2-4e0f-913d-b2f368449088"/*ClampEffect*/,
-          "Type": "System.Single",
-          "Value": 0.16
-        },
-        {
-          "Id": "db0d11c8-f4c0-4762-8821-4dd75c71fb9e"/*Strength*/,
-          "Type": "System.Single",
-          "Value": 18.7
-        },
-        {
           "Id": "df8bf08c-e576-4310-95b5-e34c6a001959"/*SampleCount*/,
           "Type": "System.Int32",
           "Value": 11
