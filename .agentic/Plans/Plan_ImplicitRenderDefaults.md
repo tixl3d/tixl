@@ -170,11 +170,35 @@ A render op's main output stays an ordinary `Texture2D` (the color image), but i
 - Camera ops record themselves after their subtree (innermost wins): `[Camera]`, `[CameraWithRotation]`,
   `[OrbitCamera]`, `[OrthographicCamera]`, `[BlendCameras]`; `[ReuseCamera]`/`[ReuseCamera2]` record the reused
   camera. `[UseProjectorCam]` sets matrices without a provider object and records nothing (an outer camera may claim).
-- Deviation from the plan above: `[RenderTarget]` attaches the bundle too, with whatever buffers it has (attaching is
-  only references). It clears `RenderedCamera` before its subtree and keeps the recorded one. `[RenderScene]`
+- `[RenderTarget]` clears `RenderedCamera` before its subtree and keeps the recorded one. It attaches the bundle only
+  with its `AttachBundle` input (default off; phase 3): image effects render through internal render targets whose
+  depth means nothing downstream, and attaching unconditionally would overwrite a bundle forwarded onto them. `[RenderScene]`
   (`render/basic`) is a composite of `[RenderTarget]` with depth, normals and velocity always on, `Multisampling` 1 by
   default, and the buffers also as separate outputs for effects that aren't bundle-aware yet. No duplicated render code.
 - Output window caption: `ImageOutputCanvas` appends `RenderBundle.Label`, e.g. `1920x1080 RGBA16F +DNV`.
+
+**Phase 3 implemented 2026-11-15, untested by a human:**
+- `[RenderTarget].AttachBundle` (bool, default false); `[RenderScene]` sets it.
+- `[HandleTextureBundle]` (`render/postfx`, visible): outputs `Depth`, `Normal`, `Velocity`, `Camera`; a non-null input
+  wins, else the bundle. Warning status when depth or camera is missing.
+- `[AttachTextureBundle]` (`render/postfx`): copies `BundleFrom.Bundle` onto `Texture`. Separate from
+  `[HandleTextureBundle]` because the effect's result depends on the resolved buffers; one op doing both would be a
+  cycle. This is the forwarding mechanism: stacked effects relay the incoming bundle to ops further down.
+- `[ScreenSpaceLighting]`: the parent's `DepthMap`/`NormalMap`/`VelocityMap`/`CameraReference` go through the helper
+  into AO, reflections and TXAA; the output passes through `[AttachTextureBundle]` with the input image's bundle. The
+  secondary outputs (AO, reflections) carry no bundle.
+- Tested by the user 2026-11-15: works.
+- Phase 4 partly done (2026-11-15, untested): `[ScreenSpaceAO]`, `[ScreenSpaceReflections]` and `[TXAA]` resolve their
+  inputs with `[HandleTextureBundle]` and forward the bundle on their main output. Remaining: `[GodRays]`,
+  `[MotionBlur]`, `_ImageFxShaderSetupStatic`.
+- `[DrawPointsShaded]` now intersects a ray with the sphere per pixel (the camera-facing disc was wrong away from the
+  view center) and writes velocity from `[KeepPreviousPointBuffer]`, like `[DrawMeshAtPoints]`. The sphere radius
+  follows `Scale.x` only.
+- AO ghosting on still surfaces after an occluder moved: disagreement is now measured against the noise of the 3x3
+  mean, and the shared frame limit interpolates geometrically, so `BlendFactor` controls how fast such shadows fade.
+- Caveat: forwarding mutates the effect's output texture. If an effect passes its input texture through unchanged, the
+  bundle is the same anyway. Two consumers forwarding different bundles onto the same texture would overwrite each
+  other; not possible with the current ops.
 
 ## Naming
 

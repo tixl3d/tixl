@@ -1,0 +1,16 @@
+{
+  "FormatVersion": 3,
+  "Id": "24ff7992-4d49-46e9-81bf-58442684a895"/*AttachTextureBundle*/,
+  "Inputs": [
+    {
+      "Id": "31caea05-a9ef-43e8-a75a-e8d2b27f303e"/*BundleFrom*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "a78e187e-ecbd-4dc1-b5de-d69ea5c8c42b"/*Texture*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

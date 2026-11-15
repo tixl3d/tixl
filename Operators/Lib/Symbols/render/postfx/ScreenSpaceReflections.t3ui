@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "c3e7a1d4-5b82-4f06-9a3e-1d6c8b2f7e40",
-  "Description": "Adds reflections of what is visible on screen to surfaces, using the depth and normal buffers of a [RenderTarget].\n\nRays are traced through the depth buffer from each pixel. Hits are accumulated over frames with the camera motion, following the reflected image rather than the surface so that mirror reflections stay stable while the camera moves. As with [TXAA], moving objects are only handled by the color clamp.\n\nRequirements:\n\n- Enable WithNormalBuffer on the source [RenderTarget]. Only shaders that output normals reflect, such as [DrawMesh] and [DrawPointsShaded].\n- The scene camera must be connected to CameraReference.\n\nOnly content visible on screen can be reflected. Where a ray finds nothing, the original image remains, including any reflections from [SetEnvironment].\n\nThe whole scene is treated as one material. To limit reflections to certain surfaces, combine the Reflections output with the image through a mask.\n\nAKA: SSR, screen space reflections, realtime reflections\n\nTips:\n\n- Place [TXAA] after this operator to clean up the remaining edges.\n- Keep MaxSteps low and raise it only when reflections break apart.",
+  "Description": "Adds reflections of what is visible on screen to surfaces, using the depth and normal buffers of the rendered scene.\n\nRays are traced through the depth buffer from each pixel. Hits are accumulated over frames with the camera motion, following the reflected image rather than the surface so that mirror reflections stay stable while the camera moves. As with [TXAA], moving objects are only handled by the color clamp.\n\nRequirements:\n\nRender the scene with [RenderScene] and connect only Image: depth, normals, velocity and the camera come with it, and the result passes them on to the next effect. Connected inputs override them.\n\nWith a plain [RenderTarget], enable WithNormalBuffer and connect its buffers and the scene camera to the matching inputs. Only shaders that output normals reflect, such as [DrawMesh] and [DrawPointsShaded].\n\nOnly content visible on screen can be reflected. Where a ray finds nothing, the original image remains, including any reflections from [SetEnvironment].\n\nThe whole scene is treated as one material. To limit reflections to certain surfaces, combine the Reflections output with the image through a mask.\n\nAKA: SSR, screen space reflections, realtime reflections\n\nTips:\n\n- Place [TXAA] after this operator to clean up the remaining edges.\n- Keep MaxSteps low and raise it only when reflections break apart.",
   "SymbolTags": "1216",
   "InputUis": [
     {
@@ -189,6 +189,22 @@
     }
   ],
   "SymbolChildUis": [
+    {
+      "ChildId": "a6d03b9e-4c71-4f28-b5e2-918c7d3f0a64",
+      "SymbolName": "Lib.render.postfx.HandleTextureBundle",
+      "Position": {
+        "X": -650.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "37f9c1e8-0b5d-4a26-9e43-d82a6b17c5f9",
+      "SymbolName": "Lib.render.postfx.AttachTextureBundle",
+      "Position": {
+        "X": 3500.0,
+        "Y": 80.0
+      }
+    },
     {
       "ChildId": "bd22a224-b8ba-5890-8808-d8f0ae2f9833",
       "SymbolName": "Lib.render._dx11.api.GetTextureSize",
@@ -762,7 +778,7 @@
     {
       "OutputId": "4a9d2c17-8e35-4b60-a1f7-2c5e9d03b681",
       "Position": {
-        "X": 3500.0,
+        "X": 3700.0,
         "Y": 80.0
       }
     },

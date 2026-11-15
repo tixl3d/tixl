@@ -34,6 +34,11 @@
       "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "InputValues": [
         {
+          "Id": "269ab682-769a-4c9e-acf5-5791ea4735f3"/*AttachBundle*/,
+          "Type": "System.Boolean",
+          "Value": true
+        },
+        {
           "Id": "3782e42e-6a36-4ba2-aaa2-3ee401a3cdf1"/*WithNormalBuffer*/,
           "Type": "System.Boolean",
           "Value": true

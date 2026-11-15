@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "8e2f6b14-a7c3-4d59-b0e8-3c91f5d27a66"/*ScreenSpaceAO*/,
-  "Description": "Darkens creases and contact areas by tracing short rays through the depth and normal buffers of a [RenderTarget].\n\nEach pixel traces a few random rays around its normal and is darkened by the share that hit something nearby. The noisy result is accumulated over frames, following the camera motion. Compared to [SSAO] it measures Radius in world units and respects the surface direction, but it requires normals and the camera reference.\n\nRequirements:\n\n- Enable WithNormalBuffer on the source [RenderTarget].\n- The scene camera must be connected to CameraReference.\n\nColorBleeding also tints surfaces with the color of what those rays hit.\n\nOnly content visible on screen can cause occlusion or bleeding. Moving objects are only handled by the clamp on the history, so they can show a slight delay.\n\nAKA: ambient occlusion, HBAO, GTAO, contact shadows\n\nTips:\n\n- Use the Occlusion output to tint the shading or apply it to a part of the image.\n- Set Radius to match the scale of the details that should be shaded.",
+  "Description": "Darkens creases and contact areas by tracing short rays through the depth and normal buffers of the rendered scene.\n\nEach pixel traces a few random rays around its normal and is darkened by the share that hit something nearby. The noisy result is accumulated over frames, following the camera motion. Compared to [SSAO] it measures Radius in world units and respects the surface direction, but it requires normals and the camera reference.\n\nRequirements:\n\nRender the scene with [RenderScene] and connect only Image: depth, normals, velocity and the camera come with it, and the result passes them on to the next effect. Connected inputs override them.\n\nWith a plain [RenderTarget], enable WithNormalBuffer and connect its buffers and the scene camera to the matching inputs.\n\nColorBleeding also tints surfaces with the color of what those rays hit.\n\nOnly content visible on screen can cause occlusion or bleeding. Moving objects need velocity (rendered by [RenderScene]); their shadows on still surfaces fade within a few frames, faster with a lower BlendFactor.\n\nAKA: ambient occlusion, HBAO, GTAO, contact shadows\n\nTips:\n\n- Use the Occlusion output to tint the shading or apply it to a part of the image.\n- Set Radius to match the scale of the details that should be shaded.",
   "SymbolTags": "1216",
   "InputUis": [
     {
@@ -95,8 +95,8 @@
     {
       "InputId": "9956cb84-af49-406f-80e3-38000482ddec"/*VelocityMap*/,
       "Position": {
-        "X": 1461.0266,
-        "Y": -137.42871
+        "X": -330.2635,
+        "Y": -802.50977
       }
     },
     {
@@ -112,8 +112,8 @@
       "InputId": "c263af58-eb07-419d-b42c-70d53916beaa"/*DepthMap*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -348.11636,
-        "Y": -152.74579
+        "X": -330.26337,
+        "Y": -872.50977
       },
       "Description": "The scene depth buffer. Only content that writes depth casts or receives occlusion."
     },
@@ -132,8 +132,8 @@
       "InputId": "d374b069-fc18-42ae-853d-81e64a27cfbb"/*NormalMap*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -348.11636,
-        "Y": -112.74579
+        "X": -330.26337,
+        "Y": -837.50977
       },
       "Description": "The NormalBuffer output of the [RenderTarget], which needs WithNormalBuffer enabled. Pixels without a normal use one reconstructed from depth, which looks faceted."
     },
@@ -153,8 +153,8 @@
       "InputId": "e485c17a-0d29-43bf-964e-92f75b38d0cc"/*CameraReference*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -348.11636,
-        "Y": -72.74579
+        "X": -330.26337,
+        "Y": -767.50977
       },
       "Description": "Reference output of the scene camera ([Camera] or [OrbitCamera])."
     },
@@ -373,6 +373,14 @@
       "Position": {
         "X": 1671.0266,
         "Y": -417.4287
+      }
+    },
+    {
+      "ChildId": "5b8e1f3c-2a47-4d69-9c0e-7f31a6d4b281",
+      "SymbolName": "Lib.render.postfx.HandleTextureBundle",
+      "Position": {
+        "X": -190.26337,
+        "Y": -907.50977
       }
     },
     {
@@ -704,6 +712,14 @@
       }
     },
     {
+      "ChildId": "e0c4a92d-61f8-4b3e-8d57-2c9f14b6a730",
+      "SymbolName": "Lib.render.postfx.AttachTextureBundle",
+      "Position": {
+        "X": 3461.6829,
+        "Y": 3.9481812
+      }
+    },
+    {
       "ChildId": "e6b4e7e7-3a31-57ca-bbd8-e3bc68c844ea",
       "SymbolName": "Types.Gfx.RenderTargetBlendDescription",
       "Position": {
@@ -780,7 +796,7 @@
     {
       "OutputId": "9f307c25-b8d4-4e6a-81f9-4da206e38b77"/*Output*/,
       "Position": {
-        "X": 3461.6829,
+        "X": 3661.6829,
         "Y": 3.9481812
       }
     },

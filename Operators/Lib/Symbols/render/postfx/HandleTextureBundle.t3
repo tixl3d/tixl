@@ -1,0 +1,28 @@
+{
+  "FormatVersion": 3,
+  "Id": "879fa99c-f462-4c0d-957c-9243ac60335c"/*HandleTextureBundle*/,
+  "Inputs": [
+    {
+      "Id": "23bd0152-e178-4323-97de-8a39df7974c7"/*DepthMap*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "2a205c54-81f2-4e80-9de5-ed7a98bb6fc8"/*CameraReference*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "2d6f7aaa-5952-4bee-865f-11b7937cf1cc"/*VelocityMap*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "62694908-74bd-46a2-88e5-7867af1fe55a"/*NormalMap*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "a08378f3-c1c8-47ee-9e2c-ce8e5f851661"/*Image*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

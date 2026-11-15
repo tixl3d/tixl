@@ -158,7 +158,11 @@ TemporalOutput psTemporal(vsOutput input)
     if (!IsOnScreen(previousUv) || historyColor.a <= 0.0 || Reset > 0.5)
         confidence = 0.0;
 
-    float frames = GetAccumulatedFrames(uv, previousUv, confidence, saturate(abs(historyColor.r - mean.a) / 0.25));
+    // A static surface whose occluder moved away has no motion of its own; only the contradiction tells. It is
+    // measured against the noise of the neighborhood mean, so a moved shadow counts but scattered ray noise doesn't.
+    float meanNoise = max(deviation.a / 3.0, 0.04);
+    float disagreement = saturate((abs(historyColor.r - mean.a) / meanNoise - 2.5) / 1.5);
+    float frames = GetAccumulatedFrames(uv, previousUv, confidence, disagreement);
     float bleedingFrames = min(frames, MaxFramesForRareHits);
 
     // Newly revealed pixels have no history to hide their noise, so they start from the neighborhood average.

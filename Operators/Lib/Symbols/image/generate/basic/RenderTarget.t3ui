@@ -25,6 +25,14 @@
       "Description": "Allows accessing the texture with [UseTextureReference] to implement feedback effects."
     },
     {
+      "InputId": "269ab682-769a-4c9e-acf5-5791ea4735f3"/*AttachBundle*/,
+      "Position": {
+        "X": -100.96112,
+        "Y": 227.75378
+      },
+      "Description": "Attaches depth, normal and velocity buffers and the rendered camera to the color image, so post effects like [ScreenSpaceLighting] find them without extra connections. [RenderScene] turns this on."
+    },
+    {
       "InputId": "3782e42e-6a36-4ba2-aaa2-3ee401a3cdf1"/*WithNormalBuffer*/,
       "Position": {
         "X": -100.96112,

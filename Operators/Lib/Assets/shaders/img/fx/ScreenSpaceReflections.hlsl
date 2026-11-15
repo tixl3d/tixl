@@ -236,7 +236,7 @@ TemporalOutput psTemporal(vsOutput input)
     if (!IsOnScreen(reflectionUv) || !IsOnScreen(surfaceUv) || storedDistance <= 0.0 || Reset > 0.5)
         confidence = 0.0;
 
-    float frames = GetAccumulatedFrames(uv, surfaceUv, confidence, disagreement);
+    float frames = GetAccumulatedFrames(uv, surfaceUv, confidence, disagreement * disagreement);
     frames = lerp(frames, min(frames, MaxFramesForRareHits), rareHits);
     if (reflectionMoves)
         frames = min(frames, MaxFramesForMovingReflections);

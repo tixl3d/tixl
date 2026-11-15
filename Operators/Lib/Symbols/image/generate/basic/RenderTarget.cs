@@ -311,11 +311,14 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
         }
             
         // The color image carries the other buffers, so one connection hands a post effect the whole render.
-        _bundle.Depth = withDepthBuffer ? DepthTexture : null;
-        _bundle.Normal = _normalTarget.Texture;
-        _bundle.Velocity = _velocityTarget.Texture;
-        if (ColorTexture != null)
+        // Off by default: image effects render through internal targets whose depth means nothing to their consumers.
+        if (AttachBundle.GetValue(context) && ColorTexture != null)
+        {
+            _bundle.Depth = withDepthBuffer ? DepthTexture : null;
+            _bundle.Normal = _normalTarget.Texture;
+            _bundle.Velocity = _velocityTarget.Texture;
             ColorTexture.Bundle = _bundle;
+        }
 
         ColorBuffer.Value = ColorTexture;
         ColorBuffer.DirtyFlag.Clear();
@@ -730,6 +733,9 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
 
     [Input(Guid = "db4ac4e3-2dd9-4f88-982b-a2e71dcb29f6")]
     public readonly InputSlot<bool> WithVelocityBuffer = new();
+
+    [Input(Guid = "269ab682-769a-4c9e-acf5-5791ea4735f3")]
+    public readonly InputSlot<bool> AttachBundle = new();
 
     [Input(Guid = "f0cf3325-4967-4419-9beb-036cd6dbfd6a")]
     public readonly InputSlot<bool> GenerateMips = new();

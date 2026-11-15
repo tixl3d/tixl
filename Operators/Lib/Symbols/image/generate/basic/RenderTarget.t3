@@ -14,6 +14,10 @@
       "DefaultValue": null
     },
     {
+      "Id": "269ab682-769a-4c9e-acf5-5791ea4735f3"/*AttachBundle*/,
+      "DefaultValue": false
+    },
+    {
       "Id": "3782e42e-6a36-4ba2-aaa2-3ee401a3cdf1"/*WithNormalBuffer*/,
       "DefaultValue": false
     },
@@ -41,6 +45,10 @@
     {
       "Id": "abebb02b-bcaa-42c7-8eb8-da3c1b2fc840"/*EnableUpdate*/,
       "DefaultValue": true
+    },
+    {
+      "Id": "db4ac4e3-2dd9-4f88-982b-a2e71dcb29f6"/*WithVelocityBuffer*/,
+      "DefaultValue": false
     },
     {
       "Id": "e882e0f0-03f9-46e6-ac7a-709e6fa66613"/*Multisampling*/,

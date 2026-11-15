@@ -1,0 +1,35 @@
+{
+  "FormatVersion": 3,
+  "Id": "24ff7992-4d49-46e9-81bf-58442684a895"/*AttachTextureBundle*/,
+  "Description": "Passes the render bundle (depth, normal, velocity and camera) of BundleFrom on to Texture.\n\nUse it at the end of post effects that keep the scene's geometry, like lighting, anti-aliasing or color grading, so effects further down the stack still find the buffers without extra connections.\n\nSee also: [HandleTextureBundle], [RenderScene]",
+  "SymbolTags": "1",
+  "InputUis": [
+    {
+      "InputId": "a78e187e-ecbd-4dc1-b5de-d69ea5c8c42b"/*Texture*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "The effect's result."
+    },
+    {
+      "InputId": "31caea05-a9ef-43e8-a75a-e8d2b27f303e"/*BundleFrom*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 50.0
+      },
+      "Description": "The image whose bundle is passed on, usually the effect's input image."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "fc1c0611-1bb4-4111-95e3-1c8c99994291"/*Output*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

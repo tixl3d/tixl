@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "f2a60c18-9d47-4b13-8e5a-c7b31d04e692"/*ScreenSpaceLighting*/,
-  "Description": "Adds contact shading, color bleeding and reflections of what is visible on screen, using the depth and normal buffers of a [RenderTarget].\n\nIt combines [ScreenSpaceAO], [ScreenSpaceReflections] and [TXAA] in one operator with shared inputs, so that reflections show the already shaded image. Use those operators directly to control their temporal settings separately.\n\nRequirements:\n\n- Enable WithNormalBuffer on the source [RenderTarget].\n- The scene camera must be connected to CameraReference.\n\nOnly content visible on screen contributes. The whole scene is treated as one material; the Occlusion and Reflections outputs allow applying the effects through a mask.\n\nAKA: SSGI, global illumination, indirect light, SSR, SSAO\n\nTips:\n\n- Noise fades over a few seconds after movement. Lower MaxAccumulatedFrames settles faster but leaves more grain.\n- Thin lines stay smoothest when they are at least one pixel wide.",
+  "Description": "Adds contact shading, color bleeding and reflections of what is visible on screen, using the depth, normal and velocity buffers of the rendered scene.\n\nIt combines [ScreenSpaceAO], [ScreenSpaceReflections] and [TXAA] in one operator with shared inputs, so that reflections show the already shaded image. Use those operators directly to control their temporal settings separately.\n\nRequirements:\n\nRender the scene with [RenderScene] and connect only Image: depth, normals, velocity and the camera come with it, and the result passes them on to the next effect. Connected inputs override them.\n\nWith a plain [RenderTarget], enable WithNormalBuffer and WithVelocityBuffer, and connect its buffers and the scene camera to the matching inputs.\n\nOnly content visible on screen contributes. The whole scene is treated as one material; the Occlusion and Reflections outputs allow applying the effects through a mask.\n\nAKA: SSGI, global illumination, indirect light, SSR, SSAO\n\nTips:\n\n- Noise fades over a few seconds after movement. Lower MaxAccumulatedFrames settles faster but leaves more grain.\n- Thin lines stay smoothest when they are at least one pixel wide.",
   "SymbolTags": "1216",
   "InputUis": [
     {
@@ -108,8 +108,8 @@
       "InputId": "51bda255-4188-55e2-a6e9-9e2f2f53c7c0"/*DepthMap*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -272.33832,
-        "Y": 75.12988
+        "X": -410.8354,
+        "Y": -93.56842
       },
       "Description": "The scene depth buffer. Only content that writes depth takes part."
     },
@@ -128,8 +128,8 @@
       "InputId": "5a84cf61-ac8d-49f7-8149-883657bb32b8"/*VelocityMap*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -272.33832,
-        "Y": 190.12988
+        "X": -410.8354,
+        "Y": -23.56842
       }
     },
     {
@@ -158,8 +158,8 @@
       "InputId": "6fd50e91-9ae7-5378-b8e3-688f4d212a78"/*CameraReference*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -272.33832,
-        "Y": 155.12988
+        "X": -410.8354,
+        "Y": 11.43158
       },
       "Description": "Reference output of the scene camera ([Camera] or [OrbitCamera])."
     },
@@ -190,8 +190,8 @@
       "InputId": "954e8e61-963b-5ab2-b6af-e6ebd979c67b"/*Image*/,
       "Relevancy": "Required",
       "Position": {
-        "X": 118.308105,
-        "Y": -122.14496
+        "X": -270.8354,
+        "Y": -163.56842
       },
       "Description": "The rendered scene color. It must come from the same render pass and camera as DepthMap and NormalMap."
     },
@@ -212,8 +212,8 @@
       "InputId": "b14dc3e3-8d42-586a-b06f-1b7ecbe783de"/*NormalMap*/,
       "Relevancy": "Required",
       "Position": {
-        "X": 48.308105,
-        "Y": -52.14496
+        "X": -410.8354,
+        "Y": -58.56842
       },
       "Description": "The NormalBuffer output of the [RenderTarget], which needs WithNormalBuffer enabled."
     },
@@ -303,6 +303,14 @@
       }
     },
     {
+      "ChildId": "3e2c5b14-8d0a-4a7e-9f61-2b7d4c90e1a3",
+      "SymbolName": "Lib.render.postfx.HandleTextureBundle",
+      "Position": {
+        "X": -270.8354,
+        "Y": -128.56842
+      }
+    },
+    {
       "ChildId": "56a90bc3-309f-5fe1-9ab8-8b300ccd9ff5",
       "SymbolName": "Lib.render.postfx.ScreenSpaceReflections",
       "Position": {
@@ -319,6 +327,14 @@
       }
     },
     {
+      "ChildId": "c71a9e02-5f4b-4d83-a6e0-9b1f37d2c845",
+      "SymbolName": "Lib.render.postfx.AttachTextureBundle",
+      "Position": {
+        "X": 810.84607,
+        "Y": 1265.2565
+      }
+    },
+    {
       "ChildId": "ed988d3b-132f-534d-b38f-c945cbcfb2d8",
       "SymbolName": "Lib.render.postfx.TXAA",
       "Position": {
@@ -331,7 +347,7 @@
     {
       "OutputId": "76c6f273-504a-5ec4-a478-667277e75d42"/*Output*/,
       "Position": {
-        "X": 670.84607,
+        "X": 950.84607,
         "Y": 1370.2565
       }
     },

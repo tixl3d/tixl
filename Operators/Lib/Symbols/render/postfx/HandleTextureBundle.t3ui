@@ -1,0 +1,80 @@
+{
+  "FormatVersion": 3,
+  "Id": "879fa99c-f462-4c0d-957c-9243ac60335c"/*HandleTextureBundle*/,
+  "Description": "Resolves the buffers and camera a post effect needs.\n\nA connected DepthMap, NormalMap, VelocityMap or CameraReference wins. Otherwise the value comes from the render bundle carried by the Image, which [RenderScene] attaches. The output window shows a bundle as \"+DNV\" after the texture format.\n\nUse it inside post effects so they work with just the image connected.\n\nSee also: [AttachTextureBundle], [RenderScene], [ScreenSpaceLighting]",
+  "SymbolTags": "1",
+  "InputUis": [
+    {
+      "InputId": "a08378f3-c1c8-47ee-9e2c-ce8e5f851661"/*Image*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "The rendered image whose bundle provides the buffers."
+    },
+    {
+      "InputId": "23bd0152-e178-4323-97de-8a39df7974c7"/*DepthMap*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 50.0
+      },
+      "Description": "Overrides the depth buffer from the bundle."
+    },
+    {
+      "InputId": "62694908-74bd-46a2-88e5-7867af1fe55a"/*NormalMap*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 100.0
+      },
+      "Description": "Overrides the normal buffer from the bundle."
+    },
+    {
+      "InputId": "2d6f7aaa-5952-4bee-865f-11b7937cf1cc"/*VelocityMap*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      },
+      "Description": "Overrides the velocity buffer from the bundle."
+    },
+    {
+      "InputId": "2a205c54-81f2-4e80-9de5-ed7a98bb6fc8"/*CameraReference*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 200.0
+      },
+      "Description": "Overrides the camera from the bundle, e.g. to light the scene from a different camera than the one it was rendered with."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "eba59106-9028-4097-88c7-0cd462b45feb"/*Depth*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "7fe1f79e-77cc-4d4e-8a10-8e451df964c8"/*Normal*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 50.0
+      }
+    },
+    {
+      "OutputId": "d41ff3e9-bcbb-492a-af2b-9fb340cd80a2"/*Velocity*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 100.0
+      }
+    },
+    {
+      "OutputId": "bcb64c90-6771-43ae-85b8-bea3dd975f35"/*Camera*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 150.0
+      }
+    }
+  ]
+}
