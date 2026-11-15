@@ -2,6 +2,7 @@
 #include "shared/quat-functions.hlsl"
 #include "shared/point-light.hlsl"
 #include "shared/pbr.hlsl"
+#include "shared/velocity-functions.hlsl"
 
 cbuffer Transforms : register(b0)
 {
@@ -69,6 +70,23 @@ struct psInput
     float3x3 tbnToWorld : TBASIS;
     float fog : VPOS;
     float4 positionInLightClipSpace : LIGHTCLIPPOS;
+    float4 clipPosition : CLIP_POSITION;
+    float4 previousClipPosition : PREVIOUS_CLIP_POSITION;
+};
+
+/** Last frame's transforms of this draw, for the velocity target. */
+cbuffer PreviousTransforms : register(b6)
+{
+    float4x4 PrevCameraToClipSpace;
+    float4x4 PrevClipSpaceToCamera;
+    float4x4 PrevWorldToCamera;
+    float4x4 PrevCameraToWorld;
+    float4x4 PrevWorldToClipSpace;
+    float4x4 PrevClipSpaceToWorld;
+    float4x4 PrevObjectToWorld;
+    float4x4 PrevWorldToObject;
+    float4x4 PrevObjectToCamera;
+    float4x4 PrevObjectToClipSpace;
 };
 
 // One entry per drawn face: the point placing it and its index into the mesh index buffer
@@ -94,6 +112,9 @@ Texture2D<float4> BRDFLookup : register(t8);
 Texture2D<float> ShadowMap : register(t9);
 StructuredBuffer<int3> FaceIndices : register(t10);
 
+/** The points one frame earlier, in the same order. Unbound or shorter, points fall back to their current position. */
+StructuredBuffer<Point> PreviousPoints : register(t11);
+
 psInput vsMain(uint id : SV_VertexID)
 {
     psInput output;
@@ -110,14 +131,34 @@ psInput vsMain(uint id : SV_VertexID)
     float resizeFromW = UseWForSize ? Points[pointIndex].FX1 : 1;
     float3 resizeFromStretch = UseStretch ? Points[pointIndex].Scale : 1;
     posInObject.xyz *= max(0, resizeFromW) * Size * resizeFromStretch;
+    float3 vertexAroundPoint = posInObject.xyz;
     float4x4 orientationMatrix = transpose(qToMatrix(normalize(Points[pointIndex].Rotation)));
     posInObject = mul(float4(posInObject.xyz, 1), orientationMatrix);
 
     posInObject += float4(Points[pointIndex].Position, 0);
+
+    // An unbound or shorter buffer reads zeros; a zero rotation marks such a point.
+    uint previousCount, previousStride;
+    PreviousPoints.GetDimensions(previousCount, previousStride);
+    Point previousPoint = Points[pointIndex];
+    if ((uint)pointIndex < previousCount)
+    {
+        Point candidate = PreviousPoints[pointIndex];
+        if (dot(candidate.Rotation, candidate.Rotation) > 1e-6)
+            previousPoint = candidate;
+    }
+
+    // The same vertex placed at last frame's point: the chunk moves and turns with it.
+    float4x4 previousOrientationMatrix = transpose(qToMatrix(normalize(previousPoint.Rotation)));
+    float4 previousPosInObject = mul(float4(vertexAroundPoint, 1), previousOrientationMatrix) + float4(previousPoint.Position, 0);
+    output.previousClipPosition = PreviousClipUnlessJumped(mul(previousPosInObject, PrevObjectToClipSpace),
+                                                           mul(float4(Points[pointIndex].Position, 1), ObjectToClipSpace),
+                                                           mul(float4(previousPoint.Position, 1), PrevObjectToClipSpace));
     output.color = Points[pointIndex].Color * float4(vertex.ColorRGB, 1);
 
     float4 posInClipSpace = mul(posInObject, ObjectToClipSpace);
     output.pixelPosition = posInClipSpace;
+    output.clipPosition = posInClipSpace;
 
     float2 uv = vertex.TexCoord;
     output.texCoord = float2(uv.x, 1 - uv.y);
@@ -184,6 +225,7 @@ struct psOutput
 {
     float4 Color : SV_Target0;
     float4 Normal : SV_Target1;
+    float4 Velocity : SV_Target2;
 };
 
 psOutput psMain(psInput pin, bool isFrontFace : SV_IsFrontFace)
@@ -332,5 +374,6 @@ psOutput psMain(psInput pin, bool isFrontFace : SV_IsFrontFace)
     psOutput output;
     output.Color = litColor;
     output.Normal = float4(N, 1);
+    output.Velocity = EncodeVelocity(pin.clipPosition, pin.previousClipPosition, CameraToClipSpace, PrevCameraToClipSpace);
     return output;
 }

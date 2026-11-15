@@ -85,3 +85,15 @@ Rotation), into a [RenderTarget] with `WithVelocityBuffer`. Look at `VelocityBuf
 **Expected:**
 - While the points move, the instances show velocity; neighbouring instances moving together show a smooth field.
 - With the points still, the velocity of the instances is zero.
+
+## Step: Point draws
+
+**Action:**
+Animate points (e.g. a rotating [RadialPoints] or a particle simulation) and draw them with [DrawPoints],
+[DrawBillboards], [DrawMovingPoints], [DrawMeshAtPoints2] and [DrawMeshChunksAtPoints] in turn, rendered by
+[RenderScene] → [MotionBlur]. View the VelocityBuffer output as well.
+
+**Expected:**
+- Each draw blurs along its motion and shows motion in the velocity buffer; still points show none.
+- Respawning particles don't streak across the screen.
+- Blended sprites over a mesh keep the mesh's shading in [ScreenSpaceLighting] (normals behind them stay intact).

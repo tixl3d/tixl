@@ -162,6 +162,38 @@
   ],
   "SymbolChildUis": [
     {
+      "ChildId": "b45f1e7a-6c3d-4a92-8b0e-2d7c9f16e35b",
+      "SymbolName": "Lib.point.usse.KeepPreviousPointBuffer",
+      "Position": {
+        "X": 3178.411,
+        "Y": 4162.272199999999
+      }
+    },
+    {
+      "ChildId": "d6e09a2c-5b71-4e3f-a8c4-07f9d1b6e283",
+      "SymbolName": "Lib.flow.context.GetRenderPassState",
+      "Position": {
+        "X": 3328.411,
+        "Y": 4092.2722
+      }
+    },
+    {
+      "ChildId": "19c7d3e5-a84f-4f60-b2d1-e6a03b9c574f",
+      "SymbolName": "Lib.render._dx11.buffer.PickBuffer",
+      "Position": {
+        "X": 3328.411,
+        "Y": 4162.272199999999
+      }
+    },
+    {
+      "ChildId": "7f3b8d14-c2e6-4a59-91d7-b4a8e05f6c32",
+      "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
+      "Position": {
+        "X": 3478.411,
+        "Y": 4162.272199999999
+      }
+    },
+    {
       "ChildId": "066a981a-2967-4619-80c2-1041c5570cbe",
       "SymbolName": "Lib.numbers.bool.convert.BoolToInt",
       "SectionId": "72ac6b2c-447d-4a08-9c4c-0f51f1169bff",

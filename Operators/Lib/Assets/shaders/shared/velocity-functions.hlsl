@@ -40,6 +40,22 @@ float4 EncodeVelocity(float4 clipPosition, float4 previousClipPosition,
     return float4(velocity, 1 - clipPosition.z / clipPosition.w, 1);
 }
 
+/** Screen distance per frame, in uv, beyond which a point's motion counts as a jump (a respawned or reordered point). */
+static const float MaxPointJumpUv = 0.25;
+
+/**
+ * For point draws: the previous clip position of a vertex, or none (w = 0, motion unknown) when the point's center
+ * jumped further than real motion would, so recycled particles don't streak across the screen.
+ */
+float4 PreviousClipUnlessJumped(float4 previousClipPosition, float4 centerClipPosition, float4 previousCenterClipPosition)
+{
+    if (centerClipPosition.w <= 1e-6 || previousCenterClipPosition.w <= 1e-6)
+        return 0;
+
+    float2 jump = ClipToUv(centerClipPosition) - ClipToUv(previousCenterClipPosition);
+    return dot(jump, jump) > MaxPointJumpUv * MaxPointJumpUv ? 0 : previousClipPosition;
+}
+
 /** True if the stored motion belongs to the surface now visible at this pixel (sceneDepth from the depth buffer). */
 bool TryDecodeVelocity(float4 encoded, float sceneDepth, out float2 velocity)
 {

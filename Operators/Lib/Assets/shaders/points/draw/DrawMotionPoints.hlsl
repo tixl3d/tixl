@@ -1,4 +1,5 @@
 #include "shared/point.hlsl"
+#include "shared/velocity-functions.hlsl"
 #include "shared/quat-functions.hlsl"
 #include "shared/point-light.hlsl"
 
@@ -95,6 +96,17 @@ struct psInput
     float2 texCoord : TEXCOORD;
     float fog : FOG;
     float stretch : INTERNAL;
+    float4 clipPosition : CLIP_POSITION;
+    float4 previousClipPosition : PREVIOUS_CLIP_POSITION;
+};
+
+struct psOutput
+{
+    float4 Color : SV_Target0;
+
+    // Sprites have no surface normal. Zero marks that, and with alpha 0 blended sprites keep the normal behind them.
+    float4 Normal : SV_Target1;
+    float4 Velocity : SV_Target2;
 };
 
 sampler WrappedSampler : register(s0);
@@ -212,6 +224,14 @@ psInput vsMain(uint id : SV_VertexID)
     float4 camQuad = cam;
     camQuad.xy += offset;
     o.position = mul(camQuad, CameraToClipSpace);
+    o.clipPosition = o.position;
+
+    // Last frame the sprite had the same shape around its previous center. Beyond VelocityMaxJump the motion is unknown.
+    float4 previousCamQuad = camP;
+    previousCamQuad.xy += offset;
+    o.previousClipPosition = useVel > 0.5
+                                 ? PreviousClipUnlessJumped(mul(previousCamQuad, PrevCameraToClipSpace), clip, clipP)
+                                 : 0;
 
     // Field & fog
     o.color *= GetField(w);
@@ -227,8 +247,9 @@ inline float SharpS(float x, float strength)
            : 1.0 - 0.5 * pow(2.0 * (1.0 - x), p);
 }
 
-float4 psMain(psInput i) : SV_TARGET
+psOutput psMain(psInput i)
 {
+    psOutput output;
     float2 uv = i.texCoord;
 
     // Stretch into pull shape
@@ -244,5 +265,8 @@ float4 psMain(psInput i) : SV_TARGET
         discard;
 
     col.rgb = lerp(col.rgb, 0.0.xxx, i.fog);
-    return col;
+    output.Color = col;
+    output.Normal = 0;
+    output.Velocity = EncodeVelocity(i.clipPosition, i.previousClipPosition, CameraToClipSpace, PrevCameraToClipSpace);
+    return output;
 }

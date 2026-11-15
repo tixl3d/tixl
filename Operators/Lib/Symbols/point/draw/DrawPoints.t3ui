@@ -112,6 +112,38 @@
   ],
   "SymbolChildUis": [
     {
+      "ChildId": "e1c3a8f2-4b67-4d09-9a5e-3f2b7c81d604",
+      "SymbolName": "Lib.point.usse.KeepPreviousPointBuffer",
+      "Position": {
+        "X": 2043.4252999999999,
+        "Y": 4376.7017
+      }
+    },
+    {
+      "ChildId": "2f8b6c13-9d47-4e5a-b0c2-84e9f1a6d378",
+      "SymbolName": "Lib.flow.context.GetRenderPassState",
+      "Position": {
+        "X": 2193.4253,
+        "Y": 4306.7017
+      }
+    },
+    {
+      "ChildId": "7a2d9e4b-c158-4f36-8b0e-d61f2a937c45",
+      "SymbolName": "Lib.render._dx11.buffer.PickBuffer",
+      "Position": {
+        "X": 2193.4253,
+        "Y": 4376.7017
+      }
+    },
+    {
+      "ChildId": "c94e0d27-6a3b-4f81-9e5c-17d8b2f04a69",
+      "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
+      "Position": {
+        "X": 2343.4253,
+        "Y": 4376.7017
+      }
+    },
+    {
       "ChildId": "083217bb-8b1c-4fa0-8160-06fa4560198b",
       "SymbolName": "Lib.flow.Execute",
       "Style": "Resizable",

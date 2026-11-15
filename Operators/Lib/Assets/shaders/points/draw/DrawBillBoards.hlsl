@@ -1,6 +1,7 @@
 #include "shared/point.hlsl"
 #include "shared/quat-functions.hlsl"
 #include "shared/hash-functions.hlsl"
+#include "shared/velocity-functions.hlsl"
 
 static const float3 Corners[] =
     {
@@ -86,6 +87,32 @@ struct psInput
     float4 color : COLOR;
     float2 texCoord : TEXCOORD;
     float fog : FOG;
+    float4 clipPosition : CLIP_POSITION;
+    float4 previousClipPosition : PREVIOUS_CLIP_POSITION;
+};
+
+struct psOutput
+{
+    float4 Color : SV_Target0;
+
+    // Sprites have no surface normal. Zero marks that, and with alpha 0 blended sprites keep the normal behind them.
+    float4 Normal : SV_Target1;
+    float4 Velocity : SV_Target2;
+};
+
+/** Last frame's transforms of this draw, for the velocity target. */
+cbuffer PreviousTransforms : register(b3)
+{
+    float4x4 PrevCameraToClipSpace;
+    float4x4 PrevClipSpaceToCamera;
+    float4x4 PrevWorldToCamera;
+    float4x4 PrevCameraToWorld;
+    float4x4 PrevWorldToClipSpace;
+    float4x4 PrevClipSpaceToWorld;
+    float4x4 PrevObjectToWorld;
+    float4x4 PrevWorldToObject;
+    float4x4 PrevObjectToCamera;
+    float4x4 PrevObjectToClipSpace;
 };
 
 sampler texSampler : register(s0);
@@ -95,6 +122,9 @@ Texture2D<float4> SpriteTexture : register(t1);
 Texture2D<float4> FxTexture : register(t2);
 Texture2D<float4> ColorOverW : register(t3);
 Texture2D<float4> SizeOverW : register(t4);
+
+/** The points one frame earlier, in the same order. Unbound or shorter, points fall back to their current position. */
+StructuredBuffer<Point> PreviousPoints : register(t5);
 
 inline float fmod(float x, float y)
 {
@@ -182,6 +212,22 @@ psInput vsMain(uint id : SV_VertexID)
 
     float4 quadPosInCamera = mul(posInObject, ObjectToCamera);
 
+    // An unbound or shorter buffer reads zeros; a zero rotation marks such a point.
+    uint previousCount, previousStride;
+    PreviousPoints.GetDimensions(previousCount, previousStride);
+    Point previousPoint = p;
+    if ((uint)pointId < previousCount)
+    {
+        Point candidate = PreviousPoints[pointId];
+        if (dot(candidate.Rotation, candidate.Rotation) > 1e-6)
+            previousPoint = candidate;
+    }
+
+    // The same scatter and offset around last frame's position; a change of rotation within one frame is ignored.
+    float4 previousPosInObject = posInObject + float4(previousPoint.Position - p.Position, 0);
+    float4 previousQuadPosInCamera = mul(previousPosInObject, PrevObjectToCamera);
+    float4 previousClipPosition = 0;
+
     // Shrink too close particles
     float4 posInCamera = mul(posInObject, ObjectToCamera);
     float tooCloseFactor = saturate(-posInCamera.z / 0.1 - 1);
@@ -245,6 +291,7 @@ psInput vsMain(uint id : SV_VertexID)
 
         corner = qRotateVec3(float3(corner, 0), rot).xy;
         output.position = mul(quadPosInCamera + float4(corner * computedScale, 0, 0), CameraToClipSpace);
+        previousClipPosition = mul(previousQuadPosInCamera + float4(corner * computedScale, 0, 0), PrevCameraToClipSpace);
     }
     else
     {
@@ -252,12 +299,19 @@ psInput vsMain(uint id : SV_VertexID)
         float4 rotation = qMul(normalize(pRotation), qFromAngleAxis((adjustedRotate + 180 + RandomRotate * scatterForScale.x * Randomize) / 180 * PI, RotationAxis));
         axis = qRotateVec3(axis, rotation) * computedScale;
         output.position = mul(posInObject + float4(axis, 0), ObjectToClipSpace);
+        previousClipPosition = mul(previousPosInObject + float4(axis, 0), PrevObjectToClipSpace);
     }
+
+    output.clipPosition = output.position;
+    output.previousClipPosition = PreviousClipUnlessJumped(previousClipPosition,
+                                                           mul(quadPosInCamera, CameraToClipSpace),
+                                                           mul(previousQuadPosInCamera, PrevCameraToClipSpace));
     return output;
 }
 
-float4 psMain(psInput input) : SV_TARGET
+psOutput psMain(psInput input)
 {
+    psOutput output;
     float4 imgColor = SpriteTexture.Sample(texSampler, input.texCoord);
     float4 color = input.color * imgColor;
 
@@ -265,5 +319,8 @@ float4 psMain(psInput input) : SV_TARGET
         discard;
 
     color.rgb = lerp(color.rgb, FogColor.rgb, input.fog * FogColor.a);
-    return clamp(color, 0, float4(100, 100, 100, 1));
+    output.Color = clamp(color, 0, float4(100, 100, 100, 1));
+    output.Normal = 0;
+    output.Velocity = EncodeVelocity(input.clipPosition, input.previousClipPosition, CameraToClipSpace, PrevCameraToClipSpace);
+    return output;
 }

@@ -1,6 +1,7 @@
 #include "shared/point.hlsl"
 #include "shared/quat-functions.hlsl"
 #include "shared/point-light.hlsl"
+#include "shared/velocity-functions.hlsl"
 
 static const float3 Corners[] =
     {
@@ -61,6 +62,32 @@ struct psInput
     float4 color : COLOR;
     float2 texCoord : TEXCOORD;
     float fog : FOG;
+    float4 clipPosition : CLIP_POSITION;
+    float4 previousClipPosition : PREVIOUS_CLIP_POSITION;
+};
+
+struct psOutput
+{
+    float4 Color : SV_Target0;
+
+    // Sprites have no surface normal. Zero marks that, and with alpha 0 blended sprites keep the normal behind them.
+    float4 Normal : SV_Target1;
+    float4 Velocity : SV_Target2;
+};
+
+/** Last frame's transforms of this draw, for the velocity target. */
+cbuffer PreviousTransforms : register(b5)
+{
+    float4x4 PrevCameraToClipSpace;
+    float4x4 PrevClipSpaceToCamera;
+    float4x4 PrevWorldToCamera;
+    float4x4 PrevCameraToWorld;
+    float4x4 PrevWorldToClipSpace;
+    float4x4 PrevClipSpaceToWorld;
+    float4x4 PrevObjectToWorld;
+    float4x4 PrevWorldToObject;
+    float4x4 PrevObjectToCamera;
+    float4x4 PrevObjectToClipSpace;
 };
 
 sampler WrappedSampler : register(s0);
@@ -73,7 +100,10 @@ Texture2D<float4> texture2 : register(t1);
 /*{GLOBALS}*/
 
 //=== Additional Resources ==========================================
-/*{RESOURCES(t2)}*/
+/** The points one frame earlier, in the same order. Unbound or shorter, points fall back to their current position. */
+StructuredBuffer<Point> PreviousPoints : register(t2);
+
+/*{RESOURCES(t3)}*/
 
 //=== Field functions ===============================================
 /*{FIELD_FUNCTIONS}*/
@@ -120,8 +150,29 @@ psInput vsMain(uint id : SV_VertexID)
                                           : pointDef.FX2;
 
     float2 s = PointSize * sizeFxFactor * (UsePointScale ? pointDef.Scale.xy : 1);
-    quadPosInCamera.xy += quadPos.xy * 0.10 * s;
+    float2 cornerOffset = quadPos.xy * 0.10 * s;
+    quadPosInCamera.xy += cornerOffset;
     output.position = mul(quadPosInCamera, CameraToClipSpace);
+    output.clipPosition = output.position;
+
+    // An unbound or shorter buffer reads zeros; a zero rotation marks such a point.
+    uint previousCount, previousStride;
+    PreviousPoints.GetDimensions(previousCount, previousStride);
+    Point previousPoint = pointDef;
+    if ((uint)particleId < previousCount)
+    {
+        Point candidate = PreviousPoints[particleId];
+        if (dot(candidate.Rotation, candidate.Rotation) > 1e-6)
+            previousPoint = candidate;
+    }
+
+    // The sprite keeps facing the camera, so last frame it had the same offset around the previous center.
+    float4 previousCenterInCamera = mul(float4(previousPoint.Position, 1), PrevObjectToCamera);
+    float4 previousQuadPosInCamera = previousCenterInCamera;
+    previousQuadPosInCamera.xy += cornerOffset;
+    output.previousClipPosition = PreviousClipUnlessJumped(mul(previousQuadPosInCamera, PrevCameraToClipSpace),
+                                                           mul(posInCamera, CameraToClipSpace),
+                                                           mul(previousCenterInCamera, PrevCameraToClipSpace));
     float4 posInWorld = mul(posInObject, ObjectToWorld);
 
     output.color *= GetField(posInWorld);
@@ -131,8 +182,10 @@ psInput vsMain(uint id : SV_VertexID)
     return output;
 }
 
-float4 psMain(psInput input) : SV_TARGET
-{    
+psOutput psMain(psInput input)
+{
+    psOutput output;
+
     float4 textureCol = texture2.Sample(WrappedSampler, input.texCoord);
 
     float4 col = input.color * textureCol;
@@ -140,5 +193,8 @@ float4 psMain(psInput input) : SV_TARGET
         discard;
 
     col.rgb = lerp(col.rgb, FogColor.rgb, input.fog * FogColor.a);
-    return clamp(col, float4(0, 0, 0, 0), float4(1000, 1000, 1000, 1));
+    output.Color = clamp(col, float4(0, 0, 0, 0), float4(1000, 1000, 1000, 1));
+    output.Normal = 0;
+    output.Velocity = EncodeVelocity(input.clipPosition, input.previousClipPosition, CameraToClipSpace, PrevCameraToClipSpace);
+    return output;
 }
