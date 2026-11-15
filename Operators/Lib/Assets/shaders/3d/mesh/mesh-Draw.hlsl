@@ -233,7 +233,7 @@ inline float AdjustRoughnessForSpecularAA(float baseRoughness)
     return saturate(adjustedR);
 }
 
-psOutput psMain(psInput pin, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
+psOutput psMain(psInput pin, bool isFrontFace : SV_IsFrontFace)
 {
     IsFrontFacing = isFrontFace;
     psOutput output;

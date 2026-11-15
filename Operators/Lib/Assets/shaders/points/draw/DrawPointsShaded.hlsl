@@ -86,6 +86,9 @@ struct psOutput
 {
     float4 Color : SV_Target0;
     float4 Normal : SV_Target1;
+
+    // The sphere's front lies between the quad and the camera, so depth only ever moves closer.
+    float Depth : SV_DepthLessEqual;
 };
 
 sampler WrappedSampler : register(s0);
@@ -137,6 +140,9 @@ float GetDistance(float3 p3)
 
 #include "shared/pbr-render.hlsl"
 
+/** A PointSize of 1 makes a quad, and so a sphere, 0.1 world units across. */
+static const float QuadHalfSizePerPointSize = 0.05;
+
 psInput vsMain(uint id : SV_VertexID)
 {
     psInput output;
@@ -168,8 +174,8 @@ psInput vsMain(uint id : SV_VertexID)
                                                 : pointDef.FX2;
 
     float2 s = PointSize * sizeFactor * (UsePointScale ? pointDef.Scale.xy : 1);
-    output.radius = s.x;
-    quadPosInCamera.xy += quadPos.xy * 0.050 * s; // sizeFactor * Size * tooCloseFactor;
+    output.radius = s.x * QuadHalfSizePerPointSize;
+    quadPosInCamera.xy += quadPos.xy * QuadHalfSizePerPointSize * s;
     output.position = mul(quadPosInCamera, CameraToClipSpace);
 
     // Fog
@@ -179,13 +185,13 @@ psInput vsMain(uint id : SV_VertexID)
 
 static float3 LightPosition = float3(1, 2, 0);
 
-psOutput psMain(psInput pin) : SV_TARGET
+psOutput psMain(psInput pin)
 {
     psOutput output;
     // Sphere Shading...
     float2 p = pin.texCoord * float2(2.0, 2.0) - float2(1.0, 1.0);
-    float d = dot(p, p);
-    if (d > 0.93)
+    float distanceSquared = dot(p, p);
+    if (distanceSquared > 0.93)
         discard;
 
     // Sample input textures to get shading model params.
@@ -197,11 +203,13 @@ psOutput psMain(psInput pin) : SV_TARGET
     frag.Occlusion = roughnessMetallicOcclusion.z;
     frag.albedo = albedo;
 
-    float z = sqrt(1 - d * d);
-    float3 normal = normalize(float3(p, z));
-    frag.N = mul(float4(normal, 0), CameraToWorld).xyz;
+    // Unit sphere in camera space, facing the camera along +z.
+    float3 normalInCamera = float3(p, sqrt(1 - distanceSquared));
+    frag.N = normalize(mul(float4(normalInCamera, 0), CameraToWorld).xyz);
 
-    frag.worldPosition = pin.centerPosInWorld + normal * pin.radius *0.01;
+    frag.worldPosition = pin.centerPosInWorld + frag.N * pin.radius;
+    float4 surfaceInClipSpace = mul(float4(frag.worldPosition, 1), WorldToClipSpace);
+    output.Depth = surfaceInClipSpace.z / surfaceInClipSpace.w;
         
     frag.uv = pin.texCoord;
     frag.fog = pin.fog;
