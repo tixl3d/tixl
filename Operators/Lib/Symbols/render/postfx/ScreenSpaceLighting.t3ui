@@ -106,7 +106,6 @@
     },
     {
       "InputId": "51bda255-4188-55e2-a6e9-9e2f2f53c7c0"/*DepthMap*/,
-      "Relevancy": "Required",
       "Position": {
         "X": -410.8354,
         "Y": -93.56842
@@ -126,7 +125,6 @@
     },
     {
       "InputId": "5a84cf61-ac8d-49f7-8149-883657bb32b8"/*VelocityMap*/,
-      "Relevancy": "Required",
       "Position": {
         "X": -410.8354,
         "Y": -23.56842
@@ -156,7 +154,6 @@
     },
     {
       "InputId": "6fd50e91-9ae7-5378-b8e3-688f4d212a78"/*CameraReference*/,
-      "Relevancy": "Required",
       "Position": {
         "X": -410.8354,
         "Y": 11.43158
@@ -210,7 +207,6 @@
     },
     {
       "InputId": "b14dc3e3-8d42-586a-b06f-1b7ecbe783de"/*NormalMap*/,
-      "Relevancy": "Required",
       "Position": {
         "X": -410.8354,
         "Y": -58.56842

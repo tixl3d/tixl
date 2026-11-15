@@ -188,7 +188,9 @@ struct TemporalOutput
 /** Returns how many frames the history stands for. Weighting it by frames / (frames + 1) makes a true running
     average that converges, where a fixed blend factor keeps replacing part of the result with new noise forever.
     Disagreement (0..1) is how strongly the current frame contradicts the history. It has to be gradual: an abrupt
-    reset would fire on the rare pixel whose few rays all happen to miss, and flash that pixel. */
+    reset would fire on the rare pixel whose few rays all happen to miss, and flash that pixel.
+    The limit moves between settled and changing frames geometrically: linearly, a settled count of hundreds would
+    barely drop until the disagreement is complete, and a moved shadow would fade over seconds. */
 float GetAccumulatedFrames(float2 uv, float2 previousUv, float confidence, float disagreement)
 {
     if (BlendFactor <= 0.0 || confidence < 0.5)
@@ -199,8 +201,8 @@ float GetAccumulatedFrames(float2 uv, float2 previousUv, float confidence, float
     float framesWhenSettled = max(MaxAccumulatedFrames, framesWhileChanging);
 
     float motionInPixels = length((uv - previousUv) * float2(TargetWidth, TargetHeight));
-    float change = max(disagreement * disagreement, saturate(motionInPixels * 4.0));
-    float limit = lerp(framesWhenSettled, framesWhileChanging, change);
+    float change = max(saturate(disagreement), saturate(motionInPixels * 4.0));
+    float limit = framesWhenSettled * pow(max(framesWhileChanging, 1e-3) / framesWhenSettled, change);
     return min(Finite(AccumulatedFrameCount.SampleLevel(texSampler, previousUv, 0)).r, limit);
 }
 

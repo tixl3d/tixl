@@ -2,6 +2,7 @@
 #include "shared/quat-functions.hlsl"
 #include "shared/point-light.hlsl"
 #include "shared/pbr.hlsl"
+#include "shared/velocity-functions.hlsl"
 
 static const float3 Corners[] =
     {
@@ -70,22 +71,38 @@ cbuffer FloatParams : register(b6)
     /*{FLOAT_PARAMS}*/
 }
 
+/** Last frame's transforms of this draw, for the velocity target. */
+cbuffer PreviousTransforms : register(b7)
+{
+    float4x4 PrevCameraToClipSpace;
+    float4x4 PrevClipSpaceToCamera;
+    float4x4 PrevWorldToCamera;
+    float4x4 PrevCameraToWorld;
+    float4x4 PrevWorldToClipSpace;
+    float4x4 PrevClipSpaceToWorld;
+    float4x4 PrevObjectToWorld;
+    float4x4 PrevWorldToObject;
+    float4x4 PrevObjectToCamera;
+    float4x4 PrevObjectToClipSpace;
+};
+
 struct psInput
 {
     float4 position : SV_POSITION;
     float4 color : COLOR;
     float2 texCoord : TEXCOORD;
     float fog : FOG;
-    float3 centerPosInWorld : POSITION2;
+    float3 centerInCamera : POSITION2;
+    float3 quadPosInCamera : POSITION3;
+    float3 movementInObject : MOTION;
     float radius : RADIUS;
-
-    // float3x3 tbnToWorld : TBASIS;
 };
 
 struct psOutput
 {
     float4 Color : SV_Target0;
     float4 Normal : SV_Target1;
+    float4 Velocity : SV_Target2;
 
     // The sphere's front lies between the quad and the camera, so depth only ever moves closer.
     float Depth : SV_DepthLessEqual;
@@ -106,12 +123,14 @@ Texture2D<float4> NormalMap : register(t4);
 TextureCube<float4> PrefilteredSpecular : register(t5);
 Texture2D<float4> BRDFLookup : register(t6);
 
+/** The points one frame earlier, in the same order. Unbound or shorter, points fall back to their current position. */
+StructuredBuffer<Point> PreviousPoints : register(t7);
 
 //=== Global functions ==============================================
 /*{GLOBALS}*/
 
 //=== Additional Resources ==========================================
-/*{RESOURCES(t7)}*/
+/*{RESOURCES(t8)}*/
 
 //=== Field functions ===============================================
 /*{FIELD_FUNCTIONS}*/
@@ -155,17 +174,23 @@ psInput vsMain(uint id : SV_VertexID)
     output.texCoord = (quadPos.xy * 0.5 + 0.5);
 
     float4 posInObject = float4(pointDef.Position, 1);
-    float4 quadPosInCamera = mul(posInObject, ObjectToCamera);
-
-    uint colorCount, stride;
+    float3 centerInCamera = mul(posInObject, ObjectToCamera).xyz;
+    output.centerInCamera = centerInCamera;
     output.color = pointDef.Color * Color;
 
-    float3 posInWorld = mul(quadPosInCamera, CameraToWorld).xyz;
-    output.centerPosInWorld = posInWorld;
+    // An unbound or shorter buffer reads zeros; a zero rotation marks such a point.
+    uint previousCount, previousStride;
+    PreviousPoints.GetDimensions(previousCount, previousStride);
+    output.movementInObject = 0;
+    if ((uint)particleId < previousCount)
+    {
+        Point previousPoint = PreviousPoints[particleId];
+        if (dot(previousPoint.Rotation, previousPoint.Rotation) > 1e-6)
+            output.movementInObject = pointDef.Position - previousPoint.Position;
+    }
 
     // Shrink too close particles
-    float4 posInCamera = mul(posInObject, ObjectToCamera);
-    float tooCloseFactor = saturate(-posInCamera.z / FadeNearest - 1);
+    float tooCloseFactor = saturate(-centerInCamera.z / FadeNearest - 1);
     output.color.a *= tooCloseFactor;
 
     float sizeFactor = ScaleFactorMode == 0
@@ -173,13 +198,27 @@ psInput vsMain(uint id : SV_VertexID)
                        : (ScaleFactorMode == 1) ? pointDef.FX1
                                                 : pointDef.FX2;
 
-    float2 s = PointSize * sizeFactor * (UsePointScale ? pointDef.Scale.xy : 1);
-    output.radius = s.x * QuadHalfSizePerPointSize;
-    quadPosInCamera.xy += quadPos.xy * QuadHalfSizePerPointSize * s;
-    output.position = mul(quadPosInCamera, CameraToClipSpace);
+    float radius = PointSize * sizeFactor * (UsePointScale != 0 ? pointDef.Scale.x : 1) * QuadHalfSizePerPointSize;
+    output.radius = radius;
+
+    // The quad faces the eye and covers the cone of rays touching the sphere. Facing the camera plane instead would
+    // misplace spheres away from the view center, where perspective shows them from the side.
+    bool isOrthographic = abs(CameraToClipSpace._34) < 1e-6;
+    float distanceToEye = length(centerInCamera);
+    float3 towardsEye = isOrthographic || distanceToEye < 1e-6 ? float3(0, 0, 1) : -centerInCamera / distanceToEye;
+    float3 right = cross(float3(0, 1, 0), towardsEye);
+    right = dot(right, right) > 1e-8 ? normalize(right) : float3(1, 0, 0);
+    float3 up = cross(towardsEye, right);
+    float halfSize = isOrthographic
+                         ? radius
+                         : radius * distanceToEye / sqrt(max(distanceToEye * distanceToEye - radius * radius, radius * radius * 0.01));
+
+    float3 quadPosInCamera = centerInCamera + (right * quadPos.x + up * quadPos.y) * halfSize;
+    output.quadPosInCamera = quadPosInCamera;
+    output.position = mul(float4(quadPosInCamera, 1), CameraToClipSpace);
 
     // Fog
-    output.fog = pow(saturate(-posInCamera.z / FogDistance), FogBias);
+    output.fog = pow(saturate(-centerInCamera.z / FogDistance), FogBias);
     return output;
 }
 
@@ -188,11 +227,19 @@ static float3 LightPosition = float3(1, 2, 0);
 psOutput psMain(psInput pin)
 {
     psOutput output;
-    // Sphere Shading...
-    float2 p = pin.texCoord * float2(2.0, 2.0) - float2(1.0, 1.0);
-    float distanceSquared = dot(p, p);
-    if (distanceSquared > 0.93)
+
+    // Ray from the eye (orthographic: along the view axis) through this pixel of the quad, intersected with the sphere.
+    bool isOrthographic = abs(CameraToClipSpace._34) < 1e-6;
+    float3 rayDirection = isOrthographic ? float3(0, 0, -1) : normalize(pin.quadPosInCamera);
+    float3 rayOrigin = isOrthographic ? pin.quadPosInCamera : 0;
+    float3 centerToOrigin = rayOrigin - pin.centerInCamera;
+    float b = dot(centerToOrigin, rayDirection);
+    float h = b * b - (dot(centerToOrigin, centerToOrigin) - pin.radius * pin.radius);
+    if (h < 0)
         discard;
+
+    float3 surfaceInCamera = rayOrigin + rayDirection * (-b - sqrt(h));
+    float3 normalInCamera = (surfaceInCamera - pin.centerInCamera) / pin.radius;
 
     // Sample input textures to get shading model params.
     float4 albedo = pin.color;
@@ -203,14 +250,17 @@ psOutput psMain(psInput pin)
     frag.Occlusion = roughnessMetallicOcclusion.z;
     frag.albedo = albedo;
 
-    // Unit sphere in camera space, facing the camera along +z.
-    float3 normalInCamera = float3(p, sqrt(1 - distanceSquared));
     frag.N = normalize(mul(float4(normalInCamera, 0), CameraToWorld).xyz);
+    frag.worldPosition = mul(float4(surfaceInCamera, 1), CameraToWorld).xyz;
 
-    frag.worldPosition = pin.centerPosInWorld + frag.N * pin.radius;
-    float4 surfaceInClipSpace = mul(float4(frag.worldPosition, 1), WorldToClipSpace);
+    float4 surfaceInClipSpace = mul(float4(surfaceInCamera, 1), CameraToClipSpace);
     output.Depth = surfaceInClipSpace.z / surfaceInClipSpace.w;
-        
+
+    // Spheres look the same from every angle, so the surface point moved with the point's center.
+    float3 surfaceInObject = mul(float4(frag.worldPosition, 1), WorldToObject).xyz;
+    float4 previousClipPosition = mul(float4(surfaceInObject - pin.movementInObject, 1), PrevObjectToClipSpace);
+    output.Velocity = EncodeVelocity(surfaceInClipSpace, previousClipPosition, CameraToClipSpace, PrevCameraToClipSpace);
+
     frag.uv = pin.texCoord;
     frag.fog = pin.fog;
 
