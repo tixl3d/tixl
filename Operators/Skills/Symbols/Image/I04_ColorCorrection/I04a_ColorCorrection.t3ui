@@ -5,28 +5,119 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "664bab47-f21e-4785-82da-dd66b1cd1dd0",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "22fc1608-e615-4b6d-8d43-f9a2ef050c89",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
+      "Position": {
+        "X": 1105.7013,
+        "Y": 1595.8777
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "34e13791-beff-4aed-9422-cce8a533235d",
+      "SymbolName": "Lib.image.use.BlendWithMask",
       "SectionId": "5bccf1c6-5825-4b2e-8265-05cba5333b31",
       "Position": {
-        "X": 1244.7633,
-        "Y": 2141.3435
+        "X": 1263.6934,
+        "Y": 2080.4023
       }
     },
     {
-      "ChildId": "6d5ea52d-e451-4792-8447-be36be43932c",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "5a89f72e-7e84-4de4-b4cc-328279c1f205",
+      "SymbolName": "Lib.image.color.AdjustColors",
+      "SectionId": "5bccf1c6-5825-4b2e-8265-05cba5333b31",
       "Position": {
-        "X": 1366.8816,
-        "Y": 1568.3276
+        "X": 1123.6934,
+        "Y": 2115.4023
       }
     },
     {
-      "ChildId": "7ec8956d-bfed-4bee-99ce-3048ef4ed3f2",
-      "SymbolName": "Lib.flow.skillQuest.DrawQuiz",
+      "ChildId": "5d7ac6f0-e863-4669-9aab-f7ba8b62ffa3",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
+      "SectionId": "5bccf1c6-5825-4b2e-8265-05cba5333b31",
+      "Position": {
+        "X": 1123.6934,
+        "Y": 2045.4023
+      }
+    },
+    {
+      "ChildId": "5e8fdebb-22a6-4951-b385-edacb55a6518",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
+      "Position": {
+        "X": 1105.7014,
+        "Y": 1490.8777
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "6ab82763-a3aa-43e3-bcba-f8b5b8246a13",
+      "SymbolName": "Lib.image.analyze.WaveForm",
+      "Position": {
+        "X": 1245.7013,
+        "Y": 1630.8777
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "75b136b4-3e50-4a62-9e22-b943fd8f6073",
+      "SymbolName": "Lib.image.color.AdjustColors",
+      "Position": {
+        "X": 1105.7013,
+        "Y": 1560.8777
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "99b8b90c-4874-4389-ba33-e4cd560d80d8",
+      "SymbolName": "Lib.image.use.BlendWithMask",
+      "Position": {
+        "X": 1245.7013,
+        "Y": 1525.8777
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "a86dc38f-ebd1-41ad-8cec-33d65ea5f1f4",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
+      "SectionId": "5bccf1c6-5825-4b2e-8265-05cba5333b31",
+      "Position": {
+        "X": 1123.6934,
+        "Y": 2150.4023
+      }
+    },
+    {
+      "ChildId": "ad123ec1-f592-4e18-baed-ad57ab649de6",
+      "SymbolName": "Lib.image.analyze.WaveForm",
+      "SectionId": "5bccf1c6-5825-4b2e-8265-05cba5333b31",
+      "Position": {
+        "X": 1263.6934,
+        "Y": 2185.4023
+      }
+    },
+    {
+      "ChildId": "adad15d4-64cb-44e3-a8aa-8991ee8102eb",
+      "SymbolName": "Lib.flow.skillQuest.ImageQuiz",
       "Position": {
         "X": 1693.2708,
         "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "cae4f7d1-d863-40a6-bca7-6db4caa209af",
+      "SymbolName": "Lib.image.fx.blur.FastBlur",
+      "Position": {
+        "X": 1105.7014,
+        "Y": 1525.8777
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "fea7bcbd-05b5-48fc-8530-48cf921be4a3",
+      "SymbolName": "Lib.image.fx.blur.FastBlur",
+      "SectionId": "5bccf1c6-5825-4b2e-8265-05cba5333b31",
+      "Position": {
+        "X": 1123.6934,
+        "Y": 2080.4023
       }
     }
   ],
@@ -51,12 +142,12 @@
         "W": 1.0
       },
       "Position": {
-        "X": 1085.0,
-        "Y": 2052.5103
+        "X": 1015.0,
+        "Y": 1881.6385
       },
       "Size": {
-        "X": 525.0,
-        "Y": 187.48975
+        "X": 630.0,
+        "Y": 463.36145
       }
     }
   ],
@@ -67,7 +158,7 @@
     },
     {
       "Id": "79a5fdc2-4c86-42e0-bc64-fd2050eb5590",
-      "Description": "The tool for this is called [WaveForm].\nThe name can be misleading at first, but it is widely used in professional software.\nIt works similarly to ImageLevels, but instead of showing a single slice, it overlays slices from the entire image.\nThis allows you to read brightness and color distribution across all columns at once.",
+      "Description": "The tool for this is called [WaveForm].\nThe name can be misleading at first, but it is widely used in professional software.\nIt works similarly to [ImageLevels], but instead of showing a single slice, it overlays slices from the entire image.\nThis allows you to read brightness and color distribution across all columns at once.",
       "Style": "InfoFor"
     },
     {

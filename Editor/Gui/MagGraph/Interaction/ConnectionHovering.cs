@@ -301,15 +301,16 @@ internal static class ToolTipContentDrawer
             _imageCanvasForTooltips.Update();
             _imageCanvasForTooltips.SetAsCurrent();
             _evaluationContext.Reset();
+            _evaluationContext.RequestedResolution = RenderProcess.ActiveOutputResolution;
 
-            _evaluationContext.RequestedResolution = RenderProcess.OutputWindow != null 
-                ? RenderProcess.OutputWindow.RequestedResolution 
-                : new Int2(1280 / 2, 1720 / 2);
-            
-            sourceOutputUi.DrawValue(outputSlot,
-                                     _evaluationContext,
-                                     "connectionLineThumbnail",
-                                     recompute: UserSettings.Config.HoverMode == UserSettings.GraphHoverModes.Live);
+            var recompute = UserSettings.Config.HoverMode == UserSettings.GraphHoverModes.Live
+                            && !WasRenderedByAnotherView(outputSlot);
+            sourceOutputUi.DrawValue(outputSlot, _evaluationContext, "connectionLineThumbnail", recompute);
+            if (recompute)
+            {
+                _lastRecomputedSlot = outputSlot;
+                _lastRecomputeFrame = ImGui.GetFrameCount();
+            }
 
             ImageOutputCanvas.Deactivate();
             TransformGizmoHandling.RestoreDrawList();
@@ -318,6 +319,25 @@ internal static class ToolTipContentDrawer
         return sourceOpUi;
     }
 
+    /// <summary>
+    /// A texture some other view (usually the output window) updated in this or the previous frame is shown as it
+    /// is: rendering it again would only resize the render targets upstream. A texture this preview rendered itself
+    /// last frame is rendered again, or an op nothing else shows would freeze while hovered. Commands always render,
+    /// because their output depends on the view.
+    /// </summary>
+    private static bool WasRenderedByAnotherView(ISlot outputSlot)
+    {
+        if (outputSlot is not Slot<Texture2D> { Value: { IsDisposed: false } })
+            return false;
+
+        var renderedItselfLastFrame = outputSlot == _lastRecomputedSlot && ImGui.GetFrameCount() - _lastRecomputeFrame <= 1;
+        return !renderedItselfLastFrame
+               && !outputSlot.DirtyFlag.IsDirty
+               && outputSlot.DirtyFlag.FramesSinceLastUpdate == 0;
+    }
+
     private static readonly ImageOutputCanvas _imageCanvasForTooltips = new() { DisableDamping = true };
     private static readonly EvaluationContext _evaluationContext = new();
+    private static ISlot? _lastRecomputedSlot;
+    private static int _lastRecomputeFrame;
 }

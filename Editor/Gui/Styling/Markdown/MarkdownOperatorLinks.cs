@@ -79,10 +79,12 @@ internal static class MarkdownOperatorLinks
             ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(10, 8) * scale);
             ImGui.BeginTooltip();
 
-            ImGui.PushFont(Fonts.FontBold);
+            ImGui.PushFont(Fonts.FontSmall);
+            ImGui.TextColored(UiColors.TextMuted, symbol.Namespace);
+            ImGui.PopFont();
+            ImGui.PushFont(Fonts.FontLarge);
             ImGui.TextUnformatted(symbol.Name);
             ImGui.PopFont();
-            ImGui.TextColored(UiColors.TextMuted, symbol.Namespace);
 
             if (symbol.TryGetSymbolUi(out var symbolUi) && !string.IsNullOrWhiteSpace(symbolUi.Description))
             {

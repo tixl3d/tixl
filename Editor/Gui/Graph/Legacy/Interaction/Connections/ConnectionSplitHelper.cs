@@ -100,9 +100,7 @@ internal static class ConnectionSplitHelper
                             var outputUi = sourceOpUi.OutputUis[output.OutputDefinition.Id];
                             _evaluationContext.Reset();
                             
-                            _evaluationContext.RequestedResolution = RenderProcess.OutputWindow != null 
-                                ? RenderProcess.OutputWindow.RequestedResolution 
-                                : new Int2(1280 / 2, 1720 / 2);
+                            _evaluationContext.RequestedResolution = RenderProcess.ActiveOutputResolution;
                             
                             outputUi.DrawValue(outputSlot, 
                                                _evaluationContext,

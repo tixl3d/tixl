@@ -40,14 +40,15 @@ internal abstract class OutputUi<T> : IOutputUi
 
     protected virtual void Recompute(ISlot slot, EvaluationContext context)
     {
-        StartInvalidation(slot);
+        StartInvalidation(slot, context);
         slot.Update(context);
     }
 
     protected abstract void DrawTypedValue(ISlot slot, string viewId);
 
-    protected void StartInvalidation(ISlot slot)
+    protected void StartInvalidation(ISlot slot, EvaluationContext context)
     {
+        context.NotifyPullResolution();
         DirtyFlag.GlobalInvalidationTick++;
         slot.InvalidateGraph();
     }

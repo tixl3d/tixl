@@ -745,6 +745,7 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
         // if (instanceForBlending.Outputs.Count == 0)
         //     return;
         
+        PrepareImageContext();
         textureOutputSlot.DirtyFlag.ForceInvalidate();
         textureOutputSlot.Update(_imageContext);
 
@@ -773,6 +774,7 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
 
         // Keep the variation active for at least one frame so render and readback don't race.
         PoolForBlendOperations.BeginHover(instanceForBlending, variation);
+        PrepareImageContext();
         textureOutputSlot.DirtyFlag.ForceInvalidate();
         textureOutputSlot.Update(_imageContext);
 
@@ -1005,7 +1007,17 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
     }
     
     protected override ScalableCanvas? Parent => null;
-    private static readonly EvaluationContext _imageContext = new() { RequestedResolution = new Int2(170,130)};
+    /// <summary>
+    /// Thumbnails render the slot the output window shows, at the output's size: a smaller size would resize every
+    /// render target upstream and back again. Saving the thumbnail scales it down.
+    /// </summary>
+    private static void PrepareImageContext()
+    {
+        _imageContext.RequestedResolution = RenderProcess.ActiveOutputResolution;
+        _imageContext.NotifyPullResolution();
+    }
+
+    private static readonly EvaluationContext _imageContext = new();
     
 
     public bool IsBlendingActive { get; private set; }

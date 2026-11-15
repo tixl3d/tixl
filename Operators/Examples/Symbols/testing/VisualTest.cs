@@ -132,6 +132,7 @@ internal sealed class VisualTest : Instance<VisualTest>
                 context.LocalFxTime = time;
                 Playback.FrameCount++;
                 context.RequestedResolution = _defaultResolution;
+                EvaluationContext.NotifyResolutionWrite(ref _lastWrittenResolution, _defaultResolution);
 
                 DirtyFlag.GlobalInvalidationTick++;
                 Image.InvalidateGraph();
@@ -552,6 +553,7 @@ internal sealed class VisualTest : Instance<VisualTest>
     private float _threshold;
     private Vector2 _timeRange;
     private bool _complainedOnce;
+    private Int2 _lastWrittenResolution;
 
     // private const int DefaultHeight = 120;
     // private const int DefaultWidth = (int)(DefaultHeight * (16f / 9));

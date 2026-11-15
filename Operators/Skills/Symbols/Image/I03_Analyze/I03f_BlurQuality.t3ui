@@ -5,25 +5,71 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "b841a2b2-a179-42bd-b22c-602fc1649ef0",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "0811b972-f5c8-4388-b9fc-894b04790704",
+      "SymbolName": "Lib.image.fx.blur.Blur",
+      "Position": {
+        "X": 1217.4346,
+        "Y": 1788.3861
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "3fe5e449-0cc2-412e-b438-b5502a2cb20e",
+      "SymbolName": "Lib.numbers.anim.time.Time",
       "SectionId": "b9c5119b-99a0-4016-960b-b47a9a6653b5",
       "Position": {
-        "X": 1244.7633,
-        "Y": 2141.3435
+        "X": 1184.7185,
+        "Y": 2145.3882
       }
     },
     {
-      "ChildId": "c64b2b9e-df29-4ede-a08c-faf4a7f744d5",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "4df82dcf-e353-4f0e-9814-003e3d9e7ddb",
+      "SymbolName": "Lib.image.fx.blur.FastBlur",
+      "SectionId": "b9c5119b-99a0-4016-960b-b47a9a6653b5",
       "Position": {
-        "X": 1366.8816,
-        "Y": 1568.3276
+        "X": 1324.7185,
+        "Y": 2180.3882
       }
     },
     {
-      "ChildId": "f018c4e2-ec0e-4750-864e-32ea2af02c44",
-      "SymbolName": "Lib.flow.skillQuest.DrawQuiz",
+      "ChildId": "60b199eb-24c0-477f-a2e9-198cb1139c21",
+      "SymbolName": "Lib.image.generate.pattern.Rings",
+      "Position": {
+        "X": 1217.4346,
+        "Y": 1718.3861
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "b782de01-6d05-4720-9700-2754c8ca489f",
+      "SymbolName": "Lib.numbers.anim.time.Time",
+      "Position": {
+        "X": 1077.4346,
+        "Y": 1753.3861
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "b8dfd1d1-7f83-4e88-88de-49d1edc07f79",
+      "SymbolName": "Lib.image.generate.pattern.Rings",
+      "SectionId": "b9c5119b-99a0-4016-960b-b47a9a6653b5",
+      "Position": {
+        "X": 1324.7185,
+        "Y": 2110.3882
+      }
+    },
+    {
+      "ChildId": "e02b7529-71bb-42fd-8ac7-c6393330dbb5",
+      "SymbolName": "Lib.image.fx.blur.FastBlur",
+      "Position": {
+        "X": 1217.4346,
+        "Y": 1896.4448
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "f5ab1dae-4fe4-4d5b-8953-517664953f7d",
+      "SymbolName": "Lib.flow.skillQuest.ImageQuiz",
       "Position": {
         "X": 1693.2708,
         "Y": 1786.6185
@@ -56,7 +102,7 @@
       },
       "Size": {
         "X": 525.0,
-        "Y": 187.48975
+        "Y": 202.87793
       }
     }
   ],

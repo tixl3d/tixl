@@ -1,3 +1,5 @@
+using Lib.Utils;
+
 namespace Lib.flow.context;
 
 [Guid("604bfb46-fe8f-4c8b-896b-1b7bc827137b")]
@@ -14,8 +16,7 @@ public sealed class GetBoolVar : Instance<GetBoolVar>
 
     private void Update(EvaluationContext context)
     {
-        if (VariableName.DirtyFlag.IsDirty && !VariableName.HasInputConnections)
-            _contextVariableNames= context.BoolVariables.Keys.ToList();
+        _variableNames.CollectIfRequested(context.BoolVariables);
             
         var variableName = VariableName.GetValue(context);
         if (variableName != null && context.BoolVariables.TryGetValue(variableName, out var value))
@@ -36,7 +37,8 @@ public sealed class GetBoolVar : Instance<GetBoolVar>
         
     IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid inputId)
     {
-        return _contextVariableNames;
+        _variableNames.Request();
+        return _variableNames.Names;
     }
         
     void ICustomDropdownHolder.HandleResultForInput(Guid inputId, string selected, bool isAListItem)
@@ -53,7 +55,7 @@ public sealed class GetBoolVar : Instance<GetBoolVar>
     #endregion
         
         
-    private  List<string> _contextVariableNames = new ();
+    private readonly VariableNameOptions _variableNames = new();
 
     [Input(Guid = "b0821091-68c0-4e34-9f8b-926c0b6ebf94")]
     public readonly InputSlot<string> VariableName = new();

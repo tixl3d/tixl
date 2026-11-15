@@ -488,14 +488,12 @@ internal static class ThumbnailManager
         if (saveToFile) {
             var saveTexture = new T3.Core.DataTypes.Texture2D(tempTarget);
             ScreenshotWriter.StartSavingToFile(saveTexture, filePath, ScreenshotWriter.FileFormats.Png,
-                                               path =>
+                                               _ =>
                                                {
-                                                   if (string.IsNullOrEmpty(path)) 
-                                                       return;
-
+                                                   // Release the lock on failure too (null path), or the thumbnail is never retried.
                                                    lock (_lockedPath)
                                                    {
-                                                       _lockedPath.Remove(path);
+                                                       _lockedPath.Remove(filePath);
                                                    }
                                                }, 
                                                logErrors: false);

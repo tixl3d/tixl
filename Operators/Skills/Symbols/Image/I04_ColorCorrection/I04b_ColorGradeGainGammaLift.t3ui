@@ -5,28 +5,63 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "330cc807-f725-4d93-a95c-3f2d671425fa",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "4d64ebb0-82ec-4745-bbcc-34ceaa342e83",
+      "SymbolName": "Lib.image.color.ColorGrade",
+      "Position": {
+        "X": 1268.4528,
+        "Y": 1792.7363
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "6166f90e-16ad-4635-a6c5-5ca60ea3cf8f",
+      "SymbolName": "Lib.image.color.ColorGrade",
       "SectionId": "2a9a40e2-ed26-4bda-bbdf-41834bbaa115",
       "Position": {
-        "X": 1244.7633,
-        "Y": 2141.3435
+        "X": 1339.4458,
+        "Y": 2068.4956
       }
     },
     {
-      "ChildId": "938c8632-78dd-415b-ada4-15dfb8341c55",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "66a246fe-4b7e-406a-b1af-b636ba6aeb84",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
       "Position": {
-        "X": 1366.8816,
-        "Y": 1568.3276
-      }
+        "X": 1050.1765,
+        "Y": 1866.1946
+      },
+      "SnapshotGroupIndex": "1"
     },
     {
-      "ChildId": "c696557b-4775-4bae-972b-18b264b74fc1",
-      "SymbolName": "Lib.flow.skillQuest.DrawQuiz",
+      "ChildId": "7237be3a-2622-408b-b430-349dc960c8aa",
+      "SymbolName": "Lib.flow.skillQuest.ImageQuiz",
       "Position": {
         "X": 1693.2708,
         "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "75621977-8001-4104-a4cc-2895939e17ac",
+      "SymbolName": "Lib.image.analyze.WaveForm",
+      "Position": {
+        "X": 1553.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "8aa32bd9-e8b9-45c2-b8de-e3615fb15eac",
+      "SymbolName": "Lib.image.color.AdjustColors",
+      "Position": {
+        "X": 1050.1765,
+        "Y": 1901.1946
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "9405c4de-d83d-4566-9698-5085b4aac712",
+      "SymbolName": "Lib.image.analyze.WaveForm",
+      "Position": {
+        "X": 1553.2708,
+        "Y": 1821.6185
       }
     }
   ],
@@ -51,30 +86,35 @@
         "W": 1.0
       },
       "Position": {
-        "X": 1085.0,
-        "Y": 2052.5103
+        "X": 1248.1503,
+        "Y": 1995.0
       },
       "Size": {
-        "X": 525.0,
-        "Y": 187.48975
+        "X": 301.0808,
+        "Y": 166.09692
       }
     }
   ],
   "TourPoints": [
     {
       "Id": "6dc5c7eb-c146-48c7-ae90-4665e09538a5",
+      "ChildId": "4d64ebb0-82ec-4745-bbcc-34ceaa342e83",
       "Description": "[ColorGrade] is a powerful operator for adjusting colors.\nIts parameters are closely related to tools used in professional color grading software."
     },
     {
       "Id": "1097e447-0fd7-42d3-8127-f56e4d94047f",
+      "ChildId": "4d64ebb0-82ec-4745-bbcc-34ceaa342e83",
       "Description": "The core parameters are Gain, Gamma, and Lift.\nThe reference gradient goes from pure black to pure white."
     },
     {
       "Id": "0155668b-b742-4da5-ba61-fbe0032592bc",
+      "ChildId": "4d64ebb0-82ec-4745-bbcc-34ceaa342e83",
       "Description": "If Gain, Gamma, and Lift are pure gray, they are neutral and have no effect.\nYou can click parameter names to reset them to their defaults."
     },
     {
       "Id": "6d5d1ffe-39ea-472b-b799-41552d451397",
+      "ChildId": "4d64ebb0-82ec-4745-bbcc-34ceaa342e83",
+      "InputId": "4dc44a7b-fe7c-4807-aaaa-53fb553de017",
       "Description": "Adjust Gain by dragging its color thumbnail with the right mouse button.\nIt primarily affects the brightest parts of the image.",
       "Style": "InfoFor"
     },

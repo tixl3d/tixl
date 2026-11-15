@@ -44,35 +44,32 @@ internal static class ScreenshotWriter
         if (_textureBgraReadAccess == null)
             _textureBgraReadAccess = new TextureBgraReadAccess();
         
-        _useFormats = FileFormats.Png;
-        _forceOpaque = false;
         return _textureBgraReadAccess.InitiateConvertAndReadBack(gpuTexture, saveSampleAfterReadback);        
     }
 
+    /// <param name="onComplete">Receives the written path, or null if the readback or the file write failed.</param>
     /// <param name="opaque">Write alpha as fully opaque — for a UI back-buffer capture, whose alpha is
     /// render residue that makes the PNG see-through in viewers.</param>
     internal static bool StartSavingToFile(T3.Core.DataTypes.Texture2D gpuTexture, string filepath, FileFormats format, Action<string?>? onComplete = null, bool logErrors=true, bool opaque = false)
     {
         _textureBgraReadAccess ??= new TextureBgraReadAccess();
-        _useFormats = format;
-        _forceOpaque = opaque;
-        
+        // Format and opacity travel with each request: several saves can be in flight at once.
         return _textureBgraReadAccess.InitiateConvertAndReadBack(gpuTexture, request => 
                                                                              {
-                                                                                 OnReadComplete(request, filepath, logErrors);
-                                                                                 onComplete?.Invoke(request.Filepath);
+                                                                                 var saved = TryWriteFile(request, filepath, format, opaque, logErrors);
+                                                                                 onComplete?.Invoke(saved ? filepath : null);
                                                                              }, filepath);        
     }
     
     
-    private static void OnReadComplete(TextureBgraReadAccess.ReadRequestItem request, string filepath, bool logErrors)
+    private static bool TryWriteFile(TextureBgraReadAccess.ReadRequestItem request, string filepath, FileFormats format, bool opaque, bool logErrors)
     {
         var immediateContext = ResourceManager.Device.ImmediateContext;
         if (request.CpuAccessTexture.IsDisposed)
         {
             if(logErrors)
                 Log.Debug("ScreenshotWriter: Texture was disposed before readback was complete");
-            return;
+            return false;
         }
         
         var dataBox = immediateContext.MapSubresource(request.CpuAccessTexture,
@@ -88,7 +85,7 @@ internal static class ScreenshotWriter
 
         // Rows are copied out one by one: the mapped row pitch is padded and can exceed width * 4. JPEG has no
         // alpha, so it gets three bytes per pixel.
-        var isPng = _useFormats == FileFormats.Png;
+        var isPng = format == FileFormats.Png;
         var bytesPerPixel = isPng ? 4 : 3;
         var pixels = new byte[width * height * bytesPerPixel];
         var row = new byte[width * 4];
@@ -107,7 +104,7 @@ internal static class ScreenshotWriter
                     pixels[target++] = row[source + 1];
                     pixels[target++] = row[source];
                     if (isPng)
-                        pixels[target++] = _forceOpaque ? (byte)255 : row[source + 3];
+                        pixels[target++] = opaque ? (byte)255 : row[source + 3];
                 }
             }
 
@@ -123,23 +120,19 @@ internal static class ScreenshotWriter
             }
 
             LastFilename = filepath;
+            return true;
         }
         catch (Exception e)
         {
             if (logErrors)
                 Log.Warning("Failed to export image: " + e.Message);
+
+            return false;
         }
     }
 
     private const int JpegQuality = 90;
 
-    /// <summary>
-    /// Save the requested format for later use by callback.
-    /// This is not ideal, but beats the alternative to moving file formats to
-    /// <see cref="_textureBgraReadAccess"/> in core.
-    /// </summary>
-    private static FileFormats _useFormats = FileFormats.Png;
-    private static bool _forceOpaque;
 
 
 }

@@ -40,8 +40,13 @@ JSON lines over TCP on `127.0.0.1:<port>`. One request per line, one response pe
 - `id` is echoed back; process responses in order (the server answers sequentially).
 - Every response envelope carries `frame`, `playbackFrame` and `structureVersion`
   (bumped on any graph-structure change) — use them to detect progress.
-- Failures come back as `"ok":false` with an `error` string. Malformed lines are logged
-  and answered with an error; the connection stays open.
+- Failures come back as `"ok":false` with an `error` object (`code`, `detail`). Malformed lines
+  (`PARSE_ERROR`) and a missing or non-string `method` (`INVALID_REQUEST`) are answered with an
+  error; the connection stays open.
+- **Check support with `getVersion.methods`, not `protocolVersion`.** The version number does not
+  track every added command; `methods` lists exactly what this build handles.
+- A malformed id (`childId`, `outputId`, …) is an `INVALID_PARAM` error, never a fallback to a
+  default target. Omitting an optional id still selects the default.
 
 ## Methods
 
@@ -71,11 +76,12 @@ Rendering: `startRender` (`path` absolute, `durationSecs`, optional `startSecs`,
 pinned `Texture2D` output to a video file through the same path as the render window, without touching the
 composition's saved render settings or version number. It returns at once with the `frameCount`; the export advances
 one frame per editor frame, so poll `getRenderStatus` (`isExporting`, `progress`, `frameIndex`, `message`) until
-`isExporting` is false. `cancelRender` stops it. Check the result with `ffprobe` / `ffmpeg`. Audio ops only stay in
+`isExporting` is false — a successful start says nothing about the export's outcome. `cancelRender` stops it. Check the result with `ffprobe` / `ffmpeg`. Audio ops only stay in
 the export if they were evaluated just before it, so wire an `[AudioBus]` into the rendered chain.
 
 Audio input: `getAudioInputs` lists the capture devices with the `active` one and its `level`; `setAudioInput` (`device`)
-makes the composition analyse that device, and an empty name goes back to its own audio. The change is in memory but
+makes the composition analyse that device (an unknown name is `NOT_FOUND`), and an empty name goes back to its own
+audio. The device list stays empty until the audio engine has started, so poll `getAudioInputs` until it fills. The change is in memory but
 gets saved with the project, so reset it when done. `startAudioRecording` / `stopAudioRecording` write the input to a WAV
 and return its path. To test without a microphone, play a known file into a PipeWire null sink and capture its monitor.
 
@@ -95,6 +101,11 @@ Parameter shapes are defined in `DebugServer.cs` — read the handler when unsur
 
 - `reload` works on **editable projects only** (synchronous recompile; MSBuild errors come
   back in a `COMPILE_FAILED` detail). Built-in packages like `Lib` need an editor restart.
+- `getUpdateStats` counts the output slots below the focused composition (nested symbols included) that ran
+  their update in the previous frame: `instances`, `outputs`, `outputsUpdated`, `updates` (an output pulled
+  twice counts twice), and the same per symbol name in `bySymbol`, largest first. Instances are not created on
+  the way. With playback paused, everything it reports is work done although nothing changed: the cost that
+  caching would save. Combine with `getFrameSamples` for CPU time.
 - `releaseGpuResources` does what the main menu's Free GPU Memory does: every render target that can rebuild its
   content releases its textures and re-renders when next pulled. It runs at the start of the next frame, so
   `pumpFrames` before reading `getMetrics`.
@@ -106,6 +117,14 @@ Parameter shapes are defined in `DebugServer.cs` — read the handler when unsur
   same key shows estimated progress. The overlay is presented by another thread, so neither
   `screenshot` nor `screenshotWindow` can capture it; they only run once the stall is over.
 - `shutdown` is fire-and-forget — the response may never arrive.
+- `screenshot` writes JPEG for `.jpg`/`.jpeg` and PNG otherwise, and only answers ok once the file is written
+  (`SCREENSHOT_FAILED` otherwise, e.g. a missing folder). Only one `target: "ui"` capture can be pending:
+  a second one before the first replies gets `SCREENSHOT_BUSY`.
+- `setBypass` answers `BYPASS_NOT_APPLIED` when the op ignored the change — an op whose main output is
+  not connected can't be bypassed.
+- `layoutSelection` right after `connect` in the same frame may arrange from the old layout; `pumpFrames`
+  (`count: 1`) in between.
+- Requests already queued still run after their client disconnects.
 - `getOutput` with a forced update only works for simple leaf evaluation and can
   double-evaluate; prefer the select-then-read pattern below.
 - `getOutput` picks the output by `outputId` (guid), `outputName`, or defaults to the
@@ -124,6 +143,13 @@ Parameter shapes are defined in `DebugServer.cs` — read the handler when unsur
   stride is decoded as a `Point` (`position`, `f1`, `orientation`, `color`, `scale`, `f2`), anything
   else as one float array per element. A GPU read flushes and waits for the GPU - fine for a probe.
   Compare the same query across machines (e.g. Mac vs Linux) to find the first op whose values differ.
+- `getOutput update:true` with `pullResolution` (`{"X":256,"Y":256}`) pulls at that size through one
+  long-lived probe context, the way a second view at another size would. Use it to test resolution caching
+  across views.
+- `probePull` (`childId`, `pullResolution`) pulls that op's first output at the given size at the start of every
+  frame, through the same probe context: a second view that pulls continuously, which a request round trip
+  (about 3 frames) can't imitate. Call it without `childId` to stop; the reply lists the texture `sizes` the
+  pulls produced.
 - `getOutput update:true` starts a fresh invalidation tick before pulling, so
   upstream changes propagate through the chain. Ops upstream with `Async` on
   still return their *previous* result while a job runs - set `Async` false on

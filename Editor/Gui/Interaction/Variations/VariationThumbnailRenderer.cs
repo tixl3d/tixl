@@ -86,6 +86,7 @@ internal static class VariationThumbnailRenderer
             return;
 
         request.Pool.BeginHover(request.Instance, variation);
+        PrepareContext();
         outputSlot.DirtyFlag.ForceInvalidate();
         outputSlot.Update(_context);
 
@@ -95,6 +96,7 @@ internal static class VariationThumbnailRenderer
 
     private static void Capture(Slot<Texture2D> outputSlot, Request request)
     {
+        PrepareContext();
         outputSlot.DirtyFlag.ForceInvalidate();
         outputSlot.Update(_context);
 
@@ -104,6 +106,16 @@ internal static class VariationThumbnailRenderer
                                        saveToFile: request.ToFile, cover: true);
 
         request.Pool.StopHover();
+    }
+
+    /// <summary>
+    /// The thumbnail renders the slot the output window shows, at the output's size: a smaller size would resize
+    /// every render target upstream and back again. The capture scales it down.
+    /// </summary>
+    private static void PrepareContext()
+    {
+        _context.RequestedResolution = RenderProcess.ActiveOutputResolution;
+        _context.NotifyPullResolution();
     }
 
     private static bool TryGetOutputSlot(out Slot<Texture2D> outputSlot)
@@ -144,7 +156,7 @@ internal static class VariationThumbnailRenderer
     private const int CanvasYieldFrames = 3;
     private const int MaxFramesWithoutOutput = 600;
 
-    private static readonly EvaluationContext _context = new() { RequestedResolution = new Int2(170, 130) };
+    private static readonly EvaluationContext _context = new();
     private static readonly Queue<Request> _queue = new();
     private static Request? _pending;
     private static int _captureDelayFrames;

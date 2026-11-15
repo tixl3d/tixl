@@ -20,6 +20,21 @@ namespace T3.Editor.Gui.Windows.RenderExport;
 internal static class RenderProcess
 {
     public static OutputWindow? OutputWindow;
+
+    /// <summary>
+    /// The size the pinned output window renders at. Previews and thumbnails render at it too, so the render targets
+    /// upstream of a shown op aren't resized back and forth between the output's size and a smaller preview's.
+    /// </summary>
+    public static Int2 ActiveOutputResolution
+    {
+        get
+        {
+            var resolution = OutputWindow?.RequestedResolution ?? default;
+            return resolution.Width > 0 && resolution.Height > 0 ? resolution : _fallbackPreviewResolution;
+        }
+    }
+
+    private static readonly Int2 _fallbackPreviewResolution = new(1280 / 2, 720 / 2);
     public static Type? MainOutputType { get; private set; }
     public static Texture2D? MainOutputTexture;
 

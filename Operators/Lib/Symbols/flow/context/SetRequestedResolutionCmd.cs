@@ -26,6 +26,11 @@ internal sealed class SetRequestedResolutionCmd : Instance<SetRequestedResolutio
             
         context.RequestedResolution = new Int2((int)(newResolution.X * resolutionFactor * resolutionStretch.X).Clamp(1, 16384),
                                                (int)(newResolution.Y * resolutionFactor * resolutionStretch.Y).Clamp(1, 16384));
+        if (EvaluationContext.NotifyResolutionWrite(ref _lastWrittenResolution, context.RequestedResolution))
+        {
+            DirtyFlag.GlobalInvalidationTick++;
+            Texture.InvalidateGraph();
+        }
             
         Result.Value = Texture.GetValue(context);
         context.RequestedResolution = previousResolution;
@@ -42,6 +47,8 @@ internal sealed class SetRequestedResolutionCmd : Instance<SetRequestedResolutio
     
     [Input(Guid = "a4d09d43-5f81-4b15-85db-e03f917b9764")]
     public readonly InputSlot<float> ScaleResolution = new();
+
+    private Int2 _lastWrittenResolution;
 
 
 }

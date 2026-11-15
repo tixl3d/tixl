@@ -28,6 +28,7 @@ using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.Legacy.Interaction;
 using T3.Editor.Gui.Legacy.Interaction.Connections;
 using T3.Editor.Gui.MagGraph.Interaction;
+using T3.Editor.Gui.Windows.RenderExport;
 
 namespace T3.Editor.Gui.Legacy;
 
@@ -266,7 +267,7 @@ internal sealed class GraphNode
                                     var firstOutput = instance.Outputs[0];
                                     IOutputUi outputUi = symbolUi.OutputUis[firstOutput.Id];
                                     _evaluationContext.Reset();
-                                    _evaluationContext.RequestedResolution = new Int2(1280 / 2, 720 / 2);
+                                    _evaluationContext.RequestedResolution = RenderProcess.ActiveOutputResolution;
                                     outputUi.DrawValue(firstOutput,
                                                        _evaluationContext,
                                                        "thumbnail",

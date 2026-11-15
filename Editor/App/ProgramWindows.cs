@@ -523,11 +523,15 @@ internal static unsafe class ProgramWindows
     /// <summary>
     /// Captures the main window's next rendered UI frame for the debug bridge. Served once by
     /// <see cref="ServePendingUiCapture"/>, after the UI has rendered and before Present. The receiver owns the
-    /// texture it gets and disposes it when done.
+    /// texture it gets and disposes it when done. Returns false while an earlier capture is still pending.
     /// </summary>
-    public static void RequestUiCapture(Action<T3.Core.DataTypes.Texture2D> onCaptured)
+    public static bool TryRequestUiCapture(Action<T3.Core.DataTypes.Texture2D> onCaptured)
     {
+        if (_pendingUiCapture != null)
+            return false;
+
         _pendingUiCapture = onCaptured;
+        return true;
     }
 
     internal static void ServePendingUiCapture()

@@ -1,3 +1,5 @@
+using Lib.Utils;
+
 namespace Lib.flow.context;
 
 [Guid("a3700115-a15b-493a-8a07-dab16b4ee0af")]
@@ -14,13 +16,7 @@ public class GetMatrixVar : Instance<GetMatrixVar>
 
     private void Update(EvaluationContext context)
     {
-        if (VariableName.DirtyFlag.IsDirty)
-        {
-            _contextVariableNames = context.ObjectVariables
-                                           .Where(k => k.Value is Vector4[])
-                                           .Select(k => k.Key)
-                                           .ToList();
-        }
+        _variableNames.CollectOfTypeIfRequested<Vector4[]>(context.ObjectVariables);
 
         var variableName = VariableName.GetValue(context);
 
@@ -61,9 +57,8 @@ public class GetMatrixVar : Instance<GetMatrixVar>
             return new List<string>();
         }
 
-        // Update the list of available variables when dropdown is shown
-        VariableName.DirtyFlag.Invalidate();
-        return _contextVariableNames;
+        _variableNames.Request();
+        return _variableNames.Names;
     }
 
     void ICustomDropdownHolder.HandleResultForInput(Guid inputId, string selected, bool isAListItem)
@@ -77,7 +72,7 @@ public class GetMatrixVar : Instance<GetMatrixVar>
         VariableName.SetTypedInputValue(selected);
     }
 
-    private List<string> _contextVariableNames = new();
+    private readonly VariableNameOptions _variableNames = new();
     #endregion
 
     #region status provider
