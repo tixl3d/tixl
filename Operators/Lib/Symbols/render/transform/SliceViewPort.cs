@@ -102,7 +102,7 @@ internal sealed class SliceViewPort : Instance<SliceViewPort>
         context.RequestedResolution = new Int2((int)cellSizeX.Clamp(1,16384),
                                                (int)cellSizeY.Clamp(1,16384));
         rasterizer.SetViewport(newViewPort);
-        if (EvaluationContext.NotifyResolutionWrite(ref _lastWrittenResolution, context.RequestedResolution))
+        if (EvaluationContext.NotifyResolutionWrite(ref _lastWrittenResolution, ref _lastResolutionWriteFrame, context.RequestedResolution))
         {
             DirtyFlag.GlobalInvalidationTick++;
             SubGraph.InvalidateGraph();
@@ -118,6 +118,7 @@ internal sealed class SliceViewPort : Instance<SliceViewPort>
         
     private Int2 _prevResolution;
     private Int2 _lastWrittenResolution;
+    private int _lastResolutionWriteFrame = -1;
 
     [Input(Guid = "21532B24-FED2-403B-ABB1-6FAA19311366")]
     public readonly InputSlot<Command> SubGraph = new ();

@@ -77,8 +77,8 @@
       "ChildId": "182b10f8-0d60-4d18-b442-75431f9beca4",
       "SymbolName": "Lib.render._dx11.fxsetup._ImageFxShaderSetupStatic",
       "Position": {
-        "X": 793.38324,
-        "Y": 565.9022
+        "X": 697.3268,
+        "Y": 334.26123
       }
     },
     {
@@ -93,8 +93,8 @@
       "ChildId": "3d331fa5-2020-432f-8fc4-40fa10c23cec",
       "SymbolName": "Lib.render._dx11.fxsetup._ImageFxShaderSetupStatic",
       "Position": {
-        "X": 526.80054,
-        "Y": 535.7032
+        "X": 697.3268,
+        "Y": -15.738831
       }
     },
     {
@@ -125,8 +125,8 @@
       "ChildId": "a663161b-a214-41a0-87d0-7c642e39e1f7",
       "SymbolName": "Types.Values.Value",
       "Position": {
-        "X": -73.05734,
-        "Y": 262.62433
+        "X": 474.44754,
+        "Y": 56.541
       }
     },
     {
