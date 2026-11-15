@@ -45,3 +45,22 @@ Inside [RenderWithMotionBlur], read `__MotionBlurPass` with [GetIntVar]; inside 
 
 **Expected:**
 - Both show the pass number and face index as before.
+
+## Step: Shadows and TXAA after the render pass state change
+
+**Action:**
+Open a scene with [SetShadow] and [DrawMeshWithShadow] (or [DrawMeshChunksAtPoints]), then one with [TXAA] on a still
+scene.
+
+**Expected:**
+- Shadows look as before: the shadow pass draws depth only, the main pass shows the shadows.
+- TXAA still smooths edges on a still camera (the sub-pixel jitter reaches the camera).
+
+## Step: Motion blur sample override in export
+
+**Action:**
+Export a few frames of a scene with [RenderWithMotionBlur], with the export's Motion Blur samples set to 10, then to -1.
+
+**Expected:**
+- With 10 the export uses 10 subframes (smoother blur, longer render); with -1 the op's own Passes.
+- Brightness is the same in both: the accumulation weight follows the actual subframe count.

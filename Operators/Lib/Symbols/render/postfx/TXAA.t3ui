@@ -280,7 +280,7 @@
     },
     {
       "ChildId": "a1b4a2a3-2cec-40c3-9179-81db94e32bc6",
-      "SymbolName": "Lib.flow.context.SetVec2Var",
+      "SymbolName": "Lib.flow.context.SetRenderPassState",
       "Position": {
         "X": 577.55066,
         "Y": -192.1865

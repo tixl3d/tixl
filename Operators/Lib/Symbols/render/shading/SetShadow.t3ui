@@ -96,7 +96,7 @@
     },
     {
       "ChildId": "3603695e-3094-4803-a869-d03ede8b8b99",
-      "SymbolName": "Lib.flow.context.SetIntVar",
+      "SymbolName": "Lib.flow.context.SetRenderPassState",
       "SectionId": "a427cc55-35e1-41a8-9453-5f8cf036d639",
       "Position": {
         "X": -812.3122,
@@ -264,7 +264,7 @@
     },
     {
       "ChildId": "f59e3a68-eaf8-44e2-bb4a-a009c82d1fcf",
-      "SymbolName": "Lib.flow.context.SetIntVar",
+      "SymbolName": "Lib.flow.context.SetRenderPassState",
       "SectionId": "a427cc55-35e1-41a8-9453-5f8cf036d639",
       "Position": {
         "X": -209.59656,

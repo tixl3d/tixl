@@ -226,19 +226,14 @@
       "Outputs": []
     },
     {
-      "Id": "5799ef0f-5279-4f00-bafe-fbc688bfef23"/*GetIntVar*/,
-      "SymbolId": "470db771-c7f2-4c52-8897-d3a9b9fc6a4e",
-      "SymbolName": "Lib.flow.context.GetIntVar",
+      "Id": "5799ef0f-5279-4f00-bafe-fbc688bfef23"/*GetRenderPassState*/,
+      "SymbolId": "a54c36f9-aa5c-4c0b-824c-f61981802f10",
+      "SymbolName": "Lib.flow.context.GetRenderPassState",
       "InputValues": [
         {
-          "Id": "70ef2d92-cd3e-4c14-ba9c-e7e29b2478c8"/*LogUpdates*/,
+          "Id": "06e25694-70eb-4fa6-9f78-10fa215a2a80",
           "Type": "System.Int32",
-          "Value": 0
-        },
-        {
-          "Id": "d7662b65-f249-4887-a319-dc2cf7d192f2"/*VariableName*/,
-          "Type": "System.String",
-          "Value": "__IsShadowPassId"
+          "Value": 3
         }
       ],
       "Outputs": []
@@ -681,7 +676,7 @@
     },
     {
       "SourceParentOrChildId": "5799ef0f-5279-4f00-bafe-fbc688bfef23",
-      "SourceSlotId": "b306b216-630c-4611-90fd-52ff322ebd00",
+      "SourceSlotId": "ff5b0eca-419d-4e4e-bf77-102c2065115b",
       "TargetParentOrChildId": "8d5ce753-2f57-4f77-88ca-f6466f846f75",
       "TargetSlotId": "00fd2794-567a-4f9b-a900-c2ebf9760764"
     },

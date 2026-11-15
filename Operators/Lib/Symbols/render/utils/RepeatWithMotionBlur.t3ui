@@ -45,7 +45,7 @@
     },
     {
       "ChildId": "201e8d9a-6b9c-4bf8-a35e-061a8b500e54",
-      "SymbolName": "Lib.flow.context.GetIntVar",
+      "SymbolName": "Lib.flow.context.GetRenderPassState",
       "Position": {
         "X": -681.99365,
         "Y": 284.576

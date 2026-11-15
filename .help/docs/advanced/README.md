@@ -13,11 +13,11 @@ Beyond the basics: writing custom operators in C#, writing shaders, and controll
 - [Adding new fonts](AddingFonts.md)
 - [Creating and using single-line SVG fonts](SvgLineFonts.md)
 - [Upgrading projects to the Vulkan renderer](UpgradingToVulkan.md)
+- [Context variables](ContextVariables.md)
 
 ## Still to write
 
 - **Shader reference** — HLSL conventions TiXL uses, built-in uniforms, coordinate spaces, common pitfalls.
-- **Context variables deep dive** — how to pass values down a sub-graph, when to use them, when not.
 - **Performance internals** — what the profiler columns mean, how to interpret flame graphs.
 - **Extending the UI** — if/when a plugin surface emerges.
 

@@ -126,6 +126,7 @@
     },
     {
       "InputId": "5a84cf61-ac8d-49f7-8149-883657bb32b8"/*VelocityMap*/,
+      "Relevancy": "Required",
       "Position": {
         "X": -300.0,
         "Y": 155.0

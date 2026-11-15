@@ -97,19 +97,12 @@ internal sealed partial class OutputWindow
 
         EvaluationContext.BackgroundColor = _backgroundColor;
 
-        const string overrideSampleVariableName = "OverrideMotionBlurSamples";
-
+        // Export can render more motion blur subframes than the graph asks for; Reset() above cleared any earlier value.
         if (RenderProcess.IsExporting)
         {
             var samples = RenderProcess.GetActiveOrRequestedSettings().OverrideMotionBlurSamples;
-            if (samples >= 0)
-            {
-                EvaluationContext.IntVariables[overrideSampleVariableName] = samples;
-            }
-        }
-        else
-        {
-            EvaluationContext.IntVariables.Remove(overrideSampleVariableName);
+            if (samples > 0)
+                EvaluationContext.RenderPass.SubframeCountOverride = samples;
         }
 
         // Already evaluated this frame — by the output setup compositing a send downstream of this op, or by

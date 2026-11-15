@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "a54c36f9-aa5c-4c0b-824c-f61981802f10"/*GetRenderPassState*/,
-  "Description": "Reads a value of the render pass the graph is evaluated in.\n\nOps that render a pass, like [RenderTarget], set these values for everything drawn inside them. Booleans are returned as 0 or 1, so the result can drive a [PickBuffer] or [Switch] directly.\n\nVelocityRequested: 1 if the surrounding [RenderTarget] renders a velocity buffer. Draw ops use it to keep the history needed for motion vectors only when they are used.\n\nSee also: [RenderTarget], [GetIntVar]",
+  "Description": "Reads a value of the render pass the graph is evaluated in.\n\nOps that render a pass, like [RenderTarget], set these values for everything drawn inside them. Booleans are returned as 0 or 1, so the result can drive a [PickBuffer] or [Switch] directly.\n\nVelocityRequested: 1 if the surrounding [RenderTarget] renders a velocity buffer. Draw ops use it to keep the history needed for motion vectors only when they are used.\nRepeatPass: index of the current motion blur subframe ([RepeatFrame]); 0 for the frame itself.\nCubeFace: face rendered by [RenderToCubeMap], 0–5.\nIsShadowPass: 1 while [SetShadow] renders its shadow map.\nSubframeCount: number of subframes [RepeatFrame] renders, e.g. for weighting their accumulation; 0 outside.\n\nSee also: [RenderTarget], [GetIntVar]",
   "SymbolTags": "8",
   "InputUis": [
     {

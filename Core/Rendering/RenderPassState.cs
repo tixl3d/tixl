@@ -1,3 +1,5 @@
+using System.Numerics;
+
 namespace T3.Core.Rendering;
 
 /// <summary>
@@ -34,6 +36,18 @@ public struct RenderPassState
 
     /// <summary>Time since the previous subframe (for the first, since the previous frame), in seconds.</summary>
     public double SubframeStepSec;
+
+    /// <summary>Number of subframes [RepeatFrame] renders this frame, e.g. to weight their accumulation; 0 outside.</summary>
+    public int SubframeCount;
+
+    /// <summary>Overrides the pass count of [RepeatFrame] (set by video export); 0 keeps the op's own count.</summary>
+    public int SubframeCountOverride;
+
+    /// <summary>The scene is drawn into a shadow map ([SetShadow]); draws can skip what a depth-only pass doesn't need.</summary>
+    public bool IsShadowPass;
+
+    /// <summary>Sub-pixel projection offset of temporal anti-aliasing in pixels ([TXAA]); cameras add it to their projection.</summary>
+    public Vector2 JitterOffset;
 
     /// <summary>
     /// How far ops that integrate over time (damping, springs) advance in this evaluation, in seconds: a subframe's step,

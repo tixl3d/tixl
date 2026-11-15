@@ -1,0 +1,49 @@
+{
+  "FormatVersion": 3,
+  "Id": "2294a247-1ae1-4bd5-8061-a7af26bf5347"/*SetRenderPassState*/,
+  "Description": "Sets a value of the render pass for the ops evaluated inside it.\n\nWith SubGraph connected, the value applies to that subgraph and is restored afterwards. Without, it applies to everything evaluated later in this frame, like the [SetFloatVar] family. Read the values with [GetRenderPassState].\n\nIsShadowPass: Value other than 0 marks a shadow map pass, as [SetShadow] does.\nJitterOffset: sub-pixel camera offset in pixels (Offset), which cameras add to their projection; used by [TXAA].\n\nSee also: [GetRenderPassState], [RenderTarget]",
+  "SymbolTags": "8",
+  "InputUis": [
+    {
+      "InputId": "ced37909-8b16-43cf-8bb9-d7230068ae89"/*SubGraph*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "90674b03-4727-42dd-9882-45836016b06d"/*Select*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Description": "Which value of the render pass to set."
+    },
+    {
+      "InputId": "5a712820-bbff-434f-8f46-1e3281cd5b95"/*Value*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      },
+      "Description": "Value for numeric and on/off entries (IsShadowPass: other than 0 is on)."
+    },
+    {
+      "InputId": "bc20ab5d-79dd-4aab-93ff-6e0e8bef2000"/*Offset*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 135.0
+      },
+      "Description": "Value for JitterOffset, in pixels."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "0361754e-9952-4d92-a078-d3023bfab1a9"/*Output*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 100.0
+      }
+    }
+  ]
+}

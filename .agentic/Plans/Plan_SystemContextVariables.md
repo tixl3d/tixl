@@ -41,6 +41,27 @@ in smaller steps:
   (it uses global time).
 - Result: damped motion is blurred and its speed doesn't depend on the pass count.
 
+**Phase 3 implemented 2026-11-15, untested by a human.** No code or graph uses `__IsShadowPassId`,
+`_TXAA_JitterOffset` or `OverrideMotionBlurSamples` anymore.
+- `RenderPassState`: `IsShadowPass`, `JitterOffset` (pixels), `SubframeCount` (set by `[RepeatFrame]`, for the
+  accumulation weight inside the subframes; a `[RepeatFrame]` output would make a graph cycle), `SubframeCountOverride`
+  (set by the editor's output window during export, > 0 only, like the export setting).
+- New `[SetRenderPassState]` (`flow/context`): `Select` (IsShadowPass, JitterOffset), `Value`, `Offset`; `SubGraph`
+  connected = scoped, unconnected = rest of the frame (like `[Set*Var]`). `[GetRenderPassState]` gained RepeatPass,
+  CubeFace, IsShadowPass, SubframeCount (appended).
+- Core `CameraJitter` reads `RenderPass.JitterOffset`; `[RepeatFrame]` applies the override and sets `SubframeCount`.
+- Graphs changed in place (same child ids and positions): `[SetShadow]` (2×), `[TXAA]` → `[SetRenderPassState]`;
+  `[DrawMeshWithShadow]`, `[DrawMeshChunksAtPoints]`, both motion blur graphs → `[GetRenderPassState]`; `Passes` goes
+  straight into `[RepeatFrame]`.
+- Not moved, by user decision: `SpeedFactorA/B` (Core `AnimMath`), `__TriggerA/B` (`[WasTrigger]`, VJ examples),
+  `_normalizedTime` (`[TimeClip]`), `_PlayModeProgress` (editor skill levels), `iterator` (obsolete ops) stay user
+  variables, documented in `.help/docs/advanced/ContextVariables.md` (with the legacy `__MotionBlurPass` / `CubeFace`).
+
+**Phase 4 done 2026-11-15:** help page `.help/docs/advanced/ContextVariables.md` (variables, scoping, loops, render pass
+state, conventional names, C# usage) and the rule "Engine state is typed, not a named context variable" in
+`AGENT_INSTRUCTIONS.md`. The legacy readers stay: `[Loop]` still maps an index variable named `__MotionBlurPass` to the
+repeat pass, `[RenderToCubeMap]` still writes `CubeFace`.
+
 ## Goal
 
 Ops talk to each other through context variables with magic names (`"__MotionBlurPass"`, `"__IsShadowPassId"`,

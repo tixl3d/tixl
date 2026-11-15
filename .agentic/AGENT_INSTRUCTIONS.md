@@ -43,6 +43,15 @@ Apply these rules where they matter — code that actually runs every frame and 
 - Prefer storing and resolving by `Guid`.
 - Be careful with stale references across reloads and graph changes.
 
+### Engine state is typed, not a named context variable
+
+State that operators pass to the ops they evaluate (shadow pass, cube face, motion blur subframe, velocity request,
+camera jitter) lives in `EvaluationContext.RenderPass` (`Core/Rendering/RenderPassState.cs`), set with save/restore
+around the subtree and read in graphs with [GetRenderPassState]. Don't add new string-named context variables
+(`context.IntVariables["__Something"]`) for engine state: the names are invisible, typo-prone and undocumented. Add a
+documented member instead. Named variables stay for user graphs; the ones built-in ops use by convention are listed in
+`.help/docs/advanced/ContextVariables.md`.
+
 ### Relationships are stored, not inferred
 
 A link between two entities is data: one stores the other's `Guid`. **Warning sign:** code that decides whether two

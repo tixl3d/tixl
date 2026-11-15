@@ -9,6 +9,10 @@ internal sealed class GetRenderPassState : Instance<GetRenderPassState>
     private enum PassValues
     {
         VelocityRequested = 0,
+        RepeatPass = 1,
+        CubeFace = 2,
+        IsShadowPass = 3,
+        SubframeCount = 4,
     }
 
     /** Re-read on every pull: one op instance can run in several passes per frame (a shadow map and the main image). */
@@ -25,6 +29,10 @@ internal sealed class GetRenderPassState : Instance<GetRenderPassState>
         Value.Value = Select.GetEnumValue<PassValues>(context) switch
                           {
                               PassValues.VelocityRequested => context.RenderPass.VelocityRequested ? 1 : 0,
+                              PassValues.RepeatPass        => context.RenderPass.RepeatPass,
+                              PassValues.CubeFace          => context.RenderPass.CubeFace,
+                              PassValues.IsShadowPass      => context.RenderPass.IsShadowPass ? 1 : 0,
+                              PassValues.SubframeCount     => context.RenderPass.SubframeCount,
                               _                            => 0,
                           };
     }
