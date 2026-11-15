@@ -54,6 +54,7 @@ public sealed class EvaluationContext
         IntVariables.Clear();
         ObjectVariables.Clear();
         StringVariables.Clear();
+        RenderPass = default;
             
         PbrContextSettings.SetDefaultToContext(this);
     }
@@ -309,6 +310,12 @@ public sealed class EvaluationContext
     public StructuredList IteratedList { get; set; }
     public int IteratedListIndex { get; set; }
     public bool BypassCameras { get; set; }
+
+    /// <summary>
+    /// State of the render pass being evaluated. A field, so writers can change one member in place; they save the
+    /// whole struct before and restore it after their subtree. See <see cref="RenderPassState"/>.
+    /// </summary>
+    public RenderPassState RenderPass;
 
     public LegacyParticleSystem LegacyParticleSystem;
     public ParticleSystem ParticleSystem;

@@ -2,6 +2,7 @@
 #include "shared/quat-functions.hlsl"
 #include "shared/point-light.hlsl"
 #include "shared/pbr.hlsl"
+#include "shared/velocity-functions.hlsl"
 #include "shared/hash-functions.hlsl"
 
 cbuffer Transforms : register(b0)
@@ -63,6 +64,21 @@ cbuffer FieldParams : register(b6)
     /*{FLOAT_PARAMS}*/
 };
 
+/** Last frame's transforms of this draw, for the velocity target. */
+cbuffer PreviousTransforms : register(b7)
+{
+    float4x4 PrevCameraToClipSpace;
+    float4x4 PrevClipSpaceToCamera;
+    float4x4 PrevWorldToCamera;
+    float4x4 PrevCameraToWorld;
+    float4x4 PrevWorldToClipSpace;
+    float4x4 PrevClipSpaceToWorld;
+    float4x4 PrevObjectToWorld;
+    float4x4 PrevWorldToObject;
+    float4x4 PrevObjectToCamera;
+    float4x4 PrevObjectToClipSpace;
+};
+
 struct psInput
 {
     float2 texCoord : TEXCOORD;
@@ -71,12 +87,15 @@ struct psInput
     float3 worldPosition : POSITION;
     float3x3 tbnToWorld : TBASIS;
     float fog : VPOS;
+    float4 clipPosition : CLIP_POSITION;
+    float4 previousClipPosition : PREVIOUS_CLIP_POSITION;
 };
 
 struct psOutput
 {
     float4 Color : SV_Target0;
     float4 Normal : SV_Target1;
+    float4 Velocity : SV_Target2;
 };
 
 sampler WrappedSampler : register(s0);
@@ -92,6 +111,23 @@ Texture2D<float4> RSMOMap : register(t5);
 Texture2D<float4> NormalMap : register(t6);
 TextureCube<float4> PrefilteredSpecular : register(t7);
 Texture2D<float4> BRDFLookup : register(t8);
+
+/** The points one frame earlier, in the same order. Unbound or shorter, instances fall back to their current point. */
+StructuredBuffer<Point> PreviousPoints : register(t9);
+
+/** Places a mesh vertex at a point: scale, the point's rotation, then its position. */
+float4 PlaceAtPoint(float3 vertexPosition, Point p, out float4x4 orientationMatrix)
+{
+    float sizeFactor = ScaleFactorMode == 0
+                           ? 1
+                       : (ScaleFactorMode == 1) ? p.FX1
+                                                : p.FX2;
+
+    float3 s = Scale * sizeFactor * (UsePointScale ? p.Scale : 1);
+    orientationMatrix = transpose(qToMatrix(normalize(p.Rotation)));
+    float4 posInObject = mul(float4(vertexPosition * s, 1), orientationMatrix);
+    return posInObject + float4(p.Position, 0);
+}
 
 psInput vsMain(uint id
                : SV_VertexID)
@@ -112,25 +148,30 @@ psInput vsMain(uint id
     int instanceIndex = id / verticesPerInstance;
 
     PbrVertex vertex = PbrVertices[FaceIndices[faceIndex][faceVertexIndex]];
-    float4 posInObject = float4(vertex.Position, 1);
+    Point currentPoint = Points[instanceIndex];
 
-
-    float sizeFactor = ScaleFactorMode == 0
-                           ? 1
-                       : (ScaleFactorMode == 1) ? Points[instanceIndex].FX1
-                                                : Points[instanceIndex].FX2;
-
-    float3 s = Scale * sizeFactor * (UsePointScale ? Points[instanceIndex].Scale : 1);
-
-    posInObject.xyz *= s; //(0, resizeFromW) * Scale * resizeFromStretch;
-    float4x4 orientationMatrix = transpose(qToMatrix(normalize(Points[instanceIndex].Rotation)));
-    posInObject = mul(float4(posInObject.xyz, 1), orientationMatrix);
-
-    posInObject += float4(Points[instanceIndex].Position, 0);
-    output.color = Points[instanceIndex].Color;
+    float4x4 orientationMatrix;
+    float4 posInObject = PlaceAtPoint(vertex.Position, currentPoint, orientationMatrix);
+    output.color = currentPoint.Color;
 
     float4 posInClipSpace = mul(posInObject, ObjectToClipSpace);
     output.pixelPosition = posInClipSpace;
+    output.clipPosition = posInClipSpace;
+
+    // An unbound or shorter buffer reads zeros; a zero rotation marks such a point.
+    uint previousCount, previousStride;
+    PreviousPoints.GetDimensions(previousCount, previousStride);
+    Point previousPoint = currentPoint;
+    if ((uint)instanceIndex < previousCount)
+    {
+        Point candidate = PreviousPoints[instanceIndex];
+        if (dot(candidate.Rotation, candidate.Rotation) > 1e-6)
+            previousPoint = candidate;
+    }
+
+    float4x4 previousOrientation;
+    float4 previousPosInObject = PlaceAtPoint(vertex.Position, previousPoint, previousOrientation);
+    output.previousClipPosition = mul(previousPosInObject, PrevObjectToClipSpace);
     
     // Texture Coordinates
     float2 uv = vertex.TexCoord;
@@ -182,7 +223,7 @@ psInput vsMain(uint id
 /*{GLOBALS}*/
 
 //=== Additional Resources ==========================================
-/*{RESOURCES(t9)}*/
+/*{RESOURCES(t10)}*/
 
 //=== Field functions ===============================================
 /*{FIELD_FUNCTIONS}*/
@@ -265,7 +306,7 @@ float3 ComputeNormal(psInput pin, float3x3 tbnToWorld)
 //     return saturate(adjustedR);
 // }
 
-psOutput psMain(psInput pin, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
+psOutput psMain(psInput pin, bool isFrontFace : SV_IsFrontFace)
 {
     IsFrontFacing = isFrontFace;
     psOutput output;
@@ -297,6 +338,7 @@ psOutput psMain(psInput pin, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
     output.Color = litColor;
 
     output.Normal = float4 (frag.N,1);
+    output.Velocity = EncodeVelocity(pin.clipPosition, pin.previousClipPosition, CameraToClipSpace, PrevCameraToClipSpace);
     
     return output;
 }

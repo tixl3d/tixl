@@ -1,0 +1,26 @@
+{
+  "FormatVersion": 3,
+  "Id": "a54c36f9-aa5c-4c0b-824c-f61981802f10"/*GetRenderPassState*/,
+  "Description": "Reads a value of the render pass the graph is evaluated in.\n\nOps that render a pass, like [RenderTarget], set these values for everything drawn inside them. Booleans are returned as 0 or 1, so the result can drive a [PickBuffer] or [Switch] directly.\n\nVelocityRequested: 1 if the surrounding [RenderTarget] renders a velocity buffer. Draw ops use it to keep the history needed for motion vectors only when they are used.\n\nSee also: [RenderTarget], [GetIntVar]",
+  "SymbolTags": "8",
+  "InputUis": [
+    {
+      "InputId": "06e25694-70eb-4fa6-9f78-10fa215a2a80"/*Select*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "Which value of the render pass to read."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "ff5b0eca-419d-4e4e-bf77-102c2065115b"/*Value*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 100.0
+      }
+    }
+  ]
+}

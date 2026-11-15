@@ -1,0 +1,12 @@
+{
+  "FormatVersion": 3,
+  "Id": "a54c36f9-aa5c-4c0b-824c-f61981802f10"/*GetRenderPassState*/,
+  "Inputs": [
+    {
+      "Id": "06e25694-70eb-4fa6-9f78-10fa215a2a80"/*Select*/,
+      "DefaultValue": 0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

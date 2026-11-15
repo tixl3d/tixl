@@ -18,8 +18,8 @@
     {
       "InputId": "22b0817f-3149-4713-b87b-89c54300cde8"/*FillMode*/,
       "Position": {
-        "X": 2000.9934,
-        "Y": 4252.8496
+        "X": 2072.6316,
+        "Y": 4314.8438
       },
       "GroupTitle": "Draw Style",
       "Description": "Solid or wireframe rendering."
@@ -28,8 +28,8 @@
       "InputId": "329d8248-5f9f-4ad3-9b97-0f142e91ba05"/*Mesh*/,
       "Relevancy": "Required",
       "Position": {
-        "X": 1468.0251,
-        "Y": 3814.7598
+        "X": 1504.7626,
+        "Y": 3965.1538
       },
       "GroupTitle": "Input"
     },
@@ -37,8 +37,8 @@
       "InputId": "408ae7c7-9aa8-4537-8c55-b5689f8f9b56"/*GPoints*/,
       "Relevancy": "Required",
       "Position": {
-        "X": 1442.1204,
-        "Y": 3581.1616
+        "X": 1393.9023,
+        "Y": 3662.4434
       }
     },
     {
@@ -61,23 +61,23 @@
     {
       "InputId": "6c36bf68-e22f-419d-9ec0-f60a83d6a560"/*BlendMode*/,
       "Position": {
-        "X": 2000.9934,
-        "Y": 4297.8496
+        "X": 2072.6316,
+        "Y": 4359.8438
       }
     },
     {
       "InputId": "70f4cc27-f901-4faa-aa2e-b4cd2a50ff73"/*EnableZTest*/,
       "Position": {
-        "X": 2000.9934,
-        "Y": 4367.8496
+        "X": 2072.6316,
+        "Y": 4429.8438
       },
       "Description": "If enabled, fragments hidden behind already drawn geometry (according to the depth buffer) are discarded."
     },
     {
       "InputId": "8af68894-0a5f-4fef-b7c9-41badeb1db16"/*AtlasMode*/,
       "Position": {
-        "X": 1916.3212,
-        "Y": 3644.9988
+        "X": 2056.321,
+        "Y": 3639.9988
       },
       "Description": "How the atlas cell of each instance is selected.\n\nBufferOrder: by the index of the point.\nF1: by the point's F1 attribute.\nF2: by the point's F2 attribute."
     },
@@ -130,8 +130,8 @@
     {
       "InputId": "c0351f55-ad27-4fbd-b3d5-668ff49f0ea0"/*CullMode*/,
       "Position": {
-        "X": 2000.9934,
-        "Y": 4217.8496
+        "X": 2072.6316,
+        "Y": 4279.8438
       },
       "Description": "Which faces are hidden.\n\nNone: both sides are drawn.\nFront: front faces are hidden, only back faces are visible.\nBack: back faces are hidden (default)."
     },
@@ -147,8 +147,8 @@
     {
       "InputId": "dd511aab-0472-4109-9c10-cc1ab5042499"/*EnableZWrite*/,
       "Position": {
-        "X": 2000.9934,
-        "Y": 4332.8496
+        "X": 2072.6316,
+        "Y": 4394.8438
       },
       "Description": "If enabled, the mesh writes into the depth buffer so it can occlude itself and geometry drawn later.",
       "AddPadding": "True"
@@ -156,11 +156,27 @@
   ],
   "SymbolChildUis": [
     {
+      "ChildId": "74eef823-3647-4629-9874-be8f8f7646c5",
+      "SymbolName": "Lib.render._dx11.buffer.PickBuffer",
+      "Position": {
+        "X": 1782.1204,
+        "Y": 3820.0
+      }
+    },
+    {
+      "ChildId": "31f080fb-63ca-4fc5-93aa-0d14b1b86647",
+      "SymbolName": "Lib.flow.context.GetRenderPassState",
+      "Position": {
+        "X": 1582.1204,
+        "Y": 3820.0
+      }
+    },
+    {
       "ChildId": "06dbd48e-65ed-4696-9430-43718868851d",
       "SymbolName": "Types.Gfx.DepthStencilState",
       "Position": {
-        "X": 2140.9934,
-        "Y": 4332.8496
+        "X": 2212.6316,
+        "Y": 4394.8438
       }
     },
     {
@@ -168,31 +184,23 @@
       "SymbolName": "Lib.render._dx11.fxsetup.SetPixelAndVertexShaderStage",
       "Position": {
         "X": 2635.2988,
-        "Y": 3457.5688
+        "Y": 3387.5686
       }
     },
     {
       "ChildId": "209bb20b-1660-4f83-ae55-4ef8abbd7640",
       "SymbolName": "Lib.numbers.int.basic.MultiplyInt",
       "Position": {
-        "X": 2224.1724,
-        "Y": 4578.953
-      }
-    },
-    {
-      "ChildId": "310e1679-eda4-45b8-8978-03779295ccb1",
-      "SymbolName": "Types.Values.IntValue",
-      "Position": {
-        "X": 1768.3304,
-        "Y": 3719.164
+        "X": 1934.8644,
+        "Y": 4603.7505
       }
     },
     {
       "ChildId": "39071e5d-9637-4cc8-b82f-e53d80b0ba73",
       "SymbolName": "Lib.render._dx11.fxsetup.PickBlendMode",
       "Position": {
-        "X": 2140.9934,
-        "Y": 4297.8496
+        "X": 2212.6316,
+        "Y": 4359.8438
       }
     },
     {
@@ -209,6 +217,14 @@
       }
     },
     {
+      "ChildId": "3b0f7d6e-9a41-4c2b-8e57-1d6a2f9c4b80",
+      "SymbolName": "Lib.point.usse.KeepPreviousPointBuffer",
+      "Position": {
+        "X": 1582.1204,
+        "Y": 3700.0
+      }
+    },
+    {
       "ChildId": "3c638d15-9dc5-4c51-a7ba-89b2521dc6fe",
       "SymbolName": "Lib.numbers.int2.process.Int2Components",
       "Position": {
@@ -220,16 +236,16 @@
       "ChildId": "475fe23e-aa2a-42f6-b1e8-9ee62b21eb92",
       "SymbolName": "Lib.render._dx11.api.OutputMergerStage",
       "Position": {
-        "X": 2280.9934,
-        "Y": 4297.8496
+        "X": 2352.6316,
+        "Y": 4359.8438
       }
     },
     {
       "ChildId": "49c0be4c-fe32-48f4-8e03-934f22d14fa2",
       "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
       "Position": {
-        "X": 1608.0251,
-        "Y": 3884.7598
+        "X": 1644.7626,
+        "Y": 4035.1538
       }
     },
     {
@@ -245,7 +261,7 @@
       "SymbolName": "Lib.render.shading._.ContextCBuffers",
       "Position": {
         "X": 2495.2988,
-        "Y": 3597.5688
+        "Y": 3527.5686
       }
     },
     {
@@ -260,16 +276,16 @@
       "ChildId": "6b105c43-dad8-4e17-bdec-8d5a8b10dfe3",
       "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
       "Position": {
-        "X": 1991.9639,
-        "Y": 3666.455
+        "X": 1644.7626,
+        "Y": 4000.1538
       }
     },
     {
       "ChildId": "732b48ad-00e7-4fab-984e-664ff1a62423",
       "SymbolName": "Types.Values.IntValue",
       "Position": {
-        "X": 2224.1724,
-        "Y": 4543.953
+        "X": 1934.8644,
+        "Y": 4568.7505
       }
     },
     {
@@ -277,7 +293,7 @@
       "SymbolName": "Lib.render.shading._.GetTextureFromContext",
       "Position": {
         "X": 2355.2988,
-        "Y": 4017.5688
+        "Y": 3982.5686
       }
     },
     {
@@ -313,8 +329,8 @@
       "ChildId": "9d4dc378-980d-4b4b-b3b0-8b0a883d9ad7",
       "SymbolName": "Lib.render._dx11.api.Rasterizer",
       "Position": {
-        "X": 2280.9934,
-        "Y": 4217.8496
+        "X": 2352.6316,
+        "Y": 4279.8438
       }
     },
     {
@@ -337,8 +353,8 @@
       "ChildId": "ad1ea12e-bd85-4e73-ae76-d9cd3f90c75c",
       "SymbolName": "Lib.render.shading._.GetPbrParameters",
       "Position": {
-        "X": 1996.596,
-        "Y": 3766.283
+        "X": 2029.8894,
+        "Y": 3805.3164
       }
     },
     {
@@ -346,7 +362,7 @@
       "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
       "Position": {
         "X": 2495.2988,
-        "Y": 4017.5688
+        "Y": 3982.5686
       }
     },
     {
@@ -374,6 +390,14 @@
       }
     },
     {
+      "ChildId": "c58e2a14-7b3d-4f96-a0e1-58d4b7e9f213",
+      "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
+      "Position": {
+        "X": 1722.1204,
+        "Y": 3735.0
+      }
+    },
+    {
       "ChildId": "c9a5a194-a095-4667-980c-88b84f19d2d2",
       "SymbolName": "Types.Gfx.SamplerState",
       "Position": {
@@ -385,24 +409,24 @@
       "ChildId": "d819ea09-6056-4c49-9549-1e996c520f08",
       "SymbolName": "Lib.mesh._._MeshBufferComponents",
       "Position": {
-        "X": 1468.0251,
-        "Y": 3849.7598
+        "X": 1504.7626,
+        "Y": 4000.1538
       }
     },
     {
       "ChildId": "e36c8cae-3c84-4601-a60f-279adc87335b",
       "SymbolName": "Lib.render._dx11.api.Draw",
       "Position": {
-        "X": 2224.1724,
-        "Y": 4648.953
+        "X": 1934.8644,
+        "Y": 4673.7505
       }
     },
     {
       "ChildId": "e5ae7c3d-686a-4006-aa36-110916ffa237",
       "SymbolName": "Lib.numbers.int.basic.MultiplyInt",
       "Position": {
-        "X": 2224.1724,
-        "Y": 4486.349
+        "X": 1934.8644,
+        "Y": 4533.7505
       }
     },
     {
@@ -414,8 +438,8 @@
         "Y": 35.0
       },
       "Position": {
-        "X": 2495.2988,
-        "Y": 3527.5688
+        "X": 2374.9133,
+        "Y": 3443.218
       }
     },
     {
@@ -438,8 +462,8 @@
       "ChildId": "fae02035-9e83-465a-a274-7a88464ef66d",
       "SymbolName": "Types.Gfx.RasterizerState",
       "Position": {
-        "X": 2140.9934,
-        "Y": 4217.8496
+        "X": 2212.6316,
+        "Y": 4279.8438
       }
     },
     {
@@ -447,7 +471,7 @@
       "SymbolName": "Types.Gfx.VertexShader",
       "Position": {
         "X": 2495.2988,
-        "Y": 3457.5688
+        "Y": 3387.5686
       }
     }
   ],

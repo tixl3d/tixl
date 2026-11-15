@@ -256,6 +256,17 @@ M0 is independent and can ship first. M1 and later come after Phase 3 above; the
   camera should lose its TXAA ghosting.
 - **M3. Moving points.** Gate `KeepPreviousPointBuffer` on the request flag in the instanced draws (`DrawMeshAtPoints`,
   `DrawPoints`, `DrawBillboards`). Move `DrawMovingPoints` onto the shared include.
+  - `[DrawMeshAtPoints]` done 2026-11-15: `KeepPreviousPointBuffer` (Keep always on, so a still frame gives zero
+    motion) → `GetBufferComponents` → SRV t9 `PreviousPoints`; `PrevBuffer` → b7. The instance transform is one
+    function (`PlaceAtPoint`) for both frames. Shader-graph resources moved to `/*{RESOURCES(t10)}*/`. A missing or
+    shorter previous buffer (zero rotation) falls back to the current point.
+    Bridge check: points rotated by `[TransformPoints]` under a static camera give a smooth velocity field; with the
+    rotation stopped velocity is exactly 0. Not yet: a jump threshold for recycled points; the other instanced draws
+    (`DrawMeshAtPoints2`, `DrawMeshChunksAtPoints`, `DrawPoints`, billboards).
+  - Next (user idea 2026-11-15): copy previous points only when the render target has a velocity buffer.
+    `[RenderTarget]` tells its draws (they run inside it, so no lag); `[PickBuffer]` evaluates only the picked input,
+    so an unpicked `KeepPreviousPointBuffer` costs nothing. Done as Phase 1 of `Plan_SystemContextVariables.md`
+    (typed `RenderPassState.VelocityRequested`), not as another string-named context variable.
 - **M4. Deformed meshes.** Previous vertex buffer for mesh ops that deform on the GPU, only when needed.
 - **M2b. [ScreenSpaceLighting] temporal passes.** SSL is a composite of `[ScreenSpaceAO]`, `[ScreenSpaceReflections]`
   and `[TXAA]`; all three accumulate history with camera-only reprojection (`ReprojectToPreviousUv` in
@@ -280,6 +291,14 @@ M0 is independent and can ship first. M1 and later come after Phase 3 above; the
     without the hit uv. The trace pass is not touched: it binds only t0–t2, and textures bind in order.
   - Limits: reflected objects without velocity (points, until M3) still trail. Separate item: the dark wash of
     reflections at high roughness is a look issue of the reflection pass, not of motion.
+- Related fixes 2026-11-15 (user reported wrong depth/normals from shaded points):
+  - `DrawPointsShaded.hlsl`: sphere normal used `sqrt(1 - d²)` with d already squared; depth was the flat quad's;
+    the shaded surface used `radius * 0.01` instead of the quad half size 0.05. Now a real sphere impostor writing
+    `SV_DepthLessEqual` (SPIR-V: FragDepth, DepthReplacing, DepthLess).
+  - Pitfall: `psOutput psMain(...) : SV_TARGET` makes slang ignore the struct's semantics and number outputs in
+    order, so an `SV_Depth` member became color output 2 (the velocity slot). Removed in `DrawPointsShaded.hlsl` and
+    `mesh-Draw.hlsl`; still present but harmless (color/normal only) in `mesh-DrawAtPoints.hlsl` and
+    `mesh-CustomDraw-template.hlsl`. Any shader that adds SV_Target2 or SV_Depth must drop it.
 - **M5. MotionBlur** reads the same velocity target. Velocity is displacement per *frame*, which is what TXAA needs
   (its history is one frame old), but it follows frame-duration jitter: motion blur must scale it by
   shutter time / `Playback.LastFrameDuration`, or blur length jumps with frame timing (seen 2026-11-15).

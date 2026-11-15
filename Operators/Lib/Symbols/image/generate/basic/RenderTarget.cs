@@ -252,8 +252,11 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
                 reference.NormalTexture = _normalTarget.Texture;
             }
 
-            // Render
+            // Render; draws keep velocity history only when this target can take it.
+            var keepRenderPass = context.RenderPass;
+            context.RenderPass.VelocityRequested = withVelocityBuffer;
             Command.GetValue(context);
+            context.RenderPass = keepRenderPass;
 
             // Restore context
             context.BypassCameras = keepCameraBypass;
