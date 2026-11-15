@@ -1,0 +1,26 @@
+{
+  "Id": "f2a60c18-9d47-4b13-8e5a-c7b31d04e692",
+  "Variations": [
+    {
+      "Id": "2b417e99-c08b-4d7c-a80e-4588779e0e4d",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Light reflection",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "e1f4deec-22fd-5652-a3c3-37b46a5eab6c": 0.0,
+          "2d098fe1-9c9e-5e3f-a910-5494b7138083": 0.0,
+          "bbcf597d-db03-5380-acab-6223b7ed1338": 0.27,
+          "5da494ec-cdf2-5d07-b15d-75540ff2c63b": 0.06,
+          "863dafd8-10c4-571f-bddc-648857c595cc": 0.07,
+          "53f228d1-c7b1-5778-aa52-03c29e16cbc7": 0.03,
+          "bf7efb01-73a0-57a4-8a3e-be714dad9a27": true
+        }
+      }
+    }
+  ]
+}
