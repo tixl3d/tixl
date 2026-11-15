@@ -14,6 +14,10 @@ internal sealed class HasIntChanged : Instance<HasIntChanged>
 
     private void Update(EvaluationContext context)
     {
+        // Motion blur subframes and further cube faces repeat this frame: keep the first pass's result.
+        if (context.RenderPass.IsRepeatOfFrame)
+            return;
+
         // Prevent double evaluations
         if (Math.Abs(context.LocalFxTime - _lastEvalTime) < double.Epsilon)
             return;

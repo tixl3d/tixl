@@ -29,6 +29,10 @@ internal sealed class PeakLevel : Instance<PeakLevel>
 
     private void Update(EvaluationContext context)
     {
+        // Motion blur subframes and further cube faces repeat this frame: keep the first pass's result.
+        if (context.RenderPass.IsRepeatOfFrame)
+            return;
+
         var t = context.Playback.FxTimeInBars;
 
         var wasEvaluatedThisFrame = Math.Abs(t - _lastEvalTime) < 0.001f;

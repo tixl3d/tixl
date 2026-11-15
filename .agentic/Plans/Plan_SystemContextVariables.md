@@ -62,6 +62,11 @@ state, conventional names, C# usage) and the rule "Engine state is typed, not a 
 `AGENT_INSTRUCTIONS.md`. The legacy readers stay: `[Loop]` still maps an index variable named `__MotionBlurPass` to the
 repeat pass, `[RenderToCubeMap]` still writes `CubeFace`.
 
+Change detectors in repeat passes (2026-11-15): `[HasValueChanged]`, `[HasIntChanged]`, `[HasVec2Changed]`,
+`[HasVec3Changed]`, `[CountInt]`, `[DeltaSinceLastFrame]`, `[WasTrigger]`, `[PeakLevel]`, `[DetectPulse]`,
+`[DuckAudioLevel]`, `_DetectBeatOffset` return early when `IsRepeatOfFrame`, keeping the first pass's outputs. Before,
+time-gated ones compared against the previous subframe, and wall-clock-gated ones (10 ms) re-ran when subframes took longer.
+
 ## Goal
 
 Ops talk to each other through context variables with magic names (`"__MotionBlurPass"`, `"__IsShadowPassId"`,

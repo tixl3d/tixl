@@ -39,6 +39,10 @@ internal sealed class DetectBeatOffset : Instance<DetectBeatOffset>
         
     private void Update(EvaluationContext context)
     {
+        // Motion blur subframes and further cube faces repeat this frame: keep the first pass's result.
+        if (context.RenderPass.IsRepeatOfFrame)
+            return;
+
         var inputFft = FftInput.GetValue(context);
         if (inputFft == null || inputFft.Count == 0)
         {

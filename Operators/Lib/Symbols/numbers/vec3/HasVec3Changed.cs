@@ -26,6 +26,10 @@ internal sealed class HasVec3Changed : Instance<HasVec3Changed>
 
     private void Update(EvaluationContext context)
     {
+        // Motion blur subframes and further cube faces repeat this frame: keep the first pass's result.
+        if (context.RenderPass.IsRepeatOfFrame)
+            return;
+
         var newValue = Value.GetValue(context);
         var threshold = Threshold.GetValue(context);
         var minTimeBetweenHits = MinTimeBetweenHits.GetValue(context);

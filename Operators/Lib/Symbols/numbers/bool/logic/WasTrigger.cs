@@ -17,6 +17,10 @@ internal sealed class WasTrigger : Instance<WasTrigger>
         
     private void Update(EvaluationContext context)
     {
+        // Motion blur subframes and further cube faces repeat this frame: keep the first pass's result.
+        if (context.RenderPass.IsRepeatOfFrame)
+            return;
+
         if (Math.Abs(Playback.RunTimeInSecs - _lastEvalTime) < 0.010f)
             return;
             

@@ -13,6 +13,10 @@ internal sealed class CountInt : Instance<CountInt>
 
     private void Update(EvaluationContext context)
     {
+        // Motion blur subframes and further cube faces repeat this frame: keep the first pass's result.
+        if (context.RenderPass.IsRepeatOfFrame)
+            return;
+
         var defaultValue =DefaultValue.GetValue(context);
         
 

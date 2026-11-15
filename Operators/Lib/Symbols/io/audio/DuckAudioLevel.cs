@@ -23,6 +23,10 @@ namespace Lib.io.audio
 
         private void Update(EvaluationContext context)
         {
+            // Motion blur subframes and further cube faces repeat this frame: keep the first pass's result.
+            if (context.RenderPass.IsRepeatOfFrame)
+                return;
+
             var level = Level.GetValue(context);
             var threshold = Threshold.GetValue(context);
             var amount = Amount.GetValue(context).Clamp(0f, 1f);
