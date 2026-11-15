@@ -14,6 +14,15 @@ using T3.Editor.UiModel.Selection;
 namespace T3.Editor.Gui.Windows.Variations;
 
 /// <summary>
+/// Lets a <see cref="VariationPicker"/> host add an actions menu to each row, opened from a gear icon.
+/// </summary>
+internal interface IVariationRowMenu
+{
+    /// <summary>Draws the menu items for <paramref name="variation"/>. Returns true to also close the picker.</summary>
+    bool DrawMenuItems(Variation variation);
+}
+
+/// <summary>
 /// A searchable, thumbnailed picker for variations (snapshots or presets) — a richer replacement
 /// for a plain combo dropdown. Phase 1: list mode (search + rows + click-to-apply). Later phases
 /// add an embedded-canvas mode, hover preview, drag-to-reorder and activation faders.
@@ -27,7 +36,7 @@ internal sealed class VariationPicker
     /// </summary>
     public Variation? Draw(IReadOnlyList<Variation> variations, SymbolVariationPool pool, Instance composition,
                            Variation? selected, string label, float width, out bool renameRequested, VariationBaseCanvas? canvas = null,
-                           Color? labelColor = null)
+                           Color? labelColor = null, IVariationRowMenu? rowMenu = null)
     {
         Variation? chosen = null;
         renameRequested = false;
@@ -148,9 +157,10 @@ internal sealed class VariationPicker
             if (_searchString != searchBefore)
                 _highlightIndex = 0;
 
+            // Without a selection nothing is highlighted until the mouse or arrow keys pick a row.
             if (_initHighlight)
             {
-                _highlightIndex = Math.Max(0, _filtered.IndexOf(selected!));
+                _highlightIndex = selected != null ? _filtered.IndexOf(selected) : NoHighlight;
                 _initHighlight = false;
             }
 
@@ -163,15 +173,16 @@ internal sealed class VariationPicker
             }
             else
             {
-                chosen = DrawList(composition, pool, selected, canvas);
+                chosen = DrawList(composition, pool, selected, rowMenu);
             }
 
             // Hover preview: while enabled in list mode, apply the highlighted variation to the
             // output (restoring on change/close) — the same transient mechanism as the Variations
             // window. The canvas drives its own preview, so skip there.
-            if (UserSettings.Config.VariationHoverPreview && !inCanvasMode && _weightDragId == Guid.Empty && _filtered.Count > 0)
+            if (UserSettings.Config.VariationHoverPreview && !inCanvasMode && _weightDragId == Guid.Empty
+                && _highlightIndex >= 0 && _highlightIndex < _filtered.Count)
             {
-                var toPreview = _filtered[Math.Clamp(_highlightIndex, 0, _filtered.Count - 1)];
+                var toPreview = _filtered[_highlightIndex];
                 if (toPreview.Id != _previewedVariationId)
                 {
                     pool.BeginHover(composition, toPreview);
@@ -207,7 +218,7 @@ internal sealed class VariationPicker
         return chosen;
     }
 
-    private Variation? DrawList(Instance composition, SymbolVariationPool pool, Variation? selected, VariationBaseCanvas? canvas)
+    private Variation? DrawList(Instance composition, SymbolVariationPool pool, Variation? selected, IVariationRowMenu? rowMenu)
     {
         Variation? chosen = null;
         var scale = T3Ui.UiScaleFactor;
@@ -231,9 +242,9 @@ internal sealed class VariationPicker
                 scrollToHighlight = true;
             }
 
-            _highlightIndex = Math.Clamp(_highlightIndex, 0, _filtered.Count - 1);
+            _highlightIndex = Math.Clamp(_highlightIndex, NoHighlight, _filtered.Count - 1);
 
-            if (ImGui.IsKeyPressed(ImGuiKey.Enter) || ImGui.IsKeyPressed(ImGuiKey.KeypadEnter))
+            if (_highlightIndex >= 0 && (ImGui.IsKeyPressed(ImGuiKey.Enter) || ImGui.IsKeyPressed(ImGuiKey.KeypadEnter)))
             {
                 chosen = _filtered[_highlightIndex];
                 ImGui.CloseCurrentPopup();
@@ -254,7 +265,7 @@ internal sealed class VariationPicker
         {
             var variation = _filtered[i];
             var highlighted = i == _highlightIndex;
-            var clicked = DrawRow(composition, pool, variation, i, variation == selected, highlighted, reorderEnabled);
+            var clicked = DrawRow(composition, pool, variation, i, variation == selected, highlighted, reorderEnabled, rowMenu != null);
 
             if (clicked)
             {
@@ -266,8 +277,18 @@ internal sealed class VariationPicker
                 ImGui.SetScrollHereY();
         }
 
-        ImGui.EndChild();
+        // The row spacing must not leak into the menu.
         ImGui.PopStyleVar();
+
+        // Opened from within the list child, so it must also begin there to resolve the same popup id.
+        var closePicker = rowMenu != null && DrawRowMenu(rowMenu);
+        ImGui.EndChild();
+
+        if (closePicker)
+        {
+            chosen = null;
+            ImGui.CloseCurrentPopup();
+        }
 
         // Live weighted blend: re-apply while a fader is dragging, bake once on release.
         if (_weightDragId != Guid.Empty && !ImGui.IsMouseDown(ImGuiMouseButton.Left))
@@ -284,6 +305,41 @@ internal sealed class VariationPicker
             _highlightIndex = _hoveredRowThisFrame;
 
         return chosen;
+    }
+
+    private bool DrawRowMenu(IVariationRowMenu rowMenu)
+    {
+        var closePicker = false;
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(6, 6) * T3Ui.UiScaleFactor);
+        if (ImGui.BeginPopup(RowMenuPopupId))
+        {
+            var variation = FindSortedVariation(_rowMenuVariationId);
+            if (variation == null)
+            {
+                // Removed while the menu was open (e.g. undo).
+                ImGui.CloseCurrentPopup();
+            }
+            else
+            {
+                closePicker = rowMenu.DrawMenuItems(variation);
+            }
+
+            ImGui.EndPopup();
+        }
+
+        ImGui.PopStyleVar();
+        return closePicker;
+    }
+
+    private Variation? FindSortedVariation(Guid id)
+    {
+        foreach (var variation in _sorted)
+        {
+            if (variation.Id == id)
+                return variation;
+        }
+
+        return null;
     }
 
     /// <summary>
@@ -378,7 +434,7 @@ internal sealed class VariationPicker
     }
 
     private bool DrawRow(Instance composition, SymbolVariationPool pool,
-                         Variation variation, int index, bool isSelected, bool isHighlighted, bool reorderEnabled)
+                         Variation variation, int index, bool isSelected, bool isHighlighted, bool reorderEnabled, bool hasRowMenu)
     {
         var scale = T3Ui.UiScaleFactor;
         var rowHeight = RowHeight * scale;
@@ -391,7 +447,8 @@ internal sealed class VariationPicker
 
         var gripW = reorderEnabled ? Icons.FontSize + 4 * scale : 2 * scale;
         var weightW = WeightCellWidth * scale;
-        var middleW = MathF.Max(10 * scale, totalW - gripW - weightW);
+        var menuW = hasRowMenu ? ImGui.GetFrameHeight() : 0;
+        var middleW = MathF.Max(10 * scale, totalW - gripW - menuW - weightW);
 
         // Hit regions left→right: grip (reorder), middle (apply), weight cell (fader). Separate
         // buttons so a fader drag never reorders and the grip is the only reorder handle.
@@ -402,7 +459,10 @@ internal sealed class VariationPicker
 
         var midClicked = ImGui.InvisibleButton("##mid" + variation.Id, new Vector2(middleW, rowHeight));
         rowHovered |= ImGui.IsItemHovered();
-        ImGui.SameLine(0, 0);
+
+        // The gear is submitted after the row visuals so its icon isn't painted over; only its slot is skipped here.
+        var menuMin = new Vector2(ImGui.GetItemRectMax().X, rowMin.Y);
+        ImGui.SameLine(0, menuW);
 
         // Weight fader hit region + interaction (visual is painted later, after the row bg).
         ImGui.InvisibleButton("##w" + variation.Id, new Vector2(weightW, rowHeight));
@@ -484,7 +544,7 @@ internal sealed class VariationPicker
 
         // Index above title, centered as a block: the two line heights nearly fill the row.
         var textX = borderMax.X + 8 * scale;
-        var textMaxX = cellMin.X - 4 * scale;
+        var textMaxX = cellMin.X - menuW - 4 * scale;
         var indexY = MathF.Floor(rowMin.Y + (rowHeight - Fonts.FontSmall.FontSize - Fonts.FontBold.FontSize) / 2);
         ImGui.PushFont(Fonts.FontSmall);
         drawList.AddText(new Vector2(textX, indexY), UiColors.TextMuted, variation.ActivationIndex.ToString("00"));
@@ -508,6 +568,23 @@ internal sealed class VariationPicker
             drawList.PopClipRect();
 
         DrawWeightCellVisual(drawList, cellMin, cellMax, pool.GetBlendWeight(variation.Id), weightDragging, freeMode, flagSource);
+
+        if (hasRowMenu)
+        {
+            ImGui.SetCursorScreenPos(menuMin);
+            ImGui.PushID(index);
+            var menuClicked = CustomComponents.IconButton(Icon.Settings2, new Vector2(menuW, rowHeight));
+            ImGui.PopID();
+            if (ImGui.IsItemHovered())
+                _hoveredRowThisFrame = index;
+
+            // Outside the row's id scope, so DrawRowMenu resolves the same popup id.
+            if (menuClicked)
+            {
+                _rowMenuVariationId = variation.Id;
+                ImGui.OpenPopup(RowMenuPopupId);
+            }
+        }
 
         return midClicked && !draggedToReorder && !weightDragging;
     }
@@ -574,6 +651,8 @@ internal sealed class VariationPicker
     private enum Modes { List, Canvas }
 
     private const string PopupId = "##variationPickerPopup";
+    private const string RowMenuPopupId = "##variationRowMenu";
+    private const int NoHighlight = -1;
     private const float RowHeight = 40;
     private const float RowSpacing = 2;
     private const float MaxListHeight = 360;
@@ -589,6 +668,7 @@ internal sealed class VariationPicker
     private float _popupWidth = 220;
     private Modes _mode = Modes.List;
     private Guid _previewedVariationId;
+    private Guid _rowMenuVariationId;
 
     // Drag-to-reorder state
     private Guid _reorderId;

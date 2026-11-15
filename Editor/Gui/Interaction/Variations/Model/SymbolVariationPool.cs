@@ -694,6 +694,42 @@ internal sealed class SymbolVariationPool
     /// </summary>
     public Variation CreatePresetForInstanceSymbol(Instance instance)
     {
+        var changes = CollectPresetValues(instance);
+        var newVariation = new Variation
+                               {
+                                   Id = Guid.NewGuid(),
+                                   Title = "untitled",
+                                   ActivationIndex = AllVariations.Count + 1, //TODO: First find the highest activation index
+                                   IsPreset = true,
+                                   PublishedDate = DateTime.Now,
+                                   ParameterSetsForChildIds = new Dictionary<Guid, Dictionary<Guid, InputValue>>
+                                                                  {
+                                                                      [Guid.Empty] = changes
+                                                                  },
+                               };
+
+        var command = new AddPresetOrVariationCommand(instance.Symbol, newVariation);
+        UndoRedoStack.AddAndExecute(command);
+        //SaveVariationsToFile();
+        return newVariation;
+    }
+
+    /// <summary>
+    /// Replaces the stored values of <paramref name="preset"/> with the instance's current non-default
+    /// parameters, as one undoable command.
+    /// </summary>
+    public void UpdatePresetFromInstance(Variation preset, Instance instance)
+    {
+        var newParameterSets = new Dictionary<Guid, Dictionary<Guid, InputValue>>
+                                   {
+                                       [Guid.Empty] = CollectPresetValues(instance)
+                                   };
+        UndoRedoStack.AddAndExecute(new UpdateVariationParametersCommand(this, preset, newParameterSets));
+    }
+
+    /** The instance's non-default, blendable inputs that aren't excluded from presets. */
+    private static Dictionary<Guid, InputValue> CollectPresetValues(Instance instance)
+    {
         var changes = new Dictionary<Guid, InputValue>();
         var symbolUi = instance.Symbol.GetSymbolUi();
 
@@ -720,23 +756,7 @@ internal sealed class SymbolVariationPool
             }
         }
 
-        var newVariation = new Variation
-                               {
-                                   Id = Guid.NewGuid(),
-                                   Title = "untitled",
-                                   ActivationIndex = AllVariations.Count + 1, //TODO: First find the highest activation index
-                                   IsPreset = true,
-                                   PublishedDate = DateTime.Now,
-                                   ParameterSetsForChildIds = new Dictionary<Guid, Dictionary<Guid, InputValue>>
-                                                                  {
-                                                                      [Guid.Empty] = changes
-                                                                  },
-                               };
-
-        var command = new AddPresetOrVariationCommand(instance.Symbol, newVariation);
-        UndoRedoStack.AddAndExecute(command);
-        //SaveVariationsToFile();
-        return newVariation;
+        return changes;
     }
 
     public bool TryCreateVariationForCompositionInstances(List<Instance> instances, [NotNullWhen(true)] out Variation? newVariation)

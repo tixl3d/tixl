@@ -32,8 +32,74 @@ namespace T3.Editor.Gui.Windows;
 [HelpUiID("ParameterWindow")]
 internal sealed class ParameterWindow : Window
 {
+    /// <summary>
+    /// The gear menu on each row of the preset dropdown. It acts on that row's preset, so it works
+    /// even when the dropdown no longer shows a preset as selected.
+    /// </summary>
+    private sealed class PresetRowMenu : IVariationRowMenu
+    {
+        public PresetRowMenu(ParameterWindow owner)
+        {
+            _owner = owner;
+        }
+
+        /** Set right before each picker draw, so the menu never outlives the instance it acts on. */
+        public void SetContext(SymbolVariationPool pool, Instance op)
+        {
+            _pool = pool;
+            _op = op;
+        }
+
+        public bool DrawMenuItems(Variation preset)
+        {
+            if (_pool == null || _op == null)
+                return false;
+
+            CustomComponents.DrawMenuGroupLabel("Preset");
+
+            var canWrite = !SymbolVariationPool.DoesInstanceMatchPresetExactly(_op, preset);
+            if (CustomComponents.DrawMenuItem(_writeActionId, Icon.Apply, "Write Current Values", isEnabled: canWrite, reserveCheckmarkColumn: false))
+            {
+                _pool.UpdatePresetFromInstance(preset, _op);
+                VariationThumbnailRenderer.RequestRender(_pool, _op, preset.Id, toFile: true);
+            }
+
+            CustomComponents.TooltipForLastItem(canWrite
+                                                    ? "Store the current parameter values in this preset"
+                                                    : "The current values already match this preset");
+
+            if (CustomComponents.DrawMenuItem(_renameActionId, Icon.None, "Rename", reserveCheckmarkColumn: false))
+            {
+                _owner.StartRenamingPreset(preset);
+                return true;
+            }
+
+            if (CustomComponents.DrawMenuItem(_updateThumbnailActionId, Icon.Refresh, "Update Thumbnail", reserveCheckmarkColumn: false))
+                VariationThumbnailRenderer.RequestRender(_pool, _op, preset.Id, toFile: true);
+
+            CustomComponents.TooltipForLastItem("Render the thumbnail from the current output");
+
+            CustomComponents.SeparatorLine();
+
+            if (CustomComponents.DrawMenuItem(_removeActionId, Icon.Trash, "Remove", reserveCheckmarkColumn: false))
+                _pool.DeleteVariation(preset);
+
+            return false;
+        }
+
+        private static readonly int _writeActionId = "presetWrite".GetHashCode();
+        private static readonly int _renameActionId = "presetRename".GetHashCode();
+        private static readonly int _updateThumbnailActionId = "presetUpdateThumbnail".GetHashCode();
+        private static readonly int _removeActionId = "presetRemove".GetHashCode();
+
+        private readonly ParameterWindow _owner;
+        private SymbolVariationPool? _pool;
+        private Instance? _op;
+    }
+
     public ParameterWindow()
     {
+        _presetRowMenu = new PresetRowMenu(this);
         _instanceCounter++;
         Config.Title = LayoutHandling.ParametersPrefix + _instanceCounter;
         Config.Visible = true;
@@ -634,17 +700,17 @@ internal sealed class ParameterWindow : Window
             {
                 _renamingPresetId = Guid.Empty; // The named preset may vanish mid-edit (e.g. undo)
                 var selectedPreset = matchingPreset ?? activePreset;
+                _presetRowMenu.SetContext(presetPool, op);
                 var chosen = _presetPicker.Draw(_presets, presetPool, op, selectedPreset, label, dropdownWidth,
                                                 out var renameRequested,
-                                                labelColor: labelColor);
+                                                labelColor: labelColor, rowMenu: _presetRowMenu);
                 if (chosen != null)
                 {
                     presetPool.Apply(op, chosen);
                 }
                 else if (renameRequested && selectedPreset != null)
                 {
-                    _renamingPresetId = selectedPreset.Id;
-                    _focusPresetRename = true;
+                    StartRenamingPreset(selectedPreset);
                 }
             }
 
@@ -672,8 +738,7 @@ internal sealed class ParameterWindow : Window
                 if (newPreset != null)
                 {
                     VariationThumbnailRenderer.RequestRender(presetPool, op, newPreset.Id, toFile: true);
-                    _renamingPresetId = newPreset.Id;
-                    _focusPresetRename = true;
+                    StartRenamingPreset(newPreset);
                 }
             }
 
@@ -760,6 +825,12 @@ internal sealed class ParameterWindow : Window
         }
 
         ImGui.Unindent(5);
+    }
+
+    private void StartRenamingPreset(Variation preset)
+    {
+        _renamingPresetId = preset.Id;
+        _focusPresetRename = true;
     }
 
     private void CollectPresets(SymbolVariationPool pool)
@@ -1068,5 +1139,6 @@ internal sealed class ParameterWindow : Window
     private Guid _matchedPresetId;
     private Guid _renamingPresetId;
     private bool _focusPresetRename;
+    private readonly PresetRowMenu _presetRowMenu;
     public static readonly RenameInputDialog RenameInputDialog = new();
 }

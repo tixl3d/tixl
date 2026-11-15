@@ -468,7 +468,54 @@ public static class ValueUtils
                                       return aValue.Value == bValue.Value;
                                   }
                 },
+                {
+                    typeof(bool), (a, b) =>
+                                  {
+                                      if (a is not InputValue<bool> aValue || b is not InputValue<bool> bValue)
+                                          return false;
+
+                                      return aValue.Value == bValue.Value;
+                                  }
+                },
+                {
+                    typeof(string), (a, b) =>
+                                    {
+                                        if (a is not InputValue<string> aValue || b is not InputValue<string> bValue)
+                                            return false;
+
+                                        return string.Equals(aValue.Value, bValue.Value, StringComparison.Ordinal);
+                                    }
+                },
+                {
+                    typeof(Gradient), (a, b) =>
+                                      {
+                                          if (a is not InputValue<Gradient> aValue || b is not InputValue<Gradient> bValue)
+                                              return false;
+
+                                          return AreGradientsEqual(aValue.Value, bValue.Value);
+                                      }
+                },
             };
+
+    /** Step ids are ignored: they identify steps for editing and differ between otherwise identical gradients. */
+    private static bool AreGradientsEqual(Gradient? a, Gradient? b)
+    {
+        if (ReferenceEquals(a, b))
+            return true;
+
+        if (a == null || b == null || a.Interpolation != b.Interpolation || a.Steps.Count != b.Steps.Count)
+            return false;
+
+        for (var stepIndex = 0; stepIndex < a.Steps.Count; stepIndex++)
+        {
+            var stepA = a.Steps[stepIndex];
+            var stepB = b.Steps[stepIndex];
+            if (stepA.NormalizedPosition != stepB.NormalizedPosition || stepA.Color != stepB.Color)
+                return false;
+        }
+
+        return true;
+    }
 
     public static string GetValueString(InputValue inputValue)
     {

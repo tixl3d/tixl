@@ -16,9 +16,10 @@ When a single operator is selected, the Parameter window shows a preset selector
 
 - The dropdown names the preset that matches the current parameter values — no matter how you arrived at them. If no preset matches, it shows the last applied preset dimmed, or the number of available presets.
 - As soon as you change any parameter (or blend between presets), the **new-preset icon** next to the dropdown lights up to suggest saving the current values.
-- Clicking that icon creates a new preset: it is placed on a free spot in the Variations window (even when that window is closed), becomes the active preset, and the dropdown turns into a name field so you can name it right away. Press `Enter` to confirm, or `Escape` to keep it as "untitled".
+- Clicking that icon creates a new preset. It is placed on a free spot in the Variations window (even when that window is closed), becomes the active preset, and the dropdown turns into a name field so you can name it right away. Press `Enter` to confirm, or `Escape` to keep it as "untitled".
 - Creating a preset can be undone — undo removes the preset again without changing the current parameter values.
 - Double-clicking the dropdown renames the selected preset.
+- Each preset in the opened dropdown has a gear icon with a menu for that preset: **Write Current Values** stores the current parameter values in it (to update a preset after tweaking it), **Rename**, **Update Thumbnail** and **Remove**. Writing and removing can be undone.
 
 ## Working with snapshots
 
