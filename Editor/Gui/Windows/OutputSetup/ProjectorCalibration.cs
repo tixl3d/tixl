@@ -1,4 +1,7 @@
 #nullable enable
+using System.Diagnostics.CodeAnalysis;
+using ImGuiNET;
+using T3.Editor.UiModel.ProjectHandling;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Output;
 using Vector2 = System.Numerics.Vector2;
@@ -7,140 +10,156 @@ using Vector3 = System.Numerics.Vector3;
 namespace T3.Editor.Gui.Windows.OutputSetup;
 
 /// <summary>
-/// Turns an output's aligned surface into a projector camera: where the projector stands, where it points and how
-/// far it zooms, so [UseProjectorCam] renders 3D content that lands on objects in front of the wall, not only on it.
+/// Keeps each projector's camera solved from the surface corner-pinned to it: where the projector stands, where it
+/// points and how far it zooms, so [UseProjectorCam] renders 3D content that lands on objects in front of the wall,
+/// not only on it.
 /// </summary>
 internal static class ProjectorCalibration
 {
     /// <summary>
-    /// Solves the output's camera from the largest top-level surface corner-pinned to it, as one undo step. The message
-    /// says what was solved or why it couldn't be.
+    /// Re-solves every projector camera that syncs to its surface and whose pin, lens shift or stage placement changed.
+    /// While <paramref name="isAiming"/> only the pose follows, with the zoom kept: read from a half-aimed pin it would
+    /// jump with every point. The full solve, zoom included, follows once aiming ends. No undo step of its own: the
+    /// camera is derived from the pin, so an undone pin is followed back on the next frame.
     /// </summary>
-    public static bool TrySolveFromAlignedSurface(Setup setup, OutputDefinition output, out string message)
+    public static void SyncCameras(Setup setup, bool isAiming)
     {
-        var surface = FindLargestMappedSurface(setup, output, out var mapping);
-        if (surface == null || mapping == null)
+        var frame = ImGui.GetFrameCount();
+        if (frame == _lastSyncFrame)
+            return;
+
+        _lastSyncFrame = frame;
+        var hasSolved = false;
+        foreach (var output in setup.Outputs)
         {
-            message = "Corner-pin a surface onto this output and calibrate it first. Surfaces that fill the output don't count.";
-            return false;
+            if (output.Kind != OutputDefinition.Kinds.Projector || output.Camera is { SyncsToSurface: false })
+                continue;
+
+            if (!_syncStates.TryGetValue(output.Id, out var state))
+            {
+                state = new SyncState();
+                _syncStates[output.Id] = state;
+            }
+
+            var surface = FindSyncSurface(setup, output, out var mapping);
+            if (surface == null || mapping == null)
+            {
+                state.Forget();
+                state.Failure = "Not solved yet: corner-pin a surface onto this output. Surfaces that fill the output don't count.";
+                continue;
+            }
+
+            var isChanged = !state.Matches(output, surface, mapping);
+            if (!isChanged && (isAiming || !state.NeedsFullSolve))
+                continue;
+
+            var camera = output.Camera ??= new OutputDefinition.ProjectorCamera();
+            var posesOnly = isAiming && camera is { Pose: not null, Lens: not null };
+            var poseBefore = camera.Pose;
+            var lensBefore = camera.Lens;
+            state.Failure = TrySolve(output, camera, surface, mapping, posesOnly, out var failure) ? null : failure;
+            state.NeedsFullSolve = posesOnly;
+            state.Remember(output, surface, mapping);
+
+            // Re-solving an unchanged pin, as after loading, gives the same camera and isn't worth a save.
+            hasSolved |= !posesOnly && state.Failure == null && (!Nullable.Equals(poseBefore, camera.Pose) || !Nullable.Equals(lensBefore, camera.Lens));
         }
 
+        // A drag is saved when it ends, before the full solve that follows it; this keeps the file in step for the Player.
+        if (hasSolved)
+            OutputSetupHandling.SaveActive();
+    }
+
+    /// <summary>What the camera currently is, or why it can't be solved, in a line for the parameter card.</summary>
+    public static string DescribeCamera(Setup setup, OutputDefinition output)
+    {
+        var camera = output.Camera;
+        var syncs = camera?.SyncsToSurface ?? true;
+        if (syncs && _syncStates.TryGetValue(output.Id, out var state) && state.Failure != null)
+            return state.Failure;
+
+        if (camera?.Pose == null || camera.Lens is not { } lens)
+        {
+            return syncs
+                       ? "Not solved yet: corner-pin a surface onto this output."
+                       : "Not solved: turn on Sync to Surface Calibration to solve it from the surface pinned to this output.";
+        }
+
+        var source = setup.FindSurface(camera.SolvedFromSurfaceId)?.Name;
+        var from = source != null ? $" from '{source}'" : string.Empty;
+        var zoom = camera.IsZoomEntered ? "entered zoom, seen too squarely to measure" : $"{lens.FieldOfViewY * 180 / MathF.PI:0.#}° vertical";
+        var frozen = syncs ? string.Empty : " Kept while sync is off.";
+        return $"Solved{from}: {zoom}, misses by {camera.ResidualPx:0.#} px.{frozen}";
+    }
+
+    /// <summary>
+    /// Solves the camera from the surface's pin into <paramref name="camera"/>: the full solve measures the zoom unless
+    /// the surface is seen too squarely, the pose-only one keeps the camera's zoom.
+    /// </summary>
+    private static bool TrySolve(OutputDefinition output, OutputDefinition.ProjectorCamera camera, Surface surface, Surface.OutputMapping mapping,
+                                 bool posesOnly, out string failure)
+    {
         var canvas = output.ResolvedResolution;
         var canvasSize = output.CanvasSize;
         if (!SurfaceGeometry.TryGetSurfaceToOutput(surface, mapping, canvasSize, out var surfaceToPixels))
         {
-            message = $"The pin of '{surface.Name}' is degenerate.";
+            failure = $"The pin of '{surface.Name}' is degenerate.";
             return false;
         }
 
-        var camera = output.Camera ?? new OutputDefinition.ProjectorCamera();
         var placement = surface.Placement?.Pose ?? Pose.Identity;
-        var fallbackFieldOfView = camera.ManualFovYDegrees * MathF.PI / 180;
-        if (!ProjectorSolver.TrySolveFromPlane(surfaceToPixels, placement, camera.LensAxis, canvas, fallbackFieldOfView,
-                                               out var pose, out var lens, out var isZoomEntered))
+        Pose pose;
+        Projection lens;
+        var isZoomEntered = camera.IsZoomEntered;
+        var isSolved = posesOnly
+                           ? ProjectorSolver.TrySolvePoseFromPlane(surfaceToPixels, placement, camera.LensAxis, canvas, camera.Lens!.Value.FieldOfViewY,
+                                                                   out pose, out lens)
+                           : ProjectorSolver.TrySolveFromPlane(surfaceToPixels, placement, camera.LensAxis, canvas,
+                                                               camera.ManualFovYDegrees * MathF.PI / 180, out pose, out lens, out isZoomEntered);
+        if (!isSolved)
         {
-            message = $"Can't solve from '{surface.Name}'.";
+            failure = $"Can't solve from '{surface.Name}'.";
             return false;
         }
-
-        CollectCorrespondences(surface, mapping, placement, canvasSize, surfaceToPixels, _correspondences);
-        var residual = MeanMissPx(pose, lens, canvas, _correspondences);
-        var hasDistance = TryGetDistanceToSurface(pose, surface, placement, out var distance);
-
-        SetupUndo.RunUndoable("Solve projector camera", setup, () =>
-                                                              {
-                                                                  var solved = output.Camera ??= new OutputDefinition.ProjectorCamera();
-                                                                  solved.Pose = pose;
-                                                                  solved.Lens = lens;
-                                                                  solved.ResidualPx = MathF.Max(residual, 0.001f);
-                                                                  solved.SolvedFromSurfaceId = surface.Id;
-                                                                  solved.IsZoomEntered = isZoomEntered;
-                                                                  solved.CalibrationPoints = new List<CalibrationPoint>(_correspondences);
-
-                                                                  // The fields show what was solved, so the side view draws it and stays editable.
-                                                                  if (!isZoomEntered)
-                                                                      solved.ManualFovYDegrees = lens.FieldOfViewY * 180 / MathF.PI;
-
-                                                                  if (hasDistance)
-                                                                      solved.ThrowDistance = distance;
-                                                              });
-
-        message = DescribeSolve(setup, output.Camera!);
-        return true;
-    }
-
-    /// <summary>
-    /// Keeps a solved camera on the pin it was solved from while that pin is being calibrated, so content rendered
-    /// through [UseProjectorCam] moves with the points being aimed. The zoom stays as solved or entered: read from a
-    /// half-aimed pin it would jump with every point. Only the pose follows, and only when the pin changed. No undo
-    /// step of its own: calibrating snapshots the whole setup, the camera included, and an undone pin is followed
-    /// back on the next frame.
-    /// </summary>
-    public static void FollowPin(OutputDefinition output, Surface surface, Surface.OutputMapping mapping)
-    {
-        if (output.Camera is not { Pose: not null, Lens: { } solvedLens } camera
-            || camera.SolvedFromSurfaceId != surface.Id
-            || mapping.IsFilling
-            || mapping.Quad.Length < 4)
-            return;
-
-        if (_followedOutputId == output.Id && _followedSurfaceId == surface.Id && _followedLensAxis == camera.LensAxis
-            && _followedQuad[0] == mapping.Quad[0] && _followedQuad[1] == mapping.Quad[1]
-            && _followedQuad[2] == mapping.Quad[2] && _followedQuad[3] == mapping.Quad[3])
-            return;
-
-        _followedOutputId = output.Id;
-        _followedSurfaceId = surface.Id;
-        _followedLensAxis = camera.LensAxis;
-        for (var i = 0; i < 4; i++)
-            _followedQuad[i] = mapping.Quad[i];
-
-        var canvas = output.ResolvedResolution;
-        var canvasSize = output.CanvasSize;
-        var placement = surface.Placement?.Pose ?? Pose.Identity;
-        if (!SurfaceGeometry.TryGetSurfaceToOutput(surface, mapping, canvasSize, out var surfaceToPixels)
-            || !ProjectorSolver.TrySolvePoseFromPlane(surfaceToPixels, placement, camera.LensAxis, canvas, solvedLens.FieldOfViewY,
-                                                      out var pose, out var lens))
-            return; // a folded or degenerate pin mid-aim: keep the last good camera
 
         CollectCorrespondences(surface, mapping, placement, canvasSize, surfaceToPixels, _correspondences);
         camera.Pose = pose;
         camera.Lens = lens;
         camera.ResidualPx = MathF.Max(MeanMissPx(pose, lens, canvas, _correspondences), 0.001f);
+        camera.SolvedFromSurfaceId = surface.Id;
+        camera.IsZoomEntered = isZoomEntered;
         camera.CalibrationPoints.Clear();
         camera.CalibrationPoints.AddRange(_correspondences);
+
+        // The fields show what was solved, so the side view draws it and stays editable.
+        if (!posesOnly && !isZoomEntered)
+            camera.ManualFovYDegrees = lens.FieldOfViewY * 180 / MathF.PI;
+
         if (TryGetDistanceToSurface(pose, surface, placement, out var distance))
             camera.ThrowDistance = distance;
+
+        failure = string.Empty;
+        return true;
     }
 
-    /// <summary>Drops the solve, so [UseProjectorCam] falls back to the manual camera.</summary>
-    public static void UseManualCamera(Setup setup, OutputDefinition output)
+    /// <summary>The surface the camera was last solved from while it is still pinned here, else the largest pinned one.</summary>
+    private static Surface? FindSyncSurface(Setup setup, OutputDefinition output, out Surface.OutputMapping? mapping)
     {
-        if (output.Camera == null)
-            return;
+        if (output.Camera is { SolvedFromSurfaceId: var solvedFromId } && solvedFromId != Guid.Empty
+            && setup.FindSurface(solvedFromId) is { } solvedFrom && IsPinnedTopLevel(solvedFrom, output, out mapping))
+        {
+            return solvedFrom;
+        }
 
-        SetupUndo.RunUndoable("Use manual projector camera", setup, () =>
-                                                                    {
-                                                                        var camera = output.Camera!;
-                                                                        camera.Pose = null;
-                                                                        camera.Lens = null;
-                                                                        camera.ResidualPx = 0;
-                                                                        camera.SolvedFromSurfaceId = Guid.Empty;
-                                                                        camera.IsZoomEntered = false;
-                                                                        camera.CalibrationPoints.Clear();
-                                                                    });
+        return FindLargestMappedSurface(setup, output, out mapping);
     }
 
-    /// <summary>What the camera currently is, in a line for the parameter card.</summary>
-    public static string DescribeSolve(Setup setup, OutputDefinition.ProjectorCamera camera)
+    /** Whether a top-level physical surface is corner-pinned (not filling) onto the output. */
+    private static bool IsPinnedTopLevel(Surface surface, OutputDefinition output, [NotNullWhen(true)] out Surface.OutputMapping? mapping)
     {
-        if (camera.Pose == null || camera.Lens is not { } lens)
-            return "Manual camera: not solved yet.";
-
-        var source = setup.FindSurface(camera.SolvedFromSurfaceId)?.Name;
-        var from = source != null ? $" from '{source}'" : string.Empty;
-        var zoom = camera.IsZoomEntered ? "entered zoom, seen too squarely to measure" : $"{lens.FieldOfViewY * 180 / MathF.PI:0.#}° vertical";
-        return $"Solved{from}: {zoom}, misses by {camera.ResidualPx:0.#} px.";
+        mapping = surface.FindMapping(output.Id);
+        return surface.ParentId == Guid.Empty && surface.Kind == Surface.Kinds.Physical
+               && mapping is { IsFilling: false, Quad.Length: >= 4 };
     }
 
     /** Distance along the projector's view to the surface's centre. */
@@ -164,8 +183,7 @@ internal static class ProjectorCalibration
             // A filling mapping is the whole canvas by definition, never aimed at anything, and as the largest quad
             // it would always win: a surface that carries a full-frame projector-camera render would solve a
             // nonsense camera.
-            if (surface.ParentId != Guid.Empty || surface.Kind != Surface.Kinds.Physical || surface.FindMapping(output.Id) is not { } mapping
-                || mapping.IsFilling || mapping.Quad.Length < 4)
+            if (!IsPinnedTopLevel(surface, output, out var mapping))
                 continue;
 
             var area = MathF.Abs(QuadArea(mapping.Quad));
@@ -246,9 +264,54 @@ internal static class ProjectorCalibration
         return sum / correspondences.Count;
     }
 
+    /// <summary>
+    /// What a projector's camera was last solved from, so a frame with the same pin, lens shift and placement costs
+    /// a comparison rather than a solve, and what came of it.
+    /// </summary>
+    private sealed class SyncState
+    {
+        public bool NeedsFullSolve;
+        public string? Failure;
+
+        public bool Matches(OutputDefinition output, Surface surface, Surface.OutputMapping mapping)
+        {
+            var camera = output.Camera;
+            return _isKnown && _surfaceId == surface.Id && _canvas == output.ResolvedResolution
+                   && camera != null && _lensAxis == camera.LensAxis
+                   && (!camera.IsZoomEntered || _enteredFovY == camera.ManualFovYDegrees)
+                   && _placement.Equals(surface.Placement?.Pose ?? Pose.Identity)
+                   && _quad[0] == mapping.Quad[0] && _quad[1] == mapping.Quad[1] && _quad[2] == mapping.Quad[2] && _quad[3] == mapping.Quad[3];
+        }
+
+        public void Remember(OutputDefinition output, Surface surface, Surface.OutputMapping mapping)
+        {
+            var camera = output.Camera!;
+            _isKnown = true;
+            _surfaceId = surface.Id;
+            _canvas = output.ResolvedResolution;
+            _lensAxis = camera.LensAxis;
+            _enteredFovY = camera.ManualFovYDegrees;
+            _placement = surface.Placement?.Pose ?? Pose.Identity;
+            for (var corner = 0; corner < 4; corner++)
+                _quad[corner] = mapping.Quad[corner];
+        }
+
+        public void Forget()
+        {
+            _isKnown = false;
+            NeedsFullSolve = false;
+        }
+
+        private bool _isKnown;
+        private Guid _surfaceId;
+        private Int2 _canvas;
+        private Vector2 _lensAxis;
+        private float _enteredFovY;
+        private Pose _placement;
+        private readonly Vector2[] _quad = new Vector2[4];
+    }
+
+    private static readonly Dictionary<Guid, SyncState> _syncStates = new();
     private static readonly List<CalibrationPoint> _correspondences = [];
-    private static readonly Vector2[] _followedQuad = new Vector2[4];
-    private static Guid _followedOutputId;
-    private static Guid _followedSurfaceId;
-    private static Vector2 _followedLensAxis;
+    private static int _lastSyncFrame = -1;
 }

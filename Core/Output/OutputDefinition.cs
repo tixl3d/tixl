@@ -37,11 +37,13 @@ public sealed class OutputDefinition
         /// <summary>Mean reprojection error in pixels of the last solve; 0 = never solved.</summary>
         public float ResidualPx;
 
-        /// <summary>Manual camera used until a calibration solve fills <see cref="Pose"/>/<see cref="Lens"/>:
-        /// a look-at (position → target) with a vertical field of view, so the render path works before calibration.</summary>
-        public System.Numerics.Vector3 ManualPosition = new(0, 1, 3);
-        public System.Numerics.Vector3 ManualTarget = System.Numerics.Vector3.Zero;
+        /// <summary>Where the zoom sits, as a vertical field of view in degrees: entered or measured by the last solve. A
+        /// solve falls back to it when the surface is seen too squarely, and an unsolved camera renders with it.</summary>
         public float ManualFovYDegrees = 45;
+
+        /// <summary>Whether the editor re-solves <see cref="Pose"/>/<see cref="Lens"/> whenever the surface corner-pinned to
+        /// this projector is calibrated; off keeps the last solve as it is.</summary>
+        public bool SyncsToSurface = true;
 
         /// <summary>Where the lens axis passes through the picture, in NDC (−1..1 from its centre to its edges); the editor
         /// shows it as lens shift, the picture's offset from the axis. One surface can't tell it, so a solve from a single
@@ -84,9 +86,10 @@ public sealed class OutputDefinition
                 writer.WriteVector2("LensShift", lens.LensShift);
             }
 
-            writer.WriteVector3("ManualPosition", ManualPosition);
-            writer.WriteVector3("ManualTarget", ManualTarget);
             writer.WriteValue("ManualFovY", ManualFovYDegrees);
+            if (!SyncsToSurface)
+                writer.WriteValue("SyncsToSurface", false);
+
             writer.WriteVector2("LensAxis", LensAxis);
             if (SolvedFromSurfaceId != Guid.Empty)
                 writer.WriteObject("SolvedFromSurface", SolvedFromSurfaceId);
@@ -118,9 +121,8 @@ public sealed class OutputDefinition
                              {
                                  CalibrationPoints = token.ReadListSafe("CalibrationPoints", CalibrationPoint.ReadFromJson),
                                  ResidualPx = token.ReadValueSafe("ResidualPx", 0f),
-                                 ManualPosition = OutputJson.ReadVector3(token["ManualPosition"], new System.Numerics.Vector3(0, 1, 3)),
-                                 ManualTarget = OutputJson.ReadVector3(token["ManualTarget"]),
                                  ManualFovYDegrees = token.ReadValueSafe("ManualFovY", 45f),
+                                 SyncsToSurface = token.ReadValueSafe("SyncsToSurface", true),
                                  LensAxis = OutputJson.ReadVector2(token["LensAxis"]),
                                  SolvedFromSurfaceId = OutputJson.ReadGuid(token["SolvedFromSurface"]),
                                  IsZoomEntered = token.ReadValueSafe("IsZoomEntered", false),

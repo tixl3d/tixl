@@ -59,6 +59,8 @@ internal sealed partial class SetupOutputView
         if (output == null)
             return;
 
+        // Pins only move in this view, so it keeps the projector cameras on them; a pressed mouse is a drag in progress.
+        ProjectorCalibration.SyncCameras(setup, isAiming: _projectsPhoto || ImGui.IsMouseDown(ImGuiMouseButton.Left));
         DrawFrame(setup, machineConfig, output, outputId, shownSurfaceId, selection);
     }
 
@@ -534,8 +536,6 @@ internal sealed partial class SetupOutputView
             && SurfaceMetrics.CountPoints(alignSubject.Traced) > 0)
         {
             DrawReferencePointPins(setup, dl, alignSubject, pinMapping, editable, handleFade);
-            if (setup.FindOutput(outputId) is { } calibratedOutput)
-                ProjectorCalibration.FollowPin(calibratedOutput, alignSubject.Pinned, pinMapping);
         }
     }
 

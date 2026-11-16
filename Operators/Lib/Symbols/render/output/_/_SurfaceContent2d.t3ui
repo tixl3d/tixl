@@ -5,11 +5,19 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
+      "ChildId": "67de9177-72b6-4c72-ba9b-3124f518a4a9",
+      "SymbolName": "Lib.render.basic.Text",
+      "Position": {
+        "X": -181.89737,
+        "Y": 10.807846
+      }
+    },
+    {
       "ChildId": "70971564-c1e7-4d44-a2cd-83ee0319f6bc",
       "SymbolName": "Lib.render.output.SendToOutput",
       "Position": {
         "X": 0.0,
-        "Y": 140.0
+        "Y": 175.0
       }
     },
     {
@@ -24,16 +32,16 @@
       "ChildId": "9d987ba9-d69b-4322-bec1-0e033853e2b9",
       "SymbolName": "Lib.render.basic.Layer2d",
       "Position": {
-        "X": 0.0,
-        "Y": 35.0
+        "X": -181.89738,
+        "Y": 112.39011
       }
     },
     {
       "ChildId": "a4045409-14ca-4634-a49e-00ccc421c346",
       "SymbolName": "Lib.render.output.SurfaceReferenceImage",
       "Position": {
-        "X": 0.0,
-        "Y": 0.0
+        "X": -321.89743,
+        "Y": 112.39011
       }
     },
     {
@@ -41,7 +49,7 @@
       "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "Position": {
         "X": 0.0,
-        "Y": 105.0
+        "Y": 140.0
       }
     }
   ],

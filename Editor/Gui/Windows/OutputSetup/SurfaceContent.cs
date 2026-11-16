@@ -19,13 +19,13 @@ using Vector2 = System.Numerics.Vector2;
 namespace T3.Editor.Gui.Windows.OutputSetup;
 
 /// <summary>
-/// "Connect..." for a surface or region that shows nothing yet: new content built around its reference photo,
-/// existing content, or slices across its regions. Turns the separate steps of creating a send, sizing it,
+/// "Connect..." for a surface or region: new content built around its reference photo, existing content, or slices
+/// across its regions, replacing what it showed before. Turns the separate steps of creating a send, sizing it,
 /// connecting it to the surface and the surface to an output into one.
 /// </summary>
 internal static class SurfaceContent
 {
-    /// <summary>Whether a surface still waits for content, which is when "Connect..." is offered.</summary>
+    /// <summary>Whether a surface still waits for content, which is when "Connect..." asks to be used.</summary>
     public static bool NeedsContent(Surface surface) => surface.SliceId == Guid.Empty;
 
     /// <summary>
@@ -89,8 +89,8 @@ internal static class SurfaceContent
     }
 
     /// <summary>
-    /// "New 3D Content": for each projector output the surface is corner-pinned onto whose camera is solved. One
-    /// output is an item, several a submenu; none shows the item greyed out with what's missing.
+    /// "New 3D Content": for each projector output the surface is corner-pinned onto, whose camera is solved from that
+    /// pin. One output is an item, several a submenu; none shows the item greyed out with what's missing.
     /// </summary>
     private static void Draw3dContentItems(Setup setup, Surface surface)
     {
@@ -98,9 +98,9 @@ internal static class SurfaceContent
         if (_projectorOutputs.Count == 0)
         {
             CustomComponents.DrawMenuItem(3, "New 3D Content", isEnabled: false, reserveIconColumn: false);
-            CustomComponents.TooltipForLastItem("Solve the projector camera first.",
-                                                "Corner-pin this surface onto a projector output, calibrate it, and choose Solve from Calibrated Surface "
-                                                + "in the output's Projector section.");
+            CustomComponents.TooltipForLastItem("Corner-pin this surface onto a projector output first.",
+                                                "3D content renders through the projector's camera, which is solved from a surface corner-pinned onto it. "
+                                                + "Tick Is Projector on the output, and pin the surface rather than filling the output with it.");
             return;
         }
 
@@ -128,7 +128,7 @@ internal static class SurfaceContent
         ImGui.EndMenu();
     }
 
-    /** Outputs the surface's pin lies on whose projector camera is solved: where its 3D content can be rendered. */
+    /** The projector outputs the surface's pin lies on: where its 3D content can be rendered. */
     private static void CollectProjectorOutputs(Setup setup, Surface surface, List<OutputDefinition> outputs)
     {
         outputs.Clear();
@@ -137,7 +137,7 @@ internal static class SurfaceContent
 
         foreach (var mapping in carrier.OutputMappings)
         {
-            if (!mapping.IsFilling && setup.FindOutput(mapping.OutputId) is { Camera.Pose: not null } output && !outputs.Contains(output))
+            if (!mapping.IsFilling && setup.FindOutput(mapping.OutputId) is { Kind: OutputDefinition.Kinds.Projector } output && !outputs.Contains(output))
                 outputs.Add(output);
         }
     }

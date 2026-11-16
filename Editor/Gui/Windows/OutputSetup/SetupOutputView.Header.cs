@@ -145,22 +145,24 @@ internal sealed partial class SetupOutputView
                              "Opacity of each surface's content over its photo — on the traced quads and the surface cards. Drag, or double-click to type.");
         }
 
-        // A surface that shows nothing yet gets one step to content, instead of creating, sizing and routing a
-        // send by hand.
-        if (primaryKind == SetupEntityKinds.Surface && setup.FindSurface(primaryId) is { } surfaceWithoutContent
-                                                      && SurfaceContent.NeedsContent(surfaceWithoutContent))
+        // One step to content, instead of creating, sizing and routing a send by hand; emphasized while the surface
+        // shows nothing yet.
+        if (primaryKind == SetupEntityKinds.Surface && setup.FindSurface(primaryId) is { } connectedSurface)
         {
+            var needsContent = SurfaceContent.NeedsContent(connectedSurface);
             ImGui.SameLine(0, 12 * T3Ui.UiScaleFactor);
-            if (CustomComponents.StateButton("Connect...", CustomComponents.ButtonStates.Emphasized))
+            if (CustomComponents.StateButton("Connect...", needsContent ? CustomComponents.ButtonStates.Emphasized : CustomComponents.ButtonStates.Default))
                 ImGui.OpenPopup(ConnectMenuId);
 
             if (ImGui.IsItemHovered())
                 CustomComponents.TooltipForLastItem("Connect...",
-                                                    "This surface shows nothing yet. Add content built around its reference photo, use existing content, or cut slices across its regions.");
+                                                    needsContent
+                                                        ? "This surface shows nothing yet. Add content built around its reference photo, use existing content, or cut slices across its regions."
+                                                        : "Replace what this surface shows: new content built around its reference photo, other existing content, or slices across its regions. The previous content stays in the graph.");
 
             if (SetupPopup.Begin(ConnectMenuId))
             {
-                SurfaceContent.DrawMenuItems(selection, setup, surfaceWithoutContent);
+                SurfaceContent.DrawMenuItems(selection, setup, connectedSurface);
                 SetupPopup.End();
             }
         }

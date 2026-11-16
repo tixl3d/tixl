@@ -8,8 +8,8 @@ namespace Lib.render.output;
 /// <summary>
 /// Renders its content sub-graph through a setup output's projector camera, so 3D scene geometry
 /// aligned to the physical stage lands correctly on that projector (Shape 2 — no corner-pin warp).
-/// Uses the output's manual camera (position → target, vertical FOV) until a calibration solve
-/// provides a real pose/lens. Wire: [3D scene] → UseProjectorCam(Projector) → RenderTarget → SendToOutput(Projector).
+/// Until the editor has solved the camera from a surface corner-pinned to the output, it renders from straight
+/// in front of the stage origin at the projector's throw distance, zoom and lens shift. Wire: [3D scene] → UseProjectorCam(Projector) → RenderTarget → SendToOutput(Projector).
 /// </summary>
 [Guid("b3e6f1a2-9c4d-4e58-8a71-2f5c6d0b93e4")]
 internal sealed class UseProjectorCam : Instance<UseProjectorCam>, IStatusProvider
@@ -40,7 +40,6 @@ internal sealed class UseProjectorCam : Instance<UseProjectorCam>, IStatusProvid
         var prevWorldToCamera = context.WorldToCamera;
         var prevCameraToClipSpace = context.CameraToClipSpace;
 
-        // Prefer the calibration-solved pose/lens; fall back to the manual look-at until a solve exists.
         if (cam?.Pose is { } pose && cam.Lens is { } lens)
         {
             context.WorldToCamera = pose.ToViewMatrix();
@@ -48,11 +47,12 @@ internal sealed class UseProjectorCam : Instance<UseProjectorCam>, IStatusProvid
         }
         else
         {
-            var position = cam?.ManualPosition ?? new Vector3(0, 1, 3);
-            var target = cam?.ManualTarget ?? Vector3.Zero;
-            var fovY = (cam?.ManualFovYDegrees ?? 45f).ToRadians();
-            context.WorldToCamera = GraphicsMath.LookAtRH(position, target, new Vector3(0, 1, 0));
-            context.CameraToClipSpace = GraphicsMath.PerspectiveFovRH(fovY, aspect, 0.01f, 1000f);
+            // A surface without a stage position sits at the origin, so this lands roughly on it before any solve.
+            var throwDistance = cam?.ThrowDistance ?? OutputDefinition.ProjectorCamera.DefaultThrowDistance;
+            var unsolvedPose = new Pose(new Vector3(0, 0, throwDistance), Quaternion.Identity);
+            var unsolvedLens = Projection.CreatePerspective((cam?.ManualFovYDegrees ?? 45f).ToRadians(), cam?.LensAxis ?? Vector2.Zero);
+            context.WorldToCamera = unsolvedPose.ToViewMatrix();
+            context.CameraToClipSpace = unsolvedLens.GetMatrix(aspect);
         }
 
         Command.GetValue(context);
@@ -77,7 +77,8 @@ internal sealed class UseProjectorCam : Instance<UseProjectorCam>, IStatusProvid
             return "Output Ref doesn't name an output of the active setup, so this renders without a projector camera.";
 
         return output.Camera?.Pose == null
-                   ? "The output's camera isn't solved yet, so this renders through its manual camera. Solve it in the output's Projector section."
+                   ? "The projector camera isn't solved yet, so this renders from straight in front of the stage origin. "
+                     + "Corner-pin a surface onto this projector output, with Sync to Surface Calibration on in its Projector section."
                    : null;
     }
 

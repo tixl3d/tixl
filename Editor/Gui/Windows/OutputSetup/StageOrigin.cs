@@ -81,8 +81,6 @@ internal static class StageOrigin
             if (camera.Pose is { } pose)
                 camera.Pose = TransformPose(pose, stageOrigin, stageTurn, stageTurnRotation);
 
-            camera.ManualPosition = TransformPoint(camera.ManualPosition, stageOrigin, stageTurn);
-            camera.ManualTarget = TransformPoint(camera.ManualTarget, stageOrigin, stageTurn);
             foreach (var point in camera.CalibrationPoints)
                 point.StagePosition = TransformPoint(point.StagePosition, stageOrigin, stageTurn);
         }

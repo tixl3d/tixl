@@ -716,28 +716,19 @@ internal static partial class SetupParameterView
         ProjectorSideView.Draw(setup, output);
         FormInputs.AddVerticalSpace(16);
 
-        FormInputs.DrawInputLabel(string.Empty);
-        if (CustomComponents.StateButton("Solve from Calibrated Surface", CustomComponents.ButtonStates.Default))
+        var syncs = camera?.SyncsToSurface ?? true;
+        if (FormInputs.AddCheckBox("Sync to Surface Calibration", ref syncs,
+                                   "Solves where the projector stands and how it zooms from the largest surface corner-pinned to this output, "
+                                   + "again whenever that surface is calibrated: while points are aimed only the position follows, the zoom is "
+                                   + "measured once they are let go. Turn it off to keep the camera as it is. Set the lens shift first, and turn "
+                                   + "the projector's own digital keystone correction off.",
+                                   isFlushLeft: true))
         {
-            _projectorSolveFailure = ProjectorCalibration.TrySolveFromAlignedSurface(setup, output, out var message)
-                                         ? default
-                                         : (output.Id, message);
+            SetupUndo.RunUndoable(syncs ? "Sync projector camera" : "Keep projector camera", setup,
+                                  () => (output.Camera ??= new OutputDefinition.ProjectorCamera()).SyncsToSurface = syncs);
         }
 
-        CustomComponents.TooltipForLastItem("Solves where the projector stands and how it zooms from the largest surface calibrated on this output.",
-                                            "Calibrate the surface first and set the lens shift. While calibrating it again, the camera follows the points with the zoom kept; solve again to re-measure the zoom. Turn the projector's own digital keystone correction off.");
-
-        var isSolved = camera?.Pose != null;
-        ImGui.SameLine();
-        ImGui.BeginDisabled(!isSolved);
-        if (CustomComponents.StateButton("Use Manual Camera", CustomComponents.ButtonStates.Default) && isSolved)
-            ProjectorCalibration.UseManualCamera(setup, output);
-
-        ImGui.EndDisabled();
-
-        FormInputs.AddHint(_projectorSolveFailure.OutputId == output.Id ? _projectorSolveFailure.Message
-                           : camera != null ? ProjectorCalibration.DescribeSolve(setup, camera)
-                           : "Manual camera: not solved yet.");
+        FormInputs.AddHint(ProjectorCalibration.DescribeCamera(setup, output));
     }
 
     /** Matches how FormInputs fades a field that holds its default value. */
@@ -1946,9 +1937,6 @@ internal static partial class SetupParameterView
     {
         return Math.Clamp(ProjectorPresets.VerticalFieldOfViewDegrees(MathF.Max(throwRatio, 0.05f), aspect), 1, 170);
     }
-
-    /** Why the last solve on an output failed, shown until the next try. */
-    private static (Guid OutputId, string Message) _projectorSolveFailure;
 
     /** Which way the zoom field reads; the editor's choice for this session, not part of the setup. */
     private static ZoomUnits _zoomUnit = ZoomUnits.Ratio;
