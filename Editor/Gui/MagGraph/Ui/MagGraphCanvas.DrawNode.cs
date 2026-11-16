@@ -415,6 +415,7 @@ internal sealed partial class MagGraphView
 
                 var labelFontSize = MathF.Min(Fonts.FontNormal.FontSize / T3Ui.UiScaleFactor * Fonts.FontNormal.Scale * canvasTextScaleFactor,
                                               Fonts.FontNormal.FontSize);
+                var reservedValueWidth = Fonts.FontNormal.CalcTextSizeA(labelFontSize, float.MaxValue, 0, "-000.000").X;
                 for (inputIndex = 0; inputIndex < item.InputLines.Length; inputIndex++)
                 {
                     var inputLine = item.InputLines[inputIndex];
@@ -513,9 +514,12 @@ internal sealed partial class MagGraphView
                         valueWidth = Fonts.FontNormal.CalcTextSizeA(labelFontSize, float.MaxValue, 0, valueAsString).X;
 
                         // A row is tall enough for two lines, so a value without room beside its input name moves
-                        // onto the line below it rather than overlapping the name.
+                        // onto the line below it rather than overlapping the name. The decision uses at least the
+                        // width of a typical value, so an animated value gaining a digit or a sign doesn't flip the
+                        // row between one and two lines every few frames.
                         var labelWidth = item.InputLines[inputIndex].MeasuredLabel.GetWidth(Fonts.FontNormal, labelFontSize, label, labelText);
-                        isValueOnSecondLine = valueRightEdge - valueWidth < labelX + labelWidth + MinLabelValueGap * CanvasScale;
+                        var layoutWidth = MathF.Max(valueWidth, reservedValueWidth);
+                        isValueOnSecondLine = valueRightEdge - layoutWidth < labelX + labelWidth + MinLabelValueGap * CanvasScale;
                     }
 
                     // A value on its own line makes the text two lines tall; centering that block in the row lifts
