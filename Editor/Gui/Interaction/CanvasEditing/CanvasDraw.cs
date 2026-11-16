@@ -1,5 +1,6 @@
 #nullable enable
 using ImGuiNET;
+using T3.Core.Output;
 using T3.Editor.Gui.Styling;
 using Color = T3.Core.DataTypes.Vector.Color;
 using Vector2 = System.Numerics.Vector2;
@@ -40,6 +41,48 @@ internal static class CanvasDraw
         var width = thickness * T3Ui.UiScaleFactor;
         for (var i = 0; i < 4; i++)
             dl.AddLine(screen[i], screen[(i + 1) % 4], color, width);
+    }
+
+    /// <summary>
+    /// An image laid perspective-correct into a screen quad (corners in the order uv top-left, top-right,
+    /// bottom-right, bottom-left). A plain image quad splits into two affine triangles that shear along the
+    /// diagonal; a grid of small cells placed through the quad's homography stays straight.
+    /// </summary>
+    public static void ImageQuadPerspective(ImDrawListPtr dl, IntPtr textureId, System.ReadOnlySpan<Vector2> screen,
+                                            Vector2 uvMin, Vector2 uvMax, Color color)
+    {
+        if (screen.Length != 4)
+            return;
+
+        if (!Homography.TryComputeQuadToQuad(_unitSquare, screen, out var unitToScreen))
+        {
+            dl.AddImageQuad(textureId, screen[0], screen[1], screen[2], screen[3],
+                            uvMin, new Vector2(uvMax.X, uvMin.Y), uvMax, new Vector2(uvMin.X, uvMax.Y), color);
+            return;
+        }
+
+        const int cellsPerSide = 12;
+        const float step = 1f / cellsPerSide;
+        for (var row = 0; row < cellsPerSide; row++)
+        {
+            var v0 = row * step;
+            var v1 = v0 + step;
+            for (var column = 0; column < cellsPerSide; column++)
+            {
+                var u0 = column * step;
+                var u1 = u0 + step;
+                dl.AddImageQuad(textureId,
+                                unitToScreen.TransformPoint(new Vector2(u0, v0)),
+                                unitToScreen.TransformPoint(new Vector2(u1, v0)),
+                                unitToScreen.TransformPoint(new Vector2(u1, v1)),
+                                unitToScreen.TransformPoint(new Vector2(u0, v1)),
+                                Vector2.Lerp(uvMin, uvMax, new Vector2(u0, v0)),
+                                Vector2.Lerp(uvMin, uvMax, new Vector2(u1, v0)),
+                                Vector2.Lerp(uvMin, uvMax, new Vector2(u1, v1)),
+                                Vector2.Lerp(uvMin, uvMax, new Vector2(u0, v1)),
+                                color);
+            }
+        }
     }
 
     /// <summary>A ring with a horizontal + vertical arm — an origin/anchor marker that can't be mistaken for a corner dot.</summary>
@@ -96,4 +139,6 @@ internal static class CanvasDraw
             vertex.pos = centre + new Vector2(p.X * cos - p.Y * sin, p.X * sin + p.Y * cos);
         }
     }
+
+    private static readonly Vector2[] _unitSquare = [new(0, 0), new(1, 0), new(1, 1), new(0, 1)];
 }

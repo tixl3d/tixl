@@ -111,9 +111,9 @@ internal sealed partial class SetupOutputView
         {
             var contentSrv = SrvManager.GetSrvForTexture(content);
             if (contentSrv is { IsDisposed: false })
-                dl.AddImageQuad((IntPtr)contentSrv.ImGuiTextureId, screen[0], screen[1], screen[2], screen[3],
-                                new Vector2(uv.X, uv.Y), new Vector2(uv.Z, uv.Y), new Vector2(uv.Z, uv.W), new Vector2(uv.X, uv.W),
-                                UiColors.ForegroundFull.Fade(preview * fade));
+                CanvasDraw.ImageQuadPerspective(dl, (IntPtr)contentSrv.ImGuiTextureId, screen,
+                                                new Vector2(uv.X, uv.Y), new Vector2(uv.Z, uv.W),
+                                                UiColors.ForegroundFull.Fade(preview * fade));
         }
 
         // Hovered from the sidebar: a faint wash behind, the outline carrying the highlight.

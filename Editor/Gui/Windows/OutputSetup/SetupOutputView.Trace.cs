@@ -40,7 +40,7 @@ internal sealed partial class SetupOutputView
             var pulse = isSelected ? 0f : FrameStats.CrossHighlightAmount(surface.Id);
 
             // What the surface shows, laid into its trace — the wall with its content, as it will be. At the
-            // preview opacity, so the photo stays the reference; per-triangle, which is close enough for a preview.
+            // preview opacity, so the photo stays the reference.
             var preview = UserSettings.Config.OutputSetupContentPreviewOpacity;
             if (preview > 0.01f && OutputContentResolver.TryGetSurfaceSlice(surface.Id, out _, out var content, out var uv) && content is { IsDisposed: false })
             {
@@ -50,9 +50,9 @@ internal sealed partial class SetupOutputView
                     for (var c = 0; c < 4; c++)
                         screenQuad[c] = _projection.CanvasToScreen(binding.Quad[c]);
 
-                    dl.AddImageQuad((IntPtr)contentSrv.ImGuiTextureId, screenQuad[0], screenQuad[1], screenQuad[2], screenQuad[3],
-                                    new Vector2(uv.X, uv.Y), new Vector2(uv.Z, uv.Y), new Vector2(uv.Z, uv.W), new Vector2(uv.X, uv.W),
-                                    UiColors.ForegroundFull.Fade(preview * fade));
+                    CanvasDraw.ImageQuadPerspective(dl, (IntPtr)contentSrv.ImGuiTextureId, screenQuad,
+                                                    new Vector2(uv.X, uv.Y), new Vector2(uv.Z, uv.W),
+                                                    UiColors.ForegroundFull.Fade(preview * fade));
                 }
             }
 
