@@ -228,7 +228,12 @@ void main(uint3 i : SV_DispatchThreadID)
     if (gi >= maxParticleCount)
         return;
 
-    if( (((gi/64) +FrameCount) % SkipCount) > 0 )
+    if (FaceCount <= 0)
+        return;
+
+    // ExecuteEveryNthFrame defaults to 0; integer modulo by zero is undefined (differs between DX11 and Vulkan)
+    int skipCount = max(SkipCount, 1);
+    if( (((gi/64) +FrameCount) % skipCount) > 0 )
         return;
 
     float3 pos = Particles[gi].Position;
