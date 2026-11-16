@@ -34,6 +34,18 @@
       "DefaultValue": ""
     },
     {
+      "Id": "b3e81c4d-6f27-4a95-9d0e-1c5a7f3b8e62"/*Position*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "c9d47a2e-3b51-4f86-a1e7-8d2f6b0c4a19"/*LetterSpacing*/,
+      "DefaultValue": 0.0
+    },
+    {
       "Id": "a5d1f7c3-8b24-4e69-9c0d-2f4a6e8b1d95"/*Size*/,
       "DefaultValue": 1.0
     },

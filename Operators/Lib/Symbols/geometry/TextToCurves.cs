@@ -15,10 +15,10 @@ namespace Lib.geometry;
 /// </summary>
 [Guid("e2b7f4a1-3c69-4d58-8a1e-9f6c0d2b5e37")]
 [ExportDependencies("SixLabors.Fonts.dll")]
-internal sealed class TextToCurves : Instance<TextToCurves>, IDescriptiveFilename, IStatusProvider
+internal sealed class TextToCurves : Instance<TextToCurves>, IDescriptiveFilename, IStatusProvider, ITransformable
 {
     [Output(Guid = "5d3f9b27-a8c1-4e60-b2d4-7e9f1c6a3b85")]
-    public readonly Slot<CurveGeometry?> Curves = new();
+    public readonly TransformCallbackSlot<CurveGeometry?> Curves = new();
 
     [Output(Guid = "9a6e2c48-d1b5-4f73-8c0e-3b7d5a2f9e16")]
     public readonly Slot<int> GlyphCount = new();
@@ -27,9 +27,15 @@ internal sealed class TextToCurves : Instance<TextToCurves>, IDescriptiveFilenam
     {
         _resource = new Resource<LoadedFont>(Path, TryLoadFont, allowDisposal: false);
         _resource.AddDependentSlots(Curves, GlyphCount);
+        Curves.TransformableOp = this;
         Curves.UpdateAction = Update;
         GlyphCount.UpdateAction = Update;
     }
+
+    IInputSlot ITransformable.TranslationInput => Position;
+    IInputSlot ITransformable.RotationInput => null!;
+    IInputSlot ITransformable.ScaleInput => null!;
+    public Action<Instance, EvaluationContext>? TransformCallback { get; set; }
 
     private void Update(EvaluationContext context)
     {
@@ -42,6 +48,8 @@ internal sealed class TextToCurves : Instance<TextToCurves>, IDescriptiveFilenam
         var axisTag = Axis.GetValue(context)?.Trim() ?? string.Empty;
         var axisValue = AxisValue.GetValue(context);
         var pivot = Pivot.GetValue(context);
+        var letterSpacing = LetterSpacing.GetValue(context) * size;
+        var position = Position.GetValue(context);
 
         if (!_resource.TryGetValue(context, out var loadedFont))
         {
@@ -96,7 +104,7 @@ internal sealed class TextToCurves : Instance<TextToCurves>, IDescriptiveFilenam
             },
         };
 
-        _collector.Begin(text, pivot);
+        _collector.Begin(text, pivot, position, letterSpacing, alignment);
         try
         {
 #if SIXLABORS_FONTS_V3
@@ -172,13 +180,24 @@ internal sealed class TextToCurves : Instance<TextToCurves>, IDescriptiveFilenam
     /// reads upright in scene space. Quadratic segments (TrueType) are raised to cubics
     /// exactly. Per glyph the source character is found by walking the text in parallel,
     /// which yields character, word and line indices even across ligatures.
+    /// Letter spacing is applied here because SixLabors.Fonts 2.x has no tracking option:
+    /// each glyph shifts by its column within the line, re-centered for the line's alignment.
     /// </summary>
     private sealed class OutlineCollector : IGlyphRenderer
     {
-        public void Begin(string text, Vector2 pivot)
+        public void Begin(string text, Vector2 pivot, Vector3 position, float letterSpacing, Alignments alignment)
         {
             _text = text;
             _pivot = pivot;
+            _position = position;
+            _letterSpacing = letterSpacing;
+            _alignmentFactor = alignment switch
+            {
+                Alignments.Center => 0.5f,
+                Alignments.Right  => 1f,
+                _                 => 0f,
+            };
+            CountColumns(text);
             _textCursor = 0;
             _wordIndex = 0;
             _lineIndex = 0;
@@ -282,7 +301,18 @@ internal sealed class TextToCurves : Instance<TextToCurves>, IDescriptiveFilenam
             var pivotX = x + _glyphBounds.Width * (_pivot.X + 1f) * 0.5f;
             var pivotY = yBottom + _glyphBounds.Height * (_pivot.Y + 1f) * 0.5f;
 
-            var finalPivot = new Vector3(pivotX, pivotY, 0);
+            var shift = _position + new Vector3(GetLetterSpacingOffset(_charIndex), 0, 0);
+            if (shift != Vector3.Zero)
+            {
+                for (var pointIndex = _contourOffsets[_glyphContourStart]; pointIndex < _positions.Count; pointIndex++)
+                {
+                    _positions[pointIndex] += shift;
+                    _handlesIn[pointIndex] += shift;
+                    _handlesOut[pointIndex] += shift;
+                }
+            }
+
+            var finalPivot = new Vector3(pivotX, pivotY, 0) + shift;
 
             _parts.Add(new CurvePart(_glyphContourStart, contourCount, finalPivot, _parts.Count, _charIndex));
             _codePoints.Add(_glyphCodePoint);
@@ -373,6 +403,41 @@ internal sealed class TextToCurves : Instance<TextToCurves>, IDescriptiveFilenam
 
         private static Vector3 Flip(Vector2 p) => new(p.X, -p.Y, 0);
 
+        private float GetLetterSpacingOffset(int charIndex)
+        {
+            if (_letterSpacing == 0 || charIndex < 0 || charIndex >= _charColumns.Count)
+                return 0;
+
+            var lineColumnCount = _lineColumnCounts[_charLines[charIndex]];
+            return _letterSpacing * (_charColumns[charIndex] - _alignmentFactor * (lineColumnCount - 1));
+        }
+
+        /** Column of every UTF-16 unit within its line, counting surrogate pairs as one and ignoring '\r'. */
+        private void CountColumns(string text)
+        {
+            _charColumns.Clear();
+            _charLines.Clear();
+            _lineColumnCounts.Clear();
+            var column = 0;
+            for (var charIndex = 0; charIndex < text.Length; charIndex++)
+            {
+                var c = text[charIndex];
+                _charLines.Add(_lineColumnCounts.Count);
+                _charColumns.Add(column);
+                if (c == '\n')
+                {
+                    _lineColumnCounts.Add(column);
+                    column = 0;
+                }
+                else if (c != '\r' && !char.IsLowSurrogate(c))
+                {
+                    column++;
+                }
+            }
+
+            _lineColumnCounts.Add(column);
+        }
+
         /// <summary>Moves the text cursor to the next occurrence of the glyph's code point, counting words and lines passed.</summary>
         private void AdvanceTextCursorTo(CodePoint codePoint)
         {
@@ -423,7 +488,13 @@ internal sealed class TextToCurves : Instance<TextToCurves>, IDescriptiveFilenam
         private int _glyphCodePoint;
         private int _glyphId;
         private Vector2 _pivot;
-       
+        private Vector3 _position;
+        private float _letterSpacing;
+        private float _alignmentFactor;
+
+        private readonly List<int> _charColumns = [];
+        private readonly List<int> _charLines = [];
+        private readonly List<int> _lineColumnCounts = [];
         private readonly List<Vector3> _positions = [];
         private readonly List<Vector3> _handlesIn = [];
         private readonly List<Vector3> _handlesOut = [];
@@ -488,5 +559,11 @@ internal sealed class TextToCurves : Instance<TextToCurves>, IDescriptiveFilenam
 
     [Input(Guid = "4a7f2b9e-8c31-4d56-a0b2-c7e4f9d1a823")]
     public readonly InputSlot<Vector2> Pivot = new();
+
+    [Input(Guid = "b3e81c4d-6f27-4a95-9d0e-1c5a7f3b8e62")]
+    public readonly InputSlot<Vector3> Position = new();
+
+    [Input(Guid = "c9d47a2e-3b51-4f86-a1e7-8d2f6b0c4a19")]
+    public readonly InputSlot<float> LetterSpacing = new();
 
 }
