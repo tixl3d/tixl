@@ -5,6 +5,13 @@
   "SymbolTags": "1",
   "InputUis": [
     {
+      "InputId": "3520d63f-9bc7-4879-83b9-88ae3a889061"/*Invert*/,
+      "Position": {
+        "X": 231.94122,
+        "Y": 247.54773
+      }
+    },
+    {
       "InputId": "4041b6d8-15e5-428c-9967-7105975a46f7"/*Image*/,
       "Relevancy": "Required",
       "Position": {
@@ -71,6 +78,14 @@
       "Position": {
         "X": 371.94125,
         "Y": -67.45227
+      }
+    },
+    {
+      "ChildId": "b907da04-fe83-4d02-9143-b1203ba3212e",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToInt",
+      "Position": {
+        "X": 371.94125,
+        "Y": 247.54773
       }
     },
     {

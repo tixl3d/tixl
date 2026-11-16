@@ -27,4 +27,7 @@ internal sealed class DetectEdges : Instance<DetectEdges>
 
     [Input(Guid = "921b8a04-d3b5-408e-ad3e-311a4c9890b1")]
     public readonly InputSlot<bool> OutputAsTransparent = new();
+
+        [Input(Guid = "3520d63f-9bc7-4879-83b9-88ae3a889061")]
+        public readonly InputSlot<bool> Invert = new InputSlot<bool>();
 }
