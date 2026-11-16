@@ -73,6 +73,8 @@ internal sealed partial class OutputWindow
         RequestedResolution = RenderProcess.TryGetActiveExportResolution(out var overrideResolution)
             ? overrideResolution
             : _selectedResolution.ComputeResolution();
+        // A send sized from its surface's aspect keeps the height it is asked for, so it must see this window's first.
+        EvaluationContext.RequestedResolution = RequestedResolution;
         // A send with a Resolution of its own renders at it wherever it goes, so it does here too.
         if (fallbackSend is IContentSupplier supplier && !RenderProcess.IsExporting)
         {
@@ -80,11 +82,11 @@ internal sealed partial class OutputWindow
             if (sendResolution.Width > 0 && sendResolution.Height > 0)
                 RequestedResolution = sendResolution;
         }
-        // An op feeding a send the output setup pulled this frame renders at that size here too while the preset
-        // is Fill: two sizes in one frame resize every render target and feedback buffer upstream back and forth.
-        else if (!RenderProcess.IsExporting && IsFillPreset(_selectedResolution) && TryGetPulledSendResolution(instance, out var pulledResolution))
+        // An op feeding a send renders at the send's size here too while the preset is Fill: the size it was pulled
+        // at this frame, else the one it pins. Two sizes in one frame would resize every render target upstream.
+        else if (!RenderProcess.IsExporting && IsFillPreset(_selectedResolution) && TryGetDownstreamSendResolution(instance, out var sendResolution))
         {
-            RequestedResolution = pulledResolution;
+            RequestedResolution = sendResolution;
         }
 
         EvaluationContext.RequestedResolution = RequestedResolution;
@@ -165,8 +167,12 @@ internal sealed partial class OutputWindow
         return preset.UseAsAspectRatio && (preset.Size.Width <= 0 || preset.Size.Height <= 0);
     }
 
-    /** The size the setup pulled a send downstream of <paramref name="instance"/> at this frame, if one was. */
-    private bool TryGetPulledSendResolution(Instance instance, out Int2 resolution)
+    /// <summary>
+    /// The size of a send downstream of <paramref name="instance"/>: what the output setup pulled it at this frame,
+    /// or, when nothing pulled it, the size it pins (its Resolution Override or its surface's aspect). Without the
+    /// fallback the send's size would only hold while the setup view is open or its surface is on a live output.
+    /// </summary>
+    private bool TryGetDownstreamSendResolution(Instance instance, out Int2 resolution)
     {
         resolution = default;
         var frame = ImGui.GetFrameCount();
@@ -174,11 +180,17 @@ internal sealed partial class OutputWindow
         {
             _downstreamSendOf = instance;
             _downstreamSendFrame = frame;
-            _downstreamSendChildId = FindDownstreamSend(instance)?.SymbolChildId ?? Guid.Empty;
+            _downstreamSend = FindDownstreamSend(instance) as IContentSupplier;
         }
 
-        return _downstreamSendChildId != Guid.Empty
-               && OutputContentStats.TryGetPulledResolution(_downstreamSendChildId, T3.Core.Output.Rendering.OutputFrame.Index, out resolution);
+        if (_downstreamSend is not Instance send)
+            return false;
+
+        if (OutputContentStats.TryGetPulledResolution(send.SymbolChildId, T3.Core.Output.Rendering.OutputFrame.Index, out resolution))
+            return true;
+
+        resolution = _downstreamSend.GetResolution(EvaluationContext);
+        return resolution.Width > 0 && resolution.Height > 0;
     }
 
     /// <summary>
@@ -226,7 +238,7 @@ internal sealed partial class OutputWindow
 
     private Instance? _downstreamSendOf;
     private int _downstreamSendFrame;
-    private Guid _downstreamSendChildId;
+    private IContentSupplier? _downstreamSend;
     private static readonly List<Instance> _sendSearchQueue = [];
     private static readonly HashSet<Instance> _sendSearchVisited = [];
 
