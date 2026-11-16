@@ -105,11 +105,10 @@
       },
       "Description": "Half the width of the ribbons in world units.",
       "AddPadding": "True",
-      "Min": 0.01,
+      "Min": 0.0,
       "Max": 10.0,
       "Scale": 0.0001,
-      "ClampMin": true,
-      "ClampMax": true
+      "ClampMin": true
     }
   ],
   "SymbolChildUis": [

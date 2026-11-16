@@ -28,7 +28,7 @@
     },
     {
       "Id": "e67e7052-1f2f-4ad0-909f-f97190128c34"/*Environment*/,
-      "DefaultValue": 2
+      "DefaultValue": 0
     }
   ],
   "Children": [
