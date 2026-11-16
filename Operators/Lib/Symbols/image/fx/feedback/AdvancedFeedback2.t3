@@ -585,8 +585,8 @@
           "Id": "23548048-e373-4fd6-9c83-1cf7398f952d"/*BiasAndGain*/,
           "Type": "System.Numerics.Vector2",
           "Value": {
-            "X": 0.475,
-            "Y": 0.35000002
+            "X": 0.79,
+            "Y": 0.32
           }
         },
         {
@@ -602,7 +602,7 @@
         {
           "Id": "cd369755-5062-4934-8f37-e3a5cc9963df"/*RangeInMax*/,
           "Type": "System.Single",
-          "Value": 15.0
+          "Value": 12.0
         },
         {
           "Id": "f2baf278-adde-42de-afce-336b6c8d0387"/*RangeOutMin*/,
