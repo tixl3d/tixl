@@ -131,6 +131,14 @@
       }
     },
     {
+      "ChildId": "5f3c9a12-7d4e-4b8a-9e61-2c0d8f4a7b35",
+      "SymbolName": "Lib.render.utils.RepeatFrame",
+      "Position": {
+        "X": 1280.6561,
+        "Y": 81.08258
+      }
+    },
+    {
       "ChildId": "6e041248-cdd6-469d-9b92-ec7cc6b679f7",
       "SymbolName": "Lib.render._dx11.api.Draw",
       "SectionId": "6443511c-49e6-484d-b155-30cf92cc9340",
@@ -234,14 +242,6 @@
       "Position": {
         "X": 761.9359,
         "Y": -259.2346
-      }
-    },
-    {
-      "ChildId": "5f3c9a12-7d4e-4b8a-9e61-2c0d8f4a7b35",
-      "SymbolName": "Lib.render.utils.RepeatFrame",
-      "Position": {
-        "X": 1280.6561,
-        "Y": 81.08258
       }
     }
   ],

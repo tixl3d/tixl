@@ -19,6 +19,10 @@
       "DefaultValue": 0
     },
     {
+      "Id": "5b3c95f4-b415-4497-b7d1-72fe10b1d720"/*Panning*/,
+      "DefaultValue": 0.0
+    },
+    {
       "Id": "8f4a2e9c-7d3b-4e1f-8c5a-9b2d6f7c3a4e"/*Frequency*/,
       "DefaultValue": 440.0
     },
@@ -34,10 +38,6 @@
     {
       "Id": "c0645e37-db4e-4658-9d65-96478851f6f6"/*Volume*/,
       "DefaultValue": 0.8
-    },
-    {
-      "Id": "5b3c95f4-b415-4497-b7d1-72fe10b1d720"/*Panning*/,
-      "DefaultValue": 0.0
     },
     {
       "Id": "d4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f8a"/*TriggerMode*/,

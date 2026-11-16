@@ -182,6 +182,13 @@
       "Outputs": []
     },
     {
+      "Id": "daa71909-3bd6-400b-aac1-3f039aaff182"/*APC40Mk1FeedbackExample*/,
+      "SymbolId": "d53adae7-b5f0-4157-9710-4683a44d5601",
+      "SymbolName": "Examples.Lib.io.midi.APC40Mk1FeedbackExample",
+      "InputValues": [],
+      "Outputs": []
+    },
+    {
       "Id": "e0a7cf4c-7b35-493a-b681-604d49afcebe"/*DrawQuiz*/,
       "SymbolId": "16e30ce0-20c9-4677-9837-0200454e05ae",
       "SymbolName": "Lib.flow.skillQuest.DrawQuiz",

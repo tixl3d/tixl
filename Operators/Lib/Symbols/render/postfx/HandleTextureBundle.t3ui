@@ -5,15 +5,6 @@
   "SymbolTags": "1",
   "InputUis": [
     {
-      "InputId": "a08378f3-c1c8-47ee-9e2c-ce8e5f851661"/*Image*/,
-      "Relevancy": "Required",
-      "Position": {
-        "X": -200.0,
-        "Y": 0.0
-      },
-      "Description": "The rendered image whose bundle provides the buffers."
-    },
-    {
       "InputId": "23bd0152-e178-4323-97de-8a39df7974c7"/*DepthMap*/,
       "Position": {
         "X": -200.0,
@@ -22,12 +13,12 @@
       "Description": "Overrides the depth buffer from the bundle."
     },
     {
-      "InputId": "62694908-74bd-46a2-88e5-7867af1fe55a"/*NormalMap*/,
+      "InputId": "2a205c54-81f2-4e80-9de5-ed7a98bb6fc8"/*CameraReference*/,
       "Position": {
         "X": -200.0,
-        "Y": 100.0
+        "Y": 200.0
       },
-      "Description": "Overrides the normal buffer from the bundle."
+      "Description": "Overrides the camera from the bundle, e.g. to light the scene from a different camera than the one it was rendered with."
     },
     {
       "InputId": "2d6f7aaa-5952-4bee-865f-11b7937cf1cc"/*VelocityMap*/,
@@ -38,12 +29,21 @@
       "Description": "Overrides the velocity buffer from the bundle."
     },
     {
-      "InputId": "2a205c54-81f2-4e80-9de5-ed7a98bb6fc8"/*CameraReference*/,
+      "InputId": "62694908-74bd-46a2-88e5-7867af1fe55a"/*NormalMap*/,
       "Position": {
         "X": -200.0,
-        "Y": 200.0
+        "Y": 100.0
       },
-      "Description": "Overrides the camera from the bundle, e.g. to light the scene from a different camera than the one it was rendered with."
+      "Description": "Overrides the normal buffer from the bundle."
+    },
+    {
+      "InputId": "a08378f3-c1c8-47ee-9e2c-ce8e5f851661"/*Image*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "The rendered image whose bundle provides the buffers."
     }
   ],
   "SymbolChildUis": [],

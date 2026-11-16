@@ -291,38 +291,6 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "5b7e2f90-a3c4-4d18-8f6b-29c1e7d05a83",
-      "SymbolName": "Lib.point.usse.KeepPreviousPointBuffer",
-      "Position": {
-        "X": 1229.2078,
-        "Y": 1677.3828
-      }
-    },
-    {
-      "ChildId": "4f6c9b28-e7d1-4a03-b5e8-c0a2d7f3196b",
-      "SymbolName": "Lib.flow.context.GetRenderPassState",
-      "Position": {
-        "X": 1379.2078,
-        "Y": 1607.3828
-      }
-    },
-    {
-      "ChildId": "d83a1c56-0f29-4b7e-a4d5-6e9b3c2f18a0",
-      "SymbolName": "Lib.render._dx11.buffer.PickBuffer",
-      "Position": {
-        "X": 1379.2078,
-        "Y": 1677.3828
-      }
-    },
-    {
-      "ChildId": "a1e57d30-82b9-4c6f-9d04-f3b8e26c7d15",
-      "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
-      "Position": {
-        "X": 1529.2078,
-        "Y": 1677.3828
-      }
-    },
-    {
       "ChildId": "01540dab-bcc3-48b1-a3c0-ab4d88987767",
       "SymbolName": "Types.Gfx.DepthStencilState",
       "Position": {
@@ -480,11 +448,27 @@
       }
     },
     {
+      "ChildId": "4f6c9b28-e7d1-4a03-b5e8-c0a2d7f3196b",
+      "SymbolName": "Lib.flow.context.GetRenderPassState",
+      "Position": {
+        "X": 1379.2078,
+        "Y": 1607.3828
+      }
+    },
+    {
       "ChildId": "5a6d6e07-b77c-4a3d-a7b2-8ebad1f2b62c",
       "SymbolName": "Lib.render._dx11.api.Rasterizer",
       "Position": {
         "X": 1689.2078,
         "Y": 1732.3828
+      }
+    },
+    {
+      "ChildId": "5b7e2f90-a3c4-4d18-8f6b-29c1e7d05a83",
+      "SymbolName": "Lib.point.usse.KeepPreviousPointBuffer",
+      "Position": {
+        "X": 1229.2078,
+        "Y": 1677.3828
       }
     },
     {
@@ -608,6 +592,14 @@
       }
     },
     {
+      "ChildId": "a1e57d30-82b9-4c6f-9d04-f3b8e26c7d15",
+      "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
+      "Position": {
+        "X": 1529.2078,
+        "Y": 1677.3828
+      }
+    },
+    {
       "ChildId": "a3a2c4e1-f2a1-4a03-957c-f19c8b6f4709",
       "SymbolName": "Lib.render._dx11.api.GetSRVProperties",
       "Position": {
@@ -698,6 +690,14 @@
       "Position": {
         "X": 1126.2114,
         "Y": 1922.5435
+      }
+    },
+    {
+      "ChildId": "d83a1c56-0f29-4b7e-a4d5-6e9b3c2f18a0",
+      "SymbolName": "Lib.render._dx11.buffer.PickBuffer",
+      "Position": {
+        "X": 1379.2078,
+        "Y": 1677.3828
       }
     },
     {

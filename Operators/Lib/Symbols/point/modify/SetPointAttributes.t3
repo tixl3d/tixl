@@ -27,7 +27,7 @@
       "DefaultValue": 1.0
     },
     {
-      "Id": "4d67dbfb-8f8c-4c49-9ee0-733bdea9a9e4"/*SetExtend*/,
+      "Id": "4d67dbfb-8f8c-4c49-9ee0-733bdea9a9e4"/*SetScale*/,
       "DefaultValue": false
     },
     {
@@ -167,14 +167,6 @@
       "SymbolId": "5d7d61ae-0a41-4ffa-a51d-93bab665e7fe",
       "SymbolName": "Types.Values.Value",
       "Name": "_padding",
-      "InputValues": [],
-      "Outputs": []
-    },
-    {
-      "Id": "78032596-f9b1-462b-93bc-6efccb5e11cb"/*Padding*/,
-      "SymbolId": "5d7d61ae-0a41-4ffa-a51d-93bab665e7fe",
-      "SymbolName": "Types.Values.Value",
-      "Name": "Padding",
       "InputValues": [],
       "Outputs": []
     },

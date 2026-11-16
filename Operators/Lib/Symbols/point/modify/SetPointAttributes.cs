@@ -32,7 +32,7 @@ internal sealed class SetPointAttributes : Instance<SetPointAttributes>
         public readonly InputSlot<float> RotationAngle = new InputSlot<float>();
 
         [Input(Guid = "4d67dbfb-8f8c-4c49-9ee0-733bdea9a9e4")]
-        public readonly InputSlot<bool> SetExtend = new InputSlot<bool>();
+        public readonly InputSlot<bool> SetScale = new InputSlot<bool>();
 
         [Input(Guid = "ef3adb10-b987-4dc9-b2eb-55d80a71a305")]
         public readonly InputSlot<System.Numerics.Vector3> Extend = new InputSlot<System.Numerics.Vector3>();

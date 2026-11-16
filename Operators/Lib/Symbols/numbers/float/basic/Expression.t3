@@ -7,7 +7,7 @@
       "DefaultValue": 0.0
     },
     {
-      "Id": "c9d5e2f8-4b1a-4c7e-8f3d-2a9b6e0c5d1f"/*ExpressionInput*/,
+      "Id": "c9d5e2f8-4b1a-4c7e-8f3d-2a9b6e0c5d1f"/*Formula*/,
       "DefaultValue": "a + b"
     },
     {

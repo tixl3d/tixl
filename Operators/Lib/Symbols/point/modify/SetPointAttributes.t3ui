@@ -50,7 +50,7 @@
       }
     },
     {
-      "InputId": "4d67dbfb-8f8c-4c49-9ee0-733bdea9a9e4"/*SetExtend*/,
+      "InputId": "4d67dbfb-8f8c-4c49-9ee0-733bdea9a9e4"/*SetScale*/,
       "Position": {
         "X": -56.088196,
         "Y": 1228.6868
@@ -221,14 +221,6 @@
       "Position": {
         "X": 83.911804,
         "Y": 1368.6868
-      }
-    },
-    {
-      "ChildId": "78032596-f9b1-462b-93bc-6efccb5e11cb",
-      "SymbolName": "Types.Values.Value",
-      "Position": {
-        "X": -262.9051,
-        "Y": 1547.5294
       }
     },
     {

@@ -4,6 +4,18 @@
   "Description": "Filters the audio flowing through it with a low-pass or high-pass filter.\n\nEverything wired into Input shares the effect. Wire Result into an [AudioBus], directly or through other audio ops.\n\nAKA: LPF, HPF, EQ, equalizer, cutoff, resonance, sweep\n\nTips\n\nAnimate Cutoff for filter sweeps; changes glide, so it doesn't click.",
   "InputUis": [
     {
+      "InputId": "32ee6dca-f277-49f5-8a6f-2f6c00bcdb7d"/*Cutoff*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 135.0
+      },
+      "Description": "Frequency in Hz where the filter starts to attenuate at 12 dB per octave, clamped to 20..20000.",
+      "Min": 20.0,
+      "Max": 20000.0,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
       "InputId": "40ddd8d4-571c-41d4-98a6-06cc486c9d9f"/*Input*/,
       "Position": {
         "X": -200.0,
@@ -29,18 +41,6 @@
         "Y": 90.0
       },
       "Description": "LowPass keeps what is below Cutoff, HighPass what is above it."
-    },
-    {
-      "InputId": "32ee6dca-f277-49f5-8a6f-2f6c00bcdb7d"/*Cutoff*/,
-      "Position": {
-        "X": -200.0,
-        "Y": 135.0
-      },
-      "Description": "Frequency in Hz where the filter starts to attenuate at 12 dB per octave, clamped to 20..20000.",
-      "Min": 20.0,
-      "Max": 20000.0,
-      "ClampMin": true,
-      "ClampMax": true
     },
     {
       "InputId": "eecb4b94-5069-4a81-b1b8-79b7b9fabd91"/*Resonance*/,

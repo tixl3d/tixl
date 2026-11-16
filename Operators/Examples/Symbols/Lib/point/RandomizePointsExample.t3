@@ -1121,7 +1121,7 @@
       "SymbolName": "Lib.point.modify.SetPointAttributes",
       "InputValues": [
         {
-          "Id": "4d67dbfb-8f8c-4c49-9ee0-733bdea9a9e4"/*SetExtend*/,
+          "Id": "4d67dbfb-8f8c-4c49-9ee0-733bdea9a9e4"/*SetScale*/,
           "Type": "System.Boolean",
           "Value": true
         },

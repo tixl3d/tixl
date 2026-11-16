@@ -88,38 +88,6 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "6f2a9c41-d3e8-4b57-a0c6-1e94b7f2d835",
-      "SymbolName": "Lib.point.usse.KeepPreviousPointBuffer",
-      "Position": {
-        "X": 2310.4138,
-        "Y": 4024.658
-      }
-    },
-    {
-      "ChildId": "4d71c6e9-2b05-4a8f-b3d1-c09e5f7a2814",
-      "SymbolName": "Lib.flow.context.GetRenderPassState",
-      "Position": {
-        "X": 2460.4138,
-        "Y": 3954.658
-      }
-    },
-    {
-      "ChildId": "b93e07d5-8a1c-4f62-9d4e-35c8f1a6e270",
-      "SymbolName": "Lib.render._dx11.buffer.PickBuffer",
-      "Position": {
-        "X": 2460.4138,
-        "Y": 4024.658
-      }
-    },
-    {
-      "ChildId": "e85b3f20-7c94-4d16-a1e7-6b0d29c4f53a",
-      "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
-      "Position": {
-        "X": 2610.4138,
-        "Y": 4024.658
-      }
-    },
-    {
       "ChildId": "06aa25a3-5d1f-46d5-a039-dd5f189dc262",
       "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
       "Position": {
@@ -194,6 +162,14 @@
       }
     },
     {
+      "ChildId": "4d71c6e9-2b05-4a8f-b3d1-c09e5f7a2814",
+      "SymbolName": "Lib.flow.context.GetRenderPassState",
+      "Position": {
+        "X": 2460.4138,
+        "Y": 3954.658
+      }
+    },
+    {
       "ChildId": "4edc453d-89be-4375-944e-d169d14c735a",
       "SymbolName": "Lib.render._dx11.api.OutputMergerStage",
       "Position": {
@@ -239,6 +215,14 @@
       "Position": {
         "X": 2910.4138,
         "Y": 4328.973
+      }
+    },
+    {
+      "ChildId": "6f2a9c41-d3e8-4b57-a0c6-1e94b7f2d835",
+      "SymbolName": "Lib.point.usse.KeepPreviousPointBuffer",
+      "Position": {
+        "X": 2310.4138,
+        "Y": 4024.658
       }
     },
     {
@@ -303,6 +287,14 @@
       }
     },
     {
+      "ChildId": "b93e07d5-8a1c-4f62-9d4e-35c8f1a6e270",
+      "SymbolName": "Lib.render._dx11.buffer.PickBuffer",
+      "Position": {
+        "X": 2460.4138,
+        "Y": 4024.658
+      }
+    },
+    {
       "ChildId": "bf3e7f5a-7504-49b6-813d-958d826373f6",
       "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
       "Position": {
@@ -332,6 +324,14 @@
       "Position": {
         "X": 2770.4138,
         "Y": 4389.199
+      }
+    },
+    {
+      "ChildId": "e85b3f20-7c94-4d16-a1e7-6b0d29c4f53a",
+      "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
+      "Position": {
+        "X": 2610.4138,
+        "Y": 4024.658
       }
     },
     {

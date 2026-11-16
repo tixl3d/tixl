@@ -11,7 +11,7 @@
       "DefaultValue": 12
     },
     {
-      "Id": "29e7c4a0-8f15-4b3d-a6c2-0e9d5b7f1c84"/*psNeighborMax*/,
+      "Id": "29e7c4a0-8f15-4b3d-a6c2-0e9d5b7f1c84"/*NeighborMaxPixelShader*/,
       "DefaultValue": null
     },
     {
@@ -19,7 +19,7 @@
       "DefaultValue": null
     },
     {
-      "Id": "4c9a1e7f-0b38-4d62-a5f4-8e2b6c1d9a03"/*psPrepare*/,
+      "Id": "4c9a1e7f-0b38-4d62-a5f4-8e2b6c1d9a03"/*PreparePixelShader*/,
       "DefaultValue": null
     },
     {
@@ -47,7 +47,7 @@
       "DefaultValue": null
     },
     {
-      "Id": "d06b5f83-7e2c-4a19-b3d8-5c4f9a2e7b61"/*psTileMax*/,
+      "Id": "d06b5f83-7e2c-4a19-b3d8-5c4f9a2e7b61"/*TileMaxPixelShader*/,
       "DefaultValue": null
     },
     {
@@ -55,7 +55,7 @@
       "DefaultValue": null
     },
     {
-      "Id": "f3a8d6b1-4c97-4e05-8b2a-7d1e3f6c9a50"/*psGather*/,
+      "Id": "f3a8d6b1-4c97-4e05-8b2a-7d1e3f6c9a50"/*GatherPixelShader*/,
       "DefaultValue": null
     }
   ],

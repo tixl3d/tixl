@@ -13,14 +13,6 @@
       "Description": "One or more float lists. Each list becomes one row (Horizontal) or column (Vertical)."
     },
     {
-      "InputId": "51545316-69fc-441f-b59f-44979e32972c"/*Pow*/,
-      "Position": {
-        "X": -200.0,
-        "Y": 180.0
-      },
-      "Description": "Exponent applied to each value. Values near 0 stop updating the texture."
-    },
-    {
       "InputId": "3b6e0f2a-8c41-4d7e-9a15-6f2c8e4b7d90"/*GainAndBias*/,
       "Position": {
         "X": -200.0,
@@ -33,6 +25,14 @@
       "ClampMax": true,
       "Format": "{0:0.000}",
       "UseVec2Control": "GainAndBias"
+    },
+    {
+      "InputId": "51545316-69fc-441f-b59f-44979e32972c"/*Pow*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 180.0
+      },
+      "Description": "Exponent applied to each value. Values near 0 stop updating the texture."
     },
     {
       "InputId": "63e90d86-5ad5-4333-8b99-7f8d285c4913"/*Direction*/,

@@ -58,6 +58,21 @@
       "Description": "Factor applied to the line height of the font."
     },
     {
+      "InputId": "cf0701ff-b73e-4630-8a2f-380c7c2ec6af"/*GroupSeparator*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 480.0
+      },
+      "Usage": "Default"
+    },
+    {
+      "InputId": "cfdde6ca-7401-4d15-a782-bc558dbacfe7"/*HideSeparator*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 555.0
+      }
+    },
+    {
       "InputId": "e05e143e-8d4c-4de7-8c9c-7fa7755009d3"/*Spacing*/,
       "Position": {
         "X": -200.0,
@@ -113,6 +128,13 @@
       "Position": {
         "X": 300.0,
         "Y": 500.0
+      }
+    },
+    {
+      "OutputId": "4b093262-68eb-4e06-b4b0-48c0ee06e45f"/*GroupCount*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 600.0
       }
     }
   ]

@@ -3,16 +3,12 @@
   "Id": "b7db2c0f-8ea7-4c90-afe3-31ec7cdcc92f"/*_DrawPointTriangles*/,
   "Inputs": [
     {
-      "Id": "6096576a-4234-4037-b253-0cb544a2cc37"/*WidthFactor*/,
-      "DefaultValue": 0
+      "Id": "0c525f9c-fc55-4d6a-9b48-2942823cd306"/*LineWidth*/,
+      "DefaultValue": 0.02
     },
     {
-      "Id": "426696f2-55b0-4ecc-9638-342338b38d6e"/*TransitionProgress*/,
-      "DefaultValue": 0.0
-    },
-    {
-      "Id": "a7c18db7-3a61-420b-8627-7969693a74d7"/*UvScaleFX*/,
-      "DefaultValue": 0
+      "Id": "14d08738-f71d-49c1-be46-0dab75245e9e"/*FadeOutTooLong*/,
+      "DefaultValue": -1.0
     },
     {
       "Id": "228e18b6-cd51-40f4-ba44-c7996ebe184e"/*Color*/,
@@ -24,40 +20,44 @@
       }
     },
     {
-      "Id": "e1144012-ca01-4bfa-8581-7eb4e44c8638"/*EnableZTest*/,
-      "DefaultValue": true
+      "Id": "3fbe354e-7521-4442-bc7b-f36f1c613908"/*BlendMod*/,
+      "DefaultValue": 0
     },
     {
-      "Id": "509929a0-745f-41cd-bc56-307ec9f3b606"/*WrapMode*/,
-      "DefaultValue": "Clamp"
-    },
-    {
-      "Id": "4c92bcdd-3c11-4e14-ac8c-2f07474f4570"/*Texture_*/,
-      "DefaultValue": null
-    },
-    {
-      "Id": "14d08738-f71d-49c1-be46-0dab75245e9e"/*FadeOutTooLong*/,
-      "DefaultValue": -1.0
-    },
-    {
-      "Id": "d8efac0b-92aa-401f-afc5-fa641aadb656"/*EnableZWrite*/,
-      "DefaultValue": true
+      "Id": "426696f2-55b0-4ecc-9638-342338b38d6e"/*TransitionProgress*/,
+      "DefaultValue": 0.0
     },
     {
       "Id": "4529319e-609d-449f-b320-f2c92c463bb5"/*ShrinkWithDistance*/,
       "DefaultValue": 0.0
     },
     {
-      "Id": "3fbe354e-7521-4442-bc7b-f36f1c613908"/*BlendMod*/,
+      "Id": "4c92bcdd-3c11-4e14-ac8c-2f07474f4570"/*Texture_*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "509929a0-745f-41cd-bc56-307ec9f3b606"/*WrapMode*/,
+      "DefaultValue": "Clamp"
+    },
+    {
+      "Id": "6096576a-4234-4037-b253-0cb544a2cc37"/*WidthFactor*/,
       "DefaultValue": 0
     },
     {
-      "Id": "0c525f9c-fc55-4d6a-9b48-2942823cd306"/*LineWidth*/,
-      "DefaultValue": 0.02
+      "Id": "a7c18db7-3a61-420b-8627-7969693a74d7"/*UvScaleFX*/,
+      "DefaultValue": 0
     },
     {
       "Id": "d0125887-e5f9-422f-883d-0c34d9b38a4b"/*GPoints*/,
       "DefaultValue": null
+    },
+    {
+      "Id": "d8efac0b-92aa-401f-afc5-fa641aadb656"/*EnableZWrite*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "e1144012-ca01-4bfa-8581-7eb4e44c8638"/*EnableZTest*/,
+      "DefaultValue": true
     },
     {
       "Id": "ebcd896d-3292-450a-a020-8cf8456d83ce"/*UvScale*/,

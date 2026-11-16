@@ -12,17 +12,17 @@
       }
     },
     {
-      "InputId": "8b3d2c71-e5a4-4f09-a6b8-1c9e07d4f352"/*DepthMap*/,
+      "InputId": "17e9b3c6-f42d-4a85-8c1e-9b6a0d5f2c47"/*SampleCount*/,
       "Position": {
         "X": -200.0,
-        "Y": 40.0
+        "Y": 280.0
       }
     },
     {
-      "InputId": "c47f9e05-2d18-4a63-b9c2-7e5a1f80d3b6"/*VelocityMap*/,
+      "InputId": "29e7c4a0-8f15-4b3d-a6c2-0e9d5b7f1c84"/*NeighborMaxPixelShader*/,
       "Position": {
         "X": -200.0,
-        "Y": 80.0
+        "Y": 440.0
       }
     },
     {
@@ -33,10 +33,10 @@
       }
     },
     {
-      "InputId": "e92a5c38-1b6f-4d40-a7e9-0d3c85f7b214"/*PreviousTransforms*/,
+      "InputId": "4c9a1e7f-0b38-4d62-a5f4-8e2b6c1d9a03"/*PreparePixelShader*/,
       "Position": {
         "X": -200.0,
-        "Y": 160.0
+        "Y": 360.0
       }
     },
     {
@@ -47,17 +47,24 @@
       }
     },
     {
+      "InputId": "7d2b9f4e-a163-4c8a-b5e0-c4f81a3d6e29"/*Sampler*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 520.0
+      }
+    },
+    {
+      "InputId": "8b3d2c71-e5a4-4f09-a6b8-1c9e07d4f352"/*DepthMap*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 40.0
+      }
+    },
+    {
       "InputId": "a5c2f8e1-6d93-4e7b-b041-2f7d9c3a8e65"/*MaxBlur*/,
       "Position": {
         "X": -200.0,
         "Y": 240.0
-      }
-    },
-    {
-      "InputId": "17e9b3c6-f42d-4a85-8c1e-9b6a0d5f2c47"/*SampleCount*/,
-      "Position": {
-        "X": -200.0,
-        "Y": 280.0
       }
     },
     {
@@ -68,38 +75,31 @@
       }
     },
     {
-      "InputId": "4c9a1e7f-0b38-4d62-a5f4-8e2b6c1d9a03"/*psPrepare*/,
+      "InputId": "c47f9e05-2d18-4a63-b9c2-7e5a1f80d3b6"/*VelocityMap*/,
       "Position": {
         "X": -200.0,
-        "Y": 360.0
+        "Y": 80.0
       }
     },
     {
-      "InputId": "d06b5f83-7e2c-4a19-b3d8-5c4f9a2e7b61"/*psTileMax*/,
+      "InputId": "d06b5f83-7e2c-4a19-b3d8-5c4f9a2e7b61"/*TileMaxPixelShader*/,
       "Position": {
         "X": -200.0,
         "Y": 400.0
       }
     },
     {
-      "InputId": "29e7c4a0-8f15-4b3d-a6c2-0e9d5b7f1c84"/*psNeighborMax*/,
+      "InputId": "e92a5c38-1b6f-4d40-a7e9-0d3c85f7b214"/*PreviousTransforms*/,
       "Position": {
         "X": -200.0,
-        "Y": 440.0
+        "Y": 160.0
       }
     },
     {
-      "InputId": "f3a8d6b1-4c97-4e05-8b2a-7d1e3f6c9a50"/*psGather*/,
+      "InputId": "f3a8d6b1-4c97-4e05-8b2a-7d1e3f6c9a50"/*GatherPixelShader*/,
       "Position": {
         "X": -200.0,
         "Y": 480.0
-      }
-    },
-    {
-      "InputId": "7d2b9f4e-a163-4c8a-b5e0-c4f81a3d6e29"/*Sampler*/,
-      "Position": {
-        "X": -200.0,
-        "Y": 520.0
       }
     }
   ],

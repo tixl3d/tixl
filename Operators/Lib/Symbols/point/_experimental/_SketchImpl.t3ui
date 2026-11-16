@@ -102,6 +102,27 @@
         "X": 0.0,
         "Y": 500.0
       }
+    },
+    {
+      "OutputId": "0b62c9b3-f033-449e-b695-c3e58d90d734"/*OverriddenPageIndex*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 600.0
+      }
+    },
+    {
+      "OutputId": "6c3e9d41-2b7a-4f0e-9a51-8d2f4c7b1e63"/*OverlayPoints*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 700.0
+      }
+    },
+    {
+      "OutputId": "a41f7c2e-5d83-4b96-8e0a-3c9b6d2f7e15"/*FillTriangles*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 800.0
+      }
     }
   ]
 }

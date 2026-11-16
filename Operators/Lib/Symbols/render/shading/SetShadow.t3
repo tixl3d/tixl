@@ -107,14 +107,14 @@
       "SymbolName": "Lib.flow.context.SetRenderPassState",
       "InputValues": [
         {
-          "Id": "90674b03-4727-42dd-9882-45836016b06d",
-          "Type": "System.Int32",
-          "Value": 0
-        },
-        {
-          "Id": "5a712820-bbff-434f-8f46-1e3281cd5b95",
+          "Id": "5a712820-bbff-434f-8f46-1e3281cd5b95"/*Value*/,
           "Type": "System.Single",
           "Value": 1.0
+        },
+        {
+          "Id": "90674b03-4727-42dd-9882-45836016b06d"/*Select*/,
+          "Type": "System.Int32",
+          "Value": 0
         }
       ],
       "Outputs": []
@@ -372,14 +372,14 @@
       "SymbolName": "Lib.flow.context.SetRenderPassState",
       "InputValues": [
         {
-          "Id": "90674b03-4727-42dd-9882-45836016b06d",
-          "Type": "System.Int32",
-          "Value": 0
-        },
-        {
-          "Id": "5a712820-bbff-434f-8f46-1e3281cd5b95",
+          "Id": "5a712820-bbff-434f-8f46-1e3281cd5b95"/*Value*/,
           "Type": "System.Single",
           "Value": 0.0
+        },
+        {
+          "Id": "90674b03-4727-42dd-9882-45836016b06d"/*Select*/,
+          "Type": "System.Int32",
+          "Value": 0
         }
       ],
       "Outputs": []

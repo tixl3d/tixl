@@ -20,7 +20,7 @@
       "Description": "If enabled, discovers WLED devices on the network via mDNS/Zeroconf and populates the `InstanceName` dropdown. When a device is selected, its sync settings override the manual inputs."
     },
     {
-      "InputId": "b7c8d9e0-f1a2-4b3c-4d5e-6f7a8b9c0d1e"/*DmxModeInput*/,
+      "InputId": "b7c8d9e0-f1a2-4b3c-4d5e-6f7a8b9c0d1e"/*SyncModeInput*/,
       "Position": {
         "X": -200.0,
         "Y": 525.0
@@ -106,16 +106,14 @@
       "Position": {
         "X": 300.0,
         "Y": 225.0
-      },
-      "Description": "The DMX start address within the universe."
+      }
     },
     {
       "OutputId": "e6f7a8b9-c0d1-4e2f-3a4b-5c6d7e8f9a0b"/*LedCount*/,
       "Position": {
         "X": 300.0,
         "Y": 300.0
-      },
-      "Description": "The number of LEDs on the WLED device. Fetched from the device's /json/ API during discovery."
+      }
     },
     {
       "OutputId": "d9e0f1a2-b3c4-4d5e-6f7a-8b9c0d1e2f3b"/*InstanceName*/,

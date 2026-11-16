@@ -5,62 +5,13 @@
   "SymbolTags": "1",
   "InputUis": [
     {
-      "InputId": "6096576a-4234-4037-b253-0cb544a2cc37"/*WidthFactor*/,
+      "InputId": "0c525f9c-fc55-4d6a-9b48-2942823cd306"/*LineWidth*/,
       "Position": {
         "X": 630.759,
-        "Y": 220.82883
+        "Y": -15.8629
       },
-      "Description": "Point attribute that multiplies the line width: None, F1 or F2."
-    },
-    {
-      "InputId": "426696f2-55b0-4ecc-9638-342338b38d6e"/*TransitionProgress*/,
-      "Position": {
-        "X": 630.759,
-        "Y": 54.1371
-      },
-      "Description": "Offsets the U texture coordinate, e.g. to scroll a texture along the lines."
-    },
-    {
-      "InputId": "a7c18db7-3a61-420b-8627-7969693a74d7"/*UvScaleFX*/,
-      "Position": {
-        "X": 630.759,
-        "Y": 185.82886
-      },
-      "Description": "Source of the U texture coordinate: Stretch maps 0..1 across the whole buffer, UFromFX1 and UFromFX2 use the point's F1 or F2 attribute."
-    },
-    {
-      "InputId": "228e18b6-cd51-40f4-ba44-c7996ebe184e"/*Color*/,
-      "Position": {
-        "X": 350.75894,
-        "Y": -155.8629
-      },
-      "Description": "Defines the color of the Lines.\nIf a Texture is used this color will be multiplied.",
-      "AddPadding": "True"
-    },
-    {
-      "InputId": "e1144012-ca01-4bfa-8581-7eb4e44c8638"/*EnableZTest*/,
-      "Position": {
-        "X": 844.74316,
-        "Y": 639.4281
-      },
-      "GroupTitle": "Draw Options",
-      "Description": "Hides lines behind other geometry."
-    },
-    {
-      "InputId": "509929a0-745f-41cd-bc56-307ec9f3b606"/*WrapMode*/,
-      "Position": {
-        "X": 630.7589,
-        "Y": 496.41733
-      },
-      "Description": "How the texture repeats outside 0..1:\n\nWrap: Repeats continuously.\nMirror: Repeats mirrored.\nClamp: Stretches the edge pixels.\nBorder: Uses the border color.\nMirrorOnce: Mirrors once, then clamps."
-    },
-    {
-      "InputId": "4c92bcdd-3c11-4e14-ac8c-2f07474f4570"/*Texture_*/,
-      "Position": {
-        "X": 490.75897,
-        "Y": 373.78
-      },
-      "Description": "Texture applied along the lines. U runs along the line, V across it."
+      "Description": "Width of the lines. Multiplied by each point's Scale.x and the attribute selected in WidthFactor.",
+      "Scale": 0.001
     },
     {
       "InputId": "14d08738-f71d-49c1-be46-0dab75245e9e"/*FadeOutTooLong*/,
@@ -75,20 +26,12 @@
       "ClampMin": true
     },
     {
-      "InputId": "d8efac0b-92aa-401f-afc5-fa641aadb656"/*EnableZWrite*/,
+      "InputId": "228e18b6-cd51-40f4-ba44-c7996ebe184e"/*Color*/,
       "Position": {
-        "X": 844.74316,
-        "Y": 674.4281
+        "X": 350.75894,
+        "Y": -155.8629
       },
-      "Description": "Writes the lines to the depth buffer so they can hide geometry drawn later."
-    },
-    {
-      "InputId": "4529319e-609d-449f-b320-f2c92c463bb5"/*ShrinkWithDistance*/,
-      "Position": {
-        "X": 630.759,
-        "Y": 19.1371
-      },
-      "Description": "0 keeps a constant width on screen, 1 makes lines thinner with distance like regular geometry.",
+      "Description": "Defines the color of the Lines.\nIf a Texture is used this color will be multiplied.",
       "AddPadding": "True"
     },
     {
@@ -100,13 +43,53 @@
       "AddPadding": "True"
     },
     {
-      "InputId": "0c525f9c-fc55-4d6a-9b48-2942823cd306"/*LineWidth*/,
+      "InputId": "426696f2-55b0-4ecc-9638-342338b38d6e"/*TransitionProgress*/,
       "Position": {
         "X": 630.759,
-        "Y": -15.8629
+        "Y": 54.1371
       },
-      "Description": "Width of the lines. Multiplied by each point's Scale.x and the attribute selected in WidthFactor.",
-      "Scale": 0.001
+      "Description": "Offsets the U texture coordinate, e.g. to scroll a texture along the lines."
+    },
+    {
+      "InputId": "4529319e-609d-449f-b320-f2c92c463bb5"/*ShrinkWithDistance*/,
+      "Position": {
+        "X": 630.759,
+        "Y": 19.1371
+      },
+      "Description": "0 keeps a constant width on screen, 1 makes lines thinner with distance like regular geometry.",
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "4c92bcdd-3c11-4e14-ac8c-2f07474f4570"/*Texture_*/,
+      "Position": {
+        "X": 490.75897,
+        "Y": 373.78
+      },
+      "Description": "Texture applied along the lines. U runs along the line, V across it."
+    },
+    {
+      "InputId": "509929a0-745f-41cd-bc56-307ec9f3b606"/*WrapMode*/,
+      "Position": {
+        "X": 630.7589,
+        "Y": 496.41733
+      },
+      "Description": "How the texture repeats outside 0..1:\n\nWrap: Repeats continuously.\nMirror: Repeats mirrored.\nClamp: Stretches the edge pixels.\nBorder: Uses the border color.\nMirrorOnce: Mirrors once, then clamps."
+    },
+    {
+      "InputId": "6096576a-4234-4037-b253-0cb544a2cc37"/*WidthFactor*/,
+      "Position": {
+        "X": 630.759,
+        "Y": 220.82883
+      },
+      "Description": "Point attribute that multiplies the line width: None, F1 or F2."
+    },
+    {
+      "InputId": "a7c18db7-3a61-420b-8627-7969693a74d7"/*UvScaleFX*/,
+      "Position": {
+        "X": 630.759,
+        "Y": 185.82886
+      },
+      "Description": "Source of the U texture coordinate: Stretch maps 0..1 across the whole buffer, UFromFX1 and UFromFX2 use the point's F1 or F2 attribute."
     },
     {
       "InputId": "d0125887-e5f9-422f-883d-0c34d9b38a4b"/*GPoints*/,
@@ -115,6 +98,23 @@
         "X": 704.74335,
         "Y": 731.009
       }
+    },
+    {
+      "InputId": "d8efac0b-92aa-401f-afc5-fa641aadb656"/*EnableZWrite*/,
+      "Position": {
+        "X": 844.74316,
+        "Y": 674.4281
+      },
+      "Description": "Writes the lines to the depth buffer so they can hide geometry drawn later."
+    },
+    {
+      "InputId": "e1144012-ca01-4bfa-8581-7eb4e44c8638"/*EnableZTest*/,
+      "Position": {
+        "X": 844.74316,
+        "Y": 639.4281
+      },
+      "GroupTitle": "Draw Options",
+      "Description": "Hides lines behind other geometry."
     },
     {
       "InputId": "ebcd896d-3292-450a-a020-8cf8456d83ce"/*UvScale*/,

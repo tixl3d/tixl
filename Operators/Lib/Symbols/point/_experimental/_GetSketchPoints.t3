@@ -7,16 +7,16 @@
       "DefaultValue": 0
     },
     {
+      "Id": "7202b1a9-45c5-412c-9796-3451ba523ce5"/*OverriddenPageIndex*/,
+      "DefaultValue": -1
+    },
+    {
       "Id": "c7c71de4-a9a8-4194-b490-ab48004565d1"/*Pages*/,
       "DefaultValue": null
     },
     {
       "Id": "ddbac6ab-e547-4955-9346-680b2c5bf8a4"/*GetOnionSkin*/,
       "DefaultValue": false
-    },
-    {
-      "Id": "7202b1a9-45c5-412c-9796-3451ba523ce5"/*OverriddenPageIndex*/,
-      "DefaultValue": -1
     }
   ],
   "Children": [],

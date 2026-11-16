@@ -156,22 +156,6 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "74eef823-3647-4629-9874-be8f8f7646c5",
-      "SymbolName": "Lib.render._dx11.buffer.PickBuffer",
-      "Position": {
-        "X": 1782.1204,
-        "Y": 3820.0
-      }
-    },
-    {
-      "ChildId": "31f080fb-63ca-4fc5-93aa-0d14b1b86647",
-      "SymbolName": "Lib.flow.context.GetRenderPassState",
-      "Position": {
-        "X": 1582.1204,
-        "Y": 3820.0
-      }
-    },
-    {
       "ChildId": "06dbd48e-65ed-4696-9430-43718868851d",
       "SymbolName": "Types.Gfx.DepthStencilState",
       "Position": {
@@ -193,6 +177,14 @@
       "Position": {
         "X": 1934.8644,
         "Y": 4603.7505
+      }
+    },
+    {
+      "ChildId": "31f080fb-63ca-4fc5-93aa-0d14b1b86647",
+      "SymbolName": "Lib.flow.context.GetRenderPassState",
+      "Position": {
+        "X": 1582.1204,
+        "Y": 3820.0
       }
     },
     {
@@ -286,6 +278,14 @@
       "Position": {
         "X": 1934.8644,
         "Y": 4568.7505
+      }
+    },
+    {
+      "ChildId": "74eef823-3647-4629-9874-be8f8f7646c5",
+      "SymbolName": "Lib.render._dx11.buffer.PickBuffer",
+      "Position": {
+        "X": 1782.1204,
+        "Y": 3820.0
       }
     },
     {

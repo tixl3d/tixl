@@ -36,6 +36,14 @@
       "DefaultValue": 1.0
     },
     {
+      "Id": "cf0701ff-b73e-4630-8a2f-380c7c2ec6af"/*GroupSeparator*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "cfdde6ca-7401-4d15-a782-bc558dbacfe7"/*HideSeparator*/,
+      "DefaultValue": false
+    },
+    {
       "Id": "e05e143e-8d4c-4de7-8c9c-7fa7755009d3"/*Spacing*/,
       "DefaultValue": 0.0
     },

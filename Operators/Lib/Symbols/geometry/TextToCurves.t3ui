@@ -76,24 +76,6 @@
       }
     },
     {
-      "InputId": "d9c4a6e2-1b83-4f50-a7e9-5c2d8b3f1a67"/*Alignment*/,
-      "Position": {
-        "X": 0.0,
-        "Y": 180.0
-      },
-      "Description": "Horizontal alignment of the lines."
-    },
-    {
-      "InputId": "f4a9c2e7-6d18-4b53-9e0c-a7b1d5f3c826"/*Weight*/,
-      "Position": {
-        "X": 0.0,
-        "Y": 270.0
-      },
-      "Min": 100.0,
-      "Max": 900.0,
-      "Scale": 1.0
-    },
-    {
       "InputId": "b3e81c4d-6f27-4a95-9d0e-1c5a7f3b8e62"/*Position*/,
       "Position": {
         "X": 0.0,
@@ -111,6 +93,24 @@
       "Min": -0.2,
       "Max": 0.5,
       "Scale": 0.01
+    },
+    {
+      "InputId": "d9c4a6e2-1b83-4f50-a7e9-5c2d8b3f1a67"/*Alignment*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 180.0
+      },
+      "Description": "Horizontal alignment of the lines."
+    },
+    {
+      "InputId": "f4a9c2e7-6d18-4b53-9e0c-a7b1d5f3c826"/*Weight*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 270.0
+      },
+      "Min": 100.0,
+      "Max": 900.0,
+      "Scale": 1.0
     }
   ],
   "SymbolChildUis": [],

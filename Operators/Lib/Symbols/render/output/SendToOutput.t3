@@ -20,10 +20,6 @@
       "DefaultValue": 2
     },
     {
-      "Id": "fd8d094d-dd51-4659-8aab-ca9a028bee33"/*ResolutionFactor*/,
-      "DefaultValue": 1.0
-    },
-    {
       "Id": "3c7f1e58-0a94-4d62-b8f3-2e5d9a0c4b17"/*ResolutionOverride*/,
       "DefaultValue": {
         "X": 0,
@@ -37,6 +33,10 @@
     {
       "Id": "9a1c4f7e-2d38-4b6a-8e50-1f7c3d9b0a24"/*Update*/,
       "DefaultValue": true
+    },
+    {
+      "Id": "fd8d094d-dd51-4659-8aab-ca9a028bee33"/*ResolutionFactor*/,
+      "DefaultValue": 1.0
     }
   ],
   "Children": [],

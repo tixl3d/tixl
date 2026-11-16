@@ -3,7 +3,7 @@
   "Id": "a7b3c8d2-1e4f-4a5b-9c6d-2e8f3a1b5c7d"/*WledInstance*/,
   "Inputs": [
     {
-      "Id": "a6b7c8d9-e0f1-4a2b-3c4d-5e6f7a8b9c0d"/*SyncEnabledInput*/,
+      "Id": "a6b7c8d9-e0f1-4a2b-3c4d-5e6f7a8b9c0d"/*MulticastInput*/,
       "DefaultValue": false
     },
     {
@@ -27,16 +27,16 @@
       "DefaultValue": ""
     },
     {
+      "Id": "e4f5a6b7-c8d9-4e0f-1a2b-3c4d5e6f7a8b"/*UniverseInput*/,
+      "DefaultValue": 0
+    },
+    {
       "Id": "f5a6b7c8-d9e0-4f1a-2b3c-4d5e6f7a8b9c"/*StartAddressInput*/,
       "DefaultValue": 1
     },
     {
       "Id": "f6a7b8c9-d0e1-4f2a-3b4c-5d6e7f8a9b0c"/*LedCountInput*/,
       "DefaultValue": 0
-    },
-    {
-      "Id": "f5a6b7c8-d9e0-4f1a-2b3c-4d5e6f7a8b9c"/*StartAddressInput*/,
-      "DefaultValue": 1
     }
   ],
   "Children": [],

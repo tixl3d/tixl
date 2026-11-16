@@ -34,6 +34,10 @@
       "DefaultValue": ""
     },
     {
+      "Id": "a5d1f7c3-8b24-4e69-9c0d-2f4a6e8b1d95"/*Size*/,
+      "DefaultValue": 1.0
+    },
+    {
       "Id": "b3e81c4d-6f27-4a95-9d0e-1c5a7f3b8e62"/*Position*/,
       "DefaultValue": {
         "X": 0.0,
@@ -44,10 +48,6 @@
     {
       "Id": "c9d47a2e-3b51-4f86-a1e7-8d2f6b0c4a19"/*LetterSpacing*/,
       "DefaultValue": 0.0
-    },
-    {
-      "Id": "a5d1f7c3-8b24-4e69-9c0d-2f4a6e8b1d95"/*Size*/,
-      "DefaultValue": 1.0
     },
     {
       "Id": "d9c4a6e2-1b83-4f50-a7e9-5c2d8b3f1a67"/*Alignment*/,

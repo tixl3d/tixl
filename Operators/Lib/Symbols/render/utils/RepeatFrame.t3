@@ -7,12 +7,12 @@
       "DefaultValue": null
     },
     {
-      "Id": "f299f6ae-9cf9-406a-84fc-77f9540d74d6"/*Passes*/,
-      "DefaultValue": 5
-    },
-    {
       "Id": "84fc2ace-2cd3-4d2f-82f5-1b5dfacc6b3f"/*Shutter*/,
       "DefaultValue": 1.0
+    },
+    {
+      "Id": "f299f6ae-9cf9-406a-84fc-77f9540d74d6"/*Passes*/,
+      "DefaultValue": 5
     }
   ],
   "Children": [],

@@ -80,6 +80,13 @@
       "Description": "Enables or disables rendering. Connect a [Once] to keep the image after an initial update."
     },
     {
+      "InputId": "db4ac4e3-2dd9-4f88-982b-a2e71dcb29f6"/*WithVelocityBuffer*/,
+      "Position": {
+        "X": -100.96112,
+        "Y": 182.75378
+      }
+    },
+    {
       "InputId": "e882e0f0-03f9-46e6-ac7a-709e6fa66613"/*Multisampling*/,
       "Position": {
         "X": -100.96112,
@@ -125,6 +132,13 @@
       "Position": {
         "X": 29.03888,
         "Y": 52.753784
+      }
+    },
+    {
+      "OutputId": "1c9e78c4-af13-4688-ab51-50360d738f07"/*VelocityBuffer*/,
+      "Position": {
+        "X": 29.03888,
+        "Y": 152.75378
       }
     }
   ]

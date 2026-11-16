@@ -275,38 +275,6 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "86d2f4a9-1e5c-4b37-a0f8-5c9d3e72b1a6",
-      "SymbolName": "Lib.point.usse.KeepPreviousPointBuffer",
-      "Position": {
-        "X": 1406.001,
-        "Y": 1272.93066
-      }
-    },
-    {
-      "ChildId": "f07b4d63-29ae-4c58-8e1d-b3f5a9c62d70",
-      "SymbolName": "Lib.flow.context.GetRenderPassState",
-      "Position": {
-        "X": 1556.001,
-        "Y": 1202.93066
-      }
-    },
-    {
-      "ChildId": "3c9a5e18-f6d2-4078-b1e4-a7d06c8f2e93",
-      "SymbolName": "Lib.render._dx11.buffer.PickBuffer",
-      "Position": {
-        "X": 1556.001,
-        "Y": 1272.93066
-      }
-    },
-    {
-      "ChildId": "6e2a8c91-d4f7-4b05-93c6-1f8e7b0a5d24",
-      "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
-      "Position": {
-        "X": 1706.001,
-        "Y": 1272.93066
-      }
-    },
-    {
       "ChildId": "052a66ef-f29d-4f30-86b9-fcab12fa6ba7",
       "SymbolName": "Lib.render._dx11.api.FloatsToBuffer",
       "Style": "Resizable",
@@ -450,6 +418,14 @@
       }
     },
     {
+      "ChildId": "3c9a5e18-f6d2-4078-b1e4-a7d06c8f2e93",
+      "SymbolName": "Lib.render._dx11.buffer.PickBuffer",
+      "Position": {
+        "X": 1556.001,
+        "Y": 1272.9307
+      }
+    },
+    {
       "ChildId": "4d3d43cb-92ae-4ecb-b2de-2f246e8711c4",
       "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "Position": {
@@ -538,6 +514,14 @@
       }
     },
     {
+      "ChildId": "6e2a8c91-d4f7-4b05-93c6-1f8e7b0a5d24",
+      "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
+      "Position": {
+        "X": 1706.001,
+        "Y": 1272.9307
+      }
+    },
+    {
       "ChildId": "73d67f50-e8e0-4f3d-94b8-b3579b954284",
       "SymbolName": "Lib.numbers.vec3.Vector3Components",
       "Position": {
@@ -572,6 +556,14 @@
       "Position": {
         "X": -634.04156,
         "Y": 425.17535
+      }
+    },
+    {
+      "ChildId": "86d2f4a9-1e5c-4b37-a0f8-5c9d3e72b1a6",
+      "SymbolName": "Lib.point.usse.KeepPreviousPointBuffer",
+      "Position": {
+        "X": 1406.001,
+        "Y": 1272.9307
       }
     },
     {
@@ -788,6 +780,14 @@
       "Position": {
         "X": 1110.2756,
         "Y": 1489.9808
+      }
+    },
+    {
+      "ChildId": "f07b4d63-29ae-4c58-8e1d-b3f5a9c62d70",
+      "SymbolName": "Lib.flow.context.GetRenderPassState",
+      "Position": {
+        "X": 1556.001,
+        "Y": 1202.9307
       }
     },
     {

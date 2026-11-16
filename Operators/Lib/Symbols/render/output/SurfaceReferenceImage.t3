@@ -7,12 +7,12 @@
       "DefaultValue": "00000000-0000-0000-0000-000000000000"
     },
     {
-      "Id": "24ce9a8f-7608-4f98-a7de-228ded5b27dd"/*Surround*/,
-      "DefaultValue": 0.0
-    },
-    {
       "Id": "1afb2fda-0889-41b6-838e-f5bdfbbc3dd0"/*MaxSize*/,
       "DefaultValue": 2048
+    },
+    {
+      "Id": "24ce9a8f-7608-4f98-a7de-228ded5b27dd"/*Surround*/,
+      "DefaultValue": 0.0
     }
   ],
   "Children": [],

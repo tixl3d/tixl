@@ -9,19 +9,19 @@
       }
     },
     {
+      "Id": "3b6e0f2a-8c41-4d7e-9a15-6f2c8e4b7d90"/*GainAndBias*/,
+      "DefaultValue": {
+        "X": 0.5,
+        "Y": 0.5
+      }
+    },
+    {
       "Id": "51545316-69fc-441f-b59f-44979e32972c"/*Pow*/,
       "DefaultValue": 1.0
     },
     {
       "Id": "63e90d86-5ad5-4333-8b99-7f8d285c4913"/*Direction*/,
       "DefaultValue": 0
-    },
-    {
-      "Id": "3b6e0f2a-8c41-4d7e-9a15-6f2c8e4b7d90"/*GainAndBias*/,
-      "DefaultValue": {
-        "X": 0.5,
-        "Y": 0.5
-      }
     },
     {
       "Id": "748fe756-c7ee-4cc1-929e-078f99bea628"/*Offset*/,

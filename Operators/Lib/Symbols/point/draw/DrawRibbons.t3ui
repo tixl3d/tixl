@@ -231,6 +231,14 @@
       }
     },
     {
+      "ChildId": "702e4e8b-f48c-5da7-9b07-710547540521",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
+      "Position": {
+        "X": 277.8078,
+        "Y": 369.08945
+      }
+    },
+    {
       "ChildId": "7bba8aa3-d0c7-4dbe-b3d8-4eb667e6176f",
       "SymbolName": "Lib.render._dx11.api.Rasterizer",
       "Position": {
@@ -284,6 +292,14 @@
       "Position": {
         "X": 765.7359,
         "Y": 813.56067
+      }
+    },
+    {
+      "ChildId": "bc5f7a40-41fc-5f64-afcc-5a3f0ae91a8e",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
+      "Position": {
+        "X": 277.8078,
+        "Y": 329.08945
       }
     },
     {
@@ -358,22 +374,6 @@
       "Position": {
         "X": 1217.6342,
         "Y": -217.7478
-      }
-    },
-    {
-      "ChildId": "bc5f7a40-41fc-5f64-afcc-5a3f0ae91a8e",
-      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
-      "Position": {
-        "X": 277.8078,
-        "Y": 329.08946000000003
-      }
-    },
-    {
-      "ChildId": "702e4e8b-f48c-5da7-9b07-710547540521",
-      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
-      "Position": {
-        "X": 277.8078,
-        "Y": 369.08946000000003
       }
     }
   ],

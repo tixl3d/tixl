@@ -260,11 +260,11 @@
             "TimeClip": {
               "TimeRange": {
                 "Start": 0.0,
-                "End": 315.0438
+                "End": 315.0498
               },
               "SourceRange": {
                 "Start": 0.0,
-                "End": 630.0876
+                "End": 630.0996
               },
               "LayerIndex": 0,
               "SourceUnit": "Seconds"
@@ -1613,45 +1613,6 @@
       "TargetSlotId": "35f501f4-5c79-4628-9441-8b3782544bf6"
     }
   ],
-  "ProjectSettings": {
-    "Enabled": true,
-    "Playback": {
-      "Bpm": 120.0,
-      "OnBpmChange": 0,
-      "AudioSource": 0,
-      "Syncing": 0,
-      "AudioDecayFactor": 0.98,
-      "AudioGainFactor": 1.0,
-      "AudioInputDeviceName": "",
-      "EnableAudioBeatLocking": "False",
-      "BeatLockSource": 0,
-      "BeatLockSmoothing": 0.5,
-      "BeatLockAudioOffsetSec": "0"
-    },
-    "Audio": {
-      "SoundtrackMute": false,
-      "SoundtrackVolume": 0.5,
-      "OperatorMute": false,
-      "OperatorVolume": 1.0,
-      "AudioResyncThreshold": 0.04
-    },
-    "Export": {
-      "Title": "",
-      "Author": "",
-      "DefaultWindowMode": 1,
-      "EnablePlaybackControlWithKeyboard": true,
-      "PreferredWidth": 1920,
-      "PreferredHeight": 1080,
-      "ShowLogs": false,
-      "SkipStartupDialog": false,
-      "StripUnusedOperators": true
-    },
-    "Proxy": {
-      "Format": 1,
-      "Resolution": 0.5,
-      "UseForPreview": true
-    }
-  },
   "Animator": [
     {
       "InstanceId": "6dae1876-83ad-472e-a055-7d926953319a",

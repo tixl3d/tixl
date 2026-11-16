@@ -5,11 +5,12 @@
   "SymbolTags": "8",
   "InputUis": [
     {
-      "InputId": "ced37909-8b16-43cf-8bb9-d7230068ae89"/*SubGraph*/,
+      "InputId": "5a712820-bbff-434f-8f46-1e3281cd5b95"/*Value*/,
       "Position": {
         "X": -200.0,
-        "Y": 0.0
-      }
+        "Y": 90.0
+      },
+      "Description": "Value for numeric and on/off entries (IsShadowPass: other than 0 is on)."
     },
     {
       "InputId": "90674b03-4727-42dd-9882-45836016b06d"/*Select*/,
@@ -20,20 +21,19 @@
       "Description": "Which value of the render pass to set."
     },
     {
-      "InputId": "5a712820-bbff-434f-8f46-1e3281cd5b95"/*Value*/,
-      "Position": {
-        "X": -200.0,
-        "Y": 90.0
-      },
-      "Description": "Value for numeric and on/off entries (IsShadowPass: other than 0 is on)."
-    },
-    {
       "InputId": "bc20ab5d-79dd-4aab-93ff-6e0e8bef2000"/*Offset*/,
       "Position": {
         "X": -200.0,
         "Y": 135.0
       },
       "Description": "Value for JitterOffset, in pixels."
+    },
+    {
+      "InputId": "ced37909-8b16-43cf-8bb9-d7230068ae89"/*SubGraph*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
     }
   ],
   "SymbolChildUis": [],
