@@ -1,0 +1,68 @@
+{
+  "FormatVersion": 3,
+  "Id": "89ddc35c-ba3b-49a1-b766-a7356a12fe40"/*OffsetCurves*/,
+  "Description": "Grows or shrinks curve outlines by moving every contour sideways by a fixed distance.\n\nA positive Offset expands the filled area of each part (for example a glyph from [TextToCurves]): outlines move outward and holes shrink, whatever winding the source uses. Open contours move to their left. Curved segments stay bezier curves and are split only where needed to stay within Tolerance. Sharp corners stay closed: on the outside they are joined with a miter, a round arc or a bevel, on the inside the two offset edges are trimmed to where they meet. The offset happens in the XY plane. Very large inward offsets can produce self-intersecting loops, which are not removed.\n\nAKA: inset, outset, grow, shrink, expand, contour offset, parallel curve",
+  "InputUis": [
+    {
+      "InputId": "83e19891-6ac2-41c2-bf59-800811d28d79"/*Curves*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "b7803f2e-b869-4181-aa44-1b4bbc3935a9"/*Offset*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      },
+      "Description": "Distance in scene units. Positive values grow shapes, negative values shrink them.",
+      "Min": -0.1,
+      "Max": 0.1,
+      "Scale": 0.001
+    },
+    {
+      "InputId": "1aa775f1-56e3-4ff3-9f1b-756ea64f9120"/*Join*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 90.0
+      },
+      "Description": "How outer corners are filled: Miter keeps them sharp, Round rounds them with the offset as radius, Bevel cuts them flat."
+    },
+    {
+      "InputId": "832f326f-c1d6-47b7-a543-680e40d5ffba"/*MiterLimit*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 135.0
+      },
+      "Description": "Longest miter as a multiple of the offset. Sharper corners fall back to a bevel.",
+      "Min": 1.0,
+      "Max": 10.0,
+      "ClampMin": true,
+      "Scale": 0.1
+    },
+    {
+      "InputId": "1d3a918c-cdb2-4fa5-a74d-57c7743e5140"/*Tolerance*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 180.0
+      },
+      "Description": "Maximum deviation of the offset curves from the exact result. Smaller values split curved segments more often.",
+      "Min": 0.0001,
+      "Max": 0.01,
+      "ClampMin": true,
+      "Scale": 0.0001
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "eb51b623-b0bc-4686-986b-0148262ced85"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}
