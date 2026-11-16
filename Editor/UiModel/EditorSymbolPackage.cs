@@ -435,6 +435,10 @@ internal class EditorSymbolPackage : SymbolPackage
 
     public Guid OverrideHomeGuid = Guid.Empty;
 
+    /// <summary>True for the package's own home symbol, ignoring a temporary <see cref="OverrideHomeGuid"/>.</summary>
+    internal bool IsPackageHomeSymbol(Guid symbolId)
+        => AssemblyInformation.TryGetReleaseInfo(out var releaseInfo) && releaseInfo.HomeGuid == symbolId;
+
     internal const string SourceCodeExtension = ".cs";
     public const string SymbolUiExtension = ".t3ui";
 

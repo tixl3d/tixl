@@ -118,6 +118,11 @@ hand-edited** — it holds symbols in memory and rewrites the `.t3ui` on save, s
 changes. So close the editor first, or restart it right after the edit and before anything that could trigger
 a save. The same applies to any other hand-edit of `.t3` / `.t3ui` / operator `.csproj` files.
 
+**Write hand-edited `.t3ui` entries the way the editor saves them**, or the editor's next save reorders the file and
+buries the real change in a noisy diff. `InputUis` are sorted by `InputId` (ascending Guid string, not parameter order):
+insert a new entry at its sorted position rather than appending it. Inside an entry, keep the field order the
+existing entries use (e.g. `Min`, `Max`, `Scale`, `ClampMin`).
+
 Follow the description conventions from the wiki
 ([dev.OperatorConventions](https://github.com/tixl3d/tixl/wiki/dev.OperatorConventions)):
 

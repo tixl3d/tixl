@@ -15,6 +15,12 @@ internal sealed class OpenedProject
     /// <summary>Empty for a project rooted at its package's home symbol.</summary>
     private readonly Guid _explicitHomeSymbolId;
 
+    /// <summary>
+    /// True when an op other than the package's home symbol was opened as root (skill level, missing operator,
+    /// debug bridge). Such views are not where the user works, so they don't persist window layout or output state.
+    /// </summary>
+    internal bool HasExplicitHome => _explicitHomeSymbolId != Guid.Empty;
+
     private Guid RootSymbolId => _explicitHomeSymbolId != Guid.Empty ? _explicitHomeSymbolId : Package.HomeSymbolId;
 
     public static readonly Dictionary<IResourcePackage, OpenedProject> OpenedProjects = new();

@@ -32,7 +32,9 @@ internal sealed partial class OutputWindow
     /// </summary>
     private void SyncStateWithProject()
     {
-        var rootInstance = ProjectView.Focused?.RootInstance;
+        // Explicit-home views keep their output state in memory only, so it never lands in that op's .t3ui.
+        var focusedView = ProjectView.Focused;
+        var rootInstance = focusedView is { OpenedProject.HasExplicitHome: false } ? focusedView.RootInstance : null;
         var symbolUi = rootInstance?.Symbol.GetSymbolUi();
         var symbolId = symbolUi?.Symbol.Id ?? Guid.Empty;
 

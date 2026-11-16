@@ -425,7 +425,7 @@ internal sealed partial class ProjectView
     private void SaveWindowLayoutToProject()
     {
         // Focus mode's layout hides the output window. The session resumes focus mode itself instead.
-        if (!UserSettings.Config.SaveWindowLayoutsWithProjects || LayoutHandling.FocusMode)
+        if (!UserSettings.Config.SaveWindowLayoutsWithProjects || LayoutHandling.FocusMode || OpenedProject.HasExplicitHome)
             return;
 
         var symbolUi = RootInstance?.Symbol.GetSymbolUi();
@@ -482,7 +482,8 @@ internal sealed partial class ProjectView
 
     private void RestoreWindowLayoutFromProject(ProjectSession? session)
     {
-        if (!UserSettings.Config.SaveWindowLayoutsWithProjects)
+        // Explicit-home views bring their own layout (e.g. the dedicated skill quest layout).
+        if (!UserSettings.Config.SaveWindowLayoutsWithProjects || OpenedProject.HasExplicitHome)
             return;
 
         if (session != null && !string.IsNullOrEmpty(session.WindowLayout))

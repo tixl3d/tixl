@@ -219,7 +219,9 @@ public sealed class CompositionSettings
 
     internal void WriteToJson(JsonTextWriter writer)
     {
-        var hasSettings = Enabled || Playback.AudioClips.Count > 0 || ProxyIsNonDefault();
+        // Disabled settings are dropped on save so cleaned-up ops don't keep carrying a stale block.
+        // Un-migrated legacy clips are kept regardless: they are content awaiting conversion to [AudioClip] ops.
+        var hasSettings = Enabled || Playback.AudioClips.Count > 0;
         if (!hasSettings)
             return;
 
@@ -300,11 +302,6 @@ public sealed class CompositionSettings
 
         writer.WriteEndObject();
     }
-
-    private bool ProxyIsNonDefault()
-        => Proxy.Format != Defaults.Proxy.Format
-           || Proxy.Resolution != Defaults.Proxy.Resolution
-           || Proxy.UseForPreview != Defaults.Proxy.UseForPreview;
 
     internal static CompositionSettings? ReadFromJson(JToken symbolToken)
     {

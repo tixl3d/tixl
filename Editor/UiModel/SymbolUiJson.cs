@@ -736,22 +736,25 @@ internal static class SymbolUiJson
         // playback root via "Specify settings for ..." in the Composition Settings window. On every
         // other symbol the editor still keeps in-memory state while the user navigates or renders,
         // but writing it would pollute the .t3ui of sub-ops the user never intentionally configured.
-        // OutputWindowStates are exempt: they're only ever assigned to a project's root symbol (see
-        // OutputWindow.SyncStateWithProject), and coupling them to Enabled silently dropped pinning
-        // for projects that never opened their settings (audio works without them now).
+        // OutputWindowStates and the window layout belong to a package's home symbol only; coupling them
+        // to Enabled silently dropped pinning for projects that never opened their settings. Copies on other
+        // symbols (ops once opened as a root, then moved) are dropped on save.
         // A custom TimelineHeight is exempt for the same reason: it is project-wide window layout and
         // only ever written to the root symbol (see TimeLineCanvas.TimelineHeight).
         // An authored SourceExtent is exempt too: it is deliberate per-symbol configuration
         // (typically on combined time-clip ops that are never playback roots).
         var isComposition = symbolUi.Symbol.CompositionSettings.Enabled;
+        var isPackageHome = symbolUi.Symbol.SymbolPackage is EditorSymbolPackage package
+                            && package.IsPackageHomeSymbol(symbolUi.Symbol.Id);
         var hasRenderSettings = symbolUi.RenderSettings != null && isComposition;
         var hasRecordingSettings = symbolUi.RecordingSettings is { } rec && !rec.IsAtDefault();
-        var hasOutputWindowStates = symbolUi.OutputWindowStates is { Count: > 0 };
+        var hasOutputWindowStates = isPackageHome && symbolUi.OutputWindowStates is { Count: > 0 };
         var hasTimelineState = symbolUi.TimelineState is { } timeline
                                && (isComposition || timeline.HasCustomHeight || timeline.SourceExtent != null);
-        var hasWindowLayout = !string.IsNullOrEmpty(symbolUi.WindowLayout);
+        var hasWindowLayout = isPackageHome && !string.IsNullOrEmpty(symbolUi.WindowLayout);
+        var hasWindowVisibility = isPackageHome && symbolUi.WindowVisibility is { Count: > 0 };
 
-        if (!hasRenderSettings && !hasRecordingSettings && !hasOutputWindowStates && !hasTimelineState && !hasWindowLayout)
+        if (!hasRenderSettings && !hasRecordingSettings && !hasOutputWindowStates && !hasTimelineState && !hasWindowLayout && !hasWindowVisibility)
             return;
 
         writer.WritePropertyName("Settings");
@@ -774,7 +777,7 @@ internal static class SymbolUiJson
                 writer.WriteValue(symbolUi.WindowLayoutImGuiVersion);
             }
 
-            if (symbolUi.WindowVisibility is { Count: > 0 })
+            if (hasWindowVisibility)
             {
                 writer.WritePropertyName("WindowVisibility");
                 writer.WriteStartObject();
