@@ -317,6 +317,38 @@ In a new graph add `[TextToCurves]` (default text "TiXL", font
 - Picking a different font file in the `Path` asset picker (Font asset type,
   `fonts` subfolder) swaps the outlines.
 
+## Step: Text spacing, position and point orientation
+
+**Action:**
+In the text-as-lines graph set `LetterSpacing` to 0.2, then toggle `Alignment`
+between Left, Center and Right. Drag the move gizmo of `[TextToCurves]` in the
+output. Then insert `[DrawPoints]` or oriented sprites after `[CurvesToPoints]`
+(or check the point rotations in the list view).
+
+**Expected:**
+- The letters spread evenly; with Center and Right the lines stay centered and
+  right-aligned. Negative values tighten the text.
+- The gizmo moves the whole text block and writes to `Position`.
+- Every point's Z axis faces away from the letter's ink: outward on outlines,
+  into the hole on the counters of "o", "a" and "e".
+
+## Step: Offsetting outlines
+
+**Action:**
+Insert `[OffsetCurves]` between `[TextToCurves]` and `[CurvesToPoints]`. Sweep
+`Offset` from -0.03 to 0.05 and switch `Join` between Miter, Round and Bevel.
+Then feed the offset curves into `[CurvesToGeometry]` instead.
+
+**Expected:**
+- Positive values grow every letter and shrink its holes; negative values thin
+  them. Corners of T, X and L stay sharp and closed with Miter, round with Round
+  and cut flat with Bevel.
+- Lowering `MiterLimit` towards 1 turns the sharpest miters (the tip of A) into
+  bevels.
+- The filled `[CurvesToGeometry]` result has no gaps at corners.
+- Very large negative offsets can fold thin strokes into small loops; this is a
+  known limit.
+
 ## Step: Text as solid mesh
 
 **Action:**
