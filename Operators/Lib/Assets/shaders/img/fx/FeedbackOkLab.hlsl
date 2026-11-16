@@ -74,7 +74,8 @@ inline float LuminocityFromRgb(float3 c) {
 float4 psMain(vsOutput input) : SV_TARGET
 {        
 
-    
+    if(Reset > 0.5)
+        return 0;
 
 
 
