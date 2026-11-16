@@ -15,7 +15,6 @@
     },
     {
       "InputId": "24b786f7-75d2-47d4-96e8-f7fcf0cc9258"/*DepthMap*/,
-      "Relevancy": "Required",
       "Position": {
         "X": -795.6495,
         "Y": -252.79443
@@ -24,18 +23,17 @@
     },
     {
       "InputId": "414b89a2-128c-40c1-a3c7-137a788bb320"/*CameraReference*/,
-      "Relevancy": "Required",
       "Position": {
-        "X": -865.6495,
-        "Y": -112.794464
+        "X": -795.6495,
+        "Y": -182.79446
       },
       "Description": "Reference output of the scene camera ([Camera] or [OrbitCamera]). Its matrices drive the reprojection of the previous frame."
     },
     {
       "InputId": "48fefd6e-44d6-457a-a1b3-12b23be585ee"/*VelocityMap*/,
       "Position": {
-        "X": -865.6495,
-        "Y": -182.79446
+        "X": -795.6495,
+        "Y": -217.79446
       }
     },
     {
