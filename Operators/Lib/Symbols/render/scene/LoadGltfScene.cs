@@ -39,6 +39,7 @@ public class LoadGltfScene : Instance<LoadGltfScene>
 
         ResultSetup.UpdateAction += Update;
         Mesh.UpdateAction += Update;
+        Material.UpdateAction += Update;
         SkinWeights.UpdateAction += Update;
         SkeletonPoints.UpdateAction += Update;
     }
@@ -123,16 +124,21 @@ public class LoadGltfScene : Instance<LoadGltfScene>
             SkeletonPoints.Value = (skeletonIndex < _skeletonPointBuffers.Count ? _skeletonPointBuffers[skeletonIndex] : null)!;
         }
 
-        if (materialNeedsUpdate && ResultSetup?.Value?.Dispatches != null && ResultSetup.Value.Dispatches.Count > 0)
+        if (materialNeedsUpdate)
         {
-            foreach (var dispatch in ResultSetup.Value.Dispatches)
+            // Materials are shared between dispatches, so update each one once. The authored factor is preserved in
+            // SceneMaterial so that this path and the create path produce the same parameter values.
+            foreach (var sceneMaterial in _sceneMaterialsByName.Values)
             {
-                if (dispatch.Material == null)
+                var pbrMaterial = sceneMaterial.PbrMaterial;
+                if (pbrMaterial == null)
                     continue;
 
-                dispatch.Material.Parameters.Roughness = _offsetRoughness;
-                dispatch.Material.Parameters.Metal = _offsetMetallic;
-                dispatch.Material.UpdateParameterBuffer();
+                sceneMaterial.PbrParameters.Roughness = sceneMaterial.AuthoredRoughnessOffset + _offsetRoughness;
+                sceneMaterial.PbrParameters.Metal = sceneMaterial.AuthoredMetalOffset + _offsetMetallic;
+
+                pbrMaterial.Parameters = sceneMaterial.PbrParameters;
+                pbrMaterial.UpdateParameterBuffer();
             }
         }
     }
@@ -681,18 +687,26 @@ public class LoadGltfScene : Instance<LoadGltfScene>
         occlusionTexture?.Dispose();
         occlusionSrv?.Dispose();
 
+        // The shader adds these parameters on top of the roughness/metallic texture channels (see mesh-Draw.hlsl).
+        // glTF stores the roughness/metallic factors as multipliers, so remap them into that additive space and keep
+        // the authored part around so that OffsetRoughness/OffsetMetallic can be applied on top without discarding it.
+        var authoredRoughnessOffset = roughness - 1f; // glTF standard uses roughness factor?!
+        var authoredMetalOffset = metallic - 1f;      // glTF standard uses metallic factor?!
+
         var newMaterialDef = new SceneSetup.SceneMaterial
                                  {
                                      Name = name,
                                      // ColorTexture = baseColorTexture,
                                      // NormalTexture = normalTexture,
+                                     AuthoredRoughnessOffset = authoredRoughnessOffset,
+                                     AuthoredMetalOffset = authoredMetalOffset,
                                      PbrParameters = new PbrMaterial.PbrParameters
                                                          {
                                                              BaseColor = baseColor,
                                                              EmissiveColor = emissiveColor,
-                                                             Roughness = roughness - 1 + _offsetRoughness, // glTF standard uses roughness factor?!
+                                                             Roughness = authoredRoughnessOffset + _offsetRoughness,
                                                              Specular = 1,
-                                                             Metal = metallic -1 + _offsetMetallic, // glTF standard uses metallic factor?!
+                                                             Metal = authoredMetalOffset + _offsetMetallic,
                                                          }
                                  };
 
@@ -716,22 +730,26 @@ public class LoadGltfScene : Instance<LoadGltfScene>
     /// <summary>
     /// Setup shaders and textures required for combining roughness, metallic and occlusion textures.
     /// </summary>
-    private static void PrepareCombineShaderResources(Instance instance, bool forceUpdate = false)
+    private static void PrepareCombineShaderResources(bool forceUpdate = false)
     {
-        if (_combineChannelsComputeShaderResource == null)
+        // This resource is shared by all instances, so it must not be owned by one of them: an owned resource is
+        // disposed with its owner (closing a project, recompiling a symbol), which would leave this static field
+        // pointing at a dead resource and make every subsequent model load fail with "Cannot access a disposed object".
+        if (_combineChannelsComputeShaderResource is not { IsDisposed: false })
         {
             const string sourcePath = "Lib:shaders/cs/CombineGltfChannels-cs.hlsl";
             const string entryPoint = "main";
 
-            _combineChannelsComputeShaderResource = ResourceManager.CreateShaderResource<ComputeShader>(sourcePath, instance, () => entryPoint, OnShaderChanged);
+            _combineChannelsComputeShaderResource = ResourceManager.CreateShaderResource<ComputeShader>(sourcePath, null, () => entryPoint, OnShaderChanged);
 
             OnShaderChanged(_combineChannelsComputeShaderResource.Value);
+            return;
         }
         
-        if (!forceUpdate && _combineChannelsComputeShaderResource?.Value != null)
+        if (!forceUpdate && _combineChannelsComputeShaderResource.Value != null)
             return;
         
-        OnShaderChanged(_combineChannelsComputeShaderResource!.Value);
+        OnShaderChanged(_combineChannelsComputeShaderResource.Value);
         return;
 
         static void OnShaderChanged(ComputeShader? e)
@@ -777,7 +795,7 @@ public class LoadGltfScene : Instance<LoadGltfScene>
             return;
         }
 
-        PrepareCombineShaderResources(this, _updateTriggered);
+        PrepareCombineShaderResources(_updateTriggered);
 
         var device = ResourceManager.Device;
         var deviceContext = device.ImmediateContext;
@@ -804,15 +822,18 @@ public class LoadGltfScene : Instance<LoadGltfScene>
 
         // TODO: create and test merge compute shader
 
+        // Set Shader
+        var combineShader = _combineChannelsComputeShaderResource?.Value;
+        if (combineShader == null)
+        {
+            Log.Warning($"Failed to combine roughness/metallic/occlusion textures in {nameof(LoadGltfScene)}", this);
+            resultSrv = PbrMaterial.DefaultRoughnessMetallicOcclusionSrv;
+            return;
+        }
+
         // Keep previous setup
         deviceContext.PushState(StateGroups.ComputeShader);
-
-        // Set Shader
-        if (_combineChannelsComputeShaderResource != null)
-        {
-            var convertShader = _combineChannelsComputeShaderResource.Value;
-            csStage.Set(convertShader);
-        }
+        csStage.Set(combineShader);
 
         var srvs = new[] { metallicRoughnessSrv, occlusionSrv };
         csStage.SetShaderResources(0, srvs);

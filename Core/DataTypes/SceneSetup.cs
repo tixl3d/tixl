@@ -87,6 +87,18 @@ public class SceneSetup : IEditableInputType, IDisposable
         public string Name;
         public PbrMaterial.PbrParameters PbrParameters;
         public PbrMaterial PbrMaterial;
+
+        /// <summary>
+        /// The authored glTF roughnessFactor remapped into the shader's additive roughness parameter (factor - 1).
+        /// The transient OffsetRoughness input is added on top of this, so changing the offset never discards the
+        /// factor encoded in the file.
+        /// </summary>
+        public float AuthoredRoughnessOffset;
+
+        /// <summary>
+        /// The authored glTF metallicFactor remapped into the shader's additive metal parameter (factor - 1).
+        /// </summary>
+        public float AuthoredMetalOffset;
     }
     
     // FIXME: This should probably be moved to somewhere in core -> Rendering
