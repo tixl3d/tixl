@@ -2,6 +2,7 @@
 #include "shared/quat-functions.hlsl"
 #include "shared/point-light.hlsl"
 #include "shared/pbr.hlsl"
+#include "shared/velocity-functions.hlsl"
 
 cbuffer Params : register(b0)
 {
@@ -62,6 +63,21 @@ cbuffer PbrParams : register(b5)
     float Specular;
     float Metal;
 }
+
+/** Last frame's transforms of this draw, for the velocity target. */
+cbuffer PreviousTransforms : register(b6)
+{
+    float4x4 PrevCameraToClipSpace;
+    float4x4 PrevClipSpaceToCamera;
+    float4x4 PrevWorldToCamera;
+    float4x4 PrevCameraToWorld;
+    float4x4 PrevWorldToClipSpace;
+    float4x4 PrevClipSpaceToWorld;
+    float4x4 PrevObjectToWorld;
+    float4x4 PrevWorldToObject;
+    float4x4 PrevObjectToCamera;
+    float4x4 PrevObjectToClipSpace;
+};
 
 Texture2D<float4> BaseColorMap : register(t0);
 Texture2D<float4> EmissiveColorMap : register(t1);
@@ -162,6 +178,7 @@ struct PSOutput
 {
     float4 color : SV_Target0;
     float4 Normal : SV_Target1;
+    float4 Velocity : SV_Target2;
     float depth : SV_Depth;
 };
 
@@ -499,5 +516,11 @@ PSOutput psMain(vsOutput input)
     // A ray that only came close to the surface is faded by DistToColor and has no surface to put into the depth buffer.
     result.depth = a >= 0.999 ? ComputeDepthFromViewZ(viewZ) : 1;
     result.Normal = float4(normal, 1.0);
+
+    // The field is evaluated in world space, so a static field moves only with the camera. Changes of the field
+    // itself are not known. Faded near misses have no surface and report no motion.
+    float4 clipPosition = mul(float4(p, 1), WorldToClipSpace);
+    float4 previousClipPosition = a >= 0.999 ? mul(float4(p, 1), PrevWorldToClipSpace) : 0;
+    result.Velocity = EncodeVelocity(clipPosition, previousClipPosition, CameraToClipSpace, PrevCameraToClipSpace);
     return result;
 }
