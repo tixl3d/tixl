@@ -417,6 +417,14 @@
       }
     },
     {
+      "ChildId": "eafa1338-bee8-4b8d-8992-082321a617c2",
+      "SymbolName": "Lib.render.postfx.AttachTextureBundle",
+      "Position": {
+        "X": 2757.35,
+        "Y": 1060.8828
+      }
+    },
+    {
       "ChildId": "ece44113-bc25-4b4a-b8f4-23f6037d1ad0",
       "SymbolName": "Lib.string.search.SearchAndReplace",
       "Position": {
@@ -454,7 +462,7 @@
       "OutputId": "12fcfd9e-1c2f-46fc-b570-83b93ec7d101"/*TextureOutput*/,
       "Position": {
         "X": 2757.35,
-        "Y": 1060.8826
+        "Y": 1130.8828
       }
     },
     {
