@@ -10,7 +10,8 @@
         "X": 374.63342,
         "Y": 88.783585
       },
-      "Description": "Near and far clip planes of the camera."
+      "Description": "Near and far clip planes of the camera.",
+      "UseVec2Control": "Range"
     },
     {
       "InputId": "9a427b76-4976-4f7e-9033-1ba08b743c23"/*DepthMap*/,

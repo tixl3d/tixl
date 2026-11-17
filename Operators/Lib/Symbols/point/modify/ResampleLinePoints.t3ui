@@ -18,7 +18,8 @@
         "X": -551.46265,
         "Y": 760.3659
       },
-      "Description": "Part of the source line to resample, normalized 0...1. See RangeMode."
+      "Description": "Part of the source line to resample, normalized 0...1. See RangeMode.",
+      "UseVec2Control": "Range"
     },
     {
       "InputId": "3d50d3c5-07e6-4246-8740-fcdc62173e1d"/*SmoothDistance*/,

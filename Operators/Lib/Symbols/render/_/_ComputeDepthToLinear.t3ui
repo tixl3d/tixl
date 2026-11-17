@@ -24,7 +24,8 @@
       "Position": {
         "X": -453.04565,
         "Y": 215.88635
-      }
+      },
+      "UseVec2Control": "Range"
     },
     {
       "InputId": "831c97ad-40c1-4687-b536-f549bbbccf6f"/*ClampOutput*/,

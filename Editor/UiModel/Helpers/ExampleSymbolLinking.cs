@@ -6,15 +6,21 @@ namespace T3.Editor.UiModel.Helpers;
 /// Provides <see cref="ExampleIdsForSymbolsId"/> collection of examples operators for each symbol.
 /// </summary>
 /// <remarks>
-/// Should be updated on editor startup. The only stores symbolIds to prevent references to
-/// outdated types after structural changes.
+/// Rebuilt lazily whenever <see cref="EditorSymbolPackage.SymbolStructureVersionCounter"/> advances, e.g. after
+/// creating or renaming symbols. Only stores symbolIds to prevent references to outdated types.
 /// </remarks>
-/// <todo>
-/// Should be "occasionally" structural changes like creating or renaming symbols.
-/// </todo>
 internal static class ExampleSymbolLinking
 {
-    internal static Dictionary<Guid, List<Guid>> ExampleIdsForSymbolsId { get; } = new(50);
+    internal static Dictionary<Guid, List<Guid>> ExampleIdsForSymbolsId
+    {
+        get
+        {
+            if (_linkedStructureVersion != EditorSymbolPackage.SymbolStructureVersionCounter)
+                UpdateExampleLinks();
+
+            return _exampleIdsForSymbolIds;
+        }
+    }
 
     public static IReadOnlyList<Guid> GetExampleIds(Guid id)
     {
@@ -45,7 +51,8 @@ internal static class ExampleSymbolLinking
     // Todo: unlink Examples implementation from naming - this should be done in a different way via attribute, guid links, etc.
     internal static void UpdateExampleLinks()
     {
-        ExampleIdsForSymbolsId.Clear();
+        _linkedStructureVersion = EditorSymbolPackage.SymbolStructureVersionCounter;
+        _exampleIdsForSymbolIds.Clear();
 
         const string exampleSuffix = "Example";
         const string examplesSuffix = "Examples";
@@ -94,19 +101,21 @@ internal static class ExampleSymbolLinking
 
             foreach (var symbol in symbolsWithName)
             {
-                if (!ExampleIdsForSymbolsId.TryGetValue(symbol.Id, out var exampleList))
+                if (!_exampleIdsForSymbolIds.TryGetValue(symbol.Id, out var exampleList))
                 {
                     exampleList = [];
-                    ExampleIdsForSymbolsId.Add(symbol.Id, exampleList);
+                    _exampleIdsForSymbolIds.Add(symbol.Id, exampleList);
                 }
 
                 exampleList.Add(exampleSymbol.Symbol.Id);
             }
         }
 
-        Log.Debug($"Found {ExampleIdsForSymbolsId.Sum(x=> x.Value.Count)} examples for {ExampleIdsForSymbolsId.Count} operators out of {potentialExamples.Count} potential examples");
+        Log.Debug($"Found {_exampleIdsForSymbolIds.Sum(x=> x.Value.Count)} examples for {_exampleIdsForSymbolIds.Count} operators out of {potentialExamples.Count} potential examples");
     }
 
+    private static readonly Dictionary<Guid, List<Guid>> _exampleIdsForSymbolIds = new(50);
+    private static int _linkedStructureVersion = -1;
     private static readonly List<Guid> _emptyIdList = [];
     private static readonly IReadOnlyList <SymbolUi> _noSymbolUis = []; 
 }

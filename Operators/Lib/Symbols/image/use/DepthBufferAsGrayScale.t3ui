@@ -37,7 +37,8 @@
         "X": -232.82065,
         "Y": 527.72107
       },
-      "Description": "Depth values mapped to 0 and 1 of the output. If both are 0, the linear depth is output unchanged."
+      "Description": "Depth values mapped to 0 and 1 of the output. If both are 0, the linear depth is output unchanged.",
+      "UseVec2Control": "Range"
     },
     {
       "InputId": "482e7931-cc65-49bd-ac56-8724b83a4e6a"/*NearFarRange*/,
@@ -46,7 +47,8 @@
         "Y": 461.6969
       },
       "GroupTitle": "Settings",
-      "Description": "Near and far clip planes of the camera."
+      "Description": "Near and far clip planes of the camera.",
+      "UseVec2Control": "Range"
     }
   ],
   "SymbolChildUis": [

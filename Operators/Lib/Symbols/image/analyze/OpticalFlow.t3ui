@@ -66,7 +66,8 @@
         "X": 832.8758,
         "Y": -287.87488
       },
-      "Description": "Clamps and normalizes the results to avoid values that are too small or excessively large."
+      "Description": "Clamps and normalizes the results to avoid values that are too small or excessively large.",
+      "UseVec2Control": "Range"
     },
     {
       "InputId": "fa54b5d3-5a98-4cc1-b848-6e5b3632af6c"/*VisualizeResult*/,

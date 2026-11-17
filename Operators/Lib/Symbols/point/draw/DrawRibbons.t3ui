@@ -45,7 +45,8 @@
         "X": -224.65475,
         "Y": 453.20538
       },
-      "Description": "Range or offset of the texture coordinates, depending on TextureMode."
+      "Description": "Range or offset of the texture coordinates, depending on TextureMode.",
+      "UseVec2Control": "Range"
     },
     {
       "InputId": "3f8b336d-fb2b-4b8a-b13a-a229e7792f46"/*Spin*/,

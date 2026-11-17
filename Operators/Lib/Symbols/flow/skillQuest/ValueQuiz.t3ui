@@ -20,7 +20,8 @@
       "GroupTitle": "Additional Parameters...",
       "Min": 0.003,
       "Max": 1.0,
-      "Scale": 0.001
+      "Scale": 0.001,
+      "UseVec2Control": "Range"
     },
     {
       "InputId": "c09a529a-dfe2-4bf8-86ce-369aeadbee4a"/*Goal*/,
@@ -36,7 +37,8 @@
       "Position": {
         "X": 344.79425,
         "Y": -1071.6667
-      }
+      },
+      "UseVec2Control": "Range"
     }
   ],
   "SymbolChildUis": [

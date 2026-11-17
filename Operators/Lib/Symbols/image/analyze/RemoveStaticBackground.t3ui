@@ -51,7 +51,8 @@
       "Description": "x: The minimum amount of nearby agreement needed before the mask starts strengthening a pixel. Raise it to require bigger, more solid shapes; lower it to keep thinner details.\n\ny: The density where the neighborhood consensus is treated as fully confident. Lower it to fill gaps more aggressively; raise it to stay stricter and preserve fine edges.\n",
       "Min": 0.0,
       "Max": 1.0,
-      "Scale": 0.001
+      "Scale": 0.001,
+      "UseVec2Control": "Range"
     },
     {
       "InputId": "455ecd34-8228-4f70-b59a-fe6493234856"/*TrainingSpreadUpRate*/,

@@ -39,7 +39,8 @@
         "X": 416.80356,
         "Y": 208.85886
       },
-      "Description": "Value range shown from the bottom to the top edge."
+      "Description": "Value range shown from the bottom to the top edge.",
+      "UseVec2Control": "Range"
     },
     {
       "InputId": "317deea3-2d0d-4493-9008-6c0102a9a7e3"/*RangeX*/,
@@ -47,7 +48,8 @@
         "X": 416.80356,
         "Y": 138.85886
       },
-      "Description": "Value range shown from the left to the right edge."
+      "Description": "Value range shown from the left to the right edge.",
+      "UseVec2Control": "Range"
     },
     {
       "InputId": "8c5601d2-a39a-4a02-9fef-0ebe0dc8330e"/*MixOriginal*/,
