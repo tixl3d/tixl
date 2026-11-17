@@ -1,0 +1,335 @@
+{
+  "FormatVersion": 3,
+  "Id": "f1e1a3b7-94e1-4b0c-a340-8ec2b84fb09d"/*JumpFloodFillExample*/,
+  "Description": "",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "050d8f5b-8594-4f81-a776-a246d0d617ad",
+      "SymbolName": "Lib.field.combine.CombineSDF",
+      "Position": {
+        "X": 698.5469,
+        "Y": 186.4845
+      }
+    },
+    {
+      "ChildId": "0bc3a873-6119-4047-8076-f5e35a64422d",
+      "SymbolName": "Lib.field.generate.sdf.BoxSDF",
+      "Position": {
+        "X": 978.5469,
+        "Y": 190.8916
+      }
+    },
+    {
+      "ChildId": "0ce27860-643f-466d-b2f9-fd659d642e37",
+      "SymbolName": "Lib.render.transform.Transform",
+      "Position": {
+        "X": 978.5469,
+        "Y": 708.9491
+      }
+    },
+    {
+      "ChildId": "12495c19-a7b4-4421-b442-663e080bfbcc",
+      "SymbolName": "Lib.numbers.anim.animators.OscillateVec3",
+      "Position": {
+        "X": 630.35913,
+        "Y": 438.5631
+      }
+    },
+    {
+      "ChildId": "1255aed5-8a6c-4c6b-b026-bbdc18ad1e3c",
+      "SymbolName": "Lib.render.shading.SetMaterial",
+      "Position": {
+        "X": 978.5469,
+        "Y": 330.89172
+      }
+    },
+    {
+      "ChildId": "1470cea1-16bd-46c3-a057-1c2689f218a9",
+      "SymbolName": "Lib.image.use.CustomPixelShader",
+      "SectionId": "79841f17-6fe5-49ed-a82d-8ca80b6dde9c",
+      "Position": {
+        "X": 394.24606,
+        "Y": 549.942
+      }
+    },
+    {
+      "ChildId": "164ca952-7ab2-47de-bfcf-c2e2a3a90bc0",
+      "SymbolName": "Lib.render.shading.SetMaterial",
+      "Position": {
+        "X": 978.5469,
+        "Y": 673.9491
+      }
+    },
+    {
+      "ChildId": "1b098eab-28a0-47df-b0ad-2fa301911936",
+      "SymbolName": "Lib.field.use.SDFToColor",
+      "SectionId": "79841f17-6fe5-49ed-a82d-8ca80b6dde9c",
+      "Position": {
+        "X": 394.24606,
+        "Y": 689.9418
+      }
+    },
+    {
+      "ChildId": "1ba6d303-f76f-436c-ac85-99a223ebf1fb",
+      "SymbolName": "Lib.render.transform.Transform",
+      "Position": {
+        "X": 978.5469,
+        "Y": 365.89172
+      }
+    },
+    {
+      "ChildId": "211997a8-d089-447e-b953-b731b0c1561e",
+      "SymbolName": "Lib.field.render.RaymarchField",
+      "Position": {
+        "X": 978.5469,
+        "Y": 295.89172
+      }
+    },
+    {
+      "ChildId": "259659f0-23ce-4170-aa00-99d7054f6bd9",
+      "SymbolName": "Lib.field.adjust.SetSDFMaterial",
+      "Position": {
+        "X": 978.5469,
+        "Y": 568.9491
+      }
+    },
+    {
+      "ChildId": "29736a79-8f95-4b61-af59-51bcea83ba33",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "Position": {
+        "X": 1346.147,
+        "Y": 650.87976
+      }
+    },
+    {
+      "ChildId": "3b40bbdc-4ccc-4ec7-a077-fc7e24e31423",
+      "SymbolName": "Lib.render.basic.Text",
+      "SectionId": "cf8a69f6-5bbb-4a2e-8057-1513ba75348c",
+      "Position": {
+        "X": 60.0,
+        "Y": 120.0
+      }
+    },
+    {
+      "ChildId": "3f9dd7d6-e670-49d9-bee4-45333a073d1d",
+      "SymbolName": "Lib.image.use.CustomPixelShader",
+      "SectionId": "cf8a69f6-5bbb-4a2e-8057-1513ba75348c",
+      "Position": {
+        "X": 340.0,
+        "Y": 155.0
+      }
+    },
+    {
+      "ChildId": "46789ec3-4b50-491b-9f1f-39fb01f33a64",
+      "SymbolName": "Lib.image.fx.blur.FastBlur",
+      "SectionId": "cf8a69f6-5bbb-4a2e-8057-1513ba75348c",
+      "Position": {
+        "X": 340.0,
+        "Y": 225.0
+      }
+    },
+    {
+      "ChildId": "56be4c32-d258-43a1-a67b-9c455a180181",
+      "SymbolName": "Lib.image.color.ChannelMixer",
+      "SectionId": "cf8a69f6-5bbb-4a2e-8057-1513ba75348c",
+      "Position": {
+        "X": 60.0,
+        "Y": 190.0
+      }
+    },
+    {
+      "ChildId": "59ca106a-15a2-4468-a6f2-46d255778b27",
+      "SymbolName": "Lib.image.color.ChannelMixer",
+      "SectionId": "79841f17-6fe5-49ed-a82d-8ca80b6dde9c",
+      "Position": {
+        "X": 114.24609,
+        "Y": 584.942
+      }
+    },
+    {
+      "ChildId": "5ed9ecd4-5de7-4ebb-a2db-8710e6bfc0d4",
+      "SymbolName": "Lib.image.generate.misc.JumpFloodFill",
+      "SectionId": "79841f17-6fe5-49ed-a82d-8ca80b6dde9c",
+      "Position": {
+        "X": 254.24606,
+        "Y": 549.942
+      }
+    },
+    {
+      "ChildId": "6398aa0d-d802-446c-bb9d-53f920b9c5c2",
+      "SymbolName": "Lib.image.generate.basic.NGonGradient",
+      "SectionId": "79841f17-6fe5-49ed-a82d-8ca80b6dde9c",
+      "Position": {
+        "X": 60.0,
+        "Y": 520.4606
+      }
+    },
+    {
+      "ChildId": "7fd91d67-855e-4f47-b21f-38e4ff045af3",
+      "SymbolName": "Lib.field.generate.sdf.BoxSDF",
+      "Position": {
+        "X": 698.5469,
+        "Y": 151.48438
+      }
+    },
+    {
+      "ChildId": "8817dc60-710a-4dd6-a641-f9fa414acf7d",
+      "SymbolName": "Lib.field.render.RaymarchField",
+      "Position": {
+        "X": 978.5469,
+        "Y": 638.9491
+      }
+    },
+    {
+      "ChildId": "8a7ef5b4-f601-49f9-abd1-6aecab4736b0",
+      "SymbolName": "Lib.image.generate.misc.JumpFloodFill",
+      "SectionId": "cf8a69f6-5bbb-4a2e-8057-1513ba75348c",
+      "Position": {
+        "X": 200.0,
+        "Y": 190.0
+      }
+    },
+    {
+      "ChildId": "a025022d-b940-4cd2-a942-e818f52c29fb",
+      "SymbolName": "Lib.image.generate.misc.JumpFloodFill",
+      "SectionId": "cf8a69f6-5bbb-4a2e-8057-1513ba75348c",
+      "Position": {
+        "X": 200.0,
+        "Y": 155.0
+      }
+    },
+    {
+      "ChildId": "a93dc7fd-ade9-475f-87b6-28601cc9151d",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "SectionId": "cf8a69f6-5bbb-4a2e-8057-1513ba75348c",
+      "Position": {
+        "X": 60.0,
+        "Y": 155.0
+      }
+    },
+    {
+      "ChildId": "bbfdd357-1bf4-408c-8b80-1e748c7c5d1e",
+      "SymbolName": "Lib.render.camera.Camera",
+      "Position": {
+        "X": 1346.147,
+        "Y": 615.87976
+      }
+    },
+    {
+      "ChildId": "c06f59ca-729e-4db4-b8b2-572a397f0ab8",
+      "SymbolName": "Lib.field.generate.sdf.Image2dSDF",
+      "SectionId": "79841f17-6fe5-49ed-a82d-8ca80b6dde9c",
+      "Position": {
+        "X": 394.24606,
+        "Y": 654.9418
+      }
+    },
+    {
+      "ChildId": "c2631141-605a-4ddb-8834-fea55456bcfc",
+      "SymbolName": "Lib.field.generate.sdf.Image2dSDF",
+      "SectionId": "cf8a69f6-5bbb-4a2e-8057-1513ba75348c",
+      "Position": {
+        "X": 340.0,
+        "Y": 259.99988
+      }
+    },
+    {
+      "ChildId": "c4d6c107-c9ee-4ef8-abcf-92da3928b45f",
+      "SymbolName": "Lib.image.generate.misc.JumpFloodFill",
+      "SectionId": "79841f17-6fe5-49ed-a82d-8ca80b6dde9c",
+      "Position": {
+        "X": 254.24606,
+        "Y": 584.942
+      }
+    },
+    {
+      "ChildId": "cd1461d7-bd66-4945-97ff-3276708f3c25",
+      "SymbolName": "Lib.field.combine.CombineSDF",
+      "Position": {
+        "X": 978.5469,
+        "Y": 498.9491
+      }
+    },
+    {
+      "ChildId": "ce2a5eff-8968-4c37-817f-8ba15f8fa585",
+      "SymbolName": "Lib.field.combine.CombineSDF",
+      "Position": {
+        "X": 978.5469,
+        "Y": 225.89172
+      }
+    },
+    {
+      "ChildId": "d1a5aa41-f62d-4c0c-82e0-d808dde3d66c",
+      "SymbolName": "Lib.image.fx.blur.FastBlur",
+      "SectionId": "79841f17-6fe5-49ed-a82d-8ca80b6dde9c",
+      "Position": {
+        "X": 394.24606,
+        "Y": 619.942
+      }
+    },
+    {
+      "ChildId": "ec13ed07-073b-49be-8ac9-21d11305cc3e",
+      "SymbolName": "Lib.render.transform.SpreadLayout",
+      "Position": {
+        "X": 1151.5686,
+        "Y": 523.474
+      }
+    },
+    {
+      "ChildId": "fb3ad8ae-9463-4ccb-bc62-40e8849c716d",
+      "SymbolName": "Lib.field.generate.sdf.BoxSDF",
+      "Position": {
+        "X": 978.5469,
+        "Y": 463.9491
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "5595e576-13f5-401a-b7f1-6e4d2039155e"/*ColorBuffer*/,
+      "Position": {
+        "X": 1756.147,
+        "Y": 426.97455
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "79841f17-6fe5-49ed-a82d-8ca80b6dde9c",
+      "Label": "Use any bitmap",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 0.0,
+        "Y": 400.46057
+      },
+      "Size": {
+        "X": 564.2461,
+        "Y": 434.4812
+      }
+    },
+    {
+      "Id": "cf8a69f6-5bbb-4a2e-8057-1513ba75348c",
+      "Label": "Signed Distance Field with Jump Flood Fill",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Size": {
+        "X": 646.323,
+        "Y": 350.75354
+      }
+    }
+  ]
+}
