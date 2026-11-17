@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "c12cf584-f6db-4d24-a03a-7801736d2c50"/*DrawTubes*/,
-  "Description": "Draws connected points as shaded 3D tubes.\n\nThe cross-section follows each line without twisting, so point rotations are not needed. Only the rotation of the first point of each line sets where the cross-section starts, which matters for textures and elliptic cross-sections. Separators (NaN points) split the buffer into separate tubes.\n\nFor rounder curves, subdivide or smooth the points before drawing them.\n\nSee also: [DrawLinesShaded], [DrawRibbons], [DrawLines]",
+  "Description": "Draws connected points as shaded 3D tubes.\n\nThe cross-section follows each line without twisting, so point rotations are not needed. Only the rotation of the first point of each line sets where the cross-section starts, which matters for textures and elliptic cross-sections. Separators (NaN points) split the buffer into separate tubes.\n\nFor rounder curves, subdivide or smooth the points before drawing them.\n\nTips\n- For thin or very many lines, [DrawLinesShaded] is cheaper: two triangles per segment and perfectly round at any distance, with neighbour smoothing. Use [DrawTubes] for textures around the tube, few-sided or elliptic profiles, caps, mitered corners and faceted shading.\n\nSee also: [DrawLinesShaded], [DrawRibbons], [DrawLines]",
   "SymbolTags": "8",
   "InputUis": [
     {
