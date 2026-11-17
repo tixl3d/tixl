@@ -30,8 +30,10 @@ internal sealed partial class OutputWindow
 {
     /// <summary>Evaluates the shown op from its own output and draws it. Evaluation always starts at the shown op:
     /// a separate start op used to exist and left windows stuck on an op with no output.</summary>
-    private Type? UpdateAndDrawOutput(Instance? instance)
+    /// <param name="presentedType">What the drawn value is navigated as, see <see cref="IOutputUi.PresentedType"/>.</param>
+    private Type? UpdateAndDrawOutput(Instance? instance, out Type? presentedType)
     {
+        presentedType = null;
         _imageCanvas.SourceLabel = null;
         if (instance == null)
             return null;
@@ -60,7 +62,7 @@ internal sealed partial class OutputWindow
             _imageCanvas.SourceLabel = fallbackSend.SymbolChild.ReadableName;
 
         if (_imageCanvas.ViewMode != ImageOutputCanvas.Modes.Fitted
-            && evaluatedOutputUi is CommandOutputUi)
+            && evaluatedOutputUi.PresentedType == typeof(Command))
         {
             _imageCanvas.SetViewMode(ImageOutputCanvas.Modes.Fitted);
         }
@@ -126,6 +128,7 @@ internal sealed partial class OutputWindow
         // Render!
         evaluatedOutputUi.DrawValue(evalOutput, EvaluationContext, Config.Title, recompute: !reuse);
 
+        presentedType = evaluatedOutputUi.PresentedType;
         return evalOutput.ValueType;
     }
 

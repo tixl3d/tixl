@@ -1209,8 +1209,12 @@ stage, VkAccessFlags2.ShaderStorageRead | VkAccessFlags2.ShaderStorageWrite);
                         var buffer = binding?.Buffer as VulkanBuffer;
                         var size = binding?.BufferSize ?? 0;
 
+                        // A structured buffer's element count is its range divided by the stride. One byte makes an
+                        // unset slot report 0 elements, as D3D11 does, so shaders that test the count for an optional
+                        // input skip it. Robust buffer access keeps reads from it at zero.
+                        var nullRange = type == VkDescriptorType.StorageBuffer ? 1UL : VK_WHOLE_SIZE;
                         bufferInfos[writeCount] = buffer == null || buffer.Buffer.IsNull
-                                             ? new VkDescriptorBufferInfo { buffer = nulls.Buffer, offset = 0, range = VK_WHOLE_SIZE }
+                                             ? new VkDescriptorBufferInfo { buffer = nulls.Buffer, offset = 0, range = nullRange }
                                              : new VkDescriptorBufferInfo
                                                    {
                                                        buffer = buffer.Buffer,

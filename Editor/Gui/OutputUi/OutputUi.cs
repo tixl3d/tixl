@@ -12,6 +12,7 @@ internal abstract class OutputUi<T> : IOutputUi
     public Symbol.OutputDefinition OutputDefinition { get; set; }
     public Guid Id => OutputDefinition.Id;
     public Type Type { get; } = typeof(T);
+    public virtual Type PresentedType => Type;
     public Vector2 PosOnCanvas { get; set; } = Vector2.Zero;
     public Vector2 Size { get; set; } = SymbolUi.Child.DefaultOpSize;
 

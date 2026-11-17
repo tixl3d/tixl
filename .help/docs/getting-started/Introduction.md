@@ -41,6 +41,8 @@ Depending on the type of this op, the window behaves differently:
 
 For images and textures it works like an image viewer. You can pan with right or middle mouse button and zoom with the mouse wheel. Pressing the Fit button or the F key will adjust the view to show everything. Pressing 1:1 will adjust the zoom to match pixels.
 
+For GPU buffers, like the points of [RadialPoints], the window shows the element count, the stride and the buffer size. Buffers don't know what they contain, so a 64-byte stride is assumed to hold points. Those can be shown as **Points**, drawn like a [VisualizePoints] with its default settings and navigated like a 3D scene, or as a **Table**. The table reads the buffer back from the GPU and lists the elements from **Start** for **Count** rows. Values that grew since the previous frame are tinted orange, values that shrank blue, and the larger the change, the stronger the tint. Hover a value to see its previous value and the change in percent. Zeros are faded out, and color fields start with a small strip showing the color. Buffers with other strides can only be shown as a table, with one column per float.
+
 ### Resolution
 
 In the resolution select we can switch from the default -- filling the size of the current output window -- to a fixed resolution or aspect ratio. Let's switch to full HD to constrain the aspect ratio. 

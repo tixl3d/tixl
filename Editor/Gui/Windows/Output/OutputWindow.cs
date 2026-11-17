@@ -174,8 +174,7 @@ internal sealed partial class OutputWindow : Window
             }
             else if (graphCanvas != null)
             {
-                var drawnType = UpdateAndDrawOutput(drawnInstance);
-                ShownOutputType = drawnType;
+                ShownOutputType = UpdateAndDrawOutput(drawnInstance, out var drawnType);
                 ImageOutputCanvas.Deactivate();
                 // An operator drawing in the output, like Sketch, uses the same drags that would steer the view camera.
                 var isInputCapturedByOperator = T3.SystemUi.OperatorKeyboardCapture.CapturedBy != Guid.Empty;
