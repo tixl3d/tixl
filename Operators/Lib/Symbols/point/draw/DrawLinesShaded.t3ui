@@ -1,0 +1,380 @@
+{
+  "FormatVersion": 3,
+  "Id": "90a5794c-4cec-41e1-bd79-403b40e5666f"/*DrawLinesShaded*/,
+  "Description": "Draws lines from a point buffer as PBR-shaded tubes using the material defined by [SetMaterial].\n\nEach segment is a camera-facing strip that is shaded and depth-tested like a round tube, so tubes stay perfectly round at any distance for two triangles per segment. Separators (NaN points) split the buffer into separate lines.\n\nSmoothing averages each point with its neighbours to remove jaggy corners; line ends stay in place.\n\nAKA: tubes, shaded lines, pipes\n\nSee also: [DrawLines], [DrawRibbons], [DrawTubes], [DrawPointsShaded]",
+  "SymbolTags": "1",
+  "InputUis": [
+    {
+      "InputId": "0295f9fc-3cef-4e93-a3a5-844c7f1d06e9"/*EnableZTest*/,
+      "Position": {
+        "X": 2630.4138,
+        "Y": 4424.199
+      },
+      "Description": "Hides lines behind other geometry."
+    },
+    {
+      "InputId": "0b1996a0-2255-4289-a07d-7a423fafc191"/*FadeNearest*/,
+      "Position": {
+        "X": 1619.0709,
+        "Y": 3754.4053
+      },
+      "Description": "Lines closer to the camera than this distance fade out; they are fully visible at twice the distance. 0 disables the fade."
+    },
+    {
+      "InputId": "3082feed-8084-4248-862f-f92c75323583"/*WidthFactor*/,
+      "Position": {
+        "X": 2345.8533,
+        "Y": 3733.3735
+      },
+      "Description": "Point attribute that multiplies the width: None, F1 or F2."
+    },
+    {
+      "InputId": "51a25054-678d-47f1-9de6-f7180515c178"/*ColorField*/,
+      "Position": {
+        "X": 2205.8533,
+        "Y": 3590.6753
+      },
+      "Description": "Optional field that multiplies the color depending on the world position of the tube surface."
+    },
+    {
+      "InputId": "5a4e9d51-27c0-4c85-8cd9-37d7dbc27ce3"/*EnableZWrite*/,
+      "Position": {
+        "X": 2630.4138,
+        "Y": 4459.199
+      },
+      "GroupTitle": "Draw Options",
+      "Description": "Writes the tubes to the depth buffer so they can hide geometry drawn later."
+    },
+    {
+      "InputId": "66c56537-7036-48a5-866b-3d21dc756c0e"/*Color*/,
+      "Position": {
+        "X": 1339.0709,
+        "Y": 3544.4053
+      },
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "76790f65-315a-42ee-b509-d01475a79f49"/*UsePointScale*/,
+      "Position": {
+        "X": 2205.8533,
+        "Y": 3768.3735
+      },
+      "Description": "Multiplies the width with the point's Scale.x.",
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "c000197c-192e-4073-a5aa-f2570933c4c8"/*Smoothing*/,
+      "Position": {
+        "X": 1619.0709,
+        "Y": 3789.4053
+      },
+      "Description": "How many neighbours on each side are averaged into each point. Removes jaggy corners; 0 draws the points as they are.",
+      "Min": 0.0,
+      "Max": 16.0,
+      "Scale": 1.0,
+      "ClampMin": true
+    },
+    {
+      "InputId": "e4ae8056-00bb-4220-80fc-69457debb26c"/*Width*/,
+      "Position": {
+        "X": 1619.0709,
+        "Y": 3684.4053
+      },
+      "AddPadding": "True",
+      "Description": "Diameter of the tubes in world units.",
+      "Min": 0.0,
+      "Max": 1.0,
+      "Scale": 0.0001,
+      "ClampMin": true
+    },
+    {
+      "InputId": "f219a75c-a4ab-4e09-a5cb-ab7448101317"/*BlendMode*/,
+      "Position": {
+        "X": 2630.4138,
+        "Y": 4389.199
+      }
+    },
+    {
+      "InputId": "fe1ca570-d864-4a18-a500-d7b2311a9c78"/*GPoints*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 2339.4011,
+        "Y": 4189.2515
+      }
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "05ca9795-13f8-4e7f-ab7f-b6d427e64493",
+      "SymbolName": "Lib.render._dx11.api.OutputMergerStage",
+      "Position": {
+        "X": 2910.4138,
+        "Y": 4389.199
+      }
+    },
+    {
+      "ChildId": "0cc45b59-56ae-4eb3-960c-b9906aa03bf8",
+      "SymbolName": "Lib.render._dx11.api.Rasterizer",
+      "Position": {
+        "X": 2910.4138,
+        "Y": 4328.973
+      }
+    },
+    {
+      "ChildId": "14da25c5-f689-4257-b46d-c0ad2d9d7379",
+      "SymbolName": "Lib.render._dx11.api.InputAssemblerStage",
+      "Position": {
+        "X": 3275.4734,
+        "Y": 3582.3838
+      }
+    },
+    {
+      "ChildId": "18269f5f-17c6-4396-84ba-6b1479a3031a",
+      "SymbolName": "Lib.render._dx11.api._TransformsCBuffer",
+      "Style": "Expanded",
+      "Size": {
+        "X": 110.0,
+        "Y": 23.0
+      },
+      "Position": {
+        "X": 2770.4138,
+        "Y": 3694.658
+      }
+    },
+    {
+      "ChildId": "1acfb98f-049b-4de1-a304-6055f35a0750",
+      "SymbolName": "Types.Gfx.SamplerState",
+      "Position": {
+        "X": 2770.4138,
+        "Y": 4254.658
+      }
+    },
+    {
+      "ChildId": "21545f7c-9b4a-433c-9fd5-1cb8ac8ea659",
+      "SymbolName": "Lib.render.shading._.ContextCBuffers",
+      "Position": {
+        "X": 2770.4138,
+        "Y": 3799.658
+      }
+    },
+    {
+      "ChildId": "24afc528-81a9-4f26-9834-acd41f36e3f3",
+      "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
+      "Position": {
+        "X": 2610.4138,
+        "Y": 4024.658
+      }
+    },
+    {
+      "ChildId": "2afa5dd0-8b36-446a-9003-8361aee6f9d4",
+      "SymbolName": "Lib.point.usse.KeepPreviousPointBuffer",
+      "Position": {
+        "X": 2310.4138,
+        "Y": 4024.658
+      }
+    },
+    {
+      "ChildId": "2b6e14a9-390c-4fff-b1f0-7089bb1b5b32",
+      "SymbolName": "Types.Gfx.SamplerState",
+      "Position": {
+        "X": 2770.4138,
+        "Y": 4219.658
+      }
+    },
+    {
+      "ChildId": "42f5dcf4-e8b7-4229-ba70-c1e69f02e681",
+      "SymbolName": "Lib.render._dx11.fxsetup.SetPixelAndVertexShaderStage",
+      "Position": {
+        "X": 2910.4138,
+        "Y": 3624.658
+      }
+    },
+    {
+      "ChildId": "43904151-533d-4d27-a002-7008775b001e",
+      "SymbolName": "Types.Gfx.VertexShader",
+      "Position": {
+        "X": 2770.4138,
+        "Y": 3624.658
+      }
+    },
+    {
+      "ChildId": "4525f54a-3cd4-41f2-943b-5492ba278fce",
+      "SymbolName": "Lib.render._dx11.api.FloatsToBuffer",
+      "Position": {
+        "X": 1759.0709,
+        "Y": 3509.4053
+      }
+    },
+    {
+      "ChildId": "59b5e7c6-293e-4e09-a996-67e3d29d9e45",
+      "SymbolName": "Lib.render.shading._.GetPbrParameters",
+      "Position": {
+        "X": 2339.4011,
+        "Y": 3880.0247
+      }
+    },
+    {
+      "ChildId": "62249d63-3df1-48d0-acad-a96980c49c46",
+      "SymbolName": "Lib.field.render._.GenerateShaderGraphCode",
+      "Position": {
+        "X": 2345.8533,
+        "Y": 3590.6753
+      }
+    },
+    {
+      "ChildId": "6a1f7c85-f3c0-4684-9b3d-5b42b83d55e6",
+      "SymbolName": "Lib.numbers.int.basic.MultiplyInt",
+      "Position": {
+        "X": 2770.4138,
+        "Y": 4564.948
+      }
+    },
+    {
+      "ChildId": "6f44de41-e863-4208-b0eb-262a3fc2be91",
+      "SymbolName": "Lib.numbers.int.process.IntsToBuffer",
+      "Position": {
+        "X": 2485.8533,
+        "Y": 3733.3735
+      }
+    },
+    {
+      "ChildId": "7ce7c09d-2592-4e6f-a39c-6c4d779429a3",
+      "SymbolName": "Types.Gfx.RasterizerState",
+      "Position": {
+        "X": 2770.4138,
+        "Y": 4328.973
+      }
+    },
+    {
+      "ChildId": "823d395c-ab0c-49aa-b524-7e04d3769515",
+      "SymbolName": "Types.Gfx.PixelShaderFromSource",
+      "Position": {
+        "X": 2485.8533,
+        "Y": 3590.6753
+      }
+    },
+    {
+      "ChildId": "84ce4eb2-c918-4f6a-842c-70bdf39e8fe8",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
+      "Style": "Resizable",
+      "Size": {
+        "X": 111.079544,
+        "Y": 59.905018
+      },
+      "Position": {
+        "X": 1619.0709,
+        "Y": 3544.4053
+      }
+    },
+    {
+      "ChildId": "8e5d9b88-acc7-45dd-b4dd-3faa24cb06b3",
+      "SymbolName": "Lib.flow.context.GetForegroundColor",
+      "Position": {
+        "X": 1339.071,
+        "Y": 3579.4053
+      }
+    },
+    {
+      "ChildId": "8fc90af8-51dc-46de-bd9d-624cf76c6d1d",
+      "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
+      "Position": {
+        "X": 2339.4011,
+        "Y": 4224.2515
+      }
+    },
+    {
+      "ChildId": "92433fe8-7ccc-4300-894d-a31dfc2b0fcf",
+      "SymbolName": "Lib.flow.context.GetRenderPassState",
+      "Position": {
+        "X": 2460.4138,
+        "Y": 3954.658
+      }
+    },
+    {
+      "ChildId": "9a42118e-132c-4652-8f95-141c63f0cb3a",
+      "SymbolName": "Types.Gfx.DepthStencilState",
+      "Position": {
+        "X": 2770.4138,
+        "Y": 4424.199
+      }
+    },
+    {
+      "ChildId": "a77ac90a-7378-447f-9526-25324b2cac89",
+      "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
+      "Position": {
+        "X": 2479.4011,
+        "Y": 4090.0244
+      }
+    },
+    {
+      "ChildId": "a83af939-1ecd-419a-a047-8214ed9c0784",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToInt",
+      "Position": {
+        "X": 2345.8533,
+        "Y": 3768.3735
+      }
+    },
+    {
+      "ChildId": "ac68c5c5-b55a-4462-9bab-b5f0a90c2a9b",
+      "SymbolName": "Lib.render._dx11.fxsetup.PickBlendMode",
+      "Position": {
+        "X": 2770.4138,
+        "Y": 4389.199
+      }
+    },
+    {
+      "ChildId": "b0491160-28e0-4908-a010-3ffd24a6a035",
+      "SymbolName": "Lib.numbers.color.BlendColors",
+      "Position": {
+        "X": 1479.0709,
+        "Y": 3544.4053
+      }
+    },
+    {
+      "ChildId": "b754aac4-2a80-402a-9d0e-a73fd2cecba4",
+      "SymbolName": "Lib.render._dx11.buffer.PickBuffer",
+      "Position": {
+        "X": 2460.4138,
+        "Y": 4024.658
+      }
+    },
+    {
+      "ChildId": "dfdaf231-e777-452c-b2b4-03f3c7ff9db6",
+      "SymbolName": "Lib.render._dx11.api.Draw",
+      "Position": {
+        "X": 2910.4138,
+        "Y": 4564.948
+      }
+    },
+    {
+      "ChildId": "ea649360-a875-47fe-9253-580df839bc85",
+      "SymbolName": "Lib.flow.Execute",
+      "Style": "Resizable",
+      "Size": {
+        "X": 81.28825,
+        "Y": 890.9817
+      },
+      "Position": {
+        "X": 3415.4734,
+        "Y": 3582.3838
+      }
+    },
+    {
+      "ChildId": "f374d539-b648-4b86-9c76-1b8e9069b48a",
+      "SymbolName": "Types.Values.Value",
+      "Position": {
+        "X": 1619.0709,
+        "Y": 3719.4053
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "666fc224-b249-4959-b07f-4a6482344a1b"/*Output*/,
+      "Position": {
+        "X": 3415.4734,
+        "Y": 3757.3838
+      }
+    }
+  ]
+}
