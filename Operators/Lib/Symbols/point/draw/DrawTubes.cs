@@ -1,3 +1,5 @@
+using T3.Core.Utils;
+
 namespace Lib.point.draw;
 
 [Guid("c12cf584-f6db-4d24-a03a-7801736d2c50")]
@@ -15,73 +17,66 @@ internal sealed class DrawTubes : Instance<DrawTubes>
     [Input(Guid = "02f5e531-2579-4eca-8fef-a8586e6534cf")]
     public readonly InputSlot<float> Width = new();
 
+    [Input(Guid = "c43b1052-2942-43c7-aaf4-56c91dc8e521", MappedType = typeof(WidthFXs))]
+    public readonly InputSlot<int> WidthFactor = new();
+
+    [Input(Guid = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d")]
+    public readonly InputSlot<bool> UsePointScale = new();
+
+    [Input(Guid = "f8fc2813-2156-4ffd-a546-38214b887e87")]
+    public readonly InputSlot<int> Sides = new();
+
     [Input(Guid = "c3742de6-6720-4a18-a6da-063e05696f9d")]
     public readonly InputSlot<float> Spin = new();
 
     [Input(Guid = "8f609301-338d-45e0-82de-660963ec0174")]
     public readonly InputSlot<float> Twist = new();
 
-    [Input(Guid = "7671239b-7934-4f2a-9e01-851516d817e0")]
-    public readonly InputSlot<bool> UseWAsU = new();
+    [Input(Guid = "4b0ae46d-6798-4c5b-aaa0-2cabb83138dd", MappedType = typeof(TextureModes))]
+    public readonly InputSlot<int> TextureMode = new();
 
-    [Input(Guid = "e1f3945d-1ab8-4e6c-b5ca-c5036ed7d52a")]
+    [Input(Guid = "0a27f15b-81cc-473d-abb3-a7e85b4c03f7")]
     public readonly InputSlot<Vector2> TextureRange = new();
+
+    [Input(Guid = "51341757-a93b-4ca8-9e8d-be30124fc060")]
+    public readonly InputSlot<float> FlatAround = new();
+
+    [Input(Guid = "c7562da2-b723-46fc-9f28-e12f7ed52bb0")]
+    public readonly InputSlot<float> FlatAlong = new();
+
+    [Input(Guid = "2d848beb-c753-4f9d-be08-097a3b1ab5a1")]
+    public readonly InputSlot<float> Miter = new();
+
+    [Input(Guid = "d74dafc3-69d5-4783-867c-edc9c4a0dc93")]
+    public readonly InputSlot<bool> CloseEnds = new();
+
+    [Input(Guid = "196458c8-dfbc-4f23-829c-6c3549b8a5cf")]
+    public readonly InputSlot<float> CapInset = new();
 
     [Input(Guid = "b1bffdfb-fc45-4ec1-baac-39a3ef2f065a")]
     public readonly InputSlot<bool> EnableDepthWrite = new();
 
-    [Input(Guid = "ec6a8011-f1da-413b-a9e4-f909859444b5")]
-    public readonly InputSlot<int> BlendMod = new();
+    [Input(Guid = "ec6a8011-f1da-413b-a9e4-f909859444b5", MappedType = typeof(SharedEnums.BlendModes))]
+    public readonly InputSlot<int> BlendMode = new();
 
     [Input(Guid = "9a486753-840e-4d53-9627-8a2ed02fd39e")]
     public readonly InputSlot<CullMode> Culling = new();
-
-    [Input(Guid = "c43b1052-2942-43c7-aaf4-56c91dc8e521", MappedType = typeof(WidthFXs))]
-    public readonly InputSlot<int> WidthFactor = new();
-
-    [Input(Guid = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d")]
-    public readonly InputSlot<bool> UseScale = new();
-
-    [Input(Guid = "03c7aa3c-5c78-4fc7-80d0-93c8eccdf385")]
-    public readonly InputSlot<bool> UniformScale = new();
-
-    [Input(Guid = "f8fc2813-2156-4ffd-a546-38214b887e87")]
-    public readonly InputSlot<int> Sides = new();
-
-    [Input(Guid = "4876fa78-b008-42d9-83bf-ae0f577d5e5c")]
-    public readonly InputSlot<bool> CapStart = new();
-
-    [Input(Guid = "740ee4c7-ea29-45ee-aebc-59d74627ed31")]
-    public readonly InputSlot<bool> CapEnd = new();
-
-    [Input(Guid = "d4e5f6a7-b8c9-4d1e-2f3a-4b5c6d7e8f90")]
-    public readonly InputSlot<bool> Smooth = new();
-
-    [Input(Guid = "a7b8c9d0-e1f2-4a3b-5c6d-7e8f90123456")]
-    public readonly InputSlot<float> RoundAmount = new();
-
-    [Input(Guid = "b8c9d0e1-f2a3-4b5c-6d7e-8f9012345678")]
-    public readonly InputSlot<int> SubSegments = new();
-
-    [Input(Guid = "a0b1c2d3-e4f5-4a6b-8c7d-9e0f1a2b3c4d")]
-    public readonly InputSlot<bool> DistanceFade = new();
-
-    [Input(Guid = "b1c2d3e4-f5a6-4b7c-9d8e-0f1a2b3c4d5e")]
-    public readonly InputSlot<float> FadeStartDist = new();
-
-    [Input(Guid = "c2d3e4f5-a6b7-4c8d-0e9f-1a2b3c4d5e6f")]
-    public readonly InputSlot<float> FadeEndDist = new();
-
-    [Input(Guid = "d3e4f5a6-b7c8-4d9e-1f0a-2b3c4d5e6f70")]
-    public readonly InputSlot<float> MinWidthFactor = new();
-
-    [Input(Guid = "e5dbb74c-5762-447b-a365-9ea7f6229204")]
-    public readonly InputSlot<float> TextureScale = new();
 
     private enum WidthFXs
     {
         None,
         F1,
         F2,
+    }
+
+    private enum TextureModes
+    {
+        Order,
+        F1,
+        F2,
+        Distance,
+        DistanceNormalized,
+        ContinuousDistance,
+        ContinuousDistanceNormalized,
     }
 }

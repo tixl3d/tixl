@@ -1,0 +1,225 @@
+{
+  "FormatVersion": 3,
+  "Id": "9b56b267-2b83-495d-8f31-90402b19ecec"/*DrawTubesExample*/,
+  "Description": "Illustrates how to setup points and draw them as tubes.",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "01255a84-8922-4e9f-b43b-e58a428d3df4",
+      "SymbolName": "Lib.point.modify.AddNoise",
+      "Position": {
+        "X": 420.0,
+        "Y": 70.0
+      }
+    },
+    {
+      "ChildId": "045fdde8-d21d-4720-8859-a4777d1993a0",
+      "SymbolName": "Lib.point.generate.RadialPoints",
+      "Position": {
+        "X": 420.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "1a0d0dba-b353-4fd6-a3c7-82c04501dbcf",
+      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "Position": {
+        "X": 140.0,
+        "Y": 525.0
+      }
+    },
+    {
+      "ChildId": "1f123e7b-d95d-45c7-b85c-6c8f166e5e1b",
+      "SymbolName": "Lib.render.transform.Group",
+      "Position": {
+        "X": 560.0,
+        "Y": 490.0
+      }
+    },
+    {
+      "ChildId": "259f7a9f-ce4a-45c4-a8c5-00488d16279d",
+      "SymbolName": "Lib.numbers.anim.time.Time",
+      "Position": {
+        "X": 280.0,
+        "Y": 140.0
+      }
+    },
+    {
+      "ChildId": "40a10389-6246-4283-839a-ada3907e058b",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
+      "Position": {
+        "X": 280.0,
+        "Y": 35.0
+      }
+    },
+    {
+      "ChildId": "42363e2e-a845-4757-b2db-f5f04e04c9a9",
+      "SymbolName": "Lib.point.generate.RadialPoints",
+      "Position": {
+        "X": 280.0,
+        "Y": 280.0
+      }
+    },
+    {
+      "ChildId": "450081a0-cc4f-482d-a24e-d1168c308e63",
+      "SymbolName": "Lib.point.draw.DrawTubes",
+      "Position": {
+        "X": 280.0,
+        "Y": 525.0
+      }
+    },
+    {
+      "ChildId": "4c77c065-a058-48a8-aeee-1242e7b9760f",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
+      "Position": {
+        "X": 280.0,
+        "Y": 105.0
+      }
+    },
+    {
+      "ChildId": "56849020-ecb7-4164-bef3-1c83749f6999",
+      "SymbolName": "Lib.render.camera.OrbitCamera",
+      "Position": {
+        "X": 420.0,
+        "Y": 490.0
+      }
+    },
+    {
+      "ChildId": "5cfd6be7-00ce-482a-8982-db3283de2d32",
+      "SymbolName": "Lib.numbers.anim.time.Time",
+      "Position": {
+        "X": 280.0,
+        "Y": 350.0
+      }
+    },
+    {
+      "ChildId": "5fbe8e75-a2ca-4acc-ada9-e40f746bdf77",
+      "SymbolName": "Lib.render.basic.RenderScene",
+      "Position": {
+        "X": 560.0,
+        "Y": 560.0
+      }
+    },
+    {
+      "ChildId": "6340b8c6-f265-4b27-8c8c-b38a5a6c8f7f",
+      "SymbolName": "Lib.render.shading.SetMaterial",
+      "Position": {
+        "X": 420.0,
+        "Y": 525.0
+      }
+    },
+    {
+      "ChildId": "67292394-b6c1-4546-827d-141dd3962e28",
+      "SymbolName": "Lib.point.modify.MapPointAttributes",
+      "Position": {
+        "X": 420.0,
+        "Y": 175.0
+      }
+    },
+    {
+      "ChildId": "6c87d95e-a7ac-43b6-a2b0-dfc813eb3bf9",
+      "SymbolName": "Lib.image.fx.blur.Bloom",
+      "Position": {
+        "X": 560.0,
+        "Y": 665.0
+      }
+    },
+    {
+      "ChildId": "7302a36c-b18c-4332-a0f4-5de6e85bb6dd",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "Position": {
+        "X": 420.0,
+        "Y": 455.0
+      }
+    },
+    {
+      "ChildId": "737dc668-3e24-4ae6-997d-68f66d6450b8",
+      "SymbolName": "Lib.render.postfx.MotionBlur",
+      "Position": {
+        "X": 560.0,
+        "Y": 630.0
+      }
+    },
+    {
+      "ChildId": "73d16642-cadd-4939-b826-7771d9da3f50",
+      "SymbolName": "Lib.render.shading.SetMaterial",
+      "Position": {
+        "X": 420.0,
+        "Y": 385.0
+      }
+    },
+    {
+      "ChildId": "8b2620d8-17b6-4563-892e-9488bceaadea",
+      "SymbolName": "Lib.point.generate.RepeatAtPoints",
+      "Position": {
+        "X": 420.0,
+        "Y": 245.0
+      }
+    },
+    {
+      "ChildId": "90ff8834-8bae-46b2-96c3-80827684c89c",
+      "SymbolName": "Lib.render.postfx.ScreenSpaceLighting",
+      "Position": {
+        "X": 560.0,
+        "Y": 595.0
+      }
+    },
+    {
+      "ChildId": "92ea4c7b-80c0-4a0b-a831-d8bcccf436cd",
+      "SymbolName": "Lib.image.color.ToneMapping",
+      "Position": {
+        "X": 560.0,
+        "Y": 700.0
+      }
+    },
+    {
+      "ChildId": "9d328513-219a-4755-b815-54cb953aee87",
+      "SymbolName": "Lib.numbers.anim.time.Time",
+      "Position": {
+        "X": 140.0,
+        "Y": 455.0
+      }
+    },
+    {
+      "ChildId": "a9522175-e5c3-4155-a1f1-0d83ee45d7c8",
+      "SymbolName": "Lib.numbers.anim.time.Time",
+      "Position": {
+        "X": 280.0,
+        "Y": 210.0
+      }
+    },
+    {
+      "ChildId": "c4f2e76e-4969-462b-9b06-14da6128f12e",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
+      "Position": {
+        "X": 280.0,
+        "Y": 420.0
+      }
+    },
+    {
+      "ChildId": "e07cbcc1-2092-4433-8b39-30486f313431",
+      "SymbolName": "Lib.point.draw.DrawTubes",
+      "Position": {
+        "X": 420.0,
+        "Y": 315.0
+      }
+    },
+    {
+      "ChildId": "eb0ea254-9699-49af-864b-9066cd172075",
+      "SymbolName": "Lib.point.io.LineTextPoints",
+      "Position": {
+        "X": 0.0,
+        "Y": 525.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "6dc7d831-5696-4128-9062-b5641f444b33"/*Output*/,
+      "Position": {
+        "X": 970.0,
+        "Y": 362.5
+      }
+    }
+  ]
+}

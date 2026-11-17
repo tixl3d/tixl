@@ -1,0 +1,44 @@
+{
+  "Id": "c12cf584-f6db-4d24-a03a-7801736d2c50",
+  "Variations": [
+    {
+      "Id": "46f7f5ad-cf75-461f-942f-91641c6185a0",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Square profile",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "02f5e531-2579-4eca-8fef-a8586e6534cf": 0.04,
+          "f8fc2813-2156-4ffd-a546-38214b887e87": 4,
+          "c3742de6-6720-4a18-a6da-063e05696f9d": 45.0,
+          "4b0ae46d-6798-4c5b-aaa0-2cabb83138dd": 6,
+          "51341757-a93b-4ca8-9e8d-be30124fc060": 1.0,
+          "c7562da2-b723-46fc-9f28-e12f7ed52bb0": 1.0,
+          "2d848beb-c753-4f9d-be08-097a3b1ab5a1": 1.0
+        }
+      }
+    },
+    {
+      "Id": "e3ba7827-0428-4e85-9613-9f7123451eae",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Happy Birthday!",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "02f5e531-2579-4eca-8fef-a8586e6534cf": 0.05,
+          "f8fc2813-2156-4ffd-a546-38214b887e87": 6,
+          "c3742de6-6720-4a18-a6da-063e05696f9d": 45.0,
+          "2d848beb-c753-4f9d-be08-097a3b1ab5a1": 1.0
+        }
+      }
+    }
+  ]
+}
