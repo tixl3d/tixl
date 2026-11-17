@@ -59,7 +59,11 @@ internal static class SymbolNaming
 
         var newSource = root.GetText().ToString();
 
-        return EditableSymbolProject.RecompileSymbol(symbol, newSource, false, out _);
+        if (!EditableSymbolProject.RecompileSymbol(symbol, newSource, false, out _))
+            return false;
+
+        EditorSymbolPackage.NotifySymbolStructureChange();
+        return true;
     }
 }
 
