@@ -37,7 +37,14 @@ internal static class SectionRenaming
     /// </summary>
     private static ChangeSectionTextCommand? _changeSectionTextCommand;
 
-    private const float LabelWidth = 350;
+    /** Leaves room for the collapse toggle left of the label. */
+    private const float InputIndent = 34;
+
+    /** Keeps the inputs inside the section's frame stroke. */
+    private const float FrameInset = 3;
+
+    /** Shared by the label input and its placeholder so the placeholder sits where typed text starts. */
+    private const float LabelPadding = 4;
 
     /** The label plus the first lines of the description. */
     private const float VisibleRows = 3;
@@ -48,13 +55,13 @@ internal static class SectionRenaming
     /// Scrolls the graph just enough to show the label field and the start of the description, which sit at
     /// the section's top-left corner and can be off-screen when a large section is opened for editing.
     /// </summary>
-    private static void ScrollInputIntoView(GraphUiContext context, Vector2 inputTopLeft)
+    private static void ScrollInputIntoView(GraphUiContext context, Vector2 inputTopLeft, float inputWidth)
     {
         var view = context.View;
         var padding = new Vector2(ViewPadding * T3Ui.UiScaleFactor);
         var viewMin = view.WindowPos + padding;
         var viewMax = view.WindowPos + view.WindowSize - padding;
-        var inputBottomRight = inputTopLeft + new Vector2(LabelWidth * T3Ui.UiScaleFactor, ImGui.GetFrameHeight() * VisibleRows);
+        var inputBottomRight = inputTopLeft + new Vector2(inputWidth, ImGui.GetFrameHeight() * VisibleRows);
 
         var delta = new Vector2(GetDistanceOutside(inputTopLeft.X, inputBottomRight.X, viewMin.X, viewMax.X),
                                 GetDistanceOutside(inputTopLeft.Y, inputBottomRight.Y, viewMin.Y, viewMax.Y));
@@ -93,6 +100,8 @@ internal static class SectionRenaming
 
         var section = magSection.Section;
         var screenArea = context.View.TransformRect(ImRect.RectWithSize(section.PosOnCanvas, section.Size));
+        var inputTopLeft = screenArea.Min + new Vector2(InputIndent * T3Ui.UiScaleFactor, 0);
+        var inputWidth = MathF.Max(screenArea.Max.X - inputTopLeft.X - FrameInset * T3Ui.UiScaleFactor, 1);
 
         // Initialize buffers and command when dialog is first opened
         var justOpened = _focusedSectionId != sectionId;
@@ -104,13 +113,13 @@ internal static class SectionRenaming
             _labelBuffer = section.Label ?? string.Empty;
             _titleBuffer = section.Title ?? string.Empty;
             _originalTitle = section.Title;
-            ScrollInputIntoView(context, screenArea.Min);
+            ScrollInputIntoView(context, inputTopLeft, inputWidth);
         }
 
         // --- Label editing UI ---
-        ImGui.SetCursorScreenPos(screenArea.Min + new Vector2(34,0));
-        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(4, 4));
-        ImGui.SetNextItemWidth(LabelWidth * T3Ui.UiScaleFactor);
+        ImGui.SetCursorScreenPos(inputTopLeft);
+        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(LabelPadding * T3Ui.UiScaleFactor));
+        ImGui.SetNextItemWidth(inputWidth);
         ImGui.InputText("##renameSectionLabel", ref _labelBuffer, 256, ImGuiInputTextFlags.AutoSelectAll);
         var isLabelActive = ImGui.IsItemActive();
         ImGui.PopStyleVar();
@@ -118,18 +127,19 @@ internal static class SectionRenaming
         // Draw placeholder if label is empty
         if (string.IsNullOrEmpty(_labelBuffer))
         {
-            ImGui.GetWindowDrawList().AddText(Fonts.FontNormal, Fonts.FontNormal.FontSize, ImGui.GetItemRectMin() + new Vector2(20, 4), UiColors.ForegroundFull.Fade(0.3f), "Label...");
+            ImGui.GetWindowDrawList().AddText(Fonts.FontNormal, Fonts.FontNormal.FontSize, ImGui.GetItemRectMin() + new Vector2(LabelPadding * T3Ui.UiScaleFactor), UiColors.ForegroundFull.Fade(0.3f), "Label...");
         }
 
         ImGui.SetCursorScreenPos(new Vector2(ImGui.GetItemRectMin().X, ImGui.GetItemRectMax().Y));
 
         // --- Title/description editing UI ---
-        ImGui.InputTextMultiline("##renameSection", ref _titleBuffer, 1024, screenArea.GetSize() - new Vector2(0, ImGui.GetItemRectSize().Y) - Vector2.One * 3, ImGuiInputTextFlags.AutoSelectAll);
+        var descriptionHeight = MathF.Max(screenArea.Max.Y - ImGui.GetItemRectMax().Y - FrameInset * T3Ui.UiScaleFactor, 1);
+        ImGui.InputTextMultiline("##renameSection", ref _titleBuffer, 1024, new Vector2(inputWidth, descriptionHeight), ImGuiInputTextFlags.AutoSelectAll);
         var isTitleActive = ImGui.IsItemActive();
         // Draw placeholder if title is empty
         if (string.IsNullOrEmpty(_titleBuffer))
         {
-            ImGui.GetWindowDrawList().AddText(Fonts.FontNormal, Fonts.FontNormal.FontSize, ImGui.GetItemRectMin() + new Vector2(7, 7), UiColors.ForegroundFull.Fade(0.3f), "Description...");
+            ImGui.GetWindowDrawList().AddText(Fonts.FontNormal, Fonts.FontNormal.FontSize, ImGui.GetItemRectMin() + new Vector2(7, 7) * T3Ui.UiScaleFactor, UiColors.ForegroundFull.Fade(0.3f), "Description...");
         }
 
         // Update section with buffer values
