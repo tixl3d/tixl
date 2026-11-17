@@ -29,7 +29,7 @@ internal static class ProjectorCalibration
             return;
 
         _lastSyncFrame = frame;
-        var hasSolved = false;
+        var isCameraChanged = false;
         foreach (var output in setup.Outputs)
         {
             if (output.Kind != OutputDefinition.Kinds.Projector || output.Camera is { SyncsToSurface: false })
@@ -46,6 +46,7 @@ internal static class ProjectorCalibration
             {
                 state.Forget();
                 state.Failure = "Not solved yet: corner-pin a surface onto this output. Surfaces that fill the output don't count.";
+                isCameraChanged |= output.Camera is { } unpinned && TryForgetSolve(unpinned);
                 continue;
             }
 
@@ -62,11 +63,11 @@ internal static class ProjectorCalibration
             state.Remember(output, surface, mapping);
 
             // Re-solving an unchanged pin, as after loading, gives the same camera and isn't worth a save.
-            hasSolved |= !posesOnly && state.Failure == null && (!Nullable.Equals(poseBefore, camera.Pose) || !Nullable.Equals(lensBefore, camera.Lens));
+            isCameraChanged |= !posesOnly && state.Failure == null && (!Nullable.Equals(poseBefore, camera.Pose) || !Nullable.Equals(lensBefore, camera.Lens));
         }
 
         // A drag is saved when it ends, before the full solve that follows it; this keeps the file in step for the Player.
-        if (hasSolved)
+        if (isCameraChanged)
             OutputSetupHandling.SaveActive();
     }
 
@@ -87,7 +88,7 @@ internal static class ProjectorCalibration
 
         var source = setup.FindSurface(camera.SolvedFromSurfaceId)?.Name;
         var from = source != null ? $" from '{source}'" : string.Empty;
-        var zoom = camera.IsZoomEntered ? "entered zoom, seen too squarely to measure" : $"{lens.FieldOfViewY * 180 / MathF.PI:0.#}° vertical";
+        var zoom = camera.IsZoomEntered ? "entered zoom, the surface can't tell it" : $"{lens.FieldOfViewY * 180 / MathF.PI:0.#}° vertical";
         var frozen = syncs ? string.Empty : " Kept while sync is off.";
         return $"Solved{from}: {zoom}, misses by {camera.ResidualPx:0.#} px.{frozen}";
     }
@@ -111,11 +112,21 @@ internal static class ProjectorCalibration
         Pose pose;
         Projection lens;
         var isZoomEntered = camera.IsZoomEntered;
+        var enteredFovY = ClampToZoomRange(camera, camera.ManualFovYDegrees * MathF.PI / 180);
         var isSolved = posesOnly
-                           ? ProjectorSolver.TrySolvePoseFromPlane(surfaceToPixels, placement, camera.LensAxis, canvas, camera.Lens!.Value.FieldOfViewY,
+                           ? ProjectorSolver.TrySolvePoseFromPlane(surfaceToPixels, placement, camera.LensAxis, canvas,
+                                                                   camera.IsZoomEntered ? enteredFovY : ClampToZoomRange(camera, camera.Lens!.Value.FieldOfViewY),
                                                                    out pose, out lens)
                            : ProjectorSolver.TrySolveFromPlane(surfaceToPixels, placement, camera.LensAxis, canvas,
-                                                               camera.ManualFovYDegrees * MathF.PI / 180, out pose, out lens, out isZoomEntered);
+                                                               enteredFovY, out pose, out lens, out isZoomEntered);
+
+        // Zoom and distance trade off almost freely on one plane, so a keystone read outside the lens's range is noise.
+        if (isSolved && !posesOnly && !isZoomEntered && !IsInZoomRange(camera, lens.FieldOfViewY))
+        {
+            isZoomEntered = true;
+            isSolved = ProjectorSolver.TrySolvePoseFromPlane(surfaceToPixels, placement, camera.LensAxis, canvas, enteredFovY, out pose, out lens);
+        }
+
         if (!isSolved)
         {
             failure = $"Can't solve from '{surface.Name}'.";
@@ -132,13 +143,48 @@ internal static class ProjectorCalibration
         camera.CalibrationPoints.AddRange(_correspondences);
 
         // The fields show what was solved, so the side view draws it and stays editable.
-        if (!posesOnly && !isZoomEntered)
+        if (!posesOnly)
             camera.ManualFovYDegrees = lens.FieldOfViewY * 180 / MathF.PI;
 
         if (TryGetDistanceToSurface(pose, surface, placement, out var distance))
             camera.ThrowDistance = distance;
 
         failure = string.Empty;
+        return true;
+    }
+
+    /** The field of view in radians, held within the lens's zoom range. */
+    private static float ClampToZoomRange(OutputDefinition.ProjectorCamera camera, float fieldOfViewY)
+    {
+        var range = camera.ZoomRangeDegrees * (MathF.PI / 180);
+        return Math.Clamp(fieldOfViewY, MathF.Min(range.X, range.Y), MathF.Max(range.X, range.Y));
+    }
+
+    private static bool IsInZoomRange(OutputDefinition.ProjectorCamera camera, float fieldOfViewY)
+    {
+        var range = camera.ZoomRangeDegrees * (MathF.PI / 180);
+        return fieldOfViewY >= MathF.Min(range.X, range.Y) * (1 - ZoomRangeTolerance)
+               && fieldOfViewY <= MathF.Max(range.X, range.Y) * (1 + ZoomRangeTolerance);
+    }
+
+    /** How far a measured zoom may lie outside the entered range, relative to it, before it counts as noise. */
+    private const float ZoomRangeTolerance = 0.1f;
+
+    /// <summary>
+    /// Drops a solve whose pin is gone. A synced camera is derived from its pin, and [UseProjectorCam] renders through
+    /// a kept pose and lens instead of the entered zoom and lens shift, so those fields would seem to do nothing.
+    /// </summary>
+    private static bool TryForgetSolve(OutputDefinition.ProjectorCamera camera)
+    {
+        if (camera.Pose == null && camera.Lens == null)
+            return false;
+
+        camera.Pose = null;
+        camera.Lens = null;
+        camera.ResidualPx = 0;
+        camera.SolvedFromSurfaceId = Guid.Empty;
+        camera.IsZoomEntered = false;
+        camera.CalibrationPoints.Clear();
         return true;
     }
 
