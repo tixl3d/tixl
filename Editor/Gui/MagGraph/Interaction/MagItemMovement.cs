@@ -405,15 +405,64 @@ internal sealed partial class MagItemMovement
         if (_connectionsToDraggedItems.Count == 0)
             return false;
 
+        var symbol = context.CompositionInstance.Symbol;
+        var outgoingConnections = new List<(MagGraphConnection Connection, int CountBefore)>();
+        foreach (var mc in _connectionsToDraggedItems)
+        {
+            if (DraggedItems.Contains(mc.TargetItem))
+                continue;
+
+            outgoingConnections.Add((mc, CountConnectionsToInput(symbol, mc.AsSymbolConnection())));
+        }
+
         NodeActions.DisconnectNodes(context.CompositionInstance, DraggedItems.Select(i => i.Selectable).ToList());
 
-        // foreach (var c in _borderConnections)
-        // {
-        //     context.MacroCommand.AddAndExecCommand(new DeleteConnectionCommand(context.CompositionOp.Symbol, c.AsSymbolConnection(), 0));
-        // }
+        CollapseLinesOfShakenOffInputs(context, outgoingConnections);
 
         _layout.FlagStructureAsChanged();
         return true;
+    }
+
+    /// <summary>
+    /// Shifts ops snapped below a target up into the input line that shaking freed, matching a manual disconnect.
+    /// Inputs that <see cref="NodeActions.DisconnectNodes"/> rewired to the shaken op's upstream source keep their line.
+    /// </summary>
+    private void CollapseLinesOfShakenOffInputs(GraphUiContext context, List<(MagGraphConnection Connection, int CountBefore)> outgoingConnections)
+    {
+        var symbol = context.CompositionInstance.Symbol;
+        var collapses = new List<(MagGraphItem TargetItem, float YThreshold)>();
+        foreach (var (mc, countBefore) in outgoingConnections)
+        {
+            if (CountConnectionsToInput(symbol, mc.AsSymbolConnection()) >= countBefore)
+                continue;
+
+            if (!DisconnectedInputWouldCollapseLine(mc))
+                continue;
+
+            var yThreshold = mc.TargetItem.PosOnCanvas.Y + MagGraphItem.GridSize.Y * (mc.InputLineIndex + 0.5f);
+            collapses.Add((mc.TargetItem, yThreshold));
+        }
+
+        // Bottom-up, so lifting a lower line doesn't shift the thresholds of the lines above it
+        collapses.Sort((a, b) => b.YThreshold.CompareTo(a.YThreshold));
+        foreach (var (targetItem, yThreshold) in collapses)
+        {
+            var snappedItems = CollectSnappedItemsBelow(targetItem, yThreshold);
+            snappedItems.ExceptWith(DraggedItems);
+            MoveSnappedItemsVertically(context, snappedItems, yThreshold, -MagGraphItem.GridSize.Y);
+        }
+    }
+
+    private static int CountConnectionsToInput(Symbol symbol, Symbol.Connection connection)
+    {
+        var count = 0;
+        foreach (var c in symbol.Connections)
+        {
+            if (c.TargetParentOrChildId == connection.TargetParentOrChildId && c.TargetSlotId == connection.TargetSlotId)
+                count++;
+        }
+
+        return count;
     }
 
     internal static void UpdateLongPressIndicator(float longTapProgress)
