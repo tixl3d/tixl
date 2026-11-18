@@ -59,8 +59,8 @@ internal sealed partial class SetupOutputView
         if (output == null)
             return;
 
-        // Pins only move in this view, so it keeps the projector cameras on them; a pressed mouse is a drag in progress.
-        ProjectorCalibration.SyncCameras(setup, isAiming: _projectsPhoto || ImGui.IsMouseDown(ImGuiMouseButton.Left));
+        // Pins are aimed in this view; a pressed mouse is a drag in progress.
+        ProjectorCalibration.ReportAiming(_projectsPhoto || ImGui.IsMouseDown(ImGuiMouseButton.Left));
         DrawFrame(setup, machineConfig, output, outputId, shownSurfaceId, selection);
     }
 
