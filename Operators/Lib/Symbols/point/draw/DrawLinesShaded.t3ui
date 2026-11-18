@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "90a5794c-4cec-41e1-bd79-403b40e5666f"/*DrawLinesShaded*/,
-  "Description": "Draws lines from a point buffer as PBR-shaded tubes using the material defined by [SetMaterial].\n\nEach segment is a camera-facing strip that is shaded and depth-tested like a round tube, so tubes stay perfectly round at any distance for two triangles per segment. Separators (NaN points) split the buffer into separate lines.\n\nSmoothing averages each point with its neighbours to remove jaggy corners; line ends stay in place.\n\nAKA: tubes, shaded lines, pipes\n\nTips\n- For textures around the tube, few-sided or elliptic profiles, closed ends, mitered corners or faceted shading, use [DrawTubes]. It builds real geometry, so it costs more per segment.\n\nSee also: [DrawLines], [DrawRibbons], [DrawTubes], [DrawPointsShaded]",
+  "Description": "Draws lines from a point buffer as PBR-shaded tubes using the material defined by [SetMaterial].\n\nEach segment is a camera-facing quad that ray-traces a round-capped tube, so tubes stay perfectly round at any distance and joints stay round at any bend angle, for two triangles per segment. Separators (NaN points) split the buffer into separate lines.\n\nBetween points the tube runs straight. Smoothing averages each point with its neighbours to remove jaggy corners; line ends stay in place.\n\nAKA: tubes, shaded lines, pipes\n\nTips\n- For textures around the tube, few-sided or elliptic profiles, flat ends, mitered corners or faceted shading, use [DrawTubes]. It builds real geometry, so it costs more per segment.\n\nSee also: [DrawLines], [DrawRibbons], [DrawTubes], [DrawPointsShaded]",
   "SymbolTags": "1",
   "InputUis": [
     {

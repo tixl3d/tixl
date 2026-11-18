@@ -4,7 +4,7 @@
 #include "shared/pbr.hlsl"
 #include "shared/velocity-functions.hlsl"
 
-/** x selects the segment's start or end point, y the side of the strip. */
+/** x selects the segment's start or end point, y the side of the quad. */
 static const float2 Corners[] =
     {
         float2(0, -1),
@@ -90,14 +90,15 @@ cbuffer PreviousTransforms : register(b7)
 struct psInput
 {
     float4 position : SV_POSITION;
-    float4 color : COLOR;
-    float2 texCoord : TEXCOORD;
-    float fog : FOG;
-    float3 axisPointInCamera : POSITION2;
-    float3 axisDirectionInCamera : DIRECTION;
-    float3 quadPosInCamera : POSITION3;
-    float3 movementInObject : MOTION;
-    float radius : RADIUS;
+    float3 quadPosInCamera : POSITION0;
+    nointerpolation float3 startInCamera : POSITION1;
+    nointerpolation float3 endInCamera : POSITION2;
+    nointerpolation float2 radii : RADIUS;
+    nointerpolation float4 startColor : COLOR0;
+    nointerpolation float4 endColor : COLOR1;
+    nointerpolation float2 lineCoords : TEXCOORD0;
+    nointerpolation float3 startMovementInObject : MOTION0;
+    nointerpolation float3 endMovementInObject : MOTION1;
 };
 
 struct psOutput
@@ -106,7 +107,7 @@ struct psOutput
     float4 Normal : SV_Target1;
     float4 Velocity : SV_Target2;
 
-    // The tube's front lies between the strip and the camera, so depth only ever moves closer.
+    // The quad lies behind the whole segment, so depth only ever moves closer.
     float Depth : SV_DepthLessEqual;
 };
 
@@ -159,23 +160,24 @@ float GetDistance(float3 p3)
 /** Smoothing beyond this many neighbours per side costs more than it changes the result. */
 static const int MaxSmoothing = 32;
 
-/** The smoothed position, direction and movement of a line point, built from its neighbours within the same line. */
-struct LineFrame
+/** One end of a segment, smoothed with its neighbours within the same line. */
+struct LineEnd
 {
-    float3 Position;
-    float3 Direction;
-    float3 Movement;
+    float3 PositionInCamera;
+    float3 MovementInObject;
+    float Radius;
+    float4 Color;
+    float LineCoord;
 };
 
-LineFrame GetSmoothedFrame(int pointIndex, int pointCount, bool hasPrevious)
+LineEnd GetLineEnd(int pointIndex, int pointCount, bool previousMatches)
 {
     int smoothing = clamp(Smoothing, 0, MaxSmoothing);
-    int reach = max(smoothing, 1);
 
     // Neighbours count only up to the next separator or buffer end, so lines never blend into each other.
     // HLSL does not short-circuit '&&', so each index is range-checked before it is read.
     int pointsBefore = 0;
-    for (; pointsBefore < reach; pointsBefore++)
+    for (; pointsBefore < smoothing; pointsBefore++)
     {
         int neighbourIndex = pointIndex - pointsBefore - 1;
         if (neighbourIndex < 0)
@@ -186,7 +188,7 @@ LineFrame GetSmoothedFrame(int pointIndex, int pointCount, bool hasPrevious)
     }
 
     int pointsAfter = 0;
-    for (; pointsAfter < reach; pointsAfter++)
+    for (; pointsAfter < smoothing; pointsAfter++)
     {
         int neighbourIndex = pointIndex + pointsAfter + 1;
         if (neighbourIndex >= pointCount)
@@ -196,38 +198,114 @@ LineFrame GetSmoothedFrame(int pointIndex, int pointCount, bool hasPrevious)
             break;
     }
 
+    // An unbound or shorter buffer reads zeros; a zero rotation marks such a point.
+    bool hasPrevious = false;
+    if (previousMatches)
+    {
+        float4 previousRotation = PreviousPoints[pointIndex].Rotation;
+        hasPrevious = dot(previousRotation, previousRotation) > 1e-6;
+    }
+
     // A symmetric window keeps the line's end points in place; it narrows towards them.
-    int positionWindow = min(smoothing, min(pointsBefore, pointsAfter));
-    int directionWindow = max(positionWindow, 1);
+    int window = min(pointsBefore, pointsAfter);
 
     float3 positionSum = 0;
     float3 movementSum = 0;
     float weightSum = 0;
-    float3 direction = 0;
-
-    for (int offset = -directionWindow; offset <= directionWindow; offset++)
+    for (int offset = -window; offset <= window; offset++)
     {
-        int neighbourIndex = pointIndex + clamp(offset, -pointsBefore, pointsAfter);
+        int neighbourIndex = pointIndex + offset;
         float3 position = Points[neighbourIndex].Position;
 
         // Triangle weights: smoother than a box filter at the same cost.
-        float weight = positionWindow + 1 - abs(offset);
-        if (abs(offset) <= positionWindow)
-        {
-            positionSum += position * weight;
-            weightSum += weight;
-            if (hasPrevious)
-                movementSum += (position - PreviousPoints[neighbourIndex].Position) * weight;
-        }
-
-        direction += position * sign(offset) * (directionWindow + 1 - abs(offset));
+        float weight = window + 1 - abs(offset);
+        positionSum += position * weight;
+        weightSum += weight;
+        if (hasPrevious)
+            movementSum += (position - PreviousPoints[neighbourIndex].Position) * weight;
     }
 
-    LineFrame frame;
-    frame.Position = positionSum / weightSum;
-    frame.Movement = movementSum / weightSum;
-    frame.Direction = direction;
-    return frame;
+    Point pointDef = Points[pointIndex];
+    float sizeFactor = WidthFactorMode == 0   ? 1
+                       : WidthFactorMode == 1 ? pointDef.FX1
+                                              : pointDef.FX2;
+    float radiusInObject = Width * 0.5 * sizeFactor * (UsePointScale != 0 ? pointDef.Scale.x : 1);
+
+    LineEnd end;
+    end.PositionInCamera = mul(float4(positionSum / weightSum, 1), ObjectToCamera).xyz;
+    end.MovementInObject = movementSum / weightSum;
+
+    // Object scale applies to the width like to the positions.
+    end.Radius = max(radiusInObject * length(mul(float4(1, 0, 0, 0), ObjectToCamera).xyz), 1e-6);
+    end.Color = pointDef.Color * Color;
+    end.LineCoord = (float)pointIndex / max((float)pointCount - 1, 1);
+    return end;
+}
+
+/** Ray against the round cone around the segment a-b (spheres of radius ra and rb at its ends and the cone
+    tangent to both): the entry distance along the ray and the surface normal. Ignores hits behind the origin. */
+bool IntersectRoundCone(float3 rayOrigin, float3 rayDirection, float3 a, float3 b, float ra, float rb,
+                        out float distance, out float3 normal)
+{
+    distance = 0;
+    normal = 0;
+
+    float3 ba = b - a;
+    float3 oa = rayOrigin - a;
+    float3 ob = rayOrigin - b;
+    float rr = ra - rb;
+    float m0 = dot(ba, ba);
+    float m1 = dot(ba, oa);
+    float m2 = dot(ba, rayDirection);
+    float m3 = dot(rayDirection, oa);
+    float m5 = dot(oa, oa);
+    float m6 = dot(ob, rayDirection);
+    float m7 = dot(ob, ob);
+
+    // Without room for a cone (one sphere holds the other) only the spheres remain.
+    float d2 = m0 - rr * rr;
+    if (d2 > 1e-12)
+    {
+        float k2 = d2 - m2 * m2;
+        float k1 = d2 * m3 - m1 * m2 + m2 * rr * ra;
+        float k0 = d2 * m5 - m1 * m1 + m1 * rr * ra * 2 - m0 * ra * ra;
+        float h = k1 * k1 - k0 * k2;
+        if (h >= 0 && k2 > 1e-12)
+        {
+            float t = (-sqrt(h) - k1) / k2;
+            float y = m1 - ra * rr + t * m2;
+            if (y > 0 && y < d2)
+            {
+                distance = t;
+                normal = normalize(d2 * (oa + t * rayDirection) - ba * y);
+                return true;
+            }
+        }
+    }
+
+    float h1 = m3 * m3 - m5 + ra * ra;
+    float h2 = m6 * m6 - m7 + rb * rb;
+    if (max(h1, h2) < 0)
+        return false;
+
+    distance = 1e20;
+    if (h1 > 0)
+    {
+        distance = -m3 - sqrt(h1);
+        normal = (oa + distance * rayDirection) / ra;
+    }
+
+    if (h2 > 0)
+    {
+        float t = -m6 - sqrt(h2);
+        if (t < distance)
+        {
+            distance = t;
+            normal = (ob + t * rayDirection) / rb;
+        }
+    }
+
+    return true;
 }
 
 psInput vsMain(uint id : SV_VertexID)
@@ -252,63 +330,89 @@ psInput vsMain(uint id : SV_VertexID)
         return output;
     }
 
-    int pointIndex = segmentIndex + (int)corner.x;
-    Point pointDef = Points[pointIndex];
-
-    // An unbound or shorter buffer reads zeros; a zero rotation marks such a point.
     uint previousCount, previousStride;
     PreviousPoints.GetDimensions(previousCount, previousStride);
-    bool hasPrevious = false;
-    if (previousCount == pointCount)
-    {
-        float4 previousRotation = PreviousPoints[pointIndex].Rotation;
-        hasPrevious = dot(previousRotation, previousRotation) > 1e-6;
-    }
+    bool previousMatches = previousCount == pointCount;
 
-    LineFrame frame = GetSmoothedFrame(pointIndex, (int)pointCount, hasPrevious);
-    output.movementInObject = frame.Movement;
+    LineEnd start = GetLineEnd(segmentIndex, (int)pointCount, previousMatches);
+    LineEnd end = GetLineEnd(segmentIndex + 1, (int)pointCount, previousMatches);
 
-    float sizeFactor = WidthFactorMode == 0   ? 1
-                       : WidthFactorMode == 1 ? pointDef.FX1
-                                              : pointDef.FX2;
-    float radiusInObject = Width * 0.5 * sizeFactor * (UsePointScale != 0 ? pointDef.Scale.x : 1);
+    float3 a = start.PositionInCamera;
+    float3 b = end.PositionInCamera;
+    float ra = start.Radius;
+    float rb = end.Radius;
+    float3 axis = b - a;
 
-    float3 axisPointInCamera = mul(float4(frame.Position, 1), ObjectToCamera).xyz;
-    float3 axisDirectionInCamera = mul(float4(frame.Direction, 0), ObjectToCamera).xyz;
-    axisDirectionInCamera = dot(axisDirectionInCamera, axisDirectionInCamera) > 1e-12 ? normalize(axisDirectionInCamera) : float3(1, 0, 0);
-
-    // The strip faces the eye around the line's axis, so it covers the tube's silhouette from every angle.
+    // The quad bounds the segment's round cone as the eye sees it: 'side' is normal to the plane through
+    // the eye and the axis, 'along' runs with the axis across the screen. Each end gets its own frame
+    // facing the eye, so a segment seen end-on still covers the disc of its nearer cap.
     bool isOrthographic = abs(CameraToClipSpace._34) < 1e-6;
-    float3 towardsEye = isOrthographic ? float3(0, 0, 1) : -axisPointInCamera;
-    float3 side = cross(axisDirectionInCamera, towardsEye);
-    if (dot(side, side) < 1e-12)
-        side = cross(axisDirectionInCamera, abs(axisDirectionInCamera.y) < 0.9 ? float3(0, 1, 0) : float3(1, 0, 0));
+    float3 viewA = isOrthographic ? float3(0, 0, -1) : normalize(a);
+    float3 viewB = isOrthographic ? float3(0, 0, -1) : normalize(b);
+    float3 side = cross(axis, viewA);
+    if (dot(side, side) < 1e-12 * max(dot(axis, axis), 1e-12))
+        side = cross(viewA, abs(viewA.y) < 0.9 ? float3(0, 1, 0) : float3(1, 0, 0));
     side = normalize(side);
 
-    // Object scale applies to the width like to the positions.
-    float radius = radiusInObject * length(mul(float4(1, 0, 0, 0), ObjectToCamera).xyz);
-    output.radius = radius;
+    float3 alongA = cross(viewA, side);
+    float3 alongB = cross(viewB, side);
 
-    // Seen in perspective, the tube's silhouette lies closer to the eye than its axis and so projects wider.
-    float distanceToEye = length(towardsEye - dot(towardsEye, axisDirectionInCamera) * axisDirectionInCamera);
-    float halfWidth = isOrthographic
-                          ? radius
-                          : radius * distanceToEye / sqrt(max(distanceToEye * distanceToEye - radius * radius, radius * radius * 0.01));
+    float3 quadPosInCamera;
+    if (isOrthographic)
+    {
+        float lengthAlong = dot(axis, alongA);
+        float startOffset = min(-ra, lengthAlong - rb);
+        float endOffset = max(ra - lengthAlong, rb);
+        float halfWidth = max(ra, rb);
+        quadPosInCamera = corner.x < 0.5
+                              ? a + alongA * startOffset
+                              : b + alongB * endOffset;
+        quadPosInCamera += side * corner.y * halfWidth;
+    }
+    else
+    {
+        // Angles seen from the eye: the radius of each end's disc and the span between the ends.
+        float distanceA = length(a);
+        float distanceB = length(b);
+        float discAngleA = asin(min(ra / distanceA, 0.99));
+        float discAngleB = asin(min(rb / distanceB, 0.99));
+        float spanAngle = atan2(dot(viewB, alongA), dot(viewB, viewA));
 
-    float3 quadPosInCamera = axisPointInCamera + side * corner.y * halfWidth;
-    output.axisPointInCamera = axisPointInCamera;
-    output.axisDirectionInCamera = axisDirectionInCamera;
-    output.quadPosInCamera = quadPosInCamera;
+        bool isStart = corner.x < 0.5;
+        float edgeAngle = isStart
+                              ? min(-discAngleA, spanAngle - discAngleB)
+                              : max(discAngleB, discAngleA - spanAngle);
+        float3 view = isStart ? viewA : viewB;
+        float3 along = isStart ? alongA : alongB;
+        float distanceBehind = isStart ? distanceA + ra : distanceB + rb;
+
+        // A straight edge bulges towards the middle, so its corners at the widest disc angle bound both discs.
+        float sideOffset = distanceBehind * tan(max(discAngleA, discAngleB)) / cos(edgeAngle);
+        quadPosInCamera = distanceBehind * (view + along * tan(edgeAngle)) + side * corner.y * sideOffset;
+    }
+
+    // Sliding the corners along their eye rays onto a plane behind the whole segment keeps the
+    // covered pixels and makes the rasterized depth a safe bound for SV_DepthLessEqual.
+    float backDepth = min(a.z - ra, b.z - rb);
+    if (isOrthographic)
+    {
+        quadPosInCamera.z = backDepth;
+    }
+    else if (quadPosInCamera.z < -1e-6)
+    {
+        quadPosInCamera *= backDepth / quadPosInCamera.z;
+    }
+
     output.position = mul(float4(quadPosInCamera, 1), CameraToClipSpace);
-
-    output.texCoord = float2((float)pointIndex / max((float)pointCount - 1, 1), corner.y * 0.5 + 0.5);
-    output.color = pointDef.Color * Color;
-
-    // Fade lines that come too close to the camera.
-    float tooCloseFactor = saturate(-axisPointInCamera.z / FadeNearest - 1);
-    output.color.a *= tooCloseFactor;
-
-    output.fog = pow(saturate(-axisPointInCamera.z / FogDistance), FogBias);
+    output.quadPosInCamera = quadPosInCamera;
+    output.startInCamera = a;
+    output.endInCamera = b;
+    output.radii = float2(ra, rb);
+    output.startColor = start.Color;
+    output.endColor = end.Color;
+    output.lineCoords = float2(start.LineCoord, end.LineCoord);
+    output.startMovementInObject = start.MovementInObject;
+    output.endMovementInObject = end.MovementInObject;
     return output;
 }
 
@@ -316,33 +420,42 @@ psOutput psMain(psInput pin)
 {
     psOutput output;
 
-    // Ray from the eye (orthographic: along the view axis) through this pixel, intersected with the tube's cylinder.
+    // Ray from the eye (orthographic: along the view axis) through this pixel, intersected with the segment's round cone.
     bool isOrthographic = abs(CameraToClipSpace._34) < 1e-6;
     float3 rayDirection = isOrthographic ? float3(0, 0, -1) : normalize(pin.quadPosInCamera);
     float3 rayOrigin = isOrthographic ? pin.quadPosInCamera : 0;
 
-    float3 axis = normalize(pin.axisDirectionInCamera);
-    float3 axisToOrigin = rayOrigin - pin.axisPointInCamera;
-    float3 rayAcross = rayDirection - dot(rayDirection, axis) * axis;
-    float3 originAcross = axisToOrigin - dot(axisToOrigin, axis) * axis;
+    float hitDistance;
+    float3 normalInCamera;
+    if (!IntersectRoundCone(rayOrigin, rayDirection, pin.startInCamera, pin.endInCamera, pin.radii.x, pin.radii.y,
+                            hitDistance, normalInCamera))
+        discard;
 
-    float a = max(dot(rayAcross, rayAcross), 1e-8);
-    float b = dot(originAcross, rayAcross);
-    float c = dot(originAcross, originAcross) - pin.radius * pin.radius;
+    // The orthographic ray starts behind the segment, so only the perspective eye can sit inside it.
+    if (!isOrthographic && hitDistance < 0)
+        discard;
 
-    // The strip's outer edge grazes the silhouette, so rounding can push it just past; clamping keeps it closed.
-    float h = max(b * b - a * c, 0);
-    float3 surfaceInCamera = rayOrigin + rayDirection * ((-b - sqrt(h)) / a);
+    float3 surfaceInCamera = rayOrigin + rayDirection * hitDistance;
+    normalInCamera = normalize(normalInCamera);
 
-    float3 axisToSurface = surfaceInCamera - pin.axisPointInCamera;
-    float3 normalInCamera = axisToSurface - dot(axisToSurface, axis) * axis;
-    normalInCamera = dot(normalInCamera, normalInCamera) > 1e-12 ? normalize(normalInCamera) : -rayDirection;
+    float3 axis = pin.endInCamera - pin.startInCamera;
+    float alongSegment = saturate(dot(surfaceInCamera - pin.startInCamera, axis) / max(dot(axis, axis), 1e-12));
 
-    float4 roughnessMetallicOcclusion = RSMOMap.Sample(WrappedSampler, pin.texCoord);
+    // Across the line, 0 and 1 mark the silhouette edges like on a flat strip.
+    float3 side = cross(rayDirection, axis);
+    float acrossLine = dot(side, side) > 1e-12 ? dot(normalInCamera, normalize(side)) * 0.5 + 0.5 : 0.5;
+    float2 texCoord = float2(lerp(pin.lineCoords.x, pin.lineCoords.y, alongSegment), acrossLine);
+
+    float4 color = lerp(pin.startColor, pin.endColor, alongSegment);
+
+    // Fade lines that come too close to the camera.
+    color.a *= saturate(-surfaceInCamera.z / FadeNearest - 1);
+
+    float4 roughnessMetallicOcclusion = RSMOMap.Sample(WrappedSampler, texCoord);
     frag.Roughness = saturate(roughnessMetallicOcclusion.x + Roughness);
     frag.Metalness = saturate(roughnessMetallicOcclusion.y + Metal);
     frag.Occlusion = roughnessMetallicOcclusion.z;
-    frag.albedo = pin.color;
+    frag.albedo = color;
 
     frag.N = normalize(mul(float4(normalInCamera, 0), CameraToWorld).xyz);
     frag.worldPosition = mul(float4(surfaceInCamera, 1), CameraToWorld).xyz;
@@ -351,11 +464,12 @@ psOutput psMain(psInput pin)
     output.Depth = surfaceInClipSpace.z / surfaceInClipSpace.w;
 
     float3 surfaceInObject = mul(float4(frag.worldPosition, 1), WorldToObject).xyz;
-    float4 previousClipPosition = mul(float4(surfaceInObject - pin.movementInObject, 1), PrevObjectToClipSpace);
+    float3 movementInObject = lerp(pin.startMovementInObject, pin.endMovementInObject, alongSegment);
+    float4 previousClipPosition = mul(float4(surfaceInObject - movementInObject, 1), PrevObjectToClipSpace);
     output.Velocity = EncodeVelocity(surfaceInClipSpace, previousClipPosition, CameraToClipSpace, PrevCameraToClipSpace);
 
-    frag.uv = pin.texCoord;
-    frag.fog = pin.fog;
+    frag.uv = texCoord;
+    frag.fog = pow(saturate(-surfaceInCamera.z / FogDistance), FogBias);
 
     float3 eyePosition = mul(float4(0, 0, 0, 1), CameraToWorld).xyz;
     frag.Lo = normalize(eyePosition - frag.worldPosition);
