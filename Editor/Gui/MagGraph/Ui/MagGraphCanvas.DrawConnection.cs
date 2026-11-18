@@ -75,7 +75,8 @@ internal sealed partial class MagGraphView
 
         var color = typeUiProperties.Color.Fade(_context.GraphOpacity);
 
-        var wasHoveredLastFrame = !_context.PreventInteraction && ConnectionHovering.IsHovered(connection);
+        var wasHoveredLastFrame = !_context.PreventInteraction
+                                  && (ConnectionHovering.IsHovered(connection) || _context.ItemMovement.WireSplitConnection == connection);
         var selectedColor = isSelected || wasHoveredLastFrame
                                 ? ColorVariations.OperatorLabel.Apply(color)
                                 : ColorVariations.ConnectionLines.Apply(color);
@@ -171,7 +172,13 @@ internal sealed partial class MagGraphView
                                                                 out var normalizedHoverPos))
                     {
                         if (context.StateMachine.CurrentState == GraphStates.Default)
+                        {
                             ConnectionHovering.RegisterHoverPoint(connection, typeColor, hoverPositionOnLine, normalizedHoverPos, sourcePosOnScreen);
+                        }
+                        else if (context.StateMachine.CurrentState == GraphStates.DragItems)
+                        {
+                            context.ItemMovement.RegisterWireSplitCandidate(connection, typeColor, hoverPositionOnLine);
+                        }
                     }
 
                     drawList.AddTriangleFilled(
@@ -219,7 +226,13 @@ internal sealed partial class MagGraphView
                                                              out var normalizedHoverPos))
                     {
                         if (context.StateMachine.CurrentState == GraphStates.Default)
+                        {
                             ConnectionHovering.RegisterHoverPoint(connection, typeColor, hoverPositionOnLine, normalizedHoverPos, sourcePosOnScreen);
+                        }
+                        else if (context.StateMachine.CurrentState == GraphStates.DragItems)
+                        {
+                            context.ItemMovement.RegisterWireSplitCandidate(connection, typeColor, hoverPositionOnLine);
+                        }
                     }
 
                     // Draw triangle
