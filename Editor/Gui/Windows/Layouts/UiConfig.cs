@@ -1,6 +1,7 @@
 #nullable enable
 using T3.Core.Animation;
 using T3.Core.Operator;
+using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.Output;
 using T3.Editor.UiModel.ProjectHandling;
@@ -21,10 +22,12 @@ internal static class UiConfig
         if (!LayoutHandling.FocusMode)
         {
             SwitchToFocusMode(projectView);
+            ActionToast.Show("{Focus mode}" + LayoutHandling.KeyHint(UserActions.ToggleFocusMode, " shows the windows again"));
         }
         else
         {
             SwitchBackFromFocusMode();
+            ActionToast.Show("{Window layout " + LayoutHandling.GetLayoutNumber(UserSettings.Config.WindowLayoutIndex) + "}");
         }
     }
 
