@@ -5,29 +5,57 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "09453e50-5213-4354-834e-f22b8c87ac95",
-      "SymbolName": "Lib.flow.skillQuest.DrawQuiz",
+      "ChildId": "0810bdf3-e1c0-48e8-ab89-d08517e505de",
+      "SymbolName": "Lib.image.analyze.WaveForm",
+      "Position": {
+        "X": 1553.2708,
+        "Y": 1786.6185
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "0917f7d0-9f8d-4dea-a773-b785ec948a24",
+      "SymbolName": "Lib.flow.skillQuest.ImageQuiz",
       "Position": {
         "X": 1693.2708,
         "Y": 1786.6185
       }
     },
     {
-      "ChildId": "3bb826cf-0083-4272-b4bc-cc6268bd2fb1",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "4f68f62c-efb0-454e-898c-76451b6f26e3",
+      "SymbolName": "Lib.image.color.ColorGrade",
+      "Position": {
+        "X": 1276.509,
+        "Y": 1717.8516
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "ba8471f1-3f9d-4fa6-b5f9-bd10a1599b25",
+      "SymbolName": "Lib.image.analyze.WaveForm",
+      "Position": {
+        "X": 1553.2708,
+        "Y": 1821.6185
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "badae4d1-41eb-46f8-9ab4-0bd56ce60f01",
+      "SymbolName": "Lib.image.color.ColorGrade",
       "SectionId": "812c04cd-37ef-4475-ae3f-499d873f572d",
       "Position": {
-        "X": 1244.7633,
-        "Y": 2141.3435
+        "X": 1222.2959,
+        "Y": 2126.321
       }
     },
     {
-      "ChildId": "90ac6f41-ca6d-4df5-98a6-76aad71f53e6",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "d01f5639-b95e-4914-a145-46badd13d1c1",
+      "SymbolName": "Skills._._ExampleContent",
       "Position": {
-        "X": 1366.8816,
-        "Y": 1568.3276
-      }
+        "X": 843.9098,
+        "Y": 1699.793
+      },
+      "SnapshotGroupIndex": "1"
     }
   ],
   "OutputUis": [
@@ -67,11 +95,16 @@
     },
     {
       "Id": "91a3cf85-5ba2-466a-a319-98b4f988d9b4",
-      "Description": "[ColorGrade] is the appropriate tool for this task.\nIt is already present in the graph. Select it."
+      "ChildId": "4f68f62c-efb0-454e-898c-76451b6f26e3",
+      "Description": "[ColorGrade] is the appropriate tool for this task.\nIt is already present in the graph. Select it.",
+      "Style": "InfoFor"
     },
     {
       "Id": "96e629d5-8399-4f6f-86cd-0fa6f465e0e4",
-      "Description": "Open the color picker for the Gain parameter.\nPure gray has no effect.\nMoving away from gray introduces a color shift.\nTo counter a blue cast, move slightly toward the complementary color: yellow."
+      "ChildId": "4f68f62c-efb0-454e-898c-76451b6f26e3",
+      "InputId": "be4dc864-a5f9-4356-91f9-58de8056a3a8",
+      "Description": "Open the color picker for the Gamma parameter.\nPure gray has no effect.\nMoving away from gray introduces a color shift.\nTo counter a blue cast, move slightly toward the complementary color: yellow.",
+      "Style": "CallToAction"
     },
     {
       "Id": "bc4e67e3-46a7-4487-b335-96a67c751cc2",
@@ -84,6 +117,8 @@
     },
     {
       "Id": "46d56a84-d22c-4ba7-81e0-3cfa6db363a7",
+      "ChildId": "4f68f62c-efb0-454e-898c-76451b6f26e3",
+      "InputId": "be4dc864-a5f9-4356-91f9-58de8056a3a8",
       "Description": "Balance the waveform curves to remove the color cast.",
       "Style": "CallToAction"
     }

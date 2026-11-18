@@ -5,28 +5,56 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "739e7548-3085-43d3-bcf3-342f99bb29ce",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "16fd4aa8-75c5-4389-9521-38b58ca5ff71",
+      "SymbolName": "Lib.flow.skillQuest.ImageQuiz",
       "Position": {
-        "X": 1366.8816,
-        "Y": 1568.3276
+        "X": 1536.3861,
+        "Y": 1761.7946
       }
     },
     {
-      "ChildId": "8fa95e5d-190c-45b2-a52c-88ac25973748",
-      "SymbolName": "Lib.flow.skillQuest.DrawQuiz",
+      "ChildId": "17889d8b-eb7f-4cf9-94a7-241d9c4ba1f6",
+      "SymbolName": "Lib.image.color.ColorGrade",
       "Position": {
-        "X": 1693.2708,
-        "Y": 1786.6185
-      }
+        "X": 1176.2529,
+        "Y": 1734.6313
+      },
+      "SnapshotGroupIndex": "1"
     },
     {
-      "ChildId": "966ca4e5-5c66-431f-aeea-694f1ad35846",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "38ebf1f1-6a7a-41c3-a3e7-8b82f86ea109",
+      "SymbolName": "Lib.image.analyze.WaveForm",
+      "Position": {
+        "X": 1396.3861,
+        "Y": 1761.7946
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "7dbadaee-5fee-4e14-baa9-2cc03b658564",
+      "SymbolName": "Skills._._ExampleContent",
+      "Position": {
+        "X": 950.46674,
+        "Y": 1761.1237
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "9e96ef6e-a6fe-45bd-bbd8-35ffff6fa82d",
+      "SymbolName": "Lib.image.analyze.WaveForm",
+      "Position": {
+        "X": 1396.3861,
+        "Y": 1796.7946
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "a815eeb2-70a3-4c2b-8895-ed57d95c5288",
+      "SymbolName": "Lib.image.color.ColorGrade",
       "SectionId": "b9a7bc54-7a33-45d7-ac5f-9b3e08966d2a",
       "Position": {
-        "X": 1244.7633,
-        "Y": 2141.3435
+        "X": 1210.5392,
+        "Y": 2125.7227
       }
     }
   ],
@@ -43,7 +71,6 @@
     {
       "Id": "b9a7bc54-7a33-45d7-ac5f-9b3e08966d2a",
       "Label": "Solution",
-      "Collapsed": "True",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -51,11 +78,11 @@
         "W": 1.0
       },
       "Position": {
-        "X": 1085.0,
-        "Y": 2052.5103
+        "X": 1120.0,
+        "Y": 2044.8247
       },
       "Size": {
-        "X": 525.0,
+        "X": 367.68616,
         "Y": 187.48975
       }
     }
@@ -67,6 +94,7 @@
     },
     {
       "Id": "627ec478-bfc5-4766-9b7b-0844cd8500fb",
+      "ChildId": "17889d8b-eb7f-4cf9-94a7-241d9c4ba1f6",
       "Description": "Insert a [ColorGrade] operator and adjust Lift and Gain to create the look.",
       "Style": "CallToAction"
     }

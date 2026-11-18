@@ -1,0 +1,86 @@
+{
+  "FormatVersion": 3,
+  "Id": "be19804d-c269-4266-84b0-091f4f23c24a"/*_ExampleContent*/,
+  "Description": "This is only an example content. \nYou do not need to change it to solve the puzzle.",
+  "InputUis": [
+    {
+      "InputId": "fcd39ec2-c822-43f1-b79a-4266cde3787b"/*Type*/,
+      "Position": {
+        "X": -310.0696,
+        "Y": 318.83463
+      }
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "01b3b1fb-82bc-41d0-b17b-f5248bc277ad",
+      "SymbolName": "Lib.image.color.ColorGrade",
+      "Position": {
+        "X": -310.0696,
+        "Y": 283.83463
+      }
+    },
+    {
+      "ChildId": "8263a9c4-4152-4d49-88da-25c63d48ae26",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
+      "Position": {
+        "X": -704.3873,
+        "Y": 313.72736
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "8621e11e-6a5a-481b-a093-8cf133b6b559",
+      "SymbolName": "Lib.image.color.AdjustColors",
+      "Position": {
+        "X": -310.0696,
+        "Y": 248.83463
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "8f2162ca-375e-4082-b04b-a236564c05d5",
+      "SymbolName": "Lib.render.basic.Layer2d",
+      "Position": {
+        "X": -704.3873,
+        "Y": 243.72736
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "bfd471e9-54ae-4e72-a7e9-551891d03892",
+      "SymbolName": "Lib.image.use.PickTexture",
+      "Position": {
+        "X": -170.06961,
+        "Y": 248.83463
+      }
+    },
+    {
+      "ChildId": "ddd41fdf-fff4-4320-9e08-6aa3c079d50d",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "Position": {
+        "X": -704.3873,
+        "Y": 278.72736
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "f8f1dddb-bc8b-4738-9aff-65a6997b7c46",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
+      "Position": {
+        "X": -704.3873,
+        "Y": 208.72736
+      },
+      "SnapshotGroupIndex": "1"
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "b0c6c3cc-200d-4de1-9088-7be166de433f"/*Output*/,
+      "Position": {
+        "X": -170.06961,
+        "Y": 353.83463
+      }
+    }
+  ]
+}

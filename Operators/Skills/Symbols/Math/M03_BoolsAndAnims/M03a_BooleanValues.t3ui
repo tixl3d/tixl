@@ -5,25 +5,42 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "046ec7d9-108b-44ba-af0b-46e6ab9bc851",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "5770b9ca-7a5f-4a37-9f32-d0088f4bc44b",
+      "SymbolName": "Types.Values.Boolean",
       "SectionId": "f59da28d-5400-4822-b7cd-f8c6908fc5c6",
       "Position": {
-        "X": 1244.7633,
-        "Y": 2141.3435
+        "X": 1237.865,
+        "Y": 2127.5361
       }
     },
     {
-      "ChildId": "81f35510-4969-4e32-a3b1-52b4a00b3cf7",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "9ea8f186-814e-44a6-aea7-378c6cb9d0da",
+      "SymbolName": "Types.Values.Boolean",
       "Position": {
-        "X": 1366.8816,
-        "Y": 1568.3276
+        "X": 1250.2391,
+        "Y": 1695.6606
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "a3d7af1f-1ace-40c4-bbf5-26fa3ac0b5b1",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
+      "Position": {
+        "X": 1553.2708,
+        "Y": 1821.6185
       }
     },
     {
-      "ChildId": "ccbdf520-d1df-448c-90ce-d4862987c178",
-      "SymbolName": "Lib.flow.skillQuest.DrawQuiz",
+      "ChildId": "a4e02236-3ebc-4f20-ae5e-4d4b0307e501",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
+      "Position": {
+        "X": 1553.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "f69f7733-76d4-4d3e-8b80-9fc3c856a1d8",
+      "SymbolName": "Lib.flow.skillQuest.ValueQuiz",
       "Position": {
         "X": 1693.2708,
         "Y": 1786.6185
@@ -67,12 +84,16 @@
     },
     {
       "Id": "58398d03-7394-4b81-a64e-9ddde6f03d6a",
-      "Description": "In TiXL, booleans are important because they are used by parameters that enable or disable things, such as checkboxes.\nThey are also used to drive trigger-like behavior. Triggers are covered in the next topic."
+      "ChildId": "9ea8f186-814e-44a6-aea7-378c6cb9d0da",
+      "Description": "In TiXL, booleans are important because they are used by parameters that enable or disable things, such as checkboxes.\nThey are also used to drive trigger-like behavior. Triggers are covered in the next topic.",
+      "Style": "Tip"
     },
     {
       "Id": "c285ac7d-e167-4dc2-bc9d-c2f7f2ba2db7",
-      "Description": "Define a boolean value using the [Bool] operator.\nYou can toggle it directly in the graph. To move the operator without toggling it, use the drag handle on the left edge.",
-      "Style": "CallToAction"
+      "ChildId": "9ea8f186-814e-44a6-aea7-378c6cb9d0da",
+      "InputId": "e7c1f0af-da6d-4e33-ac86-7dc96bfe7eb3",
+      "Description": "Define a boolean value using the [Boolean] operator.\nYou can toggle it directly in the graph. To move the operator without toggling it, use the drag handle on the left edge.",
+      "Style": "InfoFor"
     }
   ]
 }

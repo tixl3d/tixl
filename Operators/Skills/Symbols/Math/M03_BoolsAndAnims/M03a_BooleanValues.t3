@@ -4,57 +4,83 @@
   "Inputs": [],
   "Children": [
     {
-      "Id": "046ec7d9-108b-44ba-af0b-46e6ab9bc851"/*Text*/,
-      "SymbolId": "fd31d208-12fe-46bf-bfa3-101211f8f497",
-      "SymbolName": "Lib.render.basic.Text",
+      "Id": "5770b9ca-7a5f-4a37-9f32-d0088f4bc44b"/*Boolean*/,
+      "SymbolId": "ed0f5188-8888-453e-8db4-20d87d18e9f4",
+      "SymbolName": "Types.Values.Boolean",
       "InputValues": [
         {
-          "Id": "f1f1be0e-d5bc-4940-bbc1-88bfa958f0e1"/*InputText*/,
-          "Type": "System.String",
-          "Value": "Solution"
+          "Id": "e7c1f0af-da6d-4e33-ac86-7dc96bfe7eb3"/*BoolValue*/,
+          "Type": "System.Boolean",
+          "Value": true
         }
       ],
       "Outputs": []
     },
     {
-      "Id": "81f35510-4969-4e32-a3b1-52b4a00b3cf7"/*Text*/,
-      "SymbolId": "fd31d208-12fe-46bf-bfa3-101211f8f497",
-      "SymbolName": "Lib.render.basic.Text",
+      "Id": "9ea8f186-814e-44a6-aea7-378c6cb9d0da"/*Boolean*/,
+      "SymbolId": "ed0f5188-8888-453e-8db4-20d87d18e9f4",
+      "SymbolName": "Types.Values.Boolean",
       "InputValues": [
         {
-          "Id": "f1f1be0e-d5bc-4940-bbc1-88bfa958f0e1"/*InputText*/,
-          "Type": "System.String",
-          "Value": "Task"
+          "Id": "e7c1f0af-da6d-4e33-ac86-7dc96bfe7eb3"/*BoolValue*/,
+          "Type": "System.Boolean",
+          "Value": false
         }
       ],
       "Outputs": []
     },
     {
-      "Id": "ccbdf520-d1df-448c-90ce-d4862987c178"/*DrawQuiz*/,
-      "SymbolId": "16e30ce0-20c9-4677-9837-0200454e05ae",
-      "SymbolName": "Lib.flow.skillQuest.DrawQuiz",
+      "Id": "a3d7af1f-1ace-40c4-bbf5-26fa3ac0b5b1"/*BoolToFloat*/,
+      "SymbolId": "9db2fcbf-54b9-4222-878b-80d1a0dc6edf",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
+      "InputValues": [],
+      "Outputs": []
+    },
+    {
+      "Id": "a4e02236-3ebc-4f20-ae5e-4d4b0307e501"/*BoolToFloat*/,
+      "SymbolId": "9db2fcbf-54b9-4222-878b-80d1a0dc6edf",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
+      "InputValues": [],
+      "Outputs": []
+    },
+    {
+      "Id": "f69f7733-76d4-4d3e-8b80-9fc3c856a1d8"/*ValueQuiz*/,
+      "SymbolId": "702f1f75-df90-44ca-b567-78ba9d1613b5",
+      "SymbolName": "Lib.flow.skillQuest.ValueQuiz",
       "InputValues": [],
       "Outputs": []
     }
   ],
   "Connections": [
     {
-      "SourceParentOrChildId": "ccbdf520-d1df-448c-90ce-d4862987c178",
-      "SourceSlotId": "63a74fd8-a6e7-4d6f-b63d-179d7ff8ca4f",
+      "SourceParentOrChildId": "f69f7733-76d4-4d3e-8b80-9fc3c856a1d8",
+      "SourceSlotId": "6fbc9fd1-58c2-4b0b-accb-9850a8835120",
       "TargetParentOrChildId": "00000000-0000-0000-0000-000000000000",
       "TargetSlotId": "7d433093-c2fe-44cc-bded-827b7f64f0c7"
     },
     {
-      "SourceParentOrChildId": "046ec7d9-108b-44ba-af0b-46e6ab9bc851",
-      "SourceSlotId": "3f8b20a7-c8b8-45ab-86a1-0efcd927358e",
-      "TargetParentOrChildId": "ccbdf520-d1df-448c-90ce-d4862987c178",
-      "TargetSlotId": "8f4f0caa-b710-47c1-94dd-346f03fac3c8"
+      "SourceParentOrChildId": "5770b9ca-7a5f-4a37-9f32-d0088f4bc44b",
+      "SourceSlotId": "97a91f72-1e40-412c-911e-70b142e16925",
+      "TargetParentOrChildId": "a3d7af1f-1ace-40c4-bbf5-26fa3ac0b5b1",
+      "TargetSlotId": "253b9ae4-fac5-4641-bf0c-d8614606a840"
     },
     {
-      "SourceParentOrChildId": "81f35510-4969-4e32-a3b1-52b4a00b3cf7",
-      "SourceSlotId": "3f8b20a7-c8b8-45ab-86a1-0efcd927358e",
-      "TargetParentOrChildId": "ccbdf520-d1df-448c-90ce-d4862987c178",
-      "TargetSlotId": "a6f445ac-1be1-4921-baee-cf2caf5a6a90"
+      "SourceParentOrChildId": "9ea8f186-814e-44a6-aea7-378c6cb9d0da",
+      "SourceSlotId": "97a91f72-1e40-412c-911e-70b142e16925",
+      "TargetParentOrChildId": "a4e02236-3ebc-4f20-ae5e-4d4b0307e501",
+      "TargetSlotId": "253b9ae4-fac5-4641-bf0c-d8614606a840"
+    },
+    {
+      "SourceParentOrChildId": "a4e02236-3ebc-4f20-ae5e-4d4b0307e501",
+      "SourceSlotId": "f0321a54-e844-482f-a161-7f137abc54b0",
+      "TargetParentOrChildId": "f69f7733-76d4-4d3e-8b80-9fc3c856a1d8",
+      "TargetSlotId": "270bda80-7f81-4f31-adb4-9cd5e8aea693"
+    },
+    {
+      "SourceParentOrChildId": "a3d7af1f-1ace-40c4-bbf5-26fa3ac0b5b1",
+      "SourceSlotId": "f0321a54-e844-482f-a161-7f137abc54b0",
+      "TargetParentOrChildId": "f69f7733-76d4-4d3e-8b80-9fc3c856a1d8",
+      "TargetSlotId": "c09a529a-dfe2-4bf8-86ce-369aeadbee4a"
     }
   ]
 }
