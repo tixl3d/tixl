@@ -962,7 +962,11 @@ internal sealed class SnapshotControlView
 
         ImGui.SetCursorScreenPos(new Vector2(valueMax.X + 2 * scale, valueMin.Y));
 
-        if (CustomComponents.IconButton(Icon.Settings2, new Vector2(buttonSize, buttonSize), CustomComponents.ButtonStates.Default))
+        // Shares the row's ID scope with the edit control, which may draw the same icon button (e.g. the gradient options).
+        ImGui.PushID("paramActions");
+        var actionsClicked = CustomComponents.IconButton(Icon.Settings2, new Vector2(buttonSize, buttonSize), CustomComponents.ButtonStates.Default);
+        ImGui.PopID();
+        if (actionsClicked)
             ImGui.OpenPopup(ParameterActionPopupId);
 
         CustomComponents.TooltipForLastItem("Parameter actions");
