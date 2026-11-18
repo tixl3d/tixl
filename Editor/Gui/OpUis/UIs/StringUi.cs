@@ -68,8 +68,10 @@ internal static class StringUi
             if (ImGui.InputTextMultiline("##str", ref data.InputString.TypedInputValue.Value, 16368, usableArea.GetSize(),
                                          ImGuiInputTextFlags.None))
             {
+                // Invalidate() is a no-op once this frame's invalidation pass visited the slot.
                 data.InputString.Input.IsDefault = false;
-                data.InputString.DirtyFlag.Invalidate();
+                data.InputString.DirtyFlag.ForceInvalidate();
+                instance.Parent?.Symbol.InvalidateInputInAllChildInstances(data.InputString);
             }
 
             var clickedOutside = ImGui.IsMouseReleased(ImGuiMouseButton.Left) && !usableArea.Contains(ImGui.GetMousePos());
