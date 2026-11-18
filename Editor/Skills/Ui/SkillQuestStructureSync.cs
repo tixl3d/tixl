@@ -1,4 +1,5 @@
 #nullable enable
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
 using T3.Core.Operator;
@@ -9,56 +10,39 @@ using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Modification;
+using T3.Editor.UiModel.Selection;
 
 namespace T3.Editor.Skills.Ui;
 
 /// <summary>
-/// Syncs the SkillQuest level structure from the content repository (a checkout of
-/// github.com/tixl3d/skillquest) into the Skills package:
+/// Syncs SkillQuest levels between the content repository (a checkout of github.com/tixl3d/skillquest)
+/// and the Skills package. There is no record of which side changed last, so neither direction
+/// silently overwrites edited content:
 ///
+/// Import:
 /// - Builds category/topic sections with all level ops inside the EditSkillQuest symbol.
 /// - Matches markdown level headings to symbols via the shortened symbol id (<c># Title &amp;shortId</c>).
-/// - Creates stub level symbols (duplicated from the template) for headings without an id
-///   and writes the new id back into the markdown, so re-running is idempotent.
-/// - Applies the markdown tour points to every matched level — the repository is authoritative
-///   for tour content; symbols whose markdown section has no tour points are left untouched.
+/// - Headings without an id first adopt an existing, unclaimed level of their topic with the same
+///   title; only if there is none, a stub level symbol is duplicated from the template. Either way
+///   the id is written back into the markdown, so re-running is idempotent.
+/// - Applies the markdown tour points only to levels without tours of their own (or fresh stubs).
+///   Levels whose existing tour differs from the markdown are kept and reported.
+///
+/// Export:
+/// - Rewrites the markdown section of every listed level that has a tour, including tour point
+///   ids and targets, and leaves the rest of the file untouched.
 /// </summary>
 internal static class SkillQuestStructureSync
 {
-    internal static void SyncFromRepository()
+    internal static void ImportFromRepository()
     {
-        if (!TryFindRepositoryFolder(out var repositoryPath))
-        {
-            Log.Warning("Can't find skillquest content repository. Set SkillQuestRepositoryPath in user settings " +
-                        "or place a 'skillquest' checkout next to the TiXL folder.");
+        if (!TryGetSyncContext(out var repositoryPath, out var skillsProject, out var editUi))
             return;
-        }
 
-        EditableSymbolProject? skillsProject = null;
-        foreach (var project in EditableSymbolProject.AllProjects)
-        {
-            if (project.Name == "Skills")
-            {
-                skillsProject = project;
-                break;
-            }
-        }
-
-        if (skillsProject == null)
-        {
-            Log.Warning("Skills project is not loaded as editable project.");
-            return;
-        }
-
-        if (!SymbolUiRegistry.TryGetSymbolUi(EditSymbolId, out var editUi))
-        {
-            Log.Warning("Can't find EditSkillQuest symbol in Skills package.");
-            return;
-        }
-
-        Log.Debug($"Syncing SkillQuest structure from {repositoryPath}...");
+        Log.Debug($"Importing SkillQuest structure from {repositoryPath}...");
 
         var topics = CollectTopics(repositoryPath, skillsProject);
+        var adoptedCount = AdoptExistingLevels(topics, skillsProject);
         var stubCount = CreateMissingStubs(topics, skillsProject, editUi);
         WriteBackNewIds(topics);
         var tourCount = ApplyTourData(topics);
@@ -76,7 +60,96 @@ internal static class SkillQuestStructureSync
             levelCount += topic.Levels.Count;
         }
 
-        Log.Debug($"SkillQuest sync: {topics.Count} topics, {levelCount} levels, {stubCount} stubs created, {tourCount} tours applied.");
+        Log.Debug($"SkillQuest import: {topics.Count} topics, {levelCount} levels, {adoptedCount} adopted, {stubCount} stubs created, {tourCount} tours applied.");
+    }
+
+    internal static void ExportToRepository()
+    {
+        if (!TryGetSyncContext(out var repositoryPath, out var skillsProject, out _))
+            return;
+
+        Log.Debug($"Exporting SkillQuest tours to {repositoryPath}...");
+
+        var topics = CollectTopics(repositoryPath, skillsProject);
+        AdoptExistingLevels(topics, skillsProject);
+
+        var exportedCount = 0;
+        var changedFileCount = 0;
+        var sb = new StringBuilder();
+        foreach (var topic in topics)
+        {
+            if (topic.MdPath == null)
+                continue;
+
+            var sectionsByHeadingIndex = new Dictionary<int, string>();
+            foreach (var level in topic.Levels)
+            {
+                if (level.Tour == null || level.Symbol == null || !level.Symbol.TryGetSymbolUi(out var levelUi))
+                    continue;
+
+                // An empty tour would erase the markdown's content - same rule as the import guard.
+                if (levelUi.TourPoints.Count == 0)
+                    continue;
+
+                sb.Clear();
+                TourDataMarkdownExport.WriteSymbolTourMarkdown(levelUi, sb);
+                sectionsByHeadingIndex[level.HeadingIndex] = sb.ToString();
+                exportedCount++;
+            }
+
+            if (sectionsByHeadingIndex.Count == 0)
+                continue;
+
+            try
+            {
+                if (ReplaceLevelSections(topic.MdPath, sectionsByHeadingIndex))
+                    changedFileCount++;
+            }
+            catch (Exception e)
+            {
+                Log.Warning($"Failed to export tours to {topic.MdPath}: {e.Message}");
+            }
+        }
+
+        Log.Debug($"SkillQuest export: {exportedCount} levels written, {changedFileCount} files changed. Review with 'git diff' in {repositoryPath}.");
+    }
+
+    private static bool TryGetSyncContext(out string repositoryPath,
+                                          [NotNullWhen(true)] out EditableSymbolProject? skillsProject,
+                                          [NotNullWhen(true)] out SymbolUi? editUi)
+    {
+        skillsProject = null;
+        editUi = null;
+
+        if (!TryFindRepositoryFolder(out repositoryPath))
+        {
+            Log.Warning("Can't find skillquest content repository. Set SkillQuestRepositoryPath in user settings " +
+                        "or place a 'skillquest' checkout next to the TiXL folder.");
+            return false;
+        }
+
+        foreach (var project in EditableSymbolProject.AllProjects)
+        {
+            if (project.Name == "Skills")
+            {
+                skillsProject = project;
+                break;
+            }
+        }
+
+        if (skillsProject == null)
+        {
+            Log.Warning("Skills project is not loaded as editable project.");
+            return false;
+        }
+
+        if (!SymbolUiRegistry.TryGetSymbolUi(EditSymbolId, out editUi))
+        {
+            Log.Warning("Can't find EditSkillQuest symbol in Skills package.");
+            return false;
+        }
+
+        return true;
     }
 
     #region repository scanning
@@ -148,9 +221,10 @@ internal static class SkillQuestStructureSync
                 topic.NamespaceSlug = slug;
 
                 var tours = new List<TourDataMarkdownExport.TourWithId>(TourDataMarkdownExport.GetToursFromMarkdown(File.ReadAllText(mdPath)));
-                foreach (var tour in tours)
+                for (var headingIndex = 0; headingIndex < tours.Count; headingIndex++)
                 {
-                    var level = new Level { Tour = tour, Title = tour.Title };
+                    var tour = tours[headingIndex];
+                    var level = new Level { Tour = tour, Title = tour.Title, HeadingIndex = headingIndex };
                     if (!string.IsNullOrEmpty(tour.IdString))
                     {
                         if (!symbolsByShortId.TryGetValue(tour.IdString, out var symbol))
@@ -331,6 +405,99 @@ internal static class SkillQuestStructureSync
     }
     #endregion
 
+    #region adopting existing levels
+    /// <summary>
+    /// The heading ids are the stored link between markdown and symbols, but they only live in the
+    /// content repository. If a sync's write-back never got committed there, the headings come back
+    /// without ids while their level symbols already exist. Matching those by title is a one-time
+    /// back-compat step: the adopted id is written back, so later runs match by id again.
+    /// </summary>
+    private static int AdoptExistingLevels(List<Topic> topics, EditableSymbolProject skillsProject)
+    {
+        var claimed = new HashSet<Guid>();
+        foreach (var topic in topics)
+        {
+            foreach (var level in topic.Levels)
+            {
+                if (level is { Symbol: not null, Tour: not null })
+                    claimed.Add(level.Symbol.Id);
+            }
+        }
+
+        var adoptedCount = 0;
+        var candidates = new List<Symbol>();
+        foreach (var topic in topics)
+        {
+            if (topic.Namespace == null)
+                continue;
+
+            foreach (var level in topic.Levels)
+            {
+                if (level.Symbol != null || level.Tour == null)
+                    continue;
+
+                candidates.Clear();
+                var nameSuffix = level.Title.Replace(" ", "").ToValidClassName();
+                foreach (var symbol in skillsProject.Symbols.Values)
+                {
+                    if (symbol.Namespace != topic.Namespace || claimed.Contains(symbol.Id))
+                        continue;
+
+                    if (MatchesLevelTitle(symbol, level.Title, nameSuffix))
+                        candidates.Add(symbol);
+                }
+
+                if (candidates.Count == 0)
+                    continue;
+
+                if (candidates.Count > 1)
+                {
+                    // Creating a stub here would add yet another copy - leave it to the user to pick one.
+                    Log.Warning($"Level '{level.Title}' in {topic.Code} has no id and matches {candidates.Count} existing levels " +
+                                $"({string.Join(", ", candidates.Select(c => c.Name))}) - add the id to the heading manually.");
+                    level.IsAmbiguous = true;
+                    continue;
+                }
+
+                var adopted = candidates[0];
+                claimed.Add(adopted.Id);
+                level.Symbol = adopted;
+                level.NeedsIdWriteBack = true;
+                adoptedCount++;
+                Log.Debug($"Adopted existing level {adopted.Name} for heading '{level.Title}'");
+            }
+
+            // Adopted symbols were also appended as unlisted levels by the namespace scan - drop those copies.
+            topic.Levels.RemoveAll(l => l.Tour == null && l.Symbol != null && IsListedByHeading(topic, l.Symbol));
+        }
+
+        return adoptedCount;
+    }
+
+    private static bool MatchesLevelTitle(Symbol symbol, string title, string nameSuffix)
+    {
+        if (symbol.TryGetSymbolUi(out var symbolUi)
+            && string.Equals(symbolUi.Description.Trim(), title, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        // Level symbols are named "<code><letter>_<TitleWithoutSpaces>"
+        var underscoreIndex = symbol.Name.IndexOf('_');
+        return underscoreIndex > 0
+               && string.Equals(symbol.Name[(underscoreIndex + 1)..], nameSuffix, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsListedByHeading(Topic topic, Symbol symbol)
+    {
+        foreach (var level in topic.Levels)
+        {
+            if (level.Tour != null && level.Symbol == symbol)
+                return true;
+        }
+
+        return false;
+    }
+    #endregion
+
     #region stub creation
     private static int CreateMissingStubs(List<Topic> topics, EditableSymbolProject skillsProject, SymbolUi editUi)
     {
@@ -343,7 +510,7 @@ internal static class SkillQuestStructureSync
             var nextLetter = GetNextFreeLevelLetter(skillsProject, topic);
             foreach (var level in topic.Levels)
             {
-                if (level.Symbol != null || level.Tour == null)
+                if (level.Symbol != null || level.Tour == null || level.IsAmbiguous)
                     continue;
 
                 if (nextLetter > 'z')
@@ -363,6 +530,7 @@ internal static class SkillQuestStructureSync
 
                 level.Symbol = newSymbol;
                 level.IsNewStub = true;
+                level.NeedsIdWriteBack = true;
                 nextLetter++;
                 stubCount++;
                 Log.Debug($"Created stub level {topic.Namespace}.{symbolName}");
@@ -407,7 +575,7 @@ internal static class SkillQuestStructureSync
             var additions = new List<(string Title, string ShortId)>();
             foreach (var level in topic.Levels)
             {
-                if (level is { IsNewStub: true, Symbol: not null })
+                if (level is { NeedsIdWriteBack: true, Symbol: not null })
                     additions.Add((level.Title, level.Symbol.Id.ShortenGuid()));
             }
 
@@ -455,10 +623,75 @@ internal static class SkillQuestStructureSync
     }
     #endregion
 
+    #region markdown export
+    /// <summary>
+    /// Replaces the sections of the given level headings (by their order among the file's <c># </c> headings)
+    /// and keeps everything else, including the blank lines that separate sections. Returns false if nothing changed.
+    /// </summary>
+    private static bool ReplaceLevelSections(string mdPath, Dictionary<int, string> sectionsByHeadingIndex)
+    {
+        var bytes = File.ReadAllBytes(mdPath);
+        var hasBom = bytes.Length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF;
+        var text = Encoding.UTF8.GetString(bytes, hasBom ? 3 : 0, bytes.Length - (hasBom ? 3 : 0));
+        var useCrLf = text.Contains("\r\n");
+
+        var lines = text.Replace("\r\n", "\n").Split('\n');
+        var headingLineIndices = new List<int>();
+        for (var lineIndex = 0; lineIndex < lines.Length; lineIndex++)
+        {
+            if (lines[lineIndex].StartsWith("# "))
+                headingLineIndices.Add(lineIndex);
+        }
+
+        var result = new List<string>(lines.Length);
+        var firstHeadingLine = headingLineIndices.Count > 0 ? headingLineIndices[0] : lines.Length;
+        for (var lineIndex = 0; lineIndex < firstHeadingLine; lineIndex++)
+        {
+            result.Add(lines[lineIndex]);
+        }
+
+        for (var headingIndex = 0; headingIndex < headingLineIndices.Count; headingIndex++)
+        {
+            var start = headingLineIndices[headingIndex];
+            var end = headingIndex + 1 < headingLineIndices.Count ? headingLineIndices[headingIndex + 1] : lines.Length;
+
+            if (!sectionsByHeadingIndex.TryGetValue(headingIndex, out var section))
+            {
+                for (var lineIndex = start; lineIndex < end; lineIndex++)
+                {
+                    result.Add(lines[lineIndex]);
+                }
+
+                continue;
+            }
+
+            var trailingBlankCount = 0;
+            while (end - 1 - trailingBlankCount > start && lines[end - 1 - trailingBlankCount].Trim().Length == 0)
+            {
+                trailingBlankCount++;
+            }
+
+            result.AddRange(section.Replace("\r\n", "\n").TrimEnd().Split('\n'));
+            for (var i = 0; i < trailingBlankCount; i++)
+            {
+                result.Add(string.Empty);
+            }
+        }
+
+        var newText = string.Join(useCrLf ? "\r\n" : "\n", result);
+        if (string.Equals(newText, text, StringComparison.Ordinal))
+            return false;
+
+        File.WriteAllText(mdPath, newText, new UTF8Encoding(hasBom));
+        return true;
+    }
+    #endregion
+
     #region tour import
     private static int ApplyTourData(List<Topic> topics)
     {
         var appliedCount = 0;
+        var keptLevelNames = new List<string>();
         foreach (var topic in topics)
         {
             foreach (var level in topic.Levels)
@@ -469,12 +702,43 @@ internal static class SkillQuestStructureSync
                 if (!level.Symbol.TryGetSymbolUi(out var levelUi))
                     continue;
 
+                // Without knowing which side changed last, an existing tour may hold edits (styles,
+                // targets, ids) the markdown doesn't have. Only fill levels that have nothing to lose.
+                if (!level.IsNewStub && levelUi.TourPoints.Count > 0)
+                {
+                    if (!TourContentMatches(levelUi.TourPoints, level.Tour.TourPoints))
+                        keptLevelNames.Add(level.Symbol.Name);
+
+                    continue;
+                }
+
                 TourDataMarkdownExport.ApplyTourDataToSymbolUi(level.Tour, levelUi);
                 appliedCount++;
             }
         }
 
+        if (keptLevelNames.Count > 0)
+        {
+            Log.Warning($"SkillQuest import kept {keptLevelNames.Count} existing tours that differ from the markdown " +
+                        $"(export them or clear their tour points to import): {string.Join(", ", keptLevelNames)}");
+        }
+
         return appliedCount;
+    }
+
+    private static bool TourContentMatches(List<TourPoint> existing, List<TourPoint> imported)
+    {
+        if (existing.Count != imported.Count)
+            return false;
+
+        for (var i = 0; i < existing.Count; i++)
+        {
+            if (existing[i].Style != imported[i].Style
+                || !string.Equals(existing[i].Description.Trim(), imported[i].Description.Trim(), StringComparison.Ordinal))
+                return false;
+        }
+
+        return true;
     }
     #endregion
 
@@ -633,7 +897,10 @@ internal static class SkillQuestStructureSync
         public TourDataMarkdownExport.TourWithId? Tour;
         public Symbol? Symbol;
         public string Title = string.Empty;
+        public int HeadingIndex = -1;
         public bool IsNewStub;
+        public bool NeedsIdWriteBack;
+        public bool IsAmbiguous;
     }
 
     /// <summary>The Skills._.EditSkillQuest symbol holding the generated overview structure.</summary>
