@@ -121,9 +121,18 @@ internal static class Combine
         var connectionsToNewOutputs = new List<Symbol.Connection>(outputConnections.Length);
         int outputNameCounter = 2;
         var outputNameHashSet = new HashSet<string>();
+
+        // One selected output feeding several outside ops becomes a single shared output.
+        var sharedOutputIdsForSources = new Dictionary<(Guid ChildId, Guid OutputId), Guid>();
         for (var outputIndex = 0; outputIndex < outputsToGenerate.Length; outputIndex++)
         {
             var (child, output, origConnection) = outputsToGenerate[outputIndex];
+            if (sharedOutputIdsForSources.TryGetValue((child.Id, output.Id), out var sharedOutputId))
+            {
+                connectionToNewSlotIdMap.Add(origConnection, sharedOutputId);
+                continue;
+            }
+
             var outputValueType = output.ValueType;
             if (TypeNameRegistry.Entries.TryGetValue(outputValueType, out var typeName))
             {
@@ -142,6 +151,7 @@ internal static class Combine
                 var newConnection = new Symbol.Connection(child.Id, output.Id, Guid.Empty, newOutputGuid);
                 connectionsToNewOutputs.Add(newConnection);
                 connectionToNewSlotIdMap.Add(origConnection, newOutputGuid);
+                sharedOutputIdsForSources[(child.Id, output.Id)] = newOutputGuid;
             }
             else
             {
