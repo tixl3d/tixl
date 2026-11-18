@@ -132,19 +132,6 @@
     {
       "Id": "0b481be8-d514-4d08-93b2-2fb8569dcd09",
       "Description": "In computer graphics, positions are defined using three values along the x, y, and z axes.\nIn TiXL's coordinate system, x points to the right, y points upward, and z points toward the camera.\nYou can use the thumb, index finger, and middle finger of your right hand to remember their orientation."
-    },
-    {
-      "Id": "5877e222-25d7-4fd9-a066-582bd7dc25a6",
-      "Description": "Other software may use different coordinate systems.\nFor example, some CAD applications use x and y as the ground plane.\nWith TiXL's default camera, the position (0, 0, 0) is centered on the screen, so an object that is 2 units tall touches both the top and bottom edges of the view."
-    },
-    {
-      "Id": "aba8a6b7-6427-427c-b77c-8030c3d8b3f8",
-      "Description": "We can use [AnimValue] and [Vector3] to build a simple animation.\nBoth operators will be covered in more detail later."
-    },
-    {
-      "Id": "fc1ec450-aed0-4509-af71-73ad498691e5",
-      "Description": "Connect the operator to the [Vector3] to create the reference animation.",
-      "Style": "CallToAction"
     }
   ]
 }
