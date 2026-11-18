@@ -38,9 +38,11 @@ public partial class ScalableCanvas
         ScaleTarget = Vector2.One;
     }
 
-    internal void FitAreaOnCanvas(ImRect areaOnCanvas, bool flipY = false)
+    /// <param name="reservedTopFraction">Fraction of the window height kept free at the top, so the area
+    /// is fitted into the remaining lower part (e.g. below an overlay panel).</param>
+    internal void FitAreaOnCanvas(ImRect areaOnCanvas, bool flipY = false, float reservedTopFraction = 0)
     {
-        var scope = GetScopeForCanvasArea(areaOnCanvas, flipY);
+        var scope = GetScopeForCanvasArea(areaOnCanvas, flipY, reservedTopFraction);
         ScaleTarget = scope.Scale;
         ScrollTarget = scope.Scroll;
     }
@@ -298,30 +300,35 @@ public partial class ScalableCanvas
         }
     }
 
-    private CanvasScope GetScopeForCanvasArea(ImRect areaOnCanvas, bool flipY = false)
+    private CanvasScope GetScopeForCanvasArea(ImRect areaOnCanvas, bool flipY = false, float reservedTopFraction = 0)
     {
         var heightOnCanvas = areaOnCanvas.GetHeight();
         var widthOnCanvas = areaOnCanvas.GetWidth();
         var aspectOnCanvas = widthOnCanvas / heightOnCanvas;
 
+        var reservedTopPx = WindowSize.Y * Math.Clamp(reservedTopFraction, 0, 0.9f);
+        var availableHeight = WindowSize.Y - reservedTopPx;
+
         Vector2 scrollTarget;
         float scale;
-        if (aspectOnCanvas > WindowSize.X / WindowSize.Y)
+        if (aspectOnCanvas > WindowSize.X / availableHeight)
         {
             // Center in a high window...
             scale = WindowSize.X / widthOnCanvas;
             scrollTarget = new Vector2(
                                        areaOnCanvas.Min.X,
-                                       areaOnCanvas.Min.Y - (WindowSize.Y / scale - heightOnCanvas) / 2);
+                                       areaOnCanvas.Min.Y - (availableHeight / scale - heightOnCanvas) / 2);
         }
         else
         {
             // Center in a wide window... 
-            scale = WindowSize.Y / heightOnCanvas;
+            scale = availableHeight / heightOnCanvas;
             scrollTarget = new Vector2(
                                        areaOnCanvas.Min.X - (WindowSize.X / scale - widthOnCanvas) / 2,
                                        areaOnCanvas.Min.Y);
         }
+
+        scrollTarget.Y -= reservedTopPx / scale;
 
         var scaleTarget = new Vector2(scale, scale);
         if (flipY)

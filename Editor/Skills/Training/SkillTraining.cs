@@ -475,6 +475,12 @@ internal static partial class SkillTraining
                                         _context.StateMachine.CurrentState == SkillTrainingStates.Completed);
 
     /// <summary>Active level feedback, or null when not in play mode or no solution snapshot exists.</summary>
+    /// <summary>
+    /// Fraction of the graph window height covered by the instruction panel during a quest.
+    /// Fitting the view to the selection keeps the puzzle below it.
+    /// </summary>
+    internal static float ReservedGraphTopFraction => IsInPlayMode ? 0.3f : 0f;
+
     internal static LevelFeedback? ActiveLevelFeedback => IsInPlayMode ? _context.LevelFeedback : null;
 
     public static void DrawLevelHeader()

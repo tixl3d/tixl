@@ -155,13 +155,37 @@ internal sealed class MarkdownView
         ImGui.PopID();
     }
 
-    private static void DrawMarker(LineBox box)
+    private void DrawMarker(LineBox box)
     {
         if (box.MarkerText == null)
             return;
-        ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-        ImGui.TextUnformatted(box.MarkerText);
-        ImGui.PopStyleColor();
+
+        // Use the line's font, not whatever the caller has pushed, so the marker shares the text's baseline.
+        var (lineFont, _) = LineStyle(box.Kind);
+        ImGui.PushFont(lineFont);
+
+        if (box.Kind == LineKind.Bullet)
+        {
+            // A "•" glyph sits at a font-specific height that rarely matches the lowercase letters,
+            // so draw the dot centered on the x-height instead.
+            var xGlyph = lineFont.FindGlyph('x');
+            var glyphScale = ImGui.GetFontSize() / lineFont.FontSize;
+            var centerY = (xGlyph.Y0 + xGlyph.Y1) * 0.5f * glyphScale;
+            var radius = ImGui.GetFontSize() * 0.13f;
+            var topLeft = ImGui.GetCursorScreenPos();
+            ImGui.GetWindowDrawList().AddCircleFilled(new Vector2(topLeft.X + radius + 2 * T3Ui.UiScaleFactor,
+                                                                  topLeft.Y + centerY),
+                                                      radius,
+                                                      UiColors.TextMuted);
+        }
+        else
+        {
+            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
+            ImGui.TextUnformatted(box.MarkerText);
+            ImGui.PopStyleColor();
+        }
+
+        ImGui.PopFont();
     }
 
     private void DrawLineFragments(LineBox box, UrlClicked? onUrl, OperatorRefRendered? onOperatorRef)
