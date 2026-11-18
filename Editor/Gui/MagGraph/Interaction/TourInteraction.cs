@@ -5,6 +5,7 @@ using T3.Core.Utils;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.Styling.Markdown;
+using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
@@ -69,7 +70,32 @@ internal static class TourInteraction
 
             RenderTourPointDetails(compositionUi, progressIndex, hoveredIndex);
             DrawGraphIndicator(dl, activeTourPoint, projectView, compositionUi);
+
+            if (activeTourPoint.InputId != Guid.Empty)
+            {
+                _highlightedChildId = activeTourPoint.ChildId;
+                _highlightedInputId = activeTourPoint.InputId;
+                _highlightFrame = ImGui.GetFrameCount();
+            }
         }
+    }
+
+    /// <summary>
+    /// Draws a pulsing outline around a parameter row if the active tour point links to that parameter.
+    /// </summary>
+    internal static void DrawParameterRowIndicator(Guid childId, Guid inputId, ImRect rowRect)
+    {
+        // The graph window may draw after the parameter window, so accept last frame's tour point too.
+        if (ImGui.GetFrameCount() - _highlightFrame > 1)
+            return;
+
+        if (childId != _highlightedChildId || inputId != _highlightedInputId)
+            return;
+
+        var pulse = 0.5f + 0.5f * MathF.Sin((float)ImGui.GetTime() * 2.5f);
+        var dl = ImGui.GetWindowDrawList();
+        var rounding = 8 * T3Ui.UiScaleFactor;
+        dl.AddRect(rowRect.Min - Vector2.One, rowRect.Max + Vector2.One, UiColors.BackgroundActive.Fade(0.2f + 0.3f * pulse), rounding);
     }
 
     private static void RenderTourPointDetails(SymbolUi compositionUi, int progressIndex, int hoveredIndex)
@@ -281,14 +307,23 @@ internal static class TourInteraction
 
     private static void EnsureMarkdownView()
     {
-        if (_markdown != null)
-            return;
+        // The font atlas is rebuilt when the UI or display scale changes, which frees the fonts the
+        // options point to. A stale pointer may then land on another font (e.g. bold), so rebuild.
+        var largeFont = Fonts.FontLarge;
+        unsafe
+        {
+            if (_markdown != null && _markdownFont == largeFont.NativePtr)
+                return;
+
+            _markdownFont = largeFont.NativePtr;
+        }
+
         _markdown = new MarkdownView(new MarkdownView.Options
                                           {
-                                              BodyFont = Fonts.FontLarge,
+                                              BodyFont = largeFont,
                                               // Keep op links at body size — the default FontBold
                                               // would render them visibly smaller than FontLarge.
-                                              OpRefFont = Fonts.FontLarge,
+                                              OpRefFont = largeFont,
                                               // TourPoint descriptions historically treat each \n as a
                                               // hard line break (used as paragraph separators by the
                                               // legacy paragraph-renderer); preserve that here.
@@ -308,6 +343,9 @@ internal static class TourInteraction
 
     private static Vector2 _dampedCanvasPos;
     private static Guid _lastCompositionId;
+    private static Guid _highlightedChildId;
+    private static Guid _highlightedInputId;
+    private static int _highlightFrame = -10;
     private static double _lastClickTime;
     private static float TimeSinceInteraction => (float)(ImGui.GetTime() - _lastClickTime).ClampMin(0);
     private static float AttentionScaleFactor => (1 / (TimeSinceInteraction * 3f + 1)).Clamp(0, 1);
@@ -345,4 +383,5 @@ internal static class TourInteraction
     private static Dictionary<Guid, int> _symbolTourProgress = new();
 
     private static MarkdownView _markdown;
+    private static unsafe ImFont* _markdownFont;
 }
