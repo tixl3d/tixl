@@ -1,0 +1,125 @@
+{
+  "FormatVersion": 3,
+  "Id": "5c553e6a-923d-4b7b-970b-ecdfa45a88a7"/*RepeatTransform*/,
+  "Inputs": [
+    {
+      "Id": "2a8f6300-412e-46cb-8660-3b9483c1d7d2"/*Pivot*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "396fcf8c-af38-4e7e-9bc9-7a9df0d96a47"/*IndexOffset*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "3a5ae751-df04-4378-849b-ab141b3ab340"/*Translation*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "3ed374ce-87f8-4a89-964d-c12500e7da80"/*Strength*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "52faaff0-cfc0-46ae-8010-e33e38cd5153"/*GainAndBias*/,
+      "DefaultValue": {
+        "X": 0.5,
+        "Y": 0.5
+      }
+    },
+    {
+      "Id": "6171ecb0-c774-4f85-a5c9-0d56cbef0723"/*ScatterRotation*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "62b3b341-7dea-4817-873a-81d0b7aedf01"/*Rotation*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "71fdc9bc-b32b-4f55-9d24-18cca0d24d89"/*Count*/,
+      "DefaultValue": 5
+    },
+    {
+      "Id": "81f91ea5-ce6b-4d04-9d60-2522deba6dd2"/*Scale*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 1.0,
+        "Z": 1.0
+      }
+    },
+    {
+      "Id": "8dbe4378-7903-42c6-b143-5f2cdc8ea0c4"/*Command*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "9b04714f-e5c6-43cc-9d0c-bf83e9bea601"/*Mode*/,
+      "DefaultValue": 1
+    },
+    {
+      "Id": "a1d06737-6411-4021-a3c4-fcf973866c0c"/*ScatterScale*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "b528461b-e8d0-4525-a628-08da4b60493c"/*Seed*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "b96a55d9-135b-4b43-8d7a-16a35ab9586d"/*UniformScale*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "c3e18172-2496-48ce-b7f7-3d9b5e1340a3"/*ScatterTranslation*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "c874d12d-f799-474f-86b6-afe763fa9ad1"/*Gradient*/,
+      "DefaultValue": {
+        "Gradient": {
+          "Interpolation": "Linear",
+          "Steps": [
+            {
+              "Id": "bf5830c5-c364-4d02-97ac-62e19f00d1f9",
+              "NormalizedPosition": 0.0,
+              "Color": {
+                "R": 1.0,
+                "G": 1.0,
+                "B": 1.0,
+                "A": 1.0
+              }
+            },
+            {
+              "Id": "b68699b7-9883-41b6-8df5-933535619178",
+              "NormalizedPosition": 1.0,
+              "Color": {
+                "R": 1.0,
+                "G": 1.0,
+                "B": 1.0,
+                "A": 1.0
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}
