@@ -71,7 +71,7 @@ internal sealed class CubeGeometry : Instance<CubeGeometry>
             new(-1, -1, 1), new(1, -1, 1), new(1, 1, 1), new(-1, 1, 1),
         ];
 
-    private static readonly Vector2[] _quadUvs = [new(0, 1), new(1, 1), new(1, 0), new(0, 0)];
+    private static readonly Vector2[] _quadUvs = [new(1, 1), new(0, 1), new(0, 0), new(1, 0)];
 
     private readonly MeshGeometry _geometry = new();
 
