@@ -5,37 +5,162 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "de22ce4a-cca5-4b98-b0b7-c6a26260b1c2",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "05c2fd00-b226-4a58-80aa-3ab8cac5e080",
+      "SymbolName": "Lib.render.transform.Transform",
       "SectionId": "09d14dcb-2034-4b2c-9241-710ee910328d",
       "Position": {
-        "X": 1244.7633,
-        "Y": 2141.3435
+        "X": 1278.6882,
+        "Y": 2102.6885
       }
     },
     {
-      "ChildId": "e90e7df2-c7d5-4386-a161-ea8e72e8c4b6",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "0b8aff4f-a2d0-46b0-ad73-b19cf9182c60",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
+      "SectionId": "09d14dcb-2034-4b2c-9241-710ee910328d",
       "Position": {
-        "X": 1366.8816,
-        "Y": 1568.3276
+        "X": 803.078,
+        "Y": 2172.9849
       }
     },
     {
-      "ChildId": "f52b5514-3de3-4c1b-824b-5548cac3e840",
-      "SymbolName": "Lib.flow.skillQuest.DrawQuiz",
+      "ChildId": "2033a841-67b5-4047-81e1-d9fdd46f4db9",
+      "SymbolName": "Types.Values.Vector3",
       "Position": {
-        "X": 1693.2708,
-        "Y": 1786.6185
+        "X": 1138.6881,
+        "Y": 1787.5627
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "2239b138-1bdd-4263-8e70-4dd19d13018a",
+      "SymbolName": "Types.Values.Value",
+      "SectionId": "09d14dcb-2034-4b2c-9241-710ee910328d",
+      "Position": {
+        "X": 998.6881,
+        "Y": 2172.6885
       }
+    },
+    {
+      "ChildId": "35c27a21-8eb2-40b2-ab80-c2b3744233a4",
+      "SymbolName": "Lib.mesh.generate.CubeMesh",
+      "Position": {
+        "X": 1278.6881,
+        "Y": 1682.5627
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "4adc2b74-3b02-4108-a463-4cd15f5cfda6",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
+      "Position": {
+        "X": 803.40204,
+        "Y": 1823.4293
+      }
+    },
+    {
+      "ChildId": "654cf435-f2fc-4122-8419-f24e0c911889",
+      "SymbolName": "Types.Values.Value",
+      "Position": {
+        "X": 998.6881,
+        "Y": 1822.5627
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "7b9fc31a-2cdc-4daf-9b2b-d6a8aceb21b2",
+      "SymbolName": "Lib.mesh.generate.CubeMesh",
+      "SectionId": "09d14dcb-2034-4b2c-9241-710ee910328d",
+      "Position": {
+        "X": 1278.6882,
+        "Y": 2032.688
+      }
+    },
+    {
+      "ChildId": "7c653348-16f4-48e6-b815-227496ef8b34",
+      "SymbolName": "Lib.flow.skillQuest.ImageQuiz",
+      "Position": {
+        "X": 1696.392,
+        "Y": 1791.3005
+      }
+    },
+    {
+      "ChildId": "8a23c7fc-9fb1-4db7-83f3-a39fc6a7fe19",
+      "SymbolName": "Lib.render.transform.Transform",
+      "Position": {
+        "X": 1278.6881,
+        "Y": 1752.5627
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "9e3d3441-f788-441e-bdce-a02fa94ee4d2",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
+      "Position": {
+        "X": 1278.6881,
+        "Y": 1717.5627
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "a129c77c-4f06-4d89-b9e8-055f65a6de0f",
+      "SymbolName": "Types.Values.IntValue",
+      "Position": {
+        "X": 599.0768,
+        "Y": 1824.4309
+      }
+    },
+    {
+      "ChildId": "ad3eab54-cbe4-4089-8c37-6687b8d328ee",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
+      "SectionId": "09d14dcb-2034-4b2c-9241-710ee910328d",
+      "Position": {
+        "X": 1278.6882,
+        "Y": 2067.6885
+      }
+    },
+    {
+      "ChildId": "b51c7d47-992c-4aa8-b799-84f354d5437c",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "SectionId": "09d14dcb-2034-4b2c-9241-710ee910328d",
+      "Position": {
+        "X": 1418.6882,
+        "Y": 2102.6885
+      }
+    },
+    {
+      "ChildId": "b5f3c416-83fe-445b-9195-2a5b36afa216",
+      "SymbolName": "Types.Values.Vector3",
+      "SectionId": "09d14dcb-2034-4b2c-9241-710ee910328d",
+      "Position": {
+        "X": 1138.6881,
+        "Y": 2137.6885
+      }
+    },
+    {
+      "ChildId": "c5eb9e82-ef75-49c9-9d7c-c62ec1d58a0c",
+      "SymbolName": "Types.Values.IntValue",
+      "SectionId": "09d14dcb-2034-4b2c-9241-710ee910328d",
+      "Position": {
+        "X": 613.3159,
+        "Y": 2170.6729
+      }
+    },
+    {
+      "ChildId": "da4146a4-8415-4b04-90ce-97211f40174c",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "Position": {
+        "X": 1418.6881,
+        "Y": 1752.5627
+      },
+      "SnapshotGroupIndex": "1"
     }
   ],
   "OutputUis": [
     {
       "OutputId": "239d5290-db3f-4704-ac64-4db5fefe3e74"/*ColorBuffer*/,
       "Position": {
-        "X": 1693.2708,
-        "Y": 1856.6185
+        "X": 1696.392,
+        "Y": 1861.3005
       }
     }
   ],
@@ -51,24 +176,34 @@
         "W": 1.0
       },
       "Position": {
-        "X": 1085.0,
-        "Y": 2052.5103
+        "X": 585.73114,
+        "Y": 2006.3572
       },
       "Size": {
-        "X": 525.0,
-        "Y": 187.48975
+        "X": 1043.478,
+        "Y": 245.0
       }
     }
   ],
   "TourPoints": [
     {
       "Id": "ab7cfe9c-d45e-49b3-8f75-aacbcabac76f",
-      "Description": "In this example, the rotation of a cube should change in steps of exactly 15 degrees.\nThis sounds like a good case for [FloatToInt]."
+      "Description": "In this example, we want to rotate the cube in 1 degree increments to exactly 45 degrees.\n\nThis sounds like a good case for [IntToFloat]."
+    },
+    {
+      "Id": "728999be-075b-45d3-8e3f-4529fc1388f0",
+      "Description": "We have an [IntValue] node that gives us whole numbers. But the vertical rotation only accepts a float. Use [IntToFloat] to use the integer value for the rotation.",
+      "Style": "InfoFor"
     },
     {
       "Id": "fb7af4c5-fa49-4d9d-afaf-6a99b562dbf7",
-      "Description": "Complete the example.",
+      "Description": "Adjust the [IntValue] node so that the cube is rotated exactly 45 degrees like in the example.",
       "Style": "CallToAction"
+    },
+    {
+      "Id": "2c463622-2364-4826-958f-875171945035",
+      "Description": "You may be wondering whether you could not start out with [Value] instead of [IntValue].\n\nYou can in this example. But sometimes a value comes from a calculation that required float, so you don't always have that choice.",
+      "Style": "Conclusion"
     }
   ]
 }
