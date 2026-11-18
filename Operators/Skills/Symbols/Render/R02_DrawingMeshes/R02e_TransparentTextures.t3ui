@@ -5,6 +5,33 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
+      "ChildId": "1a5541d5-f178-42c1-893a-131422c52b10",
+      "SymbolName": "Lib.mesh.generate.CubeMesh",
+      "Position": {
+        "X": 1498.3328,
+        "Y": 1562.6477
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "1b0ef14c-974c-4265-836b-4369c930e96d",
+      "SymbolName": "Lib.numbers.anim.animators.AnimVec3",
+      "SectionId": "88f73836-64a1-44bb-8f1d-b50546ab59bd",
+      "Position": {
+        "X": 1280.6941,
+        "Y": 2238.5515
+      }
+    },
+    {
+      "ChildId": "39e671a7-c0a2-4a75-9e21-95132f56c918",
+      "SymbolName": "Lib.image.generate.pattern.RyojiPattern2",
+      "SectionId": "88f73836-64a1-44bb-8f1d-b50546ab59bd",
+      "Position": {
+        "X": 1280.6941,
+        "Y": 2168.5515
+      }
+    },
+    {
       "ChildId": "4421930e-06c0-4470-9542-7224e9100797",
       "SymbolName": "Lib.flow.skillQuest.DrawQuiz",
       "Position": {
@@ -13,21 +40,67 @@
       }
     },
     {
-      "ChildId": "57ff04fb-5d68-43ce-8666-cba3de147f67",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "4ebf1299-afcb-49f3-b232-b734bfb0c02d",
+      "SymbolName": "Lib.mesh.generate.CubeMesh",
       "SectionId": "88f73836-64a1-44bb-8f1d-b50546ab59bd",
       "Position": {
-        "X": 1244.7633,
-        "Y": 2141.3435
+        "X": 1420.6941,
+        "Y": 2098.5515
       }
     },
     {
-      "ChildId": "7a2bbf07-c232-4c63-8c08-0b9d0c3313e4",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "84560b65-bb7a-400c-a18e-ada7ac722682",
+      "SymbolName": "Lib.render.transform.Transform",
+      "SectionId": "88f73836-64a1-44bb-8f1d-b50546ab59bd",
       "Position": {
-        "X": 1366.8816,
-        "Y": 1568.3276
+        "X": 1420.6941,
+        "Y": 2203.5515
       }
+    },
+    {
+      "ChildId": "a0d8281a-c261-494c-a775-46e3ba7c409e",
+      "SymbolName": "Lib.mesh.draw.DrawMeshUnlit",
+      "Position": {
+        "X": 1498.3328,
+        "Y": 1597.6477
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "a56715b0-7b1c-448c-bcd7-a481d2b60a62",
+      "SymbolName": "Lib.image.generate.pattern.RyojiPattern2",
+      "Position": {
+        "X": 1358.3328,
+        "Y": 1632.6477
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "e593475c-76ef-475e-9a40-2081b2e95f41",
+      "SymbolName": "Lib.mesh.draw.DrawMeshUnlit",
+      "SectionId": "88f73836-64a1-44bb-8f1d-b50546ab59bd",
+      "Position": {
+        "X": 1420.6941,
+        "Y": 2133.5515
+      }
+    },
+    {
+      "ChildId": "f0af3786-9594-4e31-92f5-a51ae21722a9",
+      "SymbolName": "Lib.render.transform.Transform",
+      "Position": {
+        "X": 1498.3328,
+        "Y": 1667.6477
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "f5697479-2b2b-4c65-966c-06a151210224",
+      "SymbolName": "Lib.numbers.anim.animators.AnimVec3",
+      "Position": {
+        "X": 1358.3328,
+        "Y": 1702.6477
+      },
+      "SnapshotGroupIndex": "1"
     }
   ],
   "OutputUis": [
@@ -51,12 +124,12 @@
         "W": 1.0
       },
       "Position": {
-        "X": 1085.0,
-        "Y": 2052.5103
+        "X": 1172.6343,
+        "Y": 2046.871
       },
       "Size": {
-        "X": 525.0,
-        "Y": 187.48975
+        "X": 507.36572,
+        "Y": 268.32703
       }
     }
   ],
@@ -67,15 +140,23 @@
     },
     {
       "Id": "55db6cc4-ce58-4f41-bbbd-68801e7a1fb7",
+      "ChildId": "a0d8281a-c261-494c-a775-46e3ba7c409e",
+      "InputId": "8d223463-edff-45fb-9ead-6650a911cebd",
       "Description": "In this challenge, a transparent Ryoji pattern is applied to a cube.\nThe goal is to see both the outside and the inside faces."
     },
     {
       "Id": "d973a5fd-c7fb-425f-8331-82ba768d38f6",
-      "Description": "To achieve this, two things are required.\nFirst, back-face culling must be disabled so faces pointing away from the camera are still rendered."
+      "ChildId": "a0d8281a-c261-494c-a775-46e3ba7c409e",
+      "InputId": "8d223463-edff-45fb-9ead-6650a911cebd",
+      "Description": "To achieve this, two things are required.\nFirst, back-face culling must be disabled so faces pointing away from the camera are still rendered.",
+      "Style": "CallToAction"
     },
     {
       "Id": "d0568d30-89fa-49f4-a97d-bd99c9e33030",
-      "Description": "Second, the alpha cut-off parameter may need adjustment.\nIt defines a threshold at which transparent pixels are treated as holes and discarded."
+      "ChildId": "a0d8281a-c261-494c-a775-46e3ba7c409e",
+      "InputId": "72060e5d-090f-4c84-890a-ca9ee238fe82",
+      "Description": "Second, the alpha cut-off parameter may need adjustment.\nIt defines a threshold at which transparent pixels are treated as holes and discarded.",
+      "Style": "CallToAction"
     },
     {
       "Id": "50f40d36-b414-4785-a6e6-b723c02f6c25",
