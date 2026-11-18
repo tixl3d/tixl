@@ -46,11 +46,11 @@ float4 psMain(vsOutput psInput) : SV_TARGET
     float3 gammaScaled =   (Gamma * 2*Gamma.a + (0.5-Gamma.a)).rgb;
     float3 gainScaled =   (Gain * 2*Gain.a + (0.5-Gain.a)).rgb;
     
-    c.rgb=  pow( 
-                   ( c.rgb+ (liftScaled * 2-1)*(1-c.rgb))*      // Lift
-                   ( gainScaled * 2 )  // Gain
-                   ,    
-                   1/((gammaScaled*2)));        
+    // Clamp before pow: a low lift or negative gain pushes dark pixels below zero, and pow() of a
+    // negative base is undefined (NaN or abs() depending on backend), which shows up as inverted colors.
+    float3 graded = ( c.rgb+ (liftScaled * 2-1)*(1-c.rgb))*      // Lift
+                    ( gainScaled * 2 );                          // Gain
+    c.rgb = pow(max(graded, 0), 1/(gammaScaled*2));        
     
    
     c.rgb = clamp(c.rgb, 0.000001,1000);
