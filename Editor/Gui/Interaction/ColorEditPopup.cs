@@ -222,7 +222,7 @@ internal static class ColorEditPopup
         ImGui.InvisibleButton("colorWheel", size);
         if (ImGui.IsItemActive())
         {
-            var localPosition = ImGui.GetMousePos() - windowPos - size / 2;
+            var localPosition = GetPrecisionMousePos() - windowPos - size / 2;
             edited |= InputEditStateFlags.Modified;
 
             hNormalized = (MathF.Atan2(localPosition.X, localPosition.Y) / (2 * MathF.PI) - 0.25f);
@@ -273,7 +273,7 @@ internal static class ColorEditPopup
             }
 
             var isDragging = ImGui.IsItemActive();
-            var mouseY = ImGui.GetMousePos().Y;
+            var mouseY = isDragging ? GetPrecisionMousePos().Y : ImGui.GetMousePos().Y;
             var pullAboveBar = isDragging ? pMin.Y - mouseY : 0;
             if (pullAboveBar >= hdrUnlockDistance)
                 _isHdrUnlocked = true;
@@ -392,7 +392,7 @@ internal static class ColorEditPopup
             ImGui.InvisibleButton("alphaSlider", new Vector2(barSize.X, barSize.Y * 3));
             if (ImGui.IsItemActive())
             {
-                cColor.A = ((ImGui.GetMousePos() - pMin).X / barWidth).Clamp(0, 1);
+                cColor.A = ((GetPrecisionMousePos() - pMin).X / barWidth).Clamp(0, 1);
                 edited |= InputEditStateFlags.Modified;
             }
 
@@ -408,6 +408,37 @@ internal static class ColorEditPopup
         }
         return edited;
     }
+
+    /// <summary>
+    /// Returns a virtual pointer position for the active wheel or slider. It follows the mouse, but
+    /// moves at a tenth of the speed while SHIFT is held, so toggling SHIFT mid-drag refines the value
+    /// without jumping. Must be called right after the active item was submitted.
+    /// </summary>
+    private static Vector2 GetPrecisionMousePos()
+    {
+        var io = ImGui.GetIO();
+        if (ImGui.IsItemActivated())
+        {
+            _precisionMousePos = io.MousePos;
+            return _precisionMousePos;
+        }
+
+        var precisionMode = io.KeyShift;
+        _precisionMousePos += io.MouseDelta * (precisionMode ? PrecisionDragFactor : 1f);
+
+        if (precisionMode)
+        {
+            ImGui.PushFont(Fonts.FontSmall);
+            ImGui.GetForegroundDrawList().AddText(io.MousePos + new Vector2(10, 10) * T3Ui.UiScaleFactor,
+                                                  UiColors.Gray, "×0.1");
+            ImGui.PopFont();
+        }
+
+        return _precisionMousePos;
+    }
+
+    private const float PrecisionDragFactor = 0.1f;
+    private static Vector2 _precisionMousePos;
 
     private static float GetBarYFromValue(float value, float barTop, float barHeight)
     {
