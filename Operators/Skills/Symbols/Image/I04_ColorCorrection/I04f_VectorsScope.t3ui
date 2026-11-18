@@ -1,0 +1,137 @@
+{
+  "FormatVersion": 3,
+  "Id": "d3efe797-8d15-42bc-82cf-12d3bae94ce0"/*I04f_VectorsScope*/,
+  "Description": "Using a Vector Scope",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "31e43ae8-0e2e-41ce-b3ab-fb9c55f28bed",
+      "SymbolName": "Lib.numbers.anim.time.Time",
+      "Position": {
+        "X": 949.996,
+        "Y": 1896.3513
+      }
+    },
+    {
+      "ChildId": "3ec279c8-7d5d-45c1-90ea-30e6e99db320",
+      "SymbolName": "Lib.image.color.ColorGrade",
+      "Position": {
+        "X": 1393.324,
+        "Y": 1729.9308
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "9348540d-55f2-4cfa-8371-293fe36a08ff",
+      "SymbolName": "Lib.image.analyze.WaveForm",
+      "SectionId": "a468934a-e85a-4358-9855-152ccc443990",
+      "Position": {
+        "X": 1368.2345,
+        "Y": 2153.6392
+      }
+    },
+    {
+      "ChildId": "b870cae6-33c9-4877-afbd-113f7bc3211c",
+      "SymbolName": "Lib.image.color.ColorGrade",
+      "SectionId": "a468934a-e85a-4358-9855-152ccc443990",
+      "Position": {
+        "X": 1368.2345,
+        "Y": 2118.6392
+      }
+    },
+    {
+      "ChildId": "c36c024c-5f7d-41bc-90fa-2b3690c489a0",
+      "SymbolName": "Lib.image.analyze.WaveForm",
+      "Position": {
+        "X": 1393.324,
+        "Y": 1764.9308
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "d429c4ea-9b4b-456b-b48e-88f8f7684e7b",
+      "SymbolName": "Lib.flow.skillQuest.ImageQuiz",
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "e5d5e0d7-0a11-4334-8843-b02da9846540",
+      "SymbolName": "Lib.io.video.PlayVideo",
+      "Position": {
+        "X": 1089.996,
+        "Y": 1861.3513
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "2853138d-0480-4c41-9874-51c5518a4c82"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "a468934a-e85a-4358-9855-152ccc443990",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1278.1979,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 401.80212,
+        "Y": 152.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "c5345035-6381-49ac-ad8a-40d7bbc561ee",
+      "Description": "If you think the [WaveForm] view takes some getting used to you're not alone."
+    },
+    {
+      "Id": "a1422689-69b4-4107-93b4-5503abdb8309",
+      "Description": "Its Vectorscope might look even more confusing. That's why it's disabled by default. But it can be very powerful to analyze color disctributions."
+    },
+    {
+      "Id": "c2d24386-9b0b-4c65-b67c-e30ed946b6a2",
+      "Description": "First let's enable the Vector Scoop.",
+      "Style": "CallToAction"
+    },
+    {
+      "Id": "4b9eff95-664c-4c1d-8eef-7d04b6b61f33",
+      "Description": "Notice the color circle on the edge: Reds on top, blue on the bottom right, etc.\nThe white dots show the color distribution. Gray colors are in the center. Satatured colors are closer to the edge.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "d9b379b9-24cf-498f-a374-25f3e1f6e0e0",
+      "Description": "The thin white line between Yellow (YL) and Red is the natural skin tone line.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "d7fceaa9-8d28-43b5-ba93-6275b2981a4c",
+      "ChildId": "3ec279c8-7d5d-45c1-90ea-30e6e99db320",
+      "InputId": "be4dc864-a5f9-4356-91f9-58de8056a3a8",
+      "Description": "The thick lump near the **Red** line is the background.\nLet's adjust the [ColorGrade]'s Gamma parameter to change the background to a natural gray.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "4656fcf5-9319-477e-aa7e-39a4089e3804",
+      "ChildId": "3ec279c8-7d5d-45c1-90ea-30e6e99db320",
+      "InputId": "be4dc864-a5f9-4356-91f9-58de8056a3a8",
+      "Description": "Click on the Gamma color thumb to open the color picker.  Hold Shift for finer control.",
+      "Style": "CallToAction"
+    }
+  ]
+}

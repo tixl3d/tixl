@@ -816,6 +816,13 @@
       "Outputs": []
     },
     {
+      "Id": "ef8995bf-2f8c-4acd-9c3f-5c40fde21311"/*I04f_VectorsScope*/,
+      "SymbolId": "d3efe797-8d15-42bc-82cf-12d3bae94ce0",
+      "SymbolName": "Skills.Image.I04_ColorCorrection.I04f_VectorsScope",
+      "InputValues": [],
+      "Outputs": []
+    },
+    {
       "Id": "f41cab7d-c67b-4a45-b41e-9f90ad442440"/*B01b_RearrangeStacks*/,
       "SymbolId": "bd3f2fa7-48f7-4ca3-8c32-92fe0d9e3fff",
       "SymbolName": "Skills.Basics.B01_Welcome.B01b_RearrangeStacks",

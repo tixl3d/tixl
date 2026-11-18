@@ -1049,6 +1049,15 @@
       }
     },
     {
+      "ChildId": "ef8995bf-2f8c-4acd-9c3f-5c40fde21311",
+      "SymbolName": "Skills.Image.I04_ColorCorrection.I04f_VectorsScope",
+      "SectionId": "9c6d38af-c900-4c51-996d-c8dd5685926c",
+      "Position": {
+        "X": 840.0,
+        "Y": 281.17563
+      }
+    },
+    {
       "ChildId": "f41cab7d-c67b-4a45-b41e-9f90ad442440",
       "SymbolName": "Skills.Basics.B01_Welcome.B01b_RearrangeStacks",
       "SectionId": "fbedfaad-561d-4bc8-b43e-767e18fa6a47",
