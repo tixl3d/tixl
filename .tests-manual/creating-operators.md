@@ -81,3 +81,14 @@ Select `[Blur]` (snapped below `[RadialGradient]`), press `Ctrl` + `Tab`, type `
 **Expected:**
 - Holding `Shift` does not move the `+`: a snapped input can only be split along its snap.
 - `[RadialGradient]` moves up by one row and `[Tint]` sits between it and `[Blur]`, connected to both.
+
+## Step: Removing and recreating a network operator
+
+**Action:**
+Add `[SacnInput]`, set Local IP Address to `127.0.0.1`, and enable Active.
+Delete it without disabling it first, then create and activate it again with the
+same settings. Close and reopen the project with the operator active.
+
+**Expected:**
+- The recreated operator is available normally in the graph and Parameter Window.
+- No disposal or address-in-use errors appear in the Console.

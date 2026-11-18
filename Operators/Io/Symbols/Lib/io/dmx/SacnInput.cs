@@ -8,7 +8,7 @@ using T3.Core.Utils;
 namespace Lib.io.dmx;
 
 [Guid("e3207424-deaf-4462-acd5-21f2c6f16d1b")]
-internal sealed class SacnInput : Instance<SacnInput>, IStatusProvider, ICustomDropdownHolder, IDisposable
+internal sealed class SacnInput : Instance<SacnInput>, IStatusProvider, ICustomDropdownHolder
 {
     private const int SacnPort = 5568;
     private const int MinPacketLength = 126;
@@ -54,9 +54,13 @@ internal sealed class SacnInput : Instance<SacnInput>, IStatusProvider, ICustomD
         Result.UpdateAction = Update;
     }
 
-    public void Dispose()
+    protected override void Dispose(bool isDisposing)
     {
-        StopListening();
+        if (isDisposing)
+        {
+            StopListening();
+        }
+        base.Dispose(isDisposing);
     }
 
     private void Update(EvaluationContext context)
