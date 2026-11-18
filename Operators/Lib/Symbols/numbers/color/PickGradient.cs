@@ -1,4 +1,4 @@
-using T3.Core.Utils;
+using Lib.Utils;
 
 namespace Lib.numbers.color;
 
@@ -15,28 +15,9 @@ internal sealed class PickGradient : Instance<PickGradient>
 
     private void Update(EvaluationContext context)
     {
-        var connections = Gradients.GetCollectedTypedInputs();
-        if (connections == null || connections.Count == 0)
-            return;
-
-        var index = Index.GetValue(context).Mod(connections.Count);
-        Selected.Value = connections[index].GetValue(context);
-
-        // Clear dirty flag
-        if (_isFirstUpdate)
-        {
-            foreach (var c in connections)
-            {
-                c.GetValue(context);
-            }
-
-            _isFirstUpdate = false;
-        }
-
-        Gradients.DirtyFlag.Clear();
+        if (PickedInput.TryGetValue(Gradients, Index.GetValue(context), context, out var value))
+            Selected.Value = value;
     }
-
-    private bool _isFirstUpdate = true;
 
     [Input(Guid = "F68298DC-F8D0-4D08-AFF5-7D35200F18B3")]
     public readonly MultiInputSlot<Gradient> Gradients = new();

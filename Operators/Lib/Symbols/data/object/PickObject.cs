@@ -1,4 +1,4 @@
-using T3.Core.Utils;
+using Lib.Utils;
 
 namespace Lib.data.@object;
 
@@ -15,28 +15,9 @@ internal sealed class PickObject :Instance<PickObject>{
 
     private void Update(EvaluationContext context)
     {
-        var connections = Input.GetCollectedTypedInputs();
-        if (connections == null || connections.Count == 0)
-            return;
-        
-
-        var index = Index.GetValue(context).Mod(connections.Count);
-        Selected.Value = connections[index].GetValue(context);
-        
-        // Clear dirty flag
-        if (_isFirstUpdate)
-        {
-            foreach (var c in connections)
-            {
-                c.GetValue(context);
-            }
-
-            _isFirstUpdate = false;
-        }
-        Input.DirtyFlag.Clear();
-
+        if (PickedInput.TryGetValue(Input, Index.GetValue(context), context, out var value))
+            Selected.Value = value;
     }
-    private bool _isFirstUpdate = true; 
     
     [Input(Guid = "A4095B7E-2FAD-42E5-B518-848F2645AA7D")]
     public readonly MultiInputSlot<object> Input = new();

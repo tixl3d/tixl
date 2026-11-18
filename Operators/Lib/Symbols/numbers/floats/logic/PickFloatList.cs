@@ -1,4 +1,4 @@
-using T3.Core.Utils;
+using Lib.Utils;
 
 namespace Lib.numbers.floats.logic;
 
@@ -15,12 +15,8 @@ internal sealed class PickFloatList : Instance<PickFloatList>
 
     private void Update(EvaluationContext context)
     {
-        var connections = Input.GetCollectedTypedInputs();
-        if (connections == null || connections.Count == 0)
-            return;
-
-        var index = Index.GetValue(context).Mod(connections.Count);
-        Selected.Value = connections[index].GetValue(context);
+        if (PickedInput.TryGetValue(Input, Index.GetValue(context), context, out var value))
+            Selected.Value = value;
     }
 
     [Input(Guid = "5A70A1AF-D6C5-43BF-ACB8-FCE2C9A2DE3C")]

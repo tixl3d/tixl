@@ -1,5 +1,5 @@
 using SharpDX.D3DCompiler;
-using T3.Core.Utils;
+using Lib.Utils;
 
 namespace Lib.render._dx11.buffer;
 
@@ -20,19 +20,10 @@ internal sealed class PickCBuffer :Instance<PickCBuffer>{
     
     private void Update(EvaluationContext context)
     {
-        var connections = Input.GetCollectedTypedInputs();
-        var index = Index.GetValue(context);
-        
-        if (connections.Count == 0)
-        {
-            Count.Value = 0;
-            Output.DirtyFlag.Clear();
-            return;
-        }
+        Count.Value = Input.GetCollectedTypedInputs().Count;
+        if (PickedInput.TryGetValue(Input, Index.GetValue(context), context, out var value))
+            Output.Value = value;
 
-        Count.Value = connections.Count;
-        Output.Value = connections[index.Mod(connections.Count)].GetValue(context);
-            
         Output.DirtyFlag.Clear();
         Count.DirtyFlag.Clear();
     }

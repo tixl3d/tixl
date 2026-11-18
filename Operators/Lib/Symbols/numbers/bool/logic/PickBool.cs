@@ -1,4 +1,4 @@
-using T3.Core.Utils;
+using Lib.Utils;
 
 namespace Lib.numbers.@bool.logic;
 
@@ -15,28 +15,9 @@ internal sealed class PickBool : Instance<PickBool>
 
     private void Update(EvaluationContext context)
     {
-        var connections = BoolValues.GetCollectedTypedInputs();
-        BoolValues.DirtyFlag.Clear();
-            
-        if (connections == null || connections.Count == 0)
-            return;
-
-        var index = Index.GetValue(context).Mod(connections.Count);
-        Selected.Value = connections[index].GetValue(context);
-
-        // Clear dirty flag
-        if (_isFirstUpdate)
-        {
-            foreach (var c in connections)
-            {
-                c.GetValue(context);
-            }
-
-            _isFirstUpdate = false;
-        }
+        if (PickedInput.TryGetValue(BoolValues, Index.GetValue(context), context, out var value))
+            Selected.Value = value;
     }
-
-    private bool _isFirstUpdate = true; 
 
     [Input(Guid = "1F97F10C-3158-446B-85EC-8DFDB25B4D67")]
     public readonly MultiInputSlot<bool> BoolValues = new();
