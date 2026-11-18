@@ -52,7 +52,7 @@
     },
     {
       "Id": "5da494ec-cdf2-5d07-b15d-75540ff2c63b"/*ReflectionThickness*/,
-      "DefaultValue": 0.5
+      "DefaultValue": 0.1
     },
     {
       "Id": "69fe1eda-0a88-524f-b5ac-8872e33d9eb7"/*RaysPerPixel*/,
