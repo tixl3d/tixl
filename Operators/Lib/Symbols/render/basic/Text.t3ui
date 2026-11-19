@@ -127,6 +127,7 @@
         "X": 645.4279,
         "Y": 793.7574
       },
+      "ExcludedFromPresets": "True",
       "Description": "String / Input for the text to be drawn",
       "Usage": "Multiline"
     }

@@ -120,11 +120,9 @@
         "Y": -309.46722
       },
       "Description": "Orbit angle offset in degrees.",
-      "Min": -360.0,
-      "Max": 360.0,
-      "Scale": 1.0,
-      "ClampMin": true,
-      "ClampMax": true
+      "Min": -180.0,
+      "Max": 180.0,
+      "Format": "{0:0.0}°"
     },
     {
       "InputId": "acf14901-3373-4b0c-8567-03ea0051a21f"/*CameraTargetPosition*/,
@@ -159,7 +157,10 @@
         "Y": 185.53278
       },
       "Description": "Additional aim rotation in degrees (X: yaw, Y: pitch, Z: roll).",
-      "AddPadding": "True"
+      "AddPadding": "True",
+      "Min": -180.0,
+      "Max": 180.0,
+      "Format": "{0:0.0}°"
     },
     {
       "InputId": "dd81b2aa-3252-4130-8def-a5b399d3e283"/*Seed*/,
