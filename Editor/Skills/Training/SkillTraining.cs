@@ -262,6 +262,8 @@ internal static partial class SkillTraining
             var someLevelsNotCompleted = false;
             var someLevelsSkipped = false;
             topic.CompletedLevelCount = 0;
+            topic.SkippedLevelCount = 0;
+            topic.NeverPlayedLevelCount = 0;
 
             foreach (var level in topic.Levels)
             {
@@ -269,6 +271,7 @@ internal static partial class SkillTraining
                 if (!_cache.ResultsForLevelId.TryGetValue(level.SymbolId, out var results))
                 {
                     topic.ProgressionState = QuestTopic.ProgressStates.NoResultsYet;
+                    topic.NeverPlayedLevelCount++;
                     someLevelsNotCompleted = true;
                     continue;
                 }

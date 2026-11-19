@@ -1,5 +1,6 @@
 ﻿using ImGuiNET;
 using T3.Editor.Gui;
+using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Skills.Data;
@@ -56,9 +57,12 @@ internal static class SkillMapPopup
 
             if (!skipContent)
             {
+                DrawFilterOptions();
+
                 ImGui.BeginChild("Map", new Vector2(0, -10), ImGuiChildFlags.None, ImGuiWindowFlags.NoBackground);
                 {
                     _topicSelection ??= [];
+                    ApplyFilterSettings(_mapCanvas);
                     _mapCanvas.DrawContent(HandleTopicInteraction, out _, _topicSelection);
                 }
                 ImGui.EndChild();
@@ -74,6 +78,28 @@ internal static class SkillMapPopup
         }
 
         ImGui.PopStyleColor();
+    }
+
+    /** Keeps every player-facing map in sync with the filter options of the overview. */
+    internal static void ApplyFilterSettings(SkillMapCanvas canvas)
+    {
+        canvas.ShowPlannedTopics = UserSettings.Config.SkillMapShowPlannedTopics;
+        canvas.HighlightNewTopics = UserSettings.Config.SkillMapHighlightNewTopics;
+    }
+
+    private static void DrawFilterOptions()
+    {
+        var changed = FormInputs.AddCheckBox("Highlight New",
+                                             ref UserSettings.Config.SkillMapHighlightNewTopics,
+                                             "Fades topics without levels you have never played.",
+                                             isFlushLeft: true);
+        ImGui.SameLine(0, 20 * T3Ui.UiScaleFactor);
+        changed |= FormInputs.AddCheckBox("Planned",
+                                          ref UserSettings.Config.SkillMapShowPlannedTopics,
+                                          "Shows topics whose levels are still planned or in draft.",
+                                          isFlushLeft: true);
+        if (changed)
+            UserSettings.Save();
     }
 
     private static void HandleTopicInteraction(QuestTopic topic, bool isSelected)

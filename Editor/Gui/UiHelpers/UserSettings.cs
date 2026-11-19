@@ -213,6 +213,8 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         public bool ApplyDropdownValuesOnHover = true;
 
         public bool ShowSkillQuestInHub = true;
+        public bool SkillMapShowPlannedTopics = false;
+        public bool SkillMapHighlightNewTopics = false;
 
         /// <summary>Checkout of the skillquest content repository. Empty = auto-discover a "skillquest" folder next to the TiXL checkout.</summary>
         public string SkillQuestRepositoryPath = string.Empty;
