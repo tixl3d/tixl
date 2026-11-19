@@ -8,7 +8,7 @@
     },
     {
       "Id": "6e0fa62a-a8e1-4d0b-a5b1-80876ff636c0"/*Path*/,
-      "DefaultValue": "Examples:meshes/marble-player-100k.glb"
+      "DefaultValue": "Examples:meshes/marblePlayer-100k.glb"
     }
   ],
   "Children": [],
