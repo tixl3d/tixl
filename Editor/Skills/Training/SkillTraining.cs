@@ -147,6 +147,7 @@ internal static partial class SkillTraining
         FitViewToSelectionHandling.FitViewToSelection();
 
         _context.LevelFeedback = LevelFeedback.TryCreate(rootInstance);
+        _context.PlayedLevel = _context.ActiveLevel;
 
         _context.StateMachine.SetState(SkillTrainingStates.Playing, _context);
     }
@@ -495,7 +496,7 @@ internal static partial class SkillTraining
             return;
 
         var topic = _context.ActiveTopic;
-        var level = _context.ActiveLevel;
+        var level = _context.PlayedLevel;
         if (topic == null || level == null)
             return;
 

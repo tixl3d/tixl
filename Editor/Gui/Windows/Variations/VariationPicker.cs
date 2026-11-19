@@ -178,8 +178,10 @@ internal sealed class VariationPicker
 
             // Hover preview: while enabled in list mode, apply the highlighted variation to the
             // output (restoring on change/close) — the same transient mechanism as the Variations
-            // window. The canvas drives its own preview, so skip there.
+            // window. The canvas drives its own preview, so skip there. A row menu acts on the
+            // instance's real values, so the preview is lifted while one is open.
             if (UserSettings.Config.VariationHoverPreview && !inCanvasMode && _weightDragId == Guid.Empty
+                && !_isRowMenuOpen
                 && _highlightIndex >= 0 && _highlightIndex < _filtered.Count)
             {
                 var toPreview = _filtered[_highlightIndex];
@@ -311,7 +313,8 @@ internal sealed class VariationPicker
     {
         var closePicker = false;
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(6, 6) * T3Ui.UiScaleFactor);
-        if (ImGui.BeginPopup(RowMenuPopupId))
+        _isRowMenuOpen = ImGui.BeginPopup(RowMenuPopupId);
+        if (_isRowMenuOpen)
         {
             var variation = FindSortedVariation(_rowMenuVariationId);
             if (variation == null)
@@ -669,6 +672,7 @@ internal sealed class VariationPicker
     private Modes _mode = Modes.List;
     private Guid _previewedVariationId;
     private Guid _rowMenuVariationId;
+    private bool _isRowMenuOpen;
 
     // Drag-to-reorder state
     private Guid _reorderId;
