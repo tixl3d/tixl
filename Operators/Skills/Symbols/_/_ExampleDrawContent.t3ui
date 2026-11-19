@@ -1,0 +1,105 @@
+{
+  "FormatVersion": 3,
+  "Id": "dfae06ee-91b8-4834-85c5-a8a59d0ba55e"/*_ExampleDrawContent*/,
+  "Description": "This is only an example content. \nYou do not need to change it to solve the puzzle.",
+  "InputUis": [
+    {
+      "InputId": "ce75d9a9-e03a-4275-83c7-c6095e5f4575"/*Type*/,
+      "Position": {
+        "X": -831.7513,
+        "Y": 704.853
+      }
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "2a3f603b-8cdc-423d-83e1-8e0f9c170c89",
+      "SymbolName": "Lib.point.draw.DrawLines",
+      "Position": {
+        "X": -816.5917,
+        "Y": 442.40048
+      }
+    },
+    {
+      "ChildId": "4102311a-168b-47e1-bbca-7c8a98846891",
+      "SymbolName": "Lib.render.basic.Text",
+      "Position": {
+        "X": -943.4597,
+        "Y": 588.20575
+      }
+    },
+    {
+      "ChildId": "51e776df-2ad2-4012-b6a7-c99ddc0fadbc",
+      "SymbolName": "Lib.render.transform.Group",
+      "Position": {
+        "X": -663.4597,
+        "Y": 518.20575
+      }
+    },
+    {
+      "ChildId": "8cf9fcbe-f970-44cc-a717-66ddb35ec631",
+      "SymbolName": "Lib.render.transform.Transform",
+      "Position": {
+        "X": -803.4597,
+        "Y": 623.20575
+      }
+    },
+    {
+      "ChildId": "936c6ec7-feae-4abd-ac92-79308e8879b7",
+      "SymbolName": "Lib.render.basic.Text",
+      "Position": {
+        "X": -943.4597,
+        "Y": 553.20575
+      }
+    },
+    {
+      "ChildId": "be26a6bb-70ca-42f4-af2d-e2ac15413e35",
+      "SymbolName": "Lib.point.generate.CommonPointSets",
+      "Position": {
+        "X": -816.5917,
+        "Y": 407.40048
+      }
+    },
+    {
+      "ChildId": "c1bbf787-a4b6-4aba-9083-30cf9a1a253f",
+      "SymbolName": "Lib.render.transform.Transform",
+      "Position": {
+        "X": -803.4597,
+        "Y": 588.20575
+      }
+    },
+    {
+      "ChildId": "dfff2bbc-cee3-4007-b678-513858e3cac4",
+      "SymbolName": "Lib.render.transform.Transform",
+      "Position": {
+        "X": -803.4597,
+        "Y": 553.20575
+      }
+    },
+    {
+      "ChildId": "e6c1700a-9392-4622-8a1c-1e8bf2582b26",
+      "SymbolName": "Lib.render.basic.Text",
+      "Position": {
+        "X": -943.4597,
+        "Y": 623.20575
+      }
+    },
+    {
+      "ChildId": "fa634413-d633-463f-8614-b8ce6798f777",
+      "SymbolName": "Lib.flow.Switch",
+      "Position": {
+        "X": -456.8791,
+        "Y": 584.0443
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "56fd9a58-6e11-4322-b8d9-bb99b6f3b45f"/*DrawOutput*/,
+      "Position": {
+        "X": -208.57953,
+        "Y": 461.847
+      }
+    }
+  ]
+}

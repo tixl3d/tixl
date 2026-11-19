@@ -6,21 +6,121 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "227f9a30-0a6f-435b-8e6c-825d2bcbce0b",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "0cd0bf0b-9015-42df-8f2a-33e73f74ba4f",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
+      "SectionId": "c8dcad4c-ce93-4062-baff-1d94220831bf",
       "Position": {
-        "X": 1366.8816,
-        "Y": 1568.3276
+        "X": 1425.12,
+        "Y": 1955.9846
       }
     },
     {
-      "ChildId": "9ef3012e-90a7-4445-b430-0f21542038ad",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "0d38f499-ba49-4846-bda4-c63786ab36b6",
+      "SymbolName": "Lib.numbers.vec3.Magnitude",
       "SectionId": "c8dcad4c-ce93-4062-baff-1d94220831bf",
       "Position": {
-        "X": 1244.7633,
-        "Y": 2141.3435
+        "X": 1251.3636,
+        "Y": 2132.5784
       }
+    },
+    {
+      "ChildId": "12684402-84a8-4aaf-bb7b-e7bf6480fe5b",
+      "SymbolName": "Lib.mesh.generate.CubeMesh",
+      "SectionId": "c8dcad4c-ce93-4062-baff-1d94220831bf",
+      "Position": {
+        "X": 1425.12,
+        "Y": 1920.9846
+      }
+    },
+    {
+      "ChildId": "13e6351d-6497-4f9f-b5e3-87023a432be2",
+      "SymbolName": "Lib.numbers.vec3.PerlinNoise3",
+      "Position": {
+        "X": 1161.1708,
+        "Y": 1454.8647
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "208886c0-1149-4f12-9c4d-940357aa704d",
+      "SymbolName": "Lib.numbers.float.adjust.Remap",
+      "Position": {
+        "X": 1161.1708,
+        "Y": 1652.6984
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "26b2f7a8-7417-4dc7-8516-161ee641d94a",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
+      "Position": {
+        "X": 1409.0682,
+        "Y": 1383.7992
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "52fa8329-5c43-4071-b0de-4b5a1ca9df11",
+      "SymbolName": "Lib.mesh.generate.CubeMesh",
+      "Position": {
+        "X": 1409.0682,
+        "Y": 1348.7992
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "53cf960c-a144-4b12-bc3d-083dd1b66c4b",
+      "SymbolName": "Lib.numbers.float.adjust.Remap",
+      "SectionId": "c8dcad4c-ce93-4062-baff-1d94220831bf",
+      "Position": {
+        "X": 1251.3636,
+        "Y": 2167.5784
+      }
+    },
+    {
+      "ChildId": "85b9e206-c7ad-4a69-acf8-81816a500cba",
+      "SymbolName": "Lib.numbers.vec3.Magnitude",
+      "Position": {
+        "X": 1161.1707,
+        "Y": 1560.3925
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "b94763d9-afa3-4fbc-945b-7e5aceb2ff02",
+      "SymbolName": "Lib.render.camera.Camera",
+      "Position": {
+        "X": 1409.0682,
+        "Y": 1488.7992
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "c8fdb15a-def1-4b7f-b1eb-c5afde123a52",
+      "SymbolName": "Lib.render.transform.Transform",
+      "SectionId": "c8dcad4c-ce93-4062-baff-1d94220831bf",
+      "Position": {
+        "X": 1425.12,
+        "Y": 1990.9846
+      }
+    },
+    {
+      "ChildId": "d8a3a8b0-3bc2-4b08-beaa-7d95785cadb8",
+      "SymbolName": "Lib.render.camera.Camera",
+      "SectionId": "c8dcad4c-ce93-4062-baff-1d94220831bf",
+      "Position": {
+        "X": 1425.12,
+        "Y": 2060.9846
+      }
+    },
+    {
+      "ChildId": "da06de8f-cf78-4687-9acc-066e5e3b2227",
+      "SymbolName": "Lib.render.transform.Transform",
+      "Position": {
+        "X": 1409.0682,
+        "Y": 1418.7992
+      },
+      "SnapshotGroupIndex": "1"
     },
     {
       "ChildId": "ee4d47e0-80fb-4aba-a6c7-43a644a86bf4",
@@ -28,6 +128,15 @@
       "Position": {
         "X": 1693.2708,
         "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "f1045718-d958-47f9-ba58-fab288ad8f35",
+      "SymbolName": "Lib.numbers.vec3.PerlinNoise3",
+      "SectionId": "c8dcad4c-ce93-4062-baff-1d94220831bf",
+      "Position": {
+        "X": 1111.3635,
+        "Y": 2012.795
       }
     }
   ],
@@ -53,11 +162,11 @@
       },
       "Position": {
         "X": 1085.0,
-        "Y": 2052.5103
+        "Y": 1800.4675
       },
       "Size": {
         "X": 525.0,
-        "Y": 187.48975
+        "Y": 490.0
       }
     }
   ],

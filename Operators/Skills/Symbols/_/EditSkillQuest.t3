@@ -67,9 +67,9 @@
       "Outputs": []
     },
     {
-      "Id": "16b397c0-21b5-4368-8b1c-5bf6113e5597"/*R03g_SceneinaScene*/,
+      "Id": "16b397c0-21b5-4368-8b1c-5bf6113e5597"/*R03g_SceneWithinScene*/,
       "SymbolId": "8b869a9e-1bf6-4291-b310-7ddc0a523e86",
-      "SymbolName": "Skills.Render.R03_Camera.R03g_SceneinaScene",
+      "SymbolName": "Skills.Render.R03_Camera.R03g_SceneWithinScene",
       "InputValues": [],
       "Outputs": []
     },
@@ -557,6 +557,13 @@
       "Outputs": []
     },
     {
+      "Id": "9e12c930-45ae-4a14-b855-024bb4f5be6c"/*ImageQuiz*/,
+      "SymbolId": "b1cb8864-0d51-4b7f-96eb-4c6267d4b216",
+      "SymbolName": "Lib.flow.skillQuest.ImageQuiz",
+      "InputValues": [],
+      "Outputs": []
+    },
+    {
       "Id": "a5fb3d31-4c0e-469a-a7c2-5c6673d30244"/*M03e_BooleanLogicAll*/,
       "SymbolId": "b3fe4803-fa91-45c4-ac77-e827edd78d76",
       "SymbolName": "Skills.Math.M03_BoolsAndAnims.M03e_BooleanLogicAll",
@@ -798,6 +805,13 @@
       "Id": "e7b7996b-6e1a-4b2c-87ae-fdee08d3bbcf"/*I02i_Flip*/,
       "SymbolId": "680bb1ae-d906-48cc-adbd-240e0df0497d",
       "SymbolName": "Skills.Image.I02_Gradients.I02i_Flip",
+      "InputValues": [],
+      "Outputs": []
+    },
+    {
+      "Id": "e8d659ba-15bf-49ff-9174-e4d25110ef7f"/*ValueQuiz*/,
+      "SymbolId": "702f1f75-df90-44ca-b567-78ba9d1613b5",
+      "SymbolName": "Lib.flow.skillQuest.ValueQuiz",
       "InputValues": [],
       "Outputs": []
     },

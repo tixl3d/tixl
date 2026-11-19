@@ -6,20 +6,86 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "a4ce0b77-bc6e-4088-a3a7-6120614888a1",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "05b9b43b-5758-41ae-95eb-a8311c227013",
+      "SymbolName": "Lib.render.basic.Layer2d",
       "Position": {
-        "X": 1366.8816,
-        "Y": 1568.3276
+        "X": 1318.8214,
+        "Y": 1789.0708
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "25c82831-477d-42a2-b162-9982e2e19600",
+      "SymbolName": "Lib.render.basic.Layer2d",
+      "SectionId": "61ceb7d0-06cc-4b20-a74b-8daef4635e92",
+      "Position": {
+        "X": 1358.5219,
+        "Y": 2172.53
       }
     },
     {
-      "ChildId": "c3863151-7f10-4142-a814-c427b5cc8135",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "537f8271-1c60-4702-916a-1e0d712f4fd3",
+      "SymbolName": "Lib.render.camera.Camera",
+      "Position": {
+        "X": 1318.8214,
+        "Y": 1824.0708
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "5f23c85d-7af1-44b8-8153-1e46f6d0a4ae",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
       "SectionId": "61ceb7d0-06cc-4b20-a74b-8daef4635e92",
       "Position": {
-        "X": 1244.7633,
-        "Y": 2141.3435
+        "X": 1358.5219,
+        "Y": 2137.53
+      }
+    },
+    {
+      "ChildId": "75d34d3d-0792-48bc-92e0-5d6acb2bc3c2",
+      "SymbolName": "Lib.numbers.float.random.PerlinNoise",
+      "Position": {
+        "X": 1101.6058,
+        "Y": 1768.3479
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "b213d664-bd0c-4e37-98cc-27866f33564c",
+      "SymbolName": "Lib.numbers.vec3.PerlinNoise3",
+      "SectionId": "61ceb7d0-06cc-4b20-a74b-8daef4635e92",
+      "Comment": "Notice the GainAndBias parameter that makes the movement snappier.",
+      "Position": {
+        "X": 1218.5219,
+        "Y": 2242.53
+      }
+    },
+    {
+      "ChildId": "c793d4f2-e239-474c-ac82-ee5ef390c993",
+      "SymbolName": "Lib.numbers.vec3.PerlinNoise3",
+      "Comment": "Notice the GainAndBias parameter that makes the movement snappier.",
+      "Position": {
+        "X": 1101.6058,
+        "Y": 1835.3121
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "ce436f6e-a1d0-4016-8f56-b5217ea6432e",
+      "SymbolName": "Lib.render.camera.Camera",
+      "SectionId": "61ceb7d0-06cc-4b20-a74b-8daef4635e92",
+      "Position": {
+        "X": 1358.5219,
+        "Y": 2207.53
+      }
+    },
+    {
+      "ChildId": "d763dd6f-c8a4-4ceb-bc11-d2ec70daca0f",
+      "SymbolName": "Lib.numbers.float.random.PerlinNoise",
+      "SectionId": "61ceb7d0-06cc-4b20-a74b-8daef4635e92",
+      "Position": {
+        "X": 1218.5219,
+        "Y": 2277.53
       }
     },
     {
@@ -29,6 +95,15 @@
         "X": 1693.2708,
         "Y": 1786.6185
       }
+    },
+    {
+      "ChildId": "f051a6b1-8239-48de-8bff-b42396d6806f",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
+      "Position": {
+        "X": 1318.8214,
+        "Y": 1754.0708
+      },
+      "SnapshotGroupIndex": "1"
     }
   ],
   "OutputUis": [
@@ -57,7 +132,7 @@
       },
       "Size": {
         "X": 525.0,
-        "Y": 187.48975
+        "Y": 292.48975
       }
     }
   ],

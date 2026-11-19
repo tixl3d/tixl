@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 
 namespace Skills._{
     [Guid("be19804d-c269-4266-84b0-091f4f23c24a")]
-    internal sealed class _ExampleContent :Instance<_ExampleContent>    {
+    internal sealed class _ExampleImageContent :Instance<_ExampleImageContent>{
         [Output(Guid = "b0c6c3cc-200d-4de1-9088-7be166de433f")]
         public readonly Slot<Texture2D> Output = new Slot<Texture2D>();
 

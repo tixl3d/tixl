@@ -6,20 +6,39 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "5fd5672a-b046-4dd5-883e-fd9bdcf08042",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "57c0f315-abb8-4529-856b-7e3892f1cb65",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
       "Position": {
-        "X": 1366.8816,
-        "Y": 1568.3276
+        "X": 1249.8154,
+        "Y": 1521.8306
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "5cd7582f-cec2-49f3-b771-0cfe2ce332f6",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
+      "SectionId": "235fd8cc-7693-423d-b0f8-d1a52a36d5c6",
+      "Position": {
+        "X": 1312.4388,
+        "Y": 2123.8372
       }
     },
     {
-      "ChildId": "945871e6-6eaa-4354-a11d-81e447970912",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "9a06b29d-12ed-42ce-8fea-7cc01096ce87",
+      "SymbolName": "Lib.render.camera.OrbitCamera",
       "SectionId": "235fd8cc-7693-423d-b0f8-d1a52a36d5c6",
       "Position": {
-        "X": 1244.7633,
-        "Y": 2141.3435
+        "X": 1312.4388,
+        "Y": 2158.8372
+      }
+    },
+    {
+      "ChildId": "b3f572c8-abd7-4121-93fb-6579306c934e",
+      "SymbolName": "Lib.mesh.generate.LoadObj",
+      "SectionId": "235fd8cc-7693-423d-b0f8-d1a52a36d5c6",
+      "Position": {
+        "X": 1312.4388,
+        "Y": 2088.8372
       }
     },
     {
@@ -29,6 +48,24 @@
         "X": 1693.2708,
         "Y": 1786.6185
       }
+    },
+    {
+      "ChildId": "fb38a7b6-9abe-4f9d-aedf-e72cd0e1efbd",
+      "SymbolName": "Lib.mesh.generate.LoadObj",
+      "Position": {
+        "X": 1249.8154,
+        "Y": 1486.8306
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "fcfc069a-44b2-46a4-bc42-da53758b614e",
+      "SymbolName": "Lib.render.camera.OrbitCamera",
+      "Position": {
+        "X": 1249.8156,
+        "Y": 1620.254
+      },
+      "SnapshotGroupIndex": "1"
     }
   ],
   "OutputUis": [
@@ -73,6 +110,10 @@
     {
       "Id": "ae20016f-1963-456d-a386-23f2d461caf1",
       "Description": "A simple but effective operator for this is [OrbitCamera].\nIt rotates the camera around a center point and provides parameters to control distance and orientation."
+    },
+    {
+      "Id": "d786751c-a888-4b29-9a71-c5b063d9df88",
+      "Description": "Adjust the parameters to match the solution."
     }
   ]
 }

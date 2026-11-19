@@ -1,0 +1,20 @@
+{
+  "Id": "b8ff7779-3de5-4930-b9a7-26f1b3436479",
+  "Variations": [
+    {
+      "Id": "463d7c3b-1609-48cc-b5ba-aaf338c78f41",
+      "IsPreset": false,
+      "ActivationIndex": 0,
+      "Title": "Solution",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "461fe756-acbc-44ec-b88a-427571f7d6fc": {
+          "f1f1be0e-d5bc-4940-bbc1-88bfa958f0e1": "CATS&\nDOGS"
+        }
+      }
+    }
+  ]
+}
