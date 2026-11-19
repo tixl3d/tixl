@@ -28,14 +28,14 @@ internal sealed class PerlinNoise : Instance<PerlinNoise>
         var rangeMin = RangeMin.GetValue(context);
         var rangeMax = RangeMax.GetValue(context);
         var scale = Amplitude.GetValue(context);
-        var biasAndGain = GainAndBias.GetValue(context);
+        var gainAndBias = GainAndBias.GetValue(context);
 
         //var noiseSum = ComputePerlinNoise(value, period, octaves, seed);
         var noiseSum  = MathUtils.PerlinNoise(value, period, octaves, seed);
         var dist = rangeMax - rangeMin;
         var scaleToUniformFactor = 1.37f;
             
-        Result.Value = (( noiseSum * scaleToUniformFactor + 1f) * 0.5f).ApplyGainAndBias(biasAndGain.X, biasAndGain.Y) * scale * dist + rangeMin;
+        Result.Value = (( noiseSum * scaleToUniformFactor + 1f) * 0.5f).ApplyGainAndBias(gainAndBias.X, gainAndBias.Y) * scale * dist + rangeMin;
     }
 
         

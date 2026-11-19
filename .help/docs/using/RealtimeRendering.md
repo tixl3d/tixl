@@ -98,7 +98,7 @@ Todo
 
 ## Bias-Functions
 
-Many of TiXL’s operators have a Gain or a BiasAndGain parameter. This concept is incredibly powerful for procedural content, so we should cover it here. Both are so called "mapping function": they match an incoming value -- let's say a brightness -- to a new value. If the mapping function is a straight diagonal line, the function is neutral and has no effect. If it is curved up in the middle, the image gets brighter. Photoshop Curve adjustment is a good example of a mapping curve.
+Many of TiXL’s operators have a Gain or a GainAndBias parameter. This concept is incredibly powerful for procedural content, so we should cover it here. Both are so called "mapping function": they match an incoming value -- let's say a brightness -- to a new value. If the mapping function is a straight diagonal line, the function is neutral and has no effect. If it is curved up in the middle, the image gets brighter. Photoshop Curve adjustment is a good example of a mapping curve.
 
 _Bias_ and _Gain_ are two subsets of mapping curves that are defined for values between 0 and 1 (the so called normalized range). _Gain_ (sometimes called bias) pushes values towards the upper left corner or lower left corner resulting in brighter or darker images. 
 

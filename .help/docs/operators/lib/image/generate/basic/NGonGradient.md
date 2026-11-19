@@ -21,7 +21,7 @@ Similar Ops: [Rings] [RadialGradient] [LinearGradient]
 | **Offset** (Single) | Offsets the gradient inward / outward |
 | **PingPong** (Boolean) | Mirrors the gradient inward |
 | **Repeat** (Boolean) | Repeats the Gradient outward |
-| **BiasAndGain** (Vector2) | Bias and gain to control the gradient |
+| **GainAndBias** (Vector2) | Bias and gain to control the gradient |
 | **BlendMode** (Int32) | Blend mode between the generated blob graphic and the background image, if one is provided. |
 | **Resolution** (Int2) | Output resolution in pixels. Set to 0 for dynamic resolution. |
 | **Image** (Texture2D) | An optional background image. If connected, allows applying different BlendingModes. |

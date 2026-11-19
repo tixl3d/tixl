@@ -74,7 +74,7 @@
           "Value": 0.91
         },
         {
-          "Id": "3c70a819-d813-4ebd-9e5b-c185fac70ea2"/*BiasAndGain*/,
+          "Id": "3c70a819-d813-4ebd-9e5b-c185fac70ea2"/*GainAndBias*/,
           "Type": "System.Numerics.Vector2",
           "Value": {
             "X": 0.5,

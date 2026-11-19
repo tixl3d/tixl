@@ -148,7 +148,7 @@
         "X": 219.55301,
         "Y": 1203.7299
       },
-      "Description": "Add random variation to the amount of the effect. \nYou can use the BiasAndGain parameter to control the variation distribution."
+      "Description": "Add random variation to the amount of the effect. \nYou can use the GainAndBias parameter to control the variation distribution."
     },
     {
       "InputId": "fcb4c9ff-b8b7-4fa3-b1ab-d8af6dbedc96"/*SignedNormalMap*/,

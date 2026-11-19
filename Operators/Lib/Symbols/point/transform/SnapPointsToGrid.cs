@@ -32,7 +32,7 @@ internal sealed class SnapPointsToGrid : Instance<SnapPointsToGrid>
         public readonly InputSlot<float> Scatter = new InputSlot<float>();
 
         [Input(Guid = "f9df2ced-a40b-4679-8161-e2765bab7823")]
-        public readonly InputSlot<System.Numerics.Vector2> BiasAndGain = new InputSlot<System.Numerics.Vector2>();
+        public readonly InputSlot<System.Numerics.Vector2> GainAndBias = new InputSlot<System.Numerics.Vector2>();
 
         [Input(Guid = "bf7fef5e-a9d5-41e6-8025-0f74a9e07373")]
         public readonly InputSlot<bool> UseWAsWeight = new InputSlot<bool>();

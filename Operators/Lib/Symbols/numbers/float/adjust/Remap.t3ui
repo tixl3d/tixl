@@ -5,7 +5,7 @@
   "SymbolTags": "1",
   "InputUis": [
     {
-      "InputId": "23548048-e373-4fd6-9c83-1cf7398f952d"/*BiasAndGain*/,
+      "InputId": "23548048-e373-4fd6-9c83-1cf7398f952d"/*GainAndBias*/,
       "Position": {
         "X": 0.0,
         "Y": 45.0

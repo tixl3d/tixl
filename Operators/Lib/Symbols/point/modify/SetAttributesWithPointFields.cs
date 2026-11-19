@@ -17,7 +17,7 @@ internal sealed class SetAttributesWithPointFields : Instance<SetAttributesWithP
     public readonly InputSlot<float> OffsetRange = new InputSlot<float>();
 
     [Input(Guid = "3c70a819-d813-4ebd-9e5b-c185fac70ea2")]
-    public readonly InputSlot<Vector2> BiasAndGain = new InputSlot<Vector2>();
+    public readonly InputSlot<Vector2> GainAndBias = new InputSlot<Vector2>();
 
     [Input(Guid = "46238904-91b9-47ab-bf90-9392fb034dc3")]
     public readonly InputSlot<float> Variation = new InputSlot<float>();

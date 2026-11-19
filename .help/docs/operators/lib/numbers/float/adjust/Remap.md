@@ -12,7 +12,7 @@ Remaps a value range to a new value range. Optionally applies bias, clamping, or
 | **RangeInMax** (Single) | — |
 | **RangeOutMin** (Single) | — |
 | **RangeOutMax** (Single) | — |
-| **BiasAndGain** (Vector2) | — |
+| **GainAndBias** (Vector2) | — |
 | **Mode** (Int32) | — |
 
 ## Outputs

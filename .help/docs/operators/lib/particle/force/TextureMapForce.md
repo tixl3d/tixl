@@ -20,12 +20,12 @@ Please also check the example.
 | **SignedNormalMap** (Texture2D Required) | — |
 | **Amount** (Single) | How much are the particles accelerated by the signed normal map.<br/>You can use negative values to invert the direction. |
 | **AmountXY** (Vector2) | — |
-| **AmountVariation** (Single) | Add random variation to the amount of the effect. <br/>You can use the BiasAndGain parameter to control the variation distribution. |
+| **AmountVariation** (Single) | Add random variation to the amount of the effect. <br/>You can use the GainAndBias parameter to control the variation distribution. |
 | **Twist** (Single) | — |
 | **TwistVariation** (Single) | — |
 | **Spin** (Single) | Applies a rotation along the view direction. |
-| **SpinVariation** (Single) | Add a random offset to the twist rotation. Use BiasAndGain to control the amount of random distribution |
-| **VariationGainAndBias** (Vector2) | Controls the random distribution. Please check [BiasAndGainExample] and read the documentation on Wiki -> Rendering for Artists. |
+| **SpinVariation** (Single) | Add a random offset to the twist rotation. Use GainAndBias to control the amount of random distribution |
+| **VariationGainAndBias** (Vector2) | Controls the random distribution. Please check [GainAndBiasExample] and read the documentation on Wiki -> Rendering for Artists. |
 | **ViewConfinement** (Single) | Applies a force to push particles back into view. |
 | **DepthConcentration** (Single) | Applies force to push particles towards distance from the camera that is defined by CenterDepth. |
 | **CenterDepth** (Single) | Target distance from the camera plane when applying DepthConcentration. |

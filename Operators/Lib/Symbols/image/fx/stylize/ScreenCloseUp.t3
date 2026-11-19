@@ -428,7 +428,7 @@
       "SymbolName": "Lib.numbers.float.adjust.Remap",
       "InputValues": [
         {
-          "Id": "23548048-e373-4fd6-9c83-1cf7398f952d"/*BiasAndGain*/,
+          "Id": "23548048-e373-4fd6-9c83-1cf7398f952d"/*GainAndBias*/,
           "Type": "System.Numerics.Vector2",
           "Value": {
             "X": 0.5,

@@ -27,16 +27,16 @@ internal sealed class PerlinNoise2 : Instance<PerlinNoise2>
         var rangeMax = RangeMax.GetValue(context);
         var scale = Amplitude.GetValue(context);
         var scaleXY = AmplitudeXY.GetValue(context);
-        var biasAndGain = GainAndBias.GetValue(context);
+        var gainAndBias = GainAndBias.GetValue(context);
         var offset = Offset.GetValue(context);
         
         var scaleToUniformFactor = 1.37f;
 
         // var scaleToUniformFactor = 1.37f;
-        // var x = ((MathUtils.PerlinNoise(value, period, octaves, seed) * scaleToUniformFactor + 1f) * 0.5f).ApplyGainAndBias(biasAndGain.X, biasAndGain.Y) 
+        // var x = ((MathUtils.PerlinNoise(value, period, octaves, seed) * scaleToUniformFactor + 1f) * 0.5f).ApplyGainAndBias(gainAndBias.X, gainAndBias.Y) 
         //         * (rangeMax.X - rangeMin.X) + rangeMin.X;
         //
-        // var y = ((MathUtils.PerlinNoise(value, period, octaves, seed + 123) * scaleToUniformFactor + 1f) * 0.5f).ApplyGainAndBias(biasAndGain.X, biasAndGain.Y) 
+        // var y = ((MathUtils.PerlinNoise(value, period, octaves, seed + 123) * scaleToUniformFactor + 1f) * 0.5f).ApplyGainAndBias(gainAndBias.X, gainAndBias.Y) 
         //         * (rangeMax.Y - rangeMin.Y) + rangeMin.Y;
         //     
         // Result.Value  = new Vector2(x, y) * scaleXY  * scale;
@@ -49,7 +49,7 @@ internal sealed class PerlinNoise2 : Instance<PerlinNoise2>
         float ScalarNoise(int seedOffset)
         {
             return ((MathUtils.PerlinNoise(value, period, octaves, seed + seedOffset) * scaleToUniformFactor + 1f) * 0.5f)
-                  .ApplyGainAndBias(biasAndGain.X, biasAndGain.Y);
+                  .ApplyGainAndBias(gainAndBias.X, gainAndBias.Y);
         }
     }
 

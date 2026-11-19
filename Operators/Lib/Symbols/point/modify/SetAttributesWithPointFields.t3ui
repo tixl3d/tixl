@@ -13,7 +13,7 @@
       "GroupTitle": "Field Edge"
     },
     {
-      "InputId": "3c70a819-d813-4ebd-9e5b-c185fac70ea2"/*BiasAndGain*/,
+      "InputId": "3c70a819-d813-4ebd-9e5b-c185fac70ea2"/*GainAndBias*/,
       "Position": {
         "X": -306.32886,
         "Y": 1319.4006

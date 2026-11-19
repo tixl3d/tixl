@@ -45,7 +45,7 @@ internal sealed class NGonGradient : Instance<NGonGradient>
         public readonly InputSlot<bool> Repeat = new InputSlot<bool>();
 
         [Input(Guid = "df44d68a-1631-4f05-a616-242fab419e57")]
-        public readonly InputSlot<System.Numerics.Vector2> BiasAndGain = new InputSlot<System.Numerics.Vector2>();
+        public readonly InputSlot<System.Numerics.Vector2> GainAndBias = new InputSlot<System.Numerics.Vector2>();
 
         [Input(Guid = "60a0fd35-a64a-4710-b7ba-68d03887ca14", MappedType = typeof(SharedEnums.RgbBlendModes))]
         public readonly InputSlot<int> BlendMode = new InputSlot<int>();

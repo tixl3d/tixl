@@ -3,7 +3,7 @@
   "Id": "f0acd1a4-7a98-43ab-a807-6d1bd3e92169"/*Remap*/,
   "Inputs": [
     {
-      "Id": "23548048-e373-4fd6-9c83-1cf7398f952d"/*BiasAndGain*/,
+      "Id": "23548048-e373-4fd6-9c83-1cf7398f952d"/*GainAndBias*/,
       "DefaultValue": {
         "X": 0.5,
         "Y": 0.5
