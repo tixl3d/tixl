@@ -819,7 +819,8 @@ namespace T3.Editor.Gui.MagGraph.States
         /// <summary>
         /// Starts dragging temp connections from the picked output. If the dragged item is part of a multi-selection,
         /// the primary outputs of all other selected operators with a matching type are picked up too, ordered by
-        /// canvas position, so they can be dropped onto a multi-input or the symbol browser together.
+        /// canvas position, so they can be dropped onto a multi-input or the symbol browser together. Outputs already
+        /// snapped in the dragged direction are skipped, so a stack of ops only contributes its free ends.
         /// </summary>
         private static void AddTempConnectionsForOutputDrag(GraphUiContext context, MagGraphItem sourceItem, MagGraphItem.OutputLine outputLine)
         {
@@ -836,6 +837,9 @@ namespace T3.Editor.Gui.MagGraph.States
                         continue;
 
                     if (item.OutputLines.Length == 0 || item.OutputLines[0].Output.ValueType != outputType)
+                        continue;
+
+                    if (IsOutputSnapped(item.OutputLines[0], context.ActiveOutputDirection))
                         continue;
 
                     draggedItems.Add(item);
@@ -868,6 +872,22 @@ namespace T3.Editor.Gui.MagGraph.States
                                                     MultiInputIndex = index,
                                                 });
             }
+        }
+
+        private static bool IsOutputSnapped(MagGraphItem.OutputLine outputLine, MagGraphItem.Directions direction)
+        {
+            foreach (var c in outputLine.ConnectionsOut)
+            {
+                if (!c.IsSnapped)
+                    continue;
+
+                var isVertical = c.Style is MagGraphConnection.ConnectionStyles.MainOutToMainInSnappedVertical
+                                     or MagGraphConnection.ConnectionStyles.AdditionalOutToMainInputSnappedVertical;
+                if (isVertical == (direction == MagGraphItem.Directions.Vertical))
+                    return true;
+            }
+
+            return false;
         }
     }
 }
