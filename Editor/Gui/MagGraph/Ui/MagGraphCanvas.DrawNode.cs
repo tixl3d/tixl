@@ -1322,13 +1322,13 @@ internal sealed partial class MagGraphView
     private void DrawMissingInputIndicator(ImDrawListPtr drawList, MagGraphItem item, Vector2 pMin, MagGraphItem.InputLine inputLine)
     {
         var s = GridSizeOnScreen.Y;
-        var c = pMin + new Vector2(-s * 0.2f, s * 0.45f);
+        var c = pMin + new Vector2(-s * 0.2f, s * 0.5f);
         var s2 = s * 0.4f;
-        drawList.AddTriangleFilled(c + new Vector2(0, -0.2f) * s2,
+        var typeColor = TypeUiRegistry.GetPropertiesForType(inputLine.Type).Color;
+        drawList.AddTriangleFilled(c + new Vector2(0.2f, 0) * s2,
+                                   c + new Vector2(-0.2f, -0.2f) * s2,
                                    c + new Vector2(-0.2f, 0.2f) * s2,
-                                   c + new Vector2(0.2f, 0.2f) * s2,
-                                   //+ new Vector2(8, 9) * CanvasScale
-                                   UiColors.StatusAttention);
+                                   ColorVariations.Highlight.Apply(typeColor));
 
         ImGui.SetCursorScreenPos(c - Vector2.One * s2 / 2);
         ImGui.PushID(item.Id.GetHashCode());
