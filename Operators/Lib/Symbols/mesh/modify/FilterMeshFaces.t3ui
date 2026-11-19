@@ -1,0 +1,255 @@
+{
+  "FormatVersion": 3,
+  "Id": "ca6fc28d-5dc5-4162-9f85-954e65e65738"/*FilterMeshFaces*/,
+  "Description": "Picks a subset of the faces of a mesh based on start index, step and count or percentage.\n\nEvery picked face gets its own three vertices, so the result has no shared vertices (like after [SplitMeshVertices]) and its size is known without reading back from the GPU. Vertices that are not used by any picked face are dropped. Count can exceed the number of incoming faces; indices then wrap around and faces are repeated.\n\nAKA: delete faces, remove faces, reduce mesh, thin out\n\nSee also: [FilterPoints], [SplitMeshVertices], [ScatterMeshFaces], [MeshFacesPoints]",
+  "InputUis": [
+    {
+      "InputId": "1aafe02d-7d25-4d7d-a3f3-e1be54d6012f"/*InputMesh*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -700.0,
+        "Y": 300.0
+      }
+    },
+    {
+      "InputId": "3e3dd39d-20a6-47f2-9037-ae861b88484a"/*StartIndex*/,
+      "Position": {
+        "X": -700.0,
+        "Y": 10.0
+      },
+      "Description": "Index of the first picked face."
+    },
+    {
+      "InputId": "692037a3-1f93-4255-bb19-d8f60e2a5b74"/*Percentage*/,
+      "Position": {
+        "X": -700.0,
+        "Y": -25.0
+      },
+      "Description": "Fraction of the incoming faces to keep. When 0 or larger it replaces Count; 1 keeps as many faces as the input has, -1 disables it.",
+      "Min": -1.0,
+      "Max": 1.0,
+      "ClampMin": true
+    },
+    {
+      "InputId": "8c24b384-7e36-4b54-ad6c-e47341169450"/*Count*/,
+      "Position": {
+        "X": -700.0,
+        "Y": -60.0
+      },
+      "GroupTitle": "Selection",
+      "Description": "Number of faces in the result. Ignored while Percentage is 0 or larger."
+    },
+    {
+      "InputId": "a4acd677-5777-483f-a375-b7409982bd26"/*Seed*/,
+      "Position": {
+        "X": -700.0,
+        "Y": 115.0
+      },
+      "Min": 0,
+      "Max": 100
+    },
+    {
+      "InputId": "e728c014-1387-4a5f-bfb6-f03fea682b25"/*Step*/,
+      "Position": {
+        "X": -700.0,
+        "Y": 45.0
+      },
+      "Description": "Distance in face indices between picked faces.",
+      "Min": 0.0,
+      "Max": 10.0
+    },
+    {
+      "InputId": "f3d48104-cedc-48e5-82db-c54bfb6b77be"/*ScatterSelect*/,
+      "Position": {
+        "X": -700.0,
+        "Y": 80.0
+      },
+      "GroupTitle": "Scattering",
+      "Description": "Randomly offsets the picked face indices.",
+      "Min": 0.0,
+      "Max": 1.0,
+      "Scale": 0.001,
+      "ClampMin": true,
+      "ClampMax": true
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "091e826c-5573-4136-a335-82002eca9e03",
+      "SymbolName": "Types.Gfx.ComputeShader",
+      "Position": {
+        "X": 560.0,
+        "Y": -130.0
+      }
+    },
+    {
+      "ChildId": "13be5549-8fa7-493f-95af-847d2cedc38d",
+      "SymbolName": "Lib.render._dx11.fxsetup.ExecuteBufferUpdate",
+      "Position": {
+        "X": 1150.0,
+        "Y": 250.0
+      }
+    },
+    {
+      "ChildId": "2254d49b-8835-423b-bbaf-cc45ce5a3ad0",
+      "SymbolName": "Lib.numbers.float.basic.Multiply",
+      "Position": {
+        "X": -20.0,
+        "Y": -60.0
+      }
+    },
+    {
+      "ChildId": "340abb3e-db18-4347-9497-655343eb9157",
+      "SymbolName": "Lib.numbers.int.process.IntsToBuffer",
+      "Position": {
+        "X": 700.0,
+        "Y": 80.0
+      }
+    },
+    {
+      "ChildId": "3a54415a-75cf-40f4-ae79-783cb117d9a0",
+      "SymbolName": "Types.Gfx.StructuredBufferWithViews",
+      "Position": {
+        "X": 700.0,
+        "Y": 280.0
+      }
+    },
+    {
+      "ChildId": "3d79d217-02c8-4392-8150-c9b5ea68e5f0",
+      "SymbolName": "Lib.render._dx11.api.CalcDispatchCount",
+      "Position": {
+        "X": 700.0,
+        "Y": -95.0
+      }
+    },
+    {
+      "ChildId": "4af6d494-78e0-4e77-819f-b6b3fbf6f429",
+      "SymbolName": "Lib.numbers.int.basic.MultiplyInt",
+      "Position": {
+        "X": 560.0,
+        "Y": 420.0
+      }
+    },
+    {
+      "ChildId": "4fb5cc37-c62a-4ac4-806b-1dc629ed48aa",
+      "SymbolName": "Lib.numbers.float.logic.IsGreater",
+      "Position": {
+        "X": 120.0,
+        "Y": -130.0
+      }
+    },
+    {
+      "ChildId": "7147689a-cdd9-4bac-b84a-a2560d8288a4",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
+      "Position": {
+        "X": -160.0,
+        "Y": -60.0
+      }
+    },
+    {
+      "ChildId": "724d0e6b-f81b-4aa0-b184-63dba5d4216e",
+      "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
+      "Position": {
+        "X": 850.0,
+        "Y": 280.0
+      }
+    },
+    {
+      "ChildId": "818dc125-1bd5-4d08-bd22-724ade76a407",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToInt",
+      "Position": {
+        "X": 260.0,
+        "Y": -95.0
+      }
+    },
+    {
+      "ChildId": "8862ec05-610d-4edf-84c3-83e172edc713",
+      "SymbolName": "Types.Gfx.StructuredBufferWithViews",
+      "Position": {
+        "X": 700.0,
+        "Y": 420.0
+      }
+    },
+    {
+      "ChildId": "92517811-1bf2-4623-974e-afaa1938a2b4",
+      "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
+      "Position": {
+        "X": -300.0,
+        "Y": 400.0
+      }
+    },
+    {
+      "ChildId": "9c44c5f7-f135-42a2-8081-d62712b45db0",
+      "SymbolName": "Lib.numbers.int.process.FloatToInt",
+      "Position": {
+        "X": 120.0,
+        "Y": -60.0
+      }
+    },
+    {
+      "ChildId": "a0f76bbf-83f1-43aa-ac42-0e1b43acfea3",
+      "SymbolName": "Lib.mesh._._MeshBufferComponents",
+      "Position": {
+        "X": -500.0,
+        "Y": 300.0
+      }
+    },
+    {
+      "ChildId": "a70b1e93-197f-4a4f-bbfb-414077254478",
+      "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
+      "Position": {
+        "X": 850.0,
+        "Y": 420.0
+      }
+    },
+    {
+      "ChildId": "adc395be-65db-4054-bdb4-a6a734c1d1b9",
+      "SymbolName": "Lib.render._dx11.api.FloatsToBuffer",
+      "Position": {
+        "X": 700.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "bac99011-86fb-4b84-b9d3-0c19d1b3fd9d",
+      "SymbolName": "Lib.mesh._._AssembleMeshBuffers",
+      "Position": {
+        "X": 1300.0,
+        "Y": 300.0
+      }
+    },
+    {
+      "ChildId": "e556c4cd-9f87-4c8c-94b0-7be716425bdb",
+      "SymbolName": "Types.Gfx.ComputeShaderStage",
+      "Position": {
+        "X": 1000.0,
+        "Y": -60.0
+      }
+    },
+    {
+      "ChildId": "ef8162bb-02b4-4d3e-afa2-c848d1caffb9",
+      "SymbolName": "Lib.numbers.int.process.ClampInt",
+      "Position": {
+        "X": 400.0,
+        "Y": -60.0
+      }
+    },
+    {
+      "ChildId": "fea18587-3917-42dd-8a67-94da7114fd67",
+      "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
+      "Position": {
+        "X": -300.0,
+        "Y": 250.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "b058f9d6-4800-439e-a462-2f2bb98bbfbd"/*Output*/,
+      "Position": {
+        "X": 1450.0,
+        "Y": 300.0
+      }
+    }
+  ]
+}
