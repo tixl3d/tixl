@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "fdca1fdf-fbae-4844-a6a2-a543f80ceb79"/*R05c_MaterialTextures*/,
   "Description": "Material Textures",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

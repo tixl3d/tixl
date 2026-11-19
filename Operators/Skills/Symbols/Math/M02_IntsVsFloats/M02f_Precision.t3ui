@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "06498c0e-9ed9-49d9-a561-d1dac0cde797"/*M02f_Precision*/,
   "Description": "Precision",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

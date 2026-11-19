@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "55a03e82-39a1-4559-a5af-0ccc0e9c0f81"/*M06a_Vectors*/,
   "Description": "Vectors",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

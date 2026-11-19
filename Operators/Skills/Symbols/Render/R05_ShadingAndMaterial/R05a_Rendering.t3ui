@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "2b277fb9-2caa-4652-ae05-9f1806c19044"/*R05a_Rendering*/,
   "Description": "Rendering",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

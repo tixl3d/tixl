@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "af21d4fd-c99f-4649-8290-b557953b1a09"/*R06d_Foggy*/,
   "Description": "Foggy",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

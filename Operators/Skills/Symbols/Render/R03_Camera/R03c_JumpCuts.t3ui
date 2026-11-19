@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "666560a3-7857-4acc-bd37-e1e4baff38f8"/*R03c_JumpCuts*/,
   "Description": "Jump Cuts",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

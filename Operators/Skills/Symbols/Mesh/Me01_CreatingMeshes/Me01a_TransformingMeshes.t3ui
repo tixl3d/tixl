@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "14e83508-bbd1-44b8-bc8b-9e2a9909d4f3"/*Me01a_TransformingMeshes*/,
   "Description": "Transforming Meshes",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

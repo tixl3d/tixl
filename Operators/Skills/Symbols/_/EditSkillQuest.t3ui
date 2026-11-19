@@ -8,9 +8,10 @@
       "ChildId": "005fac9a-e211-4f74-804d-37cb5dbb47ec",
       "SymbolName": "Skills.Render.R03_Camera.R03c_JumpCuts",
       "SectionId": "365c7cef-5299-4509-9c1a-b8844fdaacdd",
+      "Comment": "Draft",
       "Position": {
         "X": 3320.0,
-        "Y": 135.0
+        "Y": 170.0
       }
     },
     {
@@ -26,6 +27,7 @@
       "ChildId": "079854f2-f7a6-4fac-b951-16f77f91e3e2",
       "SymbolName": "Skills.Mesh.Me01_CreatingMeshes.Me01a_TransformingMeshes",
       "SectionId": "7359fb9e-77fd-4745-866b-e8c68b92be95",
+      "Comment": "Draft",
       "Position": {
         "X": 2460.0,
         "Y": 100.0
@@ -35,6 +37,7 @@
       "ChildId": "09ca79af-b24e-458d-aff3-051c9bd77956",
       "SymbolName": "Skills.Render.R07_SwitchingScenes.R07b_MultipleSwitches",
       "SectionId": "ca7a9fd4-768f-4690-bc0a-49ed0bad3a88",
+      "Comment": "Draft",
       "Position": {
         "X": 4080.0,
         "Y": 135.0
@@ -71,9 +74,10 @@
       "ChildId": "14b20f59-c5cb-4624-a34f-f7069a9a95f9",
       "SymbolName": "Skills.Render.R04_RenderBasics.R04c_ZBuffer",
       "SectionId": "fe9720bb-31f4-4478-8e32-74fb437c2752",
+      "Comment": "Draft",
       "Position": {
         "X": 3510.0,
-        "Y": 100.0
+        "Y": 170.0
       }
     },
     {
@@ -89,9 +93,10 @@
       "ChildId": "16b397c0-21b5-4368-8b1c-5bf6113e5597",
       "SymbolName": "Skills.Render.R03_Camera.R03g_SceneinaScene",
       "SectionId": "365c7cef-5299-4509-9c1a-b8844fdaacdd",
+      "Comment": "Draft",
       "Position": {
         "X": 3320.0,
-        "Y": 275.0
+        "Y": 310.0
       }
     },
     {
@@ -109,13 +114,14 @@
       "SectionId": "992b9026-577d-44cb-b9c0-5c99e12833ce",
       "Position": {
         "X": 1270.0,
-        "Y": 345.0
+        "Y": 135.0
       }
     },
     {
       "ChildId": "1cafcbba-fb32-4562-a54e-f46971159359",
       "SymbolName": "Skills.Render.R05_ShadingAndMaterial.R05f_EmittingLight",
       "SectionId": "483a76ee-19cd-4412-97f8-fd0eaace26b5",
+      "Comment": "Draft",
       "Position": {
         "X": 3700.0,
         "Y": 275.0
@@ -143,6 +149,7 @@
       "ChildId": "1f938bec-df99-478f-a789-e13667dd77d7",
       "SymbolName": "Skills.Math.M02_IntsVsFloats.M02e_RoundingtoSteps",
       "SectionId": "e49e238c-5b90-4a4c-9fa8-9bfa404f4134",
+      "Comment": "Draft",
       "Position": {
         "X": 1460.0,
         "Y": 240.0
@@ -152,6 +159,7 @@
       "ChildId": "217adc68-9ea3-4bfd-9474-55be644ca5e3",
       "SymbolName": "Skills.Render.R07_SwitchingScenes.R07d_ExecuteNothing",
       "SectionId": "ca7a9fd4-768f-4690-bc0a-49ed0bad3a88",
+      "Comment": "Draft",
       "Position": {
         "X": 4080.0,
         "Y": 205.0
@@ -170,6 +178,7 @@
       "ChildId": "23cd7179-32ba-4a67-bf54-8ed2878bd813",
       "SymbolName": "Skills.Math.M05_Trigger.M05c_MaximumRandomwithReset",
       "SectionId": "311bfac4-2edd-4ac0-aeeb-2a93e4abf082",
+      "Comment": "Draft",
       "Position": {
         "X": 2030.0,
         "Y": 170.0
@@ -190,7 +199,7 @@
       "SectionId": "365c7cef-5299-4509-9c1a-b8844fdaacdd",
       "Position": {
         "X": 3320.0,
-        "Y": 310.0
+        "Y": 100.0
       }
     },
     {
@@ -208,7 +217,7 @@
       "SectionId": "c9924cad-90b1-4e21-8b4d-c94a4031ffda",
       "Position": {
         "X": 460.0,
-        "Y": 485.0
+        "Y": 555.0
       }
     },
     {
@@ -217,13 +226,14 @@
       "SectionId": "fe9720bb-31f4-4478-8e32-74fb437c2752",
       "Position": {
         "X": 3510.0,
-        "Y": 170.0
+        "Y": 100.0
       }
     },
     {
       "ChildId": "2d7af9c6-343d-4b4f-8f58-fff75036dca1",
       "SymbolName": "Skills.Math.M03_BoolsAndAnims.M03b_AnimatedBoolean",
       "SectionId": "97fafff2-a9fe-4a8f-985c-9e2ee61fc179",
+      "Comment": "Draft",
       "Position": {
         "X": 1650.0,
         "Y": 135.0
@@ -242,6 +252,7 @@
       "ChildId": "32dcaded-b16f-4a7c-b731-8a5138d50962",
       "SymbolName": "Skills.Render.R07_SwitchingScenes.R07e_PickvsSwitch",
       "SectionId": "ca7a9fd4-768f-4690-bc0a-49ed0bad3a88",
+      "Comment": "Draft",
       "Position": {
         "X": 4080.0,
         "Y": 240.0
@@ -251,6 +262,7 @@
       "ChildId": "34f8f46f-4c21-4726-80ca-d13dd3088c71",
       "SymbolName": "Skills.Render.R07_SwitchingScenes.R07a_SwitchingScenes",
       "SectionId": "ca7a9fd4-768f-4690-bc0a-49ed0bad3a88",
+      "Comment": "Draft",
       "Position": {
         "X": 4080.0,
         "Y": 100.0
@@ -260,6 +272,7 @@
       "ChildId": "3845b17c-07c9-4e94-929e-1978a345f2d2",
       "SymbolName": "Skills.Math.M04_TriggerAnims.M04b_CameraShake",
       "SectionId": "e3e0ee2e-c805-4fd8-ba3d-b62fe0959d59",
+      "Comment": "Draft",
       "Position": {
         "X": 1840.0,
         "Y": 135.0
@@ -269,6 +282,7 @@
       "ChildId": "3c7837f6-ef85-47be-aebc-91671cdf6061",
       "SymbolName": "Skills.Math.M06_Vectors.M06b_AccessingVectorComponents",
       "SectionId": "f44545ef-d380-42a4-b26e-60adc1aa1674",
+      "Comment": "Draft",
       "Position": {
         "X": 2220.0,
         "Y": 135.0
@@ -278,6 +292,7 @@
       "ChildId": "3e1602f8-1c86-4f4e-855b-0c657a5aa83b",
       "SymbolName": "Skills.Math.M02_IntsVsFloats.M02c_AngleStepsRevisited",
       "SectionId": "e49e238c-5b90-4a4c-9fa8-9bfa404f4134",
+      "Comment": "Draft",
       "Position": {
         "X": 1460.0,
         "Y": 170.0
@@ -287,9 +302,10 @@
       "ChildId": "3ee3fc85-8497-449f-9376-a7fa7deef4e0",
       "SymbolName": "Skills.Render.R02_DrawingMeshes.R02b_DrawingMeshes",
       "SectionId": "70e2e810-6e86-411f-bc76-a86580de8f42",
+      "Comment": "Draft",
       "Position": {
         "X": 3130.0,
-        "Y": 275.0
+        "Y": 135.0
       }
     },
     {
@@ -298,13 +314,14 @@
       "SectionId": "03dbddc0-797d-4ea3-8834-4b485c6024ca",
       "Position": {
         "X": 2940.0,
-        "Y": 240.0
+        "Y": 275.0
       }
     },
     {
       "ChildId": "45349194-c650-414e-9f8d-f743922ffbcd",
       "SymbolName": "Skills.Render.R06_ShadingAndLight.R06a_ShadingwithLight",
       "SectionId": "b1a14686-4641-44fc-821e-f7bc42dbe7bc",
+      "Comment": "Draft",
       "Position": {
         "X": 3890.0,
         "Y": 100.0
@@ -323,6 +340,7 @@
       "ChildId": "4a1d716e-c5b4-44e3-a658-26e7fd3b0840",
       "SymbolName": "Skills.Math.M03_BoolsAndAnims.M03f_BooleanLogicOrandAny",
       "SectionId": "97fafff2-a9fe-4a8f-985c-9e2ee61fc179",
+      "Comment": "Draft",
       "Position": {
         "X": 1650.0,
         "Y": 275.0
@@ -349,10 +367,10 @@
     {
       "ChildId": "4fa43b0c-6032-453d-839c-13b770cc54ff",
       "SymbolName": "Skills.Image.I20_Puzzles.I20a_Swimming",
-      "SectionId": "992b9026-577d-44cb-b9c0-5c99e12833ce",
+      "SectionId": "73dc993b-3989-4554-ad82-5fddbe13c209",
       "Position": {
-        "X": 1270.0,
-        "Y": 275.0
+        "X": 1030.0,
+        "Y": 135.0
       }
     },
     {
@@ -367,10 +385,10 @@
     {
       "ChildId": "51d01737-afa3-4234-9d11-2c648f0a4d0f",
       "SymbolName": "Skills.Image.I01_BasicShapes.I01b_DarkSun",
-      "SectionId": "992b9026-577d-44cb-b9c0-5c99e12833ce",
+      "SectionId": "c8292a5b-c9e8-4b0e-9085-c84b6516e787",
       "Position": {
-        "X": 1270.0,
-        "Y": 205.0
+        "X": 270.0,
+        "Y": 135.0
       }
     },
     {
@@ -395,9 +413,10 @@
       "ChildId": "5d99e926-60d3-4fc6-9f9a-dd3d20046719",
       "SymbolName": "Skills.Render.R03_Camera.R03d_CameraZoom",
       "SectionId": "365c7cef-5299-4509-9c1a-b8844fdaacdd",
+      "Comment": "Draft",
       "Position": {
         "X": 3320.0,
-        "Y": 170.0
+        "Y": 205.0
       }
     },
     {
@@ -422,6 +441,7 @@
       "ChildId": "607b1cbb-5471-4fa4-a0ef-a06a933dd17c",
       "SymbolName": "Skills.Math.M06_Vectors.M06d_ScalingVectors",
       "SectionId": "f44545ef-d380-42a4-b26e-60adc1aa1674",
+      "Comment": "Draft",
       "Position": {
         "X": 2220.0,
         "Y": 205.0
@@ -449,6 +469,7 @@
       "ChildId": "63bc0bae-0c8e-48a8-8e56-8ed1b489299e",
       "SymbolName": "Skills.Math.M03_BoolsAndAnims.M03c_BooleanLogicAnd",
       "SectionId": "97fafff2-a9fe-4a8f-985c-9e2ee61fc179",
+      "Comment": "Draft",
       "Position": {
         "X": 1650.0,
         "Y": 170.0
@@ -458,15 +479,17 @@
       "ChildId": "65495f3c-b699-4ac6-a9f9-1531b0d21013",
       "SymbolName": "Skills.Render.R04_RenderBasics.R04d_MultisamplingMSAA",
       "SectionId": "fe9720bb-31f4-4478-8e32-74fb437c2752",
+      "Comment": "Draft",
       "Position": {
         "X": 3510.0,
-        "Y": 135.0
+        "Y": 205.0
       }
     },
     {
       "ChildId": "65d3db73-633e-4d8c-9a40-9b0834ea1090",
       "SymbolName": "Skills.Render.R05_ShadingAndMaterial.R05c_MaterialTextures",
       "SectionId": "483a76ee-19cd-4412-97f8-fd0eaace26b5",
+      "Comment": "Draft",
       "Position": {
         "X": 3700.0,
         "Y": 170.0
@@ -478,13 +501,14 @@
       "SectionId": "70e2e810-6e86-411f-bc76-a86580de8f42",
       "Position": {
         "X": 3130.0,
-        "Y": 170.0
+        "Y": 240.0
       }
     },
     {
       "ChildId": "691ab2b2-1677-4d5e-8ec7-18e688934afa",
       "SymbolName": "Skills.Math.M06_Vectors.M06a_Vectors",
       "SectionId": "f44545ef-d380-42a4-b26e-60adc1aa1674",
+      "Comment": "Draft",
       "Position": {
         "X": 2220.0,
         "Y": 100.0
@@ -494,6 +518,7 @@
       "ChildId": "6cb4ad85-c60d-4685-b8da-c1d2e3a9e9ca",
       "SymbolName": "Skills.Render.R05_ShadingAndMaterial.R05e_Alpha",
       "SectionId": "483a76ee-19cd-4412-97f8-fd0eaace26b5",
+      "Comment": "Draft",
       "Position": {
         "X": 3700.0,
         "Y": 240.0
@@ -503,6 +528,7 @@
       "ChildId": "6d65ecde-d56b-4294-a2f2-48b2477bb119",
       "SymbolName": "Skills.Render.R05_ShadingAndMaterial.R05a_Rendering",
       "SectionId": "483a76ee-19cd-4412-97f8-fd0eaace26b5",
+      "Comment": "Draft",
       "Position": {
         "X": 3700.0,
         "Y": 100.0
@@ -512,6 +538,7 @@
       "ChildId": "6ea509e0-1e84-479b-885d-dd25bc768081",
       "SymbolName": "Skills.Render.R06_ShadingAndLight.R06c_CameraandEnvironmentOrder",
       "SectionId": "b1a14686-4641-44fc-821e-f7bc42dbe7bc",
+      "Comment": "Draft",
       "Position": {
         "X": 3890.0,
         "Y": 170.0
@@ -521,6 +548,7 @@
       "ChildId": "6eed4372-5f4a-460e-9473-0b52ff4b5b42",
       "SymbolName": "Skills.Render.R05_ShadingAndMaterial.R05d_MultiChannelTextures",
       "SectionId": "483a76ee-19cd-4412-97f8-fd0eaace26b5",
+      "Comment": "Draft",
       "Position": {
         "X": 3700.0,
         "Y": 205.0
@@ -530,6 +558,7 @@
       "ChildId": "6f1cee76-216e-4655-bcc3-ee6592f7bd50",
       "SymbolName": "Skills.Math.M06_Vectors.M06g_RotatingaVector",
       "SectionId": "f44545ef-d380-42a4-b26e-60adc1aa1674",
+      "Comment": "Draft",
       "Position": {
         "X": 2220.0,
         "Y": 310.0
@@ -541,13 +570,14 @@
       "SectionId": "c9924cad-90b1-4e21-8b4d-c94a4031ffda",
       "Position": {
         "X": 460.0,
-        "Y": 520.0
+        "Y": 485.0
       }
     },
     {
       "ChildId": "703d26d0-457f-49b5-83c7-ca3aa07c5edf",
       "SymbolName": "Skills.Math.M04_TriggerAnims.M04a_TriggerBasedAnimation",
       "SectionId": "e3e0ee2e-c805-4fd8-ba3d-b62fe0959d59",
+      "Comment": "Draft",
       "Position": {
         "X": 1840.0,
         "Y": 100.0
@@ -557,6 +587,7 @@
       "ChildId": "751e2f99-8518-4d38-acec-f1b512346a10",
       "SymbolName": "Skills.Math.M03_BoolsAndAnims.M03d_BooleanLogicRangeTest",
       "SectionId": "97fafff2-a9fe-4a8f-985c-9e2ee61fc179",
+      "Comment": "Draft",
       "Position": {
         "X": 1650.0,
         "Y": 205.0
@@ -566,6 +597,7 @@
       "ChildId": "755fdb89-ba92-4e97-b0a9-b1a994c02fb9",
       "SymbolName": "Skills.Math.M06_Vectors.M06e_Normalization",
       "SectionId": "f44545ef-d380-42a4-b26e-60adc1aa1674",
+      "Comment": "Draft",
       "Position": {
         "X": 2220.0,
         "Y": 240.0
@@ -575,6 +607,7 @@
       "ChildId": "79de5f7d-81a1-4822-9696-47a2d9460ded",
       "SymbolName": "Skills.Math.M06_Vectors.M06h_Quaternions",
       "SectionId": "f44545ef-d380-42a4-b26e-60adc1aa1674",
+      "Comment": "Draft",
       "Position": {
         "X": 2220.0,
         "Y": 345.0
@@ -584,6 +617,7 @@
       "ChildId": "79e74da6-7f05-431e-ad0d-3658af1557c1",
       "SymbolName": "Skills.Render.R07_SwitchingScenes.R07c_SpecialIndexValues",
       "SectionId": "ca7a9fd4-768f-4690-bc0a-49ed0bad3a88",
+      "Comment": "Draft",
       "Position": {
         "X": 4080.0,
         "Y": 170.0
@@ -611,6 +645,7 @@
       "ChildId": "7ec29f97-841a-4507-9c7e-7a0ee93da3ac",
       "SymbolName": "Skills.Math.M06_Vectors.M06c_VectorLength",
       "SectionId": "f44545ef-d380-42a4-b26e-60adc1aa1674",
+      "Comment": "Draft",
       "Position": {
         "X": 2220.0,
         "Y": 170.0
@@ -620,6 +655,7 @@
       "ChildId": "83380e16-fd25-46bd-a148-4497bd51ea35",
       "SymbolName": "Skills.Math.M05_Trigger.M05d_DetectingRandomSteps",
       "SectionId": "311bfac4-2edd-4ac0-aeeb-2a93e4abf082",
+      "Comment": "Draft",
       "Position": {
         "X": 2030.0,
         "Y": 205.0
@@ -629,6 +665,7 @@
       "ChildId": "847c85bb-d32b-4912-a2de-3504999d628a",
       "SymbolName": "Skills.Math.M05_Trigger.M05a_TriggerEvents",
       "SectionId": "311bfac4-2edd-4ac0-aeeb-2a93e4abf082",
+      "Comment": "Draft",
       "Position": {
         "X": 2030.0,
         "Y": 100.0
@@ -638,6 +675,7 @@
       "ChildId": "88171d4e-eb23-4810-b496-e9cfd3accff7",
       "SymbolName": "Skills.Math.M04_TriggerAnims.M04c_CombiningEverything",
       "SectionId": "e3e0ee2e-c805-4fd8-ba3d-b62fe0959d59",
+      "Comment": "Draft",
       "Position": {
         "X": 1840.0,
         "Y": 170.0
@@ -649,13 +687,14 @@
       "SectionId": "70e2e810-6e86-411f-bc76-a86580de8f42",
       "Position": {
         "X": 3130.0,
-        "Y": 240.0
+        "Y": 100.0
       }
     },
     {
       "ChildId": "8a44cfb4-9d8f-4851-a851-93465f896892",
       "SymbolName": "Skills.Render.R06_ShadingAndLight.R06b_CustomEnvironments",
       "SectionId": "b1a14686-4641-44fc-821e-f7bc42dbe7bc",
+      "Comment": "Draft",
       "Position": {
         "X": 3890.0,
         "Y": 135.0
@@ -685,7 +724,7 @@
       "SectionId": "70e2e810-6e86-411f-bc76-a86580de8f42",
       "Position": {
         "X": 3130.0,
-        "Y": 135.0
+        "Y": 205.0
       }
     },
     {
@@ -710,6 +749,7 @@
       "ChildId": "9d867c36-8c74-4106-93b9-a6588f49d7af",
       "SymbolName": "Skills.Math.M06_Vectors.M06f_Orientation",
       "SectionId": "f44545ef-d380-42a4-b26e-60adc1aa1674",
+      "Comment": "Draft",
       "Position": {
         "X": 2220.0,
         "Y": 275.0
@@ -719,6 +759,7 @@
       "ChildId": "a5fb3d31-4c0e-469a-a7c2-5c6673d30244",
       "SymbolName": "Skills.Math.M03_BoolsAndAnims.M03e_BooleanLogicAll",
       "SectionId": "97fafff2-a9fe-4a8f-985c-9e2ee61fc179",
+      "Comment": "Draft",
       "Position": {
         "X": 1650.0,
         "Y": 240.0
@@ -728,9 +769,10 @@
       "ChildId": "a99a046e-9e0d-4d1d-a85b-353e20e68dce",
       "SymbolName": "Skills.Render.R03_Camera.R03f_CameraOverrideRules",
       "SectionId": "365c7cef-5299-4509-9c1a-b8844fdaacdd",
+      "Comment": "Draft",
       "Position": {
         "X": 3320.0,
-        "Y": 240.0
+        "Y": 275.0
       }
     },
     {
@@ -782,6 +824,7 @@
       "ChildId": "b5dbae1b-9eba-4d4f-88d7-92b225859bdb",
       "SymbolName": "Skills.Render.R05_ShadingAndMaterial.R05g_NormalMapping",
       "SectionId": "483a76ee-19cd-4412-97f8-fd0eaace26b5",
+      "Comment": "Draft",
       "Position": {
         "X": 3700.0,
         "Y": 310.0
@@ -818,15 +861,17 @@
       "ChildId": "ba2f6080-41d9-40ce-96fe-d6db54be059c",
       "SymbolName": "Skills.Render.R03_Camera.R03b_HelicopterCamera",
       "SectionId": "365c7cef-5299-4509-9c1a-b8844fdaacdd",
+      "Comment": "Draft",
       "Position": {
         "X": 3320.0,
-        "Y": 100.0
+        "Y": 135.0
       }
     },
     {
       "ChildId": "bd8d8b23-93d8-4678-ae99-eda943107ef8",
       "SymbolName": "Skills.Mesh.Me01_CreatingMeshes.Me01d_MergedVertices",
       "SectionId": "7359fb9e-77fd-4745-866b-e8c68b92be95",
+      "Comment": "Draft",
       "Position": {
         "X": 2460.0,
         "Y": 205.0
@@ -836,6 +881,7 @@
       "ChildId": "bf70bdbb-02a4-4137-8a0c-caa5f043d5f1",
       "SymbolName": "Skills.Render.R05_ShadingAndMaterial.R05b_IsItShiny",
       "SectionId": "483a76ee-19cd-4412-97f8-fd0eaace26b5",
+      "Comment": "Draft",
       "Position": {
         "X": 3700.0,
         "Y": 135.0
@@ -845,9 +891,10 @@
       "ChildId": "bf7cace3-9af4-401b-8aeb-4b6f6f89275d",
       "SymbolName": "Skills.Render.R03_Camera.R03e_CameraMove",
       "SectionId": "365c7cef-5299-4509-9c1a-b8844fdaacdd",
+      "Comment": "Draft",
       "Position": {
         "X": 3320.0,
-        "Y": 205.0
+        "Y": 240.0
       }
     },
     {
@@ -863,6 +910,7 @@
       "ChildId": "c237c208-41c5-45d3-b11e-b9acb161c280",
       "SymbolName": "Skills.Mesh.Me01_CreatingMeshes.Me01e_UVs",
       "SectionId": "7359fb9e-77fd-4745-866b-e8c68b92be95",
+      "Comment": "Draft",
       "Position": {
         "X": 2460.0,
         "Y": 240.0
@@ -881,15 +929,17 @@
       "ChildId": "cb3d71a7-3b2a-44a4-9d5d-21a47891fbbd",
       "SymbolName": "Skills.Render.R04_RenderBasics.R04b_From3Dto2D",
       "SectionId": "fe9720bb-31f4-4478-8e32-74fb437c2752",
+      "Comment": "Draft",
       "Position": {
         "X": 3510.0,
-        "Y": 205.0
+        "Y": 135.0
       }
     },
     {
       "ChildId": "cc30a3b4-9851-49f3-a13f-c2ac0df0c821",
       "SymbolName": "Skills.Math.M05_Trigger.M05b_MaximumRandom",
       "SectionId": "311bfac4-2edd-4ac0-aeeb-2a93e4abf082",
+      "Comment": "Draft",
       "Position": {
         "X": 2030.0,
         "Y": 135.0
@@ -908,6 +958,7 @@
       "ChildId": "ce796b7f-e779-4ad1-990e-e0bf2d5706aa",
       "SymbolName": "Skills.Math.M02_IntsVsFloats.M02f_Precision",
       "SectionId": "e49e238c-5b90-4a4c-9fa8-9bfa404f4134",
+      "Comment": "Draft",
       "Position": {
         "X": 1460.0,
         "Y": 275.0
@@ -917,6 +968,7 @@
       "ChildId": "cf1230b0-0024-4fcd-a866-a7ec49ac5f6c",
       "SymbolName": "Skills.Math.M02_IntsVsFloats.M02d_RoundingUp",
       "SectionId": "e49e238c-5b90-4a4c-9fa8-9bfa404f4134",
+      "Comment": "Draft",
       "Position": {
         "X": 1460.0,
         "Y": 205.0
@@ -946,7 +998,7 @@
       "SectionId": "992b9026-577d-44cb-b9c0-5c99e12833ce",
       "Position": {
         "X": 1270.0,
-        "Y": 310.0
+        "Y": 240.0
       }
     },
     {
@@ -955,16 +1007,16 @@
       "SectionId": "992b9026-577d-44cb-b9c0-5c99e12833ce",
       "Position": {
         "X": 1270.0,
-        "Y": 240.0
+        "Y": 205.0
       }
     },
     {
       "ChildId": "dc559743-0bba-4fde-afa5-fb8a2576f1c0",
       "SymbolName": "Skills.Image.I20_Puzzles.I20b_Kalaidos",
-      "SectionId": "992b9026-577d-44cb-b9c0-5c99e12833ce",
+      "SectionId": "73dc993b-3989-4554-ad82-5fddbe13c209",
       "Position": {
-        "X": 1270.0,
-        "Y": 135.0
+        "X": 1030.0,
+        "Y": 170.0
       }
     },
     {
@@ -982,13 +1034,14 @@
       "SectionId": "70e2e810-6e86-411f-bc76-a86580de8f42",
       "Position": {
         "X": 3130.0,
-        "Y": 100.0
+        "Y": 170.0
       }
     },
     {
       "ChildId": "e1072bdc-7f58-4e9e-8f29-2f14f2f89c28",
       "SymbolName": "Skills.Math.M03_BoolsAndAnims.M03g_BooleanLogicNot",
       "SectionId": "97fafff2-a9fe-4a8f-985c-9e2ee61fc179",
+      "Comment": "Draft",
       "Position": {
         "X": 1650.0,
         "Y": 310.0
@@ -998,6 +1051,7 @@
       "ChildId": "e38b1dd7-4b94-4eba-ba21-f5c5a74e0018",
       "SymbolName": "Skills.Render.R06_ShadingAndLight.R06d_Foggy",
       "SectionId": "b1a14686-4641-44fc-821e-f7bc42dbe7bc",
+      "Comment": "Draft",
       "Position": {
         "X": 3890.0,
         "Y": 205.0
@@ -1018,7 +1072,7 @@
       "SectionId": "70e2e810-6e86-411f-bc76-a86580de8f42",
       "Position": {
         "X": 3130.0,
-        "Y": 205.0
+        "Y": 275.0
       }
     },
     {
@@ -1036,7 +1090,7 @@
       "SectionId": "c9924cad-90b1-4e21-8b4d-c94a4031ffda",
       "Position": {
         "X": 460.0,
-        "Y": 555.0
+        "Y": 520.0
       }
     },
     {
@@ -1045,7 +1099,7 @@
       "SectionId": "03dbddc0-797d-4ea3-8834-4b485c6024ca",
       "Position": {
         "X": 2940.0,
-        "Y": 275.0
+        "Y": 240.0
       }
     },
     {

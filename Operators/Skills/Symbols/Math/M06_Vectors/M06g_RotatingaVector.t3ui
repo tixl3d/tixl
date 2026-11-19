@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "bc1ce5e3-7e5a-4629-906c-d245b69119ec"/*M06g_RotatingaVector*/,
   "Description": "Rotating a Vector",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

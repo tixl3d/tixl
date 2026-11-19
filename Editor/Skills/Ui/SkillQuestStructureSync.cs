@@ -45,7 +45,9 @@ internal static class SkillQuestStructureSync
         var adoptedCount = AdoptExistingLevels(topics, skillsProject);
         var stubCount = CreateMissingStubs(topics, skillsProject, editUi);
         WriteBackNewIds(topics);
-        var tourCount = ApplyTourData(topics);
+        SymbolUiRegistry.TryGetSymbolUi(TemplateSymbolId, out var templateUi);
+        var tourCount = ApplyTourData(topics, templateUi);
+        var stateCount = UpdateWorkStates(topics, templateUi);
         BuildSections(editUi, topics);
 
         editUi.FlagAsModified();
@@ -60,7 +62,7 @@ internal static class SkillQuestStructureSync
             levelCount += topic.Levels.Count;
         }
 
-        Log.Debug($"SkillQuest import: {topics.Count} topics, {levelCount} levels, {adoptedCount} adopted, {stubCount} stubs created, {tourCount} tours applied.");
+        Log.Debug($"SkillQuest import: {topics.Count} topics, {levelCount} levels, {adoptedCount} adopted, {stubCount} stubs created, {tourCount} tours applied, {stateCount} work states set.");
     }
 
     internal static void ExportToRepository()
@@ -688,7 +690,7 @@ internal static class SkillQuestStructureSync
     #endregion
 
     #region tour import
-    private static int ApplyTourData(List<Topic> topics)
+    private static int ApplyTourData(List<Topic> topics, SymbolUi? templateUi)
     {
         var appliedCount = 0;
         var keptLevelNames = new List<string>();
@@ -704,7 +706,7 @@ internal static class SkillQuestStructureSync
 
                 // Without knowing which side changed last, an existing tour may hold edits (styles,
                 // targets, ids) the markdown doesn't have. Only fill levels that have nothing to lose.
-                if (!level.IsNewStub && levelUi.TourPoints.Count > 0)
+                if (!level.IsNewStub && !IsEmptyOrTemplateTour(levelUi.TourPoints, templateUi))
                 {
                     if (!TourContentMatches(levelUi.TourPoints, level.Tour.TourPoints))
                         keptLevelNames.Add(level.Symbol.Name);
@@ -726,6 +728,13 @@ internal static class SkillQuestStructureSync
         return appliedCount;
     }
 
+    /// <summary>A stub still carries the template's placeholder tour, which holds nothing worth keeping.</summary>
+    private static bool IsEmptyOrTemplateTour(List<TourPoint> tour, SymbolUi? templateUi)
+    {
+        return tour.Count == 0
+               || (templateUi != null && TourContentMatches(tour, templateUi.TourPoints));
+    }
+
     private static bool TourContentMatches(List<TourPoint> existing, List<TourPoint> imported)
     {
         if (existing.Count != imported.Count)
@@ -740,6 +749,94 @@ internal static class SkillQuestStructureSync
 
         return true;
     }
+    #endregion
+
+    #region work states
+    /// <summary>
+    /// Nothing records that a level was duplicated from the template, so untagged levels whose graph still holds
+    /// exactly the template's operators are recognized by comparison and get a stored state: Draft if a tour was
+    /// written, otherwise Planned. Planned levels move on to Draft once they receive a tour. Every other state is
+    /// the author's decision and is never changed.
+    /// </summary>
+    private static int UpdateWorkStates(List<Topic> topics, SymbolUi? templateUi)
+    {
+        if (templateUi == null)
+        {
+            Log.Warning("Can't find the level template - work states are not updated.");
+            return 0;
+        }
+
+        var templateChildSymbolIds = GetSortedChildSymbolIds(templateUi.Symbol);
+        var visitedIds = new HashSet<Guid>();
+        var changedCount = 0;
+        foreach (var topic in topics)
+        {
+            foreach (var level in topic.Levels)
+            {
+                if (level.Symbol == null || !visitedIds.Add(level.Symbol.Id) || !level.Symbol.TryGetSymbolUi(out var levelUi))
+                    continue;
+
+                var currentState = levelUi.Tags & SymbolUi.WorkStateTags;
+                var hasOwnTour = !IsEmptyOrTemplateTour(levelUi.TourPoints, templateUi);
+
+                SymbolUi.SymbolTags newState;
+                if (currentState == SymbolUi.SymbolTags.None)
+                {
+                    if (!GetSortedChildSymbolIds(level.Symbol).SequenceEqual(templateChildSymbolIds))
+                        continue;
+
+                    newState = hasOwnTour ? SymbolUi.SymbolTags.Draft : SymbolUi.SymbolTags.Planned;
+                }
+                else if (currentState == SymbolUi.SymbolTags.Planned && hasOwnTour)
+                {
+                    newState = SymbolUi.SymbolTags.Draft;
+                }
+                else
+                {
+                    continue;
+                }
+
+                levelUi.Tags = (levelUi.Tags & ~SymbolUi.WorkStateTags) | newState;
+                levelUi.FlagAsModified();
+                changedCount++;
+            }
+        }
+
+        return changedCount;
+    }
+
+    private static List<Guid> GetSortedChildSymbolIds(Symbol symbol)
+    {
+        var ids = new List<Guid>(symbol.Children.Count);
+        foreach (var child in symbol.Children.Values)
+        {
+            ids.Add(child.Symbol.Id);
+        }
+
+        ids.Sort();
+        return ids;
+    }
+
+    /// <summary>
+    /// Shows unfinished levels at a glance in the overview. Only comments written by the sync are replaced,
+    /// so notes typed by hand survive.
+    /// </summary>
+    private static void UpdateWorkStateComment(SymbolUi.Child childUi, Symbol levelSymbol)
+    {
+        var isGeneratedComment = string.IsNullOrEmpty(childUi.Comment)
+                                 || childUi.Comment == PlannedComment
+                                 || childUi.Comment == DraftComment;
+        if (!isGeneratedComment)
+            return;
+
+        var tags = levelSymbol.TryGetSymbolUi(out var levelUi) ? levelUi.Tags : SymbolUi.SymbolTags.None;
+        childUi.Comment = tags.HasFlag(SymbolUi.SymbolTags.Planned) ? PlannedComment
+                          : tags.HasFlag(SymbolUi.SymbolTags.Draft) ? DraftComment
+                          : string.Empty;
+    }
+
+    private const string PlannedComment = "Planned";
+    private const string DraftComment = "Draft";
     #endregion
 
     #region section layout
@@ -815,6 +912,7 @@ internal static class SkillQuestStructureSync
                         var childUi = FindOrCreateInstance(editUi, topicSymbols[slotIndex]);
                         childUi.PosOnCanvas = topicSection.PosOnCanvas + new Vector2(Padding, HeaderHeight + Padding + slotIndex * RowHeight);
                         childUi.SectionId = topicSection.Id;
+                        UpdateWorkStateComment(childUi, topicSymbols[slotIndex]);
                     }
                 }
 

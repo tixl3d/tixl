@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "c65e8c85-816b-456c-98fb-5c851802e8d6"/*R05g_NormalMapping*/,
   "Description": "Normal Mapping",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

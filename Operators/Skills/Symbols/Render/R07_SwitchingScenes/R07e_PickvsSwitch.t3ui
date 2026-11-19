@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "a636e064-8ff1-4736-95e6-5c99e35b09f0"/*R07e_PickvsSwitch*/,
   "Description": "Pick vs. Switch",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

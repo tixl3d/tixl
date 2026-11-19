@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "2adefd8a-6c32-4e17-ad0b-831d722c4707"/*R07c_SpecialIndexValues*/,
   "Description": "Special Index Values",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

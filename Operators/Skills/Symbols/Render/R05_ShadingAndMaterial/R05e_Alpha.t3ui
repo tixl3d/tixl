@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "2aeda7da-e0e0-414b-a40f-6ff80554ce32"/*R05e_Alpha*/,
   "Description": "Alpha",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

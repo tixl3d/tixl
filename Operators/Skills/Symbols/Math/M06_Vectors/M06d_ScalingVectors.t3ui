@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "1486f333-6a72-4be7-a707-32dee4ea72b4"/*M06d_ScalingVectors*/,
   "Description": "Scaling Vectors",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

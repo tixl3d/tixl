@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "21eb13a7-04ad-4ba4-8911-3b254840ffd8"/*R06a_ShadingwithLight*/,
   "Description": "Shading with Light",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

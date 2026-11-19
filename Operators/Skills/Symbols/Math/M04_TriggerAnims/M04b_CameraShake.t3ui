@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "c24dd182-0c86-4e0f-9222-b2d12c892aa3"/*M04b_CameraShake*/,
   "Description": "Camera Shake",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

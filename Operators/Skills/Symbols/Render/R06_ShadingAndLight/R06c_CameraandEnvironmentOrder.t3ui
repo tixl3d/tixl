@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "bd866a72-9451-4e85-aa49-1a08b78ec87d"/*R06c_CameraandEnvironmentOrder*/,
   "Description": "Camera and Environment Order",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

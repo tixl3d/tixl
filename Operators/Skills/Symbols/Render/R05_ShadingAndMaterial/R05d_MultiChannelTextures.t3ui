@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "e362db76-d60b-4dc3-8097-6eda71b525e9"/*R05d_MultiChannelTextures*/,
   "Description": "Multi-Channel Textures",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "53f827df-47e8-460b-94d4-e924219b8f98"/*R03e_CameraMove*/,
   "Description": "Camera Move",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

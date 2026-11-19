@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "3d0ab3c6-552c-41fc-a0aa-f2151d0298b3"/*M03c_BooleanLogicAnd*/,
   "Description": "Boolean Logic: And",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "86ae85a5-f147-4349-855b-4817b825a1a1"/*M02c_AngleStepsRevisited*/,
   "Description": "Angle Steps (Revisited)",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "c9112fa6-f222-49fd-bc34-388497923fbe"/*M04a_TriggerBasedAnimation*/,
   "Description": "Trigger-Based Animation",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

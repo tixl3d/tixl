@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "06de71db-842d-4f73-971c-ce9dd6437aea"/*R03d_CameraZoom*/,
   "Description": "Camera Zoom",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

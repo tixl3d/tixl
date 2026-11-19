@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "9c27c938-5bf5-4d64-8673-17b5152ba227"/*R06b_CustomEnvironments*/,
   "Description": "Custom Environments",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

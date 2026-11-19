@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "f2d52d59-c099-476d-83ef-0429f76f9180"/*R05b_IsItShiny*/,
   "Description": "Is It Shiny?",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

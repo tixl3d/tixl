@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "58a78fdc-149a-45a2-8e95-fc7f6fec66df"/*Me01e_UVs*/,
   "Description": "UVs",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

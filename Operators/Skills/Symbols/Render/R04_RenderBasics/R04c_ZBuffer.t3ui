@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "f8935a0d-bd26-448b-84a3-d0347e47ac1d"/*R04c_ZBuffer*/,
   "Description": "Z-Buffer",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "0229adf7-1da3-4a02-8ae6-53aab3938993"/*M06f_Orientation*/,
   "Description": "Orientation",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {
