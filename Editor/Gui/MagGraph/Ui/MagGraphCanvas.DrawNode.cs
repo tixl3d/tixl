@@ -506,6 +506,7 @@ internal sealed partial class MagGraphView
                     var hasValue = !string.IsNullOrWhiteSpace(valueAsString);
                     var valueWidth = 0f;
                     var isValueOnSecondLine = false;
+                    var labelWidth = item.InputLines[inputIndex].MeasuredLabel.GetWidth(Fonts.FontNormal, labelFontSize, label, labelText);
 
                     if (hasValue)
                     {
@@ -517,7 +518,6 @@ internal sealed partial class MagGraphView
                         // onto the line below it rather than overlapping the name. The decision uses at least the
                         // width of a typical value, so an animated value gaining a digit or a sign doesn't flip the
                         // row between one and two lines every few frames.
-                        var labelWidth = item.InputLines[inputIndex].MeasuredLabel.GetWidth(Fonts.FontNormal, labelFontSize, label, labelText);
                         var layoutWidth = MathF.Max(valueWidth, reservedValueWidth);
                         isValueOnSecondLine = valueRightEdge - layoutWidth < labelX + labelWidth + MinLabelValueGap * CanvasScale;
                     }
@@ -528,12 +528,37 @@ internal sealed partial class MagGraphView
                     var labelPos = new Vector2(MathF.Round(labelX),
                                                MathF.Round(pMin.Y + GridSizeOnScreen.Y * (inputIndex + 0.5f) - textBlockHeight / 2 - 2));
 
-                    drawList.AddText(Fonts.FontNormal,
-                                     labelFontSize,
-                                     labelPos,
-                                     labelColor.Fade(0.7f * CanvasScale.RemapAndClamp(0.3f,0.7f, 0,1) ),
-                                     labelText
-                                    );
+                    // A name wider than the node is first drawn smaller, and only cut short where that isn't enough.
+                    var availableLabelWidth = valueRightEdge - labelX;
+                    var labelDrawSize = labelFontSize;
+                    var isLabelCut = false;
+                    var fittedLength = 0;
+                    var fittedWidth = 0f;
+                    if (labelWidth > availableLabelWidth)
+                    {
+                        var shrinkFactor = MathF.Max(availableLabelWidth / labelWidth, MinInputLabelShrinkFactor);
+                        labelDrawSize = labelFontSize * shrinkFactor;
+                        isLabelCut = labelWidth * shrinkFactor > availableLabelWidth;
+                        if (isLabelCut)
+                        {
+                            fittedWidth = item.InputLines[inputIndex].MeasuredLabel.GetFittingLength(Fonts.FontNormal, labelDrawSize,
+                                                                                                    availableLabelWidth, labelText,
+                                                                                                    LabelCutSuffix, out fittedLength);
+                        }
+                    }
+
+                    var labelDrawPos = new Vector2(labelPos.X, MathF.Round(labelPos.Y + (labelFontSize - labelDrawSize) / 2));
+                    var labelDrawColor = labelColor.Fade(0.7f * CanvasScale.RemapAndClamp(0.3f, 0.7f, 0, 1));
+                    if (isLabelCut)
+                    {
+                        drawList.AddText(Fonts.FontNormal, labelDrawSize, labelDrawPos, labelDrawColor, labelText[..fittedLength]);
+                        drawList.AddText(Fonts.FontNormal, labelDrawSize, labelDrawPos + new Vector2(fittedWidth, 0), labelDrawColor,
+                                         LabelCutSuffix);
+                    }
+                    else
+                    {
+                        drawList.AddText(Fonts.FontNormal, labelDrawSize, labelDrawPos, labelDrawColor, labelText);
+                    }
 
                     if (hasValue)
                     {
@@ -1474,6 +1499,11 @@ internal sealed partial class MagGraphView
 
     /** Gap an input value needs beside its parameter name; below it the value moves to a second line. */
     private const float MinLabelValueGap = 4;
+
+    /** Input names smaller than this fraction of the label size get hard to read, so they are cut instead. */
+    private const float MinInputLabelShrinkFactor = 0.8f;
+
+    private const string LabelCutSuffix = "…";
 
     /** Radius of the circles for outputs without a row, in canvas units. */
     private const float AdditionalOutputMarkerRadius = 2.5f;
