@@ -35,6 +35,9 @@ internal sealed class AnimatedText : Instance<AnimatedText>
     [Input(Guid = "9993e5fc-f22b-4b58-905b-7a7c13ab1ea4", MappedType = typeof(Units))]
     public readonly InputSlot<int> Unit = new();
 
+    [Input(Guid = "3aa4b67f-a502-42e0-bf30-dbd4acba6f21", MappedType = typeof(RangeModes))]
+    public readonly InputSlot<int> RangeMode = new();
+
     [Input(Guid = "50721b83-b07f-41dc-bf5b-4b543bf02fe6")]
     public readonly InputSlot<float> RangeEnd = new();
 
@@ -75,5 +78,11 @@ internal sealed class AnimatedText : Instance<AnimatedText>
     {
         Characters,
         Groups,
+    }
+
+    private enum RangeModes
+    {
+        Index,
+        Normalized,
     }
 }

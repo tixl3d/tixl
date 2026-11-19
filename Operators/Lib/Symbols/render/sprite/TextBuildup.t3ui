@@ -27,6 +27,14 @@
       "Max": 180.0
     },
     {
+      "InputId": "121a4436-f7a2-43db-aba9-b689e2fb1b50"/*RangeMode*/,
+      "Position": {
+        "X": -500.0,
+        "Y": 712.5
+      },
+      "Description": "Index measures RangeStart and RangeEnd in units. Normalized maps 0 to before the first unit and 1 to the last unit fully built, independent of the text length."
+    },
+    {
       "InputId": "144de0c1-93c2-4e1f-a6fa-4c632006af13"/*Points*/,
       "Relevancy": "Required",
       "Position": {
@@ -143,7 +151,7 @@
         "Y": 735.0
       },
       "ExcludedFromPresets": "True",
-      "Description": "Units with an index below this value are built in. Animate it from 0 to the unit count to reveal the text.",
+      "Description": "Units with an index below this value are built in. Animate it from 0 to the unit count to reveal the text, or from 0 to 1 with RangeMode Normalized.",
       "Min": 0.0,
       "Max": 20.0
     },
