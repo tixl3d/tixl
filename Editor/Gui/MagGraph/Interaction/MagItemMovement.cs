@@ -405,18 +405,26 @@ internal sealed partial class MagItemMovement
     {
         //Log.Debug("Shake it!");
         Debug.Assert(context.MacroCommand != null);
-        if (_connectionsToDraggedItems.Count == 0)
-            return false;
 
+        // Read the current layout, not the connections collected at drag start: an earlier shake or unsnap in this
+        // drag rebuilt the layout, and those stale connections can point at input lines that no longer exist.
         var symbol = context.CompositionInstance.Symbol;
+        var hasBorderConnections = false;
         var outgoingConnections = new List<(MagGraphConnection Connection, int CountBefore)>();
-        foreach (var mc in _connectionsToDraggedItems)
+        foreach (var mc in _layout.MagConnections)
         {
+            if (mc.IsTemporary || !IsBorderConnection(mc, DraggedItems))
+                continue;
+
+            hasBorderConnections = true;
             if (DraggedItems.Contains(mc.TargetItem))
                 continue;
 
             outgoingConnections.Add((mc, CountConnectionsToInput(symbol, mc.AsSymbolConnection())));
         }
+
+        if (!hasBorderConnections)
+            return false;
 
         NodeActions.DisconnectNodes(context.CompositionInstance, DraggedItems.Select(i => i.Selectable).ToList());
 
