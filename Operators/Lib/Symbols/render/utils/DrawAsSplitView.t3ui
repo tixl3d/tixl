@@ -179,14 +179,6 @@
       }
     },
     {
-      "ChildId": "e59cfdbf-ecc7-410d-93c2-0592ad110c79",
-      "SymbolName": "Lib.render.shading.SetRequestedResolution",
-      "Position": {
-        "X": 419.865,
-        "Y": 670.972
-      }
-    },
-    {
       "ChildId": "eb7bd884-887e-4e87-80da-8d43b6dd8633",
       "SymbolName": "Lib.flow.Execute",
       "SectionId": "34f78e9d-ee63-4b4f-a598-cf90d9d06f4d",
