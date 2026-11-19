@@ -205,7 +205,7 @@
       "Outputs": []
     },
     {
-      "Id": "3a738adf-7f87-4098-b27f-f19c84aa75c2",
+      "Id": "3a738adf-7f87-4098-b27f-f19c84aa75c2"/*GetRenderPassState*/,
       "SymbolId": "a54c36f9-aa5c-4c0b-824c-f61981802f10",
       "SymbolName": "Lib.flow.context.GetRenderPassState",
       "InputValues": [],
@@ -238,7 +238,7 @@
       "Outputs": []
     },
     {
-      "Id": "3f9bd841-7ddc-433d-9442-8966666fbe9e",
+      "Id": "3f9bd841-7ddc-433d-9442-8966666fbe9e"/*PickBuffer*/,
       "SymbolId": "e6bbbeef-08d8-4105-b84d-39edadb549c0",
       "SymbolName": "Lib.render._dx11.buffer.PickBuffer",
       "InputValues": [],
@@ -407,7 +407,7 @@
       "Outputs": []
     },
     {
-      "Id": "9cc3d8e7-9631-4269-9b97-4bedeb244f11",
+      "Id": "9cc3d8e7-9631-4269-9b97-4bedeb244f11"/*GetBufferComponents*/,
       "SymbolId": "80dff680-5abf-484a-b9e0-81d72f3b7aa4",
       "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
       "InputValues": [],
@@ -455,7 +455,7 @@
       "Outputs": []
     },
     {
-      "Id": "b7d4155e-ee09-45a5-a02b-ff3ccd26d653",
+      "Id": "b7d4155e-ee09-45a5-a02b-ff3ccd26d653"/*KeepPreviousPointBuffer*/,
       "SymbolId": "c7752832-7155-4082-acd5-276c1abe7eb4",
       "SymbolName": "Lib.point.usse.KeepPreviousPointBuffer",
       "InputValues": [

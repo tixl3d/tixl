@@ -116,6 +116,7 @@
     {
       "Id": "fdf64808-869b-4fd9-9274-5aa99d64fa35",
       "Label": "Solution",
+      "Collapsed": "True",
       "Color": {
         "X": 0.6,
         "Y": 0.6,

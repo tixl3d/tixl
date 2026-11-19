@@ -59,9 +59,9 @@
       "Outputs": []
     },
     {
-      "Id": "d01f5639-b95e-4914-a145-46badd13d1c1"/*_ExampleContent*/,
+      "Id": "d01f5639-b95e-4914-a145-46badd13d1c1"/*_ExampleImageContent*/,
       "SymbolId": "be19804d-c269-4266-84b0-091f4f23c24a",
-      "SymbolName": "Skills._._ExampleContent",
+      "SymbolName": "Skills._._ExampleImageContent",
       "InputValues": [
         {
           "Id": "fcd39ec2-c822-43f1-b79a-4266cde3787b"/*Type*/,

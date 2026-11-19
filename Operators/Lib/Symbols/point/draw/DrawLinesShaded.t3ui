@@ -69,8 +69,8 @@
         "Y": 3789.4053
       },
       "Description": "How many neighbours on each side are averaged into each point. Removes jaggy corners; 0 draws the points as they are.",
-      "Min": 0.0,
-      "Max": 16.0,
+      "Min": 0,
+      "Max": 16,
       "Scale": 1.0,
       "ClampMin": true
     },
@@ -80,8 +80,8 @@
         "X": 1619.0709,
         "Y": 3684.4053
       },
-      "AddPadding": "True",
       "Description": "Diameter of the tubes in world units.",
+      "AddPadding": "True",
       "Min": 0.0,
       "Max": 1.0,
       "Scale": 0.0001,
