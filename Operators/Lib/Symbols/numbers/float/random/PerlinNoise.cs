@@ -28,7 +28,7 @@ internal sealed class PerlinNoise : Instance<PerlinNoise>
         var rangeMin = RangeMin.GetValue(context);
         var rangeMax = RangeMax.GetValue(context);
         var scale = Amplitude.GetValue(context);
-        var biasAndGain = BiasAndGain.GetValue(context);
+        var biasAndGain = GainAndBias.GetValue(context);
 
         //var noiseSum = ComputePerlinNoise(value, period, octaves, seed);
         var noiseSum  = MathUtils.PerlinNoise(value, period, octaves, seed);
@@ -63,7 +63,7 @@ internal sealed class PerlinNoise : Instance<PerlinNoise>
         
 
     [Input(Guid = "296D0F7F-D484-4781-B01F-48839DEF0324")]
-    public readonly InputSlot<Vector2> BiasAndGain = new();
+    public readonly InputSlot<Vector2> GainAndBias = new();
 
     [Input(Guid = "bd43ee20-1ff1-4c49-ac87-87ca4a1fe66f")]
     public readonly InputSlot<int> Seed = new();

@@ -227,7 +227,7 @@
       "SymbolName": "Lib.numbers.float.random.PerlinNoise",
       "InputValues": [
         {
-          "Id": "296d0f7f-d484-4781-b01f-48839def0324"/*BiasAndGain*/,
+          "Id": "296d0f7f-d484-4781-b01f-48839def0324"/*GainAndBias*/,
           "Type": "System.Numerics.Vector2",
           "Value": {
             "X": 0.5,
@@ -427,7 +427,7 @@
       "SymbolName": "Lib.numbers.float.random.PerlinNoise",
       "InputValues": [
         {
-          "Id": "296d0f7f-d484-4781-b01f-48839def0324"/*BiasAndGain*/,
+          "Id": "296d0f7f-d484-4781-b01f-48839def0324"/*GainAndBias*/,
           "Type": "System.Numerics.Vector2",
           "Value": {
             "X": 0.065,
