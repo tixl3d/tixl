@@ -690,9 +690,9 @@
       "Outputs": []
     },
     {
-      "Id": "cb3d71a7-3b2a-44a4-9d5d-21a47891fbbd"/*R04b_From3Dto2D*/,
+      "Id": "cb3d71a7-3b2a-44a4-9d5d-21a47891fbbd"/*R04b_From3dTo2d*/,
       "SymbolId": "59333bff-6604-4e02-bcc5-05bfc2c68082",
-      "SymbolName": "Skills.Render.R04_RenderBasics.R04b_From3Dto2D",
+      "SymbolName": "Skills.Render.R04_RenderBasics.R04b_From3dTo2d",
       "InputValues": [],
       "Outputs": []
     },

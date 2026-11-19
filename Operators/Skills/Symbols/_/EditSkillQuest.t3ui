@@ -92,7 +92,6 @@
       "ChildId": "16b397c0-21b5-4368-8b1c-5bf6113e5597",
       "SymbolName": "Skills.Render.R03_Camera.R03g_SceneWithinScene",
       "SectionId": "365c7cef-5299-4509-9c1a-b8844fdaacdd",
-      "Comment": "Draft",
       "Position": {
         "X": 3510.0,
         "Y": 310.0
@@ -411,7 +410,6 @@
       "ChildId": "5d99e926-60d3-4fc6-9f9a-dd3d20046719",
       "SymbolName": "Skills.Render.R03_Camera.R03d_CameraZoom",
       "SectionId": "365c7cef-5299-4509-9c1a-b8844fdaacdd",
-      "Comment": "Draft",
       "Position": {
         "X": 3510.0,
         "Y": 205.0
@@ -775,7 +773,6 @@
       "ChildId": "a99a046e-9e0d-4d1d-a85b-353e20e68dce",
       "SymbolName": "Skills.Render.R03_Camera.R03f_CameraOverrideRules",
       "SectionId": "365c7cef-5299-4509-9c1a-b8844fdaacdd",
-      "Comment": "Draft",
       "Position": {
         "X": 3510.0,
         "Y": 275.0
@@ -896,7 +893,6 @@
       "ChildId": "bf7cace3-9af4-401b-8aeb-4b6f6f89275d",
       "SymbolName": "Skills.Render.R03_Camera.R03e_CameraMove",
       "SectionId": "365c7cef-5299-4509-9c1a-b8844fdaacdd",
-      "Comment": "Draft",
       "Position": {
         "X": 3510.0,
         "Y": 240.0
@@ -932,7 +928,7 @@
     },
     {
       "ChildId": "cb3d71a7-3b2a-44a4-9d5d-21a47891fbbd",
-      "SymbolName": "Skills.Render.R04_RenderBasics.R04b_From3Dto2D",
+      "SymbolName": "Skills.Render.R04_RenderBasics.R04b_From3dTo2d",
       "SectionId": "fe9720bb-31f4-4478-8e32-74fb437c2752",
       "Comment": "Draft",
       "Position": {
