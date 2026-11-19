@@ -324,6 +324,9 @@ internal static class TourInteraction
                                               // Keep op links at body size — the default FontBold
                                               // would render them visibly smaller than FontLarge.
                                               OpRefFont = largeFont,
+                                              // The bold and code fonts are smaller than FontLarge,
+                                              // so mark bold, italic and code by color instead.
+                                              ColorOnlyInlineStyles = true,
                                               // TourPoint descriptions historically treat each \n as a
                                               // hard line break (used as paragraph separators by the
                                               // legacy paragraph-renderer); preserve that here.

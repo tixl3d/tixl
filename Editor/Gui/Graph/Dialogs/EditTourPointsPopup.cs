@@ -155,7 +155,7 @@ internal static class EditTourPointsPopup
                     modified = true;
                 }
 
-                if (CustomComponents.DisablableButton("Add Tour Point", CanAdd))
+                if (ImGui.Button("Add Tour Point"))
                 {
                     InsertNewTourPoint(_compositionUi.TourPoints.Count);
                 }

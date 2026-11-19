@@ -175,8 +175,8 @@ internal sealed class TimelineCurveEditor : AnimationParameterEditing, ITimeObje
                                               : IsComponentVisible(param.Hash, bit);
                     if (shouldDrawCurve)
                     {
-                        var color = param.Curves.Length == 1 ? DopeSheetArea.GrayCurveColor
-                            : DopeSheetArea.CurveColors[curveIndex % DopeSheetArea.CurveColors.Length];
+                        var color = param.Curves.Length == 1 ? VectorComponentColors.GrayCurveColor
+                            : VectorComponentColors.GetCurveColor(curveIndex);
 
                         // Cross-view hover: in inline mode, this curve is "emphasized" if the
                         // shared hover state points at its parameter and either no specific

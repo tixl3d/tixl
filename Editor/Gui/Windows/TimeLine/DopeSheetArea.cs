@@ -327,7 +327,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
                     }
                     ImGui.PopID();
 
-                    var baseColor = CurveColors[i % CurveColors.Length];
+                    var baseColor = VectorComponentColors.GetCurveColor(i);
                     var alpha = isVisible ? 1f : 0.25f;
                     if (compHovered) alpha = 1f;
                     var color = baseColor.Fade(alpha);
@@ -518,8 +518,6 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
         }
     }
 
-    internal static readonly Color GrayCurveColor = new(0.8f, 1f, 1.0f, 0.3f);
-
     /// <summary>
     /// Is component <paramref name="bit"/> of the parameter (hash) currently visible?
     /// Missing entry in the mask means "all components visible" (the default on expand).
@@ -572,14 +570,6 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
             return 0.4f;
         return 1f;
     }
-
-    internal static readonly Color[] CurveColors =
-        {
-            new(1f, 0.2f, 0.2f, 0.4f),
-            new(0.1f, 1f, 0.2f, 0.4f),
-            new(0.1f, 0.4f, 1.0f, 0.6f),
-            GrayCurveColor,
-        };
 
     internal static readonly string[] CurveNames =
         [
@@ -653,7 +643,9 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
             }
 
             var fade = HoverFadeAlpha(parameter.Hash, bit);
-            var bodyColor = (parameter.Curves.Length > 1 ? CurveColors[curveIndex % 4] : GrayCurveColor).Fade(fade);
+            var bodyColor = (parameter.Curves.Length > 1
+                                 ? VectorComponentColors.GetCurveColor(curveIndex)
+                                 : VectorComponentColors.GrayCurveColor).Fade(fade);
             var outsideColor = bodyColor.Fade(0.3f);
 
             // Always draw 3 segments: dimmed pre, full body, dimmed post

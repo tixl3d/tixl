@@ -254,6 +254,20 @@ internal static class MarkdownParser
                 }
             }
 
+            // *italic* or _italic_
+            if ((c == '*' || c == '_') && IsEmphasisOpener(src, from, to, i))
+            {
+                var close = IndexOfEmphasisCloser(src, i + 2, to, c);
+                if (close >= 0)
+                {
+                    FlushPlain(src, plainStart, i, doc);
+                    doc.Runs.Add(new Run(new Slice(i + 1, close - (i + 1)), RunStyle.Italic, -1));
+                    i = close + 1;
+                    plainStart = i;
+                    continue;
+                }
+            }
+
             // `code`
             if (c == '`')
             {
@@ -362,6 +376,40 @@ internal static class MarkdownParser
         {
             if (src[i] == target && src[i + 1] == target)
                 return i;
+        }
+
+        return -1;
+    }
+
+    /// <summary>
+    /// A single <c>*</c> or <c>_</c> opens emphasis when followed by non-space text. An underscore inside a
+    /// word (snake_case names) does not, so identifiers in prose stay intact.
+    /// </summary>
+    private static bool IsEmphasisOpener(string src, int from, int to, int i)
+    {
+        var marker = src[i];
+        if (i + 1 >= to)
+            return false;
+
+        var next = src[i + 1];
+        if (next == marker || char.IsWhiteSpace(next))
+            return false;
+
+        return marker != '_' || i == from || !char.IsLetterOrDigit(src[i - 1]);
+    }
+
+    /// <summary>The closing marker must follow non-space text; a closing underscore must also end the word.</summary>
+    private static int IndexOfEmphasisCloser(string src, int from, int to, char marker)
+    {
+        for (var i = from; i < to; i++)
+        {
+            if (src[i] != marker || char.IsWhiteSpace(src[i - 1]))
+                continue;
+
+            if (marker == '_' && i + 1 < to && char.IsLetterOrDigit(src[i + 1]))
+                continue;
+
+            return i;
         }
 
         return -1;

@@ -65,6 +65,13 @@ internal sealed class MarkdownView
         /// <see cref="UiColors.Text"/> — for secondary content like parameter descriptions.
         /// </summary>
         public bool MutedBodyText { get; set; }
+
+        /// <summary>
+        /// Mark bold, italic and code spans by color instead of font, keeping the body font throughout.
+        /// For large body fonts (e.g. <see cref="Fonts.FontLarge"/>) where the bold and code fonts would
+        /// render visibly smaller than the surrounding text.
+        /// </summary>
+        public bool ColorOnlyInlineStyles { get; set; }
     }
 
     public MarkdownView(in Options options)
@@ -220,10 +227,12 @@ internal sealed class MarkdownView
 
     private ImFontPtr FragmentFont(Fragment fragment, ImFontPtr lineFont)
     {
-        if ((fragment.Style & RunStyle.Code) != 0)
-            return Fonts.Code;
         if ((fragment.Style & RunStyle.OpRef) != 0)
             return OpRefFont;
+        if (_options.ColorOnlyInlineStyles)
+            return lineFont;
+        if ((fragment.Style & RunStyle.Code) != 0)
+            return Fonts.Code;
         if ((fragment.Style & RunStyle.Bold) != 0)
             return Fonts.FontBold;
         return lineFont;
@@ -239,15 +248,40 @@ internal sealed class MarkdownView
 
         if ((fragment.Style & RunStyle.Code) != 0)
         {
-            ImGui.PushFont(Fonts.Code);
-            fontPushed = true;
-            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.ForegroundFull.Fade(0.65f).Rgba);
+            if (_options.ColorOnlyInlineStyles)
+            {
+                ImGui.PushStyleColor(ImGuiCol.Text, VectorComponentColors.GetTextColor(2).Rgba);
+            }
+            else
+            {
+                ImGui.PushFont(Fonts.Code);
+                fontPushed = true;
+                ImGui.PushStyleColor(ImGuiCol.Text, UiColors.ForegroundFull.Fade(0.65f).Rgba);
+            }
+
             colorPushed = true;
         }
         else if ((fragment.Style & RunStyle.Bold) != 0)
         {
-            ImGui.PushFont(Fonts.FontBold);
-            fontPushed = true;
+            if (_options.ColorOnlyInlineStyles)
+            {
+                ImGui.PushStyleColor(ImGuiCol.Text, UiColors.ForegroundFull.Rgba);
+                colorPushed = true;
+            }
+            else
+            {
+                ImGui.PushFont(Fonts.FontBold);
+                fontPushed = true;
+            }
+        }
+        else if ((fragment.Style & RunStyle.Italic) != 0)
+        {
+            // There is no italic font, so emphasis is always marked by color.
+            var italicColor = _options.ColorOnlyInlineStyles
+                                  ? UiColors.ForegroundFull.Fade(0.9f)
+                                  : UiColors.ForegroundFull;
+            ImGui.PushStyleColor(ImGuiCol.Text, italicColor.Rgba);
+            colorPushed = true;
         }
         else if ((fragment.Style & RunStyle.Link) != 0)
         {
@@ -339,9 +373,15 @@ internal sealed class MarkdownView
                       LineKind.H1 => (Fonts.FontLarge, UiColors.TextMuted),
                       LineKind.H2 => (Fonts.FontBold, UiColors.Text),
                       LineKind.H3 => (Fonts.FontBold, UiColors.ForegroundFull.Fade(0.8f)),
-                      _           => (BodyFont, _options.MutedBodyText ? UiColors.TextMuted : UiColors.Text),
+                      _           => (BodyFont, BodyColor),
                   };
     }
+
+    private Color BodyColor => _options.ColorOnlyInlineStyles
+                                   ? UiColors.ForegroundFull.Fade(0.7f)
+                                   : _options.MutedBodyText
+                                       ? UiColors.TextMuted
+                                       : UiColors.Text;
 
     private ImFontPtr BodyFont
     {

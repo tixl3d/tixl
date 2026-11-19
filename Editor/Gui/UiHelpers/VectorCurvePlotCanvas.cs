@@ -1,5 +1,4 @@
 ﻿#nullable enable
-using System.Diagnostics.CodeAnalysis;
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Utils;
@@ -113,7 +112,7 @@ internal sealed class VectorCurvePlotCanvas<T>
         
         for(int cIndex= 0; cIndex< _componentCount; cIndex ++)
         {
-            var color = _componentCount == 1 ? CurveComponentColors.GrayCurveColor : CurveComponentColors.CurveColors[cIndex];
+            var color = _componentCount == 1 ? VectorComponentColors.GrayCurveColor : VectorComponentColors.GetCurveColor(cIndex);
             dl.AddPolyline(ref _graphPoints[cIndex,startIndex], shownSampleCount, color, ImDrawFlags.None, 1);
             dl.AddCircleFilled(_graphPoints[cIndex, _sampleCount - 1], 3, color);
         }
@@ -131,8 +130,7 @@ internal sealed class VectorCurvePlotCanvas<T>
 
         for (var cIndex = 0; cIndex < _lastValues.Length; cIndex++)
         {
-            var color = _componentCount == 1 ? CurveComponentColors.GrayCurveColor : CurveComponentColors.TextColors[cIndex];
-            color.Rgba.W= 1;
+            var color = _componentCount == 1 ? UiColors.ForegroundFull : VectorComponentColors.GetTextColor(cIndex);
                 
             var lastValue = _lastValues[cIndex];
             var valueAsString = $"{lastValue:G4}";
@@ -169,27 +167,3 @@ internal sealed class VectorCurvePlotCanvas<T>
     private readonly ScalableCanvas _canvas = new CurrentGraphSubCanvas { FillMode = ScalableCanvas.FillModes.FillAvailableContentRegion };
     //private const int MaxComponents = 4;
 }
-
-[SuppressMessage("ReSharper", "RedundantArgumentDefaultValue")]
-internal static class CurveComponentColors
-{
-    internal static readonly Color GrayCurveColor = new(1f, 1f, 1.0f, 0.3f);
-
-    internal static readonly Color[] CurveColors =
-        [
-            new(1f, 0.2f, 0.2f, 0.3f),
-            new(0.1f, 1f, 0.2f, 0.3f),
-            new(0.1f, 0.4f, 1.0f, 0.5f),
-            new(0.5f, 0.5f, 0.5f, 0.5f),
-            GrayCurveColor
-        ];
-
-    internal static readonly Color[] TextColors =
-        [
-            new(1f, 0.5f, 0.5f, 1f),
-            new(0.4f, 1f, 0.5f, 1f),
-            new(0.6f, 0.671f, 1.0f, 1f),
-            new(0.6f, 0.6f, 0.6f, 1f),
-            GrayCurveColor
-        ];        
-    }
