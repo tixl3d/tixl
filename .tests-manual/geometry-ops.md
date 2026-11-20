@@ -100,7 +100,7 @@ Feed the beveled cube into a `[VoronoiFracture]`, its `Points` from a
 
 **Action:**
 Feed a concave solid into `[VoronoiFracture]` instead of the cube: either
-`[TextToCurves]` -> `[CurvesToGeometry]` (text `Xg8`, Depth 0.2) or
+`[StringToCurves]` -> `[CurvesToGeometry]` (text `Xg8`, Depth 0.2) or
 `Lib:meshes/ring-bevelled.obj` via `[LoadObjGeometry]`. Scatter 10 to 40 seeds
 across it and pin the fracture's output.
 
@@ -114,7 +114,7 @@ across it and pin the fracture's output.
 ## Step: Sweeping the seed orientation
 
 **Action:**
-Feed `[VoronoiFracture]` (input: `[TextToCurves]` text `X` -> `[CurvesToGeometry]`)
+Feed `[VoronoiFracture]` (input: `[StringToCurves]` text `X` -> `[CurvesToGeometry]`)
 with 100 seeds from `[RadialCPoints]`, radius 1, and animate the `Axis` with a
 `[PerlinNoise]` so the ring of seeds tumbles through the glyph.
 
@@ -304,7 +304,7 @@ Insert a `[TriangulateGeometry]` directly after `[CubeGeometry]`.
 ## Step: Text as lines
 
 **Action:**
-In a new graph add `[TextToCurves]` (default text "TiXL", font
+In a new graph add `[StringToCurves]` (default text "TiXL", font
 `Lib:fonts/Inter-Variable.ttf`), connect it to `[CurvesToPoints]`, then
 `[ListToBuffer]` and `[DrawLines]`.
 
@@ -321,7 +321,7 @@ In a new graph add `[TextToCurves]` (default text "TiXL", font
 
 **Action:**
 In the text-as-lines graph set `LetterSpacing` to 0.2, then toggle `Alignment`
-between Left, Center and Right. Drag the move gizmo of `[TextToCurves]` in the
+between Left, Center and Right. Drag the move gizmo of `[StringToCurves]` in the
 output. Then insert `[DrawPoints]` or oriented sprites after `[CurvesToPoints]`
 (or check the point rotations in the list view).
 
@@ -335,7 +335,7 @@ output. Then insert `[DrawPoints]` or oriented sprites after `[CurvesToPoints]`
 ## Step: Offsetting outlines
 
 **Action:**
-Insert `[OffsetCurves]` between `[TextToCurves]` and `[CurvesToPoints]`. Sweep
+Insert `[OffsetCurves]` between `[StringToCurves]` and `[CurvesToPoints]`. Sweep
 `Offset` from -0.03 to 0.05 and switch `Join` between Miter, Round and Bevel.
 Then feed the offset curves into `[CurvesToGeometry]` instead.
 
