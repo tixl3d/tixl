@@ -76,11 +76,11 @@ Fields describe a value that varies through space. Build one, optionally reshape
 The curve operators turn fonts into 3D text:
 
 ```
-[StringToCurves] -> [CurvesToGeometry] -> [GeometryToMesh] -> [DrawMesh]
+[StringToCurves] -> [ExtrudeCurves] -> [GeometryToMesh] -> [DrawMesh]
 ```
 
 - [StringToCurves] lays out text with a TrueType or OpenType font and outputs each glyph as a curve part. Variable fonts respond to **Weight** and one additional axis. **LetterSpacing** adds tracking relative to the size, and **Position** (with a move gizmo) places the text block.
-- [CurvesToGeometry] fills the outlines. With **Depth** above 0 it extrudes them into solid letters; **Bevel** and **BevelSegments** round or chamfer the edges. Keep the bevel below half the thinnest stroke, otherwise the surface folds over itself.
+- [ExtrudeCurves] fills the outlines. With **Depth** above 0 it extrudes them into solid letters; **Bevel** and **BevelSegments** round or chamfer the edges. Keep the bevel below half the thinnest stroke, otherwise the surface folds over itself.
 - [SubdivideCurves] splits long segments into shorter ones without changing the shape — useful before deforming outlines.
 - [OffsetCurves] grows or shrinks outlines by a distance. Sharp corners stay closed with a miter, round or bevel join, and holes shrink while outlines grow.
 - [CurvesToPoints] flattens curves into a point list for [DrawLines] and the other point operators. Each point's Z axis faces away from the filled area, so oriented sprites, ribbons and instances follow the outline.

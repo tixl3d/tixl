@@ -10,8 +10,8 @@ namespace Lib.geometry.transform;
 /// Scales, rotates and translates a Geometry, either as a whole (Object space) or each point in its own orientation
 /// (Point space: X along a curve, Z along its normal). Every attribute is transformed according to its type info:
 /// positions like points, vectors such as curve handles by rotation and scale, normals by the inverse transpose,
-/// quaternions by rotation. A named float selection weights the transform per point; vertex, primitive and part
-/// selections apply to their points. Topology and value attributes are shared.
+/// quaternions by rotation. A float selection weights the transform per point (by default the flowing Selection, if
+/// any); vertex, primitive and part selections apply to their points. Topology and value attributes are shared.
 /// </summary>
 [Guid("634da8e3-0772-4f5a-816b-35b492e50938")]
 internal sealed class TransformGeometry : Instance<TransformGeometry>, ITransformable, IStatusProvider
@@ -52,9 +52,15 @@ internal sealed class TransformGeometry : Instance<TransformGeometry>, ITransfor
 
         var pointCount = source.PointCount;
         _statusMessage = string.Empty;
-        var hasSelection = !string.IsNullOrWhiteSpace(selectionName);
-        if (hasSelection)
-            CollectPointWeights(source, selectionName!);
+        // Without a name the flowing Selection applies when there is one, so SelectGeometry -> TransformGeometry just works
+        var isNamed = !string.IsNullOrWhiteSpace(selectionName);
+        var hasSelection = TryCollectPointWeights(source, isNamed ? selectionName! : GeometryAttributeNames.Selection);
+        if (isNamed && !hasSelection)
+        {
+            // A named selection that doesn't exist selects nothing; the weights are all zero
+            _statusMessage = $"No float attribute '{selectionName}' on points, vertices, primitives or parts; nothing is transformed.";
+            hasSelection = true;
+        }
 
         if (space == Spaces.Point)
             _orientations.Compute(source);
@@ -215,9 +221,10 @@ internal sealed class TransformGeometry : Instance<TransformGeometry>, ITransfor
 
     /// <summary>
     /// Point weights from the named float attribute, looked up on points, then vertices, primitives and parts; an
-    /// element's weight applies to all its points, the largest wins. A missing selection selects nothing.
+    /// element's weight applies to all its points, the largest wins.
     /// </summary>
-    private void CollectPointWeights(Geometry geometry, string name)
+    /// <returns>False if no such attribute exists; the weights are then all zero.</returns>
+    private bool TryCollectPointWeights(Geometry geometry, string name)
     {
         var pointCount = geometry.PointCount;
         if (_pointWeights.Length != pointCount)
@@ -228,7 +235,7 @@ internal sealed class TransformGeometry : Instance<TransformGeometry>, ITransfor
         if (attributes.TryGet<float>(name, AttributeDomain.Point, out var pointSelection))
         {
             Array.Copy(pointSelection.Values, _pointWeights, Math.Min(pointCount, pointSelection.Values.Length));
-            return;
+            return true;
         }
 
         if (attributes.TryGet<float>(name, AttributeDomain.Vertex, out var vertexSelection))
@@ -236,7 +243,7 @@ internal sealed class TransformGeometry : Instance<TransformGeometry>, ITransfor
             for (var vertex = 0; vertex < Math.Min(geometry.VertexCount, vertexSelection.Values.Length); vertex++)
                 RaiseWeight(geometry.VertexPoints[vertex], vertexSelection.Values[vertex]);
 
-            return;
+            return true;
         }
 
         if (attributes.TryGet<float>(name, AttributeDomain.Primitive, out var primitiveSelection))
@@ -244,7 +251,7 @@ internal sealed class TransformGeometry : Instance<TransformGeometry>, ITransfor
             for (var primitive = 0; primitive < Math.Min(geometry.PrimitiveCount, primitiveSelection.Values.Length); primitive++)
                 RaisePrimitiveWeights(geometry, primitive, primitiveSelection.Values[primitive]);
 
-            return;
+            return true;
         }
 
         if (attributes.TryGet<float>(name, AttributeDomain.Part, out var partSelection))
@@ -256,10 +263,10 @@ internal sealed class TransformGeometry : Instance<TransformGeometry>, ITransfor
                     RaisePrimitiveWeights(geometry, primitive, partSelection.Values[part]);
             }
 
-            return;
+            return true;
         }
 
-        _statusMessage = $"No float attribute '{name}' on points, vertices, primitives or parts; nothing is transformed.";
+        return false;
     }
 
     private void RaisePrimitiveWeights(Geometry geometry, int primitive, float weight)

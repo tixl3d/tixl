@@ -64,7 +64,7 @@ public static class GeometryAttributeNames
     /// <summary>Part domain, int: index of the point a part was instanced at, so per-point data can be joined back later.</summary>
     public const string SourcePoint = "SourcePoint";
 
-    /// <summary>Face domain, 1 on extrusion walls and bevels ([CurvesToGeometry]), 0 on caps.</summary>
+    /// <summary>Primitive (or Face) domain, 1 on extrusion walls and bevels ([ExtrudeCurves]), 0 on caps.</summary>
     public const string IsSide = "IsSide";
 
     /// <summary>Point domain, vec3: a curve point's incoming bezier handle, as an offset from the point.</summary>

@@ -2082,6 +2082,7 @@ internal static class DebugServer
                              ["curveCount"] = curveCount,
                              ["closedCurveCount"] = closedCurveCount,
                              ["partCount"] = geometry.Parts.Length,
+                             ["boundaryEdges"] = CountBoundaryEdges(geometry),
                              ["boundsMin"] = new JArray(min.X, min.Y, min.Z),
                              ["boundsMax"] = new JArray(max.X, max.Y, max.Z),
                              ["firstCurveVertexCounts"] = curveVertexCounts,
@@ -2112,6 +2113,19 @@ internal static class DebugServer
         }
 
         return result;
+    }
+
+    /** Polygon edges with a face on one side only; 0 for a closed surface. */
+    private static int CountBoundaryEdges(T3.Core.DataTypes.Geometry geometry)
+    {
+        var count = 0;
+        foreach (var edge in geometry.Edges.Edges)
+        {
+            if (edge.Face1 < 0)
+                count++;
+        }
+
+        return count;
     }
 
     private static JToken DescribeGeometry(T3.Core.DataTypes.MeshGeometry? geometry, string? dumpObjPath = null)

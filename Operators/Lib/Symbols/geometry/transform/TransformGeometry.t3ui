@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "634da8e3-0772-4f5a-816b-35b492e50938"/*TransformGeometry*/,
-  "Description": "Scales, rotates and translates geometry, as a whole or each point in its own orientation.\n\nIn Object space the geometry is transformed around the origin. In Point space every point is transformed in its own orientation, so translating along Y moves points across an outline and rotating turns their curve handles. A selection attribute weights the transform per point for partial or soft edits.\n\nEvery attribute follows its type: positions like points, vectors such as curve handles by rotation and scale, normals corrected for non-uniform scale, orientations by rotation. Topology and other attributes are passed through.\n\nTips\n- [SubdivideCurves] \u2192 [SelectGeometry] (Every 2) \u2192 TransformGeometry (Point space, Translation Y, Selection = Selection) turns an outline into a zigzag.",
+  "Description": "Scales, rotates and translates geometry, as a whole or each point in its own orientation.\n\nIn Object space the geometry is transformed around the origin. In Point space every point is transformed in its own orientation, so translating along Y moves points across an outline and rotating turns their curve handles. A selection attribute weights the transform per point for partial or soft edits.\n\nEvery attribute follows its type: positions like points, vectors such as curve handles by rotation and scale, normals corrected for non-uniform scale, orientations by rotation. Topology and other attributes are passed through.\n\nTips\n- [SubdivideCurves] \u2192 [SelectGeometry] (Every 2) \u2192 TransformGeometry (Point space, Translation Y) turns an outline into a zigzag.",
   "InputUis": [
     {
       "InputId": "3497c025-efaf-4191-8621-ade40d377ee9"/*Translation*/,
@@ -23,7 +23,7 @@
         "X": 0.0,
         "Y": 270.0
       },
-      "Description": "Name of a float selection attribute, e.g. Selection from [SelectGeometry]. Its weight blends the transform per point; vertex, primitive and part selections apply to their points. Empty transforms everything."
+      "Description": "Name of a float selection attribute whose weight blends the transform per point; vertex, primitive and part selections apply to their points. Empty uses the Selection from an upstream [SelectGeometry] if there is one, and otherwise transforms everything."
     },
     {
       "InputId": "86c1f762-9d7d-4f9c-bfb3-fc0d75bedf03"/*Space*/,

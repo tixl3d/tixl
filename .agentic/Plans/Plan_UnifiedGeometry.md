@@ -158,12 +158,23 @@ message must name what was expected.
   `Lib/Utils/GeometryPointOrientations`, named Selection promoted from vertices, primitives or parts, attributes transformed
   by type info) converted (2026-11-20). Snippet compiling is shared with `CustomScalarField` in
   `Lib/Utils/CSharpSnippetCompiler`. Verified: the zigzag chain moves every second point 0.03 across the outline.
-- Convert `CurvesToGeometry` (as `ExtrudeCurves`), `TransformGeometry`
+- `CurvesToGeometry` renamed to `ExtrudeCurves` (symbol id kept, `AKA: CurvesToGeometry`) and converted, with
+  KeepCurves; `GeometryToMesh` compiles `Geometry` polygons through the shared `GeometryMeshCompiler`, which now
+  writes compacted vertices for both types (2026-11-20). Verified: the extruded zigzag text is closed (0 boundary
+  edges) and renders through `DrawMesh`.
+- **Spike compromise:** `GeometryToMesh` keeps its original input id with type `MeshGeometry` (renamed `Mesh`) and gains
+  a `Geometry` input, because `[SurfaceGeometry]` (Output Setup's New 3D Content), the Skills tutorial R04b and the
+  mesh preview feed it `MeshGeometry`. Phase 2 merges them back into one input once those sources are converted.
   (Selection, Space), `GeometryToMesh`; add `SelectGeometry` with Index Pattern and Custom modes.
 - Merged output view.
 - Milestone: zigzag text, extruded, in the editor. **Decision point**: continue, or stop and keep the two types.
 
 ### Phase 2: Migrate everything
+- **Flat fill without extrusion** (maintainer, 2026-11-20): curves must become a surface without an op named
+  "extrude". Move the fill (flatten, resolve overlaps by fill rule, tessellate with holes) out of `ExtrudeCurves` into
+  a `Lib/Utils` helper, then (1) `GeometryToMesh` fills closed curves itself (option, on by default) so
+  `StringToCurves -> GeometryToMesh` renders flat shapes, and (2) a `FillCurves` op outputs the flat polygons as
+  Geometry for further modelling (Houdini's PolyFill). `ExtrudeCurves` keeps walls and bevels.
 - The remaining mesh ops (mechanical: Face -> Primitive, Corner -> Vertex), `OffsetCurves`, `CurvesToPoints`, output
   setup's `StageGeometry` and `SurfaceGeometry`.
 - Remove `MeshGeometry`, `CurveGeometry`, `CurvePart`.

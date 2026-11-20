@@ -7,8 +7,8 @@
     {
       "InputId": "b8a7277a-cfac-4e46-8619-7054c1cc6369"/*Geometry*/,
       "Position": {
-        "X": 20.0,
-        "Y": -70.0
+        "X": -120.0,
+        "Y": -35.0
       }
     }
   ],
@@ -18,7 +18,7 @@
       "SymbolName": "Lib.geometry.convert.GeometryToMesh",
       "Position": {
         "X": 20.0,
-        "Y": -35.0
+        "Y": -70.0
       }
     },
     {
@@ -34,8 +34,8 @@
     {
       "OutputId": "cd1acc57-bf0a-419c-96e0-00da788541dc"/*Output*/,
       "Position": {
-        "X": 190.0,
-        "Y": 0.0
+        "X": 20.0,
+        "Y": 35.0
       }
     }
   ]

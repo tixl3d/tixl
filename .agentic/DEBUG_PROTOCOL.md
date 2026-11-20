@@ -137,7 +137,7 @@ Parameter shapes are defined in `DebugServer.cs` — read the handler when unsur
   geometry as OBJ (one object per part, `# cut` before IsCut faces) for offline
   analysis of exactly which edges are open.
 - `getOutput` on a `Geometry` slot (the unified CPU geometry) returns point, vertex and primitive counts, polygons vs
-  curves (and how many are closed), part count, bounds, the vertex counts of the first 16 curves and the attribute
+  curves (and how many are closed), part count, `boundaryEdges` (polygon edges with one face; 0 = closed), bounds, the vertex counts of the first 16 curves and the attribute
   list with domain and type info. `readCount` (and `readOffset`) adds the points with their `handleIn`/`handleOut`
   offsets, e.g. to check that subdivided points run along each curve.
 - `getOutput` on a `Texture2D` slot returns its shape (size, format, mips, array size, bind/option

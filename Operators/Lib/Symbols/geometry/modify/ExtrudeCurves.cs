@@ -6,20 +6,20 @@ using LibTessDotNet;
 namespace Lib.geometry.modify;
 
 /// <summary>
-/// Fills closed curves into a mesh and optionally extrudes them: front cap, back cap
-/// and side walls with a rounded or chamfered bevel, in one op because the bevel
-/// needs the cap boundary and the walls to agree. One mesh part per curve part
-/// (glyph), attributes of the curve parts carried over, so per-character selection
-/// and coloring keep working after the fill.
+/// Fills the closed curve primitives of a Geometry with polygons and optionally extrudes them: front cap, back cap
+/// and side walls with a rounded or chamfered bevel, in one op because the bevel needs the cap boundary and the walls
+/// to agree. One output part per input part (glyph), with the input's part attributes, so per-character selection and
+/// coloring keep working. With KeepCurves the source curves stay in each part, after its polygons. Polygons in the
+/// input are not passed through.
 /// </summary>
 [Guid("b6e3f8d1-4a27-4c95-9d0e-7f2c5a1b8e63")]
 [ExportDependencies("LibTessDotNet.dll")]
-internal sealed class CurvesToGeometry : Instance<CurvesToGeometry>
+internal sealed class ExtrudeCurves : Instance<ExtrudeCurves>
 {
     [Output(Guid = "1c9a5e7d-3b62-4f08-a4d1-8e6b0c2f7a95")]
-    public readonly Slot<MeshGeometry?> Result = new();
+    public readonly Slot<Geometry?> Result = new();
 
-    public CurvesToGeometry()
+    public ExtrudeCurves()
     {
         Result.UpdateAction = Update;
     }
@@ -38,8 +38,9 @@ internal sealed class CurvesToGeometry : Instance<CurvesToGeometry>
         var weight = Weight.GetValue(context);
         var flatShading = FlatShading.GetValue(context);
         var smoothAngle = Math.Clamp(SmoothAngle.GetValue(context), 0f, 180f);
+        var keepCurves = KeepCurves.GetValue(context);
 
-        if (curves == null || curves.ContourCount == 0)
+        if (curves == null || curves.PrimitiveCount == 0)
         {
             Result.Value = null;
             return;
@@ -50,16 +51,17 @@ internal sealed class CurvesToGeometry : Instance<CurvesToGeometry>
         _builder.Begin();
 
         var parts = curves.Parts;
+        var curveViews = curves.Curves;
         var partCount = parts.Length > 0 ? parts.Length : 1;
         for (var partIndex = 0; partIndex < partCount; partIndex++)
         {
-            var contourStart = parts.Length > 0 ? parts[partIndex].ContourStart : 0;
-            var contourEnd = parts.Length > 0 ? contourStart + parts[partIndex].ContourCount : curves.ContourCount;
+            var primitiveStart = parts.Length > 0 ? parts[partIndex].PrimitiveStart : 0;
+            var primitiveEnd = parts.Length > 0 ? primitiveStart + parts[partIndex].PrimitiveCount : curves.PrimitiveCount;
             var pivot = parts.Length > 0 ? parts[partIndex].Pivot : Vector3.Zero;
             var id = parts.Length > 0 ? parts[partIndex].Id : 0;
             var seed = parts.Length > 0 ? parts[partIndex].SeedIndex : 0;
-            _builder.BuildPart(curves, contourStart, contourEnd, tolerance, depth, bevel, bevelSegments, weight, flatShading, smoothAngle, front, back, sides, windingRule,
-                               pivot, id, seed);
+            _builder.BuildPart(curves, curveViews, primitiveStart, primitiveEnd, tolerance, depth, bevel, bevelSegments, weight, flatShading, smoothAngle,
+                               front, back, sides, windingRule, keepCurves, pivot, id, seed);
         }
 
         _builder.Finish(_output, curves);
@@ -67,7 +69,7 @@ internal sealed class CurvesToGeometry : Instance<CurvesToGeometry>
     }
 
     private readonly MeshBuilder _builder = new();
-    private readonly MeshGeometry _output = new();
+    private readonly Geometry _output = new();
 
     /// <summary>
     /// Accumulates faces over all parts. Per part: contours are flattened and oriented
@@ -86,60 +88,121 @@ internal sealed class CurvesToGeometry : Instance<CurvesToGeometry>
             _faceOffsets.Add(0);
             _isSide.Clear();
             _parts.Clear();
+            _kinds.Clear();
+            _closed.Clear();
+            _curvePointHandles.Clear();
         }
 
-        public void Finish(MeshGeometry target, CurveGeometry source)
+        public void Finish(Geometry target, Geometry source)
         {
-            target.Positions = _positions.ToArray();
-            target.CornerPointIndices = _corners.ToArray();
-            target.FaceCornerOffsets = _faceOffsets.ToArray();
+            var pointCount = _positions.Count;
+            var primitiveCount = _faceOffsets.Count - 1;
+            var vertexCount = _corners.Count;
+            PadPolygonKinds(primitiveCount);
+
+            target.Resize(pointCount, primitiveCount, vertexCount);
+            _positions.CopyTo(target.Positions);
+            _corners.CopyTo(target.VertexPoints);
+            _faceOffsets.CopyTo(target.PrimitiveVertexOffsets);
+            _kinds.CopyTo(target.PrimitiveKind);
+            _closed.CopyTo(target.PrimitiveClosed);
             target.Parts = _parts.ToArray();
             target.Attributes.Clear();
 
-            var normals = target.Attributes.GetOrCreate<Vector3>(GeometryAttributeNames.Normal, AttributeDomain.Corner, _normals.Count);
+            var normals = target.Attributes.GetOrCreate<Vector3>(GeometryAttributeNames.Normal, AttributeDomain.Vertex, vertexCount);
             _normals.CopyTo(normals.Values);
-            var isSide = target.Attributes.GetOrCreate<float>(GeometryAttributeNames.IsSide, AttributeDomain.Face, _isSide.Count);
+            var isSide = target.Attributes.GetOrCreate<float>(GeometryAttributeNames.IsSide, AttributeDomain.Primitive, primitiveCount);
             _isSide.CopyTo(isSide.Values);
 
-            // Part attributes of the curves (glyph indices etc.) apply 1:1 to the mesh parts
-            foreach (var attribute in source.Attributes)
+            if (_curvePointHandles.Count > 0)
             {
-                if (attribute.Domain != AttributeDomain.Part || attribute.Count != _parts.Count)
-                    continue;
-
-                switch (attribute)
+                var handlesIn = target.Attributes.GetOrCreate<Vector3>(GeometryAttributeNames.HandleIn, AttributeDomain.Point, pointCount).Values;
+                var handlesOut = target.Attributes.GetOrCreate<Vector3>(GeometryAttributeNames.HandleOut, AttributeDomain.Point, pointCount).Values;
+                Array.Clear(handlesIn);
+                Array.Clear(handlesOut);
+                foreach (var (point, handleIn, handleOut) in _curvePointHandles)
                 {
-                    case GeometryAttribute<float> a:
-                        a.Values.CopyTo(target.Attributes.GetOrCreate<float>(a.Name, AttributeDomain.Part, a.Count).Values, 0);
-                        break;
-                    case GeometryAttribute<int> a:
-                        a.Values.CopyTo(target.Attributes.GetOrCreate<int>(a.Name, AttributeDomain.Part, a.Count).Values, 0);
-                        break;
-                    case GeometryAttribute<Vector4> a:
-                        a.Values.CopyTo(target.Attributes.GetOrCreate<Vector4>(a.Name, AttributeDomain.Part, a.Count).Values, 0);
-                        break;
+                    handlesIn[point] = handleIn;
+                    handlesOut[point] = handleOut;
                 }
+            }
+
+            // Part attributes of the source (glyph indices etc.) apply 1:1 to the output parts and are shared as they are
+            for (var index = 0; index < source.Attributes.Count; index++)
+            {
+                var attribute = source.Attributes[index];
+                if (attribute.Domain == AttributeDomain.Part && attribute.Count == _parts.Count)
+                    target.Attributes.Add(attribute);
             }
 
             target.InvalidateTopologyCaches();
         }
 
-        public void BuildPart(CurveGeometry curves, int contourStart, int contourEnd, float tolerance, float depth, float bevel, int bevelSegments,
-                              float weight, bool flatShading, float smoothAngle, bool front, bool back, bool sides, WindingRule windingRule,
-                              Vector3 pivot, int id, int seed)
+        public void BuildPart(Geometry geometry, Geometry.CurveEnumerable curveViews, int primitiveStart, int primitiveEnd, float tolerance, float depth,
+                              float bevel, int bevelSegments, float weight, bool flatShading, float smoothAngle, bool front, bool back, bool sides,
+                              WindingRule windingRule, bool keepCurves, Vector3 pivot, int id, int seed)
         {
-            var faceStart = _faceOffsets.Count - 1;
+            var partStart = _faceOffsets.Count - 1;
+            BuildFaces(geometry, curveViews, primitiveStart, primitiveEnd, tolerance, depth, bevel, bevelSegments, weight, flatShading, smoothAngle,
+                       front, back, sides, windingRule);
+            if (keepCurves)
+                AppendCurves(geometry, curveViews, primitiveStart, primitiveEnd);
 
-            // Flatten the part's contours into 2D loops
-            _loops.Clear();
-            for (var contourIndex = contourStart; contourIndex < contourEnd; contourIndex++)
+            var primitiveCount = _faceOffsets.Count - 1 - partStart;
+            if (primitiveCount > 0)
+                _parts.Add(new PrimitivePart(partStart, primitiveCount, pivot, id, seed));
+        }
+
+        /// <summary>Copies the part's curve primitives after its polygons, with their handles; other curve attributes are dropped.</summary>
+        private void AppendCurves(Geometry geometry, Geometry.CurveEnumerable curveViews, int primitiveStart, int primitiveEnd)
+        {
+            for (var primitive = primitiveStart; primitive < primitiveEnd; primitive++)
             {
-                if (!curves.ContourClosed[contourIndex])
+                if (geometry.PrimitiveKind[primitive] != PrimitiveKinds.Curve)
+                    continue;
+
+                PadPolygonKinds(_faceOffsets.Count - 1);
+                var curve = curveViews[primitive];
+                for (var index = 0; index < curve.VertexCount; index++)
+                {
+                    var position = curve.GetPosition(index);
+                    _curvePointHandles.Add((_positions.Count, curve.GetHandleInPosition(index) - position, curve.GetHandleOutPosition(index) - position));
+                    _corners.Add(_positions.Count);
+                    _normals.Add(Vector3.Zero);
+                    _positions.Add(position);
+                }
+
+                _faceOffsets.Add(_corners.Count);
+                _isSide.Add(0);
+                _kinds.Add(PrimitiveKinds.Curve);
+                _closed.Add(curve.IsClosed);
+            }
+        }
+
+        /** Faces are added without a kind; everything up to <paramref name="primitiveCount"/> not yet tagged is a closed polygon. */
+        private void PadPolygonKinds(int primitiveCount)
+        {
+            while (_kinds.Count < primitiveCount)
+            {
+                _kinds.Add(PrimitiveKinds.Polygon);
+                _closed.Add(true);
+            }
+        }
+
+        private void BuildFaces(Geometry geometry, Geometry.CurveEnumerable curveViews, int primitiveStart, int primitiveEnd, float tolerance, float depth,
+                                float bevel, int bevelSegments, float weight, bool flatShading, float smoothAngle, bool front, bool back, bool sides,
+                                WindingRule windingRule)
+        {
+            // Flatten the part's closed curves into 2D loops
+            _loops.Clear();
+            for (var primitive = primitiveStart; primitive < primitiveEnd; primitive++)
+            {
+                if (geometry.PrimitiveKind[primitive] != PrimitiveKinds.Curve || !geometry.PrimitiveClosed[primitive])
                     continue;
 
                 var loop = new List<Vector2>();
                 _scratch.Clear();
-                curves.Flatten(contourIndex, tolerance, _scratch);
+                curveViews[primitive].Flatten(tolerance, _scratch);
                 foreach (var p in _scratch)
                 {
                     if (loop.Count == 0 || Vector2.DistanceSquared(loop[^1], new Vector2(p.X, p.Y)) > 1e-12f)
@@ -191,10 +254,6 @@ internal sealed class CurvesToGeometry : Instance<CurvesToGeometry>
 
             if (hasWalls)
                 AddWalls(profile, flatShading, MathF.Cos(smoothAngle * MathF.PI / 180f));
-
-            var faceCount = _faceOffsets.Count - 1 - faceStart;
-            if (faceCount > 0)
-                _parts.Add(new GeometryPart(faceStart, faceCount, pivot, id, seed));
         }
 
         /// <summary>Profile of the extrusion as (inset, z) samples from the front cap to the back cap.</summary>
@@ -578,11 +637,14 @@ internal sealed class CurvesToGeometry : Instance<CurvesToGeometry>
         private readonly List<Vector3> _normals = [];
         private readonly List<int> _faceOffsets = [];
         private readonly List<float> _isSide = [];
-        private readonly List<GeometryPart> _parts = [];
+        private readonly List<PrimitivePart> _parts = [];
+        private readonly List<PrimitiveKinds> _kinds = [];
+        private readonly List<bool> _closed = [];
+        private readonly List<(int Point, Vector3 HandleIn, Vector3 HandleOut)> _curvePointHandles = [];
     }
 
     [Input(Guid = "4a7e2c9f-6d15-4b83-a0e6-9c3f8b1d5e27")]
-    public readonly InputSlot<CurveGeometry> Curves = new();
+    public readonly InputSlot<Geometry> Curves = new();
 
     [Input(Guid = "c1f5b8e3-2a94-4d67-8e0b-7d3a9f6c2b14")]
     public readonly InputSlot<float> Depth = new();
@@ -616,4 +678,7 @@ internal sealed class CurvesToGeometry : Instance<CurvesToGeometry>
 
     [Input(Guid = "6c2f9b5e-7d31-4a84-b1e0-4f8c2a6d9e75")]
     public readonly InputSlot<bool> EvenOdd = new();
+
+    [Input(Guid = "532a6559-788f-44f4-ba03-7ce2b3e7561d")]
+    public readonly InputSlot<bool> KeepCurves = new();
 }

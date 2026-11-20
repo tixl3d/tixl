@@ -100,7 +100,7 @@ Feed the beveled cube into a `[VoronoiFracture]`, its `Points` from a
 
 **Action:**
 Feed a concave solid into `[VoronoiFracture]` instead of the cube: either
-`[StringToCurves]` -> `[CurvesToGeometry]` (text `Xg8`, Depth 0.2) or
+`[StringToCurves]` -> `[ExtrudeCurves]` (text `Xg8`, Depth 0.2) or
 `Lib:meshes/ring-bevelled.obj` via `[LoadObjGeometry]`. Scatter 10 to 40 seeds
 across it and pin the fracture's output.
 
@@ -114,7 +114,7 @@ across it and pin the fracture's output.
 ## Step: Sweeping the seed orientation
 
 **Action:**
-Feed `[VoronoiFracture]` (input: `[StringToCurves]` text `X` -> `[CurvesToGeometry]`)
+Feed `[VoronoiFracture]` (input: `[StringToCurves]` text `X` -> `[ExtrudeCurves]`)
 with 100 seeds from `[RadialCPoints]`, radius 1, and animate the `Axis` with a
 `[PerlinNoise]` so the ring of seeds tumbles through the glyph.
 
@@ -337,7 +337,7 @@ output. Then insert `[DrawPoints]` or oriented sprites after `[CurvesToPoints]`
 **Action:**
 Insert `[OffsetCurves]` between `[StringToCurves]` and `[CurvesToPoints]`. Sweep
 `Offset` from -0.03 to 0.05 and switch `Join` between Miter, Round and Bevel.
-Then feed the offset curves into `[CurvesToGeometry]` instead.
+Then feed the offset curves into `[ExtrudeCurves]` instead.
 
 **Expected:**
 - Positive values grow every letter and shrink its holes; negative values thin
@@ -345,14 +345,14 @@ Then feed the offset curves into `[CurvesToGeometry]` instead.
   and cut flat with Bevel.
 - Lowering `MiterLimit` towards 1 turns the sharpest miters (the tip of A) into
   bevels.
-- The filled `[CurvesToGeometry]` result has no gaps at corners.
+- The filled `[ExtrudeCurves]` result has no gaps at corners.
 - Very large negative offsets can fold thin strokes into small loops; this is a
   known limit.
 
 ## Step: Text as solid mesh
 
 **Action:**
-Replace `[CurvesToPoints]` and the line ops with `[CurvesToGeometry]` ->
+Replace `[CurvesToPoints]` and the line ops with `[ExtrudeCurves]` ->
 `[GeometryToMesh]` -> `[DrawMesh]`. Set `Text` to `TiXL Xg8&@`.
 
 **Expected:**
