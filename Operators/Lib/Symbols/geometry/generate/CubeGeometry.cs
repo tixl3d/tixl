@@ -4,7 +4,7 @@ namespace Lib.geometry.generate;
 internal sealed class CubeGeometry : Instance<CubeGeometry>
 {
     [Output(Guid = "a3b04e1c-aa43-41fe-bf6a-1c21f6f2efd3")]
-    public readonly Slot<MeshGeometry> Geometry = new();
+    public readonly Slot<Geometry> Geometry = new();
 
     public CubeGeometry()
     {
@@ -31,26 +31,27 @@ internal sealed class CubeGeometry : Instance<CubeGeometry>
     private void BuildStaticTopology()
     {
         _geometry.Positions = new Vector3[8];
-        _geometry.FaceCornerOffsets = new int[FaceDefinitions.Length + 1];
-        _geometry.CornerPointIndices = new int[FaceDefinitions.Length * 4];
+        _geometry.PrimitiveVertexOffsets = new int[FaceDefinitions.Length + 1];
+        _geometry.SetAllPrimitiveKinds(PrimitiveKinds.Polygon);
+        _geometry.VertexPoints = new int[FaceDefinitions.Length * 4];
 
-        var normals = _geometry.Attributes.GetOrCreate<Vector3>(GeometryAttributeNames.Normal, AttributeDomain.Corner, _geometry.CornerPointIndices.Length);
-        var texCoords = _geometry.Attributes.GetOrCreate<Vector2>(GeometryAttributeNames.TexCoord, AttributeDomain.Corner, _geometry.CornerPointIndices.Length);
+        var normals = _geometry.Attributes.GetOrCreate<Vector3>(GeometryAttributeNames.Normal, AttributeDomain.Vertex, _geometry.VertexPoints.Length);
+        var texCoords = _geometry.Attributes.GetOrCreate<Vector2>(GeometryAttributeNames.TexCoord, AttributeDomain.Vertex, _geometry.VertexPoints.Length);
 
         for (var faceIndex = 0; faceIndex < FaceDefinitions.Length; faceIndex++)
         {
             var (corners, normal) = FaceDefinitions[faceIndex];
-            _geometry.FaceCornerOffsets[faceIndex] = faceIndex * 4;
+            _geometry.PrimitiveVertexOffsets[faceIndex] = faceIndex * 4;
             for (var i = 0; i < 4; i++)
             {
                 var corner = faceIndex * 4 + i;
-                _geometry.CornerPointIndices[corner] = corners[i];
+                _geometry.VertexPoints[corner] = corners[i];
                 normals.Values[corner] = normal;
                 texCoords.Values[corner] = _quadUvs[i];
             }
         }
 
-        _geometry.FaceCornerOffsets[FaceDefinitions.Length] = FaceDefinitions.Length * 4;
+        _geometry.PrimitiveVertexOffsets[FaceDefinitions.Length] = FaceDefinitions.Length * 4;
         _geometry.InvalidateTopologyCaches();
     }
 
@@ -73,7 +74,7 @@ internal sealed class CubeGeometry : Instance<CubeGeometry>
 
     private static readonly Vector2[] _quadUvs = [new(1, 1), new(0, 1), new(0, 0), new(1, 0)];
 
-    private readonly MeshGeometry _geometry = new();
+    private readonly Geometry _geometry = new();
 
     [Input(Guid = "d5c13c76-103e-4264-8056-88a33a9f0e99")]
     public readonly InputSlot<Vector3> Size = new();

@@ -10,7 +10,7 @@ using T3.Core.Utils;
 namespace Lib.geometry.modify;
 
 /// <summary>
-/// Fractures a MeshGeometry into Voronoi cells around seed points: one part per
+/// Fractures a Geometry into Voronoi cells around seed points: one part per
 /// cell, built by clipping the mesh against the bisector planes between seeds and
 /// capping the cuts. Surface corners keep their interpolated normals; cap faces
 /// are flat and marked with IsCut = 1 (mirrored into Selection) for downstream styling.
@@ -23,7 +23,7 @@ namespace Lib.geometry.modify;
 internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProvider
 {
     [Output(Guid = "48e5a9c1-d637-4b80-92f4-5c1e8b0d7a26")]
-    public readonly Slot<MeshGeometry> Result = new();
+    public readonly Slot<Geometry> Result = new();
 
     public VoronoiFracture()
     {
@@ -33,7 +33,9 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
     private void Update(EvaluationContext context)
     {
         var source = Geometry.GetValue(context);
-        if (source == null || source.FaceCount == 0)
+        if (source != null)
+            source = _polygons.GetPolygons(source);
+        if (source == null || source.PrimitiveCount == 0)
         {
             Result.Value = source;
             return;
@@ -77,7 +79,7 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
             var result = _asyncComputation.Update(context, Result, hash.ToHashCode(),
                                                   token =>
                                                   {
-                                                      var target = new MeshGeometry();
+                                                      var target = new Geometry();
                                                       Build(target, source, seeds, fillInterior, sourceIsClosed, token);
                                                       return target;
                                                   });
@@ -99,7 +101,7 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
     /// operator's own doing and gets filled; out of an open shell a gap may be the input's,
     /// and filling it would invent surface that was never there.
     /// </summary>
-    private bool UpdateSourceStats(MeshGeometry source)
+    private bool UpdateSourceStats(Geometry source)
     {
         var changed = _sourceStats.UpdateIfChanged(source);
         var isClosed = _sourceStats.BoundaryEdges == 0 && _sourceStats.NonManifoldEdges == 0;
@@ -113,10 +115,10 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
         return isClosed;
     }
 
-    private void Build(MeshGeometry target, MeshGeometry source, Vector3[] seeds, bool fillInterior, bool sourceIsClosed,
+    private void Build(Geometry target, Geometry source, Vector3[] seeds, bool fillInterior, bool sourceIsClosed,
                        CancellationToken token)
     {
-        var sourceHasNormals = source.Attributes.TryGet<Vector3>(GeometryAttributeNames.Normal, AttributeDomain.Corner, out var sourceNormals);
+        var sourceHasNormals = source.Attributes.TryGet<Vector3>(GeometryAttributeNames.Normal, AttributeDomain.Vertex, out var sourceNormals);
 
         // Source faces as clip-ready polygons plus a uniform grid, shared read-only by all cells
         var sourceIndex = new SourceIndex(source, sourceHasNormals ? sourceNormals : null);
@@ -156,7 +158,7 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
         var faceOffsets = new int[totalFaces + 1];
         var cornerNormals = new Vector3[totalCorners];
         var isCut = new float[totalFaces];
-        var parts = new List<GeometryPart>(seeds.Length);
+        var parts = new List<PrimitivePart>(seeds.Length);
 
         var pointBase = 0;
         var cornerBase = 0;
@@ -166,7 +168,7 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
             var cell = cells[seedIndex];
             var cellFaces = cell.FaceOffsets.Length - 1;
             if (cellFaces > 0)
-                parts.Add(new GeometryPart(faceBase, cellFaces, seeds[seedIndex], seedIndex, seedIndex));
+                parts.Add(new PrimitivePart(faceBase, cellFaces, seeds[seedIndex], seedIndex, seedIndex));
 
             Array.Copy(cell.Positions, 0, positions, pointBase, cell.Positions.Length);
             for (var c = 0; c < cell.Corners.Length; c++)
@@ -187,20 +189,21 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
         }
 
         target.Positions = positions;
-        target.FaceCornerOffsets = faceOffsets;
-        target.CornerPointIndices = cornerIndices;
+        target.PrimitiveVertexOffsets = faceOffsets;
+        target.SetAllPrimitiveKinds(PrimitiveKinds.Polygon);
+        target.VertexPoints = cornerIndices;
         target.Parts = parts.ToArray();
         target.Attributes.Clear();
 
         if (sourceHasNormals)
         {
-            var normals = target.Attributes.GetOrCreate<Vector3>(GeometryAttributeNames.Normal, AttributeDomain.Corner, totalCorners);
+            var normals = target.Attributes.GetOrCreate<Vector3>(GeometryAttributeNames.Normal, AttributeDomain.Vertex, totalCorners);
             Array.Copy(cornerNormals, normals.Values, totalCorners);
         }
 
         // IsCut is the lasting mark; Selection mirrors it so downstream ops act on the cuts by default
-        var isCutAttribute = target.Attributes.GetOrCreate<float>(GeometryAttributeNames.IsCut, AttributeDomain.Face, totalFaces);
-        var selection = target.Attributes.GetOrCreate<float>(GeometryAttributeNames.Selection, AttributeDomain.Face, totalFaces);
+        var isCutAttribute = target.Attributes.GetOrCreate<float>(GeometryAttributeNames.IsCut, AttributeDomain.Primitive, totalFaces);
+        var selection = target.Attributes.GetOrCreate<float>(GeometryAttributeNames.Selection, AttributeDomain.Primitive, totalFaces);
         Array.Copy(isCut, isCutAttribute.Values, totalFaces);
         Array.Copy(isCut, selection.Values, totalFaces);
 
@@ -1561,17 +1564,17 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
     /// </summary>
     private sealed class SourceIndex
     {
-        public SourceIndex(MeshGeometry source, GeometryAttribute<Vector3>? cornerNormals)
+        public SourceIndex(Geometry source, GeometryAttribute<Vector3>? cornerNormals)
         {
-            var offsets = source.FaceCornerOffsets;
-            var corners = source.CornerPointIndices;
-            _polygons = new Polygon[source.FaceCount];
-            _polygonMin = new Vector3[source.FaceCount];
-            _polygonMax = new Vector3[source.FaceCount];
+            var offsets = source.PrimitiveVertexOffsets;
+            var corners = source.VertexPoints;
+            _polygons = new Polygon[source.PrimitiveCount];
+            _polygonMin = new Vector3[source.PrimitiveCount];
+            _polygonMax = new Vector3[source.PrimitiveCount];
             Min = new Vector3(float.MaxValue);
             Max = new Vector3(float.MinValue);
 
-            for (var faceIndex = 0; faceIndex < source.FaceCount; faceIndex++)
+            for (var faceIndex = 0; faceIndex < source.PrimitiveCount; faceIndex++)
             {
                 var polygon = new Polygon { IsCap = false };
                 var min = new Vector3(float.MaxValue);
@@ -1602,14 +1605,14 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
 
             // Uniform grid: roughly one cell per few polygons along each axis
             var extent = Max - Min;
-            var resolution = Math.Clamp((int)MathF.Ceiling(MathF.Cbrt(source.FaceCount / 4f)), 1, 64);
+            var resolution = Math.Clamp((int)MathF.Ceiling(MathF.Cbrt(source.PrimitiveCount / 4f)), 1, 64);
             _gridResolution = resolution;
             _cellSize = new Vector3(MathF.Max(extent.X, 1e-6f) / resolution,
                                     MathF.Max(extent.Y, 1e-6f) / resolution,
                                     MathF.Max(extent.Z, 1e-6f) / resolution);
 
             var cellLists = new List<int>[resolution * resolution * resolution];
-            for (var faceIndex = 0; faceIndex < source.FaceCount; faceIndex++)
+            for (var faceIndex = 0; faceIndex < source.PrimitiveCount; faceIndex++)
             {
                 ToGrid(_polygonMin[faceIndex], out var x0, out var y0, out var z0);
                 ToGrid(_polygonMax[faceIndex], out var x1, out var y1, out var z1);
@@ -1836,13 +1839,13 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
 
     public bool TryGetProgress(out float progress) => _asyncComputation.TryGetUiProgress(out progress);
 
-    private readonly MeshGeometry _output = new();
-    private readonly AsyncComputation<MeshGeometry> _asyncComputation = new();
+    private readonly Geometry _output = new();
+    private readonly AsyncComputation<Geometry> _asyncComputation = new();
     private readonly List<Vector3> _seeds = [];
-    private readonly MeshGeometryStats _sourceStats = new();
+    private readonly GeometryStats _sourceStats = new();
 
     [Input(Guid = "31c7e9d4-85f2-4a60-b1c8-6d0a5e3f9b27")]
-    public readonly InputSlot<MeshGeometry> Geometry = new();
+    public readonly InputSlot<Geometry> Geometry = new();
 
     [Input(Guid = "84a2f6c0-19db-4e75-93a4-c7e1b8d25f06")]
     public readonly InputSlot<StructuredList> Points = new();
@@ -1852,4 +1855,7 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
 
     [Input(Guid = "7c4e1b90-52d8-4a36-9f1e-b8d0a6c3e574")]
     public readonly InputSlot<bool> FillInterior = new();
+
+    /** Curve primitives aren't handled by this op yet; it works on the polygons. */
+    private readonly GeometryPolygonFilter _polygons = new();
 }

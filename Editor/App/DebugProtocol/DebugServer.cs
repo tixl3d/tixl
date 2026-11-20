@@ -1895,7 +1895,6 @@ internal static class DebugServer
                                                  Slot<Vector2> s => new JArray(s.Value.X, s.Value.Y),
                                                  Slot<Vector3> s => new JArray(s.Value.X, s.Value.Y, s.Value.Z),
                                                  Slot<Vector4> s => new JArray(s.Value.X, s.Value.Y, s.Value.Z, s.Value.W),
-                                                 Slot<T3.Core.DataTypes.MeshGeometry> s => DescribeGeometry(s.Value, request["dumpObj"]?.Value<string>()),
                                                  Slot<T3.Core.DataTypes.Geometry> s => DescribeUnifiedGeometry(s.Value, request),
                                                  Slot<T3.Core.DataTypes.Texture2D> s => DescribeTexture(s.Value),
                                                  Slot<T3.Core.DataTypes.BufferWithViews> s => DescribeBuffer(s.Value, request),
@@ -2019,13 +2018,10 @@ internal static class DebugServer
     }
 
     /// <summary>
-    /// Numeric summary of a MeshGeometry so agents can validate geometry ops without
-    /// screenshots: counts, bounds, watertightness and signed volume (positive for
-    /// outward-facing closed solids; a fracture's parts must sum to the input volume).
-    /// </summary>
-    /// <summary>
-    /// A <see cref="T3.Core.DataTypes.Geometry"/> output: counts per primitive kind, bounds, vertex counts of the first
-    /// curves and the attribute list. With <c>readCount</c> (from <c>readOffset</c>) also the points with their
+    /// A <see cref="T3.Core.DataTypes.Geometry"/> output, so agents can validate geometry ops without screenshots:
+    /// counts per primitive kind, bounds, open and non-manifold polygon edges, signed volume (positive for outward-facing
+    /// closed solids; a fracture's parts must sum to the input volume), vertex counts of the first curves and the
+    /// attribute list. <c>dumpObj</c> also writes the geometry as OBJ. With <c>readCount</c> (from <c>readOffset</c>) also the points with their
     /// handle offsets, to check order along curves.
     /// </summary>
     private static JToken DescribeUnifiedGeometry(T3.Core.DataTypes.Geometry? geometry, JObject request)
@@ -2073,6 +2069,12 @@ internal static class DebugServer
                                });
         }
 
+        var stats = new T3.Core.DataTypes.GeometryStats();
+        stats.Measure(geometry);
+        var dumpObjPath = request["dumpObj"]?.Value<string>();
+        if (!string.IsNullOrEmpty(dumpObjPath))
+            DumpGeometryObj(geometry, dumpObjPath);
+
         var result = new JObject
                          {
                              ["pointCount"] = geometry.PointCount,
@@ -2083,6 +2085,8 @@ internal static class DebugServer
                              ["closedCurveCount"] = closedCurveCount,
                              ["partCount"] = geometry.Parts.Length,
                              ["boundaryEdges"] = CountBoundaryEdges(geometry),
+                             ["nonManifoldEdges"] = stats.NonManifoldEdges,
+                             ["volume"] = stats.Volume,
                              ["boundsMin"] = new JArray(min.X, min.Y, min.Z),
                              ["boundsMax"] = new JArray(max.X, max.Y, max.Z),
                              ["firstCurveVertexCounts"] = curveVertexCounts,
@@ -2128,113 +2132,16 @@ internal static class DebugServer
         return count;
     }
 
-    private static JToken DescribeGeometry(T3.Core.DataTypes.MeshGeometry? geometry, string? dumpObjPath = null)
-    {
-        if (geometry == null)
-            return JValue.CreateNull();
-
-        var positions = geometry.Positions;
-        var offsets = geometry.FaceCornerOffsets;
-        var corners = geometry.CornerPointIndices;
-
-        if (!string.IsNullOrEmpty(dumpObjPath))
-            DumpGeometryObj(geometry, dumpObjPath);
-
-        var min = new Vector3(float.MaxValue);
-        var max = new Vector3(float.MinValue);
-        foreach (var p in positions)
-        {
-            min = Vector3.Min(min, p);
-            max = Vector3.Max(max, p);
-        }
-
-        var edgeUse = new Dictionary<(int, int), int>();
-        var edgeOnCut = new Dictionary<(int, int), bool>();
-        geometry.Attributes.TryGet<float>(T3.Core.DataTypes.GeometryAttributeNames.IsCut, T3.Core.DataTypes.AttributeDomain.Face, out var isCut);
-        var volume = 0.0;
-        for (var faceIndex = 0; faceIndex < geometry.FaceCount; faceIndex++)
-        {
-            var start = offsets[faceIndex];
-            var end = offsets[faceIndex + 1];
-            var faceIsCut = isCut != null && isCut.Values[faceIndex] > 0.5f;
-            for (var c = start; c < end; c++)
-            {
-                var next = c + 1 == end ? start : c + 1;
-                var a = corners[c];
-                var b = corners[next];
-                var key = a < b ? (a, b) : (b, a);
-                edgeUse[key] = edgeUse.GetValueOrDefault(key) + 1;
-                edgeOnCut[key] = faceIsCut;
-            }
-
-            // Divergence theorem over the fan triangles
-            var p0 = positions[corners[start]];
-            for (var c = start + 2; c < end; c++)
-            {
-                var p1 = positions[corners[c - 1]];
-                var p2 = positions[corners[c]];
-                volume += Vector3.Dot(p0, Vector3.Cross(p1, p2)) / 6.0;
-            }
-        }
-
-        var boundaryEdges = 0;
-        var boundaryEdgesOnCuts = 0;
-        var nonManifoldEdges = 0;
-        var boundarySamples = new JArray();
-        foreach (var (key, use) in edgeUse)
-        {
-            if (use == 1)
-            {
-                boundaryEdges++;
-                if (edgeOnCut[key])
-                    boundaryEdgesOnCuts++;
-
-                if (boundarySamples.Count < 6)
-                {
-                    var a = positions[key.Item1];
-                    var b = positions[key.Item2];
-                    boundarySamples.Add(new JArray(a.X, a.Y, a.Z, b.X, b.Y, b.Z, edgeOnCut[key] ? "cut" : "surface"));
-                }
-            }
-            else if (use > 2)
-            {
-                nonManifoldEdges++;
-            }
-        }
-
-        var attributes = new JArray();
-        foreach (var attribute in geometry.Attributes)
-        {
-            attributes.Add($"{attribute.Name}@{attribute.Domain}");
-        }
-
-        return new JObject
-                   {
-                       ["pointCount"] = geometry.PointCount,
-                       ["faceCount"] = geometry.FaceCount,
-                       ["cornerCount"] = geometry.CornerCount,
-                       ["partCount"] = geometry.Parts.Length,
-                       ["boundsMin"] = new JArray(min.X, min.Y, min.Z),
-                       ["boundsMax"] = new JArray(max.X, max.Y, max.Z),
-                       ["boundaryEdges"] = boundaryEdges,
-                       ["boundaryEdgesOnCuts"] = boundaryEdgesOnCuts,
-                       ["boundaryEdgeSamples"] = boundarySamples,
-                       ["nonManifoldEdges"] = nonManifoldEdges,
-                       ["volume"] = volume,
-                       ["attributes"] = attributes,
-                   };
-    }
-
     /// <summary>
-    /// Writes the geometry as OBJ for offline analysis: one object per part, faces in
-    /// original corner order (N-gons kept), IsCut faces preceded by a "# cut" comment.
+    /// Writes the geometry as OBJ for offline analysis: one object per part, polygons as faces in original vertex order
+    /// (N-gons kept), curves as polylines through their points, IsCut faces preceded by a "# cut" comment.
     /// </summary>
-    private static void DumpGeometryObj(T3.Core.DataTypes.MeshGeometry geometry, string path)
+    private static void DumpGeometryObj(T3.Core.DataTypes.Geometry geometry, string path)
     {
         var positions = geometry.Positions;
-        var offsets = geometry.FaceCornerOffsets;
-        var corners = geometry.CornerPointIndices;
-        geometry.Attributes.TryGet<float>(T3.Core.DataTypes.GeometryAttributeNames.IsCut, T3.Core.DataTypes.AttributeDomain.Face, out var isCut);
+        var offsets = geometry.PrimitiveVertexOffsets;
+        var corners = geometry.VertexPoints;
+        geometry.Attributes.TryGet<float>(T3.Core.DataTypes.GeometryAttributeNames.IsCut, T3.Core.DataTypes.AttributeDomain.Primitive, out var isCut);
 
         var sb = new StringBuilder();
         var culture = System.Globalization.CultureInfo.InvariantCulture;
@@ -2247,12 +2154,12 @@ internal static class DebugServer
 
         var parts = geometry.Parts;
         var partIndex = 0;
-        for (var faceIndex = 0; faceIndex < geometry.FaceCount; faceIndex++)
+        for (var faceIndex = 0; faceIndex < geometry.PrimitiveCount; faceIndex++)
         {
-            while (partIndex < parts.Length && faceIndex >= parts[partIndex].FaceStart + parts[partIndex].FaceCount)
+            while (partIndex < parts.Length && faceIndex >= parts[partIndex].PrimitiveStart + parts[partIndex].PrimitiveCount)
                 partIndex++;
 
-            if (partIndex < parts.Length && faceIndex == parts[partIndex].FaceStart)
+            if (partIndex < parts.Length && faceIndex == parts[partIndex].PrimitiveStart)
             {
                 var pivot = parts[partIndex].Pivot;
                 sb.Append("o part_").Append(partIndex).Append(" # seed ").Append(parts[partIndex].SeedIndex)
@@ -2263,7 +2170,12 @@ internal static class DebugServer
             if (isCut != null && isCut.Values[faceIndex] > 0.5f)
                 sb.Append("# cut\n");
 
-            sb.Append('f');
+            // Curves as OBJ polylines (closed ones repeat their last point first), polygons as faces
+            var isCurve = geometry.PrimitiveKind[faceIndex] == T3.Core.DataTypes.PrimitiveKinds.Curve;
+            sb.Append(isCurve ? 'l' : 'f');
+            if (isCurve && geometry.PrimitiveClosed[faceIndex] && offsets[faceIndex + 1] > offsets[faceIndex])
+                sb.Append(' ').Append(corners[offsets[faceIndex + 1] - 1] + 1);
+
             for (var c = offsets[faceIndex]; c < offsets[faceIndex + 1]; c++)
             {
                 sb.Append(' ').Append(corners[c] + 1);

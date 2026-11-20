@@ -12,7 +12,7 @@ namespace Lib.geometry.transform;
 internal sealed class PlaceGeometryAtPoints : Instance<PlaceGeometryAtPoints>
 {
     [Output(Guid = "4b7e2d90-6c1a-4f58-9e3b-d2a8f5c7e014")]
-    public readonly Slot<MeshGeometry> Result = new();
+    public readonly Slot<Geometry> Result = new();
 
     [Output(Guid = "a9c1e5f3-2d84-4b06-8f7a-1e6d3c9b5a28")]
     public readonly Slot<int> InstanceCount = new();
@@ -31,7 +31,7 @@ internal sealed class PlaceGeometryAtPoints : Instance<PlaceGeometryAtPoints>
         var useScale = UseScale.GetValue(context);
         var useColor = UseColor.GetValue(context);
 
-        if (prototype == null || prototype.FaceCount == 0 || points == null || points.NumElements == 0)
+        if (prototype == null || prototype.PrimitiveCount == 0 || points == null || points.NumElements == 0)
         {
             Result.Value = null;
             InstanceCount.Value = 0;
@@ -54,30 +54,30 @@ internal sealed class PlaceGeometryAtPoints : Instance<PlaceGeometryAtPoints>
         }
 
         var protoPositions = prototype.Positions;
-        var protoOffsets = prototype.FaceCornerOffsets;
-        var protoCorners = prototype.CornerPointIndices;
+        var protoOffsets = prototype.PrimitiveVertexOffsets;
+        var protoCorners = prototype.VertexPoints;
         var protoPointCount = protoPositions.Length;
-        var protoFaceCount = prototype.FaceCount;
-        var protoCornerCount = prototype.CornerCount;
+        var protoFaceCount = prototype.PrimitiveCount;
+        var protoCornerCount = prototype.VertexCount;
 
         var positions = _output.Positions;
         if (positions.Length != protoPointCount * instanceCount)
             positions = new Vector3[protoPointCount * instanceCount];
 
-        var offsets = _output.FaceCornerOffsets;
+        var offsets = _output.PrimitiveVertexOffsets;
         if (offsets.Length != protoFaceCount * instanceCount + 1)
             offsets = new int[protoFaceCount * instanceCount + 1];
 
-        var corners = _output.CornerPointIndices;
+        var corners = _output.VertexPoints;
         if (corners.Length != protoCornerCount * instanceCount)
             corners = new int[protoCornerCount * instanceCount];
 
-        var parts = new GeometryPart[instanceCount];
+        var parts = new PrimitivePart[instanceCount];
 
         _output.Attributes.Clear();
-        prototype.Attributes.TryGet<Vector3>(GeometryAttributeNames.Normal, AttributeDomain.Corner, out var protoNormals);
+        prototype.Attributes.TryGet<Vector3>(GeometryAttributeNames.Normal, AttributeDomain.Vertex, out var protoNormals);
         var normals = protoNormals != null
-                          ? _output.Attributes.GetOrCreate<Vector3>(GeometryAttributeNames.Normal, AttributeDomain.Corner, corners.Length)
+                          ? _output.Attributes.GetOrCreate<Vector3>(GeometryAttributeNames.Normal, AttributeDomain.Vertex, corners.Length)
                           : null;
         var colors = useColor
                          ? _output.Attributes.GetOrCreate<Vector4>(GeometryAttributeNames.Color, AttributeDomain.Part, instanceCount)
@@ -130,7 +130,7 @@ internal sealed class PlaceGeometryAtPoints : Instance<PlaceGeometryAtPoints>
                 colors.Values[instance] = point.Color;
 
             sourceIndices.Values[instance] = pointIndex;
-            parts[instance] = new GeometryPart(faceBase, protoFaceCount, point.Position, instance, pointIndex);
+            parts[instance] = new PrimitivePart(faceBase, protoFaceCount, point.Position, instance, pointIndex);
             instance++;
         }
 
@@ -145,8 +145,8 @@ internal sealed class PlaceGeometryAtPoints : Instance<PlaceGeometryAtPoints>
             var domainCount = attribute.Domain switch
                                   {
                                       AttributeDomain.Point  => protoPointCount,
-                                      AttributeDomain.Corner => protoCornerCount,
-                                      AttributeDomain.Face   => protoFaceCount,
+                                      AttributeDomain.Vertex => protoCornerCount,
+                                      AttributeDomain.Primitive   => protoFaceCount,
                                       _                      => 0,
                                   };
             if (domainCount == 0)
@@ -173,8 +173,9 @@ internal sealed class PlaceGeometryAtPoints : Instance<PlaceGeometryAtPoints>
         }
 
         _output.Positions = positions;
-        _output.FaceCornerOffsets = offsets;
-        _output.CornerPointIndices = corners;
+        _output.PrimitiveVertexOffsets = offsets;
+        _output.SetAllPrimitiveKinds(PrimitiveKinds.Polygon);
+        _output.VertexPoints = corners;
         _output.Parts = parts;
         _output.InvalidateTopologyCaches();
         Result.Value = _output;
@@ -188,10 +189,10 @@ internal sealed class PlaceGeometryAtPoints : Instance<PlaceGeometryAtPoints>
         }
     }
 
-    private readonly MeshGeometry _output = new();
+    private readonly Geometry _output = new();
 
     [Input(Guid = "2c9e7b41-d5a3-4f80-b6e1-8a0f3d7c2e59")]
-    public readonly InputSlot<MeshGeometry> Geometry = new();
+    public readonly InputSlot<Geometry> Geometry = new();
 
     [Input(Guid = "f1a6d3c8-4e27-4b95-a0d7-c3b9e5f8a162")]
     public readonly InputSlot<StructuredList> Points = new();

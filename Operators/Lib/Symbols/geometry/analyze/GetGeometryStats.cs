@@ -6,7 +6,7 @@ using System.Diagnostics;
 namespace Lib.geometry.analyze;
 
 /// <summary>
-/// Measures a MeshGeometry: counts, bounds, signed volume, watertightness and how
+/// Measures a Geometry: counts, bounds, signed volume, watertightness and how
 /// long pulling the input took. Stats are recomputed only when the geometry
 /// changes; the Report string bundles everything for a text display.
 /// </summary>
@@ -97,7 +97,7 @@ internal sealed class GetGeometryStats : Instance<GetGeometryStats>
                         """;
     }
 
-    private void Measure(MeshGeometry geometry)
+    private void Measure(Geometry geometry)
     {
         _stats.Measure(geometry);
 
@@ -110,7 +110,7 @@ internal sealed class GetGeometryStats : Instance<GetGeometryStats>
         _attributeSummary = _attributeParts.Count == 0 ? "none" : string.Join(", ", _attributeParts);
 
         PointCount.Value = _stats.PointCount;
-        FaceCount.Value = _stats.FaceCount;
+        FaceCount.Value = _stats.PolygonCount;
         TriangleCount.Value = _stats.TriangleCount;
         PartCount.Value = _stats.PartCount;
         BoundsMin.Value = _stats.BoundsMin;
@@ -120,13 +120,13 @@ internal sealed class GetGeometryStats : Instance<GetGeometryStats>
         BoundaryEdges.Value = _stats.BoundaryEdges;
     }
 
-    private readonly MeshGeometryStats _stats = new();
+    private readonly GeometryStats _stats = new();
     private readonly List<string> _attributeParts = [];
     private string _attributeSummary = "none";
-    private MeshGeometry? _lastGeometry;
+    private Geometry? _lastGeometry;
     private int _lastVersion;
     private float _lastEvaluationMs;
 
     [Input(Guid = "4a8e2c6f-d1b3-4f70-9e5d-b7c0a3f8e214")]
-    public readonly InputSlot<MeshGeometry> Geometry = new();
+    public readonly InputSlot<Geometry> Geometry = new();
 }

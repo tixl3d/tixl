@@ -2,11 +2,7 @@ using Lib.Utils;
 
 namespace Lib.geometry.convert;
 
-/// <summary>
-/// Compiles the polygons of a Geometry into GPU mesh buffers; curve primitives are ignored. During the move to the
-/// unified Geometry type the original input keeps taking MeshGeometry (as Mesh), so existing graphs stay connected;
-/// Geometry wins when both are connected.
-/// </summary>
+/// <summary>Compiles the polygons of a Geometry into GPU mesh buffers; curve primitives are ignored.</summary>
 [Guid("4fea8c0e-cb7f-41fe-a410-df1d3886bf98")]
 internal sealed class GeometryToMesh : Instance<GeometryToMesh>, IStatusProvider
 {
@@ -21,21 +17,14 @@ internal sealed class GeometryToMesh : Instance<GeometryToMesh>, IStatusProvider
     private void Update(EvaluationContext context)
     {
         var geometry = Geometry.GetValue(context);
-        var mesh = Mesh.GetValue(context);
         _statusMessage = string.Empty;
-        if (geometry != null)
-        {
-            _compiler.Compile(geometry, relativeToPartPivots: false);
-        }
-        else if (mesh != null)
-        {
-            _compiler.Compile(mesh, relativeToPartPivots: false);
-        }
-        else
+        if (geometry == null)
         {
             Buffers.Value = null;
             return;
         }
+
+        _compiler.Compile(geometry, relativeToPartPivots: false);
 
         if (_compiler.Triangles.Length == 0)
         {
@@ -66,9 +55,6 @@ internal sealed class GeometryToMesh : Instance<GeometryToMesh>, IStatusProvider
     private BufferWithViews _indexBufferWithViews;
     private readonly MeshBuffers _data = new();
 
-    [Input(Guid = "8919e38f-63ea-4ca1-b45f-623464b93184")]
-    public readonly InputSlot<Geometry> Geometry = new();
-
     [Input(Guid = "57469ea6-f0c5-4e8d-a53c-40e8ac495bc3")]
-    public readonly InputSlot<MeshGeometry> Mesh = new();
+    public readonly InputSlot<Geometry> Geometry = new();
 }

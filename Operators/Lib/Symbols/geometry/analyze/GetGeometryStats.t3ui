@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "3f9d7b21-8e64-4c05-a1b7-d5c2e8f0a693"/*GetGeometryStats*/,
-  "Description": "Measures a MeshGeometry: counts, bounds, signed volume, watertightness and how long pulling the input took.\n\nStats are recomputed only when the geometry changes. Volume is positive for outward-facing closed solids; Boundary edges = 0 means watertight. Report bundles everything as text, e.g. for a text display or the console.\n\nAKA: geometry info, mesh statistics, debug, measure",
+  "Description": "Measures a geometry: counts, bounds, signed volume, watertightness and how long pulling the input took.\n\nStats are recomputed only when the geometry changes. Volume is positive for outward-facing closed solids; Boundary edges = 0 means watertight. Report bundles everything as text, e.g. for a text display or the console.\n\nAKA: geometry info, mesh statistics, debug, measure",
   "InputUis": [
     {
       "InputId": "4a8e2c6f-d1b3-4f70-9e5d-b7c0a3f8e214"/*Geometry*/,

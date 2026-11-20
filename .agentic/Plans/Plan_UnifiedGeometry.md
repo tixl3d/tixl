@@ -180,6 +180,13 @@ message must name what was expected.
   an offset curve's points take its first point's attributes); `CurveGeometry`, `CurvePart`, the curve output view,
   its table model and overlay, and `_OutputPreviewCurves` removed. `AttributeDomain` keeps ControlPoint, Segment and
   Contour as unused values so stored ints stay valid.
+- **Batches 2 and 3 done together (2026-11-21)**, because `GeometryPartSubset`, `MeshInsideTester` and the stats
+  were shared across them: every geometry op, `StageGeometry` and `SurfaceGeometry` take `Geometry`; `MeshGeometry`,
+  `GeometryPart`, the mesh output view, table model, overlay and `_OutputPreviewMeshGeometry` are removed;
+  `EdgeTopology` has its own file; `MeshGeometryStats` became `GeometryStats` (polygons only). `GeometryToMesh` is back
+  to one input on its original id. Bevel, Triangulate, SeparateLooseParts and VoronoiFracture work on polygons through
+  `Lib/Utils/GeometryPolygonFilter` and leave curves out (pass-through is a follow-up); `GeometryPartSubset` keeps
+  primitive kinds. The CPoint inputs of PlaceGeometryAtPoints, VoronoiFracture and the field ops stay for Phase 3.
 - **Flat fill without extrusion** (maintainer, 2026-11-20): curves must become a surface without an op named
   "extrude". Move the fill (flatten, resolve overlaps by fill rule, tessellate with holes) out of `ExtrudeCurves` into
   a `Lib/Utils` helper, then (1) `GeometryToMesh` fills closed curves itself (option, on by default) so

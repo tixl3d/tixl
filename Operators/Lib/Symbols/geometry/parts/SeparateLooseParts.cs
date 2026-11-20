@@ -6,14 +6,14 @@ using T3.Core.Utils;
 namespace Lib.geometry.parts;
 
 /// <summary>
-/// Splits a MeshGeometry into separate parts based on connected components (loose parts),
+/// Splits a Geometry into separate parts based on connected components (loose parts),
 /// and sets the pivot of each new part to its volume centroid.
 /// </summary>
 [Guid("EC6F1A69-9D76-4A46-A7A7-2248989EC386")]
 internal sealed class SeparateLooseParts : Instance<SeparateLooseParts>
 {
     [Output(Guid = "5FBCE231-EFE4-4C19-957D-72B996F133AD")]
-    public readonly Slot<MeshGeometry> Result = new();
+    public readonly Slot<Geometry> Result = new();
 
     [Output(Guid = "417E4FF5-71AA-4AB8-AA0C-A379FFC3FAC4")]
     public readonly Slot<int> PartCount = new();
@@ -27,7 +27,9 @@ internal sealed class SeparateLooseParts : Instance<SeparateLooseParts>
     private void Update(EvaluationContext context)
     {
         var source = Geometry.GetValue(context);
-        if (source == null || source.FaceCount == 0)
+        if (source != null)
+            source = _polygons.GetPolygons(source);
+        if (source == null || source.PrimitiveCount == 0)
         {
             Result.Value = source;
             PartCount.Value = 0;
@@ -36,7 +38,7 @@ internal sealed class SeparateLooseParts : Instance<SeparateLooseParts>
 
         // 1. Build face adjacency via edge topology.
         var edgeTopo = source.Edges;
-        var faceCount = source.FaceCount;
+        var faceCount = source.PrimitiveCount;
         var adjacency = new List<int>[faceCount];
         for (int i = 0; i < faceCount; i++) adjacency[i] = new List<int>();
 
@@ -80,12 +82,12 @@ internal sealed class SeparateLooseParts : Instance<SeparateLooseParts>
         // 3. Build new topology and mapping arrays.
         var newOffsets = new List<int> { 0 };
         var newCornerIndices = new List<int>();
-        var newParts = new List<GeometryPart>();
+        var newParts = new List<PrimitivePart>();
 
         // old → new face index mapping
         var oldToNewFace = new int[faceCount];
         // old → new corner index mapping (size = cornerCount, initialized to -1)
-        int cornerCount = source.CornerCount;
+        int cornerCount = source.VertexCount;
         var oldToNewCorner = new int[cornerCount];
         for (int i = 0; i < cornerCount; i++) oldToNewCorner[i] = -1;
 
@@ -100,10 +102,10 @@ internal sealed class SeparateLooseParts : Instance<SeparateLooseParts>
                 var usedPoints = new HashSet<int>();
                 foreach (int f in comp)
                 {
-                    int start = source.FaceCornerOffsets[f];
-                    int end = source.FaceCornerOffsets[f + 1];
+                    int start = source.PrimitiveVertexOffsets[f];
+                    int end = source.PrimitiveVertexOffsets[f + 1];
                     for (int c = start; c < end; c++)
-                        usedPoints.Add(source.CornerPointIndices[c]);
+                        usedPoints.Add(source.VertexPoints[c]);
                 }
                 pivot = Vector3.Zero;
                 foreach (int pi in usedPoints)
@@ -119,20 +121,20 @@ internal sealed class SeparateLooseParts : Instance<SeparateLooseParts>
             {
                 oldToNewFace[oldFace] = newFaceIdx++;
 
-                int start = source.FaceCornerOffsets[oldFace];
-                int end = source.FaceCornerOffsets[oldFace + 1];
+                int start = source.PrimitiveVertexOffsets[oldFace];
+                int end = source.PrimitiveVertexOffsets[oldFace + 1];
                 for (int oldCorner = start; oldCorner < end; oldCorner++)
                 {
                     int newCorner = newCornerIndices.Count;
                     oldToNewCorner[oldCorner] = newCorner;
-                    newCornerIndices.Add(source.CornerPointIndices[oldCorner]);
+                    newCornerIndices.Add(source.VertexPoints[oldCorner]);
                 }
                 newOffsets.Add(newCornerIndices.Count);
             }
 
-            newParts.Add(new GeometryPart(
-                FaceStart: faceStartIdx,
-                FaceCount: faceCountComp,
+            newParts.Add(new PrimitivePart(
+                PrimitiveStart: faceStartIdx,
+                PrimitiveCount: faceCountComp,
                 Pivot: pivot,
                 Id: newParts.Count,
                 SeedIndex: 0));
@@ -141,13 +143,14 @@ internal sealed class SeparateLooseParts : Instance<SeparateLooseParts>
         }
 
         // 4. Build output mesh topology.
-        var output = new MeshGeometry
+        var output = new Geometry
         {
             Positions = source.Positions,
-            FaceCornerOffsets = newOffsets.ToArray(),
-            CornerPointIndices = newCornerIndices.ToArray(),
+            PrimitiveVertexOffsets = newOffsets.ToArray(),
+            VertexPoints = newCornerIndices.ToArray(),
             Parts = newParts.ToArray()
         };
+        output.SetAllPrimitiveKinds(PrimitiveKinds.Polygon);
 
         // 5. Reorder and preserve attributes.
         output.Attributes.Clear();
@@ -160,11 +163,11 @@ internal sealed class SeparateLooseParts : Instance<SeparateLooseParts>
                     output.Attributes.Add(attr);
                     break;
 
-                case AttributeDomain.Corner:
+                case AttributeDomain.Vertex:
                     ReorderCornerAttribute(attr, oldToNewCorner, output.Attributes);
                     break;
 
-                case AttributeDomain.Face:
+                case AttributeDomain.Primitive:
                     ReorderFaceAttribute(attr, oldToNewFace, output.Attributes);
                     break;
 
@@ -190,7 +193,7 @@ internal sealed class SeparateLooseParts : Instance<SeparateLooseParts>
         {
             var newVals = new float[count];
             for (int i = 0; i < count; i++) newVals[oldToNewCorner[i]] = fAttr.Values[i];
-            var newAttr = new GeometryAttribute<float>(attr.Name, AttributeDomain.Corner, count);
+            var newAttr = new GeometryAttribute<float>(attr.Name, AttributeDomain.Vertex, count);
             Array.Copy(newVals, newAttr.Values, count);
             target.Add(newAttr);
         }
@@ -198,7 +201,7 @@ internal sealed class SeparateLooseParts : Instance<SeparateLooseParts>
         {
             var newVals = new int[count];
             for (int i = 0; i < count; i++) newVals[oldToNewCorner[i]] = iAttr.Values[i];
-            var newAttr = new GeometryAttribute<int>(attr.Name, AttributeDomain.Corner, count);
+            var newAttr = new GeometryAttribute<int>(attr.Name, AttributeDomain.Vertex, count);
             Array.Copy(newVals, newAttr.Values, count);
             target.Add(newAttr);
         }
@@ -206,7 +209,7 @@ internal sealed class SeparateLooseParts : Instance<SeparateLooseParts>
         {
             var newVals = new Vector2[count];
             for (int i = 0; i < count; i++) newVals[oldToNewCorner[i]] = v2Attr.Values[i];
-            var newAttr = new GeometryAttribute<Vector2>(attr.Name, AttributeDomain.Corner, count);
+            var newAttr = new GeometryAttribute<Vector2>(attr.Name, AttributeDomain.Vertex, count);
             Array.Copy(newVals, newAttr.Values, count);
             target.Add(newAttr);
         }
@@ -214,7 +217,7 @@ internal sealed class SeparateLooseParts : Instance<SeparateLooseParts>
         {
             var newVals = new Vector3[count];
             for (int i = 0; i < count; i++) newVals[oldToNewCorner[i]] = v3Attr.Values[i];
-            var newAttr = new GeometryAttribute<Vector3>(attr.Name, AttributeDomain.Corner, count);
+            var newAttr = new GeometryAttribute<Vector3>(attr.Name, AttributeDomain.Vertex, count);
             Array.Copy(newVals, newAttr.Values, count);
             target.Add(newAttr);
         }
@@ -222,7 +225,7 @@ internal sealed class SeparateLooseParts : Instance<SeparateLooseParts>
         {
             var newVals = new Vector4[count];
             for (int i = 0; i < count; i++) newVals[oldToNewCorner[i]] = v4Attr.Values[i];
-            var newAttr = new GeometryAttribute<Vector4>(attr.Name, AttributeDomain.Corner, count);
+            var newAttr = new GeometryAttribute<Vector4>(attr.Name, AttributeDomain.Vertex, count);
             Array.Copy(newVals, newAttr.Values, count);
             target.Add(newAttr);
         }
@@ -242,7 +245,7 @@ internal sealed class SeparateLooseParts : Instance<SeparateLooseParts>
         {
             var newVals = new float[count];
             for (int i = 0; i < count; i++) newVals[oldToNewFace[i]] = fAttr.Values[i];
-            var newAttr = new GeometryAttribute<float>(attr.Name, AttributeDomain.Face, count);
+            var newAttr = new GeometryAttribute<float>(attr.Name, AttributeDomain.Primitive, count);
             Array.Copy(newVals, newAttr.Values, count);
             target.Add(newAttr);
         }
@@ -250,7 +253,7 @@ internal sealed class SeparateLooseParts : Instance<SeparateLooseParts>
         {
             var newVals = new int[count];
             for (int i = 0; i < count; i++) newVals[oldToNewFace[i]] = iAttr.Values[i];
-            var newAttr = new GeometryAttribute<int>(attr.Name, AttributeDomain.Face, count);
+            var newAttr = new GeometryAttribute<int>(attr.Name, AttributeDomain.Primitive, count);
             Array.Copy(newVals, newAttr.Values, count);
             target.Add(newAttr);
         }
@@ -258,7 +261,7 @@ internal sealed class SeparateLooseParts : Instance<SeparateLooseParts>
         {
             var newVals = new Vector2[count];
             for (int i = 0; i < count; i++) newVals[oldToNewFace[i]] = v2Attr.Values[i];
-            var newAttr = new GeometryAttribute<Vector2>(attr.Name, AttributeDomain.Face, count);
+            var newAttr = new GeometryAttribute<Vector2>(attr.Name, AttributeDomain.Primitive, count);
             Array.Copy(newVals, newAttr.Values, count);
             target.Add(newAttr);
         }
@@ -266,7 +269,7 @@ internal sealed class SeparateLooseParts : Instance<SeparateLooseParts>
         {
             var newVals = new Vector3[count];
             for (int i = 0; i < count; i++) newVals[oldToNewFace[i]] = v3Attr.Values[i];
-            var newAttr = new GeometryAttribute<Vector3>(attr.Name, AttributeDomain.Face, count);
+            var newAttr = new GeometryAttribute<Vector3>(attr.Name, AttributeDomain.Primitive, count);
             Array.Copy(newVals, newAttr.Values, count);
             target.Add(newAttr);
         }
@@ -274,7 +277,7 @@ internal sealed class SeparateLooseParts : Instance<SeparateLooseParts>
         {
             var newVals = new Vector4[count];
             for (int i = 0; i < count; i++) newVals[oldToNewFace[i]] = v4Attr.Values[i];
-            var newAttr = new GeometryAttribute<Vector4>(attr.Name, AttributeDomain.Face, count);
+            var newAttr = new GeometryAttribute<Vector4>(attr.Name, AttributeDomain.Primitive, count);
             Array.Copy(newVals, newAttr.Values, count);
             target.Add(newAttr);
         }
@@ -289,14 +292,14 @@ internal sealed class SeparateLooseParts : Instance<SeparateLooseParts>
     /// and summing tetrahedra from the origin. Works well for closed, watertight meshes.
     /// Returns <see cref="Vector3.Zero"/> if total volume is near zero.
     /// </summary>
-    private Vector3 ComputeVolumeCentroid(List<int> faceIndices, MeshGeometry mesh)
+    private Vector3 ComputeVolumeCentroid(List<int> faceIndices, Geometry mesh)
     {
         Vector3 centroidSum = Vector3.Zero;
         double totalVolume = 0.0;
 
         var positions = mesh.Positions;
-        var offsets = mesh.FaceCornerOffsets;
-        var cornerPoints = mesh.CornerPointIndices;
+        var offsets = mesh.PrimitiveVertexOffsets;
+        var cornerPoints = mesh.VertexPoints;
 
         foreach (int f in faceIndices)
         {
@@ -330,5 +333,8 @@ internal sealed class SeparateLooseParts : Instance<SeparateLooseParts>
     }
 
     [Input(Guid = "52E9E7CB-C0E3-430C-B182-A5EA2E9C0270")]
-    public readonly InputSlot<MeshGeometry> Geometry = new();
+    public readonly InputSlot<Geometry> Geometry = new();
+
+    /** Curve primitives aren't handled by this op yet; it works on the polygons. */
+    private readonly GeometryPolygonFilter _polygons = new();
 }

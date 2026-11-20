@@ -92,8 +92,7 @@ internal static class UiRegistration
                                 typeof(T3.Graphics.Compat.PrimitiveTopology));
         
         RegisterTypesToProperty(UiProperties.CpuGeometry,
-                                typeof(Geometry),
-                                typeof(MeshGeometry));
+                                typeof(Geometry));
 
         RegisterTypesToProperty(UiProperties.CpuFields,
                                 typeof(ScalarField),
@@ -147,7 +146,6 @@ internal static class UiRegistration
         RegisterIOType(typeof(BufferWithViews), null, () => new BufferWithViewsOutputUi());
         RegisterIOType(typeof(SceneSetup), () => new SceneSetupInputUi(), () => new SceneSetupOutputUi());
         RegisterIOType(typeof(Geometry), null, () => new GeometryOutputUi());
-        RegisterIOType(typeof(MeshGeometry), null, () => new MeshGeometryOutputUi());
         RegisterIOType(typeof(AudioGraphNode), null, () => new AudioGraphNodeOutputUi());
 
         return;

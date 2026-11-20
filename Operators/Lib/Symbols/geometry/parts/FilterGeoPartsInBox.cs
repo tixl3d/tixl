@@ -6,7 +6,7 @@ using T3.Core.Utils;
 namespace Lib.geometry.parts;
 
 /// <summary>
-/// Keeps or discards the parts of a MeshGeometry by whether their pivot lies inside
+/// Keeps or discards the parts of a Geometry by whether their pivot lies inside
 /// a box volume. Handy for isolating a slice of fracture chunks for inspection, or
 /// for culling chunks outside an area. Geometry without parts counts as one part.
 /// </summary>
@@ -14,7 +14,7 @@ namespace Lib.geometry.parts;
 internal sealed class FilterGeoPartsInBox : Instance<FilterGeoPartsInBox>, ITransformable
 {
     [Output(Guid = "2e7c9a54-d106-4b38-8f1a-c5d3e0b7a921")]
-    public readonly TransformCallbackSlot<MeshGeometry> Result = new();
+    public readonly TransformCallbackSlot<Geometry> Result = new();
 
     [Output(Guid = "7a3d5f80-1c62-4e9b-b0d4-96e8a2c1f375")]
     public readonly Slot<int> KeptCount = new();
@@ -39,7 +39,7 @@ internal sealed class FilterGeoPartsInBox : Instance<FilterGeoPartsInBox>, ITran
         var size = Size.GetValue(context);
         var keepInside = (Modes)Mode.GetValue(context).Clamp(0, 1) == Modes.KeepInside;
 
-        if (source == null || source.FaceCount == 0)
+        if (source == null || source.PrimitiveCount == 0)
         {
             Result.Value = source;
             KeptCount.Value = 0;
@@ -78,12 +78,12 @@ internal sealed class FilterGeoPartsInBox : Instance<FilterGeoPartsInBox>, ITran
         KeepOutside,
     }
 
-    private readonly MeshGeometry _output = new();
+    private readonly Geometry _output = new();
     private readonly GeometryPartSubset _subset = new();
-    private readonly List<GeometryPart> _keptParts = [];
+    private readonly List<PrimitivePart> _keptParts = [];
 
     [Input(Guid = "0c5e8a72-6d14-4f9b-a3e7-b18d2c6f0459")]
-    public readonly InputSlot<MeshGeometry> Geometry = new();
+    public readonly InputSlot<Geometry> Geometry = new();
 
     [Input(Guid = "d9a2f6b1-3e58-4c07-8f4d-52c0e7a9b136")]
     public readonly InputSlot<Vector3> Center = new();

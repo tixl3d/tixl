@@ -7,7 +7,7 @@ using T3.Core.Utils;
 namespace Lib.geometry.io;
 
 /// <summary>
-/// Loads a Wavefront OBJ file as MeshGeometry, preserving N-gon faces (quads stay
+/// Loads a Wavefront OBJ file as Geometry, preserving N-gon faces (quads stay
 /// quads - important for beveling). OBJ objects/groups become parts with their
 /// centroid as pivot; normals and texture coordinates become corner attributes.
 /// </summary>
@@ -15,11 +15,11 @@ namespace Lib.geometry.io;
 internal sealed class LoadObjGeometry : Instance<LoadObjGeometry>, IDescriptiveFilename, IStatusProvider
 {
     [Output(Guid = "8e1a4c76-05d9-4f32-b6e8-72c9d5a0f143")]
-    public readonly Slot<MeshGeometry?> Result = new();
+    public readonly Slot<Geometry?> Result = new();
 
     public LoadObjGeometry()
     {
-        _resource = new Resource<MeshGeometry>(Path, TryCreateResource, allowDisposal: false);
+        _resource = new Resource<Geometry>(Path, TryCreateResource, allowDisposal: false);
         _resource.AddDependentSlots(Result);
         Result.UpdateAction = Update;
     }
@@ -45,14 +45,14 @@ internal sealed class LoadObjGeometry : Instance<LoadObjGeometry>, IDescriptiveF
         }
     }
 
-    private bool TryCreateResource(FileResource file, MeshGeometry? currentValue,
-                                   [NotNullWhen(true)] out MeshGeometry? newValue,
+    private bool TryCreateResource(FileResource file, Geometry? currentValue,
+                                   [NotNullWhen(true)] out Geometry? newValue,
                                    [NotNullWhen(false)] out string? failureReason)
     {
         try
         {
             newValue = ParseObj(file.AbsolutePath, _scale);
-            if (newValue.FaceCount == 0)
+            if (newValue.PrimitiveCount == 0)
             {
                 failureReason = $"No faces in {file.AbsolutePath}";
                 newValue = null;
@@ -71,7 +71,7 @@ internal sealed class LoadObjGeometry : Instance<LoadObjGeometry>, IDescriptiveF
         }
     }
 
-    private static MeshGeometry ParseObj(string path, float scale)
+    private static Geometry ParseObj(string path, float scale)
     {
         var positions = new List<Vector3>();
         var normals = new List<Vector3>();
@@ -158,24 +158,25 @@ internal sealed class LoadObjGeometry : Instance<LoadObjGeometry>, IDescriptiveF
             }
         }
 
-        var geometry = new MeshGeometry
+        var geometry = new Geometry
                            {
                                Positions = positions.ToArray(),
-                               FaceCornerOffsets = faceOffsets.ToArray(),
-                               CornerPointIndices = cornerPoints.ToArray(),
+                               PrimitiveVertexOffsets = faceOffsets.ToArray(),
+                               VertexPoints = cornerPoints.ToArray(),
                            };
+        geometry.SetAllPrimitiveKinds(PrimitiveKinds.Polygon);
 
         geometry.Parts = BuildParts(geometry, partFaceStarts);
 
         if (hasNormals)
         {
-            var attribute = geometry.Attributes.GetOrCreate<Vector3>(GeometryAttributeNames.Normal, AttributeDomain.Corner, cornerNormals.Count);
+            var attribute = geometry.Attributes.GetOrCreate<Vector3>(GeometryAttributeNames.Normal, AttributeDomain.Vertex, cornerNormals.Count);
             cornerNormals.CopyTo(attribute.Values);
         }
 
         if (hasTexCoords)
         {
-            var attribute = geometry.Attributes.GetOrCreate<Vector2>(GeometryAttributeNames.TexCoord, AttributeDomain.Corner, cornerTexCoords.Count);
+            var attribute = geometry.Attributes.GetOrCreate<Vector2>(GeometryAttributeNames.TexCoord, AttributeDomain.Vertex, cornerTexCoords.Count);
             cornerTexCoords.CopyTo(attribute.Values);
         }
 
@@ -183,32 +184,32 @@ internal sealed class LoadObjGeometry : Instance<LoadObjGeometry>, IDescriptiveF
         return geometry;
     }
 
-    private static GeometryPart[] BuildParts(MeshGeometry geometry, List<int> partFaceStarts)
+    private static PrimitivePart[] BuildParts(Geometry geometry, List<int> partFaceStarts)
     {
         if (partFaceStarts.Count == 0)
             return [];
 
-        var parts = new GeometryPart[partFaceStarts.Count];
+        var parts = new PrimitivePart[partFaceStarts.Count];
         for (var partIndex = 0; partIndex < partFaceStarts.Count; partIndex++)
         {
             var faceStart = partFaceStarts[partIndex];
-            var faceEnd = partIndex + 1 < partFaceStarts.Count ? partFaceStarts[partIndex + 1] : geometry.FaceCount;
+            var faceEnd = partIndex + 1 < partFaceStarts.Count ? partFaceStarts[partIndex + 1] : geometry.PrimitiveCount;
             var faceCount = faceEnd - faceStart;
             if (faceCount <= 0)
                 continue;
 
             var pivot = Vector3.Zero;
-            var cornerStart = geometry.FaceCornerOffsets[faceStart];
-            var cornerEnd = geometry.FaceCornerOffsets[faceEnd];
+            var cornerStart = geometry.PrimitiveVertexOffsets[faceStart];
+            var cornerEnd = geometry.PrimitiveVertexOffsets[faceEnd];
             for (var c = cornerStart; c < cornerEnd; c++)
             {
-                pivot += geometry.Positions[geometry.CornerPointIndices[c]];
+                pivot += geometry.Positions[geometry.VertexPoints[c]];
             }
 
             if (cornerEnd > cornerStart)
                 pivot /= cornerEnd - cornerStart;
 
-            parts[partIndex] = new GeometryPart(faceStart, faceCount, pivot, partIndex, partIndex);
+            parts[partIndex] = new PrimitivePart(faceStart, faceCount, pivot, partIndex, partIndex);
         }
 
         return parts;
@@ -250,7 +251,7 @@ internal sealed class LoadObjGeometry : Instance<LoadObjGeometry>, IDescriptiveF
         return _warningMessage;
     }
 
-    private readonly Resource<MeshGeometry> _resource;
+    private readonly Resource<Geometry> _resource;
     private string _warningMessage = string.Empty;
     private float _scale = 1;
 

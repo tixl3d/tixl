@@ -13,7 +13,7 @@ namespace Lib.render.output;
 internal sealed class SurfaceGeometry : Instance<SurfaceGeometry>, IStatusProvider
 {
     [Output(Guid = "5a5d850a-d301-451f-acda-a1e880cdf48d")]
-    public readonly Slot<MeshGeometry?> Geometry = new();
+    public readonly Slot<Geometry?> Geometry = new();
 
     public SurfaceGeometry()
     {
@@ -53,8 +53,8 @@ internal sealed class SurfaceGeometry : Instance<SurfaceGeometry>, IStatusProvid
         max += margin;
 
         var normal = Vector3.Normalize(Vector3.TransformNormal(Vector3.UnitZ, world));
-        var normals = _geometry.Attributes.GetOrCreate<Vector3>(GeometryAttributeNames.Normal, AttributeDomain.Corner, 4);
-        var texCoords = _geometry.Attributes.GetOrCreate<Vector2>(GeometryAttributeNames.TexCoord, AttributeDomain.Corner, 4);
+        var normals = _geometry.Attributes.GetOrCreate<Vector3>(GeometryAttributeNames.Normal, AttributeDomain.Vertex, 4);
+        var texCoords = _geometry.Attributes.GetOrCreate<Vector2>(GeometryAttributeNames.TexCoord, AttributeDomain.Vertex, 4);
 
         // Counter-clockwise seen from the front: bottom-left, bottom-right, top-right, top-left.
         for (var corner = 0; corner < 4; corner++)
@@ -62,13 +62,13 @@ internal sealed class SurfaceGeometry : Instance<SurfaceGeometry>, IStatusProvid
             var inRect = _cornerFractions[corner];
             var inSurface = min + (max - min) * inRect;
             _geometry.Positions[corner] = Vector3.Transform(new Vector3(inSurface.X, inSurface.Y, lift), world);
-            _geometry.CornerPointIndices[corner] = corner;
+            _geometry.VertexPoints[corner] = corner;
             normals.Values[corner] = normal;
             texCoords.Values[corner] = inRect;
         }
 
         var centre = (_geometry.Positions[0] + _geometry.Positions[2]) * 0.5f;
-        _geometry.Parts[0] = new GeometryPart(0, 1, centre, 0, 0);
+        _geometry.Parts[0] = new PrimitivePart(0, 1, centre, 0, 0);
         _geometry.InvalidateTopologyCaches();
         Geometry.Value = _geometry;
 
@@ -128,12 +128,14 @@ internal sealed class SurfaceGeometry : Instance<SurfaceGeometry>, IStatusProvid
     /** 0..1 over the rectangle, v up, in the corner order bottom-left, bottom-right, top-right, top-left. */
     private static readonly Vector2[] _cornerFractions = [new(0, 0), new(1, 0), new(1, 1), new(0, 1)];
 
-    private readonly MeshGeometry _geometry = new()
+    private readonly Geometry _geometry = new()
                                                   {
                                                       Positions = new Vector3[4],
-                                                      FaceCornerOffsets = [0, 4],
-                                                      CornerPointIndices = new int[4],
-                                                      Parts = new GeometryPart[1],
+                                                      PrimitiveVertexOffsets = [0, 4],
+                                                      PrimitiveKind = [PrimitiveKinds.Polygon],
+                                                      PrimitiveClosed = [true],
+                                                      VertexPoints = new int[4],
+                                                      Parts = new PrimitivePart[1],
                                                   };
 
     private string? _warningFormat;

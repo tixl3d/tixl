@@ -484,9 +484,6 @@ public partial class SymbolPackage
         RegisterType(typeof(Geometry), "Geometry",
                      () => new InputValue<Geometry>(null));
 
-        RegisterType(typeof(MeshGeometry), "MeshGeometry",
-                     () => new InputValue<MeshGeometry>(null));
-
         RegisterType(typeof(ScalarField), "ScalarField",
                      () => new InputValue<ScalarField>(null));
 

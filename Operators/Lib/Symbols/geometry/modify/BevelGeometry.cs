@@ -1,3 +1,4 @@
+using Lib.Utils;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -6,7 +7,7 @@ using T3.Core.Utils;
 namespace Lib.geometry.modify;
 
 /// <summary>
-/// Uniform-width edge bevel for MeshGeometry (v1): every face is inset by the bevel
+/// Uniform-width edge bevel for Geometry (v1): every face is inset by the bevel
 /// width, every edge becomes a profile strip between its two inset faces, and every
 /// vertex becomes a fan patch closing the corner. Width is clamped against the
 /// shortest edge. General miters/colliding bevels are out of scope.
@@ -15,7 +16,7 @@ namespace Lib.geometry.modify;
 internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
 {
     [Output(Guid = "48342188-0139-4ea4-943d-a5b5d59b7a4a")]
-    public readonly Slot<MeshGeometry> Result = new();
+    public readonly Slot<Geometry> Result = new();
 
     public BevelGeometry()
     {
@@ -25,13 +26,15 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
     private void Update(EvaluationContext context)
     {
         var source = Geometry.GetValue(context);
+        if (source != null)
+            source = _polygons.GetPolygons(source);
         var width = Width.GetValue(context);
         var segments = Math.Clamp(Segments.GetValue(context), 1, 16);
         var roundness = Math.Clamp(Roundness.GetValue(context), 0f, 1f);
         var flatShading = FlatShading.GetValue(context);
         var roundCorners = RoundCorners.GetValue(context);
 
-        if (source == null || source.FaceCount == 0)
+        if (source == null || source.PrimitiveCount == 0)
         {
             Result.Value = source;
             return;
@@ -59,7 +62,7 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
             var result = _asyncComputation.Update(context, Result, inputsVersion,
                                                   token =>
                                                   {
-                                                      var target = new MeshGeometry();
+                                                      var target = new Geometry();
                                                       Build(target, source, width, segments, roundness, flatShading, roundCorners, token);
                                                       return target;
                                                   });
@@ -72,12 +75,12 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
         Result.Value = _output;
     }
 
-    private void Build(MeshGeometry target, MeshGeometry source, float width, int segments, float roundness, bool flatShading, bool roundCorners,
+    private void Build(Geometry target, Geometry source, float width, int segments, float roundness, bool flatShading, bool roundCorners,
                        CancellationToken token)
     {
         var positions = source.Positions;
-        var offsets = source.FaceCornerOffsets;
-        var cornerPoints = source.CornerPointIndices;
+        var offsets = source.PrimitiveVertexOffsets;
+        var cornerPoints = source.VertexPoints;
         var edges = source.Edges;
 
         _outPositions.Clear();
@@ -87,9 +90,9 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
         _outFaceOffsets.Add(0);
 
         // Source face normals (Newell), reused for inset points and strip blending
-        if (_faceNormals.Length != source.FaceCount)
-            _faceNormals = new Vector3[source.FaceCount];
-        for (var faceIndex = 0; faceIndex < source.FaceCount; faceIndex++)
+        if (_faceNormals.Length != source.PrimitiveCount)
+            _faceNormals = new Vector3[source.PrimitiveCount];
+        for (var faceIndex = 0; faceIndex < source.PrimitiveCount; faceIndex++)
         {
             var normal = Vector3.Zero;
             var start = offsets[faceIndex];
@@ -109,10 +112,10 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
 
         // --- A: inset point per input corner --------------------------------
         var insetPointIds = _insetPointIds;
-        if (insetPointIds.Length != source.CornerCount)
-            insetPointIds = _insetPointIds = new int[source.CornerCount];
+        if (insetPointIds.Length != source.VertexCount)
+            insetPointIds = _insetPointIds = new int[source.VertexCount];
 
-        for (var faceIndex = 0; faceIndex < source.FaceCount; faceIndex++)
+        for (var faceIndex = 0; faceIndex < source.PrimitiveCount; faceIndex++)
         {
             var start = offsets[faceIndex];
             var end = offsets[faceIndex + 1];
@@ -135,7 +138,7 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
         }
 
         // --- B: inset faces (same winding as the source) --------------------
-        for (var faceIndex = 0; faceIndex < source.FaceCount; faceIndex++)
+        for (var faceIndex = 0; faceIndex < source.PrimitiveCount; faceIndex++)
         {
             var start = offsets[faceIndex];
             var end = offsets[faceIndex + 1];
@@ -180,14 +183,15 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
 
         // --- E: publish ------------------------------------------------------
         target.Positions = _outPositions.ToArray();
-        target.FaceCornerOffsets = _outFaceOffsets.ToArray();
-        target.CornerPointIndices = _outCorners.ToArray();
+        target.PrimitiveVertexOffsets = _outFaceOffsets.ToArray();
+        target.SetAllPrimitiveKinds(PrimitiveKinds.Polygon);
+        target.VertexPoints = _outCorners.ToArray();
         target.Parts = [];
         target.Attributes.Clear();
         if (!flatShading)
         {
             // Without the attribute, the compile step falls back to per-face normals - the hard/faceted look.
-            var normals = target.Attributes.GetOrCreate<Vector3>(GeometryAttributeNames.Normal, AttributeDomain.Corner, _outCorners.Count);
+            var normals = target.Attributes.GetOrCreate<Vector3>(GeometryAttributeNames.Normal, AttributeDomain.Vertex, _outCorners.Count);
             for (var c = 0; c < _outCorners.Count; c++)
             {
                 normals.Values[c] = _outNormals[_outCorners[c]];
@@ -197,7 +201,7 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
     }
 
     /// <summary>Points along the bevel profile at one edge end, from Face0's inset point to Face1's.</summary>
-    private int[] BuildEndRing(MeshGeometry source, EdgeTopology.Edge edge, int endPointId,
+    private int[] BuildEndRing(Geometry source, EdgeTopology.Edge edge, int endPointId,
                                int segments, float roundness,
                                Dictionary<(int, int), int[]> edgeRings, int edgeIndex)
     {
@@ -241,7 +245,7 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
     }
 
     /// <summary>One fan patch per source point, closing the hole between the adjacent edge rings.</summary>
-    private void BuildCornerFans(MeshGeometry source, Dictionary<(int, int), int[]> edgeRings, int segments, float roundness, bool roundCorners)
+    private void BuildCornerFans(Geometry source, Dictionary<(int, int), int[]> edgeRings, int segments, float roundness, bool roundCorners)
     {
         var edges = source.Edges;
 
@@ -428,27 +432,27 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
         }
     }
 
-    private static bool TraversesInOrder(MeshGeometry source, int faceIndex, int pointA, int pointB)
+    private static bool TraversesInOrder(Geometry source, int faceIndex, int pointA, int pointB)
     {
-        var start = source.FaceCornerOffsets[faceIndex];
-        var end = source.FaceCornerOffsets[faceIndex + 1];
+        var start = source.PrimitiveVertexOffsets[faceIndex];
+        var end = source.PrimitiveVertexOffsets[faceIndex + 1];
         for (var c = start; c < end; c++)
         {
             var next = c + 1 == end ? start : c + 1;
-            if (source.CornerPointIndices[c] == pointA && source.CornerPointIndices[next] == pointB)
+            if (source.VertexPoints[c] == pointA && source.VertexPoints[next] == pointB)
                 return true;
         }
 
         return false;
     }
 
-    private static int FindCornerInFace(MeshGeometry source, int faceIndex, int pointId)
+    private static int FindCornerInFace(Geometry source, int faceIndex, int pointId)
     {
-        var start = source.FaceCornerOffsets[faceIndex];
-        var end = source.FaceCornerOffsets[faceIndex + 1];
+        var start = source.PrimitiveVertexOffsets[faceIndex];
+        var end = source.PrimitiveVertexOffsets[faceIndex + 1];
         for (var c = start; c < end; c++)
         {
-            if (source.CornerPointIndices[c] == pointId)
+            if (source.VertexPoints[c] == pointId)
                 return c;
         }
 
@@ -456,15 +460,15 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
     }
 
     /// <summary>Finds the face's second edge touching the vertex (each vertex has exactly two per face).</summary>
-    private static bool TryFindOtherEdgeAtVertex(MeshGeometry source, int faceIndex, int pointId, int excludeEdgeIndex, out int edgeIndex)
+    private static bool TryFindOtherEdgeAtVertex(Geometry source, int faceIndex, int pointId, int excludeEdgeIndex, out int edgeIndex)
     {
         var edges = source.Edges;
-        var start = source.FaceCornerOffsets[faceIndex];
-        var end = source.FaceCornerOffsets[faceIndex + 1];
+        var start = source.PrimitiveVertexOffsets[faceIndex];
+        var end = source.PrimitiveVertexOffsets[faceIndex + 1];
         for (var c = start; c < end; c++)
         {
             var next = c + 1 == end ? start : c + 1;
-            if (source.CornerPointIndices[c] != pointId && source.CornerPointIndices[next] != pointId)
+            if (source.VertexPoints[c] != pointId && source.VertexPoints[next] != pointId)
                 continue;
 
             var candidate = edges.CornerEdgeIndices[c];
@@ -509,8 +513,8 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
 
     public bool TryGetProgress(out float progress) => _asyncComputation.TryGetUiProgress(out progress);
 
-    private readonly MeshGeometry _output = new();
-    private readonly AsyncComputation<MeshGeometry> _asyncComputation = new();
+    private readonly Geometry _output = new();
+    private readonly AsyncComputation<Geometry> _asyncComputation = new();
     private readonly List<Vector3> _outPositions = [];
     private readonly List<Vector3> _outNormals = [];
     private readonly List<int> _outFaceOffsets = [];
@@ -519,7 +523,7 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
     private Vector3[] _faceNormals = [];
 
     [Input(Guid = "46a2c9e2-7b5d-45ce-9955-b1c0b1bb01db")]
-    public readonly InputSlot<MeshGeometry> Geometry = new();
+    public readonly InputSlot<Geometry> Geometry = new();
 
     [Input(Guid = "ce40061f-b853-41be-bbef-0db172bbad7f")]
     public readonly InputSlot<float> Width = new();
@@ -538,4 +542,7 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
 
     [Input(Guid = "8d5c2a97-40e1-4b68-93fd-6b0e8c4a2d75")]
     public readonly InputSlot<bool> Async = new();
+
+    /** Curve primitives aren't handled by this op yet; it works on the polygons. */
+    private readonly GeometryPolygonFilter _polygons = new();
 }

@@ -38,7 +38,7 @@ internal sealed class GeometryToMeshChunks : Instance<GeometryToMeshChunks>
     private void Update(EvaluationContext context)
     {
         var geometry = Geometry.GetValue(context);
-        if (geometry == null || geometry.FaceCount == 0)
+        if (geometry == null || geometry.PrimitiveCount == 0)
         {
             Buffers.Value = null;
             Points.Value = null;
@@ -101,5 +101,5 @@ internal sealed class GeometryToMeshChunks : Instance<GeometryToMeshChunks>
     private readonly MeshBuffers _meshBuffers = new();
 
     [Input(Guid = "7f2c9e4b-d631-4a85-b9e7-0c5d8a3f1b62")]
-    public readonly InputSlot<MeshGeometry> Geometry = new();
+    public readonly InputSlot<Geometry> Geometry = new();
 }

@@ -13,7 +13,7 @@ namespace Lib.geometry.modify;
 internal sealed class DisplaceGeometry : Instance<DisplaceGeometry>
 {
     [Output(Guid = "3d41a807-3e7a-406c-aed8-7967e9712f90")]
-    public readonly Slot<MeshGeometry> Result = new();
+    public readonly Slot<Geometry> Result = new();
 
     public DisplaceGeometry()
     {
@@ -54,8 +54,10 @@ internal sealed class DisplaceGeometry : Instance<DisplaceGeometry>
         }
 
         // Topology and attributes are shared - except Normal, which displacement invalidates
-        _output.FaceCornerOffsets = source.FaceCornerOffsets;
-        _output.CornerPointIndices = source.CornerPointIndices;
+        _output.PrimitiveVertexOffsets = source.PrimitiveVertexOffsets;
+        _output.PrimitiveKind = source.PrimitiveKind;
+        _output.PrimitiveClosed = source.PrimitiveClosed;
+        _output.VertexPoints = source.VertexPoints;
         _output.Parts = source.Parts;
         _output.Attributes.Clear();
         var hadNormals = false;
@@ -78,8 +80,8 @@ internal sealed class DisplaceGeometry : Instance<DisplaceGeometry>
         if (hadNormals)
         {
             AccumulatePointNormals(_output, _output.Positions);
-            var cornerPoints = _output.CornerPointIndices;
-            var normals = _output.Attributes.GetOrCreate<Vector3>(GeometryAttributeNames.Normal, AttributeDomain.Corner, cornerPoints.Length);
+            var cornerPoints = _output.VertexPoints;
+            var normals = _output.Attributes.GetOrCreate<Vector3>(GeometryAttributeNames.Normal, AttributeDomain.Vertex, cornerPoints.Length);
             for (var c = 0; c < cornerPoints.Length; c++)
             {
                 var normal = _pointNormals[cornerPoints[c]];
@@ -93,16 +95,16 @@ internal sealed class DisplaceGeometry : Instance<DisplaceGeometry>
     }
 
     /// <summary>Accumulates Newell face normals onto points, into _pointNormals (unnormalized).</summary>
-    private void AccumulatePointNormals(MeshGeometry geometry, Vector3[] positions)
+    private void AccumulatePointNormals(Geometry geometry, Vector3[] positions)
     {
         var pointCount = positions.Length;
         if (_pointNormals.Length != pointCount)
             _pointNormals = new Vector3[pointCount];
         Array.Clear(_pointNormals, 0, pointCount);
 
-        var offsets = geometry.FaceCornerOffsets;
-        var cornerPoints = geometry.CornerPointIndices;
-        for (var faceIndex = 0; faceIndex < geometry.FaceCount; faceIndex++)
+        var offsets = geometry.PrimitiveVertexOffsets;
+        var cornerPoints = geometry.VertexPoints;
+        for (var faceIndex = 0; faceIndex < geometry.PrimitiveCount; faceIndex++)
         {
             var start = offsets[faceIndex];
             var end = offsets[faceIndex + 1];
@@ -124,12 +126,12 @@ internal sealed class DisplaceGeometry : Instance<DisplaceGeometry>
         }
     }
 
-    private readonly MeshGeometry _output = new();
+    private readonly Geometry _output = new();
     private readonly List<GeometryAttribute> _sharedAttributes = [];
     private Vector3[] _pointNormals = [];
 
     [Input(Guid = "a235cfd2-f2bd-4a0a-91e1-0cbcce9e2961")]
-    public readonly InputSlot<MeshGeometry> Geometry = new();
+    public readonly InputSlot<Geometry> Geometry = new();
 
     [Input(Guid = "a90ce84d-ad07-4fe0-8cf8-3e3bd0c0240c")]
     public readonly InputSlot<ScalarField> Field = new();

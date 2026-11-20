@@ -1,3 +1,4 @@
+using Lib.Utils;
 using System.Collections.Generic;
 
 namespace Lib.geometry.modify;
@@ -11,7 +12,7 @@ namespace Lib.geometry.modify;
 internal sealed class TriangulateGeometry : Instance<TriangulateGeometry>
 {
     [Output(Guid = "1a99482e-f4c2-4420-a3f5-393d398cc7bd")]
-    public readonly Slot<MeshGeometry> Result = new();
+    public readonly Slot<Geometry> Result = new();
 
     public TriangulateGeometry()
     {
@@ -21,7 +22,9 @@ internal sealed class TriangulateGeometry : Instance<TriangulateGeometry>
     private void Update(EvaluationContext context)
     {
         var source = Geometry.GetValue(context);
-        if (source == null || source.FaceCount == 0)
+        if (source != null)
+            source = _polygons.GetPolygons(source);
+        if (source == null || source.PrimitiveCount == 0)
         {
             Result.Value = source;
             return;
@@ -30,23 +33,24 @@ internal sealed class TriangulateGeometry : Instance<TriangulateGeometry>
         var triangleCount = source.GetTriangleCount();
         var cornerCount = triangleCount * 3;
 
-        if (_output.FaceCornerOffsets.Length != triangleCount + 1)
-            _output.FaceCornerOffsets = new int[triangleCount + 1];
-        if (_output.CornerPointIndices.Length != cornerCount)
-            _output.CornerPointIndices = new int[cornerCount];
+        if (_output.PrimitiveVertexOffsets.Length != triangleCount + 1)
+            _output.PrimitiveVertexOffsets = new int[triangleCount + 1];
+            _output.SetAllPrimitiveKinds(PrimitiveKinds.Polygon);
+        if (_output.VertexPoints.Length != cornerCount)
+            _output.VertexPoints = new int[cornerCount];
         if (_cornerRemap.Length != cornerCount)
             _cornerRemap = new int[cornerCount];
 
         _output.Positions = source.Positions; // shared - points are unchanged
 
-        var offsets = source.FaceCornerOffsets;
-        var cornerPoints = source.CornerPointIndices;
+        var offsets = source.PrimitiveVertexOffsets;
+        var cornerPoints = source.VertexPoints;
         var faceTriangleStarts = _faceTriangleStarts;
-        if (faceTriangleStarts.Length != source.FaceCount)
-            faceTriangleStarts = _faceTriangleStarts = new int[source.FaceCount];
+        if (faceTriangleStarts.Length != source.PrimitiveCount)
+            faceTriangleStarts = _faceTriangleStarts = new int[source.PrimitiveCount];
 
         var triangleIndex = 0;
-        for (var faceIndex = 0; faceIndex < source.FaceCount; faceIndex++)
+        for (var faceIndex = 0; faceIndex < source.PrimitiveCount; faceIndex++)
         {
             faceTriangleStarts[faceIndex] = triangleIndex;
             var start = offsets[faceIndex];
@@ -54,10 +58,10 @@ internal sealed class TriangulateGeometry : Instance<TriangulateGeometry>
             for (var i = 1; i < end - start - 1; i++)
             {
                 var outCorner = triangleIndex * 3;
-                _output.FaceCornerOffsets[triangleIndex] = outCorner;
-                _output.CornerPointIndices[outCorner] = cornerPoints[start];
-                _output.CornerPointIndices[outCorner + 1] = cornerPoints[start + i];
-                _output.CornerPointIndices[outCorner + 2] = cornerPoints[start + i + 1];
+                _output.PrimitiveVertexOffsets[triangleIndex] = outCorner;
+                _output.VertexPoints[outCorner] = cornerPoints[start];
+                _output.VertexPoints[outCorner + 1] = cornerPoints[start + i];
+                _output.VertexPoints[outCorner + 2] = cornerPoints[start + i + 1];
                 _cornerRemap[outCorner] = start;
                 _cornerRemap[outCorner + 1] = start + i;
                 _cornerRemap[outCorner + 2] = start + i + 1;
@@ -65,13 +69,13 @@ internal sealed class TriangulateGeometry : Instance<TriangulateGeometry>
             }
         }
 
-        _output.FaceCornerOffsets[triangleCount] = cornerCount;
+        _output.PrimitiveVertexOffsets[triangleCount] = cornerCount;
 
         // Corner attributes remap through the fan; other domains share buffers
         _output.Attributes.Clear();
         foreach (var attribute in source.Attributes)
         {
-            if (attribute.Domain != AttributeDomain.Corner)
+            if (attribute.Domain != AttributeDomain.Vertex)
             {
                 _sharedAttributes.Add(attribute);
                 continue;
@@ -108,15 +112,15 @@ internal sealed class TriangulateGeometry : Instance<TriangulateGeometry>
         if (source.Parts.Length > 0)
         {
             if (_outputParts.Length != source.Parts.Length)
-                _outputParts = new GeometryPart[source.Parts.Length];
+                _outputParts = new PrimitivePart[source.Parts.Length];
 
             for (var i = 0; i < source.Parts.Length; i++)
             {
                 var part = source.Parts[i];
-                var firstTriangle = faceTriangleStarts[part.FaceStart];
-                var endFace = part.FaceStart + part.FaceCount;
-                var endTriangle = endFace < source.FaceCount ? faceTriangleStarts[endFace] : triangleCount;
-                _outputParts[i] = part with { FaceStart = firstTriangle, FaceCount = endTriangle - firstTriangle };
+                var firstTriangle = faceTriangleStarts[part.PrimitiveStart];
+                var endFace = part.PrimitiveStart + part.PrimitiveCount;
+                var endTriangle = endFace < source.PrimitiveCount ? faceTriangleStarts[endFace] : triangleCount;
+                _outputParts[i] = part with { PrimitiveStart = firstTriangle, PrimitiveCount = endTriangle - firstTriangle };
             }
 
             _output.Parts = _outputParts;
@@ -138,12 +142,15 @@ internal sealed class TriangulateGeometry : Instance<TriangulateGeometry>
         }
     }
 
-    private readonly MeshGeometry _output = new();
+    private readonly Geometry _output = new();
     private readonly List<GeometryAttribute> _sharedAttributes = [];
     private int[] _cornerRemap = [];
     private int[] _faceTriangleStarts = [];
-    private GeometryPart[] _outputParts = [];
+    private PrimitivePart[] _outputParts = [];
 
     [Input(Guid = "424f42c4-18f0-412a-a725-230700d5f1a6")]
-    public readonly InputSlot<MeshGeometry> Geometry = new();
+    public readonly InputSlot<Geometry> Geometry = new();
+
+    /** Curve primitives aren't handled by this op yet; it works on the polygons. */
+    private readonly GeometryPolygonFilter _polygons = new();
 }

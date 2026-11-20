@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "9a51e3c7-4d08-4b62-bf35-1c7a8e9d0f46"/*ScatterPointsInVolume*/,
-  "Description": "Scatters points deterministically inside a box volume or a MeshGeometry.\n\nWith a Geometry connected, points are placed inside the mesh; otherwise inside the Center/Size box. An optional Density field modulates the distribution via rejection sampling (values clamped to 0..1). The same Seed always produces the same points.\n\nAKA: random points, poisson, volume scatter",
+  "Description": "Scatters points deterministically inside a box volume or a geometry.\n\nWith a Geometry connected, points are placed inside the mesh; otherwise inside the Center/Size box. An optional Density field modulates the distribution via rejection sampling (values clamped to 0..1). The same Seed always produces the same points.\n\nAKA: random points, poisson, volume scatter",
   "InputUis": [
     {
       "InputId": "12e9b8c4-75a0-4d36-9f82-3dc6e1b0a597"/*Seed*/,

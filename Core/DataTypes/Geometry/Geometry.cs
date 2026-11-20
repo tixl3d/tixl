@@ -142,6 +142,52 @@ public sealed class Geometry
             weights[point] = weight;
     }
 
+    /// <summary>
+    /// Sizes the per-primitive kind and closed arrays to <see cref="PrimitiveCount"/> and sets every primitive to
+    /// <paramref name="kind"/>; polygons count as closed. For ops that assign the topology arrays directly.
+    /// </summary>
+    public void SetAllPrimitiveKinds(PrimitiveKinds kind)
+    {
+        var primitiveCount = PrimitiveCount;
+        if (PrimitiveKind.Length != primitiveCount)
+            PrimitiveKind = new PrimitiveKinds[primitiveCount];
+
+        if (PrimitiveClosed.Length != primitiveCount)
+            PrimitiveClosed = new bool[primitiveCount];
+
+        Array.Fill(PrimitiveKind, kind);
+        Array.Fill(PrimitiveClosed, kind == PrimitiveKinds.Polygon);
+    }
+
+    /// <summary>Triangle count after fan-triangulating all polygons (what the compile step will emit).</summary>
+    public int GetTriangleCount()
+    {
+        var count = 0;
+        for (var primitive = 0; primitive < PrimitiveCount; primitive++)
+        {
+            if (PrimitiveKind[primitive] != PrimitiveKinds.Polygon)
+                continue;
+
+            var vertices = GetPrimitiveVertexCount(primitive);
+            if (vertices >= 3)
+                count += vertices - 2;
+        }
+
+        return count;
+    }
+
+    /// <summary>True if any primitive is a curve.</summary>
+    public bool HasCurves()
+    {
+        foreach (var kind in PrimitiveKind)
+        {
+            if (kind == PrimitiveKinds.Curve)
+                return true;
+        }
+
+        return false;
+    }
+
     /// <summary>The polygon primitives, as allocation-free views.</summary>
     public PolygonEnumerable Polygons => new(this);
 

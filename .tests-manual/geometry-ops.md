@@ -373,4 +373,4 @@ Replace `[CurvesToPoints]` and the line ops with `[ExtrudeCurves]` ->
 - `EvenOdd` turns the X's overlap into a hole; front/back/side flags remove the
   respective faces.
 - `[ColorFacesFromAttribute]` with the part-index option colors each letter
-  differently; the `IsSide` face attribute separates walls from caps.
+  differently; the `IsSide` primitive attribute separates walls from caps.

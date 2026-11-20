@@ -16,7 +16,7 @@ namespace Lib.geometry.attribute;
 internal sealed class ColorFacesFromAttribute : Instance<ColorFacesFromAttribute>, ICustomDropdownHolder
 {
     [Output(Guid = "c81e4b70-2f95-4d3a-96b1-e0d7a5c2f849")]
-    public readonly Slot<MeshGeometry?> Result = new();
+    public readonly Slot<Geometry?> Result = new();
 
     public ColorFacesFromAttribute()
     {
@@ -32,36 +32,36 @@ internal sealed class ColorFacesFromAttribute : Instance<ColorFacesFromAttribute
         var onlySelected = OnlySelected.GetValue(context);
 
         _lastSource = source;
-        if (source == null || source.FaceCount == 0 || colors == null || colors.Count == 0)
+        if (source == null || source.PrimitiveCount == 0 || colors == null || colors.Count == 0)
         {
             Result.Value = source;
             return;
         }
 
-        var offsets = source.FaceCornerOffsets;
-        var cornerCount = source.CornerCount;
+        var offsets = source.PrimitiveVertexOffsets;
+        var cornerCount = source.VertexCount;
 
         // Start from the existing corner colors so upstream coloring survives on untouched faces
-        var output = _output.Attributes.GetOrCreate<Vector4>(GeometryAttributeNames.Color, AttributeDomain.Corner, cornerCount);
-        if (source.Attributes.TryGet<Vector4>(GeometryAttributeNames.Color, AttributeDomain.Corner, out var existing))
+        var output = _output.Attributes.GetOrCreate<Vector4>(GeometryAttributeNames.Color, AttributeDomain.Vertex, cornerCount);
+        if (source.Attributes.TryGet<Vector4>(GeometryAttributeNames.Color, AttributeDomain.Vertex, out var existing))
             Array.Copy(existing.Values, output.Values, cornerCount);
         else
             Array.Fill(output.Values, Vector4.One);
 
         GeometryAttribute<float>? selection = null;
         if (onlySelected)
-            source.Attributes.TryGet(GeometryAttributeNames.Selection, AttributeDomain.Face, out selection);
+            source.Attributes.TryGet(GeometryAttributeNames.Selection, AttributeDomain.Primitive, out selection);
 
         var usePartIndex = attributeName == PartIndexOption;
         var usePartSeed = attributeName == PartSeedIndexOption;
         GeometryAttribute<float>? faceValues = null;
         if (!usePartIndex && !usePartSeed && attributeName != null)
-            source.Attributes.TryGet(attributeName, AttributeDomain.Face, out faceValues);
+            source.Attributes.TryGet(attributeName, AttributeDomain.Primitive, out faceValues);
 
         if (usePartIndex || usePartSeed)
             BuildFaceToPart(source);
 
-        for (var faceIndex = 0; faceIndex < source.FaceCount; faceIndex++)
+        for (var faceIndex = 0; faceIndex < source.PrimitiveCount; faceIndex++)
         {
             if (selection != null && selection.Values[faceIndex] < 0.5f)
                 continue;
@@ -94,8 +94,10 @@ internal sealed class ColorFacesFromAttribute : Instance<ColorFacesFromAttribute
 
         // Share everything but the Color attribute
         _output.Positions = source.Positions;
-        _output.FaceCornerOffsets = source.FaceCornerOffsets;
-        _output.CornerPointIndices = source.CornerPointIndices;
+        _output.PrimitiveVertexOffsets = source.PrimitiveVertexOffsets;
+        _output.PrimitiveKind = source.PrimitiveKind;
+        _output.PrimitiveClosed = source.PrimitiveClosed;
+        _output.VertexPoints = source.VertexPoints;
         _output.Parts = source.Parts;
         _shared.Clear();
         foreach (var attribute in source.Attributes)
@@ -115,18 +117,18 @@ internal sealed class ColorFacesFromAttribute : Instance<ColorFacesFromAttribute
         Result.Value = _output;
     }
 
-    private void BuildFaceToPart(MeshGeometry geometry)
+    private void BuildFaceToPart(Geometry geometry)
     {
-        if (_faceToPart.Length != geometry.FaceCount)
-            _faceToPart = new int[geometry.FaceCount];
+        if (_faceToPart.Length != geometry.PrimitiveCount)
+            _faceToPart = new int[geometry.PrimitiveCount];
 
         // No parts means one implicit part covering everything
         Array.Fill(_faceToPart, geometry.Parts.Length == 0 ? 0 : -1);
         for (var partIndex = 0; partIndex < geometry.Parts.Length; partIndex++)
         {
             var part = geometry.Parts[partIndex];
-            var end = Math.Min(part.FaceStart + part.FaceCount, geometry.FaceCount);
-            for (var faceIndex = part.FaceStart; faceIndex < end; faceIndex++)
+            var end = Math.Min(part.PrimitiveStart + part.PrimitiveCount, geometry.PrimitiveCount);
+            for (var faceIndex = part.PrimitiveStart; faceIndex < end; faceIndex++)
             {
                 _faceToPart[faceIndex] = partIndex;
             }
@@ -145,7 +147,7 @@ internal sealed class ColorFacesFromAttribute : Instance<ColorFacesFromAttribute
 
         foreach (var attribute in _lastSource.Attributes)
         {
-            if (attribute.Domain == AttributeDomain.Face)
+            if (attribute.Domain == AttributeDomain.Primitive)
                 yield return attribute.Name;
         }
     }
@@ -168,13 +170,13 @@ internal sealed class ColorFacesFromAttribute : Instance<ColorFacesFromAttribute
     private const string PartIndexOption = "Part Index";
     private const string PartSeedIndexOption = "Part Seed Index";
 
-    private readonly MeshGeometry _output = new();
+    private readonly Geometry _output = new();
     private readonly List<GeometryAttribute> _shared = [];
     private int[] _faceToPart = [];
-    private MeshGeometry? _lastSource;
+    private Geometry? _lastSource;
 
     [Input(Guid = "9d3b6e58-1c47-4fa2-b8e0-73a5c9d2f614")]
-    public readonly InputSlot<MeshGeometry> Geometry = new();
+    public readonly InputSlot<Geometry> Geometry = new();
 
     [Input(Guid = "e2a95c07-6b38-4d1f-a4c6-58f0b7e3d921")]
     public readonly InputSlot<List<Vector4>> Colors = new();

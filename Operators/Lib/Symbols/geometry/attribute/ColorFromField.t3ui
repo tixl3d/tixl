@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "d7e8318c-b5d2-4ca1-b228-bb70d6add820"/*ColorFromField*/,
-  "Description": "Writes a corner Color attribute by sampling a ScalarField at each corner position, remapping from ValueRange and blending ColorA to ColorB.\n\nNote: the built-in mesh shaders don't display vertex colors yet.",
+  "Description": "Writes a vertex Color attribute by sampling a ScalarField at each vertex position, remapping from ValueRange and blending ColorA to ColorB.\n\nNote: the built-in mesh shaders don't display vertex colors yet.",
   "InputUis": [
     {
       "InputId": "3f412276-cbc9-4b0d-a5a5-5a02ef1ac230"/*ColorB*/,

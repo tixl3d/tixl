@@ -13,7 +13,7 @@ namespace Lib.geometry.attribute;
 internal sealed class ColorFromField : Instance<ColorFromField>
 {
     [Output(Guid = "d86945c8-9889-4102-9632-e6dda2dc0e20")]
-    public readonly Slot<MeshGeometry> Result = new();
+    public readonly Slot<Geometry> Result = new();
 
     public ColorFromField()
     {
@@ -37,8 +37,10 @@ internal sealed class ColorFromField : Instance<ColorFromField>
         var invSpan = MathF.Abs(rangeSpan) > 1e-10f ? 1f / rangeSpan : 0f;
 
         _output.Positions = source.Positions;
-        _output.FaceCornerOffsets = source.FaceCornerOffsets;
-        _output.CornerPointIndices = source.CornerPointIndices;
+        _output.PrimitiveVertexOffsets = source.PrimitiveVertexOffsets;
+        _output.PrimitiveKind = source.PrimitiveKind;
+        _output.PrimitiveClosed = source.PrimitiveClosed;
+        _output.VertexPoints = source.VertexPoints;
         _output.Parts = source.Parts;
 
         _output.Attributes.Clear();
@@ -55,11 +57,11 @@ internal sealed class ColorFromField : Instance<ColorFromField>
 
         _sharedAttributes.Clear();
 
-        var colors = _output.Attributes.GetOrCreate<Vector4>(GeometryAttributeNames.Color, AttributeDomain.Corner, source.CornerCount);
+        var colors = _output.Attributes.GetOrCreate<Vector4>(GeometryAttributeNames.Color, AttributeDomain.Vertex, source.VertexCount);
         var positions = source.Positions;
-        var cornerPoints = source.CornerPointIndices;
+        var cornerPoints = source.VertexPoints;
         var evaluate = field.Evaluate;
-        for (var c = 0; c < source.CornerCount; c++)
+        for (var c = 0; c < source.VertexCount; c++)
         {
             var sample = new FieldSample(positions[cornerPoints[c]]);
             var t = Math.Clamp((evaluate(in sample) - range.X) * invSpan, 0f, 1f);
@@ -70,11 +72,11 @@ internal sealed class ColorFromField : Instance<ColorFromField>
         Result.Value = _output;
     }
 
-    private readonly MeshGeometry _output = new();
+    private readonly Geometry _output = new();
     private readonly List<GeometryAttribute> _sharedAttributes = [];
 
     [Input(Guid = "7ff90229-3731-4a5f-adc3-2abab11d3d46")]
-    public readonly InputSlot<MeshGeometry> Geometry = new();
+    public readonly InputSlot<Geometry> Geometry = new();
 
     [Input(Guid = "5c50c45e-dbe4-4f2a-a1fa-863e3d8e2023")]
     public readonly InputSlot<ScalarField> Field = new();

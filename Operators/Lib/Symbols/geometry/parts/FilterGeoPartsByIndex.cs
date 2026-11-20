@@ -13,7 +13,7 @@ namespace Lib.geometry.parts;
 internal sealed class FilterGeoPartsByIndex : Instance<FilterGeoPartsByIndex>
 {
     [Output(Guid = "9c3f2e81-a5d4-4b07-b6e1-38d0c7a9f256")]
-    public readonly Slot<MeshGeometry> Result = new();
+    public readonly Slot<Geometry> Result = new();
 
     [Output(Guid = "52b8d6f0-3a1e-4c79-9e4b-d7f1a0c3e582")]
     public readonly Slot<int> PartCount = new();
@@ -30,7 +30,7 @@ internal sealed class FilterGeoPartsByIndex : Instance<FilterGeoPartsByIndex>
         var start = Start.GetValue(context);
         var count = Count.GetValue(context);
 
-        if (source == null || source.FaceCount == 0)
+        if (source == null || source.PrimitiveCount == 0)
         {
             Result.Value = source;
             PartCount.Value = 0;
@@ -62,12 +62,12 @@ internal sealed class FilterGeoPartsByIndex : Instance<FilterGeoPartsByIndex>
         Result.Value = _output;
     }
 
-    private readonly MeshGeometry _output = new();
+    private readonly Geometry _output = new();
     private readonly GeometryPartSubset _subset = new();
-    private readonly List<GeometryPart> _keptParts = [];
+    private readonly List<PrimitivePart> _keptParts = [];
 
     [Input(Guid = "1d6f8a93-c2b5-4e40-a7d1-59e3b0c8f627")]
-    public readonly InputSlot<MeshGeometry> Geometry = new();
+    public readonly InputSlot<Geometry> Geometry = new();
 
     [Input(Guid = "8e2c4b70-5f9a-4d16-b3c8-a0d7e1f5c394")]
     public readonly InputSlot<int> Start = new();

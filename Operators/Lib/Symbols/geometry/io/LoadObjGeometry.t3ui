@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "d25b8f41-6c93-4e07-ba58-1f9e2a7c4d60"/*LoadObjGeometry*/,
-  "Description": "Loads a Wavefront OBJ file as MeshGeometry for CPU geometry processing.\n\nN-gon faces are preserved (quads stay quads, which beveling and subdivision rely on). OBJ objects and groups become parts with their centroid as pivot, so ops like [ExplodeGeometry] work per object. Normals and texture coordinates become corner attributes. The file is watched and hot-reloads on change.\n\nAKA: import, wavefront, mesh file",
+  "Description": "Loads a Wavefront OBJ file as Geometry for CPU geometry processing.\n\nN-gon faces are preserved (quads stay quads, which beveling and subdivision rely on). OBJ objects and groups become parts with their centroid as pivot, so ops like [ExplodeGeometry] work per object. Normals and texture coordinates become corner attributes. The file is watched and hot-reloads on change.\n\nAKA: import, wavefront, mesh file",
   "InputUis": [
     {
       "InputId": "4c8f2d90-a7e5-4361-9b0c-e82d6f1a5347"/*Path*/,

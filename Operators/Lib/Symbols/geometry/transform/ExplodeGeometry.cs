@@ -3,7 +3,7 @@ using System;
 namespace Lib.geometry.transform;
 
 /// <summary>
-/// Separates the parts of a MeshGeometry visually: each part shrinks toward its
+/// Separates the parts of a Geometry visually: each part shrinks toward its
 /// pivot and moves outward from the geometry center by Distance. Topology and
 /// attributes are shared with the input.
 /// </summary>
@@ -11,7 +11,7 @@ namespace Lib.geometry.transform;
 internal sealed class ExplodeGeometry : Instance<ExplodeGeometry>
 {
     [Output(Guid = "1e9c5b70-a4d8-4f26-b3e9-08d7a2c6f154")]
-    public readonly Slot<MeshGeometry> Result = new();
+    public readonly Slot<Geometry> Result = new();
 
     public ExplodeGeometry()
     {
@@ -51,16 +51,16 @@ internal sealed class ExplodeGeometry : Instance<ExplodeGeometry>
             center /= source.Parts.Length;
         }
 
-        var offsets = source.FaceCornerOffsets;
-        var corners = source.CornerPointIndices;
+        var offsets = source.PrimitiveVertexOffsets;
+        var corners = source.VertexPoints;
         foreach (var part in source.Parts)
         {
             var direction = part.Pivot - center;
             var length = direction.Length();
             var push = length > 1e-6f ? direction / length * distance : Vector3.Zero;
 
-            var cornerStart = offsets[part.FaceStart];
-            var cornerEnd = offsets[part.FaceStart + part.FaceCount];
+            var cornerStart = offsets[part.PrimitiveStart];
+            var cornerEnd = offsets[part.PrimitiveStart + part.PrimitiveCount];
             for (var c = cornerStart; c < cornerEnd; c++)
             {
                 var pointId = corners[c];
@@ -69,8 +69,12 @@ internal sealed class ExplodeGeometry : Instance<ExplodeGeometry>
             }
         }
 
-        _output.FaceCornerOffsets = source.FaceCornerOffsets;
-        _output.CornerPointIndices = source.CornerPointIndices;
+        _output.PrimitiveVertexOffsets = source.PrimitiveVertexOffsets;
+
+        _output.PrimitiveKind = source.PrimitiveKind;
+
+        _output.PrimitiveClosed = source.PrimitiveClosed;
+        _output.VertexPoints = source.VertexPoints;
         _output.Parts = source.Parts;
         _output.Attributes.Clear();
         foreach (var attribute in source.Attributes)
@@ -82,10 +86,10 @@ internal sealed class ExplodeGeometry : Instance<ExplodeGeometry>
         Result.Value = _output;
     }
 
-    private readonly MeshGeometry _output = new();
+    private readonly Geometry _output = new();
 
     [Input(Guid = "b7a03e58-c1f9-4d24-8b6a-52e0d9c7f183")]
-    public readonly InputSlot<MeshGeometry> Geometry = new();
+    public readonly InputSlot<Geometry> Geometry = new();
 
     [Input(Guid = "60d2c9b4-8e57-4a01-bf3d-94a6e1c8d725")]
     public readonly InputSlot<float> Distance = new();

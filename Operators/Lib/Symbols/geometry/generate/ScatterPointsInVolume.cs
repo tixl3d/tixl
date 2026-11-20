@@ -4,7 +4,7 @@ using Lib.Utils;
 namespace Lib.geometry.generate;
 
 /// <summary>
-/// Scatters points deterministically inside a box volume or a MeshGeometry.
+/// Scatters points deterministically inside a box volume or a Geometry.
 /// An optional ScalarField modulates the density via rejection sampling
 /// (values clamped to 0..1), so dense and sparse regions can be sculpted.
 /// </summary>
@@ -110,11 +110,11 @@ internal sealed class ScatterPointsInVolume : Instance<ScatterPointsInVolume>, I
 
     private readonly StructuredList<Point> _pointList = new(16);
     private MeshInsideTester? _insideTester;
-    private MeshGeometry? _insideTesterGeometry;
+    private Geometry? _insideTesterGeometry;
     private int _insideTesterVersion;
 
         [Input(Guid = "58c1f7a3-b2d9-4e06-85cb-7f4a90e6d221")]
-        public readonly InputSlot<T3.Core.DataTypes.MeshGeometry> Geometry = new InputSlot<T3.Core.DataTypes.MeshGeometry>();
+        public readonly InputSlot<T3.Core.DataTypes.Geometry> Geometry = new InputSlot<T3.Core.DataTypes.Geometry>();
 
         [Input(Guid = "e17d4a92-6b58-4c03-a9f1-84c5d2e7b360")]
         public readonly InputSlot<int> Count = new InputSlot<int>();

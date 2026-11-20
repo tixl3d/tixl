@@ -9,8 +9,7 @@ TiXL can build and modify meshes on the CPU before turning them into GPU buffers
 
 Most mesh operators in TiXL work on **MeshBuffers** — packed GPU vertex and index buffers that are fast to draw but hard to restructure. The geometry operators work on CPU-side data instead:
 
-- **Geometry** (`MeshGeometry`) — faces with any number of corners, shared points and flexible attributes. Quads stay quads, which is what makes modeling operations like beveling possible. Geometry can be split into **parts** (one per glyph, fracture chunk or copy), each with its own pivot.
-- **Curves** — closed or open cubic-bezier outlines, for example the glyphs of a text.
+- **Geometry** — points, and **primitives** that connect them through **vertices**: polygons with any number of corners, and cubic-bezier curves, open or closed (for example the glyphs of a text). Both kinds flow through the same connection, so selections and transforms work on either, and [ExtrudeCurves] can keep its source outline next to the solid. Quads stay quads, which is what makes modeling operations like beveling possible. Geometry can be split into **parts** (one per glyph, fracture chunk or copy), each with its own pivot. Attributes live on points, vertices, primitives, edges or parts, the terms Houdini uses.
 - **Fields** — functions that return a value for any position in space, such as noise or the distance to a set of points. They don't hold data; operators like [DisplaceGeometry] sample them where they need them.
 
 You can tell them apart by wire color: geometry and curves are teal-green, fields are a lighter yellow-green, and GPU mesh buffers stay red.

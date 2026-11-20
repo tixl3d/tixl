@@ -7,17 +7,17 @@ using T3.Core.DataTypes;
 namespace Lib.Utils;
 
 /// <summary>
-/// Rebuilds a MeshGeometry from a subset of its parts: faces, points and every
+/// Rebuilds a Geometry from a subset of its parts: faces, points and every
 /// attribute domain are compacted and remapped, part ranges renumbered. Shared by
 /// the part-filter ops. Reuse one instance per op - it keeps its scratch buffers.
 /// </summary>
 internal sealed class GeometryPartSubset
 {
     /// <summary>Builds <paramref name="target"/> from the given parts of <paramref name="source"/>.</summary>
-    public void Build(MeshGeometry source, List<GeometryPart> keptParts, MeshGeometry target)
+    public void Build(Geometry source, List<PrimitivePart> keptParts, Geometry target)
     {
-        var offsets = source.FaceCornerOffsets;
-        var corners = source.CornerPointIndices;
+        var offsets = source.PrimitiveVertexOffsets;
+        var corners = source.VertexPoints;
 
         if (_pointRemap.Length != source.PointCount)
             _pointRemap = new int[source.PointCount];
@@ -29,14 +29,14 @@ internal sealed class GeometryPartSubset
         _outFaceOffsets.Clear();
         _outCorners.Clear();
         _outFaceOffsets.Add(0);
-        var outParts = new GeometryPart[keptParts.Count];
+        var outParts = new PrimitivePart[keptParts.Count];
 
         for (var partIndex = 0; partIndex < keptParts.Count; partIndex++)
         {
             var part = keptParts[partIndex];
             var faceStart = _outFaceOffsets.Count - 1;
-            var faceEnd = Math.Min(part.FaceStart + part.FaceCount, source.FaceCount);
-            for (var faceIndex = part.FaceStart; faceIndex < faceEnd; faceIndex++)
+            var faceEnd = Math.Min(part.PrimitiveStart + part.PrimitiveCount, source.PrimitiveCount);
+            for (var faceIndex = part.PrimitiveStart; faceIndex < faceEnd; faceIndex++)
             {
                 _faceList.Add(faceIndex);
                 for (var c = offsets[faceIndex]; c < offsets[faceIndex + 1]; c++)
@@ -55,7 +55,7 @@ internal sealed class GeometryPartSubset
                 _outFaceOffsets.Add(_outCorners.Count);
             }
 
-            outParts[partIndex] = part with { FaceStart = faceStart, FaceCount = _outFaceOffsets.Count - 1 - faceStart };
+            outParts[partIndex] = part with { PrimitiveStart = faceStart, PrimitiveCount = _outFaceOffsets.Count - 1 - faceStart };
         }
 
         var positions = new Vector3[_pointList.Count];
@@ -65,8 +65,18 @@ internal sealed class GeometryPartSubset
         }
 
         target.Positions = positions;
-        target.FaceCornerOffsets = _outFaceOffsets.ToArray();
-        target.CornerPointIndices = _outCorners.ToArray();
+        target.PrimitiveVertexOffsets = _outFaceOffsets.ToArray();
+        var kinds = new PrimitiveKinds[_faceList.Count];
+        var closed = new bool[_faceList.Count];
+        for (var i = 0; i < _faceList.Count; i++)
+        {
+            kinds[i] = source.PrimitiveKind[_faceList[i]];
+            closed[i] = source.PrimitiveClosed[_faceList[i]];
+        }
+
+        target.PrimitiveKind = kinds;
+        target.PrimitiveClosed = closed;
+        target.VertexPoints = _outCorners.ToArray();
         target.Parts = outParts;
 
         // Every attribute domain is a subset of the source's - remap by the index lists
@@ -75,8 +85,8 @@ internal sealed class GeometryPartSubset
         {
             var indices = attribute.Domain switch
                               {
-                                  AttributeDomain.Corner => _cornerList,
-                                  AttributeDomain.Face   => _faceList,
+                                  AttributeDomain.Vertex => _cornerList,
+                                  AttributeDomain.Primitive   => _faceList,
                                   AttributeDomain.Point  => _pointList,
                                   _                      => null,
                               };
@@ -107,7 +117,7 @@ internal sealed class GeometryPartSubset
     }
 
     /// <summary>Part list of a geometry, where part-less geometry counts as one part pivoting on its bounds center.</summary>
-    public GeometryPart[] PartsOrWhole(MeshGeometry source)
+    public PrimitivePart[] PartsOrWhole(Geometry source)
     {
         if (source.Parts.Length > 0)
             return source.Parts;
@@ -120,7 +130,7 @@ internal sealed class GeometryPartSubset
             max = Vector3.Max(max, p);
         }
 
-        _implicitPart[0] = new GeometryPart(0, source.FaceCount, (min + max) * 0.5f, 0, 0);
+        _implicitPart[0] = new PrimitivePart(0, source.PrimitiveCount, (min + max) * 0.5f, 0, 0);
         return _implicitPart;
     }
 
@@ -132,7 +142,7 @@ internal sealed class GeometryPartSubset
         }
     }
 
-    private readonly GeometryPart[] _implicitPart = new GeometryPart[1];
+    private readonly PrimitivePart[] _implicitPart = new PrimitivePart[1];
     private readonly List<int> _faceList = [];
     private readonly List<int> _cornerList = [];
     private readonly List<int> _pointList = [];

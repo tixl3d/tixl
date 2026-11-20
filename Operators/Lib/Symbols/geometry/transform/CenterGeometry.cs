@@ -11,7 +11,7 @@ namespace Lib.geometry.transform;
 internal sealed class CenterGeometry : Instance<CenterGeometry>
 {
     [Output(Guid = "6b0f8e24-d951-4c73-9ea0-42d7c8a3f516")]
-    public readonly Slot<MeshGeometry> Result = new();
+    public readonly Slot<Geometry> Result = new();
 
     public CenterGeometry()
     {
@@ -50,12 +50,14 @@ internal sealed class CenterGeometry : Instance<CenterGeometry>
         }
 
         // Pure translation: topology, attributes and normals are shared unchanged
-        _output.FaceCornerOffsets = source.FaceCornerOffsets;
-        _output.CornerPointIndices = source.CornerPointIndices;
+        _output.PrimitiveVertexOffsets = source.PrimitiveVertexOffsets;
+        _output.PrimitiveKind = source.PrimitiveKind;
+        _output.PrimitiveClosed = source.PrimitiveClosed;
+        _output.VertexPoints = source.VertexPoints;
 
         // Part pivots are world positions and must move along
         if (_output.Parts.Length != source.Parts.Length)
-            _output.Parts = new GeometryPart[source.Parts.Length];
+            _output.Parts = new PrimitivePart[source.Parts.Length];
         for (var i = 0; i < source.Parts.Length; i++)
         {
             _output.Parts[i] = source.Parts[i] with { Pivot = source.Parts[i].Pivot - pivotPoint };
@@ -70,10 +72,10 @@ internal sealed class CenterGeometry : Instance<CenterGeometry>
         Result.Value = _output;
     }
 
-    private readonly MeshGeometry _output = new();
+    private readonly Geometry _output = new();
 
     [Input(Guid = "27c5b9e1-84f0-4a63-b2d8-59e6c0d4a713")]
-    public readonly InputSlot<MeshGeometry> Geometry = new();
+    public readonly InputSlot<Geometry> Geometry = new();
 
     [Input(Guid = "b40e7d92-3a58-4c16-9f27-06b8e5c1d349")]
     public readonly InputSlot<Vector3> Pivot = new();

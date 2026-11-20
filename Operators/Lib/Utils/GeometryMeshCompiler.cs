@@ -8,7 +8,7 @@ using T3.Core.Utils.Math3d;
 namespace Lib.Utils;
 
 /// <summary>
-/// Compiles the polygons of a <see cref="Geometry"/> or a <see cref="MeshGeometry"/> into packed PbrVertex/triangle
+/// Compiles the polygons of a <see cref="Geometry"/> into packed PbrVertex/triangle
 /// arrays: N-gons are fan triangulated, per-vertex attributes resolved, tangent bases computed. One output vertex per
 /// polygon vertex, written in primitive order, so a part's contiguous primitive range maps to contiguous vertex and
 /// triangle ranges - that is what makes the per-part chunk table possible. Curves and polygons with fewer than three
@@ -39,21 +39,7 @@ internal sealed class GeometryMeshCompiler
                 relativeToPartPivots);
     }
 
-    /// <inheritdoc cref="Compile(Geometry, bool)"/>
-    public void Compile(MeshGeometry geometry, bool relativeToPartPivots)
-    {
-        var parts = geometry.Parts;
-        SetPartCount(parts.Length);
-        for (var i = 0; i < parts.Length; i++)
-            SetPart(i, parts[i].FaceStart, parts[i].FaceCount, parts[i].Pivot);
-
-        Compile(new Source(geometry.Positions, geometry.FaceCornerOffsets, geometry.CornerPointIndices, null,
-                           geometry.Attributes, AttributeDomain.Corner, AttributeDomain.Face),
-                relativeToPartPivots);
-    }
-
-    /// <param name="Kinds">Null when every primitive is a polygon.</param>
-    private readonly record struct Source(Vector3[] Positions, int[] Offsets, int[] VertexPoints, PrimitiveKinds[]? Kinds,
+    private readonly record struct Source(Vector3[] Positions, int[] Offsets, int[] VertexPoints, PrimitiveKinds[] Kinds,
                                           GeometryAttributes Attributes, AttributeDomain VertexDomain, AttributeDomain PrimitiveDomain)
     {
         public int PrimitiveCount => Offsets.Length - 1;
@@ -61,7 +47,7 @@ internal sealed class GeometryMeshCompiler
         /** Polygons with at least three vertices; everything else is skipped. */
         public bool IsDrawn(int primitive)
         {
-            return (Kinds == null || Kinds[primitive] == PrimitiveKinds.Polygon) && Offsets[primitive + 1] - Offsets[primitive] >= 3;
+            return Kinds[primitive] == PrimitiveKinds.Polygon && Offsets[primitive + 1] - Offsets[primitive] >= 3;
         }
     }
 
