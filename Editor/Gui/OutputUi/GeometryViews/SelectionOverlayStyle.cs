@@ -16,6 +16,13 @@ internal static class SelectionOverlayStyle
         drawList.AddCircleFilled(center, DotRadius * scale, UiColors.Selection);
     }
 
+    /** A ring for a point selected by a selection attribute; its opacity follows the weight. */
+    public static void DrawRing(ImDrawListPtr drawList, Vector2 center, float weight)
+    {
+        var scale = T3Ui.UiScaleFactor;
+        drawList.AddCircle(center, RingRadius * scale, UiColors.Selection.Fade(weight), 12, MathF.Max(1, MathF.Round(1.5f * scale)));
+    }
+
     public static void DrawPivot(ImDrawListPtr drawList, Vector2 pivot, float lineThickness)
     {
         var arm = PivotArm * T3Ui.UiScaleFactor;
@@ -24,5 +31,6 @@ internal static class SelectionOverlayStyle
     }
 
     private const float DotRadius = 4;
+    private const float RingRadius = 6;
     private const float PivotArm = 6;
 }

@@ -5,15 +5,22 @@ using Lib.Utils;
 namespace Lib.geometry.convert;
 
 /// <summary>
-/// Flattens curves into a CPU point list, one polyline per contour separated by
-/// separator points - the bridge from CurveGeometry to every existing line and
-/// point op. A Color attribute on the part or contour domain lands in Point.Color;
-/// F2 carries the part index. Each point's +Z axis faces away from the filled area in the
+/// Flattens the curve primitives of a Geometry into a CPU point list, one polyline per
+/// curve separated by separator points - the bridge from curves to every existing line and
+/// point op. Polygons are skipped. With Sampling = Points only the curves' own points are emitted,
+/// without separators, e.g. to mark or instance on them. A Color attribute on the primitive or part
+/// domain lands in Point.Color; F2 carries the part index. Each point's +Z axis faces away from the filled area in the
 /// XY plane, +Y is the plane's normal and +X runs along the contour.
 /// </summary>
 [Guid("6a1d8c3f-2b57-4e90-a4f6-c8e2d5b7f019")]
 internal sealed class CurvesToPoints : Instance<CurvesToPoints>
 {
+    private enum Samplings
+    {
+        Flattened,
+        Points,
+    }
+
     [Output(Guid = "e3c5a7f1-9d24-4b68-8f0e-a1b3c6d9e274")]
     public readonly Slot<StructuredList> Points = new();
 
@@ -27,40 +34,55 @@ internal sealed class CurvesToPoints : Instance<CurvesToPoints>
         var curves = Curves.GetValue(context);
         var tolerance = MathF.Max(Tolerance.GetValue(context), 1e-5f);
         var closeLoops = CloseLoops.GetValue(context);
+        var samplesPoints = Sampling.GetValue(context) == (int)Samplings.Points;
 
-        if (curves == null || curves.ContourCount == 0)
+        if (curves == null || curves.PrimitiveCount == 0)
         {
             Points.Value = null;
             return;
         }
 
         curves.Attributes.TryGet<Vector4>(GeometryAttributeNames.Color, AttributeDomain.Part, out var partColors);
-        curves.Attributes.TryGet<Vector4>(GeometryAttributeNames.Color, AttributeDomain.Contour, out var contourColors);
+        curves.Attributes.TryGet<Vector4>(GeometryAttributeNames.Color, AttributeDomain.Primitive, out var primitiveColors);
         var parts = curves.Parts;
+        var curveViews = curves.Curves;
         CurveWinding.GetOutsideSides(curves, _contourSides);
 
         _positions.Clear();
         _pointCount = 0;
         var partIndex = 0;
-        for (var contourIndex = 0; contourIndex < curves.ContourCount; contourIndex++)
+        for (var contourIndex = 0; contourIndex < curves.PrimitiveCount; contourIndex++)
         {
-            while (partIndex < parts.Length - 1 && contourIndex >= parts[partIndex].ContourStart + parts[partIndex].ContourCount)
+            while (partIndex < parts.Length - 1 && contourIndex >= parts[partIndex].PrimitiveStart + parts[partIndex].PrimitiveCount)
                 partIndex++;
 
+            if (curves.PrimitiveKind[contourIndex] != PrimitiveKinds.Curve)
+                continue;
+
             _positions.Clear();
-            curves.Flatten(contourIndex, tolerance, _positions);
+            var curve = curveViews[contourIndex];
+            if (samplesPoints)
+            {
+                for (var index = 0; index < curve.VertexCount; index++)
+                    _positions.Add(curve.GetPosition(index));
+            }
+            else
+            {
+                curve.Flatten(tolerance, _positions);
+            }
+
             if (_positions.Count == 0)
                 continue;
 
             var color = Vector4.One;
-            if (contourColors != null)
-                color = contourColors.Values[contourIndex];
+            if (primitiveColors != null)
+                color = primitiveColors.Values[contourIndex];
             else if (partColors != null && parts.Length > 0)
                 color = partColors.Values[partIndex];
 
             var f2 = parts.Length > 0 ? partIndex : contourIndex;
-            var isContourClosed = curves.ContourClosed[contourIndex];
-            var closed = closeLoops && isContourClosed;
+            var isContourClosed = curves.PrimitiveClosed[contourIndex];
+            var closed = closeLoops && isContourClosed && !samplesPoints;
             var count = _positions.Count + (closed ? 1 : 0);
             EnsureCapacity(_pointCount + count + 1);
             for (var i = 0; i < count; i++)
@@ -78,7 +100,8 @@ internal sealed class CurvesToPoints : Instance<CurvesToPoints>
                                                               };
             }
 
-            _pointList.TypedElements[_pointCount++] = Point.Separator();
+            if (!samplesPoints)
+                _pointList.TypedElements[_pointCount++] = Point.Separator();
         }
 
         if (_pointList.NumElements != _pointCount)
@@ -135,11 +158,14 @@ internal sealed class CurvesToPoints : Instance<CurvesToPoints>
     private int _pointCount;
 
     [Input(Guid = "b7f2d9c4-5a13-4e86-9d0b-3c6e8a1f5d27")]
-    public readonly InputSlot<CurveGeometry> Curves = new();
+    public readonly InputSlot<Geometry> Curves = new();
 
     [Input(Guid = "4e9a6c1b-d872-4f35-b0e8-7a2d5f9c3e61")]
     public readonly InputSlot<float> Tolerance = new();
 
     [Input(Guid = "d2c8e5a3-1f64-4b97-8e3a-c5b0d7f4a916")]
     public readonly InputSlot<bool> CloseLoops = new();
+
+    [Input(Guid = "f9897a6d-acb2-4291-a3e0-aa2fee90cfd7", MappedType = typeof(Samplings))]
+    public readonly InputSlot<int> Sampling = new();
 }

@@ -13,6 +13,10 @@
     {
       "Id": "d2c8e5a3-1f64-4b97-8e3a-c5b0d7f4a916"/*CloseLoops*/,
       "DefaultValue": true
+    },
+    {
+      "Id": "f9897a6d-acb2-4291-a3e0-aa2fee90cfd7"/*Sampling*/,
+      "DefaultValue": 0
     }
   ],
   "Children": [],

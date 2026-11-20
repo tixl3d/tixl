@@ -1,6 +1,7 @@
 #nullable enable
 using System.Globalization;
 using ImGuiNET;
+using T3.Core.DataTypes;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.TableView;
 
@@ -127,7 +128,11 @@ internal sealed class GeometryTableView
             }
 
             ReadOnlySpan<char> text;
-            if (kind == GeometryTableModel.ColumnKinds.Bool)
+            if (kind == GeometryTableModel.ColumnKinds.PrimitiveKind)
+            {
+                text = (int)value == (int)PrimitiveKinds.Curve ? "curve" : "polygon";
+            }
+            else if (kind == GeometryTableModel.ColumnKinds.Bool)
             {
                 text = value > 0.5f ? "yes" : "no";
             }
@@ -147,7 +152,7 @@ internal sealed class GeometryTableView
             ImGui.PushStyleColor(ImGuiCol.Text, TableValueStyle.GetColor(value, previous).Rgba);
             ImGui.TextUnformatted(text);
             ImGui.PopStyleColor();
-            if (kind != GeometryTableModel.ColumnKinds.Bool)
+            if (kind is GeometryTableModel.ColumnKinds.Float or GeometryTableModel.ColumnKinds.Int)
                 TableValueStyle.DrawTooltipIfHovered(model.GetColumnName(column), value, previous);
         }
     }

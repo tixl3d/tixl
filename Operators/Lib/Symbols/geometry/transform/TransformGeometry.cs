@@ -219,66 +219,12 @@ internal sealed class TransformGeometry : Instance<TransformGeometry>, ITransfor
         return _parts;
     }
 
-    /// <summary>
-    /// Point weights from the named float attribute, looked up on points, then vertices, primitives and parts; an
-    /// element's weight applies to all its points, the largest wins.
-    /// </summary>
-    /// <returns>False if no such attribute exists; the weights are then all zero.</returns>
     private bool TryCollectPointWeights(Geometry geometry, string name)
     {
-        var pointCount = geometry.PointCount;
-        if (_pointWeights.Length != pointCount)
-            _pointWeights = new float[pointCount];
+        if (_pointWeights.Length != geometry.PointCount)
+            _pointWeights = new float[geometry.PointCount];
 
-        Array.Clear(_pointWeights);
-        var attributes = geometry.Attributes;
-        if (attributes.TryGet<float>(name, AttributeDomain.Point, out var pointSelection))
-        {
-            Array.Copy(pointSelection.Values, _pointWeights, Math.Min(pointCount, pointSelection.Values.Length));
-            return true;
-        }
-
-        if (attributes.TryGet<float>(name, AttributeDomain.Vertex, out var vertexSelection))
-        {
-            for (var vertex = 0; vertex < Math.Min(geometry.VertexCount, vertexSelection.Values.Length); vertex++)
-                RaiseWeight(geometry.VertexPoints[vertex], vertexSelection.Values[vertex]);
-
-            return true;
-        }
-
-        if (attributes.TryGet<float>(name, AttributeDomain.Primitive, out var primitiveSelection))
-        {
-            for (var primitive = 0; primitive < Math.Min(geometry.PrimitiveCount, primitiveSelection.Values.Length); primitive++)
-                RaisePrimitiveWeights(geometry, primitive, primitiveSelection.Values[primitive]);
-
-            return true;
-        }
-
-        if (attributes.TryGet<float>(name, AttributeDomain.Part, out var partSelection))
-        {
-            for (var part = 0; part < Math.Min(geometry.Parts.Length, partSelection.Values.Length); part++)
-            {
-                var range = geometry.Parts[part];
-                for (var primitive = range.PrimitiveStart; primitive < range.PrimitiveStart + range.PrimitiveCount; primitive++)
-                    RaisePrimitiveWeights(geometry, primitive, partSelection.Values[part]);
-            }
-
-            return true;
-        }
-
-        return false;
-    }
-
-    private void RaisePrimitiveWeights(Geometry geometry, int primitive, float weight)
-    {
-        for (var vertex = geometry.PrimitiveVertexOffsets[primitive]; vertex < geometry.PrimitiveVertexOffsets[primitive + 1]; vertex++)
-            RaiseWeight(geometry.VertexPoints[vertex], weight);
-    }
-
-    private void RaiseWeight(int point, float weight)
-    {
-        if (weight > _pointWeights[point])
-            _pointWeights[point] = weight;
+        return geometry.TryGetPointWeights(name, _pointWeights);
     }
 
     /** This op's own buffer for a transformed attribute, reused across updates; never the input's. */

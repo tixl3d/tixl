@@ -166,7 +166,15 @@ message must name what was expected.
   a `Geometry` input, because `[SurfaceGeometry]` (Output Setup's New 3D Content), the Skills tutorial R04b and the
   mesh preview feed it `MeshGeometry`. Phase 2 merges them back into one input once those sources are converted.
   (Selection, Space), `GeometryToMesh`; add `SelectGeometry` with Index Pattern and Custom modes.
-- Merged output view.
+- Merged output view (2026-11-20): `GeometryOutputUi` (Render, Table with Points/Vertices/Primitives/Edges/Parts and
+  a Kind column, Stats) with `UnifiedGeometryTableModel` and `GeometrySelectionOverlay`. `_OutputPreviewGeometry`
+  combines the maintainer's tuned curve preview (lines plus points) and mesh preview (indices off) through one
+  `Group`; the old mesh composite is `_OutputPreviewMeshGeometry` (same id). `CurvesToPoints` takes `Geometry`.
+  Fixed on the way: `ListToBuffer` gave a buffer wrapper without a buffer for empty lists, which warned every frame.
+  The preview's dots come from `CurvesToPoints` with Sampling = Points, so they mark the real points, not line
+  samples; points in a `Selection` attribute (any domain, via `Geometry.TryGetPointWeights`) get a ring overlay.
+  Known gap: `_OutputPreviewCurves` (`CurveGeometry`) no longer renders, since its `CurvesToPoints` takes `Geometry`;
+  only `OffsetCurves` still outputs `CurveGeometry` and is converted in Phase 2.
 - Milestone: zigzag text, extruded, in the editor. **Decision point**: continue, or stop and keep the two types.
 
 ### Phase 2: Migrate everything

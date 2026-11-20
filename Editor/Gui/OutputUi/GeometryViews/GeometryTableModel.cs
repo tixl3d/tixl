@@ -16,6 +16,9 @@ internal abstract class GeometryTableModel
         Float,
         Int,
         Bool,
+
+        /** A <see cref="PrimitiveKinds"/> value, shown by name. */
+        PrimitiveKind,
     }
 
     public int RowCount { get; private set; }

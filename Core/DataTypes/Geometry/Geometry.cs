@@ -83,6 +83,65 @@ public sealed class Geometry
         InvalidateTopologyCaches();
     }
 
+    /// <summary>
+    /// Fills one weight per point from the named float attribute, looked up on points, then vertices, primitives and
+    /// parts; an element's weight applies to all its points, the largest wins. Selections are stored this way.
+    /// </summary>
+    /// <param name="weights">At least PointCount long; cleared to zero first.</param>
+    /// <returns>False if no such attribute exists; the weights are then all zero.</returns>
+    public bool TryGetPointWeights(string name, float[] weights)
+    {
+        var pointCount = PointCount;
+        Array.Clear(weights, 0, pointCount);
+        if (Attributes.TryGet<float>(name, AttributeDomain.Point, out var pointValues))
+        {
+            Array.Copy(pointValues.Values, weights, Math.Min(pointCount, pointValues.Values.Length));
+            return true;
+        }
+
+        if (Attributes.TryGet<float>(name, AttributeDomain.Vertex, out var vertexValues))
+        {
+            for (var vertex = 0; vertex < Math.Min(VertexCount, vertexValues.Values.Length); vertex++)
+                RaiseWeight(weights, VertexPoints[vertex], vertexValues.Values[vertex]);
+
+            return true;
+        }
+
+        if (Attributes.TryGet<float>(name, AttributeDomain.Primitive, out var primitiveValues))
+        {
+            for (var primitive = 0; primitive < Math.Min(PrimitiveCount, primitiveValues.Values.Length); primitive++)
+                RaisePrimitiveWeights(weights, primitive, primitiveValues.Values[primitive]);
+
+            return true;
+        }
+
+        if (Attributes.TryGet<float>(name, AttributeDomain.Part, out var partValues))
+        {
+            for (var part = 0; part < Math.Min(Parts.Length, partValues.Values.Length); part++)
+            {
+                var range = Parts[part];
+                for (var primitive = range.PrimitiveStart; primitive < range.PrimitiveStart + range.PrimitiveCount; primitive++)
+                    RaisePrimitiveWeights(weights, primitive, partValues.Values[part]);
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private void RaisePrimitiveWeights(float[] weights, int primitive, float weight)
+    {
+        for (var vertex = PrimitiveVertexOffsets[primitive]; vertex < PrimitiveVertexOffsets[primitive + 1]; vertex++)
+            RaiseWeight(weights, VertexPoints[vertex], weight);
+    }
+
+    private static void RaiseWeight(float[] weights, int point, float weight)
+    {
+        if (weight > weights[point])
+            weights[point] = weight;
+    }
+
     /// <summary>The polygon primitives, as allocation-free views.</summary>
     public PolygonEnumerable Polygons => new(this);
 

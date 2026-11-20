@@ -147,6 +147,7 @@ internal static class UiRegistration
         RegisterIOType(typeof(Command), null, () => new CommandOutputUi());
         RegisterIOType(typeof(BufferWithViews), null, () => new BufferWithViewsOutputUi());
         RegisterIOType(typeof(SceneSetup), () => new SceneSetupInputUi(), () => new SceneSetupOutputUi());
+        RegisterIOType(typeof(Geometry), null, () => new GeometryOutputUi());
         RegisterIOType(typeof(MeshGeometry), null, () => new MeshGeometryOutputUi());
         RegisterIOType(typeof(CurveGeometry), null, () => new CurveGeometryOutputUi());
         RegisterIOType(typeof(AudioGraphNode), null, () => new AudioGraphNodeOutputUi());
