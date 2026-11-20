@@ -3,13 +3,8 @@ using T3.Core.DataTypes;
 
 namespace T3.Editor.Gui.OutputUi.Geometry;
 
-/// <summary>
-/// One domain of a <see cref="CurveGeometry"/> as a grid of floats: built-in columns (positions, handles, topology)
-/// followed by the domain's attributes, one column per component. Values are refilled when the curves change and the
-/// previous fill is kept, so the table can tint what changed. Column names are rebuilt only when the columns change,
-/// so animated curves don't allocate.
-/// </summary>
-internal sealed class CurveTableModel
+/// <summary>Rows of the anchors, segments, contours or parts of a <see cref="CurveGeometry"/>.</summary>
+internal sealed class CurveTableModel : GeometryTableModel
 {
     internal enum Domains
     {
@@ -19,23 +14,7 @@ internal sealed class CurveTableModel
         Parts,
     }
 
-    internal enum ColumnKinds
-    {
-        Float,
-        Int,
-        Bool,
-    }
-
     public Domains Domain { get; private set; }
-    public int RowCount { get; private set; }
-    public int ColumnCount { get; private set; }
-    public bool HasPrevious { get; private set; }
-
-    public string GetColumnName(int column) => _columnNames[column];
-    public ColumnKinds GetColumnKind(int column) => _columnKinds[column];
-    public bool StartsColor(int column) => _columnStartsColor[column];
-    public float GetValue(int row, int column) => _values[row * ColumnCount + column];
-    public float GetPreviousValue(int row, int column) => _previousValues[row * ColumnCount + column];
 
     /** For segment rows: the contour and the segment's index within it. */
     public int GetSegmentContour(int row) => _segmentContours[row];
@@ -57,157 +36,28 @@ internal sealed class CurveTableModel
     /// <summary>Refills the grid if the curves, their version or the domain changed.</summary>
     public void Update(CurveGeometry curves, Domains domain)
     {
-        if (ReferenceEquals(curves, _lastCurves) && curves.Version == _lastVersion && domain == Domain)
+        if (ReferenceEquals(curves, _curves) && curves.Version == _lastVersion && domain == Domain)
             return;
 
-        var isSameDomain = domain == Domain && _lastCurves != null;
-        _lastCurves = curves;
+        var isSameSource = domain == Domain && _curves != null;
+        _curves = curves;
         _lastVersion = curves.Version;
         Domain = domain;
 
-        var columnsChanged = UpdateColumns(curves, domain);
-        var rowCount = GetRowCount(curves, domain);
-        HasPrevious = isSameDomain && !columnsChanged && rowCount == RowCount;
-
-        (_previousValues, _values) = (_values, _previousValues);
-        RowCount = rowCount;
-        var cellCount = rowCount * ColumnCount;
-        if (_values.Length < cellCount)
-            _values = new float[cellCount];
-
-        var builtInCount = FillBuiltInColumns(curves, domain);
-        FillAttributeColumns(curves, builtInCount);
+        var (attributeDomain, columns) = domain switch
+                                             {
+                                                 Domains.Anchors  => (AttributeDomain.ControlPoint, AnchorColumns),
+                                                 Domains.Segments => (AttributeDomain.Segment, SegmentColumns),
+                                                 Domains.Contours => (AttributeDomain.Contour, ContourColumns),
+                                                 _                => (AttributeDomain.Part, PartColumns),
+                                             };
+        Refill(curves.Attributes, attributeDomain, (int)domain, columns, GetRowCount(curves, domain), isSameSource);
     }
 
-    #region columns
-    private bool UpdateColumns(CurveGeometry curves, Domains domain)
+    protected override void FillBuiltInColumns()
     {
-        var attributeDomain = ToAttributeDomain(domain);
-        var builtIn = GetBuiltInColumns(domain);
-
-        if (domain == _columnsDomain && AttributesMatch(curves.Attributes, attributeDomain))
-            return false;
-
-        _columnsDomain = domain;
-        _attributeCount = 0;
-        var columnCount = builtIn.Length;
-        var attributes = curves.Attributes;
-        for (var index = 0; index < attributes.Count; index++)
-        {
-            var attribute = attributes[index];
-            if (attribute.Domain != attributeDomain)
-                continue;
-
-            if (_attributeCount == _attributeNames.Length)
-            {
-                Array.Resize(ref _attributeNames, _attributeCount * 2 + 4);
-                Array.Resize(ref _attributeTypes, _attributeCount * 2 + 4);
-            }
-
-            _attributeNames[_attributeCount] = attribute.Name;
-            _attributeTypes[_attributeCount] = attribute.ValueType;
-            _attributeCount++;
-            columnCount += ComponentCount(attribute.ValueType);
-        }
-
-        if (_columnNames.Length < columnCount)
-        {
-            _columnNames = new string[columnCount];
-            _columnKinds = new ColumnKinds[columnCount];
-            _columnStartsColor = new bool[columnCount];
-        }
-
-        for (var column = 0; column < builtIn.Length; column++)
-        {
-            _columnNames[column] = builtIn[column].Name;
-            _columnKinds[column] = builtIn[column].Kind;
-            _columnStartsColor[column] = false;
-        }
-
-        var nextColumn = builtIn.Length;
-        for (var attributeIndex = 0; attributeIndex < _attributeCount; attributeIndex++)
-        {
-            var name = _attributeNames[attributeIndex];
-            var type = _attributeTypes[attributeIndex];
-            var components = ComponentCount(type);
-            var kind = type == typeof(int) ? ColumnKinds.Int : ColumnKinds.Float;
-            for (var component = 0; component < components; component++)
-            {
-                _columnNames[nextColumn] = components == 1 ? name : $"{name}.{ComponentNames[component]}";
-                _columnKinds[nextColumn] = kind;
-                _columnStartsColor[nextColumn] = component == 0
-                                                 && type == typeof(Vector4)
-                                                 && name.Contains("Color", StringComparison.OrdinalIgnoreCase);
-                nextColumn++;
-            }
-        }
-
-        ColumnCount = columnCount;
-        return true;
-    }
-
-    private bool AttributesMatch(GeometryAttributes attributes, AttributeDomain attributeDomain)
-    {
-        var matched = 0;
-        for (var index = 0; index < attributes.Count; index++)
-        {
-            var attribute = attributes[index];
-            if (attribute.Domain != attributeDomain)
-                continue;
-
-            if (matched == _attributeCount
-                || attribute.ValueType != _attributeTypes[matched]
-                || !string.Equals(attribute.Name, _attributeNames[matched], StringComparison.Ordinal))
-                return false;
-
-            matched++;
-        }
-
-        return matched == _attributeCount;
-    }
-
-    private static Column[] GetBuiltInColumns(Domains domain)
-    {
-        return domain switch
-                   {
-                       Domains.Anchors  => AnchorColumns,
-                       Domains.Segments => SegmentColumns,
-                       Domains.Contours => ContourColumns,
-                       _                => PartColumns,
-                   };
-    }
-
-    private static AttributeDomain ToAttributeDomain(Domains domain)
-    {
-        return domain switch
-                   {
-                       Domains.Anchors  => AttributeDomain.ControlPoint,
-                       Domains.Segments => AttributeDomain.Segment,
-                       Domains.Contours => AttributeDomain.Contour,
-                       _                => AttributeDomain.Part,
-                   };
-    }
-
-    private static int ComponentCount(Type type)
-    {
-        if (type == typeof(Vector2))
-            return 2;
-
-        if (type == typeof(Vector3))
-            return 3;
-
-        if (type == typeof(Vector4))
-            return 4;
-
-        return 1;
-    }
-    #endregion
-
-    #region values
-    /// <returns>The number of built-in columns filled.</returns>
-    private int FillBuiltInColumns(CurveGeometry curves, Domains domain)
-    {
-        switch (domain)
+        var curves = _curves!;
+        switch (Domain)
         {
             case Domains.Anchors:
                 for (var contour = 0; contour < curves.ContourCount; contour++)
@@ -222,10 +72,15 @@ internal sealed class CurveTableModel
                     }
                 }
 
-                return AnchorColumns.Length;
+                break;
 
             case Domains.Segments:
-                EnsureSegmentMapping(RowCount);
+                if (_segmentContours.Length < RowCount)
+                {
+                    _segmentContours = new int[RowCount];
+                    _segmentIndicesInContour = new int[RowCount];
+                }
+
                 var row = 0;
                 for (var contour = 0; contour < curves.ContourCount; contour++)
                 {
@@ -246,7 +101,7 @@ internal sealed class CurveTableModel
                     }
                 }
 
-                return SegmentColumns.Length;
+                break;
 
             case Domains.Contours:
                 for (var contour = 0; contour < curves.ContourCount; contour++)
@@ -258,7 +113,7 @@ internal sealed class CurveTableModel
                     Set(contour, 4, FindPart(curves.Parts, contour));
                 }
 
-                return ContourColumns.Length;
+                break;
 
             default:
                 for (var part = 0; part < curves.Parts.Length; part++)
@@ -271,82 +126,8 @@ internal sealed class CurveTableModel
                     Set(part, 6, p.SeedIndex);
                 }
 
-                return PartColumns.Length;
+                break;
         }
-    }
-
-    private void FillAttributeColumns(CurveGeometry curves, int firstColumn)
-    {
-        var attributeDomain = ToAttributeDomain(Domain);
-        var column = firstColumn;
-        var attributes = curves.Attributes;
-        for (var index = 0; index < attributes.Count; index++)
-        {
-            var attribute = attributes[index];
-            if (attribute.Domain != attributeDomain)
-                continue;
-
-            // A count that doesn't match the domain is a producer bug; missing rows show as NaN, highlighted.
-            switch (attribute)
-            {
-                case GeometryAttribute<float> floats:
-                    for (var row = 0; row < RowCount; row++)
-                        Set(row, column, row < floats.Values.Length ? floats.Values[row] : float.NaN);
-                    break;
-                case GeometryAttribute<int> ints:
-                    for (var row = 0; row < RowCount; row++)
-                        Set(row, column, row < ints.Values.Length ? ints.Values[row] : float.NaN);
-                    break;
-                case GeometryAttribute<Vector2> vectors2:
-                    for (var row = 0; row < RowCount; row++)
-                    {
-                        var v = row < vectors2.Values.Length ? vectors2.Values[row] : new Vector2(float.NaN);
-                        Set(row, column, v.X);
-                        Set(row, column + 1, v.Y);
-                    }
-
-                    break;
-                case GeometryAttribute<Vector3> vectors3:
-                    for (var row = 0; row < RowCount; row++)
-                        Set(row, column, row < vectors3.Values.Length ? vectors3.Values[row] : new Vector3(float.NaN));
-                    break;
-                case GeometryAttribute<Vector4> vectors4:
-                    for (var row = 0; row < RowCount; row++)
-                    {
-                        var v = row < vectors4.Values.Length ? vectors4.Values[row] : new Vector4(float.NaN);
-                        Set(row, column, v.X);
-                        Set(row, column + 1, v.Y);
-                        Set(row, column + 2, v.Z);
-                        Set(row, column + 3, v.W);
-                    }
-
-                    break;
-                default:
-                    for (var row = 0; row < RowCount; row++)
-                        Set(row, column, float.NaN);
-                    break;
-            }
-
-            column += ComponentCount(attribute.ValueType);
-        }
-    }
-
-    private void Set(int row, int column, float value) => _values[row * ColumnCount + column] = value;
-
-    private void Set(int row, int column, Vector3 value)
-    {
-        Set(row, column, value.X);
-        Set(row, column + 1, value.Y);
-        Set(row, column + 2, value.Z);
-    }
-
-    private void EnsureSegmentMapping(int rowCount)
-    {
-        if (_segmentContours.Length >= rowCount)
-            return;
-
-        _segmentContours = new int[rowCount];
-        _segmentIndicesInContour = new int[rowCount];
     }
 
     private static int FindPart(CurvePart[] parts, int contour)
@@ -359,9 +140,6 @@ internal sealed class CurveTableModel
 
         return -1;
     }
-    #endregion
-
-    private readonly record struct Column(string Name, ColumnKinds Kind);
 
     private static readonly Column[] AnchorColumns =
         [
@@ -390,21 +168,8 @@ internal sealed class CurveTableModel
             new("Id", ColumnKinds.Int), new("Seed", ColumnKinds.Int),
         ];
 
-    private static readonly string[] ComponentNames = ["X", "Y", "Z", "W"];
-
-    private CurveGeometry? _lastCurves;
+    private CurveGeometry? _curves;
     private int _lastVersion;
-
-    private Domains _columnsDomain = (Domains)(-1);
-    private string[] _columnNames = [];
-    private ColumnKinds[] _columnKinds = [];
-    private bool[] _columnStartsColor = [];
-    private string[] _attributeNames = [];
-    private Type[] _attributeTypes = [];
-    private int _attributeCount;
-
-    private float[] _values = [];
-    private float[] _previousValues = [];
     private int[] _segmentContours = [];
     private int[] _segmentIndicesInContour = [];
 }

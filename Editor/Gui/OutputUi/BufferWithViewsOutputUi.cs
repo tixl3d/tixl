@@ -47,7 +47,7 @@ internal sealed class BufferWithViewsOutputUi : OutputUi<BufferWithViews>
         _isCompact = PreviewLayout.IsCompactView();
         if (slot is not Slot<BufferWithViews> bufferSlot || _isCompact)
         {
-            base.Recompute(slot, context);
+            EvaluateWithoutGizmos(slot, context);
             return;
         }
 
@@ -59,7 +59,7 @@ internal sealed class BufferWithViewsOutputUi : OutputUi<BufferWithViews>
                 return;
         }
 
-        base.Recompute(slot, context);
+        EvaluateWithoutGizmos(slot, context);
         if (bufferSlot.Value != null)
             _tableView.UpdateReadback(bufferSlot.Value);
     }

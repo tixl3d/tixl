@@ -53,7 +53,7 @@ internal sealed class StructuredListOutputUi : OutputUi<StructuredList>
                 return;
         }
 
-        base.Recompute(slot, context);
+        EvaluateWithoutGizmos(slot, context);
     }
 
     protected override void DrawTypedValue(ISlot slot, string viewId)

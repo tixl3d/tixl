@@ -45,6 +45,25 @@ internal abstract class OutputUi<T> : IOutputUi
         slot.Update(context);
     }
 
+    /// <summary>
+    /// Evaluates for a data view (a table or stats) that has no 3D view to place transform gizmos in; they would
+    /// otherwise project through whatever viewport is set and draw distorted behind the data.
+    /// </summary>
+    protected void EvaluateWithoutGizmos(ISlot slot, EvaluationContext context)
+    {
+        var showGizmos = context.ShowGizmos;
+        context.ShowGizmos = GizmoVisibility.Off;
+        try
+        {
+            StartInvalidation(slot, context);
+            slot.Update(context);
+        }
+        finally
+        {
+            context.ShowGizmos = showGizmos;
+        }
+    }
+
     protected abstract void DrawTypedValue(ISlot slot, string viewId);
 
     protected void StartInvalidation(ISlot slot, EvaluationContext context)

@@ -7,22 +7,22 @@ using T3.Editor.Gui.TableView;
 namespace T3.Editor.Gui.OutputUi.Geometry;
 
 /// <summary>
-/// Draws a <see cref="CurveTableModel"/> as a table, styled like the buffer table, and keeps a row selection.
-/// The selection is editor state for inspecting the shown op; it is never written into the curves.
+/// Draws a <see cref="GeometryTableModel"/> as a table, styled like the buffer table, and keeps a row selection.
+/// The selection is editor state for inspecting the shown op; it is never written into the geometry.
 /// </summary>
-internal sealed class CurveTableView
+internal sealed class GeometryTableView
 {
     public int SelectedCount { get; private set; }
 
     public bool IsSelected(int row) => row < _isSelected.Length && _isSelected[row];
 
     /// <summary>Keeps the selection while the same op shows the same domain; clears it otherwise.</summary>
-    public void SyncSelection(Guid shownChildId, CurveTableModel.Domains domain, int rowCount)
+    public void SyncSelection(Guid shownChildId, int domainIndex, int rowCount)
     {
-        if (shownChildId != _selectionChildId || domain != _selectionDomain)
+        if (shownChildId != _selectionChildId || domainIndex != _selectionDomainIndex)
         {
             _selectionChildId = shownChildId;
-            _selectionDomain = domain;
+            _selectionDomainIndex = domainIndex;
             ClearSelection();
         }
 
@@ -49,7 +49,7 @@ internal sealed class CurveTableView
         _rangeStartRow = -1;
     }
 
-    public void Draw(CurveTableModel model)
+    public void Draw(GeometryTableModel model)
     {
         if (model.RowCount == 0)
         {
@@ -59,7 +59,7 @@ internal sealed class CurveTableView
 
         const ImGuiTableFlags flags = ImGuiTableFlags.RowBg | ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY
                                       | ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.BordersInnerV;
-        if (!ImGui.BeginTable("##curveValues", model.ColumnCount + 1, flags, ImGui.GetContentRegionAvail()))
+        if (!ImGui.BeginTable("##geometryValues", model.ColumnCount + 1, flags, ImGui.GetContentRegionAvail()))
             return;
 
         ImGui.PushFont(Fonts.FontSmall);
@@ -68,7 +68,7 @@ internal sealed class CurveTableView
         ImGui.TableSetupColumn("#", ImGuiTableColumnFlags.WidthFixed, IndexColumnWidth * scale);
         for (var column = 0; column < model.ColumnCount; column++)
         {
-            var width = model.GetColumnKind(column) == CurveTableModel.ColumnKinds.Float ? FloatColumnWidth : IntColumnWidth;
+            var width = model.GetColumnKind(column) == GeometryTableModel.ColumnKinds.Float ? FloatColumnWidth : IntColumnWidth;
             ImGui.TableSetupColumn(model.GetColumnName(column), ImGuiTableColumnFlags.WidthFixed, width * scale);
         }
 
@@ -94,7 +94,7 @@ internal sealed class CurveTableView
         ImGui.EndTable();
     }
 
-    private void DrawRow(CurveTableModel model, int row)
+    private void DrawRow(GeometryTableModel model, int row)
     {
         ImGui.TableNextRow();
         ImGui.TableNextColumn();
@@ -127,11 +127,11 @@ internal sealed class CurveTableView
             }
 
             ReadOnlySpan<char> text;
-            if (kind == CurveTableModel.ColumnKinds.Bool)
+            if (kind == GeometryTableModel.ColumnKinds.Bool)
             {
                 text = value > 0.5f ? "yes" : "no";
             }
-            else if (kind == CurveTableModel.ColumnKinds.Int && float.IsFinite(value))
+            else if (kind == GeometryTableModel.ColumnKinds.Int && float.IsFinite(value))
             {
                 ((int)value).TryFormat(_formatBuffer, out var length, default, CultureInfo.InvariantCulture);
                 text = _formatBuffer.AsSpan(0, length);
@@ -147,7 +147,7 @@ internal sealed class CurveTableView
             ImGui.PushStyleColor(ImGuiCol.Text, TableValueStyle.GetColor(value, previous).Rgba);
             ImGui.TextUnformatted(text);
             ImGui.PopStyleColor();
-            if (kind != CurveTableModel.ColumnKinds.Bool)
+            if (kind != GeometryTableModel.ColumnKinds.Bool)
                 TableValueStyle.DrawTooltipIfHovered(model.GetColumnName(column), value, previous);
         }
     }
@@ -199,5 +199,5 @@ internal sealed class CurveTableView
     private int _selectionRowLimit;
     private int _rangeStartRow = -1;
     private Guid _selectionChildId;
-    private CurveTableModel.Domains _selectionDomain;
+    private int _selectionDomainIndex = -1;
 }

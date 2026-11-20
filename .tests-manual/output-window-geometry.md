@@ -79,6 +79,27 @@ Select the [CubeGeometry].
 - **Render** shows the shaded cube with its wireframe and vertex indices.
 - **Stats** shows the same table as before: points, triangles, size, bounds, volume, "watertight", attributes.
 
+## Step: Geometry table
+
+**Action:**
+With the [CubeGeometry] selected, click **Table** and step through **Points**, **Faces**, **Corners** and **Edges**.
+
+**Expected:**
+- **Parts** is grayed out; its tooltip says the geometry has no parts.
+- **Points** lists 8 rows with positions, **Faces** 6 rows with 4 corners each and their centers, **Corners** 24 rows
+  with face and point, **Edges** 12 rows with both faces filled in (the cube is closed).
+- Attributes of each domain appear as extra columns, e.g. normals or texture coordinates.
+- Select a face and a few edges (Ctrl+click), switch to **Render**: the face outline and the edges are drawn thick.
+  Selected corners show as dots pulled slightly into their face.
+
+## Step: No gizmo behind tables
+
+**Action:**
+Select a [ScatterPointsInVolume] (it has a transform gizmo for its box) and switch its output to **Table**.
+
+**Expected:**
+- No gizmo is drawn behind the table. In **Points** the gizmo appears again, placed on the box.
+
 ## Step: Mode is kept per kind
 
 **Action:**

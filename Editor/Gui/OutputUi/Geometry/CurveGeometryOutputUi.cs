@@ -50,13 +50,13 @@ internal sealed class CurveGeometryOutputUi : OutputUi<CurveGeometry>
         // The curves are pulled through the preview, so they needn't be evaluated on their own first.
         if (slot is Slot<CurveGeometry> curveSlot && _mode == Modes.Render && !PreviewLayout.IsCompactView())
         {
-            _selectionOverlay.CaptureView(context);
+            _projection.CaptureView(context);
             _isPresentingRender = _preview.Render(curveSlot, context);
             if (_isPresentingRender)
                 return;
         }
 
-        base.Recompute(slot, context);
+        EvaluateWithoutGizmos(slot, context);
     }
 
     protected override void DrawTypedValue(ISlot slot, string viewId)
@@ -90,14 +90,14 @@ internal sealed class CurveGeometryOutputUi : OutputUi<CurveGeometry>
             return;
         }
 
-        _tableView.SyncSelection(slot.Parent.SymbolChildId, _domain, CurveTableModel.GetRowCount(curves, _domain));
+        _tableView.SyncSelection(slot.Parent.SymbolChildId, (int)_domain, CurveTableModel.GetRowCount(curves, _domain));
         if (_mode == Modes.Table || _tableView.SelectedCount > 0)
             _model.Update(curves, _domain);
 
         if (_isPresentingRender)
         {
             _preview.DrawRendered(viewId);
-            _selectionOverlay.Draw(curves, _model, _tableView);
+            _selectionOverlay.Draw(curves, _model, _tableView, _projection);
         }
 
         PreviewLayout.IndentControls();
@@ -109,7 +109,7 @@ internal sealed class CurveGeometryOutputUi : OutputUi<CurveGeometry>
             ImGui.SameLine(0, 12 * T3Ui.UiScaleFactor);
             if (CustomComponents.SegmentedButton(ref _domain, _isDomainDisabled, _tooltipForDomain))
             {
-                _tableView.SyncSelection(slot.Parent.SymbolChildId, _domain, CurveTableModel.GetRowCount(curves, _domain));
+                _tableView.SyncSelection(slot.Parent.SymbolChildId, (int)_domain, CurveTableModel.GetRowCount(curves, _domain));
                 _model.Update(curves, _domain);
             }
         }
@@ -244,7 +244,8 @@ internal sealed class CurveGeometryOutputUi : OutputUi<CurveGeometry>
     private bool _hasParts;
 
     private readonly CurveTableModel _model = new();
-    private readonly CurveTableView _tableView = new();
+    private readonly GeometryTableView _tableView = new();
+    private readonly PreviewProjection _projection = new();
     private readonly CurveSelectionOverlay _selectionOverlay = new();
 
     private string _summary = string.Empty;

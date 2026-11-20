@@ -234,8 +234,8 @@ A plane is a `Pose` (`Core/Output/Pose.cs`): origin plus orientation. Plane-loca
 - **Default plane** is world XY (front). Top (XZ) and side (YZ) are one click away.
 - **The document stores its plane**, as a Fusion sketch belongs to a plane. Anchors are stored in 3D, so moving
   points off the plane (A5, heights in side view) is allowed; the plane is the drawing context, not a constraint.
-- **Planes are passed between ops as `Point`s** (position plus orientation), as the geometry plan already does for
-  spaces. Section and projection ops take a plane as a point input; the editor can use any point output as a
+- **Planes are passed between ops as geometry points** (position plus an `Orientation` attribute), like placements
+  and spaces (`Plan_ProceduralGeometry.md`, "Geometry points are primary"). Section and projection ops take a plane as a point input; the editor can use any point output as a
   construction plane. No plane type.
 - **Temporary planes** (Plasticity style) for one gesture or until dismissed: through three selected anchors, normal
   to a curve at an anchor (sections along a path), on a mesh face (needs face picking, late).
@@ -291,7 +291,7 @@ connection type and without a new editor concept. When a scenario fails that tes
 scenario.
 
 **1. House section to SVG.** Load an OBJ of a house, cut a section as curves, clean up, style the lines, export SVG.
-- `LoadObjGeometry` -> `SectionGeometry` (new: mesh x plane -> closed contours, plane as a `Point` input, source part
+- `LoadObjGeometry` -> `SectionGeometry` (new: mesh x plane -> closed contours, plane as a geometry point input, source part
   and face attributes carried onto contours) -> cleanup ops (`SimplifyCurves`, `WeldCurveEnds`, `FilterContours` by
   length) -> manual fixes in `[EditCurves]` -> style -> `ExportSvg` (new, file writer with a trigger, like other
   exporters).
@@ -305,7 +305,7 @@ scenario.
 
 **2. Slice a posed animal.** Load a glTF character, pose it, take a clip, slice it into curves.
 - `LoadGltfScene` -> `PickGeometryFromScene` (`Plan_SceneDocument.md`) -> pose -> CPU skinning -> `SectionGeometry`
-  with many planes (a `Point` list from any point generator) -> one part per slice.
+  with many planes (geometry points from any point generator) -> one part per slice.
 - **Skinning is GPU-only today.** Needs a CPU `SkinGeometry` (skin weights as point attributes, already a long-term
   item in the geometry plan) or an explicit readback op. Either is an op, not a concept.
 - **Posing** is editing joint orientations: a domain with index, position and orientation. It works only because the
@@ -325,7 +325,7 @@ scenario.
 - Verdict: fits; overrides are for few elements, bulk edits go through drawn selectors.
 
 **Rules that fall out**
-- Planes and placements are `Point`s.
+- Planes and placements are geometry points; CPoints only cross to and from the GPU.
 - Conventions are attribute names, not types.
 - Overrides are for tens of elements; bulk edits use curves as selectors.
 - Exporters are ops with a trigger.
