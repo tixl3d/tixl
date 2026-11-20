@@ -151,7 +151,9 @@ message must name what was expected.
   `PrimitiveClosed`; parts are `PrimitivePart`. `AttributeDomain` gains `Vertex` and `Primitive` at the end so stored
   ints stay valid; type info defaults from well-known names. Registered as wire type, bypassable, CPU geometry
   color. No ops use it yet.)
-- Convert `StringToCurves`, `SubdivideCurves`, `CurvesToGeometry` (as `ExtrudeCurves`), `TransformGeometry`
+- `StringToCurves` and `SubdivideCurves` converted (2026-11-20). Subdivide renumbers curve points along each curve
+  and carries point and vertex attributes through `Lib/Utils/GeometryAttributeBlend`; polygons pass through.
+- Convert `CurvesToGeometry` (as `ExtrudeCurves`), `TransformGeometry`
   (Selection, Space), `GeometryToMesh`; add `SelectGeometry` with Index Pattern and Custom modes.
 - Merged output view.
 - Milestone: zigzag text, extruded, in the editor. **Decision point**: continue, or stop and keep the two types.
