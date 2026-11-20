@@ -80,11 +80,15 @@ internal sealed class VariationsWindow : Window
         {
             if (!hideHeader)
             {
+                // Keep the segmented button clear of the window border and header.
+                const float headerPadding = 1;
+                ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(headerPadding, headerPadding));
                 ImGui.BeginChild("header",
-                                 new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetFrameHeight()),
-                                 ImGuiChildFlags.None,
+                                 new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetFrameHeight() + 2 * headerPadding),
+                                 ImGuiChildFlags.AlwaysUseWindowPadding,
                                  ImGuiWindowFlags.NoScrollbar);
-                
+                ImGui.PopStyleVar();
+
                 if (CustomComponents.SegmentedButton(ref _interactionMode))
                 {
                     // _interactionMode = (InteractionModes)viewModeIndex;
