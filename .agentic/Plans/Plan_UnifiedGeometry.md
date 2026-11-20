@@ -183,6 +183,16 @@ message must name what was expected.
   a `Lib/Utils` helper, then (1) `GeometryToMesh` fills closed curves itself (option, on by default) so
   `StringToCurves -> GeometryToMesh` renders flat shapes, and (2) a `FillCurves` op outputs the flat polygons as
   Geometry for further modelling (Houdini's PolyFill). `ExtrudeCurves` keeps walls and bevels.
+- **Attribute-driven extrusion depth** (maintainer, 2026-11-20): `ExtrudeCurves` gets a `DepthAttribute` input; the
+  final depth is Depth times the attribute's value, 1 when the attribute is missing. Per part first (a part's outline
+  and holes share one depth; a primitive attribute uses the part's largest value). Per point later: walls and caps
+  share ring points, so each point can take its own depth for sloped back caps, interpolated along the flattened
+  samples. Prefer explicit `...Attribute` inputs on the few ops where a per-element value matters (depth, bevel,
+  offset distance, transform weight) over a general attribute binding for every parameter.
+- **`SetGeometryAttribute`** (maintainer, 2026-11-20): writes a named attribute on a chosen domain and type from a
+  constant, a C# snippet (sharing `CSharpSnippetCompiler` and the `i`, `count`, `p`, `A`, `B` scope of
+  `SelectGeometry`), another attribute or a field. Example: `StringToCurves -> SetGeometryAttribute (Part, Depth,
+  0.5 + 0.5 * Sin(i * 0.8 + A)) -> ExtrudeCurves (DepthAttribute = Depth)` gives an animated depth wave.
 - The remaining mesh ops (mechanical: Face -> Primitive, Corner -> Vertex), `OffsetCurves`, `CurvesToPoints`, output
   setup's `StageGeometry` and `SurfaceGeometry`.
 - Remove `MeshGeometry`, `CurveGeometry`, `CurvePart`.
