@@ -6,8 +6,9 @@ using System.Collections.Generic;
 namespace T3.Core.DataTypes;
 
 /// <summary>
-/// The element domain an attribute's values are attached to. Mesh domains first;
-/// curve domains (ControlPoint/Segment/Contour) are reserved for CurveGeometry.
+/// The element domain an attribute's values are attached to. <see cref="Geometry"/> uses Point, Vertex, Primitive,
+/// Edge and Part. Corner and Face (<see cref="MeshGeometry"/>) and ControlPoint, Segment and Contour
+/// (<see cref="CurveGeometry"/>) remain until those types are retired; values are appended so stored ints stay valid.
 /// </summary>
 public enum AttributeDomain
 {
@@ -19,6 +20,33 @@ public enum AttributeDomain
     ControlPoint,
     Segment,
     Contour,
+    Vertex,
+    Primitive,
+}
+
+/// <summary>
+/// How an attribute's values behave under transforms, so deform ops can treat every attribute correctly without
+/// knowing its name.
+/// </summary>
+public enum AttributeTypeInfos
+{
+    /// <summary>Not transformed (ids, weights, UVs, selections).</summary>
+    Value,
+
+    /// <summary>A location: translated, rotated and scaled like the points.</summary>
+    Position,
+
+    /// <summary>A direction or offset with length: rotated and scaled, not translated (bezier handles, velocity).</summary>
+    Vector,
+
+    /// <summary>A surface normal: rotated and scaled by the inverse transpose, then normalized.</summary>
+    Normal,
+
+    /// <summary>An orientation as a quaternion (X, Y, Z, W): rotated, not scaled.</summary>
+    Quaternion,
+
+    /// <summary>A color: never transformed, but shown and blended as one.</summary>
+    Color,
 }
 
 /// <summary>Well-known attribute names, so producers and consumers agree without magic strings.</summary>
@@ -38,6 +66,38 @@ public static class GeometryAttributeNames
 
     /// <summary>Face domain, 1 on extrusion walls and bevels ([CurvesToGeometry]), 0 on caps.</summary>
     public const string IsSide = "IsSide";
+
+    /// <summary>Point domain, vec3: a curve point's incoming bezier handle, as an offset from the point.</summary>
+    public const string HandleIn = "HandleIn";
+
+    /// <summary>Point domain, vec3: a curve point's outgoing bezier handle, as an offset from the point.</summary>
+    public const string HandleOut = "HandleOut";
+
+    /// <summary>Point domain, vec4 quaternion: a point's rotation, matching <c>Point.Orientation</c>.</summary>
+    public const string Orientation = "Orientation";
+
+    /// <summary>Point domain, vec3: a point's scale, matching <c>Point.Scale</c>.</summary>
+    public const string Scale = "Scale";
+
+    /// <summary>The type info an attribute gets when its creator doesn't specify one.</summary>
+    public static AttributeTypeInfos GetDefaultTypeInfo(string name)
+    {
+        if (Matches(name, Normal))
+            return AttributeTypeInfos.Normal;
+
+        if (Matches(name, HandleIn) || Matches(name, HandleOut))
+            return AttributeTypeInfos.Vector;
+
+        if (Matches(name, Orientation))
+            return AttributeTypeInfos.Quaternion;
+
+        if (Matches(name, Color))
+            return AttributeTypeInfos.Color;
+
+        return AttributeTypeInfos.Value;
+    }
+
+    private static bool Matches(string name, string wellKnownName) => string.Equals(name, wellKnownName, StringComparison.OrdinalIgnoreCase);
 }
 
 /// <summary>Attribute names produced by text layout ([StringToCurves]); all on the Part (glyph) domain.</summary>
@@ -59,14 +119,17 @@ public static class CurveAttributeNames
 /// </summary>
 public abstract class GeometryAttribute
 {
-    protected GeometryAttribute(string name, AttributeDomain domain)
+    /// <param name="typeInfo">Null takes the default for well-known names, see <see cref="GeometryAttributeNames.GetDefaultTypeInfo"/>.</param>
+    protected GeometryAttribute(string name, AttributeDomain domain, AttributeTypeInfos? typeInfo)
     {
         Name = name;
         Domain = domain;
+        TypeInfo = typeInfo ?? GeometryAttributeNames.GetDefaultTypeInfo(name);
     }
 
     public string Name { get; }
     public AttributeDomain Domain { get; }
+    public AttributeTypeInfos TypeInfo { get; }
     public abstract Type ValueType { get; }
     public abstract int Count { get; }
     public abstract void Resize(int count);
@@ -74,8 +137,8 @@ public abstract class GeometryAttribute
 
 public sealed class GeometryAttribute<T> : GeometryAttribute where T : unmanaged
 {
-    public GeometryAttribute(string name, AttributeDomain domain, int count)
-        : base(name, domain)
+    public GeometryAttribute(string name, AttributeDomain domain, int count, AttributeTypeInfos? typeInfo = null)
+        : base(name, domain, typeInfo)
     {
         Values = count == 0 ? Array.Empty<T>() : new T[count];
     }
@@ -99,7 +162,9 @@ public sealed class GeometryAttribute<T> : GeometryAttribute where T : unmanaged
 /// </summary>
 public sealed class GeometryAttributes : IEnumerable<GeometryAttribute>
 {
-    public GeometryAttribute<T> GetOrCreate<T>(string name, AttributeDomain domain, int count) where T : unmanaged
+    /// <param name="typeInfo">Used only when the attribute is created; null takes the default for the name.</param>
+    public GeometryAttribute<T> GetOrCreate<T>(string name, AttributeDomain domain, int count, AttributeTypeInfos? typeInfo = null)
+        where T : unmanaged
     {
         if (TryGet<T>(name, domain, out var existing))
         {
@@ -107,7 +172,7 @@ public sealed class GeometryAttributes : IEnumerable<GeometryAttribute>
             return existing;
         }
 
-        var attribute = new GeometryAttribute<T>(name, domain, count);
+        var attribute = new GeometryAttribute<T>(name, domain, count, typeInfo);
         _attributes.Add(attribute);
         return attribute;
     }

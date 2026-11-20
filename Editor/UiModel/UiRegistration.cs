@@ -92,6 +92,7 @@ internal static class UiRegistration
                                 typeof(T3.Graphics.Compat.PrimitiveTopology));
         
         RegisterTypesToProperty(UiProperties.CpuGeometry,
+                                typeof(Geometry),
                                 typeof(MeshGeometry),
                                 typeof(CurveGeometry));
 

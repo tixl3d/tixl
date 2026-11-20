@@ -201,7 +201,7 @@ public static class UiColors
     [T3Style.Hint(Description = "Base color for GPU buffer data.")]
     public static Color ColorForGpuData = new(0.72f, 0.2f, 0.18f, 1.000f);
 
-    [T3Style.Hint(Description = "Base color for CPU-side procedural geometry (MeshGeometry, curves).")]
+    [T3Style.Hint(Description = "Base color for CPU-side procedural geometry (Geometry, MeshGeometry, curves).")]
     public static Color ColorForCpuGeometry = new(0.3f, 0.68f, 0.5f, 1.000f);
 
     [T3Style.Hint(Description = "Base color for CPU field delegates (ScalarField, VectorField, RemapCurve).")]

@@ -145,7 +145,12 @@ message must name what was expected.
 ### Phase 1: Zigzag spike
 - Renames first, as their own commit: the two namespaces and `[ExtrudePointCurves]` (done 2026-11-20, together with
   its example `ExtrudePointCurvesExample`, which links to the op by name).
-- `Geometry` with polygon and curve primitives, typed views, attribute type info, Houdini domains.
+- `Geometry` with polygon and curve primitives, typed views, attribute type info, Houdini domains (done
+  2026-11-20: `Core/DataTypes/Geometry/Geometry.cs`. Views are `PolygonView` and `CurveView`, since
+  `T3.Core.DataTypes.Curve` is the animation curve; the per-primitive arrays are `PrimitiveKind` and
+  `PrimitiveClosed`; parts are `PrimitivePart`. `AttributeDomain` gains `Vertex` and `Primitive` at the end so stored
+  ints stay valid; type info defaults from well-known names. Registered as wire type, bypassable, CPU geometry
+  color. No ops use it yet.)
 - Convert `StringToCurves`, `SubdivideCurves`, `CurvesToGeometry` (as `ExtrudeCurves`), `TransformGeometry`
   (Selection, Space), `GeometryToMesh`; add `SelectGeometry` with Index Pattern and Custom modes.
 - Merged output view.

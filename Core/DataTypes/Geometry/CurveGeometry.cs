@@ -100,7 +100,7 @@ public sealed class CurveGeometry
         {
             GetSegmentAnchors(contourIndex, segment, out var a, out var b);
             var isLast = segment == segmentCount - 1;
-            FlattenSegment(Positions[a], HandlesOut[a], HandlesIn[b], Positions[b], tolerance, target,
+            BezierFlattening.FlattenSegment(Positions[a], HandlesOut[a], HandlesIn[b], Positions[b], tolerance, target,
                            includeEnd: !(isLast && ContourClosed[contourIndex]));
         }
     }
@@ -119,39 +119,6 @@ public sealed class CurveGeometry
         var pointCount = GetContourPointCount(contourIndex);
         a = start + segmentIndex;
         b = start + (segmentIndex + 1) % pointCount;
-    }
-
-    private static void FlattenSegment(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float tolerance, List<Vector3> target, bool includeEnd)
-    {
-        // Straight when both handles lie on the chord within tolerance - the common case for polylines and glyph corners
-        var chord = p3 - p0;
-        var chordLengthSq = chord.LengthSquared();
-        var flat = chordLengthSq < 1e-12f
-                   || (DistanceToLineSq(p1, p0, chord, chordLengthSq) <= tolerance * tolerance
-                       && DistanceToLineSq(p2, p0, chord, chordLengthSq) <= tolerance * tolerance);
-        if (flat)
-        {
-            if (includeEnd)
-                target.Add(p3);
-
-            return;
-        }
-
-        // Subdivision count from the control polygon's deviation (Wang's bound)
-        var deviation = MathF.Max((p0 - 2 * p1 + p2).Length(), (p1 - 2 * p2 + p3).Length());
-        var steps = Math.Clamp((int)MathF.Ceiling(MathF.Sqrt(0.75f * deviation / MathF.Max(tolerance, 1e-6f))), 1, 64);
-        var lastStep = includeEnd ? steps : steps - 1;
-        for (var i = 1; i <= lastStep; i++)
-        {
-            target.Add(Bezier.GetPoint(p0, p1, p2, p3, i / (float)steps));
-        }
-    }
-
-    private static float DistanceToLineSq(Vector3 p, Vector3 origin, Vector3 direction, float directionLengthSq)
-    {
-        var d = p - origin;
-        var t = Vector3.Dot(d, direction) / directionLengthSq;
-        return (d - direction * t).LengthSquared();
     }
 }
 

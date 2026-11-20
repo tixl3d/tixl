@@ -481,6 +481,9 @@ public partial class SymbolPackage
         RegisterType(typeof(MeshBuffers), "MeshBuffers",
                      () => new InputValue<MeshBuffers>(null));
 
+        RegisterType(typeof(Geometry), "Geometry",
+                     () => new InputValue<Geometry>(null));
+
         RegisterType(typeof(MeshGeometry), "MeshGeometry",
                      () => new InputValue<MeshGeometry>(null));
 

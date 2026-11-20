@@ -84,6 +84,7 @@ public readonly record struct GeometryPart(int FaceStart, int FaceCount, Vector3
 /// <summary>
 /// Unique edges of a mesh with face adjacency, derived lazily from the N-gon topology.
 /// Assumes at most two faces per edge (non-manifold extra faces keep the first two).
+/// For a <see cref="Geometry"/>, faces are its polygon primitives and curve vertices get edge -1.
 /// </summary>
 public sealed class EdgeTopology
 {
@@ -97,16 +98,29 @@ public sealed class EdgeTopology
 
     public static EdgeTopology Build(MeshGeometry geometry)
     {
-        var cornerCount = geometry.CornerCount;
+        return Build(geometry.FaceCornerOffsets, geometry.CornerPointIndices, geometry.FaceCount, null);
+    }
+
+    public static EdgeTopology Build(Geometry geometry)
+    {
+        return Build(geometry.PrimitiveVertexOffsets, geometry.VertexPoints, geometry.PrimitiveCount, geometry.PrimitiveKind);
+    }
+
+    /// <param name="kinds">Null when every primitive is a polygon; otherwise curves are skipped.</param>
+    private static EdgeTopology Build(int[] offsets, int[] cornerPoints, int faceCount, PrimitiveKinds[]? kinds)
+    {
+        var cornerCount = cornerPoints.Length;
         var edgeLookup = new Dictionary<(int, int), int>(cornerCount);
         var edges = new List<Edge>(cornerCount / 2 + 4);
         var cornerEdges = new int[cornerCount];
+        if (kinds != null)
+            Array.Fill(cornerEdges, -1);
 
-        var offsets = geometry.FaceCornerOffsets;
-        var cornerPoints = geometry.CornerPointIndices;
-
-        for (var faceIndex = 0; faceIndex < geometry.FaceCount; faceIndex++)
+        for (var faceIndex = 0; faceIndex < faceCount; faceIndex++)
         {
+            if (kinds != null && kinds[faceIndex] != PrimitiveKinds.Polygon)
+                continue;
+
             var start = offsets[faceIndex];
             var end = offsets[faceIndex + 1];
             for (var corner = start; corner < end; corner++)
