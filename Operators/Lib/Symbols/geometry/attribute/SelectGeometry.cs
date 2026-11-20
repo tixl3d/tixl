@@ -46,7 +46,7 @@ internal sealed class SelectGeometry : Instance<SelectGeometry>, IStatusProvider
             Compile(code);
 
         var attributeDomain = ToAttributeDomain(domain);
-        var count = GetElementCount(source, domain);
+        var count = GeometryElements.GetCount(source, attributeDomain);
 
         _output.Positions = source.Positions;
         _output.PrimitiveVertexOffsets = source.PrimitiveVertexOffsets;
@@ -84,7 +84,7 @@ internal sealed class SelectGeometry : Instance<SelectGeometry>, IStatusProvider
             }
             else
             {
-                weight = evaluate != null ? Math.Clamp(evaluate(i, count, GetElementPosition(source, domain, i), a, b), 0, 1) : 0;
+                weight = evaluate != null ? Math.Clamp(evaluate(i, count, GeometryElements.GetPosition(source, attributeDomain, i), a, b), 0, 1) : 0;
             }
 
             if (invert)
@@ -103,42 +103,6 @@ internal sealed class SelectGeometry : Instance<SelectGeometry>, IStatusProvider
         _output.Attributes.Add(_selection);
         _output.InvalidateTopologyCaches();
         Result.Value = _output;
-    }
-
-    private static int GetElementCount(Geometry geometry, Domains domain)
-    {
-        return domain switch
-                   {
-                       Domains.Points     => geometry.PointCount,
-                       Domains.Vertices   => geometry.VertexCount,
-                       Domains.Primitives => geometry.PrimitiveCount,
-                       _                  => geometry.Parts.Length,
-                   };
-    }
-
-    /// <summary>Points: their position. Vertices: their point's. Primitives: the mean of their points. Parts: the pivot.</summary>
-    private static Vector3 GetElementPosition(Geometry geometry, Domains domain, int index)
-    {
-        switch (domain)
-        {
-            case Domains.Points:
-                return geometry.Positions[index];
-            case Domains.Vertices:
-                return geometry.Positions[geometry.VertexPoints[index]];
-            case Domains.Primitives:
-                var start = geometry.PrimitiveVertexOffsets[index];
-                var end = geometry.PrimitiveVertexOffsets[index + 1];
-                if (end == start)
-                    return Vector3.Zero;
-
-                var sum = Vector3.Zero;
-                for (var vertex = start; vertex < end; vertex++)
-                    sum += geometry.Positions[geometry.VertexPoints[vertex]];
-
-                return sum / (end - start);
-            default:
-                return geometry.Parts[index].Pivot;
-        }
     }
 
     private static AttributeDomain ToAttributeDomain(Domains domain)

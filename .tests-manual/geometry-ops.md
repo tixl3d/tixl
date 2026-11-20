@@ -374,3 +374,27 @@ Replace `[CurvesToPoints]` and the line ops with `[ExtrudeCurves]` ->
   respective faces.
 - `[ColorFacesFromAttribute]` with the part-index option colors each letter
   differently; the `IsSide` primitive attribute separates walls from caps.
+
+## Step: Set an attribute per letter
+
+**Action:**
+Connect [StringToCurves] (text `TiXL`) -> [SetGeometryAttribute] (Domain Parts, Name `W`, Mode Custom, Code
+`return i == 1 ? 1f : 0f;`) -> [TransformGeometry] (Translation Y 0.1, Selection `W`), and look at the Output Window.
+
+**Expected:**
+- Only the `i` moves up; the other letters stay.
+- In the Table of [SetGeometryAttribute]'s output, **Parts** shows a `W` column with 1 for the `i` and 0 elsewhere.
+- A typo in Code shows the snippet's line and error as the op's warning; the last working values stay.
+
+## Step: Color letters from an attribute
+
+**Action:**
+Connect [StringToCurves] (text `TiXL`) -> [SetGeometryAttribute] (Domain Parts, Name `W`, Mode Custom, Code
+`return i * 0.25f;`) -> [ColorGeometry] (Domain Parts, Attribute `W`, Mapping FromStart, a black-to-white gradient)
+-> [CurvesToPoints] (Sampling Points), and look at the Output Window.
+
+**Expected:**
+- The four letters get four grey levels, from black for the `T` to light grey for the `L`.
+- Switching Domain to Points and Input Mode to Index gives a ramp along all points; Random gives noise that changes with Seed.
+- With an empty or misspelled Attribute the colors stay unchanged and the op shows a warning.
+- An upstream [SelectGeometry] (Every 2) recolors only every second point.

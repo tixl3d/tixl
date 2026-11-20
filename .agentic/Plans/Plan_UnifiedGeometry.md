@@ -198,7 +198,7 @@ message must name what was expected.
   share ring points, so each point can take its own depth for sloped back caps, interpolated along the flattened
   samples. Prefer explicit `...Attribute` inputs on the few ops where a per-element value matters (depth, bevel,
   offset distance, transform weight) over a general attribute binding for every parameter.
-- **`SetGeometryAttribute`** (maintainer, 2026-11-20): writes a named attribute on a chosen domain and type from a
+- **`SetGeometryAttribute`** (done 2026-11-21; element counts, positions and weights shared with `SelectGeometry` in `Lib/Utils/GeometryElements`) (maintainer, 2026-11-20): writes a named attribute on a chosen domain and type from a
   constant, a C# snippet (sharing `CSharpSnippetCompiler` and the `i`, `count`, `p`, `A`, `B` scope of
   `SelectGeometry`), another attribute or a field. Example: `StringToCurves -> SetGeometryAttribute (Part, Depth,
   0.5 + 0.5 * Sin(i * 0.8 + A)) -> ExtrudeCurves (DepthAttribute = Depth)` gives an animated depth wave.
@@ -244,6 +244,7 @@ TiXL's choice fits authoring: exact text outlines, beveling N-gons and editing a
 GPU-friendly fixed-size primitives don't keep. POPs fit large per-frame processing, which TiXL's GPU points already
 cover, without an attribute model. Two consequences:
 
+- **`ColorGeometry`** (done 2026-11-21): gradient coloring of any domain, driven by an attribute (default), index, random or field, mapped like `MapPointAttributes` (Mapping, Range, Phase) with GainAndBias, Randomize and Seed; selection-blended. Point `Color` is now read by `GeometryMeshCompiler` and `CurvesToPoints`. Open: whether `ColorFromField` becomes obsolete, since it duplicates the Field mode.
 - **Keep `Geometry` columnar** (one array per attribute, CSR topology) so an attributed GPU geometry, if TiXL ever
   wants one, could mirror the schema and upload attribute by attribute.
 - **Dimensions** are worth copying later as `Detail`-level metadata for grids, so neighbor ops don't have to rebuild

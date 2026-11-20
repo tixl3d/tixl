@@ -44,6 +44,7 @@ internal sealed class CurvesToPoints : Instance<CurvesToPoints>
 
         curves.Attributes.TryGet<Vector4>(GeometryAttributeNames.Color, AttributeDomain.Part, out var partColors);
         curves.Attributes.TryGet<Vector4>(GeometryAttributeNames.Color, AttributeDomain.Primitive, out var primitiveColors);
+        curves.Attributes.TryGet<Vector4>(GeometryAttributeNames.Color, AttributeDomain.Point, out var pointColors);
         var parts = curves.Parts;
         var curveViews = curves.Curves;
         CurveWinding.GetOutsideSides(curves, _contourSides);
@@ -79,6 +80,12 @@ internal sealed class CurvesToPoints : Instance<CurvesToPoints>
                 color = primitiveColors.Values[contourIndex];
             else if (partColors != null && parts.Length > 0)
                 color = partColors.Values[partIndex];
+            else if (pointColors != null)
+                color = pointColors.Values[curves.VertexPoints[curves.PrimitiveVertexOffsets[contourIndex]]];
+
+            // Sampled points match the curve's vertices one-to-one, so they can take their point's color
+            var vertexStart = curves.PrimitiveVertexOffsets[contourIndex];
+            var usesPointColors = samplesPoints && pointColors != null && primitiveColors == null && (partColors == null || parts.Length == 0);
 
             var f2 = parts.Length > 0 ? partIndex : contourIndex;
             var isContourClosed = curves.PrimitiveClosed[contourIndex];
@@ -96,7 +103,7 @@ internal sealed class CurvesToPoints : Instance<CurvesToPoints>
                                                                   F2 = f2,
                                                                   Orientation = GetOutwardOrientation(tangent, _contourSides[contourIndex]),
                                                                   Scale = Vector3.One,
-                                                                  Color = color,
+                                                                  Color = usesPointColors ? pointColors!.Values[curves.VertexPoints[vertexStart + index]] : color,
                                                               };
             }
 

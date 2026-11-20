@@ -1,0 +1,137 @@
+{
+  "FormatVersion": 3,
+  "Id": "c9273935-dc39-41a8-9855-2af6264ca38a"/*ColorGeometry*/,
+  "Description": "Colors the points, vertices, primitives or parts of a geometry from a gradient, driven by an attribute, the element order, a random value or a field.\n\nThe value is mapped onto the gradient like in [MapPointAttributes] (Mapping, Range, Phase) and can be shaped with gain and bias and randomized per element. The result is the Color attribute of the chosen domain, which [GeometryToMesh] and [CurvesToPoints] pick up. A selection blends the new color over the old one.\n\nAKA: color by attribute, colorize, gradient, Cd\n\nTips\n- On the Parts of [StringToCurves], Attribute CharIndex with Mapping FromStart and Range set to the text length gives one color per letter.\n- Animate Phase to scroll the gradient over the geometry.",
+  "InputUis": [
+    {
+      "InputId": "00d822de-e7f9-4e67-b648-61292ac4a74e"/*Randomize*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 405.0
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "Description": "Adds a random offset per element before mapping."
+    },
+    {
+      "InputId": "40d43e7d-ac00-4a01-8003-0c1994c9ca9d"/*GainAndBias*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 360.0
+      },
+      "Description": "Shapes the mapped value before the gradient is sampled.",
+      "UseVec2Control": "GainAndBias"
+    },
+    {
+      "InputId": "6698962e-2030-4d64-a188-46202dc05ee7"/*Gradient*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 495.0
+      },
+      "Description": "The colors sampled by the mapped value."
+    },
+    {
+      "InputId": "6b9644e5-7ccc-4939-acd7-1843ae13590f"/*Attribute*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 135.0
+      },
+      "Description": "The attribute to map, e.g. CharIndex on the parts of a text or W written by [SetGeometryAttribute]."
+    },
+    {
+      "InputId": "73465bee-c3e5-4a74-aa90-25544807d0db"/*Geometry*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "765026fe-c3ff-4c70-bd08-dbd2479bbec4"/*WriteMode*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 540.0
+      },
+      "Description": "Replace writes the gradient color; Multiply tints an existing Color."
+    },
+    {
+      "InputId": "7a46fc42-ee5a-41e9-974e-f679d95c9be0"/*Mapping*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 225.0
+      },
+      "Description": "How the value is mapped onto the gradient, as in [MapPointAttributes]: Centered around the middle, FromStart, PingPong or Repeat.",
+      "GroupTitle": "Mapping"
+    },
+    {
+      "InputId": "80562710-c60c-4748-8450-1a559f63789a"/*Phase*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 315.0
+      },
+      "Min": -1.0,
+      "Max": 1.0,
+      "Description": "Shifts the gradient along the values; animate it to scroll colors."
+    },
+    {
+      "InputId": "aac052f7-1620-4b62-ad67-1caf37ae414f"/*Selection*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 585.0
+      },
+      "Description": "Name of a float selection whose weight blends the new color over the old one. Empty uses the Selection from an upstream [SelectGeometry] if there is one, and otherwise colors every element."
+    },
+    {
+      "InputId": "c1d24e54-d36d-4bff-8d22-c036b3bbc7f3"/*InputMode*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 90.0
+      },
+      "Description": "What drives the gradient: a numeric Attribute of the domain (vectors use X), the element Index, a Random value, or a scalar Field sampled at each element."
+    },
+    {
+      "InputId": "d45c60d5-a982-4b55-a7c7-13917c9c3fa9"/*Range*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 270.0
+      },
+      "Min": 0.1,
+      "Max": 4.0,
+      "Description": "How much of the value range spans the gradient. Smaller values stretch the gradient."
+    },
+    {
+      "InputId": "d819c1fa-92f9-4dcb-9cfa-f31255c25d9f"/*Seed*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 450.0
+      },
+      "Description": "Seed for Random mode and Randomize."
+    },
+    {
+      "InputId": "f12169c2-ba7d-4e44-916d-1300a8297ac7"/*Domain*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      },
+      "Description": "Which elements get the color: points, vertices, primitives (polygons and curves) or parts, e.g. one color per letter of [StringToCurves]."
+    },
+    {
+      "InputId": "f68e29c5-a751-49d0-b1a5-7e8d51adb70e"/*Field*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 180.0
+      },
+      "Description": "Scalar field sampled at each element's position in Field mode."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "fc15916c-43c0-4377-8489-fd8624850343"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

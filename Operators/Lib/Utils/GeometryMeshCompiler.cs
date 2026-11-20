@@ -90,10 +90,13 @@ internal sealed class GeometryMeshCompiler
         attributes.TryGet<Vector2>(GeometryAttributeNames.TexCoord2, source.VertexDomain, out var vertexUvs2);
         attributes.TryGet<Vector4>(GeometryAttributeNames.Color, source.VertexDomain, out var vertexColors);
 
-        // Coarser color domains are promoted to vertices here: primitive color, else part color
+        // Other color domains are promoted to vertices here: point color, else primitive color, else part color
+        GeometryAttribute<Vector4>? pointColors = null;
         GeometryAttribute<Vector4>? primitiveColors = null;
         GeometryAttribute<Vector4>? partColors = null;
-        if (vertexColors == null && !attributes.TryGet(GeometryAttributeNames.Color, source.PrimitiveDomain, out primitiveColors))
+        if (vertexColors == null
+            && !attributes.TryGet(GeometryAttributeNames.Color, AttributeDomain.Point, out pointColors)
+            && !attributes.TryGet(GeometryAttributeNames.Color, source.PrimitiveDomain, out primitiveColors))
             attributes.TryGet(GeometryAttributeNames.Color, AttributeDomain.Part, out partColors);
 
         if (partColors != null)
@@ -139,7 +142,9 @@ internal sealed class GeometryMeshCompiler
                 var normal = vertexNormals != null ? vertexNormals.Values[c] : faceNormal;
                 var uv = vertexUvs != null ? vertexUvs.Values[c] : Vector2.Zero;
                 var uv2 = vertexUvs2 != null ? vertexUvs2.Values[c] : uv;
-                var color = vertexColors != null ? vertexColors.Values[c] : faceColor;
+                var color = vertexColors != null ? vertexColors.Values[c]
+                            : pointColors != null ? pointColors.Values[vertexPoints[c]]
+                            : faceColor;
 
                 vertices[outStart + c - start] = new PbrVertex
                                                      {

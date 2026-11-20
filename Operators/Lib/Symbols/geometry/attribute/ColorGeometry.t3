@@ -1,0 +1,93 @@
+{
+  "FormatVersion": 3,
+  "Id": "c9273935-dc39-41a8-9855-2af6264ca38a"/*ColorGeometry*/,
+  "Inputs": [
+    {
+      "Id": "00d822de-e7f9-4e67-b648-61292ac4a74e"/*Randomize*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "40d43e7d-ac00-4a01-8003-0c1994c9ca9d"/*GainAndBias*/,
+      "DefaultValue": {
+        "X": 0.5,
+        "Y": 0.5
+      }
+    },
+    {
+      "Id": "6698962e-2030-4d64-a188-46202dc05ee7"/*Gradient*/,
+      "DefaultValue": {
+        "Gradient": {
+          "Interpolation": "Linear",
+          "Steps": [
+            {
+              "Id": "cdf31050-9f88-4cf3-a28b-850b5320c028",
+              "NormalizedPosition": 0.0,
+              "Color": {
+                "R": 0.0,
+                "G": 0.0,
+                "B": 0.0,
+                "A": 1.0
+              }
+            },
+            {
+              "Id": "7b3a48f8-977d-47b3-b2dd-bf7410a2df86",
+              "NormalizedPosition": 1.0,
+              "Color": {
+                "R": 1.0,
+                "G": 1.0,
+                "B": 1.0,
+                "A": 1.0
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "Id": "6b9644e5-7ccc-4939-acd7-1843ae13590f"/*Attribute*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "73465bee-c3e5-4a74-aa90-25544807d0db"/*Geometry*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "765026fe-c3ff-4c70-bd08-dbd2479bbec4"/*WriteMode*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "7a46fc42-ee5a-41e9-974e-f679d95c9be0"/*Mapping*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "80562710-c60c-4748-8450-1a559f63789a"/*Phase*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "aac052f7-1620-4b62-ad67-1caf37ae414f"/*Selection*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "c1d24e54-d36d-4bff-8d22-c036b3bbc7f3"/*InputMode*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "d45c60d5-a982-4b55-a7c7-13917c9c3fa9"/*Range*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "d819c1fa-92f9-4dcb-9cfa-f31255c25d9f"/*Seed*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "f12169c2-ba7d-4e44-916d-1300a8297ac7"/*Domain*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "f68e29c5-a751-49d0-b1a5-7e8d51adb70e"/*Field*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}
