@@ -40,7 +40,7 @@ public static class GeometryAttributeNames
     public const string IsSide = "IsSide";
 }
 
-/// <summary>Attribute names produced by text layout ([TextToCurves]); all on the Part (glyph) domain.</summary>
+/// <summary>Attribute names produced by text layout ([StringToCurves]); all on the Part (glyph) domain.</summary>
 public static class CurveAttributeNames
 {
     public const string CodePoint = "CodePoint";

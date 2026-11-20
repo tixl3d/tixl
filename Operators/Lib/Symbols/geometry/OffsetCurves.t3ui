@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "89ddc35c-ba3b-49a1-b766-a7356a12fe40"/*OffsetCurves*/,
-  "Description": "Grows or shrinks curve outlines by moving every contour sideways by a fixed distance.\n\nA positive Offset expands the filled area of each part (for example a glyph from [TextToCurves]): outlines move outward and holes shrink, whatever winding the source uses. Open contours move to their left. Curved segments stay bezier curves and are split only where needed to stay within Tolerance. Sharp corners stay closed: on the outside they are joined with a miter, a round arc or a bevel, on the inside the two offset edges are trimmed to where they meet. The offset happens in the XY plane. Very large inward offsets can produce self-intersecting loops, which are not removed.\n\nAKA: inset, outset, grow, shrink, expand, contour offset, parallel curve",
+  "Description": "Grows or shrinks curve outlines by moving every contour sideways by a fixed distance.\n\nA positive Offset expands the filled area of each part (for example a glyph from [StringToCurves]): outlines move outward and holes shrink, whatever winding the source uses. Open contours move to their left. Curved segments stay bezier curves and are split only where needed to stay within Tolerance. Sharp corners stay closed: on the outside they are joined with a miter, a round arc or a bevel, on the inside the two offset edges are trimmed to where they meet. The offset happens in the XY plane. Very large inward offsets can produce self-intersecting loops, which are not removed.\n\nAKA: inset, outset, grow, shrink, expand, contour offset, parallel curve",
   "InputUis": [
     {
       "InputId": "1aa775f1-56e3-4ff3-9f1b-756ea64f9120"/*Join*/,

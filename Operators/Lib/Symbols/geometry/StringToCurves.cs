@@ -15,7 +15,7 @@ namespace Lib.geometry;
 /// </summary>
 [Guid("e2b7f4a1-3c69-4d58-8a1e-9f6c0d2b5e37")]
 [ExportDependencies("SixLabors.Fonts.dll")]
-internal sealed class TextToCurves : Instance<TextToCurves>, IDescriptiveFilename, IStatusProvider, ITransformable
+internal sealed class StringToCurves : Instance<StringToCurves>, IDescriptiveFilename, IStatusProvider, ITransformable
 {
     [Output(Guid = "5d3f9b27-a8c1-4e60-b2d4-7e9f1c6a3b85")]
     public readonly TransformCallbackSlot<CurveGeometry?> Curves = new();
@@ -23,7 +23,7 @@ internal sealed class TextToCurves : Instance<TextToCurves>, IDescriptiveFilenam
     [Output(Guid = "9a6e2c48-d1b5-4f73-8c0e-3b7d5a2f9e16")]
     public readonly Slot<int> GlyphCount = new();
 
-    public TextToCurves()
+    public StringToCurves()
     {
         _resource = new Resource<LoadedFont>(Path, TryLoadFont, allowDisposal: false);
         _resource.AddDependentSlots(Curves, GlyphCount);
@@ -542,6 +542,9 @@ internal sealed class TextToCurves : Instance<TextToCurves>, IDescriptiveFilenam
     [Input(Guid = "3e6b8d2a-c4f9-4a17-b5e3-8d0c7a2f6e41")]
     public readonly InputSlot<float> LineSpacing = new();
 
+    [Input(Guid = "c9d47a2e-3b51-4f86-a1e7-8d2f6b0c4a19")]
+    public readonly InputSlot<float> LetterSpacing = new();
+
     [Input(Guid = "d9c4a6e2-1b83-4f50-a7e9-5c2d8b3f1a67", MappedType = typeof(Alignments))]
     public readonly InputSlot<int> Alignment = new();
 
@@ -562,8 +565,4 @@ internal sealed class TextToCurves : Instance<TextToCurves>, IDescriptiveFilenam
 
     [Input(Guid = "b3e81c4d-6f27-4a95-9d0e-1c5a7f3b8e62")]
     public readonly InputSlot<Vector3> Position = new();
-
-    [Input(Guid = "c9d47a2e-3b51-4f86-a1e7-8d2f6b0c4a19")]
-    public readonly InputSlot<float> LetterSpacing = new();
-
 }

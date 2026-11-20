@@ -1,6 +1,6 @@
 {
   "FormatVersion": 3,
-  "Id": "e2b7f4a1-3c69-4d58-8a1e-9f6c0d2b5e37"/*TextToCurves*/,
+  "Id": "e2b7f4a1-3c69-4d58-8a1e-9f6c0d2b5e37"/*StringToCurves*/,
   "Inputs": [
     {
       "Id": "1f8a3c5e-7d92-4b06-a4e1-c6b9d2f7a350"/*Text*/,

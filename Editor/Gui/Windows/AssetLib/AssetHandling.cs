@@ -183,7 +183,7 @@ internal static class AssetHandling
                                    {
                                        PrimaryOperators =
                                            [
-                                               new Guid("e2b7f4a1-3c69-4d58-8a1e-9f6c0d2b5e37"), // TextToCurves
+                                               new Guid("e2b7f4a1-3c69-4d58-8a1e-9f6c0d2b5e37"), // StringToCurves
                                            ],
                                        Color = UiColors.ColorForCpuGeometry,
                                        IconId = (uint)Icon.FileT3Font,
