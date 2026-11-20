@@ -1,7 +1,7 @@
 #nullable enable
 using T3.Core.DataTypes;
 
-namespace T3.Editor.Gui.OutputUi.Geometry;
+namespace T3.Editor.Gui.OutputUi.GeometryViews;
 
 /// <summary>
 /// One domain of a CPU geometry as a grid of floats: built-in columns (positions, topology) followed by the domain's

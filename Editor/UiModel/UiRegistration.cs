@@ -11,7 +11,7 @@ using T3.Editor.Gui.InputUi.SimpleInputUis;
 using T3.Editor.Gui.InputUi.SingleControl;
 using T3.Editor.Gui.InputUi.VectorInputs;
 using T3.Editor.Gui.OutputUi;
-using T3.Editor.Gui.OutputUi.Geometry;
+using T3.Editor.Gui.OutputUi.GeometryViews;
 using T3.Editor.UiModel.InputsAndTypes;
 using Int3 = T3.Core.DataTypes.Vector.Int3;
 using Point = T3.Core.DataTypes.Point;

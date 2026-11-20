@@ -1,7 +1,7 @@
 #nullable enable
 using T3.Core.Rendering;
 using T3.Core.Utils;
-using T3.Core.Utils.Geometry;
+using T3.Core.Utils.Math3d;
 // ReSharper disable InconsistentNaming
 
 namespace Lib.point.helper;

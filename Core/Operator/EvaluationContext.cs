@@ -8,7 +8,7 @@ using T3.Core.Output.Rendering;
 using T3.Core.Rendering;
 using T3.Core.Rendering.Material;
 using T3.Core.Utils;
-using T3.Core.Utils.Geometry;
+using T3.Core.Utils.Math3d;
 using Buffer = T3.Graphics.Compat.Buffer;
 using Texture2D = T3.Core.DataTypes.Texture2D;
 

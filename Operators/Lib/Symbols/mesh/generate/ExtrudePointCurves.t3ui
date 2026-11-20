@@ -1,6 +1,6 @@
 {
   "FormatVersion": 3,
-  "Id": "816336a8-e214-4d2c-b8f9-05b1aa3ff2e2"/*ExtrudeCurves*/,
+  "Id": "816336a8-e214-4d2c-b8f9-05b1aa3ff2e2"/*ExtrudePointCurves*/,
   "Description": "Generates a mesh by sweeping a profile shape along a rail of points.\n\nThe profile points are placed in the XY plane of each rail point's orientation, so the rail points should be oriented with their z-axis pointing along the rail. The normals are taken directly from the combined orientation of rail and profile points. Use [VisualizePoints] to verify the alignment and adjust it with [TransformPoints] in point space.\n\nAKA: sweep, loft, extrude, tube\n\nSee also: [DrawMesh]",
   "SymbolTags": "8",
   "InputUis": [

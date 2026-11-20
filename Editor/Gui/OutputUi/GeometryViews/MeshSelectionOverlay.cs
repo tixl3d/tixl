@@ -4,7 +4,7 @@ using T3.Core.DataTypes;
 using T3.Editor.Gui.OutputUi.Previews;
 using T3.Editor.Gui.Styling;
 
-namespace T3.Editor.Gui.OutputUi.Geometry;
+namespace T3.Editor.Gui.OutputUi.GeometryViews;
 
 /// <summary>
 /// Draws the mesh elements selected in the table over the rendered preview: points, face outlines, corners (pulled

@@ -1,6 +1,6 @@
 using System;
 
-namespace T3.Core.Utils.Geometry;
+namespace T3.Core.Utils.Math3d;
 
 public static class GraphicsMath
 {

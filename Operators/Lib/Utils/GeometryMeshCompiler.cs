@@ -3,7 +3,7 @@ using System;
 using System.Numerics;
 using T3.Core.DataTypes;
 using T3.Core.Rendering;
-using T3.Core.Utils.Geometry;
+using T3.Core.Utils.Math3d;
 
 namespace Lib.Utils;
 

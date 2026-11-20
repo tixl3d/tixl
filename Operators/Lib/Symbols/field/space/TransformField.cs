@@ -1,6 +1,6 @@
 using T3.Core.DataTypes.ShaderGraph;
 using T3.Core.Utils;
-using T3.Core.Utils.Geometry;
+using T3.Core.Utils.Math3d;
 
 namespace Lib.field.space;
 

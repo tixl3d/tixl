@@ -143,7 +143,8 @@ message must name what was expected.
 ## Phases
 
 ### Phase 1: Zigzag spike
-- Renames first, as their own commit: the two namespaces and `[ExtrudePointCurves]`.
+- Renames first, as their own commit: the two namespaces and `[ExtrudePointCurves]` (done 2026-11-20, together with
+  its example `ExtrudePointCurvesExample`, which links to the op by name).
 - `Geometry` with polygon and curve primitives, typed views, attribute type info, Houdini domains.
 - Convert `StringToCurves`, `SubdivideCurves`, `CurvesToGeometry` (as `ExtrudeCurves`), `TransformGeometry`
   (Selection, Space), `GeometryToMesh`; add `SelectGeometry` with Index Pattern and Custom modes.
@@ -169,7 +170,7 @@ message must name what was expected.
 1. **One primitive list with a kind per primitive, plus typed views** (`Polygons`, `Curves`) (2026-11-20).
 2. **`Geometry` is a main type and owns the name** (2026-11-20). Namespaces that clash are renamed:
    - `T3.Core.Utils.Geometry` (`Ray`, `GraphicsMath`, `PlaneExtensions`, `MatrixExtensions`, `VectorT3`; 46 files in
-     the repo) -> `T3.Core.Utils.Spatial`. External operator packages that import it need a one-line change (one file
+     the repo) -> `T3.Core.Utils.Math3d`. External operator packages that import it need a one-line change (one file
      in the maintainer's projects); mention it in the release notes.
    - `T3.Editor.Gui.OutputUi.Geometry` -> `T3.Editor.Gui.OutputUi.GeometryViews`.
 3. **Ops that merely sound like geometry ops give up their names** (2026-11-20). The GPU `[ExtrudeCurves]` (rail and

@@ -1,7 +1,7 @@
 #nullable enable
 using T3.Core.DataTypes;
 
-namespace T3.Editor.Gui.OutputUi.Geometry;
+namespace T3.Editor.Gui.OutputUi.GeometryViews;
 
 /// <summary>
 /// Rows of the points, faces, corners, edges or parts of a <see cref="MeshGeometry"/>. Edges are the geometry's

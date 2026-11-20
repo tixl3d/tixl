@@ -13,7 +13,7 @@ using T3.Core.Logging;
 using T3.Core.Operator.Slots;
 using T3.Serialization;
 using T3.Core.Utils;
-using T3.Core.Utils.Geometry;
+using T3.Core.Utils.Math3d;
 using Int3 = T3.Core.DataTypes.Vector.Int3;
 
 namespace T3.Core.Operator;

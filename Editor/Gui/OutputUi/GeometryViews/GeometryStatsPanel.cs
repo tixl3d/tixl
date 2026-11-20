@@ -5,7 +5,7 @@ using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
 using Color = T3.Core.DataTypes.Vector.Color;
 
-namespace T3.Editor.Gui.OutputUi.Geometry;
+namespace T3.Editor.Gui.OutputUi.GeometryViews;
 
 /// <summary>
 /// Label/value lines and the attribute list shown for CPU geometry. Owners fill it when the geometry changes, so

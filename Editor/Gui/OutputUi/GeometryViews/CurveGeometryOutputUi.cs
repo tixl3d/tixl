@@ -8,7 +8,7 @@ using T3.Editor.Gui.Input;
 using T3.Editor.Gui.OutputUi.Previews;
 using T3.Editor.Gui.Styling;
 
-namespace T3.Editor.Gui.OutputUi.Geometry;
+namespace T3.Editor.Gui.OutputUi.GeometryViews;
 
 /// <summary>
 /// Output view for curves: renders them like [CurvesToPoints] into [DrawLines], lists the anchors, segments, contours

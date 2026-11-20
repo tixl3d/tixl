@@ -2,7 +2,7 @@
 using ImGuiNET;
 using T3.Editor.Gui.Styling;
 
-namespace T3.Editor.Gui.OutputUi.Geometry;
+namespace T3.Editor.Gui.OutputUi.GeometryViews;
 
 /// <summary>Shared look of highlighted geometry elements on a rendered preview.</summary>
 internal static class SelectionOverlayStyle

@@ -6,7 +6,7 @@ using T3.Core.Operator.Interfaces;
 using T3.Core.Operator.Slots;
 using T3.Core.Resource;
 using T3.Core.Utils;
-using T3.Core.Utils.Geometry;
+using T3.Core.Utils.Math3d;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows;
@@ -14,12 +14,12 @@ using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Graph;
 using Color = T3.Core.DataTypes.Vector.Color;
-using GraphicsMath = T3.Core.Utils.Geometry.GraphicsMath;
+using GraphicsMath = T3.Core.Utils.Math3d.GraphicsMath;
 using Plane = System.Numerics.Plane;
 using Quaternion = System.Numerics.Quaternion;
 using Vector2 = System.Numerics.Vector2;
 using Vector4 = System.Numerics.Vector4;
-using Ray = T3.Core.Utils.Geometry.Ray;
+using Ray = T3.Core.Utils.Math3d.Ray;
 
 // ReSharper disable RedundantNameQualifier
 

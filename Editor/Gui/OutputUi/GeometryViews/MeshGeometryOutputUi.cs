@@ -8,7 +8,7 @@ using T3.Editor.Gui.Input;
 using T3.Editor.Gui.OutputUi.Previews;
 using T3.Editor.Gui.Styling;
 
-namespace T3.Editor.Gui.OutputUi.Geometry;
+namespace T3.Editor.Gui.OutputUi.GeometryViews;
 
 /// <summary>
 /// Output view for CPU geometry: renders it like [GeometryToMesh] into [VisualizeMesh], lists its points, faces,

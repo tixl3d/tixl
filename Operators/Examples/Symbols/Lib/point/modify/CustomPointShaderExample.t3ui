@@ -1097,7 +1097,7 @@
     },
     {
       "ChildId": "95b71dc3-e082-4a8c-ba29-4194fe754b80",
-      "SymbolName": "Lib.mesh.generate.ExtrudeCurves",
+      "SymbolName": "Lib.mesh.generate.ExtrudePointCurves",
       "SectionId": "adfa4817-5222-4264-996d-c42e06d0669b",
       "Position": {
         "X": -340.26938,

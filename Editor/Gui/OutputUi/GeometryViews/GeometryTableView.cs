@@ -4,7 +4,7 @@ using ImGuiNET;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.TableView;
 
-namespace T3.Editor.Gui.OutputUi.Geometry;
+namespace T3.Editor.Gui.OutputUi.GeometryViews;
 
 /// <summary>
 /// Draws a <see cref="GeometryTableModel"/> as a table, styled like the buffer table, and keeps a row selection.

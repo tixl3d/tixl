@@ -131,7 +131,7 @@
       }
     },
     {
-      "ChildId": "1941a013-fc01-4bd6-a794-f55ac8e9368b"/*ExtrudeCurves*/,
+      "ChildId": "1941a013-fc01-4bd6-a794-f55ac8e9368b"/*ExtrudePointCurves*/,
       "Position": {
         "X": 1365.4089,
         "Y": 119.201294
@@ -614,7 +614,7 @@
       }
     },
     {
-      "ChildId": "92068204-e0e1-4f69-8c64-a5cf18c7d380"/*ExtrudeCurves*/,
+      "ChildId": "92068204-e0e1-4f69-8c64-a5cf18c7d380"/*ExtrudePointCurves*/,
       "Position": {
         "X": 1842.1521,
         "Y": 272.07678

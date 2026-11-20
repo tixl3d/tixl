@@ -1,7 +1,7 @@
 namespace Lib.mesh.generate;
 
 [Guid("816336a8-e214-4d2c-b8f9-05b1aa3ff2e2")]
-internal sealed class ExtrudeCurves : Instance<ExtrudeCurves>
+internal sealed class ExtrudePointCurves : Instance<ExtrudePointCurves>
 {
 
     [Output(Guid = "79ba19e0-13c3-40c7-8e0a-f190b03e95b0")]

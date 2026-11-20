@@ -1,7 +1,7 @@
 using T3.Core.Animation;
 using T3.Core.Rendering;
 using T3.Core.Utils;
-using T3.Core.Utils.Geometry;
+using T3.Core.Utils.Math3d;
 
 // ReSharper disable SuggestVarOrType_SimpleTypes
 

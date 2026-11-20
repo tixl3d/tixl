@@ -1,6 +1,6 @@
 {
   "FormatVersion": 3,
-  "Id": "816336a8-e214-4d2c-b8f9-05b1aa3ff2e2"/*ExtrudeCurves*/,
+  "Id": "816336a8-e214-4d2c-b8f9-05b1aa3ff2e2"/*ExtrudePointCurves*/,
   "Inputs": [
     {
       "Id": "13139afa-e01c-4cdd-abeb-8f33095a0f79"/*ScaleFactor*/,

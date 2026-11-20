@@ -5,7 +5,7 @@ using SharpGLTF.Schema2;
 using T3.Core.Rendering;
 using T3.Core.Rendering.Material;
 using T3.Core.Utils;
-using T3.Core.Utils.Geometry;
+using T3.Core.Utils.Math3d;
 using Scene = SharpGLTF.Schema2.Scene;
 
 namespace Lib.render.scene;

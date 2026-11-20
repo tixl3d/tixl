@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
-  "Id": "a469ca9f-a7f9-46b8-b34c-0a1c109e1222"/*ExtrudeCurvesExample*/,
-  "Description": "Three examples crafted by newemka for the [ExtrudeCurves] operator.",
+  "Id": "a469ca9f-a7f9-46b8-b34c-0a1c109e1222"/*ExtrudePointCurvesExample*/,
+  "Description": "Three examples crafted by newemka for the [ExtrudePointCurves] operator.",
   "InputUis": [],
   "SymbolChildUis": [
     {
@@ -31,7 +31,7 @@
     },
     {
       "ChildId": "093227ab-7a81-458c-96f1-50ec06ddaa96",
-      "SymbolName": "Lib.mesh.generate.ExtrudeCurves",
+      "SymbolName": "Lib.mesh.generate.ExtrudePointCurves",
       "SectionId": "b7d40bc4-8cae-43b8-b428-4c7f234aa088",
       "Comment": "If the generated mesh has holes on its surface, activate FixHoles",
       "Position": {
@@ -252,7 +252,7 @@
     },
     {
       "ChildId": "9ee99d7b-cbe5-4db7-ab7b-6043317db940",
-      "SymbolName": "Lib.mesh.generate.ExtrudeCurves",
+      "SymbolName": "Lib.mesh.generate.ExtrudePointCurves",
       "Position": {
         "X": 839.32214,
         "Y": -531.12366
@@ -376,7 +376,7 @@
     },
     {
       "ChildId": "edfaece3-0993-4692-8e83-4872cc26b190",
-      "SymbolName": "Lib.mesh.generate.ExtrudeCurves",
+      "SymbolName": "Lib.mesh.generate.ExtrudePointCurves",
       "Position": {
         "X": 447.22388,
         "Y": 846.77783

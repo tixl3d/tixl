@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "c6dd42a7-d3a3-4405-b64a-159bcf3beab8"/*MoveMeshToPointLine*/,
-  "Description": "Bends a mesh along a line defined by points.\n\nThe X axis of the mesh is mapped along the point line, while Y and Z are placed in the plane of the interpolated point orientations. The mesh should therefore be aligned along the X axis, starting at the origin. By default the geometry is mapped to the complete range of all points.\n\nAKA: path deform, curve deform, follow path\n\nSee also: [ExtrudeCurves]",
+  "Description": "Bends a mesh along a line defined by points.\n\nThe X axis of the mesh is mapped along the point line, while Y and Z are placed in the plane of the interpolated point orientations. The mesh should therefore be aligned along the X axis, starting at the origin. By default the geometry is mapped to the complete range of all points.\n\nAKA: path deform, curve deform, follow path\n\nSee also: [ExtrudePointCurves]",
   "SymbolTags": "8",
   "InputUis": [
     {

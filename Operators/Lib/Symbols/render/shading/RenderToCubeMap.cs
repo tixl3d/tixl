@@ -4,7 +4,7 @@ using T3.Core.Animation;
 using T3.Graphics.Compat;
 using T3.Core.Rendering;
 using T3.Core.Utils;
-using T3.Core.Utils.Geometry;
+using T3.Core.Utils.Math3d;
 using Device = T3.Graphics.Compat.Device;
 
 namespace Lib.render.shading;

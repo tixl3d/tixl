@@ -1,7 +1,7 @@
 #nullable enable
 using T3.Core.DataTypes;
 
-namespace T3.Editor.Gui.OutputUi.Geometry;
+namespace T3.Editor.Gui.OutputUi.GeometryViews;
 
 /// <summary>Rows of the anchors, segments, contours or parts of a <see cref="CurveGeometry"/>.</summary>
 internal sealed class CurveTableModel : GeometryTableModel

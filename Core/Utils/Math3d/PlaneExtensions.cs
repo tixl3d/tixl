@@ -1,7 +1,7 @@
 using System;
 using System.Numerics;
 
-namespace T3.Core.Utils.Geometry;
+namespace T3.Core.Utils.Math3d;
 
 public static class PlaneExtensions
 {

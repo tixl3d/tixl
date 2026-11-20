@@ -1,6 +1,6 @@
 {
   "FormatVersion": 3,
-  "Id": "a469ca9f-a7f9-46b8-b34c-0a1c109e1222"/*ExtrudeCurvesExample*/,
+  "Id": "a469ca9f-a7f9-46b8-b34c-0a1c109e1222"/*ExtrudePointCurvesExample*/,
   "Inputs": [],
   "Children": [
     {
@@ -55,9 +55,9 @@
       "Outputs": []
     },
     {
-      "Id": "093227ab-7a81-458c-96f1-50ec06ddaa96"/*ExtrudeCurves*/,
+      "Id": "093227ab-7a81-458c-96f1-50ec06ddaa96"/*ExtrudePointCurves*/,
       "SymbolId": "816336a8-e214-4d2c-b8f9-05b1aa3ff2e2",
-      "SymbolName": "Lib.mesh.generate.ExtrudeCurves",
+      "SymbolName": "Lib.mesh.generate.ExtrudePointCurves",
       "InputValues": [
         {
           "Id": "e4591b4f-b2e7-496d-8e02-e574a0432737"/*UVsDirection*/,
@@ -548,9 +548,9 @@
       "Outputs": []
     },
     {
-      "Id": "9ee99d7b-cbe5-4db7-ab7b-6043317db940"/*ExtrudeCurves*/,
+      "Id": "9ee99d7b-cbe5-4db7-ab7b-6043317db940"/*ExtrudePointCurves*/,
       "SymbolId": "816336a8-e214-4d2c-b8f9-05b1aa3ff2e2",
-      "SymbolName": "Lib.mesh.generate.ExtrudeCurves",
+      "SymbolName": "Lib.mesh.generate.ExtrudePointCurves",
       "InputValues": [
         {
           "Id": "13139afa-e01c-4cdd-abeb-8f33095a0f79"/*ScaleFactor*/,
@@ -852,9 +852,9 @@
       "Outputs": []
     },
     {
-      "Id": "edfaece3-0993-4692-8e83-4872cc26b190"/*ExtrudeCurves*/,
+      "Id": "edfaece3-0993-4692-8e83-4872cc26b190"/*ExtrudePointCurves*/,
       "SymbolId": "816336a8-e214-4d2c-b8f9-05b1aa3ff2e2",
-      "SymbolName": "Lib.mesh.generate.ExtrudeCurves",
+      "SymbolName": "Lib.mesh.generate.ExtrudePointCurves",
       "InputValues": [
         {
           "Id": "e4591b4f-b2e7-496d-8e02-e574a0432737"/*UVsDirection*/,

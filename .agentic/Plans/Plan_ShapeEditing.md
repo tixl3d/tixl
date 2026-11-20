@@ -346,7 +346,7 @@ Mapped from the two workflows; all on `CurveGeometry` / `MeshGeometry`, CPU, wit
 | `RectangleCurves`, `EllipseCurves`, `PolygonCurves` | B1, B4 | Also drawing tools in `[EditCurves]`; the ops are the procedural form |
 | `ResampleCurves` | A4, B2 | By distance or count, start offset, writes U/Distance, keeps corners optionally |
 | `CurvesToPoints` attribute mapping | A7, A8 | Planned in the geometry plan |
-| `SweepCurves` | A6 | Profile along path to `MeshGeometry`, one part per segment optional (planks). GPU `[ExtrudeCurves]` exists |
+| `SweepCurves` | A6 | Profile along path to `MeshGeometry`, one part per segment optional (planks). GPU `[ExtrudePointCurves]` exists |
 | `InsetFaces` / `ShrinkParts` | A6 | `ExplodeGeometry` partly covers shrinking parts |
 | `SelectGeometry` | B5 | Planned in the geometry plan |
 | `ExtrudeFaces` | B5 | Uses the face selection, selects new caps, optional named sides selection |
