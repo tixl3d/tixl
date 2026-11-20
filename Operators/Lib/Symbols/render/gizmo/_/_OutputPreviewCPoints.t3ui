@@ -1,0 +1,42 @@
+{
+  "FormatVersion": 3,
+  "Id": "0c3eb144-a156-4d72-bc7e-afdf13ba61f7"/*_OutputPreviewCPoints*/,
+  "Description": "Internal helper. Renders a CPU point list in the output window, like [ListToBuffer] into [VisualizePoints].\n\nIts only input is connected by the editor while it renders. For content, use [VisualizePoints] instead.",
+  "SymbolTags": "16",
+  "InputUis": [
+    {
+      "InputId": "37e80d44-7206-4046-9c11-2a8ba34e6929"/*Points*/,
+      "Position": {
+        "X": 190.0,
+        "Y": -105.0
+      }
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "12e7e37b-667b-438a-b60e-ff43ec0cf9fc",
+      "SymbolName": "Lib.point.draw.VisualizePoints",
+      "Position": {
+        "X": 190.0,
+        "Y": -35.0
+      }
+    },
+    {
+      "ChildId": "31cb3d01-83ab-4c6a-b60e-238aac2b0bb0",
+      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "Position": {
+        "X": 190.0,
+        "Y": -70.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "30a400c7-e467-499a-af4d-7a880d75f74e"/*Output*/,
+      "Position": {
+        "X": 190.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

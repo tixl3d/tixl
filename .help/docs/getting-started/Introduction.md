@@ -43,6 +43,8 @@ For images and textures it works like an image viewer. You can pan with right or
 
 For GPU buffers, like the points of [RadialPoints], the window shows the element count, the stride and the buffer size. Buffers don't know what they contain, so a 64-byte stride is assumed to hold points. Those can be shown as **Points**, drawn like a [VisualizePoints] with its default settings and navigated like a 3D scene, or as a **Table**. The table reads the buffer back from the GPU and lists the elements from **Start** for **Count** rows. Values that grew since the previous frame are tinted orange, values that shrank blue, and the larger the change, the stronger the tint. Hover a value to see its previous value and the change in percent. Zeros are faded out, and color fields start with a small strip showing the color. Buffers with other strides can only be shown as a table, with one column per float.
 
+CPU data is shown the same way. Point lists, like the points of [RadialCPoints], switch between **Points** and **Table**. Curves, like the outlines of [StringToCurves], and geometry, like a [CubeGeometry], switch between **Render** and **Stats**: curves are drawn as lines like [CurvesToPoints] into [DrawLines], geometry like [GeometryToMesh] into [VisualizeMesh]. **Stats** lists counts, bounds and attributes. Each kind of data remembers its own choice.
+
 ### Resolution
 
 In the resolution select we can switch from the default -- filling the size of the current output window -- to a fixed resolution or aspect ratio. Let's switch to full HD to constrain the aspect ratio. 

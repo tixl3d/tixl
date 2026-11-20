@@ -11,6 +11,7 @@ using T3.Editor.Gui.InputUi.SimpleInputUis;
 using T3.Editor.Gui.InputUi.SingleControl;
 using T3.Editor.Gui.InputUi.VectorInputs;
 using T3.Editor.Gui.OutputUi;
+using T3.Editor.Gui.OutputUi.Geometry;
 using T3.Editor.UiModel.InputsAndTypes;
 using Int3 = T3.Core.DataTypes.Vector.Int3;
 using Point = T3.Core.DataTypes.Point;
@@ -146,6 +147,7 @@ internal static class UiRegistration
         RegisterIOType(typeof(BufferWithViews), null, () => new BufferWithViewsOutputUi());
         RegisterIOType(typeof(SceneSetup), () => new SceneSetupInputUi(), () => new SceneSetupOutputUi());
         RegisterIOType(typeof(MeshGeometry), null, () => new MeshGeometryOutputUi());
+        RegisterIOType(typeof(CurveGeometry), null, () => new CurveGeometryOutputUi());
         RegisterIOType(typeof(AudioGraphNode), null, () => new AudioGraphNodeOutputUi());
 
         return;

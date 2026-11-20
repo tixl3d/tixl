@@ -112,11 +112,11 @@
       }
     },
     {
-      "ChildId": "7a1b0543-a70c-4a9f-84f8-119020c58e45",
-      "SymbolName": "Lib.mesh.draw.DrawMesh",
+      "ChildId": "a34e7722-5546-41fd-a7b5-33e3aa52f8fd",
+      "SymbolName": "Lib.mesh.draw.DrawMeshUnlit",
       "Position": {
-        "X": 488.5813,
-        "Y": 131.27681
+        "X": 337.49704,
+        "Y": 67.09627
       }
     },
     {

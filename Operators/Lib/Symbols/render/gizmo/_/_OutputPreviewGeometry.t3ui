@@ -1,0 +1,42 @@
+{
+  "FormatVersion": 3,
+  "Id": "91e30c88-bd71-42df-993a-54a0187ccd26"/*_OutputPreviewGeometry*/,
+  "Description": "Internal helper. Renders CPU geometry in the output window, like [GeometryToMesh] into [VisualizeMesh].\n\nIts only input is connected by the editor while it renders. For content, use [GeometryToMesh] and [DrawMesh] instead.",
+  "SymbolTags": "16",
+  "InputUis": [
+    {
+      "InputId": "b8a7277a-cfac-4e46-8619-7054c1cc6369"/*Geometry*/,
+      "Position": {
+        "X": 20.0,
+        "Y": -70.0
+      }
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "4dde4bbe-390e-42e2-8e94-272faa17fdff",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "Position": {
+        "X": 20.0,
+        "Y": -35.0
+      }
+    },
+    {
+      "ChildId": "b8254d04-1d81-4f84-ac2b-7a2a2ffbb97f",
+      "SymbolName": "Lib.mesh._.VisualizeMesh",
+      "Position": {
+        "X": 20.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "cd1acc57-bf0a-419c-96e0-00da788541dc"/*Output*/,
+      "Position": {
+        "X": 190.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

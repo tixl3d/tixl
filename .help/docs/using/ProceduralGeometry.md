@@ -46,7 +46,7 @@ Animating **Width** is cheap on simple shapes — the geometry rebuilds in real 
 - [TransformGeometry] scales, rotates and translates geometry while it is still in CPU form. Use it before a bevel: beveling happens after the transform and adapts to stretched shapes.
 - [CenterGeometry] moves geometry so a pivot inside its bounding box lands on the origin. Pivot `(0,-0.5,0)` puts the bottom on the ground plane — useful for imported files that aren't centered.
 - [TriangulateGeometry] converts all faces into triangles. Rendering does this automatically, so you only need it when a later operation expects triangles.
-- [GetGeometryStats] reports counts, bounds, volume and whether the shape is watertight. The output window also shows these stats when you view a geometry output directly.
+- [GetGeometryStats] reports counts, bounds, volume and whether the shape is watertight. The output window renders geometry and curve outputs directly, and its **Stats** view shows these numbers.
 
 ## Importing geometry
 

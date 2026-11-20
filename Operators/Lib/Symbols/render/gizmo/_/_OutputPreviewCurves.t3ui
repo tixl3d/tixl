@@ -1,0 +1,66 @@
+{
+  "FormatVersion": 3,
+  "Id": "9a87212f-f305-4d66-bf0f-4c8983e10e76"/*_OutputPreviewCurves*/,
+  "Description": "Internal helper. Renders curves in the output window as lines, like [CurvesToPoints] into [DrawLines].\n\nIts only input is connected by the editor while it renders. For content, use [CurvesToPoints] and [DrawLines] instead.",
+  "SymbolTags": "16",
+  "InputUis": [
+    {
+      "InputId": "61d89b08-ed0a-4c6e-a945-246de435651e"/*Curves*/,
+      "Position": {
+        "X": 34.35823,
+        "Y": -53.083954
+      }
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "96b07c33-5cf8-4703-baa6-2c1be41df8aa",
+      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "Position": {
+        "X": 34.35823,
+        "Y": 16.916046
+      }
+    },
+    {
+      "ChildId": "a3f7029b-5c42-45b1-9adc-4035fd4ec3c5",
+      "SymbolName": "Lib.point.draw.DrawPoints",
+      "Position": {
+        "X": 208.31274,
+        "Y": 54.130463
+      }
+    },
+    {
+      "ChildId": "abbdb1e2-4aed-4bf5-a36e-060d7c17511e",
+      "SymbolName": "Lib.render.transform.Group",
+      "Position": {
+        "X": 348.31274,
+        "Y": 19.130463
+      }
+    },
+    {
+      "ChildId": "acfa90f3-8fda-4474-b9dc-1e1741f3a412",
+      "SymbolName": "Lib.point.draw.DrawLines",
+      "Position": {
+        "X": 208.31276,
+        "Y": 19.130463
+      }
+    },
+    {
+      "ChildId": "d1e99a52-0188-4a63-85ef-55bfb907816d",
+      "SymbolName": "Lib.geometry.CurvesToPoints",
+      "Position": {
+        "X": 34.35823,
+        "Y": -18.083954
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "b8efe9cd-2b0c-49c1-984d-d13edc21bd71"/*Output*/,
+      "Position": {
+        "X": 348.31274,
+        "Y": 89.13046
+      }
+    }
+  ]
+}

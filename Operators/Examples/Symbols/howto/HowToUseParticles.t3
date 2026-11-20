@@ -101,11 +101,6 @@
           "Id": "d2472768-dd40-436f-af1b-7359289b5118"/*ShowIndices*/,
           "Type": "System.Boolean",
           "Value": false
-        },
-        {
-          "Id": "f6942098-3f69-41fb-9228-96bd2ffb1cbf"/*UseWForSize*/,
-          "Type": "System.Boolean",
-          "Value": false
         }
       ],
       "Outputs": []

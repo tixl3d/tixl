@@ -356,7 +356,13 @@ Existing and sufficient: `CurvesToGeometry` (fill, extrude, bevel), `OffsetCurve
 
 Each phase ships on its own and is useful without the next.
 
-### Phase 0: See the data
+### Phase 0: See the data (implemented 2026-11-20, needs a manual test pass)
+
+Done: internal composites `_OutputPreviewCPoints`, `_OutputPreviewCurves` and `_OutputPreviewGeometry`
+(`Operators/Lib/Symbols/render/gizmo/_/`) rendered through `CommandPreview<T>` (`Editor/Gui/OutputUi/Previews/`);
+Points/Table for point lists, Render/Stats for curves and geometry, a new `CurveGeometryOutputUi`. Test set
+`.tests-manual/output-window-geometry.md`. Curves show lines only; anchors and handles wait for Phase 3.
+
 - Output window previews for CPoints, Curves and Geometry (render plus stats/table), generalizing
   `PointBufferVisualizer`.
 - `CurveGeometryOutputUi` with counts, attributes per domain, parts.

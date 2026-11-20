@@ -2,20 +2,33 @@
 using System.Diagnostics;
 using ImGuiNET;
 using T3.Core.DataTypes;
+using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Editor.Gui.Input;
+using T3.Editor.Gui.OutputUi.Previews;
 using T3.Editor.Gui.Styling;
-using T3.Editor.Gui.UiHelpers;
-using Color = T3.Core.DataTypes.Vector.Color;
 
-namespace T3.Editor.Gui.OutputUi;
+namespace T3.Editor.Gui.OutputUi.Geometry;
 
 /// <summary>
-/// Output view for CPU geometry: a summary of counts, bounds, volume, watertightness
-/// and the attribute table. The text is rebuilt only when the geometry changes.
+/// Output view for CPU geometry: renders it like [GeometryToMesh] into [VisualizeMesh], or shows counts, bounds,
+/// volume, watertightness, the attributes and the part table. The text is rebuilt only when the geometry changes.
 /// </summary>
 internal sealed class MeshGeometryOutputUi : OutputUi<MeshGeometry>
 {
+    private enum Modes
+    {
+        Render,
+        Stats,
+    }
+
+    public MeshGeometryOutputUi()
+    {
+        _tooltipForMode = TooltipForMode;
+    }
+
+    public override Type PresentedType => _isPresentingRender ? typeof(Command) : Type;
+
     public override IOutputUi Clone()
     {
         return new MeshGeometryOutputUi
@@ -24,6 +37,21 @@ internal sealed class MeshGeometryOutputUi : OutputUi<MeshGeometry>
                        PosOnCanvas = PosOnCanvas,
                        Size = Size
                    };
+    }
+
+    protected override void Recompute(ISlot slot, EvaluationContext context)
+    {
+        _isPresentingRender = false;
+
+        // The geometry is pulled through the preview, so it needn't be evaluated on its own first.
+        if (slot is Slot<MeshGeometry> geometrySlot && _mode == Modes.Render && !PreviewLayout.IsCompactView())
+        {
+            _isPresentingRender = _preview.Render(geometrySlot, context);
+            if (_isPresentingRender)
+                return;
+        }
+
+        base.Recompute(slot, context);
     }
 
     protected override void DrawTypedValue(ISlot slot, string viewId)
@@ -38,6 +66,7 @@ internal sealed class MeshGeometryOutputUi : OutputUi<MeshGeometry>
         if (geometry == null)
         {
             _lastGeometry = null;
+            _isPresentingRender = false;
             CustomComponents.EmptyWindowMessage("No geometry");
             return;
         }
@@ -48,31 +77,31 @@ internal sealed class MeshGeometryOutputUi : OutputUi<MeshGeometry>
             RebuildLines(geometry);
         }
 
+        if (PreviewLayout.IsCompactView())
+        {
+            _isPresentingRender = false;
+            DrawStats(showHeadline: true);
+            return;
+        }
+
+        if (_isPresentingRender)
+            _preview.DrawRendered(viewId);
+
+        PreviewLayout.IndentControls();
+        CustomComponents.SegmentedButton(ref _mode, null, _tooltipForMode);
+        PreviewLayout.DrawSummary(_panel.Headline);
+
+        if (_mode == Modes.Stats)
+            DrawStats(showHeadline: false);
+    }
+
+    private void DrawStats(bool showHeadline)
+    {
         ImGui.BeginChild("GeometryStats");
         ImGui.Indent(10 * T3Ui.UiScaleFactor);
         FormInputs.AddVerticalSpace(5);
 
-        CustomComponents.StylizedText(_headline, Fonts.FontLarge, UiColors.Text);
-        FormInputs.AddVerticalSpace(3);
-
-        for (var i = 0; i < _lineCount; i++)
-        {
-            CustomComponents.StylizedText(_labels[i], Fonts.FontSmall, UiColors.TextMuted);
-            ImGui.SameLine(LabelWidth * T3Ui.UiScaleFactor);
-            CustomComponents.StylizedText(_values[i], Fonts.FontNormal, _valueColors[i]);
-        }
-
-        if (_attributeCount > 0)
-        {
-            FormInputs.AddVerticalSpace(8);
-            CustomComponents.StylizedText("Attributes", Fonts.FontSmall, UiColors.TextMuted);
-            for (var i = 0; i < _attributeCount; i++)
-            {
-                CustomComponents.StylizedText(_attributeNames[i], Fonts.FontNormal, UiColors.Text);
-                ImGui.SameLine(LabelWidth * T3Ui.UiScaleFactor);
-                CustomComponents.StylizedText(_attributeInfos[i], Fonts.FontSmall, UiColors.TextMuted);
-            }
-        }
+        _panel.Draw(showHeadline);
 
         if (_partRowCount > 0)
         {
@@ -148,46 +177,34 @@ internal sealed class MeshGeometryOutputUi : OutputUi<MeshGeometry>
     private void RebuildLines(MeshGeometry geometry)
     {
         var s = _stats;
-        _headline = s.PartCount > 1
-                        ? $"{s.FaceCount:N0} faces in {s.PartCount:N0} parts"
-                        : $"{s.FaceCount:N0} faces";
+        _panel.Clear(s.PartCount > 1
+                         ? $"{s.FaceCount:N0} faces in {s.PartCount:N0} parts"
+                         : $"{s.FaceCount:N0} faces");
 
-        _lineCount = 0;
-        AddLine("Points", $"{s.PointCount:N0}", UiColors.Text);
-        AddLine("Triangles", $"{s.TriangleCount:N0}", UiColors.Text);
-        AddLine("Size", $"{s.Size.X:0.###} x {s.Size.Y:0.###} x {s.Size.Z:0.###}", UiColors.Text);
-        AddLine("Bounds", $"({s.BoundsMin.X:0.###}, {s.BoundsMin.Y:0.###}, {s.BoundsMin.Z:0.###}) .. ({s.BoundsMax.X:0.###}, {s.BoundsMax.Y:0.###}, {s.BoundsMax.Z:0.###})",
-                UiColors.Text);
-        AddLine("Volume", $"{s.Volume:0.####}", UiColors.Text);
+        _panel.AddLine("Points", $"{s.PointCount:N0}", UiColors.Text);
+        _panel.AddLine("Triangles", $"{s.TriangleCount:N0}", UiColors.Text);
+        _panel.AddLine("Size", GeometryStatsPanel.FormatSize(s.Size), UiColors.Text);
+        _panel.AddLine("Bounds", GeometryStatsPanel.FormatBounds(s.BoundsMin, s.BoundsMax), UiColors.Text);
+        _panel.AddLine("Volume", $"{s.Volume:0.####}", UiColors.Text);
 
         if (s.FaceCount == 0)
         {
-            AddLine("Surface", "point cloud", UiColors.TextMuted);
+            _panel.AddLine("Surface", "point cloud", UiColors.TextMuted);
         }
         else if (s.BoundaryEdges == 0 && s.NonManifoldEdges == 0)
         {
-            AddLine("Surface", "watertight", UiColors.StatusControlled);
+            _panel.AddLine("Surface", "watertight", UiColors.StatusControlled);
         }
         else
         {
             var info = s.NonManifoldEdges > 0
                            ? $"{s.BoundaryEdges:N0} boundary edges, {s.NonManifoldEdges:N0} non-manifold"
                            : $"{s.BoundaryEdges:N0} boundary edges (open)";
-            AddLine("Surface", info, UiColors.StatusAttention);
+            _panel.AddLine("Surface", info, UiColors.StatusAttention);
         }
 
+        _panel.SetAttributes(geometry.Attributes);
         RebuildPartRows();
-
-        _attributeCount = 0;
-        foreach (var attribute in geometry.Attributes)
-        {
-            if (_attributeCount == _attributeNames.Length)
-                break;
-
-            _attributeNames[_attributeCount] = attribute.Name;
-            _attributeInfos[_attributeCount] = $"{TypeName(attribute)} per {attribute.Domain}";
-            _attributeCount++;
-        }
     }
 
     /// <summary>Row strings are formatted once per geometry change so the table draw stays allocation-free.</summary>
@@ -217,34 +234,26 @@ internal sealed class MeshGeometryOutputUi : OutputUi<MeshGeometry>
         }
     }
 
-    private void AddLine(string label, string value, Color color)
+    private static string? TooltipForMode(Modes mode)
     {
-        if (_lineCount == _labels.Length)
-            return;
-
-        _labels[_lineCount] = label;
-        _values[_lineCount] = value;
-        _valueColors[_lineCount] = color;
-        _lineCount++;
-    }
-
-    private static string TypeName(GeometryAttribute attribute)
-    {
-        return attribute switch
+        return mode switch
                    {
-                       GeometryAttribute<float>   => "float",
-                       GeometryAttribute<int>     => "int",
-                       GeometryAttribute<Vector2> => "vec2",
-                       GeometryAttribute<Vector3> => "vec3",
-                       GeometryAttribute<Vector4> => "vec4",
-                       _                          => "?",
+                       Modes.Render => "Render the geometry like [GeometryToMesh] into [VisualizeMesh] with default settings.",
+                       _            => "List counts, bounds, attributes and parts.",
                    };
     }
 
-    private const float LabelWidth = 90;
-    private const int MaxLines = 8;
-    private const int MaxAttributes = 32;
     private const int MaxVisiblePartRows = 24;
+
+    private static readonly Guid PreviewSymbolId = Guid.Parse("91e30c88-bd71-42df-993a-54a0187ccd26");
+    private static readonly Guid PreviewInputId = Guid.Parse("b8a7277a-cfac-4e46-8619-7054c1cc6369");
+
+    private readonly CommandPreview<MeshGeometry> _preview = new(PreviewSymbolId, PreviewInputId, "_OutputPreviewGeometry");
+    private readonly Func<Modes, string?> _tooltipForMode;
+
+    /** Shared by all geometry outputs, so switching ops keeps the chosen view. */
+    private static Modes _mode = Modes.Render;
+    private bool _isPresentingRender;
 
     private int _partRowCount;
     private string[] _partIndexTexts = [];
@@ -255,13 +264,6 @@ internal sealed class MeshGeometryOutputUi : OutputUi<MeshGeometry>
     private string[] _partPivotTexts = [];
 
     private readonly MeshGeometryStats _stats = new();
+    private readonly GeometryStatsPanel _panel = new();
     private MeshGeometry? _lastGeometry;
-    private string _headline = string.Empty;
-    private readonly string[] _labels = new string[MaxLines];
-    private readonly string[] _values = new string[MaxLines];
-    private readonly Color[] _valueColors = new Color[MaxLines];
-    private int _lineCount;
-    private readonly string[] _attributeNames = new string[MaxAttributes];
-    private readonly string[] _attributeInfos = new string[MaxAttributes];
-    private int _attributeCount;
 }

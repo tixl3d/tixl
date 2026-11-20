@@ -1,0 +1,57 @@
+{
+  "FormatVersion": 3,
+  "Id": "0c3eb144-a156-4d72-bc7e-afdf13ba61f7"/*_OutputPreviewCPoints*/,
+  "Inputs": [
+    {
+      "Id": "37e80d44-7206-4046-9c11-2a8ba34e6929"/*Points*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [
+    {
+      "Id": "12e7e37b-667b-438a-b60e-ff43ec0cf9fc"/*VisualizePoints*/,
+      "SymbolId": "37bdbafc-d14c-4b81-91c3-8f63c3b63812",
+      "SymbolName": "Lib.point.draw.VisualizePoints",
+      "InputValues": [
+        {
+          "Id": "c4332cb5-4dbc-4dd1-a738-cee8a3098c17"/*Color*/,
+          "Type": "System.Numerics.Vector4",
+          "Value": {
+            "X": 0.796,
+            "Y": 0.075,
+            "Z": 0.443,
+            "W": 1.0
+          }
+        }
+      ],
+      "Outputs": []
+    },
+    {
+      "Id": "31cb3d01-83ab-4c6a-b60e-238aac2b0bb0"/*ListToBuffer*/,
+      "SymbolId": "7e28c796-85e7-47ee-99bb-9599284dbeeb",
+      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "InputValues": [],
+      "Outputs": []
+    }
+  ],
+  "Connections": [
+    {
+      "SourceParentOrChildId": "12e7e37b-667b-438a-b60e-ff43ec0cf9fc",
+      "SourceSlotId": "b0294b73-58a9-4d79-b3e2-caaed304109d",
+      "TargetParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "TargetSlotId": "30a400c7-e467-499a-af4d-7a880d75f74e"
+    },
+    {
+      "SourceParentOrChildId": "31cb3d01-83ab-4c6a-b60e-238aac2b0bb0",
+      "SourceSlotId": "c52dfa83-9820-4a54-b90b-62278dc8fe3f",
+      "TargetParentOrChildId": "12e7e37b-667b-438a-b60e-ff43ec0cf9fc",
+      "TargetSlotId": "54fc4cd7-dfc3-4690-9fd1-2b555f7656d4"
+    },
+    {
+      "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "SourceSlotId": "37e80d44-7206-4046-9c11-2a8ba34e6929",
+      "TargetParentOrChildId": "31cb3d01-83ab-4c6a-b60e-238aac2b0bb0",
+      "TargetSlotId": "08f181bb-9777-497c-871d-bcc1ff252f2f"
+    }
+  ]
+}

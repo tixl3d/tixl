@@ -5,6 +5,7 @@ using T3.Core.DataTypes;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Editor.Gui.OutputUi.Buffers;
+using T3.Editor.Gui.OutputUi.Previews;
 using T3.Editor.Gui.Styling;
 
 namespace T3.Editor.Gui.OutputUi;
@@ -43,7 +44,7 @@ internal sealed class BufferWithViewsOutputUi : OutputUi<BufferWithViews>
     protected override void Recompute(ISlot slot, EvaluationContext context)
     {
         _isPresentingPoints = false;
-        _isCompact = IsCompactView();
+        _isCompact = PreviewLayout.IsCompactView();
         if (slot is not Slot<BufferWithViews> bufferSlot || _isCompact)
         {
             base.Recompute(slot, context);
@@ -53,7 +54,7 @@ internal sealed class BufferWithViewsOutputUi : OutputUi<BufferWithViews>
         // The buffer is pulled through the visualizer, so it needn't be evaluated on its own first.
         if (GetShownMode(bufferSlot.Value) == Modes.Points)
         {
-            _isPresentingPoints = _pointVisualizer.Render(bufferSlot, context);
+            _isPresentingPoints = _pointsPreview.Render(bufferSlot, context);
             if (_isPresentingPoints)
                 return;
         }
@@ -71,7 +72,7 @@ internal sealed class BufferWithViewsOutputUi : OutputUi<BufferWithViews>
             return;
         }
 
-        _isCompact = IsCompactView();
+        _isCompact = PreviewLayout.IsCompactView();
         var buffer = bufferSlot.Value;
         var isDefined = buffer?.Buffer is { IsDisposed: false } && buffer.ElementStride > 0;
         if (isDefined)
@@ -85,33 +86,25 @@ internal sealed class BufferWithViewsOutputUi : OutputUi<BufferWithViews>
         }
 
         if (_isPresentingPoints)
-        {
-            var controlsPos = ImGui.GetCursorScreenPos();
-            _pointVisualizer.DrawRendered(viewId);
-            ImGui.SetCursorScreenPos(controlsPos);
-        }
+            _pointsPreview.DrawRendered(viewId);
 
         _canShowPoints = CanShowPoints(buffer);
         var shownMode = GetShownMode(buffer);
-        var scale = T3Ui.UiScaleFactor;
-
-        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ControlsIndent * scale);
+        PreviewLayout.IndentControls();
         if (CustomComponents.SegmentedButton(ref shownMode, _isModeDisabled, _tooltipForMode))
             _mode = shownMode;
 
         if (shownMode == Modes.Table)
         {
-            ImGui.SameLine(0, 12 * scale);
+            ImGui.SameLine(0, 12 * T3Ui.UiScaleFactor);
             _tableView.DrawRangeControls(buffer!.ElementCount);
         }
 
-        ImGui.SameLine(0, 12 * scale);
-        ImGui.AlignTextToFramePadding();
-        CustomComponents.StylizedText(_summary, Fonts.FontSmall, UiColors.TextMuted);
+        PreviewLayout.DrawSummary(_summary);
 
         if (shownMode == Modes.Table)
         {
-            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ControlsIndent * scale);
+            PreviewLayout.IndentControls();
             _tableView.DrawTable();
         }
     }
@@ -144,11 +137,6 @@ internal sealed class BufferWithViewsOutputUi : OutputUi<BufferWithViews>
                    };
     }
 
-    private static bool IsCompactView()
-    {
-        return ImGui.GetContentRegionAvail().Y < MinHeightForControls * T3Ui.UiScaleFactor;
-    }
-
     /** Rebuilt only when the buffer layout changes, so drawing stays allocation-free. */
     private void UpdateSummary(BufferWithViews buffer)
     {
@@ -173,10 +161,10 @@ internal sealed class BufferWithViewsOutputUi : OutputUi<BufferWithViews>
                    };
     }
 
-    private const float ControlsIndent = 8;
-    private const float MinHeightForControls = 150;
+    private static readonly Guid VisualizePointsSymbolId = Guid.Parse("37bdbafc-d14c-4b81-91c3-8f63c3b63812");
+    private static readonly Guid VisualizePointsInputId = Guid.Parse("54fc4cd7-dfc3-4690-9fd1-2b555f7656d4");
 
-    private readonly PointBufferVisualizer _pointVisualizer = new();
+    private readonly CommandPreview<BufferWithViews> _pointsPreview = new(VisualizePointsSymbolId, VisualizePointsInputId, "VisualizePoints");
     private readonly BufferTableView _tableView = new();
     private readonly Func<Modes, bool> _isModeDisabled;
     private readonly Func<Modes, string?> _tooltipForMode;

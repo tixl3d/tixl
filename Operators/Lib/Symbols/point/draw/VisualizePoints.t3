@@ -8,7 +8,7 @@
     },
     {
       "Id": "40a04de8-54aa-4f66-acea-80ffc4dab7bd"/*PointSize*/,
-      "DefaultValue": 0.003
+      "DefaultValue": 0.002
     },
     {
       "Id": "54fc4cd7-dfc3-4690-9fd1-2b555f7656d4"/*Points*/,
@@ -16,7 +16,7 @@
     },
     {
       "Id": "621bf2cf-8d49-4b5f-88b9-4460045e8914"/*Size*/,
-      "DefaultValue": 0.05
+      "DefaultValue": 0.04
     },
     {
       "Id": "7b2054d4-e6b5-43e3-9cbe-1d2073ae35aa"/*ShowXyRadius*/,
@@ -36,7 +36,7 @@
     },
     {
       "Id": "b857b40b-2ca7-42a4-bebe-1cb11700ed71"/*LineThickness*/,
-      "DefaultValue": 0.02
+      "DefaultValue": 0.01
     },
     {
       "Id": "bbc26907-416d-4168-9e89-72ee1c6a530e"/*ShowAttributeList*/,
@@ -65,10 +65,6 @@
     },
     {
       "Id": "d2472768-dd40-436f-af1b-7359289b5118"/*ShowIndices*/,
-      "DefaultValue": true
-    },
-    {
-      "Id": "f6942098-3f69-41fb-9228-96bd2ffb1cbf"/*UseWForSize*/,
       "DefaultValue": true
     }
   ],
@@ -789,18 +785,18 @@
           "Id": "0353313f-64dc-4e93-8bac-3c9b78df5cc9"/*Color*/,
           "Type": "System.Numerics.Vector4",
           "Value": {
-            "X": 1.0,
-            "Y": 0.01692599,
-            "Z": 0.94836026,
-            "W": 0.5202871
+            "X": 0.796,
+            "Y": 0.075,
+            "Z": 0.443,
+            "W": 0.5
           }
         },
         {
           "Id": "e6d32fee-30d9-4ccf-b48b-88906f841ff8"/*LabelOffset*/,
           "Type": "System.Numerics.Vector2",
           "Value": {
-            "X": -35.02,
-            "Y": -25.02
+            "X": -35.0,
+            "Y": -35.0
           }
         },
         {
