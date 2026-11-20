@@ -15,6 +15,17 @@
       "Max": 0.01
     },
     {
+      "InputId": "85bb3f80-ea9d-4244-8289-4dedb6fa8fb0"/*BevelSides*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 180.0
+      },
+      "Description": "Number of segments that form the bevel of an edge. 1 gives a simple chamfer.",
+      "Min": 1,
+      "Max": 16,
+      "ClampMin": true
+    },
+    {
       "InputId": "97c9849e-751c-49a9-823d-0af839fa503e"/*Stretch*/,
       "Position": {
         "X": -200.0,
@@ -31,6 +42,16 @@
       }
     },
     {
+      "InputId": "aecf0016-95a8-43bb-9cee-d5f75356ae72"/*BevelFlatness*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 180.0
+      },
+      "Description": "Shape of the bevel profile: 0 is a round arc, 1 a flat chamfer with hard edges.",
+      "Min": 0.0,
+      "Max": 1.0
+    },
+    {
       "InputId": "ba355fc0-0f1c-41d9-842e-d8ae9bee162a"/*Margin2*/,
       "Position": {
         "X": -200.0,
@@ -39,6 +60,18 @@
       "Description": "Padding around the UV islands of TexCoord2.",
       "Min": 0.0,
       "Max": 0.01
+    },
+    {
+      "InputId": "dc13413f-e106-4cbe-81c7-dd260c9085cc"/*BevelWidth*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 180.0
+      },
+      "GroupTitle": "Bevel",
+      "Description": "Radius of the rounded or chamfered edges, scaled with Scale. 0 keeps the edges sharp.\n\nThe width is limited to half of the smallest side.",
+      "Min": 0.0,
+      "Max": 0.25,
+      "ClampMin": true
     },
     {
       "InputId": "e1adb865-42f5-46a9-a4ac-bfae00b03caa"/*TexCoord*/,

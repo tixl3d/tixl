@@ -20,7 +20,6 @@ internal sealed class CubeMesh : Instance<CubeMesh>
     {
         try
         {
-
             var scale = Scale.GetValue(context);
             var stretch = Stretch.GetValue(context);
             var pivot = Pivot.GetValue(context);
@@ -30,9 +29,6 @@ internal sealed class CubeMesh : Instance<CubeMesh>
                                                                       MathUtils.ToRad * (rotation.Z));
 
             var center = Center.GetValue(context);
-            // var offset = new SharpDX.Vector3(stretch.X * scale * (pivot.X - 0.5f),
-            //                                  stretch.Y * scale * (pivot.Y - 0.5f),
-            //                                  stretch.Z * scale * (pivot.Z - 0.5f));
             var uvMapMode = TexCoord.GetValue(context);
             var uvMapMode2 = TexCoord2.GetValue(context);
             var margin = Margin.GetValue(context);
@@ -41,20 +37,30 @@ internal sealed class CubeMesh : Instance<CubeMesh>
             IUvMapper uvMapper = GetUvMapper(uvMapMode);
             IUvMapper uvMapper2 = GetUvMapper(uvMapMode2);
 
-            var offset = -Vector3.One * 0.5f;
+            var size = stretch * scale;
+            var halfExtent = Vector3.Abs(size) * 0.5f;
+            var sizeSign = new Vector3(size.X < 0 ? -1 : 1, size.Y < 0 ? -1 : 1, size.Z < 0 ? -1 : 1);
 
-            var center2 = new Vector3(center.X, center.Y, center.Z);
+            var smallestHalfExtent = MathF.Min(halfExtent.X, MathF.Min(halfExtent.Y, halfExtent.Z));
+            _bevelWidth = (BevelWidth.GetValue(context) * MathF.Abs(scale)).Clamp(0, smallestHalfExtent);
+            _bevelSides = BevelSides.GetValue(context).Clamp(1, 64);
+            _bevelFlatness = BevelFlatness.GetValue(context).Clamp(0, 1);
+            _oddSeamTan = MathF.Tan((_bevelSides - 1) / 2 * MathF.PI / (2 * _bevelSides));
 
             var segments = Segments.GetValue(context);
-            _xSegments = segments.X.Clamp(1, 10000) + 1;
-            _ySegments = segments.Y.Clamp(1, 10000) + 1;
-            _zSegments = segments.Z.Clamp(1, 10000) + 1;
+            FillAxisStations(ref _xStations, segments.X, halfExtent.X);
+            FillAxisStations(ref _yStations, segments.Y, halfExtent.Y);
+            FillAxisStations(ref _zStations, segments.Z, halfExtent.Z);
 
-            var faceCount = (_ySegments - 1) * (_xSegments - 1) * 2 * 2 // front / back
-                            + (_ySegments - 1) * (_zSegments - 1) * 2 * 2 // top / bottom
-                            + (_xSegments - 1) * (_zSegments - 1) * 2 * 2; // left / right
-
-            var verticesCount = (_ySegments * _xSegments + _ySegments * _zSegments + _xSegments * _zSegments) * 2;
+            var verticesCount = 0;
+            var faceCount = 0;
+            for (var sideIndex = 0; sideIndex < _sides.Length; sideIndex++)
+            {
+                var columnCount = GetStationsForAxis(_sides[sideIndex].ColumnAxis).Length;
+                var rowCount = GetStationsForAxis(_sides[sideIndex].RowAxis).Length;
+                verticesCount += columnCount * rowCount;
+                faceCount += (columnCount - 1) * (rowCount - 1) * 2;
+            }
 
             // Create buffers
             if (_vertexBufferData.Length != verticesCount)
@@ -76,48 +82,46 @@ internal sealed class CubeMesh : Instance<CubeMesh>
 
                 var rotationMatrix = Matrix4x4.Multiply(sideRotationMatrix, cubeRotationMatrix);
 
-                var columnCount = GetSegmentCountForAxis(side.ColumnAxis);
-                var rowCount = GetSegmentCountForAxis(side.RowAxis);
-                var columnStretch = GetComponentForAxis(side.ColumnAxis, stretch);
-                var rowStretch = GetComponentForAxis(side.RowAxis, stretch);
-                var depthStretch = GetComponentForAxis(side.DepthAxis, stretch);
+                var columnDirection = Vector3.TransformNormal(VectorT3.Right, sideRotationMatrix);
+                var rowDirection = Vector3.TransformNormal(VectorT3.Up, sideRotationMatrix);
+                var depthDirection = Vector3.TransformNormal(VectorT3.ForwardLH, sideRotationMatrix);
 
-                double columnStep = 1.0 / (columnCount - 1);
-                double rowStep = 1.0 / (rowCount - 1);
-                float depthScale = 1f;
+                var columns = GetStationsForAxis(side.ColumnAxis);
+                var rows = GetStationsForAxis(side.RowAxis);
+                var columnCount = columns.Length;
+                var rowCount = rows.Length;
+                var depthInner = GetComponentForAxis(side.DepthAxis, halfExtent) - _bevelWidth;
 
-                var normal = Vector3.TransformNormal(VectorT3.ForwardLH, rotationMatrix);
-                var tangent = Vector3.TransformNormal(VectorT3.Right, rotationMatrix);
-                var binormal = Vector3.TransformNormal(VectorT3.Up, rotationMatrix);
+                var faceTangent = Vector3.TransformNormal(VectorT3.Right, rotationMatrix);
+                var faceBinormal = Vector3.TransformNormal(VectorT3.Up, rotationMatrix);
 
-                // Initialize
                 for (int columnIndex = 0; columnIndex < columnCount; ++columnIndex)
                 {
-                    var columnFragment = (float)(columnIndex * columnStep);
-
-                    var u0 = columnIndex / ((float)columnCount - 1);
+                    var u0 = columns[columnIndex].Fraction;
 
                     for (int rowIndex = 0; rowIndex < rowCount; ++rowIndex)
                     {
-                        var rowFragment = (float)(rowIndex * rowStep);
                         var vertexIndex = rowIndex + columnIndex * rowCount + sideVertexIndex;
                         var faceIndex = 2 * (rowIndex + columnIndex * (rowCount - 1)) + sideFaceIndex;
 
-                        var p = new Vector3(columnFragment,
-                                            rowFragment,
-                                            depthScale);
+                        ComputeSurfacePoint(columns[columnIndex], rows[rowIndex], depthInner, out var facePosition, out var faceNormal);
 
-                        var v0 = (rowIndex) / ((float)rowCount - 1);
+                        var boxPosition = columnDirection * facePosition.X + rowDirection * facePosition.Y + depthDirection * facePosition.Z;
+                        var position = Vector3.TransformNormal(boxPosition * sizeSign + pivot * size, cubeRotationMatrix);
+
+                        var boxNormal = columnDirection * faceNormal.X + rowDirection * faceNormal.Y + depthDirection * faceNormal.Z;
+                        var normal = Vector3.TransformNormal(boxNormal, cubeRotationMatrix);
+                        var tangent = Vector3.Normalize(faceTangent - normal * Vector3.Dot(normal, faceTangent));
+                        var binormal = Vector3.Normalize(faceBinormal - normal * Vector3.Dot(normal, faceBinormal));
+
+                        var v0 = rows[rowIndex].Fraction;
                         // Apply UV mapping based on selected mode
                         var uv0 = uvMapper.CalculateUV(u0, v0, sideIndex, margin);
                         var uv1 = uvMapper2.CalculateUV(u0, v0, sideIndex, margin2);
 
-                        var position = (Vector3.TransformNormal(p + offset, sideRotationMatrix) + pivot) * stretch * scale;
-                        position = Vector3.TransformNormal(position, cubeRotationMatrix);
-
                         _vertexBufferData[vertexIndex + 0] = new PbrVertex
                                                                  {
-                                                                     Position = position + center2,
+                                                                     Position = position + center,
                                                                      Normal = normal,
                                                                      Tangent = tangent,
                                                                      Bitangent = binormal,
@@ -154,13 +158,115 @@ internal sealed class CubeMesh : Instance<CubeMesh>
         }
     }
 
-    private int GetSegmentCountForAxis(SegmentAxis axis)
+    /// <summary>
+    /// Lays out the vertex rows along one box axis: the flat segments in the middle and, with a bevel, the rows
+    /// that follow the bevel up to the 45° seam where the neighbouring face takes over.
+    /// </summary>
+    private void FillAxisStations(ref AxisStation[] stations, int segmentCount, float halfExtent)
+    {
+        segmentCount = segmentCount.Clamp(1, 10000);
+        var hasBevel = _bevelWidth > 0;
+
+        // A flat profile needs a second vertex row where the face meets the bevel to get a hard edge.
+        var hasHardEdge = hasBevel && _bevelFlatness > 0;
+        var stepsToSeam = (_bevelSides + 1) / 2;
+        var bevelStationCount = hasBevel ? stepsToSeam + (hasHardEdge ? 1 : 0) : 0;
+
+        var count = segmentCount + 1 + 2 * bevelStationCount;
+        if (stations.Length != count)
+            stations = new AxisStation[count];
+
+        var innerHalfExtent = halfExtent - _bevelWidth;
+        var index = 0;
+
+        for (var bevelIndex = bevelStationCount - 1; bevelIndex >= 0; bevelIndex--)
+        {
+            stations[index++] = CreateBevelStation(bevelIndex, -1, innerHalfExtent, halfExtent, hasHardEdge);
+        }
+
+        for (var segmentIndex = 0; segmentIndex <= segmentCount; segmentIndex++)
+        {
+            var fraction = (float)segmentIndex / segmentCount;
+            var inner = innerHalfExtent * (2 * fraction - 1);
+            stations[index++] = new AxisStation
+                                    {
+                                        Inner = inner,
+                                        Fraction = hasBevel ? 0.5f + inner / (2 * halfExtent) : fraction,
+                                    };
+        }
+
+        for (var bevelIndex = 0; bevelIndex < bevelStationCount; bevelIndex++)
+        {
+            stations[index++] = CreateBevelStation(bevelIndex, 1, innerHalfExtent, halfExtent, hasHardEdge);
+        }
+    }
+
+    private AxisStation CreateBevelStation(int bevelIndex, float side, float innerHalfExtent, float halfExtent, bool hasHardEdge)
+    {
+        var step = hasHardEdge ? bevelIndex : bevelIndex + 1;
+        var isSeam = step == (_bevelSides + 1) / 2;
+        var tan = isSeam ? 1f : MathF.Tan(step * MathF.PI / (2 * _bevelSides));
+        var inner = side * innerHalfExtent;
+
+        return new AxisStation
+                   {
+                       Inner = inner,
+                       Tan = side * tan,
+                       Side = side,
+                       IsOddSeam = isSeam && _bevelSides % 2 == 1,
+                       Fraction = 0.5f + (inner + side * tan * _bevelWidth) / (2 * halfExtent),
+                   };
+    }
+
+    /// <summary>
+    /// Pushes a face grid point out from the box shrunk by the bevel width. Positions and normals are in the
+    /// face frame (column, row, depth).
+    /// </summary>
+    private void ComputeSurfacePoint(in AxisStation column, in AxisStation row, float depthInner, out Vector3 position, out Vector3 normal)
+    {
+        var columnTan = column.IsOddSeam ? column.Side * _oddSeamTan : column.Tan;
+        var rowTan = row.IsOddSeam ? row.Side * _oddSeamTan : row.Tan;
+
+        var offsetSum = ProjectOnProfile(new Vector3(columnTan, rowTan, 1), out var roundNormalSum);
+        var sampleCount = 1;
+
+        // With an odd number of sides the seam to the neighbouring face falls into the middle of a bevel segment,
+        // so its vertex is the average of the segment's end points on both faces.
+        if (column.IsOddSeam)
+        {
+            offsetSum += ProjectOnProfile(new Vector3(column.Side, rowTan, _oddSeamTan), out var roundNormal);
+            roundNormalSum += roundNormal;
+            sampleCount++;
+        }
+
+        if (row.IsOddSeam)
+        {
+            offsetSum += ProjectOnProfile(new Vector3(columnTan, row.Side, _oddSeamTan), out var roundNormal);
+            roundNormalSum += roundNormal;
+            sampleCount++;
+        }
+
+        position = new Vector3(column.Inner, row.Inner, depthInner) + offsetSum / sampleCount;
+
+        var chamferNormal = Vector3.Normalize(new Vector3(column.Side, row.Side, 1));
+        normal = Vector3.Normalize(Vector3.Lerp(Vector3.Normalize(roundNormalSum), chamferNormal, _bevelFlatness));
+    }
+
+    /** Offset from the shrunk box along a direction, landing on a sphere (round) or an octahedron (chamfer). */
+    private Vector3 ProjectOnProfile(Vector3 cubeDirection, out Vector3 direction)
+    {
+        direction = Vector3.Normalize(cubeDirection);
+        var chamferDistance = 1f / (MathF.Abs(direction.X) + MathF.Abs(direction.Y) + MathF.Abs(direction.Z));
+        return direction * (_bevelWidth * MathUtils.Lerp(1f, chamferDistance, _bevelFlatness));
+    }
+
+    private AxisStation[] GetStationsForAxis(SegmentAxis axis)
     {
         return axis switch
                    {
-                       SegmentAxis.X => _xSegments,
-                       SegmentAxis.Y => _ySegments,
-                       _             => _zSegments
+                       SegmentAxis.X => _xStations,
+                       SegmentAxis.Y => _yStations,
+                       _             => _zStations
                    };
     }
 
@@ -181,9 +287,32 @@ internal sealed class CubeMesh : Instance<CubeMesh>
         Z,
     }
 
-    private int _xSegments;
-    private int _ySegments;
-    private int _zSegments;
+    /** One vertex row along a box axis. */
+    private struct AxisStation
+    {
+        /** Coordinate clamped into the box shrunk by the bevel width. */
+        public float Inner;
+
+        /** Tangent of the bevel angle, ±1 on the seam to the neighbouring face. */
+        public float Tan;
+
+        /** Direction of the bevel the station belongs to, 0 on the flat part of a face. */
+        public float Side;
+
+        public bool IsOddSeam;
+
+        /** Position across the face (0..1) used for texture coordinates. */
+        public float Fraction;
+    }
+
+    private AxisStation[] _xStations = [];
+    private AxisStation[] _yStations = [];
+    private AxisStation[] _zStations = [];
+
+    private float _bevelWidth;
+    private int _bevelSides;
+    private float _bevelFlatness;
+    private float _oddSeamTan;
 
     private struct Side
     {
@@ -467,6 +596,15 @@ internal sealed class CubeMesh : Instance<CubeMesh>
 
     [Input(Guid = "e641c244-9dc8-444d-8dee-c3e9b710f9db")]
     public readonly InputSlot<Vector3> Rotation = new();
+
+    [Input(Guid = "dc13413f-e106-4cbe-81c7-dd260c9085cc")]
+    public readonly InputSlot<float> BevelWidth = new();
+
+    [Input(Guid = "85bb3f80-ea9d-4244-8289-4dedb6fa8fb0")]
+    public readonly InputSlot<int> BevelSides = new();
+
+    [Input(Guid = "aecf0016-95a8-43bb-9cee-d5f75356ae72")]
+    public readonly InputSlot<float> BevelFlatness = new();
 
     [Input(Guid = "e1adb865-42f5-46a9-a4ac-bfae00b03caa", MappedType = typeof(UvModes))]
     public readonly InputSlot<int> TexCoord = new();

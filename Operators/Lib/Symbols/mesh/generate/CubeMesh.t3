@@ -7,6 +7,10 @@
       "DefaultValue": 0.0
     },
     {
+      "Id": "85bb3f80-ea9d-4244-8289-4dedb6fa8fb0"/*BevelSides*/,
+      "DefaultValue": 4
+    },
+    {
       "Id": "97c9849e-751c-49a9-823d-0af839fa503e"/*Stretch*/,
       "DefaultValue": {
         "X": 1.0,
@@ -19,7 +23,15 @@
       "DefaultValue": 1.0
     },
     {
+      "Id": "aecf0016-95a8-43bb-9cee-d5f75356ae72"/*BevelFlatness*/,
+      "DefaultValue": 0.0
+    },
+    {
       "Id": "ba355fc0-0f1c-41d9-842e-d8ae9bee162a"/*Margin2*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "dc13413f-e106-4cbe-81c7-dd260c9085cc"/*BevelWidth*/,
       "DefaultValue": 0.0
     },
     {
