@@ -73,7 +73,7 @@ internal sealed partial class MagGraphView
         var anchorSize = 4 * CanvasScale;
         var idleFadeProgress = MathUtils.RemapAndClamp(connection.SourceOutput.DirtyFlag.FramesSinceLastUpdate, 0, 100, 1, 0f);
 
-        var color = typeUiProperties.Color.Fade(_context.GraphOpacity);
+        var color = (connection.IsTypeMismatch ? UiColors.StatusAttention : typeUiProperties.Color).Fade(_context.GraphOpacity);
 
         var wasHoveredLastFrame = !_context.PreventInteraction
                                   && (ConnectionHovering.IsHovered(connection) || _context.ItemMovement.WireSplitConnection == connection);

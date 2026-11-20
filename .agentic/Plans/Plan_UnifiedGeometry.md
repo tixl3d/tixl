@@ -173,11 +173,13 @@ message must name what was expected.
   Fixed on the way: `ListToBuffer` gave a buffer wrapper without a buffer for empty lists, which warned every frame.
   The preview's dots come from `CurvesToPoints` with Sampling = Points, so they mark the real points, not line
   samples; points in a `Selection` attribute (any domain, via `Geometry.TryGetPointWeights`) get a ring overlay.
-  Known gap: `_OutputPreviewCurves` (`CurveGeometry`) no longer renders, since its `CurvesToPoints` takes `Geometry`;
-  only `OffsetCurves` still outputs `CurveGeometry` and is converted in Phase 2.
 - Milestone: zigzag text, extruded, in the editor. **Decision point**: continue, or stop and keep the two types.
 
 ### Phase 2: Migrate everything
+- **Batch 1 done (2026-11-20):** `OffsetCurves` converted (polygons pass through, primitive and part attributes kept,
+  an offset curve's points take its first point's attributes); `CurveGeometry`, `CurvePart`, the curve output view,
+  its table model and overlay, and `_OutputPreviewCurves` removed. `AttributeDomain` keeps ControlPoint, Segment and
+  Contour as unused values so stored ints stay valid.
 - **Flat fill without extrusion** (maintainer, 2026-11-20): curves must become a surface without an op named
   "extrude". Move the fill (flatten, resolve overlaps by fill rule, tessellate with holes) out of `ExtrudeCurves` into
   a `Lib/Utils` helper, then (1) `GeometryToMesh` fills closed curves itself (option, on by default) so

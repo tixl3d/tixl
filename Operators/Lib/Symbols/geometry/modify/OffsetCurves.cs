@@ -6,17 +6,18 @@ using T3.Core.Utils.Splines;
 namespace Lib.geometry.modify;
 
 /// <summary>
-/// Offsets every contour of a CurveGeometry sideways in the XY plane by a fixed distance.
+/// Offsets every curve primitive of a Geometry sideways in the XY plane by a fixed distance.
 /// Each cubic is offset by moving its anchors along the normal and scaling its handles by
 /// the curvature there, split until it stays within Tolerance of the exact offset. Corners
 /// are joined on the outside (miter, round or bevel) and trimmed to the intersection on the
-/// inside, so closed contours stay closed and sharp corners stay sharp.
+/// inside, so closed contours stay closed and sharp corners stay sharp. Polygons pass through; primitive and part
+/// attributes are kept, and the points of an offset curve take the point and vertex attributes of its first point.
 /// </summary>
 [Guid("89ddc35c-ba3b-49a1-b766-a7356a12fe40")]
 internal sealed class OffsetCurves : Instance<OffsetCurves>
 {
     [Output(Guid = "eb51b623-b0bc-4686-986b-0148262ced85")]
-    public readonly Slot<CurveGeometry?> Result = new();
+    public readonly Slot<Geometry?> Result = new();
 
     public OffsetCurves()
     {
@@ -56,13 +57,14 @@ internal sealed class OffsetCurves : Instance<OffsetCurves>
 
     private sealed class OffsetBuilder
     {
-        public void Build(CurveGeometry source, float offset, Joins join, float miterLimit, float tolerance, CurveGeometry target)
+        public void Build(Geometry source, float offset, Joins join, float miterLimit, float tolerance, Geometry target)
         {
             _positions.Clear();
             _handlesIn.Clear();
             _handlesOut.Clear();
-            _contourOffsets.Clear();
-            _contourOffsets.Add(0);
+            _vertexPoints.Clear();
+            _pointBlend.Clear();
+            _vertexBlend.Clear();
 
             _join = join;
             _miterLimit = miterLimit;
@@ -70,46 +72,108 @@ internal sealed class OffsetCurves : Instance<OffsetCurves>
 
             CurveWinding.GetOutsideSides(source, _contourSides);
 
-            var contourCount = source.ContourCount;
-            for (var contourIndex = 0; contourIndex < contourCount; contourIndex++)
+            var sourcePointCount = source.PointCount;
+            if (_pointMap.Length < sourcePointCount)
+                _pointMap = new int[sourcePointCount];
+
+            Array.Fill(_pointMap, -1, 0, sourcePointCount);
+
+            var primitiveCount = source.PrimitiveCount;
+            if (_primitiveOffsets.Length != primitiveCount + 1)
+                _primitiveOffsets = new int[primitiveCount + 1];
+
+            var curves = source.Curves;
+            for (var primitive = 0; primitive < primitiveCount; primitive++)
             {
-                OffsetContour(source, contourIndex, offset * _contourSides[contourIndex]);
-                _contourOffsets.Add(_positions.Count);
+                _primitiveOffsets[primitive] = _vertexPoints.Count;
+                var vertexStart = source.PrimitiveVertexOffsets[primitive];
+                if (source.PrimitiveKind[primitive] == PrimitiveKinds.Curve)
+                {
+                    var firstPoint = _positions.Count;
+                    var curve = curves[primitive];
+                    OffsetContour(curve, offset * _contourSides[primitive]);
+                    var sourcePoint = curve.VertexCount > 0 ? curve.GetPointIndex(0) : 0;
+                    for (var point = firstPoint; point < _positions.Count; point++)
+                    {
+                        _vertexPoints.Add(point);
+                        _pointBlend.AddCopy(sourcePoint);
+                        _vertexBlend.AddCopy(vertexStart);
+                    }
+
+                    continue;
+                }
+
+                // Polygons pass through and keep sharing their points
+                for (var vertex = vertexStart; vertex < source.PrimitiveVertexOffsets[primitive + 1]; vertex++)
+                {
+                    var point = source.VertexPoints[vertex];
+                    if (_pointMap[point] < 0)
+                    {
+                        _pointMap[point] = _positions.Count;
+                        var position = source.Positions[point];
+                        AddAnchor(position, position, position);
+                        _pointBlend.AddCopy(point);
+                    }
+
+                    _vertexPoints.Add(_pointMap[point]);
+                    _vertexBlend.AddCopy(vertex);
+                }
             }
 
-            target.Positions = _positions.ToArray();
-            target.HandlesIn = _handlesIn.ToArray();
-            target.HandlesOut = _handlesOut.ToArray();
-            target.ContourOffsets = _contourOffsets.ToArray();
-            target.ContourClosed = (bool[])source.ContourClosed.Clone();
+            _primitiveOffsets[primitiveCount] = _vertexPoints.Count;
+            WriteTarget(source, target);
+        }
+
+        private void WriteTarget(Geometry source, Geometry target)
+        {
+            var pointCount = _positions.Count;
+            var primitiveCount = source.PrimitiveCount;
+            target.Resize(pointCount, primitiveCount, _vertexPoints.Count);
+            target.Attributes.Clear();
+
+            _positions.CopyTo(target.Positions);
+            _vertexPoints.CopyTo(target.VertexPoints);
+            Array.Copy(_primitiveOffsets, target.PrimitiveVertexOffsets, primitiveCount + 1);
+            Array.Copy(source.PrimitiveKind, target.PrimitiveKind, primitiveCount);
+            Array.Copy(source.PrimitiveClosed, target.PrimitiveClosed, primitiveCount);
             target.Parts = source.Parts;
 
-            // Contours and parts keep their count and order, so their attributes stay valid and are shared
-            target.Attributes.Clear();
-            foreach (var attribute in source.Attributes)
+            _pointBlend.Apply(source.Attributes, target.Attributes, AttributeDomain.Point, HandleNames);
+            _vertexBlend.Apply(source.Attributes, target.Attributes, AttributeDomain.Vertex);
+
+            var handlesIn = target.Attributes.GetOrCreate<Vector3>(GeometryAttributeNames.HandleIn, AttributeDomain.Point, pointCount).Values;
+            var handlesOut = target.Attributes.GetOrCreate<Vector3>(GeometryAttributeNames.HandleOut, AttributeDomain.Point, pointCount).Values;
+            for (var point = 0; point < pointCount; point++)
             {
-                if (attribute.Domain is AttributeDomain.Part or AttributeDomain.Contour)
+                handlesIn[point] = _handlesIn[point] - _positions[point];
+                handlesOut[point] = _handlesOut[point] - _positions[point];
+            }
+
+            // Primitives and parts keep their count and order, so their attributes stay valid and are shared
+            for (var index = 0; index < source.Attributes.Count; index++)
+            {
+                var attribute = source.Attributes[index];
+                if (attribute.Domain is AttributeDomain.Primitive or AttributeDomain.Part)
                     target.Attributes.Add(attribute);
             }
 
-            target.InvalidateCaches();
+            target.InvalidateTopologyCaches();
         }
 
         /// <param name="distance">Signed distance along the left normal of the contour's direction.</param>
-        private void OffsetContour(CurveGeometry source, int contourIndex, float distance)
+        private void OffsetContour(CurveView curve, float distance)
         {
-            var start = source.ContourOffsets[contourIndex];
-            var pointCount = source.GetContourPointCount(contourIndex);
-            var segmentCount = source.GetContourSegmentCount(contourIndex);
-            var closed = source.ContourClosed[contourIndex];
+            var pointCount = curve.VertexCount;
+            var segmentCount = curve.SegmentCount;
+            var closed = curve.IsClosed;
 
             _pieces.Clear();
             _segments.Clear();
             for (var segmentIndex = 0; segmentIndex < segmentCount; segmentIndex++)
             {
-                var a = start + segmentIndex;
-                var b = start + (segmentIndex + 1) % pointCount;
-                var cubic = new Cubic(source.Positions[a], source.HandlesOut[a], source.HandlesIn[b], source.Positions[b]);
+                var a = segmentIndex;
+                var b = (segmentIndex + 1) % pointCount;
+                var cubic = new Cubic(curve.GetPosition(a), curve.GetHandleOutPosition(a), curve.GetHandleInPosition(b), curve.GetPosition(b));
                 if (!TryGetTangents(cubic, out var tangentStart, out var tangentEnd))
                     continue; // zero-length segment: its neighbors join directly
 
@@ -123,9 +187,9 @@ internal sealed class OffsetCurves : Instance<OffsetCurves>
             if (_segments.Count == 0)
             {
                 // Nothing with a direction to offset; keep the anchors so contour and part ranges stay valid
-                for (var i = start; i < start + pointCount; i++)
+                for (var i = 0; i < pointCount; i++)
                 {
-                    AddAnchor(source.Positions[i], source.HandlesIn[i], source.HandlesOut[i]);
+                    AddAnchor(curve.GetPosition(i), curve.GetHandleInPosition(i), curve.GetHandleOutPosition(i));
                 }
 
                 return;
@@ -447,17 +511,22 @@ internal sealed class OffsetCurves : Instance<OffsetCurves>
         private readonly List<Vector3> _positions = [];
         private readonly List<Vector3> _handlesIn = [];
         private readonly List<Vector3> _handlesOut = [];
-        private readonly List<int> _contourOffsets = [0];
+        private readonly List<int> _vertexPoints = [];
+        private readonly GeometryAttributeBlend _pointBlend = new();
+        private readonly GeometryAttributeBlend _vertexBlend = new();
+        private int[] _pointMap = [];
+        private int[] _primitiveOffsets = [];
         private readonly List<float> _contourSides = [];
         private readonly List<Cubic> _pieces = [];
         private readonly List<SegmentInfo> _segments = [];
     }
 
     private readonly OffsetBuilder _builder = new();
-    private readonly CurveGeometry _output = new();
+    private static readonly string[] HandleNames = [GeometryAttributeNames.HandleIn, GeometryAttributeNames.HandleOut];
+    private readonly Geometry _output = new();
 
     [Input(Guid = "83e19891-6ac2-41c2-bf59-800811d28d79")]
-    public readonly InputSlot<CurveGeometry> Curves = new();
+    public readonly InputSlot<Geometry> Curves = new();
 
     [Input(Guid = "b7803f2e-b869-4181-aa44-1b4bbc3935a9")]
     public readonly InputSlot<float> Offset = new();

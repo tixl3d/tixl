@@ -250,7 +250,7 @@ public partial class Symbol
             typeof(string),
             typeof(ShaderGraphNode),
             typeof(AudioGraphNode),
-            typeof(Geometry), typeof(MeshGeometry), typeof(CurveGeometry),
+            typeof(Geometry), typeof(MeshGeometry),
         };
 
         private void SetBypassed(bool shouldBypass)

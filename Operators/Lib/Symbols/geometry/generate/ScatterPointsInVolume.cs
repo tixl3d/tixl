@@ -113,21 +113,21 @@ internal sealed class ScatterPointsInVolume : Instance<ScatterPointsInVolume>, I
     private MeshGeometry? _insideTesterGeometry;
     private int _insideTesterVersion;
 
-    [Input(Guid = "e17d4a92-6b58-4c03-a9f1-84c5d2e7b360")]
-    public readonly InputSlot<int> Count = new();
+        [Input(Guid = "58c1f7a3-b2d9-4e06-85cb-7f4a90e6d221")]
+        public readonly InputSlot<T3.Core.DataTypes.MeshGeometry> Geometry = new InputSlot<T3.Core.DataTypes.MeshGeometry>();
 
-    [Input(Guid = "3f82c6b1-9e07-45da-b824-56a1f9d3c708")]
-    public readonly InputSlot<Vector3> Center = new();
+        [Input(Guid = "e17d4a92-6b58-4c03-a9f1-84c5d2e7b360")]
+        public readonly InputSlot<int> Count = new InputSlot<int>();
 
-    [Input(Guid = "a94b0e58-27c3-4f61-90ad-c8e52b7f1d39")]
-    public readonly InputSlot<Vector3> Size = new();
+        [Input(Guid = "3f82c6b1-9e07-45da-b824-56a1f9d3c708")]
+        public readonly InputSlot<System.Numerics.Vector3> Center = new InputSlot<System.Numerics.Vector3>();
 
-    [Input(Guid = "58c1f7a3-b2d9-4e06-85cb-7f4a90e6d221")]
-    public readonly InputSlot<MeshGeometry> Geometry = new();
+        [Input(Guid = "a94b0e58-27c3-4f61-90ad-c8e52b7f1d39")]
+        public readonly InputSlot<System.Numerics.Vector3> Size = new InputSlot<System.Numerics.Vector3>();
 
-    [Input(Guid = "c6a35d18-40fb-4972-bde6-19f8c2a7e054")]
-    public readonly InputSlot<ScalarField> Density = new();
+        [Input(Guid = "c6a35d18-40fb-4972-bde6-19f8c2a7e054")]
+        public readonly InputSlot<T3.Core.DataTypes.ScalarField> Density = new InputSlot<T3.Core.DataTypes.ScalarField>();
 
-    [Input(Guid = "12e9b8c4-75a0-4d36-9f82-3dc6e1b0a597")]
-    public readonly InputSlot<int> Seed = new();
+        [Input(Guid = "12e9b8c4-75a0-4d36-9f82-3dc6e1b0a597")]
+        public readonly InputSlot<int> Seed = new InputSlot<int>();
 }

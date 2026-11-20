@@ -40,21 +40,21 @@ Select a [DefineLensFlare] (its output is a list of sprites, not points).
 Select the [StringToCurves].
 
 **Expected:**
-- A segmented button offers **Render** and **Stats**, next to the contour and part count.
-- **Render** draws the glyph outlines as thin lines.
-- **Stats** lists anchors, segments, closed contours, size, bounds and the attributes (e.g. `CodePoint per Part`).
+- A segmented button offers **Render**, **Table** and **Stats**, next to the curve and part count.
+- **Render** draws the glyph outlines as thin lines with a dot on each point of the curves, not on every line sample.
+- **Stats** lists points, vertices, how many curves are closed, size, bounds and the attributes (e.g. `CodePoint per Part`).
 
-## Step: Curve table
+## Step: Table of curves
 
 **Action:**
 With the [StringToCurves] selected and its text set to `TiXL`, click **Table**, then **Parts**.
 
 **Expected:**
-- A second segmented button offers **Anchors**, **Segments**, **Contours** and **Parts**.
-- **Parts** lists 4 rows, one per glyph, with `Contour`, `Contours`, pivot, `Id`, `Seed` and the attribute columns
+- A second segmented button offers **Points**, **Vertices**, **Primitives**, **Edges** and **Parts**.
+- **Parts** lists 4 rows, one per glyph, with `Primitive`, `Primitives`, pivot, `Id`, `Seed` and the attribute columns
   `CodePoint`, `GlyphId`, `CharIndex`, `WordIndex`, `LineIndex`, `Advance`.
-- **Contours** lists 5 rows (the `i` has two); `Closed` reads `yes`.
-- **Anchors** lists positions; the `In` and `Out` columns are zero for corners and drawn faintly.
+- **Primitives** lists 5 rows (the `i` has two); `Kind` reads `curve`, `Closed` reads `yes`.
+- **Points** lists positions and the `HandleIn` and `HandleOut` columns, zero for corners and drawn faintly.
 - The summary next to the buttons shows the row count, e.g. `4 parts`.
 
 ## Step: Highlight selected rows
@@ -64,10 +64,18 @@ In **Parts**, click the row of the `i`, Ctrl+click the row of the `L`, then clic
 
 **Expected:**
 - The summary shows `2 selected` in the table and `2 parts selected` after switching.
-- The outlines of the `i` (both contours) and the `L` are drawn thicker in the selection color, each with a cross at
+- The outlines of the `i` (both curves) and the `L` are drawn thicker in the selection color, each with a cross at
   its pivot. Orbiting the camera keeps the highlight on the glyphs.
 - Back in **Table**, Shift+click extends the selection; clicking the only selected row clears it.
-- Switching to **Anchors** clears the selection; selected anchors show a dot with their handles.
+- Switching to **Points** clears the selection; selected points show a dot.
+
+## Step: Selection attribute
+
+**Action:**
+Connect a [SubdivideCurves] and a [SelectGeometry] (Every 4) after the [StringToCurves] and select the [SelectGeometry].
+
+**Expected:**
+- Every fourth point of each curve has a ring; changing Offset moves the rings along the outline.
 
 ## Step: Geometry
 

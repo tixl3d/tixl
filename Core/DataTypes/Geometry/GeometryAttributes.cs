@@ -7,8 +7,8 @@ namespace T3.Core.DataTypes;
 
 /// <summary>
 /// The element domain an attribute's values are attached to. <see cref="Geometry"/> uses Point, Vertex, Primitive,
-/// Edge and Part. Corner and Face (<see cref="MeshGeometry"/>) and ControlPoint, Segment and Contour
-/// (<see cref="CurveGeometry"/>) remain until those types are retired; values are appended so stored ints stay valid.
+/// Edge and Part; Corner and Face remain for <see cref="MeshGeometry"/> until it is retired. ControlPoint, Segment and
+/// Contour belonged to the retired curve type and are unused; values are appended so stored ints stay valid.
 /// </summary>
 public enum AttributeDomain
 {
