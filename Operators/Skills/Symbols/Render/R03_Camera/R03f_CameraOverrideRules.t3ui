@@ -2,7 +2,7 @@
   "FormatVersion": 3,
   "Id": "b8ff7779-3de5-4930-b9a7-26f1b3436479"/*R03f_CameraOverrideRules*/,
   "Description": "Camera Override Rules",
-  "SymbolTags": "16384",
+  "SymbolTags": "32768",
   "InputUis": [],
   "SymbolChildUis": [
     {

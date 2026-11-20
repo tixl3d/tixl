@@ -6,6 +6,78 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
+      "ChildId": "09d37c0d-0f30-4324-9861-bc46ed282f52",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
+      "Position": {
+        "X": 933.325,
+        "Y": 1534.4801
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "13d1861e-fc7c-468c-81ad-44f77ebc8465",
+      "SymbolName": "Lib.render.shading.SetMaterial",
+      "Position": {
+        "X": 1170.3579,
+        "Y": 1460.3599
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "217765d1-0b71-4cc2-9ef5-3a4f43699d12",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
+      "Position": {
+        "X": 1170.3579,
+        "Y": 1612.4998
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "257693bc-c1fa-4f13-83c9-ebf5a42b5182",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
+      "Position": {
+        "X": 1170.3579,
+        "Y": 1425.3599
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "2a7adaf8-eb30-4838-aed4-f5f54b4df19b",
+      "SymbolName": "Lib.numbers.anim.time.Time",
+      "Position": {
+        "X": 933.325,
+        "Y": 1479.3751
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "3150960b-99c6-4969-994f-d1729e427c10",
+      "SymbolName": "Lib.render.transform.Group",
+      "SectionId": "1d174ed9-8d9a-4fec-ac50-71630f7143a0",
+      "Position": {
+        "X": 1278.3844,
+        "Y": 2047.9979
+      }
+    },
+    {
+      "ChildId": "3389c274-7557-4698-8ac0-aa6af359123b",
+      "SymbolName": "Lib.mesh.generate.TorusMesh",
+      "SectionId": "1d174ed9-8d9a-4fec-ac50-71630f7143a0",
+      "Position": {
+        "X": 1089.9564,
+        "Y": 1852.552
+      }
+    },
+    {
+      "ChildId": "3ee4ddb0-5ba0-4bf9-abf0-0120ee6a3f8d",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
+      "SectionId": "1d174ed9-8d9a-4fec-ac50-71630f7143a0",
+      "Position": {
+        "X": 855.92896,
+        "Y": 2060.7832
+      }
+    },
+    {
       "ChildId": "4cb8a8ef-7761-4377-bdad-c4df1cb1f324",
       "SymbolName": "Lib.flow.skillQuest.DrawQuiz",
       "Position": {
@@ -14,21 +86,130 @@
       }
     },
     {
-      "ChildId": "5828a66a-c9c5-4e71-a03e-1113109d8460",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "71d3b644-1aca-4d93-95a9-d5d041bef514",
+      "SymbolName": "Lib.render.camera.OrbitCamera",
+      "SectionId": "1d174ed9-8d9a-4fec-ac50-71630f7143a0",
       "Position": {
-        "X": 1366.8816,
-        "Y": 1568.3276
+        "X": 1278.3844,
+        "Y": 2117.998
       }
     },
     {
-      "ChildId": "a3c8b0ab-7553-4ce3-810e-5c91c4fd8f08",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "770934df-f87c-4ebb-9c79-557114531361",
+      "SymbolName": "Lib.render.shading.SetMaterial",
       "SectionId": "1d174ed9-8d9a-4fec-ac50-71630f7143a0",
       "Position": {
-        "X": 1244.7633,
-        "Y": 2141.3435
+        "X": 1089.9564,
+        "Y": 1957.552
       }
+    },
+    {
+      "ChildId": "776a329f-b82a-46c1-866b-fbf475f9f56b",
+      "SymbolName": "Lib.render.transform.Group",
+      "Position": {
+        "X": 1380.9656,
+        "Y": 1507.8324
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "8435979e-27b0-42ed-8dbb-65d07298713c",
+      "SymbolName": "Lib.mesh.generate.TorusMesh",
+      "Position": {
+        "X": 1170.3579,
+        "Y": 1355.3599
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "923c6fd4-8ffb-49ef-88ae-1994fefdad03",
+      "SymbolName": "Lib.mesh.modify.TransformMesh",
+      "Position": {
+        "X": 1170.3579,
+        "Y": 1390.3599
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "9718e757-af27-4a86-91e9-cacb0d77aa92",
+      "SymbolName": "Lib.render.shading.SetMaterial",
+      "SectionId": "1d174ed9-8d9a-4fec-ac50-71630f7143a0",
+      "Position": {
+        "X": 1089.9564,
+        "Y": 2173.8027
+      }
+    },
+    {
+      "ChildId": "a2d85a82-f411-4ef4-b4da-f25d54853379",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
+      "SectionId": "1d174ed9-8d9a-4fec-ac50-71630f7143a0",
+      "Position": {
+        "X": 1089.9564,
+        "Y": 1922.552
+      }
+    },
+    {
+      "ChildId": "b2a1d76a-05ad-40a2-aeeb-e8a847734c7e",
+      "SymbolName": "Lib.numbers.anim.time.Time",
+      "SectionId": "1d174ed9-8d9a-4fec-ac50-71630f7143a0",
+      "Position": {
+        "X": 715.92896,
+        "Y": 2095.7832
+      }
+    },
+    {
+      "ChildId": "d7fdc1cb-4c46-43b6-b534-37901b9690d0",
+      "SymbolName": "Lib.render.camera.OrbitCamera",
+      "Position": {
+        "X": 1380.9656,
+        "Y": 1542.8324
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "e68aab9d-9876-46de-8dd0-26d0e3b5a392",
+      "SymbolName": "Lib.render.shading.SetMaterial",
+      "Position": {
+        "X": 1170.3579,
+        "Y": 1647.4998
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "edf8fba2-62ff-4bf6-a24d-3aa95f124de8",
+      "SymbolName": "Lib.mesh.generate.TorusMesh",
+      "SectionId": "1d174ed9-8d9a-4fec-ac50-71630f7143a0",
+      "Position": {
+        "X": 1089.9564,
+        "Y": 2103.8027
+      }
+    },
+    {
+      "ChildId": "efc1ded5-5b99-4205-9cbf-9fbe317962f6",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
+      "SectionId": "1d174ed9-8d9a-4fec-ac50-71630f7143a0",
+      "Position": {
+        "X": 1089.9564,
+        "Y": 2138.8027
+      }
+    },
+    {
+      "ChildId": "f3ce5e92-1b3a-49df-8864-5315148574af",
+      "SymbolName": "Lib.mesh.modify.TransformMesh",
+      "SectionId": "1d174ed9-8d9a-4fec-ac50-71630f7143a0",
+      "Position": {
+        "X": 1089.9564,
+        "Y": 1887.552
+      }
+    },
+    {
+      "ChildId": "f4448462-e9ca-42e8-8147-d1fd2ee11389",
+      "SymbolName": "Lib.mesh.generate.TorusMesh",
+      "Position": {
+        "X": 1170.3579,
+        "Y": 1577.4998
+      },
+      "SnapshotGroupIndex": "1"
     }
   ],
   "OutputUis": [
@@ -52,12 +233,12 @@
         "W": 1.0
       },
       "Position": {
-        "X": 1085.0,
-        "Y": 2052.5103
+        "X": 595.66016,
+        "Y": 1804.3748
       },
       "Size": {
-        "X": 525.0,
-        "Y": 187.48975
+        "X": 1014.33984,
+        "Y": 459.26562
       }
     }
   ],
@@ -74,6 +255,11 @@
       "Id": "226bc1d4-a8cb-45dd-b9ce-c73ca1c82323",
       "Description": "Reproduce the animation.",
       "Style": "CallToAction"
+    },
+    {
+      "Id": "91e68cd3-e484-40e8-876b-0dd9b104d614",
+      "Description": "Setting up transparent objects can be tricky, because to order in which they are drawn matters.\nIdeally transparent object should be drawn last, and then from back to front.",
+      "Style": "Tip"
     }
   ]
 }

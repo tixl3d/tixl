@@ -2,25 +2,53 @@
   "FormatVersion": 3,
   "Id": "2b277fb9-2caa-4652-ae05-9f1806c19044"/*R05a_Rendering*/,
   "Description": "Rendering",
-  "SymbolTags": "16384",
+  "SymbolTags": "32768",
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "313b0c88-558d-4bb6-b556-3829eaac012c",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "01a55c28-177d-4163-b623-681cba9fe84c",
+      "SymbolName": "Lib.render.shading.SetMaterial",
       "Position": {
-        "X": 1366.8816,
-        "Y": 1568.3276
+        "X": 1084.6973,
+        "Y": 1796.5511
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "14166c6c-c1da-45f0-935e-1622b407a530",
+      "SymbolName": "Lib.render.camera.OrbitCamera",
+      "Position": {
+        "X": 1395.6366,
+        "Y": 1744.5675
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "15c2fb70-8079-4c8a-8a7d-bde8506c115f",
+      "SymbolName": "Lib.mesh.generate.LoadObj",
+      "SectionId": "47ed3048-78c6-4712-bdd1-c3a528412e79",
+      "Position": {
+        "X": 1123.8163,
+        "Y": 2051.4548
       }
     },
     {
-      "ChildId": "5453359a-5bb6-4f09-90b8-9d510466676d",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "5d98d88d-1477-4744-b6c1-54083bb14239",
+      "SymbolName": "Lib.render.shading.SetMaterial",
       "SectionId": "47ed3048-78c6-4712-bdd1-c3a528412e79",
       "Position": {
-        "X": 1244.7633,
-        "Y": 2141.3435
+        "X": 1403.8162,
+        "Y": 2121.4548
       }
+    },
+    {
+      "ChildId": "610177dc-8aad-4342-9094-7edec6bf3b25",
+      "SymbolName": "Lib.mesh.generate.LoadObj",
+      "Position": {
+        "X": 1115.6367,
+        "Y": 1674.5675
+      },
+      "SnapshotGroupIndex": "1"
     },
     {
       "ChildId": "616b7f1c-3d56-4487-a247-194f4b3f4d7f",
@@ -28,6 +56,105 @@
       "Position": {
         "X": 1693.2708,
         "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "84275766-648e-4a58-8774-42b07e3d41ac",
+      "SymbolName": "Lib.render.transform.Group",
+      "SectionId": "47ed3048-78c6-4712-bdd1-c3a528412e79",
+      "Position": {
+        "X": 1403.8162,
+        "Y": 2016.4548
+      }
+    },
+    {
+      "ChildId": "91148d20-79e9-4346-aaa8-1555610902ec",
+      "SymbolName": "Lib.numbers.vec3.PerlinNoise3",
+      "SectionId": "47ed3048-78c6-4712-bdd1-c3a528412e79",
+      "Position": {
+        "X": 1263.8162,
+        "Y": 2086.4548
+      }
+    },
+    {
+      "ChildId": "a0555ec4-f091-41a9-b4a6-82c3e9c95ba6",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
+      "SectionId": "47ed3048-78c6-4712-bdd1-c3a528412e79",
+      "Position": {
+        "X": 1263.8162,
+        "Y": 2016.4548
+      }
+    },
+    {
+      "ChildId": "a212dcf5-76fa-45ee-b670-1775132d3d69",
+      "SymbolName": "Lib.mesh.generate.TorusMesh",
+      "Position": {
+        "X": 1115.6365,
+        "Y": 1639.5675
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "bc03b883-39b7-4e40-a191-687b435eef25",
+      "SymbolName": "Lib.numbers.vec3.PerlinNoise3",
+      "Position": {
+        "X": 1255.6366,
+        "Y": 1709.5675
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "c0e4c646-913a-4826-9041-f3b4c672f8e6",
+      "SymbolName": "Lib.mesh.generate.TorusMesh",
+      "SectionId": "47ed3048-78c6-4712-bdd1-c3a528412e79",
+      "Position": {
+        "X": 1123.816,
+        "Y": 2016.4548
+      }
+    },
+    {
+      "ChildId": "e2fec7c2-1e02-4743-ac46-2edc354a813c",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
+      "Position": {
+        "X": 1255.6366,
+        "Y": 1639.5675
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "ee2bbd62-a06f-42e8-92a3-0ee77eaca7b4",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
+      "Position": {
+        "X": 1255.6366,
+        "Y": 1674.5675
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "f17800c3-ecde-445c-b9b8-4a50921aa720",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
+      "SectionId": "47ed3048-78c6-4712-bdd1-c3a528412e79",
+      "Position": {
+        "X": 1263.8162,
+        "Y": 2051.4548
+      }
+    },
+    {
+      "ChildId": "f9a2bfe5-5ded-4e50-8a21-05e9907ee386",
+      "SymbolName": "Lib.render.transform.Group",
+      "Position": {
+        "X": 1395.6366,
+        "Y": 1639.5675
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "fafe12c9-8298-4d73-a0b1-3b754704e482",
+      "SymbolName": "Lib.render.camera.OrbitCamera",
+      "SectionId": "47ed3048-78c6-4712-bdd1-c3a528412e79",
+      "Position": {
+        "X": 1403.8162,
+        "Y": 2156.4548
       }
     }
   ],
@@ -53,11 +180,11 @@
       },
       "Position": {
         "X": 1085.0,
-        "Y": 2052.5103
+        "Y": 1890.0
       },
       "Size": {
         "X": 525.0,
-        "Y": 187.48975
+        "Y": 350.0
       }
     }
   ],
@@ -68,11 +195,11 @@
     },
     {
       "Id": "8c59f9ad-f2ba-45d3-ac60-dff6d184ae6a",
-      "Description": "By default, TiXL uses a predefined studio lighting setup.\nThe default material is too rough to clearly show reflections, so a new [Material] operator is added to adjust this."
+      "Description": "By default, TiXL uses a predefined studio lighting setup.\n\nThe default material is too rough to clearly show reflections, so a new [SetMaterial] operator is added to adjust this."
     },
     {
       "Id": "42def860-9278-4772-bdce-e82e703d9165",
-      "Description": "Add a [Material] operator and adjust its roughness to match the reference.",
+      "Description": "Add a [SetMaterial] operator and adjust its roughness to match the reference.",
       "Style": "CallToAction"
     }
   ]

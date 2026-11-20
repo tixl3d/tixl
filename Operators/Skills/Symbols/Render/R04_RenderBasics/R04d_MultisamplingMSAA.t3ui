@@ -2,7 +2,7 @@
   "FormatVersion": 3,
   "Id": "abb8caef-fba7-457c-9934-613d6476f99f"/*R04d_MultisamplingMSAA*/,
   "Description": "Multisampling (MSAA)",
-  "SymbolTags": "16384",
+  "SymbolTags": "32768",
   "InputUis": [],
   "SymbolChildUis": [
     {

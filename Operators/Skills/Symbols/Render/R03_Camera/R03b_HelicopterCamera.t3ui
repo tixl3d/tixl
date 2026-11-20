@@ -2,7 +2,7 @@
   "FormatVersion": 3,
   "Id": "dcce7259-dbe4-4733-ab8d-511c52ad8773"/*R03b_HelicopterCamera*/,
   "Description": "Helicopter Camera",
-  "SymbolTags": "16384",
+  "SymbolTags": "32768",
   "InputUis": [],
   "SymbolChildUis": [
     {

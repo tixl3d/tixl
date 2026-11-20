@@ -1,8 +1,8 @@
 {
   "FormatVersion": 3,
-  "Id": "59333bff-6604-4e02-bcc5-05bfc2c68082"/*R04b_From3dTo2D*/,
+  "Id": "59333bff-6604-4e02-bcc5-05bfc2c68082"/*R04b_From3dTo2d*/,
   "Description": "From 3D to 2D",
-  "SymbolTags": "16384",
+  "SymbolTags": "32768",
   "InputUis": [],
   "SymbolChildUis": [
     {

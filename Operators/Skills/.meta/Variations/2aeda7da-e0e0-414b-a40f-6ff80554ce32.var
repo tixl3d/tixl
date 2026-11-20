@@ -1,0 +1,71 @@
+{
+  "Id": "2aeda7da-e0e0-414b-a40f-6ff80554ce32",
+  "Variations": [
+    {
+      "Id": "aafc0923-730c-44da-ad67-c41f6c6c2a6a",
+      "IsPreset": false,
+      "ActivationIndex": 0,
+      "Title": "Solution",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "f4448462-e9ca-42e8-8147-d1fd2ee11389": {
+          "608de038-6c7a-43fc-ba89-374c7b1a318e": 0.44,
+          "fdbad44a-2504-453b-bfae-976828372cc0": 0.23
+        },
+        "923c6fd4-8ffb-49ef-88ae-1994fefdad03": {
+          "1168094f-1eee-4ed7-95e2-9459e6171e08": {
+            "X": 90.0,
+            "Y": 0.0,
+            "Z": 0.0
+          }
+        },
+        "8435979e-27b0-42ed-8dbb-65d07298713c": {
+          "fdbad44a-2504-453b-bfae-976828372cc0": 0.13
+        },
+        "2a7adaf8-eb30-4838-aed4-f5f54b4df19b": {
+          "e0f765f3-ac71-45c9-87a4-e9be3fa9a9a0": 0.25
+        },
+        "09d37c0d-0f30-4324-9861-bc46ed282f52": {
+          "e47e9e63-9c94-4c29-9555-2452fa498d57": {
+            "Gradient": {
+              "Interpolation": "Linear",
+              "Steps": [
+                {
+                  "Id": "8ddf27bc-48d2-4bb9-b5f5-b3dd0b17c2f9",
+                  "NormalizedPosition": 0.54258984,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 1.0,
+                    "B": 1.0,
+                    "A": 0.0
+                  }
+                },
+                {
+                  "Id": "711c90db-b914-47a7-aba2-c30255361f8d",
+                  "NormalizedPosition": 0.63203895,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 1.0,
+                    "B": 1.0,
+                    "A": 1.0
+                  }
+                }
+              ]
+            }
+          },
+          "10d59d0f-a5a3-42e6-b874-345ab028978e": 0.25,
+          "c38647f6-c6ea-40a0-b872-0df6d4168c05": 0.0,
+          "5774969c-ef4d-482e-ab37-b3a84b09debb": true,
+          "7f3fe86d-f259-458a-908a-0a71d39ca678": true,
+          "53afc8d9-f417-4628-9a97-220bec62919f": {
+            "X": 1024,
+            "Y": 1024
+          }
+        }
+      }
+    }
+  ]
+}

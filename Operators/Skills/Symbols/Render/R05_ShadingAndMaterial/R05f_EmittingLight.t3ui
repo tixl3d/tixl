@@ -2,7 +2,7 @@
   "FormatVersion": 3,
   "Id": "99520f2a-7e6a-4bc2-ae1f-f1e6e3407766"/*R05f_EmittingLight*/,
   "Description": "Emitting Light",
-  "SymbolTags": "16384",
+  "SymbolTags": "32768",
   "InputUis": [],
   "SymbolChildUis": [
     {

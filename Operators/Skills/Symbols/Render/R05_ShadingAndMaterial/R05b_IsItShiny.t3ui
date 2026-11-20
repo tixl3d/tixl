@@ -2,9 +2,37 @@
   "FormatVersion": 3,
   "Id": "f2d52d59-c099-476d-83ef-0429f76f9180"/*R05b_IsItShiny*/,
   "Description": "Is It Shiny?",
-  "SymbolTags": "16384",
+  "SymbolTags": "32768",
   "InputUis": [],
   "SymbolChildUis": [
+    {
+      "ChildId": "0774e464-6075-4f0f-95f3-fe06cac51278",
+      "SymbolName": "Lib.mesh.modify.MeshProjectUV",
+      "Position": {
+        "X": 1434.5308,
+        "Y": 1483.4758
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "1b6c9390-89b2-40fa-b5aa-ab10bf0951cf",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
+      "SectionId": "474eba79-4f16-4734-8098-920bd704a481",
+      "Position": {
+        "X": 1397.221,
+        "Y": 2202.878
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "3556608a-a2bf-4ac4-837a-2927e51f26e9",
+      "SymbolName": "Lib.mesh._.LoadGltf",
+      "Position": {
+        "X": 1434.5308,
+        "Y": 1448.4758
+      },
+      "SnapshotGroupIndex": "1"
+    },
     {
       "ChildId": "4144d3a1-f779-4941-96ff-0ca127d3c584",
       "SymbolName": "Lib.flow.skillQuest.DrawQuiz",
@@ -14,21 +42,90 @@
       }
     },
     {
-      "ChildId": "7fdb1684-5414-4349-ae7e-ed0cb14bfa31",
-      "SymbolName": "Lib.render.basic.Text",
-      "SectionId": "474eba79-4f16-4734-8098-920bd704a481",
+      "ChildId": "42d02d50-e5bb-4daa-848c-b3ca0eec55d9",
+      "SymbolName": "Lib.numbers.anim.animators.AnimVec3",
       "Position": {
-        "X": 1244.7633,
-        "Y": 2141.3435
-      }
+        "X": 1294.5308,
+        "Y": 1518.4758
+      },
+      "SnapshotGroupIndex": "1"
     },
     {
-      "ChildId": "809d15cb-834a-4cea-bc25-7c32a2051beb",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "461b6fc2-e74b-49bf-8dd3-a2c6f78a0955",
+      "SymbolName": "Lib.mesh._.LoadGltf",
+      "SectionId": "474eba79-4f16-4734-8098-920bd704a481",
       "Position": {
-        "X": 1366.8816,
-        "Y": 1568.3276
-      }
+        "X": 1397.221,
+        "Y": 2097.878
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "61b90bf9-058b-4b88-a491-4863cda2d77d",
+      "SymbolName": "Lib.render.shading.SetMaterial",
+      "Position": {
+        "X": 1434.5308,
+        "Y": 1588.4758
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "7bc16152-44e8-44f9-8854-e9b686a5e2ed",
+      "SymbolName": "Lib.render.shading.SetMaterial",
+      "SectionId": "474eba79-4f16-4734-8098-920bd704a481",
+      "Position": {
+        "X": 1397.221,
+        "Y": 2237.878
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "829e1470-3210-47d9-bece-dd3d1a4b5ac1",
+      "SymbolName": "Lib.render.camera.OrbitCamera",
+      "SectionId": "474eba79-4f16-4734-8098-920bd704a481",
+      "Position": {
+        "X": 1397.221,
+        "Y": 2272.878
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "86a4b980-c8e3-41d5-a849-778fc0e1fd28",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
+      "Position": {
+        "X": 1434.5308,
+        "Y": 1553.4758
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "b1a92f77-ea5c-4760-a190-c1ba4b1b2dd3",
+      "SymbolName": "Lib.mesh.modify.MeshProjectUV",
+      "SectionId": "474eba79-4f16-4734-8098-920bd704a481",
+      "Position": {
+        "X": 1397.221,
+        "Y": 2132.878
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "c18c44e6-1004-4352-8ace-5a9fb27cb693",
+      "SymbolName": "Lib.numbers.anim.animators.AnimVec3",
+      "SectionId": "474eba79-4f16-4734-8098-920bd704a481",
+      "Position": {
+        "X": 1257.221,
+        "Y": 2167.878
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "c2e57301-0f3f-4f43-85e8-40fbffd603ee",
+      "SymbolName": "Lib.render.camera.OrbitCamera",
+      "Position": {
+        "X": 1434.5308,
+        "Y": 1623.4758
+      },
+      "SnapshotGroupIndex": "1"
     }
   ],
   "OutputUis": [
@@ -44,7 +141,6 @@
     {
       "Id": "474eba79-4f16-4734-8098-920bd704a481",
       "Label": "Solution",
-      "Collapsed": "True",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -52,12 +148,12 @@
         "W": 1.0
       },
       "Position": {
-        "X": 1085.0,
+        "X": 1160.3257,
         "Y": 2052.5103
       },
       "Size": {
-        "X": 525.0,
-        "Y": 187.48975
+        "X": 449.67432,
+        "Y": 322.438
       }
     }
   ],
@@ -76,6 +172,8 @@
     },
     {
       "Id": "634144b4-931b-4a2f-a06e-f8664319df13",
+      "ChildId": "61b90bf9-058b-4b88-a491-4863cda2d77d",
+      "InputId": "e14dcc43-7c18-4ed7-ad39-dfeab10e3d33",
       "Description": "Study the reference example and observe the difference.\nRecreate it.",
       "Style": "CallToAction"
     }

@@ -1,0 +1,42 @@
+{
+  "Id": "2b277fb9-2caa-4652-ae05-9f1806c19044",
+  "Variations": [
+    {
+      "Id": "b0463bbd-9ad4-4a9e-a32e-11ccb6d5cb3a",
+      "IsPreset": false,
+      "ActivationIndex": 0,
+      "Title": "Solution",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "f9a2bfe5-5ded-4e50-8a21-05e9907ee386": {
+          "4e15eb7a-3872-4f26-93e3-1dd38bce01a5": {
+            "X": 228.0,
+            "Y": 0.0,
+            "Z": 0.0
+          }
+        },
+        "a212dcf5-76fa-45ee-b670-1775132d3d69": {
+          "fdbad44a-2504-453b-bfae-976828372cc0": 0.31
+        },
+        "bc03b883-39b7-4e40-a191-687b435eef25": {
+          "03df41a8-3d72-47b1-b854-81e6e59e7cb4": 0.055555556,
+          "c427d83b-1046-4b8d-b44a-e616a64a702a": {
+            "X": 1.0,
+            "Y": 1.0,
+            "Z": 1.0
+          },
+          "e0f4333d-8bee-4f9e-bb29-9f76bd72e61f": 180.0
+        },
+        "01a55c28-177d-4163-b623-681cba9fe84c": {
+          "e14dcc43-7c18-4ed7-ad39-dfeab10e3d33": 0.0
+        },
+        "610177dc-8aad-4342-9094-7edec6bf3b25": {
+          "7d576017-89bd-4813-bc9b-70214efe6a27": "Examples:meshes/primitives/cube-bevelled.obj"
+        }
+      }
+    }
+  ]
+}
