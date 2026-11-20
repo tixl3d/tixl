@@ -44,6 +44,31 @@ Select the [StringToCurves].
 - **Render** draws the glyph outlines as thin lines.
 - **Stats** lists anchors, segments, closed contours, size, bounds and the attributes (e.g. `CodePoint per Part`).
 
+## Step: Curve table
+
+**Action:**
+With the [StringToCurves] selected and its text set to `TiXL`, click **Table**, then **Parts**.
+
+**Expected:**
+- A second segmented button offers **Anchors**, **Segments**, **Contours** and **Parts**.
+- **Parts** lists 4 rows, one per glyph, with `Contour`, `Contours`, pivot, `Id`, `Seed` and the attribute columns
+  `CodePoint`, `GlyphId`, `CharIndex`, `WordIndex`, `LineIndex`, `Advance`.
+- **Contours** lists 5 rows (the `i` has two); `Closed` reads `yes`.
+- **Anchors** lists positions; the `In` and `Out` columns are zero for corners and drawn faintly.
+- The summary next to the buttons shows the row count, e.g. `4 parts`.
+
+## Step: Highlight selected rows
+
+**Action:**
+In **Parts**, click the row of the `i`, Ctrl+click the row of the `L`, then click **Render**.
+
+**Expected:**
+- The summary shows `2 selected` in the table and `2 parts selected` after switching.
+- The outlines of the `i` (both contours) and the `L` are drawn thicker in the selection color, each with a cross at
+  its pivot. Orbiting the camera keeps the highlight on the glyphs.
+- Back in **Table**, Shift+click extends the selection; clicking the only selected row clears it.
+- Switching to **Anchors** clears the selection; selected anchors show a dot with their handles.
+
 ## Step: Geometry
 
 **Action:**

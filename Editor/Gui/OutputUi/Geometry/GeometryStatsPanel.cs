@@ -56,10 +56,11 @@ internal sealed class GeometryStatsPanel
             FormInputs.AddVerticalSpace(3);
         }
 
+        var valueStart = GetValueColumnStart();
         for (var i = 0; i < _lineCount; i++)
         {
             CustomComponents.StylizedText(_labels[i], Fonts.FontSmall, UiColors.TextMuted);
-            ImGui.SameLine(LabelWidth * T3Ui.UiScaleFactor);
+            ImGui.SameLine(valueStart);
             CustomComponents.StylizedText(_values[i], Fonts.FontNormal, _valueColors[i]);
         }
 
@@ -71,9 +72,23 @@ internal sealed class GeometryStatsPanel
         for (var i = 0; i < _attributeCount; i++)
         {
             CustomComponents.StylizedText(_attributeNames[i], Fonts.FontNormal, UiColors.Text);
-            ImGui.SameLine(LabelWidth * T3Ui.UiScaleFactor);
+            ImGui.SameLine(valueStart);
             CustomComponents.StylizedText(_attributeInfos[i], Fonts.FontSmall, UiColors.TextMuted);
         }
+    }
+
+    /** Wide enough for the longest attribute name, so long names don't run into their type. */
+    private float GetValueColumnStart()
+    {
+        var scale = T3Ui.UiScaleFactor;
+        var widest = 0f;
+        ImGui.PushFont(Fonts.FontNormal);
+        for (var i = 0; i < _attributeCount; i++)
+            widest = MathF.Max(widest, ImGui.CalcTextSize(_attributeNames[i]).X);
+
+        ImGui.PopFont();
+        var start = ImGui.GetCursorPosX() + widest + LabelGap * scale;
+        return MathF.Max(LabelWidth * scale, start);
     }
 
     public static string FormatBounds(Vector3 min, Vector3 max)
@@ -100,6 +115,7 @@ internal sealed class GeometryStatsPanel
     }
 
     private const float LabelWidth = 90;
+    private const float LabelGap = 10;
     private const int MaxLines = 8;
     private const int MaxAttributes = 32;
 

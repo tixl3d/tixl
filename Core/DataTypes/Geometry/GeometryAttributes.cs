@@ -148,6 +148,9 @@ public sealed class GeometryAttributes : IEnumerable<GeometryAttribute>
     public void Clear() => _attributes.Clear();
     public int Count => _attributes.Count;
 
+    /// <summary>Allocation-free access for per-frame readers; <c>foreach</c> boxes the enumerator.</summary>
+    public GeometryAttribute this[int index] => _attributes[index];
+
     public IEnumerator<GeometryAttribute> GetEnumerator() => _attributes.GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
