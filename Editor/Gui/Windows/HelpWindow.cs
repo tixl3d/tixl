@@ -98,22 +98,22 @@ internal sealed class HelpWindow : Window
         UpdateContextFromGraphSelection();
 
         var topCursorPos = ImGui.GetCursorPos();
-        DrawHelpBody();
+        var content = DrawHelpBody();
 
         // The floating icons overlap the doc child, and between overlapping sibling children the one
         // submitted later is on top and receives the mouse — so they must be drawn after the body.
         ImGui.SetCursorPos(topCursorPos);
-        DrawHeaderIcons();
+        DrawHeaderIcons(content);
 
         IsDrawingContent = false;
     }
 
     #region header
-    private void DrawHeaderIcons()
+    private void DrawHeaderIcons(in HelpContent content)
     {
         var buttonSize = new Vector2(ImGui.GetFrameHeight());
         var spacing = ImGui.GetStyle().ItemSpacing.X;
-        var buttonCount = _shownSymbolUi != null ? 4 : 3;
+        var buttonCount = content.SymbolUi != null ? 5 : 4;
         var iconAreaWidth = buttonCount * buttonSize.X + (buttonCount - 1) * spacing;
 
         // sameLine: false — the cursor was already placed at the window top; the default SameLine would
@@ -123,14 +123,26 @@ internal sealed class HelpWindow : Window
         CustomComponents.RightAlign(iconAreaWidth + _docScrollbarWidth, sameLine: false);
         ImGui.BeginChild("toolIcons", new Vector2(iconAreaWidth, buttonSize.Y), ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollbar);
 
-        if (_shownSymbolUi != null)
+        if (content.SymbolUi is { } symbolUi)
         {
             if (CustomComponents.IconButton(Icon.PopUp, buttonSize))
-                OperatorHelp.EditDescriptionDialog.ShowNextFrame(_shownSymbolUi.Symbol);
+                OperatorHelp.EditDescriptionDialog.ShowNextFrame(symbolUi.Symbol);
 
             CustomComponents.TooltipForLastItem("Edit description and links");
             ImGui.SameLine();
         }
+        
+        var canCopy = content.HasContent;
+        if (CustomComponents.IconButton(Icon.CopyToClipboard, buttonSize,
+                                        canCopy ? CustomComponents.ButtonStates.Default : CustomComponents.ButtonStates.Disabled)
+            && canCopy)
+        {
+            CopyHelpToClipboard(content);
+        }
+
+        CustomComponents.TooltipForLastItem("Copy help content to clipboard",
+                                            "Paste it into a translation service to read it in your language.");
+        ImGui.SameLine();
 
         // Index 0 is the newest entry, so "back" moves towards higher indices (see PushTopic).
         var canGoBack = _historyIndex >= 0 && _historyIndex < _history.Count - 1;
@@ -168,6 +180,20 @@ internal sealed class HelpWindow : Window
         ImGui.EndChild();
         
         //ImGui.SetCursorPos(keepCursorPos);
+    }
+
+    /// <summary>
+    /// Copies what is on screen as plain text (including the hover preview, when that is what is shown),
+    /// so people can paste it into a translation service and read the help in their own language.
+    /// </summary>
+    private void CopyHelpToClipboard(in HelpContent content)
+    {
+        var text = HelpTextExport.Build(content);
+        if (text.Length == 0)
+            return;
+
+        ImGui.SetClipboardText(text);
+        ActionToast.Show("{Help copied to clipboard}   paste it into a translator to read it in your language");
     }
     
     #endregion
@@ -231,7 +257,7 @@ internal sealed class HelpWindow : Window
     #endregion
 
     #region help mode
-    private void DrawHelpBody()
+    private HelpContent DrawHelpBody()
     {
         var topic = GetTopicToShow();
         var topicChanged = topic != _lastShownTopic;
@@ -241,28 +267,10 @@ internal sealed class HelpWindow : Window
             _lastShownTopic = topic;
         }
 
-        SymbolUi? symbolUi = null;
-        string? topicTitle = null;
-        string? topicDoc = null;
-        string? mentionKey = null;
-        var resourceLinks = (IReadOnlyList<VideoResourceList.LinkRow>)Array.Empty<VideoResourceList.LinkRow>();
-
-        if (topic.UiTopicKey != null)
-        {
-            if (UiTopicDocs.TryGet(topic.UiTopicKey, out var title, out topicDoc))
-            {
-                topicTitle = title;
-                mentionKey = topic.UiTopicKey;
-            }
-        }
-        else if (topic.SymbolId != Guid.Empty && SymbolUiRegistry.TryGetSymbolUi(topic.SymbolId, out symbolUi))
-        {
-            mentionKey = "op:" + symbolUi.Symbol.Namespace + "." + symbolUi.Symbol.Name;
-            // The hand-authored symbol links rank into the same footer list as the extracted video references.
-            resourceLinks = OperatorHelp.DocumentationRenderer.GetLinkRows(symbolUi);
-        }
-
-        _shownSymbolUi = symbolUi; // The header's edit icon targets the shown symbol.
+        var content = HelpContent.For(topic);
+        var symbolUi = content.SymbolUi;
+        var mentionKey = content.ResourceKey;
+        var resourceLinks = content.Links;
 
         // Reserve space at the bottom so the resources stay docked while the doc scrolls above them.
         var bodyHeight = ImGui.GetContentRegionAvail().Y;
@@ -282,9 +290,9 @@ internal sealed class HelpWindow : Window
             DrawHeaderWithThumbnail(symbolUi);
             OperatorHelp.DrawHelp(symbolUi, omitHeader: true);
         }
-        else if (topicTitle != null)
+        else if (content.UiTopicTitle != null)
         {
-            DrawUiTopicDoc(topicTitle, topicDoc);
+            DrawUiTopicDoc(content.UiTopicTitle, content.UiTopicDoc);
         }
         else if (!topic.IsEmpty)
         {
@@ -308,6 +316,8 @@ internal sealed class HelpWindow : Window
 
         if (footerHeight > 0)
             DrawResourceFooter(mentionKey, resourceLinks);
+
+        return content;
     }
 
     /// <summary>
@@ -388,7 +398,6 @@ internal sealed class HelpWindow : Window
 
     private Guid _lastGraphSelectionId;
     private HelpTopic _lastShownTopic;
-    private SymbolUi? _shownSymbolUi;
 
     /// <summary>Width of the doc child's vertical scrollbar this frame, or 0 when it is hidden.</summary>
     private float _docScrollbarWidth;
