@@ -1,0 +1,111 @@
+{
+  "FormatVersion": 3,
+  "Id": "55b64ede-9730-457c-8d3c-981a9fe6120e"/*SelectGeometry*/,
+  "Description": "Selects elements of a geometry by index pattern or a C# snippet and writes the result as a float attribute.\n\nThe selection is a named attribute (default `Selection`) with a weight from 0 to 1 on the chosen domain: points, vertices, primitives or parts. It flows with the geometry, so downstream ops such as [TransformGeometry] act on it by name. An existing selection of the same name can be extended, reduced or intersected.\n\nTips\n- After [SubdivideCurves], points are numbered along each curve, so Every 2 selects every second point of an outline.\n- In Custom mode a snippet can return a bool, e.g. `return p.Y > A;`, or a float weight for soft selections.",
+  "InputUis": [
+    {
+      "InputId": "10342312-f3b9-4a53-9413-ab358860eed4"/*Geometry*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "2f24c52a-0a48-4c4e-a359-0b6012016270"/*Code*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 225.0
+      },
+      "Description": "Body of a C# method that returns a bool (selected or not) or a float weight from 0 to 1. In scope: index i, element count, position p (a primitive's center, a part's pivot) and the parameters A and B. System.MathF is imported, e.g. `return p.Y > A;`.",
+      "Usage": "Multiline"
+    },
+    {
+      "InputId": "427919c7-6b02-4009-a9cc-938986ad1053"/*Domain*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      },
+      "Description": "Which elements to select: points, vertices, primitives (polygons and curves) or parts."
+    },
+    {
+      "InputId": "4dba7742-653a-4ad5-9e21-0ea557865bcd"/*Offset*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 180.0
+      },
+      "Min": 0.0,
+      "Max": 10.0,
+      "Description": "Index of the first selected element in the pattern."
+    },
+    {
+      "InputId": "6355884b-d2a9-4892-9698-944c8ab3a0de"/*Name*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 450.0
+      },
+      "Description": "Name of the float attribute to write. Downstream ops pick their selection by this name."
+    },
+    {
+      "InputId": "738d7eae-2dfa-4c56-a85d-a25c00143f6e"/*B*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 315.0
+      },
+      "Description": "Free parameter for the Custom snippet."
+    },
+    {
+      "InputId": "7b777d3d-1bec-4297-94c3-f7450a162aeb"/*Every*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 135.0
+      },
+      "Min": 1.0,
+      "Max": 10.0,
+      "ClampMin": true,
+      "Description": "Selects every Nth element: 2 selects every second one."
+    },
+    {
+      "InputId": "952ea8f6-51f4-46b8-94af-83dda89159b0"/*Invert*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 405.0
+      },
+      "Description": "Selects what the pattern or snippet doesn't."
+    },
+    {
+      "InputId": "959c2660-ea9c-4c3a-8f00-d4b571d777a6"/*A*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 270.0
+      },
+      "Description": "Free parameter for the Custom snippet."
+    },
+    {
+      "InputId": "d82c7cd6-f36b-4ca9-97a7-db120670e5c1"/*Mode*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 90.0
+      },
+      "Description": "IndexPattern selects every Nth element from Offset. Custom runs the C# snippet in Code for each element."
+    },
+    {
+      "InputId": "ec982690-0ef4-4b25-83d8-ddddb2c2d24e"/*Combine*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 360.0
+      },
+      "Description": "How the new selection combines with an existing one of the same name: Replace, Add (maximum), Remove or Intersect (minimum)."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "aa5016f3-1c6a-4978-a56d-3567c65c9610"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

@@ -19,6 +19,14 @@
       }
     },
     {
+      "Id": "85c720c4-8d9e-46a8-aae7-eb77fc581d3a"/*Selection*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "86c1f762-9d7d-4f9c-bfb3-fc0d75bedf03"/*Space*/,
+      "DefaultValue": 0
+    },
+    {
       "Id": "90343fe1-bee7-4ec5-a29d-c44b68a3a37c"/*Geometry*/,
       "DefaultValue": null
     },

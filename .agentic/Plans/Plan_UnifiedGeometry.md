@@ -153,6 +153,11 @@ message must name what was expected.
   color. No ops use it yet.)
 - `StringToCurves` and `SubdivideCurves` converted (2026-11-20). Subdivide renumbers curve points along each curve
   and carries point and vertex attributes through `Lib/Utils/GeometryAttributeBlend`; polygons pass through.
+- `SelectGeometry` (new, `geometry/attribute`: Index Pattern and Custom C# snippet returning bool or float; Replace,
+  Add, Remove, Intersect; Invert; named float attribute) and `TransformGeometry` (Space Object/Point via
+  `Lib/Utils/GeometryPointOrientations`, named Selection promoted from vertices, primitives or parts, attributes transformed
+  by type info) converted (2026-11-20). Snippet compiling is shared with `CustomScalarField` in
+  `Lib/Utils/CSharpSnippetCompiler`. Verified: the zigzag chain moves every second point 0.03 across the outline.
 - Convert `CurvesToGeometry` (as `ExtrudeCurves`), `TransformGeometry`
   (Selection, Space), `GeometryToMesh`; add `SelectGeometry` with Index Pattern and Custom modes.
 - Merged output view.

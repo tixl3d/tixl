@@ -1,8 +1,5 @@
 #nullable enable
-using System.Reflection;
-using System.Runtime.Loader;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
+using Lib.Utils;
 
 namespace Lib.geometry.field;
 
@@ -98,65 +95,23 @@ internal sealed class CustomScalarField : Instance<CustomScalarField>
                        }
                        """;
 
-        var syntaxTree = CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(LanguageVersion.Latest));
-        var references = new List<MetadataReference>();
-        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+        if (!_compiler.TryCompile(source, "__CustomScalarField", "Evaluate", "CustomScalarFieldSnippet", _compileErrors))
         {
-            if (assembly.IsDynamic || string.IsNullOrEmpty(assembly.Location))
-                continue;
-
-            var name = assembly.GetName().Name;
-            if (name is "System.Private.CoreLib" or "System.Runtime" or "System.Numerics.Vectors"
-                || assembly == typeof(CustomScalarField).Assembly)
-            {
-                references.Add(MetadataReference.CreateFromFile(assembly.Location));
-            }
-        }
-
-        var compilation = CSharpCompilation.Create("CustomScalarFieldSnippet",
-                                                   [syntaxTree],
-                                                   references,
-                                                   new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary,
-                                                                                optimizationLevel: OptimizationLevel.Release));
-
-        using var stream = new MemoryStream();
-        var emitResult = compilation.Emit(stream);
-        if (!emitResult.Success)
-        {
-            foreach (var diagnostic in emitResult.Diagnostics)
-            {
-                if (diagnostic.Severity != DiagnosticSeverity.Error)
-                    continue;
-
-                var line = diagnostic.Location.GetMappedLineSpan().StartLinePosition.Line + 1;
-                Log.Warning($"CustomScalarField line {line}: {diagnostic.GetMessage()}", this);
-            }
+            foreach (var error in _compileErrors)
+                Log.Warning($"CustomScalarField {error}", this);
 
             return; // keep the previous delegate so the field stays alive while typing
         }
 
-        stream.Position = 0;
-        var loadContext = new AssemblyLoadContext("CustomScalarFieldSnippet", isCollectible: true);
-        var snippetAssembly = loadContext.LoadFromStream(stream);
-        var method = snippetAssembly.GetType("__CustomScalarField")?.GetMethod("Evaluate", BindingFlags.Public | BindingFlags.Static);
-        if (method == null)
-        {
-            Log.Warning("CustomScalarField: compiled snippet has no Evaluate method", this);
-            loadContext.Unload();
-            return;
-        }
-
-        _evaluate = method.CreateDelegate<SnippetFn>();
-        // The unloaded context stays alive as long as older fields still hold its delegate
-        _loadContext?.Unload();
-        _loadContext = loadContext;
+        _evaluate = _compiler.Delegate;
     }
 
     private delegate float SnippetFn(Vector3 p, float a, float b, float c, float d, Vector3[] points);
 
     private string? _compiledCode;
     private SnippetFn? _evaluate;
-    private AssemblyLoadContext? _loadContext;
+    private readonly CSharpSnippetCompiler<SnippetFn> _compiler = new();
+    private readonly List<string> _compileErrors = [];
 
     [Input(Guid = "6e2a9c47-d580-4b13-8f6e-a1c3d7b9e024")]
     public readonly InputSlot<string> Code = new();

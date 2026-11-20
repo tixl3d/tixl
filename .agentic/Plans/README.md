@@ -156,6 +156,7 @@ These matter more than any filing decision.
 | [Plan_CameraOverhaul](Plan_CameraOverhaul.md) | Research only, written 2026-11-05 | Pivot + quaternion camera model, Godot pitch stop with roll, Unreal fly-mode WASD, persp/ortho blend. Phase 1 is editor-only and could land in 4.4 |
 | [Plan_ContextVariableInvalidation](Plan_ContextVariableInvalidation.md) | Parked 2026-11-13; Phase 0 and a targeted resolution patch shipped | Full variable redesign judged not worth it after the baseline. Keeps the analysis, the baseline scripts and the design |
 | [Plan_UiTimelapse](Plan_UiTimelapse.md) | Nothing shipped | Its encoder gate looks set to disable it on the Radeon machine, since the probe has no VAAPI candidate (not run). Cursor code paths are stale |
+| [Plan_CodeInputs](Plan_CodeInputs.md) | Nothing shipped; written 2026-11-20 | `UsageType.Code` + `CodeLanguage` for snippet inputs; `// A: Scale 0..1` comments relabel A–D per instance; highlighting later. Syntax and 4 other decisions open |
 
 ## Parked
 
