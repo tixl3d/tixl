@@ -7,7 +7,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "01620cab-c459-433a-8594-f4a65f957148",
-      "SymbolName": "Lib.geometry.BevelGeometry",
+      "SymbolName": "Lib.geometry.modify.BevelGeometry",
       "SectionId": "3f1318b7-3385-4cc0-a8a1-dd3fa8d4d978",
       "Position": {
         "X": 1140.1523,
@@ -106,7 +106,7 @@
     },
     {
       "ChildId": "2e93eb46-6f60-4edf-8e5e-2ae1c94c0468",
-      "SymbolName": "Lib.geometry.BevelGeometry",
+      "SymbolName": "Lib.geometry.modify.BevelGeometry",
       "Position": {
         "X": 1086.4922,
         "Y": 1795.3801
@@ -123,7 +123,7 @@
     },
     {
       "ChildId": "3c77f5ce-572b-4dee-9bcd-bce907e02f27",
-      "SymbolName": "Lib.geometry.CubeGeometry",
+      "SymbolName": "Lib.geometry.generate.CubeGeometry",
       "SectionId": "3f1318b7-3385-4cc0-a8a1-dd3fa8d4d978",
       "Position": {
         "X": 1140.1523,
@@ -150,7 +150,7 @@
     },
     {
       "ChildId": "5ed475a0-0697-4c14-a99a-162d175035ca",
-      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "SymbolName": "Lib.geometry.convert.GeometryToMesh",
       "Position": {
         "X": 1086.4922,
         "Y": 1830.3801
@@ -177,7 +177,7 @@
     },
     {
       "ChildId": "83b428e9-ffe6-40ec-9ed0-26253b44711f",
-      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "SymbolName": "Lib.geometry.convert.GeometryToMesh",
       "SectionId": "3f1318b7-3385-4cc0-a8a1-dd3fa8d4d978",
       "Position": {
         "X": 1140.1523,
@@ -195,7 +195,7 @@
     },
     {
       "ChildId": "926dbbb6-89c9-4d0e-8612-3ac7a7b751fb",
-      "SymbolName": "Lib.geometry.CubeGeometry",
+      "SymbolName": "Lib.geometry.generate.CubeGeometry",
       "Position": {
         "X": 1086.4922,
         "Y": 1760.3801

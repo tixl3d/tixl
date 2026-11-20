@@ -71,7 +71,7 @@
     {
       "Id": "d1e99a52-0188-4a63-85ef-55bfb907816d"/*CurvesToPoints*/,
       "SymbolId": "6a1d8c3f-2b57-4e90-a4f6-c8e2d5b7f019",
-      "SymbolName": "Lib.geometry.CurvesToPoints",
+      "SymbolName": "Lib.geometry.convert.CurvesToPoints",
       "InputValues": [],
       "Outputs": []
     }

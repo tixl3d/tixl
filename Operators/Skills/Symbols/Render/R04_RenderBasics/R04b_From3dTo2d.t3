@@ -6,7 +6,7 @@
     {
       "Id": "01620cab-c459-433a-8594-f4a65f957148"/*BevelGeometry*/,
       "SymbolId": "dbaeebea-8d46-416f-9624-867af10d9c07",
-      "SymbolName": "Lib.geometry.BevelGeometry",
+      "SymbolName": "Lib.geometry.modify.BevelGeometry",
       "InputValues": [
         {
           "Id": "c86a32c2-feeb-4c05-b2c0-cf54076247bb"/*FlatShading*/,
@@ -175,7 +175,7 @@
     {
       "Id": "2e93eb46-6f60-4edf-8e5e-2ae1c94c0468"/*BevelGeometry*/,
       "SymbolId": "dbaeebea-8d46-416f-9624-867af10d9c07",
-      "SymbolName": "Lib.geometry.BevelGeometry",
+      "SymbolName": "Lib.geometry.modify.BevelGeometry",
       "InputValues": [
         {
           "Id": "c86a32c2-feeb-4c05-b2c0-cf54076247bb"/*FlatShading*/,
@@ -205,7 +205,7 @@
     {
       "Id": "3c77f5ce-572b-4dee-9bcd-bce907e02f27"/*CubeGeometry*/,
       "SymbolId": "85c19291-2bc1-4271-88f9-f1b50696da1b",
-      "SymbolName": "Lib.geometry.CubeGeometry",
+      "SymbolName": "Lib.geometry.generate.CubeGeometry",
       "InputValues": [],
       "Outputs": []
     },
@@ -232,7 +232,7 @@
     {
       "Id": "5ed475a0-0697-4c14-a99a-162d175035ca"/*GeometryToMesh*/,
       "SymbolId": "4fea8c0e-cb7f-41fe-a410-df1d3886bf98",
-      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "SymbolName": "Lib.geometry.convert.GeometryToMesh",
       "InputValues": [],
       "Outputs": []
     },
@@ -264,7 +264,7 @@
     {
       "Id": "83b428e9-ffe6-40ec-9ed0-26253b44711f"/*GeometryToMesh*/,
       "SymbolId": "4fea8c0e-cb7f-41fe-a410-df1d3886bf98",
-      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "SymbolName": "Lib.geometry.convert.GeometryToMesh",
       "InputValues": [],
       "Outputs": []
     },
@@ -284,7 +284,7 @@
     {
       "Id": "926dbbb6-89c9-4d0e-8612-3ac7a7b751fb"/*CubeGeometry*/,
       "SymbolId": "85c19291-2bc1-4271-88f9-f1b50696da1b",
-      "SymbolName": "Lib.geometry.CubeGeometry",
+      "SymbolName": "Lib.geometry.generate.CubeGeometry",
       "InputValues": [],
       "Outputs": []
     },

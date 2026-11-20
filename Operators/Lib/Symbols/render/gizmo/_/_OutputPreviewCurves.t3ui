@@ -47,7 +47,7 @@
     },
     {
       "ChildId": "d1e99a52-0188-4a63-85ef-55bfb907816d",
-      "SymbolName": "Lib.geometry.CurvesToPoints",
+      "SymbolName": "Lib.geometry.convert.CurvesToPoints",
       "Position": {
         "X": 34.35823,
         "Y": -18.083954

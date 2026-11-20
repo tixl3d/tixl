@@ -15,7 +15,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "4dde4bbe-390e-42e2-8e94-272faa17fdff",
-      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "SymbolName": "Lib.geometry.convert.GeometryToMesh",
       "Position": {
         "X": 20.0,
         "Y": -35.0

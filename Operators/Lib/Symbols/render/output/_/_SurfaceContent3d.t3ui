@@ -22,7 +22,7 @@
     },
     {
       "ChildId": "7bc277be-8e5f-4dfb-b81a-718d31d66e00",
-      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "SymbolName": "Lib.geometry.convert.GeometryToMesh",
       "Position": {
         "X": 0.0,
         "Y": 35.0
