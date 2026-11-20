@@ -118,7 +118,9 @@ internal sealed class HelpWindow : Window
 
         // sameLine: false — the cursor was already placed at the window top; the default SameLine would
         // snap it back onto the previously drawn item's line (the resource footer at the bottom).
-        CustomComponents.RightAlign(iconAreaWidth, sameLine: false);
+        // The icons float above the doc child, so they also have to clear that child's vertical scrollbar,
+        // which eats the rightmost ScrollbarSize px of the window's content region.
+        CustomComponents.RightAlign(iconAreaWidth + _docScrollbarWidth, sameLine: false);
         ImGui.BeginChild("toolIcons", new Vector2(iconAreaWidth, buttonSize.Y), ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollbar);
 
         if (_shownSymbolUi != null)
@@ -296,6 +298,12 @@ internal sealed class HelpWindow : Window
         }
 
         CustomComponents.HandleDragScrolling(this);
+
+        // Measured inside the child because the scrollbar is per-window. Read after the content is
+        // submitted, so it matches the visibility ImGui used to lay this frame out. DrawHeaderIcons
+        // (drawn later, floating above this child) insets the icon row by it.
+        _docScrollbarWidth = ImGui.GetScrollMaxY() > 0 ? ImGui.GetStyle().ScrollbarSize : 0f;
+
         ImGui.EndChild();
 
         if (footerHeight > 0)
@@ -381,6 +389,9 @@ internal sealed class HelpWindow : Window
     private Guid _lastGraphSelectionId;
     private HelpTopic _lastShownTopic;
     private SymbolUi? _shownSymbolUi;
+
+    /// <summary>Width of the doc child's vertical scrollbar this frame, or 0 when it is hidden.</summary>
+    private float _docScrollbarWidth;
 
     private readonly List<HelpTopic> _history = new();
     private int _historyIndex = -1;
