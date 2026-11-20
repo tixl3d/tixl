@@ -9,16 +9,17 @@ using T3.Core.Utils;
 namespace Lib.geometry.generate;
 
 /// <summary>
-/// Lays out a string with a TrueType/OpenType font and emits the glyph outlines as
-/// CurveGeometry: one part per glyph (pivot at its origin), closed contours of cubic
-/// beziers, with per-glyph attributes for downstream selection and styling.
+/// Lays out a string with a TrueType/OpenType font and emits the glyph outlines as a
+/// Geometry of closed cubic-bezier curve primitives: one part per glyph (pivot at its origin),
+/// handles as HandleIn/HandleOut point attributes, and per-glyph part attributes for
+/// downstream selection and styling.
 /// </summary>
 [Guid("e2b7f4a1-3c69-4d58-8a1e-9f6c0d2b5e37")]
 [ExportDependencies("SixLabors.Fonts.dll")]
 internal sealed class StringToCurves : Instance<StringToCurves>, IDescriptiveFilename, IStatusProvider, ITransformable
 {
     [Output(Guid = "5d3f9b27-a8c1-4e60-b2d4-7e9f1c6a3b85")]
-    public readonly TransformCallbackSlot<CurveGeometry?> Curves = new();
+    public readonly TransformCallbackSlot<Geometry?> Curves = new();
 
     [Output(Guid = "9a6e2c48-d1b5-4f73-8c0e-3b7d5a2f9e16")]
     public readonly Slot<int> GlyphCount = new();
@@ -217,17 +218,40 @@ internal sealed class StringToCurves : Instance<StringToCurves>, IDescriptiveFil
             _pivots.Clear();
         }
 
-        public void Finish(CurveGeometry target)
+        /// <summary>Writes the collected contours as closed curve primitives whose vertices use the points in order.</summary>
+        public void Finish(Geometry target)
         {
-            target.Positions = _positions.ToArray();
-            target.HandlesIn = _handlesIn.ToArray();
-            target.HandlesOut = _handlesOut.ToArray();
-            target.ContourOffsets = _contourOffsets.ToArray();
-            target.ContourClosed = _contourClosed.ToArray();
-            target.Parts = _parts.ToArray();
+            var pointCount = _positions.Count;
+            var curveCount = _contourClosed.Count;
+            target.Resize(pointCount, curveCount, pointCount);
+            target.Attributes.Clear();
+
+            var handlesIn = target.Attributes.GetOrCreate<Vector3>(GeometryAttributeNames.HandleIn, AttributeDomain.Point, pointCount).Values;
+            var handlesOut = target.Attributes.GetOrCreate<Vector3>(GeometryAttributeNames.HandleOut, AttributeDomain.Point, pointCount).Values;
+            for (var point = 0; point < pointCount; point++)
+            {
+                var position = _positions[point];
+                target.Positions[point] = position;
+                target.VertexPoints[point] = point;
+                handlesIn[point] = _handlesIn[point] - position;
+                handlesOut[point] = _handlesOut[point] - position;
+            }
+
+            for (var curve = 0; curve < curveCount; curve++)
+            {
+                target.PrimitiveVertexOffsets[curve] = _contourOffsets[curve];
+                target.PrimitiveKind[curve] = PrimitiveKinds.Curve;
+                target.PrimitiveClosed[curve] = _contourClosed[curve];
+            }
+
+            target.PrimitiveVertexOffsets[curveCount] = pointCount;
+
+            if (target.Parts.Length != _parts.Count)
+                target.Parts = new PrimitivePart[_parts.Count];
+
+            _parts.CopyTo(target.Parts);
 
             var count = _parts.Count;
-            target.Attributes.Clear();
             Fill(target.Attributes.GetOrCreate<int>(CurveAttributeNames.CodePoint, AttributeDomain.Part, count).Values, _codePoints);
             Fill(target.Attributes.GetOrCreate<int>(CurveAttributeNames.GlyphId, AttributeDomain.Part, count).Values, _glyphIds);
             Fill(target.Attributes.GetOrCreate<int>(CurveAttributeNames.CharIndex, AttributeDomain.Part, count).Values, _charIndices);
@@ -314,7 +338,7 @@ internal sealed class StringToCurves : Instance<StringToCurves>, IDescriptiveFil
 
             var finalPivot = new Vector3(pivotX, pivotY, 0) + shift;
 
-            _parts.Add(new CurvePart(_glyphContourStart, contourCount, finalPivot, _parts.Count, _charIndex));
+            _parts.Add(new PrimitivePart(_glyphContourStart, contourCount, finalPivot, _parts.Count, _charIndex));
             _codePoints.Add(_glyphCodePoint);
             _glyphIds.Add(_glyphId);
             _charIndices.Add(_charIndex);
@@ -500,7 +524,7 @@ internal sealed class StringToCurves : Instance<StringToCurves>, IDescriptiveFil
         private readonly List<Vector3> _handlesOut = [];
         private readonly List<int> _contourOffsets = [0];
         private readonly List<bool> _contourClosed = [];
-        private readonly List<CurvePart> _parts = [];
+        private readonly List<PrimitivePart> _parts = [];
         private readonly List<int> _codePoints = [];
         private readonly List<int> _glyphIds = [];
         private readonly List<int> _charIndices = [];
@@ -527,7 +551,7 @@ internal sealed class StringToCurves : Instance<StringToCurves>, IDescriptiveFil
 #if SIXLABORS_FONTS_V3
     private readonly List<FontVariation> _variations = [];
 #endif
-    private readonly CurveGeometry _output = new();
+    private readonly Geometry _output = new();
     private string _warningMessage = string.Empty;
 
     [Input(Guid = "1f8a3c5e-7d92-4b06-a4e1-c6b9d2f7a350")]

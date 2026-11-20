@@ -1896,6 +1896,7 @@ internal static class DebugServer
                                                  Slot<Vector3> s => new JArray(s.Value.X, s.Value.Y, s.Value.Z),
                                                  Slot<Vector4> s => new JArray(s.Value.X, s.Value.Y, s.Value.Z, s.Value.W),
                                                  Slot<T3.Core.DataTypes.MeshGeometry> s => DescribeGeometry(s.Value, request["dumpObj"]?.Value<string>()),
+                                                 Slot<T3.Core.DataTypes.Geometry> s => DescribeUnifiedGeometry(s.Value, request),
                                                  Slot<T3.Core.DataTypes.Texture2D> s => DescribeTexture(s.Value),
                                                  Slot<T3.Core.DataTypes.BufferWithViews> s => DescribeBuffer(s.Value, request),
                                                  Slot<T3.Core.DataTypes.StructuredList> s => DescribeList(s.Value, request),
@@ -2022,6 +2023,97 @@ internal static class DebugServer
     /// screenshots: counts, bounds, watertightness and signed volume (positive for
     /// outward-facing closed solids; a fracture's parts must sum to the input volume).
     /// </summary>
+    /// <summary>
+    /// A <see cref="T3.Core.DataTypes.Geometry"/> output: counts per primitive kind, bounds, vertex counts of the first
+    /// curves and the attribute list. With <c>readCount</c> (from <c>readOffset</c>) also the points with their
+    /// handle offsets, to check order along curves.
+    /// </summary>
+    private static JToken DescribeUnifiedGeometry(T3.Core.DataTypes.Geometry? geometry, JObject request)
+    {
+        if (geometry == null)
+            return JValue.CreateNull();
+
+        var min = new Vector3(float.MaxValue);
+        var max = new Vector3(float.MinValue);
+        foreach (var p in geometry.Positions)
+        {
+            min = Vector3.Min(min, p);
+            max = Vector3.Max(max, p);
+        }
+
+        int polygonCount = 0, curveCount = 0, closedCurveCount = 0;
+        var curveVertexCounts = new JArray();
+        for (var primitive = 0; primitive < geometry.PrimitiveCount; primitive++)
+        {
+            if (geometry.PrimitiveKind[primitive] == T3.Core.DataTypes.PrimitiveKinds.Polygon)
+            {
+                polygonCount++;
+                continue;
+            }
+
+            curveCount++;
+            if (geometry.PrimitiveClosed[primitive])
+                closedCurveCount++;
+
+            if (curveVertexCounts.Count < 16)
+                curveVertexCounts.Add(geometry.GetPrimitiveVertexCount(primitive));
+        }
+
+        var attributes = new JArray();
+        for (var index = 0; index < geometry.Attributes.Count; index++)
+        {
+            var attribute = geometry.Attributes[index];
+            attributes.Add(new JObject
+                               {
+                                   ["name"] = attribute.Name,
+                                   ["domain"] = attribute.Domain.ToString(),
+                                   ["type"] = attribute.ValueType.Name,
+                                   ["typeInfo"] = attribute.TypeInfo.ToString(),
+                                   ["count"] = attribute.Count,
+                               });
+        }
+
+        var result = new JObject
+                         {
+                             ["pointCount"] = geometry.PointCount,
+                             ["vertexCount"] = geometry.VertexCount,
+                             ["primitiveCount"] = geometry.PrimitiveCount,
+                             ["polygonCount"] = polygonCount,
+                             ["curveCount"] = curveCount,
+                             ["closedCurveCount"] = closedCurveCount,
+                             ["partCount"] = geometry.Parts.Length,
+                             ["boundsMin"] = new JArray(min.X, min.Y, min.Z),
+                             ["boundsMax"] = new JArray(max.X, max.Y, max.Z),
+                             ["firstCurveVertexCounts"] = curveVertexCounts,
+                             ["attributes"] = attributes,
+                         };
+
+        var readCount = request["readCount"]?.Value<int>() ?? 0;
+        if (readCount > 0)
+        {
+            var readOffset = Math.Max(0, request["readOffset"]?.Value<int>() ?? 0);
+            geometry.Attributes.TryGet<Vector3>(T3.Core.DataTypes.GeometryAttributeNames.HandleIn, T3.Core.DataTypes.AttributeDomain.Point, out var handlesIn);
+            geometry.Attributes.TryGet<Vector3>(T3.Core.DataTypes.GeometryAttributeNames.HandleOut, T3.Core.DataTypes.AttributeDomain.Point, out var handlesOut);
+            var points = new JArray();
+            for (var point = readOffset; point < Math.Min(geometry.PointCount, readOffset + readCount); point++)
+            {
+                var p = geometry.Positions[point];
+                var entry = new JObject { ["index"] = point, ["position"] = new JArray(p.X, p.Y, p.Z) };
+                if (handlesIn != null)
+                    entry["handleIn"] = new JArray(handlesIn.Values[point].X, handlesIn.Values[point].Y, handlesIn.Values[point].Z);
+
+                if (handlesOut != null)
+                    entry["handleOut"] = new JArray(handlesOut.Values[point].X, handlesOut.Values[point].Y, handlesOut.Values[point].Z);
+
+                points.Add(entry);
+            }
+
+            result["points"] = points;
+        }
+
+        return result;
+    }
+
     private static JToken DescribeGeometry(T3.Core.DataTypes.MeshGeometry? geometry, string? dumpObjPath = null)
     {
         if (geometry == null)

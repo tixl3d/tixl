@@ -148,11 +148,9 @@ public abstract class InputValueUi<T> : IInputUi
         var isAnimated = IsAnimatable && animator.TryGetFirstInputAnimationCurve(inputSlot, out animationCurve);
         MappedType = inputSlot.MappedType;
 
+        // Happens for a frame while a package reload changes the input's type and the instance is being recreated.
         if (inputSlot is not InputSlot<T> typedInputSlot)
-        {
-            Debug.Assert(false);
             return editState;
-        }
 
         var input = inputSlot.Input;
         if (input.IsDefault && skipIfDefault)
