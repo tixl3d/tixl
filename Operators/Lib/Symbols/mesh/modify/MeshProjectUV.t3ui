@@ -43,7 +43,10 @@
         "X": -1598.8242,
         "Y": 814.76904
       },
-      "Description": "Rotates the projection plane in degrees."
+      "Description": "Rotates the projection plane in degrees.",
+      "Min": -180.0,
+      "Max": 180.0,
+      "Format": "{0:0.0}°"
     },
     {
       "InputId": "8a991e5f-361c-4ab9-9660-bdf759c87594"/*Translate*/,

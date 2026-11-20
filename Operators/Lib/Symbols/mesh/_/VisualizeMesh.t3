@@ -128,11 +128,6 @@
             "Z": 1.0,
             "W": 0.62
           }
-        },
-        {
-          "Id": "dfad3400-885a-4f83-8c39-ec6520f4e2aa"/*EnableZWrite*/,
-          "Type": "System.Boolean",
-          "Value": false
         }
       ],
       "Outputs": []
