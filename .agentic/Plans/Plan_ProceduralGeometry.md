@@ -1,5 +1,9 @@
 # Plan: CPU Procedural Geometry (Curves, Meshes, Parts, Chunks)
 
+> **2026-11-20:** `MeshGeometry` and `CurveGeometry` are being unified into one `Geometry` type with points, vertices
+> and primitives (polygons, curves), using Houdini's terms. See `Plan_UnifiedGeometry.md`; it supersedes the data-type
+> and domain decisions here. Ops, fields, parts, chunks and fracture below remain the reference.
+
 Status (2026-10-31): **core shipped in v4.3** (data types, 28 ops in `Operators/Lib/Symbols/geometry/`), on both branches.
 Left: missing ops from Phases 2-5 (`SelectGeometry`, `CombineGeometry`, `SetGeometryAttribute`, curve ops), fracture
 defects, static `_lengthList`, font licence, docs, demo graph. Phases 6-7+ not started. Progress notes saying "uncommitted" are out of date.
@@ -83,6 +87,9 @@ they are the last-mile interchange with the existing GPU point ecosystem, the wa
   back via a source-point-index part attribute stamped by `PlaceGeometryAtPoints`.
 
 ### Geometry points are primary, CPoints are the GPU bridge
+
+> **Reframed 2026-11-20** in `Plan_UnifiedGeometry.md`, "Points: two worlds and a bridge": geometry points are
+> the Point domain of any `Geometry`, not a type of their own, and use the `Point` field names as attribute names.
 
 Decided by the maintainer 2026-11-20. CPU point lists (`StructuredList<Point>`, "CPoints") were an early step; today
 about 90% of point work starts on the GPU. Inside geometry graphs, CPoints feel foreign: their fixed fields can't

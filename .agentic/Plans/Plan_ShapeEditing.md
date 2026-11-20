@@ -4,6 +4,11 @@ Status: **Design only, nothing implemented.** Written 2026-11-20. Builds on `Pla
 ops), `Plan_CameraOverhaul.md` (orthographic viewer camera) and the Output Setup canvas editing
 (`output-setup/canvas-interaction.md`, `output-setup/selection.md`).
 
+> **2026-11-20:** data types follow `Plan_UnifiedGeometry.md`. Read `CurveGeometry` as `Geometry` with curve
+> primitives, anchors as points, ControlPoint/Contour/Segment as Point/Primitive/Vertex, and `MeshGeometry` as
+> `Geometry` with polygon primitives. `[EditCurves]` edits the curve primitives of its input and passes polygons
+> through.
+
 ## Goal
 
 Draw and edit points, curves and shapes directly in the Output window, on planes viewed by an orthographic camera,
