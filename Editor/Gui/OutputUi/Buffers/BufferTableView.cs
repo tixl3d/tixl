@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using ImGuiNET;
 using T3.Core.DataTypes;
+using T3.Core.Rendering;
 using T3.Core.Resource;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.TableView;
@@ -22,6 +23,15 @@ internal sealed class BufferTableView
         _onReadComplete = OnReadComplete;
     }
 
+    /// <summary>
+    /// The struct the buffer holds, for column names and color swatches when its size matches the stride (e.g.
+    /// <see cref="PbrVertex"/>). Without it, a 64-byte stride is shown as <see cref="Point"/> and others as [0], [1], ...
+    /// </summary>
+    public Type? ElementType { get; set; }
+
+    /// <summary>Shows the components as integers, e.g. the vertex indices of a mesh's triangles.</summary>
+    public bool ShowsIntegers { get; set; }
+
     /// <summary>The row under the mouse in the last <see cref="DrawTable"/>, or -1.</summary>
     public int HoveredRow { get; private set; } = -1;
 
@@ -31,7 +41,8 @@ internal sealed class BufferTableView
     public bool TryGetHoveredPosition(out Vector3 position)
     {
         position = default;
-        if (HoveredRow < 0 || HoveredRow >= _rowCount || _stride != PointStride)
+        if (HoveredRow < 0 || HoveredRow >= _rowCount || ShowsIntegers || GetShownType(_stride) is not { } type
+            || (type != typeof(Point) && type != typeof(PbrVertex)))
             return false;
 
         position = new Vector3(ReadFloat(_values, _stride, HoveredRow, 0),
@@ -80,7 +91,8 @@ internal sealed class BufferTableView
 
         var componentCount = _stride / sizeof(float);
         var columnNames = GetColumnNames(_stride);
-        var colorColumnStarts = _stride == PointStride ? TableValueStyle.GetColorColumnStarts(typeof(Point)) : null;
+        var shownType = GetShownType(_stride);
+        var colorColumnStarts = shownType != null && !ShowsIntegers ? TableValueStyle.GetColorColumnStarts(shownType) : null;
         const ImGuiTableFlags flags = ImGuiTableFlags.RowBg | ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY
                                       | ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.BordersInnerV;
         if (!ImGui.BeginTable("##bufferValues", componentCount + 1, flags, ImGui.GetContentRegionAvail()))
@@ -151,10 +163,16 @@ internal sealed class BufferTableView
                 TableValueStyle.DrawColorSwatch(ImGui.GetCursorScreenPos(), ImGui.GetTextLineHeight(), color);
             }
 
-            var value = ReadFloat(_values, _stride, row, componentIndex);
-            var previous = hasPreviousRow ? ReadFloat(_previousValues, _stride, row, componentIndex) : value;
+            var value = ShowsIntegers ? ReadInt(_values, _stride, row, componentIndex) : ReadFloat(_values, _stride, row, componentIndex);
+            var previous = !hasPreviousRow ? value
+                           : ShowsIntegers ? ReadInt(_previousValues, _stride, row, componentIndex)
+                           : ReadFloat(_previousValues, _stride, row, componentIndex);
 
-            value.TryFormat(_formatBuffer, out var length, "0.000", CultureInfo.InvariantCulture);
+            var length = 0;
+            if (ShowsIntegers)
+                ((int)value).TryFormat(_formatBuffer, out length, default, CultureInfo.InvariantCulture);
+            else
+                value.TryFormat(_formatBuffer, out length, "0.000", CultureInfo.InvariantCulture);
             var text = _formatBuffer.AsSpan(0, length);
             var textWidth = ImGui.CalcTextSize(text).X;
             ImGui.SetCursorPosX(ImGui.GetCursorPosX() + MathF.Max(0, ImGui.GetContentRegionAvail().X - textWidth));
@@ -163,6 +181,20 @@ internal sealed class BufferTableView
             ImGui.PopStyleColor();
             TableValueStyle.DrawTooltipIfHovered(columnNames[componentIndex], value, previous);
         }
+    }
+
+    private static float ReadInt(byte[] values, int stride, int row, int componentIndex)
+    {
+        return MemoryMarshal.Read<int>(values.AsSpan(row * stride + componentIndex * sizeof(int)));
+    }
+
+    /** The struct whose fields name the columns, if its size matches the stride. */
+    private Type? GetShownType(int stride)
+    {
+        if (ElementType != null)
+            return Marshal.SizeOf(ElementType) == stride ? ElementType : null;
+
+        return stride == PointStride ? typeof(Point) : null;
     }
 
     private static float ReadFloat(byte[] values, int stride, int row, int componentIndex)
@@ -187,10 +219,10 @@ internal sealed class BufferTableView
         _firstElementOfRows = item.FirstElement;
     }
 
-    private static string[] GetColumnNames(int stride)
+    private string[] GetColumnNames(int stride)
     {
-        if (stride == PointStride)
-            return TableValueStyle.GetFloatColumnLabels(typeof(Point));
+        if (GetShownType(stride) is { } type)
+            return TableValueStyle.GetFloatColumnLabels(type);
 
         var componentCount = stride / sizeof(float);
         if (_genericColumnNames.Length != componentCount)

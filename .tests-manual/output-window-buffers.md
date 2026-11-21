@@ -89,3 +89,13 @@ Connect the points to a [ReadPointsFromGpu] and select it.
 - With Update Continuously on and the radius animated, changing values are tinted orange or blue as in the Output Window table.
 - The first `Color` field of each row shows a narrow strip in that color.
 
+## Step: Mesh buffers
+
+**Action:**
+Connect a [CubeGeometry] to a [GeometryToMesh] and select the [GeometryToMesh].
+
+**Expected:**
+- The mesh is rendered like [VisualizeMesh]; the control offers hidden sidebar, vertices (24), triangles (12) and info.
+- **Vertices** lists `Position.x` ... `ColorRgb` per vertex; hovering a row rings that vertex on the render.
+- **Triangles** lists three whole-number vertex indices per row.
+- Info shows `24 vertices, 12 triangles`.
