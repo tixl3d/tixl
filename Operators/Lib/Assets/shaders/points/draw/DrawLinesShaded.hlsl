@@ -43,6 +43,7 @@ cbuffer IntParams : register(b2)
     int WidthFactorMode;
     int UsePointScale;
     int Smoothing;
+    int FlatCaps;
 };
 
 cbuffer FogParams : register(b3)
@@ -99,6 +100,13 @@ struct psInput
     nointerpolation float2 lineCoords : TEXCOORD0;
     nointerpolation float3 startMovementInObject : MOTION0;
     nointerpolation float3 endMovementInObject : MOTION1;
+
+    // The smoothed points around the segment, for a curve that turns the shading smoothly through the joints.
+    nointerpolation float3 beforeInCamera : POSITION3;
+    nointerpolation float3 afterInCamera : POSITION4;
+
+    /** x: the segment continues a line before it, y: after it. */
+    nointerpolation float2 hasNeighbours : NEIGHBOURS;
 };
 
 struct psOutput
@@ -339,6 +347,19 @@ psInput vsMain(uint id : SV_VertexID)
 
     float3 a = start.PositionInCamera;
     float3 b = end.PositionInCamera;
+
+    // At line ends the mirrored end point keeps the curve straight there, like the segment itself.
+    bool hasBefore = segmentIndex > 0;
+    if (hasBefore)
+        hasBefore = !IsSeparator(Points[segmentIndex - 1]);
+
+    bool hasAfter = segmentIndex + 2 < (int)pointCount;
+    if (hasAfter)
+        hasAfter = !IsSeparator(Points[segmentIndex + 2]);
+
+    output.hasNeighbours = float2(hasBefore ? 1 : 0, hasAfter ? 1 : 0);
+    output.beforeInCamera = hasBefore ? GetLineEnd(segmentIndex - 1, (int)pointCount, false).PositionInCamera : 2 * a - b;
+    output.afterInCamera = hasAfter ? GetLineEnd(segmentIndex + 2, (int)pointCount, false).PositionInCamera : 2 * b - a;
     float ra = start.Radius;
     float rb = end.Radius;
     float3 axis = b - a;
@@ -416,6 +437,122 @@ psInput vsMain(uint id : SV_VertexID)
     return output;
 }
 
+/**
+ * First hit of a ray with a segment's cone (radius ra at a to rb at b) cut by two planes through a and b with normals
+ * along startCut and endCut. A hit on a cut plane returns cutSide -1 (start) or 1 (end) and the plane as normal.
+ */
+bool IntersectCutCone(float3 rayOrigin, float3 rayDirection, float3 a, float3 b, float ra, float rb,
+                      float3 startCut, float3 endCut, out float distance, out float3 normal, out int cutSide)
+{
+    distance = 0;
+    normal = 0;
+    cutSide = 0;
+
+    float3 ba = b - a;
+    float axisLength = length(ba);
+    if (axisLength < 1e-9)
+        return false;
+
+    float3 axis = ba / axisLength;
+    float slope = (rb - ra) / axisLength;
+
+    // Points within the cone: |offset from the axis|^2 - radius^2 <= 0, a quadratic along the ray.
+    float3 originFromA = rayOrigin - a;
+    float alongAtOrigin = dot(originFromA, axis);
+    float alongPerStep = dot(rayDirection, axis);
+    float3 acrossAtOrigin = originFromA - alongAtOrigin * axis;
+    float3 acrossPerStep = rayDirection - alongPerStep * axis;
+    float radiusAtOrigin = ra + slope * alongAtOrigin;
+    float radiusPerStep = slope * alongPerStep;
+
+    float qa = dot(acrossPerStep, acrossPerStep) - radiusPerStep * radiusPerStep;
+    float qb = dot(acrossAtOrigin, acrossPerStep) - radiusAtOrigin * radiusPerStep;
+    float qc = dot(acrossAtOrigin, acrossAtOrigin) - radiusAtOrigin * radiusAtOrigin;
+    // A ray along the axis stays inside or outside for its whole length.
+    float coneEnter = -1e20;
+    float coneExit = 1e20;
+    if (qa > 1e-12)
+    {
+        float h = qb * qb - qa * qc;
+        if (h < 0)
+            return false;
+
+        coneEnter = (-qb - sqrt(h)) / qa;
+        coneExit = (-qb + sqrt(h)) / qa;
+    }
+    else if (qc > 0)
+    {
+        return false;
+    }
+
+    // Clip to the slab between the cuts.
+    float slabEnter = -1e20;
+    float slabExit = 1e20;
+    int enterSide = 0;
+
+    float startFacing = dot(rayDirection, startCut);
+    float startHeight = dot(rayOrigin - a, startCut);
+    if (abs(startFacing) > 1e-9)
+    {
+        float crossing = -startHeight / startFacing;
+        if (startFacing > 0)
+        {
+            slabEnter = crossing;
+            enterSide = -1;
+        }
+        else
+        {
+            slabExit = crossing;
+        }
+    }
+    else if (startHeight < 0)
+    {
+        return false;
+    }
+
+    float endFacing = dot(rayDirection, endCut);
+    float endHeight = dot(rayOrigin - b, endCut);
+    if (abs(endFacing) > 1e-9)
+    {
+        float crossing = -endHeight / endFacing;
+        if (endFacing < 0)
+        {
+            if (crossing > slabEnter)
+            {
+                slabEnter = crossing;
+                enterSide = 1;
+            }
+        }
+        else
+        {
+            slabExit = min(slabExit, crossing);
+        }
+    }
+    else if (endHeight > 0)
+    {
+        return false;
+    }
+
+    float enter = max(coneEnter, slabEnter);
+    if (enter > min(coneExit, slabExit))
+        return false;
+
+    distance = enter;
+    if (coneEnter >= slabEnter)
+    {
+        // The cone's surface tilts towards its axis by the change of radius along it.
+        float3 across = acrossAtOrigin + enter * acrossPerStep;
+        normal = normalize(across - (radiusAtOrigin + enter * radiusPerStep) * slope * axis);
+    }
+    else
+    {
+        cutSide = enterSide;
+        normal = enterSide < 0 ? -startCut : endCut;
+    }
+
+    return true;
+}
+
 psOutput psMain(psInput pin)
 {
     psOutput output;
@@ -427,9 +564,26 @@ psOutput psMain(psInput pin)
 
     float hitDistance;
     float3 normalInCamera;
-    if (!IntersectRoundCone(rayOrigin, rayDirection, pin.startInCamera, pin.endInCamera, pin.radii.x, pin.radii.y,
-                            hitDistance, normalInCamera))
+    if (FlatCaps != 0)
+    {
+        // Cutting each segment where it meets its neighbour, at the plane halfway between both, gives every part of
+        // the tube to exactly one segment, so transparent lines don't blend their joints twice. A joint's cut face
+        // lies inside the tube, where the neighbour draws the surface; only line ends show theirs.
+        float3 startCut = normalize(pin.endInCamera - pin.beforeInCamera);
+        float3 endCut = normalize(pin.afterInCamera - pin.startInCamera);
+        int cutSide;
+        if (!IntersectCutCone(rayOrigin, rayDirection, pin.startInCamera, pin.endInCamera, pin.radii.x, pin.radii.y,
+                              startCut, endCut, hitDistance, normalInCamera, cutSide))
+            discard;
+
+        if ((cutSide < 0 && pin.hasNeighbours.x > 0.5) || (cutSide > 0 && pin.hasNeighbours.y > 0.5))
+            discard;
+    }
+    else if (!IntersectRoundCone(rayOrigin, rayDirection, pin.startInCamera, pin.endInCamera, pin.radii.x, pin.radii.y,
+                                 hitDistance, normalInCamera))
+    {
         discard;
+    }
 
     // The orthographic ray starts behind the segment, so only the perspective eye can sit inside it.
     if (!isOrthographic && hitDistance < 0)
@@ -440,6 +594,34 @@ psOutput psMain(psInput pin)
 
     float3 axis = pin.endInCamera - pin.startInCamera;
     float alongSegment = saturate(dot(surfaceInCamera - pin.startInCamera, axis) / max(dot(axis, axis), 1e-12));
+
+    // Each segment is a straight cone, so its shading would change in a step at every point. Turning the normal
+    // from the segment's axis to the tangent of a curve through the neighbouring points makes it change smoothly;
+    // both segments of a joint turn to the same tangent there.
+    float t = alongSegment;
+    float3 p0 = pin.beforeInCamera;
+    float3 p1 = pin.startInCamera;
+    float3 p2 = pin.endInCamera;
+    float3 p3 = pin.afterInCamera;
+    float3 curveTangent = 0.5 * ((p2 - p0)
+                                 + 2 * (2 * p0 - 5 * p1 + 4 * p2 - p3) * t
+                                 + 3 * (3 * p1 - p0 - 3 * p2 + p3) * t * t);
+    float axisLengthSquared = dot(axis, axis);
+    float curveTangentLengthSquared = dot(curveTangent, curveTangent);
+    if (axisLengthSquared > 1e-12 && curveTangentLengthSquared > 1e-12)
+    {
+        float3 segmentDirection = axis * rsqrt(axisLengthSquared);
+        curveTangent *= rsqrt(curveTangentLengthSquared);
+        float cosTurn = dot(segmentDirection, curveTangent);
+
+        // Rotation from one unit vector to another (Rodrigues), undefined only for a full reversal.
+        if (cosTurn > -0.99)
+        {
+            float3 turnAxis = cross(segmentDirection, curveTangent);
+            normalInCamera = normalize(normalInCamera + cross(turnAxis, normalInCamera)
+                                       + cross(turnAxis, cross(turnAxis, normalInCamera)) / (1 + cosTurn));
+        }
+    }
 
     // Across the line, 0 and 1 mark the silhouette edges like on a flat strip.
     float3 side = cross(rayDirection, axis);

@@ -98,6 +98,15 @@ struct psInput
     float4 color : COLOR;
     float4 clipPosition : CLIPPOSITION;
     float4 previousClipPosition : PREVIOUSCLIPPOSITION;
+
+    // The normals of this vertex's angle on the rings before, at the start, at the end and after its segment, in
+    // world space, for curved interpolation along the tube.
+    float3 normalBefore : NORMALBEFORE;
+    float3 normalStart : NORMALSTART;
+    float3 normalEnd : NORMALEND;
+    float3 normalAfter : NORMALAFTER;
+    float segmentFraction : SEGMENTFRACTION;
+    float smoothAlong : SMOOTHALONG;
 };
 
 sampler texSampler : register(s0);
@@ -164,6 +173,71 @@ float3 GetPointMovement(int pointIndex, uint pointCount)
     return Points[pointIndex].Position - previousPoint.Position;
 }
 
+/** One vertex of a ring: the corner at cornerY of side sideIndex on the ring at a point. */
+struct RingVertex
+{
+    float3 Direction;
+
+    /** Offset from the point for a Width of 1, with the cross-section scale and the miter stretch. */
+    float3 Side;
+
+    float3 Normal;
+    float RingFraction;
+};
+
+RingVertex GetRingVertex(int ringIndex, int sideIndex, float cornerY, uint pointCount)
+{
+    RingVertex vertex;
+    Point ringPoint = Points[ringIndex];
+    float3 direction = CenterlineTangent(ringIndex, pointCount);
+    float3 ringNormal = RingFrames[ringIndex].NormalAndDistance.xyz;
+    ringNormal = SafeNormalize(ringNormal - dot(ringNormal, direction) * direction, AnyPerpendicular(direction));
+
+    // This handedness makes the outside of the tube its front face.
+    float3 ringBinormal = cross(ringNormal, direction);
+    float2 crossSectionScale = UsePointScale > 0.5 ? ringPoint.Scale.yz : 1;
+
+    float ringFraction = (sideIndex + (cornerY * 0.5 + 0.5)) / SideCount;
+    float angleOffset = (Spin + Twist * GetCoordinateAlongTube(ringIndex, pointCount)) * 3.14159265 / 180.0;
+    float angle = ringFraction * Tau + angleOffset;
+
+    // FlatAround turns both edges of a side towards the normal of its center, so at 1 each side reads as one facet.
+    float sideCenterAngle = (sideIndex + 0.5) / SideCount * Tau + angleOffset;
+    float normalAngle = lerp(angle, sideCenterAngle, FlatAround);
+
+    float3 side = ringNormal * (cos(angle) * crossSectionScale.x) + ringBinormal * (sin(angle) * crossSectionScale.y);
+
+    // A round ring in the bisector plane pinches the corner; stretching it along the bend by 1 / cos(half the bend
+    // angle) keeps both segments at their full width.
+    float3 miterAxis = 0;
+    float miterStretch = 1;
+    float3 outgoing = DirectionToDistinctNeighbour(ringIndex, 1, pointCount);
+    float3 incoming = DirectionToDistinctNeighbour(ringIndex, -1, pointCount);
+    if (dot(outgoing, outgoing) > 0.5 && dot(incoming, incoming) > 0.5)
+    {
+        float cosHalfBend = dot(direction, outgoing);
+        float3 bend = outgoing - cosHalfBend * direction;
+        if (dot(bend, bend) > 1e-8)
+        {
+            miterAxis = normalize(bend);
+            float fullStretch = min(1 / max(cosHalfBend, 1 / MaxMiterStretch), MaxMiterStretch);
+            miterStretch = max(lerp(1, fullStretch, Miter), 0.01);
+        }
+    }
+    side += miterAxis * (dot(side, miterAxis) * (miterStretch - 1));
+
+    // The normal of an elliptic cross-section leans towards its narrow axis.
+    float3 normal = SafeNormalize(ringNormal * (cos(normalAngle) / max(crossSectionScale.x, Epsilon))
+                                  + ringBinormal * (sin(normalAngle) / max(crossSectionScale.y, Epsilon)), side);
+
+    // On a mitered joint the average of both segments' normals is the stretched ring's own normal: inverse stretch.
+    vertex.Normal = SafeNormalize(normal + miterAxis * (dot(normal, miterAxis) * (1 / miterStretch - 1)), normal);
+    vertex.Direction = direction;
+    vertex.Side = side;
+    vertex.RingFraction = ringFraction;
+    return vertex;
+}
+
 psInput vsMain(uint id : SV_VertexID)
 {
     uint pointCount, pointStride;
@@ -217,59 +291,46 @@ psInput vsMain(uint id : SV_VertexID)
 
     // A cap segment takes its frame, width and spin from the ring it closes, so its rim meets that ring exactly.
     Point ringPoint = Points[ringIndex];
-    float3 direction = CenterlineTangent(ringIndex, pointCount);
-    float3 ringNormal = RingFrames[ringIndex].NormalAndDistance.xyz;
-    ringNormal = SafeNormalize(ringNormal - dot(ringNormal, direction) * direction, AnyPerpendicular(direction));
-
-    // This handedness makes the outside of the tube its front face.
-    float3 ringBinormal = cross(ringNormal, direction);
+    RingVertex ringVertex = GetRingVertex(ringIndex, sideIndex, corner.y, pointCount);
+    float3 direction = ringVertex.Direction;
+    float3 normal = ringVertex.Normal;
+    float ringFraction = ringVertex.RingFraction;
 
     float widthFactor = WidthFX < 0.5   ? 1
                         : WidthFX < 1.5 ? ringPoint.FX1
                                         : ringPoint.FX2;
-    float2 crossSectionScale = UsePointScale > 0.5 ? ringPoint.Scale.yz : 1;
     if (!hasSegment)
         widthFactor = NAN;
 
-    float ringFraction = (sideIndex + (corner.y * 0.5 + 0.5)) / SideCount;
-    float angleOffset = (Spin + Twist * GetCoordinateAlongTube(ringIndex, pointCount)) * 3.14159265 / 180.0;
-    float angle = ringFraction * Tau + angleOffset;
-    float cosAngle = cos(angle);
-    float sinAngle = sin(angle);
-
-    // FlatAround turns both edges of a side towards the normal of its center, so at 1 each side reads as one facet.
-    float sideCenterAngle = (sideIndex + 0.5) / SideCount * Tau + angleOffset;
-    float normalAngle = lerp(angle, sideCenterAngle, FlatAround);
-
-    float3 side = ringNormal * (cosAngle * crossSectionScale.x) + ringBinormal * (sinAngle * crossSectionScale.y);
-
-    // A round ring in the bisector plane pinches the corner; stretching it along the bend by 1 / cos(half the bend
-    // angle) keeps both segments at their full width.
-    float3 miterAxis = 0;
-    float miterStretch = 1;
-    float3 outgoing = DirectionToDistinctNeighbour(ringIndex, 1, pointCount);
-    float3 incoming = DirectionToDistinctNeighbour(ringIndex, -1, pointCount);
-    if (dot(outgoing, outgoing) > 0.5 && dot(incoming, incoming) > 0.5)
-    {
-        float cosHalfBend = dot(direction, outgoing);
-        float3 bend = outgoing - cosHalfBend * direction;
-        if (dot(bend, bend) > 1e-8)
-        {
-            miterAxis = normalize(bend);
-            float fullStretch = min(1 / max(cosHalfBend, 1 / MaxMiterStretch), MaxMiterStretch);
-            miterStretch = max(lerp(1, fullStretch, Miter), 0.01);
-        }
-    }
-    side += miterAxis * (dot(side, miterAxis) * (miterStretch - 1));
-    float3 radius = side * Width * widthFactor;
+    float3 radius = ringVertex.Side * Width * widthFactor;
     float3 pInObject = isTip ? tipPosition : ringPoint.Position + radius;
 
-    // The normal of an elliptic cross-section leans towards its narrow axis.
-    float3 normal = SafeNormalize(ringNormal * (cos(normalAngle) / max(crossSectionScale.x, Epsilon))
-                                  + ringBinormal * (sin(normalAngle) / max(crossSectionScale.y, Epsilon)), side);
+    // Linear interpolation turns the normal at a constant rate within a segment and changes that rate at every point,
+    // which highlights show as bands. The pixel shader instead follows a curve through the normals of this vertex's
+    // angle on four consecutive rings; line ends repeat their last ring.
+    float3 normalStart = normal;
+    float3 normalEnd = normal;
+    float3 normalBefore = normal;
+    float3 normalAfter = normal;
+    if (hasSegment && !isCapSegment)
+    {
+        int startIndex = segmentIndex;
+        int endIndex = segmentIndex + 1;
+        int beforeIndex = IsLinePoint(startIndex - 1, pointCount) ? startIndex - 1 : startIndex;
+        int afterIndex = IsLinePoint(endIndex + 1, pointCount) ? endIndex + 1 : endIndex;
+        normalStart = pointIndex == startIndex ? normal : GetRingVertex(startIndex, sideIndex, corner.y, pointCount).Normal;
+        normalEnd = pointIndex == endIndex ? normal : GetRingVertex(endIndex, sideIndex, corner.y, pointCount).Normal;
+        normalBefore = beforeIndex == startIndex ? normalStart : GetRingVertex(beforeIndex, sideIndex, corner.y, pointCount).Normal;
+        normalAfter = afterIndex == endIndex ? normalEnd : GetRingVertex(afterIndex, sideIndex, corner.y, pointCount).Normal;
+    }
 
-    // On a mitered joint the average of both segments' normals is the stretched ring's own normal: inverse stretch.
-    normal = SafeNormalize(normal + miterAxis * (dot(normal, miterAxis) * (1 / miterStretch - 1)), normal);
+    float3x3 objectToWorldRotation = (float3x3)ObjectToWorld;
+    output.normalBefore = mul(normalBefore, objectToWorldRotation);
+    output.normalStart = mul(normalStart, objectToWorldRotation);
+    output.normalEnd = mul(normalEnd, objectToWorldRotation);
+    output.normalAfter = mul(normalAfter, objectToWorldRotation);
+    output.segmentFraction = corner.x;
+    output.smoothAlong = isCapSegment ? 0 : 1 - FlatAlong;
 
     // FlatAlong turns the normal from across the bend at the point to across this segment, so at 1 each segment
     // shades like a straight cylinder piece. A cone's surface tilts towards its axis by its radius over its length.
@@ -335,7 +396,15 @@ psOutput psMain(psInput pin, bool isFrontFace : SV_IsFrontFace)
 
 
     //return float4(pin.tbnToWorld[0],1);
-    N = normalize(mul(N,pin.tbnToWorld));
+    // The curve through four rings minus the straight blend between the two that the TBN carries.
+    float t = pin.segmentFraction;
+    float3 curvedNormal = 0.5 * (2 * pin.normalStart
+                                 + (pin.normalEnd - pin.normalBefore) * t
+                                 + (2 * pin.normalBefore - 5 * pin.normalStart + 4 * pin.normalEnd - pin.normalAfter) * t * t
+                                 + (3 * pin.normalStart - pin.normalBefore - 3 * pin.normalEnd + pin.normalAfter) * t * t * t);
+    float3x3 tbnToWorld = pin.tbnToWorld;
+    tbnToWorld[2] += (curvedNormal - lerp(pin.normalStart, pin.normalEnd, t)) * pin.smoothAlong;
+    N = normalize(mul(N, tbnToWorld));
 
     // Back faces of geometry drawn without culling need the normal facing the viewer.
     if (!isFrontFace)
