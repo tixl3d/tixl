@@ -13,7 +13,7 @@ public sealed class ReloadTests(EditorFixture editor)
     [Fact]
     public void Reload_BrokenSourceReportsErrors_FixedSourceSucceeds()
     {
-        var sourcePath = EditorFixture.FindPlaygroundSourceFile();
+        var sourcePath = editor.FindPlaygroundSourceFile();
         var original = File.ReadAllText(sourcePath);
         try
         {

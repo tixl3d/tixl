@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Threading;
 using System.Numerics;
 using T3.Core.Audio;
 using T3.Core.Audio.Native;
@@ -41,7 +42,7 @@ public class NativeAudioEngineTests
         }
         finally
         {
-            File.Delete(path);
+            DeleteRenderFile(path);
         }
     }
 
@@ -64,7 +65,7 @@ public class NativeAudioEngineTests
         }
         finally
         {
-            File.Delete(path);
+            DeleteRenderFile(path);
         }
     }
 
@@ -98,7 +99,7 @@ public class NativeAudioEngineTests
         }
         finally
         {
-            File.Delete(path);
+            DeleteRenderFile(path);
         }
     }
 
@@ -133,7 +134,7 @@ public class NativeAudioEngineTests
         }
         finally
         {
-            File.Delete(path);
+            DeleteRenderFile(path);
         }
     }
 
@@ -163,7 +164,7 @@ public class NativeAudioEngineTests
         }
         finally
         {
-            File.Delete(path);
+            DeleteRenderFile(path);
         }
     }
 
@@ -191,7 +192,7 @@ public class NativeAudioEngineTests
         }
         finally
         {
-            File.Delete(path);
+            DeleteRenderFile(path);
         }
     }
 
@@ -262,7 +263,7 @@ public class NativeAudioEngineTests
         }
         finally
         {
-            File.Delete(path);
+            DeleteRenderFile(path);
         }
     }
 
@@ -300,7 +301,7 @@ public class NativeAudioEngineTests
         }
         finally
         {
-            File.Delete(path);
+            DeleteRenderFile(path);
         }
     }
 
@@ -331,7 +332,7 @@ public class NativeAudioEngineTests
         }
         finally
         {
-            File.Delete(path);
+            DeleteRenderFile(path);
         }
     }
 
@@ -355,7 +356,7 @@ public class NativeAudioEngineTests
         }
         finally
         {
-            File.Delete(path);
+            DeleteRenderFile(path);
         }
     }
 
@@ -528,7 +529,7 @@ public class NativeAudioEngineTests
         }
         finally
         {
-            File.Delete(path);
+            DeleteRenderFile(path);
         }
     }
 
@@ -543,6 +544,28 @@ public class NativeAudioEngineTests
         var source = engine.LoadFile(path);
         Assert.True(engine.Route(source, bus));
         return (engine, bus, source, path);
+    }
+
+
+    /// <summary>
+    /// The offline engine keeps its output .wav open until it is disposed - which for the using-var
+    /// tests happens after the finally that wants to clean up. Retry briefly for a released handle
+    /// (indexers can lag), then leave the file to %TEMP% instead of failing the test over cleanup.
+    /// </summary>
+    private static void DeleteRenderFile(string path)
+    {
+        for (var attempt = 0; attempt < 20; attempt++)
+        {
+            try
+            {
+                File.Delete(path);
+                return;
+            }
+            catch (IOException)
+            {
+                Thread.Sleep(100);
+            }
+        }
     }
 
     private static float[] RenderFrames(NativeAudioEngine engine, int frames)
@@ -581,7 +604,7 @@ public class NativeAudioEngineTests
             }
             finally
             {
-                File.Delete(path);
+                DeleteRenderFile(path);
             }
         }
     }
@@ -605,7 +628,7 @@ public class NativeAudioEngineTests
             }
             finally
             {
-                File.Delete(path);
+                DeleteRenderFile(path);
             }
         }
     }
@@ -630,7 +653,7 @@ public class NativeAudioEngineTests
             }
             finally
             {
-                File.Delete(path);
+                DeleteRenderFile(path);
             }
         }
     }
@@ -650,7 +673,7 @@ public class NativeAudioEngineTests
             }
             finally
             {
-                File.Delete(path);
+                DeleteRenderFile(path);
             }
         }
     }
@@ -678,7 +701,7 @@ public class NativeAudioEngineTests
             }
             finally
             {
-                File.Delete(path);
+                DeleteRenderFile(path);
             }
         }
     }
@@ -708,7 +731,7 @@ public class NativeAudioEngineTests
             }
             finally
             {
-                File.Delete(path);
+                DeleteRenderFile(path);
             }
         }
     }
@@ -746,7 +769,7 @@ public class NativeAudioEngineTests
             }
             finally
             {
-                File.Delete(path);
+                DeleteRenderFile(path);
             }
         }
     }
@@ -783,7 +806,7 @@ public class NativeAudioEngineTests
             }
             finally
             {
-                File.Delete(path);
+                DeleteRenderFile(path);
             }
         }
     }
@@ -809,7 +832,7 @@ public class NativeAudioEngineTests
             }
             finally
             {
-                File.Delete(path);
+                DeleteRenderFile(path);
             }
         }
     }
@@ -840,7 +863,7 @@ public class NativeAudioEngineTests
             }
             finally
             {
-                File.Delete(path);
+                DeleteRenderFile(path);
             }
         }
     }
@@ -869,7 +892,7 @@ public class NativeAudioEngineTests
             }
             finally
             {
-                File.Delete(path);
+                DeleteRenderFile(path);
             }
         }
     }

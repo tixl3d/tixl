@@ -61,22 +61,23 @@ public sealed class EditorFixture : IDisposable
         return (state["children"]!.Count(), state["connections"]!.Count());
     }
 
-    /// <summary>Locates the _agentTests source folder (for reload tests), tolerant of the TiXL version folder name.</summary>
-    public static string FindPlaygroundSourceFile()
+    /// <summary>
+    /// Locates the playground source in the project folder the running editor actually opened.
+    /// Several version-suffixed folders (plus any --override-version-id profiles) sit side by
+    /// side in Documents, so taking the first TiXL* directory that happens to contain an
+    /// _agentTests edits another editor's copy while the editor under test reloads its own.
+    /// </summary>
+    public string FindPlaygroundSourceFile()
     {
-        // DoNotVerify: a missing ~/Documents would otherwise come back as an empty string.
-        var documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments, Environment.SpecialFolderOption.DoNotVerify);
-        if (Directory.Exists(documents))
-        {
-            foreach (var versionDir in Directory.GetDirectories(documents, "TiXL*"))
-            {
-                var candidate = Path.Combine(versionDir, "_agentTests", "Symbols", "_agentTests.cs");
-                if (File.Exists(candidate))
-                    return candidate;
-            }
-        }
+        var projectsFolder = Client.Call("getPaths").Require("getPaths")["projects"]?.ToObject<string>();
+        if (string.IsNullOrEmpty(projectsFolder))
+            throw new FileNotFoundException("The editor did not report a projects folder");
 
-        throw new FileNotFoundException("Can't locate _agentTests/Symbols/_agentTests.cs under Documents/TiXL*");
+        var candidate = Path.Combine(projectsFolder, PlaygroundProject, "Symbols", PlaygroundProject + ".cs");
+        if (!File.Exists(candidate))
+            throw new FileNotFoundException($"Can't locate {PlaygroundProject}/Symbols/{PlaygroundProject}.cs under {projectsFolder}");
+
+        return candidate;
     }
 
     private static string FindEditorExe()
