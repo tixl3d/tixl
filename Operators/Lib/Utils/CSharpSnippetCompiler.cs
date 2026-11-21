@@ -19,10 +19,14 @@ internal sealed class CSharpSnippetCompiler<TDelegate> where TDelegate : Delegat
 {
     public TDelegate? Delegate { get; private set; }
 
+    /// <summary>The snippet line of the first error of the last failed compile; 0 after a successful one.</summary>
+    public int FirstErrorLine { get; private set; }
+
     /// <param name="errors">Filled with "line N: message" per error; empty on success.</param>
     public bool TryCompile(string source, string typeName, string methodName, string assemblyName, List<string> errors)
     {
         errors.Clear();
+        FirstErrorLine = 0;
         var syntaxTree = CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(LanguageVersion.Latest));
         var compilation = CSharpCompilation.Create(assemblyName,
                                                    [syntaxTree],
@@ -40,6 +44,9 @@ internal sealed class CSharpSnippetCompiler<TDelegate> where TDelegate : Delegat
                     continue;
 
                 var line = diagnostic.Location.GetMappedLineSpan().StartLinePosition.Line + 1;
+                if (FirstErrorLine == 0)
+                    FirstErrorLine = line;
+
                 errors.Add($"line {line}: {diagnostic.GetMessage()}");
             }
 

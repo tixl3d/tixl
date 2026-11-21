@@ -268,7 +268,7 @@ internal sealed partial class GeometrySnippetAttributes
         }
 
         if (count == 0)
-            builder.Append(" This geometry has none here; write one upstream, e.g. with [SetGeometryAttribute] or [SelectGeometry].");
+            builder.Append(" This geometry has none here; write one upstream, e.g. with [CustomGeometryAttribute] or [SelectGeometry].");
 
         _missingGeometry = geometry;
         _missingVersion = geometry.Version;

@@ -1,6 +1,6 @@
 {
   "FormatVersion": 3,
-  "Id": "2e781d86-2a24-4ee9-95fd-26a051e0aeff"/*SetGeometryAttribute*/,
+  "Id": "2e781d86-2a24-4ee9-95fd-26a051e0aeff"/*CustomGeometryAttribute*/,
   "Inputs": [
     {
       "Id": "19ea3de4-7a2a-4368-9360-a50123280689"/*Selection*/,
@@ -9,10 +9,6 @@
     {
       "Id": "5fdbbd34-2144-4ba0-bea1-2866726ca09b"/*A*/,
       "DefaultValue": 0.0
-    },
-    {
-      "Id": "635b1aab-d8db-4a7c-b190-282306115297"/*Mode*/,
-      "DefaultValue": 0
     },
     {
       "Id": "6b66dbbd-7d8d-4e98-845c-d472bb1cf296"/*Domain*/,
@@ -27,29 +23,8 @@
       "DefaultValue": "Value"
     },
     {
-      "Id": "a54b1695-a814-4e62-9508-38bb66b0a46b"/*Value*/,
-      "DefaultValue": 1.0
-    },
-    {
       "Id": "a9170934-849e-4dcf-9202-89385090e6de"/*B*/,
       "DefaultValue": 0.0
-    },
-    {
-      "Id": "b8c3269f-83dc-456b-8320-35c6c9cbf9db"/*VectorValue*/,
-      "DefaultValue": {
-        "X": 1.0,
-        "Y": 1.0,
-        "Z": 1.0,
-        "W": 1.0
-      }
-    },
-    {
-      "Id": "d202f082-01f9-479a-933a-f082defa836a"/*Field*/,
-      "DefaultValue": null
-    },
-    {
-      "Id": "dcc732fa-6a3c-4426-a3e3-ad2be4c8b965"/*SourceAttribute*/,
-      "DefaultValue": ""
     },
     {
       "Id": "e469fa5c-3838-4af1-9e48-7bcb0a687f33"/*Geometry*/,

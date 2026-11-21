@@ -19,7 +19,8 @@
       },
       "GroupTitle": "Shader",
       "Description": "HLSL code fragment applied to each element.",
-      "Usage": "Multiline"
+      "Usage": "Code",
+      "CodeLanguage": "Hlsl"
     },
     {
       "InputId": "3104dab4-8d71-44aa-a582-47416aa977b5"/*A*/,
@@ -115,7 +116,8 @@
       },
       "GroupTitle": "Additional Options...",
       "Description": "Additional HLSL code inserted before the main function, e.g. #define statements or helper functions.",
-      "Usage": "Multiline"
+      "Usage": "Code",
+      "CodeLanguage": "Hlsl"
     },
     {
       "InputId": "eecf7eeb-fefc-4821-b280-be2abd79a2b0"/*ShaderGraph*/,

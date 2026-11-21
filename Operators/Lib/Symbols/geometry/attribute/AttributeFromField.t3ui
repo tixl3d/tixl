@@ -1,0 +1,60 @@
+{
+  "FormatVersion": 3,
+  "Id": "0eb6da76-675d-4ef6-8f7d-f392b8ae5d51"/*AttributeFromField*/,
+  "Description": "Samples a scalar field at every point, vertex, primitive or part of a geometry and writes the value as a float attribute.\n\nDownstream ops can use the attribute like any other: [ColorGeometry] maps it to colors, [SubdivideGeometry] can smooth by it, [TransformGeometry] can use it as selection, and [CustomGeometryAttribute] snippets read it as @Name. A selection blends the new value over the old one.\n\nAKA: sample field, field to attribute\n\nTips\n- [NoiseField] -> AttributeFromField -> [ColorGeometry] colors a mesh by noise.",
+  "InputUis": [
+    {
+      "InputId": "297addd8-6853-422c-abca-ae88e802e03e"/*Domain*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      },
+      "Description": "Which elements get the attribute: points, vertices, primitives (at their center) or parts (at their pivot)."
+    },
+    {
+      "InputId": "51736f5a-a348-4550-8985-c60e61a15253"/*Field*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 135.0
+      },
+      "Description": "Scalar field sampled at each element's position, e.g. a [NoiseField] or [DistanceToPointsField]."
+    },
+    {
+      "InputId": "53f453e6-4489-4795-93dc-5a59dbb21359"/*Selection*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 180.0
+      },
+      "Description": "Name of a float selection whose weight blends the new value over the old one. Empty uses the Selection from an upstream [SelectGeometry] if there is one, and otherwise sets every element. All ignores any selection.",
+      "Usage": "CustomDropdown"
+    },
+    {
+      "InputId": "76b2efe5-434f-4c68-80b3-a7e1c74851f9"/*Geometry*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "bfcb2463-3683-4404-a68f-d1ef258f081f"/*Name*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 90.0
+      },
+      "Description": "Name of the float attribute to write, e.g. Depth or Weight.",
+      "Usage": "CustomDropdown"
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "0c51c7af-79ff-4578-a37f-86c897cadb81"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

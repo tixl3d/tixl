@@ -77,7 +77,8 @@
         "Y": -356.3
       },
       "GroupTitle": "Additional Options...",
-      "Usage": "Multiline"
+      "Usage": "Code",
+      "CodeLanguage": "Hlsl"
     },
     {
       "InputId": "a5c7863e-9c26-4109-9851-3244086b0ccc"/*A*/,
@@ -138,7 +139,8 @@
         "Y": -286.3
       },
       "GroupTitle": "Shader",
-      "Usage": "Multiline"
+      "Usage": "Code",
+      "CodeLanguage": "Hlsl"
     },
     {
       "InputId": "fe120fea-dc5e-45ed-97b5-09d9d4e6269c"/*TemplateFile*/,

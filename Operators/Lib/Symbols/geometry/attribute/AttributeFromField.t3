@@ -1,0 +1,28 @@
+{
+  "FormatVersion": 3,
+  "Id": "0eb6da76-675d-4ef6-8f7d-f392b8ae5d51"/*AttributeFromField*/,
+  "Inputs": [
+    {
+      "Id": "297addd8-6853-422c-abca-ae88e802e03e"/*Domain*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "51736f5a-a348-4550-8985-c60e61a15253"/*Field*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "53f453e6-4489-4795-93dc-5a59dbb21359"/*Selection*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "76b2efe5-434f-4c68-80b3-a7e1c74851f9"/*Geometry*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "bfcb2463-3683-4404-a68f-d1ef258f081f"/*Name*/,
+      "DefaultValue": "Value"
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

@@ -1,6 +1,6 @@
 # Code inputs: annotated parameters and syntax highlighting
 
-Status: **Ready** (not started). Drafted 2026-11-20.
+Status: **Phase 1 done** (2026-11-21), plus error display ahead of Phase 4. Drafted 2026-11-20.
 
 ## Goal
 
@@ -39,8 +39,10 @@ setting. Annotations travel with the code string, so presets arrive already labe
 
 | Op | Language | Annotatable inputs |
 |---|---|---|
-| `CustomPointShader`, `CustomPixelShader`, `CustomForce`, `CustomVertexShader`, `CustomFaceShader`, `CustomDrawMesh`, `CustomSDF`, `CustomScalarField` | HLSL | A–D, `Offset`, others |
+| `CustomPointShader`, `CustomPixelShader`, `CustomForce`, `CustomVertexShader`, `CustomFaceShader`, `CustomDrawMesh`, `CustomSDF` | HLSL | A–D, `Offset`, others |
+| `CustomScalarField` | C# | A, B |
 | `SelectGeometry` (new) | C# | A, B, `Offset` |
+| `CustomGeometryAttribute` (new) | C# | A, B |
 | `ComputeShaderFromSource`, `PixelShaderFromSource` | HLSL (full shader) | none; highlighting only |
 | `Expression` | one-line formula | A–D, but **no comment syntax**, see open decision 3 |
 
@@ -98,6 +100,9 @@ One annotation per line, anywhere in the snippet:
 ## Phases
 
 ### Phase 1: `Code` usage (no visible change)
+- **Done 2026-11-21.** `UsageType.Code` and `CodeLanguage` (serialize, clone, settings); the code inputs of the ops in
+  scope (both inputs where an op has `ShaderCode` and `AdditionalDefines`) use it, `CustomScalarField`, `SelectGeometry`
+  and `CustomGeometryAttribute` with `CSharp`, the rest with `Hlsl`. `DrawMesh.ShaderDefines` stays `Multiline`.
 - Add `UsageType.Code` and `CodeLanguage` (serialize, clone, settings UI).
 - Switch the ops in scope from `Multiline` to `Code` with their language in `.t3ui`.
 - Done when: all snippet ops load, edit and save as before; `.t3ui` diff is only the usage/language fields.
@@ -118,6 +123,16 @@ One annotation per line, anywhere in the snippet:
 - Widget, recommended first step: **highlighted read-only view, edit on click** (option B below). Robust and
   cheap; the colours show while reading, not while typing.
 - Annotation comments get their own colour so they visibly read as configuration.
+
+### Error display (done 2026-11-21, ahead of Phase 4)
+- `Core/Operator/Interfaces/IInputStatusProvider` lets an op report a problem with one input as
+  `InputStatus(Message, Line)`, Line 1-based in the input's text or 0. This is the one Core piece of this plan: the
+  error comes from the running op in Lib, which cannot see the Editor.
+- `Code` inputs ask the selected op for it and draw an error border plus the message in small text below the field.
+- `SelectGeometry` and `CustomGeometryAttribute` report compile errors (with `CSharpSnippetCompiler.FirstErrorLine`)
+  and missing `@Name` attributes, listing the available ones. The HLSL ops don't report yet.
+- Phase 4 underlines `Line` instead of only showing the message. The available `@Name` attributes are the first
+  op-provided symbol list for autocomplete.
 
 ### Phase 4: Real code editor (separate decision)
 - Inline highlighting while typing, error underlines, autocomplete. Options in "Widget options".

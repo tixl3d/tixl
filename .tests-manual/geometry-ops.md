@@ -378,18 +378,18 @@ Replace `[CurvesToPoints]` and the line ops with `[ExtrudeCurves]` ->
 ## Step: Set an attribute per letter
 
 **Action:**
-Connect [StringToCurves] (text `TiXL`) -> [SetGeometryAttribute] (Domain Parts, Name `W`, Mode Custom, Code
+Connect [StringToCurves] (text `TiXL`) -> [CustomGeometryAttribute] (Domain Parts, Name `W`, Code
 `return i == 1 ? 1f : 0f;`) -> [TransformGeometry] (Translation Y 0.1, Selection `W`), and look at the Output Window.
 
 **Expected:**
 - Only the `i` moves up; the other letters stay.
-- In the Table of [SetGeometryAttribute]'s output, **Parts** shows a `W` column with 1 for the `i` and 0 elsewhere.
-- A typo in Code shows the snippet's line and error as the op's warning; the last working values stay.
+- In the Table of [CustomGeometryAttribute]'s output, **Parts** shows a `W` column with 1 for the `i` and 0 elsewhere.
+- A typo in Code gives the Code field an error border with the snippet's line and error below it; the last working values stay.
 
 ## Step: Color letters from an attribute
 
 **Action:**
-Connect [StringToCurves] (text `TiXL`) -> [SetGeometryAttribute] (Domain Parts, Name `W`, Mode Custom, Code
+Connect [StringToCurves] (text `TiXL`) -> [CustomGeometryAttribute] (Domain Parts, Name `W`, Code
 `return i * 0.25f;`) -> [ColorGeometry] (Domain Parts, Attribute `W`, Mapping FromStart, a black-to-white gradient)
 -> [CurvesToPoints] (Sampling Points), and look at the Output Window.
 
@@ -424,10 +424,20 @@ Connect [CubeGeometry] -> [SubdivideGeometry] (Linear) -> [SelectGeometry] (Doma
 ## Step: Read attributes in a snippet
 
 **Action:**
-Connect [CubeGeometry] -> [SetGeometryAttribute] (Domain Points, Name `W`, Mode Custom, Code `return p.Y;`) ->
+Connect [CubeGeometry] -> [CustomGeometryAttribute] (Domain Points, Name `W`, Code `return p.Y;`) ->
 [SelectGeometry] (Mode Custom) -> [TransformGeometry] (Translation Y 0.2).
 
 **Expected:**
 - Code `return @W > 0;` moves the top four corners.
 - Domain Primitives with `return @W > 0.4f;` selects only the top face; Domain Vertices with `return @Normal.Y > 0.5f;` too.
 - `return @Nope > 0;` moves nothing and the op warns that the attribute is missing.
+
+## Step: Sample a field into an attribute
+
+**Action:**
+Connect [CubeGeometry] -> [SubdivideGeometry] (Smoothness 0, Iterations 3) -> [AttributeFromField] (Domain Points,
+Name `N`, Field from a [NoiseField]) -> [ColorGeometry] (Attribute `N`) and look at the Output Window.
+
+**Expected:**
+- The cube shows the noise as a gradient; changing the noise changes the colors.
+- Without a connected Field the op warns and passes the geometry through.

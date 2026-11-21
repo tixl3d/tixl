@@ -198,6 +198,8 @@ message must name what was expected.
   share ring points, so each point can take its own depth for sloped back caps, interpolated along the flattened
   samples. Prefer explicit `...Attribute` inputs on the few ops where a per-element value matters (depth, bevel,
   offset distance, transform weight) over a general attribute binding for every parameter.
+- **Split (2026-11-21):** `SetGeometryAttribute` became the code-only `CustomGeometryAttribute` (same id; Constant and
+  Copy are one-line snippets with `@Name`) plus `AttributeFromField` for scalar fields.
 - **`SetGeometryAttribute`** (done 2026-11-21; element counts, positions and weights shared with `SelectGeometry` in `Lib/Utils/GeometryElements`) (maintainer, 2026-11-20): writes a named attribute on a chosen domain and type from a
   constant, a C# snippet (sharing `CSharpSnippetCompiler` and the `i`, `count`, `p`, `A`, `B` scope of
   `SelectGeometry`), another attribute or a field. Example: `StringToCurves -> SetGeometryAttribute (Part, Depth,
@@ -211,10 +213,10 @@ message must name what was expected.
   the child quads; edge attributes are dropped. Normals: Auto interpolates for Linear and recomputes smooth normals for
   Catmull-Clark. Parts keep their ranges and curves pass through unchanged.
 - **Attribute name inputs** (done 2026-11-21): selection, attribute and name inputs of TransformGeometry,
-  SetGeometryAttribute and ColorGeometry are type-ahead dropdowns of the input's attributes (`Lib/Utils/GeometryAttributeChoices`).
+  CustomGeometryAttribute, AttributeFromField and ColorGeometry are type-ahead dropdowns of the input's attributes (`Lib/Utils/GeometryAttributeChoices`).
   An empty selection shows as `Auto (Selection)` or `Auto (All)`; the reserved value `All` ignores any selection.
   Still to do: SelectGeometry's Name and the remaining ops with attribute names.
-- **Snippet attributes** (done 2026-11-21): snippets of `SelectGeometry` and `SetGeometryAttribute` read `@Name`
+- **Snippet attributes** (done 2026-11-21): snippets of `SelectGeometry` and `CustomGeometryAttribute` read `@Name`
   through `Lib/Utils/GeometrySnippetAttributes`: typed array fields of the generated class, same domain passed through,
   point attributes converted; recompiles only when the code or an attribute's type changes.
 - **`Segments` on `CubeGeometry`** (maintainer, 2026-11-21): an Int3 input (default 1, 1, 1) that splits each face

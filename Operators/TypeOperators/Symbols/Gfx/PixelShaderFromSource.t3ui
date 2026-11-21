@@ -18,7 +18,8 @@
         "X": 117.41934,
         "Y": 45.866936
       },
-      "Usage": "Multiline"
+      "Usage": "Code",
+      "CodeLanguage": "Hlsl"
     },
     {
       "InputId": "baa49d7d-127c-4c93-ae90-7e4db3598af9"/*DebugName*/,

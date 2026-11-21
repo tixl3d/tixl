@@ -17,7 +17,8 @@
         "Y": 0.0
       },
       "Description": "C# method body that returns a float for the sample position p.",
-      "Usage": "Multiline"
+      "Usage": "Code",
+      "CodeLanguage": "CSharp"
     },
     {
       "InputId": "7a3c8d54-91e6-4b27-a0f8-5d2b9c4e6138"/*D*/,

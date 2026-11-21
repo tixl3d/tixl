@@ -36,7 +36,7 @@
         "X": 0.0,
         "Y": 135.0
       },
-      "Description": "The attribute to map, e.g. CharIndex on the parts of a text or W written by [SetGeometryAttribute].",
+      "Description": "The attribute to map, e.g. CharIndex on the parts of a text or W written by [CustomGeometryAttribute] or [AttributeFromField].",
       "Usage": "CustomDropdown"
     },
     {

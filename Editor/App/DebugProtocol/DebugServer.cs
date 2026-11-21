@@ -1054,6 +1054,11 @@ internal static class DebugServer
         var includeDefaults = request["includeDefaults"]?.Value<bool>() ?? false;
         var symbolUi = symbol.GetSymbolUi();
 
+        // Status messages need instances, which exist for the focused composition
+        var compositionInstance = ProjectView.Focused?.CompositionInstance;
+        if (compositionInstance?.Symbol != symbol)
+            compositionInstance = null;
+
         var children = new JArray();
         foreach (var (childId, child) in symbol.Children)
         {
@@ -1085,6 +1090,14 @@ internal static class DebugServer
                 childJson["isBypassed"] = true;
             if (child.IsDisabled)
                 childJson["isDisabled"] = true;
+            if (compositionInstance != null
+                && ((IReadOnlyDictionary<Guid, Instance>)compositionInstance.Children).TryGetValue(childId, out var childInstance)
+                && childInstance is T3.Core.Operator.Interfaces.IStatusProvider statusProvider
+                && !string.IsNullOrEmpty(statusProvider.GetStatusMessage()))
+            {
+                childJson["status"] = statusProvider.GetStatusLevel().ToString();
+                childJson["statusMessage"] = statusProvider.GetStatusMessage();
+            }
             if (symbolUi.ChildUis.TryGetValue(childId, out var childUi))
             {
                 childJson["posX"] = childUi.PosOnCanvas.X;

@@ -105,7 +105,8 @@
         "Y": 5187.54
       },
       "Description": "HLSL code inserted into the pixel shader. It must assign the output color to c.",
-      "Usage": "Multiline"
+      "Usage": "Code",
+      "CodeLanguage": "Hlsl"
     },
     {
       "InputId": "7f731ea3-c246-4e9c-95b3-b30260887161"/*EnableZTest*/,
@@ -218,7 +219,8 @@
         "X": 1911.0858,
         "Y": 5117.54
       },
-      "Usage": "Multiline"
+      "Usage": "Code",
+      "CodeLanguage": "Hlsl"
     },
     {
       "InputId": "f9f36aec-ebbf-4221-a585-cdc6ea7f7c50"/*Color*/,

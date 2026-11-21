@@ -5,13 +5,13 @@ using T3.Core.Utils;
 namespace Lib.geometry.attribute;
 
 /// <summary>
-/// Writes a named attribute on one domain of a Geometry: a constant, a C# snippet per element, a scalar field
-/// sampled at element positions, or a copy of another attribute. A float selection blends the new value over the
-/// old one per element. Topology, positions and other attributes are shared.
+/// Writes a named attribute on one domain of a Geometry from a C# snippet evaluated per element, which can read other
+/// attributes as @Name. A float selection blends the new value over the old one per element. Topology, positions and
+/// other attributes are shared.
 /// </summary>
 [Guid("2e781d86-2a24-4ee9-95fd-26a051e0aeff")]
 [ExportDependencies("Microsoft.CodeAnalysis.dll", "Microsoft.CodeAnalysis.CSharp.dll")]
-internal sealed class SetGeometryAttribute : Instance<SetGeometryAttribute>, IStatusProvider, ICustomDropdownHolder, IInputStatusProvider
+internal sealed class CustomGeometryAttribute : Instance<CustomGeometryAttribute>, IStatusProvider, ICustomDropdownHolder, IInputStatusProvider
 {
     private enum Domains
     {
@@ -30,18 +30,10 @@ internal sealed class SetGeometryAttribute : Instance<SetGeometryAttribute>, ISt
         Vector4,
     }
 
-    private enum Modes
-    {
-        Constant,
-        Custom,
-        Field,
-        Copy,
-    }
-
     [Output(Guid = "e90cfe0e-c1e8-461e-b755-431b9929f017")]
     public readonly Slot<Geometry?> Result = new();
 
-    public SetGeometryAttribute()
+    public CustomGeometryAttribute()
     {
         Result.UpdateAction = Update;
     }
@@ -52,14 +44,9 @@ internal sealed class SetGeometryAttribute : Instance<SetGeometryAttribute>, ISt
         var domain = ToAttributeDomain((Domains)Domain.GetValue(context).Clamp(0, 3));
         var name = Name.GetValue(context);
         var type = (Types)Type.GetValue(context).Clamp(0, 4);
-        var mode = (Modes)Mode.GetValue(context).Clamp(0, 3);
-        var value = Value.GetValue(context);
-        var vectorValue = VectorValue.GetValue(context);
         var code = Code.GetValue(context) ?? string.Empty;
         var a = A.GetValue(context);
         var b = B.GetValue(context);
-        var field = Field.GetValue(context);
-        var sourceName = SourceAttribute.GetValue(context);
         var selectionName = Selection.GetValue(context);
         _statusMessage = string.Empty;
         _lastSource = source;
@@ -77,7 +64,6 @@ internal sealed class SetGeometryAttribute : Instance<SetGeometryAttribute>, ISt
             Result.Value = source;
             return;
         }
-
 
         var count = GeometryElements.GetCount(source, domain);
         if (_values.Length < count)
@@ -99,13 +85,9 @@ internal sealed class SetGeometryAttribute : Instance<SetGeometryAttribute>, ISt
         _output.Parts = source.Parts;
         _output.Attributes.Clear();
         GeometryAttribute? existing = null;
-        GeometryAttribute? copySource = null;
         for (var index = 0; index < source.Attributes.Count; index++)
         {
             var attribute = source.Attributes[index];
-            if (attribute.Domain == domain && string.Equals(attribute.Name, sourceName, StringComparison.OrdinalIgnoreCase))
-                copySource = attribute;
-
             if (attribute.Domain == domain && string.Equals(attribute.Name, name, StringComparison.OrdinalIgnoreCase))
             {
                 existing = attribute;
@@ -115,10 +97,10 @@ internal sealed class SetGeometryAttribute : Instance<SetGeometryAttribute>, ISt
             _output.Attributes.Add(attribute);
         }
 
-        var isSnippetReady = mode == Modes.Custom && PrepareSnippet(code, type, source, domain);
+        var isSnippetReady = PrepareSnippet(code, type, source, domain);
         var hasSelection = CollectWeights(source, domain, selectionName, count);
         ReadValues(existing, _oldValues, count);
-        ComputeValues(source, domain, mode, type, value, vectorValue, a, b, field, copySource, count, isSnippetReady);
+        ComputeValues(source, domain, a, b, count, isSnippetReady);
 
         var target = GetTargetAttribute(name, domain, type, count);
         for (var i = 0; i < count; i++)
@@ -159,56 +141,18 @@ internal sealed class SetGeometryAttribute : Instance<SetGeometryAttribute>, ISt
         return true;
     }
 
-    private void ComputeValues(Geometry source, AttributeDomain domain, Modes mode, Types type, float value, Vector4 vectorValue,
-                               float a, float b, ScalarField? field, GeometryAttribute? copySource, int count, bool isSnippetReady)
+    /** Runs the snippet per element; without a working snippet the old values stay. */
+    private void ComputeValues(Geometry source, AttributeDomain domain, float a, float b, int count, bool isSnippetReady)
     {
-        switch (mode)
+        var evaluate = isSnippetReady ? _compiler.Delegate : null;
+        if (evaluate == null)
         {
-            case Modes.Constant:
-                var constant = type is Types.Float or Types.Int ? new Vector4(value, 0, 0, 0) : vectorValue;
-                Array.Fill(_values, constant, 0, count);
-                break;
-
-            case Modes.Custom:
-                var evaluate = isSnippetReady ? _compiler.Delegate : null;
-                if (evaluate == null)
-                {
-                    Array.Copy(_oldValues, _values, count);
-                    break;
-                }
-
-                for (var i = 0; i < count; i++)
-                    _values[i] = evaluate(i, count, GeometryElements.GetPosition(source, domain, i), a, b);
-
-                break;
-
-            case Modes.Field:
-                if (field == null)
-                {
-                    _statusMessage = "Connect a field to sample.";
-                    Array.Copy(_oldValues, _values, count);
-                    break;
-                }
-
-                for (var i = 0; i < count; i++)
-                {
-                    var sample = field.Sample(GeometryElements.GetPosition(source, domain, i));
-                    _values[i] = new Vector4(sample);
-                }
-
-                break;
-
-            case Modes.Copy:
-                if (copySource == null)
-                {
-                    _statusMessage = "No attribute of that SourceAttribute name on this domain.";
-                    Array.Copy(_oldValues, _values, count);
-                    break;
-                }
-
-                ReadValues(copySource, _values, count);
-                break;
+            Array.Copy(_oldValues, _values, count);
+            return;
         }
+
+        for (var i = 0; i < count; i++)
+            _values[i] = evaluate(i, count, GeometryElements.GetPosition(source, domain, i), a, b);
     }
 
     /** Any numeric attribute as Vector4 components; missing values are zero. */
@@ -293,7 +237,6 @@ internal sealed class SetGeometryAttribute : Instance<SetGeometryAttribute>, ISt
                    };
     }
 
-    /// <summary>The snippet returns the attribute's type (a float for Float and Int); it is wrapped into a Vector4.</summary>
     /// <summary>Parses @attributes, recompiles when the code, the type or their types changed and binds their values.</summary>
     private bool PrepareSnippet(string code, Types type, Geometry source, AttributeDomain domain)
     {
@@ -323,6 +266,7 @@ internal sealed class SetGeometryAttribute : Instance<SetGeometryAttribute>, ISt
         return _snippetAttributes.Bind(source, domain);
     }
 
+    /// <summary>The snippet returns the attribute's type (a float for Float and Int); it is wrapped into a Vector4.</summary>
     private void Compile(string code, Types type)
     {
         _compiledCode = code;
@@ -343,7 +287,7 @@ internal sealed class SetGeometryAttribute : Instance<SetGeometryAttribute>, ISt
                        using System.Numerics;
                        using static System.MathF;
 
-                       public static class __SetGeometryAttribute
+                       public static class __CustomGeometryAttribute
                        {
                        {{_snippetAttributes.GetFieldDeclarations()}}
                            public static Vector4 Evaluate(int i, int count, Vector3 p, float A, float B)
@@ -358,7 +302,7 @@ internal sealed class SetGeometryAttribute : Instance<SetGeometryAttribute>, ISt
                            }
                        }
                        """;
-        if (_compiler.TryCompile(source, "__SetGeometryAttribute", "Evaluate", "SetGeometryAttributeSnippet", _compileErrors))
+        if (_compiler.TryCompile(source, "__CustomGeometryAttribute", "Evaluate", "CustomGeometryAttributeSnippet", _compileErrors))
         {
             _snippetAttributes.SetCompiledType(_compiler.Delegate?.Method.DeclaringType);
             return;
@@ -366,9 +310,10 @@ internal sealed class SetGeometryAttribute : Instance<SetGeometryAttribute>, ISt
 
         _snippetAttributes.SetCompiledType(null);
 
+        _compileErrorLine = _compiler.FirstErrorLine;
         _compileError = _compileErrors.Count > 0 ? $"Snippet {_compileErrors[0]}" : "Snippet failed to compile";
         foreach (var error in _compileErrors)
-            Log.Warning($"SetGeometryAttribute {error}", this);
+            Log.Warning($"CustomGeometryAttribute {error}", this);
     }
 
     public IStatusProvider.StatusLevel GetStatusLevel()
@@ -382,13 +327,15 @@ internal sealed class SetGeometryAttribute : Instance<SetGeometryAttribute>, ISt
         return snippetMessage ?? _statusMessage;
     }
 
-    string? IInputStatusProvider.GetInputStatus(Guid inputId) => inputId == Code.Input.InputDefinition.Id ? GetSnippetMessage() : null;
+    bool IInputStatusProvider.TryGetInputStatus(Guid inputId, out InputStatus status)
+    {
+        var message = inputId == Code.Input.InputDefinition.Id ? GetSnippetMessage() : null;
+        status = new InputStatus(message ?? string.Empty, _attributeError.Length > 0 ? 0 : _compileErrorLine);
+        return message != null;
+    }
 
     private string? GetSnippetMessage()
     {
-        if (Mode.Value != (int)Modes.Custom)
-            return null;
-
         if (_attributeError.Length > 0)
             return _attributeError;
 
@@ -401,7 +348,7 @@ internal sealed class SetGeometryAttribute : Instance<SetGeometryAttribute>, ISt
         if (inputId == Selection.Input.InputDefinition.Id)
             return GeometryAttributeChoices.GetSelectionDisplayValue(Selection.Value, _lastSource);
 
-        return inputId == SourceAttribute.Input.InputDefinition.Id ? SourceAttribute.Value : Name.Value;
+        return Name.Value;
     }
 
     IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid inputId)
@@ -418,8 +365,6 @@ internal sealed class SetGeometryAttribute : Instance<SetGeometryAttribute>, ISt
 
         if (inputId == Selection.Input.InputDefinition.Id)
             Selection.SetTypedInputValue(GeometryAttributeChoices.ToSelectionValue(selected));
-        else if (inputId == SourceAttribute.Input.InputDefinition.Id)
-            SourceAttribute.SetTypedInputValue(selected);
         else if (inputId == Name.Input.InputDefinition.Id)
             Name.SetTypedInputValue(selected);
     }
@@ -444,6 +389,7 @@ internal sealed class SetGeometryAttribute : Instance<SetGeometryAttribute>, ISt
     private int _compiledSignature;
     private readonly GeometrySnippetAttributes _snippetAttributes = new();
     private string _compileError = string.Empty;
+    private int _compileErrorLine;
     private string _attributeError = string.Empty;
     private string _statusMessage = string.Empty;
 
@@ -459,15 +405,6 @@ internal sealed class SetGeometryAttribute : Instance<SetGeometryAttribute>, ISt
     [Input(Guid = "f1f1fde1-9f97-4618-a020-aa6c800b7466", MappedType = typeof(Types))]
     public readonly InputSlot<int> Type = new();
 
-    [Input(Guid = "635b1aab-d8db-4a7c-b190-282306115297", MappedType = typeof(Modes))]
-    public readonly InputSlot<int> Mode = new();
-
-    [Input(Guid = "a54b1695-a814-4e62-9508-38bb66b0a46b")]
-    public readonly InputSlot<float> Value = new();
-
-    [Input(Guid = "b8c3269f-83dc-456b-8320-35c6c9cbf9db")]
-    public readonly InputSlot<Vector4> VectorValue = new();
-
     [Input(Guid = "837cd3ee-d92e-46c3-8d42-69f438c81e50")]
     public readonly InputSlot<string> Code = new();
 
@@ -476,12 +413,6 @@ internal sealed class SetGeometryAttribute : Instance<SetGeometryAttribute>, ISt
 
     [Input(Guid = "a9170934-849e-4dcf-9202-89385090e6de")]
     public readonly InputSlot<float> B = new();
-
-    [Input(Guid = "d202f082-01f9-479a-933a-f082defa836a")]
-    public readonly InputSlot<ScalarField> Field = new();
-
-    [Input(Guid = "dcc732fa-6a3c-4426-a3e3-ad2be4c8b965")]
-    public readonly InputSlot<string> SourceAttribute = new();
 
     [Input(Guid = "19ea3de4-7a2a-4368-9360-a50123280689")]
     public readonly InputSlot<string> Selection = new();

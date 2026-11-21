@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
-  "Id": "2e781d86-2a24-4ee9-95fd-26a051e0aeff"/*SetGeometryAttribute*/,
-  "Description": "Writes a named attribute on the points, vertices, primitives or parts of a geometry, from a constant, a C# snippet, a scalar field or another attribute.\n\nThe attribute flows with the geometry, so downstream ops can use it: [ExtrudeCurves] can scale its depth by a part attribute, color ops can read it, and [TransformGeometry] can use a float as selection. A selection blends the new value over the old one, so only the selected elements change.\n\nAKA: attribute create, attribute wrangle, set attribute\n\nTips\n- A Custom snippet on the Parts of [StringToCurves] gives every letter its own value, e.g. `return 0.5f + 0.5f * Sin(i * 0.8f + A);`; animate A to move it.",
+  "Id": "2e781d86-2a24-4ee9-95fd-26a051e0aeff"/*CustomGeometryAttribute*/,
+  "Description": "Writes a named attribute on the points, vertices, primitives or parts of a geometry from a C# snippet that runs for every element.\n\nThe snippet can read other attributes as @Name, so it covers constants (`return 1;`), copies (`return @Other;`) and any formula of them. The attribute flows with the geometry, so downstream ops can use it: [ExtrudeCurves] can scale its depth by a part attribute, [ColorGeometry] can map it to colors, and [TransformGeometry] can use a float as selection. A selection blends the new value over the old one, so only the selected elements change. To sample a field, use [AttributeFromField].\n\nAKA: attribute create, attribute wrangle, set attribute, SetGeometryAttribute\n\nTips\n- A snippet on the Parts of [StringToCurves] gives every letter its own value, e.g. `return 0.5f + 0.5f * Sin(i * 0.8f + A);`; animate A to move it.\n- `return @Normal.Y * A;` on Vertices reads the normals of a mesh.",
   "InputUis": [
     {
       "InputId": "19ea3de4-7a2a-4368-9360-a50123280689"/*Selection*/,
@@ -21,14 +21,6 @@
       "Description": "Free parameter for the Custom snippet, e.g. to animate it."
     },
     {
-      "InputId": "635b1aab-d8db-4a7c-b190-282306115297"/*Mode*/,
-      "Position": {
-        "X": 0.0,
-        "Y": 180.0
-      },
-      "Description": "Constant writes Value or VectorValue. Custom runs the C# snippet in Code per element. Field samples the connected scalar field at each element's position. Copy converts another attribute of the same domain."
-    },
-    {
       "InputId": "6b66dbbd-7d8d-4e98-845c-d472bb1cf296"/*Domain*/,
       "Position": {
         "X": 0.0,
@@ -42,8 +34,10 @@
         "X": 0.0,
         "Y": 315.0
       },
+      "GroupTitle": "Custom",
       "Description": "Body of a C# method that returns the attribute's type (a float for Float and Int). In scope: index i, element count, position p (a primitive's center, a part's pivot) and the parameters A and B. System.MathF is imported, e.g. `return 0.5f + 0.5f * Sin(i * 0.8f + A);`. Attributes of the input geometry are read as @Name, e.g. `@Normal.Y` or `@Selection` after an upstream [SelectGeometry]; the Table tab of the input lists them. Attributes on points are converted to the chosen domain; @P is the position.",
-      "Usage": "Multiline"
+      "Usage": "Code",
+      "CodeLanguage": "CSharp"
     },
     {
       "InputId": "945f7c9d-fef3-40fa-bd00-b612dc3a7979"/*Name*/,
@@ -55,45 +49,12 @@
       "Usage": "CustomDropdown"
     },
     {
-      "InputId": "a54b1695-a814-4e62-9508-38bb66b0a46b"/*Value*/,
-      "Position": {
-        "X": 0.0,
-        "Y": 225.0
-      },
-      "Description": "Constant value for Float and Int attributes."
-    },
-    {
       "InputId": "a9170934-849e-4dcf-9202-89385090e6de"/*B*/,
       "Position": {
         "X": 0.0,
         "Y": 405.0
       },
       "Description": "Free parameter for the Custom snippet."
-    },
-    {
-      "InputId": "b8c3269f-83dc-456b-8320-35c6c9cbf9db"/*VectorValue*/,
-      "Position": {
-        "X": 0.0,
-        "Y": 270.0
-      },
-      "Description": "Constant value for vector attributes; Vector2 and Vector3 use the first components."
-    },
-    {
-      "InputId": "d202f082-01f9-479a-933a-f082defa836a"/*Field*/,
-      "Position": {
-        "X": 0.0,
-        "Y": 450.0
-      },
-      "Description": "Scalar field sampled at each element's position in Field mode."
-    },
-    {
-      "InputId": "dcc732fa-6a3c-4426-a3e3-ad2be4c8b965"/*SourceAttribute*/,
-      "Position": {
-        "X": 0.0,
-        "Y": 495.0
-      },
-      "Description": "Attribute of the same domain to read in Copy mode; numbers and vectors convert to the chosen Type.",
-      "Usage": "CustomDropdown"
     },
     {
       "InputId": "e469fa5c-3838-4af1-9e48-7bcb0a687f33"/*Geometry*/,
@@ -109,7 +70,7 @@
         "X": 0.0,
         "Y": 135.0
       },
-      "Description": "Value type of the attribute. Float and Int use Value, the vector types use VectorValue."
+      "Description": "Value type of the attribute and of what the snippet returns: a float for Float and Int, otherwise the vector type."
     }
   ],
   "SymbolChildUis": [],

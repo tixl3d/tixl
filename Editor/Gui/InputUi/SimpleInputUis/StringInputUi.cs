@@ -38,10 +38,19 @@ public sealed class StringInputUi : InputValueUi<string>
         /// A MIDI device name or alias. Lets the settings panel find every device reference across loaded projects.
         /// </summary>
         MidiDevice,
+
+        /// <summary>
+        /// Source code, e.g. the snippet of a Custom* op. Drawn like <see cref="Multiline"/>, and marked when the operator
+        /// reports a problem with it through <see cref="IInputStatusProvider"/>. <see cref="CodeLanguage"/> names the language.
+        /// </summary>
+        Code,
     }
 
     public UsageType Usage { get; private set; } = UsageType.Default;
     public string FileFilter { get; set; } = string.Empty;
+
+    /// <summary>The language of a <see cref="UsageType.Code"/> input, e.g. "Hlsl" or "CSharp"; empty when unknown.</summary>
+    public string CodeLanguage { get; set; } = string.Empty;
 
     public override IInputUi Clone()
     {
@@ -54,6 +63,7 @@ public sealed class StringInputUi : InputValueUi<string>
                        Size = Size,
                        Usage = Usage,
                        FileFilter = FileFilter,
+                       CodeLanguage = CodeLanguage,
                    };
     }
 
@@ -69,6 +79,9 @@ public sealed class StringInputUi : InputValueUi<string>
                 inputEditStateFlags = DrawDefaultTextEdit(ref value) ? InputEditStateFlags.Modified : InputEditStateFlags.Nothing;
                 break;
             case UsageType.Multiline:
+                inputEditStateFlags = DrawMultilineTextEdit(ref value, null);
+                break;
+            case UsageType.Code:
                 inputEditStateFlags = DrawMultilineTextEdit(ref value, GetInputStatus(input));
                 break;
             case UsageType.FilePath:
@@ -158,7 +171,9 @@ public sealed class StringInputUi : InputValueUi<string>
     private static string? GetInputStatus(Symbol.Child.Input input)
     {
         var instance = ProjectView.Focused?.NodeSelection.GetSelectedInstanceWithoutComposition();
-        return instance is IInputStatusProvider provider ? provider.GetInputStatus(input.InputDefinition.Id) : null;
+        return instance is IInputStatusProvider provider && provider.TryGetInputStatus(input.InputDefinition.Id, out var status)
+                   ? status.Message
+                   : null;
     }
 
     /// <param name="error">Marks the field with an error border and shows the message below it.</param>
@@ -284,6 +299,18 @@ public sealed class StringInputUi : InputValueUi<string>
             }
         }
 
+        if (Usage == UsageType.Code)
+        {
+            FormInputs.DrawFieldSetHeader("Code Language");
+            var language = CodeLanguage;
+            if (FormInputs.AddStringInput("##Code Language", ref language, null, null,
+                                          "Language of the code, e.g. Hlsl or CSharp. Used for highlighting; empty for plain text."))
+            {
+                modified = true;
+                CodeLanguage = language;
+            }
+        }
+
         return modified;
     }
 
@@ -295,6 +322,9 @@ public sealed class StringInputUi : InputValueUi<string>
 
         if (!string.IsNullOrEmpty(FileFilter))
             writer.WriteObject(nameof(FileFilter), FileFilter);
+
+        if (!string.IsNullOrEmpty(CodeLanguage))
+            writer.WriteObject(nameof(CodeLanguage), CodeLanguage);
     }
 
     public override void Read(JToken? inputToken)
@@ -311,5 +341,6 @@ public sealed class StringInputUi : InputValueUi<string>
         }
 
         FileFilter = inputToken[nameof(FileFilter)]?.Value<string>() ?? string.Empty;
+        CodeLanguage = inputToken[nameof(CodeLanguage)]?.Value<string>() ?? string.Empty;
     }
 }

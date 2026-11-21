@@ -184,6 +184,7 @@ internal sealed class SelectGeometry : Instance<SelectGeometry>, IStatusProvider
 
         // Report whichever attempt failed less, which is the one matching what the snippet returns
         var errors = _boolErrors.Count < _compileErrors.Count ? _boolErrors : _compileErrors;
+        _compileErrorLine = _compiler.FirstErrorLine;
         _statusMessage = errors.Count > 0 ? $"Snippet {errors[0]}" : "Snippet failed to compile";
         foreach (var error in errors)
             Log.Warning($"SelectGeometry {error}", this);
@@ -217,13 +218,11 @@ internal sealed class SelectGeometry : Instance<SelectGeometry>, IStatusProvider
         return string.IsNullOrEmpty(GetStatusMessage()) ? IStatusProvider.StatusLevel.Success : IStatusProvider.StatusLevel.Warning;
     }
 
-    string? IInputStatusProvider.GetInputStatus(Guid inputId)
+    bool IInputStatusProvider.TryGetInputStatus(Guid inputId, out InputStatus status)
     {
-        if (inputId != Code.Input.InputDefinition.Id || Mode.Value != (int)Modes.Custom)
-            return null;
-
-        var message = GetStatusMessage();
-        return string.IsNullOrEmpty(message) ? null : message;
+        var message = inputId == Code.Input.InputDefinition.Id && Mode.Value == (int)Modes.Custom ? GetStatusMessage() : string.Empty;
+        status = new InputStatus(message, _attributeError.Length > 0 ? 0 : _compileErrorLine);
+        return message.Length > 0;
     }
 
     public string GetStatusMessage() => Mode.Value == (int)Modes.Custom && _attributeError.Length > 0 ? _attributeError : _statusMessage;
@@ -261,6 +260,7 @@ internal sealed class SelectGeometry : Instance<SelectGeometry>, IStatusProvider
     private string? _parsedCode;
     private int _compiledSignature;
     private string _attributeError = string.Empty;
+    private int _compileErrorLine;
     private readonly GeometrySnippetAttributes _snippetAttributes = new();
     private string _statusMessage = string.Empty;
 
