@@ -1098,6 +1098,25 @@ internal static class DebugServer
                 childJson["status"] = statusProvider.GetStatusLevel().ToString();
                 childJson["statusMessage"] = statusProvider.GetStatusMessage();
             }
+
+            // What the parameter window shows below Code inputs
+            if (compositionInstance != null
+                && ((IReadOnlyDictionary<Guid, Instance>)compositionInstance.Children).TryGetValue(childId, out var codeInstance))
+            {
+                var codeStatus = new JArray();
+                foreach (var definition in child.Symbol.InputDefinitions)
+                {
+                    if (child.Symbol.GetSymbolUi().InputUis.TryGetValue(definition.Id, out var inputUi)
+                        && inputUi is T3.Editor.Gui.InputUi.SimpleInputUis.StringInputUi { Usage: T3.Editor.Gui.InputUi.SimpleInputUis.StringInputUi.UsageType.Code }
+                        && T3.Editor.Gui.InputUi.SimpleInputUis.CodeInputStatus.TryGet(codeInstance, definition.Id, out var inputStatus))
+                    {
+                        codeStatus.Add(new JObject { ["input"] = definition.Name, ["line"] = inputStatus.Line, ["message"] = inputStatus.Message });
+                    }
+                }
+
+                if (codeStatus.Count > 0)
+                    childJson["codeInputStatus"] = codeStatus;
+            }
             if (symbolUi.ChildUis.TryGetValue(childId, out var childUi))
             {
                 childJson["posX"] = childUi.PosOnCanvas.X;

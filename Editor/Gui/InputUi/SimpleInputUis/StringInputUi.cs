@@ -171,7 +171,7 @@ public sealed class StringInputUi : InputValueUi<string>
     private static string? GetInputStatus(Symbol.Child.Input input)
     {
         var instance = ProjectView.Focused?.NodeSelection.GetSelectedInstanceWithoutComposition();
-        return instance is IInputStatusProvider provider && provider.TryGetInputStatus(input.InputDefinition.Id, out var status)
+        return instance != null && CodeInputStatus.TryGet(instance, input.InputDefinition.Id, out var status)
                    ? status.Message
                    : null;
     }

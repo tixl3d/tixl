@@ -130,14 +130,18 @@ One annotation per line, anywhere in the snippet:
   error comes from the running op in Lib, which cannot see the Editor.
 - `Code` inputs ask the selected op for it and draw an error border plus the message in small text below the field.
 - `SelectGeometry` and `CustomGeometryAttribute` report compile errors (with `CSharpSnippetCompiler.FirstErrorLine`)
-  and missing `@Name` attributes, listing the available ones. The HLSL ops don't report yet.
+  and missing `@Name` attributes, listing the available ones.
+- HLSL ops need no code of their own: `Editor/Gui/InputUi/SimpleInputUis/CodeInputStatus` falls back to a child
+  `IShaderCodeOperator` (up to two levels down) with a warning, finds each `Code` input's text in the child's spliced
+  source and maps the compiler's `Line N` into the input it falls in (shown there, prefix and file name dropped,
+  hint kept); otherwise the raw message goes below the first `Code` input. Verified on CustomPointShader (ShaderCode,
+  AdditionalDefines) and CustomPixelShader. `getGraphState` reports it per child as `codeInputStatus`.
 - Phase 4 underlines `Line` instead of only showing the message. The available `@Name` attributes are the first
   op-provided symbol list for autocomplete.
 
 ### Phase 4: Real code editor (separate decision)
 - Inline highlighting while typing, error underlines, autocomplete. Options in "Widget options".
-- Error lines: C# already reports snippet lines; for HLSL trace how the template splice reports errors and
-  subtract the snippet's start line.
+- Error lines: done for the message (see Error display); Phase 4 adds underlines in the editor widget.
 - Autocomplete: each op provides its symbol list (`p`, `idx`, `f`, `SampleGradient`, the annotated A–D
   labels). Shape of that registry is open.
 

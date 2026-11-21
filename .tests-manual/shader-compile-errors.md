@@ -21,6 +21,17 @@ Add `float3 d = rotate_vector(float3(1,0,0), float4(0,0,0,1));` as a line of the
 **Expected:**
 - The error names `rotate_vector` and a line number, and suggests `qRotateVec3`.
 
+## Step: Error below the code field
+
+**Action:**
+Keep the `rotate_vector` line from the previous step and look at the parameter window of [CustomPixelShader].
+
+**Expected:**
+- The ShaderCode field has an error border, and below it the error with the line number counted within the field
+  (the line you typed, not a line of the full shader), followed by the `qRotateVec3` hint.
+- An error in AdditionalCode shows below that field instead.
+- Fixing the line removes the border and the message.
+
 ## Step: Vector size mismatch
 
 **Action:**
