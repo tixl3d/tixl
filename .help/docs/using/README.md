@@ -8,9 +8,10 @@ Reference and how-tos for the day-to-day work: the UI, the graph, connecting inp
 - [Audio](Audio.md) — timeline clips, routing and effects, audio-reactivity, export.
 - [Presets and snapshots](PresetsAndSnapshots.md) — variations, blending, live previews.
 - [Keyboard shortcuts](KeyboardShortcuts.md) — the default map.
+- [AI models](AiModels.md) — the Settings → AI Models page: model store, browser, setup check, engine runtimes.
 - [Pitfalls](Pitfalls.md) — alarming-looking situations like missing operators, and what to do about them.
 
-*Still to write:* dedicated pages for the **Graph window**, **Parameter window**, **Output window**, and **Settings / configuration**. These exist conceptually in [Introduction](../getting-started/Introduction.md) but aren't broken out yet.
+*Still to write:* dedicated pages for the **Graph window**, **Parameter window**, **Output window**, and the remaining **Settings** pages. These exist conceptually in [Introduction](../getting-started/Introduction.md) but aren't broken out yet.
 
 ## Working with graphs
 
@@ -51,6 +52,9 @@ Reference and how-tos for the day-to-day work: the UI, the graph, connecting inp
 
 - [TiXL for VJ and live performances](LivePerformances.md)
 - [Output Setup](OutputSetup.md) — projection mapping, multi-display and Spout / NDI outputs.
+- [Live collaboration](Collaboration.md) — several editors on one graph, over LAN or a relay.
+- [Boygrouping and show failover](BoygroupingAndFailover.md) — render nodes and redundant show machines.
+- [Startup and recovery](StartupAndRecovery.md) — startup project, start with the system, restart after a crash.
 - [Using backups](Backups.md)
 - [Sharing example projects](SharingExampleProjects.md)
 - [FAQ](FAQ.md)

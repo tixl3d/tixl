@@ -156,6 +156,7 @@ internal static class KeyActionHandling
     {
         RegisterActionsFlags(UserActions.Save, Flags.KeyPressOnly);
         RegisterActionsFlags(UserActions.Exit, Flags.KeyPressOnly);
+        RegisterActionsFlags(UserActions.OpenSettings, Flags.KeyPressOnly);
         RegisterActionsFlags(UserActions.FocusSelection, Flags.NeedsWindowHover);
         RegisterActionsFlags(UserActions.Duplicate, Flags.NeedsWindowFocus);
         RegisterActionsFlags(UserActions.DuplicateWithConnections, Flags.NeedsWindowFocus);
@@ -194,6 +195,7 @@ internal static class KeyActionHandling
         RegisterActionsFlags(UserActions.ToggleOutputSetup, Flags.KeyPressOnly);
         RegisterActionsFlags(UserActions.ToggleFocusMode, Flags.KeyPressOnly);
         RegisterActionsFlags(UserActions.FocusGraphWindow, Flags.KeyPressOnly);
+        RegisterActionsFlags(UserActions.OpenSettings, Flags.KeyPressOnly);
         RegisterActionsFlags(UserActions.DisplayImageAsBackground, Flags.KeyPressOnly);
         RegisterActionsFlags(UserActions.ClearBackgroundImage, Flags.NeedsWindowFocus);
 

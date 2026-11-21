@@ -5,8 +5,11 @@ using System.IO;
 using System.IO.Compression;
 using System.Threading.Tasks;
 using ImGuiNET;
+using T3.Core.Model;
 using T3.Core.SystemUi;
 using T3.Core.Utils;
+using T3.Editor.Collab;
+using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.Compilation;
 using T3.Editor.Gui.Help;
 using T3.Editor.Gui.Window;
@@ -35,9 +38,51 @@ internal static class ProjectsPanel
         ImGui.BeginChild("content", new Vector2(0, 0), ImGuiChildFlags.Borders, ImGuiWindowFlags.NoBackground);
         {
             ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(5, 5));
-            
+
+            // 0. Live collaboration sessions — join straight from the hub.
+            DrawCollabSessions();
+
+            // Show-control projects (boygroup deploy targets, collab downloads) get their own
+            // group so an operator sees which projects belong to the distributed show.
+            var networkKinds = new Dictionary<string, string>();
+            foreach (var (kind, folder) in NetworkProjectRegistry.All())
+                networkKinds[folder] = kind;
+
+            FormInputs.AddSectionHeader("Network projects");
+            var hasNetworkProjects = false;
             foreach (var package in EditableSymbolProject.AllProjects)
             {
+                var kind = networkKinds.GetValueOrDefault(package.Folder);
+                if (kind == null)
+                    continue;
+
+                hasNetworkProjects = true;
+                DrawProjectItem(window, package);
+                DrawNetworkBadge(kind);
+            }
+
+            foreach (var (kind, folder) in NetworkProjectRegistry.All())
+            {
+                if (EditableSymbolProject.AllProjects.Any(p => p.Folder == folder))
+                    continue;
+
+                hasNetworkProjects = true;
+                ImGui.Bullet();
+                ImGui.TextUnformatted(Path.GetFileName(folder.TrimEnd(Path.DirectorySeparatorChar)));
+                ImGui.SameLine();
+                ImGui.TextDisabled("not loaded - starts with the show");
+            }
+
+            if (!hasNetworkProjects)
+                ImGui.TextDisabled("none yet - a boygroup deploy or a collab download adds this machine's show projects here");
+
+            ImGui.Separator();
+            FormInputs.AddSectionHeader("Local projects");
+            foreach (var package in EditableSymbolProject.AllProjects)
+            {
+                if (networkKinds.ContainsKey(package.Folder))
+                    continue;
+
                 DrawProjectItem(window, package);
             }
             
@@ -70,6 +115,179 @@ internal static class ProjectsPanel
         }
         ImGui.EndChild();
         ContentPanel.End();
+    }
+
+    /// <summary>
+    /// Live collaboration sessions in the hub: your own session while hosting/connected, plus
+    /// every session announced on the LAN. Clicking a session joins it (password-protected
+    /// sessions ask for the PIN first) and opens the project it belongs to when that project
+    /// exists locally.
+    /// </summary>
+    private static void DrawCollabSessions()
+    {
+        var collab = CollabManager.Instance;
+        collab.RefreshDiscoveryFromHub();
+
+        var hasOwnSession = collab.State != CollabManager.SessionState.Off;
+        if (!hasOwnSession && collab.DiscoveredSessions.Count == 0)
+        {
+            DrawJoinPinPopup(null);
+            return;
+        }
+
+        FormInputs.AddSectionHeader("Online projects");
+
+        if (hasOwnSession)
+        {
+            var ownLabel = collab.State == CollabManager.SessionState.Hosting ? "Your session" : "Joined session";
+            DrawSessionRow("collab-own", ownLabel, collab.StatusText, null, null, isActive: true, locked: false);
+        }
+
+        var pinRequested = false;
+        foreach (var session in collab.DiscoveredSessions)
+        {
+            ImGui.PushID($"collab-{session.Address}:{session.Port}");
+            var title = string.IsNullOrEmpty(session.Name) ? $"{session.Address}:{session.Port}" : session.Name;
+            var subtitle = session.PasswordProtected ? $"{session.Address}:{session.Port}  (password protected)"
+                                                     : $"{session.Address}:{session.Port}";
+            var clicked = DrawSessionRow(title,
+                                         subtitle,
+                                         session.Project is { Length: > 0 } p ? p : null,
+                                         null,
+                                         null,
+                                         isActive: false,
+                                         locked: false);
+            if (clicked)
+            {
+                if (session.PasswordProtected)
+                {
+                    _pinSession = session; // ask first, join after confirm
+                    pinRequested = true;
+                }
+                else
+                {
+                    JoinSession(session, UserSettings.Config.CollabPassword ?? "");
+                }
+            }
+            ImGui.PopID();
+        }
+
+        // OpenPopup must run at the same id scope as BeginPopupModal — calling it inside the
+        // per-session PushID above scoped the popup to that row and the modal never opened.
+        if (pinRequested)
+            ImGui.OpenPopup(JoinPinPopupId);
+
+        DrawJoinPinPopup(null);
+
+        if (collab.State == CollabManager.SessionState.Connecting)
+        {
+            ImGui.TextDisabled(collab.StatusText);
+        }
+
+        if (!string.IsNullOrEmpty(collab.ErrorText) && collab.State != CollabManager.SessionState.Off)
+        {
+            ImGui.TextColored(UiColors.StatusWarning, collab.ErrorText);
+        }
+    }
+
+    private static CollabManager.DiscoveredSession? _pinSession;
+    private static string _pinInput = "";
+    private const string JoinPinPopupId = "Join session";
+
+    /// <summary>Modal asking for a session PIN; confirming joins the pending session.</summary>
+    private static void DrawJoinPinPopup(string? _)
+    {
+        var size = new Vector2(320, 130) * T3Ui.UiScaleFactor;
+        ImGui.SetNextWindowSize(size, ImGuiCond.Always);
+        // The id here must match the OpenPopup call exactly, or the modal never opens.
+        if (!ImGui.BeginPopupModal(JoinPinPopupId))
+            return;
+
+        var name = _pinSession == null ? "" : (string.IsNullOrEmpty(_pinSession.Name) ? $"{_pinSession.Address}" : _pinSession.Name);
+        ImGui.Text($"'{name}' is password protected.");
+        ImGui.TextDisabled("Enter the session PIN to join.");
+
+        ImGui.SetNextItemWidth(-1);
+        ImGui.InputTextWithHint("##pin", "PIN", ref _pinInput, 64, ImGuiInputTextFlags.Password | ImGuiInputTextFlags.EnterReturnsTrue);
+
+        var joinRequested = false;
+        if (ImGui.IsItemFocused() && ImGui.IsKeyPressed(ImGuiKey.Enter))
+            joinRequested = true;
+
+        ImGui.Dummy(new Vector2(4, 8) * T3Ui.UiScaleFactor);
+        if (ImGui.Button("Cancel##join-pin"))
+        {
+            _pinSession = null;
+            ImGui.CloseCurrentPopup();
+        }
+
+        ImGui.SameLine();
+        ImGui.SetKeyboardFocusHere(-1);
+        if (ImGui.Button("Join##join-pin") || joinRequested)
+        {
+            var session = _pinSession;
+            _pinSession = null;
+            ImGui.CloseCurrentPopup();
+            if (session != null)
+            {
+                UserSettings.Config.CollabPassword = _pinInput;
+                UserSettings.Save();
+                JoinSession(session, _pinInput);
+            }
+        }
+
+        ImGui.EndPopup();
+    }
+
+    /// <summary>Draws one session row. Returns true when clicked.</summary>
+    private static bool DrawSessionRow(string id, string title, string subtitle, string? detail, string? footer,
+                                       bool isActive, bool locked)
+    {
+        var dl = ImGui.GetWindowDrawList();
+        var clicked = ImGui.InvisibleButton(id, ProjectItemSize);
+        var isHovered = ImGui.IsItemHovered();
+        var background = isActive
+                             ? UiColors.StatusActivated.Fade(0.18f)
+                             : isHovered
+                                 ? UiColors.ForegroundFull.Fade(0.1f)
+                                 : UiColors.ForegroundFull.Fade(0.05f);
+
+        var min = ImGui.GetItemRectMin();
+        var max = ImGui.GetItemRectMax();
+        dl.AddRectFilled(min, max, background, 6);
+
+        var padding = 3f * T3Ui.UiScaleFactor;
+        var y = min.Y + 10f;
+        var x = min.X + 20f;
+
+        var titleText = locked ? $"{title}  🔒" : title;
+        dl.AddText(Fonts.FontBold, Fonts.FontBold.FontSize, new Vector2(x, y), UiColors.Text, titleText);
+
+        y += Fonts.FontBold.FontSize + 5;
+        if (!string.IsNullOrEmpty(subtitle))
+        {
+            dl.AddText(Fonts.FontNormal, Fonts.FontNormal.FontSize, new Vector2(x, y), UiColors.TextMuted, subtitle);
+            y += Fonts.FontNormal.FontSize + 4;
+        }
+
+        if (!string.IsNullOrEmpty(detail))
+        {
+            dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize, new Vector2(x, y), UiColors.TextMuted, detail);
+            y += Fonts.FontSmall.FontSize + 4;
+        }
+
+        if (!string.IsNullOrEmpty(footer))
+        {
+            dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize, new Vector2(x, y), UiColors.TextMuted, footer);
+        }
+
+        return clicked;
+    }
+
+    /// <summary>Joins a discovered session; the manager opens or downloads the host project.</summary>
+    private static void JoinSession(CollabManager.DiscoveredSession session, string password)
+    {
+        CollabManager.Instance.JoinDirect(session.Address, session.Port, password);
     }
 
     private static void DrawProjectTools()
@@ -268,6 +486,31 @@ internal static class ProjectsPanel
                 CoreUi.Instance.OpenWithDefaultApplication(package.Folder);
             }
 
+            // Collab: host a session that shares exactly this project (pick the project first,
+            // then share it — instead of sharing whatever happens to be focused).
+            var collab = CollabManager.Instance;
+            if (collab.State == CollabManager.SessionState.Off)
+            {
+                if (CustomComponents.DrawMenuItem(_hostSessionId, "Host Collaboration Session", reserveIconColumn: false))
+                {
+                    collab.StartHost(UserSettings.Config.CollabPort,
+                                     UserSettings.Config.CollabPassword ?? "",
+                                     UserSettings.Config.CollabLanDiscovery,
+                                     package.DisplayName);
+                    WindowManager.CollabWindow.Config.Visible = true;
+                    ImGui.CloseCurrentPopup();
+                }
+            }
+            else
+            {
+                if (CustomComponents.DrawMenuItem(_leaveSessionId, $"Leave Collaboration Session ({collab.StatusText})",
+                                                  reserveIconColumn: false))
+                {
+                    collab.Leave();
+                    ImGui.CloseCurrentPopup();
+                }
+            }
+
             if (package is EditableSymbolProject { IsBuiltIn: false } shareableProject)
             {
                 if (CustomComponents.DrawMenuItem(_shareProjectId, "Share Project...", reserveIconColumn: false))
@@ -308,6 +551,16 @@ internal static class ProjectsPanel
 
         ImGui.PopID();
         return wasOpened;
+    }
+
+    /// <summary>A small kind tag after a network project row (boygroup / collab).</summary>
+    private static void DrawNetworkBadge(string kind)
+    {
+        ImGui.SameLine();
+        var color = kind == NetworkProjectRegistry.CollabKind ? UiColors.StatusActivated : UiColors.StatusOkay;
+        ImGui.PushStyleColor(ImGuiCol.Text, color.Rgba);
+        ImGui.TextUnformatted($"[{kind}]");
+        ImGui.PopStyleColor();
     }
 
     private static void DrawArchivedItem(ProjectSetup.ArchivedProjectInfo archivedProject)
@@ -707,6 +960,8 @@ internal static class ProjectsPanel
 
     private static readonly int _revealInExplorerId = nameof(_revealInExplorerId).GetHashCode();
     private static readonly int _shareProjectId = nameof(_shareProjectId).GetHashCode();
+    private static readonly int _hostSessionId = nameof(_hostSessionId).GetHashCode();
+    private static readonly int _leaveSessionId = nameof(_leaveSessionId).GetHashCode();
     private static readonly int _restoreFromBackupId = nameof(_restoreFromBackupId).GetHashCode();
     private static readonly int _unloadProjectId = nameof(_unloadProjectId).GetHashCode();
     private static readonly int _archiveProjectId = nameof(_archiveProjectId).GetHashCode();
@@ -715,4 +970,7 @@ internal static class ProjectsPanel
     private static readonly int _revealBrokenInExplorerId = nameof(_revealBrokenInExplorerId).GetHashCode();
     private static readonly int _noBackupsFoundId = nameof(_noBackupsFoundId).GetHashCode();
     private static readonly int _backupItemBaseId = nameof(_backupItemBaseId).GetHashCode();
+
+    /// <summary>Scratch for the per-frame duplicate-folder guard; cleared, never reallocated.</summary>
+    private static readonly HashSet<string> _drawnProjectFolders = new(StringComparer.OrdinalIgnoreCase);
 }

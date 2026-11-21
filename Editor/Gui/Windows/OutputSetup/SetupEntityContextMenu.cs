@@ -4,6 +4,7 @@ using T3.Core.Output;
 using T3.Editor.Gui.Styling;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
+using T3.Editor.Show;
 
 namespace T3.Editor.Gui.Windows.OutputSetup;
 
@@ -205,6 +206,11 @@ internal static class SetupEntityContextMenu
                 if (output == null)
                     break;
 
+                // A laser output has no canvas: it streams vector content from a [LaserCamera], so
+                // patches, splits and content rotation would only create routes nothing consumes.
+                if (output.Kind == OutputDefinition.Kinds.Laser)
+                    break;
+
                 if (CustomComponents.DrawMenuItem(7, "Add Patch"))
                     SetupActions.AddPatch(selection, setup, output);
 
@@ -236,6 +242,22 @@ internal static class SetupEntityContextMenu
                 break;
 
             case SetupEntityKinds.Plug:
+                // A render node's display belongs to that machine; only its binding is offered here.
+                if (Show.BoygroupManager.Instance.TryGetRemoteDisplayPlug(id, out var remoteClient, out var remoteDisplayIndex))
+                {
+                    var remoteConfig = remoteClient.MachineConfig;
+                    var remoteBound = remoteConfig == null
+                                          ? null
+                                          : Plugs.TryGetBoundOutput(setup, remoteConfig, Plugs.DisplayPlugId(remoteDisplayIndex));
+                    if (remoteBound != null
+                        && CustomComponents.DrawMenuItem(15, $"Unbind {remoteBound.Name}"))
+                    {
+                        Show.BoygroupManager.Instance.UnbindRemoteOutput(remoteClient, remoteBound.Id, remoteDisplayIndex);
+                    }
+
+                    break;
+                }
+
                 if (!OutputSetupHandling.TryGetActiveSetup(out _, out var plugMachineConfig))
                     break;
 
@@ -248,13 +270,17 @@ internal static class SetupEntityContextMenu
                     var boundOutput = setup.FindOutput(binding.OutputId);
                     if (boundOutput != null && CustomComponents.DrawMenuItem(15, $"Unbind {SetupLabels.OutputLabel(boundOutput)}"))
                     {
-                        Plugs.UnbindOutput(plugMachineConfig, boundOutput.Id);
+                        // Per-plug: a multi-bound laser output keeps its other devices.
+                        Plugs.UnbindOutput(plugMachineConfig, boundOutput.Id, id);
                         break;
                     }
                 }
 
                 if (plugMachineConfig.FindStreamPlug(id) != null && CustomComponents.DrawMenuItem(16, "Remove stream"))
                     Plugs.RemoveStream(plugMachineConfig, id);
+
+                if (plugMachineConfig.FindLaserPlug(id) != null && CustomComponents.DrawMenuItem(19, "Remove laser"))
+                    Plugs.RemoveLaser(plugMachineConfig, id);
 
                 // Which display is which, and how they are arranged, is the OS's to answer — TiXL only lists
                 // what it finds. The row's tooltip shows the arrangement; this is where it is changed.

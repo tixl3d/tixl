@@ -100,6 +100,7 @@ internal static class FactoryKeyMap
                 new(UserActions.ToggleFocusMode, new KeyCombination(Key.F12)),
                 new(UserActions.ToggleManualTestWindow, new KeyCombination(Key.T, ctrl: true, shift: true, alt: true)),
                 new(UserActions.ToggleConsoleLogWindow, new KeyCombination(Key.L, ctrl: true, shift: true, alt: true)),
+                new(UserActions.OpenSettings, new KeyCombination(Key.Comma, ctrl: true)),
                 
                 // Rendering
                 new(UserActions.RenderAnimation, new KeyCombination(Key.R, ctrl:true, shift: true)),

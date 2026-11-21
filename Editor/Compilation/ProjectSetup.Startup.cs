@@ -287,10 +287,18 @@ internal static partial class ProjectSetup
                       .ToArray();
 
         failedProjects = [];
+        failedProjects = [];
+        var registeredFolders = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var projectInfo in projectResults)
         {
             if (projectInfo is { csProjFile: not null, success: true }&& !projectInfo.csProjFile.IsArchived)
             {
+                if (!registeredFolders.Add(projectInfo.csProjFile.Directory))
+                {
+                    Log.Debug($"Project folder '{projectInfo.csProjFile.Directory}' is registered already - skipping the duplicate");
+                    continue;
+                }
+
                 var project = new EditableSymbolProject(projectInfo.csProjFile);
                 AddToLoadedPackages(project);
             }
@@ -309,6 +317,11 @@ internal static partial class ProjectSetup
               .SelectMany(dir => Directory.EnumerateFiles(dir, "*.csproj", SearchOption.AllDirectories))
               .Where(path => !path.Contains(exportSegment, StringComparison.OrdinalIgnoreCase))
               .Select(x => new FileInfo(x))
+              // Overlapping roots (a registered directory inside another, or the same one listed
+              // twice) make AllDirectories enumerate the same project twice; two instances of one
+              // folder then collide on the hub's card IDs. One project per folder - first wins.
+              .GroupBy(x => x.DirectoryName ?? x.Name, StringComparer.OrdinalIgnoreCase)
+              .Select(g => g.First())
               .ToArray();
         
 
@@ -364,6 +377,57 @@ internal static partial class ProjectSetup
         }
     }
 
+
+    /// <summary>
+    /// Loads one project folder that appeared after startup (a project received from a collab
+    /// party): reads the csproj, compiles it if the build output is missing, and registers the
+    /// package. The caller then opens it like any other project.
+    /// </summary>
+    internal static bool TryLoadProjectFromFolder(string folder, [NotNullWhen(false)] out string? error)
+    {
+        error = null;
+        var csProjFile = Directory.Exists(folder)
+                             ? Directory.EnumerateFiles(folder, "*.csproj", SearchOption.TopDirectoryOnly).FirstOrDefault()
+                             : null;
+
+        if (csProjFile == null)
+        {
+            error = $"no .csproj in '{folder}'";
+            return false;
+        }
+
+        if (!CsProjectFile.TryLoad(new FileInfo(csProjFile), out var loadInfo))
+        {
+            error = loadInfo.Error ?? "the project file could not be read";
+            return false;
+        }
+
+        var project = loadInfo.CsProjectFile!;
+        Migrations.ProjectFormatMigration.MigrateIfNeeded(project);
+
+        if (!Directory.Exists(project.GetBuildTargetDirectory()) && !project.TryRecompile(true, out var failureLog))
+        {
+            error = failureLog;
+            return false;
+        }
+
+        try
+        {
+            var package = new EditableSymbolProject(project);
+            AddToLoadedPackages(package);
+
+            // Registering the package is not enough: symbols and their UIs are loaded by the
+            // update pass, exactly as a project compiled during a normal session does.
+            UpdateSymbolPackages(package);
+        }
+        catch (InvalidOperationException e)
+        {
+            // Already loaded (the same party project joined twice); the existing package is fine.
+            Log.Debug($"Collab: project already loaded: {e.Message}");
+        }
+
+        return true;
+    }
 
     /// <summary>
     /// Source folder of the operator packages shipped with TiXL. Release builds load these as read-only

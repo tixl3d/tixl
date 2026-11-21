@@ -104,7 +104,10 @@ internal static class NavigationSidebar
 
     /// <param name="drawHeaderTools">Optional right-aligned content drawn on the header line (e.g. a help
     /// button). The callback is responsible for its own right-alignment (e.g. <c>CustomComponents.RightAlign</c>).</param>
-    internal static void BeginContentPanel(string title, object? scrollKey = null, Action? drawHeaderTools = null)
+    /// <param name="alwaysShowScrollbar">Keeps a vertical scrollbar visible even when the content fits, so long
+    /// settings panels are discoverable and the layout doesn't shift between categories.</param>
+    internal static void BeginContentPanel(string title, object? scrollKey = null, Action? drawHeaderTools = null,
+                                           bool alwaysShowScrollbar = false)
     {
         _contentPanelScrollKey = scrollKey;
 
@@ -118,7 +121,8 @@ internal static class NavigationSidebar
         ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 8 * scale);
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(16, 12) * scale);
         ImGui.BeginChild("##contentPanel", new Vector2(-margin, -margin),
-                         ImGuiChildFlags.AlwaysUseWindowPadding | ImGuiChildFlags.Borders);
+                         ImGuiChildFlags.AlwaysUseWindowPadding | ImGuiChildFlags.Borders,
+                         alwaysShowScrollbar ? ImGuiWindowFlags.AlwaysVerticalScrollbar : ImGuiWindowFlags.None);
 
         if (!string.IsNullOrEmpty(title))
         {
@@ -146,4 +150,5 @@ internal static class NavigationSidebar
         ImGui.PopStyleVar(2);
         ImGui.PopStyleColor();
     }
+
 }

@@ -3,6 +3,7 @@ using T3.Core.Output;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
 using Vector2 = System.Numerics.Vector2;
+using T3.Editor.Show;
 
 namespace T3.Editor.Gui.Windows.OutputSetup;
 
@@ -86,6 +87,40 @@ internal static class SetupRouting
     public static void ApplyDrop(Setup setup, SetupEntityKinds dragKind, Guid dragId,
                                  SetupEntityKinds targetKind, Guid targetId, bool replacesInputs = false)
     {
+        // Laser content routes by op input, not setup data: a laser camera dropped on a laser output
+        // (either direction) writes the camera's OutputRef. It never enters the slice pipeline, so
+        // every other pairing with a camera is refused here.
+        var cameraChildId = Guid.Empty;
+        if (dragKind == SetupEntityKinds.ContentSource)
+            cameraChildId = dragId;
+        else if (targetKind == SetupEntityKinds.ContentSource)
+            cameraChildId = targetId;
+
+        if (cameraChildId != Guid.Empty && LaserContent.FindCamera(cameraChildId) is { } camera)
+        {
+            var otherKind = cameraChildId == dragId ? targetKind : dragKind;
+            var otherId = cameraChildId == dragId ? targetId : dragId;
+
+            if (otherKind == SetupEntityKinds.Output)
+            {
+                var output = setup.FindOutput(otherId);
+                if (output?.Kind == OutputDefinition.Kinds.Laser)
+                    LaserContent.SetOutputRef(camera, output.Id);
+            }
+            else if (otherKind == SetupEntityKinds.Plug)
+            {
+                // A plug stands for what it presents: dropping a camera on a laser plug routes it
+                // into the laser output bound there.
+                if (OutputSetupHandling.TryGetActiveSetup(out _, out var machineConfig)
+                    && Plugs.TryGetBoundOutput(setup, machineConfig, otherId) is { Kind: var boundKind } bound
+                    && boundKind == OutputDefinition.Kinds.Laser)
+                {
+                    LaserContent.SetOutputRef(camera, bound.Id);
+                }
+            }
+
+            return;
+        }
 
         // A plug binding is machine state, not setup state: it saves on its own and sits outside the setup's undo.
         if (dragKind == SetupEntityKinds.Plug || targetKind == SetupEntityKinds.Plug)
@@ -97,13 +132,28 @@ internal static class SetupRouting
             var otherKind = dragKind == SetupEntityKinds.Plug ? targetKind : dragKind;
             var otherId = dragKind == SetupEntityKinds.Plug ? targetId : dragId;
 
+            // A render node's display is bound on that machine: the master only sends the request.
+            if (Show.BoygroupManager.Instance.TryGetRemoteDisplayPlug(plugId, out var remoteClient, out var remoteDisplay))
+            {
+                if (otherKind == SetupEntityKinds.Output && setup.FindOutput(otherId) != null)
+                    Show.BoygroupManager.Instance.BindRemoteOutput(remoteClient, otherId, remoteDisplay);
+
+                return;
+            }
+
             if (otherKind == SetupEntityKinds.Output)
             {
-                if (setup.FindOutput(otherId) != null)
+                var output = setup.FindOutput(otherId);
+                if (output != null && PlugMatchesOutput(machineConfig, plugId, output))
                     Plugs.BindOutput(machineConfig, otherId, plugId);
 
                 return;
             }
+
+            // A laser plug presents no canvas to route content onto — its content comes from the graph
+            // ([LaserCamera] → … → the output op), so only an output may be dropped on it.
+            if (machineConfig.FindLaserPlug(plugId) != null)
+                return;
 
             // A plug stands for what it presents: dropping content or a surface on it routes into that output,
             // creating and binding one when the plug is still free — the three steps that shortcut asks for.
@@ -145,6 +195,11 @@ internal static class SetupRouting
     private static void ApplyDropInternal(Setup setup, SetupEntityKinds dragKind, Guid dragId,
                                           SetupEntityKinds targetKind, Guid targetId)
     {
+        // A laser output presents no canvas: surfaces and slices never route onto it — its frame comes
+        // from the graph, through the laser output op that references it.
+        if (IsLaserOutput(setup, dragKind, dragId) || IsLaserOutput(setup, targetKind, targetId))
+            return;
+
         // Normalize so the upstream side is always the drag and the cases below only handle one direction each.
         if (SetupEntityKindInfo.Of(dragKind).RoutingRank > SetupEntityKindInfo.Of(targetKind).RoutingRank)
         {
@@ -261,6 +316,21 @@ internal static class SetupRouting
         }
     }
 
+    private static bool IsLaserOutput(Setup setup, SetupEntityKinds kind, Guid id)
+    {
+        return kind == SetupEntityKinds.Output && setup.FindOutput(id)?.Kind == OutputDefinition.Kinds.Laser;
+    }
+
+    /// <summary>
+    /// The drop matrix's plug rule: a laser plug binds laser outputs and nothing else, and a display or
+    /// stream plug never binds a laser output — the kinds of device on either side must agree.
+    /// </summary>
+    private static bool PlugMatchesOutput(MachineConfig machineConfig, Guid plugId, OutputDefinition output)
+    {
+        var isLaserPlug = machineConfig.FindLaserPlug(plugId) != null;
+        return isLaserPlug == (output.Kind == OutputDefinition.Kinds.Laser);
+    }
+
     /// <summary>
     /// The canvas a free plug needs before anything can be routed to it: named and sized after the plug, and
     /// bound to it right away. Its creation is undoable; the binding is machine state and saves on its own, so
@@ -269,12 +339,14 @@ internal static class SetupRouting
     /// </summary>
     private static OutputDefinition? CreateOutputForPlug(Setup setup, MachineConfig machineConfig, Guid plugId)
     {
+        var isLaserPlug = machineConfig.FindLaserPlug(plugId) != null;
         OutputDefinition? created = null;
         SetupUndo.RunUndoable("Add output", setup, () =>
                                                    {
                                                        created = new OutputDefinition
                                                                      {
-                                                                         Kind = OutputDefinition.Kinds.Display,
+                                                                         Name = Plugs.PlugName(machineConfig, plugId),
+                                                                         Kind = isLaserPlug ? OutputDefinition.Kinds.Laser : OutputDefinition.Kinds.Display,
                                                                      };
                                                        setup.Outputs.Add(created);
                                                    });

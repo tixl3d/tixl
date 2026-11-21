@@ -12,6 +12,7 @@ using T3.Core.Settings;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Migrations;
 using T3.Editor.UiModel;
+using T3.Editor.UiModel.ProjectHandling;
 
 namespace T3.Editor.Compilation;
 
@@ -284,6 +285,17 @@ internal static partial class ProjectSetup
         {
             // 1. Remove from archived list
             ArchivedProjects.RemoveAll(p => p.ProjectFile == projectFile);
+
+            // A folder can only ever be loaded once: a package with the same folder being active
+            // already (the project is also discovered by the startup scan) would register twice
+            // and show two identical hub cards whose identical IDs assert ImGui.
+            if (_activePackages.Any(p => p is EditableSymbolProject ep
+                                         && string.Equals(ep.Folder, projectFile.Directory, StringComparison.OrdinalIgnoreCase)))
+            {
+                Log.Debug($"Project '{projectFile.Name}' is loaded already - not reactivating a duplicate");
+                EditorSymbolPackage.NotifySymbolStructureChange();
+                return;
+            }
 
             // 2. Initialize the project - archived projects may still use the legacy file layout
             Migrations.ProjectFormatMigration.MigrateIfNeeded(projectFile);

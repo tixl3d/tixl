@@ -9,20 +9,21 @@ internal sealed class ModifyCanvasElementsCommand : ICommand
     public bool IsUndoable => true;
 
 
-    public ModifyCanvasElementsCommand(Guid compositionSymbolId, List<ISelectableCanvasObject> selectables, ISelection nodeSelection)
+    public ModifyCanvasElementsCommand(Guid compositionSymbolId, List<ISelectableCanvasObject>? selectables, ISelection? nodeSelection)
     {
         _compositionSymbolId = compositionSymbolId;
         _nodeSelection = nodeSelection;
         StoreSelectable(selectables);
     }
 
-    private void StoreSelectable(List<ISelectableCanvasObject> selectables)
+    private void StoreSelectable(List<ISelectableCanvasObject>? selectables)
     {
-        _entries = new Entry[selectables.Count];
+        // Null when built from wire data via CreateForCollab, which fills _entries itself.
+        _entries = new Entry[selectables?.Count ?? 0];
 
         for (var i = 0; i < _entries.Length; i++)
         {
-            var selectable = selectables[i];
+            var selectable = selectables![i];
             var entry = new Entry
                             {
                                 SelectableId = selectable.Id,
@@ -56,7 +57,7 @@ internal sealed class ModifyCanvasElementsCommand : ICommand
                 
             entry.PosOnCanvas = selectable.PosOnCanvas;
             entry.Size = selectable.Size;
-            _nodeSelection.IsNodeSelected(selectable);
+            _nodeSelection?.IsNodeSelected(selectable);
         }
         
         if(_selectionContainer is SymbolUi symbolUi)
@@ -123,7 +124,7 @@ internal sealed class ModifyCanvasElementsCommand : ICommand
         return container?.GetSelectables();
     }
     
-    private sealed class Entry
+    internal sealed class Entry
     {
         public Guid SelectableId;
 
@@ -137,6 +138,35 @@ internal sealed class ModifyCanvasElementsCommand : ICommand
     private readonly ISelectionContainer? _selectionContainer;
     private Entry[] _entries = [];
     private readonly Guid _compositionSymbolId;
-    private readonly ISelection _nodeSelection;
+    private readonly ISelection? _nodeSelection;
+
+    // Read access for the collab wire encoder; does not participate in undo semantics.
+    internal Guid CompositionSymbolIdForCollab => _compositionSymbolId;
+    internal Entry[] EntriesForCollab => _entries;
+
+    /// <summary>
+    /// Builds a move command from pure wire data (collab sync). The receiving side addresses
+    /// selectables by id at Do() time; original values mirror the targets so a remote move is not
+    /// undoable locally (undo stays author-local by design).
+    /// </summary>
+    internal static ModifyCanvasElementsCommand CreateForCollab(Guid compositionSymbolId, List<(Guid Id, Vector2 Pos, Vector2 Size)> targets)
+    {
+        var command = new ModifyCanvasElementsCommand(compositionSymbolId, null, null);
+        command._entries = new Entry[targets.Count];
+        for (var index = 0; index < targets.Count; index++)
+        {
+            var target = targets[index];
+            command._entries[index] = new Entry
+                                          {
+                                              SelectableId = target.Id,
+                                              OriginalPosOnCanvas = target.Pos,
+                                              OriginalSize = target.Size,
+                                              PosOnCanvas = target.Pos,
+                                              Size = target.Size,
+                                          };
+        }
+
+        return command;
+    }
 
 }

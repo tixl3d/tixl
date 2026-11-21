@@ -502,7 +502,7 @@ internal sealed class SymbolBrowser
             if (hasExamples)
             {
                 ImGui.Dummy(new Vector2(10, 10));
-                ListExampleOperators(examplesIds);
+                ListExampleOperators(examplesIds, _selectedSymbolUi);
             }
 
             ImGui.EndChild();
@@ -533,7 +533,7 @@ internal sealed class SymbolBrowser
         return true;
     }
 
-    private static void ListExampleOperators(IEnumerable<Guid> exampleIds)
+    private static void ListExampleOperators(IEnumerable<Guid> exampleIds, SymbolUi parentUi)
     {
         ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 0.5f * ImGui.GetStyle().Alpha);
         foreach (var guid in exampleIds)
@@ -541,7 +541,7 @@ internal sealed class SymbolBrowser
             if (!SymbolUiRegistry.TryGetSymbolUi(guid, out var symbolUi))
                 return;
             
-            const string label = "Example";
+            var label = UiElements.GetExampleButtonLabel(symbolUi, parentUi);
             UiElements.DrawExampleOperator(symbolUi, label);
         }
 

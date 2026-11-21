@@ -416,7 +416,7 @@ internal sealed partial class SetupOutputView
     }
 
     /// <summary>The loaded image texture (cached per path), its pixel size synced onto the entity.</summary>
-    private Texture2D? TryGetReferenceTexture(ReferenceImage image)
+    private static Texture2D? TryGetReferenceTexture(ReferenceImage image)
     {
         if (string.IsNullOrWhiteSpace(image.FilePath))
             return null;
@@ -453,7 +453,9 @@ internal sealed partial class SetupOutputView
         return texture;
     }
 
-    private T3.Graphics.Compat.ShaderResourceView? TryGetReferenceSrv(ReferenceImage image)
+    /// <summary>Shared with the setup cards: the laser output's frame preview draws the same
+    /// venue map under its points that the board draws over its cards.</summary>
+    internal static T3.Graphics.Compat.ShaderResourceView? TryGetReferenceSrv(ReferenceImage image)
     {
         var texture = TryGetReferenceTexture(image);
         return texture == null ? null : SrvManager.GetSrvForTexture(texture);
@@ -488,6 +490,6 @@ internal sealed partial class SetupOutputView
     private static readonly Vector2[] _referencePhotoQuad = new Vector2[4];
 
     // Loaded photo textures by image id, and the context that resolves their resources.
-    private readonly Dictionary<Guid, ReferenceTextureEntry> _boardRefTextures = new();
-    private EvaluationContext? _boardContext; // resolves the image resources; created on first use
+    private static readonly Dictionary<Guid, ReferenceTextureEntry> _boardRefTextures = new();
+    private static EvaluationContext? _boardContext; // resolves the image resources; created on first use
 }

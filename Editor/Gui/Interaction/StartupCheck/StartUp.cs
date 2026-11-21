@@ -1,8 +1,8 @@
-using System.Diagnostics;
 using System.IO;
 using T3.Core.SystemUi;
 using T3.Core.Settings;
 using T3.Core.Utils;
+using T3.Editor.App.Startup;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.SystemUi;
 
@@ -18,10 +18,15 @@ public static class StartUp
     {
         WarnIfLowDiskSpace();
 
-        // Stopping a debugger during startup leaves the lock behind; that is not a failed start worth a prompt.
-        if (File.Exists(StartUpLockFilePath) && !Debugger.IsAttached)
+        if (File.Exists(StartUpLockFilePath))
         {
-            ShowLastStartupFailedMessageBox();
+            #if !DEBUG
+            // A modal dialog would leave an unattended machine stuck after a crash during startup.
+            if (CrashWatchdog.IsChildProcess)
+                Log.Warning("The previous startup did not complete; continuing because the editor is supervised.");
+            else
+                ShowLastStartupFailedMessageBox();
+            #endif
         }
 
         File.WriteAllText(StartUpLockFilePath, "Startup " + DateTime.Now);

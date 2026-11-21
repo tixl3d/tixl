@@ -41,7 +41,7 @@ public static class PlaybackUtils
         // Op-backed audio clips ([AudioClip]) with AutoPlay register themselves here, independent of
         // the AudioSource mode. Coexists with the CompositionSettings layer clips above while the
         // op-backed audio-clip system is being migrated in.
-        AudioClipCollector.RegisterAutoPlayClips(ProjectView.Focused?.CompositionInstance,
+        AudioClipCollector.RegisterAutoPlayClips(TryGetFocusedComposition(),
                                                  Playback.Current.TimeInBars,
                                                  Playback.Current.TimeInSecs);
     }
@@ -56,7 +56,7 @@ public static class PlaybackUtils
 
         // Play "loose" audio-graph sources (whose output isn't wired into any bus) through an implicit
         // default bus, so basic audio plays without an [AudioBus] op. Wired sources go through their bus.
-        AudioGraphCollector.CollectLooseSources(ProjectView.Focused?.CompositionInstance);
+        AudioGraphCollector.CollectLooseSources(TryGetFocusedComposition());
 
         if (settings.Playback.UsesBeatTapping)
         {
@@ -112,7 +112,7 @@ public static class PlaybackUtils
 
     internal static CompositionSettings FindCompositionSettings(out IResourceConsumer? owner)
     {
-        var composition = ProjectView.Focused?.CompositionInstance;
+        var composition = TryGetFocusedComposition();
 
         if (composition != null && FindCompositionSettingsForInstance(composition, out var instance, out var settings))
         {
@@ -125,6 +125,16 @@ public static class PlaybackUtils
     }
 
     /// <summary>
+    /// The focused composition, or null. Reading <c>CompositionInstance</c> resolves the instance's symbol,
+    /// which throws when that symbol is not registered yet - reachable whenever a project is created,
+    /// reopened or removed while the editor runs, and this runs every frame.
+    /// </summary>
+    private static Instance? TryGetFocusedComposition()
+    {
+        return ProjectView.Focused?.TryGetCompositionInstance();
+    }
+
+    /// <summary>
     /// Scans the current composition path and its parents for a soundtrack. Each level is asked for a
     /// main soundtrack directly (settings-list entries and op-flagged [AudioClip]s alike) — an op-provided
     /// soundtrack must be found in whichever composition holds it, independent of where (or whether)
@@ -133,10 +143,14 @@ public static class PlaybackUtils
     internal static bool TryFindingSoundtrack([NotNullWhen(true)] out AudioClipResourceHandle? soundtrack,
                                               out IResourceConsumer? composition)
     {
-        var instance = ProjectView.Focused?.CompositionInstance;
+        var instance = TryGetFocusedComposition();
         while (instance != null)
         {
-            if (instance.Symbol.CompositionSettings.TryGetMainSoundtrack(instance, out soundtrack))
+            // Same guard as the settings walk: InstanceView.Symbol throws for a composition whose symbol
+            // is not registered (a project created or removed while the editor runs), and this runs every
+            // frame. No settings here means no soundtrack at this level; keep walking to the parent.
+            if (TryGetCompositionSettings(instance, out var levelSettings)
+                && levelSettings.TryGetMainSoundtrack(instance, out soundtrack))
             {
                 composition = instance;
                 return true;
@@ -166,7 +180,22 @@ public static class PlaybackUtils
                 return false;
             }
 
-            settings = instanceWithSettings.Symbol.CompositionSettings;
+            // A composition whose symbol is not registered (a project created or removed while the
+            // editor was running, or one whose package failed to load) used to throw straight out of
+            // the render loop and kill the editor. Treat it as "no settings here" and keep walking.
+            if (!TryGetCompositionSettings(instanceWithSettings, out var candidate))
+            {
+                if (!_reportedMissingSymbol)
+                {
+                    _reportedMissingSymbol = true;
+                    Log.Warning($"No composition settings: symbol for '{instanceWithSettings}' is not registered. Using the default playback settings.");
+                }
+
+                instanceWithSettings = instanceWithSettings.Parent;
+                continue;
+            }
+
+            settings = candidate;
             if (settings.Enabled)
             {
                 return true;
@@ -175,6 +204,23 @@ public static class PlaybackUtils
             instanceWithSettings = instanceWithSettings.Parent;
         }
     }
+
+    private static bool TryGetCompositionSettings(Instance instance, [NotNullWhen(true)] out CompositionSettings? settings)
+    {
+        try
+        {
+            settings = instance.Symbol.CompositionSettings;
+            return settings != null;
+        }
+        catch (Exception)
+        {
+            // InstanceView.Symbol throws when the symbol is not in the registry.
+            settings = null;
+            return false;
+        }
+    }
+
+    private static bool _reportedMissingSymbol;
 
     private static readonly CompositionSettings _defaultCompositionSettings = new()
                                                                       {

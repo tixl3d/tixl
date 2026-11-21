@@ -892,6 +892,28 @@ internal static class FormInputs
         ImGui.PopStyleVar(2);
     }
 
+    /// <summary>
+    /// A one-line hint: text past the region edge is clipped instead of wrapped. For live readouts
+    /// whose changing length would flip a wrapped hint between one and two lines - that resizes its
+    /// auto-resized section card a frame late, which clips the next card at the panel's max scroll.
+    /// </summary>
+    public static void AddHintSingleLine(string label)
+    {
+        if (string.IsNullOrEmpty(label))
+            return;
+
+        AddVerticalSpace(5);
+        ApplyIndent();
+        ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 0.5f * ImGui.GetStyle().Alpha);
+        ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(10, 20));
+
+        AddIcon(Icon.Tip);
+
+        ImGui.SameLine();
+        ImGui.TextUnformatted(label);
+        ImGui.PopStyleVar(2);
+    }
+
     public static void AddVerticalSpace(float size = 10)
     {
         // This breaks ImGui.Indent for some reason so I commented it out and brought back the Dummy call
@@ -941,6 +963,21 @@ internal static class FormInputs
     public static void ResetWidth()
     {
         _widthRatio = 1;
+    }
+
+    /// <summary>
+    /// Caps fill-width inputs (string fields, dropdowns) at a readable column width. Settings panels use
+    /// this so a wide window doesn't stretch every row across the whole screen; parameter editors keep
+    /// their own layout.
+    /// </summary>
+    public static void PushMaxContentWidth(float unscaledWidth)
+    {
+        _maxContentWidth = unscaledWidth;
+    }
+
+    public static void PopMaxContentWidth()
+    {
+        _maxContentWidth = 0;
     }
 
     public static void DrawInputLabel(string? label)
@@ -1125,6 +1162,8 @@ internal static class FormInputs
         var sizeForTooltip = !string.IsNullOrEmpty(tooltip) ? toolWidth : 0;
 
         var requestedWidth = fillWidth ? ImGui.GetContentRegionAvail().X * _widthRatio : 200 * T3Ui.UiScaleFactor;
+        if (fillWidth && _maxContentWidth > 0)
+            requestedWidth = MathF.Min(requestedWidth, _maxContentWidth * T3Ui.UiScaleFactor);
         if (maxWidth > 0)
             requestedWidth = MathF.Min(requestedWidth, maxWidth * T3Ui.UiScaleFactor);
         var availableWidth = MathF.Min(requestedWidth, ImGui.GetContentRegionAvail().X + 20);
@@ -1229,6 +1268,7 @@ internal static class FormInputs
     private const float DefaultParameterIndent = 150;
     private static float _paramIndent = DefaultParameterIndent;
     private static float _widthRatio = 1;
+    private static float _maxContentWidth;
     private static float LeftParameterPadding => _paramIndent * T3Ui.UiScaleFactor;
     public static float ParameterSpacing => 20 * T3Ui.UiScaleFactor;
 }

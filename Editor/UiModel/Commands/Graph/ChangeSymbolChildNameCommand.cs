@@ -39,4 +39,9 @@ public sealed class ChangeSymbolChildNameCommand : ICommand
     private readonly string _originalName;
     private readonly Guid _symbolChildId;
     private readonly Guid _parentSymbolId;
+
+    // Read access for the collab wire encoder; does not participate in undo semantics.
+    internal Guid ChildIdForCollab => _symbolChildId;
+    internal Guid ParentSymbolIdForCollab => _parentSymbolId;
+    internal string OriginalNameForCollab => _originalName ?? string.Empty;
 }

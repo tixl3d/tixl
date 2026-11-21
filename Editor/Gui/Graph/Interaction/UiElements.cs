@@ -12,6 +12,26 @@ namespace T3.Editor.Gui.Interaction;
 
 internal sealed class UiElements
 {
+    /// <summary>A distinguishing caption for an example button: the example symbol's name minus
+    /// the operator's own prefix and the "Example" marker ("DepthAnythingLiveExample" → "Live").
+    /// Falls back to the full name, and to "Example" when nothing shorter survives - several
+    /// identical buttons were indistinguishable in the parameter panel.</summary>
+    public static string GetExampleButtonLabel(SymbolUi exampleUi, SymbolUi? parentUi)
+    {
+        var name = exampleUi.Symbol.Name;
+        var parentName = parentUi?.Symbol.Name;
+        if (!string.IsNullOrEmpty(parentName) && name.StartsWith(parentName, StringComparison.OrdinalIgnoreCase))
+            name = name[parentName.Length..];
+
+        if (name.EndsWith("Example", StringComparison.OrdinalIgnoreCase))
+            name = name[..^"Example".Length];
+        else if (name.StartsWith("Example", StringComparison.OrdinalIgnoreCase))
+            name = name["Example".Length..];
+
+        name = name.Trim('_', ' ', '.');
+        return name.Length > 0 ? name : "Example";
+    }
+
     public static void DrawExampleOperator(SymbolUi symbolUi, string label)
     {
         var color = symbolUi.Symbol.OutputDefinitions.Count > 0

@@ -28,8 +28,65 @@ public sealed class SdlCoreUi : ICoreSystemUiService
 
         // SDL_OpenURL wants a URL; plain paths become file:// URIs.
         var url = Uri.TryCreate(uri, UriKind.Absolute, out var parsed) ? parsed.AbsoluteUri : new Uri(Path.GetFullPath(uri)).AbsoluteUri;
+
+        // SDL_OpenURL only confirms that a portal call or an xdg-open spawn went through; on
+        // desktops where those quietly do nothing, no browser ever appears. On Linux we run the
+        // openers ourselves and check that each accepted the address, keeping SDL as last resort.
+        if (OperatingSystem.IsLinux() && TryOpenWithLinuxOpener(url))
+            return;
+
         if (!SDL_OpenURL(url))
             throw new InvalidOperationException($"Could not open \"{uri}\": {SDL_GetError()}");
+    }
+
+    private static bool TryOpenWithLinuxOpener(string url)
+    {
+        foreach (var opener in LinuxOpeners(url))
+        {
+            try
+            {
+                using var process = Process.Start(opener);
+                if (process == null)
+                    continue;
+
+                if (!process.WaitForExit(8000))
+                {
+                    try
+                    {
+                        process.Kill(entireProcessTree: true);
+                    }
+                    catch
+                    {
+                        // The opener was already gone.
+                    }
+
+                    continue;
+                }
+
+                if (process.ExitCode == 0)
+                    return true;
+            }
+            catch
+            {
+                // Opener missing or refusing to start; try the next one.
+            }
+        }
+
+        return false;
+    }
+
+    private static IEnumerable<ProcessStartInfo> LinuxOpeners(string url)
+    {
+        yield return new ProcessStartInfo("xdg-open", url) { UseShellExecute = false };
+
+        var gio = new ProcessStartInfo("gio") { UseShellExecute = false };
+        gio.ArgumentList.Add("open");
+        gio.ArgumentList.Add(url);
+        yield return gio;
+
+        yield return new ProcessStartInfo("kde-open5", url) { UseShellExecute = false };
+        yield return new ProcessStartInfo("kde-open", url) { UseShellExecute = false };
+        yield return new ProcessStartInfo("gnome-open", url) { UseShellExecute = false };
     }
 
     public void RevealInFileBrowser(string path)

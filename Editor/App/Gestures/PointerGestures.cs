@@ -43,7 +43,8 @@ internal static class PointerGestures
     /// Whether scrolling should pan the view instead of zooming it: what the setting says, or what the device
     /// last used turned out to be.
     /// </summary>
-    public static bool PansWithScroll => UserSettings.Config.UseTouchPadPanning || _lastDeviceIsPrecise;
+    public static bool PansWithScroll => UserSettings.Config.UseTouchPadPanning
+                                         || (_lastDeviceIsPrecise && Environment.TickCount64 - _lastScrollEventTicks <= PrecisionMemoryMs);
 
     internal static void SetSource(IPointerGestureSource source)
     {
@@ -54,11 +55,12 @@ internal static class PointerGestures
     /// <summary>One scroll event, in notches. Fractional on a trackpad, whole on a wheel.</summary>
     public static void ReportScroll(float notchesX, float notchesY, uint deviceId, bool ctrlHeld, ImGuiIOPtr io)
     {
+        var now = Environment.TickCount64;
+        _lastScrollEventTicks = now;
         _lastDeviceIsPrecise = ClassifyDevice(deviceId, notchesX, notchesY);
 
         // Windows trackpad drivers send a pinch as Ctrl + wheel, and for a moment afterwards further events
         // belong to that zoom rather than to panning. Where the system reports pinches this is not needed.
-        var now = Environment.TickCount64;
         var emulatesPinch = _source is not { ProvidesPinch: true };
         if (emulatesPinch && PansWithScroll && (ctrlHeld || now - _lastEmulatedZoomTicks < 80))
         {
@@ -125,7 +127,7 @@ internal static class PointerGestures
         if (_lastDeviceIsPrecise && ImGui.IsMouseDragging(ImGuiMouseButton.Right))
         {
             Log.Debug("Right-button drag: scrolling zooms the view again until a trackpad shows up.");
-            _precisionDevices.Clear();
+            _scrollDevices.Clear();
             _lastDeviceIsPrecise = false;
         }
 
@@ -181,20 +183,49 @@ internal static class PointerGestures
     }
 
     /// <summary>
-    /// Remembers what a device is once it has sent a fraction of a notch, until a right-button drag forgets it.
-    /// Wheels stay unclassified, which is the same answer as "not a trackpad".
+    /// Remembers what a device is while it is being used. A trackpad streams sub-notch deltas every frame;
+    /// a wheel sends isolated fractions - a smooth-scrolling wheel does too, and its events are far apart.
+    /// So only a rapid run of fractional events promotes a device, and an idle pause, or a whole notch,
+    /// demotes it again. Without the demotion one smooth wheel event would turn scrolling into panning
+    /// for the rest of the session.
     /// </summary>
     private static bool ClassifyDevice(uint deviceId, float notchesX, float notchesY)
     {
-        if (_precisionDevices.TryGetValue(deviceId, out var wasPrecise) && wasPrecise)
-            return true;
+        var now = Environment.TickCount64;
+        if (!_scrollDevices.TryGetValue(deviceId, out var state))
+            _scrollDevices[deviceId] = state = new ScrollDevice { LastEventTicks = now };
 
-        var isPrecise = IsFractionOfNotch(notchesX) || IsFractionOfNotch(notchesY);
-        if (isPrecise)
-            Log.Debug($"Scrolling device #{deviceId} behaves like a trackpad ({notchesX:0.###}, {notchesY:0.###} notches); two fingers pan the view.");
+        var sinceLastEvent = now - state.LastEventTicks;
+        state.LastEventTicks = now;
 
-        _precisionDevices[deviceId] = isPrecise;
-        return isPrecise;
+        if (sinceLastEvent > PrecisionMemoryMs)
+            state.IsPrecise = false;
+
+        var isFractional = IsFractionOfNotch(notchesX) || IsFractionOfNotch(notchesY);
+        if (!isFractional)
+        {
+            // Whole notches only come from a wheel.
+            state.IsPrecise = false;
+            state.RapidEvents = 0;
+            return false;
+        }
+
+        state.RapidEvents = sinceLastEvent <= RapidEventGapMs ? state.RapidEvents + 1 : 1;
+        if (state.RapidEvents < RapidEventsToPan)
+            return state.IsPrecise;
+
+        if (!state.IsPrecise)
+            Log.Debug($"Scrolling device #{deviceId} streams fractional notches ({notchesX:0.###}, {notchesY:0.###}); two fingers pan the view.");
+
+        state.IsPrecise = true;
+        return true;
+    }
+
+    private sealed class ScrollDevice
+    {
+        public bool IsPrecise;
+        public long LastEventTicks;
+        public int RapidEvents;
     }
 
     /// <summary>
@@ -228,9 +259,19 @@ internal static class PointerGestures
     /// <summary>Below this, in pixels per second, the glide stops instead of creeping.</summary>
     private const float GlideStopSpeed = 40f;
 
+    /// <summary>How long a device keeps its "trackpad" classification after its last event.</summary>
+    private const long PrecisionMemoryMs = 1000;
+
+    /// <summary>Events arriving closer than this belong to one continuous gesture.</summary>
+    private const long RapidEventGapMs = 40;
+
+    /// <summary>A trackpad streams this many sub-notch events before panning takes over.</summary>
+    private const int RapidEventsToPan = 3;
+
     private static IPointerGestureSource? _source;
-    private static readonly Dictionary<uint, bool> _precisionDevices = [];
+    private static readonly Dictionary<uint, ScrollDevice> _scrollDevices = [];
     private static bool _lastDeviceIsPrecise;
+    private static long _lastScrollEventTicks;
     private static Vector2 _scrollNotches;
     private static bool _scrolledThisFrame;
     private static Vector2 _glideVelocity;

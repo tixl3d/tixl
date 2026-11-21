@@ -283,6 +283,16 @@ internal static class SetupActions
 
     internal static void AddOutput(SetupEntitySelection selection)
     {
+        AddOutput(selection, OutputDefinition.Kinds.Projector, setup => $"P{CountProjectorOutputs(setup) + 1}");
+    }
+
+    internal static void AddLaserOutput(SetupEntitySelection selection)
+    {
+        AddOutput(selection, OutputDefinition.Kinds.Laser, setup => $"L{CountLaserOutputs(setup) + 1}");
+    }
+
+    private static void AddOutput(SetupEntitySelection selection, string kind, Func<Setup, string> nameOf)
+    {
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
             return;
 
@@ -290,9 +300,10 @@ internal static class SetupActions
                                                    {
                                                        var output = new OutputDefinition
                                                                         {
-                                                                            Name = $"P{CountProjectorOutputs(setup) + 1}",
-                                                                            Kind = OutputDefinition.Kinds.Projector,
+                                                                            Name = nameOf(setup),
+                                                                            Kind = kind,
                                                                         };
+
                                                        setup.Outputs.Add(output);
                                                        selection.Select(SetupEntityKinds.Output, output.Id);
                                                    });
@@ -846,7 +857,7 @@ internal static class SetupActions
     /// are named by the OS — see <see cref="CanRenamePlug"/>).</summary>
     internal static bool CanRename(SetupEntityKinds kind) => SetupEntityKindInfo.Of(kind).CanRename;
 
-    internal static bool CanRenamePlug(Guid plugId) => !Plugs.TryGetDisplayIndex(plugId, out _);
+    internal static bool CanRenamePlug(Guid plugId) => !Plugs.TryGetDisplayIndex(plugId, out _) && !Plugs.IsRemoteDisplay(plugId);
 
     /// <summary>Renames an entity by kind. A content source has no name of its own — renaming it renames its
     /// op (already undoable as a graph command), which flows back through the sync.</summary>
@@ -871,7 +882,7 @@ internal static class SetupActions
         if (kind == SetupEntityKinds.Plug)
         {
             if (OutputSetupHandling.TryGetActiveSetup(out _, out var machineConfig))
-                Plugs.RenameStream(machineConfig, id, newName);
+                Plugs.RenamePlug(machineConfig, id, newName);
 
             return;
         }
@@ -1097,9 +1108,11 @@ internal static class SetupActions
         }
     }
 
-    // Deleting an output cascades: drop every surface's mapping onto it, unbind the display, and stop
-    // presenting it. Surfaces left without a mapping simply have no output — not lost. (The display binding
-    // lives in the per-machine config outside the setup file, so an undo restores the output unbound.)
+    // Deleting an output cascades: drop every surface's mapping onto it, unbind the display, release
+    // cameras routed to it (their OutputRef would dangle forever — cleared so the routing sync can
+    // attach them to another laser output), and stop presenting it. Surfaces left without a mapping
+    // simply have no output — not lost. (The display binding lives in the per-machine config outside
+    // the setup file, so an undo restores the output unbound.)
     private static void DeleteOutputInternal(Setup setup, MachineConfig machineConfig, Guid outputId)
     {
         setup.Outputs.RemoveAll(o => o.Id == outputId);
@@ -1111,6 +1124,13 @@ internal static class SetupActions
         }
 
         machineConfig.Unbind(outputId);
+
+        var cameras = LaserContent.Cameras;
+        for (var i = 0; i < cameras.Count; i++)
+        {
+            if (cameras[i] is T3.Core.Operator.Instance instance && LaserContent.OutputRefOf(instance) == outputId)
+                LaserContent.SetOutputRef(instance, Guid.Empty);
+        }
     }
 
     /// <summary>The duplicate cascades, one per kind, side by side.</summary>
@@ -1348,6 +1368,18 @@ internal static class SetupActions
         foreach (var output in setup.Outputs)
         {
             if (output.Kind == OutputDefinition.Kinds.Projector)
+                count++;
+        }
+
+        return count;
+    }
+
+    private static int CountLaserOutputs(Setup setup)
+    {
+        var count = 0;
+        foreach (var output in setup.Outputs)
+        {
+            if (output.Kind == OutputDefinition.Kinds.Laser)
                 count++;
         }
 
