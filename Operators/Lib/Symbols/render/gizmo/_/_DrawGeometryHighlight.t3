@@ -63,7 +63,12 @@
           "Value": false
         }
       ],
-      "Outputs": []
+      "Outputs": [
+        {
+          "Id": "73ebf863-ba71-421c-bee7-312f13c5eff0"/*DrawLines*/,
+          "IsDisabled": true
+        }
+      ]
     },
     {
       "Id": "2d5e1e9f-358f-44bb-8608-6a5f09794eb8"/*CurvesToPoints*/,
@@ -141,7 +146,12 @@
           "Value": false
         }
       ],
-      "Outputs": []
+      "Outputs": [
+        {
+          "Id": "73ebf863-ba71-421c-bee7-312f13c5eff0"/*DrawLines*/,
+          "IsDisabled": true
+        }
+      ]
     },
     {
       "Id": "cda85f59-5fcc-436a-aacd-d7020d0e3a1c"/*DrawPoints*/,
@@ -151,7 +161,7 @@
         {
           "Id": "7acc95ad-d317-42fc-97f8-85f48d7e516f"/*EnableZTest*/,
           "Type": "System.Boolean",
-          "Value": true
+          "Value": false
         },
         {
           "Id": "814fc516-250f-4383-8f20-c2a358bbe4e1"/*EnableZWrite*/,

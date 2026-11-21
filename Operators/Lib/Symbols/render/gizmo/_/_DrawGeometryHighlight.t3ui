@@ -66,8 +66,8 @@
       "ChildId": "2d5e1e9f-358f-44bb-8608-6a5f09794eb8",
       "SymbolName": "Lib.geometry.convert.CurvesToPoints",
       "Position": {
-        "X": 80.0,
-        "Y": 5.0
+        "X": -60.0,
+        "Y": 40.0
       }
     },
     {

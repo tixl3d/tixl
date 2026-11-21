@@ -46,6 +46,14 @@
       }
     },
     {
+      "ChildId": "788e19dc-e676-4600-8375-76a79cc8b059",
+      "SymbolName": "Lib.geometry.attribute.ColorGeometry",
+      "Position": {
+        "X": -13.978088,
+        "Y": 407.25732
+      }
+    },
+    {
       "ChildId": "86aaacc7-3bdc-4c2f-ac8d-f3b561994b7b",
       "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
       "Position": {

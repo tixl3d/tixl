@@ -9,9 +9,9 @@
         "X": 0.0,
         "Y": 405.0
       },
+      "Description": "Adds a random offset per element before mapping.",
       "Min": 0.0,
-      "Max": 1.0,
-      "Description": "Adds a random offset per element before mapping."
+      "Max": 1.0
     },
     {
       "InputId": "40d43e7d-ac00-4a01-8003-0c1994c9ca9d"/*GainAndBias*/,
@@ -61,8 +61,8 @@
         "X": 0.0,
         "Y": 225.0
       },
-      "Description": "How the value is mapped onto the gradient, as in [MapPointAttributes]: Centered around the middle, FromStart, PingPong or Repeat.",
-      "GroupTitle": "Mapping"
+      "GroupTitle": "Mapping",
+      "Description": "How the value is mapped onto the gradient, as in [MapPointAttributes]: Centered around the middle, FromStart, PingPong or Repeat."
     },
     {
       "InputId": "80562710-c60c-4748-8450-1a559f63789a"/*Phase*/,
@@ -70,9 +70,9 @@
         "X": 0.0,
         "Y": 315.0
       },
+      "Description": "Shifts the gradient along the values; animate it to scroll colors.",
       "Min": -1.0,
-      "Max": 1.0,
-      "Description": "Shifts the gradient along the values; animate it to scroll colors."
+      "Max": 1.0
     },
     {
       "InputId": "aac052f7-1620-4b62-ad67-1caf37ae414f"/*Selection*/,
@@ -97,9 +97,9 @@
         "X": 0.0,
         "Y": 270.0
       },
+      "Description": "How much of the value range spans the gradient. Smaller values stretch the gradient.",
       "Min": 0.1,
-      "Max": 4.0,
-      "Description": "How much of the value range spans the gradient. Smaller values stretch the gradient."
+      "Max": 4.0
     },
     {
       "InputId": "d819c1fa-92f9-4dcb-9cfa-f31255c25d9f"/*Seed*/,

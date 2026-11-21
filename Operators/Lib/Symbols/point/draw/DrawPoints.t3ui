@@ -79,8 +79,8 @@
     {
       "InputId": "9d1361e9-8ee7-412c-9bff-6e791de324c6"/*SizeMode*/,
       "Position": {
-        "X": -200.0,
-        "Y": 100.0
+        "X": 2059.2307,
+        "Y": 4210.0303
       },
       "Description": "WorldUnits: PointSize 1 is 0.2 units across, so points shrink with distance. Pixels: PointSize is the diameter in pixels on the output, e.g. for markers that keep their size while zooming."
     },
@@ -119,20 +119,6 @@
     }
   ],
   "SymbolChildUis": [
-    {
-      "ChildId": "d8c790af-ea42-43ed-ad7b-400389deaa5a"/*RequestedResolution*/,
-      "Position": {
-        "X": 2243.4253,
-        "Y": 4226.7017
-      }
-    },
-    {
-      "ChildId": "99d49be7-ff89-462c-bf60-1405591ae5b4"/*ResolutionConstBuffer*/,
-      "Position": {
-        "X": 2443.4253,
-        "Y": 4226.7017
-      }
-    },
     {
       "ChildId": "083217bb-8b1c-4fa0-8160-06fa4560198b",
       "SymbolName": "Lib.flow.Execute",
@@ -206,8 +192,8 @@
       "ChildId": "5ce3570b-ecb6-4bbf-acff-a48a4dd45a4b",
       "SymbolName": "Lib.render.shading._.ContextCBuffers",
       "Position": {
-        "X": 2503.4253,
-        "Y": 4151.7017
+        "X": 2647.7083,
+        "Y": 4076.041
       }
     },
     {
@@ -219,8 +205,8 @@
         "Y": 23.0
       },
       "Position": {
-        "X": 2503.4253,
-        "Y": 4046.7017
+        "X": 2647.7083,
+        "Y": 3971.041
       }
     },
     {
@@ -245,8 +231,8 @@
         "Y": 536.0807
       },
       "Position": {
-        "X": 2643.4253,
-        "Y": 3976.7017
+        "X": 2787.7083,
+        "Y": 3901.041
       }
     },
     {
@@ -287,6 +273,14 @@
       "Position": {
         "X": 2199.2307,
         "Y": 4105.0303
+      }
+    },
+    {
+      "ChildId": "99d49be7-ff89-462c-bf60-1405591ae5b4",
+      "SymbolName": "Lib.render._dx11.api.ResolutionConstBuffer",
+      "Position": {
+        "X": 2443.4253,
+        "Y": 4226.7017
       }
     },
     {
@@ -351,6 +345,14 @@
       "Position": {
         "X": 2372.9258,
         "Y": 3956.7456
+      }
+    },
+    {
+      "ChildId": "d8c790af-ea42-43ed-ad7b-400389deaa5a",
+      "SymbolName": "Lib.render.utils.RequestedResolution",
+      "Position": {
+        "X": 2303.4253,
+        "Y": 4226.7017
       }
     },
     {

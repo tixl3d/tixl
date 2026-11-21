@@ -138,7 +138,13 @@ internal sealed class ColorGeometry : Instance<ColorGeometry>, IStatusProvider, 
             return;
         }
 
-        var hasSelection = CollectWeights(source, domain, selectionName, count);
+        // Mapping the selection itself: it is the input, not a mask. Blending by it again would wash the colors out to the
+        // old color (white without one) wherever the weight is below 1.
+        var mapsSelection = inputMode == InputModes.Attribute
+                            && !GeometryAttributeChoices.IsAll(selectionName)
+                            && string.Equals(string.IsNullOrWhiteSpace(selectionName) ? GeometryAttributeNames.Selection : selectionName,
+                                             attributeName, StringComparison.OrdinalIgnoreCase);
+        var hasSelection = !mapsSelection && CollectWeights(source, domain, selectionName, count);
 
         if (_colors == null || _colors.Domain != domain || _colors.Values.Length != count)
             _colors = new GeometryAttribute<Vector4>(GeometryAttributeNames.Color, domain, count);
