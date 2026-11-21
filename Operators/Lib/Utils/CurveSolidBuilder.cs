@@ -71,6 +71,9 @@ internal sealed class CurveSolidBuilder
     public void Begin()
     {
         LatticeIssue = null;
+        _pointSources.Clear();
+        _primitiveSources.Clear();
+        _carriesAttributes = false;
         _positions.Clear();
         _corners.Clear();
         _normals.Clear();
@@ -117,6 +120,9 @@ internal sealed class CurveSolidBuilder
             }
         }
 
+        if (_carriesAttributes && _pointSources.Count == pointCount && _primitiveSources.Count == primitiveCount)
+            CarryAttributes(source, target);
+
         // Part attributes of the source (glyph indices etc.) apply 1:1 to the output parts and are shared as they are
         for (var index = 0; index < source.Attributes.Count; index++)
         {
@@ -133,8 +139,14 @@ internal sealed class CurveSolidBuilder
                           WindingRule windingRule, bool keepCurves, Vector3 pivot, int id, int seed)
     {
         var partStart = _faceOffsets.Count - 1;
+        var pointStart = _positions.Count;
+        _carriesAttributes = HasAttributesToCarry(geometry);
+        _samples.Clear();
         BuildFaces(geometry, curveViews, primitiveStart, primitiveEnd, tolerance, depth, bevel, bevelSegments, weight, flatShading, smoothAngle,
                    front, back, sides, windingRule);
+        if (_carriesAttributes)
+            MapToSamples(pointStart, partStart);
+
         if (keepCurves)
             AppendCurves(geometry, curveViews, primitiveStart, primitiveEnd);
 
@@ -156,6 +168,9 @@ internal sealed class CurveSolidBuilder
             for (var index = 0; index < curve.VertexCount; index++)
             {
                 var position = curve.GetPosition(index);
+                if (_carriesAttributes)
+                    _pointSources.Add(new PointSource(curve.GetPointIndex(index), curve.GetPointIndex(index), 0));
+
                 _curvePointHandles.Add((_positions.Count, curve.GetHandleInPosition(index) - position, curve.GetHandleOutPosition(index) - position));
                 _corners.Add(_positions.Count);
                 _normals.Add(Vector3.Zero);
@@ -164,10 +179,370 @@ internal sealed class CurveSolidBuilder
 
             _faceOffsets.Add(_corners.Count);
             _isSide.Add(0);
+            if (_carriesAttributes)
+                _primitiveSources.Add(primitive);
+
             _kinds.Add(PrimitiveKinds.Curve);
             _closed.Add(curve.IsClosed);
         }
     }
+
+    /// <summary>
+    /// Point and primitive attributes of the curves are carried over: each output point blends the two curve points of
+    /// the segment its nearest flattened sample lies on, wall faces copy their curve's primitive attributes, caps get
+    /// zero. Handles, normals and IsSide are written by the builder itself.
+    /// </summary>
+    private void CarryAttributes(Geometry source, Geometry target)
+    {
+        _pointStencil.Clear();
+        foreach (var pointSource in _pointSources)
+        {
+            _pointStencil.Begin();
+            if (pointSource.A < 0)
+                continue;
+
+            var w = pointSource.W;
+            PushPair(pointSource.A, pointSource.B, pointSource.T, 1 - w);
+            if (w > 0)
+                PushPair(pointSource.C, pointSource.D, pointSource.U, w);
+        }
+
+        _primitiveStencil.Clear();
+        foreach (var primitive in _primitiveSources)
+        {
+            if (primitive >= 0)
+                _primitiveStencil.AddCopy(primitive);
+            else
+                _primitiveStencil.Begin();
+        }
+
+        _pointStencil.Apply(source.Attributes, target.Attributes, AttributeDomain.Point, _builderPointAttributes);
+        _primitiveStencil.Apply(source.Attributes, target.Attributes, AttributeDomain.Primitive, _builderPrimitiveAttributes);
+    }
+
+    private void PushPair(int a, int b, float t, float weight)
+    {
+        _pointStencil.Push(a, (1 - t) * weight);
+        if (t > 0)
+            _pointStencil.Push(b, t * weight);
+    }
+
+    /** Only point and primitive attributes besides the ones the builder writes are carried; without any the bookkeeping is skipped. */
+    private static bool HasAttributesToCarry(Geometry geometry)
+    {
+        for (var index = 0; index < geometry.Attributes.Count; index++)
+        {
+            var attribute = geometry.Attributes[index];
+            if (attribute.Domain == AttributeDomain.Primitive && !IsBuilderAttribute(attribute.Name, _builderPrimitiveAttributes))
+                return true;
+
+            if (attribute.Domain == AttributeDomain.Point && !IsBuilderAttribute(attribute.Name, _builderPointAttributes))
+                return true;
+        }
+
+        return false;
+    }
+
+    private static bool IsBuilderAttribute(string name, string[] names)
+    {
+        foreach (var builderName in names)
+        {
+            if (string.Equals(name, builderName, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// The flattened samples of one curve with the curve points of their segment and their position along it (by
+    /// length), split at the samples that are exactly the curve's points.
+    /// </summary>
+    private void RecordSamples(CurveView curve, int primitive)
+    {
+        var sampleCount = _scratch.Count;
+        var vertexCount = curve.VertexCount;
+        if (sampleCount == 0 || vertexCount == 0)
+            return;
+
+        var firstSample = _samples.Count;
+        var segmentStart = 0;
+        for (var segment = 0; segment < curve.SegmentCount && segmentStart < sampleCount; segment++)
+        {
+            var endVertex = (segment + 1) % vertexCount;
+            var isClosingSegment = segment == curve.SegmentCount - 1 && curve.IsClosed;
+            var segmentEnd = sampleCount;
+            if (!isClosingSegment)
+            {
+                var endPosition = curve.GetPosition(endVertex);
+                for (var k = segmentStart + 1; k < sampleCount; k++)
+                {
+                    if (_scratch[k] != endPosition)
+                        continue;
+
+                    segmentEnd = k;
+                    break;
+                }
+            }
+
+            // Length along the segment up to its end (the next curve point, or the first sample when closing)
+            var endSample = segmentEnd < sampleCount ? _scratch[segmentEnd] : _scratch[0];
+            var total = 0f;
+            for (var k = segmentStart; k < segmentEnd; k++)
+                total += Vector3.Distance(_scratch[k], k + 1 < segmentEnd ? _scratch[k + 1] : endSample);
+
+            var a = curve.GetPointIndex(segment);
+            var b = curve.GetPointIndex(endVertex);
+            var length = 0f;
+            for (var k = segmentStart; k < segmentEnd; k++)
+            {
+                _samples.Add(new Sample(new Vector2(_scratch[k].X, _scratch[k].Y), a, b, total > 1e-9f ? length / total : 0, primitive));
+                length += Vector3.Distance(_scratch[k], k + 1 < segmentEnd ? _scratch[k + 1] : endSample);
+            }
+
+            segmentStart = segmentEnd;
+        }
+
+        // An open curve ends on its last point
+        if (!curve.IsClosed && segmentStart < sampleCount)
+        {
+            var last = curve.GetPointIndex(vertexCount - 1);
+            _samples.Add(new Sample(new Vector2(_scratch[^1].X, _scratch[^1].Y), last, last, 0, primitive));
+        }
+
+        // Link the samples along the curve for projecting and scanning
+        var end = _samples.Count;
+        for (var index = firstSample; index < end; index++)
+        {
+            var next = index + 1 < end ? index + 1 : curve.IsClosed ? firstSample : -1;
+            _samples[index] = _samples[index] with { Next = next };
+        }
+    }
+
+    /** Every point and wall face of the part takes the source of its nearest sample, found through a coarse grid. */
+    private void MapToSamples(int pointStart, int faceStart)
+    {
+        BuildSegmentGrid();
+        for (var point = pointStart; point < _positions.Count; point++)
+        {
+            // Lattice points clipped onto the outline are cap points too, but lie on it: they take the outline's value
+            var position = new Vector2(_positions[point].X, _positions[point].Y);
+            var onOutline = ProjectOntoOutline(position, out var distanceSquared);
+            _pointSources.Add(_interiorCapPoints.Contains(point) && distanceSquared > OnOutlineDistanceSquared ? ScanAcross(position) : onOutline);
+        }
+
+        _interiorCapPoints.Clear();
+
+        for (var face = faceStart; face < _faceOffsets.Count - 1; face++)
+        {
+            if (_isSide[face] <= 0)
+            {
+                _primitiveSources.Add(-1);
+                continue;
+            }
+
+            var first = _positions[_corners[_faceOffsets[face]]];
+            var segment = FindNearestSegment(new Vector2(first.X, first.Y), out _, out _);
+            _primitiveSources.Add(segment >= 0 ? _samples[segment].Primitive : -1);
+        }
+    }
+
+    /** The outline position closest to the point, on the nearest segment between two consecutive samples. */
+    private PointSource ProjectOntoOutline(Vector2 position) => ProjectOntoOutline(position, out _);
+
+    private PointSource ProjectOntoOutline(Vector2 position, out float distanceSquared)
+    {
+        var segment = FindNearestSegment(position, out var u, out distanceSquared);
+        if (segment < 0)
+            return new PointSource(-1, -1, 0);
+
+        var next = _samples[segment].Next;
+        return next < 0 ? _samples[segment].Source : GetSourceBetween(segment, next, u);
+    }
+
+    /// <summary>
+    /// For a point inside a cap: the outline to its left and right on a horizontal line, blended by distance, so values
+    /// that change across a letter (a selection, a gradient) continue smoothly through the cap. Falls back to the
+    /// nearest outline position when the line finds only one side.
+    /// </summary>
+    private PointSource ScanAcross(Vector2 position)
+    {
+        var left = new PointSource(-1, -1, 0);
+        var right = left;
+        float leftX = float.MinValue, rightX = float.MaxValue;
+        for (var index = 0; index < _samples.Count; index++)
+        {
+            var next = _samples[index].Next;
+            if (next < 0)
+                continue;
+
+            var a = _samples[index].Position;
+            var b = _samples[next].Position;
+            if ((a.Y - position.Y) * (b.Y - position.Y) > 0 || MathF.Abs(b.Y - a.Y) < 1e-12f)
+                continue;
+
+            var u = (position.Y - a.Y) / (b.Y - a.Y);
+            var x = a.X + (b.X - a.X) * u;
+            if (x <= position.X && x > leftX)
+            {
+                leftX = x;
+                left = GetSourceBetween(index, next, u);
+            }
+            else if (x > position.X && x < rightX)
+            {
+                rightX = x;
+                right = GetSourceBetween(index, next, u);
+            }
+        }
+
+        if (left.A < 0 || right.A < 0)
+            return ProjectOntoOutline(position);
+
+        var w = (position.X - leftX) / MathF.Max(rightX - leftX, 1e-9f);
+        return PointSource.Blend(left, right, w);
+    }
+
+    /// <summary>
+    /// The curve position at <paramref name="u"/> between two consecutive samples, as a single segment position: both
+    /// usually lie on one segment, or the second starts the next segment (then it is the first segment's end).
+    /// </summary>
+    private PointSource GetSourceBetween(int from, int to, float u)
+    {
+        var a = _samples[from];
+        var b = _samples[to];
+        if (a.A == b.A && a.B == b.B)
+            return new PointSource(a.A, a.B, a.T + (b.T - a.T) * u);
+
+        if (b.T == 0 && b.A == a.B)
+            return new PointSource(a.A, a.B, a.T + (1 - a.T) * u);
+
+        return u < 0.5f ? a.Source : b.Source;
+    }
+
+    /// <summary>
+    /// Every segment from a sample to its next one is listed in the grid cells its bounds overlap; a sample without a
+    /// next one (the end of an open curve) as a point. Long straight segments have only two samples, so searching
+    /// segments rather than samples is what finds the closest outline position.
+    /// </summary>
+    private void BuildSegmentGrid()
+    {
+        foreach (var list in _segmentGrid.Values)
+            list.Clear();
+
+        if (_samples.Count == 0)
+            return;
+
+        var min = new Vector2(float.MaxValue);
+        var max = new Vector2(float.MinValue);
+        foreach (var sample in _samples)
+        {
+            min = Vector2.Min(min, sample.Position);
+            max = Vector2.Max(max, sample.Position);
+        }
+
+        var extent = max - min;
+        _segmentCellSize = MathF.Max(MathF.Max(extent.X, extent.Y) / MathF.Max(1, MathF.Sqrt(_samples.Count)), 1e-5f);
+        for (var index = 0; index < _samples.Count; index++)
+        {
+            var a = _samples[index].Position;
+            var next = _samples[index].Next;
+            var b = next >= 0 ? _samples[next].Position : a;
+            var (x0, y0) = SegmentCell(Vector2.Min(a, b));
+            var (x1, y1) = SegmentCell(Vector2.Max(a, b));
+            for (var y = y0; y <= y1; y++)
+            {
+                for (var x = x0; x <= x1; x++)
+                {
+                    if (!_segmentGrid.TryGetValue((x, y), out var list))
+                    {
+                        list = [];
+                        _segmentGrid[(x, y)] = list;
+                    }
+
+                    list.Add(index);
+                }
+            }
+        }
+    }
+
+    private (long, long) SegmentCell(Vector2 position)
+    {
+        return ((long)MathF.Floor(position.X / _segmentCellSize), (long)MathF.Floor(position.Y / _segmentCellSize));
+    }
+
+    /** Searches rings of grid cells outwards until no closer segment can exist; returns its first sample and the position along it. */
+    private int FindNearestSegment(Vector2 position, out float bestU, out float bestDistance)
+    {
+        bestU = 0;
+        bestDistance = float.MaxValue;
+        if (_samples.Count == 0)
+            return -1;
+
+        var (cx, cy) = SegmentCell(position);
+        var best = -1;
+        for (var ring = 0; ring < 4096; ring++)
+        {
+            for (var dy = -ring; dy <= ring; dy++)
+            {
+                for (var dx = -ring; dx <= ring; dx++)
+                {
+                    if (Math.Max(Math.Abs(dx), Math.Abs(dy)) != ring || !_segmentGrid.TryGetValue((cx + dx, cy + dy), out var list))
+                        continue;
+
+                    foreach (var index in list)
+                    {
+                        var a = _samples[index].Position;
+                        var next = _samples[index].Next;
+                        var segment = next >= 0 ? _samples[next].Position - a : Vector2.Zero;
+                        var lengthSquared = segment.LengthSquared();
+                        var u = lengthSquared > 1e-14f ? Math.Clamp(Vector2.Dot(position - a, segment) / lengthSquared, 0, 1) : 0;
+                        var distance = Vector2.DistanceSquared(a + segment * u, position);
+                        if (distance >= bestDistance)
+                            continue;
+
+                        bestDistance = distance;
+                        bestU = u;
+                        best = index;
+                    }
+                }
+            }
+
+            // Segments not met yet lie entirely in cells at least ring cells away
+            var reach = ring * _segmentCellSize;
+            if (best >= 0 && reach * reach >= bestDistance)
+                break;
+        }
+
+        return best;
+    }
+
+    private readonly record struct Sample(Vector2 Position, int A, int B, float T, int Primitive, int Next = -1)
+    {
+        public PointSource Source => new(A, B, T);
+    }
+
+    /// <summary>A blend of two positions on the curves: lerp(lerp(A, B, T), lerp(C, D, U), W); A &lt; 0 means no source.</summary>
+    private readonly record struct PointSource(int A, int B, float T, int C, int D, float U, float W)
+    {
+        public PointSource(int a, int b, float t) : this(a, b, t, a, b, t, 0) { }
+
+        public static PointSource Blend(PointSource first, PointSource second, float w) => new(first.A, first.B, first.T, second.A, second.B, second.T, w);
+    }
+
+    private static readonly string[] _builderPointAttributes = [GeometryAttributeNames.HandleIn, GeometryAttributeNames.HandleOut, GeometryAttributeNames.Normal];
+    private static readonly string[] _builderPrimitiveAttributes = [GeometryAttributeNames.IsSide];
+
+    private const float OnOutlineDistanceSquared = 1e-5f * 1e-5f;
+
+    private bool _carriesAttributes;
+    private readonly HashSet<int> _interiorCapPoints = [];
+    private readonly List<Sample> _samples = [];
+    private readonly List<PointSource> _pointSources = [];
+    private readonly List<int> _primitiveSources = [];
+    private readonly Dictionary<(long, long), List<int>> _segmentGrid = [];
+    private float _segmentCellSize = 1;
+    private readonly GeometryAttributeStencil _pointStencil = new();
+    private readonly GeometryAttributeStencil _primitiveStencil = new();
 
     /** Faces are added without a kind; everything up to <paramref name="primitiveCount"/> not yet tagged is a closed polygon. */
     private void PadPolygonKinds(int primitiveCount)
@@ -193,6 +568,8 @@ internal sealed class CurveSolidBuilder
             var loop = new List<Vector2>();
             _scratch.Clear();
             curveViews[primitive].Flatten(tolerance, _scratch);
+            if (_carriesAttributes)
+                RecordSamples(curveViews[primitive], primitive);
             foreach (var p in _scratch)
             {
                 if (loop.Count == 0 || Vector2.DistanceSquared(loop[^1], new Vector2(p.X, p.Y)) > 1e-12f)
@@ -708,6 +1085,8 @@ internal sealed class CurveSolidBuilder
 
         var added = AddPoint(new Vector3(position.X, position.Y, z));
         _capPointLookup[key] = added;
+        if (_carriesAttributes)
+            _interiorCapPoints.Add(added);
         return added;
     }
 
