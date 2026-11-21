@@ -1,0 +1,73 @@
+{
+  "FormatVersion": 3,
+  "Id": "f2bfa791-4d84-4a9c-921b-e88b9cf52c1f"/*UnwrapGeometry*/,
+  "Description": "Generates UV coordinates by splitting the polygons of a Geometry into charts at sharp angles and unfolding each chart flat. Curve primitives pass through unchanged.\n\nFaces join a chart while their normal stays within AngleThreshold of the chart's seed face, so bevel strips and other smooth regions stay together and hard edges split into separate islands. Each chart is unfolded by laying its faces flat across their shared edges, then all islands are scaled uniformly and packed into 0..1.\n\nIn Text mode, the IsSide attribute from [ExtrudeCurves] separates flat caps from walls and bevels. The UV space is split into three horizontal bands: back-facing caps on top, front-facing caps in the middle, walls and bevels at the bottom. The cap groups keep their text layout, so the middle band reads like the original text while the top band shows it mirrored from behind. Each side loop is cut at a single edge and unrolled into a vertical stripe in the bottom band.\n\nExisting UVs in the target channel are replaced; the other channel is preserved.\n\nAKA: UV Unwrap, Atlas, Lightmap UVs\n\nTips: For hard-surface models, 45-60 degrees usually keeps faces and their bevels together without flattening rounded corners. Lower AngleThreshold to split curved regions into flatter islands. Increase Padding if islands bleed into each other at their borders. Very curved charts can fold over themselves; split them with a lower threshold.",
+  "InputUis": [
+    {
+      "InputId": "0d02f9db-b6c4-452c-8bea-76924f303495"/*ToTexCoord2*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 180.0
+      },
+      "Description": "Writes the generated UVs to TexCoord2 and keeps the existing TexCoord."
+    },
+    {
+      "InputId": "10b6e1ae-8f18-4c8a-a1fb-e10cbb64e7c7"/*AngleThreshold*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 90.0
+      },
+      "Description": "Maximum angle in degrees between the normals of faces that share a chart. Lower values create more, flatter islands; higher values keep curved regions together.",
+      "Min": 0.0,
+      "Max": 90.0,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "1941f12c-d792-4cd8-8372-e58e20b489e2"/*Mode*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      },
+      "Description": "Default unfolds every face the same way. Text splits the UV space into three bands: back caps on top, front caps in the middle, and one vertical side stripe per loop at the bottom, using the IsSide attribute."
+    },
+    {
+      "InputId": "257dfc13-8dba-4f90-bcc0-39e140a82fb8"/*Geometry*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "865a12a4-e5ac-4e9c-98ed-b4bfe3d615c9"/*Padding*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 135.0
+      },
+      "Description": "Gap between packed UV islands, in UV units. Prevents texture bleeding at island borders.",
+      "Min": 0.0,
+      "Max": 0.05,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "cf58c803-e7d0-4867-8ccf-38e1968de225"/*Async*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 225.0
+      },
+      "Description": "Computes the unwrap on a background thread. The previous result stays visible until the new one is ready."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "62b96028-0b4e-4040-a3c5-931d7bb747a7"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

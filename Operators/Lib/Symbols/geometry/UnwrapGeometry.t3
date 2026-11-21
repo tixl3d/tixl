@@ -1,0 +1,32 @@
+{
+  "FormatVersion": 3,
+  "Id": "f2bfa791-4d84-4a9c-921b-e88b9cf52c1f"/*UnwrapGeometry*/,
+  "Inputs": [
+    {
+      "Id": "0d02f9db-b6c4-452c-8bea-76924f303495"/*ToTexCoord2*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "10b6e1ae-8f18-4c8a-a1fb-e10cbb64e7c7"/*AngleThreshold*/,
+      "DefaultValue": 60.0
+    },
+    {
+      "Id": "1941f12c-d792-4cd8-8372-e58e20b489e2"/*Mode*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "257dfc13-8dba-4f90-bcc0-39e140a82fb8"/*Geometry*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "865a12a4-e5ac-4e9c-98ed-b4bfe3d615c9"/*Padding*/,
+      "DefaultValue": 0.01
+    },
+    {
+      "Id": "cf58c803-e7d0-4867-8ccf-38e1968de225"/*Async*/,
+      "DefaultValue": true
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}
