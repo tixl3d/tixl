@@ -1,7 +1,7 @@
-{
+﻿{
   "FormatVersion": 3,
   "Id": "12345678-90ab-cdef-1234-567890abcdef"/*ObjectDetection*/,
-  "Description": "Detects objects in an image using MediaPipe Object Detection.\n\nThis operator uses MediaPipe Object Detection task to detect objects in the input image. It outputs detected objects as a buffer of points (bounding box corners) and a dictionary of object data.\n\nInputs:\n- InputTexture: The image to process.\n- Enabled: Enables or disables object detection.\n- MaxObjects: Maximum number of objects to detect.\n- MinDetectionConfidence: Minimum confidence score for an object to be detected.\n- Model: Selects the object detection model to use.\n- Debug: Enables debug visualization with debug texture output.\n- CategoryAllowlist: Comma-separated list of category names to allow (e.g. \"person, cup\").\n- CategoryDenylist: Comma-separated list of category names to deny (e.g. \"person, cup\").\n- CorrectAspectRatio: Whether to correct aspect ratio for non-square inputs.\n- ZScale: Scale factor for Z coordinate of points.\n\nOutputs:\n- OutputTexture: The input texture (passed through).\n- DebugTexture: Debug visualization texture showing bounding boxes and labels when Debug is enabled.\n- ObjectCount: The number of objects detected.\n- UpdateCount: Increments each time a new frame is processed.\n- PointBuffer: A structured buffer containing points for detected objects (bounding box corners).\n- ObjectData: A dictionary containing detailed data for each detected object (bounding box coordinates, category name, confidence score).\n- ActiveCategories: A list of currently active detection categories.",
+  "Description": "Detects objects in an image using MediaPipe Object Detection.\n\nThis operator uses MediaPipe Object Detection task to detect objects in the input image. It outputs detected objects as a buffer of points (bounding box corners) and a dictionary of object data.\n\nInputs:\n- InputTexture: The image to process.\n- Enabled: Enables or disables object detection.\n- MaxObjects: Maximum number of objects to detect.\n- MinDetectionConfidence: Minimum confidence score for an object to be detected.\n- Model: Selects the object detection model to use.\n- Debug: Enables debug visualization with debug texture output.\n- CategoryAllowlist: Comma-separated list of category names to allow (e.g. \"person, cup\").\n- CategoryDenylist: Comma-separated list of category names to deny (e.g. \"person, cup\").\n- CorrectAspectRatio: Whether to correct aspect ratio for non-square inputs.\n- ZScale: Scale factor for Z coordinate of points.\n\nOutputs:\n- OutputTexture: The input texture (passed through).\n- DebugTexture: Debug visualization texture showing bounding boxes and labels when Debug is enabled.\n- ObjectCount: The number of objects detected.\n- UpdateCount: Increments each time a new frame is processed.\n- PointBuffer: A structured buffer containing points for detected objects (bounding box corners).\n- ObjectData: A dictionary containing detailed data for each detected object (bounding box coordinates, category name, confidence score).\n- ActiveCategories: A list of currently active detection categories.\n\nAcceleration selects the inference delegate: Cpu, Xnnpack (multithreaded CPU, the fast default) or Gpu. Gpu needs a native build with the OpenGL delegate (Linux here) and otherwise falls back to Cpu; InferenceThreads sets the Xnnpack worker-thread count (0 = library default).",
   "InputUis": [
     {
       "InputId": "0abcdef1-2345-6789-0abc-def123456789"/*CorrectAspectRatio*/,
@@ -76,6 +76,24 @@
       },
       "Description": "Comma-separated list of category names to deny (e.g. \"person, cup\").",
       "Usage": "Default"
+    },
+    {
+      "InputId": "a1b2c3d4-0006-4a9b-8c2d-101010101010"/*Acceleration*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 750.0
+      },
+      "Description": "Inference acceleration: Cpu = plain single-threaded TF Lite (works everywhere), Xnnpack = multithreaded CPU (the fast default), Gpu = OpenGL/EGL delegate (Linux; the Windows/macOS natives are CPU-only and fall back to Cpu)."
+    },
+    {
+      "InputId": "a1b2c3d4-1006-4a9b-8c2d-101010101010"/*InferenceThreads*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 825.0
+      },
+      "Min": 0,
+      "Max": 16,
+      "Description": "Xnnpack worker threads (default 4; 0 = library default, which is effectively single-threaded). Lower it to 2 when several MediaPipe operators run at once. Ignored by Cpu and Gpu."
     },
     {
       "InputId": "abcdef12-3456-7890-abcd-ef1234567890"/*ZScale*/,

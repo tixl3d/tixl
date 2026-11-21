@@ -1,4 +1,4 @@
-using OpenCvSharp;
+﻿using OpenCvSharp;
 using T3.Graphics.Compat;
 #nullable enable
 
@@ -30,9 +30,19 @@ namespace Lib.io.video.mediapipe
     }
 
     [Guid("A1B2C3D4-E5F6-4798-89AB-CDEF12345679")]
-    [ExportDependencies("mediapipe_c.dll", "OpenCvSharpExtern.dll", "Emgu.CV.dll", "cvextern.dll", "OpenGL.Net.dll", "CppSharp.Runtime.dll", "Google.Protobuf.dll")]
+    [ExportDependencies("mediapipe_c.dll", "libmediapipe_c.so", "libmediapipe_c.dylib", "libmediapipe_opencl_stub.dylib", "OpenCvSharpExtern.dll", "libOpenCvSharpExtern.so", "libOpenCvSharpExtern.dylib", "Emgu.CV.dll", "cvextern.dll", "OpenGL.Net.dll", "CppSharp.Runtime.dll", "Google.Protobuf.dll")]
     public class FaceDetection : Instance<FaceDetection>
     {
+        private const int MaxInferenceWidth = 640;
+        private const int MaxCachedStagingTextures = 4;
+        private const int MaxPooledBuffers = 4;
+
+        private static readonly int MaxDownscaleThreads = Math.Clamp(Environment.ProcessorCount, 1, 8);
+
+        /// <summary>Xnnpack worker threads used when the InferenceThreads input keeps its default.
+        /// See <see cref="MediaPipeInferenceTuning"/> for why the binding's 0 is a bad default.</summary>
+        private const int DefaultInferenceThreads = MediaPipeInferenceTuning.DefaultThreads;
+
         [Output(Guid = "B2C3D4E5-F6A7-489A-9B0C-DEF123456790", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
         public readonly Slot<Texture2D> OutputTexture = new();
 
@@ -63,6 +73,12 @@ namespace Lib.io.video.mediapipe
 
         private void Update(EvaluationContext context)
         {
+            // The host can evaluate an instance after it has been disposed (hot reload, package
+            // unload races). Starting a worker here would leak its native task and its thread for the
+            // process lifetime, because Dispose has already run.
+            if (_disposed)
+                return;
+
             var inputTexture = InputTexture.GetValue(context);
             var enabled = Enabled.GetValue(context);
             var showDetections = ShowDetections.GetValue(context);
@@ -80,16 +96,34 @@ namespace Lib.io.video.mediapipe
             if (!enabled || inputTexture == null || inputTexture.IsDisposed)
             {
                 OutputTexture.Value = inputTexture!;
-                StopWorker(debug);
+                StopWorker();
                 ClearOutputs();
                 return;
             }
 
             OutputTexture.Value = inputTexture;
 
-            if (_processingTask == null || _processingTask.IsCompleted || _faceDetector == null ||
-                maxFaces != _activeMaxFaces || Math.Abs(confidenceThreshold - _activeConfidenceThreshold) > 0.001f)
+            var acceleration = Acceleration.GetValue(context);
+            var inferenceThreads = InferenceThreads.GetValue(context);
+            var parametersChanged = maxFaces != _activeMaxFaces
+                                    || Math.Abs(confidenceThreshold - _activeConfidenceThreshold) > 0.001f
+                                    || acceleration != _activeAcceleration
+                                    || inferenceThreads != _activeInferenceThreads;
+            if (parametersChanged)
+                _initAttempts = 0;
+
+            var initializing = _faceDetector is null && _processingTask is { IsCompleted: false };
+            var initNeeded = !initializing && (_processingTask == null || _processingTask.IsCompleted || _faceDetector is null || parametersChanged);
+            var retryDelayMs = MediaPipeInitRetry.BackoffMs(_initAttempts);
+            var retryBlocked = _faceDetector == null && _initAttempts > 0
+                               && Environment.TickCount64 - _lastInitAttemptTicks < retryDelayMs;
+
+            if (initNeeded && !retryBlocked)
             {
+                _activeAcceleration = acceleration;
+                _activeInferenceThreads = inferenceThreads;
+                _lastInitAttemptTicks = Environment.TickCount64;
+                _initAttempts++;
                 InitializeWorker(maxFaces, confidenceThreshold, debug);
             }
 
@@ -99,7 +133,7 @@ namespace Lib.io.video.mediapipe
                 return;
             }
 
-            if (_inputQueue.Count < 1)
+            if (_inputQueue.IsEmpty && !_workerBusy)
             {
                 var request = CreateRequestFromTexture(inputTexture, confidenceThreshold, maxFaces, correctAspectRatio, zScale);
                 if (request != null)
@@ -110,22 +144,30 @@ namespace Lib.io.video.mediapipe
 
             while (_outputQueue.TryDequeue(out var result))
             {
-                if (result.FaceCount > 0)
+                if (_currentResult != null)
                 {
-                    _currentResult = result;
+                    ReturnPointArrayToPool(_currentResult.Detections);
                 }
+
+                // Assign every packet, including an empty one. Keeping the last non-empty result
+                // latched the outputs onto the last face/hand/pose ever seen instead of reporting
+                // that it left the frame - and made the count-zero paths unreachable.
+                _currentResult = result;
             }
 
             if (_currentResult != null)
             {
                 UpdateOutputsWithResult(_currentResult, showDetections, showKeypoints, detectionSize, detectionColor, keypointColor, useCombinedAiOutput, debug);
-                
+                UpdateCount.Value++;
+
                 if (debug)
                 {
                     using var mat = Texture2DToMat(inputTexture);
                     if (!mat.Empty())
                     {
-                        DrawDebugVisuals(mat, _currentResult);
+                        // The stored coordinates carry the conversion-time aspect factor in X - invert
+                        // it with the same value, or boxes land compressed on non-square images.
+                        DrawDebugVisuals(mat, _currentResult, correctAspectRatio ? (float)mat.Width / mat.Height : 1.0f);
                         UpdateDebugTextureFromMat(mat);
                     }
                 }
@@ -144,7 +186,11 @@ namespace Lib.io.video.mediapipe
             PointBuffer.Value = null!;
             FaceData.Value = new Dict<float>(0f);
             FaceCount.Value = 0;
-            _currentResult = null;
+            if (_currentResult != null)
+            {
+                ReturnPointArrayToPool(_currentResult.Detections);
+                _currentResult = null;
+            }
             DebugTexture.Value = null!;
         }
 
@@ -153,110 +199,147 @@ namespace Lib.io.video.mediapipe
         private long _frameTimestamp;
         private readonly object _faceDetectorLock = new object();
         private readonly object _timestampLock = new object();
-        
+
         private Task? _processingTask;
+        private volatile bool _workerBusy;
+        private long _lastInitAttemptTicks;
+        private int _initAttempts;
         private CancellationTokenSource? _cancellationTokenSource;
         private readonly ConcurrentQueue<FaceDetectionRequest> _inputQueue = new();
         private readonly ConcurrentQueue<FaceDetectionResultPacket> _outputQueue = new();
         private FaceDetectionResultPacket? _currentResult;
         private int _activeMaxFaces = -1;
+        private MediaPipeAcceleration? _activeAcceleration;
+        private int _activeInferenceThreads = -1;
         private float _activeConfidenceThreshold = -1f;
+        private volatile bool _disposed;
         private readonly object _workerLock = new object();
-        
-        private readonly ConcurrentDictionary<(int width, int height), T3.Graphics.Compat.Texture2D> _cachedStagingTextures = new();
+        private readonly MediaPipeWorkerReaper _reaper = new();
+
+        private readonly ConcurrentDictionary<(int width, int height, T3.Graphics.Format format), T3.Graphics.Compat.Texture2D> _cachedStagingTextures = new();
+
         private readonly object _textureCacheLock = new object();
-        
-        private readonly ConcurrentBag<Mat> _matPool = new();
+
         private readonly ConcurrentBag<byte[]> _bufferPool = new();
         private readonly ConcurrentDictionary<int, ConcurrentBag<Point[]>> _pointArrayPool = new();
         private readonly object _poolLock = new object();
 
         #endregion
-        
+
         #region Worker Thread
         private void InitializeWorker(int maxFaces, float confidence, bool debug)
         {
-            StopWorker(debug);
+            StopWorker();
             _activeMaxFaces = maxFaces;
             _activeConfidenceThreshold = confidence;
 
+            // Registry lookup only - the native detector creation runs on the worker below.
+            var modelFound = MediaPipeModelResolver.TryResolve("blaze_face_short_range.tflite", this, out var fullPath);
+            if (!modelFound)
+            {
+                // Not Debug-gated: a missing asset is the one failure a user has to fix, and the retry
+                // backoff in Update keeps this to one message per backoff window instead of one per frame.
+                Log.Warning($"[FaceDetection] Model not found: {fullPath}", this);
+                return;
+            }
+
+            var acceleration = _activeAcceleration ?? MediaPipeAcceleration.Cpu;
+            var inferenceThreads = _activeInferenceThreads;
+
+            _cancellationTokenSource = new CancellationTokenSource();
+            var token = _cancellationTokenSource.Token;
+            _processingTask = Task.Run(() => InitializeAndRunWorker(fullPath, acceleration, inferenceThreads, maxFaces, token, debug), token);
+        }
+
+        private void InitializeAndRunWorker(string fullPath, MediaPipeAcceleration acceleration, int inferenceThreads, int maxFaces, CancellationToken token, bool debug)
+        {
+            Mediapipe.Tasks.Vision.FaceDetector.FaceDetector? detector = null;
             try
             {
-                lock (_workerLock)
+                var delegateCase = acceleration == MediaPipeAcceleration.Xnnpack ? Mediapipe.Tasks.Core.CoreBaseOptions.Delegate.Xnnpack
+                    : acceleration == MediaPipeAcceleration.Gpu ? Mediapipe.Tasks.Core.CoreBaseOptions.Delegate.GPU
+                    : Mediapipe.Tasks.Core.CoreBaseOptions.Delegate.CPU;
+
+                FaceDetectorOptions BuildOptions(Mediapipe.Tasks.Core.CoreBaseOptions.Delegate selected) => new(
+                    new Mediapipe.Tasks.Core.CoreBaseOptions(modelAssetPath: fullPath, delegateCase: selected, numThreads: inferenceThreads),
+                    VisionRunningMode.VIDEO,
+                    minDetectionConfidence: 0.5f,
+                    minSuppressionThreshold: 0.3f
+                );
+
+                try
                 {
-                    var modelFound = AssetRegistry.TryResolveAddress("Mediapipe:blaze_face_short_range.tflite", this, out var fullPath, out _);
-                    
-                    // string modelPath = "../../../../Operators/Mediapipe/Resources/blaze_face_short_range.tflite";
-                    // string fullPath = System.IO.Path.GetFullPath(modelPath);
-                    //
-                    // string[] possibleModelPaths = {
-                    //     fullPath,
-                    //     System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "mediapipe", "blaze_face_short_range.tflite"),
-                    //     System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "blaze_face_short_range.tflite"),
-                    //     System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Models", "blaze_face_short_range.tflite"),
-                    //     System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "Models", "blaze_face_short_range.tflite"),
-                    //     "../../Mediapipe-Sharp/src/Mediapipe/Models/blaze_face_short_range.tflite"
-                    // };
-                    
-                    // bool modelFound = false;
-                    // foreach (string path in possibleModelPaths)
-                    // {
-                    //     if (System.IO.File.Exists(path))
-                    //     {
-                    //         fullPath = System.IO.Path.GetFullPath(path);
-                    //         modelFound = true;
-                    //         break;
-                    //     }
-                    // }
-                    
-                    if (!modelFound)
-                    {
-                        if (debug) Log.Error($"[FaceDetection] Model not found: {fullPath}", this);
-                        return;
-                    }
-
-                    var baseOptions = new Mediapipe.Tasks.Core.CoreBaseOptions(
-                        modelAssetPath: fullPath,
-                        delegateCase: Mediapipe.Tasks.Core.CoreBaseOptions.Delegate.CPU
-                    );
-
-                    FaceDetectorOptions options = new(
-                        baseOptions,
-                        VisionRunningMode.VIDEO,
-                        minDetectionConfidence: 0.5f,
-                        minSuppressionThreshold: 0.3f
-                    );
-
-                    lock (_faceDetectorLock)
-                    {
-                        _faceDetector = Mediapipe.Tasks.Vision.FaceDetector.FaceDetector.CreateFromOptions(options);
-                    }
-                    _cancellationTokenSource = new CancellationTokenSource();
-                    var token = _cancellationTokenSource.Token;
-                    _processingTask = Task.Run(() => WorkerLoop(token, debug), token);
+                    detector = Mediapipe.Tasks.Vision.FaceDetector.FaceDetector.CreateFromOptions(BuildOptions(delegateCase));
                 }
+                catch (Exception gpuEx) when (acceleration != MediaPipeAcceleration.Cpu)
+                {
+                    Log.Warning($"[FaceDetection] GPU acceleration not available ({gpuEx.Message}) - using CPU.", this);
+                    detector = Mediapipe.Tasks.Vision.FaceDetector.FaceDetector.CreateFromOptions(BuildOptions(Mediapipe.Tasks.Core.CoreBaseOptions.Delegate.CPU));
+                }
+
+                if (detector == null)
+                    return;
+
+                var published = false;
+                lock (_faceDetectorLock)
+                {
+                    if (!token.IsCancellationRequested)
+                    {
+                        _faceDetector = detector;
+                        published = true;
+                    }
+                }
+
+                if (!published)
+                {
+                    try { MediaPipeWorkerReaper.CloseNative(detector); } catch { }
+                    return;
+                }
+
+                // A later failure starts its backoff from the first step again rather than from wherever
+                // the previous outage ended.
+                _initAttempts = 0;
+
+                // The worker loop owns this instance; StopWorker closes it only after this task exits.
+                WorkerLoop(token, detector, debug);
             }
             catch (Exception ex)
             {
-                if (debug) Log.Error($"[FaceDetection] Init Failed: {ex.Message}", this);
-                lock (_faceDetectorLock)
+                // Warning, not Debug-gated: this is the path a missing native library, a rejected
+                // delegate or an unreadable model takes, and "nothing happens" without a log is the
+                // worst possible failure mode. The retry backoff limits it to one message per window.
+                Log.Warning($"[FaceDetection] Initialization failed: {ex.Message}", this);
+                if (detector != null)
                 {
-                    _faceDetector = null;
+                    try { MediaPipeWorkerReaper.CloseNative(detector); } catch { }
+                    lock (_faceDetectorLock)
+                    {
+                        if (ReferenceEquals(_faceDetector, detector))
+                            _faceDetector = null;
+                    }
                 }
             }
         }
-
-        private void WorkerLoop(CancellationToken token, bool debug)
+        private void WorkerLoop(CancellationToken token, Mediapipe.Tasks.Vision.FaceDetector.FaceDetector detector, bool debug)
         {
             while (!token.IsCancellationRequested)
             {
                 if (_inputQueue.TryDequeue(out var request))
                 {
+                    // Whatever piled up while the previous inference ran is stale by now - only the
+                    // newest frame is worth its latency, the rest goes straight back to the pool.
+                    while (_inputQueue.TryDequeue(out var newer))
+                    {
+                        ReturnBufferToPool(request.PixelData);
+                        request = newer;
+                    }
+
                     try
                     {
-                        if (_faceDetector != null && request.PixelData != null)
+                        if (request.PixelData != null)
                         {
-                            ProcessFrame(request, debug);
+                            _workerBusy = true;
+                            ProcessFrame(request, detector, debug);
                         }
                     }
                     catch (Exception ex)
@@ -265,6 +348,7 @@ namespace Lib.io.video.mediapipe
                     }
                     finally
                     {
+                        _workerBusy = false;
                         ReturnBufferToPool(request.PixelData);
                     }
                 }
@@ -275,17 +359,11 @@ namespace Lib.io.video.mediapipe
             }
         }
 
-        private void ProcessFrame(FaceDetectionRequest request, bool debug)
+        private void ProcessFrame(FaceDetectionRequest request, Mediapipe.Tasks.Vision.FaceDetector.FaceDetector detector, bool debug)
         {
-            using var image = new Image(Mediapipe.ImageFormat.Types.Format.Srgb, request.Width, request.Height, request.Width * 3, request.PixelData!);
-            
-            Mediapipe.Tasks.Vision.FaceDetector.FaceDetector? detector;
-            lock (_faceDetectorLock)
-            {
-                detector = _faceDetector;
-            }
-            
-            var result = detector?.DetectForVideo(image, request.Timestamp);
+            using var image = new Image(Mediapipe.ImageFormat.Types.Format.Srgba, request.Width, request.Height, request.Width * 4, request.PixelData!);
+
+            var result = detector.DetectForVideo(image, request.Timestamp);
 
             if (result is { } validResult && validResult.Detections != null && validResult.Detections.Count > 0)
             {
@@ -312,12 +390,34 @@ namespace Lib.io.video.mediapipe
         {
             if (result.Detections == null) return null;
 
-            var points = new List<Point>();
-
             float aspectRatio = correctAspectRatio ? (float)imageWidth / imageHeight : 1.0f;
 
             try
             {
+                // Count the valid faces first so the array can come from the pool - the
+                // result-replacement path in Update returns it, keeping rentals and returns balanced.
+                var validFaces = 0;
+                foreach (var detection in result.Detections)
+                {
+                    if (validFaces >= maxFaces) break;
+
+                    float confidence = 0f;
+                    if (detection.Categories?.Count > 0)
+                    {
+                        confidence = detection.Categories[0].Score;
+                    }
+
+                    if (confidence >= confidenceThreshold
+                        && detection.BoundingBox.Right > detection.BoundingBox.Left
+                        && detection.BoundingBox.Bottom > detection.BoundingBox.Top)
+                    {
+                        validFaces++;
+                    }
+                }
+                if (validFaces == 0) return null;
+
+                var points = GetPointArray(validFaces * 10);
+                int pointIndex = 0;
                 int detectedFaces = 0;
                 foreach (var detection in result.Detections)
                 {
@@ -328,7 +428,7 @@ namespace Lib.io.video.mediapipe
                     {
                         confidence = detection.Categories[0].Score;
                     }
-                    
+
                     if (confidence < confidenceThreshold)
                     {
                         continue;
@@ -337,8 +437,8 @@ namespace Lib.io.video.mediapipe
                     if (detection.BoundingBox.Right > detection.BoundingBox.Left && detection.BoundingBox.Bottom > detection.BoundingBox.Top)
                     {
                         var bbox = detection.BoundingBox;
-                        
-                        var bboxPoint1 = new Point
+
+                        points[pointIndex++] = new Point
                         {
                             Position = new Vector3(((float)bbox.Left / imageWidth * 2.0f - 1.0f) * aspectRatio, 1.0f - (float)bbox.Top / imageHeight * 2.0f, 0),
                             F1 = detectedFaces * 10 + 0,
@@ -347,9 +447,7 @@ namespace Lib.io.video.mediapipe
                             Scale = Vector3.One,
                             Orientation = Quaternion.Identity
                         };
-                        points.Add(bboxPoint1);
-                        
-                        var bboxPoint2 = new Point
+                        points[pointIndex++] = new Point
                         {
                             Position = new Vector3(((float)bbox.Right / imageWidth * 2.0f - 1.0f) * aspectRatio, 1.0f - (float)bbox.Top / imageHeight * 2.0f, 0),
                             F1 = detectedFaces * 10 + 1,
@@ -358,9 +456,7 @@ namespace Lib.io.video.mediapipe
                             Scale = Vector3.One,
                             Orientation = Quaternion.Identity
                         };
-                        points.Add(bboxPoint2);
-                        
-                        var bboxPoint3 = new Point
+                        points[pointIndex++] = new Point
                         {
                             Position = new Vector3(((float)bbox.Right / imageWidth * 2.0f - 1.0f) * aspectRatio, 1.0f - (float)bbox.Bottom / imageHeight * 2.0f, 0),
                             F1 = detectedFaces * 10 + 2,
@@ -369,9 +465,7 @@ namespace Lib.io.video.mediapipe
                             Scale = Vector3.One,
                             Orientation = Quaternion.Identity
                         };
-                        points.Add(bboxPoint3);
-                        
-                        var bboxPoint4 = new Point
+                        points[pointIndex++] = new Point
                         {
                             Position = new Vector3(((float)bbox.Left / imageWidth * 2.0f - 1.0f) * aspectRatio, 1.0f - (float)bbox.Bottom / imageHeight * 2.0f, 0),
                             F1 = detectedFaces * 10 + 3,
@@ -380,14 +474,13 @@ namespace Lib.io.video.mediapipe
                             Scale = Vector3.One,
                             Orientation = Quaternion.Identity
                         };
-                        points.Add(bboxPoint4);
-                        
+
                         if (detection.Keypoints != null && detection.Keypoints.Count >= 6)
                         {
                             for (int i = 0; i < 6; i++)
                             {
                                 var keypoint = detection.Keypoints[i];
-                                var keypointPoint = new Point
+                                points[pointIndex++] = new Point
                                 {
                                     Position = new Vector3((keypoint.X * 2.0f - 1.0f) * aspectRatio, 1.0f - keypoint.Y * 2.0f, 0),
                                     F1 = detectedFaces * 10 + 4 + i,
@@ -396,7 +489,6 @@ namespace Lib.io.video.mediapipe
                                     Scale = Vector3.One,
                                     Orientation = Quaternion.Identity
                                 };
-                                points.Add(keypointPoint);
                             }
                         }
                         else
@@ -405,7 +497,7 @@ namespace Lib.io.video.mediapipe
                             var centerY = bbox.Top + (bbox.Bottom - bbox.Top) * 0.5f;
                             for (int i = 0; i < 6; i++)
                             {
-                                var placeholderPoint = new Point
+                                points[pointIndex++] = new Point
                                 {
                                     Position = new Vector3((centerX / imageWidth * 2.0f - 1.0f) * aspectRatio, 1.0f - centerY / imageHeight * 2.0f, 0),
                                     F1 = detectedFaces * 10 + 4 + i,
@@ -414,15 +506,14 @@ namespace Lib.io.video.mediapipe
                                     Scale = Vector3.One,
                                     Orientation = Quaternion.Identity
                                 };
-                                points.Add(placeholderPoint);
                             }
                         }
-                    }
 
-                    detectedFaces++;
+                        detectedFaces++;
+                    }
                 }
 
-                return points.Count > 0 ? points.ToArray() : null;
+                return pointIndex > 0 ? points : null;
             }
             catch (Exception ex)
             {
@@ -435,7 +526,7 @@ namespace Lib.io.video.mediapipe
         {
             var dict = new Dict<float>(0f);
             int detectedFaces = 0;
-            
+
             foreach (var detection in result.Detections)
             {
                 if (detectedFaces >= maxFaces) break;
@@ -445,7 +536,7 @@ namespace Lib.io.video.mediapipe
                 {
                     confidence = detection.Categories[0].Score;
                 }
-                
+
                 if (confidence < confidenceThreshold)
                 {
                     continue;
@@ -453,7 +544,7 @@ namespace Lib.io.video.mediapipe
 
                 var faceIndex = detectedFaces;
                 dict[$"face_{faceIndex}_confidence"] = confidence;
-                
+
                 if (detection.BoundingBox.Right > detection.BoundingBox.Left && detection.BoundingBox.Bottom > detection.BoundingBox.Top)
                 {
                     var bbox = detection.BoundingBox;
@@ -462,7 +553,7 @@ namespace Lib.io.video.mediapipe
                     dict[$"face_{faceIndex}_bbox_width"] = (float)(bbox.Right - bbox.Left) / width;
                     dict[$"face_{faceIndex}_bbox_height"] = (float)(bbox.Bottom - bbox.Top) / height;
                 }
-                
+
                 if (detection.Keypoints != null && detection.Keypoints.Count >= 6)
                 {
                     for (int i = 0; i < 6; i++)
@@ -476,48 +567,44 @@ namespace Lib.io.video.mediapipe
 
                 detectedFaces++;
             }
-            
+
             return dict;
         }
 
-        private void StopWorker(bool debug)
+        private void StopWorker()
         {
             lock (_workerLock)
             {
-                _cancellationTokenSource?.Cancel();
-                try
+                var cancellation = _cancellationTokenSource;
+                _cancellationTokenSource = null;
+                cancellation?.Cancel();
+
+                var task = _processingTask;
+                _processingTask = null;
+
+                Mediapipe.Tasks.Vision.FaceDetector.FaceDetector? detector;
+                lock (_faceDetectorLock)
                 {
-                    if (_processingTask != null && !_processingTask.IsCompleted)
-                    {
-                        if (!_processingTask.Wait(1000))
-                        {
-                            if (debug) Log.Warning("[FaceDetection] THREAD SAFETY: Worker task did not complete within timeout", this);
-                        }
-                    }
+                    detector = _faceDetector;
+                    _faceDetector = null;
                 }
-                catch (Exception ex)
+
+                // DetectForVideo cannot be interrupted and runs on the worker outside every lock, so the
+                // native instance may only be closed after that task has fully exited - closing it earlier
+                // is a use-after-free in native code. The reaper waits on the thread pool, so the
+                // evaluation thread never blocks on an in-flight inference.
+                _reaper.Queue(task, detector, cancellation);
+
+                while (_inputQueue.TryDequeue(out var pendingRequest))
                 {
-                    if (debug) Log.Error($"[FaceDetection] THREAD SAFETY: Error waiting for worker task: {ex.Message}", this);
+                    ReturnBufferToPool(pendingRequest.PixelData);
                 }
-                
-                try
+
+                // Results that were in flight when the worker stopped still own rented arrays.
+                while (_outputQueue.TryDequeue(out var staleResult))
                 {
-                    lock (_faceDetectorLock)
-                    {
-                        _faceDetector?.Close();
-                        _faceDetector = null;
-                    }
+                    ReturnPointArrayToPool(staleResult.Detections);
                 }
-                catch (Exception ex)
-                {
-                    if (debug) Log.Error($"[FaceDetection] RESOURCE MANAGEMENT: Error closing FaceDetector: {ex.Message}", this);
-                }
-                
-                while (_inputQueue.TryDequeue(out var req))
-                {
-                    ReturnBufferToPool(req.PixelData);
-                }
-                while (_outputQueue.TryDequeue(out _)) { }
             }
         }
     #endregion Worker Thread
@@ -525,20 +612,20 @@ namespace Lib.io.video.mediapipe
         #region Memory Management
         private T3.Graphics.Compat.Texture2D GetOrCreateStagingTexture(int width, int height, T3.Graphics.Format format)
         {
-            var key = (width, height);
-            
+            var key = (width, height, format);
+
             if (_cachedStagingTextures.TryGetValue(key, out var cachedTexture))
             {
                 return cachedTexture;
             }
-            
+
             lock (_textureCacheLock)
             {
                 if (_cachedStagingTextures.TryGetValue(key, out cachedTexture))
                 {
                     return cachedTexture;
                 }
-                
+
                 var device = ResourceManager.Device;
                 var newTexture = new T3.Graphics.Compat.Texture2D(device, new Texture2DDescription
                 {
@@ -547,47 +634,41 @@ namespace Lib.io.video.mediapipe
                     Usage = ResourceUsage.Staging, BindFlags = BindFlags.None,
                     CpuAccessFlags = CpuAccessFlags.Read, OptionFlags = ResourceOptionFlags.None
                 });
-                
+
+                // A resized window or a switched camera produces a new size per step, so an uncapped
+                // cache would keep one full-resolution staging texture per distinct size for the life of
+                // the operator. Drop the older ones; only the current size is reused frame to frame.
+                if (_cachedStagingTextures.Count >= MaxCachedStagingTextures)
+                {
+                    foreach (var stale in _cachedStagingTextures)
+                    {
+                        stale.Value?.Dispose();
+                    }
+                    _cachedStagingTextures.Clear();
+                }
+
                 _cachedStagingTextures[key] = newTexture;
                 return newTexture;
             }
         }
-        
-        private Mat GetMat(int rows, int cols, MatType type)
-        {
-            if (_matPool.TryTake(out var mat))
-            {
-                if (mat.Rows == rows && mat.Cols == cols && mat.Type() == type)
-                {
-                    return mat;
-                }
-                else
-                {
-                    mat.Dispose();
-                }
-            }
-            return new Mat(rows, cols, type);
-        }
-        
-        private void ReturnMatToPool(Mat? mat)
-        {
-            if (mat != null && !mat.IsDisposed)
-            {
-                _matPool.Add(mat);
-            }
-        }
-        
+
         private byte[] GetBuffer(int size)
         {
             if (_bufferPool.TryTake(out var b) && b.Length == size) return b;
-            return new byte[size];
+
+            // Pinned on the POH: the native Image keeps this pointer and reads it during
+            // DetectForVideo, after the wrapper's own pin over the constructor has been released.
+            return GC.AllocateUninitializedArray<byte>(size, pinned: true);
         }
 
         private void ReturnBufferToPool(byte[]? b)
         {
-            if (b != null) _bufferPool.Add(b);
+            // Bounded: the buffer is pinned for its whole life, so a camera or window change that alters
+            // the inference size must not leave one permanently-pinned array per historic size behind.
+            if (b != null && _bufferPool.Count < MaxPooledBuffers)
+                _bufferPool.Add(b);
         }
-        
+
         private Point[] GetPointArray(int size)
         {
             if (!_pointArrayPool.TryGetValue(size, out var pool))
@@ -601,18 +682,20 @@ namespace Lib.io.video.mediapipe
                     }
                 }
             }
-            
+
             if (pool.TryTake(out var arr))
             {
                 return arr;
             }
-            
+
             return new Point[size];
         }
-        
+
         private void ReturnPointArrayToPool(Point[]? arr)
         {
-            if (arr != null)
+            // Empty results carry the shared Array.Empty instance, never rented - pooling it would add
+            // one entry per face-less inference without bound.
+            if (arr is { Length: > 0 })
             {
                 var size = arr.Length;
                 if (!_pointArrayPool.TryGetValue(size, out var pool))
@@ -632,67 +715,37 @@ namespace Lib.io.video.mediapipe
 
         private FaceDetectionRequest? CreateRequestFromTexture(Texture2D texture, float confidenceThreshold, int maxFaces, bool correctAspectRatio, float zScale)
         {
-            var device = ResourceManager.Device;
             var desc = texture.Description;
-            int width = desc.Width;
-            int height = desc.Height;
 
-            var stagingTexture = GetOrCreateStagingTexture(width, height, desc.Format);
-
-            device.ImmediateContext.CopyResource(texture, stagingTexture);
-            var dataBox = device.ImmediateContext.MapSubresource(stagingTexture, 0, MapMode.Read, MapFlags.None);
-            
-            if (dataBox.DataPointer == IntPtr.Zero)
+            // One readback per evaluation frame serves every MediaPipe operator reading this texture: the
+            // mapped copy costs ~2 ms at 1080p and barely less at 640 px, so seven operators on one camera
+            // would otherwise pay it seven times for byte-identical pixels.
+            if (!MediaPipeFrameCache.TryGet(texture, MaxInferenceWidth, 4, out var frame,
+                                            out var inferenceWidth, out var inferenceHeight, out var readbackError))
             {
-                device.ImmediateContext.UnmapSubresource(stagingTexture, 0);
+                Log.Debug($"[FaceDetection] Texture readback failed: {readbackError}", this);
                 return null;
             }
 
-            try
-            {
-                byte[] buffer = GetBuffer(width * height * 3);
-                unsafe
-                {
-                    IntPtr srcPtr = dataBox.DataPointer;
-                    int rowPitch = dataBox.RowPitch;
-                    
-                    fixed (byte* dst = buffer)
-                    {
-                        IntPtr dstPtr = (IntPtr)dst;
-                        Parallel.For(0, height, y =>
-                        {
-                            byte* rowSrc = (byte*)srcPtr + (y * rowPitch);
-                            byte* rowDst = (byte*)dstPtr + (y * width * 3);
-                            
-                            for (int x = 0; x < width; x++)
-                            {
-                                rowDst[x * 3] = rowSrc[x * 4 + 2];     // R
-                                rowDst[x * 3 + 1] = rowSrc[x * 4 + 1]; // G
-                                rowDst[x * 3 + 2] = rowSrc[x * 4];     // B
-                            }
-                        });
-                    }
-                }
+            // The cached array is shared and read-only for this frame; the worker still gets its own pooled
+            // copy because the native Image keeps that pointer for the duration of the inference.
+            byte[] buffer = GetBuffer(frame.Length);
+            System.Buffer.BlockCopy(frame, 0, buffer, 0, frame.Length);
 
-                long ts;
-                lock(_timestampLock) { ts = _frameTimestamp; _frameTimestamp += 33333; }
+            long ts;
+            lock(_timestampLock) { ts = _frameTimestamp; _frameTimestamp += 33; }
 
-                return new FaceDetectionRequest 
-                { 
-                    PixelData = buffer, 
-                    Width = width, 
-                    Height = height, 
-                    Timestamp = ts,
-                    ConfidenceThreshold = confidenceThreshold,
-                    MaxFaces = maxFaces,
-                    CorrectAspectRatio = correctAspectRatio,
-                    ZScale = zScale
-                };
-            }
-            finally
+            return new FaceDetectionRequest
             {
-                device.ImmediateContext.UnmapSubresource(stagingTexture, 0);
-            }
+                PixelData = buffer,
+                Width = inferenceWidth,
+                Height = inferenceHeight,
+                Timestamp = ts,
+                ConfidenceThreshold = confidenceThreshold,
+                MaxFaces = maxFaces,
+                CorrectAspectRatio = correctAspectRatio,
+                ZScale = zScale
+            };
         }
         #endregion Memory Management
 
@@ -719,36 +772,36 @@ namespace Lib.io.video.mediapipe
             }
         }
 
-        private void DrawDebugVisuals(Mat mat, FaceDetectionResultPacket result)
+        private void DrawDebugVisuals(Mat mat, FaceDetectionResultPacket result, float aspectRatio)
         {
             if (result.Detections == null || result.Detections.Length == 0) return;
-            
+
             var bboxColor = new Scalar(0, 255, 0, 255);
             var keypointColor = new Scalar(255, 0, 255, 255);
             var textColor = new Scalar(255, 255, 255, 255);
-            
+
             int faceCount = result.FaceCount;
-            
+
             for (int faceIndex = 0; faceIndex < faceCount; faceIndex++)
             {
                 int baseIdx = faceIndex * 10;
                 if (baseIdx + 3 >= result.Detections.Length) continue;
-                
+
                 var p1 = result.Detections[baseIdx];
                 var p2 = result.Detections[baseIdx + 1];
                 var p3 = result.Detections[baseIdx + 2];
                 var p4 = result.Detections[baseIdx + 3];
-                
-                int x1 = (int)((p1.Position.X + 1.0f) / 2.0f * mat.Width);
+
+                int x1 = (int)((p1.Position.X / aspectRatio + 1.0f) / 2.0f * mat.Width);
                 int y1 = (int)((1.0f - p1.Position.Y) / 2.0f * mat.Height);
-                int x2 = (int)((p3.Position.X + 1.0f) / 2.0f * mat.Width);
+                int x2 = (int)((p3.Position.X / aspectRatio + 1.0f) / 2.0f * mat.Width);
                 int y2 = (int)((1.0f - p3.Position.Y) / 2.0f * mat.Height);
-                
+
                 int width = x2 - x1;
                 int height = y2 - y1;
-                
+
                 Cv2.Rectangle(mat, new OpenCvSharp.Rect(x1, y1, width, height), bboxColor, 2);
-                
+
                 float confidence = p1.F2;
                 var scoreText = $"{confidence:F2}";
                 var textSize = Cv2.GetTextSize(scoreText, HersheyFonts.HersheySimplex, 0.5, 1, out var baseline);
@@ -756,23 +809,23 @@ namespace Lib.io.video.mediapipe
                 int textY = Math.Max(0, y1 - textSize.Height - 5);
                 Cv2.PutText(mat, scoreText, new OpenCvSharp.Point(textX, textY),
                             HersheyFonts.HersheySimplex, 0.5, textColor, 1, LineTypes.AntiAlias);
-                
+
                 for (int i = 0; i < 6; i++)
                 {
                     int kpIdx = baseIdx + 4 + i;
                     if (kpIdx >= result.Detections.Length) break;
-                    
+
                     var kp = result.Detections[kpIdx];
-                    int kpX = (int)((kp.Position.X + 1.0f) / 2.0f * mat.Width);
+                    int kpX = (int)((kp.Position.X / aspectRatio + 1.0f) / 2.0f * mat.Width);
                     int kpY = (int)((1.0f - kp.Position.Y) / 2.0f * mat.Height);
-                    
+
                     Cv2.Circle(mat, new OpenCvSharp.Point(kpX, kpY), 2, keypointColor, -1);
                 }
             }
         }
 
         private Texture2D? _debugTexture;
-        
+
         private void UpdateDebugTextureFromMat(Mat mat)
         {
             if (_debugTexture == null || _debugTexture.Description.Width != mat.Width || _debugTexture.Description.Height != mat.Height)
@@ -792,42 +845,74 @@ namespace Lib.io.video.mediapipe
                 };
                 _debugTexture = new Texture2D(new T3.Graphics.Compat.Texture2D(ResourceManager.Device, desc));
             }
-            
+
             var context = ResourceManager.Device.ImmediateContext;
             var dataBox = new DataBox(mat.Data, (int)mat.Step(), 0);
             context.UpdateSubresource(dataBox, _debugTexture, 0);
-            
+
             DebugTexture.Value = _debugTexture;
         }
 
         #region Texture Conversion (Minimal OpenCV Usage)
-        private Mat Texture2DToMat(Texture2D texture)
+        /// <summary>
+        /// Reads the input texture back as a BGRA Mat for the debug overlay. The caller owns (and
+        /// disposes) the returned Mat. Driver row pitch is honoured: a plain contiguous copy of
+        /// <c>width * height * 4</c> bytes shears the image whenever the driver pads rows, and on a
+        /// tightly allocated staging texture it would read past the mapped region.
+        /// </summary>
+private Mat Texture2DToMat(Texture2D texture)
+{
+    var device = ResourceManager.Device;
+    var desc = texture.Description;
+
+    var stagingTexture = GetOrCreateStagingTexture(desc.Width, desc.Height, desc.Format);
+    try
+    {
+        device.ImmediateContext.CopyResource(texture, stagingTexture);
+    }
+    catch (Exception ex)
+    {
+        Log.Warning($"[FaceDetection] Debug readback failed: {ex.Message}", this);
+        return new Mat();
+    }
+
+    var dataBox = device.ImmediateContext.MapSubresource(stagingTexture, 0, MapMode.Read, MapFlags.None);
+    if (dataBox.DataPointer == IntPtr.Zero)
+    {
+        device.ImmediateContext.UnmapSubresource(stagingTexture, 0);
+        return new Mat();
+    }
+
+    // Driver row pitch is not guaranteed to be width * 4: copying width * height * 4 bytes
+    // contiguously shears the image whenever rows are padded, and on a tightly allocated
+    // staging texture it reads past the mapped region. Copy row by row instead.
+    var rowBytes = desc.Width * 4;
+    if (dataBox.RowPitch < rowBytes)
+    {
+        Log.Warning($"[FaceDetection] Debug readback: row pitch {dataBox.RowPitch} < {rowBytes}.", this);
+        device.ImmediateContext.UnmapSubresource(stagingTexture, 0);
+        return new Mat();
+    }
+
+    var mat = new Mat(desc.Height, desc.Width, MatType.CV_8UC4);
+    try
+    {
+        var stride = (int)mat.Step();
+        for (var y = 0; y < desc.Height; y++)
         {
-            var device = ResourceManager.Device;
-            var desc = texture.Description;
- 
-            var stagingTexture = GetOrCreateStagingTexture(desc.Width, desc.Height, desc.Format);
-            device.ImmediateContext.CopyResource(texture, stagingTexture);
- 
-            var dataBox = device.ImmediateContext.MapSubresource(stagingTexture, 0, MapMode.Read, MapFlags.None);
-            if (dataBox.DataPointer == IntPtr.Zero)
-            {
-                device.ImmediateContext.UnmapSubresource(stagingTexture, 0);
-                return new Mat();
-            }
- 
-            var mat = GetMat(desc.Height, desc.Width, MatType.CV_8UC4);
-            try
-            {
-                T3.Graphics.Compat.GraphicsUtilities.CopyMemory(mat.Data, dataBox.DataPointer, (int)mat.Total() * mat.ElemSize());
-            }
-            finally
-            {
-                device.ImmediateContext.UnmapSubresource(stagingTexture, 0);
-            }
- 
-            return mat;
+            T3.Graphics.Compat.GraphicsUtilities.CopyMemory(mat.Data + y * stride,
+                                                            dataBox.DataPointer + y * dataBox.RowPitch,
+                                                            rowBytes);
         }
+    }
+    finally
+    {
+        device.ImmediateContext.UnmapSubresource(stagingTexture, 0);
+    }
+
+    Cv2.CvtColor(mat, mat, ColorConversionCodes.RGBA2BGRA);
+    return mat;
+}
         #endregion
 
         #region Output Management
@@ -852,7 +937,7 @@ namespace Lib.io.video.mediapipe
                     PointBuffer.Value = null!;
                     return;
                 }
-                
+
                 var filteredPoints = new List<Point>(pointCount);
                 for (int i = 0; i < points.Length; i++)
                 {
@@ -865,16 +950,17 @@ namespace Lib.io.video.mediapipe
                         filteredPoints.Add(p);
                     }
                 }
-                
+
                 var filteredArray = filteredPoints.ToArray();
                 var newSize = filteredArray.Length * Point.Stride;
 
                 try
                 {
-                    if (_detectionBuffer == null || _detectionBuffer.Buffer?.Description.SizeInBytes != newSize)
+                    var currentBuffer = _detectionBuffer;
+                    if (currentBuffer == null || currentBuffer.Buffer!.Description.SizeInBytes != newSize)
                     {
                         _detectionBuffer?.Dispose();
-                        
+
                         if (filteredArray.Length > 0)
                         {
                             _detectionBuffer = new BufferWithViews();
@@ -882,15 +968,15 @@ namespace Lib.io.video.mediapipe
                                 newSize,
                                 Point.Stride,
                                 ref _detectionBuffer.Buffer);
-                            ResourceManager.CreateStructuredBufferSrv(_detectionBuffer.Buffer, ref _detectionBuffer.Srv);
-                            ResourceManager.CreateStructuredBufferUav(_detectionBuffer.Buffer,
+                            ResourceManager.CreateStructuredBufferSrv(_detectionBuffer.Buffer!, ref _detectionBuffer.Srv);
+                            ResourceManager.CreateStructuredBufferUav(_detectionBuffer.Buffer!,
                                 UnorderedAccessViewBufferFlags.None,
                                 ref _detectionBuffer.Uav);
                         }
                     }
                     else if (filteredArray.Length > 0)
                     {
-                        ResourceManager.Device.ImmediateContext.UpdateSubresource(filteredArray, _detectionBuffer.Buffer);
+                        ResourceManager.Device.ImmediateContext.UpdateSubresource(filteredArray, currentBuffer.Buffer!);
                     }
                     else
                     {
@@ -916,18 +1002,13 @@ namespace Lib.io.video.mediapipe
         {
             if (isDisposing)
             {
-                try
-                {
-                    lock (_faceDetectorLock)
-                    {
-                        _faceDetector?.Close();
-                        _faceDetector = null;
-                    }
-                }
-                catch (Exception)
-                {
-                }
-                
+                // Stops the worker task and hands the detector to the deferred closer - closing it here
+                // directly could hit a frame still running on the worker thread. The wait is bounded so a
+                // wedged native library can delay shutdown by at most this much, never hang it.
+                _disposed = true;
+                StopWorker();
+                _reaper.WaitForPending(2000);
+
                 lock (_bufferLock)
                 {
                     try
@@ -939,9 +1020,10 @@ namespace Lib.io.video.mediapipe
                     {
                     }
                 }
-                
+
                 _debugTexture?.Dispose();
-                
+                _debugTexture = null;
+
                 lock (_textureCacheLock)
                 {
                     foreach (var kvp in _cachedStagingTextures)
@@ -950,13 +1032,7 @@ namespace Lib.io.video.mediapipe
                     }
                     _cachedStagingTextures.Clear();
                 }
-                
-                foreach (var mat in _matPool)
-                {
-                    mat?.Dispose();
-                }
-                _matPool.Clear();
-                
+
                 lock (_poolLock)
                 {
                     foreach (var kvp in _pointArrayPool)
@@ -965,8 +1041,10 @@ namespace Lib.io.video.mediapipe
                     }
                     _pointArrayPool.Clear();
                 }
-                
+
                 _bufferPool.Clear();
+
+                base.Dispose(isDisposing);
             }
         }
         #endregion
@@ -1007,6 +1085,19 @@ namespace Lib.io.video.mediapipe
 
         [Input(Guid = "F3A4B5C6-D7E8-59F0-01A2-345678901CD4")]
         public readonly InputSlot<bool> CorrectAspectRatio = new(false);
+
+        /// <summary>Inference acceleration: Cpu = plain single-threaded TF Lite (works everywhere),
+        /// Xnnpack = multithreaded CPU (the fast default; see InferenceThreads), Gpu = OpenGL/EGL
+        /// delegate (Linux native has it; the CPU-only Windows/macOS natives fall back to Cpu).</summary>
+        [Input(Guid = "a1b2c3d4-0002-4a9b-8c2d-101010101010")]
+        public readonly InputSlot<MediaPipeAcceleration> Acceleration = new(MediaPipeAcceleration.Xnnpack);
+
+        /// <summary>Worker threads for the Xnnpack acceleration (0 = library default, which is effectively
+        /// single-threaded). 4 is ~2x faster than the default on a 20-core machine; use 2 when
+        /// several MediaPipe operators run at once. Ignored by Cpu and Gpu.</summary>
+        [Input(Guid = "a1b2c3d4-1002-4a9b-8c2d-101010101010")]
+        public readonly InputSlot<int> InferenceThreads = new(DefaultInferenceThreads);
+
 
         [Input(Guid = "A4B5C6D7-E8F9-60A1-12B3-456789012DE5")]
         public readonly InputSlot<float> ZScale = new(1.0f);

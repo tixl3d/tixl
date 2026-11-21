@@ -3,12 +3,24 @@
   "Id": "c676b9c7-06d7-4ee0-8ffc-9bee96c5dc18"/*DrawInstancedIndirect*/,
   "Inputs": [
     {
+      "Id": "0c082078-895b-4d95-901a-75435d310007"/*CaptureKind*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "2772edf0-962f-40d6-a034-194110b7da58"/*CaptureVertices*/,
+      "DefaultValue": null
+    },
+    {
       "Id": "6c87816c-da1d-4429-a1f6-61233aa3d7b1"/*Buffer*/,
       "DefaultValue": null
     },
     {
       "Id": "bc874135-45f2-45e2-8005-244b9123ed20"/*AlignedByteOffsetForArgs*/,
       "DefaultValue": 0
+    },
+    {
+      "Id": "d2fe03d7-57c9-444c-94fe-8852527bc2aa"/*CaptureIndices*/,
+      "DefaultValue": null
     }
   ],
   "Children": [],

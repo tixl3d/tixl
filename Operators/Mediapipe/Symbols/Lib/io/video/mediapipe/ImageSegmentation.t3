@@ -23,8 +23,12 @@
       "DefaultValue": false
     },
     {
-      "Id": "890abcde-f123-4567-890a-bcdef1234567"/*CategoryAllowlist*/,
-      "DefaultValue": ""
+      "Id": "a1b2c3d4-0005-4a9b-8c2d-101010101010"/*Acceleration*/,
+      "DefaultValue": "Xnnpack"
+    },
+    {
+      "Id": "a1b2c3d4-1005-4a9b-8c2d-101010101010"/*InferenceThreads*/,
+      "DefaultValue": 4
     }
   ],
   "Children": [],

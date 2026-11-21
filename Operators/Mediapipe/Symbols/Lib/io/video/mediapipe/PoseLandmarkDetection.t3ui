@@ -1,7 +1,7 @@
-{
+﻿{
   "FormatVersion": 3,
   "Id": "34567890-abcd-ef12-3456-7890abcdef12"/*PoseLandmarkDetection*/,
-  "Description": "Detects pose landmarks in an image using MediaPipe Pose Landmark Detection.\n\nThis operator uses MediaPipe Pose Landmark Detection task to detect human poses and their landmarks (33 points per pose) in the input image. It outputs detected landmarks as a buffer of points and a dictionary of pose data.\n\nInputs:\n- InputTexture: The image to process.\n- Enabled: Enables or disables pose detection.\n- MaxPoses: Maximum number of poses to detect.\n- MinPoseDetectionConfidence: Minimum confidence score for pose detection to be considered successful.\n- MinPosePresenceConfidence: Minimum confidence score for pose presence to be considered successful.\n- MinTrackingConfidence: Minimum confidence score for pose tracking.\n- Debug: Enables debug visualization with debug texture output.\n- CorrectAspectRatio: Whether to correct aspect ratio for non-square inputs.\n- ZScale: Scale factor for Z coordinate of points.\n\nOutputs:\n- OutputTexture: The input texture (passed through).\n- DebugTexture: Debug visualization texture showing pose landmarks and connections when Debug is enabled.\n- PoseCount: The number of poses detected.\n- UpdateCount: Increments each time a new frame is processed.\n- WorldLandmarksBuffer: A structured buffer containing world landmarks.\n- PointBuffer: A structured buffer containing points for detected pose landmarks.\n- SegmentationMask: A texture containing the segmentation mask.",
+  "Description": "Detects pose landmarks in an image using MediaPipe Pose Landmark Detection.\n\nThis operator uses MediaPipe Pose Landmark Detection task to detect human poses and their landmarks (33 points per pose) in the input image. It outputs detected landmarks as a buffer of points and a dictionary of pose data.\n\nInputs:\n- InputTexture: The image to process.\n- Enabled: Enables or disables pose detection.\n- MaxPoses: Maximum number of poses to detect.\n- MinPoseDetectionConfidence: Minimum confidence score for pose detection to be considered successful.\n- MinPosePresenceConfidence: Minimum confidence score for pose presence to be considered successful.\n- MinTrackingConfidence: Minimum confidence score for pose tracking.\n- Debug: Enables debug visualization with debug texture output.\n- CorrectAspectRatio: Whether to correct aspect ratio for non-square inputs.\n- ZScale: Scale factor for Z coordinate of points.\n\nOutputs:\n- OutputTexture: The input texture (passed through).\n- DebugTexture: Debug visualization texture showing pose landmarks and connections when Debug is enabled.\n- PoseCount: The number of poses detected.\n- UpdateCount: Increments each time a new frame is processed.\n- WorldLandmarksBuffer: A structured buffer containing world landmarks.\n- PointBuffer: A structured buffer containing points for detected pose landmarks.\n- SegmentationMask: A texture containing the person segmentation mask - only populated when the loaded pose model emits segmentation masks (the bundled pose_landmarker.task does not; use [ImageSegmentation] or a pose model with mask output).\n\nAcceleration selects the inference delegate: Cpu, Xnnpack (multithreaded CPU, the fast default) or Gpu. Gpu needs a native build with the OpenGL delegate (Linux here) and otherwise falls back to Cpu; InferenceThreads sets the Xnnpack worker-thread count (0 = library default).",
   "InputUis": [
     {
       "InputId": "0abcdef1-2345-6789-0abc-def123456789"/*Debug*/,
@@ -58,6 +58,24 @@
         "Y": 375.0
       },
       "Description": "Minimum confidence score for pose tracking."
+    },
+    {
+      "InputId": "a1b2c3d4-0007-4a9b-8c2d-101010101010"/*Acceleration*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 675.0
+      },
+      "Description": "Inference acceleration: Cpu = plain single-threaded TF Lite (works everywhere), Xnnpack = multithreaded CPU (the fast default), Gpu = OpenGL/EGL delegate (Linux; the Windows/macOS natives are CPU-only and fall back to Cpu)."
+    },
+    {
+      "InputId": "a1b2c3d4-1007-4a9b-8c2d-101010101010"/*InferenceThreads*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 750.0
+      },
+      "Min": 0,
+      "Max": 16,
+      "Description": "Xnnpack worker threads (default 4; 0 = library default, which is effectively single-threaded). Lower it to 2 when several MediaPipe operators run at once. Ignored by Cpu and Gpu."
     },
     {
       "InputId": "abcdef12-3456-7890-abcd-ef1234567890"/*CorrectAspectRatio*/,

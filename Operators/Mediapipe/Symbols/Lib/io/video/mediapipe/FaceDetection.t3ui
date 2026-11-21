@@ -1,8 +1,26 @@
-{
+﻿{
   "FormatVersion": 3,
   "Id": "a1b2c3d4-e5f6-4798-89ab-cdef12345679"/*FaceDetection*/,
-  "Description": "Detects faces in an image using MediaPipe Face Detection.\n\nThis operator uses MediaPipe Face Detection task to detect faces in input image. It outputs detected faces as a buffer of points (bounding box corners and keypoints) and a dictionary of face data.\n\nInputs:\n- InputTexture: The image to process.\n- EnableDetection: Enables or disables face detection.\n- ConfidenceThreshold: Minimum confidence score for a face to be detected.\n- MaxFaces: Maximum number of faces to detect.\n- ShowDetections: Whether to include bounding box points in the output buffer.\n- ShowKeypoints: Whether to include keypoints (eyes, nose, mouth, ears) in the output buffer.\n- DetectionSize: Size of points in the output buffer.\n- DetectionColor: Color of bounding box points.\n- KeypointColor: Color of keypoint points.\n- UseCombinedAIOutput: Whether to generate unified AI texture outputs.\n- Debug: Enables debug logging and debug texture output.\n- CorrectAspectRatio: Whether to correct aspect ratio for non-square inputs.\n- ZScale: Scale factor for Z coordinate of points.\n\nOutputs:\n- OutputTexture: The input texture (passed through).\n- DetectionsBuffer: A structured buffer containing points for detected faces.\n- FaceData: A dictionary containing detailed data for each detected face (bounding box coordinates, keypoint positions, confidence scores).\n- FaceCount: The number of faces detected.\n- UpdateCount: Increments each time a new frame is processed.\n- DebugTexture: A debug visualization texture showing detected faces with bounding boxes and keypoints (only when Debug is enabled).",
+  "Description": "Detects faces in an image using MediaPipe Face Detection.\n\nThis operator uses MediaPipe Face Detection task to detect faces in input image. It outputs detected faces as a buffer of points (bounding box corners and keypoints) and a dictionary of face data.\n\nInputs:\n- InputTexture: The image to process.\n- EnableDetection: Enables or disables face detection.\n- ConfidenceThreshold: Minimum confidence score for a face to be detected.\n- MaxFaces: Maximum number of faces to detect.\n- ShowDetections: Whether to include bounding box points in the output buffer.\n- ShowKeypoints: Whether to include keypoints (eyes, nose, mouth, ears) in the output buffer.\n- DetectionSize: Size of points in the output buffer.\n- DetectionColor: Color of bounding box points.\n- KeypointColor: Color of keypoint points.\n- UseCombinedAIOutput: Whether to generate unified AI texture outputs.\n- Debug: Enables debug logging and debug texture output.\n- CorrectAspectRatio: Whether to correct aspect ratio for non-square inputs.\n- ZScale: Scale factor for Z coordinate of points.\n\nOutputs:\n- OutputTexture: The input texture (passed through).\n- DetectionsBuffer: A structured buffer containing points for detected faces.\n- FaceData: A dictionary containing detailed data for each detected face (bounding box coordinates, keypoint positions, confidence scores).\n- FaceCount: The number of faces detected.\n- UpdateCount: Increments each time a new frame is processed.\n- DebugTexture: A debug visualization texture showing detected faces with bounding boxes and keypoints (only when Debug is enabled)\n\nAcceleration selects the inference delegate: Cpu, Xnnpack (multithreaded CPU, the fast default) or Gpu. Gpu needs a native build with the OpenGL delegate (Linux here) and otherwise falls back to Cpu; InferenceThreads sets the Xnnpack worker-thread count (0 = library default).",
   "InputUis": [
+    {
+      "InputId": "a1b2c3d4-0002-4a9b-8c2d-101010101010"/*Acceleration*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 975.0
+      },
+      "Description": "Inference acceleration: Cpu = plain single-threaded TF Lite (works everywhere), Xnnpack = multithreaded CPU (the fast default), Gpu = OpenGL/EGL delegate (Linux; the Windows/macOS natives are CPU-only and fall back to Cpu)."
+    },
+    {
+      "InputId": "a1b2c3d4-1002-4a9b-8c2d-101010101010"/*InferenceThreads*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1050.0
+      },
+      "Min": 0,
+      "Max": 16,
+      "Description": "Xnnpack worker threads (default 4; 0 = library default, which is effectively single-threaded). Lower it to 2 when several MediaPipe operators run at once. Ignored by Cpu and Gpu."
+    },
     {
       "InputId": "a3b4c5d6-e7f8-4389-e6b1-901234567681"/*DetectionSize*/,
       "Position": {

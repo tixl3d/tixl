@@ -31,6 +31,14 @@
       "DefaultValue": 0.5
     },
     {
+      "Id": "a1b2c3d4-0007-4a9b-8c2d-101010101010"/*Acceleration*/,
+      "DefaultValue": "Xnnpack"
+    },
+    {
+      "Id": "a1b2c3d4-1007-4a9b-8c2d-101010101010"/*InferenceThreads*/,
+      "DefaultValue": 4
+    },
+    {
       "Id": "abcdef12-3456-7890-abcd-ef1234567890"/*CorrectAspectRatio*/,
       "DefaultValue": false
     },

@@ -22,6 +22,8 @@ using T3.Editor.UiModel.Helpers;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.IoServices.Midi;
 
+using T3.Editor.Gui.Windows;
+
 namespace T3.Editor.Gui;
 
 public static partial class T3Ui
@@ -33,6 +35,7 @@ public static partial class T3Ui
         Playback.Current = DefaultTimelinePlayback;
         ThemeHandling.Initialize();
         OperatorEditCommand.RegisterAsOperatorUndoHandler();
+        CameraSettingsDialog.RegisterAsOpenHandler();
     }
 
     internal static readonly Playback DefaultTimelinePlayback = new();
@@ -215,6 +218,7 @@ public static partial class T3Ui
     internal static readonly OscDataRecording OscDataRecording = new(DataRecording.ActiveRecordingSet);
 
     private static readonly UserNameDialog _userNameDialog = new();
+    private static readonly CollabPasswordDialog _collabPasswordDialog = new();
     internal static readonly AboutDialog AboutDialog = new();
     private static readonly SearchDialog _searchDialog = new();
     internal static readonly NewProjectDialog NewProjectDialog = new();
@@ -225,6 +229,8 @@ public static partial class T3Ui
     private static readonly SendCrashReportsDialog _sendCrashReportsDialog = new();
     internal static readonly ShareSessionDialog ShareSessionDialog = new();
     internal static readonly ExitDialog ExitDialog = new();
+    internal static readonly LaserArmWarningDialog LaserArmWarningDialog = new();
+    internal static readonly AiModelSetupWizard AiModelSetupWizard = new();
     private static readonly List<EditableSymbolProject> _modifiedProjects = new();
     private static bool _couldEscapeCancelSomething;
 

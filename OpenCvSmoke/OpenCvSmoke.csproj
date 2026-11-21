@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <!-- Not part of t3.sln: a standalone smoke check that the OpenCV native library for this platform
+         loads and runs the code paths the OpenCV operators use (checkerboard detection, undistort maps,
+         contour scan). Run via "dotnet run" on this project; the macOS build workflow uses it to verify
+         the bundled OpenCV on the release runner. -->
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="OpenCvSharp4" Version="4.13.0.20260627" />
+    <PackageReference Include="OpenCvSharp4.Extensions" Version="4.13.0.20260627" />
+    <!-- One native per platform, mirroring the operator packages (Lib.csproj carries the same set). -->
+    <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.13.0.20260627" Condition="$([MSBuild]::IsOSPlatform('Windows'))" />
+    <PackageReference Include="OpenCvSharp4.official.runtime.linux-x64.slim" Version="4.13.0.20260627" Condition="$([MSBuild]::IsOSPlatform('Linux'))" />
+    <PackageReference Include="OpenCvSharp4.runtime.osx.arm64" Version="4.13.0.20260627" Condition="$([MSBuild]::IsOSPlatform('OSX'))" />
+    <PackageReference Include="OpenCvSharp4.runtime.osx.x64" Version="4.13.0.20260627" Condition="$([MSBuild]::IsOSPlatform('OSX'))" />
+  </ItemGroup>
+</Project>

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "d9a7233d-5d03-4268-a58b-465972852a5b"/*VideoStreamInput*/,
-  "Description": "Receives a video stream from a network source.\n\nThis operator connects to a network video stream (e.g., RTSP, HTTP, RTMP) and provides the video as a texture. It is useful for bringing in live feeds from IP cameras, streaming servers, or other network video sources.\n\nTips:\n- Use the `Connect` toggle to start and stop receiving the stream.\n- If the stream is interrupted, use the `Reconnect` trigger to try and establish the connection again.\n- The `Status` output provides valuable information for debugging connection issues.\n\nAKA: video stream, rtsp, rtmp, http, ip camera, network video",
+  "Description": "Receives a live video stream from the network or from a publisher and outputs it as a texture.\n\nPulls a stream from `Url` (RTSP, RTMP, HTTP/MJPEG, HLS and anything else FFmpeg can open), for example from IP cameras, streaming servers or network video sources. Alternatively it hosts a small RTMP server: enable `RtmpServer` and push to the URL shown in `Status` from OBS, a phone streaming app, or ffmpeg. Any stream key is accepted while the server is listening.\n\nConnecting and decoding run on a background thread, so a slow or unreachable source never stalls the editor. A source that sends no data for 10 seconds is treated as lost, and a lost or ended stream is reconnected automatically every few seconds while `Connect` (or `RtmpServer`) stays on. RTSP is pulled over TCP.\n\nAKA: video stream, network video, ip camera, rtsp, rtmp, rtmp server, mjpeg, hls, obs, http stream, webcam stream\n\nTips:\n- Use the `Connect` toggle to start and stop pulling from `Url`.\n- Enable `RtmpServer` to receive a pushed RTMP stream instead; this takes precedence over `Connect`/`Url`.\n- `Reconnect` forces a fresh connection right away instead of waiting for the automatic retry.\n- `Status` shows connection problems and the RTMP server URL; the same message appears on the operator in the graph.\n- Windows may ask for firewall permission the first time the RTMP server listens.",
   "InputUis": [
     {
       "InputId": "2e26e552-68d7-4e2f-8208-831f2a75c96b"/*Connect*/,
@@ -9,7 +9,7 @@
         "X": -200.0,
         "Y": 75.0
       },
-      "Description": "Starts or stops the connection to the video stream."
+      "Description": "Starts or stops pulling the stream from `Url`. While on, a lost stream is reconnected automatically."
     },
     {
       "InputId": "9a240243-71b5-4235-86a9-d5369a3311a9"/*Reconnect*/,
@@ -17,7 +17,15 @@
         "X": -200.0,
         "Y": 150.0
       },
-      "Description": "A trigger to force a reconnection to the video stream."
+      "Description": "A trigger that drops the current connection and connects again immediately."
+    },
+    {
+      "InputId": "a6af67ea-2103-4ab5-8ac9-7c269cd25d14"/*RtmpPort*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 300.0
+      },
+      "Description": "The TCP port the built-in RTMP server listens on. Default is 1935, the standard RTMP port. Changing it restarts the server."
     },
     {
       "InputId": "a8b0971b-94cb-4c3d-932d-337581b8d83a"/*Url*/,
@@ -25,8 +33,16 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "Description": "The URL of the network video stream (e.g., rtsp://192.168.1.100/stream1).",
+      "Description": "The URL of the network video stream (e.g. rtsp://192.168.1.100/stream1, rtmp://server/app/stream or http://camera/video.mjpg). Changing it reconnects. Ignored while `RtmpServer` is enabled.",
       "Usage": "Default"
+    },
+    {
+      "InputId": "e268149f-7eb7-48e3-b4b5-39a1de9ca075"/*RtmpServer*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      },
+      "Description": "Enables the built-in RTMP server. It listens on `RtmpPort` and waits for a publisher (e.g. OBS); the address to push to is shown in `Status`. A publisher that disconnects can reconnect at any time. Disable it to stop the server."
     }
   ],
   "SymbolChildUis": [],

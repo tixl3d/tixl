@@ -1,7 +1,7 @@
-{
+﻿{
   "FormatVersion": 3,
   "Id": "9b2c3d4e-5f6a-4798-89ab-cdef12345678"/*FaceLandmarkDetection*/,
-  "Description": "Detects face landmarks in an image using MediaPipe Face Mesh.\n\nThis operator uses the MediaPipe Face Mesh task to detect faces and their landmarks (468 or 478 points per face) in the input image. It outputs the detected landmarks as a buffer of points and a dictionary of face data.\n\nInputs:\n- InputTexture: The image to process.\n- EnableDetection: Enables or disables face detection.\n- MaxFaces: Maximum number of faces to detect.\n- ShowLandmarks: Whether to include landmark points in the output buffer.\n- LandmarkSize: Size of the landmark points in the output buffer.\n- LandmarkColor: Color of the landmark points.\n- LandmarkScale: Scale factor for the landmark positions (useful for 3D visualization).\n- NormalizeLandmarks: Whether to normalize landmark coordinates to [0, 1] range.\n- MinFaceDetectionConfidence: Minimum confidence score for face detection to be considered successful.\n- MinFacePresenceConfidence: Minimum confidence score for face presence.\n- MinTrackingConfidence: Minimum confidence score for face tracking.\n- Debug: Enables debug logging.\n\nOutputs:\n- OutputTexture: The input texture (passed through).\n- PointBuffer: A structured buffer containing points for detected face landmarks.\n- FaceData: A dictionary containing detailed data for each detected face (landmark positions, blendshapes, transformation matrices).\n- FaceCount: The number of faces detected.",
+  "Description": "Detects face landmarks in an image using MediaPipe Face Mesh.\n\nThis operator uses the MediaPipe Face Mesh task to detect faces and their landmarks (468 or 478 points per face) in the input image. It outputs the detected landmarks as a buffer of points and a dictionary of face data.\n\nInputs:\n- InputTexture: The image to process.\n- EnableDetection: Enables or disables face detection.\n- MaxFaces: Maximum number of faces to detect.\n- ShowLandmarks: Whether to include landmark points in the output buffer.\n- LandmarkSize: Size of the landmark points in the output buffer.\n- LandmarkColor: Color of the landmark points.\n- LandmarkScale: Scale factor for the landmark positions (useful for 3D visualization).\n- NormalizeLandmarks: Whether to normalize landmark coordinates to [0, 1] range.\n- MinFaceDetectionConfidence: Minimum confidence score for face detection to be considered successful.\n- MinFacePresenceConfidence: Minimum confidence score for face presence.\n- MinTrackingConfidence: Minimum confidence score for face tracking.\n- Debug: Enables debug logging.\n\nOutputs:\n- OutputTexture: The input texture (passed through).\n- PointBuffer: A structured buffer containing points for detected face landmarks.\n- FaceData: A dictionary containing detailed data for each detected face (landmark positions, blendshapes, transformation matrices).\n- FaceCount: The number of faces detected.\n\nAcceleration selects the inference delegate: Cpu, Xnnpack (multithreaded CPU, the fast default) or Gpu. Gpu needs a native build with the OpenGL delegate (Linux here) and otherwise falls back to Cpu; InferenceThreads sets the Xnnpack worker-thread count (0 = library default).",
   "InputUis": [
     {
       "InputId": "01234567-890a-bcde-f012-34567890abcd"/*ZScale*/,
@@ -82,6 +82,24 @@
         "Y": 0.0
       },
       "Description": "The image to process."
+    },
+    {
+      "InputId": "a1b2c3d4-0003-4a9b-8c2d-101010101010"/*Acceleration*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1125.0
+      },
+      "Description": "Inference acceleration: Cpu = plain single-threaded TF Lite (works everywhere), Xnnpack = multithreaded CPU (the fast default), Gpu = OpenGL/EGL delegate (Linux; the Windows/macOS natives are CPU-only and fall back to Cpu)."
+    },
+    {
+      "InputId": "a1b2c3d4-1003-4a9b-8c2d-101010101010"/*InferenceThreads*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1200.0
+      },
+      "Min": 0,
+      "Max": 16,
+      "Description": "Xnnpack worker threads (default 4; 0 = library default, which is effectively single-threaded). Lower it to 2 when several MediaPipe operators run at once. Ignored by Cpu and Gpu."
     },
     {
       "InputId": "abcdef12-3456-7890-abcd-ef1234567890"/*Enabled*/,

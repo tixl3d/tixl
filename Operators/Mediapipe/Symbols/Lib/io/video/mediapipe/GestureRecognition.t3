@@ -11,6 +11,14 @@
       "DefaultValue": false
     },
     {
+      "Id": "a1b2c3d4-0004-4a9b-8c2d-101010101010"/*Acceleration*/,
+      "DefaultValue": "Xnnpack"
+    },
+    {
+      "Id": "a1b2c3d4-1004-4a9b-8c2d-101010101010"/*InferenceThreads*/,
+      "DefaultValue": 4
+    },
+    {
       "Id": "a1b2c3d4-e5f6-4798-89ab-cdef12345693"/*Debug*/,
       "DefaultValue": false
     },

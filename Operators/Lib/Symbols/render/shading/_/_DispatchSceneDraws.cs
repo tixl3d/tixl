@@ -1,5 +1,6 @@
 using T3.Core.Rendering;
 using T3.Core.Rendering.Material;
+using T3.Graphics.Compat;
 
 namespace Lib.render.shading._;
 
@@ -89,6 +90,14 @@ internal sealed class _DispatchSceneDraws : Instance<_DispatchSceneDraws>
             return;
         }
 
+        // Cached index views belong to the mesh buffers of the previous model
+        var firstMeshBuffers = sceneSetup.Dispatches.Count > 0 ? sceneSetup.Dispatches[0].MeshBuffers : null;
+        if (!ReferenceEquals(firstMeshBuffers, _cachedMeshBuffers))
+        {
+            ClearIndexViews();
+            _cachedMeshBuffers = firstMeshBuffers;
+        }
+
         PbrMaterial lastMaterial = null;
         foreach (var dispatch in sceneSetup.Dispatches)
         {
@@ -116,7 +125,9 @@ internal sealed class _DispatchSceneDraws : Instance<_DispatchSceneDraws>
             vsStage.SetConstantBuffers(0, ConstantBufferIndexCount, _constantBuffers);
                 
             resourcesMissing |= TestAndSet(dispatch.MeshBuffers?.VertexBuffer?.Srv, MeshVerticesIndex);
-            resourcesMissing |= TestAndSet(dispatch.MeshBuffers?.IndicesBuffer?.Srv, MeshIndicesIndex);
+            var startFaceIndex = dispatch.VertexStartIndex / 3;
+            var faceCount = dispatch.VertexCount / 3;
+            resourcesMissing |= TestAndSet(GetIndexView(dispatch.MeshBuffers?.IndicesBuffer, startFaceIndex, faceCount), MeshIndicesIndex);
 
             if (resourcesMissing)
             {
@@ -127,9 +138,62 @@ internal sealed class _DispatchSceneDraws : Instance<_DispatchSceneDraws>
             vsStage.SetShaderResources(0, _shaderResourceViews.Length, _shaderResourceViews);
             psStage.SetShaderResources(0, _shaderResourceViews.Length, _shaderResourceViews);
 
-            // Log.Debug($"Dispatching draw for {dispatch.VertexCount} vertices...");
-            ResourceManager.Device.ImmediateContext.Draw(dispatch.VertexCount, dispatch.VertexStartIndex);
+            // The index view already starts at the chunk, so the shader's SV_VertexID can be zero-based.
+            // Relying on Draw's startVertex argument would be backend-dependent and is ignored here.
+            ResourceManager.Device.ImmediateContext.Draw(dispatch.VertexCount, 0);
         }
+    }
+
+    /// <summary>
+    /// A view of just the chunk's triangle range. The scene shader reads the int3 triangle buffer by
+    /// SV_VertexID, and Draw's startVertex does not offset that id reliably across backends; binding
+    /// the triangle range makes every dispatch draw its own chunk.
+    /// </summary>
+    private ShaderResourceView? GetIndexView(BufferWithViews? indices, int firstElement, int elementCount)
+    {
+        if (indices?.Buffer == null || indices.Buffer.IsDisposed || indices.Srv == null)
+            return null;
+
+        if (firstElement <= 0 && elementCount >= indices.ElementCount)
+            return indices.Srv;
+
+        var key = (indices.Buffer, firstElement, elementCount);
+        if (_indexViews.TryGetValue(key, out var existing) && !existing.IsDisposed)
+            return existing;
+
+        var description = new ShaderResourceViewDescription
+                              {
+                                  Dimension = ShaderResourceViewDimension.ExtendedBuffer,
+                                  Format = Format.Unknown,
+                                  BufferEx = new ShaderResourceViewDescription.ExtendedBufferResource
+                                                 {
+                                                     FirstElement = firstElement,
+                                                     ElementCount = elementCount,
+                                                 },
+                              };
+
+        var view = new ShaderResourceView(ResourceManager.Device, indices.Buffer, description);
+        _indexViews[key] = view;
+        return view;
+    }
+
+    private void ClearIndexViews()
+    {
+        foreach (var view in _indexViews.Values)
+        {
+            view.Dispose();
+        }
+
+        _indexViews.Clear();
+    }
+
+    protected override void Dispose(bool isDisposing)
+    {
+        if (!isDisposing)
+            return;
+
+        ClearIndexViews();
+        _cachedMeshBuffers = null;
     }
 
     private  bool TryGetAndApplySrv(EvaluationContext context, InputSlot<ShaderResourceView> srvInput, int index)
@@ -171,7 +235,9 @@ internal sealed class _DispatchSceneDraws : Instance<_DispatchSceneDraws>
 
     private readonly ShaderResourceView[] _shaderResourceViews = new ShaderResourceView[SrvIndexCount];
     private readonly Buffer[] _constantBuffers = new Buffer[ConstantBufferIndexCount];
+    private readonly Dictionary<(Buffer Buffer, int FirstElement, int ElementCount), ShaderResourceView> _indexViews = new();
     private SamplerState[] _samplerStates = Array.Empty<SamplerState>();
+    private MeshBuffers? _cachedMeshBuffers;
         
     private bool _useSceneMaterials;
 

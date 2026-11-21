@@ -18,13 +18,34 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <!-- Managed bindings + native LGPL DLLs so the test host can decode real files. -->
+    <!-- Managed bindings + the same native LGPL FFmpeg the Video operator package ships, so tests exercise
+         the shipped configuration on every platform instead of whatever the OS provides (a system FFmpeg with
+         a matching soname silently serves different codecs — or a GPL build the shipped editor would reject).
+         Sdcb.FFmpeg.runtime.* is a GPL build and deliberately not used here. -->
     <PackageReference Include="Sdcb.FFmpeg" Version="7.0.0" />
-    <PackageReference Include="Sdcb.FFmpeg.runtime.windows-x64" Version="7.1.0" />
+    <PackageReference Include="FFmpeg.LGPL" Version="20250329.1.0" Condition="$([MSBuild]::IsOSPlatform('Windows'))" />
+    <PackageReference Include="TqkLibrary.FFmpeg.Lgpl3.Native.Linux.x64" Version="7.1.5.1" Condition="$([MSBuild]::IsOSPlatform('Linux'))" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\VideoServices\VideoServices.csproj" />
+  </ItemGroup>
+
+  <!-- CameraControlsV4L2LiveTests exercises the Video operator package's camera-control backend on real
+       hardware. The backend types are internal to that package and the package project is not referenced
+       here, so its sources are compiled straight into the test assembly. This adds NO dependencies —
+       the V4L2 path P/Invokes only libc, and T3.Core.Logging already arrives transitively via
+       VideoServices. The WebcamWithIndex stand-in in the test file pairs with these entries. -->
+  <ItemGroup>
+    <Compile Include="..\Operators\Video\Utils\CameraControls.cs" />
+    <Compile Include="..\Operators\Video\Utils\CameraControlsV4L2.cs" />
+  </ItemGroup>
+
+  <!-- Mirrors the operator package's project-level global using (Operators/Video/Video.csproj:44):
+       the backend files call Log.Debug without a using directive. Not a dependency — T3.Core.Logging
+       already arrives transitively via VideoServices. -->
+  <ItemGroup>
+    <Using Include="T3.Core.Logging" />
   </ItemGroup>
 
 </Project>

@@ -170,7 +170,14 @@ public sealed class VideoPlaybackController : IDisposable
     {
         _cancellation.Cancel();
         _wake.Set();
-        _worker?.Join(TimeSpan.FromSeconds(2));
+        if (_worker != null && !_worker.Join(TimeSpan.FromSeconds(2)))
+        {
+            // Stuck in a blocking open/decode. The worker still owns _session, _converter, _cache and the
+            // pending GPU frame; disposing them under it is a native use-after-free. Leak them instead -
+            // the thread is background and exits as soon as its current call returns.
+            Log.Warning("[VideoPlayback] The decode worker did not exit in time; leaving its resources behind.");
+            return;
+        }
 
         // The worker has exited, so its resources can be released without racing it.
         _hardwareConverter?.Dispose();

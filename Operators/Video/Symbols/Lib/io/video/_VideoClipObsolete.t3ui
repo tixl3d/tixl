@@ -1,28 +1,31 @@
 {
   "FormatVersion": 3,
   "Id": "b4288f74-7997-40f4-bc4c-2833bf3797de"/*_VideoClipObsolete*/,
-  "Description": "",
+  "Description": "Obsolete operator kept only for loading old projects; its inputs map onto the same-named inputs of VideoClip/PlayVideo. Use VideoClipPlayer for new projects.",
   "InputUis": [
     {
       "InputId": "69c0c1fd-ca53-4943-9e26-6c78d79555be"/*Loop*/,
       "Position": {
         "X": 339.13132,
         "Y": 36.050827
-      }
+      },
+      "Description": "Legacy: whether the clip restarts from the beginning after reaching its end."
     },
     {
       "InputId": "88ca47b1-66af-4f59-9266-c1781d9101e5"/*ShowTimeCode*/,
       "Position": {
         "X": 339.13132,
         "Y": 235.45197
-      }
+      },
+      "Description": "Legacy: overlays the clip's current time code on the video output."
     },
     {
       "InputId": "a5f0efc1-2f2d-41a5-91f4-162febf046b2"/*ResynchThreshold*/,
       "Position": {
         "X": 339.13132,
         "Y": -33.949173
-      }
+      },
+      "Description": "Legacy: maximum time difference before playback resynchronizes to the clip time."
     },
     {
       "InputId": "c064afe1-0078-48eb-be6a-4616f7c5a383"/*FilePath*/,
@@ -30,6 +33,7 @@
         "X": -188.89662,
         "Y": -62.692398
       },
+      "Description": "Legacy: path of the video file. Kept only so old projects keep loading - use VideoClipPlayer instead.",
       "Usage": "FilePath"
     }
   ],

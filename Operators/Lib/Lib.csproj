@@ -127,8 +127,13 @@
     <PackageReference Include="System.ServiceModel.Security" Version="6.0.0" />
     <PackageReference Include="OpenCvSharp4" Version="4.13.0.20260627" />
     <PackageReference Include="OpenCvSharp4.Extensions" Version="4.13.0.20260627" />
-    <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.13.0.20260627" />
-    <PackageReference Include="OpenCvSharp4.Windows" Version="4.13.0.20260627" />
+    <!-- OpenCV natives, one package per platform (the managed references above stay unconditional). The Linux
+         slim build is self-contained (OpenCV statically linked; no GTK/X11 — TiXL ops never call highgui).
+         Like the FFmpeg natives in the Video package, each is restored only on the platform that can use it. -->
+    <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.13.0.20260627" Condition="$([MSBuild]::IsOSPlatform('Windows'))" />
+    <PackageReference Include="OpenCvSharp4.official.runtime.linux-x64.slim" Version="4.13.0.20260627" Condition="$([MSBuild]::IsOSPlatform('Linux'))" />
+    <PackageReference Include="OpenCvSharp4.runtime.osx.arm64" Version="4.13.0.20260627" Condition="$([MSBuild]::IsOSPlatform('OSX'))" />
+    <PackageReference Include="OpenCvSharp4.runtime.osx.x64" Version="4.13.0.20260627" Condition="$([MSBuild]::IsOSPlatform('OSX'))" />
     <PackageReference Include="SharpGLTF.Core" Version="1.0.6" />
     <PackageReference Include="Svg" Version="3.4.8" />
     <!-- Cross-platform SVG. Svg.Custom is a fork of the Svg library above and declares the same types in the
@@ -143,6 +148,16 @@
     <PackageReference Include="SkiaSharp.NativeAssets.macOS" Version="4.148.0" Condition="$([MSBuild]::IsOSPlatform('OSX'))" />
     <PackageReference Include="SixLabors.Fonts" Version="$(SixLaborsFontsVersion)" />
     <PackageReference Include="LibTessDotNet" Version="1.1.15" />
+    <!-- Pure managed rigid-body engine: no native binaries, so the same package restores on
+         Windows, macOS and Linux and follows the graph to a Linux build unchanged. The 2.5
+         beta line is what upstream ships; 2.4.0 is the last stable release. -->
+    <PackageReference Include="BepuPhysics" Version="2.5.0-beta.33" />
+    <!-- Assimp model import/export ([AssimpImport], [AssimpExport]). Ships native builds for win/linux/osx
+         x64 and arm64 under runtimes/; AssimpNet loads them with its own resolver (see AssimpNative). -->
+    <PackageReference Include="AssimpNetter" Version="6.0.5" />
+    <!-- Managed-only DirectShow interop for [WebcamInput]'s camera controls (brightness, pan, zoom...) on
+         Windows; the assembly loads elsewhere but is never called. -->
+    <PackageReference Include="DirectShowLib.Standard" Version="2.1.0" />
   </ItemGroup>
   <!-- Copy package content into this project's own output only (not transitively to other projects).
        Uses a custom Target instead of <Content CopyToOutputDirectory> to prevent MSBuild from
@@ -199,6 +214,24 @@
 }</OperatorPackageInfoJson>
     </PropertyGroup>
     <WriteLinesToFile File="$(OutputPath)/OperatorPackage.json" Lines="$(OperatorPackageInfoJson)" Overwrite="True" Encoding="UTF-8" />
+  </Target>
+  <!-- Launcher for isolated Assimp imports and exports (AssimpIsolatedImport), placed next to the package so
+       it ships with it. Incremental: skipped while its output is newer than its sources, so hot-reload
+       compiles don't pay for it. Restore runs as its own call because the launcher isn't part of the
+       solution restore. It is listed in t3.sln for IDE visibility only (ActiveCfg, no Build.0), which keeps
+       a solution build from compiling it a second time next to this target. -->
+  <!-- Standalone launcher for isolated Assimp imports and exports outside the editor (the editor hosts
+       the same worker itself). Placed next to the package so it ships with it. Incremental: skipped
+       while its output is newer than its sources, so hot-reload compiles don't pay for it. Restore runs
+       as its own call because the launcher isn't part of the solution restore. It is listed in t3.sln
+       for IDE visibility only (ActiveCfg, no Build.0), which keeps a solution build from compiling it a
+       second time next to this target. -->
+  <PropertyGroup>
+    <AssimpImportHostFolder>$(MSBuildThisFileDirectory)../AssimpImportHost/</AssimpImportHostFolder>
+  </PropertyGroup>
+  <Target Name="BuildAssimpImportHost" AfterTargets="AfterBuild" Inputs="$(AssimpImportHostFolder)AssimpImportHost.csproj;$(AssimpImportHostFolder)Program.cs" Outputs="$(TargetDir)AssimpImportHost/AssimpImportHost.dll">
+    <MSBuild Projects="$(AssimpImportHostFolder)AssimpImportHost.csproj" Targets="Restore" Properties="AssimpImportHostRestore=true" />
+    <MSBuild Projects="$(AssimpImportHostFolder)AssimpImportHost.csproj" Targets="Build" Properties="Configuration=$(Configuration);OutDir=$(TargetDir)AssimpImportHost/" />
   </Target>
   <!-- OpenCV's FFmpeg video plugin is unused now that VideoStreamInput decodes via FFmpeg directly, so drop
        it to avoid shipping a second FFmpeg alongside the LGPL FFmpeg build. -->

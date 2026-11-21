@@ -27,6 +27,22 @@
       "DefaultValue": 0.5
     },
     {
+      "Id": "a1b2c3d4-0001-4a9b-8c2d-101010101010"/*Acceleration*/,
+      "DefaultValue": "Xnnpack"
+    },
+    {
+      "Id": "a1b2c3d4-1001-4a9b-8c2d-101010101010"/*InferenceThreads*/,
+      "DefaultValue": 4
+    },
+    {
+      "Id": "a1b2c3d4-2001-4a9b-8c2d-101010101010"/*ConstantSize*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "a1b2c3d4-2002-4a9b-8c2d-101010101010"/*HandSize*/,
+      "DefaultValue": 0.15
+    },
+    {
       "Id": "abcdef12-3456-7890-abcd-ef1234567890"/*Debug*/,
       "DefaultValue": false
     },

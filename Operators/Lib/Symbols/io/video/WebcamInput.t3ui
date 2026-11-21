@@ -1,7 +1,7 @@
-{
+﻿{
   "FormatVersion": 3,
   "Id": "cd5a182e-254b-4e65-820b-ff754122614c"/*WebcamInput*/,
-  "Description": "Captures live video from a connected device like a webcam or capture card.\n\nThis operator provides access to video devices available on your system. You can select the device, resolution, and frame rate. It also allows for basic image manipulation like flipping and repositioning.\n\nTips:\n- To save system resources, enable `DeactivateWhenNotShowing`. This will pause the capture when the operator is not being rendered.\n- The `Status` output provides useful information for troubleshooting connection issues.\n\nAKA: webcam, camera, capture card, video input, VideoDeviceInput",
+  "Description": "Captures live video from a connected device like a webcam or capture card.\n\nDevices are opened through FFmpeg - DirectShow on Windows, V4L2 on Linux, AVFoundation on macOS. The device, resolution, and frame rate can be selected, and the capture runs on its own thread and automatically retries when a device is unplugged and returns. Basic image manipulation like flipping, rotation, scaling and repositioning is done in software.\n\nThe `Control1`..`Control4` pairs reach any control the device actually exposes: each pair is a control name plus its value, applied to the camera whenever it changes. By default the values are in device units; `NormalizedControlValues` maps them to 0..1 over each control's range instead. The `ControlsCatalog` output lists everything the device reports - kind, range, step, default, current value and auto/inactive state.\n\nTips:\n- To save system resources, enable `DeactivateWhenNotShowing`. This will pause the capture when the operator is not being rendered.\n- The `Status` output provides useful information for troubleshooting connection issues.\n- `OpenSettings` opens a camera settings window; `Control1`..`Control4` drive any camera control (pan, tilt, zoom, focus...) from the graph.",
   "InputUis": [
     {
       "InputId": "11f7432d-31f1-44b9-8f75-b1569b314b13"/*CustomFps*/,
@@ -12,12 +12,31 @@
       "Description": "Manually specify a frame rate. This will only work if the device and its driver support the requested FPS. Default is 0 (fastest rate of the selected resolution)."
     },
     {
+      "InputId": "13553eca-d106-4eb6-afe9-095425b19b98"/*NormalizedControlValues*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 975.0
+      },
+      "GroupTitle": "Camera Controls",
+      "Description": "If enabled, Control1Value..Control4Value range from 0 to 1 over each control's range as the camera reports it. If disabled, they are in the camera's own units, the numbers the settings window shows."
+    },
+    {
+      "InputId": "1ad30e74-ec75-43da-8e1c-4f9b55f14977"/*Control4Value*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1575.0
+      },
+      "Description": "Value for Control4. Sent to the camera whenever it changes; with NormalizedControlValues it is 0..1 over the control's range.",
+      "Min": 0.0,
+      "Max": 1.0
+    },
+    {
       "InputId": "22513b82-e77a-417a-8a46-24e677f072d4"/*DeactivateWhenNotShowing*/,
       "Position": {
         "X": -200.0,
         "Y": 150.0
       },
-      "Description": "If enabled, the device is automatically deactivated when its output is not being rendered, which can save significant system resources."
+      "Description": "If enabled, capture stops after a few seconds without this operator being evaluated — that is, while its output is not being rendered — releasing the camera for other applications and saving the CPU spent converting frames. Capture resumes within a moment of the operator being rendered again."
     },
     {
       "InputId": "236d4c5c-0022-4416-a22c-d6df73c306e2"/*Active*/,
@@ -26,6 +45,15 @@
         "Y": 0.0
       },
       "Description": "Enables or disables the video capture."
+    },
+    {
+      "InputId": "2f1e2465-34c3-40b1-94c5-375e7a8d733f"/*Control1*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1050.0
+      },
+      "Description": "A camera control to drive from the graph, such as Pan, Tilt, Zoom or Focus. The dropdown lists what the selected camera supports.",
+      "Usage": "CustomDropdown"
     },
     {
       "InputId": "3022de8a-5d88-4a37-9799-780f2a838a5f"/*FlipVertically*/,
@@ -44,12 +72,42 @@
       "Description": "Applies a rotation to the video image in degrees. This is used for correcting orientation."
     },
     {
+      "InputId": "340481bb-c924-4bb1-a565-54d5bea3f2ea"/*Control3Value*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1425.0
+      },
+      "Description": "Value for Control3. Sent to the camera whenever it changes; with NormalizedControlValues it is 0..1 over the control's range.",
+      "Min": 0.0,
+      "Max": 1.0
+    },
+    {
       "InputId": "49019d29-873e-4b7c-a897-c575a384a650"/*ResolutionFpsType*/,
       "Position": {
         "X": -200.0,
         "Y": 225.0
       },
+      "GroupTitle": "Format",
       "Description": "Selects how resolution and FPS are determined. 'Custom' allows manual input, otherwise the largest mode up to 1080p is used."
+    },
+    {
+      "InputId": "4e15a154-74ee-4fa7-9a31-62f23e8f5d61"/*CameraSettings*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1650.0
+      },
+      "Description": "Camera values committed with OK or Apply in the settings window (see OpenSettings), stored with the project and applied again whenever the camera opens. Edit them in the window rather than here.",
+      "Usage": "Default"
+    },
+    {
+      "InputId": "5605ce18-38fd-45dc-bdba-19dc19f8b909"/*Control2Value*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1275.0
+      },
+      "Description": "Value for Control2. Sent to the camera whenever it changes; with NormalizedControlValues it is 0..1 over the control's range.",
+      "Min": 0.0,
+      "Max": 1.0
     },
     {
       "InputId": "67e149a5-f7b6-47bc-b147-3b9b11c19c29"/*Reconnect*/,
@@ -58,6 +116,16 @@
         "Y": 900.0
       },
       "Description": "A trigger to force a reconnection to the video device, which can be useful if the device becomes unresponsive or if settings have been changed externally."
+    },
+    {
+      "InputId": "71948b15-97d5-4a01-858f-d07bb3f60a26"/*Control1Value*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1125.0
+      },
+      "Description": "Value for Control1. Sent to the camera whenever it changes; with NormalizedControlValues it is 0..1 over the control's range.",
+      "Min": 0.0,
+      "Max": 1.0
     },
     {
       "InputId": "805602d5-52b2-4a73-a337-12e00c3c91f2"/*Scale*/,
@@ -73,7 +141,17 @@
         "X": -200.0,
         "Y": 675.0
       },
-      "Description": "No longer available: camera settings dialogs are not offered on any platform. Kept for existing projects."
+      "GroupTitle": "Settings & Status",
+      "Description": "Opens the camera settings window: every control the camera supports (brightness, contrast, white balance, pan, tilt, zoom, focus...) with sliders and Auto switches, the same on Windows, Linux and macOS. Values committed with OK or Apply are stored in CameraSettings."
+    },
+    {
+      "InputId": "a3dd2efe-f31e-4f3c-bcd1-aab1972b9af5"/*Control4*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1500.0
+      },
+      "Description": "A camera control to drive from the graph, such as Pan, Tilt, Zoom or Focus. The dropdown lists what the selected camera supports.",
+      "Usage": "CustomDropdown"
     },
     {
       "InputId": "a57e815d-70c9-4d3b-998c-d13506b8f56e"/*FlipHorizontally*/,
@@ -92,11 +170,21 @@
       "Description": "Manually specify a resolution (width and height). A size the device does not offer is scaled, which costs CPU time. Default is 0,0 (largest mode up to 1080p)."
     },
     {
+      "InputId": "e557173c-1835-4ef2-98da-0828b24a4ca1"/*Control3*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1350.0
+      },
+      "Description": "A camera control to drive from the graph, such as Pan, Tilt, Zoom or Focus. The dropdown lists what the selected camera supports.",
+      "Usage": "CustomDropdown"
+    },
+    {
       "InputId": "f187a997-7e4a-48c6-81f9-2a27f150a68a"/*Reposition*/,
       "Position": {
         "X": -200.0,
         "Y": 750.0
       },
+      "GroupTitle": "Framing",
       "Description": "Applies a 2D translation (X,Y) to the video image. Part of the transformation."
     },
     {
@@ -107,10 +195,26 @@
       },
       "Description": "The name of the video capture device to use. The dropdown lists all devices detected on the system.",
       "Usage": "CustomDropdown"
+    },
+    {
+      "InputId": "ffb8bf70-1ef8-4e11-921c-fb76c8f8a4e6"/*Control2*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1200.0
+      },
+      "Description": "A camera control to drive from the graph, such as Pan, Tilt, Zoom or Focus. The dropdown lists what the selected camera supports.",
+      "Usage": "CustomDropdown"
     }
   ],
   "SymbolChildUis": [],
   "OutputUis": [
+    {
+      "OutputId": "f23112d1-2f77-4afe-813d-c6a51ab1f6a4"/*ControlsCatalog*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 600.0
+      }
+    },
     {
       "OutputId": "1d0159cc-33d2-46b1-9c0c-7054aa560df5"/*Texture*/,
       "Position": {

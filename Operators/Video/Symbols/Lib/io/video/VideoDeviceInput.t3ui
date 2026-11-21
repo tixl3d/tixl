@@ -1,0 +1,243 @@
+﻿{
+  "FormatVersion": 3,
+  "Id": "34c2d58d-ae76-47b6-9713-02911a783341"/*VideoDeviceInput*/,
+  "Description": "Captures live video from a connected device like a webcam or capture card, with the basic camera hardware configs built in: Pan, Tilt, Zoom, Focus, Exposure and Brightness are applied to the camera automatically whenever their input changes — several settings at once, and each can be patched/animated.\n\nBeyond the fixed config inputs, a generic control surface reaches every control the device actually exposes — the replacement for the old DirectShow capture-filter dialog: `ControlName` offers the discovered controls as a dropdown, `ControlValue` carries the value in device units (for menu controls it picks one of the item values its dropdown lists), `ControlAuto` is a strict two-way switch (true = engage the control's auto mode, value ignored; false = apply the value as manual, which disengages auto), and `ApplyControl` sends the combination to the camera. The `ControlsCatalog` output lists everything the device reports — kind, range, step, default, current value and auto/inactive state. On platforms without a camera-control backend, both report controls as unavailable.\n\nDevices are opened through FFmpeg — DirectShow on Windows, V4L2 on Linux, AVFoundation on macOS. The device, resolution, and frame rate can be selected; the capture runs on its own thread and automatically retries when a device is unplugged and returns. Basic image manipulation like flipping, rotation, scaling and repositioning is done in software.\n\nTips:\n- To save system resources, enable `DeactivateWhenNotShowing`. This will pause the capture when the operator is not being rendered.\n- The config inputs only touch the camera when their value changes, and only if the camera actually implements the control. Values are in device units (Zoom 100 = 1x, Pan/Tilt in 1/64°); `Status` shows the supported range after an apply. All control traffic runs on a background worker, so success notes, clamping and unsupported warnings land one evaluation after the change, and an animated input coalesces into one pending write.\n- The resolution and frame-rate dropdowns list the combinations the device reports (on macOS the device doesn't expose them, so only defaults are offered); with `ResolutionFpsType` set to `Custom`, any value can be typed — the driver negotiates the closest match and the image is resized in software when the device can't deliver the requested size.\n- On macOS the camera is gated by privacy: if the editor is denied camera access, no devices appear — allow it under System Settings → Privacy & Security → Camera, then trigger `Reconnect`.\n- A `Reconnect` trigger also rescans the device list, so cameras plugged in after startup become selectable, and refreshes the control catalog of the (possibly replaced) camera.\n- The `Status` output provides useful information for troubleshooting connection issues.\n\nAKA: webcam, camera, capture card, ptz, pan, tilt, zoom, video input",
+  "InputUis": [
+    {
+      "InputId": "06c894a8-fe69-4cf6-bf54-b9c155b8f035"/*ControlValue*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1500.0
+      },
+      "Description": "Value in device units for the selected control (see `ControlsCatalog` for its range and current value). For menu controls this is the selected item's value — the dropdown lists the items as 'value — label'; for non-menu controls the typed value is used as-is."
+    },
+    {
+      "InputId": "11f7432d-31f1-44b9-8f75-b1569b314b13"/*CustomFps*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 375.0
+      },
+      "Description": "Manually specify a frame rate. This will only work if the device and its driver support the requested FPS. Default is 0 (device default)."
+    },
+    {
+      "InputId": "145615c4-c65b-49e9-abb5-78338579e7a3"/*ControlAuto*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1575.0
+      },
+      "Description": "Strict two-way switch: true engages the selected control's auto mode (`ControlValue` is ignored); false, the default, applies `ControlValue` as a manual value — which disengages the auto mode on every platform. There is deliberately no 'leave auto untouched' option."
+    },
+    {
+      "InputId": "22513b82-e77a-417a-8a46-24e677f072d4"/*DeactivateWhenNotShowing*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      },
+      "Description": "If enabled, the device is automatically deactivated when its output is not being rendered, which can save significant system resources."
+    },
+    {
+      "InputId": "236d4c5c-0022-4416-a22c-d6df73c306e2"/*Active*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "Enables or disables the video capture."
+    },
+    {
+      "InputId": "2e75b9c3-8d41-4a6f-b520-93e78f1c4a62"/*Tilt*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1050.0
+      },
+      "Description": "Camera tilt in device units (UVC: 1/64°). Applied when the value changes; ignored if the camera has no tilt."
+    },
+    {
+      "InputId": "3022de8a-5d88-4a37-9799-780f2a838a5f"/*FlipVertically*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 450.0
+      },
+      "Description": "Flips the incoming video image vertically."
+    },
+    {
+      "InputId": "3022de8a-5d88-4a37-9799-780f2a838a6e"/*ApplyRotationData*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 600.0
+      },
+      "Description": "Applies a rotation to the video image in degrees. This is used for correcting orientation."
+    },
+    {
+      "InputId": "32f597e7-eb25-45be-b37a-153214b1119e"/*CameraSettings*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 750.0
+      },
+      "Usage": "Default"
+    },
+    {
+      "InputId": "49019d29-873e-4b7c-a897-c575a384a650"/*ResolutionFpsType*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      },
+      "GroupTitle": "Format",
+      "Description": "Selects how resolution and FPS are determined. 'Custom' allows manual input, otherwise device defaults are used."
+    },
+    {
+      "InputId": "67e149a5-f7b6-47bc-b147-3b9b11c19c29"/*Reconnect*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 900.0
+      },
+      "Description": "A trigger to force a reconnection to the video device, which can be useful if the device becomes unresponsive or if settings have been changed externally."
+    },
+    {
+      "InputId": "694ce2cc-cbdc-49d2-a591-6ac0d5fa16bd"/*ControlName*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1425.0
+      },
+      "Description": "The device control to drive, picked from everything the camera actually reports — the dropdown lists the same controls as the `ControlsCatalog` output. Send it with `ApplyControl`.",
+      "Usage": "CustomDropdown"
+    },
+    {
+      "InputId": "6c38a1f4-92d7-4b5e-8c63-1f94b6d3a758"/*Zoom*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1125.0
+      },
+      "Description": "Camera zoom in device units (UVC: 100 = 1x). Applied when the value changes; ignored if the camera has no zoom."
+    },
+    {
+      "InputId": "723a1471-c002-44a5-9b9e-f325d716671f"/*ApplyControl*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1650.0
+      },
+      "GroupTitle": "Camera Controls",
+      "Description": "Trigger that sends the ControlName/ControlValue/ControlAuto combination to the camera and self-clears. Control traffic runs on a background worker — `Status` reports the result (clamping, unsupported controls) one evaluation later."
+    },
+    {
+      "InputId": "805602d5-52b2-4a73-a337-12e00c3c91f2"/*Scale*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 825.0
+      },
+      "Description": "Scales the video image. Part of the `Reposition` transform. Default is 1,1 (no scaling)."
+    },
+    {
+      "InputId": "84b6e3c9-1a52-4f7d-9e28-67d3f1a5b496"/*Exposure*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1275.0
+      },
+      "Description": "Camera exposure in device units (UVC absolute exposure: 0.1 ms). Applied when the value changes; ignored if the camera has no manual exposure."
+    },
+    {
+      "InputId": "8d2c28c7-1234-40e2-9388-75574519543d"/*OpenSettings*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 675.0
+      },
+      "GroupTitle": "Settings & Status",
+      "Description": "A trigger to open the video device's native driver settings dialog, if available."
+    },
+    {
+      "InputId": "a57e815d-70c9-4d3b-998c-d13506b8f56e"/*FlipHorizontally*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 525.0
+      },
+      "Description": "Flips the incoming video image horizontally."
+    },
+    {
+      "InputId": "a5f4d2b8-63e9-4c17-8d40-52b7e9c6f183"/*Focus*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1200.0
+      },
+      "Description": "Camera focus in device units (absolute). Applied when the value changes; ignored if the camera has no manual focus."
+    },
+    {
+      "InputId": "c9e1c1f6-3a18-4a1c-8a5e-4b4119965b6e"/*CustomResolution*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 300.0
+      },
+      "Description": "Manually specify a resolution (width and height). This will only work if the device and its driver support the requested resolution. Default is 0,0 (device default)."
+    },
+    {
+      "InputId": "d7a2f851-4c93-46b8-8e71-3b95c6e2d740"/*Brightness*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1350.0
+      },
+      "Description": "Camera brightness in device units. Applied when the value changes; ignored if the camera has no brightness control."
+    },
+    {
+      "InputId": "d91c4a7e-5b36-4e82-9f10-7c64a2d8e513"/*Pan*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 975.0
+      },
+      "Description": "Camera pan in device units (UVC: 1/64°). Applied when the value changes; ignored if the camera has no pan."
+    },
+    {
+      "InputId": "f187a997-7e4a-48c6-81f9-2a27f150a68a"/*Reposition*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 750.0
+      },
+      "GroupTitle": "Framing",
+      "Description": "Applies a 2D translation (X,Y) to the video image. Part of the transformation."
+    },
+    {
+      "InputId": "f5b900ec-ee17-123e-9972-cdd0580c104e"/*InputDeviceName*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      },
+      "Description": "The name of the video capture device to use. The dropdown lists all devices detected on the system.",
+      "Usage": "CustomDropdown"
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "1d0159cc-33d2-46b1-9c0c-7054aa560df5"/*Texture*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    },
+    {
+      "OutputId": "868d5ffe-032c-4522-b56b-d96b30841db7"/*UpdateCount*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 300.0
+      }
+    },
+    {
+      "OutputId": "9c2e4c11-09b6-4f4d-8f99-4a7372d5f2b5"/*Resolution*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 400.0
+      }
+    },
+    {
+      "OutputId": "a1b2c3d4-5678-90ef-1234-567890abcdef"/*Status*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 500.0
+      }
+    },
+    {
+      "OutputId": "60e8db59-6f3a-4891-9232-3ff40c338432"/*ControlsCatalog*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 600.0
+      }
+    }
+  ]
+}

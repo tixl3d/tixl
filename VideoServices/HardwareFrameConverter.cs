@@ -55,14 +55,18 @@ internal sealed class HardwareFrameConverter : IDisposable
             // balanced and FFmpeg's own reference is left intact. (Risk spot: if the pool exhausts after ~20
             // frames and decode stalls, this AddRef is doubling a ref the ctor already takes — drop it then.)
             Marshal.AddRef(texturePtr);
-            // The decoder hands over an NV12 or P010 array texture; the plane comes from the view's format.
+            // The frame's pixel format is always D3D11 for a hardware surface, so the actual layout comes from
+            // the frames context's software format (NV12 for 8-bit, P010 for 10-bit). Assuming NV12 here made
+            // every P010 surface take R8/R8G8 plane views, which D3D11 rejects.
+            var swFormat = HardwareSurfaceFormat(gpuFrame);
+            var tenBit = swFormat is AVPixelFormat.P010le or AVPixelFormat.P016le;
             var decoderDescription = new Texture2DDescription
                                          {
                                              Width = width,
                                              Height = height,
                                              MipLevels = 1,
                                              ArraySize = sliceIndex + 1,
-                                             Format = gpuFrame.Format == (int)AVPixelFormat.D3d11 ? Format.NV12 : Format.P010,
+                                             Format = tenBit ? Format.P010 : Format.NV12,
                                              SampleDescription = new SampleDescription(1, 0),
                                              BindFlags = BindFlags.ShaderResource,
                                              Usage = ResourceUsage.Default,
@@ -74,7 +78,6 @@ internal sealed class HardwareFrameConverter : IDisposable
             // NV12 (8-bit) reads R8/R8G8 plane SRVs into an RGBA8 output; P010/P016 (10/12-bit) read R16/R16G16
             // into RGBA16 so the extra bits survive. The plane is selected by the SRV format on the decoder
             // texture-array slice (D3D11 maps the format to the plane; PlaneSlice is a D3D12 concept).
-            var tenBit = decoderTexture.Description.Format != Format.NV12;
             var lumaFormat = tenBit ? Format.R16_UNorm : Format.R8_UNorm;
             var chromaFormat = tenBit ? Format.R16G16_UNorm : Format.R8G8_UNorm;
             var outputFormat = tenBit ? Format.R16G16B16A16_UNorm : Format.R8G8B8A8_UNorm;
@@ -99,6 +102,21 @@ internal sealed class HardwareFrameConverter : IDisposable
         }
 
         return _output;
+    }
+
+    /// <summary>
+    /// The software pixel format of a hardware frame (NV12 for 8-bit, P010 for 10-bit), read from its
+    /// <c>AVHWFramesContext</c> — the frame's own <c>format</c> is always the D3D11 hardware format.
+    /// Returns <see cref="AVPixelFormat.None"/> when the frame carries no frames context.
+    /// </summary>
+    private static unsafe AVPixelFormat HardwareSurfaceFormat(Frame gpuFrame)
+    {
+        var framesContext = gpuFrame.HwFramesContext;
+        if (framesContext is not { IsInvalid: false })
+            return AVPixelFormat.None;
+
+        var context = (AVHWFramesContext*)framesContext.Data.Pointer;
+        return context != null ? context->sw_format : AVPixelFormat.None;
     }
 
     private static ShaderResourceViewDescription PlaneSrvDesc(Format format, int slice) => new()

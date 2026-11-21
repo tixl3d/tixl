@@ -1,5 +1,6 @@
 using Sdcb.FFmpeg.Codecs;
 using Sdcb.FFmpeg.Raw;
+using Sdcb.FFmpeg.Utils;
 using T3.Core.Logging;
 
 namespace T3.VideoServices;
@@ -13,9 +14,16 @@ namespace T3.VideoServices;
 /// </summary>
 public static class HardwareEncoderProbe
 {
-    // Vendor order: NVIDIA NVENC, Intel Quick Sync, AMD AMF. The first that opens wins.
-    private static readonly string[] H264Candidates = { "h264_nvenc", "h264_qsv", "h264_amf" };
-    private static readonly string[] HevcCandidates = { "hevc_nvenc", "hevc_qsv", "hevc_amf" };
+    // Vendor order: NVIDIA NVENC, Intel Quick Sync, AMD AMF; Apple's VideoToolbox first on macOS.
+    // The first that opens wins. (VAAPI is deliberately absent: its encoders need a hardware-frame
+    // pipeline this encode path doesn't have, unlike NVENC/QSV/AMF/VideoToolbox which accept
+    // system-memory frames.)
+    private static readonly string[] H264Candidates = OperatingSystem.IsMacOS()
+                                                          ? ["h264_videotoolbox", "h264_nvenc", "h264_qsv", "h264_amf"]
+                                                          : ["h264_nvenc", "h264_qsv", "h264_amf"];
+    private static readonly string[] HevcCandidates = OperatingSystem.IsMacOS()
+                                                          ? ["hevc_videotoolbox", "hevc_nvenc", "hevc_qsv", "hevc_amf"]
+                                                          : ["hevc_nvenc", "hevc_qsv", "hevc_amf"];
 
     /// <summary>The working H.264 hardware encoder name (e.g. <c>h264_nvenc</c>), or null if none initializes.</summary>
     public static string? H264HardwareEncoder => _h264 ??= FindWorkingEncoder(H264Candidates);
@@ -48,25 +56,57 @@ public static class HardwareEncoderProbe
         return null;
     }
 
-    // Opening with minimal CPU-input params is the only reliable availability test: hardware encoders accept
-    // system-memory frames (they upload internally), and a missing GPU/driver fails here at Open().
-    private static bool CanOpenEncoder(string encoderName)
+    // Opening is not proof of encoding: a headless VM can initialize VideoToolbox/QSV and then emit no
+    // packets at all. Encode keyframes with the same settings the live encoder uses and require a packet
+    // without flushing — a live stream never flushes, so an encoder that only emits on flush is unusable.
+    private static unsafe bool CanOpenEncoder(string encoderName)
     {
         CodecContext? context = null;
         try
         {
             var codec = Codec.FindEncoderByName(encoderName);
+            var pixelFormat = EncoderInputFormat(encoderName);
             context = new CodecContext(codec)
                           {
                               Width = 320,
                               Height = 240,
                               TimeBase = new AVRational(1, 30),
                               Framerate = new AVRational(30, 1),
-                              PixelFormat = EncoderInputFormat(encoderName),
-                              BitRate = 1_000_000,
+                              PixelFormat = pixelFormat,
+                              BitRate = 1_500_000,
+                              MaxBFrames = 0,
+                              GopSize = 60,
+                              ColorRange = AVColorRange.Mpeg,
+                              ColorPrimaries = AVColorPrimaries.Bt709,
+                              ColorTrc = AVColorTransferCharacteristic.Bt709,
+                              Colorspace = AVColorSpace.Bt709,
                           };
+            context.Flags |= AV_CODEC_FLAG.LowDelay;
+            LiveH264Encoder.ApplyLowLatencyOptions(context, encoderName);
             context.Open();
-            return true;
+
+            using var frame = Frame.CreateVideo(320, 240, pixelFormat);
+            frame.EnsureBuffer(1);
+            frame.ColorRange = AVColorRange.Mpeg;
+            frame.ColorPrimaries = AVColorPrimaries.Bt709;
+            frame.ColorTrc = AVColorTransferCharacteristic.Bt709;
+            frame.Colorspace = AVColorSpace.Bt709;
+
+            using var packet = new Packet();
+            for (var i = 0; i < 3; i++)
+            {
+                frame.Pts = i;
+                frame.PictType = i == 0 ? AVPictureType.I : AVPictureType.None;
+                context.SendFrame(frame);
+                if (context.ReceivePacket(packet) != CodecResult.Success)
+                    continue;
+
+                packet.Unref();
+                return true;
+            }
+
+            Log.Debug($"Hardware video encoder {encoderName} opened but produced no packet for 3 frames");
+            return false;
         }
         catch (Exception e)
         {

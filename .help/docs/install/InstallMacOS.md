@@ -65,19 +65,13 @@ operators still load, but your own operators won't compile.
 
 ### Video playback
 
-TiXL doesn't include FFmpeg on macOS yet, so video operators don't work out of the box. For now you can
-use Homebrew's FFmpeg 7:
+TiXL ships its own FFmpeg with the app, so video playback, video export and render export work out of
+the box. Video export uses Apple's VideoToolbox hardware encoders when the Mac has them (it does,
+on Apple Silicon) and falls back to software encoders.
 
-```bash
-brew install ffmpeg@7
-```
-
-Homebrew's FFmpeg is licensed differently from the version TiXL ships on other systems, so TiXL only uses
-it when you start it with `TIXL_FFMPEG_ALLOW_RESTRICTED=1`:
-
-```bash
-TIXL_FFMPEG_ALLOW_RESTRICTED=1 /Applications/TiXL.app/Contents/MacOS/TiXL
-```
+For development from source the app has no bundled FFmpeg: install Homebrew's FFmpeg 7
+(`brew install ffmpeg@7`) and start TiXL with `TIXL_FFMPEG_ALLOW_RESTRICTED=1`. Homebrew's FFmpeg is
+licensed differently from the one TiXL ships, which is why it is only used when you ask for it.
 
 ## Using TiXL on a Mac
 

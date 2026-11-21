@@ -103,6 +103,7 @@
     <ProjectReference Include="..\..\Graphics\Graphics.csproj" Private="false" PrivateAssets="all" />
     <ProjectReference Include="..\..\Graphics.Compat\Graphics.Compat.csproj" Private="false" PrivateAssets="all" />
     <ProjectReference Include="..\..\Logging\Logging.csproj" Private="false" PrivateAssets="all" />
+    <ProjectReference Include="..\..\SystemUi\SystemUi.csproj" Private="false" PrivateAssets="all" />
     <!-- FFmpeg video services (decode + encode). -->
     <ProjectReference Include="..\..\VideoServices\VideoServices.csproj" />
   </ItemGroup>
@@ -117,6 +118,9 @@
     <PackageReference Include="Sdcb.FFmpeg" Version="7.0.0" />
     <PackageReference Include="FFmpeg.LGPL" Version="20250329.1.0" Condition="$([MSBuild]::IsOSPlatform('Windows'))" />
     <PackageReference Include="TqkLibrary.FFmpeg.Lgpl3.Native.Linux.x64" Version="7.1.5.1" Condition="$([MSBuild]::IsOSPlatform('Linux'))" />
+    <!-- Managed-only DirectShow interop: [VideoDeviceInput] enumerates webcam names and capabilities on
+         Windows before opening them through FFmpeg's dshow demuxer. Loads (but is never called) elsewhere. -->
+    <PackageReference Include="DirectShowLib.Standard" Version="2.1.0" />
   </ItemGroup>
   <ItemGroup Label="OperatorPackages">
     <Operators Include="lib" Version="1.0.0" ResourcesOnly="False" />

@@ -7,12 +7,24 @@
       "DefaultValue": 0
     },
     {
+      "Id": "13553eca-d106-4eb6-afe9-095425b19b98"/*NormalizedControlValues*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "1ad30e74-ec75-43da-8e1c-4f9b55f14977"/*Control4Value*/,
+      "DefaultValue": 0.0
+    },
+    {
       "Id": "22513b82-e77a-417a-8a46-24e677f072d4"/*DeactivateWhenNotShowing*/,
       "DefaultValue": false
     },
     {
       "Id": "236d4c5c-0022-4416-a22c-d6df73c306e2"/*Active*/,
       "DefaultValue": false
+    },
+    {
+      "Id": "2f1e2465-34c3-40b1-94c5-375e7a8d733f"/*Control1*/,
+      "DefaultValue": ""
     },
     {
       "Id": "3022de8a-5d88-4a37-9799-780f2a838a5f"/*FlipVertically*/,
@@ -23,12 +35,28 @@
       "DefaultValue": 0.0
     },
     {
+      "Id": "340481bb-c924-4bb1-a565-54d5bea3f2ea"/*Control3Value*/,
+      "DefaultValue": 0.0
+    },
+    {
       "Id": "49019d29-873e-4b7c-a897-c575a384a650"/*ResolutionFpsType*/,
       "DefaultValue": 0
     },
     {
+      "Id": "4e15a154-74ee-4fa7-9a31-62f23e8f5d61"/*CameraSettings*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "5605ce18-38fd-45dc-bdba-19dc19f8b909"/*Control2Value*/,
+      "DefaultValue": 0.0
+    },
+    {
       "Id": "67e149a5-f7b6-47bc-b147-3b9b11c19c29"/*Reconnect*/,
       "DefaultValue": false
+    },
+    {
+      "Id": "71948b15-97d5-4a01-858f-d07bb3f60a26"/*Control1Value*/,
+      "DefaultValue": 0.0
     },
     {
       "Id": "805602d5-52b2-4a73-a337-12e00c3c91f2"/*Scale*/,
@@ -42,6 +70,10 @@
       "DefaultValue": false
     },
     {
+      "Id": "a3dd2efe-f31e-4f3c-bcd1-aab1972b9af5"/*Control4*/,
+      "DefaultValue": ""
+    },
+    {
       "Id": "a57e815d-70c9-4d3b-998c-d13506b8f56e"/*FlipHorizontally*/,
       "DefaultValue": false
     },
@@ -53,6 +85,10 @@
       }
     },
     {
+      "Id": "e557173c-1835-4ef2-98da-0828b24a4ca1"/*Control3*/,
+      "DefaultValue": ""
+    },
+    {
       "Id": "f187a997-7e4a-48c6-81f9-2a27f150a68a"/*Reposition*/,
       "DefaultValue": {
         "X": 0.0,
@@ -61,6 +97,10 @@
     },
     {
       "Id": "f5b900ec-ee17-123e-9972-cdd0580c104e"/*InputDeviceName*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "ffb8bf70-1ef8-4e11-921c-fb76c8f8a4e6"/*Control2*/,
       "DefaultValue": ""
     }
   ],

@@ -11,7 +11,7 @@ using Size = OpenCvSharp.Size;
 namespace Lib.io.video
 {
     [Guid("7b4d3c2a-5b16-4b2a-8f3a-7e8c9d0b1a2b")]
-    [ExportDependencies("OpenCvSharpExtern.dll")]
+    [ExportDependencies("OpenCvSharpExtern.dll", "libOpenCvSharpExtern.so", "libOpenCvSharpExtern.dylib")]
     public class CameraCalibrator : Instance<CameraCalibrator>, ICustomDropdownHolder
     {
         public enum Modes

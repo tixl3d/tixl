@@ -11,11 +11,34 @@ public sealed unsafe class SdlCameraProvider : ICameraProvider
     public void EnsureStarted()
     {
         if (_isStarted)
+        {
+            // The camera set changed (seen by a capture thread or a camera listing); restart on the main thread.
+            if (!_isRescanRequested)
+                return;
+
+            lock (_sdlLock)
+            {
+                // A capture thread is opening a camera. Restarting camera support would pull the subsystem
+                // out from under it, and waiting here would block the caller — this runs on the evaluation
+                // thread every frame. Leave the request standing for a later frame.
+                if (_opensInFlight > 0 || _isShutDown)
+                    return;
+
+                _isRescanRequested = false;
+                RestartCameraSupportLocked();
+            }
+
             return;
+        }
 
         _isStarted = true;
         if (!SDL_InitSubSystem(SDL_InitFlags.SDL_INIT_CAMERA))
             Log.Warning($"Could not start camera support: {SDL_GetError()}");
+
+        lock (_sdlLock)
+        {
+            _knownDeviceSignature = CameraDeviceWatcher.ReadSignature();
+        }
     }
 
     public IReadOnlyList<CameraInfo> GetCameras()
@@ -24,6 +47,11 @@ public sealed unsafe class SdlCameraProvider : ICameraProvider
         {
             if (_isShutDown)
                 return [];
+
+            // Someone is choosing a camera: pick up a newly connected one. The restart itself runs on the main
+            // thread (EnsureStarted), because this may be called from a background task.
+            if (HasCameraSetChangedLocked())
+                _isRescanRequested = true;
 
             var cameras = ReadCameras();
             var result = new CameraInfo[cameras.Count];
@@ -39,9 +67,100 @@ public sealed unsafe class SdlCameraProvider : ICameraProvider
 
     public ICameraStream? TryOpen(string cameraName, CameraMode requestedMode, out string? error)
     {
+        error = null;
+
+        // Resolve what to open and reserve the open while holding the lock, then release it for the blocking
+        // part: SDL_OpenCamera can sit for seconds on a permission prompt or a slow driver, and the
+        // evaluation thread's EnsureStarted() must never wait behind that.
+        SDL_CameraID cameraId;
+        string displayName;
+        CameraMode mode;
+        int epoch;
         lock (_sdlLock)
         {
-            return TryOpenLocked(cameraName, requestedMode, out error);
+            if (_isShutDown)
+            {
+                error = "Camera support has shut down.";
+                return null;
+            }
+
+            var cameras = ReadCameras();
+            if (cameras.Count == 0)
+            {
+                error = "No camera found.";
+                return null;
+            }
+
+            var cameraIndex = string.IsNullOrEmpty(cameraName) ? 0 : cameras.FindIndex(camera => camera.Name == cameraName);
+            if (cameraIndex < 0)
+            {
+                if (HasCameraSetChangedLocked())
+                {
+                    // This runs on a capture thread; the main thread restarts camera support and the retry finds it.
+                    _isRescanRequested = true;
+                    error = $"Camera '{cameraName}' not found yet. Looking for newly connected cameras...";
+                    return null;
+                }
+
+                error = $"Camera '{cameraName}' not found.";
+                return null;
+            }
+
+            cameraId = cameras[cameraIndex].Id;
+            displayName = cameras[cameraIndex].Name;
+            mode = CompleteMode(requestedMode, ReadModes(cameraId));
+
+            // No restart can run while this is set: EnsureStarted leaves the request standing instead.
+            _opensInFlight++;
+            epoch = _supportEpoch;
+        }
+
+        try
+        {
+            var spec = new SDL_CameraSpec
+                           {
+                               format = SDL_PIXELFORMAT_RGBA32,
+                               colorspace = SDL_Colorspace.SDL_COLORSPACE_SRGB,
+                               width = mode.Width,
+                               height = mode.Height,
+                               framerate_numerator = mode.Fps,
+                               framerate_denominator = 1,
+                           };
+
+            SDL_Camera* camera;
+            lock (_openLock)
+            {
+                camera = SDL_OpenCamera(cameraId, &spec);
+            }
+
+            if (camera == null)
+            {
+                error = $"Could not open camera '{displayName}': {SDL_GetError()}";
+                return null;
+            }
+
+            lock (_sdlLock)
+            {
+                // Camera support restarted while this open was in flight, so the handle belongs to a
+                // subsystem that no longer exists and nobody would ever close it.
+                if (_isShutDown || epoch != _supportEpoch)
+                {
+                    SDL_CloseCamera(camera);
+                    error = "Camera support restarted while the camera was opening.";
+                    return null;
+                }
+
+                var stream = new Stream(this, camera, cameraId);
+                _openStreams.Add(stream);
+                return stream;
+            }
+        }
+        finally
+        {
+            lock (_sdlLock)
+            {
+                _opensInFlight--;
+            }
         }
     }
 
@@ -63,51 +182,46 @@ public sealed unsafe class SdlCameraProvider : ICameraProvider
         }
     }
 
-    private ICameraStream? TryOpenLocked(string cameraName, CameraMode requestedMode, out string? error)
+    /// <summary>
+    /// Where SDL has no hotplug (Windows, macOS), compares the system's camera list with the one SDL loaded.
+    /// Throttled, because it is reached from retry loops and from dropdowns drawn every frame.
+    /// </summary>
+    private bool HasCameraSetChangedLocked()
     {
-        error = null;
-        if (_isShutDown)
+        if (!CameraDeviceWatcher.IsNeeded)
+            return false;
+
+        var now = Environment.TickCount64;
+        if (now - _lastDeviceCheckMs < DeviceCheckIntervalMs)
+            return false;
+
+        _lastDeviceCheckMs = now;
+        var signature = CameraDeviceWatcher.ReadSignature();
+        return signature != null && signature != _knownDeviceSignature;
+    }
+
+    /// <summary>
+    /// SDL reads the camera list only when camera support starts, so restarting it is the only way to see a
+    /// camera connected later. Open cameras are closed first: their streams report Disconnected, and their
+    /// operators reopen them within a second.
+    /// </summary>
+    private void RestartCameraSupportLocked()
+    {
+        foreach (var stream in _openStreams)
         {
-            error = "Camera support has shut down.";
-            return null;
+            stream.CloseLocked();
         }
 
-        var cameras = ReadCameras();
-        if (cameras.Count == 0)
-        {
-            error = "No camera found.";
-            return null;
-        }
+        _openStreams.Clear();
 
-        var cameraIndex = string.IsNullOrEmpty(cameraName) ? 0 : cameras.FindIndex(camera => camera.Name == cameraName);
-        if (cameraIndex < 0)
-        {
-            error = $"Camera '{cameraName}' not found.";
-            return null;
-        }
+        SDL_QuitSubSystem(SDL_InitFlags.SDL_INIT_CAMERA);
+        if (!SDL_InitSubSystem(SDL_InitFlags.SDL_INIT_CAMERA))
+            Log.Warning($"Could not restart camera support: {SDL_GetError()}");
 
-        var cameraId = cameras[cameraIndex].Id;
-        var mode = CompleteMode(requestedMode, ReadModes(cameraId));
-        var spec = new SDL_CameraSpec
-                       {
-                           format = SDL_PIXELFORMAT_RGBA32,
-                           colorspace = SDL_Colorspace.SDL_COLORSPACE_SRGB,
-                           width = mode.Width,
-                           height = mode.Height,
-                           framerate_numerator = mode.Fps,
-                           framerate_denominator = 1,
-                       };
-
-        var camera = SDL_OpenCamera(cameraId, &spec);
-        if (camera == null)
-        {
-            error = $"Could not open camera '{cameras[cameraIndex].Name}': {SDL_GetError()}";
-            return null;
-        }
-
-        var stream = new Stream(this, camera, cameraId);
-        _openStreams.Add(stream);
-        return stream;
+        // Tells an open that is still in flight that the subsystem it opened against is gone.
+        _supportEpoch++;
+        _knownDeviceSignature = CameraDeviceWatcher.ReadSignature();
+        Log.Debug("Camera list changed; camera support restarted to pick it up.");
     }
 
     /** Fills in what a request leaves open: the largest size that is cheap to convert, then that size's fastest rate. */
@@ -194,23 +308,29 @@ public sealed unsafe class SdlCameraProvider : ICameraProvider
 
     private sealed class Stream(SdlCameraProvider provider, SDL_Camera* camera, SDL_CameraID cameraId) : ICameraStream
     {
-        public CameraStreamState State { get; private set; } = CameraStreamState.Open;
+        /// <summary>
+        /// Per stream, so reading one camera does not serialize the other cameras' capture threads. Lock
+        /// order is provider._sdlLock → _streamLock, never the reverse.
+        /// </summary>
+        private readonly Lock _streamLock = new();
+
+        public CameraStreamState State => _state;
 
         public bool TryReadFrame(ref byte[] rgbaPixels, out int width, out int height)
         {
             width = 0;
             height = 0;
 
-            lock (provider._sdlLock)
+            lock (_streamLock)
             {
                 if (_isClosed)
                 {
-                    State = CameraStreamState.Disconnected;
+                    _state = CameraStreamState.Disconnected;
                     return false;
                 }
 
                 UpdateState();
-                if (State != CameraStreamState.Open)
+                if (_state != CameraStreamState.Open)
                     return false;
 
                 ulong timestampNs;
@@ -228,9 +348,17 @@ public sealed unsafe class SdlCameraProvider : ICameraProvider
                 fixed (byte* destination = rgbaPixels)
                 {
                     var source = (byte*)frame->pixels;
-                    for (var row = 0; row < height; row++)
+                    if (frame->pitch == rowByteCount)
                     {
-                        Buffer.MemoryCopy(source + row * frame->pitch, destination + row * rowByteCount, rowByteCount, rowByteCount);
+                        // The usual case for RGBA32 — one copy instead of one per row.
+                        Buffer.MemoryCopy(source, destination, byteCount, byteCount);
+                    }
+                    else
+                    {
+                        for (var row = 0; row < height; row++)
+                        {
+                            Buffer.MemoryCopy(source + row * frame->pitch, destination + row * rowByteCount, rowByteCount, rowByteCount);
+                        }
                     }
                 }
 
@@ -250,11 +378,14 @@ public sealed unsafe class SdlCameraProvider : ICameraProvider
 
         public void CloseLocked()
         {
-            if (_isClosed)
-                return;
+            lock (_streamLock)
+            {
+                if (_isClosed)
+                    return;
 
-            _isClosed = true;
-            SDL_CloseCamera(camera);
+                _isClosed = true;
+                SDL_CloseCamera(camera);
+            }
         }
 
         /** Checked regardless of frames arriving, because SDL keeps delivering blank frames from an unplugged camera. */
@@ -268,7 +399,7 @@ public sealed unsafe class SdlCameraProvider : ICameraProvider
 
             if (SDL_GetCameraPermissionState(camera) == SDL_CameraPermissionState.SDL_CAMERA_PERMISSION_STATE_DENIED)
             {
-                State = CameraStreamState.Denied;
+                _state = CameraStreamState.Denied;
                 return;
             }
 
@@ -285,9 +416,10 @@ public sealed unsafe class SdlCameraProvider : ICameraProvider
 
             SDL_free(ids);
             if (!isConnected)
-                State = CameraStreamState.Disconnected;
+                _state = CameraStreamState.Disconnected;
         }
 
+        private volatile CameraStreamState _state = CameraStreamState.Open;
         private long _lastStateCheckMs = Environment.TickCount64;
         private bool _isClosed;
     }
@@ -301,9 +433,24 @@ public sealed unsafe class SdlCameraProvider : ICameraProvider
     private const int MaxDefaultHeight = 1080;
 
     private const int StateCheckIntervalMs = 1000;
+    private const int DeviceCheckIntervalMs = 1000;
 
     private readonly Lock _sdlLock = new();
+
+    /** Serializes SDL_OpenCamera itself, which runs without the registry lock so it cannot block EnsureStarted. */
+    private readonly Lock _openLock = new();
+
     private readonly List<Stream> _openStreams = [];
+
+    /** Opens that resolved their camera but have not finished SDL_OpenCamera yet. Guarded by _sdlLock. */
+    private int _opensInFlight;
+
+    /** Bumped by every restart, so an open that outlived it knows its camera handle is void. */
+    private int _supportEpoch;
+
     private bool _isStarted;
     private bool _isShutDown;
+    private volatile bool _isRescanRequested;
+    private string? _knownDeviceSignature;
+    private long _lastDeviceCheckMs;
 }

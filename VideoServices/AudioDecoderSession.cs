@@ -156,6 +156,7 @@ public sealed class AudioDecoderSession : IDisposable
     {
         samples = default;
         startSeconds = 0;
+        var pendingReads = 0;
 
         while (true)
         {
@@ -190,6 +191,18 @@ public sealed class AudioDecoderSession : IDisposable
             {
                 _draining = true;
                 ffmpeg.avcodec_send_packet(_codecContext, null); // drain what the decoder still holds
+                continue;
+            }
+
+            if (read == CodecResult.Again)
+            {
+                // Non-blocking demuxers have no packet ready yet; the unfilled packet must not be sent —
+                // an empty packet puts the decoder into drain mode and ends the stream. Wait briefly and
+                // retry, bounded so a dead source still reports end-of-stream.
+                if (++pendingReads > MaxPendingReads)
+                    return false;
+
+                Thread.Sleep(1);
                 continue;
             }
 
@@ -295,6 +308,9 @@ public sealed class AudioDecoderSession : IDisposable
     }
 
     private static readonly long NoPts = ffmpeg.AV_NOPTS_VALUE;
+
+    /** How many consecutive 1 ms EAGAIN waits a read tolerates (at least ~5 s) before reporting end-of-stream. */
+    private const int MaxPendingReads = 5000;
 
     private readonly FormatContext _formatContext;
     private readonly CodecContext _codecContext;

@@ -34,7 +34,9 @@ TiXL then appears in your app menu. Inside the Flatpak, settings and logs live i
 `~/.var/app/app.tixl.TiXL/config/`; projects stay in `~/Documents`. To update, install the next bundle the same way.
 To remove TiXL, run `flatpak uninstall --user app.tixl.TiXL`.
 
-Audio goes through PipeWire or PulseAudio where they run, and ALSA otherwise. The licenses of everything TiXL includes are in the `licenses` folder of every download.
+TiXL currently includes the BASS audio library ([un4seen.com](https://www.un4seen.com)), in the Flatpak as in the
+download below. BASS is free for non-commercial use; using TiXL commercially requires a BASS license from un4seen
+until TiXL switches to its own audio backend. The license text is in the `licenses` folder of every download.
 
 ## Install the dependencies
 
@@ -228,44 +230,26 @@ NDI finds sources on the network through Avahi, so `avahi-daemon` has to be runn
 installing the runtime: a running program doesn't see newly installed libraries. Without the runtime the NDI
 operators show "NDI runtime not found" in their status and produce no output.
 
-## Optional: SpaceMouse
-
-TiXL reads a 3Dconnexion SpaceMouse directly, so spacenavd isn't needed. Linux only lets your user read the
-device with a udev rule. Create it once and replug the SpaceMouse:
-
-```bash
-printf '%s\n' 'KERNEL=="event*", ATTRS{idVendor}=="256f", TAG+="uaccess"' \
-               'KERNEL=="event*", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c6*", TAG+="uaccess"' \
-  | sudo tee /etc/udev/rules.d/70-spacemouse.rules
-sudo udevadm control --reload && sudo udevadm trigger --subsystem-match=input
-```
-
-*Settings → Input Devices* shows whether TiXL found the SpaceMouse and can read it, and whether it flies the
-camera or drives the [SpaceMouse] operator. The same applies to the Flatpak. A running spacenavd can take the
-device for itself; if TiXL sees no input, stop it while using TiXL.
-
-Game controllers need no setup. On some distributions an Xbox controller connected by Bluetooth pairs but sends no
-input; a USB cable or the `xpadneo` driver helps.
-
 ## What doesn't work on Linux yet
 
 A few features rely on Windows-only libraries:
 
-- Computer vision operators based on OpenCV and MediaPipe.
-- Screen capture.
+- GPU depth estimation without the CUDA libraries. [DepthAnything] and StreamDiffusion use the CUDA 12 build of ONNX
+  Runtime, which needs the CUDA 12 runtime and cuDNN 9 installed, driver 525 or newer, and a Pascal or newer GPU.
+  Without them the operators log why and run on the CPU. MediaPipe works; its GPU delegate falls back to the CPU
+  when no GL context is available. The OpenCV operators ([CameraCalibrator], the DMX point scanner and
+  [OnvifCamera]) work — each system ships its own OpenCV build. Webcam capture works too:
+  `[VideoDeviceInput]` opens cameras through FFmpeg's V4L2 backend.
+- Hardware-accelerated video export on AMD and Intel GPUs (NVIDIA's NVENC works). The software
+  encoders cover the rest.
+- NDI input and output, and screen capture.
 - Recording what other programs play (loopback). Live input from a microphone or line-in works.
 - Spout video sharing, which only exists on Windows.
-- Ableton Link.
+- SpaceMouse support, gamepads and Ableton Link.
 
 [Platform support](PlatformSupport.md) has the full comparison of Windows, Linux and macOS.
 
 ## Troubleshooting
-
-### A webcam is not listed
-
-Check that `v4l2-ctl --list-devices` shows it and that your user may open the device. Most desktops grant this
-automatically; otherwise add yourself to the `video` group and log in again. A camera can only be used by one
-program or operator at a time, and `[WebcamInput]` reports this in its status.
 
 ### Nothing happens when I start TiXL from the app menu
 
