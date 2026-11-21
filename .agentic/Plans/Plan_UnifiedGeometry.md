@@ -218,7 +218,12 @@ message must name what was expected.
   Still to do: SelectGeometry's Name and the remaining ops with attribute names.
 - **Snippet attributes** (done 2026-11-21): snippets of `SelectGeometry` and `CustomGeometryAttribute` read `@Name`
   through `Lib/Utils/GeometrySnippetAttributes`: typed array fields of the generated class, same domain passed through,
-  point attributes converted; recompiles only when the code or an attribute's type changes.
+  attributes of other domains converted through the vertices (each element averages what its vertices reach; ints take
+  the first value, orientations re-normalized; lookup: own domain, then points, vertices, primitives, parts). A dimmed
+  `InputStatus` note (IsError false) below the Code field names converted attributes. Not cached yet: a converted
+  attribute is rebuilt on every evaluation (one pass over the vertices); add a cache keyed on the geometry's version
+  only if profiling shows it matters, since in-place upstream updates must bump that version.
+  Recompiles only when the code or an attribute's type changes.
 - **`Segments` on `CubeGeometry`** (maintainer, 2026-11-21): an Int3 input (default 1, 1, 1) that splits each face
   into a grid, with per-axis counts that subdividing cannot give (e.g. 10 x 1 x 3 for a bar to bend). Shared points
   along cube edges, so the result stays watertight; UVs per face as today.

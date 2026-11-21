@@ -431,6 +431,9 @@ Connect [CubeGeometry] -> [CustomGeometryAttribute] (Domain Points, Name `W`, Co
 - Code `return @W > 0;` moves the top four corners.
 - Domain Primitives with `return @W > 0.4f;` selects only the top face; Domain Vertices with `return @Normal.Y > 0.5f;` too.
 - `return @Nope > 0;` moves nothing and the op warns that the attribute is missing.
+- Add a [CustomGeometryAttribute] (Domain Primitives, Name `FN`, Type Vector3, Code `return Vector3.Normalize(@Normal);`)
+  after the cube. Below its Code field a dimmed note says `@Normal averaged from vertices`.
+- [SelectGeometry] (Domain Primitives) with `return @FN.Y > 0.9f;` moves only the top face.
 
 ## Step: Sample a field into an attribute
 

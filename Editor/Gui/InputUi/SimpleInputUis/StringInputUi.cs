@@ -82,7 +82,8 @@ public sealed class StringInputUi : InputValueUi<string>
                 inputEditStateFlags = DrawMultilineTextEdit(ref value, null);
                 break;
             case UsageType.Code:
-                inputEditStateFlags = DrawMultilineTextEdit(ref value, GetInputStatus(input));
+                var hasStatus = TryGetInputStatus(input, out var status);
+                inputEditStateFlags = DrawMultilineTextEdit(ref value, hasStatus ? status : null);
                 break;
             case UsageType.FilePath:
                 inputEditStateFlags = FilePickingUi.DrawTypeAheadSearch(FileOperations.FilePickerTypes.File, FileFilter, ref value);
@@ -167,17 +168,16 @@ public sealed class StringInputUi : InputValueUi<string>
 
 
     
-    /// <summary>A problem the selected operator reports for this input, e.g. a snippet that doesn't compile.</summary>
-    private static string? GetInputStatus(Symbol.Child.Input input)
+    /// <summary>What the selected operator reports for this input, e.g. a snippet that doesn't compile.</summary>
+    private static bool TryGetInputStatus(Symbol.Child.Input input, out InputStatus status)
     {
         var instance = ProjectView.Focused?.NodeSelection.GetSelectedInstanceWithoutComposition();
-        return instance != null && CodeInputStatus.TryGet(instance, input.InputDefinition.Id, out var status)
-                   ? status.Message
-                   : null;
+        status = default;
+        return instance != null && CodeInputStatus.TryGet(instance, input.InputDefinition.Id, out status);
     }
 
-    /// <param name="error">Marks the field with an error border and shows the message below it.</param>
-    private static InputEditStateFlags DrawMultilineTextEdit(ref string value, string? error)
+    /// <param name="status">An error marks the field with a border and shows the message below it; a note is shown dimmed.</param>
+    private static InputEditStateFlags DrawMultilineTextEdit(ref string value, InputStatus? status)
     {
         // Wrap to next line
         ImGui.Dummy(new Vector2(1, 1));
@@ -189,7 +189,7 @@ public sealed class StringInputUi : InputValueUi<string>
         var requestedContentHeight = lineCount * lineHeight;
         var clampedToWindowHeight = MathF.Min(requestedContentHeight, ImGui.GetWindowSize().Y * 0.5f);
         
-        var hasError = !string.IsNullOrEmpty(error);
+        var hasError = status is { IsError: true, Message.Length: > 0 };
         if (hasError)
         {
             ImGui.PushStyleColor(ImGuiCol.Border, UiColors.StatusError.Rgba);
@@ -205,11 +205,11 @@ public sealed class StringInputUi : InputValueUi<string>
 
         ImGui.PopStyleColor();
         ImGui.PopFont();
-        if (hasError)
+        if (status is { Message.Length: > 0 } shown)
         {
             ImGui.PushFont(Fonts.FontSmall);
-            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.StatusError.Rgba);
-            ImGui.TextWrapped(error);
+            ImGui.PushStyleColor(ImGuiCol.Text, (shown.IsError ? UiColors.StatusError : UiColors.TextMuted).Rgba);
+            ImGui.TextWrapped(shown.Message);
             ImGui.PopStyleColor();
             ImGui.PopFont();
         }

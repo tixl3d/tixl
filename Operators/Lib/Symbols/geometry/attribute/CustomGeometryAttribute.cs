@@ -329,9 +329,20 @@ internal sealed class CustomGeometryAttribute : Instance<CustomGeometryAttribute
 
     bool IInputStatusProvider.TryGetInputStatus(Guid inputId, out InputStatus status)
     {
-        var message = inputId == Code.Input.InputDefinition.Id ? GetSnippetMessage() : null;
-        status = new InputStatus(message ?? string.Empty, _attributeError.Length > 0 ? 0 : _compileErrorLine);
-        return message != null;
+        status = default;
+        if (inputId != Code.Input.InputDefinition.Id)
+            return false;
+
+        var message = GetSnippetMessage();
+        if (message != null)
+        {
+            status = new InputStatus(message, _attributeError.Length > 0 ? 0 : _compileErrorLine);
+            return true;
+        }
+
+        // No problem: say which attributes come from another domain
+        status = new InputStatus(_snippetAttributes.ConversionNote, IsError: false);
+        return status.Message.Length > 0;
     }
 
     private string? GetSnippetMessage()

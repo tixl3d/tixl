@@ -17,7 +17,7 @@
         "X": 0.0,
         "Y": 225.0
       },
-      "Description": "Body of a C# method that returns a bool (selected or not) or a float weight from 0 to 1. In scope: index i, element count, position p (a primitive's center, a part's pivot) and the parameters A and B. System.MathF is imported, e.g. `return p.Y > A;`. Attributes of the input geometry are read as @Name, e.g. `@Normal.Y` or `@Selection` after an upstream [SelectGeometry]; the Table tab of the input lists them. Attributes on points are converted to the chosen domain; @P is the position.",
+      "Description": "Body of a C# method that returns a bool (selected or not) or a float weight from 0 to 1. In scope: index i, element count, position p (a primitive's center, a part's pivot) and the parameters A and B. System.MathF is imported, e.g. `return p.Y > A;`. Attributes of the input geometry are read as @Name, e.g. `@Normal.Y` or `@Selection` after an upstream [SelectGeometry]; the Table tab of the input lists them. Attributes of other domains are converted: a primitive averages its vertices or points, a vertex takes its point or primitive, a point averages the vertices around it; ints take the first value, and averaged normals need Normalize(). @P is the position.",
       "Usage": "Code",
       "CodeLanguage": "CSharp"
     },

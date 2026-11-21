@@ -12,8 +12,11 @@ namespace Lib.Utils;
 /// <summary>
 /// Lets the C# snippets of geometry ops read attributes as <c>@Name</c> (Houdini style). Each name becomes a typed
 /// array field of the generated class, indexed by the element <c>i</c>; <c>@P</c> is the element position <c>p</c>.
-/// An attribute on the op's domain is passed as is, a point attribute is converted (a vertex takes its point, a
-/// primitive or part the mean of its points). The snippet recompiles only when the code or an attribute's type changes.
+/// An attribute on the op's domain is passed as is. One on another domain is converted through the vertices, which
+/// link every point, primitive and part: each element averages the values reached through its vertices, so a
+/// primitive averages its vertices or points, a vertex takes its point, primitive or part, a point averages the
+/// vertices or primitives around it. Ints take the first value instead of an average, orientations are re-normalized.
+/// The snippet recompiles only when the code or an attribute's type changes.
 /// </summary>
 internal sealed partial class GeometrySnippetAttributes
 {
@@ -51,7 +54,7 @@ internal sealed partial class GeometrySnippetAttributes
         for (var index = 0; index < _names.Count; index++)
         {
             var name = _names[index];
-            var attribute = Find(geometry.Attributes, name, domain) ?? (domain != AttributeDomain.Point ? Find(geometry.Attributes, name, AttributeDomain.Point) : null);
+            var attribute = FindOnAnyDomain(geometry.Attributes, name, domain);
             if (attribute == null)
             {
                 error = GetMissingMessage(geometry, domain, name);
@@ -67,7 +70,53 @@ internal sealed partial class GeometrySnippetAttributes
             _current[index] = attribute;
         }
 
+        UpdateConversionNote();
         return true;
+    }
+
+    /// <summary>Which attributes are converted from another domain, e.g. "@Normal: averaged from vertices"; empty when none.</summary>
+    public string ConversionNote { get; private set; } = string.Empty;
+
+    /** Rebuilt only when the source domains change, so an unchanged snippet doesn't allocate per frame. */
+    private void UpdateConversionNote()
+    {
+        var signature = _names.Count;
+        for (var index = 0; index < _names.Count; index++)
+            signature = HashCode.Combine(signature, _current[index]!.Domain, _names[index]);
+
+        signature = HashCode.Combine(signature, _lastTargetDomain);
+        if (signature == _noteSignature)
+            return;
+
+        _noteSignature = signature;
+        var builder = new StringBuilder();
+        for (var index = 0; index < _names.Count; index++)
+        {
+            var attribute = _current[index]!;
+            if (attribute.Domain == _lastTargetDomain)
+                continue;
+
+            builder.Append(builder.Length == 0 ? "" : ", ")
+                   .Append('@').Append(attribute.Name)
+                   .Append(attribute is GeometryAttribute<int> ? " taken from " : " averaged from ")
+                   .Append(GetDomainLabel(attribute.Domain));
+        }
+
+        ConversionNote = builder.ToString();
+    }
+
+    /** The op's own domain first, then points, vertices, primitives, parts. */
+    private GeometryAttribute? FindOnAnyDomain(GeometryAttributes attributes, string name, AttributeDomain domain)
+    {
+        _lastTargetDomain = domain;
+        var attribute = Find(attributes, name, domain);
+        for (var index = 0; attribute == null && index < _lookupOrder.Length; index++)
+        {
+            if (_lookupOrder[index] != domain)
+                attribute = Find(attributes, name, _lookupOrder[index]);
+        }
+
+        return attribute;
     }
 
     /// <summary>Identifies the referenced attributes' types, so a failed compile is only retried after they change.</summary>
@@ -138,53 +187,102 @@ internal sealed partial class GeometrySnippetAttributes
         for (var index = 0; index < _names.Count; index++)
         {
             var attribute = _current[index]!;
-            var values = attribute.Domain == domain ? GetValues(attribute) : ConvertFromPoints(geometry, domain, attribute, index);
+            var values = attribute.Domain == domain ? GetValues(attribute) : Convert(geometry, domain, attribute, index);
             _fields[index].SetValue(null, values);
         }
 
         return true;
     }
 
-    private Array ConvertFromPoints(Geometry geometry, AttributeDomain domain, GeometryAttribute attribute, int index)
+    /// <summary>
+    /// Converts through the vertices: every vertex adds the value of its source element to its target element.
+    /// Elements no vertex reaches (loose points, empty parts) get zero.
+    /// </summary>
+    private Array Convert(Geometry geometry, AttributeDomain targetDomain, GeometryAttribute attribute, int index)
     {
-        var count = GeometryElements.GetCount(geometry, domain);
+        var count = GeometryElements.GetCount(geometry, targetDomain);
         var buffer = _buffers[index];
         if (buffer == null || buffer.Length != count || buffer.GetType().GetElementType() != attribute.ValueType)
             _buffers[index] = buffer = Array.CreateInstance(attribute.ValueType, count);
 
+        if (_sums.Length < count)
+        {
+            _sums = new Vector4[count];
+            _counts = new int[count];
+        }
+
+        Array.Clear(_sums, 0, count);
+        Array.Clear(_counts, 0, count);
+        UpdateVertexOwners(geometry);
+
+        var takesFirst = attribute is GeometryAttribute<int>;
+        var isOrientation = attribute.TypeInfo == AttributeTypeInfos.Quaternion;
+        for (var vertex = 0; vertex < geometry.VertexCount; vertex++)
+        {
+            var target = GetElement(geometry, targetDomain, vertex);
+            var source = GetElement(geometry, attribute.Domain, vertex);
+            if (target < 0 || source < 0 || (takesFirst && _counts[target] > 0))
+                continue;
+
+            var value = Read(attribute, source);
+            if (isOrientation && _counts[target] > 0 && Vector4.Dot(_sums[target], value) < 0)
+                value = -value;
+
+            _sums[target] += value;
+            _counts[target]++;
+        }
+
         for (var element = 0; element < count; element++)
         {
-            var sum = Vector4.Zero;
-            var pointCount = 0;
-            switch (domain)
-            {
-                case AttributeDomain.Vertex:
-                    sum = Read(attribute, geometry.VertexPoints[element]);
-                    pointCount = 1;
-                    break;
-                case AttributeDomain.Primitive:
-                    AddPrimitivePoints(geometry, attribute, element, ref sum, ref pointCount);
-                    break;
-                case AttributeDomain.Part:
-                    var part = geometry.Parts[element];
-                    for (var primitive = part.PrimitiveStart; primitive < part.PrimitiveStart + part.PrimitiveCount; primitive++)
-                        AddPrimitivePoints(geometry, attribute, primitive, ref sum, ref pointCount);
+            var value = _counts[element] > 0 ? _sums[element] / _counts[element] : Vector4.Zero;
+            if (isOrientation && value.LengthSquared() > 1e-12f)
+                value = Vector4.Normalize(value);
 
-                    break;
-            }
-
-            Write(buffer, element, pointCount > 0 ? sum / pointCount : Vector4.Zero);
+            Write(buffer, element, value);
         }
 
         return buffer;
     }
 
-    private static void AddPrimitivePoints(Geometry geometry, GeometryAttribute attribute, int primitive, ref Vector4 sum, ref int pointCount)
+    /** The element of <paramref name="domain"/> that <paramref name="vertex"/> belongs to; -1 for a primitive outside every part. */
+    private int GetElement(Geometry geometry, AttributeDomain domain, int vertex)
     {
-        for (var vertex = geometry.PrimitiveVertexOffsets[primitive]; vertex < geometry.PrimitiveVertexOffsets[primitive + 1]; vertex++)
+        return domain switch
+                   {
+                       AttributeDomain.Point     => geometry.VertexPoints[vertex],
+                       AttributeDomain.Vertex    => vertex,
+                       AttributeDomain.Primitive => _vertexPrimitives[vertex],
+                       AttributeDomain.Part      => _primitiveParts[_vertexPrimitives[vertex]],
+                       _                         => -1,
+                   };
+    }
+
+    /** Primitive per vertex and part per primitive, rebuilt once per geometry version. */
+    private void UpdateVertexOwners(Geometry geometry)
+    {
+        if (ReferenceEquals(geometry, _ownersGeometry) && geometry.Version == _ownersVersion && _vertexPrimitives.Length >= geometry.VertexCount)
+            return;
+
+        _ownersGeometry = geometry;
+        _ownersVersion = geometry.Version;
+        if (_vertexPrimitives.Length < geometry.VertexCount)
+            _vertexPrimitives = new int[geometry.VertexCount];
+
+        if (_primitiveParts.Length < geometry.PrimitiveCount)
+            _primitiveParts = new int[geometry.PrimitiveCount];
+
+        for (var primitive = 0; primitive < geometry.PrimitiveCount; primitive++)
         {
-            sum += Read(attribute, geometry.VertexPoints[vertex]);
-            pointCount++;
+            for (var vertex = geometry.PrimitiveVertexOffsets[primitive]; vertex < geometry.PrimitiveVertexOffsets[primitive + 1]; vertex++)
+                _vertexPrimitives[vertex] = primitive;
+        }
+
+        Array.Fill(_primitiveParts, -1, 0, geometry.PrimitiveCount);
+        for (var part = 0; part < geometry.Parts.Length; part++)
+        {
+            var range = geometry.Parts[part];
+            for (var primitive = range.PrimitiveStart; primitive < Math.Min(range.PrimitiveStart + range.PrimitiveCount, geometry.PrimitiveCount); primitive++)
+                _primitiveParts[primitive] = part;
         }
     }
 
@@ -255,12 +353,11 @@ internal sealed partial class GeometrySnippetAttributes
         if (ReferenceEquals(geometry, _missingGeometry) && geometry.Version == _missingVersion && domain == _missingDomain && name == _missingName)
             return _missingMessage;
 
-        var builder = new StringBuilder($"No attribute @{name} on {GetDomainLabel(domain)}");
-        builder.Append(domain == AttributeDomain.Point ? "." : " or points.");
+        var builder = new StringBuilder($"No attribute @{name} on this geometry.");
         var count = 0;
         foreach (var available in GeometryAttributeChoices.GetAttributeNames(geometry, null, floatsOnly: false))
         {
-            var attribute = Find(geometry.Attributes, available, domain) ?? Find(geometry.Attributes, available, AttributeDomain.Point);
+            var attribute = FindOnAnyDomain(geometry.Attributes, available, domain);
             if (attribute == null || GetTypeName(attribute) == null)
                 continue;
 
@@ -268,7 +365,7 @@ internal sealed partial class GeometrySnippetAttributes
         }
 
         if (count == 0)
-            builder.Append(" This geometry has none here; write one upstream, e.g. with [CustomGeometryAttribute] or [SelectGeometry].");
+            builder.Append(" It has none; write one upstream, e.g. with [CustomGeometryAttribute] or [SelectGeometry].");
 
         _missingGeometry = geometry;
         _missingVersion = geometry.Version;
@@ -313,6 +410,15 @@ internal sealed partial class GeometrySnippetAttributes
     private readonly List<FieldInfo> _fields = [];
     private readonly List<Array?> _buffers = [];
     private bool _isDisabled;
+    private static readonly AttributeDomain[] _lookupOrder = [AttributeDomain.Point, AttributeDomain.Vertex, AttributeDomain.Primitive, AttributeDomain.Part];
+    private AttributeDomain _lastTargetDomain;
+    private int _noteSignature;
+    private Vector4[] _sums = [];
+    private int[] _counts = [];
+    private int[] _vertexPrimitives = [];
+    private int[] _primitiveParts = [];
+    private Geometry? _ownersGeometry;
+    private int _ownersVersion;
     private Geometry? _missingGeometry;
     private int _missingVersion;
     private AttributeDomain _missingDomain;

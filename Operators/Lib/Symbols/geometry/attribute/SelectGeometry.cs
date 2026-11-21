@@ -220,9 +220,20 @@ internal sealed class SelectGeometry : Instance<SelectGeometry>, IStatusProvider
 
     bool IInputStatusProvider.TryGetInputStatus(Guid inputId, out InputStatus status)
     {
-        var message = inputId == Code.Input.InputDefinition.Id && Mode.Value == (int)Modes.Custom ? GetStatusMessage() : string.Empty;
-        status = new InputStatus(message, _attributeError.Length > 0 ? 0 : _compileErrorLine);
-        return message.Length > 0;
+        status = default;
+        if (inputId != Code.Input.InputDefinition.Id || Mode.Value != (int)Modes.Custom)
+            return false;
+
+        var message = GetStatusMessage();
+        if (message.Length > 0)
+        {
+            status = new InputStatus(message, _attributeError.Length > 0 ? 0 : _compileErrorLine);
+            return true;
+        }
+
+        // No problem: say which attributes come from another domain
+        status = new InputStatus(_snippetAttributes.ConversionNote, IsError: false);
+        return status.Message.Length > 0;
     }
 
     public string GetStatusMessage() => Mode.Value == (int)Modes.Custom && _attributeError.Length > 0 ? _attributeError : _statusMessage;
