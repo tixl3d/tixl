@@ -41,6 +41,7 @@ cbuffer IntParams : register(b2)
     int SegmentCount;
     int ScaleFX;
     int UsePointScale;
+    int SizeMode; // 0: world units, 1: pixels
 };
 
 cbuffer FogParams : register(b3)
@@ -76,6 +77,12 @@ struct psOutput
 };
 
 /** Last frame's transforms of this draw, for the velocity target. */
+cbuffer Resolution : register(b6)
+{
+    float TargetWidth;
+    float TargetHeight;
+};
+
 cbuffer PreviousTransforms : register(b5)
 {
     float4x4 PrevCameraToClipSpace;
@@ -153,6 +160,15 @@ psInput vsMain(uint id : SV_VertexID)
     float2 cornerOffset = quadPos.xy * 0.10 * s;
     quadPosInCamera.xy += cornerOffset;
     output.position = mul(quadPosInCamera, CameraToClipSpace);
+
+    // In pixels: offset the projected center, so the sprite keeps its size at any distance
+    float2 clipPerPixelSize = SizeMode == 1 ? s / max(float2(TargetWidth, TargetHeight), 1) : 0;
+    if (SizeMode == 1)
+    {
+        float4 centerInClip = mul(posInCamera, CameraToClipSpace);
+        output.position = centerInClip + float4(quadPos.xy * clipPerPixelSize * centerInClip.w, 0, 0);
+    }
+
     output.clipPosition = output.position;
 
     // An unbound or shorter buffer reads zeros; a zero rotation marks such a point.
@@ -170,9 +186,13 @@ psInput vsMain(uint id : SV_VertexID)
     float4 previousCenterInCamera = mul(float4(previousPoint.Position, 1), PrevObjectToCamera);
     float4 previousQuadPosInCamera = previousCenterInCamera;
     previousQuadPosInCamera.xy += cornerOffset;
-    output.previousClipPosition = PreviousClipUnlessJumped(mul(previousQuadPosInCamera, PrevCameraToClipSpace),
+    float4 previousCenterInClip = mul(previousCenterInCamera, PrevCameraToClipSpace);
+    float4 previousQuadInClip = SizeMode == 1
+                                    ? previousCenterInClip + float4(quadPos.xy * clipPerPixelSize * previousCenterInClip.w, 0, 0)
+                                    : mul(previousQuadPosInCamera, PrevCameraToClipSpace);
+    output.previousClipPosition = PreviousClipUnlessJumped(previousQuadInClip,
                                                            mul(posInCamera, CameraToClipSpace),
-                                                           mul(previousCenterInCamera, PrevCameraToClipSpace));
+                                                           previousCenterInClip);
     float4 posInWorld = mul(posInObject, ObjectToWorld);
 
     output.color *= GetField(posInWorld);

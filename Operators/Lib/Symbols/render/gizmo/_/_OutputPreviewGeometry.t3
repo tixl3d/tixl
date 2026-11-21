@@ -37,7 +37,12 @@
         {
           "Id": "414c8045-5086-4449-9d9a-03f28c3966b3"/*PointSize*/,
           "Type": "System.Single",
-          "Value": 0.047
+          "Value": 4.0
+        },
+        {
+          "Id": "9d1361e9-8ee7-412c-9bff-6e791de324c6"/*SizeMode*/,
+          "Type": "System.Int32",
+          "Value": 1
         },
         {
           "Id": "cc442161-e9ca-40ea-be3b-f87189d4e155"/*Color*/,
@@ -105,7 +110,7 @@
         {
           "Id": "c7887b49-a16e-4bf1-ada2-19b250972fb5"/*ShowIndices*/,
           "Type": "System.Boolean",
-          "Value": true
+          "Value": false
         }
       ],
       "Outputs": []
@@ -114,7 +119,23 @@
       "Id": "d1e99a52-0188-4a63-85ef-55bfb907816d"/*CurvesToPoints*/,
       "SymbolId": "6a1d8c3f-2b57-4e90-a4f6-c8e2d5b7f019",
       "SymbolName": "Lib.geometry.convert.CurvesToPoints",
-      "InputValues": [],
+      "InputValues": [
+        {
+          "Id": "91c96818-ba39-4cec-af54-ae005c8610a5"/*PolygonEdges*/,
+          "Type": "System.Int32",
+          "Value": 1
+        },
+        {
+          "Id": "d2c8e5a3-1f64-4b97-8e3a-c5b0d7f4a916"/*CloseLoops*/,
+          "Type": "System.Boolean",
+          "Value": true
+        },
+        {
+          "Id": "f9897a6d-acb2-4291-a3e0-aa2fee90cfd7"/*Sampling*/,
+          "Type": "System.Int32",
+          "Value": 0
+        }
+      ],
       "Outputs": []
     },
     {

@@ -234,6 +234,12 @@ message must name what was expected.
   attribute is rebuilt on every evaluation (one pass over the vertices); add a cache keyed on the geometry's version
   only if profiling shows it matters, since in-place upstream updates must bump that version.
   Recompiles only when the code or an attribute's type changes.
+- **Lattice caps** (done 2026-11-21): `CurveSolidBuilder.Lattice` (input on ExtrudeCurves and FillCurves) inserts
+  points where outlines cross grid lines (skipping crossings within 10% of a cell of an existing point), fills inner
+  cells with one quad and clips border cells with the tessellator (AbsGeqTwo of loops and the cell square), and welds
+  cap points within that 10% onto ring points, so caps and walls share their points (extrusion stays closed, same
+  volume). Not with a bevel yet: the bevel's inset ring doesn't sit on the grid. Thin pieces remain along finely
+  flattened curves (median aspect 2.2, worst ~300 on "TiXL").
 - **`MergeCurves`** (done 2026-11-21): Union, Xor or Intersect of the closed curves via the tessellator's winding
   rules (boundary contours), flattened in XY, so the output has straight segments only. Source parts that merge into one
   island are joined (union-find), so touching letters become one part while an untouched letter keeps its pieces. Open

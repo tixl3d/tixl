@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "ffd94e5a-bc98-4e70-84d8-cce831e6925f"/*DrawPoints*/,
-  "Description": "Draws a point buffer as camera-facing sprites.\n\nThe orientation of the points is ignored. The size is PointSize multiplied by the point's Scale (see UsePointsScale) and optionally its F1 or F2 attribute (see ScaleFactor). A PointSize of 1 results in a diameter of 0.2 world units. Point colors are multiplied with Color and the optional texture, which replaces the default round shape.\n\nPoints are drawn in buffer order and not sorted by distance to the camera, which can cause artifacts with transparent blending. Try other blend modes or disable depth writing for additive effects. Very large points cause high fill rates and can drastically impact performance.\n\nSee also: [DrawBillboards], [DrawPointsShaded], [DrawLines], [DrawRibbons]\nAlso check out the [HowToDrawThings] and [HowToUsePoints] tutorials.",
+  "Description": "Draws a point buffer as camera-facing sprites.\n\nThe orientation of the points is ignored. The size is PointSize multiplied by the point's Scale (see UsePointsScale) and optionally its F1 or F2 attribute (see ScaleFactor). A PointSize of 1 results in a diameter of 0.2 world units; with SizeMode Pixels, PointSize is the diameter in pixels. Point colors are multiplied with Color and the optional texture, which replaces the default round shape.\n\nPoints are drawn in buffer order and not sorted by distance to the camera, which can cause artifacts with transparent blending. Try other blend modes or disable depth writing for additive effects. Very large points cause high fill rates and can drastically impact performance.\n\nSee also: [DrawBillboards], [DrawPointsShaded], [DrawLines], [DrawRibbons]\nAlso check out the [HowToDrawThings] and [HowToUsePoints] tutorials.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -77,6 +77,14 @@
       "GroupTitle": "Draw options"
     },
     {
+      "InputId": "9d1361e9-8ee7-412c-9bff-6e791de324c6"/*SizeMode*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 100.0
+      },
+      "Description": "WorldUnits: PointSize 1 is 0.2 units across, so points shrink with distance. Pixels: PointSize is the diameter in pixels on the output, e.g. for markers that keep their size while zooming."
+    },
+    {
       "InputId": "cc442161-e9ca-40ea-be3b-f87189d4e155"/*Color*/,
       "Position": {
         "X": 1922.5884,
@@ -111,6 +119,20 @@
     }
   ],
   "SymbolChildUis": [
+    {
+      "ChildId": "d8c790af-ea42-43ed-ad7b-400389deaa5a"/*RequestedResolution*/,
+      "Position": {
+        "X": 2243.4253,
+        "Y": 4226.7017
+      }
+    },
+    {
+      "ChildId": "99d49be7-ff89-462c-bf60-1405591ae5b4"/*ResolutionConstBuffer*/,
+      "Position": {
+        "X": 2443.4253,
+        "Y": 4226.7017
+      }
+    },
     {
       "ChildId": "083217bb-8b1c-4fa0-8160-06fa4560198b",
       "SymbolName": "Lib.flow.Execute",
