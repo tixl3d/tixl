@@ -1,4 +1,4 @@
-{
+﻿{
   "by_fullpath": {
     "Lib.data.object.PickObject": {
       "url": "/operators/lib/data/object/PickObject/",
@@ -92,6 +92,10 @@
       "url": "/operators/lib/field/generate/sdf/Image2dSDF/",
       "summary": "Uses the grayscale information of a texture as (signed) distance data."
     },
+    "Lib.field.generate.sdf.MeshToSDF": {
+      "url": "/operators/lib/field/generate/sdf/MeshToSDF/",
+      "summary": "Bakes a signed distance field volume from a triangle mesh."
+    },
     "Lib.field.generate.sdf.OctahedronSDF": {
       "url": "/operators/lib/field/generate/sdf/OctahedronSDF/",
       "summary": "Generates a octahedron distande field."
@@ -135,6 +139,10 @@
     "Lib.field.render.RaymarchField": {
       "url": "/operators/lib/field/render/RaymarchField/",
       "summary": "Renders the connected shader graph SDF."
+    },
+    "Lib.field.render.RaymarchToCubeMap": {
+      "url": "/operators/lib/field/render/RaymarchToCubeMap/",
+      "summary": "Renders an SDF field into a cube map texture by raymarching the field into each face."
     },
     "Lib.field.render.Render2dField": {
       "url": "/operators/lib/field/render/Render2dField/",
@@ -796,6 +804,22 @@
       "url": "/operators/lib/image/use/UseTextureReference/",
       "summary": "Uses a reference to a [RenderTarget] to implement feedback effects."
     },
+    "Lib.io.ai.StreamDiffusion": {
+      "url": "/operators/lib/io/ai/StreamDiffusion/",
+      "summary": "AI image generation using Stable Diffusion with ONNX Runtime. Supports text-to-image, image-to-image and continuous video streams."
+    },
+    "Lib.io.ai.StreamDiffusionExample": {
+      "url": "/operators/lib/io/ai/StreamDiffusionExample/",
+      "summary": "Generates an image from a prompt with SD Turbo. Point ModelPath at an ONNX export folder containing unet.onnx, text_encoder.onnx, vae_decoder.onnx and tokenizer files; AutoGenerate redraws when the prompt changes."
+    },
+    "Lib.io.ai.StreamDiffusionExampleImg2ImgRestyle": {
+      "url": "/operators/lib/io/ai/StreamDiffusionExampleImg2ImgRestyle/",
+      "summary": "Transforms an image with a prompt. Strength controls how far the result moves away from the input: 0 keeps the image, 1 replaces it. The export needs vae_encoder.onnx for img2img."
+    },
+    "Lib.io.ai.StreamDiffusionExampleV2Restyle": {
+      "url": "/operators/lib/io/ai/StreamDiffusionExampleV2Restyle/",
+      "summary": "Streams a restyled image with the StreamDiffusion V2 video model. AdjustColors feeds a float render target, which the operator converts on the worker; use CUDA or TensorRT and point ModelPath at the V2 export folder."
+    },
     "Lib.io.audio.AudioPlayer": {
       "url": "/operators/lib/io/audio/AudioPlayer/",
       "summary": "An audio player using BASS audio library. Features include:"
@@ -855,6 +879,10 @@
     "Lib.io.dmx.obsolete.PointsToRGBList": {
       "url": "/operators/lib/io/dmx/obsolete/PointsToRGBList/",
       "summary": "Converts a buffer of 3D points into a flat list of RGB float values (0-255)."
+    },
+    "Lib.io.file.AssimpExport": {
+      "url": "/operators/lib/io/file/AssimpExport/",
+      "summary": "Writes a mesh, a polygon geometry or a point cloud to a 3D file with Assimp."
     },
     "Lib.io.file.FilesInFolder": {
       "url": "/operators/lib/io/file/FilesInFolder/",
@@ -1004,6 +1032,14 @@
       "url": "/operators/lib/io/video/NdiOutput/",
       "summary": "NDI live video output. R8G8B8A8_UNorm texture format or R8G8B8A8_Typeless is required for output. You can adjust the render format by using a ConvertFormat op or [RenderTarget] like in this example: [TorusMesh]->[DrawMesh]->[RenderTarget]->[SpoutOutput]."
     },
+    "Lib.io.video.OmtInput": {
+      "url": "/operators/lib/io/video/OmtInput/",
+      "summary": "Receives one OMT source and publishes it as a texture."
+    },
+    "Lib.io.video.OmtOutput": {
+      "url": "/operators/lib/io/video/OmtOutput/",
+      "summary": "Sends a texture as an OMT source that other OMT receivers can discover."
+    },
     "Lib.io.video.PlayAudioClip": {
       "url": "/operators/lib/io/video/PlayAudioClip/",
       "summary": "This is a workaround to playback audio clips without syncing."
@@ -1032,13 +1068,65 @@
       "url": "/operators/lib/io/video/VideoClip/",
       "summary": ""
     },
-    "Lib.io.video.WebcamInput": {
-      "url": "/operators/lib/io/video/WebcamInput/",
-      "summary": "Captures live video from a connected device like a webcam, capture card, or NDI source."
+    "Lib.io.video.VideoDeviceInput": {
+      "url": "/operators/lib/io/video/VideoDeviceInput/",
+      "summary": "Captures live video from a connected device like a webcam or capture card, with the basic camera hardware configs built in: Pan, Tilt, Zoom, Focus, Exposure and Brightness are applied to the camera automatically whenever their input changes — several settings at once, and each can be patched/animated."
     },
     "Lib.io.video.VideoStreamInput": {
       "url": "/operators/lib/io/video/VideoStreamInput/",
-      "summary": "Receives a video stream from a network source."
+      "summary": "Receives a live video stream from the network or from a publisher and outputs it as a texture."
+    },
+    "Lib.io.video.WebcamInput": {
+      "url": "/operators/lib/io/video/WebcamInput/",
+      "summary": "Captures live video from a connected device like a webcam or capture card."
+    },
+    "Lib.io.video.depthanything.DepthAnything": {
+      "url": "/operators/lib/io/video/depthanything/DepthAnything/",
+      "summary": "Estimates a depth map from an image with Depth Anything 3 or 2 through ONNX Runtime."
+    },
+    "Lib.io.video.depthanything.DepthAnythingExample": {
+      "url": "/operators/lib/io/video/depthanything/DepthAnythingExample/",
+      "summary": "Estimates a depth map from an image with Depth Anything 3. Near objects stay bright; switch ModelSizeParam for a larger model or InvertDepth to flip the ramp. The colorized NormalizedDepthTexture is the output."
+    },
+    "Lib.io.video.depthanything.DepthAnythingExampleNormalSurface": {
+      "url": "/operators/lib/io/video/depthanything/DepthAnythingExampleNormalSurface/",
+      "summary": "Turns a depth map into a normal map and camera-space positions. Wire the normal output into lighting or relighting setups; the position texture holds x, y and distance for point clouds or displacement."
+    },
+    "Lib.io.video.depthanything.DepthAnythingExampleParallaxMove": {
+      "url": "/operators/lib/io/video/depthanything/DepthAnythingExampleParallaxMove/",
+      "summary": "Shifts a still image by its depth, as if the camera moved sideways. Animate Offset for the classic 2.5D wobble; FocalPlane chooses the depth that stays still. MinDepth and MaxDepth come from DepthAnything."
+    },
+    "Lib.io.video.depthanything.DepthAnythingLiveExample": {
+      "url": "/operators/lib/io/video/depthanything/DepthAnythingLiveExample/",
+      "summary": "Estimates depth from a live network stream: a VideoStreamInput connects to an RTSP camera and Depth Anything 3 runs on every frame it delivers. Output is the colorized NormalizedDepthTexture (near bright). Point StreamUrl at your own camera; VideoStreamInput's Status output shows the connection state."
+    },
+    "Lib.io.video.depthanything.DepthAnythingSplatExample": {
+      "url": "/operators/lib/io/video/depthanything/DepthAnythingSplatExample/",
+      "summary": "Renders a live video stream as a navigable 2.5D point cloud: Depth Anything 3 estimates per-pixel depth, DepthToPoints unprojects it into camera-space splats (size and opacity from depth and confidence), and DrawPoints billboards them into a RenderTarget. Orbit or move the Camera to look around the scene. Stabilize a stationary camera with DepthToPoints.TemporalSmoothing; rebuild from stills with TemporalSmoothing 0."
+    },
+    "Lib.io.video.depthanything.DepthFilter": {
+      "url": "/operators/lib/io/video/depthanything/DepthFilter/",
+      "summary": "Smooths a depth map with an edge-aware bilateral filter."
+    },
+    "Lib.io.video.depthanything.DepthParallax": {
+      "url": "/operators/lib/io/video/depthanything/DepthParallax/",
+      "summary": "Shifts an image by its depth, as if the camera moved sideways."
+    },
+    "Lib.io.video.depthanything.DepthThreshold": {
+      "url": "/operators/lib/io/video/depthanything/DepthThreshold/",
+      "summary": "Creates a mask from the depth range between two thresholds."
+    },
+    "Lib.io.video.depthanything.DepthToNormal": {
+      "url": "/operators/lib/io/video/depthanything/DepthToNormal/",
+      "summary": "Converts a depth map into a normal map."
+    },
+    "Lib.io.video.depthanything.DepthToPoints": {
+      "url": "/operators/lib/io/video/depthanything/DepthToPoints/",
+      "summary": "Unprojects a depth map into a camera-space point buffer."
+    },
+    "Lib.io.video.depthanything.DepthToPosition": {
+      "url": "/operators/lib/io/video/depthanything/DepthToPosition/",
+      "summary": "Unprojects a depth map into camera-space positions."
     },
     "Lib.io.video.mediapipe.FaceDetection": {
       "url": "/operators/lib/io/video/mediapipe/FaceDetection/",
@@ -1050,7 +1138,7 @@
     },
     "Lib.io.video.mediapipe.GestureRecognition": {
       "url": "/operators/lib/io/video/mediapipe/GestureRecognition/",
-      "summary": "Recognizes hand gestures in an image using MediaPipe Gesture Recognition."
+      "summary": "Recognizes hand gestures in an image on top of MediaPipe hand landmark detection."
     },
     "Lib.io.video.mediapipe.HandLandmarkDetection": {
       "url": "/operators/lib/io/video/mediapipe/HandLandmarkDetection/",
@@ -1075,6 +1163,22 @@
     "Lib.io.websocket.WebSocketServer": {
       "url": "/operators/lib/io/websocket/WebSocketServer/",
       "summary": "Creates a WebSocket server to enable real-time, two-way communication with web clients."
+    },
+    "Lib.laser.camera.LaserCamera": {
+      "url": "/operators/lib/laser/camera/LaserCamera/",
+      "summary": "Renders a scene through its own camera lens and captures every point, line and mesh drawn inside it as 16-bit laser points."
+    },
+    "Lib.laser.convert.LaserPointsToBuffer": {
+      "url": "/operators/lib/laser/convert/LaserPointsToBuffer/",
+      "summary": "Converts a laser point list into a GPU point buffer, bridging laser frames back into the graph."
+    },
+    "Lib.laser.convert.MeshToLaserPoints": {
+      "url": "/operators/lib/laser/convert/MeshToLaserPoints/",
+      "summary": "Converts a mesh into laser points as wireframe runs or vertex dots."
+    },
+    "Lib.laser.input.PONKInput": {
+      "url": "/operators/lib/laser/input/PONKInput/",
+      "summary": "Receives laser frames from any PONK-compliant sender (e.g. MadMapper) over UDP and republishes them as 16-bit laser points."
     },
     "Lib.mesh.draw.DrawMesh": {
       "url": "/operators/lib/mesh/draw/DrawMesh/",
@@ -1107,6 +1211,10 @@
     "Lib.mesh.draw.VisualizeUvMap": {
       "url": "/operators/lib/mesh/draw/VisualizeUvMap/",
       "summary": "A draw helper to check the UV maps of a given mesh"
+    },
+    "Lib.mesh.generate.AssimpImport": {
+      "url": "/operators/lib/mesh/generate/AssimpImport/",
+      "summary": "Loads a 3D model file with Assimp as mesh, points, polygon geometry and skeleton with animations."
     },
     "Lib.mesh.generate.CubeMesh": {
       "url": "/operators/lib/mesh/generate/CubeMesh/",
@@ -2220,6 +2328,74 @@
       "url": "/operators/lib/particle/force/VolumeForce/",
       "summary": "Repels particles from primitive volumes."
     },
+    "Lib.physics.MeshToGeometryExample": {
+      "url": "/operators/lib/physics/MeshToGeometryExample/",
+      "summary": "[MeshToGeometry] reads a GPU mesh back as geometry, so meshes from [TorusMesh], [IcosahedronMesh], [LoadGltf] and every other mesh operator can collide. The readback only happens when the mesh changes."
+    },
+    "Lib.physics.PhysicsSdfFieldExample": {
+      "url": "/operators/lib/physics/PhysicsSdfFieldExample/",
+      "summary": "The ground here is not a mesh at all: it is an SDF field, a formula on the GPU, drawn with [RaymarchField]. Physics runs on the CPU, so the field reaches it by being sampled: [GridPoints] lays a grid over it, [SampleFieldPoints] writes the field's distance into every point, [ReadPointsFromGpu] brings them to the CPU and [SdfPointsToGeometry] extracts the surface as the Geometry of a static [RigidBody]."
+    },
+    "Lib.physics.PhysicsToVolumeExample": {
+      "url": "/operators/lib/physics/PhysicsToVolumeExample/",
+      "summary": "Physics output feeds the volume operators too. The world's poses are read back with [ReadPointsFromGpu], [VolumeFromPoints] splats them into a density volume and [VolumeToMesh] extracts one blobby surface around all of them, every frame. Think of it as a metaball or liquid look on top of rigid bodies."
+    },
+    "Lib.physics.PhysicsVolumeGravityExample": {
+      "url": "/operators/lib/physics/PhysicsVolumeGravityExample/",
+      "summary": "A volume can be a force as well as a collider. [VolumeToField] turns the torus volume into a vector field, its gradient, and a [RigidForce] of type Field samples that field at every body. Negative Strength pulls the boxes towards the surface instead of pushing them away. The same volume, meshed with [VolumeToMesh], is the collider they land on. World gravity is zero."
+    },
+    "Lib.physics.PhysicsVolumesExample": {
+      "url": "/operators/lib/physics/PhysicsVolumesExample/",
+      "summary": "Any volume becomes a collider through [VolumeToMesh]. On the left, the bunny is loaded with [LoadVdb], made coarser with [VolumeResample] and scaled down; on the right, a bowl is carved out of a block with [VolumeCsg]. Balls rain on both."
+    },
+    "Lib.physics.PhysicsWorld": {
+      "url": "/operators/lib/physics/PhysicsWorld/",
+      "summary": "Simulates rigid bodies with BepuPhysics and outputs their poses as a point buffer."
+    },
+    "Lib.physics.PhysicsWorldExample": {
+      "url": "/operators/lib/physics/PhysicsWorldExample/",
+      "summary": "The basics of the physics package: a [PhysicsWorld] simulates the bodies that [RigidBody] operators describe."
+    },
+    "Lib.physics.RigidBody": {
+      "url": "/operators/lib/physics/RigidBody/",
+      "summary": "Declares rigid bodies for [PhysicsWorld]."
+    },
+    "Lib.physics.RigidBodyExample": {
+      "url": "/operators/lib/physics/RigidBodyExample/",
+      "summary": "[RigidBody] turns any geometry into a collider. Shape Auto splits concave geometry into several convex hulls, so the rings keep their holes and slide down the posts they land over, and the letters keep their counters."
+    },
+    "Lib.physics.RigidBodyGeometry": {
+      "url": "/operators/lib/physics/RigidBodyGeometry/",
+      "summary": "Returns the simulated bodies of one or more [RigidBody] operators as geometry."
+    },
+    "Lib.physics.RigidBodyGeometryExample": {
+      "url": "/operators/lib/physics/RigidBodyGeometryExample/",
+      "summary": "[VoronoiFracture] cuts a cube into cells; a [RigidBody] makes every cell a body, so the cube breaks apart when it lands. [RigidBodyGeometry] returns the pieces as geometry, ready for [GeometryToMesh] or any other geometry operator."
+    },
+    "Lib.physics.RigidBodyPoints": {
+      "url": "/operators/lib/physics/RigidBodyPoints/",
+      "summary": "The poses of the bodies of one [RigidBody], picked out of a [PhysicsWorld]."
+    },
+    "Lib.physics.RigidBodyPointsExample": {
+      "url": "/operators/lib/physics/RigidBodyPointsExample/",
+      "summary": "The car is a chassis and four cylinder wheels from a 2 x 2 point grid. One Hinge joint with AutoAnchor fits all four wheels at once and its MotorSpeed drives them."
+    },
+    "Lib.physics.RigidForce": {
+      "url": "/operators/lib/physics/RigidForce/",
+      "summary": "Declares a force for [PhysicsWorld]."
+    },
+    "Lib.physics.RigidForceExample": {
+      "url": "/operators/lib/physics/RigidForceExample/",
+      "summary": "[RigidForce] pushes the dynamic bodies of a world. Three continuous forces make a whirlwind: a Vortex swirls the boxes around the vertical axis, a Radial force keeps them near the centre and a Directional force lifts them against gravity. A fourth force is an impulse: it fires once each time its Trigger is pressed."
+    },
+    "Lib.physics.RigidJoint": {
+      "url": "/operators/lib/physics/RigidJoint/",
+      "summary": "Declares a constraint between two bodies."
+    },
+    "Lib.physics.RigidJointExample": {
+      "url": "/operators/lib/physics/RigidJointExample/",
+      "summary": "[RigidJoint] links bodies. Three set-ups show its modes side by side."
+    },
     "Lib.point.combine.BlendPoints": {
       "url": "/operators/lib/point/combine/BlendPoints/",
       "summary": "Creates different transitions between two different point setups"
@@ -2399,6 +2575,14 @@
     "Lib.point.helper.SampleCpuPoints": {
       "url": "/operators/lib/point/helper/SampleCpuPoints/",
       "summary": "Samples a list of line points with cubic bezier spline interpolation."
+    },
+    "Lib.point.io.CsvToPoints": {
+      "url": "/operators/lib/point/io/CsvToPoints/",
+      "summary": "Loads a CSV file and routes its columns into a point buffer."
+    },
+    "Lib.point.io.CsvToPointsExample": {
+      "url": "/operators/lib/point/io/CsvToPointsExample/",
+      "summary": "Loads a CSV file and renders its columns as points."
     },
     "Lib.point.io.DataPointConverter": {
       "url": "/operators/lib/point/io/DataPointConverter/",
@@ -2800,6 +2984,10 @@
       "url": "/operators/lib/render/shading/PointLight/",
       "summary": "The standard point light with transform gizmo."
     },
+    "Lib.render.shading.RenderToCubeMap": {
+      "url": "/operators/lib/render/shading/RenderToCubeMap/",
+      "summary": "Renders the connected scene command into a cube map texture."
+    },
     "Lib.render.shading.SetEnvironment": {
       "url": "/operators/lib/render/shading/SetEnvironment/",
       "summary": "Sets the image-based lighting (IBL) for the current RenderTarget. This texture can then be used by drawing operators for physically based rendering (PBR) further left in the graph."
@@ -3023,6 +3211,146 @@
     "Lib.string.transform.WrapString": {
       "url": "/operators/lib/string/transform/WrapString/",
       "summary": "Wraps a string at a column width"
+    },
+    "Lib.volume.LoadVdbExample": {
+      "url": "/operators/lib/volume/LoadVdbExample/",
+      "summary": "[LoadVdb] reads OpenVDB files as written by Houdini, Blender or TiXL itself. The bunny is a level set: made coarser with [VolumeResample], meshed and scaled down. The plume is a fog volume: [VolumeToNanoVdb] uploads it and [VdbDensityField] makes its density a field for [RaymarchField]. [VolumeInfo] reports what a file contains."
+    },
+    "Lib.volume.NanoVdbRenderExample": {
+      "url": "/operators/lib/volume/NanoVdbRenderExample/",
+      "summary": "[NanoVdbRender] raymarches three NanoVDB grids at once: a reflective liquid, smoke and fire. Each starts as a [VolumePrimitive] - a slab, a ball and a capsule - roughened by [VolumeNoise] whose offset drifts, and is uploaded to the GPU with [VolumeToNanoVdb]."
+    },
+    "Lib.volume.VdbToSdfFieldExample": {
+      "url": "/operators/lib/volume/VdbToSdfFieldExample/",
+      "summary": "[VdbToSdfField] makes a volume's signed distances a field, so it mixes with every SDF operator. Here a torus volume is blended smoothly with an animated [SphereSDF] by [CombineSDF], placed on an SDF floor and raymarched. Nothing is meshed."
+    },
+    "Lib.volume.VolumeCsgExample": {
+      "url": "/operators/lib/volume/VolumeCsgExample/",
+      "summary": "[VolumeCsg] combines level sets like a sculptor: Union merges, Intersection keeps the overlap, Difference carves. Read the row from left to right: a rounded box intersected with a sphere gives the classic CSG body, three bars joined with Union make the drill, and the body minus the drill is the result on the right."
+    },
+    "Lib.volume.VolumeFromMeshExample": {
+      "url": "/operators/lib/volume/VolumeFromMeshExample/",
+      "summary": "Left: the word TiXL as geometry becomes a level set with [VolumeFromMesh], and [VolumeMorphology] dilates it into soft bubble letters. Middle: scattered points are splatted into a density volume with [VolumeFromPoints], a metaball cloud. Right: a noise field is sampled over a box with [FieldToVolume]."
+    },
+    "Lib.volume.VolumeNoiseExample": {
+      "url": "/operators/lib/volume/VolumeNoiseExample/",
+      "summary": "Three stages of one chain, left to right. [VolumeNoise] in Displace mode pushes the sphere's surface along fractal noise. [VolumeMorphology] with Dilate grows it outwards, which swells the bumps and closes the dents, and [VolumeFilter] smooths the voxels, which softens what is left."
+    },
+    "Lib.volume.VolumePrimitiveExample": {
+      "url": "/operators/lib/volume/VolumePrimitiveExample/",
+      "summary": "[VolumePrimitive] builds a shape directly as a level set: a sparse grid of signed distances that is exact near the surface. Eight primitives stand on the floor here, each meshed with [VolumeToMesh] and drawn lit."
+    },
+    "Lib.volume.VolumeShakingWaterExample": {
+      "url": "/operators/lib/volume/VolumeShakingWaterExample/",
+      "summary": "The container is an open box: a box minus a slightly smaller box with [VolumeCsg] Difference. The water is a slab displaced by [VolumeNoise] and clipped by Intersection to the inside of the box. Two [OscillateVec3] make the box shake and the water slosh."
+    },
+    "Lib.volume.VolumeToPointsExample": {
+      "url": "/operators/lib/volume/VolumeToPointsExample/",
+      "summary": "One torus volume, three outputs side by side. Left: [VolumeToMesh] extracts triangles. Middle: [VolumeToPoints] turns the voxels near the surface into points, drawn together with the boxes of the volume's sparse tree from [DrawVdbBounds] - only where there is surface is there data. Right: [VolumeToTexture3D] bakes a dense 3D texture and [VolumeField] makes it a field that [RaymarchField] draws."
+    },
+    "Lib.volume.analyze.VolumeInfo": {
+      "url": "/operators/lib/volume/analyze/VolumeInfo/",
+      "summary": "Reports statistics about a volume."
+    },
+    "Lib.volume.convert.DrawVdbBounds": {
+      "url": "/operators/lib/volume/convert/DrawVdbBounds/",
+      "summary": "Draws the sparse structure of a NanoVDB grid as wireframe boxes, one per node of the selected level."
+    },
+    "Lib.volume.convert.NanoVdbToPoints": {
+      "url": "/operators/lib/volume/convert/NanoVdbToPoints/",
+      "summary": "Turns the active voxels of a NanoVDB grid into TiXL points on the GPU."
+    },
+    "Lib.volume.convert.VolumeToField": {
+      "url": "/operators/lib/volume/convert/VolumeToField/",
+      "summary": "Wraps a volume in a CPU scalar field that samples it trilinearly in world space."
+    },
+    "Lib.volume.convert.VolumeToMesh": {
+      "url": "/operators/lib/volume/convert/VolumeToMesh/",
+      "summary": "Extracts an isosurface from a volume as a triangle mesh."
+    },
+    "Lib.volume.convert.VolumeToPoints": {
+      "url": "/operators/lib/volume/convert/VolumeToPoints/",
+      "summary": "Converts volume voxels into a point list."
+    },
+    "Lib.volume.convert.VolumeToTexture3D": {
+      "url": "/operators/lib/volume/convert/VolumeToTexture3D/",
+      "summary": "Bakes a volume into a dense 3D texture plus its world-space bounds."
+    },
+    "Lib.volume.fields.VdbDensityField": {
+      "url": "/operators/lib/volume/fields/VdbDensityField/",
+      "summary": "Exposes a NanoVDB fog volume as a field with the usual negative-inside convention."
+    },
+    "Lib.volume.fields.VdbToSdfField": {
+      "url": "/operators/lib/volume/fields/VdbToSdfField/",
+      "summary": "Exposes a NanoVDB level set as a signed-distance field, so every existing field operator works on it."
+    },
+    "Lib.volume.generate.FieldToVolume": {
+      "url": "/operators/lib/volume/generate/FieldToVolume/",
+      "summary": "Samples a CPU scalar field into a sparse grid over a box region."
+    },
+    "Lib.volume.generate.VolumeFromMesh": {
+      "url": "/operators/lib/volume/generate/VolumeFromMesh/",
+      "summary": "Converts a mesh into a sparse volume, either a signed distance field or a fog density."
+    },
+    "Lib.volume.generate.VolumeFromPoints": {
+      "url": "/operators/lib/volume/generate/VolumeFromPoints/",
+      "summary": "Splats a point list into a sparse density volume."
+    },
+    "Lib.volume.generate.VolumePrimitive": {
+      "url": "/operators/lib/volume/generate/VolumePrimitive/",
+      "summary": "Generates an analytic primitive as a narrow-band level set volume."
+    },
+    "Lib.volume.gpu.VolumeToNanoVdb": {
+      "url": "/operators/lib/volume/gpu/VolumeToNanoVdb/",
+      "summary": "Flattens the volume into a NanoVDB buffer and uploads it to the GPU."
+    },
+    "Lib.volume.io.LoadNanoVdb": {
+      "url": "/operators/lib/volume/io/LoadNanoVdb/",
+      "summary": "Loads a NanoVDB .nvdb file and uploads it as a GPU buffer."
+    },
+    "Lib.volume.io.LoadVdb": {
+      "url": "/operators/lib/volume/io/LoadVdb/",
+      "summary": "Loads grids from an OpenVDB file."
+    },
+    "Lib.volume.io.SaveNanoVdb": {
+      "url": "/operators/lib/volume/io/SaveNanoVdb/",
+      "summary": "Writes the volume as a NanoVDB file."
+    },
+    "Lib.volume.io.SaveVdb": {
+      "url": "/operators/lib/volume/io/SaveVdb/",
+      "summary": "Writes the volume's grids to an OpenVDB file."
+    },
+    "Lib.volume.modify.VolumeCsg": {
+      "url": "/operators/lib/volume/modify/VolumeCsg/",
+      "summary": "Constructive solid geometry on level-set volumes."
+    },
+    "Lib.volume.modify.VolumeFilter": {
+      "url": "/operators/lib/volume/modify/VolumeFilter/",
+      "summary": "Smoothing and value filters on the active voxels."
+    },
+    "Lib.volume.modify.VolumeMath": {
+      "url": "/operators/lib/volume/modify/VolumeMath/",
+      "summary": "Arithmetic between two volumes or between a volume and a constant."
+    },
+    "Lib.volume.modify.VolumeMorphology": {
+      "url": "/operators/lib/volume/modify/VolumeMorphology/",
+      "summary": "Morphological dilate and erode on volumes."
+    },
+    "Lib.volume.modify.VolumeNoise": {
+      "url": "/operators/lib/volume/modify/VolumeNoise/",
+      "summary": "Adds procedural fractal noise to a volume."
+    },
+    "Lib.volume.modify.VolumeResample": {
+      "url": "/operators/lib/volume/modify/VolumeResample/",
+      "summary": "Changes a volume's voxel size by resampling its values trilinearly."
+    },
+    "Lib.volume.render.NanoVdbRender": {
+      "url": "/operators/lib/volume/render/NanoVdbRender/",
+      "summary": "Renders NanoVDB liquid, smoke and fire inside a glass box."
+    },
+    "Lib.volume.render.VolumeField": {
+      "url": "/operators/lib/volume/render/VolumeField/",
+      "summary": "Samples a baked 3D texture as a distance field for [RaymarchField]."
     }
   },
   "by_shortname": {
@@ -3130,6 +3458,14 @@
     ],
     "AsciiRender": [
       "Lib.image.fx.stylize.AsciiRender"
+    ],
+    "AssimpExport": [
+      "Lib.io.file.AssimpExport",
+      "Lib.io.file.AssimpExport"
+    ],
+    "AssimpImport": [
+      "Lib.mesh.generate.AssimpImport",
+      "Lib.mesh.generate.AssimpImport"
     ],
     "Atan2": [
       "Lib.numbers.float.trigonometry.Atan2"
@@ -3392,6 +3728,12 @@
     "CrossVec3": [
       "Lib.numbers.vec3.CrossVec3"
     ],
+    "CsvToPoints": [
+      "Lib.point.io.CsvToPoints"
+    ],
+    "CsvToPointsExample": [
+      "Lib.point.io.CsvToPointsExample"
+    ],
     "CubeMesh": [
       "Lib.mesh.generate.CubeMesh"
     ],
@@ -3482,11 +3824,47 @@
     "DeltaSinceLastFrame": [
       "Lib.numbers.floats.process.DeltaSinceLastFrame"
     ],
+    "DepthAnything": [
+      "Lib.io.video.depthanything.DepthAnything"
+    ],
+    "DepthAnythingExample": [
+      "Lib.io.video.depthanything.DepthAnythingExample"
+    ],
+    "DepthAnythingExampleNormalSurface": [
+      "Lib.io.video.depthanything.DepthAnythingExampleNormalSurface"
+    ],
+    "DepthAnythingExampleParallaxMove": [
+      "Lib.io.video.depthanything.DepthAnythingExampleParallaxMove"
+    ],
+    "DepthAnythingLiveExample": [
+      "Lib.io.video.depthanything.DepthAnythingLiveExample"
+    ],
+    "DepthAnythingSplatExample": [
+      "Lib.io.video.depthanything.DepthAnythingSplatExample"
+    ],
     "DepthBufferAsGrayScale": [
       "Lib.image.use.DepthBufferAsGrayScale"
     ],
+    "DepthFilter": [
+      "Lib.io.video.depthanything.DepthFilter"
+    ],
     "DepthOfField": [
       "Lib.render.postfx.DepthOfField"
+    ],
+    "DepthParallax": [
+      "Lib.io.video.depthanything.DepthParallax"
+    ],
+    "DepthThreshold": [
+      "Lib.io.video.depthanything.DepthThreshold"
+    ],
+    "DepthToNormal": [
+      "Lib.io.video.depthanything.DepthToNormal"
+    ],
+    "DepthToPoints": [
+      "Lib.io.video.depthanything.DepthToPoints"
+    ],
+    "DepthToPosition": [
+      "Lib.io.video.depthanything.DepthToPosition"
     ],
     "DetectEdges": [
       "Lib.image.fx.stylize.DetectEdges"
@@ -3644,6 +4022,9 @@
     "DrawTubes": [
       "Lib.point.draw.DrawTubes"
     ],
+    "DrawVdbBounds": [
+      "Lib.volume.convert.DrawVdbBounds"
+    ],
     "DustParticles": [
       "Lib.render.basic.DustParticles"
     ],
@@ -3709,6 +4090,9 @@
     ],
     "FieldToImage": [
       "Lib.image.fx.distort.FieldToImage"
+    ],
+    "FieldToVolume": [
+      "Lib.volume.generate.FieldToVolume"
     ],
     "FieldVolumeForce": [
       "Lib.particle.force.FieldVolumeForce"
@@ -4055,6 +4439,12 @@
     "KochKaleidoskope": [
       "Lib.image.fx.distort.KochKaleidoskope"
     ],
+    "LaserCamera": [
+      "Lib.laser.camera.LaserCamera"
+    ],
+    "LaserPointsToBuffer": [
+      "Lib.laser.convert.LaserPointsToBuffer"
+    ],
     "LastFrameDuration": [
       "Lib.numbers.anim.time.LastFrameDuration"
     ],
@@ -4100,6 +4490,9 @@
     "LoadImageFromUrl": [
       "Lib.image.generate.load.LoadImageFromUrl"
     ],
+    "LoadNanoVdb": [
+      "Lib.volume.io.LoadNanoVdb"
+    ],
     "LoadObj": [
       "Lib.mesh.generate.LoadObj"
     ],
@@ -4114,6 +4507,12 @@
     ],
     "LoadSvgAsTexture2D": [
       "Lib.image.generate.load.LoadSvgAsTexture2D"
+    ],
+    "LoadVdb": [
+      "Lib.volume.io.LoadVdb"
+    ],
+    "LoadVdbExample": [
+      "Lib.volume.LoadVdbExample"
     ],
     "Locator": [
       "Lib.render.gizmo.Locator"
@@ -4162,6 +4561,15 @@
     ],
     "MeshProjectUV": [
       "Lib.mesh.modify.MeshProjectUV"
+    ],
+    "MeshToGeometryExample": [
+      "Lib.physics.MeshToGeometryExample"
+    ],
+    "MeshToLaserPoints": [
+      "Lib.laser.convert.MeshToLaserPoints"
+    ],
+    "MeshToSDF": [
+      "Lib.field.generate.sdf.MeshToSDF"
     ],
     "MeshVerticesToPoints": [
       "Lib.point.generate.MeshVerticesToPoints"
@@ -4253,6 +4661,15 @@
     "NGonMesh": [
       "Lib.mesh.generate.NGonMesh"
     ],
+    "NanoVdbRender": [
+      "Lib.volume.render.NanoVdbRender"
+    ],
+    "NanoVdbRenderExample": [
+      "Lib.volume.NanoVdbRenderExample"
+    ],
+    "NanoVdbToPoints": [
+      "Lib.volume.convert.NanoVdbToPoints"
+    ],
     "NdiInput": [
       "Lib.io.video.NdiInput"
     ],
@@ -4285,6 +4702,12 @@
     ],
     "OctahedronSDF": [
       "Lib.field.generate.sdf.OctahedronSDF"
+    ],
+    "OmtInput": [
+      "Lib.io.video.OmtInput"
+    ],
+    "OmtOutput": [
+      "Lib.io.video.OmtOutput"
     ],
     "Once": [
       "Lib.flow.Once"
@@ -4319,6 +4742,9 @@
     "OscillateVec3": [
       "Lib.numbers.anim.animators.OscillateVec3"
     ],
+    "PONKInput": [
+      "Lib.laser.input.PONKInput"
+    ],
     "PadVec2Range": [
       "Lib.numbers.vec2.PadVec2Range"
     ],
@@ -4345,6 +4771,24 @@
     ],
     "PerlinNoise3": [
       "Lib.numbers.vec3.PerlinNoise3"
+    ],
+    "PhysicsSdfFieldExample": [
+      "Lib.physics.PhysicsSdfFieldExample"
+    ],
+    "PhysicsToVolumeExample": [
+      "Lib.physics.PhysicsToVolumeExample"
+    ],
+    "PhysicsVolumeGravityExample": [
+      "Lib.physics.PhysicsVolumeGravityExample"
+    ],
+    "PhysicsVolumesExample": [
+      "Lib.physics.PhysicsVolumesExample"
+    ],
+    "PhysicsWorld": [
+      "Lib.physics.PhysicsWorld"
+    ],
+    "PhysicsWorldExample": [
+      "Lib.physics.PhysicsWorldExample"
     ],
     "PickBool": [
       "Lib.numbers.bool.logic.PickBool"
@@ -4529,6 +4973,9 @@
     "RaymarchPoints": [
       "Lib.field.use.RaymarchPoints"
     ],
+    "RaymarchToCubeMap": [
+      "Lib.field.render.RaymarchToCubeMap"
+    ],
     "ReadFile": [
       "Lib.io.file.ReadFile"
     ],
@@ -4564,6 +5011,9 @@
     ],
     "RenderTarget": [
       "Lib.image.generate.basic.RenderTarget"
+    ],
+    "RenderToCubeMap": [
+      "Lib.render.shading.RenderToCubeMap"
     ],
     "RenderWithMotionBlur": [
       "Lib.image.use.RenderWithMotionBlur"
@@ -4618,6 +5068,36 @@
     ],
     "RgbaToColor": [
       "Lib.numbers.vec4.RgbaToColor"
+    ],
+    "RigidBody": [
+      "Lib.physics.RigidBody"
+    ],
+    "RigidBodyExample": [
+      "Lib.physics.RigidBodyExample"
+    ],
+    "RigidBodyGeometry": [
+      "Lib.physics.RigidBodyGeometry"
+    ],
+    "RigidBodyGeometryExample": [
+      "Lib.physics.RigidBodyGeometryExample"
+    ],
+    "RigidBodyPoints": [
+      "Lib.physics.RigidBodyPoints"
+    ],
+    "RigidBodyPointsExample": [
+      "Lib.physics.RigidBodyPointsExample"
+    ],
+    "RigidForce": [
+      "Lib.physics.RigidForce"
+    ],
+    "RigidForceExample": [
+      "Lib.physics.RigidForceExample"
+    ],
+    "RigidJoint": [
+      "Lib.physics.RigidJoint"
+    ],
+    "RigidJointExample": [
+      "Lib.physics.RigidJointExample"
     ],
     "Rings": [
       "Lib.image.generate.pattern.Rings"
@@ -4693,6 +5173,12 @@
     ],
     "SamplePointsByCameraDistance": [
       "Lib.point.modify.SamplePointsByCameraDistance"
+    ],
+    "SaveNanoVdb": [
+      "Lib.volume.io.SaveNanoVdb"
+    ],
+    "SaveVdb": [
+      "Lib.volume.io.SaveVdb"
     ],
     "ScaleResolution": [
       "Lib.numbers.int2.process.ScaleResolution"
@@ -4982,6 +5468,18 @@
     "StopWatch": [
       "Lib.numbers.anim.time.StopWatch"
     ],
+    "StreamDiffusion": [
+      "Lib.io.ai.StreamDiffusion"
+    ],
+    "StreamDiffusionExample": [
+      "Lib.io.ai.StreamDiffusionExample"
+    ],
+    "StreamDiffusionExampleImg2ImgRestyle": [
+      "Lib.io.ai.StreamDiffusionExampleImg2ImgRestyle"
+    ],
+    "StreamDiffusionExampleV2Restyle": [
+      "Lib.io.ai.StreamDiffusionExampleV2Restyle"
+    ],
     "StringBuilderToString": [
       "Lib.string.buffers.convert.StringBuilderToString"
     ],
@@ -5180,6 +5678,15 @@
     "ValuesToTexture2": [
       "Lib.numbers.floats.process.ValuesToTexture2"
     ],
+    "VdbDensityField": [
+      "Lib.volume.fields.VdbDensityField"
+    ],
+    "VdbToSdfField": [
+      "Lib.volume.fields.VdbToSdfField"
+    ],
+    "VdbToSdfFieldExample": [
+      "Lib.volume.VdbToSdfFieldExample"
+    ],
     "Vec2Magnitude": [
       "Lib.numbers.vec3.Vec2Magnitude"
     ],
@@ -5219,8 +5726,8 @@
     "VideoClip": [
       "Lib.io.video.VideoClip"
     ],
-    "WebcamInput": [
-      "Lib.io.video.WebcamInput"
+    "VideoDeviceInput": [
+      "Lib.io.video.VideoDeviceInput"
     ],
     "VideoStreamInput": [
       "Lib.io.video.VideoStreamInput"
@@ -5246,8 +5753,74 @@
     "VisualizeUvMap": [
       "Lib.mesh.draw.VisualizeUvMap"
     ],
+    "VolumeCsg": [
+      "Lib.volume.modify.VolumeCsg"
+    ],
+    "VolumeCsgExample": [
+      "Lib.volume.VolumeCsgExample"
+    ],
+    "VolumeField": [
+      "Lib.volume.render.VolumeField"
+    ],
+    "VolumeFilter": [
+      "Lib.volume.modify.VolumeFilter"
+    ],
     "VolumeForce": [
       "Lib.particle.force.VolumeForce"
+    ],
+    "VolumeFromMesh": [
+      "Lib.volume.generate.VolumeFromMesh"
+    ],
+    "VolumeFromMeshExample": [
+      "Lib.volume.VolumeFromMeshExample"
+    ],
+    "VolumeFromPoints": [
+      "Lib.volume.generate.VolumeFromPoints"
+    ],
+    "VolumeInfo": [
+      "Lib.volume.analyze.VolumeInfo"
+    ],
+    "VolumeMath": [
+      "Lib.volume.modify.VolumeMath"
+    ],
+    "VolumeMorphology": [
+      "Lib.volume.modify.VolumeMorphology"
+    ],
+    "VolumeNoise": [
+      "Lib.volume.modify.VolumeNoise"
+    ],
+    "VolumeNoiseExample": [
+      "Lib.volume.VolumeNoiseExample"
+    ],
+    "VolumePrimitive": [
+      "Lib.volume.generate.VolumePrimitive"
+    ],
+    "VolumePrimitiveExample": [
+      "Lib.volume.VolumePrimitiveExample"
+    ],
+    "VolumeResample": [
+      "Lib.volume.modify.VolumeResample"
+    ],
+    "VolumeShakingWaterExample": [
+      "Lib.volume.VolumeShakingWaterExample"
+    ],
+    "VolumeToField": [
+      "Lib.volume.convert.VolumeToField"
+    ],
+    "VolumeToMesh": [
+      "Lib.volume.convert.VolumeToMesh"
+    ],
+    "VolumeToNanoVdb": [
+      "Lib.volume.gpu.VolumeToNanoVdb"
+    ],
+    "VolumeToPoints": [
+      "Lib.volume.convert.VolumeToPoints"
+    ],
+    "VolumeToPointsExample": [
+      "Lib.volume.VolumeToPointsExample"
+    ],
+    "VolumeToTexture3D": [
+      "Lib.volume.convert.VolumeToTexture3D"
     ],
     "VoronoiCells": [
       "Lib.image.fx.stylize.VoronoiCells"
@@ -5269,6 +5842,9 @@
     ],
     "WebSocketServer": [
       "Lib.io.websocket.WebSocketServer"
+    ],
+    "WebcamInput": [
+      "Lib.io.video.WebcamInput"
     ],
     "WorleyNoise": [
       "Lib.image.generate.noise.WorleyNoise"

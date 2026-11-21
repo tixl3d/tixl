@@ -1,7 +1,9 @@
 #nullable enable
 
+using ImGuiNET;
 using T3.Core.Stats;
 using T3.Editor.Gui.Input;
+using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 
 namespace T3.Editor.Gui.Windows.Analyze;
@@ -23,7 +25,50 @@ internal sealed class PerformanceWindow : Window
     protected override void DrawContent()
     {
         DrawPresentationSettings();
+        DrawOperatorTimings();
         T3Metrics.DrawDetailedView();
+    }
+
+    /// <summary>
+    /// The operators whose updates took longest, summed over all their instances. The list refreshes a few times a
+    /// second so it can be read; timing costs a little per update, so it is only on while the checkbox is.
+    /// </summary>
+    private static void DrawOperatorTimings()
+    {
+        var showTimings = OpTimings.Enabled;
+        if (FormInputs.AddCheckBox("Operator Timings",
+                                   ref showTimings,
+                                   """
+                                   Lists the operators whose updates took longest in the last frame, summed over all their instances.
+                                   An update includes the inputs it pulls, so an operator's time contains its upstream operators'.
+                                   """,
+                                   false))
+        {
+            OpTimings.Enabled = showTimings;
+            OpTimings.Reset();
+            _timings.Clear();
+        }
+
+        if (!showTimings)
+            return;
+
+        var now = ImGui.GetTime();
+        if (now - _lastTimingsRefresh > TimingsRefreshIntervalSec)
+        {
+            _lastTimingsRefresh = now;
+            _timings = OpTimings.Snapshot(MaxListedOperators);
+        }
+
+        ImGui.PushFont(Fonts.FontSmall);
+        foreach (var (name, milliseconds, count) in _timings)
+        {
+            ImGui.TextUnformatted(count > 1
+                                      ? $"{milliseconds,7:0.00} ms  {name}  ×{count}"
+                                      : $"{milliseconds,7:0.00} ms  {name}");
+        }
+
+        ImGui.PopFont();
+        FormInputs.AddVerticalSpace();
     }
 
     /// <summary>The vsync and frame-rate settings, shared with the settings window.</summary>
@@ -87,6 +132,10 @@ internal sealed class PerformanceWindow : Window
 
     private static string FormatFrameLatency(int frames) => frames <= 1 ? "Low latency (1 frame)" : "Smooth (2 frames)";
 
+    private const double TimingsRefreshIntervalSec = 0.25;
+    private const int MaxListedOperators = 15;
+    private static double _lastTimingsRefresh;
+    private static List<(string Name, double Milliseconds, int Count)> _timings = [];
     private static readonly int[] TargetFrameRates = [0, 144, 120, 60, 50, 30];
     private static readonly int[] FrameLatencies = [1, 2];
     private static int _matchDisplayLabelRate = -1;

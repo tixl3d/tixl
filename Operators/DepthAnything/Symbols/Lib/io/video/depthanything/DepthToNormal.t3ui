@@ -1,0 +1,41 @@
+{
+  "FormatVersion": 3,
+  "Id": "d9e0f1a2-3b4c-5d6e-7f8a-9b0c1d2e3f4a"/*DepthToNormal*/,
+  "Description": "Converts a depth map into a normal map.\n\nUses Sobel gradients of the depth to derive surface normals.\n\nAKA: normals from depth, depth normals",
+  "InputUis": [
+    {
+      "InputId": "a1b2c3d4-e5f6-a7b8-c9d0-e1f2a3b4c5d6"/*DepthTexture*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -350.0
+      },
+      "Description": "The depth map to convert."
+    },
+    {
+      "InputId": "b2c3d4e5-f6a7-b8c9-d0e1-f2a3b4c5d6e7"/*Strength*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -300.0
+      },
+      "Description": "Scales the depth gradient, exaggerating or flattening the normals."
+    },
+    {
+      "InputId": "c3d4e5f6-a7b8-c9d0-e1f2-a3b4c5d6e7f8"/*Invert*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -250.0
+      },
+      "Description": "Flips the normal direction."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "e1f2a3b4-c5d6-e7f8-a9b0-c1d2e3f4a5b6"/*NormalTexture*/,
+      "Position": {
+        "X": 200.0,
+        "Y": -350.0
+      }
+    }
+  ]
+}

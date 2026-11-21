@@ -1,0 +1,76 @@
+{
+  "FormatVersion": 3,
+  "Id": "2f6a8c41-93d7-4b58-a2e9-7c1d5b3f6e84"/*DepthAnythingSplatExample*/,
+  "Description": "Renders a live video stream as a navigable 2.5D point cloud: Depth Anything 3 estimates per-pixel depth, DepthToPoints unprojects it into camera-space splats (size and opacity from depth and confidence), and DrawPoints billboards them into a RenderTarget. Orbit or move the Camera to look around the scene. Stabilize a stationary camera with DepthToPoints.TemporalSmoothing; rebuild from stills with TemporalSmoothing 0.",
+  "SymbolTags": "10",
+  "InputUis": [
+    {
+      "InputId": "4a9e2c7f-8b31-4d65-9a24-6e5f8c3b1d70"/*StreamUrl*/,
+      "Position": {
+        "X": -620.0,
+        "Y": -60.0
+      },
+      "Description": "RTSP (or other stream) URL of the camera.",
+      "Usage": "Default"
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "1c4f8b25-7d93-4a26-8e51-9f3a6c2d5b74",
+      "SymbolName": "Lib.io.video.VideoStreamInput",
+      "Position": {
+        "X": -400.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "3a9e6c47-1f28-4b95-8d63-7c4e2f9a5b16",
+      "SymbolName": "Lib.point.draw.DrawPoints",
+      "Position": {
+        "X": 380.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "5d8c2f61-9a34-4e72-b815-6f2a3d7e4c98",
+      "SymbolName": "Lib.render.camera.Camera",
+      "Position": {
+        "X": 560.0,
+        "Y": -110.0
+      }
+    },
+    {
+      "ChildId": "6e3a9d14-58c2-4b76-9a08-2d7e4c91a3f5",
+      "SymbolName": "Lib.io.video.depthanything.DepthAnything",
+      "Position": {
+        "X": -120.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "8b57d2e9-4c16-4a83-9f27-3e6a1d84c502",
+      "SymbolName": "Lib.io.video.depthanything.DepthToPoints",
+      "Position": {
+        "X": 160.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "9e4b7a23-5c86-4d19-a2f4-8b3d6c15e7a1",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "Position": {
+        "X": 560.0,
+        "Y": 110.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "8d4e7a2c-6b39-4f15-92d8-5a3c7e1f4b96"/*Splat*/,
+      "Position": {
+        "X": 760.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

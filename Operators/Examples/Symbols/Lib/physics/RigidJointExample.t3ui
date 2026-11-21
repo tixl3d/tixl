@@ -1,0 +1,514 @@
+{
+  "FormatVersion": 3,
+  "Id": "95f7abd4-5a03-5b5a-86b7-3adf0daac5ad"/*RigidJointExample*/,
+  "Description": "[RigidJoint] links bodies. Three set-ups show its modes side by side.\n\nThe rope is a line of points joined link to link by one joint in Chain mode, and pinned in place by its first link with a second joint in World mode. The seesaw is a plank on a Hinge around a kinematic pivot; a crate drops on one end and launches the other. The net joins every two knots that start close together, with Mode Nearby, and drapes over a ball.\n\nAKA: constraint, rope, chain, hinge, ball socket, cloth, net, seesaw\n\nTips\n- Playback must run for the simulation to advance; press Reset on the World to start over.\n- A static body cannot be a joint anchor; use a Kinematic one.\n- Higher Frequency makes joints stiffer; ropes and nets like more Substeps on the World.",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "000c4b74-79c5-5a8b-8fe1-15ea1f9e9eaa",
+      "SymbolName": "Lib.physics.RigidBodyGeometry",
+      "Position": {
+        "X": 2080.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "07edf2e5-307a-5655-a55f-27ec617efc68",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "Position": {
+        "X": 2340.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "0fe46ae4-d121-5793-af29-a420424224e5",
+      "SymbolName": "Lib.physics.RigidBodyGeometry",
+      "Position": {
+        "X": 2080.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "10756b7e-1d7c-5339-985e-a00706499af6",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "SectionId": "b1852edc-6e04-561e-b1f7-eaa83ab2788a",
+      "Position": {
+        "X": 3120.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "1415426e-a8a7-597a-b945-de578086c5ed",
+      "SymbolName": "Lib.render.camera.Camera",
+      "SectionId": "b1852edc-6e04-561e-b1f7-eaa83ab2788a",
+      "Position": {
+        "X": 3120.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "154bc513-4ef4-5d84-b5ea-6b6be1d602f4",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "a8fbde76-8d86-5440-be41-e4bccf97652e",
+      "Position": {
+        "X": 780.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "16da33c8-ae90-54b0-94fe-5d5dc050ba8c",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "Position": {
+        "X": 2600.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "1d8fcb6d-0845-58ac-a979-5f49d0d55492",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "Position": {
+        "X": 2340.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "3073e528-2809-5ddc-8bf0-a120615324a8",
+      "SymbolName": "Lib.physics.RigidBodyGeometry",
+      "Position": {
+        "X": 2080.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "364e0f43-7ff1-5088-9674-9d0335b398e9",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "Position": {
+        "X": 2340.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "3b8c51f4-5f8a-55fe-9d78-d527a815fa98",
+      "SymbolName": "Lib.physics.RigidBody",
+      "Position": {
+        "X": 780.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "3bdd93c2-ef19-5068-8e1c-cdaa97f37bbe",
+      "SymbolName": "Lib.physics.RigidBodyGeometry",
+      "Position": {
+        "X": 2080.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "442f4720-a992-5f95-86a7-398b0f3021d3",
+      "SymbolName": "Lib.physics.RigidBodyGeometry",
+      "Position": {
+        "X": 2080.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "451e514e-d1f0-51bd-9e6b-54ab673bd79d",
+      "SymbolName": "Lib.point.generate.GridPoints",
+      "SectionId": "28b9c530-833b-5f9b-92e3-c61574296c39",
+      "Position": {
+        "X": 0.0,
+        "Y": 880.0
+      }
+    },
+    {
+      "ChildId": "49e9bd49-58c1-529f-a7fd-d30c0312169e",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "28b9c530-833b-5f9b-92e3-c61574296c39",
+      "Position": {
+        "X": 780.0,
+        "Y": 770.0
+      }
+    },
+    {
+      "ChildId": "5132382e-6320-5126-8ada-97309c839742",
+      "SymbolName": "Lib.flow.Execute",
+      "SectionId": "b1852edc-6e04-561e-b1f7-eaa83ab2788a",
+      "Position": {
+        "X": 3120.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "5ae59abb-cd58-5836-b76c-4752bc5551c9",
+      "SymbolName": "Lib.physics.PhysicsWorld",
+      "Position": {
+        "X": 1560.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "5bd6b9b4-3413-5d36-9d9c-94276fc232fc",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "Position": {
+        "X": 2340.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "5e3c16a9-76ad-5bf2-b344-95ab7adc4ae5",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "736239d9-2d33-5adf-a1a6-740405028ccc",
+      "Position": {
+        "X": 780.0,
+        "Y": 660.0
+      }
+    },
+    {
+      "ChildId": "6cfece6b-ab03-5da9-bdb6-dfe9dfee3dad",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "Position": {
+        "X": 2340.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "74b90774-8de9-58ff-9fad-16edb9ed77c8",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "SectionId": "b1852edc-6e04-561e-b1f7-eaa83ab2788a",
+      "Position": {
+        "X": 3120.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "77452545-5f88-58e0-a770-f9851f83074b",
+      "SymbolName": "Lib.render.shading.SetShadow",
+      "SectionId": "b1852edc-6e04-561e-b1f7-eaa83ab2788a",
+      "Position": {
+        "X": 3120.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "7a744780-7a27-5b0d-98d8-835531405bce",
+      "SymbolName": "Lib.physics.RigidJoint",
+      "SectionId": "a8fbde76-8d86-5440-be41-e4bccf97652e",
+      "Position": {
+        "X": 1040.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "83039f37-7fa6-5b6d-8df5-f51f3e6f8c03",
+      "SymbolName": "Lib.physics.RigidJoint",
+      "SectionId": "28b9c530-833b-5f9b-92e3-c61574296c39",
+      "Position": {
+        "X": 1040.0,
+        "Y": 880.0
+      }
+    },
+    {
+      "ChildId": "88a0907c-1f3b-5f7e-9237-6535efb63aaf",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "Position": {
+        "X": 2600.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "8e8ee6bc-32d0-5fab-a9b6-77aa5924378b",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "Position": {
+        "X": 2600.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "8fdba56c-bb76-566c-8236-72ab15e80ca6",
+      "SymbolName": "Lib.render.postfx.SSAO",
+      "SectionId": "b1852edc-6e04-561e-b1f7-eaa83ab2788a",
+      "Position": {
+        "X": 3640.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "9103c3f7-606b-574f-a7e7-ca9de71f50eb",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "736239d9-2d33-5adf-a1a6-740405028ccc",
+      "Position": {
+        "X": 780.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "aed23e83-2fb4-5e17-9eda-5f5607a3c610",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "Position": {
+        "X": 2600.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "b374e6ee-9b89-5be4-adad-481ab3c0b2f4",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "Position": {
+        "X": 2600.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "b9d7b168-6821-5eaa-95fe-d5a714e63930",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "736239d9-2d33-5adf-a1a6-740405028ccc",
+      "Position": {
+        "X": 780.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "bad2347a-d6bb-5652-a643-717fb28a7ca4",
+      "SymbolName": "Lib.physics.RigidJoint",
+      "SectionId": "736239d9-2d33-5adf-a1a6-740405028ccc",
+      "Position": {
+        "X": 1040.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "c0599445-bf6e-5534-8c37-ddf2cd626124",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "Position": {
+        "X": 2600.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "cd9e270e-d229-5b12-b01c-6dd27f847456",
+      "SymbolName": "Lib.physics.RigidJoint",
+      "SectionId": "a8fbde76-8d86-5440-be41-e4bccf97652e",
+      "Position": {
+        "X": 1040.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "cf8ffe39-8c9d-585b-9666-044fa926f1dd",
+      "SymbolName": "Lib.point.generate.LinePoints",
+      "SectionId": "a8fbde76-8d86-5440-be41-e4bccf97652e",
+      "Position": {
+        "X": 0.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "d0c2b3fe-d2c2-5f0e-b001-1cd36a331cb8",
+      "SymbolName": "Lib.point.helper.ReadPointsFromGpu",
+      "SectionId": "28b9c530-833b-5f9b-92e3-c61574296c39",
+      "Position": {
+        "X": 260.0,
+        "Y": 880.0
+      }
+    },
+    {
+      "ChildId": "d2c103e2-5db5-584a-a426-b467750fc8da",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "736239d9-2d33-5adf-a1a6-740405028ccc",
+      "Position": {
+        "X": 780.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "d2cad68b-3a7e-5f2f-8c2f-68af9d6a1811",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "Position": {
+        "X": 2340.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "d358abb4-46b6-5a56-95b3-de144d821813",
+      "SymbolName": "Lib.render.shading.SetFog",
+      "SectionId": "b1852edc-6e04-561e-b1f7-eaa83ab2788a",
+      "Position": {
+        "X": 3120.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "da171184-56d5-5d1a-b530-7751efadfffc",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "SectionId": "b1852edc-6e04-561e-b1f7-eaa83ab2788a",
+      "Position": {
+        "X": 3380.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "dd60c014-f9d2-5fc1-8d6e-0a918f3eaf0a",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "28b9c530-833b-5f9b-92e3-c61574296c39",
+      "Position": {
+        "X": 780.0,
+        "Y": 880.0
+      }
+    },
+    {
+      "ChildId": "e00c4ea0-a19c-5215-8e24-fd15a4afa9b3",
+      "SymbolName": "Lib.physics.RigidBodyGeometry",
+      "Position": {
+        "X": 2080.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "fbf9bb30-7416-5519-80a2-34fe7da8efef",
+      "SymbolName": "Lib.point.helper.ReadPointsFromGpu",
+      "SectionId": "a8fbde76-8d86-5440-be41-e4bccf97652e",
+      "Position": {
+        "X": 260.0,
+        "Y": 110.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "c5e29ad8-acf1-5f34-9099-53e67507486c"/*Output*/,
+      "Position": {
+        "X": 3900.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "28b9c530-833b-5f9b-92e3-c61574296c39",
+      "Title": "3  Net: Nearby links over a ball",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.3,
+        "Z": 0.35,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -40.0,
+        "Y": 700.0
+      },
+      "Size": {
+        "X": 1320.0,
+        "Y": 280.0
+      }
+    },
+    {
+      "Id": "736239d9-2d33-5adf-a1a6-740405028ccc",
+      "Title": "2  Seesaw: a Hinge between a kinematic pivot and a plank",
+      "Color": {
+        "X": 0.65,
+        "Y": 0.45,
+        "Z": 0.25,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 740.0,
+        "Y": 260.0
+      },
+      "Size": {
+        "X": 540.0,
+        "Y": 500.0
+      }
+    },
+    {
+      "Id": "a8fbde76-8d86-5440-be41-e4bccf97652e",
+      "Title": "1  Rope: Chain and World joints",
+      "Color": {
+        "X": 0.35,
+        "Y": 0.5,
+        "Z": 0.65,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -40.0,
+        "Y": 40.0
+      },
+      "Size": {
+        "X": 1320.0,
+        "Y": 280.0
+      }
+    },
+    {
+      "Id": "b1852edc-6e04-561e-b1f7-eaa83ab2788a",
+      "Title": "Render: light, shadow and camera",
+      "Color": {
+        "X": 0.4,
+        "Y": 0.4,
+        "Z": 0.45,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 3080.0,
+        "Y": -70.0
+      },
+      "Size": {
+        "X": 800.0,
+        "Y": 720.0
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "87b44861-1f10-5e2d-8267-413d1c8caa48",
+      "ChildId": "154bc513-4ef4-5d84-b5ea-6b6be1d602f4",
+      "Description": "Twenty-four links from a line of points. CollisionGroup 1 lets neighbouring links overlap without pushing each other away."
+    },
+    {
+      "Id": "d84db3ac-8c5d-520c-a5b4-5013a5ff7bc5",
+      "ChildId": "7a744780-7a27-5b0d-98d8-835531405bce",
+      "InputId": "2148cccb-f1d5-41a3-99e1-057d79d29622",
+      "Description": "Mode Chain joins point 0 to 1, 1 to 2 and so on: one operator for the whole rope.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "4425ccc1-c951-513e-9a7c-dc018688761e",
+      "ChildId": "cd9e270e-d229-5b12-b01c-6dd27f847456",
+      "InputId": "e262b93c-a458-48df-a256-9e508f71b7b9",
+      "Description": "Mode World holds a body where it starts; InstanceIndex 0 pins only the first link.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "e77636a5-914c-5825-a69d-d97b47d69f86",
+      "ChildId": "9103c3f7-606b-574f-a7e7-ca9de71f50eb",
+      "InputId": "70f094d8-c499-40bf-ab28-0081297a5985",
+      "Description": "The pivot is Kinematic: it has infinite mass and never moves unless its Position changes.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "cdce3e92-1eb1-5643-b53a-2537747bf407",
+      "ChildId": "bad2347a-d6bb-5652-a643-717fb28a7ca4",
+      "InputId": "da042534-228c-44e5-8f92-37626fb97964",
+      "Description": "A Hinge lets the plank turn around the Z axis only.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "dda5ae91-1e75-5d5f-bef5-1f78c2758e6d",
+      "ChildId": "5e3c16a9-76ad-5bf2-b344-95ab7adc4ae5",
+      "InputId": "974ca0a2-5f02-4ccd-817b-5114070b243e",
+      "Description": "A heavy crate drops on the right end and catapults the light one on the left.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "2773536e-9d37-506f-9303-e21f8057fb46",
+      "ChildId": "83039f37-7fa6-5b6d-8df5-f51f3e6f8c03",
+      "InputId": "943e0e36-52d5-4721-aea1-c66e221d71ed",
+      "Description": "Mode Nearby links every two knots closer than LinkDistance: a net, or cloth.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "939a5aee-5df3-5336-9e38-d00e237e533f",
+      "ChildId": "5ae59abb-cd58-5836-b76c-4752bc5551c9",
+      "InputId": "54247fde-224c-4764-97e1-01d1e725acdc",
+      "Description": "Joints like more Substeps and SolverIterations than loose bodies.",
+      "Style": "Tip"
+    }
+  ]
+}

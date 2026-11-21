@@ -1,0 +1,120 @@
+{
+  "FormatVersion": 3,
+  "Id": "9ba5a498-af7a-45ec-84b8-b5540932e78b"/*DepthToPoints*/,
+  "Description": "Unprojects a depth map into a camera-space point buffer.\n\nOne point per pixel (or per PixelStride-th pixel) is placed at the depth, colored from the color texture, with its Scale set to the world-space size that covers SplatSizePixels screen pixels. Connect the buffer to DrawPoints with UsePointsScale enabled: DrawPoints billboards each point in camera space, so the result is a live depth splat that can be orbited and moved like a 3D object.\n\nInvalid depths and points below ConfidenceThreshold are written as zero-scale transparent points, so no compaction pass is needed.\n\nAKA: depth splat, point cloud, live splat, unproject, depth to 3D",
+  "InputUis": [
+    {
+      "InputId": "13e8c899-4847-4fbe-b05c-b146c28f6e1a"/*DepthTexture*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -400.0
+      },
+      "Description": "DepthAnything's DepthTexture (R32_Float). V3 outputs depth, V2 outputs disparity."
+    },
+    {
+      "InputId": "22ec87ea-deb5-405e-a109-1130e27b0a59"/*PixelStride*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -150.0
+      },
+      "Description": "Sample every Nth pixel. 2 quarters the point count; raise it for dense inputs or slower GPUs."
+    },
+    {
+      "InputId": "23dd5434-b077-4780-9166-53307e7562fa"/*Opacity*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 0.0
+      },
+      "Description": "Alpha of each point. Lower values blend overlapping points more softly."
+    },
+    {
+      "InputId": "3494a9de-be76-4408-948f-f33a03de56d8"/*DepthScale*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -250.0
+      },
+      "Description": "Scales the distance of every point from the camera. Relative depth has no unit, so this sets the size of the reconstruction."
+    },
+    {
+      "InputId": "3acf35fe-7218-4011-8b7d-5f107c4a4b4a"/*FieldOfView*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -300.0
+      },
+      "Description": "Vertical field of view in degrees. Wire DepthAnything's VerticalFov for the model's estimate."
+    },
+    {
+      "InputId": "447053fe-f28b-41c6-ae16-d841e14e0b34"/*Enabled*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 150.0
+      },
+      "Description": "Toggle the point generation."
+    },
+    {
+      "InputId": "782f0918-4efe-46fc-8a2f-3456d509e2d4"/*MaxPoints*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -100.0
+      },
+      "Description": "Upper bound for the buffer. The stride is grown automatically when PixelStride would exceed it."
+    },
+    {
+      "InputId": "aad0c94b-e4a8-483a-a99b-7854a3a20dea"/*SplatSizePixels*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -50.0
+      },
+      "Description": "Screen-space diameter of a point's splat, in pixels, at its depth. Point size in DrawPoints multiplies this."
+    },
+    {
+      "InputId": "b62bb5a6-fd54-49a0-abb5-8e860c036f50"/*ConfidenceThreshold*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 100.0
+      },
+      "Description": "Minimum confidence for a point to be kept. Only used when ConfidenceTexture is connected."
+    },
+    {
+      "InputId": "bd22de74-c0b5-430b-b374-1f50a1d08acf"/*ColorTexture*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -450.0
+      },
+      "Description": "Color sampled for each point. When unconnected, points are white."
+    },
+    {
+      "InputId": "e18fb9ca-7d80-4d53-9435-b7087701c0c3"/*TemporalSmoothing*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 50.0
+      },
+      "Description": "Blends each point with the previous frame's buffer. 0 is raw and most responsive; 0.8-0.9 calms a still webcam, while lower values reduce lag on a moving camera."
+    },
+    {
+      "InputId": "e694fb2e-1b13-469e-92ad-1f71eea71f49"/*ConfidenceTexture*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -350.0
+      },
+      "Description": "Optional confidence map; points below ConfidenceThreshold are dropped."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "111c5692-cce7-4c9b-a3e7-520b50477e40"/*Points*/,
+      "Position": {
+        "X": 200.0,
+        "Y": -450.0
+      }
+    },
+    {
+      "OutputId": "c56de3f1-a90c-4b13-960c-4b59bfdb8f32"/*PointCount*/,
+      "Position": {
+        "X": 200.0,
+        "Y": -400.0
+      }
+    }
+  ]
+}

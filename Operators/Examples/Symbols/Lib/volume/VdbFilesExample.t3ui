@@ -1,0 +1,535 @@
+{
+  "FormatVersion": 3,
+  "Id": "3d45bab4-aef9-507c-b213-348b0614a097"/*VdbFilesExample*/,
+  "Description": "A test scene for real-world VDB files. Three level sets from the OpenVDB samples - the armadillo, the buddha and a torus knot - are read with [LoadVdb], made coarser with [VolumeResample] and meshed with [VolumeToMesh]. Balls fall onto the armadillo, whose mesh is their collider.\n\nThe fire is an EmberGen cache of 100 frames, played as a sequence: Path marks the frame number with %d and Frame follows the playback time. EmberGen writes Z-up files in voxel units, so [LoadVdb] turns them upright and scales them as it reads them. Its temperature and flames grids are negated with [VolumeMath], because [NanoVdbRender] reads density from the depth below the zero level, and raymarched together.\n\nEvery file is read and processed on background threads: the scene appears piece by piece while playback keeps running.\n\nThe files are expected in D:\\DEVDEVDEV\\vdbs; change the Path of each [LoadVdb] for another folder.\n\nAKA: vdb files, openvdb samples, embergen, fire sequence, armadillo, buddha\n\nTips\n- The armadillo file holds 22 million voxels: it takes a few seconds to appear, the rest keeps playing.\n- A finer VoxelSize on [VolumeResample] gives a smoother mesh with more triangles.\n- The ground explosion cache plays the same way: point Path at ground_explosion_####.vdb and Mod at 200.",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "02bee2c3-55b7-50a0-9787-3e431f4b5536",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "SectionId": "71d30043-92ca-5f56-94e3-e7b637524557",
+      "Position": {
+        "X": 3380.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "0c23245c-4d93-57b6-b5c3-019ee5ff0015",
+      "SymbolName": "Lib.physics.PhysicsWorld",
+      "SectionId": "1e7a32a8-0315-5b4d-a5be-9e5120f9a4f6",
+      "Position": {
+        "X": 2080.0,
+        "Y": 880.0
+      }
+    },
+    {
+      "ChildId": "0f2a8130-837c-5e68-8a08-a9d112fefb41",
+      "SymbolName": "Lib.physics.RigidBodyPoints",
+      "Position": {
+        "X": 2340.0,
+        "Y": 990.0
+      }
+    },
+    {
+      "ChildId": "0f50a321-9b84-5342-8c67-0be60829edca",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "Position": {
+        "X": 1300.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "16d24d1d-6f5d-5c96-a0d7-4c23c1c78991",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "1e7a32a8-0315-5b4d-a5be-9e5120f9a4f6",
+      "Position": {
+        "X": 1560.0,
+        "Y": 990.0
+      }
+    },
+    {
+      "ChildId": "20391c3a-96a0-596f-afd3-1ef05bc3720b",
+      "SymbolName": "Lib.geometry.ScatterPointsInVolume",
+      "SectionId": "1e7a32a8-0315-5b4d-a5be-9e5120f9a4f6",
+      "Position": {
+        "X": 1040.0,
+        "Y": 990.0
+      }
+    },
+    {
+      "ChildId": "2d1bc887-f7cd-51d2-a55a-bbf3d9ed2ef1",
+      "SymbolName": "Lib.volume.io.LoadVdb",
+      "SectionId": "5cce0e7b-b471-5997-a3e7-8b9c7520758f",
+      "Position": {
+        "X": 0.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "2d7172f7-2436-57e4-8bff-401954111144",
+      "SymbolName": "Lib.numbers.int.process.FloatToInt",
+      "SectionId": "b0500adb-757e-5c2f-8404-56c447d2c5f6",
+      "Position": {
+        "X": 520.0,
+        "Y": 1320.0
+      }
+    },
+    {
+      "ChildId": "30a1fbe4-f79f-579d-991b-ea047a6c6937",
+      "SymbolName": "Lib.volume.io.LoadVdb",
+      "SectionId": "5cce0e7b-b471-5997-a3e7-8b9c7520758f",
+      "Position": {
+        "X": 0.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "3af3505f-7667-52da-b0f9-a83aa2c41a73",
+      "SymbolName": "Lib.mesh.generate.QuadMesh",
+      "Position": {
+        "X": 2340.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "3e7e4051-2a3b-56ca-990b-4ecaa2cb4032",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "1e7a32a8-0315-5b4d-a5be-9e5120f9a4f6",
+      "Position": {
+        "X": 1560.0,
+        "Y": 880.0
+      }
+    },
+    {
+      "ChildId": "45ad2493-1bcf-5b0d-adb0-acd7e91739ab",
+      "SymbolName": "Lib.flow.Execute",
+      "SectionId": "71d30043-92ca-5f56-94e3-e7b637524557",
+      "Position": {
+        "X": 3120.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "47407f56-159a-5f93-89c1-c1b92e1e8770",
+      "SymbolName": "Lib.volume.convert.VolumeToMesh",
+      "SectionId": "5cce0e7b-b471-5997-a3e7-8b9c7520758f",
+      "Position": {
+        "X": 520.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "490cb457-180f-54c2-b352-25502bc45d53",
+      "SymbolName": "Lib.volume.io.LoadVdb",
+      "SectionId": "5cce0e7b-b471-5997-a3e7-8b9c7520758f",
+      "Position": {
+        "X": 0.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "4f445892-57aa-5c50-bda8-55a8060685be",
+      "SymbolName": "Lib.render.camera.Camera",
+      "SectionId": "71d30043-92ca-5f56-94e3-e7b637524557",
+      "Position": {
+        "X": 3120.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "573ae502-ba96-550c-85ca-dcbe93be9885",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "Position": {
+        "X": 1040.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "577bd9e8-eb51-5e38-8f7b-4127b32f7e9c",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "Position": {
+        "X": 1040.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "59dfb3f9-9808-5229-a145-7030a4f72a81",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "Position": {
+        "X": 1040.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "59fe0a5f-0eb8-5545-ae93-6e698b1bf777",
+      "SymbolName": "Lib.render.shading.SetFog",
+      "SectionId": "71d30043-92ca-5f56-94e3-e7b637524557",
+      "Position": {
+        "X": 3120.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "5d43bd63-de91-5157-9ce3-b8238dba413a",
+      "SymbolName": "Lib.volume.modify.VolumeMath",
+      "SectionId": "b0500adb-757e-5c2f-8404-56c447d2c5f6",
+      "Position": {
+        "X": 1300.0,
+        "Y": 1430.0
+      }
+    },
+    {
+      "ChildId": "5e8e9f00-1454-5346-9c08-78d7366e9389",
+      "SymbolName": "Lib.volume.gpu.VolumeToNanoVdb",
+      "SectionId": "b0500adb-757e-5c2f-8404-56c447d2c5f6",
+      "Position": {
+        "X": 1560.0,
+        "Y": 1430.0
+      }
+    },
+    {
+      "ChildId": "647dd92d-9a39-5667-af40-587909ce6615",
+      "SymbolName": "Lib.volume.convert.VolumeToMesh",
+      "SectionId": "5cce0e7b-b471-5997-a3e7-8b9c7520758f",
+      "Position": {
+        "X": 520.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "654b3b67-e183-538e-a73e-a124ea8f7a63",
+      "SymbolName": "Lib.render.postfx.SSAO",
+      "SectionId": "71d30043-92ca-5f56-94e3-e7b637524557",
+      "Position": {
+        "X": 3640.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "68966f58-12f6-56f0-af5e-2caf0f00eb75",
+      "SymbolName": "Lib.volume.convert.VolumeToMesh",
+      "SectionId": "5cce0e7b-b471-5997-a3e7-8b9c7520758f",
+      "Position": {
+        "X": 520.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "6a9acd43-eb47-58e5-a906-664b3a07431b",
+      "SymbolName": "Lib.mesh.generate.SphereMesh",
+      "SectionId": "1e7a32a8-0315-5b4d-a5be-9e5120f9a4f6",
+      "Position": {
+        "X": 2080.0,
+        "Y": 1100.0
+      }
+    },
+    {
+      "ChildId": "6aa60dc6-b2e1-5dc2-a75b-8ea86b05d906",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "Position": {
+        "X": 1300.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "6c64b23b-0a84-5ec3-88e6-ec1029423876",
+      "SymbolName": "Lib.volume.render.NanoVdbRender",
+      "SectionId": "b0500adb-757e-5c2f-8404-56c447d2c5f6",
+      "Position": {
+        "X": 1820.0,
+        "Y": 1540.0
+      }
+    },
+    {
+      "ChildId": "6c689d74-9592-5a6e-8551-12993233f301",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "Position": {
+        "X": 1300.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "6d2ef3f1-bd79-589a-9ce4-d4501957256b",
+      "SymbolName": "Lib.volume.io.LoadVdb",
+      "SectionId": "b0500adb-757e-5c2f-8404-56c447d2c5f6",
+      "Position": {
+        "X": 1040.0,
+        "Y": 1430.0
+      }
+    },
+    {
+      "ChildId": "82516eaf-27a6-507b-810f-8e75d64a3fec",
+      "SymbolName": "Lib.volume.io.LoadVdb",
+      "SectionId": "b0500adb-757e-5c2f-8404-56c447d2c5f6",
+      "Position": {
+        "X": 1040.0,
+        "Y": 1650.0
+      }
+    },
+    {
+      "ChildId": "8273b74c-142f-551b-9a2f-ab1fe89db609",
+      "SymbolName": "Lib.render.shading.SetShadow",
+      "SectionId": "71d30043-92ca-5f56-94e3-e7b637524557",
+      "Position": {
+        "X": 3120.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "96e929b5-c43a-5abe-9345-10f686f176d3",
+      "SymbolName": "Lib.mesh.generate.RepeatMeshAtPoints",
+      "Position": {
+        "X": 2600.0,
+        "Y": 990.0
+      }
+    },
+    {
+      "ChildId": "a40e58ea-76de-532a-bc56-1b9d235d261b",
+      "SymbolName": "Lib.volume.gpu.VolumeToNanoVdb",
+      "SectionId": "b0500adb-757e-5c2f-8404-56c447d2c5f6",
+      "Position": {
+        "X": 1560.0,
+        "Y": 1650.0
+      }
+    },
+    {
+      "ChildId": "a83fa3e0-ce1c-5eb7-b840-d398735cb8e3",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "SectionId": "71d30043-92ca-5f56-94e3-e7b637524557",
+      "Position": {
+        "X": 3120.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "a92fc9ab-86de-546a-a9ba-4ced07e1de2f",
+      "SymbolName": "Lib.numbers.float.basic.Multiply",
+      "SectionId": "b0500adb-757e-5c2f-8404-56c447d2c5f6",
+      "Position": {
+        "X": 260.0,
+        "Y": 1320.0
+      }
+    },
+    {
+      "ChildId": "a934cf23-903c-57a7-a4a8-03589516b6a7",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "SectionId": "71d30043-92ca-5f56-94e3-e7b637524557",
+      "Position": {
+        "X": 3120.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "bf149fec-1eb5-533b-baaf-371d1b96dd35",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "Position": {
+        "X": 2860.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "c18b0fba-4545-5703-9995-41ed5698ae2b",
+      "SymbolName": "Lib.volume.modify.VolumeResample",
+      "SectionId": "5cce0e7b-b471-5997-a3e7-8b9c7520758f",
+      "Position": {
+        "X": 260.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "c4c6ccf9-39cc-5a28-a612-b109fc59ba67",
+      "SymbolName": "Lib.numbers.int.basic.ModInt",
+      "SectionId": "b0500adb-757e-5c2f-8404-56c447d2c5f6",
+      "Position": {
+        "X": 780.0,
+        "Y": 1320.0
+      }
+    },
+    {
+      "ChildId": "ccfe9111-02e5-5e34-8273-da619684e097",
+      "SymbolName": "Lib.volume.modify.VolumeResample",
+      "SectionId": "5cce0e7b-b471-5997-a3e7-8b9c7520758f",
+      "Position": {
+        "X": 260.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "cdeff68d-3498-5721-a936-508e29adfc54",
+      "SymbolName": "Lib.numbers.anim.time.Time",
+      "SectionId": "b0500adb-757e-5c2f-8404-56c447d2c5f6",
+      "Position": {
+        "X": 0.0,
+        "Y": 1320.0
+      }
+    },
+    {
+      "ChildId": "d224ac8b-e2d3-5e28-9b50-ef1c766ca4fe",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "Position": {
+        "X": 2860.0,
+        "Y": 990.0
+      }
+    },
+    {
+      "ChildId": "de979743-11cf-59a6-955d-438a55a8655c",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "1e7a32a8-0315-5b4d-a5be-9e5120f9a4f6",
+      "Position": {
+        "X": 1560.0,
+        "Y": 770.0
+      }
+    },
+    {
+      "ChildId": "e4a10281-a654-57ad-ae55-6a9df67c1db9",
+      "SymbolName": "Lib.volume.modify.VolumeMath",
+      "SectionId": "b0500adb-757e-5c2f-8404-56c447d2c5f6",
+      "Position": {
+        "X": 1300.0,
+        "Y": 1650.0
+      }
+    },
+    {
+      "ChildId": "f6e8efaf-cd54-5226-b62c-33363cbd6a9b",
+      "SymbolName": "Lib.volume.modify.VolumeResample",
+      "SectionId": "5cce0e7b-b471-5997-a3e7-8b9c7520758f",
+      "Position": {
+        "X": 260.0,
+        "Y": 550.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "aecae997-05bc-5876-926b-5e48aa8f62a3"/*Output*/,
+      "Position": {
+        "X": 3900.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "1e7a32a8-0315-5b4d-a5be-9e5120f9a4f6",
+      "Title": "2  Balls on the armadillo",
+      "Color": {
+        "X": 0.65,
+        "Y": 0.45,
+        "Z": 0.25,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1000.0,
+        "Y": 700.0
+      },
+      "Size": {
+        "X": 1320.0,
+        "Y": 500.0
+      }
+    },
+    {
+      "Id": "5cce0e7b-b471-5997-a3e7-8b9c7520758f",
+      "Title": "1  Level sets from files, meshed",
+      "Color": {
+        "X": 0.35,
+        "Y": 0.5,
+        "Z": 0.65,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -40.0,
+        "Y": 40.0
+      },
+      "Size": {
+        "X": 800.0,
+        "Y": 610.0
+      }
+    },
+    {
+      "Id": "71d30043-92ca-5f56-94e3-e7b637524557",
+      "Title": "Render: light, shadow and camera",
+      "Color": {
+        "X": 0.4,
+        "Y": 0.4,
+        "Z": 0.45,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 3080.0,
+        "Y": -70.0
+      },
+      "Size": {
+        "X": 800.0,
+        "Y": 720.0
+      }
+    },
+    {
+      "Id": "b0500adb-757e-5c2f-8404-56c447d2c5f6",
+      "Title": "3  An EmberGen fire sequence",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.3,
+        "Z": 0.35,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -40.0,
+        "Y": 1250.0
+      },
+      "Size": {
+        "X": 2100.0,
+        "Y": 500.0
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "4dd77551-ac2c-59fb-b3fe-ca865ea47ef7",
+      "ChildId": "30a1fbe4-f79f-579d-991b-ea047a6c6937",
+      "InputId": "a53afcdd-64d2-474b-8a3d-e437f9681de4",
+      "Description": "[LoadVdb] reads the file on a background thread and places it: Scale and Translation bring it to scene size.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "2ac4af07-54d6-5335-b606-5ad3b290e722",
+      "ChildId": "ccfe9111-02e5-5e34-8273-da619684e097",
+      "InputId": "d21b910d-a7d9-507f-b7f6-4053dbdee86a",
+      "Description": "The file has 22 million voxels; resampling to coarser voxels keeps the mesh light.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "c070e77b-0b66-54af-94f8-449633a60418",
+      "ChildId": "de979743-11cf-59a6-955d-438a55a8655c",
+      "Description": "The armadillo mesh is a static collider; its collision tree is built in the background too.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "64b4c726-6a8b-590f-a013-78a836644ec6",
+      "ChildId": "6d2ef3f1-bd79-589a-9ce4-d4501957256b",
+      "InputId": "f32c0f35-8925-491c-ad36-757c30c37142",
+      "Description": "A sequence: %d in Path is replaced by Frame. ZUp stands the EmberGen cache upright.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "25667142-7844-5712-864b-d53f6428fbba",
+      "ChildId": "c4c6ccf9-39cc-5a28-a612-b109fc59ba67",
+      "InputId": "ccdea113-c046-4ec2-b1fb-30d6e15db7ce",
+      "Description": "Playback time at 24 frames per second, looped over the 100 frames of the cache.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "db352886-699f-5f16-8585-f97d5aa987d5",
+      "ChildId": "5d43bd63-de91-5157-9ce3-b8238dba413a",
+      "InputId": "d7a5ce51-3e0f-57b5-81b6-3599334f0d4d",
+      "Description": "[NanoVdbRender] reads density from the depth below zero, so the positive temperature is negated.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "f68fe5f7-17fb-5a6b-a6b1-8ff492dc150e",
+      "ChildId": "6c64b23b-0a84-5ec3-88e6-ec1029423876",
+      "InputId": "c1140119-00fa-56d4-8f71-6bb4a79366a8",
+      "Description": "Temperature is drawn as hot smoke, flames as fire. Tune SmokeDensity and FireIntensity to taste.",
+      "Style": "CallToAction"
+    }
+  ]
+}

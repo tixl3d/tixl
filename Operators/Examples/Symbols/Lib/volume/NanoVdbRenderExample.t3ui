@@ -1,0 +1,302 @@
+{
+  "FormatVersion": 3,
+  "Id": "792104ff-1cda-5a84-93dd-463e60448572"/*NanoVdbRenderExample*/,
+  "Description": "[NanoVdbRender] raymarches three NanoVDB grids at once: a reflective liquid, smoke and fire. Each starts as a [VolumePrimitive] - a slab, a ball and a capsule - roughened once by [VolumeNoise] and uploaded to the GPU with [VolumeToNanoVdb]. The motion comes from the renderer itself: its procedural noise, driven by [Time], makes the smoke billow and the flames flicker without rebuilding a grid.\n\nAKA: smoke, fire, flames, liquid, water, nanovdb, gpu volume, raymarch, glass\n\nTips\n- Smaller VoxelSize means sharper surfaces and more memory and time; start coarse and refine.\n- Level sets store signed distance in world units (negative inside); fog volumes store density.\n- All three grid inputs must be connected; LiquidAmount, SmokeDensity and FireIntensity switch them on and off.\n- StepCount trades quality against GPU time.\n- Animating a grid on the CPU (a moving noise Offset, say) rebuilds and uploads it every frame; prefer the renderer's Time-driven noise for motion.",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0279c511-682a-5295-bdb6-bdc067e0502c",
+      "SymbolName": "Lib.render.shading.SetShadow",
+      "SectionId": "f59645c6-bf54-5d81-b3a5-ed1f3f75e585",
+      "Position": {
+        "X": 1560.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "05f7b4dd-8bdb-5558-9ffb-b65335d98abe",
+      "SymbolName": "Lib.render.shading.SetFog",
+      "SectionId": "f59645c6-bf54-5d81-b3a5-ed1f3f75e585",
+      "Position": {
+        "X": 1560.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "449b420a-3f26-5543-bfb6-bd21977ad209",
+      "SymbolName": "Lib.volume.generate.VolumePrimitive",
+      "SectionId": "2db7ea85-1348-5802-9277-95d720796d5c",
+      "Position": {
+        "X": 0.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "497466ff-933c-5eef-b92e-c91ff865ec6d",
+      "SymbolName": "Lib.volume.gpu.VolumeToNanoVdb",
+      "SectionId": "abcc54b6-eddb-509a-b2a5-9ae7a4710008",
+      "Position": {
+        "X": 520.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "54d41f76-c43e-55e5-9021-9859d8247d8c",
+      "SymbolName": "Lib.volume.gpu.VolumeToNanoVdb",
+      "SectionId": "abcc54b6-eddb-509a-b2a5-9ae7a4710008",
+      "Position": {
+        "X": 520.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "5e9bc402-022b-5dd5-9da5-30460936048e",
+      "SymbolName": "Lib.numbers.anim.time.Time",
+      "SectionId": "abcc54b6-eddb-509a-b2a5-9ae7a4710008",
+      "Position": {
+        "X": 0.0,
+        "Y": 770.0
+      }
+    },
+    {
+      "ChildId": "64480c5d-e103-5053-bf08-fdd439a83826",
+      "SymbolName": "Lib.render.camera.Camera",
+      "SectionId": "f59645c6-bf54-5d81-b3a5-ed1f3f75e585",
+      "Position": {
+        "X": 1560.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "6a8e1831-b873-5492-a8bb-fb06670924c6",
+      "SymbolName": "Lib.volume.modify.VolumeNoise",
+      "SectionId": "2db7ea85-1348-5802-9277-95d720796d5c",
+      "Position": {
+        "X": 260.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "78daa298-fe94-57ef-88ce-80094ac6218f",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "SectionId": "f59645c6-bf54-5d81-b3a5-ed1f3f75e585",
+      "Position": {
+        "X": 1560.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "93522412-319f-5ea9-8658-4c333dab77be",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "SectionId": "f59645c6-bf54-5d81-b3a5-ed1f3f75e585",
+      "Position": {
+        "X": 1820.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "ad81da20-bc9a-5138-80e4-f298690b6420",
+      "SymbolName": "Lib.mesh.generate.QuadMesh",
+      "SectionId": "abcc54b6-eddb-509a-b2a5-9ae7a4710008",
+      "Position": {
+        "X": 780.0,
+        "Y": 660.0
+      }
+    },
+    {
+      "ChildId": "b556c774-2a86-500d-9616-8e980834e1b3",
+      "SymbolName": "Lib.volume.modify.VolumeNoise",
+      "SectionId": "2db7ea85-1348-5802-9277-95d720796d5c",
+      "Position": {
+        "X": 260.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "c1b5383b-296d-5aaf-a1cf-df3936190de4",
+      "SymbolName": "Lib.flow.Execute",
+      "SectionId": "f59645c6-bf54-5d81-b3a5-ed1f3f75e585",
+      "Position": {
+        "X": 1560.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "c2b41d7e-8465-5877-9b27-510468933c6a",
+      "SymbolName": "Lib.render.postfx.SSAO",
+      "SectionId": "f59645c6-bf54-5d81-b3a5-ed1f3f75e585",
+      "Position": {
+        "X": 2080.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "c9109303-a3e5-5238-959b-b4899f0db7bd",
+      "SymbolName": "Lib.volume.gpu.VolumeToNanoVdb",
+      "SectionId": "abcc54b6-eddb-509a-b2a5-9ae7a4710008",
+      "Position": {
+        "X": 520.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "e2384589-80ec-50fe-a845-1bcc27badcc8",
+      "SymbolName": "Lib.volume.render.NanoVdbRender",
+      "SectionId": "abcc54b6-eddb-509a-b2a5-9ae7a4710008",
+      "Position": {
+        "X": 780.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "e58e4abc-0e9c-53e3-933a-46f40cdd6925",
+      "SymbolName": "Lib.volume.generate.VolumePrimitive",
+      "SectionId": "2db7ea85-1348-5802-9277-95d720796d5c",
+      "Position": {
+        "X": 0.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "e8173ca9-a10f-5973-9724-5bb67845171b",
+      "SymbolName": "Lib.volume.modify.VolumeNoise",
+      "SectionId": "2db7ea85-1348-5802-9277-95d720796d5c",
+      "Position": {
+        "X": 260.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "eb00e56d-2dac-5549-b3ca-8de0abcf37ed",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "SectionId": "f59645c6-bf54-5d81-b3a5-ed1f3f75e585",
+      "Position": {
+        "X": 1560.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "ebe10adf-cd52-5851-a665-184d6d51550c",
+      "SymbolName": "Lib.volume.generate.VolumePrimitive",
+      "SectionId": "2db7ea85-1348-5802-9277-95d720796d5c",
+      "Position": {
+        "X": 0.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "fd57727c-97dd-5b1f-870f-af6d081117fe",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "Position": {
+        "X": 1300.0,
+        "Y": 660.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "fb7a479b-1899-5e7a-91dc-3f5d15f89488"/*Output*/,
+      "Position": {
+        "X": 2340.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "2db7ea85-1348-5802-9277-95d720796d5c",
+      "Title": "1  Three shapes, roughened",
+      "ParentSectionId": "abcc54b6-eddb-509a-b2a5-9ae7a4710008",
+      "Color": {
+        "X": 0.35,
+        "Y": 0.5,
+        "Z": 0.65,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -40.0,
+        "Y": 40.0
+      },
+      "Size": {
+        "X": 540.0,
+        "Y": 610.0
+      }
+    },
+    {
+      "Id": "abcc54b6-eddb-509a-b2a5-9ae7a4710008",
+      "Title": "2  Uploaded and raymarched",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.3,
+        "Z": 0.35,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -40.0,
+        "Y": 40.0
+      },
+      "Size": {
+        "X": 1060.0,
+        "Y": 830.0
+      }
+    },
+    {
+      "Id": "f59645c6-bf54-5d81-b3a5-ed1f3f75e585",
+      "Title": "Render: light, shadow and camera",
+      "Color": {
+        "X": 0.4,
+        "Y": 0.4,
+        "Z": 0.45,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1520.0,
+        "Y": -70.0
+      },
+      "Size": {
+        "X": 800.0,
+        "Y": 720.0
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "404f55dd-7904-51f9-9a44-89e4d1e1cc79",
+      "ChildId": "ebe10adf-cd52-5851-a665-184d6d51550c",
+      "Description": "Each element starts as a simple [VolumePrimitive]: a slab of liquid, a ball of smoke, a capsule of fire."
+    },
+    {
+      "Id": "7ba2425c-92e6-5995-9174-bbc5f85c5170",
+      "ChildId": "e8173ca9-a10f-5973-9724-5bb67845171b",
+      "InputId": "fa3b21cd-383f-5f82-9b5a-57c316cdef7d",
+      "Description": "Displacing with noise turns a ball into a billow. It is computed once, so it costs nothing per frame.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "1d19e989-6435-588f-ae6b-5c4a4d2a6fc4",
+      "ChildId": "497466ff-933c-5eef-b92e-c91ff865ec6d",
+      "Description": "[VolumeToNanoVdb] flattens the grid into the GPU layout the renderer reads.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "1e5c25f2-ead1-5748-b2ca-76c67f20a0ae",
+      "ChildId": "e2384589-80ec-50fe-a845-1bcc27badcc8",
+      "InputId": "1d6e5b85-380e-5c4f-927a-2edeea989d3c",
+      "Description": "Fade the three elements in and out with LiquidAmount, SmokeDensity and FireIntensity.",
+      "Style": "CallToAction"
+    },
+    {
+      "Id": "5d245e61-fdb2-5403-8131-8a36db02e4b7",
+      "ChildId": "e2384589-80ec-50fe-a845-1bcc27badcc8",
+      "InputId": "76f6689f-4b17-5daa-b078-1f2a176c7f03",
+      "Description": "StepCount is the raymarch quality.",
+      "Style": "Tip"
+    },
+    {
+      "Id": "816bd5c5-ec14-562c-a6a2-51a4235a4cd9",
+      "ChildId": "5e9bc402-022b-5dd5-9da5-30460936048e",
+      "Description": "The renderer animates its own noise with Time, so the smoke and fire move although the grids stay put.",
+      "Style": "InfoFor"
+    }
+  ]
+}

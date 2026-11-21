@@ -1,0 +1,78 @@
+{
+  "FormatVersion": 3,
+  "Id": "dbfd4f61-ac7d-481d-8347-dda6068e6643"/*StreamDiffusionExampleV2Restyle*/,
+  "Description": "Streams a restyled image with the StreamDiffusion V2 video model. AdjustColors feeds a float render target, which the operator converts on the worker; use CUDA or TensorRT and point ModelPath at the V2 export folder.",
+  "SymbolTags": "10",
+  "InputUis": [
+    {
+      "InputId": "156ca01c-9dd5-4a89-962f-8a60868084d6"/*ImagePath*/,
+      "Position": {
+        "X": -620.0,
+        "Y": 120.0
+      },
+      "Description": "Image to restyle.",
+      "Usage": "FilePath"
+    },
+    {
+      "InputId": "3fd3401f-1b22-46de-a784-03f3dd3eb77e"/*Prompt*/,
+      "Position": {
+        "X": -620.0,
+        "Y": 30.0
+      },
+      "Description": "Text prompt.",
+      "Usage": "Multiline"
+    },
+    {
+      "InputId": "8fcd83a5-892f-411c-8ea2-ca945b318607"/*ModelPath*/,
+      "Position": {
+        "X": -620.0,
+        "Y": -60.0
+      },
+      "Description": "Folder with the StreamDiffusion V2 ONNX export.",
+      "Usage": "DirectoryPath"
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "3cd44d57-efc9-4208-966a-d45452e6a8b8",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
+      "Position": {
+        "X": -620.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "a7bf68c4-7742-41fa-bedc-9e8e2321e88e",
+      "SymbolName": "Lib.image.color.AdjustColors",
+      "Position": {
+        "X": -280.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "cdad38a4-5251-42ad-875a-ad8ebb39879d",
+      "SymbolName": "Lib.io.ai.StreamDiffusion",
+      "Position": {
+        "X": 100.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "e7e3a015-848a-47cd-8930-8e03888dbd57",
+      "SymbolName": "Lib.io.video.VideoStreamInput",
+      "Position": {
+        "X": 14.597931,
+        "Y": 212.04901
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "19e6c4cb-0000-4e05-bbe0-9d07dd7fbfab"/*Image*/,
+      "Position": {
+        "X": 620.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

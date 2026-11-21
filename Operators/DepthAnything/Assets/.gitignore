@@ -1,0 +1,3 @@
+# The model binaries (up to 670 MB) are not tracked - fetch them with
+# Scripts/download_models.py instead of committing them.
+*.onnx

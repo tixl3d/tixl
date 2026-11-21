@@ -2,6 +2,8 @@
 
 ## Operators
 
+- [**CsvToPoints**](CsvToPoints.md) — Loads a CSV file and routes its columns into a point buffer.
+- [**CsvToPointsExample**](CsvToPointsExample.md) — Loads a CSV file and renders its columns as points.
 - [**DataPointConverter**](DataPointConverter.md) — Converts point data from CSV or JSON files into a GPU structured buffer of Point objects. It supports custom column mapping for CSV files and can export the converted points back to CSV or JSON.
 - [**DataPointImportExport**](DataPointImportExport.md) — Imports a JSON point list into a GPU structured buffer and optionally exports it again. The node keeps the imported data in an internal buffer, so the points remain visible even when the import trigger is released. It also features an autoload capability that re-imports the file when the ImportFilePath is modified.
 - [**LineTextPoints**](LineTextPoints.md) — Loads a single line SVG font and generates a point buffer for a text. This can then be rendered as lines, particle effects, or mesh.

@@ -1,0 +1,73 @@
+{
+  "FormatVersion": 3,
+  "Id": "9e4a6c18-3b5d-4f82-a091-6c8e0f3b5d72"/*DepthParallax*/,
+  "Description": "Shifts an image by its depth, as if the camera moved sideways.\n\nGives a still image or live video a 3D feel from a depth map: nearer surfaces move further than distant ones when Offset changes. Each pixel searches for the nearest surface that lands on it, so no holes open up, at the price of some stretching at depth edges.\n\nTips:\n- Animate Offset with a slow circle or an LFO for the classic 3D-photo wobble.\n- Wire MinDepth and MaxDepth from DepthAnything so the effect stays steady as the scene changes.\n\nAKA: 2.5d, 3d photo, depth displacement, parallax, depth warp",
+  "InputUis": [
+    {
+      "InputId": "061bd38f-a2c4-46f9-97a8-d3f57a02c4e9"/*FocalPlane*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -100.0
+      },
+      "Description": "Where the depth stays put, from 0 (farthest) to 1 (nearest). Nearer surfaces move one way, farther ones the other."
+    },
+    {
+      "InputId": "172ce490-b3d5-470a-a8b9-e4068b13d5fa"/*Steps*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -50.0
+      },
+      "Description": "Search steps per pixel. More steps follow sharp depth edges better and cost more."
+    },
+    {
+      "InputId": "b16c8e3a-5d7f-41a4-82b3-8ea02b5d7f94"/*ImageTexture*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -350.0
+      },
+      "Description": "The image to shift."
+    },
+    {
+      "InputId": "c27d9f4b-6e80-42b5-93c4-9fb13c6e80a5"/*DepthTexture*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -300.0
+      },
+      "Description": "The depth map belonging to the image."
+    },
+    {
+      "InputId": "d38ea05c-7f91-43c6-a4d5-a0c24d7f91b6"/*MinDepth*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -250.0
+      },
+      "Description": "Depth value at one end of the range. Wire DepthAnything's MinDepth here."
+    },
+    {
+      "InputId": "e49fb16d-80a2-44d7-b5e6-b1d35e80a2c7"/*MaxDepth*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -200.0
+      },
+      "Description": "Depth value at the other end of the range. Wire DepthAnything's MaxDepth here."
+    },
+    {
+      "InputId": "f50ac27e-91b3-45e8-86f7-c2e46f91b3d8"/*Offset*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -150.0
+      },
+      "Description": "Size and direction of the virtual camera move, as a fraction of the image. The nearest surface moves by this much."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "a05b7d29-4c6e-4093-b1a2-7d9f1a4c6e83"/*ResultTexture*/,
+      "Position": {
+        "X": 200.0,
+        "Y": -350.0
+      }
+    }
+  ]
+}

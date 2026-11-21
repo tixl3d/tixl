@@ -19,8 +19,18 @@ internal sealed class GeometryToMesh : Instance<GeometryToMesh>
         if (geometry == null || geometry.FaceCount == 0)
         {
             Buffers.Value = null;
+            _compiledGeometry = null;
             return;
         }
+
+        // Compiling the mesh and re-uploading its buffers costs milliseconds on large geometry, and
+        // animated sources re-evaluate this slot every frame with unchanged content. The geometry's
+        // version only moves when a producer actually rebuilt it, so that is the cache key.
+        if (ReferenceEquals(geometry, _compiledGeometry) && geometry.Version == _compiledVersion)
+            return;
+
+        _compiledGeometry = geometry;
+        _compiledVersion = geometry.Version;
 
         _compiler.Compile(geometry, relativeToPartPivots: false);
 
@@ -35,6 +45,8 @@ internal sealed class GeometryToMesh : Instance<GeometryToMesh>
     private BufferWithViews _vertexBufferWithViews;
     private BufferWithViews _indexBufferWithViews;
     private readonly MeshBuffers _data = new();
+    private MeshGeometry _compiledGeometry;
+    private int _compiledVersion;
 
     [Input(Guid = "57469ea6-f0c5-4e8d-a53c-40e8ac495bc3")]
     public readonly InputSlot<MeshGeometry> Geometry = new();

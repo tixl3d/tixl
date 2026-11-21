@@ -1,0 +1,369 @@
+{
+  "FormatVersion": 3,
+  "Id": "130a7ff9-33be-5377-8ea1-c7fffe6adfb1"/*RigidBodyPointsExample*/,
+  "Description": "The car is a chassis and four cylinder wheels from a 2 x 2 point grid. One Hinge joint with AutoAnchor fits all four wheels at once and its MotorSpeed drives them.\n\n[RigidBodyPoints] picks one body description's poses out of the world as a point buffer. That is the cheap way to draw many identical bodies: one mesh repeated at every point with [RepeatMeshAtPoints], instead of rebuilding geometry every frame.\n\nAKA: vehicle, car, wheels, motor, axle, instancing, crates\n\nTips\n- Playback must run for the simulation to advance; press Reset on the World to start over.\n- Bodies with the same CollisionGroup pass through each other; the car parts share one so the wheels can touch the chassis.\n- Negative MotorSpeed drives backwards.",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "07659f00-7a65-5d2d-b112-03d9cfff2ce7",
+      "SymbolName": "Lib.flow.Execute",
+      "SectionId": "25ca4546-cfb8-509a-ad42-10094cadde49",
+      "Position": {
+        "X": 2860.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "1051524a-e7cb-5d99-ae80-fa2e674f8fd5",
+      "SymbolName": "Lib.render.camera.Camera",
+      "SectionId": "25ca4546-cfb8-509a-ad42-10094cadde49",
+      "Position": {
+        "X": 2860.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "148df031-fa22-5b7c-8114-1e91d2da2056",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "SectionId": "abb4065d-7028-5b7f-b57e-faa1f40f3908",
+      "Position": {
+        "X": 2340.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "1b7df842-1ad3-5853-bd81-ed57208824d1",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "Position": {
+        "X": 2080.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "1e0c475b-0e36-5fbf-ab96-643d877358aa",
+      "SymbolName": "Lib.mesh.generate.RepeatMeshAtPoints",
+      "SectionId": "abb4065d-7028-5b7f-b57e-faa1f40f3908",
+      "Position": {
+        "X": 2080.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "2f73708b-b23b-5fc1-98ec-dd493f7abf4b",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "Position": {
+        "X": 2340.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "30c1a681-950e-5a72-af81-828f9c9650eb",
+      "SymbolName": "Lib.render.shading.SetShadow",
+      "SectionId": "25ca4546-cfb8-509a-ad42-10094cadde49",
+      "Position": {
+        "X": 2860.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "612b85b9-00ef-5429-889e-91192cfc4486",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "SectionId": "25ca4546-cfb8-509a-ad42-10094cadde49",
+      "Position": {
+        "X": 3120.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "63284b4d-0eab-56f1-b3d1-128b8c1591f8",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "c4256f8a-de10-5875-937f-62aefc9c04f9",
+      "Position": {
+        "X": 780.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "7271b75a-3784-533a-bf50-882f391c7d3e",
+      "SymbolName": "Lib.render.shading.SetFog",
+      "SectionId": "25ca4546-cfb8-509a-ad42-10094cadde49",
+      "Position": {
+        "X": 2860.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "7986aae1-4385-58bb-93a3-3983b6a96462",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "c4256f8a-de10-5875-937f-62aefc9c04f9",
+      "Position": {
+        "X": 780.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "7e6d72f0-36f0-59b1-833a-3d2e0f71cdce",
+      "SymbolName": "Lib.physics.PhysicsWorld",
+      "Position": {
+        "X": 1300.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "836e8a13-56d9-501e-beb0-75b0d417c19d",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "SectionId": "25ca4546-cfb8-509a-ad42-10094cadde49",
+      "Position": {
+        "X": 2860.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "85edda5f-3209-5f19-8ffa-c5c51ce90bc5",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "Position": {
+        "X": 2080.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "932b6082-a8fb-5c6d-8f99-192be545871f",
+      "SymbolName": "Lib.point.helper.ReadPointsFromGpu",
+      "SectionId": "739ceb5f-cbf2-5e99-a751-9652e9e87ee0",
+      "Position": {
+        "X": 260.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "9a89b554-2fd9-5f74-88e0-6ee88cc012d8",
+      "SymbolName": "Lib.render.postfx.SSAO",
+      "SectionId": "25ca4546-cfb8-509a-ad42-10094cadde49",
+      "Position": {
+        "X": 3380.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "a81f31c5-41e2-5d56-b270-045a947cbcd7",
+      "SymbolName": "Lib.physics.RigidBodyGeometry",
+      "Position": {
+        "X": 1820.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "a9a32e53-0403-52b6-84e7-4458bdbd7885",
+      "SymbolName": "Lib.point.helper.ReadPointsFromGpu",
+      "SectionId": "c4256f8a-de10-5875-937f-62aefc9c04f9",
+      "Position": {
+        "X": 260.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "ade96500-cf7f-505a-ab7a-718bbf1c15aa",
+      "SymbolName": "Lib.point.generate.GridPoints",
+      "SectionId": "739ceb5f-cbf2-5e99-a751-9652e9e87ee0",
+      "Position": {
+        "X": 0.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "c7447a1b-9d32-5953-8b47-687954571412",
+      "SymbolName": "Lib.physics.RigidBodyPoints",
+      "SectionId": "abb4065d-7028-5b7f-b57e-faa1f40f3908",
+      "Position": {
+        "X": 1820.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "cb056030-9357-50e1-8ca5-1f636a129acc",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "SectionId": "25ca4546-cfb8-509a-ad42-10094cadde49",
+      "Position": {
+        "X": 2860.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "ceb78dfd-9337-5803-a127-e930ca9aedfa",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "Position": {
+        "X": 2340.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "d407f396-1ba3-575d-b45e-1ed11b88fdc8",
+      "SymbolName": "Lib.mesh.generate.CubeMesh",
+      "SectionId": "abb4065d-7028-5b7f-b57e-faa1f40f3908",
+      "Position": {
+        "X": 1820.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "d435fe43-ae13-58b4-8ab8-7e0a74897a49",
+      "SymbolName": "Lib.physics.RigidBodyGeometry",
+      "Position": {
+        "X": 1820.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "dbb22090-e4ec-50ae-9227-dafa64555468",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "739ceb5f-cbf2-5e99-a751-9652e9e87ee0",
+      "Position": {
+        "X": 780.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "fbecd8c1-998b-5333-98dc-2fb7efe15b70",
+      "SymbolName": "Lib.physics.RigidBody",
+      "Position": {
+        "X": 780.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "ff01885a-6a9a-5a2a-8d51-bfeb67787660",
+      "SymbolName": "Lib.point.generate.GridPoints",
+      "SectionId": "c4256f8a-de10-5875-937f-62aefc9c04f9",
+      "Position": {
+        "X": 0.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "ffa1e88f-1f62-5e16-b40b-e8c9fe4f7d14",
+      "SymbolName": "Lib.physics.RigidJoint",
+      "SectionId": "c4256f8a-de10-5875-937f-62aefc9c04f9",
+      "Position": {
+        "X": 1040.0,
+        "Y": 220.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "89d9cb1a-0606-5afc-bf3e-096412913cf2"/*Output*/,
+      "Position": {
+        "X": 3640.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "25ca4546-cfb8-509a-ad42-10094cadde49",
+      "Title": "Render: light, shadow and camera",
+      "Color": {
+        "X": 0.4,
+        "Y": 0.4,
+        "Z": 0.45,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 2820.0,
+        "Y": -70.0
+      },
+      "Size": {
+        "X": 800.0,
+        "Y": 720.0
+      }
+    },
+    {
+      "Id": "739ceb5f-cbf2-5e99-a751-9652e9e87ee0",
+      "Title": "2  Crates",
+      "Color": {
+        "X": 0.65,
+        "Y": 0.45,
+        "Z": 0.25,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -40.0,
+        "Y": 370.0
+      },
+      "Size": {
+        "X": 1060.0,
+        "Y": 170.0
+      }
+    },
+    {
+      "Id": "abb4065d-7028-5b7f-b57e-faa1f40f3908",
+      "Title": "3  Instanced drawing",
+      "Color": {
+        "X": 0.3,
+        "Y": 0.55,
+        "Z": 0.4,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1780.0,
+        "Y": 260.0
+      },
+      "Size": {
+        "X": 800.0,
+        "Y": 280.0
+      }
+    },
+    {
+      "Id": "c4256f8a-de10-5875-937f-62aefc9c04f9",
+      "Title": "1  Car: chassis, wheels and one hinge for all four",
+      "Color": {
+        "X": 0.35,
+        "Y": 0.5,
+        "Z": 0.65,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -40.0,
+        "Y": 40.0
+      },
+      "Size": {
+        "X": 1320.0,
+        "Y": 280.0
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "069894cd-7db0-5b2a-aca7-c6764b52489a",
+      "ChildId": "7986aae1-4385-58bb-93a3-3983b6a96462",
+      "Description": "Four wheels from a 2 x 2 grid. The grid turns every point 90 degrees, so the cylinder axis lies sideways.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "1e9dbfdd-bb87-5216-b63c-3780228c0c67",
+      "ChildId": "ffa1e88f-1f62-5e16-b40b-e8c9fe4f7d14",
+      "InputId": "15ea23f0-7b4b-43a5-a245-98cac83fa0b6",
+      "Description": "AutoAnchor puts the hinge at each wheel, so one joint fits all four. MotorSpeed drives them.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "d9a9b7e7-9ea0-5532-9985-a912dfb86538",
+      "ChildId": "dbb22090-e4ec-50ae-9227-dafa64555468",
+      "InputId": "10919c3d-5979-4499-a958-c347008f7c12",
+      "Description": "MassMode FromDensity weighs the crates by their volume.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "a2e50eae-56c3-5709-8779-de88d7c578b3",
+      "ChildId": "c7447a1b-9d32-5953-8b47-687954571412",
+      "Description": "[RigidBodyPoints] outputs just the crates' poses, with each body's size as the point scale.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "03199ef7-90a1-5200-abaf-4498b1063948",
+      "ChildId": "1e0c475b-0e36-5fbf-ab96-643d877358aa",
+      "Description": "One cube mesh repeated at every pose: cheap even for thousands of bodies.",
+      "Style": "InfoFor"
+    }
+  ]
+}

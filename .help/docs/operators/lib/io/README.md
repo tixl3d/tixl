@@ -2,6 +2,7 @@
 
 ## Sub-namespaces
 
+- [Lib.io.ai](ai/README.md)
 - [Lib.io.audio](audio/README.md)
 - [Lib.io.dmx](dmx/README.md)
 - [Lib.io.file](file/README.md)

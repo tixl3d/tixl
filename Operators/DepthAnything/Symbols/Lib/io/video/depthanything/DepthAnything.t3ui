@@ -1,0 +1,220 @@
+{
+  "FormatVersion": 3,
+  "Id": "c8f7d6e5-4b3a-2c1d-9f8e-7a6b5c4d3e2f"/*DepthAnything*/,
+  "Description": "Estimates a depth map from an image with Depth Anything 3 through ONNX Runtime.\n\nRuns the model on a background worker, so the graph never waits for inference. The image is resampled and normalized on the GPU and only the small model-sized input is read back, which keeps latency low for live input. Models are managed in Settings > AI Models (download or custom export) and resolved from the model store first; a copy inside the package's Assets folder still works.\n\nOutputs:\n- OutputTexture: The input texture, passed through.\n- DepthTexture: Raw model output as a single float channel. DA3 predicts depth - far is larger.\n- NormalizedDepthTexture: Depth normalized to 0..1 with near bright and visualized according to OutputFormat.\n- ConfidenceTexture: Per-pixel confidence, for models that predict it.\n- SkyTexture: Sky score, for models that predict it.\n- UpdateCount: Increments each time a new depth frame was processed.\n- MinDepth, MaxDepth: Depth range of the latest frame, settled over time by Smoothing.\n- VerticalFov: Field of view in degrees estimated by the model (or from the FieldOfView input for the Metric model), 0 when it gives none.\n- InferenceMs, LatencyMs: Model time and the time from capturing the input to receiving its result.\n- Status: Current model and execution provider state.\n\nTips:\n- Use CUDA (or TensorRT for the lowest latency) and a Small model for live input; the CPU is only practical for stills.\n- Feed VerticalFov and DepthTexture into DepthToPosition for a point-cloud style reconstruction.\n- A lower InputResolution trades depth detail for speed on models that accept it.\n\nAKA: depth estimation, depth anything, depth anything 3, da3, monocular depth, z-depth, ai",
+  "InputUis": [
+    {
+      "InputId": "012345ab-cdef-0123-4567-89abcdef0123"/*ExecutionProviderParam*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -150.0
+      },
+      "Description": "Hardware used for inference. The dropdown lists only the providers this operating system supports: Windows and Linux have CUDA and TensorRT, macOS has CoreML. A provider that cannot initialize falls back to the next one, ending at CPU."
+    },
+    {
+      "InputId": "12345678-1234-1234-1234-123456789012"/*InputTexture*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -350.0
+      },
+      "Description": "The image to estimate depth for. Any texture format and size works; it is resampled on the GPU."
+    },
+    {
+      "InputId": "23456789-2345-2345-2345-234567890123"/*Enabled*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -300.0
+      },
+      "Description": "Enables or disables depth estimation."
+    },
+    {
+      "InputId": "234567cd-8912-9012-3456-6789012345ab"/*MatchInputAspect*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -100.0
+      },
+      "Description": "Scales the depth outputs to the input resolution on the CPU. Leave off for the lowest latency; the GPU upsamples the model-sized depth when it is sampled."
+    },
+    {
+      "InputId": "34567890-3456-3456-3456-345678901234"/*ModelSizeParam*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -250.0
+      },
+      "Description": "Model variant. All options are Depth Anything 3 models; larger models are more detailed and slower, Metric Large predicts depth in meters. Legacy V2-era selections load as their DA3 equivalent."
+    },
+    {
+      "InputId": "3f4a5b6c-7d8e-4f90-a1b2-c3d4e5f6a7b8"/*Normalization*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 150.0
+      },
+      "Description": "How depth maps to brightness: Full Range stretches the frame minimum/maximum (sky excluded when the model predicts sky); Percentile bounds the range at the 2nd/98th quantiles so outlier spikes do not compress the foreground."
+    },
+    {
+      "InputId": "45678901-4567-4567-4567-456789012345"/*OutputFormat*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 50.0
+      },
+      "Description": "Visualization of NormalizedDepthTexture."
+    },
+    {
+      "InputId": "56789012-5678-5678-5678-567890123456"/*EnhanceContrast*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 100.0
+      },
+      "Description": "Stretches the depth range of the visualization."
+    },
+    {
+      "InputId": "67890123-6789-6789-6789-678901234567"/*InvertDepth*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 150.0
+      },
+      "Description": "Flips near and far."
+    },
+    {
+      "InputId": "78901234-7890-7890-7890-789012345678"/*Debug*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 200.0
+      },
+      "Description": "Logs detailed timing and state information."
+    },
+    {
+      "InputId": "90123456-9012-9012-9012-901234567890"/*InputResolution*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -200.0
+      },
+      "Description": "Size the image is scaled to before inference. Auto uses the model default. Models exported at a fixed size ignore it."
+    },
+    {
+      "InputId": "d2e3f4a5-b6c7-4d8e-9f0a-1b2c3d4e5f60"/*SkyHandlingParam*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 200.0
+      },
+      "Description": "Stabilize (default) excludes sky pixels from the depth range and clamps their depth to the foreground maximum, so sky reads as consistently far. Keep publishes the raw model output."
+    },
+    {
+      "InputId": "d5c7a0fc-9eab-4c6e-b058-a06e2c4d7fbd"/*Smoothing*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -50.0
+      },
+      "Description": "Blends each result with the previous one and settles the depth range, which calms the flicker of the model's frame-to-frame scale. 0 is off; higher values trail fast motion."
+    },
+    {
+      "InputId": "e4f1c2a7-5b3d-4c8e-9a6f-2d7b1e0c3f58"/*CameraMotion*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 275.0
+      }
+    },
+    {
+      "InputId": "f7e9c21e-bbcd-4e80-8a7a-c2800e6f91df"/*FieldOfView*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 0.0
+      },
+      "Description": "Horizontal field of view of the source camera in degrees. The Metric model uses it to convert depth to meters; for the other models it is the fallback when the model reports no FOV."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "d9e8f7a6-5c4b-3d2e-0f9e-8b7a6c5d4e3f"/*OutputTexture*/,
+      "Position": {
+        "X": 200.0,
+        "Y": -350.0
+      }
+    },
+    {
+      "OutputId": "e0f9e8b7-6d5c-4e3f-1a0f-9c8b7a6d5e4f"/*DepthTexture*/,
+      "Position": {
+        "X": 200.0,
+        "Y": -300.0
+      }
+    },
+    {
+      "OutputId": "f1a0f9c8-7e6d-5f4e-2b1a-0d9c8b7a6e5f"/*NormalizedDepthTexture*/,
+      "Position": {
+        "X": 200.0,
+        "Y": -250.0
+      }
+    },
+    {
+      "OutputId": "3b7e1c42-8a5d-4f60-9d21-6c0e5a7b8f13"/*ConfidenceTexture*/,
+      "Position": {
+        "X": 200.0,
+        "Y": -200.0
+      }
+    },
+    {
+      "OutputId": "5d9a2e74-1b3c-4a86-b7f0-2e8c4d6a9b35"/*SkyTexture*/,
+      "Position": {
+        "X": 200.0,
+        "Y": -150.0
+      }
+    },
+    {
+      "OutputId": "a2b1c0d9-8f7e-6d5c-3c2b-1e0d9c8b7f6a"/*UpdateCount*/,
+      "Position": {
+        "X": 200.0,
+        "Y": -100.0
+      }
+    },
+    {
+      "OutputId": "b3c2d1e0-0f9f-8e7d-4d3c-2f1e0d9c8a7b"/*MinDepth*/,
+      "Position": {
+        "X": 200.0,
+        "Y": -50.0
+      }
+    },
+    {
+      "OutputId": "c4d3e2f1-1a0b-9f8e-5e4d-3f2e1d0b9a8c"/*MaxDepth*/,
+      "Position": {
+        "X": 200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "7f1c4b96-3d5e-4c08-a9b2-4a0e6c8d1f57"/*VerticalFov*/,
+      "Position": {
+        "X": 200.0,
+        "Y": 50.0
+      }
+    },
+    {
+      "OutputId": "91e3d6b8-5f7a-4e2a-8c14-6c2a8e0f3b79"/*InferenceMs*/,
+      "Position": {
+        "X": 200.0,
+        "Y": 100.0
+      }
+    },
+    {
+      "OutputId": "b3a5f8da-7c9b-4a4c-9e36-8e4c0a2b5d9b"/*LatencyMs*/,
+      "Position": {
+        "X": 200.0,
+        "Y": 150.0
+      }
+    },
+    {
+      "OutputId": "d5e6f7a2-1b2c-0d9e-8f7a-6b5c4d3e2f1a"/*Status*/,
+      "Position": {
+        "X": 200.0,
+        "Y": 200.0
+      }
+    },
+    {
+      "OutputId": "5a3334ec-78c3-4001-8018-3d8aae7f870f"/*CamReference*/,
+      "Position": {
+        "X": 200.0,
+        "Y": 250.0
+      }
+    }
+  ]
+}

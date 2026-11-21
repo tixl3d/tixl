@@ -1,0 +1,56 @@
+{
+  "FormatVersion": 3,
+  "Id": "9ba5a498-af7a-45ec-84b8-b5540932e78b"/*DepthToPoints*/,
+  "Inputs": [
+    {
+      "Id": "13e8c899-4847-4fbe-b05c-b146c28f6e1a"/*DepthTexture*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "22ec87ea-deb5-405e-a109-1130e27b0a59"/*PixelStride*/,
+      "DefaultValue": 2
+    },
+    {
+      "Id": "23dd5434-b077-4780-9166-53307e7562fa"/*Opacity*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "3494a9de-be76-4408-948f-f33a03de56d8"/*DepthScale*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "3acf35fe-7218-4011-8b7d-5f107c4a4b4a"/*FieldOfView*/,
+      "DefaultValue": 50.0
+    },
+    {
+      "Id": "447053fe-f28b-41c6-ae16-d841e14e0b34"/*Enabled*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "782f0918-4efe-46fc-8a2f-3456d509e2d4"/*MaxPoints*/,
+      "DefaultValue": 262144
+    },
+    {
+      "Id": "aad0c94b-e4a8-483a-a99b-7854a3a20dea"/*SplatSizePixels*/,
+      "DefaultValue": 2.0
+    },
+    {
+      "Id": "b62bb5a6-fd54-49a0-abb5-8e860c036f50"/*ConfidenceThreshold*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "bd22de74-c0b5-430b-b374-1f50a1d08acf"/*ColorTexture*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "e18fb9ca-7d80-4d53-9435-b7087701c0c3"/*TemporalSmoothing*/,
+      "DefaultValue": 0.5
+    },
+    {
+      "Id": "e694fb2e-1b13-469e-92ad-1f71eea71f49"/*ConfidenceTexture*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

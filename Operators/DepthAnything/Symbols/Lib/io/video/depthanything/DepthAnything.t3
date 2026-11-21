@@ -1,0 +1,68 @@
+{
+  "FormatVersion": 3,
+  "Id": "c8f7d6e5-4b3a-2c1d-9f8e-7a6b5c4d3e2f"/*DepthAnything*/,
+  "Inputs": [
+    {
+      "Id": "012345ab-cdef-0123-4567-89abcdef0123"/*ExecutionProviderParam*/,
+      "DefaultValue": 5
+    },
+    {
+      "Id": "12345678-1234-1234-1234-123456789012"/*InputTexture*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "23456789-2345-2345-2345-234567890123"/*Enabled*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "234567cd-8912-9012-3456-6789012345ab"/*MatchInputAspect*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "34567890-3456-3456-3456-345678901234"/*ModelSizeParam*/,
+      "DefaultValue": 5
+    },
+    {
+      "Id": "3f4a5b6c-7d8e-4f90-a1b2-c3d4e5f6a7b8"/*Normalization*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "45678901-4567-4567-4567-456789012345"/*OutputFormat*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "56789012-5678-5678-5678-567890123456"/*EnhanceContrast*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "67890123-6789-6789-6789-678901234567"/*InvertDepth*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "78901234-7890-7890-7890-789012345678"/*Debug*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "90123456-9012-9012-9012-901234567890"/*InputResolution*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "d2e3f4a5-b6c7-4d8e-9f0a-1b2c3d4e5f60"/*SkyHandlingParam*/,
+      "DefaultValue": 1
+    },
+    {
+      "Id": "d5c7a0fc-9eab-4c6e-b058-a06e2c4d7fbd"/*Smoothing*/,
+      "DefaultValue": 0.25
+    },
+    {
+      "Id": "e4f1c2a7-5b3d-4c8e-9a6f-2d7b1e0c3f58"/*CameraMotion*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "f7e9c21e-bbcd-4e80-8a7a-c2800e6f91df"/*FieldOfView*/,
+      "DefaultValue": 60.0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

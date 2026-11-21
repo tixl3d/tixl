@@ -1,0 +1,465 @@
+{
+  "FormatVersion": 3,
+  "Id": "bad6b43d-5448-5212-9480-b39a365d0d86"/*MeshToGeometryExample*/,
+  "Description": "[MeshToGeometry] reads a GPU mesh back as geometry, so meshes from [TorusMesh], [IcosahedronMesh], [LoadGltf] and every other mesh operator can collide. The readback only happens when the mesh changes.\n\nEach mesh becomes a body at every scattered point. They are drawn with their original mesh through [RigidBodyPoints] and [RepeatMeshAtPoints], so smooth normals and UVs stay as they were. The tori are concave and keep their holes.\n\nAKA: mesh collider, mesh readback, gltf physics, import, cpu mesh\n\nTips\n- Playback must run for the simulation to advance; press Reset on the World to start over.\n- A mesh with several chunks, such as a loaded model, arrives as several parts: use Pieces to choose between one body per part and one for the whole model.",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0dec01da-ccab-5028-a8f3-3216af9bb4c6",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "SectionId": "00955442-4b1a-5f0c-b5be-f8a8d6661716",
+      "Position": {
+        "X": 3120.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "0ea2fadf-a022-5b76-aab6-48ab9f99c6a4",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "SectionId": "00955442-4b1a-5f0c-b5be-f8a8d6661716",
+      "Position": {
+        "X": 3380.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "17ab787b-03d4-5d62-b5cd-23b671250705",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "e2011338-6343-5c0a-98cf-a18d4e81b127",
+      "Position": {
+        "X": 1040.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "294468c8-b09a-533a-b706-7a9de8a0b064",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "3d62b2f2-37b4-5023-9ebc-347c3bddbb12",
+      "Position": {
+        "X": 1040.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "29b44fd3-d22a-5c06-be84-6ab7aee542b8",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "SectionId": "680afa9d-f3f1-5716-8d25-ae76c975eb54",
+      "Position": {
+        "X": 2600.0,
+        "Y": 660.0
+      }
+    },
+    {
+      "ChildId": "29f4e53d-0b07-5416-93dd-49681bb36c53",
+      "SymbolName": "Lib.physics.RigidBodyPoints",
+      "SectionId": "680afa9d-f3f1-5716-8d25-ae76c975eb54",
+      "Position": {
+        "X": 2080.0,
+        "Y": 660.0
+      }
+    },
+    {
+      "ChildId": "2da940b7-873b-5f14-8c84-2b788bd52339",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "SectionId": "680afa9d-f3f1-5716-8d25-ae76c975eb54",
+      "Position": {
+        "X": 2600.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "2ff71d93-1255-5e78-bf20-32a74c3a6642",
+      "SymbolName": "Lib.flow.Execute",
+      "SectionId": "00955442-4b1a-5f0c-b5be-f8a8d6661716",
+      "Position": {
+        "X": 3120.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "363b02e2-5435-5bef-a5ab-9e085f1e02fd",
+      "SymbolName": "Lib.geometry.MeshToGeometry",
+      "SectionId": "3d62b2f2-37b4-5023-9ebc-347c3bddbb12",
+      "Position": {
+        "X": 520.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "3bfc4a23-cc40-5d1c-8edc-874440000a08",
+      "SymbolName": "Lib.geometry.MeshToGeometry",
+      "SectionId": "3d62b2f2-37b4-5023-9ebc-347c3bddbb12",
+      "Position": {
+        "X": 520.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "4147878a-cbda-5482-8885-ef5bd6a26f3d",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "3d62b2f2-37b4-5023-9ebc-347c3bddbb12",
+      "Position": {
+        "X": 1040.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "62a0351b-4aee-5156-8d1c-fcfe7a97e7c4",
+      "SymbolName": "Lib.geometry.ScatterPointsInVolume",
+      "SectionId": "3d62b2f2-37b4-5023-9ebc-347c3bddbb12",
+      "Position": {
+        "X": 520.0,
+        "Y": 660.0
+      }
+    },
+    {
+      "ChildId": "665ce4fe-9f04-591d-afc1-c7db6989c7c1",
+      "SymbolName": "Lib.geometry.ScatterPointsInVolume",
+      "SectionId": "3d62b2f2-37b4-5023-9ebc-347c3bddbb12",
+      "Position": {
+        "X": 520.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "6fb85949-aa13-59de-b493-5a371655c7d0",
+      "SymbolName": "Lib.render.camera.Camera",
+      "SectionId": "00955442-4b1a-5f0c-b5be-f8a8d6661716",
+      "Position": {
+        "X": 3120.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "72facf17-024c-5ec4-8c53-7675ab4951e2",
+      "SymbolName": "Lib.render.shading.SetShadow",
+      "SectionId": "00955442-4b1a-5f0c-b5be-f8a8d6661716",
+      "Position": {
+        "X": 3120.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "7436ef04-0e39-5bc6-a9d9-64c539a552c8",
+      "SymbolName": "Lib.mesh.generate.RepeatMeshAtPoints",
+      "SectionId": "680afa9d-f3f1-5716-8d25-ae76c975eb54",
+      "Position": {
+        "X": 2340.0,
+        "Y": 660.0
+      }
+    },
+    {
+      "ChildId": "8adaa801-431e-55ee-a697-794badec8964",
+      "SymbolName": "Lib.render.shading.SetFog",
+      "SectionId": "00955442-4b1a-5f0c-b5be-f8a8d6661716",
+      "Position": {
+        "X": 3120.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "8baa6ac8-e547-535a-a73d-284b61920835",
+      "SymbolName": "Lib.physics.RigidBodyPoints",
+      "SectionId": "680afa9d-f3f1-5716-8d25-ae76c975eb54",
+      "Position": {
+        "X": 2080.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "90659cd1-38de-5f16-8b03-71af06953a9a",
+      "SymbolName": "Lib.physics.PhysicsWorld",
+      "Position": {
+        "X": 1560.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "916b120f-1810-5f48-861d-9759d709340a",
+      "SymbolName": "Lib.volume.generate.VolumePrimitive",
+      "SectionId": "e2011338-6343-5c0a-98cf-a18d4e81b127",
+      "Position": {
+        "X": 0.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "91ee0646-772b-5408-9cd7-73f3bcc14a1e",
+      "SymbolName": "Lib.render.postfx.SSAO",
+      "SectionId": "00955442-4b1a-5f0c-b5be-f8a8d6661716",
+      "Position": {
+        "X": 3640.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "952cee36-8a49-53b2-9212-9a588e976f54",
+      "SymbolName": "Lib.geometry.MeshToGeometry",
+      "SectionId": "3d62b2f2-37b4-5023-9ebc-347c3bddbb12",
+      "Position": {
+        "X": 520.0,
+        "Y": 770.0
+      }
+    },
+    {
+      "ChildId": "9b217606-1d41-5fd0-9797-5d52398a7933",
+      "SymbolName": "Lib.mesh.generate.TorusMesh",
+      "SectionId": "3d62b2f2-37b4-5023-9ebc-347c3bddbb12",
+      "Position": {
+        "X": 0.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "9ff62131-85ee-5459-84a0-854d06c9eb04",
+      "SymbolName": "Lib.geometry.ScatterPointsInVolume",
+      "SectionId": "3d62b2f2-37b4-5023-9ebc-347c3bddbb12",
+      "Position": {
+        "X": 520.0,
+        "Y": 880.0
+      }
+    },
+    {
+      "ChildId": "a259ccf4-bd48-5968-881b-9ad6ea9a0a7c",
+      "SymbolName": "Lib.mesh.generate.CylinderMesh",
+      "SectionId": "3d62b2f2-37b4-5023-9ebc-347c3bddbb12",
+      "Position": {
+        "X": 0.0,
+        "Y": 770.0
+      }
+    },
+    {
+      "ChildId": "a5a989dd-82e4-5722-8940-4cc555f69606",
+      "SymbolName": "Lib.volume.convert.VolumeToMesh",
+      "SectionId": "e2011338-6343-5c0a-98cf-a18d4e81b127",
+      "Position": {
+        "X": 520.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "a990080f-571a-592b-b122-510168ea2cc0",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "SectionId": "00955442-4b1a-5f0c-b5be-f8a8d6661716",
+      "Position": {
+        "X": 3120.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "ad3c139d-9469-541a-b90e-7e4a078433d6",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "e2011338-6343-5c0a-98cf-a18d4e81b127",
+      "Position": {
+        "X": 1040.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "b03fe8b9-876a-503a-a025-1e6088eb96cb",
+      "SymbolName": "Lib.physics.RigidBodyGeometry",
+      "Position": {
+        "X": 2080.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "b0d8781c-fed4-5896-b99c-478a95da532d",
+      "SymbolName": "Lib.physics.RigidBodyPoints",
+      "SectionId": "680afa9d-f3f1-5716-8d25-ae76c975eb54",
+      "Position": {
+        "X": 2080.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "b17458de-01f7-55d5-98f6-7bb79032efca",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "Position": {
+        "X": 2340.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "b5fc16e3-f25b-52c3-ad52-284caeabcc95",
+      "SymbolName": "Lib.mesh.generate.IcosahedronMesh",
+      "SectionId": "3d62b2f2-37b4-5023-9ebc-347c3bddbb12",
+      "Position": {
+        "X": 0.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "c4dcd1fd-4da2-5ed0-910a-c363c95103d5",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "3d62b2f2-37b4-5023-9ebc-347c3bddbb12",
+      "Position": {
+        "X": 1040.0,
+        "Y": 770.0
+      }
+    },
+    {
+      "ChildId": "c9158204-6f86-5c6d-a884-6cd491cd6ffb",
+      "SymbolName": "Lib.volume.modify.VolumeCsg",
+      "SectionId": "e2011338-6343-5c0a-98cf-a18d4e81b127",
+      "Position": {
+        "X": 260.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "d4649013-d14e-5e35-8c8c-fb05e5dfd0d8",
+      "SymbolName": "Lib.mesh.generate.RepeatMeshAtPoints",
+      "SectionId": "680afa9d-f3f1-5716-8d25-ae76c975eb54",
+      "Position": {
+        "X": 2340.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "d9f8727a-f8cc-55eb-9067-7d93ea0a3c83",
+      "SymbolName": "Lib.volume.generate.VolumePrimitive",
+      "SectionId": "e2011338-6343-5c0a-98cf-a18d4e81b127",
+      "Position": {
+        "X": 0.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "e2be97b1-64e1-582d-8675-0b14043cd3ec",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "Position": {
+        "X": 2600.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "e716056e-3a4f-5e21-b467-e0e97d043720",
+      "SymbolName": "Lib.mesh.generate.RepeatMeshAtPoints",
+      "SectionId": "680afa9d-f3f1-5716-8d25-ae76c975eb54",
+      "Position": {
+        "X": 2340.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "fc908c17-e197-5248-9106-00ed68368d1c",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "SectionId": "680afa9d-f3f1-5716-8d25-ae76c975eb54",
+      "Position": {
+        "X": 2600.0,
+        "Y": 220.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "037f33a9-733f-5e6f-8526-5502955aff28"/*Output*/,
+      "Position": {
+        "X": 3900.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "00955442-4b1a-5f0c-b5be-f8a8d6661716",
+      "Title": "Render: light, shadow and camera",
+      "Color": {
+        "X": 0.4,
+        "Y": 0.4,
+        "Z": 0.45,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 3080.0,
+        "Y": -70.0
+      },
+      "Size": {
+        "X": 800.0,
+        "Y": 720.0
+      }
+    },
+    {
+      "Id": "3d62b2f2-37b4-5023-9ebc-347c3bddbb12",
+      "Title": "2  GPU meshes become bodies",
+      "Color": {
+        "X": 0.65,
+        "Y": 0.45,
+        "Z": 0.25,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -40.0,
+        "Y": 260.0
+      },
+      "Size": {
+        "X": 1320.0,
+        "Y": 720.0
+      }
+    },
+    {
+      "Id": "680afa9d-f3f1-5716-8d25-ae76c975eb54",
+      "Title": "3  Drawn with their own meshes",
+      "Color": {
+        "X": 0.3,
+        "Y": 0.55,
+        "Z": 0.4,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 2040.0,
+        "Y": 150.0
+      },
+      "Size": {
+        "X": 800.0,
+        "Y": 610.0
+      }
+    },
+    {
+      "Id": "e2011338-6343-5c0a-98cf-a18d4e81b127",
+      "Title": "1  A bowl carved from volumes",
+      "Color": {
+        "X": 0.35,
+        "Y": 0.5,
+        "Z": 0.65,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -40.0,
+        "Y": -70.0
+      },
+      "Size": {
+        "X": 1320.0,
+        "Y": 390.0
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "eda3bf3b-af90-5ca9-a32b-227365fffa6a",
+      "ChildId": "363b02e2-5435-5bef-a5ab-9e085f1e02fd",
+      "Description": "[MeshToGeometry] reads the GPU mesh back. WeldPoints reconnects faces the mesh split for its normals.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "6eda6d82-b689-572d-b097-f133c033e8d6",
+      "ChildId": "294468c8-b09a-533a-b706-7a9de8a0b064",
+      "Description": "With Points connected the whole mesh sits at every point. Shape Auto splits the concave torus into hulls.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "7ddd3389-1dfb-5dcf-8d38-6c2c97b7e2b8",
+      "ChildId": "e716056e-3a4f-5e21-b467-e0e97d043720",
+      "Description": "Drawing with the original mesh keeps its smooth normals: [RepeatMeshAtPoints] places it at every body.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "2c035230-4479-5f00-9ae7-918b6f54c860",
+      "ChildId": "ad3c139d-9469-541a-b90e-7e4a078433d6",
+      "InputId": "70f094d8-c499-40bf-ab28-0081297a5985",
+      "Description": "Static bodies made from geometry collide as their exact triangles.",
+      "Style": "InfoFor"
+    }
+  ]
+}

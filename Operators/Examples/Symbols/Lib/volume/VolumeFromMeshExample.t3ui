@@ -1,0 +1,387 @@
+﻿{
+  "FormatVersion": 3,
+  "Id": "afe8d595-838b-5aa2-8411-57bba4355642"/*VolumeFromMeshExample*/,
+  "Description": "Left: the word TiXL as geometry becomes a level set with [VolumeFromMesh], and [VolumeMorphology] dilates it into soft bubble letters. Middle: scattered points are splatted into a density volume with [VolumeFromPoints], a metaball cloud. Right: a noise field is sampled over a box with [FieldToVolume].\n\nWhatever goes in, what comes out is a volume, and every volume operator works on it.\n\nAKA: voxelize, mesh to sdf, points to volume, metaballs, splat, field to volume\n\nTips\n- Smaller VoxelSize means sharper surfaces and more memory and time; start coarse and refine.\n- Level sets store signed distance in world units (negative inside); fog volumes store density.\n- A density volume is meshed at a density Isovalue, not at 0.",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "2145d906-1eb1-5269-bc29-463527db089c",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "Position": {
+        "X": 1820.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "237cc933-0a9a-5dda-8d05-cdd060dcfdcc",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "SectionId": "8f6d6058-15b8-5ca2-b5a1-1cd325bbb3ba",
+      "Position": {
+        "X": 2340.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "2f63532f-7cf9-5000-bb39-ab4c73f1bf80",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "Position": {
+        "X": 1560.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "34edcee8-bcc6-5c11-9d9e-5ae7177ee282",
+      "SymbolName": "Lib.volume.convert.VolumeToMesh",
+      "SectionId": "940db7fb-5c32-5907-b707-e7c10a094e4d",
+      "Position": {
+        "X": 1040.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "42eedecb-3ba0-5536-b4df-89d73060d577",
+      "SymbolName": "Lib.render.shading.SetShadow",
+      "SectionId": "8f6d6058-15b8-5ca2-b5a1-1cd325bbb3ba",
+      "Position": {
+        "X": 2340.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "457ba401-f26a-5573-bcfb-7bd908fccd83",
+      "SymbolName": "Lib.render.postfx.SSAO",
+      "SectionId": "8f6d6058-15b8-5ca2-b5a1-1cd325bbb3ba",
+      "Position": {
+        "X": 2860.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "5d663ce8-9e8a-5126-9534-1b08f2dc49e1",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "Position": {
+        "X": 1820.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "5f69dcb5-8a9c-599c-aca2-832a8f50c7d2",
+      "SymbolName": "Lib.geometry.CurvesToGeometry",
+      "SectionId": "a76a4e44-297a-5a91-bf6e-c919e7e929f2",
+      "Position": {
+        "X": 260.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "609453d4-3e64-58ce-a6af-3a7e6ea6983f",
+      "SymbolName": "Lib.render.shading.SetFog",
+      "SectionId": "8f6d6058-15b8-5ca2-b5a1-1cd325bbb3ba",
+      "Position": {
+        "X": 2340.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "6172b909-c938-5521-9bba-8152bc875053",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "Position": {
+        "X": 1820.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "61c1b410-85a9-583e-91f9-c0441ae5804a",
+      "SymbolName": "Lib.volume.generate.VolumeFromPoints",
+      "SectionId": "940db7fb-5c32-5907-b707-e7c10a094e4d",
+      "Position": {
+        "X": 520.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "632344e8-c2b6-59e4-90ef-ab83fc707589",
+      "SymbolName": "Lib.geometry.TransformGeometry",
+      "Position": {
+        "X": 1300.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "694d801b-43e5-55da-b603-141bcd6c8439",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "Position": {
+        "X": 1560.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "6b009f07-e022-5fd9-8309-e9d5d1548637",
+      "SymbolName": "Lib.geometry.StringToCurves",
+      "SectionId": "a76a4e44-297a-5a91-bf6e-c919e7e929f2",
+      "Position": {
+        "X": 0.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "6b4b03bc-58dd-5177-a3c8-4f282bb25558",
+      "SymbolName": "Lib.mesh.generate.QuadMesh",
+      "Position": {
+        "X": 1300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "6f84b17c-b800-522e-9316-0c344b0e7f45",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "Position": {
+        "X": 1820.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "734a6294-9515-52cf-9866-bd3585a0cb57",
+      "SymbolName": "Lib.geometry.TransformGeometry",
+      "Position": {
+        "X": 1300.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "7bf292fa-0f18-5f5c-bbfd-062182504500",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "Position": {
+        "X": 1560.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "b21b0f44-5e98-5f1b-a7fc-11f6ed5f2246",
+      "SymbolName": "Lib.volume.generate.FieldToVolume",
+      "SectionId": "9e869cc0-a3dc-55af-b1c2-6bc3edbf4a61",
+      "Position": {
+        "X": 520.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "b5a26d7b-bb69-5232-9bf9-130f540cf62f",
+      "SymbolName": "Lib.volume.generate.VolumeFromMesh",
+      "SectionId": "a76a4e44-297a-5a91-bf6e-c919e7e929f2",
+      "Position": {
+        "X": 520.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "b81effbf-780a-5ce7-914f-8f4c6809ab02",
+      "SymbolName": "Lib.geometry.TransformGeometry",
+      "Position": {
+        "X": 1300.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "c0405e10-1ce3-5abd-b7b2-2427a3752153",
+      "SymbolName": "Lib.geometry.ScatterPointsInVolume",
+      "SectionId": "940db7fb-5c32-5907-b707-e7c10a094e4d",
+      "Position": {
+        "X": 0.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "c7f739f8-5dd9-5d5a-a800-d936240a0e88",
+      "SymbolName": "Lib.render.camera.Camera",
+      "SectionId": "8f6d6058-15b8-5ca2-b5a1-1cd325bbb3ba",
+      "Position": {
+        "X": 2340.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "cdccdd0a-a9d5-52a2-889e-322a7240001c",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "SectionId": "8f6d6058-15b8-5ca2-b5a1-1cd325bbb3ba",
+      "Position": {
+        "X": 2600.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "ce813b12-5c3d-571e-aa84-7e60ad8d6c36",
+      "SymbolName": "Lib.flow.Execute",
+      "SectionId": "8f6d6058-15b8-5ca2-b5a1-1cd325bbb3ba",
+      "Position": {
+        "X": 2340.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "d9ae4621-17ee-5655-9e7a-0474592b9d32",
+      "SymbolName": "Lib.volume.convert.VolumeToMesh",
+      "SectionId": "9e869cc0-a3dc-55af-b1c2-6bc3edbf4a61",
+      "Position": {
+        "X": 1040.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "de0206c6-fe66-541e-88e8-b702404d297f",
+      "SymbolName": "Lib.geometry.NoiseField",
+      "SectionId": "9e869cc0-a3dc-55af-b1c2-6bc3edbf4a61",
+      "Position": {
+        "X": 0.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "e5defbb3-3cc1-51d4-b298-47c5e03a9b3f",
+      "SymbolName": "Lib.volume.modify.VolumeMorphology",
+      "SectionId": "a76a4e44-297a-5a91-bf6e-c919e7e929f2",
+      "Position": {
+        "X": 780.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "edbe52ab-ec9b-5da9-b744-07ee75d6dd99",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "SectionId": "8f6d6058-15b8-5ca2-b5a1-1cd325bbb3ba",
+      "Position": {
+        "X": 2340.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "f0456af3-963d-5ee2-8265-4a106ea88465",
+      "SymbolName": "Lib.volume.convert.VolumeToMesh",
+      "SectionId": "a76a4e44-297a-5a91-bf6e-c919e7e929f2",
+      "Position": {
+        "X": 1040.0,
+        "Y": 110.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "d60c0b83-c747-52e9-849b-05ece40eaf4b"/*Output*/,
+      "Position": {
+        "X": 3120.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "8f6d6058-15b8-5ca2-b5a1-1cd325bbb3ba",
+      "Title": "Render: light, shadow and camera",
+      "Color": {
+        "X": 0.4,
+        "Y": 0.4,
+        "Z": 0.45,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 2300.0,
+        "Y": -70.0
+      },
+      "Size": {
+        "X": 800.0,
+        "Y": 720.0
+      }
+    },
+    {
+      "Id": "940db7fb-5c32-5907-b707-e7c10a094e4d",
+      "Title": "2  From points",
+      "Color": {
+        "X": 0.65,
+        "Y": 0.45,
+        "Z": 0.25,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -40.0,
+        "Y": 260.0
+      },
+      "Size": {
+        "X": 1320.0,
+        "Y": 170.0
+      }
+    },
+    {
+      "Id": "9e869cc0-a3dc-55af-b1c2-6bc3edbf4a61",
+      "Title": "3  From a field",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.3,
+        "Z": 0.35,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -40.0,
+        "Y": 480.0
+      },
+      "Size": {
+        "X": 1320.0,
+        "Y": 170.0
+      }
+    },
+    {
+      "Id": "a76a4e44-297a-5a91-bf6e-c919e7e929f2",
+      "Title": "1  From a mesh",
+      "Color": {
+        "X": 0.35,
+        "Y": 0.5,
+        "Z": 0.65,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -40.0,
+        "Y": 40.0
+      },
+      "Size": {
+        "X": 1320.0,
+        "Y": 170.0
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "d93de08c-49ab-5452-95aa-ca165bc9065b",
+      "ChildId": "b5a26d7b-bb69-5232-9bf9-130f540cf62f",
+      "InputId": "5dc83de1-24e8-52c8-9ef4-2ad2aafab51f",
+      "Description": "[VolumeFromMesh] turns closed geometry into a level set. The smallest feature needs a few voxels.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "6def980f-e0fa-56ec-9c75-846d77adfd7b",
+      "ChildId": "e5defbb3-3cc1-51d4-b298-47c5e03a9b3f",
+      "InputId": "afb22fff-6a74-5f28-893e-950eb71eba4d",
+      "Description": "Dilate grows the surface outwards by Radius: crisp letters turn into bubbles.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "ead57cfc-c60d-5b0e-87b7-0e6a49f19f03",
+      "ChildId": "61c1b410-85a9-583e-91f9-c0441ae5804a",
+      "InputId": "8a3c8412-7266-50ce-83ba-7841bb431863",
+      "Description": "[VolumeFromPoints] adds a soft ball of density around every point; close balls merge.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "7f253c9f-2538-5df3-99cd-711922cc5546",
+      "ChildId": "34edcee8-bcc6-5c11-9d9e-5ae7177ee282",
+      "InputId": "345f946b-8c36-5548-a569-4123e0544b8f",
+      "Description": "Density is meshed at a threshold: lower the Isovalue for a fatter cloud.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "a3b632f8-8018-5ad0-a7e3-ca67cc14be20",
+      "ChildId": "b21b0f44-5e98-5f1b-a7fc-11f6ed5f2246",
+      "InputId": "56318452-ae77-53d2-b4b1-55d93eaffcd7",
+      "Description": "[FieldToVolume] samples any scalar field over a box; Mode chooses level set or density.",
+      "Style": "InfoFor"
+    }
+  ]
+}

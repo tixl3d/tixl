@@ -1,0 +1,476 @@
+﻿{
+  "FormatVersion": 3,
+  "Id": "db613897-4f88-5c81-a321-c460456d3001"/*RigidBodyExample*/,
+  "Description": "[RigidBody] turns any geometry into a collider. Shape Auto splits concave geometry into several convex hulls, so the rings keep their holes and slide down the posts they land over, and the letters keep their counters.\n\nThe same word falls twice: on the left with Pieces EachPartIsABody, so every letter is a body of its own, and on the right with WholeObject, so the word stays rigid. Bodies made from geometry weigh their volume times Density.\n\nAKA: convex decomposition, compound body, concave collider, mesh collider, multi-part, ring toss\n\nTips\n- Playback must run for the simulation to advance; press Reset on the World to start over.\n- Set the Rings' Shape to ConvexHull and reset: every ring then fills its hole and rests on top of the posts.\n- Turn on ShowColliders on a [RigidBodyGeometry] to see the hulls.\n- MaxHulls trades accuracy against cost.",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "02c5c7ea-0057-53a5-977e-e5c4f0203a3d",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "SectionId": "e8a2892a-537f-5a94-9233-e52c972f3d80",
+      "Position": {
+        "X": 2860.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "1003eb5e-57d1-5bce-befd-40ba471d43ea",
+      "SymbolName": "Lib.physics.RigidBodyGeometry",
+      "SectionId": "2a173f80-8150-56db-8058-40fc97a8f06d",
+      "Position": {
+        "X": 1820.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "13071f53-ff6e-5077-acfc-61b2c0c236b4",
+      "SymbolName": "Lib.physics.RigidBodyGeometry",
+      "SectionId": "2a173f80-8150-56db-8058-40fc97a8f06d",
+      "Position": {
+        "X": 1820.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "21beec73-582f-5448-8d80-6d81816c295f",
+      "SymbolName": "Lib.geometry.CurvesToGeometry",
+      "SectionId": "a434f90d-fe5d-586e-abe0-516775655270",
+      "Position": {
+        "X": 260.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "2b0d20e1-34c4-5695-b534-42afe6156c90",
+      "SymbolName": "Lib.geometry.StringToCurves",
+      "SectionId": "a434f90d-fe5d-586e-abe0-516775655270",
+      "Position": {
+        "X": 0.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "2d0cd208-a456-5ce0-960c-a15acf16f064",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "70ad702a-ae8a-59db-9cae-04be60fa41c0",
+      "Position": {
+        "X": 780.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "35c3a894-fc58-5de6-9d8d-73748d5f6aaf",
+      "SymbolName": "Lib.volume.generate.VolumePrimitive",
+      "SectionId": "70ad702a-ae8a-59db-9cae-04be60fa41c0",
+      "Position": {
+        "X": 0.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "3a279f51-3308-5db3-ad60-954076d9fb0c",
+      "SymbolName": "Lib.render.shading.SetFog",
+      "SectionId": "e8a2892a-537f-5a94-9233-e52c972f3d80",
+      "Position": {
+        "X": 2860.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "4598b233-f1da-5291-8150-b3a0472fbe4a",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "SectionId": "e8a2892a-537f-5a94-9233-e52c972f3d80",
+      "Position": {
+        "X": 2860.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "499a8186-d04f-5b3a-bd3d-aee8f7252e98",
+      "SymbolName": "Lib.render.shading.SetShadow",
+      "SectionId": "e8a2892a-537f-5a94-9233-e52c972f3d80",
+      "Position": {
+        "X": 2860.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "53abf493-9273-5860-a00b-7b5cd45033dd",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "70ad702a-ae8a-59db-9cae-04be60fa41c0",
+      "Position": {
+        "X": 780.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "5a6e8c54-922c-5893-b565-64bf881fe7eb",
+      "SymbolName": "Lib.physics.PhysicsWorld",
+      "SectionId": "2a173f80-8150-56db-8058-40fc97a8f06d",
+      "Position": {
+        "X": 1300.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "5b90fa2a-9a7e-556d-9cd1-0553e32a4dcc",
+      "SymbolName": "Lib.geometry.ScatterPointsInVolume",
+      "SectionId": "70ad702a-ae8a-59db-9cae-04be60fa41c0",
+      "Position": {
+        "X": 520.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "698daf4d-026e-54f4-a15d-122e76b3305b",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "70ad702a-ae8a-59db-9cae-04be60fa41c0",
+      "Position": {
+        "X": 780.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "7041ffab-816a-5563-b7e7-bee599fdf9f3",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "SectionId": "2a173f80-8150-56db-8058-40fc97a8f06d",
+      "Position": {
+        "X": 2080.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "81d2244b-e2ff-5a51-88b2-5ffea17523ab",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "SectionId": "2a173f80-8150-56db-8058-40fc97a8f06d",
+      "Position": {
+        "X": 2080.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "915f2f8c-6209-5af0-8cc2-636f88b9a5a1",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "SectionId": "2a173f80-8150-56db-8058-40fc97a8f06d",
+      "Position": {
+        "X": 2080.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "9323d88b-4a56-5a86-8af3-71c09fb04595",
+      "SymbolName": "Lib.physics.RigidBodyGeometry",
+      "SectionId": "2a173f80-8150-56db-8058-40fc97a8f06d",
+      "Position": {
+        "X": 1820.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "9b658c40-b7e8-508a-aa3f-e0f8c4725d0b",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "SectionId": "2a173f80-8150-56db-8058-40fc97a8f06d",
+      "Position": {
+        "X": 2340.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "9c82e2e6-255e-5024-827d-e2194bc56462",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "a434f90d-fe5d-586e-abe0-516775655270",
+      "Position": {
+        "X": 780.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "9f96a26b-0aec-5742-aadd-961dbbdcb964",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "SectionId": "2a173f80-8150-56db-8058-40fc97a8f06d",
+      "Position": {
+        "X": 2340.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "a0b834e9-0f01-5aae-83a0-b438401c95cc",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "SectionId": "2a173f80-8150-56db-8058-40fc97a8f06d",
+      "Position": {
+        "X": 2080.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "a7525167-197b-53d2-8456-cf2c6d3d9b3c",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "SectionId": "2a173f80-8150-56db-8058-40fc97a8f06d",
+      "Position": {
+        "X": 2080.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "ac51db66-1bd2-5ce9-860d-2e6045d9130a",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "SectionId": "2a173f80-8150-56db-8058-40fc97a8f06d",
+      "Position": {
+        "X": 2340.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "ba7e7a45-ab34-5195-aedc-476176f812e6",
+      "SymbolName": "Lib.geometry.TransformGeometry",
+      "SectionId": "70ad702a-ae8a-59db-9cae-04be60fa41c0",
+      "Position": {
+        "X": 520.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "bc34c2c1-23b5-5bae-b7d5-e370797721fb",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "SectionId": "2a173f80-8150-56db-8058-40fc97a8f06d",
+      "Position": {
+        "X": 2340.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "bdcae0dd-3625-57af-abd4-9c0f387f53ba",
+      "SymbolName": "Lib.render.postfx.SSAO",
+      "SectionId": "e8a2892a-537f-5a94-9233-e52c972f3d80",
+      "Position": {
+        "X": 3380.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "be1e8977-1939-52ea-8e93-0ab7f5302f23",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "a434f90d-fe5d-586e-abe0-516775655270",
+      "Position": {
+        "X": 780.0,
+        "Y": 660.0
+      }
+    },
+    {
+      "ChildId": "c0c7f66f-44b5-597c-acfe-8524418fa4c2",
+      "SymbolName": "Lib.geometry.ScatterPointsInVolume",
+      "SectionId": "70ad702a-ae8a-59db-9cae-04be60fa41c0",
+      "Position": {
+        "X": 520.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "cc8e5f8e-5d4c-58b2-acee-082eac9de736",
+      "SymbolName": "Lib.physics.RigidBodyGeometry",
+      "SectionId": "2a173f80-8150-56db-8058-40fc97a8f06d",
+      "Position": {
+        "X": 1820.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "d1c4766f-fb0b-58fa-aa6e-73be9aebf2a2",
+      "SymbolName": "Lib.flow.Execute",
+      "SectionId": "e8a2892a-537f-5a94-9233-e52c972f3d80",
+      "Position": {
+        "X": 2860.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "d90c1a18-9b48-56e1-b6e4-d6e7e010e5bc",
+      "SymbolName": "Lib.volume.convert.VolumeToMesh",
+      "SectionId": "70ad702a-ae8a-59db-9cae-04be60fa41c0",
+      "Position": {
+        "X": 260.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "e472cef3-7e10-50cc-8f4b-d6ccf68bda17",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "SectionId": "2a173f80-8150-56db-8058-40fc97a8f06d",
+      "Position": {
+        "X": 2340.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "eed5bd9a-169c-54e3-ba97-d1e4833375a5",
+      "SymbolName": "Lib.render.camera.Camera",
+      "SectionId": "e8a2892a-537f-5a94-9233-e52c972f3d80",
+      "Position": {
+        "X": 2860.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "f9204497-94bf-5fcf-ba31-9356e9b5fb5a",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "SectionId": "e8a2892a-537f-5a94-9233-e52c972f3d80",
+      "Position": {
+        "X": 3120.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "ff4de9d8-140d-5ecc-872e-a32b18a768b4",
+      "SymbolName": "Lib.physics.RigidBodyGeometry",
+      "SectionId": "2a173f80-8150-56db-8058-40fc97a8f06d",
+      "Position": {
+        "X": 1820.0,
+        "Y": 330.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "1086c26e-037c-596b-b7b8-cd9be710528a"/*Output*/,
+      "Position": {
+        "X": 3640.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "2a173f80-8150-56db-8058-40fc97a8f06d",
+      "Title": "3  Simulate and draw",
+      "Color": {
+        "X": 0.3,
+        "Y": 0.55,
+        "Z": 0.4,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1260.0,
+        "Y": -70.0
+      },
+      "Size": {
+        "X": 1320.0,
+        "Y": 610.0
+      }
+    },
+    {
+      "Id": "70ad702a-ae8a-59db-9cae-04be60fa41c0",
+      "Title": "1  Rings: one concave geometry at every point",
+      "Color": {
+        "X": 0.35,
+        "Y": 0.5,
+        "Z": 0.65,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -40.0,
+        "Y": -70.0
+      },
+      "Size": {
+        "X": 1060.0,
+        "Y": 500.0
+      }
+    },
+    {
+      "Id": "a434f90d-fe5d-586e-abe0-516775655270",
+      "Title": "2  Letters: parts apart or together",
+      "Color": {
+        "X": 0.65,
+        "Y": 0.45,
+        "Z": 0.25,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -40.0,
+        "Y": 480.0
+      },
+      "Size": {
+        "X": 1060.0,
+        "Y": 280.0
+      }
+    },
+    {
+      "Id": "e8a2892a-537f-5a94-9233-e52c972f3d80",
+      "Title": "Render: light, shadow and camera",
+      "Color": {
+        "X": 0.4,
+        "Y": 0.4,
+        "Z": 0.45,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 2820.0,
+        "Y": -70.0
+      },
+      "Size": {
+        "X": 800.0,
+        "Y": 720.0
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "fd70737d-c23f-5631-8992-a9a638e960da",
+      "ChildId": "35c3a894-fc58-5de6-9d8d-73748d5f6aaf",
+      "Description": "A torus from a volume. Any geometry works: [VolumeToMesh], [CubeGeometry], text, loaded models."
+    },
+    {
+      "Id": "570eefca-31ed-5a03-acfb-333d7b0610b0",
+      "ChildId": "ba7e7a45-ab34-5195-aedc-476176f812e6",
+      "Description": "[TransformGeometry] lays it flat. A RigidBody's Rotation would also turn the cloud of points it is placed at.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "bd1deec9-132c-57c8-9cae-7168664e51fe",
+      "ChildId": "698daf4d-026e-54f4-a15d-122e76b3305b",
+      "InputId": "5f6cc54b-9221-42b9-87d7-a0f9669c64b2",
+      "Description": "Shape Auto splits the concave ring into convex hulls, so its hole stays open.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "e82aeff8-ab16-51b1-8234-13152f2d661b",
+      "ChildId": "698daf4d-026e-54f4-a15d-122e76b3305b",
+      "InputId": "dba98aeb-66df-41eb-b3a2-e91acb71d0be",
+      "Description": "MaxHulls caps how many hulls one part is split into.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "e56059dd-5491-5b38-9d88-72cedc39f412",
+      "ChildId": "53abf493-9273-5860-a00b-7b5cd45033dd",
+      "Description": "Static cylinders, one per point.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "68e0625a-4401-5999-b9ba-672e760db99d",
+      "ChildId": "9c82e2e6-255e-5024-827d-e2194bc56462",
+      "InputId": "e13e2b87-7a04-4197-82a8-a11fab87d1f9",
+      "Description": "With Pieces EachPartIsABody every letter falls on its own.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "9b243eee-ad46-5df4-b8a6-6dc701d5bc38",
+      "ChildId": "be1e8977-1939-52ea-8e93-0ab7f5302f23",
+      "InputId": "e13e2b87-7a04-4197-82a8-a11fab87d1f9",
+      "Description": "With WholeObject the parts form one rigid body.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "7166db81-4015-598b-81d4-86546c7c6a91",
+      "ChildId": "be1e8977-1939-52ea-8e93-0ab7f5302f23",
+      "InputId": "10919c3d-5979-4499-a958-c347008f7c12",
+      "Description": "Geometry bodies weigh their volume times Density; MassMode Fixed uses Mass instead.",
+      "Style": "Tip"
+    },
+    {
+      "Id": "a689ca4b-d1a3-5f89-8e6a-188ea52fdc13",
+      "ChildId": "9323d88b-4a56-5a86-8af3-71c09fb04595",
+      "InputId": "4b8e2f61-93c7-4d0a-b5e8-7f21c6a9d304",
+      "Description": "Turn on ShowColliders to see the hulls each ring was split into.",
+      "Style": "CallToAction"
+    }
+  ]
+}

@@ -45,8 +45,18 @@ internal sealed class GeometryToMeshChunks : Instance<GeometryToMeshChunks>
             GPoints.Value = null;
             ChunkIndices.Value = null;
             ChunkCount.Value = 0;
+            _compiledGeometry = null;
             return;
         }
+
+        // Compiling the chunks and re-uploading five buffers costs milliseconds on large geometry, and
+        // animated sources re-evaluate this slot every frame with unchanged content. The geometry's
+        // version only moves when a producer actually rebuilt it, so that is the cache key.
+        if (ReferenceEquals(geometry, _compiledGeometry) && geometry.Version == _compiledVersion)
+            return;
+
+        _compiledGeometry = geometry;
+        _compiledVersion = geometry.Version;
 
         _compiler.Compile(geometry, relativeToPartPivots: true);
         var chunks = _compiler.Chunks;
@@ -99,6 +109,8 @@ internal sealed class GeometryToMeshChunks : Instance<GeometryToMeshChunks>
     private BufferWithViews _pointsBuffer;
     private BufferWithViews _chunkIndicesBuffer;
     private readonly MeshBuffers _meshBuffers = new();
+    private MeshGeometry _compiledGeometry;
+    private int _compiledVersion;
 
     [Input(Guid = "7f2c9e4b-d631-4a85-b9e7-0c5d8a3f1b62")]
     public readonly InputSlot<MeshGeometry> Geometry = new();

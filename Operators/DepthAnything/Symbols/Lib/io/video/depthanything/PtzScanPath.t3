@@ -1,0 +1,84 @@
+{
+  "FormatVersion": 3,
+  "Id": "4b8e2d17-6a93-4f05-9c21-d7e3a5b4f690"/*PtzScanPath*/,
+  "Inputs": [
+    {
+      "Id": "074ae9d3-2665-4bc1-98ed-93af6b70b2bc"/*PanStep*/,
+      "DefaultValue": 40.0
+    },
+    {
+      "Id": "185bfae4-3776-4cd2-a9fe-a4b07c81c3cd"/*TiltMin*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "296c0bf5-4887-4de3-8a0f-b5c18d92d4de"/*TiltMax*/,
+      "DefaultValue": 90.0
+    },
+    {
+      "Id": "3a7d1c06-5998-4ef4-9b1a-c6d29ea3e5ef"/*TiltStep*/,
+      "DefaultValue": 25.0
+    },
+    {
+      "Id": "4b8e2d17-6aa9-4f05-8c2b-d7e3afb4f6f0"/*PoleTilt*/,
+      "DefaultValue": 90.0
+    },
+    {
+      "Id": "5c9f3e28-7bba-4016-9d3c-e8f4b0c50701"/*SettleSec*/,
+      "DefaultValue": 0.8
+    },
+    {
+      "Id": "6da04f39-8ccb-4127-ae4d-f905c1d61812"/*ArrivalTolerance*/,
+      "DefaultValue": 0.5
+    },
+    {
+      "Id": "7eb1504a-9ddc-4238-bf5e-0a16d2e72923"/*CurrentPan*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "8fc2615b-aeed-4349-806f-1b27e3f83a34"/*CurrentTilt*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "90d3726c-bffe-445a-9170-2c38f4094b45"/*PanDegreesPerUnit*/,
+      "DefaultValue": 180.0
+    },
+    {
+      "Id": "a1e4837d-c10f-456b-a281-3d4905ba5c56"/*TiltDegreesPerUnit*/,
+      "DefaultValue": 90.0
+    },
+    {
+      "Id": "b2f5948e-d21a-467c-b392-4e5a16cb6d67"/*TiltZeroAt*/,
+      "DefaultValue": -1.0
+    },
+    {
+      "Id": "c306a59f-e21b-478d-94a9-5f6b2d3c7e78"/*Run*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "c417b6a0-f32c-489e-a5ba-607c3e4d8f9a"/*Continuous*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "c528c7b1-0443-49af-b6cb-718d4f5e90ab"/*SweepSpeed*/,
+      "DefaultValue": 15.0
+    },
+    {
+      "Id": "c639d8c2-1554-4ab0-87dc-829e5a6fa1bc"/*MaxLead*/,
+      "DefaultValue": 6.0
+    },
+    {
+      "Id": "d417b6a0-f32c-489e-a5ba-607c3e4d8f89"/*Restart*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "e528c7b1-0443-49af-b6cb-718d4f5e909a"/*PanStart*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "f639d8c2-1554-4ab0-87dc-829e5a6fa1ab"/*PanRange*/,
+      "DefaultValue": 360.0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

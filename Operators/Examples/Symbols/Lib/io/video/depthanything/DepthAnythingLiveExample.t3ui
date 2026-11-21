@@ -1,0 +1,44 @@
+{
+  "FormatVersion": 3,
+  "Id": "7e3a2f91-8b4c-4d27-a516-3c9e2b8f70da"/*DepthAnythingLiveExample*/,
+  "Description": "Estimates depth from a live network stream: a VideoStreamInput connects to an RTSP camera and Depth Anything 3 runs on every frame it delivers. Output is the colorized NormalizedDepthTexture (near bright). Point StreamUrl at your own camera; VideoStreamInput's Status output shows the connection state.",
+  "SymbolTags": "10",
+  "InputUis": [
+    {
+      "InputId": "cf2e5d9a-417b-4c86-9e3f-2b71d4a50e13"/*StreamUrl*/,
+      "Position": {
+        "X": -620.0,
+        "Y": -60.0
+      },
+      "Description": "RTSP (or other stream) URL of the camera.",
+      "Usage": "Default"
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "3d8c61b2-95a4-42e7-b1f3-8d2a5c6e9741",
+      "SymbolName": "Lib.io.video.VideoStreamInput",
+      "Position": {
+        "X": -400.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "a4b9d3c7-6e28-45fa-8b54-1e7c92d0a3f6",
+      "SymbolName": "Lib.io.video.depthanything.DepthAnything",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "b9f2c4a8-1d7d-4e67-9a28-f5c3e1d2b640"/*Depth*/,
+      "Position": {
+        "X": 620.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

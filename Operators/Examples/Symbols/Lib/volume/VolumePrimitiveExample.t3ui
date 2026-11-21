@@ -1,0 +1,484 @@
+{
+  "FormatVersion": 3,
+  "Id": "4f0e965c-96cd-5b62-9a47-1e4286b3367d"/*VolumePrimitiveExample*/,
+  "Description": "[VolumePrimitive] builds a shape directly as a level set: a sparse grid of signed distances that is exact near the surface. Eight primitives stand on the floor here, each meshed with [VolumeToMesh] and drawn lit.\n\nA level set is not a mesh: it can be combined with [VolumeCsg], displaced with [VolumeNoise], grown with [VolumeMorphology] and only turned into triangles at the end.\n\nAKA: vdb, openvdb, level set, sdf grid, voxel shape, primitive\n\nTips\n- Smaller VoxelSize means sharper surfaces and more memory and time; start coarse and refine.\n- Level sets store signed distance in world units (negative inside); fog volumes store density.\n- Size is the full extent; a sphere reads only its X.\n- BandWidth is how many voxels of exact distance surround the surface; widen it before heavy morphology.",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "09588c96-329c-5435-8074-13dfcf7e7f3d",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "SectionId": "cf7566d8-b6a0-5bb1-9530-2187dd79e03f",
+      "Position": {
+        "X": 1040.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "0b8dd9c1-c3fd-585c-bfde-de11fcaa0823",
+      "SymbolName": "Lib.volume.convert.VolumeToMesh",
+      "SectionId": "a2c72504-11e0-5d0a-9c54-e3f4170c58ba",
+      "Position": {
+        "X": 260.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "0d3ae40f-aebb-5b18-9d8e-317771308da7",
+      "SymbolName": "Lib.volume.convert.VolumeToMesh",
+      "SectionId": "a2c72504-11e0-5d0a-9c54-e3f4170c58ba",
+      "Position": {
+        "X": 260.0,
+        "Y": 770.0
+      }
+    },
+    {
+      "ChildId": "12ae92d8-4056-5cb5-9847-77654034be26",
+      "SymbolName": "Lib.render.postfx.SSAO",
+      "SectionId": "57c632b0-bb26-591c-a496-6a003df44c53",
+      "Position": {
+        "X": 2080.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "179b740c-7c10-5123-87b1-f0626c911186",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "SectionId": "57c632b0-bb26-591c-a496-6a003df44c53",
+      "Position": {
+        "X": 1820.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "19252bb5-0ef7-577a-a1fc-4f1844be8055",
+      "SymbolName": "Lib.volume.convert.VolumeToMesh",
+      "SectionId": "a2c72504-11e0-5d0a-9c54-e3f4170c58ba",
+      "Position": {
+        "X": 260.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "25f9dc49-a6ae-5a94-bfb4-160cca208bec",
+      "SymbolName": "Lib.mesh.generate.QuadMesh",
+      "Position": {
+        "X": 520.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "2c79b3db-f907-50f6-8e45-2483f61b8741",
+      "SymbolName": "Lib.volume.generate.VolumePrimitive",
+      "SectionId": "a2c72504-11e0-5d0a-9c54-e3f4170c58ba",
+      "Position": {
+        "X": 0.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "314602ca-f5ea-50bb-9099-802ee5e436cc",
+      "SymbolName": "Lib.volume.convert.VolumeToMesh",
+      "SectionId": "a2c72504-11e0-5d0a-9c54-e3f4170c58ba",
+      "Position": {
+        "X": 260.0,
+        "Y": 660.0
+      }
+    },
+    {
+      "ChildId": "355f058d-d2b0-5665-bd43-129d8d38d680",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "SectionId": "57c632b0-bb26-591c-a496-6a003df44c53",
+      "Position": {
+        "X": 1560.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "35b33735-fc99-5144-b3ec-b9fbb9e542ea",
+      "SymbolName": "Lib.volume.generate.VolumePrimitive",
+      "SectionId": "a2c72504-11e0-5d0a-9c54-e3f4170c58ba",
+      "Position": {
+        "X": 0.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "3a8c82c0-d389-5f31-bc9a-42ecc3860ce7",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "SectionId": "cf7566d8-b6a0-5bb1-9530-2187dd79e03f",
+      "Position": {
+        "X": 780.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "3add7468-60e2-55f8-b81d-93300639c871",
+      "SymbolName": "Lib.volume.generate.VolumePrimitive",
+      "SectionId": "a2c72504-11e0-5d0a-9c54-e3f4170c58ba",
+      "Position": {
+        "X": 0.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "58f6d0c4-e007-50c8-94a3-7905d5aa785a",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "SectionId": "cf7566d8-b6a0-5bb1-9530-2187dd79e03f",
+      "Position": {
+        "X": 1040.0,
+        "Y": 770.0
+      }
+    },
+    {
+      "ChildId": "62d02c23-2e8c-50c7-b706-34f0afeca6de",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "SectionId": "cf7566d8-b6a0-5bb1-9530-2187dd79e03f",
+      "Position": {
+        "X": 1040.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "6847d46f-72dd-511e-9875-395853500a90",
+      "SymbolName": "Lib.volume.generate.VolumePrimitive",
+      "SectionId": "a2c72504-11e0-5d0a-9c54-e3f4170c58ba",
+      "Position": {
+        "X": 0.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "68c617ee-eb8b-5087-842e-ac9080612c95",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "SectionId": "cf7566d8-b6a0-5bb1-9530-2187dd79e03f",
+      "Position": {
+        "X": 780.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "6eca3fda-9e89-55e6-bc0e-71fd36e29086",
+      "SymbolName": "Lib.render.shading.SetFog",
+      "SectionId": "57c632b0-bb26-591c-a496-6a003df44c53",
+      "Position": {
+        "X": 1560.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "71dc032e-08a1-50cd-944f-0989f2c3e9d9",
+      "SymbolName": "Lib.volume.generate.VolumePrimitive",
+      "SectionId": "a2c72504-11e0-5d0a-9c54-e3f4170c58ba",
+      "Position": {
+        "X": 0.0,
+        "Y": 770.0
+      }
+    },
+    {
+      "ChildId": "7789f847-503a-5b32-9667-e612311a5fa0",
+      "SymbolName": "Lib.flow.Execute",
+      "SectionId": "57c632b0-bb26-591c-a496-6a003df44c53",
+      "Position": {
+        "X": 1560.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "77b5d2be-a9db-5dc9-b9c7-bd5a0c60ee7e",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "SectionId": "cf7566d8-b6a0-5bb1-9530-2187dd79e03f",
+      "Position": {
+        "X": 780.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "7ec74d4a-7105-5f5b-a868-6cdf961028d3",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "SectionId": "cf7566d8-b6a0-5bb1-9530-2187dd79e03f",
+      "Position": {
+        "X": 1040.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "89fbf6e8-95ff-5f83-a6ff-fb82d149f79d",
+      "SymbolName": "Lib.volume.generate.VolumePrimitive",
+      "SectionId": "a2c72504-11e0-5d0a-9c54-e3f4170c58ba",
+      "Position": {
+        "X": 0.0,
+        "Y": 660.0
+      }
+    },
+    {
+      "ChildId": "8e98ce7e-984c-53aa-9f87-26cb762fcb2a",
+      "SymbolName": "Lib.render.camera.Camera",
+      "SectionId": "57c632b0-bb26-591c-a496-6a003df44c53",
+      "Position": {
+        "X": 1560.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "8fffb5b0-ae73-52d9-96a4-32f369bc7aaf",
+      "SymbolName": "Lib.volume.convert.VolumeToMesh",
+      "SectionId": "a2c72504-11e0-5d0a-9c54-e3f4170c58ba",
+      "Position": {
+        "X": 260.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "92ed8e8f-31fe-53d1-95a2-010c38caeae0",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "SectionId": "cf7566d8-b6a0-5bb1-9530-2187dd79e03f",
+      "Position": {
+        "X": 780.0,
+        "Y": 880.0
+      }
+    },
+    {
+      "ChildId": "a230d832-9c62-5601-bfbe-6fba854fcc58",
+      "SymbolName": "Lib.render.shading.SetShadow",
+      "SectionId": "57c632b0-bb26-591c-a496-6a003df44c53",
+      "Position": {
+        "X": 1560.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "a38939d8-ae67-5e2d-9736-781035a09f98",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "SectionId": "cf7566d8-b6a0-5bb1-9530-2187dd79e03f",
+      "Position": {
+        "X": 1040.0,
+        "Y": 660.0
+      }
+    },
+    {
+      "ChildId": "b2097536-cba7-5ac8-b70a-7dacb5e8680b",
+      "SymbolName": "Lib.volume.convert.VolumeToMesh",
+      "SectionId": "a2c72504-11e0-5d0a-9c54-e3f4170c58ba",
+      "Position": {
+        "X": 260.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "ba344225-7ce8-54b0-abc4-80edf9bbb343",
+      "SymbolName": "Lib.volume.convert.VolumeToMesh",
+      "SectionId": "a2c72504-11e0-5d0a-9c54-e3f4170c58ba",
+      "Position": {
+        "X": 260.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "bd8f41f3-6267-5010-b52e-e70c9d40ca36",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "SectionId": "cf7566d8-b6a0-5bb1-9530-2187dd79e03f",
+      "Position": {
+        "X": 1040.0,
+        "Y": 880.0
+      }
+    },
+    {
+      "ChildId": "c33e84a9-404f-5542-87ae-3bdfb676b4a9",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "SectionId": "cf7566d8-b6a0-5bb1-9530-2187dd79e03f",
+      "Position": {
+        "X": 780.0,
+        "Y": 770.0
+      }
+    },
+    {
+      "ChildId": "c388579d-91d7-52da-bc9d-d299d318f2b5",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "SectionId": "cf7566d8-b6a0-5bb1-9530-2187dd79e03f",
+      "Position": {
+        "X": 1040.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "ca4c1de2-e0f8-512a-ad07-a5a0fcbfffe4",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "SectionId": "cf7566d8-b6a0-5bb1-9530-2187dd79e03f",
+      "Position": {
+        "X": 780.0,
+        "Y": 660.0
+      }
+    },
+    {
+      "ChildId": "cfe1435e-820d-5e53-8023-5698e16e6aa6",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "Position": {
+        "X": 1040.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "d0123238-42d5-5386-9a5e-063537bdbdea",
+      "SymbolName": "Lib.volume.generate.VolumePrimitive",
+      "SectionId": "a2c72504-11e0-5d0a-9c54-e3f4170c58ba",
+      "Position": {
+        "X": 0.0,
+        "Y": 880.0
+      }
+    },
+    {
+      "ChildId": "daae368f-70e6-58f9-88be-2c4c7a642164",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "SectionId": "57c632b0-bb26-591c-a496-6a003df44c53",
+      "Position": {
+        "X": 1560.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "e87fd8dd-52d6-5ec8-8107-8b2e4f083639",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "SectionId": "cf7566d8-b6a0-5bb1-9530-2187dd79e03f",
+      "Position": {
+        "X": 1040.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "ebf2ec9e-9607-51d0-816d-d14299f22dd1",
+      "SymbolName": "Lib.volume.convert.VolumeToMesh",
+      "SectionId": "a2c72504-11e0-5d0a-9c54-e3f4170c58ba",
+      "Position": {
+        "X": 260.0,
+        "Y": 880.0
+      }
+    },
+    {
+      "ChildId": "f419b617-7c9a-5808-b660-c04ec85cc7b6",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "SectionId": "cf7566d8-b6a0-5bb1-9530-2187dd79e03f",
+      "Position": {
+        "X": 780.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "fb507bd7-eb91-5aa8-b660-0bc2c79eefed",
+      "SymbolName": "Lib.volume.generate.VolumePrimitive",
+      "SectionId": "a2c72504-11e0-5d0a-9c54-e3f4170c58ba",
+      "Position": {
+        "X": 0.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "fe1b7fab-06ce-55cb-a0d7-89626812917f",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "SectionId": "cf7566d8-b6a0-5bb1-9530-2187dd79e03f",
+      "Position": {
+        "X": 780.0,
+        "Y": 440.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "5e0ad6f9-227e-5881-8920-a4a20836bc85"/*Output*/,
+      "Position": {
+        "X": 2340.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "57c632b0-bb26-591c-a496-6a003df44c53",
+      "Title": "Render: light, shadow and camera",
+      "Color": {
+        "X": 0.4,
+        "Y": 0.4,
+        "Z": 0.45,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1520.0,
+        "Y": -70.0
+      },
+      "Size": {
+        "X": 800.0,
+        "Y": 720.0
+      }
+    },
+    {
+      "Id": "a2c72504-11e0-5d0a-9c54-e3f4170c58ba",
+      "Title": "1  Eight primitives as level sets",
+      "Color": {
+        "X": 0.35,
+        "Y": 0.5,
+        "Z": 0.65,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -40.0,
+        "Y": 40.0
+      },
+      "Size": {
+        "X": 540.0,
+        "Y": 940.0
+      }
+    },
+    {
+      "Id": "cf7566d8-b6a0-5bb1-9530-2187dd79e03f",
+      "Title": "2  Meshed and drawn",
+      "Color": {
+        "X": 0.3,
+        "Y": 0.55,
+        "Z": 0.4,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 740.0,
+        "Y": 40.0
+      },
+      "Size": {
+        "X": 540.0,
+        "Y": 940.0
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "8ac6ac83-0fcf-5495-911c-dad66e750b6a",
+      "ChildId": "fb507bd7-eb91-5aa8-b660-0bc2c79eefed",
+      "Description": "A [VolumePrimitive] is a shape made of voxels: signed distances to its surface, stored only near it."
+    },
+    {
+      "Id": "3ff70926-c37b-5f06-988c-310e410cf771",
+      "ChildId": "2c79b3db-f907-50f6-8e45-2483f61b8741",
+      "InputId": "d2cf0b36-bd51-5f39-9ae4-ea24893f1222",
+      "Description": "Shape picks the primitive; Size is its full extent and Center places it.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "50b12e9d-09d9-5ccf-9801-1a8ecacdb637",
+      "ChildId": "2c79b3db-f907-50f6-8e45-2483f61b8741",
+      "InputId": "89ac8fe1-dfda-5b97-8d05-1c5378f896b4",
+      "Description": "VoxelSize is the grid resolution. Halve it and the surface gets sharper, at four times the memory.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "360a0178-bdc1-516d-aafc-69a93f09b39f",
+      "ChildId": "0b8dd9c1-c3fd-585c-bfde-de11fcaa0823",
+      "InputId": "345f946b-8c36-5548-a569-4123e0544b8f",
+      "Description": "[VolumeToMesh] extracts the surface where the distance is Isovalue, 0 for a level set.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "a161a0ab-bcc9-5b08-acf7-838889aa9461",
+      "ChildId": "71dc032e-08a1-50cd-944f-0989f2c3e9d9",
+      "InputId": "89ac8fe1-dfda-5b97-8d05-1c5378f896b4",
+      "Description": "Try changing a VoxelSize to 0.1 to see how coarse voxels round everything off.",
+      "Style": "CallToAction"
+    }
+  ]
+}

@@ -1,0 +1,120 @@
+{
+  "FormatVersion": 3,
+  "Id": "efa358f6-8f07-448f-ad9e-d911c41a2098"/*RigidBody*/,
+  "Inputs": [
+    {
+      "Id": "050f6d8c-40ff-4450-b4a1-69bf4ff2b3be"/*Size*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 1.0,
+        "Z": 1.0
+      }
+    },
+    {
+      "Id": "09fe2b00-ad21-4103-84fd-bf970c329bb2"/*Enabled*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "10919c3d-5979-4499-a958-c347008f7c12"/*MassMode*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "1b9b7bbd-aba7-4a23-8f78-c1366f260f75"/*GravityScale*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "28d83ea4-beb0-4e39-bb27-dc714c48c69f"/*Friction*/,
+      "DefaultValue": 0.5
+    },
+    {
+      "Id": "38f46166-46ad-4f6c-94e8-5b1b4b1c7445"/*CollisionGroup*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "3d837671-9883-43b0-a889-764ae0fbb6e6"/*AngularVelocity*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "5072f21a-83a3-41a7-83cd-f702d9c89c84"/*Position*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "5f6cc54b-9221-42b9-87d7-a0f9669c64b2"/*Shape*/,
+      "DefaultValue": 6
+    },
+    {
+      "Id": "70f094d8-c499-40bf-ab28-0081297a5985"/*Kind*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "7c155391-9271-4678-95b2-052795115586"/*Geometry*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "847babc8-53b1-457d-ab45-f85b8eff80c9"/*Bounciness*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "890a457a-af9a-4d23-80b5-07014c95ee27"/*Rotation*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "974ca0a2-5f02-4ccd-817b-5114070b243e"/*Mass*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "a7a684cf-2d9b-4cc5-948b-a07dd990e08a"/*LinearDamping*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "acd5e765-3086-4489-bbab-aab68881a2c0"/*AngularDamping*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "c37e0055-1f11-4b35-8d1f-0a3eb0c64a57"/*Points*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "c63d5ebe-108d-4afd-ba39-2cbda0d62011"/*Radius*/,
+      "DefaultValue": 0.5
+    },
+    {
+      "Id": "cf7c8302-520f-4a41-84ad-18d9f0b7148b"/*Density*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "d8d048f0-6517-497e-878d-24fc95ed8a64"/*Length*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "dba98aeb-66df-41eb-b3a2-e91acb71d0be"/*MaxHulls*/,
+      "DefaultValue": 8
+    },
+    {
+      "Id": "e13e2b87-7a04-4197-82a8-a11fab87d1f9"/*Pieces*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "e965e0ce-38ce-46da-a7ac-e730d7876d29"/*LinearVelocity*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

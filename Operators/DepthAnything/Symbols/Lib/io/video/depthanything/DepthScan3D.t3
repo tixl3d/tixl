@@ -1,0 +1,116 @@
+{
+  "FormatVersion": 3,
+  "Id": "7e6eb18c-433f-41c0-8443-6a82dae72703"/*DepthScan3D*/,
+  "Inputs": [
+    {
+      "Id": "0187ea06-b66b-4cc2-9fd1-7d68455ac6b9"/*PixelStride*/,
+      "DefaultValue": 2
+    },
+    {
+      "Id": "0773ed04-80ce-43b1-9104-990d44f9ba33"/*SaveFileName*/,
+      "DefaultValue": "scan3d"
+    },
+    {
+      "Id": "13b697b4-c85d-4a15-afb2-37d76a8425e9"/*SaveFormatInput*/,
+      "DefaultValue": 1
+    },
+    {
+      "Id": "34d31350-9754-43bf-8037-aa1f7f1a6eda"/*CaptureOnce*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "3c5e7a91-4d28-4f6b-8a13-7e9d2c4b6f01"/*KnownFloorSizeA*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "5304c51a-4e3f-4d9c-a34b-4af6f5cbe0d9"/*MaxPoints*/,
+      "DefaultValue": 500000
+    },
+    {
+      "Id": "5a05aca8-d4ed-43b0-82e4-1dcd41849203"/*SampleLifetime*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "6c269444-aaec-4359-9708-4eb2cfdd0487"/*SaveTrigger*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "75c48797-6bba-4176-9549-459e9bcac012"/*SaveFolder*/,
+      "DefaultValue": "Resources/DepthScans"
+    },
+    {
+      "Id": "79d30636-4d7f-4c46-97b6-806b20d8f674"/*StartRecord*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "79ecd596-22d3-44a1-8f25-5fd74549770d"/*Confidence*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "8a4f0d63-2e91-4b57-a3c8-6f5d1e2b4c70"/*AutoScale*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "93c8d941-f395-4271-b36a-86aadb010cff"/*DepthMap*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "9a1d3f57-6b82-4c04-b5e9-2f7a8c1d3e64"/*KnownFloorSizeB*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "9fa379e9-10b0-4010-a344-2bba6a85fcd0"/*Mode*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "a7a2eb05-619f-4363-9b6a-120d3c4d0411"/*CameraReference*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "afc191c7-be4d-44eb-938b-701e35f75fae"/*ColorMap*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "b080c2a6-1559-4dcb-837d-24e68f4db439"/*StopRecord*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "b4c8e1a2-5d37-4f90-8a6b-3e2f1c7d9a40"/*RegularizeRoom*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "c0f6dcfb-f8d9-4030-80da-ca0f7042e936"/*PointScale*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "c84c32af-1f72-4ade-badd-83525ba48332"/*VoxelSize*/,
+      "DefaultValue": 0.02
+    },
+    {
+      "Id": "d31b9eb4-076e-460d-9204-25247df35875"/*FieldOfView*/,
+      "DefaultValue": 50.0
+    },
+    {
+      "Id": "d7a3f5c1-2b84-4e96-9c1d-6f0a8b3e5d72"/*GlobalAlign*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "e805a254-7980-4bbe-b603-d58e3a010105"/*ConfidenceThreshold*/,
+      "DefaultValue": 0.5
+    },
+    {
+      "Id": "e8ba2ceb-4817-47b9-a2e2-f86cf73f2a6a"/*Reset*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "e9b4c7a3-6d15-4b82-a3f0-1c8d5e7b2a96"/*FlatSurfaces*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "fc20b574-76b5-4acd-bcec-933960de8f6a"/*Capture*/,
+      "DefaultValue": false
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

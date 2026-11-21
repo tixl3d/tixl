@@ -23,12 +23,12 @@
     <ItemGroup>
         <PackageReference Include="Delaunator" Version="1.0.11" />
         <PackageReference Include="JeremyAnsel.Media.Dds" Version="2.0.7" />
+        <PackageReference Include="LaserCore.EtherDream.Net" Version="2.0.0" />
         <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="5.6.0" />
         <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="10.0.10" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
         <PackageReference Include="NuGet.Configuration" Version="7.6.0" />
         <PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.4" />
-        <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.30.0" />
         <PackageReference Include="SharpDX.D3DCompiler" Version="4.2.0" />
         <PackageReference Include="SharpDX.Direct2D1" Version="4.2.0" />
         <PackageReference Include="SharpDX.Direct3D11" Version="4.2.0" />
@@ -36,6 +36,27 @@
         <PackageReference Include="SharpGLTF.Core" Version="1.0.6" />
         <PackageReference Include="StbImageSharp" Version="2.30.16" />
         <PackageReference Include="System.ServiceModel.Primitives" Version="10.0.652802" />
+    </ItemGroup>
+
+    <PropertyGroup>
+        <TixlOnnxDirectMl Condition="'$(TixlOnnxDirectMl)' == '' And $([MSBuild]::IsOSPlatform('Windows'))">true</TixlOnnxDirectMl>
+    </PropertyGroup>
+
+    <!-- Operator packages load the ONNX Runtime assembly from Core instead of their own copy, so the natives the
+         operators choose between have to ship next to it: the GPU build (CUDA/TensorRT, CoreML on macOS) in
+         runtimes/win-x64 and, on Windows, the DirectML build in runtimes/win-x64-directml (same file names, so it
+         cannot share the folder). 1.24.4 is the last release with a DirectML build and a CUDA 12 GPU build. -->
+    <ItemGroup>
+        <PackageReference Include="Microsoft.ML.OnnxRuntime.Gpu" Version="1.24.4" Condition="$([MSBuild]::IsOSPlatform('Windows')) Or $([MSBuild]::IsOSPlatform('Linux'))" />
+        <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.24.4" Condition="$([MSBuild]::IsOSPlatform('OSX'))" />
+        <PackageReference Include="Microsoft.ML.OnnxRuntime.DirectML" Version="1.24.4" GeneratePathProperty="true" ExcludeAssets="all" Condition="'$(TixlOnnxDirectMl)' == 'true'" />
+        <PackageReference Include="Microsoft.AI.DirectML" Version="1.15.4" GeneratePathProperty="true" ExcludeAssets="all" Condition="'$(TixlOnnxDirectMl)' == 'true'" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TixlOnnxDirectMl)' == 'true'">
+        <Content Include="$(PkgMicrosoft_ML_OnnxRuntime_DirectML)/runtimes/win-x64/native/onnxruntime.dll" Link="runtimes/win-x64-directml/native/onnxruntime.dll" CopyToOutputDirectory="PreserveNewest" />
+        <Content Include="$(PkgMicrosoft_ML_OnnxRuntime_DirectML)/runtimes/win-x64/native/onnxruntime_providers_shared.dll" Link="runtimes/win-x64-directml/native/onnxruntime_providers_shared.dll" CopyToOutputDirectory="PreserveNewest" />
+        <Content Include="$(PkgMicrosoft_AI_DirectML)/bin/x64-win/DirectML.dll" Link="runtimes/win-x64-directml/native/DirectML.dll" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
 
     <ItemGroup>

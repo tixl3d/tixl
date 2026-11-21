@@ -1,0 +1,64 @@
+{
+  "FormatVersion": 3,
+  "Id": "7c3e9a51-2f84-4d6b-b1e0-5a9d8c2f4e17"/*AxisPtzCamera*/,
+  "Inputs": [
+    {
+      "Id": "05c728ea-b81d-46f4-8a19-e3267fb8d1a0"/*Password*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "16d839fb-c92e-4705-9b2a-f4378ac9e2b1"/*PollRate*/,
+      "DefaultValue": 30.0
+    },
+    {
+      "Id": "27e94a0c-da3f-4816-ac3b-05489bdaf3c2"/*DelayMs*/,
+      "DefaultValue": 120.0
+    },
+    {
+      "Id": "38fa5b1d-eb4c-4927-bd4c-1659ac04e4d3"/*FieldOfView*/,
+      "DefaultValue": 38.4
+    },
+    {
+      "Id": "490b6c2e-fc5d-4a38-8e5d-276abd15f5e4"/*AspectRatio*/,
+      "DefaultValue": 1.7777778
+    },
+    {
+      "Id": "5a1c7d3f-0d6e-4b49-9f6e-387bce2606f5"/*InvertPan*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "6b2d8e40-1e7f-4c5a-a07f-498cdf371706"/*InvertTilt*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "7c3e9f51-2f80-4d6b-b18f-5a9de0482817"/*MountRotation*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "8d4fa062-3091-4e7c-82f1-6bae9d305f29"/*ReferencePan*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "9e50b173-41a2-4f8d-93a2-7cbf0e416a3a"/*ReferenceTilt*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "d294f5b7-85ea-43c1-97e6-b0f34c85ae7d"/*Active*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "e3a506c8-96fb-44d2-a8f7-c1045d96bf8e"/*Address*/,
+      "DefaultValue": "10.0.0.111"
+    },
+    {
+      "Id": "f4b617d9-a70c-45e3-b908-d2156ea7c09f"/*User*/,
+      "DefaultValue": ""
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

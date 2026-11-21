@@ -1,0 +1,34 @@
+{
+  "FormatVersion": 3,
+  "Id": "f4489290-24d9-4533-86ce-a5f5972ea952"/*MeshToGeometry*/,
+  "Description": "Reads a GPU mesh back into a polygon geometry.\n\nMeshes from [LoadGltf], [CubeMesh], [AssimpImport] and the other mesh operators become geometry that the geometry operators and [RigidBody] can use. Every triangle becomes a face and every mesh chunk a part, so a model loaded with several pieces keeps them apart. Normals and texture coordinates are kept per corner.\n\nAKA: mesh readback, mesh to polygons, GPU to CPU mesh, physics collider from mesh\n\nTips\n- The readback briefly stalls the GPU, so it only runs when the incoming mesh changes. Avoid feeding it a mesh that is animated every frame.\n- For a physics collider: [LoadGltf] -> MeshToGeometry -> the Geometry input of [RigidBody].",
+  "InputUis": [
+    {
+      "InputId": "1c26862c-483f-4266-bad4-4521bef57cd6"/*Mesh*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "The GPU mesh to read back."
+    },
+    {
+      "InputId": "1d5f3f1b-118e-4618-bc9d-653f566a9c9d"/*WeldPoints*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      },
+      "Description": "Joins vertices at the same position into one point, so faces that a mesh splits for its normals or UVs are connected again. Off keeps one point per mesh vertex."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "8fe1e5eb-c3f4-4d5e-a869-c9e6725ec7fc"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

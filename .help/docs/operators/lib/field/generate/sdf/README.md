@@ -12,6 +12,7 @@
 - [**FractalSDF**](FractalSDF.md) — Generates a procedural MandelBox field which can be rendered with [RaymarchField] and visualized with [VisualizeFieldDistance].
 - [**HeightMapSdf**](HeightMapSdf.md) — Generates an SDF from a texture
 - [**Image2dSDF**](Image2dSDF.md) — Uses the grayscale information of a texture as (signed) distance data.
+- [**MeshToSDF**](MeshToSDF.md) — Bakes a signed distance field volume from a triangle mesh.
 - [**OctahedronSDF**](OctahedronSDF.md) — Generates a octahedron distande field.
 - [**PlaneSDF**](PlaneSDF.md) — Creates a flat surface as an SDF field.
 - [**PrismSDF**](PrismSDF.md) — Generates a prism SDF (i.e. an n-sided cylinder).

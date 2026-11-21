@@ -1,0 +1,270 @@
+{
+  "FormatVersion": 3,
+  "Id": "7e6eb18c-433f-41c0-8443-6a82dae72703"/*DepthScan3D*/,
+  "Description": "Scans a depth map into a persistent world-space 3D point cloud, the way a LiDAR scanner accumulates returns.\n\nEvery valid depth pixel is unprojected using the camera from CameraReference (DepthAnything's CamReference: pose and field of view per frame) and inserted into a voxel grid of size VoxelSize. Observations that land in the same voxel are averaged (denoising, like a real scanner's weighted returns) or replaced, gated by Confidence and colored from ColorMap. The cloud is held until Reset and survives a disconnected input; SampleLifetime lets observations age out so the cloud follows what the camera keeps seeing.\n\nOutputs:\n- Points / PointCount: The held cloud as a drawable point buffer (draws on D3D11 and Vulkan).\n- Captures: Frames scanned in since the last Reset.\n- PointsAdded: New points from the last capture.\n- SavedPath: Relative path of the last PLY save.\n- Recording: True while StartRecord/StopRecord recording is active.\n\nTips:\n- Connect DepthAnything.CamReference to CameraReference so moving the camera builds one consistent cloud; without it, every capture overwrites the same camera-space view.\n- VoxelSize is the detail knob: about 0.01-0.05 for metric DA3 scans of rooms, larger for big scenes.\n- Keep a still camera and Mode Average for a denoised static scan; StartRecord/StopRecord drive hands-free scans.\n- Save exports a PLY that opens in MeshLab, CloudCompare or Blender; the Points output feeds DrawPoints directly.\n\nAKA: 3d scanning, point cloud scan, lidar scanning, depth fusion, voxel scan, spatial scan, scan3d, depth scan 3d",
+  "InputUis": [
+    {
+      "InputId": "0187ea06-b66b-4cc2-9fd1-7d68455ac6b9"/*PixelStride*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 40.0
+      },
+      "Description": "Sample every Nth pixel per capture (1 = every pixel). Larger strides scan faster but coarser."
+    },
+    {
+      "InputId": "0773ed04-80ce-43b1-9104-990d44f9ba33"/*SaveFileName*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 200.0
+      },
+      "Description": "Base file name; .ply is added automatically.",
+      "Usage": "Default"
+    },
+    {
+      "InputId": "13b697b4-c85d-4a15-afb2-37d76a8425e9"/*SaveFormatInput*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 240.0
+      },
+      "Description": "PLY encoding: ASCII (readable, larger) or binary little-endian (compact)."
+    },
+    {
+      "InputId": "34d31350-9754-43bf-8037-aa1f7f1a6eda"/*CaptureOnce*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -200.0
+      },
+      "Description": "Scans exactly one more depth frame."
+    },
+    {
+      "InputId": "3c5e7a91-4d28-4f6b-8a13-7e9d2c4b6f01"/*KnownFloorSizeA*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 440.0
+      },
+      "Description": "Optional, for a camera that only rotates: one floor dimension of the room in meters (0 = off). With both dimensions set, the scan's floor plan is stretched along its two best-fit axes to these sizes, because a rotating camera has no parallax to tell the depth model's scale error along each axis. Heights stay as measured."
+    },
+    {
+      "InputId": "5304c51a-4e3f-4d9c-a34b-4af6f5cbe0d9"/*MaxPoints*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -40.0
+      },
+      "Description": "Upper limit for the cloud; once reached, further observations are skipped until Reset. Raise it or use SampleLifetime to keep scanning."
+    },
+    {
+      "InputId": "5a05aca8-d4ed-43b0-82e4-1dcd41849203"/*SampleLifetime*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 0.0
+      },
+      "Description": "Seconds a point stays before it ages out if not re-observed (0 = keep forever). Re-observed voxels refresh, so the cloud keeps what you keep looking at."
+    },
+    {
+      "InputId": "6c269444-aaec-4359-9708-4eb2cfdd0487"/*SaveTrigger*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 120.0
+      },
+      "Description": "Writes the cloud to SaveFolder/SaveFileName as a PLY point cloud (x/y/z + RGB)."
+    },
+    {
+      "InputId": "75c48797-6bba-4176-9549-459e9bcac012"/*SaveFolder*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 160.0
+      },
+      "Description": "Target folder for saved scans (asset-relative).",
+      "Usage": "Default"
+    },
+    {
+      "InputId": "79d30636-4d7f-4c46-97b6-806b20d8f674"/*StartRecord*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -160.0
+      },
+      "Description": "Starts recording until StopRecord or Reset. Same effect as holding Capture on."
+    },
+    {
+      "InputId": "79ecd596-22d3-44a1-8f25-5fd74549770d"/*Confidence*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -480.0
+      },
+      "Description": "Optional confidence map gating which samples are accepted (higher = more reliable). Same size as the depth map."
+    },
+    {
+      "InputId": "8a4f0d63-2e91-4b57-a3c8-6f5d1e2b4c70"/*AutoScale*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 280.0
+      },
+      "Description": "Anchors each capture's depth scale against the points already merged, so relative depth wobble cannot stack repeated copies of the same surfaces at increasing range. Turn off for metric depth models."
+    },
+    {
+      "InputId": "93c8d941-f395-4271-b36a-86aadb010cff"/*DepthMap*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -560.0
+      },
+      "Description": "The depth map to scan. Connect DepthAnything's DepthTexture (R32_Float)."
+    },
+    {
+      "InputId": "9a1d3f57-6b82-4c04-b5e9-2f7a8c1d3e64"/*KnownFloorSizeB*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 480.0
+      },
+      "Description": "The other floor dimension of the room in meters (0 = off); the order of the two does not matter."
+    },
+    {
+      "InputId": "9fa379e9-10b0-4010-a344-2bba6a85fcd0"/*Mode*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -280.0
+      },
+      "Description": "How overlapping observations merge: Average = running weighted mean per voxel (denoises), Replace = the latest observation wins."
+    },
+    {
+      "InputId": "a7a2eb05-619f-4363-9b6a-120d3c4d0411"/*CameraReference*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -440.0
+      },
+      "Description": "Optional camera (DepthAnything's CamReference) providing pose and field of view; unprojects points into world space. Without it, points stay in DA3-style camera space (+Z forward)."
+    },
+    {
+      "InputId": "afc191c7-be4d-44eb-938b-701e35f75fae"/*ColorMap*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -520.0
+      },
+      "Description": "Optional color frame (DepthAnything's OutputTexture) sampled with the depth; colors the points and the saved PLY."
+    },
+    {
+      "InputId": "b080c2a6-1559-4dcb-837d-24e68f4db439"/*StopRecord*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -120.0
+      },
+      "Description": "Ends recording; the cloud keeps holding."
+    },
+    {
+      "InputId": "b4c8e1a2-5d37-4f90-8a6b-3e2f1c7d9a40"/*RegularizeRoom*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 320.0
+      },
+      "Description": "For a camera that only rotates (a pan/tilt head): fit a box to the scan and snap walls, floor and ceiling to it. Only suits rectangular rooms; leave off for objects and irregular spaces."
+    },
+    {
+      "InputId": "c0f6dcfb-f8d9-4030-80da-ca0f7042e936"/*PointScale*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -360.0
+      },
+      "Description": "Depth multiplier from model units to world units (1 = meters for DA3 metric models)."
+    },
+    {
+      "InputId": "c84c32af-1f72-4ade-badd-83525ba48332"/*VoxelSize*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -320.0
+      },
+      "Description": "World-space size of the merge grid. Observations landing in the same voxel are averaged or replaced; smaller values keep more detail, larger ones denoise harder."
+    },
+    {
+      "InputId": "d31b9eb4-076e-460d-9204-25247df35875"/*FieldOfView*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -400.0
+      },
+      "Description": "Fallback vertical field of view in degrees when no camera is connected (DA3 metric: real FOV)."
+    },
+    {
+      "InputId": "d7a3f5c1-2b84-4e96-9c1d-6f0a8b3e5d72"/*GlobalAlign*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 360.0
+      },
+      "Description": "For a camera that only rotates: solves every capture's depth scale jointly from all the places the captures overlap, instead of chaining them one after another. Removes the stepped walls relative depth models produce between captures. Needs about eight captures."
+    },
+    {
+      "InputId": "e805a254-7980-4bbe-b603-d58e3a010105"/*ConfidenceThreshold*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 80.0
+      },
+      "Description": "Samples with lower confidence are ignored (0 = accept everything)."
+    },
+    {
+      "InputId": "e8ba2ceb-4817-47b9-a2e2-f86cf73f2a6a"/*Reset*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -80.0
+      },
+      "Description": "Clears the point cloud."
+    },
+    {
+      "InputId": "e9b4c7a3-6d15-4b82-a3f0-1c8d5e7b2a96"/*FlatSurfaces*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 400.0
+      },
+      "Description": "For a camera that only rotates: finds the planes in the scan (walls, floor, ceiling, tables; any orientation, no box assumed) and moves the surfaces that lie on them onto flat planes. Clutter that fits no plane keeps its shape."
+    },
+    {
+      "InputId": "fc20b574-76b5-4acd-bcec-933960de8f6a"/*Capture*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -240.0
+      },
+      "Description": "While on, every new depth frame is scanned into the point cloud."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "9165831a-1b50-44f2-a5e3-c88c5e630423"/*Points*/,
+      "Position": {
+        "X": 200.0,
+        "Y": -560.0
+      }
+    },
+    {
+      "OutputId": "29fc10f7-e7a9-49a7-abca-62b5105b3914"/*PointCount*/,
+      "Position": {
+        "X": 200.0,
+        "Y": -520.0
+      }
+    },
+    {
+      "OutputId": "63df221c-b771-430e-bad7-ea252018c1ff"/*Captures*/,
+      "Position": {
+        "X": 200.0,
+        "Y": -480.0
+      }
+    },
+    {
+      "OutputId": "077366c4-089f-4bfe-ae55-72ec76dbb0be"/*PointsAdded*/,
+      "Position": {
+        "X": 200.0,
+        "Y": -440.0
+      }
+    },
+    {
+      "OutputId": "9b45f9d2-07d1-4385-b448-9ff857382e8d"/*SavedPath*/,
+      "Position": {
+        "X": 200.0,
+        "Y": -400.0
+      }
+    },
+    {
+      "OutputId": "b19a2b3c-4d5e-4f60-a1b2-c3d4e5f6a7b8"/*Recording*/,
+      "Position": {
+        "X": 200.0,
+        "Y": -360.0
+      }
+    }
+  ]
+}

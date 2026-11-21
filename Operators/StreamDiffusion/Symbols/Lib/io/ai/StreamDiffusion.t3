@@ -1,0 +1,76 @@
+{
+  "FormatVersion": 3,
+  "Id": "9a7b3c8d-4e2f-5a6b-7c8d-9e0f1a2b3c4d"/*StreamDiffusion*/,
+  "Inputs": [
+    {
+      "Id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"/*Model*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "a3b4c5d6-e7f8-9012-6789-123456789012"/*CudaDevice*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "b4c5d6e7-c8d9-4e0f-a1b2-3c4d5e6f7a8b"/*MatchInputAspect*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "b4c5d6e7-f8a9-0123-7890-234567890123"/*TriggerGenerate*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "b7c8d9e0-f1a2-3456-7890-123456789012"/*FastDecode*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "c1d2e3f4-a5b6-4c7d-8e9f-0a1b2c3d4e5f"/*TargetFps*/,
+      "DefaultValue": 16.0
+    },
+    {
+      "Id": "c3d4e5f6-a7b8-9012-cdef-123456789012"/*Prompt*/,
+      "DefaultValue": "a beautiful landscape"
+    },
+    {
+      "Id": "c5d6e7f8-a9b0-1234-8901-345678901234"/*AutoGenerate*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "c7d8e9f0-a1b2-3456-7890-1234567890ab"/*ExecutionProvider*/,
+      "DefaultValue": 5
+    },
+    {
+      "Id": "c9d0e1f2-a3b4-5678-2345-789012345678"/*Strength*/,
+      "DefaultValue": 0.8
+    },
+    {
+      "Id": "c9d0e1f2-a3b4-5678-9abc-def012345678"/*Feedback*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "d0e1f2a3-b4c5-6789-3456-890123456789"/*Steps*/,
+      "DefaultValue": 2
+    },
+    {
+      "Id": "d2e3f4a5-b6c7-8901-2345-678901234567"/*Debug*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "e1f2a3b4-c5d6-7890-4567-901234567890"/*InputImage*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "e2f3a4b5-c6d7-8901-2345-678901234567"/*ResizeMode*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "e5a6d7c8-9f0b-4a1c-8b2d-3c4e5f6a7b8d"/*ResetStream*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "e5f6a7b8-c9d0-1234-ef01-345678901234"/*Seed*/,
+      "DefaultValue": -1
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

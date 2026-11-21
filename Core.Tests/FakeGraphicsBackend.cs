@@ -83,6 +83,13 @@ internal sealed class FakeGraphicsBackend : IGraphicsBackend
     public void EndFrame(ICommandList commands) => FramesEnded++;
 
     public MappedMemory MapForRead(GpuResource resource, int subresource) => default;
+
+    public bool TryMapForRead(GpuResource resource, int subresource, out MappedMemory memory)
+    {
+        memory = default;
+        return false;
+    }
+
     public void Unmap(GpuResource resource, int subresource) { }
 
     public Task<ReadbackResult> ReadbackAsync(GpuTexture texture, int mipLevel, int arraySlice, CancellationToken cancellation = default)

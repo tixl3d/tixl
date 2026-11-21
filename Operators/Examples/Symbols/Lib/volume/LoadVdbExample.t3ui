@@ -1,0 +1,302 @@
+{
+  "FormatVersion": 3,
+  "Id": "ff0e1abc-733f-59ff-9af5-3e0382474bd6"/*LoadVdbExample*/,
+  "Description": "[LoadVdb] reads OpenVDB files as written by Houdini, Blender or TiXL itself. The bunny is a level set: made coarser with [VolumeResample], meshed and scaled down. The plume is a fog volume: [VolumeToNanoVdb] uploads it and [VdbDensityField] makes its density a field for [RaymarchField]. [VolumeInfo] reports what a file contains.\n\nAKA: vdb, openvdb, houdini, import, file, bunny, smoke, cloud\n\nTips\n- Smaller VoxelSize means sharper surfaces and more memory and time; start coarse and refine.\n- Level sets store signed distance in world units (negative inside); fog volumes store density.\n- Files are watched and reload when they change on disk.\n- A file with several grids: pick one with GridName.",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0e8f5427-32f0-59e3-96e5-9f27d909060a",
+      "SymbolName": "Lib.volume.gpu.VolumeToNanoVdb",
+      "SectionId": "5cd0b192-5b57-59c6-ae48-b6b6c121cd79",
+      "Position": {
+        "X": 260.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "1734d23b-c46f-5ba1-8c13-a58beae42909",
+      "SymbolName": "Lib.render.postfx.SSAO",
+      "SectionId": "3048c3ed-281c-5512-80ff-9f35c6ec4ee5",
+      "Position": {
+        "X": 2340.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "19a278e1-b592-5e66-95e9-5446a432352f",
+      "SymbolName": "Lib.volume.modify.VolumeResample",
+      "SectionId": "c1b29bfa-0024-5199-88fb-3ac0cb5e1d76",
+      "Position": {
+        "X": 260.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "1f150721-e881-5687-8782-0101ddd87c10",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "Position": {
+        "X": 1040.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "2172d8a1-4634-53cc-98e1-972f85dc2170",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "Position": {
+        "X": 1300.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "234c8779-2134-50d7-9790-88c250462084",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "SectionId": "3048c3ed-281c-5512-80ff-9f35c6ec4ee5",
+      "Position": {
+        "X": 1820.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "2a305205-fa81-5a1e-9a48-12d60d04f113",
+      "SymbolName": "Lib.render.camera.Camera",
+      "SectionId": "3048c3ed-281c-5512-80ff-9f35c6ec4ee5",
+      "Position": {
+        "X": 1820.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "44511a17-3db0-5409-bb45-bd076b4ae2c7",
+      "SymbolName": "Lib.render.shading.SetFog",
+      "SectionId": "3048c3ed-281c-5512-80ff-9f35c6ec4ee5",
+      "Position": {
+        "X": 1820.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "4a257799-4e80-506d-b1bd-fbc8f598769b",
+      "SymbolName": "Lib.field.space.TransformField",
+      "SectionId": "5cd0b192-5b57-59c6-ae48-b6b6c121cd79",
+      "Position": {
+        "X": 780.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "4f58a5cc-d2bd-5b81-8b29-c1dd60960631",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "SectionId": "3048c3ed-281c-5512-80ff-9f35c6ec4ee5",
+      "Position": {
+        "X": 1820.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "53631076-7d7b-56fc-9d4f-c8397fbcde60",
+      "SymbolName": "Lib.volume.fields.VdbDensityField",
+      "SectionId": "5cd0b192-5b57-59c6-ae48-b6b6c121cd79",
+      "Position": {
+        "X": 520.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "54972a0e-1218-559c-8ddc-3f1ba8f38940",
+      "SymbolName": "Lib.volume.convert.VolumeToMesh",
+      "SectionId": "c1b29bfa-0024-5199-88fb-3ac0cb5e1d76",
+      "Position": {
+        "X": 520.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "7fd18935-c55a-5956-a734-68af00afe182",
+      "SymbolName": "Lib.volume.analyze.VolumeInfo",
+      "SectionId": "c1b29bfa-0024-5199-88fb-3ac0cb5e1d76",
+      "Position": {
+        "X": 260.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "9ba9ae42-75f9-5bcd-b725-add2812163ed",
+      "SymbolName": "Lib.render.shading.SetShadow",
+      "SectionId": "3048c3ed-281c-5512-80ff-9f35c6ec4ee5",
+      "Position": {
+        "X": 1820.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "9c4b8f38-167f-5ebd-bbb5-695813452016",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "Position": {
+        "X": 1300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "a6f03240-74c1-5d30-b836-ed9534aae09d",
+      "SymbolName": "Lib.geometry.TransformGeometry",
+      "Position": {
+        "X": 780.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "b77f495a-bd02-5b67-81ad-1afdf890abf6",
+      "SymbolName": "Lib.field.render.RaymarchField",
+      "SectionId": "5cd0b192-5b57-59c6-ae48-b6b6c121cd79",
+      "Position": {
+        "X": 1040.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "cefdcaa6-38a0-5286-9795-c30a4ac24236",
+      "SymbolName": "Lib.flow.Execute",
+      "SectionId": "3048c3ed-281c-5512-80ff-9f35c6ec4ee5",
+      "Position": {
+        "X": 1820.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "d03c13ec-d0c1-5d8d-8e78-edc1a410bbd6",
+      "SymbolName": "Lib.mesh.generate.QuadMesh",
+      "Position": {
+        "X": 780.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "d5678992-ea54-5f80-9f51-ea64457740c9",
+      "SymbolName": "Lib.volume.io.LoadVdb",
+      "SectionId": "c1b29bfa-0024-5199-88fb-3ac0cb5e1d76",
+      "Position": {
+        "X": 0.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "d6ccf6ba-01ca-5a6b-bcb2-695d9184b397",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "SectionId": "3048c3ed-281c-5512-80ff-9f35c6ec4ee5",
+      "Position": {
+        "X": 2080.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "de038459-f775-564b-b4f8-22730f25c155",
+      "SymbolName": "Lib.volume.io.LoadVdb",
+      "SectionId": "5cd0b192-5b57-59c6-ae48-b6b6c121cd79",
+      "Position": {
+        "X": 0.0,
+        "Y": 440.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "7eec62d6-6b20-55a4-b813-6ad4a7a7ade9"/*Output*/,
+      "Position": {
+        "X": 2600.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "3048c3ed-281c-5512-80ff-9f35c6ec4ee5",
+      "Title": "Render: light, shadow and camera",
+      "Color": {
+        "X": 0.4,
+        "Y": 0.4,
+        "Z": 0.45,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1780.0,
+        "Y": -70.0
+      },
+      "Size": {
+        "X": 800.0,
+        "Y": 720.0
+      }
+    },
+    {
+      "Id": "5cd0b192-5b57-59c6-ae48-b6b6c121cd79",
+      "Title": "2  A fog volume from a file",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.3,
+        "Z": 0.35,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -40.0,
+        "Y": 370.0
+      },
+      "Size": {
+        "X": 1320.0,
+        "Y": 170.0
+      }
+    },
+    {
+      "Id": "c1b29bfa-0024-5199-88fb-3ac0cb5e1d76",
+      "Title": "1  A level set from a file",
+      "Color": {
+        "X": 0.35,
+        "Y": 0.5,
+        "Z": 0.65,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -40.0,
+        "Y": 40.0
+      },
+      "Size": {
+        "X": 800.0,
+        "Y": 280.0
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "98e09c89-6351-555c-8ac1-ffd6e0683d12",
+      "ChildId": "d5678992-ea54-5f80-9f51-ea64457740c9",
+      "InputId": "e16c0dad-a228-5a6f-964b-82986746836e",
+      "Description": "[LoadVdb] reads the first float grid of a .vdb file; vector grids come along.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "5d57f11c-f6bf-5e4d-b1df-42a3fa368e4b",
+      "ChildId": "19a278e1-b592-5e66-95e9-5446a432352f",
+      "InputId": "d21b910d-a7d9-507f-b7f6-4053dbdee86a",
+      "Description": "Resampling to coarser voxels makes the mesh much lighter.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "e8094d10-4fc6-57b3-9dc3-3d3e46f96875",
+      "ChildId": "7fd18935-c55a-5956-a734-68af00afe182",
+      "InputId": "dbfceb27-904a-55ff-b0ed-3a3707d795d6",
+      "Description": "[VolumeInfo] reports voxel count, memory and value range. Turn on LogToConsole to print it.",
+      "Style": "CallToAction"
+    },
+    {
+      "Id": "2eea18a9-1ba3-5fce-b664-505073efdf52",
+      "ChildId": "53631076-7d7b-56fc-9d4f-c8397fbcde60",
+      "InputId": "6e1d8b47-3a92-4c05-b7e8-9f2a1d6c4b53",
+      "Description": "[VdbDensityField] reads density from the GPU grid; IsoValue sets where the cloud is considered solid.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "26b18537-3a98-5a3d-b8cd-e36bcbd6ad66",
+      "ChildId": "4a257799-4e80-506d-b1bd-fbc8f598769b",
+      "Description": "Fields are transformed like objects: this one is scaled down and moved next to the bunny.",
+      "Style": "InfoFor"
+    }
+  ]
+}

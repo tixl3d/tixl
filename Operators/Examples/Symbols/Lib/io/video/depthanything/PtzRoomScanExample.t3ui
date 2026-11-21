@@ -1,0 +1,92 @@
+{
+  "FormatVersion": 3,
+  "Id": "5d2f8c14-7a39-4e6b-b1c0-9e4a2d7f3b58"/*PtzRoomScanExample*/,
+  "Description": "Scans a whole room with a pan/tilt (PTZ) network camera and shows it as a point cloud. The camera stops at each raster position, DepthAnything estimates depth, and DepthScan3D merges every capture by the camera's own pan/tilt into one range map that snaps to a fitted room box. The output draws the cloud; it fills in as the sweep runs. Set Address to your AXIS camera and turn Run on. Save a closed mesh with DepthScan3D's SaveFormat 'PLY mesh (room box)'.",
+  "SymbolTags": "10",
+  "InputUis": [
+    {
+      "InputId": "6e30a925-8b4a-4f7c-c2d1-af5b3e804c69"/*Address*/,
+      "Position": {
+        "X": -1800.0,
+        "Y": 100.0
+      },
+      "Description": "IP address of the AXIS PTZ camera (ONVIF and VAPIX).",
+      "Usage": "Default"
+    },
+    {
+      "InputId": "7f41ba36-9c5b-408d-d3e2-b06c4f915d7a"/*Run*/,
+      "Position": {
+        "X": -1800.0,
+        "Y": 220.0
+      },
+      "Description": "Runs the scan; off pauses it at the current stop."
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "1a44ce69-6fcd-51e0-94a7-26e7defa4e6c",
+      "SymbolName": "Lib.io.video.depthanything.AxisPtzCamera",
+      "Position": {
+        "X": -1500.0,
+        "Y": 300.0
+      }
+    },
+    {
+      "ChildId": "31fc8c22-0d02-5a3c-9606-5d7a45682ae8",
+      "SymbolName": "Lib.io.ptz.OnvifCamera",
+      "Position": {
+        "X": -1500.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "320c9606-059a-565d-bbcf-31e8ecff2224",
+      "SymbolName": "Lib.io.video.depthanything.DepthScan3D",
+      "Position": {
+        "X": -300.0,
+        "Y": 100.0
+      }
+    },
+    {
+      "ChildId": "32c9bbfe-ed22-5624-9668-1f2daaa829e0",
+      "SymbolName": "Lib.point.draw.DrawPoints",
+      "Position": {
+        "X": 100.0,
+        "Y": 100.0
+      }
+    },
+    {
+      "ChildId": "78d8f17a-3ff4-52a6-8b7b-e175eef740da",
+      "SymbolName": "Lib.io.video.depthanything.DepthAnything",
+      "Position": {
+        "X": -700.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "82a9e008-d1c2-5813-8762-11f3e2a64472",
+      "SymbolName": "Lib.io.video.depthanything.PtzScanPath",
+      "Position": {
+        "X": -1100.0,
+        "Y": 150.0
+      }
+    },
+    {
+      "ChildId": "b9481063-1242-4b43-9ff9-d3b4cdccc77a",
+      "SymbolName": "Lib.image.color.AdjustColors",
+      "Position": {
+        "X": -474.13373,
+        "Y": -70.49295
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "8052cb47-ad6c-419e-e4f3-c17d50a26e8b"/*Cloud*/,
+      "Position": {
+        "X": 500.0,
+        "Y": 100.0
+      }
+    }
+  ]
+}

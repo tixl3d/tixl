@@ -1,0 +1,63 @@
+{
+  "FormatVersion": 3,
+  "Id": "7e3a2f91-8b4c-4d27-a516-3c9e2b8f70da"/*DepthAnythingLiveExample*/,
+  "Inputs": [
+    {
+      "Id": "cf2e5d9a-417b-4c86-9e3f-2b71d4a50e13"/*StreamUrl*/,
+      "DefaultValue": "rtsp://10.0.0.189:8554/rpi_webcam"
+    }
+  ],
+  "Children": [
+    {
+      "Id": "3d8c61b2-95a4-42e7-b1f3-8d2a5c6e9741"/*VideoStreamInput*/,
+      "SymbolId": "d9a7233d-5d03-4268-a58b-465972852a5b",
+      "SymbolName": "Lib.io.video.VideoStreamInput",
+      "InputValues": [
+        {
+          "Id": "2e26e552-68d7-4e2f-8208-831f2a75c96b"/*Connect*/,
+          "Type": "System.Boolean",
+          "Value": true
+        }
+      ],
+      "Outputs": []
+    },
+    {
+      "Id": "a4b9d3c7-6e28-45fa-8b54-1e7c92d0a3f6"/*DepthAnything*/,
+      "SymbolId": "c8f7d6e5-4b3a-2c1d-9f8e-7a6b5c4d3e2f",
+      "SymbolName": "Lib.io.video.depthanything.DepthAnything",
+      "InputValues": [
+        {
+          "Id": "34567890-3456-3456-3456-345678901234"/*ModelSizeParam*/,
+          "Type": "System.Int32",
+          "Value": 5
+        },
+        {
+          "Id": "45678901-4567-4567-4567-456789012345"/*OutputFormat*/,
+          "Type": "System.Int32",
+          "Value": 1
+        }
+      ],
+      "Outputs": []
+    }
+  ],
+  "Connections": [
+    {
+      "SourceParentOrChildId": "a4b9d3c7-6e28-45fa-8b54-1e7c92d0a3f6",
+      "SourceSlotId": "f1a0f9c8-7e6d-5f4e-2b1a-0d9c8b7a6e5f",
+      "TargetParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "TargetSlotId": "b9f2c4a8-1d7d-4e67-9a28-f5c3e1d2b640"
+    },
+    {
+      "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "SourceSlotId": "cf2e5d9a-417b-4c86-9e3f-2b71d4a50e13",
+      "TargetParentOrChildId": "3d8c61b2-95a4-42e7-b1f3-8d2a5c6e9741",
+      "TargetSlotId": "a8b0971b-94cb-4c3d-932d-337581b8d83a"
+    },
+    {
+      "SourceParentOrChildId": "3d8c61b2-95a4-42e7-b1f3-8d2a5c6e9741",
+      "SourceSlotId": "2e7e2404-5881-4327-9653-ca9533b856a9",
+      "TargetParentOrChildId": "a4b9d3c7-6e28-45fa-8b54-1e7c92d0a3f6",
+      "TargetSlotId": "12345678-1234-1234-1234-123456789012"
+    }
+  ]
+}

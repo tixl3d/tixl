@@ -1,0 +1,254 @@
+{
+  "FormatVersion": 3,
+  "Id": "12016fb4-ffa4-5655-81e9-aa833e9fddcb"/*VdbToSdfFieldExample*/,
+  "Description": "[VdbToSdfField] makes a volume's signed distances a field, so it mixes with every SDF operator. Here a torus volume is blended smoothly with an animated [SphereSDF] by [CombineSDF], placed on an SDF floor and raymarched. Nothing is meshed.\n\nAKA: sdf, signed distance field, raymarch, blend, metaball, smooth union\n\nTips\n- Smaller VoxelSize means sharper surfaces and more memory and time; start coarse and refine.\n- Level sets store signed distance in world units (negative inside); fog volumes store density.\n- K is the blend radius of the smooth union; 0 gives a hard edge.\n- Any volume works, also one loaded with [LoadVdb].",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "16a27011-ec67-591b-892f-3dc4567f2e29",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "SectionId": "650b828d-60d6-50e6-bdf8-ba4877e4ebfe",
+      "Position": {
+        "X": 1820.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "1911abc9-d759-56ba-bfb0-303397135b07",
+      "SymbolName": "Lib.field.generate.sdf.PlaneSDF",
+      "SectionId": "7ddd4bd3-c8e7-5944-8a4d-fb46f585e85b",
+      "Position": {
+        "X": 520.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "1dcb6ebd-5426-528b-aa03-6728a3a8f292",
+      "SymbolName": "Lib.flow.Execute",
+      "SectionId": "650b828d-60d6-50e6-bdf8-ba4877e4ebfe",
+      "Position": {
+        "X": 1820.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "1f70b26b-ef9a-553d-9457-bc2702a3b466",
+      "SymbolName": "Lib.field.render.RaymarchField",
+      "SectionId": "7ddd4bd3-c8e7-5944-8a4d-fb46f585e85b",
+      "Position": {
+        "X": 1300.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "3662a833-998a-53b7-9951-69246a331e2d",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "SectionId": "650b828d-60d6-50e6-bdf8-ba4877e4ebfe",
+      "Position": {
+        "X": 2080.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "4186675d-42d8-5058-9719-5a473d1f4dbc",
+      "SymbolName": "Lib.field.generate.sdf.SphereSDF",
+      "SectionId": "7ddd4bd3-c8e7-5944-8a4d-fb46f585e85b",
+      "Position": {
+        "X": 520.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "5efbccda-25fc-52a7-8a5c-4483e7424674",
+      "SymbolName": "Lib.render.shading.SetFog",
+      "SectionId": "650b828d-60d6-50e6-bdf8-ba4877e4ebfe",
+      "Position": {
+        "X": 1820.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "7f197b73-8fb5-5d0e-a53d-b3450dee9d10",
+      "SymbolName": "Lib.field.combine.CombineSDF",
+      "SectionId": "7ddd4bd3-c8e7-5944-8a4d-fb46f585e85b",
+      "Position": {
+        "X": 1040.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "89a98fbc-1303-55b5-b623-f8a42be53439",
+      "SymbolName": "Lib.field.combine.CombineSDF",
+      "SectionId": "7ddd4bd3-c8e7-5944-8a4d-fb46f585e85b",
+      "Position": {
+        "X": 780.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "92246502-78b6-5084-90fc-c9ed8e908f5c",
+      "SymbolName": "Lib.render.shading.SetShadow",
+      "SectionId": "650b828d-60d6-50e6-bdf8-ba4877e4ebfe",
+      "Position": {
+        "X": 1820.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "b5191818-f3fc-5abe-9f65-0b4b4cbce28b",
+      "SymbolName": "Lib.volume.generate.VolumePrimitive",
+      "SectionId": "6d604213-3f64-50dc-a58e-94205780720a",
+      "Position": {
+        "X": 0.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "b617b3e5-5ce5-5478-a82f-e2cbb92a30aa",
+      "SymbolName": "Lib.volume.fields.VdbToSdfField",
+      "SectionId": "6d604213-3f64-50dc-a58e-94205780720a",
+      "Position": {
+        "X": 520.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "ca93a761-ce12-56ee-aa80-b6d9d29269e5",
+      "SymbolName": "Lib.numbers.anim.animators.AnimVec3",
+      "SectionId": "7ddd4bd3-c8e7-5944-8a4d-fb46f585e85b",
+      "Position": {
+        "X": 260.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "e12b543b-e8c8-5447-a326-7263eb0df743",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "SectionId": "650b828d-60d6-50e6-bdf8-ba4877e4ebfe",
+      "Position": {
+        "X": 1820.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "e7ceeea2-c469-59df-9efc-2163f29cf3cf",
+      "SymbolName": "Lib.render.postfx.SSAO",
+      "SectionId": "650b828d-60d6-50e6-bdf8-ba4877e4ebfe",
+      "Position": {
+        "X": 2340.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "f465aa87-17aa-5792-a407-bdac39e10735",
+      "SymbolName": "Lib.render.camera.Camera",
+      "SectionId": "650b828d-60d6-50e6-bdf8-ba4877e4ebfe",
+      "Position": {
+        "X": 1820.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "f4be6d59-c312-50f0-a2e2-ef65197a4c07",
+      "SymbolName": "Lib.volume.gpu.VolumeToNanoVdb",
+      "SectionId": "6d604213-3f64-50dc-a58e-94205780720a",
+      "Position": {
+        "X": 260.0,
+        "Y": 110.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "974939ea-9ec1-5c6e-9957-18cf961bbb59"/*Output*/,
+      "Position": {
+        "X": 2600.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "650b828d-60d6-50e6-bdf8-ba4877e4ebfe",
+      "Title": "Render: light, shadow and camera",
+      "Color": {
+        "X": 0.4,
+        "Y": 0.4,
+        "Z": 0.45,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1780.0,
+        "Y": -70.0
+      },
+      "Size": {
+        "X": 800.0,
+        "Y": 720.0
+      }
+    },
+    {
+      "Id": "6d604213-3f64-50dc-a58e-94205780720a",
+      "Title": "1  The volume as a field",
+      "Color": {
+        "X": 0.35,
+        "Y": 0.5,
+        "Z": 0.65,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -40.0,
+        "Y": 40.0
+      },
+      "Size": {
+        "X": 800.0,
+        "Y": 170.0
+      }
+    },
+    {
+      "Id": "7ddd4bd3-c8e7-5944-8a4d-fb46f585e85b",
+      "Title": "2  Blended with SDF shapes",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.3,
+        "Z": 0.35,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 220.0,
+        "Y": 150.0
+      },
+      "Size": {
+        "X": 1320.0,
+        "Y": 500.0
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "202bd60e-f222-5764-8caa-8b9dbff61237",
+      "ChildId": "b617b3e5-5ce5-5478-a82f-e2cbb92a30aa",
+      "Description": "[VdbToSdfField] reads the uploaded grid as a signed distance field.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "3730f29c-f4e1-55cc-abf4-ae0bf92cc7b1",
+      "ChildId": "89a98fbc-1303-55b5-b623-f8a42be53439",
+      "InputId": "9e4f5916-722d-4c4b-b1ca-814958a5b836",
+      "Description": "UnionSmooth melts the two shapes together within K.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "d7d1158c-3749-5479-9851-9e8010e54d8a",
+      "ChildId": "1f70b26b-ef9a-553d-9457-bc2702a3b466",
+      "Description": "[RaymarchField] draws the combined field directly; no mesh is built.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "174e2eb1-6d08-59dd-b1b8-f71829303354",
+      "ChildId": "89a98fbc-1303-55b5-b623-f8a42be53439",
+      "InputId": "4648e514-b48c-4a98-a728-3ebf9bcfa0b7",
+      "Description": "Set CombineMethod to CutOut to carve the ball out of the torus instead.",
+      "Style": "CallToAction"
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "FormatVersion": 3,
+  "Id": "90f1f8ad-201d-4471-9c8a-b5cf1faf9317"/*DepthAnythingExample*/,
+  "Description": "Estimates a depth map from an image with Depth Anything 3. Near objects stay bright; switch ModelSizeParam for a larger model or InvertDepth to flip the ramp. The colorized NormalizedDepthTexture is the output.",
+  "SymbolTags": "10",
+  "InputUis": [
+    {
+      "InputId": "ce32cdf5-9929-403a-abdf-ba537cdb06c3"/*ImagePath*/,
+      "Position": {
+        "X": -620.0,
+        "Y": -60.0
+      },
+      "Description": "Image to estimate depth for.",
+      "Usage": "FilePath"
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0cfee6da-83c6-418a-b37e-ee018dbfa97b",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
+      "Position": {
+        "X": -400.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "ad32d270-0ffd-4609-b67b-054828bb2b0f",
+      "SymbolName": "Lib.io.video.depthanything.DepthAnything",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "e20fba13-866f-40e1-8399-c292b801b861"/*Depth*/,
+      "Position": {
+        "X": 620.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

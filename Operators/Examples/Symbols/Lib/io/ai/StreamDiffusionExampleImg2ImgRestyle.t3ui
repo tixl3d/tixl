@@ -1,0 +1,62 @@
+{
+  "FormatVersion": 3,
+  "Id": "d9057671-ba90-47c5-bfaa-c9c53b3abf90"/*StreamDiffusionExampleImg2ImgRestyle*/,
+  "Description": "Restyles an input image with a text prompt using Stream Diffusion V2. Strength sets how far the result moves away from the source (0 keeps the image, 1 replaces it), the seed keeps runs repeatable, and ModelPath points at a Stream Diffusion V2 ONNX export folder from the model store. Feed the result into a draw operator and pump frames - the restyle updates live while the prompt holds.",
+  "SymbolTags": "10",
+  "InputUis": [
+    {
+      "InputId": "0872f2fa-fc10-427c-96e3-f2cccf62e804"/*ModelPath*/,
+      "Position": {
+        "X": -620.0,
+        "Y": -60.0
+      },
+      "Description": "Folder with a StreamDiffusion V2 ONNX export.",
+      "Usage": "DirectoryPath"
+    },
+    {
+      "InputId": "4c87d916-bc35-43bc-a785-7f239a686d3b"/*ImagePath*/,
+      "Position": {
+        "X": -620.0,
+        "Y": 120.0
+      },
+      "Description": "Image to transform.",
+      "Usage": "FilePath"
+    },
+    {
+      "InputId": "b9aa84fb-f9e3-494f-b0aa-483fc3ae4e31"/*Prompt*/,
+      "Position": {
+        "X": -620.0,
+        "Y": 30.0
+      },
+      "Description": "Text prompt.",
+      "Usage": "Multiline"
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "264e9eb1-961b-4f60-b525-c592de8f2d12",
+      "SymbolName": "Lib.io.ai.StreamDiffusion",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "b62ff1a1-b581-464e-b9cd-ab16fd9f1d7c",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
+      "Position": {
+        "X": -420.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "574a52b9-8081-4668-a42b-1bbf7f83afc0"/*Image*/,
+      "Position": {
+        "X": 620.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

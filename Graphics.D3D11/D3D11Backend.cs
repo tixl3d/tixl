@@ -434,6 +434,38 @@ public sealed class D3D11Backend : IGraphicsBackend, IDisposable
         return new MappedMemory((void*)box.DataPointer, box.RowPitch, box.SlicePitch, box.SlicePitch);
     }
 
+    /// <summary>
+    /// DoNotWait: the map fails with DXGI_ERROR_WAS_STILL_DRAWING instead of stalling until the whole
+    /// queued frame is done. Callers keep their last good read and retry next interval.
+    /// </summary>
+    public unsafe bool TryMapForRead(GpuResource resource, int subresource, out MappedMemory memory)
+    {
+        memory = default;
+        var target = resource switch
+                         {
+                             D3D11Texture texture => texture.Resource,
+                             D3D11Buffer buffer   => (Resource)buffer.Buffer,
+                             _                    => null,
+                         };
+
+        if (target == null)
+            return false;
+
+        try
+        {
+            var box = Device.ImmediateContext.MapSubresource(target, subresource, MapMode.Read, SharpDX.Direct3D11.MapFlags.DoNotWait);
+            memory = new MappedMemory((void*)box.DataPointer, box.RowPitch, box.SlicePitch, box.SlicePitch);
+            return true;
+        }
+        catch (SharpDX.SharpDXException)
+        {
+            // WAS_STILL_DRAWING means the copy is still queued; DEVICE_REMOVED/RESET/HUNG and OOM are
+            // permanent failures. Either way the caller keeps its last good read, and its readback
+            // timeout decides when to give up - no exception reaches the evaluation thread.
+            return false;
+        }
+    }
+
     public void Unmap(GpuResource resource, int subresource) => _commands.Unmap(resource, subresource);
 
     /// <summary>

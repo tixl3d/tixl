@@ -1,0 +1,45 @@
+{
+  "FormatVersion": 3,
+  "Id": "fe71eba4-ba4d-4fc3-b6bf-3cb4a33cdbcc"/*StreamDiffusionExample*/,
+  "Description": "Generates an image from a prompt with the StreamDiffusion V2 Wan2.1 model. Point ModelPath at a V2 ONNX export folder (dit_step.onnx, text_encoder.onnx, vae_decoder.onnx, tokenizer.json); AutoGenerate redraws when the prompt changes.",
+  "SymbolTags": "10",
+  "InputUis": [
+    {
+      "InputId": "669328d8-66ff-4fba-a23a-99aa97bc12f6"/*ModelPath*/,
+      "Position": {
+        "X": -620.0,
+        "Y": -60.0
+      },
+      "Description": "Folder with a StreamDiffusion V2 ONNX export.",
+      "Usage": "DirectoryPath"
+    },
+    {
+      "InputId": "e5bf45ec-137e-4d91-acff-7fd5298d9665"/*Prompt*/,
+      "Position": {
+        "X": -620.0,
+        "Y": 30.0
+      },
+      "Description": "Text prompt.",
+      "Usage": "Multiline"
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "18dfb664-ede1-4279-92ec-a94dd7f8fef1",
+      "SymbolName": "Lib.io.ai.StreamDiffusion",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "a9370a92-822e-434f-98e3-90691a7e44f5"/*Image*/,
+      "Position": {
+        "X": 620.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

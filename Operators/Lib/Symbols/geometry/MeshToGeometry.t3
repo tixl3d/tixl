@@ -1,0 +1,16 @@
+{
+  "FormatVersion": 3,
+  "Id": "f4489290-24d9-4533-86ce-a5f5972ea952"/*MeshToGeometry*/,
+  "Inputs": [
+    {
+      "Id": "1c26862c-483f-4266-bad4-4521bef57cd6"/*Mesh*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "1d5f3f1b-118e-4618-bc9d-653f566a9c9d"/*WeldPoints*/,
+      "DefaultValue": true
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

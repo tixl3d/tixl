@@ -1,0 +1,358 @@
+{
+  "FormatVersion": 3,
+  "Id": "37449751-31a8-5ead-9525-88759fdfd1b0"/*VolumeShakingWaterExample*/,
+  "Description": "The container is an open box: a box minus a slightly smaller box with [VolumeCsg] Difference. The water is a slab displaced by [VolumeNoise] and clipped by Intersection to the inside of the box. Two [OscillateVec3] make the box shake and the water slosh.\n\nAKA: water, liquid, slosh, container, csg, noise, animation\n\nTips\n- Smaller VoxelSize means sharper surfaces and more memory and time; start coarse and refine.\n- Level sets store signed distance in world units (negative inside); fog volumes store density.",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0445b698-4382-58ce-bc7b-0e85f34fe341",
+      "SymbolName": "Lib.render.camera.Camera",
+      "SectionId": "f0bf2da7-905d-542c-85e2-73704d248c41",
+      "Position": {
+        "X": 2600.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "11da8e15-3354-50e1-ac37-2980ee022a5c",
+      "SymbolName": "Lib.volume.modify.VolumeCsg",
+      "SectionId": "edf64184-154f-594a-840b-0a59e6f62d9c",
+      "Position": {
+        "X": 520.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "1583a406-fedd-5d6c-b50c-82df7faff498",
+      "SymbolName": "Lib.render.shading.SetFog",
+      "SectionId": "f0bf2da7-905d-542c-85e2-73704d248c41",
+      "Position": {
+        "X": 2600.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "173e7705-da92-509a-b61b-e1232312fbed",
+      "SymbolName": "Lib.mesh.generate.QuadMesh",
+      "Position": {
+        "X": 1820.0,
+        "Y": 660.0
+      }
+    },
+    {
+      "ChildId": "20f9443f-c05e-5964-9200-86ca586cb57a",
+      "SymbolName": "Lib.flow.Execute",
+      "SectionId": "f0bf2da7-905d-542c-85e2-73704d248c41",
+      "Position": {
+        "X": 2600.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "27067283-9589-5f02-8080-152b242d2a17",
+      "SymbolName": "Lib.volume.generate.VolumePrimitive",
+      "SectionId": "edf64184-154f-594a-840b-0a59e6f62d9c",
+      "Position": {
+        "X": 0.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "2892f867-b023-5b4c-90ad-10c48c7a2019",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "Position": {
+        "X": 2340.0,
+        "Y": 660.0
+      }
+    },
+    {
+      "ChildId": "3096bbca-3778-578d-9dc9-f2bfa1477588",
+      "SymbolName": "Lib.volume.convert.VolumeToMesh",
+      "SectionId": "434d06ff-d1ec-5988-836d-332c31cb6034",
+      "Position": {
+        "X": 520.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "4f8faaa1-11bb-514e-81bf-43aa27eabde1",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "SectionId": "f0bf2da7-905d-542c-85e2-73704d248c41",
+      "Position": {
+        "X": 2860.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "5ed5afe1-b761-5c2f-8ba2-f67f239ff134",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "SectionId": "a7fa1b67-52cc-5a66-a128-bbcd3c397c68",
+      "Position": {
+        "X": 1560.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "6008125f-2469-592a-b591-1de425b8a874",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "SectionId": "f0bf2da7-905d-542c-85e2-73704d248c41",
+      "Position": {
+        "X": 2600.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "60b97808-8e37-5f9b-9da2-08c58f3965ab",
+      "SymbolName": "Lib.volume.modify.VolumeCsg",
+      "SectionId": "434d06ff-d1ec-5988-836d-332c31cb6034",
+      "Position": {
+        "X": 260.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "69ab0ba0-e61a-58b3-8a06-f85a2cee83bd",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "Position": {
+        "X": 1040.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "6dc61edc-2a0f-5a10-aeee-f9f0b485cd51",
+      "SymbolName": "Lib.volume.generate.VolumePrimitive",
+      "SectionId": "434d06ff-d1ec-5988-836d-332c31cb6034",
+      "Position": {
+        "X": 0.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "70264ce5-55f0-5cb1-9fac-bb86c0ef4ccc",
+      "SymbolName": "Lib.numbers.anim.animators.OscillateVec3",
+      "SectionId": "a7fa1b67-52cc-5a66-a128-bbcd3c397c68",
+      "Position": {
+        "X": 1560.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "7cd2e716-6d08-5a39-9672-4a347a9a0950",
+      "SymbolName": "Lib.render.transform.Group",
+      "SectionId": "a7fa1b67-52cc-5a66-a128-bbcd3c397c68",
+      "Position": {
+        "X": 1820.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "91be0ccf-6441-5094-a315-25d884750175",
+      "SymbolName": "Lib.render.postfx.SSAO",
+      "SectionId": "f0bf2da7-905d-542c-85e2-73704d248c41",
+      "Position": {
+        "X": 3120.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "9a3238b4-03c8-5ee6-ab36-6332a237e014",
+      "SymbolName": "Lib.render.shading.SetShadow",
+      "SectionId": "f0bf2da7-905d-542c-85e2-73704d248c41",
+      "Position": {
+        "X": 2600.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "a17dc958-11dc-56c0-a3a6-675e3b23e02d",
+      "SymbolName": "Lib.volume.generate.VolumePrimitive",
+      "SectionId": "434d06ff-d1ec-5988-836d-332c31cb6034",
+      "Position": {
+        "X": 0.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "b16f9990-367f-5f46-9ef3-d8cc55ef3b10",
+      "SymbolName": "Lib.volume.generate.VolumePrimitive",
+      "SectionId": "edf64184-154f-594a-840b-0a59e6f62d9c",
+      "Position": {
+        "X": 0.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "c4290551-e8a2-5d93-8e64-5e8ee9e0593c",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "Position": {
+        "X": 1300.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "c456db78-9ea5-5c3b-9689-26abef9efcef",
+      "SymbolName": "Lib.numbers.anim.animators.OscillateVec3",
+      "SectionId": "a7fa1b67-52cc-5a66-a128-bbcd3c397c68",
+      "Position": {
+        "X": 1820.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "de102d78-f5e3-5394-96e1-49c4126d347d",
+      "SymbolName": "Lib.volume.modify.VolumeNoise",
+      "SectionId": "edf64184-154f-594a-840b-0a59e6f62d9c",
+      "Position": {
+        "X": 260.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "e13d8528-20a0-5bd5-a871-c58f5afb07c4",
+      "SymbolName": "Lib.render.transform.Group",
+      "SectionId": "a7fa1b67-52cc-5a66-a128-bbcd3c397c68",
+      "Position": {
+        "X": 2080.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "eb2c53f5-62d9-57c8-bf0a-95bd7cf72ad2",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "SectionId": "f0bf2da7-905d-542c-85e2-73704d248c41",
+      "Position": {
+        "X": 2600.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "fe01eb3f-493f-5af5-9133-ce7a9506e7bf",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "Position": {
+        "X": 1300.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "fee826a1-ba0b-5a7b-b483-04d096979c2f",
+      "SymbolName": "Lib.volume.convert.VolumeToMesh",
+      "SectionId": "edf64184-154f-594a-840b-0a59e6f62d9c",
+      "Position": {
+        "X": 780.0,
+        "Y": 440.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "e29b2d3c-8e83-55d0-a789-f484a390fffc"/*Output*/,
+      "Position": {
+        "X": 3380.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "434d06ff-d1ec-5988-836d-332c31cb6034",
+      "Title": "1  An open box from CSG",
+      "Color": {
+        "X": 0.35,
+        "Y": 0.5,
+        "Z": 0.65,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -40.0,
+        "Y": 40.0
+      },
+      "Size": {
+        "X": 800.0,
+        "Y": 280.0
+      }
+    },
+    {
+      "Id": "a7fa1b67-52cc-5a66-a128-bbcd3c397c68",
+      "Title": "3  Shake and slosh",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.3,
+        "Z": 0.35,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1520.0,
+        "Y": -70.0
+      },
+      "Size": {
+        "X": 800.0,
+        "Y": 610.0
+      }
+    },
+    {
+      "Id": "edf64184-154f-594a-840b-0a59e6f62d9c",
+      "Title": "2  Water: a noisy slab clipped to the box",
+      "Color": {
+        "X": 0.65,
+        "Y": 0.45,
+        "Z": 0.25,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -40.0,
+        "Y": 370.0
+      },
+      "Size": {
+        "X": 1060.0,
+        "Y": 280.0
+      }
+    },
+    {
+      "Id": "f0bf2da7-905d-542c-85e2-73704d248c41",
+      "Title": "Render: light, shadow and camera",
+      "Color": {
+        "X": 0.4,
+        "Y": 0.4,
+        "Z": 0.45,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 2560.0,
+        "Y": -70.0
+      },
+      "Size": {
+        "X": 800.0,
+        "Y": 720.0
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "da738e95-d5d7-529c-9a3a-72c1efa3e5b6",
+      "ChildId": "60b97808-8e37-5f9b-9da2-08c58f3965ab",
+      "InputId": "e0616bd7-2a4a-5953-95a5-a11929871bd9",
+      "Description": "Difference carves the inner box out of the outer one, leaving walls and a floor.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "734c1f18-2b8e-5d4b-9ce1-f7f1cfb06bec",
+      "ChildId": "de102d78-f5e3-5394-96e1-49c4126d347d",
+      "InputId": "fa3b21cd-383f-5f82-9b5a-57c316cdef7d",
+      "Description": "Displacing the water slab with noise gives it waves.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "06ca6692-b140-5832-862a-43674abaf1b4",
+      "ChildId": "11da8e15-3354-50e1-ac37-2980ee022a5c",
+      "InputId": "e0616bd7-2a4a-5953-95a5-a11929871bd9",
+      "Description": "Intersection keeps only the water inside the box, so no wave pokes through a wall.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "9ba42933-2e37-5415-8ee7-9b65b82ec210",
+      "ChildId": "70264ce5-55f0-5cb1-9fac-bb86c0ef4ccc",
+      "Description": "[OscillateVec3] moves the whole box a little: the meshes stay, only their [Group] moves.",
+      "Style": "InfoFor"
+    }
+  ]
+}

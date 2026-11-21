@@ -1,0 +1,159 @@
+{
+  "FormatVersion": 3,
+  "Id": "13f60f14-0553-422b-85de-d7eb8d92912c"/*MeshToSDF*/,
+  "Description": "Bakes a signed distance field volume from a triangle mesh.\n\nThe mesh is voxelized on the GPU and the volume is filled with nearest-surface distances using jump flooding (port of Fire-Aalt mesh-to-sdf). Inside the mesh the distance is negative.\n\nConnect the result to [RaymarchField] to render the mesh as a raymarched SDF, or combine it with other SDF primitives (e.g. [CombineSDF], [BendField], [PolarRepeat]).\n\nWith AutoFitVolume enabled (default) the bake volume automatically fits the mesh bounding box, so the whole mesh is always captured. Disable it to place the box manually with Center and Size. Resolution sets the voxels along the largest axis.\n\nWith AutoRebake enabled the volume is re-baked whenever the mesh changes. Bakes are split into work units that are spread over BakeFrames frames, so even heavy bakes never freeze the app: [SdfTexture] always holds the last completed bake while [BakeProgress] (0..1) and [BakeInProgress] report the progress of the running one, and [BakeCount] increments when it finishes. Set BakeFrames to 1 to force the whole bake into a single frame.\n\nSurface quality guide: with Smoothing at 0 the raw voxel field shows staircase and speckle. For clean raymarched surfaces use Resolution 256, SampleDensity 8-16 (low values leave holes in thin parts, which shows as speckle), and Smoothing 0.4-0.6 with a SmoothingRadius of 2-3 to melt the voxel noise. Mode Exact Closest Point Scatter gives the smoothest surfaces (exact triangle distances near the mesh).\n\nInvert flips inside and outside - useful for hollow shells, rooms or carving. Smoothing can be tweaked after a bake without re-baking it. The [SdfTexture] output can be inspected with [ShowTexture3d].\n\nLimits and failure behaviour: Resolution is capped at 256, which uses about 500 MB of GPU memory (about 63 MB at 128 and 8 MB at 64). If that allocation fails, the bake reports it in the status bar, releases the partial allocation and waits for a changed input before retrying. Meshes above about 4.2 million triangles exceed the GPU dispatch limit and are rejected with a message instead of being baked. A failed bake never retries in a loop, never blocks the app and never crashes it - change an input or pulse Bake to try again.",
+  "SymbolTags": "1",
+  "InputUis": [
+    {
+      "InputId": "115ac2e8-3157-49e4-b544-14a885bbe8b0"/*Smoothing*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "Blurs the distance field to remove voxel noise (0 = off). 0.4-0.6 gives clean raymarched surfaces. Changing this after a bake re-applies smoothing without a full re-bake."
+    },
+    {
+      "InputId": "2707d838-e482-41c5-a982-088309551c22"/*Offset*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "Shifts the resulting surface inward (negative) or outward (positive) by this many world units."
+    },
+    {
+      "InputId": "2778c24f-99fc-45b8-b0af-ca657e99cdb2"/*AutoFitVolume*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 135.0
+      },
+      "Description": "Fits the bake volume to the mesh bounding box on every bake, so the whole mesh is always captured. When disabled, the volume box is placed manually with Center and Size."
+    },
+    {
+      "InputId": "2792f002-4d4e-4a18-b68d-36d6c01352e5"/*AutoRebake*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 270.0
+      },
+      "Description": "Rebake automatically whenever the mesh changes."
+    },
+    {
+      "InputId": "4c385ad2-9248-4b53-bdfe-8965aeacc770"/*SmoothingRadius*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "Radius of the smoothing kernel in voxels. Values below 1 barely smooth; 2-3 works well at 128-256 resolution."
+    },
+    {
+      "InputId": "4c53055d-1dae-4328-b097-5c629a3bdb49"/*Bake*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Description": "Pulse to rebake the volume with the current settings."
+    },
+    {
+      "InputId": "514e150f-ac58-4a7e-9377-9ea2d1067c9c"/*SampleDensity*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      },
+      "Description": "Sample points per voxel² of triangle area used during voxelization. Low values can leave holes in thin parts, which shows as speckle in the field. Use 8-16 for detailed meshes."
+    },
+    {
+      "InputId": "61089b3b-8f93-4f09-9937-aa6505c6e1f4"/*Size*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      },
+      "Description": "Size of the baked volume box in local space. Only used when AutoFitVolume is off; the mesh must fit inside this box to be captured fully."
+    },
+    {
+      "InputId": "676f5929-9077-4a0c-b532-c39deaf5ed3e"/*Invert*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "Flips inside and outside of the field, turning the mesh into a hollow shell. Applied during the next bake."
+    },
+    {
+      "InputId": "6f409060-a626-4cdd-b02d-16634ee6e4e5"/*Mode*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "Conversion algorithm: 0 = Jump Flood (fast, signed - good default), 1 = Exact Closest Point (slow brute force per voxel), 2 = Exact Closest Point Scatter (GPU-parallel, exact distances near the surface - smoothest result), 3 = Jump Flood unsigned (distance only, always positive)."
+    },
+    {
+      "InputId": "7ddb3297-50df-4a92-8f8a-6823b306a305"/*Center*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 180.0
+      },
+      "Description": "Center of the baked volume box in local space. Only used when AutoFitVolume is off."
+    },
+    {
+      "InputId": "a55ebcaa-0809-4299-8d08-bf1781aaf10d"/*Mesh*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "The triangle mesh to convert. Vertex buffers of mesh operators connect here."
+    },
+    {
+      "InputId": "b9c90672-04e7-4a87-8dcd-41d9d9b3eecb"/*BakeFrames*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 315.0
+      },
+      "Description": "Number of frames a bake is spread over so the app stays responsive. 1 = bake within a single frame (can cause a hitch on large volumes). Changing this only affects future bakes."
+    },
+    {
+      "InputId": "d66b7b80-096b-41e0-967d-bc7a0fbcf3d8"/*Resolution*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      },
+      "Description": "Voxels along the largest volume axis. Higher values capture finer detail at the cost of memory and bake time (256 uses roughly 500 MB of GPU memory across the working volumes). 128 is a safe default, 256 for close-up surfaces."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "4620f091-a393-4a7b-9eb4-4dbb28f183ed"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    },
+    {
+      "OutputId": "2667fcb5-2e48-4154-a7f0-7f172b77e4c8"/*SdfTexture*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 300.0
+      }
+    },
+    {
+      "OutputId": "49bbd706-83af-4a99-9640-2f5464640260"/*BakeCount*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 400.0
+      }
+    },
+    {
+      "OutputId": "39685a0a-013a-4d21-b925-52f605731b84"/*BakeProgress*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 500.0
+      }
+    },
+    {
+      "OutputId": "6f802b9a-738b-45c1-af85-422c120c0edd"/*BakeInProgress*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 600.0
+      }
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "FormatVersion": 3,
+  "Id": "13f60f14-0553-422b-85de-d7eb8d92912c"/*MeshToSDF*/,
+  "Inputs": [
+    {
+      "Id": "115ac2e8-3157-49e4-b544-14a885bbe8b0"/*Smoothing*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "2707d838-e482-41c5-a982-088309551c22"/*Offset*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "2778c24f-99fc-45b8-b0af-ca657e99cdb2"/*AutoFitVolume*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "2792f002-4d4e-4a18-b68d-36d6c01352e5"/*AutoRebake*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "4c385ad2-9248-4b53-bdfe-8965aeacc770"/*SmoothingRadius*/,
+      "DefaultValue": 2.0
+    },
+    {
+      "Id": "4c53055d-1dae-4328-b097-5c629a3bdb49"/*Bake*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "514e150f-ac58-4a7e-9377-9ea2d1067c9c"/*SampleDensity*/,
+      "DefaultValue": 8.0
+    },
+    {
+      "Id": "61089b3b-8f93-4f09-9937-aa6505c6e1f4"/*Size*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 1.0,
+        "Z": 1.0
+      }
+    },
+    {
+      "Id": "676f5929-9077-4a0c-b532-c39deaf5ed3e"/*Invert*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "6f409060-a626-4cdd-b02d-16634ee6e4e5"/*Mode*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "7ddb3297-50df-4a92-8f8a-6823b306a305"/*Center*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "a55ebcaa-0809-4299-8d08-bf1781aaf10d"/*Mesh*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "b9c90672-04e7-4a87-8dcd-41d9d9b3eecb"/*BakeFrames*/,
+      "DefaultValue": 8.0
+    },
+    {
+      "Id": "d66b7b80-096b-41e0-967d-bc7a0fbcf3d8"/*Resolution*/,
+      "DefaultValue": 128.0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

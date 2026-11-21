@@ -1,0 +1,67 @@
+{
+  "FormatVersion": 3,
+  "Id": "5e2b0f2a-f01f-4a2f-a7a3-91ea37fa39db"/*DepthAnythingExampleNormalSurface*/,
+  "Description": "Turns a depth map into a normal map and camera-space positions. Wire the normal output into lighting or relighting setups; the position texture holds x, y and distance for point clouds or displacement.",
+  "SymbolTags": "10",
+  "InputUis": [
+    {
+      "InputId": "c0e59cd2-6944-45cf-8168-b23d6a1e0227"/*ImagePath*/,
+      "Position": {
+        "X": -620.0,
+        "Y": -60.0
+      },
+      "Description": "Image to estimate depth for.",
+      "Usage": "FilePath"
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "35b2daea-bc6f-4e78-8935-df623ee9c006",
+      "SymbolName": "Lib.io.video.depthanything.DepthAnything",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "589f009e-0c09-4013-8c6f-dbe452d1c33e",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
+      "Position": {
+        "X": -400.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "af016c75-8102-41d9-b8bc-fc57a864efae",
+      "SymbolName": "Lib.io.video.depthanything.DepthToPosition",
+      "Position": {
+        "X": 320.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "dd2557da-9c61-4d0e-bd40-25b64ba4ab73",
+      "SymbolName": "Lib.io.video.depthanything.DepthToNormal",
+      "Position": {
+        "X": 320.0,
+        "Y": -110.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "05611821-ee33-48f4-9bb6-ed3bda9196b9"/*Normals*/,
+      "Position": {
+        "X": 620.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "1e61ff87-bd39-4781-82e7-31691bb6dbd9"/*Positions*/,
+      "Position": {
+        "X": 620.0,
+        "Y": 90.0
+      }
+    }
+  ]
+}

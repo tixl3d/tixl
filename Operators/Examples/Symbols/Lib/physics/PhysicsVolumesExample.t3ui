@@ -1,0 +1,381 @@
+{
+  "FormatVersion": 3,
+  "Id": "126bb660-5354-5e40-b211-86e92adebade"/*PhysicsVolumesExample*/,
+  "Description": "Any volume becomes a collider through [VolumeToMesh]. On the left, the bunny is loaded with [LoadVdb], made coarser with [VolumeResample] and scaled down; on the right, a bowl is carved out of a block with [VolumeCsg]. Balls rain on both.\n\nAKA: vdb, nanovdb, openvdb, level set, voxel collider, csg, bunny\n\nTips\n- Playback must run for the simulation to advance; press Reset on the World to start over.\n- A coarser VoxelSize gives fewer triangles and a cheaper collider.\n- A volume that changes rebuilds the collider, so animate it sparingly.",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "074b107e-7316-51c7-bd3d-f50cd4366bf9",
+      "SymbolName": "Lib.physics.RigidBodyGeometry",
+      "Position": {
+        "X": 2080.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "0e6cfc76-8ce4-50f4-838a-2e93653ec830",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "Position": {
+        "X": 2340.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "2c20a890-ae83-5622-a7d7-223861724568",
+      "SymbolName": "Lib.physics.RigidBody",
+      "Position": {
+        "X": 1040.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "429c5d54-f56f-50df-8805-cf43eaea70fd",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "Position": {
+        "X": 2600.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "453cf255-95df-5625-9d2b-5912c0c86988",
+      "SymbolName": "Lib.geometry.ScatterPointsInVolume",
+      "Position": {
+        "X": 520.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "47dff20c-35f3-5c20-b91f-a3f1dab17cc3",
+      "SymbolName": "Lib.render.postfx.SSAO",
+      "SectionId": "a9a574f3-1af0-5646-a8c4-4be0bdc8e092",
+      "Position": {
+        "X": 3640.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "485663dc-cc95-52ca-abb6-17c0a5089593",
+      "SymbolName": "Lib.physics.PhysicsWorld",
+      "Position": {
+        "X": 1560.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "573b753e-2e1f-5733-9067-643281c8c5b5",
+      "SymbolName": "Lib.volume.io.LoadVdb",
+      "SectionId": "5c08c5a3-444c-5aac-91c2-b954b7b75651",
+      "Position": {
+        "X": 0.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "58d0c335-5d6a-5458-944b-74344bd5598b",
+      "SymbolName": "Lib.render.shading.SetShadow",
+      "SectionId": "a9a574f3-1af0-5646-a8c4-4be0bdc8e092",
+      "Position": {
+        "X": 3120.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "5f2954d3-0bf4-5b60-a5bc-70540510bbfd",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "SectionId": "a9a574f3-1af0-5646-a8c4-4be0bdc8e092",
+      "Position": {
+        "X": 3120.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "63165aea-b563-5437-8c45-09e3824fe276",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "e2abb36a-67a1-506b-baed-aac70742662a",
+      "Position": {
+        "X": 1040.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "6a08436f-4523-5fec-869c-24d5e14d9725",
+      "SymbolName": "Lib.geometry.TransformGeometry",
+      "SectionId": "5c08c5a3-444c-5aac-91c2-b954b7b75651",
+      "Position": {
+        "X": 780.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "6b39b872-e0ae-5940-8e62-350f0b53c63f",
+      "SymbolName": "Lib.volume.generate.VolumePrimitive",
+      "SectionId": "e2abb36a-67a1-506b-baed-aac70742662a",
+      "Position": {
+        "X": 0.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "6f25fc92-2a64-548a-a014-9065f245bbc7",
+      "SymbolName": "Lib.render.shading.SetFog",
+      "SectionId": "a9a574f3-1af0-5646-a8c4-4be0bdc8e092",
+      "Position": {
+        "X": 3120.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "7ec64260-d7e2-5caf-ab8e-f13248e3ad30",
+      "SymbolName": "Lib.volume.convert.VolumeToMesh",
+      "SectionId": "e2abb36a-67a1-506b-baed-aac70742662a",
+      "Position": {
+        "X": 520.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "8385509b-c8de-5c90-8153-896cc24f4ba4",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "Position": {
+        "X": 2600.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "83fe81f4-47d9-5be8-9036-f51a89b3dc39",
+      "SymbolName": "Lib.mesh.generate.SphereMesh",
+      "Position": {
+        "X": 1820.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "844e88eb-745a-5ee7-ae38-7b97e8d7ea21",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "Position": {
+        "X": 2340.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "8e0cdd48-1308-5494-ae4b-741a1949940b",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "SectionId": "a9a574f3-1af0-5646-a8c4-4be0bdc8e092",
+      "Position": {
+        "X": 3120.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "a056361e-b044-5b68-a7ba-6268a1eeda39",
+      "SymbolName": "Lib.volume.modify.VolumeResample",
+      "SectionId": "5c08c5a3-444c-5aac-91c2-b954b7b75651",
+      "Position": {
+        "X": 260.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "a4361133-b41c-5c23-9a4f-76eaea3c4937",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "Position": {
+        "X": 2600.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "c26416fa-4127-5b88-9db1-817fc6efbfb5",
+      "SymbolName": "Lib.volume.convert.VolumeToMesh",
+      "SectionId": "5c08c5a3-444c-5aac-91c2-b954b7b75651",
+      "Position": {
+        "X": 520.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "c29c2956-aacc-5836-99bd-0f5590116001",
+      "SymbolName": "Lib.volume.modify.VolumeCsg",
+      "SectionId": "e2abb36a-67a1-506b-baed-aac70742662a",
+      "Position": {
+        "X": 260.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "c64d4b58-7a83-5964-a562-ac9af44d8940",
+      "SymbolName": "Lib.volume.generate.VolumePrimitive",
+      "SectionId": "e2abb36a-67a1-506b-baed-aac70742662a",
+      "Position": {
+        "X": 0.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "ca1c7e50-91fa-5fcb-a1d7-cdda8fb5ba05",
+      "SymbolName": "Lib.physics.RigidBodyPoints",
+      "Position": {
+        "X": 2080.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "cdf8262e-85f5-5617-a22f-fad6e94b2ebd",
+      "SymbolName": "Lib.mesh.generate.RepeatMeshAtPoints",
+      "Position": {
+        "X": 2340.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "dc755d1d-ed1b-5fdf-89c2-dbca28f2dfdb",
+      "SymbolName": "Lib.physics.RigidBody",
+      "Position": {
+        "X": 1040.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "e61a3fb9-6c9e-579a-8259-ce45a5cff34b",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "5c08c5a3-444c-5aac-91c2-b954b7b75651",
+      "Position": {
+        "X": 1040.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "ec5727cf-1f96-5377-8ba9-b2255e189b2f",
+      "SymbolName": "Lib.physics.RigidBodyGeometry",
+      "Position": {
+        "X": 2080.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "f7fa4305-56de-59ba-b77f-ad1d074350ce",
+      "SymbolName": "Lib.render.camera.Camera",
+      "SectionId": "a9a574f3-1af0-5646-a8c4-4be0bdc8e092",
+      "Position": {
+        "X": 3120.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "fbf84f20-42e6-51e4-a098-26a61f9a47d7",
+      "SymbolName": "Lib.flow.Execute",
+      "SectionId": "a9a574f3-1af0-5646-a8c4-4be0bdc8e092",
+      "Position": {
+        "X": 3120.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "fd5086ec-49c4-5df8-b1d1-54d7a5380d84",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "SectionId": "a9a574f3-1af0-5646-a8c4-4be0bdc8e092",
+      "Position": {
+        "X": 3380.0,
+        "Y": 550.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "773d43f3-7302-5079-b078-d098d8e6b531"/*Output*/,
+      "Position": {
+        "X": 3900.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "5c08c5a3-444c-5aac-91c2-b954b7b75651",
+      "Title": "1  A VDB file",
+      "Color": {
+        "X": 0.35,
+        "Y": 0.5,
+        "Z": 0.65,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -40.0,
+        "Y": 40.0
+      },
+      "Size": {
+        "X": 1320.0,
+        "Y": 170.0
+      }
+    },
+    {
+      "Id": "a9a574f3-1af0-5646-a8c4-4be0bdc8e092",
+      "Title": "Render: light, shadow and camera",
+      "Color": {
+        "X": 0.4,
+        "Y": 0.4,
+        "Z": 0.45,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 3080.0,
+        "Y": -70.0
+      },
+      "Size": {
+        "X": 800.0,
+        "Y": 720.0
+      }
+    },
+    {
+      "Id": "e2abb36a-67a1-506b-baed-aac70742662a",
+      "Title": "2  Carved with CSG",
+      "Color": {
+        "X": 0.65,
+        "Y": 0.45,
+        "Z": 0.25,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -40.0,
+        "Y": 260.0
+      },
+      "Size": {
+        "X": 1320.0,
+        "Y": 280.0
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "c172a3fb-9410-5ca3-bbb8-f0732b479673",
+      "ChildId": "573b753e-2e1f-5733-9067-643281c8c5b5",
+      "Description": "[LoadVdb] loads a level set from a .vdb file.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "f35372ab-e7fc-589d-9186-a278266ae05d",
+      "ChildId": "a056361e-b044-5b68-a7ba-6268a1eeda39",
+      "InputId": "d21b910d-a7d9-507f-b7f6-4053dbdee86a",
+      "Description": "A coarser grid gives fewer triangles: a cheaper collider that looks the same from a distance.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "ddbdc783-707c-58dc-940c-addd76434148",
+      "ChildId": "e61a3fb9-6c9e-579a-8259-ce45a5cff34b",
+      "Description": "A Static body with Geometry collides as the exact mesh.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "0d7a0190-d6ee-5aa3-a049-c6e9f97986eb",
+      "ChildId": "c29c2956-aacc-5836-99bd-0f5590116001",
+      "InputId": "e0616bd7-2a4a-5953-95a5-a11929871bd9",
+      "Description": "[VolumeCsg] subtracts the sphere from the block: a bowl that catches the balls.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "7d277e5a-f9bd-5ec5-9d52-0a5b92c44a13",
+      "ChildId": "ca1c7e50-91fa-5fcb-a1d7-cdda8fb5ba05",
+      "Description": "260 balls drawn the cheap way: [RigidBodyPoints] and [RepeatMeshAtPoints] with one sphere mesh, instead of rebuilding geometry every frame.",
+      "Style": "CallToAction"
+    }
+  ]
+}

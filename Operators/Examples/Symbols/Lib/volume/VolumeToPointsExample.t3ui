@@ -1,0 +1,346 @@
+{
+  "FormatVersion": 3,
+  "Id": "91bb0f8b-593c-557c-9da6-15005722b733"/*VolumeToPointsExample*/,
+  "Description": "One torus volume, three outputs side by side. Left: [VolumeToMesh] extracts triangles. Middle: [VolumeToPoints] turns the voxels near the surface into points, drawn together with the boxes of the volume's sparse tree from [DrawVdbBounds] - only where there is surface is there data. Right: [VolumeToTexture3D] bakes a dense 3D texture and [VolumeField] makes it a field that [RaymarchField] draws.\n\nAKA: volume to points, point cloud, voxels, sparse tree, raymarch, 3d texture, convert\n\nTips\n- Smaller VoxelSize means sharper surfaces and more memory and time; start coarse and refine.\n- Level sets store signed distance in world units (negative inside); fog volumes store density.\n- Meshes suit shading and physics, points suit particles, the texture suits raymarching and SDF combinations.",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "04bb7bcf-d7e7-5333-b642-6b3f812ab8c1",
+      "SymbolName": "Lib.geometry.TransformGeometry",
+      "Position": {
+        "X": 520.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "06073a26-a128-5ab9-97eb-de6449e254ad",
+      "SymbolName": "Lib.render.postfx.SSAO",
+      "SectionId": "2661117e-71b3-5287-93fc-8989066a1a5d",
+      "Position": {
+        "X": 2340.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "2338ef35-ba46-5da3-96a1-2b516d6a3f6c",
+      "SymbolName": "Lib.volume.convert.DrawVdbBounds",
+      "SectionId": "05e163e7-793a-5a41-93ce-cb2d7f1b8cd9",
+      "Position": {
+        "X": 520.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "2581e293-1098-5524-a16a-851dc79ba0ca",
+      "SymbolName": "Lib.field.space.TransformField",
+      "SectionId": "bd49f455-94c2-5a24-9d37-a844b4283411",
+      "Position": {
+        "X": 780.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "2686bcd8-e2e7-5dc1-b724-eb56c0de7475",
+      "SymbolName": "Lib.volume.convert.VolumeToPoints",
+      "SectionId": "05e163e7-793a-5a41-93ce-cb2d7f1b8cd9",
+      "Position": {
+        "X": 260.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "272c5be9-bdac-58aa-b775-68a41db5ca6b",
+      "SymbolName": "Lib.render.shading.SetFog",
+      "SectionId": "2661117e-71b3-5287-93fc-8989066a1a5d",
+      "Position": {
+        "X": 1820.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "27b8ad19-ef08-5e87-9df8-1b9f3d513949",
+      "SymbolName": "Lib.volume.convert.VolumeToTexture3D",
+      "SectionId": "bd49f455-94c2-5a24-9d37-a844b4283411",
+      "Position": {
+        "X": 260.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "3ad0b9fb-b07a-5ee6-9cd6-2873d9206901",
+      "SymbolName": "Lib.point.draw.DrawLines",
+      "SectionId": "05e163e7-793a-5a41-93ce-cb2d7f1b8cd9",
+      "Position": {
+        "X": 780.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "44866ccb-5101-56df-9454-2f74ed3c8f55",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "SectionId": "2661117e-71b3-5287-93fc-8989066a1a5d",
+      "Position": {
+        "X": 1820.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "4642322a-b536-5892-a482-53841e710931",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "SectionId": "2661117e-71b3-5287-93fc-8989066a1a5d",
+      "Position": {
+        "X": 2080.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "4a579169-0b1b-5b11-9be4-041910b08c85",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "Position": {
+        "X": 780.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "6ded3f17-9825-5fd0-b1d5-3301552a9c92",
+      "SymbolName": "Lib.render.shading.SetShadow",
+      "SectionId": "2661117e-71b3-5287-93fc-8989066a1a5d",
+      "Position": {
+        "X": 1820.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "6edef2ec-d956-57d7-8b67-93cc274fbbdf",
+      "SymbolName": "Lib.flow.Execute",
+      "SectionId": "2661117e-71b3-5287-93fc-8989066a1a5d",
+      "Position": {
+        "X": 1820.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "7878859d-74b0-5236-b644-db8dc97859d9",
+      "SymbolName": "Lib.volume.generate.VolumePrimitive",
+      "Position": {
+        "X": 0.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "7f0eba79-5aed-5243-a3cf-f07c862e9cfe",
+      "SymbolName": "Lib.volume.gpu.VolumeToNanoVdb",
+      "SectionId": "05e163e7-793a-5a41-93ce-cb2d7f1b8cd9",
+      "Position": {
+        "X": 260.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "850d2d0f-5543-578f-a764-3a6bc73f011c",
+      "SymbolName": "Lib.volume.render.VolumeField",
+      "SectionId": "bd49f455-94c2-5a24-9d37-a844b4283411",
+      "Position": {
+        "X": 520.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "8775b2aa-5c0e-5be9-9b91-51dde2b20a34",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "SectionId": "2661117e-71b3-5287-93fc-8989066a1a5d",
+      "Position": {
+        "X": 1820.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "8c18941c-0147-5b24-98d9-02cfc75a53df",
+      "SymbolName": "Lib.point.draw.DrawPointsShaded",
+      "SectionId": "05e163e7-793a-5a41-93ce-cb2d7f1b8cd9",
+      "Position": {
+        "X": 780.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "95909f35-dc52-5279-9a6f-3efc0f8f7a1f",
+      "SymbolName": "Types.Gfx.ComputeShader",
+      "SectionId": "05e163e7-793a-5a41-93ce-cb2d7f1b8cd9",
+      "Position": {
+        "X": 260.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "a10f148f-df4d-53ca-bc11-a68f1280ef58",
+      "SymbolName": "Lib.volume.convert.VolumeToMesh",
+      "SectionId": "7baf8988-bee7-560a-835c-b26191a0db7b",
+      "Position": {
+        "X": 260.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "d0023a40-01bc-5aa3-bac8-26e5a7167b44",
+      "SymbolName": "Lib.mesh.generate.QuadMesh",
+      "Position": {
+        "X": 780.0,
+        "Y": 660.0
+      }
+    },
+    {
+      "ChildId": "d5d76fb3-eeff-57eb-b437-e24aa4f36312",
+      "SymbolName": "Lib.render.camera.Camera",
+      "SectionId": "2661117e-71b3-5287-93fc-8989066a1a5d",
+      "Position": {
+        "X": 1820.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "d8e88c96-334f-56a1-94b1-5c1fa8fd2583",
+      "SymbolName": "Lib.field.render.RaymarchField",
+      "SectionId": "bd49f455-94c2-5a24-9d37-a844b4283411",
+      "Position": {
+        "X": 1040.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "dc8b9d5d-00a9-5c2e-bffe-3169edb0780f",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "Position": {
+        "X": 1300.0,
+        "Y": 660.0
+      }
+    },
+    {
+      "ChildId": "e008252b-aaca-5a35-a13f-71aa2522e008",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "Position": {
+        "X": 1040.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "267e084f-5393-5b46-83b0-c8c4c901120c"/*Output*/,
+      "Position": {
+        "X": 2600.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "05e163e7-793a-5a41-93ce-cb2d7f1b8cd9",
+      "Title": "2  Points and the sparse tree",
+      "Color": {
+        "X": 0.65,
+        "Y": 0.45,
+        "Z": 0.25,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 220.0,
+        "Y": 150.0
+      },
+      "Size": {
+        "X": 800.0,
+        "Y": 390.0
+      }
+    },
+    {
+      "Id": "2661117e-71b3-5287-93fc-8989066a1a5d",
+      "Title": "Render: light, shadow and camera",
+      "Color": {
+        "X": 0.4,
+        "Y": 0.4,
+        "Z": 0.45,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1780.0,
+        "Y": -70.0
+      },
+      "Size": {
+        "X": 800.0,
+        "Y": 720.0
+      }
+    },
+    {
+      "Id": "7baf8988-bee7-560a-835c-b26191a0db7b",
+      "Title": "1  Mesh",
+      "Color": {
+        "X": 0.35,
+        "Y": 0.5,
+        "Z": 0.65,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 220.0,
+        "Y": -70.0
+      },
+      "Size": {
+        "X": 280.0,
+        "Y": 170.0
+      }
+    },
+    {
+      "Id": "bd49f455-94c2-5a24-9d37-a844b4283411",
+      "Title": "3  Raymarched 3D texture",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.3,
+        "Z": 0.35,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 220.0,
+        "Y": 480.0
+      },
+      "Size": {
+        "X": 1060.0,
+        "Y": 170.0
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "1f4d3f00-b9df-5efd-a17e-88c6aad49139",
+      "ChildId": "2686bcd8-e2e7-5dc1-b724-eb56c0de7475",
+      "InputId": "bd7e2b17-0c96-52d3-a674-68d58855057a",
+      "Description": "[VolumeToPoints] gives one point per active voxel, as a CPU list and as a GPU buffer.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "63518ef8-832f-5d9e-a565-bf8c042ab18f",
+      "ChildId": "2338ef35-ba46-5da3-96a1-2b516d6a3f6c",
+      "InputId": "1d104dc8-1b12-469f-a2b3-d9093d2634f0",
+      "Description": "The orange boxes are the nodes of the sparse tree: a VDB stores data only where the surface is.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "43533316-a391-5497-b1b6-e510bc41614d",
+      "ChildId": "27b8ad19-ef08-5e87-9df8-1b9f3d513949",
+      "InputId": "b88c73a2-e66c-530e-9e72-a52bf2c27e13",
+      "Description": "[VolumeToTexture3D] bakes a dense texture; MaxResolution caps its size along the longest axis.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "212a2baf-522f-5245-a905-2c93686ce6e0",
+      "ChildId": "850d2d0f-5543-578f-a764-3a6bc73f011c",
+      "Description": "[VolumeField] turns the texture into a field, so it combines with every SDF operator.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "a3deefd6-0b42-5fd9-abb7-0fff5bb6dae7",
+      "ChildId": "d8e88c96-334f-56a1-94b1-5c1fa8fd2583",
+      "InputId": "0700d5cb-6a1e-43ad-b7fb-b9b7b1415584",
+      "Description": "The raymarch is drawn first and writes depth, so the meshes and points sit correctly around it.",
+      "Style": "InfoFor"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "FormatVersion": 3,
+  "Id": "70b83837-48fa-53ad-8b68-504bceff2848"/*LoadVdb*/,
+  "Inputs": [
+    {
+      "Id": "1e3dcc23-489a-5a54-b1af-c04d85ac3b8a"/*GridName*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "6b2d3103-e07f-4364-ae0f-572e22ff767a"/*Translation*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "a53afcdd-64d2-474b-8a3d-e437f9681de4"/*Scale*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "c5a3b6f4-6e0d-4b8a-9a63-2f1d7e4c9b05"/*Frame*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "e16c0dad-a228-5a6f-964b-82986746836e"/*Path*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "f32c0f35-8925-491c-ad36-757c30c37142"/*ZUp*/,
+      "DefaultValue": false
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

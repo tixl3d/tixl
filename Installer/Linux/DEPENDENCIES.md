@@ -69,7 +69,7 @@ License texts for everything bundled are in `Dependencies/licenses/`.
 
 These are feature gaps, not packaging issues. The affected operators are expected to fail when used.
 
-- **Emgu CV** (`cvextern`) and **Mediapipe**: only Windows natives are vendored.
+- **Emgu CV** (`cvextern`): only Windows natives are vendored. Mediapipe ships Linux and macOS natives as well (see `Dependencies/linux-x64/README.md` and `Dependencies/osx/README.md`).
 - **Spout**: Windows-only by design.
 
 ## Build dependencies

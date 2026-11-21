@@ -1,0 +1,64 @@
+{
+  "FormatVersion": 3,
+  "Id": "f4a5b6c7-d8e9-f0a1-b2c3-d4e5f6a7b8c9"/*DepthThreshold*/,
+  "Description": "Creates a mask from the depth range between two thresholds.\n\nUseful for separating foreground from background.\n\nAKA: depth mask, depth key, background removal",
+  "InputUis": [
+    {
+      "InputId": "a3b4c5d6-e7f8-a9b0-c1d2-e3f4a5b6c7d8"/*DepthTexture*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -350.0
+      },
+      "Description": "The depth map to threshold."
+    },
+    {
+      "InputId": "b4c5d6e7-f8a9-b0c1-d2e3-f4a5b6c7d8e9"/*MinThreshold*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -300.0
+      },
+      "Description": "Lower bound of the depth range that is kept."
+    },
+    {
+      "InputId": "c5d6e7f8-a9b0-c1d2-e3f4-a5b6c7d8e9f0"/*MaxThreshold*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -250.0
+      },
+      "Description": "Upper bound of the depth range that is kept."
+    },
+    {
+      "InputId": "d6e7f8a9-b0c1-d2e3-f4a5-b6c7d8e9f0a1"/*Invert*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -200.0
+      },
+      "Description": "Flips the mask."
+    },
+    {
+      "InputId": "e7f8a9b0-c1d2-e3f4-a5b6-c7d8e9f0a1b2"/*UseNormalized*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -150.0
+      },
+      "Description": "Interprets the thresholds relative to the depth range of the frame instead of as absolute values."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "a5b6c7d8-e9f0-a1b2-c3d4-e5f6a7b8c9d0"/*MaskTexture*/,
+      "Position": {
+        "X": 200.0,
+        "Y": -350.0
+      }
+    },
+    {
+      "OutputId": "b6c7d8e9-f0a1-b2c3-d4e5-f6a7b8c9d0e1"/*PixelRatio*/,
+      "Position": {
+        "X": 200.0,
+        "Y": -300.0
+      }
+    }
+  ]
+}

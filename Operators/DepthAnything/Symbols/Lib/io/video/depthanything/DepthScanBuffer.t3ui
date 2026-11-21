@@ -1,0 +1,267 @@
+{
+  "FormatVersion": 3,
+  "Id": "4af2de92-6078-483c-b755-0b387cbfcb9a"/*DepthScanBuffer*/,
+  "Description": "Holds and merges depth maps like a LiDAR scan buffer.\n\nWhile Capture is on, every incoming depth frame is merged into one persistent map (Latest, Average, Min or Max per pixel), which stays published on the outputs until Reset - the held scan survives a disconnected or stopped input.\n\nAn optional Confidence map gates which samples merge; an optional ColorMap is held alongside and colors the point cloud. Save writes the held scan to disk as a 16-bit PNG (depth x SaveScale) or exact raw float32 file; PointCloud rebuilds the held scan as a drawable camera-space point cloud for 3D scanning.\n\nOutputs:\n- HeldDepth: The accumulated map (R32_Float), held until Reset.\n- HeldColor: The held color frame, white where no ColorMap is connected.\n- MaskTexture: White where the scan holds data.\n- PointCloud / PointCount: Held scan as a drawable point buffer (draws on D3D11 and Vulkan).\n- Coverage: Fraction of pixels holding at least one valid sample.\n- Captures: Frames merged since the last Reset.\n- SavedPath: Relative path of the last save.\n- Recording: True while a StartRecord/StopRecord recording run is active.\n\nRecording, lifetime and point options: StartRecord/StopRecord latch a recording run (Recording shows the state); SampleLifetime ages samples out in seconds so a scan can fade like a decaying sweep; PointGrid picks Square or Hexagonal sampling; PointStability blends rebuilt point positions toward their previous spots to minimize jitter.\n\nCameraReference: connect DepthAnything's CamReference to unproject PointCloud into the camera's world space; without it the cloud stays in DA3-style camera space (+Z forward, like DepthToPoints).\n\nTips:\n- Average with MaxCaptures ~30 on a still camera gives a denoised LiDAR-style scan; then hold, unproject and save.\n- Wire DepthAnything.VerticalFov into FieldOfView for a correctly scaled point cloud.\n- The held HeldDepth feeds DepthToPoints, DepthToPosition or DepthToNormal as usual.\n\nAKA: depth accumulation, lidar scan, scan buffer, scan accumulator, 3d scanning, scan save, depth hold, freeze depth",
+  "InputUis": [
+    {
+      "InputId": "23182ac9-0259-46db-ae29-e73f90aa24e6"/*SaveFormatInput*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 120.0
+      },
+      "Description": "File format for the Save input: 16-bit PNG (portable) or raw float32 (exact values)."
+    },
+    {
+      "InputId": "37d9f547-32f0-422a-8d4e-5a6b8ca8b81a"/*DepthMap*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -400.0
+      },
+      "Description": "The depth map to scan. Connect DepthAnything's DepthTexture (R32_Float)."
+    },
+    {
+      "InputId": "4713556d-3b2d-4f7e-bbd1-5f15b70784ff"/*CaptureOnce*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -240.0
+      },
+      "Description": "Merges exactly one more depth frame into the held scan."
+    },
+    {
+      "InputId": "5e4d5335-b71c-4f19-b520-1dcd33132a01"/*Reset*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -200.0
+      },
+      "Description": "Clears the held scan; all outputs go empty until new frames are captured."
+    },
+    {
+      "InputId": "6e1f7081-92a3-4e1f-8a3b-4c5d6e7f8a9b"/*StartRecord*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 320.0
+      },
+      "Description": "Starts recording: merges frames until StopRecord (or MaxCaptures) ends it. Same effect as holding Capture on."
+    },
+    {
+      "InputId": "7f2a8192-a3b4-4f2a-9b4c-5d6e7f8a9b0c"/*StopRecord*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 360.0
+      },
+      "Description": "Ends recording; the scan keeps holding on the outputs."
+    },
+    {
+      "InputId": "883b1806-aad6-4287-b5c8-c33557b440c4"/*MaxCaptures*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -80.0
+      },
+      "Description": "Stops merging after this many captures (0 = keep scanning)."
+    },
+    {
+      "InputId": "8a3b92a3-b4c5-4a3b-8c5d-6e7f8a9b0c1d"/*SampleLifetime*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 400.0
+      },
+      "Description": "Seconds a sample stays held before it ages out (0 = keep forever). Lets a scan fade like a decaying LiDAR sweep; Coverage and PointCloud follow."
+    },
+    {
+      "InputId": "978bd764-3d64-4a0f-b00c-684da15daab4"/*SaveFileName*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 80.0
+      },
+      "Description": "Base file name; the extension (.png or .raw) is added automatically.",
+      "Usage": "Default"
+    },
+    {
+      "InputId": "9b4ca3b4-c5d6-4b4c-9d6e-7f8a9b0c1d2e"/*PointGrid*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 440.0
+      },
+      "Description": "Point cloud sampling grid: Square or Hexagonal (offset rows, even neighbor distances)."
+    },
+    {
+      "InputId": "9e5e441e-b065-4083-a50e-3fa731157d26"/*SaveScale*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 0.0
+      },
+      "Description": "PNG only: stored value = depth x SaveScale; 1000 stores millimeters. Raw save ignores it."
+    },
+    {
+      "InputId": "a1f2e3d4-c5b6-4a7c-8d9e-0f1a2b3c4d5e"/*FieldOfView*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 160.0
+      },
+      "Description": "Vertical field of view in degrees used to unproject PointCloud; wire DepthAnything's VerticalFov here."
+    },
+    {
+      "InputId": "ac5db4c5-d6e7-4c5d-ae7f-8a9b0c1d2e3f"/*PointStability*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 480.0
+      },
+      "Description": "Smooths rebuilt point positions toward their previous spots (0 = exact, 1 = frozen). Kills jitter while a live scan keeps updating."
+    },
+    {
+      "InputId": "b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6f"/*PointScale*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 200.0
+      },
+      "Description": "Depth multiplier for PointCloud positions (1 = model units, meters for DA3)."
+    },
+    {
+      "InputId": "b54e0fb0-b37f-4bd7-b12b-fa5315686960"/*ConfidenceThreshold*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -40.0
+      },
+      "Description": "Samples with lower confidence are ignored (0 = accept everything)."
+    },
+    {
+      "InputId": "c3d4e5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f"/*PixelStride*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 240.0
+      },
+      "Description": "Sample every Nth pixel for PointCloud (1 = every pixel)."
+    },
+    {
+      "InputId": "c8d9e0f1-a2b3-4c5d-8e6f-7a8b9c0d1e2f"/*CameraReference*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 520.0
+      },
+      "Description": "Optional camera (DepthAnything's CamReference) providing pose and frustum; PointCloud unprojects into the camera's world space. Without it the cloud stays in DA3-style camera space (+Z forward), matching DepthToPoints."
+    },
+    {
+      "InputId": "d4e5f6a7-b8c9-4d0e-a1f2-3b4c5d6e7f8a"/*MaxPoints*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 280.0
+      },
+      "Description": "Upper limit for PointCloud; PixelStride grows automatically to stay under it."
+    },
+    {
+      "InputId": "dc882e31-4963-4c64-8a56-1cca9af6b362"/*Capture*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -280.0
+      },
+      "Description": "While on, every new depth frame is merged into the held scan."
+    },
+    {
+      "InputId": "e6a1b2c3-d4e5-4f60-a7b8-c9d0e1f2a3b4"/*ColorMap*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -320.0
+      },
+      "Description": "Optional color frame held alongside the depth scan; feeds HeldColor and colors PointCloud. Same size as the depth map."
+    },
+    {
+      "InputId": "ec25952d-6e85-4e37-b65a-a682d8d95580"/*SaveFolder*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 40.0
+      },
+      "Description": "Target folder for saved scans (asset-relative).",
+      "Usage": "Default"
+    },
+    {
+      "InputId": "f11ea5dc-2f47-4fb4-a9c5-174d0d9b7e22"/*Confidence*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -360.0
+      },
+      "Description": "Optional confidence map gating which samples merge (higher = more reliable). Same size as the depth map."
+    },
+    {
+      "InputId": "f7a8b9c0-d1e2-4a3b-8c5d-6e7f8a9b0c1d"/*SaveTrigger*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -160.0
+      },
+      "Description": "Writes the held scan to SaveFolder/SaveFileName as a 16-bit PNG or raw float32 file."
+    },
+    {
+      "InputId": "f84cf1ce-6b69-4374-bd24-21e83332cfbc"/*Mode*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -120.0
+      },
+      "Description": "How new frames merge: Latest replaces the held value, Average averages all captures (LiDAR-style denoising), Min keeps the nearest surface, Max the farthest."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "a2592953-52fe-41e1-b8b2-c63ee025f5b8"/*HeldDepth*/,
+      "Position": {
+        "X": 200.0,
+        "Y": 320.0
+      }
+    },
+    {
+      "OutputId": "2a7b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d"/*HeldColor*/,
+      "Position": {
+        "X": 200.0,
+        "Y": 360.0
+      }
+    },
+    {
+      "OutputId": "58d2de23-cfc6-49a6-866d-4e30da6b50fb"/*MaskTexture*/,
+      "Position": {
+        "X": 200.0,
+        "Y": 400.0
+      }
+    },
+    {
+      "OutputId": "3b8c4d5e-6f70-4b8c-9d0e-1f2a3b4c5d6e"/*PointCloud*/,
+      "Position": {
+        "X": 200.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "OutputId": "4c9d5e6f-7081-4c9d-ae1f-2a3b4c5d6e7f"/*PointCount*/,
+      "Position": {
+        "X": 200.0,
+        "Y": 480.0
+      }
+    },
+    {
+      "OutputId": "76d74e26-37a3-42d9-8524-14538e6dba1f"/*Coverage*/,
+      "Position": {
+        "X": 200.0,
+        "Y": 520.0
+      }
+    },
+    {
+      "OutputId": "911c67c5-1919-46fc-9a12-9d72452154bf"/*Captures*/,
+      "Position": {
+        "X": 200.0,
+        "Y": 560.0
+      }
+    },
+    {
+      "OutputId": "ff5bb829-f235-4fe1-b3be-d5a256c2158a"/*SavedPath*/,
+      "Position": {
+        "X": 200.0,
+        "Y": 600.0
+      }
+    },
+    {
+      "OutputId": "5d0e6f70-8192-4d0e-bf2a-3b4c5d6e7f8a"/*Recording*/,
+      "Position": {
+        "X": 200.0,
+        "Y": 650.0
+      }
+    }
+  ]
+}

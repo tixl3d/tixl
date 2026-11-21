@@ -1,0 +1,183 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="$(SolutionDir)/Tixl.props" />
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UserSecretsId>9ec4b43e-d682-4589-bc4e-4a7619ccef96</UserSecretsId>
+    <Configurations>Debug;Release</Configurations>
+    <Platforms>AnyCPU</Platforms>
+    <VersionPrefix>1.0.0</VersionPrefix>
+    <HomeGuid>00000000-0000-0000-0000-000000000000</HomeGuid>
+    <EditorVersion>$(TixlVersion)</EditorVersion>
+    <IsEditorOnly>false</IsEditorOnly>
+    <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <NoWarn>$(NoWarn);0108;9084;NU1900</NoWarn>
+    <PackageId>0253965c-52d7-4c3a-ad1d-124c08d953a3</PackageId>
+    <ProjectFormatVersion>2</ProjectFormatVersion>
+    <RootNamespace>StreamDiffusion</RootNamespace>
+    <AssemblyName>$(RootNamespace)</AssemblyName>
+    <IsArchived>false</IsArchived>
+    <!-- Analyzers roughly double operator compile time and run on every hot-reload compile; keep them for Release builds. -->
+    <RunAnalyzers Condition="'$(Configuration)' == 'Debug'">false</RunAnalyzers>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <NoWarn>$(NoWarn);0108;9084;NU1900;CS8981</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <NoWarn>$(NoWarn);0108;9084;NU1900;CS8981</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <Using Include="System" />
+    <Using Include="System.Numerics" />
+    <Using Include="System.Linq" />
+    <Using Include="System.Linq.Enumerable" Static="True" />
+    <Using Include="System.Collections" />
+    <Using Include="System.Linq.Expressions" />
+    <Using Include="System.Collections.Generic" />
+    <Using Include="System.Collections.Concurrent" />
+    <Using Include="System.Collections.ObjectModel" />
+    <Using Include="System.Diagnostics.CodeAnalysis" />
+    <Using Include="System.Runtime.CompilerServices" />
+    <Using Include="System.Text" />
+    <Using Include="System.Net" />
+    <Using Include="System.Net.Http" />
+    <Using Include="System.Threading.Tasks" />
+    <Using Include="System.IO" />
+    <Using Include="T3.Core.Logging" />
+    <Using Include="System.Runtime.InteropServices" />
+    <Using Include="T3.Core.Operator" />
+    <Using Include="T3.Core.Operator.Attributes" />
+    <Using Include="T3.Core.Operator.Slots" />
+    <Using Include="T3.Core.DataTypes" />
+    <Using Include="T3.Core.Operator.Interfaces" />
+    <Using Include="T3.Core.Resource" />
+    <Using Alias="Buffer" Include="T3.Graphics.Compat.Buffer" />
+    <Using Alias="ShaderResourceView" Include="T3.Graphics.Compat.ShaderResourceView" />
+    <Using Alias="UnorderedAccessView" Include="T3.Graphics.Compat.UnorderedAccessView" />
+    <Using Alias="CullMode" Include="T3.Graphics.Compat.CullMode" />
+    <Using Alias="FillMode" Include="T3.Graphics.Compat.FillMode" />
+    <Using Alias="TextureAddressMode" Include="T3.Graphics.Compat.TextureAddressMode" />
+    <Using Alias="Filter" Include="T3.Graphics.Compat.Filter" />
+    <Using Alias="Format" Include="T3.Graphics.Format" />
+    <Using Alias="Texture2DDescription" Include="T3.Graphics.Compat.Texture2DDescription" />
+    <Using Alias="Texture3DDescription" Include="T3.Graphics.Compat.Texture3DDescription" />
+    <Using Alias="RenderTargetBlendDescription" Include="T3.Graphics.Compat.RenderTargetBlendDescription" />
+    <Using Alias="SamplerState" Include="T3.Graphics.Compat.SamplerState" />
+    <Using Alias="UnorderedAccessViewBufferFlags" Include="T3.Graphics.Compat.UnorderedAccessViewBufferFlags" />
+    <Using Alias="ScissorRect" Include="T3.Graphics.ScissorRect" />
+    <Using Alias="Viewport" Include="T3.Graphics.Viewport" />
+    <Using Alias="ResourceUsage" Include="T3.Graphics.Compat.ResourceUsage" />
+    <Using Alias="ResourceOptionFlags" Include="T3.Graphics.Compat.ResourceOptionFlags" />
+    <Using Alias="InputLayout" Include="T3.Graphics.Compat.InputLayout" />
+    <using Alias="PrimitiveTopology" Include="T3.Graphics.Compat.PrimitiveTopology" />
+    <Using Alias="BlendState" Include="T3.Graphics.Compat.BlendState" />
+    <Using Alias="Comparison" Include="T3.Graphics.Compat.Comparison" />
+    <Using Alias="BlendOption" Include="T3.Graphics.Compat.BlendOption" />
+    <Using Alias="BlendOperation" Include="T3.Graphics.Compat.BlendOperation" />
+    <Using Alias="BindFlags" Include="T3.Graphics.Compat.BindFlags" />
+    <Using Alias="StateGroups" Include="T3.Graphics.Compat.StateGroups" />
+    <Using Alias="ColorWriteMaskFlags" Include="T3.Graphics.Compat.ColorWriteMaskFlags" />
+    <Using Alias="CpuAccessFlags" Include="T3.Graphics.Compat.CpuAccessFlags" />
+    <Using Alias="DepthStencilView" Include="T3.Graphics.Compat.DepthStencilView" />
+    <Using Alias="DepthStencilState" Include="T3.Graphics.Compat.DepthStencilState" />
+    <Using Alias="RenderTargetView" Include="T3.Graphics.Compat.RenderTargetView" />
+    <Using Alias="RasterizerState" Include="T3.Graphics.Compat.RasterizerState" />
+    <Using Alias="Point" Include="T3.Core.DataTypes.Point" />
+    <Using Alias="Texture2D" Include="T3.Core.DataTypes.Texture2D" />
+    <Using Alias="Texture3D" Include="T3.Core.DataTypes.Texture3D" />
+    <Using Alias="Vector2" Include="System.Numerics.Vector2" />
+    <Using Alias="Vector3" Include="System.Numerics.Vector3" />
+    <Using Alias="Vector4" Include="System.Numerics.Vector4" />
+    <Using Alias="Matrix4x4" Include="System.Numerics.Matrix4x4" />
+    <Using Alias="Quaternion" Include="System.Numerics.Quaternion" />
+    <Using Alias="Int2" Include="T3.Core.DataTypes.Vector.Int2" />
+    <Using Alias="Int3" Include="T3.Core.DataTypes.Vector.Int3" />
+    <Using Alias="Int4" Include="T3.Core.DataTypes.Vector.Int4" />
+    <Using Alias="ResourceManager" Include="T3.Core.Resource.ResourceManager" />
+    <Using Alias="ComputeShader" Include="T3.Core.DataTypes.ComputeShader" />
+    <Using Alias="PixelShader" Include="T3.Core.DataTypes.PixelShader" />
+    <Using Alias="VertexShader" Include="T3.Core.DataTypes.VertexShader" />
+    <Using Alias="GeometryShader" Include="T3.Core.DataTypes.GeometryShader" />
+    <Using Alias="SampleDescription" Include="T3.Graphics.SampleDescription" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="StreamDiffusion.Tests" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../Core/Core.csproj" Private="false" PrivateAssets="all" />
+    <ProjectReference Include="../../Graphics\Graphics.csproj" Private="false" PrivateAssets="all" />
+    <ProjectReference Include="../../Graphics.Compat\Graphics.Compat.csproj" Private="false" PrivateAssets="all" />
+    <ProjectReference Include="../../Logging/Logging.csproj" Private="false" PrivateAssets="all" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- The managed ONNX Runtime assembly is shared process-wide with Core and every other operator package, so the
+         version must match Core's pin exactly (1.30.0) and must not be newer than the native it loads. The GPU build
+         carries CUDA/TensorRT on Windows and Linux and needs the CUDA 13 runtime plus cuDNN 9 (driver 580+; CUDA 13
+         dropped Pascal); macOS uses the CoreML-capable CPU build.
+         ONNX Runtime 1.28 dropped the DirectML NuGet build, so selecting DirectML now falls back to CUDA/CPU with a
+         readable log line instead of shipping a second native that would collide with the GPU one on the same
+         runtimes/<rid>/native/onnxruntime.dll path. -->
+    <PackageReference Include="Microsoft.ML.OnnxRuntime.Gpu" Version="1.30.0" Condition="$([MSBuild]::IsOSPlatform('Windows')) Or $([MSBuild]::IsOSPlatform('Linux'))" />
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.30.0" Condition="$([MSBuild]::IsOSPlatform('OSX'))" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Examples\**" />
+  </ItemGroup>
+  <!-- Copy package content into this project's own output only (not transitively to other
+  projects).
+       Uses a custom Target instead of <Content CopyToOutputDirectory> to prevent MSBuild from
+       propagating these files into every project that builds as part of the same solution. -->
+  <ItemGroup Condition="'$(Configuration)' == 'Release'">
+    <PackageAssets Include="Assets/**/*" />
+    <PackageSymbols Include="Symbols/**/*.t3" />
+    <PackageSymbolUis Include="Symbols/**/*.t3ui" />
+    <PackageSourceCode Include="Symbols/**/*.cs" />
+    <PackageMeta Include=".meta/**/*" />
+  </ItemGroup>
+  <Target Name="CopyPackageContent" AfterTargets="AfterBuild" Condition="'$(Configuration)' == 'Release'">
+    <Copy SourceFiles="@(PackageAssets)" DestinationFiles="@(PackageAssets->'$(OutputPath)/Assets/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PackageSymbols)" DestinationFiles="@(PackageSymbols->'$(OutputPath)/Symbols/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PackageSymbolUis)" DestinationFiles="@(PackageSymbolUis->'$(OutputPath)/SymbolUis/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PackageMeta)" DestinationFiles="@(PackageMeta->'$(OutputPath)/.meta/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PackageSourceCode)" DestinationFiles="@(PackageSourceCode->'$(OutputPath)/SourceCode/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+  </Target>
+  <ItemGroup>
+    <Compile Remove="Examples\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Remove="Examples\**" />
+  </ItemGroup>
+  <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild" Condition="'$(Configuration)' == 'Release'">
+    <!-- Clear previous files in the export folder -->
+    <RemoveDir Directories="$(BaseOutputPath)$(Configuration)" />
+  </Target>
+  <Target Name="CreatePackageInfo" AfterTargets="AfterBuild">
+    <ItemGroup Label="Define json structure of referenced operator packages">
+      <OpPacks Include="@(Operators)">
+        <OpPackageInfoJson>{
+          "Identity": "%(Identity)",
+          "Version": "%(Version)",
+          "ResourcesOnly": "%(ResourcesOnly)"
+          }</OpPackageInfoJson>
+      </OpPacks>
+    </ItemGroup>
+    <PropertyGroup>
+      <OperatorReferenceArray>@(OpPacks -> '%(OpPackageInfoJson)', ',')</OperatorReferenceArray>
+      <OperatorPackageInfoJson>{
+        "HomeGuid": "$(HomeGuid)",
+        "PackageId": "$(PackageId)",
+        "RootNamespace": "$(RootNamespace)",
+        "AssemblyFileName": "$(RootNamespace)",
+        "Version": "$(VersionPrefix)",
+        "EditorVersion": "$(EditorVersion)",
+        "IsEditorOnly": "$(IsEditorOnly)",
+        "OperatorPackages": [$(OperatorReferenceArray)
+        ]
+        }</OperatorPackageInfoJson>
+    </PropertyGroup>
+    <WriteLinesToFile File="$(OutputPath)/OperatorPackage.json" Lines="$(OperatorPackageInfoJson)" Overwrite="True" Encoding="UTF-8" />
+  </Target>
+</Project>

@@ -1,0 +1,207 @@
+{
+  "FormatVersion": 3,
+  "Id": "efa358f6-8f07-448f-ad9e-d911c41a2098"/*RigidBody*/,
+  "Description": "Declares rigid bodies for [PhysicsWorld].\n\nOutputs a description, not a live body: the world owns the simulation state. On its own this is one primitive body. Connect Points for one body per point, and Geometry to collide as that geometry: every geometry part becomes a body (try [VoronoiFracture]), the whole geometry becomes one body (Pieces WholeObject), or the whole geometry sits at each point. Concave geometry such as a torus, a cup or a letter collides as several convex hulls, so its holes stay open. Bodies made from geometry weigh their volume times Density.\n\nUse Kind Static for colliders that never move, and Kind Kinematic for infinite-mass bodies that follow the Position input or serve as joint anchors.\n\nAKA: collider, physics body, box, sphere, capsule, cylinder, convex hull, convex decomposition, compound, mesh collider, fracture, instances\n\nTips\n- Static and kinematic bodies ignore Mass and Density.\n- Shape Auto picks the right collider for connected geometry; ConvexHull is the fastest choice for shapes that are already convex.\n- Concave geometry is split in the background whenever it changes; a new body appears once its hulls are ready. Avoid animating the geometry of a dynamic body.\n- [RigidBodyGeometry] with ShowColliders draws the hulls a body collides as.\n- Do not let a joint partner overlap its anchor collider; the contact pushes them apart.\n- To collide with a volume, connect [VolumeToMesh] to Geometry and set Kind to Static.\n- For a mesh from [LoadGltf], [CubeMesh] or another mesh operator, insert [MeshToGeometry].\n- [RigidBodyGeometry] returns the simulated bodies as geometry, ready for [GeometryToMesh].",
+  "InputUis": [
+    {
+      "InputId": "050f6d8c-40ff-4450-b4a1-69bf4ff2b3be"/*Size*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 675.0
+      },
+      "Description": "Full extents of a box collider."
+    },
+    {
+      "InputId": "09fe2b00-ad21-4103-84fd-bf970c329bb2"/*Enabled*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 135.0
+      },
+      "Description": "Removes the body from the simulation when off, including its joints."
+    },
+    {
+      "InputId": "10919c3d-5979-4499-a958-c347008f7c12"/*MassMode*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 855.0
+      },
+      "Description": "How a dynamic body gets its mass. Auto weighs geometry bodies by their volume times Density, so a small fracture shard is lighter than a big chunk, and gives primitives the fixed Mass. Fixed always uses Mass; FromDensity always uses the volume."
+    },
+    {
+      "InputId": "1b9b7bbd-aba7-4a23-8f78-c1366f260f75"/*GravityScale*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 225.0
+      },
+      "Description": "Multiplier on world gravity for this body. 0 makes it float."
+    },
+    {
+      "InputId": "28d83ea4-beb0-4e39-bb27-dc714c48c69f"/*Friction*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 180.0
+      },
+      "Description": "Contact friction. Pairs combine as the geometric mean."
+    },
+    {
+      "InputId": "38f46166-46ad-4f6c-94e8-5b1b4b1c7445"/*CollisionGroup*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 810.0
+      },
+      "Description": "Bodies with the same non-zero group pass through each other. Use it for the links of a rope or the pieces of one object. 0 collides with everything."
+    },
+    {
+      "InputId": "3d837671-9883-43b0-a889-764ae0fbb6e6"/*AngularVelocity*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      },
+      "Description": "Initial angular velocity in radians per second."
+    },
+    {
+      "InputId": "5072f21a-83a3-41a7-83cd-f702d9c89c84"/*Position*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 495.0
+      },
+      "Description": "Initial world position. A change teleports the body."
+    },
+    {
+      "InputId": "5f6cc54b-9221-42b9-87d7-a0f9669c64b2"/*Shape*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 630.0
+      },
+      "Description": "Collider shape. Auto is a box without Geometry; with Geometry it is the exact triangles for static and kinematic bodies and, for dynamic bodies, a convex hull that is split into several hulls where the shape is concave (see MaxHulls). ConvexHull wraps every part in one hull, ConvexDecomposition always splits, and Mesh is the exact triangles. Box, Sphere, Capsule and Cylinder are primitives; with Geometry connected they act like Auto."
+    },
+    {
+      "InputId": "70f094d8-c499-40bf-ab28-0081297a5985"/*Kind*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 270.0
+      },
+      "Description": "Dynamic bodies fall and collide; Static bodies never move; Kinematic bodies have infinite mass and follow their transform."
+    },
+    {
+      "InputId": "7c155391-9271-4678-95b2-052795115586"/*Geometry*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 765.0
+      },
+      "Description": "Optional. The bodies collide as this geometry instead of a primitive. Pieces decides whether every part becomes its own body, which is how [VoronoiFracture] pieces fall apart, or the whole geometry is one body; with Points the whole geometry is placed at each point. GPU meshes need [MeshToGeometry] first."
+    },
+    {
+      "InputId": "847babc8-53b1-457d-ab45-f85b8eff80c9"/*Bounciness*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 90.0
+      },
+      "Description": "Restitution approximation: 0 is dead, 1 is very bouncy."
+    },
+    {
+      "InputId": "890a457a-af9a-4d23-80b5-07014c95ee27"/*Rotation*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 585.0
+      },
+      "Description": "Initial rotation in degrees (yaw around Y, pitch around X, roll around Z)."
+    },
+    {
+      "InputId": "974ca0a2-5f02-4ccd-817b-5114070b243e"/*Mass*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 450.0
+      },
+      "Description": "Mass of a dynamic body in kilograms when MassMode is Fixed, or Auto without Geometry. Ignored for static and kinematic bodies."
+    },
+    {
+      "InputId": "a7a684cf-2d9b-4cc5-948b-a07dd990e08a"/*LinearDamping*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 360.0
+      },
+      "Description": "Drag applied to linear velocity per second."
+    },
+    {
+      "InputId": "acd5e765-3086-4489-bbab-aab68881a2c0"/*AngularDamping*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "Drag applied to angular velocity per second."
+    },
+    {
+      "InputId": "c37e0055-1f11-4b35-8d1f-0a3eb0c64a57"/*Points*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 720.0
+      },
+      "Description": "Optional. One body per point: the point's position, rotation and scale place and size the body relative to Position and Rotation, and its color is passed through to the world's output. GPU points need [ReadPointsFromGpu] first."
+    },
+    {
+      "InputId": "c63d5ebe-108d-4afd-ba39-2cbda0d62011"/*Radius*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 540.0
+      },
+      "Description": "Radius of sphere, capsule and cylinder colliders."
+    },
+    {
+      "InputId": "cf7c8302-520f-4a41-84ad-18d9f0b7148b"/*Density*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 900.0
+      },
+      "Description": "Mass per cubic unit when the mass comes from the volume. 1 gives a unit cube a mass of 1.",
+      "Min": 0.01,
+      "Max": 10.0,
+      "ClampMin": true
+    },
+    {
+      "InputId": "d8d048f0-6517-497e-878d-24fc95ed8a64"/*Length*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 315.0
+      },
+      "Description": "Length of the cylindrical section of capsule and cylinder colliders."
+    },
+    {
+      "InputId": "dba98aeb-66df-41eb-b3a2-e91acb71d0be"/*MaxHulls*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 945.0
+      },
+      "Description": "Most convex hulls one geometry part is split into by the Auto and ConvexDecomposition shapes. More hulls follow a concave shape closer and cost more to build and simulate; 1 turns the splitting off.",
+      "Min": 1,
+      "Max": 32,
+      "ClampMin": true
+    },
+    {
+      "InputId": "e13e2b87-7a04-4197-82a8-a11fab87d1f9"/*Pieces*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 990.0
+      },
+      "Description": "What the parts of the connected geometry become. EachPartIsABody lets every part move on its own, like the cells of a [VoronoiFracture]. WholeObject keeps all parts together as one body, like the pieces of an imported model. With Points the whole geometry is always one body per point."
+    },
+    {
+      "InputId": "e965e0ce-38ce-46da-a7ac-e730d7876d29"/*LinearVelocity*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 405.0
+      },
+      "Description": "Initial linear velocity. Changing it applies the new velocity."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "165a613b-df3a-4d84-b5af-1c72a381fa15"/*OutBody*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

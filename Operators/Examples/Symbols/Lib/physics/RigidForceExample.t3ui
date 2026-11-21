@@ -1,0 +1,298 @@
+{
+  "FormatVersion": 3,
+  "Id": "e3cfa5d7-fff0-5f26-b8b3-32539f72c32b"/*RigidForceExample*/,
+  "Description": "[RigidForce] pushes the dynamic bodies of a world. Three continuous forces make a whirlwind: a Vortex swirls the boxes around the vertical axis, a Radial force keeps them near the centre and a Directional force lifts them against gravity. A fourth force is an impulse: it fires once each time its Trigger is pressed.\n\nAKA: wind, vortex, tornado, attractor, gravity well, explosion, impulse, force field\n\nTips\n- Playback must run for the simulation to advance; press Reset on the World to start over.\n- Negative Strength turns a radial pull into a push.\n- ScaleByMass makes heavy bodies react less; Field samples a [VectorField], e.g. from [VolumeToField].",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "09ea8491-3095-5533-8810-7784703ae1ad",
+      "SymbolName": "Lib.physics.RigidForce",
+      "SectionId": "cfa040e2-1999-5c8f-a4d8-48e99cc9ea71",
+      "Position": {
+        "X": 520.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "0f61e75f-a66b-5a6f-a1ec-be392ed04c6c",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "Position": {
+        "X": 2080.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "26dcaeee-0ac9-5897-90a6-8bf586a959c7",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "c9d13c87-1ce6-54ad-b728-f355fecea79b",
+      "Position": {
+        "X": 520.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "28aef98b-9060-5001-bd04-dd1719148917",
+      "SymbolName": "Lib.render.shading.SetFog",
+      "SectionId": "5feddc64-c20d-5801-bb2d-cfd4f69a3803",
+      "Position": {
+        "X": 2600.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "29b0720d-5fc9-58e2-a170-8c4981d13cd5",
+      "SymbolName": "Lib.physics.RigidBodyGeometry",
+      "Position": {
+        "X": 1560.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "2fa0ee34-588c-530a-b39a-f79acb5b223f",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "Position": {
+        "X": 1820.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "321b88b2-45d0-5200-b794-7468a626dbaf",
+      "SymbolName": "Lib.physics.RigidForce",
+      "SectionId": "cfa040e2-1999-5c8f-a4d8-48e99cc9ea71",
+      "Position": {
+        "X": 520.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "3d37c513-ade7-573a-8d53-9c393d99a935",
+      "SymbolName": "Lib.physics.RigidForce",
+      "SectionId": "cfa040e2-1999-5c8f-a4d8-48e99cc9ea71",
+      "Position": {
+        "X": 520.0,
+        "Y": 660.0
+      }
+    },
+    {
+      "ChildId": "4f0a1b34-6018-55f0-99ea-c3dd8c3818c1",
+      "SymbolName": "Lib.physics.RigidForce",
+      "SectionId": "cfa040e2-1999-5c8f-a4d8-48e99cc9ea71",
+      "Position": {
+        "X": 520.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "561a897b-f4fc-577c-8e7e-f3c784a547f8",
+      "SymbolName": "Lib.render.camera.Camera",
+      "SectionId": "5feddc64-c20d-5801-bb2d-cfd4f69a3803",
+      "Position": {
+        "X": 2600.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "573c9bcc-a7ad-5c28-95ba-bb11db2c4289",
+      "SymbolName": "Lib.physics.RigidBodyGeometry",
+      "Position": {
+        "X": 1560.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "746253c4-f394-5c7b-8678-7d3f0d30e0de",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "SectionId": "5feddc64-c20d-5801-bb2d-cfd4f69a3803",
+      "Position": {
+        "X": 2600.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "74fd3051-22e1-53ed-8caf-e9f734e6a642",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "c9d13c87-1ce6-54ad-b728-f355fecea79b",
+      "Position": {
+        "X": 520.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "7977a089-7915-5708-a6cf-e07b1d52d8c7",
+      "SymbolName": "Lib.render.postfx.SSAO",
+      "SectionId": "5feddc64-c20d-5801-bb2d-cfd4f69a3803",
+      "Position": {
+        "X": 3120.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "836ad686-3fea-5fa3-ace9-f7d49fbd177f",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "SectionId": "5feddc64-c20d-5801-bb2d-cfd4f69a3803",
+      "Position": {
+        "X": 2600.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "8673f9ae-86aa-52b1-9cb3-ae14ff1b4ff7",
+      "SymbolName": "Lib.physics.PhysicsWorld",
+      "Position": {
+        "X": 1040.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "8cbbeeaf-45ac-54e1-bdd0-a3edfef73ebb",
+      "SymbolName": "Lib.geometry.ScatterPointsInVolume",
+      "SectionId": "c9d13c87-1ce6-54ad-b728-f355fecea79b",
+      "Position": {
+        "X": 0.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "97b9d554-6d24-5917-a2d2-6c3e7bedac9f",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "SectionId": "5feddc64-c20d-5801-bb2d-cfd4f69a3803",
+      "Position": {
+        "X": 2860.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "9f81a80e-39fa-53f1-b86a-3f5c71e235ef",
+      "SymbolName": "Lib.flow.Execute",
+      "SectionId": "5feddc64-c20d-5801-bb2d-cfd4f69a3803",
+      "Position": {
+        "X": 2600.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "a3b8d8cc-b351-5bb7-b41f-091822765837",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "Position": {
+        "X": 2080.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "b6b4660e-1876-5646-8f32-5b80ca453407",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "Position": {
+        "X": 1820.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "cde1c613-b409-5331-b073-283e39ddd91d",
+      "SymbolName": "Lib.render.shading.SetShadow",
+      "SectionId": "5feddc64-c20d-5801-bb2d-cfd4f69a3803",
+      "Position": {
+        "X": 2600.0,
+        "Y": 110.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "86feaaa3-c19d-5b42-aa68-8cf0a9dceca0"/*Output*/,
+      "Position": {
+        "X": 3380.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "5feddc64-c20d-5801-bb2d-cfd4f69a3803",
+      "Title": "Render: light, shadow and camera",
+      "Color": {
+        "X": 0.4,
+        "Y": 0.4,
+        "Z": 0.45,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 2560.0,
+        "Y": -70.0
+      },
+      "Size": {
+        "X": 800.0,
+        "Y": 720.0
+      }
+    },
+    {
+      "Id": "c9d13c87-1ce6-54ad-b728-f355fecea79b",
+      "Title": "1  Bodies",
+      "Color": {
+        "X": 0.65,
+        "Y": 0.45,
+        "Z": 0.25,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -40.0,
+        "Y": -70.0
+      },
+      "Size": {
+        "X": 800.0,
+        "Y": 280.0
+      }
+    },
+    {
+      "Id": "cfa040e2-1999-5c8f-a4d8-48e99cc9ea71",
+      "Title": "2  Forces",
+      "Color": {
+        "X": 0.35,
+        "Y": 0.5,
+        "Z": 0.65,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 480.0,
+        "Y": 260.0
+      },
+      "Size": {
+        "X": 280.0,
+        "Y": 500.0
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "78875ebf-f4b8-53bd-b81e-995563ab09a6",
+      "ChildId": "321b88b2-45d0-5200-b794-7468a626dbaf",
+      "InputId": "65b63902-756a-42a8-b027-2d5a26332f08",
+      "Description": "A Vortex swirls bodies around the axis through Position along Direction; Radius and Falloff limit its reach.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "9cab9022-5dad-5f4d-ad7c-d0d1b66df242",
+      "ChildId": "4f0a1b34-6018-55f0-99ea-c3dd8c3818c1",
+      "Description": "A Radial force pulls towards Position, which keeps the whirlwind together.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "7ae3b32d-7e55-5921-b3e5-cca1ea80ffe3",
+      "ChildId": "09ea8491-3095-5533-8810-7784703ae1ad",
+      "Description": "A Directional force is a constant push, here upwards against gravity.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "53834d95-3782-5a02-9037-ebbf23b8e28c",
+      "ChildId": "3d37c513-ade7-573a-8d53-9c393d99a935",
+      "InputId": "9c51f502-2305-4927-8502-6051d51846ff",
+      "Description": "Press Trigger: this impulse fires once and blasts the boxes outwards.",
+      "Style": "CallToAction"
+    },
+    {
+      "Id": "4cccece8-c001-5b2e-ad73-a4d4ee29342d",
+      "ChildId": "8673f9ae-86aa-52b1-9cb3-ae14ff1b4ff7",
+      "Description": "Every force goes into the Forces input of the world.",
+      "Style": "InfoFor"
+    }
+  ]
+}

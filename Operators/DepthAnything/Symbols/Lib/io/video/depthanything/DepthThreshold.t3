@@ -1,0 +1,28 @@
+{
+  "FormatVersion": 3,
+  "Id": "f4a5b6c7-d8e9-f0a1-b2c3-d4e5f6a7b8c9"/*DepthThreshold*/,
+  "Inputs": [
+    {
+      "Id": "a3b4c5d6-e7f8-a9b0-c1d2-e3f4a5b6c7d8"/*DepthTexture*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "b4c5d6e7-f8a9-b0c1-d2e3-f4a5b6c7d8e9"/*MinThreshold*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "c5d6e7f8-a9b0-c1d2-e3f4-a5b6c7d8e9f0"/*MaxThreshold*/,
+      "DefaultValue": 0.5
+    },
+    {
+      "Id": "d6e7f8a9-b0c1-d2e3-f4a5-b6c7d8e9f0a1"/*Invert*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "e7f8a9b0-c1d2-e3f4-a5b6-c7d8e9f0a1b2"/*UseNormalized*/,
+      "DefaultValue": true
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

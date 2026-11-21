@@ -1,0 +1,24 @@
+{
+  "FormatVersion": 3,
+  "Id": "e2f3a4b5-c6d7-e8f9-a0b1-c2d3e4f5a6b7"/*DepthFilter*/,
+  "Inputs": [
+    {
+      "Id": "a2b3c4d5-e6f7-a8b9-c0d1-e2f3a4b5c6d7"/*DepthTexture*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "b3c4d5e6-f7a8-b9c0-d1e2-f3a4b5c6d7e8"/*SigmaSpace*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "c4d5e6f7-a8b9-c0d1-e2f3-a4b5c6d7e8f9"/*SigmaColor*/,
+      "DefaultValue": 0.1
+    },
+    {
+      "Id": "d5e6f7a8-b9c0-d1e2-f3a4-b5c6d7e8f9a0"/*Enabled*/,
+      "DefaultValue": true
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

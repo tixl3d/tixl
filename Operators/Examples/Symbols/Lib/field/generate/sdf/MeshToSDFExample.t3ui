@@ -1,0 +1,57 @@
+{
+  "FormatVersion": 3,
+  "Id": "7aeb2189-969f-4edf-90d4-6d9e41ef1120"/*MeshToSDFExample*/,
+  "Description": "How to bake a mesh into a raymarchable SDF volume with [MeshToSDF].\n\nA [CubeMesh] is converted into a distance field volume, which is then rendered with [RaymarchField]. Because the volume is baked, the mesh can be combined with procedural SDF primitives afterwards - see [CombineSDF], [BendField] or [PolarRepeat].\n\nTry changing Mode, Resolution and Smoothing on [MeshToSDF]: Jump Flood is the fast default, Exact Closest Point Scatter gives the smoothest surfaces near the mesh. [BakeProgress] and [BakeInProgress] show the bake while it is spread over frames; [BakeCount] increments when it completes.",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "24dbb5e9-211c-4f49-affc-b4a904860461",
+      "SymbolName": "Lib.field.render.RaymarchField",
+      "Position": {
+        "X": 610.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "66bfae32-6b64-403c-8bbd-1b0e035ff898",
+      "SymbolName": "Lib.field.generate.sdf.MeshToSDF",
+      "Position": {
+        "X": 260.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "8694be43-9727-4dc1-913c-1099769143d4",
+      "SymbolName": "Lib.render.camera.Camera",
+      "Position": {
+        "X": 870.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "d3eebc6f-26fb-4350-8081-bb4ba303fdc8",
+      "SymbolName": "Lib.mesh.generate.CubeMesh",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "e189befb-01bd-4208-8fcb-94e94796d512",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "Position": {
+        "X": 1110.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "7c75e16f-98d7-45bf-920f-ac4171c2e5c6"/*ColorBuffer*/,
+      "Position": {
+        "X": 1400.0,
+        "Y": 60.0
+      }
+    }
+  ]
+}

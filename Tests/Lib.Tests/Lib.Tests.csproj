@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <Import Project="$(SolutionDir)/Tixl.props" />
+    <PropertyGroup>
+        <TargetFramework>$(TixlNetFrameworkVersion)</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+        <IsTestProject>true</IsTestProject>
+        <Deterministic>true</Deterministic>
+        <RootNamespace>Lib.Tests</RootNamespace>
+        <!-- PhysicsSimulation.cs is shared with the Lib operator package, which compiles with
+             nullable annotations disabled; the flow and annotation warnings only fire in this
+             nullable-aware build (CS8765 is the untagged Equals(object) override). -->
+        <NoWarn>$(NoWarn);CS8600;CS8602;CS8603;CS8604;CS8618;CS8625;CS8765</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.8.1" />
+        <PackageReference Include="xunit" Version="2.9.3" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="BepuPhysics" Version="2.5.0-beta.33" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <!-- Operators are compiled in rather than referenced: the operator package is only loadable by the editor. -->
+        <Compile Include="..\..\Operators\Lib\Utils\PhysicsSimulation.cs" Link="Utils\PhysicsSimulation.cs" />
+        <Compile Include="..\..\Operators\Lib\Utils\PhysicsGeometry.cs" Link="Utils\PhysicsGeometry.cs" />
+        <Compile Include="..\..\Operators\Lib\Utils\PhysicsDecomposition.cs" Link="Utils\PhysicsDecomposition.cs" />
+        <Compile Include="..\..\Operators\Lib\Utils\MeshBuffersToGeometry.cs" Link="Utils\MeshBuffersToGeometry.cs" />
+        <Compile Include="..\..\Operators\Lib\Utils\BackgroundJob.cs" Link="Utils\BackgroundJob.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\Core\Core.csproj" />
+    </ItemGroup>
+</Project>

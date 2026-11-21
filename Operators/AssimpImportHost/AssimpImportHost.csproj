@@ -1,0 +1,56 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Standalone launcher for isolated Assimp imports and exports outside the editor ([AssimpImport],
+       [AssimpExport]). Inside TiXL the editor executable hosts the same worker in host mode and needs
+       no dotnet installation; this launcher covers tests and other hosts. It has no dependencies of its
+       own: it loads the Lib operator package from the path it gets and runs the operation there, in a
+       separate process, so a native crash or hang in Assimp can't affect the caller. Built and copied
+       into Lib's output by Lib.csproj. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <!-- Run with "dotnet AssimpImportHost.dll": no native apphost, so one build serves every platform -->
+    <UseAppHost>false</UseAppHost>
+    <RollForward>Major</RollForward>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <PackageId>a87748e1-bff7-4c5a-8412-39bea4510b1a</PackageId>
+    <HomeGuid>00000000-0000-0000-0000-000000000000</HomeGuid>
+    <VersionPrefix>1.0.0</VersionPrefix>
+    <EditorVersion>4.3.0</EditorVersion>
+    <IsEditorOnly>false</IsEditorOnly>
+    <IsArchived>false</IsArchived>
+    <RootNamespace>AssimpImportHost</RootNamespace>
+  </PropertyGroup>
+  <Target Name="CreatePackageInfo" AfterTargets="AfterBuild">
+    <ItemGroup Label="Define json structure of referenced operator packages">
+      <OpPacks Include="@(Operators)">
+        <OpPackageInfoJson>{
+    "Identity": "%(Identity)",
+    "Version": "%(Version)", 
+    "ResourcesOnly": "%(ResourcesOnly)"
+}</OpPackageInfoJson>
+      </OpPacks>
+    </ItemGroup>
+    <PropertyGroup>
+      <OperatorReferenceArray>@(OpPacks -> '%(OpPackageInfoJson)', ',')</OperatorReferenceArray>
+      <OperatorPackageInfoJson>{
+    "HomeGuid": "$(HomeGuid)", 
+    "PackageId": "$(PackageId)",
+    "RootNamespace": "$(RootNamespace)",
+    "AssemblyFileName": "$(RootNamespace)",
+    "Version": "$(VersionPrefix)",
+    "EditorVersion": "$(EditorVersion)",
+    "IsEditorOnly": "$(IsEditorOnly)",
+    "OperatorPackages": [$(OperatorReferenceArray)
+    ]
+}</OperatorPackageInfoJson>
+    </PropertyGroup>
+    <WriteLinesToFile File="$(OutputPath)/OperatorPackage.json" Lines="$(OperatorPackageInfoJson)" Overwrite="True" Encoding="UTF-8" />
+  </Target>
+  <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild" Condition="'$(Configuration)' == 'Release'">
+    <RemoveDir Directories="$(BaseOutputPath)$(Configuration)" />
+  </Target>
+</Project>

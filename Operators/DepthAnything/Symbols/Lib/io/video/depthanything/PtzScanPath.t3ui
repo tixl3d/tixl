@@ -1,0 +1,214 @@
+{
+  "FormatVersion": 3,
+  "Id": "4b8e2d17-6a93-4f05-9c21-d7e3a5b4f690"/*PtzScanPath*/,
+  "Description": "Drives a pan/tilt camera along a serpentine raster for 3D room scans.\n\nContinuous mode (default) glides OnvifCamera's target along the raster at SweepSpeed and holds while AxisPtzCamera reports the camera lagging more than MaxLead; Scanning is on meanwhile, for DepthScan3D.Capture. Stop mode moves to each stop, waits for arrival plus SettleSec and pulses Capture (DepthScan3D.CaptureOnce). Rows near PoleTilt get fewer stops.\n\nAKA: ptz scan, panorama scan, room scan path",
+  "InputUis": [
+    {
+      "InputId": "074ae9d3-2665-4bc1-98ed-93af6b70b2bc"/*PanStep*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -400.0
+      },
+      "Description": "Degrees between stops along a row at the horizon; about 2/3 of the horizontal field of view keeps 30% overlap."
+    },
+    {
+      "InputId": "185bfae4-3776-4cd2-a9fe-a4b07c81c3cd"/*TiltMin*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -350.0
+      }
+    },
+    {
+      "InputId": "296c0bf5-4887-4de3-8a0f-b5c18d92d4de"/*TiltMax*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -300.0
+      }
+    },
+    {
+      "InputId": "3a7d1c06-5998-4ef4-9b1a-c6d29ea3e5ef"/*TiltStep*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -250.0
+      },
+      "Description": "Degrees between rows; about 2/3 of the vertical field of view."
+    },
+    {
+      "InputId": "4b8e2d17-6aa9-4f05-8c2b-d7e3afb4f6f0"/*PoleTilt*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -200.0
+      },
+      "Description": "Tilt (degrees) at which the camera looks along its pan axis; rows thin out towards it."
+    },
+    {
+      "InputId": "5c9f3e28-7bba-4016-9d3c-e8f4b0c50701"/*SettleSec*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -150.0
+      },
+      "Description": "Seconds to wait after arrival before capturing: video delay plus depth smoothing."
+    },
+    {
+      "InputId": "6da04f39-8ccb-4127-ae4d-f905c1d61812"/*ArrivalTolerance*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -100.0
+      },
+      "Description": "Degrees the reported position may differ from the target to count as arrived."
+    },
+    {
+      "InputId": "7eb1504a-9ddc-4238-bf5e-0a16d2e72923"/*CurrentPan*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -50.0
+      },
+      "Description": "Reported pan in degrees, e.g. AxisPtzCamera.Pan."
+    },
+    {
+      "InputId": "8fc2615b-aeed-4349-806f-1b27e3f83a34"/*CurrentTilt*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 0.0
+      },
+      "Description": "Reported tilt in degrees, e.g. AxisPtzCamera.Tilt."
+    },
+    {
+      "InputId": "90d3726c-bffe-445a-9170-2c38f4094b45"/*PanDegreesPerUnit*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 50.0
+      },
+      "Description": "ONVIF mapping: degrees of pan per generic unit (180 on AXIS, generic -1..1 = -180..180 degrees)."
+    },
+    {
+      "InputId": "a1e4837d-c10f-456b-a281-3d4905ba5c56"/*TiltDegreesPerUnit*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 100.0
+      },
+      "Description": "ONVIF mapping: degrees of tilt per generic unit (90 on AXIS)."
+    },
+    {
+      "InputId": "b2f5948e-d21a-467c-b392-4e5a16cb6d67"/*TiltZeroAt*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 150.0
+      },
+      "Description": "ONVIF mapping: generic tilt value at 0 degrees (-1 on AXIS)."
+    },
+    {
+      "InputId": "c306a59f-e21b-478d-94a9-5f6b2d3c7e78"/*Run*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 200.0
+      },
+      "Description": "Runs the scan; off pauses it at the current stop."
+    },
+    {
+      "InputId": "c417b6a0-f32c-489e-a5ba-607c3e4d8f9a"/*Continuous*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 250.0
+      },
+      "Description": "Sweeps the path at SweepSpeed while capturing every frame, instead of stopping at each stop."
+    },
+    {
+      "InputId": "c528c7b1-0443-49af-b6cb-718d4f5e90ab"/*SweepSpeed*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 300.0
+      },
+      "Description": "Continuous sweep speed in degrees per second; slower gives sharper frames and denser clouds."
+    },
+    {
+      "InputId": "c639d8c2-1554-4ab0-87dc-829e5a6fa1bc"/*MaxLead*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 350.0
+      },
+      "Description": "Degrees the target may run ahead of the reported position before the sweep waits for the camera."
+    },
+    {
+      "InputId": "d417b6a0-f32c-489e-a5ba-607c3e4d8f89"/*Restart*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 400.0
+      },
+      "Description": "Rising edge returns to the first stop."
+    },
+    {
+      "InputId": "e528c7b1-0443-49af-b6cb-718d4f5e909a"/*PanStart*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 450.0
+      }
+    },
+    {
+      "InputId": "f639d8c2-1554-4ab0-87dc-829e5a6fa1ab"/*PanRange*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 500.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "5c9f3e28-7ba4-4016-8d32-e8f4b6c50701"/*Pan*/,
+      "Position": {
+        "X": 200.0,
+        "Y": -400.0
+      }
+    },
+    {
+      "OutputId": "6da04f39-8cb5-4127-9e43-f905c7d61812"/*Tilt*/,
+      "Position": {
+        "X": 200.0,
+        "Y": -350.0
+      }
+    },
+    {
+      "OutputId": "7eb1504a-9dc6-4238-8f54-0a16d8e72923"/*Move*/,
+      "Position": {
+        "X": 200.0,
+        "Y": -300.0
+      }
+    },
+    {
+      "OutputId": "8fc2615b-aed7-4349-9065-1b27e9f83a34"/*Capture*/,
+      "Position": {
+        "X": 200.0,
+        "Y": -250.0
+      }
+    },
+    {
+      "OutputId": "90d3726c-bfe8-445a-a176-2c38fa094b45"/*Progress*/,
+      "Position": {
+        "X": 200.0,
+        "Y": -200.0
+      }
+    },
+    {
+      "OutputId": "a1e4837d-c0f9-456b-b287-3d490b1a5c56"/*Done*/,
+      "Position": {
+        "X": 200.0,
+        "Y": -150.0
+      }
+    },
+    {
+      "OutputId": "b2f5948e-d10a-467c-8398-4e5a1c2b6d67"/*StopIndex*/,
+      "Position": {
+        "X": 200.0,
+        "Y": -100.0
+      }
+    },
+    {
+      "OutputId": "c3a6a59f-e21b-478d-84a9-5f6b2d3c7e89"/*Scanning*/,
+      "Position": {
+        "X": 200.0,
+        "Y": -50.0
+      }
+    }
+  ]
+}

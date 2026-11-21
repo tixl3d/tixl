@@ -1,0 +1,325 @@
+{
+  "FormatVersion": 3,
+  "Id": "748fdcc7-6b02-5fdc-8eac-94039edb9124"/*VolumeNoiseExample*/,
+  "Description": "Three stages of one chain, left to right. [VolumeNoise] in Displace mode pushes the sphere's surface along fractal noise. [VolumeMorphology] with Dilate grows it outwards, which swells the bumps and closes the dents, and [VolumeFilter] smooths the voxels, which softens what is left.\n\nAKA: displace, noise, blob, organic, smooth, blur, erode, dilate, open, close\n\nTips\n- Smaller VoxelSize means sharper surfaces and more memory and time; start coarse and refine.\n- Level sets store signed distance in world units (negative inside); fog volumes store density.\n- Animated volumes are rebuilt on the CPU every frame; keep their voxels coarse.",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "05dd85f8-1c09-50c5-948a-ecbfa386cf1a",
+      "SymbolName": "Lib.render.shading.SetFog",
+      "SectionId": "2383b3ac-e461-5c72-b7d7-b320799d7883",
+      "Position": {
+        "X": 2340.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "12006554-9873-5e15-ae24-d01d2bc7e2aa",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "Position": {
+        "X": 1820.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "39ca85ee-8c34-519e-9c0c-dc6b123286b6",
+      "SymbolName": "Lib.volume.convert.VolumeToMesh",
+      "SectionId": "6af90836-1156-56f6-9734-f803e25be3fa",
+      "Position": {
+        "X": 1040.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "3e732b2c-db0e-5b45-81d2-fe024a916d1c",
+      "SymbolName": "Lib.volume.convert.VolumeToMesh",
+      "SectionId": "6af90836-1156-56f6-9734-f803e25be3fa",
+      "Position": {
+        "X": 1040.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "4f0139d6-7d33-5f65-a980-f6d4a39f0f06",
+      "SymbolName": "Lib.render.postfx.SSAO",
+      "SectionId": "2383b3ac-e461-5c72-b7d7-b320799d7883",
+      "Position": {
+        "X": 2860.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "51cd85de-6a81-5675-a7b8-98289a9f6d0e",
+      "SymbolName": "Lib.volume.modify.VolumeMorphology",
+      "SectionId": "ae9d8f89-6a13-5014-a009-55811645f8bc",
+      "Position": {
+        "X": 520.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "63f28cfe-be25-5551-b0eb-5555b95f20c7",
+      "SymbolName": "Lib.render.shading.SetShadow",
+      "SectionId": "2383b3ac-e461-5c72-b7d7-b320799d7883",
+      "Position": {
+        "X": 2340.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "671fd8ac-48c1-5081-a3ec-2ab5a4d1e0c6",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "Position": {
+        "X": 1820.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "7b7dc190-f947-5cf5-a95b-0ce058d08f37",
+      "SymbolName": "Lib.render.camera.Camera",
+      "SectionId": "2383b3ac-e461-5c72-b7d7-b320799d7883",
+      "Position": {
+        "X": 2340.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "7db3ed6f-1a53-5dcd-9065-bf43e664b618",
+      "SymbolName": "Lib.flow.Execute",
+      "SectionId": "2383b3ac-e461-5c72-b7d7-b320799d7883",
+      "Position": {
+        "X": 2340.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "8022094d-fd27-543c-bc77-cd918806fcef",
+      "SymbolName": "Lib.volume.convert.VolumeToMesh",
+      "SectionId": "6af90836-1156-56f6-9734-f803e25be3fa",
+      "Position": {
+        "X": 1040.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "8038272c-12ff-5b4f-b885-dc76bc724703",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "SectionId": "2383b3ac-e461-5c72-b7d7-b320799d7883",
+      "Position": {
+        "X": 2340.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "866a2814-643a-53e0-b2ee-4d63dcc16c4c",
+      "SymbolName": "Lib.volume.modify.VolumeFilter",
+      "SectionId": "ae9d8f89-6a13-5014-a009-55811645f8bc",
+      "Position": {
+        "X": 780.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "979ad19b-26da-533a-996e-9b61063805cc",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "Position": {
+        "X": 1560.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "a7b2c289-9241-51cb-a5d1-4d5200904c31",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "Position": {
+        "X": 1560.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "ae8d71a5-09c8-5aac-87d0-7d25c75f1d1c",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "Position": {
+        "X": 1820.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "b62ebcf9-4dde-58b9-b37b-95e51b903337",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "SectionId": "2383b3ac-e461-5c72-b7d7-b320799d7883",
+      "Position": {
+        "X": 2600.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "bd65092e-ceaf-5a01-b5fb-8e7777e74bc9",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "Position": {
+        "X": 1820.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "c9f084af-fae6-592d-ba50-477f50579d05",
+      "SymbolName": "Lib.geometry.TransformGeometry",
+      "Position": {
+        "X": 1300.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "cfc39914-bc99-5189-9945-ed15308808a6",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "Position": {
+        "X": 1560.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "d25ecc7f-4506-502f-8092-9c1c8881d341",
+      "SymbolName": "Lib.volume.generate.VolumePrimitive",
+      "SectionId": "ae9d8f89-6a13-5014-a009-55811645f8bc",
+      "Position": {
+        "X": 0.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "d9ea920f-0d39-518c-834a-87b80992e0ca",
+      "SymbolName": "Lib.mesh.generate.QuadMesh",
+      "Position": {
+        "X": 1300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "dba3a7ba-37d9-501e-8c1d-518c1492d3ef",
+      "SymbolName": "Lib.volume.modify.VolumeNoise",
+      "SectionId": "ae9d8f89-6a13-5014-a009-55811645f8bc",
+      "Position": {
+        "X": 260.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "ebb09ee8-e435-58ce-b5e0-b9b2deede63c",
+      "SymbolName": "Lib.geometry.TransformGeometry",
+      "Position": {
+        "X": 1300.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "fe81cebb-3542-5ad7-ae95-91b09f209dd4",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "SectionId": "2383b3ac-e461-5c72-b7d7-b320799d7883",
+      "Position": {
+        "X": 2340.0,
+        "Y": 330.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "9361eb81-eb0c-536e-87e8-6db9e14ef3bb"/*Output*/,
+      "Position": {
+        "X": 3120.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "2383b3ac-e461-5c72-b7d7-b320799d7883",
+      "Title": "Render: light, shadow and camera",
+      "Color": {
+        "X": 0.4,
+        "Y": 0.4,
+        "Z": 0.45,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 2300.0,
+        "Y": -70.0
+      },
+      "Size": {
+        "X": 800.0,
+        "Y": 720.0
+      }
+    },
+    {
+      "Id": "6af90836-1156-56f6-9734-f803e25be3fa",
+      "Title": "2  Each stage meshed",
+      "Color": {
+        "X": 0.3,
+        "Y": 0.55,
+        "Z": 0.4,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1000.0,
+        "Y": 150.0
+      },
+      "Size": {
+        "X": 280.0,
+        "Y": 390.0
+      }
+    },
+    {
+      "Id": "ae9d8f89-6a13-5014-a009-55811645f8bc",
+      "Title": "1  Displace, grow, smooth",
+      "Color": {
+        "X": 0.35,
+        "Y": 0.5,
+        "Z": 0.65,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -40.0,
+        "Y": 40.0
+      },
+      "Size": {
+        "X": 1060.0,
+        "Y": 170.0
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "b9d757dd-f194-599b-8c88-5aa677c0fce0",
+      "ChildId": "dba3a7ba-37d9-501e-8c1d-518c1492d3ef",
+      "InputId": "3d95a0ca-fd17-53e5-817f-fdfe293f3b6e",
+      "Description": "Mode Displace pushes the surface along the noise. Amplitude is in voxels and cannot reach beyond the BandWidth of the input.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "b7c4f27b-ad6b-5809-bb13-fe1c42c0be02",
+      "ChildId": "51cd85de-6a81-5675-a7b8-98289a9f6d0e",
+      "InputId": "2ad87fa8-ac60-5972-a42e-38a4a224c4f1",
+      "Description": "Dilate grows the surface outwards by Radius: the bumps swell and the dents between them close up. Erode, Open and Close are the other operations.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "c839df12-dbb3-5ce2-82fd-92af0a6c4da2",
+      "ChildId": "866a2814-643a-53e0-b2ee-4d63dcc16c4c",
+      "InputId": "f4356aa3-0941-5c80-bc46-4670bb4edf85",
+      "Description": "A Gaussian [VolumeFilter] blurs the voxel values, which softens what is left.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "836aa992-fdf2-5f71-9074-0b08370c0096",
+      "ChildId": "dba3a7ba-37d9-501e-8c1d-518c1492d3ef",
+      "InputId": "a8c2bbd9-1601-59c4-bbdb-db3189a7bdf7",
+      "Description": "Connect an [AnimVec3] to Offset to make the shape flow. Every change rebuilds the chain on the CPU, so keep VoxelSize coarse while animating.",
+      "Style": "Tip"
+    },
+    {
+      "Id": "87d68c95-ef8f-5bb9-bbe3-cf94e51f2ae5",
+      "ChildId": "dba3a7ba-37d9-501e-8c1d-518c1492d3ef",
+      "InputId": "1ee7f2e0-d46f-5bd6-909e-1cd0cb15d0d0",
+      "Description": "Try Fractal Ridged for sharp crests, or NoiseType Worley for cells.",
+      "Style": "CallToAction"
+    }
+  ]
+}

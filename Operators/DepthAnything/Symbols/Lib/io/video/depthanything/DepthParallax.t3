@@ -1,0 +1,39 @@
+{
+  "FormatVersion": 3,
+  "Id": "9e4a6c18-3b5d-4f82-a091-6c8e0f3b5d72"/*DepthParallax*/,
+  "Inputs": [
+    {
+      "Id": "061bd38f-a2c4-46f9-97a8-d3f57a02c4e9"/*FocalPlane*/,
+      "DefaultValue": 0.5
+    },
+    {
+      "Id": "172ce490-b3d5-470a-a8b9-e4068b13d5fa"/*Steps*/,
+      "DefaultValue": 16
+    },
+    {
+      "Id": "b16c8e3a-5d7f-41a4-82b3-8ea02b5d7f94"/*ImageTexture*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "c27d9f4b-6e80-42b5-93c4-9fb13c6e80a5"/*DepthTexture*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "d38ea05c-7f91-43c6-a4d5-a0c24d7f91b6"/*MinDepth*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "e49fb16d-80a2-44d7-b5e6-b1d35e80a2c7"/*MaxDepth*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "f50ac27e-91b3-45e8-86f7-c2e46f91b3d8"/*Offset*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

@@ -1,0 +1,484 @@
+{
+  "FormatVersion": 3,
+  "Id": "d05d13f9-1270-5855-a6d3-c98667892977"/*PhysicsWorldExample*/,
+  "Description": "The basics of the physics package: a [PhysicsWorld] simulates the bodies that [RigidBody] operators describe.\n\nFive balls show Bounciness from 0 to 1, a ball tips over a row of dominoes made from points, and capsules and cylinders tumble onto the floor. Every impact is reported by the world's Contacts output and drawn as a spark. [RigidBodyGeometry] hands the simulated bodies back as geometry, so each one is drawn as exactly the shape it collides as.\n\nAKA: physics, rigid body, simulation, bepu, bounce, domino, collision\n\nTips\n- Playback must run for the simulation to advance; press Reset on the World to start over.\n- Select a ball and change Bounciness or Friction while it plays.\n- A body without Geometry is a primitive; Shape picks box, sphere, capsule or cylinder.",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "05c94afa-2352-56c8-9bb5-6fdd52dbc432",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "fca7c014-9a4e-5590-b678-8c885b05af1a",
+      "Position": {
+        "X": 520.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "09e0a12a-c544-5572-9312-a429a94b6c2f",
+      "SymbolName": "Lib.render.postfx.SSAO",
+      "SectionId": "bdee06fa-5d12-55f9-a249-c537ec8f68b0",
+      "Position": {
+        "X": 3120.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "0a7c494d-895c-50d9-947d-033cddeb2bf3",
+      "SymbolName": "Lib.point.helper.ReadPointsFromGpu",
+      "SectionId": "fca7c014-9a4e-5590-b678-8c885b05af1a",
+      "Position": {
+        "X": 260.0,
+        "Y": 660.0
+      }
+    },
+    {
+      "ChildId": "2df9e65a-65ac-5187-aa2f-724bfca740c8",
+      "SymbolName": "Lib.physics.RigidBodyGeometry",
+      "SectionId": "ae57c915-c68a-5f86-8462-a9b3a1fdbca3",
+      "Position": {
+        "X": 1560.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "39a44f86-4e22-50fe-9bca-786b20140de5",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "SectionId": "ae57c915-c68a-5f86-8462-a9b3a1fdbca3",
+      "Position": {
+        "X": 1820.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "447b135d-125c-5a02-b679-d740cfab9939",
+      "SymbolName": "Lib.render.shading.SetFog",
+      "SectionId": "bdee06fa-5d12-55f9-a249-c537ec8f68b0",
+      "Position": {
+        "X": 2600.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "4592e739-7125-54fa-a6cc-1fdb1a83b187",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "fca7c014-9a4e-5590-b678-8c885b05af1a",
+      "Position": {
+        "X": 520.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "4f9ce4bb-6547-55e0-80f0-8f66a2b147fc",
+      "SymbolName": "Lib.geometry.ScatterPointsInVolume",
+      "SectionId": "fca7c014-9a4e-5590-b678-8c885b05af1a",
+      "Position": {
+        "X": 0.0,
+        "Y": 990.0
+      }
+    },
+    {
+      "ChildId": "5217120e-1c92-501d-b152-ed4feb6fd39c",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "SectionId": "ae57c915-c68a-5f86-8462-a9b3a1fdbca3",
+      "Position": {
+        "X": 2080.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "5b5d1e17-04d9-5387-8099-9aab12c1366c",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "SectionId": "bdee06fa-5d12-55f9-a249-c537ec8f68b0",
+      "Position": {
+        "X": 2600.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "5dcc3b94-8e03-501b-b5df-50c94b7ad099",
+      "SymbolName": "Lib.render.camera.Camera",
+      "SectionId": "bdee06fa-5d12-55f9-a249-c537ec8f68b0",
+      "Position": {
+        "X": 2600.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "630d855c-f41a-5c7d-a009-0e37921f791e",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "fca7c014-9a4e-5590-b678-8c885b05af1a",
+      "Position": {
+        "X": 520.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "6392d220-5339-596a-a5cf-762c83169fee",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "SectionId": "ae57c915-c68a-5f86-8462-a9b3a1fdbca3",
+      "Position": {
+        "X": 1820.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "6c2b330d-ca9f-5e5d-b2ca-3efb56f0c64b",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "SectionId": "ae57c915-c68a-5f86-8462-a9b3a1fdbca3",
+      "Position": {
+        "X": 2080.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "6e2fb43e-a323-5843-9537-6ad2887b3441",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "SectionId": "ae57c915-c68a-5f86-8462-a9b3a1fdbca3",
+      "Position": {
+        "X": 2080.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "6e3baaf5-949b-517e-bd5d-768dea7e8060",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "SectionId": "bdee06fa-5d12-55f9-a249-c537ec8f68b0",
+      "Position": {
+        "X": 2860.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "75f4e0cb-ba4d-58da-ab3b-f899674b213e",
+      "SymbolName": "Lib.physics.RigidBodyGeometry",
+      "SectionId": "ae57c915-c68a-5f86-8462-a9b3a1fdbca3",
+      "Position": {
+        "X": 1560.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "8be68a7f-286f-57d9-9326-4eab7380d66b",
+      "SymbolName": "Lib.flow.Execute",
+      "SectionId": "bdee06fa-5d12-55f9-a249-c537ec8f68b0",
+      "Position": {
+        "X": 2600.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "92d29102-6bbe-52e0-850f-b93a5148d9ee",
+      "SymbolName": "Lib.physics.RigidBodyGeometry",
+      "SectionId": "ae57c915-c68a-5f86-8462-a9b3a1fdbca3",
+      "Position": {
+        "X": 1560.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "9bcd3aaf-a11d-5861-9cf8-f8e21dfd478e",
+      "SymbolName": "Lib.geometry.ScatterPointsInVolume",
+      "SectionId": "fca7c014-9a4e-5590-b678-8c885b05af1a",
+      "Position": {
+        "X": 0.0,
+        "Y": 880.0
+      }
+    },
+    {
+      "ChildId": "9f647578-4357-59ec-a691-0c27798e3816",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "SectionId": "ae57c915-c68a-5f86-8462-a9b3a1fdbca3",
+      "Position": {
+        "X": 1820.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "ac412554-ac99-5ad2-bd1b-287c9f1639d4",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "SectionId": "ae57c915-c68a-5f86-8462-a9b3a1fdbca3",
+      "Position": {
+        "X": 2080.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "b10aefed-2213-51d9-a2e7-c19a8fb28a04",
+      "SymbolName": "Lib.mesh.generate.SphereMesh",
+      "SectionId": "ae57c915-c68a-5f86-8462-a9b3a1fdbca3",
+      "Position": {
+        "X": 1560.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "b15c4a13-d195-50e9-91f1-3eeed4111e8f",
+      "SymbolName": "Lib.mesh.draw.DrawMeshAtPoints",
+      "SectionId": "ae57c915-c68a-5f86-8462-a9b3a1fdbca3",
+      "Position": {
+        "X": 2080.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "b8423645-31b0-5aae-a238-b979d25088e1",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "fca7c014-9a4e-5590-b678-8c885b05af1a",
+      "Position": {
+        "X": 520.0,
+        "Y": 880.0
+      }
+    },
+    {
+      "ChildId": "bdb4e7e0-6788-5b5b-a5f9-f8257f692cdf",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "SectionId": "ae57c915-c68a-5f86-8462-a9b3a1fdbca3",
+      "Position": {
+        "X": 1820.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "c55b7d52-1270-593a-864f-405793ae0ed5",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "fca7c014-9a4e-5590-b678-8c885b05af1a",
+      "Position": {
+        "X": 520.0,
+        "Y": 660.0
+      }
+    },
+    {
+      "ChildId": "d1bff54b-a291-534e-8100-b80f2ddee3cb",
+      "SymbolName": "Lib.render.shading.SetShadow",
+      "SectionId": "bdee06fa-5d12-55f9-a249-c537ec8f68b0",
+      "Position": {
+        "X": 2600.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "db25b763-72e2-532f-ba75-4e2b5ce7e896",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "SectionId": "bdee06fa-5d12-55f9-a249-c537ec8f68b0",
+      "Position": {
+        "X": 2600.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "e3f83822-6040-5d26-af06-8a99d084fce1",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "fca7c014-9a4e-5590-b678-8c885b05af1a",
+      "Position": {
+        "X": 520.0,
+        "Y": 770.0
+      }
+    },
+    {
+      "ChildId": "e57bd9bc-70a3-56e0-950f-8441674b68bb",
+      "SymbolName": "Lib.point.generate.GridPoints",
+      "SectionId": "fca7c014-9a4e-5590-b678-8c885b05af1a",
+      "Position": {
+        "X": 0.0,
+        "Y": 660.0
+      }
+    },
+    {
+      "ChildId": "e8c4f7e0-924b-5084-86e0-7b57adbdd3d5",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "fca7c014-9a4e-5590-b678-8c885b05af1a",
+      "Position": {
+        "X": 520.0,
+        "Y": 990.0
+      }
+    },
+    {
+      "ChildId": "e9321e96-9735-573b-8238-866af1749779",
+      "SymbolName": "Lib.physics.PhysicsWorld",
+      "SectionId": "ac4f04df-b13e-5156-b4b1-1215ae39358a",
+      "Position": {
+        "X": 1040.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "f8af8283-7c34-55e6-918a-f5e008df49e3",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "fca7c014-9a4e-5590-b678-8c885b05af1a",
+      "Position": {
+        "X": 520.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "fb12e5a6-2a75-585a-bb6c-39fce9759570",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "fca7c014-9a4e-5590-b678-8c885b05af1a",
+      "Position": {
+        "X": 520.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "fd0a85e7-87a6-5928-9f28-46299da2d9a7",
+      "SymbolName": "Lib.physics.RigidBodyGeometry",
+      "SectionId": "ae57c915-c68a-5f86-8462-a9b3a1fdbca3",
+      "Position": {
+        "X": 1560.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "ff0949ad-d8de-5fa9-a7be-a18e0d2f8290",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "fca7c014-9a4e-5590-b678-8c885b05af1a",
+      "Position": {
+        "X": 520.0,
+        "Y": 110.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "d662b16a-0158-505d-b4f3-c195759ccd76"/*Output*/,
+      "Position": {
+        "X": 3380.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "ac4f04df-b13e-5156-b4b1-1215ae39358a",
+      "Title": "2  World: one simulation for all of them",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.3,
+        "Z": 0.35,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1000.0,
+        "Y": 370.0
+      },
+      "Size": {
+        "X": 280.0,
+        "Y": 170.0
+      }
+    },
+    {
+      "Id": "ae57c915-c68a-5f86-8462-a9b3a1fdbca3",
+      "Title": "3  Drawing: bodies back as geometry",
+      "Color": {
+        "X": 0.3,
+        "Y": 0.55,
+        "Z": 0.4,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1520.0,
+        "Y": -70.0
+      },
+      "Size": {
+        "X": 800.0,
+        "Y": 720.0
+      }
+    },
+    {
+      "Id": "bdee06fa-5d12-55f9-a249-c537ec8f68b0",
+      "Title": "Render: light, shadow and camera",
+      "Color": {
+        "X": 0.4,
+        "Y": 0.4,
+        "Z": 0.45,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 2560.0,
+        "Y": -70.0
+      },
+      "Size": {
+        "X": 800.0,
+        "Y": 720.0
+      }
+    },
+    {
+      "Id": "fca7c014-9a4e-5590-b678-8c885b05af1a",
+      "Title": "1  Bodies: what exists and how it behaves",
+      "Color": {
+        "X": 0.65,
+        "Y": 0.45,
+        "Z": 0.25,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -40.0,
+        "Y": -70.0
+      },
+      "Size": {
+        "X": 800.0,
+        "Y": 1160.0
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "861d7645-1ccb-5f4c-9eae-48950fbbe0ac",
+      "ChildId": "05c94afa-2352-56c8-9bb5-6fdd52dbc432",
+      "Description": "Every body is a [RigidBody] description. This one is Static: it never moves, but everything collides with it."
+    },
+    {
+      "Id": "fcaed4b6-e387-55c0-9fd7-ede550cfc6ee",
+      "ChildId": "fb12e5a6-2a75-585a-bb6c-39fce9759570",
+      "InputId": "847babc8-53b1-457d-ab45-f85b8eff80c9",
+      "Description": "Five balls differ only in Bounciness, from 0 to 1. Watch how high each one comes back.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "812a6e16-9133-5a39-8bd5-75533968d89d",
+      "ChildId": "c55b7d52-1270-593a-864f-405793ae0ed5",
+      "InputId": "c37e0055-1f11-4b35-8d1f-0a3eb0c64a57",
+      "Description": "Connecting Points makes one body per point: fifteen dominoes from one operator.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "46287df1-5a46-5996-8e12-49c2ce578057",
+      "ChildId": "e3f83822-6040-5d26-af06-8a99d084fce1",
+      "InputId": "e965e0ce-38ce-46da-a7ac-e730d7876d29",
+      "Description": "A starting LinearVelocity sends this ball into the first domino.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "a6ed9bda-7c48-5a55-b4dc-3324d0323efb",
+      "ChildId": "e9321e96-9735-573b-8238-866af1749779",
+      "Description": "The [PhysicsWorld] collects all bodies and steps the simulation with the playback time.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "98b4da13-84c0-596a-952e-ed101472e807",
+      "ChildId": "e9321e96-9735-573b-8238-866af1749779",
+      "InputId": "47787d21-9ddc-45ab-97f6-a573a717675c",
+      "Description": "Its Contacts output lists every impact of the frame as points.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "60140419-2a60-5eea-9ea7-46956cf111d9",
+      "ChildId": "b15c4a13-d195-50e9-91f1-3eeed4111e8f",
+      "Description": "Drawing a small mesh at the contact points gives a spark wherever something hits.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "61277e2f-c923-5bb0-ab89-a4bbc7dacec9",
+      "ChildId": "2df9e65a-65ac-5187-aa2f-724bfca740c8",
+      "Description": "[RigidBodyGeometry] returns bodies at their simulated poses as geometry, so no separate mesh has to match the collider.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "3c19e716-5a0e-5255-ba52-80f0dacc103e",
+      "ChildId": "e9321e96-9735-573b-8238-866af1749779",
+      "InputId": "8279a472-cae2-4427-8de7-2fe51bde82b4",
+      "Description": "Press Reset on the World and play again.",
+      "Style": "CallToAction"
+    }
+  ]
+}

@@ -1,0 +1,153 @@
+{
+  "FormatVersion": 3,
+  "Id": "7c3e9a51-2f84-4d6b-b1e0-5a9d8c2f4e17"/*AxisPtzCamera*/,
+  "Description": "Camera pose from an AXIS PTZ camera's own pan/tilt/zoom readout (VAPIX).\n\nPolls the camera's position in the background and outputs a camera for DepthScan3D's CameraReference, so a pan/tilt sweep merges into one consistent half-sphere without the drift of a pose estimated from depth. DelayMs aligns the pose with the delayed video; the field of view follows the zoom (VerticalFov output for DepthAnything). The world is TiXL's: y up, ReferencePan/ReferenceTilt straight ahead.\n\nAKA: ptz, vapix, onvif camera pose",
+  "InputUis": [
+    {
+      "InputId": "05c728ea-b81d-46f4-8a19-e3267fb8d1a0"/*Password*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -400.0
+      },
+      "Usage": "Default"
+    },
+    {
+      "InputId": "16d839fb-c92e-4705-9b2a-f4378ac9e2b1"/*PollRate*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -350.0
+      },
+      "Description": "Position queries per second."
+    },
+    {
+      "InputId": "27e94a0c-da3f-4816-ac3b-05489bdaf3c2"/*DelayMs*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -300.0
+      },
+      "Description": "How far the pose lags behind the live PTZ position, so it matches the video frame the depth was computed from: the stream's latency plus the depth model's. The P5635-E stream measured 80 ms on a LAN."
+    },
+    {
+      "InputId": "38fa5b1d-eb4c-4927-bd4c-1659ac04e4d3"/*FieldOfView*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -250.0
+      },
+      "Description": "Vertical field of view in degrees at the widest zoom (38.4 for the P5635-E per its data sheet, 37.2 measured). The camera narrows it by the lens magnification of the current zoom reading."
+    },
+    {
+      "InputId": "490b6c2e-fc5d-4a38-8e5d-276abd15f5e4"/*AspectRatio*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -200.0
+      }
+    },
+    {
+      "InputId": "5a1c7d3f-0d6e-4b49-9f6e-387bce2606f5"/*InvertPan*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -150.0
+      }
+    },
+    {
+      "InputId": "6b2d8e40-1e7f-4c5a-a07f-498cdf371706"/*InvertTilt*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -100.0
+      }
+    },
+    {
+      "InputId": "7c3e9f51-2f80-4d6b-b18f-5a9de0482817"/*MountRotation*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -50.0
+      },
+      "Description": "Rotates the whole scan (pitch, yaw, roll in degrees), e.g. to stand the half-sphere of a sideways-mounted camera upright."
+    },
+    {
+      "InputId": "8d4fa062-3091-4e7c-82f1-6bae9d305f29"/*ReferencePan*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 0.0
+      },
+      "Description": "Pan reading (degrees) of the view that becomes the scan's straight-ahead, upright direction, e.g. the middle of a tour."
+    },
+    {
+      "InputId": "9e50b173-41a2-4f8d-93a2-7cbf0e416a3a"/*ReferenceTilt*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 50.0
+      },
+      "Description": "Tilt reading (degrees) of that reference view."
+    },
+    {
+      "InputId": "d294f5b7-85ea-43c1-97e6-b0f34c85ae7d"/*Active*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 100.0
+      }
+    },
+    {
+      "InputId": "e3a506c8-96fb-44d2-a8f7-c1045d96bf8e"/*Address*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 150.0
+      },
+      "Description": "Camera host or base URL, e.g. 10.0.0.111.",
+      "Usage": "Default"
+    },
+    {
+      "InputId": "f4b617d9-a70c-45e3-b908-d2156ea7c09f"/*User*/,
+      "Position": {
+        "X": -250.0,
+        "Y": 200.0
+      },
+      "Usage": "Default"
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "8d4fa062-3095-4e7c-82f1-6bae9d305f28"/*Camera*/,
+      "Position": {
+        "X": 200.0,
+        "Y": -400.0
+      }
+    },
+    {
+      "OutputId": "9e50b173-41a6-4f8d-93a2-7cbf0e416a39"/*Pan*/,
+      "Position": {
+        "X": 200.0,
+        "Y": -350.0
+      }
+    },
+    {
+      "OutputId": "af61c284-52b7-409e-a4b3-8dc01f527b4a"/*Tilt*/,
+      "Position": {
+        "X": 200.0,
+        "Y": -300.0
+      }
+    },
+    {
+      "OutputId": "b072d395-63c8-41af-b5c4-9ed12a638c5b"/*Zoom*/,
+      "Position": {
+        "X": 200.0,
+        "Y": -250.0
+      }
+    },
+    {
+      "OutputId": "c183e4a6-74d9-42b0-86d5-afe23b749d6c"/*Status*/,
+      "Position": {
+        "X": 200.0,
+        "Y": -200.0
+      }
+    },
+    {
+      "OutputId": "d294f5b7-85ea-43c1-97e6-b0f34c85ae80"/*VerticalFov*/,
+      "Position": {
+        "X": 200.0,
+        "Y": -150.0
+      }
+    }
+  ]
+}

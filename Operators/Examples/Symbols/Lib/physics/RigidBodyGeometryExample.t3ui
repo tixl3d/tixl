@@ -1,0 +1,348 @@
+{
+  "FormatVersion": 3,
+  "Id": "05fe32c1-2c83-5f9e-aaf9-0d5d7d2377ad"/*RigidBodyGeometryExample*/,
+  "Description": "[VoronoiFracture] cuts a cube into cells; a [RigidBody] makes every cell a body, so the cube breaks apart when it lands. [RigidBodyGeometry] returns the pieces as geometry, ready for [GeometryToMesh] or any other geometry operator.\n\nThe ring on the right is drawn with ShowColliders: instead of its own surface you see the convex hulls it collides as.\n\nAKA: fracture, shatter, break, debris, voronoi, collider view, debug\n\nTips\n- Playback must run for the simulation to advance; press Reset on the World to start over.\n- More seed points give smaller pieces; small pieces weigh less because mass follows volume.\n- Toggle ShowColliders on the Pieces geometry too: fracture cells are already convex, so collider and drawing match.",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "043fdb8f-c678-5c05-b1ae-61c2ec2fc835",
+      "SymbolName": "Lib.geometry.ScatterPointsInVolume",
+      "SectionId": "e4763762-18a4-5e7e-94cd-9ea6a1c6571e",
+      "Position": {
+        "X": 0.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "0d189575-1edf-5704-96b5-1b261d425b8b",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "Position": {
+        "X": 2340.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "156c3b10-3983-50f3-b992-71c6e8456511",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "SectionId": "b3b8653e-dbfd-517b-bbc0-6332194ee7b2",
+      "Position": {
+        "X": 2860.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "16df5810-bb84-5a3d-9c3f-7813f9c201a5",
+      "SymbolName": "Lib.geometry.VoronoiFracture",
+      "SectionId": "e4763762-18a4-5e7e-94cd-9ea6a1c6571e",
+      "Position": {
+        "X": 260.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "1965b50a-2c58-5027-9366-4c0af31c0b68",
+      "SymbolName": "Lib.flow.Execute",
+      "SectionId": "b3b8653e-dbfd-517b-bbc0-6332194ee7b2",
+      "Position": {
+        "X": 2860.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "1e942e11-7949-5fcf-83cd-fc95af6df87b",
+      "SymbolName": "Lib.physics.RigidBodyGeometry",
+      "Position": {
+        "X": 1820.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "21d5f13d-c1c0-59f1-a728-b05f4e623a33",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "SectionId": "807379c2-25df-56af-a9a1-76833908a398",
+      "Position": {
+        "X": 2340.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "29762861-a50f-50d6-9b73-dd930fedc9c7",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "e4763762-18a4-5e7e-94cd-9ea6a1c6571e",
+      "Position": {
+        "X": 780.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "3eedae85-0a8b-5769-95f5-2d6518c7b390",
+      "SymbolName": "Lib.volume.convert.VolumeToMesh",
+      "SectionId": "de5368db-5898-5980-b83c-2e47ae29888c",
+      "Position": {
+        "X": 260.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "4673f6da-298c-5026-b1e5-44306c5564a3",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "SectionId": "807379c2-25df-56af-a9a1-76833908a398",
+      "Position": {
+        "X": 2080.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "5c0a72a2-34f8-5ce9-bbc5-391ace71a912",
+      "SymbolName": "Lib.render.shading.SetFog",
+      "SectionId": "b3b8653e-dbfd-517b-bbc0-6332194ee7b2",
+      "Position": {
+        "X": 2860.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "5e54d347-d7bc-5916-b14d-5e336c2b0f1a",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "de5368db-5898-5980-b83c-2e47ae29888c",
+      "Position": {
+        "X": 780.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "69f24870-6efc-5f16-973a-65659f092ce6",
+      "SymbolName": "Lib.render.camera.Camera",
+      "SectionId": "b3b8653e-dbfd-517b-bbc0-6332194ee7b2",
+      "Position": {
+        "X": 2860.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "741ca382-65a8-5f31-a1d7-23be5fe79f8c",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "SectionId": "807379c2-25df-56af-a9a1-76833908a398",
+      "Position": {
+        "X": 2080.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "88d8ed92-ac34-583b-985a-8e83256b371d",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "Position": {
+        "X": 2080.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "95d24dae-f25a-558c-a346-84773769b9ba",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "SectionId": "807379c2-25df-56af-a9a1-76833908a398",
+      "Position": {
+        "X": 2340.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "96adacda-06c0-5db7-ac68-cedb4464880c",
+      "SymbolName": "Lib.render.postfx.SSAO",
+      "SectionId": "b3b8653e-dbfd-517b-bbc0-6332194ee7b2",
+      "Position": {
+        "X": 3380.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "a727e178-b671-50a6-b704-9d6e81640678",
+      "SymbolName": "Lib.render.shading.SetShadow",
+      "SectionId": "b3b8653e-dbfd-517b-bbc0-6332194ee7b2",
+      "Position": {
+        "X": 2860.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "a906b830-c23e-5530-ac0d-163e43fed976",
+      "SymbolName": "Lib.physics.PhysicsWorld",
+      "Position": {
+        "X": 1300.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "ab264df0-b4c3-51a7-aafe-103d64d7b90d",
+      "SymbolName": "Lib.geometry.CubeGeometry",
+      "SectionId": "e4763762-18a4-5e7e-94cd-9ea6a1c6571e",
+      "Position": {
+        "X": 0.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "c9fd8fb6-c323-561d-9b99-5cebecf44ce8",
+      "SymbolName": "Lib.physics.RigidBodyGeometry",
+      "SectionId": "807379c2-25df-56af-a9a1-76833908a398",
+      "Position": {
+        "X": 1820.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "cfe39375-bcaa-5135-ae12-7590ce626d29",
+      "SymbolName": "Lib.physics.RigidBody",
+      "Position": {
+        "X": 780.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "d002c205-cada-5e87-bd70-180291305331",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "SectionId": "b3b8653e-dbfd-517b-bbc0-6332194ee7b2",
+      "Position": {
+        "X": 2860.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "dc0e7547-5f94-5359-ad63-fdc11c2eafc8",
+      "SymbolName": "Lib.volume.generate.VolumePrimitive",
+      "SectionId": "de5368db-5898-5980-b83c-2e47ae29888c",
+      "Position": {
+        "X": 0.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "f517fd1e-4d68-505f-9c62-4a09168c2401",
+      "SymbolName": "Lib.physics.RigidBodyGeometry",
+      "SectionId": "807379c2-25df-56af-a9a1-76833908a398",
+      "Position": {
+        "X": 1820.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "fedcbdf0-d284-5a1b-bb17-68f53be62ae8",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "SectionId": "b3b8653e-dbfd-517b-bbc0-6332194ee7b2",
+      "Position": {
+        "X": 3120.0,
+        "Y": 550.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "00693f1f-3590-5eb1-bb29-898872222f37"/*Output*/,
+      "Position": {
+        "X": 3640.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "807379c2-25df-56af-a9a1-76833908a398",
+      "Title": "3  Bodies back as geometry",
+      "Color": {
+        "X": 0.3,
+        "Y": 0.55,
+        "Z": 0.4,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1780.0,
+        "Y": 40.0
+      },
+      "Size": {
+        "X": 800.0,
+        "Y": 390.0
+      }
+    },
+    {
+      "Id": "b3b8653e-dbfd-517b-bbc0-6332194ee7b2",
+      "Title": "Render: light, shadow and camera",
+      "Color": {
+        "X": 0.4,
+        "Y": 0.4,
+        "Z": 0.45,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 2820.0,
+        "Y": -70.0
+      },
+      "Size": {
+        "X": 800.0,
+        "Y": 720.0
+      }
+    },
+    {
+      "Id": "de5368db-5898-5980-b83c-2e47ae29888c",
+      "Title": "2  A concave ring",
+      "Color": {
+        "X": 0.65,
+        "Y": 0.45,
+        "Z": 0.25,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -40.0,
+        "Y": 370.0
+      },
+      "Size": {
+        "X": 1060.0,
+        "Y": 170.0
+      }
+    },
+    {
+      "Id": "e4763762-18a4-5e7e-94cd-9ea6a1c6571e",
+      "Title": "1  Fracture",
+      "Color": {
+        "X": 0.35,
+        "Y": 0.5,
+        "Z": 0.65,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -40.0,
+        "Y": 40.0
+      },
+      "Size": {
+        "X": 1060.0,
+        "Y": 280.0
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "9de77d83-0dd5-5d89-ac60-7002f80f81a9",
+      "ChildId": "16df5810-bb84-5a3d-9c3f-7813f9c201a5",
+      "Description": "[VoronoiFracture] cuts the cube into one part per seed point.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "9e0ead12-c2bc-5860-a5df-d518f92a7776",
+      "ChildId": "29762861-a50f-50d6-9b73-dd930fedc9c7",
+      "InputId": "e13e2b87-7a04-4197-82a8-a11fab87d1f9",
+      "Description": "Geometry with several parts: every part becomes its own body, placed where it sits in the cube.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "587d01fd-abd3-5c9f-a98e-7240b22a2dcc",
+      "ChildId": "f517fd1e-4d68-505f-9c62-4a09168c2401",
+      "Description": "Each part comes back moved by its body. Any geometry operator can follow, for example [BevelGeometry].",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "2ca7cc0e-fb3d-5c2c-998b-556e336b2341",
+      "ChildId": "c9fd8fb6-c323-561d-9b99-5cebecf44ce8",
+      "InputId": "4b8e2f61-93c7-4d0a-b5e8-7f21c6a9d304",
+      "Description": "ShowColliders draws the convex hulls instead: the ring was split into several, which keep its hole open.",
+      "Style": "InfoFor"
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "FormatVersion": 3,
+  "Id": "6a1f3c85-2d4b-4e97-8c10-5b7d9e2a4f61"/*DepthToPosition*/,
+  "Description": "Unprojects a depth map into camera-space positions.\n\nWrites x, y and z of every pixel into the red, green and blue channels of a float texture, with x to the right, y up and z the distance in front of the camera. Alpha is 1 where the depth was usable and 0 elsewhere. The positions can drive displacement, particles or relighting with ordinary texture-reading operators.\n\nAKA: depth to world, point cloud, unproject, depth to xyz",
+  "InputUis": [
+    {
+      "InputId": "0b4d6f29-5a7c-4d3b-a154-9e0c2d4f7b05"/*DepthTexture*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -350.0
+      },
+      "Description": "The depth map to unproject."
+    },
+    {
+      "InputId": "1c5e7a3b-6b8d-4e4c-b265-0f1d3e5a8c16"/*FieldOfView*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -300.0
+      },
+      "Description": "Vertical field of view of the camera in degrees. DepthAnything's VerticalFov gives the model's estimate."
+    },
+    {
+      "InputId": "2d6f8b4c-7c9e-4f5d-8376-1a2e4f6b9d27"/*DepthScale*/,
+      "Position": {
+        "X": -250.0,
+        "Y": -250.0
+      },
+      "Description": "Scales the distance of every point from the camera. Relative depth has no unit, so this sets the size of the reconstruction."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "8c3e5a07-4f6d-4b19-9e32-7d9fb14c6a83"/*PositionTexture*/,
+      "Position": {
+        "X": 200.0,
+        "Y": -350.0
+      }
+    }
+  ]
+}
