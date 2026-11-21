@@ -7,6 +7,7 @@ nav:
   - Timeline.md
   - PresetsAndSnapshots.md
   - KeyboardShortcuts.md
+  - AiModels.md
   # Assets
   - ImportingAssets.md
   # Working with graphs
@@ -24,6 +25,9 @@ nav:
   - RemoveStaticBackground.md
   # Live use and data
   - LivePerformances.md
+  - Collaboration.md
+  - BoygroupingAndFailover.md
+  - StartupAndRecovery.md
   - Backups.md
   - SharingExampleProjects.md
   - FAQ.md

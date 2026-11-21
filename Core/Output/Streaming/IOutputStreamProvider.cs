@@ -16,4 +16,11 @@ public interface IOutputStreamProvider
 
     /// <summary>Opens a sender under the given name. Frame size follows the textures sent.</summary>
     IOutputStreamSender CreateSender(string name);
+
+    /// <summary>
+    /// Whether a sender may stay open, sending nothing, while this machine is a show-failover standby. The source
+    /// is then already on the network when the active machine fails, so receivers that fail over to it connect at
+    /// once instead of waiting for it to appear. Off for transports that would keep re-sending their last frame.
+    /// </summary>
+    bool SupportsWarmStandby => false;
 }

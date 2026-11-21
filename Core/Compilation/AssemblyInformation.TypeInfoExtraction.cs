@@ -11,6 +11,7 @@ using T3.Core.Operator.Interfaces;
 using T3.Core.Operator.Slots;
 using T3.Core.Output.Streaming;
 using T3.Core.Resource;
+using T3.Core.Video;
 
 namespace T3.Core.Compilation;
 
@@ -26,7 +27,8 @@ public sealed partial class AssemblyInformation
     /// <param name="typesByName"></param>
     /// <param name="operatorTypeInfo"></param>
     private static void LoadTypes(Type[] types, Assembly assembly, out bool shouldShareResources, ConcurrentDictionary<Guid, OperatorTypeInfo> operatorTypeInfo,
-                                  HashSet<string> namespaces, Dictionary<string, Type> typesByName, List<IOutputStreamProvider> streamProviders)
+                                  HashSet<string> namespaces, Dictionary<string, Type> typesByName, List<IOutputStreamProvider> streamProviders,
+                                  List<IRemoteVideoInputProvider> remoteVideoProviders, List<IPeerCameraProvider> peerCameraProviders)
     {
         if (!operatorTypeInfo.IsEmpty)
         {
@@ -108,32 +110,46 @@ public sealed partial class AssemblyInformation
                                          return false;
                                      }).Any();
 
-        RegisterStreamProviders(nonOperatorTypes, streamProviders);
+        RegisterStreamProviders(nonOperatorTypes, streamProviders, remoteVideoProviders, peerCameraProviders);
     }
 
     /// <summary>
-    /// A package that carries a stream library (Spout, NDI) offers it to the output setup as an
-    /// <see cref="IOutputStreamProvider"/>. Instantiated here, alongside the resource-sharing probe, and kept
-    /// on the assembly so an unload can take them out of the registry again.
+    /// A package that carries a stream library (Spout, NDI, OMT) offers it to the output setup as an
+    /// <see cref="IOutputStreamProvider"/> and, if it can also receive, to boygrouping as an
+    /// <see cref="IRemoteVideoInputProvider"/>. Instantiated here, alongside the resource-sharing probe, and
+    /// kept on the assembly so an unload can take them out of the registries again.
     /// </summary>
-    private static void RegisterStreamProviders(IEnumerable<Type> candidates, List<IOutputStreamProvider> streamProviders)
+    private static void RegisterStreamProviders(IEnumerable<Type> candidates, List<IOutputStreamProvider> streamProviders,
+                                                List<IRemoteVideoInputProvider> remoteVideoProviders, List<IPeerCameraProvider> peerCameraProviders)
     {
         foreach (var type in candidates)
         {
-            if (type.IsAbstract || type.IsInterface || !type.IsAssignableTo(typeof(IOutputStreamProvider)))
+            var isStreamProvider = type.IsAssignableTo(typeof(IOutputStreamProvider));
+            var isRemoteVideoProvider = type.IsAssignableTo(typeof(IRemoteVideoInputProvider));
+            var isPeerCameraProvider = type.IsAssignableTo(typeof(IPeerCameraProvider));
+            if (type.IsAbstract || type.IsInterface || (!isStreamProvider && !isRemoteVideoProvider && !isPeerCameraProvider))
                 continue;
 
             try
             {
                 var obj = Activator.CreateInstance(type, ConstructorBindingFlags, binder: null, args: null, culture: null);
-                if (obj is not IOutputStreamProvider provider)
+                if (obj is IOutputStreamProvider provider)
                 {
-                    Log.Error($"Failed to create {nameof(IOutputStreamProvider)} for {type.FullName}");
-                    continue;
+                    streamProviders.Add(provider);
+                    OutputStreamRegistry.Register(provider);
                 }
 
-                streamProviders.Add(provider);
-                OutputStreamRegistry.Register(provider);
+                if (obj is IRemoteVideoInputProvider remoteVideoProvider)
+                {
+                    remoteVideoProviders.Add(remoteVideoProvider);
+                    RemoteVideoInputRegistry.Register(remoteVideoProvider);
+                }
+
+                if (obj is IPeerCameraProvider peerCameraProvider)
+                {
+                    peerCameraProviders.Add(peerCameraProvider);
+                    PeerCameraRegistry.Register(peerCameraProvider);
+                }
             }
             catch (Exception e)
             {

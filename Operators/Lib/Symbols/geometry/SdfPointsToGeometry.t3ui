@@ -1,0 +1,49 @@
+{
+  "FormatVersion": 3,
+  "Id": "648ba407-e15a-4010-b6ba-a4a7a7e211f4"/*SdfPointsToGeometry*/,
+  "Description": "Meshes a signed-distance field from point samples.\n\nThis is the way from the SDF field graph to geometry. Sample any field on a 3D grid of points with [SampleFieldPoints], read the points back with [ReadPointsFromGpu], and this operator extracts the surface. The field can be anything the field operators produce: [SphereSDF], a [CombineSDF] of several shapes, or a volume through [VdbToSdfField].\n\nThe result is ordinary geometry. Connect it to the Geometry input of a static [RigidBody] and the field is a physics collider.\n\nAKA: sdf to mesh, field to geometry, marching cubes, isosurface, bake field, field collider\n\nTips\n- Detail is set by the point grid: 48 points per axis is a good start, and the cost grows with the cube of it.\n- The grid has to be cubic in spacing, not in size: use the same Size value on all three axes of [GridPoints].\n- For an animated field turn on UpdateContinuously on [ReadPointsFromGpu]. As a collider that rebuilds the body whenever the surface changes.",
+  "InputUis": [
+    {
+      "InputId": "0531842f-2afc-4513-80aa-d2ba502d618d"/*Points*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "A regular 3D grid of points that carry the field's distance, read back to the CPU: [GridPoints] with three counts → [SampleFieldPoints] → [ReadPointsFromGpu]. The grid must enclose the shape with a point or two to spare."
+    },
+    {
+      "InputId": "42b9049d-204e-477c-a5a3-0c11a6814ed1"/*Isovalue*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      },
+      "Description": "The distance at which the surface sits. 0 is the field's own surface; a positive value inflates the shape, a negative one shrinks it."
+    },
+    {
+      "InputId": "76dbaf32-e7aa-42fe-95c5-59baa5f036f7"/*VoxelSize*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 90.0
+      },
+      "Description": "Spacing of the point grid. 0 finds it from the points, which works for any [GridPoints] grid with equal spacing on all axes."
+    },
+    {
+      "InputId": "9a121e94-3ce5-4804-b26a-ccc177c8cc90"/*ValueFrom*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 135.0
+      },
+      "Description": "Which point attribute holds the distance. [SampleFieldPoints] writes F1 by default."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "85944599-8077-465d-afff-3b38ee7d9b34"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

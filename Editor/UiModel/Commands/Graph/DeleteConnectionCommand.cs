@@ -38,4 +38,9 @@ internal sealed class DeleteConnectionCommand : ICommand
     private readonly Guid _compositionSymbolId;
     private readonly Symbol.Connection _removedConnection;
     private readonly int _multiInputIndex;
+
+    // Read access for the collab wire encoder; does not participate in undo semantics.
+    internal Guid CompositionSymbolIdForCollab => _compositionSymbolId;
+    internal Symbol.Connection ConnectionForCollab => _removedConnection;
+    internal int MultiInputIndexForCollab => _multiInputIndex;
 }

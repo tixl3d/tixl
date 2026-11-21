@@ -37,6 +37,21 @@ internal sealed class NdiSender : IOutputStreamSender
     /// <summary>Whether the alpha channel is sent, or receivers get an opaque frame.</summary>
     public bool EnableAlpha;
 
+    /// <summary>Advertises the source without sending: with nobody sending, a receiver that fails over to it connects instantly.</summary>
+    public void KeepWarm()
+    {
+        if (!NdiRuntime.IsAvailable)
+            return;
+
+        if (_ndiSender != IntPtr.Zero && _requestedName != _openedName)
+            Release();
+
+        if (_ndiSender == IntPtr.Zero)
+            Open(_requestedName);
+
+        UpdateFailoverSource();
+    }
+
     public void Configure(OutputStreamSettings settings)
     {
         FrameRate = settings.FrameRate;
@@ -108,6 +123,8 @@ internal sealed class NdiSender : IOutputStreamSender
 
         if (_ndiSender == IntPtr.Zero)
             Open(_requestedName);
+
+        UpdateFailoverSource();
 
         // Checked before any GPU work: with nobody listening, reading 46 megapixels back only to drop them is waste.
         // No timeout — waiting here would stall the render loop every frame nobody watches.
@@ -182,6 +199,44 @@ internal sealed class NdiSender : IOutputStreamSender
     {
         Release();
     }
+
+    /// <summary>
+    /// With show failover on, tells receivers which source to switch to when this one goes away: the partner
+    /// machine's sender of the same name. Receivers that support NDI failover then follow a takeover by themselves.
+    /// </summary>
+    private void UpdateFailoverSource()
+    {
+        var now = Environment.TickCount64;
+        if (now < _nextFailoverCheckTicks)
+            return;
+
+        _nextFailoverCheckTicks = now + FailoverCheckIntervalMs;
+        var host = T3.Core.Show.FailoverArbiter.IsEnabled ? T3.Core.Show.FailoverArbiter.PeerHostName : null;
+        if (string.IsNullOrEmpty(host))
+            return;
+
+        // NDI names a source after the machine in upper case, whatever case the OS reports it in.
+        var failoverName = $"{host.ToUpperInvariant()} ({_openedName})";
+        if (failoverName == _failoverName)
+            return;
+
+        _failoverName = failoverName;
+        var name = NewTek.NDI.UTF.StringToUtf8(failoverName);
+        try
+        {
+            var source = new NDIlib.source_t { p_ndi_name = name };
+            NDIlib.send_set_failover(_ndiSender, ref source);
+            Log.Debug($"NDI '{_openedName}': receivers fail over to '{failoverName}'");
+        }
+        finally
+        {
+            Marshal.FreeHGlobal(name);
+        }
+    }
+
+    private const long FailoverCheckIntervalMs = 1000;
+    private long _nextFailoverCheckTicks;
+    private string? _failoverName;
 
     private void Open(string senderName)
     {
@@ -362,6 +417,7 @@ internal sealed class NdiSender : IOutputStreamSender
         }
 
         _lastConnectionCount = 0;
+        _failoverName = null;
 
         UnmapInFlightSlot();
         _queuedSlots.Clear();

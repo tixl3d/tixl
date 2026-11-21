@@ -80,6 +80,13 @@ public class Playback
     }
         
     public double PlaybackSpeed { get; set; }
+
+    /// <summary>
+    /// Effect time to adopt at the end of the next <see cref="Update"/>, after the frame's own time handling ran.
+    /// A mirrored machine sets it so ops that animate on <see cref="FxTimeInBars"/> (noise, idle motion) see the
+    /// same value as the machine they follow, even while the timeline is paused.
+    /// </summary>
+    public double? FxTimeOverride { get; set; }
         
     /// <summary>
     /// The frame rate relative to 60 fps, e.g. 2 on a 120 Hz display or 25/60 when exporting at 25 fps.
@@ -162,6 +169,12 @@ public class Playback
                 TimeInBars = LoopRange.Start;
             else
                 TimeInBars -= loopDuration;
+        }
+
+        if (FxTimeOverride is { } fxTime)
+        {
+            FxTimeInBars = fxTime;
+            FxTimeOverride = null;
         }
 
         _previousTimeInBars = TimeInBars;

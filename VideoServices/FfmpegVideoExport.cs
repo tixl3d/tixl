@@ -19,7 +19,12 @@ public sealed class FfmpegVideoEncoderFactory : IVideoEncoderFactory
     /// <see cref="TryCreateWriter"/>). Called eagerly when the operator package loads so export works even
     /// when the rendered graph never used a video operator.
     /// </summary>
-    public static void Register() => VideoExport.Factory ??= new FfmpegVideoEncoderFactory();
+    public static void Register()
+    {
+        VideoExport.Factory ??= new FfmpegVideoEncoderFactory();
+        FfmpegLiveEncoderFactory.Register();
+        FfmpegLiveDecoderFactory.Register();
+    }
 
     public IVideoFileWriter? TryCreateWriter(VideoExportSettings settings, out string? error)
     {

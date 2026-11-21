@@ -266,6 +266,11 @@ public sealed class MidiInput : Instance<MidiInput>, MidiConnectionManager.IMidi
     /// </remarks>
     public void MessageReceivedHandler(object sender, MidiInMessageEventArgs msg)
     {
+        // A boygroup render node takes its input from the master; a local device on that machine must
+        // not fight it. The simulated path (HandleSimulatedMidi) bypasses this check.
+        if (RemoteInputBus.IsMidiReplayActive)
+            return;
+
         if (sender is not MidiInputDevice midiIn || msg.MidiEvent == null)
             return;
 

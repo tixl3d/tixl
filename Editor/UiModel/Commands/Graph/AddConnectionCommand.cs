@@ -42,4 +42,9 @@ internal sealed class AddConnectionCommand : ICommand
     private readonly Guid _compositionSymbolId;
     private readonly Symbol.Connection _addedConnection;
     private readonly int _multiInputIndex;
+
+    // Read access for the collab wire encoder; does not participate in undo semantics.
+    internal Guid CompositionSymbolIdForCollab => _compositionSymbolId;
+    internal Symbol.Connection ConnectionForCollab => _addedConnection;
+    internal int MultiInputIndexForCollab => _multiInputIndex;
 }

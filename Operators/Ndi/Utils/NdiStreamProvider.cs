@@ -15,5 +15,7 @@ internal sealed class NdiStreamProvider : IOutputStreamProvider
 
     public OutputStreamOptions Supported => OutputStreamOptions.FrameRate | OutputStreamOptions.Alpha;
 
+    public bool SupportsWarmStandby => true;
+
     public IOutputStreamSender CreateSender(string name) => new NdiSender(name);
 }

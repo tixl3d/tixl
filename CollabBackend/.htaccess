@@ -1,0 +1,6 @@
+# TiXL party backend. The public entry is party.php.
+# PHP OPcache keys on the file path, so never overwrite a deployed file in place -
+# upload the next build under a new name (party2.php, party3.php, ...) and update
+# the URL in Settings > Collaboration > Advanced (Backend URL).
+#
+# data/ holds the SQLite database and is not reachable over the web.

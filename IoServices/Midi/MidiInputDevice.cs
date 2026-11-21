@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using NAudio.Midi;
+using T3.Core.IO;
 
 namespace T3.IoServices.Midi;
 
@@ -26,6 +27,9 @@ public abstract class MidiInputDevice : IDisposable
 
     protected void RaiseMessageReceived(int rawMessage, int timestamp)
     {
+        // Replicate before dispatch: a consumer that throws must not swallow the message for the
+        // render nodes.
+        RemoteInputBus.CaptureMidi(Info.ProductName, rawMessage);
         MessageReceived?.Invoke(this, new MidiInMessageEventArgs(rawMessage, timestamp));
     }
 

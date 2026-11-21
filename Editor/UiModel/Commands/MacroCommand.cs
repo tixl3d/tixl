@@ -48,6 +48,10 @@ internal sealed class MacroCommand : ICommand
 
     internal int Count => _commands.Count;
     private readonly List<ICommand> _commands;
+
+    // Read access for the collab wire encoder, which flattens macros into batches; does not
+    // participate in undo semantics.
+    internal IReadOnlyList<ICommand> CommandsForCollab => _commands;
     public override string ToString()
     {
         return Name;

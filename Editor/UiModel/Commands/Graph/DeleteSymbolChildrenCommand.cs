@@ -173,4 +173,86 @@ public class DeleteSymbolChildrenCommand : ICommand
     private readonly Guid _compositionSymbolId;
     private readonly ChildEntry[] _removedChildren;
     private readonly List<ConnectionEntry> _removedConnections = new();
+
+    // Read access for the collab wire encoder; does not participate in undo semantics.
+    internal Guid CompositionSymbolIdForCollab => _compositionSymbolId;
+    internal IEnumerable<Guid> RemovedChildIdsForCollab => _removedChildren.Select(e => e.ChildId);
+
+    /// <summary>
+    /// Snapshot of the children about to be removed, taken from the live graph while this command is
+    /// created (before Do). The collab wire encoder ships it with the delete op so any participant
+    /// can invert the delete (see restore_children). Mirrors what ChildEntry captures for local undo,
+    /// plus the connections Do() will remove — without them an undone delete would lose wiring.
+    /// </summary>
+    internal CollabChildRestoreData[] CaptureCollabRestoreData()
+    {
+        if (!SymbolUiRegistry.TryGetSymbolUi(_compositionSymbolId, out var compositionSymbolUi))
+            return [];
+
+        var compositionSymbol = compositionSymbolUi.Symbol;
+        var restoreData = new List<CollabChildRestoreData>(_removedChildren.Length);
+        foreach (var entry in _removedChildren)
+        {
+            if (!compositionSymbolUi.ChildUis.TryGetValue(entry.ChildId, out var childUi))
+                continue;
+
+            var child = childUi.SymbolChild;
+            var inputValues = new Dictionary<Guid, InputValue>();
+            foreach (var (inputId, input) in child.Inputs)
+            {
+                if (input.IsDefault)
+                    continue;
+
+                inputValues[inputId] = input.Value.Clone();
+            }
+
+            var timeClips = new Dictionary<Guid, TimeClip>();
+            foreach (var (outputId, output) in child.Outputs)
+            {
+                if (output.OutputData is TimeClip timeClip)
+                    timeClips[outputId] = timeClip.Clone();
+            }
+
+            var removedConnections = new List<(Symbol.Connection Connection, int MultiInputIndex)>();
+            foreach (var connection in compositionSymbol.Connections)
+            {
+                if (connection.SourceParentOrChildId != entry.ChildId && connection.TargetParentOrChildId != entry.ChildId)
+                    continue;
+
+                removedConnections.Add((connection, compositionSymbol.GetMultiInputIndexFor(connection)));
+            }
+
+            restoreData.Add(new CollabChildRestoreData
+                                {
+                                    SymbolId = entry.SymbolId,
+                                    ChildId = entry.ChildId,
+                                    Name = entry.ChildName,
+                                    PosOnCanvas = entry.PosInCanvas,
+                                    Size = entry.Size,
+                                    SectionId = entry.SectionId,
+                                    InputValues = inputValues,
+                                    TimeClips = timeClips,
+                                    Connections = removedConnections,
+                                });
+        }
+
+        return restoreData.ToArray();
+    }
+}
+
+/// <summary>
+/// Pure data description of one removed child, sufficient for the collab wire to re-create it.
+/// Values are clones; encoding happens after the command is created but before it executes.
+/// </summary>
+internal sealed class CollabChildRestoreData
+{
+    public Guid SymbolId { get; init; }
+    public Guid ChildId { get; init; }
+    public string Name { get; init; } = string.Empty;
+    public Vector2 PosOnCanvas { get; init; }
+    public Vector2 Size { get; init; }
+    public Guid SectionId { get; init; }
+    public Dictionary<Guid, InputValue> InputValues { get; init; } = new();
+    public Dictionary<Guid, TimeClip> TimeClips { get; init; } = new();
+    public List<(Symbol.Connection Connection, int MultiInputIndex)> Connections { get; init; } = new();
 }

@@ -1,0 +1,48 @@
+{
+  "FormatVersion": 3,
+  "Id": "8e417a73-0f16-4f5e-b253-39ec13c2ace0"/*RigidBodyGeometry*/,
+  "Description": "Returns the simulated bodies of one or more [RigidBody] operators as geometry.\n\nThis is the way back from physics into the geometry operators. A [RigidBody] made from geometry gives that same geometry back with every part moved by its body, so one geometry describes the object, is the collider and is what you draw. A primitive [RigidBody] gives a box, sphere, capsule or cylinder of its own size, so it needs no separate mesh either.\n\nEvery body is one part of the result. Connect [GeometryToMesh] to draw it, or any other geometry operator.\n\nAKA: simulated geometry, physics mesh, pose geometry, bake physics\n\nTips\n- The geometry is rebuilt every frame on the CPU. For many identical bodies, [RigidBodyPoints] with [DrawMeshAtPoints] is cheaper.\n- Connect several [RigidBody] outputs to Body to get them as one geometry. Joined bodies keep positions, faces, parts, normals and part colors; other attributes are kept only for a single body.\n- Bodies spawned from points carry the point color as a Color part attribute.\n- Turn on ShowColliders to see the hulls a concave body was split into.",
+  "InputUis": [
+    {
+      "InputId": "4b8e2f61-93c7-4d0a-b5e8-7f21c6a9d304"/*ShowColliders*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 90.0
+      },
+      "Description": "Draws bodies made from geometry as the convex hulls they collide as, each hull in a face color of its own, instead of as their geometry. Use it to check how a concave shape was split."
+    },
+    {
+      "InputId": "9039d3ba-121e-4956-8b74-944bd4170f69"/*Body*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "The [RigidBody] operators whose simulated bodies to return as geometry. Several are joined into one geometry, in connection order."
+    },
+    {
+      "InputId": "eb4be503-426c-4ea3-af0d-47933b2fd641"/*World*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      },
+      "Description": "The OutBuffer of [PhysicsWorld]. It makes the world step before the poses are read."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "27dd76aa-73b8-4a36-97d5-f6a10b334f48"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "d1e9cddf-c53f-4380-afbd-2ac91a0304bc"/*Count*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 45.0
+      }
+    }
+  ]
+}

@@ -1,0 +1,273 @@
+{
+  "FormatVersion": 3,
+  "Id": "faa1fe57-3dd8-5136-93c3-fe9bdbeccd4d"/*PhysicsToVolumeExample*/,
+  "Description": "Physics output feeds the volume operators too. The world's poses are read back with [ReadPointsFromGpu], [VolumeFromPoints] splats them into a density volume and [VolumeToMesh] extracts one blobby surface around all of them, every frame. Think of it as a metaball or liquid look on top of rigid bodies.\n\nNone of this holds up a frame: the read-back is asynchronous and both volume operators work on a background thread, so the skin trails the balls by a frame or two while playback stays smooth.\n\nAKA: metaballs, blobby, liquid, skin, splat, points to volume\n\nTips\n- Playback must run for the simulation to advance; press Reset on the World to start over.\n- A larger Radius on [VolumeFromPoints] melts the balls together; a smaller VoxelSize gives a smoother skin and costs more.",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "00c3cd12-5e08-5e07-881d-b677e28e181c",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "e0a4c807-a53b-5acf-9e5b-16b75f49d369",
+      "Position": {
+        "X": 520.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "14b4ef7f-56fb-57e0-af4c-dff221101dd9",
+      "SymbolName": "Lib.render.shading.SetShadow",
+      "SectionId": "e026e8b6-46c3-56dd-a687-59b6b0c103d3",
+      "Position": {
+        "X": 2860.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "21fe8a8c-d797-5692-a7b7-2cdda0ddc144",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "e0a4c807-a53b-5acf-9e5b-16b75f49d369",
+      "Position": {
+        "X": 520.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "2c249c3c-70df-54c2-969a-9f3becd7b9d5",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "SectionId": "ef093492-56eb-5d08-b295-8c9ffaa31c46",
+      "Position": {
+        "X": 2080.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "34042595-5deb-5d55-af75-01e9de3e97e9",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "Position": {
+        "X": 1560.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "4037c77e-d5eb-566d-8e9d-9b94cdb60dc6",
+      "SymbolName": "Lib.physics.PhysicsWorld",
+      "SectionId": "e0a4c807-a53b-5acf-9e5b-16b75f49d369",
+      "Position": {
+        "X": 780.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "44ecb34f-6066-5aef-9e5d-90724c166454",
+      "SymbolName": "Lib.render.camera.Camera",
+      "SectionId": "e026e8b6-46c3-56dd-a687-59b6b0c103d3",
+      "Position": {
+        "X": 2860.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "4a695499-2380-52df-b417-b14d80594b1e",
+      "SymbolName": "Lib.geometry.ScatterPointsInVolume",
+      "SectionId": "e0a4c807-a53b-5acf-9e5b-16b75f49d369",
+      "Position": {
+        "X": 0.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "4cd3c736-128e-5e07-a4c5-64683c63aef8",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "SectionId": "e026e8b6-46c3-56dd-a687-59b6b0c103d3",
+      "Position": {
+        "X": 2860.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "5532e983-0eca-5ed7-94fb-1c5558b8172c",
+      "SymbolName": "Lib.render.postfx.SSAO",
+      "SectionId": "e026e8b6-46c3-56dd-a687-59b6b0c103d3",
+      "Position": {
+        "X": 3380.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "6de8c6bc-2f64-5fc6-a311-981a32d860a6",
+      "SymbolName": "Lib.point.helper.ReadPointsFromGpu",
+      "SectionId": "ef093492-56eb-5d08-b295-8c9ffaa31c46",
+      "Position": {
+        "X": 1300.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "7752c5ac-b092-5535-bbaf-030b7abbb29a",
+      "SymbolName": "Lib.volume.generate.VolumeFromPoints",
+      "SectionId": "ef093492-56eb-5d08-b295-8c9ffaa31c46",
+      "Position": {
+        "X": 1560.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "78cded01-e283-5cd3-8c53-8de377e56096",
+      "SymbolName": "Lib.flow.Execute",
+      "SectionId": "e026e8b6-46c3-56dd-a687-59b6b0c103d3",
+      "Position": {
+        "X": 2860.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "7ad01e53-0027-5bd6-b8b7-2e96b17fc015",
+      "SymbolName": "Lib.physics.RigidBodyGeometry",
+      "Position": {
+        "X": 1300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "a8bae468-3c44-590e-847e-189dfb93be7c",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "Position": {
+        "X": 1820.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "acd38d99-ed55-5ffc-bc77-653d81f6be96",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "SectionId": "ef093492-56eb-5d08-b295-8c9ffaa31c46",
+      "Position": {
+        "X": 2340.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "b1d042b6-0a08-56ed-840c-fee0dcdfa16d",
+      "SymbolName": "Lib.volume.convert.VolumeToMesh",
+      "SectionId": "ef093492-56eb-5d08-b295-8c9ffaa31c46",
+      "Position": {
+        "X": 1820.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "d1918a65-7ddc-5ca3-8978-ca3c3f77a1b0",
+      "SymbolName": "Lib.render.shading.SetFog",
+      "SectionId": "e026e8b6-46c3-56dd-a687-59b6b0c103d3",
+      "Position": {
+        "X": 2860.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "daa548f9-fee5-51f0-a4ba-6c4bd3ca4db2",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "SectionId": "e026e8b6-46c3-56dd-a687-59b6b0c103d3",
+      "Position": {
+        "X": 3120.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "ef49ea7f-aaf7-5cf7-8ca7-1bdd42a7f413",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "SectionId": "e026e8b6-46c3-56dd-a687-59b6b0c103d3",
+      "Position": {
+        "X": 2860.0,
+        "Y": 220.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "6aa0bc05-b707-559a-8862-7ddc3b359fa0"/*Output*/,
+      "Position": {
+        "X": 3640.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "e026e8b6-46c3-56dd-a687-59b6b0c103d3",
+      "Title": "Render: light, shadow and camera",
+      "Color": {
+        "X": 0.4,
+        "Y": 0.4,
+        "Z": 0.45,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 2820.0,
+        "Y": -70.0
+      },
+      "Size": {
+        "X": 800.0,
+        "Y": 720.0
+      }
+    },
+    {
+      "Id": "e0a4c807-a53b-5acf-9e5b-16b75f49d369",
+      "Title": "1  Falling balls",
+      "Color": {
+        "X": 0.65,
+        "Y": 0.45,
+        "Z": 0.25,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -40.0,
+        "Y": -70.0
+      },
+      "Size": {
+        "X": 1060.0,
+        "Y": 280.0
+      }
+    },
+    {
+      "Id": "ef093492-56eb-5d08-b295-8c9ffaa31c46",
+      "Title": "2  Poses into a volume, volume into a skin",
+      "Color": {
+        "X": 0.3,
+        "Y": 0.55,
+        "Z": 0.4,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1260.0,
+        "Y": 150.0
+      },
+      "Size": {
+        "X": 1320.0,
+        "Y": 170.0
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "9f71c2da-1181-54ce-ae22-73551c70bc46",
+      "ChildId": "6de8c6bc-2f64-5fc6-a311-981a32d860a6",
+      "InputId": "b2a36ab5-5b81-4b72-9f40-9e66d3dcf94b",
+      "Description": "The world's OutBuffer holds every body's pose. Async reads it back every frame without waiting for the GPU.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "58588042-3bd1-5cba-a2fc-28a2cb5528bc",
+      "ChildId": "7752c5ac-b092-5535-bbaf-030b7abbb29a",
+      "InputId": "8a3c8412-7266-50ce-83ba-7841bb431863",
+      "Description": "[VolumeFromPoints] splats a sphere of density at every point.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "4e71cca8-7bc4-5958-b1ce-f6805b0ae0c2",
+      "ChildId": "b1d042b6-0a08-56ed-840c-fee0dcdfa16d",
+      "InputId": "345f946b-8c36-5548-a569-4123e0544b8f",
+      "Description": "One surface around all the balls: lower the Isovalue for a fatter skin.",
+      "Style": "InfoFor"
+    }
+  ]
+}

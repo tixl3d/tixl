@@ -12,6 +12,7 @@ using T3.Core.IO;
 using T3.Core.Logging;
 using T3.Core.Output.Streaming;
 using T3.Core.Utils;
+using T3.Core.Video;
 using T3.Serialization;
 
 namespace T3.Core.Compilation;
@@ -79,8 +80,11 @@ public sealed partial class AssemblyInformation
 
     internal bool ShouldShareResources;
 
-    // Stream providers this assembly contributed to the OutputStreamRegistry; taken out again on unload.
+    // Stream providers this assembly contributed to the OutputStreamRegistry and RemoteVideoInputRegistry;
+    // taken out again on unload.
     private readonly List<IOutputStreamProvider> _streamProviders = [];
+    private readonly List<IRemoteVideoInputProvider> _remoteVideoProviders = [];
+    private readonly List<IPeerCameraProvider> _peerCameraProviders = [];
     internal TixlAssemblyLoadContext? LoadContext => _loadContext;
     private TixlAssemblyLoadContext? _loadContext;
     private readonly Lock _assemblyLock = new();
@@ -91,6 +95,16 @@ public sealed partial class AssemblyInformation
             OutputStreamRegistry.Unregister(provider);
 
         _streamProviders.Clear();
+
+        foreach (var provider in _remoteVideoProviders)
+            RemoteVideoInputRegistry.Unregister(provider);
+
+        _remoteVideoProviders.Clear();
+
+        foreach (var provider in _peerCameraProviders)
+            PeerCameraRegistry.Unregister(provider);
+
+        _peerCameraProviders.Clear();
     }
 
     public static AssemblyInformation CreateUninitialized()
@@ -199,7 +213,7 @@ public sealed partial class AssemblyInformation
             try
             {
                 var types = rootNode.Assembly.GetTypes();
-                LoadTypes(types, rootNode.Assembly, out ShouldShareResources, _operatorTypeInfo, _namespaces, _types, _streamProviders);
+                LoadTypes(types, rootNode.Assembly, out ShouldShareResources, _operatorTypeInfo, _namespaces, _types, _streamProviders, _remoteVideoProviders, _peerCameraProviders);
                 _loadedTypes = true;
                 return true;
             }

@@ -26,9 +26,10 @@ internal sealed class OscInput : Instance<OscInput>, OscConnectionManager.IOscCo
 
         WasTrigger.UpdateAction += AnimatedUpdate;
 
-        // Receive replayed OSC from SimulateIoData. Filtering by port + address happens
-        // inside HandleSimulatedOsc so the existing ProcessMessage code path is reused.
+        // Receive replayed OSC from SimulateIoData and from a boygroup master. Filtering by port +
+        // address happens inside the handlers so the existing ProcessMessage code path is reused.
         SimulatedIoBus.OscEventReceived += HandleSimulatedOsc;
+        SimulatedIoBus.OscPacketReceived += HandleSimulatedOscPacket;
     }
 
     private void HandleSimulatedOsc(SimulatedIoBus.SimulatedOscEvent ev)
@@ -39,7 +40,16 @@ internal sealed class OscInput : Instance<OscInput>, OscConnectionManager.IOscCo
 
         // Reconstruct an OscMessage and route through the existing handler so the
         // address-prefix filter, key grouping, search regex etc. all behave identically.
-        ProcessMessage(new OscMessage(ev.Address, ev.Value));
+        ProcessMessageCore(new OscMessage(ev.Address, ev.Value));
+    }
+
+    private void HandleSimulatedOscPacket(SimulatedIoBus.SimulatedOscPacket ev)
+    {
+        if (ev.Port != _port)
+            return;
+
+        // The master sends the original packet, so multi-argument messages keep their types.
+        ProcessMessageCore(ev.Message);
     }
 
     private bool _isListening;
@@ -231,6 +241,16 @@ internal sealed class OscInput : Instance<OscInput>, OscConnectionManager.IOscCo
     # region handling async messages from other thread
     public void ProcessMessage(OscMessage msg)
     {
+        // A boygroup render node takes its input from the master; a local socket on that machine must
+        // not fight it. The simulated path (HandleSimulatedOsc/Packet) bypasses this check.
+        if (RemoteInputBus.IsOscReplayActive)
+            return;
+
+        ProcessMessageCore(msg);
+    }
+
+    private void ProcessMessageCore(OscMessage msg)
+    {
         lock (this)
         {
             if (_printLogMessages)
@@ -400,6 +420,7 @@ internal sealed class OscInput : Instance<OscInput>, OscConnectionManager.IOscCo
 
         OscConnectionManager.UnregisterConsumer(this);
         SimulatedIoBus.OscEventReceived -= HandleSimulatedOsc;
+        SimulatedIoBus.OscPacketReceived -= HandleSimulatedOscPacket;
     }
 
     private static string GetLocalIpAddress()

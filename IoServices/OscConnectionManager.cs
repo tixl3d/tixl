@@ -1,9 +1,12 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Rug.Osc;
+using T3.Core.IO;
 using T3.Core.Logging;
+using T3.Core.Utils;
 
 namespace T3.IoServices;
 
@@ -100,7 +103,14 @@ public static class OscConnectionManager
         public PortGroup(int listenPort)
         {
             Port = listenPort;
-            _receiver = new OscReceiver(listenPort);
+
+            // OSC used to bind every adapter. The chosen adapter is per machine (Networking settings),
+            // so a show host with Wi-Fi, VPN and Hyper-V adapters answers only on the show network.
+            var localAddress = ProtocolInterfaces.ResolveOptionalAddress(ProtocolInterfaces.Keys.Osc);
+            _receiver = localAddress == null
+                            ? new OscReceiver(listenPort)
+                            : new OscReceiver(IPAddress.Parse(localAddress), listenPort);
+
             try
             {
                 _receiver.Connect();
@@ -186,6 +196,10 @@ public static class OscConnectionManager
 
         private void ForwardMessage(OscMessage message)
         {
+            // Capture the packet once per port, not once per consumer: the master forwards the original
+            // bytes so every argument type survives on the render node.
+            RemoteInputBus.CaptureOsc(Port, message.ToByteArray());
+
             foreach (var consumer in Consumers)
             {
                 consumer.ProcessMessage(message);

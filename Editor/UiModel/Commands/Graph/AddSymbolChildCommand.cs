@@ -18,6 +18,20 @@ public sealed class AddSymbolChildCommand : ICommand
         _addedChildId = Guid.NewGuid();
     }
 
+    /// <summary>
+    /// Variant with a pre-chosen child id, used by the collab sync so the author's id is applied
+    /// on every participant instead of each instance minting its own.
+    /// </summary>
+    public AddSymbolChildCommand(Symbol compositionOp, Guid symbolIdToAdd, Guid forcedChildId)
+    {
+        if (compositionOp == null)
+            return;
+
+        _parentSymbolId = compositionOp.Id;
+        _addedSymbolId = symbolIdToAdd;
+        _addedChildId = forcedChildId;
+    }
+
     public void Undo()
     {
         if(!SymbolUiRegistry.TryGetSymbolUi(_parentSymbolId, out var parentSymbolUi))
@@ -93,4 +107,8 @@ public sealed class AddSymbolChildCommand : ICommand
     public Vector2 PosOnCanvas { get; set; } = Vector2.Zero;
     public Vector2 Size { get; set; } = SymbolUi.Child.DefaultOpSize;
     public string ChildName { get; set; } = string.Empty;
+
+    // Read access for the collab wire encoder; does not participate in undo semantics.
+    internal Guid ParentSymbolIdForCollab => _parentSymbolId;
+    internal Guid SymbolIdForCollab => _addedSymbolId;
 }

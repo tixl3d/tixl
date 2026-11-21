@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Headless test runner for the collab / boygroup / failover network layer.
+
+    Deliberately targets plain net10.0 (NOT net10.0-windows): building this project is the
+    POSIX compile gate for every network-layer source file it pulls in via <Compile Include>.
+    It must build unmodified on Windows, Linux and macOS. Do not add editor dependencies to
+    the included files; keep them in the plain-socket subset.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>T3.CollabHeadless</RootNamespace>
+    <AssemblyName>CollabHeadless</AssemblyName>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <NoWarn>$(NoWarn);CS8632</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../../Editor/Collab/CollabProtocol.cs" Link="Included/CollabProtocol.cs" />
+    <Compile Include="../../Editor/Collab/CollabAuth.cs" Link="Included/CollabAuth.cs" />
+    <Compile Include="../../Core/Utils/LanInterfaces.cs" Link="Included/LanInterfaces.cs" />
+    <Compile Include="../../Editor/Collab/CollabTransport.cs" Link="Included/CollabTransport.cs" />
+    <Compile Include="../../Editor/Show/BoygroupDeployer.cs" Link="Included/BoygroupDeployer.cs" />
+    <Compile Include="../../Editor/Show/BoygroupTransport.cs" Link="Included/BoygroupTransport.cs" />
+    <Compile Include="../../Core/Show/FailoverArbiter.cs" Link="Included/FailoverArbiter.cs" />
+  </ItemGroup>
+</Project>

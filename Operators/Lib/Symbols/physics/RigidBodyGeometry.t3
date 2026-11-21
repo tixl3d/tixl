@@ -1,0 +1,20 @@
+{
+  "FormatVersion": 3,
+  "Id": "8e417a73-0f16-4f5e-b253-39ec13c2ace0"/*RigidBodyGeometry*/,
+  "Inputs": [
+    {
+      "Id": "4b8e2f61-93c7-4d0a-b5e8-7f21c6a9d304"/*ShowColliders*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "9039d3ba-121e-4956-8b74-944bd4170f69"/*Body*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "eb4be503-426c-4ea3-af0d-47933b2fd641"/*World*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

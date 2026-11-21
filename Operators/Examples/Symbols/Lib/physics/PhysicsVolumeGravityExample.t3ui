@@ -1,0 +1,292 @@
+{
+  "FormatVersion": 3,
+  "Id": "0f12b1a9-7c69-51d1-ab4a-ad4778d97aeb"/*PhysicsVolumeGravityExample*/,
+  "Description": "A volume can be a force as well as a collider. [VolumeToField] turns the torus volume into a vector field, its gradient, and a [RigidForce] of type Field samples that field at every body. Negative Strength pulls the boxes towards the surface instead of pushing them away. The same volume, meshed with [VolumeToMesh], is the collider they land on. World gravity is zero.\n\nAKA: gravity well, attractor, magnet, field force, volume gradient\n\nTips\n- Playback must run for the simulation to advance; press Reset on the World to start over.\n- Any [VectorField] works as a force: noise, curl, or a field built from SDF operators.",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "02adcddc-b45b-5404-be12-ee9754b1783f",
+      "SymbolName": "Lib.physics.PhysicsWorld",
+      "SectionId": "ce417364-d598-5bd5-9769-3167f7ba1bc8",
+      "Position": {
+        "X": 1300.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "0b3fbc59-0400-5c0c-af81-b8890d19bdcd",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "Position": {
+        "X": 2080.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "141cecae-9adf-5531-911b-1dcda865f88f",
+      "SymbolName": "Lib.render.shading.SetShadow",
+      "SectionId": "e852c15a-9498-5c7e-89ec-de4356e49e84",
+      "Position": {
+        "X": 2860.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "41e481a1-046a-5e69-a123-19a05159ebd9",
+      "SymbolName": "Lib.volume.convert.VolumeToMesh",
+      "SectionId": "59cc99b7-bc8f-5280-bd25-18d2903ec22c",
+      "Position": {
+        "X": 260.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "4295ebb7-7bee-5b10-b4c0-99d385ae79f0",
+      "SymbolName": "Lib.render.postfx.SSAO",
+      "SectionId": "e852c15a-9498-5c7e-89ec-de4356e49e84",
+      "Position": {
+        "X": 3380.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "469e13fc-3e75-50f6-96c3-10d30d7206fb",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "SectionId": "e852c15a-9498-5c7e-89ec-de4356e49e84",
+      "Position": {
+        "X": 2860.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "7ee3ef79-222b-53a8-a80d-ecf725771238",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "ce417364-d598-5bd5-9769-3167f7ba1bc8",
+      "Position": {
+        "X": 780.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "8c04e5dc-b749-55f1-b053-00281730ad18",
+      "SymbolName": "Lib.flow.Execute",
+      "SectionId": "e852c15a-9498-5c7e-89ec-de4356e49e84",
+      "Position": {
+        "X": 2860.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "8f848171-f6f0-5674-9fc3-104a584a31ee",
+      "SymbolName": "Lib.render.camera.Camera",
+      "SectionId": "e852c15a-9498-5c7e-89ec-de4356e49e84",
+      "Position": {
+        "X": 2860.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "96df498f-930b-56ca-a0b6-115383309370",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "SectionId": "e852c15a-9498-5c7e-89ec-de4356e49e84",
+      "Position": {
+        "X": 2860.0,
+        "Y": 220.0
+      }
+    },
+    {
+      "ChildId": "9f1f99a1-8b86-5070-b82e-529a0edabe90",
+      "SymbolName": "Lib.physics.RigidBodyGeometry",
+      "Position": {
+        "X": 1820.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "d254f7a1-ba22-5dcb-9775-fa3dc4842010",
+      "SymbolName": "Lib.render.shading.SetFog",
+      "SectionId": "e852c15a-9498-5c7e-89ec-de4356e49e84",
+      "Position": {
+        "X": 2860.0,
+        "Y": 440.0
+      }
+    },
+    {
+      "ChildId": "d5cc5bb5-5bc1-55ce-b8f6-3803312f4d4b",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "Position": {
+        "X": 2340.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "e01d126c-26b0-5747-a1c4-de79b5aee871",
+      "SymbolName": "Lib.volume.generate.VolumePrimitive",
+      "SectionId": "59cc99b7-bc8f-5280-bd25-18d2903ec22c",
+      "Position": {
+        "X": 0.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "e02fb34b-c3ba-572b-b570-414bbb111332",
+      "SymbolName": "Lib.physics.RigidBodyGeometry",
+      "Position": {
+        "X": 1820.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "e4974b32-1f75-5d90-a8db-aa9c6dfea319",
+      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "Position": {
+        "X": 2340.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "e52cf4b5-56f6-59fb-9d1b-91d5727b5a6f",
+      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "Position": {
+        "X": 2080.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "ecf406b2-3489-5936-ab8e-4cf915e26800",
+      "SymbolName": "Lib.physics.RigidBody",
+      "SectionId": "59cc99b7-bc8f-5280-bd25-18d2903ec22c",
+      "Position": {
+        "X": 780.0,
+        "Y": 110.0
+      }
+    },
+    {
+      "ChildId": "edf012f8-a391-5c16-8075-dcc45e659b53",
+      "SymbolName": "Lib.geometry.ScatterPointsInVolume",
+      "SectionId": "ce417364-d598-5bd5-9769-3167f7ba1bc8",
+      "Position": {
+        "X": 260.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "eff8afd6-4a81-5761-817d-c6da2b774fcc",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "SectionId": "e852c15a-9498-5c7e-89ec-de4356e49e84",
+      "Position": {
+        "X": 3120.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "ChildId": "f9b7838d-ff6b-58f2-ba26-8c7f4d744143",
+      "SymbolName": "Lib.physics.RigidForce",
+      "SectionId": "59cc99b7-bc8f-5280-bd25-18d2903ec22c",
+      "Position": {
+        "X": 780.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "fa2ebdef-5c79-5813-9a91-465508111821",
+      "SymbolName": "Lib.volume.convert.VolumeToField",
+      "SectionId": "59cc99b7-bc8f-5280-bd25-18d2903ec22c",
+      "Position": {
+        "X": 260.0,
+        "Y": 330.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "707067e2-92d8-53b7-b124-13a032211f4b"/*Output*/,
+      "Position": {
+        "X": 3640.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "59cc99b7-bc8f-5280-bd25-18d2903ec22c",
+      "Title": "1  One volume, two uses",
+      "Color": {
+        "X": 0.35,
+        "Y": 0.5,
+        "Z": 0.65,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -40.0,
+        "Y": 40.0
+      },
+      "Size": {
+        "X": 1060.0,
+        "Y": 390.0
+      }
+    },
+    {
+      "Id": "ce417364-d598-5bd5-9769-3167f7ba1bc8",
+      "Title": "2  Debris in zero gravity",
+      "Color": {
+        "X": 0.65,
+        "Y": 0.45,
+        "Z": 0.25,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 220.0,
+        "Y": 260.0
+      },
+      "Size": {
+        "X": 1320.0,
+        "Y": 390.0
+      }
+    },
+    {
+      "Id": "e852c15a-9498-5c7e-89ec-de4356e49e84",
+      "Title": "Render: light, shadow and camera",
+      "Color": {
+        "X": 0.4,
+        "Y": 0.4,
+        "Z": 0.45,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 2820.0,
+        "Y": -70.0
+      },
+      "Size": {
+        "X": 800.0,
+        "Y": 720.0
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "f4785f9e-3a0e-591f-9370-84ffe12b4fea",
+      "ChildId": "e01d126c-26b0-5747-a1c4-de79b5aee871",
+      "Description": "One torus volume feeds both the collider and the force."
+    },
+    {
+      "Id": "d47bc470-8a84-5d63-a6da-2a69acd2e6be",
+      "ChildId": "fa2ebdef-5c79-5813-9a91-465508111821",
+      "Description": "[VolumeToField] outputs the volume's gradient as Vectors: they point away from the surface.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "3346011b-bb8e-5787-87f5-8bd4ba8d113a",
+      "ChildId": "f9b7838d-ff6b-58f2-ba26-8c7f4d744143",
+      "InputId": "4b020f6c-2875-42f1-b1d7-3fe2f53a57b6",
+      "Description": "A Field force samples it at every body; negative Strength pulls towards the surface.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "ebb890b2-52aa-505b-9d1f-1443ed48a351",
+      "ChildId": "02adcddc-b45b-5404-be12-ee9754b1783f",
+      "InputId": "098ac911-44f7-45e4-99e4-80b18b7058ba",
+      "Description": "Gravity is zero, so the torus is the only thing that attracts.",
+      "Style": "InfoFor"
+    }
+  ]
+}
