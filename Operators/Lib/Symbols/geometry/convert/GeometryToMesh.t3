@@ -5,6 +5,10 @@
     {
       "Id": "57469ea6-f0c5-4e8d-a53c-40e8ac495bc3"/*Geometry*/,
       "DefaultValue": null
+    },
+    {
+      "Id": "94d5cf91-080f-44f4-9c8c-80a81ebd88f6"/*FillCurves*/,
+      "DefaultValue": true
     }
   ],
   "Children": [],

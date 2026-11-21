@@ -187,12 +187,14 @@ message must name what was expected.
   to one input on its original id. Bevel, Triangulate, SeparateLooseParts and VoronoiFracture work on polygons through
   `Lib/Utils/GeometryPolygonFilter` and leave curves out (pass-through is a follow-up); `GeometryPartSubset` keeps
   primitive kinds. The CPoint inputs of PlaceGeometryAtPoints, VoronoiFracture and the field ops stay for Phase 3.
-- **Flat fill without extrusion** (maintainer, 2026-11-20): curves must become a surface without an op named
+- **Flat fill without extrusion** (done 2026-11-21: `Lib/Utils/CurveSolidBuilder` is the builder moved out of
+  `ExtrudeCurves`; `FillCurves` and `GeometryToMesh.FillCurves` use its `FillFlat`, which skips parts that already have
+  polygons so kept curves don't double a front cap) (maintainer, 2026-11-20): curves must become a surface without an op named
   "extrude". Move the fill (flatten, resolve overlaps by fill rule, tessellate with holes) out of `ExtrudeCurves` into
   a `Lib/Utils` helper, then (1) `GeometryToMesh` fills closed curves itself (option, on by default) so
   `StringToCurves -> GeometryToMesh` renders flat shapes, and (2) a `FillCurves` op outputs the flat polygons as
   Geometry for further modelling (Houdini's PolyFill). `ExtrudeCurves` keeps walls and bevels.
-- **Attribute-driven extrusion depth** (maintainer, 2026-11-20): `ExtrudeCurves` gets a `DepthAttribute` input; the
+- **Attribute-driven extrusion depth** (done 2026-11-21 per part; per point still open) (maintainer, 2026-11-20): `ExtrudeCurves` gets a `DepthAttribute` input; the
   final depth is Depth times the attribute's value, 1 when the attribute is missing. Per part first (a part's outline
   and holes share one depth; a primitive attribute uses the part's largest value). Per point later: walls and caps
   share ring points, so each point can take its own depth for sloped back caps, interpolated along the flattened
@@ -224,13 +226,15 @@ message must name what was expected.
   attribute is rebuilt on every evaluation (one pass over the vertices); add a cache keyed on the geometry's version
   only if profiling shows it matters, since in-place upstream updates must bump that version.
   Recompiles only when the code or an attribute's type changes.
-- **`Segments` on `CubeGeometry`** (maintainer, 2026-11-21): an Int3 input (default 1, 1, 1) that splits each face
+- **`Segments` on `CubeGeometry`** (done 2026-11-21) (maintainer, 2026-11-21): an Int3 input (default 1, 1, 1) that splits each face
   into a grid, with per-axis counts that subdividing cannot give (e.g. 10 x 1 x 3 for a bar to bend). Shared points
   along cube edges, so the result stays watertight; UVs per face as today.
-- The remaining mesh ops (mechanical: Face -> Primitive, Corner -> Vertex), `OffsetCurves`, `CurvesToPoints`, output
-  setup's `StageGeometry` and `SurfaceGeometry`.
-- Remove `MeshGeometry`, `CurveGeometry`, `CurvePart`.
-- One commit for the mechanical rename, separate from behavior changes.
+- ~~The remaining mesh ops, `OffsetCurves`, `CurvesToPoints`, `StageGeometry`, `SurfaceGeometry`; removing
+  `MeshGeometry`, `CurveGeometry`, `CurvePart`~~: done in batches 1-3.
+- **Curves through polygon-only ops** (done 2026-11-21): Bevel, Triangulate, SeparateLooseParts and VoronoiFracture
+  append the source's curves to their result through `Lib/Utils/GeometryCurvePassThrough` (a new cached instance, so
+  async results stay valid), after all parts. Triangulate also remaps primitive attributes per triangle now.
+- Known: `BevelGeometry` outputs no parts.
 
 ### Phase 3: Points bridge
 - Geometry points in `ScatterPointsInVolume`, `PlaceGeometryAtPoints` and the field ops, `GeometryToPointBuffer`,

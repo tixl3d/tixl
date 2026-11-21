@@ -444,3 +444,29 @@ Name `N`, Field from a [NoiseField]) -> [ColorGeometry] (Attribute `N`) and look
 **Expected:**
 - The cube shows the noise as a gradient; changing the noise changes the colors.
 - Without a connected Field the op warns and passes the geometry through.
+
+## Step: Flat text and a depth wave
+
+**Action:**
+Connect [StringToCurves] (text `TiXL`) directly to [GeometryToMesh] -> [DrawMesh].
+
+**Expected:**
+- The letters render flat and filled, holes included; turning FillCurves off on [GeometryToMesh] hides them and the op
+  warns that there is nothing to draw.
+- [StringToCurves] -> [FillCurves] -> [GeometryToMesh] looks the same; the Stats of [FillCurves] show polygons, one part
+  per letter.
+- Insert [CustomGeometryAttribute] (Domain Parts, Name `Depth`, Code `return 0.5f + 0.5f * Sin(i * 0.8f + A);`) and
+  [ExtrudeCurves] (DepthAttribute `Depth`) before [GeometryToMesh]: each letter gets its own depth; animating A moves
+  the wave. A misspelled DepthAttribute warns and extrudes all letters equally.
+- With KeepCurves on [ExtrudeCurves], the front caps don't flicker: [GeometryToMesh] doesn't fill the kept curves again.
+
+## Step: Segmented cube and curves through mesh ops
+
+**Action:**
+Set Segments of [CubeGeometry] to 2, 1, 3 and look at the Stats. Then connect [ExtrudeCurves] (KeepCurves on) to
+[BevelGeometry], [TriangulateGeometry], [SeparateLooseParts] and [VoronoiFracture] in turn.
+
+**Expected:**
+- The cube has 24 points and 22 quads, Boundary edges 0 and volume 1; 1, 1, 1 gives the plain cube.
+- Each op's output still contains the letter outlines as curves (Stats, Table Primitives), after all parts.
+- After [TriangulateGeometry], the IsSide primitive attribute has one value per triangle.

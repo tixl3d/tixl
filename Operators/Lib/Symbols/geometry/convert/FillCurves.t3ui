@@ -1,0 +1,58 @@
+{
+  "FormatVersion": 3,
+  "Id": "daab8738-babd-4036-8581-22e3dc55e4ba"/*FillCurves*/,
+  "Description": "Fills the closed curves of a geometry with flat polygons, holes included, for example to turn [StringToCurves] into flat letters.\n\nThe result is a regular polygon geometry: it can be subdivided, displaced, transformed or colored before [GeometryToMesh] draws it. To only render flat shapes, connect the curves to [GeometryToMesh] directly; it fills closed curves itself. For depth, walls and bevels use [ExtrudeCurves].\n\nAKA: fill, polyfill, triangulate curves, flat text, cap\n\nTips\n- [StringToCurves] -> FillCurves -> [SubdivideGeometry] (Smoothness 0) -> [DisplaceGeometry] gives letters with enough points to deform.",
+  "InputUis": [
+    {
+      "InputId": "02b5e3a3-064e-4e1b-85b9-1d3ca685958d"/*EvenOdd*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 135.0
+      },
+      "Description": "Uses the even-odd fill rule instead of non-zero."
+    },
+    {
+      "InputId": "2b970621-dc0a-41d8-9220-3dd19a707af1"/*Curves*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "a2bca4ff-9cd9-4f97-9fbf-a0ee9351b86e"/*KeepCurves*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 180.0
+      },
+      "Description": "Keeps the source curves in each part, after its polygons, e.g. to draw an outline over the fill."
+    },
+    {
+      "InputId": "ac6b705b-b962-4f92-8e4a-451d787f57bb"/*Weight*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 90.0
+      },
+      "Description": "Offsets the outline outwards (positive) or inwards (negative) for a bolder or lighter look.",
+      "Scale": 0.01
+    },
+    {
+      "InputId": "d1deb9b8-6ffd-476b-b9b4-fbd32845b0f0"/*Tolerance*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      },
+      "Description": "Maximum deviation when flattening the curves into polygons. Smaller values give smoother outlines and more faces."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "4dfc042d-c7fa-4ce1-b774-2892a67f1d6c"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}
