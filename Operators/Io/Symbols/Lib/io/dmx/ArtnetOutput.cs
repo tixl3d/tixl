@@ -9,7 +9,7 @@ namespace Lib.io.dmx
 {
     [Guid("98efc7c8-cafd-45ee-8746-14f37e9f59f8")]
     [ExportDependencies("ArtNet.dll")]
-    internal sealed class ArtnetOutput : Instance<ArtnetOutput>, IStatusProvider, ICustomDropdownHolder, IDisposable
+    internal sealed class ArtnetOutput : Instance<ArtnetOutput>, IStatusProvider, ICustomDropdownHolder
     {
         private const int ArtNetPort = 6454;
         private static readonly byte[] _artnetId = "Art-Net\0"u8.ToArray();
@@ -467,7 +467,16 @@ namespace Lib.io.dmx
             }
         }
 
-        public void Dispose() { StopSenderThread(); StopArtPolling(); CloseSocket(); }
+        protected override void Dispose(bool isDisposing)
+        {
+            if (isDisposing)
+            {
+                StopSenderThread();
+                StopArtPolling();
+                CloseSocket();
+            }
+            base.Dispose(isDisposing);
+        }
 
         private void CloseSocket()
         {
