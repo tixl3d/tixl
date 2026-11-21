@@ -1,6 +1,8 @@
+﻿using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Sdcb.FFmpeg.Codecs;
+using Sdcb.FFmpeg.Common;
 using Sdcb.FFmpeg.Formats;
 using Sdcb.FFmpeg.Raw;
 using Sdcb.FFmpeg.Utils;
@@ -64,29 +66,82 @@ public sealed class VideoDecoderSession : IDisposable
     /// <summary>
     /// Opens <paramref name="url"/> (file or network stream) and selects the best video stream. Returns null
     /// on failure. <paramref name="demuxerOptions"/> passes demuxer options (e.g. <c>rtsp_transport=tcp</c>).
+    /// <paramref name="inputFormat"/> forces the demuxer by short name (e.g. <c>v4l2</c>, <c>dshow</c>) for
+    /// URLs that content probing cannot identify, like capture device nodes.
     /// </summary>
+    /// <param name="cancellationToken">Checked before opening and between frame reads, so a cancelled live
+    /// session stops decoding at its next frame boundary instead of after the I/O timeout. It does not abort
+    /// an I/O call already in flight — <paramref name="ioTimeout"/> is what bounds those.</param>
+    /// <param name="ioTimeout">The longest a single blocking open or packet read may take before FFmpeg
+    /// abandons it (<c>rw_timeout</c>); <see cref="TimeSpan.Zero"/> leaves the protocol's own timeout in
+    /// charge. Protocols without a socket timeout (plain HTTP, RTMP) need this to notice a source that
+    /// stopped sending — without it a stalled read blocks its thread indefinitely.</param>
     public static unsafe VideoDecoderSession? TryOpen(string url, VideoPlaybackOptimization optimization, out string? error,
-                                                      IReadOnlyDictionary<string, string>? demuxerOptions = null)
+                                                      IReadOnlyDictionary<string, string>? demuxerOptions = null,
+                                                      string? inputFormat = null, bool lowLatency = false,
+                                                      CancellationToken cancellationToken = default,
+                                                      TimeSpan ioTimeout = default)
     {
         error = null;
+        if (cancellationToken.IsCancellationRequested)
+        {
+            error = "Cancelled.";
+            return null;
+        }
+
         if (!FfmpegLibrary.EnsureInitialized())
         {
             error = FfmpegLibrary.StatusError ?? "FFmpeg is not available";
             return null;
         }
 
+        InputFormat? forcedFormat = null;
+        if (!string.IsNullOrEmpty(inputFormat))
+        {
+            try
+            {
+                var found = InputFormat.FindByShortName(inputFormat);
+                if (found == null)
+                {
+                    // Means the demuxer was never registered (no avdevice_register_all) or the name is
+                    // wrong — passing an empty format would silently fall back to byte-probing the URL.
+                    error = $"Input format '{inputFormat}' not found in this FFmpeg build.";
+                    return null;
+                }
+
+                forcedFormat = found;
+            }
+            catch (Exception e)
+            {
+                error = $"Unknown input format '{inputFormat}': {e.Message}";
+                return null;
+            }
+        }
+
         FormatContext? formatContext = null;
         MediaDictionary? options = null;
         try
         {
-            if (demuxerOptions != null)
+            var effectiveOptions = WithIoTimeout(demuxerOptions, ioTimeout);
+            if (effectiveOptions != null)
             {
                 options = new MediaDictionary();
-                foreach (var pair in demuxerOptions)
+                foreach (var pair in effectiveOptions)
                     options[pair.Key] = pair.Value;
             }
 
-            formatContext = FormatContext.OpenInputUrl(url, null, options);
+            if (lowLatency)
+            {
+                // Live capture: skip the demuxer's probe/frame buffering and hand decoded frames straight
+                // through. Callers may pass no demuxer options (local capture devices) — create the
+                // dictionary here. fflags are comma/plus-composed — merge with any caller-provided value.
+                options ??= new MediaDictionary();
+                var fflags = options.ContainsKey("fflags") ? options["fflags"] + "+nobuffer" : "nobuffer";
+                options["fflags"] = fflags;
+                options["avioflags"] = "direct";
+            }
+
+            formatContext = FormatContext.OpenInputUrl(url, forcedFormat, options);
             formatContext.LoadStreamInfo();
 
             var stream = formatContext.FindBestStreamOrNull(AVMediaType.Video);
@@ -130,6 +185,8 @@ public sealed class VideoDecoderSession : IDisposable
             {
                 codecContext = new CodecContext(codec);
                 codecContext.FillParameters(codecParameters);
+                if (lowLatency)
+                    codecContext.Flags |= AV_CODEC_FLAG.LowDelay;
                 codecContext.Open();
             }
 
@@ -143,11 +200,12 @@ public sealed class VideoDecoderSession : IDisposable
                 Log.Info("Zero-copy decode skipped: stream pixel format isn't a supported 4:2:0 surface. "
                          + "Using hardware decode with CPU read-back.");
 
-            return new VideoDecoderSession(formatContext, codecContext, videoStream, usesHardware, zeroCopy, hwDeviceCtx);
+            return new VideoDecoderSession(formatContext, codecContext, videoStream, usesHardware, zeroCopy, hwDeviceCtx,
+                                           cancellationToken);
         }
         catch (Exception e)
         {
-            error = "Failed to open video: " + e.Message;
+            error = "Failed to open video: " + e;
             formatContext?.Dispose();
             return null;
         }
@@ -155,6 +213,27 @@ public sealed class VideoDecoderSession : IDisposable
         {
             options?.Dispose();
         }
+    }
+
+    /// <summary>
+    /// Adds FFmpeg's <c>rw_timeout</c> — the hard bound on a single blocking read or open — to the caller's
+    /// demuxer options. It is the generic backstop for protocols without a socket timeout of their own (plain
+    /// HTTP, RTMP); RTSP keeps using its own <c>timeout</c>. A copy is returned so the caller's dictionary is
+    /// never mutated.
+    /// </summary>
+    private static IReadOnlyDictionary<string, string>? WithIoTimeout(IReadOnlyDictionary<string, string>? demuxerOptions,
+                                                                     TimeSpan ioTimeout)
+    {
+        if (ioTimeout <= TimeSpan.Zero)
+            return demuxerOptions;
+
+        var merged = demuxerOptions == null
+                         ? new Dictionary<string, string>()
+                         : new Dictionary<string, string>(demuxerOptions);
+
+        merged["rw_timeout"] = Math.Max(1, (long)ioTimeout.TotalMicroseconds)
+                              .ToString(CultureInfo.InvariantCulture);
+        return merged;
     }
 
     /// <summary>
@@ -360,7 +439,13 @@ public sealed class VideoDecoderSession : IDisposable
     /// </summary>
     public unsafe bool TryReadNextFrame(out long framePts)
     {
+        var pendingReads = 0;
         framePts = 0;
+
+        // A cancelled live session stops here, at the frame boundary, rather than after the I/O timeout.
+        if (_cancellation.IsCancellationRequested)
+            return false;
+
         while (true)
         {
             // FFmpeg clears the receiving frame before reporting EOF, so decode into a scratch frame: at the end of
@@ -402,17 +487,44 @@ public sealed class VideoDecoderSession : IDisposable
                 continue;
             }
 
-            try
+            if (read == CodecResult.Again)
             {
-                if (_packet.StreamIndex == _videoStreamIndex)
-                    _codecContext.SendPacket(_packet);
+                // Non-blocking demuxers (avfoundation, live devices) have no packet ready yet. The packet is
+                // unfilled, and sending it would put the decoder into drain mode and end the stream.
+                if (++pendingReads > MaxPendingReads)
+                    return false;
+
+                Thread.Sleep(1);
+                continue;
             }
-            finally
+
+            if (_packet.StreamIndex == _videoStreamIndex)
             {
-                _packet.Unref();
+                // Raw call instead of CodecContext.SendPacket: Sdcb's wrapper throws on any negative
+                // return without exposing the code, but AVERROR_INVALIDDATA must be skippable — live
+                // capture devices start streaming mid-frame, so the first buffer(s) are fragments the
+                // decoder rejects. The ffmpeg CLI drops those packets and carries on; so does this.
+                var sendResult = ffmpeg.avcodec_send_packet(_codecContext, _packet);
+                if (sendResult == AvErrorInvalidData)
+                {
+                    Log.Debug("Skipped an undecodable packet (fragmentary start of a live stream).");
+                }
+                else if (sendResult < 0)
+                {
+                    _packet.Unref();
+                    throw new FFmpegException($"Error sending a packet for decoding: [FFmpeg error {sendResult}]");
+                }
             }
+
+            _packet.Unref();
         }
     }
+
+    // AVERROR_INVALIDDATA — see the send-packet handling above.
+    private const int AvErrorInvalidData = -1094995529;
+
+    /** How many consecutive 1 ms EAGAIN waits a read tolerates (at least ~5 s) before reporting the stream as lost. */
+    private const int MaxPendingReads = 5000;
 
     /// <summary>
     /// Seeks to the keyframe at or before <paramref name="targetPts"/> and flushes the decoder. The caller
@@ -463,12 +575,14 @@ public sealed class VideoDecoderSession : IDisposable
     }
 
     private unsafe VideoDecoderSession(FormatContext formatContext, CodecContext codecContext,
-                                       MediaStream videoStream, bool usesHardware, bool zeroCopy, AVBufferRef* hwDeviceCtx)
+                                       MediaStream videoStream, bool usesHardware, bool zeroCopy, AVBufferRef* hwDeviceCtx,
+                                       CancellationToken cancellation)
     {
         _formatContext = formatContext;
         _codecContext = codecContext;
         _videoStreamIndex = videoStream.Index;
         _hwDeviceCtx = hwDeviceCtx;
+        _cancellation = cancellation;
         UsesHardwareDecode = usesHardware;
         UsesZeroCopy = zeroCopy;
         _zeroCopy = zeroCopy;
@@ -534,4 +648,5 @@ public sealed class VideoDecoderSession : IDisposable
     private readonly bool _zeroCopy;
     private bool _lastFrameReadBack;
     private bool _draining;
+    private readonly CancellationToken _cancellation;
 }

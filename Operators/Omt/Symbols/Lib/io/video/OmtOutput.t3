@@ -1,0 +1,24 @@
+{
+  "FormatVersion": 3,
+  "Id": "957ef10e-b410-4eb6-8c2a-b813e8df3a3e"/*OmtOutput*/,
+  "Inputs": [
+    {
+      "Id": "852d49b4-a3d9-48b0-a855-d41383f7f95e"/*SenderName*/,
+      "DefaultValue": "TiXL"
+    },
+    {
+      "Id": "98e9190e-9cde-45da-bffc-e3c97a528be3"/*FrameRate*/,
+      "DefaultValue": 30
+    },
+    {
+      "Id": "a16c8835-4298-43c0-b240-9ab428f6dba9"/*Texture*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "e7bbb443-b97e-4446-acb8-10648d65237a"/*EnableAlpha*/,
+      "DefaultValue": false
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

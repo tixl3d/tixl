@@ -1,0 +1,54 @@
+{
+  "FormatVersion": 3,
+  "Id": "c5dcd8b9-1c68-4315-82b2-0c1496dd1e70"/*FaceLandmarkDetectionExample*/,
+  "Description": "Detects faces in a live camera image and shows the built-in debug view: the camera frame with the dense 478-point face mesh of every detected face.\n\nTurn [Debug] off to get the clean camera image on [OutputTexture]. The mesh is provided as data: [PointBuffer] holds 478 points per face in centered image coordinates (Y up, roughly -1..1), each point carrying its mesh index in F1 - see the MediaPipe FaceMesh topology for landmark indices (e.g. 168 = bridge of the nose, 13/14 = inner lips). [FaceCount] holds the number of faces.\n\nFace meshes are small on screen; move close to the camera for a stable dense mesh.",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "1d597e6d-1be9-40fd-a0fd-cc76e09a3de5",
+      "SymbolName": "Lib.io.video.WebcamInput",
+      "Position": {
+        "X": -700.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "a7595433-34e5-45ed-838d-192a7a9227f2",
+      "SymbolName": "Lib.io.video.mediapipe.FaceLandmarkDetection",
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "08aa5e5b-eeab-4b82-ba79-a2ba6ecfb1ab"/*Output*/,
+      "Position": {
+        "X": -100.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "b10c71ed-39ca-4c1d-8d45-91fed5d163eb",
+      "Title": "This example needs a camera\n\n1. Select the [VideoDeviceInput] op\n2. Pick your camera in the InputDeviceName field\n3. Tick [Active] - put yourself (or a hand / objects) in view\n\nThe output shows the operator's debug view with the detected landmarks. Turn its [Debug] input off to get the clean camera image, and open the operator's outputs (PointBuffer, counts, ...) to drive your own visuals.",
+      "Label": "Setup your camera",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -1080.0,
+        "Y": -350.0
+      },
+      "Size": {
+        "X": 420.0,
+        "Y": 330.0
+      }
+    }
+  ]
+}

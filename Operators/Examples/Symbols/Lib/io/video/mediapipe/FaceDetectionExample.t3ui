@@ -1,0 +1,54 @@
+{
+  "FormatVersion": 3,
+  "Id": "ddd9f388-ac70-4ef5-ad14-ead618f3814c"/*FaceDetectionExample*/,
+  "Description": "Detects faces in a live camera image and shows the built-in debug view: the camera frame with a bounding box, its confidence score and the 6 facial keypoints per face.\n\nThe example's output is that debug view, so it needs [Debug] on - with [Debug] off it goes blank, and the clean camera image is then only available on the operator's [OutputTexture] output. The detections are provided as data: [PointBuffer] holds 4 corner points per detected face in image space (X from -aspect to aspect, Y from -1 to 1, Y down like screen space), with F1 encoding the corner index (faceIndex * 10 + corner) and F2 the detection confidence. [FaceCount] holds the number of faces.\n\nThis is the lightweight blazeface-style detector - use it for presence, tracking and framing; use [FaceLandmarkDetectionExample] when the detailed face mesh is needed.",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "5dee718a-89f6-4d44-ad90-75ce312a00fa",
+      "SymbolName": "Lib.io.video.mediapipe.FaceDetection",
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "d7a03d45-4d85-4314-a471-f97c889df0ab",
+      "SymbolName": "Lib.io.video.WebcamInput",
+      "Position": {
+        "X": -700.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "de6c28bd-0d6c-46cc-862b-8b969eb218d2"/*Output*/,
+      "Position": {
+        "X": -100.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "4bf824b1-51e4-48d9-83c5-79c0e8e4fbd1",
+      "Title": "This example needs a camera\n\n1. Select the [VideoDeviceInput] op\n2. Pick the camera in the InputDeviceName field\n3. Tick [Active] - put yourself (or a hand / objects) in view\n\nThe output shows the operator's debug view with the detected landmarks - keep its [Debug] input on, or the view goes blank. The clean camera image is on the operator's [OutputTexture] output, and the detections (PointBuffer, counts, ...) are available as data to drive your own visuals.",
+      "Label": "Setup your camera",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -1080.0,
+        "Y": -350.0
+      },
+      "Size": {
+        "X": 420.0,
+        "Y": 330.0
+      }
+    }
+  ]
+}

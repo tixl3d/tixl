@@ -9,6 +9,7 @@
 - [**LenseFlareSetup**](LenseFlareSetup.md) — Pre-made complex light flare setups with various styles.
 - [**LenseFlareSetupAdvanced**](LenseFlareSetupAdvanced.md) — Same as [LenseFlareSetup] but all elements can be tweaked separately.
 - [**PointLight**](PointLight.md) — The standard point light with transform gizmo.
+- [**RenderToCubeMap**](RenderToCubeMap.md) — Renders the connected scene command into a cube map texture.
 - [**SetEnvironment**](SetEnvironment.md) — Sets the image-based lighting (IBL) for the current RenderTarget. This texture can then be used by drawing operators for physically based rendering (PBR) further left in the graph.
 - [**SetFog**](SetFog.md) — Adds fog to the incoming scene.
 - [**SetMaterial**](SetMaterial.md) — Sets the Physically Based Rendering (PBR) Material for the current RenderTarget which is then used by [DrawMesh] and other PBR rendering operators. Each of the material properties can be controlled by a color and/or by connecting a texture input by using a [LoadImage] operator.

@@ -5,6 +5,13 @@
   "SymbolTags": "24",
   "InputUis": [
     {
+      "InputId": "4b524025-f9af-4ae1-9712-b7c0dca2723f"/*CaptureKind*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 225.0
+      }
+    },
+    {
       "InputId": "8716b11a-ef71-437e-9930-bb747da818a7"/*VertexCount*/,
       "Position": {
         "X": 0.46875006,
@@ -16,6 +23,20 @@
       "Position": {
         "X": 0.0,
         "Y": 0.0
+      }
+    },
+    {
+      "InputId": "c55aeb0a-ba11-49b8-82ee-2d2a74996c87"/*CaptureVertices*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 75.0
+      }
+    },
+    {
+      "InputId": "e5d1fbd5-dd92-422e-a5fb-d33204421761"/*CaptureIndices*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 150.0
       }
     }
   ],

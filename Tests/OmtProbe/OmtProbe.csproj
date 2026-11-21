@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Command-line check of an OMT link between two machines, independent of the editor. See .tests-manual/omt-streaming.md. -->
+  <Import Project="$(SolutionDir)/Tixl.props" />
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <RollForward>Major</RollForward>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../Vendor/libomtnet/libomtnet.csproj" />
+  </ItemGroup>
+  <!-- The same codec binaries the Omt package ships, in the same layout. -->
+  <ItemGroup>
+    <Content Include="../../Operators/Omt/dependencies/runtimes/**/*" CopyToOutputDirectory="PreserveNewest">
+      <Link>runtimes/%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Content>
+  </ItemGroup>
+</Project>

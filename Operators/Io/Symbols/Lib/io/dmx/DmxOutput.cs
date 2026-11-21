@@ -8,7 +8,7 @@ using T3.Core.Utils;
 namespace Lib.io.dmx;
 
 [Guid("7A610996-913A-443B-921A-12E6B05F4110")]
-internal sealed class DmxOutput : Instance<DmxOutput>, IStatusProvider, ICustomDropdownHolder, IDisposable
+internal sealed class DmxOutput : Instance<DmxOutput>, IStatusProvider, ICustomDropdownHolder
 {
     private readonly byte[] _dmxFrameBuffer = new byte[513];
     private readonly Stopwatch _stopwatch = new();
@@ -65,9 +65,15 @@ internal sealed class DmxOutput : Instance<DmxOutput>, IStatusProvider, ICustomD
         PortName.SetTypedInputValue(SerialConnectionManager.GetPortNameFromDeviceDescription(s));
     }
 
-    public void Dispose()
+    /// <summary>The framework only calls this hook; a plain Dispose() would never run on delete.</summary>
+    protected override void Dispose(bool isDisposing)
     {
-        SerialConnectionManager.Unregister(this, _lastPortName);
+        if (isDisposing)
+        {
+            SerialConnectionManager.Unregister(this, _lastPortName);
+        }
+
+        base.Dispose(isDisposing);
     }
 
     public IStatusProvider.StatusLevel GetStatusLevel()

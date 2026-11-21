@@ -1,0 +1,54 @@
+{
+  "FormatVersion": 3,
+  "Id": "2261aae2-88cd-471a-a41f-7d82acf7e3d1"/*ObjectDetectionExample*/,
+  "Description": "Detects objects in a live camera image with an efficientdet-lite model and shows the built-in debug view: the camera frame with a box, label and score per object.\n\nTurn [Debug] off to get the clean camera image on [OutputTexture]. The detections are provided as data: [PointBuffer] holds 5 points per object (the center plus the 4 box corners) in image space (X from -aspect to aspect, Y from -1 to 1), with F1 carrying the detection confidence. [ObjectCount] holds the number of objects, [ObjectData] is a dictionary of label -> best confidence, and [ActiveCategories] lists the detected labels.\n\n[CategoryAllowlist] / [CategoryDenylist] filter the 80 COCO classes the model knows (person, cup, laptop, couch, ...).",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "3ded0f7d-632c-4267-8770-a57b1368e050",
+      "SymbolName": "Lib.io.video.mediapipe.ObjectDetection",
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "4d230949-c053-4dae-bf35-9d82ffb0854a",
+      "SymbolName": "Lib.io.video.WebcamInput",
+      "Position": {
+        "X": -700.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "0811a904-ed9c-4903-8401-71704cdc78ee"/*Output*/,
+      "Position": {
+        "X": -100.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "fe7dd66f-7e4d-45c3-9d33-e3cf0e466309",
+      "Title": "This example needs a camera\n\n1. Select the [VideoDeviceInput] op\n2. Pick your camera in the InputDeviceName field\n3. Tick [Active] - put yourself (or a hand / objects) in view\n\nThe output shows the operator's debug view with the detected landmarks. Turn its [Debug] input off to get the clean camera image, and open the operator's outputs (PointBuffer, counts, ...) to drive your own visuals.",
+      "Label": "Setup your camera",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -1080.0,
+        "Y": -350.0
+      },
+      "Size": {
+        "X": 420.0,
+        "Y": 330.0
+      }
+    }
+  ]
+}

@@ -5,6 +5,20 @@
   "SymbolTags": "80",
   "InputUis": [
     {
+      "InputId": "0c082078-895b-4d95-901a-75435d310007"/*CaptureKind*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 225.0
+      }
+    },
+    {
+      "InputId": "2772edf0-962f-40d6-a034-194110b7da58"/*CaptureVertices*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 75.0
+      }
+    },
+    {
       "InputId": "6c87816c-da1d-4429-a1f6-61233aa3d7b1"/*Buffer*/,
       "Relevancy": "Required",
       "Position": {
@@ -19,6 +33,13 @@
         "Y": 0.0
       },
       "Description": "Byte offset of the draw arguments in the buffer."
+    },
+    {
+      "InputId": "d2fe03d7-57c9-444c-94fe-8852527bc2aa"/*CaptureIndices*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 150.0
+      }
     }
   ],
   "SymbolChildUis": [],

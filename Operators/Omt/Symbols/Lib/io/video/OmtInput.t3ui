@@ -1,0 +1,35 @@
+{
+  "FormatVersion": 3,
+  "Id": "608acba9-f310-4876-981b-ade0664c5c66"/*OmtInput*/,
+  "Description": "Receives an Open Media Transport (OMT) video stream as a texture.\n\nSources announced on the local network are listed in the dropdown as MACHINE (Source Name). The operator waits for a source that is not up yet and reconnects on its own when the sender restarts. Where discovery does not reach (other subnets, Linux without avahi-daemon), a source can be entered directly as omt://host:port; [OmtOutput] shows the name it advertises.\n\nOMT is an open, royalty-free alternative to NDI that runs on Windows, Linux and macOS.\n\nAKA: Open Media Transport, network video input, NDI alternative\n\nTips\n- Frames arrive as B8G8R8A8_UNorm with the sender's alpha.\n- Use [OmtOutput] or an OMT stream in the output setup on another machine to send to this operator.",
+  "InputUis": [
+    {
+      "InputId": "6988eb41-8866-43b8-a6aa-124e413cecc4"/*SourceName*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      },
+      "Description": "A discovered source (MACHINE (Source Name)) or a direct omt://host:port address.",
+      "Usage": "CustomDropdown"
+    },
+    {
+      "InputId": "b1e6d486-3e33-4147-b03b-c30f8cd6caab"/*TriggerReconnect*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 135.0
+      },
+      "GroupTitle": "Additional Options",
+      "Description": "Drops the current connection and connects to the selected source again."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "786f11e0-1e13-42f1-bcb0-1c07c8659be6"/*Texture*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    }
+  ]
+}

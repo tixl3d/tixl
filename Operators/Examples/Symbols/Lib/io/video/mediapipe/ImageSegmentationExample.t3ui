@@ -1,0 +1,62 @@
+{
+  "FormatVersion": 3,
+  "Id": "41d5a992-673f-491e-b912-a55334e4dfec"/*ImageSegmentationExample*/,
+  "Description": "Segments a live camera image into known categories (background, hair, body-skin, face-skin, clothes, others) and tints the segmented region with a color: the camera image is fed into both inputs of [BlendWithMask], whose [Mask] input receives the [ImageSegmentation] mask - so everything the model segments is tinted magenta. Change [ColorB] for a different tint, or wire a custom image into [ImageB].\n\nThe raw segmentation outputs are available directly: [MaskTexture] is the binary category mask of [Model]'s selected category, [CategoryMask] holds all categories, and [ConfidenceMask]/[Confidence] the per-pixel confidence. [SelectedCategories] picks which categories count as foreground.",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "5430afa3-d65b-4a44-afbc-6931ad257a6e",
+      "SymbolName": "Lib.io.video.WebcamInput",
+      "Position": {
+        "X": -700.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "c0585b7c-4b47-4e74-bcc7-c22bf0328460",
+      "SymbolName": "Lib.image.use.BlendWithMask",
+      "Position": {
+        "X": 250.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "ea7a00a8-c307-46a3-8706-b9ab767fd462",
+      "SymbolName": "Lib.io.video.mediapipe.ImageSegmentation",
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "4f7c9558-a970-42b3-a57d-3cb93be4ab07"/*Output*/,
+      "Position": {
+        "X": 350.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "4975f633-6d4a-483b-8b38-0f3766614a3a",
+      "Title": "This example needs a camera\n\n1. Select the [VideoDeviceInput] op\n2. Pick the camera in the InputDeviceName field\n3. Tick [Active] - put yourself (or a hand / objects) in view\n\nThe output shows the operator's debug view with the detected landmarks. Turn its [Debug] input off to get the clean camera image, and open the operator's outputs (PointBuffer, counts, ...) to drive your own visuals.",
+      "Label": "Setup your camera",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -1080.0,
+        "Y": -350.0
+      },
+      "Size": {
+        "X": 420.0,
+        "Y": 330.0
+      }
+    }
+  ]
+}

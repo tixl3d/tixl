@@ -1,0 +1,54 @@
+{
+  "FormatVersion": 3,
+  "Id": "f77b3731-f87c-4dd9-822a-4509de8cb5eb"/*PoseLandmarkDetectionExample*/,
+  "Description": "Detects full-body poses in a live camera image and shows the built-in debug view: the camera frame with all 33 landmarks of every detected person.\n\nTurn [Debug] off to get the clean camera image on [OutputTexture]. The poses are provided as data: [PointBuffer] holds 33 points per person in centered image coordinates (Y up, roughly -1..1), each point carrying its landmark index (0 = nose, 11/12 = shoulders, 23/24 = hips) in F1. [WorldLandmarksBuffer] holds metric world-space landmarks, [PoseCount] the number of people, and [SegmentationMask] a mask of the detected persons (only when the pose model emits masks - the bundled one does not).\n\n[CorrectAspectRatio] keeps positions aligned with non-square camera images.",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "037e2bb5-3d92-4072-9e09-1a8defc7af67",
+      "SymbolName": "Lib.io.video.WebcamInput",
+      "Position": {
+        "X": -700.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "78f80b75-0fbc-4e1a-8df6-19e165832bd9",
+      "SymbolName": "Lib.io.video.mediapipe.PoseLandmarkDetection",
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "6cb30146-5f67-483d-bc32-64add6c62e4d"/*Output*/,
+      "Position": {
+        "X": -100.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "876e6be3-fc58-42eb-8a84-1c3533d699c6",
+      "Title": "This example needs a camera\n\n1. Select the [VideoDeviceInput] op\n2. Pick your camera in the InputDeviceName field\n3. Tick [Active] - put yourself (or a hand / objects) in view\n\nThe output shows the operator's debug view with the detected landmarks. Turn its [Debug] input off to get the clean camera image, and open the operator's outputs (PointBuffer, counts, ...) to drive your own visuals.",
+      "Label": "Setup your camera",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -1080.0,
+        "Y": -350.0
+      },
+      "Size": {
+        "X": 420.0,
+        "Y": 330.0
+      }
+    }
+  ]
+}

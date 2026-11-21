@@ -18,7 +18,7 @@ public sealed class VideoFrameReceivedEventArgs : EventArgs
 public abstract class VideoCaptureThread
 {
     private Thread captureThread;
-    private bool isRunning;
+    private volatile bool isRunning;
     public int ThreadSleepTime = 1;
 
     public EventHandler<VideoFrameReceivedEventArgs> FrameReceived;
@@ -30,7 +30,7 @@ public abstract class VideoCaptureThread
 
         this.isRunning = true;
         this.Configure();
-        this.captureThread = new Thread(new ThreadStart(this.Run));
+        this.captureThread = new Thread(new ThreadStart(this.Run)) { IsBackground = true };
         this.captureThread.Start();
     }
 
@@ -39,8 +39,9 @@ public abstract class VideoCaptureThread
         if (!this.isRunning)
             return;
 
-        this.captureThread.Join();
+        // The flag has to drop first: the loop only ends on it, so joining before would wait forever.
         this.isRunning = false;
+        this.captureThread.Join();
     }
 
     private void Run()
@@ -51,10 +52,7 @@ public abstract class VideoCaptureThread
 
             if (frame.HasValue)
             {
-                if (this.FrameReceived != null)
-                {
-                    this.FrameReceived(this, new VideoFrameReceivedEventArgs(frame.Value));
-                }
+                this.FrameReceived?.Invoke(this, new VideoFrameReceivedEventArgs(frame.Value));
             }
             else
             {

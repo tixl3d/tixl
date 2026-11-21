@@ -1,0 +1,57 @@
+{
+  "FormatVersion": 3,
+  "Id": "2261aae2-88cd-471a-a41f-7d82acf7e3d1"/*ObjectDetectionExample*/,
+  "Inputs": [],
+  "Children": [
+    {
+      "Id": "3ded0f7d-632c-4267-8770-a57b1368e050"/*ObjectDetection*/,
+      "SymbolId": "12345678-90ab-cdef-1234-567890abcdef",
+      "SymbolName": "Lib.io.video.mediapipe.ObjectDetection",
+      "InputValues": [
+        {
+          "Id": "0abcdef1-2345-6789-0abc-def123456789"/*CorrectAspectRatio*/,
+          "Type": "System.Boolean",
+          "Value": true
+        },
+        {
+          "Id": "7890abcd-ef12-3456-7890-abcdef123456"/*Debug*/,
+          "Type": "System.Boolean",
+          "Value": true
+        },
+        {
+          "Id": "a1b2c3d4-0006-4a9b-8c2d-101010101010"/*Acceleration*/,
+          "Type": "Lib.io.video.mediapipe.MediaPipeAcceleration",
+          "Value": "Xnnpack"
+        }
+      ],
+      "Outputs": []
+    },
+    {
+      "Id": "4d230949-c053-4dae-bf35-9d82ffb0854a"/*WebcamInput*/,
+      "SymbolId": "cd5a182e-254b-4e65-820b-ff754122614c",
+      "SymbolName": "Lib.io.video.WebcamInput",
+      "InputValues": [
+        {
+          "Id": "236d4c5c-0022-4416-a22c-d6df73c306e2"/*Active*/,
+          "Type": "System.Boolean",
+          "Value": false
+        }
+      ],
+      "Outputs": []
+    }
+  ],
+  "Connections": [
+    {
+      "SourceParentOrChildId": "3ded0f7d-632c-4267-8770-a57b1368e050",
+      "SourceSlotId": "cdef1234-5678-90ab-cdef-1234567890ab",
+      "TargetParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "TargetSlotId": "0811a904-ed9c-4903-8401-71704cdc78ee"
+    },
+    {
+      "SourceParentOrChildId": "4d230949-c053-4dae-bf35-9d82ffb0854a",
+      "SourceSlotId": "1d0159cc-33d2-46b1-9c0c-7054aa560df5",
+      "TargetParentOrChildId": "3ded0f7d-632c-4267-8770-a57b1368e050",
+      "TargetSlotId": "23456789-0abc-def1-2345-67890abcdef1"
+    }
+  ]
+}

@@ -86,7 +86,9 @@ internal static class OutputWindowHandling
     /// </summary>
     public static void Present(int displayIndex, Texture2D? composite)
     {
+        var startTicks = System.Diagnostics.Stopwatch.GetTimestamp();
         var displayWindow = GetOrCreate(displayIndex);
+        var createdTicks = System.Diagnostics.Stopwatch.GetTimestamp();
         if (displayWindow == null || displayWindow.IsClaimed)
             return;
 
@@ -95,6 +97,19 @@ internal static class OutputWindowHandling
         // Assigning null would trip the implicit conversion to the SharpDX texture; keep the last frame instead.
         if (composite is { IsDisposed: false })
             displayWindow.Window.Texture = composite;
+
+        var doneTicks = System.Diagnostics.Stopwatch.GetTimestamp();
+        var totalMs = (doneTicks - startTicks) * 1000.0 / System.Diagnostics.Stopwatch.Frequency;
+
+        // Creating a display window and its swap chain costs real time (measured 200 ms and up on X11), and it
+        // happens inside the frame that first presents to that display - i.e. right after a project loads. A
+        // warning here separates "the editor is slow" from "one frame paid for a window".
+        if (totalMs > 500)
+        {
+            Log.Warning($"Presenting to display {displayIndex + 1} blocked {totalMs:0} ms " +
+                        $"(window handling {((createdTicks - startTicks) * 1000.0 / System.Diagnostics.Stopwatch.Frequency):0} ms, " +
+                        $"texture {(composite == null ? "none" : "assigned")}).");
+        }
 
         _presenting.Add(displayWindow);
     }

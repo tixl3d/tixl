@@ -157,6 +157,21 @@ internal sealed unsafe class VulkanSwapchain : GpuSwapchain
                    _requestedHeight > 0 ? _requestedHeight : Description.Height);
             _requestedWidth = 0;
             _requestedHeight = 0;
+
+            // Recreating once in a while is a normal response to a resized or rotated surface. A storm of
+            // recreations means the surface never settles (e.g. a zero-sized or unmapped window) and costs
+            // a device wait plus a full rebuild every frame, which reads as heavy lag with nothing in the
+            // log. A rate-limited warning makes that state visible.
+            var now = Environment.TickCount64;
+            while (_recentRecreations.Count > 0 && now - _recentRecreations[0] > RecreationWindowMs)
+                _recentRecreations.RemoveAt(0);
+            _recentRecreations.Add(now);
+            if (_recentRecreations.Count == RecreationStormThreshold)
+            {
+                GraphicsLog.Warning?.Invoke($"A swapchain was recreated {_recentRecreations.Count} times within " +
+                                            $"{RecreationWindowMs / 1000.0:0.#}s and keeps going out of date — check the " +
+                                            $"window or display this output presents to (size, visibility, connection).");
+            }
         }
 
         if (_swapchain.IsNull)
@@ -396,6 +411,10 @@ internal sealed unsafe class VulkanSwapchain : GpuSwapchain
     private readonly VkPresentModeKHR[] _supportedPresentModes;
     private bool _acquired;
     private bool _needsRecreation;
+
+    private const int RecreationStormThreshold = 5;
+    private const long RecreationWindowMs = 10_000;
+    private readonly List<long> _recentRecreations = [];
 
     /** Id of the latest present queued on the current swapchain object; 0 before the first. */
     private ulong _lastPresentId;

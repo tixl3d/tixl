@@ -1,0 +1,54 @@
+{
+  "FormatVersion": 3,
+  "Id": "fdbd28d5-85db-44b7-980e-d7531411fa41"/*GestureRecognitionExample*/,
+  "Description": "Recognizes hand gestures in a live camera image and shows the built-in debug view: the camera frame with the detected hand landmarks.\n\nThe recognized gesture is provided as data: [PrimaryGesture] is the name of the recognized basic gesture (None, Fist, Open Palm, Point, Peace, Thumbs Up) - connect it to a string input or compare it to trigger things - and [Confidence] a fixed value per gesture type, not a recognizer score. [PointBuffer] holds the 21 hand landmarks per hand like [HandLandmarkDetectionExample], [HandCount] the number of hands.\n\nShow a clear hand to the camera; the gesture rules run on top of hand landmark detection, so hands need to be reasonably visible.",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "027a4a31-50b5-4d93-a876-e0f5adbcb3b3",
+      "SymbolName": "Lib.io.video.mediapipe.GestureRecognition",
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "9c80a5f5-b476-47b5-865c-f20a94070759",
+      "SymbolName": "Lib.io.video.WebcamInput",
+      "Position": {
+        "X": -700.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "660d109f-ca00-437a-b8f1-27e5bce8e494"/*Output*/,
+      "Position": {
+        "X": -100.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "9cf7ccb2-5573-48fe-885c-0c79bc02d4c8",
+      "Title": "This example needs a camera\n\n1. Select the [VideoDeviceInput] op\n2. Pick your camera in the InputDeviceName field\n3. Tick [Active] - put yourself (or a hand / objects) in view\n\nThe output shows the operator's debug view with the detected landmarks. Turn its [Debug] input off to get the clean camera image, and open the operator's outputs (PointBuffer, counts, ...) to drive your own visuals.",
+      "Label": "Setup your camera",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -1080.0,
+        "Y": -350.0
+      },
+      "Size": {
+        "X": 420.0,
+        "Y": 330.0
+      }
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "FormatVersion": 3,
+  "Id": "608acba9-f310-4876-981b-ade0664c5c66"/*OmtInput*/,
+  "Inputs": [
+    {
+      "Id": "6988eb41-8866-43b8-a6aa-124e413cecc4"/*SourceName*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "b1e6d486-3e33-4147-b03b-c30f8cd6caab"/*TriggerReconnect*/,
+      "DefaultValue": false
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

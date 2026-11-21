@@ -266,6 +266,8 @@ internal sealed unsafe class AppWindow
         SDL_AddEventWatch(&RenderDuringLiveResize, IntPtr.Zero);
 
         IsLoopRunning = true;
+        const int maxConsecutiveFrameFailures = 10;
+        var consecutiveFrameFailures = 0;
         SDL_Event sdlEvent;
         while (!_exitRequested)
         {
@@ -284,7 +286,29 @@ internal sealed unsafe class AppWindow
             if (_exitRequested)
                 break;
 
-            RenderFrame();
+            // A failed frame must not unwind out of the loop and kill the process: one-off graph or
+            // graphics errors (e.g. a driver reset reporting DeviceLost) would otherwise lose the whole
+            // session. Ride out sporadic failures; exit through the normal shutdown path (which saves
+            // the session) when rendering keeps failing every frame.
+            try
+            {
+                RenderFrame();
+                consecutiveFrameFailures = 0;
+            }
+            catch (Exception e)
+            {
+                consecutiveFrameFailures++;
+                if (consecutiveFrameFailures >= maxConsecutiveFrameFailures)
+                {
+                    Log.Error($"Rendering failed {consecutiveFrameFailures} frames in a row; exiting " +
+                              $"through the normal shutdown to save the session. Last error: {e.Message}");
+                    RequestExit();
+                }
+                else
+                {
+                    Log.Error($"Skipping a failed frame ({consecutiveFrameFailures}/{maxConsecutiveFrameFailures}): {e.Message}");
+                }
+            }
         }
 
         IsLoopRunning = false;

@@ -1,4 +1,4 @@
-# ArtnetOutput
+﻿# ArtnetOutput
 
 *in [Lib.io.dmx](README.md)*
 
@@ -17,6 +17,7 @@ Tips:
 - For broadcast, leave `TargetIpAddress` empty. For unicast, specify the destination IP.
 - Use `UniverseChannels` to define the starting universe for each input (auto-expands as needed)
 - Enable `SendTrigger` to start continuous transmission; disable to stop.
+- The node status lists the universes each input occupies. Starting universes are stored per input, so when an input grows (more fixtures, a changed `FixturesPerUniverse` on PointsToDmxLights) it can run into the next input's universes. A later input that would overlap an earlier one is moved to the first free universe behind it, and the move is logged.
 
 AKA: artnet, dmx, lighting, sacn
 
@@ -25,7 +26,6 @@ AKA: artnet, dmx, lighting, sacn
 |---|---|
 | **InputsValues** (List`1) | A multi-input where each connected input provides DMX channel data for a separate universe. Each input should contain a list of float values (0-255) that are clamped to 0-255. |
 | **UniverseChannels** (List`1) | Defines the starting universe number for each input. If an input has more than 512 channels, it automatically spans to the next universe. Auto-expands when you add more inputs. |
-| **LocalIpAddress** (String) | The IP address of the network interface to send from. A dropdown shows available addresses. If you have multiple network cards, make sure to select the one connected to your lighting network. |
 | **SendTrigger** (Boolean) | A trigger to manually send the Art-Net data. The data is sent when this value changes from 0 to 1. |
 | **Reconnect** (Boolean) | Forces a reconnection of the network socket. |
 | **SendSync** (Boolean) | If enabled, an ArtSync packet is sent after the DMX data. This can be used to synchronize updates across multiple Art-Net nodes. |

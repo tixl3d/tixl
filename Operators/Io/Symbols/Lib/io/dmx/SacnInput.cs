@@ -1,4 +1,4 @@
-#nullable enable
+﻿#nullable enable
 using System.Diagnostics;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
@@ -8,7 +8,7 @@ using T3.Core.Utils;
 namespace Lib.io.dmx;
 
 [Guid("e3207424-deaf-4462-acd5-21f2c6f16d1b")]
-internal sealed class SacnInput : Instance<SacnInput>, IStatusProvider, ICustomDropdownHolder, IDisposable
+internal sealed class SacnInput : Instance<SacnInput>, IStatusProvider
 {
     private const int SacnPort = 5568;
     private const int MinPacketLength = 126;
@@ -18,10 +18,6 @@ internal sealed class SacnInput : Instance<SacnInput>, IStatusProvider, ICustomD
 
     [Input(Guid = "ca55c1b3-0669-46f1-bcc4-ee2e7f5a6028")]
     public readonly InputSlot<bool> Active = new();
-
-    // Unique GUID for LocalIpAddress in SacnInput
-    [Input(Guid = "24B5D450-4E83-49DB-88B1-7D688E64585D")]
-    public readonly InputSlot<string> LocalIpAddress = new("0.0.0.0 (Any)");
 
     [Input(Guid = "2cffbf1c-ce09-4283-a685-5234e4e49fee")]
     public readonly InputSlot<int> NumUniverses = new(1);
@@ -54,16 +50,22 @@ internal sealed class SacnInput : Instance<SacnInput>, IStatusProvider, ICustomD
         Result.UpdateAction = Update;
     }
 
-    public void Dispose()
+    /// <summary>The framework only calls this hook; a plain Dispose() would never run on delete.</summary>
+    protected override void Dispose(bool isDisposing)
     {
-        StopListening();
+        if (isDisposing)
+        {
+            StopListening();
+        }
+
+        base.Dispose(isDisposing);
     }
 
     private void Update(EvaluationContext context)
     {
         _printToLog = PrintToLog.GetValue(context); // Update printToLog flag
         var active = Active.GetValue(context);
-        var localIp = LocalIpAddress.GetValue(context);
+        var localIp = ProtocolInterfaces.ResolveAddressString(ProtocolInterfaces.Keys.Sacn);
         var startUniverse = StartUniverse.GetValue(context);
         var numUniverses = NumUniverses.GetValue(context).Clamp(1, 4096);
 
@@ -151,9 +153,9 @@ internal sealed class SacnInput : Instance<SacnInput>, IStatusProvider, ICustomD
         UdpClient? currentUdpClient = null; // Declare locally for safer cleanup
         try
         {
-            var localIpStr = LocalIpAddress.Value;
+            var localIpStr = ProtocolInterfaces.ResolveAddressString(ProtocolInterfaces.Keys.Sacn);
             var listenIp = IPAddress.Any;
-            if (!string.IsNullOrEmpty(localIpStr) && localIpStr != "0.0.0.0 (Any)" && IPAddress.TryParse(localIpStr, out var parsedIp))
+            if (!string.IsNullOrEmpty(localIpStr) && IPAddress.TryParse(localIpStr, out var parsedIp))
                 listenIp = parsedIp;
             _boundIpAddress = listenIp;
 
@@ -294,13 +296,13 @@ internal sealed class SacnInput : Instance<SacnInput>, IStatusProvider, ICustomD
 
     private void UpdateStatusMessage(int numUniverses, int startUniverse)
     {
-        var localIpDisplay = LocalIpAddress.Value;
+        var localIpDisplay = ProtocolInterfaces.ResolveAddressString(ProtocolInterfaces.Keys.Sacn);
         if (!_isListening) SetStatus("Inactive. Enable 'Active'.", IStatusProvider.StatusLevel.Notice);
         else if (_lastStatusLevel != IStatusProvider.StatusLevel.Error)
         {
             var receivedCount = _receivedUniverses.Count;
             if (receivedCount == 0)
-                SetStatus($"Listening on {localIpDisplay.Split(' ')[0]}:{SacnPort} for {numUniverses} universes (from {startUniverse})... No packets received.",
+                SetStatus($"Listening on {localIpDisplay}:{SacnPort} for {numUniverses} universes (from {startUniverse})... No packets received.",
                           IStatusProvider.StatusLevel.Warning);
             else SetStatus($"Listening for {numUniverses} universes. Receiving {receivedCount} active universes.", IStatusProvider.StatusLevel.Success);
         }
@@ -319,7 +321,7 @@ internal sealed class SacnInput : Instance<SacnInput>, IStatusProvider, ICustomD
         public long LastReceivedTicks;
     }
 
-    #region IStatusProvider & ICustomDropdownHolder
+    #region IStatusProvider
     private string _lastStatusMessage = "Inactive."; // Default status on init
     private IStatusProvider.StatusLevel _lastStatusLevel = IStatusProvider.StatusLevel.Notice;
 
@@ -332,32 +334,5 @@ internal sealed class SacnInput : Instance<SacnInput>, IStatusProvider, ICustomD
     public IStatusProvider.StatusLevel GetStatusLevel() => _lastStatusLevel;
     public string GetStatusMessage() => _lastStatusMessage;
 
-    string ICustomDropdownHolder.GetValueForInput(Guid inputId) => inputId == LocalIpAddress.Id ? LocalIpAddress.Value : string.Empty;
-
-    IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid inputId)
-    {
-        return inputId == LocalIpAddress.Id ? GetLocalIPv4Addresses() : Empty<string>();
-    }
-
-    void ICustomDropdownHolder.HandleResultForInput(Guid inputId, string? selected, bool isAListItem)
-    {
-        if (string.IsNullOrEmpty(selected) || !isAListItem || inputId != LocalIpAddress.Id) return;
-        var ip = selected.Split(' ')[0];
-        LocalIpAddress.SetTypedInputValue(ip);
-    }
-
-    private static IEnumerable<string> GetLocalIPv4Addresses()
-    {
-        yield return "0.0.0.0 (Any)";
-        yield return "127.0.0.1";
-        if (!NetworkInterface.GetIsNetworkAvailable()) yield break;
-        foreach (var ni in NetworkInterface.GetAllNetworkInterfaces())
-        {
-            if (ni.OperationalStatus != OperationalStatus.Up || ni.NetworkInterfaceType == NetworkInterfaceType.Loopback) continue;
-            foreach (var ipInfo in ni.GetIPProperties().UnicastAddresses)
-                if (ipInfo.Address.AddressFamily == AddressFamily.InterNetwork)
-                    yield return ipInfo.Address.ToString();
-        }
-    }
     #endregion
 }

@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Open Media Transport, built from vendored upstream source (see README.md for the pinned commit and local patches). -->
+  <Import Project="$(SolutionDir)/Tixl.props" />
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>libomtnet</AssemblyName>
+    <RootNamespace>libomtnet</RootNamespace>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AssemblyVersion>1.0.0.20</AssemblyVersion>
+    <FileVersion>1.0.0.20</FileVersion>
+    <Version>1.0.0.20</Version>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <!-- Upstream code as-is: obsolete-API, nullability and naming warnings are theirs to fix, not ours to carry. -->
+    <WarningLevel>0</WarningLevel>
+    <NoWarn>$(NoWarn);CS0168;CS0169;CS0219;CS0414;CS0618;CS0649;CS0162;CA1416;SYSLIB0006;SYSLIB0014;SYSLIB0050;SYSLIB0011</NoWarn>
+    <RunAnalyzers>false</RunAnalyzers>
+  </PropertyGroup>
+</Project>

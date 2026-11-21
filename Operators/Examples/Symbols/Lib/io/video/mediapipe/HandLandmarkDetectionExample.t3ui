@@ -1,0 +1,54 @@
+{
+  "FormatVersion": 3,
+  "Id": "f34db825-436a-41bb-b33b-b433e102cbcb"/*HandLandmarkDetectionExample*/,
+  "Description": "Detects hands in a live camera image and shows the built-in debug view: the camera frame with all 21 landmarks of every detected hand.\n\nTurn [Debug] off to get the clean camera image on [OutputTexture] instead. The detected hands are provided as data: [PointBuffer] holds 21 points per hand in centered image coordinates (Y up, X and Y in roughly -1..1, Z scaled by [ZScale]), each point carrying its landmark index (0 = wrist, 9 = middle finger base) in F1 and a visibility estimate in F2. [WorldLandmarksBuffer] holds the same hands in metric world space, [HandCount] the number of hands.\n\nSee [MaxHands] and the three confidence thresholds for tuning, [Acceleration] for the inference delegate, and [ConstantSize] to lock the landmark cloud's size regardless of the hand's distance to the camera.",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "aa98e784-637d-4b93-be80-a4df254d1237",
+      "SymbolName": "Lib.io.video.mediapipe.HandLandmarkDetection",
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "fbdb9750-c986-41dd-b227-479ab2bc4e79",
+      "SymbolName": "Lib.io.video.WebcamInput",
+      "Position": {
+        "X": -700.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "964451c1-7773-4e86-95da-013497b9d2c9"/*Output*/,
+      "Position": {
+        "X": -100.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "fd667fe8-bc91-40da-9a32-7af01815e2af",
+      "Title": "This example needs a camera\n\n1. Select the [VideoDeviceInput] op\n2. Pick your camera in the InputDeviceName field\n3. Tick [Active] - put yourself (or a hand / objects) in view\n\nThe output shows the operator's debug view with the detected landmarks. Turn its [Debug] input off to get the clean camera image, and open the operator's outputs (PointBuffer, counts, ...) to drive your own visuals.",
+      "Label": "Setup your camera",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -1080.0,
+        "Y": -350.0
+      },
+      "Size": {
+        "X": 420.0,
+        "Y": 330.0
+      }
+    }
+  ]
+}

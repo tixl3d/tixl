@@ -546,7 +546,13 @@
       "Id": "953e80e9-98d5-459d-b912-a52f94993f9c"/*DrawInstancedIndirect*/,
       "SymbolId": "c676b9c7-06d7-4ee0-8ffc-9bee96c5dc18",
       "SymbolName": "Lib.render._dx11.api.DrawInstancedIndirect",
-      "InputValues": [],
+      "InputValues": [
+        {
+          "Id": "0c082078-895b-4d95-901a-75435d310007"/*CaptureKind*/,
+          "Type": "System.Int32",
+          "Value": 1
+        }
+      ],
       "Outputs": []
     },
     {
@@ -801,7 +807,13 @@
       "Id": "f591b509-9f1f-4275-b470-ba9d8db50a5d"/*Draw*/,
       "SymbolId": "9b28e6b9-1d1f-42d8-8a9e-33497b1df820",
       "SymbolName": "Lib.render._dx11.api.Draw",
-      "InputValues": [],
+      "InputValues": [
+        {
+          "Id": "4b524025-f9af-4ae1-9712-b7c0dca2723f"/*CaptureKind*/,
+          "Type": "System.Int32",
+          "Value": 1
+        }
+      ],
       "Outputs": []
     },
     {
@@ -1240,6 +1252,12 @@
       "TargetSlotId": "7a13b834-21e5-4cef-ad5b-23c3770ea763"
     },
     {
+      "SourceParentOrChildId": "8eee0abc-72fa-44e9-b878-233421823343",
+      "SourceSlotId": "c997268d-6709-49de-980e-64d7a47504f7",
+      "TargetParentOrChildId": "953e80e9-98d5-459d-b912-a52f94993f9c",
+      "TargetSlotId": "2772edf0-962f-40d6-a034-194110b7da58"
+    },
+    {
       "SourceParentOrChildId": "0717b54a-d4ee-4ebf-bf6a-1b878d944536",
       "SourceSlotId": "a7d11905-eb9e-42a4-a077-11d2c1cb41b2",
       "TargetParentOrChildId": "953e80e9-98d5-459d-b912-a52f94993f9c",
@@ -1574,6 +1592,12 @@
       "SourceSlotId": "5e847363-142d-4da9-a5b3-3a7aa2541bed",
       "TargetParentOrChildId": "f591b509-9f1f-4275-b470-ba9d8db50a5d",
       "TargetSlotId": "8716b11a-ef71-437e-9930-bb747da818a7"
+    },
+    {
+      "SourceParentOrChildId": "8eee0abc-72fa-44e9-b878-233421823343",
+      "SourceSlotId": "c997268d-6709-49de-980e-64d7a47504f7",
+      "TargetParentOrChildId": "f591b509-9f1f-4275-b470-ba9d8db50a5d",
+      "TargetSlotId": "c55aeb0a-ba11-49b8-82ee-2d2a74996c87"
     },
     {
       "SourceParentOrChildId": "1206c609-e9f5-4166-b623-918a4a9c8c80",

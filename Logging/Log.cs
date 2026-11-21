@@ -121,11 +121,11 @@ public static class Log
 
     #endregion
 
-    private static string FormatMessageWithArguments(string messageString, object?[] args)
+    private static string FormatMessageWithArguments(string messageString, object?[]? args)
     {
         try
         {
-            messageString = args.Length == 0 ? messageString : string.Format(messageString, args);
+            messageString = args == null || args.Length == 0 ? messageString : string.Format(messageString, args);
         }
         catch (FormatException)
         {

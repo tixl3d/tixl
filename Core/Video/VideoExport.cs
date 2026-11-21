@@ -1,4 +1,4 @@
-#nullable enable
+﻿#nullable enable
 using System;
 using System.Threading;
 
@@ -153,6 +153,73 @@ public enum VideoProxyRecommendation
 public readonly record struct VideoProxyAdvice(VideoProxyRecommendation Recommendation,
                                                double KeyframeIntervalSeconds, string Reason);
 
+/// <summary>FFmpeg-free settings for a live H.264 stream: no file, no container, no audio.</summary>
+public readonly record struct VideoLiveEncoderSettings
+{
+    public required int Width { get; init; }
+    public required int Height { get; init; }
+    public required double FrameRate { get; init; }
+
+    /// <summary>Target bit rate in bits per second; ≤ 0 uses a resolution-appropriate default.</summary>
+    public long BitRate { get; init; }
+}
+
+/// <summary>
+/// Encodes successive RGBA frames into Annex-B H.264 access units for a live transport. One encoder
+/// is driven by one caller; <see cref="Encode"/> can raise <see cref="AccessUnitEncoded"/> zero or
+/// more times per frame while the codec flushes. Not thread-safe.
+/// </summary>
+public interface ILiveVideoEncoder : IDisposable
+{
+    /// <summary>The encoder that opened (e.g. "NVIDIA NVENC", "OpenH264"), for status display.</summary>
+    string EncoderName { get; }
+
+    /// <summary>Encodes one RGBA8 frame whose size matches the encoder settings.</summary>
+    void Encode(ReadOnlySpan<byte> rgbaPixels, int rowStride, bool forceKeyFrame);
+
+    /// <summary>
+    /// Encodes one RGBA8 frame of a possibly different size; the encoder scales it to its configured
+    /// output size. Use this when the source is a render target of varying resolution.
+    /// </summary>
+    void EncodeScaled(ReadOnlySpan<byte> rgbaPixels, int rowStride, int sourceWidth, int sourceHeight, bool forceKeyFrame);
+
+    /// <summary>Raised with one Annex-B access unit (SPS/PPS precede an IDR when the codec emits them).</summary>
+    event Action<byte[]>? AccessUnitEncoded;
+}
+
+/// <summary>Creates <see cref="ILiveVideoEncoder"/>s; implemented by the video assembly.</summary>
+public interface IVideoLiveEncoderFactory
+{
+    /// <summary>Returns null and an <paramref name="error"/> message when no H.264 encoder can be created.</summary>
+    ILiveVideoEncoder? TryCreateLiveEncoder(VideoLiveEncoderSettings settings, out string? error);
+}
+
+/// <summary>
+/// Decodes Annex-B H.264 access units of a live stream into a reused RGBA8 buffer. One decoder is
+/// driven by one consumer and is not thread-safe.
+/// </summary>
+public interface ILiveVideoDecoder : IDisposable
+{
+    int Width { get; }
+    int Height { get; }
+
+    /// <summary>The last decoded frame (RGBA8), valid until the next decode call.</summary>
+    ReadOnlySpan<byte> Rgba { get; }
+
+    /// <summary>Feeds one access unit; true when a complete frame is available in <see cref="Rgba"/>.</summary>
+    bool TryDecode(ReadOnlySpan<byte> annexB);
+
+    /// <summary>Drains a decoder that is holding the last frame for reordering.</summary>
+    void Flush();
+}
+
+/// <summary>Creates <see cref="ILiveVideoDecoder"/>s; implemented by the video assembly.</summary>
+public interface IVideoLiveDecoderFactory
+{
+    /// <summary>Returns null and an <paramref name="error"/> message when no H.264 decoder can be created.</summary>
+    ILiveVideoDecoder? TryCreateLiveVideoDecoder(out string? error);
+}
+
 /// <summary>Creates <see cref="IVideoFileWriter"/>s; implemented by the video assembly.</summary>
 public interface IVideoEncoderFactory
 {
@@ -209,4 +276,10 @@ public interface IVideoThumbnailReader : IDisposable
 public static class VideoExport
 {
     public static IVideoEncoderFactory? Factory { get; set; }
+
+    /// <summary>Live-stream encoder factory, registered by the same video assembly as <see cref="Factory"/>.</summary>
+    public static IVideoLiveEncoderFactory? LiveFactory { get; set; }
+
+    /// <summary>Live-stream decoder factory, registered by the same video assembly.</summary>
+    public static IVideoLiveDecoderFactory? LiveDecoderFactory { get; set; }
 }
