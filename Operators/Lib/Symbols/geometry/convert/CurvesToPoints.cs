@@ -21,6 +21,13 @@ internal sealed class CurvesToPoints : Instance<CurvesToPoints>
         Points,
     }
 
+    private enum PolygonEdgeModes
+    {
+        None,
+        All,
+        Sharp,
+    }
+
     [Output(Guid = "e3c5a7f1-9d24-4b68-8f0e-a1b3c6d9e274")]
     public readonly Slot<StructuredList> Points = new();
 
@@ -35,6 +42,8 @@ internal sealed class CurvesToPoints : Instance<CurvesToPoints>
         var tolerance = MathF.Max(Tolerance.GetValue(context), 1e-5f);
         var closeLoops = CloseLoops.GetValue(context);
         var samplesPoints = Sampling.GetValue(context) == (int)Samplings.Points;
+        var edgeMode = (PolygonEdgeModes)Math.Clamp(PolygonEdges.GetValue(context), 0, 2);
+        var sharpAngle = Math.Clamp(SharpAngle.GetValue(context), 0f, 180f);
 
         if (curves == null || curves.PrimitiveCount == 0)
         {
@@ -111,10 +120,99 @@ internal sealed class CurvesToPoints : Instance<CurvesToPoints>
                 _pointList.TypedElements[_pointCount++] = Point.Separator();
         }
 
+        if (edgeMode != PolygonEdgeModes.None)
+            AppendPolygonEdges(curves, edgeMode == PolygonEdgeModes.Sharp ? MathF.Cos(sharpAngle * MathF.PI / 180f) : 2f,
+                               primitiveColors, partColors);
+
         if (_pointList.NumElements != _pointCount)
             _pointList.SetLength(_pointCount);
 
         Points.Value = _pointList;
+    }
+
+    /// <summary>
+    /// Polygon edges as two-point lines with a separator after each, e.g. to outline extruded text. With a cosine
+    /// below 1 only sharp edges are emitted: open borders and edges whose two faces' normals differ by more than the
+    /// angle, so flat regions (like a subdivided cap) stay clean.
+    /// </summary>
+    private void AppendPolygonEdges(Geometry geometry, float maxCos, GeometryAttribute<Vector4>? primitiveColors, GeometryAttribute<Vector4>? partColors)
+    {
+        var edges = geometry.Edges.Edges;
+        if (edges.Length == 0)
+            return;
+
+        var checksAngle = maxCos < 1;
+        if (checksAngle)
+            ComputeFaceNormals(geometry);
+
+        var partOfPrimitive = partColors != null ? GetPartOfPrimitive(geometry) : null;
+        EnsureCapacity(_pointCount + edges.Length * 3);
+        foreach (var edge in edges)
+        {
+            if (checksAngle && edge.Face1 >= 0 && Vector3.Dot(_faceNormals[edge.Face0], _faceNormals[edge.Face1]) >= maxCos)
+                continue;
+
+            var color = primitiveColors != null ? primitiveColors.Values[edge.Face0]
+                        : partOfPrimitive != null && partOfPrimitive[edge.Face0] >= 0 ? partColors!.Values[partOfPrimitive[edge.Face0]]
+                        : Vector4.One;
+            AddEdgePoint(geometry.Positions[edge.PointA], edge.Face0, color);
+            AddEdgePoint(geometry.Positions[edge.PointB], edge.Face0, color);
+            _pointList.TypedElements[_pointCount++] = Point.Separator();
+        }
+    }
+
+    private void AddEdgePoint(Vector3 position, int face, Vector4 color)
+    {
+        _pointList.TypedElements[_pointCount++] = new Point
+                                                      {
+                                                          Position = position,
+                                                          F1 = 1,
+                                                          F2 = face,
+                                                          Orientation = Quaternion.Identity,
+                                                          Scale = Vector3.One,
+                                                          Color = color,
+                                                      };
+    }
+
+    /** Unit normals of the polygons (Newell's method); curves get zero. */
+    private void ComputeFaceNormals(Geometry geometry)
+    {
+        if (_faceNormals.Length < geometry.PrimitiveCount)
+            _faceNormals = new Vector3[geometry.PrimitiveCount];
+
+        for (var primitive = 0; primitive < geometry.PrimitiveCount; primitive++)
+        {
+            var normal = Vector3.Zero;
+            if (geometry.PrimitiveKind[primitive] == PrimitiveKinds.Polygon)
+            {
+                var start = geometry.PrimitiveVertexOffsets[primitive];
+                var end = geometry.PrimitiveVertexOffsets[primitive + 1];
+                for (var vertex = start; vertex < end; vertex++)
+                {
+                    var p0 = geometry.Positions[geometry.VertexPoints[vertex]];
+                    var p1 = geometry.Positions[geometry.VertexPoints[vertex + 1 == end ? start : vertex + 1]];
+                    normal += new Vector3((p0.Y - p1.Y) * (p0.Z + p1.Z), (p0.Z - p1.Z) * (p0.X + p1.X), (p0.X - p1.X) * (p0.Y + p1.Y));
+                }
+            }
+
+            _faceNormals[primitive] = normal.LengthSquared() > 1e-20f ? Vector3.Normalize(normal) : Vector3.Zero;
+        }
+    }
+
+    private int[] GetPartOfPrimitive(Geometry geometry)
+    {
+        if (_partOfPrimitive.Length < geometry.PrimitiveCount)
+            _partOfPrimitive = new int[geometry.PrimitiveCount];
+
+        Array.Fill(_partOfPrimitive, -1, 0, geometry.PrimitiveCount);
+        for (var part = 0; part < geometry.Parts.Length; part++)
+        {
+            var range = geometry.Parts[part];
+            for (var primitive = range.PrimitiveStart; primitive < Math.Min(range.PrimitiveStart + range.PrimitiveCount, geometry.PrimitiveCount); primitive++)
+                _partOfPrimitive[primitive] = part;
+        }
+
+        return _partOfPrimitive;
     }
 
     /// <summary>Average of the unit directions of both adjacent edges, so corners get the bisecting normal.</summary>
@@ -162,6 +260,8 @@ internal sealed class CurvesToPoints : Instance<CurvesToPoints>
     private readonly StructuredList<Point> _pointList = new(1);
     private readonly List<Vector3> _positions = [];
     private readonly List<float> _contourSides = [];
+    private Vector3[] _faceNormals = [];
+    private int[] _partOfPrimitive = [];
     private int _pointCount;
 
     [Input(Guid = "b7f2d9c4-5a13-4e86-9d0b-3c6e8a1f5d27")]
@@ -175,4 +275,10 @@ internal sealed class CurvesToPoints : Instance<CurvesToPoints>
 
     [Input(Guid = "f9897a6d-acb2-4291-a3e0-aa2fee90cfd7", MappedType = typeof(Samplings))]
     public readonly InputSlot<int> Sampling = new();
+
+    [Input(Guid = "91c96818-ba39-4cec-af54-ae005c8610a5", MappedType = typeof(PolygonEdgeModes))]
+    public readonly InputSlot<int> PolygonEdges = new();
+
+    [Input(Guid = "246c6a25-be64-4d99-8452-b0fd9ac66f2f")]
+    public readonly InputSlot<float> SharpAngle = new();
 }
