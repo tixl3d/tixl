@@ -1,0 +1,49 @@
+{
+  "FormatVersion": 3,
+  "Id": "52320906-a1c9-431c-bdf6-e41ac63157bb"/*AssimpImportExample*/,
+  "Description": "Loads a glTF model with [AssimpImport] and draws it with its PBR materials through [DrawScene].\n\n[AssimpImport] reads 40+ formats, including FBX, glTF/GLB, OBJ, Collada, STL and PLY. The example uses the DamagedHelmet from the Examples assets; select the AssimpImport node and change FilePath to load any other model. Its Geometry output keeps N-gons for the procedural geometry operators, and its Setup output carries the materials, skeleton and animation clips.\n\nAKA: assimp, import, model, fbx, gltf, glb, obj, dae, stl, ply, pbr\n\nSee also: [AssimpImport], [AssimpExport], [LoadGltfScene], [DrawScene]",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "6b775ad9-bcde-4900-9a6b-2902440c743f",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "Position": {
+        "X": 960.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "c5031b8c-a170-4b2c-b1f6-aace4899db5f",
+      "SymbolName": "Lib.render.scene.DrawScene",
+      "Position": {
+        "X": 320.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "cd961505-8702-4313-b28d-12b34ab8c6a9",
+      "SymbolName": "Lib.render.camera.OrbitCamera",
+      "Position": {
+        "X": 640.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "f2442819-575a-41a1-bc50-2555e26275be",
+      "SymbolName": "Lib.mesh.generate.AssimpImport",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "e81ba487-65be-4bab-a9c5-8a6e2af64462"/*ColorBuffer*/,
+      "Position": {
+        "X": 1280.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

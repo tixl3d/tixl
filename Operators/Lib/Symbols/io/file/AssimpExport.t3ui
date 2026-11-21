@@ -1,0 +1,132 @@
+{
+  "FormatVersion": 3,
+  "Id": "f66c3cd9-b648-4e19-a564-d87aa48d6d88"/*AssimpExport*/,
+  "Description": "Writes a mesh, a polygon geometry or a point cloud to a 3D file with Assimp.\n\nSupports OBJ, FBX, glTF/GLB, STL, PLY, Collada (DAE), 3DS, 3MF, X3D and every other exporter listed in SupportedFormats. ExportMesh writes Geometry if it is connected (keeping N-gons for formats that store them, one object per geometry part), otherwise MeshData. ExportPoints writes Points as a point cloud. Files are numbered MeshName_001.ext, MeshName_002.ext and so on; existing files are never overwritten. The file is written in the background, in a separate process when possible, so playback continues and a crashing native exporter can't take the editor down.\n\nAKA: save, write, fbx, gltf, glb, stl, ply, 3d print, model, assimp\n\nSee also: [WriteObj], [AssimpImport], [AssimpImportExample]\n\nTips:\n- A relative FolderPath writes into the assets of the current project, e.g. \"exports\"; prefix a project name (\"MyProject:exports\") or use an absolute path to write elsewhere.\n- For 3D printing use Stl or ThreeMf; for other DCC tools Fbx, Glb or Obj.\n- GlTF and OBJ exports may write sidecar files (.bin, .mtl) named after the main file; the numbering covers only the main file.",
+  "InputUis": [
+    {
+      "InputId": "0b8e46d2-7f3a-4c91-a5d8-e2964f1c3b70"/*Geometry*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      },
+      "Description": "Polygon geometry to write with ExportMesh. Takes precedence over MeshData."
+    },
+    {
+      "InputId": "20960269-69a9-4ff1-a3e7-395883521b06"/*ExportMesh*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 315.0
+      },
+      "GroupTitle": "Actions",
+      "Description": "Writes Geometry or MeshData to the next numbered file."
+    },
+    {
+      "InputId": "2b3c4d5e-6f7a-8b9c-1d2e-3f4a5b6c7d8e"/*MeshName*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 180.0
+      },
+      "Description": "Base name of the files and of the exported object. With ExportFormat Auto, its extension (e.g. \"chair.glb\") picks the format.",
+      "Usage": "Default"
+    },
+    {
+      "InputId": "3c4d5e6f-7a8b-9c1d-2e3f-4a5b6c7d8e9f"/*ResetCounter*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 405.0
+      },
+      "Description": "Restarts the file numbering at 001. Existing files are still skipped."
+    },
+    {
+      "InputId": "47f14471-1d6e-4bad-a3cc-f372dda4872c"/*MeshData*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "GroupTitle": "Data",
+      "Description": "Mesh to write with ExportMesh. It is read back from the GPU when the export is triggered."
+    },
+    {
+      "InputId": "5e6f7a8b-9c1d-2e3f-4a5b-6c7d8e9f0a1b"/*ExportPoints*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 360.0
+      },
+      "Description": "Writes Points to the next numbered file."
+    },
+    {
+      "InputId": "b0e70377-685c-44b1-8069-2f0c2a9dcbb2"/*Points*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 90.0
+      },
+      "Description": "Points to write as point cloud with ExportPoints. Separator points are skipped."
+    },
+    {
+      "InputId": "e8c4f2a7-9b3d-4e1f-a5c6-7d8e9f0a1b2c"/*ExportFormat*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 225.0
+      },
+      "Description": "File format. Auto derives it from the extension of MeshName and falls back to Obj. Custom uses the format id in CustomFormat. PlyBinary may not be readable by every Assimp version; Ply writes ASCII."
+    },
+    {
+      "InputId": "f3d5e8b2-7a4c-4f9e-b2d1-6e7f8a9c0b1d"/*CustomFormat*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 270.0
+      },
+      "Description": "Assimp format id used when ExportFormat is Custom, e.g. \"fbxa\" or \"assjson\". See the SupportedFormats output.",
+      "Usage": "Default"
+    },
+    {
+      "InputId": "f784fe22-ba03-499c-bb4e-fe2ded8bf754"/*FolderPath*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 135.0
+      },
+      "GroupTitle": "File",
+      "Description": "Target folder. Relative folders are created inside the current project's assets.",
+      "Usage": "DirectoryPath"
+    },
+    {
+      "InputId": "ffeb7639-9911-4099-a69f-73bbd1da9757"/*IsolateExport*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 450.0
+      },
+      "Description": "Exports in a second TiXL process (started with --assimp-host), so a crash or hang inside an Assimp exporter only ends that process and shows an error. When turned off, the export runs inside TiXL; the status says which one was used."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "7fde5b8d-b541-43d3-8ec4-67037f47bf31"/*Success*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "369771fd-4c3f-4877-b44e-d42b28702282"/*StatusMessage*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "6c0e8b53-f2a7-4d19-9b64-ae31d85c07f2"/*LastFilePath*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"/*SupportedFormats*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

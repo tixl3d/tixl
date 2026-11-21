@@ -2,6 +2,7 @@
 
 ## Operators
 
+- [**AssimpImport**](AssimpImport.md) — Loads a 3D model file with Assimp as mesh, points, polygon geometry and skeleton with animations.
 - [**CubeMesh**](CubeMesh.md) — Generates a procedural three-dimensional mesh which can be rendered with [DrawMesh], [DrawMeshUnlit] and [DrawMeshHatched] among others.
 - [**CylinderMesh**](CylinderMesh.md) — Generates a procedural three-dimensional mesh which can be rendered with [DrawMesh], [DrawMeshUnlit], and [DrawMeshHatched] among others.
 - [**DelaunayMesh**](DelaunayMesh.md) — Generate a mesh from point list

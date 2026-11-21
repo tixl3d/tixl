@@ -1,0 +1,97 @@
+{
+  "FormatVersion": 3,
+  "Id": "92a2c86f-4040-4ed4-b8e6-ec31e94cf83f"/*AssimpRoundTripExample*/,
+  "Description": "Imports a model once with [AssimpImport] and carries its data through every connected type: MeshBuffers and MeshGeometry go back out through [AssimpExport] (Export Mesh writes the Geometry or MeshData with UVs, Export Points writes a point cloud), the MeshData's vertices become a point cloud through [MeshVerticesToPoints], and the Geometry voxelizes through [VolumeFromMesh] into a VdbVolume that branches into [VolumeToField], [VolumeToMesh] and [VolumeToPoints] - covering the field, mesh and point conversions. The preview draws the imported scene with its PBR materials via [DrawScene].\n\nThe DamagedHelmet glb from the Examples assets carries UVs, so the exported OBJ keeps the texture coordinates. Set a FolderPath and press Export Mesh or Export Points on the [AssimpExport] node to write the files.\n\nAKA: assimp, export, roundtrip, round-trip, obj, ply, convert, geometry, points, mesh, volume, field, uv\n\nSee also: [AssimpImport], [AssimpExport], [AssimpImportExample], [VolumeFromMesh], [MeshVerticesToPoints]",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "09824b5c-b3cb-490d-ac36-281eed3c49b5",
+      "SymbolName": "Lib.volume.convert.VolumeToPoints",
+      "Position": {
+        "X": 960.0,
+        "Y": 640.0
+      }
+    },
+    {
+      "ChildId": "2a2fe685-86fa-431e-aeb0-d4112240b095",
+      "SymbolName": "Lib.volume.convert.VolumeToMesh",
+      "Position": {
+        "X": 960.0,
+        "Y": 470.0
+      }
+    },
+    {
+      "ChildId": "2e4bd71e-def5-4691-b8d2-ec5cfdc786bd",
+      "SymbolName": "Lib.io.file.AssimpExport",
+      "Position": {
+        "X": 320.0,
+        "Y": 300.0
+      }
+    },
+    {
+      "ChildId": "40ebb128-5eab-487e-be9e-fe0db33d0e09",
+      "SymbolName": "Lib.point.generate.MeshVerticesToPoints",
+      "Position": {
+        "X": 640.0,
+        "Y": 470.0
+      }
+    },
+    {
+      "ChildId": "79c4c224-4111-818b-f29c-78c4699be7fb",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "Position": {
+        "X": 960.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "8762cf30-7c35-1e49-fa11-2c093ceeaf3a",
+      "SymbolName": "Lib.render.camera.OrbitCamera",
+      "Position": {
+        "X": 640.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "a02e867f-3795-7be8-9633-7a50181a80dd",
+      "SymbolName": "Lib.render.scene.DrawScene",
+      "Position": {
+        "X": 320.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "de8c8eea-ce28-4708-a05c-4d3e13b9efae",
+      "SymbolName": "Lib.volume.convert.VolumeToField",
+      "Position": {
+        "X": 960.0,
+        "Y": 300.0
+      }
+    },
+    {
+      "ChildId": "f00a2168-88a0-4046-b638-b9a22d100ed9",
+      "SymbolName": "Lib.volume.generate.VolumeFromMesh",
+      "Position": {
+        "X": 640.0,
+        "Y": 300.0
+      }
+    },
+    {
+      "ChildId": "fe096a2b-989f-ea6f-305f-d9ae4217ce2b",
+      "SymbolName": "Lib.mesh.generate.AssimpImport",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "e81ba487-65be-4bab-a9c5-8a6e2af64462"/*ColorBuffer*/,
+      "Position": {
+        "X": 1280.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

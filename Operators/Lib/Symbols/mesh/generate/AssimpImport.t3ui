@@ -1,0 +1,221 @@
+{
+  "FormatVersion": 3,
+  "Id": "e0b5b99d-c44f-434d-920d-422e88c75870"/*AssimpImport*/,
+  "Description": "Loads a 3D model file with Assimp as mesh, points, polygon geometry and skeleton with animations.\n\nReads 40+ formats, among them FBX, glTF/GLB, OBJ, Collada (DAE), STL, PLY, 3DS, Blend, X3D and 3MF. All meshes of the file are combined with their node transforms applied; each mesh instance becomes one chunk of MeshData and one part of Geometry. Loading runs in the background, in a separate process when possible, so large files don't stall playback and a broken file can't crash TiXL; the previous model stays visible until the new one is ready, and the file hot-reloads when it changes on disk.\n\nOutputs:\n- MeshData: triangulated mesh for [DrawMesh] and the other mesh operators.\n- Geometry: polygonal geometry with N-gons preserved (quads stay quads) for [BevelGeometry], [ExplodeGeometry], [GeometryToMesh] and the other geometry operators.\n- Points: one point per vertex, with the vertex color.\n- Setup: materials, skeleton and animation clips for [DrawScene], [SampleGltfAnimation] and [PoseToSkinMatrices]. [DrawScene] draws each part with its own material.\n- Material: the material of the first mesh, e.g. for [UseMaterial] around a [DrawMesh].\n- SkinWeights / SkeletonPoints: for [SkinMesh], [SkinPoints] and visualizing the rig.\n\nMaterials are converted to PBR materials with base color, emissive, normal and roughness/metallic/occlusion maps. Textures are read from the file (embedded) or from image files next to the model, also when the file stores an absolute path of another machine.\n\nAKA: fbx, gltf, glb, dae, collada, 3ds, stl, ply, blend, model, import, assimp\n\nSee also: [LoadObj], [LoadGltfScene], [LoadObjGeometry], [AssimpExport], [AssimpImportExample] (Examples > mesh)\n\nTips:\n- Normalize fits any model into a unit cube around the origin, which helps with files in centimeters or kilometers.\n- Use YUpToZUp / ZUpToYUp for files authored with a different up axis. Both are rotations, so animations stay intact; the Flip modes mirror the model and reverse the triangle winding to keep faces pointing outward.\n- Files larger than 2 GB are rejected, and one import keeps at most 1 GiB of decoded textures; textures that don't fit are skipped and listed in the status.",
+  "InputUis": [
+    {
+      "InputId": "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"/*FlipNormals*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 225.0
+      },
+      "Description": "Inverts all normals and reverses the triangle winding, for models that render inside out."
+    },
+    {
+      "InputId": "2b3c4d5e-6f7a-8b9c-1d2e-3f4a5b6c7d8e"/*SelectedMeshIndex*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 270.0
+      },
+      "Description": "Imports only the mesh with this index (see MeshNames). -1 imports all meshes.",
+      "Min": -1,
+      "Max": 32,
+      "ClampMin": true
+    },
+    {
+      "InputId": "4e9a1c73-d6b2-4f58-8a07-b3c5e91d26f4"/*TriggerReload*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      },
+      "Description": "Reloads the file, e.g. after changing files it references."
+    },
+    {
+      "InputId": "6aff02c4-35c8-4875-bb25-d2b10adfc276"/*PostProcessFlags*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 180.0
+      },
+      "GroupTitle": "Processing",
+      "Description": "How much Assimp prepares the mesh.\n\nNone: only triangulation and validation; missing normals are computed from the faces.\nBasic: generates smooth normals where the file has none.\nFull: also generates UVs, tangents, joins identical vertices and optimizes the vertex cache order."
+    },
+    {
+      "InputId": "7a3b8c2d-5e9f-4a7b-8c9d-0e1f2a3b4c5d"/*Scale*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 405.0
+      },
+      "Description": "Uniform scale, applied after normalization.",
+      "Min": 0.01,
+      "Max": 10.0,
+      "Scale": 0.01
+    },
+    {
+      "InputId": "8b4c9d3e-6f0a-4b8c-9d1e-1f2b3c4d5e6f"/*Normalize*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 360.0
+      },
+      "Description": "Centers the model at the origin and scales it to fit into a unit cube."
+    },
+    {
+      "InputId": "9c5d0e4f-7a1b-5c9d-2e3f-3b4c5d6e7f8a"/*AxisConversionMode*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 315.0
+      },
+      "GroupTitle": "Transform",
+      "Description": "Converts between coordinate conventions. YUpToZUp and ZUpToYUp rotate the model by 90 degrees around X; the Flip modes mirror it along one axis."
+    },
+    {
+      "InputId": "9d2b6f48-e1c7-4a35-b806-7f3e52c0a9d1"/*ImportMaterials*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 90.0
+      },
+      "Description": "Reads materials and decodes their textures. Turn off for faster loading when the model gets its own material."
+    },
+    {
+      "InputId": "b569d0cc-9f84-419c-a3db-91406df6a3f8"/*FilePath*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "GroupTitle": "File",
+      "Description": "Path to the model file.",
+      "Usage": "FilePath",
+      "FileFilter": "fbx, gltf, glb, obj, dae, 3ds, stl, ply, blend, x3d, 3mf, ase, lwo, ms3d, md5mesh, x, off, ifc"
+    },
+    {
+      "InputId": "e46a0d8b-35f1-4c27-9b93-c1d85a7e2f60"/*IsolateImport*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 135.0
+      },
+      "Description": "Imports in a second TiXL process (started with --assimp-host), so a crash or hang inside Assimp only ends that process and shows an error. When turned off, the import runs inside TiXL. Metadata says which one was used."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "77a21584-b35b-46b6-8056-1feb4196c0b7"/*MeshData*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "3f6d2a8e-91c4-4b57-a0e3-6c18d92b7f45"/*Geometry*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "9342c958-3d1f-40b0-b5e0-696812704812"/*Points*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "c81e5f27-4a9d-4e36-b2f0-7d53a1c69e08"/*Setup*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "b7d3e1a9-4c62-4f85-9e07-2a6c8d5f31b4"/*Material*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "5b2e9c61-d847-4f1a-93b6-e0a4c72f158d"/*SkinWeights*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "a94f3d17-6e28-4c85-b1d9-28f7e05b3a6c"/*SkeletonPoints*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "a1b2c3d4-5e6f-4a7b-8c9d-0e1f2a3b4c5d"/*Metadata*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "b2c3d4e5-6f7a-4b8c-9d1e-1f2b3c4d5e6f"/*VertexCount*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "c3d4e5f6-7a8b-4c9d-1e2f-2b3c4d5e6f7a"/*FaceCount*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "d4e5f6a7-8b9c-4d1e-2f3b-3c4d5e6f7a8b"/*MeshCount*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "e5f6a7b8-9c1d-4e2f-3b4c-4d5e6f7a8b9c"/*BoundsMin*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "f6a7b8c9-1d2e-4f3b-4c5d-5e6f7a8b9c1d"/*BoundsMax*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "a7b8c9d1-2e3f-4b4c-5d6e-6f7a8b9c1d2e"/*MeshNames*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "1d7c4e92-b35a-4f08-8e61-c29a07d4b3f5"/*BoneCount*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "6e83a5c0-2f19-4d7b-a4e2-93b1f60c8d27"/*AnimationCount*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "d2f07b39-8c64-4a15-9e3b-51a8e6c2d04f"/*AnimationNames*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

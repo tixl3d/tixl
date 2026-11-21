@@ -16,7 +16,7 @@
         {
           "Id": "292e80cf-ba31-4a50-9bf4-83712430f811"/*Path*/,
           "Type": "System.String",
-          "Value": "pixtur.Playground:mesh/animations/Fox.gltf"
+          "Value": "Lib:mesh/animations/Fox.gltf"
         },
         {
           "Id": "d02f41a6-1a6b-4a6e-8d6c-a28873c79f2c"/*Setup*/,

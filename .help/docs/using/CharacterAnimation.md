@@ -95,6 +95,15 @@ Most setups that don't work have one of these connections wrong:
 - **SkeletonIndex has to agree.** Files with more than one skeleton need the same
   **SkeletonIndex** on every operator of a chain.
 
+## FBX, Collada and other formats
+
+[AssimpImport] loads rigged and animated models from FBX, Collada, glTF and the other formats Assimp reads, and drives the same chain:
+
+- [AssimpImport] **Setup** → [SampleGltfAnimation] **Setup** and [PoseToSkinMatrices] **Setup**
+- [AssimpImport] **MeshData** and **SkinWeights**, plus [PoseToSkinMatrices] **SkinMatrices** → [SkinMesh]
+
+All meshes of the file are combined into one skinned mesh, so there is no **MeshChildIndex** to match. **AnimationNames** lists the clips in the order **ClipIndex** addresses them. **Normalize**, **Scale** and **AxisConversionMode** keep working with animations: the import transform is stored as an extra root joint called `ImportRoot`. Joints also include the parent nodes of the bones, so the skeleton usually has more joints than **BoneCount**.
+
 ## Rigging your own geometry
 
 Geometry that never had a skeleton can be bound to one:
