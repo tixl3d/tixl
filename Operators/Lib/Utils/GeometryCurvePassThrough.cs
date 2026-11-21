@@ -8,7 +8,7 @@ namespace Lib.Utils;
 
 /// <summary>
 /// The counterpart of <see cref="GeometryPolygonFilter"/>: after an op has worked on the polygons only, appends the
-/// source's curve primitives to its result, so text outlines or paths in a mixed geometry survive the op. The curves
+/// source's curve primitives (or, for ops on closed curves, the open curves and polygons) to its result, so text outlines or paths in a mixed geometry survive the op. The curves
 /// get copies of their points and keep their point, vertex and primitive attributes (handles included); attributes
 /// only one side has are filled with zeros on the other. They come after all parts, since an op like a fracture
 /// renumbers parts in ways a curve can't follow. Returns a new instance, cached while result and source are unchanged,
@@ -16,17 +16,31 @@ namespace Lib.Utils;
 /// </summary>
 internal sealed class GeometryCurvePassThrough
 {
-    public Geometry? Combine(Geometry? result, Geometry? source)
+    /// <summary>Which source primitives are appended.</summary>
+    public enum Selections
     {
-        if (result == null || source == null || ReferenceEquals(result, source) || !source.HasCurves())
+        /// <summary>All curves, for ops that work on polygons.</summary>
+        Curves,
+
+        /// <summary>Open curves and polygons, for ops that work on closed curves (e.g. merging their outlines).</summary>
+        OpenCurvesAndPolygons,
+    }
+
+    public Geometry? Combine(Geometry? result, Geometry? source, Selections selection = Selections.Curves)
+    {
+        if (result == null || source == null || ReferenceEquals(result, source) || (selection == Selections.Curves && !source.HasCurves()))
             return result;
 
         if (_combined != null
             && ReferenceEquals(result, _lastResult) && result.Version == _lastResultVersion
-            && ReferenceEquals(source, _lastSource) && source.Version == _lastSourceVersion)
+            && ReferenceEquals(source, _lastSource) && source.Version == _lastSourceVersion
+            && selection == _lastSelection)
             return _combined;
 
-        CollectCurves(source);
+        CollectPrimitives(source, selection);
+        if (_primitives.Count == 0)
+            return result;
+
         var pointOffset = result.PointCount;
         var vertexOffset = result.VertexCount;
         var primitiveOffset = result.PrimitiveCount;
@@ -54,7 +68,7 @@ internal sealed class GeometryCurvePassThrough
         {
             var primitive = _primitives[index];
             combined.PrimitiveVertexOffsets[primitiveOffset + index] = vertex;
-            combined.PrimitiveKind[primitiveOffset + index] = PrimitiveKinds.Curve;
+            combined.PrimitiveKind[primitiveOffset + index] = source.PrimitiveKind[primitive];
             combined.PrimitiveClosed[primitiveOffset + index] = source.PrimitiveClosed[primitive];
             for (var sourceVertex = source.PrimitiveVertexOffsets[primitive]; sourceVertex < source.PrimitiveVertexOffsets[primitive + 1]; sourceVertex++)
                 combined.VertexPoints[vertex++] = pointOffset + _pointMap[source.VertexPoints[sourceVertex]];
@@ -69,11 +83,12 @@ internal sealed class GeometryCurvePassThrough
         _lastResultVersion = result.Version;
         _lastSource = source;
         _lastSourceVersion = source.Version;
+        _lastSelection = selection;
         return combined;
     }
 
-    /** The curve primitives, their vertices and their points (each once, in first-use order) as source indices. */
-    private void CollectCurves(Geometry source)
+    /** The selected primitives, their vertices and their points (each once, in first-use order) as source indices. */
+    private void CollectPrimitives(Geometry source, Selections selection)
     {
         _primitives.Clear();
         _vertices.Clear();
@@ -84,7 +99,11 @@ internal sealed class GeometryCurvePassThrough
         Array.Fill(_pointMap, -1, 0, source.PointCount);
         for (var primitive = 0; primitive < source.PrimitiveCount; primitive++)
         {
-            if (source.PrimitiveKind[primitive] != PrimitiveKinds.Curve)
+            var isCurve = source.PrimitiveKind[primitive] == PrimitiveKinds.Curve;
+            var isSelected = selection == Selections.Curves
+                                 ? isCurve
+                                 : !isCurve || !source.PrimitiveClosed[primitive];
+            if (!isSelected)
                 continue;
 
             _primitives.Add(primitive);
@@ -203,4 +222,5 @@ internal sealed class GeometryCurvePassThrough
     private int _lastResultVersion;
     private Geometry? _lastSource;
     private int _lastSourceVersion;
+    private Selections _lastSelection;
 }

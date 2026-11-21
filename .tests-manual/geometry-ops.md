@@ -485,3 +485,15 @@ Connect [CubeGeometry] -> [SelectGeometry] (Domain Primitives, Offset 4, Count 1
 - A [SelectGeometry] Custom snippet `return i == 4 ? 0.5f : 0f;` with Iterations 4 refines the top face twice (21 polygons).
 - With LevelAttribute empty, a [CubeGeometry] of Size 4, 1, 1 and MaxEdgeLength 0.6 gives far fewer faces than
   without MaxEdgeLength, with the long sides refined more than the ends.
+
+## Step: Merge overlapping curves
+
+**Action:**
+Connect [StringToCurves] (text `TiXL`) -> [MergeCurves] -> [ExtrudeCurves] and look at the Stats of each.
+
+**Expected:**
+- Without overlaps, [MergeCurves] keeps 5 curves in 4 parts; the dot of the `i` stays in the `i`'s part.
+- With LetterSpacing -0.2 on [StringToCurves], the letters merge into one outline in one part, and the extrusion is
+  closed (Boundary edges 0) without walls inside the overlaps.
+- Xor turns overlaps into holes; Intersect keeps only the overlapping areas.
+- A [CubeGeometry] as input passes through with the warning that there are no closed curves.

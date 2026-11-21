@@ -234,6 +234,11 @@ message must name what was expected.
   attribute is rebuilt on every evaluation (one pass over the vertices); add a cache keyed on the geometry's version
   only if profiling shows it matters, since in-place upstream updates must bump that version.
   Recompiles only when the code or an attribute's type changes.
+- **`MergeCurves`** (done 2026-11-21): Union, Xor or Intersect of the closed curves via the tessellator's winding
+  rules (boundary contours), flattened in XY, so the output has straight segments only. Source parts that merge into one
+  island are joined (union-find), so touching letters become one part while an untouched letter keeps its pieces. Open
+  curves and polygons pass through (`GeometryCurvePassThrough.Selections.OpenCurvesAndPolygons`). Open: a two-input
+  variant (A minus B) and keeping Bezier segments.
 - **`Segments` on `CubeGeometry`** (done 2026-11-21) (maintainer, 2026-11-21): an Int3 input (default 1, 1, 1) that splits each face
   into a grid, with per-axis counts that subdividing cannot give (e.g. 10 x 1 x 3 for a bar to bend). Shared points
   along cube edges, so the result stays watertight; UVs per face as today.

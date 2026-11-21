@@ -1,0 +1,20 @@
+{
+  "FormatVersion": 3,
+  "Id": "edfa6c74-9efb-4209-b099-2c8d20cb3e37"/*MergeCurves*/,
+  "Inputs": [
+    {
+      "Id": "ad16ec6a-842a-44fd-9fd0-4212be66d128"/*Tolerance*/,
+      "DefaultValue": 0.002
+    },
+    {
+      "Id": "d5994346-fa1f-4152-9bd4-a0e15a6122af"/*Mode*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "db5a0ef8-d464-4606-a7c4-4a57063deb27"/*Curves*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}
