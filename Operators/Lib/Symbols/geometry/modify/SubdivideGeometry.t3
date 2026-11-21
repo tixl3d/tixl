@@ -11,6 +11,10 @@
       "DefaultValue": 0
     },
     {
+      "Id": "09b5442d-9eff-43e1-b6e8-79eaed455b74"/*SmoothAngle*/,
+      "DefaultValue": 60.0
+    },
+    {
       "Id": "26a66856-a38f-4dab-a274-3ef133ed43df"/*LevelAttribute*/,
       "DefaultValue": ""
     },

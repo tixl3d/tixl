@@ -19,7 +19,17 @@
         "X": 0.0,
         "Y": 180.0
       },
-      "Description": "Auto keeps the input normals interpolated at Smoothness 0 and computes smooth normals otherwise. Interpolate keeps the input's normals, Smooth computes shared point normals, Flat leaves the facets visible."
+      "Description": "Auto keeps the input normals interpolated at Smoothness 0 and computes smooth normals otherwise. Interpolate keeps the input's normals, Smooth computes shared point normals (hard above SmoothAngle), Flat leaves the facets visible."
+    },
+    {
+      "InputId": "09b5442d-9eff-43e1-b6e8-79eaed455b74"/*SmoothAngle*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 315.0
+      },
+      "Min": 0.0,
+      "Max": 180.0,
+      "Description": "For smooth normals: edges between faces more than this many degrees apart stay hard, like the corners of a cube next to a rounded region. 180 smooths everything."
     },
     {
       "InputId": "26a66856-a38f-4dab-a274-3ef133ed43df"/*LevelAttribute*/,

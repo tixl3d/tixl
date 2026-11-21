@@ -217,6 +217,8 @@ message must name what was expected.
   coarse neighbours flat; smoothing across level borders is therefore approximate, not exact Catmull-Clark.
   Estimated cost: two extra cheap passes per iteration (about +20-40% on the same input), usually far less total work
   since only part of the mesh grows; not measured yet.
+  Smooth normals honour `SmoothAngle` (default 60): a vertex averages only the polygons within that angle of its own,
+  area-weighted, so cube edges next to a refined region stay hard.
   Point and vertex attributes are averaged like the new points, so UV seams stay intact; primitive attributes copy to
   the child quads; edge attributes are dropped. Normals: Auto interpolates for Linear and recomputes smooth normals for
   Catmull-Clark. Parts keep their ranges and curves pass through unchanged.

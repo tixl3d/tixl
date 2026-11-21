@@ -71,7 +71,7 @@ internal sealed class SubdivideGeometry : Instance<SubdivideGeometry>, IStatusPr
         }
 
         if (normalMode == NormalModes.Smooth && !ReferenceEquals(current, source))
-            WriteSmoothNormals(current);
+            WriteSmoothNormals(current, SmoothAngle.GetValue(context));
 
         Result.Value = current;
     }
@@ -470,41 +470,89 @@ internal sealed class SubdivideGeometry : Instance<SubdivideGeometry>, IStatusPr
         }
     }
 
-    /// <summary>Area-weighted point normals of the polygons, written as vertex normals.</summary>
-    private void WriteSmoothNormals(Geometry geometry)
+    /// <summary>
+    /// Smooth vertex normals: each vertex averages the area-weighted normals of the polygons around its point, but only
+    /// those within <paramref name="smoothAngle"/> degrees of its own polygon, so edges sharper than that stay hard (e.g.
+    /// the corners of a cube next to a smoothed region). 180 smooths everything.
+    /// </summary>
+    private void WriteSmoothNormals(Geometry geometry, float smoothAngle)
     {
         var positions = geometry.Positions;
         var offsets = geometry.PrimitiveVertexOffsets;
         var vertexPoints = geometry.VertexPoints;
-        EnsureLength(ref _pointNormals, geometry.PointCount);
-        Array.Clear(_pointNormals, 0, geometry.PointCount);
-        for (var primitive = 0; primitive < geometry.PrimitiveCount; primitive++)
+        var pointCount = geometry.PointCount;
+        var primitiveCount = geometry.PrimitiveCount;
+
+        // Area-weighted (Newell) and unit normal per polygon
+        EnsureLength(ref _faceNormals, primitiveCount);
+        EnsureLength(ref _faceDirections, primitiveCount);
+        for (var primitive = 0; primitive < primitiveCount; primitive++)
+        {
+            var normal = Vector3.Zero;
+            if (geometry.PrimitiveKind[primitive] == PrimitiveKinds.Polygon)
+            {
+                var start = offsets[primitive];
+                var end = offsets[primitive + 1];
+                for (var vertex = start; vertex < end; vertex++)
+                {
+                    var p0 = positions[vertexPoints[vertex]];
+                    var p1 = positions[vertexPoints[vertex + 1 == end ? start : vertex + 1]];
+                    normal += new Vector3((p0.Y - p1.Y) * (p0.Z + p1.Z),
+                                          (p0.Z - p1.Z) * (p0.X + p1.X),
+                                          (p0.X - p1.X) * (p0.Y + p1.Y));
+                }
+            }
+
+            _faceNormals[primitive] = normal;
+            _faceDirections[primitive] = normal.LengthSquared() > 1e-20f ? Vector3.Normalize(normal) : Vector3.Zero;
+        }
+
+        // Polygons around each point (CSR)
+        EnsureLength(ref _pointFaceStarts, pointCount + 1);
+        Array.Clear(_pointFaceStarts, 0, pointCount + 1);
+        for (var primitive = 0; primitive < primitiveCount; primitive++)
         {
             if (geometry.PrimitiveKind[primitive] != PrimitiveKinds.Polygon)
                 continue;
 
-            // Newell's method; the length is twice the polygon's area
-            var start = offsets[primitive];
-            var end = offsets[primitive + 1];
-            var normal = Vector3.Zero;
-            for (var vertex = start; vertex < end; vertex++)
-            {
-                var p0 = positions[vertexPoints[vertex]];
-                var p1 = positions[vertexPoints[vertex + 1 == end ? start : vertex + 1]];
-                normal += new Vector3((p0.Y - p1.Y) * (p0.Z + p1.Z),
-                                      (p0.Z - p1.Z) * (p0.X + p1.X),
-                                      (p0.X - p1.X) * (p0.Y + p1.Y));
-            }
-
-            for (var vertex = start; vertex < end; vertex++)
-                _pointNormals[vertexPoints[vertex]] += normal;
+            for (var vertex = offsets[primitive]; vertex < offsets[primitive + 1]; vertex++)
+                _pointFaceStarts[vertexPoints[vertex] + 1]++;
         }
 
-        var normals = geometry.Attributes.GetOrCreate<Vector3>(GeometryAttributeNames.Normal, AttributeDomain.Vertex, geometry.VertexCount).Values;
-        for (var vertex = 0; vertex < vertexPoints.Length; vertex++)
+        for (var point = 0; point < pointCount; point++)
+            _pointFaceStarts[point + 1] += _pointFaceStarts[point];
+
+        EnsureLength(ref _pointFaces, _pointFaceStarts[pointCount]);
+        EnsureLength(ref _pointFaceFill, pointCount);
+        Array.Copy(_pointFaceStarts, _pointFaceFill, pointCount);
+        for (var primitive = 0; primitive < primitiveCount; primitive++)
         {
-            var normal = _pointNormals[vertexPoints[vertex]];
-            normals[vertex] = normal.LengthSquared() > 1e-20f ? Vector3.Normalize(normal) : Vector3.UnitY;
+            if (geometry.PrimitiveKind[primitive] != PrimitiveKinds.Polygon)
+                continue;
+
+            for (var vertex = offsets[primitive]; vertex < offsets[primitive + 1]; vertex++)
+                _pointFaces[_pointFaceFill[vertexPoints[vertex]]++] = primitive;
+        }
+
+        var minCos = smoothAngle >= 180 ? -2f : MathF.Cos(Math.Clamp(smoothAngle, 0, 180) * MathF.PI / 180f);
+        var normals = geometry.Attributes.GetOrCreate<Vector3>(GeometryAttributeNames.Normal, AttributeDomain.Vertex, geometry.VertexCount).Values;
+        for (var primitive = 0; primitive < primitiveCount; primitive++)
+        {
+            var ownDirection = _faceDirections[primitive];
+            for (var vertex = offsets[primitive]; vertex < offsets[primitive + 1]; vertex++)
+            {
+                var point = vertexPoints[vertex];
+                var sum = Vector3.Zero;
+                for (var index = _pointFaceStarts[point]; index < _pointFaceStarts[point + 1]; index++)
+                {
+                    var face = _pointFaces[index];
+                    if (Vector3.Dot(_faceDirections[face], ownDirection) >= minCos)
+                        sum += _faceNormals[face];
+                }
+
+                normals[vertex] = sum.LengthSquared() > 1e-20f ? Vector3.Normalize(sum)
+                                  : ownDirection.LengthSquared() > 0 ? ownDirection : Vector3.UnitY;
+            }
         }
     }
 
@@ -562,7 +610,11 @@ internal sealed class SubdivideGeometry : Instance<SubdivideGeometry>, IStatusPr
     private int[] _valences = [];
     private int[] _boundaryCounts = [];
     private Vector3[] _boundarySums = [];
-    private Vector3[] _pointNormals = [];
+    private Vector3[] _faceNormals = [];
+    private Vector3[] _faceDirections = [];
+    private int[] _pointFaceStarts = [];
+    private int[] _pointFaceFill = [];
+    private int[] _pointFaces = [];
     private string _statusMessage = string.Empty;
 
     [Input(Guid = "bef4d855-bedd-45ea-9d28-0f45b9fc3b7a")]
@@ -579,6 +631,9 @@ internal sealed class SubdivideGeometry : Instance<SubdivideGeometry>, IStatusPr
 
     [Input(Guid = "6ff3ad95-376e-4de3-ba02-875a3f620bee")]
     public readonly InputSlot<float> MaxEdgeLength = new();
+
+    [Input(Guid = "09b5442d-9eff-43e1-b6e8-79eaed455b74")]
+    public readonly InputSlot<float> SmoothAngle = new();
 
     [Input(Guid = "f361912f-b190-4e4f-a192-ef77e8ce5eac")]
     public readonly InputSlot<int> Iterations = new();

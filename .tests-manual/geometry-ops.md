@@ -480,6 +480,8 @@ Connect [CubeGeometry] -> [SelectGeometry] (Domain Primitives, Offset 4, Count 1
 **Expected:**
 - Only the top face is refined: 69 polygons (64 + 5), Boundary edges 0, volume 1.
 - Smoothness 1 rounds the top while the border to the other faces stays closed (Boundary edges 0).
+- With [GeometryToMesh] -> [DrawMesh] after it, the cube's edges stay hard (SmoothAngle 60); SmoothAngle 180 blends
+  the shading across them.
 - A [SelectGeometry] Custom snippet `return i == 4 ? 0.5f : 0f;` with Iterations 4 refines the top face twice (21 polygons).
 - With LevelAttribute empty, a [CubeGeometry] of Size 4, 1, 1 and MaxEdgeLength 0.6 gives far fewer faces than
   without MaxEdgeLength, with the long sides refined more than the ends.
