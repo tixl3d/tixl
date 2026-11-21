@@ -1,0 +1,149 @@
+﻿{
+  "FormatVersion": 3,
+  "Id": "b2c3d4e5-f6a7-8901-abcd-ef1234567890"/*PONKInput*/,
+  "Description": "Receives laser frames from any PONK-compliant sender (e.g. MadMapper) over UDP.\n\nA background listener binds to Port (default 5583) and joins the default multicast group 239.255.10.24; unicast packets to the same port are also received. Chunked frames are reassembled, checksummed, decoded in both mandatory formats (XY_F32_RGB_U8 and XY_U16_RGB) and republished as StructuredList<LaserPoint> in TiXL's ILDA-style 16-bit range.\n\nUse Min/Max X/Y to zoom into a sub-rectangle of the laser frame.",
+  "InputUis": [
+    {
+      "InputId": "8b965258-0c3f-47f7-bdc1-29fe74c5bb78"/*FilterSenderName*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 450.0
+      },
+      "Description": "Dropdown lists the PONK streams currently arriving (sender name and source IP, from packet headers). Pick one to accept only that sender; '(any sender)' or an empty field accepts all. Streams that stop sending drop out after Timeout seconds.",
+      "Usage": "CustomDropdown"
+    },
+    {
+      "InputId": "f1e2d3c4-b5a6-7890-abcd-ef1234567801"/*Active*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "Starts/stops the UDP listener. The thread auto-restarts if it dies from a socket error."
+    },
+    
+    {
+      "InputId": "f1e2d3c4-b5a6-7890-abcd-ef1234567803"/*Port*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      },
+      "Description": "UDP port to listen on. Default 5583.",
+      "Min": 1,
+      "Max": 65535,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "f1e2d3c4-b5a6-7890-abcd-ef1234567804"/*PrintToLog*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      },
+      "Description": "Logs bind/join events, CRC mismatches and per-frame receive info."
+    },
+    {
+      "InputId": "f1e2d3c4-b5a6-7890-abcd-ef1234567805"/*Timeout*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 300.0
+      },
+      "Description": "Seconds after which incomplete frames (with missing chunks) are discarded.",
+      "Min": 0.1,
+      "Max": 10.0,
+      "ClampMin": true,
+      "Format": "{0:0.0}s"
+    },
+    {
+      "InputId": "f1e2d3c4-b5a6-7890-abcd-ef1234567806"/*ExpectedSenderId*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 375.0
+      },
+      "Description": "Only accept frames from this sender id. 0 = accept any. Use the SenderId output to discover a sender's id.",
+      "Min": 0,
+      "ClampMin": true
+    },
+    {
+      "InputId": "f1e2d3c4-b5a6-7890-abcd-ef1234567807"/*MinX*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 525.0
+      },
+      "Description": "Left edge of the sub-rectangle stretched to the full output. PONK coords run -1..1; default -1 = full width.",
+      "Min": -1.0,
+      "Max": 1.0,
+      "Format": "{0:0.00}"
+    },
+    {
+      "InputId": "f1e2d3c4-b5a6-7890-abcd-ef1234567808"/*MaxX*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 600.0
+      },
+      "Description": "Right edge of the displayed X range. e.g. -0.5..0.5 zooms into the middle half; outside content is clamped.",
+      "Min": -1.0,
+      "Max": 1.0,
+      "Format": "{0:0.00}"
+    },
+    {
+      "InputId": "f1e2d3c4-b5a6-7890-abcd-ef1234567809"/*MinY*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 675.0
+      },
+      "Description": "Bottom edge of displayed Y range. Default -1 = full height.",
+      "Min": -1.0,
+      "Max": 1.0,
+      "Format": "{0:0.00}"
+    },
+    {
+      "InputId": "f1e2d3c4-b5a6-7890-abcd-ef123456780a"/*MaxY*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 750.0
+      },
+      "Description": "Top edge of displayed Y range. Default 1 = full height.",
+      "Min": -1.0,
+      "Max": 1.0,
+      "Format": "{0:0.00}"
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "e1d2c3b4-a5f6-7890-abcd-ef1234567890"/*LaserPoints*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 100.0
+      }
+    },
+    {
+      "OutputId": "f2e3d4c5-b6a7-8901-abcd-ef1234567891"/*StatusMessage*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    },
+    {
+      "OutputId": "a3b4c5d6-c7d8-9012-abcd-ef1234567892"/*FrameCount*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 300.0
+      }
+    },
+    {
+      "OutputId": "b4c5d6e7-d8e9-0123-abcd-ef1234567893"/*SenderName*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 400.0
+      }
+    },
+    {
+      "OutputId": "c5d6e7f8-e9f0-1234-abcd-ef1234567894"/*SenderId*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 500.0
+      }
+    }
+  ]
+}

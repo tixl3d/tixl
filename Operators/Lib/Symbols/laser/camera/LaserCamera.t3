@@ -1,0 +1,139 @@
+{
+  "FormatVersion": 3,
+  "Id": "2ccc2f86-fe71-42ff-b91d-812763f5c6cf"/*LaserCamera*/,
+  "Inputs": [
+    {
+      "Id": "0bdac069-cad2-4f54-a600-5db4463121db"/*DepthLiftResolution*/,
+      "DefaultValue": 160
+    },
+    {
+      "Id": "0c48ed58-1242-4f8b-869a-7396cb055931"/*DotDwellPoints*/,
+      "DefaultValue": 8
+    },
+    {
+      "Id": "1683dc5c-a279-44d5-9fe9-8ef5134067c9"/*Up*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 1.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "1c513c59-cc3a-4a8e-b963-d21658cc9d43"/*Position*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 2.4141
+      }
+    },
+    {
+      "Id": "24af02c5-0683-4986-91ac-2ba3fa0579cc"/*CameraReference*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "2f4b9989-7e26-4de9-a6e0-804704344df3"/*Update*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "3f7695e3-6fe2-4034-8337-b4a98c3a4489"/*ClipPlanes*/,
+      "DefaultValue": {
+        "X": 0.01,
+        "Y": 1000.0
+      }
+    },
+    {
+      "Id": "4236c5e7-5665-45f6-b761-c70708e91b00"/*BeamGizmo*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "42bcabad-7b49-48d1-95a3-9b0fc2e4eb91"/*Target*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "4f55d55b-b51d-4a29-8788-e1ae21a80960"/*MaxEdgeStep*/,
+      "DefaultValue": 4000.0
+    },
+    {
+      "Id": "5498b950-55fa-41ed-b098-e8f89026b6c1"/*VectorizeMode*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "5544ec6e-0f90-4853-9af0-69da0f213c22"/*Roll*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "5b629016-9618-4b4b-82e9-b266f330355d"/*CreaseAngle*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "5c6f85eb-fe4c-4643-ae4d-b3ed0feb2772"/*DepthLiftCapture*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "6475ca9c-6ed6-4659-87d2-a602813c823c"/*Scene*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "73241494-c686-4013-96c0-ef40d5932f7f"/*PrintToLog*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "7b2d9f04-63a8-4c51-9e2b-d84f06a73c18"/*Rotation*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "8e5c3a71-2d94-4b6f-a0c8-51e97b3d62f4"/*UseRotation*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "9ce8f8f8-25a0-44c0-952c-d74ea4e22ce5"/*FieldOfView*/,
+      "DefaultValue": 45.0
+    },
+    {
+      "Id": "a942cb01-cb02-4487-83d3-71bfbfab012b"/*DepthLiftStride*/,
+      "DefaultValue": 2
+    },
+    {
+      "Id": "aeaaf98d-e98a-4b52-b675-6ba138db7381"/*VectorizeUseColor*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "b1251dc5-c80f-412d-aad8-b269a303e275"/*VectorizeBrightness*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "ccc53bdc-1fe1-4462-b759-cc6bc98b6546"/*VectorizeThreshold*/,
+      "DefaultValue": 0.2
+    },
+    {
+      "Id": "d71f032b-5144-415a-8003-669af281129f"/*VectorizeResolution*/,
+      "DefaultValue": 256
+    },
+    {
+      "Id": "e0a239e4-9c3a-4943-becf-f946239450c5"/*VectorizePointSpacing*/,
+      "DefaultValue": 4.0
+    },
+    {
+      "Id": "d62b1d2f-8b69-4f58-a8cb-9f9eb89a831d"/*AspectRatio*/,
+      "DefaultValue": -1.0
+    },
+    {
+      "Id": "e7a2c41d-9b58-4c0f-a3d6-8e41f2b7c5a9"/*OutputRef*/,
+      "DefaultValue": "00000000-0000-0000-0000-000000000000"
+    },
+    {
+      "Id": "ef444cd1-f58e-4d92-a09a-8b6a93487dd9"/*BackfaceCulling*/,
+      "DefaultValue": false
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

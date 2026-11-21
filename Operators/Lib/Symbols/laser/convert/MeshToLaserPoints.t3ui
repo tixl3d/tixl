@@ -1,0 +1,100 @@
+{
+  "FormatVersion": 3,
+  "Id": "65770451-b526-4d5a-b1a5-262cf9549c41"/*MeshToLaserPoints*/,
+  "Description": "Converts a mesh into laser points - brings 3D mesh content into the laser pipeline as 2D vector graphics.\n\nWireframe mode emits each unique triangle edge as an isolated lit run (blanked approach point, then straight-line samples at MaxEdgeStep), so each edge becomes its own shape. Vertices mode emits each vertex as an isolated dwell dot (blanked jump + dwell run, like LaserCamera in Points mode) so the mesh silhouette appears as a point cloud. Positions are projected through a Camera into ILDA 16-bit space; color comes from the vertex ColorRgb multiplied by Brightness.\n\nConsume the LaserPoints output through [LaserPointsToBuffer]: into a [LaserCamera]'s PointBuffer input to project it to a laser output, or into a point draw op for on-screen preview. Optimization and safety run in the output setup, not in this operator.",
+  "InputUis": [
+    {
+      "InputId": "4f55d55b-b51d-4a29-8788-e1ae21a80960"/*MaxEdgeStep*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      },
+      "Description": "Wireframe only: distance in 16-bit laser units between lit samples along an edge. Smaller = smoother/brighter lines but more points (default 4000 ≈ safety jump limit).",
+      "Min": 1.0,
+      "ClampMin": true,
+      "Format": "{0:0}"
+    },
+    {
+      "InputId": "944b4428-2852-4474-a344-d24d3fb30bb6"/*TriggerUpdate*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 450.0
+      },
+      "Description": "Pulse to re-read the mesh from the GPU once on the next frame (ignored when UpdateContinuously is on). Resets to false automatically."
+    },
+    {
+      "InputId": "a0c2c2c8-f247-4b9d-8993-730d502b6aca"/*Mesh*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "Mesh to convert (e.g. TorusMesh, SphereMesh, or any MeshBuffers source). Model-space positions; rotate/scale the mesh itself before this operator if needed."
+    },
+    {
+      "InputId": "ac065c9c-eac6-4f6c-a2b2-f9f1515a2353"/*Camera*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      },
+      "Description": "Camera used to project the mesh into laser space. Use the same camera that renders the scene so the laser matches the audience view."
+    },
+    {
+      "InputId": "b8b1385d-be4d-4218-9ff2-27e8b853ca73"/*UpdateContinuously*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 525.0
+      },
+      "Description": "When on, re-reads the mesh every frame (needed for animated/deforming meshes). When off, updates only on TriggerUpdate or when settings change - cheaper for static meshes."
+    },
+    {
+      "InputId": "c1be157f-9e5e-45b9-91ab-c133ce4bae65"/*Brightness*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 375.0
+      },
+      "Description": "Global output brightness multiplier (0..1) applied on top of the vertex colors.",
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true,
+      "Format": "{0:0.00}"
+    },
+    {
+      "InputId": "c883666d-4bda-40a6-9289-0c8508e32ea0"/*Mode*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      },
+      "Description": "Wireframe: scan the triangle edges as connected lines (each edge blanked-separated, deduplicated). Vertices: scan each vertex as an isolated dwell dot - the mesh appears as a point cloud, never with lit connecting lines."
+    },
+    {
+      "InputId": "fcb3b079-830a-403e-a549-a3e3f1f95c56"/*DotDwellPoints*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 300.0
+      },
+      "Description": "Vertices mode only: lit repeats per dot (1..64). More repeats = brighter, more stable dots at the cost of frame budget; stays under the output setup's static-dwell safety limiter.",
+      "Min": 1,
+      "Max": 64,
+      "ClampMin": true,
+      "ClampMax": true
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "469832f7-f83b-47eb-adb8-2bc39b5f6d99"/*LaserPoints*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 100.0
+      }
+    },
+    {
+      "OutputId": "d54e2936-e57a-4e3c-b31e-394f14491d62"/*PointCount*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    }
+  ]
+}

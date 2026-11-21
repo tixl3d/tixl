@@ -1,0 +1,45 @@
+{
+  "FormatVersion": 3,
+  "Id": "624747a6-e974-4650-b60c-a7bdb078a104"/*LaserPointsToBuffer*/,
+  "Description": "Converts a laser point list (StructuredList<LaserPoint>) into a GPU structured buffer (BufferWithViews) with T3.Core.DataTypes.Point layout.\n\nLaserPoint X/Y are scaled to world-space positions; R/G/B/I become the Color vector. This is the bridge from laser frames back into the graph: feed the buffer into a [LaserCamera]'s PointBuffer input to project received/generated frames to a laser output, or into a point draw op (DrawPoints, DrawBillboards) to preview laser frames on screen. Use Scale to fit the points into a reasonable world-space range (default = 1/32767 maps ILDA units to roughly [-1,1]).",
+  "InputUis": [
+    {
+      "InputId": "112189ef-6929-4cee-b54b-c2dfafa12ee5"/*Scale*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      },
+      "Description": "Multiplier applied to each X/Y coordinate. Default 1/32767 maps ILDA 16-bit signed range to roughly [-1, 1]. Use 1 for raw integer units.",
+      "Min": 1E-07,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true,
+      "Format": "{0:G3}"
+    },
+    {
+      "InputId": "55ed02f0-2cd5-4566-b15a-580fddda2484"/*LaserPoints*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "Laser point list to convert. Blanked points (I = 0) are preserved as zero-alpha entries."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "61bb56cf-8b97-468b-8811-84dd3fdc3649"/*Buffer*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    },
+    {
+      "OutputId": "fcee2f07-b573-4dd0-a365-36bad0cce3c5"/*PointCount*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 300.0
+      }
+    }
+  ]
+}

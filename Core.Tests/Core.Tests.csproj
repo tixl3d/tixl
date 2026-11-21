@@ -28,8 +28,17 @@
     <!-- The layout rewriter has no ImGui dependency, so it is tested as linked source instead of referencing the Editor. -->
     <ItemGroup>
         <Compile Include="../Editor/Gui/Windows/Layouts/ImGuiLayoutScaling.cs" Link="Layouts/ImGuiLayoutScaling.cs" />
+        <!-- The CSV parser has no operator or GPU dependency, so it is tested the same way. -->
+        <Compile Include="../Operators/Lib/Utils/CsvPointParser.cs" Link="Utils/CsvPointParser.cs" />
         <None Include="../.Defaults/Layouts/layout0.json" Link="Layouts/layout0.json" CopyToOutputDirectory="PreserveNewest" />
         <None Include="../.Defaults/Layouts/layout12.json" Link="Layouts/layout12.json" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <!-- Self-contained operator helper: compiled in so its projection math is tested without loading the operator package. -->
+        <Compile Include="..\Operators\Lib\Utils\LaserProjection.cs" Link="LaserProjection.cs" />
+        <!-- Self-contained laser vectorizer: compiled in so its CPU pipeline is tested without loading the operator package. -->
+        <Compile Include="..\Operators\Lib\Utils\LaserVectorize.cs" Link="LaserVectorize.cs" />
     </ItemGroup>
 
     <ItemGroup>

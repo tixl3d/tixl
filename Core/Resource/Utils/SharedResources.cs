@@ -62,6 +62,10 @@ public static class SharedResources
 
         _colorPickerTexture = ResourceManager.CreateTextureResource(Path.Combine(EditorResourcesDirectory, "images/t3-colorpicker.png"), null);
 
+        _laserMasterIdleTexture = ResourceManager.CreateTextureResource(Path.Combine(EditorResourcesDirectory, "images/laser-master-idle.png"), null);
+        _laserMasterFireTexture = ResourceManager.CreateTextureResource(Path.Combine(EditorResourcesDirectory, "images/laser-master-fire.png"), null);
+        _laserMasterHoverTexture = ResourceManager.CreateTextureResource(Path.Combine(EditorResourcesDirectory, "images/laser-master-hover.png"), null);
+
         if (_viewWindowDefaultTexture.Value == null)
         {
             Log.Error("Failed to load default view window background texture");
@@ -88,17 +92,38 @@ public static class SharedResources
         {
             _t3LogoAlphaTexture.Value.CreateShaderResourceView(ref T3LogoAlphaTextureImageSrv, "t3 logo image SRV"); // convert to shader resource view
         }
+
+        if (_laserMasterIdleTexture.Value != null)
+            _laserMasterIdleTexture.Value.CreateShaderResourceView(ref LaserMasterIdleImageSrv, "laser master idle image SRV");
+        else
+            Log.Error("Failed to load laser master idle texture");
+
+        if (_laserMasterFireTexture.Value != null)
+            _laserMasterFireTexture.Value.CreateShaderResourceView(ref LaserMasterFireImageSrv, "laser master fire image SRV");
+        else
+            Log.Error("Failed to load laser master fire texture");
+
+        if (_laserMasterHoverTexture.Value != null)
+            _laserMasterHoverTexture.Value.CreateShaderResourceView(ref LaserMasterHoverImageSrv, "laser master hover image SRV");
+        else
+            Log.Error("Failed to load laser master hover texture");
     }
 
     public static RasterizerState ViewWindowRasterizerState;
     private static ShaderResourceView _viewWindowDefaultTextureSrv;
     public static ShaderResourceView ColorPickerImageSrv;
     public static ShaderResourceView T3LogoAlphaTextureImageSrv;
+    public static ShaderResourceView LaserMasterIdleImageSrv;
+    public static ShaderResourceView LaserMasterFireImageSrv;
+    public static ShaderResourceView LaserMasterHoverImageSrv;
     private static Resource<VertexShader> _fullScreenVertexShaderResource;
     private static Resource<PixelShader> _fullScreenPixelShaderResource;
     private static Resource<Texture2D> _viewWindowDefaultTexture;
     private static Resource<Texture2D> _colorPickerTexture;
-    private static Resource<Texture2D> _t3LogoAlphaTexture; //create texture for t3logo for about dialog 
+    private static Resource<Texture2D> _t3LogoAlphaTexture; //create texture for t3logo for about dialog
+    private static Resource<Texture2D> _laserMasterIdleTexture;
+    private static Resource<Texture2D> _laserMasterFireTexture;
+    private static Resource<Texture2D> _laserMasterHoverTexture;
     public static Resource<VertexShader> FullScreenVertexShaderResource => _fullScreenVertexShaderResource;
 
     public static Resource<PixelShader> FullScreenPixelShaderResource => _fullScreenPixelShaderResource;

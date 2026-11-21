@@ -1,0 +1,40 @@
+{
+  "FormatVersion": 3,
+  "Id": "65770451-b526-4d5a-b1a5-262cf9549c41"/*MeshToLaserPoints*/,
+  "Inputs": [
+    {
+      "Id": "4f55d55b-b51d-4a29-8788-e1ae21a80960"/*MaxEdgeStep*/,
+      "DefaultValue": 4000.0
+    },
+    {
+      "Id": "944b4428-2852-4474-a344-d24d3fb30bb6"/*TriggerUpdate*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "a0c2c2c8-f247-4b9d-8993-730d502b6aca"/*Mesh*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "ac065c9c-eac6-4f6c-a2b2-f9f1515a2353"/*Camera*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "b8b1385d-be4d-4218-9ff2-27e8b853ca73"/*UpdateContinuously*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "c1be157f-9e5e-45b9-91ab-c133ce4bae65"/*Brightness*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "c883666d-4bda-40a6-9289-0c8508e32ea0"/*Mode*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "fcb3b079-830a-403e-a549-a3e3f1f95c56"/*DotDwellPoints*/,
+      "DefaultValue": 8
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

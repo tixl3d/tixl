@@ -54,6 +54,27 @@ internal static class SetupLabels
     /// patches — the implicit full-canvas one reads as the output, so it takes no number.</summary>
     /// <summary>A name the user typed if there is one, otherwise what the output is bound to on this machine, so
     /// a setup moved to another machine doesn't carry the first machine's display names along.</summary>
+    /// <summary>
+    /// The state a laser output is in, in the words the outliner and the board card show: what stops it
+    /// streaming content comes first (unbound, uncalibrated, beam off).
+    /// </summary>
+    public static string LaserOutputState(OutputDefinition output, bool isBound, out bool needsAttention)
+    {
+        var safety = output.LaserProcessing?.Safety;
+        needsAttention = true;
+        if (!isBound)
+            return "unbound";
+
+        if (safety == null || !safety.Calibrated)
+            return "uncalibrated";
+
+        if (!safety.BeamEnable)
+            return "beam off";
+
+        needsAttention = false;
+        return "calibrated";
+    }
+
     public static string OutputLabel(OutputDefinition output)
     {
         if (!string.IsNullOrEmpty(output.Name))

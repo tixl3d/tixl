@@ -1,0 +1,16 @@
+{
+  "FormatVersion": 3,
+  "Id": "624747a6-e974-4650-b60c-a7bdb078a104"/*LaserPointsToBuffer*/,
+  "Inputs": [
+    {
+      "Id": "112189ef-6929-4cee-b54b-c2dfafa12ee5"/*Scale*/,
+      "DefaultValue": 3.0517578E-05
+    },
+    {
+      "Id": "55ed02f0-2cd5-4566-b15a-580fddda2484"/*LaserPoints*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

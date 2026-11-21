@@ -17,17 +17,20 @@ public sealed class PlugBinding
     {
         public const string Display = "Display";
         public const string Stream = "Stream";
+        public const string Laser = "Laser";
     }
 
     public Guid OutputId;
 
-    /// <summary>A display (index/name below) or a <see cref="StreamPlug"/> (<see cref="PlugId"/>).</summary>
+    /// <summary>A display (index/name below), a <see cref="StreamPlug"/> or a <see cref="LaserPlug"/> (<see cref="PlugId"/>).</summary>
     public string Kind = Kinds.Display;
 
-    /// <summary>The stream plug for <see cref="Kinds.Stream"/> bindings; unused for displays.</summary>
+    /// <summary>The stream or laser plug for those bindings; unused for displays.</summary>
     public Guid PlugId;
 
     public bool IsStream => Kind == Kinds.Stream;
+
+    public bool IsLaser => Kind == Kinds.Laser;
 
     /// <summary>
     /// OS device name (e.g. \\.\DISPLAY2), recorded when the binding was made. Its number is an adapter

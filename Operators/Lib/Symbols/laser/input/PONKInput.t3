@@ -1,0 +1,49 @@
+﻿{
+  "FormatVersion": 3,
+  "Id": "b2c3d4e5-f6a7-8901-abcd-ef1234567890"/*PONKInput*/,
+  "Inputs": [
+    {
+      "Id": "8b965258-0c3f-47f7-bdc1-29fe74c5bb78"/*FilterSenderName*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "f1e2d3c4-b5a6-7890-abcd-ef1234567801"/*Active*/,
+      "DefaultValue": true
+    },
+    
+    {
+      "Id": "f1e2d3c4-b5a6-7890-abcd-ef1234567803"/*Port*/,
+      "DefaultValue": 5583
+    },
+    {
+      "Id": "f1e2d3c4-b5a6-7890-abcd-ef1234567804"/*PrintToLog*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "f1e2d3c4-b5a6-7890-abcd-ef1234567805"/*Timeout*/,
+      "DefaultValue": 1.2
+    },
+    {
+      "Id": "f1e2d3c4-b5a6-7890-abcd-ef1234567806"/*ExpectedSenderId*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "f1e2d3c4-b5a6-7890-abcd-ef1234567807"/*MinX*/,
+      "DefaultValue": -1.0
+    },
+    {
+      "Id": "f1e2d3c4-b5a6-7890-abcd-ef1234567808"/*MaxX*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "f1e2d3c4-b5a6-7890-abcd-ef1234567809"/*MinY*/,
+      "DefaultValue": -1.0
+    },
+    {
+      "Id": "f1e2d3c4-b5a6-7890-abcd-ef123456780a"/*MaxY*/,
+      "DefaultValue": 1.0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

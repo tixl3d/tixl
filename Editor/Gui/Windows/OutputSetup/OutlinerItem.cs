@@ -41,6 +41,9 @@ internal sealed class OutlinerItem
         /// routing, which the outliner's connections show.</summary>
         public string? Status;
 
+        /// <summary>Colors the status text when it names something that needs attention; null = muted.</summary>
+        public Color? StatusColor;
+
         /// <summary>Overrides the kind's icon (a stream plug differs from a display plug).</summary>
         public Icon? LeadingIcon;
 
@@ -357,7 +360,7 @@ internal sealed class OutlinerItem
                               ? (float)Math.Round(rowMin.Y + lineHeight - 3 * scale)
                               : (float)Math.Round(rowMin.Y + (lineHeight - smallHeight) * 0.5f - 1 * scale);
             ImGui.SetCursorScreenPos(new Vector2(rowMax.X - 6 * scale - statusWidth, statusY));
-            CustomComponents.StylizedText(args.Status, Fonts.FontSmall, UiColors.TextMuted.Fade(fade));
+            CustomComponents.StylizedText(args.Status, Fonts.FontSmall, (args.StatusColor ?? UiColors.TextMuted).Fade(fade));
         }
 
         var inputSlots = SetupRouting.InputSlotsOf(args.Kind);

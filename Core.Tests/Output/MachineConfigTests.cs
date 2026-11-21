@@ -65,4 +65,50 @@ public class MachineConfigTests
         Assert.Equal(1, binding.DisplayIndex);
         Assert.Equal(Guid.Empty, binding.OutputId);
     }
+
+    [Fact]
+    public void RemoveKindMismatchedBindings_DropsDisplayBindingOnLaserOutput()
+    {
+        var laserOutput = new OutputDefinition { Id = Guid.NewGuid(), Name = "L1", Kind = OutputDefinition.Kinds.Laser };
+        var displayOutput = new OutputDefinition { Id = Guid.NewGuid(), Name = "P1", Kind = OutputDefinition.Kinds.Projector };
+        var laserPlug = Guid.NewGuid();
+
+        var config = new MachineConfig();
+        config.Bind(new PlugBinding { OutputId = laserOutput.Id, DisplayIndex = 0 });          // stale: a display on a laser output
+        config.Bind(new PlugBinding { OutputId = laserOutput.Id, Kind = PlugBinding.Kinds.Laser, PlugId = laserPlug });
+        config.Bind(new PlugBinding { OutputId = displayOutput.Id, DisplayIndex = 0 });        // legitimate
+
+        var removed = config.RemoveKindMismatchedBindings([laserOutput, displayOutput]);
+
+        Assert.Equal(1, removed);
+        Assert.DoesNotContain(config.Bindings, b => b.OutputId == laserOutput.Id && !b.IsLaser);
+        Assert.Contains(config.Bindings, b => b.OutputId == laserOutput.Id && b.IsLaser && b.PlugId == laserPlug);
+        Assert.Contains(config.Bindings, b => b.OutputId == displayOutput.Id && !b.IsLaser);
+    }
+
+    [Fact]
+    public void RemoveKindMismatchedBindings_DropsLaserBindingOnCanvasOutput()
+    {
+        var canvasOutput = new OutputDefinition { Id = Guid.NewGuid(), Name = "P1", Kind = OutputDefinition.Kinds.Projector };
+        var config = new MachineConfig();
+        config.Bind(new PlugBinding { OutputId = canvasOutput.Id, Kind = PlugBinding.Kinds.Laser, PlugId = Guid.NewGuid() });
+
+        Assert.Equal(1, config.RemoveKindMismatchedBindings([canvasOutput]));
+        Assert.Empty(config.Bindings);
+    }
+
+    [Fact]
+    public void RemoveKindMismatchedBindings_LeavesMatchingPairsAlone()
+    {
+        var laserOutput = new OutputDefinition { Id = Guid.NewGuid(), Name = "L1", Kind = OutputDefinition.Kinds.Laser };
+        var displayOutput = new OutputDefinition { Id = Guid.NewGuid(), Name = "P1", Kind = OutputDefinition.Kinds.Projector };
+        var streamOutput = new OutputDefinition { Id = Guid.NewGuid(), Name = "P2", Kind = OutputDefinition.Kinds.Projector };
+        var config = new MachineConfig();
+        config.Bind(new PlugBinding { OutputId = laserOutput.Id, Kind = PlugBinding.Kinds.Laser, PlugId = Guid.NewGuid() });
+        config.Bind(new PlugBinding { OutputId = displayOutput.Id, DisplayIndex = 1 });
+        config.Bind(new PlugBinding { OutputId = streamOutput.Id, Kind = PlugBinding.Kinds.Stream, PlugId = Guid.NewGuid() });
+
+        Assert.Equal(0, config.RemoveKindMismatchedBindings([laserOutput, displayOutput, streamOutput]));
+        Assert.Equal(3, config.Bindings.Count);
+    }
 }

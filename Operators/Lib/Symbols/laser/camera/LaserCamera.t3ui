@@ -1,0 +1,279 @@
+{
+  "FormatVersion": 3,
+  "Id": "2ccc2f86-fe71-42ff-b91d-812763f5c6cf"/*LaserCamera*/,
+  "Description": "Geometry-to-laser converter and a standard camera in one: it aims with its own lens (Position/Target or Use Rotation angles, FieldOfView — camera dropdown, mouse control, gizmo) or borrows the lens of a camera wired into CameraReference, and every point/line/mesh drawn inside the Scene connected to it is captured and encoded into a laser frame — dots, line segments and mesh wireframes merged, with Group/transform scopes applied.\n\nThe Command output renders NOTHING — the only thing it carries is the gizmo. Laser data leaves exclusively through LaserPoints: route it via OutputRef to a laser output of the active output setup, whose driver streams it to the bound device. Each camera keeps its own viewpoint, so multiple cameras stay separate, and the scene is captured once per laser pump on the pump's budget — never per rendered frame.\n\nAll positions are projected into ILDA 16-bit (depth/|NDC| culling), colors from the source geometry, 16-bit.\n\nMesh wireframes can be culled: CreaseAngle skips edges between faces that fold less than the angle, BackfaceCulling drops the mesh's hidden side. When the scene needs more points than the frame budget, the op's status line reports the drop.\n\nOptimization and safety settings are managed in the Output Setup; the app bar's LASER button is the master enable.\n\nLike SendToOutput it lists as content in the Output Setup, where Update freezes the camera on its last frame.\n\nRaster content the vertex capture cannot see (raymarched fields, volumes, video textures) is handled by the optional vectorize stage (VectorizeMode): an offscreen render of the scene with the same lens is read back and run through the [ImageToLaserPoints] pipeline, and its shapes merge into the same frame under the transport budget - each shape is emitted whole, vectorized content yields to captured content. Costs one more scene evaluation per pump while enabled, one pump behind the render like the depth lift.",
+  "InputUis": [
+    {
+      "InputId": "0bdac069-cad2-4f54-a600-5db4463121db"/*DepthLiftResolution*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 275.0
+      },
+      "Description": "Resolution of the square depth-lift target (32..512). Higher resolution puts more dots on the same surface."
+    },
+    {
+      "InputId": "0c48ed58-1242-4f8b-869a-7396cb055931"/*DotDwellPoints*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "Lit repeats per dot (1..64). More repeats = brighter, more stable dots at the cost of frame budget; stays under the laser output's static-dwell limiter.",
+      "Min": 1,
+      "Max": 64,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "1683dc5c-a279-44d5-9fe9-8ef5134067c9"/*Up*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 525.0
+      },
+      "Description": "Camera up vector."
+    },
+    {
+      "InputId": "1c513c59-cc3a-4a8e-b963-d21658cc9d43"/*Position*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 375.0
+      },
+      "Description": "X (-left / +right), Y (-down / +up), Z (-forward / +backwards) view position of the camera. Draggable from the output window when this op is selected, and through the gizmo.",
+      "Scale": 0.01
+    },
+    {
+      "InputId": "24af02c5-0683-4986-91ac-2ba3fa0579cc"/*CameraReference*/,
+      "Position": {
+        "X": -200.0,
+        "Y": -150.0
+      },
+      "Description": "Reference output of another camera, e.g. [Camera], [OrbitCamera] or a rig's master [LaserCamera]. Connected: that camera's view and lens drive the projection, and this op's own Position/Target/Rotation/FieldOfView are ignored (its gizmo handles disappear). Empty: the op aims itself."
+    },
+    {
+      "InputId": "2f4b9989-7e26-4de9-a6e0-804704344df3"/*Update*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      },
+      "Description": "When off, the camera holds its last laser frame and stops evaluating its scene. Also switchable from the content card in the Output Setup."
+    },
+    {
+      "InputId": "3f7695e3-6fe2-4034-8337-b4a98c3a4489"/*ClipPlanes*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 825.0
+      },
+      "Description": "Near/far clip planes of the projection matrix."
+    },
+    {
+      "InputId": "4236c5e7-5665-45f6-b761-c70708e91b00"/*BeamGizmo*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 175.0
+      },
+      "Description": "Editor gizmo only: draws the glowing laser beam and corner fan on this camera's view gizmo. When off, the gizmo falls back to plain aim lines - useful when the glow of a big rig is too busy."
+    },
+    {
+      "InputId": "42bcabad-7b49-48d1-95a3-9b0fc2e4eb91"/*Target*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 450.0
+      },
+      "Description": "The point the camera looks at. Draggable from the output window when this op is selected, and through the gizmo's target handle. Ignored while Use Rotation is on.",
+      "Scale": 0.01
+    },
+    {
+      "InputId": "4f55d55b-b51d-4a29-8788-e1ae21a80960"/*MaxEdgeStep*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      },
+      "Description": "Distance in 16-bit laser units between lit samples along a line or mesh edge. Smaller = smoother/brighter lines but more points (default 4000 ≈ safety jump limit).",
+      "Min": 1.0,
+      "ClampMin": true,
+      "Format": "{0:0}"
+    },
+    {
+      "InputId": "5498b950-55fa-41ed-b098-e8f89026b6c1"/*VectorizeMode*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 875.0
+      },
+      "Description": "How raster content (raymarched fields, volumes, video textures) that the vertex capture cannot see becomes laser shapes: Off keeps the camera to captured geometry and depth-lift dots. FindPaths vectorizes an offscreen render of the scene: bright strokes become lit centerlines, blobs wider than Threshold become region outlines, isolated bright pixels become dwell dots. FindContours traces the render's Canny edges as thin paths. Shapes merge into the laser frame under the transport budget; costs one more scene evaluation per pump while enabled."
+    },
+    {
+      "InputId": "5544ec6e-0f90-4853-9af0-69da0f213c22"/*Roll*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 675.0
+      },
+      "Description": "Rotates the camera right/left.",
+      "Min": -90.0,
+      "Max": 90.0,
+      "Format": "{0:0.0}°"
+    },
+    {
+      "InputId": "5b629016-9618-4b4b-82e9-b266f330355d"/*CreaseAngle*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 125.0
+      },
+      "Description": "Wireframe only: minimum angle in degrees between a mesh edge's faces for the edge to be drawn - seams that fold less read as one surface. The default 1° keeps a quad's triangle diagonal out; raise it to sketch only the folds and silhouette of a curved mesh, which also saves points.",
+      "Min": 0.0,
+      "Max": 180.0,
+      "ClampMin": true,
+      "ClampMax": true,
+      "Format": "{0:0.0}°"
+    },
+    {
+      "InputId": "5c6f85eb-fe4c-4643-ae4d-b3ed0feb2772"/*DepthLiftCapture*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 250.0
+      },
+      "Description": "Optional second render pass for content the vertex capture cannot see (raymarched SDF fields, volumes): a small offscreen render of the scene with this camera's lens, whose depth is lifted back to world-space dots colored by the scene. Costs a second scene evaluation per pump while on."
+    },
+    {
+      "InputId": "6475ca9c-6ed6-4659-87d2-a602813c823c"/*Scene*/,
+      "Position": {
+        "X": -200.0,
+        "Y": -75.0
+      },
+      "Description": "Subtree to evaluate and capture. Wire the scene here; every point/line/mesh drawn inside is merged into the laser frame, transformed by the Group/transform scopes active at draw time. The Command output renders nothing — route the frame with OutputRef instead. Capture cost: one CPU readback per unique buffer per frame."
+    },
+    {
+      "InputId": "73241494-c686-4013-96c0-ef40d5932f7f"/*PrintToLog*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      },
+      "Description": "Logs per-source counts (captured sources / dots / segments / wireframe edges) on every update."
+    },
+    {
+      "InputId": "7b2d9f04-63a8-4c51-9e2b-d84f06a73c18"/*Rotation*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 425.0
+      },
+      "Description": "The aim angles in degrees, used when Use Rotation is on (same order as the transform ops): X = Pitch°, Y = Yaw°, Z = Roll°. The gizmo's target drag converts back into these angles."
+    },
+    {
+      "InputId": "8e5c3a71-2d94-4b6f-a0c8-51e97b3d62f4"/*UseRotation*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 400.0
+      },
+      "Description": "Aim by rotation angles instead of a target point: the camera looks along Pitch°/Yaw°/Roll° around the Position and the Target vector is ignored."
+    },
+    {
+      "InputId": "9ce8f8f8-25a0-44c0-952c-d74ea4e22ce5"/*FieldOfView*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 600.0
+      },
+      "Description": "Field of view of the camera in degrees. Same lens for the screen render and the laser projection.",
+      "Min": 0.0,
+      "Max": 180.0,
+      "ClampMin": true,
+      "ClampMax": true,
+      "Format": "{0:0.0}°"
+    },
+    {
+      "InputId": "a942cb01-cb02-4487-83d3-71bfbfab012b"/*DepthLiftStride*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 325.0
+      },
+      "Description": "Samples every Nth pixel of the depth-lift readback. Higher values trade dot density (and point budget) for fewer dots."
+    },
+    {
+      "InputId": "aeaaf98d-e98a-4b52-b675-6ba138db7381"/*VectorizeUseColor*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1025.0
+      },
+      "Description": "When on, vectorized shapes take the rendered pixel's color; when off, they are white."
+    },
+    {
+      "InputId": "b1251dc5-c80f-412d-aad8-b269a303e275"/*VectorizeBrightness*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1075.0
+      },
+      "Description": "Global color multiplier (0..1) on the vectorized points."
+    },
+    {
+      "InputId": "ccc53bdc-1fe1-4462-b759-cc6bc98b6546"/*VectorizeThreshold*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 925.0
+      },
+      "Description": "Brightness a rendered pixel needs to count as content (0..1). Compression noise sits above zero - raise until the background drops out. FindContours: how strong an edge must be."
+    },
+    {
+      "InputId": "d71f032b-5144-415a-8003-669af281129f"/*VectorizeResolution*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1125.0
+      },
+      "Description": "Resolution of the square vectorize render (64..1024). Higher = finer detail in the vectorized shapes at the cost of the render, readback and vectorize."
+    },
+    {
+      "InputId": "e0a239e4-9c3a-4943-becf-f946239450c5"/*VectorizePointSpacing*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 975.0
+      },
+      "Description": "A lit sample every N working pixels along a vectorized stroke - smaller = smoother, brighter lines, more points."
+    },
+    {
+      "InputId": "d62b1d2f-8b69-4f58-a8cb-9f9eb89a831d"/*AspectRatio*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 750.0
+      },
+      "Description": "Aspect ratio of the projection. -1 = square scanner field (the laser frame is square). Set explicitly only for anamorphic framing - any other value squeezes the picture to match.",
+      "Format": "{0:0.00}"
+    },
+    {
+      "InputId": "e7a2c41d-9b58-4c0f-a3d6-8e41f2b7c5a9"/*OutputRef*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 300.0
+      },
+      "Description": "Routes this op's laser frame to a laser output of the active output setup (the output's driver streams it to the bound device). The projection is always this op's own aim - Position/Target or Use Rotation angles, FieldOfView. New cameras attach themselves to a free laser output automatically.",
+      "Usage": "OutputSetupEntities"
+    },
+    {
+      "InputId": "ef444cd1-f58e-4d92-a09a-8b6a93487dd9"/*BackfaceCulling*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 100.0
+      },
+      "Description": "Wireframe only: drops mesh edges whose faces all face away from the camera - the hidden side of a closed mesh. Needs consistent triangle winding (the mesh operators' standard); leave off for meshes with unknown winding."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "073058b3-38ac-4560-bfbb-a1cc42ba3f22"/*Output*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "972566b4-e695-4ac5-8a35-f364e3a00cd2"/*LaserPoints*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 100.0
+      }
+    },
+    {
+      "OutputId": "81c5a82d-0c99-40b2-9832-262c95dedf59"/*Reference*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    }
+  ]
+}

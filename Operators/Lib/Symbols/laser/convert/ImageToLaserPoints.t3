@@ -1,0 +1,80 @@
+{
+  "FormatVersion": 3,
+  "Id": "7e3c1a52-9b44-4c2e-8f6a-1d2b3c4e5f60"/*ImageToLaserPoints*/,
+  "Inputs": [
+    {
+      "Id": "2b7d9c14-6a53-4e91-bc08-3f42d8a95e17"/*UseColor*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "3f6e1a90-7c2b-4e3d-9a41-5b8c2d7e1f60"/*Texture*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "5a8f2d61-9c3b-4e74-bd15-2e7c9a4b1d36"/*MaxPaths*/,
+      "DefaultValue": 256
+    },
+    {
+      "Id": "70ab0278-c054-4175-8025-d73771ef2fd8"/*InFade*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "71b043c3-ae4f-4b33-a48c-93a33ddca3ca"/*OutFade*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "71c3e9a2-8d54-4b16-ae27-9c4f1b2d3e58"/*Denoise*/,
+      "DefaultValue": 2
+    },
+    {
+      "Id": "80a65286-1404-437a-b421-baf62a8428c9"/*PathMaxLength*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "8c1e5b39-4a72-4d86-9e20-6b3f7c1a2d45"/*PointSpacing*/,
+      "DefaultValue": 4.0
+    },
+    {
+      "Id": "9d2f4b18-3e57-4c86-b2a9-1f60d3c47e25"/*Mode*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "a7c1e382-5b94-4d26-8f30-9d1a2b3c4e65"/*OutputRef*/,
+      "DefaultValue": "00000000-0000-0000-0000-000000000000"
+    },
+    {
+      "Id": "b6e2c948-7d13-4a65-8c04-2f1a5b6c7d84"/*Brightness*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "c5e8a273-1b94-4f02-8d36-7a91b4c2e5f8"/*Threshold*/,
+      "DefaultValue": 0.2
+    },
+    {
+      "Id": "d3b7a164-5e28-4c93-af06-1b9c2d3e4f57"/*MaxRes*/,
+      "DefaultValue": 1
+    },
+    {
+      "Id": "e4a1b385-2c76-4d02-9f53-8b1c6d2e4a79"/*Thickness*/,
+      "DefaultValue": 1
+    },
+    {
+      "Id": "e8f4a261-9c3d-4e57-8b26-4f1a5d3c7e08"/*BlurSize*/,
+      "DefaultValue": 1
+    },
+    {
+      "Id": "f9a4d175-6e32-4b58-9d16-3c8e1b2a4c75"/*Update*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "fd3cdd65-3155-4082-880a-ea24bfe5eab9"/*EndRepeat*/,
+      "DefaultValue": 2
+    },
+    {
+      "Id": "ff82f232-0a87-4eba-ae83-e69a803cb2a8"/*PathMinLength*/,
+      "DefaultValue": 0.0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

@@ -35,7 +35,15 @@ public static class SetupFiles
         // The machine config remembers which setup this machine last had active, so it is read first.
         var machineConfigPath = Path.Combine(setupsFolder, MachineConfig.FileName);
         if (File.Exists(machineConfigPath))
+        {
             MachineConfig.TryLoadFromFile(machineConfigPath, out machineConfig);
+
+            // A project folder cloned from another computer carries that machine's adapter IPs.
+            // Re-home them on first load and persist the repair, so the fix sticks (and so the
+            // binding report a boygroup slave sends its master shows this machine's addresses).
+            if (machineConfig.ReconcileLocalInterfaces() > 0)
+                machineConfig.TrySaveToFile(machineConfigPath);
+        }
 
         if (!Directory.Exists(setupsFolder))
             return false;
@@ -143,6 +151,12 @@ public static class SetupFiles
                 continue;
             }
 
+            if (output.Kind == OutputDefinition.Kinds.Laser)
+            {
+                output.ResolvedResolution = LaserResolution;
+                continue;
+            }
+
             var binding = machineConfig.FindBinding(output.Id);
             var resolution = resolutionOfBinding == null ? UnboundResolution : resolutionOfBinding(binding);
             output.ResolvedResolution = resolution.Width > 0 && resolution.Height > 0 ? resolution : UnboundResolution;
@@ -158,4 +172,7 @@ public static class SetupFiles
 
     /// <summary>What an output that follows its plug renders at while nothing is bound to it.</summary>
     public static readonly Int2 UnboundResolution = new(1920, 1080);
+
+    /// <summary>A laser's scan field is square, so a laser output that follows its plug gets a square canvas.</summary>
+    public static readonly Int2 LaserResolution = new(1024, 1024);
 }
