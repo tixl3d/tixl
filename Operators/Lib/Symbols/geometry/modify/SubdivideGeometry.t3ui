@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "98d9ae64-3784-4141-a509-489ae5775bd6"/*SubdivideGeometry*/,
-  "Description": "Splits every polygon of a geometry into quads and optionally smooths it, from linear (Smoothness 0) to Catmull-Clark (1).\n\nEach polygon gets a new point in its center and on each edge. An attribute can scale the smoothing per point, so only selected regions round off. Attributes like UVs and colors are averaged for the new points, parts keep their polygons and curves pass through unchanged.\n\nAKA: subdivision surface, subd, smooth, catmull-clark, tessellate, densify\n\nTips\n- [BevelGeometry] before smoothing keeps edges tighter: a bevelled cube becomes a rounded box.\n- Smoothness 0 before [DisplaceGeometry] gives it enough points to move.\n- [SelectGeometry] -> SubdivideGeometry with SmoothnessAttribute `Selection` rounds only the selected faces.",
+  "Description": "Splits every polygon of a geometry into quads and optionally smooths it, from linear (Smoothness 0) to Catmull-Clark (1).\n\nEach polygon gets a new point in its center and on each edge. LevelAttribute and MaxEdgeLength refine only some faces, keeping the surface closed. An attribute can scale the smoothing per point, so only selected regions round off. Attributes like UVs and colors are averaged for the new points, parts keep their polygons and curves pass through unchanged.\n\nAKA: subdivision surface, subd, smooth, catmull-clark, tessellate, densify\n\nTips\n- [BevelGeometry] before smoothing keeps edges tighter: a bevelled cube becomes a rounded box.\n- Smoothness 0 before [DisplaceGeometry] gives it enough points to move.\n- [SelectGeometry] -> SubdivideGeometry with SmoothnessAttribute `Selection` rounds only the selected faces.",
   "InputUis": [
     {
       "InputId": "070c122c-2fea-425d-bf5c-62910f393676"/*Smoothness*/,
@@ -20,6 +20,25 @@
         "Y": 180.0
       },
       "Description": "Auto keeps the input normals interpolated at Smoothness 0 and computes smooth normals otherwise. Interpolate keeps the input's normals, Smooth computes shared point normals, Flat leaves the facets visible."
+    },
+    {
+      "InputId": "26a66856-a38f-4dab-a274-3ef133ed43df"/*LevelAttribute*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 225.0
+      },
+      "Description": "Optional float attribute that refines faces adaptively: a face is subdivided while its value times Iterations exceeds the iteration, so 1 gets every iteration, 0.5 half of them and 0 none. A Selection from [SelectGeometry] on Primitives refines only the selected faces; a soft or noise-driven value gives gradual density. Neighbouring faces stay closed.",
+      "Usage": "CustomDropdown"
+    },
+    {
+      "InputId": "6ff3ad95-376e-4de3-ba02-875a3f620bee"/*MaxEdgeLength*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 270.0
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "Description": "When above 0, only faces with an edge longer than this are subdivided, up to Iterations times, so big faces get dense and small ones stay as they are, e.g. before [DisplaceGeometry] on an uneven mesh. 0 subdivides every face."
     },
     {
       "InputId": "951c95ee-c446-41be-ba9e-7211dc78ff2b"/*SmoothnessAttribute*/,

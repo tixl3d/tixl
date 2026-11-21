@@ -37,6 +37,8 @@ internal sealed class SubdivideGeometry : Instance<SubdivideGeometry>, IStatusPr
         var hasAttribute = !string.IsNullOrWhiteSpace(attributeName);
         var iterations = Iterations.GetValue(context).Clamp(0, MaxIterations);
         var normalMode = (NormalModes)Normals.GetValue(context).Clamp(0, 3);
+        var levelName = LevelAttribute.GetValue(context);
+        var maxEdgeLength = MaxEdgeLength.GetValue(context);
         var smooths = smoothness != 0;
         if (normalMode == NormalModes.Auto)
             normalMode = smooths ? NormalModes.Smooth : NormalModes.Interpolate;
@@ -52,6 +54,9 @@ internal sealed class SubdivideGeometry : Instance<SubdivideGeometry>, IStatusPr
         var current = source;
         for (var iteration = 0; iteration < iterations; iteration++)
         {
+            if (!CollectSplits(current, iteration, iterations, string.IsNullOrWhiteSpace(levelName) ? null : levelName, maxEdgeLength))
+                break;
+
             if (GetSubdividedVertexCount(current) > MaxVertexCount)
             {
                 _statusMessage = $"Stopped after {iteration} iterations: more would exceed {MaxVertexCount / 1000000}M vertices.";
@@ -91,26 +96,77 @@ internal sealed class SubdivideGeometry : Instance<SubdivideGeometry>, IStatusPr
         return _smoothness;
     }
 
-    private static int GetSubdividedVertexCount(Geometry geometry)
+    /// <summary>
+    /// Which polygons split in this iteration. With LevelAttribute, a face splits while its value times Iterations
+    /// exceeds the iteration (values flow to the child faces, so a face with 0.5 of 4 iterations splits twice). With
+    /// MaxEdgeLength, only faces with a longer edge split. Without either, every polygon splits.
+    /// </summary>
+    /// <returns>False when no face splits, so further iterations would change nothing.</returns>
+    private bool CollectSplits(Geometry geometry, int iteration, int iterations, string? levelName, float maxEdgeLength)
+    {
+        var primitiveCount = geometry.PrimitiveCount;
+        EnsureLength(ref _splits, primitiveCount);
+        var hasLevels = false;
+        if (levelName != null)
+        {
+            EnsureLength(ref _levels, primitiveCount);
+            EnsureLength(ref _attributeScratch, geometry.PointCount);
+            hasLevels = GeometryElements.TryGetWeights(geometry, AttributeDomain.Primitive, levelName, _levels, _attributeScratch);
+            if (!hasLevels)
+                _statusMessage = $"No float attribute '{levelName}'; every face is subdivided.";
+        }
+
+        var maxEdgeLengthSquared = maxEdgeLength * maxEdgeLength;
+        var anySplit = false;
+        for (var primitive = 0; primitive < primitiveCount; primitive++)
+        {
+            var start = geometry.PrimitiveVertexOffsets[primitive];
+            var vertexCount = geometry.PrimitiveVertexOffsets[primitive + 1] - start;
+            var splits = geometry.PrimitiveKind[primitive] == PrimitiveKinds.Polygon && vertexCount >= 3;
+            if (splits && hasLevels)
+                splits = _levels[primitive] * iterations > iteration;
+
+            if (splits && maxEdgeLength > 0)
+                splits = GetLongestEdgeSquared(geometry, start, vertexCount) > maxEdgeLengthSquared;
+
+            _splits[primitive] = splits;
+            anySplit |= splits;
+        }
+
+        return anySplit;
+    }
+
+    private static float GetLongestEdgeSquared(Geometry geometry, int start, int vertexCount)
+    {
+        var longest = 0f;
+        for (var i = 0; i < vertexCount; i++)
+        {
+            var a = geometry.Positions[geometry.VertexPoints[start + i]];
+            var b = geometry.Positions[geometry.VertexPoints[start + (i + 1) % vertexCount]];
+            longest = MathF.Max(longest, Vector3.DistanceSquared(a, b));
+        }
+
+        return longest;
+    }
+
+    private int GetSubdividedVertexCount(Geometry geometry)
     {
         var count = 0;
         for (var primitive = 0; primitive < geometry.PrimitiveCount; primitive++)
         {
             var vertexCount = geometry.PrimitiveVertexOffsets[primitive + 1] - geometry.PrimitiveVertexOffsets[primitive];
-            count += IsSubdivided(geometry, primitive, vertexCount) ? vertexCount * 4 : vertexCount;
+            count += _splits[primitive] ? vertexCount * 4 : vertexCount;
         }
 
         return count;
     }
 
-    private static bool IsSubdivided(Geometry geometry, int primitive, int vertexCount)
-    {
-        return geometry.PrimitiveKind[primitive] == PrimitiveKinds.Polygon && vertexCount >= 3;
-    }
-
     /// <summary>
-    /// Output points: the source points first (so curves keep their indices), then one per edge, then one per
-    /// subdivided polygon. Each N-gon becomes N quads: its vertex, the next edge point, the face point, the previous edge point.
+    /// Output points: the source points first (so curves keep their indices), then one per edge of a splitting face,
+    /// then one per splitting face. Each split N-gon becomes N quads: its vertex, the next edge point, the face point,
+    /// the previous edge point. A face that doesn't split gets the edge points of split neighbours inserted into its
+    /// outline, so the surface stays closed; those border edges count as open for the smoothing, which keeps the
+    /// border points on the edge and the coarse face flat.
     /// </summary>
     /// <param name="smoothness">Per source point: 0 keeps the linear position, 1 the Catmull-Clark one; null is linear.</param>
     private void Subdivide(Geometry source, Geometry target, float[]? smoothness, bool dropNormals)
@@ -125,35 +181,56 @@ internal sealed class SubdivideGeometry : Instance<SubdivideGeometry>, IStatusPr
         var edgeCount = edges.Length;
         var primitiveCount = source.PrimitiveCount;
 
-        // Sizes, face point indices and how many subdivided polygons use each edge
+        // How many splitting polygons use each edge; output primitive counts
         EnsureLength(ref _facePoints, primitiveCount);
         EnsureLength(ref _primitiveStarts, primitiveCount);
         EnsureLength(ref _edgeUse, edgeCount);
+        EnsureLength(ref _edgePoints, edgeCount);
         Array.Clear(_edgeUse, 0, edgeCount);
-        var facePointCount = 0;
         var outputPrimitiveCount = 0;
-        var outputVertexCount = 0;
         for (var primitive = 0; primitive < primitiveCount; primitive++)
         {
             var start = offsets[primitive];
             var vertexCount = offsets[primitive + 1] - start;
             _primitiveStarts[primitive] = outputPrimitiveCount;
-            if (!IsSubdivided(source, primitive, vertexCount))
+            if (!_splits[primitive])
             {
-                _facePoints[primitive] = -1;
                 outputPrimitiveCount++;
-                outputVertexCount += vertexCount;
                 continue;
             }
 
-            _facePoints[primitive] = pointCount + edgeCount + facePointCount++;
             outputPrimitiveCount += vertexCount;
-            outputVertexCount += vertexCount * 4;
             for (var vertex = start; vertex < start + vertexCount; vertex++)
                 _edgeUse[cornerEdges[vertex]]++;
         }
 
-        var outputPointCount = pointCount + edgeCount + facePointCount;
+        // Edge points only where a splitting face needs one, then the face points
+        var nextPoint = pointCount;
+        for (var edge = 0; edge < edgeCount; edge++)
+            _edgePoints[edge] = _edgeUse[edge] > 0 ? nextPoint++ : -1;
+
+        var outputVertexCount = 0;
+        for (var primitive = 0; primitive < primitiveCount; primitive++)
+        {
+            var start = offsets[primitive];
+            var vertexCount = offsets[primitive + 1] - start;
+            if (_splits[primitive])
+            {
+                _facePoints[primitive] = nextPoint++;
+                outputVertexCount += vertexCount * 4;
+                continue;
+            }
+
+            _facePoints[primitive] = -1;
+            outputVertexCount += vertexCount;
+            for (var vertex = start; vertex < start + vertexCount; vertex++)
+            {
+                if (cornerEdges[vertex] >= 0 && _edgePoints[cornerEdges[vertex]] >= 0)
+                    outputVertexCount++;
+            }
+        }
+
+        var outputPointCount = nextPoint;
         if (target.Positions.Length != outputPointCount)
             target.Positions = new Vector3[outputPointCount];
         if (target.PrimitiveVertexOffsets.Length != outputPrimitiveCount + 1)
@@ -173,7 +250,10 @@ internal sealed class SubdivideGeometry : Instance<SubdivideGeometry>, IStatusPr
             _pointStencil.AddCopy(point);
 
         for (var edge = 0; edge < edgeCount; edge++)
-            _pointStencil.AddMidpoint(edges[edge].PointA, edges[edge].PointB);
+        {
+            if (_edgePoints[edge] >= 0)
+                _pointStencil.AddMidpoint(edges[edge].PointA, edges[edge].PointB);
+        }
 
         for (var primitive = 0; primitive < primitiveCount; primitive++)
         {
@@ -198,17 +278,21 @@ internal sealed class SubdivideGeometry : Instance<SubdivideGeometry>, IStatusPr
         // Edge points: the midpoint, pulled toward both face points for smooth interior edges by the mean smoothness of its ends
         for (var edge = 0; edge < edgeCount; edge++)
         {
+            var edgePoint = _edgePoints[edge];
+            if (edgePoint < 0)
+                continue;
+
             var e = edges[edge];
             var midpoint = (positions[e.PointA] + positions[e.PointB]) * 0.5f;
             if (smoothness == null || _edgeUse[edge] != 2 || e.Face1 < 0)
             {
-                outputPositions[pointCount + edge] = midpoint;
+                outputPositions[edgePoint] = midpoint;
                 continue;
             }
 
             var smoothed = (midpoint * 2 + outputPositions[_facePoints[e.Face0]] + outputPositions[_facePoints[e.Face1]]) * 0.25f;
             var weight = (smoothness[e.PointA] + smoothness[e.PointB]) * 0.5f;
-            outputPositions[pointCount + edge] = Vector3.Lerp(midpoint, smoothed, weight);
+            outputPositions[edgePoint] = Vector3.Lerp(midpoint, smoothed, weight);
         }
 
         Array.Copy(positions, outputPositions, pointCount);
@@ -239,6 +323,14 @@ internal sealed class SubdivideGeometry : Instance<SubdivideGeometry>, IStatusPr
                 {
                     outputVertexPoints[outputVertex++] = vertexPoints[vertex];
                     _vertexStencil.AddCopy(vertex);
+
+                    // A split neighbour's edge point joins the outline, so no gap opens along the shared edge
+                    var edge = cornerEdges[vertex];
+                    if (edge < 0 || _edgePoints[edge] < 0)
+                        continue;
+
+                    outputVertexPoints[outputVertex++] = _edgePoints[edge];
+                    _vertexStencil.AddMidpoint(vertex, vertex + 1 == end ? start : vertex + 1);
                 }
 
                 continue;
@@ -258,9 +350,9 @@ internal sealed class SubdivideGeometry : Instance<SubdivideGeometry>, IStatusPr
                 outputPrimitive++;
 
                 outputVertexPoints[outputVertex++] = vertexPoints[vertex];
-                outputVertexPoints[outputVertex++] = pointCount + cornerEdges[vertex];
+                outputVertexPoints[outputVertex++] = _edgePoints[cornerEdges[vertex]];
                 outputVertexPoints[outputVertex++] = facePoint;
-                outputVertexPoints[outputVertex++] = pointCount + cornerEdges[previous];
+                outputVertexPoints[outputVertex++] = _edgePoints[cornerEdges[previous]];
 
                 _vertexStencil.AddCopy(vertex);
                 _vertexStencil.AddMidpoint(vertex, next);
@@ -417,14 +509,19 @@ internal sealed class SubdivideGeometry : Instance<SubdivideGeometry>, IStatusPr
     }
 
     #region ICustomDropdownHolder - float attributes of the last input
-    string ICustomDropdownHolder.GetValueForInput(Guid inputId) => SmoothnessAttribute.Value;
+    string ICustomDropdownHolder.GetValueForInput(Guid inputId) => inputId == LevelAttribute.Input.InputDefinition.Id ? LevelAttribute.Value : SmoothnessAttribute.Value;
 
     IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid inputId) => GeometryAttributeChoices.GetAttributeNames(_lastSource, null, floatsOnly: true);
 
     void ICustomDropdownHolder.HandleResultForInput(Guid inputId, string? selected, bool isAListItem)
     {
-        if (inputId == SmoothnessAttribute.Input.InputDefinition.Id && selected != null)
+        if (selected == null)
+            return;
+
+        if (inputId == SmoothnessAttribute.Input.InputDefinition.Id)
             SmoothnessAttribute.SetTypedInputValue(selected);
+        else if (inputId == LevelAttribute.Input.InputDefinition.Id)
+            LevelAttribute.SetTypedInputValue(selected);
     }
     #endregion
 
@@ -454,6 +551,9 @@ internal sealed class SubdivideGeometry : Instance<SubdivideGeometry>, IStatusPr
     private float[] _smoothness = [];
     private float[] _attributeScratch = [];
     private int[] _facePoints = [];
+    private int[] _edgePoints = [];
+    private bool[] _splits = [];
+    private float[] _levels = [];
     private int[] _primitiveStarts = [];
     private int[] _edgeUse = [];
     private Vector3[] _faceSums = [];
@@ -473,6 +573,12 @@ internal sealed class SubdivideGeometry : Instance<SubdivideGeometry>, IStatusPr
 
     [Input(Guid = "951c95ee-c446-41be-ba9e-7211dc78ff2b")]
     public readonly InputSlot<string> SmoothnessAttribute = new();
+
+    [Input(Guid = "26a66856-a38f-4dab-a274-3ef133ed43df")]
+    public readonly InputSlot<string> LevelAttribute = new();
+
+    [Input(Guid = "6ff3ad95-376e-4de3-ba02-875a3f620bee")]
+    public readonly InputSlot<float> MaxEdgeLength = new();
 
     [Input(Guid = "f361912f-b190-4e4f-a192-ef77e8ce5eac")]
     public readonly InputSlot<int> Iterations = new();

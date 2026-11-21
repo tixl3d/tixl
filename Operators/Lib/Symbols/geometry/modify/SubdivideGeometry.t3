@@ -11,6 +11,14 @@
       "DefaultValue": 0
     },
     {
+      "Id": "26a66856-a38f-4dab-a274-3ef133ed43df"/*LevelAttribute*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "6ff3ad95-376e-4de3-ba02-875a3f620bee"/*MaxEdgeLength*/,
+      "DefaultValue": 0.0
+    },
+    {
       "Id": "951c95ee-c446-41be-ba9e-7211dc78ff2b"/*SmoothnessAttribute*/,
       "DefaultValue": ""
     },

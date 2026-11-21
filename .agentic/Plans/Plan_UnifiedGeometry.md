@@ -211,12 +211,18 @@ message must name what was expected.
   smooths, with boundary edges kept as creases (open edges stay open, corners stay fixed). Iterations repeat it.
   Done as a `Smoothness` blend (0 linear, 1 Catmull-Clark, unclamped) with an optional `SmoothnessAttribute`
   per point instead of a mode switch.
+  Adaptive (done 2026-11-21): `LevelAttribute` (per face, value x Iterations levels) and `MaxEdgeLength` pick the
+  faces that split each iteration; only their edges get points, and unsplit neighbours take those edge points into
+  their outline, so the surface stays closed. Border edges count as open for the smoothing (crease), which keeps
+  coarse neighbours flat; smoothing across level borders is therefore approximate, not exact Catmull-Clark.
+  Estimated cost: two extra cheap passes per iteration (about +20-40% on the same input), usually far less total work
+  since only part of the mesh grows; not measured yet.
   Point and vertex attributes are averaged like the new points, so UV seams stay intact; primitive attributes copy to
   the child quads; edge attributes are dropped. Normals: Auto interpolates for Linear and recomputes smooth normals for
   Catmull-Clark. Parts keep their ranges and curves pass through unchanged.
 - **Attribute name inputs** (done 2026-11-21): selection, attribute and name inputs of TransformGeometry,
   CustomGeometryAttribute, AttributeFromField and ColorGeometry are type-ahead dropdowns of the input's attributes (`Lib/Utils/GeometryAttributeChoices`).
-  An empty selection shows as `Auto (Selection)` or `Auto (All)`; the reserved value `All` ignores any selection.
+  An empty selection shows as `<Auto: Selection>` or `<Auto: All>`; the reserved value `<All>` (or a plain `All` stored earlier) ignores any selection.
   Still to do: SelectGeometry's Name and the remaining ops with attribute names.
 - **Snippet attributes** (done 2026-11-21): snippets of `SelectGeometry` and `CustomGeometryAttribute` read `@Name`
   through `Lib/Utils/GeometrySnippetAttributes`: typed array fields of the generated class, same domain passed through,

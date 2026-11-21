@@ -419,7 +419,7 @@ Connect [CubeGeometry] -> [SubdivideGeometry] (Linear) -> [SelectGeometry] (Doma
 **Expected:**
 - The selected faces are filled and outlined, not ringed at their points.
 - Count 2 keeps only two faces from Offset; animating Offset moves them around the cube.
-- On [TransformGeometry], Selection shows `Auto (Selection)`. Typing opens a list with `Auto`, `All` and the float attributes; `All` moves the whole cube.
+- On [TransformGeometry], Selection shows `<Auto: Selection>`. Typing opens a list with `<Auto>`, `<All>` and the float attributes; `<All>` moves the whole cube.
 
 ## Step: Read attributes in a snippet
 
@@ -470,3 +470,16 @@ Set Segments of [CubeGeometry] to 2, 1, 3 and look at the Stats. Then connect [E
 - The cube has 24 points and 22 quads, Boundary edges 0 and volume 1; 1, 1, 1 gives the plain cube.
 - Each op's output still contains the letter outlines as curves (Stats, Table Primitives), after all parts.
 - After [TriangulateGeometry], the IsSide primitive attribute has one value per triangle.
+
+## Step: Adaptive subdivision
+
+**Action:**
+Connect [CubeGeometry] -> [SelectGeometry] (Domain Primitives, Offset 4, Count 1) -> [SubdivideGeometry]
+(Smoothness 0, Iterations 3, LevelAttribute `Selection`) and look at the Output Window, Stats tab.
+
+**Expected:**
+- Only the top face is refined: 69 polygons (64 + 5), Boundary edges 0, volume 1.
+- Smoothness 1 rounds the top while the border to the other faces stays closed (Boundary edges 0).
+- A [SelectGeometry] Custom snippet `return i == 4 ? 0.5f : 0f;` with Iterations 4 refines the top face twice (21 polygons).
+- With LevelAttribute empty, a [CubeGeometry] of Size 4, 1, 1 and MaxEdgeLength 0.6 gives far fewer faces than
+  without MaxEdgeLength, with the long sides refined more than the ends.
