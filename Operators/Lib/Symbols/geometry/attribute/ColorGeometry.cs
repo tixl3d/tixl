@@ -86,6 +86,12 @@ internal sealed class ColorGeometry : Instance<ColorGeometry>, IStatusProvider, 
             range = 1e-6f;
 
         var count = GeometryElements.GetCount(source, domain);
+        if (count == 0)
+        {
+            Result.Value = source;
+            return;
+        }
+
         if (_weights.Length < count)
             _weights = new float[count];
 

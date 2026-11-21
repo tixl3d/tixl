@@ -4,6 +4,14 @@
   "Description": "Keeps the points, primitives or parts of a geometry whose float attribute is above a threshold, e.g. only what [SelectGeometry] selected; Invert removes them instead.\n\nA primitive stays only with all its points. Kept points that lose their primitives stay as loose points, parts are rebuilt from what remains, and the attributes of the kept elements come along.\n\nAKA: blast, delete, keep, isolate, remove selection, filter by attribute",
   "InputUis": [
     {
+      "InputId": "0147ca4d-7cd7-4380-a08d-8648bcde9ee8"/*WhenMissing*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 250.0
+      },
+      "Description": "What happens when the geometry has no such attribute: KeepAll passes it through with a warning, RemoveAll outputs empty geometry, e.g. to draw a selection only when there is one."
+    },
+    {
       "InputId": "3fcdb0e5-8432-423d-9343-c6adcbc12703"/*Invert*/,
       "Position": {
         "X": 0.0,

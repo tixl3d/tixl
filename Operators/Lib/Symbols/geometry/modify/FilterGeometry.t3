@@ -3,6 +3,10 @@
   "Id": "c8554f60-1c63-4d29-bea0-9f243e2044f9"/*FilterGeometry*/,
   "Inputs": [
     {
+      "Id": "0147ca4d-7cd7-4380-a08d-8648bcde9ee8"/*WhenMissing*/,
+      "DefaultValue": 0
+    },
+    {
       "Id": "3fcdb0e5-8432-423d-9343-c6adcbc12703"/*Invert*/,
       "DefaultValue": false
     },

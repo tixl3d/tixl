@@ -14,6 +14,16 @@
       "SymbolName": "Lib.geometry.modify.FilterGeometry",
       "InputValues": [
         {
+          "Id": "0147ca4d-7cd7-4380-a08d-8648bcde9ee8"/*WhenMissing*/,
+          "Type": "System.Int32",
+          "Value": 1
+        },
+        {
+          "Id": "3fcdb0e5-8432-423d-9343-c6adcbc12703"/*Invert*/,
+          "Type": "System.Boolean",
+          "Value": false
+        },
+        {
           "Id": "6832a86a-074e-4f38-9bde-0497f38ec813"/*UseAbsolute*/,
           "Type": "System.Boolean",
           "Value": true

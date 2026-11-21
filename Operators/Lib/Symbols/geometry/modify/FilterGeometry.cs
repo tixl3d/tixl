@@ -20,6 +20,12 @@ internal sealed class FilterGeometry : Instance<FilterGeometry>, IStatusProvider
         Parts,
     }
 
+    private enum MissingModes
+    {
+        KeepAll,
+        RemoveAll,
+    }
+
     [Output(Guid = "5f31df04-58f6-4029-b722-3666068d39ea")]
     public readonly Slot<Geometry?> Result = new();
 
@@ -36,6 +42,7 @@ internal sealed class FilterGeometry : Instance<FilterGeometry>, IStatusProvider
         var threshold = Threshold.GetValue(context);
         var useAbsolute = UseAbsolute.GetValue(context);
         var invert = Invert.GetValue(context);
+        var whenMissing = (MissingModes)Math.Clamp(WhenMissing.GetValue(context), 0, 1);
         _statusMessage = string.Empty;
         _lastSource = source;
         if (source == null)
@@ -46,6 +53,13 @@ internal sealed class FilterGeometry : Instance<FilterGeometry>, IStatusProvider
 
         if (string.IsNullOrWhiteSpace(name) || !TryFindWeights(source, name, domainChoice, out var weights, out var domain))
         {
+            // Removing everything is a deliberate choice (e.g. showing a selection only when there is one), so no warning
+            if (whenMissing == MissingModes.RemoveAll)
+            {
+                Result.Value = _empty;
+                return;
+            }
+
             _statusMessage = $"No float attribute '{name}'; nothing is removed.";
             Result.Value = source;
             return;
@@ -297,6 +311,7 @@ internal sealed class FilterGeometry : Instance<FilterGeometry>, IStatusProvider
     private int[] _pointMap = [];
     private int[] _primitiveMap = [];
     private Geometry? _lastSource;
+    private readonly Geometry _empty = new();
     private string _statusMessage = string.Empty;
 
     [Input(Guid = "561e6e45-b630-4d6a-9a90-09240385145f")]
@@ -316,4 +331,7 @@ internal sealed class FilterGeometry : Instance<FilterGeometry>, IStatusProvider
 
     [Input(Guid = "3fcdb0e5-8432-423d-9343-c6adcbc12703")]
     public readonly InputSlot<bool> Invert = new();
+
+    [Input(Guid = "0147ca4d-7cd7-4380-a08d-8648bcde9ee8", MappedType = typeof(MissingModes))]
+    public readonly InputSlot<int> WhenMissing = new();
 }
