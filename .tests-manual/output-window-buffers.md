@@ -12,40 +12,46 @@ related-help:
   - ../.help/docs/getting-started/Introduction.md
 ---
 
-The Output Window shows GPU buffers as points or as a table of their values. Buffers don't carry their element
+The Output Window shows GPU buffers as points, with a sidebar for a table of their values. Buffers don't carry their element
 type, so only 64-byte strides (the size of a point) can be shown as points.
 
-## Step: Points mode
+## Step: Points with the sidebar hidden
 
 **Action:**
 Select the [RadialPoints] and look at the Output Window.
 
 **Expected:**
-- A segmented button offers **Points** and **Table**, with **Points** selected.
+- A segmented control floats at the top left: a closed eye (hidden sidebar, selected), a point icon with the
+  point count in small text, and an info icon.
 - The points are drawn as with a [VisualizePoints] with default settings, on top of the grid.
-- The row next to the button lists the count, `64 bytes` and the buffer size.
+- Next to the control, the count, `64 bytes` and the buffer size.
 - Dragging in the output orbits the camera; the toolbar shows the camera controls as for a rendered scene.
 
-## Step: Table mode
+## Step: Table in the sidebar
 
 **Action:**
-Click **Table**.
+Click the point icon.
 
 **Expected:**
-- **Start** and **Count** fields appear, and a table lists one row per point with columns `Pos X` ... `F2`.
-- Zeros are drawn faintly, not black.
-- The `Color.R` cell starts with a narrow strip in the point's color.
-- While the radius grows, changing position values are tinted orange; while it shrinks, blue. Larger changes are tinted more strongly.
-- Hovering a tinted value shows its previous value and the change in percent.
-- With playback stopped, the tint disappears.
+- A sidebar opens on the left with **Start** and **Count** fields and a table, one row per point, columns `Pos X` ... `F2`.
+- The points move into the area right of the sidebar and below the toolbar, centered there; orbiting turns around its
+  middle. Nothing is drawn behind the table.
+- Dragging the splitter between sidebar and render resizes both.
+- Hovering a row draws a blue ring around that point on the render.
+- The list icon at the right of the control row maximizes the table over the whole view; clicking it again brings
+  the render back.
+- Zeros are drawn faintly, not black. The `Color.R` cell starts with a narrow strip in the point's color.
+- While the radius grows, changing position values are tinted orange; while it shrinks, blue. Hovering a tinted value
+  shows its previous value and the change in percent. With playback stopped, the tint disappears.
+- The info icon shows the count, stride and size instead of the table.
 
-## Step: Mode is shared between ops
+## Step: Layout is shared between ops
 
 **Action:**
-With **Table** selected, select a different point op (e.g. a [GridPoints]), then select the [RadialPoints] again.
+With the table open, select a different point op (e.g. a [GridPoints]), then select the [RadialPoints] again.
 
 **Expected:**
-- Both ops are shown as a table. Switching back to **Points** on one op also shows the other as points.
+- Both ops show the sidebar with the table at the same width. Hiding it on one op also hides it on the other.
 
 ## Step: Start and Count
 
@@ -62,7 +68,7 @@ Set **Start** to 10 and **Count** to 5.
 Select an op that outputs a buffer with another stride (e.g. a particle simulation's or a custom compute shader's buffer).
 
 **Expected:**
-- **Points** is grayed out; its tooltip explains that only 64-byte strides can be shown as points.
+- Nothing is rendered: the sidebar covers the whole view, and the hidden-sidebar segment is grayed out.
 - The table shows one column per float, labelled `[0]`, `[1]`, ...
 
 ## Step: Connection tooltip

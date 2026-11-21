@@ -4,6 +4,7 @@ using T3.Core.DataTypes;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.Resource;
+using T3.Editor.Gui.UiHelpers;
 
 namespace T3.Editor.Gui.OutputUi.Previews;
 
@@ -50,6 +51,18 @@ internal sealed class CommandPreview<T>
         var cursorPos = ImGui.GetCursorScreenPos();
         _commandRenderer.DrawRenderedOutput(_output, viewId);
         ImGui.SetCursorScreenPos(cursorPos);
+    }
+
+    /// <summary>Draws the last render stretched into <paramref name="screenRect"/>, outside the output canvas's pan and zoom.</summary>
+    public void DrawRenderedInRect(ImRect screenRect)
+    {
+        var texture = _commandRenderer.RenderedTexture;
+        if (texture == null || texture.IsDisposed)
+            return;
+
+        var srv = SrvManager.GetSrvForTexture(texture);
+        if (srv != null)
+            ImGui.GetWindowDrawList().AddImage((IntPtr)srv.ImGuiTextureId, screenRect.Min, screenRect.Max);
     }
 
     private bool TryGetInstance()

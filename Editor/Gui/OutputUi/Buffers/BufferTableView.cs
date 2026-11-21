@@ -22,6 +22,24 @@ internal sealed class BufferTableView
         _onReadComplete = OnReadComplete;
     }
 
+    /// <summary>The row under the mouse in the last <see cref="DrawTable"/>, or -1.</summary>
+    public int HoveredRow { get; private set; } = -1;
+
+    public void ClearHover() => HoveredRow = -1;
+
+    /// <summary>The position of the hovered row's point; only for point buffers.</summary>
+    public bool TryGetHoveredPosition(out Vector3 position)
+    {
+        position = default;
+        if (HoveredRow < 0 || HoveredRow >= _rowCount || _stride != PointStride)
+            return false;
+
+        position = new Vector3(ReadFloat(_values, _stride, HoveredRow, 0),
+                               ReadFloat(_values, _stride, HoveredRow, 1),
+                               ReadFloat(_values, _stride, HoveredRow, 2));
+        return true;
+    }
+
     /// <summary>Completes last frame's readback and requests the next. Call once per frame after the buffer was evaluated.</summary>
     public void UpdateReadback(BufferWithViews buffer)
     {
@@ -56,6 +74,7 @@ internal sealed class BufferTableView
 
     public void DrawTable()
     {
+        HoveredRow = -1;
         if (_rowCount == 0)
             return;
 
@@ -102,6 +121,15 @@ internal sealed class BufferTableView
     {
         ImGui.TableNextRow();
         ImGui.TableNextColumn();
+
+        // An empty full-width selectable only to detect hovering the row
+        ImGui.PushID(row);
+        ImGui.Selectable("##row", false, ImGuiSelectableFlags.SpanAllColumns | ImGuiSelectableFlags.AllowOverlap);
+        if (ImGui.IsItemHovered())
+            HoveredRow = row;
+
+        ImGui.PopID();
+        ImGui.SameLine(0, 0);
         (_firstElementOfRows + row).TryFormat(_formatBuffer, out var indexLength, default, CultureInfo.InvariantCulture);
         ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
         ImGui.TextUnformatted(_formatBuffer.AsSpan(0, indexLength));

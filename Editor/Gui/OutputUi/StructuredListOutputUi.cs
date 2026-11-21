@@ -4,6 +4,7 @@ using ImGuiNET;
 using T3.Core.DataTypes;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
+using T3.Editor.Gui.OutputUi.GeometryViews;
 using T3.Editor.Gui.OutputUi.Previews;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.TableView;
@@ -11,19 +12,14 @@ using T3.Editor.Gui.TableView;
 namespace T3.Editor.Gui.OutputUi;
 
 /// <summary>
-/// Lists a CPU list's values in an editable table. Lists of <see cref="Point"/> can also be rendered as points.
+/// Lists a CPU list's values in an editable table. Lists of <see cref="Point"/> are rendered as points, with the table
+/// or a count in a sidebar (see <see cref="PreviewSidebar"/>); hovering a row marks its point on the render.
 /// </summary>
 internal sealed class StructuredListOutputUi : OutputUi<StructuredList>
 {
-    private enum Modes
-    {
-        Points,
-        Table,
-    }
-
     public StructuredListOutputUi()
     {
-        _tooltipForMode = TooltipForMode;
+        _sidebar = new PreviewSidebar(_sidebarState);
     }
 
     public override Type PresentedType => _isPresentingPoints ? typeof(Command) : Type;
@@ -44,11 +40,14 @@ internal sealed class StructuredListOutputUi : OutputUi<StructuredList>
 
         // The list is pulled through the preview, so it needn't be evaluated on its own first.
         if (slot is Slot<StructuredList> listSlot
-            && _mode == Modes.Points
+            && _sidebar.ShowsPreview
             && IsPointList(listSlot.Value)
             && !PreviewLayout.IsCompactView())
         {
+            _sidebar.BeginView(context);
+            _projection.CaptureView(context);
             _isPresentingPoints = _pointsPreview.Render(listSlot, context);
+            _sidebar.EndView(context);
             if (_isPresentingPoints)
                 return;
         }
@@ -79,19 +78,49 @@ internal sealed class StructuredListOutputUi : OutputUi<StructuredList>
             return;
         }
 
-        if (_isPresentingPoints)
-            _pointsPreview.DrawRendered(viewId);
-
-        PreviewLayout.IndentControls();
-        CustomComponents.SegmentedButton(ref _mode, null, _tooltipForMode);
         UpdateSummary(list.NumElements);
-        PreviewLayout.DrawSummary(_summary);
-
-        if (_mode == Modes.Table)
+        if (_isPresentingPoints)
         {
-            PreviewLayout.IndentControls();
-            DrawTable(typedSlot, list);
+            DrawRendered(viewId);
+            var hovered = _hoveredRow;
+            if (_sidebar.Selected == TableSegment && list is StructuredList<Point> points && hovered >= 0 && hovered < points.NumElements
+                && _projection.BeginDraw() && _projection.TryProject(points.TypedElements[hovered].Position, out var onScreen))
+                SelectionOverlayStyle.DrawHoverRing(ImGui.GetWindowDrawList(), onScreen);
         }
+
+        if (!_sidebar.Begin(Segments, _counts))
+        {
+            _hoveredRow = -1;
+            PreviewLayout.DrawSummary(_summary);
+            return;
+        }
+
+        if (_sidebar.Selected == TableSegment)
+        {
+            DrawTable(typedSlot, list);
+            _hoveredRow = TableList.LastHoveredRow;
+        }
+        else
+        {
+            _hoveredRow = -1;
+            ImGui.TextUnformatted(_summary);
+        }
+
+        _sidebar.End();
+    }
+
+    /** Into the rectangle right of the sidebar while it is open, otherwise onto the output canvas as usual. */
+    private void DrawRendered(string viewId)
+    {
+        if (_sidebar.TryGetViewRect(out var viewRect))
+        {
+            _projection.SetTargetRect(viewRect);
+            _pointsPreview.DrawRenderedInRect(viewRect);
+            return;
+        }
+
+        _projection.SetTargetRect(null);
+        _pointsPreview.DrawRendered(viewId);
     }
 
     private void DrawTable(Slot<StructuredList> slot, StructuredList list)
@@ -110,15 +139,6 @@ internal sealed class StructuredListOutputUi : OutputUi<StructuredList>
         return list != null && list.Type == typeof(Point);
     }
 
-    private static string? TooltipForMode(Modes mode)
-    {
-        return mode switch
-                   {
-                       Modes.Points => "Render the points like [ListToBuffer] into [VisualizePoints] with default settings.",
-                       _            => "List the values of the points.",
-                   };
-    }
-
     /** Rebuilt only when the count changes, so drawing stays allocation-free. */
     private void UpdateSummary(int count)
     {
@@ -127,17 +147,30 @@ internal sealed class StructuredListOutputUi : OutputUi<StructuredList>
 
         _summaryCount = count;
         _summary = count == 1 ? "1 point" : $"{count:N0} points";
+        _counts[TableSegment] = PreviewSidebar.FormatCount(count);
     }
 
     private static readonly Guid PreviewSymbolId = Guid.Parse("0c3eb144-a156-4d72-bc7e-afdf13ba61f7");
     private static readonly Guid PreviewInputId = Guid.Parse("37e80d44-7206-4046-9c11-2a8ba34e6929");
 
-    private readonly CommandPreview<StructuredList> _pointsPreview = new(PreviewSymbolId, PreviewInputId, "_OutputPreviewCPoints");
-    private readonly Func<Modes, string?> _tooltipForMode;
+    private const int TableSegment = 1;
 
-    /** Shared by all point list outputs, so switching ops keeps the chosen view. */
-    private static Modes _mode = Modes.Points;
+    private static readonly PreviewSidebar.Segment[] Segments =
+        [
+            new(Icon.Hidden, "Hide the sidebar; the points use the whole view."),
+            new(Icon.DomainPoints, "List the values of the points."),
+            new(Icon.Info, "Point count."),
+        ];
+
+    /** Shared by all point list outputs, so switching ops keeps the layout. */
+    private static readonly PreviewSidebar.State _sidebarState = new();
+
+    private readonly CommandPreview<StructuredList> _pointsPreview = new(PreviewSymbolId, PreviewInputId, "_OutputPreviewCPoints");
+    private readonly PreviewSidebar _sidebar;
+    private readonly PreviewProjection _projection = new();
+    private readonly string?[] _counts = new string?[Segments.Length];
     private bool _isPresentingPoints;
+    private int _hoveredRow = -1;
 
     private StructuredList? _shownList;
     private StructuredList? _previousList;

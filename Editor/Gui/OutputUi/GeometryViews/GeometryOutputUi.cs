@@ -12,24 +12,15 @@ namespace T3.Editor.Gui.OutputUi.GeometryViews;
 
 /// <summary>
 /// Output view for <see cref="Geometry"/>: renders polygons like [GeometryToMesh] into [VisualizeMesh] and curves
-/// like [CurvesToPoints] into [DrawLines], lists points, vertices, primitives, edges or parts with their attributes in
-/// a table, or shows counts, bounds and attributes. Rows selected in the table are highlighted on the render. The text
-/// is rebuilt only when the geometry changes.
+/// like [CurvesToPoints] into [DrawLines]. A sidebar (see <see cref="PreviewSidebar"/>) lists points, vertices, edges,
+/// primitives or parts with their attributes, or shows counts, bounds and attributes. Rows selected in the table are
+/// highlighted on the render, and the hovered row's element too. The text is rebuilt only when the geometry changes.
 /// </summary>
 internal sealed class GeometryOutputUi : OutputUi<Geometry>
 {
-    private enum Modes
-    {
-        Render,
-        Table,
-        Stats,
-    }
-
     public GeometryOutputUi()
     {
-        _tooltipForMode = TooltipForMode;
-        _isDomainDisabled = IsDomainDisabled;
-        _tooltipForDomain = TooltipForDomain;
+        _sidebar = new PreviewSidebar(_sidebarState);
     }
 
     public override Type PresentedType => _isPresentingRender ? typeof(Command) : Type;
@@ -49,10 +40,12 @@ internal sealed class GeometryOutputUi : OutputUi<Geometry>
         _isPresentingRender = false;
 
         // The geometry is pulled through the preview, so it needn't be evaluated on its own first.
-        if (slot is Slot<Geometry> geometrySlot && _mode == Modes.Render && !PreviewLayout.IsCompactView())
+        if (slot is Slot<Geometry> geometrySlot && _sidebar.ShowsPreview && !PreviewLayout.IsCompactView())
         {
+            _sidebar.BeginView(context);
             _projection.CaptureView(context);
             _isPresentingRender = _preview.Render(geometrySlot, context);
+            _sidebar.EndView(context);
             if (_isPresentingRender)
                 return;
         }
@@ -82,6 +75,7 @@ internal sealed class GeometryOutputUi : OutputUi<Geometry>
             _lastGeometry = geometry;
             _lastVersion = geometry.Version;
             RebuildStats(geometry);
+            RebuildCounts(geometry);
         }
 
         if (PreviewLayout.IsCompactView())
@@ -91,43 +85,96 @@ internal sealed class GeometryOutputUi : OutputUi<Geometry>
             return;
         }
 
-        _tableView.SyncSelection(slot.Parent.SymbolChildId, (int)_domain, UnifiedGeometryTableModel.GetRowCount(geometry, _domain));
-        if (_mode == Modes.Table || _tableView.SelectedCount > 0)
+        var childId = slot.Parent.SymbolChildId;
+        UpdateDomain(geometry, childId);
+        var showsTable = TryGetDomain(_sidebar.Selected, out _);
+        if (showsTable || _tableView.SelectedCount > 0)
             _model.Update(geometry, _domain);
 
         if (_isPresentingRender)
         {
-            _preview.DrawRendered(viewId);
+            DrawRendered(viewId);
             _selectionOverlay.DrawSelectionAttribute(geometry, _projection);
             _selectionOverlay.Draw(geometry, _model, _tableView, _projection);
+            if (showsTable)
+                _selectionOverlay.DrawHovered(geometry, _model, _tableView.HoveredRow, _projection);
         }
 
-        PreviewLayout.IndentControls();
-        CustomComponents.SegmentedButton(ref _mode, null, _tooltipForMode);
-
-        if (_mode == Modes.Table)
+        var disabledMask = geometry.Parts.Length > 0 ? 0 : 1 << PartsSegment;
+        if (!_sidebar.Begin(Segments, _counts, disabledMask))
         {
-            _hasParts = geometry.Parts.Length > 0;
-            ImGui.SameLine(0, 12 * T3Ui.UiScaleFactor);
-            if (CustomComponents.SegmentedButton(ref _domain, _isDomainDisabled, _tooltipForDomain))
-            {
-                _tableView.SyncSelection(slot.Parent.SymbolChildId, (int)_domain, UnifiedGeometryTableModel.GetRowCount(geometry, _domain));
-                _model.Update(geometry, _domain);
-            }
+            _tableView.ClearHover();
+            UpdateSummary();
+            PreviewLayout.DrawSummary(_summary);
+            return;
         }
 
-        UpdateSummary();
-        PreviewLayout.DrawSummary(_summary);
+        // A segment picked in this frame shows its table right away
+        if (UpdateDomain(geometry, childId))
+            _model.Update(geometry, _domain);
 
-        if (_mode == Modes.Table)
+        if (TryGetDomain(_sidebar.Selected, out _))
         {
-            PreviewLayout.IndentControls();
             _tableView.Draw(_model);
         }
-        else if (_mode == Modes.Stats)
+        else
         {
-            DrawStats(showHeadline: false);
+            _tableView.ClearHover();
+            DrawStats(showHeadline: true);
         }
+
+        _sidebar.End();
+    }
+
+    /** Into the rectangle right of the sidebar while it is open, otherwise onto the output canvas as usual. */
+    private void DrawRendered(string viewId)
+    {
+        if (_sidebar.TryGetViewRect(out var viewRect))
+        {
+            _projection.SetTargetRect(viewRect);
+            _preview.DrawRenderedInRect(viewRect);
+            return;
+        }
+
+        _projection.SetTargetRect(null);
+        _preview.DrawRendered(viewId);
+    }
+
+    /// <returns>True when the shown domain changed.</returns>
+    private bool UpdateDomain(Geometry geometry, Guid childId)
+    {
+        var changed = false;
+        if (TryGetDomain(_sidebar.Selected, out var domain) && domain != _domain)
+        {
+            _domain = domain;
+            changed = true;
+        }
+
+        _tableView.SyncSelection(childId, (int)_domain, UnifiedGeometryTableModel.GetRowCount(geometry, _domain));
+        return changed;
+    }
+
+    private static bool TryGetDomain(int segment, out UnifiedGeometryTableModel.Domains domain)
+    {
+        domain = segment switch
+                     {
+                         PointsSegment     => UnifiedGeometryTableModel.Domains.Points,
+                         VerticesSegment   => UnifiedGeometryTableModel.Domains.Vertices,
+                         EdgesSegment      => UnifiedGeometryTableModel.Domains.Edges,
+                         PrimitivesSegment => UnifiedGeometryTableModel.Domains.Primitives,
+                         _                 => UnifiedGeometryTableModel.Domains.Parts,
+                     };
+        return segment is >= PointsSegment and <= PartsSegment;
+    }
+
+    /** Element counts for the segments, rebuilt with the geometry. */
+    private void RebuildCounts(Geometry geometry)
+    {
+        _counts[PointsSegment] = PreviewSidebar.FormatCount(geometry.PointCount);
+        _counts[VerticesSegment] = PreviewSidebar.FormatCount(geometry.VertexCount);
+        _counts[EdgesSegment] = PreviewSidebar.FormatCount(geometry.Edges.Edges.Length);
+        _counts[PrimitivesSegment] = PreviewSidebar.FormatCount(geometry.PrimitiveCount);
+        _counts[PartsSegment] = PreviewSidebar.FormatCount(geometry.Parts.Length);
     }
 
     private void DrawStats(bool showHeadline)
@@ -217,68 +264,48 @@ internal sealed class GeometryOutputUi : OutputUi<Geometry>
     /** Rebuilt only when one of its numbers changes, so drawing stays allocation-free. */
     private void UpdateSummary()
     {
-        var isTable = _mode == Modes.Table;
-        var rowCount = isTable ? _model.RowCount : -1;
         var selectedCount = _tableView.SelectedCount;
-        if (ReferenceEquals(_summaryHeadline, _panel.Headline)
-            && rowCount == _summaryRowCount
-            && selectedCount == _summarySelectedCount
-            && _domain == _summaryDomain)
+        if (ReferenceEquals(_summaryHeadline, _panel.Headline) && selectedCount == _summarySelectedCount && _domain == _summaryDomain)
             return;
 
         _summaryHeadline = _panel.Headline;
-        _summaryRowCount = rowCount;
         _summarySelectedCount = selectedCount;
         _summaryDomain = _domain;
-
-        var domainLabel = DomainLabels[(int)_domain];
-        var main = isTable ? $"{rowCount:N0} {domainLabel}" : _panel.Headline;
         _summary = selectedCount == 0
-                       ? main
-                       : isTable
-                           ? $"{main}, {selectedCount:N0} selected"
-                           : $"{main}, {selectedCount:N0} {domainLabel} selected";
+                       ? _panel.Headline
+                       : $"{_panel.Headline}, {selectedCount:N0} {DomainLabels[(int)_domain]} selected";
     }
 
-    private bool IsDomainDisabled(UnifiedGeometryTableModel.Domains domain) => domain == UnifiedGeometryTableModel.Domains.Parts && !_hasParts;
+    private const int PointsSegment = 1;
+    private const int VerticesSegment = 2;
+    private const int EdgesSegment = 3;
+    private const int PrimitivesSegment = 4;
+    private const int PartsSegment = 5;
 
-    private string? TooltipForDomain(UnifiedGeometryTableModel.Domains domain)
-    {
-        return domain switch
-                   {
-                       UnifiedGeometryTableModel.Domains.Points     => "One row per point. Curve handles are point attributes, as offsets.",
-                       UnifiedGeometryTableModel.Domains.Vertices   => "One row per vertex: which primitive and which point.\nPer-face values like UVs often live here.",
-                       UnifiedGeometryTableModel.Domains.Primitives => "One row per primitive: polygon or curve, with its first vertex and vertex count.",
-                       UnifiedGeometryTableModel.Domains.Edges      => "One row per unique polygon edge, with the primitives on either side (-1 for an open edge).",
-                       _ when !_hasParts                            => "This geometry has no parts.",
-                       _                                            => "One row per part, e.g. a glyph or a fracture cell.",
-                   };
-    }
-
-    private static string? TooltipForMode(Modes mode)
-    {
-        return mode switch
-                   {
-                       Modes.Render => "Render polygons like [GeometryToMesh] into [VisualizeMesh] and curves like [CurvesToPoints] into [DrawLines].\nRows selected in the table are highlighted.",
-                       Modes.Table  => "List the elements of a domain with their attributes.\nClick rows to select them, Ctrl+click toggles, Shift+click extends.",
-                       _            => "List counts, bounds, whether the surface is closed, and the attributes.",
-                   };
-    }
+    private static readonly PreviewSidebar.Segment[] Segments =
+        [
+            new(Icon.Hidden, "Hide the sidebar; the render uses the whole view."),
+            new(Icon.DomainPoints, "Points: one row per point. Curve handles are point attributes, as offsets."),
+            new(Icon.DomainVertices, "Vertices: one row per vertex, with its primitive and point.\nPer-face values like UVs often live here."),
+            new(Icon.DomainEdges, "Edges: one row per unique polygon edge, with the primitives on either side (-1 for an open edge)."),
+            new(Icon.DomainPrimitives, "Primitives: one row per polygon or curve, with its first vertex and vertex count."),
+            new(Icon.DomainParts, "Parts: one row per part, e.g. a glyph or a fracture cell."),
+            new(Icon.Info, "Stats: counts, bounds, whether the surface is closed, and the attributes."),
+        ];
 
     private static readonly Guid PreviewSymbolId = Guid.Parse("70c1d6d4-1e97-4c9d-93c8-93702000ab5b");
     private static readonly Guid PreviewInputId = Guid.Parse("76e0cf44-0f1a-451f-a0ce-bd5a9c2fb5ff");
     private static readonly string[] DomainLabels = ["points", "vertices", "primitives", "edges", "parts"];
 
-    private readonly CommandPreview<Geometry> _preview = new(PreviewSymbolId, PreviewInputId, "_OutputPreviewGeometry");
-    private readonly Func<Modes, string?> _tooltipForMode;
-    private readonly Func<UnifiedGeometryTableModel.Domains, bool> _isDomainDisabled;
-    private readonly Func<UnifiedGeometryTableModel.Domains, string?> _tooltipForDomain;
+    /** Shared by all geometry outputs, so switching ops keeps the layout. */
+    private static readonly PreviewSidebar.State _sidebarState = new();
 
-    /** Shared by all geometry outputs, so switching ops keeps the chosen view. */
-    private static Modes _mode = Modes.Render;
     private static UnifiedGeometryTableModel.Domains _domain = UnifiedGeometryTableModel.Domains.Points;
+
+    private readonly CommandPreview<Geometry> _preview = new(PreviewSymbolId, PreviewInputId, "_OutputPreviewGeometry");
+    private readonly PreviewSidebar _sidebar;
+    private readonly string?[] _counts = new string?[Segments.Length];
     private bool _isPresentingRender;
-    private bool _hasParts;
 
     private readonly GeometryStatsPanel _panel = new();
     private readonly UnifiedGeometryTableModel _model = new();
@@ -290,7 +317,6 @@ internal sealed class GeometryOutputUi : OutputUi<Geometry>
 
     private string _summary = string.Empty;
     private string? _summaryHeadline;
-    private int _summaryRowCount = -1;
     private int _summarySelectedCount = -1;
     private UnifiedGeometryTableModel.Domains _summaryDomain;
 }

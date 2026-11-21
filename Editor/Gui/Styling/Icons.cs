@@ -343,6 +343,12 @@ internal static class Icons
             new(Icon.RoundingSW, slotIndex: 159),
             new(Icon.ChevronUpDown, slotIndex: 160),
             new(Icon.Patch, slotIndex: 161),
+            new(Icon.DomainPoints, slotIndex: 162),
+            new(Icon.DomainVertices, slotIndex: 163),
+            new(Icon.DomainEdges, slotIndex: 164),
+            new(Icon.DomainPrimitives, slotIndex: 165),
+            new(Icon.DomainParts, slotIndex: 166),
+            new(Icon.Info, slotIndex: 167),
         };
 
     public static readonly string IconAtlasPath = Path.Combine(SharedResources.EditorResourcesDirectory, @"images/t3-icons.png");
@@ -522,5 +528,13 @@ public enum Icon
     RoundingSW,
     Mapping,
     ChevronUpDown,
-    Patch
+    Patch,
+
+    // Geometry domains, e.g. for the output window's sidebar
+    DomainPoints,
+    DomainVertices,
+    DomainEdges,
+    DomainPrimitives,
+    DomainParts,
+    Info,
 }

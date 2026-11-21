@@ -5,28 +5,23 @@ using T3.Core.DataTypes;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Editor.Gui.OutputUi.Buffers;
+using T3.Editor.Gui.OutputUi.GeometryViews;
 using T3.Editor.Gui.OutputUi.Previews;
 using T3.Editor.Gui.Styling;
 
 namespace T3.Editor.Gui.OutputUi;
 
 /// <summary>
-/// Shows a GPU buffer's count, stride and size, and either renders it as points or lists a readback of its values.
-/// Buffers don't carry their element type, so only a 64-byte stride is offered as points. Views too small for the
-/// controls, like connection tooltips, only show the summary.
+/// Shows a GPU buffer: renders it as points and, in a sidebar (see <see cref="PreviewSidebar"/>), lists a readback of
+/// its values or its count, stride and size. Buffers don't carry their element type, so only a 64-byte stride is
+/// rendered as points; other buffers show the sidebar over the whole view. Hovering a row of a point buffer marks the
+/// point on the render. Views too small for the controls, like connection tooltips, only show the summary.
 /// </summary>
 internal sealed class BufferWithViewsOutputUi : OutputUi<BufferWithViews>
 {
-    private enum Modes
-    {
-        Points,
-        Table,
-    }
-
     public BufferWithViewsOutputUi()
     {
-        _isModeDisabled = IsModeDisabled;
-        _tooltipForMode = TooltipForMode;
+        _sidebar = new PreviewSidebar(_sidebarState);
     }
 
     public override Type PresentedType => _isPresentingPoints ? typeof(Command) : Type;
@@ -52,15 +47,18 @@ internal sealed class BufferWithViewsOutputUi : OutputUi<BufferWithViews>
         }
 
         // The buffer is pulled through the visualizer, so it needn't be evaluated on its own first.
-        if (GetShownMode(bufferSlot.Value) == Modes.Points)
+        if (CanShowPoints(bufferSlot.Value) && _sidebar.ShowsPreview)
         {
+            _sidebar.BeginView(context);
+            _projection.CaptureView(context);
             _isPresentingPoints = _pointsPreview.Render(bufferSlot, context);
-            if (_isPresentingPoints)
-                return;
+            _sidebar.EndView(context);
         }
 
-        EvaluateWithoutGizmos(slot, context);
-        if (bufferSlot.Value != null)
+        if (!_isPresentingPoints)
+            EvaluateWithoutGizmos(slot, context);
+
+        if (bufferSlot.Value != null && _sidebar.Selected == TableSegment)
             _tableView.UpdateReadback(bufferSlot.Value);
     }
 
@@ -85,28 +83,48 @@ internal sealed class BufferWithViewsOutputUi : OutputUi<BufferWithViews>
             return;
         }
 
+        var canShowPoints = CanShowPoints(buffer);
         if (_isPresentingPoints)
-            _pointsPreview.DrawRendered(viewId);
-
-        _canShowPoints = CanShowPoints(buffer);
-        var shownMode = GetShownMode(buffer);
-        PreviewLayout.IndentControls();
-        if (CustomComponents.SegmentedButton(ref shownMode, _isModeDisabled, _tooltipForMode))
-            _mode = shownMode;
-
-        if (shownMode == Modes.Table)
         {
-            ImGui.SameLine(0, 12 * T3Ui.UiScaleFactor);
-            _tableView.DrawRangeControls(buffer!.ElementCount);
+            DrawRendered(viewId);
+            if (_sidebar.Selected == TableSegment && _tableView.TryGetHoveredPosition(out var hovered)
+                                                 && _projection.BeginDraw() && _projection.TryProject(hovered, out var onScreen))
+                SelectionOverlayStyle.DrawHoverRing(ImGui.GetWindowDrawList(), onScreen);
         }
 
-        PreviewLayout.DrawSummary(_summary);
-
-        if (shownMode == Modes.Table)
+        if (!_sidebar.Begin(Segments, _counts, hasNoPreview: !canShowPoints))
         {
-            PreviewLayout.IndentControls();
+            _tableView.ClearHover();
+            PreviewLayout.DrawSummary(_summary);
+            return;
+        }
+
+        if (_sidebar.Selected == TableSegment)
+        {
+            _tableView.DrawRangeControls(buffer!.ElementCount);
             _tableView.DrawTable();
         }
+        else
+        {
+            _tableView.ClearHover();
+            ImGui.TextUnformatted(_summary);
+        }
+
+        _sidebar.End();
+    }
+
+    /** Into the rectangle right of the sidebar while it is open, otherwise onto the output canvas as usual. */
+    private void DrawRendered(string viewId)
+    {
+        if (_sidebar.TryGetViewRect(out var viewRect))
+        {
+            _projection.SetTargetRect(viewRect);
+            _pointsPreview.DrawRenderedInRect(viewRect);
+            return;
+        }
+
+        _projection.SetTargetRect(null);
+        _pointsPreview.DrawRendered(viewId);
     }
 
     private void DrawSummaryOnly(bool isDefined)
@@ -115,26 +133,9 @@ internal sealed class BufferWithViewsOutputUi : OutputUi<BufferWithViews>
         ImGui.TextUnformatted(isDefined ? _summary : "Undefined");
     }
 
-    private Modes GetShownMode(BufferWithViews? buffer)
-    {
-        return CanShowPoints(buffer) ? _mode : Modes.Table;
-    }
-
     private static bool CanShowPoints(BufferWithViews? buffer)
     {
         return buffer is { Srv: not null } && buffer.ElementStride == BufferTableView.PointStride;
-    }
-
-    private bool IsModeDisabled(Modes mode) => mode == Modes.Points && !_canShowPoints;
-
-    private string? TooltipForMode(Modes mode)
-    {
-        return mode switch
-                   {
-                       Modes.Points when !_canShowPoints => "Only buffers with a 64-byte stride can be shown as points.",
-                       Modes.Points                      => "Render the buffer like a [VisualizePoints] with default settings.",
-                       _                                 => "Read the buffer back from the GPU and list its values.\nOrange values grew since the last frame, blue ones shrank.",
-                   };
     }
 
     /** Rebuilt only when the buffer layout changes, so drawing stays allocation-free. */
@@ -148,6 +149,7 @@ internal sealed class BufferWithViewsOutputUi : OutputUi<BufferWithViews>
         _summaryCount = count;
         _summaryStride = stride;
         _summary = $"{count:N0} × {stride} bytes = {FormatByteSize((long)count * stride)}";
+        _counts[TableSegment] = PreviewSidebar.FormatCount(count);
     }
 
     private static string FormatByteSize(long bytes)
@@ -161,17 +163,26 @@ internal sealed class BufferWithViewsOutputUi : OutputUi<BufferWithViews>
                    };
     }
 
+    private const int TableSegment = 1;
+
+    private static readonly PreviewSidebar.Segment[] Segments =
+        [
+            new(Icon.Hidden, "Hide the sidebar; the points use the whole view."),
+            new(Icon.DomainPoints, "Read the buffer back from the GPU and list its values.\nOrange values grew since the last frame, blue ones shrank."),
+            new(Icon.Info, "Element count, stride and size."),
+        ];
+
     private static readonly Guid VisualizePointsSymbolId = Guid.Parse("37bdbafc-d14c-4b81-91c3-8f63c3b63812");
     private static readonly Guid VisualizePointsInputId = Guid.Parse("54fc4cd7-dfc3-4690-9fd1-2b555f7656d4");
 
+    /** Shared by all buffer outputs, so switching ops keeps the layout. */
+    private static readonly PreviewSidebar.State _sidebarState = new();
+
     private readonly CommandPreview<BufferWithViews> _pointsPreview = new(VisualizePointsSymbolId, VisualizePointsInputId, "VisualizePoints");
     private readonly BufferTableView _tableView = new();
-    private readonly Func<Modes, bool> _isModeDisabled;
-    private readonly Func<Modes, string?> _tooltipForMode;
-
-    /** Shared by all buffer outputs, so switching ops keeps the chosen view. */
-    private static Modes _mode = Modes.Points;
-    private bool _canShowPoints;
+    private readonly PreviewSidebar _sidebar;
+    private readonly PreviewProjection _projection = new();
+    private readonly string?[] _counts = new string?[Segments.Length];
     private bool _isPresentingPoints;
     private bool _isCompact;
 

@@ -1,4 +1,5 @@
 #nullable enable
+using T3.Core.DataTypes.Vector;
 using ImGuiNET;
 using T3.Core.DataTypes;
 using T3.Editor.Gui.OutputUi.Previews;
@@ -15,39 +16,64 @@ internal sealed class GeometrySelectionOverlay
 {
     public void Draw(Geometry geometry, UnifiedGeometryTableModel model, GeometryTableView selection, PreviewProjection projection)
     {
-        if (selection.SelectedCount == 0 || !projection.BeginDraw())
+        if (selection.SelectedCount == 0 || !BeginDraw(geometry, projection, UiColors.Selection))
             return;
+
+        for (var row = 0; row < model.RowCount; row++)
+        {
+            if (selection.IsSelected(row))
+                DrawElement(geometry, model, row, isHover: false);
+        }
+    }
+
+    /// <summary>Marks the element of the hovered table row, in the hover color.</summary>
+    public void DrawHovered(Geometry geometry, UnifiedGeometryTableModel model, int row, PreviewProjection projection)
+    {
+        if (row < 0 || row >= model.RowCount || !BeginDraw(geometry, projection, SelectionOverlayStyle.Hover))
+            return;
+
+        DrawElement(geometry, model, row, isHover: true);
+    }
+
+    private bool BeginDraw(Geometry geometry, PreviewProjection projection, Color color)
+    {
+        if (!projection.BeginDraw())
+            return false;
 
         _projection = projection;
         _drawList = ImGui.GetWindowDrawList();
         _lineThickness = MathF.Max(1, MathF.Round(SelectionOverlayStyle.LineThickness * T3Ui.UiScaleFactor));
         _curves = geometry.Curves;
+        _color = color;
+        return true;
+    }
 
-        for (var row = 0; row < model.RowCount; row++)
+    private void DrawElement(Geometry geometry, UnifiedGeometryTableModel model, int row, bool isHover)
+    {
+        switch (model.Domain)
         {
-            if (!selection.IsSelected(row))
-                continue;
-
-            switch (model.Domain)
-            {
-                case UnifiedGeometryTableModel.Domains.Points:
-                    if (row < geometry.PointCount && projection.TryProject(geometry.Positions[row], out var point))
+            case UnifiedGeometryTableModel.Domains.Points:
+                if (row < geometry.PointCount && _projection!.TryProject(geometry.Positions[row], out var point))
+                {
+                    if (isHover)
+                        SelectionOverlayStyle.DrawHoverRing(_drawList, point);
+                    else
                         SelectionOverlayStyle.DrawDot(_drawList, point);
+                }
 
-                    break;
-                case UnifiedGeometryTableModel.Domains.Vertices:
-                    DrawVertex(geometry, row, model.GetVertexPrimitive(row));
-                    break;
-                case UnifiedGeometryTableModel.Domains.Primitives:
-                    DrawPrimitive(geometry, row);
-                    break;
-                case UnifiedGeometryTableModel.Domains.Edges:
-                    DrawEdge(geometry, row);
-                    break;
-                case UnifiedGeometryTableModel.Domains.Parts:
-                    DrawPart(geometry, row);
-                    break;
-            }
+                break;
+            case UnifiedGeometryTableModel.Domains.Vertices:
+                DrawVertex(geometry, row, model.GetVertexPrimitive(row));
+                break;
+            case UnifiedGeometryTableModel.Domains.Primitives:
+                DrawPrimitive(geometry, row);
+                break;
+            case UnifiedGeometryTableModel.Domains.Edges:
+                DrawEdge(geometry, row);
+                break;
+            case UnifiedGeometryTableModel.Domains.Parts:
+                DrawPart(geometry, row);
+                break;
         }
     }
 
@@ -66,6 +92,7 @@ internal sealed class GeometrySelectionOverlay
         _drawList = ImGui.GetWindowDrawList();
         _lineThickness = MathF.Max(1, MathF.Round(SelectionOverlayStyle.LineThickness * T3Ui.UiScaleFactor));
         _curves = geometry.Curves;
+        _color = UiColors.Selection;
         var weights = selection.Values;
 
         switch (selection.Domain)
@@ -193,7 +220,7 @@ internal sealed class GeometrySelectionOverlay
         {
             var isVisible = _projection.TryProject(curve.Evaluate(segment, step / (float)SegmentSteps), out var current);
             if (hasPrevious && isVisible)
-                _drawList.AddLine(previous, current, UiColors.Selection, _lineThickness);
+                _drawList.AddLine(previous, current, _color, _lineThickness);
 
             previous = current;
             hasPrevious = isVisible;
@@ -208,7 +235,7 @@ internal sealed class GeometrySelectionOverlay
         var position = geometry.Positions[geometry.VertexPoints[vertex]];
         var towardsCenter = Vector3.Lerp(position, UnifiedGeometryTableModel.GetPrimitiveCenter(geometry, primitive), VertexInset);
         if (_projection!.TryProject(towardsCenter, out var onScreen))
-            SelectionOverlayStyle.DrawDot(_drawList, onScreen);
+            SelectionOverlayStyle.DrawDot(_drawList, onScreen, _color);
     }
 
     private void DrawEdge(Geometry geometry, int edgeIndex)
@@ -230,13 +257,13 @@ internal sealed class GeometrySelectionOverlay
             DrawPrimitive(geometry, primitive);
 
         if (_projection!.TryProject(part.Pivot, out var pivot))
-            SelectionOverlayStyle.DrawPivot(_drawList, pivot, _lineThickness);
+            SelectionOverlayStyle.DrawPivot(_drawList, pivot, _lineThickness, _color);
     }
 
     private void DrawLine(Vector3 from, Vector3 to)
     {
         if (_projection!.TryProject(from, out var a) && _projection.TryProject(to, out var b))
-            _drawList.AddLine(a, b, UiColors.Selection, _lineThickness);
+            _drawList.AddLine(a, b, _color, _lineThickness);
     }
 
     /** How far a vertex's dot moves from its point towards the primitive's center. */
@@ -249,6 +276,7 @@ internal sealed class GeometrySelectionOverlay
     private PreviewProjection? _projection;
     private ImDrawListPtr _drawList;
     private float _lineThickness;
+    private Color _color = UiColors.Selection;
     private Geometry.CurveEnumerable _curves;
     private float[] _pointWeights = [];
 }

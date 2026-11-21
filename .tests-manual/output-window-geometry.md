@@ -12,8 +12,8 @@ related-help:
   - ../.help/docs/using/ProceduralGeometry.md
 ---
 
-The Output Window renders CPU point lists, curves and geometry without draw ops, and switches curves and geometry to
-their stats.
+The Output Window renders CPU point lists, curves and geometry without draw ops. One segmented control at the top
+left hides the sidebar or shows a table per domain or the stats in it; the render stays visible next to the sidebar.
 
 ## Step: CPU points
 
@@ -21,10 +21,9 @@ their stats.
 Select the [RadialCPoints] and look at the Output Window.
 
 **Expected:**
-- A segmented button offers **Points** and **Table**, with **Points** selected, next to the point count.
-- The points are drawn as with a [VisualizePoints] with default settings.
-- Dragging orbits the camera; the toolbar shows the camera controls as for a rendered scene.
-- **Table** lists the point values as before.
+- A segmented control floats at the top left: closed eye (sidebar hidden), points with their count, info.
+- The points are drawn as with a [VisualizePoints] with default settings; dragging orbits the camera.
+- The points icon opens a sidebar with the point table; hovering a row rings that point in blue on the render.
 
 ## Step: Other lists
 
@@ -32,42 +31,45 @@ Select the [RadialCPoints] and look at the Output Window.
 Select a [DefineLensFlare] (its output is a list of sprites, not points).
 
 **Expected:**
-- Only the table is shown, without the segmented button.
+- Only the table is shown, without the segmented control.
 
 ## Step: Curves
 
 **Action:**
-Select the [StringToCurves].
+Select the [StringToCurves] with the text `TiXL`.
 
 **Expected:**
-- A segmented button offers **Render**, **Table** and **Stats**, next to the curve and part count.
-- **Render** draws the glyph outlines as thin lines with a dot on each point of the curves, not on every line sample.
-- **Stats** lists points, vertices, how many curves are closed, size, bounds and the attributes (e.g. `CodePoint per Part`).
+- The control shows seven segments: closed eye, points, vertices, edges, primitives, parts (each with its count in
+  small text) and info.
+- With the sidebar hidden, the glyph outlines are drawn as thin lines with a dot on each curve point, and the summary
+  next to the control names the curves and parts.
+- The info segment shows points, vertices, closed curves, size, bounds and the attributes (e.g. `CodePoint per Part`).
 
-## Step: Table of curves
+## Step: Tables in the sidebar
 
 **Action:**
-With the [StringToCurves] selected and its text set to `TiXL`, click **Table**, then **Parts**.
+Click the parts segment, then the primitives and the points segment.
 
 **Expected:**
-- A second segmented button offers **Points**, **Vertices**, **Primitives**, **Edges** and **Parts**.
-- **Parts** lists 4 rows, one per glyph, with `Primitive`, `Primitives`, pivot, `Id`, `Seed` and the attribute columns
-  `CodePoint`, `GlyphId`, `CharIndex`, `WordIndex`, `LineIndex`, `Advance`.
-- **Primitives** lists 5 rows (the `i` has two); `Kind` reads `curve`, `Closed` reads `yes`.
-- **Points** lists positions and the `HandleIn` and `HandleOut` columns, zero for corners and drawn faintly.
-- The summary next to the buttons shows the row count, e.g. `4 parts`.
+- The sidebar opens on the left with the default window background; the render moves into the area right of the
+  splitter and below the toolbar, with nothing drawn behind the table or the toolbar. The glyphs are centered there
+  and orbit around its middle. Dragging the splitter resizes both.
+- **Parts** lists 4 rows with pivot, `Id`, `Seed` and `CodePoint`, `GlyphId`, `CharIndex` ... ; **Primitives** 5 rows
+  (`Kind` curve, `Closed` yes); **Points** the positions with `HandleIn` and `HandleOut`.
+- Hovering a row draws that element in blue on the render: a ring around a point, the outline of a primitive, the
+  outlines and pivot of a part.
+- The list icon at the right of the control row maximizes the table; the render pauses until it is clicked again.
 
 ## Step: Highlight selected rows
 
 **Action:**
-In **Parts**, click the row of the `i`, Ctrl+click the row of the `L`, then click **Render**.
+In **Parts**, click the row of the `i`, Ctrl+click the row of the `L`, then hide the sidebar.
 
 **Expected:**
-- The summary shows `2 selected` in the table and `2 parts selected` after switching.
-- The outlines of the `i` (both curves) and the `L` are drawn thicker in the selection color, each with a cross at
+- The summary shows `2 parts selected`.
+- The outlines of the `i` (both curves) and the `L` stay drawn thicker in the selection color, each with a cross at
   its pivot. Orbiting the camera keeps the highlight on the glyphs.
-- Back in **Table**, Shift+click extends the selection; clicking the only selected row clears it.
-- Switching to **Points** clears the selection; selected points show a dot.
+- Shift+click extends the selection; clicking the only selected row clears it. Switching to another domain clears it.
 
 ## Step: Selection attribute
 
@@ -80,41 +82,30 @@ Connect a [SubdivideCurves] and a [SelectGeometry] (Every 4) after the [StringTo
 ## Step: Geometry
 
 **Action:**
-Select the [CubeGeometry].
+Select the [CubeGeometry] and open the points, vertices, edges and primitives tables.
 
 **Expected:**
-- A segmented button offers **Render** and **Stats**, next to the face count.
-- **Render** shows the shaded cube with its wireframe and vertex indices.
-- **Stats** shows the same table as before: points, triangles, size, bounds, volume, "watertight", attributes.
-
-## Step: Geometry table
-
-**Action:**
-With the [CubeGeometry] selected, click **Table** and step through **Points**, **Faces**, **Corners** and **Edges**.
-
-**Expected:**
-- **Parts** is grayed out; its tooltip says the geometry has no parts.
-- **Points** lists 8 rows with positions, **Faces** 6 rows with 4 corners each and their centers, **Corners** 24 rows
-  with face and point, **Edges** 12 rows with both faces filled in (the cube is closed).
+- The parts segment is grayed out; its tooltip mentions parts.
+- **Points** lists 8 rows, **Vertices** 24 with primitive and point, **Edges** 12 with both primitives filled in (the
+  cube is closed), **Primitives** 6 with 4 vertices each; the counts in the control match.
 - Attributes of each domain appear as extra columns, e.g. normals or texture coordinates.
-- Select a face and a few edges (Ctrl+click), switch to **Render**: the face outline and the edges are drawn thick.
-  Selected corners show as dots pulled slightly into their face.
+- Selected primitives and edges are drawn thick; selected vertices show as dots pulled slightly into their face.
 
 ## Step: No gizmo behind tables
 
 **Action:**
-Select a [ScatterPointsInVolume] (it has a transform gizmo for its box) and switch its output to **Table**.
+Select a [ScatterPointsInVolume] (it has a transform gizmo for its box) and maximize its table.
 
 **Expected:**
-- No gizmo is drawn behind the table. In **Points** the gizmo appears again, placed on the box.
+- No gizmo is drawn while the sidebar is open; hiding the sidebar shows the gizmo on the box again.
 
-## Step: Mode is kept per kind
+## Step: Layout is kept per kind
 
 **Action:**
-Switch the curves to **Stats**, select the [CubeGeometry], then the [StringToCurves] again.
+Open the stats for the curves, select the [CubeGeometry], then the [StringToCurves] again.
 
 **Expected:**
-- The cube is still rendered; the curves still show their stats.
+- Both show the stats in the sidebar at the same width; the point views keep their own layout.
 
 ## Step: Connection tooltip
 
@@ -122,4 +113,4 @@ Switch the curves to **Stats**, select the [CubeGeometry], then the [StringToCur
 Connect the [CubeGeometry] to a [GeometryToMesh] and hover the connection.
 
 **Expected:**
-- The tooltip shows the stats with the face count as headline, with no buttons and no render.
+- The tooltip shows the stats with the face count as headline, with no control and no render.

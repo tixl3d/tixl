@@ -15,6 +15,11 @@ internal sealed class GeometryTableView
 {
     public int SelectedCount { get; private set; }
 
+    /// <summary>The row under the mouse in the last <see cref="Draw"/>, or -1.</summary>
+    public int HoveredRow { get; private set; } = -1;
+
+    public void ClearHover() => HoveredRow = -1;
+
     public bool IsSelected(int row) => row < _isSelected.Length && _isSelected[row];
 
     /// <summary>Keeps the selection while the same op shows the same domain; clears it otherwise.</summary>
@@ -52,6 +57,7 @@ internal sealed class GeometryTableView
 
     public void Draw(GeometryTableModel model)
     {
+        HoveredRow = -1;
         if (model.RowCount == 0)
         {
             CustomComponents.StylizedText("No elements in this domain.", Fonts.FontSmall, UiColors.TextMuted);
@@ -103,6 +109,9 @@ internal sealed class GeometryTableView
         ImGui.PushID(row);
         if (ImGui.Selectable("##row", IsSelected(row), ImGuiSelectableFlags.SpanAllColumns | ImGuiSelectableFlags.AllowOverlap))
             HandleRowClick(row);
+
+        if (ImGui.IsItemHovered())
+            HoveredRow = row;
 
         ImGui.PopID();
         ImGui.SameLine(0, 0);

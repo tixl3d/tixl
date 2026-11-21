@@ -14,6 +14,9 @@ public static class TableList
         return Draw(list, Vector2.Zero, previousList);
     }
 
+    /// <summary>The element under the mouse in the list drawn last, or -1; e.g. to mark it on a preview.</summary>
+    public static int LastHoveredRow { get; private set; } = -1;
+
     public static Dictionary<Type, string[]> TypeComponents = new()
                                                                   {
                                                                       { typeof(Vector2), new[] { ".x", ".y" } },
@@ -125,6 +128,7 @@ public static class TableList
 
     private static bool DrawTable(StructuredList list, Vector2 size, int firstRow, int rowCount, bool fitHeightToRows, StructuredList? previousList)
     {
+        LastHoveredRow = -1;
         var canCompare = previousList != null && previousList != list && previousList.Type == list.Type;
         ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(2, 2));
         ImGui.PushFont(Fonts.FontSmall);
@@ -212,6 +216,10 @@ public static class TableList
                     ImGui.Dummy(new Vector2(1, ImGui.GetFrameHeight()));
                     continue;
                 }
+
+                if (ImGui.IsWindowHovered()
+                    && ImGui.IsMouseHoveringRect(cursorScreenPos, cursorScreenPos + new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetFrameHeight())))
+                    LastHoveredRow = objectIndex;
 
                 ImGui.AlignTextToFramePadding();
                 ImGui.TextUnformatted(objectIndex + ".");
