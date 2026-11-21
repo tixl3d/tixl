@@ -1,7 +1,8 @@
-#nullable enable
+﻿#nullable enable
 using System.Net.NetworkInformation;
 using System.Net.WebSockets;
 using System.Threading;
+using T3.Core.Utils;
 using System.Text.Json; // Added for JSON parsing
 using System.Globalization; // Added for CultureInfo.InvariantCulture
 
@@ -81,7 +82,7 @@ namespace Lib.io.websocket
             var shouldListen = Listen.GetValue(context);
             var port = Port.GetValue(context);
             var path = Path.GetValue(context);
-            var localIp = LocalIpAddress.GetValue(context);
+            var localIp = ProtocolInterfaces.ResolveAddressString(ProtocolInterfaces.Keys.WebSocket);
 
             // New inputs for client message parsing
             var clientParsingMode = (MessageParsingMode)ClientMessageParsingMode.GetValue(context);
@@ -95,7 +96,7 @@ namespace Lib.io.websocket
                 if (shouldListen)
                 {
                     var host = localIp;
-                    if (string.IsNullOrEmpty(host) || host.Equals("0.0.0.0") || host.Equals("0.0.0.0 (Listen on all interfaces)"))
+                    if (string.IsNullOrEmpty(host) || host.Equals("0.0.0.0"))
                     {
                         host = "+";
                     }
@@ -457,10 +458,6 @@ namespace Lib.io.websocket
         #region ICustomDropdownHolder Implementation
         string ICustomDropdownHolder.GetValueForInput(Guid id)
         {
-            if (id == LocalIpAddress.Id)
-            {
-                return LocalIpAddress.Value;
-            }
             if (id == ClientMessageParsingMode.Id)
             {
                 return ((MessageParsingMode)ClientMessageParsingMode.Value).ToString();
@@ -470,10 +467,6 @@ namespace Lib.io.websocket
 
         IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid id)
         {
-            if (id == LocalIpAddress.Id)
-            {
-                return GetLocalIPv4Addresses();
-            }
             if (id == ClientMessageParsingMode.Id)
             {
                 return Enum.GetNames(typeof(MessageParsingMode));
@@ -485,11 +478,7 @@ namespace Lib.io.websocket
         {
             if (string.IsNullOrEmpty(s) || !isAListItem) return;
 
-            if (id == LocalIpAddress.Id)
-            {
-                LocalIpAddress.SetTypedInputValue(s.Split(' ')[0]);
-            }
-            else if (id == ClientMessageParsingMode.Id)
+            if (id == ClientMessageParsingMode.Id)
             {
                 if (Enum.TryParse(s, out MessageParsingMode mode))
                 {
@@ -537,9 +526,6 @@ namespace Lib.io.websocket
 
         [Input(Guid = "4D3C2B1A-0F9E-4876-5432-10FEDCBA9876")]
         public readonly InputSlot<bool> SendTrigger = new();
-
-        [Input(Guid = "73B1F8C9-9A2E-47C0-B1C8-29C34A2E7D01")]
-        public readonly InputSlot<string> LocalIpAddress = new("0.0.0.0 (Listen on all interfaces)");
 
         [Input(Guid = "2E725916-4143-4759-8651-E12185C658D3")]
         public readonly InputSlot<bool> PrintToLog = new();

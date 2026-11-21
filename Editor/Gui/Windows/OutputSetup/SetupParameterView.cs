@@ -1,8 +1,9 @@
-#nullable enable
+﻿#nullable enable
 using T3.Editor.SystemUi;
 using ImGuiNET;
 using T3.Core.DataTypes;
 using T3.Core.Operator;
+using T3.Core.Operator.Interfaces;
 using T3.Core.Operator.Slots;
 using T3.Core.Output;
 using T3.Core.Output.Rendering;
@@ -14,6 +15,7 @@ using T3.Editor.Gui.InputUi.ListInputs;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Show;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.Commands.Setup;
@@ -70,6 +72,14 @@ internal static partial class SetupParameterView
         FormInputs.AddVerticalSpace(5);
         DrawHeader(setup, kind, id);
 
+        // Entity cards can be far taller than the panel (a laser output: frame preview + scanner
+        // camera + optimization + safety) and the parameter window deliberately has no scrollbar,
+        // so the card body scrolls here. The header stays fixed. The EndChild pair below belongs to
+        // this child and to setupEntity: it had been left without its BeginChild, which made every
+        // frame end one window too many (Missing PopStyleVar / End() too many times / ImGui-ID).
+        ImGui.BeginChild("##setupEntityCard", Vector2.Zero, ImGuiChildFlags.None,
+                         ImGuiWindowFlags.AlwaysVerticalScrollbar);
+
         switch (kind)
         {
             case SetupEntityKinds.Surface:
@@ -108,7 +118,13 @@ internal static partial class SetupParameterView
             CustomComponents.StylizedText($"+{selection.Count - 1} more selected", Fonts.FontSmall, UiColors.TextMuted);
         }
 
-        ImGui.EndChild();
+        // Scroll headroom: the section cards auto-resize a frame behind their content, and live
+        // readouts (scan stats, pump times) change that height while the show runs - without this
+        // spacer the card tail clips at the panel's max scroll.
+        FormInputs.AddVerticalSpace(20);
+
+        ImGui.EndChild(); // ##setupEntityCard
+        ImGui.EndChild(); // setupEntity
         return true;
     }
 
@@ -612,6 +628,70 @@ internal static partial class SetupParameterView
         CommitFieldUndo(setup, "Turn floor", rotationState);
     }
 
+    /// <summary>
+    /// The outputs an output-card edit fans out to: the primary plus every other selected output
+    /// of the same kind (ctrl/shift-extend in the outliner or on the board). Edits across a multi
+    /// selection apply to all of them as one undo step; per-device aim geometry (setup rect, warp
+    /// corners, masks) and identity stay on the primary - those are aimed per projector.
+    /// </summary>
+    private static List<OutputDefinition> CollectEditTargets(Setup setup, OutputDefinition primary)
+    {
+        var selection = GlobalSelectionHandling.SetupEntities;
+        if (selection.Count < 2)
+            return [primary];
+
+        List<OutputDefinition>? targets = null;
+        foreach (var target in selection.Targets)
+        {
+            if (target.Kind != SetupEntityKinds.Output)
+                continue;
+
+            var output = setup.FindOutput(target.EntityId);
+            if (output == null || output.Kind != primary.Kind)
+                continue;
+
+            targets ??= [];
+            targets.Add(output);
+        }
+
+        if (targets == null)
+            return [primary];
+
+        // The primary leads: first in the list, and always present even when its selection row
+        // was pruned mid-draw.
+        targets.Remove(primary);
+        targets.Insert(0, primary);
+        return targets;
+    }
+
+    /// <summary>An undoable output edit applied to every selected output of the primary's kind as one undo step.</summary>
+    private static void EditOutputs(Setup setup, string undoLabel, OutputDefinition primary, Action<OutputDefinition> edit)
+    {
+        SetupUndo.RunUndoable(undoLabel, setup, () =>
+        {
+            foreach (var target in CollectEditTargets(setup, primary))
+                edit(target);
+        });
+    }
+
+    /// <summary>Safety-settings fan-out: every target gets its own settings object created on demand.</summary>
+    private static void EditSafety(Setup setup, string undoLabel, OutputDefinition primary,
+                                   Action<LaserProcessingSettings.SafetySettings> edit)
+        => EditOutputs(setup, undoLabel, primary,
+                       output => edit((output.LaserProcessing ??= new LaserProcessingSettings()).Safety));
+
+    /// <summary>Path-optimizer fan-out, same as <see cref="EditSafety"/>.</summary>
+    private static void EditOptimizer(Setup setup, string undoLabel, OutputDefinition primary,
+                                      Action<LaserProcessingSettings.OptimizerSettings> edit)
+        => EditOutputs(setup, undoLabel, primary,
+                       output => edit((output.LaserProcessing ??= new LaserProcessingSettings()).Optimizer));
+
+    /// <summary>Scanner-motion fan-out, same as <see cref="EditSafety"/>.</summary>
+    private static void EditMotion(Setup setup, string undoLabel, OutputDefinition primary,
+                                   Action<LaserProcessingSettings.MotionSettings> edit)
+        => EditOutputs(setup, undoLabel, primary,
+                       output => edit((output.LaserProcessing ??= new LaserProcessingSettings()).Motion));
+
     private static void DrawOutputCard(Setup setup, MachineConfig machineConfig, Guid id)
     {
         var output = setup.FindOutput(id);
@@ -620,9 +700,54 @@ internal static partial class SetupParameterView
 
         // A wider label column than other cards: the zoom row's unit switch sits in it.
         FormInputs.Indent(OutputCardExtraIndent);
+
+        var isLaser = output.Kind == OutputDefinition.Kinds.Laser;
+        if (isLaser)
+        {
+            var editTargetCount = CollectEditTargets(setup, output).Count;
+            if (editTargetCount > 1)
+            {
+                FormInputs.AddHint($"Editing {editTargetCount} laser outputs together - the shared settings below apply to all of them. "
+                                   + "Per-device aim (setup rect, warp corners, masks) stays on this one.");
+            }
+
+            DrawLaserStatusStrip(machineConfig, output);
+            PanelLayout.BeginSection("Output");
+        }
+
+        // Laser outputs stream vector content instead of compositing a canvas, but Send means the
+        // same thing to them: pause this output without dropping its device binding.
         var send = output.IsSending;
-        if (FormInputs.AddCheckBox("Send", ref send, "Pause presenting without dropping the display binding."))
-            SetupUndo.RunUndoable("Toggle send", setup, () => output.IsSending = send);
+        var sendTooltip = output.Kind == OutputDefinition.Kinds.Laser
+                              ? "Streams this laser output. Unticked, its bound scanners get nothing while the device stays connected."
+                              : "Pause presenting without dropping the display binding.";
+        if (FormInputs.AddCheckBox("Send", ref send, sendTooltip))
+            EditOutputs(setup, "Toggle send", output, o => o.IsSending = send);
+
+        // Show distribution: which boygroup node presents this output. Empty = every machine (the
+        // classic behavior), so single-machine setups need none of this.
+        var labels = new List<string> { "(all machines)", Environment.MachineName };
+        foreach (var client in Show.BoygroupManager.Instance.Clients)
+        {
+            if (!string.IsNullOrEmpty(client.Name) && !labels.Contains(client.Name))
+                labels.Add(client.Name);
+        }
+
+        var selectedLabel = string.IsNullOrEmpty(output.MachineName) ? labels[0] : output.MachineName;
+        if (FormInputs.AddDropdown(ref selectedLabel, labels, "Render on machine",
+                                   "In a boygrouped show only the chosen node presents this output. '(all machines)' keeps the default behavior."))
+        {
+            var value = labels.IndexOf(selectedLabel) > 0 ? selectedLabel : string.Empty;
+            SetupUndo.RunUndoable("Assign output machine", setup, () => output.MachineName = value);
+        }
+
+        if (isLaser)
+        {
+            PanelLayout.EndSection();
+            DrawLaserOutputCard(setup, output);
+            FormInputs.Unindent(OutputCardExtraIndent);
+            return;
+        }
 
         // The canvas every route onto this output is measured in, and what its content is asked to render at:
         // an unset resolution upstream (a RenderTarget at 0×0) resolves to this, so it is the one place the
@@ -734,11 +859,1639 @@ internal static partial class SetupParameterView
     /** Matches how FormInputs fades a field that holds its default value. */
     private const float DefaultValueAlpha = 0.7f;
 
+    /** Pure UI state: whether the gamma row drives all three channels with one value. */
+    private static bool _linkGammaChannels;
+
     private static void DrawCardDivider()
     {
         FormInputs.AddVerticalSpace(8);
         ImGui.Separator();
         FormInputs.AddVerticalSpace(8);
+    }
+
+    /// <summary>
+    /// What a laser output needs at a glance: where it streams, whether the stream is healthy, and the
+    /// two safety states (calibration and beam) that decide what actually reaches the scanners.
+    /// </summary>
+    private static void DrawLaserStatusStrip(MachineConfig machineConfig, OutputDefinition output)
+    {
+        var processing = output.LaserProcessing ??= new LaserProcessingSettings();
+        var safety = processing.Safety;
+
+        // A laser output may bind several plugs - the same frame fans out to each device.
+        _boundPlugNames.Clear();
+        foreach (var binding in machineConfig.FindLaserBindings(output.Id))
+        {
+            var plug = machineConfig.FindLaserPlug(binding.PlugId);
+            if (plug != null)
+                _boundPlugNames.Add(plug.Name);
+        }
+
+        var hasStream = LaserDriver.TryGetStreamStatus(output.Id, out var streamStatus, out var streamLevel);
+        var streamColor = !hasStream
+                              ? UiColors.TextMuted
+                              : streamLevel switch
+                                    {
+                                        IStatusProvider.StatusLevel.Success => UiColors.StatusOkay,
+                                        IStatusProvider.StatusLevel.Warning or IStatusProvider.StatusLevel.Error => UiColors.StatusAttention,
+                                        _ => UiColors.TextMuted,
+                                    };
+        var streamLabel = !hasStream
+                              ? "No driver stream"
+                              : streamLevel == IStatusProvider.StatusLevel.Success
+                                  ? "Driver OK"
+                                  : streamLevel is IStatusProvider.StatusLevel.Warning or IStatusProvider.StatusLevel.Error
+                                      ? "Driver problem"
+                                      : "Driver idle";
+
+        PanelLayout.StatusPill(streamLabel, streamColor);
+        CustomComponents.TooltipForLastItem("Live status of the driver streaming this output",
+                                            hasStream ? streamStatus : "No laser stream yet - is the master laser on?");
+
+        ImGui.SameLine(0, PanelLayout.SpaceS * T3Ui.UiScaleFactor);
+        PanelLayout.StatusPill(safety.Calibrated ? "Calibrated" : "Uncalibrated",
+                               safety.Calibrated ? UiColors.StatusOkay : UiColors.StatusAttention);
+        CustomComponents.TooltipForLastItem(safety.Calibrated
+                                                ? "Content streams, limited by the safety settings below."
+                                                : "Only the alignment rectangle streams until this output is calibrated.");
+
+        ImGui.SameLine(0, PanelLayout.SpaceS * T3Ui.UiScaleFactor);
+        PanelLayout.StatusPill(safety.BeamEnable ? "Beam on" : "Beam off",
+                               safety.BeamEnable ? UiColors.StatusOkay : UiColors.TextMuted);
+        CustomComponents.TooltipForLastItem("The output's beam switch: off blanks every point.");
+
+        PanelLayout.Space(PanelLayout.SpaceXS);
+        var boundTo = _boundPlugNames.Count == 0
+                          ? "Unbound - drop this output on a laser plug (it can bind several)"
+                          : $"Streams to {string.Join(", ", _boundPlugNames)} (edit a plug under Local Bindings)";
+        DrawWrappedSmallText(boundTo, UiColors.TextMuted);
+
+        if (hasStream)
+            DrawWrappedSmallTextStable(streamStatus, UiColors.TextMuted, 3);
+
+        PanelLayout.Space(PanelLayout.SpaceM);
+    }
+
+    /// <summary>
+    /// A laser output carries the show: the processing pipeline (optimization + safety — managed here
+    /// rather than in graph ops). The projection itself is the routed [LaserCamera]'s own aim — its
+    /// Position/Target/Use Rotation/FieldOfView on the op. The device — address, port, device settings
+    /// — lives on the laser plug it is bound to; select the plug in LOCAL BINDINGS to edit it.
+    /// Setting a [LaserCamera]'s OutputRef to this output routes the camera's frame here.
+    /// </summary>
+    private static void DrawLaserOutputCard(Setup setup, OutputDefinition output)
+    {
+        DrawLaserProcessing(setup, output);
+
+        // The projector card's venue map, same rows: an image to place the safe zone, masks and
+        // warp corners against while aiming. Lasers have no patches, so nothing follows it here.
+        var routedContent = LaserContent.Cameras
+                                        .OfType<Instance>()
+                                        .Where(c => LaserContent.OutputRefOf(c) == output.Id)
+                                        .Select(c => c.Symbol.Name)
+                                        .ToList();
+        FormInputs.AddHint(routedContent.Count > 0
+                               ? $"Content: {string.Join(", ", routedContent)}"
+                               : "Content: nothing routed yet - set the routed camera op's Output reference to this output.");
+
+        DrawCardDivider();
+        DrawReferenceLayoutRows(setup, output);
+    }
+
+    private static void DrawWrappedSmallText(string text, T3.Core.DataTypes.Vector.Color color)
+    {
+        ImGui.PushFont(Fonts.FontSmall);
+        ImGui.PushStyleColor(ImGuiCol.Text, color.Rgba);
+        ImGui.TextWrapped(text);
+        ImGui.PopStyleColor();
+        ImGui.PopFont();
+    }
+
+    /// <summary>
+    /// Wrapped small text inside a fixed line-count slot. Live timings (the pump stats in a
+    /// stream status) change the message length every frame, and a strip that resizes with them
+    /// shifts everything below one frame late - which clips the card tail at the panel's max
+    /// scroll. The slot keeps the height constant; longer text clips at the last line.
+    /// </summary>
+    private static void DrawWrappedSmallTextStable(string text, T3.Core.DataTypes.Vector.Color color, int lines)
+    {
+        ImGui.PushFont(Fonts.FontSmall);
+        var lineHeight = ImGui.GetTextLineHeight();
+        ImGui.PushStyleColor(ImGuiCol.Text, color.Rgba);
+        ImGui.TextWrapped(text);
+        ImGui.PopStyleColor();
+
+        var renderedLines = Math.Max(1, (int)MathF.Round(ImGui.GetItemRectSize().Y / lineHeight));
+        var missing = lines - renderedLines;
+        if (missing > 0)
+            ImGui.Dummy(new Vector2(1, missing * lineHeight));
+
+        ImGui.PopFont();
+    }
+
+    /// <summary>The streamed frame, live - the same drawing the Board card shows, where the output is edited.</summary>
+    private static void DrawLaserFramePreview(Setup setup, OutputDefinition output)
+    {
+        // A square frame reads like the scanner field; capped so it does not stretch across a wide panel.
+        var previewSize = MathF.Min(ImGui.GetContentRegionAvail().X, 200f * T3Ui.UiScaleFactor);
+        var previewMin = ImGui.GetCursorScreenPos();
+        var previewMax = new Vector2(previewMin.X + previewSize, previewMin.Y + previewSize);
+        var previewDl = ImGui.GetWindowDrawList();
+        previewDl.AddRectFilled(previewMin, previewMax, UiColors.BackgroundPopup.Fade(0.6f));
+
+        // The venue map (Reference Layout) under the points, the way the board draws it over the
+        // cards - so the safe zone and masks are aimed against the room, not a black square.
+        var reference = setup.FindReferenceImage(output.ReferenceImageId);
+        if (reference != null && output.ReferenceOpacity > 0f
+                               && SetupOutputView.TryGetReferenceSrv(reference) is { IsDisposed: false } mapSrv)
+        {
+            previewDl.AddImage((IntPtr)mapSrv.ImGuiTextureId, previewMin, previewMax, Vector2.Zero, Vector2.One,
+                               UiColors.ForegroundFull.Fade(output.ReferenceOpacity));
+        }
+
+        LaserOutputPreview.DrawFrame(previewDl, previewMin, previewMax, LaserOutputPreview.GetFrame(output));
+
+        // Safe-zone outline and, with frame warp on, the four draggable keystone corners.
+        var processing = output.LaserProcessing ??= new LaserProcessingSettings();
+        DrawLaserFrameOverlay(setup, processing.Safety, previewDl, previewMin, previewMax);
+
+        ImGui.SetCursorScreenPos(new Vector2(previewMin.X, previewMax.Y));
+        ImGui.Dummy(Vector2.Zero);
+        PanelLayout.Space(PanelLayout.SpaceM);
+    }
+
+    /// <summary>
+    /// Over the frame preview: the safe zone the corners must stay inside, and — with frame warp
+    /// on — the warp quad with its four draggable corner handles. This is where the laser output's
+    /// "basic screen" is trapezed: drag a corner and the quad follows, clamped to the safe zone,
+    /// as one undo step per drag.
+    /// </summary>
+    private static void DrawLaserFrameOverlay(Setup setup, LaserProcessingSettings.SafetySettings safety,
+                                              ImDrawListPtr dl, Vector2 min, Vector2 max)
+    {
+        var uiScale = T3Ui.UiScaleFactor;
+        var inset = 3f * uiScale;
+        var side = MathF.Min(max.X - min.X, max.Y - min.Y) - 2f * inset;
+        if (side < 16f)
+            return;
+
+        var projection = new FieldProjection { Center = (min + max) * 0.5f, Half = side * 0.5f };
+
+        var zoneHalfW = MathF.Max(0f, safety.SafeZoneWidth) * 0.5f;
+        var zoneHalfH = MathF.Max(0f, safety.SafeZoneHeight) * 0.5f;
+        var zoneMin = new Vector2(Math.Clamp(safety.SafeZoneCenterX - zoneHalfW, -1f, 1f),
+                                  Math.Clamp(safety.SafeZoneCenterY - zoneHalfH, -1f, 1f));
+        var zoneMax = new Vector2(Math.Clamp(safety.SafeZoneCenterX + zoneHalfW, -1f, 1f),
+                                  Math.Clamp(safety.SafeZoneCenterY + zoneHalfH, -1f, 1f));
+        dl.AddRect(projection.CanvasToScreen(zoneMin), projection.CanvasToScreen(zoneMax),
+                   UiColors.TextMuted.Fade(0.3f), 0, ImDrawFlags.None, MathF.Max(1f, MathF.Round(uiScale)));
+
+        // Safety masks: every quad outlined (allow masks green, blank masks orange, disabled
+        // dimmed); the selected one gets the draggable corner handles, same gesture as the
+        // keystone. Drawn whatever the warp state - masks apply after the warp, so they land
+        // exactly where they are drawn.
+        if (_laserMaskSelected >= safety.Masks.Count)
+            _laserMaskSelected = -1;
+
+        for (var m = 0; m < safety.Masks.Count; m++)
+        {
+            var mask = safety.Masks[m];
+            Span<Vector2> maskCorners =
+            [
+                new Vector2(mask.X1, mask.Y1),
+                new Vector2(mask.X2, mask.Y2),
+                new Vector2(mask.X3, mask.Y3),
+                new Vector2(mask.X4, mask.Y4),
+            ];
+
+            var maskColor = !mask.Enabled
+                                ? UiColors.TextMuted.Fade(0.3f)
+                                : mask.AllowOnlyInside
+                                    ? UiColors.StatusOkay.Fade(0.8f)
+                                    : UiColors.StatusAttention.Fade(0.8f);
+            for (var i = 0; i < 4; i++)
+            {
+                dl.AddLine(projection.CanvasToScreen(maskCorners[i]), projection.CanvasToScreen(maskCorners[(i + 1) % 4]),
+                           maskColor, 1.5f * uiScale);
+            }
+
+            if (m != _laserMaskSelected)
+                continue;
+
+            var handleStyle = CanvasPointHandle.Style.Default(mask.Enabled ? UiColors.StatusAttention : UiColors.TextMuted);
+            handleStyle.Radius = 4;
+            for (var i = 0; i < 4; i++)
+            {
+                ImGui.PushID(100 + m * 4 + i);
+                var phase = CanvasPointHandle.Draw(ref maskCorners[i], projection, handleStyle);
+                if (phase != CanvasPointHandle.DragPhases.None)
+                {
+                    maskCorners[i] = ClampToZone(maskCorners[i], zoneMin, zoneMax);
+                    SetMaskCorner(safety, m, i, maskCorners[i]);
+
+                    if (phase == CanvasPointHandle.DragPhases.Started)
+                    {
+                        _laserMaskDragOldJson = setup.ToJsonString();
+                        OutputSetupHandling.NotifyLiveEdit();
+                    }
+                    else if (phase == CanvasPointHandle.DragPhases.Completed && _laserMaskDragOldJson != null)
+                    {
+                        SetupUndo.CommitGesture(setup, "Edit laser mask corners", _laserMaskDragOldJson);
+                        _laserMaskDragOldJson = null;
+                    }
+                }
+
+                ImGui.PopID();
+            }
+        }
+
+        if (!safety.FrameWarp)
+            return;
+
+        Span<Vector2> corners =
+        [
+            new Vector2(safety.WarpCorner1X, safety.WarpCorner1Y),
+            new Vector2(safety.WarpCorner2X, safety.WarpCorner2Y),
+            new Vector2(safety.WarpCorner3X, safety.WarpCorner3Y),
+            new Vector2(safety.WarpCorner4X, safety.WarpCorner4Y),
+        ];
+
+        var quadColor = UiColors.StatusAttention.Fade(0.8f);
+        for (var i = 0; i < 4; i++)
+        {
+            dl.AddLine(projection.CanvasToScreen(corners[i]), projection.CanvasToScreen(corners[(i + 1) % 4]),
+                       quadColor, 1.5f * uiScale);
+        }
+
+        var style = CanvasPointHandle.Style.Default(UiColors.StatusAttention);
+        style.Radius = 4;
+        for (var i = 0; i < 4; i++)
+        {
+            ImGui.PushID(i);
+            var phase = CanvasPointHandle.Draw(ref corners[i], projection, style);
+            if (phase != CanvasPointHandle.DragPhases.None)
+            {
+                corners[i] = ClampToZone(corners[i], zoneMin, zoneMax);
+                SetWarpCorner(safety, i, corners[i]);
+
+                if (phase == CanvasPointHandle.DragPhases.Started)
+                {
+                    _laserWarpDragOldJson = setup.ToJsonString();
+                    OutputSetupHandling.NotifyLiveEdit();
+                }
+                else if (phase == CanvasPointHandle.DragPhases.Completed && _laserWarpDragOldJson != null)
+                {
+                    SetupUndo.CommitGesture(setup, "Warp laser frame corners", _laserWarpDragOldJson);
+                    _laserWarpDragOldJson = null;
+                }
+            }
+
+            ImGui.PopID();
+        }
+    }
+
+    private static Vector2 ClampToZone(Vector2 corner, Vector2 zoneMin, Vector2 zoneMax)
+    {
+        return new Vector2(Math.Clamp(corner.X, zoneMin.X, zoneMax.X),
+                           Math.Clamp(corner.Y, zoneMin.Y, zoneMax.Y));
+    }
+
+    private static void SetMaskCorner(LaserProcessingSettings.SafetySettings safety, int maskIndex, int cornerIndex, Vector2 value)
+    {
+        var mask = safety.Masks[maskIndex];
+        switch (cornerIndex)
+        {
+            case 0:
+                mask.X1 = value.X;
+                mask.Y1 = value.Y;
+                break;
+            case 1:
+                mask.X2 = value.X;
+                mask.Y2 = value.Y;
+                break;
+            case 2:
+                mask.X3 = value.X;
+                mask.Y3 = value.Y;
+                break;
+            case 3:
+                mask.X4 = value.X;
+                mask.Y4 = value.Y;
+                break;
+        }
+
+        safety.MasksChanged();
+    }
+
+    private static void SetWarpCorner(LaserProcessingSettings.SafetySettings safety, int corner, Vector2 value)
+    {
+        switch (corner)
+        {
+            case 0:
+                safety.WarpCorner1X = value.X;
+                safety.WarpCorner1Y = value.Y;
+                break;
+            case 1:
+                safety.WarpCorner2X = value.X;
+                safety.WarpCorner2Y = value.Y;
+                break;
+            case 2:
+                safety.WarpCorner3X = value.X;
+                safety.WarpCorner3Y = value.Y;
+                break;
+            case 3:
+                safety.WarpCorner4X = value.X;
+                safety.WarpCorner4Y = value.Y;
+                break;
+        }
+    }
+
+    /// <summary>Maps normalized field units (-1..1, y up) onto the square preview rect (y down) —
+    /// the same inscribed square <see cref="LaserOutputPreview"/> draws the frame into, so the
+    /// handles sit exactly on the quad they warp.</summary>
+    private sealed class FieldProjection : ICanvasProjection
+    {
+        public Vector2 Center;
+        public float Half;
+
+        public Vector2 CanvasToScreen(Vector2 posInCanvas)
+        {
+            return new Vector2(Center.X + posInCanvas.X * Half, Center.Y - posInCanvas.Y * Half);
+        }
+
+        public Vector2 ScreenToCanvas(Vector2 posOnScreen)
+        {
+            return new Vector2((posOnScreen.X - Center.X) / Half, -(posOnScreen.Y - Center.Y) / Half);
+        }
+    }
+
+    private static string? _laserWarpDragOldJson;
+
+    /** The laser output card's mask currently showing its draggable corner handles; -1 = none. */
+    private static int _laserMaskSelected = -1;
+    private static string? _laserMaskDragOldJson;
+    private static readonly List<string> _boundPlugNames = [];
+
+    /// <summary>
+    /// A laser plug's own card: the endpoint (address, port, network interface) and the device settings
+    /// (scan rate, brightness ceiling, channel order, protocol identity) live HERE, at the plug in local
+    /// bindings — the output bound here carries the show (camera, pipeline), never the device address.
+    /// </summary>
+    private static void DrawLaserPlugCard(MachineConfig machineConfig, LaserPlug plug, OutputDefinition? boundOutput)
+    {
+        // One control for the endpoint: type an address, or open the chevron to pick a discovered
+        // device (Ether Dream DACs announce themselves by UDP broadcast).
+        if (plug.Kind == LaserPlug.Kinds.EtherDream)
+            LaserPlugDiscovery.EnsureEtherDreamDiscovery();
+        else if (plug.Kind == LaserPlug.Kinds.Citp)
+            CitpPeerDiscovery.EnsureStarted();
+        else if (plug.Kind == LaserPlug.Kinds.Ponk)
+            PonkSenderDiscovery.EnsureStarted();
+        else if (plug.Kind == LaserPlug.Kinds.ShowNet)
+            LaserPlugDiscovery.EnsureShowNetDiscovery();
+
+        // An address left empty gets a working basic one as soon as something is known - the
+        // first active CITP peer (instantly, while it announces), the first discovered Ether
+        // Dream DAC, or the PONK multicast group. Typing always wins afterwards.
+        AutoPreselectLaserEndpoint(machineConfig, plug);
+
+        DrawLaserPlugStatus(plug, boundOutput);
+
+        PanelLayout.BeginSection("Connection");
+        FormInputs.DrawInputLabel("Address");
+        if (_laserAddressPlug != plug.Id)
+        {
+            _laserAddressPlug = plug.Id;
+            _laserAddressBuffer = plug.Address;
+        }
+
+        var addressArrow = DrawEditableComboField("##laserAddress", ref _laserAddressBuffer, 64,
+                                                  $"##laserAddressPick{plug.Id:N}");
+        if (addressArrow)
+            Plugs.UpdateLaser(machineConfig, plug.Id, null, _laserAddressBuffer.Trim(), null);
+
+        CustomComponents.TooltipForLastItem(plug.Kind switch
+                                                {
+                                                    LaserPlug.Kinds.Ponk => "The PONK host: the 239.255.10.24 multicast group, or a receiver's unicast IP.",
+                                                    LaserPlug.Kinds.Citp => "The CITP capture host (used with a Port above 0; 0 keeps PLoc multicast discovery).",
+                                                    LaserPlug.Kinds.ShowNet => "The showNET laser's IP address on the LAN — type it, or pick a discovered laser from the chevron.",
+                                                    _ => "The Ether Dream DAC's IP address on the LAN — type it, or pick a discovered device from the chevron.",
+                                                });
+
+        if (plug.Kind == LaserPlug.Kinds.EtherDream && ImGui.BeginPopup($"##laserAddressPick{plug.Id:N}"))
+        {
+            var dacs = LaserPlugDiscovery.EtherDreamDacs;
+            var connected = LaserPlugDiscovery.ConnectedDevice;
+
+            if (dacs.Count == 0 && connected == null)
+                CustomComponents.StylizedText("discovering…", Fonts.FontSmall, UiColors.TextMuted);
+
+            foreach (var dac in dacs)
+            {
+                if (ImGui.Selectable($"{dac.Name} ({dac.Ip})") && dac.Ip != plug.Address)
+                {
+                    _laserAddressBuffer = dac.Ip;
+                    Plugs.UpdateLaser(machineConfig, plug.Id, null, dac.Ip, null);
+                    ImGui.CloseCurrentPopup();
+                }
+            }
+
+            // A DAC being streamed to stops its discovery broadcasts — offer what an output op
+            // is connected to, so the picker works during a show too.
+            if (connected is { } device && dacs.All(d => !string.Equals(d.Ip, device.Ip, StringComparison.OrdinalIgnoreCase)))
+            {
+                if (ImGui.Selectable($"● connected: {device.Name} ({device.Ip})") && device.Ip != plug.Address)
+                {
+                    _laserAddressBuffer = device.Ip;
+                    Plugs.UpdateLaser(machineConfig, plug.Id, null, device.Ip, null);
+                    ImGui.CloseCurrentPopup();
+                }
+            }
+
+            CustomComponents.StylizedText("DACs stop broadcasting while a show streams to them — the connected device is listed above.",
+                                          Fonts.FontSmall, UiColors.TextMuted);
+            ImGui.EndPopup();
+        }
+        else if (plug.Kind == LaserPlug.Kinds.Citp && ImGui.BeginPopup($"##laserAddressPick{plug.Id:N}"))
+        {
+            // CITP peers announce themselves (CITP PLoc on 224.0.0.180:4809) - Capture, Depence,
+            // media servers. Picking one sets host and port for a direct connection.
+            CitpPeerDiscovery.EnsureStarted();
+            var peers = CitpPeerDiscovery.Peers;
+            if (peers.Count == 0)
+                CustomComponents.StylizedText("listening for CITP peers announcing themselves…", Fonts.FontSmall, UiColors.TextMuted);
+
+            foreach (var peer in peers)
+            {
+                if (ImGui.Selectable($"{peer.Name} ({peer.Type}) — {peer.Ip}:{peer.TcpPort}")
+                    && (peer.Ip != plug.Address || peer.TcpPort != plug.Port))
+                {
+                    _laserAddressBuffer = peer.Ip;
+                    Plugs.UpdateLaser(machineConfig, plug.Id, null, peer.Ip, peer.TcpPort);
+                    ImGui.CloseCurrentPopup();
+                }
+            }
+
+            CustomComponents.StylizedText("Peers appear as they announce themselves on 224.0.0.180:4809.",
+                                          Fonts.FontSmall, UiColors.TextMuted);
+            ImGui.EndPopup();
+        }
+        else if (plug.Kind == LaserPlug.Kinds.Ponk && ImGui.BeginPopup($"##laserAddressPick{plug.Id:N}"))
+        {
+            PonkSenderDiscovery.EnsureStarted();
+
+            // Multicast first - it reaches every receiver and needs no address at all.
+            const string multicastAddress = "239.255.10.24";
+            if (ImGui.Selectable($"Multicast group — {multicastAddress} (all receivers)")
+                && plug.Address != multicastAddress)
+            {
+                _laserAddressBuffer = multicastAddress;
+                Plugs.UpdateLaser(machineConfig, plug.Id, null, multicastAddress, null);
+                ImGui.CloseCurrentPopup();
+            }
+
+            var senders = PonkSenderDiscovery.Senders;
+            foreach (var sender in senders)
+            {
+                if (ImGui.Selectable($"{sender.Name} — {sender.Ip}") && sender.Ip != plug.Address)
+                {
+                    _laserAddressBuffer = sender.Ip;
+                    Plugs.UpdateLaser(machineConfig, plug.Id, null, sender.Ip, null);
+                    ImGui.CloseCurrentPopup();
+                }
+            }
+
+            if (senders.Count == 0)
+                CustomComponents.StylizedText("listening for PONK senders on 239.255.10.24:5583…", Fonts.FontSmall, UiColors.TextMuted);
+
+            CustomComponents.StylizedText("Multicast reaches every receiver without an address; a receive-only MadMapper cannot announce itself, so only senders on the group are listed.",
+                                          Fonts.FontSmall, UiColors.TextMuted);
+            ImGui.EndPopup();
+        }
+        else if (plug.Kind == LaserPlug.Kinds.ShowNet && ImGui.BeginPopup($"##laserAddressPick{plug.Id:N}"))
+        {
+            LaserPlugDiscovery.EnsureShowNetDiscovery();
+            var lasers = LaserPlugDiscovery.ShowNetLasers;
+            var connected = LaserPlugDiscovery.ConnectedDevice;
+
+            if (lasers.Count == 0 && connected == null)
+                CustomComponents.StylizedText("probing for showNET lasers...", Fonts.FontSmall, UiColors.TextMuted);
+
+            foreach (var laser in lasers)
+            {
+                if (ImGui.Selectable($"{laser.Name} ({laser.Ip})") && laser.Ip != plug.Address)
+                {
+                    _laserAddressBuffer = laser.Ip;
+                    Plugs.UpdateLaser(machineConfig, plug.Id, null, laser.Ip, null);
+                    ImGui.CloseCurrentPopup();
+                }
+            }
+
+            CustomComponents.StylizedText("Lasers answer the broadcast probe while streaming; entries age out after ~12 s of silence.",
+                                          Fonts.FontSmall, UiColors.TextMuted);
+            ImGui.EndPopup();
+        }
+
+        // Ether Dream DACs listen on the protocol-fixed port, so editing would be a no-op — shown read-only
+        // at its effective value; PONK and CITP endpoints are configurable.
+        if (plug.Kind is LaserPlug.Kinds.EtherDream or LaserPlug.Kinds.ShowNet)
+        {
+            var defaultPort = plug.Kind == LaserPlug.Kinds.EtherDream ? 7765 : 41855;
+            Span<int> port = [plug.Port > 0 ? plug.Port : defaultPort];
+            var portNote = plug.Kind == LaserPlug.Kinds.EtherDream
+                               ? "The Ether Dream protocol port is fixed at 7765."
+                               : "The showNET protocol port is fixed at 41855.";
+            DrawIntsRow("Port", port, portNote, readOnly: true);
+        }
+        else
+        {
+            Span<int> port = [plug.Port];
+            var portState = DrawIntsRow("Port", port, "Remote port; 0 = the protocol's default (PONK 5583, CITP discovery).");
+            if ((portState & InputEditStateFlags.Modified) != 0)
+                Plugs.UpdateLaser(machineConfig, plug.Id, null, null, port[0]);
+        }
+
+        FormInputs.DrawInputLabel("Interface");
+        if (_laserTextKey != plug.Id + ":if")
+        {
+            _laserTextKey = plug.Id + ":if";
+            _laserTextBuffer = plug.LocalAddress;
+        }
+
+        var interfaceArrow = DrawEditableComboField("##laserLocal", ref _laserTextBuffer, 40,
+                                                    $"##laserInterfacePick{plug.Id:N}");
+        if (interfaceArrow)
+        {
+            plug.LocalAddress = _laserTextBuffer.Trim();
+            OutputSetupHandling.SaveActive();
+        }
+
+        CustomComponents.TooltipForLastItem(plug.Kind == LaserPlug.Kinds.EtherDream
+                                                ? "Not used by Ether Dream: the DAC is reached over the operating system's route."
+                                                : "Network interface packets leave on (this machine's NIC IP); empty = any. Type it, or pick from the chevron.");
+
+        if (ImGui.BeginPopup($"##laserInterfacePick{plug.Id:N}"))
+        {
+            foreach (var nic in LaserPlugDiscovery.InterfaceAddresses)
+            {
+                if (ImGui.Selectable($"{nic.Name}: {nic.Ip}") && nic.Ip != plug.LocalAddress)
+                {
+                    _laserTextBuffer = nic.Ip;
+                    plug.LocalAddress = nic.Ip;
+                    OutputSetupHandling.SaveActive();
+                    ImGui.CloseCurrentPopup();
+                }
+            }
+
+            ImGui.EndPopup();
+        }
+
+        PanelLayout.EndSection();
+
+        DrawLaserDeviceSettings(machineConfig, plug);
+    }
+
+    /// <summary>The plug's protocol, what it streams for, and the live status of the driver behind it.</summary>
+    private static void DrawLaserPlugStatus(LaserPlug plug, OutputDefinition? boundOutput)
+    {
+        PanelLayout.StatusPill(plug.Kind.ToString(), UiColors.TextMuted);
+
+        var hasStream = boundOutput != null
+                        && LaserDriver.TryGetStreamStatus(boundOutput.Id, out _, out _);
+        ImGui.SameLine(0, PanelLayout.SpaceS * T3Ui.UiScaleFactor);
+        if (boundOutput == null)
+        {
+            PanelLayout.StatusPill("Nothing bound", UiColors.TextMuted);
+            PanelLayout.Space(PanelLayout.SpaceM);
+            return;
+        }
+
+        LaserDriver.TryGetStreamStatus(boundOutput.Id, out var opStatus, out var opLevel);
+        var statusColor = !hasStream
+                              ? UiColors.TextMuted
+                              : opLevel switch
+                                    {
+                                        IStatusProvider.StatusLevel.Success => UiColors.StatusOkay,
+                                        IStatusProvider.StatusLevel.Warning or IStatusProvider.StatusLevel.Error => UiColors.StatusAttention,
+                                        _ => UiColors.TextMuted,
+                                    };
+        PanelLayout.StatusPill(hasStream ? "Driver connected" : "No driver stream", statusColor);
+        CustomComponents.TooltipForLastItem("Live status of the driver streaming to this plug's device.",
+                                            hasStream ? opStatus : "No laser stream for this plug yet - is the master laser on?");
+
+        PanelLayout.Space(PanelLayout.SpaceXS);
+        DrawWrappedSmallText($"Streaming for {boundOutput.Name}", UiColors.TextMuted);
+        if (hasStream)
+            DrawWrappedSmallTextStable(opStatus, statusColor, 3); // pump timings change every frame
+
+        PanelLayout.Space(PanelLayout.SpaceM);
+    }
+
+    /// <summary>
+    /// Fills a laser plug's empty address with a working basic endpoint as soon as one is known:
+    /// the first announcing CITP peer (direct host+port), the first discovered Ether Dream DAC,
+    /// or the PONK multicast group. Runs once per plug — as soon as the address is non-empty
+    /// (by this write or by typing) it never touches it again.
+    /// </summary>
+    private static void AutoPreselectLaserEndpoint(MachineConfig machineConfig, LaserPlug plug)
+    {
+        if (!string.IsNullOrWhiteSpace(plug.Address))
+            return;
+
+        switch (plug.Kind)
+        {
+            case LaserPlug.Kinds.Citp:
+            {
+                // "Select the first active instantly": the plug starts talking to the first peer
+                // that announced itself instead of waiting for a manual pick.
+                var peer = CitpPeerDiscovery.Peers.FirstOrDefault();
+                if (peer == null)
+                    return;
+
+                _laserAddressBuffer = peer.Ip;
+                Plugs.UpdateLaser(machineConfig, plug.Id, null, peer.Ip, peer.TcpPort);
+                break;
+            }
+            case LaserPlug.Kinds.EtherDream:
+            {
+                var dacs = LaserPlugDiscovery.EtherDreamDacs;
+                if (dacs.Count == 0)
+                    return;
+
+                _laserAddressBuffer = dacs[0].Ip;
+                Plugs.UpdateLaser(machineConfig, plug.Id, null, dacs[0].Ip, null);
+                break;
+            }
+            case LaserPlug.Kinds.Ponk:
+            {
+                // Multicast group = the PONK basic: reaches every receiver without an address.
+                const string multicast = "239.255.10.24";
+                _laserAddressBuffer = multicast;
+                Plugs.UpdateLaser(machineConfig, plug.Id, null, multicast, null);
+                break;
+            }
+            case LaserPlug.Kinds.ShowNet:
+            {
+                // The first discovered laser = the showNET basic: the probe listener starts with
+                // the plug card, so the first announcement arrives within a probe interval.
+                var lasers = LaserPlugDiscovery.ShowNetLasers;
+                if (lasers.Count == 0)
+                    return;
+
+                _laserAddressBuffer = lasers[0].Ip;
+                Plugs.UpdateLaser(machineConfig, plug.Id, null, lasers[0].Ip, null);
+                break;
+            }
+        }
+    }
+
+    /// <summary>
+    /// An editable combo: an input line with a chevron button at its right that opens popupId (the
+    /// device/NIC list drawn by the caller). Typing commits on deactivate; returns true then, with
+    /// the buffer holding the committed text.
+    /// </summary>
+    private static bool DrawEditableComboField(string fieldId, ref string buffer, uint maxLength, string? popupId)
+    {
+        var scale = T3Ui.UiScaleFactor;
+        var gap = 4 * scale;
+        var arrowWidth = popupId != null ? ImGui.GetFrameHeight() : 0f;
+        ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X - arrowWidth - gap);
+        ImGui.InputText(fieldId, ref buffer, maxLength);
+        var committed = ImGui.IsItemDeactivatedAfterEdit();
+
+        if (popupId == null)
+            return committed;
+
+        ImGui.SameLine(0, gap);
+        // IconButton pushes the icon's id internally — two chevrons on one card (address +
+        // interface) would collide, so scope it under the unique popup id.
+        ImGui.PushID(popupId);
+        var chevronClicked = CustomComponents.IconButton(Icon.ChevronDown, Vector2.Zero);
+        ImGui.PopID();
+        if (chevronClicked)
+            ImGui.OpenPopup(popupId);
+
+        return committed;
+    }
+
+    /// <summary>Device settings of the plug — machine state, saved on change like the address.</summary>
+    private static void DrawLaserDeviceSettings(MachineConfig machineConfig, LaserPlug plug)
+    {
+        PanelLayout.BeginSection("Device");
+
+        if (plug.Kind == LaserPlug.Kinds.EtherDream)
+        {
+            var device = plug.EtherDreamSettings;
+            Span<int> scanRate = [device.ScanRate];
+            var scanState = DrawIntsRow("Scan rate (pps)", scanRate,
+                                        "Points per second requested from the DAC; 0 = the output op's own input. Stream more points per second than this or the DAC buffer drains and playback halts.",
+                                        readOnly: false, reserveRight: 22);
+            if ((scanState & InputEditStateFlags.Modified) != 0)
+            {
+                device.ScanRate = Math.Clamp(scanRate[0], 0, 100000);
+                OutputSetupHandling.SaveActive();
+            }
+
+            DrawRowReset("ResetScanRate", "scan rate",
+                         () =>
+                             {
+                                 device.ScanRate = 30000;
+                                 OutputSetupHandling.SaveActive();
+                             }, null);
+
+            DrawLaserCeilingAndSwap(machineConfig, plug, ref device.MaxBrightness, ref device.SwapColorChannels);
+        }
+        else if (plug.Kind == LaserPlug.Kinds.Ponk)
+        {
+            var device = plug.PonkSettings;
+
+            var multicast = device.UseMulticast;
+            if (FormInputs.AddCheckBox("Multicast", ref multicast, "Send to the multicast group (how MadMapper discovers PONK senders); off sends unicast."))
+            {
+                device.UseMulticast = multicast;
+                OutputSetupHandling.SaveActive();
+            }
+
+            DrawRowReset("ResetMulticast", "multicast",
+                         () =>
+                             {
+                                 device.UseMulticast = true;
+                                 OutputSetupHandling.SaveActive();
+                             }, null);
+
+            FormInputs.DrawInputLabel("Sender name");
+            if (_laserTextKey != plug.Id + ":sender")
+            {
+                _laserTextKey = plug.Id + ":sender";
+                _laserTextBuffer = device.SenderName;
+            }
+
+            if (ImGui.InputText("##laserSender", ref _laserTextBuffer, 32))
+            {
+                // committed on deactivate
+            }
+
+            if (ImGui.IsItemDeactivatedAfterEdit())
+            {
+                device.SenderName = _laserTextBuffer.Trim();
+                OutputSetupHandling.SaveActive();
+            }
+
+            ImGui.SameLine(0, 4 * T3Ui.UiScaleFactor);
+            ImGui.PushID("ResetSenderName");
+            if (CustomComponents.IconButton(Icon.Reset, Vector2.Zero))
+            {
+                device.SenderName = "TiXL";
+                _laserTextBuffer = device.SenderName;
+                OutputSetupHandling.SaveActive();
+            }
+
+            ImGui.PopID();
+            CustomComponents.TooltipForLastItem("Reset sender name", "Restores the default value.");
+
+            Span<float> maxSpeed = [device.MaxScanSpeed];
+            var speedState = DrawFloatsRow("Scan speed (x)", maxSpeed, "Sent as MAXSPEED path metadata - the requested scanner-speed multiplier. 1.0 = neutral.",
+                                           reserveRight: 22);
+            if ((speedState & InputEditStateFlags.Modified) != 0)
+            {
+                device.MaxScanSpeed = MathF.Max(0.01f, maxSpeed[0]);
+                OutputSetupHandling.SaveActive();
+            }
+
+            DrawRowReset("ResetScanSpeed", "scan speed",
+                         () =>
+                             {
+                                 device.MaxScanSpeed = 1f;
+                                 OutputSetupHandling.SaveActive();
+                             }, null);
+
+            var ponkKeepalive = device.Keepalive;
+            if (FormInputs.AddCheckBox("Keepalive", ref ponkKeepalive,
+                                       "Keeps streaming while the LASER master is off. A preview override for receivers that only visualize - PONK receivers can drive real scanners, so while this is off the master stays a hard kill."))
+            {
+                device.Keepalive = ponkKeepalive;
+                OutputSetupHandling.SaveActive();
+            }
+
+            DrawRowReset("ResetPonkKeepalive", "keepalive",
+                         () =>
+                             {
+                                 device.Keepalive = false;
+                                 OutputSetupHandling.SaveActive();
+                             }, null);
+
+            DrawLaserCeilingAndSwap(machineConfig, plug, ref device.MaxBrightness, ref device.SwapColorChannels);
+        }
+        else if (plug.Kind == LaserPlug.Kinds.ShowNet)
+        {
+            var device = plug.ShowNetSettings;
+            Span<int> scanRate = [device.ScanRate];
+            var scanState = DrawIntsRow("Scan rate (pps)", scanRate, "Points per second requested from the laser; 0 = the 30 kpps default — the device's ticks-per-point divisor.",
+                                        reserveRight: 22);
+            if ((scanState & InputEditStateFlags.Modified) != 0)
+            {
+                device.ScanRate = Math.Clamp(scanRate[0], 0, 100000);
+                OutputSetupHandling.SaveActive();
+            }
+
+            DrawRowReset("ResetShowNetScanRate", "scan rate",
+                         () =>
+                             {
+                                 device.ScanRate = 30000;
+                                 OutputSetupHandling.SaveActive();
+                             }, null);
+
+            DrawLaserCeilingAndSwap(machineConfig, plug, ref device.MaxBrightness, ref device.SwapColorChannels);
+        }
+        else if (plug.Kind == LaserPlug.Kinds.Citp)
+        {
+            var device = plug.CitpSettings;
+
+            FormInputs.DrawInputLabel("Feed name");
+            if (_laserTextKey != plug.Id + ":feed")
+            {
+                _laserTextKey = plug.Id + ":feed";
+                _laserTextBuffer = device.FeedName;
+            }
+
+            if (ImGui.InputText("##laserFeed", ref _laserTextBuffer, 32))
+            {
+                // committed on deactivate
+            }
+
+            if (ImGui.IsItemDeactivatedAfterEdit())
+            {
+                device.FeedName = _laserTextBuffer.Trim();
+                OutputSetupHandling.SaveActive();
+            }
+
+            ImGui.SameLine(0, 4 * T3Ui.UiScaleFactor);
+            ImGui.PushID("ResetFeedName");
+            if (CustomComponents.IconButton(Icon.Reset, Vector2.Zero))
+            {
+                device.FeedName = string.Empty;
+                _laserTextBuffer = device.FeedName;
+                OutputSetupHandling.SaveActive();
+            }
+
+            ImGui.PopID();
+            CustomComponents.TooltipForLastItem("Reset feed name", "Empty - the feed follows the plug's name.");
+
+            // What the peer actually lists: every plug is one feed of the machine's single "TiXL"
+            // source, numbered by feed order ("Physical Output" in Capture).
+            FormInputs.AddHint($"\"{device.ResolveFeedName(plug.Name)}\" as a feed of the TiXL source");
+
+            var citpKeepalive = device.Keepalive;
+            if (FormInputs.AddCheckBox("Keepalive", ref citpKeepalive,
+                                       "Keeps the feed streaming while the LASER master is off. CITP is a previz path that never drives projectors, so this defaults to on - Capture keeps showing the show while the real beam is dark."))
+            {
+                device.Keepalive = citpKeepalive;
+                OutputSetupHandling.SaveActive();
+            }
+
+            DrawRowReset("ResetCitpKeepalive", "keepalive",
+                         () =>
+                             {
+                                 device.Keepalive = true;
+                                 OutputSetupHandling.SaveActive();
+                             }, null);
+
+            DrawLaserCeilingAndSwap(machineConfig, plug, ref device.MaxBrightness, ref device.SwapColorChannels);
+        }
+
+        PanelLayout.EndSection();
+    }
+
+    /// <summary>The two device settings every laser protocol shares: the final brightness ceiling
+    /// applied at encode (the non-bypassable audit) and the RGB/BGR channel order.</summary>
+    private static void DrawLaserCeilingAndSwap(MachineConfig machineConfig, LaserPlug plug, ref float maxBrightness, ref bool swap)
+    {
+        Span<float> ceiling = [maxBrightness];
+        var ceilingState = DrawFloatsRow("Brightness ceiling", ceiling, "Final intensity ceiling (0..1) applied to every point right before streaming - runs inside the device, so no upstream bug can exceed it.",
+                                         reserveRight: 22);
+        if ((ceilingState & InputEditStateFlags.Modified) != 0)
+        {
+            maxBrightness = Math.Clamp(ceiling[0], 0f, 1f);
+            OutputSetupHandling.SaveActive();
+        }
+
+        // The resets flag through DrawRowReset and apply here: the values are ref parameters,
+        // which lambdas must not capture.
+        var ceilingReset = false;
+        DrawRowReset("ResetCeiling", "brightness ceiling", () => ceilingReset = true, null);
+        if (ceilingReset)
+        {
+            maxBrightness = 1f;
+            OutputSetupHandling.SaveActive();
+        }
+
+        var swapChannels = swap;
+        if (FormInputs.AddCheckBox("Swap color channels", ref swapChannels, "Some projectors expect the color channels as BGR - swaps R and B when on."))
+        {
+            swap = swapChannels;
+            OutputSetupHandling.SaveActive();
+        }
+
+        var swapReset = false;
+        DrawRowReset("ResetSwapChannels", "color channels", () => swapReset = true, null);
+        if (swapReset)
+        {
+            swap = false;
+            OutputSetupHandling.SaveActive();
+        }
+    }
+
+    /// <summary>
+    /// The setup-driven pipeline: optimization and safety for this laser output, applied by the output
+    /// operator before streaming. Safety starts uncalibrated - only the alignment rectangle streams -
+    /// and the app-bar laser button stays orange until every laser output is calibrated.
+    /// </summary>
+    private static void DrawLaserProcessing(Setup setup, OutputDefinition output)
+    {
+        var processing = output.LaserProcessing ??= new LaserProcessingSettings();
+        var optimizer = processing.Optimizer;
+        var safety = processing.Safety;
+        var motion = processing.Motion;
+
+        PanelLayout.BeginSection("Frame",
+                                 "The projection is the aim of the routed [LaserCamera] (edit it on the op). A new camera attaches to a free laser output; drop a camera onto this output to route a specific one. The frame streams to the bound plug while the master laser is on.");
+        DrawLaserFramePreview(setup, output);
+
+        // How the camera frame lands in the aimed zone. The frame is the scanner field itself (the
+        // camera's picture), so this is a fixed transform of that field - content keeps its size
+        // while it animates.
+        var frameMapping = output.FrameMapping;
+        if (FormInputs.AddEnumDropdown(ref frameMapping, "Frame mapping",
+                                       "How the camera frame lands in the aimed zone (the setup rectangle). The frame is the scanner field, so sizes stay as the camera framed them: Fit keeps the aspect and fits the field into the rect (a 1.0 x 1.0 rect is a pass-through); Stretch fills both axes and may distort; Crop keeps the aspect, fills the rect and blanks what falls outside the aimed zone; Off streams the field as-is. Applies in calibrated mode.",
+                                       LaserFrameMappingMode.Fit,
+                                       m => m switch
+                                               {
+                                                   LaserFrameMappingMode.Stretch => "Stretch",
+                                                   LaserFrameMappingMode.Fit => "Fit (keep aspect)",
+                                                   LaserFrameMappingMode.Crop => "Crop (fill, cut overflow)",
+                                                   _ => "Off",
+                                               }))
+        {
+            EditOutputs(setup, "Set laser frame mapping", output, o => o.FrameMapping = frameMapping);
+        }
+
+        // Keystone: four draggable corners in the frame preview above (clamped to the safe zone).
+        // Uncalibrated, the green alignment shape IS the quad - trapeze it against a skewed screen.
+        // Calibrated, the frame is mapped onto the quad with a homography.
+        var frameWarp = safety.FrameWarp;
+        if (FormInputs.AddCheckBox("Trapeze frame (4 corners)", ref frameWarp,
+                                   "Warps the frame onto the four corners instead of the setup rectangle: drag the corners in the frame preview above (they stay inside the safe zone). While uncalibrated, the green alignment shape becomes the corner quad itself — trapeze it against a skewed screen. In calibrated mode the camera frame is mapped onto the quad (keystone), replacing the Frame mapping. Switching on adopts the setup rectangle's corners, so nothing moves until a corner is dragged."))
+        {
+            EditSafety(setup, "Toggle laser frame warp", output, s =>
+                       {
+                           s.FrameWarp = frameWarp;
+                           if (frameWarp)
+                           {
+                               // Start from each output's own setup rect's corners: enabling changes
+                               // nothing until a corner is dragged.
+                               var halfW = s.SetupWidth * 0.5f;
+                               var halfH = s.SetupHeight * 0.5f;
+                               s.WarpCorner1X = s.SetupCenterX - halfW;
+                               s.WarpCorner1Y = s.SetupCenterY + halfH;
+                               s.WarpCorner2X = s.SetupCenterX + halfW;
+                               s.WarpCorner2Y = s.SetupCenterY + halfH;
+                               s.WarpCorner3X = s.SetupCenterX + halfW;
+                               s.WarpCorner3Y = s.SetupCenterY - halfH;
+                               s.WarpCorner4X = s.SetupCenterX - halfW;
+                               s.WarpCorner4Y = s.SetupCenterY - halfH;
+                           }
+                       });
+        }
+
+        DrawRowReset("ResetFrameWarp", "frame corners",
+                     () => EditSafety(setup, "Reset frame corners", output, s => s.FrameWarp = false), null);
+
+        PanelLayout.EndSection();
+
+        PanelLayout.BeginSection("Safety", "What reaches the scanners. Calibrate first: until then only the alignment rectangle streams.");
+
+        var calibrated = safety.Calibrated;
+        if (FormInputs.AddCheckBox("Calibrated", ref calibrated,
+                                   "While off, upstream content is ignored and only the alignment rectangle below streams - aim it, then switch on for content. The app-bar laser button stays orange until every laser output is calibrated."))
+        {
+            EditSafety(setup, "Toggle laser calibration", output, s => s.Calibrated = calibrated);
+        }
+
+        // Test screen: the aiming aid that works BEFORE calibration - rectangle + output name, so
+        // the projector on the wall can be told apart from its siblings. Transient show state.
+        var testScreen = LaserDriver.IsTestScreen(output.Id);
+        if (FormInputs.AddCheckBox("Test screen", ref testScreen,
+                                   "Streams a test pattern - regardless of Calibrated - so you can aim and calibrate the projector. The frame preview shows it too. Master enable still gates the beam."))
+        {
+            foreach (var target in CollectEditTargets(setup, output))
+                LaserDriver.SetTestScreen(target.Id, testScreen);
+        }
+
+        if (testScreen)
+        {
+            var patternNames = new[]
+                                   {
+                                       "Name frame", "Color shift", "Diode threshold", "White balance",
+                                       "Gamma ramp", "Scan area grid", "Circle", "ILDA test pattern",
+                                   };
+            var selectedPattern = patternNames[(int)LaserDriver.TestScreenPattern];
+            if (FormInputs.AddDropdown(ref selectedPattern, patternNames, "Test pattern",
+                                       "The calibration pattern to stream: color shift tunes the per-channel color timing, diode threshold and white balance the per-channel voltages, gamma ramp the brightness curve, the grid shows the scan area, the circle checks motion smoothness, and the ILDA pattern verifies the whole field."))
+            {
+                var index = Array.IndexOf(patternNames, selectedPattern);
+                if (index >= 0)
+                    LaserDriver.TestScreenPattern = (LaserTestFrame.Pattern)index;
+            }
+        }
+
+        if (!calibrated)
+        {
+            Span<float> setupRect =
+            [
+                safety.SetupCenterX, safety.SetupCenterY, safety.SetupWidth, safety.SetupHeight,
+            ];
+            var rectState = DrawFloatsRow("Setup rect (cx, cy, w, h)", setupRect,
+                                          "The alignment rectangle in normalized field units: center -1..1, width/height 0..1 where 1 = the full scanner field. Start tiny at center and extend step by step until the rectangle fills the projection, then switch Calibrated on.",
+                                          speed: 0.001f, format: "{0:0.000}", reserveRight: 22);
+            BeginFieldUndo(setup, rectState);
+            if ((rectState & InputEditStateFlags.Modified) != 0)
+            {
+                safety.SetupCenterX = Math.Clamp(setupRect[0], -1f, 1f);
+                safety.SetupCenterY = Math.Clamp(setupRect[1], -1f, 1f);
+                safety.SetupWidth = Math.Clamp(setupRect[2], 0.01f, 1f);
+                safety.SetupHeight = Math.Clamp(setupRect[3], 0.01f, 1f);
+            }
+
+            CommitFieldUndo(setup, "Aim setup rectangle", rectState);
+            DrawRowReset("ResetSetupRect", "setup rectangle",
+                         () =>
+                             {
+                                 safety.SetupCenterX = 0f;
+                                 safety.SetupCenterY = 0f;
+                                 safety.SetupWidth = 0.04f;
+                                 safety.SetupHeight = 0.04f;
+                             }, setup);
+        }
+
+        var beamEnable = safety.BeamEnable;
+        if (FormInputs.AddCheckBox("Beam enable", ref beamEnable, "Master beam switch for this output; off blanks every point but keeps the geometry."))
+        {
+            EditSafety(setup, "Toggle laser beam", output, s => s.BeamEnable = beamEnable);
+        }
+
+        var desiredFps = safety.DesiredFps;
+        if (FormInputs.AddInt("Desired FPS", ref desiredFps, 1, 120, 1,
+                              "Frames per second this output recomputes content at. Between updates the scanners loop the last frame at full scan rate, so the visible ILDA frame rate stays scan-rate / point count. Match a synced video's FPS; text stops blinking above ~45 FPS and blinking shows under ~35. Scanning faster than the hardware likes heats the scanners - lower is safer.", 60))
+        {
+            EditSafety(setup, "Set laser desired FPS", output, s => s.DesiredFps = Math.Clamp(desiredFps, 1, 120));
+        }
+
+        var (pointCount, scanRate, effectiveFps) = LaserDriver.GetScanStats(output);
+        FormInputs.AddHintSingleLine(pointCount > 0
+                                         ? $"{pointCount} points · {scanRate} pps · {effectiveFps} fps scanned"
+                                         : "No frame computed yet - the readout fills in once the pump ran.");
+
+        Span<float> zone =
+        [
+            safety.SafeZoneCenterX, safety.SafeZoneCenterY, safety.SafeZoneWidth, safety.SafeZoneHeight,
+        ];
+        var zoneState = DrawFloatsRow("Safe zone (cx, cy, w, h)", zone,
+                                      "The region the beam may enter, in ILDA units (full field 65534 wide). Points outside are clamped in.",
+                                      reserveRight: 22);
+        BeginFieldUndo(setup, zoneState);
+        if ((zoneState & InputEditStateFlags.Modified) != 0)
+        {
+            foreach (var target in CollectEditTargets(setup, output))
+            {
+                var s = (target.LaserProcessing ??= new LaserProcessingSettings()).Safety;
+                s.SafeZoneCenterX = zone[0];
+                s.SafeZoneCenterY = zone[1];
+                // MathF.Max propagates NaN, which would persist as "no safe zone" - treat a NaN
+                // edit as the smallest zone instead.
+                s.SafeZoneWidth = float.IsNaN(zone[2]) ? 0f : MathF.Max(0f, zone[2]);
+                s.SafeZoneHeight = float.IsNaN(zone[3]) ? 0f : MathF.Max(0f, zone[3]);
+            }
+        }
+
+        CommitFieldUndo(setup, "Laser safe zone", zoneState);
+        DrawRowReset("ResetSafeZone", "safe zone",
+                     () => EditSafety(setup, "Reset safe zone", output,
+                                      s =>
+                                          {
+                                              s.SafeZoneCenterX = 0f;
+                                              s.SafeZoneCenterY = 0f;
+                                              s.SafeZoneWidth = 65534f;
+                                              s.SafeZoneHeight = 65534f;
+                                          }), null);
+
+        Span<float> limits =
+        [
+            safety.MaxStepPerPoint, safety.MaxStaticPoints, safety.MaxBrightness,
+        ];
+        var limitsState = DrawFloatsRow("Jump / dwell / bright", limits,
+                                        "Max jump per point (ILDA units, subdivided), max points dwelling in one place before blanking, and the show-level brightness ceiling (the plug's device ceiling stays the final audit).",
+                                        reserveRight: 22);
+        BeginFieldUndo(setup, limitsState);
+        if ((limitsState & InputEditStateFlags.Modified) != 0)
+        {
+            foreach (var target in CollectEditTargets(setup, output))
+            {
+                var s = (target.LaserProcessing ??= new LaserProcessingSettings()).Safety;
+                // Same NaN hole as the zone: MathF.Max/Math.Clamp pass NaN through, and a NaN step
+                // limit disables the jump limiter downstream.
+                s.MaxStepPerPoint = float.IsNaN(limits[0]) ? 4000f : MathF.Max(1f, limits[0]);
+                s.MaxStaticPoints = Math.Clamp((int)limits[1], 1, 100000);
+                s.MaxBrightness = float.IsNaN(limits[2]) ? 0f : Math.Clamp(limits[2], 0f, 1f);
+            }
+        }
+
+        CommitFieldUndo(setup, "Laser safety limits", limitsState);
+        DrawRowReset("ResetSafetyLimits", "safety limits",
+                     () => EditSafety(setup, "Reset safety limits", output,
+                                      s =>
+                                          {
+                                              s.MaxStepPerPoint = 4000f;
+                                              s.MaxStaticPoints = 64;
+                                              s.MaxBrightness = 1f;
+                                          }), null);
+
+        Span<float> gains =
+        [
+            safety.ColorGainR, safety.ColorGainG, safety.ColorGainB,
+        ];
+        var gainsState = DrawFloatsRow("Color gains (R G B)", gains,
+                                       "Per-channel projector calibration: multiplies each diode's level (0..2) so the projectors' whites match or a weak diode is lifted.",
+                                       reserveRight: 22);
+        BeginFieldUndo(setup, gainsState);
+        if ((gainsState & InputEditStateFlags.Modified) != 0)
+        {
+            foreach (var target in CollectEditTargets(setup, output))
+            {
+                var s = (target.LaserProcessing ??= new LaserProcessingSettings()).Safety;
+                // NaN through MathF.Max would persist as an unusable gain - fold it to neutral.
+                s.ColorGainR = float.IsNaN(gains[0]) ? 1f : Math.Clamp(gains[0], 0f, 2f);
+                s.ColorGainG = float.IsNaN(gains[1]) ? 1f : Math.Clamp(gains[1], 0f, 2f);
+                s.ColorGainB = float.IsNaN(gains[2]) ? 1f : Math.Clamp(gains[2], 0f, 2f);
+            }
+        }
+
+        CommitFieldUndo(setup, "Laser color gains", gainsState);
+        DrawRowReset("ResetColorGains", "color gains",
+                     () => EditSafety(setup, "Reset color gains", output,
+                                      s =>
+                                          {
+                                              s.ColorGainR = 1f;
+                                              s.ColorGainG = 1f;
+                                              s.ColorGainB = 1f;
+                                          }), null);
+
+        Span<float> minimums =
+        [
+            safety.ColorMinR, safety.ColorMinG, safety.ColorMinB,
+        ];
+        var minState = DrawFloatsRow("Color min (R G B)", minimums,
+                                     "Per-channel emission threshold (0..1): a diode below this fraction of the field stays dark. Laser diodes start emitting at slightly different voltages - without a minimum, near-black content shows a faint unwanted color.",
+                                     speed: 0.002f, format: "{0:0.000}", reserveRight: 22);
+        BeginFieldUndo(setup, minState);
+        if ((minState & InputEditStateFlags.Modified) != 0)
+        {
+            foreach (var target in CollectEditTargets(setup, output))
+            {
+                var s = (target.LaserProcessing ??= new LaserProcessingSettings()).Safety;
+                s.ColorMinR = float.IsNaN(minimums[0]) ? 0f : Math.Clamp(minimums[0], 0f, 1f);
+                s.ColorMinG = float.IsNaN(minimums[1]) ? 0f : Math.Clamp(minimums[1], 0f, 1f);
+                s.ColorMinB = float.IsNaN(minimums[2]) ? 0f : Math.Clamp(minimums[2], 0f, 1f);
+            }
+        }
+
+        CommitFieldUndo(setup, "Laser color minimums", minState);
+        DrawRowReset("ResetColorMinimums", "color minimums",
+                     () => EditSafety(setup, "Reset color minimums", output,
+                                      s =>
+                                          {
+                                              s.ColorMinR = 0f;
+                                              s.ColorMinG = 0f;
+                                              s.ColorMinB = 0f;
+                                          }), null);
+
+        var ttlMode = safety.TtlMode;
+        if (FormInputs.AddCheckBox("TTL laser", ref ttlMode,
+                                   "Binary on/off diodes: at or above 50% the channel outputs its maximum, below it turns off. Color gains, minimums and gamma are skipped - only for lasers without analog modulation."))
+        {
+            EditSafety(setup, "Toggle laser TTL mode", output, s => s.TtlMode = ttlMode);
+        }
+
+        if (!safety.TtlMode)
+        {
+            var linkGamma = _linkGammaChannels;
+            if (FormInputs.AddCheckBox("Link gamma channels", ref linkGamma,
+                                       "Drive all three channels' gamma with one value - the usual setup; untick to tune a channel separately."))
+                _linkGammaChannels = linkGamma;
+
+            Span<float> gammas =
+            [
+                safety.ColorGammaR, safety.ColorGammaG, safety.ColorGammaB,
+            ];
+            var gammaState = DrawFloatsRow(_linkGammaChannels ? "Gamma (linked)" : "Gamma (R G B)", gammas,
+                                           "Per-channel gamma exponent: out = in^(1/gamma). 1 = linear, 2.2 = the sRGB-style perceptual default (mid-tones compressed), higher compresses more - tune on the Gamma ramp test pattern so brightness rows look evenly spaced. Per-channel values fix mixed direct-diode/DPSS systems.",
+                                           speed: 0.01f, format: "{0:0.00}", reserveRight: 22,
+                                           min: 0.1f, max: 8f, clampMin: true, clampMax: true);
+            BeginFieldUndo(setup, gammaState);
+            if ((gammaState & InputEditStateFlags.Modified) != 0)
+            {
+                // Linked mode: any channel edit drives all three with its value.
+                var linked = _linkGammaChannels
+                                 && !float.IsNaN(gammas[0])
+                                 && (float.IsNaN(gammas[1]) || gammas[1].Equals(gammas[0]))
+                                 && (float.IsNaN(gammas[2]) || gammas[2].Equals(gammas[0]));
+                var gamma = float.IsNaN(gammas[0]) ? 1f : Math.Clamp(gammas[0], 0.1f, 8f);
+                var gammaG = linked ? gamma : float.IsNaN(gammas[1]) ? 1f : Math.Clamp(gammas[1], 0.1f, 8f);
+                var gammaB = linked ? gamma : float.IsNaN(gammas[2]) ? 1f : Math.Clamp(gammas[2], 0.1f, 8f);
+                foreach (var target in CollectEditTargets(setup, output))
+                {
+                    var s = (target.LaserProcessing ??= new LaserProcessingSettings()).Safety;
+                    s.ColorGammaR = gamma;
+                    s.ColorGammaG = gammaG;
+                    s.ColorGammaB = gammaB;
+                }
+            }
+
+            CommitFieldUndo(setup, "Laser gamma", gammaState);
+            DrawRowReset("ResetLaserGamma", "gamma",
+                         () => EditSafety(setup, "Reset laser gamma", output,
+                                          s =>
+                                              {
+                                                  s.ColorGammaR = 1f;
+                                                  s.ColorGammaG = 1f;
+                                                  s.ColorGammaB = 1f;
+                                              }), null);
+        }
+
+        var staticPercent = safety.MaxStaticIntensity * 100f;
+        if (FormInputs.AddFloat("Max static beam %", ref staticPercent, 0f, 100f, 0.5f,
+                                clampMin: true, clampMax: true,
+                                tooltip: "Intensity fraction a stationary beam keeps after the dwell limit, instead of blanking - the venue-controlled equivalent of the safety guide's 'max non-moving beam intensity'. 0 = blank (scan-fail default). WARNING: raising this lets a holding beam output real power - be sure nobody and nothing could be burnt by the beam before changing it."))
+        {
+            foreach (var target in CollectEditTargets(setup, output))
+                (target.LaserProcessing ??= new LaserProcessingSettings()).Safety.MaxStaticIntensity =
+                    Math.Clamp(staticPercent / 100f, 0f, 1f);
+        }
+
+        Span<float> flips =
+        [
+            safety.FlipX ? 1f : 0f, safety.FlipY ? 1f : 0f,
+        ];
+        var flipState = DrawFloatsRow("Flip (X Y)", flips,
+                                      "Mirror the output horizontally / vertically on the projector (0/1). Applied inside the safe-zone clamp so masks and the bounds audit keep their guarantees.",
+                                      format: "{0:0}", reserveRight: 22);
+        BeginFieldUndo(setup, flipState);
+        if ((flipState & InputEditStateFlags.Modified) != 0)
+        {
+            foreach (var target in CollectEditTargets(setup, output))
+            {
+                var s = (target.LaserProcessing ??= new LaserProcessingSettings()).Safety;
+                s.FlipX = flips[0] >= 0.5f;
+                s.FlipY = flips[1] >= 0.5f;
+            }
+        }
+
+        CommitFieldUndo(setup, "Laser flip", flipState);
+
+        Span<float> shifts =
+        [
+            safety.ColorShiftR, safety.ColorShiftG, safety.ColorShiftB,
+        ];
+        var shiftState = DrawFloatsRow("Color shift (R G B)", shifts,
+                                       "Per-channel time shift in points: how far a diode's color trails the beam position (negative = leads). Diodes react at different speeds, so without it a color edge fringes along the scan direction - tune it on a test pattern with fast moving colored lines. A shift never lights a blanked point.",
+                                       speed: 0.1f, format: "{0:0}", reserveRight: 22,
+                                       min: -LaserSafetyTransforms.MaxColorShiftPoints, max: LaserSafetyTransforms.MaxColorShiftPoints,
+                                       clampMin: true, clampMax: true);
+        BeginFieldUndo(setup, shiftState);
+        if ((shiftState & InputEditStateFlags.Modified) != 0)
+        {
+            var shiftR = ToColorShiftPoints(shifts[0]);
+            var shiftG = ToColorShiftPoints(shifts[1]);
+            var shiftB = ToColorShiftPoints(shifts[2]);
+            foreach (var target in CollectEditTargets(setup, output))
+            {
+                var s = (target.LaserProcessing ??= new LaserProcessingSettings()).Safety;
+                s.ColorShiftR = shiftR;
+                s.ColorShiftG = shiftG;
+                s.ColorShiftB = shiftB;
+            }
+        }
+
+        CommitFieldUndo(setup, "Laser color shift", shiftState);
+        DrawRowReset("ResetColorShift", "color shift",
+                     () => EditSafety(setup, "Reset color shift", output,
+                                      s =>
+                                          {
+                                              s.ColorShiftR = 0;
+                                              s.ColorShiftG = 0;
+                                              s.ColorShiftB = 0;
+                                          }), null);
+
+        PanelLayout.EndSection();
+
+        DrawLaserMasks(setup, safety);
+
+        if (PanelLayout.BeginCollapsibleSection("Optimization", "Path tour, blanking and corner dwell applied before the safety stage."))
+        {
+
+            var enableOptimization = optimizer.EnableOptimization;
+            if (FormInputs.AddCheckBox("Reorder path", ref enableOptimization,
+                                       "Greedy nearest-neighbour tour over the lit segments (reversing segments when closer). Off keeps the drawn order; blanking and corner dwelling always apply."))
+            {
+                EditOptimizer(setup, "Toggle laser optimization", output, o => o.EnableOptimization = enableOptimization);
+            }
+
+            DrawRowReset("ResetReorderPath", "reorder path",
+                         () => EditOptimizer(setup, "Reset reorder path", output, o => o.EnableOptimization = true), null);
+
+            Span<float> jump = [optimizer.MaxJumpDistance];
+            var jumpState = DrawFloatsRow("Max jump (units)", jump, "ILDA units per blanked-jump segment; the blank count between shapes scales with jump length.",
+                                          reserveRight: 22);
+            BeginFieldUndo(setup, jumpState);
+            if ((jumpState & InputEditStateFlags.Modified) != 0)
+            {
+                foreach (var target in CollectEditTargets(setup, output))
+                    (target.LaserProcessing ??= new LaserProcessingSettings()).Optimizer.MaxJumpDistance = MathF.Max(1f, jump[0]);
+            }
+
+            CommitFieldUndo(setup, "Laser optimization", jumpState);
+            DrawRowReset("ResetMaxJump", "max jump",
+                         () => EditOptimizer(setup, "Reset max jump", output, o => o.MaxJumpDistance = 5000f), null);
+
+            Span<int> blanking = [optimizer.BlankingDelayPoints];
+            var blankingState = DrawIntsRow("Blanking points", blanking, "Maximum blanked points inserted before a shape start (0..100).",
+                                            reserveRight: 22);
+            BeginFieldUndo(setup, blankingState);
+            if ((blankingState & InputEditStateFlags.Modified) != 0)
+            {
+                foreach (var target in CollectEditTargets(setup, output))
+                    (target.LaserProcessing ??= new LaserProcessingSettings()).Optimizer.BlankingDelayPoints = Math.Clamp(blanking[0], 0, 100);
+            }
+
+            CommitFieldUndo(setup, "Laser optimization", blankingState);
+            DrawRowReset("ResetBlanking", "blanking points",
+                         () => EditOptimizer(setup, "Reset blanking points", output, o => o.BlankingDelayPoints = 5), null);
+
+            Span<float> corner = [optimizer.CornerAngleThreshold];
+            var cornerState = DrawFloatsRow("Corner angle (°)", corner, "Corners sharper than this get dwell anchors.",
+                                            reserveRight: 22);
+            BeginFieldUndo(setup, cornerState);
+            if ((cornerState & InputEditStateFlags.Modified) != 0)
+            {
+                foreach (var target in CollectEditTargets(setup, output))
+                    (target.LaserProcessing ??= new LaserProcessingSettings()).Optimizer.CornerAngleThreshold = MathF.Max(0f, corner[0]);
+            }
+
+            CommitFieldUndo(setup, "Laser optimization", cornerState);
+            DrawRowReset("ResetCornerAngle", "corner angle",
+                         () => EditOptimizer(setup, "Reset corner angle", output, o => o.CornerAngleThreshold = 30f), null);
+
+            Span<int> anchors = [optimizer.CornerAnchorCount];
+            var anchorsState = DrawIntsRow("Corner anchors", anchors, "Repeated points at a corner (1..10) - brighter, steadier corners.",
+                                           reserveRight: 22);
+            BeginFieldUndo(setup, anchorsState);
+            if ((anchorsState & InputEditStateFlags.Modified) != 0)
+            {
+                foreach (var target in CollectEditTargets(setup, output))
+                    (target.LaserProcessing ??= new LaserProcessingSettings()).Optimizer.CornerAnchorCount = Math.Clamp(anchors[0], 1, 10);
+            }
+
+            CommitFieldUndo(setup, "Laser optimization", anchorsState);
+            DrawRowReset("ResetCornerAnchors", "corner anchors",
+                         () => EditOptimizer(setup, "Reset corner anchors", output, o => o.CornerAnchorCount = 3), null);
+
+            PanelLayout.EndSection();
+        }
+
+        if (PanelLayout.BeginCollapsibleSection("Scanner Motion",
+                                                "The scanners' time budgets in µs, converted to dwell and sample counts at the bound plug's scan rate. All zero keeps the content's own point spacing in charge."))
+        {
+            Span<float> drawingSpeed = [motion.DrawingSpeedUs];
+            var speedState = DrawFloatsRow("Drawing speed (µs)", drawingSpeed,
+                                           "Slowest the beam may draw, in µs per 1000 ILDA units - drawn segments are stretched with interpolated samples so the scanners can track them (0 = the content's point spacing decides; typical galvos 6-12).",
+                                           reserveRight: 22);
+            BeginFieldUndo(setup, speedState);
+            if ((speedState & InputEditStateFlags.Modified) != 0)
+            {
+                foreach (var target in CollectEditTargets(setup, output))
+                    (target.LaserProcessing ??= new LaserProcessingSettings()).Motion.DrawingSpeedUs = Math.Clamp(drawingSpeed[0], 0f, 100f);
+            }
+
+            CommitFieldUndo(setup, "Laser scanner motion", speedState);
+            DrawRowReset("ResetDrawingSpeed", "drawing speed",
+                         () => EditMotion(setup, "Reset drawing speed", output, m => m.DrawingSpeedUs = 0f), null);
+
+            Span<float> motionResponse = [motion.MotionResponseUs];
+            var responseState = DrawFloatsRow("Motion response (µs)", motionResponse,
+                                              "Dwell at every shape's first sample - the settle time the scanners need after a jump before the beam opens (0 = off; typical 50-300).",
+                                              reserveRight: 22);
+            BeginFieldUndo(setup, responseState);
+            if ((responseState & InputEditStateFlags.Modified) != 0)
+            {
+                foreach (var target in CollectEditTargets(setup, output))
+                    (target.LaserProcessing ??= new LaserProcessingSettings()).Motion.MotionResponseUs = Math.Clamp(motionResponse[0], 0f, 2000f);
+            }
+
+            CommitFieldUndo(setup, "Laser scanner motion", responseState);
+            DrawRowReset("ResetMotionResponse", "motion response",
+                         () => EditMotion(setup, "Reset motion response", output, m => m.MotionResponseUs = 0f), null);
+
+            Span<float> cornerSettle = [motion.CornerSettleUs];
+            var settleState = DrawFloatsRow("Corner settle (µs)", cornerSettle,
+                                            "Extra dwell at sharp corners, on top of the corner anchors above, so corners render sharp instead of rounded off (0 = off; typical 50-200).",
+                                            reserveRight: 22);
+            BeginFieldUndo(setup, settleState);
+            if ((settleState & InputEditStateFlags.Modified) != 0)
+            {
+                foreach (var target in CollectEditTargets(setup, output))
+                    (target.LaserProcessing ??= new LaserProcessingSettings()).Motion.CornerSettleUs = Math.Clamp(cornerSettle[0], 0f, 2000f);
+            }
+
+            CommitFieldUndo(setup, "Laser scanner motion", settleState);
+            DrawRowReset("ResetCornerSettle", "corner settle",
+                         () => EditMotion(setup, "Reset corner settle", output, m => m.CornerSettleUs = 0f), null);
+
+            Span<float> transition = [motion.TransitionUs];
+            var transitionState = DrawFloatsRow("Transitions (µs)", transition,
+                                                "Extra blanked hold at each shape entry - the time between shapes the scanners get before the beam opens (0 = off; typical 100-500).",
+                                                reserveRight: 22);
+            BeginFieldUndo(setup, transitionState);
+            if ((transitionState & InputEditStateFlags.Modified) != 0)
+            {
+                foreach (var target in CollectEditTargets(setup, output))
+                    (target.LaserProcessing ??= new LaserProcessingSettings()).Motion.TransitionUs = Math.Clamp(transition[0], 0f, 2000f);
+            }
+
+            CommitFieldUndo(setup, "Laser scanner motion", transitionState);
+            DrawRowReset("ResetTransitionUs", "transitions",
+                         () => EditMotion(setup, "Reset transitions", output, m => m.TransitionUs = 0f), null);
+
+            PanelLayout.EndSection();
+        }
+    }
+
+    private static int ToColorShiftPoints(float value)
+    {
+        return float.IsNaN(value)
+                   ? 0
+                   : (int)Math.Clamp(MathF.Round(value), -LaserSafetyTransforms.MaxColorShiftPoints, LaserSafetyTransforms.MaxColorShiftPoints);
+    }
+
+    /// <summary>
+    /// Safety masks: quads in the frame preview where the beam is blanked or dimmed - or, in
+    /// allow-only mode, the only place it may emit. Edited like the keystone corners, but they
+    /// apply in the safety stage after the warp, so a mask lands exactly where it is drawn
+    /// regardless of keystone or content - no graph operator can bypass it.
+    /// </summary>
+    private static void DrawLaserMasks(Setup setup, LaserProcessingSettings.SafetySettings safety)
+    {
+        PanelLayout.BeginSection("Masks", "Quads where the beam is blanked or dimmed, applied after the warp so no graph operator can bypass them.");
+
+        var renderShapes = safety.RenderSafetyShapes;
+        if (FormInputs.AddCheckBox("Render shapes on the laser", ref renderShapes,
+                                   "Streams the safe-zone rectangle and the enabled masks as faint outlines on top of the calibrated frame, so you can verify the protected regions against the real venue while aiming."))
+        {
+            SetupUndo.RunUndoable("Toggle laser safety shapes", setup, () => safety.RenderSafetyShapes = renderShapes);
+        }
+
+        if (renderShapes)
+        {
+            Span<float> shapeLevel = [safety.RenderShapesLevel];
+            var levelState = DrawFloatsRow("Shape level", shapeLevel,
+                                           "Brightness of the rendered safety outlines (0..1). Kept low on purpose: the outline is an aiming aid, not content.",
+                                           reserveRight: 22);
+            BeginFieldUndo(setup, levelState);
+            if ((levelState & InputEditStateFlags.Modified) != 0)
+                safety.RenderShapesLevel = float.IsNaN(shapeLevel[0]) ? 0.1f : Math.Clamp(shapeLevel[0], 0f, 1f);
+            CommitFieldUndo(setup, "Laser safety shape level", levelState);
+
+            var customColor = safety.RenderShapesUseCustomColor;
+            if (FormInputs.AddCheckBox("Custom shape color", ref customColor,
+                                       "Draw the outlines in the color below instead of the semantic defaults (green = safe zone, orange = masks) - for matching a show's look or a dim red in dark venues."))
+            {
+                SetupUndo.RunUndoable("Toggle laser shape color", setup,
+                                      () => safety.RenderShapesUseCustomColor = customColor);
+            }
+
+            if (customColor)
+            {
+                Span<float> shapeColor = [safety.RenderShapesColorR, safety.RenderShapesColorG, safety.RenderShapesColorB];
+                var colorState = DrawFloatsRow("Shape color (R G B)", shapeColor,
+                                               "Outline color for the safe zone and masks, 0..1 per channel.",
+                                               reserveRight: 22);
+                BeginFieldUndo(setup, colorState);
+                if ((colorState & InputEditStateFlags.Modified) != 0)
+                {
+                    safety.RenderShapesColorR = float.IsNaN(shapeColor[0]) ? 1f : Math.Clamp(shapeColor[0], 0f, 1f);
+                    safety.RenderShapesColorG = float.IsNaN(shapeColor[1]) ? 0f : Math.Clamp(shapeColor[1], 0f, 1f);
+                    safety.RenderShapesColorB = float.IsNaN(shapeColor[2]) ? 0f : Math.Clamp(shapeColor[2], 0f, 1f);
+                }
+
+                CommitFieldUndo(setup, "Laser safety shape color", colorState);
+            }
+        }
+
+        if (safety.Masks.Count == 0)
+        {
+            CustomComponents.StylizedText("None - add quads to blank or dim the beam where drawn, e.g. over people or structures.",
+                                          Fonts.FontSmall, UiColors.TextMuted);
+        }
+
+        for (var i = 0; i < safety.Masks.Count; i++)
+        {
+            var mask = safety.Masks[i];
+            ImGui.PushID(i);
+
+            var enabled = mask.Enabled;
+            if (FormInputs.AddCheckBox("Enabled", ref enabled,
+                                       mask.AllowOnlyInside
+                                           ? "Allow-only mask: everything OUTSIDE this quad is blanked - the beam may only emit inside it. Off disables the mask."
+                                           : "Blank mask: the beam is off inside this quad (the scanners keep moving the path). Off disables the mask."))
+            {
+                var captured = i;
+                SetupUndo.RunUndoable("Toggle laser mask", setup, () =>
+                                                                     {
+                                                                         safety.Masks[captured].Enabled = enabled;
+                                                                         safety.MasksChanged();
+                                                                     });
+            }
+
+            ImGui.SameLine();
+            if (ImGui.Button(mask.AllowOnlyInside ? "Allow inside" : "Blank inside"))
+            {
+                var captured = i;
+                SetupUndo.RunUndoable("Switch laser mask mode", setup, () =>
+                                                                           {
+                                                                               safety.Masks[captured].AllowOnlyInside = !safety.Masks[captured].AllowOnlyInside;
+                                                                               safety.MasksChanged();
+                                                                           });
+            }
+
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("Blank inside = protect this area. Allow inside = the beam may only emit here.");
+
+            if (!mask.AllowOnlyInside)
+            {
+                ImGui.SameLine();
+                ImGui.SetNextItemWidth(60f * T3Ui.UiScaleFactor);
+                var level = mask.Level;
+                if (ImGui.DragFloat("##masklevel", ref level, 0.005f, 0f, 1f, "{0:0.00}"))
+                {
+                    var capturedValue = Math.Clamp(level, 0f, 1f);
+                    var captured = i;
+                    SetupUndo.RunUndoable("Set laser mask level", setup, () =>
+                                                                             {
+                                                                                 safety.Masks[captured].Level = capturedValue;
+                                                                                 safety.MasksChanged();
+                                                                             });
+                }
+
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Beam level kept inside the mask: 0 blanks it, 0.05 keeps a faint 5% beam (reduced-level audience scanning), 1 would change nothing.");
+            }
+
+            ImGui.SameLine();
+            var selected = _laserMaskSelected == i;
+            if (ImGui.Button(selected ? "Editing" : "Edit"))
+                _laserMaskSelected = selected ? -1 : i;
+
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("Drag this mask's four corners in the frame preview above.");
+
+            ImGui.SameLine();
+            if (PanelLayout.DestructiveButton("Remove"))
+            {
+                if (_laserMaskSelected == i)
+                    _laserMaskSelected = -1;
+                SetupUndo.RunUndoable("Remove laser mask", setup, () =>
+                                                                      {
+                                                                          safety.Masks.RemoveAt(i);
+                                                                          safety.MasksChanged();
+                                                                      });
+                ImGui.PopID();
+                break; // the list shortened under this row
+            }
+
+            ImGui.PopID();
+        }
+
+        if (ImGui.Button("Add mask"))
+        {
+            SetupUndo.RunUndoable("Add laser mask", setup, () =>
+                                                               {
+                                                                   safety.Masks.Add(LaserProcessingSettings.SafetySettings.MaskQuad.Centered());
+                                                                   safety.MasksChanged();
+                                                                   _laserMaskSelected = safety.Masks.Count - 1;
+                                                               });
+        }
+
+        if (ImGui.IsItemHovered())
+            ImGui.SetTooltip("Adds a centered quad; drag its corners in the frame preview above (select Edit first).");
+
+        PanelLayout.EndSection();
     }
 
     /// <summary>
@@ -1102,8 +2855,59 @@ internal static partial class SetupParameterView
     /// stream carries the settings its kind honours — the host asks the provider which those are, so a kind
     /// that has no notion of frame rate or alpha simply doesn't offer them.
     /// </summary>
+    /// <summary>
+    /// Properties of a render node's display: its reported mode, what the node presents there, and who
+    /// the node is. Read-only - the display and its bindings belong to that machine; the binding is
+    /// changed by dropping an output on the row and released from its context menu.
+    /// </summary>
+    private static void DrawRemoteDisplayCard(Setup setup, Show.BoygroupManager.ClientInfo client, int displayIndex)
+    {
+        Show.BoygroupManager.RemoteScreen? screen = null;
+        foreach (var candidate in client.Screens)
+        {
+            if (candidate.Index != displayIndex)
+                continue;
+
+            screen = candidate;
+            break;
+        }
+
+        Span<int> mode = [screen?.Width ?? 0, screen?.Height ?? 0];
+        DrawIntsRow("Resolution (px)", mode, "The render node display's current mode (read-only).", readOnly: true);
+
+        var boundOutput = client.MachineConfig == null
+                              ? null
+                              : Plugs.TryGetBoundOutput(setup, client.MachineConfig, Plugs.DisplayPlugId(displayIndex));
+        FormInputs.AddHint(boundOutput == null ? "nothing bound" : $"presenting {SetupLabels.OutputLabel(boundOutput)}");
+        FormInputs.AddHint($"Display {displayIndex + 1}{(screen == null ? "" : $" · {screen.Name}")}");
+
+        FormInputs.AddVerticalSpace(6);
+        FormInputs.AddSectionSubHeader("Render node");
+        DrawInfoRow("Name", client.Name);
+        DrawInfoRow("Address", client.Address);
+        DrawInfoRow("Status", client.IsDeployed ? $"{client.StatusText} · project deployed" : client.StatusText);
+        if (!string.IsNullOrEmpty(client.Group))
+            DrawInfoRow("Group", client.Group);
+    }
+
+    /// <summary>A read-only label and value, aligned with the editable rows above and below it.</summary>
+    private static void DrawInfoRow(string label, string value)
+    {
+        FormInputs.DrawInputLabel(label);
+        ImGui.AlignTextToFramePadding();
+        ImGui.TextUnformatted(value);
+    }
+
     private static void DrawPlugCard(Setup setup, MachineConfig machineConfig, Guid id)
     {
+        // A render node's display is not this machine's plug: it gets its own card, and without this
+        // branch the local plug lookups below find nothing and the card stays empty.
+        if (Show.BoygroupManager.Instance.TryGetRemoteDisplayPlug(id, out var remoteClient, out var remoteDisplayIndex))
+        {
+            DrawRemoteDisplayCard(setup, remoteClient, remoteDisplayIndex);
+            return;
+        }
+
         var boundOutput = Plugs.TryGetBoundOutput(setup, machineConfig, id);
         var boundLabel = boundOutput == null ? "nothing bound" : $"presenting {SetupLabels.OutputLabel(boundOutput)}";
 
@@ -1119,6 +2923,13 @@ internal static partial class SetupParameterView
 
             DrawIntsRow("Resolution (px)", mode, "The display's current mode (read-only).", readOnly: true);
             FormInputs.AddHint(boundLabel);
+            return;
+        }
+
+        var laser = machineConfig.FindLaserPlug(id);
+        if (laser != null)
+        {
+            DrawLaserPlugCard(machineConfig, laser, boundOutput);
             return;
         }
 
@@ -1184,6 +2995,8 @@ internal static partial class SetupParameterView
         }
     }
 
+
+
     /// <summary>Edits one of the send op's inputs as a regular parameter change: undoable, and it dirties the symbol.</summary>
     private static void SetInputUndoable<T>(Instance instance, IInputSlot slot, T value)
     {
@@ -1209,6 +3022,12 @@ internal static partial class SetupParameterView
         }
 
         var instance = ContentSourceSync.FindSendInstance(childId);
+        if (instance == null)
+        {
+            DrawLaserCameraCard(setup, childId);
+            return;
+        }
+
         if (instance is not IContentSupplier supplier)
             return;
 
@@ -1246,6 +3065,136 @@ internal static partial class SetupParameterView
             CustomComponents.StylizedText($"⚠ also routed to an output of {other.Width}×{other.Height} — it shows {rendered.Width}×{rendered.Height}",
                                           Fonts.FontSmall, UiColors.StatusAttention);
         }
+    }
+
+    /// <summary>
+    /// The laser counterpart of the content card: a [LaserCamera] has no pixels, so the card carries what
+    /// the send card does — freezing the content — plus where its frame is routed and how big it is.
+    /// </summary>
+    private static void DrawLaserCameraCard(Setup setup, Guid childId)
+    {
+        if (LaserContent.FindCamera(childId) is not { } instance || instance is not ILaserContentSupplier supplier)
+            return;
+
+        var update = supplier.GetUpdateEnabled(OutputContentResolver.Context);
+        var output = setup.FindOutput(LaserContent.OutputRefOf(instance));
+
+        PanelLayout.StatusPill(output == null ? "Not routed" : "Routed",
+                               output == null ? UiColors.StatusAttention : UiColors.StatusOkay);
+        ImGui.SameLine(0, PanelLayout.SpaceS * T3Ui.UiScaleFactor);
+        PanelLayout.StatusPill(update ? "Updating" : "Frozen", update ? UiColors.TextMuted : UiColors.StatusAttention);
+
+        PanelLayout.Space(PanelLayout.SpaceXS);
+        // The point count changes every frame: a wrapped line would resize its card a frame late.
+        DrawWrappedSmallTextStable(output == null
+                                       ? "Drop it on a laser output to route it."
+                                       : $"Streams to {output.Name} · {LaserDriver.GetFrame(output).Count} points",
+                                   UiColors.TextMuted, 1);
+
+        if (instance is IStatusProvider { } status && status.GetStatusLevel() >= IStatusProvider.StatusLevel.Warning
+                                                    && status.GetStatusMessage() is { } message)
+        {
+            DrawWrappedSmallTextStable(message, UiColors.StatusAttention, 2);
+        }
+
+        PanelLayout.Space(PanelLayout.SpaceM);
+        PanelLayout.BeginSection("Frame");
+        if (FormInputs.AddCheckBox("Update", ref update, "When off, freezes this laser frame and stops evaluating the scene."))
+            SetInputUndoable(instance, supplier.UpdateInput, update);
+
+        PanelLayout.EndSection();
+
+        DrawLaserRenderSection(instance);
+    }
+
+    /// <summary>
+    /// The content side of the MadLaser split: the output card owns device and safety, the routed
+    /// content op owns how the content becomes points. Surfaces the render knobs the routed op
+    /// declares - by input name, so [ImageToLaserPoints] and [LaserCamera] both work without type
+    /// coupling. Missing knobs are simply absent (each op lists what it has).
+    /// </summary>
+    private static void DrawLaserRenderSection(Instance instance)
+    {
+        PanelLayout.Space(PanelLayout.SpaceM);
+        PanelLayout.BeginSection("Laser Render",
+                                 "How this content turns into laser points - the per-source render settings. "
+                                 + "Everything device-side (scan rate, blanking, color calibration, safety) lives on the output's card.");
+
+        var drewAny = false;
+        drewAny |= DrawRenderFloat(instance, "PointSpacing", "Point spacing", 0.5f, 64f, 0.25f,
+                                   "Working pixels between lit samples along a path - the density dial. Lower = more points (denser, brighter, heavier); higher = fewer points (lighter on the scanner budget).");
+        drewAny |= DrawRenderInt(instance, "DotDwellPoints", "Dot dwell points", 0, 64,
+                                 "Samples held on isolated dots - their point intensity. More = brighter beams that stay put.");
+        drewAny |= DrawRenderInt(instance, "EndRepeat", "End repeat", 0, 16,
+                                 "Extra samples held at each shape's end position, so the scanner settles on the real endpoint instead of rounding it off. A dot's dwell grows with it too.");
+        drewAny |= DrawRenderFloat(instance, "InFade", "In fade", 0f, 1f, 0.01f,
+                                   "Ramps each shape's first samples up from this dim level to full: the scanner is still accelerating at a path's start, which otherwise blooms the start point. 0 = off.");
+        drewAny |= DrawRenderFloat(instance, "OutFade", "Out fade", 0f, 1f, 0.01f,
+                                   "Ramps the end-repeat samples down, so finishing a shape doesn't leave a bright pause dot of its own. 0 = repeats hold at full brightness.");
+        if (DrawRenderFloat(instance, "PathMinLength", "Path min length %", 0f, 100f, 0.5f,
+                            "Drops shapes shorter than this percentage of the working image's larger dimension - noise specks that would cost a blank jump each. 0 keeps everything."))
+        {
+            DrawRenderFloat(instance, "PathMaxLength", "Path max length %", 0f, 2000f, 5f,
+                            "Drops shapes longer than this percentage of the working image's larger dimension - runaway background strokes. 0 keeps everything.");
+            drewAny = true;
+        }
+
+        if (!drewAny)
+            FormInputs.AddHint("This content op has no render knobs - its parameters live on the op in the graph.");
+
+        PanelLayout.EndSection();
+    }
+
+    private static bool DrawRenderFloat(Instance instance, string inputName, string label,
+                                        float min, float max, float speed, string tooltip)
+    {
+        if (!TryGetInstanceInput(instance, inputName, out var slot)
+            || slot.Input.Value is not InputValue<float> value)
+            return false;
+
+        var v = value.Value;
+        if (FormInputs.AddFloat(label, ref v, min, max, speed, clampMin: true, clampMax: true, tooltip: tooltip))
+            SetInputUndoable(instance, slot, v);
+
+        return true;
+    }
+
+    private static bool DrawRenderInt(Instance instance, string inputName, string label,
+                                      int min, int max, string tooltip)
+    {
+        if (!TryGetInstanceInput(instance, inputName, out var slot)
+            || slot.Input.Value is not InputValue<int> value)
+            return false;
+
+        var v = value.Value;
+        if (FormInputs.AddInt(label, ref v, min, max, 1, tooltip))
+            SetInputUndoable(instance, slot, v);
+
+        return true;
+    }
+
+    /// <summary>Finds an instance input slot by its definition name (the parameter-panel name).</summary>
+    private static bool TryGetInstanceInput(Instance instance, string inputName, out IInputSlot slot)
+    {
+        foreach (var def in instance.Symbol.InputDefinitions)
+        {
+            if (!string.Equals(def.Name, inputName, StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            foreach (var candidate in instance.Inputs)
+            {
+                if (candidate.Id == def.Id)
+                {
+                    slot = candidate;
+                    return true;
+                }
+            }
+
+            break;
+        }
+
+        slot = null;
+        return false;
     }
 
     private static void DrawSliceCard(Setup setup, Guid id)
@@ -1635,9 +3584,10 @@ internal static partial class SetupParameterView
     }
 
     /// <summary>Integer counterpart of <see cref="DrawFloatsRow"/>.</summary>
-    private static InputEditStateFlags DrawIntsRow(string label, Span<int> values, string? tooltip = null, bool readOnly = false)
+    private static InputEditStateFlags DrawIntsRow(string label, Span<int> values, string? tooltip = null, bool readOnly = false,
+                                                   float reserveRight = 0)
     {
-        var size = BeginValuesRow(label, tooltip, values.Length, readOnly, 0, out var gap);
+        var size = BeginValuesRow(label, tooltip, values.Length, readOnly, reserveRight, out var gap);
         var result = InputEditStateFlags.Nothing;
         for (var i = 0; i < values.Length; i++)
         {
@@ -1712,6 +3662,26 @@ internal static partial class SetupParameterView
 
         SetupUndo.CommitGesture(setup, name, _fieldEditOldJson);
         _fieldEditOldJson = null;
+    }
+
+    /// <summary>
+    /// A reset-to-default button appended to the row just drawn (give the row reserveRight: 22 so the
+    /// icon fits). Undoable on setup cards; machine-side rows (plugs) apply and save immediately.
+    /// </summary>
+    private static void DrawRowReset(string rowId, string what, Action reset, Setup? undoSetup)
+    {
+        ImGui.SameLine(0, 4 * T3Ui.UiScaleFactor);
+        ImGui.PushID(rowId);
+        var clicked = CustomComponents.IconButton(Icon.Reset, Vector2.Zero);
+        ImGui.PopID();
+        CustomComponents.TooltipForLastItem($"Reset {what}", "Restores the default value.");
+        if (!clicked)
+            return;
+
+        if (undoSetup != null)
+            SetupUndo.RunUndoable($"Reset {what}", undoSetup, reset);
+        else
+            reset();
     }
 
     /// <summary>
@@ -1858,6 +3828,14 @@ internal static partial class SetupParameterView
     private static string _renameBuffer = string.Empty;
     private static bool _renameFieldActive;
 
+    // Laser-plug address editing: the buffer reloads when a different plug's field is drawn.
+    private static Guid _laserAddressPlug;
+    private static string _laserAddressBuffer = string.Empty;
+
+    // Laser-plug text rows (interface, PONK sender, CITP feed): one buffer keyed by plug + purpose.
+    private static string? _laserTextKey;
+    private static string _laserTextBuffer = string.Empty;
+
     private static SurfaceFacings FacingOf(float pitchDegrees)
     {
         const float tolerance = 0.5f;
@@ -1949,4 +3927,5 @@ internal static partial class SetupParameterView
 
     /** What a projector with no camera data yet shows: the defaults, edited into a real camera on the first change. */
     private static readonly OutputDefinition.ProjectorCamera _defaultCamera = new();
+
 }

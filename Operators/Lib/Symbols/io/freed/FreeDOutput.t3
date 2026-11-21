@@ -1,4 +1,4 @@
-{
+﻿{
   "FormatVersion": 3,
   "Id": "a9b8c7d6-e5f4-4210-9876-54321fedcba0"/*FreeDOutput*/,
   "Inputs": [
@@ -6,10 +6,7 @@
       "Id": "8f9a0b1c-2d3e-4f5a-a6b7-c8d9e0f1a2b3"/*Connect*/,
       "DefaultValue": false
     },
-    {
-      "Id": "9a0b1c2d-3e4f-4a6b-b7c8-d9e0f1a2b3c4"/*LocalIpAddress*/,
-      "DefaultValue": ""
-    },
+    
     {
       "Id": "a0b1c2d3-e4f5-4a7b-c8d9-e0f1a2b3c4d5"/*TargetIpAddress*/,
       "DefaultValue": ""

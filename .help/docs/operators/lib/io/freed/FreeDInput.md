@@ -1,4 +1,4 @@
-# FreeDInput
+﻿# FreeDInput
 
 *in [Lib.io.freed](README.md)*
 
@@ -10,7 +10,6 @@ Also see: [FreeDOutput]
 | Name (Relevancy & Type) | Description |
 |---|---|
 | **Listen** (Boolean) | Enable to open the UDP socket and begin listening for data. Disable to close the connection. |
-| **LocalIpAddress** (String) | The local network adapter (IP address) to listen on. '0.0.0.0 (Any)' listens on all available adapters, which is usually what you want. |
 | **Port** (Int32) | The UDP port to listen on. This must match the port the sender is broadcasting to. |
 | **CameraId** (Int32) | Selects a specific camera ID to output on the single-camera outputs (CameraPos, CameraRot, etc.). If set to -1, it automatically selects the camera with the lowest ID. |
 | **PrintToLog** (Boolean) | Enable to print detailed activity and error messages to the T3 log console for debugging. |

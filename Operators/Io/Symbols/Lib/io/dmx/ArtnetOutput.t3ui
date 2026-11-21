@@ -1,4 +1,4 @@
-{
+﻿{
   "FormatVersion": 3,
   "Id": "98efc7c8-cafd-45ee-8746-14f37e9f59f8"/*ArtnetOutput*/,
   "Description": "Sends DMX data over the network using the Art-Net protocol.\n\nThis operator broadcasts or unicasts DMX data to Art-Net-enabled devices like lighting fixtures, nodes, or media servers. It can send multiple DMX universes simultaneously and uses a dedicated background thread for high-performance transmission.\n\nFeatures:\n- Multi-input support: Connect multiple lists to send different universes\n- Automatic universe expansion: Lists larger than 512 channels span multiple universes\n- Built-in ArtPoll discovery to find Art-Net nodes on your network\n- Frame rate limiting to prevent network flooding\n- Optional ArtSync for synchronized updates\n\nTips:\n- For broadcast, leave `TargetIpAddress` empty. For unicast, specify the destination IP.\n- Use `UniverseChannels` to define the starting universe for each input (auto-expands as needed)\n- Enable `SendTrigger` to start continuous transmission; disable to stop.\n\nAKA: artnet, dmx, lighting, sacn",
@@ -90,15 +90,6 @@
         "Y": 0.0
       },
       "Description": "A multi-input where each connected input provides DMX channel data for a separate universe. Each input should contain a list of float values (0-255) that are clamped to 0-255."
-    },
-    {
-      "InputId": "fcbfe87b-b8aa-461c-a5ac-b22bb29ad36d"/*LocalIpAddress*/,
-      "Position": {
-        "X": -200.0,
-        "Y": 150.0
-      },
-      "Description": "The IP address of the network interface to send from. A dropdown shows available addresses. If you have multiple network cards, make sure to select the one connected to your lighting network.",
-      "Usage": "CustomDropdown"
     }
   ],
   "SymbolChildUis": [],

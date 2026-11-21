@@ -1,12 +1,11 @@
-#nullable enable
-using System.Net.NetworkInformation;
+﻿#nullable enable
 using System.Net.Sockets;
 using T3.Core.Utils;
 
 namespace Lib.io.freed;
 
 [Guid("a9b8c7d6-e5f4-4210-9876-54321fedcba0")]
-internal sealed class FreeDOutput : Instance<FreeDOutput>, IStatusProvider, ICustomDropdownHolder, IDisposable
+internal sealed class FreeDOutput : Instance<FreeDOutput>, IStatusProvider, IDisposable
 {
     public FreeDOutput()
     {
@@ -24,7 +23,7 @@ internal sealed class FreeDOutput : Instance<FreeDOutput>, IStatusProvider, ICus
     {
         _printToLog = PrintToLog.GetValue(context);
         var shouldConnect = Connect.GetValue(context);
-        var localIp = LocalIpAddress.GetValue(context)  ?? string.Empty;
+        var localIp = ProtocolInterfaces.ResolveAddressString(ProtocolInterfaces.Keys.FreeD);
         var targetIp = TargetIpAddress.GetValue(context) ?? string.Empty;
         var targetPort = TargetPort.GetValue(context);
 
@@ -169,7 +168,7 @@ internal sealed class FreeDOutput : Instance<FreeDOutput>, IStatusProvider, ICus
         _disposed = true;
     }
 
-    #region Status and Dropdown
+    #region Status
     private string _statusMessage = "Not connected.";
     private IStatusProvider.StatusLevel _statusLevel = IStatusProvider.StatusLevel.Notice;
     private readonly object _statusLock = new();
@@ -198,39 +197,6 @@ internal sealed class FreeDOutput : Instance<FreeDOutput>, IStatusProvider, ICus
             return _statusMessage;
         }
     }
-
-    string ICustomDropdownHolder.GetValueForInput(Guid id)
-    {
-        return id == LocalIpAddress.Id ? LocalIpAddress.Value : string.Empty;
-    }
-
-    IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid id)
-    {
-        if (id != LocalIpAddress.Id)
-            return Empty<string>();
-
-        if (_cachedIpAddresses == null)
-            _cachedIpAddresses = GetLocalIPv4Addresses().ToList();
-
-        return _cachedIpAddresses;
-    }
-
-    void ICustomDropdownHolder.HandleResultForInput(Guid id, string? s, bool i)
-    {
-        if (!string.IsNullOrEmpty(s) && i && id == LocalIpAddress.Id) LocalIpAddress.SetTypedInputValue(s.Split(' ')[0]);
-    }
-
-    private static IEnumerable<string> GetLocalIPv4Addresses()
-    {
-        if (!NetworkInterface.GetIsNetworkAvailable()) yield break;
-        foreach (var ni in NetworkInterface.GetAllNetworkInterfaces())
-        {
-            if (ni.OperationalStatus != OperationalStatus.Up) continue;
-            foreach (var ipInfo in ni.GetIPProperties().UnicastAddresses)
-                if (ipInfo.Address.AddressFamily == AddressFamily.InterNetwork)
-                    yield return ipInfo.Address.ToString();
-        }
-    }
     #endregion
 
     #region Fields
@@ -240,7 +206,6 @@ internal sealed class FreeDOutput : Instance<FreeDOutput>, IStatusProvider, ICus
     private string _lastLocalIp = string.Empty, _lastTargetIp = string.Empty;
     private int _lastTargetPort;
     private readonly MemoryStream _packetStream = new(FreeDPacketLength);
-    private List<string>? _cachedIpAddresses;
     private readonly BinaryWriter _writer;
     private const int FreeDPacketLength = 29;
     private const byte FreeDIdentifier = 0xD1;
@@ -257,9 +222,6 @@ internal sealed class FreeDOutput : Instance<FreeDOutput>, IStatusProvider, ICus
 
     [Input(Guid = "8f9a0b1c-2d3e-4f5a-a6b7-c8d9e0f1a2b3")]
     public readonly InputSlot<bool> Connect = new();
-
-    [Input(Guid = "9a0b1c2d-3e4f-4a6b-b7c8-d9e0f1a2b3c4")]
-    public readonly InputSlot<string> LocalIpAddress = new("0.0.0.0");
 
     [Input(Guid = "a0b1c2d3-e4f5-4a7b-c8d9-e0f1a2b3c4d5")]
     public readonly InputSlot<string> TargetIpAddress = new("127.0.0.1");

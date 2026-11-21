@@ -1,7 +1,7 @@
-{
+﻿{
   "FormatVersion": 3,
   "Id": "fc03dcd0-6f2f-4507-be06-1ed105607489"/*ArtnetInput*/,
-  "Description": "Receives DMX data over the network using the Art-Net protocol.\n\nThis operator listens for Art-Net packets on the local network, allowing you to receive DMX data from lighting consoles, media servers, or other Art-Net-enabled devices. It can listen to multiple DMX universes simultaneously.\n\nTips:\n- Select the correct `LocalIpAddress` for your network interface.\n- `StartUniverse` and `NumUniverses` define the range of DMX universes to listen to.\n- The output is a list of lists. The outer list corresponds to the universes, and each inner list contains the 512 channel values for that universe.\n\nAKA: artnet, dmx, lighting, sacn",
+  "Description": "Receives DMX data over the network using the Art-Net protocol.\n\nThis operator listens for Art-Net packets on the local network, allowing you to receive DMX data from lighting consoles, media servers, or other Art-Net-enabled devices. It can listen to multiple DMX universes simultaneously.\n\nTips:\n- Pick the adapter for ArtNet in Settings → Networking (bindings are per machine).\n- `StartUniverse` and `NumUniverses` define the range of DMX universes to listen to.\n- The output is a list of lists. The outer list corresponds to the universes, and each inner list contains the 512 channel values for that universe.\n\nAKA: artnet, dmx, lighting, sacn",
   "InputUis": [
     {
       "InputId": "19bde769-3992-4cf0-a0b4-e3ae25c03c79"/*StartUniverse*/,
@@ -15,15 +15,7 @@
       "ClampMin": true,
       "ClampMax": true
     },
-    {
-      "InputId": "24b5d450-4e83-49db-88b1-7d688e64585d"/*LocalIpAddress*/,
-      "Position": {
-        "X": -200.0,
-        "Y": 0.0
-      },
-      "Description": "The IP address of the network interface to listen on. A dropdown shows available addresses. If you have multiple network cards, make sure to select the one connected to your lighting network.",
-      "Usage": "CustomDropdown"
-    },
+    
     {
       "InputId": "3d085f6f-6f4a-4876-805f-22f25497a731"/*Active*/,
       "Position": {

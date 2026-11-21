@@ -1,4 +1,4 @@
-{
+﻿{
   "FormatVersion": 3,
   "Id": "c029b846-b442-458b-933b-653609827b75"/*UdpInput*/,
   "Inputs": [
@@ -14,10 +14,7 @@
       "Id": "5e725916-4143-4759-8651-e12185c658d3"/*PrintToLog*/,
       "DefaultValue": true
     },
-    {
-      "Id": "9e23335a-d63a-4286-930e-c63e86d0e6f0"/*LocalIpAddress*/,
-      "DefaultValue": "0.0.0.0"
-    },
+    
     {
       "Id": "e6589335-4e51-41b0-8777-6a5d54c4f0ee"/*ListLength*/,
       "DefaultValue": 1

@@ -26,24 +26,29 @@ Outputs:
 - FaceData: A dictionary containing detailed data for each detected face (landmark positions, blendshapes, transformation matrices).
 - FaceCount: The number of faces detected.
 
+Acceleration selects the inference delegate: Cpu, Xnnpack (multithreaded CPU, the fast default) or Gpu. Gpu needs a native build with the OpenGL delegate (Linux here) and otherwise falls back to Cpu; InferenceThreads sets the Xnnpack worker-thread count (0 = library default).
+
 ## Input Parameters
 | Name (Relevancy & Type) | Description |
 |---|---|
-| **InputTexture** (Texture2D) | The image to process. |
-| **Enabled** (Boolean) | Enables or disables face detection. |
-| **MaxFaces** (Int32) | Maximum number of faces to detect. |
-| **ShowLandmarks** (Boolean) | Whether to include landmark points in the output buffer. |
-| **LandmarkSize** (Single) | Size of the landmark points in the output buffer. |
-| **LandmarkColor** (Vector4) | Color of the landmark points. |
-| **LandmarkScale** (Single) | Scale factor for the landmark positions (useful for 3D visualization). |
-| **NormalizeLandmarks** (Boolean) | Whether to normalize landmark coordinates to [0, 1] range. |
-| **MinFaceDetectionConfidence** (Single) | Minimum confidence score for face detection to be considered successful. |
-| **MinFacePresenceConfidence** (Single) | Minimum confidence score for face presence. |
-| **MinTrackingConfidence** (Single) | Minimum confidence score for face tracking. |
-| **Debug** (Boolean) | Enables debug logging. |
-| **UseCombinedAIOutput** (Boolean) | Use combined AI output. |
-| **CorrectAspectRatio** (Boolean) | Correct aspect ratio. |
 | **ZScale** (Single) | Z Scale. |
+| **MinTrackingConfidence** (Single) | Minimum confidence score for face tracking. |
+| **MinFaceDetectionConfidence** (Single) | Minimum confidence score for face detection to be considered successful. |
+| **LandmarkSize** (Single) | Size of the landmark points in the output buffer. |
+| **Debug** (Boolean) | Enables debug logging. |
+| **MaxFaces** (Int32) | Maximum number of faces to detect. |
+| **MinFacePresenceConfidence** (Single) | Minimum confidence score for face presence. |
+| **LandmarkColor** (Vector4) | Color of the landmark points. |
+| **UseCombinedAIOutput** (Boolean) | Use combined AI output. |
+| **InputTexture** (Texture2D) | The image to process. |
+| **Acceleration** (MediaPipeAcceleration) | Inference acceleration: Cpu = plain single-threaded TF Lite (works everywhere), Xnnpack = multithreaded CPU (the fast default), Gpu = OpenGL/EGL delegate (Linux; the Windows/macOS natives are CPU-only and fall back to Cpu). |
+| **InferenceThreads** (Int32) | Xnnpack worker threads (default 4; 0 = library default, which is effectively single-threaded). Lower it to 2 when several MediaPipe operators run at once. Ignored by Cpu and Gpu. |
+| **Enabled** (Boolean) | Enables or disables face detection. |
+| **LandmarkScale** (Single) | Scale factor for the landmark positions (useful for 3D visualization). |
+| **CorrectAspectRatio** (Boolean) | Correct aspect ratio. |
+| **ShowLandmarks** (Boolean) | Whether to include landmark points in the output buffer. |
+| **NormalizeLandmarks** (Boolean) | Whether to normalize landmark coordinates to [0, 1] range. |
+
 
 ## Outputs
 | Name | Type |
@@ -54,4 +59,3 @@ Outputs:
 | **DebugTexture** | T3.Core.DataTypes.Texture2D |
 | **PointBuffer** | T3.Core.DataTypes.BufferWithViews |
 | **Blendshapes** | T3.Core.DataTypes.Dict`1[System.Single] |
-

@@ -48,6 +48,10 @@ jobs:
         shell: powershell
         run: Installer/Windows/build-release.ps1
 
+      # Drives the bundled mediapipe_c.dll through the Tasks API the mediapipe operators use.
+      - name: MediaPipe Smoke
+        run: dotnet test Mediapipe.Tests -c Release --nologo
+
       - name: Package Installer
         run: |
           $isccArgs = @("Installer\Windows\installer.iss", "/DSkipBuild")

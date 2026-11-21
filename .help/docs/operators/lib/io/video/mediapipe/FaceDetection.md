@@ -27,24 +27,29 @@ Outputs:
 - FaceData: A dictionary containing detailed data for each detected face (bounding box coordinates, keypoint positions, confidence scores).
 - FaceCount: The number of faces detected.
 - UpdateCount: Increments each time a new frame is processed.
-- DebugTexture: A debug visualization texture showing detected faces with bounding boxes and keypoints (only when Debug is enabled).
+- DebugTexture: A debug visualization texture showing detected faces with bounding boxes and keypoints (only when Debug is enabled)
+
+Acceleration selects the inference delegate: Cpu, Xnnpack (multithreaded CPU, the fast default) or Gpu. Gpu needs a native build with the OpenGL delegate (Linux here) and otherwise falls back to Cpu; InferenceThreads sets the Xnnpack worker-thread count (0 = library default).
 
 ## Input Parameters
 | Name (Relevancy & Type) | Description |
 |---|---|
+| **Acceleration** (MediaPipeAcceleration) | Inference acceleration: Cpu = plain single-threaded TF Lite (works everywhere), Xnnpack = multithreaded CPU (the fast default), Gpu = OpenGL/EGL delegate (Linux; the Windows/macOS natives are CPU-only and fall back to Cpu). |
+| **InferenceThreads** (Int32) | Xnnpack worker threads (default 4; 0 = library default, which is effectively single-threaded). Lower it to 2 when several MediaPipe operators run at once. Ignored by Cpu and Gpu. |
+| **DetectionSize** (Single) | Size of points in the output buffer. |
+| **ZScale** (Single) | Scale factor for Z coordinate of points. |
 | **InputTexture** (Texture2D) | The image to process. |
+| **DetectionColor** (Vector4) | Color of bounding box points. |
 | **Enabled** (Boolean) | Enables or disables face detection. |
+| **KeypointColor** (Vector4) | Color of keypoint points. |
 | **ConfidenceThreshold** (Single) | Minimum confidence score for a face to be detected. |
 | **MaxFaces** (Int32) | Maximum number of faces to detect. |
-| **ShowDetections** (Boolean) | Whether to include bounding box points in the output buffer. |
-| **ShowKeypoints** (Boolean) | Whether to include keypoints (eyes, nose, mouth, ears) in the output buffer. |
-| **DetectionSize** (Single) | Size of points in the output buffer. |
-| **DetectionColor** (Vector4) | Color of bounding box points. |
-| **KeypointColor** (Vector4) | Color of keypoint points. |
 | **UseCombinedAiOutput** (Boolean) | Whether to generate unified AI texture outputs. |
+| **ShowDetections** (Boolean) | Whether to include bounding box points in the output buffer. |
 | **Debug** (Boolean) | Enables debug logging and debug texture output. |
+| **ShowKeypoints** (Boolean) | Whether to include keypoints (eyes, nose, mouth, ears) in the output buffer. |
 | **CorrectAspectRatio** (Boolean) | Whether to correct aspect ratio for non-square inputs. |
-| **ZScale** (Single) | Scale factor for Z coordinate of points. |
+
 
 ## Outputs
 | Name | Type |
@@ -55,4 +60,3 @@ Outputs:
 | **FaceCount** | System.Int32 |
 | **UpdateCount** | System.Int32 |
 | **DebugTexture** | T3.Core.DataTypes.Texture2D |
-

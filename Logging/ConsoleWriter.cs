@@ -11,15 +11,23 @@ public class ConsoleWriter : ILogWriter
     {
     }
 
+    // Once the console is gone (a launched process whose pipe closed, a detached start), every
+    // write would fail - and reporting that failure through Log again would recurse forever
+    // and take the editor down. Disable this writer after the first failure instead.
+    private bool _broken;
+
     public void ProcessEntry(ILogEntry newEntry)
     {
+        if (_broken)
+            return;
+
         try
         {
             Console.Write("{0}: {1}\n", newEntry.Level.ToString(), newEntry.Message);
         }
-        catch(Exception e)
+        catch
         {
-            Log.Debug("Failed to print log message to console: " + e.Message);
+            _broken = true;
         }
     }
 }

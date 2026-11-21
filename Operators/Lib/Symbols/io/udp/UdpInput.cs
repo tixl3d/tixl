@@ -1,5 +1,5 @@
-#nullable enable
-using System.Net.NetworkInformation;
+﻿#nullable enable
+using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using T3.Core.Utils;
@@ -7,7 +7,7 @@ using T3.Core.Utils;
 namespace Lib.io.udp;
 
 [Guid("C029B846-B442-458B-933B-653609827B75")]
-internal sealed class UdpInput : Instance<UdpInput>, IStatusProvider, ICustomDropdownHolder, IDisposable
+internal sealed class UdpInput : Instance<UdpInput>, IStatusProvider, IDisposable
 {
     [Output(Guid = "9C4D3558-1584-422E-A59B-D08D23E45242")]
     public readonly Slot<bool> IsListening = new();
@@ -23,9 +23,6 @@ internal sealed class UdpInput : Instance<UdpInput>, IStatusProvider, ICustomDro
 
     [Input(Guid = "E6589335-4E51-41B0-8777-6A5D54C4F0EE")]
     public readonly InputSlot<int> ListLength = new(10);
-
-    [Input(Guid = "9E23335A-D63A-4286-930E-C63E86D0E6F0")]
-    public readonly InputSlot<string> LocalIpAddress = new("0.0.0.0");
 
     [Input(Guid = "2EBE418D-407E-46D8-B274-13B41C52ACCF")]
     public readonly InputSlot<int> Port = new(7000);
@@ -43,8 +40,7 @@ internal sealed class UdpInput : Instance<UdpInput>, IStatusProvider, ICustomDro
     public readonly Slot<bool> WasTrigger = new();
 
     private string? _lastLocalIp;
-    private int _lastPort;
-    private bool _printToLog;
+    private int _lastPort;    private bool _printToLog;
 
     private bool _wasListening;
 
@@ -67,7 +63,7 @@ internal sealed class UdpInput : Instance<UdpInput>, IStatusProvider, ICustomDro
     {
         _printToLog = PrintToLog.GetValue(context);
         var shouldListen = Listen.GetValue(context);
-        var localIp = LocalIpAddress.GetValue(context);
+        var localIp = ProtocolInterfaces.ResolveAddressString(ProtocolInterfaces.Keys.Udp);
         var port = Port.GetValue(context);
 
         var settingsChanged = shouldListen != _wasListening || localIp != _lastLocalIp || port != _lastPort;
@@ -134,13 +130,13 @@ internal sealed class UdpInput : Instance<UdpInput>, IStatusProvider, ICustomDro
     private void ListenLoop()
     {
         var port = Port.Value;
-        var localIpStr = LocalIpAddress.Value;
+        var localIpStr = ProtocolInterfaces.ResolveAddressString(ProtocolInterfaces.Keys.Udp);
         UdpClient? currentUdpClient = null; // Declare locally
 
         try
         {
             var listenIp = IPAddress.Any;
-            if (!string.IsNullOrEmpty(localIpStr) && localIpStr != "0.0.0.0 (Any)" && IPAddress.TryParse(localIpStr, out var parsedIp))
+            if (!string.IsNullOrEmpty(localIpStr) && IPAddress.TryParse(localIpStr, out var parsedIp))
                 listenIp = parsedIp;
             var localEp = new IPEndPoint(listenIp, port);
 
@@ -206,10 +202,10 @@ internal sealed class UdpInput : Instance<UdpInput>, IStatusProvider, ICustomDro
 
     private void UpdateStatusMessage()
     {
-        var localIpDisplay = LocalIpAddress.Value ?? string.Empty;
+        var localIpDisplay = ProtocolInterfaces.ResolveAddressString(ProtocolInterfaces.Keys.Udp);
         if (!_runListener) SetStatus("Not listening. Enable 'Listen'.", IStatusProvider.StatusLevel.Notice);
         else if (_lastStatusLevel != IStatusProvider.StatusLevel.Error)
-            SetStatus($"Listening on {localIpDisplay.Split(' ')[0]}:{Port.Value}", IStatusProvider.StatusLevel.Success);
+            SetStatus($"Listening on {localIpDisplay}:{Port.Value}", IStatusProvider.StatusLevel.Success);
     }
 
     #region internal types, state, and providers
@@ -244,53 +240,5 @@ internal sealed class UdpInput : Instance<UdpInput>, IStatusProvider, ICustomDro
 
     public IStatusProvider.StatusLevel GetStatusLevel() => _lastStatusLevel;
     public string? GetStatusMessage() => _lastErrorMessage;
-    
-    #region Network Interface Logic
-    private static List<NetworkAdapterInfo> _networkInterfaces = new();
-
-    private static List<NetworkAdapterInfo> GetNetworkInterfaces()
-    {
-        var list = new List<NetworkAdapterInfo>();
-        list.Add(new NetworkAdapterInfo(IPAddress.Any, IPAddress.Any, "Any"));
-        list.Add(new NetworkAdapterInfo(IPAddress.Loopback, IPAddress.Parse("255.0.0.0"), "Localhost"));
-        
-        try
-        {
-            list.AddRange(from ni in NetworkInterface.GetAllNetworkInterfaces()
-                          where ni.OperationalStatus == OperationalStatus.Up && ni.NetworkInterfaceType != NetworkInterfaceType.Loopback
-                          from ip in ni.GetIPProperties().UnicastAddresses
-                          where ip.Address.AddressFamily == AddressFamily.InterNetwork
-                          select new NetworkAdapterInfo(ip.Address, ip.IPv4Mask, ni.Name));
-        }
-        catch (Exception e)
-        {
-            Log.Warning("Could not enumerate network interfaces: " + e.Message);
-        }
-        return list;
-    }
-
-    private sealed record NetworkAdapterInfo(IPAddress IpAddress, IPAddress SubnetMask, string Name)
-    {
-        public string DisplayName => $"{Name}: {IpAddress}";
-    }
-    #endregion
-
-    string ICustomDropdownHolder.GetValueForInput(Guid id) => id == LocalIpAddress.Id ? LocalIpAddress.Value : string.Empty;
-
-    IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid id)
-    {
-        if (id == LocalIpAddress.Id)
-        {
-            _networkInterfaces = GetNetworkInterfaces();
-            foreach (var adapter in _networkInterfaces) yield return adapter.DisplayName;
-        }
-    }
-
-    void ICustomDropdownHolder.HandleResultForInput(Guid id, string? s, bool i)
-    {
-        if (string.IsNullOrEmpty(s) || !i || id != LocalIpAddress.Id) return;
-        var foundAdapter = _networkInterfaces.FirstOrDefault(adapter => adapter.DisplayName == s);
-        if (foundAdapter != null) LocalIpAddress.SetTypedInputValue(foundAdapter.IpAddress.ToString());
-    }
     #endregion
 }

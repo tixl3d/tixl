@@ -1,4 +1,4 @@
-# TcpClient
+﻿# TcpClient
 
 *in [Lib.io.tcp](README.md)*
 
@@ -25,8 +25,6 @@ AKA: tcp, network, socket, client
 | **SendOnChange** (Boolean) | If enabled, a message is sent automatically whenever the content of `MessageParts` changes. |
 | **SendTrigger** (Boolean) | A trigger to manually send the message. The message is sent when this value changes from 0 to 1. |
 | **Separator** (String) | A string used to join the `MessageParts` together before sending. |
-| **LocalIpAddress** (String) | — |
-
 ## Outputs
 | Name | Type |
 |---|---|

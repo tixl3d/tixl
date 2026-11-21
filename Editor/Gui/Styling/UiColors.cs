@@ -35,6 +35,13 @@ public static class UiColors
     [T3Style.Hint(Description = "The checkmark inside checkboxes and menu toggles.")]
     public static Color CheckMark = new(1,1,1,0.8f);
 
+    // -- Collaboration -------------------------------------------------------------------------------
+    [T3Style.Hint(GroupTitle = "Collab", Description = "Accent for the pairing code in the collab window.")]
+    public static Color CollabAccent = new(0.62f, 0.42f, 0.85f, 1f);
+
+    [T3Style.Hint(Description = "The \"You\" marker on your own whisper lines.")]
+    public static Color WhisperOwn = new(0.55f, 0.8f, 0.55f, 1f);
+
     // -- Window Background ---------------------------------------------------------------------------
     [T3Style.Hint(GroupTitle = "Window Background", DisplayName = "Panel Background",
                   Description = "The content background of windows and panels (e.g. the Asset Library, Parameters, Settings content). Kept semi-transparent so stacked panels blend. For the backdrop behind windows and the menu bar, see App / Menu Background.")]

@@ -1,7 +1,7 @@
-{
+﻿{
   "FormatVersion": 3,
   "Id": "1d2e3f4a-5b6c-4789-0123-456789abcdef"/*WebServer*/,
-  "Description": "Starts a simple HTTP web server to serve content over the network.\n\nThis operator can be used to create simple web interfaces, provide data to other applications via a basic REST API, or serve files. The content served to connecting clients is determined by the `HtmlContent` input.\n\nTips:\n- Use the `Listen` toggle to start and stop the server.\n- If `Port` is set to 0, the server will automatically pick a free port.\n- The server's URL will be `http://<LocalIpAddress>:<Port>/`\n\nAKA: http, server, web, rest, api",
+  "Description": "Starts a simple HTTP web server to serve content over the network.\n\nThis operator can be used to create simple web interfaces, provide data to other applications via a basic REST API, or serve files. The content served to connecting clients is determined by the `HtmlContent` input.\n\nTips:\n- Use the `Listen` toggle to start and stop the server.\n- If `Port` is set to 0, the server will automatically pick a free port.\n- The server's URL will be `http://<Networking settings page>:<Port>/`\n\nAKA: http, server, web, rest, api",
   "InputUis": [
     {
       "InputId": "4c5d6e7f-8a9b-4012-3456-7890abcdef12"/*Listen*/,
@@ -11,15 +11,7 @@
       },
       "Description": "Starts or stops the web server."
     },
-    {
-      "InputId": "5d6e7f8a-9b0c-4123-4567-890abcdef123"/*LocalIpAddress*/,
-      "Position": {
-        "X": -200.0,
-        "Y": 75.0
-      },
-      "Description": "The local IP address for the server to listen on. A dropdown shows available addresses. Use '0.0.0.0' to listen on all available network interfaces.",
-      "Usage": "CustomDropdown"
-    },
+    
     {
       "InputId": "6e7f8a9b-0c1d-4234-5678-90abcdef1234"/*Port*/,
       "Position": {

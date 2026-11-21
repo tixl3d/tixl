@@ -1,4 +1,4 @@
-# UdpOutput
+﻿# UdpOutput
 
 *in [Lib.io.udp](README.md)*
 
@@ -17,7 +17,6 @@ AKA: udp, network, socket, datagram
 | Name (Relevancy & Type) | Description |
 |---|---|
 | **Connect** (Boolean) | Initializes or re-initializes the network socket. This can be useful if network settings change. |
-| **LocalIpAddress** (String) | The IP address of the network interface to send from. A dropdown shows available addresses. If left empty, the system will choose one automatically. |
 | **MessageParts** (String) | A list of strings or values that will be joined together to form the message to be sent. |
 | **PrintToLog** (Boolean) | If enabled, prints sent data and status information to the T3 log. Useful for debugging. |
 | **SendOnChange** (Boolean) | If enabled, a message is sent automatically whenever the content of `MessageParts` changes. |

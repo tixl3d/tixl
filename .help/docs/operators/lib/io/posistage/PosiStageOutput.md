@@ -1,4 +1,4 @@
-# PosiStageOutput
+﻿# PosiStageOutput
 
 *in [Lib.io.posistage](README.md)*
 
@@ -17,7 +17,6 @@ AKA: posistage, tracking, stage, psn, motion capture, sender
 | Name (Relevancy & Type) | Description |
 |---|---|
 | **Connect** (Boolean) | Initializes or re-initializes the network socket. |
-| **LocalIpAddress** (String) | The IP address of the network interface to send from. If left empty, the system will choose one automatically. |
 | **Names** (String) | A list of strings to name the individual trackers. The list should correspond to the points in `TrackerData`. |
 | **PrintToLog** (Boolean) | If enabled, prints information about sent packets to the T3 log for debugging. |
 | **SendOnChange** (Boolean) | If enabled, sends a packet automatically whenever the `TrackerData` input changes. |

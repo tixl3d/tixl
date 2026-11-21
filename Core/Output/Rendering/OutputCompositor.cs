@@ -88,9 +88,19 @@ public static class OutputCompositor
     public static Texture2D? RenderPreview(Guid outputId)
     {
         if (OutputPreviewRefresh.ShouldRefresh(outputId))
-            return RenderOutput(outputId);
+        {
+            var rendered = RenderOutput(outputId);
 
-        return _compositeFrames.TryGetValue(outputId, out var rendered) && rendered.HasContent
+            // The refresh budget records a preview as filled before the composite is known to have pixels.
+            // An early frame (setup still loading, a send not instantiated yet) can produce an empty
+            // composite; without this, the card would stay blank for the rest of the session.
+            if (rendered == null)
+                OutputPreviewRefresh.Invalidate(outputId);
+
+            return rendered;
+        }
+
+        return _compositeFrames.TryGetValue(outputId, out var cached) && cached.HasContent
                && _targets.TryGetValue(outputId, out var target)
                    ? target.Texture
                    : null;

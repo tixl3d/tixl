@@ -1,4 +1,4 @@
-#nullable enable
+﻿#nullable enable
 using System.Diagnostics;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -12,7 +12,7 @@ namespace Lib.io.dmx;
 
 [Guid("fc03dcd0-6f2f-4507-be06-1ed105607489")]
 [ExportDependencies("ArtNet.dll")]
-internal sealed class ArtnetInput : Instance<ArtnetInput>, IStatusProvider, ICustomDropdownHolder
+internal sealed class ArtnetInput : Instance<ArtnetInput>, IStatusProvider
 {
     private const int ArtNetPort = 6454;
     private static readonly byte[] _artnetId = "Art-Net\0"u8.ToArray();
@@ -20,9 +20,6 @@ internal sealed class ArtnetInput : Instance<ArtnetInput>, IStatusProvider, ICus
 
     [Input(Guid = "3d085f6f-6f4a-4876-805f-22f25497a731")]
     public readonly InputSlot<bool> Active = new();
-
-    [Input(Guid = "24B5D450-4E83-49DB-88B1-7D688E64585D")]
-    public readonly InputSlot<string> LocalIpAddress = new("0.0.0.0 (Any)");
 
     [Input(Guid = "c18a9359-3ef8-4e0d-85d8-51f725357388")]
     public readonly InputSlot<int> NumUniverses = new(1);
@@ -57,7 +54,7 @@ internal sealed class ArtnetInput : Instance<ArtnetInput>, IStatusProvider, ICus
     {
         _printToLog = PrintToLog.GetValue(context);
         var active = Active.GetValue(context);
-        var localIp = LocalIpAddress.GetValue(context);
+        var localIp = ProtocolInterfaces.ResolveAddressString(ProtocolInterfaces.Keys.ArtNet);
 
         var settingsChanged = active != _wasActive || localIp != _lastLocalIp;
         if (settingsChanged)
@@ -140,9 +137,9 @@ internal sealed class ArtnetInput : Instance<ArtnetInput>, IStatusProvider, ICus
         UdpClient? currentUdpClient = null;
         try
         {
-            var localIpStr = LocalIpAddress.Value;
+            var localIpStr = ProtocolInterfaces.ResolveAddressString(ProtocolInterfaces.Keys.ArtNet);
             var listenIp = IPAddress.Any;
-            if (!string.IsNullOrEmpty(localIpStr) && localIpStr != "0.0.0.0 (Any)" && IPAddress.TryParse(localIpStr, out var parsedIp))
+            if (!string.IsNullOrEmpty(localIpStr) && IPAddress.TryParse(localIpStr, out var parsedIp))
                 listenIp = parsedIp;
 
             currentUdpClient = new UdpClient { ExclusiveAddressUse = false };
@@ -239,7 +236,7 @@ internal sealed class ArtnetInput : Instance<ArtnetInput>, IStatusProvider, ICus
 
     private void UpdateStatusMessage(int numUniverses, int startUniverse)
     {
-        var localIpDisplay = LocalIpAddress.Value ?? string.Empty;
+        var localIpDisplay = ProtocolInterfaces.ResolveAddressString(ProtocolInterfaces.Keys.ArtNet);
         if (!_wasActive)
         {
             SetStatus("Inactive. Enable 'Active'.", IStatusProvider.StatusLevel.Notice);
@@ -273,7 +270,7 @@ internal sealed class ArtnetInput : Instance<ArtnetInput>, IStatusProvider, ICus
         public long LastReceivedTicks;
     }
 
-    #region IStatusProvider & ICustomDropdownHolder
+    #region IStatusProvider
     private string _lastStatusMessage = "Inactive";
     private IStatusProvider.StatusLevel _lastStatusLevel = IStatusProvider.StatusLevel.Notice;
 
@@ -285,53 +282,5 @@ internal sealed class ArtnetInput : Instance<ArtnetInput>, IStatusProvider, ICus
 
     public IStatusProvider.StatusLevel GetStatusLevel() => _lastStatusLevel;
     public string GetStatusMessage() => _lastStatusMessage;
-
-    #region Network Interface Logic
-    private static List<NetworkAdapterInfo> _networkInterfaces = new();
-
-    private static List<NetworkAdapterInfo> GetNetworkInterfaces()
-    {
-        var list = new List<NetworkAdapterInfo>();
-        list.Add(new NetworkAdapterInfo(IPAddress.Any, IPAddress.Any, "Any"));
-        list.Add(new NetworkAdapterInfo(IPAddress.Loopback, IPAddress.Parse("255.0.0.0"), "Localhost"));
-        
-        try
-        {
-            list.AddRange(from ni in NetworkInterface.GetAllNetworkInterfaces()
-                          where ni.OperationalStatus == OperationalStatus.Up && ni.NetworkInterfaceType != NetworkInterfaceType.Loopback
-                          from ip in ni.GetIPProperties().UnicastAddresses
-                          where ip.Address.AddressFamily == AddressFamily.InterNetwork
-                          select new NetworkAdapterInfo(ip.Address, ip.IPv4Mask, ni.Name));
-        }
-        catch (Exception e)
-        {
-            Log.Warning("Could not enumerate network interfaces: " + e.Message);
-        }
-        return list;
-    }
-
-    private sealed record NetworkAdapterInfo(IPAddress IpAddress, IPAddress SubnetMask, string Name)
-    {
-        public string DisplayName => $"{Name} ({IpAddress})";
-    }
-    #endregion
-
-    string ICustomDropdownHolder.GetValueForInput(Guid id) => id == LocalIpAddress.Id ? LocalIpAddress.Value : string.Empty;
-
-    IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid id)
-    {
-        if (id == LocalIpAddress.Id)
-        {
-            _networkInterfaces = GetNetworkInterfaces();
-            foreach (var adapter in _networkInterfaces) yield return adapter.DisplayName;
-        }
-    }
-
-    void ICustomDropdownHolder.HandleResultForInput(Guid id, string? s, bool i)
-    {
-        if (string.IsNullOrEmpty(s) || !i || id != LocalIpAddress.Id) return;
-        var foundAdapter = _networkInterfaces.FirstOrDefault(adapter => adapter.DisplayName == s);
-        if (foundAdapter != null) LocalIpAddress.SetTypedInputValue(foundAdapter.IpAddress.ToString());
-    }
     #endregion
 }

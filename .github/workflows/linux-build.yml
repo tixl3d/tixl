@@ -13,7 +13,42 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Proves the MediaPipe native loads and runs before the tarball is produced: the bundled
+  # libmediapipe_c.so needs GL (libEGL/libGLESv2, provided by mesa on the runner image) and the
+  # test suite exercises the same Tasks-API paths the mediapipe operators use.
+  verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Cache NuGet Packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-linux-${{ hashFiles('**/*.csproj', 'Tixl.props', 'Directory.Build.props') }}
+          restore-keys: nuget-linux-
+
+      # The bundled libmediapipe_c.so links mesa's GL at load time (libEGL.so.1, libGLESv2.so.2);
+      # the runner image doesn't carry them.
+      - name: Install GL Libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libegl1 libgles2
+
+      - name: MediaPipe Smoke
+        run: dotnet test Mediapipe.Tests -c Release --nologo
+
   build:
+    needs: verify
     runs-on: ubuntu-latest
     # Ubuntu 22.04's glibc (2.35) keeps everything built here portable; the prebuilt libcimgui.so from
     # ImGui.NET still raises the tarball's minimum to glibc 2.38.

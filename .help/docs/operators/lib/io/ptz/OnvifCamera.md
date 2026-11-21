@@ -1,4 +1,4 @@
-# OnvifCamera
+﻿# OnvifCamera
 
 *in [Lib.io.ptz](README.md)*
 
@@ -20,7 +20,6 @@ Tips:
 ## Input Parameters
 | Name (Relevancy & Type) | Description |
 |---|---|
-| **LocalIpAddress** (String) | The local network interface to use for discovery and connection. Select the adapter connected to the camera network. |
 | **Discover** (Boolean) | Starts scanning the local network (via WS-Discovery) for ONVIF devices. Found devices will appear in the Address dropdown. |
 | **Address** (String) | The IP address or RTSP URL of the camera. If 'Discover' is used, you can select found cameras from the dropdown. |
 | **Username** (String) | The username for camera authentication (ONVIF and RTSP). |

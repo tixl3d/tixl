@@ -65,15 +65,21 @@ internal sealed partial class SetupOutputView
     }
 
     /// <summary>
-    /// The previews that must stay live: the focused output's composite, and whatever the selection points at —
-    /// a surface or slice through to the source feeding it, so dragging content around shows the real thing.
-    /// Several selected take turns; everything else holds the content it rendered once.
+    /// The previews that must stay live: the focused output's composite, whatever the selection
+    /// points at — a surface or slice through to the source feeding it, so dragging content
+    /// around shows the real thing — and every content source of the setup: the setup is a live
+    /// view for laser rigs too, so an unselected send must not freeze while the show runs from
+    /// here. All of them share the per-frame turn budget, so a frame never carries more than a
+    /// single send's cost however many are live.
     /// </summary>
     private static void MarkEditedPreviews(Setup setup, OutputDefinition? output, SetupEntitySelection? selection)
     {
         OutputPreviewRefresh.BeginPriorityFrame();
         if (output != null)
             OutputPreviewRefresh.AddPriority(output.Id);
+
+        foreach (var source in setup.ContentSources)
+            OutputPreviewRefresh.AddPriority(source.SymbolChildId);
 
         if (selection == null)
             return;
@@ -346,7 +352,11 @@ internal sealed partial class SetupOutputView
         var straighten = _viewMorph.Value;
 
         // Pulled before the transform so the content aspect below reads a live evaluation context.
-        var composite = OutputCompositor.RenderPreview(outputId);
+        // Laser outputs have no canvas composite: asking would invalidate the null result and retry
+        // the render every frame forever - their content shows through the laser frame previews.
+        var composite = output.Kind == OutputDefinition.Kinds.Laser
+                            ? null
+                            : OutputCompositor.RenderPreview(outputId);
 
         // Rectify basis = the focused surface. Freeze it while it is the one being dragged, so the transform
         // doesn't chase its own edit; otherwise the live quad keeps R settled and current.

@@ -1,4 +1,4 @@
-{
+﻿{
   "FormatVersion": 3,
   "Id": "e5a8d9e6-3c5a-4bbb-9da3-737b6330b9c3"/*SacnOutput*/,
   "Inputs": [
@@ -52,10 +52,6 @@
     },
     {
       "Id": "d9e8d7c6-b5a4-434a-9e3a-4e2b1d0c9a7b"/*TargetIpAddress*/,
-      "DefaultValue": ""
-    },
-    {
-      "Id": "f8a7e0c8-c6c7-4b53-9a3a-3e5f2a4f4e1c"/*LocalIpAddress*/,
       "DefaultValue": ""
     }
   ],

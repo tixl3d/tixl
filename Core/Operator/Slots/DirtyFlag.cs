@@ -21,6 +21,11 @@ public sealed class DirtyFlag
         _globalTickCount += GlobalTickDiffPerFrame;
     }
 
+    /// <summary>The current frame counter - constant within one frame, bumped once per frame.
+    /// Lets per-frame caches (e.g. the laser cameras' shared scene capture) key on the frame
+    /// deterministically instead of guessing with time windows.</summary>
+    public static int GlobalTicks => _globalTickCount;
+
     public bool IsDirty => TriggerIsEnabled || ValueVersion != SourceVersion;
 
     public static int GlobalInvalidationTick = 0;

@@ -68,7 +68,13 @@
       "Id": "0f882c2c-b1ec-420a-ac13-a2921ea624e6"/*Draw*/,
       "SymbolId": "9b28e6b9-1d1f-42d8-8a9e-33497b1df820",
       "SymbolName": "Lib.render._dx11.api.Draw",
-      "InputValues": [],
+      "InputValues": [
+        {
+          "Id": "4b524025-f9af-4ae1-9712-b7c0dca2723f"/*CaptureKind*/,
+          "Type": "System.Int32",
+          "Value": 1
+        }
+      ],
       "Outputs": []
     },
     {
@@ -458,6 +464,12 @@
       "TargetSlotId": "8716b11a-ef71-437e-9930-bb747da818a7"
     },
     {
+      "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "SourceSlotId": "5df18658-ef86-4c0f-8bb4-4ac3fbbf9a33",
+      "TargetParentOrChildId": "0f882c2c-b1ec-420a-ac13-a2921ea624e6",
+      "TargetSlotId": "c55aeb0a-ba11-49b8-82ee-2d2a74996c87"
+    },
+    {
       "SourceParentOrChildId": "faffc1d4-b3a9-442b-a940-83167266d8a4",
       "SourceSlotId": "a1ab0c16-ed15-4334-a529-10e3c217df1a",
       "TargetParentOrChildId": "19f7fe44-cfdc-4161-b342-787134dc014f",
@@ -744,6 +756,12 @@
       "SourceSlotId": "cc442161-e9ca-40ea-be3b-f87189d4e155",
       "TargetParentOrChildId": "fd0b19bc-ffcc-436f-800b-f934f82a0423",
       "TargetSlotId": "eb601c57-2025-4135-8292-223eaedaf187"
+    },
+    {
+      "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "SourceSlotId": "414c8045-5086-4449-9d9a-03f28c3966b3"/*PointSize*/,
+      "TargetParentOrChildId": "0f882c2c-b1ec-420a-ac13-a2921ea624e6"/*Draw*/,
+      "TargetSlotId": "f68fafbc-fe56-4987-9dcb-bd3260d5c1af"/*CapturePointSize*/
     }
   ]
 }

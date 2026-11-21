@@ -1,4 +1,4 @@
-# SacnOutput
+﻿# SacnOutput
 
 *in [Lib.io.dmx](README.md)*
 
@@ -27,7 +27,6 @@ AKA: sacn, streaming acn, dmx, artnet, lighting, e1.31
 |---|---|
 | **InputsValues** (List`1) | A multi-input where each connected input provides DMX channel data for a separate universe. Each input should contain a list of float values (0-255) that are clamped to 0-255. |
 | **UniverseChannels** (List`1) | Defines the starting universe number for each input. If an input has more than 512 channels, it automatically spans to the next universe. |
-| **LocalIpAddress** (String) | The IP address of the network interface to send from. A dropdown shows available addresses. If you have multiple network cards, make sure to select the one connected to your lighting network. |
 | **SendTrigger** (Boolean) | Enables continuous transmission of sACN data. When true, the operator sends packets at the rate specified by `MaxFps`. |
 | **Reconnect** (Boolean) | Forces a reconnection of the network socket. Toggle this to reconnect after network changes. |
 | **SendUnicast** (Boolean) | If enabled, sends sACN packets as unicast to the `TargetIpAddress`. Otherwise, packets are multicast. |

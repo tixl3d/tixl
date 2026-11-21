@@ -1,7 +1,8 @@
-#nullable enable
+﻿#nullable enable
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Threading;
+using T3.Core.Utils;
 
 namespace Lib.io.http;
 
@@ -9,7 +10,7 @@ namespace Lib.io.http;
 /// A simple HTTP server operator for T3 to serve a user-provided HTML string.
 /// </summary>
 [Guid("1D2E3F4A-5B6C-4789-0123-456789ABCDEF")] // Updated GUID
-internal sealed class WebServer : Instance<WebServer>, IStatusProvider, ICustomDropdownHolder, IDisposable // Added ICustomDropdownHolder
+internal sealed class WebServer : Instance<WebServer>, IStatusProvider, IDisposable
 {
     #region Constructor
     public WebServer()
@@ -37,7 +38,7 @@ internal sealed class WebServer : Instance<WebServer>, IStatusProvider, ICustomD
 
         _printToLog = PrintToLog.GetValue(context); // Update PrintToLog flag
         var shouldListen = Listen.GetValue(context);
-        var localIp = LocalIpAddress.GetValue(context); // Get local IP
+        var localIp = ProtocolInterfaces.ResolveAddressString(ProtocolInterfaces.Keys.WebServer);
         var port = Port.GetValue(context);
         var htmlContent = HtmlContent.GetValue(context); // Get HTML content from input
 
@@ -75,7 +76,7 @@ internal sealed class WebServer : Instance<WebServer>, IStatusProvider, ICustomD
     private HttpListener? _listener;
     private CancellationTokenSource? _cancellationTokenSource;
     private bool _lastListenState;
-    private string? _lastLocalIp; // Added for LocalIpAddress input
+    private string? _lastLocalIp;
     private int _lastPort;
     private string? _lastHtmlContent; // Store last HTML content
     private bool _disposed;
@@ -91,9 +92,9 @@ internal sealed class WebServer : Instance<WebServer>, IStatusProvider, ICustomD
         string prefixHost;
 
         // Determine the IP address to listen on
-        if (string.IsNullOrEmpty(localIpAddress) || localIpAddress == "0.0.0.0 (Any)")
+        if (string.IsNullOrEmpty(localIpAddress) || localIpAddress == "0.0.0.0")
         {
-            prefixHost = "+"; // Use '+' for HttpListener to listen on all interfaces
+            prefixHost = "+"; // HttpListener listens on all interfaces with '+', not a literal address
         }
         else if (!IPAddress.TryParse(localIpAddress, out _))
         {
@@ -336,50 +337,10 @@ internal sealed class WebServer : Instance<WebServer>, IStatusProvider, ICustomD
     }
     #endregion
 
-    #region ICustomDropdownHolder Implementation
-    string ICustomDropdownHolder.GetValueForInput(Guid id) => id == LocalIpAddress.Id ? LocalIpAddress.Value : string.Empty;
-
-    IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid id)
-    {
-        return id == LocalIpAddress.Id ? GetLocalIPv4Addresses() : Empty<string>();
-    }
-
-    void ICustomDropdownHolder.HandleResultForInput(Guid id, string? s, bool i)
-    {
-        if (string.IsNullOrEmpty(s) || !i || id != LocalIpAddress.Id) return;
-        LocalIpAddress.SetTypedInputValue(s.Split(' ')[0]);
-    }
-
-    private static IEnumerable<string> GetLocalIPv4Addresses()
-    {
-        yield return "0.0.0.0 (Any)"; // Option to listen on all available interfaces
-        yield return "127.0.0.1"; // Loopback address
-
-        if (!NetworkInterface.GetIsNetworkAvailable()) yield break;
-
-        foreach (var ni in NetworkInterface.GetAllNetworkInterfaces())
-        {
-            // Only consider operational and non-loopback interfaces
-            if (ni.OperationalStatus != OperationalStatus.Up || ni.NetworkInterfaceType == NetworkInterfaceType.Loopback) continue;
-
-            foreach (var ipInfo in ni.GetIPProperties().UnicastAddresses)
-            {
-                // Only consider IPv4 addresses
-                if (ipInfo.Address.AddressFamily == AddressFamily.InterNetwork)
-                {
-                    yield return ipInfo.Address.ToString();
-                }
-            }
-        }
-    }
-    #endregion
 
     #region Input Slots
     [Input(Guid = "4C5D6E7F-8A9B-4012-3456-7890ABCDEF12")] // Updated GUID
     public readonly InputSlot<bool> Listen = new();
-
-    [Input(Guid = "5D6E7F8A-9B0C-4123-4567-890ABCDEF123")] // Updated GUID
-    public readonly InputSlot<string> LocalIpAddress = new("0.0.0.0 (Any)"); // New input slot
 
     [Input(Guid = "6E7F8A9B-0C1D-4234-5678-90ABCDEF1234")] // Updated GUID
     public readonly InputSlot<int> Port = new(8080);

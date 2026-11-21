@@ -1,4 +1,4 @@
-{
+﻿{
   "FormatVersion": 3,
   "Id": "a9b8c7d6-e5f4-4210-9876-54321fedcba0"/*FreeDOutput*/,
   "Description": "Sends camera tracking data over UDP using the FreeD protocol. This is essential for virtual production, augmented reality, and broadcasting, allowing real-time integration with systems like Unreal Engine, Vizrt, or Aximmetry.\n\nSee also: [FreeDInput]",
@@ -11,15 +11,7 @@
       },
       "Description": "Enable to open the UDP socket and begin sending data. Disable to close the connection."
     },
-    {
-      "InputId": "9a0b1c2d-3e4f-4a6b-b7c8-d9e0f1a2b3c4"/*LocalIpAddress*/,
-      "Position": {
-        "X": -200.0,
-        "Y": 75.0
-      },
-      "Description": "The local network adapter (IP address) to send from. '0.0.0.0' lets the OS decide, which is usually sufficient.",
-      "Usage": "CustomDropdown"
-    },
+    
     {
       "InputId": "a0b1c2d3-e4f5-4a7b-c8d9-e0f1a2b3c4d5"/*TargetIpAddress*/,
       "Position": {

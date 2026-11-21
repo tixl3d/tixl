@@ -35,6 +35,7 @@ public static class OutputPreviewRefresh
         {
             _frame = frame;
             _refreshesThisFrame = 0;
+            _firstFillsThisFrame = 0;
 
             // A send appearing or going away is the one event that can make every preview wrong at once.
             if (_registryVersion != ContentSupplierRegistry.Version)
@@ -48,8 +49,21 @@ public static class OutputPreviewRefresh
         if (hasRendered && !_priority.Contains(id))
             return false;
 
-        // The one preview being edited stays live; everything else — first fills and several edited at once —
-        // goes through the per-frame budget, so their costs never land on the same frame.
+        // A first fill gets its own slot in addition to the refresh budget. Otherwise the previews that are
+        // drawn first (the Board's content cards) would take the single refresh slot every frame and a card
+        // that has never rendered — typically an output card — would stay blank forever.
+        if (!hasRendered)
+        {
+            if (_firstFillsThisFrame >= MaxFirstFillsPerFrame)
+                return false;
+
+            _firstFillsThisFrame++;
+            _renderedFrameById[id] = frame;
+            return true;
+        }
+
+        // The one preview being edited stays live; everything else — several edited at once — goes through
+        // the per-frame budget, so their costs never land on the same frame.
         if (hasRendered && _priority.Count == 1)
         {
             _renderedFrameById[id] = frame;
@@ -98,9 +112,13 @@ public static class OutputPreviewRefresh
     /** One per frame, so a stack of previews can never add up to more than a single send's cost. */
     private const int MaxRefreshesPerFrame = 1;
 
+    /** Blank cards are the most urgent case there is; one gets filled per frame on top of the refresh budget. */
+    private const int MaxFirstFillsPerFrame = 1;
+
     private static readonly Dictionary<Guid, int> _renderedFrameById = new();
     private static readonly HashSet<Guid> _priority = [];
     private static int _frame = -1;
     private static int _refreshesThisFrame;
+    private static int _firstFillsThisFrame;
     private static int _registryVersion = -1;
 }

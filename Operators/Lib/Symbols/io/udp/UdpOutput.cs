@@ -1,20 +1,18 @@
-#nullable enable
-using System.Net.NetworkInformation;
+﻿#nullable enable
+using System.Net;
 using System.Net.Sockets;
+using T3.Core.Utils;
 
 namespace Lib.io.udp;
 
 [Guid("34E4E63B-2708-4673-B682-1D07D0245E1E")]
-internal sealed class UdpOutput : Instance<UdpOutput>, IStatusProvider, ICustomDropdownHolder, IDisposable
+internal sealed class UdpOutput : Instance<UdpOutput>, IStatusProvider, IDisposable
 {
     [Input(Guid = "7AB8F2A6-4874-4235-85A5-D0E1F30C0446")]
     public readonly InputSlot<bool> Connect = new();
 
     [Output(Guid = "07B57F3A-8993-4B9F-8349-D0A4762E4447")]
     public readonly Slot<bool> IsConnected = new();
-
-    [Input(Guid = "9E23335A-D63A-4286-930E-C63E86D0E6F0")]
-    public readonly InputSlot<string> LocalIpAddress = new("127.0.0.1"); // Default updated
 
     [Input(Guid = "59074D76-1F4F-406A-B512-5813F4E3420E")]
     public readonly MultiInputSlot<string> MessageParts = new();
@@ -55,28 +53,6 @@ internal sealed class UdpOutput : Instance<UdpOutput>, IStatusProvider, ICustomD
         Result.UpdateAction = Update;
     }
 
-    string ICustomDropdownHolder.GetValueForInput(Guid id)
-    {
-        return id == LocalIpAddress.Id ? LocalIpAddress.Value  ?? string.Empty: string.Empty;
-    }
-
-    IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid id)
-    {
-        if (id == LocalIpAddress.Id)
-        {
-            _networkInterfaces = GetNetworkInterfaces();
-            foreach (var adapter in _networkInterfaces) yield return adapter.DisplayName;
-        }
-        Enumerable.Empty<string>();
-    }
-
-    void ICustomDropdownHolder.HandleResultForInput(Guid id, string? s, bool i)
-    {
-        if (string.IsNullOrEmpty(s) || !i || id != LocalIpAddress.Id) return;
-        var foundAdapter = _networkInterfaces.FirstOrDefault(adapter => adapter.DisplayName == s);
-        if (foundAdapter != null) LocalIpAddress.SetTypedInputValue(foundAdapter.IpAddress.ToString());
-    }
-
     public void Dispose()
     {
         CloseSocket();
@@ -96,7 +72,7 @@ internal sealed class UdpOutput : Instance<UdpOutput>, IStatusProvider, ICustomD
     {
         _printToLog = PrintToLog.GetValue(context); // Update printToLog flag
 
-        var localIp = LocalIpAddress.GetValue(context);
+        var localIp = ProtocolInterfaces.ResolveAddressString(ProtocolInterfaces.Keys.Udp);
         var shouldConnect = Connect.GetValue(context);
 
         var settingsChanged = localIp != _lastLocalIp || shouldConnect != _lastConnectState;
@@ -207,33 +183,4 @@ internal sealed class UdpOutput : Instance<UdpOutput>, IStatusProvider, ICustomD
         _lastStatusLevel = l;
     }
 
-    #region Network Interface Logic
-    private static List<NetworkAdapterInfo> _networkInterfaces = new();
-
-    private static List<NetworkAdapterInfo> GetNetworkInterfaces()
-    {
-        var list = new List<NetworkAdapterInfo>();
-        list.Add(new NetworkAdapterInfo(IPAddress.Any, IPAddress.Any, "Any"));
-        list.Add(new NetworkAdapterInfo(IPAddress.Loopback, IPAddress.Parse("255.0.0.0"), "Localhost"));
-        
-        try
-        {
-            list.AddRange(from ni in NetworkInterface.GetAllNetworkInterfaces()
-                          where ni.OperationalStatus == OperationalStatus.Up && ni.NetworkInterfaceType != NetworkInterfaceType.Loopback
-                          from ip in ni.GetIPProperties().UnicastAddresses
-                          where ip.Address.AddressFamily == AddressFamily.InterNetwork
-                          select new NetworkAdapterInfo(ip.Address, ip.IPv4Mask, ni.Name));
-        }
-        catch (Exception e)
-        {
-            Log.Warning("Could not enumerate network interfaces: " + e.Message);
-        }
-        return list;
-    }
-
-    private sealed record NetworkAdapterInfo(IPAddress IpAddress, IPAddress SubnetMask, string Name)
-    {
-        public string DisplayName => $"{Name}: {IpAddress}";
-    }
-    #endregion
 }

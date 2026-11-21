@@ -1,4 +1,4 @@
-{
+﻿{
   "FormatVersion": 3,
   "Id": "9b4e3c2d-a1f0-4567-89bc-def012345678"/*WebSocketServer*/,
   "Inputs": [
@@ -30,10 +30,7 @@
       "Id": "5a6f7e8d-9c0b-4412-3456-789abcdef012"/*ClientMessageDelimiter*/,
       "DefaultValue": ""
     },
-    {
-      "Id": "73b1f8c9-9a2e-47c0-b1c8-29c34a2e7d01"/*LocalIpAddress*/,
-      "DefaultValue": "0.0.0.0"
-    },
+    
     {
       "Id": "8e7d6c5b-4a3f-4123-b9c8-d7e6f5a4b3c2"/*Path*/,
       "DefaultValue": ""

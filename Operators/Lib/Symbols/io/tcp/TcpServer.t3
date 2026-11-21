@@ -1,4 +1,4 @@
-{
+﻿{
   "FormatVersion": 3,
   "Id": "0f1e2d3c-4b5a-4678-9012-3456789abcde"/*TcpServer*/,
   "Inputs": [
@@ -6,10 +6,7 @@
       "Id": "9a0b1c2d-3e4f-4567-8901-23456789abc0"/*Listen*/,
       "DefaultValue": false
     },
-    {
-      "Id": "a0b1c2d3-e4f5-4678-9012-3456789abcde"/*LocalIpAddress*/,
-      "DefaultValue": "127.0.0.1"
-    },
+    
     {
       "Id": "b1c2d3e4-f5a6-4789-0123-456789abcdef"/*Port*/,
       "DefaultValue": 7070

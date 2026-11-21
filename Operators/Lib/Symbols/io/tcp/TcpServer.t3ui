@@ -1,4 +1,4 @@
-{
+﻿{
   "FormatVersion": 3,
   "Id": "0f1e2d3c-4b5a-4678-9012-3456789abcde"/*TcpServer*/,
   "Description": "Creates a TCP server to listen for incoming connections and receive data.\n\nThis operator starts a TCP server on a specified IP address and port, allowing multiple clients to connect simultaneously. It receives data from all connected clients and can broadcast messages to them.\n\nTips:\n- Use `Listen` to start and stop the server.\n- `ConnectionCount` shows how many clients are currently connected.\n- Messages sent via the `Message` input are broadcast to all connected clients.\n\nAKA: tcp, network, socket, server",
@@ -11,15 +11,7 @@
       },
       "Description": "Starts or stops the TCP server from listening for new connections."
     },
-    {
-      "InputId": "a0b1c2d3-e4f5-4678-9012-3456789abcde"/*LocalIpAddress*/,
-      "Position": {
-        "X": -200.0,
-        "Y": 75.0
-      },
-      "Description": "The local IP address for the server to listen on. A dropdown shows available addresses. Using '0.0.0.0' will make the server listen on all available network interfaces.",
-      "Usage": "CustomDropdown"
-    },
+    
     {
       "InputId": "b1c2d3e4-f5a6-4789-0123-456789abcdef"/*Port*/,
       "Position": {

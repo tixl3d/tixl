@@ -1,12 +1,13 @@
-#nullable enable
-using System.Net.NetworkInformation;
+﻿#nullable enable
+using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using T3.Core.Utils;
 
 namespace Lib.io.freed;
 
 [Guid("1f2e3d4c-5b6a-4988-9a0b-c1d2e3f4a5b6")]
-internal sealed class FreeDInput : Instance<FreeDInput>, IStatusProvider, ICustomDropdownHolder, IDisposable
+internal sealed class FreeDInput : Instance<FreeDInput>, IStatusProvider, IDisposable
 {
     public FreeDInput()
     {
@@ -33,7 +34,7 @@ internal sealed class FreeDInput : Instance<FreeDInput>, IStatusProvider, ICusto
             ParseFreeDDataPacket(data);
 
         var shouldListen = Listen.GetValue(context);
-        var localIp = LocalIpAddress.GetValue(context) ?? string.Empty;
+        var localIp = ProtocolInterfaces.ResolveAddressString(ProtocolInterfaces.Keys.FreeD);
         var port = Port.GetValue(context);
 
         var settingsChanged = shouldListen != _lastListenState || localIp != _lastLocalIp || port != _lastPort;
@@ -131,7 +132,7 @@ internal sealed class FreeDInput : Instance<FreeDInput>, IStatusProvider, ICusto
         try
         {
             var listenIp = IPAddress.Any;
-            if (!string.IsNullOrEmpty(localIpStr) && localIpStr != "0.0.0.0 (Any)" && IPAddress.TryParse(localIpStr, out var parsedIp))
+            if (!string.IsNullOrEmpty(localIpStr) && IPAddress.TryParse(localIpStr, out var parsedIp))
                 listenIp = parsedIp;
 
             _udpClient = new UdpClient();
@@ -231,12 +232,12 @@ internal sealed class FreeDInput : Instance<FreeDInput>, IStatusProvider, ICusto
         _disposed = true;
     }
 
-    #region Status and Dropdown
+    #region Status
     private string _statusMessage = "Not listening.";
     private IStatusProvider.StatusLevel _statusLevel = IStatusProvider.StatusLevel.Notice;
     private readonly object _statusLock = new();
 
-    public void SetStatus(string m, IStatusProvider.StatusLevel l)
+    private void SetStatus(string m, IStatusProvider.StatusLevel l)
     {
         lock (_statusLock)
         {
@@ -260,38 +261,6 @@ internal sealed class FreeDInput : Instance<FreeDInput>, IStatusProvider, ICusto
             return _statusMessage;
         }
     }
-
-    string ICustomDropdownHolder.GetValueForInput(Guid id)
-    {
-        return id == LocalIpAddress.Id ? LocalIpAddress.Value  ?? string.Empty: string.Empty;
-    }
-
-    IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid id)
-    {
-        if (id != LocalIpAddress.Id)
-            return Empty<string>();
-
-        return _cachedIpAddresses ??= GetLocalIPv4Addresses().ToList();
-    }
-
-    void ICustomDropdownHolder.HandleResultForInput(Guid id, string? s, bool i)
-    {
-        if (!string.IsNullOrEmpty(s) && i && id == LocalIpAddress.Id) LocalIpAddress.SetTypedInputValue(s);
-    }
-
-    private static IEnumerable<string> GetLocalIPv4Addresses()
-    {
-        yield return "0.0.0.0 (Any)";
-        yield return "127.0.0.1";
-        if (!NetworkInterface.GetIsNetworkAvailable()) yield break;
-        foreach (var ni in NetworkInterface.GetAllNetworkInterfaces())
-        {
-            if (ni.OperationalStatus != OperationalStatus.Up || ni.NetworkInterfaceType == NetworkInterfaceType.Loopback) continue;
-            foreach (var ipInfo in ni.GetIPProperties().UnicastAddresses)
-                if (ipInfo.Address.AddressFamily == AddressFamily.InterNetwork)
-                    yield return ipInfo.Address.ToString();
-        }
-    }
     #endregion
 
     #region Fields
@@ -305,7 +274,6 @@ internal sealed class FreeDInput : Instance<FreeDInput>, IStatusProvider, ICusto
     private readonly ConcurrentDictionary<byte, FreeDCameraData> _trackedValues = new();
     private BufferWithViews? _outputBuffer;
     private Point[]? _pointArrayForGpu;
-    private List<string>? _cachedIpAddresses;
     private const int FreeDPacketLength = 29;
     private const byte FreeDIdentifier = 0xD1;
     private const float AngleScale = 32768.0f;
@@ -341,9 +309,6 @@ internal sealed class FreeDInput : Instance<FreeDInput>, IStatusProvider, ICusto
 
     [Input(Guid = "4b5c6d7e-8f9a-4b1c-c2d3-e4f5a6b7c8d9")]
     public readonly InputSlot<bool> Listen = new();
-
-    [Input(Guid = "5c6d7e8f-9a0b-4c2d-d3e4-f5a6b7c8d9e0")]
-    public readonly InputSlot<string> LocalIpAddress = new("0.0.0.0 (Any)");
 
     [Input(Guid = "6d7e8f9a-0b1c-4d3e-e4f5-a6b7c8d9e0f1")]
     public readonly InputSlot<int> Port = new(6000);

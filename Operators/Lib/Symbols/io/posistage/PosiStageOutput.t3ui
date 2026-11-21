@@ -1,4 +1,4 @@
-{
+﻿{
   "FormatVersion": 3,
   "Id": "f1b2a3c4-d5e6-4f7a-8b9c-0d1e2f3a4b5c"/*PosiStageOutput*/,
   "Description": "Sends real-time 3D tracking data using the PosiStageNet (PSN) protocol.\n\nThis operator takes a list of points and sends them as PosiStageNet tracker data over the network. This allows TiXL to act as a source of tracking information for other applications in a virtual production or live event workflow.\n\nTips:\n- The `TrackerData` input expects a structured buffer of points, where each point represents a tracker with position and orientation.\n- Use `SendOnChange` or `SendTrigger` to control when data is sent.\n- The `Names` input can be used to assign names to the trackers being sent.\n\nAKA: posistage, tracking, stage, psn, motion capture, sender",
@@ -45,15 +45,7 @@
       },
       "Description": "Initializes or re-initializes the network socket."
     },
-    {
-      "InputId": "9e23335a-d63a-4286-930e-c63e86d0e6f0"/*LocalIpAddress*/,
-      "Position": {
-        "X": -200.0,
-        "Y": 75.0
-      },
-      "Description": "The IP address of the network interface to send from. If left empty, the system will choose one automatically.",
-      "Usage": "Default"
-    },
+    
     {
       "InputId": "b16a0356-ef4a-413a-a656-7497127e31d4"/*SendOnChange*/,
       "Position": {

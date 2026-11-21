@@ -117,14 +117,6 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "c3a7e591-2f84-4d6b-9e0c-58b1d4f27a63",
-      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
-      "Position": {
-        "X": 1482.9324,
-        "Y": 4165.0068
-      }
-    },
-    {
       "ChildId": "08a6f1a1-8fb2-4f41-9f57-e856caa980d1",
       "SymbolName": "Lib.flow.context.GetForegroundColor",
       "Position": {
@@ -289,6 +281,14 @@
       "Position": {
         "X": 1682.9324,
         "Y": 4045.0068
+      }
+    },
+    {
+      "ChildId": "c3a7e591-2f84-4d6b-9e0c-58b1d4f27a63",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
+      "Position": {
+        "X": 1482.9324,
+        "Y": 4165.007
       }
     },
     {

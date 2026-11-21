@@ -52,6 +52,8 @@ Animating **Width** is cheap on simple shapes — the geometry rebuilds in real 
 
 [LoadObjGeometry] loads a Wavefront `.obj` file as geometry. Quads and other N-gons are kept, so imported models can be beveled. OBJ objects and groups become parts, and the file reloads automatically when it changes on disk. For glTF files and character animation, use [LoadGltfScene] instead — see [Character animation](CharacterAnimation.md).
 
+[AssimpImport] reads FBX, glTF, Collada, STL, PLY, 3DS, Blend and many more formats. Its **Geometry** output keeps N-gons like [LoadObjGeometry]; every mesh of the file becomes one part, with the file's node transforms applied. Positions that only differ in their UVs or normals are welded, so edges at UV seams stay connected for beveling. [AssimpExport] writes geometry (one object per part), meshes or points back to these formats.
+
 ## Deforming and coloring with fields
 
 Fields describe a value that varies through space. Build one, optionally reshape it, then let an operator sample it:

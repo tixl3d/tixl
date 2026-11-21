@@ -156,7 +156,10 @@ public abstract partial class Instance
         var inputs = instance._inputs;
         var inputDefinitions = instance.Symbol.InputDefinitions;
         int numInputs = inputs.Count;
-        var lastIndex = numInputs - 1;
+        // An op whose instantiated input slots outnumber its definitions (e.g. a child whose
+        // .t3 lags a new .cs input) would index past the definitions here and crash the
+        // whole instantiation — sort the overlap only.
+        var lastIndex = Math.Min(numInputs, inputDefinitions.Count) - 1;
 
         for (int i = 0; i < lastIndex; i++)
         {

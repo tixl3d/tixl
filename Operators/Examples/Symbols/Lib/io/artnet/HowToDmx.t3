@@ -1,4 +1,4 @@
-{
+﻿{
   "FormatVersion": 3,
   "Id": "0ea8b502-6489-46df-86ed-82d882f67817"/*HowToDmx*/,
   "Inputs": [
@@ -44,11 +44,6 @@
           "Id": "d293bb33-2fba-4048-99b8-86aa15a478f2"/*SendSync*/,
           "Type": "System.Boolean",
           "Value": false
-        },
-        {
-          "Id": "fcbfe87b-b8aa-461c-a5ac-b22bb29ad36d"/*LocalIpAddress*/,
-          "Type": "System.String",
-          "Value": "127.0.0.1"
         }
       ],
       "Outputs": []
@@ -847,11 +842,6 @@
           "Id": "d293bb33-2fba-4048-99b8-86aa15a478f2"/*SendSync*/,
           "Type": "System.Boolean",
           "Value": false
-        },
-        {
-          "Id": "fcbfe87b-b8aa-461c-a5ac-b22bb29ad36d"/*LocalIpAddress*/,
-          "Type": "System.String",
-          "Value": "127.0.0.1"
         }
       ],
       "Outputs": []
@@ -1025,11 +1015,6 @@
           "Id": "d293bb33-2fba-4048-99b8-86aa15a478f2"/*SendSync*/,
           "Type": "System.Boolean",
           "Value": false
-        },
-        {
-          "Id": "fcbfe87b-b8aa-461c-a5ac-b22bb29ad36d"/*LocalIpAddress*/,
-          "Type": "System.String",
-          "Value": "127.0.0.1"
         }
       ],
       "Outputs": []
@@ -1423,11 +1408,6 @@
           "Id": "d293bb33-2fba-4048-99b8-86aa15a478f2"/*SendSync*/,
           "Type": "System.Boolean",
           "Value": false
-        },
-        {
-          "Id": "fcbfe87b-b8aa-461c-a5ac-b22bb29ad36d"/*LocalIpAddress*/,
-          "Type": "System.String",
-          "Value": "127.0.0.1"
         }
       ],
       "Outputs": []
@@ -1563,11 +1543,6 @@
           "Id": "d293bb33-2fba-4048-99b8-86aa15a478f2"/*SendSync*/,
           "Type": "System.Boolean",
           "Value": false
-        },
-        {
-          "Id": "fcbfe87b-b8aa-461c-a5ac-b22bb29ad36d"/*LocalIpAddress*/,
-          "Type": "System.String",
-          "Value": "127.0.0.1"
         }
       ],
       "Outputs": []

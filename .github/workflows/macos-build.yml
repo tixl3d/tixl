@@ -16,7 +16,56 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Proves the media stack works on macOS before a DMG is produced: the same LGPL FFmpeg the bundle
+  # carries is compiled here and driven by the real VideoServices test suite (decode, every software
+  # encoder incl. HEVC, hardware VideoToolbox round-trip), and the OpenCV smoke runs the code paths
+  # the CameraCalibrator / point-scanner operators use on the osx-arm64 native build.
+  verify:
+    runs-on: macos-15
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Cache NuGet Packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-macos-${{ hashFiles('**/*.csproj', 'Tixl.props', 'Directory.Build.props') }}
+          restore-keys: nuget-macos-
+
+      - name: Build LGPL FFmpeg
+        run: Installer/macOS/build-ffmpeg.sh "$RUNNER_TEMP/ffmpeg-lib"
+
+      - name: Run VideoServices Test Suite Against the Bundled Build
+        env:
+          TIXL_FFMPEG_DIR: ${{ runner.temp }}/ffmpeg-lib
+        run: dotnet test VideoServices.Tests -c Release --nologo
+
+      - name: OpenCV Smoke
+        run: dotnet run --project OpenCvSmoke -c Release
+
+      # Drives the bundled libmediapipe_c.dylib (universal2) through the Tasks API the mediapipe
+      # operators use, so a native/API mismatch fails here instead of inside the editor.
+      # The release dylib must be (at least ad-hoc) signed for dyld on Apple Silicon; the shipped DMG
+      # re-signs all dylibs anyway, so re-signing here matches what actually ships.
+      - name: MediaPipe Smoke
+        run: |
+          dotnet build Mediapipe.Tests -c Release --nologo
+          ls -la Mediapipe.Tests/bin/Release/net10.0/libmediapipe_c.dylib Mediapipe.Tests/bin/Release/net10.0/libmediapipe_opencl_stub.dylib
+          codesign --force --sign - Mediapipe.Tests/bin/Release/net10.0/libmediapipe_c.dylib
+          codesign --force --sign - Mediapipe.Tests/bin/Release/net10.0/libmediapipe_opencl_stub.dylib
+          dotnet test Mediapipe.Tests -c Release --no-build --nologo
+
   build:
+    needs: verify
     # Apple Silicon runner: the DMG is osx-arm64 only.
     runs-on: macos-15
     # Only tag runs enter the environment, so a manual run on a branch builds unsigned instead of being refused.

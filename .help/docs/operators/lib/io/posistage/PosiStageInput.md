@@ -1,4 +1,4 @@
-# PosiStageInput
+﻿# PosiStageInput
 
 *in [Lib.io.posistage](README.md)*
 
@@ -17,7 +17,6 @@ AKA: posistage, tracking, stage, psn, motion capture
 | Name (Relevancy & Type) | Description |
 |---|---|
 | **Listen** (Boolean) | Enables or disables listening for PosiStageNet packets. |
-| **LocalIpAddress** (String) | The IP address of the network interface to listen on. A dropdown shows available addresses. Ensure this is the interface connected to your tracking network. |
 | **MulticastIpAddress** (String) | The multicast IP address to join for receiving PosiStageNet data. The default for PSN is typically 236.10.10.10. |
 | **Port** (Int32) | The UDP port to listen for PosiStageNet data on. The default for PSN is typically 12345. |
 | **PrintToLog** (Boolean) | If enabled, prints received tracker data and status information to the T3 log. Useful for debugging. |

@@ -136,6 +136,17 @@ internal sealed partial class OutputWindow
         SaveStateTo(state);
     }
 
+    /// <summary>The window's current state as a standalone copy, for failover to mirror onto the standby.</summary>
+    internal OutputWindowState CaptureState()
+    {
+        var state = new OutputWindowState();
+        SaveStateTo(state);
+        return state;
+    }
+
+    /// <summary>Applies a state received from the active machine; see <see cref="CaptureState"/>.</summary>
+    internal void ApplyState(OutputWindowState state) => LoadStateFrom(state);
+
     private void SaveStateTo(OutputWindowState state)
     {
         // ShowGizmos and TransformGizmoMode are already on the state object (direct backing store)

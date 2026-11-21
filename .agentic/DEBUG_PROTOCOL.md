@@ -106,6 +106,10 @@ Parameter shapes are defined in `DebugServer.cs` — read the handler when unsur
   twice counts twice), and the same per symbol name in `bySymbol`, largest first. Instances are not created on
   the way. With playback paused, everything it reports is work done although nothing changed: the cost that
   caching would save. Combine with `getFrameSamples` for CPU time.
+- `getOpTimings` switches on per-operator update timing and returns the previous frame's 30 slowest operators
+  (`operators`: `name`, `ms`, `updates`). Times are inclusive of everything an operator evaluates, so rows must
+  not be summed. `setOpTimings` (`enabled`: bool) turns it off again and clears the counters; while off the
+  update path only pays a single bool test.
 - `releaseGpuResources` does what the main menu's Free GPU Memory does: every render target that can rebuild its
   content releases its textures and re-renders when next pulled. It runs at the start of the next frame, so
   `pumpFrames` before reading `getMetrics`.

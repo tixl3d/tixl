@@ -1,6 +1,5 @@
-#nullable enable
+﻿#nullable enable
 using System.Net;
-using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Threading;
 using T3.Core.Utils;
@@ -9,7 +8,7 @@ namespace Lib.io.tcp
 {
     [Guid("A2B3C4D5-E6F7-4890-1234-567890ABCDEF")]
     internal sealed class TcpClient : Instance<TcpClient>
-                                    , IStatusProvider, ICustomDropdownHolder, IDisposable
+                                    , IStatusProvider, IDisposable
     {
         private readonly List<string> _messageHistory = new();
         private readonly ConcurrentQueue<string> _receivedQueue = new();
@@ -50,9 +49,6 @@ namespace Lib.io.tcp
 
         [Input(Guid = "E6F7A8B9-C0D1-4234-5678-90ABCDEF1234")]
         public readonly InputSlot<string> Separator = new(" ");
-
-        [Input(Guid = "759368A6-5123-4E6B-9087-123456789ABC")]
-        public readonly InputSlot<string> LocalIpAddress = new("0.0.0.0 (Any)");
 
         [Output(Guid = "1A2B3C4D-5E6F-4789-A0B1-C2D3E4F5A6B7", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
         public readonly Slot<bool> WasTrigger = new();
@@ -95,7 +91,7 @@ namespace Lib.io.tcp
             var shouldConnect = Connect.GetValue(context);
             var host = Host.GetValue(context);
             var port = Port.GetValue(context);
-            var localIp = LocalIpAddress.GetValue(context);
+            var localIp = ProtocolInterfaces.ResolveAddressString(ProtocolInterfaces.Keys.Tcp);
 
             var settingsChanged = shouldConnect != _lastConnectState || host != _lastHost || port != _lastPort || localIp != _lastLocalIp;
             if (settingsChanged)
@@ -379,7 +375,7 @@ namespace Lib.io.tcp
             public async Task ConnectAsync(string host, int port, string? localIpAddress)
             {
                 IPAddress? localIp = null;
-                if (!string.IsNullOrEmpty(localIpAddress) && localIpAddress != "0.0.0.0 (Any)")
+                if (!string.IsNullOrEmpty(localIpAddress) && localIpAddress != "0.0.0.0")
                 {
                     IPAddress.TryParse(localIpAddress, out localIp);
                 }
@@ -435,54 +431,5 @@ namespace Lib.io.tcp
         public string GetStatusMessage() => _statusMessage;
         #endregion
 
-        #region Network Interface Logic
-        private static List<NetworkAdapterInfo> _networkInterfaces = new();
-
-        private static List<NetworkAdapterInfo> GetNetworkInterfaces()
-        {
-            var list = new List<NetworkAdapterInfo>();
-            list.Add(new NetworkAdapterInfo(IPAddress.Any, IPAddress.Any, "Any"));
-            list.Add(new NetworkAdapterInfo(IPAddress.Loopback, IPAddress.Parse("255.0.0.0"), "Localhost"));
-            
-            try
-            {
-                list.AddRange(from ni in NetworkInterface.GetAllNetworkInterfaces()
-                              where ni.OperationalStatus == OperationalStatus.Up && ni.NetworkInterfaceType != NetworkInterfaceType.Loopback
-                              from ip in ni.GetIPProperties().UnicastAddresses
-                              where ip.Address.AddressFamily == AddressFamily.InterNetwork
-                              select new NetworkAdapterInfo(ip.Address, ip.IPv4Mask, ni.Name));
-            }
-            catch (Exception e)
-            {
-                Log.Warning("Could not enumerate network interfaces: " + e.Message);
-            }
-            return list;
-        }
-
-        private sealed record NetworkAdapterInfo(IPAddress IpAddress, IPAddress SubnetMask, string Name)
-        {
-            public string DisplayName => $"{Name}: {IpAddress}";
-        }
-        #endregion
-
-        #region ICustomDropdownHolder
-        string ICustomDropdownHolder.GetValueForInput(Guid id) => id == LocalIpAddress.Id ? LocalIpAddress.Value ?? string.Empty : string.Empty;
-
-        IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid id)
-        {
-            if (id == LocalIpAddress.Id)
-            {
-                _networkInterfaces = GetNetworkInterfaces();
-                foreach (var adapter in _networkInterfaces) yield return adapter.DisplayName;
-            }
-        }
-
-        void ICustomDropdownHolder.HandleResultForInput(Guid id, string? s, bool i)
-        {
-            if (string.IsNullOrEmpty(s) || !i || id != LocalIpAddress.Id) return;
-            var foundAdapter = _networkInterfaces.FirstOrDefault(adapter => adapter.DisplayName == s);
-            if (foundAdapter != null) LocalIpAddress.SetTypedInputValue(foundAdapter.IpAddress.ToString());
-        }
-        #endregion
     }
 }

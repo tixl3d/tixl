@@ -1,4 +1,4 @@
-# WebSocketServer
+﻿# WebSocketServer
 
 *in [Lib.io.websocket](README.md)*
 
@@ -8,7 +8,7 @@ This operator is ideal for building interactive web-based UIs, remote controls, 
 
 Tips:
 - Use `Listen` to start and stop the server.
-- The server address will be `ws://[LocalIpAddress]:[Port]/[Path]`.
+- The server address is `ws://<adapter from the Networking settings>:<Port>/<Path>`.
 - Messages sent from T3 via the `Message` input are broadcast to all connected clients.
 - Incoming messages from clients are available on the `LastReceived...` outputs.
 
@@ -23,7 +23,6 @@ AKA: websocket, server, network, web, socket, real-time
 | **Message** (String) | The message to be broadcast to all connected clients. |
 | **SendOnChange** (Boolean) | If enabled, the `Message` is broadcast automatically to all clients whenever its content changes. |
 | **SendTrigger** (Boolean) | A trigger to manually broadcast the `Message` to all connected clients. The message is sent when this value changes from 0 to 1. |
-| **LocalIpAddress** (String) | The local IP address to bind the server to. Use '0.0.0.0 (Listen on all interfaces)' to listen on all available network interfaces. Default is '0.0.0.0 (Listen on all interfaces)'. |
 | **PrintToLog** (Boolean) | If enabled, prints connection status, sent/received messages, and errors to the T3 log. Useful for debugging. |
 | **ClientMessageParsingMode** (Int32) | Defines how incoming messages from clients are parsed. 'Raw' treats the message as a single string, while other modes attempt to split or parse the message. Default is Raw. |
 | **ClientMessageDelimiter** (String) | The character or string to use as a delimiter when `ClientMessageParsingMode` is set to 'SpaceSeparated'. Default is a single space. |

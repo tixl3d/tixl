@@ -225,10 +225,27 @@ internal sealed partial class SetupOutputView
             if (!TryGetBoardBounds(setup, SetupEntityKinds.Output, output.Id, out var min, out var max))
                 continue;
 
-            var composite = OutputCompositor.RenderPreview(output.Id);
+            // Only canvas outputs composite here. A laser output has no composite - and asking for
+            // one would retry a "first fill" every frame forever (a null composite invalidates
+            // itself, so the rationer keeps re-attempting), one wasted render pass per laser card
+            // per frame. Its card shows what streams instead: the laser frame after the output's
+            // pipeline, drawn onto the ILDA scan field.
+            Texture2D? composite = null;
+            var isLaser = output.Kind == OutputDefinition.Kinds.Laser;
+            if (!isLaser)
+                composite = OutputCompositor.RenderPreview(output.Id);
+
             var srv = composite is { IsDisposed: false } ? SrvManager.GetSrvForTexture(composite) : null;
             DrawBoardCard(setup, selection, dl, SetupEntityKinds.Output, output.Id, min, max,
                           SetupLabels.OutputLabel(output), BoardMeta(output.Id), srv, true);
+
+            if (isLaser)
+            {
+                var frameMin = _boardProjection.CanvasToScreen(new Vector2(min.X, max.Y));
+                var frameMax = _boardProjection.CanvasToScreen(new Vector2(max.X, min.Y));
+                SetupStrokes.SnapRect(ref frameMin, ref frameMax);
+                LaserOutputPreview.DrawFrame(dl, frameMin, frameMax, LaserOutputPreview.GetFrame(output), _boardLayerFade);
+            }
 
             // The pixel map over the card's composite, as on the output canvas, so patches are placed against it here too.
             var pixelMap = setup.FindReferenceImage(output.ReferenceImageId);
@@ -2441,6 +2458,14 @@ internal sealed partial class SetupOutputView
         foreach (var output in setup.Outputs)
         {
             var binding = machineConfig.FindBinding(output.Id);
+            if (output.Kind == OutputDefinition.Kinds.Laser)
+            {
+                // A laser output has no pixel canvas; what matters on its card is whether it streams.
+                var state = SetupLabels.LaserOutputState(output, binding != null, out _);
+                _boardMeta[output.Id] = binding == null ? state : $"{state} → {Plugs.BindingLabel(machineConfig, binding)}";
+                continue;
+            }
+
             _boardMeta[output.Id] = binding == null
                                         ? $"{output.ResolvedResolution.Width}×{output.ResolvedResolution.Height}"
                                         : $"{output.ResolvedResolution.Width}×{output.ResolvedResolution.Height} → {Plugs.BindingLabel(machineConfig, binding)}";
@@ -2612,7 +2637,7 @@ internal sealed partial class SetupOutputView
 
     // Card metadata strings by entity id, rebuilt per structure change.
     private readonly Dictionary<Guid, string> _boardMeta = new();
-    private int _boardMetaVersion = -1;
+    private static int _boardMetaVersion = -1; // shared: the reference-texture sync invalidates it from static context
 
     /** The lifted walls' gap labels, formatted only when an elevation changes — the Board draws per frame. */
     private readonly Dictionary<Guid, (float Elevation, string Label)> _wallElevationLabels = new();

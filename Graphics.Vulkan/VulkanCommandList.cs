@@ -644,6 +644,7 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
                                            };
 
             backend.Api.vkCmdCopyImageToBuffer(_commandBuffer, from.Image, VkImageLayout.TransferSrcOptimal, to.StagingBuffer, 1, &region);
+            to.ReadbackWrittenInFrameSerial = backend.RecordingFrameSerial;
             return;
         }
 
@@ -703,6 +704,9 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
                                   };
 
         backend.Api.vkCmdCopyBuffer(_commandBuffer, from.Buffer, to.Buffer, 1, &region);
+
+        if (to.Mapped != null)
+            to.ReadbackWrittenInFrameSerial = backend.RecordingFrameSerial;
     }
 
     public void CopyTextureRegion(GpuTexture source, int sourceSubresource, GpuTexture destination, int destinationSubresource, int x, int y, int z)

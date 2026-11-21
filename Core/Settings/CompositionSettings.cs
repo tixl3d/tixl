@@ -186,6 +186,12 @@ public sealed class CompositionSettings
         public VideoExportCodec Format = VideoExportCodec.ProRes; // all-intra, no GPL
         public float Resolution = 0.5f;                           // fraction of the source resolution
         public bool UseForPreview = true;                         // open a clip's proxy when one exists (never while rendering)
+
+        /// <summary>True when any field left its default - the section must round-trip on its own merit,
+        /// not only while playback writing is enabled (a picked codec shouldn't reset on reload).</summary>
+        public bool HasNonDefaults => Format != VideoExportCodec.ProRes
+                                      || System.Math.Abs(Resolution - 0.5f) > 0.0001f
+                                      || !UseForPreview;
     }
 
     public sealed class PlaybackConfig
@@ -221,7 +227,8 @@ public sealed class CompositionSettings
     {
         // Disabled settings are dropped on save so cleaned-up ops don't keep carrying a stale block.
         // Un-migrated legacy clips are kept regardless: they are content awaiting conversion to [AudioClip] ops.
-        var hasSettings = Enabled || Playback.AudioClips.Count > 0;
+        // A non-default proxy keeps the block too - the codec choice travels with the project either way.
+        var hasSettings = Enabled || Playback.AudioClips.Count > 0 || Proxy.HasNonDefaults;
         if (!hasSettings)
             return;
 

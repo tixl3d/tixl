@@ -23,8 +23,17 @@ public sealed class StructuredBufferReadAccess : IDisposable
         public required int StructureByteStride;
         public int FirstElement { get; init; }
 
-        internal bool IsReady => RequestIndex == BufferReadAccess._frameCounter - (BufferCount - 2);
-        internal bool IsObsolete => RequestIndex < BufferReadAccess._frameCounter - (BufferCount - 2);
+        // A request is mappable once the copy has been queued for a full frame. It stays mappable
+        // on the following frames too: with a non-blocking map the copy is usually not downloaded
+        // yet on the first attempt and has to be retried.
+        internal bool IsReady => RequestIndex <= BufferReadAccess._frameCounter - 1;
+
+        // Its staging buffer is overwritten by the copy of the request BufferCount frames later,
+        // so it must be dropped before that copy is issued.
+        internal bool IsObsolete => RequestIndex < BufferReadAccess._frameCounter - BufferCount;
+
+        // Last frame on which this request can still be mapped before its staging slot is reused.
+        internal bool IsLastAttempt => RequestIndex == BufferReadAccess._frameCounter - BufferCount;
     }
 
     public delegate void OnReadComplete(ReadRequestItem readItem, IntPtr dataPointer, DataStream dataStream);
@@ -43,27 +52,68 @@ public sealed class StructuredBufferReadAccess : IDisposable
             _readRequests.RemoveAt(0);
         }
 
-        if (_readRequests.Count == 0 || !_readRequests[0].IsReady)
+        if (_readRequests.Count == 0)
             return;
 
-        var request = _readRequests[0];
         var context = ResourceManager.Device.ImmediateContext;
 
-        var dataBox = context.MapSubresource(
-            request.CpuAccessBuffer,
-            0,
-            MapMode.Read,
-            MapFlags.None,
-            out var dataStream);
+        // Try every matured request, not just the head: a copy that hasn't landed yet must not
+        // block the requests behind it, and it has to stay queued so a later Update can retry it.
+        // The rotating staging buffers keep it valid until it is about to be overwritten.
+        for (var i = 0; i < _readRequests.Count; i++)
+        {
+            var request = _readRequests[i];
+            if (!request.IsReady)
+                continue;
 
-        try
-        {
-            request.OnSuccess(request, dataBox.DataPointer, dataStream);
-        }
-        finally
-        {
-            context.UnmapSubresource(request.CpuAccessBuffer, 0);
-            _readRequests.RemoveAt(0);
+            try
+            {
+                // A blocking map stalls the CPU until the GPU has drained everything queued so far.
+                // Only accept that when the staging slot is about to be reused.
+                IntPtr dataPointer;
+                DataStream dataStream;
+                if (request.IsLastAttempt)
+                {
+                    var dataBox = context.MapSubresource(request.CpuAccessBuffer, 0, MapMode.Read, MapFlags.None, out dataStream);
+                    dataPointer = dataBox.DataPointer;
+                    if (dataPointer == IntPtr.Zero)
+                    {
+                        Log.Warning("Failed to map buffer readback even after waiting; dropping the request.");
+                        _readRequests.RemoveAt(i);
+                        i--;
+                        continue;
+                    }
+                }
+                else
+                {
+                    // Returns false while the GPU has not finished the copy yet (D3D11: DoNotWait,
+                    // Vulkan: frame fence not signalled).
+                    if (!context.TryMapSubresourceForRead(request.CpuAccessBuffer, 0, out dataStream))
+                        continue;
+
+                    dataPointer = dataStream.DataPointer;
+                }
+
+                try
+                {
+                    request.OnSuccess(request, dataPointer, dataStream);
+                }
+                finally
+                {
+                    context.UnmapSubresource(request.CpuAccessBuffer, 0);
+                    _readRequests.RemoveAt(i);
+                    i--;
+                }
+            }
+            catch (Exception e)
+            {
+                // Lost device, disposed staging buffer or a throwing consumer: drop the request, keep the frame loop alive.
+                Log.Warning("Buffer readback failed: " + e.Message);
+                if (_readRequests.Remove(request))
+                {
+                    i--;
+                }
+            }
         }
     }
 
@@ -169,7 +219,11 @@ public sealed class StructuredBufferReadAccess : IDisposable
         DisposeBuffers();
     }
 
-    private const int BufferCount = 3;
+    // Each request keeps its staging buffer alive for BufferCount Update() calls. This must be
+    // generous: a caller can update more than once per rendered frame, and when the GPU is a
+    // frame or two behind a non-blocking map only succeeds once the copy has actually executed.
+    // With a short window the last-chance blocking map in Update() would fire every frame.
+    private const int BufferCount = 8;
     private readonly List<Buffer> _cpuAccessBuffers = new(BufferCount);
     private readonly List<ReadRequestItem> _readRequests = new(BufferCount);
     private int _frameCounter;

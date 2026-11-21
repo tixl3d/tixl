@@ -1,4 +1,4 @@
-{
+﻿{
   "FormatVersion": 3,
   "Id": "fc03dcd0-6f2f-4507-be06-1ed105607489"/*ArtnetInput*/,
   "Inputs": [
@@ -6,10 +6,7 @@
       "Id": "19bde769-3992-4cf0-a0b4-e3ae25c03c79"/*StartUniverse*/,
       "DefaultValue": 1
     },
-    {
-      "Id": "24b5d450-4e83-49db-88b1-7d688e64585d"/*LocalIpAddress*/,
-      "DefaultValue": "127.0.0.1"
-    },
+    
     {
       "Id": "3d085f6f-6f4a-4876-805f-22f25497a731"/*Active*/,
       "DefaultValue": true

@@ -1,4 +1,4 @@
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using T3.Graphics;
 using Vortice.Vulkan;
@@ -1255,7 +1255,11 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
     {
         // D3D11's Map(Read) waits for the GPU, and the operators that use it are written around that stall.
         FlushAndWait();
+        return MappedMemoryOf(resource);
+    }
 
+    private static MappedMemory MappedMemoryOf(GpuResource resource)
+    {
         switch (resource)
         {
             case VulkanBuffer buffer when buffer.Mapped != null:
@@ -1273,6 +1277,56 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
                 GraphicsLog.WarnOnce("Only resources created with readback or upload memory can be mapped.");
                 return default;
         }
+    }
+
+    public bool TryMapForRead(GpuResource resource, int subresource, out MappedMemory memory)
+    {
+        // Host-visible readback memory is mapped for its lifetime, so the only question is whether the GPU has
+        // finished the copy that fills it. That is a fence check; blocking on it would stall the render thread
+        // for the whole queue every time a caller polls. A copy still in flight, or one recorded into the frame
+        // being built, reports not-ready and the caller keeps its last good read. A resource without readback
+        // memory is not-ready as well.
+        var writtenInFrame = resource switch
+                                 {
+                                     VulkanBuffer buffer => buffer.ReadbackWrittenInFrameSerial,
+                                     VulkanTexture texture => texture.ReadbackWrittenInFrameSerial,
+                                     _ => 0,
+                                 };
+
+        if (writtenInFrame != 0 && !IsFrameSerialComplete(writtenInFrame))
+        {
+            memory = default;
+            return false;
+        }
+
+        memory = MappedMemoryOf(resource);
+        return memory.Data != null;
+    }
+
+    /// <summary>
+    /// True once the GPU has finished the frame with this serial. The completed serial only advances when a slot
+    /// is recorded again, which is a frame or more too late for a readback, so the fences of the frames already
+    /// submitted are polled. One queue retires its submissions in order, so a finished frame finishes the ones before it.
+    /// </summary>
+    private bool IsFrameSerialComplete(long serial)
+    {
+        if (serial <= _completedFrameSerial)
+            return true;
+
+        for (var slot = 0; slot < _frames.Length; slot++)
+        {
+            if (_frameActive && slot == _frameIndex)
+                continue;
+
+            ref var frame = ref _frames[slot];
+            if (frame.Serial <= _completedFrameSerial)
+                continue;
+
+            if (Api.vkGetFenceStatus(frame.Fence) == VkResult.Success)
+                _completedFrameSerial = Math.Max(_completedFrameSerial, frame.Serial);
+        }
+
+        return serial <= _completedFrameSerial;
     }
 
     public void Unmap(GpuResource resource, int subresource)

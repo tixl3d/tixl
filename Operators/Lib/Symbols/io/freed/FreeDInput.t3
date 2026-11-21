@@ -1,4 +1,4 @@
-{
+﻿{
   "FormatVersion": 3,
   "Id": "1f2e3d4c-5b6a-4988-9a0b-c1d2e3f4a5b6"/*FreeDInput*/,
   "Inputs": [
@@ -6,10 +6,7 @@
       "Id": "4b5c6d7e-8f9a-4b1c-c2d3-e4f5a6b7c8d9"/*Listen*/,
       "DefaultValue": true
     },
-    {
-      "Id": "5c6d7e8f-9a0b-4c2d-d3e4-f5a6b7c8d9e0"/*LocalIpAddress*/,
-      "DefaultValue": "0.0.0.0 (Any)"
-    },
+    
     {
       "Id": "6d7e8f9a-0b1c-4d3e-e4f5-a6b7c8d9e0f1"/*Port*/,
       "DefaultValue": 7000

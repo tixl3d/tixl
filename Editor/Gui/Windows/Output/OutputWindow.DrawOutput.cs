@@ -8,6 +8,7 @@ using T3.Core.Operator;
 using T3.Core.Video;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Keyboard;
+using T3.Editor.Gui.Interaction.TransformGizmos;
 using T3.Editor.Gui.OutputUi;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
@@ -99,6 +100,12 @@ internal sealed partial class OutputWindow
             EvaluationContext.SetViewFromCamera(_camSelectionHandling.CameraForRendering);
         }
 
+        // The window's view, captured before evaluation: the rendered chain may point the context's
+        // matrices elsewhere (camera draws), but the all-cameras gizmo overlay must project with
+        // what this window is looking through.
+        var gizmoView = EvaluationContext.WorldToCamera;
+        var gizmoClip = EvaluationContext.CameraToClipSpace;
+
         EvaluationContext.BackgroundColor = _backgroundColor;
 
         // Export can render more motion blur subframes than the graph asks for; Reset() above cleared any earlier value.
@@ -129,6 +136,13 @@ internal sealed partial class OutputWindow
         evaluatedOutputUi.DrawValue(evalOutput, EvaluationContext, Config.Title, recompute: !reuse);
 
         presentedType = evaluatedOutputUi.PresentedType;
+
+        // Every camera view gizmo of the focused project - not just the selected op's, whose
+        // gizmo would otherwise only exist while its output is part of the rendered chain. The
+        // scope is the project ROOT, not the shown instance: a rig's cameras typically feed a
+        // Group from the outside, so scoping by the pinned op hid every one of them.
+        TransformGizmoHandling.DrawCameraOverlays(EvaluationContext, gizmoView, gizmoClip,
+                                                  ProjectView.Focused?.RootInstance ?? instance);
         return evalOutput.ValueType;
     }
 

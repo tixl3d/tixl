@@ -1,4 +1,4 @@
-{
+﻿{
   "FormatVersion": 3,
   "Id": "1d2e3f4a-5b6c-4789-0123-456789abcdef"/*WebServer*/,
   "Inputs": [
@@ -6,10 +6,7 @@
       "Id": "4c5d6e7f-8a9b-4012-3456-7890abcdef12"/*Listen*/,
       "DefaultValue": false
     },
-    {
-      "Id": "5d6e7f8a-9b0c-4123-4567-890abcdef123"/*LocalIpAddress*/,
-      "DefaultValue": "127.0.0.1"
-    },
+    
     {
       "Id": "6e7f8a9b-0c1d-4234-5678-90abcdef1234"/*Port*/,
       "DefaultValue": 8082

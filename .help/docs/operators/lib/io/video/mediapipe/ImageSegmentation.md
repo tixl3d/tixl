@@ -12,7 +12,7 @@ Inputs:
 - Model: Selects the segmentation model to use (e.g., SelfieSegmenter, DeepLabV3).
 - SelectedCategories: Comma-separated list of category indices to include in the mask.
 - Debug: Enables debug logging and debug texture output.
-- CategoryAllowlist: Comma-separated list of category names to allow (e.g. "person, cup").
+
 
 Outputs:
 - OutputTexture: The input texture (passed through).
@@ -23,6 +23,8 @@ Outputs:
 - ConfidenceMask: A texture containing confidence scores for each pixel.
 - DebugTexture: Debug visualization texture.
 
+Acceleration selects the inference delegate: Cpu, Xnnpack (multithreaded CPU, the fast default) or Gpu. Gpu needs a native build with the OpenGL delegate (Linux here) and otherwise falls back to Cpu; InferenceThreads sets the Xnnpack worker-thread count (0 = library default).
+
 ## Input Parameters
 | Name (Relevancy & Type) | Description |
 |---|---|
@@ -31,7 +33,9 @@ Outputs:
 | **Model** (Int32) | Selects the segmentation model to use (e.g., SelfieSegmenter, DeepLabV3). |
 | **SelectedCategories** (String) | Comma-separated list of category indices to include in the mask. |
 | **Debug** (Boolean) | Enables debug logging and debug texture output. |
-| **CategoryAllowlist** (String) | Comma-separated list of category names to allow (e.g. "person, cup"). |
+| **Acceleration** (MediaPipeAcceleration) | Inference acceleration: Cpu = plain single-threaded TF Lite (works everywhere), Xnnpack = multithreaded CPU (the fast default), Gpu = OpenGL/EGL delegate (Linux; the Windows/macOS natives are CPU-only and fall back to Cpu). |
+| **InferenceThreads** (Int32) | Xnnpack worker threads (default 4; 0 = library default, which is effectively single-threaded). Lower it to 2 when several MediaPipe operators run at once. Ignored by Cpu and Gpu. |
+
 
 ## Outputs
 | Name | Type |
@@ -43,4 +47,3 @@ Outputs:
 | **CategoryMask** | T3.Core.DataTypes.Texture2D |
 | **ConfidenceMask** | T3.Core.DataTypes.Texture2D |
 | **DebugTexture** | T3.Core.DataTypes.Texture2D |
-

@@ -1,4 +1,5 @@
 #nullable enable
+using System.Collections.Generic;
 using ImGuiNET;
 
 namespace T3.Editor.Gui.Styling.Markdown;
@@ -327,31 +328,63 @@ internal static class MarkdownLayout
 
     private static int FindLastFittingSpace(string src, int from, int len, float maxWidth)
     {
-        // Walk backwards from end finding a space; verify the prefix width fits.
-        for (var i = len - 1; i > 0; i--)
+        // Prefix widths are monotone (glyph advances are non-negative), so binary-search
+        // the space positions for the rightmost one whose prefix fits. The old backward
+        // scan re-measured a prefix for every space it passed, which is quadratic on long
+        // runs — a 10 KB parameter description froze the editor for seconds, per frame.
+        _spacePositions.Clear();
+        for (var i = 1; i < len; i++)
         {
-            if (src[from + i] != ' ')
-                continue;
-            var prefix = src.Substring(from, i);
-            if (ImGui.CalcTextSize(prefix).X <= maxWidth)
-                return i;
+            if (src[from + i] == ' ')
+                _spacePositions.Add(i);
         }
 
-        return -1;
+        var lo = 0;
+        var hi = _spacePositions.Count - 1;
+        var best = -1;
+        while (lo <= hi)
+        {
+            var mid = (lo + hi) / 2;
+            var prefix = src.Substring(from, _spacePositions[mid]);
+            if (ImGui.CalcTextSize(prefix).X <= maxWidth)
+            {
+                best = _spacePositions[mid];
+                lo = mid + 1;
+            }
+            else
+            {
+                hi = mid - 1;
+            }
+        }
+
+        return best;
     }
 
     private static int FindForcedBreak(string src, int from, int len, float maxWidth)
     {
-        // Find the rightmost char index whose prefix still fits.
-        for (var i = len - 1; i > 0; i--)
+        // Rightmost char index whose prefix fits, by the same monotone-width binary search.
+        var lo = 1;
+        var hi = len - 1;
+        var best = -1;
+        while (lo <= hi)
         {
-            var prefix = src.Substring(from, i);
+            var mid = (lo + hi) / 2;
+            var prefix = src.Substring(from, mid);
             if (ImGui.CalcTextSize(prefix).X <= maxWidth)
-                return i;
+            {
+                best = mid;
+                lo = mid + 1;
+            }
+            else
+            {
+                hi = mid - 1;
+            }
         }
 
-        return -1;
+        return best;
     }
+
+    private static readonly List<int> _spacePositions = new();
 
     private static void AddFragment(LayoutResult result, string text, RunStyle style, int urlIndex)
     {

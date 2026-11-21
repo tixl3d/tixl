@@ -1,4 +1,4 @@
-{
+﻿{
   "FormatVersion": 3,
   "Id": "e3207424-deaf-4462-acd5-21f2c6f16d1b"/*SacnInput*/,
   "Inputs": [
@@ -6,10 +6,7 @@
       "Id": "0c348760-474e-4e30-a8c1-55e59cb1a908"/*StartUniverse*/,
       "DefaultValue": 1
     },
-    {
-      "Id": "24b5d450-4e83-49db-88b1-7d688e64585d"/*LocalIpAddress*/,
-      "DefaultValue": "127.0.0.1"
-    },
+    
     {
       "Id": "2cffbf1c-ce09-4283-a685-5234e4e49fee"/*NumUniverses*/,
       "DefaultValue": 1

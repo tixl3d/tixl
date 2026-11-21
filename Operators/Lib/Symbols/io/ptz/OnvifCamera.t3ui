@@ -1,4 +1,4 @@
-{
+﻿{
   "FormatVersion": 3,
   "Id": "8b23c93b-3b45-4c9b-9c23-4d5e6f7a8b9c"/*OnvifCamera*/,
   "Description": "Connects to an ONVIF-compliant IP camera to retrieve video texture and control PTZ.\n\nThis operator handles the discovery, connection, and control of network cameras supporting the ONVIF standard. It uses FFmpeg to capture the video stream (RTSP) and SOAP requests for PTZ control.\n\nThe video stream is output as a Texture2D.\nPTZ controls are normalized (Pan/Tilt -1..1, Zoom 0..1).\n\nAKA: IPCamera, RTSP, NetworkCamera, SecurityCamera, PTZ\n\nTips:\n* Use the 'Discover' toggle to find cameras on your local network.\n* Ensure the 'Local IP Address' is set to the network adapter connected to the cameras.\n* PTZ movements are damped/smoothed.\n* If the stream URL is not automatically resolved, you can enter a direct RTSP URL in the Address field.",
@@ -62,15 +62,7 @@
       "ClampMin": true,
       "ClampMax": true
     },
-    {
-      "InputId": "74185692-2982-4895-8963-125478963214"/*LocalIpAddress*/,
-      "Position": {
-        "X": -200.0,
-        "Y": 225.0
-      },
-      "Description": "The local network interface to use for discovery and connection. Select the adapter connected to the camera network.",
-      "Usage": "CustomDropdown"
-    },
+    
     {
       "InputId": "7f12f82f-2f34-958f-cf12-3f4f5f6f7f8f"/*Zoom*/,
       "Position": {

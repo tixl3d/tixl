@@ -1,4 +1,4 @@
-{
+﻿{
   "FormatVersion": 3,
   "Id": "98efc7c8-cafd-45ee-8746-14f37e9f59f8"/*ArtnetOutput*/,
   "Inputs": [
@@ -49,10 +49,6 @@
       "DefaultValue": {
         "Values": []
       }
-    },
-    {
-      "Id": "fcbfe87b-b8aa-461c-a5ac-b22bb29ad36d"/*LocalIpAddress*/,
-      "DefaultValue": ""
     }
   ],
   "Children": [],

@@ -289,7 +289,7 @@ internal class EditorSymbolPackage : SymbolPackage
 
             if (guid == Guid.Empty)
             {
-                if (IsInOperatorFolder(file))
+                if (IsInSymbolsFolder(file))
                     Log.Warning($"{DisplayName}: \"{file}\" defines no operator ([Guid] missing). Shared helper classes belong in the package's Utils/ folder, not in Symbols/.");
 
                 return;
@@ -303,12 +303,17 @@ internal class EditorSymbolPackage : SymbolPackage
         }
     }
 
-    /// <summary>Operators live in Symbols/ (shipped as SourceCode/); helpers elsewhere in the package are fine.</summary>
-    private static bool IsInOperatorFolder(string file)
+    /// <summary>
+    /// Only a helper inside Symbols/ is misplaced: Utils/ and the package root are for shared
+    /// classes by design. Deployed packages flatten everything into SourceCode/, so the shipped
+    /// path can't tell a helper from a broken operator - and every healthy Utils/ class would be
+    /// flagged. A symbol whose source never showed up is reported separately when the symbol is
+    /// opened (see EditableSymbolProject.Recompilation), which is the case this warning existed for.
+    /// </summary>
+    private static bool IsInSymbolsFolder(string file)
     {
         var normalized = file.Replace('\\', '/');
-        return normalized.Contains('/' + FileLocations.SymbolsSubfolder + '/', StringComparison.Ordinal)
-               || normalized.Contains('/' + FileLocations.SourceCodeSubFolder + '/', StringComparison.Ordinal);
+        return normalized.Contains('/' + FileLocations.SymbolsSubfolder + '/', StringComparison.Ordinal);
     }
 
     public bool TryGetSymbolFilePath(Symbol symbol, [NotNullWhen(true)] out string? path)

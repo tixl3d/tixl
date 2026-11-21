@@ -1,4 +1,4 @@
-# ViscaCamera
+﻿# ViscaCamera
 
 *in [Lib.io.ptz](README.md)*
 
@@ -17,7 +17,6 @@ Tips:
 | Name (Relevancy & Type) | Description |
 |---|---|
 | **TextureInput** (Texture2D) | — |
-| **LocalIpAddress** (String) | The local network interface to use for sending VISCA commands. Useful if you have multiple network adapters. |
 | **Address** (String) | The IP address of the camera (e.g., 192.168.1.100). |
 | **Port** (Int32) | The UDP port used for VISCA over IP communication. Default is usually 52381. |
 | **Connect** (Boolean) | Toggles the connection state. When enabled, it resets the sequence number and prepares for communication. |

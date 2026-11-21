@@ -1,4 +1,4 @@
-# TcpServer
+﻿# TcpServer
 
 *in [Lib.io.tcp](README.md)*
 
@@ -17,7 +17,6 @@ AKA: tcp, network, socket, server
 | Name (Relevancy & Type) | Description |
 |---|---|
 | **Listen** (Boolean) | Starts or stops the TCP server from listening for new connections. |
-| **LocalIpAddress** (String) | The local IP address for the server to listen on. A dropdown shows available addresses. Using '0.0.0.0' will make the server listen on all available network interfaces. |
 | **Message** (String) | The message to be broadcast to all connected clients. |
 | **Port** (Int32) | The port number for the server to listen on. |
 | **PrintToLog** (Boolean) | If enabled, prints status information, connection events, sent/received data, and errors to the T3 log. Useful for debugging. |

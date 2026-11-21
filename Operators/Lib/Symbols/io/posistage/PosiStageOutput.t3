@@ -1,4 +1,4 @@
-{
+﻿{
   "FormatVersion": 3,
   "Id": "f1b2a3c4-d5e6-4f7a-8b9c-0d1e2f3a4b5c"/*PosiStageOutput*/,
   "Inputs": [
@@ -22,10 +22,7 @@
       "Id": "7ab8f2a6-4874-4235-85a5-d0e1f30c0446"/*Connect*/,
       "DefaultValue": false
     },
-    {
-      "Id": "9e23335a-d63a-4286-930e-c63e86d0e6f0"/*LocalIpAddress*/,
-      "DefaultValue": ""
-    },
+    
     {
       "Id": "b16a0356-ef4a-413a-a656-7497127e31d4"/*SendOnChange*/,
       "DefaultValue": false

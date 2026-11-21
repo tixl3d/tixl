@@ -74,14 +74,6 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "91f3d6b8-04ae-4c27-b5e1-d78a2c6f0e49",
-      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
-      "Position": {
-        "X": 572.2412,
-        "Y": 310.5555
-      }
-    },
-    {
       "ChildId": "397470de-82a9-42d9-ab6f-84f8397d9737",
       "SymbolName": "Lib.render._dx11.api.InputAssemblerStage",
       "Position": {
@@ -156,6 +148,14 @@
       "Position": {
         "X": 1305.472,
         "Y": -21.355316
+      }
+    },
+    {
+      "ChildId": "91f3d6b8-04ae-4c27-b5e1-d78a2c6f0e49",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
+      "Position": {
+        "X": 572.2412,
+        "Y": 310.5555
       }
     },
     {

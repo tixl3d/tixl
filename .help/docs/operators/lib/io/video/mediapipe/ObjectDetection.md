@@ -27,9 +27,12 @@ Outputs:
 - ObjectData: A dictionary containing detailed data for each detected object (bounding box coordinates, category name, confidence score).
 - ActiveCategories: A list of currently active detection categories.
 
+Acceleration selects the inference delegate: Cpu, Xnnpack (multithreaded CPU, the fast default) or Gpu. Gpu needs a native build with the OpenGL delegate (Linux here) and otherwise falls back to Cpu; InferenceThreads sets the Xnnpack worker-thread count (0 = library default).
+
 ## Input Parameters
 | Name (Relevancy & Type) | Description |
 |---|---|
+| **CorrectAspectRatio** (Boolean) | Whether to correct aspect ratio for non-square inputs. |
 | **InputTexture** (Texture2D) | The image to process. |
 | **Enabled** (Boolean) | Enables or disables object detection. |
 | **MaxObjects** (Int32) | Maximum number of objects to detect. |
@@ -38,8 +41,10 @@ Outputs:
 | **Debug** (Boolean) | Enables debug visualization with debug texture output showing bounding boxes and labels. |
 | **CategoryAllowlist** (String) | Comma-separated list of category names to allow (e.g. "person, cup"). |
 | **CategoryDenylist** (String) | Comma-separated list of category names to deny (e.g. "person, cup"). |
-| **CorrectAspectRatio** (Boolean) | Whether to correct aspect ratio for non-square inputs. |
+| **Acceleration** (MediaPipeAcceleration) | Inference acceleration: Cpu = plain single-threaded TF Lite (works everywhere), Xnnpack = multithreaded CPU (the fast default), Gpu = OpenGL/EGL delegate (Linux; the Windows/macOS natives are CPU-only and fall back to Cpu). |
+| **InferenceThreads** (Int32) | Xnnpack worker threads (default 4; 0 = library default, which is effectively single-threaded). Lower it to 2 when several MediaPipe operators run at once. Ignored by Cpu and Gpu. |
 | **ZScale** (Single) | Scale factor for Z coordinate of points. |
+
 
 ## Outputs
 | Name | Type |
@@ -51,4 +56,3 @@ Outputs:
 | **PointBuffer** | T3.Core.DataTypes.BufferWithViews |
 | **ObjectData** | T3.Core.DataTypes.Dict`1[System.Single] |
 | **ActiveCategories** | System.Collections.Generic.List`1[System.String] |
-

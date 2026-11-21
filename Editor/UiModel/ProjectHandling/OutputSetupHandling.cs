@@ -114,6 +114,10 @@ internal static class OutputSetupHandling
 
         // A setup edit (re-routing, a new slice, a moved patch) changes what the cards show, so they render once more.
         T3.Core.Output.Rendering.OutputPreviewRefresh.InvalidateAll();
+
+        // A boygroup server forwards setup edits to its render nodes as they are saved.
+        T3.Editor.Show.BoygroupManager.Instance.OnSetupSaved();
+
         if (!TryGetFocusedEntry(out var entry, out var setupsFolder))
             return;
 
@@ -125,6 +129,67 @@ internal static class OutputSetupHandling
         entry.MachineConfig.ActiveSetupName = entry.Setup.Name;
         entry.MachineConfig.TrySaveToFile(Path.Combine(setupsFolder, MachineConfig.FileName));
     }
+
+    /// <summary>
+    /// Forgets a project's cached setup after its setup files changed on disk — a boygroup deploy,
+    /// an external edit. Without <paramref name="projectFolder"/> the focused project is used. Only
+    /// the presented project's release/notify happens here; another project reloads when focused.
+    /// </summary>
+    public static void OnSetupFilesChanged(string? projectFolder = null)
+    {
+        var folder = projectFolder;
+        if (string.IsNullOrEmpty(folder))
+            folder = ProjectView.Focused?.OpenedProject.Package.Folder;
+
+        if (!string.IsNullOrEmpty(folder))
+            _entriesByProjectFolder.Remove(folder);
+
+        if (string.IsNullOrEmpty(folder) || IsFocusedProject(folder))
+        {
+            OutputPresentation.ReleaseAll();
+            StructureVersion++;
+            ActiveSetup.NotifyChanged();
+        }
+    }
+
+    /// <summary>
+    /// Loads a setup file into a specific project and makes it that project's active setup. Used by
+    /// boygroup deploy so a received setup lands in the master's project even while another project
+    /// is focused.
+    /// </summary>
+    public static bool TryApplySetupFile(string projectFolder, string setupName)
+    {
+        var setupsFolder = SetupFiles.FolderIn(projectFolder);
+        if (!Setup.TryLoadFromFile(SetupFilePath(setupsFolder, setupName), out var setup, out _))
+            return false;
+
+        var entry = GetOrLoadEntry(projectFolder);
+        entry.Setup = setup;
+        entry.IsSaved = true;
+
+        Directory.CreateDirectory(setupsFolder);
+        entry.MachineConfig.ActiveSetupName = setupName;
+        entry.MachineConfig.TrySaveToFile(Path.Combine(setupsFolder, MachineConfig.FileName));
+
+        if (IsFocusedProject(projectFolder))
+        {
+            OutputPresentation.ReleaseAll();
+            StructureVersion++;
+            ActiveSetup.NotifyChanged();
+        }
+
+        return true;
+    }
+
+    private static bool IsFocusedProject(string projectFolder)
+    {
+        var focused = ProjectView.Focused?.OpenedProject.Package.Folder;
+        return focused != null && string.Equals(focused, projectFolder, PathComparison);
+    }
+
+    private static StringComparison PathComparison =>
+        OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+
 
     /// <summary>
     /// Shows the active setup's file in the system's file manager. A setup that only exists in memory is saved
@@ -387,6 +452,18 @@ internal static class OutputSetupHandling
         {
             // Persist the repair right away, so the file on disk stops being broken.
             setup.TrySaveToFile(SetupFilePath(setupsFolder, setup.Name));
+        }
+
+        // Configs from older builds can pair a laser output with a display/stream plug. The
+        // presentation pass ignores those, but a stale pair also draws a misleading board edge and
+        // can present an input full-screen on a display in builds that lack the guard - clean it
+        // while loading and persist, so the fix doesn't depend on the user unbinding by hand.
+        var mismatched = machineConfig.RemoveKindMismatchedBindings(setup.Outputs);
+        if (mismatched > 0)
+        {
+            T3.Core.Logging.Log.Warning($"Dropped {mismatched} output binding(s) whose plug kind does not match the output kind "
+                                        + "(a laser output cannot be presented on a display or stream).");
+            machineConfig.TrySaveToFile(Path.Combine(setupsFolder, MachineConfig.FileName));
         }
 
         entry = new ProjectEntry { Setup = setup, MachineConfig = machineConfig, IsSaved = isSaved };

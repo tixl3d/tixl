@@ -385,7 +385,13 @@
       "Id": "fbad3319-9974-c1d7-192c-f4f8d79c08bc"/*Draw*/,
       "SymbolId": "9b28e6b9-1d1f-42d8-8a9e-33497b1df820",
       "SymbolName": "Lib.render._dx11.api.Draw",
-      "InputValues": [],
+      "InputValues": [
+        {
+          "Id": "4b524025-f9af-4ae1-9712-b7c0dca2723f"/*CaptureKind*/,
+          "Type": "System.Int32",
+          "Value": 2
+        }
+      ],
       "Outputs": []
     }
   ],
@@ -677,6 +683,12 @@
       "SourceSlotId": "5e847363-142d-4da9-a5b3-3a7aa2541bed",
       "TargetParentOrChildId": "fbad3319-9974-c1d7-192c-f4f8d79c08bc",
       "TargetSlotId": "8716b11a-ef71-437e-9930-bb747da818a7"
+    },
+    {
+      "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "SourceSlotId": "e15b6dc7-aaf9-4244-a4b8-4ac13ee7d23f",
+      "TargetParentOrChildId": "fbad3319-9974-c1d7-192c-f4f8d79c08bc",
+      "TargetSlotId": "c55aeb0a-ba11-49b8-82ee-2d2a74996c87"
     }
   ]
 }

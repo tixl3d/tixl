@@ -1,6 +1,7 @@
-#nullable enable
+﻿#nullable enable
 using System.Net.Sockets;
 using System.Threading;
+using T3.Core.Utils;
 using System.Net.NetworkInformation;
 // ReSharper disable SuggestVarOrType_BuiltInTypes
 
@@ -9,7 +10,7 @@ namespace Lib.io.posistage
 
 
     [Guid("A9E8D7C6-B5A4-4E1A-8D0F-3C5A7B9E2D1F")]
-    internal sealed class PosiStageInput : Instance<PosiStageInput>, IStatusProvider, ICustomDropdownHolder
+    internal sealed class PosiStageInput : Instance<PosiStageInput>, IStatusProvider
     {
         [Output(Guid = "C8C4D0F7-C06E-4B1A-9D6C-6F5E4D3C2B1B", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
         public readonly Slot<BufferWithViews?> TrackersAsBuffer = new();
@@ -45,7 +46,7 @@ namespace Lib.io.posistage
         {
             _printToLog = PrintToLog.GetValue(context);
             var shouldListen = Listen.GetValue(context);
-            var localIp = LocalIpAddress.GetValue(context) ?? string.Empty;
+            var localIp = ProtocolInterfaces.ResolveAddressString(ProtocolInterfaces.Keys.PosiStageNet);
             var multicastIp = MulticastIpAddress.GetValue(context) ?? string.Empty;
             var port = Port.GetValue(context);
 
@@ -292,36 +293,6 @@ namespace Lib.io.posistage
             _outputBuffer?.Dispose();
         }
         
-        #region ICustomDropdownHolder implementation
-        string ICustomDropdownHolder.GetValueForInput(Guid id) => id == LocalIpAddress.Id ? LocalIpAddress.Value ?? string.Empty : string.Empty;
-        IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid id) => id == LocalIpAddress.Id 
-                                                                                     ? GetLocalIPv4Addresses() 
-                                                                                     : [];
-
-        void ICustomDropdownHolder.HandleResultForInput(Guid id, string? s, bool i)
-        {
-            if (!string.IsNullOrEmpty(s) && i && id == LocalIpAddress.Id) 
-                LocalIpAddress.SetTypedInputValue(s.Split(' ')[0]);
-        }
-
-        private static IEnumerable<string> GetLocalIPv4Addresses()
-        {
-            yield return "0.0.0.0"; // Any
-            
-            if (!NetworkInterface.GetIsNetworkAvailable()) 
-                yield break;
-            
-            foreach (var ni in NetworkInterface.GetAllNetworkInterfaces())
-            {
-                if (ni.OperationalStatus != OperationalStatus.Up) continue;
-                foreach (var ipInfo in ni.GetIPProperties().UnicastAddresses)
-                {
-                    if (ipInfo.Address.AddressFamily == AddressFamily.InterNetwork)
-                        yield return ipInfo.Address.ToString();
-                }
-            }
-        }
-        #endregion
 
         #region IStatusProvider
         private string? _statusMessage = "Not listening.";
@@ -337,9 +308,6 @@ namespace Lib.io.posistage
 
         [Input(Guid = "0944714D-693D-4251-93A6-E22A2DB64F20")]
         public readonly InputSlot<bool> Listen = new();
-        
-        [Input(Guid = "9E23335A-D63A-4286-930E-C63E86D0E6F0")]
-        public readonly InputSlot<string> LocalIpAddress = new("0.0.0.0");
         
         [Input(Guid = "46C2BF8B-3E0C-4856-AA4A-32943A4B0223")]
         public readonly InputSlot<string> MulticastIpAddress = new("236.10.10.10");

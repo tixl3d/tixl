@@ -1,4 +1,4 @@
-{
+﻿{
   "FormatVersion": 3,
   "Id": "7c90d60d-0d12-736d-ad90-1d2e3f4d5d6d"/*ViscaCamera*/,
   "Inputs": [
@@ -14,10 +14,7 @@
       "Id": "2923a93a-3a45-069a-da23-4a5a6a7a8a9a"/*PrintToLog*/,
       "DefaultValue": false
     },
-    {
-      "Id": "34185692-2982-4895-8963-125478963214"/*LocalIpAddress*/,
-      "DefaultValue": ""
-    },
+    
     {
       "Id": "9a23a93a-3a45-069a-da23-4a5a6a7a8a9a"/*Address*/,
       "DefaultValue": "192.168.1.100"

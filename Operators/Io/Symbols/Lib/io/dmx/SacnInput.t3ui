@@ -1,7 +1,7 @@
-{
+﻿{
   "FormatVersion": 3,
   "Id": "e3207424-deaf-4462-acd5-21f2c6f16d1b"/*SacnInput*/,
-  "Description": "Receives DMX data over the network using the sACN (Streaming ACN) protocol.\n\nThis operator listens for sACN packets on the local network, allowing you to receive DMX data from lighting consoles, media servers, or other sACN-enabled devices. It can listen to multiple DMX universes simultaneously.\n\nTips:\n- Select the correct `LocalIpAddress` for your network interface.\n- `StartUniverse` and `NumUniverses` define the range of DMX universes to listen to.\n- The output is a list of lists. The outer list corresponds to the universes, and each inner list contains the 512 channel values for that universe.\n\nAKA: sacn, streaming acn, dmx, artnet, lighting",
+  "Description": "Receives DMX data over the network using the sACN (Streaming ACN) protocol.\n\nThis operator listens for sACN packets on the local network, allowing you to receive DMX data from lighting consoles, media servers, or other sACN-enabled devices. It can listen to multiple DMX universes simultaneously.\n\nTips:\n- Pick the adapter for sACN in Settings → Networking (Bindings are per machine).\n- `StartUniverse` and `NumUniverses` define the range of DMX universes to listen to.\n- The output is a list of lists. The outer list corresponds to the universes, and each inner list contains the 512 channel values for that universe.\n\nAKA: sacn, streaming acn, dmx, artnet, lighting",
   "InputUis": [
     {
       "InputId": "0c348760-474e-4e30-a8c1-55e59cb1a908"/*StartUniverse*/,
@@ -15,15 +15,7 @@
       "ClampMin": true,
       "ClampMax": true
     },
-    {
-      "InputId": "24b5d450-4e83-49db-88b1-7d688e64585d"/*LocalIpAddress*/,
-      "Position": {
-        "X": -200.0,
-        "Y": 0.0
-      },
-      "Description": "The IP address of the network interface to listen on. A dropdown shows available addresses. If you have multiple network cards, make sure to select the one connected to your lighting network.",
-      "Usage": "CustomDropdown"
-    },
+    
     {
       "InputId": "2cffbf1c-ce09-4283-a685-5234e4e49fee"/*NumUniverses*/,
       "Position": {

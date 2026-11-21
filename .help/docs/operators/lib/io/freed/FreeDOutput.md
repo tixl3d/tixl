@@ -1,4 +1,4 @@
-# FreeDOutput
+﻿# FreeDOutput
 
 *in [Lib.io.freed](README.md)*
 
@@ -10,7 +10,6 @@ Also see: [FreeDInput]
 | Name (Relevancy & Type) | Description |
 |---|---|
 | **Connect** (Boolean) | Enable to open the UDP socket and begin sending data. Disable to close the connection. |
-| **LocalIpAddress** (String) | The local network adapter (IP address) to send from. '0.0.0.0' lets the OS decide, which is usually sufficient. |
 | **TargetIpAddress** (String) | The IP address of the destination device. Leave empty to broadcast to all devices on the local network (255.255.255.255). |
 | **TargetPort** (Int32) | The UDP port on the destination device. This must match the port the receiver is listening on. |
 | **Rotation** (Vector3) | The camera's rotation as Euler angles (Pitch, Yaw, Roll) in degrees. |

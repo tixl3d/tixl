@@ -1,14 +1,15 @@
-#nullable enable
+﻿#nullable enable
 using System.Diagnostics;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using T3.Core.Utils;
 using T3.Graphics.Compat;
 using Exception = System.Exception;
 
 namespace Lib.io.posistage
 {
     [Guid("F1B2A3C4-D5E6-4F7A-8B9C-0D1E2F3A4B5C")]
-    internal sealed class PosiStageOutput : Instance<PosiStageOutput>, IStatusProvider, ICustomDropdownHolder
+    internal sealed class PosiStageOutput : Instance<PosiStageOutput>, IStatusProvider
     {
         private readonly Stopwatch _infoPacketStopwatch = new();
         private readonly Stopwatch _stopwatch = new();
@@ -21,9 +22,6 @@ namespace Lib.io.posistage
 
         [Output(Guid = "07B57F3A-8993-4B9F-8349-D0A4762E4447")]
         public readonly Slot<bool> IsConnected = new();
-
-        [Input(Guid = "9E23335A-D63A-4286-930E-C63E86D0E6F0")]
-        public readonly InputSlot<string> LocalIpAddress = new("127.0.0.1");
 
         [Input(Guid = "B2B8C4F1-6D0E-4B3A-9C8E-7F1A0D9E6B5B")]
         public readonly MultiInputSlot<string> Names = new();
@@ -68,7 +66,7 @@ namespace Lib.io.posistage
         {
             _printToLog = PrintToLog.GetValue(context);
             var shouldConnect = Connect.GetValue(context);
-            var localIp = LocalIpAddress.GetValue(context) ?? string.Empty;
+            var localIp = ProtocolInterfaces.ResolveAddressString(ProtocolInterfaces.Keys.PosiStageNet);
             var targetIp = TargetIpAddress.GetValue(context) ?? string.Empty;
             var targetPort = TargetPort.GetValue(context);
 
@@ -333,33 +331,6 @@ namespace Lib.io.posistage
             CloseSocket();
         }
 
-        #region ICustomDropdownHolder
-        string ICustomDropdownHolder.GetValueForInput(Guid id) => id == LocalIpAddress.Id ? LocalIpAddress.Value ?? string.Empty : string.Empty;
-
-        IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid id)
-        {
-            return id == LocalIpAddress.Id ? GetLocalIPv4Addresses() : Empty<string>();
-        }
-
-        void ICustomDropdownHolder.HandleResultForInput(Guid id, string? s, bool i)
-        {
-            if (!string.IsNullOrEmpty(s) && i && id == LocalIpAddress.Id) LocalIpAddress.SetTypedInputValue(s.Split(' ')[0]);
-        }
-
-        private static IEnumerable<string> GetLocalIPv4Addresses()
-        {
-            if (!NetworkInterface.GetIsNetworkAvailable()) yield break;
-            foreach (var ni in NetworkInterface.GetAllNetworkInterfaces())
-            {
-                if (ni.OperationalStatus != OperationalStatus.Up) continue;
-                foreach (var ipInfo in ni.GetIPProperties().UnicastAddresses)
-                {
-                    if (ipInfo.Address.AddressFamily == AddressFamily.InterNetwork)
-                        yield return ipInfo.Address.ToString();
-                }
-            }
-        }
-        #endregion
 
         #region IStatusProvider
         private string? _statusMessage = "Not connected.";

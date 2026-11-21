@@ -1,7 +1,7 @@
-{
+﻿{
   "FormatVersion": 3,
   "Id": "c029b846-b442-458b-933b-653609827b75"/*UdpInput*/,
-  "Description": "Receives data from the network using the UDP (User Datagram Protocol).\n\nThis operator listens for UDP packets on a specified port, allowing communication with other applications or devices that send UDP data. UDP is a connectionless protocol, meaning data is sent without establishing a persistent connection, which is fast but less reliable than TCP.\n\nTips:\n- Ensure the `Port` and `LocalIpAddress` match the sender's destination settings.\n- `WasTrigger` becomes true for one frame whenever a new message is received, which can be used to trigger other actions.\n- Unlike TCP, UDP does not guarantee message delivery or order.\n\nAKA: udp, network, socket, datagram",
+  "Description": "Receives data from the network using the UDP (User Datagram Protocol).\n\nThis operator listens for UDP packets on a specified port, allowing communication with other applications or devices that send UDP data. UDP is a connectionless protocol, meaning data is sent without establishing a persistent connection, which is fast but less reliable than TCP.\n\nTips:\n- Ensure the `Port` matches the sender's destination; pick the listening adapter in Settings → Networking.\n- `WasTrigger` becomes true for one frame whenever a new message is received, which can be used to trigger other actions.\n- Unlike TCP, UDP does not guarantee message delivery or order.\n\nAKA: udp, network, socket, datagram",
   "InputUis": [
     {
       "InputId": "0944714d-693d-4251-93a6-e22a2db64f20"/*Listen*/,
@@ -27,15 +27,7 @@
       },
       "Description": "If enabled, prints received data and sender information to the TiXL log. Useful for debugging."
     },
-    {
-      "InputId": "9e23335a-d63a-4286-930e-c63e86d0e6f0"/*LocalIpAddress*/,
-      "Position": {
-        "X": -200.0,
-        "Y": 75.0
-      },
-      "Description": "The IP address of the network interface to listen on. A dropdown shows available addresses. Use '0.0.0.0' to listen on all available network interfaces.",
-      "Usage": "CustomDropdown"
-    },
+    
     {
       "InputId": "e6589335-4e51-41b0-8777-6a5d54c4f0ee"/*ListLength*/,
       "Position": {

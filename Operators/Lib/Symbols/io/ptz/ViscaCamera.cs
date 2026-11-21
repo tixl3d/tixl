@@ -2,12 +2,13 @@
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Threading;
+using T3.Core.Utils;
 using T3.Core.Animation;
 
 namespace Lib.io.ptz
 {
     [Guid("7c90d60d-0d12-736d-ad90-1d2e3f4d5d6d")]
-    public class ViscaCamera : Instance<ViscaCamera>, ICustomDropdownHolder
+    public class ViscaCamera : Instance<ViscaCamera>
     {
         [Output(Guid = "A1B2C3D4-E5F6-4789-0123-456789ABCDEF")]
         public readonly Slot<Texture2D> TextureOutput = new();
@@ -31,15 +32,7 @@ namespace Lib.io.ptz
             TextureOutput.Value = TextureInput.GetValue(context);
 
             // --- Network Interface Management ---
-            var localIpString = LocalIpAddress.GetValue(context);
-            if (string.IsNullOrEmpty(localIpString))
-            {
-                if (Playback.RunTimeInSecs - _lastNetworkRefreshTime > 5.0)
-                {
-                    _lastNetworkRefreshTime = Playback.RunTimeInSecs;
-                    _networkInterfaces = GetNetworkInterfaces();
-                }
-            }
+            var localIpString = ProtocolInterfaces.ResolveAddressString(ProtocolInterfaces.Keys.Visca);
 
             var address = Address.GetValue(context);
             var port = Port.GetValue(context);
@@ -364,62 +357,7 @@ namespace Lib.io.ptz
             Disconnect(false);
         }
 
-        #region Network Interface Logic
-        private static List<NetworkAdapterInfo> _networkInterfaces = new();
 
-        private static List<NetworkAdapterInfo> GetNetworkInterfaces()
-        {
-            var list = new List<NetworkAdapterInfo>();
-            list.Add(new NetworkAdapterInfo(IPAddress.Any, IPAddress.Any, "Any"));
-            list.Add(new NetworkAdapterInfo(IPAddress.Loopback, IPAddress.Parse("255.0.0.0"), "Localhost"));
-            
-            try
-            {
-                list.AddRange(from ni in NetworkInterface.GetAllNetworkInterfaces()
-                              where ni.OperationalStatus == OperationalStatus.Up && ni.NetworkInterfaceType != NetworkInterfaceType.Loopback
-                              from ip in ni.GetIPProperties().UnicastAddresses
-                              where ip.Address.AddressFamily == AddressFamily.InterNetwork
-                              select new NetworkAdapterInfo(ip.Address, ip.IPv4Mask, ni.Name));
-            }
-            catch (Exception e)
-            {
-                Log.Warning("Could not enumerate network interfaces: " + e.Message);
-            }
-            return list;
-        }
-
-        private sealed record NetworkAdapterInfo(IPAddress IpAddress, IPAddress SubnetMask, string Name)
-        {
-            public string DisplayName => $"{Name} ({IpAddress})";
-        }
-        #endregion
-
-        #region ICustomDropdownHolder
-        string ICustomDropdownHolder.GetValueForInput(Guid inputId)
-        {
-            if (inputId == LocalIpAddress.Id) return LocalIpAddress.Value ?? string.Empty;
-            return string.Empty;
-        }
-
-        IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid inputId)
-        {
-            if (inputId == LocalIpAddress.Id)
-            {
-                _networkInterfaces = GetNetworkInterfaces();
-                foreach (var adapter in _networkInterfaces) yield return adapter.DisplayName;
-            }
-        }
-
-        void ICustomDropdownHolder.HandleResultForInput(Guid inputId, string selected, bool isAListItem)
-        {
-            if (string.IsNullOrEmpty(selected) || !isAListItem) return;
-            if (inputId == LocalIpAddress.Id)
-            {
-                var foundAdapter = _networkInterfaces.FirstOrDefault(i => i.DisplayName == selected);
-                if (foundAdapter != null) LocalIpAddress.SetTypedInputValue(foundAdapter.IpAddress.ToString());
-            }
-        }
-        #endregion
 
         private UdpClient _udpClient;
         private bool _isConnected;
@@ -435,9 +373,6 @@ namespace Lib.io.ptz
 
         [Input(Guid = "B2C3D4E5-F6A7-4890-1234-567890ABCDEF")]
         public readonly InputSlot<Texture2D> TextureInput = new();
-
-        [Input(Guid = "34185692-2982-4895-8963-125478963214")]
-        public readonly InputSlot<string> LocalIpAddress = new();
 
         [Input(Guid = "9a23a93a-3a45-069a-da23-4a5a6a7a8a9a")]
         public readonly InputSlot<string> Address = new();

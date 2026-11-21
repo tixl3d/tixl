@@ -118,7 +118,13 @@ public static class OutputContentResolver
             return content is { IsDisposed: false };
         }
 
-        return TryGetSourceContent(symbolChildId, out _, out content);
+        if (TryGetSourceContent(symbolChildId, out _, out content))
+            return true;
+
+        // Same as an empty output composite: a first fill that produced nothing (the send not instantiated
+        // yet, the graph not ready) must not count as the preview's one render, or it stays blank forever.
+        OutputPreviewRefresh.Invalidate(symbolChildId);
+        return false;
     }
 
     /// <summary>The live texture a content source resolves to, if its op is currently instantiated.</summary>

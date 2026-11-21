@@ -28,13 +28,19 @@ public static class TableList
         ImGui.BeginChild("child", size);
         ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(2, 2));
         var valueColumnWidth = 50 * T3Ui.UiScaleFactor;
+        // ILDA coordinates are six characters wide with the sign ("-32768"). A 50px cell can't hold
+        // that next to a drag handle, so integer columns get their own width.
+        var intColumnWidth = 80 * T3Ui.UiScaleFactor;
         var lineNumberWidth = 40 * T3Ui.UiScaleFactor;
         var headerHeight = 30 * T3Ui.UiScaleFactor;
         var listModified = false;
         
         ImGui.PushFont(Fonts.FontSmall);
         {
-            FieldInfo[] members = list.Type.GetFields();
+            // Instance fields only: GetFields() with default flags also returns public static
+            // fields, so LaserPoint's "Zero" sentinel showed up as an extra column that rendered
+            // "?" - and editing it would have written to the static, not the element.
+            FieldInfo[] members = list.Type.GetFields(BindingFlags.Public | BindingFlags.Instance);
 
             ImGui.AlignTextToFramePadding();
             ImGui.TextUnformatted($"[{list.NumElements}]");
@@ -45,6 +51,7 @@ public static class TableList
             for (var fieldIndex = 0; fieldIndex < members.Length; fieldIndex++)
             {
                 var fi = members[fieldIndex];
+                var cellWidth = fi.FieldType == typeof(int) ? intColumnWidth : valueColumnWidth;
                 if (TypeComponents.TryGetValue(fi.FieldType, out var components))
                 {
                     bool isFirst = true;
@@ -70,7 +77,7 @@ public static class TableList
                 {
                     ImGui.Selectable(" " + fi.Name, 
                                      false, ImGuiSelectableFlags.None, 
-                                     new Vector2(valueColumnWidth, 
+                                     new Vector2(cellWidth, 
                                                  headerHeight));
                     if (ImGui.IsItemHovered())
                     {
@@ -118,6 +125,35 @@ public static class TableList
                             fi.SetValue(obj, f);
                             objModified = true;
                         }
+                    }
+                    else if (o is int integer)
+                    {
+                        // Integer struct fields (ILDA laser coordinates, counts) were rendered as
+                        // "?" before - unreadable for exactly the lists users inspect most.
+                        // Step 0: InputInt's default -/+ buttons eat the whole cell and clip the
+                        // number, which is the value you came to read.
+                        ImGui.PushID(fi.Name);
+                        ImGui.SetNextItemWidth(intColumnWidth);
+                        if (ImGui.InputInt("##int", ref integer, 0, 0))
+                        {
+                            fi.SetValue(obj, integer);
+                            objModified = true;
+                        }
+
+                        ImGui.SameLine();
+                        ImGui.PopID();
+                    }
+                    else if (o is bool flag)
+                    {
+                        ImGui.PushID(fi.Name);
+                        if (ImGui.Checkbox("##bool", ref flag))
+                        {
+                            fi.SetValue(obj, flag);
+                            objModified = true;
+                        }
+
+                        ImGui.SameLine();
+                        ImGui.PopID();
                     }
                     else if (fi.FieldType == typeof(string))
                     {
