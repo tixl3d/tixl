@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "70c1d6d4-1e97-4c9d-93c8-93702000ab5b"/*_OutputPreviewGeometry*/,
-  "Description": "Internal helper. Renders a Geometry in the output window: polygons like [GeometryToMesh] into [VisualizeMesh], curves like [CurvesToPoints] into [DrawLines] with [DrawPoints] on the points.\n\nIts only input is connected by the editor while it renders. For content, use [GeometryToMesh] and [DrawMesh], or [CurvesToPoints] and [DrawLines] instead.",
+  "Description": "Internal helper. Renders a Geometry in the output window: polygons like [GeometryToMesh] into [VisualizeMesh], curves like [CurvesToPoints] into [DrawLines] with [DrawPoints] on the points.\n\nIts only input is connected by the editor while it renders; [GetPreviewState] tells it which overlays the output window wants and which elements are selected or hovered. For content, use [GeometryToMesh] and [DrawMesh], or [CurvesToPoints] and [DrawLines] instead.",
   "SymbolTags": "16",
   "InputUis": [
     {
@@ -83,6 +83,86 @@
       "Position": {
         "X": -71.687256,
         "Y": 89.13046
+      }
+    },
+    {
+      "ChildId": "871fb7e1-2b8d-4ba9-8d21-edccbdc3965a",
+      "SymbolName": "Lib.flow.context.GetPreviewState",
+      "Position": {
+        "X": -150.0,
+        "Y": -120.0
+      }
+    },
+    {
+      "ChildId": "cbca644b-cda1-4e80-a961-93d20b81e008",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToInt",
+      "Position": {
+        "X": -20.0,
+        "Y": -120.0
+      }
+    },
+    {
+      "ChildId": "1bb51553-276f-4ecd-ad5d-68aa4fcc9579",
+      "SymbolName": "Lib.flow.Execute",
+      "Position": {
+        "X": 280.0,
+        "Y": 120.0
+      }
+    },
+    {
+      "ChildId": "dc8192ac-3439-477e-b12e-9aac315a2acc",
+      "SymbolName": "Lib.flow.Execute",
+      "Position": {
+        "X": 280.0,
+        "Y": 200.0
+      }
+    },
+    {
+      "ChildId": "309c2ae7-9b6e-4d00-ab9f-d12d27067531",
+      "SymbolName": "Lib.flow.Execute",
+      "Position": {
+        "X": 280.0,
+        "Y": 260.0
+      }
+    },
+    {
+      "ChildId": "91a21213-0158-45c9-9c92-1b7a0c77316e",
+      "SymbolName": "Lib.render.gizmo._._DrawGeometryHighlight",
+      "Position": {
+        "X": 140.0,
+        "Y": 200.0
+      }
+    },
+    {
+      "ChildId": "f5f1e2e0-758f-4ae2-8a67-0f06a52c794d",
+      "SymbolName": "Lib.render.gizmo._._DrawGeometryHighlight",
+      "Position": {
+        "X": 140.0,
+        "Y": 260.0
+      }
+    },
+    {
+      "ChildId": "03b55e2e-58ae-46ac-840a-7bb71a8be60a",
+      "SymbolName": "Lib.geometry.modify.FilterGeometry",
+      "Position": {
+        "X": -20.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "e30192c5-fa3e-497d-bd97-22432670505a",
+      "SymbolName": "Lib.geometry.attribute.ColorGeometry",
+      "Position": {
+        "X": 60.0,
+        "Y": 330.0
+      }
+    },
+    {
+      "ChildId": "8ac009cf-c266-415e-80ca-2ad2216432ad",
+      "SymbolName": "Lib.render.gizmo._._DrawGeometryHighlight",
+      "Position": {
+        "X": 140.0,
+        "Y": 330.0
       }
     }
   ],

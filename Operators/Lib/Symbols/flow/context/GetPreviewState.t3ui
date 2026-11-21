@@ -1,0 +1,65 @@
+{
+  "FormatVersion": 3,
+  "Id": "333f87ae-4641-477f-bb61-fc25d14552d6"/*GetPreviewState*/,
+  "Description": "Reads what the output window asks its preview to draw: a flag per overlay (wireframe, points, indices, selection, hover, normals) and the table's selected and hovered elements as small geometries.\n\nUsed inside preview ops like [_OutputPreviewGeometry]; each output window sets these from its toolbar menu. Outside an output window the flags have their defaults and the geometries are empty.\n\nSee also: [GetRenderPassState]",
+  "InputUis": [],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "fa63f9a0-4203-4434-b638-13eeb743c2f1"/*Wireframe*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "aac0cca5-0f05-4f66-8fcb-d7564c9a6c02"/*Points*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 45.0
+      }
+    },
+    {
+      "OutputId": "5d76e2a1-3d04-4461-9260-fdfba52ebfae"/*PointIndices*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 90.0
+      }
+    },
+    {
+      "OutputId": "cb70f1f4-44db-46d8-a894-954e1b3a71fe"/*Selection*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 135.0
+      }
+    },
+    {
+      "OutputId": "006658a5-795f-43ed-8d80-c8eafee79a56"/*Hover*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 180.0
+      }
+    },
+    {
+      "OutputId": "1bddb185-9043-4a4c-8c46-9199e4aa47da"/*Normals*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 225.0
+      }
+    },
+    {
+      "OutputId": "b82f34dc-0917-43b0-898c-c1bd395773ba"/*Selected*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 270.0
+      }
+    },
+    {
+      "OutputId": "27ff19b0-ced8-4940-9bd8-25b1cd61c8b0"/*Hovered*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 315.0
+      }
+    }
+  ]
+}

@@ -55,6 +55,7 @@ public sealed class EvaluationContext
         ObjectVariables.Clear();
         StringVariables.Clear();
         RenderPass = default;
+        PreviewOverlay = default;
             
         PbrContextSettings.SetDefaultToContext(this);
     }
@@ -324,6 +325,9 @@ public sealed class EvaluationContext
     /// whole struct before and restore it after their subtree. See <see cref="RenderPassState"/>.
     /// </summary>
     public RenderPassState RenderPass;
+
+    /// <summary>Overlays and the selected or hovered elements an output window asks its preview to draw; see [GetPreviewState].</summary>
+    public PreviewOverlayState PreviewOverlay;
 
     public LegacyParticleSystem LegacyParticleSystem;
     public ParticleSystem ParticleSystem;

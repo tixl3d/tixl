@@ -417,7 +417,7 @@ Connect [CubeGeometry] -> [SubdivideGeometry] (Linear) -> [SelectGeometry] (Doma
 [TransformGeometry] (Translation Y 0.2), select [SelectGeometry] and look at the Output Window.
 
 **Expected:**
-- The selected faces are filled and outlined, not ringed at their points.
+- The selected faces are outlined in white with their corners as dots; edges hidden behind the cube are faint.
 - Count 2 keeps only two faces from Offset; animating Offset moves them around the cube.
 - On [TransformGeometry], Selection shows `<Auto: Selection>`. Typing opens a list with `<Auto>`, `<All>` and the float attributes; `<All>` moves the whole cube.
 
@@ -522,3 +522,13 @@ Connect [CubeGeometry] -> [CurvesToPoints] -> [ListToBuffer] -> [DrawLines] and 
 - After [SubdivideGeometry] (Smoothness 0, Iterations 2), All draws the whole grid, Sharp still only the cube's edges.
 - On [ExtrudeCurves] of a text, Sharp outlines the letters on both caps and the corners of the walls, without lines
   across the caps, also with Lattice.
+
+## Step: Filter by a selection
+
+**Action:**
+Connect [CubeGeometry] -> [SelectGeometry] -> [FilterGeometry] and look at the Stats of [FilterGeometry].
+
+**Expected:**
+- [SelectGeometry] Domain Points, Count 2: 2 points and no primitives remain (loose points).
+- Domain Primitives, Offset 4, Count 1: the top face with its 4 points remains; Invert keeps the other 5 faces.
+- A misspelled Attribute warns and passes the geometry through.

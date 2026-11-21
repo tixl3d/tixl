@@ -3,6 +3,7 @@
 using System.Diagnostics.CodeAnalysis;
 using ImGuiNET;
 using T3.Core.DataTypes;
+using T3.Core.Rendering;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
 using T3.Core.Video;
@@ -70,6 +71,8 @@ internal sealed partial class OutputWindow
         // Prepare context
         EvaluationContext.Reset();
         EvaluationContext.ShowGizmos = State.ShowGizmos;
+        EvaluationContext.PreviewOverlay = new PreviewOverlayState { IsSet = true, Overlays = State.PreviewOverlays };
+        _shownValueType = evaluatedOutputUi.Type;
         EvaluationContext.TransformGizmoMode = State.TransformGizmoMode;
         EvaluationContext.BypassCameras = _camSelectionHandling.BypassCamera;
         RequestedResolution = RenderProcess.TryGetActiveExportResolution(out var overrideResolution)

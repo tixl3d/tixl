@@ -19,6 +19,7 @@ internal sealed class CurvesToPoints : Instance<CurvesToPoints>
     {
         Flattened,
         Points,
+        AllPoints,
     }
 
     private enum PolygonEdgeModes
@@ -41,13 +42,21 @@ internal sealed class CurvesToPoints : Instance<CurvesToPoints>
         var curves = Curves.GetValue(context);
         var tolerance = MathF.Max(Tolerance.GetValue(context), 1e-5f);
         var closeLoops = CloseLoops.GetValue(context);
-        var samplesPoints = Sampling.GetValue(context) == (int)Samplings.Points;
+        var sampling = (Samplings)Math.Clamp(Sampling.GetValue(context), 0, 2);
+        var samplesPoints = sampling == Samplings.Points;
         var edgeMode = (PolygonEdgeModes)Math.Clamp(PolygonEdges.GetValue(context), 0, 2);
         var sharpAngle = Math.Clamp(SharpAngle.GetValue(context), 0f, 180f);
 
-        if (curves == null || curves.PrimitiveCount == 0)
+        if (curves == null || (curves.PrimitiveCount == 0 && sampling != Samplings.AllPoints))
         {
             Points.Value = null;
+            return;
+        }
+
+        if (sampling == Samplings.AllPoints)
+        {
+            WriteAllPoints(curves);
+            Points.Value = _pointList;
             return;
         }
 
@@ -159,6 +168,29 @@ internal sealed class CurvesToPoints : Instance<CurvesToPoints>
             AddEdgePoint(geometry.Positions[edge.PointB], edge.Face0, color);
             _pointList.TypedElements[_pointCount++] = Point.Separator();
         }
+    }
+
+    /// <summary>Every point of the geometry once, in point order, with its point Color (white without); no separators.</summary>
+    private void WriteAllPoints(Geometry geometry)
+    {
+        geometry.Attributes.TryGet<Vector4>(GeometryAttributeNames.Color, AttributeDomain.Point, out var pointColors);
+        _pointCount = 0;
+        EnsureCapacity(Math.Max(geometry.PointCount, 1));
+        for (var point = 0; point < geometry.PointCount; point++)
+        {
+            _pointList.TypedElements[_pointCount++] = new Point
+                                                          {
+                                                              Position = geometry.Positions[point],
+                                                              F1 = 1,
+                                                              F2 = point,
+                                                              Orientation = Quaternion.Identity,
+                                                              Scale = Vector3.One,
+                                                              Color = pointColors != null ? pointColors.Values[point] : Vector4.One,
+                                                          };
+        }
+
+        if (_pointList.NumElements != _pointCount)
+            _pointList.SetLength(_pointCount);
     }
 
     private void AddEdgePoint(Vector3 position, int face, Vector4 color)

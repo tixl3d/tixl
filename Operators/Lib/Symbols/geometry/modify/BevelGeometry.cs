@@ -7,14 +7,22 @@ using T3.Core.Utils;
 namespace Lib.geometry.modify;
 
 /// <summary>
-/// Uniform-width edge bevel for Geometry (v1): every face is inset by the bevel
-/// width, every edge becomes a profile strip between its two inset faces, and every
-/// vertex becomes a fan patch closing the corner. Width is clamped against the
-/// shortest edge. General miters/colliding bevels are out of scope.
+/// Edge bevel for Geometry: every face is inset, every edge becomes a profile strip between its two
+/// inset faces, and every vertex becomes a patch closing the corner. Faces meeting at less than the
+/// flat angle are merged first, so flat edges get no strip.
 /// </summary>
 [Guid("dbaeebea-8d46-416f-9624-867af10d9c07")]
 internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
 {
+    private enum Methods
+    {
+        Fast,
+        StraightSkeleton,
+    }
+
+    private readonly record struct Settings(float Width, int Segments, float Roundness, bool FlatShading, bool RoundCorners,
+                                            Methods Method, float FlatAngle);
+
     [Output(Guid = "48342188-0139-4ea4-943d-a5b5d59b7a4a")]
     public readonly Slot<Geometry> Result = new();
 
@@ -27,29 +35,15 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
     {
         var original = Geometry.GetValue(context);
         var source = original != null ? _polygons.GetPolygons(original) : null;
-        var width = Width.GetValue(context);
-        var segments = Math.Clamp(Segments.GetValue(context), 1, 16);
-        var roundness = Math.Clamp(Roundness.GetValue(context), 0f, 1f);
-        var flatShading = FlatShading.GetValue(context);
-        var roundCorners = RoundCorners.GetValue(context);
+        var settings = new Settings(Width.GetValue(context),
+                                    Math.Clamp(Segments.GetValue(context), 1, 16),
+                                    Math.Clamp(Roundness.GetValue(context), 0f, 1f),
+                                    FlatShading.GetValue(context),
+                                    RoundCorners.GetValue(context),
+                                    (Methods)Math.Clamp(Method.GetValue(context), 0, (int)Methods.StraightSkeleton),
+                                    Math.Clamp(FlatAngle.GetValue(context), 0f, 90f));
 
-        if (source == null || source.PrimitiveCount == 0)
-        {
-            Result.Value = original;
-            return;
-        }
-
-        // Clamp against the shortest edge so opposite bevels can't cross
-        var edges = source.Edges;
-        var maxWidth = float.MaxValue;
-        foreach (var edge in edges.Edges)
-        {
-            var length = Vector3.Distance(source.Positions[edge.PointA], source.Positions[edge.PointB]);
-            maxWidth = MathF.Min(maxWidth, length * 0.35f);
-        }
-
-        width = MathF.Min(width, maxWidth);
-        if (width <= 0)
+        if (source == null || source.PrimitiveCount == 0 || settings.Width <= 0)
         {
             Result.Value = original;
             return;
@@ -57,12 +51,12 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
 
         if (Async.GetValue(context))
         {
-            var inputsVersion = HashCode.Combine(source.Version, source.GetHashCode(), width, segments, roundness, flatShading, roundCorners);
+            var inputsVersion = HashCode.Combine(source.Version, source.GetHashCode(), settings);
             var result = _asyncComputation.Update(context, Result, inputsVersion,
                                                   token =>
                                                   {
                                                       var target = new Geometry();
-                                                      Build(target, source, width, segments, roundness, flatShading, roundCorners, token);
+                                                      Build(target, source, settings, token);
                                                       return target;
                                                   });
             Result.Value = result != null ? _curves.Combine(result, original) : original;
@@ -70,17 +64,16 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
         }
 
         _asyncComputation.WaitForPending(Result);
-        Build(_output, source, width, segments, roundness, flatShading, roundCorners, CancellationToken.None);
+        Build(_output, source, settings, CancellationToken.None);
         Result.Value = _curves.Combine(_output, original);
     }
 
-    private void Build(Geometry target, Geometry source, float width, int segments, float roundness, bool flatShading, bool roundCorners,
-                       CancellationToken token)
+    private void Build(Geometry target, Geometry source, Settings settings, CancellationToken token)
     {
-        var positions = source.Positions;
-        var offsets = source.PrimitiveVertexOffsets;
-        var cornerPoints = source.VertexPoints;
-        var edges = source.Edges;
+        var mesh = settings.FlatAngle > 0 ? MergeFlatFaces(source, settings.FlatAngle) : source;
+        var offsets = mesh.PrimitiveVertexOffsets;
+        var edges = mesh.Edges;
+        var segments = settings.Segments;
 
         _outPositions.Clear();
         _outNormals.Clear();
@@ -88,70 +81,39 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
         _outCorners.Clear();
         _outFaceOffsets.Add(0);
 
-        // Source face normals (Newell), reused for inset points and strip blending
-        if (_faceNormals.Length != source.PrimitiveCount)
-            _faceNormals = new Vector3[source.PrimitiveCount];
-        for (var faceIndex = 0; faceIndex < source.PrimitiveCount; faceIndex++)
-        {
-            var normal = Vector3.Zero;
-            var start = offsets[faceIndex];
-            var end = offsets[faceIndex + 1];
-            for (var c = start; c < end; c++)
-            {
-                var next = c + 1 == end ? start : c + 1;
-                var p0 = positions[cornerPoints[c]];
-                var p1 = positions[cornerPoints[next]];
-                normal += new Vector3((p0.Y - p1.Y) * (p0.Z + p1.Z),
-                                      (p0.Z - p1.Z) * (p0.X + p1.X),
-                                      (p0.X - p1.X) * (p0.Y + p1.Y));
-            }
-
-            _faceNormals[faceIndex] = normal.LengthSquared() > 1e-10f ? Vector3.Normalize(normal) : Vector3.UnitY;
-        }
+        ComputeFaceNormals(mesh, ref _faceNormals);
+        _asyncComputation.ReportProgress(0.05f);
 
         // --- A: inset point per input corner --------------------------------
-        var insetPointIds = _insetPointIds;
-        if (insetPointIds.Length != source.VertexCount)
-            insetPointIds = _insetPointIds = new int[source.VertexCount];
+        if (_insetPointIds.Length != mesh.VertexCount)
+            _insetPointIds = new int[mesh.VertexCount];
 
-        for (var faceIndex = 0; faceIndex < source.PrimitiveCount; faceIndex++)
+        if (settings.Method == Methods.StraightSkeleton)
         {
-            var start = offsets[faceIndex];
-            var end = offsets[faceIndex + 1];
-            for (var c = start; c < end; c++)
-            {
-                var next = c + 1 == end ? start : c + 1;
-                var prev = c == start ? end - 1 : c - 1;
-                var p = positions[cornerPoints[c]];
-                var toNext = Vector3.Normalize(positions[cornerPoints[next]] - p);
-                var toPrev = Vector3.Normalize(positions[cornerPoints[prev]] - p);
-
-                var cosAngle = Math.Clamp(Vector3.Dot(toNext, toPrev), -1f, 1f);
-                var sinHalf = MathF.Sqrt(MathF.Max((1 - cosAngle) * 0.5f, 1e-6f));
-                var bisector = toNext + toPrev;
-                var bisectorLength = bisector.Length();
-                var inward = bisectorLength > 1e-6f ? bisector / bisectorLength : Vector3.Zero;
-
-                insetPointIds[c] = AddPoint(p + inward * (width / sinHalf), _faceNormals[faceIndex]);
-            }
+            InsetBySkeleton(mesh, settings.Width, token);
+        }
+        else
+        {
+            InsetFast(mesh, settings.Width);
         }
 
         // --- B: inset faces (same winding as the source) --------------------
-        for (var faceIndex = 0; faceIndex < source.PrimitiveCount; faceIndex++)
+        for (var faceIndex = 0; faceIndex < mesh.PrimitiveCount; faceIndex++)
         {
             var start = offsets[faceIndex];
             var end = offsets[faceIndex + 1];
             for (var c = start; c < end; c++)
             {
-                _outCorners.Add(insetPointIds[c]);
+                _polygon.Add(_insetPointIds[c]);
             }
 
-            _outFaceOffsets.Add(_outCorners.Count);
+            AddPolygon(_polygon);
         }
 
         // --- C: edge strips --------------------------------------------------
         // ring point ids per edge and end vertex, ordered from Face0's inset to Face1's
         var edgeRings = new Dictionary<(int EdgeIndex, int PointId), int[]>();
+        _ringsByEnds.Clear();
 
         for (var edgeIndex = 0; edgeIndex < edges.Edges.Length; edgeIndex++)
         {
@@ -161,24 +123,30 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
             if (edge.Face1 < 0)
                 continue; // boundary edge - nothing to connect
 
-            var ringA = BuildEndRing(source, edge, edge.PointA, segments, roundness, edgeRings, edgeIndex);
-            var ringB = BuildEndRing(source, edge, edge.PointB, segments, roundness, edgeRings, edgeIndex);
+            var ringA = BuildEndRing(mesh, edge, edge.PointA, segments, settings.Roundness, edgeRings, edgeIndex);
+            var ringB = BuildEndRing(mesh, edge, edge.PointB, segments, settings.Roundness, edgeRings, edgeIndex);
+            if (ringA == ringB)
+                continue; // the edge collapsed in both inset faces
 
             // Face0 traverses the edge either A->B or B->A; the strip must run opposite
             // to Face0's inset edge to face outward.
-            var startRing = TraversesInOrder(source, edge.Face0, edge.PointA, edge.PointB) ? ringA : ringB;
+            var startRing = TraversesInOrder(mesh, edge.Face0, edge.PointA, edge.PointB) ? ringA : ringB;
             var endRing = startRing == ringA ? ringB : ringA;
 
             for (var s = 0; s < segments; s++)
             {
-                AddQuad(endRing[s], startRing[s], startRing[s + 1], endRing[s + 1]);
+                _polygon.Add(endRing[s]);
+                _polygon.Add(startRing[s]);
+                _polygon.Add(startRing[s + 1]);
+                _polygon.Add(endRing[s + 1]);
+                AddPolygon(_polygon);
             }
         }
 
         // --- D: corner fans --------------------------------------------------
         token.ThrowIfCancellationRequested();
         _asyncComputation.ReportProgress(0.7f);
-        BuildCornerFans(source, edgeRings, segments, roundness, roundCorners);
+        BuildCornerFans(mesh, edgeRings, segments, settings.Roundness, settings.RoundCorners);
 
         // --- E: publish ------------------------------------------------------
         target.Positions = _outPositions.ToArray();
@@ -187,7 +155,7 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
         target.VertexPoints = _outCorners.ToArray();
         target.Parts = [];
         target.Attributes.Clear();
-        if (!flatShading)
+        if (!settings.FlatShading)
         {
             // Without the attribute, the compile step falls back to per-face normals - the hard/faceted look.
             var normals = target.Attributes.GetOrCreate<Vector3>(GeometryAttributeNames.Normal, AttributeDomain.Vertex, _outCorners.Count);
@@ -196,7 +164,476 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
                 normals.Values[c] = _outNormals[_outCorners[c]];
             }
         }
+
         target.InvalidateTopologyCaches();
+    }
+
+    /// <summary>
+    /// Merges faces that meet at less than the flat angle into single polygons and drops points that only
+    /// split a straight edge, so flat edges get no bevel strip. A region whose outline is not one simple
+    /// convex loop (a hole, a pinched or concave corner) keeps its faces.
+    /// </summary>
+    private Geometry MergeFlatFaces(Geometry source, float flatAngleDegrees)
+    {
+        var faceCount = source.PrimitiveCount;
+        var offsets = source.PrimitiveVertexOffsets;
+        var cornerPoints = source.VertexPoints;
+        var positions = source.Positions;
+        var edges = source.Edges;
+        var minCos = MathF.Cos(flatAngleDegrees * MathF.PI / 180f);
+        ComputeFaceNormals(source, ref _faceNormals);
+
+        var parent = new int[faceCount];
+        for (var faceIndex = 0; faceIndex < faceCount; faceIndex++)
+        {
+            parent[faceIndex] = faceIndex;
+        }
+
+        foreach (var edge in edges.Edges)
+        {
+            if (edge.Face1 >= 0 && Vector3.Dot(_faceNormals[edge.Face0], _faceNormals[edge.Face1]) >= minCos)
+                Union(parent, edge.Face0, edge.Face1);
+        }
+
+        // Faces grouped by region (counting sort on the root)
+        var regionStart = new int[faceCount + 1];
+        for (var faceIndex = 0; faceIndex < faceCount; faceIndex++)
+        {
+            regionStart[Find(parent, faceIndex) + 1]++;
+        }
+
+        for (var i = 0; i < faceCount; i++)
+        {
+            regionStart[i + 1] += regionStart[i];
+        }
+
+        var members = new int[faceCount];
+        var fill = (int[])regionStart.Clone();
+        for (var faceIndex = 0; faceIndex < faceCount; faceIndex++)
+        {
+            members[fill[Find(parent, faceIndex)]++] = faceIndex;
+        }
+
+        var mergedOffsets = new List<int>(faceCount + 1) { 0 };
+        var mergedCorners = new List<int>(cornerPoints.Length);
+        var regionStates = new byte[faceCount]; // 0 undecided, 1 merged, 2 kept as is
+        var nextPoint = new Dictionary<int, int>();
+        var loop = new List<int>();
+        var changed = false;
+
+        for (var faceIndex = 0; faceIndex < faceCount; faceIndex++)
+        {
+            var root = Find(parent, faceIndex);
+            var regionSize = regionStart[root + 1] - regionStart[root];
+            if (regionSize > 1 && regionStates[root] == 0)
+            {
+                regionStates[root] = TryTraceRegionOutline(source, parent, root, members, regionStart, nextPoint, loop)
+                                     && IsConvex(loop, positions, _faceNormals[faceIndex])
+                                         ? (byte)1
+                                         : (byte)2;
+                if (regionStates[root] == 1)
+                {
+                    mergedCorners.AddRange(loop);
+                    mergedOffsets.Add(mergedCorners.Count);
+                    changed = true;
+                }
+            }
+
+            if (regionSize > 1 && regionStates[root] == 1)
+                continue;
+
+            for (var c = offsets[faceIndex]; c < offsets[faceIndex + 1]; c++)
+            {
+                mergedCorners.Add(cornerPoints[c]);
+            }
+
+            mergedOffsets.Add(mergedCorners.Count);
+        }
+
+        var merged = new Geometry
+                         {
+                             Positions = positions,
+                             PrimitiveVertexOffsets = mergedOffsets.ToArray(),
+                             VertexPoints = mergedCorners.ToArray(),
+                             Parts = [],
+                         };
+        merged.SetAllPrimitiveKinds(PrimitiveKinds.Polygon);
+
+        // A point with only two edges that continue each other in a straight line splits nothing visible
+        var pointEdgeCounts = new int[positions.Length];
+        foreach (var edge in merged.Edges.Edges)
+        {
+            pointEdgeCounts[edge.PointA]++;
+            pointEdgeCounts[edge.PointB]++;
+        }
+
+        var reducedOffsets = new List<int>(mergedOffsets.Count) { 0 };
+        var reducedCorners = new List<int>(mergedCorners.Count);
+        for (var faceIndex = 0; faceIndex < merged.PrimitiveCount; faceIndex++)
+        {
+            var start = merged.PrimitiveVertexOffsets[faceIndex];
+            var end = merged.PrimitiveVertexOffsets[faceIndex + 1];
+            var faceStart = reducedCorners.Count;
+            for (var c = start; c < end; c++)
+            {
+                var pointId = merged.VertexPoints[c];
+                if (pointEdgeCounts[pointId] == 2)
+                {
+                    var previous = positions[merged.VertexPoints[c == start ? end - 1 : c - 1]];
+                    var next = positions[merged.VertexPoints[c + 1 == end ? start : c + 1]];
+                    var p = positions[pointId];
+                    var toPoint = p - previous;
+                    var fromPoint = next - p;
+                    var lengths = toPoint.Length() * fromPoint.Length();
+                    if (lengths > 1e-20f && Vector3.Dot(toPoint, fromPoint) >= minCos * lengths)
+                        continue;
+                }
+
+                reducedCorners.Add(pointId);
+            }
+
+            if (reducedCorners.Count - faceStart < 3)
+            {
+                // Degenerate leftover - keep the face as it was
+                reducedCorners.RemoveRange(faceStart, reducedCorners.Count - faceStart);
+                for (var c = start; c < end; c++)
+                {
+                    reducedCorners.Add(merged.VertexPoints[c]);
+                }
+            }
+
+            changed |= reducedCorners.Count - faceStart != end - start;
+            reducedOffsets.Add(reducedCorners.Count);
+        }
+
+        if (!changed)
+            return source;
+
+        merged.PrimitiveVertexOffsets = reducedOffsets.ToArray();
+        merged.VertexPoints = reducedCorners.ToArray();
+        merged.SetAllPrimitiveKinds(PrimitiveKinds.Polygon);
+        merged.InvalidateTopologyCaches();
+        return merged;
+    }
+
+    /// <summary>Chains the outline edges of a flat region into one loop; false if it isn't a single simple loop.</summary>
+    private static bool TryTraceRegionOutline(Geometry source, int[] parent, int root, int[] members, int[] regionStart,
+                                              Dictionary<int, int> nextPoint, List<int> loop)
+    {
+        var edges = source.Edges;
+        var offsets = source.PrimitiveVertexOffsets;
+        var cornerPoints = source.VertexPoints;
+        nextPoint.Clear();
+        loop.Clear();
+        var firstPoint = -1;
+
+        for (var m = regionStart[root]; m < regionStart[root + 1]; m++)
+        {
+            var faceIndex = members[m];
+            var start = offsets[faceIndex];
+            var end = offsets[faceIndex + 1];
+            for (var c = start; c < end; c++)
+            {
+                var edge = edges.Edges[edges.CornerEdgeIndices[c]];
+                var otherFace = edge.Face0 == faceIndex ? edge.Face1 : edge.Face0;
+                if (otherFace >= 0 && Find(parent, otherFace) == root)
+                    continue;
+
+                var from = cornerPoints[c];
+                if (!nextPoint.TryAdd(from, cornerPoints[c + 1 == end ? start : c + 1]))
+                    return false; // pinched: the outline passes a point twice
+
+                if (firstPoint < 0)
+                    firstPoint = from;
+            }
+        }
+
+        if (firstPoint < 0)
+            return false;
+
+        var current = firstPoint;
+        do
+        {
+            loop.Add(current);
+            if (!nextPoint.TryGetValue(current, out current) || loop.Count > nextPoint.Count)
+                return false;
+        }
+        while (current != firstPoint);
+
+        return loop.Count == nextPoint.Count && loop.Count >= 3;
+    }
+
+    /** Polygons are fan triangulated downstream, so a merged face must not turn the wrong way anywhere (straight runs are fine). */
+    private static bool IsConvex(List<int> loop, Vector3[] positions, Vector3 normal)
+    {
+        for (var i = 0; i < loop.Count; i++)
+        {
+            var previous = positions[loop[i == 0 ? loop.Count - 1 : i - 1]];
+            var p = positions[loop[i]];
+            var next = positions[loop[(i + 1) % loop.Count]];
+            var toPoint = p - previous;
+            var fromPoint = next - p;
+            if (Vector3.Dot(Vector3.Cross(toPoint, fromPoint), normal) < -1e-4f * toPoint.Length() * fromPoint.Length())
+                return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Moves every corner inward along its miter with a width limited per point: a corner uses at most
+    /// <see cref="MaxShareOfDistance"/> of each adjacent edge and of its distance to the other edges of
+    /// the face, so short edges and thin faces only narrow the bevel around them.
+    /// </summary>
+    private void InsetFast(Geometry mesh, float width)
+    {
+        var positions = mesh.Positions;
+        var offsets = mesh.PrimitiveVertexOffsets;
+        var cornerPoints = mesh.VertexPoints;
+        ComputeCornerVelocities(mesh);
+
+        if (_pointWidths.Length != positions.Length)
+            _pointWidths = new float[positions.Length];
+        Array.Fill(_pointWidths, width);
+
+        for (var faceIndex = 0; faceIndex < mesh.PrimitiveCount; faceIndex++)
+        {
+            var start = offsets[faceIndex];
+            var end = offsets[faceIndex + 1];
+            for (var c = start; c < end; c++)
+            {
+                var next = c + 1 == end ? start : c + 1;
+                var pointId = cornerPoints[c];
+                var p = positions[pointId];
+                var edge = positions[cornerPoints[next]] - p;
+                var length = edge.Length();
+                if (length > 1e-12f)
+                {
+                    var direction = edge / length;
+                    LimitPointWidth(pointId, length, Vector3.Dot(_cornerVelocities[c], direction));
+                    LimitPointWidth(cornerPoints[next], length, -Vector3.Dot(_cornerVelocities[next], direction));
+                }
+
+                var speed = _cornerVelocities[c].Length();
+                for (var other = start; other < end; other++)
+                {
+                    var otherNext = other + 1 == end ? start : other + 1;
+                    if (other == c || otherNext == c)
+                        continue;
+
+                    var distance = DistanceToSegment(p, positions[cornerPoints[other]], positions[cornerPoints[otherNext]]);
+                    LimitPointWidth(pointId, distance, speed);
+                }
+            }
+        }
+
+        for (var faceIndex = 0; faceIndex < mesh.PrimitiveCount; faceIndex++)
+        {
+            for (var c = offsets[faceIndex]; c < offsets[faceIndex + 1]; c++)
+            {
+                var pointId = cornerPoints[c];
+                _insetPointIds[c] = AddPoint(positions[pointId] + _cornerVelocities[c] * _pointWidths[pointId], _faceNormals[faceIndex]);
+            }
+        }
+    }
+
+    /** Caps a point's width so moving at <paramref name="speed"/> toward something uses at most its share of the distance. */
+    private void LimitPointWidth(int pointId, float distance, float speed)
+    {
+        if (speed > 1e-6f)
+            _pointWidths[pointId] = MathF.Min(_pointWidths[pointId], MaxShareOfDistance * distance / speed);
+    }
+
+    /// <summary>
+    /// Insets every face with its straight skeleton: all edges move inward at the same speed, and an edge
+    /// that shrinks to nothing is removed and its two corners merge into one inset point. A face that
+    /// collapses before the full width stops there. Split events are not computed: a concave face stops
+    /// short of the width where a concave corner would reach another edge.
+    /// </summary>
+    private void InsetBySkeleton(Geometry mesh, float width, CancellationToken token)
+    {
+        var positions = mesh.Positions;
+        var offsets = mesh.PrimitiveVertexOffsets;
+        var cornerPoints = mesh.VertexPoints;
+        ComputeCornerVelocities(mesh);
+
+        for (var faceIndex = 0; faceIndex < mesh.PrimitiveCount; faceIndex++)
+        {
+            if ((faceIndex & 255) == 0)
+                token.ThrowIfCancellationRequested();
+
+            var start = offsets[faceIndex];
+            var end = offsets[faceIndex + 1];
+            var count = end - start;
+            var faceNormal = _faceNormals[faceIndex];
+
+            _skeleton.Clear();
+            _cornerSlots.Clear(); // a cancelled build can leave the previous face's slots behind
+            if (_slotPointIds.Length < count)
+                _slotPointIds = new int[count];
+
+            for (var c = start; c < end; c++)
+            {
+                var previous = c == start ? end - 1 : c - 1;
+                var next = c + 1 == end ? start : c + 1;
+                var p = positions[cornerPoints[c]];
+                _skeleton.Add(new SkeletonVertex(p,
+                                                 _cornerVelocities[c],
+                                                 EdgeInwardNormal(positions[cornerPoints[previous]], p, faceNormal),
+                                                 EdgeInwardNormal(p, positions[cornerPoints[next]], faceNormal),
+                                                 c - start == 0 ? count - 1 : c - start - 1,
+                                                 c - start + 1 == count ? 0 : c - start + 1));
+                _cornerSlots.Add(c - start);
+            }
+
+            var alive = count;
+            var time = 0f;
+            var limit = width;
+            while (alive > 2)
+            {
+                var collapseSlot = FindNextEdgeCollapse(time, out var collapseTime);
+                var splitTime = FindFirstSplit(faceNormal, time);
+                if (splitTime < limit && splitTime <= collapseTime)
+                {
+                    limit = time + (splitTime - time) * SplitSafety;
+                    break;
+                }
+
+                if (collapseSlot < 0 || collapseTime >= limit)
+                    break;
+
+                MergeWithNext(collapseSlot, collapseTime);
+                time = collapseTime;
+                alive--;
+            }
+
+            if (alive <= 2)
+                limit = time; // the face shrank to a ridge or a point - moving on would cross it
+
+            // Corners that arrive at the same spot (a face shrunk to a point or ridge) share one point
+            var weldDistanceSq = MathF.Max(limit * CollapseWeldFactor, 1e-7f);
+            weldDistanceSq *= weldDistanceSq;
+            for (var slot = 0; slot < count; slot++)
+            {
+                var vertex = _skeleton[slot];
+                _slotPointIds[slot] = -1;
+                if (!vertex.Alive)
+                    continue;
+
+                var position = vertex.Origin + vertex.Velocity * limit;
+                var previousSlot = vertex.Previous;
+                if (previousSlot < slot && _slotPointIds[previousSlot] >= 0
+                    && Vector3.DistanceSquared(_outPositions[_slotPointIds[previousSlot]], position) < weldDistanceSq)
+                {
+                    _slotPointIds[slot] = _slotPointIds[previousSlot];
+                    continue;
+                }
+
+                _slotPointIds[slot] = AddPoint(position, faceNormal);
+            }
+
+            for (var local = 0; local < count; local++)
+            {
+                _insetPointIds[start + local] = _slotPointIds[_cornerSlots[local]];
+            }
+        }
+    }
+
+    /// <summary>The alive slot whose outgoing edge shrinks to zero first after <paramref name="time"/>.</summary>
+    private int FindNextEdgeCollapse(float time, out float collapseTime)
+    {
+        collapseTime = float.PositiveInfinity;
+        var bestSlot = -1;
+        for (var slot = 0; slot < _skeleton.Count; slot++)
+        {
+            var vertex = _skeleton[slot];
+            if (!vertex.Alive)
+                continue;
+
+            var next = _skeleton[vertex.Next];
+            var direction = EdgeDirection(vertex.NextNormal, next.Origin - vertex.Origin);
+            var shrinkRate = Vector3.Dot(vertex.Velocity - next.Velocity, direction);
+            if (shrinkRate <= 1e-6f)
+                continue;
+
+            var t = MathF.Max(Vector3.Dot(next.Origin - vertex.Origin, direction) / shrinkRate, time);
+            if (t < collapseTime)
+            {
+                collapseTime = t;
+                bestSlot = slot;
+            }
+        }
+
+        return bestSlot;
+    }
+
+    /// <summary>The time a concave corner first reaches a non-adjacent edge (a split event), or infinity.</summary>
+    private float FindFirstSplit(Vector3 faceNormal, float time)
+    {
+        var splitTime = float.PositiveInfinity;
+        for (var slot = 0; slot < _skeleton.Count; slot++)
+        {
+            var vertex = _skeleton[slot];
+            if (!vertex.Alive || Vector3.Dot(Vector3.Cross(vertex.PreviousNormal, vertex.NextNormal), faceNormal) >= -1e-6f)
+                continue; // only concave corners can split a face
+
+            for (var edgeSlot = 0; edgeSlot < _skeleton.Count; edgeSlot++)
+            {
+                var edgeStart = _skeleton[edgeSlot];
+                if (!edgeStart.Alive || edgeSlot == slot || edgeStart.Next == slot)
+                    continue;
+
+                // Signed distance of the corner to the edge's line, which moves inward at unit speed
+                var approachRate = Vector3.Dot(vertex.Velocity - edgeStart.Velocity, edgeStart.NextNormal);
+                if (approachRate >= -1e-6f)
+                    continue;
+
+                var t = -Vector3.Dot(vertex.Origin - edgeStart.Origin, edgeStart.NextNormal) / approachRate;
+                if (t <= time || t >= splitTime)
+                    continue;
+
+                var edgeEnd = _skeleton[edgeStart.Next];
+                var a = edgeStart.Origin + edgeStart.Velocity * t;
+                var b = edgeEnd.Origin + edgeEnd.Velocity * t;
+                var hit = vertex.Origin + vertex.Velocity * t;
+                var ab = b - a;
+                var lengthSq = ab.LengthSquared();
+                if (lengthSq < 1e-20f)
+                    continue;
+
+                var along = Vector3.Dot(hit - a, ab) / lengthSq;
+                if (along >= 0 && along <= 1)
+                    splitTime = t;
+            }
+        }
+
+        return splitTime;
+    }
+
+    /** Removes the edge after <paramref name="slot"/>: both of its corners continue as one. */
+    private void MergeWithNext(int slot, float time)
+    {
+        var vertex = _skeleton[slot];
+        var nextSlot = vertex.Next;
+        var next = _skeleton[nextSlot];
+        var position = (vertex.Origin + vertex.Velocity * time + next.Origin + next.Velocity * time) * 0.5f;
+        var velocity = MiterVelocity(vertex.PreviousNormal, next.NextNormal);
+
+        _skeleton[slot] = vertex with
+                              {
+                                  Origin = position - velocity * time,
+                                  Velocity = velocity,
+                                  NextNormal = next.NextNormal,
+                                  Next = next.Next,
+                              };
+        _skeleton[next.Next] = _skeleton[next.Next] with { Previous = slot };
+        _skeleton[nextSlot] = next with { Alive = false };
+
+        for (var local = 0; local < _cornerSlots.Count; local++)
+        {
+            if (_cornerSlots[local] == nextSlot)
+                _cornerSlots[local] = slot;
+        }
     }
 
     /// <summary>Points along the bevel profile at one edge end, from Face0's inset point to Face1's.</summary>
@@ -210,6 +647,30 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
 
         var q0Id = _insetPointIds[FindCornerInFace(source, edge.Face0, endPointId)];
         var q1Id = _insetPointIds[FindCornerInFace(source, edge.Face1, endPointId)];
+
+        // An edge collapsed in both inset faces ends in the same points at both ends - share one ring
+        var otherEnd = endPointId == edge.PointA ? edge.PointB : edge.PointA;
+        if (edgeRings.TryGetValue((edgeIndex, otherEnd), out var otherRing) && otherRing[0] == q0Id && otherRing[segments] == q1Id)
+        {
+            edgeRings.Add(key, otherRing);
+            return otherRing;
+        }
+
+        // A point with only two edges, both between the same two faces, gets no corner patch -
+        // both edges must end in the same ring or a gap opens between them
+        var endsKey = (endPointId, Math.Min(q0Id, q1Id), Math.Max(q0Id, q1Id));
+        if (_ringsByEnds.TryGetValue(endsKey, out var sharedRing))
+        {
+            if (sharedRing[0] != q0Id)
+            {
+                sharedRing = (int[])sharedRing.Clone();
+                Array.Reverse(sharedRing);
+            }
+
+            edgeRings.Add(key, sharedRing);
+            return sharedRing;
+        }
+
         var q0 = _outPositions[q0Id];
         var q1 = _outPositions[q1Id];
 
@@ -240,16 +701,27 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
         }
 
         edgeRings.Add(key, ring);
+        _ringsByEnds.Add(endsKey, ring);
         return ring;
     }
 
-    /// <summary>One fan patch per source point, closing the hole between the adjacent edge rings.</summary>
+    /// <summary>
+    /// One patch per source point, closing the hole between the adjacent edge rings. Points joined by an
+    /// edge that collapsed in both inset faces share a single patch, as a straight skeleton would.
+    /// </summary>
     private void BuildCornerFans(Geometry source, Dictionary<(int, int), int[]> edgeRings, int segments, float roundness, bool roundCorners)
     {
         var edges = source.Edges;
+        var positions = source.Positions;
 
         // adjacency: point -> adjacent interior edges
         var pointEdges = new Dictionary<int, List<int>>();
+        var clusterParent = new int[source.PointCount];
+        for (var pointId = 0; pointId < clusterParent.Length; pointId++)
+        {
+            clusterParent[pointId] = pointId;
+        }
+
         for (var edgeIndex = 0; edgeIndex < edges.Edges.Length; edgeIndex++)
         {
             var edge = edges.Edges[edgeIndex];
@@ -258,89 +730,181 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
 
             (pointEdges.TryGetValue(edge.PointA, out var listA) ? listA : pointEdges[edge.PointA] = []).Add(edgeIndex);
             (pointEdges.TryGetValue(edge.PointB, out var listB) ? listB : pointEdges[edge.PointB] = []).Add(edgeIndex);
+            if (edgeRings[(edgeIndex, edge.PointA)] == edgeRings[(edgeIndex, edge.PointB)])
+                Union(clusterParent, edge.PointA, edge.PointB);
         }
 
+        var clusters = new Dictionary<int, List<(int[] Loop, Vector3 Vertex)>>();
         var loop = new List<int>();
         foreach (var (pointId, adjacentEdges) in pointEdges)
         {
-            if (adjacentEdges.Count < 3)
+            if (adjacentEdges.Count < 3 || !TryWalkCornerLoop(source, edgeRings, pointId, adjacentEdges, segments, loop))
                 continue;
 
-            // Walk the fan of faces around the vertex: edge -> its arc -> the far face -> that face's other edge at the vertex.
-            loop.Clear();
-            var currentEdgeIndex = adjacentEdges[0];
-            var currentFace = edges.Edges[currentEdgeIndex].Face0;
-            var valid = true;
-            for (var i = 0; i < adjacentEdges.Count; i++)
+            OrientOutward(loop, positions[pointId]);
+            var root = Find(clusterParent, pointId);
+            (clusters.TryGetValue(root, out var members) ? members : clusters[root] = []).Add((loop.ToArray(), positions[pointId]));
+        }
+
+        var directedEdges = new HashSet<(int, int)>();
+        var nextInLoop = new Dictionary<int, int>();
+        foreach (var members in clusters.Values)
+        {
+            if (members.Count > 1 && TryMergeLoops(members, directedEdges, nextInLoop, loop))
             {
-                var edge = edges.Edges[currentEdgeIndex];
-                var ring = edgeRings[(currentEdgeIndex, pointId)];
-
-                // The arc runs Face0 -> Face1; append it so we leave on the far side of currentFace.
-                var forward = edge.Face0 == currentFace;
-                for (var s = 0; s < segments; s++)
+                var vertex = Vector3.Zero;
+                foreach (var member in members)
                 {
-                    loop.Add(forward ? ring[s] : ring[segments - s]);
+                    vertex += member.Vertex;
                 }
 
-                var nextFace = forward ? edge.Face1 : edge.Face0;
-                if (!TryFindOtherEdgeAtVertex(source, nextFace, pointId, currentEdgeIndex, out currentEdgeIndex))
-                {
-                    valid = false;
-                    break;
-                }
-
-                currentFace = nextFace;
-            }
-
-            if (!valid || loop.Count < 3)
+                vertex /= members.Count;
+                OrientOutward(loop, vertex);
+                CloseCorner(loop, vertex, segments, roundness, roundCorners);
                 continue;
-
-            // Fan center: the loop centroid pulled back toward the original vertex, so the
-            // patch bulges outward (the centroid itself lies inside the rounded corner).
-            var vertex = source.Positions[pointId];
-            var centroid = Vector3.Zero;
-            foreach (var id in loop)
-            {
-                centroid += _outPositions[id];
             }
 
-            centroid /= loop.Count;
+            foreach (var member in members)
+            {
+                loop.Clear();
+                loop.AddRange(member.Loop);
+                CloseCorner(loop, member.Vertex, segments, roundness, roundCorners);
+            }
+        }
+    }
 
-            // The face walk can go either way around the vertex - orient the loop so its
-            // polygon normal (Newell) points outward, along vertex-minus-centroid.
-            var loopNormal = Vector3.Zero;
+    /// <summary>Walks the fan of faces around a vertex and collects the ring points between them.</summary>
+    private static bool TryWalkCornerLoop(Geometry source, Dictionary<(int, int), int[]> edgeRings, int pointId, List<int> adjacentEdges,
+                                          int segments, List<int> loop)
+    {
+        var edges = source.Edges;
+
+        // edge -> its arc -> the far face -> that face's other edge at the vertex
+        loop.Clear();
+        var currentEdgeIndex = adjacentEdges[0];
+        var currentFace = edges.Edges[currentEdgeIndex].Face0;
+        for (var i = 0; i < adjacentEdges.Count; i++)
+        {
+            var edge = edges.Edges[currentEdgeIndex];
+            var ring = edgeRings[(currentEdgeIndex, pointId)];
+
+            // The arc runs Face0 -> Face1; append it so we leave on the far side of currentFace.
+            var forward = edge.Face0 == currentFace;
+            for (var s = 0; s < segments; s++)
+            {
+                var id = forward ? ring[s] : ring[segments - s];
+                if (loop.Count == 0 || loop[^1] != id)
+                    loop.Add(id);
+            }
+
+            var nextFace = forward ? edge.Face1 : edge.Face0;
+            if (!TryFindOtherEdgeAtVertex(source, nextFace, pointId, currentEdgeIndex, out currentEdgeIndex))
+                return false;
+
+            currentFace = nextFace;
+        }
+
+        while (loop.Count > 1 && loop[^1] == loop[0])
+        {
+            loop.RemoveAt(loop.Count - 1);
+        }
+
+        return loop.Count >= 3;
+    }
+
+    /// <summary>
+    /// Joins the loops of a corner cluster along the rings they share: neighbouring outward loops run
+    /// a shared ring in opposite directions, so those edges cancel and the rest is the merged outline.
+    /// </summary>
+    private static bool TryMergeLoops(List<(int[] Loop, Vector3 Vertex)> members, HashSet<(int, int)> directedEdges, Dictionary<int, int> nextInLoop,
+                                      List<int> result)
+    {
+        directedEdges.Clear();
+        foreach (var (memberLoop, _) in members)
+        {
+            for (var i = 0; i < memberLoop.Length; i++)
+            {
+                var from = memberLoop[i];
+                var to = memberLoop[(i + 1) % memberLoop.Length];
+                if (!directedEdges.Remove((to, from)) && !directedEdges.Add((from, to)))
+                    return false;
+            }
+        }
+
+        nextInLoop.Clear();
+        var firstPoint = -1;
+        foreach (var (from, to) in directedEdges)
+        {
+            if (!nextInLoop.TryAdd(from, to))
+                return false;
+
+            if (firstPoint < 0)
+                firstPoint = from;
+        }
+
+        result.Clear();
+        if (firstPoint < 0)
+            return false;
+
+        var current = firstPoint;
+        do
+        {
+            result.Add(current);
+            if (!nextInLoop.TryGetValue(current, out current) || result.Count > nextInLoop.Count)
+                return false;
+        }
+        while (current != firstPoint);
+
+        return result.Count == nextInLoop.Count && result.Count >= 3;
+    }
+
+    /** Orients a loop so its polygon normal (Newell) points away from its centroid, toward the vertex it closes. */
+    private void OrientOutward(List<int> loop, Vector3 vertex)
+    {
+        var centroid = Vector3.Zero;
+        var loopNormal = Vector3.Zero;
+        for (var i = 0; i < loop.Count; i++)
+        {
+            centroid += _outPositions[loop[i]];
+            loopNormal += NewellTerm(_outPositions[loop[i]], _outPositions[loop[(i + 1) % loop.Count]]);
+        }
+
+        centroid /= loop.Count;
+        if (Vector3.Dot(loopNormal, vertex - centroid) < 0)
+            loop.Reverse();
+    }
+
+    /** Closes an outward-oriented corner loop with a fan or, for round corners, concentric rings. */
+    private void CloseCorner(List<int> loop, Vector3 vertex, int segments, float roundness, bool roundCorners)
+    {
+        // Fan center: the loop centroid pulled back toward the original vertex, so the
+        // patch bulges outward (the centroid itself lies inside the rounded corner).
+        var centroid = Vector3.Zero;
+        foreach (var id in loop)
+        {
+            centroid += _outPositions[id];
+        }
+
+        centroid /= loop.Count;
+
+        var outwardDir = vertex - centroid;
+        var centerNormal = outwardDir.LengthSquared() > 1e-10f ? Vector3.Normalize(outwardDir) : Vector3.UnitY;
+
+        if (!roundCorners || segments == 1)
+        {
+            var bulge = 1f - 0.25f * roundness;
+            var centerId = AddPoint(vertex + (centroid - vertex) * bulge, centerNormal);
+
             for (var i = 0; i < loop.Count; i++)
             {
-                var p0 = _outPositions[loop[i]];
-                var p1 = _outPositions[loop[(i + 1) % loop.Count]];
-                loopNormal += new Vector3((p0.Y - p1.Y) * (p0.Z + p1.Z),
-                                          (p0.Z - p1.Z) * (p0.X + p1.X),
-                                          (p0.X - p1.X) * (p0.Y + p1.Y));
+                var next = (i + 1) % loop.Count;
+                AddTriangle(loop[i], loop[next], centerId);
             }
 
-            if (Vector3.Dot(loopNormal, vertex - centroid) < 0)
-                loop.Reverse();
-
-            var outwardDir = vertex - centroid;
-            var centerNormal = outwardDir.LengthSquared() > 1e-10f ? Vector3.Normalize(outwardDir) : Vector3.UnitY;
-
-            if (!roundCorners || segments == 1)
-            {
-                var bulge = 1f - 0.25f * roundness;
-                var centerId = AddPoint(vertex + (centroid - vertex) * bulge, centerNormal);
-
-                for (var i = 0; i < loop.Count; i++)
-                {
-                    var next = (i + 1) % loop.Count;
-                    AddTriangle(loop[i], loop[next], centerId);
-                }
-
-                continue;
-            }
-
-            BuildCornerRings(loop, vertex, centerNormal, segments, roundness);
+            return;
         }
+
+        BuildCornerRings(loop, vertex, centerNormal, segments, roundness);
     }
 
     /// <summary>
@@ -418,7 +982,11 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
             for (var i = 0; i < n; i++)
             {
                 var next = (i + 1) % n;
-                AddQuad(previousRing[i], previousRing[next], currentRing[next], currentRing[i]);
+                _polygon.Add(previousRing[i]);
+                _polygon.Add(previousRing[next]);
+                _polygon.Add(currentRing[next]);
+                _polygon.Add(currentRing[i]);
+                AddPolygon(_polygon);
             }
 
             (previousRing, currentRing) = (currentRing, previousRing);
@@ -429,6 +997,119 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
             var next = (i + 1) % n;
             AddTriangle(previousRing[i], previousRing[next], poleId);
         }
+    }
+
+    /// <summary>Per corner: how fast it moves when both of its edges move inward at unit speed (in the face plane).</summary>
+    private void ComputeCornerVelocities(Geometry mesh)
+    {
+        var positions = mesh.Positions;
+        var offsets = mesh.PrimitiveVertexOffsets;
+        var cornerPoints = mesh.VertexPoints;
+        if (_cornerVelocities.Length != mesh.VertexCount)
+            _cornerVelocities = new Vector3[mesh.VertexCount];
+
+        for (var faceIndex = 0; faceIndex < mesh.PrimitiveCount; faceIndex++)
+        {
+            var faceNormal = _faceNormals[faceIndex];
+            var start = offsets[faceIndex];
+            var end = offsets[faceIndex + 1];
+            for (var c = start; c < end; c++)
+            {
+                var previous = positions[cornerPoints[c == start ? end - 1 : c - 1]];
+                var next = positions[cornerPoints[c + 1 == end ? start : c + 1]];
+                var p = positions[cornerPoints[c]];
+                _cornerVelocities[c] = MiterVelocity(EdgeInwardNormal(previous, p, faceNormal), EdgeInwardNormal(p, next, faceNormal));
+            }
+        }
+    }
+
+    /// <summary>
+    /// Velocity of a corner between two edges moving along their inward normals at unit speed. Unlike the
+    /// bisector of the edge directions it points into the face at concave corners too.
+    /// </summary>
+    private static Vector3 MiterVelocity(Vector3 inwardA, Vector3 inwardB)
+    {
+        // A near-180° spike would need an unbounded miter; its sum vanishes, so the corner stays put
+        return (inwardA + inwardB) / MathF.Max(1f + Vector3.Dot(inwardA, inwardB), MinMiterDenominator);
+    }
+
+    /** Points into a counter-clockwise face (seen from its normal), perpendicular to the edge. */
+    private static Vector3 EdgeInwardNormal(Vector3 from, Vector3 to, Vector3 faceNormal)
+    {
+        var inward = Vector3.Cross(faceNormal, to - from);
+        var length = inward.Length();
+        return length > 1e-12f ? inward / length : Vector3.Zero;
+    }
+
+    /** Recovers the direction of a skeleton edge from its inward normal; falls back to the chord for degenerate edges. */
+    private static Vector3 EdgeDirection(Vector3 inwardNormal, Vector3 chord)
+    {
+        if (inwardNormal.LengthSquared() > 0.5f)
+        {
+            var faceNormal = Vector3.Cross(chord, inwardNormal);
+            if (faceNormal.LengthSquared() > 1e-20f)
+                return Vector3.Normalize(Vector3.Cross(inwardNormal, Vector3.Normalize(faceNormal)));
+        }
+
+        var length = chord.Length();
+        return length > 1e-12f ? chord / length : Vector3.Zero;
+    }
+
+    private static void ComputeFaceNormals(Geometry mesh, ref Vector3[] faceNormals)
+    {
+        var positions = mesh.Positions;
+        var offsets = mesh.PrimitiveVertexOffsets;
+        var cornerPoints = mesh.VertexPoints;
+        if (faceNormals.Length != mesh.PrimitiveCount)
+            faceNormals = new Vector3[mesh.PrimitiveCount];
+
+        for (var faceIndex = 0; faceIndex < mesh.PrimitiveCount; faceIndex++)
+        {
+            var normal = Vector3.Zero;
+            var start = offsets[faceIndex];
+            var end = offsets[faceIndex + 1];
+            for (var c = start; c < end; c++)
+            {
+                var next = c + 1 == end ? start : c + 1;
+                normal += NewellTerm(positions[cornerPoints[c]], positions[cornerPoints[next]]);
+            }
+
+            faceNormals[faceIndex] = normal.LengthSquared() > 1e-10f ? Vector3.Normalize(normal) : Vector3.UnitY;
+        }
+    }
+
+    private static Vector3 NewellTerm(Vector3 p0, Vector3 p1)
+    {
+        return new Vector3((p0.Y - p1.Y) * (p0.Z + p1.Z),
+                           (p0.Z - p1.Z) * (p0.X + p1.X),
+                           (p0.X - p1.X) * (p0.Y + p1.Y));
+    }
+
+    private static float DistanceToSegment(Vector3 p, Vector3 a, Vector3 b)
+    {
+        var ab = b - a;
+        var lengthSq = ab.LengthSquared();
+        var t = lengthSq > 1e-20f ? Math.Clamp(Vector3.Dot(p - a, ab) / lengthSq, 0f, 1f) : 0f;
+        return Vector3.Distance(p, a + ab * t);
+    }
+
+    private static int Find(int[] parent, int index)
+    {
+        while (parent[index] != index)
+        {
+            parent[index] = parent[parent[index]];
+            index = parent[index];
+        }
+
+        return index;
+    }
+
+    private static void Union(int[] parent, int a, int b)
+    {
+        var rootA = Find(parent, a);
+        var rootB = Find(parent, b);
+        if (rootA != rootB)
+            parent[Math.Max(rootA, rootB)] = Math.Min(rootA, rootB);
     }
 
     private static bool TraversesInOrder(Geometry source, int faceIndex, int pointA, int pointB)
@@ -493,24 +1174,56 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
         return _outPositions.Count - 1;
     }
 
-    private void AddQuad(int a, int b, int c, int d)
+    /** Emits the collected corners as a face, skipping repeats left by collapsed edges, then clears the list. */
+    private void AddPolygon(List<int> corners)
     {
-        _outCorners.Add(a);
-        _outCorners.Add(b);
-        _outCorners.Add(c);
-        _outCorners.Add(d);
+        var start = _outCorners.Count;
+        foreach (var id in corners)
+        {
+            if (_outCorners.Count == start || _outCorners[^1] != id)
+                _outCorners.Add(id);
+        }
+
+        while (_outCorners.Count - start > 1 && _outCorners[^1] == _outCorners[start])
+        {
+            _outCorners.RemoveAt(_outCorners.Count - 1);
+        }
+
+        corners.Clear();
+        if (_outCorners.Count - start < 3)
+        {
+            _outCorners.RemoveRange(start, _outCorners.Count - start);
+            return;
+        }
+
         _outFaceOffsets.Add(_outCorners.Count);
     }
 
     private void AddTriangle(int a, int b, int c)
     {
-        _outCorners.Add(a);
-        _outCorners.Add(b);
-        _outCorners.Add(c);
-        _outFaceOffsets.Add(_outCorners.Count);
+        _polygon.Add(a);
+        _polygon.Add(b);
+        _polygon.Add(c);
+        AddPolygon(_polygon);
     }
 
     public bool TryGetProgress(out float progress) => _asyncComputation.TryGetUiProgress(out progress);
+
+    /// <summary>A corner of a face being shrunk: its position at time t is Origin + Velocity * t.</summary>
+    private readonly record struct SkeletonVertex(Vector3 Origin, Vector3 Velocity, Vector3 PreviousNormal, Vector3 NextNormal,
+                                                  int Previous, int Next, bool Alive = true);
+
+    /** Fraction of an edge, or of the distance to another edge of the face, a corner may move across. */
+    private const float MaxShareOfDistance = 0.45f;
+
+    /** Stops a concave face this far before a corner would touch the opposite edge. */
+    private const float SplitSafety = 0.9f;
+
+    /** Skeleton corners closer than this fraction of the width after the inset are welded. */
+    private const float CollapseWeldFactor = 1e-3f;
+
+    /** 1 + cos of the turn between two edge normals; caps miter length at sharp spikes. */
+    private const float MinMiterDenominator = 0.02f;
 
     private readonly Geometry _output = new();
     private readonly AsyncComputation<Geometry> _asyncComputation = new();
@@ -518,14 +1231,27 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
     private readonly List<Vector3> _outNormals = [];
     private readonly List<int> _outFaceOffsets = [];
     private readonly List<int> _outCorners = [];
+    private readonly List<int> _polygon = [];
+    private readonly List<SkeletonVertex> _skeleton = [];
+    private readonly List<int> _cornerSlots = [];
+    private readonly Dictionary<(int PointId, int LowInsetId, int HighInsetId), int[]> _ringsByEnds = [];
+    private int[] _slotPointIds = new int[64];
     private int[] _insetPointIds = [];
     private Vector3[] _faceNormals = [];
+    private Vector3[] _cornerVelocities = [];
+    private float[] _pointWidths = [];
 
     [Input(Guid = "46a2c9e2-7b5d-45ce-9955-b1c0b1bb01db")]
     public readonly InputSlot<Geometry> Geometry = new();
 
     [Input(Guid = "ce40061f-b853-41be-bbef-0db172bbad7f")]
     public readonly InputSlot<float> Width = new();
+
+    [Input(Guid = "5c23fb6d-c4c7-4256-a2d4-3ddd76aed6e4", MappedType = typeof(Methods))]
+    public readonly InputSlot<int> Method = new();
+
+    [Input(Guid = "88b2db34-b099-4fa6-8875-743dc40fd367")]
+    public readonly InputSlot<float> FlatAngle = new();
 
     [Input(Guid = "e9085eac-dc15-4ecf-862d-869e66981418")]
     public readonly InputSlot<int> Segments = new();

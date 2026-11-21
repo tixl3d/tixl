@@ -15,6 +15,9 @@ internal sealed class GeometryTableView
 {
     public int SelectedCount { get; private set; }
 
+    /// <summary>Changes whenever the selection does, so consumers can rebuild only then.</summary>
+    public int SelectionVersion { get; private set; }
+
     /// <summary>The row under the mouse in the last <see cref="Draw"/>, or -1.</summary>
     public int HoveredRow { get; private set; } = -1;
 
@@ -43,6 +46,7 @@ internal sealed class GeometryTableView
 
             _isSelected[row] = false;
             SelectedCount--;
+            SelectionVersion++;
         }
 
         _selectionRowLimit = rowCount;
@@ -53,6 +57,7 @@ internal sealed class GeometryTableView
         Array.Clear(_isSelected);
         SelectedCount = 0;
         _rangeStartRow = -1;
+        SelectionVersion++;
     }
 
     public void Draw(GeometryTableModel model)
@@ -202,6 +207,7 @@ internal sealed class GeometryTableView
 
         _isSelected[row] = isSelected;
         SelectedCount += isSelected ? 1 : -1;
+        SelectionVersion++;
     }
 
     private const float IndexColumnWidth = 45;

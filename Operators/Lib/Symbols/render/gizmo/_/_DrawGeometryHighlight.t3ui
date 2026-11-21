@@ -1,0 +1,131 @@
+{
+  "FormatVersion": 3,
+  "Id": "63eedd22-6495-47dc-817c-801b512e93f7",
+  "Description": "Internal helper. Draws a small geometry as a highlight: its curves and polygon edges as lines and its points as dots of a fixed pixel size, in Color where visible and in HiddenColor where other geometry covers them.\n\nUsed by the output previews for the selected and hovered elements.",
+  "SymbolTags": "16",
+  "InputUis": [
+    {
+      "InputId": "b37da34f-e932-4541-bead-2d69f663c756",
+      "Position": {
+        "X": -300.0,
+        "Y": 0.0
+      },
+      "Relevancy": "Required"
+    },
+    {
+      "InputId": "5138f02e-f261-462b-b82b-9dda3e7a3ef8",
+      "Position": {
+        "X": -300.0,
+        "Y": 45.0
+      },
+      "Description": "Color where the highlight is visible."
+    },
+    {
+      "InputId": "b4e92de5-f4b2-4f78-b2e6-6b025f036f47",
+      "Position": {
+        "X": -300.0,
+        "Y": 90.0
+      },
+      "Description": "Color where other geometry covers the highlight."
+    },
+    {
+      "InputId": "7031d4a4-22b8-43ed-bf3d-53ce15e6ea75",
+      "Position": {
+        "X": -300.0,
+        "Y": 135.0
+      },
+      "Description": "Width of the highlighted edges and curves."
+    },
+    {
+      "InputId": "e0b0507b-7f81-431d-a82e-b1a83e09bd9c",
+      "Position": {
+        "X": -300.0,
+        "Y": 180.0
+      },
+      "Description": "Diameter of the highlighted points in pixels."
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "2d5e1e9f-358f-44bb-8608-6a5f09794eb8",
+      "SymbolName": "Lib.geometry.convert.CurvesToPoints",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "e02d0643-a166-4b8c-bf78-6dcf37f4d1b3",
+      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "Position": {
+        "X": 150.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "2bdbf55b-8a49-4182-ae41-529281e79469",
+      "SymbolName": "Lib.point.draw.DrawLines",
+      "Position": {
+        "X": 300.0,
+        "Y": -40.0
+      }
+    },
+    {
+      "ChildId": "c81f0be9-1b90-44df-88ae-08605905223a",
+      "SymbolName": "Lib.point.draw.DrawLines",
+      "Position": {
+        "X": 300.0,
+        "Y": 20.0
+      }
+    },
+    {
+      "ChildId": "13ba78d9-6b98-428d-abc3-5521d46dc22b",
+      "SymbolName": "Lib.geometry.convert.CurvesToPoints",
+      "Position": {
+        "X": 0.0,
+        "Y": 120.0
+      }
+    },
+    {
+      "ChildId": "a5943dad-6fe7-4822-b4a4-503494301dae",
+      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "Position": {
+        "X": 150.0,
+        "Y": 120.0
+      }
+    },
+    {
+      "ChildId": "80c3da1f-9d9d-4862-8f80-665c86c31825",
+      "SymbolName": "Lib.point.draw.DrawPoints",
+      "Position": {
+        "X": 300.0,
+        "Y": 100.0
+      }
+    },
+    {
+      "ChildId": "cda85f59-5fcc-436a-aacd-d7020d0e3a1c",
+      "SymbolName": "Lib.point.draw.DrawPoints",
+      "Position": {
+        "X": 300.0,
+        "Y": 160.0
+      }
+    },
+    {
+      "ChildId": "503abe46-2a33-495e-8a91-188fd9786660",
+      "SymbolName": "Lib.render.transform.Group",
+      "Position": {
+        "X": 500.0,
+        "Y": 40.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "7a94a219-a4ef-45ff-8743-282f01038f79",
+      "Position": {
+        "X": 900.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

@@ -7,7 +7,6 @@ using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.Rendering;
 using T3.Editor.Gui.OutputUi.Buffers;
-using T3.Editor.Gui.OutputUi.GeometryViews;
 using T3.Editor.Gui.OutputUi.Previews;
 using T3.Editor.Gui.Styling;
 
@@ -53,8 +52,13 @@ internal sealed class MeshBuffersOutputUi : OutputUi<MeshBuffers>
         if (_sidebar.ShowsPreview)
         {
             _sidebar.BeginView(context);
-            _projection.CaptureView(context);
+            var previousOverlay = context.PreviewOverlay;
+            var overlay = previousOverlay;
+            var hasHovered = _vertexTable.TryGetHoveredPosition(out var hovered) && _sidebar.Selected == VerticesSegment;
+            overlay.Hovered = _hoveredPoint.Get(hasHovered, hovered);
+            context.PreviewOverlay = overlay;
             _isPresentingMesh = _preview.Render(meshSlot, context);
+            context.PreviewOverlay = previousOverlay;
             _sidebar.EndView(context);
         }
 
@@ -95,9 +99,6 @@ internal sealed class MeshBuffersOutputUi : OutputUi<MeshBuffers>
         if (_isPresentingMesh)
         {
             DrawRendered(viewId);
-            if (_sidebar.Selected == VerticesSegment && _vertexTable.TryGetHoveredPosition(out var hovered)
-                                                    && _projection.BeginDraw() && _projection.TryProject(hovered, out var onScreen))
-                SelectionOverlayStyle.DrawHoverRing(ImGui.GetWindowDrawList(), onScreen);
         }
 
         if (!_sidebar.Begin(Segments, _counts))
@@ -132,12 +133,9 @@ internal sealed class MeshBuffersOutputUi : OutputUi<MeshBuffers>
     {
         if (_sidebar.TryGetViewRect(out var viewRect))
         {
-            _projection.SetTargetRect(viewRect);
             _preview.DrawRenderedInRect(viewRect);
             return;
         }
-
-        _projection.SetTargetRect(null);
         _preview.DrawRendered(viewId);
     }
 
@@ -172,15 +170,15 @@ internal sealed class MeshBuffersOutputUi : OutputUi<MeshBuffers>
             new(Icon.Info, "Vertex and triangle counts."),
         ];
 
-    private static readonly Guid VisualizeMeshSymbolId = Guid.Parse("f8b12b4f-c10b-4e8b-9a69-344dbe8a063e");
-    private static readonly Guid VisualizeMeshInputId = Guid.Parse("ae443ba9-13b9-4692-97c4-a22d7acafcd4");
+    private static readonly Guid PreviewSymbolId = Guid.Parse("ca23d69c-9dbf-421a-9c75-205c3eab3101");
+    private static readonly Guid PreviewInputId = Guid.Parse("f13f5753-d17d-4234-a605-a99fab1a57b5");
 
     /** Shared by all mesh outputs, so switching ops keeps the layout. */
     private static readonly PreviewSidebar.State _sidebarState = new();
 
-    private readonly CommandPreview<MeshBuffers> _preview = new(VisualizeMeshSymbolId, VisualizeMeshInputId, "VisualizeMesh");
+    private readonly CommandPreview<MeshBuffers> _preview = new(PreviewSymbolId, PreviewInputId, "_OutputPreviewMesh");
     private readonly PreviewSidebar _sidebar;
-    private readonly PreviewProjection _projection = new();
+    private readonly PreviewPointGeometry _hoveredPoint = new();
     private readonly BufferTableView _vertexTable = new();
     private readonly BufferTableView _triangleTable = new();
     private readonly string?[] _counts = new string?[Segments.Length];

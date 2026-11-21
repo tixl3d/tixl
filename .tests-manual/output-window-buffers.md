@@ -37,7 +37,7 @@ Click the point icon.
 - The points move into the area right of the sidebar and below the toolbar, centered there; orbiting turns around its
   middle. Nothing is drawn behind the table.
 - Dragging the splitter between sidebar and render resizes both.
-- Hovering a row draws a blue ring around that point on the render.
+- Hovering a row marks that point with a blue dot on the render.
 - The list icon at the right of the control row maximizes the table over the whole view; clicking it again brings
   the render back.
 - Zeros are drawn faintly, not black. The `Color.R` cell starts with a narrow strip in the point's color.
@@ -96,6 +96,6 @@ Connect a [CubeGeometry] to a [GeometryToMesh] and select the [GeometryToMesh].
 
 **Expected:**
 - The mesh is rendered like [VisualizeMesh]; the control offers hidden sidebar, vertices (24), triangles (12) and info.
-- **Vertices** lists `Position.x` ... `ColorRgb` per vertex; hovering a row rings that vertex on the render.
+- **Vertices** lists `Position.x` ... `ColorRgb` per vertex; hovering a row marks that vertex with a blue dot on the render.
 - **Triangles** lists three whole-number vertex indices per row.
 - Info shows `24 vertices, 12 triangles`.

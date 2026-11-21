@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using ImGuiNET;
 using T3.Core.DataTypes;
+using T3.Core.Rendering;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Editor.Gui.Input;
@@ -21,6 +22,8 @@ internal sealed class GeometryOutputUi : OutputUi<Geometry>
     public GeometryOutputUi()
     {
         _sidebar = new PreviewSidebar(_sidebarState);
+        _isSelectedRow = row => _tableView.IsSelected(row);
+        _isHoveredRow = row => row == _tableView.HoveredRow;
     }
 
     public override Type PresentedType => _isPresentingRender ? typeof(Command) : Type;
@@ -43,8 +46,10 @@ internal sealed class GeometryOutputUi : OutputUi<Geometry>
         if (slot is Slot<Geometry> geometrySlot && _sidebar.ShowsPreview && !PreviewLayout.IsCompactView())
         {
             _sidebar.BeginView(context);
-            _projection.CaptureView(context);
+            var previousOverlay = context.PreviewOverlay;
+            context.PreviewOverlay = GetPreviewOverlay(previousOverlay);
             _isPresentingRender = _preview.Render(geometrySlot, context);
+            context.PreviewOverlay = previousOverlay;
             _sidebar.EndView(context);
             if (_isPresentingRender)
                 return;
@@ -94,10 +99,6 @@ internal sealed class GeometryOutputUi : OutputUi<Geometry>
         if (_isPresentingRender)
         {
             DrawRendered(viewId);
-            _selectionOverlay.DrawSelectionAttribute(geometry, _projection);
-            _selectionOverlay.Draw(geometry, _model, _tableView, _projection);
-            if (showsTable)
-                _selectionOverlay.DrawHovered(geometry, _model, _tableView.HoveredRow, _projection);
         }
 
         var disabledMask = geometry.Parts.Length > 0 ? 0 : 1 << PartsSegment;
@@ -131,13 +132,26 @@ internal sealed class GeometryOutputUi : OutputUi<Geometry>
     {
         if (_sidebar.TryGetViewRect(out var viewRect))
         {
-            _projection.SetTargetRect(viewRect);
             _preview.DrawRenderedInRect(viewRect);
             return;
         }
-
-        _projection.SetTargetRect(null);
         _preview.DrawRendered(viewId);
+    }
+
+    /// <summary>The table's selected and hovered elements as small geometries for the preview to highlight.</summary>
+    private PreviewOverlayState GetPreviewOverlay(PreviewOverlayState state)
+    {
+        var geometry = _lastGeometry;
+        if (geometry == null)
+            return state;
+
+        state.Selected = _tableView.SelectedCount > 0
+                             ? _selectedSubset.Update(geometry, _domain, _tableView.SelectionVersion, _isSelectedRow)
+                             : null;
+        state.Hovered = _tableView.HoveredRow >= 0 && TryGetDomain(_sidebar.Selected, out _)
+                            ? _hoveredSubset.Update(geometry, _domain, _tableView.HoveredRow, _isHoveredRow)
+                            : null;
+        return state;
     }
 
     /// <returns>True when the shown domain changed.</returns>
@@ -310,8 +324,10 @@ internal sealed class GeometryOutputUi : OutputUi<Geometry>
     private readonly GeometryStatsPanel _panel = new();
     private readonly UnifiedGeometryTableModel _model = new();
     private readonly GeometryTableView _tableView = new();
-    private readonly GeometrySelectionOverlay _selectionOverlay = new();
-    private readonly PreviewProjection _projection = new();
+    private readonly GeometryElementSubset _selectedSubset = new();
+    private readonly GeometryElementSubset _hoveredSubset = new();
+    private readonly Func<int, bool> _isSelectedRow;
+    private readonly Func<int, bool> _isHoveredRow;
     private Geometry? _lastGeometry;
     private int _lastVersion;
 

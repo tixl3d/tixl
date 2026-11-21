@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "dbaeebea-8d46-416f-9624-867af10d9c07"/*BevelGeometry*/,
-  "Description": "Bevels all edges of a geometry with a uniform width: faces are inset, edges become rounded profile strips, vertices become fan patches. Width is clamped against the shortest edge.\n\nWorks on polygons; curve primitives pass through unchanged and come after all parts.",
+  "Description": "Bevels the edges of a geometry: faces are inset, edges become rounded profile strips, vertices become corner patches.\n\nEdges between faces that meet at less than FlatAngle are skipped: those faces are merged into one polygon first and points on straight edges are dropped, which keeps the polygon count low on fractured or triangulated input without changing its look. Method decides how short edges and thin faces limit the width. Works on polygons; curve primitives pass through unchanged and come after all parts.\n\nAKA: chamfer, round edges, fillet",
   "InputUis": [
     {
       "InputId": "091c932c-a7bb-487e-97c5-093e9838a700"/*Roundness*/,
@@ -28,6 +28,24 @@
       }
     },
     {
+      "InputId": "5c23fb6d-c4c7-4256-a2d4-3ddd76aed6e4"/*Method*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 315.0
+      },
+      "Description": "Fast limits the width per point: a corner uses at most about half of each adjacent edge, so a short edge only narrows the bevel around it. Straight Skeleton shrinks each face and removes edges that shrink to nothing, so the bevel keeps its full width past short edges; slower, and concave faces stop short where a corner would split them."
+    },
+    {
+      "InputId": "88b2db34-b099-4fa6-8875-743dc40fd367"/*FlatAngle*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 360.0
+      },
+      "Min": 0.0,
+      "Max": 10.0,
+      "Description": "Faces meeting at less than this angle (degrees) are merged and their shared edge gets no bevel. 0 bevels every edge."
+    },
+    {
       "InputId": "8d5c2a97-40e1-4b68-93fd-6b0e8c4a2d75"/*Async*/,
       "Position": {
         "X": 0.0,
@@ -49,7 +67,7 @@
         "X": 0.0,
         "Y": 45.0
       },
-      "Description": "Bevel width in world units. Clamped to 35% of the shortest edge so opposite bevels cannot cross."
+      "Description": "Bevel width in world units. Narrowed locally where edges are short or faces are thin, see Method."
     },
     {
       "InputId": "e9085eac-dc15-4ecf-862d-869e66981418"/*Segments*/,

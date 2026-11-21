@@ -18,6 +18,9 @@ internal sealed class ColorGeometry : Instance<ColorGeometry>, IStatusProvider, 
         Vertices,
         Primitives,
         Parts,
+
+        /** The domain of the Attribute, e.g. to color a selection wherever it was made. */
+        Auto,
     }
 
     private enum InputModes
@@ -53,9 +56,12 @@ internal sealed class ColorGeometry : Instance<ColorGeometry>, IStatusProvider, 
     private void Update(EvaluationContext context)
     {
         var source = Geometry.GetValue(context);
-        var domain = ToAttributeDomain((Domains)Domain.GetValue(context).Clamp(0, 3));
+        var domainChoice = (Domains)Domain.GetValue(context).Clamp(0, 4);
         var inputMode = (InputModes)InputMode.GetValue(context).Clamp(0, 3);
         var attributeName = Attribute.GetValue(context);
+        var domain = domainChoice == Domains.Auto
+                         ? FindAttributeDomain(source, attributeName)
+                         : ToAttributeDomain(domainChoice);
         var field = Field.GetValue(context);
         var mapping = (MappingModes)Mapping.GetValue(context).Clamp(0, 3);
         var range = Range.GetValue(context);
@@ -219,6 +225,27 @@ internal sealed class ColorGeometry : Instance<ColorGeometry>, IStatusProvider, 
         Array.Clear(_weights, 0, count);
         return true;
     }
+
+    /** The first domain (points, vertices, primitives, parts) with an attribute of that name; points without one. */
+    private static AttributeDomain FindAttributeDomain(Geometry? geometry, string? name)
+    {
+        if (geometry == null || string.IsNullOrWhiteSpace(name))
+            return AttributeDomain.Point;
+
+        foreach (var domain in AutoDomains)
+        {
+            for (var index = 0; index < geometry.Attributes.Count; index++)
+            {
+                var attribute = geometry.Attributes[index];
+                if (attribute.Domain == domain && string.Equals(attribute.Name, name, StringComparison.OrdinalIgnoreCase))
+                    return domain;
+            }
+        }
+
+        return AttributeDomain.Point;
+    }
+
+    private static readonly AttributeDomain[] AutoDomains = [AttributeDomain.Point, AttributeDomain.Vertex, AttributeDomain.Primitive, AttributeDomain.Part];
 
     private static AttributeDomain ToAttributeDomain(Domains domain)
     {

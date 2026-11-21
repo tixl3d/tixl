@@ -23,7 +23,7 @@ Select the [RadialCPoints] and look at the Output Window.
 **Expected:**
 - A segmented control floats at the top left: closed eye (sidebar hidden), points with their count, info.
 - The points are drawn as with a [VisualizePoints] with default settings; dragging orbits the camera.
-- The points icon opens a sidebar with the point table; hovering a row rings that point in blue on the render.
+- The points icon opens a sidebar with the point table; hovering a row marks that point with a blue dot on the render.
 
 ## Step: Other lists
 
@@ -56,8 +56,8 @@ Click the parts segment, then the primitives and the points segment.
   and orbit around its middle. Dragging the splitter resizes both.
 - **Parts** lists 4 rows with pivot, `Id`, `Seed` and `CodePoint`, `GlyphId`, `CharIndex` ... ; **Primitives** 5 rows
   (`Kind` curve, `Closed` yes); **Points** the positions with `HandleIn` and `HandleOut`.
-- Hovering a row draws that element in blue on the render: a ring around a point, the outline of a primitive, the
-  outlines and pivot of a part.
+- Hovering a row draws that element in blue on the render: a dot for a point or vertex, the outline of a primitive,
+  the outlines of a part with a dot at its pivot. Parts hidden behind other geometry are drawn faintly.
 - The list icon at the right of the control row maximizes the table; the render pauses until it is clicked again.
 
 ## Step: Highlight selected rows
@@ -67,8 +67,8 @@ In **Parts**, click the row of the `i`, Ctrl+click the row of the `L`, then hide
 
 **Expected:**
 - The summary shows `2 parts selected`.
-- The outlines of the `i` (both curves) and the `L` stay drawn thicker in the selection color, each with a cross at
-  its pivot. Orbiting the camera keeps the highlight on the glyphs.
+- The outlines of the `i` (both curves) and the `L` stay drawn white, with a dot at each pivot. Orbiting the camera
+  keeps the highlight on the glyphs.
 - Shift+click extends the selection; clicking the only selected row clears it. Switching to another domain clears it.
 
 ## Step: Selection attribute
@@ -77,7 +77,7 @@ In **Parts**, click the row of the `i`, Ctrl+click the row of the `L`, then hide
 Connect a [SubdivideCurves] and a [SelectGeometry] (Every 4) after the [StringToCurves] and select the [SelectGeometry].
 
 **Expected:**
-- Every fourth point of each curve has a ring; changing Offset moves the rings along the outline.
+- Every fourth point of each curve has a white dot; changing Offset moves the dots along the outline.
 
 ## Step: Geometry
 
@@ -114,3 +114,26 @@ Connect the [CubeGeometry] to a [GeometryToMesh] and hover the connection.
 
 **Expected:**
 - The tooltip shows the stats with the face count as headline, with no control and no render.
+
+## Step: Overlay menu
+
+**Action:**
+With the [CubeGeometry] selected, click the eye icon next to the gizmo toggle in the output toolbar.
+
+**Expected:**
+- A popup lists Wireframe, Points, Point indices, Selection, Hover and Normals, each with its icon and a check mark
+  when on.
+- Turning Wireframe off hides the edges, Points the point dots; Point indices shows the vertex indices.
+- A second output window keeps its own choices, and they survive a restart.
+- For a texture or a scene output the icon is not shown.
+
+## Step: Soft selection colors
+
+**Action:**
+Connect [CubeGeometry] -> [SubdivideGeometry] (Smoothness 0, Iterations 2) -> [SelectGeometry] (Domain Points, Mode
+Custom, Code `return p.X * 3;`) and select the [SelectGeometry].
+
+**Expected:**
+- Points on the right side are white where the weight is about 1 and turn blue above 1; points on the left (negative
+  weights) are red; points around the middle (weight 0) are not marked.
+- Selections hidden behind the cube are drawn faintly.

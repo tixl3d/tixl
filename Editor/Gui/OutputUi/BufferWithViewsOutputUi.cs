@@ -5,7 +5,6 @@ using T3.Core.DataTypes;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Editor.Gui.OutputUi.Buffers;
-using T3.Editor.Gui.OutputUi.GeometryViews;
 using T3.Editor.Gui.OutputUi.Previews;
 using T3.Editor.Gui.Styling;
 
@@ -50,8 +49,13 @@ internal sealed class BufferWithViewsOutputUi : OutputUi<BufferWithViews>
         if (CanShowPoints(bufferSlot.Value) && _sidebar.ShowsPreview)
         {
             _sidebar.BeginView(context);
-            _projection.CaptureView(context);
+            var previousOverlay = context.PreviewOverlay;
+            var overlay = previousOverlay;
+            var hasHovered = _tableView.TryGetHoveredPosition(out var hovered) && _sidebar.Selected == TableSegment;
+            overlay.Hovered = _hoveredPoint.Get(hasHovered, hovered);
+            context.PreviewOverlay = overlay;
             _isPresentingPoints = _pointsPreview.Render(bufferSlot, context);
+            context.PreviewOverlay = previousOverlay;
             _sidebar.EndView(context);
         }
 
@@ -87,9 +91,6 @@ internal sealed class BufferWithViewsOutputUi : OutputUi<BufferWithViews>
         if (_isPresentingPoints)
         {
             DrawRendered(viewId);
-            if (_sidebar.Selected == TableSegment && _tableView.TryGetHoveredPosition(out var hovered)
-                                                 && _projection.BeginDraw() && _projection.TryProject(hovered, out var onScreen))
-                SelectionOverlayStyle.DrawHoverRing(ImGui.GetWindowDrawList(), onScreen);
         }
 
         if (!_sidebar.Begin(Segments, _counts, hasNoPreview: !canShowPoints))
@@ -118,12 +119,9 @@ internal sealed class BufferWithViewsOutputUi : OutputUi<BufferWithViews>
     {
         if (_sidebar.TryGetViewRect(out var viewRect))
         {
-            _projection.SetTargetRect(viewRect);
             _pointsPreview.DrawRenderedInRect(viewRect);
             return;
         }
-
-        _projection.SetTargetRect(null);
         _pointsPreview.DrawRendered(viewId);
     }
 
@@ -172,16 +170,16 @@ internal sealed class BufferWithViewsOutputUi : OutputUi<BufferWithViews>
             new(Icon.Info, "Element count, stride and size."),
         ];
 
-    private static readonly Guid VisualizePointsSymbolId = Guid.Parse("37bdbafc-d14c-4b81-91c3-8f63c3b63812");
-    private static readonly Guid VisualizePointsInputId = Guid.Parse("54fc4cd7-dfc3-4690-9fd1-2b555f7656d4");
+    private static readonly Guid PreviewSymbolId = Guid.Parse("6bf2c69e-0ab5-40b2-8ea1-b469333f4247");
+    private static readonly Guid PreviewInputId = Guid.Parse("89d49547-bbf2-4acf-80b8-aba4175acade");
 
     /** Shared by all buffer outputs, so switching ops keeps the layout. */
     private static readonly PreviewSidebar.State _sidebarState = new();
 
-    private readonly CommandPreview<BufferWithViews> _pointsPreview = new(VisualizePointsSymbolId, VisualizePointsInputId, "VisualizePoints");
+    private readonly CommandPreview<BufferWithViews> _pointsPreview = new(PreviewSymbolId, PreviewInputId, "_OutputPreviewPoints");
     private readonly BufferTableView _tableView = new();
     private readonly PreviewSidebar _sidebar;
-    private readonly PreviewProjection _projection = new();
+    private readonly PreviewPointGeometry _hoveredPoint = new();
     private readonly string?[] _counts = new string?[Segments.Length];
     private bool _isPresentingPoints;
     private bool _isCompact;

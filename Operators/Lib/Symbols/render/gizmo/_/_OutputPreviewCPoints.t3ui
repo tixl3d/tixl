@@ -28,6 +28,38 @@
         "X": 190.0,
         "Y": -70.0
       }
+    },
+    {
+      "ChildId": "1a834906-bbf4-4f06-b7ef-2b9e07054a52",
+      "SymbolName": "Lib.flow.context.GetPreviewState",
+      "Position": {
+        "X": -150.0,
+        "Y": 80.0
+      }
+    },
+    {
+      "ChildId": "f0a8590d-1e82-45ad-90d0-90c50020c6b8",
+      "SymbolName": "Lib.render.transform.Group",
+      "Position": {
+        "X": 450.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "6d745d04-7db2-4cd9-9e13-d8e04748f175",
+      "SymbolName": "Lib.flow.Execute",
+      "Position": {
+        "X": 300.0,
+        "Y": 120.0
+      }
+    },
+    {
+      "ChildId": "55eb0b8b-c0a3-4a80-ac2d-fdc4f819e83b",
+      "SymbolName": "Lib.render.gizmo._._DrawGeometryHighlight",
+      "Position": {
+        "X": 150.0,
+        "Y": 120.0
+      }
     }
   ],
   "OutputUis": [

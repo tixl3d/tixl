@@ -51,7 +51,7 @@ internal sealed class PreviewSidebar
     /// While the sidebar is open next to the render, renders at the size of the rectangle right of it, with the
     /// projection's aspect corrected so the vertical field of view stays the same; transform gizmos are hidden meanwhile.
     /// Call before rendering the preview
-    /// (and before capturing a <see cref="PreviewProjection"/>), and <see cref="EndView"/> after.
+    /// and <see cref="EndView"/> after.
     /// </summary>
     public void BeginView(EvaluationContext context)
     {

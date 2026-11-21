@@ -4,7 +4,6 @@ using ImGuiNET;
 using T3.Core.DataTypes;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
-using T3.Editor.Gui.OutputUi.GeometryViews;
 using T3.Editor.Gui.OutputUi.Previews;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.TableView;
@@ -45,8 +44,12 @@ internal sealed class StructuredListOutputUi : OutputUi<StructuredList>
             && !PreviewLayout.IsCompactView())
         {
             _sidebar.BeginView(context);
-            _projection.CaptureView(context);
+            var previousOverlay = context.PreviewOverlay;
+            var overlay = previousOverlay;
+            overlay.Hovered = GetHoveredPoint(listSlot.Value);
+            context.PreviewOverlay = overlay;
             _isPresentingPoints = _pointsPreview.Render(listSlot, context);
+            context.PreviewOverlay = previousOverlay;
             _sidebar.EndView(context);
             if (_isPresentingPoints)
                 return;
@@ -82,10 +85,6 @@ internal sealed class StructuredListOutputUi : OutputUi<StructuredList>
         if (_isPresentingPoints)
         {
             DrawRendered(viewId);
-            var hovered = _hoveredRow;
-            if (_sidebar.Selected == TableSegment && list is StructuredList<Point> points && hovered >= 0 && hovered < points.NumElements
-                && _projection.BeginDraw() && _projection.TryProject(points.TypedElements[hovered].Position, out var onScreen))
-                SelectionOverlayStyle.DrawHoverRing(ImGui.GetWindowDrawList(), onScreen);
         }
 
         if (!_sidebar.Begin(Segments, _counts))
@@ -114,12 +113,9 @@ internal sealed class StructuredListOutputUi : OutputUi<StructuredList>
     {
         if (_sidebar.TryGetViewRect(out var viewRect))
         {
-            _projection.SetTargetRect(viewRect);
             _pointsPreview.DrawRenderedInRect(viewRect);
             return;
         }
-
-        _projection.SetTargetRect(null);
         _pointsPreview.DrawRendered(viewId);
     }
 
@@ -167,7 +163,17 @@ internal sealed class StructuredListOutputUi : OutputUi<StructuredList>
 
     private readonly CommandPreview<StructuredList> _pointsPreview = new(PreviewSymbolId, PreviewInputId, "_OutputPreviewCPoints");
     private readonly PreviewSidebar _sidebar;
-    private readonly PreviewProjection _projection = new();
+    private readonly PreviewPointGeometry _hoveredPoint = new();
+
+    /** The hovered table row's point, for the preview to highlight. */
+    private Geometry? GetHoveredPoint(StructuredList? list)
+    {
+        var row = _hoveredRow;
+        if (_sidebar.Selected != TableSegment || list is not StructuredList<Point> points || row < 0 || row >= points.NumElements)
+            return null;
+
+        return _hoveredPoint.Get(true, points.TypedElements[row].Position);
+    }
     private readonly string?[] _counts = new string?[Segments.Length];
     private bool _isPresentingPoints;
     private int _hoveredRow = -1;
