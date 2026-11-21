@@ -27,6 +27,7 @@ internal sealed class SelectGeometry : Instance<SelectGeometry>, IStatusProvider
         var mode = (Modes)Mode.GetValue(context).Clamp(0, 1);
         var every = Math.Max(1, Every.GetValue(context));
         var offset = Offset.GetValue(context);
+        var limit = Math.Max(0, Count.GetValue(context));
         var code = Code.GetValue(context) ?? string.Empty;
         var a = A.GetValue(context);
         var b = B.GetValue(context);
@@ -80,7 +81,16 @@ internal sealed class SelectGeometry : Instance<SelectGeometry>, IStatusProvider
             float weight;
             if (mode == Modes.IndexPattern)
             {
-                weight = ((i - offset) % every + every) % every == 0 ? 1 : 0;
+                if (limit == 0)
+                {
+                    weight = ((i - offset) % every + every) % every == 0 ? 1 : 0;
+                }
+                else
+                {
+                    // A window of Count matches from Offset, wrapping past the last element
+                    var distance = ((i - offset) % count + count) % count;
+                    weight = distance % every == 0 && distance / every < limit ? 1 : 0;
+                }
             }
             else
             {
@@ -217,6 +227,9 @@ internal sealed class SelectGeometry : Instance<SelectGeometry>, IStatusProvider
 
     [Input(Guid = "4dba7742-653a-4ad5-9e21-0ea557865bcd")]
     public readonly InputSlot<int> Offset = new();
+
+    [Input(Guid = "7bac9932-a892-4d15-909d-ded6f6c90564")]
+    public readonly InputSlot<int> Count = new();
 
     [Input(Guid = "2f24c52a-0a48-4c4e-a359-0b6012016270")]
     public readonly InputSlot<string> Code = new();

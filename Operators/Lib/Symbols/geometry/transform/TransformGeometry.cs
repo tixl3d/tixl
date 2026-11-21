@@ -14,7 +14,7 @@ namespace Lib.geometry.transform;
 /// any); vertex, primitive and part selections apply to their points. Topology and value attributes are shared.
 /// </summary>
 [Guid("634da8e3-0772-4f5a-816b-35b492e50938")]
-internal sealed class TransformGeometry : Instance<TransformGeometry>, ITransformable, IStatusProvider
+internal sealed class TransformGeometry : Instance<TransformGeometry>, ITransformable, IStatusProvider, ICustomDropdownHolder
 {
     [Output(Guid = "895d2fd4-c40f-4200-89af-395253275b0a")]
     public readonly TransformCallbackSlot<Geometry?> Result = new();
@@ -36,6 +36,7 @@ internal sealed class TransformGeometry : Instance<TransformGeometry>, ITransfor
         var source = Geometry.GetValue(context);
         var space = (Spaces)Space.GetValue(context).Clamp(0, 1);
         var selectionName = Selection.GetValue(context);
+        _lastSource = source;
         if (source == null)
         {
             Result.Value = null;
@@ -52,9 +53,11 @@ internal sealed class TransformGeometry : Instance<TransformGeometry>, ITransfor
 
         var pointCount = source.PointCount;
         _statusMessage = string.Empty;
-        // Without a name the flowing Selection applies when there is one, so SelectGeometry -> TransformGeometry just works
-        var isNamed = !string.IsNullOrWhiteSpace(selectionName);
-        var hasSelection = TryCollectPointWeights(source, isNamed ? selectionName! : GeometryAttributeNames.Selection);
+        // Without a name the flowing Selection applies when there is one, so SelectGeometry -> TransformGeometry just works;
+        // All ignores any selection
+        var ignoresSelection = GeometryAttributeChoices.IsAll(selectionName);
+        var isNamed = !ignoresSelection && !string.IsNullOrWhiteSpace(selectionName);
+        var hasSelection = !ignoresSelection && TryCollectPointWeights(source, isNamed ? selectionName! : GeometryAttributeNames.Selection);
         if (isNamed && !hasSelection)
         {
             // A named selection that doesn't exist selects nothing; the weights are all zero
@@ -258,6 +261,19 @@ internal sealed class TransformGeometry : Instance<TransformGeometry>, ITransfor
         Point,
     }
 
+    #region ICustomDropdownHolder - the float attributes of the last input as selections
+    string ICustomDropdownHolder.GetValueForInput(Guid inputId) => GeometryAttributeChoices.GetSelectionDisplayValue(Selection.Value, _lastSource);
+
+    IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid inputId) => GeometryAttributeChoices.GetSelectionOptions(_lastSource);
+
+    void ICustomDropdownHolder.HandleResultForInput(Guid inputId, string? selected, bool isAListItem)
+    {
+        if (inputId == Selection.Input.InputDefinition.Id && selected != null)
+            Selection.SetTypedInputValue(GeometryAttributeChoices.ToSelectionValue(selected));
+    }
+    #endregion
+
+    private Geometry? _lastSource;
     private readonly Geometry _output = new();
     private readonly GeometryPointOrientations _orientations = new();
     private readonly List<GeometryAttribute> _ownedAttributes = [];

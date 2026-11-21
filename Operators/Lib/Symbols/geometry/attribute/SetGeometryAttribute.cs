@@ -11,7 +11,7 @@ namespace Lib.geometry.attribute;
 /// </summary>
 [Guid("2e781d86-2a24-4ee9-95fd-26a051e0aeff")]
 [ExportDependencies("Microsoft.CodeAnalysis.dll", "Microsoft.CodeAnalysis.CSharp.dll")]
-internal sealed class SetGeometryAttribute : Instance<SetGeometryAttribute>, IStatusProvider
+internal sealed class SetGeometryAttribute : Instance<SetGeometryAttribute>, IStatusProvider, ICustomDropdownHolder
 {
     private enum Domains
     {
@@ -62,6 +62,8 @@ internal sealed class SetGeometryAttribute : Instance<SetGeometryAttribute>, ISt
         var sourceName = SourceAttribute.GetValue(context);
         var selectionName = Selection.GetValue(context);
         _statusMessage = string.Empty;
+        _lastSource = source;
+        _lastDomain = domain;
 
         if (source == null)
         {
@@ -142,6 +144,9 @@ internal sealed class SetGeometryAttribute : Instance<SetGeometryAttribute>, ISt
     /// <returns>False when every element gets the new value.</returns>
     private bool CollectWeights(Geometry source, AttributeDomain domain, string? selectionName, int count)
     {
+        if (GeometryAttributeChoices.IsAll(selectionName))
+            return false;
+
         // Without a name the flowing Selection applies when there is one, as in TransformGeometry
         var isNamed = !string.IsNullOrWhiteSpace(selectionName);
         if (GeometryElements.TryGetWeights(source, domain, isNamed ? selectionName! : GeometryAttributeNames.Selection, _weights, _pointWeights))
@@ -333,6 +338,38 @@ internal sealed class SetGeometryAttribute : Instance<SetGeometryAttribute>, ISt
 
     public string GetStatusMessage() => !string.IsNullOrEmpty(_compileError) && Mode.Value == (int)Modes.Custom ? _compileError : _statusMessage;
 
+    #region ICustomDropdownHolder - attribute names of the last input
+    string ICustomDropdownHolder.GetValueForInput(Guid inputId)
+    {
+        if (inputId == Selection.Input.InputDefinition.Id)
+            return GeometryAttributeChoices.GetSelectionDisplayValue(Selection.Value, _lastSource);
+
+        return inputId == SourceAttribute.Input.InputDefinition.Id ? SourceAttribute.Value : Name.Value;
+    }
+
+    IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid inputId)
+    {
+        return inputId == Selection.Input.InputDefinition.Id
+                   ? GeometryAttributeChoices.GetSelectionOptions(_lastSource)
+                   : GeometryAttributeChoices.GetAttributeNames(_lastSource, _lastDomain, floatsOnly: false);
+    }
+
+    void ICustomDropdownHolder.HandleResultForInput(Guid inputId, string? selected, bool isAListItem)
+    {
+        if (selected == null)
+            return;
+
+        if (inputId == Selection.Input.InputDefinition.Id)
+            Selection.SetTypedInputValue(GeometryAttributeChoices.ToSelectionValue(selected));
+        else if (inputId == SourceAttribute.Input.InputDefinition.Id)
+            SourceAttribute.SetTypedInputValue(selected);
+        else if (inputId == Name.Input.InputDefinition.Id)
+            Name.SetTypedInputValue(selected);
+    }
+    #endregion
+
+    private Geometry? _lastSource;
+    private AttributeDomain _lastDomain;
     private delegate Vector4 SnippetFn(int i, int count, Vector3 p, float a, float b);
 
     private readonly Geometry _output = new();

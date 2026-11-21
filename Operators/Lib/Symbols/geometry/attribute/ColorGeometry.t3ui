@@ -36,7 +36,8 @@
         "X": 0.0,
         "Y": 135.0
       },
-      "Description": "The attribute to map, e.g. CharIndex on the parts of a text or W written by [SetGeometryAttribute]."
+      "Description": "The attribute to map, e.g. CharIndex on the parts of a text or W written by [SetGeometryAttribute].",
+      "Usage": "CustomDropdown"
     },
     {
       "InputId": "73465bee-c3e5-4a74-aa90-25544807d0db"/*Geometry*/,
@@ -79,7 +80,8 @@
         "X": 0.0,
         "Y": 585.0
       },
-      "Description": "Name of a float selection whose weight blends the new color over the old one. Empty uses the Selection from an upstream [SelectGeometry] if there is one, and otherwise colors every element."
+      "Description": "Name of a float selection whose weight blends the new color over the old one. Empty uses the Selection from an upstream [SelectGeometry] if there is one, and otherwise colors every element. All ignores any selection.",
+      "Usage": "CustomDropdown"
     },
     {
       "InputId": "c1d24e54-d36d-4bff-8d22-c036b3bbc7f3"/*InputMode*/,

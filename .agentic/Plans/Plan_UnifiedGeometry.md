@@ -202,6 +202,19 @@ message must name what was expected.
   constant, a C# snippet (sharing `CSharpSnippetCompiler` and the `i`, `count`, `p`, `A`, `B` scope of
   `SelectGeometry`), another attribute or a field. Example: `StringToCurves -> SetGeometryAttribute (Part, Depth,
   0.5 + 0.5 * Sin(i * 0.8 + A)) -> ExtrudeCurves (DepthAttribute = Depth)` gives an animated depth wave.
+- **`SubdivideGeometry`** (done 2026-11-21; weighted averaging in `Lib/Utils/GeometryAttributeStencil`) (maintainer, 2026-11-21): densifies the polygons of any Geometry. Linear splits every
+  N-gon into quads (a point per edge and per face) without changing the shape, for displacement; Catmull-Clark also
+  smooths, with boundary edges kept as creases (open edges stay open, corners stay fixed). Iterations repeat it.
+  Point and vertex attributes are averaged like the new points, so UV seams stay intact; primitive attributes copy to
+  the child quads; edge attributes are dropped. Normals: Auto interpolates for Linear and recomputes smooth normals for
+  Catmull-Clark. Parts keep their ranges and curves pass through unchanged.
+- **Attribute name inputs** (done 2026-11-21): selection, attribute and name inputs of TransformGeometry,
+  SetGeometryAttribute and ColorGeometry are type-ahead dropdowns of the input's attributes (`Lib/Utils/GeometryAttributeChoices`).
+  An empty selection shows as `Auto (Selection)` or `Auto (All)`; the reserved value `All` ignores any selection.
+  Still to do: SelectGeometry's Name and the remaining ops with attribute names.
+- **`Segments` on `CubeGeometry`** (maintainer, 2026-11-21): an Int3 input (default 1, 1, 1) that splits each face
+  into a grid, with per-axis counts that subdividing cannot give (e.g. 10 x 1 x 3 for a bar to bend). Shared points
+  along cube edges, so the result stays watertight; UVs per face as today.
 - The remaining mesh ops (mechanical: Face -> Primitive, Corner -> Vertex), `OffsetCurves`, `CurvesToPoints`, output
   setup's `StageGeometry` and `SurfaceGeometry`.
 - Remove `MeshGeometry`, `CurveGeometry`, `CurvePart`.

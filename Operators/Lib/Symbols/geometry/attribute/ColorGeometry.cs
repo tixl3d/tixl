@@ -204,6 +204,9 @@ internal sealed class ColorGeometry : Instance<ColorGeometry>, IStatusProvider, 
     /// <returns>False when every element is colored.</returns>
     private bool CollectWeights(Geometry source, AttributeDomain domain, string? selectionName, int count)
     {
+        if (GeometryAttributeChoices.IsAll(selectionName))
+            return false;
+
         // Without a name the flowing Selection applies when there is one, as in TransformGeometry
         var isNamed = !string.IsNullOrWhiteSpace(selectionName);
         if (GeometryElements.TryGetWeights(source, domain, isNamed ? selectionName! : GeometryAttributeNames.Selection, _weights, _pointWeights))
@@ -236,9 +239,21 @@ internal sealed class ColorGeometry : Instance<ColorGeometry>, IStatusProvider, 
     public string GetStatusMessage() => _statusMessage;
 
     #region ICustomDropdownHolder - lists the attributes of the colored domain on the last input
-    string ICustomDropdownHolder.GetValueForInput(Guid inputId) => Attribute.Value;
+    string ICustomDropdownHolder.GetValueForInput(Guid inputId)
+    {
+        return inputId == Selection.Input.InputDefinition.Id
+                   ? GeometryAttributeChoices.GetSelectionDisplayValue(Selection.Value, _lastSource)
+                   : Attribute.Value;
+    }
 
     IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid inputId)
+    {
+        return inputId == Selection.Input.InputDefinition.Id
+                   ? GeometryAttributeChoices.GetSelectionOptions(_lastSource)
+                   : GetMappableAttributes();
+    }
+
+    private IEnumerable<string> GetMappableAttributes()
     {
         if (_lastSource == null)
             yield break;
@@ -254,10 +269,13 @@ internal sealed class ColorGeometry : Instance<ColorGeometry>, IStatusProvider, 
 
     void ICustomDropdownHolder.HandleResultForInput(Guid inputId, string? selected, bool isAListItem)
     {
-        if (inputId != Attribute.Input.InputDefinition.Id || selected == null)
+        if (selected == null)
             return;
 
-        Attribute.SetTypedInputValue(selected);
+        if (inputId == Selection.Input.InputDefinition.Id)
+            Selection.SetTypedInputValue(GeometryAttributeChoices.ToSelectionValue(selected));
+        else if (inputId == Attribute.Input.InputDefinition.Id)
+            Attribute.SetTypedInputValue(selected);
     }
     #endregion
 

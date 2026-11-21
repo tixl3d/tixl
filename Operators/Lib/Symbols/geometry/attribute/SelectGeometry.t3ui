@@ -66,6 +66,16 @@
       "Description": "Selects every Nth element: 2 selects every second one."
     },
     {
+      "InputId": "7bac9932-a892-4d15-909d-ded6f6c90564"/*Count*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Min": 0,
+      "Max": 20,
+      "Description": "How many elements the pattern selects, starting at Offset and wrapping past the end; animate Offset to move them. 0 selects every match."
+    },
+    {
       "InputId": "952ea8f6-51f4-46b8-94af-83dda89159b0"/*Invert*/,
       "Position": {
         "X": 0.0,
@@ -87,7 +97,7 @@
         "X": 0.0,
         "Y": 90.0
       },
-      "Description": "IndexPattern selects every Nth element from Offset. Custom runs the C# snippet in Code for each element."
+      "Description": "IndexPattern selects every Nth element from Offset, optionally only Count of them. Custom runs the C# snippet in Code for each element."
     },
     {
       "InputId": "ec982690-0ef4-4b25-83d8-ddddb2c2d24e"/*Combine*/,

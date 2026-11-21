@@ -398,3 +398,24 @@ Connect [StringToCurves] (text `TiXL`) -> [SetGeometryAttribute] (Domain Parts, 
 - Switching Domain to Points and Input Mode to Index gives a ramp along all points; Random gives noise that changes with Seed.
 - With an empty or misspelled Attribute the colors stay unchanged and the op shows a warning.
 - An upstream [SelectGeometry] (Every 2) recolors only every second point.
+
+## Step: Subdivide a cube
+
+**Action:**
+Connect [CubeGeometry] -> [SubdivideGeometry] and look at the Output Window, Stats tab.
+
+**Expected:**
+- Linear with 1 iteration gives 26 points and 24 quads; the volume stays 1 and the cube looks unchanged.
+- CatmullClark gives a rounded shape that shrinks with more iterations; Boundary edges stays 0 and the shading is smooth.
+- With [StringToCurves] as input the curves pass through unchanged.
+
+## Step: See and limit a face selection
+
+**Action:**
+Connect [CubeGeometry] -> [SubdivideGeometry] (Linear) -> [SelectGeometry] (Domain Primitives, Every 5) ->
+[TransformGeometry] (Translation Y 0.2), select [SelectGeometry] and look at the Output Window.
+
+**Expected:**
+- The selected faces are filled and outlined, not ringed at their points.
+- Count 2 keeps only two faces from Offset; animating Offset moves them around the cube.
+- On [TransformGeometry], Selection shows `Auto (Selection)`. Typing opens a list with `Auto`, `All` and the float attributes; `All` moves the whole cube.

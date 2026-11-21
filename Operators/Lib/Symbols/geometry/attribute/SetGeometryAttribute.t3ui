@@ -9,7 +9,8 @@
         "X": 0.0,
         "Y": 540.0
       },
-      "Description": "Name of a float selection whose weight blends the new value over the old one. Empty uses the Selection from an upstream [SelectGeometry] if there is one, and otherwise sets every element."
+      "Description": "Name of a float selection whose weight blends the new value over the old one. Empty uses the Selection from an upstream [SelectGeometry] if there is one, and otherwise sets every element. All ignores any selection.",
+      "Usage": "CustomDropdown"
     },
     {
       "InputId": "5fdbbd34-2144-4ba0-bea1-2866726ca09b"/*A*/,
@@ -50,7 +51,8 @@
         "X": 0.0,
         "Y": 90.0
       },
-      "Description": "Name of the attribute to write, e.g. Depth for the depth of each part of an extrusion, or Color."
+      "Description": "Name of the attribute to write, e.g. Depth for the depth of each part of an extrusion, or Color.",
+      "Usage": "CustomDropdown"
     },
     {
       "InputId": "a54b1695-a814-4e62-9508-38bb66b0a46b"/*Value*/,
@@ -90,7 +92,8 @@
         "X": 0.0,
         "Y": 495.0
       },
-      "Description": "Attribute of the same domain to read in Copy mode; numbers and vectors convert to the chosen Type."
+      "Description": "Attribute of the same domain to read in Copy mode; numbers and vectors convert to the chosen Type.",
+      "Usage": "CustomDropdown"
     },
     {
       "InputId": "e469fa5c-3838-4af1-9e48-7bcb0a687f33"/*Geometry*/,
