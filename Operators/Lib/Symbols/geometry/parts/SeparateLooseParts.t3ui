@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "ec6f1a69-9d76-4a46-a7a7-2248989ec386"/*SeparateLooseParts*/,
-  "Description": "Splits a geometry into separate parts, one per connected component (loose part).\n\nWorks on polygons; curve primitives are left out.\n\nThe pivot of each new part is set to its volume centroid, which works best for closed meshes. Use it before [GeometryToMeshChunks] or [ExplodeGeometry] to animate the pieces individually.\n\nAKA: split, islands, components",
+  "Description": "Splits a geometry into separate parts, one per connected component (loose part).\n\nWorks on polygons; curve primitives pass through unchanged and come after all parts.\n\nThe pivot of each new part is set to its volume centroid, which works best for closed meshes. Use it before [GeometryToMeshChunks] or [ExplodeGeometry] to animate the pieces individually.\n\nAKA: split, islands, components",
   "InputUis": [
     {
       "InputId": "52e9e7cb-c0e3-430c-b182-a5ea2e9c0270"/*Geometry*/,

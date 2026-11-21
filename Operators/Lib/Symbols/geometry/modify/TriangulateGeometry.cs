@@ -21,12 +21,11 @@ internal sealed class TriangulateGeometry : Instance<TriangulateGeometry>
 
     private void Update(EvaluationContext context)
     {
-        var source = Geometry.GetValue(context);
-        if (source != null)
-            source = _polygons.GetPolygons(source);
+        var original = Geometry.GetValue(context);
+        var source = original != null ? _polygons.GetPolygons(original) : null;
         if (source == null || source.PrimitiveCount == 0)
         {
-            Result.Value = source;
+            Result.Value = original;
             return;
         }
 
@@ -40,6 +39,8 @@ internal sealed class TriangulateGeometry : Instance<TriangulateGeometry>
             _output.VertexPoints = new int[cornerCount];
         if (_cornerRemap.Length != cornerCount)
             _cornerRemap = new int[cornerCount];
+        if (_triangleFaces.Length != triangleCount)
+            _triangleFaces = new int[triangleCount];
 
         _output.Positions = source.Positions; // shared - points are unchanged
 
@@ -65,16 +66,23 @@ internal sealed class TriangulateGeometry : Instance<TriangulateGeometry>
                 _cornerRemap[outCorner] = start;
                 _cornerRemap[outCorner + 1] = start + i;
                 _cornerRemap[outCorner + 2] = start + i + 1;
+                _triangleFaces[triangleIndex] = faceIndex;
                 triangleIndex++;
             }
         }
 
         _output.PrimitiveVertexOffsets[triangleCount] = cornerCount;
 
-        // Corner attributes remap through the fan; other domains share buffers
+        // Corner attributes remap through the fan, primitive attributes copy to each triangle of their face; other domains share buffers
         _output.Attributes.Clear();
         foreach (var attribute in source.Attributes)
         {
+            if (attribute.Domain == AttributeDomain.Primitive)
+            {
+                RemapPrimitives(attribute, triangleCount);
+                continue;
+            }
+
             if (attribute.Domain != AttributeDomain.Vertex)
             {
                 _sharedAttributes.Add(attribute);
@@ -131,7 +139,37 @@ internal sealed class TriangulateGeometry : Instance<TriangulateGeometry>
         }
 
         _output.InvalidateTopologyCaches();
-        Result.Value = _output;
+        Result.Value = _curves.Combine(_output, original);
+    }
+
+    private void RemapPrimitives(GeometryAttribute attribute, int triangleCount)
+    {
+        switch (attribute)
+        {
+            case GeometryAttribute<float> values:
+                RemapFaces(values.Values, _output.Attributes.GetOrCreate<float>(attribute.Name, attribute.Domain, triangleCount, attribute.TypeInfo).Values);
+                break;
+            case GeometryAttribute<int> values:
+                RemapFaces(values.Values, _output.Attributes.GetOrCreate<int>(attribute.Name, attribute.Domain, triangleCount, attribute.TypeInfo).Values);
+                break;
+            case GeometryAttribute<Vector2> values:
+                RemapFaces(values.Values, _output.Attributes.GetOrCreate<Vector2>(attribute.Name, attribute.Domain, triangleCount, attribute.TypeInfo).Values);
+                break;
+            case GeometryAttribute<Vector3> values:
+                RemapFaces(values.Values, _output.Attributes.GetOrCreate<Vector3>(attribute.Name, attribute.Domain, triangleCount, attribute.TypeInfo).Values);
+                break;
+            case GeometryAttribute<Vector4> values:
+                RemapFaces(values.Values, _output.Attributes.GetOrCreate<Vector4>(attribute.Name, attribute.Domain, triangleCount, attribute.TypeInfo).Values);
+                break;
+        }
+    }
+
+    private void RemapFaces<T>(T[] source, T[] target) where T : unmanaged
+    {
+        for (var i = 0; i < target.Length; i++)
+        {
+            target[i] = source[_triangleFaces[i]];
+        }
     }
 
     private void Remap<T>(T[] source, T[] target) where T : unmanaged
@@ -145,12 +183,14 @@ internal sealed class TriangulateGeometry : Instance<TriangulateGeometry>
     private readonly Geometry _output = new();
     private readonly List<GeometryAttribute> _sharedAttributes = [];
     private int[] _cornerRemap = [];
+    private int[] _triangleFaces = [];
     private int[] _faceTriangleStarts = [];
     private PrimitivePart[] _outputParts = [];
 
     [Input(Guid = "424f42c4-18f0-412a-a725-230700d5f1a6")]
     public readonly InputSlot<Geometry> Geometry = new();
 
-    /** Curve primitives aren't handled by this op yet; it works on the polygons. */
+    /** The op works on the polygons; the curves are appended to its result unchanged. */
     private readonly GeometryPolygonFilter _polygons = new();
+    private readonly GeometryCurvePassThrough _curves = new();
 }

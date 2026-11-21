@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "70d8f2b5-3a41-4c96-8e2d-b09c6f5e1a73"/*VoronoiFracture*/,
-  "Description": "Fractures a geometry into Voronoi cells around seed points.\n\nWorks on polygons; curve primitives are left out.\n\nEach cell becomes one part (pivot at its seed), built by clipping the mesh against the bisector planes between seeds and capping the cuts. Surface corners keep their interpolated normals; cap faces are flat and carry a Selection attribute of 1 for downstream styling. Use [ScatterPointsInVolume] to generate seeds.\n\nClosed input meshes yield closed chunks whose volumes add up to the input. Details smaller than 0.1% of the mesh size are merged during the cut (weld tolerance), so very fine geometry may lose a sliver. Open input meshes stay open along their original border.\n\nAKA: shatter, break, cells, destruction",
+  "Description": "Fractures a geometry into Voronoi cells around seed points.\n\nWorks on polygons; curve primitives pass through unchanged and come after all parts.\n\nEach cell becomes one part (pivot at its seed), built by clipping the mesh against the bisector planes between seeds and capping the cuts. Surface corners keep their interpolated normals; cap faces are flat and carry a Selection attribute of 1 for downstream styling. Use [ScatterPointsInVolume] to generate seeds.\n\nClosed input meshes yield closed chunks whose volumes add up to the input. Details smaller than 0.1% of the mesh size are merged during the cut (weld tolerance), so very fine geometry may lose a sliver. Open input meshes stay open along their original border.\n\nAKA: shatter, break, cells, destruction",
   "InputUis": [
     {
       "InputId": "31c7e9d4-85f2-4a60-b1c8-6d0a5e3f9b27"/*Geometry*/,

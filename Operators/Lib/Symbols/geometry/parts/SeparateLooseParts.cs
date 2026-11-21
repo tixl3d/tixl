@@ -26,12 +26,11 @@ internal sealed class SeparateLooseParts : Instance<SeparateLooseParts>
 
     private void Update(EvaluationContext context)
     {
-        var source = Geometry.GetValue(context);
-        if (source != null)
-            source = _polygons.GetPolygons(source);
+        var original = Geometry.GetValue(context);
+        var source = original != null ? _polygons.GetPolygons(original) : null;
         if (source == null || source.PrimitiveCount == 0)
         {
-            Result.Value = source;
+            Result.Value = original;
             PartCount.Value = 0;
             return;
         }
@@ -180,7 +179,7 @@ internal sealed class SeparateLooseParts : Instance<SeparateLooseParts>
         }
 
         output.InvalidateTopologyCaches();
-        Result.Value = output;
+        Result.Value = _curves.Combine(output, original);
         PartCount.Value = components.Count;
     }
 
@@ -335,6 +334,7 @@ internal sealed class SeparateLooseParts : Instance<SeparateLooseParts>
     [Input(Guid = "52E9E7CB-C0E3-430C-B182-A5EA2E9C0270")]
     public readonly InputSlot<Geometry> Geometry = new();
 
-    /** Curve primitives aren't handled by this op yet; it works on the polygons. */
+    /** The op works on the polygons; the curves are appended to its result unchanged. */
     private readonly GeometryPolygonFilter _polygons = new();
+    private readonly GeometryCurvePassThrough _curves = new();
 }

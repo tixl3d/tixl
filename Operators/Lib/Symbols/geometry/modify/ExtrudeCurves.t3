@@ -27,6 +27,10 @@
       "DefaultValue": 0.0
     },
     {
+      "Id": "5c7feaba-714e-4134-bc65-e8438ef6839d"/*DepthAttribute*/,
+      "DefaultValue": ""
+    },
+    {
       "Id": "6c2f9b5e-7d31-4a84-b1e0-4f8c2a6d9e75"/*EvenOdd*/,
       "DefaultValue": false
     },

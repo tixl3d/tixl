@@ -32,12 +32,11 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
 
     private void Update(EvaluationContext context)
     {
-        var source = Geometry.GetValue(context);
-        if (source != null)
-            source = _polygons.GetPolygons(source);
+        var original = Geometry.GetValue(context);
+        var source = original != null ? _polygons.GetPolygons(original) : null;
         if (source == null || source.PrimitiveCount == 0)
         {
-            Result.Value = source;
+            Result.Value = original;
             return;
         }
 
@@ -55,7 +54,7 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
 
         if (_seeds.Count < 2)
         {
-            Result.Value = source;
+            Result.Value = original;
             return;
         }
 
@@ -83,13 +82,13 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
                                                       Build(target, source, seeds, fillInterior, sourceIsClosed, token);
                                                       return target;
                                                   });
-            Result.Value = result ?? source;
+            Result.Value = result != null ? _curves.Combine(result, original) : original;
             return;
         }
 
         _asyncComputation.WaitForPending(Result);
         Build(_output, source, _seeds.ToArray(), fillInterior, sourceIsClosed, CancellationToken.None);
-        Result.Value = _output;
+        Result.Value = _curves.Combine(_output, original);
     }
 
     /// <summary>
@@ -1856,6 +1855,7 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
     [Input(Guid = "7c4e1b90-52d8-4a36-9f1e-b8d0a6c3e574")]
     public readonly InputSlot<bool> FillInterior = new();
 
-    /** Curve primitives aren't handled by this op yet; it works on the polygons. */
+    /** The op works on the polygons; the curves are appended to its result unchanged. */
     private readonly GeometryPolygonFilter _polygons = new();
+    private readonly GeometryCurvePassThrough _curves = new();
 }

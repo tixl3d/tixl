@@ -25,9 +25,8 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
 
     private void Update(EvaluationContext context)
     {
-        var source = Geometry.GetValue(context);
-        if (source != null)
-            source = _polygons.GetPolygons(source);
+        var original = Geometry.GetValue(context);
+        var source = original != null ? _polygons.GetPolygons(original) : null;
         var width = Width.GetValue(context);
         var segments = Math.Clamp(Segments.GetValue(context), 1, 16);
         var roundness = Math.Clamp(Roundness.GetValue(context), 0f, 1f);
@@ -36,7 +35,7 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
 
         if (source == null || source.PrimitiveCount == 0)
         {
-            Result.Value = source;
+            Result.Value = original;
             return;
         }
 
@@ -52,7 +51,7 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
         width = MathF.Min(width, maxWidth);
         if (width <= 0)
         {
-            Result.Value = source;
+            Result.Value = original;
             return;
         }
 
@@ -66,13 +65,13 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
                                                       Build(target, source, width, segments, roundness, flatShading, roundCorners, token);
                                                       return target;
                                                   });
-            Result.Value = result ?? source;
+            Result.Value = result != null ? _curves.Combine(result, original) : original;
             return;
         }
 
         _asyncComputation.WaitForPending(Result);
         Build(_output, source, width, segments, roundness, flatShading, roundCorners, CancellationToken.None);
-        Result.Value = _output;
+        Result.Value = _curves.Combine(_output, original);
     }
 
     private void Build(Geometry target, Geometry source, float width, int segments, float roundness, bool flatShading, bool roundCorners,
@@ -543,6 +542,7 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
     [Input(Guid = "8d5c2a97-40e1-4b68-93fd-6b0e8c4a2d75")]
     public readonly InputSlot<bool> Async = new();
 
-    /** Curve primitives aren't handled by this op yet; it works on the polygons. */
+    /** The op works on the polygons; the curves are appended to its result unchanged. */
     private readonly GeometryPolygonFilter _polygons = new();
+    private readonly GeometryCurvePassThrough _curves = new();
 }

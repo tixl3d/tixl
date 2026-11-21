@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "dbaeebea-8d46-416f-9624-867af10d9c07"/*BevelGeometry*/,
-  "Description": "Bevels all edges of a geometry with a uniform width: faces are inset, edges become rounded profile strips, vertices become fan patches. Width is clamped against the shortest edge.\n\nWorks on polygons; curve primitives are left out.",
+  "Description": "Bevels all edges of a geometry with a uniform width: faces are inset, edges become rounded profile strips, vertices become fan patches. Width is clamped against the shortest edge.\n\nWorks on polygons; curve primitives pass through unchanged and come after all parts.",
   "InputUis": [
     {
       "InputId": "091c932c-a7bb-487e-97c5-093e9838a700"/*Roundness*/,
