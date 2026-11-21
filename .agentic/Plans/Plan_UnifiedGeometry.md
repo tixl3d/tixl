@@ -205,6 +205,8 @@ message must name what was expected.
 - **`SubdivideGeometry`** (done 2026-11-21; weighted averaging in `Lib/Utils/GeometryAttributeStencil`) (maintainer, 2026-11-21): densifies the polygons of any Geometry. Linear splits every
   N-gon into quads (a point per edge and per face) without changing the shape, for displacement; Catmull-Clark also
   smooths, with boundary edges kept as creases (open edges stay open, corners stay fixed). Iterations repeat it.
+  Done as a `Smoothness` blend (0 linear, 1 Catmull-Clark, unclamped) with an optional `SmoothnessAttribute`
+  per point instead of a mode switch.
   Point and vertex attributes are averaged like the new points, so UV seams stay intact; primitive attributes copy to
   the child quads; edge attributes are dropped. Normals: Auto interpolates for Linear and recomputes smooth normals for
   Catmull-Clark. Parts keep their ranges and curves pass through unchanged.
@@ -212,6 +214,9 @@ message must name what was expected.
   SetGeometryAttribute and ColorGeometry are type-ahead dropdowns of the input's attributes (`Lib/Utils/GeometryAttributeChoices`).
   An empty selection shows as `Auto (Selection)` or `Auto (All)`; the reserved value `All` ignores any selection.
   Still to do: SelectGeometry's Name and the remaining ops with attribute names.
+- **Snippet attributes** (done 2026-11-21): snippets of `SelectGeometry` and `SetGeometryAttribute` read `@Name`
+  through `Lib/Utils/GeometrySnippetAttributes`: typed array fields of the generated class, same domain passed through,
+  point attributes converted; recompiles only when the code or an attribute's type changes.
 - **`Segments` on `CubeGeometry`** (maintainer, 2026-11-21): an Int3 input (default 1, 1, 1) that splits each face
   into a grid, with per-axis counts that subdividing cannot give (e.g. 10 x 1 x 3 for a bar to bend). Shared points
   along cube edges, so the result stays watertight; UVs per face as today.

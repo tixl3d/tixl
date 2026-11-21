@@ -10,7 +10,7 @@ namespace Lib.geometry.attribute;
 /// </summary>
 [Guid("55b64ede-9730-457c-8d3c-981a9fe6120e")]
 [ExportDependencies("Microsoft.CodeAnalysis.dll", "Microsoft.CodeAnalysis.CSharp.dll")]
-internal sealed class SelectGeometry : Instance<SelectGeometry>, IStatusProvider
+internal sealed class SelectGeometry : Instance<SelectGeometry>, IStatusProvider, IInputStatusProvider
 {
     [Output(Guid = "aa5016f3-1c6a-4978-a56d-3567c65c9610")]
     public readonly Slot<Geometry?> Result = new();
@@ -43,10 +43,8 @@ internal sealed class SelectGeometry : Instance<SelectGeometry>, IStatusProvider
             return;
         }
 
-        if (mode == Modes.Custom && code != _compiledCode)
-            Compile(code);
-
         var attributeDomain = ToAttributeDomain(domain);
+        var isSnippetReady = mode == Modes.Custom && PrepareSnippet(code, source, attributeDomain);
         var count = GeometryElements.GetCount(source, attributeDomain);
 
         _output.Positions = source.Positions;
@@ -75,7 +73,7 @@ internal sealed class SelectGeometry : Instance<SelectGeometry>, IStatusProvider
 
         _selection.Resize(count);
         var weights = _selection.Values;
-        var evaluate = mode == Modes.Custom ? _compiler.Delegate : null;
+        var evaluate = isSnippetReady ? _compiler.Delegate : null;
         for (var i = 0; i < count; i++)
         {
             float weight;
@@ -130,6 +128,35 @@ internal sealed class SelectGeometry : Instance<SelectGeometry>, IStatusProvider
     /// The snippet may return a bool (selected or not) or a float weight; it is compiled as a bool method first and as a
     /// float method if that fails, so either reads naturally.
     /// </summary>
+    /// <summary>Parses @attributes, recompiles when the code or their types changed and binds their values.</summary>
+    private bool PrepareSnippet(string code, Geometry source, AttributeDomain domain)
+    {
+        if (code != _parsedCode)
+        {
+            _snippetAttributes.Parse(code);
+            _parsedCode = code;
+        }
+
+        _attributeError = string.Empty;
+        if (!_snippetAttributes.Resolve(source, domain, out var error))
+        {
+            // The last compile error belongs to earlier code; the missing attribute is the problem now
+            _attributeError = error!;
+            _statusMessage = string.Empty;
+            _compiledCode = null;
+            return false;
+        }
+
+        var signature = _snippetAttributes.GetTypeSignature();
+        if (code != _compiledCode || signature != _compiledSignature)
+        {
+            _compiledSignature = signature;
+            Compile(code);
+        }
+
+        return _snippetAttributes.Bind(source, domain);
+    }
+
     private void Compile(string code)
     {
         _compiledCode = code;
@@ -137,13 +164,23 @@ internal sealed class SelectGeometry : Instance<SelectGeometry>, IStatusProvider
         if (string.IsNullOrWhiteSpace(code))
             return;
 
-        if (_compiler.TryCompile(BuildSource(code, returnsBool: true), "__SelectGeometry", "Evaluate", "SelectGeometrySnippet", _compileErrors))
+        var fields = _snippetAttributes.GetFieldDeclarations();
+        var body = _snippetAttributes.Code;
+        if (_compiler.TryCompile(BuildSource(body, fields, returnsBool: true), "__SelectGeometry", "Evaluate", "SelectGeometrySnippet", _compileErrors))
+        {
+            _snippetAttributes.SetCompiledType(_compiler.Delegate?.Method.DeclaringType);
             return;
+        }
 
         _boolErrors.Clear();
         _boolErrors.AddRange(_compileErrors);
-        if (_compiler.TryCompile(BuildSource(code, returnsBool: false), "__SelectGeometry", "Evaluate", "SelectGeometrySnippet", _compileErrors))
+        if (_compiler.TryCompile(BuildSource(body, fields, returnsBool: false), "__SelectGeometry", "Evaluate", "SelectGeometrySnippet", _compileErrors))
+        {
+            _snippetAttributes.SetCompiledType(_compiler.Delegate?.Method.DeclaringType);
             return;
+        }
+
+        _snippetAttributes.SetCompiledType(null);
 
         // Report whichever attempt failed less, which is the one matching what the snippet returns
         var errors = _boolErrors.Count < _compileErrors.Count ? _boolErrors : _compileErrors;
@@ -152,7 +189,7 @@ internal sealed class SelectGeometry : Instance<SelectGeometry>, IStatusProvider
             Log.Warning($"SelectGeometry {error}", this);
     }
 
-    private static string BuildSource(string code, bool returnsBool)
+    private static string BuildSource(string code, string fields, bool returnsBool)
     {
         var returnType = returnsBool ? "bool" : "float";
         var wrapper = returnsBool ? "Snippet(i, count, p, A, B) ? 1f : 0f" : "Snippet(i, count, p, A, B)";
@@ -163,6 +200,7 @@ internal sealed class SelectGeometry : Instance<SelectGeometry>, IStatusProvider
 
                  public static class __SelectGeometry
                  {
+                 {{fields}}
                      public static float Evaluate(int i, int count, Vector3 p, float A, float B) => {{wrapper}};
 
                      private static {{returnType}} Snippet(int i, int count, Vector3 p, float A, float B)
@@ -176,10 +214,19 @@ internal sealed class SelectGeometry : Instance<SelectGeometry>, IStatusProvider
 
     public IStatusProvider.StatusLevel GetStatusLevel()
     {
-        return string.IsNullOrEmpty(_statusMessage) ? IStatusProvider.StatusLevel.Success : IStatusProvider.StatusLevel.Warning;
+        return string.IsNullOrEmpty(GetStatusMessage()) ? IStatusProvider.StatusLevel.Success : IStatusProvider.StatusLevel.Warning;
     }
 
-    public string GetStatusMessage() => _statusMessage;
+    string? IInputStatusProvider.GetInputStatus(Guid inputId)
+    {
+        if (inputId != Code.Input.InputDefinition.Id || Mode.Value != (int)Modes.Custom)
+            return null;
+
+        var message = GetStatusMessage();
+        return string.IsNullOrEmpty(message) ? null : message;
+    }
+
+    public string GetStatusMessage() => Mode.Value == (int)Modes.Custom && _attributeError.Length > 0 ? _attributeError : _statusMessage;
 
     private delegate float SnippetFn(int i, int count, Vector3 p, float a, float b);
 
@@ -211,6 +258,10 @@ internal sealed class SelectGeometry : Instance<SelectGeometry>, IStatusProvider
     private readonly List<string> _boolErrors = [];
     private GeometryAttribute<float>? _selection;
     private string? _compiledCode;
+    private string? _parsedCode;
+    private int _compiledSignature;
+    private string _attributeError = string.Empty;
+    private readonly GeometrySnippetAttributes _snippetAttributes = new();
     private string _statusMessage = string.Empty;
 
     [Input(Guid = "10342312-f3b9-4a53-9413-ab358860eed4")]

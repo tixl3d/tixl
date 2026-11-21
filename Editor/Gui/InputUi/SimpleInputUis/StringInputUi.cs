@@ -69,7 +69,7 @@ public sealed class StringInputUi : InputValueUi<string>
                 inputEditStateFlags = DrawDefaultTextEdit(ref value) ? InputEditStateFlags.Modified : InputEditStateFlags.Nothing;
                 break;
             case UsageType.Multiline:
-                inputEditStateFlags = DrawMultilineTextEdit(ref value);
+                inputEditStateFlags = DrawMultilineTextEdit(ref value, GetInputStatus(input));
                 break;
             case UsageType.FilePath:
                 inputEditStateFlags = FilePickingUi.DrawTypeAheadSearch(FileOperations.FilePickerTypes.File, FileFilter, ref value);
@@ -154,7 +154,15 @@ public sealed class StringInputUi : InputValueUi<string>
 
 
     
-    private static InputEditStateFlags DrawMultilineTextEdit(ref string value)
+    /// <summary>A problem the selected operator reports for this input, e.g. a snippet that doesn't compile.</summary>
+    private static string? GetInputStatus(Symbol.Child.Input input)
+    {
+        var instance = ProjectView.Focused?.NodeSelection.GetSelectedInstanceWithoutComposition();
+        return instance is IInputStatusProvider provider ? provider.GetInputStatus(input.InputDefinition.Id) : null;
+    }
+
+    /// <param name="error">Marks the field with an error border and shows the message below it.</param>
+    private static InputEditStateFlags DrawMultilineTextEdit(ref string value, string? error)
     {
         // Wrap to next line
         ImGui.Dummy(new Vector2(1, 1));
@@ -166,9 +174,31 @@ public sealed class StringInputUi : InputValueUi<string>
         var requestedContentHeight = lineCount * lineHeight;
         var clampedToWindowHeight = MathF.Min(requestedContentHeight, ImGui.GetWindowSize().Y * 0.5f);
         
+        var hasError = !string.IsNullOrEmpty(error);
+        if (hasError)
+        {
+            ImGui.PushStyleColor(ImGuiCol.Border, UiColors.StatusError.Rgba);
+            ImGui.PushStyleVar(ImGuiStyleVar.FrameBorderSize, 1);
+        }
+
         var changed = ImGui.InputTextMultiline("##textEdit", ref value, MaxStringLength, new Vector2(-1, clampedToWindowHeight));
+        if (hasError)
+        {
+            ImGui.PopStyleVar();
+            ImGui.PopStyleColor();
+        }
+
         ImGui.PopStyleColor();
         ImGui.PopFont();
+        if (hasError)
+        {
+            ImGui.PushFont(Fonts.FontSmall);
+            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.StatusError.Rgba);
+            ImGui.TextWrapped(error);
+            ImGui.PopStyleColor();
+            ImGui.PopFont();
+        }
+
         FormInputs.AddVerticalSpace(3);
         return changed ? InputEditStateFlags.Modified : InputEditStateFlags.Nothing;
     }

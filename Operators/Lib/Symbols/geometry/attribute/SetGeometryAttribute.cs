@@ -11,7 +11,7 @@ namespace Lib.geometry.attribute;
 /// </summary>
 [Guid("2e781d86-2a24-4ee9-95fd-26a051e0aeff")]
 [ExportDependencies("Microsoft.CodeAnalysis.dll", "Microsoft.CodeAnalysis.CSharp.dll")]
-internal sealed class SetGeometryAttribute : Instance<SetGeometryAttribute>, IStatusProvider, ICustomDropdownHolder
+internal sealed class SetGeometryAttribute : Instance<SetGeometryAttribute>, IStatusProvider, ICustomDropdownHolder, IInputStatusProvider
 {
     private enum Domains
     {
@@ -78,8 +78,6 @@ internal sealed class SetGeometryAttribute : Instance<SetGeometryAttribute>, ISt
             return;
         }
 
-        if (mode == Modes.Custom && (code != _compiledCode || type != _compiledType))
-            Compile(code, type);
 
         var count = GeometryElements.GetCount(source, domain);
         if (_values.Length < count)
@@ -117,9 +115,10 @@ internal sealed class SetGeometryAttribute : Instance<SetGeometryAttribute>, ISt
             _output.Attributes.Add(attribute);
         }
 
+        var isSnippetReady = mode == Modes.Custom && PrepareSnippet(code, type, source, domain);
         var hasSelection = CollectWeights(source, domain, selectionName, count);
         ReadValues(existing, _oldValues, count);
-        ComputeValues(source, domain, mode, type, value, vectorValue, a, b, field, copySource, count);
+        ComputeValues(source, domain, mode, type, value, vectorValue, a, b, field, copySource, count, isSnippetReady);
 
         var target = GetTargetAttribute(name, domain, type, count);
         for (var i = 0; i < count; i++)
@@ -161,7 +160,7 @@ internal sealed class SetGeometryAttribute : Instance<SetGeometryAttribute>, ISt
     }
 
     private void ComputeValues(Geometry source, AttributeDomain domain, Modes mode, Types type, float value, Vector4 vectorValue,
-                               float a, float b, ScalarField? field, GeometryAttribute? copySource, int count)
+                               float a, float b, ScalarField? field, GeometryAttribute? copySource, int count, bool isSnippetReady)
     {
         switch (mode)
         {
@@ -171,9 +170,15 @@ internal sealed class SetGeometryAttribute : Instance<SetGeometryAttribute>, ISt
                 break;
 
             case Modes.Custom:
-                var evaluate = _compiler.Delegate;
+                var evaluate = isSnippetReady ? _compiler.Delegate : null;
+                if (evaluate == null)
+                {
+                    Array.Copy(_oldValues, _values, count);
+                    break;
+                }
+
                 for (var i = 0; i < count; i++)
-                    _values[i] = evaluate != null ? evaluate(i, count, GeometryElements.GetPosition(source, domain, i), a, b) : Vector4.Zero;
+                    _values[i] = evaluate(i, count, GeometryElements.GetPosition(source, domain, i), a, b);
 
                 break;
 
@@ -289,6 +294,35 @@ internal sealed class SetGeometryAttribute : Instance<SetGeometryAttribute>, ISt
     }
 
     /// <summary>The snippet returns the attribute's type (a float for Float and Int); it is wrapped into a Vector4.</summary>
+    /// <summary>Parses @attributes, recompiles when the code, the type or their types changed and binds their values.</summary>
+    private bool PrepareSnippet(string code, Types type, Geometry source, AttributeDomain domain)
+    {
+        if (code != _parsedCode)
+        {
+            _snippetAttributes.Parse(code);
+            _parsedCode = code;
+        }
+
+        _attributeError = string.Empty;
+        if (!_snippetAttributes.Resolve(source, domain, out var error))
+        {
+            // The last compile error belongs to earlier code; the missing attribute is the problem now
+            _attributeError = error!;
+            _compileError = string.Empty;
+            _compiledCode = null;
+            return false;
+        }
+
+        var signature = _snippetAttributes.GetTypeSignature();
+        if (code != _compiledCode || type != _compiledType || signature != _compiledSignature)
+        {
+            _compiledSignature = signature;
+            Compile(code, type);
+        }
+
+        return _snippetAttributes.Bind(source, domain);
+    }
+
     private void Compile(string code, Types type)
     {
         _compiledCode = code;
@@ -311,6 +345,7 @@ internal sealed class SetGeometryAttribute : Instance<SetGeometryAttribute>, ISt
 
                        public static class __SetGeometryAttribute
                        {
+                       {{_snippetAttributes.GetFieldDeclarations()}}
                            public static Vector4 Evaluate(int i, int count, Vector3 p, float A, float B)
                            {
                                {{wrap}}
@@ -319,12 +354,17 @@ internal sealed class SetGeometryAttribute : Instance<SetGeometryAttribute>, ISt
                            private static {{returnType}} Snippet(int i, int count, Vector3 p, float A, float B)
                            {
                        #line 1
-                       {{code}}
+                       {{_snippetAttributes.Code}}
                            }
                        }
                        """;
         if (_compiler.TryCompile(source, "__SetGeometryAttribute", "Evaluate", "SetGeometryAttributeSnippet", _compileErrors))
+        {
+            _snippetAttributes.SetCompiledType(_compiler.Delegate?.Method.DeclaringType);
             return;
+        }
+
+        _snippetAttributes.SetCompiledType(null);
 
         _compileError = _compileErrors.Count > 0 ? $"Snippet {_compileErrors[0]}" : "Snippet failed to compile";
         foreach (var error in _compileErrors)
@@ -336,7 +376,24 @@ internal sealed class SetGeometryAttribute : Instance<SetGeometryAttribute>, ISt
         return string.IsNullOrEmpty(GetStatusMessage()) ? IStatusProvider.StatusLevel.Success : IStatusProvider.StatusLevel.Warning;
     }
 
-    public string GetStatusMessage() => !string.IsNullOrEmpty(_compileError) && Mode.Value == (int)Modes.Custom ? _compileError : _statusMessage;
+    public string GetStatusMessage()
+    {
+        var snippetMessage = GetSnippetMessage();
+        return snippetMessage ?? _statusMessage;
+    }
+
+    string? IInputStatusProvider.GetInputStatus(Guid inputId) => inputId == Code.Input.InputDefinition.Id ? GetSnippetMessage() : null;
+
+    private string? GetSnippetMessage()
+    {
+        if (Mode.Value != (int)Modes.Custom)
+            return null;
+
+        if (_attributeError.Length > 0)
+            return _attributeError;
+
+        return _compileError.Length > 0 ? _compileError : null;
+    }
 
     #region ICustomDropdownHolder - attribute names of the last input
     string ICustomDropdownHolder.GetValueForInput(Guid inputId)
@@ -383,7 +440,11 @@ internal sealed class SetGeometryAttribute : Instance<SetGeometryAttribute>, ISt
     private float[] _pointWeights = [];
     private string? _compiledCode;
     private Types _compiledType;
+    private string? _parsedCode;
+    private int _compiledSignature;
+    private readonly GeometrySnippetAttributes _snippetAttributes = new();
     private string _compileError = string.Empty;
+    private string _attributeError = string.Empty;
     private string _statusMessage = string.Empty;
 
     [Input(Guid = "e469fa5c-3838-4af1-9e48-7bcb0a687f33")]

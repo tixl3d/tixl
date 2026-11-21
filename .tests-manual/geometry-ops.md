@@ -405,8 +405,9 @@ Connect [StringToCurves] (text `TiXL`) -> [SetGeometryAttribute] (Domain Parts, 
 Connect [CubeGeometry] -> [SubdivideGeometry] and look at the Output Window, Stats tab.
 
 **Expected:**
-- Linear with 1 iteration gives 26 points and 24 quads; the volume stays 1 and the cube looks unchanged.
-- CatmullClark gives a rounded shape that shrinks with more iterations; Boundary edges stays 0 and the shading is smooth.
+- Smoothness 0 with 1 iteration gives 26 points and 24 quads; the volume stays 1 and the cube looks unchanged.
+- Smoothness 1 gives a rounded shape (volume about 0.42) that shrinks with more iterations; Boundary edges stays 0 and the shading is smooth. 0.5 lies in between.
+- Insert [SelectGeometry] (Domain Points, Count 3) before it and set SmoothnessAttribute to `Selection`: only the region around those points rounds off.
 - With [StringToCurves] as input the curves pass through unchanged.
 
 ## Step: See and limit a face selection
@@ -419,3 +420,14 @@ Connect [CubeGeometry] -> [SubdivideGeometry] (Linear) -> [SelectGeometry] (Doma
 - The selected faces are filled and outlined, not ringed at their points.
 - Count 2 keeps only two faces from Offset; animating Offset moves them around the cube.
 - On [TransformGeometry], Selection shows `Auto (Selection)`. Typing opens a list with `Auto`, `All` and the float attributes; `All` moves the whole cube.
+
+## Step: Read attributes in a snippet
+
+**Action:**
+Connect [CubeGeometry] -> [SetGeometryAttribute] (Domain Points, Name `W`, Mode Custom, Code `return p.Y;`) ->
+[SelectGeometry] (Mode Custom) -> [TransformGeometry] (Translation Y 0.2).
+
+**Expected:**
+- Code `return @W > 0;` moves the top four corners.
+- Domain Primitives with `return @W > 0.4f;` selects only the top face; Domain Vertices with `return @Normal.Y > 0.5f;` too.
+- `return @Nope > 0;` moves nothing and the op warns that the attribute is missing.

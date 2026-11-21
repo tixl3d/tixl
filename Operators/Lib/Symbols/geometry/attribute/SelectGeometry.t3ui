@@ -17,7 +17,7 @@
         "X": 0.0,
         "Y": 225.0
       },
-      "Description": "Body of a C# method that returns a bool (selected or not) or a float weight from 0 to 1. In scope: index i, element count, position p (a primitive's center, a part's pivot) and the parameters A and B. System.MathF is imported, e.g. `return p.Y > A;`.",
+      "Description": "Body of a C# method that returns a bool (selected or not) or a float weight from 0 to 1. In scope: index i, element count, position p (a primitive's center, a part's pivot) and the parameters A and B. System.MathF is imported, e.g. `return p.Y > A;`. Attributes of the input geometry are read as @Name, e.g. `@Normal.Y` or `@Selection` after an upstream [SelectGeometry]; the Table tab of the input lists them. Attributes on points are converted to the chosen domain; @P is the position.",
       "Usage": "Multiline"
     },
     {
