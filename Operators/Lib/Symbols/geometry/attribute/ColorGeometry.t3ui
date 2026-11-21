@@ -80,7 +80,7 @@
         "X": 0.0,
         "Y": 585.0
       },
-      "Description": "Name of a float selection whose weight blends the new color over the old one. Empty uses the Selection from an upstream [SelectGeometry] if there is one, and otherwise colors every element. All ignores any selection.",
+      "Description": "Name of a float selection whose weight blends the new color over the old one. Empty uses the Selection from an upstream [SelectGeometry] if there is one, and otherwise colors every element. <All> ignores any selection.",
       "Usage": "CustomDropdown"
     },
     {

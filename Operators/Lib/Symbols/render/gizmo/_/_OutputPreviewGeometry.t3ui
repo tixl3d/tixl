@@ -5,20 +5,36 @@
   "SymbolTags": "16",
   "InputUis": [
     {
-      "InputId": "76e0cf44-0f1a-451f-a0ce-bd5a9c2fb5ff",
+      "InputId": "76e0cf44-0f1a-451f-a0ce-bd5a9c2fb5ff"/*Geometry*/,
       "Position": {
-        "X": -400.0,
-        "Y": 0.0
+        "X": -296.75818,
+        "Y": 4.735901
       }
     }
   ],
   "SymbolChildUis": [
     {
+      "ChildId": "4dde4bbe-390e-42e2-8e94-272faa17fdff",
+      "SymbolName": "Lib.geometry.convert.GeometryToMesh",
+      "Position": {
+        "X": 68.312744,
+        "Y": 19.130463
+      }
+    },
+    {
+      "ChildId": "86aaacc7-3bdc-4c2f-ac8d-f3b561994b7b",
+      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "Position": {
+        "X": 68.312744,
+        "Y": 89.13046
+      }
+    },
+    {
       "ChildId": "96b07c33-5cf8-4703-baa6-2c1be41df8aa",
       "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
       "Position": {
-        "X": 34.35823,
-        "Y": 16.916046
+        "X": 68.312744,
+        "Y": 54.130463
       }
     },
     {
@@ -26,7 +42,7 @@
       "SymbolName": "Lib.point.draw.DrawPoints",
       "Position": {
         "X": 208.31274,
-        "Y": 54.130463
+        "Y": 89.13046
       }
     },
     {
@@ -41,7 +57,15 @@
       "ChildId": "acfa90f3-8fda-4474-b9dc-1e1741f3a412",
       "SymbolName": "Lib.point.draw.DrawLines",
       "Position": {
-        "X": 208.31276,
+        "X": 208.31274,
+        "Y": 54.130463
+      }
+    },
+    {
+      "ChildId": "b8254d04-1d81-4f84-ac2b-7a2a2ffbb97f",
+      "SymbolName": "Lib.mesh._.VisualizeMesh",
+      "Position": {
+        "X": 208.31274,
         "Y": 19.130463
       }
     },
@@ -49,49 +73,25 @@
       "ChildId": "d1e99a52-0188-4a63-85ef-55bfb907816d",
       "SymbolName": "Lib.geometry.convert.CurvesToPoints",
       "Position": {
-        "X": 34.35823,
-        "Y": -18.083954
-      }
-    },
-    {
-      "ChildId": "4dde4bbe-390e-42e2-8e94-272faa17fdff",
-      "SymbolName": "Lib.geometry.convert.GeometryToMesh",
-      "Position": {
-        "X": 20.0,
-        "Y": 130.0
-      }
-    },
-    {
-      "ChildId": "b8254d04-1d81-4f84-ac2b-7a2a2ffbb97f",
-      "SymbolName": "Lib.mesh._.VisualizeMesh",
-      "Position": {
-        "X": 20.0,
-        "Y": 200.0
+        "X": -71.687256,
+        "Y": 54.130463
       }
     },
     {
       "ChildId": "e1b6d9ca-ae81-4135-ab0f-55bd081feb65",
       "SymbolName": "Lib.geometry.convert.CurvesToPoints",
       "Position": {
-        "X": -200.0,
-        "Y": -150.0
-      }
-    },
-    {
-      "ChildId": "86aaacc7-3bdc-4c2f-ac8d-f3b561994b7b",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
-      "Position": {
-        "X": -30.0,
-        "Y": -150.0
+        "X": -71.687256,
+        "Y": 89.13046
       }
     }
   ],
   "OutputUis": [
     {
-      "OutputId": "10c42d0f-737b-4a23-90f1-f20eb5390eb4",
+      "OutputId": "10c42d0f-737b-4a23-90f1-f20eb5390eb4"/*Output*/,
       "Position": {
-        "X": 400.0,
-        "Y": 0.0
+        "X": 348.31274,
+        "Y": 124.13046
       }
     }
   ]

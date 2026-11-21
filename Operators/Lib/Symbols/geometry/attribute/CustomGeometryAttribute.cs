@@ -47,7 +47,7 @@ internal sealed class CustomGeometryAttribute : Instance<CustomGeometryAttribute
         var code = Code.GetValue(context) ?? string.Empty;
         var a = A.GetValue(context);
         var b = B.GetValue(context);
-        var selectionName = Selection.GetValue(context);
+        var selectionName = GeometryAttributeChoices.ToSelectionValue(Selection.GetValue(context) ?? string.Empty);
         _statusMessage = string.Empty;
         _lastSource = source;
         _lastDomain = domain;

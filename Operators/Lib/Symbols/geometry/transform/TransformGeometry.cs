@@ -35,7 +35,7 @@ internal sealed class TransformGeometry : Instance<TransformGeometry>, ITransfor
     {
         var source = Geometry.GetValue(context);
         var space = (Spaces)Space.GetValue(context).Clamp(0, 1);
-        var selectionName = Selection.GetValue(context);
+        var selectionName = GeometryAttributeChoices.ToSelectionValue(Selection.GetValue(context) ?? string.Empty);
         _lastSource = source;
         if (source == null)
         {
@@ -54,7 +54,7 @@ internal sealed class TransformGeometry : Instance<TransformGeometry>, ITransfor
         var pointCount = source.PointCount;
         _statusMessage = string.Empty;
         // Without a name the flowing Selection applies when there is one, so SelectGeometry -> TransformGeometry just works;
-        // All ignores any selection
+        // <All> ignores any selection
         var ignoresSelection = GeometryAttributeChoices.IsAll(selectionName);
         var isNamed = !ignoresSelection && !string.IsNullOrWhiteSpace(selectionName);
         var hasSelection = !ignoresSelection && TryCollectPointWeights(source, isNamed ? selectionName! : GeometryAttributeNames.Selection);

@@ -65,7 +65,7 @@ internal sealed class ColorGeometry : Instance<ColorGeometry>, IStatusProvider, 
         var seed = Seed.GetValue(context);
         var gradient = Gradient.GetValue(context);
         var writeMode = (WriteModes)WriteMode.GetValue(context).Clamp(0, 1);
-        var selectionName = Selection.GetValue(context);
+        var selectionName = GeometryAttributeChoices.ToSelectionValue(Selection.GetValue(context) ?? string.Empty);
         _statusMessage = string.Empty;
         _lastSource = source;
         _lastDomain = domain;

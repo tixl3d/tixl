@@ -23,7 +23,7 @@
         "X": 0.0,
         "Y": 270.0
       },
-      "Description": "Name of a float selection attribute whose weight blends the transform per point; vertex, primitive and part selections apply to their points. Empty uses the Selection from an upstream [SelectGeometry] if there is one, and otherwise transforms everything. All ignores any selection.",
+      "Description": "Name of a float selection attribute whose weight blends the transform per point; vertex, primitive and part selections apply to their points. Empty uses the Selection from an upstream [SelectGeometry] if there is one, and otherwise transforms everything. <All> ignores any selection.",
       "Usage": "CustomDropdown"
     },
     {

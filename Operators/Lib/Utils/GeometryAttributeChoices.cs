@@ -8,15 +8,19 @@ namespace Lib.Utils;
 /// <summary>
 /// Attribute names offered by the type-ahead of geometry ops' name inputs, and the meaning of a selection input:
 /// empty is Auto (the flowing Selection if the input has one, otherwise everything), <see cref="All"/> ignores any selection.
+/// Both are shown in angle brackets, like the editor's &lt;null&gt;, so they can't be mistaken for attribute names.
+/// A plain "All" stored before the brackets were added still means All.
 /// </summary>
 internal static class GeometryAttributeChoices
 {
-    public const string All = "All";
-    private const string Auto = "Auto";
+    public const string All = "<All>";
+    private const string LegacyAll = "All";
+    private const string Auto = "<Auto>";
 
     public static bool IsAll(string? selectionName)
     {
-        return string.Equals(selectionName?.Trim(), All, StringComparison.OrdinalIgnoreCase);
+        var trimmed = selectionName?.Trim();
+        return string.Equals(trimmed, All, StringComparison.OrdinalIgnoreCase) || string.Equals(trimmed, LegacyAll, StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>Shows what an empty selection input resolves to, so the default is visible and can be changed.</summary>
@@ -26,8 +30,8 @@ internal static class GeometryAttributeChoices
             return value;
 
         return lastSource != null && HasFloatAttribute(lastSource, GeometryAttributeNames.Selection)
-                   ? "Auto (Selection)"
-                   : "Auto (All)";
+                   ? "<Auto: Selection>"
+                   : "<Auto: All>";
     }
 
     public static IEnumerable<string> GetSelectionOptions(Geometry? lastSource)
@@ -42,7 +46,7 @@ internal static class GeometryAttributeChoices
     public static string ToSelectionValue(string selected)
     {
         var trimmed = selected.Trim();
-        return trimmed.StartsWith(Auto, StringComparison.OrdinalIgnoreCase) ? string.Empty : trimmed;
+        return trimmed.StartsWith("<Auto", StringComparison.OrdinalIgnoreCase) ? string.Empty : trimmed;
     }
 
     /// <summary>Distinct attribute names of the geometry, optionally of one domain or only floats.</summary>

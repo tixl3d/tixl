@@ -34,7 +34,7 @@ internal sealed class AttributeFromField : Instance<AttributeFromField>, IStatus
         var domain = ToAttributeDomain((Domains)Domain.GetValue(context).Clamp(0, 3));
         var name = Name.GetValue(context);
         var field = Field.GetValue(context);
-        var selectionName = Selection.GetValue(context);
+        var selectionName = GeometryAttributeChoices.ToSelectionValue(Selection.GetValue(context) ?? string.Empty);
         _statusMessage = string.Empty;
         _lastSource = source;
         _lastDomain = domain;
