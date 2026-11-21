@@ -1,0 +1,653 @@
+From 4ff593c2620b7a4d5be68e05d4543811d68151eb Mon Sep 17 00:00:00 2001
+From: banidu-512 <madmacmester@gmail.com>
+Date: Sun, 1 Nov 2026 21:48:25 +0100
+Subject: [PATCH 1/3] settings: camera sharing switch in the boygroup and
+ collaboration panels
+
+The switch and camera lists were only in the failover panel; all three panels now draw the same section and share one setting.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+---
+ Editor/Gui/Windows/SettingsWindow.BoygroupPanel.cs | 2 ++
+ Editor/Gui/Windows/SettingsWindow.CollabPanel.cs   | 2 ++
+ 2 files changed, 4 insertions(+)
+
+diff --git a/Editor/Gui/Windows/SettingsWindow.BoygroupPanel.cs b/Editor/Gui/Windows/SettingsWindow.BoygroupPanel.cs
+index ab1dace59..f820a332c 100644
+--- a/Editor/Gui/Windows/SettingsWindow.BoygroupPanel.cs
++++ b/Editor/Gui/Windows/SettingsWindow.BoygroupPanel.cs
+@@ -42,6 +42,7 @@ internal sealed partial class SettingsWindow
+         if (!config.BoygroupEnabled)
+         {
+             DrawBoygroupStatus(manager);
++            DrawCameraSharing(ref changed);
+             DrawBoygroupError(manager);
+             return;
+         }
+@@ -81,6 +82,7 @@ internal sealed partial class SettingsWindow
+         else
+             DrawSlaveSection(manager);
+ 
++        DrawCameraSharing(ref changed);
+         DrawBoygroupError(manager);
+     }
+ 
+diff --git a/Editor/Gui/Windows/SettingsWindow.CollabPanel.cs b/Editor/Gui/Windows/SettingsWindow.CollabPanel.cs
+index 051f6325c..e14c19b00 100644
+--- a/Editor/Gui/Windows/SettingsWindow.CollabPanel.cs
++++ b/Editor/Gui/Windows/SettingsWindow.CollabPanel.cs
+@@ -88,6 +88,8 @@ internal sealed partial class SettingsWindow
+             ImGui.PopStyleColor();
+         }
+ 
++        DrawCameraSharing(ref changed);
++
+         FormInputs.AddVerticalSpace();
+         DrawAdvancedConnectionSettings(manager, ref changed);
+     }
+-- 
+2.47.3
+
+
+From 6f19b5795c1fb7e64678bcf71288d4a3e271af0f Mon Sep 17 00:00:00 2001
+From: banidu-512 <madmacmester@gmail.com>
+Date: Sun, 1 Nov 2026 21:48:26 +0100
+Subject: [PATCH 2/3] mediapipe tests: Xnnpack and GPU delegates run or fail
+ catchably
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+---
+ Mediapipe.Tests/MediapipeNativeTests.cs | 31 +++++++++++++++++++++++++
+ 1 file changed, 31 insertions(+)
+
+diff --git a/Mediapipe.Tests/MediapipeNativeTests.cs b/Mediapipe.Tests/MediapipeNativeTests.cs
+index e7786939a..b3bdfde57 100644
+--- a/Mediapipe.Tests/MediapipeNativeTests.cs
++++ b/Mediapipe.Tests/MediapipeNativeTests.cs
+@@ -73,6 +73,37 @@ public class MediapipeNativeTests
+         }
+     }
+ 
++    // The operators default to Xnnpack and offer Gpu; both must either work or fail with a managed exception
++    // the operator can catch and fall back from - a native abort here would take the whole editor down.
++    [Theory]
++    [InlineData(CoreBaseOptions.Delegate.Xnnpack)]
++    [InlineData(CoreBaseOptions.Delegate.GPU)]
++    public void HandLandmarker_AcceleratedDelegate_RunsOrFailsCatchably(CoreBaseOptions.Delegate delegateCase)
++    {
++        HandLandmarker landmarker;
++        try
++        {
++            var baseOptions = new CoreBaseOptions(modelAssetPath: AssetPath("hand_landmarker.task"), delegateCase: delegateCase);
++            landmarker = HandLandmarker.CreateFromOptions(new HandLandmarkerOptions(baseOptions, VisionRunningMode.VIDEO, numHands: 2));
++        }
++        catch (Exception) when (delegateCase == CoreBaseOptions.Delegate.GPU)
++        {
++            return;
++        }
++
++        using (landmarker)
++        {
++            long timestamp = 0;
++            for (var frame = 0; frame < 3; frame++)
++            {
++                timestamp += 33;
++                using var image = CreateTestImage();
++                var result = landmarker.DetectForVideo(image, timestamp);
++                Assert.True(result.HandLandmarks == null || result.HandLandmarks.Count <= 2);
++            }
++        }
++    }
++
+     [Fact]
+     public void HandLandmarker_VideoMode_RejectsNonMonotonicTimestamp()
+     {
+-- 
+2.47.3
+
+
+From 3d5a0a73a89e670d7cbc9914a8ad85e6e5df5db0 Mon Sep 17 00:00:00 2001
+From: banidu-512 <madmacmester@gmail.com>
+Date: Sun, 1 Nov 2026 21:48:26 +0100
+Subject: [PATCH 3/3] onnx: CUDA 12 on Linux, CUDA and DirectML builds on
+ Windows, CPU fallback fixes
+
+Pin ONNX Runtime to 1.24.4, the last release with a DirectML build and a CUDA 12 GPU build (1.28+ needs CUDA 13, which Pascal cards and driver 550 cannot run).
+Windows ships the GPU and DirectML natives side by side; OnnxNativeSelector binds one per operator package on first use, switching needs a restart.
+Linux probes for the CUDA 12 libraries before appending the CUDA provider and logs what is missing instead of failing inside native code.
+The CPU provider uses the extended optimization level: 1.24 cannot initialize the fp16 Depth Anything graph at ENABLE_ALL.
+Linux docs describe CUDA 12 and that MediaPipe works.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+---
+ .help/docs/install/InstallLinux.md            |   5 +-
+ .help/docs/install/PlatformSupport.md         |   5 +-
+ Core/Core.csproj                              |   2 +-
+ Core/Utils/LinuxCudaRuntime.cs                | 127 ++++++++++++++++++
+ Core/Utils/OnnxNativeSelector.cs              |  89 ++++++++++++
+ Installer/Linux/DEPENDENCIES.md               |   7 +-
+ Operators/DepthAnything/DepthAnything.csproj  |  22 ++-
+ .../io/video/depthanything/DepthAnything.cs   |  29 +++-
+ .../StreamDiffusion/StreamDiffusion.csproj    |  22 ++-
+ .../StreamDiffusion/Utils/OnnxModelSession.cs |  29 +++-
+ 10 files changed, 312 insertions(+), 25 deletions(-)
+ create mode 100644 Core/Utils/LinuxCudaRuntime.cs
+ create mode 100644 Core/Utils/OnnxNativeSelector.cs
+
+diff --git a/.help/docs/install/InstallLinux.md b/.help/docs/install/InstallLinux.md
+index 3898bac95..d6d5f0323 100644
+--- a/.help/docs/install/InstallLinux.md
++++ b/.help/docs/install/InstallLinux.md
+@@ -234,7 +234,10 @@ operators show "NDI runtime not found" in their status and produce no output.
+ 
+ A few features rely on Windows-only libraries:
+ 
+-- The MediaPipe operators. The OpenCV operators ([CameraCalibrator], the DMX point scanner and
++- GPU depth estimation without the CUDA libraries. [DepthAnything] and StreamDiffusion use the CUDA 12 build of ONNX
++  Runtime, which needs the CUDA 12 runtime and cuDNN 9 installed, driver 525 or newer, and a Pascal or newer GPU.
++  Without them the operators log why and run on the CPU. MediaPipe works; its GPU delegate falls back to the CPU
++  when no GL context is available. The OpenCV operators ([CameraCalibrator], the DMX point scanner and
+   [OnvifCamera]) work — each system ships its own OpenCV build. Webcam capture works too:
+   `[VideoDeviceInput]` opens cameras through FFmpeg's V4L2 backend.
+ - Hardware-accelerated video export on AMD and Intel GPUs (NVIDIA's NVENC works). The software
+diff --git a/.help/docs/install/PlatformSupport.md b/.help/docs/install/PlatformSupport.md
+index a5ba5852e..7f9170d33 100644
+--- a/.help/docs/install/PlatformSupport.md
++++ b/.help/docs/install/PlatformSupport.md
+@@ -116,13 +116,14 @@ already carries the name TiXL.
+ 
+ | Feature | Windows | Linux | macOS |
+ |---|---|---|---|
+-| MediaPipe (pose, hands, face) | Works | Planned | Planned |
++| MediaPipe (pose, hands, face) | Works | Works | Planned |
++| DepthAnything depth estimation | Works (DirectML, CUDA, CPU) | Works (CUDA needs the CUDA 12 runtime and cuDNN 9, otherwise CPU) | Works (CoreML, CPU) |
+ | OpenCV operators (camera calibration, point scanning) | Works | Works | Works |
+ | Beat and bar detection from audio | Works | Works | Works |
+ 
+ The OpenCV operators ([CameraCalibrator], the DMX point scanner and [OnvifCamera]) run on all three
+ systems; each ships its own OpenCV build. The macOS build runs as part of TiXL's CI on Apple Silicon.
+-MediaPipe still needs its Windows library.
++MediaPipe runs on Windows and Linux; the macOS library is still to come.
+ 
+ ## Editor and system integration
+ 
+diff --git a/Core/Core.csproj b/Core/Core.csproj
+index 18f71f685..2e05e4caa 100644
+--- a/Core/Core.csproj
++++ b/Core/Core.csproj
+@@ -33,7 +33,7 @@
+         <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+         <PackageReference Include="NuGet.Configuration" Version="7.6.0" />
+         <PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.4" />
+-        <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.30.0" />
++        <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.24.4" />
+         <PackageReference Include="SharpDX.D3DCompiler" Version="4.2.0" />
+         <PackageReference Include="SharpDX.Direct2D1" Version="4.2.0" />
+         <PackageReference Include="SharpDX.Direct3D11" Version="4.2.0" />
+diff --git a/Core/Utils/LinuxCudaRuntime.cs b/Core/Utils/LinuxCudaRuntime.cs
+new file mode 100644
+index 000000000..249edd0d2
+--- /dev/null
++++ b/Core/Utils/LinuxCudaRuntime.cs
+@@ -0,0 +1,127 @@
++using System;
++using System.Collections.Generic;
++using System.IO;
++using System.Linq;
++using System.Runtime.InteropServices;
++
++namespace T3.Core.Utils;
++
++/// <summary>Linux only: checks that the CUDA runtime the ONNX Runtime GPU build links against can be loaded,
++/// before the CUDA execution provider is appended. Without it the provider fails inside native code
++/// ("libcublasLt.so.12: cannot open shared object file") and ONNX Runtime prints the error to stderr;
++/// probing first lets the operator skip CUDA with one readable line and go on to the CPU provider.
++/// <para>Libraries are looked up through ld.so first, then in the usual toolkit folders, a
++/// <c>CudaRuntime</c> folder next to the operator, and <c>CUDA_PATH</c>/<c>CUDA_HOME</c>. Loaded by absolute path
++/// they stay resident, and the provider's own imports are then satisfied by SONAME without
++/// <c>LD_LIBRARY_PATH</c> having to be set.</para></summary>
++public static class LinuxCudaRuntime
++{
++    /** What libonnxruntime_providers_cuda.so of the 1.24 GPU package links against, plus cuDNN. */
++    private static readonly string[] RequiredLibraries =
++    {
++        "libcudart.so.12", "libcublasLt.so.12", "libcublas.so.12", "libcurand.so.10", "libcufft.so.11", "libcudnn.so.9"
++    };
++
++    private static readonly object Lock = new();
++    private static readonly List<IntPtr> LoadedHandles = new();
++    private static string? _failure;
++    private static bool _probed;
++
++    public static bool TryPrepare(out string reason)
++    {
++        lock (Lock)
++        {
++            if (!_probed)
++            {
++                _probed = true;
++                _failure = Probe();
++            }
++
++            reason = _failure ?? string.Empty;
++            return _failure == null;
++        }
++    }
++
++    private static string? Probe()
++    {
++        var searchDirs = CollectSearchDirs();
++        var missing = new List<string>();
++
++        foreach (var library in RequiredLibraries)
++        {
++            if (!TryLoad(library, searchDirs))
++                missing.Add(library);
++        }
++
++        if (missing.Count == 0)
++            return null;
++
++        return $"{string.Join(", ", missing)} not found. The ONNX Runtime GPU build needs the CUDA 12 runtime and cuDNN 9 " +
++               "(NVIDIA driver 525 or newer, Pascal or newer GPU). Install them, or point CUDA_PATH at the toolkit";
++    }
++
++    private static bool TryLoad(string library, List<string> searchDirs)
++    {
++        if (NativeLibrary.TryLoad(library, out var handle))
++        {
++            LoadedHandles.Add(handle);
++            return true;
++        }
++
++        foreach (var dir in searchDirs)
++        {
++            var path = Path.Combine(dir, library);
++            if (File.Exists(path) && NativeLibrary.TryLoad(path, out handle))
++            {
++                LoadedHandles.Add(handle);
++                return true;
++            }
++        }
++
++        return false;
++    }
++
++    private static List<string> CollectSearchDirs()
++    {
++        var dirs = new List<string>();
++
++        void Add(string? dir)
++        {
++            if (!string.IsNullOrEmpty(dir) && Directory.Exists(dir) && !dirs.Contains(dir))
++                dirs.Add(dir);
++        }
++
++        var assemblyDir = Path.GetDirectoryName(typeof(LinuxCudaRuntime).Assembly.Location);
++        Add(Path.Combine(AppContext.BaseDirectory, "CudaRuntime"));
++        if (!string.IsNullOrEmpty(assemblyDir))
++            Add(Path.Combine(assemblyDir, "CudaRuntime"));
++
++        foreach (var variable in new[] { "CUDA_PATH", "CUDA_HOME" })
++        {
++            var root = Environment.GetEnvironmentVariable(variable);
++            if (string.IsNullOrEmpty(root))
++                continue;
++
++            Add(Path.Combine(root, "lib64"));
++            Add(Path.Combine(root, "lib"));
++            Add(Path.Combine(root, "targets", "x86_64-linux", "lib"));
++        }
++
++        // Toolkit installs: NVIDIA's runfile/deb (/usr/local/cuda-12.x), Arch (/opt/cuda), distro packages
++        var roots = new List<string> { "/usr/local/cuda", "/opt/cuda" };
++        if (Directory.Exists("/usr/local"))
++        {
++            roots.AddRange(Directory.GetDirectories("/usr/local", "cuda-12*").OrderByDescending(d => d, StringComparer.Ordinal));
++        }
++
++        foreach (var root in roots)
++        {
++            Add(Path.Combine(root, "lib64"));
++            Add(Path.Combine(root, "targets", "x86_64-linux", "lib"));
++        }
++
++        Add("/usr/lib/x86_64-linux-gnu");
++        Add("/usr/lib64");
++        return dirs;
++    }
++}
+diff --git a/Core/Utils/OnnxNativeSelector.cs b/Core/Utils/OnnxNativeSelector.cs
+new file mode 100644
+index 000000000..b2711d69b
+--- /dev/null
++++ b/Core/Utils/OnnxNativeSelector.cs
+@@ -0,0 +1,89 @@
++using System;
++using System.Collections.Generic;
++using System.IO;
++using System.Reflection;
++using System.Runtime.InteropServices;
++using T3.Core.Logging;
++
++namespace T3.Core.Utils;
++
++/// <summary>
++/// Windows ships two ONNX Runtime natives with identical file names: the GPU build (CUDA, TensorRT) in
++/// <c>runtimes/win-x64/native</c> and the DirectML build in <c>runtimes/win-x64-directml/native</c>. A process can bind
++/// only one of them per managed ONNX Runtime assembly, so the first <see cref="Select"/> for an assembly decides, and the
++/// other provider family then needs a restart. Call it before the first ONNX Runtime type is used (a native call).
++/// On Linux and macOS there is nothing to choose and the call does nothing.
++/// </summary>
++public static class OnnxNativeSelector
++{
++    public enum Build
++    {
++        /// <summary>The GPU build: CUDA and TensorRT providers on Windows and Linux, CoreML on macOS.</summary>
++        Gpu,
++        DirectMl,
++    }
++
++    private const string GpuFolder = "runtimes/win-x64/native";
++    private const string DirectMlFolder = "runtimes/win-x64-directml/native";
++
++    private static readonly object Lock = new();
++    private static readonly Dictionary<Assembly, Build> Selected = new();
++
++    /// <summary>Binds the native for <paramref name="ortAssembly"/> (the Microsoft.ML.OnnxRuntime assembly of the calling
++    /// operator package) on first use and returns the build in effect, which differs from
++    /// <paramref name="preferred"/> when the other one was bound earlier or its files are not shipped.</summary>
++    public static Build Select(Assembly ortAssembly, Build preferred)
++    {
++        if (!OperatingSystem.IsWindows())
++            return Build.Gpu;
++
++        lock (Lock)
++        {
++            if (Selected.TryGetValue(ortAssembly, out var existing))
++                return existing;
++
++            var assemblyDir = Path.GetDirectoryName(ortAssembly.Location) ?? AppContext.BaseDirectory;
++            var chosen = preferred;
++            if (!HasNative(assemblyDir, chosen))
++            {
++                chosen = chosen == Build.Gpu ? Build.DirectMl : Build.Gpu;
++                if (!HasNative(assemblyDir, chosen))
++                    chosen = preferred; // neither shipped here: leave the default probing alone
++                else
++                    Log.Info($"[ONNX] The {Describe(preferred)} build is not shipped next to {Path.GetFileName(ortAssembly.Location)}, using {Describe(chosen)}");
++            }
++
++            try
++            {
++                var folder = Path.Combine(assemblyDir, chosen == Build.Gpu ? GpuFolder : DirectMlFolder);
++                NativeLibrary.SetDllImportResolver(ortAssembly, (name, _, _) => Resolve(name, folder));
++            }
++            catch (InvalidOperationException)
++            {
++                // A resolver is already set for this assembly: the default probing stays in charge
++            }
++
++            Selected[ortAssembly] = chosen;
++            return chosen;
++        }
++    }
++
++    public static string Describe(Build build) => build == Build.Gpu ? "CUDA" : "DirectML";
++
++    private static bool HasNative(string assemblyDir, Build build)
++        => File.Exists(Path.Combine(assemblyDir, build == Build.Gpu ? GpuFolder : DirectMlFolder, "onnxruntime.dll"));
++
++    private static IntPtr Resolve(string libraryName, string folder)
++    {
++        if (!libraryName.StartsWith("onnxruntime", StringComparison.OrdinalIgnoreCase))
++            return IntPtr.Zero;
++
++        // The DirectML runtime beside the build is preferred over a (possibly older) system DirectML.dll
++        var directMl = Path.Combine(folder, "DirectML.dll");
++        if (File.Exists(directMl))
++            NativeLibrary.TryLoad(directMl, out _);
++
++        var file = Path.Combine(folder, libraryName.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) ? libraryName : libraryName + ".dll");
++        return File.Exists(file) && NativeLibrary.TryLoad(file, out var handle) ? handle : IntPtr.Zero;
++    }
++}
+diff --git a/Installer/Linux/DEPENDENCIES.md b/Installer/Linux/DEPENDENCIES.md
+index 77e16cd22..c0f8ea6df 100644
+--- a/Installer/Linux/DEPENDENCIES.md
++++ b/Installer/Linux/DEPENDENCIES.md
+@@ -47,8 +47,13 @@ compile differently — that is what the pin is about — so prefer the pinned l
+ | Component | Enables | Arch | Debian / Ubuntu | Fedora | nixpkgs |
+ |---|---|---|---|---|---|
+ | NDI runtime (`libndi.so.6`) | Ndi operators and NDI output streams. Found via `NDI_RUNTIME_DIR_V6` or the system library path; source discovery needs `avahi-daemon` | AUR `ndi-sdk` | vendor download (ndi.video) | vendor download | `ndi` (unfree) |
++| CUDA 12 runtime + cuDNN 9 (`libcudart.so.12`, `libcublas.so.12`, `libcublasLt.so.12`, `libcurand.so.10`, `libcufft.so.11`, `libcudnn.so.9`) | CUDA execution provider of the DepthAnything and StreamDiffusion operators (NVIDIA driver 525+, Pascal or newer GPU). Found via ld.so, `CUDA_PATH`/`CUDA_HOME`, `/usr/local/cuda-12*` or a `CudaRuntime` folder next to the operator. Without it the operators log the missing library and run on the CPU | NVIDIA packages (`cuda`, `cudnn`) | NVIDIA CUDA repo (`cuda-runtime-12-4`, `cudnn9-cuda-12`) | NVIDIA CUDA repo | `cudaPackages_12` |
+ | Vulkan validation layers | GPU debugging | `vulkan-validation-layers` | `vulkan-validationlayers` | `vulkan-validation-layers` | `vulkan-validation-layers` |
+ 
++The CUDA 12 runtime must not be newer than the driver supports: on a GTX 1070 with driver 550 (CUDA 12.4), cuDNN 9.1 with
++CUDA 12.4 ran Depth Anything at 16 ms per frame, while CUDA 12.9 with cuDNN 9.27 loaded but failed on the first convolution.
++`nvidia-smi` shows the highest CUDA version the driver supports.
++
+ ## Bundled in the tarball
+ 
+ These ship with TiXL, so packagers don't need to provide them. Distro packages may swap in the system
+@@ -70,7 +75,7 @@ License texts for everything bundled are in `Dependencies/licenses/`.
+ 
+ These are feature gaps, not packaging issues. The affected operators are expected to fail when used.
+ 
+-- **Emgu CV** (`cvextern`) and **Mediapipe**: only Windows natives are vendored.
++- **Emgu CV** (`cvextern`): only Windows natives are vendored.
+ - **Loopback audio capture**: BASS on Linux only enumerates real inputs, so microphones and line inputs
+   work but capturing the system's own output doesn't. (WASAPI loopback is Windows-only.)
+ - **Spout**: Windows-only by design.
+diff --git a/Operators/DepthAnything/DepthAnything.csproj b/Operators/DepthAnything/DepthAnything.csproj
+index 91545ef2d..1bdc3eacb 100644
+--- a/Operators/DepthAnything/DepthAnything.csproj
++++ b/Operators/DepthAnything/DepthAnything.csproj
+@@ -110,11 +110,25 @@
+     <ProjectReference Include="../../Logging/Logging.csproj" Private="false" PrivateAssets="all" />
+   </ItemGroup>
+   <ItemGroup>
+-    <!-- The GPU build carries the CUDA/TensorRT providers for Windows and Linux; macOS has no such
+-         build and uses the CPU package that Core already ships. -->
+-    <PackageReference Include="Microsoft.ML.OnnxRuntime.Gpu" Version="1.30.0" Condition="$([MSBuild]::IsOSPlatform('Windows')) Or $([MSBuild]::IsOSPlatform('Linux'))" />
+-    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.30.0" Condition="$([MSBuild]::IsOSPlatform('OSX'))" />
++    <!-- 1.24.4 is the last ONNX Runtime with a DirectML build, and the last whose GPU build targets CUDA 12 (Pascal and
++         newer, driver 525+); 1.28 and up need CUDA 13. The managed assembly must not be newer than any native it loads.
++         Windows carries two natives: the GPU build (CUDA/TensorRT) under runtimes/win-x64 and the DirectML build under
++         runtimes/win-x64-directml; OnnxNativeSelector in Core picks one per process. Linux has CUDA and CPU, macOS CoreML and CPU. -->
++    <PackageReference Include="Microsoft.ML.OnnxRuntime.Gpu" Version="1.24.4" Condition="$([MSBuild]::IsOSPlatform('Windows')) Or $([MSBuild]::IsOSPlatform('Linux'))" />
++    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.24.4" Condition="$([MSBuild]::IsOSPlatform('OSX'))" />
++    <PackageReference Include="Microsoft.ML.OnnxRuntime.DirectML" Version="1.24.4" GeneratePathProperty="true" ExcludeAssets="all" Condition="'$(TixlOnnxDirectMl)' == 'true'" />
++    <PackageReference Include="Microsoft.AI.DirectML" Version="1.15.4" GeneratePathProperty="true" ExcludeAssets="all" Condition="'$(TixlOnnxDirectMl)' == 'true'" />
+   </ItemGroup>
++  <PropertyGroup>
++    <TixlOnnxDirectMl Condition="'$(TixlOnnxDirectMl)' == '' And $([MSBuild]::IsOSPlatform('Windows'))">true</TixlOnnxDirectMl>
++  </PropertyGroup>
++  <!-- The DirectML build has the same file names as the GPU build, so it cannot share runtimes/win-x64. -->
++  <Target Name="CopyOnnxDirectMlNatives" AfterTargets="Build" Condition="'$(TixlOnnxDirectMl)' == 'true'">
++    <ItemGroup>
++      <DirectMlNative Include="$(PkgMicrosoft_ML_OnnxRuntime_DirectML)/runtimes/win-x64/native/onnxruntime.dll;$(PkgMicrosoft_ML_OnnxRuntime_DirectML)/runtimes/win-x64/native/onnxruntime_providers_shared.dll;$(PkgMicrosoft_AI_DirectML)/bin/x64-win/DirectML.dll" />
++    </ItemGroup>
++    <Copy SourceFiles="@(DirectMlNative)" DestinationFolder="$(OutDir)runtimes/win-x64-directml/native" SkipUnchangedFiles="true" />
++  </Target>
+   <ItemGroup>
+     <None Remove="Examples\**" />
+   </ItemGroup>
+diff --git a/Operators/DepthAnything/Symbols/Lib/io/video/depthanything/DepthAnything.cs b/Operators/DepthAnything/Symbols/Lib/io/video/depthanything/DepthAnything.cs
+index 314f499a7..b285bbc03 100644
+--- a/Operators/DepthAnything/Symbols/Lib/io/video/depthanything/DepthAnything.cs
++++ b/Operators/DepthAnything/Symbols/Lib/io/video/depthanything/DepthAnything.cs
+@@ -7,6 +7,7 @@ using System.Threading.Tasks;
+ using Microsoft.ML.OnnxRuntime;
+ using Microsoft.ML.OnnxRuntime.Tensors;
+ using T3.Core.Logging;
++using T3.Core.Utils;
+ using T3.Graphics.Compat;
+ using T3.Core.Resource;
+ using T3.Core.Resource.Assets;
+@@ -695,6 +696,15 @@ public class DepthAnything : Instance<DepthAnything>, ICustomDropdownHolder
+             LogGpuAdapters();
+         }
+ 
++        // Windows has a CUDA and a DirectML ONNX Runtime native; the first request of the process binds one
++        var wantedBuild = provider == ExecutionProvider.DirectMl ? OnnxNativeSelector.Build.DirectMl : OnnxNativeSelector.Build.Gpu;
++        var build = OnnxNativeSelector.Select(typeof(InferenceSession).Assembly, wantedBuild);
++        if (OperatingSystem.IsWindows() && provider is ExecutionProvider.DirectMl or ExecutionProvider.Cuda && build != wantedBuild)
++        {
++            Log.Warning($"[DepthAnything] {OnnxNativeSelector.Describe(wantedBuild)} needs its own ONNX Runtime build, but this session already loaded " +
++                        $"the {OnnxNativeSelector.Describe(build)} one - restart TiXL to switch.", this);
++        }
++
+         // Without a thread cap the CPU provider saturates all cores during inference
+         // and starves the render thread
+         int intraOpThreads = Math.Min(4, Math.Max(1, Environment.ProcessorCount));
+@@ -702,8 +712,14 @@ public class DepthAnything : Instance<DepthAnything>, ICustomDropdownHolder
+         // Walk the chain and keep the first provider that initializes; CPU is always last and always works
+         foreach (var candidate in GetProviderChain(provider))
+         {
+-            if (!IsProviderAvailableOnThisPlatform(candidate))
++            if (!IsProviderAvailableOnThisPlatform(candidate, build))
++            {
++                continue;
++            }
++
++            if (candidate == ExecutionProvider.Cuda && OperatingSystem.IsLinux() && !LinuxCudaRuntime.TryPrepare(out var cudaMissing))
+             {
++                Log.Info($"[DepthAnything] CUDA unavailable, trying next provider: {cudaMissing}", this);
+                 continue;
+             }
+ 
+@@ -712,7 +728,8 @@ public class DepthAnything : Instance<DepthAnything>, ICustomDropdownHolder
+             {
+                 options = new SessionOptions
+                 {
+-                    GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL,
++                    // ORT 1.24 fails to initialize fp16 transformer graphs (SimplifiedLayerNormFusion) on the CPU at ENABLE_ALL; EXTENDED costs nothing measurable
++                    GraphOptimizationLevel = candidate == ExecutionProvider.Cpu ? GraphOptimizationLevel.ORT_ENABLE_EXTENDED : GraphOptimizationLevel.ORT_ENABLE_ALL,
+                     IntraOpNumThreads = intraOpThreads
+                 };
+ 
+@@ -754,13 +771,13 @@ public class DepthAnything : Instance<DepthAnything>, ICustomDropdownHolder
+         };
+     }
+ 
+-    /** DirectML exists only on Windows, CUDA in the Windows and Linux GPU builds, CoreML only on macOS. */
+-    private static bool IsProviderAvailableOnThisPlatform(ExecutionProvider provider)
++    /** DirectML exists only in the Windows DirectML build, CUDA in the Windows GPU build and on Linux, CoreML only on macOS. */
++    private static bool IsProviderAvailableOnThisPlatform(ExecutionProvider provider, OnnxNativeSelector.Build build)
+     {
+         return provider switch
+         {
+-            ExecutionProvider.DirectMl => OperatingSystem.IsWindows(),
+-            ExecutionProvider.Cuda => OperatingSystem.IsWindows() || OperatingSystem.IsLinux(),
++            ExecutionProvider.DirectMl => OperatingSystem.IsWindows() && build == OnnxNativeSelector.Build.DirectMl,
++            ExecutionProvider.Cuda => (OperatingSystem.IsWindows() && build == OnnxNativeSelector.Build.Gpu) || OperatingSystem.IsLinux(),
+             ExecutionProvider.CoreMl => OperatingSystem.IsMacOS(),
+             _ => true
+         };
+diff --git a/Operators/StreamDiffusion/StreamDiffusion.csproj b/Operators/StreamDiffusion/StreamDiffusion.csproj
+index 34fcf8d52..dcdc45af4 100644
+--- a/Operators/StreamDiffusion/StreamDiffusion.csproj
++++ b/Operators/StreamDiffusion/StreamDiffusion.csproj
+@@ -113,11 +113,25 @@
+     <ProjectReference Include="../../Logging/Logging.csproj" Private="false" PrivateAssets="all" />
+   </ItemGroup>
+   <ItemGroup>
+-    <!-- The GPU build carries the CUDA/TensorRT providers for Windows and Linux; macOS has no such
+-         build and uses the CPU package that Core already ships. -->
+-    <PackageReference Include="Microsoft.ML.OnnxRuntime.Gpu" Version="1.30.0" Condition="$([MSBuild]::IsOSPlatform('Windows')) Or $([MSBuild]::IsOSPlatform('Linux'))" />
+-    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.30.0" Condition="$([MSBuild]::IsOSPlatform('OSX'))" />
++    <!-- 1.24.4 is the last ONNX Runtime with a DirectML build, and the last whose GPU build targets CUDA 12 (Pascal and
++         newer, driver 525+); 1.28 and up need CUDA 13. The managed assembly must not be newer than any native it loads.
++         Windows carries two natives: the GPU build (CUDA/TensorRT) under runtimes/win-x64 and the DirectML build under
++         runtimes/win-x64-directml; OnnxNativeSelector in Core picks one per process. Linux has CUDA and CPU, macOS CoreML and CPU. -->
++    <PackageReference Include="Microsoft.ML.OnnxRuntime.Gpu" Version="1.24.4" Condition="$([MSBuild]::IsOSPlatform('Windows')) Or $([MSBuild]::IsOSPlatform('Linux'))" />
++    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.24.4" Condition="$([MSBuild]::IsOSPlatform('OSX'))" />
++    <PackageReference Include="Microsoft.ML.OnnxRuntime.DirectML" Version="1.24.4" GeneratePathProperty="true" ExcludeAssets="all" Condition="'$(TixlOnnxDirectMl)' == 'true'" />
++    <PackageReference Include="Microsoft.AI.DirectML" Version="1.15.4" GeneratePathProperty="true" ExcludeAssets="all" Condition="'$(TixlOnnxDirectMl)' == 'true'" />
+   </ItemGroup>
++  <PropertyGroup>
++    <TixlOnnxDirectMl Condition="'$(TixlOnnxDirectMl)' == '' And $([MSBuild]::IsOSPlatform('Windows'))">true</TixlOnnxDirectMl>
++  </PropertyGroup>
++  <!-- The DirectML build has the same file names as the GPU build, so it cannot share runtimes/win-x64. -->
++  <Target Name="CopyOnnxDirectMlNatives" AfterTargets="Build" Condition="'$(TixlOnnxDirectMl)' == 'true'">
++    <ItemGroup>
++      <DirectMlNative Include="$(PkgMicrosoft_ML_OnnxRuntime_DirectML)/runtimes/win-x64/native/onnxruntime.dll;$(PkgMicrosoft_ML_OnnxRuntime_DirectML)/runtimes/win-x64/native/onnxruntime_providers_shared.dll;$(PkgMicrosoft_AI_DirectML)/bin/x64-win/DirectML.dll" />
++    </ItemGroup>
++    <Copy SourceFiles="@(DirectMlNative)" DestinationFolder="$(OutDir)runtimes/win-x64-directml/native" SkipUnchangedFiles="true" />
++  </Target>
+   <ItemGroup>
+     <None Remove="Examples\**" />
+   </ItemGroup>
+diff --git a/Operators/StreamDiffusion/Utils/OnnxModelSession.cs b/Operators/StreamDiffusion/Utils/OnnxModelSession.cs
+index addf5845e..c7cb2b248 100644
+--- a/Operators/StreamDiffusion/Utils/OnnxModelSession.cs
++++ b/Operators/StreamDiffusion/Utils/OnnxModelSession.cs
+@@ -2,6 +2,7 @@ using System.Runtime.InteropServices;
+ using Microsoft.ML.OnnxRuntime;
+ using Microsoft.ML.OnnxRuntime.Tensors;
+ using T3.Core.Logging;
++using T3.Core.Utils;
+ 
+ namespace t3.streamdiffusion.Onnx;
+ 
+@@ -76,11 +77,26 @@ internal sealed class OnnxModelSession : IDisposable
+ 
+         PreloadCudaRuntimes(modelPath);
+ 
++        // Windows has a CUDA and a DirectML ONNX Runtime native; the first request of the process binds one
++        var wantedBuild = provider == ExecutionProvider.DirectMl ? OnnxNativeSelector.Build.DirectMl : OnnxNativeSelector.Build.Gpu;
++        var build = OnnxNativeSelector.Select(typeof(InferenceSession).Assembly, wantedBuild);
++        if (OperatingSystem.IsWindows() && provider is ExecutionProvider.DirectMl or ExecutionProvider.Cuda or ExecutionProvider.TensorRt && build != wantedBuild)
++        {
++            Log.Warning($"[StreamDiffusion] {name}: {OnnxNativeSelector.Describe(wantedBuild)} needs its own ONNX Runtime build, but this session already loaded " +
++                        $"the {OnnxNativeSelector.Describe(build)} one - restart TiXL to switch.");
++        }
++
+         foreach (var candidate in chain)
+         {
+-            if (!IsProviderAvailableOnThisPlatform(candidate))
++            if (!IsProviderAvailableOnThisPlatform(candidate, build))
+                 continue;
+ 
++            if (candidate is ExecutionProvider.Cuda or ExecutionProvider.TensorRt && OperatingSystem.IsLinux() && !LinuxCudaRuntime.TryPrepare(out var cudaMissing))
++            {
++                Log.Info($"[StreamDiffusion] {name}: {EpLabel(candidate)} unavailable ({cudaMissing}), trying next provider");
++                continue;
++            }
++
+             SessionOptions? options = null;
+             try
+             {
+@@ -114,7 +130,8 @@ internal sealed class OnnxModelSession : IDisposable
+     {
+         var options = new SessionOptions
+         {
+-            GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL,
++            // ORT 1.24 fails to initialize fp16 transformer graphs (SimplifiedLayerNormFusion) on the CPU at ENABLE_ALL; EXTENDED costs nothing measurable
++            GraphOptimizationLevel = provider == ExecutionProvider.Cpu ? GraphOptimizationLevel.ORT_ENABLE_EXTENDED : GraphOptimizationLevel.ORT_ENABLE_ALL,
+             IntraOpNumThreads = provider == ExecutionProvider.Cpu ? Math.Max(4, Environment.ProcessorCount) : 2,
+         };
+ 
+@@ -156,14 +173,14 @@ internal sealed class OnnxModelSession : IDisposable
+         return options;
+     }
+ 
+-    /** DirectML exists only on Windows, CUDA and TensorRT only in the Windows and Linux GPU builds. */
+-    private static bool IsProviderAvailableOnThisPlatform(ExecutionProvider provider)
++    /** DirectML exists only in the Windows DirectML build, CUDA and TensorRT in the Windows GPU build and on Linux. */
++    private static bool IsProviderAvailableOnThisPlatform(ExecutionProvider provider, OnnxNativeSelector.Build build)
+     {
+         return provider switch
+         {
+-            ExecutionProvider.DirectMl => OperatingSystem.IsWindows(),
++            ExecutionProvider.DirectMl => OperatingSystem.IsWindows() && build == OnnxNativeSelector.Build.DirectMl,
+             ExecutionProvider.CoreMl => OperatingSystem.IsMacOS(),
+-            ExecutionProvider.Cuda or ExecutionProvider.TensorRt => OperatingSystem.IsWindows() || OperatingSystem.IsLinux(),
++            ExecutionProvider.Cuda or ExecutionProvider.TensorRt => (OperatingSystem.IsWindows() && build == OnnxNativeSelector.Build.Gpu) || OperatingSystem.IsLinux(),
+             _ => true
+         };
+     }
+-- 
+2.47.3
+

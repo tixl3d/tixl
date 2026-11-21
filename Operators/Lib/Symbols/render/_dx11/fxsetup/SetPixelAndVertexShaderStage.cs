@@ -58,30 +58,41 @@ internal sealed class SetPixelAndVertexShaderStage : Instance<SetPixelAndVertexS
 
     private void GetAdditionalResources(EvaluationContext context)
     {
-        if (!VariousResources.DirtyFlag.IsDirty)
-            return;
-        
+        // GenerateShaderGraphCode mutates the same list in place (e.g. when [MeshToSDF] recreates its volumes),
+        // so a dirty-flag gate misses the change and keeps binding disposed SRVs. Compare the content instead.
         var collectedTypedInputs = VariousResources.GetCollectedTypedInputs();
-        
+
         foreach (var t in collectedTypedInputs)
         {
             switch (t.GetValue(context))
             {
                 case List<ShaderResourceView> srvs:
                 {
-                    if (srvs.Count != _additionalSrvs.Length)
-                        _additionalSrvs = new ShaderResourceView[srvs.Count];
+                    var changed = srvs.Count != _additionalSrvs.Length;
+                    if (!changed)
+                    {
+                        for (var srvIndex = 0; srvIndex < srvs.Count; srvIndex++)
+                        {
+                            if (!ReferenceEquals(srvs[srvIndex], _additionalSrvs[srvIndex]))
+                            {
+                                changed = true;
+                                break;
+                            }
+                        }
+                    }
 
+                    if (!changed)
+                        break;
+
+                    _additionalSrvs = new ShaderResourceView[srvs.Count];
                     for (var srvIndex = 0; srvIndex < srvs.Count; srvIndex++)
                     {
-                        var srv = srvs[srvIndex];
-                        _additionalSrvs[srvIndex] = srv;
+                        _additionalSrvs[srvIndex] = srvs[srvIndex];
                     }
                     break;
                 }
             }
         }
-        VariousResources.DirtyFlag.Clear();
     }
 
     private void Restore(EvaluationContext context)

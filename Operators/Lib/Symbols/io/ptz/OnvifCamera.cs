@@ -1,8 +1,10 @@
 ﻿
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Globalization;
 using System.Security.Cryptography;
 using System.Threading;
+using T3.Core.Utils;
 using System.Xml.Linq;
 using OpenCvSharp;
 using T3.Graphics.Compat;
@@ -12,7 +14,7 @@ using Utilities = T3.Core.Utils.Utilities;
 namespace Lib.io.ptz
 {
     [Guid("8b23c93b-3b45-4c9b-9c23-4d5e6f7a8b9c")]
-    [ExportDependencies("OpenCvSharpExtern.dll")]
+    [ExportDependencies("OpenCvSharpExtern.dll", "libOpenCvSharpExtern.so", "libOpenCvSharpExtern.dylib")]
     public class OnvifCamera : Instance<OnvifCamera>, IStatusProvider, ICustomDropdownHolder
     {
         [Output(Guid = "e5d0c2f1-4b3a-4829-9c5d-1e6f7a8b9c0d", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
@@ -39,17 +41,7 @@ namespace Lib.io.ptz
         {
             _printToLog = PrintToLog.GetValue(context);
 
-            // --- Network Interface Management ---
-            var localIpString = LocalIpAddress.GetValue(context);
-            
-            if (string.IsNullOrEmpty(localIpString))
-            {
-                if (Playback.RunTimeInSecs - _lastNetworkRefreshTime > 5.0)
-                {
-                    _lastNetworkRefreshTime = Playback.RunTimeInSecs;
-                    _networkInterfaces = GetNetworkInterfaces();
-                }
-            }
+            var localIpString = ProtocolInterfaces.ResolveAddressString(ProtocolInterfaces.Keys.Onvif);
 
             var address = Address.GetValue(context);
             var username = Username.GetValue(context);
@@ -245,17 +237,15 @@ namespace Lib.io.ptz
             
             if (!_captureThread.Join(TimeSpan.FromSeconds(2)))
             {
-                Log.Warning("OnvifCamera: Capture thread did not finish in time. Leaking VideoCapture to avoid crash.", this);
-                // Do not dispose _capture, as the thread is still using it.
+                Log.Warning("OnvifCamera: Capture thread did not finish in time. Leaving it to release its stream on its own.", this);
+                // Do not dispose the token source: the thread still polls it to notice cancellation.
             }
             else
             {
-                _capture?.Dispose();
-                _capture = null;
+                _cancellationTokenSource?.Dispose();
             }
-            
+
             _captureThread = null;
-            _cancellationTokenSource?.Dispose();
             _cancellationTokenSource = null;
             _connected = false;
             SetStatus("Disconnected");
@@ -263,6 +253,9 @@ namespace Lib.io.ptz
 
         private void CaptureLoop(string address, string username, string password, CancellationToken token)
         {
+            // Owned by this thread alone: an orphaned thread from a timed-out stop must never dispose the
+            // capture of the thread that replaced it while that one is inside a native Read.
+            VideoCapture capture = null;
             while (!token.IsCancellationRequested)
             {
                 try
@@ -303,15 +296,15 @@ namespace Lib.io.ptz
 
                     if (token.IsCancellationRequested) return;
 
-                    _capture = new VideoCapture(streamUri, VideoCaptureAPIs.FFMPEG);
+                    capture = new VideoCapture(streamUri, VideoCaptureAPIs.FFMPEG);
                     
-                    if (token.IsCancellationRequested || !_capture.IsOpened())
+                    if (token.IsCancellationRequested || !capture.IsOpened())
                     {
                         var msg = $"Error: Failed to open stream. Retrying in 5s...";
                         SetStatus(msg);
                         if (_printToLog) Log.Warning(msg, this);
-                        _capture?.Dispose();
-                        _capture = null;
+                        capture.Dispose();
+                        capture = null;
                         if (WaitCancelled(5000, token)) return;
                         continue;
                     }
@@ -325,7 +318,7 @@ namespace Lib.io.ptz
 
                     while (!token.IsCancellationRequested)
                     {
-                        if (_capture.Read(frame) && !frame.Empty())
+                        if (capture.Read(frame) && !frame.Empty())
                         {
                             errorCount = 0;
                             lock (_lockObject)
@@ -363,8 +356,8 @@ namespace Lib.io.ptz
                 finally
                 {
                     _connected = false;
-                    _capture?.Dispose();
-                    _capture = null;
+                    capture?.Dispose();
+                    capture = null;
                 }
 
                 if (!token.IsCancellationRequested)
@@ -583,8 +576,8 @@ namespace Lib.io.ptz
                 var body = $@"<AbsoluteMove xmlns=""http://www.onvif.org/ver20/ptz/wsdl"">
                                 <ProfileToken>{_profileToken}</ProfileToken>
                                 <Position>
-                                    <PanTilt x=""{p}"" y=""{t}"" space=""http://www.onvif.org/ver10/tptz/PanTiltSpaces/PositionGenericSpace"" xmlns=""http://www.onvif.org/ver10/schema""/>
-                                    <Zoom x=""{z}"" space=""http://www.onvif.org/ver10/tptz/ZoomSpaces/PositionGenericSpace"" xmlns=""http://www.onvif.org/ver10/schema""/>
+                                    <PanTilt x=""{p.ToString(CultureInfo.InvariantCulture)}"" y=""{t.ToString(CultureInfo.InvariantCulture)}"" space=""http://www.onvif.org/ver10/tptz/PanTiltSpaces/PositionGenericSpace"" xmlns=""http://www.onvif.org/ver10/schema""/>
+                                    <Zoom x=""{z.ToString(CultureInfo.InvariantCulture)}"" space=""http://www.onvif.org/ver10/tptz/ZoomSpaces/PositionGenericSpace"" xmlns=""http://www.onvif.org/ver10/schema""/>
                                 </Position>
                               </AbsoluteMove>";
 
@@ -634,12 +627,12 @@ namespace Lib.io.ptz
                     float p = 0, t = 0, z = 0;
                     if (panTilt != null)
                     {
-                        float.TryParse(panTilt.Attribute("x")?.Value, out p);
-                        float.TryParse(panTilt.Attribute("y")?.Value, out t);
+                        float.TryParse(panTilt.Attribute("x")?.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out p);
+                        float.TryParse(panTilt.Attribute("y")?.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out t);
                     }
                     if (zoom != null)
                     {
-                        float.TryParse(zoom.Attribute("x")?.Value, out z);
+                        float.TryParse(zoom.Attribute("x")?.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out z);
                     }
                     lock (_lockObject)
                     {
@@ -699,7 +692,9 @@ namespace Lib.io.ptz
             var header = "";
             if (!string.IsNullOrEmpty(username))
             {
-                var created = (DateTime.UtcNow + _timeOffset).ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
+                // WS-Security wants an xs:dateTime: invariant separators, or locales with a non-colon time
+                // separator (and comma decimal points) send an unparseable Created value.
+                var created = (DateTime.UtcNow + _timeOffset).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture);
                 var nonce = new byte[16];
                 using (var rng = RandomNumberGenerator.Create()) rng.GetBytes(nonce);
                 var nonceBase64 = Convert.ToBase64String(nonce);
@@ -904,37 +899,8 @@ namespace Lib.io.ptz
         #endregion
         #endregion
 
-        #region Network Interface Logic
-        private static List<NetworkAdapterInfo> _networkInterfaces = new();
 
-        private static List<NetworkAdapterInfo> GetNetworkInterfaces()
-        {
-            var list = new List<NetworkAdapterInfo>();
-            list.Add(new NetworkAdapterInfo(IPAddress.Any, IPAddress.Any, "Any"));
-            list.Add(new NetworkAdapterInfo(IPAddress.Loopback, IPAddress.Parse("255.0.0.0"), "Localhost"));
-            
-            try
-            {
-                list.AddRange(from ni in NetworkInterface.GetAllNetworkInterfaces()
-                              where ni.OperationalStatus == OperationalStatus.Up && ni.NetworkInterfaceType != NetworkInterfaceType.Loopback
-                              from ip in ni.GetIPProperties().UnicastAddresses
-                              where ip.Address.AddressFamily == AddressFamily.InterNetwork
-                              select new NetworkAdapterInfo(ip.Address, ip.IPv4Mask, ni.Name));
-            }
-            catch (Exception e)
-            {
-                Log.Warning("Could not enumerate network interfaces: " + e.Message);
-            }
-            return list;
-        }
-
-        private sealed record NetworkAdapterInfo(IPAddress IpAddress, IPAddress SubnetMask, string Name)
-        {
-            public string DisplayName => $"{Name} ({IpAddress})";
-        }
-        #endregion
-
-        #region IStatusProvider & ICustomDropdownHolder
+        #region IStatusProvider & address dropdown
         public IStatusProvider.StatusLevel GetStatusLevel() => _lastStatusMessage.StartsWith("Error") ? IStatusProvider.StatusLevel.Error : IStatusProvider.StatusLevel.Success;
         public string GetStatusMessage() => _lastStatusMessage;
         private void SetStatus(string message) => _lastStatusMessage = message;
@@ -942,19 +908,13 @@ namespace Lib.io.ptz
 
         string ICustomDropdownHolder.GetValueForInput(Guid inputId)
         {
-            if (inputId == LocalIpAddress.Id) return LocalIpAddress.Value ?? string.Empty;
             if (inputId == Address.Id) return Address.Value ?? string.Empty;
             return string.Empty;
         }
 
         IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid inputId)
         {
-            if (inputId == LocalIpAddress.Id)
-            {
-                _networkInterfaces = GetNetworkInterfaces();
-                foreach (var adapter in _networkInterfaces) yield return adapter.DisplayName;
-            }
-            else if (inputId == Address.Id)
+            if (inputId == Address.Id)
             {
                 if (_discoveredDevices.IsEmpty) yield return _isDiscovering ? "Searching..." : "Enable 'Discover' to search...";
                 
@@ -966,12 +926,7 @@ namespace Lib.io.ptz
         void ICustomDropdownHolder.HandleResultForInput(Guid inputId, string selected, bool isAListItem)
         {
             if (string.IsNullOrEmpty(selected) || !isAListItem) return;
-            if (inputId == LocalIpAddress.Id)
-            {
-                var foundAdapter = _networkInterfaces.FirstOrDefault(i => i.DisplayName == selected);
-                if (foundAdapter != null) LocalIpAddress.SetTypedInputValue(foundAdapter.IpAddress.ToString());
-            }
-            else if (inputId == Address.Id)
+            if (inputId == Address.Id)
             {
                 // Ignore status messages
                 if (selected.StartsWith("Enable 'Discover'") || selected.StartsWith("Searching")) return;
@@ -999,7 +954,6 @@ namespace Lib.io.ptz
         private bool _lastConnectState;
         private Thread _captureThread;
         private CancellationTokenSource _cancellationTokenSource;
-        private VideoCapture _capture;
         private Texture2D _gpuTexture;
         private Mat _sharedBgraMat;
         private readonly object _lockObject = new();
@@ -1033,9 +987,6 @@ namespace Lib.io.ptz
         
         private CancellationTokenSource _disposeCts;
         private volatile bool _isSendingPtz;
-        
-        [Input(Guid = "74185692-2982-4895-8963-125478963214")]
-        public readonly InputSlot<string> LocalIpAddress = new();
         
         [Input(Guid = "8451268E-3156-4F5C-8932-156842356842")]
         public readonly InputSlot<bool> Discover = new();

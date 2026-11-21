@@ -229,13 +229,29 @@ internal sealed class D3D11CommandList(D3D11Device device) : ICommandList
             Context.DrawInstancedIndirect(buffer, offset);
     }
 
-    public void Dispatch(int groupsX, int groupsY, int groupsZ) => Context.Dispatch(groupsX, groupsY, groupsZ);
+    public void Dispatch(int groupsX, int groupsY, int groupsZ)
+    {
+        Context.Dispatch(groupsX, groupsY, groupsZ);
+        UnbindComputeUavs();
+    }
 
     public void DispatchIndirect(GpuBuffer arguments, int offset)
     {
         if ((arguments as D3D11Buffer)?.Buffer is { } buffer)
+        {
             Context.DispatchIndirect(buffer, offset);
+            UnbindComputeUavs();
+        }
     }
+
+    /// <summary>
+    /// A compute result is commonly read by the next draw (e.g. [SkinMesh]). D3D11 keeps the UAV bound on
+    /// the immediate context, and a resource that is still a bound UAV cannot be bound as a shader
+    /// resource, so the draw silently loses its buffer. Unbind the UAV slots after every dispatch.
+    /// </summary>
+    private void UnbindComputeUavs() => Context.ComputeShader.SetUnorderedAccessViews(0, _nullUavs);
+
+    private static readonly UnorderedAccessView[] _nullUavs = new UnorderedAccessView[8];
 
     public void CopyTexture(GpuTexture source, GpuTexture destination)
     {

@@ -1,0 +1,61 @@
+{
+  "FormatVersion": 3,
+  "Id": "7a25f962-a800-49a0-9394-cf03f6742661"/*CsvToPointsExample*/,
+  "Description": "Loads a CSV file and renders its columns as points.\n\nEvery point attribute is read from a named column: Position X/Y/Z, rotation around Z, a uniform scale for all three axes, RGBA color in 0..255 and the radial phase mapped to F1. The sample dataset is a 21×21 ripple with per-point color and size; the points are drawn into a render target so the example can be used like any other image source.\n\nTry changing CsvFile to your own file, or open the operator's parameter panel and pick different columns in the mapping dropdowns.",
+  "SymbolTags": "2",
+  "InputUis": [
+    {
+      "InputId": "2e752c92-5a39-4d39-ba43-a8ab2be81c6d"/*CsvFile*/,
+      "Position": {
+        "X": -750.0,
+        "Y": -100.0
+      },
+      "Description": "CSV file to load. Its first row supplies the column names used by the mapping dropdowns.",
+      "Usage": "FilePath",
+      "FileFilter": "csv"
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "7b46d7a4-360f-4c8c-a9a6-627df90c2d13",
+      "SymbolName": "Lib.render.transform.Group",
+      "Position": {
+        "X": 80.0,
+        "Y": -100.0
+      }
+    },
+    {
+      "ChildId": "939c2031-db8a-49ca-b9da-4eca0d90789e",
+      "SymbolName": "Lib.point.draw.DrawPoints",
+      "Position": {
+        "X": -180.0,
+        "Y": -100.0
+      }
+    },
+    {
+      "ChildId": "b1f9380d-09eb-4bbe-b826-f9bdf4b34e19",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "Position": {
+        "X": 320.0,
+        "Y": -100.0
+      }
+    },
+    {
+      "ChildId": "f0835272-c067-44d7-8d9e-c70b91fde689",
+      "SymbolName": "Lib.point.io.CsvToPoints",
+      "Position": {
+        "X": -500.0,
+        "Y": -100.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "d210eb56-2e3f-4889-bbfe-1864d8c73bcb"/*Output*/,
+      "Position": {
+        "X": 560.0,
+        "Y": -100.0
+      }
+    }
+  ]
+}

@@ -304,13 +304,31 @@ internal sealed class D3D11Buffer(D3D11Device device, SharpDX.Direct3D11.Buffer 
             return view;
 
         var (firstElement, elementCount) = Elements(offset, size);
-        var description = new ShaderResourceViewDescription
-                              {
-                                  Format = Description.StructureByteStride > 0 ? SharpDX.DXGI.Format.Unknown : SharpDX.DXGI.Format.R32_Float,
-                                  Dimension = D3D.ShaderResourceViewDimension.ExtendedBuffer,
-                                  BufferEx = new ShaderResourceViewDescription.ExtendedBufferResource
-                                                 { FirstElement = firstElement, ElementCount = elementCount },
-                              };
+        var structured = Description.StructureByteStride > 0;
+
+        // A structured buffer takes the BUFFER dimension with an element range. BUFFEREX is for raw
+        // buffers and rejects an offset on a structured buffer with E_INVALIDARG.
+        var description = structured
+                              ? new ShaderResourceViewDescription
+                                    {
+                                        Format = SharpDX.DXGI.Format.Unknown,
+                                        Dimension = D3D.ShaderResourceViewDimension.Buffer,
+                                        Buffer = new ShaderResourceViewDescription.BufferResource
+                                                     {
+                                                         FirstElement = firstElement,
+                                                         ElementCount = elementCount,
+                                                     },
+                                    }
+                              : new ShaderResourceViewDescription
+                                    {
+                                        Format = SharpDX.DXGI.Format.R32_Float,
+                                        Dimension = D3D.ShaderResourceViewDimension.ExtendedBuffer,
+                                        BufferEx = new ShaderResourceViewDescription.ExtendedBufferResource
+                                                       {
+                                                           FirstElement = firstElement,
+                                                           ElementCount = elementCount,
+                                                       },
+                                    };
 
         view = new ShaderResourceView(device, Buffer, description);
         _shaderResources[key] = view;

@@ -332,7 +332,7 @@ internal sealed class OperatorHelp
             {
                 foreach (var exampleUi in examples)
                 {
-                    UiElements.DrawExampleOperator(exampleUi, "Example");
+                    UiElements.DrawExampleOperator(exampleUi, UiElements.GetExampleButtonLabel(exampleUi, _cachedSymbolUi));
                 }
             }
         }

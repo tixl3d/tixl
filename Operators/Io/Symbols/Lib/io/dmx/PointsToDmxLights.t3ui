@@ -215,7 +215,7 @@
         "X": -200.0,
         "Y": 300.0
       },
-      "Description": "Pad each universe with zero channels up to the full 512 slots, for interfaces that expect complete universes."
+      "Description": "Pad the end of the output with zero channels so the last universe is complete (512 slots), for interfaces that expect complete universes."
     },
     {
       "InputId": "8880c101-403f-46e0-901e-20ec2dd333e9"/*PositionDistanceRange*/,
@@ -280,7 +280,7 @@
         "X": -200.0,
         "Y": 375.0
       },
-      "Description": "Maximum number of fixtures placed in each 512-channel universe before the next fixture starts at the next universe boundary. 0 disables the limit and packs fixtures by channel count only."
+      "Description": "Number of fixtures packed back to back before the next batch starts at channel 1 of the next free universe. A batch spans as many universes as its channels need, e.g. 600 RGB pixels (1800 channels) fill 4 universes. 0 disables batching and packs fixtures by channel count only."
     },
     {
       "InputId": "b2c3d4e5-f6a7-8901-bcde-f23456789012"/*CustomVariableChannels*/,
