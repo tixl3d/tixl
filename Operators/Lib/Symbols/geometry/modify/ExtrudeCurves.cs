@@ -50,6 +50,7 @@ internal sealed class ExtrudeCurves : Instance<ExtrudeCurves>, IStatusProvider, 
             return;
         }
 
+        _builder.Lattice = MathF.Max(Lattice.GetValue(context), 0);
         _builder.Begin();
 
         var parts = curves.Parts;
@@ -72,6 +73,8 @@ internal sealed class ExtrudeCurves : Instance<ExtrudeCurves>, IStatusProvider, 
         }
 
         _builder.Finish(_output, curves);
+        if (_builder.LatticeIssue != null && _statusMessage.Length == 0)
+            _statusMessage = _builder.LatticeIssue;
         Result.Value = _output;
     }
 
@@ -181,4 +184,7 @@ internal sealed class ExtrudeCurves : Instance<ExtrudeCurves>, IStatusProvider, 
 
     [Input(Guid = "5c7feaba-714e-4134-bc65-e8438ef6839d")]
     public readonly InputSlot<string> DepthAttribute = new();
+
+    [Input(Guid = "9bf01fa0-e722-4caa-9130-18578a0db485")]
+    public readonly InputSlot<float> Lattice = new();
 }

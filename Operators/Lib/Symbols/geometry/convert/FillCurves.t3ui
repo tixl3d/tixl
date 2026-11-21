@@ -43,6 +43,16 @@
         "Y": 45.0
       },
       "Description": "Maximum deviation when flattening the curves into polygons. Smaller values give smoother outlines and more faces."
+    },
+    {
+      "InputId": "eff0d217-6548-4871-aa00-31c85029e69c"/*Lattice*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 450.0
+      },
+      "Min": 0.0,
+      "Max": 0.2,
+      "Description": "Cell size of a grid that splits the flat caps into regular quads (0: off), so [SubdivideGeometry] and deformers don't produce long thin triangles. Where the outline crosses a grid line it gets a point, unless a corner is within a tenth of a cell. Not combined with a bevel."
     }
   ],
   "SymbolChildUis": [],

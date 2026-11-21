@@ -43,6 +43,10 @@
       "DefaultValue": false
     },
     {
+      "Id": "9bf01fa0-e722-4caa-9130-18578a0db485"/*Lattice*/,
+      "DefaultValue": 0.0
+    },
+    {
       "Id": "9e3a7d1c-5b48-4f26-b9c0-1a6e4d8f3c72"/*Bevel*/,
       "DefaultValue": 0.0
     },

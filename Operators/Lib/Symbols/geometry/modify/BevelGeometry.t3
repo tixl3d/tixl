@@ -20,7 +20,7 @@
     },
     {
       "Id": "c86a32c2-feeb-4c05-b2c0-cf54076247bb"/*FlatShading*/,
-      "DefaultValue": false
+      "DefaultValue": true
     },
     {
       "Id": "ce40061f-b853-41be-bbef-0db172bbad7f"/*Width*/,
@@ -28,7 +28,7 @@
     },
     {
       "Id": "e9085eac-dc15-4ecf-862d-869e66981418"/*Segments*/,
-      "DefaultValue": 3
+      "DefaultValue": 1
     }
   ],
   "Children": [],

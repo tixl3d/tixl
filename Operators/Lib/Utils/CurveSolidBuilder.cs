@@ -57,8 +57,20 @@ internal sealed class CurveSolidBuilder
         return false;
     }
 
+    /// <summary>
+    /// Cell size of a square grid that splits the caps into regular quads (0: off), so they subdivide and deform
+    /// without long thin triangles. The outlines get a point where they cross a grid line, unless an existing point is
+    /// within a tenth of a cell; cap points that close to an outline point use it instead, so caps and walls share
+    /// their points. Not combined with a bevel.
+    /// </summary>
+    public float Lattice { get; set; }
+
+    /// <summary>Why the last build ignored <see cref="Lattice"/>, or null.</summary>
+    public string? LatticeIssue { get; private set; }
+
     public void Begin()
     {
+        LatticeIssue = null;
         _positions.Clear();
         _corners.Clear();
         _normals.Clear();
@@ -218,6 +230,13 @@ internal sealed class CurveSolidBuilder
 
             OrientLoops();
         }
+
+        _usesLattice = Lattice > 0 && bevel <= 0;
+        if (Lattice > 0 && bevel > 0)
+            LatticeIssue = "Lattice is ignored with a bevel.";
+
+        if (_usesLattice)
+            InsertGridCrossings(Lattice, Lattice * LatticeSnap);
 
         var hasWalls = sides && depth > 0;
         var profile = BuildProfile(depth, bevel, bevelSegments, hasWalls);
@@ -432,6 +451,9 @@ internal sealed class CurveSolidBuilder
 
     private void AddCap(int ringIndex, WindingRule windingRule, bool flip)
     {
+        if (_usesLattice && TryAddLatticeCap(ringIndex, flip))
+            return;
+
         var tess = new Tess();
         for (var l = 0; l < _loops.Count; l++)
         {
@@ -475,6 +497,298 @@ internal sealed class CurveSolidBuilder
 
             AddFace(p0, p1, p2, normal, isSide: false);
         }
+    }
+
+    /// <summary>Splits every loop segment where it crosses a grid line, unless the crossing is within <paramref name="snap"/> of a point already there.</summary>
+    private void InsertGridCrossings(float cell, float snap)
+    {
+        var snapSquared = snap * snap;
+        for (var l = 0; l < _loops.Count; l++)
+        {
+            var loop = _loops[l];
+            _crossingLoop.Clear();
+            for (var i = 0; i < loop.Count; i++)
+            {
+                var a = loop[i];
+                var b = loop[(i + 1) % loop.Count];
+                _crossingLoop.Add(a);
+
+                // Crossings with vertical and horizontal grid lines, by their position along the segment
+                _crossings.Clear();
+                AddCrossings(a.X, b.X, cell);
+                AddCrossings(a.Y, b.Y, cell);
+                _crossings.Sort();
+
+                var last = a;
+                foreach (var t in _crossings)
+                {
+                    var point = Vector2.Lerp(a, b, t);
+                    if (Vector2.DistanceSquared(point, last) < snapSquared || Vector2.DistanceSquared(point, b) < snapSquared)
+                        continue;
+
+                    _crossingLoop.Add(point);
+                    last = point;
+                }
+            }
+
+            loop.Clear();
+            loop.AddRange(_crossingLoop);
+        }
+    }
+
+    /** Segment parameters where the coordinate passes a multiple of the cell size. */
+    private void AddCrossings(float from, float to, float cell)
+    {
+        if (MathF.Abs(to - from) < 1e-9f)
+            return;
+
+        var min = MathF.Min(from, to);
+        var max = MathF.Max(from, to);
+        for (var line = MathF.Floor(min / cell) + 1; line * cell < max; line++)
+            _crossings.Add((line * cell - from) / (to - from));
+    }
+
+    /// <summary>
+    /// A cap made of the grid cells: cells fully inside become one quad, cells on the outline the part of the shape
+    /// inside them (clipped by the tessellator). Points are welded to the ring's points within the snap distance and
+    /// shared between neighbouring cells, so the cap has no gaps and meets the walls.
+    /// </summary>
+    /// <returns>False when there would be too many cells; the caller falls back to the plain cap.</returns>
+    private bool TryAddLatticeCap(int ringIndex, bool flip)
+    {
+        var cell = Lattice;
+        var snap = cell * LatticeSnap;
+        var min = new Vector2(float.MaxValue);
+        var max = new Vector2(float.MinValue);
+        foreach (var loop in _loops)
+        {
+            foreach (var p in loop)
+            {
+                min = Vector2.Min(min, p);
+                max = Vector2.Max(max, p);
+            }
+        }
+
+        var cellMinX = (int)MathF.Floor(min.X / cell);
+        var cellMinY = (int)MathF.Floor(min.Y / cell);
+        var cellMaxX = (int)MathF.Floor(max.X / cell);
+        var cellMaxY = (int)MathF.Floor(max.Y / cell);
+        if ((long)(cellMaxX - cellMinX + 1) * (cellMaxY - cellMinY + 1) > MaxLatticeCells)
+        {
+            LatticeIssue = $"Lattice is ignored: more than {MaxLatticeCells} cells. Use a larger cell size.";
+            return false;
+        }
+
+        // Ring points by snap bucket, for welding cap points onto them
+        _ringBuckets.Clear();
+        var z = 0f;
+        for (var l = 0; l < _loops.Count; l++)
+        {
+            var count = _loops[l].Count;
+            for (var i = 0; i < count; i++)
+            {
+                var pointId = _loopRings[l][ringIndex * count + i];
+                var p = _positions[pointId];
+                z = p.Z;
+                var key = ((long)MathF.Floor(p.X / snap), (long)MathF.Floor(p.Y / snap));
+                if (!_ringBuckets.TryGetValue(key, out var list))
+                {
+                    list = [];
+                    _ringBuckets[key] = list;
+                }
+
+                list.Add(pointId);
+            }
+        }
+
+        _capPointLookup.Clear();
+        var normal = flip ? -Vector3.UnitZ : Vector3.UnitZ;
+        for (var cy = cellMinY; cy <= cellMaxY; cy++)
+        {
+            for (var cx = cellMinX; cx <= cellMaxX; cx++)
+            {
+                var cellMin = new Vector2(cx * cell, cy * cell);
+                var cellMax = cellMin + new Vector2(cell);
+                if (!CellTouchesOutline(cellMin, cellMax))
+                {
+                    if (IsInside((cellMin + cellMax) * 0.5f))
+                    {
+                        _polygon.Clear();
+                        _polygon.Add(WeldCapPoint(cellMin, z, snap));
+                        _polygon.Add(WeldCapPoint(new Vector2(cellMax.X, cellMin.Y), z, snap));
+                        _polygon.Add(WeldCapPoint(cellMax, z, snap));
+                        _polygon.Add(WeldCapPoint(new Vector2(cellMin.X, cellMax.Y), z, snap));
+                        AddCapPolygon(normal, flip);
+                    }
+
+                    continue;
+                }
+
+                ClipCell(cellMin, cellMax, z, snap, normal, flip);
+            }
+        }
+
+        return true;
+    }
+
+    /** The shape inside one cell: the loops and the cell's square, where both overlap (winding of 2 or more). */
+    private void ClipCell(Vector2 cellMin, Vector2 cellMax, float z, float snap, Vector3 normal, bool flip)
+    {
+        var tess = new Tess();
+        foreach (var loop in _loops)
+        {
+            if (!BoundsOverlap(loop, cellMin, cellMax))
+                continue;
+
+            var contour = new ContourVertex[loop.Count];
+            for (var i = 0; i < loop.Count; i++)
+                contour[i] = new ContourVertex(new Vec3(loop[i].X, loop[i].Y, 0));
+
+            tess.AddContour(contour, ContourOrientation.Original);
+        }
+
+        // Counter-clockwise like the outer loops (see OrientLoops), so inside both the winding adds up to 2
+        tess.AddContour([
+                            new ContourVertex(new Vec3(cellMin.X, cellMin.Y, 0)),
+                            new ContourVertex(new Vec3(cellMax.X, cellMin.Y, 0)),
+                            new ContourVertex(new Vec3(cellMax.X, cellMax.Y, 0)),
+                            new ContourVertex(new Vec3(cellMin.X, cellMax.Y, 0)),
+                        ], ContourOrientation.Original);
+        tess.Tessellate(WindingRule.AbsGeqTwo, ElementType.Polygons, MaxCapPolygonSize, null, new Vec3(0, 0, 1));
+        for (var element = 0; element < tess.ElementCount; element++)
+        {
+            _polygon.Clear();
+            for (var i = 0; i < MaxCapPolygonSize; i++)
+            {
+                var index = tess.Elements[element * MaxCapPolygonSize + i];
+                if (index == Tess.Undef)
+                    break;
+
+                var v = tess.Vertices[index].Position;
+                _polygon.Add(WeldCapPoint(new Vector2(v.X, v.Y), z, snap));
+            }
+
+            AddCapPolygon(normal, flip);
+        }
+    }
+
+    /// <summary>A ring point within the snap distance, otherwise a cap point shared by all cells at that position.</summary>
+    private int WeldCapPoint(Vector2 position, float z, float snap)
+    {
+        var bucketX = (long)MathF.Floor(position.X / snap);
+        var bucketY = (long)MathF.Floor(position.Y / snap);
+        var best = -1;
+        var bestDistance = snap * snap;
+        for (var dy = -1; dy <= 1; dy++)
+        {
+            for (var dx = -1; dx <= 1; dx++)
+            {
+                if (!_ringBuckets.TryGetValue((bucketX + dx, bucketY + dy), out var list))
+                    continue;
+
+                foreach (var pointId in list)
+                {
+                    var p = _positions[pointId];
+                    var distance = Vector2.DistanceSquared(new Vector2(p.X, p.Y), position);
+                    if (distance <= bestDistance)
+                    {
+                        bestDistance = distance;
+                        best = pointId;
+                    }
+                }
+            }
+        }
+
+        if (best >= 0)
+            return best;
+
+        var key = ((long)MathF.Round(position.X * 1e5f), (long)MathF.Round(position.Y * 1e5f));
+        if (_capPointLookup.TryGetValue(key, out var existing))
+            return existing;
+
+        var added = AddPoint(new Vector3(position.X, position.Y, z));
+        _capPointLookup[key] = added;
+        return added;
+    }
+
+    /** Adds the collected polygon without repeated points, wound counter-clockwise from +Z for the front cap. */
+    private void AddCapPolygon(Vector3 normal, bool flip)
+    {
+        for (var i = _polygon.Count - 1; i >= 0 && _polygon.Count > 0; i--)
+        {
+            var previous = _polygon[(i + _polygon.Count - 1) % _polygon.Count];
+            if (_polygon[i] == previous)
+                _polygon.RemoveAt(i);
+        }
+
+        if (_polygon.Count < 3)
+            return;
+
+        var area = 0f;
+        for (var i = 0; i < _polygon.Count; i++)
+        {
+            var a = _positions[_polygon[i]];
+            var b = _positions[_polygon[(i + 1) % _polygon.Count]];
+            area += a.X * b.Y - b.X * a.Y;
+        }
+
+        if (MathF.Abs(area) < 1e-12f)
+            return;
+
+        if (area > 0 == flip)
+            _polygon.Reverse();
+
+        foreach (var point in _polygon)
+        {
+            _corners.Add(point);
+            _normals.Add(normal);
+        }
+
+        _faceOffsets.Add(_corners.Count);
+        _isSide.Add(0);
+    }
+
+    private bool CellTouchesOutline(Vector2 cellMin, Vector2 cellMax)
+    {
+        foreach (var loop in _loops)
+        {
+            for (var i = 0; i < loop.Count; i++)
+            {
+                var a = loop[i];
+                var b = loop[(i + 1) % loop.Count];
+                if (MathF.Max(a.X, b.X) >= cellMin.X && MathF.Min(a.X, b.X) <= cellMax.X
+                    && MathF.Max(a.Y, b.Y) >= cellMin.Y && MathF.Min(a.Y, b.Y) <= cellMax.Y)
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    /** Even-odd test over all loops; they no longer overlap after resolving, so this matches the fill. */
+    private bool IsInside(Vector2 point)
+    {
+        var inside = false;
+        foreach (var loop in _loops)
+        {
+            if (Contains(loop, point))
+                inside = !inside;
+        }
+
+        return inside;
+    }
+
+    private static bool BoundsOverlap(List<Vector2> loop, Vector2 cellMin, Vector2 cellMax)
+    {
+        var min = new Vector2(float.MaxValue);
+        var max = new Vector2(float.MinValue);
+        foreach (var p in loop)
+        {
+            min = Vector2.Min(min, p);
+            max = Vector2.Max(max, p);
+        }
+
+        return max.X >= cellMin.X && min.X <= cellMax.X && max.Y >= cellMin.Y && min.Y <= cellMax.Y;
     }
 
     /// <summary>Tessellator vertices carry the point id they came from; new (Steiner) vertices are added on the fly.</summary>
@@ -604,6 +918,17 @@ internal sealed class CurveSolidBuilder
         _isSide.Add(isSide ? 1 : 0);
     }
 
+    /** Grid crossings closer than this share of a cell to an existing point use that point. */
+    private const float LatticeSnap = 0.1f;
+    private const int MaxLatticeCells = 40000;
+    private const int MaxCapPolygonSize = 16;
+
+    private bool _usesLattice;
+    private readonly List<Vector2> _crossingLoop = [];
+    private readonly List<float> _crossings = [];
+    private readonly List<int> _polygon = [];
+    private readonly Dictionary<(long, long), List<int>> _ringBuckets = [];
+    private readonly Dictionary<(long, long), int> _capPointLookup = [];
     private readonly List<List<Vector2>> _loops = [];
     private readonly List<Vector3> _scratch = [];
     private readonly List<Vector2> _scratch2 = [];

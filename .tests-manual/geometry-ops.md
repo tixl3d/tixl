@@ -497,3 +497,28 @@ Connect [StringToCurves] (text `TiXL`) -> [MergeCurves] -> [ExtrudeCurves] and l
   closed (Boundary edges 0) without walls inside the overlaps.
 - Xor turns overlaps into holes; Intersect keeps only the overlapping areas.
 - A [CubeGeometry] as input passes through with the warning that there are no closed curves.
+
+## Step: Lattice caps
+
+**Action:**
+Connect [StringToCurves] (text `TiXL`) -> [ExtrudeCurves] (Lattice 0.05) -> [SubdivideGeometry] (Smoothness 1,
+Iterations 2) -> [GeometryToMesh] -> [DrawMesh], and compare with Lattice 0.
+
+**Expected:**
+- With Lattice, the front and back caps are a grid of squares with small pieces along the outline; without it, long
+  thin triangles span the letters. The subdivided result shows no streaks across the caps.
+- The Stats of [ExtrudeCurves] and [SubdivideGeometry] show Boundary edges 0; the volume of [ExtrudeCurves] is the
+  same with and without Lattice.
+- With a Bevel, or a Lattice so small that it needs more than 40000 cells, the op warns and builds the plain caps.
+- [FillCurves] with Lattice gives the same grid as a flat surface.
+
+## Step: Polygon edges as lines
+
+**Action:**
+Connect [CubeGeometry] -> [CurvesToPoints] -> [ListToBuffer] -> [DrawLines] and set PolygonEdges.
+
+**Expected:**
+- None draws nothing (no curves), All and Sharp draw the 12 cube edges.
+- After [SubdivideGeometry] (Smoothness 0, Iterations 2), All draws the whole grid, Sharp still only the cube's edges.
+- On [ExtrudeCurves] of a text, Sharp outlines the letters on both caps and the corners of the walls, without lines
+  across the caps, also with Lattice.

@@ -90,6 +90,16 @@
       "Description": "Uses flat normals for all walls and bevels."
     },
     {
+      "InputId": "9bf01fa0-e722-4caa-9130-18578a0db485"/*Lattice*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 450.0
+      },
+      "Min": 0.0,
+      "Max": 0.2,
+      "Description": "Cell size of a grid that splits the flat caps into regular quads (0: off), so [SubdivideGeometry] and deformers don't produce long thin triangles. Where the outline crosses a grid line it gets a point, unless a corner is within a tenth of a cell. Not combined with a bevel."
+    },
+    {
       "InputId": "9e3a7d1c-5b48-4f26-b9c0-1a6e4d8f3c72"/*Bevel*/,
       "Position": {
         "X": 0.0,

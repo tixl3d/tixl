@@ -11,7 +11,7 @@ namespace Lib.geometry.convert;
 /// </summary>
 [Guid("daab8738-babd-4036-8581-22e3dc55e4ba")]
 [ExportDependencies("LibTessDotNet.dll")]
-internal sealed class FillCurves : Instance<FillCurves>
+internal sealed class FillCurves : Instance<FillCurves>, IStatusProvider
 {
     [Output(Guid = "4dfc042d-c7fa-4ce1-b774-2892a67f1d6c")]
     public readonly Slot<Geometry?> Result = new();
@@ -34,10 +34,20 @@ internal sealed class FillCurves : Instance<FillCurves>
             return;
         }
 
+        _builder.Lattice = MathF.Max(Lattice.GetValue(context), 0);
         _builder.FillFlat(curves, tolerance, weight, windingRule, keepCurves, _output);
+        _statusMessage = _builder.LatticeIssue ?? string.Empty;
         Result.Value = _output;
     }
 
+    public IStatusProvider.StatusLevel GetStatusLevel()
+    {
+        return string.IsNullOrEmpty(_statusMessage) ? IStatusProvider.StatusLevel.Success : IStatusProvider.StatusLevel.Warning;
+    }
+
+    public string GetStatusMessage() => _statusMessage;
+
+    private string _statusMessage = string.Empty;
     private readonly CurveSolidBuilder _builder = new();
     private readonly Geometry _output = new();
 
@@ -55,4 +65,7 @@ internal sealed class FillCurves : Instance<FillCurves>
 
     [Input(Guid = "a2bca4ff-9cd9-4f97-9fbf-a0ee9351b86e")]
     public readonly InputSlot<bool> KeepCurves = new();
+
+    [Input(Guid = "eff0d217-6548-4871-aa00-31c85029e69c")]
+    public readonly InputSlot<float> Lattice = new();
 }
