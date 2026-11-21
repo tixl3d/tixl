@@ -47,6 +47,7 @@ internal sealed class CustomGeometryAttribute : Instance<CustomGeometryAttribute
         var code = Code.GetValue(context) ?? string.Empty;
         var a = A.GetValue(context);
         var b = B.GetValue(context);
+        var offset = Offset.GetValue(context);
         var selectionName = GeometryAttributeChoices.ToSelectionValue(Selection.GetValue(context) ?? string.Empty);
         _statusMessage = string.Empty;
         _lastSource = source;
@@ -100,7 +101,7 @@ internal sealed class CustomGeometryAttribute : Instance<CustomGeometryAttribute
         var isSnippetReady = PrepareSnippet(code, type, source, domain);
         var hasSelection = CollectWeights(source, domain, selectionName, count);
         ReadValues(existing, _oldValues, count);
-        ComputeValues(source, domain, a, b, count, isSnippetReady);
+        ComputeValues(source, domain, a, b, offset, count, isSnippetReady);
 
         var target = GetTargetAttribute(name, domain, type, count);
         for (var i = 0; i < count; i++)
@@ -142,7 +143,7 @@ internal sealed class CustomGeometryAttribute : Instance<CustomGeometryAttribute
     }
 
     /** Runs the snippet per element; without a working snippet the old values stay. */
-    private void ComputeValues(Geometry source, AttributeDomain domain, float a, float b, int count, bool isSnippetReady)
+    private void ComputeValues(Geometry source, AttributeDomain domain, float a, float b, Vector3 offset, int count, bool isSnippetReady)
     {
         var evaluate = isSnippetReady ? _compiler.Delegate : null;
         if (evaluate == null)
@@ -152,7 +153,7 @@ internal sealed class CustomGeometryAttribute : Instance<CustomGeometryAttribute
         }
 
         for (var i = 0; i < count; i++)
-            _values[i] = evaluate(i, count, GeometryElements.GetPosition(source, domain, i), a, b);
+            _values[i] = evaluate(i, count, GeometryElements.GetPosition(source, domain, i), a, b, offset);
     }
 
     /** Any numeric attribute as Vector4 components; missing values are zero. */
@@ -277,10 +278,10 @@ internal sealed class CustomGeometryAttribute : Instance<CustomGeometryAttribute
 
         var (returnType, wrap) = type switch
                                      {
-                                         Types.Vector2 => ("Vector2", "var v = Snippet(i, count, p, A, B); return new Vector4(v.X, v.Y, 0, 0);"),
-                                         Types.Vector3 => ("Vector3", "return new Vector4(Snippet(i, count, p, A, B), 0);"),
-                                         Types.Vector4 => ("Vector4", "return Snippet(i, count, p, A, B);"),
-                                         _             => ("float", "return new Vector4(Snippet(i, count, p, A, B), 0, 0, 0);"),
+                                         Types.Vector2 => ("Vector2", "var v = Snippet(i, count, p, A, B, Offset); return new Vector4(v.X, v.Y, 0, 0);"),
+                                         Types.Vector3 => ("Vector3", "return new Vector4(Snippet(i, count, p, A, B, Offset), 0);"),
+                                         Types.Vector4 => ("Vector4", "return Snippet(i, count, p, A, B, Offset);"),
+                                         _             => ("float", "return new Vector4(Snippet(i, count, p, A, B, Offset), 0, 0, 0);"),
                                      };
         var source = $$"""
                        using System;
@@ -290,12 +291,12 @@ internal sealed class CustomGeometryAttribute : Instance<CustomGeometryAttribute
                        public static class __CustomGeometryAttribute
                        {
                        {{_snippetAttributes.GetFieldDeclarations()}}
-                           public static Vector4 Evaluate(int i, int count, Vector3 p, float A, float B)
+                           public static Vector4 Evaluate(int i, int count, Vector3 p, float A, float B, Vector3 Offset)
                            {
                                {{wrap}}
                            }
 
-                           private static {{returnType}} Snippet(int i, int count, Vector3 p, float A, float B)
+                           private static {{returnType}} Snippet(int i, int count, Vector3 p, float A, float B, Vector3 Offset)
                            {
                        #line 1
                        {{_snippetAttributes.Code}}
@@ -383,7 +384,7 @@ internal sealed class CustomGeometryAttribute : Instance<CustomGeometryAttribute
 
     private Geometry? _lastSource;
     private AttributeDomain _lastDomain;
-    private delegate Vector4 SnippetFn(int i, int count, Vector3 p, float a, float b);
+    private delegate Vector4 SnippetFn(int i, int count, Vector3 p, float a, float b, Vector3 offset);
 
     private readonly Geometry _output = new();
     private readonly CSharpSnippetCompiler<SnippetFn> _compiler = new();
@@ -424,6 +425,9 @@ internal sealed class CustomGeometryAttribute : Instance<CustomGeometryAttribute
 
     [Input(Guid = "a9170934-849e-4dcf-9202-89385090e6de")]
     public readonly InputSlot<float> B = new();
+
+    [Input(Guid = "5d02de12-6d97-4ad3-ba41-005adc553df4")]
+    public readonly InputSlot<Vector3> Offset = new();
 
     [Input(Guid = "19ea3de4-7a2a-4368-9360-a50123280689")]
     public readonly InputSlot<string> Selection = new();

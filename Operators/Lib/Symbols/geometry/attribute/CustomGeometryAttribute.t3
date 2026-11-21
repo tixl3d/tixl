@@ -7,6 +7,14 @@
       "DefaultValue": ""
     },
     {
+      "Id": "5d02de12-6d97-4ad3-ba41-005adc553df4"/*Offset*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
       "Id": "5fdbbd34-2144-4ba0-bea1-2866726ca09b"/*A*/,
       "DefaultValue": 0.0
     },

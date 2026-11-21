@@ -7,162 +7,162 @@
     {
       "InputId": "76e0cf44-0f1a-451f-a0ce-bd5a9c2fb5ff"/*Geometry*/,
       "Position": {
-        "X": -296.75818,
-        "Y": 4.735901
+        "X": -465.40506,
+        "Y": -166.33115
       }
     }
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "4dde4bbe-390e-42e2-8e94-272faa17fdff",
-      "SymbolName": "Lib.geometry.convert.GeometryToMesh",
+      "ChildId": "03b55e2e-58ae-46ac-840a-7bb71a8be60a",
+      "SymbolName": "Lib.geometry.modify.FilterGeometry",
       "Position": {
-        "X": 68.312744,
-        "Y": 19.130463
-      }
-    },
-    {
-      "ChildId": "86aaacc7-3bdc-4c2f-ac8d-f3b561994b7b",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
-      "Position": {
-        "X": 68.312744,
-        "Y": 89.13046
-      }
-    },
-    {
-      "ChildId": "96b07c33-5cf8-4703-baa6-2c1be41df8aa",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
-      "Position": {
-        "X": 68.312744,
-        "Y": 54.130463
-      }
-    },
-    {
-      "ChildId": "a3f7029b-5c42-45b1-9adc-4035fd4ec3c5",
-      "SymbolName": "Lib.point.draw.DrawPoints",
-      "Position": {
-        "X": 208.31274,
-        "Y": 89.13046
-      }
-    },
-    {
-      "ChildId": "abbdb1e2-4aed-4bf5-a36e-060d7c17511e",
-      "SymbolName": "Lib.render.transform.Group",
-      "Position": {
-        "X": 348.31274,
-        "Y": 19.130463
-      }
-    },
-    {
-      "ChildId": "acfa90f3-8fda-4474-b9dc-1e1741f3a412",
-      "SymbolName": "Lib.point.draw.DrawLines",
-      "Position": {
-        "X": 208.31274,
-        "Y": 54.130463
-      }
-    },
-    {
-      "ChildId": "b8254d04-1d81-4f84-ac2b-7a2a2ffbb97f",
-      "SymbolName": "Lib.mesh._.VisualizeMesh",
-      "Position": {
-        "X": 208.31274,
-        "Y": 19.130463
-      }
-    },
-    {
-      "ChildId": "d1e99a52-0188-4a63-85ef-55bfb907816d",
-      "SymbolName": "Lib.geometry.convert.CurvesToPoints",
-      "Position": {
-        "X": -71.687256,
-        "Y": 54.130463
-      }
-    },
-    {
-      "ChildId": "e1b6d9ca-ae81-4135-ab0f-55bd081feb65",
-      "SymbolName": "Lib.geometry.convert.CurvesToPoints",
-      "Position": {
-        "X": -71.687256,
-        "Y": 89.13046
-      }
-    },
-    {
-      "ChildId": "871fb7e1-2b8d-4ba9-8d21-edccbdc3965a",
-      "SymbolName": "Lib.flow.context.GetPreviewState",
-      "Position": {
-        "X": -150.0,
-        "Y": -120.0
-      }
-    },
-    {
-      "ChildId": "cbca644b-cda1-4e80-a961-93d20b81e008",
-      "SymbolName": "Lib.numbers.bool.convert.BoolToInt",
-      "Position": {
-        "X": -20.0,
-        "Y": -120.0
+        "X": -185.40506,
+        "Y": 78.66885
       }
     },
     {
       "ChildId": "1bb51553-276f-4ecd-ad5d-68aa4fcc9579",
       "SymbolName": "Lib.flow.Execute",
       "Position": {
-        "X": 280.0,
-        "Y": 120.0
-      }
-    },
-    {
-      "ChildId": "dc8192ac-3439-477e-b12e-9aac315a2acc",
-      "SymbolName": "Lib.flow.Execute",
-      "Position": {
-        "X": 280.0,
-        "Y": 200.0
+        "X": 234.59494,
+        "Y": -61.331146
       }
     },
     {
       "ChildId": "309c2ae7-9b6e-4d00-ab9f-d12d27067531",
       "SymbolName": "Lib.flow.Execute",
       "Position": {
-        "X": 280.0,
-        "Y": 260.0
+        "X": 234.59494,
+        "Y": 183.66885
       }
     },
     {
-      "ChildId": "91a21213-0158-45c9-9c92-1b7a0c77316e",
-      "SymbolName": "Lib.render.gizmo._._DrawGeometryHighlight",
+      "ChildId": "4dde4bbe-390e-42e2-8e94-272faa17fdff",
+      "SymbolName": "Lib.geometry.convert.GeometryToMesh",
       "Position": {
-        "X": 140.0,
-        "Y": 200.0
+        "X": 129.08102,
+        "Y": -311.01752
       }
     },
     {
-      "ChildId": "f5f1e2e0-758f-4ae2-8a67-0f06a52c794d",
-      "SymbolName": "Lib.render.gizmo._._DrawGeometryHighlight",
+      "ChildId": "86aaacc7-3bdc-4c2f-ac8d-f3b561994b7b",
+      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
       "Position": {
-        "X": 140.0,
-        "Y": 260.0
+        "X": -115.40506,
+        "Y": -26.331146
       }
     },
     {
-      "ChildId": "03b55e2e-58ae-46ac-840a-7bb71a8be60a",
-      "SymbolName": "Lib.geometry.modify.FilterGeometry",
+      "ChildId": "871fb7e1-2b8d-4ba9-8d21-edccbdc3965a",
+      "SymbolName": "Lib.flow.context.GetPreviewState",
       "Position": {
-        "X": -20.0,
-        "Y": 330.0
-      }
-    },
-    {
-      "ChildId": "e30192c5-fa3e-497d-bd97-22432670505a",
-      "SymbolName": "Lib.geometry.attribute.ColorGeometry",
-      "Position": {
-        "X": 60.0,
-        "Y": 330.0
+        "X": -369.76273,
+        "Y": 97.2626
       }
     },
     {
       "ChildId": "8ac009cf-c266-415e-80ca-2ad2216432ad",
       "SymbolName": "Lib.render.gizmo._._DrawGeometryHighlight",
       "Position": {
-        "X": 140.0,
-        "Y": 330.0
+        "X": 94.59494,
+        "Y": 78.66885
+      }
+    },
+    {
+      "ChildId": "91a21213-0158-45c9-9c92-1b7a0c77316e",
+      "SymbolName": "Lib.render.gizmo._._DrawGeometryHighlight",
+      "Position": {
+        "X": 94.59494,
+        "Y": 43.668854
+      }
+    },
+    {
+      "ChildId": "96b07c33-5cf8-4703-baa6-2c1be41df8aa",
+      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "Position": {
+        "X": 164.59494,
+        "Y": -131.33115
+      }
+    },
+    {
+      "ChildId": "a3f7029b-5c42-45b1-9adc-4035fd4ec3c5",
+      "SymbolName": "Lib.point.draw.DrawPoints",
+      "Position": {
+        "X": 24.59494,
+        "Y": -26.331146
+      }
+    },
+    {
+      "ChildId": "abbdb1e2-4aed-4bf5-a36e-060d7c17511e",
+      "SymbolName": "Lib.render.transform.Group",
+      "Position": {
+        "X": 444.59494,
+        "Y": -166.33115
+      }
+    },
+    {
+      "ChildId": "acfa90f3-8fda-4474-b9dc-1e1741f3a412",
+      "SymbolName": "Lib.point.draw.DrawLines",
+      "Position": {
+        "X": 304.59494,
+        "Y": -131.33115
+      }
+    },
+    {
+      "ChildId": "b8254d04-1d81-4f84-ac2b-7a2a2ffbb97f",
+      "SymbolName": "Lib.mesh._.VisualizeMesh",
+      "Position": {
+        "X": 269.08102,
+        "Y": -311.01752
+      }
+    },
+    {
+      "ChildId": "cbca644b-cda1-4e80-a961-93d20b81e008",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToInt",
+      "Position": {
+        "X": -115.40506,
+        "Y": -96.33115
+      }
+    },
+    {
+      "ChildId": "d1e99a52-0188-4a63-85ef-55bfb907816d",
+      "SymbolName": "Lib.geometry.convert.CurvesToPoints",
+      "Position": {
+        "X": 24.59494,
+        "Y": -131.33115
+      }
+    },
+    {
+      "ChildId": "dc8192ac-3439-477e-b12e-9aac315a2acc",
+      "SymbolName": "Lib.flow.Execute",
+      "Position": {
+        "X": 234.59494,
+        "Y": 43.668854
+      }
+    },
+    {
+      "ChildId": "e1b6d9ca-ae81-4135-ab0f-55bd081feb65",
+      "SymbolName": "Lib.geometry.convert.CurvesToPoints",
+      "Position": {
+        "X": -255.40506,
+        "Y": -26.331146
+      }
+    },
+    {
+      "ChildId": "e30192c5-fa3e-497d-bd97-22432670505a",
+      "SymbolName": "Lib.geometry.attribute.ColorGeometry",
+      "Position": {
+        "X": -45.40506,
+        "Y": 78.66885
+      }
+    },
+    {
+      "ChildId": "f5f1e2e0-758f-4ae2-8a67-0f06a52c794d",
+      "SymbolName": "Lib.render.gizmo._._DrawGeometryHighlight",
+      "Position": {
+        "X": 94.59494,
+        "Y": 183.66885
       }
     }
   ],
@@ -170,8 +170,8 @@
     {
       "OutputId": "10c42d0f-737b-4a23-90f1-f20eb5390eb4"/*Output*/,
       "Position": {
-        "X": 348.31274,
-        "Y": 124.13046
+        "X": 444.59497,
+        "Y": 8.668854
       }
     }
   ]
