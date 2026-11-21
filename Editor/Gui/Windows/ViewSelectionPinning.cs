@@ -326,6 +326,12 @@ internal sealed class ViewSelectionPinning
         _pinnedInstancePath = [];
     }
 
+    /// <summary>Selects which output of the pinned instance the window displays (Guid.Empty = the default/first).</summary>
+    internal void SelectOutput(Guid outputId)
+    {
+        _selectedOutputId = outputId;
+    }
+
     internal void SaveStateTo(Output.OutputWindowState state)
     {
         state.IsPinned = _isPinned;

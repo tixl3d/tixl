@@ -1,0 +1,118 @@
+{
+  "FormatVersion": 3,
+  "Id": "9ea50c34-2361-4201-a421-43c9fc1999e4"/*MediaPipeExample*/,
+  "Description": "All seven MediaPipe operators in one graph, sharing a single camera: hand, pose and face landmark detection, face and object detection, gesture recognition and image segmentation. The [Index] input of [PickTexture] selects which operator's debug view is shown:\n\n0 = Image segmentation (mask tint via [BlendWithMask])\n1 = Gesture recognition\n2 = Object detection\n3 = Face detection\n4 = Face landmark detection\n5 = Pose landmark detection\n6 = Hand landmark detection\n\nOnly the operator currently selected by [Index] runs on the camera image each frame; its outputs (point buffers, counts, gesture names, masks) are available while it is selected, and the unselected operators cost no CPU until selected. See the individual *Example operators for a description of each operator's inputs and outputs.\n\n[Acceleration] is Xnnpack everywhere; running several of these models in one graph is heavy, so keep [Index] on the currently needed operator.",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "1432daa6-34a1-4ed0-a082-1ad42410023b",
+      "SymbolName": "Lib.image.use.PickTexture",
+      "Position": {
+        "X": 600.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "1981bbff-ac7a-4feb-8f83-557587178169",
+      "SymbolName": "Lib.io.video.mediapipe.GestureRecognition",
+      "Position": {
+        "X": -600.0,
+        "Y": 1400.0
+      }
+    },
+    {
+      "ChildId": "6f909de1-f9cf-4dc9-ad76-21fff04fd03c",
+      "SymbolName": "Lib.io.video.mediapipe.FaceLandmarkDetection",
+      "Position": {
+        "X": -600.0,
+        "Y": 560.0
+      }
+    },
+    {
+      "ChildId": "70664fda-e501-40de-b54b-6ea57d32ed77",
+      "SymbolName": "Lib.io.video.WebcamInput",
+      "Position": {
+        "X": -1200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "725b341e-8a05-409f-8596-efe72da0bfaf",
+      "SymbolName": "Lib.io.video.mediapipe.ObjectDetection",
+      "Position": {
+        "X": -600.0,
+        "Y": 1120.0
+      }
+    },
+    {
+      "ChildId": "7c80971a-3253-45e4-b19b-39bced050ed1",
+      "SymbolName": "Lib.image.use.BlendWithMask",
+      "Position": {
+        "X": -100.0,
+        "Y": 1680.0
+      }
+    },
+    {
+      "ChildId": "a18db567-9c7d-4073-93a9-9c7281da7a62",
+      "SymbolName": "Lib.io.video.mediapipe.HandLandmarkDetection",
+      "Position": {
+        "X": -600.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "bb38e8d9-2e7d-41ee-ada3-688448c3e508",
+      "SymbolName": "Lib.io.video.mediapipe.ImageSegmentation",
+      "Position": {
+        "X": -600.0,
+        "Y": 1680.0
+      }
+    },
+    {
+      "ChildId": "c0788d0e-9bd2-4195-a622-7b197a7bc9e0",
+      "SymbolName": "Lib.io.video.mediapipe.FaceDetection",
+      "Position": {
+        "X": -600.0,
+        "Y": 840.0
+      }
+    },
+    {
+      "ChildId": "dd973c98-6775-4ef5-8e38-ddffec9a9a5a",
+      "SymbolName": "Lib.io.video.mediapipe.PoseLandmarkDetection",
+      "Position": {
+        "X": -600.0,
+        "Y": 280.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "9d3fc2bb-4de1-4805-a5df-3a024b567da9"/*Output*/,
+      "Position": {
+        "X": 700.0,
+        "Y": 840.0
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "ba10d1b9-d755-4f92-a4fb-e8add26a5515",
+      "Title": "This example needs a camera\n\n1. Select the [VideoDeviceInput] op\n2. Pick the camera in the InputDeviceName field\n3. Tick [Active]\n\nThen change [PickTexture]'s [Index] input (0-6) to flip between the seven operators' debug views - the selected operator runs on the camera image, and only while it is selected are its outputs available.",
+      "Label": "Setup your camera",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -1700.0,
+        "Y": -350.0
+      },
+      "Size": {
+        "X": 430.0,
+        "Y": 330.0
+      }
+    }
+  ]
+}

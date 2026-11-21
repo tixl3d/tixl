@@ -110,23 +110,30 @@
     <ProjectReference Include="../../Logging/Logging.csproj" Private="false" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>
+    <!-- The teardown reaper and the pooling helpers are implementation details of the operators, but
+         their invariants (native task closed only after its worker exits, bounded waits) are what the
+         tests exist to pin down. -->
+    <InternalsVisibleTo Include="Mediapipe.Tests" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="CppSharp.Runtime" Version="1.1.84.17100" />
     <PackageReference Include="OpenCvSharp4" Version="4.13.0.20260627" />
     <PackageReference Include="OpenCvSharp4.Extensions" Version="4.13.0.20260627" />
-    <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.13.0.20260627" />
+    <!-- The OpenCV native runtime exists per platform; the managed assembly is shared.
+         Same split as Operators/Lib and Operators/Io. -->
+    <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.13.0.20260627" Condition="$([MSBuild]::IsOSPlatform('Windows'))" />
+    <PackageReference Include="OpenCvSharp4.official.runtime.linux-x64.slim" Version="4.13.0.20260627" Condition="$([MSBuild]::IsOSPlatform('Linux'))" />
+    <PackageReference Include="OpenCvSharp4.runtime.osx.arm64" Version="4.13.0.20260627" Condition="$([MSBuild]::IsOSPlatform('OSX'))" />
+    <PackageReference Include="OpenCvSharp4.runtime.osx.x64" Version="4.13.0.20260627" Condition="$([MSBuild]::IsOSPlatform('OSX'))" />
     <PackageReference Include="OpenGL.Net" Version="0.8.4">
       <NoWarn>NU1701</NoWarn>
     </PackageReference>
     <PackageReference Include="Google.Protobuf" Version="3.35.1" />
   </ItemGroup>
-  <!-- Native dependencies -->
+  <!-- Native dependencies (natives are copied by Editor.csproj from the solution Dependencies/ folder) -->
   <ItemGroup>
-    <Content Include="./dependencies/**/*" CopyToOutputDirectory="PreserveNewest">
-      <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
-    </Content>
-    <None Update="Libs\mediapipe_c.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <!-- The mediapipe_c native ships from the solution's Dependencies folder (flat for Windows,
+         Dependencies/linux-x64 and Dependencies/osx elsewhere), copied by Editor/Player.csproj. -->
     <None Remove="Examples\**" />
   </ItemGroup>
   <!-- Copy package content into this project's own output only (not transitively to other
@@ -137,7 +144,16 @@
     <PackageAssets Include="Assets/**/*" />
     <PackageSymbols Include="Symbols/**/*.t3" />
     <PackageSymbolUis Include="Symbols/**/*.t3ui" />
+    <!-- Only the operator sources: SourceCode/ is the packaged mirror the editor maps [Guid]s to for
+         "open source" - it is never compiled (TixlAssemblyLoadContext skips it). Shipping the Utils/
+         helpers in it made the editor warn once per file at every start ("defines no operator"). -->
     <PackageSourceCode Include="Symbols/**/*.cs" />
+    <!-- The package's shared helpers live outside Symbols/ (they define no operator), but a recompile of
+         the installed package globs SourceCode/** - so they have to ship with it. MediapipeNativeLibrary
+         is in particular not optional: its module initializer registers MediaPipeAcceleration as an input
+         slot type. -->
+    <PackageSourceCode Include="Utils/**/*.cs" />
+    <PackageSourceCode Include="MediapipeNativeLibrary.cs" />
     <PackageMeta Include=".meta/**/*" />
   </ItemGroup>
   <Target Name="CopyPackageContent" AfterTargets="AfterBuild" Condition="'$(Configuration)' == 'Release'">

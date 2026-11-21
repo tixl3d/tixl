@@ -1,0 +1,66 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="$(SolutionDir)/Tixl.props" />
+  <PropertyGroup>
+    <TargetFramework>$(TixlNetFrameworkVersion)</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Deterministic>true</Deterministic>
+    <RootNamespace>Mediapipe.Tests</RootNamespace>
+    <NoWarn>$(NoWarn);NU1701</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.8.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Operators\Mediapipe\Mediapipe.csproj" />
+    <!-- The operator package references Logging with Private=false (the editor supplies it at run time),
+         so the test host has to bring it along for the code paths that log. -->
+    <ProjectReference Include="..\Logging\Logging.csproj" />
+  </ItemGroup>
+
+  <!-- Ship the same mediapipe_c native the editor carries (Dependencies root on Windows, the platform
+       folders elsewhere), so the tests exercise the shipped library on every platform instead of
+       depending on whatever resolution happens to find. Link is explicit because the sources live
+       outside the project folder. -->
+  <ItemGroup>
+    <Content Include="../Dependencies/mediapipe_c.dll" Link="mediapipe_c.dll" Condition="$([MSBuild]::IsOSPlatform('Windows'))" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../Dependencies/linux-x64/libmediapipe_c.so" Link="libmediapipe_c.so" Condition="$([MSBuild]::IsOSPlatform('Linux'))" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../Dependencies/osx/libmediapipe_c.dylib" Link="libmediapipe_c.dylib" Condition="$([MSBuild]::IsOSPlatform('OSX'))" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <!-- The task models the operators use; enough of them to drive every task type once. -->
+  <ItemGroup>
+    <Content Include="../Operators/Mediapipe/Assets/hand_landmarker.task" Link="Assets/hand_landmarker.task" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../Operators/Mediapipe/Assets/pose_landmarker.task" Link="Assets/pose_landmarker.task" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../Operators/Mediapipe/Assets/selfie_segmenter.tflite" Link="Assets/selfie_segmenter.tflite" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../Operators/Mediapipe/Assets/blaze_face_short_range.tflite" Link="Assets/blaze_face_short_range.tflite" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <!-- macOS: libmediapipe_c.dylib resolves its OpenCL imports by dynamic lookup and Apple Silicon ships
+       no OpenCL, so the no-op stub must be in the process before the first P/Invoke (MediapipeNativeLibrary
+       loads it from the app directory). Needs clang (Xcode command line tools). -->
+  <Target Name="BuildOpenClStub" BeforeTargets="BeforeBuild" Condition="$([MSBuild]::IsOSPlatform('OSX'))">
+    <MakeDir Directories="$(OutputPath)" />
+    <Exec Command="clang -arch x86_64 -arch arm64 -shared -o &quot;$(OutputPath)libmediapipe_opencl_stub.dylib&quot; &quot;$(MSBuildThisFileDirectory)../Dependencies/osx/mediapipe-opencl-stub.c&quot;" />
+  </Target>
+
+
+  <!-- Temporary spike: readback measurement needs the graphics stack. -->
+  <ItemGroup>
+    <ProjectReference Include="..\Core\Core.csproj" />
+    <ProjectReference Include="..\Graphics\Graphics.csproj" />
+    <ProjectReference Include="..\Graphics.Compat\Graphics.Compat.csproj" />
+    <ProjectReference Include="..\Graphics.D3D11\Graphics.D3D11.csproj" />
+  </ItemGroup>
+
+</Project>

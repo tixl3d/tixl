@@ -91,7 +91,9 @@ public sealed class DebugProtocolClient : IDisposable
         => Call("connect", new { sourceChildId, sourceOutput, targetChildId, targetInput }).Require("connect");
 
     public void DeleteOp(Guid childId) => Call("deleteOp", new { childId }).Require("deleteOp");
-    public void Pin(Guid childId) => Call("pin", new { childId }).Require("pin");
+    /// <summary>Pins an instance; <paramref name="outputName"/> optionally selects which output the output window shows.</summary>
+    public void Pin(Guid childId, string? outputName = null)
+        => Call("pin", new JObject { ["childId"] = childId, ["outputName"] = outputName }).Require("pin");
     public void Select(Guid childId) => Call("select", new { childId }).Require("select");
 
     public void SetInput(Guid childId, string inputName, JToken value)
@@ -111,12 +113,23 @@ public sealed class DebugProtocolClient : IDisposable
         return result["value"]?.Type == JTokenType.Null ? null : result["value"]?.Value<string>();
     }
 
+    /// <summary>
+    /// Reads a named output. With <paramref name="update"/> the slot is pulled even when no view
+    /// consumes it, which is what async operators with string/status outputs need.
+    /// </summary>
+    public string? GetOutputValue(Guid childId, string outputName, bool update = false)
+    {
+        var result = Call("getOutput", new { childId, outputName, update }).Require("getOutput");
+        return result["value"]?.Type == JTokenType.Null ? null : result["value"]?.Value<string>();
+    }
+
     public JObject GetGraphState(bool includeDefaults = false)
         => Call("getGraphState", new { includeDefaults }).Require("getGraphState");
 
     /// <param name="target">"output" (the output window's texture) or "ui" (the whole editor window as rendered).</param>
     public void Screenshot(string path, string target = "output") => Call("screenshot", new { path, target }).Require("screenshot");
     public Response Reload(string project) => Call("reload", new { project });
+    public void Save() => Call("save").Require("save");
     public void Undo() => Call("undo").Require("undo");
 
     public JArray GetLogTail(long sinceSeq = -1, string minLevel = "debug", int maxCount = 200)
